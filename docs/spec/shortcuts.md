@@ -34,7 +34,7 @@ comando; o usuário pode mudar qualquer um.
 - Combinação com Ctrl+letra: recusada, com aviso no log, para não roubar tecla do terminal.
 
 ## Critérios de aceite
-- [ ] Todo atalho padrão aponta para um comando registrado.
-- [ ] Não há dois atalhos padrão com a mesma combinação.
-- [ ] Um `shortcuts.json` com `"cmd+shift+t": "tab.new"` faz ⌘⇧T abrir aba nova.
-- [ ] Um `shortcuts.json` quebrado não impede o app de abrir.
+- [x] Todo atalho padrão aponta para um comando registrado.
+- [x] Não há dois atalhos padrão com a mesma combinação.
+- [x] Um `shortcuts.json` com `"cmd+shift+t": "tab.new"` faz ⌘⇧T abrir aba nova.
+- [x] Um `shortcuts.json` quebrado não impede o app de abrir.

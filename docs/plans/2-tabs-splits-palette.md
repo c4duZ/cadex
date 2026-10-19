@@ -73,5 +73,6 @@ Fases A a E feitas. A confirmação ao fechar (E) entrou junto com abas e painé
 `apps/macos/features/tabs/CloseConfirmation.swift`. Conferido no app com prints: ⌘K com foco no
 terminal, busca e Enter na paleta, ⌘T na pasta atual, ⌘1 e Ctrl+Tab, confirmação do ⌘W com
 `sleep 100`, ⌘D, ⌘⇧D, foco por direção e fechar painel. O dono conferiu à mão o resto: renomear, arrastar aba e divisor, painel novo na mesma pasta,
-fechar depois de confirmar sem travar, e o último painel fechando a janela. Fica sem conferir só um
-arquivo shortcuts.json de verdade (coberto por teste).
+fechar depois de confirmar sem travar, e o último painel fechando a janela. Um shortcuts.json de verdade
+também conferido: `{"cmd+t": null, "cmd+shift+t": "tab.new"}` pôs ⇧⌘T em "Nova aba" no menu, e um
+arquivo quebrado deixou o app abrir com os padrões e o aviso no log.
