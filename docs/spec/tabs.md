@@ -50,10 +50,10 @@ painéis. Hoje só abas de terminal; editor, preview e outras entram com as feat
 
 ## Critérios de aceite
 - [x] ⌘T abre na pasta atual depois de um `cd` na aba ativa.
-- [ ] Renomear mantém o nome depois de um `cd`; renomear para vazio volta ao nome da pasta.
+- [x] Renomear mantém o nome depois de um `cd`; renomear para vazio volta ao nome da pasta.
 - [x] ⌘1 a ⌘9 trocam de aba; Ctrl+Tab volta para a aba usada antes.
-- [ ] ⌘D e ⌘⇧D dividem e o painel novo abre na mesma pasta.
+- [x] ⌘D e ⌘⇧D dividem e o painel novo abre na mesma pasta.
 - [x] ⌘W com `sleep 100` no painel pede confirmação; com o shell parado, fecha direto.
-- [ ] Fechar o último painel da última aba fecha a janela.
+- [x] Fechar o último painel da última aba fecha a janela.
 - [x] Árvore de painéis: dividir, fechar e reequilibrar dão o layout esperado.
 - [x] Abas escondidas não desenham.

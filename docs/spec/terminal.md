@@ -131,7 +131,7 @@ sistema (NSPasteboard); no Windows, a do Win32. O núcleo recebe só o texto fin
 - [ ] Em tela Retina, o texto em SF Mono 13 pt sai nítido (comparado lado a lado com o Terminal do
       macOS no mesmo tamanho).
 - [x] `cat` de um arquivo de 100 MB não trava a janela, e Ctrl+C interrompe em menos de 1 segundo.
-- [ ] ⌘D, ⌘Shift+D, ⌘W e ⌘T funcionam e a aba nova abre na pasta da sessão ativa.
+- [x] ⌘D, ⌘Shift+D, ⌘W e ⌘T funcionam e a aba nova abre na pasta da sessão ativa.
 - [x] Fechar uma aba com `sleep 100` rodando pede confirmação; com o shell parado, fecha direto.
 - [ ] Reabrir o app restaura abas, divisões e pastas.
 - [ ] `vim`, `htop` e `less` funcionam, inclusive com rolagem e redimensionamento.
