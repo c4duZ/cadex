@@ -35,6 +35,8 @@ pub const Options = struct {
     cwd: ?[]const u8 = null,
     /// Configured shell; empty or null falls back to $SHELL, then zsh.
     shell: ?[]const u8 = null,
+    /// Lines of history to keep; 0 is the default (model.zig).
+    history_lines: u32 = 0,
     callbacks: Callbacks = .{},
 };
 
@@ -61,10 +63,11 @@ pub const Session = struct {
         const self = try gpa.create(Session);
         errdefer gpa.destroy(self);
 
-        const model = try Model.create(Model.defaultIo(), gpa, .{
+        const history: usize = if (options.history_lines == 0) @import("model.zig").scrollback_lines else options.history_lines;
+        const model = try Model.createWithHistory(Model.defaultIo(), gpa, .{
             .cols = options.size.cols,
             .rows = options.size.rows,
-        });
+        }, history);
         errdefer model.destroy();
 
         self.* = .{
@@ -211,6 +214,12 @@ pub const Session = struct {
             .bell => self.callbacks.on_bell,
         };
         if (callback) |notify| notify(self.callbacks.context);
+    }
+
+    pub fn setCursorDefaults(self: *Session, shape: Model.CursorShape, blink: bool) void {
+        self.lock();
+        defer self.unlock();
+        self.model.setCursorDefaults(shape, blink);
     }
 
     /// The theme's colors for this terminal (model.zig:setColors).

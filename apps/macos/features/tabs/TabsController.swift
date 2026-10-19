@@ -232,7 +232,7 @@ public final class TabsController {
     public func shouldCloseAll(then close: @escaping @MainActor () -> Void,
                                cancelled: @escaping @MainActor () -> Void = {}) -> Bool {
         let running = tabs.values.contains { $0.hasForegroundProcess }
-        let asks = UserDefaults.standard.object(forKey: CloseConfirmation.preferenceKey) as? Bool ?? true
+        let asks = TerminalPreferences.current.confirmClose
         guard running, asks else { return true }
         CloseConfirmation.confirm(running: true, in: window, what: "a janela", then: close, cancelled: cancelled)
         return false

@@ -20,6 +20,7 @@ fn options() api.Options {
         .on_exit = null,
         .on_title = null,
         .on_bell = null,
+        .history_lines = 0,
     };
 }
 

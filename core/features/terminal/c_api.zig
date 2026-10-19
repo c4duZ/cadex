@@ -20,6 +20,7 @@ pub const Options = extern struct {
     on_exit: ?*const fn (?*anyopaque, i32) callconv(.c) void,
     on_title: ?*const fn (?*anyopaque) callconv(.c) void,
     on_bell: ?*const fn (?*anyopaque) callconv(.c) void,
+    history_lines: u32,
 };
 
 pub export fn cadex_terminal_open(options: ?*const Options, out: ?*?*Session) callconv(.c) status.Code {
@@ -31,6 +32,7 @@ pub export fn cadex_terminal_open(options: ?*const Options, out: ?*?*Session) ca
         .size = .{ .cols = o.cols, .rows = o.rows },
         .cwd = if (o.cwd) |s| std.mem.span(s) else null,
         .shell = if (o.shell) |s| std.mem.span(s) else null,
+        .history_lines = o.history_lines,
         .callbacks = .{
             .context = o.context,
             .on_output = o.on_output,
@@ -136,6 +138,15 @@ pub export fn cadex_terminal_copy_working_directory(session: ?*Session, out: ?*?
     const copy = gpa.dupe(u8, dir) catch return status.out_of_memory;
     ptr.* = copy.ptr;
     len.* = copy.len;
+    return status.ok;
+}
+
+/// The cursor's default shape (CADEX_CURSOR_BLOCK, _BAR, _UNDERLINE) and
+/// blinking. A shape the program set stays until it resets it.
+pub export fn cadex_terminal_set_cursor(session: ?*Session, shape: u8, blink: bool) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const cursor = std.enums.fromInt(@import("model.zig").Model.CursorShape, shape) orelse return status.invalid_argument;
+    s.setCursorDefaults(cursor, blink);
     return status.ok;
 }
 

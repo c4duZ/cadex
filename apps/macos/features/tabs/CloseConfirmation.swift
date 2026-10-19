@@ -1,18 +1,16 @@
 import AppKit
+import Terminal
 
 /// Asks before closing panes with a program in the foreground (a server,
 /// an agent, `sleep 100`): docs/spec/tabs.md, "Fechar". The alert's "não
-/// perguntar de novo" turns it off; the terminal's own close uses the same
-/// preference.
+/// perguntar de novo" turns it off (TerminalPreferences.confirmClose).
 @MainActor
 enum CloseConfirmation {
-    static let preferenceKey = "terminal.confirmClose"
-
     /// Runs `close` now if nothing is running or the user turned the
     /// question off; otherwise asks in a sheet and runs it on "Fechar".
     static func confirm(running: Bool, in window: NSWindow?, what: String,
                         then close: @escaping @MainActor () -> Void, cancelled: @escaping @MainActor () -> Void = {}) {
-        let asks = UserDefaults.standard.object(forKey: preferenceKey) as? Bool ?? true
+        let asks = TerminalPreferences.current.confirmClose
         guard asks, running, let window else {
             close()
             return
@@ -28,7 +26,7 @@ enum CloseConfirmation {
         alert.beginSheetModal(for: window) { response in
             MainActor.assumeIsolated {
                 if alert.suppressionButton?.state == .on {
-                    UserDefaults.standard.set(false, forKey: preferenceKey)
+                    TerminalPreferences.current.confirmClose = false
                 }
                 response == .alertFirstButtonReturn ? close() : cancelled()
             }

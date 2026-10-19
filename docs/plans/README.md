@@ -40,7 +40,8 @@ Começando uma sessão do zero:
 5. Conferir no app sem roubar o teclado do dono, que pode estar usando a máquina: acionar comandos
    pelos itens de menu do processo (`tell application "System Events" to tell process "Cadex" to
    click menu item "Dividir à direita" of menu "Painéis" of menu bar 1`) e capturar a janela com
-   `screencapture -l`, que funciona com ela atrás. Tecla simulada vai para o app que estiver na
+   `screencapture -l`, que funciona com ela atrás. Abrir o app para teste com `CADEX_BACKGROUND=1`, que
+   mostra a janela sem ativar o app nem tomar o foco. Tecla simulada vai para o app que estiver na
    frente: só usar depois de conferir que é o Cadex, logo antes de cada envio. Em 2026-10-19 teclas
    de teste caíram no Chrome do dono.
 

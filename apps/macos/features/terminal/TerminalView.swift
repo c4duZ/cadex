@@ -14,12 +14,11 @@ public final class TerminalView: MTKView {
     private var lastSize: (cols: UInt16, rows: UInt16) = (0, 0)
     var markedText = NSAttributedString()
     /// Left Option as Meta (Option+B goes to the shell as Meta+B) instead of
-    /// typing ∫. Off by default (docs/spec/terminal.md, Teclado); the settings
-    /// window (plan 3) will write this default.
-    public var optionAsMeta = UserDefaults.standard.bool(forKey: "terminal.optionAsMeta")
+    /// typing ∫. Off by default (docs/spec/terminal.md, Teclado).
+    var optionAsMeta: Bool { TerminalPreferences.current.optionAsMeta }
     /// Copy on select (docs/spec/terminal.md): off by default, so hovering,
     /// clicking or selecting never replaces what is on the clipboard.
-    public var copyOnSelect = UserDefaults.standard.bool(forKey: "terminal.copyOnSelect")
+    var copyOnSelect: Bool { TerminalPreferences.current.copyOnSelect }
     /// Scroll and drag state (TerminalMouse.swift).
     var mouse = MouseState()
     /// Created on the first ⌘F (TerminalFind.swift).
@@ -48,10 +47,13 @@ public final class TerminalView: MTKView {
 
         let scale = window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
         if let device {
-            renderer = TerminalRenderer(device: device, font: TerminalFont(scale: scale), pixelFormat: colorPixelFormat)
+            renderer = TerminalRenderer(device: device, font: Self.preferredFont(scale: scale), pixelFormat: colorPixelFormat)
         }
         let size = gridSize()
-        session = try? TerminalSession(cols: size.cols, rows: size.rows, cwd: cwd)
+        let preferences = TerminalPreferences.current
+        session = try? TerminalSession(cols: size.cols, rows: size.rows, cwd: cwd,
+                                       shell: preferences.shell.isEmpty ? nil : preferences.shell,
+                                       historyLines: UInt32(clamping: preferences.historyLines))
         session?.onOutput = { [weak self] in
             self?.needsDisplay = true
             self?.refreshFindCounts()
@@ -63,8 +65,35 @@ public final class TerminalView: MTKView {
         }
         connectSignals()
         followAppearance()
+        followPreferences()
         registerForDraggedTypes([.fileURL])
         Self.cleanPastedImagesOnce()
+    }
+
+    static func preferredFont(scale: CGFloat) -> TerminalFont {
+        let preferences = TerminalPreferences.current
+        return TerminalFont(family: preferences.fontFamily, pointSize: preferences.fontSize, scale: scale)
+    }
+
+    /// Font and cursor follow the preferences live; the rest is read when
+    /// needed (TerminalPreferences.swift).
+    private func followPreferences() {
+        applyCursorPreference()
+        NotificationCenter.default.addObserver(forName: TerminalPreferences.didChange, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.applyCursorPreference()
+                self.renderer?.setFont(Self.preferredFont(scale: self.scale))
+                self.lastSize = (0, 0)
+                self.resizeSession()
+                self.needsDisplay = true
+            }
+        }
+    }
+
+    private func applyCursorPreference() {
+        let preferences = TerminalPreferences.current
+        session?.setCursor(shape: preferences.cursorShape.rawValue, blink: preferences.cursorBlink)
     }
 
     /// Takes the current theme colors now and whenever they change.
@@ -116,7 +145,7 @@ public final class TerminalView: MTKView {
         super.viewDidChangeBackingProperties()
         // Moved to a screen with another scale: rasterize glyphs for it, or
         // they are scaled and blurry.
-        renderer?.setFont(TerminalFont(scale: scale))
+        renderer?.setFont(Self.preferredFont(scale: scale))
         resizeSession()
     }
 

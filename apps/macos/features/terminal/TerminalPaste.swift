@@ -4,10 +4,6 @@ import AppKit
 /// PasteContent; encoding (bracketed paste) and escaping paths are the
 /// core's job.
 extension TerminalView {
-    /// Ask before pasting several lines into a program without bracketed
-    /// paste, where a shell would run each line. The alert's "não perguntar
-    /// de novo" turns it off.
-    static let confirmPasteKey = "terminal.confirmMultilinePaste"
 
     func pasteFromClipboard() {
         guard let session, let content = PasteContent.read(from: .general) else { return }
@@ -27,7 +23,9 @@ extension TerminalView {
 
     private func pasteText(_ text: String) {
         guard let session else { return }
-        let asks = UserDefaults.standard.object(forKey: Self.confirmPasteKey) as? Bool ?? true
+        // Ask before pasting several lines into a program without bracketed
+        // paste, where a shell would run each line.
+        let asks = TerminalPreferences.current.confirmMultilinePaste
         guard asks, !session.isPasteSafe(text), let window else {
             session.paste(text)
             return
@@ -44,7 +42,7 @@ extension TerminalView {
         alert.beginSheetModal(for: window) { [weak self] response in
             MainActor.assumeIsolated {
                 if alert.suppressionButton?.state == .on {
-                    UserDefaults.standard.set(false, forKey: Self.confirmPasteKey)
+                    TerminalPreferences.current.confirmMultilinePaste = false
                 }
                 if response == .alertFirstButtonReturn { self?.session?.paste(text) }
             }

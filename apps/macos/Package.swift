@@ -30,6 +30,13 @@ let package = Package(
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
         .target(
+            name: "Settings",
+            dependencies: ["Themes", "CommandPalette", "Shortcuts", "Icons"],
+            path: "features/settings",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
+        .target(
             name: "StatusBar",
             path: "features/status-bar",
             exclude: ["CLAUDE.md", "tests"],
@@ -102,6 +109,12 @@ let package = Package(
             path: "features/status-bar/tests"
         ),
         .executableTarget(
+            name: "SettingsTests",
+            dependencies: ["Settings", "Checks"],
+            path: "features/settings/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+        .executableTarget(
             name: "ThemesTests",
             dependencies: ["Themes", "Checks"],
             path: "features/themes/tests"
@@ -114,7 +127,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons", "Settings"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

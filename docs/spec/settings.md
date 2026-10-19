@@ -30,7 +30,7 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
 - Fonte que não existe no sistema: volta para SF Mono, com aviso no log.
 
 ## Critérios de aceite
-- [ ] Preferências salvas e relidas dão os mesmos valores.
-- [ ] Mudar o tamanho da fonte redesenha os terminais abertos com as novas métricas.
-- [ ] Um `settings.json` editado à mão com o app aberto vale na hora.
-- [ ] Um `settings.json` quebrado não impede o app de abrir.
+- [x] Preferências salvas e relidas dão os mesmos valores.
+- [x] Mudar o tamanho da fonte redesenha os terminais abertos com as novas métricas.
+- [x] Um `settings.json` editado à mão com o app aberto vale na hora.
+- [x] Um `settings.json` quebrado não impede o app de abrir.

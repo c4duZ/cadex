@@ -12,9 +12,8 @@ comando; o usuário pode mudar qualquer um.
   - ⌘D dividir à direita · ⌘⇧D dividir para baixo · ⌘] e ⌘[ próximo e anterior painel
   - ⌘⌥ + setas mudar o foco para o painel naquela direção
   - ⌘↑ e ⌘↓ topo e fim do histórico
-- O usuário muda atalhos num arquivo de preferências (`shortcuts.json` em Application
-  Support/Cadex): um mapa de combinação de teclas para id de comando. A tela de configuração vem
-  com a feature settings.
+- O usuário muda atalhos na seção `shortcuts` do settings.json (spec de settings): um mapa de
+  combinação de teclas para id de comando. A tela de configuração faz o mesmo pela janela.
 - Um atalho personalizado substitui o padrão da mesma combinação. Apontar uma combinação para
   `null` desliga o padrão dela.
 - Atalhos do app nunca usam Ctrl sozinho com letra (Ctrl+B, Ctrl+R, Ctrl+A...): essas teclas são
@@ -22,9 +21,8 @@ comando; o usuário pode mudar qualquer um.
 - O menu mostra o atalho em vigor de cada comando.
 
 ## Estados
-- **Sem arquivo de preferências:** só os padrões.
-- **Arquivo inválido** (JSON quebrado): os padrões valem e o problema é registrado no log; o app
-  abre normalmente.
+- **Sem atalhos no settings.json:** só os padrões.
+- **Seção inválida:** os padrões valem e o problema vai para o log; o app abre normalmente.
 
 ## Casos de borda
 - Combinação personalizada para um id que não existe: ignorada, com aviso no log.
@@ -36,5 +34,5 @@ comando; o usuário pode mudar qualquer um.
 ## Critérios de aceite
 - [x] Todo atalho padrão aponta para um comando registrado.
 - [x] Não há dois atalhos padrão com a mesma combinação.
-- [x] Um `shortcuts.json` com `"cmd+shift+t": "tab.new"` faz ⌘⇧T abrir aba nova.
-- [x] Um `shortcuts.json` quebrado não impede o app de abrir.
+- [x] Um atalho `"cmd+shift+t": "tab.new"` nas preferências faz ⌘⇧T abrir aba nova.
+- [x] Preferências quebradas não impedem o app de abrir.

@@ -41,6 +41,9 @@
   currentDirectory, closeSession) e os ganchos onShellExit, onActivity e onProgramTitle do
   `TerminalView`; a pergunta ao fechar com programa rodando é da feature tabs. Botão "Cancelar" de
   alerta ganha Esc à mão: o NSAlert só dá Esc a "Cancel".
+- Preferências: `TerminalPreferences.swift` (fonte, cursor, histórico, Option como Meta, copiar ao
+  selecionar, perguntas, shell), preenchida pelo app a partir do settings.json; fonte e cursor
+  valem na hora, histórico e shell nos terminais novos.
 - Cores: `TerminalAppearance.swift` guarda as cores que todo terminal usa (quem aplica o tema
   preenche `current`); cada `TerminalView` passa ao núcleo e usa a cor de seleção do tema.
 - Comandos do terminal em `TerminalActions.swift` (terminal.clear, terminal.find,

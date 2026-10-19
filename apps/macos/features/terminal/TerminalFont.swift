@@ -26,11 +26,18 @@ final class TerminalFont {
     private let italic: CTFont
     private let boldItalic: CTFont
 
-    init(pointSize: CGFloat = TerminalFont.defaultPointSize, scale: CGFloat) {
+    /// family: a font installed on the system; "SF Mono", or one that is
+    /// missing, uses the system's monospaced font (docs/spec/settings.md).
+    init(family: String = "SF Mono", pointSize: CGFloat = TerminalFont.defaultPointSize, scale: CGFloat) {
         let pixelSize = pointSize * scale
-        // monospacedSystemFont is SF Mono, which ships with macOS.
-        regular = NSFont.monospacedSystemFont(ofSize: pixelSize, weight: .regular) as CTFont
-        bold = NSFont.monospacedSystemFont(ofSize: pixelSize, weight: .bold) as CTFont
+        if family != "SF Mono", let custom = NSFont(name: family, size: pixelSize) {
+            regular = custom as CTFont
+            bold = (NSFontManager.shared.convert(custom, toHaveTrait: .boldFontMask)) as CTFont
+        } else {
+            // monospacedSystemFont is SF Mono, which ships with macOS.
+            regular = NSFont.monospacedSystemFont(ofSize: pixelSize, weight: .regular) as CTFont
+            bold = NSFont.monospacedSystemFont(ofSize: pixelSize, weight: .bold) as CTFont
+        }
         italic = Self.italicVariant(of: regular)
         boldItalic = Self.italicVariant(of: bold)
         metrics = Self.measure(regular, scale: scale)

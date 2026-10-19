@@ -54,6 +54,8 @@ typedef struct {
     void (*on_title)(void *context);
     /* Called on the reader thread when the program rings the bell. */
     void (*on_bell)(void *context);
+    /* Lines of history to keep (at most 100 000). 0: 10 000. */
+    uint32_t history_lines;
 } cadex_terminal_options;
 
 /* Starts a login shell on a new pty. */
@@ -118,6 +120,11 @@ cadex_status cadex_terminal_copy_title(cadex_terminal *terminal, uint8_t **out, 
  * (file://host/path decoded), or else the directory of the program in the
  * foreground. Not NUL-terminated; free with cadex_free. Unknown: *out NULL. */
 cadex_status cadex_terminal_copy_working_directory(cadex_terminal *terminal, uint8_t **out, size_t *out_len);
+
+/* The cursor's default shape (CADEX_CURSOR_BLOCK, _BAR, _UNDERLINE) and
+ * blinking, from the user's preferences. A shape the program set (DECSCUSR)
+ * stays until it resets it. */
+cadex_status cadex_terminal_set_cursor(cadex_terminal *terminal, uint8_t shape, bool blink);
 
 /* The theme's colors for a terminal, 0xRRGGBB. */
 typedef struct {

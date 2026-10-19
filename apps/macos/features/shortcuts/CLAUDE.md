@@ -11,8 +11,9 @@
 
 ## Como eu quero
 - Um atalho é só (teclas -> id de comando). Ver `../../../../docs/adr/0005-every-action-is-a-command.md`.
-- O atalho padrão mora no próprio comando (`defaultShortcut`); `Keymap.swift` junta os padrões e o
-  arquivo shortcuts.json de Application Support/Cadex, anotando os problemas para o log.
+- O atalho padrão mora no próprio comando (`defaultShortcut`); `Keymap.swift` junta os padrões e a
+  seção shortcuts do settings.json (feature settings), anotando os problemas para o log. O app
+  refaz keymap, menu e despacho quando ela muda.
 - `KeyCombo.swift`: "cmd+shift+t" ↔ evento ↔ "⇧⌘T" ↔ menu. A tecla é o caractere do layout sem
   modificadores, como nos menus do macOS.
 - `ShortcutDispatcher.swift`: monitor local de teclado, antes de qualquer view. Comando

@@ -70,15 +70,13 @@ let exitCode = await Checks.run([
         expect(ids.count == registry.commands.count)
         expect(ids.allSatisfy { registry.command($0) != nil })
     }),
-    ("a broken preferences file leaves the defaults", {
+    ("shortcuts from settings.json override and turn off defaults", {
         let registry = appRegistry()
         var keymap = Keymap(registry: registry)
-        let file = FileManager.default.temporaryDirectory.appendingPathComponent("cadex-shortcuts-\(UUID()).json")
-        defer { try? FileManager.default.removeItem(at: file) }
-        try Data("{ quebrado".utf8).write(to: file)
-        keymap.applyPreferences(from: file, registry: registry)
-        expect(keymap.command(for: KeyCombo("cmd+l")!) == "terminal.clear")
-        expect(keymap.problems.count == 1)
+        keymap.applyPreferences(["cmd+shift+t": "tab.new", "cmd+l": nil] as [String: String?], registry: registry)
+        expect(keymap.command(for: KeyCombo("cmd+shift+t")!) == "tab.new")
+        expect(keymap.command(for: KeyCombo("cmd+l")!) == nil)
+        expect(keymap.problems.isEmpty, "\(keymap.problems)")
     }),
 ])
 exit(exitCode)

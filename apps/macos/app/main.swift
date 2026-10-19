@@ -17,6 +17,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var palette: CommandPaletteController?
     private var tabs: TabsController?
     private var workspace: WorkspaceView?
+    private let settings = SettingsBridge()
+    private var keymapLabels: (String) -> String? = { _ in nil }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpCommands()
@@ -30,8 +32,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         connectStatusBar(workspace.statusBar, to: tabs)
         tabs.newTab(cwd: NSHomeDirectory())
         window.center()
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        // CADEX_BACKGROUND=1 shows the window without taking the keyboard,
+        // for checking the app while someone else uses the machine: opening
+        // it activated the app and sent the owner's typing into a terminal
+        // (2026-10-19).
+        if ProcessInfo.processInfo.environment["CADEX_BACKGROUND"] == "1" {
+            window.orderFrontRegardless()
+        } else {
+            window.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+        }
     }
 
     /// The title area is the app's (fullSizeContentView, transparent title
@@ -70,10 +80,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     /// Every feature registers its commands; the menu and the shortcuts
     /// come from the registry (ADR 0005).
     private func setUpCommands() {
-        // The palette shows each command's shortcut, known only once the
-        // keymap is built; it reads it through this box.
-        var labels: (String) -> String? = { _ in nil }
-        let palette = CommandPaletteController(registry: commands) { labels($0) }
+        // The palette shows each command's shortcut, which settings can
+        // change; it reads the current one through keymapLabels.
+        let palette = CommandPaletteController(registry: commands) { [weak self] in self?.keymapLabels($0) }
         self.palette = palette
         commands.register(palette.openCommand)
         commands.register(StandardCommands.all)
@@ -84,18 +93,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         commands.register(TerminalCommands.all)
         commands.register(TabCommands.all { [weak self] in self?.tabs })
 
+        settings.onShortcuts = { [weak self] shortcuts in self?.applyShortcuts(shortcuts) }
+        settings.start()
+    }
+
+    /// Builds the keymap from the commands' defaults and the shortcuts in
+    /// settings.json, then the menu and the dispatcher from it. Runs again
+    /// when the shortcuts change.
+    private func applyShortcuts(_ shortcuts: [String: String?]) {
         var keymap = Keymap(registry: commands)
-        keymap.applyPreferences(from: Keymap.preferencesFile, registry: commands)
+        keymap.applyPreferences(shortcuts, registry: commands)
         keymap.problems.forEach { NSLog("atalhos: %@", $0) }
         let finalKeymap = keymap
-        labels = { finalKeymap.combo(for: $0)?.label }
+        keymapLabels = { finalKeymap.combo(for: $0)?.label }
 
-        let menu = CommandMenu(registry: commands) { keymap.combo(for: $0)?.menuKeyEquivalent }
+        let menu = CommandMenu(registry: commands) { finalKeymap.combo(for: $0)?.menuKeyEquivalent }
         NSApp.mainMenu = menu.build()
         self.menu = menu
-        let dispatcher = ShortcutDispatcher(registry: commands, keymap: keymap)
-        dispatcher.start()
-        self.dispatcher = dispatcher
+        if let dispatcher {
+            dispatcher.update(keymap: keymap)
+        } else {
+            let dispatcher = ShortcutDispatcher(registry: commands, keymap: keymap)
+            dispatcher.start()
+            self.dispatcher = dispatcher
+        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

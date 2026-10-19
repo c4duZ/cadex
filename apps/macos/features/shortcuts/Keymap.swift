@@ -25,21 +25,10 @@ public struct Keymap {
         }
     }
 
-    /// The file of custom shortcuts: Application Support/Cadex/shortcuts.json.
-    public static var preferencesFile: URL {
-        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return base.appendingPathComponent("Cadex/shortcuts.json")
-    }
-
-    /// Applies {"cmd+shift+t": "tab.new", "cmd+k": null} on top of the
-    /// defaults. A missing file is fine; a broken one leaves the defaults.
-    public mutating func applyPreferences(from url: URL, registry: CommandRegistry) {
-        guard let data = try? Data(contentsOf: url) else { return }
-        guard let object = try? JSONSerialization.jsonObject(with: data), let map = object as? [String: Any] else {
-            problems.append("\(url.lastPathComponent) não é um objeto JSON; valem os atalhos padrão")
-            return
-        }
-        applyPreferences(map, registry: registry)
+    /// The user's shortcuts from settings.json: combination → command id, or
+    /// nil to turn a default off.
+    public mutating func applyPreferences(_ shortcuts: [String: String?], registry: CommandRegistry) {
+        applyPreferences(shortcuts.mapValues { $0.map { $0 as Any } ?? NSNull() }, registry: registry)
     }
 
     public mutating func applyPreferences(_ map: [String: Any], registry: CommandRegistry) {

@@ -24,11 +24,12 @@ public final class TerminalSession {
     nonisolated(unsafe) private(set) var handle: OpaquePointer?
     private let relay: CallbackRelay
 
-    public init(cols: UInt16, rows: UInt16, cwd: String? = nil, shell: String? = nil) throws {
+    public init(cols: UInt16, rows: UInt16, cwd: String? = nil, shell: String? = nil, historyLines: UInt32 = 0) throws {
         relay = CallbackRelay()
         var options = cadex_terminal_options()
         options.cols = cols
         options.rows = rows
+        options.history_lines = historyLines
         options.context = Unmanaged.passUnretained(relay).toOpaque()
         options.on_output = { context in CallbackRelay.from(context).outputArrived() }
         options.on_exit = { context, code in CallbackRelay.from(context).exited(code: code) }
@@ -92,6 +93,12 @@ public final class TerminalSession {
         guard cadex_terminal_copy_working_directory(handle, &bytes, &length) == CADEX_OK, let bytes else { return nil }
         defer { cadex_free(bytes) }
         return String(decoding: UnsafeBufferPointer(start: bytes, count: length), as: UTF8.self)
+    }
+
+    /// The cursor's default shape (CADEX_CURSOR_*) and blinking.
+    func setCursor(shape: UInt8, blink: Bool) {
+        guard let handle else { return }
+        _ = cadex_terminal_set_cursor(handle, shape, blink)
     }
 
     /// The theme's colors become the terminal's defaults.

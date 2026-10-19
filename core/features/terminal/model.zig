@@ -67,6 +67,17 @@ pub const Model = struct {
     /// Heap-allocated because the stream's handler keeps a pointer to the
     /// terminal; the model must not move after init.
     pub fn create(io: std.Io, gpa: std.mem.Allocator, size: Size) !*Model {
+        return createWithHistory(io, gpa, size, scrollback_lines);
+    }
+
+    /// The most history a user can ask for (docs/spec/settings.md): more
+    /// would cost too much memory per terminal.
+    pub const max_history_lines = 100_000;
+
+    /// A model keeping at least `history_lines` of scrollback (clamped to
+    /// 1..max_history_lines).
+    pub fn createWithHistory(io: std.Io, gpa: std.mem.Allocator, size: Size, history_lines: usize) !*Model {
+        const history = std.math.clamp(history_lines, 1, max_history_lines);
         const self = try gpa.create(Model);
         errdefer gpa.destroy(self);
         self.* = .{
@@ -75,7 +86,7 @@ pub const Model = struct {
                 .cols = size.cols,
                 .rows = size.rows,
                 .max_scrollback_bytes = null,
-                .max_scrollback_lines = scrollback_lines + scrollback_headroom,
+                .max_scrollback_lines = history + scrollback_headroom,
             }),
             .stream = undefined,
         };
@@ -153,6 +164,20 @@ pub const Model = struct {
         try t.colors.palette.changeDefault(self.gpa, palette);
         // A palette change forces the next frame to rebuild every cell.
         t.flags.dirty.palette = true;
+    }
+
+    pub const CursorShape = enum(u8) { block = 0, bar = 1, underline = 2 };
+
+    /// The cursor's default shape and blinking (the user's preference). A
+    /// shape the program chose (DECSCUSR) stays until it asks for the
+    /// default again.
+    pub fn setCursorDefaults(self: *Model, shape: CursorShape, blink: bool) void {
+        self.terminal.setDefaultCursorStyle(switch (shape) {
+            .block => .block,
+            .bar => .bar,
+            .underline => .underline,
+        });
+        self.terminal.setDefaultCursorBlink(blink);
     }
 
     /// Current directory reported by the shell through OSC 7, if any.
@@ -331,6 +356,22 @@ test "long lines reflow when the width changes" {
     const narrow = try model.plainText(testing.allocator);
     defer testing.allocator.free(narrow);
     try testing.expectEqualStrings("01234\n56789\nabcde", narrow);
+}
+
+test "the cursor follows the user's default until a program picks its own" {
+    const model = try Model.create(testing.io, testing.allocator, .{ .cols = 20, .rows = 4 });
+    defer model.destroy();
+    model.setCursorDefaults(.bar, false);
+    try testing.expect(model.terminal.screens.active.cursor.cursor_style == .bar);
+    try testing.expect(!model.terminal.modes.get(.cursor_blinking));
+
+    // vim asks for a steady block in normal mode.
+    model.feed("\x1b[2 q");
+    model.setCursorDefaults(.underline, true);
+    try testing.expect(model.terminal.screens.active.cursor.cursor_style == .block);
+    // Back to the default when the program resets it.
+    model.feed("\x1b[0 q");
+    try testing.expect(model.terminal.screens.active.cursor.cursor_style == .underline);
 }
 
 test "keeps ten thousand lines of history" {

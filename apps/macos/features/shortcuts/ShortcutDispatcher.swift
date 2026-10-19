@@ -15,6 +15,11 @@ public final class ShortcutDispatcher {
         self.keymap = keymap
     }
 
+    /// Settings changed the shortcuts: new presses use the new map.
+    public func update(keymap: Keymap) {
+        self.keymap = keymap
+    }
+
     public func start() {
         guard monitor == nil else { return }
         monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
