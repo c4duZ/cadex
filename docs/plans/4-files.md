@@ -22,7 +22,8 @@ workspace, explorer, search.
 - Ler a árvore inteira de uma vez ou o conteúdo de arquivos grandes sem limite.
 - Busca que trava a digitação ou não cancela quando a consulta muda.
 - Apagar de verdade sem passar pela Lixeira.
-- Ícones de terceiros sem licença compatível registrada no `NOTICE`.
+- Ícones fora da Phosphor (`docs/adr/0008-phosphor-icons.md`): os de tipo de arquivo também saem de
+  `apps/macos/shared/icons/Icon.swift`.
 
 ## Como eu quero
 **Onde estamos.** O painel lateral existe e está vazio (plano 3). A paleta e o fuzzy de pontuação
@@ -43,8 +44,8 @@ existem (plano 2, função fuzzy em core/features/search). As pastas das feature
   Lixeira é do sistema), ler arquivo com detecção de binário e limite de tamanho; observação de
   pastas com FSEvents (macOS) agregando eventos e avisando o app por callback (mesmo padrão de
   thread e de callback de `core/features/terminal/session.zig`).
-- **C. Explorer (app):** NSOutlineView com carregamento sob demanda, ícones (SF Symbols ou conjunto
-  com licença MIT/Apache), menu de contexto com comandos registrados, arrastar para o terminal
+- **C. Explorer (app):** NSOutlineView com carregamento sob demanda, ícones Phosphor (`apps/macos/shared/icons/Icon.swift`,
+  um caso por ícone), menu de contexto com comandos registrados, arrastar para o terminal
   reaproveitando o escapador de caminhos do plano 1.
 - **D. Busca (núcleo):** índice de nomes em memória atualizado pela observação de arquivos; parser de
   .gitignore (padrões, negação, pastas, aninhados); busca de conteúdo numa thread com cancelamento e
@@ -62,3 +63,21 @@ existem (plano 2, função fuzzy em core/features/search). As pastas das feature
   Lixeira, arrastar um arquivo para o terminal, ⌘P achando render.zig, ⌘Shift+F achando
   "libghostty" e abrindo na linha.
 - Atualizar specs, `CLAUDE.md` das features e o status em `docs/plans/README.md`.
+
+## Retomada (2026-10-19, fim da sessão dos planos 1 a 3)
+Nada deste plano começou. Antes de escrever código: ler `CLAUDE.md`, `docs/plans/README.md` (inclui
+como testar o app sem roubar o teclado do dono) e este plano; escrever as specs workspace, explorer
+e search. O que já existe e este plano usa:
+- Painel lateral vazio e recolhível: `apps/macos/app/SidebarView.swift` e `apps/macos/app/WorkspaceView.swift`.
+- Paleta e registro de comandos: `apps/macos/features/command-palette/` (comando novo = um
+  `Command` registrado em `apps/macos/app/main.swift`; atalho padrão mora no comando).
+- Fuzzy no núcleo: `core/features/search/fuzzy.zig` e `core/features/search/rank.zig`, API `cadex_fuzzy_rank`.
+- Escapar caminho para o shell: `cadex_terminal_quote_paths`; pasta atual da sessão:
+  `cadex_terminal_copy_working_directory`; levar o terminal a uma pasta: changeDirectory em `apps/macos/features/terminal/TerminalClose.swift`.
+- Preferências num lugar só: `apps/macos/features/settings/` (settings.json); preferência nova entra
+  em `apps/macos/features/settings/Settings.swift` e
+  `apps/macos/features/settings/SettingsFile.swift`.
+- Cores e cartões seguem o tema: `apps/macos/features/themes/ThemeStore.swift`.
+O dono usa teclado ABNT2 e o computador ao mesmo tempo que os testes: abrir o app com
+`CADEX_BACKGROUND=1` e acionar comandos pelos itens de menu, nunca por teclas simuladas.
+
