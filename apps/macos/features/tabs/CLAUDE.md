@@ -41,7 +41,7 @@
   `onStateChange` avisa cada mudança; `onEmpty`, a última aba fechada (sem ele, fecha a janela).
   `TabsClosing.swift`: fechar painel, aba e janela, e `shouldClose` para vários conjuntos de abas
   (uma pergunta só ao sair, contando os spaces escondidos).
-- `TabSource.swift`: as abas como lista da paleta (`TabCommands.source`, o `@` do app).
+- `TabSource.swift`: as abas como lista da paleta (TabCommands.source, o `@` do app).
 - `TabCommands.swift`: tab.new, tab.rename, tab.select-1…9, tab.previous-used,
   tab.least-recently-used, pane.close, pane.split-right, pane.split-down, pane.next, pane.previous,
   pane.focus-left/right/up/down. `CloseConfirmation.swift`: a pergunta ao fechar painel, aba ou
