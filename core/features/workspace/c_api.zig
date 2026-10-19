@@ -4,23 +4,9 @@ const std = @import("std");
 const status = @import("../../status.zig");
 const workspace = @import("workspace.zig");
 const terminal = @import("../terminal/terminal.zig");
-
-/// Buffers handed to the app come from malloc, freed with cadex_free.
-const gpa = std.heap.c_allocator;
-
-/// Copies `text` into a malloc'd buffer for the app. A null `out` skips it.
-fn handOut(text: []const u8, out: ?*?[*]u8, out_len: ?*usize) status.Code {
-    const ptr = out orelse return status.ok;
-    const copy = gpa.dupe(u8, text) catch return status.out_of_memory;
-    ptr.* = copy.ptr;
-    if (out_len) |len| len.* = copy.len;
-    return status.ok;
-}
-
-fn clearOut(out: ?*?[*]u8, out_len: ?*usize) void {
-    if (out) |ptr| ptr.* = null;
-    if (out_len) |len| len.* = 0;
-}
+const c_buffer = @import("../../shared/c_buffer.zig");
+const handOut = c_buffer.handOut;
+const clearOut = c_buffer.clearOut;
 
 /// Authorizes an existing directory for this run. *out (optional) receives
 /// its canonical path, not NUL-terminated; free with cadex_free.

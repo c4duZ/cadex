@@ -3,5 +3,7 @@
 module CCadex [system] {
     header "../../../../core/include/cadex.h"
     link "cadex"
+    // FSEvents, used by the core's file watching (core/features/explorer/watch.zig).
+    link framework "CoreServices"
     export *
 }

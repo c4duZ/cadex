@@ -8,6 +8,8 @@
 
 ## Como eu quero
 - Antes de mover algo para cá, as duas features que usam têm que existir.
+- Hoje: `c_buffer.zig` (entregar bytes ao app pela API C, usado por workspace e explorer) e
+  `test_dir.zig` (pasta temporária com caminho canônico, só nos testes de workspace e explorer).
 
 ## Como validar
 - `make core-test` (ou `zig build test` dentro de `core/`) passa, sem vazamento no alocador de teste.

@@ -14,6 +14,13 @@ pub const io_failed: Code = 4;
 pub const not_found: Code = 5;
 /// The path is outside every authorized directory (feature workspace).
 pub const not_authorized: Code = 6;
+pub const permission_denied: Code = 7;
+/// The name is taken (create, rename, move).
+pub const already_exists: Code = 8;
+/// The file is above the size the caller accepts (feature explorer).
+pub const too_large: Code = 9;
+/// The file is not text (feature explorer).
+pub const binary: Code = 10;
 
 /// Maps a Zig error to the closest status the apps can act on.
 pub fn fromError(err: anyerror) Code {
@@ -22,7 +29,11 @@ pub fn fromError(err: anyerror) Code {
         error.ForkFailed => spawn_failed,
         error.NotFound, error.FileNotFound => not_found,
         error.Outside => not_authorized,
-        error.NotAbsolute, error.NameInvalid, error.NameTooLong, error.NotDirectory => invalid_argument,
+        error.PermissionDenied => permission_denied,
+        error.AlreadyExists => already_exists,
+        error.TooLarge => too_large,
+        error.Binary => binary,
+        error.NotAbsolute, error.NameInvalid, error.NameTooLong, error.NotDirectory, error.IsDirectory, error.IntoItself => invalid_argument,
         else => io_failed,
     };
 }

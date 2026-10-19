@@ -62,11 +62,11 @@ operações do Finder que importam para quem programa.
 
 ## Critérios de aceite
 - [ ] Listar uma pasta devolve nome, tipo, tamanho e se é ignorada, pastas primeiro.
-- [ ] Criar, renomear, mover e copiar funcionam e recusam fora do workspace.
-- [ ] Renomear para um nome existente é recusado.
-- [ ] Mover uma pasta para dentro dela mesma é recusado.
-- [ ] A observação avisa criação e remoção de arquivo numa pasta observada.
-- [ ] Ler arquivo recusa binário e arquivo acima do limite.
+- [x] Criar, renomear, mover e copiar funcionam e recusam fora do workspace.
+- [x] Renomear para um nome existente é recusado.
+- [x] Mover uma pasta para dentro dela mesma é recusado.
+- [x] A observação avisa criação e remoção de arquivo numa pasta observada.
+- [x] Ler arquivo recusa binário e arquivo acima do limite.
 - [ ] Apagar manda para a Lixeira.
 - [ ] Expandir `core/features/` mostra as pastas das features com ícone de pasta.
 - [ ] Arrastar um arquivo para o terminal cola o caminho escapado.

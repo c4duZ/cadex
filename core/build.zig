@@ -22,6 +22,16 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
     });
 
+    // FSEvents, for the explorer's file watching (features/explorer/watch.zig).
+    // Zig does not look in the macOS SDK on its own when the target is not
+    // the bare host ("unable to find framework 'CoreServices'", 2026-10-19);
+    // usr/lib resolves the framework's own dependencies (libobjc). Setting
+    // the SDK as sysroot instead doubled the path in a warning.
+    const sdk = std.mem.trimEnd(u8, b.run(&.{ "xcrun", "--show-sdk-path" }), "\n");
+    root.addFrameworkPath(.{ .cwd_relative = b.pathJoin(&.{ sdk, "System/Library/Frameworks" }) });
+    root.addLibraryPath(.{ .cwd_relative = b.pathJoin(&.{ sdk, "usr/lib" }) });
+    root.linkFramework("CoreServices", .{});
+
     // Only the terminal feature may import this (ADR 0003).
     const ghostty = b.lazyDependency("ghostty", .{
         .target = target,

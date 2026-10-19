@@ -17,6 +17,14 @@ pub const Error = error{ NotAbsolute, NotFound, NameInvalid, NameTooLong };
 pub fn canonicalize(path: []const u8, out: *Buffer) Error![]const u8 {
     if (path.len == 0 or path[0] != '/') return error.NotAbsolute;
     if (resolveExisting(path, out)) |real| return real;
+    return canonicalizeEntry(path, out);
+}
+
+/// Like canonicalize, but the last component is kept as given, not
+/// followed: renaming, moving or deleting a symbolic link acts on the link,
+/// not on what it points to. Only the parent folder is resolved.
+pub fn canonicalizeEntry(path: []const u8, out: *Buffer) Error![]const u8 {
+    if (path.len == 0 or path[0] != '/') return error.NotAbsolute;
     const trimmed = std.mem.trimEnd(u8, path, "/");
     const name = std.fs.path.basename(trimmed);
     if (!isPlainName(name)) return error.NameInvalid;
@@ -38,6 +46,14 @@ fn resolveExisting(path: []const u8, out: *Buffer) ?[]const u8 {
     z[path.len] = 0;
     const real = c.realpath(@ptrCast(&z), out) orelse return null;
     return std.mem.span(real);
+}
+
+/// `path` NUL-terminated in `out`, for the libc calls.
+pub fn terminate(path: []const u8, out: *Buffer) error{NameTooLong}![:0]const u8 {
+    if (path.len >= max_path) return error.NameTooLong;
+    @memcpy(out[0..path.len], path);
+    out[path.len] = 0;
+    return out[0..path.len :0];
 }
 
 /// Whether an existing canonical path is a directory.
@@ -95,4 +111,11 @@ test "canonicalize resolves dots and keeps a missing last component" {
     try testing.expectError(error.NotAbsolute, canonicalize("tmp", &buf));
     try testing.expectError(error.NotFound, canonicalize("/tmp/missing-dir/file", &buf));
     try testing.expectError(error.NameInvalid, canonicalize("/tmp/missing-dir/..", &buf));
+}
+
+test "canonicalizeEntry keeps the last component unresolved" {
+    var buf: Buffer = undefined;
+    try testing.expectEqualStrings("/etc", try canonicalizeEntry("/etc", &buf));
+    try testing.expectEqualStrings("/private/tmp/x", try canonicalizeEntry("/tmp/x/", &buf));
+    try testing.expectError(error.NameInvalid, canonicalizeEntry("/", &buf));
 }

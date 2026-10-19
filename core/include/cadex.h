@@ -28,6 +28,10 @@ typedef int32_t cadex_status;
 #define CADEX_IO_FAILED 4
 #define CADEX_NOT_FOUND 5      /* the path does not exist */
 #define CADEX_NOT_AUTHORIZED 6 /* outside every authorized directory */
+#define CADEX_PERMISSION_DENIED 7
+#define CADEX_ALREADY_EXISTS 8 /* the name is taken */
+#define CADEX_TOO_LARGE 9      /* above the size limit asked for */
+#define CADEX_BINARY 10        /* not a text file */
 
 /* Releases a buffer returned by the core. NULL is accepted. */
 void cadex_free(void *ptr);
@@ -407,6 +411,77 @@ cadex_status cadex_workspace_authorize_terminal(cadex_terminal *terminal, uint8_
  * authorized by this call. */
 cadex_status cadex_workspace_launch_directory(const char *const *argv, size_t argc, const char *cwd,
                                               uint8_t **out, size_t *out_len);
+
+/* ---- Explorer (core/features/explorer) -------------------------------- */
+
+/* Every path must resolve inside an authorized directory (Workspace above),
+ * or the call returns CADEX_NOT_AUTHORIZED. Paths that come out are
+ * canonical, not NUL-terminated, freed with cadex_free. Deleting is the
+ * app's (the system Trash). */
+
+#define CADEX_ENTRY_FILE      0
+#define CADEX_ENTRY_DIRECTORY 1
+#define CADEX_ENTRY_SYMLINK   2
+#define CADEX_ENTRY_OTHER     3
+
+typedef struct {
+    uint32_t name_offset; /* into cadex_explorer_listing.names */
+    uint32_t name_len;    /* UTF-8, not NUL-terminated */
+    uint8_t kind;         /* CADEX_ENTRY_* */
+    bool link_to_directory; /* a symbolic link to a folder: sorted with folders */
+    uint64_t size;        /* bytes, for files */
+} cadex_explorer_entry;
+
+typedef struct {
+    cadex_explorer_entry *entries;
+    size_t count;
+    uint8_t *names;
+} cadex_explorer_listing;
+
+/* One folder: folders first, then files, natural order ignoring case
+ * (file2 before file10); `.git` is left out. Free with
+ * cadex_explorer_listing_free. CADEX_PERMISSION_DENIED: no read access. */
+cadex_status cadex_explorer_list(const char *path, cadex_explorer_listing *out);
+void cadex_explorer_listing_free(cadex_explorer_listing *listing);
+
+/* Create an empty file or folder; CADEX_ALREADY_EXISTS if the name is taken. */
+cadex_status cadex_explorer_create_file(const char *path);
+cadex_status cadex_explorer_create_directory(const char *path);
+
+/* New name in the same folder (a plain name, no slash). A taken name is
+ * CADEX_ALREADY_EXISTS; a case-only change is allowed. *out: the new path. */
+cadex_status cadex_explorer_rename(const char *path, const char *new_name, uint8_t **out, size_t *out_len);
+
+/* Into the folder `destination`, same name. A folder into itself:
+ * CADEX_INVALID_ARGUMENT. Taken name: CADEX_ALREADY_EXISTS. */
+cadex_status cadex_explorer_move(const char *path, const char *destination, uint8_t **out, size_t *out_len);
+
+/* Copy (folders with everything in them) into `destination`; next to a
+ * namesake the copy is "name cópia.ext", then "name cópia 2.ext". */
+cadex_status cadex_explorer_copy(const char *path, const char *destination, uint8_t **out, size_t *out_len);
+
+/* A text file's bytes. max_size 0: 10 MB. Above it: CADEX_TOO_LARGE; a NUL
+ * byte in the first 8 KB: CADEX_BINARY; a folder: CADEX_INVALID_ARGUMENT. */
+cadex_status cadex_explorer_read_text(const char *path, uint64_t max_size, uint8_t **out, size_t *out_len);
+
+/* -- Watching (FSEvents) -- */
+
+typedef struct cadex_explorer_watcher cadex_explorer_watcher;
+
+typedef struct {
+    const char *path; /* the folder whose contents changed, canonical */
+    bool subtree;     /* detail was lost: read everything below again */
+} cadex_explorer_change;
+
+/* Watches a folder and everything below it. on_change runs on the core's
+ * watcher queue, each changed folder once per batch (~100 ms of changes);
+ * it must return quickly, copy what it keeps, and not call
+ * cadex_explorer_watch_stop. */
+cadex_status cadex_explorer_watch(const char *path, void *context,
+                                  void (*on_change)(void *context, const cadex_explorer_change *changes, size_t count),
+                                  cadex_explorer_watcher **out);
+/* No callback runs after this returns. NULL is accepted. */
+void cadex_explorer_watch_stop(cadex_explorer_watcher *watcher);
 
 #ifdef __cplusplus
 }
