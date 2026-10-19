@@ -3,6 +3,8 @@
 Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 
 ## O que eu quero
+- **Trabalho em andamento:** seguir `docs/plans/README.md` (planos do fim do terminal até o MVP no
+  Mac, em ordem). Começar uma sessão lendo este arquivo, o índice e o plano da vez.
 - Recriar todas as funcionalidades do Terax com código próprio, licença MIT.
 - O app mais leve e rápido possível em cada sistema: macOS primeiro, Windows depois, sobre o mesmo
   núcleo.

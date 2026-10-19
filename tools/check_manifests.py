@@ -1,4 +1,4 @@
-"""Fails when a CLAUDE.md breaks the repository rules.
+"""Fails when a CLAUDE.md or a plan in docs/plans breaks the repository rules.
 
 Two checks, both cheap and both catching the usual way manifests rot:
 - every CLAUDE.md has the four sections, in order;
@@ -22,6 +22,8 @@ def manifests():
     for path in ROOT.rglob("CLAUDE.md"):
         if not SKIP_DIRS.intersection(path.relative_to(ROOT).parts):
             yield path
+    # Plans follow the same four-section format (docs/plans/README.md).
+    yield from (ROOT / "docs" / "plans").glob("*.md")
 
 
 def section_errors(text):
