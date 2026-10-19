@@ -24,11 +24,11 @@
   "Pasta vazia" e "Sem permissão"), `ExplorerDataSource.swift` (dados, células desenhadas à mão no
   `layout()`, arrastar e soltar), `ExplorerOutline.swift` (teclas da árvore e menu de contexto),
   `ExplorerRename.swift` (renomear no lugar), `ExplorerActions.swift` (o que cada comando faz e
-  quando está indisponível), `FileTypeIcon.swift` (ícone Phosphor por tipo e extensão).
+  quando está indisponível), `FileTypeIcon.swift` (pasta, link, e os arquivos pelo `FileIcons` compartilhado).
 - Um clique abre (arquivo na aba, pasta abre ou fecha); ⌘ e ⇧ só selecionam; a seta não abre duas
   vezes. Aparência do VS Code (spec, "Aparência"): linhas de 22 pt, recuo de 8 pt, guias de recuo com o
   ponteiro sobre a árvore e fundo leve na linha sob ele (`ExplorerOutline.swift` e
-  `ExplorerRowView`), cores por tipo em `FileTypeIcon.swift` (FileTypeColor, da tabela do CodeEdit,
+  `ExplorerRowView`), cores por tipo em `apps/macos/shared/icons/FileIcons.swift` (da tabela do CodeEdit,
   MIT, no NOTICE). `ExplorerCompact.swift`: pastas compactas; a linha é a primeira pasta da cadeia,
   mostra os filhos da última e as ações valem para a última (`tail`, `item(of:)`, `row(of:)`,
   `parentFolder(of:)`: a última pasta não é item do outline, então nada pergunta ao outline quem é

@@ -1,5 +1,6 @@
 import AppKit
 import CCadex
+import Icons
 
 /// The outline's rows, cells and drag and drop. Dragging rows out gives
 /// file URLs, which the terminal turns into quoted paths and the Finder
@@ -170,7 +171,7 @@ final class ExplorerCell: NSTableCellView {
         imageView?.image = FileTypeIcon.icon(name: node.name, entry: node.entry, expanded: expanded).image(size: 14)
         // Folders in the theme's accent: with them gray, a theme changed only
         // the background (owner, 2026-10-19).
-        imageView?.contentTintColor = node.isFolder ? style.accent : FileTypeColor.color(forFileNamed: node.name) ?? style.secondaryText
+        imageView?.contentTintColor = node.isFolder ? style.accent : FileIcons.color(forFileNamed: node.name) ?? style.secondaryText
         textField?.textColor = git.map { node.isFolder ? style.text : Self.gitColor($0) } ?? style.text
         alphaValue = node.isHidden || node.entry?.ignored == true ? 0.55 : 1
         toolTip = node.entry?.kind == .symlink && !cadex_workspace_is_authorized(node.path) ? "Aponta para fora da pasta aberta" : nil

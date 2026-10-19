@@ -92,12 +92,12 @@ let exitCode = await Checks.run([
         try? FileManager.default.removeItem(atPath: root)
     }),
     ("icons by kind and extension", {
-        expect(FileTypeIcon.icon(forFileNamed: "render.zig") == .fileCode)
-        expect(FileTypeIcon.icon(forFileNamed: "README.md") == .fileMd)
-        expect(FileTypeIcon.icon(forFileNamed: "Package.resolved") == .file)
-        expect(FileTypeIcon.icon(forFileNamed: "settings.JSON") == .bracketsCurly)
-        expect(FileTypeIcon.icon(forFileNamed: "Makefile") == .fileCode)
-        expect(FileTypeIcon.icon(forFileNamed: ".gitignore") == .bracketsCurly)
+        expect(FileIcons.icon(forFileNamed: "render.zig") == .fileCode)
+        expect(FileIcons.icon(forFileNamed: "README.md") == .fileMd)
+        expect(FileIcons.icon(forFileNamed: "Package.resolved") == .file)
+        expect(FileIcons.icon(forFileNamed: "settings.JSON") == .bracketsCurly)
+        expect(FileIcons.icon(forFileNamed: "Makefile") == .fileCode)
+        expect(FileIcons.icon(forFileNamed: ".gitignore") == .bracketsCurly)
         let folder = FileEntry(name: "src", kind: .directory, size: 0, linkToDirectory: false)
         expect(FileTypeIcon.icon(name: "src", entry: folder, expanded: true) == .folderOpen)
     }),
@@ -134,10 +134,10 @@ let exitCode = await Checks.run([
         try? FileManager.default.removeItem(atPath: root)
     }),
     ("file colors by type, gray for the rest", {
-        expect(FileTypeColor.color(forFileNamed: "App.swift") == .systemOrange)
-        expect(FileTypeColor.color(forFileNamed: "build.zig") != nil)
-        expect(FileTypeColor.color(forFileNamed: "notes.txt") == nil)
-        expect(FileTypeColor.color(forFileNamed: "Makefile") != nil)
+        expect(FileIcons.color(forFileNamed: "App.swift") == .systemOrange)
+        expect(FileIcons.color(forFileNamed: "build.zig") != nil)
+        expect(FileIcons.color(forFileNamed: "notes.txt") == nil)
+        expect(FileIcons.color(forFileNamed: "Makefile") != nil)
     }),
     ("the watcher reports a new file on the main thread", {
         let root = sandbox()

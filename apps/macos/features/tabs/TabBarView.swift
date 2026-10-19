@@ -30,19 +30,25 @@ public final class TabBarView: NSView {
         let id: Int
         let title: String
         let active: Bool
-        /// A terminal tab, or a document (file, diff, history, preview).
-        var terminal = true
+        /// The tab's kind: a terminal, or the document's (file by type,
+        /// history, web page).
+        var icon: Icon = .terminalWindow
+        /// The file type's color (Swift orange, Markdown blue...), or nil:
+        /// the accent when active, gray otherwise.
+        var iconColor: NSColor?
     }
 
     static let height: CGFloat = 30
-    private static let minWidth: CGFloat = 72
+    /// A short title ("~") does not leave a hole before the next tab.
+    private static let minWidth: CGFloat = 56
     private static let maxWidth: CGFloat = 200
     private static let closeSize: CGFloat = 14
     private static let iconSize: CGFloat = 13
     private static let padding: CGFloat = 10
-    private static let pillHeight: CGFloat = 24
+    /// The title bar's control height: tabs and buttons on one line.
+    private static let pillHeight: CGFloat = 26
     private static let pillRadius: CGFloat = 6
-    private static let gap: CGFloat = 2
+    private static let gap: CGFloat = 4
 
     public var style = Style(activeFill: .controlBackgroundColor, hoverFill: .quaternaryLabelColor,
                              text: .labelColor, secondaryText: .secondaryLabelColor) {
@@ -141,7 +147,8 @@ public final class TabBarView: NSView {
         let color = item.active ? style.text : style.secondaryText
 
         let iconRect = NSRect(x: rect.minX + Self.padding, y: rect.midY - Self.iconSize / 2, width: Self.iconSize, height: Self.iconSize)
-        tinted(item.terminal ? .terminalWindow : .file, size: Self.iconSize, color: item.active ? style.accent : color).draw(in: iconRect)
+        let iconColor = item.iconColor.map { item.active ? $0 : $0.withAlphaComponent(0.75) } ?? (item.active ? style.accent : color)
+        tinted(item.icon, size: Self.iconSize, color: iconColor).draw(in: iconRect)
 
         let paragraph = NSMutableParagraphStyle()
         paragraph.lineBreakMode = .byTruncatingTail

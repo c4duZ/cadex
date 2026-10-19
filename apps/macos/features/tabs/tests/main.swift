@@ -2,6 +2,7 @@ import AppKit
 import CoreGraphics
 import Checks
 @testable import Tabs
+import Icons
 
 // Tests of the tabs feature. Run with `make macos-test` (see
 // shared/checks/Checks.swift for why this is an executable).
@@ -136,6 +137,13 @@ let exitCode = await Checks.run([
         expect(ok, "\(first.snapshot())")
         first.closeAll()
         expect(first.count == 0)
+    }),
+    ("a document tab's icon comes from what it shows", {
+        expect(TabsController.tabIcon(for: "/repo/README.md").0 == .fileMd)
+        expect(TabsController.tabIcon(for: "/repo/App.swift").1 == .systemOrange)
+        expect(TabsController.tabIcon(for: "diff:work:/repo/core/build.zig").0 == .fileCode)
+        expect(TabsController.tabIcon(for: "history:/repo").0 == .gitCommit)
+        expect(TabsController.tabIcon(for: "preview:http://localhost:3000").0 == .globe)
     }),
 ])
 exit(exitCode)

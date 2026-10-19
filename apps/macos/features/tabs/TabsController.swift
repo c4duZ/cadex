@@ -1,4 +1,5 @@
 import AppKit
+import Icons
 import Terminal
 
 /// The tabs of a window: opening, closing, switching, renaming and
@@ -208,7 +209,8 @@ public final class TabsController {
         bar.items = list.order.compactMap { id in
             if let document = documents[id] {
                 let title = document.hasUnsavedChanges ? "● " + document.title : document.title
-                return TabBarView.Item(id: id, title: title, active: id == list.active, terminal: false)
+                let (icon, color) = Self.tabIcon(for: document.identity)
+                return TabBarView.Item(id: id, title: title, active: id == list.active, icon: icon, iconColor: color)
             }
             return tabs[id].map { TabBarView.Item(id: id, title: $0.title(home: home), active: id == list.active) }
         }
@@ -249,5 +251,16 @@ public final class TabsController {
                 self?.refreshBar()
             }
         }
+    }
+
+    /// A document tab's icon from its identity: a file by its type and
+    /// color, as in the explorer (owner, 2026-10-19: the tabs had one icon
+    /// for every document); the git history and web pages by their kind.
+    static func tabIcon(for identity: String) -> (Icon, NSColor?) {
+        if identity.hasPrefix("history:") { return (.gitCommit, nil) }
+        if identity.hasPrefix("preview:") { return (.globe, nil) }
+        // A path, or a diff ("diff:work:/repo/file"): the file's own name.
+        let name = (identity as NSString).lastPathComponent
+        return (FileIcons.icon(forFileNamed: name), FileIcons.color(forFileNamed: name))
     }
 }

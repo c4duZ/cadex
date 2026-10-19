@@ -320,6 +320,6 @@ Only the parser (src/md4c.c) is compiled in; the HTML is Cadex's own.
 MIT. Copyright © 2016-2026 Martin Mitáš
 
 CodeEdit — https://github.com/CodeEditApp/CodeEdit
-The colors of the explorer's file icons by type (apps/macos/features/explorer/FileTypeIcon.swift,
-FileTypeColor) follow CodeEdit's CEWorkspaceFileIcon.iconColor.
+The colors of the file icons by type (apps/macos/shared/icons/FileIcons.swift, used by the
+explorer and the tabs) follow CodeEdit's CEWorkspaceFileIcon.iconColor.
 MIT. Copyright (c) 2022 CodeEdit

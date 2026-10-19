@@ -14,6 +14,8 @@
 - `Resources/Phosphor-Regular.ttf` é a fonte desse mesmo pacote, inteira; a licença está ao lado e
   no `NOTICE`. Ícone novo: achar o nome em phosphoricons.com, pegar o código no style.css da mesma
   versão e acrescentar um caso.
+- `FileIcons.swift`: ícone e cor de um arquivo pelo nome e extensão (cores da tabela do CodeEdit,
+  MIT, no NOTICE), usados pela árvore do explorer e pelas abas.
 
 ## Como validar
 - `make macos-test` passa: todo caso tem glifo na fonte.
