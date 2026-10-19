@@ -6,10 +6,12 @@ const c = std.c;
 const Model = @import("model.zig").Model;
 const pty = @import("pty.zig");
 const shell_env = @import("shell_env.zig");
+const render = @import("render.zig");
 
 extern "c" fn usleep(microseconds: c_uint) c_int;
 
 pub const Size = pty.Size;
+pub const Frame = render.Frame;
 
 /// Called on the reader thread. They must return quickly and must not call
 /// close() on the same session: close() waits for the reader thread.
@@ -45,6 +47,8 @@ pub const Session = struct {
     stop: std.atomic.Value(bool) = .init(false),
     /// Set by the reader once it collected the shell's exit status.
     reaped: bool = false,
+    /// Only used from the thread that draws (the app main thread).
+    renderer: render.Renderer = .{},
 
     pub fn open(gpa: std.mem.Allocator, options: Options) !*Session {
         const self = try gpa.create(Session);
@@ -76,6 +80,7 @@ pub const Session = struct {
         self.reader.join();
         if (!self.reaped) hangUp(self.child);
         _ = c.close(self.child.fd);
+        self.renderer.deinit(self.gpa);
         self.model.destroy();
         self.gpa.destroy(self);
     }
@@ -90,6 +95,16 @@ pub const Session = struct {
         defer self.unlock();
         try pty.resize(self.child.fd, size);
         try self.model.resize(.{ .cols = size.cols, .rows = size.rows });
+    }
+
+    /// Captures the screen into a flat frame for drawing. Call from one thread
+    /// only (the one that draws); the frame is valid until the next call.
+    pub fn updateFrame(self: *Session) !*const Frame {
+        self.lock();
+        const captured = self.renderer.capture(self.gpa, &self.model.terminal);
+        self.unlock();
+        try captured;
+        return self.renderer.build(self.gpa);
     }
 
     pub fn hasForegroundProcess(self: *Session) bool {

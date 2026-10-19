@@ -68,6 +68,60 @@ cadex_status cadex_terminal_resize(cadex_terminal *terminal, uint16_t cols, uint
 /* True while a program other than the shell runs in the foreground. */
 bool cadex_terminal_has_foreground_process(cadex_terminal *terminal);
 
+/* -- Drawing (core/features/terminal/render.zig) -- */
+
+#define CADEX_CELL_BOLD           (1u << 0)
+#define CADEX_CELL_ITALIC         (1u << 1)
+#define CADEX_CELL_FAINT          (1u << 2)
+#define CADEX_CELL_STRIKETHROUGH  (1u << 3)
+/* First half of a double-width character: draw it across two cells. */
+#define CADEX_CELL_WIDE           (1u << 4)
+/* Second half of a wide character: draw nothing. */
+#define CADEX_CELL_SPACER         (1u << 5)
+/* bg differs from the frame background; otherwise skip drawing it. */
+#define CADEX_CELL_HAS_BACKGROUND (1u << 6)
+/* Underline kind: (flags >> CADEX_CELL_UNDERLINE_SHIFT) & 7.
+ * 0 none, 1 single, 2 double, 3 curly, 4 dotted, 5 dashed. */
+#define CADEX_CELL_UNDERLINE_SHIFT 8
+
+typedef struct {
+    uint32_t fg;          /* 0xRRGGBB, inverse already applied */
+    uint32_t bg;          /* 0xRRGGBB */
+    uint32_t text_offset; /* into cadex_terminal_frame.text */
+    uint16_t text_len;    /* UTF-8 bytes; 0 for an empty cell */
+    uint16_t flags;       /* CADEX_CELL_* */
+} cadex_terminal_cell;
+
+#define CADEX_CURSOR_BLOCK        0
+#define CADEX_CURSOR_BAR          1
+#define CADEX_CURSOR_UNDERLINE    2
+#define CADEX_CURSOR_BLOCK_HOLLOW 3
+
+typedef struct {
+    const cadex_terminal_cell *cells; /* rows * cols, row by row */
+    const uint8_t *text;              /* UTF-8 of every cell */
+    uint32_t text_len;
+    uint32_t background;              /* 0xRRGGBB */
+    uint32_t foreground;              /* 0xRRGGBB */
+    uint32_t cursor_color;            /* valid if has_cursor_color */
+    uint16_t cols;
+    uint16_t rows;
+    uint16_t cursor_x;
+    uint16_t cursor_y;
+    uint8_t cursor_style;             /* CADEX_CURSOR_* */
+    bool cursor_visible;
+    bool cursor_blinking;
+    bool has_cursor_color;
+} cadex_terminal_frame;
+
+/* Layout shared with render.zig, which asserts the same sizes. */
+_Static_assert(sizeof(cadex_terminal_cell) == 16, "cadex_terminal_cell layout");
+_Static_assert(sizeof(cadex_terminal_frame) == 48, "cadex_terminal_frame layout");
+
+/* Captures the screen for drawing. Call only from the thread that draws;
+ * the frame stays valid until the next call or cadex_terminal_close. */
+cadex_status cadex_terminal_update_frame(cadex_terminal *terminal, const cadex_terminal_frame **out);
+
 /* Visible text, one line per row, not NUL-terminated. Free with cadex_free.
  * Empty screen: *out is NULL and *out_len is 0. */
 cadex_status cadex_terminal_copy_text(cadex_terminal *terminal, uint8_t **out, size_t *out_len);

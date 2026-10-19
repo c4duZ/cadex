@@ -81,3 +81,12 @@ pub export fn cadex_terminal_copy_text(session: ?*Session, out: ?*?[*]u8, out_le
     len.* = text.len;
     return status.ok;
 }
+
+/// Captures the screen into a flat frame for drawing. Call only from the
+/// thread that draws; the frame stays valid until the next call or close.
+pub export fn cadex_terminal_update_frame(session: ?*Session, out: ?*?*const terminal.Frame) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const frame = out orelse return status.invalid_argument;
+    frame.* = s.updateFrame() catch |err| return status.fromError(err);
+    return status.ok;
+}

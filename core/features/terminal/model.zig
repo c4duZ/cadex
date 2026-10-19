@@ -39,6 +39,10 @@ pub const Model = struct {
             .stream = undefined,
         };
         errdefer self.terminal.deinit(gpa);
+        // Keep emoji sequences (skin tones, ZWJ families) and combining
+        // accents in one cell, as Ghostty does by default (mode 2027).
+        // Without it a thumbs-up with a skin tone splits into two glyphs.
+        self.terminal.modes.set(.grapheme_cluster, true);
 
         var handler: Handler = .init(&self.terminal);
         handler.effects.write_pty = &writePty;
