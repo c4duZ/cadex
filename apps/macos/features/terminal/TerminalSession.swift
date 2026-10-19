@@ -94,6 +94,13 @@ public final class TerminalSession {
         return String(decoding: UnsafeBufferPointer(start: bytes, count: length), as: UTF8.self)
     }
 
+    /// The theme's colors become the terminal's defaults.
+    func setColors(_ appearance: TerminalAppearance) {
+        guard let handle else { return }
+        var colors = appearance.coreColors
+        _ = cadex_terminal_set_colors(handle, &colors)
+    }
+
     /// The title the program set, empty if none.
     public func title() -> String {
         guard let handle else { return "" }

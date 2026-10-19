@@ -23,6 +23,16 @@ pub const NoticeFn = *const fn (context: ?*anyopaque, notice: Notice) void;
 
 pub const Size = struct { cols: u16, rows: u16 };
 
+/// The theme's colors for the terminal (docs/spec/themes.md), 0xRRGGBB.
+/// Mirrors cadex_terminal_colors in include/cadex.h.
+pub const Colors = extern struct {
+    background: u32,
+    foreground: u32,
+    cursor: u32,
+    /// The 16 ANSI colors: 8 normal, then 8 bright.
+    ansi: [16]u32,
+};
+
 /// Lines of history kept above the screen, at least (docs/spec/terminal.md).
 /// Counted in lines, not bytes: libghostty-vt's default is 10 KB, a few
 /// screens.
@@ -129,6 +139,22 @@ pub const Model = struct {
         return .{ .total = bar.total, .offset = bar.offset, .rows = bar.len };
     }
 
+    /// Sets the theme's colors as the terminal's defaults. What a program
+    /// changed with OSC 4/10/11 stays changed, as in other terminals; the
+    /// theme only replaces the defaults those reset to. Programs asking for
+    /// the colors (OSC 10/11/4) get these.
+    pub fn setColors(self: *Model, colors: Colors) !void {
+        const t = &self.terminal;
+        t.colors.background.default = rgbOf(colors.background);
+        t.colors.foreground.default = rgbOf(colors.foreground);
+        t.colors.cursor.default = rgbOf(colors.cursor);
+        var palette = t.colors.palette.original.*;
+        for (colors.ansi, 0..) |c, i| palette[i] = rgbOf(c);
+        try t.colors.palette.changeDefault(self.gpa, palette);
+        // A palette change forces the next frame to rebuild every cell.
+        t.flags.dirty.palette = true;
+    }
+
     /// Current directory reported by the shell through OSC 7, if any.
     pub fn workingDirectory(self: *Model) ?[]const u8 {
         return self.terminal.getPwd();
@@ -141,6 +167,10 @@ pub const Model = struct {
     /// Visible text (the viewport), one line per row. Caller frees.
     pub fn plainText(self: *Model, gpa: std.mem.Allocator) ![]const u8 {
         return self.terminal.plainString(gpa);
+    }
+
+    fn rgbOf(value: u32) vt.color.RGB {
+        return .{ .r = @truncate(value >> 16), .g = @truncate(value >> 8), .b = @truncate(value) };
     }
 
     fn fromHandler(handler: *Handler) *Model {
@@ -233,6 +263,37 @@ test "scrolls through the history and back to the bottom" {
 
     model.scrollToBottom();
     try testing.expectEqual(model.scrollbar().total, model.scrollbar().offset + model.scrollbar().rows);
+}
+
+test "the theme's colors become the terminal's and answer color queries" {
+    const Capture = struct {
+        var buf: [64]u8 = undefined;
+        var len: usize = 0;
+        fn reply(_: ?*anyopaque, bytes: []const u8) void {
+            @memcpy(buf[len..][0..bytes.len], bytes);
+            len += bytes.len;
+        }
+    };
+    Capture.len = 0;
+    const model = try Model.create(testing.io, testing.allocator, .{ .cols = 20, .rows = 4 });
+    defer model.destroy();
+    model.setReply(&Capture.reply, null);
+
+    var ansi: [16]u32 = undefined;
+    for (&ansi, 0..) |*c, i| c.* = @intCast(0x101010 * i);
+    try model.setColors(.{ .background = 0x161616, .foreground = 0xD6D6D6, .cursor = 0xE6E6E6, .ansi = ansi });
+    try testing.expectEqual(@as(u8, 0x16), model.terminal.colors.background.get().?.r);
+    try testing.expectEqual(@as(u8, 0x50), model.terminal.colors.palette.current[5].g);
+
+    // vim asks for the background to choose between its light and dark look.
+    model.feed("\x1b]11;?\x07");
+    try testing.expect(std.mem.indexOf(u8, Capture.buf[0..Capture.len], "1616/1616/1616") != null);
+
+    // A program's own change survives a theme change.
+    model.feed("\x1b]4;1;rgb:ff/00/00\x07");
+    try model.setColors(.{ .background = 0xFFFFFF, .foreground = 0, .cursor = 0, .ansi = ansi });
+    try testing.expectEqual(@as(u8, 0xFF), model.terminal.colors.palette.current[1].r);
+    try testing.expectEqual(@as(u8, 0xFF), model.terminal.colors.background.get().?.r);
 }
 
 test "the title and the bell reach the notice callback" {

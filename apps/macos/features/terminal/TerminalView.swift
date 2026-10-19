@@ -62,8 +62,24 @@ public final class TerminalView: MTKView {
             if let handler = self.onShellExit { handler() } else { self.window?.close() }
         }
         connectSignals()
+        followAppearance()
         registerForDraggedTypes([.fileURL])
         Self.cleanPastedImagesOnce()
+    }
+
+    /// Takes the current theme colors now and whenever they change.
+    private func followAppearance() {
+        applyAppearance()
+        NotificationCenter.default.addObserver(forName: TerminalAppearance.didChange, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.applyAppearance() }
+        }
+    }
+
+    private func applyAppearance() {
+        guard let appearance = TerminalAppearance.current else { return }
+        session?.setColors(appearance)
+        renderer?.selectionColor = appearance.selection
+        needsDisplay = true
     }
 
     /// Pasted images older than a week go away once per app launch.

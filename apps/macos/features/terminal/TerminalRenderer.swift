@@ -34,6 +34,8 @@ final class TerminalRenderer {
     private(set) var atlas: GlyphAtlas
     private var font: TerminalFont
     private var builder = QuadBuilder()
+    /// The theme's selection color; nil tints with the text color.
+    var selectionColor: UInt32?
 
     /// Several frames can be in flight; each writes its own buffer.
     private static let buffersInFlight = 3
@@ -65,7 +67,8 @@ final class TerminalRenderer {
     func draw(_ frame: cadex_terminal_frame, padding: SIMD2<Float>, in drawable: CAMetalDrawable, size: CGSize,
               overlay: DrawOverlay = DrawOverlay()) {
         let quads = builder.build(frame: frame, atlas: atlas, metrics: font.metrics, padding: padding,
-                                  viewSize: SIMD2(Float(size.width), Float(size.height)), overlay: overlay)
+                                  viewSize: SIMD2(Float(size.width), Float(size.height)), overlay: overlay,
+                                  selection: selectionColor)
 
         inFlight.wait()
         bufferIndex = (bufferIndex + 1) % Self.buffersInFlight

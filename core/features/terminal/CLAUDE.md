@@ -39,6 +39,8 @@
   (`pty.zig:currentDirectory`).
 - `mouse.zig`: mouse para programas que pedem (vim, htop, tmux) no formato que pediram; a roda vira
   relatório de botão, setas na tela alternativa (modo 1007) ou rolagem do histórico; foco (1004).
+- Cores do tema: `model.zig:setColors` troca o padrão de fundo, texto, cursor e das 16 ANSI; o que o
+  programa trocou por OSC continua, e as consultas OSC 10/11/4 respondem com essas cores.
 - Título (OSC 0/2) e sino chegam ao app pelos callbacks on_title e on_bell (`model.zig:Notice`),
   na thread de leitura, como on_output.
 - `session_view.zig` e `c_api_view.zig`: rolagem, seleção, busca e links da sessão, separados para

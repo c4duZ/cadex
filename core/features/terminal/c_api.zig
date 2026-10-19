@@ -139,6 +139,15 @@ pub export fn cadex_terminal_copy_working_directory(session: ?*Session, out: ?*?
     return status.ok;
 }
 
+/// The theme's colors: background, text, cursor and the 16 ANSI colors
+/// become the terminal's defaults (docs/spec/themes.md).
+pub export fn cadex_terminal_set_colors(session: ?*Session, colors: ?*const @import("model.zig").Colors) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const c = colors orelse return status.invalid_argument;
+    s.setColors(c.*) catch |err| return status.fromError(err);
+    return status.ok;
+}
+
 /// Captures the screen into a flat frame for drawing. Call only from the
 /// thread that draws; the frame stays valid until the next call or close.
 pub export fn cadex_terminal_update_frame(session: ?*Session, out: ?*?*const terminal.Frame) callconv(.c) status.Code {

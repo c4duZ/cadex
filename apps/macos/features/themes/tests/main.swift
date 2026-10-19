@@ -12,6 +12,32 @@ let exitCode = await Checks.run([
         }
         expect(Theme.cadexDark.dark && !Theme.cadexLight.dark)
     }),
+    ("a theme file reads back what was written", {
+        let data = ThemeFile.write(.cadexDark)
+        expect(try ThemeFile.read(data) == .cadexDark)
+    }),
+    ("an invalid color is refused with the field in the message", {
+        var object = try JSONSerialization.jsonObject(with: ThemeFile.write(.cadexLight)) as! [String: Any]
+        var terminal = object["terminal"] as! [String: Any]
+        terminal["cursor"] = "vermelho"
+        object["terminal"] = terminal
+        do {
+            _ = try ThemeFile.read(try JSONSerialization.data(withJSONObject: object))
+            expect(false, "accepted an invalid color")
+        } catch let problem as ThemeFile.Problem {
+            expect(problem.field == "terminal.cursor", problem.description)
+        }
+    }),
+    ("short forms of colors and a short ANSI list", {
+        expect(try ThemeFile.parse("#fff", field: "x") == RGB(0xFFFFFF))
+        expect(try ThemeFile.parse("#12345678", field: "x") == RGB(0x123456))
+        expect((try? ThemeFile.parse("123456", field: "x")) == nil)
+        var object = try JSONSerialization.jsonObject(with: ThemeFile.write(.cadexLight)) as! [String: Any]
+        var terminal = object["terminal"] as! [String: Any]
+        terminal["ansi"] = ["#000000"]
+        object["terminal"] = terminal
+        expect((try? ThemeFile.read(try JSONSerialization.data(withJSONObject: object))) == nil)
+    }),
     ("colors print as #RRGGBB", {
         expect(RGB(0x252525).hex == "#252525")
         expect(RGB(0x1FFFFFF).value == 0xFFFFFF)

@@ -119,6 +119,20 @@ cadex_status cadex_terminal_copy_title(cadex_terminal *terminal, uint8_t **out, 
  * foreground. Not NUL-terminated; free with cadex_free. Unknown: *out NULL. */
 cadex_status cadex_terminal_copy_working_directory(cadex_terminal *terminal, uint8_t **out, size_t *out_len);
 
+/* The theme's colors for a terminal, 0xRRGGBB. */
+typedef struct {
+    uint32_t background;
+    uint32_t foreground;
+    uint32_t cursor;
+    uint32_t ansi[16]; /* 8 normal, then 8 bright */
+} cadex_terminal_colors;
+
+_Static_assert(sizeof(cadex_terminal_colors) == 76, "cadex_terminal_colors layout");
+
+/* Sets the theme's colors as the terminal's defaults. What a program changed
+ * with OSC 4/10/11 stays; programs asking for colors get these. */
+cadex_status cadex_terminal_set_colors(cadex_terminal *terminal, const cadex_terminal_colors *colors);
+
 /* -- Drawing (core/features/terminal/render.zig) -- */
 
 #define CADEX_CELL_BOLD           (1u << 0)

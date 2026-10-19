@@ -1,6 +1,7 @@
 import AppKit
 import StatusBar
 import Tabs
+import Terminal
 import Themes
 
 /// The window's content, laid out like Terax: the title bar with the tabs,
@@ -77,6 +78,11 @@ final class WorkspaceView: NSView {
     }
 
     private func apply(_ theme: Theme) {
+        let term = theme.terminal
+        let colors = TerminalAppearance(
+            background: term.background.value, foreground: term.foreground.value, cursor: term.cursor.value,
+            selection: term.selection.value, ansi: term.ansi.map(\.value))
+        if TerminalAppearance.current != colors { TerminalAppearance.current = colors }
         let ui = theme.interface
         // The chrome color goes on the window, not on this view's layer: a
         // filled layer here covered the close, minimize and zoom buttons in

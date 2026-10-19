@@ -213,6 +213,13 @@ pub const Session = struct {
         if (callback) |notify| notify(self.callbacks.context);
     }
 
+    /// The theme's colors for this terminal (model.zig:setColors).
+    pub fn setColors(self: *Session, colors: @import("model.zig").Colors) !void {
+        self.lock();
+        defer self.unlock();
+        try self.model.setColors(colors);
+    }
+
     /// The title the program set (OSC 0/2), empty if none. Caller frees.
     pub fn title(self: *Session, gpa: std.mem.Allocator) ![]u8 {
         self.lock();

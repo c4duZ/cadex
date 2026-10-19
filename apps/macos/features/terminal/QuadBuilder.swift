@@ -35,7 +35,8 @@ struct QuadBuilder {
     static let flashAlpha: Float = 0.12
 
     mutating func build(frame: cadex_terminal_frame, atlas: GlyphAtlas, metrics m: CellMetrics,
-                        padding: SIMD2<Float>, viewSize: SIMD2<Float>, overlay: DrawOverlay = DrawOverlay()) -> [QuadInstance] {
+                        padding: SIMD2<Float>, viewSize: SIMD2<Float>, overlay: DrawOverlay = DrawOverlay(),
+                        selection: UInt32? = nil) -> [QuadInstance] {
         quads.removeAll(keepingCapacity: true)
         let cols = Int(frame.cols)
         let rows = Int(frame.rows)
@@ -53,7 +54,9 @@ struct QuadBuilder {
         for index in 0..<(cols * rows) where cells[index].flags & UInt16(CADEX_CELL_HAS_BACKGROUND) != 0 {
             solid(origin(index), SIMD2(cellW, cellH), rgba(cells[index].bg))
         }
-        let selectionColor = rgba(frame.foreground, alpha: Self.selectionAlpha)
+        // The theme's selection color is opaque and drawn under the text;
+        // without one, the text color at low opacity.
+        let selectionColor = selection.map { rgba($0) } ?? rgba(frame.foreground, alpha: Self.selectionAlpha)
         for index in 0..<(cols * rows) where cells[index].flags & UInt16(CADEX_CELL_SELECTED) != 0 {
             solid(origin(index), SIMD2(cellW, cellH), selectionColor)
         }
