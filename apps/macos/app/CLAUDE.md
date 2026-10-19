@@ -21,7 +21,8 @@
   mudanças do disco aos editores abertos e monta a aparência do editor (`EditorLooks`).
 - A casca da janela, no estilo do Terax: título transparente com barra de ferramentas compacta
   (38 pt, botões da janela centrados); `TitleBarView.swift` (painel lateral, paleta, o space como migalha "Space 1 ›", abas, "+", a busca sem caixa, cada controle um `TitleBarButton.swift` de 26 pt com fundo ao passar e
-  ao clicar,
+  ao clicar, a busca um campo de verdade (`TitleBarSearch.swift`, com ⌘K à direita, encolhe antes
+  das abas), o space só o ícone de pilha com um space e o nome com mais,
   busca, todos por comando), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
   painel lateral recolhível, barra de status) e `SidebarView.swift` (duas páginas, Arquivos e Git, trocadas por abas largas embaixo do painel, como no Terax, que rodam explorer.focus e git.show). O explorer é criado
   junto com os comandos, antes de as configurações montarem os atalhos.

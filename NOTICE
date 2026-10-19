@@ -323,3 +323,8 @@ CodeEdit — https://github.com/CodeEditApp/CodeEdit
 The colors of the file icons by type (apps/macos/shared/icons/FileIcons.swift, used by the
 explorer and the tabs) follow CodeEdit's CEWorkspaceFileIcon.iconColor.
 MIT. Copyright (c) 2022 CodeEdit
+
+Material Icon Theme — https://github.com/material-extensions/vscode-material-icon-theme
+File and folder icons of the explorer and the tabs (docs/adr/0011), a selection converted to PDF
+in apps/macos/shared/icons/Resources/FileIcons by tools/icons/build_file_icons.py.
+MIT. Copyright (c) 2025 Material Extensions

@@ -168,10 +168,18 @@ final class ExplorerCell: NSTableCellView {
             return
         }
         textField?.font = .systemFont(ofSize: 12)
-        imageView?.image = FileTypeIcon.icon(name: node.name, entry: node.entry, expanded: expanded).image(size: 14)
-        // Folders in the theme's accent: with them gray, a theme changed only
-        // the background (owner, 2026-10-19).
-        imageView?.contentTintColor = node.isFolder ? style.accent : FileIcons.color(forFileNamed: node.name) ?? style.secondaryText
+        // The Material Icon Theme's drawing when it knows the name (Docker,
+        // Python, src, tests...; docs/adr/0011), in its own colors; else the
+        // Phosphor glyph, folders in the theme's accent (with them gray, a
+        // theme changed only the background, owner, 2026-10-19).
+        let link = node.entry?.kind == .symlink
+        if !link, let material = node.isFolder ? FileIcons.folderImage(named: node.name) : FileIcons.image(forFileNamed: node.name) {
+            imageView?.image = material
+            imageView?.contentTintColor = nil
+        } else {
+            imageView?.image = FileTypeIcon.icon(name: node.name, entry: node.entry, expanded: expanded).image(size: 14)
+            imageView?.contentTintColor = node.isFolder ? style.accent : FileIcons.color(forFileNamed: node.name) ?? style.secondaryText
+        }
         textField?.textColor = git.map { node.isFolder ? style.text : Self.gitColor($0) } ?? style.text
         alphaValue = node.isHidden || node.entry?.ignored == true ? 0.55 : 1
         toolTip = node.entry?.kind == .symlink && !cadex_workspace_is_authorized(node.path) ? "Aponta para fora da pasta aberta" : nil

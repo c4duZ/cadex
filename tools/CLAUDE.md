@@ -14,6 +14,10 @@
   `themes/official-palettes.json` (paletas oficiais, cada cor com a fonte). Cortes de temas
   parecidos e o padrão ficam no script; descrições em `themes/descriptions.json`; licenças em
   `themes/licenses/` e no `NOTICE`.
+- `icons/build_file_icons.py`: gera os ícones de arquivo e pasta do app a partir do Material Icon
+  Theme (commit fixado no script; o checkout é passado na linha de comando), com
+  `icons/svg_to_pdf.swift` convertendo para PDF. A lista do que entra fica no script
+  (`docs/adr/0011-material-file-icons.md`).
 
 ## Como validar
 - `make manifests` passa.

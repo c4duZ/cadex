@@ -1,6 +1,6 @@
 # 0008 — Ícones Phosphor em todo o app, pela fonte de ícones
 
-Data: 2026-10-19 · Status: aceita
+Data: 2026-10-19 · Status: aceita; os ícones de tipo de arquivo têm a exceção do 0011
 
 ## Contexto
 O app precisa de ícones (barra de título, abas, painel lateral, barra de status). O dono escolheu a

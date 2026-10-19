@@ -210,7 +210,8 @@ public final class TabsController {
             if let document = documents[id] {
                 let title = document.hasUnsavedChanges ? "● " + document.title : document.title
                 let (icon, color) = Self.tabIcon(for: document.identity)
-                return TabBarView.Item(id: id, title: title, active: id == list.active, icon: icon, iconColor: color)
+                return TabBarView.Item(id: id, title: title, active: id == list.active, icon: icon, iconColor: color,
+                                       image: Self.tabImage(for: document.identity))
             }
             return tabs[id].map { TabBarView.Item(id: id, title: $0.title(home: home), active: id == list.active) }
         }
@@ -256,6 +257,12 @@ public final class TabsController {
     /// A document tab's icon from its identity: a file by its type and
     /// color, as in the explorer (owner, 2026-10-19: the tabs had one icon
     /// for every document); the git history and web pages by their kind.
+    /// The file's Material drawing, when it has one (docs/adr/0011).
+    static func tabImage(for identity: String) -> NSImage? {
+        guard !identity.hasPrefix("history:"), !identity.hasPrefix("preview:") else { return nil }
+        return FileIcons.image(forFileNamed: (identity as NSString).lastPathComponent)
+    }
+
     static func tabIcon(for identity: String) -> (Icon, NSColor?) {
         if identity.hasPrefix("history:") { return (.gitCommit, nil) }
         if identity.hasPrefix("preview:") { return (.globe, nil) }

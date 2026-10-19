@@ -20,8 +20,8 @@ let package = Package(
         .target(
             name: "Icons",
             path: "shared/icons",
-            exclude: ["CLAUDE.md", "Resources/LICENSE-Phosphor.txt", "tests"],
-            resources: [.copy("Resources/Phosphor-Regular.ttf")]
+            exclude: ["CLAUDE.md", "Resources/LICENSE-Phosphor.txt", "Resources/LICENSE-MaterialIconTheme.txt", "tests"],
+            resources: [.copy("Resources/Phosphor-Regular.ttf"), .copy("Resources/FileIcons")]
         ),
         .target(
             name: "Themes",

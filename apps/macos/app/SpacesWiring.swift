@@ -15,7 +15,7 @@ extension AppDelegate {
         let spaces = SpacesController { [unowned self] in self.makeTabs() }
         spaces.onSwitch = { [weak self] tabs in self?.workspace?.show(tabs) }
         spaces.onChange = { [weak self, weak spaces] in
-            self?.workspace?.titleBar.spaceName = spaces?.activeName ?? ""
+            self?.workspace?.titleBar.setSpace(name: spaces?.activeName ?? "", count: spaces?.spaces.count ?? 1)
         }
         commands.register(SpacesCommands.all(spaces, palette: palette) { [weak self] in
             self?.folder.root ?? NSHomeDirectory()

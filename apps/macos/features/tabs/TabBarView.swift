@@ -1,12 +1,14 @@
 import AppKit
 import Icons
 
-/// The tab strip in the title bar: one tab per item, as wide as its title,
-/// with a small icon; the active one filled, × on hover, as in Terax (the
-/// owner compared both on 2026-10-19: fixed-width pills with centered titles
-/// looked unlike it). Click selects, double-click renames, dragging
-/// reorders. Drawn by hand so dragging is simple; colors come from the
-/// theme through `style`.
+/// The tab strip in the title bar, the bar's main element: tabs of equal
+/// width side by side, as macOS's own tabs (Safari, Ghostty), each with its
+/// own light fill so it reads as a tab, the active one stronger and marked
+/// with a line in the theme's accent; × on the active tab and under the
+/// pointer. The owner chose this over Terax's quiet pills, which gave the
+/// space and the tabs the same weight (2026-10-19). Click selects,
+/// double-click renames, dragging reorders, the middle button closes.
+/// Drawn by hand so dragging is simple; colors come from the theme.
 public final class TabBarView: NSView {
     /// The colors of the strip, set by whoever applies the theme.
     public struct Style {
@@ -36,18 +38,19 @@ public final class TabBarView: NSView {
         /// The file type's color (Swift orange, Markdown blue...), or nil:
         /// the accent when active, gray otherwise.
         var iconColor: NSColor?
+        /// The Material drawing of the file, drawn as it is (over `icon`).
+        var image: NSImage?
     }
 
     static let height: CGFloat = 30
-    /// A short title ("~") does not leave a hole before the next tab.
-    private static let minWidth: CGFloat = 56
-    private static let maxWidth: CGFloat = 200
+    /// Tabs shrink to this when many are open, then the strip clips.
+    private static let minWidth: CGFloat = 96
+    private static let maxWidth: CGFloat = 220
     private static let closeSize: CGFloat = 14
     private static let iconSize: CGFloat = 13
     private static let padding: CGFloat = 10
-    /// The title bar's control height: tabs and buttons on one line.
-    private static let pillHeight: CGFloat = 26
-    private static let pillRadius: CGFloat = 6
+    private static let pillHeight: CGFloat = 28
+    private static let pillRadius: CGFloat = 7
     private static let gap: CGFloat = 4
 
     public var style = Style(activeFill: .controlBackgroundColor, hoverFill: .quaternaryLabelColor,
@@ -94,25 +97,18 @@ public final class TabBarView: NSView {
         .systemFont(ofSize: 12, weight: item.active ? .medium : .regular)
     }
 
-    /// Icon, title and the room for × (kept so the title does not move on hover).
+    /// Every tab at full width: the strip asks for this much.
     private var naturalWidths: [CGFloat] {
-        items.map { item in
-            let text = (item.title as NSString).size(withAttributes: [.font: font(item)]).width
-            let width = Self.padding + Self.iconSize + 6 + ceil(text) + 4 + Self.closeSize + Self.padding - 2
-            return min(max(width, Self.minWidth), Self.maxWidth)
-        }
+        items.map { _ in Self.maxWidth }
     }
 
-    /// The tabs' frames; when they do not fit, all shrink by the same factor.
+    /// Equal widths, the most that fits, never under `minWidth`.
     private var frames: [NSRect] {
-        let widths = naturalWidths
         let gaps = Self.gap * CGFloat(max(items.count - 1, 0))
-        let total = widths.reduce(0, +)
-        let scale = total + gaps > bounds.width && total > 0 ? max(bounds.width - gaps, 0) / total : 1
-        var x: CGFloat = 0
-        return widths.map { width in
-            defer { x += width * scale + Self.gap }
-            return NSRect(x: x, y: 0, width: width * scale, height: bounds.height)
+        let fit = items.isEmpty ? Self.maxWidth : (bounds.width - gaps) / CGFloat(items.count)
+        let width = min(max(fit, Self.minWidth), Self.maxWidth).rounded(.down)
+        return items.indices.map { i in
+            NSRect(x: CGFloat(i) * (width + Self.gap), y: 0, width: width, height: bounds.height)
         }
     }
 
@@ -142,15 +138,23 @@ public final class TabBarView: NSView {
 
     private func drawTab(_ item: Item, in rect: NSRect, hovered: Bool) {
         let pill = NSRect(x: rect.minX, y: rect.midY - Self.pillHeight / 2, width: rect.width, height: Self.pillHeight)
-        if item.active || hovered {
-            (item.active ? style.activeFill : style.hoverFill).setFill()
-            NSBezierPath(roundedRect: pill, xRadius: Self.pillRadius, yRadius: Self.pillRadius).fill()
+        let fill = item.active ? style.activeFill : hovered ? style.hoverFill : style.text.withAlphaComponent(0.05)
+        fill.setFill()
+        NSBezierPath(roundedRect: pill, xRadius: Self.pillRadius, yRadius: Self.pillRadius).fill()
+        if item.active {
+            style.accent.setFill()
+            NSBezierPath(roundedRect: NSRect(x: pill.minX + 10, y: pill.maxY - 2.5, width: pill.width - 20, height: 2),
+                         xRadius: 1, yRadius: 1).fill()
         }
         let color = item.active ? style.text : style.secondaryText
 
         let iconRect = NSRect(x: rect.minX + Self.padding, y: rect.midY - Self.iconSize / 2, width: Self.iconSize, height: Self.iconSize)
-        let iconColor = item.iconColor.map { item.active ? $0 : $0.withAlphaComponent(0.75) } ?? (item.active ? style.accent : color)
-        tinted(item.icon, size: Self.iconSize, color: iconColor).draw(in: iconRect)
+        if let image = item.image {
+            image.draw(in: iconRect, from: .zero, operation: .sourceOver, fraction: item.active ? 1 : 0.8)
+        } else {
+            let iconColor = item.iconColor.map { item.active ? $0 : $0.withAlphaComponent(0.75) } ?? (item.active ? style.accent : color)
+            tinted(item.icon, size: Self.iconSize, color: iconColor).draw(in: iconRect)
+        }
 
         let paragraph = NSMutableParagraphStyle()
         paragraph.lineBreakMode = .byTruncatingTail
@@ -161,7 +165,7 @@ public final class TabBarView: NSView {
         (item.title as NSString).draw(in: NSRect(x: textX, y: rect.midY - lineHeight / 2, width: textWidth, height: lineHeight),
                                       withAttributes: attributes)
 
-        guard hovered else { return }
+        guard hovered || item.active else { return }
         tinted(.x, size: 11, color: style.secondaryText).draw(in: closeFrame(in: rect).insetBy(dx: 1.5, dy: 1.5))
     }
 
@@ -196,7 +200,7 @@ public final class TabBarView: NSView {
         let point = convert(event.locationInWindow, from: nil)
         guard let i = index(at: point) else { return }
         let item = items[i]
-        if closeFrame(in: frame(at: i)).contains(point), hovered == item.id {
+        if closeFrame(in: frame(at: i)).contains(point), hovered == item.id || item.active {
             onClose?(item.id)
             return
         }

@@ -44,6 +44,7 @@ cp "$PACKAGING/Info.plist" "$APP/Contents/Info.plist"
 # SwiftPM's own resource bundles would have to sit in the app's root folder.
 cp "$MACOS/shared/icons/Resources/Phosphor-Regular.ttf" "$APP/Contents/Resources/"
 cp "$MACOS/features/themes/Resources/catalog.json" "$APP/Contents/Resources/"
+cp -R "$MACOS/shared/icons/Resources/FileIcons" "$APP/Contents/Resources/"
 cp "$ROOT/LICENSE" "$ROOT/NOTICE" "$APP/Contents/Resources/"
 
 # The icon in every size macOS asks for, from the large PNG.

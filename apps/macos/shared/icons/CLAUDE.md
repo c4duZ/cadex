@@ -14,8 +14,10 @@
 - `Resources/Phosphor-Regular.ttf` é a fonte desse mesmo pacote, inteira; a licença está ao lado e
   no `NOTICE`. Ícone novo: achar o nome em phosphoricons.com, pegar o código no style.css da mesma
   versão e acrescentar um caso.
-- `FileIcons.swift`: ícone e cor de um arquivo pelo nome e extensão (cores da tabela do CodeEdit,
-  MIT, no NOTICE), usados pela árvore do explorer e pelas abas.
+- `FileIcons.swift`: o ícone de um arquivo ou pasta, usado pela árvore do explorer e pelas abas.
+  Primeiro o desenho do Material Icon Theme (`Resources/FileIcons`, PDFs gerados por
+  `../../../../tools/icons/build_file_icons.py`, ver `../../../../docs/adr/0011-material-file-icons.md`);
+  sem ele, o glifo Phosphor pela extensão, com a cor da tabela do CodeEdit (MIT, no NOTICE).
 
 ## Como validar
 - `make macos-test` passa: todo caso tem glifo na fonte.

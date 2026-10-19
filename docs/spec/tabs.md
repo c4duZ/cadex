@@ -18,6 +18,11 @@ mostram um arquivo e têm um ponto no título quando há mudança não salva.
   (Ctrl+Tab volta para a aba usada antes da atual).
 - Arrastar uma aba na barra muda a posição dela.
 - Clicar numa aba vai para ela; o × da aba ou o clique do meio (botão 3 do mouse) fecha a aba.
+- As abas são o elemento principal da barra de cima: largura igual (até 220 pt, encolhendo quando
+  não cabem), cada uma com fundo próprio, a ativa com fundo mais forte e uma linha na cor do tema
+  embaixo; ícone do que mostram (terminal, arquivo pelo tipo, histórico, página web). O × aparece
+  na ativa e na que está sob o ponteiro. O dono escolheu esse estilo, o das abas nativas do macOS,
+  no lugar das pílulas discretas do Terax (2026-10-19).
 - A barra de abas aparece mesmo com uma aba só (o visual final vem com a feature themes).
 
 ### Divisões

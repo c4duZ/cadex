@@ -53,10 +53,11 @@ final class TitleBarButton: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("TitleBarButton is created in code") }
 
-    /// The words; nil keeps the icon alone.
+    /// The words; empty leaves the icon alone.
     func setTitle(_ attributed: NSAttributedString) {
         attributedTitle = attributed
-        setAccessibilityLabel(attributed.string)
+        label.isHidden = attributed.length == 0
+        if attributed.length > 0 { setAccessibilityLabel(attributed.string) }
     }
 
     private func restyle() {

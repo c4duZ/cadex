@@ -22,9 +22,9 @@ final class TitleBarView: NSView {
     private let sidebarButton = TitleBarButton(icon: .sidebar, tip: "Painel lateral (⌘B)")
     private let paletteButton = TitleBarButton(icon: .command, tip: "Paleta de comandos (⌘K)")
     /// The space's name; clicking it switches spaces (docs/spec/spaces.md).
-    private let spaceButton = TitleBarButton(icon: nil, title: "", tip: "Trocar de space (⇧⌘S)")
+    private let spaceButton = TitleBarButton(icon: .stack, title: "", tip: "Trocar de space (⇧⌘S)")
     private let newTabButton = TitleBarButton(icon: .plus, tip: "Nova aba (⌘T)")
-    private let searchButton = TitleBarButton(icon: .magnifyingGlass, title: "Buscar (⌘K)", tip: "Buscar arquivos e comandos (⌘K)")
+    private let searchButton = TitleBarSearch()
     private let settingsButton = TitleBarButton(icon: .gearSix, tip: "Configurações (⌘,)")
     /// The shown space's tabs; swapped when the space changes.
     private(set) var tabBar: TabBarView?
@@ -54,29 +54,37 @@ final class TitleBarView: NSView {
             spaceButton.leadingAnchor.constraint(equalTo: paletteButton.trailingAnchor, constant: 8),
             spaceButton.widthAnchor.constraint(lessThanOrEqualToConstant: 160),
             searchButton.leadingAnchor.constraint(greaterThanOrEqualTo: newTabButton.trailingAnchor, constant: 12),
-            searchButton.trailingAnchor.constraint(equalTo: settingsButton.leadingAnchor, constant: -4),
+            searchButton.trailingAnchor.constraint(equalTo: settingsButton.leadingAnchor, constant: -6),
+            // Wide when there is room; the tabs give way before it shrinks.
+            searchButton.widthAnchor.constraint(lessThanOrEqualToConstant: 280),
+            searchButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 150),
             settingsButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
         ] + views.map { $0.centerYAnchor.constraint(equalTo: centerYAnchor) })
+        // Under the tabs' hold: in a narrow window the search shrinks first.
+        let wide = searchButton.widthAnchor.constraint(equalToConstant: 280)
+        wide.priority = NSLayoutConstraint.Priority(200)
+        wide.isActive = true
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("TitleBarView is created in code") }
 
-    /// The space as a breadcrumb before its tabs, "Space 1 ›", quiet as in
-    /// Terax ("Default ›"); the bold name competed with the tabs (2026-10-19).
+    /// The space, quiet: the stack icon alone with one space, its name and
+    /// a caret with more. The name before the tabs weighed as much as them
+    /// (owner, 2026-10-19).
     private var spaceTitle = ""
-    var spaceName: String {
-        get { spaceTitle }
-        set {
-            spaceTitle = newValue
-            let title = NSMutableAttributedString(string: newValue, attributes: [
-                .font: NSFont.systemFont(ofSize: 12), .foregroundColor: secondaryColor,
-            ])
-            title.append(NSAttributedString(string: "  ›", attributes: [
-                .font: NSFont.systemFont(ofSize: 12), .foregroundColor: secondaryColor.withAlphaComponent(0.6),
-            ]))
-            spaceButton.setTitle(title)
-        }
+    private var spaceCount = 1
+    func setSpace(name: String, count: Int) {
+        spaceTitle = name
+        spaceCount = count
+        guard count > 1 else { return spaceButton.setTitle(NSAttributedString()) }
+        let title = NSMutableAttributedString(string: name, attributes: [
+            .font: NSFont.systemFont(ofSize: 12), .foregroundColor: secondaryColor,
+        ])
+        title.append(NSAttributedString(string: " ▾", attributes: [
+            .font: NSFont.systemFont(ofSize: 9), .foregroundColor: secondaryColor.withAlphaComponent(0.7),
+        ]))
+        spaceButton.setTitle(title)
     }
 
     /// Puts a space's tab bar between its name and "+".
@@ -106,9 +114,12 @@ final class TitleBarView: NSView {
     func setColors(text: NSColor, secondary: NSColor, field: NSColor) {
         textColor = text
         secondaryColor = secondary
-        for button in [sidebarButton, paletteButton, spaceButton, newTabButton, searchButton, settingsButton] {
-            button.colors = (text, secondary)
-        }
-        spaceName = spaceTitle
+        // The bar's own controls in near-full contrast: in the quiet gray
+        // they disappeared next to the tabs (owner, 2026-10-19).
+        let strong = text.withAlphaComponent(0.78)
+        for button in [sidebarButton, paletteButton, newTabButton, settingsButton] { button.colors = (text, strong) }
+        spaceButton.colors = (text, secondary)
+        searchButton.setColors(text: text, secondary: secondary, field: field)
+        setSpace(name: spaceTitle, count: spaceCount)
     }
 }

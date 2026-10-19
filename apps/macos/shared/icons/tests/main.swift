@@ -21,5 +21,15 @@ let exitCode = await Checks.run([
         let image = Icon.plus.image(size: 20)
         expect(image.isTemplate && image.size == NSSize(width: 20, height: 20))
     }),
+    ("file and folder icons from the Material pack, Phosphor for the rest", {
+        expect(FileIcons.image(forFileNamed: "Dockerfile") != nil)
+        expect(FileIcons.image(forFileNamed: "main.py") != nil)
+        expect(FileIcons.image(forFileNamed: "types.d.ts") != nil)
+        expect(FileIcons.image(forFileNamed: ".env") != nil)
+        expect(FileIcons.image(forFileNamed: "notas.qualquer") == nil)
+        expect(FileIcons.folderImage(named: "src") != nil)
+        expect(FileIcons.folderImage(named: ".github") != nil)
+        expect(FileIcons.folderImage(named: "minha-pasta") == nil)
+    }),
 ])
 exit(exitCode)

@@ -77,4 +77,58 @@ public enum FileIcons {
         for (color, extensions) in groups { for ext in extensions { map[ext] = color } }
         return map
     }()
+
+    // MARK: Material Icon Theme (docs/adr/0011-material-file-icons.md)
+
+    /// The pack's colored drawing for a file, or nil (Phosphor then).
+    public static func image(forFileNamed name: String) -> NSImage? {
+        let lower = name.lowercased()
+        let map = materialMap
+        if let icon = map.names[lower] ?? map.extensions[lower] { return material(icon) }
+        // Longest suffix first: "x.d.ts" tries "d.ts", then "ts".
+        var rest = Substring(lower)
+        while let dot = rest.firstIndex(of: ".") {
+            rest = rest[rest.index(after: dot)...]
+            if let icon = map.extensions[String(rest)] { return material(icon) }
+        }
+        return nil
+    }
+
+    /// The pack's drawing for a folder by its name, or nil (the plain
+    /// folder in the theme's accent then). ".github" and "_tests" count as
+    /// "github" and "tests", as the pack does.
+    public static func folderImage(named name: String) -> NSImage? {
+        let lower = name.lowercased()
+        let map = materialMap
+        let bare = lower.drop { $0 == "." || $0 == "_" }
+        guard let icon = map.folders[lower] ?? map.folders[String(bare)] else { return nil }
+        return material(icon)
+    }
+
+    private struct MaterialMap: Decodable {
+        var extensions: [String: String] = [:]
+        var names: [String: String] = [:]
+        var folders: [String: String] = [:]
+    }
+
+    /// The pack's folder: Contents/Resources in Cadex.app, the SwiftPM
+    /// bundle in development (see Icon.registerFont for why both).
+    private static let materialFolder: URL? =
+        Bundle.main.url(forResource: "FileIcons", withExtension: nil) ?? Bundle.module.url(forResource: "FileIcons", withExtension: nil)
+
+    private static let materialMap: MaterialMap = {
+        guard let url = materialFolder?.appendingPathComponent("map.json"), let data = try? Data(contentsOf: url),
+              let map = try? JSONDecoder().decode(MaterialMap.self, from: data) else { return MaterialMap() }
+        return map
+    }()
+
+    nonisolated(unsafe) private static var cache: [String: NSImage] = [:]
+
+    private static func material(_ icon: String) -> NSImage? {
+        if let image = cache[icon] { return image }
+        // PDF, not the pack's SVG: macOS 13 does not read SVG (ADR 0011).
+        guard let url = materialFolder?.appendingPathComponent(icon + ".pdf"), let image = NSImage(contentsOf: url) else { return nil }
+        cache[icon] = image
+        return image
+    }
 }
