@@ -2,7 +2,10 @@
 
 Receita de empacotamento reaproveitada do BKDict (projeto vizinho, ../BKDict: build.sh e
 scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem conta Apple Developer.
-Ainda não há scripts aqui: esta pasta recebe o build.sh e o release.sh do Cadex quando forem escritos.
+
+- `build.sh` (ou `make package`): monta dist/Cadex.app na raiz do repositório, universal, com o
+  `Info.plist` desta pasta (bundle id io.github.c4duz.cadex, versão, categoria, pastas e arquivos
+  soltos no ícone do Dock). Leva 1 min e meio.
 
 ## O que eu quero
 - Um `.app` universal (Apple Silicon + Intel) gerado só com as Command Line Tools.
@@ -24,9 +27,15 @@ Ainda não há scripts aqui: esta pasta recebe o build.sh e o release.sh do Cade
   - `lipo -create <bin arm64> <bin x86_64> -output Cadex.app/Contents/MacOS/Cadex`;
   - o núcleo Zig também nas duas arquiteturas (zig build -Dtarget=x86_64-macos.13.0 e
     aarch64-macos.13.0), juntando as duas libcadex.a com lipo antes do link.
-- Montar o bundle à mão: Info.plist, ícone (`sips` gera os tamanhos a partir do PNG de 1024 e
-  `iconutil -c icns` monta o .icns), recursos e frameworks em Contents/Frameworks com rpath
-  `@executable_path/../Frameworks`.
+- Montar o bundle à mão: Info.plist, ícone (`sips` gera os tamanhos a partir do
+  `docs/cadex-icon.png` e `iconutil -c icns` monta o .icns), LICENSE e NOTICE em Resources.
+- Recursos do código (a fonte Phosphor, o catálogo de temas) vão soltos em Contents/Resources e o
+  código procura primeiro no Bundle.main: o Bundle.module do SwiftPM procura na raiz do .app, que a
+  assinatura não aceita, e depois num caminho da máquina que compilou.
+- O núcleo sai nas duas arquiteturas e as duas libcadex.a viram uma só, gorda, em
+  core/zig-out/lib (onde o Package.swift liga); cada swift build pega a fatia dele. Os executáveis
+  de release são apagados antes, porque o swift build não religa quando só a biblioteca mudou.
+- `strip -x` antes de assinar (3 MB a menos).
 - Assinar de dentro para fora, ad hoc, fixando a identidade no bundle id:
   `codesign --force --sign - -r='designated => identifier "<bundle id>"' Cadex.app`
   (frameworks antes, com `codesign --force --deep --sign -`).
@@ -44,4 +53,6 @@ Ainda não há scripts aqui: esta pasta recebe o build.sh e o release.sh do Cade
 - `codesign -dv --verbose=2 Cadex.app` mostra `Identifier=` com o bundle id e `Signature=adhoc`.
 - `lipo -archs Cadex.app/Contents/MacOS/Cadex` lista `x86_64 arm64`.
 - O app abre num Mac Intel e num Apple Silicon, e as permissões dadas continuam depois de um build novo.
+  Sem Mac Intel à mão: `arch -x86_64 dist/Cadex.app/Contents/MacOS/Cadex` roda a fatia Intel no
+  Rosetta (conferido em 2026-10-19; falta um Mac Intel de verdade).
 - `spctl -a -vv Cadex.app` dá `rejected` enquanto não houver notarização: esperado, não é bug.

@@ -80,7 +80,11 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     private static func registerFont() {
         guard !registered else { return }
         registered = true
-        guard let url = Bundle.module.url(forResource: "Phosphor-Regular", withExtension: "ttf") else { return }
+        // In Cadex.app the font is in Contents/Resources (packaging/build.sh):
+        // SwiftPM's Bundle.module looks in the app's root folder, which the
+        // signature does not allow, then at a path on the build machine.
+        guard let url = Bundle.main.url(forResource: "Phosphor-Regular", withExtension: "ttf")
+            ?? Bundle.module.url(forResource: "Phosphor-Regular", withExtension: "ttf") else { return }
         CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
     }
 }

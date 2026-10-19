@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>Cadex</string>
+    <key>CFBundleDisplayName</key>
+    <string>Cadex</string>
+    <!-- The signature pins the app to this id (build.sh): changing it makes
+         macOS forget the permissions people gave. -->
+    <key>CFBundleIdentifier</key>
+    <string>io.github.c4duz.cadex</string>
+    <key>CFBundleExecutable</key>
+    <string>Cadex</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>13.0</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.developer-tools</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>© 2026 Cadex. Licença MIT.</string>
+    <!-- Folders and files dropped on the Dock icon (application(_:open:)):
+         a folder becomes the workspace, a file opens in a tab. -->
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>Pasta</string>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSHandlerRank</key>
+            <string>Alternate</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>public.folder</string>
+            </array>
+        </dict>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>Arquivo</string>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSHandlerRank</key>
+            <string>Alternate</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>public.item</string>
+            </array>
+        </dict>
+    </array>
+    <!-- A program in the terminal reaching these folders asks in Cadex's name. -->
+    <key>NSDocumentsFolderUsageDescription</key>
+    <string>Um programa no terminal do Cadex quer usar a pasta Documentos.</string>
+    <key>NSDesktopFolderUsageDescription</key>
+    <string>Um programa no terminal do Cadex quer usar a Mesa.</string>
+    <key>NSDownloadsFolderUsageDescription</key>
+    <string>Um programa no terminal do Cadex quer usar a pasta Downloads.</string>
+</dict>
+</plist>

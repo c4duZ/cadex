@@ -46,6 +46,10 @@ extension TerminalView {
         center.removeObserver(self, name: NSWindow.didBecomeKeyNotification, object: nil)
         center.removeObserver(self, name: NSWindow.didResignKeyNotification, object: nil)
         guard let window else { return }
+        // Output that came while the view had no window had nothing to draw
+        // into: a space's first terminal stayed blank until the shell wrote
+        // again (2026-10-19).
+        needsDisplay = true
         center.addObserver(self, selector: #selector(windowKeyChanged), name: NSWindow.didBecomeKeyNotification, object: window)
         center.addObserver(self, selector: #selector(windowKeyChanged), name: NSWindow.didResignKeyNotification, object: window)
     }

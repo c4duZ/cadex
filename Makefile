@@ -1,4 +1,4 @@
-.PHONY: check manifests core core-test macos-test app run relink
+.PHONY: check manifests core core-test macos-test app run relink package
 
 # Run before handing work over: manifests, core tests, app tests.
 check: manifests core-test macos-test
@@ -40,3 +40,7 @@ app: core relink
 
 run: app
 	@cd apps/macos && swift run Cadex
+
+# dist/Cadex.app, universal and signed ad hoc (apps/macos/packaging/build.sh).
+package:
+	@apps/macos/packaging/build.sh

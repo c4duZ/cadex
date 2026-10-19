@@ -10,7 +10,10 @@ public enum ThemeCatalog {
     /// Every built-in family, the default first. Empty only if the bundled
     /// file is missing or broken, which the tests catch.
     public static let builtIn: [ThemeFamily] = {
-        guard let url = Bundle.module.url(forResource: "catalog", withExtension: "json"),
+        // Contents/Resources in Cadex.app; Bundle.module in development (see
+        // Icon.registerFont for why not Bundle.module in the app).
+        guard let url = Bundle.main.url(forResource: "catalog", withExtension: "json")
+                ?? Bundle.module.url(forResource: "catalog", withExtension: "json"),
               let data = try? Data(contentsOf: url) else { return [] }
         return (try? read(data)) ?? []
     }()

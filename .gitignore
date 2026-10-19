@@ -14,3 +14,6 @@ xcuserdata/
 
 # Python
 __pycache__/
+
+# Release builds (apps/macos/packaging/build.sh)
+dist/
