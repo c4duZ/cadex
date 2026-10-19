@@ -42,7 +42,7 @@ public final class CommandRegistry {
         guard let command = command(id), command.unavailableReason() == nil else { return false }
         switch command.action {
         case .responder(let selector):
-            NSApp.sendAction(selector, to: nil, from: nil)
+            NSApplication.shared.sendAction(selector, to: nil, from: nil)
         case .run(let body):
             body()
         }

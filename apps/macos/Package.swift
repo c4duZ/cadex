@@ -18,6 +18,7 @@ let package = Package(
 
         .target(
             name: "CommandPalette",
+            dependencies: ["CCadex"],
             path: "features/command-palette",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -50,7 +51,8 @@ let package = Package(
         .executableTarget(
             name: "CommandPaletteTests",
             dependencies: ["CommandPalette", "Checks"],
-            path: "features/command-palette/tests"
+            path: "features/command-palette/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         // Shortcuts tests check the defaults of every feature's commands.
         .executableTarget(

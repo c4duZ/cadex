@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private let commands = CommandRegistry()
     private var menu: CommandMenu?
     private var dispatcher: ShortcutDispatcher?
+    private var palette: CommandPaletteController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpCommands()
@@ -36,12 +37,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     /// Every feature registers its commands; the menu and the shortcuts
     /// come from the registry (ADR 0005).
     private func setUpCommands() {
+        // The palette shows each command's shortcut, known only once the
+        // keymap is built; it reads it through this box.
+        var labels: (String) -> String? = { _ in nil }
+        let palette = CommandPaletteController(registry: commands) { labels($0) }
+        self.palette = palette
+        commands.register(palette.openCommand)
         commands.register(StandardCommands.all)
         commands.register(TerminalCommands.all)
 
         var keymap = Keymap(registry: commands)
         keymap.applyPreferences(from: Keymap.preferencesFile, registry: commands)
         keymap.problems.forEach { NSLog("atalhos: %@", $0) }
+        let finalKeymap = keymap
+        labels = { finalKeymap.combo(for: $0)?.label }
 
         let menu = CommandMenu(registry: commands) { keymap.combo(for: $0)?.menuKeyEquivalent }
         NSApp.mainMenu = menu.build()

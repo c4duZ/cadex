@@ -328,6 +328,34 @@ bool cadex_terminal_paste_is_safe(cadex_terminal *terminal, const uint8_t *bytes
 cadex_status cadex_terminal_quote_paths(const char *const *paths, size_t count,
                                         uint8_t **out, size_t *out_len);
 
+/* ---- Search (core/features/search) ------------------------------------ */
+
+typedef struct {
+    const uint8_t *text; /* UTF-8, not NUL-terminated */
+    size_t len;
+} cadex_text;
+
+typedef struct {
+    uint32_t index;            /* into the texts passed in */
+    int32_t score;             /* higher is better */
+    uint32_t positions_offset; /* into cadex_fuzzy_result.positions */
+    uint32_t positions_count;  /* one per query character */
+} cadex_fuzzy_match;
+
+typedef struct {
+    cadex_fuzzy_match *matches; /* best first */
+    size_t count;
+    uint32_t *positions;        /* byte offsets of the matched characters, to bold */
+} cadex_fuzzy_result;
+
+/* Fuzzy-ranks texts against a query: the query's characters must appear in
+ * order; case and Portuguese accents do not matter; word starts rank
+ * higher. An empty query keeps every text in order. Free the result with
+ * cadex_fuzzy_result_free. */
+cadex_status cadex_fuzzy_rank(const uint8_t *query, size_t query_len,
+                              const cadex_text *texts, size_t count, cadex_fuzzy_result *out);
+void cadex_fuzzy_result_free(cadex_fuzzy_result *result);
+
 #ifdef __cplusplus
 }
 #endif

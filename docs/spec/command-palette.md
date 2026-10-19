@@ -41,9 +41,9 @@ ação do app (ADR 0005). Quando existirem, acha também abas, spaces e arquivos
 - Dois comandos com o mesmo título: os dois aparecem; o id decide qual executa.
 
 ## Critérios de aceite
-- [ ] Todo id usado por menu ou atalho existe no registro.
-- [ ] Todo comando registrado tem título e é achado pela busca do próprio título.
-- [ ] A busca "na" ordena "Nova aba" acima de "Abrir nova janela".
-- [ ] ⌘K com o foco no terminal abre a paleta e não envia nada ao shell.
-- [ ] Enter executa o comando selecionado; Esc fecha sem executar.
+- [x] Todo id usado por menu ou atalho existe no registro.
+- [x] Todo comando registrado tem título e é achado pela busca do próprio título.
+- [x] A busca "na" ordena "Nova aba" acima de "Abrir nova janela".
+- [x] ⌘K com o foco no terminal abre a paleta e não envia nada ao shell.
+- [x] Enter executa o comando selecionado; Esc fecha sem executar.
 - [ ] Comando indisponível aparece apagado com o motivo e não executa.

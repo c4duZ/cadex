@@ -4,14 +4,17 @@
 
 pub const status = @import("status.zig");
 pub const terminal = @import("features/terminal/terminal.zig");
+pub const search = @import("features/search/search.zig");
 
 comptime {
     _ = @import("features/terminal/c_api.zig");
     _ = @import("features/terminal/c_api_view.zig");
+    _ = @import("features/search/c_api.zig");
 }
 
 test {
     _ = status;
     _ = terminal;
+    _ = search;
     _ = @import("features/terminal/c_api_test.zig");
 }

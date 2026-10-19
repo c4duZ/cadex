@@ -64,6 +64,6 @@ public struct Command {
     ) -> Command {
         Command(id: id, title: title, keywords: keywords, category: category, defaultShortcut: shortcut,
                 action: .responder(selector),
-                unavailableReason: { NSApp.target(forAction: selector, to: nil, from: nil) == nil ? reason : nil })
+                unavailableReason: { NSApplication.shared.target(forAction: selector, to: nil, from: nil) == nil ? reason : nil })
     }
 }
