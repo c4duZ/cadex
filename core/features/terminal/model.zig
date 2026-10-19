@@ -6,6 +6,7 @@ const std = @import("std");
 const vt = @import("ghostty-vt");
 
 const selection = @import("selection.zig");
+const search = @import("search.zig");
 
 const Stream = vt.TerminalStream;
 const Handler = @FieldType(Stream, "handler");
@@ -43,6 +44,7 @@ pub const Model = struct {
     reply: ?ReplyFn = null,
     reply_context: ?*anyopaque = null,
     selector: selection.Selector = .{},
+    search: search.Search = .{},
 
     /// Heap-allocated because the stream's handler keeps a pointer to the
     /// terminal; the model must not move after init.
@@ -74,6 +76,7 @@ pub const Model = struct {
     pub fn destroy(self: *Model) void {
         const gpa = self.gpa;
         self.selector.deinit(&self.terminal);
+        self.search.deinit(&self.terminal);
         self.stream.deinit();
         self.terminal.deinit(gpa);
         gpa.destroy(self);

@@ -8,7 +8,8 @@
 
 ## O que eu não quero
 - Qualquer outra feature, do núcleo ou do app, falando direto com a libghostty: só `model.zig`,
-  `render.zig`, `input.zig`, `selection.zig` e `paste.zig`.
+  `render.zig`, `input.zig`, `selection.zig`, `paste.zig`, `search.zig` e
+  `links.zig`.
 - Processo do shell sobrevivendo ao fechamento da sessão.
 - Callback do app chamando `cadex_terminal_close`: o close espera a thread de leitura, que é quem
   chama o callback (trava).
@@ -30,6 +31,14 @@
 - `paste.zig`: colagem codificada para o programa (bracketed paste; sem ele, \n vira Enter; bytes
   de controle viram espaço), se a colagem é segura e o escape de caminhos para o shell (aspas
   simples quando precisa). O que colar (arquivos, imagem, texto) é decisão do app.
+- `search.zig`: busca (⌘F) pela TerminalSearch da libghostty, na tela e no histórico; marca as
+  ocorrências no quadro pelos destaques do RenderState. Alcança a saída nova a cada captura.
+- `links.zig` + `link_detect.zig`: link sob a célula. Primeiro o hiperlink OSC 8; senão URL ou
+  caminho achado no texto do quadro (linhas quebradas por largura juntas). Caminho só vale se
+  existe: relativo resolve pelo OSC 7 ou pelo diretório do processo em primeiro plano
+  (`pty.zig:currentDirectory`).
+- `session_view.zig` e `c_api_view.zig`: rolagem, seleção, busca e links da sessão, separados para
+  `session.zig` e `c_api.zig` ficarem abaixo de 300 linhas.
 - Rolagem e histórico no `model.zig`: pelo menos 10 mil linhas (limite em linhas com folga de uma
   página, porque a libghostty descarta páginas inteiras). Digitar ou colar limpa a seleção e volta
   ao fim (`session.zig:returnToInput`).
@@ -39,12 +48,15 @@
 - `session.zig`: thread de leitura com poll (acorda a cada 50 ms para ver se houve close) e mutex
   da libc protegendo o modelo; o close manda SIGHUP e, depois de 200 ms, SIGKILL.
 - Spec em `../../../docs/spec/terminal.md`. Status: sessão, PTY, quadro para desenhar, teclas pelo
-  núcleo, rolagem, seleção, colagem e API C prontos.
+  núcleo, rolagem, seleção, colagem, busca, links e API C
+  prontos.
 
 ## Como validar
 - `make core-test` (ou `zig build test` dentro de `core/`) passa, sem vazamento no alocador de teste.
 - `session_test.zig` abre shells de verdade; `c_api_test.zig` usa a API C como o app usa.
 - `selection_test.zig` cobre palavra, linha, arrasto, Shift+clique, tudo, linha quebrada por largura
   e as células marcadas no quadro; `model.zig` testa rolagem e as 10 mil linhas.
+- `search_test.zig` e `links_test.zig` cobrem busca no histórico e links (URL quebrada em duas
+  linhas, caminho relativo, OSC 8).
 - `input.zig` testa setas em modo de aplicação, F-keys, modificadores, Ctrl/Meta e kitty.
 - `render_test.zig` cobre cores, estilos, inversão, largura dupla, emoji e cursor.

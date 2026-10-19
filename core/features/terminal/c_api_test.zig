@@ -4,6 +4,7 @@
 const std = @import("std");
 const testing = std.testing;
 const api = @import("c_api.zig");
+const view_api = @import("c_api_view.zig");
 const status = @import("../../status.zig");
 
 extern "c" fn usleep(microseconds: c_uint) c_int;
@@ -83,7 +84,7 @@ test "selection and scrolling through the C API" {
     // Nothing selected: copying gives nothing.
     var ptr: ?[*]u8 = null;
     var len: usize = 0;
-    try testing.expectEqual(status.ok, api.cadex_terminal_copy_selection(session, &ptr, &len));
+    try testing.expectEqual(status.ok, view_api.cadex_terminal_copy_selection(session, &ptr, &len));
     try testing.expect(ptr == null and len == 0);
 
     // Wait for the prompt, then select everything and copy it.
@@ -93,23 +94,23 @@ test "selection and scrolling through the C API" {
     var attempts: u32 = 0;
     while (!found and attempts < 250) : (attempts += 1) {
         _ = usleep(20 * 1000);
-        try testing.expectEqual(status.ok, api.cadex_terminal_select_all(session));
-        try testing.expectEqual(status.ok, api.cadex_terminal_copy_selection(session, &ptr, &len));
+        try testing.expectEqual(status.ok, view_api.cadex_terminal_select_all(session));
+        try testing.expectEqual(status.ok, view_api.cadex_terminal_copy_selection(session, &ptr, &len));
         if (ptr) |p| found = std.mem.indexOf(u8, p[0..len], "sel-4") != null;
         status.cadex_free(ptr);
     }
     try testing.expect(found);
-    try testing.expect(api.cadex_terminal_has_selection(session));
+    try testing.expect(view_api.cadex_terminal_has_selection(session));
 
     // Typing drops the selection.
     try testing.expectEqual(status.ok, api.cadex_terminal_write(session, " ", 1));
-    try testing.expect(!api.cadex_terminal_has_selection(session));
+    try testing.expect(!view_api.cadex_terminal_has_selection(session));
 
-    try testing.expectEqual(status.ok, api.cadex_terminal_scroll(session, -5));
-    try testing.expectEqual(status.ok, api.cadex_terminal_scroll_to(session, api.scroll_bottom));
-    try testing.expectEqual(status.invalid_argument, api.cadex_terminal_scroll_to(session, 9));
-    try testing.expectEqual(status.invalid_argument, api.cadex_terminal_select_press(session, null, 1, false));
-    try testing.expect(!api.cadex_terminal_has_selection(null));
+    try testing.expectEqual(status.ok, view_api.cadex_terminal_scroll(session, -5));
+    try testing.expectEqual(status.ok, view_api.cadex_terminal_scroll_to(session, view_api.scroll_bottom));
+    try testing.expectEqual(status.invalid_argument, view_api.cadex_terminal_scroll_to(session, 9));
+    try testing.expectEqual(status.invalid_argument, view_api.cadex_terminal_select_press(session, null, 1, false));
+    try testing.expect(!view_api.cadex_terminal_has_selection(null));
 }
 
 test "paste and path quoting through the C API" {

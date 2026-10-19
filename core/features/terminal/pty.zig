@@ -13,6 +13,14 @@ extern "c" fn ioctl(fd: c_int, request: c_ulong, ...) c_int;
 extern "c" fn tcgetpgrp(fd: c_int) c.pid_t;
 extern "c" fn fcntl(fd: c_int, cmd: c_int, ...) c_int;
 extern "c" fn usleep(microseconds: c_uint) c_int;
+extern "c" fn proc_pidinfo(pid: c_int, flavor: c_int, arg: u64, buffer: ?*anyopaque, size: c_int) c_int;
+
+/// <sys/proc_info.h>: PROC_PIDVNODEPATHINFO and struct proc_vnodepathinfo,
+/// whose pvi_cdir.vip_path (the current directory) starts after a 152-byte
+/// vnode_info. Measured with clang on macOS 27, 2026-10-19.
+const PROC_PIDVNODEPATHINFO: c_int = 9;
+const vnode_path_info_size = 2352;
+const cwd_path_offset = 152;
 
 /// _IOW('t', 103, struct winsize) on macOS.
 const TIOCSWINSZ: c_ulong = 0x80087467;
@@ -90,6 +98,20 @@ pub fn writeAll(fd: c_int, bytes: []const u8) error{WriteFailed}!void {
 
 /// True while a program other than the shell itself owns the terminal, such
 /// as an agent, a server or `sleep`. Used to confirm before closing.
+/// The current directory of the program in the foreground (the shell, or
+/// what it runs), written into `buf`. Null if the system does not say.
+/// Used when the shell does not report its directory with OSC 7.
+pub fn currentDirectory(child: Child, buf: *[vnode_path_info_size]u8) ?[]const u8 {
+    const group = tcgetpgrp(child.fd);
+    const pid = if (group > 0) group else child.pid;
+    const got = proc_pidinfo(pid, PROC_PIDVNODEPATHINFO, 0, buf, vnode_path_info_size);
+    if (got != vnode_path_info_size) return null;
+    const path = std.mem.sliceTo(buf[cwd_path_offset..], 0);
+    return if (path.len == 0) null else path;
+}
+
+pub const directory_buffer_size = vnode_path_info_size;
+
 pub fn hasForegroundProcess(child: Child) bool {
     const group = tcgetpgrp(child.fd);
     return group > 0 and group != child.pid;

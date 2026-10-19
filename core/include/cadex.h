@@ -119,6 +119,9 @@ bool cadex_terminal_has_foreground_process(cadex_terminal *terminal);
 #define CADEX_CELL_HAS_BACKGROUND (1u << 6)
 /* Inside the text selection. */
 #define CADEX_CELL_SELECTED       (1u << 7)
+/* A match of the open search, and the current match. */
+#define CADEX_CELL_MATCH          (1u << 11)
+#define CADEX_CELL_MATCH_CURRENT  (1u << 12)
 /* Underline kind: (flags >> CADEX_CELL_UNDERLINE_SHIFT) & 7.
  * 0 none, 1 single, 2 double, 3 curly, 4 dotted, 5 dashed. */
 #define CADEX_CELL_UNDERLINE_SHIFT 8
@@ -169,7 +172,7 @@ cadex_status cadex_terminal_update_frame(cadex_terminal *terminal, const cadex_t
  * Empty screen: *out is NULL and *out_len is 0. */
 cadex_status cadex_terminal_copy_text(cadex_terminal *terminal, uint8_t **out, size_t *out_len);
 
-/* -- Scrolling and selection (core/features/terminal/selection.zig) -- */
+/* -- Scrolling and selection (core/features/terminal/c_api_view.zig) -- */
 
 /* Moves the view through the history by rows; negative goes up. */
 cadex_status cadex_terminal_scroll(cadex_terminal *terminal, int32_t rows);
@@ -213,6 +216,46 @@ bool cadex_terminal_has_selection(cadex_terminal *terminal);
  * *out is NULL and *out_len is 0. Typing or writing to the terminal clears
  * the selection and scrolls to the bottom. */
 cadex_status cadex_terminal_copy_selection(cadex_terminal *terminal, uint8_t **out, size_t *out_len);
+
+/* -- Find (core/features/terminal/search.zig) -- */
+
+/* Starts finding text in the screen and the history (ASCII letters ignore
+ * case), replacing any search. len 0 stops it. Matches are marked in the
+ * frame with CADEX_CELL_MATCH and CADEX_CELL_MATCH_CURRENT. */
+cadex_status cadex_terminal_search_start(cadex_terminal *terminal, const uint8_t *needle, size_t len);
+void cadex_terminal_search_stop(cadex_terminal *terminal);
+
+#define CADEX_SEARCH_NEXT     0  /* toward older matches (Enter) */
+#define CADEX_SEARCH_PREVIOUS 1  /* toward newer matches (Shift+Enter) */
+/* Moves the current match, wrapping, and scrolls to it. *found: false when
+ * there are no matches. */
+cadex_status cadex_terminal_search_select(cadex_terminal *terminal, uint8_t direction, bool *found);
+/* Matches found and the current one counting from 1 (0: none), for "3 de 12". */
+cadex_status cadex_terminal_search_counts(cadex_terminal *terminal, uint32_t *total, uint32_t *current);
+
+/* -- Links (core/features/terminal/links.zig) -- */
+
+#define CADEX_LINK_NONE 0
+#define CADEX_LINK_URL  1
+#define CADEX_LINK_PATH 2
+
+typedef struct {
+    uint8_t kind;       /* CADEX_LINK_* */
+    uint16_t start_col; /* first and last cell on screen, to underline */
+    uint16_t start_row;
+    uint16_t end_col;
+    uint16_t end_row;
+} cadex_terminal_link;
+
+_Static_assert(sizeof(cadex_terminal_link) == 10, "cadex_terminal_link layout");
+
+/* The link at a viewport cell: an OSC 8 hyperlink, or a URL or existing
+ * file path in the text (rows wrapped by width are joined). *target, not
+ * NUL-terminated, is the URL or absolute path; free with cadex_free. No
+ * link: kind CADEX_LINK_NONE and *target NULL. Call from the drawing thread:
+ * it refreshes the frame, so a frame pointer taken before is stale. */
+cadex_status cadex_terminal_link_at(cadex_terminal *terminal, uint16_t col, uint16_t row,
+                                    cadex_terminal_link *out, uint8_t **target, size_t *target_len);
 
 /* -- Paste (core/features/terminal/paste.zig) -- */
 

@@ -9,6 +9,9 @@ struct MouseState {
     var lastDragLocation: CGPoint = .zero
     /// Set by mouseDown; mouseUp copies only after a press made a selection.
     var selecting = false
+    /// The link under the pointer while ⌘ is held (TerminalLinks.swift).
+    var hoveredLink: TerminalSession.Link?
+    var trackingArea: NSTrackingArea?
 }
 
 /// Mouse: scrolling the history and selecting text. The core keeps the
@@ -33,6 +36,7 @@ extension TerminalView {
     public override func mouseDown(with event: NSEvent) {
         window?.makeFirstResponder(self)
         let location = convert(event.locationInWindow, from: nil)
+        if event.modifierFlags.contains(.command), openLink(at: location) { return }
         session?.selectPress(
             geometry.pointer(at: location),
             clicks: event.clickCount,

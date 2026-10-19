@@ -22,6 +22,8 @@ public final class TerminalView: MTKView {
     public var copyOnSelect = UserDefaults.standard.bool(forKey: "terminal.copyOnSelect")
     /// Scroll and drag state (TerminalMouse.swift).
     var mouse = MouseState()
+    /// Created on the first ⌘F (TerminalFind.swift).
+    var findBar: TerminalFindBar?
 
     public init(frame: CGRect, cwd: String? = nil) {
         super.init(frame: frame, device: MTLCreateSystemDefaultDevice())
@@ -37,7 +39,10 @@ public final class TerminalView: MTKView {
         }
         let size = gridSize()
         session = try? TerminalSession(cols: size.cols, rows: size.rows, cwd: cwd)
-        session?.onOutput = { [weak self] in self?.needsDisplay = true }
+        session?.onOutput = { [weak self] in
+            self?.needsDisplay = true
+            self?.refreshFindCounts()
+        }
         session?.onExit = { [weak self] _ in self?.window?.close() }
         registerForDraggedTypes([.fileURL])
         Self.cleanPastedImagesOnce()
@@ -63,7 +68,8 @@ public final class TerminalView: MTKView {
               let frame = session.currentFrame()
         else { return }
         let padding = Float(Self.paddingPoints * scale)
-        renderer.draw(frame.pointee, padding: SIMD2(padding, padding), in: drawable, size: drawableSize)
+        renderer.draw(frame.pointee, padding: SIMD2(padding, padding), in: drawable, size: drawableSize,
+                      linkCells: hoveredLinkCells)
     }
 
     public override func setFrameSize(_ newSize: NSSize) {
@@ -136,6 +142,12 @@ public final class TerminalView: MTKView {
     }
 
     public override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        // ⌘F also works while typing in the find bar (it selects the text).
+        if event.modifierFlags.contains(.command), event.charactersIgnoringModifiers == "f",
+           let bar = findBar, !bar.isHidden {
+            showFindBar()
+            return true
+        }
         guard event.modifierFlags.contains(.command), window?.firstResponder === self else {
             return super.performKeyEquivalent(with: event)
         }
@@ -152,6 +164,9 @@ public final class TerminalView: MTKView {
         switch event.charactersIgnoringModifiers {
         case "c":
             copySelection()
+            return true
+        case "f":
+            showFindBar()
             return true
         case "a":
             session?.selectAll()

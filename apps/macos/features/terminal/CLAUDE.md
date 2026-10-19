@@ -30,13 +30,17 @@
   `PasteboardContent.swift`. Imagem vira PNG em cadex-paste/ dentro da pasta temporária, apagado
   depois de 7 dias (ao abrir o app). Várias linhas sem bracketed paste pedem confirmação, que o
   default "terminal.confirmMultilinePaste" desliga.
-- ⌘C, ⌘A, ⌘↑ e ⌘↓ estão no `performKeyEquivalent` até a paleta existir (plano 2).
+- Links em `TerminalLinks.swift`: com ⌘ pressionado, o link sob o ponteiro é sublinhado; ⌘+clique
+  abre a URL no navegador e mostra o arquivo no Finder (até os visualizadores, plano 5).
+- Busca: `TerminalFind.swift` liga o ⌘F ao núcleo; `TerminalFindBar.swift` é a barra no canto
+  superior direito ("3 de 12", ↩ próxima, ⇧↩ anterior, Esc fecha).
+- ⌘C, ⌘A, ⌘F, ⌘↑ e ⌘↓ estão no `performKeyEquivalent` até a paleta existir (plano 2).
 - Ações do terminal (limpar, buscar, copiar, colar) registradas como comandos.
 - Status: janela com um shell, desenho em Metal (SF Mono, nítido), teclado básico e colagem de
   texto, teclas pelo núcleo (modo de aplicação, F-keys, modificadores, kitty, Option como Meta).
   Rolagem com barra discreta, seleção (arrastar, duplo e triplo clique, Shift+clique, ⌘A) e ⌘C.
   Colagem de texto (bracketed paste), arquivos e imagem, e arrastar arquivos.
-  Faltam: links e busca.
+  Links com ⌘ e busca (⌘F) no histórico.
 
 ## Como validar
 - `make macos-test` passa.

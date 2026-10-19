@@ -15,9 +15,15 @@ struct QuadBuilder {
     /// is not at the bottom of the history.
     static let scrollbarWidthPoints: Float = 3
     static let scrollbarAlpha: Float = 0.35
+    /// Find (⌘F) highlights: amber for every match, a stronger orange for
+    /// the current one, like Safari's find. Translucent so the text shows.
+    static let matchColor = rgba(0xE5B341, alpha: 0.35)
+    static let currentMatchColor = rgba(0xFF9F0A, alpha: 0.7)
 
+    /// linkCells: first and last cell index (row-major) of the link under
+    /// the pointer while ⌘ is held, underlined.
     mutating func build(frame: cadex_terminal_frame, atlas: GlyphAtlas, metrics m: CellMetrics,
-                        padding: SIMD2<Float>, viewSize: SIMD2<Float>) -> [QuadInstance] {
+                        padding: SIMD2<Float>, viewSize: SIMD2<Float>, linkCells: ClosedRange<Int>? = nil) -> [QuadInstance] {
         quads.removeAll(keepingCapacity: true)
         let cols = Int(frame.cols)
         let rows = Int(frame.rows)
@@ -39,6 +45,11 @@ struct QuadBuilder {
         for index in 0..<(cols * rows) where cells[index].flags & UInt16(CADEX_CELL_SELECTED) != 0 {
             solid(origin(index), SIMD2(cellW, cellH), selectionColor)
         }
+        let matchFlags = UInt16(CADEX_CELL_MATCH | CADEX_CELL_MATCH_CURRENT)
+        for index in 0..<(cols * rows) where cells[index].flags & matchFlags != 0 {
+            let current = cells[index].flags & UInt16(CADEX_CELL_MATCH_CURRENT) != 0
+            solid(origin(index), SIMD2(cellW, cellH), current ? Self.currentMatchColor : Self.matchColor)
+        }
         if cursorAt >= 0, blockCursor {
             solid(origin(cursorAt), SIMD2(cellW, cellH), cursorColor)
         }
@@ -54,6 +65,12 @@ struct QuadBuilder {
 
         for index in 0..<(cols * rows) {
             decorations(cells[index], at: origin(index), metrics: m)
+        }
+        if let linkCells {
+            let y = Float(m.baseline + m.underlineOffset)
+            for index in linkCells.clamped(to: 0...(cols * rows - 1)) {
+                solid(origin(index) + SIMD2(0, y), SIMD2(cellW, Float(m.lineThickness)), rgba(cells[index].fg))
+            }
         }
 
         if cursorAt >= 0, !blockCursor {

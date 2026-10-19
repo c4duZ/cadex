@@ -5,6 +5,7 @@
 
 const std = @import("std");
 const vt = @import("ghostty-vt");
+const search = @import("search.zig");
 
 /// libghostty-vt style id of the default style (style.zig: default_id).
 const default_style_id = 0;
@@ -26,6 +27,9 @@ pub const CellFlags = struct {
     /// Underline kind in bits 8..10: 0 none, 1 single, 2 double, 3 curly,
     /// 4 dotted, 5 dashed.
     pub const underline_shift: u4 = 8;
+    /// A match of the open search (⌘F), and the current one.
+    pub const match: u16 = 1 << 11;
+    pub const match_current: u16 = 1 << 12;
 };
 
 pub const Cell = extern struct {
@@ -81,15 +85,17 @@ pub const Renderer = struct {
 
     /// First phase: needs exclusive access to the terminal (hold the
     /// session lock). Kept short so the reader thread is not held up.
-    pub fn capture(self: *Renderer, gpa: std.mem.Allocator, terminal: *vt.Terminal) !void {
+    pub fn capture(self: *Renderer, gpa: std.mem.Allocator, terminal: *vt.Terminal, find: ?*search.Search) !void {
+        if (find) |f| f.catchUp(terminal);
         try self.state.beginUpdate(gpa, terminal);
         self.scrollbar = terminal.screens.active.pages.scrollbar();
     }
 
     /// Second phase: only touches memory this renderer owns, so it runs
     /// without the lock. The frame stays valid until the next capture.
-    pub fn build(self: *Renderer, gpa: std.mem.Allocator) !*const Frame {
+    pub fn build(self: *Renderer, gpa: std.mem.Allocator, find: ?*search.Search) !*const Frame {
         self.state.endUpdate();
+        if (find) |f| try f.highlight(gpa, &self.state);
         const s = &self.state;
         const cols: usize = s.cols;
         const rows: usize = s.rows;
@@ -99,6 +105,7 @@ pub const Renderer = struct {
 
         const row_cells = s.row_data.items(.cells);
         const row_selections = s.row_data.items(.selection);
+        const row_highlights = s.row_data.items(.highlights);
         for (0..rows) |y| {
             const row = row_cells[y].slice();
             for (0..cols) |x| {
@@ -112,6 +119,7 @@ pub const Renderer = struct {
                 if (row_selections[y]) |range| {
                     if (x >= range[0] and x <= range[1]) out.flags |= CellFlags.selected;
                 }
+                out.flags |= matchFlags(row_highlights[y].items, x);
             }
         }
 
@@ -187,6 +195,16 @@ pub const Renderer = struct {
         for (cell.grapheme) |cp| try appendCodepoint(gpa, &self.text, cp);
     }
 };
+
+/// Search flags for column x. The current match was added first, so the
+/// first highlight covering x decides.
+fn matchFlags(highlights: []const vt.RenderState.Highlight, x: usize) u16 {
+    for (highlights) |h| {
+        if (x < h.range[0] or x > h.range[1]) continue;
+        return if (h.tag == search.tag_current) CellFlags.match_current else CellFlags.match;
+    }
+    return 0;
+}
 
 fn appendCodepoint(gpa: std.mem.Allocator, text: *std.ArrayList(u8), cp: u21) !void {
     var buf: [4]u8 = undefined;

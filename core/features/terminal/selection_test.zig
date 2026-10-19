@@ -101,8 +101,8 @@ test "selected cells are marked in the frame" {
     model.feed("ab cd");
 
     try click(model, at(3, 0, .left), 2);
-    try renderer.capture(testing.allocator, &model.terminal);
-    const frame = try renderer.build(testing.allocator);
+    try renderer.capture(testing.allocator, &model.terminal, null);
+    const frame = try renderer.build(testing.allocator, null);
     const selected = render.CellFlags.selected;
     try testing.expect(frame.cells[0].flags & selected == 0);
     try testing.expect(frame.cells[3].flags & selected != 0);

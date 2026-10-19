@@ -7,6 +7,7 @@ pub const terminal = @import("features/terminal/terminal.zig");
 
 comptime {
     _ = @import("features/terminal/c_api.zig");
+    _ = @import("features/terminal/c_api_view.zig");
 }
 
 test {

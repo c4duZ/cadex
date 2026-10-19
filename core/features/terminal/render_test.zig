@@ -21,8 +21,8 @@ const Fixture = struct {
     }
 
     fn frame(self: *Fixture) !*const render.Frame {
-        try self.renderer.capture(testing.allocator, &self.model.terminal);
-        return self.renderer.build(testing.allocator);
+        try self.renderer.capture(testing.allocator, &self.model.terminal, null);
+        return self.renderer.build(testing.allocator, null);
     }
 };
 

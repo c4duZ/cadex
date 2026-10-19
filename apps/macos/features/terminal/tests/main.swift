@@ -161,6 +161,31 @@ let exitCode = await Checks.run([
         expect(session.isPasteSafe("uma linha"))
         expect(!session.isPasteSafe("ls\nrm -rf x\n"))
     }),
+    ("find counts matches and links resolve through the core", {
+        let session = try TerminalSession(cols: 80, rows: 24, shell: "/bin/sh")
+        defer { session.close() }
+        session.write("clear; echo 'achar https://cadex.dev/docs'\n")
+        var link: TerminalSession.Link?
+        for _ in 0..<250 where link == nil {
+            try await Task.sleep(for: .milliseconds(20))
+            // The echo output is on the row after the command.
+            for row in 0..<4 where link == nil {
+                link = session.link(atCol: 10, row: row)
+            }
+        }
+        expect(link?.target == "https://cadex.dev/docs", "\(String(describing: link))")
+        expect(link?.kind == .url && link?.start.col == 6)
+
+        session.searchStart("cadex.dev")
+        var counts = session.searchCounts()
+        // `clear` wiped the command line (and the history): only the output.
+        expect(counts.total == 1, "\(counts)")
+        session.searchSelect(forward: true)
+        counts = session.searchCounts()
+        expect(counts.current == 1, "\(counts)")
+        session.searchStop()
+        expect(session.searchCounts().total == 0)
+    }),
     ("arrow keys reach the shell through the core", {
         let session = try TerminalSession(cols: 80, rows: 24, shell: "/bin/sh")
         defer { session.close() }

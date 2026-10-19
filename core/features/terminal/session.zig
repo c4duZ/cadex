@@ -133,74 +133,6 @@ pub const Session = struct {
         self.model.scrollToBottom();
     }
 
-    /// Moves the view through the history; negative goes up.
-    pub fn scroll(self: *Session, rows: isize) void {
-        self.lock();
-        defer self.unlock();
-        self.model.scroll(rows);
-    }
-
-    pub fn scrollToTop(self: *Session) void {
-        self.lock();
-        defer self.unlock();
-        self.model.scrollToTop();
-    }
-
-    pub fn scrollToBottom(self: *Session) void {
-        self.lock();
-        defer self.unlock();
-        self.model.scrollToBottom();
-    }
-
-    pub fn selectPress(self: *Session, p: Pointer, clicks: u8, extend: bool) !void {
-        self.lock();
-        defer self.unlock();
-        try self.model.selector.press(&self.model.terminal, p, clicks, extend);
-    }
-
-    pub fn selectDrag(self: *Session, p: Pointer) !Autoscroll {
-        self.lock();
-        defer self.unlock();
-        return self.model.selector.drag(&self.model.terminal, p);
-    }
-
-    pub fn selectAutoscroll(self: *Session, p: Pointer) !Autoscroll {
-        self.lock();
-        defer self.unlock();
-        return self.model.selector.autoscroll(&self.model.terminal, p);
-    }
-
-    pub fn selectRelease(self: *Session, p: Pointer) void {
-        self.lock();
-        defer self.unlock();
-        self.model.selector.release(&self.model.terminal, p);
-    }
-
-    pub fn selectAll(self: *Session) !void {
-        self.lock();
-        defer self.unlock();
-        try selection.selectAll(&self.model.terminal);
-    }
-
-    pub fn clearSelection(self: *Session) void {
-        self.lock();
-        defer self.unlock();
-        selection.clear(&self.model.terminal);
-    }
-
-    pub fn hasSelection(self: *Session) bool {
-        self.lock();
-        defer self.unlock();
-        return selection.hasSelection(&self.model.terminal);
-    }
-
-    /// The selected text, or null without a selection. Caller frees.
-    pub fn copySelection(self: *Session, gpa: std.mem.Allocator) !?[:0]const u8 {
-        self.lock();
-        defer self.unlock();
-        return selection.selectedText(&self.model.terminal, gpa);
-    }
-
     pub fn resize(self: *Session, size: Size) !void {
         self.lock();
         defer self.unlock();
@@ -212,10 +144,10 @@ pub const Session = struct {
     /// only (the one that draws); the frame is valid until the next call.
     pub fn updateFrame(self: *Session) !*const Frame {
         self.lock();
-        const captured = self.renderer.capture(self.gpa, &self.model.terminal);
+        const captured = self.renderer.capture(self.gpa, &self.model.terminal, &self.model.search);
         self.unlock();
         try captured;
-        return self.renderer.build(self.gpa);
+        return self.renderer.build(self.gpa, &self.model.search);
     }
 
     pub fn hasForegroundProcess(self: *Session) bool {
