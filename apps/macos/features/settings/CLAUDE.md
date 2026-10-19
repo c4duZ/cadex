@@ -11,11 +11,16 @@
 - `Settings.swift`: o modelo (geral, terminal, aparência, atalhos) e os limites da spec.
   `SettingsFile.swift`: lê o JSON campo a campo (campo errado volta ao padrão e vira aviso, o resto
   vale) e escreve. `SettingsStore.swift`: memória e disco (Application Support/Cadex), salva a cada
-  mudança e relê edição à mão observando a pasta.
+  mudança e relê edição à mão observando a pasta (salvar atômico) e o arquivo (edição no lugar).
+- A janela (⌘,, comando settings.open): `SettingsWindowController.swift`, com as seções em abas no
+  topo como no Terax; `GeneralPages.swift` (Geral, Terminal, Sobre), `ThemesPage.swift` (modo e
+  grade de cartões de tema), `ShortcutsPage.swift` (grava a próxima combinação com os atalhos do
+  app suspensos; Delete tira, Esc cancela, "Padrão" volta) e `SettingsPage.swift` (linhas, caixas e
+  controles que mudam o arquivo na hora).
 - O app (`../../app/SettingsBridge.swift`) passa as preferências ao `TerminalPreferences` do
   terminal, ao tema e aos atalhos, e salva o que um alerta desliga ("não perguntar de novo").
-- Spec em `../../../../docs/spec/settings.md`. Status: arquivo, store e aplicação ao vivo prontos;
-  janela a fazer.
+- Spec em `../../../../docs/spec/settings.md`. Status: arquivo, store, aplicação ao vivo e janela
+  prontos; imagem de fundo e vibrância a fazer (plano 3, fase E).
 
 ## Como validar
 - `make macos-test` passa: ler, escrever, arquivo quebrado, campo errado, limites, edição à mão.

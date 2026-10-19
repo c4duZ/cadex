@@ -18,6 +18,7 @@ final class TitleBarView: NSView {
     private let paletteButton: NSButton
     private let newTabButton: NSButton
     private let searchButton = NSButton()
+    private let settingsButton: NSButton
     private var textColor = NSColor.labelColor
     private var secondaryColor = NSColor.secondaryLabelColor
     private var fieldColor = NSColor.controlBackgroundColor
@@ -27,6 +28,7 @@ final class TitleBarView: NSView {
         sidebarButton = Self.iconButton(.sidebar, "Painel lateral")
         paletteButton = Self.iconButton(.command, "Paleta de comandos (⌘K)")
         newTabButton = Self.iconButton(.plus, "Nova aba (⌘T)")
+        settingsButton = Self.iconButton(.gearSix, "Configurações (⌘,)")
         super.init(frame: .zero)
         sidebarButton.target = self
         sidebarButton.action = #selector(toggleSidebar)
@@ -34,6 +36,8 @@ final class TitleBarView: NSView {
         paletteButton.action = #selector(openPalette)
         newTabButton.target = self
         newTabButton.action = #selector(newTab)
+        settingsButton.target = self
+        settingsButton.action = #selector(openSettings)
         searchButton.isBordered = false
         searchButton.image = Icon.magnifyingGlass.image(size: 13)
         searchButton.imagePosition = .imageLeading
@@ -43,7 +47,7 @@ final class TitleBarView: NSView {
         searchButton.wantsLayer = true
         searchButton.layer?.cornerRadius = 6
 
-        let views: [NSView] = [sidebarButton, paletteButton, tabBar, newTabButton, searchButton]
+        let views: [NSView] = [sidebarButton, paletteButton, tabBar, newTabButton, searchButton, settingsButton]
         views.forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             addSubview($0)
@@ -55,7 +59,8 @@ final class TitleBarView: NSView {
             tabBar.heightAnchor.constraint(equalToConstant: 30),
             newTabButton.leadingAnchor.constraint(equalTo: tabBar.trailingAnchor, constant: 4),
             searchButton.leadingAnchor.constraint(greaterThanOrEqualTo: newTabButton.trailingAnchor, constant: 12),
-            searchButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
+            searchButton.trailingAnchor.constraint(equalTo: settingsButton.leadingAnchor, constant: -10),
+            settingsButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
             searchButton.widthAnchor.constraint(equalToConstant: 200),
             searchButton.heightAnchor.constraint(equalToConstant: 26),
         ] + views.map { $0.centerYAnchor.constraint(equalTo: centerYAnchor) })
@@ -75,7 +80,7 @@ final class TitleBarView: NSView {
         textColor = text
         secondaryColor = secondary
         fieldColor = field
-        for button in [sidebarButton, paletteButton, newTabButton] { button.contentTintColor = secondary }
+        for button in [sidebarButton, paletteButton, newTabButton, settingsButton] { button.contentTintColor = secondary }
         searchButton.layer?.backgroundColor = field.cgColor
         searchButton.contentTintColor = secondary
         let title = NSMutableAttributedString(string: " Buscar", attributes: [
@@ -99,4 +104,5 @@ final class TitleBarView: NSView {
     @objc private func toggleSidebar() { run("view.toggle-sidebar") }
     @objc private func openPalette() { run("palette.open") }
     @objc private func newTab() { run("tab.new") }
+    @objc private func openSettings() { run("settings.open") }
 }

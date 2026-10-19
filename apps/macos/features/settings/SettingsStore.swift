@@ -8,7 +8,8 @@ public final class SettingsStore {
     public private(set) var settings = Settings()
     public let file: URL
     private var observers: [(Settings) -> Void] = []
-    private var watcher: DispatchSourceFileSystemObject?
+    private var folderWatcher: DispatchSourceFileSystemObject?
+    private var fileWatcher: DispatchSourceFileSystemObject?
     /// Set while saving, so our own write does not count as a hand edit.
     private var lastWritten: Data?
 
@@ -60,23 +61,37 @@ public final class SettingsStore {
         }
     }
 
-    /// Watches the folder (an atomic save replaces the file, so watching the
-    /// file itself would lose track after the first edit).
+    /// Watches the folder and the file: an atomic save replaces the file
+    /// (only the folder hears it), while an edit in place only touches the
+    /// file. Both were missed one way or the other (2026-10-19).
     public func watchForEdits() {
         let folder = file.deletingLastPathComponent()
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        let descriptor = open(folder.path, O_EVTONLY)
-        guard descriptor >= 0 else { return }
-        let source = DispatchSource.makeFileSystemObjectSource(fileDescriptor: descriptor, eventMask: .write, queue: .main)
+        folderWatcher = watch(folder.path, events: .write)
+        watchFile()
+    }
+
+    /// The file's watcher follows one inode; after a replace it watches the
+    /// new file.
+    private func watchFile() {
+        fileWatcher?.cancel()
+        fileWatcher = watch(file.path, events: [.write, .delete, .rename, .extend])
+    }
+
+    private func watch(_ path: String, events: DispatchSource.FileSystemEvent) -> DispatchSourceFileSystemObject? {
+        let descriptor = open(path, O_EVTONLY)
+        guard descriptor >= 0 else { return nil }
+        let source = DispatchSource.makeFileSystemObjectSource(fileDescriptor: descriptor, eventMask: events, queue: .main)
         source.setEventHandler { [weak self] in
             MainActor.assumeIsolated { self?.fileChanged() }
         }
         source.setCancelHandler { close(descriptor) }
         source.resume()
-        watcher = source
+        return source
     }
 
     private func fileChanged() {
+        watchFile()
         guard let data = try? Data(contentsOf: file), data != lastWritten else { return }
         load()
     }

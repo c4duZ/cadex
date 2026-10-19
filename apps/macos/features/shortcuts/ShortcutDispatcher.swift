@@ -9,6 +9,9 @@ public final class ShortcutDispatcher {
     private let registry: CommandRegistry
     private var keymap: Keymap
     private var monitor: Any?
+    /// While true, presses go to the views untouched (the settings window
+    /// recording a new shortcut).
+    public var isSuspended = false
 
     public init(registry: CommandRegistry, keymap: Keymap) {
         self.registry = registry
@@ -38,7 +41,7 @@ public final class ShortcutDispatcher {
 
     /// True when the press ran a command and must not reach the view.
     public func handle(_ event: NSEvent) -> Bool {
-        guard let combo = KeyCombo(event: event), let id = keymap.command(for: combo) else { return false }
+        guard !isSuspended, let combo = KeyCombo(event: event), let id = keymap.command(for: combo) else { return false }
         return registry.run(id)
     }
 }

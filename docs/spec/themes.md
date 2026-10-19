@@ -33,7 +33,7 @@ temas que ele já usava no Terax.
 - Arquivo do Terax num formato que o importador não conhece: recusado com mensagem, nada é criado.
 
 ## Critérios de aceite
-- [ ] Um tema JSON válido é lido; uma cor inválida é recusada com mensagem que cita o campo.
+- [x] Um tema JSON válido é lido; uma cor inválida é recusada com mensagem que cita o campo.
 - [ ] O terminal usa o fundo, o texto e as 16 cores do tema (`ls --color` e `vim` mostram as cores).
 - [ ] Com "seguir o sistema", trocar o modo do macOS troca o tema na hora.
 - [ ] Um tema exportado do Terax importado no Cadex tem as mesmas cores.

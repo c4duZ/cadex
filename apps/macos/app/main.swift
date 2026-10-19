@@ -1,6 +1,7 @@
 import AppKit
 import StatusBar
 import CommandPalette
+import Settings
 import Shortcuts
 import Tabs
 import Terminal
@@ -19,6 +20,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var workspace: WorkspaceView?
     private let settings = SettingsBridge()
     private var keymapLabels: (String) -> String? = { _ in nil }
+    private var keymap: Keymap?
+    private var settingsWindow: SettingsWindowController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpCommands()
@@ -86,6 +89,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         self.palette = palette
         commands.register(palette.openCommand)
         commands.register(StandardCommands.all)
+        let settingsWindow = SettingsWindowController(
+            store: settings.store, registry: commands,
+            keymap: { [weak self] in self?.keymap ?? Keymap(registry: CommandRegistry()) },
+            suspendShortcuts: { [weak self] on in self?.dispatcher?.isSuspended = on })
+        self.settingsWindow = settingsWindow
+        commands.register(settingsWindow.openCommand)
         commands.register(Command(
             id: "view.toggle-sidebar", title: "Mostrar ou esconder o painel lateral",
             keywords: ["sidebar", "explorer", "painel"], category: .view, defaultShortcut: "cmd+b",
@@ -105,6 +114,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         keymap.applyPreferences(shortcuts, registry: commands)
         keymap.problems.forEach { NSLog("atalhos: %@", $0) }
         let finalKeymap = keymap
+        self.keymap = keymap
         keymapLabels = { finalKeymap.combo(for: $0)?.label }
 
         let menu = CommandMenu(registry: commands) { finalKeymap.combo(for: $0)?.menuKeyEquivalent }
