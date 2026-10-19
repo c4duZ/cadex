@@ -12,6 +12,8 @@ e divisões são o plano 2):
 - **B. Rolagem, seleção e copiar:** histórico de 10 mil linhas rolado por trackpad e roda; digitar
   volta ao fim; ⌘↑/⌘↓ vão ao topo/fim; arrastar seleciona, duplo clique palavra, triplo linha,
   Shift+clique estende; ⌘C copia (sem seleção, nada); ⌘A seleciona tudo; barra de rolagem discreta.
+  "Copiar ao selecionar" é uma configuração (desligada por padrão): desligada, passar o mouse,
+  clicar ou selecionar nunca mexe na área de transferência, seja o que for que estava copiado.
 - **C. Colar e arrastar:** ⌘V na ordem da spec (arquivos do Finder viram caminhos escapados; imagem
   vira PNG temporário e cola o caminho; texto com bracketed paste); colar várias linhas num shell
   sem bracketed paste pede confirmação; arrastar arquivos cola os caminhos.
@@ -78,7 +80,8 @@ links pelos hyperlinks OSC 8 das células e detecção de URL no texto; recursos
   posição visível e a flag CADEX_CELL_SELECTED. App: scrollWheel acumulando pixels → linhas;
   mouseDown/Dragged/Up convertendo posição em célula (descontando padding e escala); autoscroll ao
   arrastar fora; ⌘C/⌘A; QuadBuilder pinta a seleção e a barra de rolagem. Digitar limpa a seleção
-  e volta ao fim.
+  e volta ao fim. Só ⌘C escreve no NSPasteboard; "copiar ao selecionar" pelo default
+  "terminal.copyOnSelect" (desligado), com teste de que selecionar não muda o pasteboard.
 - **C.** API C de colagem (paste com bracketed paste; is_safe) e um escapador de caminhos para shell
   no núcleo (aspas simples, tratando aspa no nome), usado por colar e arrastar. App: ⌘V segue a
   ordem da spec com NSPasteboard; imagem em FileManager.temporaryDirectory/cadex-paste/; alerta
