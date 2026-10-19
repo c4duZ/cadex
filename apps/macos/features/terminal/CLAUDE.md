@@ -34,13 +34,17 @@
   abre a URL no navegador e mostra o arquivo no Finder (até os visualizadores, plano 5).
 - Busca: `TerminalFind.swift` liga o ⌘F ao núcleo; `TerminalFindBar.swift` é a barra no canto
   superior direito ("3 de 12", ↩ próxima, ⇧↩ anterior, Esc fecha).
+- Programas que pedem mouse recebem cliques, arrastos e a roda (`TerminalMouse.swift`); Shift
+  força a seleção local. Foco, título da janela, sino (pisca a view, sem som) e cursor piscando em
+  `TerminalSignals.swift`; o timer do cursor só roda com a janela na frente e o programa pedindo.
 - ⌘C, ⌘A, ⌘F, ⌘↑ e ⌘↓ estão no `performKeyEquivalent` até a paleta existir (plano 2).
 - Ações do terminal (limpar, buscar, copiar, colar) registradas como comandos.
 - Status: janela com um shell, desenho em Metal (SF Mono, nítido), teclado básico e colagem de
   texto, teclas pelo núcleo (modo de aplicação, F-keys, modificadores, kitty, Option como Meta).
   Rolagem com barra discreta, seleção (arrastar, duplo e triplo clique, Shift+clique, ⌘A) e ⌘C.
   Colagem de texto (bracketed paste), arquivos e imagem, e arrastar arquivos.
-  Links com ⌘ e busca (⌘F) no histórico.
+  Links com ⌘ e busca (⌘F) no histórico. Mouse para programas, foco, título, sino e cursor
+  piscando.
 
 ## Como validar
 - `make macos-test` passa.

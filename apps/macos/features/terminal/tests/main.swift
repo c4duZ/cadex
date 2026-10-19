@@ -58,6 +58,15 @@ let exitCode = await Checks.run([
         expect(outside.col == 0 && outside.row == 16, "\(outside.col),\(outside.row)")
         expect(first.padding_left == 16 && first.view_height == 600 && first.cell_width == 16)
     }),
+    ("mouse events for programs are in pixels from the top-left", {
+        let g = TerminalGeometry(viewSize: CGSize(width: 400, height: 300), scale: 2, padding: 8,
+                                 cellWidth: 16, cellHeight: 32, cols: 48, rows: 17)
+        let e = g.mouseEvent(at: CGPoint(x: 10, y: 290), action: CADEX_MOUSE_PRESS,
+                             button: CADEX_MOUSE_BUTTON_LEFT, mods: 0)
+        expect(e.x == 20 && e.y == 20, "\(e.x),\(e.y)")
+        expect(e.view_width == 800 && e.view_height == 600 && e.padding == 16)
+        expect(e.cell_width == 16 && e.cell_height == 32 && e.button == UInt8(CADEX_MOUSE_BUTTON_LEFT))
+    }),
     ("trackpad and wheel deltas become whole rows", {
         var acc = ScrollAccumulator()
         // Trackpad: 10 pt rows; 4 pt per event moves nothing until it adds up.
@@ -185,6 +194,18 @@ let exitCode = await Checks.run([
         expect(counts.current == 1, "\(counts)")
         session.searchStop()
         expect(session.searchCounts().total == 0)
+    }),
+    ("the title a program sets reaches the app", {
+        let session = try TerminalSession(cols: 80, rows: 24, shell: "/bin/sh")
+        defer { session.close() }
+        var titled = false
+        session.onTitle = { titled = true }
+        session.write("printf '\\033]2;titulo-cadex\\007'\n")
+        for _ in 0..<250 where !titled {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        expect(titled, "on_title never came")
+        expect(session.title() == "titulo-cadex", session.title())
     }),
     ("arrow keys reach the shell through the core", {
         let session = try TerminalSession(cols: 80, rows: 24, shell: "/bin/sh")

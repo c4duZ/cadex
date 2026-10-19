@@ -13,6 +13,7 @@ extension TerminalView {
 
     public override func mouseMoved(with event: NSEvent) {
         refreshHoveredLink(at: convert(event.locationInWindow, from: nil), command: event.modifierFlags.contains(.command))
+        reportHover(event)
     }
 
     public override func flagsChanged(with event: NSEvent) {

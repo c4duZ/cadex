@@ -8,12 +8,15 @@ const selection = @import("selection.zig");
 const search = @import("search.zig");
 const links = @import("links.zig");
 const pty = @import("pty.zig");
+const mouse = @import("mouse.zig");
 
 pub const Pointer = selection.Pointer;
 pub const Autoscroll = selection.Autoscroll;
 pub const Link = links.Link;
 pub const LinkPoint = links.Point;
 pub const SearchDirection = search.Direction;
+pub const MouseEvent = mouse.Event;
+pub const MouseTracking = mouse.Tracking;
 
 /// Moves the view through the history; negative goes up.
 pub fn scroll(s: *Session, rows: isize) void {
@@ -133,4 +136,43 @@ pub fn linkAt(s: *Session, gpa: std.mem.Allocator, at: LinkPoint) !?Link {
     const home = if (std.c.getenv("HOME")) |h| std.mem.span(h) else null;
     const cwd = reported orelse pty.currentDirectory(s.child, &cwd_buf);
     return links.detectAt(gpa, &s.renderer, at, .{ .cwd = cwd, .home = home });
+}
+
+// ---- Mouse for programs, wheel and focus ----
+
+/// What the running program asked to receive from the mouse.
+pub fn mouseTracking(s: *Session) MouseTracking {
+    s.lock();
+    defer s.unlock();
+    return mouse.tracking(&s.model.terminal);
+}
+
+/// Sends a click, release or motion to the program, if it tracks the mouse.
+pub fn mouseEvent(s: *Session, e: MouseEvent) !void {
+    var buf: [mouse.max_encoded_len]u8 = undefined;
+    s.lock();
+    const bytes = mouse.encode(&buf, &s.model.terminal, e, &s.model.last_mouse_cell);
+    s.unlock();
+    if (bytes.len > 0) try pty.writeAll(s.child.fd, bytes);
+}
+
+/// The wheel, `rows` steps (negative is up): reports to a program that
+/// tracks the mouse, arrows on the alternate screen, or scrolling the
+/// history otherwise (mouse.zig:encodeWheel).
+pub fn wheel(s: *Session, e: MouseEvent, rows: i32) !void {
+    var buf: [mouse.max_encoded_len]u8 = undefined;
+    s.lock();
+    const bytes = mouse.encodeWheel(&buf, &s.model.terminal, e, rows, &s.model.last_mouse_cell);
+    if (bytes == null) s.model.scroll(rows);
+    s.unlock();
+    if (bytes) |b| if (b.len > 0) try pty.writeAll(s.child.fd, b);
+}
+
+/// Tells the program the view gained or lost focus, if it asked (1004).
+pub fn focus(s: *Session, focused: bool) !void {
+    var buf: [8]u8 = undefined;
+    s.lock();
+    const bytes = mouse.encodeFocus(&buf, &s.model.terminal, focused);
+    s.unlock();
+    if (bytes.len > 0) try pty.writeAll(s.child.fd, bytes);
 }

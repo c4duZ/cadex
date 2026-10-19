@@ -195,3 +195,48 @@ pub export fn cadex_terminal_link_at(
     len.* = link.target.len;
     return status.ok;
 }
+
+// ---- Mouse for programs, wheel and focus ----
+
+/// CADEX_MOUSE_TRACKING_*: what the running program asked to receive.
+pub export fn cadex_terminal_mouse_tracking(session: ?*Session) callconv(.c) u8 {
+    const s = session orelse return 0;
+    return @intFromEnum(view.mouseTracking(s));
+}
+
+/// A click, release or motion for the program; nothing if it does not
+/// track the mouse.
+pub export fn cadex_terminal_mouse(session: ?*Session, event: ?*const view.MouseEvent) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const e = event orelse return status.invalid_argument;
+    if (!validMouseEvent(e)) return status.invalid_argument;
+    view.mouseEvent(s, e.*) catch |err| return status.fromError(err);
+    return status.ok;
+}
+
+/// The wheel, rows steps (negative is up): to the program if it tracks the
+/// mouse, as arrows on the alternate screen, or scrolling the history.
+pub export fn cadex_terminal_wheel(session: ?*Session, event: ?*const view.MouseEvent, rows: i32) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const e = event orelse return status.invalid_argument;
+    if (!validMouseEvent(e)) return status.invalid_argument;
+    if (rows == 0) return status.ok;
+    view.wheel(s, e.*, rows) catch |err| return status.fromError(err);
+    return status.ok;
+}
+
+/// The view gained or lost keyboard focus.
+pub export fn cadex_terminal_focus(session: ?*Session, focused: bool) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    view.focus(s, focused) catch |err| return status.fromError(err);
+    return status.ok;
+}
+
+/// The enums in the event come from C as bytes: reject values Zig's
+/// enums do not have instead of trusting them.
+fn validMouseEvent(e: *const view.MouseEvent) bool {
+    const bytes: *const [@sizeOf(view.MouseEvent)]u8 = @ptrCast(e);
+    const action = bytes[@offsetOf(view.MouseEvent, "action")];
+    const button = bytes[@offsetOf(view.MouseEvent, "button")];
+    return action <= 2 and button <= 3 and e.cell_width > 0 and e.cell_height > 0;
+}

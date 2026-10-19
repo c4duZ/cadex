@@ -18,6 +18,8 @@ fn options() api.Options {
         .context = null,
         .on_output = null,
         .on_exit = null,
+        .on_title = null,
+        .on_bell = null,
     };
 }
 
@@ -135,4 +137,29 @@ test "paste and path quoting through the C API" {
     try testing.expect(api.cadex_terminal_paste_is_safe(session, "a b", 3));
     try testing.expectEqual(status.ok, api.cadex_terminal_paste(session, "echo x", 6));
     try testing.expectEqual(status.invalid_argument, api.cadex_terminal_paste(null, "x", 1));
+}
+
+test "mouse, wheel and focus through the C API" {
+    testing.log_level = .err;
+    var session: ?*@import("session.zig").Session = null;
+    var o = options();
+    try testing.expectEqual(status.ok, api.cadex_terminal_open(&o, &session));
+    defer api.cadex_terminal_close(session);
+
+    try testing.expectEqual(@as(u8, 0), view_api.cadex_terminal_mouse_tracking(session));
+    var event: @import("mouse.zig").Event = .{
+        .x = 20, .y = 20, .view_width = 800, .view_height = 480,
+        .cell_width = 10, .cell_height = 20, .padding = 5,
+        .action = .press, .button = .left, .mods = 0,
+    };
+    try testing.expectEqual(status.ok, view_api.cadex_terminal_mouse(session, &event));
+    try testing.expectEqual(status.ok, view_api.cadex_terminal_wheel(session, &event, -3));
+    try testing.expectEqual(status.ok, view_api.cadex_terminal_focus(session, true));
+    event.cell_width = 0;
+    try testing.expectEqual(status.invalid_argument, view_api.cadex_terminal_mouse(session, &event));
+
+    var ptr: ?[*]u8 = null;
+    var len: usize = 0;
+    try testing.expectEqual(status.ok, api.cadex_terminal_copy_title(session, &ptr, &len));
+    status.cadex_free(ptr);
 }

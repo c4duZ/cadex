@@ -1,6 +1,17 @@
 import CCadex
 import simd
 
+/// What the view adds on top of the frame.
+struct DrawOverlay {
+    /// First and last cell index (row-major) of the link under the pointer
+    /// while ⌘ is held, underlined.
+    var linkCells: ClosedRange<Int>?
+    /// The hidden half of a blinking cursor.
+    var hideCursor = false
+    /// The bell's flash over the whole view.
+    var flash = false
+}
+
 /// Turns a frame into quads, in painting order: cell backgrounds, selection,
 /// block cursor, glyphs, underline and strikethrough, thin cursors and the
 /// scrollbar on top.
@@ -20,17 +31,18 @@ struct QuadBuilder {
     static let matchColor = rgba(0xE5B341, alpha: 0.35)
     static let currentMatchColor = rgba(0xFF9F0A, alpha: 0.7)
 
-    /// linkCells: first and last cell index (row-major) of the link under
-    /// the pointer while ⌘ is held, underlined.
+    /// The bell flash: the text color over everything, faintly.
+    static let flashAlpha: Float = 0.12
+
     mutating func build(frame: cadex_terminal_frame, atlas: GlyphAtlas, metrics m: CellMetrics,
-                        padding: SIMD2<Float>, viewSize: SIMD2<Float>, linkCells: ClosedRange<Int>? = nil) -> [QuadInstance] {
+                        padding: SIMD2<Float>, viewSize: SIMD2<Float>, overlay: DrawOverlay = DrawOverlay()) -> [QuadInstance] {
         quads.removeAll(keepingCapacity: true)
         let cols = Int(frame.cols)
         let rows = Int(frame.rows)
         guard cols > 0, rows > 0, let cells = frame.cells else { return quads }
         let cellW = Float(m.width)
         let cellH = Float(m.height)
-        let cursorAt = frame.cursor_visible ? Int(frame.cursor_y) * cols + Int(frame.cursor_x) : -1
+        let cursorAt = frame.cursor_visible && !overlay.hideCursor ? Int(frame.cursor_y) * cols + Int(frame.cursor_x) : -1
         let cursorColor = rgba(frame.has_cursor_color ? frame.cursor_color : frame.foreground)
         let blockCursor = frame.cursor_style == UInt8(CADEX_CURSOR_BLOCK)
 
@@ -66,7 +78,7 @@ struct QuadBuilder {
         for index in 0..<(cols * rows) {
             decorations(cells[index], at: origin(index), metrics: m)
         }
-        if let linkCells {
+        if let linkCells = overlay.linkCells {
             let y = Float(m.baseline + m.underlineOffset)
             for index in linkCells.clamped(to: 0...(cols * rows - 1)) {
                 solid(origin(index) + SIMD2(0, y), SIMD2(cellW, Float(m.lineThickness)), rgba(cells[index].fg))
@@ -77,6 +89,9 @@ struct QuadBuilder {
             cursor(style: frame.cursor_style, at: origin(cursorAt), color: cursorColor, metrics: m)
         }
         scrollbar(frame, metrics: m, padding: padding, viewSize: viewSize)
+        if overlay.flash {
+            solid(.zero, viewSize, rgba(frame.foreground, alpha: Self.flashAlpha))
+        }
         return quads
     }
 

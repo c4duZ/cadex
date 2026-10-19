@@ -24,6 +24,8 @@ public final class TerminalView: MTKView {
     var mouse = MouseState()
     /// Created on the first ⌘F (TerminalFind.swift).
     var findBar: TerminalFindBar?
+    /// Bell flash and cursor blink (TerminalSignals.swift).
+    var signals = SignalState()
 
     public init(frame: CGRect, cwd: String? = nil) {
         super.init(frame: frame, device: MTLCreateSystemDefaultDevice())
@@ -44,6 +46,7 @@ public final class TerminalView: MTKView {
             self?.refreshFindCounts()
         }
         session?.onExit = { [weak self] _ in self?.window?.close() }
+        connectSignals()
         registerForDraggedTypes([.fileURL])
         Self.cleanPastedImagesOnce()
     }
@@ -68,8 +71,9 @@ public final class TerminalView: MTKView {
               let frame = session.currentFrame()
         else { return }
         let padding = Float(Self.paddingPoints * scale)
-        renderer.draw(frame.pointee, padding: SIMD2(padding, padding), in: drawable, size: drawableSize,
-                      linkCells: hoveredLinkCells)
+        updateBlink(programWantsBlink: frame.pointee.cursor_blinking)
+        let overlay = DrawOverlay(linkCells: hoveredLinkCells, hideCursor: !signals.cursorShown, flash: isFlashing)
+        renderer.draw(frame.pointee, padding: SIMD2(padding, padding), in: drawable, size: drawableSize, overlay: overlay)
     }
 
     public override func setFrameSize(_ newSize: NSSize) {
@@ -116,6 +120,7 @@ public final class TerminalView: MTKView {
     // MARK: Keyboard
 
     public override func keyDown(with event: NSEvent) {
+        restartBlink()
         // A dead key is waiting (´ before e): the input system decides what
         // Backspace, Escape or the next letter do with it.
         if hasMarkedText() {

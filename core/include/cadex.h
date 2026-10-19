@@ -49,6 +49,11 @@ typedef struct {
     /* Called on the reader thread when the shell exits on its own, with the
      * exit code (128 + signal if killed). Must not call cadex_terminal_close. */
     void (*on_exit)(void *context, int32_t exit_code);
+    /* Called on the reader thread when the title changes (OSC 0/2); read it
+     * with cadex_terminal_copy_title. Same rules as on_output. */
+    void (*on_title)(void *context);
+    /* Called on the reader thread when the program rings the bell. */
+    void (*on_bell)(void *context);
 } cadex_terminal_options;
 
 /* Starts a login shell on a new pty. */
@@ -104,6 +109,10 @@ cadex_status cadex_terminal_resize(cadex_terminal *terminal, uint16_t cols, uint
 
 /* True while a program other than the shell runs in the foreground. */
 bool cadex_terminal_has_foreground_process(cadex_terminal *terminal);
+
+/* The title the program set (OSC 0/2), not NUL-terminated. Free with
+ * cadex_free. No title: *out is NULL and *out_len is 0. */
+cadex_status cadex_terminal_copy_title(cadex_terminal *terminal, uint8_t **out, size_t *out_len);
 
 /* -- Drawing (core/features/terminal/render.zig) -- */
 
@@ -256,6 +265,51 @@ _Static_assert(sizeof(cadex_terminal_link) == 10, "cadex_terminal_link layout");
  * it refreshes the frame, so a frame pointer taken before is stale. */
 cadex_status cadex_terminal_link_at(cadex_terminal *terminal, uint16_t col, uint16_t row,
                                     cadex_terminal_link *out, uint8_t **target, size_t *target_len);
+
+/* -- Mouse for programs, wheel and focus (core/features/terminal/mouse.zig) -- */
+
+#define CADEX_MOUSE_TRACKING_NONE   0  /* select locally */
+#define CADEX_MOUSE_TRACKING_CLICKS 1  /* presses and releases */
+#define CADEX_MOUSE_TRACKING_DRAG   2  /* plus motion with a button down */
+#define CADEX_MOUSE_TRACKING_MOTION 3  /* plus every motion */
+uint8_t cadex_terminal_mouse_tracking(cadex_terminal *terminal);
+
+#define CADEX_MOUSE_PRESS   0
+#define CADEX_MOUSE_RELEASE 1
+#define CADEX_MOUSE_MOTION  2
+
+#define CADEX_MOUSE_BUTTON_NONE   0
+#define CADEX_MOUSE_BUTTON_LEFT   1
+#define CADEX_MOUSE_BUTTON_RIGHT  2
+#define CADEX_MOUSE_BUTTON_MIDDLE 3
+
+typedef struct {
+    double x;               /* pixels from the view's top-left */
+    double y;
+    uint32_t view_width;    /* pixels */
+    uint32_t view_height;
+    uint16_t cell_width;    /* pixels */
+    uint16_t cell_height;
+    uint16_t padding;       /* pixels around the grid, the same on every side */
+    uint8_t action;         /* CADEX_MOUSE_PRESS, _RELEASE, _MOTION */
+    uint8_t button;         /* CADEX_MOUSE_BUTTON_*; motion with a button down is a drag */
+    uint8_t mods;           /* CADEX_MOD_* */
+} cadex_terminal_mouse_event;
+
+_Static_assert(sizeof(cadex_terminal_mouse_event) == 40, "cadex_terminal_mouse_event layout");
+
+/* A click, release or motion for the program, in the format it set;
+ * nothing if it does not track the mouse. */
+cadex_status cadex_terminal_mouse(cadex_terminal *terminal, const cadex_terminal_mouse_event *event);
+
+/* The wheel, rows steps (negative is up): wheel reports if the program
+ * tracks the mouse, arrow keys on the alternate screen (less, vim), or
+ * scrolling the history. */
+cadex_status cadex_terminal_wheel(cadex_terminal *terminal, const cadex_terminal_mouse_event *event, int32_t rows);
+
+/* The view gained or lost keyboard focus: CSI I / CSI O if the program
+ * asked for focus reports. */
+cadex_status cadex_terminal_focus(cadex_terminal *terminal, bool focused);
 
 /* -- Paste (core/features/terminal/paste.zig) -- */
 

@@ -36,6 +36,23 @@ struct TerminalGeometry {
     }
 }
 
+extension TerminalGeometry {
+    /// A mouse event for the program (cadex_terminal_mouse), in pixels.
+    func mouseEvent(at location: CGPoint, action: Int32, button: Int32, mods: UInt8) -> cadex_terminal_mouse_event {
+        cadex_terminal_mouse_event(
+            x: Double(location.x * scale),
+            y: Double((viewSize.height - location.y) * scale),
+            view_width: UInt32(clamping: Int((viewSize.width * scale).rounded())),
+            view_height: UInt32(clamping: Int((viewSize.height * scale).rounded())),
+            cell_width: UInt16(clamping: cellWidth),
+            cell_height: UInt16(clamping: cellHeight),
+            padding: UInt16(clamping: Int((padding * scale).rounded())),
+            action: UInt8(action),
+            button: UInt8(button),
+            mods: mods)
+    }
+}
+
 /// Turns scroll wheel and trackpad deltas into whole rows, keeping the
 /// remainder so slow trackpad scrolling still moves.
 struct ScrollAccumulator {

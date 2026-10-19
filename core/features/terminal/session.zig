@@ -24,6 +24,10 @@ pub const Callbacks = struct {
     on_output: ?*const fn (context: ?*anyopaque) callconv(.c) void = null,
     /// The shell exited on its own. Exit code, or 128 + signal number.
     on_exit: ?*const fn (context: ?*anyopaque, exit_code: i32) callconv(.c) void = null,
+    /// The title changed (OSC 0/2): read it with title().
+    on_title: ?*const fn (context: ?*anyopaque) callconv(.c) void = null,
+    /// The program rang the bell.
+    on_bell: ?*const fn (context: ?*anyopaque) callconv(.c) void = null,
 };
 
 pub const Options = struct {
@@ -72,6 +76,7 @@ pub const Session = struct {
         errdefer pty.killNow(self.child);
 
         model.setReply(&replyToShell, self);
+        model.setNotice(&forwardNotice);
         self.reader = try std.Thread.spawn(.{}, readLoop, .{self});
         return self;
     }
@@ -192,6 +197,22 @@ pub const Session = struct {
         const code = pty.waitExitCode(self.child.pid);
         self.reaped = true;
         if (self.callbacks.on_exit) |notify| notify(self.callbacks.context, code);
+    }
+
+    fn forwardNotice(context: ?*anyopaque, notice: @import("model.zig").Notice) void {
+        const self: *Session = @ptrCast(@alignCast(context.?));
+        const callback = switch (notice) {
+            .title => self.callbacks.on_title,
+            .bell => self.callbacks.on_bell,
+        };
+        if (callback) |notify| notify(self.callbacks.context);
+    }
+
+    /// The title the program set (OSC 0/2), empty if none. Caller frees.
+    pub fn title(self: *Session, gpa: std.mem.Allocator) ![]u8 {
+        self.lock();
+        defer self.unlock();
+        return gpa.dupe(u8, self.model.title() orelse "");
     }
 
     fn replyToShell(context: ?*anyopaque, bytes: []const u8) void {

@@ -18,6 +18,8 @@ pub const Options = extern struct {
     context: ?*anyopaque,
     on_output: ?*const fn (?*anyopaque) callconv(.c) void,
     on_exit: ?*const fn (?*anyopaque, i32) callconv(.c) void,
+    on_title: ?*const fn (?*anyopaque) callconv(.c) void,
+    on_bell: ?*const fn (?*anyopaque) callconv(.c) void,
 };
 
 pub export fn cadex_terminal_open(options: ?*const Options, out: ?*?*Session) callconv(.c) status.Code {
@@ -29,7 +31,13 @@ pub export fn cadex_terminal_open(options: ?*const Options, out: ?*?*Session) ca
         .size = .{ .cols = o.cols, .rows = o.rows },
         .cwd = if (o.cwd) |s| std.mem.span(s) else null,
         .shell = if (o.shell) |s| std.mem.span(s) else null,
-        .callbacks = .{ .context = o.context, .on_output = o.on_output, .on_exit = o.on_exit },
+        .callbacks = .{
+            .context = o.context,
+            .on_output = o.on_output,
+            .on_exit = o.on_exit,
+            .on_title = o.on_title,
+            .on_bell = o.on_bell,
+        },
     }) catch |err| return status.fromError(err);
     return status.ok;
 }
@@ -98,6 +106,18 @@ pub export fn cadex_terminal_copy_text(session: ?*Session, out: ?*?[*]u8, out_le
     // A Zig empty slice owns no memory and its pointer is not from malloc:
     // hand out NULL so cadex_free never sees it.
     ptr.* = if (text.len == 0) null else @constCast(text.ptr);
+    len.* = text.len;
+    return status.ok;
+}
+
+/// The title the program set (OSC 0/2), not NUL-terminated. Free with
+/// cadex_free. No title: *out is NULL and *out_len is 0.
+pub export fn cadex_terminal_copy_title(session: ?*Session, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const ptr = out orelse return status.invalid_argument;
+    const len = out_len orelse return status.invalid_argument;
+    const text = s.title(gpa) catch |err| return status.fromError(err);
+    ptr.* = if (text.len == 0) null else text.ptr;
     len.* = text.len;
     return status.ok;
 }

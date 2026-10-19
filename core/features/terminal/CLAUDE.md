@@ -8,8 +8,8 @@
 
 ## O que eu não quero
 - Qualquer outra feature, do núcleo ou do app, falando direto com a libghostty: só `model.zig`,
-  `render.zig`, `input.zig`, `selection.zig`, `paste.zig`, `search.zig` e
-  `links.zig`.
+  `render.zig`, `input.zig`, `selection.zig`, `paste.zig`, `search.zig`,
+  `links.zig` e `mouse.zig`.
 - Processo do shell sobrevivendo ao fechamento da sessão.
 - Callback do app chamando `cadex_terminal_close`: o close espera a thread de leitura, que é quem
   chama o callback (trava).
@@ -37,6 +37,10 @@
   caminho achado no texto do quadro (linhas quebradas por largura juntas). Caminho só vale se
   existe: relativo resolve pelo OSC 7 ou pelo diretório do processo em primeiro plano
   (`pty.zig:currentDirectory`).
+- `mouse.zig`: mouse para programas que pedem (vim, htop, tmux) no formato que pediram; a roda vira
+  relatório de botão, setas na tela alternativa (modo 1007) ou rolagem do histórico; foco (1004).
+- Título (OSC 0/2) e sino chegam ao app pelos callbacks on_title e on_bell (`model.zig:Notice`),
+  na thread de leitura, como on_output.
 - `session_view.zig` e `c_api_view.zig`: rolagem, seleção, busca e links da sessão, separados para
   `session.zig` e `c_api.zig` ficarem abaixo de 300 linhas.
 - Rolagem e histórico no `model.zig`: pelo menos 10 mil linhas (limite em linhas com folga de uma
@@ -48,8 +52,8 @@
 - `session.zig`: thread de leitura com poll (acorda a cada 50 ms para ver se houve close) e mutex
   da libc protegendo o modelo; o close manda SIGHUP e, depois de 200 ms, SIGKILL.
 - Spec em `../../../docs/spec/terminal.md`. Status: sessão, PTY, quadro para desenhar, teclas pelo
-  núcleo, rolagem, seleção, colagem, busca, links e API C
-  prontos.
+  núcleo, rolagem, seleção, colagem, busca, links, mouse
+  para programas, foco, título, sino e API C prontos. Reflow ao redimensionar coberto por teste.
 
 ## Como validar
 - `make core-test` (ou `zig build test` dentro de `core/`) passa, sem vazamento no alocador de teste.

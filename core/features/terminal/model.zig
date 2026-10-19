@@ -16,6 +16,11 @@ const Handler = @FieldType(Stream, "handler");
 /// valid during the call.
 pub const ReplyFn = *const fn (context: ?*anyopaque, bytes: []const u8) void;
 
+/// Something the app shows outside the grid: the title changed (OSC 0/2),
+/// or the program rang the bell. Called on the thread that feeds output.
+pub const Notice = enum { title, bell };
+pub const NoticeFn = *const fn (context: ?*anyopaque, notice: Notice) void;
+
 pub const Size = struct { cols: u16, rows: u16 };
 
 /// Lines of history kept above the screen, at least (docs/spec/terminal.md).
@@ -43,6 +48,9 @@ pub const Model = struct {
     stream: Stream,
     reply: ?ReplyFn = null,
     reply_context: ?*anyopaque = null,
+    notice: ?NoticeFn = null,
+    /// Last cell a mouse motion was reported for (mouse.zig drops repeats).
+    last_mouse_cell: ?vt.Coordinate = null,
     selector: selection.Selector = .{},
     search: search.Search = .{},
 
@@ -69,6 +77,8 @@ pub const Model = struct {
 
         var handler: Handler = .init(&self.terminal);
         handler.effects.write_pty = &writePty;
+        handler.effects.title_changed = &titleChanged;
+        handler.effects.bell = &bellRang;
         self.stream = .init(.{ .allocator = gpa, .handler = handler });
         return self;
     }
@@ -85,6 +95,11 @@ pub const Model = struct {
     pub fn setReply(self: *Model, reply: ReplyFn, context: ?*anyopaque) void {
         self.reply = reply;
         self.reply_context = context;
+    }
+
+    /// Notices go to the same context as replies.
+    pub fn setNotice(self: *Model, notice: NoticeFn) void {
+        self.notice = notice;
     }
 
     /// Feeds shell output into the model.
@@ -128,11 +143,25 @@ pub const Model = struct {
         return self.terminal.plainString(gpa);
     }
 
-    fn writePty(handler: *Handler, bytes: []const u8) void {
+    fn fromHandler(handler: *Handler) *Model {
         const stream: *Stream = @fieldParentPtr("handler", handler);
-        const self: *Model = @alignCast(@fieldParentPtr("stream", stream));
+        return @alignCast(@fieldParentPtr("stream", stream));
+    }
+
+    fn writePty(handler: *Handler, bytes: []const u8) void {
+        const self = fromHandler(handler);
         const reply = self.reply orelse return;
         reply(self.reply_context, bytes);
+    }
+
+    fn titleChanged(handler: *Handler) void {
+        const self = fromHandler(handler);
+        if (self.notice) |notify| notify(self.reply_context, .title);
+    }
+
+    fn bellRang(handler: *Handler) void {
+        const self = fromHandler(handler);
+        if (self.notice) |notify| notify(self.reply_context, .bell);
     }
 };
 
@@ -204,6 +233,43 @@ test "scrolls through the history and back to the bottom" {
 
     model.scrollToBottom();
     try testing.expectEqual(model.scrollbar().total, model.scrollbar().offset + model.scrollbar().rows);
+}
+
+test "the title and the bell reach the notice callback" {
+    const Capture = struct {
+        var titles: u32 = 0;
+        var bells: u32 = 0;
+        fn notice(_: ?*anyopaque, n: Notice) void {
+            switch (n) {
+                .title => titles += 1,
+                .bell => bells += 1,
+            }
+        }
+    };
+    const model = try Model.create(testing.io, testing.allocator, .{ .cols = 20, .rows = 4 });
+    defer model.destroy();
+    model.setNotice(&Capture.notice);
+
+    model.feed("\x1b]2;vim notas.md\x07\x07");
+    try testing.expectEqualStrings("vim notas.md", model.title() orelse "");
+    try testing.expectEqual(@as(u32, 1), Capture.titles);
+    try testing.expectEqual(@as(u32, 1), Capture.bells);
+}
+
+test "long lines reflow when the width changes" {
+    const model = try Model.create(testing.io, testing.allocator, .{ .cols = 10, .rows = 4 });
+    defer model.destroy();
+    model.feed("0123456789abcde");
+
+    try model.resize(.{ .cols = 20, .rows = 4 });
+    const wide = try model.plainText(testing.allocator);
+    defer testing.allocator.free(wide);
+    try testing.expectEqualStrings("0123456789abcde", wide);
+
+    try model.resize(.{ .cols = 5, .rows = 4 });
+    const narrow = try model.plainText(testing.allocator);
+    defer testing.allocator.free(narrow);
+    try testing.expectEqualStrings("01234\n56789\nabcde", narrow);
 }
 
 test "keeps ten thousand lines of history" {
