@@ -1,0 +1,96 @@
+import AppKit
+import CommandPalette
+
+/// The source-control commands (ADR 0005). Buttons, the lists' menu and
+/// ⌘Enter in the message run these ids.
+public enum SourceControlCommands {
+    @MainActor
+    public static func all(_ git: SourceControlController, palette: CommandPaletteController,
+                           activeDiff: @escaping @MainActor () -> DiffDocument? = { nil }) -> [Command] {
+        func needsRepo() -> String? { git.repo == nil ? "Nenhum repositório git aberto" : nil }
+        func needsSelection() -> String? { git.panel.selectedEntries().isEmpty ? "Nenhum arquivo selecionado" : nil }
+        func selected() -> [GitRepository.Entry] { git.panel.selectedEntries().map(\.0) }
+        return [
+            Command(id: "git.commit", title: "Fazer o commit", keywords: ["commit", "git"], category: .file,
+                    action: .run { git.commit() }, unavailableReason: needsRepo),
+            Command(id: "git.stage-all", title: "Stage de todas as mudanças", keywords: ["git add", "stage"], category: .file,
+                    action: .run { git.stageAll() }, unavailableReason: needsRepo),
+            Command(id: "git.unstage-all", title: "Unstage de tudo", keywords: ["git reset", "unstage"], category: .file,
+                    action: .run { git.unstageAll() }, unavailableReason: needsRepo),
+            Command(id: "git.stage", title: "Stage do arquivo", keywords: ["git add"], category: .file,
+                    action: .run { git.stage(selected()) }, unavailableReason: needsSelection),
+            Command(id: "git.unstage", title: "Unstage do arquivo", keywords: ["git reset"], category: .file,
+                    action: .run { git.unstage(selected()) }, unavailableReason: needsSelection),
+            Command(id: "git.discard", title: "Descartar as mudanças do arquivo", keywords: ["git restore", "desfazer"],
+                    category: .file, action: .run { git.discard(selected()) }, unavailableReason: needsSelection),
+            Command(id: "git.open-diff", title: "Ver o diff do arquivo", keywords: ["diff"], category: .file,
+                    action: .run { if let (e, staged) = git.panel.selectedEntries().first { git.openDiff(e, staged: staged) } },
+                    unavailableReason: needsSelection),
+            Command(id: "git.open-file", title: "Abrir o arquivo alterado", keywords: ["abrir"], category: .file,
+                    action: .run { if let e = selected().first { git.openFile(e) } }, unavailableReason: needsSelection),
+            Command(id: "git.reveal", title: "Revelar o arquivo alterado no Finder", keywords: ["finder", "mostrar"],
+                    category: .file, action: .run { git.reveal(selected()) }, unavailableReason: needsSelection),
+            Command(id: "git.fetch", title: "Git fetch", keywords: ["buscar", "remoto"], category: .file,
+                    action: .run { git.fetch() }, unavailableReason: needsRepo),
+            Command(id: "git.pull", title: "Git pull (só fast-forward)", keywords: ["puxar", "atualizar"], category: .file,
+                    action: .run { git.pull() }, unavailableReason: needsRepo),
+            Command(id: "git.push", title: "Git push", keywords: ["enviar", "publicar"], category: .file,
+                    action: .run { git.push() }, unavailableReason: needsRepo),
+            Command(id: "git.refresh", title: "Atualizar o status do git", keywords: ["status", "refresh"], category: .file,
+                    action: .run { git.refresh() }, unavailableReason: needsRepo),
+            Command(id: "diff.toggle-layout", title: "Alternar diff lado a lado/unificado", keywords: ["diff", "patch", "unified"],
+                    category: .view, action: .run { activeDiff()?.toggleLayout() },
+                    unavailableReason: { activeDiff() == nil ? "Nenhum diff aberto" : nil }),
+            Command(id: "git.switch-branch", title: "Trocar de branch", keywords: ["checkout", "switch", "branch"], category: .file,
+                    action: .run { palette.open(BranchSource(git: git)) }, unavailableReason: needsRepo),
+        ]
+    }
+}
+
+/// The branches in the palette; choosing one switches to it (a remote one
+/// becomes a local branch tracking it).
+@MainActor
+final class BranchSource: PaletteSource {
+    private weak var git: SourceControlController?
+    private var branches: [(name: String, remote: Bool)] = []
+
+    init(git: SourceControlController) {
+        self.git = git
+    }
+
+    var placeholder: String { "Trocar para a branch" }
+    var emptyText: String { "Nenhuma branch" }
+
+    func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
+        guard let repo = git?.repo else { return show([], nil) }
+        if branches.isEmpty {
+            show([], "Carregando…")
+            repo.queue.async {
+                let list = repo.branches()
+                DispatchQueue.main.async {
+                    MainActor.assumeIsolated {
+                        self.branches = list
+                        self.search(query, show: show)
+                    }
+                }
+            }
+            return
+        }
+        let current = git?.status.branch ?? ""
+        let items = branches
+            .filter { query.isEmpty || $0.name.localizedCaseInsensitiveContains(query) }
+            .map { PaletteItem(id: ($0.remote ? "remote\t" : "local\t") + $0.name, title: $0.name,
+                               detail: $0.name == current ? "atual" : ($0.remote ? "remota" : nil)) }
+        show(items, nil)
+    }
+
+    func choose(_ item: PaletteItem) {
+        let parts = item.id.split(separator: "\t", maxSplits: 1)
+        guard parts.count == 2 else { return }
+        let name = String(parts[1])
+        let remote = parts[0] == "remote"
+        git?.perform { $0.switchTo(name, remote: remote) }
+    }
+
+    func stop() {}
+}

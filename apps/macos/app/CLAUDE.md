@@ -13,12 +13,12 @@
   ou sair (shouldCloseAll). Liga a barra de status ao terminal com foco. Cria o `WorkspaceFolder` do explorer, abre a
   primeira aba na pasta dele; pastas e arquivos da linha de comando ou soltos no ícone do Dock
   (`application(_:open:)`, o Dock só com o pacote .app do plano 7): pasta vira workspace, arquivo
-  abre numa aba, endereço http(s) abre no preview. `FileOpener.swift` decide onde um arquivo abre (mídia pelo tipo, o resto no editor), passa as
+  abre numa aba, endereço http(s) abre no preview. `FileOpener.swift` decide onde um arquivo abre (mídia pelo tipo, o resto no editor; diffs do git numa aba DiffDocument), passa as
   mudanças do disco aos editores abertos e monta a aparência do editor (`EditorLooks`).
 - A casca da janela, no estilo do Terax: título transparente com barra de ferramentas compacta
   (38 pt, botões da janela centrados); `TitleBarView.swift` (painel lateral, paleta, abas, "+",
   busca, todos por comando), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
-  painel lateral recolhível, barra de status) e `SidebarView.swift` (a árvore do explorer; o source control entra no plano 6). O explorer é criado
+  painel lateral recolhível, barra de status) e `SidebarView.swift` (duas páginas, Arquivos e Git, trocadas por explorer.focus e git.show). O explorer é criado
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.

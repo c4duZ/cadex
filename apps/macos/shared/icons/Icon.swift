@@ -8,8 +8,10 @@ import CoreText
 public enum Icon: UInt32, CaseIterable, Sendable {
     case arrowClockwise = 0xE036
     case arrowCounterClockwise = 0xE038
+    case arrowDown = 0xE03E
     case arrowLeft = 0xE058
     case arrowRight = 0xE06C
+    case arrowUp = 0xE08E
     case arrowsClockwise = 0xE094
     case bell = 0xE0CE
     case bracketsCurly = 0xE860
@@ -31,9 +33,11 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case folder = 0xE24A
     case folderOpen = 0xE256
     case folderPlus = 0xE258
+    case files = 0xE710
     case gearSix = 0xE272
     case globe = 0xE288
     case gitBranch = 0xE278
+    case gitCommit = 0xE27A
     case info = 0xE2CE
     case keyboard = 0xE2D8
     case link = 0xE2E2

@@ -16,7 +16,7 @@ e pull. Os agentes mexem no código pelo terminal; aqui se confere e se faz o co
   D apagado, R renomeado (com o nome antigo), U em conflito, ? novo não rastreado.
 - Cada linha tem stage (+) ou unstage (−) ao passar o mouse; os títulos das listas têm "tudo".
 - Clicar numa linha abre o diff numa aba (spec "Diff" abaixo). Menu de contexto: abrir o arquivo,
-  stage/unstage, descartar, revelar no Finder.
+  stage/unstage, descartar, revelar no Finder (cada item roda um comando git.*).
 - Campo de mensagem embaixo das listas; ⌘Enter faz o commit do que está staged. Sem nada staged, o
   commit pergunta se é para incluir todas as mudanças.
 - Botões: fetch, pull (só fast-forward), push. Push sem upstream oferece publicar a branch
@@ -70,7 +70,7 @@ e pull. Os agentes mexem no código pelo terminal; aqui se confere e se faz o co
 - [x] Status em porcelain v2 lido certo com renomeação, espaço e acento no nome.
 - [x] Stage, unstage, commit e diff funcionam num repositório temporário.
 - [x] Pull fast-forward recusado quando as branches divergem.
-- [ ] Sem git, a mensagem clara aparece.
-- [ ] O painel atualiza depois de um commit feito no terminal.
-- [ ] O explorer marca os alterados.
-- [ ] O diff lado a lado mostra removidas e adicionadas com destaque de sintaxe.
+- [x] Sem git, a mensagem clara aparece.
+- [x] O painel atualiza depois de um commit feito no terminal.
+- [x] O explorer marca os alterados.
+- [x] O diff lado a lado mostra removidas e adicionadas com destaque de sintaxe.

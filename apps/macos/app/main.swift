@@ -7,6 +7,7 @@ import Markdown
 import MediaPreview
 import Preview
 import Search
+import SourceControl
 import Settings
 import Shortcuts
 import Tabs
@@ -33,6 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var search: SearchController?
     private var opener: FileOpener?
     private var markdown: MarkdownController?
+    private var git: SourceControlController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpCommands()
@@ -43,15 +45,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         tabs.onOpenPreview = { [weak self] url in self?.openPreview(url) }
         self.opener = opener
         explorer?.openFile = { [weak opener] path in opener?.open(path) }
-        explorer?.onFolderChange = { [weak opener] folders in opener?.foldersChanged(folders) }
+        explorer?.onFolderChange = { [weak self, weak opener] folders in
+            opener?.foldersChanged(folders)
+            self?.git?.diskChanged(folders)
+        }
         let explorer = self.explorer!
-        let workspace = WorkspaceView(tabs: tabs, explorer: explorer) { [weak self] id in self?.commands.run(id) }
+        let git = self.git!
+        let workspace = WorkspaceView(tabs: tabs, explorer: explorer, git: git) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace
         self.window = window
         self.tabs = tabs
         self.workspace = workspace
         connectStatusBar(workspace.statusBar, to: tabs)
-        explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar() }
+        explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar(.files) }
+        git.onOpenFile = { [weak opener] path in opener?.open(path) }
+        git.onOpenDiff = { [weak opener] request in opener?.openDiff(request) }
+        git.onMarks = { [weak explorer] marks in explorer?.gitMarks = marks }
         settings.onLooks = { [weak workspace] image, vibrancy in workspace?.setLooks(image: image, vibrancy: vibrancy) }
         let looks = settings.store.settings.appearance
         workspace.setLooks(image: looks.backgroundImage.map { .init(path: $0, opacity: looks.backgroundOpacity, blur: looks.backgroundBlur) },
@@ -138,6 +147,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             self.explorer?.setRoot(root)
             self.search?.setRoot(root, showHidden: self.explorer?.showHidden ?? true)
             self.markdown?.setRoot(root)
+            self.git?.setFolder(root)
         }
     }
 
@@ -177,6 +187,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         commands.register(TabCommands.all { [weak self] in self?.tabs })
         makeExplorer()
         makeSearch(palette: palette)
+        let git = SourceControlController(folder: folder.root) { [weak self] id in self?.commands.run(id) ?? false }
+        self.git = git
+        commands.register(SourceControlCommands.all(git, palette: palette) { [weak self] in
+            self?.tabs?.activeDocument as? DiffDocument
+        })
+        commands.register(Command(
+            id: "git.show", title: "Mostrar o Git", keywords: ["source control", "git", "mudanças", "commit"],
+            category: .view, defaultShortcut: "cmd+shift+g",
+            action: .run { [weak self] in
+                self?.workspace?.showSidebar(.git)
+                self?.git?.refresh()
+            }))
         commands.register(EditorCommands.all { [weak self] in self?.tabs?.activeDocument as? EditorDocument })
         commands.register(MediaCommands.all { [weak self] in self?.tabs?.activeDocument as? MediaDocument })
         commands.register(PreviewCommands.all(open: { [weak self] url in self?.openPreview(url) },

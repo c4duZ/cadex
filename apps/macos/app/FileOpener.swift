@@ -1,6 +1,7 @@
 import AppKit
 import Editor
 import MediaPreview
+import SourceControl
 import Tabs
 import Terminal
 import Themes
@@ -34,6 +35,19 @@ final class FileOpener {
         }
     }
 
+    /// A file's git diff in a tab; the same diff again selects its tab and
+    /// reads it again.
+    func openDiff(_ request: SourceControlController.DiffRequest) {
+        guard let tabs else { return }
+        if let existing = tabs.document(identity: DiffDocument.identity(for: request)) as? DiffDocument {
+            existing.load()
+            return tabs.open(existing)
+        }
+        let diff = DiffDocument(request: request)
+        diff.openFile = { [weak self] path in self?.open(path) }
+        tabs.open(diff)
+    }
+
     /// The real path, as the core compares them: /tmp/x is /private/tmp/x.
     /// NSString's resolvingSymlinksInPath drops /private on purpose, so the
     /// Markdown index did not know the note (2026-10-19).
@@ -57,6 +71,9 @@ final class FileOpener {
         for document in tabs.allDocuments where changed.contains((document.identity as NSString).deletingLastPathComponent) {
             (document as? EditorDocument)?.diskMayHaveChanged()
             (document as? MediaDocument)?.diskMayHaveChanged()
+        }
+        for case let diff as DiffDocument in tabs.allDocuments where changed.contains((diff.request.repo + "/" + diff.request.path as NSString).deletingLastPathComponent) {
+            diff.load()
         }
     }
 }

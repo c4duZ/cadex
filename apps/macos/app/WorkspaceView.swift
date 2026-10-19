@@ -1,5 +1,6 @@
 import AppKit
 import Explorer
+import SourceControl
 import StatusBar
 import Tabs
 import Terminal
@@ -28,10 +29,10 @@ final class WorkspaceView: NSView {
     private var backgroundImage: WindowBackdrop.Image?
     private var vibrancy = false
 
-    init(tabs: TabsController, explorer: ExplorerController, run: @escaping (String) -> Void) {
+    init(tabs: TabsController, explorer: ExplorerController, git: SourceControlController, run: @escaping (String) -> Void) {
         titleBar = TitleBarView(tabBar: tabs.bar, run: run)
         self.explorer = explorer
-        sidebar = SidebarView(content: explorer.view)
+        sidebar = SidebarView(files: explorer.view, git: git.view, run: run)
         super.init(frame: .zero)
         frost.blendingMode = .behindWindow
         frost.material = .underWindowBackground
@@ -75,9 +76,10 @@ final class WorkspaceView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("WorkspaceView is created in code") }
 
-    /// Shows the sidebar if it is hidden (explorer.focus).
-    func showSidebar() {
+    /// Shows the sidebar on a page (explorer.focus, git.show).
+    func showSidebar(_ page: SidebarView.Page = .files) {
         if !sidebarVisible { toggleSidebar() }
+        sidebar.show(page)
     }
 
     /// The view.toggle-sidebar command.

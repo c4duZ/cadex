@@ -24,7 +24,8 @@
 - Cores: `EditorSyntax.swift` fala com a feature editor do núcleo em UTF-16 (offsets viram NSRange
   direto); `EditorHighlighter.swift` pinta no NSTextStorage só as linhas que o núcleo diz que
   mudaram, depois de a edição terminar. `EditorAppearance.swift`: fonte e cores, que o app preenche
-  (a fonte do terminal e a paleta ANSI do tema).
+  (a fonte do terminal e a paleta ANSI do tema). `EditorColoring.swift`: pinta um texto inteiro com
+  as mesmas cores, para quem mostra código sem editar (o diff do git).
 - Ganchos para outras features (markdown): `textView`, `commandClick` (⌘+clique num caractere) e
   `showAlternate(_:)` (outra view no lugar do texto, como o renderizado).
 - Comandos em `EditorCommands.swift`: editor.save (⌘S), editor.fold-all, editor.unfold-all.

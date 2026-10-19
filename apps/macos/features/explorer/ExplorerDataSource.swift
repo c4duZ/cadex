@@ -49,7 +49,7 @@ extension ExplorerController: NSOutlineViewDataSource, NSOutlineViewDelegate {
     public func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
         let file = node(item)
         let cell = (outlineView.makeView(withIdentifier: ExplorerCell.identifier, owner: nil) as? ExplorerCell) ?? ExplorerCell()
-        cell.show(file, expanded: outlineView.isItemExpanded(item), style: style)
+        cell.show(file, expanded: outlineView.isItemExpanded(item), style: style, git: gitMark(for: file))
         cell.textField?.delegate = self
         return cell
     }
@@ -83,6 +83,17 @@ extension ExplorerController: NSOutlineViewDataSource, NSOutlineViewDelegate {
 
 /// A row: icon and name; hidden files dimmed, notes in italics.
 final class ExplorerCell: NSTableCellView {
+    /// Same colors as the Git lists: green new, red deleted or in conflict,
+    /// blue renamed, orange changed.
+    static func gitColor(_ letter: Character) -> NSColor {
+        switch letter {
+        case "A", "?": .systemGreen
+        case "D", "U": .systemRed
+        case "R", "C": .systemBlue
+        default: .systemOrange
+        }
+    }
+
     static let identifier = NSUserInterfaceItemIdentifier("explorer.cell")
 
     init() {
@@ -110,11 +121,28 @@ final class ExplorerCell: NSTableCellView {
         let mid = bounds.midY
         imageView?.frame = NSRect(x: 2, y: mid - 8, width: 16, height: 16)
         let height = textField?.intrinsicContentSize.height ?? 17
-        textField?.frame = NSRect(x: 24, y: mid - height / 2, width: max(bounds.width - 28, 0), height: height)
+        let markWidth: CGFloat = mark.stringValue.isEmpty ? 0 : 16
+        textField?.frame = NSRect(x: 24, y: mid - height / 2, width: max(bounds.width - 28 - markWidth, 0), height: height)
+        mark.frame = NSRect(x: bounds.width - markWidth - 4, y: mid - height / 2, width: markWidth, height: height)
     }
 
+    /// The git change of a file (its letter) or a dot on a folder holding
+    /// changes, in the change's color (docs/spec/source-control.md).
+    private var mark: NSTextField {
+        if let existing = subviews.first(where: { $0.identifier == Self.markIdentifier }) as? NSTextField { return existing }
+        let field = NSTextField(labelWithString: "")
+        field.identifier = Self.markIdentifier
+        field.font = .monospacedSystemFont(ofSize: 10, weight: .bold)
+        field.alignment = .right
+        addSubview(field)
+        return field
+    }
+    private static let markIdentifier = NSUserInterfaceItemIdentifier("explorer.git-mark")
+
     @MainActor
-    func show(_ node: FileNode, expanded: Bool, style: ExplorerStyle) {
+    func show(_ node: FileNode, expanded: Bool, style: ExplorerStyle, git: Character? = nil) {
+        mark.stringValue = git.map { node.isFolder ? "•" : String($0) } ?? ""
+        if let git { mark.textColor = Self.gitColor(git) }
         textField?.stringValue = node.name
         textField?.isEditable = false
         if node.isNote {
@@ -126,7 +154,7 @@ final class ExplorerCell: NSTableCellView {
         textField?.font = .systemFont(ofSize: 13)
         imageView?.image = FileTypeIcon.icon(name: node.name, entry: node.entry, expanded: expanded).image(size: 15)
         imageView?.contentTintColor = node.isFolder ? style.accent : style.secondaryText
-        textField?.textColor = style.text
+        textField?.textColor = git.map { node.isFolder ? style.text : Self.gitColor($0) } ?? style.text
         alphaValue = node.isHidden || node.entry?.ignored == true ? 0.55 : 1
         toolTip = node.entry?.kind == .symlink && !cadex_workspace_is_authorized(node.path) ? "Aponta para fora da pasta aberta" : nil
     }

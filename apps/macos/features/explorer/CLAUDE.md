@@ -33,7 +33,8 @@
 - "Mostrar ocultos" é explorer.showHidden no settings.json (padrão: mostrar, apagados); o app liga.
 - Abrir um arquivo chama `openFile` (o app manda para o editor); sem ele, o app padrão do sistema.
   `onFolderChange` repassa as pastas que mudaram no disco (o app avisa os editores abertos). Marca de ignorado pelo
-  .gitignore entra na fase D; marca do git, no plano 6.
+  .gitignore entra na fase D. `gitMarks` (caminho -> letra, vindo do source control pelo app) pinta
+  o nome com a cor do tipo de mudança e põe um ponto nas pastas que contêm alterados.
 - Spec: `docs/spec/explorer.md` e `docs/spec/workspace.md`. Status: plano 4, fases A e C prontas.
 
 ## Como validar

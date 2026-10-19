@@ -8,6 +8,7 @@ import Editor
 import Markdown
 import MediaPreview
 import Preview
+import SourceControl
 import Tabs
 import Terminal
 
@@ -27,6 +28,8 @@ func appRegistry() -> CommandRegistry {
     registry.register(EditorCommands.all { nil })
     registry.register(MediaCommands.all { nil })
     registry.register(PreviewCommands.all(open: { _ in }, active: { nil }))
+    registry.register(SourceControlCommands.all(SourceControlController(folder: NSTemporaryDirectory()) { _ in false },
+                                                palette: palette))
     registry.register(MarkdownCommands.all(MarkdownController(root: NSTemporaryDirectory(), findFiles: { _ in [] }, open: { _, _ in }),
                                            palette: palette) { nil })
     registry.register(SearchCommands.all(SearchController(root: NSTemporaryDirectory(), showHidden: false) { _, _ in },

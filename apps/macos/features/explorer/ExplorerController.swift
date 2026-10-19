@@ -47,6 +47,27 @@ public final class ExplorerController: NSObject {
     public var openFile: ((String) -> Void)?
     /// Folders changed on disk (from the tree's watcher), for open files.
     public var onFolderChange: (([String]) -> Void)?
+    /// Changed files from git: absolute path -> letter. Their folders get a
+    /// dot (docs/spec/source-control.md, "Explorer").
+    public var gitMarks: [String: Character] = [:] {
+        didSet {
+            guard gitMarks != oldValue else { return }
+            var folders: Set<String> = []
+            for path in gitMarks.keys {
+                var folder = (path as NSString).deletingLastPathComponent
+                while folder.count > 1, folders.insert(folder).inserted { folder = (folder as NSString).deletingLastPathComponent }
+            }
+            changedFolders = folders
+            outline.reloadData(forRowIndexes: IndexSet(integersIn: 0..<outline.numberOfRows), columnIndexes: [0])
+        }
+    }
+    private var changedFolders: Set<String> = []
+
+    func gitMark(for node: FileNode) -> Character? {
+        if let letter = gitMarks[node.path] { return letter }
+        return node.isFolder && changedFolders.contains(node.path) ? "M" : nil
+    }
+
     /// Makes the sidebar visible (explorer.focus with the sidebar hidden).
     public var revealSidebar: (() -> Void)?
     public var style = ExplorerStyle(text: .labelColor, secondaryText: .secondaryLabelColor, accent: .controlAccentColor) {

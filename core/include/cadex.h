@@ -706,10 +706,10 @@ typedef struct {
     uint8_t *patch; size_t patch_len;   /* git diff of the path */
     bool binary;
     bool too_large; /* a side above 2 MB */
-} cadex_git_diff;
+} cadex_git_diff_sides;
 /* orig: the old name of a rename, or NULL. Free with cadex_git_diff_free. */
-cadex_status cadex_git_diff(const char *repo, const char *path, const char *orig, bool staged, cadex_git_diff *out);
-void cadex_git_diff_free(cadex_git_diff *diff);
+cadex_status cadex_git_diff(const char *repo, const char *path, const char *orig, bool staged, cadex_git_diff_sides *out);
+void cadex_git_diff_free(cadex_git_diff_sides *diff);
 
 #ifdef __cplusplus
 }
