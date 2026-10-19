@@ -133,6 +133,8 @@ public final class TerminalView: MTKView {
         case .core(let key, let mods):
             sendToCore(event, key: key, mods: mods)
         case .text:
+            // ⌘ with a key no command took (⌘J): not text for the shell.
+            if event.modifierFlags.contains(.command) { return }
             interpretKeyEvents([event])
         }
     }
@@ -146,55 +148,19 @@ public final class TerminalView: MTKView {
         session?.key(key, mods: mods, text: text, unshifted: unshifted)
     }
 
+    /// Only Mac-style line editing (⌘← ⌘→ ⌘⌫ ⌘⌦) is handled here: it is input
+    /// for the shell, not an app action. Every other ⌘ shortcut is a command
+    /// (ADR 0005), run by the Shortcuts dispatcher before this view sees it.
     public override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        // ⌘F also works while typing in the find bar (it selects the text).
-        if event.modifierFlags.contains(.command), event.charactersIgnoringModifiers == "f",
-           let bar = findBar, !bar.isHidden {
-            showFindBar()
-            return true
-        }
         guard event.modifierFlags.contains(.command), window?.firstResponder === self else {
             return super.performKeyEquivalent(with: event)
         }
-        // ⌘← ⌘→ ⌘⌫ ⌘⌦: line editing, sent to the shell.
         if case .macEditing(let editing) = KeyEncoding.route(keyCode: event.keyCode, modifiers: event.modifierFlags, optionAsMeta: optionAsMeta) {
             session?.write(editing)
             return true
         }
-        if let jump = Self.historyJumps[event.keyCode] {
-            jump == .top ? session?.scrollToTop() : session?.scrollToBottom()
-            needsDisplay = true
-            return true
-        }
-        switch event.charactersIgnoringModifiers {
-        case "c":
-            copySelection()
-            return true
-        case "f":
-            showFindBar()
-            return true
-        case "a":
-            session?.selectAll()
-            needsDisplay = true
-            return true
-        case "v":
-            paste()
-            return true
-        case "l":
-            // Clear screen (docs/spec/terminal.md): Ctrl+L, which shells redraw.
-            session?.write("\u{0C}")
-            return true
-        case "k":
-            // Reserved for the command palette (ADR 0005); never reaches the shell.
-            return true
-        default:
-            return super.performKeyEquivalent(with: event)
-        }
+        return super.performKeyEquivalent(with: event)
     }
-
-    private enum HistoryJump { case top, bottom }
-    /// ⌘↑ and ⌘↓ (key codes 126 and 125): top and bottom of the history.
-    private static let historyJumps: [UInt16: HistoryJump] = [126: .top, 125: .bottom]
 
     /// ⌘C: only the selection, and only when there is one; without it the
     /// clipboard keeps what it had (docs/spec/terminal.md).

@@ -17,8 +17,21 @@ let package = Package(
         .systemLibrary(name: "CCadex", path: "shared/core-bridge"),
 
         .target(
+            name: "CommandPalette",
+            path: "features/command-palette",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
+        .target(
+            name: "Shortcuts",
+            dependencies: ["CommandPalette"],
+            path: "features/shortcuts",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
+        .target(
             name: "Terminal",
-            dependencies: ["CCadex"],
+            dependencies: ["CCadex", "CommandPalette"],
             path: "features/terminal",
             exclude: ["CLAUDE.md", "tests"],
             // @testable access for the feature's test executable.
@@ -35,8 +48,21 @@ let package = Package(
         ),
 
         .executableTarget(
+            name: "CommandPaletteTests",
+            dependencies: ["CommandPalette", "Checks"],
+            path: "features/command-palette/tests"
+        ),
+        // Shortcuts tests check the defaults of every feature's commands.
+        .executableTarget(
+            name: "ShortcutsTests",
+            dependencies: ["Shortcuts", "CommandPalette", "Terminal", "Checks"],
+            path: "features/shortcuts/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+
+        .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

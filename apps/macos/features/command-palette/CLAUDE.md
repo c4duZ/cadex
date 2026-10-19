@@ -11,11 +11,16 @@
 - Ação que existe só num botão, menu ou atalho, fora do registro.
 - Outra feature implementando a própria ação em vez de registrar um comando.
 - Paleta demorando para abrir: ela é o caminho principal do app.
+- Esta feature dependendo de outra: o atalho de cada comando chega por closure (`CommandMenu`).
 
 ## Como eu quero
 - Cada feature registra os comandos dela pela porta de entrada desta feature; menus, botões e atalhos
   disparam pelo id. Ver `../../../../docs/adr/0005-every-action-is-a-command.md`.
-- Spec de comportamento em docs/spec/command-palette.md, escrita antes do código. Status: não iniciada.
+- `Command.swift`: o comando. Ação de responder (copiar, colar, limpar: vai para quem tem o foco,
+  terminal ou campo de texto) ou closure da feature dona. O atalho padrão mora no comando.
+- `CommandRegistry.swift`: registro, execução por id, recentes. `StandardCommands.swift`: sair,
+  ocultar, desfazer, copiar, colar. `CommandMenu.swift`: menu da aplicação gerado do registro.
+- Spec em `../../../../docs/spec/command-palette.md`. Status: registro e menu prontos; paleta a fazer.
 
 ## Como validar
 - `make macos-test` passa.

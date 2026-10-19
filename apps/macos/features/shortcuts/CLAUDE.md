@@ -11,7 +11,14 @@
 
 ## Como eu quero
 - Um atalho é só (teclas -> id de comando). Ver `../../../../docs/adr/0005-every-action-is-a-command.md`.
-- Spec de comportamento em docs/spec/shortcuts.md, escrita antes do código. Status: não iniciada.
+- O atalho padrão mora no próprio comando (`defaultShortcut`); `Keymap.swift` junta os padrões e o
+  arquivo shortcuts.json de Application Support/Cadex, anotando os problemas para o log.
+- `KeyCombo.swift`: "cmd+shift+t" ↔ evento ↔ "⇧⌘T" ↔ menu. A tecla é o caractere do layout sem
+  modificadores, como nos menus do macOS.
+- `ShortcutDispatcher.swift`: monitor local de teclado, antes de qualquer view. Comando
+  indisponível deixa a tecla seguir para a view.
+- Spec em `../../../../docs/spec/shortcuts.md`. Status: modelo, preferências e despacho prontos;
+  tela de configuração no plano 3.
 
 ## Como validar
 - `make macos-test` passa.

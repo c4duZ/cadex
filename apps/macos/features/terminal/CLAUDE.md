@@ -40,7 +40,10 @@
 - Fechar com programa em primeiro plano pede confirmação (`TerminalClose.swift:shouldClose`), que
   o default "terminal.confirmClose" desliga. Quem fecha (janela hoje, aba no plano 2) chama
   `shouldClose`. Botão "Cancelar" de alerta ganha Esc à mão: o NSAlert só dá Esc a "Cancel".
-- ⌘C, ⌘A, ⌘F, ⌘↑ e ⌘↓ estão no `performKeyEquivalent` até a paleta existir (plano 2).
+- Comandos do terminal em `TerminalActions.swift` (terminal.clear, terminal.find,
+  terminal.scroll-top, terminal.scroll-bottom): ações da cadeia de responders que o `TerminalView`
+  com foco responde, junto com copy:, paste: e selectAll: dos comandos de edição. O
+  `performKeyEquivalent` só trata a edição estilo Mac (⌘← ⌘→ ⌘⌫ ⌘⌦), que é entrada para o shell.
 - Ações do terminal (limpar, buscar, copiar, colar) registradas como comandos.
 - Status: janela com um shell, desenho em Metal (SF Mono, nítido), teclado básico e colagem de
   texto, teclas pelo núcleo (modo de aplicação, F-keys, modificadores, kitty, Option como Meta).

@@ -9,7 +9,7 @@ extension TerminalView {
     /// de novo" turns it off.
     static let confirmPasteKey = "terminal.confirmMultilinePaste"
 
-    func paste() {
+    func pasteFromClipboard() {
         guard let session, let content = PasteContent.read(from: .general) else { return }
         switch content {
         case .files(let urls):
