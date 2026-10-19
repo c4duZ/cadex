@@ -21,6 +21,6 @@
 - Spec: `docs/spec/preview.md`. Status: plano 5, fase E pronta.
 
 ## Como validar
-- `make macos-test` passa: endereço com http por padrão e só esquemas web, mesma aba para o mesmo
+- `make macos-test` passa: sem esquema, http para servidor local e https para o resto, e só esquemas web, mesma aba para o mesmo
   servidor, página sem ponte com o app.
 - No app: `Cadex <pasta> http://localhost:8000/` abre o endereço numa aba de preview.

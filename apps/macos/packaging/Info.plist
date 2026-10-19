@@ -49,6 +49,11 @@
 	<string>public.app-category.developer-tools</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>13.0</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
+	</dict>
 	<key>NSDesktopFolderUsageDescription</key>
 	<string>Um programa no terminal do Cadex quer usar a Mesa.</string>
 	<key>NSDocumentsFolderUsageDescription</key>

@@ -79,7 +79,8 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     public func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) { close() }
     public func close() { web.stopLoading() }
 
-    /// Loads an address; without a scheme, http://.
+    /// Loads an address; without a scheme, http:// for local servers and
+    /// https:// for the rest.
     public func load(_ text: String) {
         guard let url = Self.url(from: text) else { return }
         address.stringValue = url.absoluteString
@@ -95,9 +96,18 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     static func url(from text: String) -> URL? {
         let trimmed = text.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return nil }
-        let full = trimmed.contains("://") ? trimmed : "http://" + trimmed
+        let full = trimmed.contains("://") ? trimmed : (isLocal(trimmed) ? "http://" : "https://") + trimmed
         guard let url = URL(string: full), let scheme = url.scheme?.lowercased(), ["http", "https"].contains(scheme) else { return nil }
         return url
+    }
+
+    /// localhost, 127.x, 0.0.0.0, [::1], *.local and private IPs: dev
+    /// servers, which rarely speak https. "bkdg.center" went out as http
+    /// and the system refused it (owner, 2026-10-19).
+    static func isLocal(_ address: String) -> Bool {
+        let host = URL(string: "http://" + address)?.host?.lowercased() ?? ""
+        if ["localhost", "0.0.0.0", "::1"].contains(host) || host.hasSuffix(".local") { return true }
+        return ["127.", "10.", "192.168."].contains { host.hasPrefix($0) }
     }
 
     public func reload() { web.reload() }
@@ -111,7 +121,15 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         onChange?()
     }
 
+    /// A page started showing: an older error no longer applies (it stayed
+    /// over the next page, 2026-10-19).
+    public func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        message.isHidden = true
+    }
+
     public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+        // Cancelled: a new address replaced it, not a failure.
+        if (error as NSError).code == NSURLErrorCancelled { return }
         message.stringValue = "Não foi possível conectar a \(address.stringValue)\n\(error.localizedDescription)"
         message.isHidden = false
     }

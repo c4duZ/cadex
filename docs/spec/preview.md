@@ -6,7 +6,9 @@ Ver no Cadex a página do servidor que um agente subiu no terminal (`npm run dev
 
 ## Comportamento
 - Comando "Abrir preview web" abre uma aba com uma barra de endereço e a página. A barra tem voltar,
-  avançar, recarregar e o endereço editável; Enter carrega. Sem esquema, vale `http://`.
+  avançar, recarregar e o endereço editável; Enter carrega. Sem esquema, vale `http://` para servidor local (localhost, 127.x, rede
+  local) e `https://` para o resto. Sites só em http também abrem. Um erro some quando a página
+  seguinte carrega.
 - A aba mostra o título da página.
 - Quando a saída de um terminal mostra um endereço local (`http://localhost:5173`,
   `http://127.0.0.1:8000`, `http://0.0.0.0:3000`, `http://[::1]:8080`), aparece no canto do terminal
