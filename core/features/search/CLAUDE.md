@@ -19,8 +19,8 @@
   `files.zig` ordena (nome do arquivo vale mais que as pastas, filtro barato antes do fuzzy).
 - ⌘⇧F: `content.zig` busca numa thread, entrega em lotes de 64, uma ocorrência por linha, até 2 000,
   pula binário e arquivo acima de 2 MB; `cancel()` só volta depois do último callback.
-  `content_match.zig`: texto literal pelo núcleo, regex pela libc (ERE + extensões da Apple,
-  `docs/adr/0009-regex-from-the-system.md`).
+  `content_match.zig`: texto literal pelo núcleo, regex pela TRE compilada no núcleo (ERE com
+  `\d \w \s \b`, igual no Mac e no Windows, `docs/adr/0013-regex-tre.md`).
 - API C: `c_api.zig` (fuzzy), `c_api_files.zig` (índice), `c_api_content.zig` (conteúdo).
 - Spec: `docs/spec/search.md`. Status: núcleo pronto (plano 4, fase D); a paleta é a fase E.
 

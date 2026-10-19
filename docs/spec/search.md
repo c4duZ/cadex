@@ -19,7 +19,7 @@ Achar um arquivo pelo nome ou um trecho de texto dentro do workspace, sem sair d
 - ⌘⇧F abre a paleta no modo "conteúdo". Procura o texto em todos os arquivos do workspace.
 - Por padrão, texto literal sem diferenciar caixa (só letras sem acento mudam de caixa). Opções
   alternáveis: diferenciar caixa e expressão regular, na sintaxe estendida do POSIX com `\d`, `\w`,
-  `\s` e `\b` (ADR 0009).
+  `\s`, `\b`, `\<` e `\>`, igual no Mac e no Windows (ADR 0013).
 - Resultados chegam aos poucos, agrupados por arquivo: caminho relativo, número da linha e o trecho
   da linha com o que casou em destaque.
 - Digitar de novo cancela a busca anterior; resultados da busca velha nunca aparecem.

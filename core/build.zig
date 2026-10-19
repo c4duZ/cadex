@@ -37,7 +37,9 @@ pub fn build(b: *std.Build) void {
     const grammar_libs = grammars.add(b, root, target) orelse return;
     // md4c, for the rendered Markdown (features/markdown).
     const md4c = grammars.addMd4c(b, root, target) orelse return;
-    const c_libs = std.mem.concat(b.allocator, *std.Build.Step.Compile, &.{ grammar_libs, &.{md4c} }) catch @panic("OOM");
+    // TRE, for the regular expressions (shared/regex.zig).
+    const tre = grammars.addTre(b, root, target) orelse return;
+    const c_libs = std.mem.concat(b.allocator, *std.Build.Step.Compile, &.{ grammar_libs, &.{ md4c, tre } }) catch @panic("OOM");
 
     const core_lib = b.addLibrary(.{
         .name = "cadex-core",

@@ -96,6 +96,110 @@ pub fn addMd4c(b: *std.Build, root: *std.Build.Module, target: std.Build.Resolve
     return lib;
 }
 
+/// TRE, the regular expressions of the content search and the editor's
+/// highlight queries, the same engine on the Mac and on Windows
+/// (docs/adr/0013-regex-tre.md). Bytes only (no wchar, no locale), as the
+/// system's TRE behaved under the core's "C" locale; no approximate
+/// matching. The two headers configure stands in for come from here.
+pub fn addTre(b: *std.Build, root: *std.Build.Module, target: std.Build.ResolvedTarget) ?*std.Build.Step.Compile {
+    const dep = b.lazyDependency("tre", .{}) orelse return null;
+    const headers = b.addWriteFiles();
+    _ = headers.add("config.h",
+        \\#define HAVE_SYS_TYPES_H 1
+        \\#define HAVE_ISASCII 1
+        \\#define HAVE_ISBLANK 1
+        \\#define TRE_REGEX_T_FIELD value
+        \\#define TRE_VERSION "0.9.0"
+        \\#define TRE_VERSION_1 0
+        \\#define TRE_VERSION_2 9
+        \\#define TRE_VERSION_3 0
+        \\
+    );
+    _ = headers.add("tre-config.h",
+        \\#define HAVE_SYS_TYPES_H 1
+        \\#define TRE_VERSION "0.9.0"
+        \\#define TRE_VERSION_1 0
+        \\#define TRE_VERSION_2 9
+        \\#define TRE_VERSION_3 0
+        \\
+    );
+    const lib = cLibrary(b, target, "tre");
+    lib.root_module.addIncludePath(headers.getDirectory());
+    lib.root_module.addIncludePath(dep.path("lib"));
+    lib.root_module.addCSourceFiles(.{
+        .root = dep.path("lib"),
+        .files = &.{ "tre-ast.c", "tre-compile.c", "tre-match-backtrack.c", "tre-match-parallel.c", "tre-mem.c", "tre-parse.c", "tre-stack.c", "regcomp.c", "regexec.c", "regerror.c" },
+        .flags = treFlags(b),
+    });
+    root.linkLibrary(lib);
+    return lib;
+}
+
+/// Every global symbol of TRE 0.9.0 (nm on the built library), renamed
+/// cadex_tre_*: macOS's libc carries its own TRE and exports the same names,
+/// and the app's linker bound tre_compile to libSystem, where it is not
+/// really there (dyld "Symbol not found: _tre_compile", 2026-10-19).
+const tre_symbols = [_][]const u8{
+    "tre_ast_new_catenation",
+    "tre_ast_new_iter",
+    "tre_ast_new_literal",
+    "tre_ast_new_node",
+    "tre_ast_new_union",
+    "tre_compile",
+    "tre_config",
+    "tre_ctype",
+    "tre_ctype_map",
+    "tre_fill_pmatch",
+    "tre_free",
+    "tre_have_approx",
+    "tre_have_backrefs",
+    "tre_isalnum_func",
+    "tre_isalpha_func",
+    "tre_isascii_func",
+    "tre_isblank_func",
+    "tre_iscntrl_func",
+    "tre_isdigit_func",
+    "tre_isgraph_func",
+    "tre_islower_func",
+    "tre_isprint_func",
+    "tre_ispunct_func",
+    "tre_isspace_func",
+    "tre_isupper_func",
+    "tre_isxdigit_func",
+    "tre_mem_alloc_impl",
+    "tre_mem_destroy",
+    "tre_mem_new_impl",
+    "tre_parse",
+    "tre_regcomp",
+    "tre_regcompb",
+    "tre_regerror",
+    "tre_regexec",
+    "tre_regexecb",
+    "tre_regfree",
+    "tre_regncomp",
+    "tre_regncompb",
+    "tre_regnexec",
+    "tre_regnexecb",
+    "tre_reguexec",
+    "tre_stack_destroy",
+    "tre_stack_new",
+    "tre_stack_num_objects",
+    "tre_stack_pop_int",
+    "tre_stack_pop_voidptr",
+    "tre_stack_push_int",
+    "tre_stack_push_voidptr",
+    "tre_tnfa_run_backtrack",
+    "tre_tnfa_run_parallel",
+    "tre_version",
+};
+
+fn treFlags(b: *std.Build) []const []const u8 {
+    var flags: std.ArrayList([]const u8) = .empty;
+    flags.appendSlice(b.allocator, &.{ "-std=c99", "-DHAVE_CONFIG_H" }) catch @panic("OOM");
+    for (tre_symbols) |name| flags.append(b.allocator, b.fmt("-D{s}=cadex_{s}", .{ name, name })) catch @panic("OOM");
+    return flags.items;
+}
+
 fn cLibrary(b: *std.Build, target: std.Build.ResolvedTarget, name: []const u8) *std.Build.Step.Compile {
     const module = b.createModule(.{ .target = target, .optimize = .ReleaseSmall, .link_libc = true });
     return b.addLibrary(.{ .name = name, .linkage = .static, .root_module = module });

@@ -1,6 +1,6 @@
 # 0009 — Regex da busca: a biblioteca do sistema
 
-Data: 2026-10-19 · Status: aceita
+Data: 2026-10-19 · Status: substituída pela 0013 (a TRE compilada no núcleo, para o Windows)
 
 ## Contexto
 A busca de conteúdo (⌘⇧F, `docs/spec/search.md`) aceita expressão regular. O plano 4 pediu para

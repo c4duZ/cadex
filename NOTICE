@@ -314,6 +314,11 @@ MIT. Copyright (c) 2017 Max Brunsfeld
 tree-sitter-markdown 0.5.3 (block and inline) — https://github.com/tree-sitter-grammars/tree-sitter-markdown
 MIT. Copyright (c) 2021 Matthias Deiml
 
+TRE 0.9.0 — https://github.com/laurikari/tre
+Regular expressions of the content search and the editor's highlight queries
+(core/shared/regex.zig, docs/adr/0013). Compiled into the core, bytes only.
+BSD 2-Clause. Copyright (c) 2001-2009 Ville Laurikari <vl@iki.fi>
+
 md4c 0.6.0 — https://github.com/mity/md4c
 Markdown parser of the rendered view in core/features/markdown (docs/adr/0010).
 Only the parser (src/md4c.c) is compiled in; the HTML is Cadex's own.
