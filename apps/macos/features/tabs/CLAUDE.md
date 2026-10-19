@@ -13,7 +13,8 @@
   ordem de uso). Abas de documento: `TabDocument.swift` é o protocolo que o editor (e depois mídia e
   preview) implementa; `open(_:)` abre ou vai para a aba da mesma identidade (o caminho), o título
   ganha "●" com mudança não salva, fechar pergunta ao documento, sair pergunta se há arquivo não
-  salvo. Terminal novo abre na pasta do documento ativo. `TabList.swift`: as regras puras (ordem, ativa, recentes, mover), testadas.
+  salvo. Terminal novo abre na pasta do documento ativo. A oferta de preview de cada terminal sai por
+  `onOpenPreview`. `TabList.swift`: as regras puras (ordem, ativa, recentes, mover), testadas.
 - `TabBarView.swift`: a barra de abas em pílulas, desenhada à mão (clique, duplo clique renomeia,
   arrastar reordena, ×), com cores de fora (`style`); fica na barra de título da janela
   (a propriedade bar do controlador). `TabsView.swift`: só a aba ativa. `Tab.swift`: uma aba.

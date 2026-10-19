@@ -10,6 +10,7 @@ const render = @import("render.zig");
 const input = @import("input.zig");
 const selection = @import("selection.zig");
 const paste_encoding = @import("paste.zig");
+const local_url = @import("local_url.zig");
 
 pub const Size = pty.Size;
 pub const Frame = render.Frame;
@@ -28,6 +29,9 @@ pub const Callbacks = struct {
     on_title: ?*const fn (context: ?*anyopaque) callconv(.c) void = null,
     /// The program rang the bell.
     on_bell: ?*const fn (context: ?*anyopaque) callconv(.c) void = null,
+    /// A local server's address showed up in the output (local_url.zig),
+    /// NUL-terminated, valid during the call. Once per address.
+    on_local_url: ?*const fn (context: ?*anyopaque, url: [*:0]const u8) callconv(.c) void = null,
 };
 
 pub const Options = struct {
@@ -58,6 +62,8 @@ pub const Session = struct {
     reaped: bool = false,
     /// Only used from the thread that draws (the app main thread).
     renderer: render.Renderer = .{},
+    /// Only used by the reader thread.
+    local_urls: local_url.Detector = undefined,
 
     pub fn open(gpa: std.mem.Allocator, options: Options) !*Session {
         const self = try gpa.create(Session);
@@ -75,6 +81,7 @@ pub const Session = struct {
             .model = model,
             .child = try spawnShell(gpa, options),
             .callbacks = options.callbacks,
+            .local_urls = .{ .gpa = gpa },
         };
         errdefer pty.killNow(self.child);
 
@@ -97,6 +104,7 @@ pub const Session = struct {
         _ = c.close(self.child.fd);
         if (!self.reaped) pty.hangUp(self.child, hangup_grace_ms);
         self.renderer.deinit(self.gpa);
+        self.local_urls.deinit();
         self.model.destroy();
         self.gpa.destroy(self);
     }
@@ -199,12 +207,21 @@ pub const Session = struct {
             self.model.feed(buf[0..@intCast(n)]);
             self.unlock();
             if (self.callbacks.on_output) |notify| notify(self.callbacks.context);
+            if (self.callbacks.on_local_url != null) self.local_urls.scan(buf[0..@intCast(n)], self, reportLocalUrl);
         }
         if (self.stop.load(.acquire)) return;
 
         const code = pty.waitExitCode(self.child.pid);
         self.reaped = true;
         if (self.callbacks.on_exit) |notify| notify(self.callbacks.context, code);
+    }
+
+    fn reportLocalUrl(self: *Session, url: []const u8) void {
+        var z: [local_url.max_url + 40]u8 = undefined;
+        if (url.len >= z.len) return;
+        @memcpy(z[0..url.len], url);
+        z[url.len] = 0;
+        if (self.callbacks.on_local_url) |notify| notify(self.callbacks.context, z[0..url.len :0]);
     }
 
     fn forwardNotice(context: ?*anyopaque, notice: @import("model.zig").Notice) void {

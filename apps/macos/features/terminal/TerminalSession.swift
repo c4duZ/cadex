@@ -18,6 +18,8 @@ public final class TerminalSession {
     public var onTitle: (() -> Void)?
     /// The program rang the bell.
     public var onBell: (() -> Void)?
+    /// A local server's address showed up in the output (once each).
+    public var onLocalURL: ((String) -> Void)?
 
     // Touched from deinit, which is not main-actor isolated. Safe because
     // cadex_terminal_close may be called from any thread.
@@ -35,6 +37,11 @@ public final class TerminalSession {
         options.on_exit = { context, code in CallbackRelay.from(context).exited(code: code) }
         options.on_title = { context in CallbackRelay.from(context).onMain { $0.onTitle?() } }
         options.on_bell = { context in CallbackRelay.from(context).onMain { $0.onBell?() } }
+        options.on_local_url = { context, url in
+            guard let url else { return }
+            let address = String(cString: url)
+            CallbackRelay.from(context).onMain { $0.onLocalURL?(address) }
+        }
 
         var opened: OpaquePointer?
         let status = withOptionalCString(cwd) { cwdPtr in

@@ -5,6 +5,7 @@ import Editor
 import Explorer
 import Markdown
 import MediaPreview
+import Preview
 import Search
 import Settings
 import Shortcuts
@@ -39,6 +40,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let tabs = TabsController(window: window)
         let opener = FileOpener(tabs: tabs)
         opener.onEditorOpened = { [weak self] document in self?.markdown?.attach(document) }
+        tabs.onOpenPreview = { [weak self] url in self?.openPreview(url) }
         self.opener = opener
         explorer?.openFile = { [weak opener] path in opener?.open(path) }
         explorer?.onFolderChange = { [weak opener] folders in opener?.foldersChanged(folders) }
@@ -56,6 +58,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                            vibrancy: looks.vibrancy)
         tabs.newTab(cwd: folder.root)
         openLaunchItems(Self.launchFiles)
+        CommandLine.arguments.dropFirst().filter { $0.hasPrefix("http://") || $0.hasPrefix("https://") }.forEach(openPreview)
         window.center()
         // CADEX_BACKGROUND=1 shows the window without taking the keyboard,
         // for checking the app while someone else uses the machine: opening
@@ -100,6 +103,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         explorer.onShowHiddenChange = { [weak self] show in self?.settings.store.update { $0.explorer.showHidden = show } }
         commands.register(ExplorerCommands.all(explorer))
         self.explorer = explorer
+    }
+
+    /// A preview tab for `url` (empty: a blank one); the tab already showing
+    /// that address is reloaded instead (docs/spec/preview.md).
+    private func openPreview(_ url: String) {
+        guard let tabs else { return }
+        if let existing = tabs.document(identity: PreviewDocument.identity(for: url)) as? PreviewDocument {
+            existing.reload()
+            return tabs.open(existing)
+        }
+        tabs.open(PreviewDocument(url: url))
     }
 
     /// ⌘P and ⌘⇧F over the workspace folder; the chosen file opens in a tab.
@@ -165,6 +179,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         makeSearch(palette: palette)
         commands.register(EditorCommands.all { [weak self] in self?.tabs?.activeDocument as? EditorDocument })
         commands.register(MediaCommands.all { [weak self] in self?.tabs?.activeDocument as? MediaDocument })
+        commands.register(PreviewCommands.all(open: { [weak self] url in self?.openPreview(url) },
+                                              active: { [weak self] in self?.tabs?.activeDocument as? PreviewDocument }))
         let markdown = MarkdownController(root: folder.root, findFiles: { [weak self] in self?.search?.findFiles($0) ?? [] },
                                           open: { [weak self] path, line in self?.opener?.open(path, line: line) })
         self.markdown = markdown

@@ -36,6 +36,10 @@ public final class TerminalView: MTKView {
     public var onProgramTitle: ((String) -> Void)?
     /// The view took the keyboard focus (a click on a pane, for example).
     public var onFocus: (() -> Void)?
+    /// "Abrir no preview" was clicked for a local server's address (the
+    /// offer shows only when this is set).
+    public var onOpenPreview: ((String) -> Void)?
+    var previewOffer: TerminalPreviewOffer?
 
     public init(frame: CGRect, cwd: String? = nil) {
         super.init(frame: frame, device: MTLCreateSystemDefaultDevice())
@@ -63,6 +67,7 @@ public final class TerminalView: MTKView {
             guard let self else { return }
             if let handler = self.onShellExit { handler() } else { self.window?.close() }
         }
+        session?.onLocalURL = { [weak self] url in self?.offerPreview(url) }
         connectSignals()
         followAppearance()
         followPreferences()

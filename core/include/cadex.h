@@ -62,6 +62,10 @@ typedef struct {
     void (*on_bell)(void *context);
     /* Lines of history to keep (at most 100 000). 0: 10 000. */
     uint32_t history_lines;
+    /* Called on the reader thread when a local server's address shows up in
+     * the output (http://localhost:5173/), once per address per session;
+     * url is valid during the call. NULL: no detection. */
+    void (*on_local_url)(void *context, const char *url);
 } cadex_terminal_options;
 
 /* Starts a login shell on a new pty. */

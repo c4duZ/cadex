@@ -16,11 +16,12 @@ Ver no Cadex a página do servidor que um agente subiu no terminal (`npm run dev
 - Link da página que abre janela nova abre no navegador do sistema.
 - A página não tem acesso ao app nem a arquivos locais: sem ponte com o Cadex, sem `file://`, cookies
   e dados guardados só enquanto o app está aberto.
-- ⌘R recarrega com o foco na aba de preview; ⌥⌘I abre o inspetor da página.
+- ⌘R recarrega com a aba de preview ativa; "Inspecionar elemento" no menu de contexto da página abre
+  o inspetor.
 
 ## Estados
 - **Carregando:** barra de progresso fina embaixo do endereço.
-- **Erro:** servidor fora do ar: "Não foi possível conectar a <endereço>" com "Tentar de novo".
+- **Erro:** servidor fora do ar: "Não foi possível conectar a <endereço>" com o motivo; recarregar tenta de novo.
 - **Pronto:** a página.
 
 ## Casos de borda
@@ -30,6 +31,6 @@ Ver no Cadex a página do servidor que um agente subiu no terminal (`npm run dev
 
 ## Critérios de aceite
 - [ ] `python3 -m http.server` no terminal faz a oferta aparecer, e ela abre a página.
-- [ ] Endereços locais são detectados nos formatos acima; os de fora (`https://example.com`) não.
-- [ ] A página não acessa `file://` nem objetos do app.
+- [x] Endereços locais são detectados nos formatos acima; os de fora (`https://example.com`) não.
+- [x] A página não acessa `file://` nem objetos do app.
 - [ ] Voltar, avançar e recarregar funcionam.

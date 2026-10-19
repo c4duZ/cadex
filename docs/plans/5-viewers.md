@@ -64,3 +64,14 @@ editor, markdown, media-preview, preview.
   arquivo de 100 MB sem travar; editar e salvar um Markdown com autocomplete de `](` e `[[`; abrir
   `docs/cadex-icon.png`, um PDF e um vídeo; `python3 -m http.server` oferece o preview.
 - Atualizar specs, `CLAUDE.md` das features e o status em `docs/plans/README.md`.
+
+## Fechamento (2026-10-19)
+Fases A a E feitas, cada uma num commit. Conferido no app em segundo plano (menus e argumentos de
+linha de comando, sem teclas): `core/features/terminal/render.zig` com destaque, números e dobras; dobrar todos; arquivo de
+100 MB abrindo os primeiros 10 MB em menos de 1 s; nota Markdown com link quebrado sublinhado e o
+renderizado (tabela, tarefas, código colorido, imagem local, script que não roda); PNG, PDF e vídeo;
+página de um servidor local no preview (depois de recarregar). Falta conferir à mão, com o app na
+frente: digitar e salvar com ⌘S, o autocomplete de `](` e `[[` aparecendo enquanto se digita,
+⌘+clique num link, `python3 -m http.server` num terminal fazendo a oferta aparecer, e o preview
+desenhando a página na primeira carga (no teste, com a janela fora da mesa ativa, ficou em branco
+até recarregar). Ficou para depois do MVP: miniaturas no PDF, editar sem desdobrar tudo.

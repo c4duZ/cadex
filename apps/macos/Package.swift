@@ -114,6 +114,13 @@ let package = Package(
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
+        .target(
+            name: "Preview",
+            dependencies: ["CommandPalette", "Icons", "Tabs"],
+            path: "features/preview",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
         // Tests are an executable: see shared/checks/Checks.swift.
         .target(name: "Checks", path: "shared/checks"),
         .executableTarget(
@@ -132,7 +139,7 @@ let package = Package(
         // Shortcuts tests check the defaults of every feature's commands.
         .executableTarget(
             name: "ShortcutsTests",
-            dependencies: ["Shortcuts", "CommandPalette", "Terminal", "Tabs", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Checks"],
+            dependencies: ["Shortcuts", "CommandPalette", "Terminal", "Tabs", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "Checks"],
             path: "features/shortcuts/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
@@ -191,6 +198,12 @@ let package = Package(
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
+            name: "PreviewTests",
+            dependencies: ["Preview", "Checks"],
+            path: "features/preview/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+        .executableTarget(
             name: "IconsTests",
             dependencies: ["Icons", "Checks"],
             path: "shared/icons/tests"
@@ -198,7 +211,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

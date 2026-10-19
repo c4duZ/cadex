@@ -117,3 +117,30 @@ fn monotonicSeconds() f64 {
     _ = std.c.clock_gettime(.MONOTONIC, &ts);
     return @as(f64, @floatFromInt(ts.sec)) + @as(f64, @floatFromInt(ts.nsec)) / 1e9;
 }
+
+test "a local server's address in the output is reported once" {
+    quietLogs();
+    const Seen = struct {
+        var count: std.atomic.Value(u32) = .init(0);
+        var last: [128]u8 = undefined;
+        fn onUrl(_: ?*anyopaque, url: [*:0]const u8) callconv(.c) void {
+            const s = std.mem.span(url);
+            @memcpy(last[0..s.len], s);
+            last[s.len] = 0;
+            _ = count.fetchAdd(1, .release);
+        }
+    };
+    const session = try Session.open(testing.allocator, .{
+        .size = .{ .cols = 80, .rows = 24 },
+        .shell = "/bin/sh",
+        .callbacks = .{ .on_local_url = Seen.onUrl },
+    });
+    defer session.close();
+    // Built by the shell, so the echo of the typed command does not match.
+    try session.write("p=8000; echo \"Serving on http://0.0.0.0:$p/ now\"; echo \"again 0.0.0.0:$p/\"\n");
+    var attempts: u32 = 0;
+    while (Seen.count.load(.acquire) == 0 and attempts < 250) : (attempts += 1) _ = usleep(20 * 1000);
+    _ = usleep(200 * 1000);
+    try testing.expectEqual(@as(u32, 1), Seen.count.load(.acquire));
+    try testing.expectEqualStrings("http://localhost:8000/", std.mem.sliceTo(&Seen.last, 0));
+}

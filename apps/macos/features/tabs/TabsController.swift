@@ -11,6 +11,8 @@ public final class TabsController {
     /// The active tab, its focused pane or that pane's folder changed: the
     /// status bar follows.
     public var onActiveChange: (() -> Void)?
+    /// "Abrir no preview" was clicked in a terminal, for a local address.
+    public var onOpenPreview: ((String) -> Void)?
     private var list = TabList()
     private var tabs: [Int: Tab] = [:]
     /// Tabs that show a document instead of terminals (TabDocument).
@@ -169,6 +171,7 @@ public final class TabsController {
             self?.removePane(pane, from: tab)
         }
         terminal.onActivity = { [weak self] in self?.scheduleTitleRefresh() }
+        terminal.onOpenPreview = { [weak self] url in self?.onOpenPreview?(url) }
         terminal.onProgramTitle = { [weak self] _ in self?.refreshBar() }
         terminal.onFocus = { [weak self, weak tab] in
             tab?.noteFocus(pane)
