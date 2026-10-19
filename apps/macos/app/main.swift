@@ -4,6 +4,7 @@ import CommandPalette
 import Editor
 import Explorer
 import Markdown
+import MediaPreview
 import Search
 import Settings
 import Shortcuts
@@ -163,6 +164,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         makeExplorer()
         makeSearch(palette: palette)
         commands.register(EditorCommands.all { [weak self] in self?.tabs?.activeDocument as? EditorDocument })
+        commands.register(MediaCommands.all { [weak self] in self?.tabs?.activeDocument as? MediaDocument })
         let markdown = MarkdownController(root: folder.root, findFiles: { [weak self] in self?.search?.findFiles($0) ?? [] },
                                           open: { [weak self] path, line in self?.opener?.open(path, line: line) })
         self.markdown = markdown

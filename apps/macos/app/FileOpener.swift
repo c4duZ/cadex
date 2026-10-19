@@ -1,12 +1,12 @@
 import AppKit
 import Editor
+import MediaPreview
 import Tabs
 import Terminal
 import Themes
 
-/// Where a chosen file opens (explorer, ⌘P, ⌘⇧F): an editor tab for text,
-/// the system's default app for what the viewers do not show yet. Media
-/// viewers join with plan 5, phase D.
+/// Where a chosen file opens (explorer, ⌘P, ⌘⇧F): a media tab for images,
+/// video, audio, PDF and what Quick Look shows; an editor tab for the rest.
 @MainActor
 final class FileOpener {
     private weak var tabs: TabsController?
@@ -21,6 +21,11 @@ final class FileOpener {
     func open(_ given: String, line: Int? = nil) {
         guard let tabs else { return }
         let path = Self.canonical(given)
+        if let kind = MediaKind.of(path: path) {
+            let media = (tabs.document(identity: path) as? MediaDocument) ?? MediaDocument(path: path, kind: kind)
+            media.openExternally = { NSWorkspace.shared.open(URL(fileURLWithPath: $0)) }
+            return tabs.open(media)
+        }
         let document = (tabs.document(identity: path) as? EditorDocument) ?? makeEditor(path)
         tabs.open(document)
         if let line {
@@ -49,9 +54,9 @@ final class FileOpener {
     func foldersChanged(_ folders: [String]) {
         guard let tabs else { return }
         let changed = Set(folders)
-        for case let editor as EditorDocument in tabs.allDocuments {
-            let folder = (editor.path as NSString).deletingLastPathComponent
-            if changed.contains(folder) { editor.diskMayHaveChanged() }
+        for document in tabs.allDocuments where changed.contains((document.identity as NSString).deletingLastPathComponent) {
+            (document as? EditorDocument)?.diskMayHaveChanged()
+            (document as? MediaDocument)?.diskMayHaveChanged()
         }
     }
 }

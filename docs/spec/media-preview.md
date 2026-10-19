@@ -9,11 +9,11 @@ sabe mostrar.
   vídeo (MP4, MOV, M4V, WebM quando o sistema toca), áudio (MP3, WAV, AAC, M4A, FLAC, AIFF), PDF.
   Outros arquivos que não são texto abrem pelo Quick Look, se ele souber mostrar.
 - **Imagem:** centralizada, ajustada à aba quando maior que ela; ⌘+ e ⌘− dão zoom, ⌘0 volta a
-  ajustar, ⌘1 mostra no tamanho real. Fundo xadrez discreto para transparência. Na parte de baixo,
+  ajustar, ⌥⌘0 mostra no tamanho real (⌘1 é da troca de abas). Fundo xadrez discreto para transparência. Na parte de baixo,
   dimensões e tamanho do arquivo. GIF anima.
 - **Vídeo e áudio:** controles do sistema (tocar, pausar, barra de tempo, volume, tela cheia no
   vídeo). Não começa a tocar sozinho.
-- **PDF:** páginas roláveis, miniaturas opcionais na lateral, zoom e ⌘F para buscar no texto.
+- **PDF:** páginas roláveis, zoom e ⌘F para buscar no texto (miniaturas ficaram para depois).
 - O arquivo mudou no disco: a aba recarrega.
 
 ## Estados
@@ -27,7 +27,7 @@ sabe mostrar.
 - PDF protegido por senha -> pede a senha.
 
 ## Critérios de aceite
-- [ ] O visualizador é escolhido pelo tipo do arquivo (imagem, vídeo, áudio, PDF, Quick Look, texto).
-- [ ] `docs/cadex-icon.png` abre ajustado à aba, com zoom.
-- [ ] Um PDF abre com busca.
-- [ ] Um vídeo abre com os controles do sistema, parado.
+- [x] O visualizador é escolhido pelo tipo do arquivo (imagem, vídeo, áudio, PDF, Quick Look, texto).
+- [x] `docs/cadex-icon.png` abre ajustado à aba, com zoom.
+- [x] Um PDF abre com busca.
+- [x] Um vídeo abre com os controles do sistema, parado.

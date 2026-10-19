@@ -13,7 +13,7 @@
   ou sair (shouldCloseAll). Liga a barra de status ao terminal com foco. Cria o `WorkspaceFolder` do explorer, abre a
   primeira aba na pasta dele; pastas e arquivos da linha de comando ou soltos no ícone do Dock
   (`application(_:open:)`, o Dock só com o pacote .app do plano 7): pasta vira workspace, arquivo
-  abre numa aba. `FileOpener.swift` decide onde um arquivo abre (editor; mídia na fase D), passa as
+  abre numa aba. `FileOpener.swift` decide onde um arquivo abre (mídia pelo tipo, o resto no editor), passa as
   mudanças do disco aos editores abertos e monta a aparência do editor (`EditorLooks`).
 - A casca da janela, no estilo do Terax: título transparente com barra de ferramentas compacta
   (38 pt, botões da janela centrados); `TitleBarView.swift` (painel lateral, paleta, abas, "+",
