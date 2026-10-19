@@ -12,6 +12,7 @@ pub const Key = @import("input.zig").Key;
 pub const Mods = @import("input.zig").Mods;
 pub const Pointer = session.Pointer;
 pub const Autoscroll = session.Autoscroll;
+pub const quotePaths = @import("paste.zig").quotePaths;
 
 test {
     _ = @import("model.zig");
@@ -24,4 +25,5 @@ test {
     _ = @import("input.zig");
     _ = @import("selection.zig");
     _ = @import("selection_test.zig");
+    _ = @import("paste.zig");
 }

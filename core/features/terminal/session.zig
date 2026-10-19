@@ -9,6 +9,7 @@ const shell_env = @import("shell_env.zig");
 const render = @import("render.zig");
 const input = @import("input.zig");
 const selection = @import("selection.zig");
+const paste_encoding = @import("paste.zig");
 
 pub const Size = pty.Size;
 pub const Frame = render.Frame;
@@ -105,6 +106,24 @@ pub const Session = struct {
         self.unlock();
         const bytes = try encoded;
         if (bytes.len > 0) try self.write(bytes);
+    }
+
+    /// Pastes text, encoded for the program (bracketed paste, see paste.zig).
+    pub fn paste(self: *Session, text: []const u8) !void {
+        self.lock();
+        const encoded = paste_encoding.encode(self.gpa, &self.model.terminal, text);
+        self.returnToInput();
+        self.unlock();
+        const bytes = try encoded;
+        defer self.gpa.free(bytes);
+        try pty.writeAll(self.child.fd, bytes);
+    }
+
+    /// False when the paste could run commands unseen (paste.zig:isSafe).
+    pub fn isPasteSafe(self: *Session, text: []const u8) bool {
+        self.lock();
+        defer self.unlock();
+        return paste_encoding.isSafe(&self.model.terminal, text);
     }
 
     /// Typing or pasting goes back to the prompt: drops the selection and

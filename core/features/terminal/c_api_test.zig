@@ -111,3 +111,27 @@ test "selection and scrolling through the C API" {
     try testing.expectEqual(status.invalid_argument, api.cadex_terminal_select_press(session, null, 1, false));
     try testing.expect(!api.cadex_terminal_has_selection(null));
 }
+
+test "paste and path quoting through the C API" {
+    const paths = [_]?[*:0]const u8{ "/tmp/a b.txt", "/tmp/c" };
+    var ptr: ?[*]u8 = null;
+    var len: usize = 0;
+    try testing.expectEqual(status.ok, api.cadex_terminal_quote_paths(&paths, paths.len, &ptr, &len));
+    defer status.cadex_free(ptr);
+    try testing.expectEqualStrings("'/tmp/a b.txt' /tmp/c", ptr.?[0..len]);
+
+    var none: ?[*]u8 = null;
+    try testing.expectEqual(status.ok, api.cadex_terminal_quote_paths(null, 0, &none, &len));
+    try testing.expect(none == null and len == 0);
+
+    testing.log_level = .err;
+    var session: ?*@import("session.zig").Session = null;
+    var o = options();
+    try testing.expectEqual(status.ok, api.cadex_terminal_open(&o, &session));
+    defer api.cadex_terminal_close(session);
+    // /bin/sh has no bracketed paste: several lines are not safe.
+    try testing.expect(!api.cadex_terminal_paste_is_safe(session, "a\nb", 3));
+    try testing.expect(api.cadex_terminal_paste_is_safe(session, "a b", 3));
+    try testing.expectEqual(status.ok, api.cadex_terminal_paste(session, "echo x", 6));
+    try testing.expectEqual(status.invalid_argument, api.cadex_terminal_paste(null, "x", 1));
+}

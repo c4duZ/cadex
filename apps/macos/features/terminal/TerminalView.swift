@@ -39,6 +39,16 @@ public final class TerminalView: MTKView {
         session = try? TerminalSession(cols: size.cols, rows: size.rows, cwd: cwd)
         session?.onOutput = { [weak self] in self?.needsDisplay = true }
         session?.onExit = { [weak self] _ in self?.window?.close() }
+        registerForDraggedTypes([.fileURL])
+        Self.cleanPastedImagesOnce()
+    }
+
+    /// Pasted images older than a week go away once per app launch.
+    private static var cleanedPastedImages = false
+    private static func cleanPastedImagesOnce() {
+        guard !cleanedPastedImages else { return }
+        cleanedPastedImages = true
+        DispatchQueue.global(qos: .utility).async { PastedImageStore.removeOld() }
     }
 
     @available(*, unavailable)
@@ -172,12 +182,5 @@ public final class TerminalView: MTKView {
         guard let text = session?.selectedText() else { return }
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
-    }
-
-    /// First version of ⌘V: text only. Files, images and bracketed paste
-    /// follow docs/spec/terminal.md in the next step.
-    private func paste() {
-        guard let text = NSPasteboard.general.string(forType: .string) else { return }
-        session?.write(text)
     }
 }

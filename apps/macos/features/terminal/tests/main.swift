@@ -68,6 +68,52 @@ let exitCode = await Checks.run([
         acc.reset()
         expect(acc.rows(deltaY: -3, precise: false, cellHeightPoints: 10) == 3)
     }),
+    ("⌘V order: files, then image, then text", {
+        let pasteboard = NSPasteboard(name: NSPasteboard.Name("cadex-test-\(UUID().uuidString)"))
+        defer { pasteboard.releaseGlobally() }
+        expect(PasteContent.read(from: pasteboard) == nil, "empty clipboard pastes nothing")
+
+        pasteboard.clearContents()
+        pasteboard.setString("só texto", forType: .string)
+        expect(PasteContent.read(from: pasteboard) == .text("só texto"))
+
+        // An image and text together (a browser copy): the image wins.
+        let image = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 2, pixelsHigh: 2, bitsPerSample: 8,
+                                     samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+                                     colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+        pasteboard.clearContents()
+        pasteboard.setData(image.tiffRepresentation, forType: .tiff)
+        pasteboard.setString("https://exemplo.com/foto.png", forType: .string)
+        if case .image(let png) = PasteContent.read(from: pasteboard) {
+            expect(png.starts(with: [0x89, 0x50, 0x4E, 0x47]), "not a PNG")
+        } else {
+            expect(false, "image did not win over text")
+        }
+
+        // Files copied in Finder come with their names as text: files win.
+        let file = URL(fileURLWithPath: "/tmp/Meus Arquivos/a b.txt")
+        pasteboard.clearContents()
+        pasteboard.writeObjects([file as NSURL])
+        expect(PasteContent.read(from: pasteboard) == .files([file]))
+    }),
+    ("pasted paths are escaped by the core", {
+        expect(TerminalSession.quotePaths(["/tmp/a b.txt", "/tmp/c"]) == "'/tmp/a b.txt' /tmp/c")
+        expect(TerminalSession.quotePaths(["/tmp/it's"]) == "'/tmp/it'\\''s'")
+        expect(TerminalSession.quotePaths([]) == "")
+    }),
+    ("pasted images are saved as PNG and removed after a week", {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("cadex-test-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let old = try PastedImageStore.save(Data([0x89, 0x50]), in: dir)
+        let recent = try PastedImageStore.save(Data([0x89, 0x50]), in: dir)
+        let eightDaysAgo = Date().addingTimeInterval(-8 * 24 * 60 * 60)
+        try FileManager.default.setAttributes([.modificationDate: eightDaysAgo], ofItemAtPath: old.path)
+        expect(old != recent && old.pathExtension == "png")
+
+        PastedImageStore.removeOld(in: dir)
+        expect(!FileManager.default.fileExists(atPath: old.path), "old image stayed")
+        expect(FileManager.default.fileExists(atPath: recent.path), "recent image removed")
+    }),
     ("cell metrics are whole pixels and scale with the display", {
         let retina = TerminalFont(scale: 2).metrics
         let standard = TerminalFont(scale: 1).metrics
@@ -108,6 +154,12 @@ let exitCode = await Checks.run([
         expect(copied.contains("copy-7"), copied)
         session.write(" ")
         expect(!session.hasSelection)
+    }),
+    ("several lines into a shell without bracketed paste are not safe", {
+        let session = try TerminalSession(cols: 80, rows: 24, shell: "/bin/sh")
+        defer { session.close() }
+        expect(session.isPasteSafe("uma linha"))
+        expect(!session.isPasteSafe("ls\nrm -rf x\n"))
     }),
     ("arrow keys reach the shell through the core", {
         let session = try TerminalSession(cols: 80, rows: 24, shell: "/bin/sh")

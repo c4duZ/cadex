@@ -26,12 +26,17 @@
   `TerminalGeometry.swift` converte pontos em célula (padding e escala).
 - Área de transferência: só ⌘C escreve nela. "Copiar ao selecionar" pelo default
   "terminal.copyOnSelect" (desligado); ligado, copia ao soltar o botão com seleção feita.
+- Colar e arrastar em `TerminalPaste.swift`; a ordem do ⌘V (arquivos, imagem, texto) em
+  `PasteboardContent.swift`. Imagem vira PNG em cadex-paste/ dentro da pasta temporária, apagado
+  depois de 7 dias (ao abrir o app). Várias linhas sem bracketed paste pedem confirmação, que o
+  default "terminal.confirmMultilinePaste" desliga.
 - ⌘C, ⌘A, ⌘↑ e ⌘↓ estão no `performKeyEquivalent` até a paleta existir (plano 2).
 - Ações do terminal (limpar, buscar, copiar, colar) registradas como comandos.
 - Status: janela com um shell, desenho em Metal (SF Mono, nítido), teclado básico e colagem de
   texto, teclas pelo núcleo (modo de aplicação, F-keys, modificadores, kitty, Option como Meta).
   Rolagem com barra discreta, seleção (arrastar, duplo e triplo clique, Shift+clique, ⌘A) e ⌘C.
-  Faltam: links, busca, colagem de arquivos e imagem.
+  Colagem de texto (bracketed paste), arquivos e imagem, e arrastar arquivos.
+  Faltam: links e busca.
 
 ## Como validar
 - `make macos-test` passa.

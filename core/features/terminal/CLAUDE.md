@@ -8,7 +8,7 @@
 
 ## O que eu não quero
 - Qualquer outra feature, do núcleo ou do app, falando direto com a libghostty: só `model.zig`,
-  `render.zig`, `input.zig` e `selection.zig`.
+  `render.zig`, `input.zig`, `selection.zig` e `paste.zig`.
 - Processo do shell sobrevivendo ao fechamento da sessão.
 - Callback do app chamando `cadex_terminal_close`: o close espera a thread de leitura, que é quem
   chama o callback (trava).
@@ -27,6 +27,9 @@
 - `selection.zig`: seleção pelo SelectionGesture da libghostty (clique, arrasto com autoscroll,
   Shift+clique, tudo) e o texto selecionado, sem espaços no fim e com linhas quebradas por largura
   juntas. O app conta os cliques (clickCount); o gesto nunca conta sozinho. Mora no `model.zig`.
+- `paste.zig`: colagem codificada para o programa (bracketed paste; sem ele, \n vira Enter; bytes
+  de controle viram espaço), se a colagem é segura e o escape de caminhos para o shell (aspas
+  simples quando precisa). O que colar (arquivos, imagem, texto) é decisão do app.
 - Rolagem e histórico no `model.zig`: pelo menos 10 mil linhas (limite em linhas com folga de uma
   página, porque a libghostty descarta páginas inteiras). Digitar ou colar limpa a seleção e volta
   ao fim (`session.zig:returnToInput`).
@@ -36,7 +39,7 @@
 - `session.zig`: thread de leitura com poll (acorda a cada 50 ms para ver se houve close) e mutex
   da libc protegendo o modelo; o close manda SIGHUP e, depois de 200 ms, SIGKILL.
 - Spec em `../../../docs/spec/terminal.md`. Status: sessão, PTY, quadro para desenhar, teclas pelo
-  núcleo, rolagem, seleção e API C prontos.
+  núcleo, rolagem, seleção, colagem e API C prontos.
 
 ## Como validar
 - `make core-test` (ou `zig build test` dentro de `core/`) passa, sem vazamento no alocador de teste.

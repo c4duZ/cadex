@@ -214,6 +214,23 @@ bool cadex_terminal_has_selection(cadex_terminal *terminal);
  * the selection and scrolls to the bottom. */
 cadex_status cadex_terminal_copy_selection(cadex_terminal *terminal, uint8_t **out, size_t *out_len);
 
+/* -- Paste (core/features/terminal/paste.zig) -- */
+
+/* Pastes text, encoded for the program: bracketed paste (ESC [ 200 ~ ...
+ * ESC [ 201 ~) when it asked for it, newlines as Enter otherwise, control
+ * bytes as spaces. Clears the selection and scrolls to the bottom. */
+cadex_status cadex_terminal_paste(cadex_terminal *terminal, const uint8_t *bytes, size_t len);
+
+/* False when pasting could run commands unseen: several lines without
+ * bracketed paste, or text that ends the bracketed frame early. */
+bool cadex_terminal_paste_is_safe(cadex_terminal *terminal, const uint8_t *bytes, size_t len);
+
+/* Paths (NUL-terminated UTF-8) escaped for the shell (single quotes when
+ * needed) and joined by spaces. Not NUL-terminated; free with cadex_free.
+ * count 0: *out is NULL and *out_len is 0. */
+cadex_status cadex_terminal_quote_paths(const char *const *paths, size_t count,
+                                        uint8_t **out, size_t *out_len);
+
 #ifdef __cplusplus
 }
 #endif

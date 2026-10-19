@@ -120,9 +120,9 @@ sistema (NSPasteboard); no Windows, a do Win32. O núcleo recebe só o texto fin
   tmux e terminal suspenso por atalho global. Podem entrar depois, cada um com a própria decisão.
 
 ## Critérios de aceite
-- [ ] Copiar um arquivo com espaço no nome no Finder e colar resulta num caminho que o shell aceita.
-- [ ] Colar um print de tela cola o caminho de um PNG que existe e abre a imagem.
-- [ ] Colar texto num programa com bracketed paste ativo não executa as linhas automaticamente.
+- [x] Copiar um arquivo com espaço no nome no Finder e colar resulta num caminho que o shell aceita.
+- [x] Colar um print de tela cola o caminho de um PNG que existe e abre a imagem.
+- [x] Colar texto num programa com bracketed paste ativo não executa as linhas automaticamente.
 - [x] Com "copiar ao selecionar" desligado e qualquer coisa copiada, passar o mouse e selecionar
       texto no terminal não muda a área de transferência; ⌘V ainda cola o que estava lá.
 - [x] Com "copiar ao selecionar" ligado, terminar uma seleção copia o texto dela.

@@ -211,3 +211,53 @@ pub export fn cadex_terminal_copy_selection(session: ?*Session, out: ?*?[*]u8, o
     len.* = text.len;
     return status.ok;
 }
+
+// ---- Paste ----
+
+/// Pastes text, encoded for the program: bracketed paste when it asked for
+/// it, newlines as Enter otherwise, control bytes as spaces.
+pub export fn cadex_terminal_paste(session: ?*Session, bytes: ?[*]const u8, len: usize) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    if (len == 0) return status.ok;
+    const data = bytes orelse return status.invalid_argument;
+    s.paste(data[0..len]) catch |err| return status.fromError(err);
+    return status.ok;
+}
+
+/// False when pasting could run commands unseen: several lines without
+/// bracketed paste, or text that ends the bracketed frame early.
+pub export fn cadex_terminal_paste_is_safe(session: ?*Session, bytes: ?[*]const u8, len: usize) callconv(.c) bool {
+    const s = session orelse return false;
+    if (len == 0) return true;
+    const data = bytes orelse return false;
+    return s.isPasteSafe(data[0..len]);
+}
+
+/// Paths (NUL-terminated UTF-8) escaped for the shell and joined by spaces,
+/// not NUL-terminated. Free with cadex_free.
+pub export fn cadex_terminal_quote_paths(
+    paths: ?[*]const ?[*:0]const u8,
+    count: usize,
+    out: ?*?[*]u8,
+    out_len: ?*usize,
+) callconv(.c) status.Code {
+    const ptr = out orelse return status.invalid_argument;
+    const len = out_len orelse return status.invalid_argument;
+    ptr.* = null;
+    len.* = 0;
+    if (count == 0) return status.ok;
+    const list = paths orelse return status.invalid_argument;
+
+    const slices = gpa.alloc([]const u8, count) catch return status.out_of_memory;
+    defer gpa.free(slices);
+    for (slices, 0..) |*slice, i| {
+        slice.* = std.mem.span(list[i] orelse return status.invalid_argument);
+    }
+    const quoted = terminal.quotePaths(gpa, slices) catch |err| return status.fromError(err);
+    // Never empty here (count > 0 adds at least the quotes), but keep the
+    // rule: an empty Zig slice is not from malloc.
+    if (quoted.len == 0) return status.ok;
+    ptr.* = quoted.ptr;
+    len.* = quoted.len;
+    return status.ok;
+}

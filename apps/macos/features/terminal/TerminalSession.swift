@@ -77,6 +77,39 @@ public final class TerminalSession {
         _ = cadex_terminal_resize(handle, cols, rows, cellWidth, cellHeight)
     }
 
+    // MARK: Paste
+
+    /// Pastes text, encoded by the core for the program (bracketed paste).
+    func paste(_ text: String) {
+        guard let handle, !text.isEmpty else { return }
+        let bytes = Array(text.utf8)
+        _ = bytes.withUnsafeBufferPointer { cadex_terminal_paste(handle, $0.baseAddress, $0.count) }
+    }
+
+    /// False when pasting could run commands unseen (several lines into a
+    /// shell without bracketed paste).
+    func isPasteSafe(_ text: String) -> Bool {
+        guard let handle else { return true }
+        let bytes = Array(text.utf8)
+        return bytes.withUnsafeBufferPointer { cadex_terminal_paste_is_safe(handle, $0.baseAddress, $0.count) }
+    }
+
+    /// Paths escaped for the shell and joined by spaces.
+    static func quotePaths(_ paths: [String]) -> String {
+        var cStrings = paths.map { strdup($0) }
+        defer { cStrings.forEach { free($0) } }
+        var out: UnsafeMutablePointer<UInt8>?
+        var length = 0
+        let status = cStrings.withUnsafeMutableBufferPointer { buffer in
+            buffer.baseAddress!.withMemoryRebound(to: UnsafePointer<CChar>?.self, capacity: buffer.count) {
+                cadex_terminal_quote_paths($0, buffer.count, &out, &length)
+            }
+        }
+        guard status == CADEX_OK, let out else { return "" }
+        defer { cadex_free(out) }
+        return String(decoding: UnsafeBufferPointer(start: out, count: length), as: UTF8.self)
+    }
+
     // MARK: Scrolling and selection
 
     /// Moves the view through the history; negative goes up.
