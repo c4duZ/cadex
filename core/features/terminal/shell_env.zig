@@ -11,7 +11,7 @@ pub const fallback_shell = "/bin/zsh";
 /// session started from another terminal does not claim to be that terminal.
 const owned_vars = [_][]const u8{ "TERM", "COLORTERM", "TERM_PROGRAM", "TERM_PROGRAM_VERSION" };
 
-const added_vars = [_][]const u8{
+pub const added_vars = [_][]const u8{
     "TERM=xterm-256color",
     "COLORTERM=truecolor",
     "TERM_PROGRAM=Cadex",
@@ -53,7 +53,7 @@ pub fn sessionEnv(arena: std.mem.Allocator, parent: []const [*:0]const u8) !Envp
     return envp.ptr;
 }
 
-fn isOwned(entry: []const u8) bool {
+pub fn isOwned(entry: []const u8) bool {
     const eq = std.mem.indexOfScalar(u8, entry, '=') orelse return false;
     const name = entry[0..eq];
     for (owned_vars) |owned| {

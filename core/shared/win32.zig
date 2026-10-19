@@ -193,3 +193,29 @@ pub extern "kernel32" fn AssignProcessToJobObject(job: HANDLE, process: HANDLE) 
 pub extern "kernel32" fn TerminateJobObject(job: HANDLE, code: c_uint) callconv(.winapi) BOOL;
 pub extern "kernel32" fn GetEnvironmentStringsW() callconv(.winapi) ?[*]WCHAR;
 pub extern "kernel32" fn FreeEnvironmentStringsW(block: [*]WCHAR) callconv(.winapi) BOOL;
+
+// ConPTY (features/terminal/pty_windows.zig).
+
+pub const COORD = extern struct { X: i16, Y: i16 };
+pub const HPCON = *anyopaque;
+/// HRESULT; S_OK is 0.
+pub const HRESULT = c_long;
+
+pub const JOBOBJECT_BASIC_ACCOUNTING_INFORMATION = extern struct {
+    TotalUserTime: i64,
+    TotalKernelTime: i64,
+    ThisPeriodTotalUserTime: i64,
+    ThisPeriodTotalKernelTime: i64,
+    TotalPageFaultCount: DWORD,
+    TotalProcesses: DWORD,
+    ActiveProcesses: DWORD,
+    TotalTerminatedProcesses: DWORD,
+};
+pub const JobObjectBasicAccountingInformation: c_int = 1;
+
+pub extern "kernel32" fn CreatePseudoConsole(size: COORD, input: HANDLE, output: HANDLE, flags: DWORD, console: *HPCON) callconv(.winapi) HRESULT;
+pub extern "kernel32" fn ResizePseudoConsole(console: HPCON, size: COORD) callconv(.winapi) HRESULT;
+pub extern "kernel32" fn ClosePseudoConsole(console: HPCON) callconv(.winapi) void;
+pub extern "kernel32" fn QueryInformationJobObject(job: HANDLE, class: c_int, info: *anyopaque, len: DWORD, returned: ?*DWORD) callconv(.winapi) BOOL;
+pub extern "kernel32" fn SearchPathW(path: ?LPCWSTR, name: LPCWSTR, extension: ?LPCWSTR, len: DWORD, buffer: [*]WCHAR, file_part: ?*?[*]WCHAR) callconv(.winapi) DWORD;
+pub extern "kernel32" fn GetEnvironmentVariableW(name: LPCWSTR, buffer: [*]WCHAR, len: DWORD) callconv(.winapi) DWORD;

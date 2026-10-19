@@ -131,7 +131,8 @@ pub fn linkAt(s: *Session, gpa: std.mem.Allocator, at: LinkPoint) !?Link {
     _ = try s.renderer.build(s.gpa, &s.model.search);
     if (try hyperlink) |link| return link;
 
-    const home = if (std.c.getenv("HOME")) |h| std.mem.span(h) else null;
+    var home_buf: [1024]u8 = undefined;
+    const home = pty.homeDirectory(&home_buf);
     return links.detectAt(gpa, &s.renderer, at, .{ .cwd = directory(s, &places), .home = home });
 }
 
@@ -139,7 +140,7 @@ pub fn linkAt(s: *Session, gpa: std.mem.Allocator, at: LinkPoint) !?Link {
 
 pub const DirectoryBuffers = struct {
     osc7: [1024]u8,
-    process: [pty.directory_buffer_size]u8,
+    process: pty.DirectoryBuffer,
 };
 
 /// The session's current directory: what the shell reported with OSC 7
@@ -150,7 +151,7 @@ pub fn directory(s: *Session, buffers: *DirectoryBuffers) ?[]const u8 {
     s.lock();
     const reported = if (s.model.workingDirectory()) |r| links.directoryFromOsc7(r, &buffers.osc7) else null;
     s.unlock();
-    return reported orelse pty.currentDirectory(s.child, &buffers.process);
+    return reported orelse s.child.currentDirectory(&buffers.process);
 }
 
 // ---- Mouse for programs, wheel and focus ----
@@ -168,7 +169,7 @@ pub fn mouseEvent(s: *Session, e: MouseEvent) !void {
     s.lock();
     const bytes = mouse.encode(&buf, &s.model.terminal, e, &s.model.last_mouse_cell);
     s.unlock();
-    if (bytes.len > 0) try pty.writeAll(s.child.fd, bytes);
+    if (bytes.len > 0) try s.child.write(bytes);
 }
 
 /// The wheel, `rows` steps (negative is up): reports to a program that
@@ -180,7 +181,7 @@ pub fn wheel(s: *Session, e: MouseEvent, rows: i32) !void {
     const bytes = mouse.encodeWheel(&buf, &s.model.terminal, e, rows, &s.model.last_mouse_cell);
     if (bytes == null) s.model.scroll(rows);
     s.unlock();
-    if (bytes) |b| if (b.len > 0) try pty.writeAll(s.child.fd, b);
+    if (bytes) |b| if (b.len > 0) try s.child.write(b);
 }
 
 /// Tells the program the view gained or lost focus, if it asked (1004).
@@ -189,5 +190,5 @@ pub fn focus(s: *Session, focused: bool) !void {
     s.lock();
     const bytes = mouse.encodeFocus(&buf, &s.model.terminal, focused);
     s.unlock();
-    if (bytes.len > 0) try pty.writeAll(s.child.fd, bytes);
+    if (bytes.len > 0) try s.child.write(bytes);
 }

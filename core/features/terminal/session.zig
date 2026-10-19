@@ -3,10 +3,8 @@
 
 const std = @import("std");
 const sync = @import("../../shared/sync.zig");
-const c = std.c;
 const Model = @import("model.zig").Model;
 const pty = @import("pty.zig");
-const shell_env = @import("shell_env.zig");
 const render = @import("render.zig");
 const input = @import("input.zig");
 const selection = @import("selection.zig");
@@ -45,10 +43,6 @@ pub const Options = struct {
     callbacks: Callbacks = .{},
 };
 
-/// How often the reader wakes to check whether close() asked it to stop.
-const stop_poll_ms = 50;
-/// Grace period for the shell to exit on SIGHUP before it is killed.
-const hangup_grace_ms = 200;
 const read_buffer_size = 64 * 1024;
 
 pub const Session = struct {
@@ -80,11 +74,11 @@ pub const Session = struct {
         self.* = .{
             .gpa = gpa,
             .model = model,
-            .child = try spawnShell(gpa, options),
+            .child = try pty.Child.start(gpa, .{ .size = options.size, .cwd = options.cwd, .shell = options.shell }),
             .callbacks = options.callbacks,
             .local_urls = .{ .gpa = gpa },
         };
-        errdefer pty.killNow(self.child);
+        errdefer self.child.kill();
 
         model.setReply(&replyToShell, self);
         model.setNotice(&forwardNotice);
@@ -92,18 +86,13 @@ pub const Session = struct {
         return self;
     }
 
-    /// Ends the shell (SIGHUP, then SIGKILL after a grace period), stops the
-    /// reader and frees everything. No callback runs after this returns.
+    /// Ends the shell, stops the reader and frees everything. No callback
+    /// runs after this returns.
     pub fn close(self: *Session) void {
         self.stop.store(true, .release);
+        self.child.unblockReader();
         self.reader.join();
-        // Close our side of the pty before waiting for the shell. With the
-        // reader stopped nobody drains its output, and an exiting shell
-        // waits in the kernel for that drain: the app hung forever in
-        // waitpid closing a tab that ran `sleep 100` (2026-10-19, sample of
-        // the main thread in __wait4, zsh in state E).
-        _ = c.close(self.child.fd);
-        if (!self.reaped) pty.hangUp(self.child, hangup_grace_ms);
+        self.child.finish(self.reaped);
         self.renderer.deinit(self.gpa);
         self.local_urls.deinit();
         self.model.destroy();
@@ -115,7 +104,7 @@ pub const Session = struct {
         self.lock();
         self.returnToInput();
         self.unlock();
-        try pty.writeAll(self.child.fd, bytes);
+        try self.child.write(bytes);
     }
 
     /// Sends a key press, encoded for the modes the program set (see
@@ -138,7 +127,7 @@ pub const Session = struct {
         self.unlock();
         const bytes = try encoded;
         defer self.gpa.free(bytes);
-        try pty.writeAll(self.child.fd, bytes);
+        try self.child.write(bytes);
     }
 
     /// False when the paste could run commands unseen (paste.zig:isSafe).
@@ -158,7 +147,7 @@ pub const Session = struct {
     pub fn resize(self: *Session, size: Size) !void {
         self.lock();
         defer self.unlock();
-        try pty.resize(self.child.fd, size);
+        try self.child.resize(size);
         try self.model.resize(.{ .cols = size.cols, .rows = size.rows });
     }
 
@@ -173,7 +162,7 @@ pub const Session = struct {
     }
 
     pub fn hasForegroundProcess(self: *Session) bool {
-        return !self.reaped and pty.hasForegroundProcess(self.child);
+        return !self.reaped and self.child.hasForegroundProcess();
     }
 
     /// Visible text, one line per row. Caller frees with `gpa`.
@@ -195,24 +184,16 @@ pub const Session = struct {
 
     fn readLoop(self: *Session) void {
         var buf: [read_buffer_size]u8 = undefined;
-        var fds = [_]c.pollfd{.{ .fd = self.child.fd, .events = c.POLL.IN, .revents = 0 }};
-        while (!self.stop.load(.acquire)) {
-            const ready = c.poll(&fds, 1, stop_poll_ms);
-            if (ready <= 0) continue;
-            const n = c.read(self.child.fd, &buf, buf.len);
-            if (n < 0 and c.errno(n) == .INTR) continue;
-            // 0 or EIO: the shell closed its side of the pty.
-            if (n <= 0) break;
-
+        while (self.child.read(&buf, &self.stop)) |n| {
             self.lock();
-            self.model.feed(buf[0..@intCast(n)]);
+            self.model.feed(buf[0..n]);
             self.unlock();
             if (self.callbacks.on_output) |notify| notify(self.callbacks.context);
-            if (self.callbacks.on_local_url != null) self.local_urls.scan(buf[0..@intCast(n)], self, reportLocalUrl);
+            if (self.callbacks.on_local_url != null) self.local_urls.scan(buf[0..n], self, reportLocalUrl);
         }
         if (self.stop.load(.acquire)) return;
 
-        const code = pty.waitExitCode(self.child.pid);
+        const code = self.child.waitExitCode();
         self.reaped = true;
         if (self.callbacks.on_exit) |notify| notify(self.callbacks.context, code);
     }
@@ -258,26 +239,6 @@ pub const Session = struct {
         const self: *Session = @ptrCast(@alignCast(context.?));
         // A failed reply to a terminal query is not worth failing the
         // session for; the program just does not get its answer.
-        pty.writeAll(self.child.fd, bytes) catch {};
+        self.child.write(bytes) catch {};
     }
 };
-
-fn spawnShell(gpa: std.mem.Allocator, options: Options) !pty.Child {
-    var arena: std.heap.ArenaAllocator = .init(gpa);
-    defer arena.deinit();
-    const a = arena.allocator();
-
-    const env_shell = if (c.getenv("SHELL")) |s| std.mem.span(s) else null;
-    const shell = try a.dupeZ(u8, shell_env.resolveShell(options.shell, env_shell));
-    const cwd = if (options.cwd) |dir| (try a.dupeZ(u8, dir)).ptr else null;
-    const argv = try shell_env.loginArgv(a, shell);
-    const envp = try shell_env.sessionEnv(a, try parentEnv(a));
-    return pty.spawn(shell.ptr, argv, envp, cwd, options.size);
-}
-
-fn parentEnv(arena: std.mem.Allocator) ![]const [*:0]const u8 {
-    var list: std.ArrayList([*:0]const u8) = .empty;
-    var i: usize = 0;
-    while (c.environ[i]) |entry| : (i += 1) try list.append(arena, entry);
-    return list.items;
-}

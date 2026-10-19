@@ -36,7 +36,7 @@
 - `links.zig` + `link_detect.zig`: link sob a célula. Primeiro o hiperlink OSC 8; senão URL ou
   caminho achado no texto do quadro (linhas quebradas por largura juntas). Caminho só vale se
   existe: relativo resolve pelo OSC 7 ou pelo diretório do processo em primeiro plano
-  (`pty.zig:currentDirectory`).
+  (`pty_posix.zig:currentDirectory`; no Windows só o OSC 7).
 - `mouse.zig`: mouse para programas que pedem (vim, htop, tmux) no formato que pediram; a roda vira
   relatório de botão, setas na tela alternativa (modo 1007) ou rolagem do histórico; foco (1004).
 - Preferências: cursor padrão e piscar (`model.zig:setCursorDefaults`, o que o programa escolheu
@@ -54,11 +54,16 @@
 - Rolagem e histórico no `model.zig`: pelo menos 10 mil linhas (limite em linhas com folga de uma
   página, porque a libghostty descarta páginas inteiras). Digitar ou colar limpa a seleção e volta
   ao fim (`session.zig:returnToInput`).
-- `pty.zig`: forkpty + execve; o filho só faz chdir e execve (depois do fork, só chamadas seguras).
-  Também espera, desliga (SIGHUP) e mata o filho.
+- `pty.zig`: a interface do PTY, um `Child` com os mesmos métodos nos dois sistemas.
+  `pty_posix.zig`: forkpty + execve; o filho só faz chdir e execve (depois do fork, só chamadas
+  seguras); espera, desliga (SIGHUP) e mata o filho. `pty_windows.zig`: ConPTY, shell (pwsh, senão
+  Windows PowerShell) num Job Object; uma thread espera o processo e fecha o console, porque o
+  ConPTY não fecha a saída sozinho quando o shell sai.
 - `shell_env.zig`: shell, argv de login e ambiente (TERM=xterm-256color, TERM_PROGRAM=Cadex).
-- `session.zig`: thread de leitura com poll (acorda a cada 50 ms para ver se houve close) e mutex
-  da libc protegendo o modelo; o close manda SIGHUP e, depois de 200 ms, SIGKILL.
+- `session.zig`: thread de leitura e mutex (`core/shared/sync.zig`) protegendo o modelo. O close
+  pede ao Child para destravar a leitura (no Mac o poll acorda a cada 50 ms; no Windows fecha o
+  console), espera a thread e encerra o shell (Mac: SIGHUP e, depois de 200 ms, SIGKILL; Windows:
+  o Job Object inteiro).
 - Spec em `../../../docs/spec/terminal.md`. Status: sessão, PTY, quadro para desenhar, teclas pelo
   núcleo, rolagem, seleção, colagem, busca, links, mouse
   para programas, foco, título, sino e API C prontos. Reflow ao redimensionar coberto por teste.
