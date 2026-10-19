@@ -2,31 +2,37 @@ import CCadex
 import Foundation
 
 /// What the palette lists for a query (docs/spec/command-palette.md):
-/// empty, the recent commands then a section per area, each alphabetical
-/// with the unavailable ones last; otherwise the fuzzy matches of the
-/// titles, then the commands found only by a keyword, unavailable last.
+/// empty, the pins under "Abrir", the recent commands, then a section per
+/// area, each alphabetical; otherwise the fuzzy matches of the titles,
+/// then the commands found only by a keyword. A command that cannot run
+/// now is not listed (owner, 2026-10-19: "então pra que mostrar?").
 @MainActor
 enum PaletteModel {
-    static func items(for query: String, registry: CommandRegistry, shortcut: (String) -> String?) -> [PaletteItem] {
-        let commands = registry.commands
-        func item(_ command: Command, bold: [Range<String.Index>] = [], section: CommandSections.Section? = nil) -> PaletteItem {
+    static let openSection = "Abrir"
+
+    static func items(for query: String, registry: CommandRegistry, pins: [PalettePin] = [],
+                      shortcut: (String) -> String?) -> [PaletteItem] {
+        let commands = registry.commands.filter { $0.unavailableReason() == nil }
+        func item(_ command: Command, bold: [Range<String.Index>] = [], section: String? = nil) -> PaletteItem {
             PaletteItem(id: command.id, title: command.title, bold: bold, shortcut: shortcut(command.id),
-                        unavailableReason: command.unavailableReason(), section: section?.title,
-                        icon: CommandSections.section(of: command.id).icon)
-        }
-        func availableFirst(_ items: [PaletteItem]) -> [PaletteItem] {
-            items.filter { $0.unavailableReason == nil } + items.filter { $0.unavailableReason != nil }
+                        section: section, icon: CommandSections.section(of: command.id).icon)
         }
 
         if query.isEmpty {
-            let recent = registry.recent.compactMap { registry.command($0) }.map { item($0, section: CommandSections.recent) }
-            let rest = commands.filter { !registry.recent.contains($0.id) }
+            let available = Dictionary(commands.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+            let pinned = pins.filter { available[$0.id] != nil }.map {
+                PaletteItem(id: $0.id, title: $0.title, shortcut: shortcut($0.id), section: openSection, icon: $0.icon)
+            }
+            let skip = Set(pins.map(\.id))
+            let recent = registry.recent.filter { !skip.contains($0) }.compactMap { available[$0] }
+                .map { item($0, section: CommandSections.recent.title) }
+            let rest = commands.filter { !registry.recent.contains($0.id) && !skip.contains($0.id) }
                 .sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
             let grouped = Dictionary(grouping: rest) { CommandSections.section(of: $0.id).title }
             let sections = (CommandSections.all + [CommandSections.app]).flatMap { section in
-                availableFirst((grouped[section.title] ?? []).map { item($0, section: section) })
+                (grouped[section.title] ?? []).map { item($0, section: section.title) }
             }
-            return recent + sections
+            return pinned + recent + sections
         }
 
         let byTitle = FuzzyRank.rank(query, commands.map(\.title))
@@ -40,7 +46,7 @@ enum PaletteModel {
             seen.insert(match.index)
             items.append(item(commands[match.index]))
         }
-        return availableFirst(items)
+        return items
     }
 }
 

@@ -36,6 +36,8 @@ extension PaletteSource {
 final class CommandSource: PaletteSource {
     private let registry: CommandRegistry
     private let shortcut: (String) -> String?
+    /// Shown first, under "Abrir" (the app sets them).
+    var pins: [PalettePin] = []
 
     init(registry: CommandRegistry, shortcut: @escaping (String) -> String?) {
         self.registry = registry
@@ -49,7 +51,7 @@ final class CommandSource: PaletteSource {
     var hints: [PaletteHint] { [PaletteHint("↩", "executar")] }
 
     func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
-        show(PaletteModel.items(for: query, registry: registry, shortcut: shortcut), nil)
+        show(PaletteModel.items(for: query, registry: registry, pins: pins, shortcut: shortcut), nil)
     }
 
     func choose(_ item: PaletteItem) {

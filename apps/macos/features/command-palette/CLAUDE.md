@@ -5,7 +5,8 @@
   condição de disponibilidade e a função que executa.
 - A paleta no ⌘K, aberta de qualquer lugar (inclusive com o foco no terminal), com busca fuzzy de
   comandos, abas, spaces e arquivos.
-- Comando indisponível aparece apagado, com o motivo (ex.: "salvar" sem editor ativo).
+- Comando indisponível fica fora da paleta e apagado no menu (ex.: "salvar" sem editor ativo).
+- As aberturas (terminal ao lado, arquivo, preview, grafo) primeiro, em "Abrir" (`PalettePin`).
 
 ## O que eu não quero
 - Ação que existe só num botão, menu ou atalho, fora do registro.
@@ -19,7 +20,8 @@
 - `Command.swift`: o comando. Ação de responder (copiar, colar, limpar: vai para quem tem o foco,
   terminal ou campo de texto) ou closure da feature dona. O atalho padrão mora no comando.
 - `CommandRegistry.swift`: registro, execução por id, recentes. `StandardCommands.swift`: sair,
-  ocultar, desfazer, copiar, colar. `CommandMenu.swift`: menu da aplicação gerado do registro.
+  ocultar, desfazer, copiar, colar. `CommandMenu.swift`: menu da aplicação gerado do registro, e
+  `popup(_:)`, o menu do "+" com os pins.
 - Paleta: `CommandPaletteController.swift` (comando palette.open; `open(_:)` mostra qualquer fonte,
   o mesmo atalho de novo fecha, outro troca; `addPrefix` liga `/`, `#` e `@` a outras fontes no ⌘K;
   `style` recebe as cores do tema pelo app; descarta resultado de consulta velha; devolve o foco à

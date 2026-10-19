@@ -33,7 +33,7 @@ final class TitleBarView: NSView {
     private let spaceButton = TitleBarButton(icon: .stack, title: "", tip: "Trocar de space (⇧⌘S)")
     /// The three as one group on a light fill.
     private let group = NSView()
-    private let newTabButton = TitleBarButton(icon: .plus, tip: "Nova aba (⌘T)")
+    private let newTabButton = TitleBarButton(icon: .plus, tip: "Abrir terminal, arquivo, preview ou grafo do git")
     private let settingsButton = TitleBarButton(icon: .gearSix, tip: "Configurações (⌘,)")
     /// The shown space's tabs; swapped when the space changes.
     private(set) var tabBar: TabBarView?
@@ -41,13 +41,21 @@ final class TitleBarView: NSView {
     private var textColor = NSColor.labelColor
     private var secondaryColor = NSColor.secondaryLabelColor
 
+    /// The "+" menu (the openers, built by the app); without it, "+" is a new tab.
+    var newMenu: (() -> NSMenu?)?
+
+    private func showNewMenu() {
+        guard let menu = newMenu?(), !menu.items.isEmpty else { return run("tab.new") }
+        menu.popUp(positioning: nil, at: NSPoint(x: 0, y: newTabButton.isFlipped ? newTabButton.bounds.maxY + 4 : -4), in: newTabButton)
+    }
+
     init(run: @escaping (String) -> Void) {
         self.run = run
         super.init(frame: .zero)
         sidebarButton.onPress = { [weak self] in self?.run("view.toggle-sidebar") }
         searchButton.onPress = { [weak self] in self?.run("palette.open") }
         spaceButton.onPress = { [weak self] in self?.run("space.switch") }
-        newTabButton.onPress = { [weak self] in self?.run("tab.new") }
+        newTabButton.onPress = { [weak self] in self?.showNewMenu() }
         settingsButton.onPress = { [weak self] in self?.run("settings.open") }
 
         group.wantsLayer = true

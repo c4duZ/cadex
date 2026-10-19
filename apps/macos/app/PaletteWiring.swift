@@ -8,7 +8,18 @@ import Themes
 /// The palette in the app's colors and its prefixes (docs/spec/
 /// command-palette.md): "/" files, "#" text, "@" the tabs and spaces.
 extension AppDelegate {
+    /// The ways to open things, first in ⌘K and in the "+" menu next to
+    /// the tabs, as in Terax's "+" (owner, 2026-10-19).
+    static let openers = [
+        PalettePin(id: "pane.split-right", title: "Terminal ao lado", icon: .terminalWindow),
+        PalettePin(id: "search.files", title: "Arquivo…", icon: .file),
+        PalettePin(id: "preview.open", title: "Preview web", icon: .globe),
+        PalettePin(id: "git.history", title: "Grafo do git", icon: .gitBranch),
+        PalettePin(id: "tab.new", title: "Terminal em nova aba", icon: .plus),
+    ]
+
     func connectPalette(_ palette: CommandPaletteController) {
+        palette.pins = Self.openers
         ThemeStore.shared.observe { [weak palette] theme in
             let ui = theme.interface
             palette?.style = PaletteStyle(

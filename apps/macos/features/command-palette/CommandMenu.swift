@@ -1,4 +1,5 @@
 import AppKit
+import Icons
 
 /// The app menu, generated from the registry: one submenu per category,
 /// each item running its command by id. Items show the shortcut in effect
@@ -39,6 +40,21 @@ public final class CommandMenu: NSObject, NSMenuItemValidation {
             item.keyEquivalentModifierMask = shortcut.modifiers
         }
         return item
+    }
+
+    /// A pop-up menu of these commands, each with its icon and the
+    /// shortcut in effect; the ones that cannot run now are left out (the
+    /// "+" next to the tabs).
+    public func popup(_ pins: [PalettePin]) -> NSMenu {
+        let menu = NSMenu()
+        for pin in pins where registry.unavailableReason(pin.id) == nil {
+            guard let command = registry.command(pin.id) else { continue }
+            let entry = item(for: command)
+            entry.title = pin.title
+            entry.image = pin.icon.image(size: 16)
+            menu.addItem(entry)
+        }
+        return menu
     }
 
     @objc private func runItem(_ sender: NSMenuItem) {

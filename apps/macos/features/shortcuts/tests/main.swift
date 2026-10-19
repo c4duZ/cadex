@@ -77,9 +77,10 @@ let exitCode = await Checks.run([
         expect(keymap.command(for: KeyCombo("ctrl+r")!) == nil, "Ctrl+letter is the terminal's")
         expect(keymap.problems.count == 3, "\(keymap.problems)")
     }),
-    ("every command of the app is found by its own title", {
+    ("every command that can run is found by its own title", {
         let registry = appRegistry()
-        for command in registry.commands {
+        // The ones that cannot run now are left out of the palette.
+        for command in registry.commands where command.unavailableReason() == nil {
             let found = PaletteModel.items(for: command.title, registry: registry) { _ in nil }.map(\.id)
             expect(found.contains(command.id), "\(command.id) not found by \"\(command.title)\"")
         }

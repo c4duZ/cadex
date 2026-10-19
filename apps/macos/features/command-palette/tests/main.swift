@@ -31,13 +31,6 @@ let exitCode = await Checks.run([
         expect(items.map(\.section) == ["Recentes", "Abas", "Cadex"], "\(items.map(\.section))")
         expect(items[1].icon == .files && items[2].icon == .gearSix)
     }),
-    ("unavailable commands go last: in their section, and among the matches", {
-        let registry = CommandRegistry()
-        registry.register(Command(id: "tab.a", title: "A aba", category: .tabs, action: .run {}, unavailableReason: { "não" }))
-        registry.register(Command(id: "tab.b", title: "B aba", category: .tabs, action: .run {}))
-        expect(PaletteModel.items(for: "", registry: registry) { _ in nil }.map(\.id) == ["tab.b", "tab.a"])
-        expect(PaletteModel.items(for: "aba", registry: registry) { _ in nil }.map(\.id) == ["tab.b", "tab.a"])
-    }),
     ("titles go where the section changes; arrows skip them", {
         let items = [PaletteItem(id: "a", title: "a", section: "X"), PaletteItem(id: "b", title: "b", section: "X"),
                      PaletteItem(id: "c", title: "c", section: "Y")]
@@ -79,11 +72,26 @@ let exitCode = await Checks.run([
         expect(items.first?.shortcut == "⌘D")
         expect(items.first?.bold.contains { items[0].title[$0] == "à" } == true)
     }),
-    ("an unavailable command is listed with its reason", {
+    ("a command that cannot run now is not listed, empty or searched", {
         let registry = CommandRegistry()
         registry.register(Command(id: "x.blocked", title: "Salvar", category: .app, action: .run {},
                                   unavailableReason: { "Sem editor ativo" }))
-        expect(PaletteModel.items(for: "salvar", registry: registry) { _ in nil }.first?.unavailableReason == "Sem editor ativo")
+        expect(PaletteModel.items(for: "salvar", registry: registry) { _ in nil }.isEmpty)
+        expect(PaletteModel.items(for: "", registry: registry) { _ in nil }.isEmpty)
+    }),
+    ("the pins come first under Abrir, with their names, and not again below", {
+        let registry = sampleRegistry()
+        registry.register(Command(id: "pane.split-right", title: "Dividir à direita", category: .panes, action: .run {}))
+        registry.register(Command(id: "git.history", title: "Abrir o histórico", category: .app, action: .run {},
+                                  unavailableReason: { "Sem repositório" }))
+        registry.run("tab.new")
+        let pins = [PalettePin(id: "pane.split-right", title: "Terminal ao lado", icon: .terminalWindow),
+                    PalettePin(id: "git.history", title: "Grafo do git", icon: .gitBranch),
+                    PalettePin(id: "tab.new", title: "Terminal em nova aba", icon: .plus)]
+        let items = PaletteModel.items(for: "", registry: registry, pins: pins) { $0 == "pane.split-right" ? "⌘D" : nil }
+        expect(items.prefix(2).map(\.title) == ["Terminal ao lado", "Terminal em nova aba"], "\(items.map(\.title))")
+        expect(items[0].section == "Abrir" && items[0].shortcut == "⌘D")
+        expect(items.filter { $0.id == "tab.new" }.count == 1 && !items.contains { $0.section == "Recentes" })
     }),
     ("a registered command runs by id and goes to the recent list", {
         let registry = CommandRegistry()

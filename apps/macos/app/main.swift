@@ -21,7 +21,7 @@ import Terminal
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var window: NSWindow?
     let commands = CommandRegistry()
-    private var menu: CommandMenu?
+    var menu: CommandMenu?
     private var dispatcher: ShortcutDispatcher?
     private var palette: CommandPaletteController?
     var spaces: SpacesController?
@@ -64,6 +64,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let workspace = WorkspaceView(explorer: explorer, git: git) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace
         self.workspace = workspace
+        workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.openers) }
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
         explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar(.files) }
         git.onOpenFile = { [weak opener] path in opener?.open(path) }

@@ -38,6 +38,22 @@ enum CommandSections {
     }
 }
 
+/// A command shown first in ⌘K, under "Abrir", with its own name and
+/// icon: the ways to open things beside the terminal (owner, 2026-10-19:
+/// "os primeiros deveriam ser o atalho pra abrir as coisas na direita").
+/// The app's "+" menu lists the same ones.
+public struct PalettePin: Sendable {
+    public let id: String
+    public let title: String
+    public let icon: Icon
+
+    public init(id: String, title: String, icon: Icon) {
+        self.id = id
+        self.title = title
+        self.icon = icon
+    }
+}
+
 /// Several lists in one, each under its own title: `@` shows the tabs and
 /// the spaces together. Ids get the part's index, so choosing goes back to
 /// the list that made the row.

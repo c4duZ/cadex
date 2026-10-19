@@ -8,8 +8,8 @@
   entrada dela (os tipos `public` do módulo).
 
 ## Como eu quero
-- `PaletteWiring.swift`: a paleta nas cores do tema e os prefixos do ⌘K (`/` arquivos, `#` texto,
-  `@` abas e spaces).
+- `PaletteWiring.swift`: a paleta nas cores do tema, os prefixos do ⌘K (`/` arquivos, `#` texto,
+  `@` abas e spaces) e as aberturas (`openers`), primeiro no ⌘K e no menu do "+" das abas.
 - `SpacesWiring.swift`: os spaces na janela (abas de cada space ligadas à barra de status e ao
   preview, documentos reabertos, pasta do workspace devolvida); `tabs` em `main.swift` é sempre a
   do space que aparece, então os comandos agem nela. Sair e fechar a janela perguntam uma vez por

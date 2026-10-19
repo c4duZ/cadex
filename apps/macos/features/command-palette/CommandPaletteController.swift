@@ -28,6 +28,12 @@ public final class CommandPaletteController {
         set { panel.style = newValue }
     }
 
+    /// The commands ⌘K shows first, under "Abrir".
+    public var pins: [PalettePin] {
+        get { commands.pins }
+        set { commands.pins = newValue }
+    }
+
     /// Typing `prefix` first in ⌘K lists `source` with the rest of the text.
     public func addPrefix(_ prefix: Character, label: String, source: PaletteSource) {
         prefixes.append((prefix, label, source))
