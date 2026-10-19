@@ -1,0 +1,47 @@
+# packaging (app macOS)
+
+Receita de empacotamento reaproveitada do BKDict (projeto vizinho, ../BKDict: build.sh e
+scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem conta Apple Developer.
+Ainda não há scripts aqui: esta pasta recebe o build.sh e o release.sh do Cadex quando forem escritos.
+
+## O que eu quero
+- Um `.app` universal (Apple Silicon + Intel) gerado só com as Command Line Tools.
+- Um DMG de "arrastar para Aplicativos" com fundo e ícone próprios, e um ZIP do mesmo app.
+- Release publicada no GitHub com DMG, ZIP e, se houver atualização automática, o appcast assinado.
+- O instalador por comando do ADR 0007 baixando o mesmo ZIP da release.
+
+## O que eu não quero
+- Depender do Xcode completo para gerar a release (ver `../../../docs/adr/0007-one-step-install.md`).
+- Assinatura ad hoc padrão: ela usa o cdhash como identidade, e o macOS esquece as permissões
+  (Acessibilidade, Microfone, Arquivos) a cada build novo.
+- Prometer que o app abre sem aviso: sem Developer ID e notarização, a primeira abertura pelo DMG
+  pede "Abrir Mesmo Assim". O README explica isso, como o do BKDict faz.
+
+## Como eu quero
+- Universal sem xcbuild: compilar cada arquitetura separada e juntar com lipo. O
+  `swift build --arch arm64 --arch x86_64` exige o Xcode completo.
+  - `swift build -c release --triple arm64-apple-macosx13.0` e o mesmo com `x86_64-...`;
+  - `lipo -create <bin arm64> <bin x86_64> -output Cadex.app/Contents/MacOS/Cadex`;
+  - o núcleo Zig também nas duas arquiteturas (zig build -Dtarget=x86_64-macos.13.0 e
+    aarch64-macos.13.0), juntando as duas libcadex.a com lipo antes do link.
+- Montar o bundle à mão: Info.plist, ícone (`sips` gera os tamanhos a partir do PNG de 1024 e
+  `iconutil -c icns` monta o .icns), recursos e frameworks em Contents/Frameworks com rpath
+  `@executable_path/../Frameworks`.
+- Assinar de dentro para fora, ad hoc, fixando a identidade no bundle id:
+  `codesign --force --sign - -r='designated => identifier "<bundle id>"' Cadex.app`
+  (frameworks antes, com `codesign --force --deep --sign -`).
+- ZIP com `ditto -c -k --keepParent Cadex.app`, que preserva atributos e assinatura.
+- DMG com `create-dmg` (brew): volname, volicon, background, tamanho da janela, posição do ícone do
+  app e do atalho de Aplicativos. Ele controla o Finder por AppleScript, então roda numa sessão
+  logada (não em CI headless). O fundo do BKDict é gerado por um script Swift, com as posições dos
+  ícones combinando com as do build.
+- Publicar com `gh release create` usando nomes sem versão (Cadex.dmg) para os links
+  `releases/latest/download/...` do README sempre baixarem a última.
+- Atualização automática, se entrar (decisão própria, ADR 0007): Sparkle, com a chave EdDSA no
+  Keychain e `generate_appcast` apontando para o ZIP; o app lê SUFeedURL e SUPublicEDKey do Info.plist.
+
+## Como validar
+- `codesign -dv --verbose=2 Cadex.app` mostra `Identifier=` com o bundle id e `Signature=adhoc`.
+- `lipo -archs Cadex.app/Contents/MacOS/Cadex` lista `x86_64 arm64`.
+- O app abre num Mac Intel e num Apple Silicon, e as permissões dadas continuam depois de um build novo.
+- `spctl -a -vv Cadex.app` dá `rejected` enquanto não houver notarização: esperado, não é bug.

@@ -27,6 +27,8 @@ de quarentena, e o Gatekeeper não bloqueia.
 - O script de instalação é parte do produto: curto, legível, sem `sudo`, e testado em cada release.
 - Dependência nova só entra se puder ir dentro do bundle.
 - O tamanho do download é métrica do projeto, medido a cada release.
+- A receita de build universal, assinatura ad hoc e DMG vem do BKDict (projeto vizinho que já
+  distribui assim): ver `../../apps/macos/packaging/CLAUDE.md`.
 - **Rever quando o Cadex tiver público fora dos desenvolvedores:** aí a conta Apple Developer (Developer
   ID + notarização) passa a valer o custo, e o DMG vira o caminho principal.
 - Atualização automática, Homebrew e comando `cadex` no terminal são extras possíveis, cada um com a
