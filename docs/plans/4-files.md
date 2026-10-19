@@ -81,3 +81,14 @@ e search. O que já existe e este plano usa:
 O dono usa teclado ABNT2 e o computador ao mesmo tempo que os testes: abrir o app com
 `CADEX_BACKGROUND=1` e acionar comandos pelos itens de menu, nunca por teclas simuladas.
 
+
+## Fechamento (2026-10-19)
+Fases A a E feitas, cada uma num commit. Conferido no app em segundo plano (menus e
+acessibilidade, sem teclas): abrir na pasta da linha de comando, árvore com ícones e ignorados
+apagados, expandir `core/features/`, criar pasta, renomear no lugar, apagar para a Lixeira,
+atualização ao vivo, "Abrir no terminal", "Copiar caminho relativo". Falta conferir à mão, com o
+app na frente: "Abrir pasta…" (seletor do sistema), arrastar um arquivo da árvore para o terminal,
+⌘P achando render.zig e ⌘⇧F achando "libghostty" (a paleta fecha ao perder o foco, então não abre
+com o app atrás). Abrir na linha certa depende dos visualizadores do plano 5. Ficou para depois do
+MVP: soltar na árvore arquivos vindos do Finder, o .gitignore global do git e regras de pastas acima
+do workspace.

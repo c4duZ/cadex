@@ -23,7 +23,10 @@ Achar um arquivo pelo nome ou um trecho de texto dentro do workspace, sem sair d
 - Resultados chegam aos poucos, agrupados por arquivo: caminho relativo, número da linha e o trecho
   da linha com o que casou em destaque.
 - Digitar de novo cancela a busca anterior; resultados da busca velha nunca aparecem.
-- Enter abre o arquivo na linha do resultado.
+- Enter abre o arquivo na linha do resultado (até os visualizadores do plano 5, abre no app padrão do
+  sistema, que não recebe a linha).
+- ⌥⌘C alterna diferenciar caixa e ⌥⌘R alterna regex, com a busca de texto aberta; as opções ligadas
+  aparecem à direita do campo ("Aa .*").
 - Limites: até 2 000 resultados (avisa "resultados demais, refine a busca"); arquivos acima de
   2 MB e binários são pulados.
 

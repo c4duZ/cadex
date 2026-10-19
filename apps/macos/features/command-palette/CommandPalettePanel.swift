@@ -14,8 +14,12 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
     private let field = NSTextField()
     private let table = NSTableView()
     private let scroll = NSScrollView()
-    private let emptyLabel = NSTextField(labelWithString: "Nenhum comando encontrado")
+    private let emptyLabel = NSTextField(labelWithString: "")
+    /// A short note from the source on the right of the field ("Indexando…").
+    private let statusLabel = NSTextField(labelWithString: "")
     private var items: [PaletteItem] = []
+
+    var query: String { field.stringValue }
 
     init() {
         super.init(contentRect: NSRect(x: 0, y: 0, width: Self.width, height: 60),
@@ -36,16 +40,24 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
     }
 
     func show(over parent: NSWindow) {
-        field.stringValue = ""
         let frame = parent.frame
         let top = frame.maxY - 60
         setFrameTopLeftPoint(NSPoint(x: frame.midX - Self.width / 2, y: top))
         makeKeyAndOrderFront(nil)
         makeFirstResponder(field)
+    }
+
+    /// A new source: empty field, its placeholder, and its first list.
+    func prepare(placeholder: String, emptyText: String) {
+        field.stringValue = ""
+        field.placeholderString = placeholder
+        emptyLabel.stringValue = emptyText
+        statusLabel.stringValue = ""
         onQuery?("")
     }
 
-    func show(items newItems: [PaletteItem]) {
+    func show(items newItems: [PaletteItem], status: String?) {
+        statusLabel.stringValue = status ?? ""
         items = newItems
         table.reloadData()
         emptyLabel.isHidden = !items.isEmpty
@@ -65,7 +77,6 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         background.layer?.masksToBounds = true
         contentView = background
 
-        field.placeholderString = "Digite um comando"
         field.font = .systemFont(ofSize: 17)
         field.isBordered = false
         field.drawsBackground = false
@@ -91,15 +102,21 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         scroll.automaticallyAdjustsContentInsets = false
         emptyLabel.textColor = .secondaryLabelColor
         emptyLabel.isHidden = true
+        statusLabel.textColor = .secondaryLabelColor
+        statusLabel.font = .systemFont(ofSize: 12)
+        statusLabel.alignment = .right
+        statusLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
 
-        for view in [field, scroll, emptyLabel] as [NSView] {
+        for view in [field, statusLabel, scroll, emptyLabel] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             background.addSubview(view)
         }
         NSLayoutConstraint.activate([
             field.topAnchor.constraint(equalTo: background.topAnchor, constant: 14),
             field.leadingAnchor.constraint(equalTo: background.leadingAnchor, constant: 16),
-            field.trailingAnchor.constraint(equalTo: background.trailingAnchor, constant: -16),
+            statusLabel.trailingAnchor.constraint(equalTo: background.trailingAnchor, constant: -16),
+            statusLabel.centerYAnchor.constraint(equalTo: field.centerYAnchor),
+            field.trailingAnchor.constraint(equalTo: statusLabel.leadingAnchor, constant: -8),
             scroll.topAnchor.constraint(equalTo: field.bottomAnchor, constant: 10),
             scroll.leadingAnchor.constraint(equalTo: background.leadingAnchor, constant: 6),
             scroll.trailingAnchor.constraint(equalTo: background.trailingAnchor, constant: -6),
@@ -204,7 +221,7 @@ final class PaletteRowView: NSTableCellView {
             text.addAttribute(.font, value: NSFont.boldSystemFont(ofSize: 14), range: NSRange(range, in: item.title))
         }
         title.attributedStringValue = text
-        detail.stringValue = item.unavailableReason ?? item.shortcut ?? ""
+        detail.stringValue = item.unavailableReason ?? item.detail ?? ""
         detail.font = available ? .monospacedSystemFont(ofSize: 12, weight: .regular) : .systemFont(ofSize: 12)
     }
 }

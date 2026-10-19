@@ -20,10 +20,13 @@
   terminal ou campo de texto) ou closure da feature dona. O atalho padrão mora no comando.
 - `CommandRegistry.swift`: registro, execução por id, recentes. `StandardCommands.swift`: sair,
   ocultar, desfazer, copiar, colar. `CommandMenu.swift`: menu da aplicação gerado do registro.
-- Paleta: `CommandPaletteController.swift` (comando palette.open, abre e fecha, devolve o foco à
-  janela antes de rodar o comando escolhido), `CommandPalettePanel.swift` (NSPanel sem borda, feito
-  uma vez e reaproveitado; fecha ao perder o foco) e `PaletteModel.swift` (o que listar: recentes,
-  depois título fuzzy, depois palavra-chave; fuzzy do núcleo por `cadex_fuzzy_rank`).
+- Paleta: `CommandPaletteController.swift` (comando palette.open; `open(_:)` mostra qualquer fonte,
+  o mesmo atalho de novo fecha, outro troca; descarta resultado de consulta velha; devolve o foco à
+  janela antes de executar), `PaletteSource.swift` (o protocolo das fontes e a fonte de comandos),
+  `CommandPalettePanel.swift` (NSPanel sem borda, feito uma vez e reaproveitado; status à direita do
+  campo; fecha ao perder o foco) e `PaletteModel.swift` (`PaletteItem` público e o que listar de
+  comandos: recentes, depois título fuzzy, depois palavra-chave; fuzzy do núcleo).
+- Outras features entram na paleta implementando `PaletteSource` (a busca: ⌘P e ⌘⇧F).
 - Spec em `../../../../docs/spec/command-palette.md`. Status: registro, menu e paleta prontos.
 
 ## Como validar

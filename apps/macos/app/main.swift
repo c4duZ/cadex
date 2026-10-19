@@ -2,6 +2,7 @@ import AppKit
 import StatusBar
 import CommandPalette
 import Explorer
+import Search
 import Settings
 import Shortcuts
 import Tabs
@@ -25,6 +26,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var settingsWindow: SettingsWindowController?
     private let folder = WorkspaceFolder()
     private var explorer: ExplorerController?
+    private var search: SearchController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpCommands()
@@ -85,10 +87,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let explorer = ExplorerController(root: folder.root) { [weak self] id in self?.commands.run(id) ?? false }
         explorer.openInTerminal = { [weak self] path in self?.tabs?.activeTerminal?.changeDirectory(to: path) }
         explorer.onShowHiddenChange = { [weak self] show in self?.settings.store.update { $0.explorer.showHidden = show } }
-        settings.onExplorer = { [weak explorer] prefs in explorer?.showHidden = prefs.showHidden }
-        folder.onChange = { [weak explorer] root in explorer?.setRoot(root) }
         commands.register(ExplorerCommands.all(explorer))
         self.explorer = explorer
+    }
+
+    /// ⌘P and ⌘⇧F over the workspace folder, opening what is chosen in
+    /// the system's default app until the viewers exist (plan 5).
+    private func makeSearch(palette: CommandPaletteController) {
+        let search = SearchController(root: folder.root, showHidden: true) { path, _ in
+            NSWorkspace.shared.open(URL(fileURLWithPath: path))
+        }
+        commands.register(SearchCommands.all(search, palette: palette))
+        self.search = search
+    }
+
+    /// The workspace folder and the hidden-files preference reach the
+    /// explorer and the search together.
+    private func connectFolder() {
+        settings.onExplorer = { [weak self] prefs in
+            guard let self else { return }
+            self.explorer?.showHidden = prefs.showHidden
+            self.search?.setRoot(self.folder.root, showHidden: prefs.showHidden)
+        }
+        folder.onChange = { [weak self] root in
+            guard let self else { return }
+            self.explorer?.setRoot(root)
+            self.search?.setRoot(root, showHidden: self.explorer?.showHidden ?? true)
+        }
     }
 
     /// The status bar follows the focused terminal's folder, and its folder
@@ -126,6 +151,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                                                 terminalFolder: { [weak self] in self?.tabs?.activeTerminal?.currentDirectory }))
         commands.register(TabCommands.all { [weak self] in self?.tabs })
         makeExplorer()
+        makeSearch(palette: palette)
+        connectFolder()
 
         settings.onShortcuts = { [weak self] shortcuts in self?.applyShortcuts(shortcuts) }
         settings.start()

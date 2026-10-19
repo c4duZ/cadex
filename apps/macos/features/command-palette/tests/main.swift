@@ -39,7 +39,7 @@ let exitCode = await Checks.run([
         registry.register(Command(id: "pane.split-right", title: "Dividir à direita", category: .panes, action: .run {}))
         let items = PaletteModel.items(for: "A DIR", registry: registry) { _ in "⌘D" }
         expect(items.first?.id == "pane.split-right")
-        expect(items.first?.shortcut == "⌘D")
+        expect(items.first?.detail == "⌘D")
         expect(items.first?.bold.contains { items[0].title[$0] == "à" } == true)
     }),
     ("an unavailable command is listed with its reason", {

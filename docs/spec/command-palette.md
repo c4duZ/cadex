@@ -29,6 +29,11 @@ ação do app (ADR 0005). Quando existirem, acha também abas, spaces e arquivos
   painel aberto). Enter num indisponível não faz nada.
 - ⌘K com a paleta aberta fecha a paleta.
 
+### Outras listas
+- A mesma paleta mostra arquivos (⌘P) e texto nos arquivos (⌘⇧F), da feature search. O atalho de
+  uma lista com ela aberta fecha a paleta; o de outra troca de lista, com o campo vazio.
+- À direita do campo, uma nota curta da lista ("Indexando…", "12 resultados").
+
 ## Estados
 - **Vazio:** sem texto, lista recentes e todos os comandos.
 - **Sem resultados:** "Nenhum comando encontrado".

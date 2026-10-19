@@ -3,6 +3,7 @@ import Checks
 @testable import CommandPalette
 @testable import Shortcuts
 import Explorer
+import Search
 import Tabs
 import Terminal
 
@@ -13,11 +14,14 @@ import Terminal
 @MainActor
 func appRegistry() -> CommandRegistry {
     let registry = CommandRegistry()
-    registry.register(CommandPaletteController(registry: registry) { _ in nil }.openCommand)
+    let palette = CommandPaletteController(registry: registry) { _ in nil }
+    registry.register(palette.openCommand)
     registry.register(StandardCommands.all)
     registry.register(TerminalCommands.all)
     registry.register(TabCommands.all { nil })
     registry.register(ExplorerCommands.all(ExplorerController(root: NSTemporaryDirectory()) { _ in false }))
+    registry.register(SearchCommands.all(SearchController(root: NSTemporaryDirectory(), showHidden: false) { _, _ in },
+                                         palette: palette))
     return registry
 }
 
