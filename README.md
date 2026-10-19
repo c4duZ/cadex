@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <sub>Grátis e de código aberto (MIT) · 7,6 MB · <a href="#instalar-no-mac">como instalar</a> · <a href="#pelo-terminal">instalar com um comando</a></sub>
+  <sub>Grátis e de código aberto (MIT) · 7,7 MB · <a href="#instalar-no-mac">como instalar</a> · <a href="#pelo-terminal">instalar com um comando</a></sub>
 </p>
 
 ---
