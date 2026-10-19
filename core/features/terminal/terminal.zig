@@ -1,9 +1,17 @@
 //! Entry point of the terminal feature. Other features and the C API use
 //! only what is re-exported here.
 
-pub const Model = @import("model.zig").Model;
+const session = @import("session.zig");
+
+pub const Session = session.Session;
+pub const Options = session.Options;
+pub const Callbacks = session.Callbacks;
+pub const Size = session.Size;
 
 test {
-    @import("std").testing.refAllDecls(@This());
     _ = @import("model.zig");
+    _ = @import("shell_env.zig");
+    _ = @import("pty.zig");
+    _ = @import("session.zig");
+    _ = @import("session_test.zig");
 }

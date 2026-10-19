@@ -1,0 +1,83 @@
+//! The terminal feature's part of the C API (include/cadex.h). Thin: it
+//! converts C types and errors and calls the Session.
+
+const std = @import("std");
+const status = @import("../../status.zig");
+const terminal = @import("terminal.zig");
+const Session = terminal.Session;
+
+/// The core is called from Swift and allocates with malloc, so a buffer it
+/// returns can be released with cadex_free (or free()).
+const gpa = std.heap.c_allocator;
+
+pub const Options = extern struct {
+    cols: u16,
+    rows: u16,
+    cwd: ?[*:0]const u8,
+    shell: ?[*:0]const u8,
+    context: ?*anyopaque,
+    on_output: ?*const fn (?*anyopaque) callconv(.c) void,
+    on_exit: ?*const fn (?*anyopaque, i32) callconv(.c) void,
+};
+
+pub export fn cadex_terminal_open(options: ?*const Options, out: ?*?*Session) callconv(.c) status.Code {
+    const o = options orelse return status.invalid_argument;
+    const result = out orelse return status.invalid_argument;
+    if (o.cols == 0 or o.rows == 0) return status.invalid_argument;
+
+    result.* = Session.open(gpa, .{
+        .size = .{ .cols = o.cols, .rows = o.rows },
+        .cwd = if (o.cwd) |s| std.mem.span(s) else null,
+        .shell = if (o.shell) |s| std.mem.span(s) else null,
+        .callbacks = .{ .context = o.context, .on_output = o.on_output, .on_exit = o.on_exit },
+    }) catch |err| return status.fromError(err);
+    return status.ok;
+}
+
+pub export fn cadex_terminal_close(session: ?*Session) callconv(.c) void {
+    if (session) |s| s.close();
+}
+
+pub export fn cadex_terminal_write(session: ?*Session, bytes: ?[*]const u8, len: usize) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    if (len == 0) return status.ok;
+    const data = bytes orelse return status.invalid_argument;
+    s.write(data[0..len]) catch |err| return status.fromError(err);
+    return status.ok;
+}
+
+pub export fn cadex_terminal_resize(
+    session: ?*Session,
+    cols: u16,
+    rows: u16,
+    cell_width_px: u16,
+    cell_height_px: u16,
+) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    if (cols == 0 or rows == 0) return status.invalid_argument;
+    s.resize(.{
+        .cols = cols,
+        .rows = rows,
+        .cell_width_px = cell_width_px,
+        .cell_height_px = cell_height_px,
+    }) catch |err| return status.fromError(err);
+    return status.ok;
+}
+
+pub export fn cadex_terminal_has_foreground_process(session: ?*Session) callconv(.c) bool {
+    const s = session orelse return false;
+    return s.hasForegroundProcess();
+}
+
+/// Visible text, one line per row, not NUL-terminated. Free with cadex_free.
+pub export fn cadex_terminal_copy_text(session: ?*Session, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const ptr = out orelse return status.invalid_argument;
+    const len = out_len orelse return status.invalid_argument;
+    const text = s.copyText(gpa) catch |err| return status.fromError(err);
+    // A Zig empty slice owns no memory and its pointer is not from malloc:
+    // hand out NULL so cadex_free never sees it.
+    ptr.* = if (text.len == 0) null else @constCast(text.ptr);
+    len.* = text.len;
+    return status.ok;
+}

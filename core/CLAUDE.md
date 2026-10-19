@@ -11,6 +11,8 @@
 
 ## Como eu quero
 - Zig (`../docs/adr/0002-zig-core-with-c-api.md`). Uma pasta por feature em features/, e shared/ só com o que 2+ features usam.
+- O build junta núcleo, simdutf e highway num único libcadex.a com o `zig ar` (ver `build.zig`).
+  Alvo padrão: macOS 13, CPU base (o app roda em outros Macs, não só nesta máquina).
 - Memória: quem aloca libera; a API C deixa claro de quem é cada buffer.
 - Funções da API C com prefixo cadex_ e o nome da feature (ex.: cadex_terminal_open).
 

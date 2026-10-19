@@ -16,6 +16,12 @@ pub const ReplyFn = *const fn (context: ?*anyopaque, bytes: []const u8) void;
 pub const Size = struct { cols: u16, rows: u16 };
 
 pub const Model = struct {
+    /// libghostty-vt's blocking Io, sized for an embedded library: no thread
+    /// pool and no 256 KB of thread-local storage, unlike std.Io.Threaded.
+    pub fn defaultIo() std.Io {
+        return vt.TinyIo.init.io();
+    }
+
     gpa: std.mem.Allocator,
     terminal: vt.Terminal,
     stream: Stream,

@@ -7,7 +7,12 @@ const std = @import("std");
 const vt_features = "-kitty_graphics,-glyph_protocol,-snapshot";
 
 pub fn build(b: *std.Build) void {
-    const target = b.standardTargetOptions(.{});
+    // Not the host: the app ships to other Macs. Baseline CPU (no features
+    // of this machine's chip) and macOS 13 as the oldest supported version.
+    const target = b.standardTargetOptions(.{ .default_target = .{
+        .os_tag = .macos,
+        .os_version_min = .{ .semver = .{ .major = 13, .minor = 0, .patch = 0 } },
+    } });
     const optimize = b.standardOptimizeOption(.{});
 
     const root = b.createModule(.{
@@ -64,8 +69,12 @@ fn installMergedLibrary(
         .optimize = optimize,
     }) orelse return;
 
-    // macOS libtool. The Windows app will need lib.exe here (ADR 0001).
-    const merge = b.addSystemCommand(&.{ "libtool", "-static", "-no_warning_for_no_symbols", "-o" });
+    // Zig's own llvm-ar, not macOS libtool: libtool silently drops the Zig
+    // object ("member not 8-byte aligned"), and with it every cadex_
+    // function (found 2026-10-19). llvm-ar also works for the Windows app.
+    // q: append, c: create, L: add the members of the input archives,
+    // s: write the symbol index.
+    const merge = b.addSystemCommand(&.{ b.graph.zig_exe, "ar", "qcLs" });
     const merged = merge.addOutputFileArg("libcadex.a");
     merge.addArtifactArg(core_lib);
     merge.addArtifactArg(simdutf.artifact("simdutf"));

@@ -1,8 +1,16 @@
-//! Root of the Cadex core. The C API exported to the apps lives here and in
-//! the entry point of each feature; see include/cadex.h.
+//! Root of the Cadex core and of its C API (include/cadex.h). Each feature
+//! exports its C functions from its own c_api.zig; importing them here
+//! puts them in the library.
 
+pub const status = @import("status.zig");
 pub const terminal = @import("features/terminal/terminal.zig");
 
+comptime {
+    _ = @import("features/terminal/c_api.zig");
+}
+
 test {
-    @import("std").testing.refAllDecls(@This());
+    _ = status;
+    _ = terminal;
+    _ = @import("features/terminal/c_api_test.zig");
 }
