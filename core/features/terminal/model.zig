@@ -5,6 +5,8 @@
 const std = @import("std");
 const vt = @import("ghostty-vt");
 
+const selection = @import("selection.zig");
+
 const Stream = vt.TerminalStream;
 const Handler = @FieldType(Stream, "handler");
 
@@ -14,6 +16,19 @@ const Handler = @FieldType(Stream, "handler");
 pub const ReplyFn = *const fn (context: ?*anyopaque, bytes: []const u8) void;
 
 pub const Size = struct { cols: u16, rows: u16 };
+
+/// Lines of history kept above the screen, at least (docs/spec/terminal.md).
+/// Counted in lines, not bytes: libghostty-vt's default is 10 KB, a few
+/// screens.
+pub const scrollback_lines = 10_000;
+/// libghostty-vt drops history a whole page at a time, so with a limit of
+/// exactly 10 000 only ~9 700 lines were left (measured 2026-10-19, 20
+/// columns). The headroom covers one page.
+const scrollback_headroom = 1_000;
+
+/// Where the viewport sits in the history, in rows. offset + rows == total
+/// when it shows the bottom.
+pub const Scrollbar = struct { total: usize, offset: usize, rows: usize };
 
 pub const Model = struct {
     /// libghostty-vt's blocking Io, sized for an embedded library: no thread
@@ -27,6 +42,7 @@ pub const Model = struct {
     stream: Stream,
     reply: ?ReplyFn = null,
     reply_context: ?*anyopaque = null,
+    selector: selection.Selector = .{},
 
     /// Heap-allocated because the stream's handler keeps a pointer to the
     /// terminal; the model must not move after init.
@@ -35,7 +51,12 @@ pub const Model = struct {
         errdefer gpa.destroy(self);
         self.* = .{
             .gpa = gpa,
-            .terminal = try .init(io, gpa, .{ .cols = size.cols, .rows = size.rows }),
+            .terminal = try .init(io, gpa, .{
+                .cols = size.cols,
+                .rows = size.rows,
+                .max_scrollback_bytes = null,
+                .max_scrollback_lines = scrollback_lines + scrollback_headroom,
+            }),
             .stream = undefined,
         };
         errdefer self.terminal.deinit(gpa);
@@ -52,6 +73,7 @@ pub const Model = struct {
 
     pub fn destroy(self: *Model) void {
         const gpa = self.gpa;
+        self.selector.deinit(&self.terminal);
         self.stream.deinit();
         self.terminal.deinit(gpa);
         gpa.destroy(self);
@@ -71,6 +93,24 @@ pub const Model = struct {
         try self.stream.handler.resize(.{ .cols = size.cols, .rows = size.rows });
     }
 
+    /// Moves the viewport through the history; negative goes up.
+    pub fn scroll(self: *Model, rows: isize) void {
+        self.terminal.scrollViewport(.{ .delta = rows });
+    }
+
+    pub fn scrollToTop(self: *Model) void {
+        self.terminal.scrollViewport(.top);
+    }
+
+    pub fn scrollToBottom(self: *Model) void {
+        self.terminal.scrollViewport(.bottom);
+    }
+
+    pub fn scrollbar(self: *Model) Scrollbar {
+        const bar = self.terminal.screens.active.pages.scrollbar();
+        return .{ .total = bar.total, .offset = bar.offset, .rows = bar.len };
+    }
+
     /// Current directory reported by the shell through OSC 7, if any.
     pub fn workingDirectory(self: *Model) ?[]const u8 {
         return self.terminal.getPwd();
@@ -80,14 +120,14 @@ pub const Model = struct {
         return self.terminal.getTitle();
     }
 
-    /// Visible text, one line per row. Caller frees.
+    /// Visible text (the viewport), one line per row. Caller frees.
     pub fn plainText(self: *Model, gpa: std.mem.Allocator) ![]const u8 {
         return self.terminal.plainString(gpa);
     }
 
     fn writePty(handler: *Handler, bytes: []const u8) void {
         const stream: *Stream = @fieldParentPtr("handler", handler);
-        const self: *Model = @fieldParentPtr("stream", stream);
+        const self: *Model = @alignCast(@fieldParentPtr("stream", stream));
         const reply = self.reply orelse return;
         reply(self.reply_context, bytes);
     }
@@ -134,4 +174,43 @@ test "tracks the working directory reported by the shell (OSC 7)" {
         "file://localhost/Users/cadu/projeto",
         model.workingDirectory() orelse "",
     );
+}
+
+test "scrolls through the history and back to the bottom" {
+    const model = try Model.create(testing.io, testing.allocator, .{ .cols = 20, .rows = 4 });
+    defer model.destroy();
+
+    for (1..101) |i| {
+        var buf: [16]u8 = undefined;
+        model.feed(try std.fmt.bufPrint(&buf, "{d}\r\n", .{i}));
+    }
+    // 100 lines and an empty prompt line: the screen shows 98..100 and "".
+    model.scroll(-50);
+    const scrolled = try model.plainText(testing.allocator);
+    defer testing.allocator.free(scrolled);
+    try testing.expectEqualStrings("48\n49\n50\n51", scrolled);
+
+    const bar = model.scrollbar();
+    try testing.expectEqual(@as(usize, 101), bar.total);
+    try testing.expectEqual(@as(usize, 47), bar.offset);
+
+    model.scrollToTop();
+    const top = try model.plainText(testing.allocator);
+    defer testing.allocator.free(top);
+    try testing.expectEqualStrings("1\n2\n3\n4", top);
+
+    model.scrollToBottom();
+    try testing.expectEqual(model.scrollbar().total, model.scrollbar().offset + model.scrollbar().rows);
+}
+
+test "keeps ten thousand lines of history" {
+    // Just past the limit with headroom, so a page gets dropped. Slow in
+    // Debug (~0.7 ms per line in libghostty-vt's checks), so one width only.
+    const model = try Model.create(testing.io, testing.allocator, .{ .cols = 80, .rows = 4 });
+    defer model.destroy();
+
+    model.feed("line\r\n" ** 12_000);
+    const bar = model.scrollbar();
+    try testing.expect(bar.total >= scrollback_lines);
+    try testing.expect(bar.total < 12_000);
 }

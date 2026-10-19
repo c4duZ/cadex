@@ -117,6 +117,8 @@ bool cadex_terminal_has_foreground_process(cadex_terminal *terminal);
 #define CADEX_CELL_SPACER         (1u << 5)
 /* bg differs from the frame background; otherwise skip drawing it. */
 #define CADEX_CELL_HAS_BACKGROUND (1u << 6)
+/* Inside the text selection. */
+#define CADEX_CELL_SELECTED       (1u << 7)
 /* Underline kind: (flags >> CADEX_CELL_UNDERLINE_SHIFT) & 7.
  * 0 none, 1 single, 2 double, 3 curly, 4 dotted, 5 dashed. */
 #define CADEX_CELL_UNDERLINE_SHIFT 8
@@ -149,11 +151,15 @@ typedef struct {
     bool cursor_visible;
     bool cursor_blinking;
     bool has_cursor_color;
+    /* Rows of history plus screen, and the first row shown. The view is at
+     * the bottom when scroll_offset + rows == scroll_total. */
+    uint32_t scroll_total;
+    uint32_t scroll_offset;
 } cadex_terminal_frame;
 
 /* Layout shared with render.zig, which asserts the same sizes. */
 _Static_assert(sizeof(cadex_terminal_cell) == 16, "cadex_terminal_cell layout");
-_Static_assert(sizeof(cadex_terminal_frame) == 48, "cadex_terminal_frame layout");
+_Static_assert(sizeof(cadex_terminal_frame) == 56, "cadex_terminal_frame layout");
 
 /* Captures the screen for drawing. Call only from the thread that draws;
  * the frame stays valid until the next call or cadex_terminal_close. */
@@ -162,6 +168,51 @@ cadex_status cadex_terminal_update_frame(cadex_terminal *terminal, const cadex_t
 /* Visible text, one line per row, not NUL-terminated. Free with cadex_free.
  * Empty screen: *out is NULL and *out_len is 0. */
 cadex_status cadex_terminal_copy_text(cadex_terminal *terminal, uint8_t **out, size_t *out_len);
+
+/* -- Scrolling and selection (core/features/terminal/selection.zig) -- */
+
+/* Moves the view through the history by rows; negative goes up. */
+cadex_status cadex_terminal_scroll(cadex_terminal *terminal, int32_t rows);
+
+#define CADEX_SCROLL_TOP    0
+#define CADEX_SCROLL_BOTTOM 1
+cadex_status cadex_terminal_scroll_to(cadex_terminal *terminal, uint8_t where);
+
+/* Where the pointer is, for selection. */
+typedef struct {
+    double x;               /* pixels from the view's top-left, padding included */
+    double y;
+    uint16_t col;           /* viewport cell under the pointer, clamped to the grid */
+    uint16_t row;
+    uint16_t cell_width;    /* pixels */
+    uint16_t padding_left;  /* pixels */
+    uint32_t view_height;   /* pixels: dragging past it scrolls */
+} cadex_terminal_pointer;
+
+_Static_assert(sizeof(cadex_terminal_pointer) == 32, "cadex_terminal_pointer layout");
+
+/* Mouse down. clicks: 1 by cell (a plain click clears the selection), 2 by
+ * word, 3 by line. extend: Shift+click moves the far end of the selection. */
+cadex_status cadex_terminal_select_press(cadex_terminal *terminal, const cadex_terminal_pointer *pointer,
+                                         uint8_t clicks, bool extend);
+/* Mouse dragged. *autoscroll: -1 up, 1 down, 0 none; while not 0 and the
+ * button is down, call cadex_terminal_select_autoscroll on a timer. */
+cadex_status cadex_terminal_select_drag(cadex_terminal *terminal, const cadex_terminal_pointer *pointer,
+                                        int8_t *autoscroll);
+/* One timer step: scrolls a row and extends the selection. */
+cadex_status cadex_terminal_select_autoscroll(cadex_terminal *terminal, const cadex_terminal_pointer *pointer,
+                                              int8_t *autoscroll);
+cadex_status cadex_terminal_select_release(cadex_terminal *terminal, const cadex_terminal_pointer *pointer);
+/* Everything, history included. */
+cadex_status cadex_terminal_select_all(cadex_terminal *terminal);
+void cadex_terminal_select_clear(cadex_terminal *terminal);
+bool cadex_terminal_has_selection(cadex_terminal *terminal);
+
+/* The selected text, not NUL-terminated: lines wrapped by width come back
+ * joined, trailing spaces trimmed. Free with cadex_free. No selection:
+ * *out is NULL and *out_len is 0. Typing or writing to the terminal clears
+ * the selection and scrolls to the bottom. */
+cadex_status cadex_terminal_copy_selection(cadex_terminal *terminal, uint8_t **out, size_t *out_len);
 
 #ifdef __cplusplus
 }

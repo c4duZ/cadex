@@ -10,6 +10,8 @@ pub const Size = session.Size;
 pub const Frame = session.Frame;
 pub const Key = @import("input.zig").Key;
 pub const Mods = @import("input.zig").Mods;
+pub const Pointer = session.Pointer;
+pub const Autoscroll = session.Autoscroll;
 
 test {
     _ = @import("model.zig");
@@ -20,4 +22,6 @@ test {
     _ = @import("render.zig");
     _ = @import("render_test.zig");
     _ = @import("input.zig");
+    _ = @import("selection.zig");
+    _ = @import("selection_test.zig");
 }

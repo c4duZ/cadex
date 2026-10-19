@@ -123,9 +123,9 @@ sistema (NSPasteboard); no Windows, a do Win32. O núcleo recebe só o texto fin
 - [ ] Copiar um arquivo com espaço no nome no Finder e colar resulta num caminho que o shell aceita.
 - [ ] Colar um print de tela cola o caminho de um PNG que existe e abre a imagem.
 - [ ] Colar texto num programa com bracketed paste ativo não executa as linhas automaticamente.
-- [ ] Com "copiar ao selecionar" desligado e qualquer coisa copiada, passar o mouse e selecionar
+- [x] Com "copiar ao selecionar" desligado e qualquer coisa copiada, passar o mouse e selecionar
       texto no terminal não muda a área de transferência; ⌘V ainda cola o que estava lá.
-- [ ] Com "copiar ao selecionar" ligado, terminar uma seleção copia o texto dela.
+- [x] Com "copiar ao selecionar" ligado, terminar uma seleção copia o texto dela.
 - [ ] ⌘K com o foco no terminal abre a paleta e não envia nada ao shell.
 - [ ] No zsh e no bash, ⌥← ⌥→ ⌘← ⌘→ ⌥⌫ ⌘⌫ movem e apagam como descrito em Teclado.
 - [ ] Em tela Retina, o texto em SF Mono 13 pt sai nítido (comparado lado a lado com o Terminal do

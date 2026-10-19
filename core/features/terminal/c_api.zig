@@ -110,3 +110,104 @@ pub export fn cadex_terminal_update_frame(session: ?*Session, out: ?*?*const ter
     frame.* = s.updateFrame() catch |err| return status.fromError(err);
     return status.ok;
 }
+
+// ---- Scrolling and selection ----
+
+pub const scroll_top: u8 = 0;
+pub const scroll_bottom: u8 = 1;
+
+/// Moves the view through the history by rows; negative goes up.
+pub export fn cadex_terminal_scroll(session: ?*Session, rows: i32) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    s.scroll(rows);
+    return status.ok;
+}
+
+/// CADEX_SCROLL_TOP or CADEX_SCROLL_BOTTOM.
+pub export fn cadex_terminal_scroll_to(session: ?*Session, where: u8) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    switch (where) {
+        scroll_top => s.scrollToTop(),
+        scroll_bottom => s.scrollToBottom(),
+        else => return status.invalid_argument,
+    }
+    return status.ok;
+}
+
+pub export fn cadex_terminal_select_press(
+    session: ?*Session,
+    pointer: ?*const terminal.Pointer,
+    clicks: u8,
+    extend: bool,
+) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const p = pointer orelse return status.invalid_argument;
+    s.selectPress(p.*, clicks, extend) catch |err| return status.fromError(err);
+    return status.ok;
+}
+
+/// *autoscroll: -1 up, 1 down, 0 none. While not 0 and the button is down,
+/// call cadex_terminal_select_autoscroll on a timer.
+pub export fn cadex_terminal_select_drag(
+    session: ?*Session,
+    pointer: ?*const terminal.Pointer,
+    autoscroll: ?*i8,
+) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const p = pointer orelse return status.invalid_argument;
+    const direction = s.selectDrag(p.*) catch |err| return status.fromError(err);
+    if (autoscroll) |out| out.* = @intFromEnum(direction);
+    return status.ok;
+}
+
+pub export fn cadex_terminal_select_autoscroll(
+    session: ?*Session,
+    pointer: ?*const terminal.Pointer,
+    autoscroll: ?*i8,
+) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const p = pointer orelse return status.invalid_argument;
+    const direction = s.selectAutoscroll(p.*) catch |err| return status.fromError(err);
+    if (autoscroll) |out| out.* = @intFromEnum(direction);
+    return status.ok;
+}
+
+pub export fn cadex_terminal_select_release(session: ?*Session, pointer: ?*const terminal.Pointer) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const p = pointer orelse return status.invalid_argument;
+    s.selectRelease(p.*);
+    return status.ok;
+}
+
+pub export fn cadex_terminal_select_all(session: ?*Session) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    s.selectAll() catch |err| return status.fromError(err);
+    return status.ok;
+}
+
+pub export fn cadex_terminal_select_clear(session: ?*Session) callconv(.c) void {
+    if (session) |s| s.clearSelection();
+}
+
+pub export fn cadex_terminal_has_selection(session: ?*Session) callconv(.c) bool {
+    const s = session orelse return false;
+    return s.hasSelection();
+}
+
+/// The selected text, not NUL-terminated. Free with cadex_free. No selection
+/// (or an empty one): *out is NULL and *out_len is 0.
+pub export fn cadex_terminal_copy_selection(session: ?*Session, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const ptr = out orelse return status.invalid_argument;
+    const len = out_len orelse return status.invalid_argument;
+    ptr.* = null;
+    len.* = 0;
+    const text = (s.copySelection(gpa) catch |err| return status.fromError(err)) orelse return status.ok;
+    if (text.len == 0) {
+        gpa.free(text);
+        return status.ok;
+    }
+    ptr.* = @constCast(text.ptr);
+    len.* = text.len;
+    return status.ok;
+}

@@ -21,6 +21,8 @@ pub const CellFlags = struct {
     pub const spacer: u16 = 1 << 5;
     /// bg differs from the frame background; otherwise skip drawing it.
     pub const has_background: u16 = 1 << 6;
+    /// Inside the text selection.
+    pub const selected: u16 = 1 << 7;
     /// Underline kind in bits 8..10: 0 none, 1 single, 2 double, 3 curly,
     /// 4 dotted, 5 dashed.
     pub const underline_shift: u4 = 8;
@@ -58,6 +60,10 @@ pub const Frame = extern struct {
     cursor_visible: bool,
     cursor_blinking: bool,
     has_cursor_color: bool,
+    /// Rows of history plus screen, and the first row shown: the viewport
+    /// is at the bottom when scroll_offset + rows == scroll_total.
+    scroll_total: u32,
+    scroll_offset: u32,
 };
 
 pub const Renderer = struct {
@@ -65,6 +71,7 @@ pub const Renderer = struct {
     cells: std.ArrayList(Cell) = .empty,
     text: std.ArrayList(u8) = .empty,
     frame: Frame = undefined,
+    scrollbar: vt.PageList.Scrollbar = .zero,
 
     pub fn deinit(self: *Renderer, gpa: std.mem.Allocator) void {
         self.state.deinit(gpa);
@@ -76,6 +83,7 @@ pub const Renderer = struct {
     /// session lock). Kept short so the reader thread is not held up.
     pub fn capture(self: *Renderer, gpa: std.mem.Allocator, terminal: *vt.Terminal) !void {
         try self.state.beginUpdate(gpa, terminal);
+        self.scrollbar = terminal.screens.active.pages.scrollbar();
     }
 
     /// Second phase: only touches memory this renderer owns, so it runs
@@ -90,15 +98,20 @@ pub const Renderer = struct {
         self.text.clearRetainingCapacity();
 
         const row_cells = s.row_data.items(.cells);
+        const row_selections = s.row_data.items(.selection);
         for (0..rows) |y| {
             const row = row_cells[y].slice();
             for (0..cols) |x| {
                 const out = &self.cells.items[y * cols + x];
                 if (x >= row.len) {
                     out.* = blankCell(s);
-                    continue;
+                } else {
+                    out.* = try self.translateCell(gpa, row.get(x));
                 }
-                out.* = try self.translateCell(gpa, row.get(x));
+                // The range is inclusive on both ends.
+                if (row_selections[y]) |range| {
+                    if (x >= range[0] and x <= range[1]) out.flags |= CellFlags.selected;
+                }
             }
         }
 
@@ -117,6 +130,8 @@ pub const Renderer = struct {
             .cursor_visible = s.cursor.visible and s.cursor.viewport != null,
             .cursor_blinking = s.cursor.blinking,
             .cursor_style = cursorStyle(s.cursor.visual_style),
+            .scroll_total = @intCast(@min(self.scrollbar.total, std.math.maxInt(u32))),
+            .scroll_offset = @intCast(@min(self.scrollbar.offset, std.math.maxInt(u32))),
         };
         return &self.frame;
     }
@@ -200,5 +215,5 @@ fn cursorStyle(style: anytype) u8 {
 // Layout shared with include/cadex.h, which asserts the same sizes.
 comptime {
     std.debug.assert(@sizeOf(Cell) == 16);
-    std.debug.assert(@sizeOf(Frame) == 48);
+    std.debug.assert(@sizeOf(Frame) == 56);
 }

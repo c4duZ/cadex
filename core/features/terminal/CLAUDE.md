@@ -8,7 +8,7 @@
 
 ## O que eu não quero
 - Qualquer outra feature, do núcleo ou do app, falando direto com a libghostty: só `model.zig`,
-  `render.zig` e `input.zig`.
+  `render.zig`, `input.zig` e `selection.zig`.
 - Processo do shell sobrevivendo ao fechamento da sessão.
 - Callback do app chamando `cadex_terminal_close`: o close espera a thread de leitura, que é quem
   chama o callback (trava).
@@ -24,15 +24,24 @@
 - `input.zig`: teclas (Key e Mods nossos, CADEX_KEY_* e CADEX_MOD_*) codificadas pelo encoder da
   libghostty com os modos atuais do terminal (setas em modo de aplicação, kitty). Lê os modos com a
   sessão travada (`session.zig:key`). Alt só chega quando o app trata o Option como Meta.
+- `selection.zig`: seleção pelo SelectionGesture da libghostty (clique, arrasto com autoscroll,
+  Shift+clique, tudo) e o texto selecionado, sem espaços no fim e com linhas quebradas por largura
+  juntas. O app conta os cliques (clickCount); o gesto nunca conta sozinho. Mora no `model.zig`.
+- Rolagem e histórico no `model.zig`: pelo menos 10 mil linhas (limite em linhas com folga de uma
+  página, porque a libghostty descarta páginas inteiras). Digitar ou colar limpa a seleção e volta
+  ao fim (`session.zig:returnToInput`).
 - `pty.zig`: forkpty + execve; o filho só faz chdir e execve (depois do fork, só chamadas seguras).
+  Também espera, desliga (SIGHUP) e mata o filho.
 - `shell_env.zig`: shell, argv de login e ambiente (TERM=xterm-256color, TERM_PROGRAM=Cadex).
 - `session.zig`: thread de leitura com poll (acorda a cada 50 ms para ver se houve close) e mutex
   da libc protegendo o modelo; o close manda SIGHUP e, depois de 200 ms, SIGKILL.
 - Spec em `../../../docs/spec/terminal.md`. Status: sessão, PTY, quadro para desenhar, teclas pelo
-  núcleo e API C prontos.
+  núcleo, rolagem, seleção e API C prontos.
 
 ## Como validar
 - `make core-test` (ou `zig build test` dentro de `core/`) passa, sem vazamento no alocador de teste.
 - `session_test.zig` abre shells de verdade; `c_api_test.zig` usa a API C como o app usa.
+- `selection_test.zig` cobre palavra, linha, arrasto, Shift+clique, tudo, linha quebrada por largura
+  e as células marcadas no quadro; `model.zig` testa rolagem e as 10 mil linhas.
 - `input.zig` testa setas em modo de aplicação, F-keys, modificadores, Ctrl/Meta e kitty.
 - `render_test.zig` cobre cores, estilos, inversão, largura dupla, emoji e cursor.

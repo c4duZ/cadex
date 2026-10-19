@@ -8,11 +8,12 @@ const pty = @import("pty.zig");
 const shell_env = @import("shell_env.zig");
 const render = @import("render.zig");
 const input = @import("input.zig");
-
-extern "c" fn usleep(microseconds: c_uint) c_int;
+const selection = @import("selection.zig");
 
 pub const Size = pty.Size;
 pub const Frame = render.Frame;
+pub const Pointer = selection.Pointer;
+pub const Autoscroll = selection.Autoscroll;
 
 /// Called on the reader thread. They must return quickly and must not call
 /// close() on the same session: close() waits for the reader thread.
@@ -67,7 +68,7 @@ pub const Session = struct {
             .child = try spawnShell(gpa, options),
             .callbacks = options.callbacks,
         };
-        errdefer killNow(self.child);
+        errdefer pty.killNow(self.child);
 
         model.setReply(&replyToShell, self);
         self.reader = try std.Thread.spawn(.{}, readLoop, .{self});
@@ -79,7 +80,7 @@ pub const Session = struct {
     pub fn close(self: *Session) void {
         self.stop.store(true, .release);
         self.reader.join();
-        if (!self.reaped) hangUp(self.child);
+        if (!self.reaped) pty.hangUp(self.child, hangup_grace_ms);
         _ = c.close(self.child.fd);
         self.renderer.deinit(self.gpa);
         self.model.destroy();
@@ -88,6 +89,9 @@ pub const Session = struct {
 
     /// Sends input (typed keys, pasted text) to the shell.
     pub fn write(self: *Session, bytes: []const u8) !void {
+        self.lock();
+        self.returnToInput();
+        self.unlock();
         try pty.writeAll(self.child.fd, bytes);
     }
 
@@ -97,9 +101,85 @@ pub const Session = struct {
         var buf: [input.max_sequence_len]u8 = undefined;
         self.lock();
         const encoded = input.encodeKey(&buf, &self.model.terminal, k, mods, text, unshifted);
+        self.returnToInput();
         self.unlock();
         const bytes = try encoded;
         if (bytes.len > 0) try self.write(bytes);
+    }
+
+    /// Typing or pasting goes back to the prompt: drops the selection and
+    /// scrolls to the bottom (docs/spec/terminal.md). Hold the lock.
+    fn returnToInput(self: *Session) void {
+        selection.clear(&self.model.terminal);
+        self.model.scrollToBottom();
+    }
+
+    /// Moves the view through the history; negative goes up.
+    pub fn scroll(self: *Session, rows: isize) void {
+        self.lock();
+        defer self.unlock();
+        self.model.scroll(rows);
+    }
+
+    pub fn scrollToTop(self: *Session) void {
+        self.lock();
+        defer self.unlock();
+        self.model.scrollToTop();
+    }
+
+    pub fn scrollToBottom(self: *Session) void {
+        self.lock();
+        defer self.unlock();
+        self.model.scrollToBottom();
+    }
+
+    pub fn selectPress(self: *Session, p: Pointer, clicks: u8, extend: bool) !void {
+        self.lock();
+        defer self.unlock();
+        try self.model.selector.press(&self.model.terminal, p, clicks, extend);
+    }
+
+    pub fn selectDrag(self: *Session, p: Pointer) !Autoscroll {
+        self.lock();
+        defer self.unlock();
+        return self.model.selector.drag(&self.model.terminal, p);
+    }
+
+    pub fn selectAutoscroll(self: *Session, p: Pointer) !Autoscroll {
+        self.lock();
+        defer self.unlock();
+        return self.model.selector.autoscroll(&self.model.terminal, p);
+    }
+
+    pub fn selectRelease(self: *Session, p: Pointer) void {
+        self.lock();
+        defer self.unlock();
+        self.model.selector.release(&self.model.terminal, p);
+    }
+
+    pub fn selectAll(self: *Session) !void {
+        self.lock();
+        defer self.unlock();
+        try selection.selectAll(&self.model.terminal);
+    }
+
+    pub fn clearSelection(self: *Session) void {
+        self.lock();
+        defer self.unlock();
+        selection.clear(&self.model.terminal);
+    }
+
+    pub fn hasSelection(self: *Session) bool {
+        self.lock();
+        defer self.unlock();
+        return selection.hasSelection(&self.model.terminal);
+    }
+
+    /// The selected text, or null without a selection. Caller frees.
+    pub fn copySelection(self: *Session, gpa: std.mem.Allocator) !?[:0]const u8 {
+        self.lock();
+        defer self.unlock();
+        return selection.selectedText(&self.model.terminal, gpa);
     }
 
     pub fn resize(self: *Session, size: Size) !void {
@@ -158,7 +238,7 @@ pub const Session = struct {
         }
         if (self.stop.load(.acquire)) return;
 
-        const code = waitExitCode(self.child.pid);
+        const code = pty.waitExitCode(self.child.pid);
         self.reaped = true;
         if (self.callbacks.on_exit) |notify| notify(self.callbacks.context, code);
     }
@@ -189,41 +269,4 @@ fn parentEnv(arena: std.mem.Allocator) ![]const [*:0]const u8 {
     var i: usize = 0;
     while (c.environ[i]) |entry| : (i += 1) try list.append(arena, entry);
     return list.items;
-}
-
-fn waitExitCode(pid: c.pid_t) i32 {
-    var status: c_int = 0;
-    while (c.waitpid(pid, &status, 0) < 0) {
-        if (c.errno(@as(c_int, -1)) != .INTR) return -1;
-    }
-    return decodeStatus(status);
-}
-
-/// Exit code for a normal exit, 128 + signal for a killed shell (the same
-/// convention shells use for $?).
-fn decodeStatus(status: c_int) i32 {
-    const signal = status & 0x7f;
-    if (signal == 0) return (status >> 8) & 0xff;
-    return 128 + signal;
-}
-
-fn hangUp(child: pty.Child) void {
-    _ = c.kill(child.pid, .HUP);
-    var waited: u32 = 0;
-    while (waited < hangup_grace_ms) : (waited += 10) {
-        if (c.waitpid(child.pid, null, c.W.NOHANG) != 0) return;
-        _ = usleep(10 * 1000);
-    }
-    killNow(child);
-}
-
-fn killNow(child: pty.Child) void {
-    _ = c.kill(child.pid, .KILL);
-    _ = c.waitpid(child.pid, null, 0);
-}
-
-test "exit status decoding follows the shell convention" {
-    try std.testing.expectEqual(@as(i32, 0), decodeStatus(0));
-    try std.testing.expectEqual(@as(i32, 3), decodeStatus(3 << 8));
-    try std.testing.expectEqual(@as(i32, 128 + 9), decodeStatus(9));
 }

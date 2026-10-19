@@ -21,10 +21,17 @@
   `cadex_terminal_key`, ou texto pelo sistema de entrada, que compõe acentos). Sequências de
   terminal só na tabela da edição estilo Mac, que é convenção do app. Option esquerdo como Meta
   pelo default "terminal.optionAsMeta" (desligado; a janela de configurações vai gravá-lo).
+- Mouse em `TerminalMouse.swift`: roda e trackpad viram linhas (`TerminalGeometry.swift`,
+  ScrollAccumulator), clique e arrasto vão à seleção do núcleo, timer de autoscroll a cada 15 ms.
+  `TerminalGeometry.swift` converte pontos em célula (padding e escala).
+- Área de transferência: só ⌘C escreve nela. "Copiar ao selecionar" pelo default
+  "terminal.copyOnSelect" (desligado); ligado, copia ao soltar o botão com seleção feita.
+- ⌘C, ⌘A, ⌘↑ e ⌘↓ estão no `performKeyEquivalent` até a paleta existir (plano 2).
 - Ações do terminal (limpar, buscar, copiar, colar) registradas como comandos.
 - Status: janela com um shell, desenho em Metal (SF Mono, nítido), teclado básico e colagem de
   texto, teclas pelo núcleo (modo de aplicação, F-keys, modificadores, kitty, Option como Meta).
-  Faltam: seleção, links, busca, rolagem, colagem de arquivos e imagem.
+  Rolagem com barra discreta, seleção (arrastar, duplo e triplo clique, Shift+clique, ⌘A) e ⌘C.
+  Faltam: links, busca, colagem de arquivos e imagem.
 
 ## Como validar
 - `make macos-test` passa.

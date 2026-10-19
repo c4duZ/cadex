@@ -72,3 +72,42 @@ test "keys go through the core's encoder" {
     try testing.expectEqual(status.invalid_argument, api.cadex_terminal_key(session, 0, 0, null, 3, 0));
     try testing.expectEqual(status.invalid_argument, api.cadex_terminal_key(null, up, 0, null, 0, 0));
 }
+
+test "selection and scrolling through the C API" {
+    testing.log_level = .err;
+    var session: ?*@import("session.zig").Session = null;
+    var o = options();
+    try testing.expectEqual(status.ok, api.cadex_terminal_open(&o, &session));
+    defer api.cadex_terminal_close(session);
+
+    // Nothing selected: copying gives nothing.
+    var ptr: ?[*]u8 = null;
+    var len: usize = 0;
+    try testing.expectEqual(status.ok, api.cadex_terminal_copy_selection(session, &ptr, &len));
+    try testing.expect(ptr == null and len == 0);
+
+    // Wait for the prompt, then select everything and copy it.
+    const input = "echo sel-$((2+2))\n";
+    try testing.expectEqual(status.ok, api.cadex_terminal_write(session, input.ptr, input.len));
+    var found = false;
+    var attempts: u32 = 0;
+    while (!found and attempts < 250) : (attempts += 1) {
+        _ = usleep(20 * 1000);
+        try testing.expectEqual(status.ok, api.cadex_terminal_select_all(session));
+        try testing.expectEqual(status.ok, api.cadex_terminal_copy_selection(session, &ptr, &len));
+        if (ptr) |p| found = std.mem.indexOf(u8, p[0..len], "sel-4") != null;
+        status.cadex_free(ptr);
+    }
+    try testing.expect(found);
+    try testing.expect(api.cadex_terminal_has_selection(session));
+
+    // Typing drops the selection.
+    try testing.expectEqual(status.ok, api.cadex_terminal_write(session, " ", 1));
+    try testing.expect(!api.cadex_terminal_has_selection(session));
+
+    try testing.expectEqual(status.ok, api.cadex_terminal_scroll(session, -5));
+    try testing.expectEqual(status.ok, api.cadex_terminal_scroll_to(session, api.scroll_bottom));
+    try testing.expectEqual(status.invalid_argument, api.cadex_terminal_scroll_to(session, 9));
+    try testing.expectEqual(status.invalid_argument, api.cadex_terminal_select_press(session, null, 1, false));
+    try testing.expect(!api.cadex_terminal_has_selection(null));
+}

@@ -77,6 +77,73 @@ public final class TerminalSession {
         _ = cadex_terminal_resize(handle, cols, rows, cellWidth, cellHeight)
     }
 
+    // MARK: Scrolling and selection
+
+    /// Moves the view through the history; negative goes up.
+    func scroll(rows: Int32) {
+        guard let handle, rows != 0 else { return }
+        _ = cadex_terminal_scroll(handle, rows)
+    }
+
+    func scrollToTop() {
+        guard let handle else { return }
+        _ = cadex_terminal_scroll_to(handle, UInt8(CADEX_SCROLL_TOP))
+    }
+
+    func scrollToBottom() {
+        guard let handle else { return }
+        _ = cadex_terminal_scroll_to(handle, UInt8(CADEX_SCROLL_BOTTOM))
+    }
+
+    func selectPress(_ pointer: cadex_terminal_pointer, clicks: Int, extend: Bool) {
+        guard let handle else { return }
+        var p = pointer
+        _ = cadex_terminal_select_press(handle, &p, UInt8(clamping: clicks), extend)
+    }
+
+    /// Returns the autoscroll direction: -1 up, 1 down, 0 none.
+    func selectDrag(_ pointer: cadex_terminal_pointer) -> Int8 {
+        guard let handle else { return 0 }
+        var p = pointer
+        var autoscroll: Int8 = 0
+        _ = cadex_terminal_select_drag(handle, &p, &autoscroll)
+        return autoscroll
+    }
+
+    func selectAutoscroll(_ pointer: cadex_terminal_pointer) -> Int8 {
+        guard let handle else { return 0 }
+        var p = pointer
+        var autoscroll: Int8 = 0
+        _ = cadex_terminal_select_autoscroll(handle, &p, &autoscroll)
+        return autoscroll
+    }
+
+    func selectRelease(_ pointer: cadex_terminal_pointer) {
+        guard let handle else { return }
+        var p = pointer
+        _ = cadex_terminal_select_release(handle, &p)
+    }
+
+    func selectAll() {
+        guard let handle else { return }
+        _ = cadex_terminal_select_all(handle)
+    }
+
+    var hasSelection: Bool {
+        guard let handle else { return false }
+        return cadex_terminal_has_selection(handle)
+    }
+
+    /// The selected text, or nil without a selection.
+    func selectedText() -> String? {
+        guard let handle else { return nil }
+        var bytes: UnsafeMutablePointer<UInt8>?
+        var length = 0
+        guard cadex_terminal_copy_selection(handle, &bytes, &length) == CADEX_OK, let bytes else { return nil }
+        defer { cadex_free(bytes) }
+        return String(decoding: UnsafeBufferPointer(start: bytes, count: length), as: UTF8.self)
+    }
+
     public var hasForegroundProcess: Bool {
         guard let handle else { return false }
         return cadex_terminal_has_foreground_process(handle)

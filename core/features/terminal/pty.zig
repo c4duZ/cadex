@@ -12,6 +12,7 @@ extern "c" fn forkpty(amaster: *c_int, name: ?[*]u8, termp: ?*const anyopaque, w
 extern "c" fn ioctl(fd: c_int, request: c_ulong, ...) c_int;
 extern "c" fn tcgetpgrp(fd: c_int) c.pid_t;
 extern "c" fn fcntl(fd: c_int, cmd: c_int, ...) c_int;
+extern "c" fn usleep(microseconds: c_uint) c_int;
 
 /// _IOW('t', 103, struct winsize) on macOS.
 const TIOCSWINSZ: c_ulong = 0x80087467;
@@ -92,4 +93,42 @@ pub fn writeAll(fd: c_int, bytes: []const u8) error{WriteFailed}!void {
 pub fn hasForegroundProcess(child: Child) bool {
     const group = tcgetpgrp(child.fd);
     return group > 0 and group != child.pid;
+}
+
+pub fn waitExitCode(pid: c.pid_t) i32 {
+    var status: c_int = 0;
+    while (c.waitpid(pid, &status, 0) < 0) {
+        if (c.errno(@as(c_int, -1)) != .INTR) return -1;
+    }
+    return decodeStatus(status);
+}
+
+/// Exit code for a normal exit, 128 + signal for a killed shell (the same
+/// convention shells use for $?).
+fn decodeStatus(status: c_int) i32 {
+    const signal = status & 0x7f;
+    if (signal == 0) return (status >> 8) & 0xff;
+    return 128 + signal;
+}
+
+/// SIGHUP, then SIGKILL if the child is still there after grace_ms.
+pub fn hangUp(child: Child, grace_ms: u32) void {
+    _ = c.kill(child.pid, .HUP);
+    var waited: u32 = 0;
+    while (waited < grace_ms) : (waited += 10) {
+        if (c.waitpid(child.pid, null, c.W.NOHANG) != 0) return;
+        _ = usleep(10 * 1000);
+    }
+    killNow(child);
+}
+
+pub fn killNow(child: Child) void {
+    _ = c.kill(child.pid, .KILL);
+    _ = c.waitpid(child.pid, null, 0);
+}
+
+test "exit status decoding follows the shell convention" {
+    try std.testing.expectEqual(@as(i32, 0), decodeStatus(0));
+    try std.testing.expectEqual(@as(i32, 3), decodeStatus(3 << 8));
+    try std.testing.expectEqual(@as(i32, 128 + 9), decodeStatus(9));
 }

@@ -41,6 +41,33 @@ let exitCode = await Checks.run([
         expect(KeyEncoding.route(keyCode: 0, modifiers: [], optionAsMeta: false) == .text)
         expect(KeyEncoding.route(keyCode: 0, modifiers: .shift, optionAsMeta: false) == .text)
     }),
+    ("position to cell with padding and Retina scale", {
+        // 8 pt padding at scale 2 is 16 px; cells 16x32 px; a 400x300 pt view.
+        let g = TerminalGeometry(viewSize: CGSize(width: 400, height: 300), scale: 2, padding: 8,
+                                 cellWidth: 16, cellHeight: 32, cols: 48, rows: 17)
+        // Top-left cell: AppKit's y grows upward, so the top is y = 300.
+        let first = g.pointer(at: CGPoint(x: 9, y: 291))
+        expect(first.col == 0 && first.row == 0, "\(first.col),\(first.row)")
+        expect(first.x == 18 && first.y == 18, "\(first.x),\(first.y)")
+        // Column 3 spans 16 + 3*16 = 64 px to 80 px (32..40 pt); row 2 spans
+        // 16 + 2*32 = 80 px to 112 px (40..56 pt down).
+        let inner = g.pointer(at: CGPoint(x: 34, y: 300 - 41))
+        expect(inner.col == 3 && inner.row == 2, "\(inner.col),\(inner.row)")
+        // Outside the grid clamps to the edge cells.
+        let outside = g.pointer(at: CGPoint(x: -20, y: -50))
+        expect(outside.col == 0 && outside.row == 16, "\(outside.col),\(outside.row)")
+        expect(first.padding_left == 16 && first.view_height == 600 && first.cell_width == 16)
+    }),
+    ("trackpad and wheel deltas become whole rows", {
+        var acc = ScrollAccumulator()
+        // Trackpad: 10 pt rows; 4 pt per event moves nothing until it adds up.
+        expect(acc.rows(deltaY: 4, precise: true, cellHeightPoints: 10) == 0)
+        expect(acc.rows(deltaY: 4, precise: true, cellHeightPoints: 10) == 0)
+        expect(acc.rows(deltaY: 4, precise: true, cellHeightPoints: 10) == -1)
+        // Wheel: lines; negative delta goes down (toward the bottom).
+        acc.reset()
+        expect(acc.rows(deltaY: -3, precise: false, cellHeightPoints: 10) == 3)
+    }),
     ("cell metrics are whole pixels and scale with the display", {
         let retina = TerminalFont(scale: 2).metrics
         let standard = TerminalFont(scale: 1).metrics
@@ -65,6 +92,22 @@ let exitCode = await Checks.run([
             }
         }
         expect(found, "shell output never reached the frame")
+    }),
+    ("select all and copy through the core; typing clears the selection", {
+        let session = try TerminalSession(cols: 80, rows: 24, shell: "/bin/sh")
+        defer { session.close() }
+        expect(session.selectedText() == nil, "no selection copies nothing")
+        session.write("echo copy-$((3+4))\n")
+
+        var copied = ""
+        for _ in 0..<250 where !copied.contains("copy-7") {
+            try await Task.sleep(for: .milliseconds(20))
+            session.selectAll()
+            copied = session.selectedText() ?? ""
+        }
+        expect(copied.contains("copy-7"), copied)
+        session.write(" ")
+        expect(!session.hasSelection)
     }),
     ("arrow keys reach the shell through the core", {
         let session = try TerminalSession(cols: 80, rows: 24, shell: "/bin/sh")

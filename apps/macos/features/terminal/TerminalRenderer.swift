@@ -63,7 +63,8 @@ final class TerminalRenderer {
     }
 
     func draw(_ frame: cadex_terminal_frame, padding: SIMD2<Float>, in drawable: CAMetalDrawable, size: CGSize) {
-        let quads = builder.build(frame: frame, atlas: atlas, metrics: font.metrics, padding: padding)
+        let quads = builder.build(frame: frame, atlas: atlas, metrics: font.metrics, padding: padding,
+                                  viewSize: SIMD2(Float(size.width), Float(size.height)))
 
         inFlight.wait()
         bufferIndex = (bufferIndex + 1) % Self.buffersInFlight

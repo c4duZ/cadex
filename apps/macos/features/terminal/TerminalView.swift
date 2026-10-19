@@ -17,6 +17,11 @@ public final class TerminalView: MTKView {
     /// typing ∫. Off by default (docs/spec/terminal.md, Teclado); the settings
     /// window (plan 3) will write this default.
     public var optionAsMeta = UserDefaults.standard.bool(forKey: "terminal.optionAsMeta")
+    /// Copy on select (docs/spec/terminal.md): off by default, so hovering,
+    /// clicking or selecting never replaces what is on the clipboard.
+    public var copyOnSelect = UserDefaults.standard.bool(forKey: "terminal.copyOnSelect")
+    /// Scroll and drag state (TerminalMouse.swift).
+    var mouse = MouseState()
 
     public init(frame: CGRect, cwd: String? = nil) {
         super.init(frame: frame, device: MTLCreateSystemDefaultDevice())
@@ -65,6 +70,15 @@ public final class TerminalView: MTKView {
     }
 
     private var scale: CGFloat { window?.backingScaleFactor ?? 2 }
+
+    /// Points to cells for the current size, font and screen.
+    var geometry: TerminalGeometry {
+        let m = renderer?.metrics
+        return TerminalGeometry(
+            viewSize: bounds.size, scale: scale, padding: Self.paddingPoints,
+            cellWidth: m.map { Int($0.width) } ?? 1, cellHeight: m.map { Int($0.height) } ?? 1,
+            cols: Int(lastSize.cols), rows: Int(lastSize.rows))
+    }
 
     private func gridSize() -> (cols: UInt16, rows: UInt16) {
         guard let m = renderer?.metrics else { return (80, 24) }
@@ -120,7 +134,19 @@ public final class TerminalView: MTKView {
             session?.write(editing)
             return true
         }
+        if let jump = Self.historyJumps[event.keyCode] {
+            jump == .top ? session?.scrollToTop() : session?.scrollToBottom()
+            needsDisplay = true
+            return true
+        }
         switch event.charactersIgnoringModifiers {
+        case "c":
+            copySelection()
+            return true
+        case "a":
+            session?.selectAll()
+            needsDisplay = true
+            return true
         case "v":
             paste()
             return true
@@ -134,6 +160,18 @@ public final class TerminalView: MTKView {
         default:
             return super.performKeyEquivalent(with: event)
         }
+    }
+
+    private enum HistoryJump { case top, bottom }
+    /// ⌘↑ and ⌘↓ (key codes 126 and 125): top and bottom of the history.
+    private static let historyJumps: [UInt16: HistoryJump] = [126: .top, 125: .bottom]
+
+    /// ⌘C: only the selection, and only when there is one; without it the
+    /// clipboard keeps what it had (docs/spec/terminal.md).
+    func copySelection() {
+        guard let text = session?.selectedText() else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
     }
 
     /// First version of ⌘V: text only. Files, images and bracketed paste
