@@ -309,6 +309,12 @@ let app = NSApplication.shared
 // Run as a regular app (Dock icon, menu bar) even when launched as a bare
 // executable during development, before there is an .app bundle.
 app.setActivationPolicy(.regular)
+// The bare executable has no bundle, so no icon: the Dock showed a generic
+// one in development while Cadex.app had ours (owner, 2026-10-19).
+if Bundle.main.bundleIdentifier == nil {
+    let repo = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../../..")
+    app.applicationIconImage = NSImage(contentsOf: repo.appendingPathComponent("docs/cadex-icon.png").standardized)
+}
 let delegate = AppDelegate()
 app.delegate = delegate
 app.run()

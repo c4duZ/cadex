@@ -15,8 +15,9 @@
   ganha "●" com mudança não salva, fechar pergunta ao documento, sair pergunta se há arquivo não
   salvo. Terminal novo abre na pasta do documento ativo. A oferta de preview de cada terminal sai por
   `onOpenPreview`. `TabList.swift`: as regras puras (ordem, ativa, recentes, mover), testadas.
-- `TabBarView.swift`: a barra de abas em pílulas, desenhada à mão (clique, duplo clique renomeia,
-  arrastar reordena, ×), com cores de fora (`style`); fica na barra de título da janela
+- `TabBarView.swift`: a barra de abas desenhada à mão, cada aba da largura do título (72 a 200 pt),
+  com ícone de terminal ou documento, a ativa com fundo neutro e × ao passar o mouse, como no Terax
+  (clique, duplo clique renomeia, arrastar reordena), com cores de fora (`style`); fica na barra de título da janela
   (a propriedade bar do controlador). `TabsView.swift`: só a aba ativa. `Tab.swift`: uma aba.
 - Divisões: `PaneTree.swift` é a árvore pura (dividir, remover dando o espaço ao irmão, retângulos,
   ordem de leitura, vizinho por direção, proporção por caminho), testada. `PaneLayoutView.swift`

@@ -182,7 +182,9 @@ public final class ExplorerController: NSObject {
     // MARK: View
 
     private func buildView() {
-        header.font = .systemFont(ofSize: 12, weight: .semibold)
+        // The folder's name small and quiet, the actions on the right, as in
+        // Terax (owner's comparison, 2026-10-19).
+        header.font = .systemFont(ofSize: 11, weight: .semibold)
         header.lineBreakMode = .byTruncatingMiddle
         message.font = .systemFont(ofSize: 11)
         message.isHidden = true
@@ -194,12 +196,13 @@ public final class ExplorerController: NSObject {
         scroll.autohidesScrollers = true
         scroll.drawsBackground = false
         buttons = [
+            button(.magnifyingGlass, "search.files", "Buscar arquivo (⌘P)"),
             button(.filePlus, "explorer.new-file", "Novo arquivo"),
             button(.folderPlus, "explorer.new-folder", "Nova pasta"),
             button(.arrowsClockwise, "explorer.refresh", "Recarregar"),
         ]
-        let bar = NSStackView(views: [header] + buttons)
-        bar.spacing = 2
+        let bar = NSStackView(views: [header, NSView()] + buttons)
+        bar.spacing = 0
         bar.setHuggingPriority(.defaultLow, for: .horizontal)
         header.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         for v in [bar, scroll, message] as [NSView] {
@@ -223,7 +226,7 @@ public final class ExplorerController: NSObject {
     }
 
     private func button(_ icon: Icon, _ command: String, _ tip: String) -> NSButton {
-        let b = NSButton(image: icon.image(size: 14), target: self, action: #selector(runButton(_:)))
+        let b = NSButton(image: icon.image(size: 13), target: self, action: #selector(runButton(_:)))
         b.isBordered = false
         b.identifier = NSUserInterfaceItemIdentifier(command)
         b.toolTip = tip
@@ -236,7 +239,7 @@ public final class ExplorerController: NSObject {
     }
 
     private func applyStyle() {
-        header.textColor = style.text
+        header.textColor = style.secondaryText
         message.textColor = style.secondaryText
         buttons.forEach { $0.contentTintColor = style.secondaryText }
         outline.reloadData()

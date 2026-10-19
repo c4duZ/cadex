@@ -49,10 +49,7 @@ final class TitleBarView: NSView {
         searchButton.imageHugsTitle = true
         searchButton.target = self
         searchButton.action = #selector(openPalette)
-        searchButton.wantsLayer = true
-        searchButton.layer?.cornerRadius = 6
         spaceButton.isBordered = false
-        spaceButton.font = .systemFont(ofSize: 12, weight: .semibold)
         spaceButton.toolTip = "Trocar de space (⇧⌘S)"
         spaceButton.target = self
         spaceButton.action = #selector(switchSpace)
@@ -69,18 +66,26 @@ final class TitleBarView: NSView {
             spaceButton.leadingAnchor.constraint(equalTo: paletteButton.trailingAnchor, constant: 12),
             spaceButton.widthAnchor.constraint(lessThanOrEqualToConstant: 160),
             searchButton.leadingAnchor.constraint(greaterThanOrEqualTo: newTabButton.trailingAnchor, constant: 12),
-            searchButton.trailingAnchor.constraint(equalTo: settingsButton.leadingAnchor, constant: -10),
+            searchButton.trailingAnchor.constraint(equalTo: settingsButton.leadingAnchor, constant: -14),
             settingsButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
-            searchButton.widthAnchor.constraint(equalToConstant: 200),
-            searchButton.heightAnchor.constraint(equalToConstant: 26),
         ] + views.map { $0.centerYAnchor.constraint(equalTo: centerYAnchor) })
     }
 
+    /// The space as a breadcrumb before its tabs, "Space 1 ›", quiet as in
+    /// Terax ("Default ›"); the bold name competed with the tabs (2026-10-19).
+    private var spaceTitle = ""
     var spaceName: String {
-        get { spaceButton.title }
-        set { spaceButton.attributedTitle = NSAttributedString(string: newValue, attributes: [
-            .font: NSFont.systemFont(ofSize: 12, weight: .semibold), .foregroundColor: secondaryColor,
-        ]) }
+        get { spaceTitle }
+        set {
+            spaceTitle = newValue
+            let title = NSMutableAttributedString(string: newValue, attributes: [
+                .font: NSFont.systemFont(ofSize: 12), .foregroundColor: secondaryColor,
+            ])
+            title.append(NSAttributedString(string: "  ›", attributes: [
+                .font: NSFont.systemFont(ofSize: 12), .foregroundColor: secondaryColor.withAlphaComponent(0.6),
+            ]))
+            spaceButton.attributedTitle = title
+        }
     }
 
     /// Puts a space's tab bar between its name and "+".
@@ -115,17 +120,13 @@ final class TitleBarView: NSView {
         secondaryColor = secondary
         fieldColor = field
         for button in [sidebarButton, paletteButton, newTabButton, settingsButton] { button.contentTintColor = secondary }
-        searchButton.layer?.backgroundColor = field.cgColor
+        // No box: icon and words in the quiet color, as Terax's "Search (⌘F)".
+        // The filled field had its text off the button's center (2026-10-19).
         searchButton.contentTintColor = secondary
-        let title = NSMutableAttributedString(string: " Buscar", attributes: [
+        searchButton.attributedTitle = NSAttributedString(string: " Buscar (⌘K)", attributes: [
             .font: NSFont.systemFont(ofSize: 12), .foregroundColor: secondary,
         ])
-        title.append(NSAttributedString(string: "   ⌘K", attributes: [
-            .font: NSFont.systemFont(ofSize: 11), .foregroundColor: secondary.withAlphaComponent(0.7),
-        ]))
-        searchButton.attributedTitle = title
-        searchButton.alignment = .left
-        spaceName = spaceButton.title
+        spaceName = spaceTitle
     }
 
     private static func iconButton(_ icon: Icon, _ tip: String) -> NSButton {

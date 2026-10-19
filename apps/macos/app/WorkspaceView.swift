@@ -145,6 +145,7 @@ final class WorkspaceView: NSView {
         contentPanel.setColors(fill: theme.terminal.background.nsColor, border: ui.panelBorder.nsColor)
         explorer.style = .init(text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor, accent: ui.accent.nsColor)
         titleBar.setColors(text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, field: ui.field.nsColor)
+        sidebar.setColors(text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, fill: ui.tabActive.nsColor)
         statusBar.style = .init(text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor)
         let style = TabBarView.Style(
             activeFill: ui.tabActive.nsColor, hoverFill: ui.tabActive.color(alpha: 0.5),

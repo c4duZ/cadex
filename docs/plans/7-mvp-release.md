@@ -67,7 +67,7 @@ Fases A a D feitas, cada uma num commit; falta a E (semana de uso), que é do do
 - **B. Build universal:** `make package` gera o app em 1 min e meio; lipo, codesign e spctl dão o
   esperado. A fatia Intel rodou pelo Rosetta (`arch -x86_64`). Achado no caminho: o terminal criado
   antes de entrar na janela (o primeiro de um space) ficava em branco; agora redesenha ao entrar.
-- **C. DMG, ZIP e instalador:** `release.sh` gera tudo em dist/ e só publica com `--publish`. O
+- **C. DMG, ZIP e instalador:** `apps/macos/packaging/release.sh` gera tudo em dist/ e só publica com `--publish`. O
   install.sh instalou numa pasta de teste e recusou um ZIP alterado. O DMG foi testado sem o passo
   do Finder (CADEX_DMG_PLAIN=1), para não abrir janelas na frente do dono.
 - **D. Medidas:** no README (DMG 7,5 MB, app 40 MB, 66 MB de memória com um terminal).

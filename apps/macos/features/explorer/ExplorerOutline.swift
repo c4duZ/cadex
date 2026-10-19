@@ -17,7 +17,7 @@ final class ExplorerOutline: NSOutlineView {
         columnAutoresizingStyle = .firstColumnOnlyAutoresizingStyle
         outlineTableColumn = column
         headerView = nil
-        rowHeight = 22
+        rowHeight = 20
         indentationPerLevel = 12
         backgroundColor = .clear
         style = .plain

@@ -208,7 +208,7 @@ public final class TabsController {
         bar.items = list.order.compactMap { id in
             if let document = documents[id] {
                 let title = document.hasUnsavedChanges ? "● " + document.title : document.title
-                return TabBarView.Item(id: id, title: title, active: id == list.active)
+                return TabBarView.Item(id: id, title: title, active: id == list.active, terminal: false)
             }
             return tabs[id].map { TabBarView.Item(id: id, title: $0.title(home: home), active: id == list.active) }
         }

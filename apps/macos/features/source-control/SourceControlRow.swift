@@ -90,8 +90,15 @@ final class SourceControlRowView: NSTableCellView {
                 .font: NSFont.systemFont(ofSize: 11), .foregroundColor: NSColor.secondaryLabelColor,
             ]))
         }
+        // One line, the folder cut at the end: the attributed text wrapped and the
+        // folder ran over the next row (2026-10-19).
+        let oneLine = NSMutableParagraphStyle()
+        oneLine.lineBreakMode = .byTruncatingTail
+        text.addAttribute(.paragraphStyle, value: oneLine, range: NSRange(location: 0, length: text.length))
         label.attributedStringValue = text
-        label.lineBreakMode = .byTruncatingMiddle
+        label.lineBreakMode = .byTruncatingTail
+        label.maximumNumberOfLines = 1
+        label.cell?.wraps = false
         label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         let letter = entry.letter(staged: staged)
         let mark = NSTextField(labelWithString: String(letter))

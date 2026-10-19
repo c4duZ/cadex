@@ -41,8 +41,18 @@ extension AppDelegate {
         spaces.workspaceFolder = { [weak self] in self?.folder.root }
         spaces.start(folder: folder.root) { [weak self] identity in self?.reopen(identity) }
         // Opened on a folder: the old tabs come back and the folder gets its
-        // own terminal in the shown space (docs/spec/spaces.md).
-        if folder.launchedWithFolder, saved != nil { tabs?.newTab(cwd: folder.root) }
+        // own terminal in the shown space (docs/spec/spaces.md), unless one
+        // is already there: opening the same folder again stacked tabs.
+        if folder.launchedWithFolder, saved != nil, let tabs, !hasTerminal(in: folder.root, tabs) {
+            tabs.newTab(cwd: folder.root)
+        }
+    }
+
+    private func hasTerminal(in folder: String, _ tabs: TabsController) -> Bool {
+        tabs.snapshot().items.contains { item in
+            if case let .terminal(_, layout, _) = item { return layout.folders.contains(folder) }
+            return false
+        }
     }
 
     /// A saved document tab: files that still exist and the git history.

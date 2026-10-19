@@ -1,15 +1,17 @@
 import AppKit
 import Icons
 
-/// The sidebar: the explorer's tree or the Git view, switched by two icon
-/// buttons on top (they run the sidebar.files and sidebar.git commands).
+/// The sidebar: the explorer's tree or the Git view, switched by two tabs
+/// at the bottom, "Arquivos" and "Git", as in Terax (they run the
+/// explorer.focus and git.show commands). The owner compared the two
+/// side by side on 2026-10-19: loose icons on top read as decoration.
 final class SidebarView: NSView {
     enum Page { case files, git }
 
     private let files: NSView
     private let git: NSView
-    private let filesButton: NSButton
-    private let gitButton: NSButton
+    private let filesTab: SidebarTab
+    private let gitTab: SidebarTab
     private(set) var page: Page = .files
     private let run: (String) -> Void
 
@@ -17,32 +19,31 @@ final class SidebarView: NSView {
         self.files = files
         self.git = git
         self.run = run
-        filesButton = Self.button(.files, "Arquivos (⇧⌘E)")
-        gitButton = Self.button(.gitBranch, "Git (⇧⌘G)")
+        filesTab = SidebarTab(icon: .files, title: "Arquivos", tip: "Arquivos (⇧⌘E)")
+        gitTab = SidebarTab(icon: .gitBranch, title: "Git", tip: "Git (⇧⌘G)")
         super.init(frame: .zero)
-        filesButton.target = self
-        filesButton.action = #selector(filesPressed)
-        gitButton.target = self
-        gitButton.action = #selector(gitPressed)
-        let bar = NSStackView(views: [filesButton, gitButton, NSView()])
-        bar.spacing = 2
-        bar.edgeInsets = NSEdgeInsets(top: 4, left: 8, bottom: 0, right: 8)
-        for v in [bar, files, git] as [NSView] {
+        filesTab.onPress = { [weak self] in self?.run("explorer.focus") }
+        gitTab.onPress = { [weak self] in self?.run("git.show") }
+        let bar = NSStackView(views: [filesTab, gitTab])
+        bar.distribution = .fillEqually
+        bar.spacing = 4
+        bar.edgeInsets = NSEdgeInsets(top: 0, left: 6, bottom: 0, right: 6)
+        for v in [files, git, bar] as [NSView] {
             v.translatesAutoresizingMaskIntoConstraints = false
             addSubview(v)
         }
         for content in [files, git] {
             NSLayoutConstraint.activate([
-                content.topAnchor.constraint(equalTo: bar.bottomAnchor),
+                content.topAnchor.constraint(equalTo: topAnchor),
                 content.leadingAnchor.constraint(equalTo: leadingAnchor),
                 content.trailingAnchor.constraint(equalTo: trailingAnchor),
-                content.bottomAnchor.constraint(equalTo: bottomAnchor),
+                content.bottomAnchor.constraint(equalTo: bar.topAnchor, constant: -4),
             ])
         }
         NSLayoutConstraint.activate([
-            bar.topAnchor.constraint(equalTo: topAnchor),
             bar.leadingAnchor.constraint(equalTo: leadingAnchor),
             bar.trailingAnchor.constraint(equalTo: trailingAnchor),
+            bar.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -6),
             bar.heightAnchor.constraint(equalToConstant: 26),
         ])
         show(.files)
@@ -55,18 +56,60 @@ final class SidebarView: NSView {
         self.page = page
         files.isHidden = page != .files
         git.isHidden = page != .git
-        filesButton.contentTintColor = page == .files ? .controlAccentColor : .secondaryLabelColor
-        gitButton.contentTintColor = page == .git ? .controlAccentColor : .secondaryLabelColor
+        filesTab.selected = page == .files
+        gitTab.selected = page == .git
     }
 
-    private static func button(_ icon: Icon, _ tip: String) -> NSButton {
-        let b = NSButton(image: icon.image(size: 15), target: nil, action: nil)
-        b.isBordered = false
-        b.toolTip = tip
-        b.widthAnchor.constraint(equalToConstant: 26).isActive = true
-        return b
+    /// The theme's colors: text, quiet text and the fill of the chosen tab.
+    func setColors(text: NSColor, secondary: NSColor, fill: NSColor) {
+        for tab in [filesTab, gitTab] { tab.colors = (text, secondary, fill) }
+    }
+}
+
+/// One of the two tabs: icon and label, filled when chosen.
+private final class SidebarTab: NSView {
+    var onPress: (() -> Void)?
+    var selected = false { didSet { restyle() } }
+    var colors: (text: NSColor, secondary: NSColor, fill: NSColor) = (.labelColor, .secondaryLabelColor, .quaternaryLabelColor) {
+        didSet { restyle() }
+    }
+    private let icon: NSImageView
+    private let label: NSTextField
+
+    init(icon: Icon, title: String, tip: String) {
+        self.icon = NSImageView(image: icon.image(size: 13))
+        label = NSTextField(labelWithString: title)
+        super.init(frame: .zero)
+        wantsLayer = true
+        layer?.cornerRadius = 6
+        toolTip = tip
+        setAccessibilityRole(.button)
+        setAccessibilityLabel(title)
+        label.font = .systemFont(ofSize: 12, weight: .medium)
+        let content = NSStackView(views: [self.icon, label])
+        content.spacing = 5
+        content.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(content)
+        NSLayoutConstraint.activate([
+            content.centerXAnchor.constraint(equalTo: centerXAnchor),
+            content.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
+        restyle()
     }
 
-    @objc private func filesPressed() { run("explorer.focus") }
-    @objc private func gitPressed() { run("git.show") }
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("SidebarTab is created in code") }
+
+    override func mouseDown(with event: NSEvent) { onPress?() }
+    override func accessibilityPerformPress() -> Bool {
+        onPress?()
+        return true
+    }
+
+    private func restyle() {
+        layer?.backgroundColor = selected ? colors.fill.cgColor : nil
+        let color = selected ? colors.text : colors.secondary
+        label.textColor = color
+        icon.contentTintColor = color
+    }
 }

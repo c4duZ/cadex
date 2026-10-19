@@ -20,14 +20,16 @@
   abre numa aba, endereço http(s) abre no preview. `FileOpener.swift` decide onde um arquivo abre (mídia pelo tipo, o resto no editor; diffs do git numa aba DiffDocument, o histórico numa aba HistoryDocument que recebe as mudanças em .git), passa as
   mudanças do disco aos editores abertos e monta a aparência do editor (`EditorLooks`).
 - A casca da janela, no estilo do Terax: título transparente com barra de ferramentas compacta
-  (38 pt, botões da janela centrados); `TitleBarView.swift` (painel lateral, paleta, nome do space, abas, "+",
+  (38 pt, botões da janela centrados); `TitleBarView.swift` (painel lateral, paleta, o space como migalha "Space 1 ›", abas, "+", a busca sem caixa,
   busca, todos por comando), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
-  painel lateral recolhível, barra de status) e `SidebarView.swift` (duas páginas, Arquivos e Git, trocadas por explorer.focus e git.show). O explorer é criado
+  painel lateral recolhível, barra de status) e `SidebarView.swift` (duas páginas, Arquivos e Git, trocadas por abas largas embaixo do painel, como no Terax, que rodam explorer.focus e git.show). O explorer é criado
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.
 - `WindowBackdrop.swift`: imagem de fundo atrás da área do terminal (desfoque calculado uma vez) e,
   com vibrância, a moldura fosca; depois de ligar, os botões da janela voltam para cima da camada.
+- Sem pacote .app (make run), `main.swift` põe o ícone de `docs/cadex-icon.png` no Dock; no .app ele
+  vem do AppIcon.icns.
 - Abrir para teste com CADEX_BACKGROUND=1: a janela aparece sem tomar o foco do teclado. Abas, spaces e a paleta
   entram aqui conforme as features existirem.
 

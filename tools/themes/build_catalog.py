@@ -80,8 +80,11 @@ def from_tweakcn(c):
         "interface": {
             "chrome": c.get("muted", c["background"]), "panel": c["background"],
             "panelBorder": c.get("border", c["background"]),
-            "tabActive": mix(c.get("accent", c["background"]), c["foreground"], 0.1),
-            "field": c.get("accent", c["background"]), "text": c["foreground"],
+            # Neutral, from the title bar's own color: tweakcn's "accent" is a
+            # hover color, amber or green in some themes, and painted the
+            # active tab and the search field (owner's feedback, 2026-10-19).
+            "tabActive": mix(c.get("muted", c["background"]), c["foreground"], 0.12),
+            "field": mix(c.get("muted", c["background"]), c["foreground"], 0.06), "text": c["foreground"],
             "secondaryText": c.get("muted-foreground", c["foreground"]), "accent": c["primary"],
         },
         "terminal": {

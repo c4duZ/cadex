@@ -102,7 +102,7 @@ final class ExplorerCell: NSTableCellView {
         let icon = NSImageView()
         let label = NSTextField(labelWithString: "")
         label.lineBreakMode = .byTruncatingMiddle
-        label.font = .systemFont(ofSize: 13)
+        label.font = .systemFont(ofSize: 12)
         label.cell?.isScrollable = true
         addSubview(icon)
         addSubview(label)
@@ -119,10 +119,10 @@ final class ExplorerCell: NSTableCellView {
     override func layout() {
         super.layout()
         let mid = bounds.midY
-        imageView?.frame = NSRect(x: 2, y: mid - 8, width: 16, height: 16)
+        imageView?.frame = NSRect(x: 2, y: mid - 7, width: 14, height: 14)
         let height = textField?.intrinsicContentSize.height ?? 17
         let markWidth: CGFloat = mark.stringValue.isEmpty ? 0 : 16
-        textField?.frame = NSRect(x: 24, y: mid - height / 2, width: max(bounds.width - 28 - markWidth, 0), height: height)
+        textField?.frame = NSRect(x: 22, y: mid - height / 2, width: max(bounds.width - 26 - markWidth, 0), height: height)
         mark.frame = NSRect(x: bounds.width - markWidth - 4, y: mid - height / 2, width: markWidth, height: height)
     }
 
@@ -147,13 +147,15 @@ final class ExplorerCell: NSTableCellView {
         textField?.isEditable = false
         if node.isNote {
             imageView?.image = nil
-            textField?.font = NSFontManager.shared.convert(.systemFont(ofSize: 12), toHaveTrait: .italicFontMask)
+            textField?.font = NSFontManager.shared.convert(.systemFont(ofSize: 11), toHaveTrait: .italicFontMask)
             textField?.textColor = style.secondaryText
             return
         }
-        textField?.font = .systemFont(ofSize: 13)
-        imageView?.image = FileTypeIcon.icon(name: node.name, entry: node.entry, expanded: expanded).image(size: 15)
-        imageView?.contentTintColor = node.isFolder ? style.accent : style.secondaryText
+        textField?.font = .systemFont(ofSize: 12)
+        imageView?.image = FileTypeIcon.icon(name: node.name, entry: node.entry, expanded: expanded).image(size: 14)
+        // Gray like the files: the accent of some themes (amber) made the
+        // tree loud next to Terax's (2026-10-19).
+        imageView?.contentTintColor = style.secondaryText
         textField?.textColor = git.map { node.isFolder ? style.text : Self.gitColor($0) } ?? style.text
         alphaValue = node.isHidden || node.entry?.ignored == true ? 0.55 : 1
         toolTip = node.entry?.kind == .symlink && !cadex_workspace_is_authorized(node.path) ? "Aponta para fora da pasta aberta" : nil

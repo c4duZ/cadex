@@ -16,7 +16,8 @@
 - Comandos em `WorkspaceCommands.swift`: `workspace.open-folder` ("Abrir pasta…", ⌘O, seletor do
   sistema) e `workspace.use-terminal-folder` (a pasta do terminal com foco, que `apps/macos/app/main.swift`
   passa por closure: o explorer não vê terminais).
-- A árvore: `ExplorerController.swift` (porta de entrada: a view do painel lateral, a raiz, o
+- A árvore: `ExplorerController.swift` (porta de entrada: a view do painel lateral, com o nome da
+  pasta pequeno e cinza e as ações à direita, buscar arquivo, novo arquivo, nova pasta, recarregar; a raiz, o
   watcher, recarregar mantendo pastas abertas e seleção, mensagem curta embaixo da árvore),
   `FileNode.swift` (uma linha; pasta lida só ao abrir; recarga reaproveita linhas iguais; notas
   "Pasta vazia" e "Sem permissão"), `ExplorerDataSource.swift` (dados, células desenhadas à mão no
