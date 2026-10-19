@@ -46,6 +46,35 @@ pub fn sides(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []cons
     return .{ .before = before, .after = after, .patch = r.stdout, .binary = binary, .too_large = too_large };
 }
 
+/// A file as a commit changed it (git-history): its first parent's version
+/// and the commit's (nothing before a root commit), and the patch.
+pub fn commitSides(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const u8, sha: []const u8, path: []const u8, orig: []const u8) !Sides {
+    for (sha) |ch| if (!std.ascii.isHex(ch)) return error.InvalidPattern;
+    const parent_spec = try std.fmt.allocPrint(gpa, "{s}^1", .{sha});
+    defer gpa.free(parent_spec);
+    var parent = try git.run(gpa, registry, repo, &.{ "rev-parse", "--verify", "--quiet", parent_spec }, .{});
+    defer parent.deinit(gpa);
+    const base: ?[]const u8 = if (parent.ok()) std.mem.trimEnd(u8, parent.stdout, "\n") else null;
+    const before = if (base) |b| try show(gpa, registry, repo, b, if (orig.len > 0) orig else path) else try gpa.alloc(u8, 0);
+    errdefer gpa.free(before);
+    const after = try show(gpa, registry, repo, sha, path);
+    errdefer gpa.free(after);
+    var args: std.ArrayList([]const u8) = .empty;
+    defer args.deinit(gpa);
+    try args.appendSlice(gpa, &.{ "diff-tree", "-p", "-M", "--no-color", "--no-ext-diff" });
+    if (base) |b| try args.append(gpa, b) else try args.appendSlice(gpa, &.{ "--root", "--no-commit-id" });
+    try args.appendSlice(gpa, &.{ sha, "--" });
+    if (orig.len > 0) try args.append(gpa, orig);
+    try args.append(gpa, path);
+    var r = try git.run(gpa, registry, repo, args.items, .{});
+    errdefer r.deinit(gpa);
+    gpa.free(r.stderr);
+    r.stderr = &.{};
+    const binary = isBinary(before) or isBinary(after);
+    const too_large = before.len > max_side_bytes or after.len > max_side_bytes;
+    return .{ .before = before, .after = after, .patch = r.stdout, .binary = binary, .too_large = too_large };
+}
+
 /// `git show <rev>:<path>` (rev "" is the index); empty when the path is
 /// not there (a new file).
 fn show(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const u8, rev: []const u8, path: []const u8) ![]u8 {

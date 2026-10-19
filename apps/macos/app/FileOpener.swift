@@ -1,5 +1,6 @@
 import AppKit
 import Editor
+import GitHistory
 import MediaPreview
 import SourceControl
 import Tabs
@@ -13,6 +14,8 @@ final class FileOpener {
     private weak var tabs: TabsController?
     /// A file was opened in a new editor tab (markdown attaches its help).
     var onEditorOpened: ((EditorDocument) -> Void)?
+    /// Runs a command by id, for tabs whose menus fire commands (history).
+    var runCommand: ((String) -> Bool)?
 
     init(tabs: TabsController) {
         self.tabs = tabs
@@ -48,6 +51,21 @@ final class FileOpener {
         tabs.open(diff)
     }
 
+    /// The repository's history in a tab; again, its tab, read again.
+    func openHistory(_ root: String) {
+        guard let tabs else { return }
+        if let existing = tabs.document(identity: HistoryDocument.identity(for: root)) as? HistoryDocument {
+            existing.reload()
+            return tabs.open(existing)
+        }
+        let history = HistoryDocument(root: root)
+        history.runCommand = { [weak self] id in self?.runCommand?(id) ?? false }
+        history.onOpenDiff = { [weak self] repo, sha, path, orig in
+            self?.openDiff(.init(repo: repo, path: path, orig: orig, staged: false, commit: sha))
+        }
+        tabs.open(history)
+    }
+
     /// The real path, as the core compares them: /tmp/x is /private/tmp/x.
     /// NSString's resolvingSymlinksInPath drops /private on purpose, so the
     /// Markdown index did not know the note (2026-10-19).
@@ -74,6 +92,9 @@ final class FileOpener {
         }
         for case let diff as DiffDocument in tabs.allDocuments where changed.contains((diff.request.repo + "/" + diff.request.path as NSString).deletingLastPathComponent) {
             diff.load()
+        }
+        for case let history as HistoryDocument in tabs.allDocuments {
+            history.diskChanged(folders)
         }
     }
 }

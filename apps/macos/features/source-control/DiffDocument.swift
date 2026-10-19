@@ -27,11 +27,15 @@ public final class DiffDocument: TabDocument {
     }
 
     public static func identity(for request: SourceControlController.DiffRequest) -> String {
-        "diff:\(request.staged ? "staged" : "work"):\(request.repo)/\(request.path)"
+        let side = request.commit.map { "commit \($0)" } ?? (request.staged ? "staged" : "work")
+        return "diff:\(side):\(request.repo)/\(request.path)"
     }
 
     public var identity: String { Self.identity(for: request) }
-    public var title: String { (request.path as NSString).lastPathComponent + (request.staged ? " (staged)" : " (diff)") }
+    public var title: String {
+        let side = request.commit.map { " (\($0.prefix(7)))" } ?? (request.staged ? " (staged)" : " (diff)")
+        return (request.path as NSString).lastPathComponent + side
+    }
     public var hasUnsavedChanges: Bool { false }
     public func focus() { view.window?.makeFirstResponder(left ?? right) }
     public func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) { close() }
@@ -42,7 +46,11 @@ public final class DiffDocument: TabDocument {
         let repo = GitRepository(root: request.repo)
         let request = self.request
         repo.queue.async { [weak self] in
-            let diff = repo.diff(path: request.path, orig: request.orig, staged: request.staged)
+            let diff = if let sha = request.commit {
+                repo.diff(commit: sha, path: request.path, orig: request.orig)
+            } else {
+                repo.diff(path: request.path, orig: request.orig, staged: request.staged)
+            }
             DispatchQueue.main.async { MainActor.assumeIsolated { self?.show(diff) } }
         }
     }

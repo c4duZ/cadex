@@ -709,7 +709,34 @@ typedef struct {
 } cadex_git_diff_sides;
 /* orig: the old name of a rename, or NULL. Free with cadex_git_diff_free. */
 cadex_status cadex_git_diff(const char *repo, const char *path, const char *orig, bool staged, cadex_git_diff_sides *out);
+/* A file as commit sha changed it: its first parent's version (nothing
+ * for a root commit) and the commit's, and the patch. */
+cadex_status cadex_git_diff_commit(const char *repo, const char *sha, const char *path, const char *orig, cadex_git_diff_sides *out);
 void cadex_git_diff_free(cadex_git_diff_sides *diff);
+
+/* ---- Git history (core/features/git-history) ------------------------- */
+
+/* The log in pages, newest first, children before parents. Without a query,
+ * each line carries the graph's lanes, continued from the page before.
+ * Close with cadex_history_close. */
+typedef struct cadex_history cadex_history;
+/* query NULL or "": every commit with the graph (current_only: only what HEAD
+ * reaches); otherwise the commits whose subject, author or sha match. */
+cadex_status cadex_history_open(const char *repo, const char *query, bool current_only, cadex_history **out);
+/* The next count commits (empty when the log ended), one per line:
+ * "sha \t parents \t author \t email \t unix time \t refs \t subject \t column
+ * \t color \t top \t bottom". parents are space-separated; column -1 without
+ * a graph; top: segments "from,to,color" (space-separated) from a lane at the
+ * row's top to the middle; bottom: from the middle to a lane at the bottom. */
+cadex_status cadex_history_next(cadex_history *log, size_t count, uint8_t **out, size_t *out_len);
+void cadex_history_close(cadex_history *log);
+/* "parents \x1e message \x1e" then per file "letter \t added \t removed \t path
+ * \t old path" (added/removed "-" for binary). A merge is compared with its
+ * first parent. */
+cadex_status cadex_history_details(const char *repo, const char *sha, uint8_t **out, size_t *out_len);
+/* The commit's web page on origin (GitHub, GitLab, Bitbucket, Gitea...);
+ * CADEX_NOT_FOUND without a known remote. */
+cadex_status cadex_history_remote_url(const char *repo, const char *sha, uint8_t **out, size_t *out_len);
 
 #ifdef __cplusplus
 }

@@ -23,8 +23,9 @@
   git.refresh, git.switch-branch (branches na paleta) e diff.toggle-layout. Botões, menu e ⌘Enter
   só disparam esses ids. O git.show (⇧⌘G, mostrar o painel) é registrado em `apps/macos/app/main.swift`.
 - `DiffDocument.swift`: aba de diff (TabDocument) com as cores do editor, linhas de `DiffLines.swift`
-  marcadas, as duas colunas rolando juntas, ou o patch numa coluna.
-- Spec de comportamento em `docs/spec/source-control.md`. Status: plano 6, fases C e D prontas.
+  marcadas, as duas colunas rolando juntas, ou o patch numa coluna. Com `commit` no DiffRequest, o
+  arquivo como aquele commit o mudou (o histórico pede pelo app).
+- Spec de comportamento em `docs/spec/source-control.md`. Status: pronto (plano 6).
 
 ## Como validar
 - `make macos-test` passa: status vindo do núcleo, limite de 1000 linhas, linhas do patch, painel

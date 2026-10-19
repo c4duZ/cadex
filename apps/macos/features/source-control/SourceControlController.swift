@@ -10,6 +10,17 @@ public final class SourceControlController {
         public let path: String
         public let orig: String
         public let staged: Bool
+        /// A file as this commit changed it (the history), instead of the
+        /// working copy.
+        public let commit: String?
+
+        public init(repo: String, path: String, orig: String, staged: Bool, commit: String? = nil) {
+            self.repo = repo
+            self.path = path
+            self.orig = orig
+            self.staged = staged
+            self.commit = commit
+        }
     }
 
     public enum State: Equatable {
@@ -22,6 +33,8 @@ public final class SourceControlController {
     let panel = SourceControlView()
     public var view: NSView { panel }
     private(set) var repo: GitRepository?
+    /// The repository's top folder, for the history (git-history).
+    public var repositoryRoot: String? { repo?.root }
     private(set) var status = GitRepository.Status()
     private(set) var state: State = .loading
     private var folder = ""

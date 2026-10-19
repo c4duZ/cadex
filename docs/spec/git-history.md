@@ -5,7 +5,7 @@ Ver o histórico do repositório como um grafo: o que os agentes commitaram, de 
 coisa, e abrir qualquer commit, seus arquivos e diffs.
 
 ## Comportamento
-- Comando "Abrir o histórico do git" abre uma aba com a lista de commits, do mais novo para o mais
+- Comando "Abrir o histórico do git" (⇧⌘H) abre uma aba com a lista de commits, do mais novo para o mais
   antigo, de todas as branches.
 - Cada linha: o grafo à esquerda (faixas coloridas, um ponto no commit, linhas para os pais, curvas
   nos merges e nas bifurcações), o assunto, as etiquetas (branches, tags, HEAD), o autor, a data
@@ -20,7 +20,7 @@ coisa, e abrir qualquer commit, seus arquivos e diffs.
 - "Abrir no remoto" abre o commit no navegador, a partir do `origin`: GitHub, GitLab, Bitbucket e
   Gitea (`https://host/dono/repo/commit/<sha>`), com remoto em SSH ou HTTPS. Sem remoto conhecido, o
   comando fica indisponível.
-- "Copiar sha" copia o sha inteiro.
+- "Copiar sha" copia o sha inteiro. Os dois ficam no menu de contexto da linha e na paleta.
 - A aba atualiza quando o repositório muda (commit novo aparece no topo).
 
 ## Estados
@@ -35,8 +35,8 @@ coisa, e abrir qualquer commit, seus arquivos e diffs.
 - Assunto com emoji ou acento -> mostrado como está.
 
 ## Critérios de aceite
-- [ ] O log paginado traz sha, pais, autor, data, assunto e etiquetas.
-- [ ] As faixas do grafo saem certas para um histórico com dois merges.
-- [ ] URL do commit no remoto para SSH e HTTPS (GitHub, GitLab, Bitbucket).
-- [ ] Arquivos de um commit com o tipo e +/−.
-- [ ] O commit feito no painel aparece no topo do grafo.
+- [x] O log paginado traz sha, pais, autor, data, assunto e etiquetas.
+- [x] As faixas do grafo saem certas para um histórico com dois merges.
+- [x] URL do commit no remoto para SSH e HTTPS (GitHub, GitLab, Bitbucket).
+- [x] Arquivos de um commit com o tipo e +/−.
+- [x] O commit feito no painel aparece no topo do grafo.

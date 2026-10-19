@@ -98,8 +98,17 @@ final class GitRepository: @unchecked Sendable {
     }
 
     func diff(path: String, orig: String, staged: Bool) -> Diff? {
+        sides { cadex_git_diff(root, path, orig.isEmpty ? nil : orig, staged, &$0) }
+    }
+
+    /// The file as commit `sha` changed it.
+    func diff(commit sha: String, path: String, orig: String) -> Diff? {
+        sides { cadex_git_diff_commit(root, sha, path, orig.isEmpty ? nil : orig, &$0) }
+    }
+
+    private func sides(_ call: (inout cadex_git_diff_sides) -> cadex_status) -> Diff? {
         var d = cadex_git_diff_sides()
-        guard cadex_git_diff(root, path, orig.isEmpty ? nil : orig, staged, &d) == CADEX_OK else { return nil }
+        guard call(&d) == CADEX_OK else { return nil }
         defer { cadex_git_diff_free(&d) }
         func string(_ p: UnsafeMutablePointer<UInt8>?, _ n: Int) -> String {
             guard let p else { return "" }

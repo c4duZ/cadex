@@ -30,6 +30,8 @@ pub const Error = workspace.Error || error{ GitMissing, SpawnFailed };
 pub fn run(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const u8, args: []const []const u8, options: struct {
     timeout_ms: u32 = local_timeout_ms,
     stdin: []const u8 = "",
+    /// The history search reads the whole log (git-history).
+    max_output: usize = 16 * 1024 * 1024,
 }) !Result {
     var buf: workspace.paths.Buffer = undefined;
     const real = try registry.resolve(repo, &buf);
@@ -42,6 +44,7 @@ pub fn run(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const 
         .timeout_ms = options.timeout_ms,
         .env = &env,
         .stdin = options.stdin,
+        .max_output = options.max_output,
     });
     if (result.code == -1) {
         var r = result;

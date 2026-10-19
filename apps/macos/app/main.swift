@@ -8,6 +8,7 @@ import MediaPreview
 import Preview
 import Search
 import SourceControl
+import GitHistory
 import Settings
 import Shortcuts
 import Tabs
@@ -42,6 +43,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let tabs = TabsController(window: window)
         let opener = FileOpener(tabs: tabs)
         opener.onEditorOpened = { [weak self] document in self?.markdown?.attach(document) }
+        opener.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
         tabs.onOpenPreview = { [weak self] url in self?.openPreview(url) }
         self.opener = opener
         explorer?.openFile = { [weak opener] path in opener?.open(path) }
@@ -199,6 +201,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 self?.workspace?.showSidebar(.git)
                 self?.git?.refresh()
             }))
+        commands.register(HistoryCommands.all(
+            open: { [weak self] in if let root = self?.git?.repositoryRoot { self?.opener?.openHistory(root) } },
+            repository: { [weak self] in self?.git?.repositoryRoot },
+            active: { [weak self] in self?.tabs?.activeDocument as? HistoryDocument }))
         commands.register(EditorCommands.all { [weak self] in self?.tabs?.activeDocument as? EditorDocument })
         commands.register(MediaCommands.all { [weak self] in self?.tabs?.activeDocument as? MediaDocument })
         commands.register(PreviewCommands.all(open: { [weak self] url in self?.openPreview(url) },

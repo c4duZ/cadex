@@ -122,6 +122,14 @@ let package = Package(
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
         .target(
+            name: "GitHistory",
+            dependencies: ["CCadex", "CommandPalette", "Tabs"],
+            path: "features/git-history",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+        .target(
             name: "SourceControl",
             dependencies: ["CCadex", "CommandPalette", "Icons", "Editor", "Tabs"],
             path: "features/source-control",
@@ -147,7 +155,7 @@ let package = Package(
         // Shortcuts tests check the defaults of every feature's commands.
         .executableTarget(
             name: "ShortcutsTests",
-            dependencies: ["Shortcuts", "CommandPalette", "Terminal", "Tabs", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "Checks"],
+            dependencies: ["Shortcuts", "CommandPalette", "Terminal", "Tabs", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Checks"],
             path: "features/shortcuts/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
@@ -212,6 +220,12 @@ let package = Package(
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
+            name: "GitHistoryTests",
+            dependencies: ["GitHistory", "Explorer", "Checks"],
+            path: "features/git-history/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+        .executableTarget(
             name: "SourceControlTests",
             dependencies: ["SourceControl", "Explorer", "CommandPalette", "Checks"],
             path: "features/source-control/tests",
@@ -225,7 +239,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

@@ -9,6 +9,7 @@ import Markdown
 import MediaPreview
 import Preview
 import SourceControl
+import GitHistory
 import Tabs
 import Terminal
 
@@ -30,6 +31,7 @@ func appRegistry() -> CommandRegistry {
     registry.register(PreviewCommands.all(open: { _ in }, active: { nil }))
     registry.register(SourceControlCommands.all(SourceControlController(folder: NSTemporaryDirectory()) { _ in false },
                                                 palette: palette))
+    registry.register(HistoryCommands.all(open: {}, repository: { nil }, active: { nil }))
     registry.register(MarkdownCommands.all(MarkdownController(root: NSTemporaryDirectory(), findFiles: { _ in [] }, open: { _, _ in }),
                                            palette: palette) { nil })
     registry.register(SearchCommands.all(SearchController(root: NSTemporaryDirectory(), showHidden: false) { _, _ in },

@@ -54,3 +54,16 @@ feature precisar (aqui: source-control e git-history). Manifestos: `core/feature
 - Manual, com print: no próprio repositório do Cadex, alterar um arquivo, ver no painel e no
   explorer, abrir o diff, fazer stage e commit, ver o commit no grafo, abrir no GitHub.
 - Atualizar specs, `CLAUDE.md` das features e o status em `docs/plans/README.md`.
+
+## Fechamento (2026-10-19)
+Fases A a E feitas: A e B num commit (núcleo), C e D noutro (painel e diff), E no último (histórico).
+O executor de processo ficou em `core/shared/process.zig`; o git roda pela porta de entrada da
+source-control, que a git-history usa. Conferido no app em segundo plano (menus, sem teclas): painel
+num repositório temporário com M e ?, um commit feito no terminal sumindo da lista sozinho, PATH sem
+git mostrando a mensagem de instalar, marcas no explorer, diff lado a lado com as cores do editor,
+o histórico do próprio Cadex (49 commits, etiquetas main e origin/main) e um repositório com dois
+merges desenhado igual ao `git log --graph`, com os detalhes do merge (pais e arquivo +1 −0). Falta
+conferir à mão, com o app na frente: ⌘Enter na mensagem, os botões + e − nas linhas, clicar num
+arquivo do commit abrindo o diff, "Abrir no remoto" no GitHub (o teste confere a URL, não o
+navegador) e o push de verdade. Ficou para depois do MVP: arrastar a divisa entre a lista e os
+detalhes do histórico, e busca que ignore acento.

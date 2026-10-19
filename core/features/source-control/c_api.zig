@@ -142,6 +142,15 @@ pub const Diff = extern struct {
     too_large: bool,
 };
 
+fn fill(d: *Diff, sides: sc.diff.Sides) Code {
+    _ = c_buffer.handOut(sides.before, &d.before, &d.before_len);
+    _ = c_buffer.handOut(sides.after, &d.after, &d.after_len);
+    _ = c_buffer.handOut(sides.patch, &d.patch, &d.patch_len);
+    d.binary = sides.binary;
+    d.too_large = sides.too_large;
+    return status_code.ok;
+}
+
 pub export fn cadex_git_diff(repo: ?[*:0]const u8, path: ?[*:0]const u8, orig: ?[*:0]const u8, staged: bool, out: ?*Diff) callconv(.c) Code {
     const d = out orelse return status_code.invalid_argument;
     d.* = std.mem.zeroes(Diff);
@@ -149,12 +158,20 @@ pub export fn cadex_git_diff(repo: ?[*:0]const u8, path: ?[*:0]const u8, orig: ?
     const p = span(path) orelse return status_code.invalid_argument;
     var sides = sc.diff.sides(gpa, workspace.registry(), r, p, span(orig) orelse "", staged) catch |err| return status_code.fromError(err);
     defer sides.deinit(gpa);
-    _ = c_buffer.handOut(sides.before, &d.before, &d.before_len);
-    _ = c_buffer.handOut(sides.after, &d.after, &d.after_len);
-    _ = c_buffer.handOut(sides.patch, &d.patch, &d.patch_len);
-    d.binary = sides.binary;
-    d.too_large = sides.too_large;
-    return status_code.ok;
+    return fill(d, sides);
+}
+
+/// A file as commit `sha` changed it (the history's diff), in the same
+/// struct, freed with cadex_git_diff_free.
+pub export fn cadex_git_diff_commit(repo: ?[*:0]const u8, sha: ?[*:0]const u8, path: ?[*:0]const u8, orig: ?[*:0]const u8, out: ?*Diff) callconv(.c) Code {
+    const d = out orelse return status_code.invalid_argument;
+    d.* = std.mem.zeroes(Diff);
+    const r = span(repo) orelse return status_code.invalid_argument;
+    const s = span(sha) orelse return status_code.invalid_argument;
+    const p = span(path) orelse return status_code.invalid_argument;
+    var sides = sc.diff.commitSides(gpa, workspace.registry(), r, s, p, span(orig) orelse "") catch |err| return status_code.fromError(err);
+    defer sides.deinit(gpa);
+    return fill(d, sides);
 }
 
 pub export fn cadex_git_diff_free(diff: ?*Diff) callconv(.c) void {

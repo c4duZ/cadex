@@ -71,3 +71,5 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Stage**: marcar mudanças para entrar no próximo commit.
 - **Upstream**: a branch remota que a branch local acompanha.
 - **Grafo** (`git graph`): o desenho das linhas de commits e merges no histórico.
+- **Faixa** (`lane`): uma coluna do grafo, que espera um commit; o primeiro pai continua a faixa,
+  os outros pais de um merge abrem ou encontram outra.

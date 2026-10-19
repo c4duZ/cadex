@@ -21,9 +21,9 @@
   divergência com mensagem em português), push sem nunca forçar (publish cria o upstream), branches
   locais e remotas sem par local, trocar de branch, init. Cada ação devolve a mensagem do git ou nada.
 - `diff.zig`: os dois lados (HEAD/índice ou índice/disco) e o patch, com aviso de binário e de lado
-  acima de 2 MB.
+  acima de 2 MB; `commitSides`, um arquivo como um commit o mudou (para o histórico, da git-history).
 - API C em `c_api.zig` (`cadex_git_*`), listas em linhas com tab.
-- Spec: `docs/spec/source-control.md`. Status: núcleo pronto (plano 6, fases A e B). A observação do
+- Spec: `docs/spec/source-control.md`. Status: pronto (plano 6). A observação do
   repositório é a do explorer no app (as mudanças em .git chegam pelo mesmo watcher).
 
 ## Como validar
