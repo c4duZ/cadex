@@ -13,7 +13,7 @@ public final class EditorDocument: TabDocument {
         didSet { if hasUnsavedChanges != oldValue { onChange?() } }
     }
     let banner = EditorBanner()
-    private(set) var textView: CodeTextView?
+    private(set) var codeView: CodeTextView?
     private var ruler: LineRuler?
     private(set) var highlighter: EditorHighlighter?
     let folding = EditorFolding()
@@ -36,18 +36,37 @@ public final class EditorDocument: TabDocument {
         }
     }
 
+    /// The text view, for features that work on the text (markdown).
+    public var textView: NSTextView? { codeView }
+    /// ⌘+click on the character at an offset; true when handled.
+    public var commandClick: ((Int) -> Bool)? {
+        get { codeView?.commandClick }
+        set { codeView?.commandClick = newValue }
+    }
+    /// What shows instead of the text (the rendered Markdown), or nil.
+    public private(set) var alternate: NSView?
+    private var textContainer: NSView?
+
+    /// Shows `view` in place of the text, or the text again with nil.
+    public func showAlternate(_ view: NSView?) {
+        alternate = view
+        guard let content = view ?? textContainer else { return }
+        place(content)
+        if view == nil { focus() }
+    }
+
     public var title: String { (path as NSString).lastPathComponent }
     public var identity: String { path }
     /// "Zig", or nil for plain text.
     public var language: String? { highlighter?.language }
 
     public func focus() {
-        if let textView { view.window?.makeFirstResponder(textView) }
+        if let codeView { view.window?.makeFirstResponder(codeView) }
     }
 
     public func close() {
         if let appearanceObserver { NotificationCenter.default.removeObserver(appearanceObserver) }
-        textView?.textStorage?.delegate = nil
+        codeView?.textStorage?.delegate = nil
     }
 
     // MARK: Loading
@@ -73,20 +92,21 @@ public final class EditorDocument: TabDocument {
     }
 
     private func showText(_ text: String) {
-        let (scroll, textView) = makeTextView()
+        let (scroll, codeView) = makeTextView()
         loading = true
-        textView.string = text
+        codeView.string = text
         loading = false
-        textView.isEditable = !readOnly
-        textView.indentUnit = CodeTextView.detectIndent(text)
-        let highlighter = EditorHighlighter(storage: textView.textStorage!, fileName: path, appearance: EditorAppearance.current,
+        codeView.isEditable = !readOnly
+        codeView.indentUnit = CodeTextView.detectIndent(text)
+        let highlighter = EditorHighlighter(storage: codeView.textStorage!, fileName: path, appearance: EditorAppearance.current,
                                             highlight: text.utf8.count <= EditorFile.maxHighlightBytes)
         highlighter.onTextChange = { [weak self] in self?.textChanged() }
         self.highlighter = highlighter
-        self.textView = textView
+        self.codeView = codeView
         folding.lines = highlighter.lines
         folding.setRegions(highlighter.folds())
         applyAppearance()
+        textContainer = scroll
         place(scroll)
     }
 
@@ -95,30 +115,30 @@ public final class EditorDocument: TabDocument {
         scroll.hasVerticalScroller = true
         scroll.autohidesScrollers = true
         scroll.drawsBackground = false
-        let textView = CodeTextView(frame: NSRect(x: 0, y: 0, width: 600, height: 400))
-        textView.autoresizingMask = [.width]
-        textView.isRichText = false
-        textView.allowsUndo = true
-        textView.usesFindBar = true
-        textView.isIncrementalSearchingEnabled = true
-        textView.isAutomaticQuoteSubstitutionEnabled = false
-        textView.isAutomaticDashSubstitutionEnabled = false
-        textView.isAutomaticTextReplacementEnabled = false
-        textView.isAutomaticSpellingCorrectionEnabled = false
-        textView.isContinuousSpellCheckingEnabled = false
-        textView.smartInsertDeleteEnabled = false
-        textView.textContainerInset = NSSize(width: 4, height: 6)
-        textView.textContainer?.widthTracksTextView = true
-        (textView.textLayoutManager?.textContentManager as? NSTextContentStorage)?.delegate = folding
-        scroll.documentView = textView
-        let ruler = LineRuler(textView: textView, scrollView: scroll)
+        let codeView = CodeTextView(frame: NSRect(x: 0, y: 0, width: 600, height: 400))
+        codeView.autoresizingMask = [.width]
+        codeView.isRichText = false
+        codeView.allowsUndo = true
+        codeView.usesFindBar = true
+        codeView.isIncrementalSearchingEnabled = true
+        codeView.isAutomaticQuoteSubstitutionEnabled = false
+        codeView.isAutomaticDashSubstitutionEnabled = false
+        codeView.isAutomaticTextReplacementEnabled = false
+        codeView.isAutomaticSpellingCorrectionEnabled = false
+        codeView.isContinuousSpellCheckingEnabled = false
+        codeView.smartInsertDeleteEnabled = false
+        codeView.textContainerInset = NSSize(width: 4, height: 6)
+        codeView.textContainer?.widthTracksTextView = true
+        (codeView.textLayoutManager?.textContentManager as? NSTextContentStorage)?.delegate = folding
+        scroll.documentView = codeView
+        let ruler = LineRuler(textView: codeView, scrollView: scroll)
         ruler.folding = folding
         scroll.verticalRulerView = ruler
         scroll.hasVerticalRuler = true
         scroll.rulersVisible = true
         self.ruler = ruler
         folding.onChange = { [weak self] in self?.foldsChanged() }
-        return (scroll, textView)
+        return (scroll, codeView)
     }
 
     private func place(_ content: NSView) {
@@ -160,10 +180,10 @@ public final class EditorDocument: TabDocument {
     }
 
     private func foldsChanged() {
-        guard let textView, let layout = textView.textLayoutManager else { return }
+        guard let codeView, let layout = codeView.textLayoutManager else { return }
         layout.invalidateLayout(for: layout.documentRange)
-        textView.needsLayout = true
-        textView.needsDisplay = true
+        codeView.needsLayout = true
+        codeView.needsDisplay = true
         ruler?.needsDisplay = true
     }
 
@@ -177,22 +197,22 @@ public final class EditorDocument: TabDocument {
 
     /// Replaces the whole text without counting it as an edit.
     func replaceAllText(_ text: String) {
-        guard let textView else { return }
+        guard let codeView else { return }
         loading = true
-        textView.string = text
+        codeView.string = text
         loading = false
         highlighter?.paintAll()
     }
 
     func applyAppearance() {
         let look = EditorAppearance.current
-        guard let textView, let highlighter else { return }
+        guard let codeView, let highlighter else { return }
         highlighter.appearance = look
-        textView.backgroundColor = look.background
-        textView.insertionPointColor = look.foreground
-        textView.currentLineColor = look.currentLine
-        textView.selectedTextAttributes = [.backgroundColor: look.selection]
-        textView.typingAttributes = [.font: look.font, .foregroundColor: look.foreground]
+        codeView.backgroundColor = look.background
+        codeView.insertionPointColor = look.foreground
+        codeView.currentLineColor = look.currentLine
+        codeView.selectedTextAttributes = [.backgroundColor: look.selection]
+        codeView.typingAttributes = [.font: look.font, .foregroundColor: look.foreground]
         ruler?.background = look.background
         ruler?.numberColor = look.lineNumber
         ruler?.font = .monospacedDigitSystemFont(ofSize: max(look.font.pointSize - 2, 9), weight: .regular)

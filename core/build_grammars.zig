@@ -84,6 +84,18 @@ pub fn add(b: *std.Build, root: *std.Build.Module, target: std.Build.ResolvedTar
     return libs.items;
 }
 
+/// md4c, the Markdown parser of the rendered view (docs/adr/0010-markdown-rendering.md).
+/// Only the parser: the HTML comes from core/features/markdown.
+pub fn addMd4c(b: *std.Build, root: *std.Build.Module, target: std.Build.ResolvedTarget) ?*std.Build.Step.Compile {
+    const dep = b.lazyDependency("md4c", .{}) orelse return null;
+    const lib = cLibrary(b, target, "md4c");
+    lib.root_module.addCSourceFile(.{ .file = dep.path("src/md4c.c"), .flags = &.{"-std=c99"} });
+    lib.root_module.addIncludePath(dep.path("src"));
+    root.addIncludePath(dep.path("src"));
+    root.linkLibrary(lib);
+    return lib;
+}
+
 fn cLibrary(b: *std.Build, target: std.Build.ResolvedTarget, name: []const u8) *std.Build.Step.Compile {
     const module = b.createModule(.{ .target = target, .optimize = .ReleaseSmall, .link_libc = true });
     return b.addLibrary(.{ .name = name, .linkage = .static, .root_module = module });

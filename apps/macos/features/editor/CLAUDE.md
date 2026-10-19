@@ -25,6 +25,8 @@
   direto); `EditorHighlighter.swift` pinta no NSTextStorage só as linhas que o núcleo diz que
   mudaram, depois de a edição terminar. `EditorAppearance.swift`: fonte e cores, que o app preenche
   (a fonte do terminal e a paleta ANSI do tema).
+- Ganchos para outras features (markdown): `textView`, `commandClick` (⌘+clique num caractere) e
+  `showAlternate(_:)` (outra view no lugar do texto, como o renderizado).
 - Comandos em `EditorCommands.swift`: editor.save (⌘S), editor.fold-all, editor.unfold-all.
 - A inteligência de Markdown (autocomplete, ⌘+clique, links quebrados, quem aponta pra cá) vem da
   feature markdown, pela porta de entrada dela.

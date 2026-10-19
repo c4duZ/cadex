@@ -17,7 +17,12 @@ const foldable_words = [_][]const u8{
     "element", "section", "fenced_code", "dictionary", "list", "mapping", "sequence",
 };
 
-pub fn regions(gpa: std.mem.Allocator, root: ts.TSNode) ![]Region {
+/// In Markdown only sections (a heading and what follows it) and code
+/// blocks fold: lists and tables end on the blank line after them, so
+/// every item looked foldable (2026-10-19).
+const markdown_foldable = [_][]const u8{ "section", "fenced_code_block" };
+
+pub fn regions(gpa: std.mem.Allocator, root: ts.TSNode, markdown: bool) ![]Region {
     var by_row: std.AutoArrayHashMapUnmanaged(u32, u32) = .empty;
     defer by_row.deinit(gpa);
     const cursor_root = root;
@@ -28,7 +33,7 @@ pub fn regions(gpa: std.mem.Allocator, root: ts.TSNode) ![]Region {
     var depth: usize = 0;
     while (true) {
         const node = ts.ts_tree_cursor_current_node(&cursor);
-        if (depth > 0 and ts.ts_node_is_named(node)) try consider(gpa, node, &by_row);
+        if (depth > 0 and ts.ts_node_is_named(node)) try consider(gpa, node, &by_row, markdown);
         if (ts.ts_tree_cursor_goto_first_child(&cursor)) {
             depth += 1;
             continue;
@@ -40,19 +45,19 @@ pub fn regions(gpa: std.mem.Allocator, root: ts.TSNode) ![]Region {
     }
 }
 
-fn consider(gpa: std.mem.Allocator, node: ts.TSNode, by_row: *std.AutoArrayHashMapUnmanaged(u32, u32)) !void {
+fn consider(gpa: std.mem.Allocator, node: ts.TSNode, by_row: *std.AutoArrayHashMapUnmanaged(u32, u32), markdown: bool) !void {
     const start = ts.ts_node_start_point(node);
     const end = ts.ts_node_end_point(node);
     // A node ending at column 0 really ends on the line before.
     const last = if (end.column == 0 and end.row > 0) end.row - 1 else end.row;
     if (last <= start.row) return;
     if (by_row.contains(start.row)) return;
-    if (!isFoldable(std.mem.span(ts.ts_node_type(node)))) return;
+    if (!isFoldable(std.mem.span(ts.ts_node_type(node)), if (markdown) &markdown_foldable else &foldable_words)) return;
     try by_row.put(gpa, start.row, last);
 }
 
-fn isFoldable(node_type: []const u8) bool {
-    for (foldable_words) |word| {
+fn isFoldable(node_type: []const u8, words: []const []const u8) bool {
+    for (words) |word| {
         if (std.mem.indexOf(u8, node_type, word) != null) return true;
     }
     return false;

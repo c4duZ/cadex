@@ -214,7 +214,8 @@ pub const Document = struct {
     /// Fold regions of the whole document (empty without a language).
     pub fn foldRegions(self: *Document, gpa: std.mem.Allocator) ![]folds.Region {
         const tree = self.tree orelse return &.{};
-        return folds.regions(gpa, ts.ts_tree_root_node(tree));
+        const markdown = if (self.language) |l| l.id == .markdown else false;
+        return folds.regions(gpa, ts.ts_tree_root_node(tree), markdown);
     }
 };
 
@@ -262,6 +263,18 @@ fn collectInline(gpa: std.mem.Allocator, node: ts.TSNode, out: *std.ArrayList(ts
     }
     const n = ts.ts_node_child_count(node);
     for (0..n) |i| try collectInline(gpa, ts.ts_node_child(node, @intCast(i)), out);
+}
+
+test "markdown folds sections and code blocks only" {
+    const source = "# A\n\n- one\n- two\n\n```zig\nconst x = 1;\n```\n\n## B\n\ntext\n";
+    const doc = try Document.open(std.testing.allocator, "n.md", source, .utf8);
+    defer doc.close();
+    const regions = try doc.foldRegions(std.testing.allocator);
+    defer std.testing.allocator.free(regions);
+    try std.testing.expectEqual(@as(usize, 3), regions.len);
+    try std.testing.expectEqual(@as(u32, 0), regions[0].start_row);
+    try std.testing.expectEqual(@as(u32, 5), regions[1].start_row);
+    try std.testing.expectEqual(@as(u32, 9), regions[2].start_row);
 }
 
 test {

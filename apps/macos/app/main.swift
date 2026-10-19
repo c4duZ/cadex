@@ -3,6 +3,7 @@ import StatusBar
 import CommandPalette
 import Editor
 import Explorer
+import Markdown
 import Search
 import Settings
 import Shortcuts
@@ -29,12 +30,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var explorer: ExplorerController?
     private var search: SearchController?
     private var opener: FileOpener?
+    private var markdown: MarkdownController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpCommands()
         let window = makeWindow()
         let tabs = TabsController(window: window)
         let opener = FileOpener(tabs: tabs)
+        opener.onEditorOpened = { [weak self] document in self?.markdown?.attach(document) }
         self.opener = opener
         explorer?.openFile = { [weak opener] path in opener?.open(path) }
         explorer?.onFolderChange = { [weak opener] folders in opener?.foldersChanged(folders) }
@@ -119,6 +122,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             guard let self else { return }
             self.explorer?.setRoot(root)
             self.search?.setRoot(root, showHidden: self.explorer?.showHidden ?? true)
+            self.markdown?.setRoot(root)
         }
     }
 
@@ -159,6 +163,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         makeExplorer()
         makeSearch(palette: palette)
         commands.register(EditorCommands.all { [weak self] in self?.tabs?.activeDocument as? EditorDocument })
+        let markdown = MarkdownController(root: folder.root, findFiles: { [weak self] in self?.search?.findFiles($0) ?? [] },
+                                          open: { [weak self] path, line in self?.opener?.open(path, line: line) })
+        self.markdown = markdown
+        commands.register(MarkdownCommands.all(markdown, palette: palette) { [weak self] in
+            self?.tabs?.activeDocument as? EditorDocument
+        })
         connectFolder()
 
         settings.onShortcuts = { [weak self] shortcuts in self?.applyShortcuts(shortcuts) }
@@ -216,7 +226,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let folders = existing.filter { FileManager.default.fileExists(atPath: $0, isDirectory: &isFolder) && isFolder.boolValue }
         if let first = folders.first { folder.open(first) }
         for file in existing where !folders.contains(file) {
-            let real = (file as NSString).resolvingSymlinksInPath
+            let real = FileOpener.canonical(file)
             if !real.hasPrefix(folder.root + "/") { folder.open((real as NSString).deletingLastPathComponent) }
             opener?.open(real)
         }

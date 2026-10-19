@@ -631,6 +631,37 @@ cadex_status cadex_editor_highlights(cadex_editor_document *document, uint32_t s
 /* Foldable regions of the whole text, by start row. Free with cadex_free. */
 cadex_status cadex_editor_folds(cadex_editor_document *document, cadex_editor_fold **out, size_t *count);
 
+/* ---- Markdown (core/features/markdown) ------------------------------- */
+
+/* The rendered page's HTML body (md4c, ADR 0010): GitHub anchors, colored
+ * code, `[[Note]]` as href="cadex-wiki:Note", raw HTML sanitized. Free with
+ * cadex_free. */
+cadex_status cadex_markdown_render(const uint8_t *text, size_t len, uint8_t **out, size_t *out_len);
+
+/* The headings and links of every note of a folder, kept current from the
+ * disk. Answers are lines of tab-separated fields (free with cadex_free);
+ * paths in and out are absolute. */
+typedef struct cadex_markdown_index cadex_markdown_index;
+cadex_status cadex_markdown_index_open(const char *root, cadex_markdown_index **out);
+void cadex_markdown_index_close(cadex_markdown_index *index);
+bool cadex_markdown_index_ready(cadex_markdown_index *index);
+/* One note path (relative to the root) per line. */
+cadex_status cadex_markdown_notes(cadex_markdown_index *index, uint8_t **out, size_t *out_len);
+/* "level \t line \t anchor \t text" per heading. CADEX_NOT_FOUND: not indexed. */
+cadex_status cadex_markdown_headings(cadex_markdown_index *index, const char *path, uint8_t **out, size_t *out_len);
+/* The links of an unsaved text (UTF-8) of the note at path: "start \t end
+ * \t kind \t broken \t target \t line" per link. start/end in UTF-16 units;
+ * kind 0 file, 1 wiki, 2 web; broken 0/1; target absolute or empty; line of
+ * the heading named, 0 if none. */
+cadex_status cadex_markdown_links(cadex_markdown_index *index, const char *path, const uint8_t *text, size_t len,
+                                  uint8_t **out, size_t *out_len);
+/* The notes linking to path: "absolute path \t line" per link. */
+cadex_status cadex_markdown_backlinks(cadex_markdown_index *index, const char *path, uint8_t **out, size_t *out_len);
+/* Where a destination written in the note at path goes (wiki: a note
+ * name): "absolute path \t line \t broken". CADEX_NOT_FOUND: nowhere. */
+cadex_status cadex_markdown_resolve(cadex_markdown_index *index, const char *path, const char *destination, bool wiki,
+                                    uint8_t **out, size_t *out_len);
+
 #ifdef __cplusplus
 }
 #endif

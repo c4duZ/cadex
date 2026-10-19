@@ -43,6 +43,9 @@ pub fn build(b: *std.Build) void {
 
     // tree-sitter and the grammars, for the editor (features/editor).
     const grammar_libs = grammars.add(b, root, target) orelse return;
+    // md4c, for the rendered Markdown (features/markdown).
+    const md4c = grammars.addMd4c(b, root, target) orelse return;
+    const c_libs = std.mem.concat(b.allocator, *std.Build.Step.Compile, &.{ grammar_libs, &.{md4c} }) catch @panic("OOM");
 
     const core_lib = b.addLibrary(.{
         .name = "cadex-core",
@@ -53,7 +56,7 @@ pub fn build(b: *std.Build) void {
     // A Zig static library does not absorb the static libraries its modules
     // link, and ghostty-vt links simdutf and highway that way. The app should
     // link one file, so merge them into libcadex.a.
-    installMergedLibrary(b, ghostty, core_lib, grammar_libs, target, optimize);
+    installMergedLibrary(b, ghostty, core_lib, c_libs, target, optimize);
     b.installDirectory(.{
         .source_dir = b.path("include"),
         .install_dir = .header,

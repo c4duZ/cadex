@@ -17,6 +17,12 @@ public final class SearchController {
         setRoot(root, showHidden: showHidden)
     }
 
+    /// Workspace files whose name matches `query` (fuzzy), relative to the
+    /// root, best first: for other features' suggestions (markdown `](`).
+    public func findFiles(_ query: String, limit: Int = 30) -> [String] {
+        Array(files.rank(query).prefix(limit).map(\.path))
+    }
+
     /// The workspace or the hidden-files preference changed. The same
     /// values again (settings apply on every change) keep the index.
     public func setRoot(_ root: String, showHidden: Bool) {

@@ -16,7 +16,21 @@
   sublinhado, painel) e se liga ao editor pela porta de entrada dele.
 - Abrir link, alternar texto e renderizado e mostrar "quem aponta pra cá" são comandos registrados.
 - Conteúdo sanitizado antes de exibir.
-- Spec de comportamento em docs/spec/markdown.md, escrita antes do código. Status: não iniciada.
+- Porta de entrada: `MarkdownController.swift` (o índice das notas, `attach` de cada nota aberta no
+  editor, alternar o renderizado, seguir links, sugestões, "quem aponta pra cá" como lista da
+  paleta). `MarkdownIndex.swift` fala com a feature markdown do núcleo.
+- `MarkdownSession.swift`, uma por nota aberta: confere os links um pouco depois de parar de
+  digitar, sublinha os quebrados com atributos do texto (os de desenho do TextKit 2 se perdiam quando
+  o editor repintava as cores), ⌘+clique pelo gancho do editor, sugestões por
+  `CompletionTrigger.swift` (o que completar e o caminho relativo) e `CompletionPopup.swift` (lista
+  que não toma o teclado; ↑ ↓ Enter Tab Esc vêm do delegate do texto).
+- `MarkdownPreview.swift`: WKWebView sem JavaScript, CSP que só deixa imagens cadex-file: e estilo
+  embutido, imagens servidas só de dentro do workspace; clique em link volta para o app (nota abre no
+  Cadex no título, web no navegador). Cores do `EditorAppearance` (rgba, com o alfa).
+- Comandos em `MarkdownCommands.swift`: markdown.toggle-preview (⇧⌘V), markdown.open-link,
+  markdown.backlinks.
+- Spec: `docs/spec/markdown.md`. Status: plano 5, fase C pronta.
 
 ## Como validar
-- `make macos-test` passa.
+- `make macos-test` passa: o que completar, caminhos relativos, página sem script, links quebrados,
+  sugestões de nota e título, backlinks, seguir link.

@@ -24,11 +24,11 @@ macos-test: core relink
 		&& swift build --product StatusBarTests && swift build --product IconsTests \
 		&& swift build --product ThemesTests && swift build --product SettingsTests \
 		&& swift build --product ExplorerTests && swift build --product SearchTests \
-		&& swift build --product EditorTests
+		&& swift build --product EditorTests && swift build --product MarkdownTests
 	@cd apps/macos && .build/debug/TerminalTests && .build/debug/CommandPaletteTests && .build/debug/ShortcutsTests \
 		&& .build/debug/TabsTests && .build/debug/StatusBarTests && .build/debug/IconsTests \
 		&& .build/debug/ThemesTests && .build/debug/SettingsTests \
-		&& .build/debug/ExplorerTests && .build/debug/SearchTests && .build/debug/EditorTests
+		&& .build/debug/ExplorerTests && .build/debug/SearchTests && .build/debug/EditorTests && .build/debug/MarkdownTests
 
 # Debug build of the app; `make run` opens it.
 app: core relink

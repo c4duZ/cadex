@@ -4,6 +4,8 @@ import Checks
 @testable import Shortcuts
 import Explorer
 import Search
+import Editor
+import Markdown
 import Tabs
 import Terminal
 
@@ -20,6 +22,9 @@ func appRegistry() -> CommandRegistry {
     registry.register(TerminalCommands.all)
     registry.register(TabCommands.all { nil })
     registry.register(ExplorerCommands.all(ExplorerController(root: NSTemporaryDirectory()) { _ in false }))
+    registry.register(EditorCommands.all { nil })
+    registry.register(MarkdownCommands.all(MarkdownController(root: NSTemporaryDirectory(), findFiles: { _ in [] }, open: { _, _ in }),
+                                           palette: palette) { nil })
     registry.register(SearchCommands.all(SearchController(root: NSTemporaryDirectory(), showHidden: false) { _, _ in },
                                          palette: palette))
     return registry

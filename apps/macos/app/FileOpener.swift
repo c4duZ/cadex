@@ -10,14 +10,17 @@ import Themes
 @MainActor
 final class FileOpener {
     private weak var tabs: TabsController?
+    /// A file was opened in a new editor tab (markdown attaches its help).
+    var onEditorOpened: ((EditorDocument) -> Void)?
 
     init(tabs: TabsController) {
         self.tabs = tabs
     }
 
     /// Opens `path`, at a 1-based line when given.
-    func open(_ path: String, line: Int? = nil) {
+    func open(_ given: String, line: Int? = nil) {
         guard let tabs else { return }
+        let path = Self.canonical(given)
         let document = (tabs.document(identity: path) as? EditorDocument) ?? makeEditor(path)
         tabs.open(document)
         if let line {
@@ -26,9 +29,19 @@ final class FileOpener {
         }
     }
 
+    /// The real path, as the core compares them: /tmp/x is /private/tmp/x.
+    /// NSString's resolvingSymlinksInPath drops /private on purpose, so the
+    /// Markdown index did not know the note (2026-10-19).
+    static func canonical(_ path: String) -> String {
+        guard let real = realpath(path, nil) else { return path }
+        defer { free(real) }
+        return String(cString: real)
+    }
+
     private func makeEditor(_ path: String) -> EditorDocument {
         let document = EditorDocument(path: path)
         document.openExternally = { NSWorkspace.shared.open(URL(fileURLWithPath: $0)) }
+        onEditorOpened?(document)
         return document
     }
 

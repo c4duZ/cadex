@@ -24,9 +24,9 @@ ao editar, ter links que funcionam entre os arquivos (ADR 0006).
   completa `[[nome]]`.
 - ⌘+clique num link (`[x](caminho#titulo)` ou `[[nota]]`) abre o arquivo no título.
 - Link quebrado (arquivo que não existe, ou título que não existe no arquivo) fica sublinhado em
-  vermelho ondulado.
-- Comando "Quem aponta pra cá": um painel lista os arquivos do workspace que linkam o arquivo atual,
-  com a linha de cada link; clicar abre lá.
+  vermelho pontilhado.
+- Comando "Quem aponta pra cá": a paleta lista os arquivos do workspace que linkam o arquivo atual,
+  com a linha de cada link; escolher abre lá.
 
 ### Âncoras
 - Formato do GitHub: minúsculas, acentos mantidos, espaços viram `-`, pontuação some (menos `-` e
@@ -48,10 +48,10 @@ ao editar, ter links que funcionam entre os arquivos (ADR 0006).
 - Imagem remota (`https://`) no renderizado -> não carrega (sem rede na página).
 
 ## Critérios de aceite
-- [ ] O índice acha link para arquivo, para título, wiki-link, link quebrado e "quem aponta pra cá".
-- [ ] "Decisão Final" vira `#decisão-final`.
-- [ ] O HTML renderizado não contém `<script>` nem atributos `on*`.
-- [ ] Autocomplete de `](` e de `[[` completa o caminho certo.
-- [ ] ⌘+clique abre o arquivo no título.
-- [ ] Link quebrado aparece sublinhado.
-- [ ] ⇧⌘V alterna entre texto e renderizado.
+- [x] O índice acha link para arquivo, para título, wiki-link, link quebrado e "quem aponta pra cá".
+- [x] "Decisão Final" vira `#decisão-final`.
+- [x] O HTML renderizado não contém `<script>` nem atributos `on*`.
+- [x] Autocomplete de `](` e de `[[` completa o caminho certo.
+- [x] ⌘+clique abre o arquivo no título.
+- [x] Link quebrado aparece sublinhado.
+- [x] ⇧⌘V alterna entre texto e renderizado.

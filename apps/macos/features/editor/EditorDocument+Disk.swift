@@ -6,12 +6,12 @@ extension EditorDocument {
     /// ⌘S. False (with the reason in the banner) when it could not save.
     @discardableResult
     public func save() -> Bool {
-        guard let textView else { return false }
+        guard let codeView else { return false }
         guard !readOnly else {
             banner.show("Este arquivo está aberto só para leitura.")
             return false
         }
-        let data = Data(textView.string.utf8)
+        let data = Data(codeView.string.utf8)
         if let problem = EditorFile.write(path, data) {
             banner.show(problem)
             return false
@@ -42,15 +42,15 @@ extension EditorDocument {
 
     /// Puts the cursor at the start of a 1-based line, centered.
     public func reveal(line: Int) {
-        guard let textView, let highlighter else { return }
+        guard let codeView, let highlighter else { return }
         let index = max(0, min(line - 1, highlighter.lines.count - 1))
         let range = highlighter.lines.range(lines: index, through: index)
-        textView.setSelectedRange(NSRange(location: range.location, length: 0))
-        textView.scrollRangeToVisible(range)
-        if let frame = textView.currentLineFrame(), let clip = textView.enclosingScrollView?.contentView {
+        codeView.setSelectedRange(NSRange(location: range.location, length: 0))
+        codeView.scrollRangeToVisible(range)
+        if let frame = codeView.currentLineFrame(), let clip = codeView.enclosingScrollView?.contentView {
             let y = max(0, frame.midY - clip.bounds.height / 2)
             clip.scroll(to: NSPoint(x: 0, y: y))
-            textView.enclosingScrollView?.reflectScrolledClipView(clip)
+            codeView.enclosingScrollView?.reflectScrolledClipView(clip)
         }
     }
 
@@ -77,14 +77,14 @@ extension EditorDocument {
 
     /// New text from disk, keeping the cursor and the scroll where they were.
     func replaceText(_ text: String, data: Data) {
-        guard let textView else { return }
-        let selection = textView.selectedRange()
-        let origin = textView.enclosingScrollView?.contentView.bounds.origin ?? .zero
+        guard let codeView else { return }
+        let selection = codeView.selectedRange()
+        let origin = codeView.enclosingScrollView?.contentView.bounds.origin ?? .zero
         replaceAllText(text)
         markSaved(data)
         let length = (text as NSString).length
-        textView.setSelectedRange(NSRange(location: min(selection.location, length), length: 0))
-        textView.enclosingScrollView?.contentView.scroll(to: origin)
+        codeView.setSelectedRange(NSRange(location: min(selection.location, length), length: 0))
+        codeView.enclosingScrollView?.contentView.scroll(to: origin)
         banner.hide()
     }
 

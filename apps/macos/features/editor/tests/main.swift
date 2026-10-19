@@ -35,10 +35,10 @@ let exitCode = await Checks.run([
         let doc = EditorDocument(path: root + "/a.zig")
         expect(doc.language == "Zig")
         expect(doc.folding.isFoldStart(0))
-        let storage = doc.textView!.textStorage!
+        let storage = doc.codeView!.textStorage!
         let color = storage.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? NSColor
         expect(color != nil && color != EditorAppearance.current.foreground, "fn should be colored")
-        doc.textView!.insertText("// x\n", replacementRange: NSRange(location: 0, length: 0))
+        doc.codeView!.insertText("// x\n", replacementRange: NSRange(location: 0, length: 0))
         expect(doc.hasUnsavedChanges)
         expect(doc.save())
         expect(!doc.hasUnsavedChanges)
@@ -46,14 +46,14 @@ let exitCode = await Checks.run([
         expect(saved.hasPrefix("// x\nfn a()"), saved)
         try "const b = 1;\n".write(toFile: root + "/a.zig", atomically: true, encoding: .utf8)
         doc.diskMayHaveChanged()
-        expect(doc.textView!.string == "const b = 1;\n", doc.textView!.string)
+        expect(doc.codeView!.string == "const b = 1;\n", doc.codeView!.string)
         try? FileManager.default.removeItem(atPath: root)
     }),
     ("binary files show a message instead of the text", {
         let root = sandbox([:])
         FileManager.default.createFile(atPath: root + "/x.bin", contents: Data([0x50, 0x00, 0x01]))
         let doc = EditorDocument(path: root + "/x.bin")
-        expect(doc.textView == nil)
+        expect(doc.codeView == nil)
         try? FileManager.default.removeItem(atPath: root)
     }),
 ])

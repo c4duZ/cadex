@@ -19,6 +19,18 @@ final class CodeTextView: NSTextView {
         performTextFinderAction(item)
     }
 
+    /// ⌘+click on a character: true when it did something (opened a link),
+    /// so the click does not move the cursor.
+    var commandClick: ((Int) -> Bool)?
+
+    override func mouseDown(with event: NSEvent) {
+        if event.modifierFlags.contains(.command), let commandClick {
+            let index = characterIndexForInsertion(at: convert(event.locationInWindow, from: nil))
+            if commandClick(index) { return }
+        }
+        super.mouseDown(with: event)
+    }
+
     override func insertTab(_ sender: Any?) {
         insertText(indentUnit, replacementRange: selectedRange())
     }
