@@ -27,7 +27,9 @@ final class ExplorerOutline: NSOutlineView {
         dataSource = controller
         delegate = controller
         target = self
-        doubleAction = #selector(openClicked)
+        // One click opens, as in VS Code: two clicks for every file was the
+        // owner's complaint (2026-10-19).
+        action = #selector(rowClicked)
         registerForDraggedTypes([.fileURL])
         setDraggingSourceOperationMask([.move], forLocal: true)
         setDraggingSourceOperationMask([.copy], forLocal: false)
@@ -80,16 +82,28 @@ final class ExplorerOutline: NSOutlineView {
         enumerateAvailableRowViews { view, _ in view.needsDisplay = true }
     }
 
-    /// Where the guide of `level` goes: under that level's disclosure arrow.
-    func guideX(level: Int, row: Int) -> CGFloat {
-        let cell = frameOfCell(atColumn: 0, row: row)
-        let rowLevel = self.level(forRow: row)
-        // The arrow's center sits a fixed distance left of the cell.
-        return cell.minX - CGFloat(rowLevel - level) * indentationPerLevel - 8
+    /// Where the guides of a row go: under the arrow of each folder above
+    /// it, read from the outline itself. A fixed distance guessed from the
+    /// cell put them across the arrows (owner's screenshot, 2026-10-19).
+    func guideXs(row: Int) -> [CGFloat] {
+        var xs: [CGFloat] = []
+        var item = self.item(atRow: row)
+        while let parent = self.parent(forItem: item) {
+            let parentRow = self.row(forItem: parent)
+            guard parentRow >= 0 else { break }
+            xs.append(frameOfOutlineCell(atRow: parentRow).midX)
+            item = parent
+        }
+        return xs
     }
 
-    @objc private func openClicked() {
-        guard clickedRow >= 0 else { return }
+    /// A file opens in its tab, a folder opens or closes. Not with ⌘ or ⇧
+    /// (they build a selection), and not on the arrow, which already did it.
+    @objc private func rowClicked() {
+        guard clickedRow >= 0, let event = NSApp.currentEvent else { return }
+        if !event.modifierFlags.intersection([.command, .shift]).isEmpty { return }
+        let point = convert(event.locationInWindow, from: nil)
+        if frameOfOutlineCell(atRow: clickedRow).insetBy(dx: -4, dy: 0).contains(point) { return }
         run("explorer.open")
     }
 

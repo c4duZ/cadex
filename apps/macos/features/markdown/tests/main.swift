@@ -109,5 +109,23 @@ let exitCode = await Checks.run([
         expect(doc.alternate is RenderedNoteView)
         try? FileManager.default.removeItem(atPath: root)
     }),
+    ("a note gets the button in its tab, and opens rendered when the setting says so", {
+        let root = sandbox(["a.md": "# A\n", "b.md": "# B\n"])
+        let markdown = MarkdownController(root: root, findFiles: { _ in [] }, open: { _, _ in })
+        var ran: [String] = []
+        markdown.runCommand = { id in ran.append(id); return false }
+        let a = EditorDocument(path: root + "/a.md")
+        markdown.attach(a)
+        guard let toggle = a.accessory as? MarkdownToggle else { return expect(false, "sem botão") }
+        expect(a.alternate == nil)
+        toggle.mouseDown(with: NSEvent())
+        // The command did not run (false): the button renders this note itself.
+        expect(ran == ["markdown.toggle-preview"] && a.alternate is RenderedNoteView)
+        markdown.opensRendered = true
+        let b = EditorDocument(path: root + "/b.md")
+        markdown.attach(b)
+        expect(b.alternate is RenderedNoteView)
+        try? FileManager.default.removeItem(atPath: root)
+    }),
 ])
 exit(exitCode)

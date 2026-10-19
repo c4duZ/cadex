@@ -29,6 +29,9 @@
   Cadex no título, web no navegador). Cores do `EditorAppearance` (rgba, com o alfa). A página
   é da nota enquanto aparece: voltar para o texto ou fechar a aba libera o WebKit, e alternar de
   novo renderiza outra (o controlador não guarda nenhuma).
+- `MarkdownToggle.swift`: o botão "Visualizar"/"Código" no canto da aba (o acessório do editor),
+  que roda markdown.toggle-preview; `opensRendered` (markdown.openAs do settings.json, que o app
+  passa) abre a nota já renderizada.
 - Comandos em `MarkdownCommands.swift`: markdown.toggle-preview (⇧⌘V), markdown.open-link,
   markdown.backlinks.
 - Spec: `docs/spec/markdown.md`. Status: plano 5, fase C pronta.

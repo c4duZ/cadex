@@ -20,7 +20,9 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case caretRight = 0xE13A
     case caretUp = 0xE13C
     case check = 0xE182
+    case code = 0xE1BC
     case command = 0xE1C4
+    case eye = 0xE220
     case file = 0xE230
     case fileArchive = 0xEB2A
     case fileAudio = 0xEA20

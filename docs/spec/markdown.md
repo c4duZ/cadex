@@ -7,8 +7,11 @@ ao editar, ter links que funcionam entre os arquivos (ADR 0006).
 ## Comportamento
 
 ### Ver
-- Um `.md` abre no editor (texto). O comando "Alternar Markdown renderizado" (⇧⌘V) troca para a
-  página renderizada e de volta, na mesma aba.
+- Um `.md` abre no editor (texto), ou já renderizado se as configurações pedirem ("Abrir Markdown
+  como", em Geral). O comando "Alternar Markdown renderizado" (⇧⌘V) troca para a página
+  renderizada e de volta, na mesma aba.
+- No canto superior direito da aba há um botão que faz o mesmo: "Visualizar" sobre o texto,
+  "Código" sobre a página. Sem ele ninguém achava o renderizado (dono, 2026-10-19).
 - Renderizado no estilo do GitHub: títulos, ênfase, listas, listas de tarefa, tabelas, citações,
   blocos de código com destaque, linhas horizontais, imagens locais (caminho relativo ao arquivo) e
   links. Cores do tema.

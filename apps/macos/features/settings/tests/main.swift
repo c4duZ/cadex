@@ -13,10 +13,15 @@ let exitCode = await Checks.run([
         settings.appearance.theme = "tokyo-night"
         settings.appearance.backgroundImage = "/tmp/fundo.png"
         settings.explorer.showHidden = false
+        settings.markdown.openAs = "rendered"
         settings.shortcuts = ["cmd+shift+t": "tab.new", "cmd+t": nil]
         let (read, problems) = SettingsFile.read(SettingsFile.write(settings))
         expect(problems.isEmpty, "\(problems)")
         expect(read == settings, "\(read)")
+    }),
+    ("a note opens as source unless the file says rendered; anything else is a problem", {
+        let (read, problems) = SettingsFile.read(Data(#"{"markdown": {"openAs": "slides"}}"#.utf8))
+        expect(read.markdown.openAs == "source" && problems.count == 1, "\(problems)")
     }),
     ("a broken file gives the defaults and says why", {
         let (read, problems) = SettingsFile.read(Data("{ quebrado".utf8))

@@ -8,7 +8,7 @@
 - Esta feature aplicando preferências nas outras: ela guarda e avisa; o app liga cada uma.
 
 ## Como eu quero
-- `Settings.swift`: o modelo (geral, terminal, aparência, explorer, atalhos) e os limites da spec.
+- `Settings.swift`: o modelo (geral, terminal, aparência, explorer, markdown, atalhos) e os limites da spec.
   `SettingsFile.swift`: lê o JSON campo a campo (campo errado volta ao padrão e vira aviso, o resto
   vale) e escreve. `SettingsStore.swift`: memória e disco (Application Support/Cadex), salva a cada
   mudança e relê edição à mão observando a pasta (salvar atômico) e o arquivo (edição no lugar).

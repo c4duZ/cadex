@@ -100,7 +100,7 @@ let package = Package(
         ),
         .target(
             name: "Markdown",
-            dependencies: ["CCadex", "CommandPalette", "Editor"],
+            dependencies: ["CCadex", "CommandPalette", "Editor", "Icons"],
             path: "features/markdown",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],

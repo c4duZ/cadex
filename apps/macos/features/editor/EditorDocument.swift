@@ -45,6 +45,14 @@ public final class EditorDocument: TabDocument {
     }
     /// What shows instead of the text (the rendered Markdown), or nil.
     public private(set) var alternate: NSView?
+    /// A control another feature puts at the top right of the tab, over the
+    /// text and over the alternate view alike (markdown's "Visualizar").
+    public var accessory: NSView? {
+        didSet {
+            oldValue?.removeFromSuperview()
+            placeAccessory()
+        }
+    }
     private var textContainer: NSView?
 
     /// Shows `view` in place of the text, or the text again with nil.
@@ -141,8 +149,20 @@ public final class EditorDocument: TabDocument {
         return (scroll, codeView)
     }
 
+    private func placeAccessory() {
+        guard let accessory else { return }
+        accessory.removeFromSuperview()
+        accessory.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(accessory, positioned: .above, relativeTo: nil)
+        NSLayoutConstraint.activate([
+            accessory.topAnchor.constraint(equalTo: banner.bottomAnchor, constant: 8),
+            // Clear of the vertical scroller.
+            accessory.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -22),
+        ])
+    }
+
     private func place(_ content: NSView) {
-        view.subviews.filter { $0 !== banner }.forEach { $0.removeFromSuperview() }
+        view.subviews.filter { $0 !== banner && $0 !== accessory }.forEach { $0.removeFromSuperview() }
         content.translatesAutoresizingMaskIntoConstraints = false
         banner.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(content)
@@ -155,6 +175,7 @@ public final class EditorDocument: TabDocument {
             content.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             content.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
+        placeAccessory()
     }
 
     private func showMessage(_ text: String, action: String?) {

@@ -24,8 +24,10 @@ operações do Finder que importam para quem programa.
 O dono comparou com o Terax e preferiu o explorador do VS Code (2026-10-19). O comportamento abaixo
 segue a documentação pública do VS Code; o código de cores por tipo vem do CodeEdit (MIT).
 - Linhas de largura inteira, 22 pt de altura, recuo de 8 pt por nível depois da seta.
-- Guias de recuo: linhas verticais finas marcando cada nível, que aparecem com o ponteiro sobre a
-  árvore.
+- Um clique abre: arquivo na aba, pasta abre ou fecha. Com ⌘ ou ⇧ o clique só monta a seleção.
+  Dois cliques para tudo foi a queixa do dono (2026-10-19).
+- Guias de recuo: linhas verticais finas que descem do centro da seta de cada pasta aberta e
+  passam pelos filhos dela, com o ponteiro sobre a árvore.
 - Ao passar o ponteiro, a linha ganha um fundo leve. A selecionada tem o fundo na cor do tema e,
   com a árvore em foco, uma borda fina da mesma cor; sem foco, só o fundo, mais fraco.
 - Pastas compactas: uma pasta que só tem outra pasta dentro aparece numa linha só, "src/main/java",

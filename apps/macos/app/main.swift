@@ -213,6 +213,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let markdown = MarkdownController(root: folder.root, findFiles: { [weak self] in self?.search?.findFiles($0) ?? [] },
                                           open: { [weak self] path, line in self?.opener?.open(path, line: line) })
         self.markdown = markdown
+        markdown.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
+        settings.onMarkdown = { [weak markdown] prefs in markdown?.opensRendered = prefs.openAs == "rendered" }
         commands.register(MarkdownCommands.all(markdown, palette: palette) { [weak self] in
             self?.tabs?.activeDocument as? EditorDocument
         })

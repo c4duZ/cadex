@@ -6,7 +6,7 @@ import AppKit
 enum GeneralPages {
     static func general(_ store: SettingsStore) -> NSView {
         let g = store.settings.general
-        return SettingsPage.make(title: "Geral", subtitle: "Shell e as perguntas antes de agir.", rows: [
+        return SettingsPage.make(title: "Geral", subtitle: "Shell, as perguntas antes de agir e como abrem as notas.", rows: [
             SettingsPage.row("Shell", "Vazio usa o shell do sistema. Vale para terminais novos.",
                              control: SettingsPage.text(g.shell, placeholder: "/bin/zsh") { value in
                                  store.update { $0.general.shell = value.trimmingCharacters(in: .whitespaces) }
@@ -16,6 +16,11 @@ enum GeneralPages {
             SettingsPage.row("Perguntar antes de colar várias linhas", "Quando o programa não marca colagens e cada linha rodaria.",
                              control: SettingsPage.toggle(g.confirmMultilinePaste) { on in
                                  store.update { $0.general.confirmMultilinePaste = on }
+                             }),
+            SettingsPage.row("Abrir Markdown como", "Código para editar, ou já renderizado. O botão no canto da aba troca a qualquer hora.",
+                             control: SettingsPage.popup([("Código", "source"), ("Renderizado", "rendered")],
+                                                         selected: store.settings.markdown.openAs) { value in
+                                 store.update { $0.markdown.openAs = value }
                              }),
         ])
     }

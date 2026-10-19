@@ -38,10 +38,17 @@ public struct Settings: Equatable, Sendable {
         public var showHidden = true
     }
 
+    public struct Markdown: Equatable, Sendable {
+        /// How a note opens: "source" (the text, to edit) or "rendered"
+        /// (docs/spec/markdown.md). The button in the tab switches either way.
+        public var openAs = "source"
+    }
+
     public var general = General()
     public var terminal = Terminal()
     public var appearance = Appearance()
     public var explorer = Explorer()
+    public var markdown = Markdown()
     /// "cmd+shift+t" → command id, or nil to turn a default off.
     public var shortcuts: [String: String?] = [:]
 
@@ -52,4 +59,5 @@ public struct Settings: Equatable, Sendable {
     static let historyRange = 100...100_000
     static let cursors = ["bar", "block", "underline"]
     static let modes = ["system", "dark", "light"]
+    static let markdownOpenings = ["source", "rendered"]
 }

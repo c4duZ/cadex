@@ -41,6 +41,9 @@ public enum SettingsFile {
         if let e = reader.section(root, "explorer") {
             settings.explorer.showHidden = reader.bool(e, "explorer.showHidden") ?? settings.explorer.showHidden
         }
+        if let m = reader.section(root, "markdown") {
+            settings.markdown.openAs = reader.choice(m, "markdown.openAs", Settings.markdownOpenings) ?? settings.markdown.openAs
+        }
         if let s = reader.section(root, "shortcuts") {
             for (combo, value) in s {
                 if value is NSNull { settings.shortcuts[combo] = .some(nil) }
@@ -66,6 +69,7 @@ public enum SettingsFile {
                            "backgroundImage": s.appearance.backgroundImage ?? NSNull(),
                            "backgroundOpacity": s.appearance.backgroundOpacity, "backgroundBlur": s.appearance.backgroundBlur],
             "explorer": ["showHidden": s.explorer.showHidden],
+            "markdown": ["openAs": s.markdown.openAs],
             "shortcuts": shortcuts,
         ]
         return (try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])) ?? Data()

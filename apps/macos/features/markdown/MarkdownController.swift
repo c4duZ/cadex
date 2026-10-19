@@ -14,6 +14,10 @@ public final class MarkdownController {
     /// Opens a file in the app, at a 1-based line when known.
     private let open: (String, Int?) -> Void
     private var sessions: [ObjectIdentifier: MarkdownSession] = [:]
+    /// markdown.openAs in settings.json: a note opens rendered, not as text.
+    public var opensRendered = false
+    /// Runs a command by id: the tab's button runs markdown.toggle-preview.
+    public var runCommand: ((String) -> Bool)?
 
     public init(root: String, findFiles: @escaping (String) -> [String], open: @escaping (String, Int?) -> Void) {
         index = MarkdownIndex(root: root)
@@ -33,6 +37,14 @@ public final class MarkdownController {
     public func attach(_ document: EditorDocument) {
         guard Self.isMarkdown(document.path), document.textView != nil else { return }
         sessions[ObjectIdentifier(document)] = MarkdownSession(document: document, controller: self)
+        let toggle = MarkdownToggle()
+        toggle.onPress = { [weak self, weak document] in
+            guard let self, let document else { return }
+            // The button is in this note's tab, which is the active one.
+            if self.runCommand?("markdown.toggle-preview") != true { self.togglePreview(document) }
+        }
+        document.accessory = toggle
+        if opensRendered { togglePreview(document) }
         refreshWhenReady()
     }
 
@@ -60,6 +72,7 @@ public final class MarkdownController {
     public func togglePreview(_ document: EditorDocument) {
         if document.alternate != nil {
             document.showAlternate(nil)
+            (document.accessory as? MarkdownToggle)?.show(rendered: false)
             return
         }
         let preview = MarkdownPreview(path: document.path)
@@ -69,6 +82,7 @@ public final class MarkdownController {
         }
         preview.show(document.textView?.string ?? "")
         document.showAlternate(preview.handOff())
+        (document.accessory as? MarkdownToggle)?.show(rendered: true)
     }
 
     /// markdown.open-link: the link under the cursor.

@@ -8,7 +8,8 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
   de novo.
 - Seções:
   - **Geral:** shell (vazio usa o do sistema), perguntar antes de fechar com programa rodando,
-    perguntar antes de colar várias linhas.
+    perguntar antes de colar várias linhas, e como uma nota Markdown abre: código (padrão) ou
+    renderizada (`markdown.openAs`, "source" ou "rendered").
   - **Terminal:** fonte, tamanho, cursor (barra, bloco, sublinhado), cursor piscando, linhas de
     histórico, Option esquerdo como Meta, copiar ao selecionar.
   - **Aparência:** tema (seguir o sistema, ou um tema fixo), imagem de fundo com opacidade e

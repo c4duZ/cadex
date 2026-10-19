@@ -207,8 +207,7 @@ final class ExplorerRowView: NSTableRowView {
         }
         guard outline.pointerInside else { return }
         guide.setFill()
-        for level in 0..<outline.level(forRow: row) {
-            let x = outline.guideX(level: level, row: row)
+        for x in outline.guideXs(row: row) {
             NSRect(x: x.rounded(.down), y: 0, width: 1, height: bounds.height).fill()
         }
     }
