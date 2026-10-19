@@ -11,7 +11,8 @@
 - Hoje: `c_buffer.zig` (entregar bytes ao app pela API C, usado por workspace e explorer),
   `ignore.zig` e `glob.zig` (regras de .gitignore, .ignore e .git/info/exclude, como o git: a mais
   funda decide, a última linha vence, nada volta de dentro de pasta ignorada; usado pelo explorer e
-  pela busca), `regex.zig` (regex POSIX da libc, ADR 0009; usado pela busca e pelos predicados de
+  pela busca), `process.zig` (roda um programa sem shell, com pasta, tempo limite que mata o grupo, saída
+  limitada e ambiente extra; usado por source-control e git-history), `regex.zig` (regex POSIX da libc, ADR 0009; usado pela busca e pelos predicados de
   destaque do editor) e `test_dir.zig` (pasta temporária com caminho canônico, só nos testes).
 
 ## Como validar

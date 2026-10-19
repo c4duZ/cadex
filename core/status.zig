@@ -21,6 +21,8 @@ pub const already_exists: Code = 8;
 pub const too_large: Code = 9;
 /// The file is not text (feature explorer).
 pub const binary: Code = 10;
+/// No working `git` on the PATH (features source-control, git-history).
+pub const git_missing: Code = 11;
 
 /// Maps a Zig error to the closest status the apps can act on.
 pub fn fromError(err: anyerror) Code {
@@ -33,6 +35,7 @@ pub fn fromError(err: anyerror) Code {
         error.AlreadyExists => already_exists,
         error.TooLarge => too_large,
         error.Binary => binary,
+        error.GitMissing => git_missing,
         error.NotAbsolute, error.NameInvalid, error.NameTooLong, error.NotDirectory, error.IsDirectory, error.IntoItself, error.InvalidPattern => invalid_argument,
         else => io_failed,
     };

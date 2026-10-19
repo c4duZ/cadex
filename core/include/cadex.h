@@ -32,6 +32,7 @@ typedef int32_t cadex_status;
 #define CADEX_ALREADY_EXISTS 8 /* the name is taken */
 #define CADEX_TOO_LARGE 9      /* above the size limit asked for */
 #define CADEX_BINARY 10        /* not a text file */
+#define CADEX_GIT_MISSING 11   /* no working git on the PATH */
 
 /* Releases a buffer returned by the core. NULL is accepted. */
 void cadex_free(void *ptr);
@@ -665,6 +666,50 @@ cadex_status cadex_markdown_backlinks(cadex_markdown_index *index, const char *p
  * name): "absolute path \t line \t broken". CADEX_NOT_FOUND: nowhere. */
 cadex_status cadex_markdown_resolve(cadex_markdown_index *index, const char *path, const char *destination, bool wiki,
                                     uint8_t **out, size_t *out_len);
+
+/* ---- Source control (core/features/source-control) ------------------- */
+
+/* Everything runs the user's `git` (time limit, no password prompt, C
+ * locale), only inside an authorized folder. Listings are lines of
+ * tab-separated fields; a failed action returns CADEX_IO_FAILED with git's
+ * message in *message (free with cadex_free). Paths in lists are relative
+ * to the repository. */
+
+bool cadex_git_available(void);
+/* The repository's top folder; CADEX_NOT_FOUND when not in one. */
+cadex_status cadex_git_root(const char *folder, uint8_t **out, size_t *out_len);
+/* First line "branch \t oid \t upstream \t ahead \t behind" (branch empty when
+ * detached, oid "(initial)" before the first commit); then per path "kind \t X
+ * \t Y \t path \t orig": kind 0 changed, 1 renamed, 2 conflict, 3 untracked;
+ * X/Y the index and work-tree letters (M A D R C T U ? .). */
+cadex_status cadex_git_status(const char *repo, uint8_t **out, size_t *out_len);
+cadex_status cadex_git_stage(const char *repo, const char *const *paths, size_t count, uint8_t **message, size_t *message_len);
+cadex_status cadex_git_unstage(const char *repo, const char *const *paths, size_t count, uint8_t **message, size_t *message_len);
+/* Drops work-tree changes of tracked paths (untracked ones: the Trash). */
+cadex_status cadex_git_discard(const char *repo, const char *const *paths, size_t count, uint8_t **message, size_t *message_len);
+/* Commits the staged changes, or every change with all. */
+cadex_status cadex_git_commit(const char *repo, const char *text, bool all, uint8_t **message, size_t *message_len);
+cadex_status cadex_git_fetch(const char *repo, uint8_t **message, size_t *message_len);
+/* Fast-forward only: diverged branches are refused with a message. */
+cadex_status cadex_git_pull(const char *repo, uint8_t **message, size_t *message_len);
+/* Never forces. publish: push this branch to origin and track it; NULL: the upstream. */
+cadex_status cadex_git_push(const char *repo, const char *publish, uint8_t **message, size_t *message_len);
+/* "local \t name" / "remote \t name" per line, the current branch first. */
+cadex_status cadex_git_branches(const char *repo, uint8_t **out, size_t *out_len);
+/* remote: name is origin/x; a local branch x tracking it is created. */
+cadex_status cadex_git_switch(const char *repo, const char *name, bool remote, uint8_t **message, size_t *message_len);
+cadex_status cadex_git_init(const char *folder, uint8_t **message, size_t *message_len);
+
+typedef struct {
+    uint8_t *before; size_t before_len; /* HEAD (staged) or the index */
+    uint8_t *after; size_t after_len;   /* the index (staged) or the disk */
+    uint8_t *patch; size_t patch_len;   /* git diff of the path */
+    bool binary;
+    bool too_large; /* a side above 2 MB */
+} cadex_git_diff;
+/* orig: the old name of a rename, or NULL. Free with cadex_git_diff_free. */
+cadex_status cadex_git_diff(const char *repo, const char *path, const char *orig, bool staged, cadex_git_diff *out);
+void cadex_git_diff_free(cadex_git_diff *diff);
 
 #ifdef __cplusplus
 }

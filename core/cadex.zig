@@ -9,6 +9,7 @@ pub const workspace = @import("features/workspace/workspace.zig");
 pub const explorer = @import("features/explorer/explorer.zig");
 pub const editor = @import("features/editor/editor.zig");
 pub const markdown = @import("features/markdown/markdown.zig");
+pub const source_control = @import("features/source-control/source_control.zig");
 
 comptime {
     _ = @import("features/terminal/c_api.zig");
@@ -21,6 +22,7 @@ comptime {
     _ = @import("features/explorer/c_api_watch.zig");
     _ = @import("features/editor/c_api.zig");
     _ = @import("features/markdown/c_api.zig");
+    _ = @import("features/source-control/c_api.zig");
 }
 
 test {
@@ -31,9 +33,11 @@ test {
     _ = explorer;
     _ = editor;
     _ = markdown;
+    _ = source_control;
     _ = @import("features/terminal/c_api_test.zig");
     _ = @import("shared/c_buffer.zig");
     _ = @import("shared/glob.zig");
     _ = @import("shared/ignore.zig");
     _ = @import("shared/regex.zig");
+    _ = @import("shared/process.zig");
 }
