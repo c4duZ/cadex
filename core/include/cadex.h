@@ -558,6 +558,69 @@ cadex_status cadex_explorer_watch(const char *path, void *context,
 /* No callback runs after this returns. NULL is accepted. */
 void cadex_explorer_watch_stop(cadex_explorer_watcher *watcher);
 
+/* ---- Editor (core/features/editor) ----------------------------------- */
+
+/* Syntax colors and folds with tree-sitter (ADR 0006). Offsets are in units
+ * of the text's encoding: bytes for UTF-8, code units for UTF-16 (the
+ * encoding of NSString, so ranges map straight to NSRange). */
+
+#define CADEX_TEXT_UTF8  0
+#define CADEX_TEXT_UTF16 1 /* little-endian */
+
+/* What a colored span is; the app picks the theme color. */
+#define CADEX_TOKEN_KEYWORD     1
+#define CADEX_TOKEN_STRING      2
+#define CADEX_TOKEN_NUMBER      3
+#define CADEX_TOKEN_COMMENT     4
+#define CADEX_TOKEN_FUNCTION    5
+#define CADEX_TOKEN_TYPE        6
+#define CADEX_TOKEN_CONSTANT    7
+#define CADEX_TOKEN_PROPERTY    8
+#define CADEX_TOKEN_OPERATOR    9
+#define CADEX_TOKEN_PUNCTUATION 10
+#define CADEX_TOKEN_VARIABLE    11 /* builtins and parameters */
+#define CADEX_TOKEN_TAG         12
+#define CADEX_TOKEN_ATTRIBUTE   13
+#define CADEX_TOKEN_ESCAPE      14
+#define CADEX_TOKEN_HEADING     15
+#define CADEX_TOKEN_LINK        16
+#define CADEX_TOKEN_EMPHASIS    17
+
+typedef struct cadex_editor_document cadex_editor_document;
+
+typedef struct {
+    uint32_t start;
+    uint32_t end;
+    uint8_t kind; /* CADEX_TOKEN_* */
+} cadex_editor_span;
+
+typedef struct {
+    uint32_t start_row; /* 0-based */
+    uint32_t end_row;   /* last row inside the region */
+} cadex_editor_fold;
+
+/* Parses the text with the language of file_name (by extension and a few
+ * names). Unknown languages and texts above 1 MB are plain: no spans, no
+ * folds. The text is copied. Close with cadex_editor_close. */
+cadex_status cadex_editor_open(const char *file_name, const void *text, size_t len_bytes, uint8_t encoding,
+                               cadex_editor_document **out);
+void cadex_editor_close(cadex_editor_document *document);
+/* "Zig", "TypeScript"...; NULL for plain text. Static, not freed. */
+const char *cadex_editor_language(cadex_editor_document *document);
+
+/* Replaces [start, old_end) with text (same encoding) and reparses only what
+ * changed. *changed_start..*changed_end: the range to recolor. */
+cadex_status cadex_editor_edit(cadex_editor_document *document, uint32_t start, uint32_t old_end,
+                               const void *text, size_t len_bytes, uint32_t *changed_start, uint32_t *changed_end);
+
+/* Non-overlapping colored spans in [start, end), in order. Free *out with
+ * cadex_free (NULL when there are none). */
+cadex_status cadex_editor_highlights(cadex_editor_document *document, uint32_t start, uint32_t end,
+                                     cadex_editor_span **out, size_t *count);
+
+/* Foldable regions of the whole text, by start row. Free with cadex_free. */
+cadex_status cadex_editor_folds(cadex_editor_document *document, cadex_editor_fold **out, size_t *count);
+
 #ifdef __cplusplus
 }
 #endif

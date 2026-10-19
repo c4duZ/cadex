@@ -42,6 +42,9 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   apagado no explorer e não entra na busca.
 - **Índice de nomes** (`search index`): a lista dos arquivos do workspace em memória, que o ⌘P
   consulta a cada tecla e que acompanha o disco.
+- **Destaque de sintaxe** (`highlight`): cores por tipo de trecho (palavra-chave, texto, comentário...)
+  que o tree-sitter acha no código; o app pinta com as cores do tema.
+- **Dobra** (`fold`): um bloco de várias linhas que o editor recolhe numa linha só.
 - **Ambiente** (`workspace environment`): onde os processos rodam. Local, ou uma distro WSL no
   Windows.
 

@@ -1,4 +1,5 @@
 const std = @import("std");
+const grammars = @import("build_grammars.zig");
 
 /// libghostty-vt features Cadex does not use, turned off to keep them out of
 /// the app. kitty_graphics also drops the wuffs image decoder; snapshot is the
@@ -40,6 +41,9 @@ pub fn build(b: *std.Build) void {
     }) orelse return;
     root.addImport("ghostty-vt", ghostty.module("ghostty-vt"));
 
+    // tree-sitter and the grammars, for the editor (features/editor).
+    const grammar_libs = grammars.add(b, root, target) orelse return;
+
     const core_lib = b.addLibrary(.{
         .name = "cadex-core",
         .linkage = .static,
@@ -49,7 +53,7 @@ pub fn build(b: *std.Build) void {
     // A Zig static library does not absorb the static libraries its modules
     // link, and ghostty-vt links simdutf and highway that way. The app should
     // link one file, so merge them into libcadex.a.
-    installMergedLibrary(b, ghostty, core_lib, target, optimize);
+    installMergedLibrary(b, ghostty, core_lib, grammar_libs, target, optimize);
     b.installDirectory(.{
         .source_dir = b.path("include"),
         .install_dir = .header,
@@ -65,6 +69,7 @@ fn installMergedLibrary(
     b: *std.Build,
     ghostty: *std.Build.Dependency,
     core_lib: *std.Build.Step.Compile,
+    grammar_libs: []const *std.Build.Step.Compile,
     target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
 ) void {
@@ -89,5 +94,6 @@ fn installMergedLibrary(
     merge.addArtifactArg(core_lib);
     merge.addArtifactArg(simdutf.artifact("simdutf"));
     merge.addArtifactArg(highway.artifact("highway"));
+    for (grammar_libs) |lib| merge.addArtifactArg(lib);
     b.getInstallStep().dependOn(&b.addInstallLibFile(merged, "libcadex.a").step);
 }

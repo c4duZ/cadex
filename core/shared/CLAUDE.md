@@ -11,7 +11,8 @@
 - Hoje: `c_buffer.zig` (entregar bytes ao app pela API C, usado por workspace e explorer),
   `ignore.zig` e `glob.zig` (regras de .gitignore, .ignore e .git/info/exclude, como o git: a mais
   funda decide, a última linha vence, nada volta de dentro de pasta ignorada; usado pelo explorer e
-  pela busca) e `test_dir.zig` (pasta temporária com caminho canônico, só nos testes).
+  pela busca), `regex.zig` (regex POSIX da libc, ADR 0009; usado pela busca e pelos predicados de
+  destaque do editor) e `test_dir.zig` (pasta temporária com caminho canônico, só nos testes).
 
 ## Como validar
 - `make core-test` (ou `zig build test` dentro de `core/`) passa, sem vazamento no alocador de teste.

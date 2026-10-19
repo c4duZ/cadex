@@ -7,6 +7,7 @@ pub const terminal = @import("features/terminal/terminal.zig");
 pub const search = @import("features/search/search.zig");
 pub const workspace = @import("features/workspace/workspace.zig");
 pub const explorer = @import("features/explorer/explorer.zig");
+pub const editor = @import("features/editor/editor.zig");
 
 comptime {
     _ = @import("features/terminal/c_api.zig");
@@ -17,6 +18,7 @@ comptime {
     _ = @import("features/workspace/c_api.zig");
     _ = @import("features/explorer/c_api.zig");
     _ = @import("features/explorer/c_api_watch.zig");
+    _ = @import("features/editor/c_api.zig");
 }
 
 test {
@@ -25,8 +27,10 @@ test {
     _ = search;
     _ = workspace;
     _ = explorer;
+    _ = editor;
     _ = @import("features/terminal/c_api_test.zig");
     _ = @import("shared/c_buffer.zig");
     _ = @import("shared/glob.zig");
     _ = @import("shared/ignore.zig");
+    _ = @import("shared/regex.zig");
 }
