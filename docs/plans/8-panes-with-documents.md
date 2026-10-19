@@ -108,3 +108,19 @@ documento (`open(_:)`, `activeDocument`, `document(identity:)`, `allDocuments`).
   chama Cadex), captura pelo pid (helper que filtra `kCGWindowOwnerPID`). Um spaces.json de teste
   com um terminal e um documento lado a lado serve para ver o layout sem digitar nada.
 - Atualizar specs, CLAUDE.md das features tocadas e o status em `docs/plans/README.md`.
+
+## Fechamento (2026-10-19)
+Fases A a E feitas. Conferido no app em segundo plano: terminal e documento lado a lado voltam do
+spaces.json; abrir um arquivo pela linha de comando troca o documento do painel (regra 2); ⌘D num
+documento abre terminal na pasta dele, três painéis iguais; fechar devolve o espaço; sair e reabrir
+guarda o layout. `make package` passa.
+
+Desvio do plano: quem pede a abertura (o histórico abrindo um diff, o diff abrindo o arquivo) fica
+no painel dele (`keeping` em `open(_:beside:keeping:)`); sem isso, a regra 2 trocava o histórico
+pelo diff. O clique em documento usa um reconhecedor que falha na hora (`PanePressRecognizer`) em
+vez do `NSClickGestureRecognizer`, para que arrastar seleção também dê o foco.
+
+Falta o dono conferir à mão: clicar num documento e ver o escurecimento passar para o terminal;
+"Abrir ao lado" e "Abrir em nova aba" no menu de contexto do explorer; a configuração "Abrir
+arquivos" em Geral; abrir um diff pelo histórico e um preview pela oferta do terminal; editar um
+arquivo ao lado (sem salvar) e abrir outro (deve dividir, não trocar); ⌘W com arquivo não salvo.

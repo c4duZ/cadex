@@ -28,6 +28,8 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
 
 - **Terminal** rápido e nítido (modelo da [libghostty](https://github.com/ghostty-org/ghostty),
   desenho em Metal), com abas, divisões, busca, links e colagem de imagens.
+- **Documentos ao lado do terminal:** código, Markdown, mídia, diffs, histórico e previews abrem
+  num painel da mesma aba (ou em aba própria, se preferir), divididos como terminais.
 - **Spaces:** grupos de abas com nome, que voltam como estavam ao reabrir o app.
 - **Explorador e busca** de arquivos por nome e por conteúdo, respeitando o `.gitignore`.
 - **Editor de código** com destaque de sintaxe (tree-sitter), números de linha e dobras.
