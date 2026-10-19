@@ -13,9 +13,15 @@
   ordem de uso). `TabList.swift`: as regras puras (ordem, ativa, recentes, mover), testadas.
 - `TabBarView.swift`: a barra desenhada à mão (clique, duplo clique renomeia, arrastar reordena, ×).
   `TabsView.swift`: barra em cima e a aba ativa embaixo. `Tab.swift`: uma aba.
-- `TabCommands.swift`: tab.new, pane.close, tab.rename, tab.select-1…9, tab.previous-used,
-  tab.least-recently-used. `CloseConfirmation.swift`: a pergunta ao fechar com programa rodando.
-- Spec em `../../../../docs/spec/tabs.md`. Status: abas prontas; divisões a fazer.
+- Divisões: `PaneTree.swift` é a árvore pura (dividir, remover dando o espaço ao irmão, retângulos,
+  ordem de leitura, vizinho por direção, proporção por caminho), testada. `PaneLayoutView.swift`
+  posiciona os terminais pela árvore, divisor arrastável de 1 pt (tamanho mínimo de painel) e
+  contorno discreto no painel com foco. `Tab.swift` guarda árvore, painéis e foco.
+- `TabCommands.swift`: tab.new, tab.rename, tab.select-1…9, tab.previous-used,
+  tab.least-recently-used, pane.close, pane.split-right, pane.split-down, pane.next, pane.previous,
+  pane.focus-left/right/up/down. `CloseConfirmation.swift`: a pergunta ao fechar painel, aba ou
+  janela com programa rodando.
+- Spec em `../../../../docs/spec/tabs.md`. Status: abas e divisões prontas.
 
 ## Como validar
-- `make macos-test` passa.
+- `make macos-test` passa: `TabList` e `PaneTree` têm os testes das regras.

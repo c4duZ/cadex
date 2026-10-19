@@ -37,6 +37,12 @@ Começando uma sessão do zero:
 4. Ver o app de verdade: com o app aberto, o id da janela sai de um programinha Swift que lista
    janelas com CGWindowListCopyWindowInfo (dono "Cadex"), e `screencapture -x -o -l <id> arquivo.png`
    tira o print para conferir visualmente.
+5. Conferir no app sem roubar o teclado do dono, que pode estar usando a máquina: acionar comandos
+   pelos itens de menu do processo (`tell application "System Events" to tell process "Cadex" to
+   click menu item "Dividir à direita" of menu "Painéis" of menu bar 1`) e capturar a janela com
+   `screencapture -l`, que funciona com ela atrás. Tecla simulada vai para o app que estiver na
+   frente: só usar depois de conferir que é o Cadex, logo antes de cada envio. Em 2026-10-19 teclas
+   de teste caíram no Chrome do dono.
 
 Ao fim de cada fase: `make check` passando, commit pequeno, `CLAUDE.md` das features tocadas
 atualizado (status, pontos de entrada, regras), spec com os critérios marcados. Ao fim de cada plano:

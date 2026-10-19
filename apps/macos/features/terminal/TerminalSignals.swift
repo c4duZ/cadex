@@ -27,7 +27,10 @@ extension TerminalView {
 
     public override func becomeFirstResponder() -> Bool {
         let accepted = super.becomeFirstResponder()
-        if accepted { focusChanged() }
+        if accepted {
+            focusChanged()
+            onFocus?()
+        }
         return accepted
     }
 

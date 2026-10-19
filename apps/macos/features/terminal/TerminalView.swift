@@ -35,6 +35,8 @@ public final class TerminalView: MTKView {
     /// The program set the title (OSC 0/2); without a handler it goes to
     /// the window.
     public var onProgramTitle: ((String) -> Void)?
+    /// The view took the keyboard focus (a click on a pane, for example).
+    public var onFocus: (() -> Void)?
 
     public init(frame: CGRect, cwd: String? = nil) {
         super.init(frame: frame, device: MTLCreateSystemDefaultDevice())

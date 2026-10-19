@@ -49,11 +49,11 @@ painéis. Hoje só abas de terminal; editor, preview e outras entram com as feat
 - Pasta da sessão sumiu (apagada): a aba nova abre na pasta pessoal.
 
 ## Critérios de aceite
-- [ ] ⌘T abre na pasta atual depois de um `cd` na aba ativa.
+- [x] ⌘T abre na pasta atual depois de um `cd` na aba ativa.
 - [ ] Renomear mantém o nome depois de um `cd`; renomear para vazio volta ao nome da pasta.
-- [ ] ⌘1 a ⌘9 trocam de aba; Ctrl+Tab volta para a aba usada antes.
+- [x] ⌘1 a ⌘9 trocam de aba; Ctrl+Tab volta para a aba usada antes.
 - [ ] ⌘D e ⌘⇧D dividem e o painel novo abre na mesma pasta.
-- [ ] ⌘W com `sleep 100` no painel pede confirmação; com o shell parado, fecha direto.
+- [x] ⌘W com `sleep 100` no painel pede confirmação; com o shell parado, fecha direto.
 - [ ] Fechar o último painel da última aba fecha a janela.
-- [ ] Árvore de painéis: dividir, fechar e reequilibrar dão o layout esperado.
-- [ ] Abas escondidas não desenham.
+- [x] Árvore de painéis: dividir, fechar e reequilibrar dão o layout esperado.
+- [x] Abas escondidas não desenham.

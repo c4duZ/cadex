@@ -9,6 +9,7 @@ public final class TabsController {
     private var list = TabList()
     private var tabs: [Int: Tab] = [:]
     private var nextId = 1
+    private var nextPane = 1
     private weak var window: NSWindow?
     private let home = NSHomeDirectory()
     /// Coalesces title refreshes while output streams in.
@@ -34,16 +35,58 @@ public final class TabsController {
 
     /// ⌘T: a terminal in `cwd`, or in the active terminal's folder, or home.
     public func newTab(cwd: String? = nil) {
-        let folder = cwd ?? activeTerminal?.currentDirectory ?? home
-        let start = FileManager.default.fileExists(atPath: folder) ? folder : home
-        let terminal = TerminalView(frame: view.bounds, cwd: start)
-        let tab = Tab(id: nextId, terminal: terminal)
+        let terminal = makeTerminal(cwd: cwd)
+        let pane = nextPane
+        nextPane += 1
+        let tab = Tab(id: nextId, pane: pane, terminal: terminal)
         nextId += 1
         tabs[tab.id] = tab
-        wire(terminal, in: tab)
+        wire(terminal, pane: pane, in: tab)
         list.insert(tab.id)
         showActive()
     }
+
+    /// A terminal in `cwd`, or in the active terminal's folder, or home
+    /// when that folder is gone (docs/spec/tabs.md, casos de borda).
+    private func makeTerminal(cwd: String?) -> TerminalView {
+        let folder = cwd ?? activeTerminal?.currentDirectory ?? home
+        let start = FileManager.default.fileExists(atPath: folder) ? folder : home
+        return TerminalView(frame: view.bounds, cwd: start)
+    }
+
+    // MARK: Panes
+
+    /// ⌘D (right) and ⌘⇧D (down): a new pane in the same folder, focused.
+    func split(_ axis: PaneTree.Axis) {
+        guard let tab = activeTab, tab.canSplit(axis: axis) else {
+            NSSound.beep()
+            return
+        }
+        let terminal = makeTerminal(cwd: tab.focused.currentDirectory)
+        let pane = nextPane
+        nextPane += 1
+        tab.split(axis: axis, pane: pane, terminal: terminal)
+        wire(terminal, pane: pane, in: tab)
+        refreshBar()
+    }
+
+    /// ⌘] and ⌘[.
+    public func focusPane(step: Int) {
+        guard let tab = activeTab, let next = tab.tree.cycling(from: tab.focusedPane, by: step) else { return }
+        tab.focus(next)
+        refreshBar()
+    }
+
+    /// ⌘⌥ + arrow.
+    func focusPane(_ direction: PaneTree.Direction) {
+        guard let tab = activeTab,
+              let next = tab.tree.neighbor(of: tab.focusedPane, direction, in: tab.layout.bounds)
+        else { return }
+        tab.focus(next)
+        refreshBar()
+    }
+
+    public var activePaneCount: Int { activeTab?.tree.leaves.count ?? 0 }
 
     func select(_ id: Int) {
         list.select(id)
@@ -73,10 +116,18 @@ public final class TabsController {
         refreshBar()
     }
 
-    private func wire(_ terminal: TerminalView, in tab: Tab) {
-        terminal.onShellExit = { [weak self] in self?.remove(tab.id) }
+    private func wire(_ terminal: TerminalView, pane: Int, in tab: Tab) {
+        // The shell exited by itself: nothing to ask, the pane just goes.
+        terminal.onShellExit = { [weak self, weak tab] in
+            guard let tab else { return }
+            self?.removePane(pane, from: tab)
+        }
         terminal.onActivity = { [weak self] in self?.scheduleTitleRefresh() }
         terminal.onProgramTitle = { [weak self] _ in self?.refreshBar() }
+        terminal.onFocus = { [weak self, weak tab] in
+            tab?.noteFocus(pane)
+            self?.refreshBar()
+        }
     }
 
     // MARK: Titles
@@ -127,9 +178,27 @@ public final class TabsController {
 
     // MARK: Closing
 
-    /// ⌘W: closes the focused pane, which today is the whole tab.
+    /// ⌘W: closes the focused pane; the last pane closes the tab, and the
+    /// last tab the window (docs/spec/tabs.md, "Fechar").
     public func closeFocusedPane() {
-        if let id = list.active { closeTab(id) }
+        guard let tab = activeTab else { return }
+        let pane = tab.focusedPane
+        let running = tab.focused.hasForegroundProcess
+        CloseConfirmation.confirm(running: running, in: window, what: "o painel") { [weak self, weak tab] in
+            guard let tab else { return }
+            self?.removePane(pane, from: tab)
+        }
+    }
+
+    private func removePane(_ pane: Int, from tab: Tab) {
+        guard let terminal = tab.panes[pane] else { return }
+        if tab.terminals.count == 1 {
+            remove(tab.id)
+            return
+        }
+        terminal.closeSession()
+        _ = tab.remove(pane: pane)
+        refreshBar()
     }
 
     func closeTab(_ id: Int) {
