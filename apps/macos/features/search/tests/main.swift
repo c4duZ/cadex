@@ -37,7 +37,7 @@ let exitCode = await Checks.run([
     ("⌘P finds render.zig, not the ignored copy, and remembers what was opened", {
         let root = sandbox()
         var opened: [String] = []
-        let search = SearchController(root: root, showHidden: false) { path, _ in opened.append(path) }
+        let search = SearchController(root: root, showHidden: false) { path, _, _ in opened.append(path) }
         var shown: [PaletteItem] = []
         let found = await eventually {
             search.files.search("render") { items, _ in shown = items }
@@ -54,7 +54,7 @@ let exitCode = await Checks.run([
     ("⌘⇧F streams results with the line, and an invalid regex says so", {
         let root = sandbox()
         var opened: [(String, Int?)] = []
-        let search = SearchController(root: root, showHidden: false) { opened.append(($0, $1)) }
+        let search = SearchController(root: root, showHidden: false) { opened.append(($0, $1)) ; _ = $2 }
         var shown: [PaletteItem] = []
         var status: String?
         search.content.search("libghostty") { items, s in shown = items; status = s }
@@ -71,7 +71,7 @@ let exitCode = await Checks.run([
     }),
     ("a new query drops the results of the old one", {
         let root = sandbox()
-        let search = SearchController(root: root, showHidden: false) { _, _ in }
+        let search = SearchController(root: root, showHidden: false) { _, _, _ in }
         var fromOld = 0
         search.content.search("Cadex") { items, _ in fromOld += items.count }
         var shown: [PaletteItem] = []

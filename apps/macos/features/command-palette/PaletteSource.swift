@@ -1,4 +1,5 @@
 import Foundation
+import Icons
 
 /// What the palette lists and runs. Commands are one source (⌘K); other
 /// features add theirs (files on ⌘P, text on ⌘⇧F) without this feature
@@ -14,8 +15,20 @@ public protocol PaletteSource: AnyObject {
     func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void)
     /// The user picked a row; the palette is already closed.
     func choose(_ item: PaletteItem)
+    /// The same, with ⌥↩ or ⌘↩: files open beside or in a new tab.
+    func choose(_ item: PaletteItem, as choice: PaletteChoice)
+    /// The keys this list answers to, for the footer.
+    var hints: [PaletteHint] { get }
+    /// The field's icon while this list is on.
+    var icon: Icon { get }
     /// The palette closed or switched source: stop work in progress.
     func stop()
+}
+
+extension PaletteSource {
+    public func choose(_ item: PaletteItem, as choice: PaletteChoice) { choose(item) }
+    public var hints: [PaletteHint] { [PaletteHint("↩", "escolher")] }
+    public var icon: Icon { .magnifyingGlass }
 }
 
 /// ⌘K: the registered commands (PaletteModel), run by id.
@@ -31,6 +44,9 @@ final class CommandSource: PaletteSource {
 
     var placeholder: String { "Digite um comando" }
     var emptyText: String { "Nenhum comando encontrado" }
+
+    var icon: Icon { .command }
+    var hints: [PaletteHint] { [PaletteHint("↩", "executar")] }
 
     func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
         show(PaletteModel.items(for: query, registry: registry, shortcut: shortcut), nil)

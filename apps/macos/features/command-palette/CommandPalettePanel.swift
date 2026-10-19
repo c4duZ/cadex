@@ -1,34 +1,48 @@
 import AppKit
+import Icons
 
-/// The palette window: a search field and the list under it, at the top of
-/// the app window. Made once and reused, so ⌘K shows it in the same frame.
+/// The palette window: the field with the list's icon, the rows in
+/// sections under it and the footer with the keys, at the top of the app
+/// window, in the theme's colors (docs/spec/command-palette.md). Made once
+/// and reused, so ⌘K shows it in the same frame.
 final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate {
-    static let width: CGFloat = 560
-    static let rowHeight: CGFloat = 30
-    static let visibleRows = 10
+    static let width: CGFloat = 640
+    static let rowHeight: CGFloat = 36
+    static let headerHeight: CGFloat = 30
+    static let listMaxHeight: CGFloat = 400
+    private static let fieldHeight: CGFloat = 54
+    private static let footerHeight: CGFloat = 36
 
     var onQuery: ((String) -> Void)?
-    var onChoose: ((Int) -> Void)?
+    var onChoose: ((Int, PaletteChoice) -> Void)?
     var onDismiss: (() -> Void)?
+    var style = PaletteStyle.system { didSet { applyStyle() } }
 
+    private let background = NSView()
+    private let fieldIcon = NSImageView()
     private let field = NSTextField()
     private let table = NSTableView()
     private let scroll = NSScrollView()
     private let emptyLabel = NSTextField(labelWithString: "")
     /// A short note from the source on the right of the field ("Indexando…").
     private let statusLabel = NSTextField(labelWithString: "")
+    private let topLine = NSView()
+    private let bottomLine = NSView()
+    private let footer = PaletteFooterView()
     private var items: [PaletteItem] = []
+    private var rows: [PaletteRows.Row] = []
 
     var query: String { field.stringValue }
 
     init() {
-        super.init(contentRect: NSRect(x: 0, y: 0, width: Self.width, height: 60),
+        super.init(contentRect: NSRect(x: 0, y: 0, width: Self.width, height: 120),
                    styleMask: [.borderless], backing: .buffered, defer: true)
         isFloatingPanel = true
         backgroundColor = .clear
         isOpaque = false
         hasShadow = true
         buildContent()
+        applyStyle()
     }
 
     override var canBecomeKey: Bool { true }
@@ -41,27 +55,38 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
 
     func show(over parent: NSWindow) {
         let frame = parent.frame
-        let top = frame.maxY - 60
-        setFrameTopLeftPoint(NSPoint(x: frame.midX - Self.width / 2, y: top))
+        setFrameTopLeftPoint(NSPoint(x: frame.midX - Self.width / 2, y: frame.maxY - 56))
         makeKeyAndOrderFront(nil)
         makeFirstResponder(field)
     }
 
-    /// A new source: empty field, its placeholder, and its first list.
-    func prepare(placeholder: String, emptyText: String) {
+    /// A new source: empty field, its placeholder and icon, and its first list.
+    func prepare(placeholder: String, emptyText: String, icon: Icon) {
         field.stringValue = ""
-        field.placeholderString = placeholder
-        emptyLabel.stringValue = emptyText
+        setLook(placeholder: placeholder, emptyText: emptyText, icon: icon)
         statusLabel.stringValue = ""
         onQuery?("")
     }
 
-    func show(items newItems: [PaletteItem], status: String?) {
+    /// The list on screen changed without a new field (a prefix typed).
+    func setLook(placeholder: String, emptyText: String, icon: Icon) {
+        field.placeholderAttributedString = NSAttributedString(string: placeholder, attributes: [
+            .font: NSFont.systemFont(ofSize: 18), .foregroundColor: style.secondaryText.withAlphaComponent(0.7),
+        ])
+        emptyLabel.stringValue = emptyText
+        fieldIcon.image = icon.image(size: 18)
+    }
+
+    func show(items newItems: [PaletteItem], status: String?, hints: [PaletteHint]) {
         statusLabel.stringValue = status ?? ""
         items = newItems
+        rows = PaletteRows.rows(for: newItems)
         table.reloadData()
         emptyLabel.isHidden = !items.isEmpty
-        if !items.isEmpty { table.selectRowIndexes([0], byExtendingSelection: false) }
+        footer.show(hints, style: style)
+        if let first = rows.firstIndex(where: { if case .item = $0 { true } else { false } }) {
+            table.selectRowIndexes([first], byExtendingSelection: false)
+        }
         table.scrollRowToVisible(0)
         resizeToFit()
     }
@@ -69,15 +94,14 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
     // MARK: Layout
 
     private func buildContent() {
-        let background = NSVisualEffectView()
-        background.material = .menu
-        background.state = .active
         background.wantsLayer = true
-        background.layer?.cornerRadius = 10
+        background.layer?.cornerRadius = 14
+        background.layer?.cornerCurve = .continuous
         background.layer?.masksToBounds = true
+        background.layer?.borderWidth = 1
         contentView = background
 
-        field.font = .systemFont(ofSize: 17)
+        field.font = .systemFont(ofSize: 18)
         field.isBordered = false
         field.drawsBackground = false
         field.focusRingType = .none
@@ -85,12 +109,12 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
 
         table.addTableColumn(NSTableColumn(identifier: .init("item")))
         table.headerView = nil
-        table.rowHeight = Self.rowHeight
         table.backgroundColor = .clear
         table.intercellSpacing = .zero
         // The default (inset) style pads the list, which pushed the last row
-        // out of the panel sized for rows × rowHeight.
+        // out of the panel sized for its rows.
         table.style = .plain
+        table.selectionHighlightStyle = .regular
         table.dataSource = self
         table.delegate = self
         table.target = self
@@ -99,41 +123,72 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         scroll.drawsBackground = false
         scroll.hasVerticalScroller = true
         scroll.autohidesScrollers = true
+        scroll.scrollerStyle = .overlay
         scroll.automaticallyAdjustsContentInsets = false
-        emptyLabel.textColor = .secondaryLabelColor
         emptyLabel.isHidden = true
-        statusLabel.textColor = .secondaryLabelColor
+        emptyLabel.font = .systemFont(ofSize: 13)
         statusLabel.font = .systemFont(ofSize: 12)
         statusLabel.alignment = .right
         statusLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        for line in [topLine, bottomLine] { line.wantsLayer = true }
 
-        for view in [field, statusLabel, scroll, emptyLabel] as [NSView] {
+        for view in [fieldIcon, field, statusLabel, topLine, scroll, emptyLabel, bottomLine, footer] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             background.addSubview(view)
         }
         NSLayoutConstraint.activate([
-            field.topAnchor.constraint(equalTo: background.topAnchor, constant: 14),
-            field.leadingAnchor.constraint(equalTo: background.leadingAnchor, constant: 16),
-            statusLabel.trailingAnchor.constraint(equalTo: background.trailingAnchor, constant: -16),
-            statusLabel.centerYAnchor.constraint(equalTo: field.centerYAnchor),
+            fieldIcon.leadingAnchor.constraint(equalTo: background.leadingAnchor, constant: 20),
+            fieldIcon.centerYAnchor.constraint(equalTo: background.topAnchor, constant: Self.fieldHeight / 2),
+            fieldIcon.widthAnchor.constraint(equalToConstant: 18),
+            fieldIcon.heightAnchor.constraint(equalToConstant: 18),
+            field.leadingAnchor.constraint(equalTo: fieldIcon.trailingAnchor, constant: 12),
+            field.centerYAnchor.constraint(equalTo: fieldIcon.centerYAnchor),
+            statusLabel.trailingAnchor.constraint(equalTo: background.trailingAnchor, constant: -20),
+            statusLabel.centerYAnchor.constraint(equalTo: fieldIcon.centerYAnchor),
             field.trailingAnchor.constraint(equalTo: statusLabel.leadingAnchor, constant: -8),
-            scroll.topAnchor.constraint(equalTo: field.bottomAnchor, constant: 10),
-            scroll.leadingAnchor.constraint(equalTo: background.leadingAnchor, constant: 6),
-            scroll.trailingAnchor.constraint(equalTo: background.trailingAnchor, constant: -6),
-            scroll.bottomAnchor.constraint(equalTo: background.bottomAnchor, constant: -6),
-            emptyLabel.topAnchor.constraint(equalTo: field.bottomAnchor, constant: 12),
+            topLine.topAnchor.constraint(equalTo: background.topAnchor, constant: Self.fieldHeight),
+            topLine.leadingAnchor.constraint(equalTo: background.leadingAnchor),
+            topLine.trailingAnchor.constraint(equalTo: background.trailingAnchor),
+            topLine.heightAnchor.constraint(equalToConstant: 1),
+            scroll.topAnchor.constraint(equalTo: topLine.bottomAnchor, constant: 6),
+            scroll.leadingAnchor.constraint(equalTo: background.leadingAnchor, constant: 8),
+            scroll.trailingAnchor.constraint(equalTo: background.trailingAnchor, constant: -8),
+            scroll.bottomAnchor.constraint(equalTo: bottomLine.topAnchor, constant: -6),
+            emptyLabel.topAnchor.constraint(equalTo: topLine.bottomAnchor, constant: 14),
             emptyLabel.leadingAnchor.constraint(equalTo: field.leadingAnchor),
+            bottomLine.leadingAnchor.constraint(equalTo: background.leadingAnchor),
+            bottomLine.trailingAnchor.constraint(equalTo: background.trailingAnchor),
+            bottomLine.heightAnchor.constraint(equalToConstant: 1),
+            bottomLine.bottomAnchor.constraint(equalTo: background.bottomAnchor, constant: -Self.footerHeight),
+            footer.leadingAnchor.constraint(equalTo: background.leadingAnchor, constant: 20),
+            footer.centerYAnchor.constraint(equalTo: background.bottomAnchor, constant: -Self.footerHeight / 2),
         ])
     }
 
+    private func applyStyle() {
+        background.layer?.backgroundColor = style.background.cgColor
+        background.layer?.borderColor = style.border.cgColor
+        for line in [topLine, bottomLine] { line.layer?.backgroundColor = style.border.cgColor }
+        field.textColor = style.text
+        fieldIcon.contentTintColor = style.accent
+        statusLabel.textColor = style.secondaryText
+        emptyLabel.textColor = style.secondaryText
+        appearance = NSAppearance(named: style.background.isDark ? .darkAqua : .aqua)
+        table.reloadData()
+    }
+
     private func resizeToFit() {
-        let rows = items.isEmpty ? 1 : min(items.count, Self.visibleRows)
-        // Margins around the field and the list, as laid out in buildContent.
-        let height = 14 + field.intrinsicContentSize.height + 10 + CGFloat(rows) * Self.rowHeight + 6
+        let list = rows.isEmpty ? Self.rowHeight : min(rows.reduce(0) { $0 + height(of: $1) }, Self.listMaxHeight)
+        let total = Self.fieldHeight + 1 + 6 + list + 6 + 1 + Self.footerHeight
         var frame = self.frame
-        frame.origin.y += frame.height - height
-        frame.size.height = height
+        frame.origin.y += frame.height - total
+        frame.size.height = total
         setFrame(frame, display: true)
+    }
+
+    private func height(of row: PaletteRows.Row) -> CGFloat {
+        if case .header = row { return Self.headerHeight }
+        return Self.rowHeight
     }
 
     // MARK: Keys in the field
@@ -146,82 +201,89 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         switch selector {
         case #selector(NSResponder.moveDown(_:)): moveSelection(1)
         case #selector(NSResponder.moveUp(_:)): moveSelection(-1)
-        case #selector(NSResponder.insertNewline(_:)): chooseSelected()
+        case #selector(NSResponder.insertNewline(_:)): chooseSelected(Self.choice(NSApp.currentEvent?.modifierFlags ?? []))
+        // ⌥↩ in a text field (docs/spec/command-palette.md: open beside).
+        case #selector(NSResponder.insertNewlineIgnoringFieldEditor(_:)): chooseSelected(.option)
         case #selector(NSResponder.cancelOperation(_:)): onDismiss?()
         default: return false
         }
         return true
     }
 
-    private func moveSelection(_ step: Int) {
-        guard !items.isEmpty else { return }
-        let row = min(max(table.selectedRow + step, 0), items.count - 1)
-        table.selectRowIndexes([row], byExtendingSelection: false)
-        table.scrollRowToVisible(row)
+    /// ⌘↩ never reaches the field: the menus would take it first.
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        if [36, 76].contains(event.keyCode), event.modifierFlags.contains(.command) {
+            chooseSelected(.command)
+            return true
+        }
+        return super.performKeyEquivalent(with: event)
     }
 
-    private func chooseSelected() {
+    private static func choice(_ flags: NSEvent.ModifierFlags) -> PaletteChoice {
+        if flags.contains(.command) { return .command }
+        if flags.contains(.option) { return .option }
+        return .primary
+    }
+
+    private func moveSelection(_ step: Int) {
+        guard let next = PaletteRows.next(from: table.selectedRow, by: step, in: rows) else { return }
+        table.selectRowIndexes([next], byExtendingSelection: false)
+        table.scrollRowToVisible(next)
+    }
+
+    private func chooseSelected(_ choice: PaletteChoice) {
         let row = table.selectedRow
-        guard row >= 0, row < items.count, items[row].unavailableReason == nil else { return }
-        onChoose?(row)
+        guard row >= 0, row < rows.count, case .item(let index) = rows[row],
+              items[index].unavailableReason == nil else { return }
+        onChoose?(index, choice)
     }
 
     @objc private func rowClicked() {
-        chooseSelected()
+        chooseSelected(.primary)
     }
 
     // MARK: Table
 
-    func numberOfRows(in tableView: NSTableView) -> Int { items.count }
+    func numberOfRows(in tableView: NSTableView) -> Int { rows.count }
+
+    func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat { height(of: rows[row]) }
+
+    func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
+        if case .item = rows[row] { return true }
+        return false
+    }
+
+    func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
+        let view = PaletteRowBackground()
+        view.fill = style.selection
+        return view
+    }
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        let view = tableView.makeView(withIdentifier: PaletteRowView.identifier, owner: nil) as? PaletteRowView ?? PaletteRowView()
-        view.show(items[row])
-        return view
+        switch rows[row] {
+        case .header(let title):
+            let view = PaletteHeaderView()
+            view.show(title, style: style)
+            return view
+        case .item(let index):
+            let view = tableView.makeView(withIdentifier: PaletteRowView.identifier, owner: nil) as? PaletteRowView ?? PaletteRowView()
+            view.show(items[index], style: style, selected: tableView.selectedRow == row)
+            return view
+        }
+    }
+
+    func tableViewSelectionDidChange(_ notification: Notification) {
+        let selected = table.selectedRow
+        table.enumerateAvailableRowViews { rowView, row in
+            (rowView.view(atColumn: 0) as? PaletteRowView)?.setSelected(row == selected)
+        }
     }
 }
 
-/// A palette row: the title with the matched letters in bold, and the
-/// shortcut, or the reason a command is unavailable, on the right.
-final class PaletteRowView: NSTableCellView {
-    static let identifier = NSUserInterfaceItemIdentifier("palette-row")
-    private let title = NSTextField(labelWithString: "")
-    private let detail = NSTextField(labelWithString: "")
-
-    init() {
-        super.init(frame: .zero)
-        identifier = Self.identifier
-        detail.textColor = .secondaryLabelColor
-        detail.alignment = .right
-        for view in [title, detail] {
-            view.translatesAutoresizingMaskIntoConstraints = false
-            view.lineBreakMode = .byTruncatingTail
-            addSubview(view)
-        }
-        title.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        NSLayoutConstraint.activate([
-            title.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
-            title.centerYAnchor.constraint(equalTo: centerYAnchor),
-            detail.leadingAnchor.constraint(greaterThanOrEqualTo: title.trailingAnchor, constant: 12),
-            detail.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
-            detail.centerYAnchor.constraint(equalTo: centerYAnchor),
-        ])
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) { fatalError("PaletteRowView is created in code") }
-
-    func show(_ item: PaletteItem) {
-        let available = item.unavailableReason == nil
-        let color: NSColor = available ? .labelColor : .tertiaryLabelColor
-        let text = NSMutableAttributedString(string: item.title, attributes: [
-            .font: NSFont.systemFont(ofSize: 14), .foregroundColor: color,
-        ])
-        for range in item.bold {
-            text.addAttribute(.font, value: NSFont.boldSystemFont(ofSize: 14), range: NSRange(range, in: item.title))
-        }
-        title.attributedStringValue = text
-        detail.stringValue = item.unavailableReason ?? item.detail ?? ""
-        detail.font = available ? .monospacedSystemFont(ofSize: 12, weight: .regular) : .systemFont(ofSize: 12)
+private extension NSColor {
+    /// Whether text on this fill should be light.
+    var isDark: Bool {
+        guard let rgb = usingColorSpace(.sRGB) else { return true }
+        return 0.299 * rgb.redComponent + 0.587 * rgb.greenComponent + 0.114 * rgb.blueComponent < 0.5
     }
 }

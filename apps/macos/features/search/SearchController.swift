@@ -9,9 +9,10 @@ public final class SearchController {
     public let content: ContentSearch
     private var current: (root: String, showHidden: Bool)?
 
-    /// `open`: shows a chosen file, at a line when the result has one. Until
-    /// the viewers (plan 5) the app opens it in the system's default app.
-    public init(root: String, showHidden: Bool, open: @escaping (String, Int?) -> Void) {
+    /// `open`: shows a chosen file, at a line when the result has one;
+    /// the last value is beside (true) or in a new tab (false) for ⌥↩ and
+    /// ⌘↩, nil for what the settings say (docs/spec/command-palette.md).
+    public init(root: String, showHidden: Bool, open: @escaping (String, Int?, Bool?) -> Void) {
         files = FileSearch(open: open)
         content = ContentSearch(open: open)
         setRoot(root, showHidden: showHidden)

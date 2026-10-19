@@ -23,11 +23,48 @@ let exitCode = await Checks.run([
         let first = items[0]
         expect(first.bold.map { String(first.title[$0]) } == ["N", "a"], "\(first.bold)")
     }),
-    ("an empty search lists the recent commands first, then by title", {
+    ("an empty search lists the recent commands, then a section per area", {
         let registry = sampleRegistry()
         registry.run("terminal.clear")
-        let ids = PaletteModel.items(for: "", registry: registry) { _ in nil }.map(\.id)
-        expect(ids == ["terminal.clear", "window.new", "tab.new"], "\(ids)")
+        let items = PaletteModel.items(for: "", registry: registry) { _ in nil }
+        expect(items.map(\.id) == ["terminal.clear", "tab.new", "window.new"], "\(items.map(\.id))")
+        expect(items.map(\.section) == ["Recentes", "Abas", "Cadex"], "\(items.map(\.section))")
+        expect(items[1].icon == .files && items[2].icon == .gearSix)
+    }),
+    ("unavailable commands go last: in their section, and among the matches", {
+        let registry = CommandRegistry()
+        registry.register(Command(id: "tab.a", title: "A aba", category: .tabs, action: .run {}, unavailableReason: { "não" }))
+        registry.register(Command(id: "tab.b", title: "B aba", category: .tabs, action: .run {}))
+        expect(PaletteModel.items(for: "", registry: registry) { _ in nil }.map(\.id) == ["tab.b", "tab.a"])
+        expect(PaletteModel.items(for: "aba", registry: registry) { _ in nil }.map(\.id) == ["tab.b", "tab.a"])
+    }),
+    ("titles go where the section changes; arrows skip them", {
+        let items = [PaletteItem(id: "a", title: "a", section: "X"), PaletteItem(id: "b", title: "b", section: "X"),
+                     PaletteItem(id: "c", title: "c", section: "Y")]
+        let rows = PaletteRows.rows(for: items)
+        expect(rows == [.header("X"), .item(0), .item(1), .header("Y"), .item(2)], "\(rows)")
+        expect(PaletteRows.next(from: 2, by: 1, in: rows) == 4)
+        expect(PaletteRows.next(from: 1, by: -1, in: rows) == nil)
+        expect(KeycapsView.keys(of: "⇧⌘D") == ["⇧", "⌘", "D"] && KeycapsView.keys(of: "esc") == ["esc"])
+    }),
+    ("a prefix in ⌘K lists another source with the rest of the text", {
+        final class Files: PaletteSource {
+            var placeholder: String { "" }
+            var emptyText: String { "" }
+            func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {}
+            func choose(_ item: PaletteItem) {}
+            func stop() {}
+        }
+        let palette = CommandPaletteController(registry: sampleRegistry()) { _ in nil }
+        let files = Files()
+        palette.addPrefix("/", label: "arquivos", source: files)
+        let commands = palette.commands
+        let toFiles = palette.route("/ render", from: commands)
+        expect(toFiles.0 === files && toFiles.1 == "render", "\(toFiles.1)")
+        let back = palette.route("> nova", from: commands)
+        expect(back.0 === commands && back.1 == "nova")
+        // Only from ⌘K: in ⌘P, "/" is just text.
+        expect(palette.route("/x", from: files).0 === files && palette.route("/x", from: files).1 == "/x")
     }),
     ("keywords find a command after the title matches", {
         let items = PaletteModel.items(for: "cls", registry: sampleRegistry()) { _ in nil }
@@ -39,7 +76,7 @@ let exitCode = await Checks.run([
         registry.register(Command(id: "pane.split-right", title: "Dividir à direita", category: .panes, action: .run {}))
         let items = PaletteModel.items(for: "A DIR", registry: registry) { _ in "⌘D" }
         expect(items.first?.id == "pane.split-right")
-        expect(items.first?.detail == "⌘D")
+        expect(items.first?.shortcut == "⌘D")
         expect(items.first?.bold.contains { items[0].title[$0] == "à" } == true)
     }),
     ("an unavailable command is listed with its reason", {

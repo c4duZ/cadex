@@ -34,7 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var settingsWindow: SettingsWindowController?
     let folder = WorkspaceFolder()
     private var explorer: ExplorerController?
-    private var search: SearchController?
+    var search: SearchController?
     var opener: FileOpener?
     private var markdown: MarkdownController?
     var git: SourceControlController?
@@ -132,8 +132,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     /// ⌘P and ⌘⇧F over the workspace folder; the chosen file opens in a tab.
     private func makeSearch(palette: CommandPaletteController) {
-        let search = SearchController(root: folder.root, showHidden: true) { [weak self] path, line in
-            self?.opener?.open(path, line: line)
+        let search = SearchController(root: folder.root, showHidden: true) { [weak self] path, line, beside in
+            self?.opener?.open(path, line: line, beside: beside)
         }
         commands.register(SearchCommands.all(search, palette: palette))
         self.search = search
@@ -195,6 +195,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         makeSpaces(palette: palette)
         makeExplorer()
         makeSearch(palette: palette)
+        connectPalette(palette)
         let git = SourceControlController(folder: folder.root) { [weak self] id in self?.commands.run(id) ?? false }
         self.git = git
         commands.register(SourceControlCommands.all(git, palette: palette) { [weak self] in

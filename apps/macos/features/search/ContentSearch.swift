@@ -1,6 +1,7 @@
 import AppKit
 import CCadex
 import CommandPalette
+import Icons
 
 /// ⌘⇧F: text in the workspace's files (docs/spec/search.md). Each keystroke
 /// cancels the search running in the core and starts another; results come
@@ -18,7 +19,7 @@ public final class ContentSearch: PaletteSource {
     private var box: Box?
     private var hits: [Hit] = []
     private var show: (@MainActor ([PaletteItem], String?) -> Void)?
-    let open: (String, Int?) -> Void
+    let open: (String, Int?, Bool?) -> Void
 
     struct Hit: Equatable, Sendable {
         let path: String
@@ -29,7 +30,7 @@ public final class ContentSearch: PaletteSource {
         let matchLength: Int
     }
 
-    init(open: @escaping (String, Int?) -> Void) {
+    init(open: @escaping (String, Int?, Bool?) -> Void) {
         self.open = open
     }
 
@@ -41,6 +42,10 @@ public final class ContentSearch: PaletteSource {
 
     public var placeholder: String { "Buscar texto nos arquivos" }
     public var emptyText: String { "Nenhum resultado" }
+    public var icon: Icon { .magnifyingGlass }
+    public var hints: [PaletteHint] {
+        [PaletteHint("↩", "abrir"), PaletteHint("⌥↩", "ao lado"), PaletteHint("⌘↩", "em nova aba")]
+    }
 
     public func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
         stop()
@@ -65,9 +70,13 @@ public final class ContentSearch: PaletteSource {
     }
 
     public func choose(_ item: PaletteItem) {
+        choose(item, as: .primary)
+    }
+
+    public func choose(_ item: PaletteItem, as choice: PaletteChoice) {
         guard let index = Int(item.id), index < hits.count else { return }
         let hit = hits[index]
-        open(FileSearchPaths.absolute(hit.path, in: root), hit.line)
+        open(FileSearchPaths.absolute(hit.path, in: root), hit.line, choice == .primary ? nil : choice == .option)
     }
 
     /// Cancels the core's search: no batch of it is delivered afterwards,
@@ -106,7 +115,8 @@ public final class ContentSearch: PaletteSource {
             let offsets = Array(hit.matchStart..<(hit.matchStart + hit.matchLength))
             return PaletteItem(id: String(i), title: hit.text,
                                bold: PaletteItem.boldRanges(in: hit.text, byteOffsets: offsets),
-                               detail: "\(hit.path):\(hit.line)")
+                               detail: "\(hit.path):\(hit.line)",
+                               image: FileIcons.image(forFileNamed: (hit.path as NSString).lastPathComponent))
         }
     }
 

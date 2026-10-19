@@ -13,7 +13,9 @@
   raiz ou "mostrar ocultos" refaz o índice, os mesmos valores não) e os comandos search.files (⌘P),
   search.content (⌘⇧F), search.toggle-case (⌥⌘C) e search.toggle-regex (⌥⌘R); os dois
   últimos só valem com a busca de texto aberta, senão a tecla segue para a view.
-- `FileSearch.swift`: índice de nomes do núcleo, 50 linhas por consulta, recentes com o campo vazio.
+- `FileSearch.swift`: índice de nomes do núcleo, 50 linhas por consulta, recentes com o campo vazio;
+  cada linha com o nome, a pasta em cinza e o ícone do tipo. Nas duas listas, ↩ abre pela
+  configuração, ⌥↩ ao lado e ⌘↩ em nova aba (o `open` recebe a escolha).
   `ContentSearch.swift`: cada tecla cancela a busca do núcleo e começa outra; os lotes chegam por
   funções C soltas (fora da main actor) e uma caixa que a nova busca desliga, então lote velho não
   aparece. A linha de status mostra as opções ("Aa .*") e a contagem.

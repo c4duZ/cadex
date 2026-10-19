@@ -1,56 +1,32 @@
 import CCadex
 import Foundation
 
-/// One row of the palette, whatever lists it (commands, files, text).
-public struct PaletteItem: Equatable {
-    public let id: String
-    public let title: String
-    /// Ranges of the title to draw in bold: the letters the search matched.
-    public let bold: [Range<String.Index>]
-    /// On the right: a command's shortcut, a file's folder, "path:line".
-    public let detail: String?
-    /// Why it cannot run now; the row is greyed out.
-    public let unavailableReason: String?
-
-    public init(id: String, title: String, bold: [Range<String.Index>] = [], detail: String? = nil,
-                unavailableReason: String? = nil) {
-        self.id = id
-        self.title = title
-        self.bold = bold
-        self.detail = detail
-        self.unavailableReason = unavailableReason
-    }
-
-    /// The characters at the matched UTF-8 offsets, as ranges of `text`:
-    /// what the core's fuzzy ranking returns, made drawable.
-    public static func boldRanges(in text: String, byteOffsets: [Int]) -> [Range<String.Index>] {
-        let utf8 = text.utf8
-        return byteOffsets.compactMap { offset in
-            guard offset < utf8.count else { return nil }
-            let start = utf8.index(utf8.startIndex, offsetBy: offset)
-            guard let char = String.Index(start, within: text) else { return nil }
-            return char..<text.index(after: char)
-        }
-    }
-}
-
 /// What the palette lists for a query (docs/spec/command-palette.md):
-/// empty, the recent commands then all by title; otherwise the fuzzy
-/// matches of the titles, then the commands found only by a keyword.
+/// empty, the recent commands then a section per area, each alphabetical
+/// with the unavailable ones last; otherwise the fuzzy matches of the
+/// titles, then the commands found only by a keyword, unavailable last.
 @MainActor
 enum PaletteModel {
     static func items(for query: String, registry: CommandRegistry, shortcut: (String) -> String?) -> [PaletteItem] {
         let commands = registry.commands
-        func item(_ command: Command, bold: [Range<String.Index>] = []) -> PaletteItem {
-            PaletteItem(id: command.id, title: command.title, bold: bold, detail: shortcut(command.id),
-                        unavailableReason: command.unavailableReason())
+        func item(_ command: Command, bold: [Range<String.Index>] = [], section: CommandSections.Section? = nil) -> PaletteItem {
+            PaletteItem(id: command.id, title: command.title, bold: bold, shortcut: shortcut(command.id),
+                        unavailableReason: command.unavailableReason(), section: section?.title,
+                        icon: CommandSections.section(of: command.id).icon)
+        }
+        func availableFirst(_ items: [PaletteItem]) -> [PaletteItem] {
+            items.filter { $0.unavailableReason == nil } + items.filter { $0.unavailableReason != nil }
         }
 
         if query.isEmpty {
-            let recent = registry.recent.compactMap { registry.command($0) }
+            let recent = registry.recent.compactMap { registry.command($0) }.map { item($0, section: CommandSections.recent) }
             let rest = commands.filter { !registry.recent.contains($0.id) }
                 .sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
-            return (recent + rest).map { item($0) }
+            let grouped = Dictionary(grouping: rest) { CommandSections.section(of: $0.id).title }
+            let sections = (CommandSections.all + [CommandSections.app]).flatMap { section in
+                availableFirst((grouped[section.title] ?? []).map { item($0, section: section) })
+            }
+            return recent + sections
         }
 
         let byTitle = FuzzyRank.rank(query, commands.map(\.title))
@@ -64,7 +40,7 @@ enum PaletteModel {
             seen.insert(match.index)
             items.append(item(commands[match.index]))
         }
-        return items
+        return availableFirst(items)
     }
 }
 

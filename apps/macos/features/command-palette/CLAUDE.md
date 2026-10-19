@@ -21,12 +21,18 @@
 - `CommandRegistry.swift`: registro, execução por id, recentes. `StandardCommands.swift`: sair,
   ocultar, desfazer, copiar, colar. `CommandMenu.swift`: menu da aplicação gerado do registro.
 - Paleta: `CommandPaletteController.swift` (comando palette.open; `open(_:)` mostra qualquer fonte,
-  o mesmo atalho de novo fecha, outro troca; descarta resultado de consulta velha; devolve o foco à
-  janela antes de executar), `PaletteSource.swift` (o protocolo das fontes e a fonte de comandos),
-  `CommandPalettePanel.swift` (NSPanel sem borda, feito uma vez e reaproveitado; status à direita do
-  campo; fecha ao perder o foco) e `PaletteModel.swift` (`PaletteItem` público e o que listar de
-  comandos: recentes, depois título fuzzy, depois palavra-chave; fuzzy do núcleo).
-- Outras features entram na paleta implementando `PaletteSource` (a busca: ⌘P e ⌘⇧F).
+  o mesmo atalho de novo fecha, outro troca; `addPrefix` liga `/`, `#` e `@` a outras fontes no ⌘K;
+  `style` recebe as cores do tema pelo app; descarta resultado de consulta velha; devolve o foco à
+  janela antes de executar), `PaletteSource.swift` (o protocolo das fontes, com ícone, teclas do
+  rodapé e escolha com ⌥↩/⌘↩, e a fonte de comandos), `PaletteItem.swift` (a linha: seção, ícone ou
+  imagem, detalhe, atalho), `PaletteSections.swift` (a seção de cada comando pelo prefixo do id, e
+  `MergedSource`, várias fontes numa lista com títulos), `PaletteModel.swift` (recentes e seções com
+  o campo vazio; fuzzy no título, depois palavra-chave; indisponíveis no fim; fuzzy do núcleo),
+  `CommandPalettePanel.swift` (NSPanel sem borda, feito uma vez e reaproveitado: ícone da lista,
+  campo, status, linhas com títulos de seção, rodapé com as teclas; fecha ao perder o foco) e
+  `PaletteRows.swift` (as linhas, os títulos, as teclas desenhadas e o `PaletteStyle`).
+- Outras features entram na paleta implementando `PaletteSource` (a busca: ⌘P e ⌘⇧F; as abas e os
+  spaces no `@`).
 - Spec em `../../../../docs/spec/command-palette.md`. Status: registro, menu e paleta prontos.
 
 ## Como validar

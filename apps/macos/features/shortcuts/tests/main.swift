@@ -36,7 +36,7 @@ func appRegistry() -> CommandRegistry {
     registry.register(SpacesCommands.all(SpacesController { fatalError("not called") }, palette: palette) { "/" })
     registry.register(MarkdownCommands.all(MarkdownController(root: NSTemporaryDirectory(), findFiles: { _ in [] }, open: { _, _ in }),
                                            palette: palette) { nil })
-    registry.register(SearchCommands.all(SearchController(root: NSTemporaryDirectory(), showHidden: false) { _, _ in },
+    registry.register(SearchCommands.all(SearchController(root: NSTemporaryDirectory(), showHidden: false) { _, _, _ in },
                                          palette: palette))
     return registry
 }

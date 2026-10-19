@@ -45,7 +45,7 @@ let package = Package(
         ),
         .target(
             name: "CommandPalette",
-            dependencies: ["CCadex"],
+            dependencies: ["CCadex", "Icons"],
             path: "features/command-palette",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -84,7 +84,7 @@ let package = Package(
         ),
         .target(
             name: "Search",
-            dependencies: ["CCadex", "CommandPalette"],
+            dependencies: ["CCadex", "CommandPalette", "Icons"],
             path: "features/search",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -123,7 +123,7 @@ let package = Package(
         ),
         .target(
             name: "Spaces",
-            dependencies: ["CommandPalette", "Tabs"],
+            dependencies: ["CommandPalette", "Tabs", "Icons"],
             path: "features/spaces",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],

@@ -1,5 +1,6 @@
 import AppKit
 import CommandPalette
+import Icons
 
 /// The spaces' commands (ADR 0005). The title bar's label runs
 /// space.switch; `folder` is where a new space's terminal starts.
@@ -45,6 +46,12 @@ public enum SpacesCommands {
     }
 }
 
+extension SpacesCommands {
+    /// The spaces as a palette list, for the app's "@" (with the tabs).
+    @MainActor
+    public static func source(_ spaces: SpacesController) -> PaletteSource { SpaceSource(spaces: spaces) }
+}
+
 /// The spaces in the palette; choosing one shows it.
 @MainActor
 final class SpaceSource: PaletteSource {
@@ -56,6 +63,7 @@ final class SpaceSource: PaletteSource {
 
     var placeholder: String { "Trocar para o space" }
     var emptyText: String { "Nenhum space" }
+    var icon: Icon { .stack }
 
     func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
         guard let spaces else { return show([], nil) }
@@ -64,7 +72,8 @@ final class SpaceSource: PaletteSource {
             .map { index, space in
                 let tabs = space.tabs.count == 1 ? "1 aba" : "\(space.tabs.count) abas"
                 return PaletteItem(id: String(index), title: space.name,
-                                   detail: index == spaces.activeIndex ? "atual · \(tabs)" : "\(index + 1) · \(tabs)")
+                                   detail: index == spaces.activeIndex ? "atual · \(tabs)" : "\(index + 1) · \(tabs)",
+                                   icon: .stack)
             }
         show(items, nil)
     }

@@ -1,6 +1,7 @@
 import AppKit
 import CCadex
 import CommandPalette
+import Icons
 
 /// ⌘P: the workspace's files by name (docs/spec/search.md). The core keeps
 /// the names in memory and current; each keystroke ranks them there.
@@ -16,10 +17,10 @@ public final class FileSearch: PaletteSource {
     private(set) var root = ""
     /// Opened from here, most recent first, as paths relative to the root.
     private(set) var recent: [String] = []
-    /// Opens a chosen file (absolute path; line, when known).
-    let open: (String, Int?) -> Void
+    /// Opens a chosen file (absolute path; line, when known; beside or not).
+    let open: (String, Int?, Bool?) -> Void
 
-    init(open: @escaping (String, Int?) -> Void) {
+    init(open: @escaping (String, Int?, Bool?) -> Void) {
         self.open = open
     }
 
@@ -35,6 +36,10 @@ public final class FileSearch: PaletteSource {
 
     public var placeholder: String { "Buscar arquivo pelo nome" }
     public var emptyText: String { "Nenhum arquivo encontrado" }
+    public var icon: Icon { .files }
+    public var hints: [PaletteHint] {
+        [PaletteHint("↩", "abrir"), PaletteHint("⌥↩", "ao lado"), PaletteHint("⌘↩", "em nova aba")]
+    }
 
     public func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
         guard !query.isEmpty else {
@@ -45,7 +50,12 @@ public final class FileSearch: PaletteSource {
 
     public func choose(_ item: PaletteItem) {
         remember(item.id)
-        open(FileSearchPaths.absolute(item.id, in: root), nil)
+        open(FileSearchPaths.absolute(item.id, in: root), nil, nil)
+    }
+
+    public func choose(_ item: PaletteItem, as choice: PaletteChoice) {
+        remember(item.id)
+        open(FileSearchPaths.absolute(item.id, in: root), nil, choice == .primary ? nil : choice == .option)
     }
 
     public func stop() {}
@@ -79,8 +89,17 @@ public final class FileSearch: PaletteSource {
         return ready ? nil : "Indexando… \(count)"
     }
 
+    /// The name as the title, its folder in grey, the type's icon: the
+    /// owner found whole paths hard to scan (2026-10-19). The matched
+    /// letters of the name stay bold.
     private func item(path: String, positions: [Int]) -> PaletteItem {
-        PaletteItem(id: path, title: path, bold: PaletteItem.boldRanges(in: path, byteOffsets: positions))
+        let name = (path as NSString).lastPathComponent
+        let start = path.utf8.count - name.utf8.count
+        let inName = positions.filter { $0 >= start }.map { $0 - start }
+        let folder = (path as NSString).deletingLastPathComponent
+        return PaletteItem(id: path, title: name, bold: PaletteItem.boldRanges(in: name, byteOffsets: inName),
+                           detail: folder.isEmpty ? nil : folder, icon: FileIcons.icon(forFileNamed: name),
+                           image: FileIcons.image(forFileNamed: name))
     }
 
     deinit {
