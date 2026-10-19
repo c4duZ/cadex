@@ -3,7 +3,7 @@
 ## O que eu quero
 - Desenhar o terminal em Metal, com fonte, cursor, seleção, links e true color.
 - Teclado completo, colagem (texto, caminhos de arquivo e imagem como arquivo temporário), arrastar
-  arquivos.
+  arquivos. A ordem da colagem está em `../../../../docs/spec/terminal.md`.
 - Busca dentro do terminal.
 - Comportamento inicial igual ao terminal do Terax, e de preferência mais leve.
 

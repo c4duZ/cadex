@@ -17,12 +17,11 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | search | sim | sim | busca de arquivo por nome (fuzzy) e de conteúdo, respeitando .gitignore |
 | source-control | sim | sim | status, diff, stage, commit, push e pull via o binário git |
 | git-history | sim | sim | log de commits e grafo |
-| language-server | sim | sim | processos LSP e integração com o editor |
 | workspace | sim | não | diretórios autorizados, diretório de lançamento, ambiente (WSL no Windows) |
-| editor | não | sim | editor de código, vim, formatar ao salvar |
+| editor | sim | sim | ler código: números de linha, dobrar, destaque de sintaxe (tree-sitter), linha atual |
 | preview | não | sim | preview web de servidores locais e URLs |
 | media-preview | não | sim | imagem, vídeo, áudio e PDF com os frameworks do sistema |
-| markdown | não | sim | Markdown renderizado |
+| markdown | sim | sim | Markdown renderizado; ao editar: autocomplete de link, ⌘+clique, links quebrados, quem aponta pra cá |
 | tabs | não | sim | abas e divisões de painel |
 | spaces | não | sim | grupos de abas restaurados entre sessões |
 | themes | não | sim | temas do app e do editor, imagem de fundo |

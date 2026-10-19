@@ -17,7 +17,8 @@ conta, sem IA embutida: rode os seus agentes de código numa aba de terminal.
                     │                                      │
                     │  terminal ── libghostty-vt           │
                     │  explorer · search · source-control  │
-                    │  git-history · language-server       │
+                    │  git-history · editor (tree-sitter)  │
+                    │  markdown (índice de links)          │
                     │  workspace                           │
                     └──────────────────▲───────────────────┘
                                        │ API C

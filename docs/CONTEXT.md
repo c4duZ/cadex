@@ -20,7 +20,7 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Painel** (`pane`): uma divisão dentro de uma aba de terminal. Uma aba pode ter vários painéis.
 - **Folha** (`leaf`): um painel final da árvore de divisões, que contém uma sessão de terminal.
 - **Barra lateral** (`sidebar`): a coluna com o explorer ou o source control.
-- **Barra de status** (`status-bar`): a faixa inferior com diretório, ambiente e diagnósticos.
+- **Barra de status** (`status-bar`): a faixa inferior com diretório e ambiente.
 - **Paleta de comandos** (`command-palette`): a busca de ações aberta pelo ⌘K. Executa qualquer comando.
 - **Comando** (`command`): uma ação do app, com id, título e a função que executa. Menus, botões e
   atalhos só disparam comandos.
@@ -47,10 +47,15 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Observação de arquivos** (`file watch`): o aviso do sistema quando algo muda no disco.
 
 ## Editor e código
-- **Language server** (`LSP`): processo externo que dá diagnósticos, navegação, autocomplete e
-  formatação para uma linguagem.
-- **Diagnóstico**: erro ou aviso que o language server aponta numa linha.
-- **Formatador externo**: programa como Prettier, Ruff ou rustfmt, rodado ao salvar.
+- **Destaque de sintaxe** (`syntax highlighting`): as cores por tipo de trecho (string, palavra-chave,
+  comentário), calculadas pelo tree-sitter.
+- **Dobrar** (`folding`): esconder e mostrar um bloco de código pela setinha ao lado do número da
+  linha.
+- **tree-sitter**: biblioteca em C que entende a estrutura do código de cada linguagem; dá o destaque
+  de sintaxe e as regiões que podem ser dobradas.
+- **Link wiki** (`[[nota]]`): link para outro Markdown pelo nome do arquivo, sem caminho nem extensão.
+- **Quem aponta pra cá** (`backlinks`): os arquivos Markdown que têm link para o arquivo aberto.
+- **Link quebrado**: link para arquivo ou título que não existe; aparece sublinhado.
 
 ## Git
 - **Source control**: o painel de stage, commit, push e pull.

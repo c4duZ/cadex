@@ -1,7 +1,7 @@
 # status-bar (app macOS)
 
 ## O que eu quero
-- Diretório atual navegável, ambiente, status do language server e diagnósticos.
+- Diretório atual navegável e ambiente.
 
 ## O que eu não quero
 - Informação que muda a cada tecla causando redesenho da janela.
