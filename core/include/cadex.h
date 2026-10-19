@@ -388,6 +388,80 @@ cadex_status cadex_fuzzy_rank(const uint8_t *query, size_t query_len,
                               const cadex_text *texts, size_t count, cadex_fuzzy_result *out);
 void cadex_fuzzy_result_free(cadex_fuzzy_result *result);
 
+/* -- File names (⌘P) -- */
+
+/* The file names of a folder (inside an authorized directory) in memory:
+ * read on a thread of the core, then kept current by watching the disk.
+ * .git, .gitignore'd and (unless show_hidden) hidden paths are left out;
+ * symbolic links are not followed. Close with cadex_search_index_close. */
+typedef struct cadex_search_index cadex_search_index;
+cadex_status cadex_search_index_open(const char *root, bool show_hidden, cadex_search_index **out);
+void cadex_search_index_close(cadex_search_index *index);
+/* Files indexed so far; *ready (optional) turns true after the first full read. */
+size_t cadex_search_index_count(cadex_search_index *index, bool *ready);
+
+typedef struct {
+    uint32_t path_offset; /* into cadex_search_files_result.paths; relative to the root */
+    uint32_t path_len;    /* UTF-8, not NUL-terminated */
+    int32_t score;
+    uint32_t positions_offset; /* into cadex_search_files_result.positions */
+    uint32_t positions_count;  /* byte offsets in the path of the matched characters */
+} cadex_file_match;
+
+typedef struct {
+    cadex_file_match *matches; /* best first */
+    size_t count;
+    uint8_t *paths;
+    uint32_t *positions;
+} cadex_search_files_result;
+
+/* The best `limit` paths for a fuzzy query; the file name counts more than
+ * its folders. An empty query gives no matches. Fast enough per keystroke. */
+cadex_status cadex_search_files(cadex_search_index *index, const uint8_t *query, size_t query_len,
+                                size_t limit, cadex_search_files_result *out);
+void cadex_search_files_result_free(cadex_search_files_result *result);
+
+/* -- Content (⌘⇧F) -- */
+
+typedef struct cadex_search_content cadex_search_content;
+
+typedef struct {
+    bool case_sensitive;
+    bool regex;        /* POSIX extended syntax with Apple's \d \w \s \b (ADR 0009) */
+    bool show_hidden;
+    uint32_t max_results; /* 0: 2000 */
+} cadex_search_content_options;
+
+/* One line with a match; valid only during on_hits. */
+typedef struct {
+    const char *path;      /* relative to the root, NUL-terminated */
+    uint32_t line;         /* 1-based */
+    uint32_t column;       /* byte offset of the match in the line */
+    const uint8_t *text;   /* the line around the match, at most 240 bytes */
+    uint32_t text_len;
+    uint32_t match_start;  /* the match inside text */
+    uint32_t match_len;
+} cadex_search_hit;
+
+typedef struct {
+    void *context;
+    /* Batches of hits, on the search's thread. Must return quickly. */
+    void (*on_hits)(void *context, const cadex_search_hit *hits, size_t count);
+    /* The search ended by itself (not called after cancel). truncated:
+     * stopped at max_results. files: how many were searched. */
+    void (*on_done)(void *context, bool truncated, uint32_t files);
+} cadex_search_content_callbacks;
+
+/* Searches the files under root (.gitignore'd, binary and > 2 MB files are
+ * skipped; one hit per line). An invalid regex: CADEX_INVALID_ARGUMENT. */
+cadex_status cadex_search_content_start(const char *root, const uint8_t *query, size_t query_len,
+                                        const cadex_search_content_options *options,
+                                        const cadex_search_content_callbacks *callbacks,
+                                        cadex_search_content **out);
+/* Stops and frees; no callback runs after this returns. Not from inside a
+ * callback. NULL is accepted. */
+void cadex_search_content_cancel(cadex_search_content *search);
+
 /* ---- Workspace (core/features/workspace) ------------------------------ */
 
 /* Paths go in absolute and NUL-terminated. Paths that come out are
@@ -429,6 +503,7 @@ typedef struct {
     uint32_t name_len;    /* UTF-8, not NUL-terminated */
     uint8_t kind;         /* CADEX_ENTRY_* */
     bool link_to_directory; /* a symbolic link to a folder: sorted with folders */
+    bool ignored;         /* left out by .gitignore, .ignore or .git/info/exclude */
     uint64_t size;        /* bytes, for files */
 } cadex_explorer_entry;
 

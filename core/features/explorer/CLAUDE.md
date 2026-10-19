@@ -23,9 +23,9 @@
 - Apagar não mora aqui: vai para a Lixeira do sistema pelo app (FileManager.trashItem).
 - API C em `c_api.zig` e `c_api_watch.zig`. O link com CoreServices (FSEvents) está em
   `core/build.zig` (testes) e no `apps/macos/shared/core-bridge/module.modulemap` (app).
-- Marcar ignorado pelo .gitignore na listagem entra com o parser da fase D do plano 4 (o parser vai
-  para `core/shared/`, usado pelo explorer e pela busca).
-- Spec: `docs/spec/explorer.md`. Status: núcleo pronto (plano 4, fase B), menos a marca de ignorado.
+- A listagem marca o que .gitignore, .ignore e .git/info/exclude deixam de fora
+  (`core/shared/ignore.zig`, com as regras do workspace a que a pasta pertence).
+- Spec: `docs/spec/explorer.md`. Status: núcleo pronto (plano 4, fases B e D).
 
 ## Como validar
 - `make core-test` (ou `zig build test` dentro de `core/`) passa, sem vazamento no alocador de teste.

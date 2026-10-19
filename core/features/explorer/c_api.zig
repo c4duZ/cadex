@@ -19,6 +19,8 @@ pub const Entry = extern struct {
     /// explorer.listing.Kind: 0 file, 1 folder, 2 symbolic link, 3 other.
     kind: u8,
     link_to_directory: bool,
+    /// Left out by .gitignore, .ignore or .git/info/exclude.
+    ignored: bool,
     size: u64,
 };
 
@@ -58,6 +60,7 @@ fn flatten(entries: []const explorer.listing.Entry, result: *Listing) status.Cod
             .name_len = @intCast(e.name.len),
             .kind = @intFromEnum(e.kind),
             .link_to_directory = e.link_to_directory,
+            .ignored = e.ignored,
             .size = e.size,
         };
         @memcpy(names[at..][0..e.name.len], e.name);

@@ -33,7 +33,7 @@ pub fn fromError(err: anyerror) Code {
         error.AlreadyExists => already_exists,
         error.TooLarge => too_large,
         error.Binary => binary,
-        error.NotAbsolute, error.NameInvalid, error.NameTooLong, error.NotDirectory, error.IsDirectory, error.IntoItself => invalid_argument,
+        error.NotAbsolute, error.NameInvalid, error.NameTooLong, error.NotDirectory, error.IsDirectory, error.IntoItself, error.InvalidPattern => invalid_argument,
         else => io_failed,
     };
 }

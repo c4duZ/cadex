@@ -63,7 +63,7 @@ operações do Finder que importam para quem programa.
 - Arquivo binário ou acima de 10 MB pedido pelo visualizador -> recusado com o motivo.
 
 ## Critérios de aceite
-- [ ] Listar uma pasta devolve nome, tipo, tamanho e se é ignorada, pastas primeiro.
+- [x] Listar uma pasta devolve nome, tipo, tamanho e se é ignorada, pastas primeiro.
 - [x] Criar, renomear, mover e copiar funcionam e recusam fora do workspace.
 - [x] Renomear para um nome existente é recusado.
 - [x] Mover uma pasta para dentro dela mesma é recusado.

@@ -127,7 +127,7 @@ final class ExplorerCell: NSTableCellView {
         imageView?.image = FileTypeIcon.icon(name: node.name, entry: node.entry, expanded: expanded).image(size: 15)
         imageView?.contentTintColor = node.isFolder ? style.accent : style.secondaryText
         textField?.textColor = style.text
-        alphaValue = node.isHidden ? 0.55 : 1
+        alphaValue = node.isHidden || node.entry?.ignored == true ? 0.55 : 1
         toolTip = node.entry?.kind == .symlink && !cadex_workspace_is_authorized(node.path) ? "Aponta para fora da pasta aberta" : nil
     }
 }

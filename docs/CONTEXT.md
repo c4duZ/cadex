@@ -38,6 +38,10 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   executado como digitação.
 - **Diretório autorizado** (`authorized directory`): pasta que o usuário abriu nesta execução. O
   núcleo só mexe em arquivos dentro de uma delas, com o caminho resolvido (sem `..` nem links).
+- **Ignorado** (`ignored`): o que .gitignore, .ignore ou .git/info/exclude deixam de fora. Aparece
+  apagado no explorer e não entra na busca.
+- **Índice de nomes** (`search index`): a lista dos arquivos do workspace em memória, que o ⌘P
+  consulta a cada tecla e que acompanha o disco.
 - **Ambiente** (`workspace environment`): onde os processos rodam. Local, ou uma distro WSL no
   Windows.
 

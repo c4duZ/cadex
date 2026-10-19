@@ -9,6 +9,8 @@ struct FileEntry: Equatable {
     let kind: Kind
     let size: UInt64
     let linkToDirectory: Bool
+    /// Left out by .gitignore, .ignore or .git/info/exclude: shown dimmed.
+    var ignored = false
 
     var opensAsFolder: Bool { kind == .directory || linkToDirectory }
 }
@@ -42,7 +44,7 @@ enum ExplorerFiles {
             let e = entries[i]
             let name = String(decoding: UnsafeBufferPointer(start: names + Int(e.name_offset), count: Int(e.name_len)), as: UTF8.self)
             return FileEntry(name: name, kind: FileEntry.Kind(rawValue: e.kind) ?? .other, size: e.size,
-                             linkToDirectory: e.link_to_directory)
+                             linkToDirectory: e.link_to_directory, ignored: e.ignored)
         }
     }
 

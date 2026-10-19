@@ -68,6 +68,20 @@ pub const Registry = struct {
         return error.Outside;
     }
 
+    /// The deepest authorized directory holding canonical `real`, copied
+    /// into `out`: the workspace a path belongs to.
+    pub fn rootOf(self: *Registry, real: []const u8, out: *paths.Buffer) ?[]const u8 {
+        _ = c.pthread_mutex_lock(&self.mutex);
+        defer _ = c.pthread_mutex_unlock(&self.mutex);
+        var best: ?[]const u8 = null;
+        for (self.roots.items) |root| {
+            if (paths.isWithin(root, real) and (best == null or root.len > best.?.len)) best = root;
+        }
+        const root = best orelse return null;
+        @memcpy(out[0..root.len], root);
+        return out[0..root.len];
+    }
+
     pub fn allows(self: *Registry, path: []const u8) bool {
         var buf: paths.Buffer = undefined;
         _ = self.resolve(path, &buf) catch return false;

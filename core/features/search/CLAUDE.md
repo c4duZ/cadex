@@ -10,15 +10,22 @@
 - Uma busca nova competindo com a anterior: a anterior é cancelada.
 
 ## Como eu quero
-- Índice de nomes em memória, atualizado pela observação de arquivos.
-- Limite de resultados e de tamanho de arquivo lido.
 - Porta de entrada: `search.zig`. `fuzzy.zig` pontua um texto (letras em ordem; caixa e acentos do
-  português não importam; começo de palavra vale mais) e `rank.zig` ordena uma lista. API C em
-  `c_api.zig` (`cadex_fuzzy_rank`), usada hoje pela paleta de comandos.
-- Spec de comportamento em docs/spec/search.md, escrita antes do código da busca de arquivos.
-  Status: fuzzy pronto (spec da paleta); busca de arquivos e conteúdo no plano 4.
+  português não importam; começo de palavra vale mais) e `rank.zig` ordena uma lista (paleta).
+- `walker.zig` percorre o workspace: só arquivos, sem `.git`, sem ignorados (`core/shared/ignore.zig`),
+  ocultos só se pedido, sem seguir links, até 300 000 arquivos, ordem por nome.
+- ⌘P: `index.zig` guarda os nomes em memória numa thread própria e se atualiza com o watcher do
+  explorer, relendo só a pasta que mudou (subpastas novas inteiras, sumidas removidas);
+  `files.zig` ordena (nome do arquivo vale mais que as pastas, filtro barato antes do fuzzy).
+- ⌘⇧F: `content.zig` busca numa thread, entrega em lotes de 64, uma ocorrência por linha, até 2 000,
+  pula binário e arquivo acima de 2 MB; `cancel()` só volta depois do último callback.
+  `content_match.zig`: texto literal pelo núcleo, regex pela libc (ERE + extensões da Apple,
+  `docs/adr/0009-regex-from-the-system.md`).
+- API C: `c_api.zig` (fuzzy), `c_api_files.zig` (índice), `c_api_content.zig` (conteúdo).
+- Spec: `docs/spec/search.md`. Status: núcleo pronto (plano 4, fase D); a paleta é a fase E.
 
 ## Como validar
 - `make core-test` (ou `zig build test` dentro de `core/`) passa, sem vazamento no alocador de teste.
-- Teste com uma árvore de exemplo que confere .gitignore e cancelamento.
+- Testes com pastas temporárias: .gitignore, índice acompanhando criação e remoção, busca literal e
+  regex, limite, cancelamento sem resultado depois (`content_test.zig`).
 - `fuzzy.zig` e `rank.zig` testam a ordem ("na" põe "Nova aba" na frente), acentos e posições.

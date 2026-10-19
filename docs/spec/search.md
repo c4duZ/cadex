@@ -17,8 +17,9 @@ Achar um arquivo pelo nome ou um trecho de texto dentro do workspace, sem sair d
 
 ### Conteúdo (⌘⇧F)
 - ⌘⇧F abre a paleta no modo "conteúdo". Procura o texto em todos os arquivos do workspace.
-- Por padrão, texto literal sem diferenciar caixa. Opções alternáveis: diferenciar caixa e
-  expressão regular.
+- Por padrão, texto literal sem diferenciar caixa (só letras sem acento mudam de caixa). Opções
+  alternáveis: diferenciar caixa e expressão regular, na sintaxe estendida do POSIX com `\d`, `\w`,
+  `\s` e `\b` (ADR 0009).
 - Resultados chegam aos poucos, agrupados por arquivo: caminho relativo, número da linha e o trecho
   da linha com o que casou em destaque.
 - Digitar de novo cancela a busca anterior; resultados da busca velha nunca aparecem.
@@ -43,15 +44,18 @@ Achar um arquivo pelo nome ou um trecho de texto dentro do workspace, sem sair d
 ## Casos de borda
 - Workspace com 100 000 arquivos -> a busca por nome continua respondendo a cada tecla.
 - Arquivo com linha de 1 MB -> o trecho mostrado é cortado em volta do que casou.
-- `.gitignore` com `build/` e `!build/keep.txt` -> `build/keep.txt` entra, o resto de `build/` não.
+- `.gitignore` com `build/*` e `!build/keep.txt` -> `build/keep.txt` entra, o resto de `build/` não.
+  Com `build/` (a pasta inteira), nada de dentro volta, como no git.
+- Links simbólicos não são seguidos pela busca (ficam de fora).
 - Busca trocada no meio -> a anterior para; nenhum resultado dela aparece depois.
 - Arquivo em UTF-8 inválido -> buscado como bytes; o trecho mostra o caractere de substituição.
 
 ## Critérios de aceite
 - [x] O fuzzy acha "na" em "Nova aba" na frente de "Abrir nova janela" (paleta de comandos).
-- [ ] O fuzzy acha "cntrl" em `core/features/terminal/c_api`.
-- [ ] `.gitignore` com negação e com pasta aninhada decide certo o que entra.
-- [ ] Busca cancelada não entrega resultados velhos.
-- [ ] A busca de conteúdo acha texto literal e regex e devolve linha e coluna.
+- [x] O fuzzy acha "trmcapi" em `core/features/terminal/c_api.zig` (o plano pedia "cntrl", mas
+  essas letras não estão em ordem nesse caminho).
+- [x] `.gitignore` com negação e com pasta aninhada decide certo o que entra.
+- [x] Busca cancelada não entrega resultados velhos.
+- [x] A busca de conteúdo acha texto literal e regex e devolve linha e coluna.
 - [ ] ⌘P acha `render.zig` na pasta do Cadex.
 - [ ] ⌘⇧F acha "libghostty" e abre o arquivo na linha.

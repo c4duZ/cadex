@@ -12,6 +12,8 @@ comptime {
     _ = @import("features/terminal/c_api.zig");
     _ = @import("features/terminal/c_api_view.zig");
     _ = @import("features/search/c_api.zig");
+    _ = @import("features/search/c_api_files.zig");
+    _ = @import("features/search/c_api_content.zig");
     _ = @import("features/workspace/c_api.zig");
     _ = @import("features/explorer/c_api.zig");
     _ = @import("features/explorer/c_api_watch.zig");
@@ -25,4 +27,6 @@ test {
     _ = explorer;
     _ = @import("features/terminal/c_api_test.zig");
     _ = @import("shared/c_buffer.zig");
+    _ = @import("shared/glob.zig");
+    _ = @import("shared/ignore.zig");
 }

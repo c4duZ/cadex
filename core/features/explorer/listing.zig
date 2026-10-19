@@ -6,6 +6,7 @@ const c = std.c;
 const workspace = @import("../workspace/workspace.zig");
 const errors = @import("errors.zig");
 const natural = @import("natural.zig");
+const ignore = @import("../../shared/ignore.zig");
 
 const paths = workspace.paths;
 pub const Error = errors.Error;
@@ -21,6 +22,8 @@ pub const Entry = struct {
     size: u64,
     /// A symbolic link whose target is a folder: listed with the folders.
     link_to_directory: bool = false,
+    /// Left out by .gitignore, .ignore or .git/info/exclude (shown dimmed).
+    ignored: bool = false,
 
     fn sortsAsDirectory(self: Entry) bool {
         return self.kind == .directory or self.link_to_directory;
@@ -64,8 +67,27 @@ pub fn list(gpa: std.mem.Allocator, registry: *workspace.Registry, path: []const
             .link_to_directory = entry.link_to_directory,
         });
     }
+    markIgnored(gpa, registry, real, entries.items);
     std.mem.sort(Entry, entries.items, {}, treeOrder);
     return .{ .arena = arena, .entries = entries.items };
+}
+
+/// Asks the ignore rules of the folder's workspace about each entry. A
+/// failure here only leaves the marks off.
+fn markIgnored(gpa: std.mem.Allocator, registry: *workspace.Registry, folder: []const u8, entries: []Entry) void {
+    var root_buf: paths.Buffer = undefined;
+    const root = registry.rootOf(folder, &root_buf) orelse return;
+    var matcher = ignore.Matcher.init(gpa, root) catch return;
+    defer matcher.deinit();
+    const below = std.mem.trimStart(u8, folder[root.len..], "/");
+    for (entries) |*entry| {
+        var rel_buf: paths.Buffer = undefined;
+        const rel = (if (below.len == 0)
+            std.fmt.bufPrint(&rel_buf, "{s}", .{entry.name})
+        else
+            std.fmt.bufPrint(&rel_buf, "{s}/{s}", .{ below, entry.name })) catch continue;
+        entry.ignored = matcher.isIgnored(rel, entry.sortsAsDirectory());
+    }
 }
 
 fn skipped(name: []const u8) bool {
@@ -137,4 +159,26 @@ test "listing outside the workspace is refused" {
     _ = try registry.authorize(try dir.join("inside"));
     try testing.expectError(error.Outside, list(testing.allocator, &registry, dir.path()));
     try testing.expectError(error.Outside, list(testing.allocator, &registry, try dir.join("inside/..")));
+}
+
+test "entries left out by .gitignore are marked, also inside an ignored folder" {
+    var dir = try TestDir.init();
+    defer dir.deinit();
+    try dir.writeFile(".gitignore", "zig-out/\n*.log\n");
+    try dir.makeDir("zig-out/lib");
+    try dir.writeFile("app.log", "");
+    try dir.writeFile("main.zig", "");
+    var registry = workspace.Registry.init(testing.allocator);
+    defer registry.deinit();
+    _ = try registry.authorize(dir.path());
+
+    var top = try list(testing.allocator, &registry, dir.path());
+    defer top.deinit();
+    for (top.entries) |e| {
+        const want = std.mem.eql(u8, e.name, "zig-out") or std.mem.eql(u8, e.name, "app.log");
+        try testing.expectEqual(want, e.ignored);
+    }
+    var inner = try list(testing.allocator, &registry, try dir.join("zig-out"));
+    defer inner.deinit();
+    try testing.expect(inner.entries[0].ignored);
 }
