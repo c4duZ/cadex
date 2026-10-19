@@ -4,6 +4,7 @@
 //! import it (ADR 0003).
 
 const std = @import("std");
+const fs = @import("../../shared/fs.zig");
 const vt = @import("ghostty-vt");
 const render = @import("render.zig");
 const detect = @import("link_detect.zig");
@@ -104,7 +105,7 @@ fn resolvePath(gpa: std.mem.Allocator, raw: []const u8, places: Places) !?[]u8 {
     const candidates = [_][]const u8{ raw, detect.withoutLineSuffix(raw) };
     for (candidates) |candidate| {
         const absolute = try absolutePath(gpa, candidate, places) orelse continue;
-        if (exists(gpa, absolute)) return absolute;
+        if (exists(absolute)) return absolute;
         gpa.free(absolute);
     }
     return null;
@@ -121,10 +122,9 @@ fn absolutePath(gpa: std.mem.Allocator, path: []const u8, places: Places) !?[]u8
     return try std.mem.concat(gpa, u8, &.{ cwd, "/", path });
 }
 
-fn exists(gpa: std.mem.Allocator, path: []const u8) bool {
-    const z = gpa.dupeZ(u8, path) catch return false;
-    defer gpa.free(z);
-    return std.c.access(z, std.c.F_OK) == 0;
+/// Follows a last link, like access(2): a broken link is no file.
+fn exists(path: []const u8) bool {
+    return fs.info(path, true) != null;
 }
 
 /// Decodes the directory of an OSC 7 report ("file://host/Users/x%20y")

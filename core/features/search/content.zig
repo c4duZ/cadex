@@ -4,7 +4,7 @@
 //! callback, so results of an old search never arrive later.
 
 const std = @import("std");
-const c = std.c;
+const fs = @import("../../shared/fs.zig");
 const workspace = @import("../workspace/workspace.zig");
 const Walker = @import("walker.zig").Walker;
 const Matcher = @import("content_match.zig").Matcher;
@@ -140,17 +140,11 @@ pub const Search = struct {
     /// The file's bytes in a buffer reused across files.
     fn read(self: *Search, rel: []const u8) !?[]const u8 {
         var path_buf: paths.Buffer = undefined;
-        const path = try std.fmt.bufPrintZ(&path_buf, "{s}/{s}", .{ self.root, rel });
-        const fd = c.open(path.ptr, .{ .ACCMODE = .RDONLY, .CLOEXEC = true, .NOFOLLOW = true });
-        if (fd < 0) return null;
-        defer _ = c.close(fd);
+        const path = try fs.join(&path_buf, self.root, rel);
+        const file = fs.File.openRead(path, .{ .follow = false }) catch return null;
+        defer file.close();
         self.buffer.clearRetainingCapacity();
-        var chunk: [64 * 1024]u8 = undefined;
-        while (self.buffer.items.len <= self.options.max_file_size) {
-            const n = c.read(fd, &chunk, chunk.len);
-            if (n <= 0) break;
-            try self.buffer.appendSlice(self.gpa, chunk[0..@intCast(n)]);
-        }
+        try fs.appendUpTo(self.gpa, file, &self.buffer, self.options.max_file_size);
         if (self.buffer.items.len > self.options.max_file_size) return null;
         return self.buffer.items;
     }

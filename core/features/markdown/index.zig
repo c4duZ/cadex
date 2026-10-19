@@ -3,8 +3,8 @@
 //! folder has only its own notes read again (docs/spec/markdown.md).
 
 const std = @import("std");
+const fs = @import("../../shared/fs.zig");
 const sync = @import("../../shared/sync.zig");
-const c = std.c;
 const workspace = @import("../workspace/workspace.zig");
 const explorer = @import("../explorer/explorer.zig");
 const search = @import("../search/search.zig");
@@ -217,20 +217,14 @@ fn stillThere(key: []const u8, folder: []const u8, contents: Walker.Folder) bool
     return false;
 }
 
-fn readFile(gpa: std.mem.Allocator, path: [:0]const u8) ?[]u8 {
-    const fd = c.open(path.ptr, .{ .ACCMODE = .RDONLY, .CLOEXEC = true });
-    if (fd < 0) return null;
-    defer _ = c.close(fd);
+fn readFile(gpa: std.mem.Allocator, path: []const u8) ?[]u8 {
+    const file = fs.File.openRead(path, .{}) catch return null;
+    defer file.close();
     var out: std.ArrayList(u8) = .empty;
-    var chunk: [16 * 1024]u8 = undefined;
-    while (out.items.len <= max_note_bytes) {
-        const n = c.read(fd, &chunk, chunk.len);
-        if (n <= 0) break;
-        out.appendSlice(gpa, chunk[0..@intCast(n)]) catch {
-            out.deinit(gpa);
-            return null;
-        };
-    }
+    fs.appendUpTo(gpa, file, &out, max_note_bytes) catch {
+        out.deinit(gpa);
+        return null;
+    };
     return out.toOwnedSlice(gpa) catch null;
 }
 

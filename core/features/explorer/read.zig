@@ -2,7 +2,7 @@
 //! directory, up to a size, and not binary (docs/spec/explorer.md).
 
 const std = @import("std");
-const c = std.c;
+const fs = @import("../../shared/fs.zig");
 const workspace = @import("../workspace/workspace.zig");
 const errors = @import("errors.zig");
 
@@ -31,39 +31,21 @@ pub fn readHead(gpa: std.mem.Allocator, registry: *workspace.Registry, path: []c
 
 fn read(gpa: std.mem.Allocator, registry: *workspace.Registry, path: []const u8, limit: u64, head: bool) Error!Head {
     var buf: paths.Buffer = undefined;
-    var z_buf: paths.Buffer = undefined;
-    const z = try paths.terminate(try registry.resolve(path, &buf), &z_buf);
-    const fd = c.open(z.ptr, .{ .ACCMODE = .RDONLY, .CLOEXEC = true });
-    if (fd < 0) return errors.fromErrno();
-    defer _ = c.close(fd);
-    var st: c.Stat = undefined;
-    if (c.fstat(fd, &st) != 0) return errors.fromErrno();
-    if (st.mode & c.S.IFMT == c.S.IFDIR) return error.IsDirectory;
-    const size: u64 = @intCast(st.size);
+    const file = try fs.File.openRead(try registry.resolve(path, &buf), .{});
+    defer file.close();
+    const found = try file.info();
+    if (found.kind == .directory) return error.IsDirectory;
+    const size = found.size;
     if (size > limit and !head) return error.TooLarge;
 
     const bytes = try gpa.alloc(u8, @intCast(@min(size, limit)));
     errdefer gpa.free(bytes);
     // The file may shrink while it is read: keep what was there.
-    const got = try readAll(fd, bytes);
+    const got = try fs.readAll(file, bytes);
     if (std.mem.indexOfScalar(u8, bytes[0..@min(got, sniff_size)], 0) != null) return error.Binary;
     const truncated = size > limit;
     if (got == bytes.len) return .{ .bytes = bytes, .truncated = truncated };
     return .{ .bytes = try gpa.realloc(bytes, got), .truncated = truncated };
-}
-
-fn readAll(fd: c.fd_t, out: []u8) Error!usize {
-    var at: usize = 0;
-    while (at < out.len) {
-        const n = c.read(fd, out[at..].ptr, out.len - at);
-        if (n < 0) {
-            if (c.errno(n) == .INTR) continue;
-            return errors.fromErrno();
-        }
-        if (n == 0) break;
-        at += @intCast(n);
-    }
-    return at;
 }
 
 const testing = std.testing;

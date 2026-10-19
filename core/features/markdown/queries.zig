@@ -2,6 +2,7 @@
 //! of the text being edited, resolved and checked; who points at a note.
 
 const std = @import("std");
+const fs = @import("../../shared/fs.zig");
 const Index = @import("index.zig").Index;
 const outline = @import("outline.zig");
 const resolve = @import("resolve.zig");
@@ -27,7 +28,7 @@ pub fn checkLinks(a: std.mem.Allocator, index: *Index, from: []const u8, text: [
     const notes = index.notesView();
     const out = try a.alloc(CheckedLink, current.links.len);
     for (current.links, out) |link, *o| {
-        var buf: [std.c.PATH_MAX]u8 = undefined;
+        var buf: fs.Buffer = undefined;
         const t = resolve.resolve(index.root, from, link, notes, &current, &buf);
         o.* = .{ .start = link.start, .end = link.end, .kind = link.kind, .broken = t.broken, .rel = try a.dupe(u8, t.rel), .row = t.row };
     }
@@ -45,7 +46,7 @@ pub fn backlinks(a: std.mem.Allocator, index: *Index, target: []const u8) ![]Bac
     for (index.notes.keys(), index.notes.values()) |from, note| {
         for (note.links) |link| {
             if (link.kind == .web) continue;
-            var buf: [std.c.PATH_MAX]u8 = undefined;
+            var buf: fs.Buffer = undefined;
             const t = resolve.resolve(index.root, from, link, notes, note, &buf);
             if (std.mem.eql(u8, t.rel, target) and !std.mem.eql(u8, from, target)) {
                 try list.append(a, .{ .from = try a.dupe(u8, from), .row = link.row });

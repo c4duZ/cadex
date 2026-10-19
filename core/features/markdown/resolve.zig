@@ -4,6 +4,7 @@
 //! their GitHub anchor.
 
 const std = @import("std");
+const fs = @import("../../shared/fs.zig");
 const outline = @import("outline.zig");
 
 /// What the resolver needs from the index: the notes and their headings.
@@ -124,9 +125,8 @@ fn sharedFolders(a: []const u8, b: []const u8) usize {
 }
 
 fn exists(root: []const u8, rel: []const u8) bool {
-    var buf: [std.c.PATH_MAX]u8 = undefined;
-    const path = std.fmt.bufPrintZ(&buf, "{s}/{s}", .{ root, rel }) catch return false;
-    return std.c.access(path.ptr, std.c.F_OK) == 0;
+    var buf: fs.Buffer = undefined;
+    return fs.info(std.fmt.bufPrint(&buf, "{s}/{s}", .{ root, rel }) catch return false, true) != null;
 }
 
 const testing = std.testing;

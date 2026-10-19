@@ -4,49 +4,26 @@
 //! stays a link; the file it points to is replaced.
 
 const std = @import("std");
-const c = std.c;
+const builtin = @import("builtin");
+const fs = @import("../../shared/fs.zig");
 const workspace = @import("../workspace/workspace.zig");
 const errors = @import("errors.zig");
 
 const paths = workspace.paths;
 pub const Error = errors.Error;
 
-extern "c" fn fchmod(fd: c.fd_t, mode: c.mode_t) c_int;
-extern "c" fn fsync(fd: c.fd_t) c_int;
-
 pub fn writeText(registry: *workspace.Registry, path: []const u8, data: []const u8) Error!void {
     var buf: paths.Buffer = undefined;
     const real = try registry.resolve(path, &buf);
-    var z_buf: paths.Buffer = undefined;
-    const z = try paths.terminate(real, &z_buf);
     // Keep the permissions of the file being replaced (a script stays executable).
-    var st: c.Stat = undefined;
-    const mode: c.mode_t = if (c.fstatat(c.AT.FDCWD, z.ptr, &st, 0) == 0) st.mode & 0o7777 else 0o644;
+    const mode: u32 = if (fs.info(real, true)) |found| found.mode else 0o644;
 
     var tmp_buf: paths.Buffer = undefined;
     const dir = std.fs.path.dirname(real) orelse return error.NameInvalid;
-    const tmp = std.fmt.bufPrintZ(&tmp_buf, "{s}/.{s}.cadex-save-{d}", .{ dir, std.fs.path.basename(real), c.getpid() }) catch return error.NameTooLong;
-    const fd = c.open(tmp.ptr, .{ .ACCMODE = .WRONLY, .CREAT = true, .TRUNC = true, .CLOEXEC = true }, @as(c.mode_t, 0o600));
-    if (fd < 0) return errors.fromErrno();
-    var ok = false;
-    defer if (!ok) {
-        _ = c.unlink(tmp.ptr);
-    };
-    {
-        defer _ = c.close(fd);
-        var at: usize = 0;
-        while (at < data.len) {
-            const n = c.write(fd, data[at..].ptr, data.len - at);
-            if (n < 0) {
-                if (c.errno(n) == .INTR) continue;
-                return errors.fromErrno();
-            }
-            at += @intCast(n);
-        }
-        if (fchmod(fd, mode) != 0 or fsync(fd) != 0) return errors.fromErrno();
-    }
-    if (c.rename(tmp.ptr, z.ptr) != 0) return errors.fromErrno();
-    ok = true;
+    var tmp_name: [paths.max_path]u8 = undefined;
+    const name = std.fmt.bufPrint(&tmp_name, ".{s}.cadex-save-{d}", .{ std.fs.path.basename(real), fs.processId() }) catch return error.NameTooLong;
+    const tmp = try fs.join(&tmp_buf, dir, name);
+    try fs.writeThenRename(tmp, real, data, mode);
 }
 
 const testing = std.testing;
@@ -56,7 +33,7 @@ test "saves over a file keeping its mode, and refuses outside" {
     var dir = try TestDir.init();
     defer dir.deinit();
     try dir.writeFile("run.sh", "old");
-    _ = c.chmod((try dir.join("run.sh")).ptr, 0o755);
+    if (builtin.os.tag != .windows) _ = std.c.chmod((try dir.join("run.sh")).ptr, 0o755);
     var registry = workspace.Registry.init(testing.allocator);
     defer registry.deinit();
     _ = try registry.authorize(dir.path());
@@ -65,10 +42,9 @@ test "saves over a file keeping its mode, and refuses outside" {
     const text = try @import("read.zig").readText(testing.allocator, &registry, try dir.join("run.sh"), 1024);
     defer testing.allocator.free(text);
     try testing.expectEqualStrings("#!/bin/sh\necho new\n", text);
-    var st: c.Stat = undefined;
-    try testing.expectEqual(@as(c_int, 0), c.fstatat(c.AT.FDCWD, (try dir.join("run.sh")).ptr, &st, 0));
-    try testing.expectEqual(@as(c.mode_t, 0o755), st.mode & 0o777);
+    if (builtin.os.tag != .windows) try testing.expectEqual(@as(u32, 0o755), fs.info(try dir.join("run.sh"), true).?.mode & 0o777);
     try writeText(&registry, try dir.join("new.md"), "# new\n");
     try testing.expect(dir.exists("new.md"));
-    try testing.expectError(error.Outside, writeText(&registry, "/private/tmp/cadex-outside.txt", "x"));
+    var outside: paths.Buffer = undefined;
+    try testing.expectError(error.Outside, writeText(&registry, try dir.joinInto(&outside, "../cadex-outside.txt"), "x"));
 }

@@ -2,7 +2,7 @@
 //! (docs/spec/explorer.md): folders first, then files, in natural order.
 
 const std = @import("std");
-const c = std.c;
+const fs = @import("../../shared/fs.zig");
 const workspace = @import("../workspace/workspace.zig");
 const errors = @import("errors.zig");
 const natural = @import("natural.zig");
@@ -11,9 +11,7 @@ const ignore = @import("../../shared/ignore.zig");
 const paths = workspace.paths;
 pub const Error = errors.Error;
 
-extern "c" fn dirfd(dir: *c.DIR) c.fd_t;
-
-pub const Kind = enum(u8) { file = 0, directory = 1, symlink = 2, other = 3 };
+pub const Kind = fs.Kind;
 
 pub const Entry = struct {
     name: []const u8,
@@ -45,26 +43,20 @@ pub const Listing = struct {
 pub fn list(gpa: std.mem.Allocator, registry: *workspace.Registry, path: []const u8) Error!Listing {
     var real_buf: paths.Buffer = undefined;
     const real = try registry.resolve(path, &real_buf);
-    var z_buf: paths.Buffer = undefined;
-    const z = try paths.terminate(real, &z_buf);
-    const dir = c.opendir(z.ptr) orelse return errors.fromErrno();
-    defer _ = c.closedir(dir);
-    const fd = dirfd(dir);
+    var dir = try fs.DirReader.open(real);
+    defer dir.close();
 
     var arena: std.heap.ArenaAllocator = .init(gpa);
     errdefer arena.deinit();
     const a = arena.allocator();
     var entries: std.ArrayList(Entry) = .empty;
-    while (c.readdir(dir)) |ent| {
-        const name = ent.name[0..ent.namlen];
-        if (skipped(name)) continue;
-        // Gone between readdir and stat: skip it, the watcher reports it.
-        const entry = describe(fd, name) orelse continue;
+    while (dir.next()) |found| {
+        if (std.mem.eql(u8, found.name, ".git")) continue;
         try entries.append(a, .{
-            .name = try a.dupe(u8, name),
-            .kind = entry.kind,
-            .size = entry.size,
-            .link_to_directory = entry.link_to_directory,
+            .name = try a.dupe(u8, found.name),
+            .kind = found.kind,
+            .size = found.size,
+            .link_to_directory = found.kind == .symlink and dir.linksToDirectory(found.name),
         });
     }
     markIgnored(gpa, registry, real, entries.items);
@@ -90,32 +82,6 @@ fn markIgnored(gpa: std.mem.Allocator, registry: *workspace.Registry, folder: []
     }
 }
 
-fn skipped(name: []const u8) bool {
-    return std.mem.eql(u8, name, ".") or std.mem.eql(u8, name, "..") or std.mem.eql(u8, name, ".git");
-}
-
-fn describe(dir_fd: c.fd_t, name: []const u8) ?Entry {
-    var z_buf: paths.Buffer = undefined;
-    const z = paths.terminate(name, &z_buf) catch return null;
-    var st: c.Stat = undefined;
-    if (c.fstatat(dir_fd, z.ptr, &st, c.AT.SYMLINK_NOFOLLOW) != 0) return null;
-    const kind = kindOf(st.mode);
-    var entry: Entry = .{ .name = name, .kind = kind, .size = if (kind == .file) @intCast(st.size) else 0 };
-    if (kind == .symlink) {
-        var target: c.Stat = undefined;
-        entry.link_to_directory = c.fstatat(dir_fd, z.ptr, &target, 0) == 0 and kindOf(target.mode) == .directory;
-    }
-    return entry;
-}
-
-fn kindOf(mode: c.mode_t) Kind {
-    return switch (mode & c.S.IFMT) {
-        c.S.IFREG => .file,
-        c.S.IFDIR => .directory,
-        c.S.IFLNK => .symlink,
-        else => .other,
-    };
-}
 
 fn treeOrder(_: void, a: Entry, b: Entry) bool {
     if (a.sortsAsDirectory() != b.sortsAsDirectory()) return a.sortsAsDirectory();
@@ -134,7 +100,7 @@ test "lists folders first in natural order, with kinds and sizes" {
     try dir.writeFile("file10.txt", "0123456789");
     try dir.writeFile("file2.txt", "ab");
     try dir.writeFile(".env", "");
-    try testing.expectEqual(@as(c_int, 0), c.symlink("src", (try dir.join("link-to-src")).ptr));
+    try dir.symlinkToDirectory("src", "link-to-src");
     var registry = workspace.Registry.init(testing.allocator);
     defer registry.deinit();
     _ = try registry.authorize(dir.path());

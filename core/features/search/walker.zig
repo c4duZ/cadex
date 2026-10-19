@@ -3,10 +3,8 @@
 //! Symbolic links are not followed, so the walk never leaves the folder.
 
 const std = @import("std");
-const c = std.c;
+const fs = @import("../../shared/fs.zig");
 const ignore = @import("../../shared/ignore.zig");
-
-extern "c" fn dirfd(dir: *c.DIR) c.fd_t;
 
 /// A walk stops after this many files: a home folder opened by mistake
 /// should not eat the memory.
@@ -66,28 +64,23 @@ pub const Walker = struct {
     /// Reads one folder (relative, "" for the root), allocating in `a`. A
     /// folder that cannot be opened reads as empty.
     pub fn readFolder(self: *Walker, a: std.mem.Allocator, folder: []const u8) !Folder {
-        var path_buf: [c.PATH_MAX]u8 = undefined;
-        const path = (if (folder.len == 0)
-            std.fmt.bufPrintZ(&path_buf, "{s}", .{self.root})
-        else
-            std.fmt.bufPrintZ(&path_buf, "{s}/{s}", .{ self.root, folder })) catch return .{ .files = &.{}, .folders = &.{} };
-        const dir = c.opendir(path.ptr) orelse return .{ .files = &.{}, .folders = &.{} };
-        defer _ = c.closedir(dir);
-        const fd = dirfd(dir);
+        // Relative paths keep '/' on every system (the ignore rules are
+        // written that way); Windows takes it in a full path too.
+        var path_buf: fs.Buffer = undefined;
+        const path = (if (folder.len == 0) self.root else fs.join(&path_buf, self.root, folder)) catch return .{ .files = &.{}, .folders = &.{} };
+        var dir = fs.DirReader.open(path) catch return .{ .files = &.{}, .folders = &.{} };
+        defer dir.close();
 
         var files: std.ArrayList(File) = .empty;
         var folders: std.ArrayList([]const u8) = .empty;
-        while (c.readdir(dir)) |ent| {
-            const name = ent.name[0..ent.namlen];
-            if (std.mem.eql(u8, name, ".") or std.mem.eql(u8, name, "..") or std.mem.eql(u8, name, ".git")) continue;
+        while (dir.next()) |entry| {
+            const name = entry.name;
+            if (std.mem.eql(u8, name, ".git")) continue;
             if (!self.options.show_hidden and name[0] == '.') continue;
-            var st: c.Stat = undefined;
-            if (c.fstatat(fd, (try a.dupeZ(u8, name)).ptr, &st, c.AT.SYMLINK_NOFOLLOW) != 0) continue;
-            const kind = st.mode & c.S.IFMT;
-            if (kind != c.S.IFREG and kind != c.S.IFDIR) continue;
+            if (entry.kind != .file and entry.kind != .directory) continue;
             const rel = try join(a, folder, try a.dupe(u8, name));
-            if (self.matcher.decide(rel, kind == c.S.IFDIR)) continue;
-            if (kind == c.S.IFDIR) try folders.append(a, rel) else try files.append(a, .{ .rel = rel, .size = @intCast(st.size) });
+            if (self.matcher.decide(rel, entry.kind == .directory)) continue;
+            if (entry.kind == .directory) try folders.append(a, rel) else try files.append(a, .{ .rel = rel, .size = entry.size });
         }
         std.mem.sort(File, files.items, {}, struct {
             fn lessThan(_: void, x: File, y: File) bool {

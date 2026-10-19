@@ -5,7 +5,6 @@
 
 const std = @import("std");
 const sync = @import("../../shared/sync.zig");
-const c = std.c;
 const paths = @import("paths.zig");
 
 pub const Error = paths.Error || error{ OutOfMemory, NotDirectory, Outside };
@@ -118,10 +117,13 @@ test "a symbolic link pointing outside is refused" {
     var registry = Registry.init(testing.allocator);
     defer registry.deinit();
 
-    var buf: [1024]u8 = undefined;
-    var link: [1024]u8 = undefined;
-    const link_path = try std.fmt.bufPrintZ(&link, "{s}/inside/escape", .{fx.path()});
-    try testing.expectEqual(@as(c_int, 0), c.symlink("/etc", link_path.ptr));
+    try fx.makeDir("outside");
+    try fx.writeFile("outside/hosts", "");
+    var buf: paths.Buffer = undefined;
+    var link: paths.Buffer = undefined;
+    var target: paths.Buffer = undefined;
+    try fx.symlinkToDirectory(try fx.joinInto(&target, "outside"), "inside/escape");
+    const link_path = try fx.joinInto(&link, "inside/escape");
     _ = try registry.authorize(try fx.joinInto(&buf, "inside"));
     try testing.expect(!registry.allows(link_path));
     try testing.expect(!registry.allows(try fx.joinInto(&buf, "inside/escape/hosts")));

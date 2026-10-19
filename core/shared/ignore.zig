@@ -6,7 +6,7 @@
 //! dim) and the search (to skip).
 
 const std = @import("std");
-const c = std.c;
+const fs = @import("fs.zig");
 const glob = @import("glob.zig");
 
 /// Ignore files bigger than this are skipped (a generated file, not rules).
@@ -142,24 +142,17 @@ fn trimTrailingSpaces(line: []const u8) []const u8 {
 
 /// root/folder/name, read whole if small; null when missing or too big.
 fn readSmall(a: std.mem.Allocator, root: []const u8, folder: []const u8, name: []const u8) ?[]const u8 {
-    var buf: [c.PATH_MAX]u8 = undefined;
+    var buf: fs.Buffer = undefined;
     const path = (if (folder.len == 0)
-        std.fmt.bufPrintZ(&buf, "{s}/{s}", .{ root, name })
+        std.fmt.bufPrint(&buf, "{s}/{s}", .{ root, name })
     else
-        std.fmt.bufPrintZ(&buf, "{s}/{s}/{s}", .{ root, folder, name })) catch return null;
-    const fd = c.open(path.ptr, .{ .ACCMODE = .RDONLY, .CLOEXEC = true });
-    if (fd < 0) return null;
-    defer _ = c.close(fd);
-    var st: c.Stat = undefined;
-    if (c.fstat(fd, &st) != 0 or st.size > max_rules_file or st.mode & c.S.IFMT != c.S.IFREG) return null;
-    const bytes = a.alloc(u8, @intCast(st.size)) catch return null;
-    var at: usize = 0;
-    while (at < bytes.len) {
-        const n = c.read(fd, bytes[at..].ptr, bytes.len - at);
-        if (n <= 0) break;
-        at += @intCast(n);
-    }
-    return bytes[0..at];
+        std.fmt.bufPrint(&buf, "{s}/{s}/{s}", .{ root, folder, name })) catch return null;
+    const file = fs.File.openRead(path, .{}) catch return null;
+    defer file.close();
+    const found = file.info() catch return null;
+    if (found.size > max_rules_file or found.kind != .file) return null;
+    const bytes = a.alloc(u8, @intCast(found.size)) catch return null;
+    return bytes[0 .. fs.readAll(file, bytes) catch return null];
 }
 
 const testing = std.testing;

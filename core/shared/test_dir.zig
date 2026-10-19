@@ -3,22 +3,23 @@
 //! tests; only compiled into tests.
 
 const std = @import("std");
-const c = std.c;
+const builtin = @import("builtin");
+const fs = @import("fs.zig");
 const testing = std.testing;
 
 pub const TestDir = struct {
     tmp: testing.TmpDir,
-    root: [c.PATH_MAX]u8 = undefined,
+    root: fs.Buffer = undefined,
     root_len: usize = 0,
     /// Scratch for join().
-    joined: [c.PATH_MAX]u8 = undefined,
+    joined: fs.Buffer = undefined,
 
     pub fn init() !TestDir {
         var self: TestDir = .{ .tmp = testing.tmpDir(.{}) };
-        var rel: [c.PATH_MAX]u8 = undefined;
-        const relative = try std.fmt.bufPrintZ(&rel, ".zig-cache/tmp/{s}", .{self.tmp.sub_path});
-        const real = c.realpath(relative.ptr, &self.root) orelse return error.NotFound;
-        self.root_len = std.mem.span(real).len;
+        var rel: fs.Buffer = undefined;
+        const relative = try std.fmt.bufPrint(&rel, ".zig-cache/tmp/{s}", .{self.tmp.sub_path});
+        const real = fs.realPath(relative, &self.root) orelse return error.NotFound;
+        self.root_len = real.len;
         return self;
     }
 
@@ -30,14 +31,17 @@ pub const TestDir = struct {
         return self.root[0..self.root_len];
     }
 
-    /// root/sub, NUL-terminated. Valid until the next join on this TestDir.
+    /// root/sub, NUL-terminated, with this system's separators (tests
+    /// write "a/b"). Valid until the next join on this TestDir.
     pub fn join(self: *TestDir, sub: []const u8) ![:0]const u8 {
-        return std.fmt.bufPrintZ(&self.joined, "{s}/{s}", .{ self.path(), sub });
+        return self.joinInto(&self.joined, sub);
     }
 
     /// root/sub in a buffer of the caller, for keeping two paths at once.
     pub fn joinInto(self: *const TestDir, buf: []u8, sub: []const u8) ![:0]const u8 {
-        return std.fmt.bufPrintZ(buf, "{s}/{s}", .{ self.path(), sub });
+        const out = try std.fmt.bufPrintZ(buf, "{s}{c}{s}", .{ self.path(), fs.sep, sub });
+        if (fs.sep != '/') std.mem.replaceScalar(u8, out, '/', fs.sep);
+        return out;
     }
 
     pub fn makeDir(self: *TestDir, sub: []const u8) !void {
@@ -49,7 +53,18 @@ pub const TestDir = struct {
     }
 
     pub fn exists(self: *TestDir, sub: []const u8) bool {
-        const p = self.join(sub) catch return false;
-        return c.access(p.ptr, c.F_OK) == 0;
+        return fs.exists(self.join(sub) catch return false);
+    }
+
+    /// A symbolic link at `sub` to the folder `target`. Windows makes links
+    /// only in Developer Mode or as administrator: the test is skipped
+    /// otherwise.
+    pub fn symlinkToDirectory(self: *TestDir, target: []const u8, sub: []const u8) !void {
+        const flags: std.Io.Dir.SymLinkFlags = .{ .is_directory = true };
+        if (builtin.os.tag == .windows) {
+            self.tmp.dir.symLink(testing.io, target, sub, flags) catch return error.SkipZigTest;
+        } else {
+            try self.tmp.dir.symLink(testing.io, target, sub, flags);
+        }
     }
 };

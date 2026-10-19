@@ -3,6 +3,7 @@
 //! the disk. The app lays the sides out with the editor's colors.
 
 const std = @import("std");
+const fs = @import("../../shared/fs.zig");
 const workspace = @import("../workspace/workspace.zig");
 const git = @import("git.zig");
 
@@ -91,21 +92,14 @@ fn show(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const u8,
 
 fn readDisk(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const u8, path: []const u8) ![]u8 {
     var buf: workspace.paths.Buffer = undefined;
-    const full = try std.fmt.bufPrint(&buf, "{s}/{s}", .{ repo, path });
+    const full = try fs.join(&buf, repo, path);
     var real_buf: workspace.paths.Buffer = undefined;
     const real = registry.resolve(full, &real_buf) catch return gpa.alloc(u8, 0);
-    var z: workspace.paths.Buffer = undefined;
-    const fd = std.c.open((try workspace.paths.terminate(real, &z)).ptr, .{ .ACCMODE = .RDONLY, .CLOEXEC = true });
-    if (fd < 0) return gpa.alloc(u8, 0);
-    defer _ = std.c.close(fd);
+    const file = fs.File.openRead(real, .{}) catch return gpa.alloc(u8, 0);
+    defer file.close();
     var out: std.ArrayList(u8) = .empty;
     errdefer out.deinit(gpa);
-    var chunk: [64 * 1024]u8 = undefined;
-    while (out.items.len <= max_side_bytes) {
-        const n = std.c.read(fd, &chunk, chunk.len);
-        if (n <= 0) break;
-        try out.appendSlice(gpa, chunk[0..@intCast(n)]);
-    }
+    try fs.appendUpTo(gpa, file, &out, max_side_bytes);
     return out.toOwnedSlice(gpa);
 }
 
