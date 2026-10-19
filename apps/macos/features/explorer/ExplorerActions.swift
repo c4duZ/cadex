@@ -27,7 +27,8 @@ extension ExplorerController {
     func openSelection() {
         for node in selectedNodes {
             if node.isFolder {
-                outline.isItemExpanded(node) ? outline.collapseItem(node) : outline.expandItem(node)
+                let row = item(of: node)
+                outline.isItemExpanded(row) ? outline.collapseItem(row) : outline.expandItem(row)
             } else if cadex_workspace_is_authorized(node.path) {
                 if let openFile { openFile(node.path) } else { NSWorkspace.shared.open(URL(fileURLWithPath: node.path)) }
             } else {
@@ -44,7 +45,7 @@ extension ExplorerController {
     private func create(base: String, folder: Bool) {
         let parent = targetFolder()
         if !parent.isLoaded { parent.load() }
-        if parent !== root { outline.expandItem(parent) }
+        if parent !== root { outline.expandItem(item(of: parent)) }
         for n in 1...100 {
             let path = FileNode.join(parent.path, n == 1 ? base : "\(base) \(n)")
             do {
@@ -65,10 +66,12 @@ extension ExplorerController {
     /// selected, as in the Finder.
     func beginRename() {
         guard let node = selectedNodes.first, selectedNodes.count == 1 else { return }
-        let row = outline.row(forItem: node)
+        let row = self.row(of: node)
         guard row >= 0, let cell = outline.view(atColumn: 0, row: row, makeIfNecessary: true) as? ExplorerCell,
               let field = cell.textField else { return }
         renaming = node
+        // A compact row shows "a/b/c"; only the last folder is renamed.
+        field.stringValue = node.name
         field.isEditable = true
         field.window?.makeFirstResponder(field)
         let stem = node.isFolder ? node.name : (node.name as NSString).deletingPathExtension
@@ -114,7 +117,7 @@ extension ExplorerController {
 
     /// Moves dropped rows into `target` (a folder, or a file's folder).
     func move(_ paths: [String], into target: FileNode) {
-        let folder = target.isFolder ? target : ((outline.parent(forItem: target) as? FileNode) ?? root)
+        let folder = target.isFolder ? tail(of: target) : parentFolder(of: target)
         var last: String?
         for path in paths {
             do { last = try ExplorerFiles.move(path, into: folder.path) } catch { showMessage(error.message) }
@@ -156,7 +159,7 @@ extension ExplorerController {
     }
 
     private func reloadParents(of nodes: [FileNode]) {
-        let parents = nodes.map { (outline.parent(forItem: $0) as? FileNode) ?? root }
+        let parents = nodes.map { parentFolder(of: $0) }
         var seen = Set<ObjectIdentifier>()
         for parent in parents where seen.insert(ObjectIdentifier(parent)).inserted { reload(parent) }
     }

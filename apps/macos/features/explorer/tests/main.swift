@@ -101,6 +101,44 @@ let exitCode = await Checks.run([
         let folder = FileEntry(name: "src", kind: .directory, size: 0, linkToDirectory: false)
         expect(FileTypeIcon.icon(name: "src", entry: folder, expanded: true) == .folderOpen)
     }),
+    ("a folder with only a folder inside shares its row; actions act on the last one", {
+        let root = sandbox()
+        try? FileManager.default.createDirectory(atPath: root + "/one/two/three", withIntermediateDirectories: true)
+        FileManager.default.createFile(atPath: root + "/one/two/three/x.swift", contents: nil)
+        let explorer = ExplorerController(root: root) { _ in true }
+        let one = explorer.root.children!.first { $0.name == "one" }!
+        explorer.expand(path: one.path)
+        expect(explorer.title(of: one) == "one/two/three", explorer.title(of: one))
+        let tail = explorer.tail(of: one)
+        expect(tail.name == "three" && explorer.item(of: tail) === one)
+        let row = explorer.row(of: tail)
+        expect(row >= 0 && explorer.outline.item(atRow: row + 1).map { ($0 as! FileNode).name } == "x.swift")
+        explorer.outline.selectRowIndexes([row], byExtendingSelection: false)
+        expect(explorer.selectedNodes.map(\.name) == ["three"])
+        // A second item in the middle folder breaks the chain on the next read.
+        FileManager.default.createFile(atPath: root + "/one/two/y.txt", contents: nil)
+        explorer.reload(explorer.root.find(root + "/one/two")!)
+        expect(explorer.title(of: one) == "one/two", explorer.title(of: one))
+        try? FileManager.default.removeItem(atPath: root)
+    }),
+    ("open folders come back for the same root", {
+        let root = sandbox()
+        let first = ExplorerController(root: root) { _ in true }
+        first.expand(path: root + "/src")
+        let again = ExplorerController(root: root) { _ in true }
+        let src = again.root.children!.first { $0.name == "src" }!
+        expect(again.outline.isItemExpanded(again.item(of: src)), "src fechada")
+        var all = UserDefaults.standard.dictionary(forKey: ExplorerController.expandedKey) as? [String: [String]] ?? [:]
+        all[root] = nil
+        UserDefaults.standard.set(all, forKey: ExplorerController.expandedKey)
+        try? FileManager.default.removeItem(atPath: root)
+    }),
+    ("file colors by type, gray for the rest", {
+        expect(FileTypeColor.color(forFileNamed: "App.swift") == .systemOrange)
+        expect(FileTypeColor.color(forFileNamed: "build.zig") != nil)
+        expect(FileTypeColor.color(forFileNamed: "notes.txt") == nil)
+        expect(FileTypeColor.color(forFileNamed: "Makefile") != nil)
+    }),
     ("the watcher reports a new file on the main thread", {
         let root = sandbox()
         var seen: [String] = []

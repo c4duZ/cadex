@@ -13,6 +13,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case arrowRight = 0xE06C
     case arrowUp = 0xE08E
     case arrowsClockwise = 0xE094
+    case arrowsInLineVertical = 0xE532
     case bell = 0xE0CE
     case bracketsCurly = 0xE860
     case caretDown = 0xE136

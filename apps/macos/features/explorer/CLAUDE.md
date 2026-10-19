@@ -25,6 +25,14 @@
   `layout()`, arrastar e soltar), `ExplorerOutline.swift` (teclas da árvore e menu de contexto),
   `ExplorerRename.swift` (renomear no lugar), `ExplorerActions.swift` (o que cada comando faz e
   quando está indisponível), `FileTypeIcon.swift` (ícone Phosphor por tipo e extensão).
+- Aparência do VS Code (spec, "Aparência"): linhas de 22 pt, recuo de 8 pt, guias de recuo com o
+  ponteiro sobre a árvore e fundo leve na linha sob ele (`ExplorerOutline.swift` e
+  `ExplorerRowView`), cores por tipo em `FileTypeIcon.swift` (FileTypeColor, da tabela do CodeEdit,
+  MIT, no NOTICE). `ExplorerCompact.swift`: pastas compactas; a linha é a primeira pasta da cadeia,
+  mostra os filhos da última e as ações valem para a última (`tail`, `item(of:)`, `row(of:)`,
+  `parentFolder(of:)`: a última pasta não é item do outline, então nada pergunta ao outline quem é
+  o pai). `ExplorerExpanded.swift`: as pastas abertas por raiz, nas preferências do app (estado, não
+  configuração). Renomeando, nome que seria recusado deixa o campo vermelho.
 - Disco só pelo núcleo: `ExplorerFiles.swift` (API C do explorer; a Lixeira é a do sistema, com a
   pasta do item checada no workspace) e `FileWatcher.swift` (FSEvents do núcleo; o callback é uma
   função solta, fora da main actor, que passa o lote para a thread principal).
@@ -42,6 +50,7 @@
 
 ## Como validar
 - `make macos-test` passa: árvore (recarga mantém linhas, ocultos, notas), operações recusadas,
-  ícones, watcher entregando na thread principal.
+  ícones e cores, pastas compactas (e a cadeia que se desfaz), pastas abertas que voltam, watcher
+  entregando na thread principal.
 - No app, sem roubar o teclado: a árvore é acessível (linhas, AXSelected, triângulo com AXPress) e
   os comandos estão no menu Arquivo.

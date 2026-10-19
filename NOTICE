@@ -318,3 +318,8 @@ md4c 0.6.0 — https://github.com/mity/md4c
 Markdown parser of the rendered view in core/features/markdown (docs/adr/0010).
 Only the parser (src/md4c.c) is compiled in; the HTML is Cadex's own.
 MIT. Copyright © 2016-2026 Martin Mitáš
+
+CodeEdit — https://github.com/CodeEditApp/CodeEdit
+The colors of the explorer's file icons by type (apps/macos/features/explorer/FileTypeIcon.swift,
+FileTypeColor) follow CodeEdit's CEWorkspaceFileIcon.iconColor.
+MIT. Copyright (c) 2022 CodeEdit

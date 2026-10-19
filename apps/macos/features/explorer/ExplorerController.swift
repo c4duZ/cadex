@@ -31,6 +31,10 @@ public final class ExplorerController: NSObject {
     private var watcher: FileWatcher?
     /// The row whose name is being edited (ExplorerRename.swift).
     var renaming: FileNode?
+    /// The head row that shows each folder of a compact chain (ExplorerCompact.swift).
+    var compactHeads: [String: FileNode] = [:]
+    /// Opening the saved folders must not save the half-open tree.
+    var restoringExpanded = false
     /// Runs a command by id through the registry; false when unavailable.
     let run: (String) -> Bool
 
@@ -86,16 +90,18 @@ public final class ExplorerController: NSObject {
     public func setRoot(_ path: String) {
         root = FileNode(path: path, entry: nil)
         root.load()
-        header.stringValue = (path as NSString).lastPathComponent
+        compactHeads = [:]
+        header.stringValue = (path as NSString).lastPathComponent.uppercased()
         header.toolTip = path
         outline.reloadData()
+        restoreExpanded()
         watcher = FileWatcher(path: path) { [weak self] changes in self?.apply(changes) }
     }
 
     // MARK: Selection
 
     var selectedNodes: [FileNode] {
-        outline.selectedRowIndexes.compactMap { outline.item(atRow: $0) as? FileNode }.filter { !$0.isNote }
+        outline.selectedRowIndexes.compactMap { outline.item(atRow: $0) as? FileNode }.filter { !$0.isNote }.map(tail(of:))
     }
 
     /// Where new and pasted items go: the selected folder, the selected
@@ -103,7 +109,7 @@ public final class ExplorerController: NSObject {
     func targetFolder() -> FileNode {
         guard let node = selectedNodes.last else { return root }
         if node.isFolder { return node }
-        return (outline.parent(forItem: node) as? FileNode) ?? root
+        return parentFolder(of: node)
     }
 
     /// Opens the folders down to `path` (inside the root) and selects it.
@@ -112,11 +118,11 @@ public final class ExplorerController: NSObject {
         while let next = folder.children?.first(where: { path == $0.path || path.hasPrefix($0.path + "/") }) {
             if next.path == path { break }
             if !next.isLoaded { next.load() }
-            outline.expandItem(next)
+            outline.expandItem(item(of: next))
             folder = next
         }
         guard let node = root.find(path) else { return }
-        let row = outline.row(forItem: node)
+        let row = self.row(of: node)
         guard row >= 0 else { return }
         outline.selectRowIndexes([row], byExtendingSelection: false)
         outline.scrollRowToVisible(row)
@@ -128,7 +134,7 @@ public final class ExplorerController: NSObject {
     func reload(_ node: FileNode) {
         let selected = selectedNodes.map(\.path)
         node.load()
-        outline.reloadItem(node === root ? nil : node, reloadChildren: true)
+        outline.reloadItem(node === root ? nil : item(of: node), reloadChildren: true)
         restoreSelection(selected)
     }
 
@@ -145,7 +151,7 @@ public final class ExplorerController: NSObject {
     }
 
     private func restoreSelection(_ paths: [String]) {
-        let rows = paths.compactMap { root.find($0) }.map { outline.row(forItem: $0) }.filter { $0 >= 0 }
+        let rows = paths.compactMap { root.find($0) }.map { row(of: $0) }.filter { $0 >= 0 }
         outline.selectRowIndexes(IndexSet(rows), byExtendingSelection: false)
     }
 
@@ -200,6 +206,7 @@ public final class ExplorerController: NSObject {
             button(.filePlus, "explorer.new-file", "Novo arquivo"),
             button(.folderPlus, "explorer.new-folder", "Nova pasta"),
             button(.arrowsClockwise, "explorer.refresh", "Recarregar"),
+            button(.arrowsInLineVertical, "explorer.collapse-all", "Recolher todas as pastas"),
         ]
         let bar = NSStackView(views: [header, NSView()] + buttons)
         bar.spacing = 0

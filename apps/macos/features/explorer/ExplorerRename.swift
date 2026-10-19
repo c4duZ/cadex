@@ -10,7 +10,20 @@ extension ExplorerController: NSTextFieldDelegate {
         (control as? NSTextField)?.stringValue = node.name
         (control as? NSTextField)?.abortEditing()
         finishRename(control)
+        redrawRow(of: node)
         return true
+    }
+
+    /// While typing, a name that would be refused turns the field red (as
+    /// CodeEdit does): empty, with "/", or a sibling's.
+    public func controlTextDidChange(_ notification: Notification) {
+        guard let field = notification.object as? NSTextField, let node = renaming else { return }
+        let name = field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        let siblings = parentFolder(of: node).children ?? []
+        let taken = name != node.name && siblings.contains { $0.name.caseInsensitiveCompare(name) == .orderedSame }
+        let refused = name.isEmpty || name.contains("/") || taken
+        field.drawsBackground = refused
+        field.backgroundColor = refused ? NSColor.systemRed.withAlphaComponent(0.25) : .clear
     }
 
     public func controlTextDidEndEditing(_ notification: Notification) {
@@ -18,24 +31,31 @@ extension ExplorerController: NSTextFieldDelegate {
         renaming = nil
         let name = field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
         finishRename(field)
-        guard name != node.name else { return }
+        guard name != node.name else { return redrawRow(of: node) }
         guard !name.isEmpty, !name.contains("/") else {
-            field.stringValue = node.name
+            redrawRow(of: node)
             return showMessage("Nome inválido")
         }
-        let parent = (outline.parent(forItem: node) as? FileNode) ?? root
+        let parent = parentFolder(of: node)
         do {
             let renamed = try ExplorerFiles.rename(node.path, to: name)
             reload(parent)
             select(path: renamed)
         } catch {
-            field.stringValue = node.name
+            redrawRow(of: node)
             showMessage(error.message)
         }
     }
 
+    /// The row's text again (a compact row shows the whole chain).
+    private func redrawRow(of node: FileNode) {
+        let row = self.row(of: node)
+        if row >= 0 { outline.reloadData(forRowIndexes: [row], columnIndexes: [0]) }
+    }
+
     private func finishRename(_ control: NSControl) {
         (control as? NSTextField)?.isEditable = false
+        (control as? NSTextField)?.drawsBackground = false
         outline.window?.makeFirstResponder(outline)
     }
 }

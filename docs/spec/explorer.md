@@ -17,9 +17,29 @@ operações do Finder que importam para quem programa.
 - Arquivos ocultos (nome começando com `.`) e ignorados pelo `.gitignore` aparecem apagados. O
   comando "Mostrar arquivos ocultos" alterna se aparecem; a escolha fica nas configurações. `.git`
   nunca aparece.
-- Arquivos alterados no git ganham marcação quando a feature source-control existir (plano 6).
 - A árvore atualiza sozinha quando algo muda no disco (outro programa, o terminal, o git). As pastas
   abertas continuam abertas e a seleção é mantida.
+
+### Aparência (no estilo do explorador do VS Code)
+O dono comparou com o Terax e preferiu o explorador do VS Code (2026-10-19). O comportamento abaixo
+segue a documentação pública do VS Code; o código de cores por tipo vem do CodeEdit (MIT).
+- Linhas de largura inteira, 22 pt de altura, recuo de 8 pt por nível depois da seta.
+- Guias de recuo: linhas verticais finas marcando cada nível, que aparecem com o ponteiro sobre a
+  árvore.
+- Ao passar o ponteiro, a linha ganha um fundo leve. A selecionada tem o fundo na cor do tema e,
+  com a árvore em foco, uma borda fina da mesma cor; sem foco, só o fundo, mais fraco.
+- Pastas compactas: uma pasta que só tem outra pasta dentro aparece numa linha só, "src/main/java",
+  até a primeira pasta com mais de um item ou com arquivo. Abrir a linha abre a última pasta da
+  cadeia; as ações (novo arquivo, renomear, apagar) valem para ela.
+- Ícones coloridos pelo tipo: pastas na cor do tema, cada linguagem na sua cor (Swift laranja,
+  JavaScript âmbar, TypeScript azul, JSON e YAML vermelhos...), o resto cinza.
+- Git: o nome do arquivo alterado fica na cor da mudança, com a letra (M, A, U, D) alinhada à
+  direita; a pasta que contém alterados ganha o nome levemente colorido e um ponto.
+- Cabeçalho: o nome da pasta raiz em maiúsculas, pequeno; à direita, buscar arquivo, novo arquivo,
+  nova pasta, recarregar e recolher tudo.
+- As pastas abertas são lembradas por raiz: reabrir o app ou voltar àquela pasta abre as mesmas.
+- Renomeando, um nome inválido (vazio, com `/`, ou de um irmão que já existe) deixa o campo
+  vermelho antes de confirmar.
 
 ### Teclado
 - ↑ e ↓ movem a seleção; → abre a pasta (ou desce para o primeiro filho); ← fecha a pasta (ou sobe
@@ -73,3 +93,11 @@ operações do Finder que importam para quem programa.
 - [x] Expandir `core/features/` mostra as pastas das features com ícone de pasta.
 - [ ] Arrastar um arquivo para o terminal cola o caminho escapado.
 - [x] Todas as operações estão registradas como comandos e aparecem na paleta.
+- Pasta compacta e o disco muda (entra um segundo item na pasta do meio) -> a cadeia se desfaz na
+  próxima leitura.
+
+## Critérios de aceite (aparência)
+- [x] Uma cadeia de pastas com uma pasta só dentro aparece numa linha, e abrir mostra o conteúdo da
+  última.
+- [x] As pastas abertas voltam ao reabrir o app.
+- [ ] Guias de recuo, seleção e cores por tipo conferidos num print lado a lado com o VS Code.

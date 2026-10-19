@@ -9,12 +9,19 @@ extension ExplorerController: NSOutlineViewDataSource, NSOutlineViewDelegate {
         (item as? FileNode) ?? root
     }
 
+    /// A row's children are its chain's last folder's (ExplorerCompact.swift).
+    private func contents(_ item: Any?) -> FileNode {
+        item == nil ? root : tail(of: node(item))
+    }
+
     public func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: Any?) -> Int {
-        node(item).visibleChildren(showHidden: showHidden).count
+        contents(item).visibleChildren(showHidden: showHidden).count
     }
 
     public func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
-        node(item).visibleChildren(showHidden: showHidden)[index]
+        let child = contents(item).visibleChildren(showHidden: showHidden)[index]
+        register(child)
+        return child
     }
 
     public func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
@@ -23,17 +30,18 @@ extension ExplorerController: NSOutlineViewDataSource, NSOutlineViewDelegate {
 
     /// Folders are read the first time they open.
     public func outlineView(_ outlineView: NSOutlineView, shouldExpandItem item: Any) -> Bool {
-        let folder = node(item)
-        if !folder.isLoaded { folder.load() }
+        loadChain(from: node(item))
         return true
     }
 
     public func outlineViewItemDidExpand(_ notification: Notification) {
         redrawIcon(notification)
+        saveExpanded()
     }
 
     public func outlineViewItemDidCollapse(_ notification: Notification) {
         redrawIcon(notification)
+        saveExpanded()
     }
 
     private func redrawIcon(_ notification: Notification) {
@@ -49,13 +57,14 @@ extension ExplorerController: NSOutlineViewDataSource, NSOutlineViewDelegate {
     public func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
         let row = (outlineView.makeView(withIdentifier: ExplorerRowView.identifier, owner: nil) as? ExplorerRowView) ?? ExplorerRowView()
         row.accent = style.accent
+        row.guide = style.secondaryText.withAlphaComponent(0.25)
         return row
     }
 
     public func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
         let file = node(item)
         let cell = (outlineView.makeView(withIdentifier: ExplorerCell.identifier, owner: nil) as? ExplorerCell) ?? ExplorerCell()
-        cell.show(file, expanded: outlineView.isItemExpanded(item), style: style, git: gitMark(for: file))
+        cell.show(file, title: title(of: file), expanded: outlineView.isItemExpanded(item), style: style, git: gitMark(for: file))
         cell.textField?.delegate = self
         return cell
     }
@@ -146,10 +155,10 @@ final class ExplorerCell: NSTableCellView {
     private static let markIdentifier = NSUserInterfaceItemIdentifier("explorer.git-mark")
 
     @MainActor
-    func show(_ node: FileNode, expanded: Bool, style: ExplorerStyle, git: Character? = nil) {
+    func show(_ node: FileNode, title: String? = nil, expanded: Bool, style: ExplorerStyle, git: Character? = nil) {
         mark.stringValue = git.map { node.isFolder ? "•" : String($0) } ?? ""
         if let git { mark.textColor = Self.gitColor(git) }
-        textField?.stringValue = node.name
+        textField?.stringValue = title ?? node.name
         textField?.isEditable = false
         if node.isNote {
             imageView?.image = nil
@@ -161,19 +170,22 @@ final class ExplorerCell: NSTableCellView {
         imageView?.image = FileTypeIcon.icon(name: node.name, entry: node.entry, expanded: expanded).image(size: 14)
         // Folders in the theme's accent: with them gray, a theme changed only
         // the background (owner, 2026-10-19).
-        imageView?.contentTintColor = node.isFolder ? style.accent : style.secondaryText
+        imageView?.contentTintColor = node.isFolder ? style.accent : FileTypeColor.color(forFileNamed: node.name) ?? style.secondaryText
         textField?.textColor = git.map { node.isFolder ? style.text : Self.gitColor($0) } ?? style.text
         alphaValue = node.isHidden || node.entry?.ignored == true ? 0.55 : 1
         toolTip = node.entry?.kind == .symlink && !cadex_workspace_is_authorized(node.path) ? "Aponta para fora da pasta aberta" : nil
     }
 }
 
-/// A selected row in the theme's accent, light enough to read the name,
-/// with or without the keyboard: the system's gray for a tree without focus
-/// barely showed, and its blue ignored the theme (owner, 2026-10-19).
+/// A row of the tree, drawn as in VS Code: a light fill under the pointer,
+/// thin indent guides while the pointer is over the tree, and the selection
+/// in the theme's accent, with a 1 pt border when the tree has the keyboard.
+/// The system's gray selection barely showed without focus, and its blue
+/// ignored the theme (owner, 2026-10-19).
 final class ExplorerRowView: NSTableRowView {
     static let identifier = NSUserInterfaceItemIdentifier("explorer.row")
     var accent: NSColor = .controlAccentColor { didSet { needsDisplay = true } }
+    var guide: NSColor = .separatorColor
 
     init() {
         super.init(frame: .zero)
@@ -183,10 +195,32 @@ final class ExplorerRowView: NSTableRowView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("ExplorerRowView is created in code") }
 
+    private var outline: ExplorerOutline? { superview as? ExplorerOutline }
+
+    override func drawBackground(in dirtyRect: NSRect) {
+        guard let outline else { return }
+        let row = outline.row(for: self)
+        guard row >= 0 else { return }
+        if !isSelected, row == outline.hoveredRow {
+            NSColor.labelColor.withAlphaComponent(0.06).setFill()
+            bounds.fill()
+        }
+        guard outline.pointerInside else { return }
+        guide.setFill()
+        for level in 0..<outline.level(forRow: row) {
+            let x = outline.guideX(level: level, row: row)
+            NSRect(x: x.rounded(.down), y: 0, width: 1, height: bounds.height).fill()
+        }
+    }
+
     override func drawSelection(in dirtyRect: NSRect) {
-        let alpha: CGFloat = isEmphasized ? 0.32 : 0.2
-        accent.withAlphaComponent(alpha).setFill()
-        NSBezierPath(roundedRect: bounds.insetBy(dx: 4, dy: 0.5), xRadius: 5, yRadius: 5).fill()
+        accent.withAlphaComponent(isEmphasized ? 0.28 : 0.16).setFill()
+        bounds.fill()
+        guard isEmphasized else { return }
+        accent.withAlphaComponent(0.8).setStroke()
+        let border = NSBezierPath(rect: bounds.insetBy(dx: 0.5, dy: 0.5))
+        border.lineWidth = 1
+        border.stroke()
     }
 
     /// The text stays in its own colors on the light fill.
