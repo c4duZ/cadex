@@ -6,11 +6,13 @@
   arquivos. A ordem da colagem está em `../../../../docs/spec/terminal.md`.
 - Busca dentro do terminal.
 - Comportamento inicial igual ao terminal do Terax, e de preferência mais leve.
+- Texto nítido: desenhado na resolução real da tela, alinhado aos pixels. SF Mono 13 pt por padrão.
 
 ## O que eu não quero
 - Modo em blocos e terminal privado.
 - Lógica de terminal no app: o estado vem do núcleo.
 - Redesenhar a tela inteira quando só uma linha mudou.
+- Texto borrado: renderizar numa resolução e escalar depois.
 - ⌘K indo para o shell: abre a paleta. Limpar a tela é ⌘L.
 
 ## Como eu quero
