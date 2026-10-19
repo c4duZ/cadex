@@ -11,19 +11,23 @@ import Themes
 /// video, audio, PDF and what Quick Look shows; an editor tab for the rest.
 @MainActor
 final class FileOpener {
-    private weak var tabs: TabsController?
+    /// The shown space's tabs, where things open.
+    private let currentTabs: () -> TabsController?
+    /// Every space's tabs, for disk changes.
+    private let everyTabs: () -> [TabsController]
     /// A file was opened in a new editor tab (markdown attaches its help).
     var onEditorOpened: ((EditorDocument) -> Void)?
     /// Runs a command by id, for tabs whose menus fire commands (history).
     var runCommand: ((String) -> Bool)?
 
-    init(tabs: TabsController) {
-        self.tabs = tabs
+    init(tabs: @escaping () -> TabsController?, every: @escaping () -> [TabsController]) {
+        currentTabs = tabs
+        everyTabs = every
     }
 
     /// Opens `path`, at a 1-based line when given.
     func open(_ given: String, line: Int? = nil) {
-        guard let tabs else { return }
+        guard let tabs = currentTabs() else { return }
         let path = Self.canonical(given)
         if let kind = MediaKind.of(path: path) {
             let media = (tabs.document(identity: path) as? MediaDocument) ?? MediaDocument(path: path, kind: kind)
@@ -41,7 +45,7 @@ final class FileOpener {
     /// A file's git diff in a tab; the same diff again selects its tab and
     /// reads it again.
     func openDiff(_ request: SourceControlController.DiffRequest) {
-        guard let tabs else { return }
+        guard let tabs = currentTabs() else { return }
         if let existing = tabs.document(identity: DiffDocument.identity(for: request)) as? DiffDocument {
             existing.load()
             return tabs.open(existing)
@@ -53,7 +57,7 @@ final class FileOpener {
 
     /// The repository's history in a tab; again, its tab, read again.
     func openHistory(_ root: String) {
-        guard let tabs else { return }
+        guard let tabs = currentTabs() else { return }
         if let existing = tabs.document(identity: HistoryDocument.identity(for: root)) as? HistoryDocument {
             existing.reload()
             return tabs.open(existing)
@@ -84,16 +88,16 @@ final class FileOpener {
 
     /// Folders changed on disk: open files in them read themselves again.
     func foldersChanged(_ folders: [String]) {
-        guard let tabs else { return }
         let changed = Set(folders)
-        for document in tabs.allDocuments where changed.contains((document.identity as NSString).deletingLastPathComponent) {
+        let documents = everyTabs().flatMap(\.allDocuments)
+        for document in documents where changed.contains((document.identity as NSString).deletingLastPathComponent) {
             (document as? EditorDocument)?.diskMayHaveChanged()
             (document as? MediaDocument)?.diskMayHaveChanged()
         }
-        for case let diff as DiffDocument in tabs.allDocuments where changed.contains((diff.request.repo + "/" + diff.request.path as NSString).deletingLastPathComponent) {
+        for case let diff as DiffDocument in documents where changed.contains((diff.request.repo + "/" + diff.request.path as NSString).deletingLastPathComponent) {
             diff.load()
         }
-        for case let history as HistoryDocument in tabs.allDocuments {
+        for case let history as HistoryDocument in documents {
             history.diskChanged(folders)
         }
     }

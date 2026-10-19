@@ -11,11 +11,16 @@ public final class WorkspaceFolder {
     public private(set) var root: String
     /// Called after the root changes, with the new root.
     public var onChange: ((String) -> Void)?
+    /// Whether the app was opened on a folder (otherwise the root is the
+    /// home folder until something else is chosen).
+    public let launchedWithFolder: Bool
 
     /// Starts at the folder the app was opened with, or the home folder.
     public init(arguments: [String] = CommandLine.arguments,
                 cwd: String = FileManager.default.currentDirectoryPath) {
-        let start = Self.launchDirectory(arguments: arguments, cwd: cwd) ?? NSHomeDirectory()
+        let launch = Self.launchDirectory(arguments: arguments, cwd: cwd)
+        launchedWithFolder = launch != nil
+        let start = launch ?? NSHomeDirectory()
         root = Self.authorize(start) ?? start
     }
 
@@ -45,6 +50,14 @@ public final class WorkspaceFolder {
             self?.open(url.path)
         }
         if let window { panel.beginSheetModal(for: window, completionHandler: pick) } else { pick(panel.runModal()) }
+    }
+
+    /// Authorizes a folder without making it the root: a restored document
+    /// was opened in a folder the user chose then (docs/spec/spaces.md).
+    /// The canonical path, or nil when it is gone.
+    @discardableResult
+    public static func allow(_ path: String) -> String? {
+        authorize(path)
     }
 
     /// The canonical path once authorized, or nil.

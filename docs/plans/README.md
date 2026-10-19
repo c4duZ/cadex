@@ -16,8 +16,8 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 3 | `docs/plans/3-window-and-theme.md` | janela com a cara do Terax, tema, configurações | feito; falta conferência manual |
 | 4 | `docs/plans/4-files.md` | workspace, explorer e busca | feito; falta conferência manual |
 | 5 | `docs/plans/5-viewers.md` | código, Markdown, mídia e preview web | feito; falta conferência manual |
-| 6 | `docs/plans/6-git.md` | source control e grafo do git | feito |
-| 7 | `docs/plans/7-mvp-release.md` | spaces que restauram, empacotamento, semana de uso | pendente |
+| 6 | `docs/plans/6-git.md` | source control e grafo do git | feito; falta conferência manual |
+| 7 | `docs/plans/7-mvp-release.md` | spaces que restauram, empacotamento, semana de uso | em andamento: fase A feita |
 
 ## O que eu não quero
 - Executar plano sem ler antes o `CLAUDE.md` da raiz e o da feature que vai mexer.

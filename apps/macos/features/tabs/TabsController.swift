@@ -13,14 +13,23 @@ public final class TabsController {
     public var onActiveChange: (() -> Void)?
     /// "Abrir no preview" was clicked in a terminal, for a local address.
     public var onOpenPreview: ((String) -> Void)?
-    private var list = TabList()
-    private var tabs: [Int: Tab] = [:]
+    /// Anything the snapshot holds changed (tabs, panes, folders, titles):
+    /// the spaces save it.
+    public var onStateChange: (() -> Void)?
+    /// The last tab closed. Without it, the window closes (one space).
+    public var onEmpty: (() -> Void)?
+    /// Whether these tabs are the ones in the window. Spaces keep the
+    /// others alive but hidden: they must not retitle the window or take
+    /// the keyboard.
+    public var isShown = true
+    var list = TabList()
+    var tabs: [Int: Tab] = [:]
     /// Tabs that show a document instead of terminals (TabDocument).
-    private var documents: [Int: TabDocument] = [:]
-    private var nextId = 1
-    private var nextPane = 1
-    private weak var window: NSWindow?
-    private let home = NSHomeDirectory()
+    var documents: [Int: TabDocument] = [:]
+    var nextId = 1
+    var nextPane = 1
+    weak var window: NSWindow?
+    let home = NSHomeDirectory()
     /// Coalesces title refreshes while output streams in.
     private var titleRefreshPending = false
 
@@ -59,10 +68,15 @@ public final class TabsController {
         nextPane += 1
         let tab = Tab(id: nextId, pane: pane, terminal: terminal)
         nextId += 1
-        tabs[tab.id] = tab
+        add(tab)
         wire(terminal, pane: pane, in: tab)
         list.insert(tab.id)
         showActive()
+    }
+
+    func add(_ tab: Tab) {
+        tabs[tab.id] = tab
+        tab.onLayoutChange = { [weak self] in self?.onStateChange?() }
     }
 
     /// Shows `document` in a new tab to the right of the active one, or
@@ -90,7 +104,7 @@ public final class TabsController {
 
     /// A terminal in `cwd`, or in the active terminal's folder, or home
     /// when that folder is gone (docs/spec/tabs.md, casos de borda).
-    private func makeTerminal(cwd: String?) -> TerminalView {
+    func makeTerminal(cwd: String?) -> TerminalView {
         let folder = cwd ?? activeFolder ?? home
         let start = FileManager.default.fileExists(atPath: folder) ? folder : home
         return TerminalView(frame: view.bounds, cwd: start)
@@ -151,20 +165,20 @@ public final class TabsController {
         if let id = list.leastRecentlyUsed { select(id) }
     }
 
-    private func showActive() {
+    func showActive() {
         if let document = activeDocument {
             view.show(document.view)
-            document.focus()
+            if isShown { document.focus() }
             refreshBar()
             return
         }
         guard let tab = activeTab else { return }
         view.show(tab.view)
-        window?.makeFirstResponder(tab.focused)
+        if isShown { window?.makeFirstResponder(tab.focused) }
         refreshBar()
     }
 
-    private func wire(_ terminal: TerminalView, pane: Int, in tab: Tab) {
+    func wire(_ terminal: TerminalView, pane: Int, in tab: Tab) {
         // The shell exited by itself: nothing to ask, the pane just goes.
         terminal.onShellExit = { [weak self, weak tab] in
             guard let tab else { return }
@@ -190,7 +204,7 @@ public final class TabsController {
         }
     }
 
-    private func refreshBar() {
+    func refreshBar() {
         bar.items = list.order.compactMap { id in
             if let document = documents[id] {
                 let title = document.hasUnsavedChanges ? "● " + document.title : document.title
@@ -198,6 +212,8 @@ public final class TabsController {
             }
             return tabs[id].map { TabBarView.Item(id: id, title: $0.title(home: home), active: id == list.active) }
         }
+        onStateChange?()
+        guard isShown else { return }
         if let document = activeDocument {
             window?.title = document.title
             onActiveChange?()
@@ -233,80 +249,5 @@ public final class TabsController {
                 self?.refreshBar()
             }
         }
-    }
-
-    // MARK: Closing
-
-    /// ⌘W: closes the focused pane; the last pane closes the tab, and the
-    /// last tab the window (docs/spec/tabs.md, "Fechar").
-    public func closeFocusedPane() {
-        if let id = list.active, documents[id] != nil {
-            closeTab(id)
-            return
-        }
-        guard let tab = activeTab else { return }
-        let pane = tab.focusedPane
-        let running = tab.focused.hasForegroundProcess
-        CloseConfirmation.confirm(running: running, in: window, what: "o painel") { [weak self, weak tab] in
-            guard let tab else { return }
-            self?.removePane(pane, from: tab)
-        }
-    }
-
-    private func removePane(_ pane: Int, from tab: Tab) {
-        guard let terminal = tab.panes[pane] else { return }
-        if tab.terminals.count == 1 {
-            remove(tab.id)
-            return
-        }
-        terminal.closeSession()
-        _ = tab.remove(pane: pane)
-        refreshBar()
-    }
-
-    func closeTab(_ id: Int) {
-        if let document = documents[id] {
-            document.confirmClose(in: window) { [weak self] in self?.remove(id) }
-            return
-        }
-        guard let tab = tabs[id] else { return }
-        CloseConfirmation.confirm(running: tab.hasForegroundProcess, in: window, what: "a aba") { [weak self] in
-            self?.remove(id)
-        }
-    }
-
-    /// Ends the tab's sessions and drops it; the last one closes the window.
-    private func remove(_ id: Int) {
-        if let document = documents.removeValue(forKey: id) {
-            document.close()
-            document.view.removeFromSuperview()
-        } else if let tab = tabs.removeValue(forKey: id) {
-            tab.terminals.forEach { $0.closeSession() }
-            tab.view.removeFromSuperview()
-        } else {
-            return
-        }
-        list.remove(id)
-        if list.order.isEmpty {
-            window?.close()
-        } else {
-            showActive()
-        }
-    }
-
-    /// Closing the window or quitting: asks once if any pane runs a program.
-    /// True when it can close now; otherwise `close` runs after confirming.
-    public func shouldCloseAll(then close: @escaping @MainActor () -> Void,
-                               cancelled: @escaping @MainActor () -> Void = {}) -> Bool {
-        let unsaved = documents.values.filter(\.hasUnsavedChanges).count
-        if unsaved > 0 {
-            CloseConfirmation.confirmUnsaved(count: unsaved, in: window, then: close, cancelled: cancelled)
-            return false
-        }
-        let running = tabs.values.contains { $0.hasForegroundProcess }
-        let asks = TerminalPreferences.current.confirmClose
-        guard running, asks else { return true }
-        CloseConfirmation.confirm(running: true, in: window, what: "a janela", then: close, cancelled: cancelled)
-        return false
     }
 }

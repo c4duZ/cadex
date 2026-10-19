@@ -11,7 +11,8 @@
 - Árvore carregada sob demanda, pasta por pasta.
 - A raiz da árvore é o workspace: `WorkspaceFolder.swift` guarda a pasta aberta (a da linha de
   comando, senão a pasta pessoal), autoriza no núcleo cada pasta que vira raiz e avisa a troca por
-  `onChange`. A feature workspace não tem pasta no app; a parte dela que o usuário vê mora aqui.
+  `onChange`. `launchedWithFolder` diz se o app abriu numa pasta (sem ela, os spaces devolvem a
+  última); `allow` autoriza a pasta de um documento restaurado sem virar raiz. A feature workspace não tem pasta no app; a parte dela que o usuário vê mora aqui.
 - Comandos em `WorkspaceCommands.swift`: `workspace.open-folder` ("Abrir pasta…", ⌘O, seletor do
   sistema) e `workspace.use-terminal-folder` (a pasta do terminal com foco, que `apps/macos/app/main.swift`
   passa por closure: o explorer não vê terminais).

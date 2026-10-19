@@ -13,15 +13,32 @@ final class Tab {
     private(set) var focusedPane: Int
     let layout = PaneLayoutView(frame: .zero)
 
-    init(id: Int, pane: Int, terminal: TerminalView) {
+    /// A divider was dragged: the saved layout changes (spaces).
+    var onLayoutChange: (() -> Void)?
+
+    convenience init(id: Int, pane: Int, terminal: TerminalView) {
+        self.init(id: id, tree: .leaf(pane), panes: [pane: terminal], focused: pane)
+    }
+
+    /// A tab with panes already laid out (a restored one).
+    init(id: Int, tree: PaneTree, panes: [Int: TerminalView], focused: Int) {
         self.id = id
-        focusedPane = pane
-        panes[pane] = terminal
-        layout.tree = .leaf(pane)
-        layout.panes = [pane: terminal]
-        layout.focused = pane
-        layout.onTreeChange = { [weak self] tree in self?.layout.tree = tree }
+        focusedPane = focused
+        self.panes = panes
+        layout.tree = tree
+        layout.panes = panes
+        layout.focused = focused
+        layout.onTreeChange = { [weak self] tree in
+            self?.layout.tree = tree
+            self?.onLayoutChange?()
+        }
         layout.syncSubviews()
+    }
+
+    /// The tab as saved: its name, panes with folders, and focus.
+    func snapshot(home: String) -> TabsSnapshot.Item {
+        let layout = tree.snapshot { panes[$0]?.currentDirectory ?? home }
+        return .terminal(title: customTitle, layout: layout, focus: tree.leaves.firstIndex(of: focusedPane) ?? 0)
     }
 
     var view: NSView { layout }

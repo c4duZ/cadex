@@ -6,6 +6,15 @@ import Checks
 // Tests of the tabs feature. Run with `make macos-test` (see
 // shared/checks/Checks.swift for why this is an executable).
 
+@MainActor
+func eventually(_ body: () -> Bool) async -> Bool {
+    for _ in 0..<100 {
+        if body() { return true }
+        try? await Task.sleep(nanoseconds: 50_000_000)
+    }
+    return false
+}
+
 let exitCode = await Checks.run([
     ("splitting puts the new pane after the old one, half and half", {
         let tree = PaneTree.leaf(1).splitting(1, axis: .horizontal, newPane: 2)
@@ -92,6 +101,41 @@ let exitCode = await Checks.run([
         expect(folderTitle("/Users/cadu", home: "/Users/cadu") == "~")
         expect(folderTitle(nil, home: "/Users/cadu") == "~")
         expect(folderTitle("/", home: "/Users/cadu") == "/")
+    }),
+    ("a saved layout comes back with the same splits, ratios and folders", {
+        let tree = PaneTree.leaf(1).splitting(1, axis: .horizontal, newPane: 2).splitting(2, axis: .vertical, newPane: 3)
+            .settingRatio(0.3, at: [])
+        let folders = [1: "/a", 2: "/b", 3: "/c"]
+        let layout = tree.snapshot { folders[$0]! }
+        expect(layout.folders == ["/a", "/b", "/c"])
+        let snapshot = TabsSnapshot(items: [.terminal(title: "api", layout: layout, focus: 2), .document(identity: "/x.md")], active: 1)
+        let data = try! JSONEncoder().encode(snapshot)
+        let back = try! JSONDecoder().decode(TabsSnapshot.self, from: data)
+        expect(back == snapshot, String(decoding: data, as: UTF8.self))
+        var next = 10
+        let rebuilt = PaneTree.from(layout) { defer { next += 1 }; return next }
+        expect(rebuilt == .split(.horizontal, .leaf(10), .split(.vertical, .leaf(11), .leaf(12), ratio: 0.5), ratio: 0.3), "\(rebuilt)")
+    }),
+    ("tabs saved and restored come back the same, documents through the app", {
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 500), styleMask: [.titled], backing: .buffered, defer: false)
+        let first = TabsController(window: window)
+        // realpath, as the shell reports it: resolvingSymlinksInPath drops /private.
+        let tmp = String(cString: realpath(NSTemporaryDirectory(), nil))
+        let saved = TabsSnapshot(items: [
+            .terminal(title: nil, layout: .pane(folder: tmp), focus: 0),
+            .terminal(title: "dois", layout: .split(sideBySide: true, ratio: 0.4, first: .pane(folder: "/"), second: .pane(folder: tmp)), focus: 1),
+            .document(identity: "/sumiu.txt"),
+        ], active: 1)
+        var asked: [String] = []
+        first.restore(saved) { asked.append($0) }
+        expect(asked == ["/sumiu.txt"] && first.count == 2, "\(asked) \(first.count)")
+        // The document could not be reopened: the rest stays, the active one too.
+        var expected = saved
+        expected.items.removeLast()
+        let ok = await eventually { first.snapshot() == expected }
+        expect(ok, "\(first.snapshot())")
+        first.closeAll()
+        expect(first.count == 0)
     }),
 ])
 exit(exitCode)

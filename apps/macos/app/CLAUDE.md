@@ -8,6 +8,10 @@
   entrada dela (os tipos `public` do módulo).
 
 ## Como eu quero
+- `SpacesWiring.swift`: os spaces na janela (abas de cada space ligadas à barra de status e ao
+  preview, documentos reabertos, pasta do workspace devolvida); `tabs` em `main.swift` é sempre a
+  do space que aparece, então os comandos agem nela. Sair e fechar a janela perguntam uma vez por
+  todos os spaces e salvam.
 - `main.swift` registra os comandos de cada feature (e o view.toggle-sidebar da casca), monta menu e
   atalhos a partir deles, e abre a janela. Como delegate, pergunta às abas antes de fechar a janela
   ou sair (shouldCloseAll). Liga a barra de status ao terminal com foco. Cria o `WorkspaceFolder` do explorer, abre a
@@ -16,7 +20,7 @@
   abre numa aba, endereço http(s) abre no preview. `FileOpener.swift` decide onde um arquivo abre (mídia pelo tipo, o resto no editor; diffs do git numa aba DiffDocument, o histórico numa aba HistoryDocument que recebe as mudanças em .git), passa as
   mudanças do disco aos editores abertos e monta a aparência do editor (`EditorLooks`).
 - A casca da janela, no estilo do Terax: título transparente com barra de ferramentas compacta
-  (38 pt, botões da janela centrados); `TitleBarView.swift` (painel lateral, paleta, abas, "+",
+  (38 pt, botões da janela centrados); `TitleBarView.swift` (painel lateral, paleta, nome do space, abas, "+",
   busca, todos por comando), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
   painel lateral recolhível, barra de status) e `SidebarView.swift` (duas páginas, Arquivos e Git, trocadas por explorer.focus e git.show). O explorer é criado
   junto com os comandos, antes de as configurações montarem os atalhos.

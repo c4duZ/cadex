@@ -9,42 +9,44 @@ import Preview
 import Search
 import SourceControl
 import GitHistory
+import Spaces
 import Settings
 import Shortcuts
 import Tabs
 import Terminal
 
-/// Opens the window: tabs of terminals inside the Terax-like shell
-/// (WorkspaceView). Spaces and the rest of the workspace come as their
-/// features are built (CLAUDE.md, atlas).
+/// Opens the window: the spaces' tabs inside the Terax-like shell
+/// (WorkspaceView), with the explorer, search, git and the viewers.
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
-    private var window: NSWindow?
-    private let commands = CommandRegistry()
+    var window: NSWindow?
+    let commands = CommandRegistry()
     private var menu: CommandMenu?
     private var dispatcher: ShortcutDispatcher?
     private var palette: CommandPaletteController?
-    private var tabs: TabsController?
-    private var workspace: WorkspaceView?
+    var spaces: SpacesController?
+    /// The shown space's tabs: every command acts on these.
+    var tabs: TabsController? { spaces?.active }
+    var workspace: WorkspaceView?
     private let settings = SettingsBridge()
     private var keymapLabels: (String) -> String? = { _ in nil }
     private var keymap: Keymap?
     private var settingsWindow: SettingsWindowController?
-    private let folder = WorkspaceFolder()
+    let folder = WorkspaceFolder()
     private var explorer: ExplorerController?
     private var search: SearchController?
-    private var opener: FileOpener?
+    var opener: FileOpener?
     private var markdown: MarkdownController?
     private var git: SourceControlController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpCommands()
         let window = makeWindow()
-        let tabs = TabsController(window: window)
-        let opener = FileOpener(tabs: tabs)
+        self.window = window
+        let opener = FileOpener(tabs: { [weak self] in self?.tabs },
+                                every: { [weak self] in self?.spaces?.spaces.map(\.tabs) ?? [] })
         opener.onEditorOpened = { [weak self] document in self?.markdown?.attach(document) }
         opener.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
-        tabs.onOpenPreview = { [weak self] url in self?.openPreview(url) }
         self.opener = opener
         explorer?.openFile = { [weak opener] path in opener?.open(path) }
         explorer?.onFolderChange = { [weak self, weak opener] folders in
@@ -53,12 +55,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         let explorer = self.explorer!
         let git = self.git!
-        let workspace = WorkspaceView(tabs: tabs, explorer: explorer, git: git) { [weak self] id in self?.commands.run(id) }
+        let workspace = WorkspaceView(explorer: explorer, git: git) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace
-        self.window = window
-        self.tabs = tabs
         self.workspace = workspace
-        connectStatusBar(workspace.statusBar, to: tabs)
+        workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
         explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar(.files) }
         git.onOpenFile = { [weak opener] path in opener?.open(path) }
         git.onOpenDiff = { [weak opener] request in opener?.openDiff(request) }
@@ -67,7 +67,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let looks = settings.store.settings.appearance
         workspace.setLooks(image: looks.backgroundImage.map { .init(path: $0, opacity: looks.backgroundOpacity, blur: looks.backgroundBlur) },
                            vibrancy: looks.vibrancy)
-        tabs.newTab(cwd: folder.root)
+        startSpaces()
         openLaunchItems(Self.launchFiles)
         CommandLine.arguments.dropFirst().filter { $0.hasPrefix("http://") || $0.hasPrefix("https://") }.forEach(openPreview)
         window.center()
@@ -118,7 +118,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     /// A preview tab for `url` (empty: a blank one); the tab already showing
     /// that address is reloaded instead (docs/spec/preview.md).
-    private func openPreview(_ url: String) {
+    func openPreview(_ url: String) {
         guard let tabs else { return }
         if let existing = tabs.document(identity: PreviewDocument.identity(for: url)) as? PreviewDocument {
             existing.reload()
@@ -150,18 +150,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             self.search?.setRoot(root, showHidden: self.explorer?.showHidden ?? true)
             self.markdown?.setRoot(root)
             self.git?.setFolder(root)
+            self.spaces?.scheduleSave()
         }
     }
 
     /// The status bar follows the focused terminal's folder, and its folder
     /// menu takes that terminal there (docs/spec/status-bar.md).
-    private func connectStatusBar(_ bar: StatusBarView, to tabs: TabsController) {
+    func connectStatusBar(_ bar: StatusBarView, to tabs: TabsController) {
         tabs.onActiveChange = { [weak tabs, weak bar] in
             let terminal = tabs?.activeTerminal
             bar?.path = terminal?.currentDirectory
             bar?.canNavigate = terminal?.hasForegroundProcess == false
         }
-        bar.onNavigate = { [weak tabs] folder in tabs?.activeTerminal?.changeDirectory(to: folder) }
     }
 
     /// Every feature registers its commands; the menu and the shortcuts
@@ -187,6 +187,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         commands.register(WorkspaceCommands.all(folder, window: { [weak self] in self?.window },
                                                 terminalFolder: { [weak self] in self?.tabs?.activeTerminal?.currentDirectory }))
         commands.register(TabCommands.all { [weak self] in self?.tabs })
+        makeSpaces(palette: palette)
         makeExplorer()
         makeSearch(palette: palette)
         let git = SourceControlController(folder: folder.root) { [weak self] id in self?.commands.run(id) ?? false }
@@ -285,16 +286,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     /// The tabs ask before closing over a running program; close() after
     /// the confirmation does not come back here.
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        guard let tabs else { return true }
-        return tabs.shouldCloseAll(then: { sender.close() })
+        guard let spaces else { return true }
+        spaces.saveNow()
+        return spaces.shouldCloseAll(then: { sender.close() })
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard let tabs, window?.isVisible == true else { return .terminateNow }
-        let now = tabs.shouldCloseAll(
+        guard let spaces, window?.isVisible == true else { return .terminateNow }
+        let now = spaces.shouldCloseAll(
             then: { NSApp.reply(toApplicationShouldTerminate: true) },
             cancelled: { NSApp.reply(toApplicationShouldTerminate: false) })
         return now ? .terminateNow : .terminateLater
+    }
+
+    /// The spaces as they were at the end, for the next launch.
+    func applicationWillTerminate(_ notification: Notification) {
+        spaces?.saveNow()
     }
 }
 

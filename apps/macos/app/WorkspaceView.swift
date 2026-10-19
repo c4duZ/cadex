@@ -28,9 +28,12 @@ final class WorkspaceView: NSView {
     private let frost = NSVisualEffectView()
     private var backgroundImage: WindowBackdrop.Image?
     private var vibrancy = false
+    private var tabBarStyle: TabBarView.Style?
+    /// The shown space's tabs in the content panel.
+    private weak var tabsView: NSView?
 
-    init(tabs: TabsController, explorer: ExplorerController, git: SourceControlController, run: @escaping (String) -> Void) {
-        titleBar = TitleBarView(tabBar: tabs.bar, run: run)
+    init(explorer: ExplorerController, git: SourceControlController, run: @escaping (String) -> Void) {
+        titleBar = TitleBarView(run: run)
         self.explorer = explorer
         sidebar = SidebarView(files: explorer.view, git: git.view, run: run)
         super.init(frame: .zero)
@@ -43,7 +46,6 @@ final class WorkspaceView: NSView {
             addSubview(view)
         }
         fill(sidebarPanel, with: sidebar)
-        fill(contentPanel, with: tabs.view)
 
         let gap = Self.gap
         sidebarWidth = sidebarPanel.widthAnchor.constraint(equalToConstant: Self.sidebarWidth)
@@ -75,6 +77,16 @@ final class WorkspaceView: NSView {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("WorkspaceView is created in code") }
+
+    /// A space's tabs come into the window (docs/spec/spaces.md).
+    func show(_ tabs: TabsController) {
+        guard tabs.view !== tabsView else { return }
+        tabsView?.removeFromSuperview()
+        fill(contentPanel, with: tabs.view)
+        tabsView = tabs.view
+        titleBar.setTabBar(tabs.bar)
+        if let tabBarStyle { tabs.bar.style = tabBarStyle }
+    }
 
     /// Shows the sidebar on a page (explorer.focus, git.show).
     func showSidebar(_ page: SidebarView.Page = .files) {
@@ -134,9 +146,11 @@ final class WorkspaceView: NSView {
         explorer.style = .init(text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor, accent: ui.accent.nsColor)
         titleBar.setColors(text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, field: ui.field.nsColor)
         statusBar.style = .init(text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor)
-        (titleBar.subviews.first { $0 is TabBarView } as? TabBarView)?.style = .init(
+        let style = TabBarView.Style(
             activeFill: ui.tabActive.nsColor, hoverFill: ui.tabActive.color(alpha: 0.5),
             text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor)
+        tabBarStyle = style
+        titleBar.tabBar?.style = style
     }
 
     /// The frost is a layer over the title area and hid the close, minimize
