@@ -12,7 +12,8 @@ mais leve e rápido possível em cada sistema.
   (ver ADR 0002).
 - macOS vem primeiro: Swift com AppKit, renderização do terminal em Metal, e os frameworks do
   sistema para mídia (ImageIO, PDFKit, AVKit, Quick Look).
-- Windows vem depois, sobre o mesmo núcleo. A pasta `apps/windows/` fica reservada.
+- Windows vem depois, sobre o mesmo núcleo. A pasta `apps/windows/` fica reservada. (A stack foi
+  decidida no ADR 0012: Zig com Win32 e Direct3D 11.)
 - Linux está fora do escopo por enquanto.
 
 ## Consequências

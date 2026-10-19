@@ -1,4 +1,4 @@
-# Planos: do fim do terminal ao MVP no Mac
+# Planos: do fim do terminal ao MVP no Mac, e o port para o Windows
 
 Oito planos, um por entrega que o dono abre e usa. Cada plano é autocontido e dividido em fases que
 cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal funcionando numa janela
@@ -19,6 +19,17 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 6 | `docs/plans/6-git.md` | source control e grafo do git | feito; falta conferência manual |
 | 7 | `docs/plans/7-mvp-release.md` | spaces que restauram, empacotamento, semana de uso | em andamento: fases A a D feitas; falta a semana de uso |
 | 8 | `docs/plans/8-panes-with-documents.md` | documentos em painéis ao lado do terminal (v1.0) | feito, publicado na v1.0.0; falta conferência manual |
+
+- Depois do Mac, o port para o Windows 11 (pedido do dono em 2026-10-19, todas as features), em Zig
+  com Win32 e Direct3D 11 (`docs/adr/0012-windows-zig-win32-d3d11.md`), na mesma ordem:
+
+| # | plano | entrega | status |
+|---|---|---|---|
+| 9 | `docs/plans/9-windows-core.md` | núcleo compilando e testado no Windows, ConPTY, WSL | em andamento |
+| 10 | `docs/plans/10-windows-terminal.md` | janela e terminal completo no Windows | a fazer |
+| 11 | `docs/plans/11-windows-shell.md` | abas, divisões, paleta, tema, configurações | a fazer |
+| 12 | `docs/plans/12-windows-files-viewers-git.md` | explorer, busca, visualizadores e git | a fazer |
+| 13 | `docs/plans/13-windows-release.md` | spaces, painéis com documentos, instalador e release | a fazer |
 
 ## O que eu não quero
 - Executar plano sem ler antes o `CLAUDE.md` da raiz e o da feature que vai mexer.

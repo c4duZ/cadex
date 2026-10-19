@@ -48,7 +48,8 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 
 ## Como eu quero
 - `core/`: núcleo em Zig, exposto por uma API C (`docs/adr/0002-zig-core-with-c-api.md`).
-  `apps/macos/`: Swift com AppKit e Metal. `apps/windows/`: reservado.
+  `apps/macos/`: Swift com AppKit e Metal. `apps/windows/`: Zig com Win32 e
+  Direct3D 11, Windows 11 (`docs/adr/0012-windows-zig-win32-d3d11.md`).
 - Toda ação é um comando registrado na feature `command-palette`; menus, botões e atalhos só
   disparam comandos pelo id.
 - O que 2+ features usam sobe para `core/shared/` ou `apps/macos/shared/`. Só isso vai para lá.
