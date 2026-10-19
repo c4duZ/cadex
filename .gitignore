@@ -1,8 +1,9 @@
 .DS_Store
 
-# Zig
+# Zig (zig-pkg holds fetched dependencies; build.zig.zon pins them by hash)
 .zig-cache/
 zig-out/
+zig-pkg/
 
 # Swift / Xcode
 .build/

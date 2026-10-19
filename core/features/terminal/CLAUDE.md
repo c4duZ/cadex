@@ -12,9 +12,11 @@
 - Saída do terminal sendo copiada para o app quadro a quadro sem necessidade.
 
 ## Como eu quero
-- Toda chamada à libghostty-vt mora aqui; a porta de entrada expõe tipos nossos.
+- Porta de entrada: `terminal.zig`. Toda chamada à libghostty-vt mora em `model.zig`; a porta de
+  entrada expõe tipos nossos.
 - Leitura do PTY fora da thread do app, com fila limitada (backpressure).
-- Spec de comportamento em docs/spec/terminal.md, escrita antes do código. Status: não iniciada.
+- Spec de comportamento em `../../../docs/spec/terminal.md`. Status: modelo pronto (`model.zig`);
+  PTY e API C a fazer.
 
 ## Como validar
 - `make core-test` (ou `zig build test` dentro de `core/`) passa, sem vazamento no alocador de teste.
