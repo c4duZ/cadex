@@ -1,4 +1,5 @@
 import AppKit
+import Icons
 
 /// The find bar (⌘F) over the top-right corner of the terminal: the text to
 /// find, "3 de 12", previous and next, close. Enter goes to the next (older)
@@ -30,9 +31,9 @@ final class TerminalFindBar: NSVisualEffectView, NSSearchFieldDelegate {
 
         let stack = NSStackView(views: [
             field, countLabel,
-            button("chevron.up", "Anterior (⇧↩)", #selector(previousClicked)),
-            button("chevron.down", "Próxima (↩)", #selector(nextClicked)),
-            button("xmark", "Fechar (Esc)", #selector(closeClicked)),
+            button(.caretUp, "Anterior (⇧↩)", #selector(previousClicked)),
+            button(.caretDown, "Próxima (↩)", #selector(nextClicked)),
+            button(.x, "Fechar (Esc)", #selector(closeClicked)),
         ])
         stack.spacing = 6
         stack.edgeInsets = NSEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
@@ -90,9 +91,9 @@ final class TerminalFindBar: NSVisualEffectView, NSSearchFieldDelegate {
 
     // MARK: Buttons
 
-    private func button(_ symbol: String, _ tip: String, _ action: Selector) -> NSButton {
-        let image = NSImage(systemSymbolName: symbol, accessibilityDescription: tip) ?? NSImage()
-        let button = NSButton(image: image, target: self, action: action)
+    private func button(_ icon: Icon, _ tip: String, _ action: Selector) -> NSButton {
+        let button = NSButton(image: icon.image(size: 14), target: self, action: action)
+        button.setAccessibilityLabel(tip)
         button.isBordered = false
         button.toolTip = tip
         return button

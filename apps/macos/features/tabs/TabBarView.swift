@@ -1,10 +1,26 @@
 import AppKit
+import Icons
 
-/// The tab strip above the terminal: one cell per tab, the active one
-/// highlighted, × to close on hover. Click selects, double-click renames,
-/// dragging reorders. Drawn by hand so dragging is simple; the final look
-/// comes with the themes feature (plan 3).
-final class TabBarView: NSView {
+/// The tab strip in the title bar: one pill per tab, the active one filled,
+/// × to close on hover. Click selects, double-click renames, dragging
+/// reorders. Drawn by hand so dragging is simple; colors come from the
+/// theme through `style`.
+public final class TabBarView: NSView {
+    /// The colors of the strip, set by whoever applies the theme.
+    public struct Style {
+        public var activeFill: NSColor
+        public var hoverFill: NSColor
+        public var text: NSColor
+        public var secondaryText: NSColor
+
+        public init(activeFill: NSColor, hoverFill: NSColor, text: NSColor, secondaryText: NSColor) {
+            self.activeFill = activeFill
+            self.hoverFill = hoverFill
+            self.text = text
+            self.secondaryText = secondaryText
+        }
+    }
+
     struct Item: Equatable {
         let id: Int
         let title: String
@@ -12,10 +28,28 @@ final class TabBarView: NSView {
     }
 
     static let height: CGFloat = 30
-    private static let maxWidth: CGFloat = 220
+    private static let maxWidth: CGFloat = 180
     private static let closeSize: CGFloat = 16
+    private static let pillInset: CGFloat = 2
+    private static let pillRadius: CGFloat = 7
 
-    var items: [Item] = [] { didSet { needsDisplay = true } }
+    public var style = Style(activeFill: .controlBackgroundColor, hoverFill: .quaternaryLabelColor,
+                             text: .labelColor, secondaryText: .secondaryLabelColor) {
+        didSet { needsDisplay = true }
+    }
+
+    var items: [Item] = [] {
+        didSet {
+            needsDisplay = true
+            if items.count != oldValue.count { invalidateIntrinsicContentSize() }
+        }
+    }
+
+    /// As wide as its tabs, so "+" sits right after them; the title bar
+    /// squeezes it when there is no room.
+    public override var intrinsicContentSize: NSSize {
+        NSSize(width: CGFloat(max(items.count, 1)) * Self.maxWidth, height: Self.height)
+    }
     var onSelect: ((Int) -> Void)?
     var onClose: ((Int) -> Void)?
     var onRename: ((Int) -> Void)?
@@ -25,9 +59,11 @@ final class TabBarView: NSView {
     private var hovered: Int?
     private var dragging: (id: Int, startX: CGFloat, offset: CGFloat)?
 
-    override var isFlipped: Bool { true }
+    public override var isFlipped: Bool { true }
+    /// Clicks on tabs must not drag the window from the title bar.
+    public override var mouseDownCanMoveWindow: Bool { false }
 
-    override func updateTrackingAreas() {
+    public override func updateTrackingAreas() {
         super.updateTrackingAreas()
         trackingAreas.forEach(removeTrackingArea)
         addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect], owner: self))
@@ -55,34 +91,29 @@ final class TabBarView: NSView {
 
     // MARK: Drawing
 
-    override func draw(_ dirtyRect: NSRect) {
-        NSColor.windowBackgroundColor.setFill()
-        bounds.fill()
+    public override func draw(_ dirtyRect: NSRect) {
         for (i, item) in items.enumerated() {
             var rect = frame(at: i)
             if let drag = dragging, drag.id == item.id { rect.origin.x += drag.offset }
             drawTab(item, in: rect, hovered: hovered == item.id)
         }
-        NSColor.separatorColor.setFill()
-        NSRect(x: 0, y: bounds.maxY - 1, width: bounds.width, height: 1).fill()
     }
 
     private func drawTab(_ item: Item, in rect: NSRect, hovered: Bool) {
-        if item.active {
-            NSColor.controlBackgroundColor.setFill()
-            rect.fill()
+        let pill = rect.insetBy(dx: Self.pillInset, dy: Self.pillInset)
+        if item.active || hovered {
+            (item.active ? style.activeFill : style.hoverFill).setFill()
+            NSBezierPath(roundedRect: pill, xRadius: Self.pillRadius, yRadius: Self.pillRadius).fill()
         }
-        NSColor.separatorColor.setFill()
-        NSRect(x: rect.maxX - 1, y: rect.minY + 6, width: 1, height: rect.height - 12).fill()
 
         let showClose = item.active || hovered
-        let style = NSMutableParagraphStyle()
-        style.lineBreakMode = .byTruncatingTail
-        style.alignment = .center
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.lineBreakMode = .byTruncatingTail
+        paragraph.alignment = .center
         let attributes: [NSAttributedString.Key: Any] = [
             .font: NSFont.systemFont(ofSize: 12, weight: item.active ? .medium : .regular),
-            .foregroundColor: item.active ? NSColor.labelColor : NSColor.secondaryLabelColor,
-            .paragraphStyle: style,
+            .foregroundColor: item.active ? style.text : style.secondaryText,
+            .paragraphStyle: paragraph,
         ]
         let inset = Self.closeSize + 14
         let textRect = NSRect(x: rect.minX + inset, y: rect.midY - 8, width: rect.width - inset * 2, height: 16)
@@ -90,14 +121,21 @@ final class TabBarView: NSView {
 
         guard showClose else { return }
         let close = closeFrame(in: rect)
-        let image = NSImage(systemSymbolName: "xmark", accessibilityDescription: "Fechar aba")
-        image?.withSymbolConfiguration(.init(pointSize: 9, weight: .semibold))?
-            .draw(in: close.insetBy(dx: 3, dy: 3))
+        // The template icon drawn in the text color: lock focus on a copy and
+        // fill over it with sourceAtop.
+        let image = Icon.x.image(size: 12)
+        let tinted = NSImage(size: image.size, flipped: false) { rect in
+            image.draw(in: rect)
+            self.style.secondaryText.set()
+            rect.fill(using: .sourceAtop)
+            return true
+        }
+        tinted.draw(in: close.insetBy(dx: 2, dy: 2))
     }
 
     // MARK: Mouse
 
-    override func mouseMoved(with event: NSEvent) {
+    public override func mouseMoved(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
         let id = index(at: point).map { items[$0].id }
         if id != hovered {
@@ -106,12 +144,12 @@ final class TabBarView: NSView {
         }
     }
 
-    override func mouseExited(with event: NSEvent) {
+    public override func mouseExited(with event: NSEvent) {
         hovered = nil
         needsDisplay = true
     }
 
-    override func mouseDown(with event: NSEvent) {
+    public override func mouseDown(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
         guard let i = index(at: point) else { return }
         let item = items[i]
@@ -127,14 +165,14 @@ final class TabBarView: NSView {
         dragging = (item.id, point.x, 0)
     }
 
-    override func mouseDragged(with event: NSEvent) {
+    public override func mouseDragged(with event: NSEvent) {
         guard var drag = dragging else { return }
         drag.offset = convert(event.locationInWindow, from: nil).x - drag.startX
         dragging = drag
         needsDisplay = true
     }
 
-    override func mouseUp(with event: NSEvent) {
+    public override func mouseUp(with event: NSEvent) {
         defer {
             dragging = nil
             needsDisplay = true

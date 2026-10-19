@@ -13,7 +13,11 @@
 
 ## Como eu quero
 - O importador converte o tema do Terax para o formato do Cadex; o Cadex só guarda o formato dele.
-- Spec de comportamento em docs/spec/themes.md, escrita antes do código. Status: não iniciada.
+- `Theme.swift`: o tema (cores da interface e do terminal, 16 ANSI). `BuiltInThemes.swift`: Cadex
+  Escuro (cores da interface medidas num print do Terax) e Cadex Claro. `ThemeStore.swift`: o tema
+  em uso, seguindo o modo do sistema, e quem observa a troca.
+- Spec em `../../../../docs/spec/themes.md`. Status: temas embutidos e troca pelo sistema prontos;
+  arquivo JSON, cores no terminal, importar do Terax e imagem de fundo a fazer.
 
 ## Como validar
 - `make macos-test` passa.

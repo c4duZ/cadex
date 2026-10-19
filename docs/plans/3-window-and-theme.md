@@ -20,7 +20,7 @@ Depende de: planos 1 e 2 · Features: themes, settings, status-bar (app); a casc
 
 ## O que eu não quero
 - Copiar CSS, ícones ou arquivos do Terax: o visual é refeito a partir de prints do app e do que o
-  dono descrever. Ícones vêm de uma fonte com licença permissiva ou SF Symbols, registrados no `NOTICE`.
+  dono descrever. Ícones são Phosphor (`docs/adr/0008-phosphor-icons.md`), registrados no `NOTICE`.
 - Transparência ou desfoque ligados por padrão (custam desempenho a cada quadro).
 - Ler o formato de tema do Terax no código dele (ADR 0004): o formato é levantado a partir de
   arquivos exportados que o dono fornece (pedir um ou dois antes de começar a fase D).

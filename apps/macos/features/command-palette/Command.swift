@@ -5,13 +5,14 @@ import AppKit
 public struct Command {
     /// Where the command sits in the app menu.
     public enum Category: Int, CaseIterable, Sendable {
-        case app, edit, terminal, tabs, panes
+        case app, edit, view, terminal, tabs, panes
 
         /// The menu title, in Portuguese like the rest of the interface.
         public var title: String {
             switch self {
             case .app: "Cadex"
             case .edit: "Editar"
+            case .view: "Visualizar"
             case .terminal: "Terminal"
             case .tabs: "Abas"
             case .panes: "Painéis"

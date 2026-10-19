@@ -1,11 +1,13 @@
 import AppKit
+import StatusBar
 import CommandPalette
 import Shortcuts
 import Tabs
 import Terminal
 
-/// Opens one window with tabs of terminals. Spaces and the rest of the
-/// workspace come as their features are built (CLAUDE.md, atlas).
+/// Opens the window: tabs of terminals inside the Terax-like shell
+/// (WorkspaceView). Spaces and the rest of the workspace come as their
+/// features are built (CLAUDE.md, atlas).
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var window: NSWindow?
@@ -14,28 +16,55 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var dispatcher: ShortcutDispatcher?
     private var palette: CommandPaletteController?
     private var tabs: TabsController?
+    private var workspace: WorkspaceView?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpCommands()
-        let frame = NSRect(x: 0, y: 0, width: 900, height: 600)
+        let window = makeWindow()
+        let tabs = TabsController(window: window)
+        let workspace = WorkspaceView(tabs: tabs) { [weak self] id in self?.commands.run(id) }
+        window.contentView = workspace
+        self.window = window
+        self.tabs = tabs
+        self.workspace = workspace
+        connectStatusBar(workspace.statusBar, to: tabs)
+        tabs.newTab(cwd: NSHomeDirectory())
+        window.center()
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    /// The title area is the app's (fullSizeContentView, transparent title
+    /// bar); an empty compact toolbar makes it 38 points tall with the window
+    /// buttons centered in it, as in Terax.
+    private func makeWindow() -> NSWindow {
         let window = NSWindow(
-            contentRect: frame,
-            styleMask: [.titled, .closable, .miniaturizable, .resizable],
+            contentRect: NSRect(x: 0, y: 0, width: 1100, height: 700),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered, defer: false)
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
+        window.toolbar = NSToolbar()
+        window.toolbarStyle = .unifiedCompact
+        window.minSize = NSSize(width: 600, height: 360)
         window.title = "Cadex"
         window.delegate = self
         // A window made in code frees itself on close by default, leaving
         // self.window dangling; applicationShouldTerminate then crashed
         // reading it (EXC_BAD_ACCESS, crash reports of 2026-10-19).
         window.isReleasedWhenClosed = false
-        let tabs = TabsController(window: window)
-        window.contentView = tabs.view
-        self.tabs = tabs
-        tabs.newTab(cwd: NSHomeDirectory())
-        window.center()
-        window.makeKeyAndOrderFront(nil)
-        self.window = window
-        NSApp.activate(ignoringOtherApps: true)
+        return window
+    }
+
+    /// The status bar follows the focused terminal's folder, and its folder
+    /// menu takes that terminal there (docs/spec/status-bar.md).
+    private func connectStatusBar(_ bar: StatusBarView, to tabs: TabsController) {
+        tabs.onActiveChange = { [weak tabs, weak bar] in
+            let terminal = tabs?.activeTerminal
+            bar?.path = terminal?.currentDirectory
+            bar?.canNavigate = terminal?.hasForegroundProcess == false
+        }
+        bar.onNavigate = { [weak tabs] folder in tabs?.activeTerminal?.changeDirectory(to: folder) }
     }
 
     /// Every feature registers its commands; the menu and the shortcuts
@@ -48,6 +77,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         self.palette = palette
         commands.register(palette.openCommand)
         commands.register(StandardCommands.all)
+        commands.register(Command(
+            id: "view.toggle-sidebar", title: "Mostrar ou esconder o painel lateral",
+            keywords: ["sidebar", "explorer", "painel"], category: .view, defaultShortcut: "cmd+b",
+            action: .run { [weak self] in self?.workspace?.toggleSidebar() }))
         commands.register(TerminalCommands.all)
         commands.register(TabCommands.all { [weak self] in self?.tabs })
 

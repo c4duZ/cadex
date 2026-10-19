@@ -16,6 +16,25 @@ let package = Package(
         // The core's C API (core/include/cadex.h) as a Swift module.
         .systemLibrary(name: "CCadex", path: "shared/core-bridge"),
 
+        // Phosphor icons for every feature (docs/adr/0008-phosphor-icons.md).
+        .target(
+            name: "Icons",
+            path: "shared/icons",
+            exclude: ["CLAUDE.md", "Resources/LICENSE-Phosphor.txt", "tests"],
+            resources: [.copy("Resources/Phosphor-Regular.ttf")]
+        ),
+        .target(
+            name: "Themes",
+            path: "features/themes",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
+        .target(
+            name: "StatusBar",
+            path: "features/status-bar",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
         .target(
             name: "CommandPalette",
             dependencies: ["CCadex"],
@@ -32,7 +51,7 @@ let package = Package(
         ),
         .target(
             name: "Terminal",
-            dependencies: ["CCadex", "CommandPalette"],
+            dependencies: ["CCadex", "CommandPalette", "Icons"],
             path: "features/terminal",
             exclude: ["CLAUDE.md", "tests"],
             // @testable access for the feature's test executable.
@@ -41,7 +60,7 @@ let package = Package(
         ),
         .target(
             name: "Tabs",
-            dependencies: ["Terminal", "CommandPalette"],
+            dependencies: ["Terminal", "CommandPalette", "Icons"],
             path: "features/tabs",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -78,8 +97,24 @@ let package = Package(
         ),
 
         .executableTarget(
+            name: "StatusBarTests",
+            dependencies: ["StatusBar", "Checks"],
+            path: "features/status-bar/tests"
+        ),
+        .executableTarget(
+            name: "ThemesTests",
+            dependencies: ["Themes", "Checks"],
+            path: "features/themes/tests"
+        ),
+        .executableTarget(
+            name: "IconsTests",
+            dependencies: ["Icons", "Checks"],
+            path: "shared/icons/tests"
+        ),
+
+        .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

@@ -6,6 +6,11 @@ import Terminal
 @MainActor
 public final class TabsController {
     public let view: TabsView
+    /// The tab strip, for the window's title bar.
+    public let bar = TabBarView()
+    /// The active tab, its focused pane or that pane's folder changed: the
+    /// status bar follows.
+    public var onActiveChange: (() -> Void)?
     private var list = TabList()
     private var tabs: [Int: Tab] = [:]
     private var nextId = 1
@@ -18,10 +23,10 @@ public final class TabsController {
     public init(window: NSWindow) {
         self.window = window
         view = TabsView(frame: window.contentView?.bounds ?? .zero)
-        view.bar.onSelect = { [weak self] in self?.select($0) }
-        view.bar.onClose = { [weak self] in self?.closeTab($0) }
-        view.bar.onRename = { [weak self] in self?.rename($0) }
-        view.bar.onMove = { [weak self] id, index in
+        bar.onSelect = { [weak self] in self?.select($0) }
+        bar.onClose = { [weak self] in self?.closeTab($0) }
+        bar.onRename = { [weak self] in self?.rename($0) }
+        bar.onMove = { [weak self] id, index in
             self?.list.move(id, to: index)
             self?.refreshBar()
         }
@@ -142,11 +147,12 @@ public final class TabsController {
     }
 
     private func refreshBar() {
-        view.bar.items = list.order.compactMap { id in
+        bar.items = list.order.compactMap { id in
             tabs[id].map { TabBarView.Item(id: id, title: $0.title(home: home), active: id == list.active) }
         }
         let program = activeTab?.focused.programTitle ?? ""
         window?.title = program.isEmpty ? (activeTab?.title(home: home) ?? "Cadex") : program
+        onActiveChange?()
     }
 
     /// "Renomear aba": empty goes back to the folder name.

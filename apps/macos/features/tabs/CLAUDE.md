@@ -11,8 +11,9 @@
 ## Como eu quero
 - `TabsController.swift`: as abas de uma janela (abrir na pasta atual, trocar, renomear, fechar,
   ordem de uso). `TabList.swift`: as regras puras (ordem, ativa, recentes, mover), testadas.
-- `TabBarView.swift`: a barra desenhada à mão (clique, duplo clique renomeia, arrastar reordena, ×).
-  `TabsView.swift`: barra em cima e a aba ativa embaixo. `Tab.swift`: uma aba.
+- `TabBarView.swift`: a barra de abas em pílulas, desenhada à mão (clique, duplo clique renomeia,
+  arrastar reordena, ×), com cores de fora (`style`); fica na barra de título da janela
+  (a propriedade bar do controlador). `TabsView.swift`: só a aba ativa. `Tab.swift`: uma aba.
 - Divisões: `PaneTree.swift` é a árvore pura (dividir, remover dando o espaço ao irmão, retângulos,
   ordem de leitura, vizinho por direção, proporção por caminho), testada. `PaneLayoutView.swift`
   posiciona os terminais pela árvore, divisor arrastável de 1 pt (tamanho mínimo de painel) e

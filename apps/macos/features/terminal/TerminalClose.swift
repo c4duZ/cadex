@@ -11,6 +11,13 @@ extension TerminalView {
     /// program's); new tabs and panes open there.
     public var currentDirectory: String? { session?.workingDirectory() }
 
+    /// Takes the shell to `path` by typing `cd` with the path escaped, as if
+    /// the user did it (the status bar's folder menu).
+    public func changeDirectory(to path: String) {
+        guard let session, !session.hasForegroundProcess else { return }
+        session.write("cd " + TerminalSession.quotePaths([path]) + "\r")
+    }
+
     /// Ends the shell now, without asking (the caller asked already).
     public func closeSession() {
         session?.close()
