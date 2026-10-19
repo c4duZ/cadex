@@ -1,0 +1,7 @@
+// The core's C API as the Swift module CCadex. The header lives in the core
+// so there is one copy; libcadex.a comes from `zig build` (see Package.swift).
+module CCadex [system] {
+    header "../../../../core/include/cadex.h"
+    link "cadex"
+    export *
+}

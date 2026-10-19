@@ -1,0 +1,45 @@
+// swift-tools-version: 6.0
+//
+// Each feature is its own Swift module: only what it marks `public` is
+// visible to the others, so "use a feature only through its entry point"
+// is enforced by the compiler (see ../../CLAUDE.md).
+
+import PackageDescription
+
+/// libcadex.a, built by `zig build` in core/ (run `make core` first).
+let coreLibDir = Context.packageDirectory + "/../../core/zig-out/lib"
+
+let package = Package(
+    name: "Cadex",
+    platforms: [.macOS(.v13)],
+    targets: [
+        // The core's C API (core/include/cadex.h) as a Swift module.
+        .systemLibrary(name: "CCadex", path: "shared/core-bridge"),
+
+        .target(
+            name: "Terminal",
+            dependencies: ["CCadex"],
+            path: "features/terminal",
+            exclude: ["CLAUDE.md", "tests"],
+            // @testable access for the feature's test executable.
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+        // Tests are an executable: see shared/checks/Checks.swift.
+        .target(name: "Checks", path: "shared/checks"),
+        .executableTarget(
+            name: "TerminalTests",
+            dependencies: ["Terminal", "Checks"],
+            path: "features/terminal/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+
+        .executableTarget(
+            name: "Cadex",
+            dependencies: ["Terminal"],
+            path: "app",
+            exclude: ["CLAUDE.md"],
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+    ]
+)

@@ -1,4 +1,4 @@
-.PHONY: check manifests core-test macos-test
+.PHONY: check manifests core core-test macos-test app run
 
 # Run before handing work over: manifests, core tests, app tests.
 check: manifests core-test macos-test
@@ -6,12 +6,19 @@ check: manifests core-test macos-test
 manifests:
 	@python3 tools/check_manifests.py
 
-# The core and the app have no code yet; each target starts running its tests
-# as soon as the build file exists, so nobody has to remember to wire it up.
-core-test:
-	@if [ -f core/build.zig ]; then cd core && zig build test; \
-	else echo "core: sem código ainda"; fi
+# libcadex.a + cadex.h in core/zig-out, which the macOS app links.
+core:
+	@cd core && zig build -Doptimize=ReleaseFast
 
-macos-test:
-	@if [ -f apps/macos/Package.swift ]; then cd apps/macos && swift test; \
-	else echo "apps/macos: sem código ainda"; fi
+core-test:
+	@cd core && zig build test
+
+macos-test: core
+	@cd apps/macos && swift run TerminalTests
+
+# Debug build of the app; `make run` opens it.
+app: core
+	@cd apps/macos && swift build
+
+run: app
+	@cd apps/macos && swift run Cadex

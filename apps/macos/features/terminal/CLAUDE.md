@@ -18,7 +18,8 @@
 ## Como eu quero
 - Só desenha e repassa entrada; fala com a feature terminal do núcleo.
 - Ações do terminal (limpar, buscar, copiar, colar) registradas como comandos.
-- Spec de comportamento em docs/spec/terminal.md, escrita antes do código. Status: não iniciada.
+- Status: janela com um shell, desenho em Metal (SF Mono, nítido), teclado básico e colagem de
+  texto. Faltam: seleção, links, busca, rolagem, colagem de arquivos e imagem, teclas pelo núcleo.
 
 ## Como validar
 - `make macos-test` passa.
