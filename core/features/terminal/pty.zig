@@ -144,9 +144,25 @@ pub fn hangUp(child: Child, grace_ms: u32) void {
     killNow(child);
 }
 
+/// How long close() waits for a killed shell before reaping it in the
+/// background instead: closing must never hang the app.
+const kill_wait_ms = 500;
+
 pub fn killNow(child: Child) void {
     _ = c.kill(child.pid, .KILL);
-    _ = c.waitpid(child.pid, null, 0);
+    var waited: u32 = 0;
+    while (waited < kill_wait_ms) : (waited += 10) {
+        if (c.waitpid(child.pid, null, c.W.NOHANG) != 0) return;
+        _ = usleep(10 * 1000);
+    }
+    // Still exiting: reap it on a thread of its own so it does not stay a
+    // zombie, without blocking the caller.
+    const reaper = std.Thread.spawn(.{}, reapBlocking, .{child.pid}) catch return;
+    reaper.detach();
+}
+
+fn reapBlocking(pid: c.pid_t) void {
+    _ = waitExitCode(pid);
 }
 
 test "exit status decoding follows the shell convention" {

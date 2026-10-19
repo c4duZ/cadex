@@ -86,8 +86,13 @@ pub const Session = struct {
     pub fn close(self: *Session) void {
         self.stop.store(true, .release);
         self.reader.join();
-        if (!self.reaped) pty.hangUp(self.child, hangup_grace_ms);
+        // Close our side of the pty before waiting for the shell. With the
+        // reader stopped nobody drains its output, and an exiting shell
+        // waits in the kernel for that drain: the app hung forever in
+        // waitpid closing a tab that ran `sleep 100` (2026-10-19, sample of
+        // the main thread in __wait4, zsh in state E).
         _ = c.close(self.child.fd);
+        if (!self.reaped) pty.hangUp(self.child, hangup_grace_ms);
         self.renderer.deinit(self.gpa);
         self.model.destroy();
         self.gpa.destroy(self);

@@ -93,3 +93,27 @@ test "closing a session with a running program does not hang" {
     _ = usleep(100 * 1000);
     session.close();
 }
+
+test "closing while a program floods the terminal does not hang" {
+    testing.log_level = .err;
+    const session = try Session.open(testing.allocator, .{
+        .size = .{ .cols = 80, .rows = 24 },
+        .shell = "/bin/sh",
+    });
+    try session.write("yes cadex\n");
+    _ = usleep(300 * 1000);
+
+    // Before the fix close() waited forever for the shell to drain its
+    // output. Closing the pty first lets it exit within the SIGHUP grace
+    // (0.22 s measured); with the old order only the bounded kill wait
+    // saved it (1.02 s), which this limit catches.
+    const start = monotonicSeconds();
+    session.close();
+    try testing.expect(monotonicSeconds() - start < 0.6);
+}
+
+fn monotonicSeconds() f64 {
+    var ts: std.c.timespec = undefined;
+    _ = std.c.clock_gettime(.MONOTONIC, &ts);
+    return @as(f64, @floatFromInt(ts.sec)) + @as(f64, @floatFromInt(ts.nsec)) / 1e9;
+}
