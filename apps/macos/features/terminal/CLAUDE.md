@@ -2,15 +2,20 @@
 
 ## O que eu quero
 - Desenhar o terminal em Metal, com fonte, cursor, seleção, links e true color.
-- Teclado completo, colagem (texto, caminhos de arquivo e imagem como arquivo temporário), arrastar arquivos.
-- Busca dentro do terminal e o modo em blocos com campo de comando estilo editor.
+- Teclado completo, colagem (texto, caminhos de arquivo e imagem como arquivo temporário), arrastar
+  arquivos.
+- Busca dentro do terminal.
+- Comportamento inicial igual ao terminal do Terax, e de preferência mais leve.
 
 ## O que eu não quero
+- Modo em blocos e terminal privado.
 - Lógica de terminal no app: o estado vem do núcleo.
 - Redesenhar a tela inteira quando só uma linha mudou.
+- ⌘K indo para o shell: abre a paleta. Limpar a tela é ⌘L.
 
 ## Como eu quero
 - Só desenha e repassa entrada; fala com a feature terminal do núcleo.
+- Ações do terminal (limpar, buscar, copiar, colar) registradas como comandos.
 - Spec de comportamento em docs/spec/terminal.md, escrita antes do código. Status: não iniciada.
 
 ## Como validar

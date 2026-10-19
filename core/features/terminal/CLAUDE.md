@@ -3,7 +3,7 @@
 ## O que eu quero
 - Abrir, redimensionar e fechar sessões de shell num PTY, com o shell padrão do usuário.
 - Alimentar a libghostty-vt com a saída e expor ao app a grade, o cursor, os modos e o scrollback.
-- Integração de shell (OSC 7 e OSC 133) para saber o diretório atual e os blocos de comando.
+- Integração de shell (OSC 7) para saber o diretório atual de cada sessão.
 - Saber se uma sessão tem um processo rodando em primeiro plano (para avisar antes de fechar).
 
 ## O que eu não quero

@@ -21,7 +21,9 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Folha** (`leaf`): um painel final da árvore de divisões, que contém uma sessão de terminal.
 - **Barra lateral** (`sidebar`): a coluna com o explorer ou o source control.
 - **Barra de status** (`status-bar`): a faixa inferior com diretório, ambiente e diagnósticos.
-- **Paleta de comandos** (`command-palette`): a busca de ações e arquivos por teclado.
+- **Paleta de comandos** (`command-palette`): a busca de ações aberta pelo ⌘K. Executa qualquer comando.
+- **Comando** (`command`): uma ação do app, com id, título e a função que executa. Menus, botões e
+  atalhos só disparam comandos.
 
 ## Terminal
 - **Sessão** (`session`): um shell rodando num PTY, ligado a uma folha.
@@ -30,11 +32,8 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   mantido pela libghostty-vt.
 - **Render** (`renderer`): a parte que desenha a grade na tela (Metal no macOS).
 - **Scrollback**: as linhas que já saíram do topo da tela e ainda podem ser vistas rolando.
-- **Modo em blocos** (`blocks`): terminal em que cada comando e sua saída viram um bloco, com um
-  campo de comando separado, estilo editor.
-- **Bloco** (`block`): um comando executado e a saída dele, no modo em blocos.
 - **Integração de shell** (`shell integration`): o script injetado no shell que avisa o diretório
-  atual e onde começa e termina cada comando (OSC 7 e OSC 133).
+  atual (OSC 7).
 - **Bracketed paste**: modo em que o programa pede que o texto colado venha marcado, para não ser
   executado como digitação.
 - **Ambiente** (`workspace environment`): onde os processos rodam. Local, ou uma distro WSL no

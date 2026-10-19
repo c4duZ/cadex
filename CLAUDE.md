@@ -6,17 +6,18 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 - Recriar todas as funcionalidades do Terax com código próprio, licença MIT.
 - O app mais leve e rápido possível em cada sistema: macOS primeiro, Windows depois, sobre o mesmo
   núcleo.
+- Tudo pode ser feito pelo ⌘K: toda ação do app é um comando que a paleta encontra e executa
+  (`docs/adr/0005-every-action-is-a-command.md`).
 - As features abaixo, cada uma com pasta própria e o mesmo nome no núcleo e no app:
 
 | feature | núcleo | app macOS | o que faz |
 |---|---|---|---|
-| terminal | sim | sim | sessões PTY, modelo libghostty-vt, render Metal, teclado, colagem, modo em blocos |
+| terminal | sim | sim | sessões PTY, modelo libghostty-vt, render Metal, teclado, colagem, busca |
 | explorer | sim | sim | operações de arquivo, observação do disco, árvore e ícones |
 | search | sim | sim | busca de arquivo por nome (fuzzy) e de conteúdo, respeitando .gitignore |
 | source-control | sim | sim | status, diff, stage, commit, push e pull via o binário git |
 | git-history | sim | sim | log de commits e grafo |
 | language-server | sim | sim | processos LSP e integração com o editor |
-| command-history | sim | sim | histórico e sugestões de comandos do terminal |
 | workspace | sim | não | diretórios autorizados, diretório de lançamento, ambiente (WSL no Windows) |
 | editor | não | sim | editor de código, vim, formatar ao salvar |
 | preview | não | sim | preview web de servidores locais e URLs |
@@ -26,7 +27,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | spaces | não | sim | grupos de abas restaurados entre sessões |
 | themes | não | sim | temas do app e do editor, imagem de fundo |
 | settings | não | sim | janela de configurações e preferências salvas |
-| command-palette | não | sim | paleta de comandos |
+| command-palette | não | sim | ⌘K: registro de todos os comandos e a paleta que executa qualquer um |
 | shortcuts | não | sim | atalhos configuráveis |
 | status-bar | não | sim | barra de status |
 
@@ -35,6 +36,8 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
   `docs/spec/`. Ver `docs/adr/0004-clean-rewrite.md`.
 - WebView, Electron ou Tauri para a interface (`docs/adr/0001-macos-first-native-app.md`).
 - IA embutida no app. Agentes de código rodam numa aba de terminal.
+- Modo em blocos, terminal privado e launcher de agentes: ficaram de fora do Cadex.
+- Ação que não é um comando registrado (que só existe num botão, menu ou atalho).
 - Feature importando o miolo de outra feature.
 - Swift chamando detalhe interno do Zig, ou qualquer código falando com a libghostty fora da feature
   `terminal` do núcleo.
@@ -43,6 +46,8 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 ## Como eu quero
 - `core/`: núcleo em Zig, exposto por uma API C (`docs/adr/0002-zig-core-with-c-api.md`).
   `apps/macos/`: Swift com AppKit e Metal. `apps/windows/`: reservado.
+- Toda ação é um comando registrado na feature `command-palette`; menus, botões e atalhos só
+  disparam comandos pelo id.
 - O que 2+ features usam sobe para `core/shared/` ou `apps/macos/shared/`. Só isso vai para lá.
 - Feature nova: spec em `docs/spec/<feature>.md` antes do código, pasta própria com `CLAUDE.md`
   neste formato, testes dentro, uma linha na tabela acima.
