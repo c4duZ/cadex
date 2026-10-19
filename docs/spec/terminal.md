@@ -82,6 +82,9 @@ sistema (NSPasteboard); no Windows, a do Win32. O núcleo recebe só o texto fin
 - ⌘L limpa a tela (o histórico continua disponível).
 - Option digita os caracteres especiais do macOS por padrão; uma configuração faz o Option esquerdo
   funcionar como Meta (para atalhos de shell como Option+B).
+- Setas, F1–F12, Home/End/PgUp/PgDn e combinações com Ctrl, Shift e Meta chegam ao programa no
+  formato que ele pediu: modo de aplicação das setas (vim, less, htop) e protocolo de teclado do
+  kitty (neovim, fish).
 - Atalhos do app nunca roubam teclas de controle que os programas usam (Ctrl+B, Ctrl+R, Ctrl+A...).
 
 ### Fechar e restaurar

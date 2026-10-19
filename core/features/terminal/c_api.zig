@@ -46,6 +46,26 @@ pub export fn cadex_terminal_write(session: ?*Session, bytes: ?[*]const u8, len:
     return status.ok;
 }
 
+/// A key that is not plain text: special keys, and text with Ctrl or Alt.
+/// Encoded by the core for the program's current modes (input.zig).
+pub export fn cadex_terminal_key(
+    session: ?*Session,
+    key: u16,
+    mods: u8,
+    text: ?[*]const u8,
+    text_len: usize,
+    unshifted_codepoint: u32,
+) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const typed: []const u8 = if (text_len == 0) "" else (text orelse return status.invalid_argument)[0..text_len];
+    const unshifted = std.math.cast(u21, unshifted_codepoint) orelse return status.invalid_argument;
+    s.key(@enumFromInt(key), @bitCast(mods), typed, unshifted) catch |err| return switch (err) {
+        error.InvalidKey, error.KeyTooLong => status.invalid_argument,
+        else => status.fromError(err),
+    };
+    return status.ok;
+}
+
 pub export fn cadex_terminal_resize(
     session: ?*Session,
     cols: u16,

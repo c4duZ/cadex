@@ -7,6 +7,7 @@ const Model = @import("model.zig").Model;
 const pty = @import("pty.zig");
 const shell_env = @import("shell_env.zig");
 const render = @import("render.zig");
+const input = @import("input.zig");
 
 extern "c" fn usleep(microseconds: c_uint) c_int;
 
@@ -88,6 +89,17 @@ pub const Session = struct {
     /// Sends input (typed keys, pasted text) to the shell.
     pub fn write(self: *Session, bytes: []const u8) !void {
         try pty.writeAll(self.child.fd, bytes);
+    }
+
+    /// Sends a key press, encoded for the modes the program set (see
+    /// input.zig). Keys that encode to nothing are dropped.
+    pub fn key(self: *Session, k: input.Key, mods: input.Mods, text: []const u8, unshifted: u21) !void {
+        var buf: [input.max_sequence_len]u8 = undefined;
+        self.lock();
+        const encoded = input.encodeKey(&buf, &self.model.terminal, k, mods, text, unshifted);
+        self.unlock();
+        const bytes = try encoded;
+        if (bytes.len > 0) try self.write(bytes);
     }
 
     pub fn resize(self: *Session, size: Size) !void {

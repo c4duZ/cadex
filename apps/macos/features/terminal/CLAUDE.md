@@ -17,9 +17,14 @@
 
 ## Como eu quero
 - Só desenha e repassa entrada; fala com a feature terminal do núcleo.
+- Teclado: `KeyEncoding.swift` só decide a rota (edição estilo Mac, tecla para o núcleo via
+  `cadex_terminal_key`, ou texto pelo sistema de entrada, que compõe acentos). Sequências de
+  terminal só na tabela da edição estilo Mac, que é convenção do app. Option esquerdo como Meta
+  pelo default "terminal.optionAsMeta" (desligado; a janela de configurações vai gravá-lo).
 - Ações do terminal (limpar, buscar, copiar, colar) registradas como comandos.
 - Status: janela com um shell, desenho em Metal (SF Mono, nítido), teclado básico e colagem de
-  texto. Faltam: seleção, links, busca, rolagem, colagem de arquivos e imagem, teclas pelo núcleo.
+  texto, teclas pelo núcleo (modo de aplicação, F-keys, modificadores, kitty, Option como Meta).
+  Faltam: seleção, links, busca, rolagem, colagem de arquivos e imagem.
 
 ## Como validar
 - `make macos-test` passa.

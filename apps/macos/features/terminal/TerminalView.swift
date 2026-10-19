@@ -1,4 +1,5 @@
 import AppKit
+import CCadex
 import MetalKit
 
 /// The terminal on screen: draws the session with Metal, sends keys and
@@ -12,6 +13,10 @@ public final class TerminalView: MTKView {
     private var renderer: TerminalRenderer?
     private var lastSize: (cols: UInt16, rows: UInt16) = (0, 0)
     var markedText = NSAttributedString()
+    /// Left Option as Meta (Option+B goes to the shell as Meta+B) instead of
+    /// typing ∫. Off by default (docs/spec/terminal.md, Teclado); the settings
+    /// window (plan 3) will write this default.
+    public var optionAsMeta = UserDefaults.standard.bool(forKey: "terminal.optionAsMeta")
 
     public init(frame: CGRect, cwd: String? = nil) {
         super.init(frame: frame, device: MTLCreateSystemDefaultDevice())
@@ -81,12 +86,29 @@ public final class TerminalView: MTKView {
     // MARK: Keyboard
 
     public override func keyDown(with event: NSEvent) {
-        if let bytes = KeyEncoding.sequence(keyCode: event.keyCode, modifiers: event.modifierFlags, characters: event.characters) {
-            session?.write(bytes)
+        // A dead key is waiting (´ before e): the input system decides what
+        // Backspace, Escape or the next letter do with it.
+        if hasMarkedText() {
+            interpretKeyEvents([event])
             return
         }
-        // Text goes through the input system so dead keys compose.
-        interpretKeyEvents([event])
+        switch KeyEncoding.route(keyCode: event.keyCode, modifiers: event.modifierFlags, optionAsMeta: optionAsMeta) {
+        case .macEditing(let bytes):
+            session?.write(bytes)
+        case .core(let key, let mods):
+            sendToCore(event, key: key, mods: mods)
+        case .text:
+            interpretKeyEvents([event])
+        }
+    }
+
+    /// The core needs the text without Ctrl and Option applied (Ctrl+C is
+    /// "c", Meta+B is "b") and the key without Shift, for the kitty protocol.
+    private func sendToCore(_ event: NSEvent, key: UInt16, mods: UInt8) {
+        let isText = key == UInt16(CADEX_KEY_NONE)
+        let text = isText ? event.characters(byApplyingModifiers: event.modifierFlags.intersection([.shift, .capsLock])) ?? "" : ""
+        let unshifted = isText ? event.characters(byApplyingModifiers: [])?.unicodeScalars.first?.value ?? 0 : 0
+        session?.key(key, mods: mods, text: text, unshifted: unshifted)
     }
 
     public override func performKeyEquivalent(with event: NSEvent) -> Bool {
@@ -94,7 +116,7 @@ public final class TerminalView: MTKView {
             return super.performKeyEquivalent(with: event)
         }
         // ⌘← ⌘→ ⌘⌫ ⌘⌦: line editing, sent to the shell.
-        if let editing = KeyEncoding.sequence(keyCode: event.keyCode, modifiers: event.modifierFlags, characters: event.characters) {
+        if case .macEditing(let editing) = KeyEncoding.route(keyCode: event.keyCode, modifiers: event.modifierFlags, optionAsMeta: optionAsMeta) {
             session?.write(editing)
             return true
         }

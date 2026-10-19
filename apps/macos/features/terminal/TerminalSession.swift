@@ -61,6 +61,17 @@ public final class TerminalSession {
         write(Array(text.utf8))
     }
 
+    /// A key the core encodes for the program's modes: CADEX_KEY_* and
+    /// CADEX_MOD_*, the typed text without Ctrl and Option, and the key's
+    /// character without Shift (or 0).
+    public func key(_ key: UInt16, mods: UInt8, text: String = "", unshifted: UInt32 = 0) {
+        guard let handle else { return }
+        let bytes = Array(text.utf8)
+        _ = bytes.withUnsafeBufferPointer {
+            cadex_terminal_key(handle, key, mods, $0.baseAddress, $0.count, unshifted)
+        }
+    }
+
     public func resize(cols: UInt16, rows: UInt16, cellWidth: UInt16, cellHeight: UInt16) {
         guard let handle, cols > 0, rows > 0 else { return }
         _ = cadex_terminal_resize(handle, cols, rows, cellWidth, cellHeight)

@@ -56,3 +56,19 @@ test "rejects invalid arguments instead of crashing" {
     try testing.expect(!api.cadex_terminal_has_foreground_process(null));
     api.cadex_terminal_close(null);
 }
+
+test "keys go through the core's encoder" {
+    testing.log_level = .err;
+    var session: ?*@import("session.zig").Session = null;
+    var o = options();
+    try testing.expectEqual(status.ok, api.cadex_terminal_open(&o, &session));
+    defer api.cadex_terminal_close(session);
+
+    const up: u16 = 11;
+    const ctrl: u8 = 1 << 1;
+    try testing.expectEqual(status.ok, api.cadex_terminal_key(session, up, 0, null, 0, 0));
+    try testing.expectEqual(status.ok, api.cadex_terminal_key(session, 0, ctrl, "c", 1, 'c'));
+    try testing.expectEqual(status.invalid_argument, api.cadex_terminal_key(session, 999, 0, null, 0, 0));
+    try testing.expectEqual(status.invalid_argument, api.cadex_terminal_key(session, 0, 0, null, 3, 0));
+    try testing.expectEqual(status.invalid_argument, api.cadex_terminal_key(null, up, 0, null, 0, 0));
+}

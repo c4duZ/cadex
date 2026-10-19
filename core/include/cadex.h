@@ -61,6 +61,43 @@ void cadex_terminal_close(cadex_terminal *terminal);
 /* Sends input to the shell: typed keys, pasted text. */
 cadex_status cadex_terminal_write(cadex_terminal *terminal, const uint8_t *bytes, size_t len);
 
+/* -- Keys (core/features/terminal/input.zig) -- */
+
+/* Keys that are not text. CADEX_KEY_NONE: the event is text with Ctrl or
+ * Alt (Ctrl+C, Meta+B). */
+#define CADEX_KEY_NONE        0
+#define CADEX_KEY_ENTER       1
+#define CADEX_KEY_TAB         2
+#define CADEX_KEY_BACKSPACE   3
+#define CADEX_KEY_ESCAPE      4
+#define CADEX_KEY_DELETE      5
+#define CADEX_KEY_INSERT      6
+#define CADEX_KEY_HOME        7
+#define CADEX_KEY_END         8
+#define CADEX_KEY_PAGE_UP     9
+#define CADEX_KEY_PAGE_DOWN   10
+#define CADEX_KEY_UP          11
+#define CADEX_KEY_DOWN        12
+#define CADEX_KEY_LEFT        13
+#define CADEX_KEY_RIGHT       14
+/* F1..F12 are CADEX_KEY_F1 + 0..11. */
+#define CADEX_KEY_F1          15
+#define CADEX_KEY_F12         26
+
+#define CADEX_MOD_SHIFT (1u << 0)
+#define CADEX_MOD_CTRL  (1u << 1)
+/* Only when Option acts as Meta; otherwise Option composes text. */
+#define CADEX_MOD_ALT   (1u << 2)
+#define CADEX_MOD_SUPER (1u << 3)
+
+/* Sends a key press, encoded for the program's current modes (application
+ * cursor keys, modifiers, kitty keyboard protocol). text: what the key typed
+ * with Shift but without Ctrl or Option ("A" for Ctrl+Shift+A), may be empty.
+ * unshifted_codepoint: the key without Shift ('a'), or 0. */
+cadex_status cadex_terminal_key(cadex_terminal *terminal, uint16_t key, uint8_t mods,
+                                const uint8_t *text, size_t text_len,
+                                uint32_t unshifted_codepoint);
+
 /* New size in cells, plus the cell size in pixels (programs may ask for it). */
 cadex_status cadex_terminal_resize(cadex_terminal *terminal, uint16_t cols, uint16_t rows,
                                    uint16_t cell_width_px, uint16_t cell_height_px);

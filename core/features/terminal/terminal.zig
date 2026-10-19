@@ -8,6 +8,8 @@ pub const Options = session.Options;
 pub const Callbacks = session.Callbacks;
 pub const Size = session.Size;
 pub const Frame = session.Frame;
+pub const Key = @import("input.zig").Key;
+pub const Mods = @import("input.zig").Mods;
 
 test {
     _ = @import("model.zig");
@@ -17,4 +19,5 @@ test {
     _ = @import("session_test.zig");
     _ = @import("render.zig");
     _ = @import("render_test.zig");
+    _ = @import("input.zig");
 }
