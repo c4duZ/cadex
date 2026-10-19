@@ -8,6 +8,9 @@ public struct Settings: Equatable, Sendable {
         public var shell = ""
         public var confirmClose = true
         public var confirmMultilinePaste = true
+        /// Where files, diffs, the git history and web previews open:
+        /// "beside" the focused pane or in a new "tab" (docs/spec/tabs.md).
+        public var openFiles = "beside"
     }
 
     public struct Terminal: Equatable, Sendable {
@@ -62,4 +65,5 @@ public struct Settings: Equatable, Sendable {
     static let cursors = ["bar", "block", "underline"]
     static let modes = ["system", "dark", "light"]
     static let markdownOpenings = ["source", "rendered"]
+    static let fileOpenings = ["beside", "tab"]
 }

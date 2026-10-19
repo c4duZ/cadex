@@ -15,6 +15,7 @@ let exitCode = await Checks.run([
         settings.explorer.showHidden = false
         settings.explorer.followTerminal = false
         settings.markdown.openAs = "rendered"
+        settings.general.openFiles = "tab"
         settings.shortcuts = ["cmd+shift+t": "tab.new", "cmd+t": nil]
         let (read, problems) = SettingsFile.read(SettingsFile.write(settings))
         expect(problems.isEmpty, "\(problems)")
@@ -23,6 +24,11 @@ let exitCode = await Checks.run([
     ("a note opens as source unless the file says rendered; anything else is a problem", {
         let (read, problems) = SettingsFile.read(Data(#"{"markdown": {"openAs": "slides"}}"#.utf8))
         expect(read.markdown.openAs == "source" && problems.count == 1, "\(problems)")
+    }),
+    ("files open beside unless the file says tab; anything else is a problem", {
+        expect(SettingsFile.read(Data("{}".utf8)).0.general.openFiles == "beside")
+        let (read, problems) = SettingsFile.read(Data(#"{"general": {"openFiles": "janela"}}"#.utf8))
+        expect(read.general.openFiles == "beside" && problems.count == 1, "\(problems)")
     }),
     ("a broken file gives the defaults and says why", {
         let (read, problems) = SettingsFile.read(Data("{ quebrado".utf8))

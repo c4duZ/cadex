@@ -43,7 +43,10 @@
 - Arrastar linhas: para o terminal vira caminho escapado (o terminal já aceita arquivos), para o
   Finder copia, para uma pasta da árvore move. Arquivos de fora soltos na árvore ainda não entram.
 - "Mostrar ocultos" é explorer.showHidden no settings.json (padrão: mostrar, apagados); o app liga.
-- Abrir um arquivo chama `openFile` (o app manda para o editor); sem ele, o app padrão do sistema.
+- Abrir um arquivo chama `openFile` (o app abre ao lado ou em nova aba, pela configuração); sem ele,
+  o app padrão do sistema. explorer.open-beside e explorer.open-in-tab ("Abrir ao lado", "Abrir em
+  nova aba", no menu de contexto logo depois de "Abrir arquivo") chamam `openFileAs` com a escolha;
+  o explorer não conhece abas.
   `onFolderChange` repassa as pastas que mudaram no disco (o app avisa os editores abertos). Marca de ignorado pelo
   .gitignore entra na fase D. `gitMarks` (caminho -> letra, vindo do source control pelo app) pinta
   o nome com a cor do tipo de mudança e põe um ponto nas pastas que contêm alterados.

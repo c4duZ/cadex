@@ -269,5 +269,50 @@ let exitCode = await Checks.run([
         tabs.closeAll()
         gone.closeAll()
     }),
+    ("beside: a split to the right first, then the document pane is reused, never stacked", {
+        let tabs = makeTabs()
+        tabs.newTab(cwd: "/")
+        tabs.view.layoutSubtreeIfNeeded()
+        let a = FakeDocument("/r/a.md"), b = FakeDocument("/r/b.md")
+        tabs.open(a, beside: true)
+        expect(tabs.count == 1 && tabs.activePaneCount == 2 && tabs.activeDocument === a)
+        expect(tabs.activeTab?.tree == .split(.horizontal, .leaf(1), .leaf(2), ratio: 0.5), "\(tabs.activeTab!.tree)")
+        tabs.focusPane(step: 1)
+        tabs.open(b, beside: true)
+        expect(tabs.activePaneCount == 2 && tabs.activeDocument === b && a.closed, "\(tabs.activePaneCount)")
+        // Already open: its pane gets the focus, nothing else changes.
+        tabs.newTab(cwd: "/")
+        tabs.open(FakeDocument("/r/b.md"), beside: true)
+        expect(tabs.count == 2 && tabs.activeDocument === b && tabs.activePaneCount == 2)
+        tabs.closeAll()
+    }),
+    ("beside: an unsaved document is not replaced, and the asking one stays", {
+        let tabs = makeTabs()
+        tabs.newTab(cwd: "/")
+        tabs.view.layoutSubtreeIfNeeded()
+        let a = FakeDocument("/r/a.swift")
+        tabs.open(a, beside: true)
+        a.hasUnsavedChanges = true
+        let b = FakeDocument("/r/b.swift")
+        tabs.open(b, beside: true)
+        expect(tabs.activePaneCount == 3 && !a.closed && tabs.activeDocument === b)
+        // The history opening a diff: the diff goes beside it, not over it.
+        let c = FakeDocument("diff:work:/r/b.swift")
+        tabs.open(c, beside: true, keeping: b)
+        expect(!b.closed && tabs.activePaneCount == 4, "\(tabs.activePaneCount)")
+        a.hasUnsavedChanges = false
+        tabs.closeAll()
+    }),
+    ("beside with no room to split opens a new tab; the setting off opens a new tab", {
+        let tabs = makeTabs()
+        tabs.newTab(cwd: "/")
+        tabs.view.frame.size.width = 200
+        tabs.view.layoutSubtreeIfNeeded()
+        tabs.open(FakeDocument("/r/a.md"), beside: true)
+        expect(tabs.count == 2 && tabs.activePaneCount == 1, "\(tabs.count)")
+        tabs.open(FakeDocument("/r/b.md"), beside: false)
+        expect(tabs.count == 3)
+        tabs.closeAll()
+    }),
 ])
 exit(exitCode)

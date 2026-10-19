@@ -37,4 +37,4 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
 - [x] Mudar o tamanho da fonte redesenha os terminais abertos com as novas métricas.
 - [x] Um `settings.json` editado à mão com o app aberto vale na hora.
 - [x] Um `settings.json` quebrado não impede o app de abrir.
-- [ ] Sem `general.openFiles` no arquivo, arquivos abrem ao lado; "tab" abre em nova aba.
+- [x] Sem `general.openFiles` no arquivo, arquivos abrem ao lado; "tab" abre em nova aba.

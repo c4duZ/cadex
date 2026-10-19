@@ -11,6 +11,9 @@ extension ExplorerController {
         case "explorer.open", "explorer.trash", "explorer.copy-files", "explorer.reveal", "explorer.copy-path",
              "explorer.copy-relative-path":
             return selection.isEmpty ? "Nenhum arquivo selecionado" : nil
+        case "explorer.open-beside", "explorer.open-in-tab":
+            if openFileAs == nil { return "Nada onde abrir" }
+            return selection.contains { !$0.isFolder } ? nil : "Nenhum arquivo selecionado"
         case "explorer.rename":
             return selection.count == 1 ? nil : "Selecione um arquivo"
         case "explorer.paste-files":
@@ -22,15 +25,20 @@ extension ExplorerController {
         }
     }
 
-    /// Enter: folders open and close, files open in the system's app until
-    /// the viewers exist (plan 5). A link pointing outside does not open.
-    func openSelection() {
+    /// Enter: folders open and close, files open where the settings say
+    /// (openFile), or in the system's app without it. `beside` chooses on
+    /// the spot ("Abrir ao lado", "Abrir em nova aba"), folders untouched.
+    /// A link pointing outside does not open.
+    func openSelection(beside: Bool? = nil) {
         for node in selectedNodes {
             if node.isFolder {
+                guard beside == nil else { continue }
                 let row = item(of: node)
                 outline.isItemExpanded(row) ? outline.collapseItem(row) : outline.expandItem(row)
             } else if cadex_workspace_is_authorized(node.path) {
-                if let openFile { openFile(node.path) } else { NSWorkspace.shared.open(URL(fileURLWithPath: node.path)) }
+                if let beside, let openFileAs { openFileAs(node.path, beside) }
+                else if let openFile { openFile(node.path) }
+                else { NSWorkspace.shared.open(URL(fileURLWithPath: node.path)) }
             } else {
                 showMessage("Aponta para fora da pasta aberta")
             }

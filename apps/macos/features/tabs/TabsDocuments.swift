@@ -18,8 +18,45 @@ extension TabsController {
     /// Shows `document` in a new tab to the right of the active one, or
     /// goes to the pane that already shows the same identity.
     public func open(_ document: TabDocument) {
+        open(document, beside: false)
+    }
+
+    /// Shows `document` beside the focused pane, or in a new tab when
+    /// `beside` is false. Beside, in this order (docs/spec/tabs.md): the
+    /// pane that already shows it; the active tab's document pane with
+    /// nothing unsaved, which it replaces; a split to the right of the
+    /// focused pane; a new tab when there is no room. Opening file after
+    /// file never stacks splits. `keeping`: the document that asked (the
+    /// history opening a diff), never replaced by what it opens.
+    public func open(_ document: TabDocument, beside: Bool, keeping: TabDocument? = nil) {
         if reveal(identity: document.identity) { return }
-        addTab(.document(document))
+        guard beside, let tab = activeTab else { return addTab(.document(document)) }
+        if let pane = reusablePane(in: tab, keeping: keeping) {
+            replace(pane, in: tab, with: document)
+        } else if tab.canSplit(axis: .horizontal) {
+            split(tab, axis: .horizontal, with: .document(document))
+        } else {
+            addTab(.document(document))
+        }
+    }
+
+    /// A document pane whose content can go without asking: the focused
+    /// one first, then the first in reading order.
+    private func reusablePane(in tab: Tab, keeping: TabDocument?) -> Int? {
+        let clean = { (id: Int) in
+            tab.panes[id]?.document.map { !$0.hasUnsavedChanges && $0 !== keeping } ?? false
+        }
+        if clean(tab.focusedPane) { return tab.focusedPane }
+        return tab.tree.leaves.first(where: clean)
+    }
+
+    private func replace(_ pane: Int, in tab: Tab, with document: TabDocument) {
+        guard let old = tab.panes[pane] else { return }
+        tab.replace(pane: pane, with: .document(document))
+        wire(.document(document), pane: pane, in: tab)
+        end(old)
+        tab.focus(pane)
+        refreshBar()
     }
 
     /// Selects the tab and focuses the pane showing `identity`, if any.

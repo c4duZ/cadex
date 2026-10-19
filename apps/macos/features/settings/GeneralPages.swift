@@ -6,7 +6,7 @@ import AppKit
 enum GeneralPages {
     static func general(_ store: SettingsStore) -> NSView {
         let g = store.settings.general
-        return SettingsPage.make(title: "Geral", subtitle: "Shell, as perguntas antes de agir e como abrem as notas.", rows: [
+        return SettingsPage.make(title: "Geral", subtitle: "Shell, as perguntas antes de agir e onde abrem os arquivos e as notas.", rows: [
             SettingsPage.row("Shell", "Vazio usa o shell do sistema. Vale para terminais novos.",
                              control: SettingsPage.text(g.shell, placeholder: "/bin/zsh") { value in
                                  store.update { $0.general.shell = value.trimmingCharacters(in: .whitespaces) }
@@ -16,6 +16,10 @@ enum GeneralPages {
             SettingsPage.row("Perguntar antes de colar várias linhas", "Quando o programa não marca colagens e cada linha rodaria.",
                              control: SettingsPage.toggle(g.confirmMultilinePaste) { on in
                                  store.update { $0.general.confirmMultilinePaste = on }
+                             }),
+            SettingsPage.row("Abrir arquivos", "Ao lado do painel com foco, na mesma aba, ou numa aba nova. \"Abrir ao lado\" e \"Abrir em nova aba\" escolhem na hora.",
+                             control: SettingsPage.popup([("Ao lado", "beside"), ("Em nova aba", "tab")], selected: g.openFiles) { value in
+                                 store.update { $0.general.openFiles = value }
                              }),
             SettingsPage.row("A árvore segue o terminal", "Ao mudar de pasta no terminal, a árvore vai para o projeto dela (a raiz do repositório git, ou a própria pasta).",
                              control: SettingsPage.toggle(store.settings.explorer.followTerminal) { on in

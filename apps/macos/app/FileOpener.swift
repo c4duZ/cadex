@@ -3,13 +3,16 @@ import Editor
 import Explorer
 import GitHistory
 import MediaPreview
+import Preview
 import SourceControl
 import Tabs
 import Terminal
 import Themes
 
-/// Where a chosen file opens (explorer, ⌘P, ⌘⇧F): a media tab for images,
-/// video, audio, PDF and what Quick Look shows; an editor tab for the rest.
+/// Where a chosen file opens (explorer, ⌘P, ⌘⇧F): media for images,
+/// video, audio, PDF and what Quick Look shows; the editor for the rest.
+/// Files, diffs, the history and web previews open beside the focused
+/// pane or in a new tab, as general.openFiles says (docs/spec/tabs.md).
 @MainActor
 final class FileOpener {
     /// The shown space's tabs, where things open.
@@ -20,18 +23,24 @@ final class FileOpener {
     var onEditorOpened: ((EditorDocument) -> Void)?
     /// Runs a command by id, for tabs whose menus fire commands (history).
     var runCommand: ((String) -> Bool)?
+    /// The setting: beside (true) or in a new tab.
+    private let opensBeside: () -> Bool
 
-    init(tabs: @escaping () -> TabsController?, every: @escaping () -> [TabsController]) {
+    init(tabs: @escaping () -> TabsController?, every: @escaping () -> [TabsController],
+         opensBeside: @escaping () -> Bool) {
         currentTabs = tabs
         everyTabs = every
+        self.opensBeside = opensBeside
     }
 
-    /// Opens `path`, at a 1-based line when given.
-    func open(_ given: String, line: Int? = nil) {
+    /// Opens `path`, at a 1-based line when given; `beside` overrides the
+    /// setting ("Abrir ao lado", "Abrir em nova aba"). `from` is the
+    /// document asking (a diff opening its file), which stays in its pane.
+    func open(_ given: String, line: Int? = nil, beside: Bool? = nil, from source: TabDocument? = nil) {
         guard let tabs = currentTabs() else { return }
         let path = Self.canonical(given)
         let document = tabs.document(identity: path) ?? makeFile(path)
-        tabs.open(document)
+        tabs.open(document, beside: beside ?? opensBeside(), keeping: source)
         if let line, let editor = document as? EditorDocument {
             // After the tab is in the window, so the view has its size.
             DispatchQueue.main.async { editor.reveal(line: line) }
@@ -66,15 +75,15 @@ final class FileOpener {
 
     /// A file's git diff in a tab; the same diff again selects its tab and
     /// reads it again.
-    func openDiff(_ request: SourceControlController.DiffRequest) {
+    func openDiff(_ request: SourceControlController.DiffRequest, from source: TabDocument? = nil) {
         guard let tabs = currentTabs() else { return }
         if let existing = tabs.document(identity: DiffDocument.identity(for: request)) as? DiffDocument {
             existing.load()
             return tabs.open(existing)
         }
         let diff = DiffDocument(request: request)
-        diff.openFile = { [weak self] path in self?.open(path) }
-        tabs.open(diff)
+        diff.openFile = { [weak self, weak diff] path in self?.open(path, from: diff) }
+        tabs.open(diff, beside: opensBeside(), keeping: source)
     }
 
     /// The repository's history in a tab; again, its tab, read again.
@@ -84,14 +93,24 @@ final class FileOpener {
             existing.reload()
             return tabs.open(existing)
         }
-        tabs.open(makeHistory(root))
+        tabs.open(makeHistory(root), beside: opensBeside())
+    }
+
+    /// A web page (a local server, a URL); again, its pane, loaded again.
+    func openPreview(_ url: String) {
+        guard let tabs = currentTabs() else { return }
+        if let existing = tabs.document(identity: PreviewDocument.identity(for: url)) as? PreviewDocument {
+            existing.reload()
+            return tabs.open(existing)
+        }
+        tabs.open(PreviewDocument(url: url), beside: opensBeside())
     }
 
     private func makeHistory(_ root: String) -> HistoryDocument {
         let history = HistoryDocument(root: root)
         history.runCommand = { [weak self] id in self?.runCommand?(id) ?? false }
-        history.onOpenDiff = { [weak self] repo, sha, path, orig in
-            self?.openDiff(.init(repo: repo, path: path, orig: orig, staged: false, commit: sha))
+        history.onOpenDiff = { [weak self, weak history] repo, sha, path, orig in
+            self?.openDiff(.init(repo: repo, path: path, orig: orig, staged: false, commit: sha), from: history)
         }
         return history
     }

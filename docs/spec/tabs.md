@@ -89,8 +89,8 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
 - [x] Fechar o último painel da última aba fecha a janela.
 - [x] Árvore de painéis: dividir, fechar e reequilibrar dão o layout esperado.
 - [x] Abas escondidas não desenham.
-- [ ] Abrir ao lado segue as quatro regras: painel existente, troca, divisão, nova aba.
-- [ ] Abrir ao lado com o documento da aba não salvo divide em vez de trocar.
+- [x] Abrir ao lado segue as quatro regras: painel existente, troca, divisão, nova aba.
+- [x] Abrir ao lado com o documento da aba não salvo divide em vez de trocar.
 - [ ] Clicar num documento dá o foco a ele; ⌘], ⌘[ e ⌘⌥ + seta passam por documentos.
 - [ ] ⌘D num documento abre um terminal ao lado, na pasta do arquivo.
 - [ ] Fechar painel, aba ou janela com documento não salvo pergunta antes.

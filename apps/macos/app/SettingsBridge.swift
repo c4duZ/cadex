@@ -20,6 +20,10 @@ final class SettingsBridge {
     var onLooks: ((WindowBackdrop.Image?, Bool) -> Void)?
     private var lastShortcuts: [String: String?]?
 
+    /// general.openFiles: files open beside the focused pane unless it
+    /// says "tab". Read at each opening, so a change counts at once.
+    var opensBeside: Bool { store.settings.general.openFiles != "tab" }
+
     func start() {
         ThemeStore.shared.setFamilies(ThemeCatalog.builtIn)
         store.observe { [weak self] settings in self?.apply(settings) }

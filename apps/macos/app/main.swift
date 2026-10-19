@@ -48,11 +48,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let window = makeWindow()
         self.window = window
         let opener = FileOpener(tabs: { [weak self] in self?.tabs },
-                                every: { [weak self] in self?.spaces?.spaces.map(\.tabs) ?? [] })
+                                every: { [weak self] in self?.spaces?.spaces.map(\.tabs) ?? [] },
+                                opensBeside: { [weak self] in self?.settings.opensBeside ?? true })
         opener.onEditorOpened = { [weak self] document in self?.markdown?.attach(document) }
         opener.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
         self.opener = opener
         explorer?.openFile = { [weak opener] path in opener?.open(path) }
+        explorer?.openFileAs = { [weak opener] path, beside in opener?.open(path, beside: beside) }
         explorer?.onFolderChange = { [weak self, weak opener] folders in
             opener?.foldersChanged(folders)
             self?.git?.diskChanged(folders)
@@ -125,12 +127,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     /// A preview tab for `url` (empty: a blank one); the tab already showing
     /// that address is reloaded instead (docs/spec/preview.md).
     func openPreview(_ url: String) {
-        guard let tabs else { return }
-        if let existing = tabs.document(identity: PreviewDocument.identity(for: url)) as? PreviewDocument {
-            existing.reload()
-            return tabs.open(existing)
-        }
-        tabs.open(PreviewDocument(url: url))
+        opener?.openPreview(url)
     }
 
     /// ⌘P and ⌘⇧F over the workspace folder; the chosen file opens in a tab.

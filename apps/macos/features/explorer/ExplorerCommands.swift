@@ -8,6 +8,8 @@ public enum ExplorerCommands {
     private static let table: [(String, String, [String], String?)] = [
         ("explorer.focus", "Mostrar os arquivos", ["explorer", "árvore", "focus"], "cmd+shift+e"),
         ("explorer.open", "Abrir arquivo", ["open", "abrir"], nil),
+        ("explorer.open-beside", "Abrir ao lado", ["open beside", "split", "painel", "abrir"], nil),
+        ("explorer.open-in-tab", "Abrir em nova aba", ["open in tab", "aba", "abrir"], nil),
         ("explorer.new-file", "Novo arquivo", ["new file", "criar"], nil),
         ("explorer.new-folder", "Nova pasta", ["new folder", "criar", "diretório"], nil),
         ("explorer.rename", "Renomear", ["rename", "nome"], nil),
@@ -25,7 +27,7 @@ public enum ExplorerCommands {
 
     /// The context menu, in order; nil is a separator.
     static let contextMenu: [String?] = [
-        "explorer.open", nil, "explorer.new-file", "explorer.new-folder", nil, "explorer.rename",
+        "explorer.open", "explorer.open-beside", "explorer.open-in-tab", nil, "explorer.new-file", "explorer.new-folder", nil, "explorer.rename",
         "explorer.copy-files", "explorer.paste-files", "explorer.trash", nil, "explorer.copy-path",
         "explorer.copy-relative-path", "explorer.reveal", "explorer.open-in-terminal",
     ]
@@ -49,6 +51,8 @@ extension ExplorerController {
         switch id {
         case "explorer.focus": focus()
         case "explorer.open": openSelection()
+        case "explorer.open-beside": openSelection(beside: true)
+        case "explorer.open-in-tab": openSelection(beside: false)
         case "explorer.new-file": newFile()
         case "explorer.new-folder": newFolder()
         case "explorer.rename": beginRename()

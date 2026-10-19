@@ -49,6 +49,9 @@ public final class ExplorerController: NSObject {
     /// Opens a file chosen in the tree (Enter, double click). Without it the
     /// system's default app opens it.
     public var openFile: ((String) -> Void)?
+    /// Opens a file beside the focused pane (true) or in a new tab (false),
+    /// whatever the settings say (docs/spec/explorer.md).
+    public var openFileAs: ((String, Bool) -> Void)?
     /// Folders changed on disk (from the tree's watcher), for open files.
     public var onFolderChange: (([String]) -> Void)?
     /// Changed files from git: absolute path -> letter. Their folders get a
