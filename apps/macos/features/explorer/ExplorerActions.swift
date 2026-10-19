@@ -29,7 +29,7 @@ extension ExplorerController {
             if node.isFolder {
                 outline.isItemExpanded(node) ? outline.collapseItem(node) : outline.expandItem(node)
             } else if cadex_workspace_is_authorized(node.path) {
-                NSWorkspace.shared.open(URL(fileURLWithPath: node.path))
+                if let openFile { openFile(node.path) } else { NSWorkspace.shared.open(URL(fileURLWithPath: node.path)) }
             } else {
                 showMessage("Aponta para fora da pasta aberta")
             }

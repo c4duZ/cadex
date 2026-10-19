@@ -32,4 +32,21 @@ enum CloseConfirmation {
             }
         }
     }
+
+    /// Closing the window or quitting with documents not saved.
+    static func confirmUnsaved(count: Int, in window: NSWindow?,
+                               then close: @escaping @MainActor () -> Void, cancelled: @escaping @MainActor () -> Void) {
+        guard let window else {
+            close()
+            return
+        }
+        let alert = NSAlert()
+        alert.messageText = count == 1 ? "Fechar com 1 arquivo não salvo?" : "Fechar com \(count) arquivos não salvos?"
+        alert.informativeText = "As mudanças não salvas serão perdidas."
+        alert.addButton(withTitle: "Fechar sem salvar")
+        alert.addButton(withTitle: "Cancelar").keyEquivalent = "\u{1B}"
+        alert.beginSheetModal(for: window) { response in
+            MainActor.assumeIsolated { response == .alertFirstButtonReturn ? close() : cancelled() }
+        }
+    }
 }

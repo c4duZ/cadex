@@ -539,6 +539,16 @@ cadex_status cadex_explorer_copy(const char *path, const char *destination, uint
  * byte in the first 8 KB: CADEX_BINARY; a folder: CADEX_INVALID_ARGUMENT. */
 cadex_status cadex_explorer_read_text(const char *path, uint64_t max_size, uint8_t **out, size_t *out_len);
 
+/* At most max_size bytes (0: 10 MB) from the start, for a file too big to
+ * show whole; *truncated (optional) is true when there is more. */
+cadex_status cadex_explorer_read_text_head(const char *path, uint64_t max_size, uint8_t **out, size_t *out_len,
+                                           bool *truncated);
+
+/* Saves the bytes over the file, or creates it: written next to it and
+ * renamed over, keeping its permissions. A symbolic link keeps pointing
+ * to the replaced file. */
+cadex_status cadex_explorer_write_text(const char *path, const uint8_t *data, size_t len);
+
 /* -- Watching (FSEvents) -- */
 
 typedef struct cadex_explorer_watcher cadex_explorer_watcher;

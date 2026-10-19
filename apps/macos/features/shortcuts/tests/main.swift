@@ -52,7 +52,7 @@ let exitCode = await Checks.run([
             "cmd+shift+l": "terminal.clear",
             "cmd+l": NSNull(),
             "cmd+f": "edit.copy",
-            "ctrl+r": "terminal.find",
+            "ctrl+r": "edit.find",
             "cmd+j": "nao.existe",
         ], registry: registry)
         expect(keymap.command(for: KeyCombo("cmd+shift+l")!) == "terminal.clear")

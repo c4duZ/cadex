@@ -1,8 +1,9 @@
 # tabs
 
 ## Para que serve
-Ter vários terminais abertos na mesma janela: abas lado a lado na barra, e cada aba dividida em
-painéis. Hoje só abas de terminal; editor, preview e outras entram com as features delas.
+Ter vários terminais e arquivos abertos na mesma janela: abas lado a lado na barra; abas de
+terminal se dividem em painéis. Abas de documento (editor; mídia e preview com as features delas)
+mostram um arquivo e têm um ponto no título quando há mudança não salva.
 
 ## Comportamento
 

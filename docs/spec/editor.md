@@ -8,8 +8,8 @@ lê, confere e corrige uma linha (ADR 0006).
 ## Comportamento
 
 ### Abrir
-- Abrir um arquivo de texto (explorer, ⌘P, ⌘⇧F, ⌘+clique num caminho do terminal) abre uma aba de
-  editor com o nome do arquivo no título. Abrir de novo um arquivo já aberto vai para a aba dele.
+- Abrir um arquivo de texto (explorer, ⌘P, ⌘⇧F, `Cadex arquivo` na linha de comando) abre uma aba
+  de editor com o nome do arquivo no título. Abrir de novo um arquivo já aberto vai para a aba dele.
 - Abrir de um resultado do ⌘⇧F leva o cursor à linha do resultado, centralizada.
 - A linguagem vem da extensão (e de nomes como `Makefile`, `Dockerfile`). Linguagens com destaque no
   MVP: TypeScript, JavaScript, Python, Rust, Go, Swift, Zig, C, C++, Java, HTML, CSS, JSON, YAML,
@@ -23,7 +23,9 @@ lê, confere e corrige uma linha (ADR 0006).
 - Destaque de sintaxe com as cores do tema: palavra-chave, texto, número, comentário, função, tipo,
   constante, propriedade, operador, pontuação.
 - Setinha de dobrar ao lado de cada bloco que ocupa mais de uma linha (funções, classes, blocos,
-  objetos). Clicar dobra; o bloco dobrado vira uma linha com "…". Clicar de novo desdobra.
+  objetos). Clicar dobra: fica a primeira linha, com a setinha fechada, e as outras somem. Clicar de
+  novo desdobra. Comandos "Dobrar todos os blocos" e "Desdobrar todos os blocos". Editar o texto
+  desdobra tudo.
 - Linhas longas quebram na largura da aba (sem rolagem horizontal).
 
 ### Editar
@@ -58,8 +60,8 @@ lê, confere e corrige uma linha (ADR 0006).
 - [x] Destaque de um arquivo de exemplo de cada linguagem dá os tipos esperados nas posições certas.
 - [x] Uma edição reanalisa só o trecho alterado.
 - [x] Dobras aparecem em funções e blocos de várias linhas.
-- [ ] `core/features/terminal/render.zig` abre com destaque e dobras.
-- [ ] Editar e salvar grava no disco e tira o ponto do título.
-- [ ] Mudança no disco sem edição pendente recarrega a aba.
-- [ ] Arquivo de 100 MB abre sem travar.
-- [ ] Binário mostra o aviso em vez do conteúdo.
+- [x] `core/features/terminal/render.zig` abre com destaque e dobras.
+- [x] Editar e salvar grava no disco e tira o ponto do título.
+- [x] Mudança no disco sem edição pendente recarrega a aba.
+- [x] Arquivo de 100 MB abre sem travar.
+- [x] Binário mostra o aviso em vez do conteúdo.

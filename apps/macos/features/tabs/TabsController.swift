@@ -13,6 +13,8 @@ public final class TabsController {
     public var onActiveChange: (() -> Void)?
     private var list = TabList()
     private var tabs: [Int: Tab] = [:]
+    /// Tabs that show a document instead of terminals (TabDocument).
+    private var documents: [Int: TabDocument] = [:]
     private var nextId = 1
     private var nextPane = 1
     private weak var window: NSWindow?
@@ -35,6 +37,16 @@ public final class TabsController {
     public var activeTerminal: TerminalView? { list.active.flatMap { tabs[$0]?.focused } }
     var activeTab: Tab? { list.active.flatMap { tabs[$0] } }
     public var count: Int { list.order.count }
+    /// The document of the active tab, when it is not a terminal tab.
+    public var activeDocument: TabDocument? { list.active.flatMap { documents[$0] } }
+
+    /// The open document with this identity, if any.
+    public func document(identity: String) -> TabDocument? {
+        documents.values.first { $0.identity == identity }
+    }
+
+    /// Every open document, for passing on disk changes.
+    public var allDocuments: [TabDocument] { list.order.compactMap { documents[$0] } }
 
     // MARK: Opening and switching
 
@@ -51,10 +63,33 @@ public final class TabsController {
         showActive()
     }
 
+    /// Shows `document` in a new tab to the right of the active one, or
+    /// selects the tab that already shows the same identity.
+    public func open(_ document: TabDocument) {
+        if let id = documents.first(where: { $0.value.identity == document.identity })?.key {
+            select(id)
+            return
+        }
+        let id = nextId
+        nextId += 1
+        documents[id] = document
+        document.onChange = { [weak self] in self?.refreshBar() }
+        list.insert(id)
+        showActive()
+    }
+
+    /// The folder new terminals start in: the active terminal's, or the
+    /// active document's.
+    private var activeFolder: String? {
+        if let terminal = activeTerminal { return terminal.currentDirectory }
+        guard let path = activeDocument?.identity, path.hasPrefix("/") else { return nil }
+        return (path as NSString).deletingLastPathComponent
+    }
+
     /// A terminal in `cwd`, or in the active terminal's folder, or home
     /// when that folder is gone (docs/spec/tabs.md, casos de borda).
     private func makeTerminal(cwd: String?) -> TerminalView {
-        let folder = cwd ?? activeTerminal?.currentDirectory ?? home
+        let folder = cwd ?? activeFolder ?? home
         let start = FileManager.default.fileExists(atPath: folder) ? folder : home
         return TerminalView(frame: view.bounds, cwd: start)
     }
@@ -115,6 +150,12 @@ public final class TabsController {
     }
 
     private func showActive() {
+        if let document = activeDocument {
+            view.show(document.view)
+            document.focus()
+            refreshBar()
+            return
+        }
         guard let tab = activeTab else { return }
         view.show(tab.view)
         window?.makeFirstResponder(tab.focused)
@@ -148,7 +189,16 @@ public final class TabsController {
 
     private func refreshBar() {
         bar.items = list.order.compactMap { id in
-            tabs[id].map { TabBarView.Item(id: id, title: $0.title(home: home), active: id == list.active) }
+            if let document = documents[id] {
+                let title = document.hasUnsavedChanges ? "● " + document.title : document.title
+                return TabBarView.Item(id: id, title: title, active: id == list.active)
+            }
+            return tabs[id].map { TabBarView.Item(id: id, title: $0.title(home: home), active: id == list.active) }
+        }
+        if let document = activeDocument {
+            window?.title = document.title
+            onActiveChange?()
+            return
         }
         let program = activeTab?.focused.programTitle ?? ""
         window?.title = program.isEmpty ? (activeTab?.title(home: home) ?? "Cadex") : program
@@ -187,6 +237,10 @@ public final class TabsController {
     /// ⌘W: closes the focused pane; the last pane closes the tab, and the
     /// last tab the window (docs/spec/tabs.md, "Fechar").
     public func closeFocusedPane() {
+        if let id = list.active, documents[id] != nil {
+            closeTab(id)
+            return
+        }
         guard let tab = activeTab else { return }
         let pane = tab.focusedPane
         let running = tab.focused.hasForegroundProcess
@@ -208,6 +262,10 @@ public final class TabsController {
     }
 
     func closeTab(_ id: Int) {
+        if let document = documents[id] {
+            document.confirmClose(in: window) { [weak self] in self?.remove(id) }
+            return
+        }
         guard let tab = tabs[id] else { return }
         CloseConfirmation.confirm(running: tab.hasForegroundProcess, in: window, what: "a aba") { [weak self] in
             self?.remove(id)
@@ -216,9 +274,15 @@ public final class TabsController {
 
     /// Ends the tab's sessions and drops it; the last one closes the window.
     private func remove(_ id: Int) {
-        guard let tab = tabs.removeValue(forKey: id) else { return }
-        tab.terminals.forEach { $0.closeSession() }
-        tab.view.removeFromSuperview()
+        if let document = documents.removeValue(forKey: id) {
+            document.close()
+            document.view.removeFromSuperview()
+        } else if let tab = tabs.removeValue(forKey: id) {
+            tab.terminals.forEach { $0.closeSession() }
+            tab.view.removeFromSuperview()
+        } else {
+            return
+        }
         list.remove(id)
         if list.order.isEmpty {
             window?.close()
@@ -231,6 +295,11 @@ public final class TabsController {
     /// True when it can close now; otherwise `close` runs after confirming.
     public func shouldCloseAll(then close: @escaping @MainActor () -> Void,
                                cancelled: @escaping @MainActor () -> Void = {}) -> Bool {
+        let unsaved = documents.values.filter(\.hasUnsavedChanges).count
+        if unsaved > 0 {
+            CloseConfirmation.confirmUnsaved(count: unsaved, in: window, then: close, cancelled: cancelled)
+            return false
+        }
         let running = tabs.values.contains { $0.hasForegroundProcess }
         let asks = TerminalPreferences.current.confirmClose
         guard running, asks else { return true }

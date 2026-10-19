@@ -13,9 +13,6 @@ public enum TerminalCommands {
             .responder("terminal.clear", "Limpar o terminal", keywords: ["clear", "cls", "tela"],
                        category: .terminal, shortcut: "cmd+l",
                        selector: #selector(TerminalView.terminalClear(_:)), reason: noTerminal),
-            .responder("terminal.find", "Buscar no terminal", keywords: ["find", "procurar", "pesquisar"],
-                       category: .terminal, shortcut: "cmd+f",
-                       selector: #selector(TerminalView.terminalFind(_:)), reason: noTerminal),
             .responder("terminal.scroll-top", "Ir ao topo do histórico", keywords: ["scroll", "rolar", "início"],
                        category: .terminal, shortcut: "cmd+up",
                        selector: #selector(TerminalView.terminalScrollToTop(_:)), reason: noTerminal),
@@ -34,7 +31,8 @@ extension TerminalView {
         session?.write("\u{0C}")
     }
 
-    @objc public func terminalFind(_ sender: Any?) {
+    /// edit.find (⌘F) with the terminal focused.
+    @objc public func showFind(_ sender: Any?) {
         showFindBar()
     }
 

@@ -31,7 +31,8 @@
 - Arrastar linhas: para o terminal vira caminho escapado (o terminal já aceita arquivos), para o
   Finder copia, para uma pasta da árvore move. Arquivos de fora soltos na árvore ainda não entram.
 - "Mostrar ocultos" é explorer.showHidden no settings.json (padrão: mostrar, apagados); o app liga.
-- Arquivo abre no app padrão do sistema até os visualizadores do plano 5. Marca de ignorado pelo
+- Abrir um arquivo chama `openFile` (o app manda para o editor); sem ele, o app padrão do sistema.
+  `onFolderChange` repassa as pastas que mudaram no disco (o app avisa os editores abertos). Marca de ignorado pelo
   .gitignore entra na fase D; marca do git, no plano 6.
 - Spec: `docs/spec/explorer.md` e `docs/spec/workspace.md`. Status: plano 4, fases A e C prontas.
 

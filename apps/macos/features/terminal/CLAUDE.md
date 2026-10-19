@@ -32,7 +32,8 @@
   default "terminal.confirmMultilinePaste" desliga.
 - Links em `TerminalLinks.swift`: com ⌘ pressionado, o link sob o ponteiro é sublinhado; ⌘+clique
   abre a URL no navegador e mostra o arquivo no Finder (até os visualizadores, plano 5).
-- Busca: `TerminalFind.swift` liga o ⌘F ao núcleo; `TerminalFindBar.swift` é a barra no canto
+- Busca: `TerminalFind.swift` liga o ⌘F (comando edit.find da paleta, que chega pelo
+  `showFind(_:)` de quem tem o foco) ao núcleo; `TerminalFindBar.swift` é a barra no canto
   superior direito ("3 de 12", ↩ próxima, ⇧↩ anterior, Esc fecha).
 - Programas que pedem mouse recebem cliques, arrastos e a roda (`TerminalMouse.swift`); Shift
   força a seleção local. Foco, título da janela, sino (pisca a view, sem som) e cursor piscando em
@@ -46,7 +47,7 @@
   valem na hora, histórico e shell nos terminais novos.
 - Cores: `TerminalAppearance.swift` guarda as cores que todo terminal usa (quem aplica o tema
   preenche `current`); cada `TerminalView` passa ao núcleo e usa a cor de seleção do tema.
-- Comandos do terminal em `TerminalActions.swift` (terminal.clear, terminal.find,
+- Comandos do terminal em `TerminalActions.swift` (terminal.clear,
   terminal.scroll-top, terminal.scroll-bottom): ações da cadeia de responders que o `TerminalView`
   com foco responde, junto com copy:, paste: e selectAll: dos comandos de edição. O
   `performKeyEquivalent` só trata a edição estilo Mac (⌘← ⌘→ ⌘⌫ ⌘⌦), que é entrada para o shell.

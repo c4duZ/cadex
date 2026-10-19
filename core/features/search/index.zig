@@ -22,6 +22,10 @@ pub const Index = struct {
     files: std.StringArrayHashMapUnmanaged(void) = .empty,
     ready: std.atomic.Value(bool) = .init(false),
     stop: bool = false,
+    /// Read by the walk between folders: closing does not wait for a
+    /// workspace-sized read to finish (switching away from the home folder
+    /// took seconds, 2026-10-19).
+    cancelled: std.atomic.Value(bool) = .init(false),
     /// Folders the watcher reported, waiting for the index thread.
     pending: std.ArrayList(Pending) = .empty,
     thread: std.Thread = undefined,
@@ -47,6 +51,7 @@ pub const Index = struct {
     /// Stops the watcher and the thread, and frees everything.
     pub fn close(self: *Index) void {
         if (self.watcher) |w| w.stop();
+        self.cancelled.store(true, .release);
         _ = c.pthread_mutex_lock(&self.mutex);
         self.stop = true;
         _ = c.pthread_cond_signal(&self.wake);
@@ -80,7 +85,7 @@ pub const Index = struct {
     }
 
     fn run(self: *Index) void {
-        var walker = Walker.init(self.gpa, self.root, .{ .show_hidden = self.show_hidden }) catch return;
+        var walker = Walker.init(self.gpa, self.root, .{ .show_hidden = self.show_hidden, .cancel = &self.cancelled }) catch return;
         defer walker.deinit();
         self.rescan(&walker, "", true);
         self.ready.store(true, .release);
@@ -125,7 +130,10 @@ pub const Index = struct {
             }
         };
         var collect: Collect = .{ .list = &fresh, .a = a };
-        for (new_folders.items) |sub| _ = walker.walk(sub, &collect, Collect.visit) catch {};
+        for (new_folders.items) |sub| {
+            if (self.cancelled.load(.acquire)) return;
+            _ = walker.walk(sub, &collect, Collect.visit) catch {};
+        }
 
         self.lock();
         defer self.unlock();
@@ -193,6 +201,12 @@ const TestDir = @import("../../shared/test_dir.zig").TestDir;
 
 extern "c" fn usleep(microseconds: c_uint) c_int;
 
+fn nowMs() i64 {
+    var ts: c.timespec = undefined;
+    _ = c.clock_gettime(.MONOTONIC, &ts);
+    return @as(i64, ts.sec) * 1000 + @divTrunc(@as(i64, ts.nsec), 1_000_000);
+}
+
 fn waitFor(index: *Index, comptime check: fn (*Index) bool) !void {
     var attempts: u32 = 0;
     while (attempts < 250) : (attempts += 1) {
@@ -236,6 +250,18 @@ test "indexes the workspace and follows files created and removed" {
             return !i.files.contains("core/features/terminal/render.zig") and i.files.count() == 2;
         }
     }.f);
+}
+
+test "closing during the first read does not wait for it" {
+    var registry = workspace.Registry.init(testing.allocator);
+    defer registry.deinit();
+    // A big tree that takes far longer than the limit below to walk.
+    _ = try registry.authorize("/usr");
+    const index = try Index.open(testing.allocator, &registry, "/usr", true);
+    _ = usleep(20 * 1000);
+    const before = nowMs();
+    index.close();
+    try testing.expect(nowMs() - before < 500);
 }
 
 test "stale keys after reading a folder again" {

@@ -116,6 +116,7 @@ final class WorkspaceView: NSView {
             selection: term.selection.value, ansi: term.ansi.map(\.value),
             backgroundAlpha: picture == nil ? 1 : 1 - (backgroundImage?.opacity ?? 0))
         if TerminalAppearance.current != colors { TerminalAppearance.current = colors }
+        EditorLooks.refresh()
         let ui = theme.interface
         // The chrome color goes on the window, not on this view's layer: a
         // filled layer here covered the close, minimize and zoom buttons in

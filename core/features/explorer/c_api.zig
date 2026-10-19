@@ -127,6 +127,27 @@ pub export fn cadex_explorer_read_text(path: ?[*:0]const u8, max_size: u64, out:
     return c_buffer.handOut(bytes, out, out_len);
 }
 
+/// At most `max_size` bytes from the start (0: 10 MB); *truncated tells if
+/// the file is longer. CADEX_BINARY as above.
+pub export fn cadex_explorer_read_text_head(path: ?[*:0]const u8, max_size: u64, out: ?*?[*]u8, out_len: ?*usize, truncated: ?*bool) callconv(.c) status.Code {
+    c_buffer.clearOut(out, out_len);
+    const p = span(path) orelse return status.invalid_argument;
+    if (out == null) return status.invalid_argument;
+    const limit = if (max_size == 0) explorer.read.max_text_size else max_size;
+    const head = explorer.read.readHead(gpa, workspace.registry(), p, limit) catch |err| return status.fromError(err);
+    defer gpa.free(head.bytes);
+    if (truncated) |t| t.* = head.truncated;
+    return c_buffer.handOut(head.bytes, out, out_len);
+}
+
+/// Saves `len` bytes over the file (or creates it), atomically.
+pub export fn cadex_explorer_write_text(path: ?[*:0]const u8, data: ?[*]const u8, len: usize) callconv(.c) status.Code {
+    const p = span(path) orelse return status.invalid_argument;
+    const bytes: []const u8 = if (len == 0) "" else (data orelse return status.invalid_argument)[0..len];
+    explorer.write.writeText(workspace.registry(), p, bytes) catch |err| return status.fromError(err);
+    return status.ok;
+}
+
 const testing = std.testing;
 const TestDir = @import("../../shared/test_dir.zig").TestDir;
 

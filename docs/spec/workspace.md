@@ -9,7 +9,8 @@ só mexe em arquivos dentro das pastas que o usuário abriu.
   dentro dela.
 - O workspace é definido:
   - ao abrir o app com uma pasta: pela linha de comando (`Cadex /caminho`) ou arrastando a pasta no
-    ícone do Dock;
+    ícone do Dock; com um arquivo, ele abre numa aba e, se estiver fora do workspace, a pasta dele
+    vira o workspace;
   - pela paleta, com "Abrir pasta…", que mostra o seletor de pastas do sistema;
   - pela paleta, com "Usar a pasta do terminal", que pega a pasta atual do painel com foco.
 - Sem nenhuma dessas, o workspace é a pasta pessoal do usuário.

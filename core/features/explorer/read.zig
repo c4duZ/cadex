@@ -17,6 +17,19 @@ const sniff_size = 8 * 1024;
 /// The file's bytes, owned by the caller. TooLarge above `limit`; Binary
 /// when a NUL byte shows up in the first 8 KB.
 pub fn readText(gpa: std.mem.Allocator, registry: *workspace.Registry, path: []const u8, limit: u64) Error![]u8 {
+    const head = try read(gpa, registry, path, limit, false);
+    return head.bytes;
+}
+
+pub const Head = struct { bytes: []u8, truncated: bool };
+
+/// At most `limit` bytes from the start of the file, for showing a huge
+/// file without reading all of it (docs/spec/editor.md). Binary as above.
+pub fn readHead(gpa: std.mem.Allocator, registry: *workspace.Registry, path: []const u8, limit: u64) Error!Head {
+    return read(gpa, registry, path, limit, true);
+}
+
+fn read(gpa: std.mem.Allocator, registry: *workspace.Registry, path: []const u8, limit: u64, head: bool) Error!Head {
     var buf: paths.Buffer = undefined;
     var z_buf: paths.Buffer = undefined;
     const z = try paths.terminate(try registry.resolve(path, &buf), &z_buf);
@@ -27,15 +40,16 @@ pub fn readText(gpa: std.mem.Allocator, registry: *workspace.Registry, path: []c
     if (c.fstat(fd, &st) != 0) return errors.fromErrno();
     if (st.mode & c.S.IFMT == c.S.IFDIR) return error.IsDirectory;
     const size: u64 = @intCast(st.size);
-    if (size > limit) return error.TooLarge;
+    if (size > limit and !head) return error.TooLarge;
 
-    const bytes = try gpa.alloc(u8, @intCast(size));
+    const bytes = try gpa.alloc(u8, @intCast(@min(size, limit)));
     errdefer gpa.free(bytes);
     // The file may shrink while it is read: keep what was there.
     const got = try readAll(fd, bytes);
     if (std.mem.indexOfScalar(u8, bytes[0..@min(got, sniff_size)], 0) != null) return error.Binary;
-    if (got == bytes.len) return bytes;
-    return gpa.realloc(bytes, got);
+    const truncated = size > limit;
+    if (got == bytes.len) return .{ .bytes = bytes, .truncated = truncated };
+    return .{ .bytes = try gpa.realloc(bytes, got), .truncated = truncated };
 }
 
 fn readAll(fd: c.fd_t, out: []u8) Error!usize {
@@ -75,4 +89,8 @@ test "reads text and refuses binary, oversized and outside files" {
     try testing.expectError(error.TooLarge, readText(testing.allocator, &registry, try dir.join("hello.txt"), 2));
     try testing.expectError(error.IsDirectory, readText(testing.allocator, &registry, dir.path(), max_text_size));
     try testing.expectError(error.Outside, readText(testing.allocator, &registry, "/etc/hosts", max_text_size));
+    const head = try readHead(testing.allocator, &registry, try dir.join("hello.txt"), 2);
+    defer testing.allocator.free(head.bytes);
+    try testing.expectEqualStrings("ol", head.bytes);
+    try testing.expect(head.truncated);
 }

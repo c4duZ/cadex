@@ -1,5 +1,11 @@
 import AppKit
 
+/// A view that can show a find bar (the terminal, the editor): edit.find
+/// goes to whichever has focus.
+@objc public protocol FindTarget {
+    func showFind(_ sender: Any?)
+}
+
 /// Commands every Mac app has. Copy, paste and the rest go down the
 /// responder chain, so they act on the terminal or on a text field,
 /// whichever has focus.
@@ -21,6 +27,8 @@ public enum StandardCommands {
                        selector: #selector(NSText.copy(_:)), reason: "Nada para copiar aqui"),
             .responder("edit.paste", "Colar", keywords: ["paste"], category: .edit, shortcut: "cmd+v",
                        selector: #selector(NSText.paste(_:)), reason: "Nada aceita colagem aqui"),
+            .responder("edit.find", "Buscar", keywords: ["find", "procurar", "pesquisar"], category: .edit,
+                       shortcut: "cmd+f", selector: #selector(FindTarget.showFind(_:)), reason: "Nada para buscar aqui"),
             .responder("edit.select-all", "Selecionar tudo", keywords: ["select all"], category: .edit,
                        shortcut: "cmd+a", selector: #selector(NSText.selectAll(_:)), reason: "Nada para selecionar aqui"),
         ]

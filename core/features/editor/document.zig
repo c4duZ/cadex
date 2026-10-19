@@ -34,7 +34,9 @@ pub const Document = struct {
     pub fn open(gpa: std.mem.Allocator, file_name: []const u8, text: []const u8, encoding: Encoding) !*Document {
         const self = try gpa.create(Document);
         errdefer gpa.destroy(self);
-        const language = if (text.len > max_highlight_bytes) null else languages.forFileName(file_name);
+        // The limit is about the file (UTF-8 bytes); UTF-16 doubles ASCII.
+        const size = if (encoding == .utf16) text.len / 2 else text.len;
+        const language = if (size > max_highlight_bytes) null else languages.forFileName(file_name);
         self.* = .{ .gpa = gpa, .encoding = encoding, .language = language };
         errdefer self.text.deinit(gpa);
         try self.text.appendSlice(gpa, text);

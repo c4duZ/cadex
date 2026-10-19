@@ -42,6 +42,11 @@ public final class ExplorerController: NSObject {
     public var onShowHiddenChange: ((Bool) -> Void)?
     /// Takes the focused terminal to a folder (explorer.open-in-terminal).
     public var openInTerminal: ((String) -> Void)?
+    /// Opens a file chosen in the tree (Enter, double click). Without it the
+    /// system's default app opens it.
+    public var openFile: ((String) -> Void)?
+    /// Folders changed on disk (from the tree's watcher), for open files.
+    public var onFolderChange: (([String]) -> Void)?
     /// Makes the sidebar visible (explorer.focus with the sidebar hidden).
     public var revealSidebar: (() -> Void)?
     public var style = ExplorerStyle(text: .labelColor, secondaryText: .secondaryLabelColor, accent: .controlAccentColor) {
@@ -126,6 +131,7 @@ public final class ExplorerController: NSObject {
     /// A batch from the watcher: the loaded folders among the changed ones
     /// are read again. Others are read when opened.
     private func apply(_ changes: [FileWatcher.Change]) {
+        onFolderChange?(changes.map(\.path))
         var folders: [FileNode] = []
         for change in changes {
             guard let node = root.find(change.path), node.isLoaded else { continue }

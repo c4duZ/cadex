@@ -1,6 +1,7 @@
 import AppKit
 import StatusBar
 import CommandPalette
+import Editor
 import Explorer
 import Search
 import Settings
@@ -27,11 +28,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private let folder = WorkspaceFolder()
     private var explorer: ExplorerController?
     private var search: SearchController?
+    private var opener: FileOpener?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpCommands()
         let window = makeWindow()
         let tabs = TabsController(window: window)
+        let opener = FileOpener(tabs: tabs)
+        self.opener = opener
+        explorer?.openFile = { [weak opener] path in opener?.open(path) }
+        explorer?.onFolderChange = { [weak opener] folders in opener?.foldersChanged(folders) }
         let explorer = self.explorer!
         let workspace = WorkspaceView(tabs: tabs, explorer: explorer) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace
@@ -45,6 +51,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         workspace.setLooks(image: looks.backgroundImage.map { .init(path: $0, opacity: looks.backgroundOpacity, blur: looks.backgroundBlur) },
                            vibrancy: looks.vibrancy)
         tabs.newTab(cwd: folder.root)
+        openLaunchItems(Self.launchFiles)
         window.center()
         // CADEX_BACKGROUND=1 shows the window without taking the keyboard,
         // for checking the app while someone else uses the machine: opening
@@ -91,11 +98,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         self.explorer = explorer
     }
 
-    /// ⌘P and ⌘⇧F over the workspace folder, opening what is chosen in
-    /// the system's default app until the viewers exist (plan 5).
+    /// ⌘P and ⌘⇧F over the workspace folder; the chosen file opens in a tab.
     private func makeSearch(palette: CommandPaletteController) {
-        let search = SearchController(root: folder.root, showHidden: true) { path, _ in
-            NSWorkspace.shared.open(URL(fileURLWithPath: path))
+        let search = SearchController(root: folder.root, showHidden: true) { [weak self] path, line in
+            self?.opener?.open(path, line: line)
         }
         commands.register(SearchCommands.all(search, palette: palette))
         self.search = search
@@ -152,6 +158,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         commands.register(TabCommands.all { [weak self] in self?.tabs })
         makeExplorer()
         makeSearch(palette: palette)
+        commands.register(EditorCommands.all { [weak self] in self?.tabs?.activeDocument as? EditorDocument })
         connectFolder()
 
         settings.onShortcuts = { [weak self] shortcuts in self?.applyShortcuts(shortcuts) }
@@ -185,8 +192,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     /// (docs/spec/workspace.md). Needs the .app bundle's document types,
     /// which come with packaging (plan 7).
     func application(_ application: NSApplication, open urls: [URL]) {
-        guard let url = urls.first(where: \.hasDirectoryPath) ?? urls.first else { return }
-        folder.open(url.path)
+        openLaunchItems(urls.map(\.path))
+    }
+
+    /// Files (not folders: WorkspaceFolder takes those) named on the
+    /// command line, absolute.
+    private static var launchFiles: [String] {
+        let cwd = FileManager.default.currentDirectoryPath
+        return CommandLine.arguments.dropFirst().compactMap { arg in
+            guard !arg.hasPrefix("-") else { return nil }
+            let path = (arg as NSString).isAbsolutePath ? arg : cwd + "/" + arg
+            var isFolder: ObjCBool = false
+            return FileManager.default.fileExists(atPath: path, isDirectory: &isFolder) && !isFolder.boolValue ? path : nil
+        }
+    }
+
+    /// Folders and files given at launch (command line) or dropped on the
+    /// Dock icon: a folder becomes the workspace; a file opens in a tab,
+    /// its folder becoming the workspace when it is outside the current one.
+    private func openLaunchItems(_ paths: [String]) {
+        var isFolder: ObjCBool = false
+        let existing = paths.filter { FileManager.default.fileExists(atPath: $0, isDirectory: &isFolder) }
+        let folders = existing.filter { FileManager.default.fileExists(atPath: $0, isDirectory: &isFolder) && isFolder.boolValue }
+        if let first = folders.first { folder.open(first) }
+        for file in existing where !folders.contains(file) {
+            let real = (file as NSString).resolvingSymlinksInPath
+            if !real.hasPrefix(folder.root + "/") { folder.open((real as NSString).deletingLastPathComponent) }
+            opener?.open(real)
+        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

@@ -11,11 +11,26 @@
 - Recolorir o arquivo inteiro a cada tecla.
 
 ## Como eu quero
-- NSTextView (TextKit 2) com uma régua de números de linha e dobras.
-- Cores e dobras vêm da feature editor do núcleo; o app só pinta.
+- Porta de entrada: `EditorDocument.swift`, a aba de um arquivo (implementa o `TabDocument` das
+  abas): lê pelo núcleo (`EditorFile.swift`: até 10 MB, acima disso o começo só para leitura;
+  binário vira mensagem com "Abrir no app padrão"), salva pelo núcleo (gravação atômica, dentro do
+  workspace), segue o disco (`EditorDocument+Disk.swift`: recarrega sem edição pendente, pergunta
+  com edição), vai para uma linha, pergunta ao fechar com mudança.
+- Texto: `CodeTextView.swift` (NSTextView com TextKit 2; linha atual, Tab com a indentação do
+  arquivo, ⌘F pelo comando edit.find), `LineRuler.swift` (números e setinhas de dobra; lê só o
+  TextKit 2, porque tocar no layoutManager antigo volta o NSTextView ao TextKit 1),
+  `EditorFolding.swift` (dobra escondendo parágrafos pelo delegate do NSTextContentStorage, sem
+  mexer no texto; uma edição desdobra tudo), `LineIndex.swift` (inícios de linha em UTF-16).
+- Cores: `EditorSyntax.swift` fala com a feature editor do núcleo em UTF-16 (offsets viram NSRange
+  direto); `EditorHighlighter.swift` pinta no NSTextStorage só as linhas que o núcleo diz que
+  mudaram, depois de a edição terminar. `EditorAppearance.swift`: fonte e cores, que o app preenche
+  (a fonte do terminal e a paleta ANSI do tema).
+- Comandos em `EditorCommands.swift`: editor.save (⌘S), editor.fold-all, editor.unfold-all.
 - A inteligência de Markdown (autocomplete, ⌘+clique, links quebrados, quem aponta pra cá) vem da
   feature markdown, pela porta de entrada dela.
-- Spec de comportamento em docs/spec/editor.md, escrita antes do código. Status: não iniciada.
+- Spec: `docs/spec/editor.md`. Status: plano 5, fase B pronta (código). Markdown na fase C.
 
 ## Como validar
-- `make macos-test` passa.
+- `make macos-test` passa: índice de linhas, indentação, abrir Zig com cores e dobras, salvar,
+  recarregar do disco, binário.
+- No app sem tomar o teclado: `Cadex <arquivo>` abre o arquivo numa aba; os comandos estão nos menus.

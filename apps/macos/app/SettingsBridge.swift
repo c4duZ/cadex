@@ -29,6 +29,7 @@ final class SettingsBridge {
 
     private func apply(_ settings: Settings) {
         TerminalPreferences.current = Self.terminalPreferences(from: settings)
+        EditorLooks.refresh()
         ThemeStore.shared.select(id: settings.appearance.theme, mode: ThemeMode(rawValue: settings.appearance.mode) ?? .system)
         let a = settings.appearance
         onLooks?(a.backgroundImage.map { .init(path: $0, opacity: a.backgroundOpacity, blur: a.backgroundBlur) }, a.vibrancy)
