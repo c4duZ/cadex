@@ -83,6 +83,17 @@ public final class TerminalSession {
         _ = cadex_terminal_resize(handle, cols, rows, cellWidth, cellHeight)
     }
 
+    /// The current directory: what the shell reported (OSC 7), or the
+    /// directory of the program in the foreground. Nil if unknown.
+    public func workingDirectory() -> String? {
+        guard let handle else { return nil }
+        var bytes: UnsafeMutablePointer<UInt8>?
+        var length = 0
+        guard cadex_terminal_copy_working_directory(handle, &bytes, &length) == CADEX_OK, let bytes else { return nil }
+        defer { cadex_free(bytes) }
+        return String(decoding: UnsafeBufferPointer(start: bytes, count: length), as: UTF8.self)
+    }
+
     /// The title the program set, empty if none.
     public func title() -> String {
         guard let handle else { return "" }

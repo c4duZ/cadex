@@ -2,6 +2,7 @@ import AppKit
 import Checks
 @testable import CommandPalette
 @testable import Shortcuts
+import Tabs
 import Terminal
 
 // Tests of the shortcuts feature. Run with `make macos-test` (see
@@ -14,6 +15,7 @@ func appRegistry() -> CommandRegistry {
     registry.register(CommandPaletteController(registry: registry) { _ in nil }.openCommand)
     registry.register(StandardCommands.all)
     registry.register(TerminalCommands.all)
+    registry.register(TabCommands.all { nil })
     return registry
 }
 

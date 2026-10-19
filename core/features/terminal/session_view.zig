@@ -121,21 +121,36 @@ pub fn searchCounts(s: *Session) struct { total: usize, current: usize } {
 /// path in the text. Main thread only, like updateFrame: it refreshes the
 /// frame, so a frame pointer taken before is stale after this.
 pub fn linkAt(s: *Session, gpa: std.mem.Allocator, at: LinkPoint) !?Link {
-    var cwd_buf: [pty.directory_buffer_size]u8 = undefined;
-    var osc7_buf: [1024]u8 = undefined;
+    var places: DirectoryBuffers = undefined;
 
     s.lock();
     const captured = s.renderer.capture(s.gpa, &s.model.terminal, &s.model.search);
     const hyperlink = if (captured) |_| links.hyperlinkAt(gpa, &s.renderer.state, at) else |err| err;
-    const reported = if (s.model.workingDirectory()) |r| links.directoryFromOsc7(r, &osc7_buf) else null;
     s.unlock();
     try captured;
     _ = try s.renderer.build(s.gpa, &s.model.search);
     if (try hyperlink) |link| return link;
 
     const home = if (std.c.getenv("HOME")) |h| std.mem.span(h) else null;
-    const cwd = reported orelse pty.currentDirectory(s.child, &cwd_buf);
-    return links.detectAt(gpa, &s.renderer, at, .{ .cwd = cwd, .home = home });
+    return links.detectAt(gpa, &s.renderer, at, .{ .cwd = directory(s, &places), .home = home });
+}
+
+// ---- Current directory ----
+
+pub const DirectoryBuffers = struct {
+    osc7: [1024]u8,
+    process: [pty.directory_buffer_size]u8,
+};
+
+/// The session's current directory: what the shell reported with OSC 7
+/// (decoded from file://host/path), or else the directory of the program
+/// in the foreground, which works without shell integration. Points into
+/// `buffers`.
+pub fn directory(s: *Session, buffers: *DirectoryBuffers) ?[]const u8 {
+    s.lock();
+    const reported = if (s.model.workingDirectory()) |r| links.directoryFromOsc7(r, &buffers.osc7) else null;
+    s.unlock();
+    return reported orelse pty.currentDirectory(s.child, &buffers.process);
 }
 
 // ---- Mouse for programs, wheel and focus ----

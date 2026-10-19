@@ -27,6 +27,15 @@ public final class TerminalView: MTKView {
     /// Bell flash and cursor blink (TerminalSignals.swift).
     var signals = SignalState()
 
+    /// The shell exited. Whoever holds the view (a tab, a pane) closes it;
+    /// without a handler the window closes.
+    public var onShellExit: (() -> Void)?
+    /// New output arrived; tabs refresh the folder in their title.
+    public var onActivity: (() -> Void)?
+    /// The program set the title (OSC 0/2); without a handler it goes to
+    /// the window.
+    public var onProgramTitle: ((String) -> Void)?
+
     public init(frame: CGRect, cwd: String? = nil) {
         super.init(frame: frame, device: MTLCreateSystemDefaultDevice())
         colorPixelFormat = .bgra8Unorm
@@ -44,8 +53,12 @@ public final class TerminalView: MTKView {
         session?.onOutput = { [weak self] in
             self?.needsDisplay = true
             self?.refreshFindCounts()
+            self?.onActivity?()
         }
-        session?.onExit = { [weak self] _ in self?.window?.close() }
+        session?.onExit = { [weak self] _ in
+            guard let self else { return }
+            if let handler = self.onShellExit { handler() } else { self.window?.close() }
+        }
         connectSignals()
         registerForDraggedTypes([.fileURL])
         Self.cleanPastedImagesOnce()

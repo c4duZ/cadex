@@ -122,6 +122,23 @@ pub export fn cadex_terminal_copy_title(session: ?*Session, out: ?*?[*]u8, out_l
     return status.ok;
 }
 
+/// The session's current directory (OSC 7, or the foreground program's),
+/// not NUL-terminated. Free with cadex_free. Unknown: *out is NULL.
+pub export fn cadex_terminal_copy_working_directory(session: ?*Session, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const ptr = out orelse return status.invalid_argument;
+    const len = out_len orelse return status.invalid_argument;
+    ptr.* = null;
+    len.* = 0;
+    var buffers: terminal.view.DirectoryBuffers = undefined;
+    const dir = terminal.view.directory(s, &buffers) orelse return status.ok;
+    if (dir.len == 0) return status.ok;
+    const copy = gpa.dupe(u8, dir) catch return status.out_of_memory;
+    ptr.* = copy.ptr;
+    len.* = copy.len;
+    return status.ok;
+}
+
 /// Captures the screen into a flat frame for drawing. Call only from the
 /// thread that draws; the frame stays valid until the next call or close.
 pub export fn cadex_terminal_update_frame(session: ?*Session, out: ?*?*const terminal.Frame) callconv(.c) status.Code {

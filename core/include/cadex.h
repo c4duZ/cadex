@@ -114,6 +114,11 @@ bool cadex_terminal_has_foreground_process(cadex_terminal *terminal);
  * cadex_free. No title: *out is NULL and *out_len is 0. */
 cadex_status cadex_terminal_copy_title(cadex_terminal *terminal, uint8_t **out, size_t *out_len);
 
+/* The session's current directory: what the shell reported with OSC 7
+ * (file://host/path decoded), or else the directory of the program in the
+ * foreground. Not NUL-terminated; free with cadex_free. Unknown: *out NULL. */
+cadex_status cadex_terminal_copy_working_directory(cadex_terminal *terminal, uint8_t **out, size_t *out_len);
+
 /* -- Drawing (core/features/terminal/render.zig) -- */
 
 #define CADEX_CELL_BOLD           (1u << 0)

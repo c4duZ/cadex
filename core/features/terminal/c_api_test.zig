@@ -163,3 +163,26 @@ test "mouse, wheel and focus through the C API" {
     try testing.expectEqual(status.ok, api.cadex_terminal_copy_title(session, &ptr, &len));
     status.cadex_free(ptr);
 }
+
+test "the working directory follows the shell" {
+    testing.log_level = .err;
+    var session: ?*@import("session.zig").Session = null;
+    var o = options();
+    o.cwd = "/usr";
+    try testing.expectEqual(status.ok, api.cadex_terminal_open(&o, &session));
+    defer api.cadex_terminal_close(session);
+
+    const input = "cd /bin\n";
+    try testing.expectEqual(status.ok, api.cadex_terminal_write(session, input.ptr, input.len));
+    var found = false;
+    var attempts: u32 = 0;
+    while (!found and attempts < 250) : (attempts += 1) {
+        _ = usleep(20 * 1000);
+        var ptr: ?[*]u8 = null;
+        var len: usize = 0;
+        try testing.expectEqual(status.ok, api.cadex_terminal_copy_working_directory(session, &ptr, &len));
+        if (ptr) |p| found = std.mem.eql(u8, p[0..len], "/bin");
+        status.cadex_free(ptr);
+    }
+    try testing.expect(found);
+}

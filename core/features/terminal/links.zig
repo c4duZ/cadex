@@ -145,6 +145,7 @@ const testing = std.testing;
 test "OSC 7 reports decode to a directory" {
     var buf: [256]u8 = undefined;
     try testing.expectEqualStrings("/Users/cadu/Meus Projetos", directoryFromOsc7("file://mac.local/Users/cadu/Meus%20Projetos", &buf).?);
+    try testing.expectEqualStrings("/Users/x", directoryFromOsc7("file://localhost/Users/x", &buf).?);
     try testing.expect(directoryFromOsc7("http://x/y", &buf) == null);
 }
 

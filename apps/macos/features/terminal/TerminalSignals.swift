@@ -61,8 +61,15 @@ extension TerminalView {
 
     private func titleChanged() {
         let title = session?.title() ?? ""
-        window?.title = title.isEmpty ? "Cadex" : title
+        if let handler = onProgramTitle {
+            handler(title)
+        } else {
+            window?.title = title.isEmpty ? "Cadex" : title
+        }
     }
+
+    /// The title the program set (OSC 0/2), empty if none.
+    public var programTitle: String { session?.title() ?? "" }
 
     private func bellRang() {
         signals.flashUntil = Date().addingTimeInterval(Self.bellFlash)

@@ -15,8 +15,9 @@ core-test:
 
 macos-test: core
 	@cd apps/macos && swift build --product TerminalTests && swift build --product CommandPaletteTests \
-		&& swift build --product ShortcutsTests
-	@cd apps/macos && .build/debug/TerminalTests && .build/debug/CommandPaletteTests && .build/debug/ShortcutsTests
+		&& swift build --product ShortcutsTests && swift build --product TabsTests
+	@cd apps/macos && .build/debug/TerminalTests && .build/debug/CommandPaletteTests && .build/debug/ShortcutsTests \
+		&& .build/debug/TabsTests
 
 # Debug build of the app; `make run` opens it.
 app: core

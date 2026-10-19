@@ -1,9 +1,10 @@
 import AppKit
 import CommandPalette
 import Shortcuts
+import Tabs
 import Terminal
 
-/// Opens one window with a terminal. Tabs, spaces and the rest of the
+/// Opens one window with tabs of terminals. Spaces and the rest of the
 /// workspace come as their features are built (CLAUDE.md, atlas).
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
@@ -12,6 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var menu: CommandMenu?
     private var dispatcher: ShortcutDispatcher?
     private var palette: CommandPaletteController?
+    private var tabs: TabsController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpCommands()
@@ -26,10 +28,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // self.window dangling; applicationShouldTerminate then crashed
         // reading it (EXC_BAD_ACCESS, crash reports of 2026-10-19).
         window.isReleasedWhenClosed = false
-        window.contentView = TerminalView(frame: frame, cwd: NSHomeDirectory())
+        let tabs = TabsController(window: window)
+        window.contentView = tabs.view
+        self.tabs = tabs
+        tabs.newTab(cwd: NSHomeDirectory())
         window.center()
         window.makeKeyAndOrderFront(nil)
-        window.makeFirstResponder(window.contentView)
         self.window = window
         NSApp.activate(ignoringOtherApps: true)
     }
@@ -45,6 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         commands.register(palette.openCommand)
         commands.register(StandardCommands.all)
         commands.register(TerminalCommands.all)
+        commands.register(TabCommands.all { [weak self] in self?.tabs })
 
         var keymap = Keymap(registry: commands)
         keymap.applyPreferences(from: Keymap.preferencesFile, registry: commands)
@@ -64,16 +69,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         true
     }
 
-    /// The terminal asks before closing over a running program; close()
-    /// after the confirmation does not come back here.
+    /// The tabs ask before closing over a running program; close() after
+    /// the confirmation does not come back here.
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        guard let terminal = sender.contentView as? TerminalView else { return true }
-        return terminal.shouldClose(then: { sender.close() })
+        guard let tabs else { return true }
+        return tabs.shouldCloseAll(then: { sender.close() })
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard let terminal = window?.contentView as? TerminalView, window?.isVisible == true else { return .terminateNow }
-        let now = terminal.shouldClose(
+        guard let tabs, window?.isVisible == true else { return .terminateNow }
+        let now = tabs.shouldCloseAll(
             then: { NSApp.reply(toApplicationShouldTerminate: true) },
             cancelled: { NSApp.reply(toApplicationShouldTerminate: false) })
         return now ? .terminateNow : .terminateLater
