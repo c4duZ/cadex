@@ -30,10 +30,13 @@ test "watching through the C API refuses outside and stops cleanly" {
     const Noop = struct {
         fn onChange(_: ?*anyopaque, _: [*]const watch.Change, _: usize) callconv(.c) void {}
     };
+    var dir = try @import("../../shared/test_dir.zig").TestDir.init();
+    defer dir.deinit();
+    try dir.makeDir("watched");
     var watcher: ?*Watcher = null;
-    try std.testing.expectEqual(status.not_authorized, cadex_explorer_watch("/System", null, Noop.onChange, &watcher));
+    try std.testing.expectEqual(status.not_authorized, cadex_explorer_watch(try dir.join("watched"), null, Noop.onChange, &watcher));
     try std.testing.expect(watcher == null);
-    _ = try workspace.registry().authorize("/usr/share");
-    try std.testing.expectEqual(status.ok, cadex_explorer_watch("/usr/share", null, Noop.onChange, &watcher));
+    _ = try workspace.registry().authorize(try dir.join("watched"));
+    try std.testing.expectEqual(status.ok, cadex_explorer_watch(try dir.join("watched"), null, Noop.onChange, &watcher));
     cadex_explorer_watch_stop(watcher);
 }

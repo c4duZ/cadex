@@ -219,3 +219,36 @@ pub extern "kernel32" fn ClosePseudoConsole(console: HPCON) callconv(.winapi) vo
 pub extern "kernel32" fn QueryInformationJobObject(job: HANDLE, class: c_int, info: *anyopaque, len: DWORD, returned: ?*DWORD) callconv(.winapi) BOOL;
 pub extern "kernel32" fn SearchPathW(path: ?LPCWSTR, name: LPCWSTR, extension: ?LPCWSTR, len: DWORD, buffer: [*]WCHAR, file_part: ?*?[*]WCHAR) callconv(.winapi) DWORD;
 pub extern "kernel32" fn GetEnvironmentVariableW(name: LPCWSTR, buffer: [*]WCHAR, len: DWORD) callconv(.winapi) DWORD;
+
+// Watching folders (features/explorer/watch_windows.zig).
+
+pub const OVERLAPPED = extern struct {
+    Internal: usize = 0,
+    InternalHigh: usize = 0,
+    Offset: DWORD = 0,
+    OffsetHigh: DWORD = 0,
+    hEvent: ?HANDLE = null,
+};
+
+/// The fixed part of one record; the name (UTF-16, relative to the
+/// watched folder) follows it.
+pub const FILE_NOTIFY_INFORMATION = extern struct {
+    NextEntryOffset: DWORD,
+    Action: DWORD,
+    FileNameLength: DWORD,
+};
+
+pub const FILE_LIST_DIRECTORY: DWORD = 0x1;
+pub const FILE_FLAG_OVERLAPPED: DWORD = 0x40000000;
+pub const FILE_NOTIFY_CHANGE_FILE_NAME: DWORD = 0x1;
+pub const FILE_NOTIFY_CHANGE_DIR_NAME: DWORD = 0x2;
+pub const FILE_NOTIFY_CHANGE_SIZE: DWORD = 0x8;
+pub const FILE_NOTIFY_CHANGE_LAST_WRITE: DWORD = 0x10;
+pub const ERROR_OPERATION_ABORTED: DWORD = 995;
+
+pub extern "kernel32" fn CreateEventW(security: ?*anyopaque, manual_reset: BOOL, initial: BOOL, name: ?LPCWSTR) callconv(.winapi) ?HANDLE;
+pub extern "kernel32" fn SetEvent(event: HANDLE) callconv(.winapi) BOOL;
+pub extern "kernel32" fn WaitForMultipleObjects(count: DWORD, handles: [*]const HANDLE, wait_all: BOOL, ms: DWORD) callconv(.winapi) DWORD;
+pub extern "kernel32" fn ReadDirectoryChangesW(dir: HANDLE, buffer: *anyopaque, len: DWORD, subtree: BOOL, filter: DWORD, returned: ?*DWORD, overlapped: ?*OVERLAPPED, completion: ?*anyopaque) callconv(.winapi) BOOL;
+pub extern "kernel32" fn GetOverlappedResult(file: HANDLE, overlapped: *OVERLAPPED, transferred: *DWORD, wait: BOOL) callconv(.winapi) BOOL;
+pub extern "kernel32" fn CancelIoEx(file: HANDLE, overlapped: ?*OVERLAPPED) callconv(.winapi) BOOL;

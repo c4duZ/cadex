@@ -2,7 +2,7 @@
 
 ## O que eu quero
 - Listar, ler, escrever, criar, renomear, mover, copiar e apagar arquivos e pastas.
-- Avisar o app quando algo muda no disco (FSEvents no macOS).
+- Avisar o app quando algo muda no disco (FSEvents no macOS, ReadDirectoryChangesW no Windows).
 - Detectar arquivo binário ou grande demais antes de entregar o conteúdo.
 
 ## O que eu não quero
@@ -18,8 +18,9 @@
   de `natural.zig`, `.git` fora); `operations.zig` cria, renomeia (nome ocupado é recusado sem corrida:
   renamex_np com RENAME_EXCL no Mac, MoveFileExW sem substituir no Windows), move e copia (recursivo;
   copyfile com clone no APFS, nome "x cópia.ext"); `read.zig` lê texto com limite (10 MB) e recusa binário (byte nulo nos primeiros
-  8 KB, como o git); `watch.zig` observa com FSEvents numa fila própria, uma chamada por lote com
-  cada pasta uma vez, e nenhuma chamada depois de stop(); `errors.zig` junta os erros do workspace, os do sistema de arquivos e os próprios.
+  8 KB, como o git); `watch.zig` observa (interface; `watch_macos.zig` com FSEvents numa fila própria,
+  `watch_windows.zig` com ReadDirectoryChangesW numa thread, juntando a janela de latência), uma
+  chamada por lote com cada pasta uma vez, e nenhuma chamada depois de stop(); `errors.zig` junta os erros do workspace, os do sistema de arquivos e os próprios.
 - Todo acesso ao disco passa por `core/shared/fs.zig` (libc no Mac, Win32 no Windows); nada de
   libc direto aqui, para a feature valer nas duas plataformas.
 - Apagar não mora aqui: vai para a Lixeira do sistema pelo app (FileManager.trashItem).
@@ -32,4 +33,4 @@
 ## Como validar
 - `make core-test` (ou `zig build test` dentro de `core/`) passa, sem vazamento no alocador de teste.
 - Teste que tenta escrever fora do workspace e recebe recusa; os testes usam pastas temporárias de
-  `core/shared/test_dir.zig`. O teste de `watch.zig` usa FSEvents de verdade (leva ~0,3 s).
+  `core/shared/test_dir.zig`. O teste de `watch.zig` observa o disco de verdade (leva ~0,3 s).
