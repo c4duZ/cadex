@@ -1,0 +1,646 @@
+{
+  "themes": [
+    {
+      "id": "kanagawa",
+      "name": "Kanagawa",
+      "description": "Dark theme inspired by the colors of Katsushika Hokusai's The Great Wave off Kanagawa (Wave variant).",
+      "variants": {
+        "dark": {
+          "background": "#1F1F28",
+          "foreground": "#DCD7BA",
+          "cursor": "#C8C093",
+          "selection": "#2D4F67",
+          "ansi": [
+            "#16161D",
+            "#C34043",
+            "#76946A",
+            "#C0A36E",
+            "#7E9CD8",
+            "#957FB8",
+            "#6A9589",
+            "#C8C093",
+            "#727169",
+            "#E82424",
+            "#98BB6C",
+            "#E6C384",
+            "#7FB4CA",
+            "#938AA9",
+            "#7AA89F",
+            "#DCD7BA"
+          ],
+          "ui": {
+            "surface": "#16161D",
+            "border": "#54546D",
+            "muted": "#727169",
+            "accent": "#7E9CD8"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 Tommaso Laurenzi",
+      "sources": [
+        "https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/extras/kitty/kanagawa.conf",
+        "https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/lua/kanagawa/colors.lua",
+        "https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/lua/kanagawa/themes.lua",
+        "https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/LICENSE"
+      ],
+      "notes": "Terminal values from extras/kitty/kanagawa.conf. UI: surface=float.bg (sumiInk0), border=float.fg_border (sumiInk6), muted=syn.comment (fujiGray), accent=syn.fun (crystalBlue), from themes.lua wave."
+    },
+    {
+      "id": "kanagawa-dragon",
+      "name": "Kanagawa Dragon",
+      "description": "Darker, earthier, low-saturation variant of Kanagawa.",
+      "variants": {
+        "dark": {
+          "background": "#181616",
+          "foreground": "#c5c9c5",
+          "cursor": "#C8C093",
+          "selection": "#2D4F67",
+          "ansi": [
+            "#0d0c0c",
+            "#c4746e",
+            "#8a9a7b",
+            "#c4b28a",
+            "#8ba4b0",
+            "#a292a3",
+            "#8ea4a2",
+            "#C8C093",
+            "#a6a69c",
+            "#E46876",
+            "#87a987",
+            "#E6C384",
+            "#7FB4CA",
+            "#938AA9",
+            "#7AA89F",
+            "#c5c9c5"
+          ],
+          "ui": {
+            "surface": "#0d0c0c",
+            "border": "#54546D",
+            "muted": "#737c73",
+            "accent": "#8ba4b0"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 Tommaso Laurenzi",
+      "sources": [
+        "https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/extras/kitty/kanagawa_dragon.conf",
+        "https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/lua/kanagawa/colors.lua",
+        "https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/lua/kanagawa/themes.lua",
+        "https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/LICENSE"
+      ],
+      "notes": "Terminal values from extras/kitty/kanagawa_dragon.conf. UI: surface=float.bg (dragonBlack0), border=float.fg_border (sumiInk6), muted=syn.comment (dragonAsh), accent=syn.fun (dragonBlue2), from themes.lua dragon."
+    },
+    {
+      "id": "tokyonight",
+      "name": "Tokyo Night",
+      "description": "Clean dark theme celebrating the lights of downtown Tokyo at night, with a light Day variant.",
+      "variants": {
+        "dark": {
+          "background": "#1a1b26",
+          "foreground": "#c0caf5",
+          "cursor": "#c0caf5",
+          "selection": "#283457",
+          "ansi": [
+            "#15161e",
+            "#f7768e",
+            "#9ece6a",
+            "#e0af68",
+            "#7aa2f7",
+            "#bb9af7",
+            "#7dcfff",
+            "#a9b1d6",
+            "#414868",
+            "#ff899d",
+            "#9fe044",
+            "#faba4a",
+            "#8db0ff",
+            "#c7a9ff",
+            "#a4daff",
+            "#c0caf5"
+          ],
+          "ui": {
+            "surface": "#16161e",
+            "border": "#3b4261",
+            "muted": "#565f89",
+            "accent": "#7aa2f7"
+          }
+        },
+        "light": {
+          "background": "#e1e2e7",
+          "foreground": "#3760bf",
+          "cursor": "#3760bf",
+          "selection": "#b7c1e3",
+          "ansi": [
+            "#b4b5b9",
+            "#f52a65",
+            "#587539",
+            "#8c6c3e",
+            "#2e7de9",
+            "#9854f1",
+            "#007197",
+            "#6172b0",
+            "#a1a6c5",
+            "#ff4774",
+            "#5c8524",
+            "#a27629",
+            "#358aff",
+            "#a463ff",
+            "#007ea8",
+            "#3760bf"
+          ],
+          "ui": {
+            "surface": "#d0d5e3",
+            "border": "#a8aecb",
+            "muted": "#848cb5",
+            "accent": "#2e7de9"
+          }
+        }
+      },
+      "license": "Apache-2.0",
+      "copyright": "No copyright line: the repository LICENSE is the unmodified Apache-2.0 text with the template line 'Copyright [yyyy] [name of copyright owner]'. Author: Folke Lemaitre.",
+      "sources": [
+        "https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/extras/kitty/tokyonight_night.conf",
+        "https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/extras/kitty/tokyonight_day.conf",
+        "https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/extras/lua/tokyonight_night.lua",
+        "https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/extras/lua/tokyonight_day.lua",
+        "https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/LICENSE"
+      ],
+      "notes": "Variants: dark=night, light=day. Repo LICENSE is Apache-2.0, but the generated kitty extras headers say '## license: MIT' - treat as Apache-2.0 to be safe. UI: surface=bg_dark, border=fg_gutter (the palette's 'border' key equals black #15161e/#b4b5b9, nearly invisible), muted=comment, accent=blue, from extras/lua."
+    },
+    {
+      "id": "catppuccin",
+      "name": "Catppuccin",
+      "description": "Soothing pastel theme: Mocha (dark) and Latte (light) flavors.",
+      "variants": {
+        "dark": {
+          "background": "#1e1e2e",
+          "foreground": "#cdd6f4",
+          "cursor": "#f5e0dc",
+          "selection": "#f5e0dc",
+          "ansi": [
+            "#45475a",
+            "#f38ba8",
+            "#a6e3a1",
+            "#f9e2af",
+            "#89b4fa",
+            "#f5c2e7",
+            "#94e2d5",
+            "#bac2de",
+            "#585b70",
+            "#f38ba8",
+            "#a6e3a1",
+            "#f9e2af",
+            "#89b4fa",
+            "#f5c2e7",
+            "#94e2d5",
+            "#a6adc8"
+          ],
+          "ui": {
+            "surface": "#181825",
+            "border": "#313244",
+            "muted": "#7f849c",
+            "accent": "#cba6f7"
+          }
+        },
+        "light": {
+          "background": "#eff1f5",
+          "foreground": "#4c4f69",
+          "cursor": "#dc8a78",
+          "selection": "#dc8a78",
+          "ansi": [
+            "#5c5f77",
+            "#d20f39",
+            "#40a02b",
+            "#df8e1d",
+            "#1e66f5",
+            "#ea76cb",
+            "#179299",
+            "#acb0be",
+            "#6c6f85",
+            "#d20f39",
+            "#40a02b",
+            "#df8e1d",
+            "#1e66f5",
+            "#ea76cb",
+            "#179299",
+            "#bcc0cc"
+          ],
+          "ui": {
+            "surface": "#e6e9ef",
+            "border": "#ccd0da",
+            "muted": "#8c8fa1",
+            "accent": "#8839ef"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 Catppuccin",
+      "sources": [
+        "https://raw.githubusercontent.com/catppuccin/kitty/43098316202b84d6a71f71aaf8360f102f4d3f1a/themes/mocha.conf",
+        "https://raw.githubusercontent.com/catppuccin/kitty/43098316202b84d6a71f71aaf8360f102f4d3f1a/themes/latte.conf",
+        "https://raw.githubusercontent.com/catppuccin/kitty/43098316202b84d6a71f71aaf8360f102f4d3f1a/LICENSE",
+        "https://raw.githubusercontent.com/catppuccin/palette/07d02aa110ef9eb7e7427afca5c73ba9cf7f8ebd/palette.json"
+      ],
+      "notes": "Kitty selection_background is rosewater with selection_foreground=base (inverted look); if a translucent-style selection is preferred, surface2 (#585b70 / #acb0be) is a palette alternative, not what the kitty port uses. UI: surface=mantle, border=surface0, muted=overlay1, accent=mauve, from palette.json. catppuccin/palette LICENSE also MIT (not separately checked for copyright line)."
+    },
+    {
+      "id": "rose-pine",
+      "name": "Rosé Pine",
+      "description": "All natural pine, faux fur and a bit of soho vibes: Main (dark) and Dawn (light).",
+      "variants": {
+        "dark": {
+          "background": "#191724",
+          "foreground": "#e0def4",
+          "cursor": "#524f67",
+          "selection": "#403d52",
+          "ansi": [
+            "#26233a",
+            "#eb6f92",
+            "#31748f",
+            "#f6c177",
+            "#9ccfd8",
+            "#c4a7e7",
+            "#ebbcba",
+            "#e0def4",
+            "#6e6a86",
+            "#eb6f92",
+            "#31748f",
+            "#f6c177",
+            "#9ccfd8",
+            "#c4a7e7",
+            "#ebbcba",
+            "#e0def4"
+          ],
+          "ui": {
+            "surface": "#1f1d2e",
+            "border": "#403d52",
+            "muted": "#6e6a86",
+            "accent": "#c4a7e7"
+          }
+        },
+        "light": {
+          "background": "#faf4ed",
+          "foreground": "#575279",
+          "cursor": "#cecacd",
+          "selection": "#dfdad9",
+          "ansi": [
+            "#f2e9e1",
+            "#b4637a",
+            "#286983",
+            "#ea9d34",
+            "#56949f",
+            "#907aa9",
+            "#d7827e",
+            "#575279",
+            "#9893a5",
+            "#b4637a",
+            "#286983",
+            "#ea9d34",
+            "#56949f",
+            "#907aa9",
+            "#d7827e",
+            "#575279"
+          ],
+          "ui": {
+            "surface": "#fffaf3",
+            "border": "#dfdad9",
+            "muted": "#9893a5",
+            "accent": "#907aa9"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) Rosé Pine",
+      "sources": [
+        "https://raw.githubusercontent.com/rose-pine/kitty/efd4f01cb9887feaa7114ff21a887464295d0205/dist/rose-pine.conf",
+        "https://raw.githubusercontent.com/rose-pine/kitty/efd4f01cb9887feaa7114ff21a887464295d0205/dist/rose-pine-dawn.conf",
+        "https://raw.githubusercontent.com/rose-pine/kitty/efd4f01cb9887feaa7114ff21a887464295d0205/LICENSE",
+        "https://raw.githubusercontent.com/rose-pine/rose-pine-palette/92af52b465ab6e47437aca223c9b8d3009a2023b/dist/css/rose-pine-class.css"
+      ],
+      "notes": "Kitty cursor is highlight-high (#524f67 / #cecacd) with cursor_text_color=text. UI from rose-pine-palette: surface=surface, border=highlight-med, muted=muted, accent=iris (choice of accent is ours; the kitty port uses pine for the active border). rose-pine-palette LICENSE says 'Copyright (c) mvllow'."
+    },
+    {
+      "id": "everforest",
+      "name": "Everforest",
+      "description": "Green-based, warm, soft-contrast theme designed to be easy on the eyes (medium contrast).",
+      "variants": {
+        "dark": {
+          "background": "#2d353b",
+          "foreground": "#d3c6aa",
+          "cursor": "#d3c6aa",
+          "selection": "#543a48",
+          "ansi": [
+            "#475258",
+            "#e67e80",
+            "#a7c080",
+            "#dbbc7f",
+            "#7fbbb3",
+            "#d699b6",
+            "#83c092",
+            "#d3c6aa",
+            "#475258",
+            "#e67e80",
+            "#a7c080",
+            "#dbbc7f",
+            "#7fbbb3",
+            "#d699b6",
+            "#83c092",
+            "#d3c6aa"
+          ],
+          "ui": {
+            "surface": "#343f44",
+            "border": "#4f585e",
+            "muted": "#859289",
+            "accent": "#a7c080"
+          }
+        },
+        "light": {
+          "background": "#fdf6e3",
+          "foreground": "#5c6a72",
+          "cursor": "#5c6a72",
+          "selection": "#eaedc8",
+          "ansi": [
+            "#5c6a72",
+            "#f85552",
+            "#8da101",
+            "#dfa000",
+            "#3a94c5",
+            "#df69ba",
+            "#35a77c",
+            "#e6e2cc",
+            "#5c6a72",
+            "#f85552",
+            "#8da101",
+            "#dfa000",
+            "#3a94c5",
+            "#df69ba",
+            "#35a77c",
+            "#e6e2cc"
+          ],
+          "ui": {
+            "surface": "#f4f0d9",
+            "border": "#e0dcc7",
+            "muted": "#939f91",
+            "accent": "#8da101"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2019 sainnhe",
+      "sources": [
+        "https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/autoload/everforest.vim",
+        "https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/colors/everforest.vim",
+        "https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/palette.md",
+        "https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/LICENSE"
+      ],
+      "notes": "sainnhe/everforest ships no kitty/alacritty file; ANSI values come from the Vim scheme's own terminal mapping (colors/everforest.vim 'Terminal' section: black=bg3 (dark) / fg (light), white=fg (dark) / bg3 (light), bright = normal) with the medium palette in autoload/everforest.vim. Selection=bg_visual. Cursor is NOT defined by the theme (Cursor uses 'reverse' / terminal default) - cursor=foreground is our derivation. UI: surface=bg1, border=bg4 (VertSplit fg), muted=grey1, accent=green."
+    },
+    {
+      "id": "nord",
+      "name": "Nord",
+      "description": "Arctic, north-bluish clean and elegant palette.",
+      "variants": {
+        "dark": {
+          "background": "#2e3440",
+          "foreground": "#d8dee9",
+          "cursor": "#d8dee9",
+          "selection": "#4c566a",
+          "ansi": [
+            "#3b4252",
+            "#bf616a",
+            "#a3be8c",
+            "#ebcb8b",
+            "#81a1c1",
+            "#b48ead",
+            "#88c0d0",
+            "#e5e9f0",
+            "#4c566a",
+            "#bf616a",
+            "#a3be8c",
+            "#ebcb8b",
+            "#81a1c1",
+            "#b48ead",
+            "#8fbcbb",
+            "#eceff4"
+          ],
+          "ui": {
+            "surface": "#3b4252",
+            "border": "#434c5e",
+            "muted": "#4c566a",
+            "accent": "#88c0d0"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2016-present Sven Greb <development@svengreb.de> (https://www.svengreb.de)",
+      "sources": [
+        "https://raw.githubusercontent.com/nordtheme/alacritty/9949642f3903e8fcb62bfc03f09410e3d78440c2/src/nord.yaml",
+        "https://raw.githubusercontent.com/nordtheme/alacritty/9949642f3903e8fcb62bfc03f09410e3d78440c2/license",
+        "https://raw.githubusercontent.com/nordtheme/nord/1cef71605416a222e57225b544540ce0fcec18d4/src/nord.css",
+        "https://raw.githubusercontent.com/nordtheme/nord/1cef71605416a222e57225b544540ce0fcec18d4/license"
+      ],
+      "notes": "Terminal values from nordtheme/alacritty (arcticicestudio/* now redirects to nordtheme/*; there is no official nordtheme/kitty repo). No official light variant. UI from nord.css: surface=nord1, border=nord2, muted=nord3, accent=nord8."
+    },
+    {
+      "id": "gruvbox",
+      "name": "Gruvbox",
+      "description": "Retro groove color scheme with warm, earthy tones (medium contrast).",
+      "variants": {
+        "dark": {
+          "background": "#282828",
+          "foreground": "#ebdbb2",
+          "cursor": "#ebdbb2",
+          "selection": "#665c54",
+          "ansi": [
+            "#282828",
+            "#cc241d",
+            "#98971a",
+            "#d79921",
+            "#458588",
+            "#b16286",
+            "#689d6a",
+            "#a89984",
+            "#928374",
+            "#fb4934",
+            "#b8bb26",
+            "#fabd2f",
+            "#83a598",
+            "#d3869b",
+            "#8ec07c",
+            "#ebdbb2"
+          ],
+          "ui": {
+            "surface": "#3c3836",
+            "border": "#665c54",
+            "muted": "#928374",
+            "accent": "#fe8019"
+          }
+        },
+        "light": {
+          "background": "#fbf1c7",
+          "foreground": "#3c3836",
+          "cursor": "#3c3836",
+          "selection": "#bdae93",
+          "ansi": [
+            "#fbf1c7",
+            "#cc241d",
+            "#98971a",
+            "#d79921",
+            "#458588",
+            "#b16286",
+            "#689d6a",
+            "#7c6f64",
+            "#928374",
+            "#9d0006",
+            "#79740e",
+            "#b57614",
+            "#076678",
+            "#8f3f71",
+            "#427b58",
+            "#3c3836"
+          ],
+          "ui": {
+            "surface": "#ebdbb2",
+            "border": "#bdae93",
+            "muted": "#928374",
+            "accent": "#af3a03"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "No LICENSE file in morhetz/gruvbox: README.md 'License' section says MIT/X11 and package.json says license MIT, author 'Pavel Pertsev <morhetz@gmail.com>'. No copyright line exists.",
+      "sources": [
+        "https://raw.githubusercontent.com/morhetz/gruvbox/ef8864bb42bf244f0295d1c5a403b27e3d139695/colors/gruvbox.vim",
+        "https://raw.githubusercontent.com/morhetz/gruvbox/ef8864bb42bf244f0295d1c5a403b27e3d139695/README.md",
+        "https://raw.githubusercontent.com/morhetz/gruvbox/ef8864bb42bf244f0295d1c5a403b27e3d139695/package.json",
+        "https://raw.githubusercontent.com/morhetz/gruvbox-contrib/150e9ca30fcd679400dc388c24930e5ec8c98a9f/xresources/gruvbox-dark.xresources",
+        "https://raw.githubusercontent.com/morhetz/gruvbox-contrib/150e9ca30fcd679400dc388c24930e5ec8c98a9f/xresources/gruvbox-light.xresources"
+      ],
+      "notes": "ANSI from gruvbox.vim's own Neovim terminal mapping (g:terminal_color_0..15), medium contrast. Dark matches gruvbox-contrib xresources exactly; light differs only in color0: xresources has #fdf4c1 (an older light0), vim uses bg0=#fbf1c7 (used here). gruvbox-contrib has no license. Cursor: theme uses 'inverse' (no explicit color) - cursor=foreground is our derivation. Selection=Visual bg (bg3). UI: surface=bg1, border=bg3 (VertSplit), muted=gray, accent=orange (hls_cursor default; accent choice is ours)."
+    },
+    {
+      "id": "dracula",
+      "name": "Dracula",
+      "description": "Dark theme with vivid purple, pink and green accents.",
+      "variants": {
+        "dark": {
+          "background": "#282a36",
+          "foreground": "#f8f8f2",
+          "cursor": "#f8f8f2",
+          "selection": "#44475a",
+          "ansi": [
+            "#21222c",
+            "#ff5555",
+            "#50fa7b",
+            "#f1fa8c",
+            "#bd93f9",
+            "#ff79c6",
+            "#8be9fd",
+            "#f8f8f2",
+            "#6272a4",
+            "#ff6e6e",
+            "#69ff94",
+            "#ffffa5",
+            "#d6acff",
+            "#ff92df",
+            "#a4ffff",
+            "#ffffff"
+          ],
+          "ui": {
+            "surface": "#21222c",
+            "border": "#44475a",
+            "muted": "#6272a4",
+            "accent": "#bd93f9"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2018 Dracula Theme",
+      "sources": [
+        "https://raw.githubusercontent.com/dracula/kitty/87717a3f00e3dff0fc10c93f5ff535ea4092de70/dracula.conf",
+        "https://raw.githubusercontent.com/dracula/kitty/87717a3f00e3dff0fc10c93f5ff535ea4092de70/LICENSE",
+        "https://raw.githubusercontent.com/dracula/dracula-theme/e22ebcc048b8aff586f9bc94db30ff5347070b42/README.md",
+        "https://raw.githubusercontent.com/dracula/dracula-theme/e22ebcc048b8aff586f9bc94db30ff5347070b42/LICENSE"
+      ],
+      "notes": "Terminal from dracula/kitty (LICENSE 2018); spec palette from dracula/dracula-theme README (LICENSE 'Copyright (c) 2023 Dracula Theme'). The spec also defines a light 'Alucard' palette (bg #fffbeb, fg #1f1f1f, selection #cfcfde) but has no official terminal ANSI mapping for it, so not included. UI: surface=#21222c (kitty color0; the spec has no darker surface), border=Current Line, muted=Comment, accent=Purple."
+    },
+    {
+      "id": "solarized",
+      "name": "Solarized",
+      "description": "Precision sixteen-color palette with selective contrast, for dark and light backgrounds.",
+      "variants": {
+        "dark": {
+          "background": "#002b36",
+          "foreground": "#839496",
+          "cursor": "#839496",
+          "selection": "#073642",
+          "ansi": [
+            "#073642",
+            "#dc322f",
+            "#859900",
+            "#b58900",
+            "#268bd2",
+            "#d33682",
+            "#2aa198",
+            "#eee8d5",
+            "#002b36",
+            "#cb4b16",
+            "#586e75",
+            "#657b83",
+            "#839496",
+            "#6c71c4",
+            "#93a1a1",
+            "#fdf6e3"
+          ],
+          "ui": {
+            "surface": "#073642",
+            "border": "#586e75",
+            "muted": "#586e75",
+            "accent": "#268bd2"
+          }
+        },
+        "light": {
+          "background": "#fdf6e3",
+          "foreground": "#657b83",
+          "cursor": "#657b83",
+          "selection": "#eee8d5",
+          "ansi": [
+            "#073642",
+            "#dc322f",
+            "#859900",
+            "#b58900",
+            "#268bd2",
+            "#d33682",
+            "#2aa198",
+            "#eee8d5",
+            "#002b36",
+            "#cb4b16",
+            "#586e75",
+            "#657b83",
+            "#839496",
+            "#6c71c4",
+            "#93a1a1",
+            "#fdf6e3"
+          ],
+          "ui": {
+            "surface": "#eee8d5",
+            "border": "#93a1a1",
+            "muted": "#93a1a1",
+            "accent": "#268bd2"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2011 Ethan Schoonover",
+      "sources": [
+        "https://raw.githubusercontent.com/altercation/solarized/62f656a02f93c5190a8753159e34b385588d5ff3/README.md",
+        "https://raw.githubusercontent.com/altercation/solarized/62f656a02f93c5190a8753159e34b385588d5ff3/iterm2-colors-solarized/Solarized%20Dark.itermcolors",
+        "https://raw.githubusercontent.com/altercation/solarized/62f656a02f93c5190a8753159e34b385588d5ff3/iterm2-colors-solarized/Solarized%20Light.itermcolors",
+        "https://raw.githubusercontent.com/altercation/solarized/62f656a02f93c5190a8753159e34b385588d5ff3/LICENSE"
+      ],
+      "notes": "Hex values are the sRGB values from the README 'SOLARIZED HEX / 16/8 TERMCOL' table (ANSI slot per color from that table; same 16 for dark and light). The official .itermcolors files store calibrated (non-sRGB) floats that convert to different hex (e.g. #001e27), so they were used only for roles: bg=Ansi8/base03 (dark) or Ansi15/base3 (light), fg=cursor=base0 (dark) / base00 (light), selection=base02 (dark) / base2 (light). UI: surface=base02/base2 (background highlights), border and muted=base01 (dark) / base1 (light) (comments), accent=blue (our choice)."
+    }
+  ]
+}

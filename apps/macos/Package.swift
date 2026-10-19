@@ -27,6 +27,7 @@ let package = Package(
             name: "Themes",
             path: "features/themes",
             exclude: ["CLAUDE.md", "tests"],
+            resources: [.copy("Resources/catalog.json")],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
         .target(

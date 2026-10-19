@@ -199,3 +199,56 @@ Icon font (regular weight) of @phosphor-icons/web 2.1.2, in apps/macos/shared/ic
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
+
+Theme colors
+------------
+The built-in themes (apps/macos/features/themes/Resources/catalog.json) are converted
+by tools/themes/build_catalog.py from the sources below. Apache-2.0 text:
+tools/themes/licenses/Apache-2.0.txt.
+
+tweakcn theme presets
+https://github.com/jnsahaj/tweakcn (utils/theme-presets.ts, commit a3b47b3)
+Licensed under the Apache License, Version 2.0.
+
+Kanagawa
+https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/extras/kitty/kanagawa.conf
+MIT. Copyright (c) 2021 Tommaso Laurenzi
+
+Kanagawa Dragon
+https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/extras/kitty/kanagawa_dragon.conf
+MIT. Copyright (c) 2021 Tommaso Laurenzi
+
+Tokyo Night
+https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/extras/kitty/tokyonight_night.conf
+Apache-2.0. No copyright line: the repository LICENSE is the unmodified Apache-2.0 text with the template line 'Copyright [yyyy] [name of copyright owner]'. Author: Folke Lemaitre.
+
+Catppuccin
+https://raw.githubusercontent.com/catppuccin/kitty/43098316202b84d6a71f71aaf8360f102f4d3f1a/themes/mocha.conf
+MIT. Copyright (c) 2021 Catppuccin
+
+Rosé Pine
+https://raw.githubusercontent.com/rose-pine/kitty/efd4f01cb9887feaa7114ff21a887464295d0205/dist/rose-pine.conf
+MIT. Copyright (c) Rosé Pine
+
+Everforest
+https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/autoload/everforest.vim
+MIT. Copyright (c) 2019 sainnhe
+
+Nord
+https://raw.githubusercontent.com/nordtheme/alacritty/9949642f3903e8fcb62bfc03f09410e3d78440c2/src/nord.yaml
+MIT. Copyright (c) 2016-present Sven Greb <development@svengreb.de> (https://www.svengreb.de)
+
+Gruvbox
+https://raw.githubusercontent.com/morhetz/gruvbox/ef8864bb42bf244f0295d1c5a403b27e3d139695/colors/gruvbox.vim
+MIT. No LICENSE file in morhetz/gruvbox: README.md 'License' section says MIT/X11 and package.json says license MIT, author 'Pavel Pertsev <morhetz@gmail.com>'. No copyright line exists.
+
+Dracula
+https://raw.githubusercontent.com/dracula/kitty/87717a3f00e3dff0fc10c93f5ff535ea4092de70/dracula.conf
+MIT. Copyright (c) 2018 Dracula Theme
+
+Solarized
+https://raw.githubusercontent.com/altercation/solarized/62f656a02f93c5190a8753159e34b385588d5ff3/README.md
+MIT. Copyright (c) 2011 Ethan Schoonover
+
+The MIT-licensed palettes above are used under the MIT License, whose text is the one
+reproduced for libghostty-vt at the top of this file, with each project's copyright line.

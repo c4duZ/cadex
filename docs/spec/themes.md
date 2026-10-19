@@ -7,10 +7,12 @@ temas que ele já usava no Terax.
 ## Comportamento
 - Um tema define as cores da interface (moldura da janela, painéis, abas, campos, texto, destaque)
   e as do terminal (fundo, texto, cursor, seleção e as 16 cores ANSI).
-- Vêm dois temas embutidos: **Cadex Escuro**, no estilo do Terax (moldura cinza-grafite, painéis
-  quase pretos, cantos arredondados), e **Cadex Claro**.
-- Por padrão o Cadex segue o modo do sistema: escuro no modo escuro, claro no claro. O usuário pode
-  fixar um tema nas configurações.
+- Cada tema tem versão escura e/ou clara. O usuário escolhe o tema e o modo: seguir o sistema
+  (padrão), sempre escuro ou sempre claro. Tema sem a versão pedida mostra a que tem.
+- Vêm 46 temas embutidos: as paletas oficiais de temas abertos (Kanagawa, Kanagawa Dragon, Tokyo
+  Night, Catppuccin, Rosé Pine, Everforest, Nord, Gruvbox, Dracula, Solarized), com as cores de
+  terminal dos próprios projetos, e os temas do tweakcn, sem os quase iguais. O padrão é o
+  Caffeine. Créditos e licenças no `NOTICE`.
 - Trocar de tema (ou o sistema mudar de modo) vale na hora em todas as janelas, terminais
   incluídos, sem reabrir nada.
 - Programas que perguntam as cores do terminal (OSC 10, 11 e 4, como o vim faz para saber se o

@@ -1,0 +1,3449 @@
+{
+ "tweakcnCommit": "a3b47b37cba97dd637de517aab52c45ec0f83456",
+ "families": [
+  {
+   "id": "caffeine",
+   "name": "Caffeine",
+   "description": "Tons de café: creme e espresso.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#efefef",
+     "panel": "#f9f9f9",
+     "panelBorder": "#d8d8d8",
+     "tabActive": "#d4d4d4",
+     "field": "#e8e8e8",
+     "text": "#202020",
+     "secondaryText": "#646464",
+     "accent": "#644a40"
+    },
+    "terminal": {
+     "background": "#f9f9f9",
+     "foreground": "#202020",
+     "cursor": "#644a40",
+     "selection": "#ccc4c2",
+     "ansi": [
+      "#1f1f1f",
+      "#e54d2e",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#e54d2e",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#222222",
+     "panel": "#111111",
+     "panelBorder": "#201e18",
+     "tabActive": "#3e3e3e",
+     "field": "#2a2a2a",
+     "text": "#eeeeee",
+     "secondaryText": "#b4b4b4",
+     "accent": "#ffe0c2"
+    },
+    "terminal": {
+     "background": "#111111",
+     "foreground": "#eeeeee",
+     "cursor": "#ffe0c2",
+     "selection": "#584f46",
+     "ansi": [
+      "#1e1e1e",
+      "#e54d2e",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#e54d2e",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "amber-minimal",
+   "name": "Amber Minimal",
+   "description": "Neutro com toque âmbar.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f9fafb",
+     "panel": "#ffffff",
+     "panelBorder": "#e5e7eb",
+     "tabActive": "#e9e6d7",
+     "field": "#fffbeb",
+     "text": "#262626",
+     "secondaryText": "#6b7280",
+     "accent": "#f59e0b"
+    },
+    "terminal": {
+     "background": "#ffffff",
+     "foreground": "#262626",
+     "cursor": "#f59e0b",
+     "selection": "#fce2b6",
+     "ansi": [
+      "#1f1f1f",
+      "#ef4444",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ef4444",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#1f1f1f",
+     "panel": "#171717",
+     "panelBorder": "#404040",
+     "tabActive": "#9a5024",
+     "field": "#92400e",
+     "text": "#e5e5e5",
+     "secondaryText": "#a3a3a3",
+     "accent": "#f59e0b"
+    },
+    "terminal": {
+     "background": "#171717",
+     "foreground": "#e5e5e5",
+     "cursor": "#f59e0b",
+     "selection": "#5a4013",
+     "ansi": [
+      "#1e1e1e",
+      "#ef4444",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ef4444",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "amethyst-haze",
+   "name": "Amethyst Haze",
+   "description": "Névoa lilás.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#dcd9e3",
+     "panel": "#f8f7fa",
+     "panelBorder": "#cec9d9",
+     "tabActive": "#d59aae",
+     "field": "#e6a5b8",
+     "text": "#3d3c4f",
+     "secondaryText": "#6b6880",
+     "accent": "#8a79ab"
+    },
+    "terminal": {
+     "background": "#f8f7fa",
+     "foreground": "#3d3c4f",
+     "cursor": "#8a79ab",
+     "selection": "#d7d1e2",
+     "ansi": [
+      "#1f1f1f",
+      "#d95c5c",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#d95c5c",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#242031",
+     "panel": "#1a1823",
+     "panelBorder": "#302c40",
+     "tabActive": "#484051",
+     "field": "#372e3f",
+     "text": "#e0ddef",
+     "secondaryText": "#a09aad",
+     "accent": "#a995c9"
+    },
+    "terminal": {
+     "background": "#1a1823",
+     "foreground": "#e0ddef",
+     "cursor": "#a995c9",
+     "selection": "#453e55",
+     "ansi": [
+      "#1e1e1e",
+      "#e57373",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#e57373",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "bold-tech",
+   "name": "Bold Tech",
+   "description": "Roxo vibrante sobre azul-noite.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f5f3ff",
+     "panel": "#ffffff",
+     "panelBorder": "#e0e7ff",
+     "tabActive": "#cad7f2",
+     "field": "#dbeafe",
+     "text": "#312e81",
+     "secondaryText": "#7c3aed",
+     "accent": "#8b5cf6"
+    },
+    "terminal": {
+     "background": "#ffffff",
+     "foreground": "#312e81",
+     "cursor": "#8b5cf6",
+     "selection": "#dccefc",
+     "ansi": [
+      "#1f1f1f",
+      "#ef4444",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ef4444",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#171447",
+     "panel": "#0f172a",
+     "panelBorder": "#2e1065",
+     "tabActive": "#534acf",
+     "field": "#4338ca",
+     "text": "#e0e7ff",
+     "secondaryText": "#c4b5fd",
+     "accent": "#8b5cf6"
+    },
+    "terminal": {
+     "background": "#0f172a",
+     "foreground": "#e0e7ff",
+     "cursor": "#8b5cf6",
+     "selection": "#342c67",
+     "ansi": [
+      "#1e1e1e",
+      "#ef4444",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ef4444",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "bubblegum",
+   "name": "Bubblegum",
+   "description": "Rosa chiclete divertido.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#b2e1eb",
+     "panel": "#f6e6ee",
+     "panelBorder": "#d04f99",
+     "tabActive": "#ebd49f",
+     "field": "#fbe2a7",
+     "text": "#5b5b5b",
+     "secondaryText": "#7a7a7a",
+     "accent": "#d04f99"
+    },
+    "terminal": {
+     "background": "#f6e6ee",
+     "foreground": "#5b5b5b",
+     "cursor": "#d04f99",
+     "selection": "#ebb9d4",
+     "ansi": [
+      "#1f1f1f",
+      "#f96f70",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#f96f70",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#24272b",
+     "panel": "#12242e",
+     "panelBorder": "#324859",
+     "tabActive": "#ca859e",
+     "field": "#c67b96",
+     "text": "#f3e3ea",
+     "secondaryText": "#e4a2b1",
+     "accent": "#fbe2a7"
+    },
+    "terminal": {
+     "background": "#12242e",
+     "foreground": "#f3e3ea",
+     "cursor": "#fbe2a7",
+     "selection": "#585d52",
+     "ansi": [
+      "#1e1e1e",
+      "#e35ea4",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#e35ea4",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "candyland",
+   "name": "Candyland",
+   "description": "Doce e colorido.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#ddd9c4",
+     "panel": "#f7f9fa",
+     "panelBorder": "#d4d4d4",
+     "tabActive": "#ebeb05",
+     "field": "#ffff00",
+     "text": "#333333",
+     "secondaryText": "#6e6e6e",
+     "accent": "#ffc0cb"
+    },
+    "terminal": {
+     "background": "#f7f9fa",
+     "foreground": "#333333",
+     "cursor": "#ffc0cb",
+     "selection": "#f9e8ec",
+     "ansi": [
+      "#1f1f1f",
+      "#ef4444",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ef4444",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#444444",
+     "panel": "#1a1d23",
+     "panelBorder": "#444444",
+     "tabActive": "#90d0ea",
+     "field": "#87ceeb",
+     "text": "#e5e5e5",
+     "secondaryText": "#a3a3a3",
+     "accent": "#ff99cc"
+    },
+    "terminal": {
+     "background": "#1a1d23",
+     "foreground": "#e5e5e5",
+     "cursor": "#ff99cc",
+     "selection": "#5f4256",
+     "ansi": [
+      "#1e1e1e",
+      "#ef4444",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ef4444",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "catppuccin",
+   "name": "Catppuccin",
+   "description": "Mocha e Latte, pastel e suave.",
+   "source": "official",
+   "dark": {
+    "interface": {
+     "chrome": "#181825",
+     "panel": "#1e1e2e",
+     "panelBorder": "#313244",
+     "tabActive": "#2e2f3e",
+     "field": "#181825",
+     "text": "#cdd6f4",
+     "secondaryText": "#7f849c",
+     "accent": "#cba6f7"
+    },
+    "terminal": {
+     "background": "#1e1e2e",
+     "foreground": "#cdd6f4",
+     "cursor": "#f5e0dc",
+     "selection": "#f5e0dc",
+     "ansi": [
+      "#45475a",
+      "#f38ba8",
+      "#a6e3a1",
+      "#f9e2af",
+      "#89b4fa",
+      "#f5c2e7",
+      "#94e2d5",
+      "#bac2de",
+      "#585b70",
+      "#f38ba8",
+      "#a6e3a1",
+      "#f9e2af",
+      "#89b4fa",
+      "#f5c2e7",
+      "#94e2d5",
+      "#a6adc8"
+     ]
+    }
+   },
+   "light": {
+    "interface": {
+     "chrome": "#e6e9ef",
+     "panel": "#eff1f5",
+     "panelBorder": "#ccd0da",
+     "tabActive": "#d4d7df",
+     "field": "#e6e9ef",
+     "text": "#4c4f69",
+     "secondaryText": "#8c8fa1",
+     "accent": "#8839ef"
+    },
+    "terminal": {
+     "background": "#eff1f5",
+     "foreground": "#4c4f69",
+     "cursor": "#dc8a78",
+     "selection": "#dc8a78",
+     "ansi": [
+      "#5c5f77",
+      "#d20f39",
+      "#40a02b",
+      "#df8e1d",
+      "#1e66f5",
+      "#ea76cb",
+      "#179299",
+      "#acb0be",
+      "#6c6f85",
+      "#d20f39",
+      "#40a02b",
+      "#df8e1d",
+      "#1e66f5",
+      "#ea76cb",
+      "#179299",
+      "#bcc0cc"
+     ]
+    }
+   }
+  },
+  {
+   "id": "claude",
+   "name": "Claude",
+   "description": "Argila quente sobre papel.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#ede9de",
+     "panel": "#faf9f5",
+     "panelBorder": "#dad9d4",
+     "tabActive": "#d8d5ca",
+     "field": "#e9e6dc",
+     "text": "#3d3929",
+     "secondaryText": "#83827d",
+     "accent": "#c96442"
+    },
+    "terminal": {
+     "background": "#faf9f5",
+     "foreground": "#3d3929",
+     "cursor": "#c96442",
+     "selection": "#ebccbf",
+     "ansi": [
+      "#1f1f1f",
+      "#141413",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#141413",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#1b1b19",
+     "panel": "#262624",
+     "panelBorder": "#3e3e38",
+     "tabActive": "#2b2a25",
+     "field": "#1a1915",
+     "text": "#c3c0b6",
+     "secondaryText": "#b7b5a9",
+     "accent": "#d97757"
+    },
+    "terminal": {
+     "background": "#262624",
+     "foreground": "#c3c0b6",
+     "cursor": "#d97757",
+     "selection": "#5c3e33",
+     "ansi": [
+      "#1e1e1e",
+      "#ef4444",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ef4444",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "claymorphism",
+   "name": "Claymorphism",
+   "description": "Superfícies macias de argila.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#e7e5e4",
+     "panel": "#e7e5e4",
+     "panelBorder": "#d6d3d1",
+     "tabActive": "#ded2e2",
+     "field": "#f3e5f5",
+     "text": "#1e293b",
+     "secondaryText": "#6b7280",
+     "accent": "#6366f1"
+    },
+    "terminal": {
+     "background": "#e7e5e4",
+     "foreground": "#1e293b",
+     "cursor": "#6366f1",
+     "selection": "#bfbfe8",
+     "ansi": [
+      "#1f1f1f",
+      "#ef4444",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ef4444",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#1f1c19",
+     "panel": "#1e1b18",
+     "panelBorder": "#3a3633",
+     "tabActive": "#575452",
+     "field": "#484441",
+     "text": "#e2e8f0",
+     "secondaryText": "#9ca3af",
+     "accent": "#818cf8"
+    },
+    "terminal": {
+     "background": "#1e1b18",
+     "foreground": "#e2e8f0",
+     "cursor": "#818cf8",
+     "selection": "#3c3d5b",
+     "ansi": [
+      "#1e1e1e",
+      "#ef4444",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ef4444",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "cosmic-night",
+   "name": "Cosmic Night",
+   "description": "Céu noturno violeta.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f0f0fa",
+     "panel": "#f5f5ff",
+     "panelBorder": "#e0e0f0",
+     "tabActive": "#c7d3ed",
+     "field": "#d8e6ff",
+     "text": "#2a2a4a",
+     "secondaryText": "#6c6c8a",
+     "accent": "#6e56cf"
+    },
+    "terminal": {
+     "background": "#f5f5ff",
+     "foreground": "#2a2a4a",
+     "cursor": "#6e56cf",
+     "selection": "#ccc5f1",
+     "ansi": [
+      "#1f1f1f",
+      "#ff5470",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ff5470",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#222244",
+     "panel": "#0f0f1a",
+     "panelBorder": "#303052",
+     "tabActive": "#42426f",
+     "field": "#303060",
+     "text": "#e2e2f5",
+     "secondaryText": "#a0a0c0",
+     "accent": "#a48fff"
+    },
+    "terminal": {
+     "background": "#0f0f1a",
+     "foreground": "#e2e2f5",
+     "cursor": "#a48fff",
+     "selection": "#3c355f",
+     "ansi": [
+      "#1e1e1e",
+      "#ff5470",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ff5470",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "cyberpunk",
+   "name": "Cyberpunk",
+   "description": "Neon magenta e ciano.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f0f0ff",
+     "panel": "#f8f9fa",
+     "panelBorder": "#dfe6e9",
+     "tabActive": "#01e7ba",
+     "field": "#00ffcc",
+     "text": "#0c0c1d",
+     "secondaryText": "#0c0c1d",
+     "accent": "#ff00c8"
+    },
+    "terminal": {
+     "background": "#f8f9fa",
+     "foreground": "#0c0c1d",
+     "cursor": "#ff00c8",
+     "selection": "#faaeeb",
+     "ansi": [
+      "#1f1f1f",
+      "#ff3d00",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ff3d00",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#151530",
+     "panel": "#0c0c1d",
+     "panelBorder": "#2e2e5e",
+     "tabActive": "#18fdd0",
+     "field": "#00ffcc",
+     "text": "#eceff4",
+     "secondaryText": "#8085a6",
+     "accent": "#ff00c8"
+    },
+    "terminal": {
+     "background": "#0c0c1d",
+     "foreground": "#eceff4",
+     "cursor": "#ff00c8",
+     "selection": "#550850",
+     "ansi": [
+      "#1e1e1e",
+      "#ff3d00",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ff3d00",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "darkmatter",
+   "name": "Darkmatter",
+   "description": "Escuro com laranja e verde-água.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f3f4f6",
+     "panel": "#ffffff",
+     "panelBorder": "#e5e7eb",
+     "tabActive": "#d8d9da",
+     "field": "#eeeeee",
+     "text": "#111827",
+     "secondaryText": "#6b7280",
+     "accent": "#d87943"
+    },
+    "terminal": {
+     "background": "#ffffff",
+     "foreground": "#111827",
+     "cursor": "#d87943",
+     "selection": "#f3d7c7",
+     "ansi": [
+      "#1f1f1f",
+      "#ef4444",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ef4444",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#222222",
+     "panel": "#121113",
+     "panelBorder": "#222222",
+     "tabActive": "#414141",
+     "field": "#333333",
+     "text": "#c1c1c1",
+     "secondaryText": "#888888",
+     "accent": "#e78a53"
+    },
+    "terminal": {
+     "background": "#121113",
+     "foreground": "#c1c1c1",
+     "cursor": "#e78a53",
+     "selection": "#523526",
+     "ansi": [
+      "#1e1e1e",
+      "#5f8787",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#5f8787",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "doom-64",
+   "name": "Doom 64",
+   "description": "Retrô de jogo dos anos 90.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#b8b8b8",
+     "panel": "#cccccc",
+     "panelBorder": "#505050",
+     "tabActive": "#4278a5",
+     "field": "#4682b4",
+     "text": "#1f1f1f",
+     "secondaryText": "#4a4a4a",
+     "accent": "#b71c1c"
+    },
+    "terminal": {
+     "background": "#cccccc",
+     "foreground": "#1f1f1f",
+     "cursor": "#b71c1c",
+     "selection": "#c69797",
+     "ansi": [
+      "#1f1f1f",
+      "#ff6f00",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ff6f00",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#252525",
+     "panel": "#1a1a1a",
+     "panelBorder": "#4a4a4a",
+     "tabActive": "#70b9f4",
+     "field": "#64b5f6",
+     "text": "#e0e0e0",
+     "secondaryText": "#a0a0a0",
+     "accent": "#e53935"
+    },
+    "terminal": {
+     "background": "#1a1a1a",
+     "foreground": "#e0e0e0",
+     "cursor": "#e53935",
+     "selection": "#572322",
+     "ansi": [
+      "#1e1e1e",
+      "#ffa000",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ffa000",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "dracula",
+   "name": "Dracula",
+   "description": "Roxo clássico de alto contraste.",
+   "source": "official",
+   "dark": {
+    "interface": {
+     "chrome": "#21222c",
+     "panel": "#282a36",
+     "panelBorder": "#44475a",
+     "tabActive": "#3b3c44",
+     "field": "#21222c",
+     "text": "#f8f8f2",
+     "secondaryText": "#6272a4",
+     "accent": "#bd93f9"
+    },
+    "terminal": {
+     "background": "#282a36",
+     "foreground": "#f8f8f2",
+     "cursor": "#f8f8f2",
+     "selection": "#44475a",
+     "ansi": [
+      "#21222c",
+      "#ff5555",
+      "#50fa7b",
+      "#f1fa8c",
+      "#bd93f9",
+      "#ff79c6",
+      "#8be9fd",
+      "#f8f8f2",
+      "#6272a4",
+      "#ff6e6e",
+      "#69ff94",
+      "#ffffa5",
+      "#d6acff",
+      "#ff92df",
+      "#a4ffff",
+      "#ffffff"
+     ]
+    }
+   }
+  },
+  {
+   "id": "elegant-luxury",
+   "name": "Elegant Luxury",
+   "description": "Vinho e dourado.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f0ebe8",
+     "panel": "#faf7f5",
+     "panelBorder": "#f5e8d2",
+     "tabActive": "#e7ddb6",
+     "field": "#fef3c7",
+     "text": "#1a1a1a",
+     "secondaryText": "#57534e",
+     "accent": "#9b2c2c"
+    },
+    "terminal": {
+     "background": "#faf7f5",
+     "foreground": "#1a1a1a",
+     "cursor": "#9b2c2c",
+     "selection": "#debab9",
+     "ansi": [
+      "#1f1f1f",
+      "#991b1b",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#991b1b",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#1f1c1a",
+     "panel": "#1c1917",
+     "panelBorder": "#44403c",
+     "tabActive": "#ba6320",
+     "field": "#b45309",
+     "text": "#f5f5f4",
+     "secondaryText": "#d6d3d1",
+     "accent": "#b91c1c"
+    },
+    "terminal": {
+     "background": "#1c1917",
+     "foreground": "#f5f5f4",
+     "cursor": "#b91c1c",
+     "selection": "#4b1a18",
+     "ansi": [
+      "#1e1e1e",
+      "#ef4444",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ef4444",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "everforest",
+   "name": "Everforest",
+   "description": "Floresta verde de pouco contraste.",
+   "source": "official",
+   "dark": {
+    "interface": {
+     "chrome": "#343f44",
+     "panel": "#2d353b",
+     "panelBorder": "#4f585e",
+     "tabActive": "#474f50",
+     "field": "#343f44",
+     "text": "#d3c6aa",
+     "secondaryText": "#859289",
+     "accent": "#a7c080"
+    },
+    "terminal": {
+     "background": "#2d353b",
+     "foreground": "#d3c6aa",
+     "cursor": "#d3c6aa",
+     "selection": "#543a48",
+     "ansi": [
+      "#475258",
+      "#e67e80",
+      "#a7c080",
+      "#dbbc7f",
+      "#7fbbb3",
+      "#d699b6",
+      "#83c092",
+      "#d3c6aa",
+      "#475258",
+      "#e67e80",
+      "#a7c080",
+      "#dbbc7f",
+      "#7fbbb3",
+      "#d699b6",
+      "#83c092",
+      "#d3c6aa"
+     ]
+    }
+   },
+   "light": {
+    "interface": {
+     "chrome": "#f4f0d9",
+     "panel": "#fdf6e3",
+     "panelBorder": "#e0dcc7",
+     "tabActive": "#e2e0cd",
+     "field": "#f4f0d9",
+     "text": "#5c6a72",
+     "secondaryText": "#939f91",
+     "accent": "#8da101"
+    },
+    "terminal": {
+     "background": "#fdf6e3",
+     "foreground": "#5c6a72",
+     "cursor": "#5c6a72",
+     "selection": "#eaedc8",
+     "ansi": [
+      "#5c6a72",
+      "#f85552",
+      "#8da101",
+      "#dfa000",
+      "#3a94c5",
+      "#df69ba",
+      "#35a77c",
+      "#e6e2cc",
+      "#5c6a72",
+      "#f85552",
+      "#8da101",
+      "#dfa000",
+      "#3a94c5",
+      "#df69ba",
+      "#35a77c",
+      "#e6e2cc"
+     ]
+    }
+   }
+  },
+  {
+   "id": "graphite",
+   "name": "Graphite",
+   "description": "Cinza grafite neutro.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#d9d9d9",
+     "panel": "#f0f0f0",
+     "panelBorder": "#d0d0d0",
+     "tabActive": "#b2b2b2",
+     "field": "#c0c0c0",
+     "text": "#333333",
+     "secondaryText": "#666666",
+     "accent": "#606060"
+    },
+    "terminal": {
+     "background": "#f0f0f0",
+     "foreground": "#333333",
+     "cursor": "#606060",
+     "selection": "#c5c5c5",
+     "ansi": [
+      "#1f1f1f",
+      "#cc3333",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#cc3333",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#2a2a2a",
+     "panel": "#1a1a1a",
+     "panelBorder": "#353535",
+     "tabActive": "#4f4f4f",
+     "field": "#404040",
+     "text": "#d9d9d9",
+     "secondaryText": "#808080",
+     "accent": "#a0a0a0"
+    },
+    "terminal": {
+     "background": "#1a1a1a",
+     "foreground": "#d9d9d9",
+     "cursor": "#a0a0a0",
+     "selection": "#424242",
+     "ansi": [
+      "#1e1e1e",
+      "#e06666",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#e06666",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "gruvbox",
+   "name": "Gruvbox",
+   "description": "Retrô, quente e terroso.",
+   "source": "official",
+   "dark": {
+    "interface": {
+     "chrome": "#3c3836",
+     "panel": "#282828",
+     "panelBorder": "#665c54",
+     "tabActive": "#514c45",
+     "field": "#3c3836",
+     "text": "#ebdbb2",
+     "secondaryText": "#928374",
+     "accent": "#fe8019"
+    },
+    "terminal": {
+     "background": "#282828",
+     "foreground": "#ebdbb2",
+     "cursor": "#ebdbb2",
+     "selection": "#665c54",
+     "ansi": [
+      "#282828",
+      "#cc241d",
+      "#98971a",
+      "#d79921",
+      "#458588",
+      "#b16286",
+      "#689d6a",
+      "#a89984",
+      "#928374",
+      "#fb4934",
+      "#b8bb26",
+      "#fabd2f",
+      "#83a598",
+      "#d3869b",
+      "#8ec07c",
+      "#ebdbb2"
+     ]
+    }
+   },
+   "light": {
+    "interface": {
+     "chrome": "#ebdbb2",
+     "panel": "#fbf1c7",
+     "panelBorder": "#bdae93",
+     "tabActive": "#d6c7a3",
+     "field": "#ebdbb2",
+     "text": "#3c3836",
+     "secondaryText": "#928374",
+     "accent": "#af3a03"
+    },
+    "terminal": {
+     "background": "#fbf1c7",
+     "foreground": "#3c3836",
+     "cursor": "#3c3836",
+     "selection": "#bdae93",
+     "ansi": [
+      "#fbf1c7",
+      "#cc241d",
+      "#98971a",
+      "#d79921",
+      "#458588",
+      "#b16286",
+      "#689d6a",
+      "#7c6f64",
+      "#928374",
+      "#9d0006",
+      "#79740e",
+      "#b57614",
+      "#076678",
+      "#8f3f71",
+      "#427b58",
+      "#3c3836"
+     ]
+    }
+   }
+  },
+  {
+   "id": "kanagawa",
+   "name": "Kanagawa",
+   "description": "Tinta escura inspirada em Hokusai.",
+   "source": "official",
+   "dark": {
+    "interface": {
+     "chrome": "#16161D",
+     "panel": "#1F1F28",
+     "panelBorder": "#54546D",
+     "tabActive": "#2e2d30",
+     "field": "#16161D",
+     "text": "#DCD7BA",
+     "secondaryText": "#727169",
+     "accent": "#7E9CD8"
+    },
+    "terminal": {
+     "background": "#1F1F28",
+     "foreground": "#DCD7BA",
+     "cursor": "#C8C093",
+     "selection": "#2D4F67",
+     "ansi": [
+      "#16161D",
+      "#C34043",
+      "#76946A",
+      "#C0A36E",
+      "#7E9CD8",
+      "#957FB8",
+      "#6A9589",
+      "#C8C093",
+      "#727169",
+      "#E82424",
+      "#98BB6C",
+      "#E6C384",
+      "#7FB4CA",
+      "#938AA9",
+      "#7AA89F",
+      "#DCD7BA"
+     ]
+    }
+   }
+  },
+  {
+   "id": "kanagawa-dragon",
+   "name": "Kanagawa Dragon",
+   "description": "A variante Dragon, quase preta e terrosa.",
+   "source": "official",
+   "dark": {
+    "interface": {
+     "chrome": "#0d0c0c",
+     "panel": "#181616",
+     "panelBorder": "#54546D",
+     "tabActive": "#232322",
+     "field": "#0d0c0c",
+     "text": "#c5c9c5",
+     "secondaryText": "#737c73",
+     "accent": "#8ba4b0"
+    },
+    "terminal": {
+     "background": "#181616",
+     "foreground": "#c5c9c5",
+     "cursor": "#C8C093",
+     "selection": "#2D4F67",
+     "ansi": [
+      "#0d0c0c",
+      "#c4746e",
+      "#8a9a7b",
+      "#c4b28a",
+      "#8ba4b0",
+      "#a292a3",
+      "#8ea4a2",
+      "#C8C093",
+      "#a6a69c",
+      "#E46876",
+      "#87a987",
+      "#E6C384",
+      "#7FB4CA",
+      "#938AA9",
+      "#7AA89F",
+      "#c5c9c5"
+     ]
+    }
+   }
+  },
+  {
+   "id": "kodama-grove",
+   "name": "Kodama Grove",
+   "description": "Bosque verde-oliva.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#decea0",
+     "panel": "#e4d7b0",
+     "panelBorder": "#b19681",
+     "tabActive": "#cebc8b",
+     "field": "#dbc894",
+     "text": "#5c4b3e",
+     "secondaryText": "#85766a",
+     "accent": "#8d9d4f"
+    },
+    "terminal": {
+     "background": "#e4d7b0",
+     "foreground": "#5c4b3e",
+     "cursor": "#8d9d4f",
+     "selection": "#cac693",
+     "ansi": [
+      "#1f1f1f",
+      "#d98b7e",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#d98b7e",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#4a4439",
+     "panel": "#3a3529",
+     "panelBorder": "#5a5345",
+     "tabActive": "#a99868",
+     "field": "#a18f5c",
+     "text": "#ede4d4",
+     "secondaryText": "#a8a096",
+     "accent": "#8a9f7b"
+    },
+    "terminal": {
+     "background": "#3a3529",
+     "foreground": "#ede4d4",
+     "cursor": "#8a9f7b",
+     "selection": "#525542",
+     "ansi": [
+      "#1e1e1e",
+      "#b5766a",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#b5766a",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "midnight-bloom",
+   "name": "Midnight Bloom",
+   "description": "Flor da meia-noite em roxo.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#c9c4b5",
+     "panel": "#f9f9f9",
+     "panelBorder": "#d4d4d4",
+     "tabActive": "#828a62",
+     "field": "#8b9467",
+     "text": "#333333",
+     "secondaryText": "#6e6e6e",
+     "accent": "#6c5ce7"
+    },
+    "terminal": {
+     "background": "#f9f9f9",
+     "foreground": "#333333",
+     "cursor": "#6c5ce7",
+     "selection": "#cfcaf4",
+     "ansi": [
+      "#1f1f1f",
+      "#ef4444",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ef4444",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#444444",
+     "panel": "#1a1d23",
+     "panelBorder": "#444444",
+     "tabActive": "#719dec",
+     "field": "#6495ed",
+     "text": "#e5e5e5",
+     "secondaryText": "#a3a3a3",
+     "accent": "#6c5ce7"
+    },
+    "terminal": {
+     "background": "#1a1d23",
+     "foreground": "#e5e5e5",
+     "cursor": "#6c5ce7",
+     "selection": "#33305e",
+     "ansi": [
+      "#1e1e1e",
+      "#ef4444",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ef4444",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "modern-minimal",
+   "name": "Modern Minimal",
+   "description": "Minimalista com azul.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f9fafb",
+     "panel": "#ffffff",
+     "panelBorder": "#e5e7eb",
+     "tabActive": "#cfdfea",
+     "field": "#e0f2fe",
+     "text": "#333333",
+     "secondaryText": "#6b7280",
+     "accent": "#3b82f6"
+    },
+    "terminal": {
+     "background": "#ffffff",
+     "foreground": "#333333",
+     "cursor": "#3b82f6",
+     "selection": "#c4dafc",
+     "ansi": [
+      "#1f1f1f",
+      "#ef4444",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ef4444",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#1f1f1f",
+     "panel": "#171717",
+     "panelBorder": "#404040",
+     "tabActive": "#324b93",
+     "field": "#1e3a8a",
+     "text": "#e5e5e5",
+     "secondaryText": "#a3a3a3",
+     "accent": "#3b82f6"
+    },
+    "terminal": {
+     "background": "#171717",
+     "foreground": "#e5e5e5",
+     "cursor": "#3b82f6",
+     "selection": "#22375a",
+     "ansi": [
+      "#1e1e1e",
+      "#ef4444",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ef4444",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "nature",
+   "name": "Nature",
+   "description": "Verdes da natureza.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f0e9e0",
+     "panel": "#f8f5f0",
+     "panelBorder": "#e0d6c9",
+     "tabActive": "#bad3b8",
+     "field": "#c8e6c9",
+     "text": "#3e2723",
+     "secondaryText": "#6d4c41",
+     "accent": "#2e7d32"
+    },
+    "terminal": {
+     "background": "#f8f5f0",
+     "foreground": "#3e2723",
+     "cursor": "#2e7d32",
+     "selection": "#bbd1b7",
+     "ansi": [
+      "#1f1f1f",
+      "#c62828",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#c62828",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#252f26",
+     "panel": "#1c2a1f",
+     "panelBorder": "#3e4a3d",
+     "tabActive": "#4a974d",
+     "field": "#388e3c",
+     "text": "#f0ebe5",
+     "secondaryText": "#d7cfc4",
+     "accent": "#4caf50"
+    },
+    "terminal": {
+     "background": "#1c2a1f",
+     "foreground": "#f0ebe5",
+     "cursor": "#4caf50",
+     "selection": "#2a522e",
+     "ansi": [
+      "#1e1e1e",
+      "#c62828",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#c62828",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "neo-brutalism",
+   "name": "Neo Brutalism",
+   "description": "Contraste duro e cores puras.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f0f0f0",
+     "panel": "#ffffff",
+     "panelBorder": "#000000",
+     "tabActive": "#005ce6",
+     "field": "#0066ff",
+     "text": "#000000",
+     "secondaryText": "#333333",
+     "accent": "#ff3333"
+    },
+    "terminal": {
+     "background": "#ffffff",
+     "foreground": "#000000",
+     "cursor": "#ff3333",
+     "selection": "#ffc2c2",
+     "ansi": [
+      "#1f1f1f",
+      "#000000",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#000000",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#1a1a1a",
+     "panel": "#000000",
+     "panelBorder": "#ffffff",
+     "tabActive": "#47a3ff",
+     "field": "#3399ff",
+     "text": "#ffffff",
+     "secondaryText": "#cccccc",
+     "accent": "#ff6666"
+    },
+    "terminal": {
+     "background": "#000000",
+     "foreground": "#ffffff",
+     "cursor": "#ff6666",
+     "selection": "#4c1f1f",
+     "ansi": [
+      "#1e1e1e",
+      "#ffffff",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ffffff",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "nord",
+   "name": "Nord",
+   "description": "Ártico, azulado e limpo.",
+   "source": "official",
+   "dark": {
+    "interface": {
+     "chrome": "#3b4252",
+     "panel": "#2e3440",
+     "panelBorder": "#434c5e",
+     "tabActive": "#4e5564",
+     "field": "#3b4252",
+     "text": "#d8dee9",
+     "secondaryText": "#4c566a",
+     "accent": "#88c0d0"
+    },
+    "terminal": {
+     "background": "#2e3440",
+     "foreground": "#d8dee9",
+     "cursor": "#d8dee9",
+     "selection": "#4c566a",
+     "ansi": [
+      "#3b4252",
+      "#bf616a",
+      "#a3be8c",
+      "#ebcb8b",
+      "#81a1c1",
+      "#b48ead",
+      "#88c0d0",
+      "#e5e9f0",
+      "#4c566a",
+      "#bf616a",
+      "#a3be8c",
+      "#ebcb8b",
+      "#81a1c1",
+      "#b48ead",
+      "#8fbcbb",
+      "#eceff4"
+     ]
+    }
+   }
+  },
+  {
+   "id": "northern-lights",
+   "name": "Northern Lights",
+   "description": "Aurora boreal em verde e azul.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#ddd9c4",
+     "panel": "#f9f9fa",
+     "panelBorder": "#d4d4d4",
+     "tabActive": "#61c8dc",
+     "field": "#66d9ef",
+     "text": "#333333",
+     "secondaryText": "#6e6e6e",
+     "accent": "#34a85a"
+    },
+    "terminal": {
+     "background": "#f9f9fa",
+     "foreground": "#333333",
+     "cursor": "#34a85a",
+     "selection": "#bee1ca",
+     "ansi": [
+      "#1f1f1f",
+      "#ef4444",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ef4444",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#444444",
+     "panel": "#1a1d23",
+     "panelBorder": "#444444",
+     "tabActive": "#719dec",
+     "field": "#6495ed",
+     "text": "#e5e5e5",
+     "secondaryText": "#a3a3a3",
+     "accent": "#34a85a"
+    },
+    "terminal": {
+     "background": "#1a1d23",
+     "foreground": "#e5e5e5",
+     "cursor": "#34a85a",
+     "selection": "#224734",
+     "ansi": [
+      "#1e1e1e",
+      "#ef4444",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ef4444",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "ocean-breeze",
+   "name": "Ocean Breeze",
+   "description": "Brisa do mar em verde e azul.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f3f4f6",
+     "panel": "#f0f8ff",
+     "panelBorder": "#e5e7eb",
+     "tabActive": "#c2e8d6",
+     "field": "#d1fae5",
+     "text": "#374151",
+     "secondaryText": "#6b7280",
+     "accent": "#22c55e"
+    },
+    "terminal": {
+     "background": "#f0f8ff",
+     "foreground": "#374151",
+     "cursor": "#22c55e",
+     "selection": "#b2e9cf",
+     "ansi": [
+      "#1f1f1f",
+      "#ef4444",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ef4444",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#19212e",
+     "panel": "#0f172a",
+     "panelBorder": "#4b5563",
+     "tabActive": "#46505f",
+     "field": "#374151",
+     "text": "#d1d5db",
+     "secondaryText": "#6b7280",
+     "accent": "#34d399"
+    },
+    "terminal": {
+     "background": "#0f172a",
+     "foreground": "#d1d5db",
+     "cursor": "#34d399",
+     "selection": "#1a4f4b",
+     "ansi": [
+      "#1e1e1e",
+      "#ef4444",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ef4444",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "perpetuity",
+   "name": "Perpetuity",
+   "description": "Ciano sobre petróleo.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#e0eaea",
+     "panel": "#e8f0f0",
+     "panelBorder": "#cde0e2",
+     "tabActive": "#b6d6d8",
+     "field": "#c9e5e7",
+     "text": "#0a4a55",
+     "secondaryText": "#427a7e",
+     "accent": "#06858e"
+    },
+    "terminal": {
+     "background": "#e8f0f0",
+     "foreground": "#0a4a55",
+     "cursor": "#06858e",
+     "selection": "#a4d0d3",
+     "ansi": [
+      "#1f1f1f",
+      "#d13838",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#d13838",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#0f3039",
+     "panel": "#0a1a20",
+     "panelBorder": "#164955",
+     "tabActive": "#1c5964",
+     "field": "#164955",
+     "text": "#4de8e8",
+     "secondaryText": "#36a5a5",
+     "accent": "#4de8e8"
+    },
+    "terminal": {
+     "background": "#0a1a20",
+     "foreground": "#4de8e8",
+     "cursor": "#4de8e8",
+     "selection": "#1e585c",
+     "ansi": [
+      "#1e1e1e",
+      "#e83c3c",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#e83c3c",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "quantum-rose",
+   "name": "Quantum Rose",
+   "description": "Rosa elétrico.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#ffe3f2",
+     "panel": "#fff0f8",
+     "panelBorder": "#ffc7e6",
+     "tabActive": "#f4b0d6",
+     "field": "#ffc1e3",
+     "text": "#91185c",
+     "secondaryText": "#c04283",
+     "accent": "#e6067a"
+    },
+    "terminal": {
+     "background": "#fff0f8",
+     "foreground": "#91185c",
+     "cursor": "#e6067a",
+     "selection": "#f8aad2",
+     "ansi": [
+      "#1f1f1f",
+      "#d13869",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#d13869",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#331941",
+     "panel": "#1a0922",
+     "panelBorder": "#4a1b5f",
+     "tabActive": "#6a2e6d",
+     "field": "#5a1f5d",
+     "text": "#ffb3ff",
+     "secondaryText": "#d67ad6",
+     "accent": "#ff6bef"
+    },
+    "terminal": {
+     "background": "#1a0922",
+     "foreground": "#ffb3ff",
+     "cursor": "#ff6bef",
+     "selection": "#5f2660",
+     "ansi": [
+      "#1e1e1e",
+      "#ff2876",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ff2876",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "retro-arcade",
+   "name": "Retro Arcade",
+   "description": "Fliperama em tons de petróleo.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#93a1a1",
+     "panel": "#fdf6e3",
+     "panelBorder": "#839496",
+     "tabActive": "#b7491a",
+     "field": "#cb4b16",
+     "text": "#073642",
+     "secondaryText": "#073642",
+     "accent": "#d33682"
+    },
+    "terminal": {
+     "background": "#fdf6e3",
+     "foreground": "#073642",
+     "cursor": "#d33682",
+     "selection": "#f0bcc6",
+     "ansi": [
+      "#1f1f1f",
+      "#dc322f",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#dc322f",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#586e75",
+     "panel": "#002b36",
+     "panelBorder": "#586e75",
+     "tabActive": "#c55424",
+     "field": "#cb4b16",
+     "text": "#93a1a1",
+     "secondaryText": "#93a1a1",
+     "accent": "#d33682"
+    },
+    "terminal": {
+     "background": "#002b36",
+     "foreground": "#93a1a1",
+     "cursor": "#d33682",
+     "selection": "#3f2e4d",
+     "ansi": [
+      "#1e1e1e",
+      "#dc322f",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#dc322f",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "rose-pine",
+   "name": "Rosé Pine",
+   "description": "Pinho, rosa e um ar de Soho.",
+   "source": "official",
+   "dark": {
+    "interface": {
+     "chrome": "#1f1d2e",
+     "panel": "#191724",
+     "panelBorder": "#403d52",
+     "tabActive": "#363446",
+     "field": "#1f1d2e",
+     "text": "#e0def4",
+     "secondaryText": "#6e6a86",
+     "accent": "#c4a7e7"
+    },
+    "terminal": {
+     "background": "#191724",
+     "foreground": "#e0def4",
+     "cursor": "#524f67",
+     "selection": "#403d52",
+     "ansi": [
+      "#26233a",
+      "#eb6f92",
+      "#31748f",
+      "#f6c177",
+      "#9ccfd8",
+      "#c4a7e7",
+      "#ebbcba",
+      "#e0def4",
+      "#6e6a86",
+      "#eb6f92",
+      "#31748f",
+      "#f6c177",
+      "#9ccfd8",
+      "#c4a7e7",
+      "#ebbcba",
+      "#e0def4"
+     ]
+    }
+   },
+   "light": {
+    "interface": {
+     "chrome": "#fffaf3",
+     "panel": "#faf4ed",
+     "panelBorder": "#dfdad9",
+     "tabActive": "#ebe6e4",
+     "field": "#fffaf3",
+     "text": "#575279",
+     "secondaryText": "#9893a5",
+     "accent": "#907aa9"
+    },
+    "terminal": {
+     "background": "#faf4ed",
+     "foreground": "#575279",
+     "cursor": "#cecacd",
+     "selection": "#dfdad9",
+     "ansi": [
+      "#f2e9e1",
+      "#b4637a",
+      "#286983",
+      "#ea9d34",
+      "#56949f",
+      "#907aa9",
+      "#d7827e",
+      "#575279",
+      "#9893a5",
+      "#b4637a",
+      "#286983",
+      "#ea9d34",
+      "#56949f",
+      "#907aa9",
+      "#d7827e",
+      "#575279"
+     ]
+    }
+   }
+  },
+  {
+   "id": "sage-garden",
+   "name": "Sage Garden",
+   "description": "Verde-sálvia calmo.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#e8e6e1",
+     "panel": "#f8f7f4",
+     "panelBorder": "#e8e6e1",
+     "tabActive": "#aeb8ad",
+     "field": "#bfc9bb",
+     "text": "#1a1f2e",
+     "secondaryText": "#6b7280",
+     "accent": "#7c9082"
+    },
+    "terminal": {
+     "background": "#f8f7f4",
+     "foreground": "#1a1f2e",
+     "cursor": "#7c9082",
+     "selection": "#d3d8d2",
+     "ansi": [
+      "#1f1f1f",
+      "#c73e3a",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#c73e3a",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#1a1a1a",
+     "panel": "#0a0a0a",
+     "panelBorder": "#2a2a2a",
+     "tabActive": "#49564d",
+     "field": "#36443a",
+     "text": "#f5f5f5",
+     "secondaryText": "#a0a0a0",
+     "accent": "#7c9082"
+    },
+    "terminal": {
+     "background": "#0a0a0a",
+     "foreground": "#f5f5f5",
+     "cursor": "#7c9082",
+     "selection": "#2c322e",
+     "ansi": [
+      "#1e1e1e",
+      "#ef4444",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ef4444",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "soft-pop",
+   "name": "Soft Pop",
+   "description": "Pop suave e alegre.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f0f0f0",
+     "panel": "#f7f9f3",
+     "panelBorder": "#000000",
+     "tabActive": "#dc8e0a",
+     "field": "#f59e0b",
+     "text": "#000000",
+     "secondaryText": "#333333",
+     "accent": "#4f46e5"
+    },
+    "terminal": {
+     "background": "#f7f9f3",
+     "foreground": "#000000",
+     "cursor": "#4f46e5",
+     "selection": "#c5c3ef",
+     "ansi": [
+      "#1f1f1f",
+      "#ef4444",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ef4444",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#333333",
+     "panel": "#000000",
+     "panelBorder": "#545454",
+     "tabActive": "#fcd75f",
+     "field": "#fcd34d",
+     "text": "#ffffff",
+     "secondaryText": "#cccccc",
+     "accent": "#818cf8"
+    },
+    "terminal": {
+     "background": "#000000",
+     "foreground": "#ffffff",
+     "cursor": "#818cf8",
+     "selection": "#272a4a",
+     "ansi": [
+      "#1e1e1e",
+      "#f87171",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#f87171",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "solar-dusk",
+   "name": "Solar Dusk",
+   "description": "Entardecer laranja.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f1e9da",
+     "panel": "#fdfbf7",
+     "panelBorder": "#e4d9bc",
+     "tabActive": "#e1caac",
+     "field": "#f2daba",
+     "text": "#4a3b33",
+     "secondaryText": "#78716c",
+     "accent": "#b45309"
+    },
+    "terminal": {
+     "background": "#fdfbf7",
+     "foreground": "#4a3b33",
+     "cursor": "#b45309",
+     "selection": "#e7c9b0",
+     "ansi": [
+      "#1f1f1f",
+      "#991b1b",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#991b1b",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#201d1a",
+     "panel": "#1c1917",
+     "panelBorder": "#44403c",
+     "tabActive": "#345462",
+     "field": "#1e4252",
+     "text": "#f5f5f4",
+     "secondaryText": "#a8a29e",
+     "accent": "#f97316"
+    },
+    "terminal": {
+     "background": "#1c1917",
+     "foreground": "#f5f5f4",
+     "cursor": "#f97316",
+     "selection": "#5e3417",
+     "ansi": [
+      "#1e1e1e",
+      "#dc2626",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#dc2626",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "solarized",
+   "name": "Solarized",
+   "description": "A paleta precisa de Ethan Schoonover.",
+   "source": "official",
+   "dark": {
+    "interface": {
+     "chrome": "#073642",
+     "panel": "#002b36",
+     "panelBorder": "#586e75",
+     "tabActive": "#16414c",
+     "field": "#073642",
+     "text": "#839496",
+     "secondaryText": "#586e75",
+     "accent": "#268bd2"
+    },
+    "terminal": {
+     "background": "#002b36",
+     "foreground": "#839496",
+     "cursor": "#839496",
+     "selection": "#073642",
+     "ansi": [
+      "#073642",
+      "#dc322f",
+      "#859900",
+      "#b58900",
+      "#268bd2",
+      "#d33682",
+      "#2aa198",
+      "#eee8d5",
+      "#002b36",
+      "#cb4b16",
+      "#586e75",
+      "#657b83",
+      "#839496",
+      "#6c71c4",
+      "#93a1a1",
+      "#fdf6e3"
+     ]
+    }
+   },
+   "light": {
+    "interface": {
+     "chrome": "#eee8d5",
+     "panel": "#fdf6e3",
+     "panelBorder": "#93a1a1",
+     "tabActive": "#dedbcb",
+     "field": "#eee8d5",
+     "text": "#657b83",
+     "secondaryText": "#93a1a1",
+     "accent": "#268bd2"
+    },
+    "terminal": {
+     "background": "#fdf6e3",
+     "foreground": "#657b83",
+     "cursor": "#657b83",
+     "selection": "#eee8d5",
+     "ansi": [
+      "#073642",
+      "#dc322f",
+      "#859900",
+      "#b58900",
+      "#268bd2",
+      "#d33682",
+      "#2aa198",
+      "#eee8d5",
+      "#002b36",
+      "#cb4b16",
+      "#586e75",
+      "#657b83",
+      "#839496",
+      "#6c71c4",
+      "#93a1a1",
+      "#fdf6e3"
+     ]
+    }
+   }
+  },
+  {
+   "id": "starry-night",
+   "name": "Starry Night",
+   "description": "Noite estrelada em azul e amarelo.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#e5e5df",
+     "panel": "#f5f7fa",
+     "panelBorder": "#b0b8c1",
+     "tabActive": "#6696b3",
+     "field": "#6ea3c1",
+     "text": "#1a2238",
+     "secondaryText": "#3a5ba0",
+     "accent": "#3a5ba0"
+    },
+    "terminal": {
+     "background": "#f5f7fa",
+     "foreground": "#1a2238",
+     "cursor": "#3a5ba0",
+     "selection": "#bdc8df",
+     "ansi": [
+      "#1f1f1f",
+      "#2d1e2f",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#2d1e2f",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#1d1e2f",
+     "panel": "#181a24",
+     "panelBorder": "#2d2e3e",
+     "tabActive": "#c0d0f0",
+     "field": "#bccdf0",
+     "text": "#e6eaf3",
+     "secondaryText": "#7a88a1",
+     "accent": "#3a5ba0"
+    },
+    "terminal": {
+     "background": "#181a24",
+     "foreground": "#e6eaf3",
+     "cursor": "#3a5ba0",
+     "selection": "#222e49",
+     "ansi": [
+      "#1e1e1e",
+      "#a04a6c",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#a04a6c",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "sunset-horizon",
+   "name": "Sunset Horizon",
+   "description": "Pôr do sol em coral.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#fff0eb",
+     "panel": "#fff9f5",
+     "panelBorder": "#ffe0d6",
+     "tabActive": "#eba774",
+     "field": "#feb47b",
+     "text": "#3d3436",
+     "secondaryText": "#78716c",
+     "accent": "#ff7e5f"
+    },
+    "terminal": {
+     "background": "#fff9f5",
+     "foreground": "#3d3436",
+     "cursor": "#ff7e5f",
+     "selection": "#ffd4c8",
+     "ansi": [
+      "#1f1f1f",
+      "#e63946",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#e63946",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#30272c",
+     "panel": "#2a2024",
+     "panelBorder": "#463a41",
+     "tabActive": "#fdb986",
+     "field": "#feb47b",
+     "text": "#f2e9e4",
+     "secondaryText": "#d7c6bc",
+     "accent": "#ff7e5f"
+    },
+    "terminal": {
+     "background": "#2a2024",
+     "foreground": "#f2e9e4",
+     "cursor": "#ff7e5f",
+     "selection": "#6a3c36",
+     "ansi": [
+      "#1e1e1e",
+      "#e63946",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#e63946",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "supabase",
+   "name": "Supabase",
+   "description": "Verde Supabase.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#ededed",
+     "panel": "#fcfcfc",
+     "panelBorder": "#dfdfdf",
+     "tabActive": "#d8d8d8",
+     "field": "#ededed",
+     "text": "#171717",
+     "secondaryText": "#202020",
+     "accent": "#72e3ad"
+    },
+    "terminal": {
+     "background": "#fcfcfc",
+     "foreground": "#171717",
+     "cursor": "#72e3ad",
+     "selection": "#d3f4e4",
+     "ansi": [
+      "#1f1f1f",
+      "#ca3214",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ca3214",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#1f1f1f",
+     "panel": "#121212",
+     "panelBorder": "#292929",
+     "tabActive": "#434344",
+     "field": "#313131",
+     "text": "#e2e8f0",
+     "secondaryText": "#a2a2a2",
+     "accent": "#006239"
+    },
+    "terminal": {
+     "background": "#121212",
+     "foreground": "#e2e8f0",
+     "cursor": "#006239",
+     "selection": "#0d2a1e",
+     "ansi": [
+      "#1e1e1e",
+      "#541c15",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#541c15",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "t3-chat",
+   "name": "T3 Chat",
+   "description": "Ameixa e rosa.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f6e5f3",
+     "panel": "#faf5fa",
+     "panelBorder": "#efbdeb",
+     "tabActive": "#e1b3d7",
+     "field": "#f1c4e6",
+     "text": "#501854",
+     "secondaryText": "#834588",
+     "accent": "#a84370"
+    },
+    "terminal": {
+     "background": "#faf5fa",
+     "foreground": "#501854",
+     "cursor": "#a84370",
+     "selection": "#e1c0d1",
+     "ansi": [
+      "#1f1f1f",
+      "#ab4347",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ab4347",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#28222d",
+     "panel": "#221d27",
+     "panelBorder": "#3b3237",
+     "tabActive": "#544561",
+     "field": "#463753",
+     "text": "#d2c4de",
+     "secondaryText": "#c2b6cf",
+     "accent": "#a3004c"
+    },
+    "terminal": {
+     "background": "#221d27",
+     "foreground": "#d2c4de",
+     "cursor": "#a3004c",
+     "selection": "#491432",
+     "ansi": [
+      "#1e1e1e",
+      "#301015",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#301015",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "tangerine",
+   "name": "Tangerine",
+   "description": "Tangerina sobre ardósia.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f9fafb",
+     "panel": "#e8ebed",
+     "panelBorder": "#dcdfe2",
+     "tabActive": "#c6d2dd",
+     "field": "#d6e4f0",
+     "text": "#333333",
+     "secondaryText": "#6b7280",
+     "accent": "#e05d38"
+    },
+    "terminal": {
+     "background": "#e8ebed",
+     "foreground": "#333333",
+     "cursor": "#e05d38",
+     "selection": "#e6c0b7",
+     "ansi": [
+      "#1f1f1f",
+      "#ef4444",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#ef4444",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#2a303e",
+     "panel": "#1c2433",
+     "panelBorder": "#3d4354",
+     "tabActive": "#3d4864",
+     "field": "#2a3656",
+     "text": "#e5e5e5",
+     "secondaryText": "#a3a3a3",
+     "accent": "#e05d38"
+    },
+    "terminal": {
+     "background": "#1c2433",
+     "foreground": "#e5e5e5",
+     "cursor": "#e05d38",
+     "selection": "#573534",
+     "ansi": [
+      "#1e1e1e",
+      "#ef4444",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ef4444",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "tokyonight",
+   "name": "Tokyo Night",
+   "description": "Calmo, puxado para o azul.",
+   "source": "official",
+   "dark": {
+    "interface": {
+     "chrome": "#16161e",
+     "panel": "#1a1b26",
+     "panelBorder": "#3b4261",
+     "tabActive": "#2a2c38",
+     "field": "#16161e",
+     "text": "#c0caf5",
+     "secondaryText": "#565f89",
+     "accent": "#7aa2f7"
+    },
+    "terminal": {
+     "background": "#1a1b26",
+     "foreground": "#c0caf5",
+     "cursor": "#c0caf5",
+     "selection": "#283457",
+     "ansi": [
+      "#15161e",
+      "#f7768e",
+      "#9ece6a",
+      "#e0af68",
+      "#7aa2f7",
+      "#bb9af7",
+      "#7dcfff",
+      "#a9b1d6",
+      "#414868",
+      "#ff899d",
+      "#9fe044",
+      "#faba4a",
+      "#8db0ff",
+      "#c7a9ff",
+      "#a4daff",
+      "#c0caf5"
+     ]
+    }
+   },
+   "light": {
+    "interface": {
+     "chrome": "#d0d5e3",
+     "panel": "#e1e2e7",
+     "panelBorder": "#a8aecb",
+     "tabActive": "#bec7df",
+     "field": "#d0d5e3",
+     "text": "#3760bf",
+     "secondaryText": "#848cb5",
+     "accent": "#2e7de9"
+    },
+    "terminal": {
+     "background": "#e1e2e7",
+     "foreground": "#3760bf",
+     "cursor": "#3760bf",
+     "selection": "#b7c1e3",
+     "ansi": [
+      "#b4b5b9",
+      "#f52a65",
+      "#587539",
+      "#8c6c3e",
+      "#2e7de9",
+      "#9854f1",
+      "#007197",
+      "#6172b0",
+      "#a1a6c5",
+      "#ff4774",
+      "#5c8524",
+      "#a27629",
+      "#358aff",
+      "#a463ff",
+      "#007ea8",
+      "#3760bf"
+     ]
+    }
+   }
+  },
+  {
+   "id": "twitter",
+   "name": "Twitter",
+   "description": "Azul do Twitter.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#e5e5e6",
+     "panel": "#ffffff",
+     "panelBorder": "#e1eaef",
+     "tabActive": "#ced6e0",
+     "field": "#e3ecf6",
+     "text": "#0f1419",
+     "secondaryText": "#0f1419",
+     "accent": "#1e9df1"
+    },
+    "terminal": {
+     "background": "#ffffff",
+     "foreground": "#0f1419",
+     "cursor": "#1e9df1",
+     "selection": "#bce2fb",
+     "ansi": [
+      "#1f1f1f",
+      "#f4212e",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#f4212e",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#181818",
+     "panel": "#000000",
+     "panelBorder": "#242628",
+     "tabActive": "#1c2b36",
+     "field": "#061622",
+     "text": "#e7e9ea",
+     "secondaryText": "#72767a",
+     "accent": "#1c9cf0"
+    },
+    "terminal": {
+     "background": "#000000",
+     "foreground": "#e7e9ea",
+     "cursor": "#1c9cf0",
+     "selection": "#082f48",
+     "ansi": [
+      "#1e1e1e",
+      "#f4212e",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#f4212e",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "vercel",
+   "name": "Vercel",
+   "description": "Preto e branco puros.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f5f5f5",
+     "panel": "#fcfcfc",
+     "panelBorder": "#e4e4e4",
+     "tabActive": "#d4d4d4",
+     "field": "#ebebeb",
+     "text": "#000000",
+     "secondaryText": "#525252",
+     "accent": "#000000"
+    },
+    "terminal": {
+     "background": "#fcfcfc",
+     "foreground": "#000000",
+     "cursor": "#000000",
+     "selection": "#b0b0b0",
+     "ansi": [
+      "#1f1f1f",
+      "#e54b4f",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#e54b4f",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#1d1d1d",
+     "panel": "#000000",
+     "panelBorder": "#242424",
+     "tabActive": "#474747",
+     "field": "#333333",
+     "text": "#ffffff",
+     "secondaryText": "#a4a4a4",
+     "accent": "#ffffff"
+    },
+    "terminal": {
+     "background": "#000000",
+     "foreground": "#ffffff",
+     "cursor": "#ffffff",
+     "selection": "#4c4c4c",
+     "ansi": [
+      "#1e1e1e",
+      "#ff5b5b",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#ff5b5b",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "vintage-paper",
+   "name": "Vintage Paper",
+   "description": "Papel envelhecido.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#ece5d8",
+     "panel": "#f5f1e6",
+     "panelBorder": "#dbd0ba",
+     "tabActive": "#c6ba9e",
+     "field": "#d4c8aa",
+     "text": "#4a3f35",
+     "secondaryText": "#7d6b56",
+     "accent": "#a67c52"
+    },
+    "terminal": {
+     "background": "#f5f1e6",
+     "foreground": "#4a3f35",
+     "cursor": "#a67c52",
+     "selection": "#ddceba",
+     "ansi": [
+      "#1f1f1f",
+      "#b54a35",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#b54a35",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#312b26",
+     "panel": "#2d2621",
+     "panelBorder": "#4a4039",
+     "tabActive": "#68594d",
+     "field": "#59493e",
+     "text": "#ece5d8",
+     "secondaryText": "#c5bcac",
+     "accent": "#c0a080"
+    },
+    "terminal": {
+     "background": "#2d2621",
+     "foreground": "#ece5d8",
+     "cursor": "#c0a080",
+     "selection": "#594b3e",
+     "ansi": [
+      "#1e1e1e",
+      "#b54a35",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#b54a35",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  },
+  {
+   "id": "violet-bloom",
+   "name": "Violet Bloom",
+   "description": "Violeta florescendo.",
+   "source": "tweakcn",
+   "light": {
+    "interface": {
+     "chrome": "#f5f5f5",
+     "panel": "#fdfdfd",
+     "panelBorder": "#e7e7ee",
+     "tabActive": "#cbd4e6",
+     "field": "#e2ebff",
+     "text": "#000000",
+     "secondaryText": "#525252",
+     "accent": "#7033ff"
+    },
+    "terminal": {
+     "background": "#fdfdfd",
+     "foreground": "#000000",
+     "cursor": "#7033ff",
+     "selection": "#d3c0fe",
+     "ansi": [
+      "#1f1f1f",
+      "#e54b4f",
+      "#3c8c2c",
+      "#9c7a10",
+      "#2f62c8",
+      "#9b3fb8",
+      "#1f8a92",
+      "#bdbdbd",
+      "#6b6b6b",
+      "#e54b4f",
+      "#4fa63c",
+      "#b8921e",
+      "#4a7de0",
+      "#b45bd0",
+      "#2fa3ab",
+      "#e6e6e6"
+     ]
+    }
+   },
+   "dark": {
+    "interface": {
+     "chrome": "#2a2c33",
+     "panel": "#1a1b1e",
+     "panelBorder": "#33353a",
+     "tabActive": "#333d4d",
+     "field": "#1e293b",
+     "text": "#f0f0f0",
+     "secondaryText": "#a0a0a0",
+     "accent": "#8c5cff"
+    },
+    "terminal": {
+     "background": "#1a1b1e",
+     "foreground": "#f0f0f0",
+     "cursor": "#8c5cff",
+     "selection": "#3c2e62",
+     "ansi": [
+      "#1e1e1e",
+      "#f87171",
+      "#8cc570",
+      "#e2c06b",
+      "#6ca5f0",
+      "#c27be0",
+      "#5fc3c9",
+      "#c8c8c8",
+      "#5c5c5c",
+      "#f87171",
+      "#a3d98a",
+      "#f0d388",
+      "#8dbbf7",
+      "#d59aec",
+      "#7dd6db",
+      "#f2f2f2"
+     ]
+    }
+   }
+  }
+ ]
+}

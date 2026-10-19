@@ -24,19 +24,24 @@ public enum ThemeFile {
         guard let name = root["name"] as? String, !name.isEmpty else {
             throw Problem(field: "name", message: "falta o nome do tema")
         }
-        let dark = root["dark"] as? Bool ?? true
-        let ui = try object(root, "interface")
-        let term = try object(root, "terminal")
-        func color(_ section: [String: Any], _ prefix: String, _ key: String) throws -> RGB {
-            try parse(section[key], field: "\(prefix).\(key)")
+        return try variant(root, name: name, dark: root["dark"] as? Bool ?? true, prefix: "")
+    }
+
+    /// The interface and terminal sections of `object` as a theme. `prefix`
+    /// goes before field names in problems ("dark." in the catalog).
+    static func variant(_ object: [String: Any], name: String, dark: Bool, prefix: String) throws -> Theme {
+        let ui = try section(object, prefix + "interface")
+        let term = try section(object, prefix + "terminal")
+        func color(_ section: [String: Any], _ group: String, _ key: String) throws -> RGB {
+            try parse(section[key], field: "\(prefix)\(group).\(key)")
         }
         guard let ansiList = term["ansi"] as? [Any] else {
-            throw Problem(field: "terminal.ansi", message: "faltam as 16 cores ANSI")
+            throw Problem(field: prefix + "terminal.ansi", message: "faltam as 16 cores ANSI")
         }
         guard ansiList.count == 16 else {
-            throw Problem(field: "terminal.ansi", message: "são \(ansiList.count) cores; precisa de 16")
+            throw Problem(field: prefix + "terminal.ansi", message: "são \(ansiList.count) cores; precisa de 16")
         }
-        let ansi = try ansiList.enumerated().map { try parse($0.element, field: "terminal.ansi[\($0.offset)]") }
+        let ansi = try ansiList.enumerated().map { try parse($0.element, field: "\(prefix)terminal.ansi[\($0.offset)]") }
         return Theme(
             name: name, dark: dark,
             interface: .init(
@@ -82,8 +87,9 @@ public enum ThemeFile {
         return RGB(value)
     }
 
-    private static func object(_ root: [String: Any], _ key: String) throws -> [String: Any] {
-        guard let section = root[key] as? [String: Any] else { throw Problem(field: key, message: "falta a seção") }
+    private static func section(_ root: [String: Any], _ key: String) throws -> [String: Any] {
+        let name = String(key.split(separator: ".").last!)
+        guard let section = root[name] as? [String: Any] else { throw Problem(field: key, message: "falta a seção") }
         return section
     }
 }

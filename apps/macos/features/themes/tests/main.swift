@@ -38,6 +38,17 @@ let exitCode = await Checks.run([
         object["terminal"] = terminal
         expect((try? ThemeFile.read(try JSONSerialization.data(withJSONObject: object))) == nil)
     }),
+    ("the built-in catalog has the 46 themes, Caffeine first", {
+        let families = ThemeCatalog.builtIn
+        expect(families.count == 46, "\(families.count)")
+        expect(families.first?.id == "caffeine")
+        expect(Set(families.map(\.id)).count == families.count, "repeated ids")
+        for family in families {
+            expect(family.dark != nil || family.light != nil, family.id)
+            expect(!family.description.isEmpty, family.id)
+        }
+        expect(families.first { $0.id == "nord" }?.light == nil, "Nord has no light version")
+    }),
     ("colors print as #RRGGBB", {
         expect(RGB(0x252525).hex == "#252525")
         expect(RGB(0x1FFFFFF).value == 0xFFFFFF)
