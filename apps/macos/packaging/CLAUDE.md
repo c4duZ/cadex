@@ -6,6 +6,13 @@ scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem con
 - `build.sh` (ou `make package`): monta dist/Cadex.app na raiz do repositório, universal, com o
   `Info.plist` desta pasta (bundle id io.github.c4duz.cadex, versão, categoria, pastas e arquivos
   soltos no ícone do Dock). Leva 1 min e meio.
+- `release.sh`: build, Cadex.zip com o Cadex.zip.sha256, Cadex.dmg (create-dmg com o
+  `dmg-background.tiff`, gerado por `dmg-background.swift`) e o install.sh em dist/. Só publica com
+  `--publish "notas"` (gh release create com nomes sem versão). `CADEX_DMG_PLAIN=1` faz o DMG sem
+  mexer no Finder (sem fundo nem posições), para testar com alguém usando a máquina.
+- `install.sh`: o instalador por comando (sh, sem sudo): baixa o ZIP e o checksum da última
+  release, confere, põe em /Applications ou ~/Applications e tira a quarentena só do Cadex.
+  `CADEX_DOWNLOAD` (URL ou pasta) e `CADEX_INSTALL_DIR` trocam a origem e o destino nos testes.
 
 ## O que eu quero
 - Um `.app` universal (Apple Silicon + Intel) gerado só com as Command Line Tools.
@@ -56,3 +63,6 @@ scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem con
   Sem Mac Intel à mão: `arch -x86_64 dist/Cadex.app/Contents/MacOS/Cadex` roda a fatia Intel no
   Rosetta (conferido em 2026-10-19; falta um Mac Intel de verdade).
 - `spctl -a -vv Cadex.app` dá `rejected` enquanto não houver notarização: esperado, não é bug.
+- `CADEX_DOWNLOAD=dist CADEX_INSTALL_DIR=<pasta de teste> sh install.sh` instala e a assinatura
+  confere; com o ZIP alterado, recusa sem instalar nada. O DMG montado com `hdiutil attach
+  -nobrowse` tem o Cadex.app assinado e o atalho para Aplicativos.

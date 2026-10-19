@@ -6,8 +6,27 @@ Terminal, editor de código, explorador de arquivos, controle de versão com gra
 (web, Markdown, imagem, vídeo, áudio e PDF), num app nativo para cada sistema. Sem telemetria, sem
 conta, sem IA embutida: rode os seus agentes de código numa aba de terminal.
 
-> **Status:** início do projeto. Nenhuma feature implementada ainda. O plano está no atlas do
-> [`CLAUDE.md`](CLAUDE.md) e as decisões em [`docs/adr/`](docs/adr/).
+> **Status:** perto do MVP no macOS: terminal, abas e divisões, spaces, explorer, busca, editor,
+> Markdown, mídia, preview web, git e grafo funcionam. O plano está em
+> [`docs/plans/`](docs/plans/README.md) e as decisões em [`docs/adr/`](docs/adr/).
+
+## Instalar (macOS 13 ou mais novo, Apple Silicon ou Intel)
+
+Num terminal:
+
+```bash
+curl -fsSL https://github.com/c4duZ/cadex/releases/latest/download/install.sh | sh
+```
+
+O script baixa o app da última release, confere o checksum e coloca o Cadex em Aplicativos (ou em
+`~/Applications`, se Aplicativos não aceitar). Não pede senha nem instala mais nada. Dá para ler
+antes de rodar: [`install.sh`](apps/macos/packaging/install.sh).
+
+**Ou pelo DMG:** baixe o [Cadex.dmg](https://github.com/c4duZ/cadex/releases/latest/download/Cadex.dmg),
+abra e arraste o Cadex para Aplicativos. O Cadex ainda não é notarizado pela Apple, então na primeira
+vez o macOS diz que não pode verificar o app: feche o aviso, vá em **Ajustes do Sistema >
+Privacidade e Segurança**, role até o aviso sobre o Cadex e clique em **Abrir Mesmo Assim**. Depois
+disso ele abre normalmente. (Instalado pelo comando acima, esse aviso não aparece.)
 
 ## Arquitetura
 
@@ -67,7 +86,9 @@ feature, manifestos curtos por pasta e verificação executável.
 make check     # manifestos + testes do núcleo + testes do app
 ```
 
-Pré-requisitos (quando houver código): macOS 13+, Xcode e Swift 6, Zig.
+Pré-requisitos: macOS 13+, as Command Line Tools (Swift 6; o Xcode completo não é preciso) e
+Zig 0.16. `make run` abre o app; `make package` gera o `dist/Cadex.app` universal;
+`apps/macos/packaging/release.sh` gera o DMG, o ZIP e o instalador.
 
 ## Licença
 
