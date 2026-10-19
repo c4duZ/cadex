@@ -1,32 +1,98 @@
-# Cadex
+<p align="center">
+  <img src="docs/images/icon.png" width="128" alt="Ícone do Cadex">
+</p>
 
-Um workspace de desenvolvimento centrado no terminal, nativo e leve.
+<h1 align="center">Cadex</h1>
 
-Terminal, editor de código, explorador de arquivos, controle de versão com grafo do git e previews
-(web, Markdown, imagem, vídeo, áudio e PDF), num app nativo para cada sistema. Sem telemetria, sem
-conta, sem IA embutida: rode os seus agentes de código numa aba de terminal.
+<p align="center">
+  Um workspace de desenvolvimento centrado no terminal, nativo e leve.<br>
+  Terminal, editor de código, explorador de arquivos, git com grafo e previews (web, Markdown, imagem,
+  vídeo, áudio e PDF) numa janela só. <b>Sem telemetria, sem conta, sem IA embutida:</b> rode os seus
+  agentes de código numa aba de terminal.
+</p>
 
-> **Status:** perto do MVP no macOS: terminal, abas e divisões, spaces, explorer, busca, editor,
-> Markdown, mídia, preview web, git e grafo funcionam. O plano está em
-> [`docs/plans/`](docs/plans/README.md) e as decisões em [`docs/adr/`](docs/adr/).
+<p align="center">
+  <a href="https://github.com/c4duZ/cadex/releases/latest/download/Cadex.dmg"><img src="https://img.shields.io/badge/Baixar%20para%20Mac-macOS%2013%2B%20%C2%B7%20Intel%20e%20Apple%20Silicon-C06A2B?style=for-the-badge&logo=apple&logoColor=F2F2F2&labelColor=1E1E1E" alt="Baixar o Cadex para Mac" height="44"></a>
+</p>
 
-## Instalar (macOS 13 ou mais novo, Apple Silicon ou Intel)
+<p align="center">
+  <sub>Grátis e de código aberto (MIT) · 7,5 MB · <a href="#instalar-no-mac">como instalar</a> · <a href="#pelo-terminal">instalar com um comando</a></sub>
+</p>
 
-Num terminal:
+---
+
+## O que é
+
+O Cadex junta num app nativo do macOS o que um dia de trabalho com agentes de código pede: o terminal
+onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tudo alcançável pelo ⌘K.
+
+- **Terminal** rápido e nítido (modelo da [libghostty](https://github.com/ghostty-org/ghostty),
+  desenho em Metal), com abas, divisões, busca, links e colagem de imagens.
+- **Spaces:** grupos de abas com nome, que voltam como estavam ao reabrir o app.
+- **Explorador e busca** de arquivos por nome e por conteúdo, respeitando o `.gitignore`.
+- **Editor de código** com destaque de sintaxe (tree-sitter), números de linha e dobras.
+- **Markdown** renderizado, com links entre notas, links quebrados e quem aponta pra cá.
+- **Git:** mudanças, stage, commit, push e pull, diff lado a lado e o grafo do histórico.
+- **Previews:** servidores locais e páginas web, imagem, vídeo, áudio e PDF.
+- **Temas:** 46 embutidos, imagem de fundo e vibrância.
+
+## Instalar no Mac
+
+<table>
+  <tr>
+    <td align="center" width="33%"><h3>1</h3><b>Baixe</b></td>
+    <td align="center" width="33%"><h3>2</h3><b>Arraste para Aplicativos</b></td>
+    <td align="center" width="33%"><h3>3</h3><b>Abra</b></td>
+  </tr>
+  <tr>
+    <td valign="top">Clique em <a href="https://github.com/c4duZ/cadex/releases/latest/download/Cadex.dmg"><b>Baixar para Mac</b></a>. Vem sempre a versão mais recente.</td>
+    <td valign="top">Abra o <code>Cadex.dmg</code> e arraste o ícone do Cadex para a pasta <b>Aplicativos</b>.</td>
+    <td valign="top">Na primeira vez, o macOS avisa que não pode verificar o app: vá em <b>Ajustes do Sistema → Privacidade e Segurança</b> e clique em <b>Abrir Mesmo Assim</b>. Depois disso ele abre direto.</td>
+  </tr>
+</table>
+
+Requisitos: macOS 13 ou superior, Intel ou Apple Silicon. Tudo o que o Cadex usa vem dentro do app: não
+precisa instalar Xcode, Homebrew nem nada antes, e funciona offline.
+
+### Pelo terminal
+
+Um comando baixa a última versão, confere o checksum e coloca o Cadex em Aplicativos, sem pedir
+senha e sem o aviso da primeira abertura:
 
 ```bash
 curl -fsSL https://github.com/c4duZ/cadex/releases/latest/download/install.sh | sh
 ```
 
-O script baixa o app da última release, confere o checksum e coloca o Cadex em Aplicativos (ou em
-`~/Applications`, se Aplicativos não aceitar). Não pede senha nem instala mais nada. Dá para ler
-antes de rodar: [`install.sh`](apps/macos/packaging/install.sh).
+O script é curto e dá para ler antes de rodar: [`install.sh`](apps/macos/packaging/install.sh). Rodar
+de novo atualiza para a versão mais recente.
 
-**Ou pelo DMG:** baixe o [Cadex.dmg](https://github.com/c4duZ/cadex/releases/latest/download/Cadex.dmg),
-abra e arraste o Cadex para Aplicativos. O Cadex ainda não é notarizado pela Apple, então na primeira
-vez o macOS diz que não pode verificar o app: feche o aviso, vá em **Ajustes do Sistema >
-Privacidade e Segurança**, role até o aviso sobre o Cadex e clique em **Abrir Mesmo Assim**. Depois
-disso ele abre normalmente. (Instalado pelo comando acima, esse aviso não aparece.)
+<details>
+<summary><b>Problemas na instalação?</b></summary>
+
+- **O macOS não deixa abrir na primeira vez:** o Cadex ainda não é notarizado pela Apple. Vá em Ajustes do Sistema → Privacidade e Segurança → **Abrir Mesmo Assim**, ou rode `xattr -dr com.apple.quarantine /Applications/Cadex.app`.
+- **O comando instalou em `~/Applications`:** a pasta Aplicativos do sistema não aceitou a cópia sem senha; o Cadex funciona igual de lá.
+- **O botão de baixar dá 404:** enquanto o repositório for privado, os downloads só funcionam para quem tem acesso a ele e está logado no GitHub.
+- **Versões anteriores:** na [página de releases](https://github.com/c4duZ/cadex/releases).
+
+</details>
+
+## Atalhos
+
+Toda ação do Cadex é um comando: o **⌘K** acha e roda qualquer uma, e os atalhos podem ser trocados
+nas configurações (⌘,).
+
+| Ação | Atalho |
+|---|---|
+| Paleta de comandos | `⌘K` |
+| Nova aba / fechar painel | `⌘T` / `⌘W` |
+| Dividir à direita / para baixo | `⌘D` / `⌘⇧D` |
+| Ir para a aba 1…9 | `⌘1…9` |
+| Abrir arquivo por nome / buscar no conteúdo | `⌘P` / `⌘⇧F` |
+| Abrir pasta | `⌘O` |
+| Painel lateral / arquivos / git | `⌘B` / `⌘⇧E` / `⌘⇧G` |
+| Histórico do git | `⌘⇧H` |
+| Trocar de space / novo space | `⌘⇧S` / `⌃⌘N` |
+| Buscar no terminal / limpar | `⌘F` / `⌘L` |
 
 ## Tamanho e memória
 
@@ -98,13 +164,29 @@ feature, manifestos curtos por pasta e verificação executável.
 
 ## Desenvolvimento
 
+Requisitos: macOS 13+, as Command Line Tools (Swift 6; o Xcode completo não é preciso) e Zig 0.16.
+
 ```bash
 make check     # manifestos + testes do núcleo + testes do app
+make run       # compila e abre o app
+make package   # gera dist/Cadex.app universal (Intel + Apple Silicon), assinado ad hoc
 ```
 
-Pré-requisitos: macOS 13+, as Command Line Tools (Swift 6; o Xcode completo não é preciso) e
-Zig 0.16. `make run` abre o app; `make package` gera o `dist/Cadex.app` universal;
-`apps/macos/packaging/release.sh` gera o DMG, o ZIP e o instalador.
+O identificador `io.github.c4duz.cadex` é fixo na assinatura para o macOS manter as permissões dadas
+ao Cadex entre um build e outro.
+
+### Publicar uma versão
+
+```bash
+# 1. Suba CFBundleShortVersionString (ex.: 0.2.0) e CFBundleVersion (inteiro, sempre maior)
+#    em apps/macos/packaging/Info.plist
+# 2. Gere e publique (requer: brew install create-dmg, e o gh logado na conta dona do repositório)
+apps/macos/packaging/release.sh --publish "O que mudou nesta versão"
+```
+
+O script gera o `Cadex.dmg`, o `Cadex.zip` com o checksum e o `install.sh`, e cria a release
+`vX.Y.Z`. Os arquivos sobem com nome fixo, sem a versão, para o botão de download e o comando de
+instalação do topo sempre pegarem a última. Sem `--publish`, ele só gera os arquivos em `dist/`.
 
 ## Licença
 
