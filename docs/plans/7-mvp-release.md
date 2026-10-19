@@ -55,3 +55,26 @@ completa, testada no projeto vizinho BKDict, está em `apps/macos/packaging/CLAU
   o DMG instala arrastando.
 - Fim do MVP: critérios de aceite das specs marcados, semana de uso concluída, status na tabela de
   `docs/plans/README.md`.
+
+## Andamento (2026-10-19)
+Fases A a D feitas, cada uma num commit; falta a E (semana de uso), que é do dono.
+
+- **A. Spaces:** salvos em Application Support/Cadex/spaces.json meio segundo depois de cada mudança
+  e ao sair; conferido no app (novo space, dividir, histórico aberto, sair pelo menu, reabrir com as
+  abas, a divisão, o foco e o space ativo; abrir sem pasta devolve a pasta do workspace). Os
+  documentos restaurados têm a pasta autorizada de novo (o histórico de um repositório fora do
+  workspace falhava).
+- **B. Build universal:** `make package` gera o app em 1 min e meio; lipo, codesign e spctl dão o
+  esperado. A fatia Intel rodou pelo Rosetta (`arch -x86_64`). Achado no caminho: o terminal criado
+  antes de entrar na janela (o primeiro de um space) ficava em branco; agora redesenha ao entrar.
+- **C. DMG, ZIP e instalador:** `release.sh` gera tudo em dist/ e só publica com `--publish`. O
+  install.sh instalou numa pasta de teste e recusou um ZIP alterado. O DMG foi testado sem o passo
+  do Finder (CADEX_DMG_PLAIN=1), para não abrir janelas na frente do dono.
+- **D. Medidas:** no README (DMG 7,5 MB, app 40 MB, 66 MB de memória com um terminal).
+
+Falta, com o dono: rodar `apps/macos/packaging/release.sh` numa sessão livre (o DMG com fundo e
+posições), publicar com `--publish` (cria a release v0.1.0 no GitHub), instalar pelo comando num
+usuário limpo, abrir num Mac Intel de verdade, trocar de space pela paleta (⇧⌘S e escolher) e a
+semana de uso. Decisões tomadas sem o dono, para confirmar: bundle id io.github.c4duz.cadex (mudar
+depois faz o macOS esquecer as permissões), atalhos ⇧⌘S, ⌃⌘N e ⌃⌘←/→ para spaces, e o checksum
+SHA-256 publicado junto do ZIP.
