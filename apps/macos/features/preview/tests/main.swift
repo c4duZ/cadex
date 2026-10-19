@@ -22,5 +22,9 @@ let exitCode = await Checks.run([
         expect(doc.web.configuration.userContentController.userScripts.isEmpty)
         expect(!doc.web.configuration.websiteDataStore.isPersistent)
     }),
+    ("the page sees Safari, so Google serves its real page", {
+        let ua = PreviewDocument.safariUserAgent
+        expect(ua.hasPrefix("Version/") && ua.hasSuffix("Safari/605.1.15"), ua)
+    }),
 ])
 exit(exitCode)

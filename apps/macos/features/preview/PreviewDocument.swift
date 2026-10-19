@@ -23,11 +23,21 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     /// Fixed at creation: the same address opens the same tab.
     public let identity: String
 
+    /// The tail Safari adds to WebKit's user agent. Without it Google took
+    /// the preview for an unknown browser: the old basic HTML page, then the
+    /// "unusual traffic" captcha on searching (owner, 2026-10-19).
+    static var safariUserAgent: String {
+        let info = NSDictionary(contentsOfFile: "/Applications/Safari.app/Contents/Info.plist")
+        let version = info?["CFBundleShortVersionString"] as? String ?? "18.0"
+        return "Version/\(version) Safari/605.1.15"
+    }
+
     /// An empty `url` opens a blank tab with the address bar ready.
     public init(url: String) {
         identity = Self.identity(for: url)
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
+        configuration.applicationNameForUserAgent = Self.safariUserAgent
         web = WKWebView(frame: .zero, configuration: configuration)
         back = Self.button(.arrowLeft, "Voltar")
         forward = Self.button(.arrowRight, "Avançar")
