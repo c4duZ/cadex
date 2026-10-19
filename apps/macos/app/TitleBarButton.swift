@@ -7,7 +7,13 @@ import Icons
 /// on their 16 pt glyph (UI review, 2026-10-19).
 final class TitleBarButton: NSView {
     static let height: CGFloat = 26
-    static let iconOnlyWidth: CGFloat = 28
+    static let iconSize: CGFloat = 15
+    /// The same margin on both sides of every button, with words or not, so
+    /// icons side by side sit at equal distances: an icon alone is 28 pt.
+    /// Mixed margins (8 and 9 pt next to a 28 pt icon button) left the
+    /// group's gaps uneven (owner, 2026-10-19).
+    static let margin: CGFloat = 6.5
+    static let iconOnlyWidth: CGFloat = iconSize + margin * 2
 
     var onPress: (() -> Void)?
     var colors: (text: NSColor, secondary: NSColor) = (.labelColor, .secondaryLabelColor) { didSet { restyle() } }
@@ -19,8 +25,7 @@ final class TitleBarButton: NSView {
     var attributedTitle: NSAttributedString? { didSet { restyle() } }
 
     init(icon: Icon?, title: String? = nil, tip: String) {
-        // 15 pt alone, 13 pt next to words: one size per role.
-        self.icon = icon.map { NSImageView(image: $0.image(size: title == nil ? 15 : 13)) }
+        self.icon = icon.map { NSImageView(image: $0.image(size: Self.iconSize)) }
         super.init(frame: .zero)
         wantsLayer = true
         layer?.cornerRadius = 6
@@ -32,7 +37,7 @@ final class TitleBarButton: NSView {
         label.font = .systemFont(ofSize: 12)
         let views: [NSView] = (self.icon.map { [$0] } ?? []) + (title == nil ? [] : [label])
         let content = NSStackView(views: views)
-        content.spacing = 5
+        content.spacing = 4
         content.translatesAutoresizingMaskIntoConstraints = false
         addSubview(content)
         var constraints = [
@@ -43,8 +48,8 @@ final class TitleBarButton: NSView {
             constraints += [widthAnchor.constraint(equalToConstant: Self.iconOnlyWidth),
                             content.centerXAnchor.constraint(equalTo: centerXAnchor)]
         } else {
-            constraints += [content.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-                            content.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -9)]
+            constraints += [content.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Self.margin),
+                            content.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Self.margin)]
         }
         NSLayoutConstraint.activate(constraints)
         restyle()

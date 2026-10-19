@@ -16,8 +16,14 @@ final class TitleBarView: NSView {
     /// Matches the title area of a window with a unified compact toolbar,
     /// where macOS centers the window buttons.
     static let height: CGFloat = 38
-    /// Right after the close, minimize and zoom buttons.
-    private static let windowButtonsWidth: CGFloat = 76
+    /// Where the close, minimize and zoom buttons end, and the one gap used
+    /// before and after the group: 6 and 12 pt there read as crooked.
+    // Measured in a capture: the zoom button ends at 72 pt (2026-10-19).
+    private static let windowButtonsEnd: CGFloat = 72
+    private static let groupGap: CGFloat = 10
+    /// The group's leading edge: after the window buttons, or at the edge in
+    /// full screen, where macOS hides them (owner, 2026-10-19).
+    private var groupLeading: NSLayoutConstraint!
 
     private let run: (String) -> Void
     private let sidebarButton = TitleBarButton(icon: .sidebar, tip: "Painel lateral (⌘B)")
@@ -48,7 +54,7 @@ final class TitleBarView: NSView {
         group.layer?.cornerRadius = 8
         let inside = NSStackView(views: [sidebarButton, searchButton, spaceButton])
         inside.spacing = 0
-        inside.edgeInsets = NSEdgeInsets(top: 1, left: 1, bottom: 1, right: 1)
+        inside.edgeInsets = NSEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
         inside.translatesAutoresizingMaskIntoConstraints = false
         group.addSubview(inside)
         NSLayoutConstraint.activate([
@@ -64,8 +70,9 @@ final class TitleBarView: NSView {
             $0.translatesAutoresizingMaskIntoConstraints = false
             addSubview($0)
         }
+        groupLeading = group.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Self.windowButtonsEnd + Self.groupGap)
         NSLayoutConstraint.activate([
-            group.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Self.windowButtonsWidth),
+            groupLeading,
             spaceButton.widthAnchor.constraint(lessThanOrEqualToConstant: 160),
             settingsButton.leadingAnchor.constraint(greaterThanOrEqualTo: newTabButton.trailingAnchor, constant: 12),
             settingsButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
@@ -101,7 +108,7 @@ final class TitleBarView: NSView {
         bar.translatesAutoresizingMaskIntoConstraints = false
         addSubview(bar)
         tabBarConstraints = [
-            bar.leadingAnchor.constraint(equalTo: group.trailingAnchor, constant: 12),
+            bar.leadingAnchor.constraint(equalTo: group.trailingAnchor, constant: Self.groupGap),
             bar.heightAnchor.constraint(equalToConstant: 30),
             bar.centerYAnchor.constraint(equalTo: centerYAnchor),
             newTabButton.leadingAnchor.constraint(equalTo: bar.trailingAnchor, constant: 4),
@@ -112,6 +119,21 @@ final class TitleBarView: NSView {
         bar.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         bar.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         tabBar = bar
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        let center = NotificationCenter.default
+        center.removeObserver(self)
+        guard let window else { return }
+        center.addObserver(self, selector: #selector(fullScreenChanged), name: NSWindow.didEnterFullScreenNotification, object: window)
+        center.addObserver(self, selector: #selector(fullScreenChanged), name: NSWindow.didExitFullScreenNotification, object: window)
+        fullScreenChanged()
+    }
+
+    @objc private func fullScreenChanged() {
+        let full = window?.styleMask.contains(.fullScreen) == true
+        groupLeading.constant = full ? 8 : Self.windowButtonsEnd + Self.groupGap
     }
 
     /// Empty parts of the bar drag the window, like a normal title bar.
