@@ -4,6 +4,7 @@
 //! folder authorized for the session.
 
 const std = @import("std");
+const sync = @import("../../shared/sync.zig");
 const c = std.c;
 const paths = @import("paths.zig");
 
@@ -14,7 +15,7 @@ pub const Registry = struct {
     roots: std.ArrayList([]u8) = .empty,
     /// The app calls from the main thread; search and file watching from
     /// their own threads.
-    mutex: c.pthread_mutex_t = c.PTHREAD_MUTEX_INITIALIZER,
+    mutex: sync.Mutex = .{},
 
     pub fn init(gpa: std.mem.Allocator) Registry {
         return .{ .gpa = gpa };
@@ -31,8 +32,8 @@ pub const Registry = struct {
         var buf: paths.Buffer = undefined;
         const real = try paths.canonicalize(path, &buf);
         if (!paths.isDirectory(real)) return error.NotDirectory;
-        _ = c.pthread_mutex_lock(&self.mutex);
-        defer _ = c.pthread_mutex_unlock(&self.mutex);
+        self.mutex.lock();
+        defer self.mutex.unlock();
         for (self.roots.items) |root| {
             if (std.mem.eql(u8, root, real)) return root;
         }
@@ -60,8 +61,8 @@ pub const Registry = struct {
     }
 
     fn check(self: *Registry, real: []const u8) error{Outside}!void {
-        _ = c.pthread_mutex_lock(&self.mutex);
-        defer _ = c.pthread_mutex_unlock(&self.mutex);
+        self.mutex.lock();
+        defer self.mutex.unlock();
         for (self.roots.items) |root| {
             if (paths.isWithin(root, real)) return;
         }
@@ -71,8 +72,8 @@ pub const Registry = struct {
     /// The deepest authorized directory holding canonical `real`, copied
     /// into `out`: the workspace a path belongs to.
     pub fn rootOf(self: *Registry, real: []const u8, out: *paths.Buffer) ?[]const u8 {
-        _ = c.pthread_mutex_lock(&self.mutex);
-        defer _ = c.pthread_mutex_unlock(&self.mutex);
+        self.mutex.lock();
+        defer self.mutex.unlock();
         var best: ?[]const u8 = null;
         for (self.roots.items) |root| {
             if (paths.isWithin(root, real) and (best == null or root.len > best.?.len)) best = root;

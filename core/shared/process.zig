@@ -5,6 +5,7 @@
 //! this.
 
 const std = @import("std");
+const clock = @import("clock.zig");
 const c = std.c;
 
 pub const Options = struct {
@@ -111,13 +112,13 @@ fn collect(gpa: std.mem.Allocator, out_fd: c.fd_t, err_fd: c.fd_t, pid: c.pid_t,
         .{ .fd = out_fd, .events = c.POLL.IN, .revents = 0 },
         .{ .fd = err_fd, .events = c.POLL.IN, .revents = 0 },
     };
-    const deadline = nowMs() + options.timeout_ms;
+    const deadline = clock.monotonicMs() + options.timeout_ms;
     var truncated = false;
     var timed_out = false;
     var open: usize = 2;
     var buf: [64 * 1024]u8 = undefined;
     while (open > 0) {
-        const left = deadline - nowMs();
+        const left = deadline - clock.monotonicMs();
         if (left <= 0) {
             timed_out = true;
             _ = c.kill(-pid, .KILL);
@@ -166,12 +167,6 @@ fn environment(a: std.mem.Allocator, extra: []const []const u8) ![*:null]const ?
     }
     for (extra) |e| try list.append(a, (try a.dupeZ(u8, e)).ptr);
     return (try list.toOwnedSliceSentinel(a, null)).ptr;
-}
-
-fn nowMs() i64 {
-    var ts: c.timespec = undefined;
-    _ = c.clock_gettime(.MONOTONIC, &ts);
-    return @as(i64, ts.sec) * 1000 + @divTrunc(@as(i64, ts.nsec), 1_000_000);
 }
 
 const testing = std.testing;

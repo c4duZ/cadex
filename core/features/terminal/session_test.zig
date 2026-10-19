@@ -2,10 +2,9 @@
 //! model working together.
 
 const std = @import("std");
+const clock = @import("../../shared/clock.zig");
 const testing = std.testing;
 const Session = @import("session.zig").Session;
-
-extern "c" fn usleep(microseconds: c_uint) c_int;
 
 /// Real shells send sequences libghostty-vt logs as "unimplemented" (/bin/sh asks
 /// for mode 1034). Harmless, but the build runner reports any test stderr as
@@ -21,7 +20,7 @@ fn waitForText(session: *Session, needle: []const u8) !void {
         const text = try session.copyText(testing.allocator);
         defer testing.allocator.free(text);
         if (std.mem.indexOf(u8, text, needle) != null) return;
-        _ = usleep(20 * 1000);
+        clock.sleepMs(20);
     }
     return error.TextNeverAppeared;
 }
@@ -72,14 +71,14 @@ test "reports a foreground program and the shell exit code" {
 
     try session.write("sleep 5\n");
     var attempts: u32 = 0;
-    while (!session.hasForegroundProcess() and attempts < 250) : (attempts += 1) _ = usleep(20 * 1000);
+    while (!session.hasForegroundProcess() and attempts < 250) : (attempts += 1) clock.sleepMs(20);
     try testing.expect(session.hasForegroundProcess());
 
     // Ctrl+C ends sleep; then the shell exits with code 7.
     try session.write("\x03");
     try session.write("exit 7\n");
     attempts = 0;
-    while (Exit.code.load(.acquire) < 0 and attempts < 250) : (attempts += 1) _ = usleep(20 * 1000);
+    while (Exit.code.load(.acquire) < 0 and attempts < 250) : (attempts += 1) clock.sleepMs(20);
     try testing.expectEqual(@as(i32, 7), Exit.code.load(.acquire));
 }
 
@@ -90,7 +89,7 @@ test "closing a session with a running program does not hang" {
         .shell = "/bin/sh",
     });
     try session.write("sleep 100\n");
-    _ = usleep(100 * 1000);
+    clock.sleepMs(100);
     session.close();
 }
 
@@ -101,7 +100,7 @@ test "closing while a program floods the terminal does not hang" {
         .shell = "/bin/sh",
     });
     try session.write("yes cadex\n");
-    _ = usleep(300 * 1000);
+    clock.sleepMs(300);
 
     // Before the fix close() waited forever for the shell to drain its
     // output. Closing the pty first lets it exit within the SIGHUP grace
@@ -113,9 +112,7 @@ test "closing while a program floods the terminal does not hang" {
 }
 
 fn monotonicSeconds() f64 {
-    var ts: std.c.timespec = undefined;
-    _ = std.c.clock_gettime(.MONOTONIC, &ts);
-    return @as(f64, @floatFromInt(ts.sec)) + @as(f64, @floatFromInt(ts.nsec)) / 1e9;
+    return @as(f64, @floatFromInt(clock.monotonicMs())) / 1000;
 }
 
 test "a local server's address in the output is reported once" {
@@ -139,8 +136,8 @@ test "a local server's address in the output is reported once" {
     // Built by the shell, so the echo of the typed command does not match.
     try session.write("p=8000; echo \"Serving on http://0.0.0.0:$p/ now\"; echo \"again 0.0.0.0:$p/\"\n");
     var attempts: u32 = 0;
-    while (Seen.count.load(.acquire) == 0 and attempts < 250) : (attempts += 1) _ = usleep(20 * 1000);
-    _ = usleep(200 * 1000);
+    while (Seen.count.load(.acquire) == 0 and attempts < 250) : (attempts += 1) clock.sleepMs(20);
+    clock.sleepMs(200);
     try testing.expectEqual(@as(u32, 1), Seen.count.load(.acquire));
     try testing.expectEqualStrings("http://localhost:8000/", std.mem.sliceTo(&Seen.last, 0));
 }

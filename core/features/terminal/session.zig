@@ -2,6 +2,7 @@
 //! reads the shell's output into the model.
 
 const std = @import("std");
+const sync = @import("../../shared/sync.zig");
 const c = std.c;
 const Model = @import("model.zig").Model;
 const pty = @import("pty.zig");
@@ -55,7 +56,7 @@ pub const Session = struct {
     model: *Model,
     child: pty.Child,
     callbacks: Callbacks,
-    mutex: c.pthread_mutex_t = c.PTHREAD_MUTEX_INITIALIZER,
+    mutex: sync.Mutex = .{},
     reader: std.Thread = undefined,
     stop: std.atomic.Value(bool) = .init(false),
     /// Set by the reader once it collected the shell's exit status.
@@ -185,11 +186,11 @@ pub const Session = struct {
     /// The model is shared with the reader thread: hold the lock while
     /// reading it (for example, while drawing a frame).
     pub fn lock(self: *Session) void {
-        _ = c.pthread_mutex_lock(&self.mutex);
+        self.mutex.lock();
     }
 
     pub fn unlock(self: *Session) void {
-        _ = c.pthread_mutex_unlock(&self.mutex);
+        self.mutex.unlock();
     }
 
     fn readLoop(self: *Session) void {

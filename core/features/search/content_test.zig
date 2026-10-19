@@ -1,24 +1,24 @@
 //! Content search on real folders: results, limits, and cancellation.
 
 const std = @import("std");
+const sync = @import("../../shared/sync.zig");
+const clock = @import("../../shared/clock.zig");
 const testing = std.testing;
 const workspace = @import("../workspace/workspace.zig");
 const content = @import("content.zig");
 const TestDir = @import("../../shared/test_dir.zig").TestDir;
 
-extern "c" fn usleep(microseconds: c_uint) c_int;
-
 /// Collects what the callbacks deliver, from the search thread.
 const Seen = struct {
-    mutex: std.c.pthread_mutex_t = std.c.PTHREAD_MUTEX_INITIALIZER,
+    mutex: sync.Mutex = .{},
     lines: std.ArrayList([]u8) = .empty,
     done: std.atomic.Value(bool) = .init(false),
     truncated: bool = false,
 
     fn onHits(context: ?*anyopaque, hits: [*]const content.Hit, count: usize) callconv(.c) void {
         const self: *Seen = @ptrCast(@alignCast(context.?));
-        _ = std.c.pthread_mutex_lock(&self.mutex);
-        defer _ = std.c.pthread_mutex_unlock(&self.mutex);
+        self.mutex.lock();
+        defer self.mutex.unlock();
         for (hits[0..count]) |h| {
             const text = h.text[0..h.text_len];
             const line = std.fmt.allocPrint(testing.allocator, "{s}:{d}:{d}:{s}", .{
@@ -38,7 +38,7 @@ const Seen = struct {
         var attempts: u32 = 0;
         while (!self.done.load(.acquire)) : (attempts += 1) {
             if (attempts > 250) return error.SearchNeverFinished;
-            _ = usleep(20 * 1000);
+            clock.sleepMs(20);
         }
     }
 
@@ -119,10 +119,10 @@ test "a cancelled search delivers nothing afterwards" {
     defer seen.deinit();
     const search = try content.Search.start(testing.allocator, &registry, dir.path(), "needle", .{}, seen.callbacks());
     search.cancel();
-    _ = std.c.pthread_mutex_lock(&seen.mutex);
+    seen.mutex.lock();
     const after_cancel = seen.lines.items.len;
-    _ = std.c.pthread_mutex_unlock(&seen.mutex);
-    _ = usleep(100 * 1000);
+    seen.mutex.unlock();
+    clock.sleepMs(100);
     try testing.expectEqual(after_cancel, seen.lines.items.len);
 }
 

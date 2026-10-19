@@ -2,12 +2,11 @@
 //! functions, to lock the contract in include/cadex.h.
 
 const std = @import("std");
+const clock = @import("../../shared/clock.zig");
 const testing = std.testing;
 const api = @import("c_api.zig");
 const view_api = @import("c_api_view.zig");
 const status = @import("../../status.zig");
-
-extern "c" fn usleep(microseconds: c_uint) c_int;
 
 fn options() api.Options {
     return .{
@@ -44,7 +43,7 @@ test "open, write, read the text back and close through the C API" {
         try testing.expectEqual(status.ok, api.cadex_terminal_copy_text(session, &ptr, &len));
         if (ptr) |p| found = std.mem.indexOf(u8, p[0..len], "c-api-2") != null;
         status.cadex_free(ptr);
-        if (!found) _ = usleep(20 * 1000);
+        if (!found) clock.sleepMs(20);
     }
     try testing.expect(found);
 }
@@ -97,7 +96,7 @@ test "selection and scrolling through the C API" {
     var found = false;
     var attempts: u32 = 0;
     while (!found and attempts < 250) : (attempts += 1) {
-        _ = usleep(20 * 1000);
+        clock.sleepMs(20);
         try testing.expectEqual(status.ok, view_api.cadex_terminal_select_all(session));
         try testing.expectEqual(status.ok, view_api.cadex_terminal_copy_selection(session, &ptr, &len));
         if (ptr) |p| found = std.mem.indexOf(u8, p[0..len], "sel-4") != null;
@@ -179,7 +178,7 @@ test "the working directory follows the shell" {
     var found = false;
     var attempts: u32 = 0;
     while (!found and attempts < 250) : (attempts += 1) {
-        _ = usleep(20 * 1000);
+        clock.sleepMs(20);
         var ptr: ?[*]u8 = null;
         var len: usize = 0;
         try testing.expectEqual(status.ok, api.cadex_terminal_copy_working_directory(session, &ptr, &len));

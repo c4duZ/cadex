@@ -4,6 +4,8 @@
 //! the workspace.
 
 const std = @import("std");
+const sync = @import("../../shared/sync.zig");
+const clock = @import("../../shared/clock.zig");
 const c = std.c;
 const workspace = @import("../workspace/workspace.zig");
 const explorer = @import("../explorer/explorer.zig");
@@ -16,8 +18,8 @@ pub const Index = struct {
     gpa: std.mem.Allocator,
     root: []u8,
     show_hidden: bool,
-    mutex: c.pthread_mutex_t = c.PTHREAD_MUTEX_INITIALIZER,
-    wake: c.pthread_cond_t = c.PTHREAD_COND_INITIALIZER,
+    mutex: sync.Mutex = .{},
+    wake: sync.Condition = .{},
     /// Paths relative to the root, owned.
     files: std.StringArrayHashMapUnmanaged(void) = .empty,
     ready: std.atomic.Value(bool) = .init(false),
@@ -52,10 +54,10 @@ pub const Index = struct {
     pub fn close(self: *Index) void {
         if (self.watcher) |w| w.stop();
         self.cancelled.store(true, .release);
-        _ = c.pthread_mutex_lock(&self.mutex);
+        self.mutex.lock();
         self.stop = true;
-        _ = c.pthread_cond_signal(&self.wake);
-        _ = c.pthread_mutex_unlock(&self.mutex);
+        self.wake.signal();
+        self.mutex.unlock();
         self.thread.join();
         for (self.pending.items) |p| self.gpa.free(p.rel);
         self.pending.deinit(self.gpa);
@@ -66,11 +68,11 @@ pub const Index = struct {
     }
 
     pub fn lock(self: *Index) void {
-        _ = c.pthread_mutex_lock(&self.mutex);
+        self.mutex.lock();
     }
 
     pub fn unlock(self: *Index) void {
-        _ = c.pthread_mutex_unlock(&self.mutex);
+        self.mutex.unlock();
     }
 
     /// The indexed paths; hold lock() while using them.
@@ -99,7 +101,7 @@ pub const Index = struct {
     fn nextPending(self: *Index) ?Pending {
         self.lock();
         defer self.unlock();
-        while (!self.stop and self.pending.items.len == 0) _ = c.pthread_cond_wait(&self.wake, &self.mutex);
+        while (!self.stop and self.pending.items.len == 0) self.wake.wait(&self.mutex);
         if (self.stop) return null;
         return self.pending.orderedRemove(0);
     }
@@ -177,7 +179,7 @@ pub const Index = struct {
             const copy = self.gpa.dupe(u8, rel) catch continue;
             self.pending.append(self.gpa, .{ .rel = copy, .subtree = change.subtree }) catch self.gpa.free(copy);
         }
-        _ = c.pthread_cond_signal(&self.wake);
+        self.wake.signal();
     }
 };
 
@@ -199,14 +201,6 @@ fn isStale(key: []const u8, folder: []const u8, kept_folders: []const []const u8
 const testing = std.testing;
 const TestDir = @import("../../shared/test_dir.zig").TestDir;
 
-extern "c" fn usleep(microseconds: c_uint) c_int;
-
-fn nowMs() i64 {
-    var ts: c.timespec = undefined;
-    _ = c.clock_gettime(.MONOTONIC, &ts);
-    return @as(i64, ts.sec) * 1000 + @divTrunc(@as(i64, ts.nsec), 1_000_000);
-}
-
 fn waitFor(index: *Index, comptime check: fn (*Index) bool) !void {
     var attempts: u32 = 0;
     while (attempts < 250) : (attempts += 1) {
@@ -214,7 +208,7 @@ fn waitFor(index: *Index, comptime check: fn (*Index) bool) !void {
         const ok = check(index);
         index.unlock();
         if (ok) return;
-        _ = usleep(20 * 1000);
+        clock.sleepMs(20);
     }
     return error.IndexNeverCaughtUp;
 }
@@ -236,7 +230,7 @@ test "indexes the workspace and follows files created and removed" {
             return i.files.contains("core/features/terminal/render.zig") and i.files.contains("README.md");
         }
     }.f);
-    _ = usleep(200 * 1000);
+    clock.sleepMs(200);
     try dir.makeDir("core/features/search");
     try dir.writeFile("core/features/search/index.zig", "");
     try waitFor(index, struct {
@@ -258,10 +252,10 @@ test "closing during the first read does not wait for it" {
     // A big tree that takes far longer than the limit below to walk.
     _ = try registry.authorize("/usr");
     const index = try Index.open(testing.allocator, &registry, "/usr", true);
-    _ = usleep(20 * 1000);
-    const before = nowMs();
+    clock.sleepMs(20);
+    const before = clock.monotonicMs();
     index.close();
-    try testing.expect(nowMs() - before < 500);
+    try testing.expect(clock.monotonicMs() - before < 500);
 }
 
 test "stale keys after reading a folder again" {

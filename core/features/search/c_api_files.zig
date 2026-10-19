@@ -2,6 +2,7 @@
 //! ranking.
 
 const std = @import("std");
+const clock = @import("../../shared/clock.zig");
 const status = @import("../../status.zig");
 const workspace = @import("../workspace/workspace.zig");
 const Index = @import("index.zig").Index;
@@ -112,8 +113,6 @@ pub export fn cadex_search_files_result_free(result: ?*FilesResult) callconv(.c)
 const testing = std.testing;
 const TestDir = @import("../../shared/test_dir.zig").TestDir;
 
-extern "c" fn usleep(microseconds: c_uint) c_int;
-
 test "indexes and ranks through the C API" {
     var dir = try TestDir.init();
     defer dir.deinit();
@@ -130,7 +129,7 @@ test "indexes and ranks through the C API" {
     while (!ready or cadex_search_index_count(index, &ready) < 2) : (attempts += 1) {
         if (attempts > 250) return error.IndexNeverReady;
         _ = cadex_search_index_count(index, &ready);
-        _ = usleep(20 * 1000);
+        clock.sleepMs(20);
     }
     var result: FilesResult = undefined;
     try testing.expectEqual(status.ok, cadex_search_files(index, "render", 6, 10, &result));

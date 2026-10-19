@@ -6,6 +6,8 @@
 //! quickly, and none runs after stop() returns.
 
 const std = @import("std");
+const sync = @import("../../shared/sync.zig");
+const clock = @import("../../shared/clock.zig");
 const dispatch = std.c.dispatch;
 const workspace = @import("../workspace/workspace.zig");
 const errors = @import("errors.zig");
@@ -147,17 +149,15 @@ extern "c" fn FSEventStreamRelease(stream: *anyopaque) void;
 const testing = std.testing;
 const TestDir = @import("../../shared/test_dir.zig").TestDir;
 
-extern "c" fn usleep(microseconds: c_uint) c_int;
-
 const Seen = struct {
-    mutex: std.c.pthread_mutex_t = std.c.PTHREAD_MUTEX_INITIALIZER,
+    mutex: sync.Mutex = .{},
     text: [8192]u8 = undefined,
     len: usize = 0,
 
     fn record(context: ?*anyopaque, changes: [*]const Change, count: usize) callconv(.c) void {
         const self: *Seen = @ptrCast(@alignCast(context.?));
-        _ = std.c.pthread_mutex_lock(&self.mutex);
-        defer _ = std.c.pthread_mutex_unlock(&self.mutex);
+        self.mutex.lock();
+        defer self.mutex.unlock();
         for (changes[0..count]) |change| {
             const p = std.mem.span(change.path);
             if (self.len + p.len + 1 > self.text.len) return;
@@ -168,8 +168,8 @@ const Seen = struct {
     }
 
     fn clear(self: *Seen) void {
-        _ = std.c.pthread_mutex_lock(&self.mutex);
-        defer _ = std.c.pthread_mutex_unlock(&self.mutex);
+        self.mutex.lock();
+        defer self.mutex.unlock();
         self.len = 0;
     }
 
@@ -177,11 +177,11 @@ const Seen = struct {
     fn waitFor(self: *Seen, line: []const u8) !void {
         var attempts: u32 = 0;
         while (attempts < 250) : (attempts += 1) {
-            _ = std.c.pthread_mutex_lock(&self.mutex);
+            self.mutex.lock();
             const found = std.mem.indexOf(u8, self.text[0..self.len], line) != null;
-            _ = std.c.pthread_mutex_unlock(&self.mutex);
+            self.mutex.unlock();
             if (found) return;
-            _ = usleep(20 * 1000);
+            clock.sleepMs(20);
         }
         return error.ChangeNeverReported;
     }
@@ -199,7 +199,7 @@ test "reports the folder where a file was created, then removed" {
     const watcher = try Watcher.start(testing.allocator, &registry, dir.path(), Seen.record, &seen, 0.05);
     defer watcher.stop();
     // FSEvents only reports what happens after the stream is running.
-    _ = usleep(200 * 1000);
+    clock.sleepMs(200);
 
     try dir.writeFile("sub/new.txt", "x");
     var line: [1024]u8 = undefined;

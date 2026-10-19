@@ -43,4 +43,6 @@ test {
     _ = @import("shared/ignore.zig");
     _ = @import("shared/regex.zig");
     _ = @import("shared/process.zig");
+    _ = @import("shared/sync.zig");
+    _ = @import("shared/clock.zig");
 }

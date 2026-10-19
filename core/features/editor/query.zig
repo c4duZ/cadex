@@ -3,6 +3,7 @@
 //! (and their #not- forms). Others (#is-not? local, #set!) count as true.
 
 const std = @import("std");
+const sync = @import("../../shared/sync.zig");
 const ts = @import("ts.zig").c;
 const highlight = @import("highlight.zig");
 const languages = @import("languages.zig");
@@ -68,13 +69,13 @@ fn captureText(match: *const ts.TSQueryMatch, capture: u32, text: Text, buf: []u
 
 /// Compiled queries live for the whole process, one per language.
 var cache: [languages.all.len]?*Query = @splat(null);
-var cache_mutex: std.c.pthread_mutex_t = std.c.PTHREAD_MUTEX_INITIALIZER;
+var cache_mutex: sync.Mutex = .{};
 
 /// The language's query, compiled on first use; null if it does not
 /// compile against the grammar (then the file shows without colors).
 pub fn forLanguage(language: *const languages.Language) ?*Query {
-    _ = std.c.pthread_mutex_lock(&cache_mutex);
-    defer _ = std.c.pthread_mutex_unlock(&cache_mutex);
+    cache_mutex.lock();
+    defer cache_mutex.unlock();
     const slot = &cache[@intFromEnum(language.id)];
     if (slot.* == null) slot.* = compile(std.heap.c_allocator, language) catch null;
     return slot.*;

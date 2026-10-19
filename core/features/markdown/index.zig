@@ -3,6 +3,7 @@
 //! folder has only its own notes read again (docs/spec/markdown.md).
 
 const std = @import("std");
+const sync = @import("../../shared/sync.zig");
 const c = std.c;
 const workspace = @import("../workspace/workspace.zig");
 const explorer = @import("../explorer/explorer.zig");
@@ -20,8 +21,8 @@ const max_note_bytes = 2 * 1024 * 1024;
 pub const Index = struct {
     gpa: std.mem.Allocator,
     root: []u8,
-    mutex: c.pthread_mutex_t = c.PTHREAD_MUTEX_INITIALIZER,
-    wake: c.pthread_cond_t = c.PTHREAD_COND_INITIALIZER,
+    mutex: sync.Mutex = .{},
+    wake: sync.Condition = .{},
     /// Relative path (owned) -> its outline.
     notes: std.StringArrayHashMapUnmanaged(*outline.Outline) = .empty,
     ready: std.atomic.Value(bool) = .init(false),
@@ -49,7 +50,7 @@ pub const Index = struct {
         self.cancelled.store(true, .release);
         self.lock();
         self.stop = true;
-        _ = c.pthread_cond_signal(&self.wake);
+        self.wake.signal();
         self.unlock();
         self.thread.join();
         for (self.pending.items) |p| self.gpa.free(p);
@@ -61,11 +62,11 @@ pub const Index = struct {
     }
 
     pub fn lock(self: *Index) void {
-        _ = c.pthread_mutex_lock(&self.mutex);
+        self.mutex.lock();
     }
 
     pub fn unlock(self: *Index) void {
-        _ = c.pthread_mutex_unlock(&self.mutex);
+        self.mutex.unlock();
     }
 
     fn free(self: *Index, key: []const u8, value: *outline.Outline) void {
@@ -109,7 +110,7 @@ pub const Index = struct {
     fn nextPending(self: *Index) ?[]u8 {
         self.lock();
         defer self.unlock();
-        while (!self.stop and self.pending.items.len == 0) _ = c.pthread_cond_wait(&self.wake, &self.mutex);
+        while (!self.stop and self.pending.items.len == 0) self.wake.wait(&self.mutex);
         if (self.stop) return null;
         return self.pending.orderedRemove(0);
     }
@@ -193,7 +194,7 @@ pub const Index = struct {
             const copy = self.gpa.dupe(u8, rel) catch continue;
             self.pending.append(self.gpa, copy) catch self.gpa.free(copy);
         }
-        _ = c.pthread_cond_signal(&self.wake);
+        self.wake.signal();
     }
 };
 

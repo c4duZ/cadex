@@ -2,13 +2,12 @@
 //! wiki links, broken links, who points here, and following the disk.
 
 const std = @import("std");
+const clock = @import("../../shared/clock.zig");
 const testing = std.testing;
 const workspace = @import("../workspace/workspace.zig");
 const Index = @import("index.zig").Index;
 const queries = @import("queries.zig");
 const TestDir = @import("../../shared/test_dir.zig").TestDir;
-
-extern "c" fn usleep(microseconds: c_uint) c_int;
 
 fn waitReady(index: *Index, notes: usize) !void {
     var attempts: u32 = 0;
@@ -17,7 +16,7 @@ fn waitReady(index: *Index, notes: usize) !void {
         const n = index.notes.count();
         index.unlock();
         if (index.ready.load(.acquire) and n == notes) return;
-        _ = usleep(20 * 1000);
+        clock.sleepMs(20);
     }
     return error.IndexNeverReady;
 }
@@ -72,7 +71,7 @@ test "a new note on disk joins the index" {
     const index = try Index.open(testing.allocator, &registry, dir.path());
     defer index.close();
     try waitReady(index, 1);
-    _ = usleep(200 * 1000);
+    clock.sleepMs(200);
     try dir.makeDir("notes");
     try dir.writeFile("notes/b.md", "# B\n\n[a](../a.md)\n");
     try waitReady(index, 2);

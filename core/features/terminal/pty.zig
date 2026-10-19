@@ -2,6 +2,7 @@
 //! master side. POSIX only; the Windows app will need ConPTY here (ADR 0001).
 
 const std = @import("std");
+const clock = @import("../../shared/clock.zig");
 const c = std.c;
 const shell_env = @import("shell_env.zig");
 
@@ -12,7 +13,6 @@ extern "c" fn forkpty(amaster: *c_int, name: ?[*]u8, termp: ?*const anyopaque, w
 extern "c" fn ioctl(fd: c_int, request: c_ulong, ...) c_int;
 extern "c" fn tcgetpgrp(fd: c_int) c.pid_t;
 extern "c" fn fcntl(fd: c_int, cmd: c_int, ...) c_int;
-extern "c" fn usleep(microseconds: c_uint) c_int;
 extern "c" fn proc_pidinfo(pid: c_int, flavor: c_int, arg: u64, buffer: ?*anyopaque, size: c_int) c_int;
 
 /// <sys/proc_info.h>: PROC_PIDVNODEPATHINFO and struct proc_vnodepathinfo,
@@ -139,7 +139,7 @@ pub fn hangUp(child: Child, grace_ms: u32) void {
     var waited: u32 = 0;
     while (waited < grace_ms) : (waited += 10) {
         if (c.waitpid(child.pid, null, c.W.NOHANG) != 0) return;
-        _ = usleep(10 * 1000);
+        clock.sleepMs(10);
     }
     killNow(child);
 }
@@ -153,7 +153,7 @@ pub fn killNow(child: Child) void {
     var waited: u32 = 0;
     while (waited < kill_wait_ms) : (waited += 10) {
         if (c.waitpid(child.pid, null, c.W.NOHANG) != 0) return;
-        _ = usleep(10 * 1000);
+        clock.sleepMs(10);
     }
     // Still exiting: reap it on a thread of its own so it does not stay a
     // zombie, without blocking the caller.
