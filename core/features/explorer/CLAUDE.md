@@ -15,11 +15,13 @@
   canônico que ela devolve. Operação sobre a própria entrada (renomear, mover, copiar) não segue o
   link simbólico do último componente; ler e listar seguem, e o destino tem que estar dentro.
 - Porta de entrada: `explorer.zig`. `listing.zig` lista uma pasta (pastas primeiro, ordem natural
-  de `natural.zig`, `.git` fora); `operations.zig` cria, renomeia (`renamex_np` com RENAME_EXCL:
-  nome ocupado é recusado sem corrida), move e copia (`copyfile` recursivo, clone no APFS, nome
-  "x cópia.ext"); `read.zig` lê texto com limite (10 MB) e recusa binário (byte nulo nos primeiros
+  de `natural.zig`, `.git` fora); `operations.zig` cria, renomeia (nome ocupado é recusado sem corrida:
+  renamex_np com RENAME_EXCL no Mac, MoveFileExW sem substituir no Windows), move e copia (recursivo;
+  copyfile com clone no APFS, nome "x cópia.ext"); `read.zig` lê texto com limite (10 MB) e recusa binário (byte nulo nos primeiros
   8 KB, como o git); `watch.zig` observa com FSEvents numa fila própria, uma chamada por lote com
-  cada pasta uma vez, e nenhuma chamada depois de stop(); `errors.zig` traduz o errno.
+  cada pasta uma vez, e nenhuma chamada depois de stop(); `errors.zig` junta os erros do workspace, os do sistema de arquivos e os próprios.
+- Todo acesso ao disco passa por `core/shared/fs.zig` (libc no Mac, Win32 no Windows); nada de
+  libc direto aqui, para a feature valer nas duas plataformas.
 - Apagar não mora aqui: vai para a Lixeira do sistema pelo app (FileManager.trashItem).
 - API C em `c_api.zig` e `c_api_watch.zig`. O link com CoreServices (FSEvents) está em
   `core/build.zig` (testes) e no `apps/macos/shared/core-bridge/module.modulemap` (app).

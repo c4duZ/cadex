@@ -6,7 +6,8 @@
 const std = @import("std");
 const windows = std.os.windows;
 
-pub const BOOL = windows.BOOL;
+/// A plain int: Zig 0.16's windows.BOOL is a wrapper type, awkward against 0.
+pub const BOOL = c_int;
 pub const DWORD = windows.DWORD;
 pub const HANDLE = windows.HANDLE;
 pub const SRWLOCK = windows.SRWLOCK;

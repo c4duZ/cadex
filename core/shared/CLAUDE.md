@@ -14,9 +14,12 @@
   funda decide, a última linha vence, nada volta de dentro de pasta ignorada; usado pelo explorer e
   pela busca), `process.zig` (roda um programa sem shell, com pasta, tempo limite que mata o grupo, saída
   limitada e ambiente extra; usado por source-control e git-history), `regex.zig` (regex POSIX da libc, ADR 0009; usado pela busca e pelos predicados de
-  destaque do editor) `test_dir.zig` (pasta temporária com caminho canônico, só nos testes),
+  destaque do editor), `test_dir.zig` (pasta temporária com caminho canônico, só nos testes),
   `sync.zig` (mutex e condição: pthread no Mac, SRWLOCK no Windows), `clock.zig` (espera e relógio
   em ms) e `win32.zig` (as funções do Win32 que o núcleo chama, declaradas à mão, ADR 0012).
+- `fs.zig`: o sistema de arquivos das features (ler, listar, renomear, copiar, caminho real, salvar
+  com troca atômica), escolhendo `fs_posix.zig` ou `fs_windows.zig` num ponto só. Caminhos em UTF-8;
+  relativos ao workspace usam `/` nas duas plataformas.
 - Zig 0.16 levou mutex, sleep e relógio do std para o std.Io; o núcleo usa `sync.zig` e
   `clock.zig` em vez de pthread ou usleep direto, para valer nas duas plataformas.
 
