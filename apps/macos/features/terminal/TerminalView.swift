@@ -93,6 +93,11 @@ public final class TerminalView: MTKView {
         guard event.modifierFlags.contains(.command), window?.firstResponder === self else {
             return super.performKeyEquivalent(with: event)
         }
+        // ⌘← ⌘→ ⌘⌫ ⌘⌦: line editing, sent to the shell.
+        if let editing = KeyEncoding.sequence(keyCode: event.keyCode, modifiers: event.modifierFlags, characters: event.characters) {
+            session?.write(editing)
+            return true
+        }
         switch event.charactersIgnoringModifiers {
         case "v":
             paste()

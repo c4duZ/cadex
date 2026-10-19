@@ -75,6 +75,9 @@ sistema (NSPasteboard); no Windows, a do Win32. O núcleo recebe só o texto fin
   por espaço, como na colagem de arquivos.
 
 ### Teclado
+- Edição estilo Mac no prompt: ⌥← e ⌥→ andam por palavra; ⌘← e ⌘→ vão ao início e ao fim da
+  linha; ⌥⌫ apaga a palavra anterior; ⌘⌫ apaga até o início da linha; ⌥⌦ e ⌘⌦ apagam a palavra
+  seguinte e até o fim da linha. Enviados como os atalhos de shell equivalentes (Esc b, Ctrl+A...).
 - ⌘K abre a paleta de comandos, mesmo com o foco no terminal. Nada é enviado ao shell.
 - ⌘L limpa a tela (o histórico continua disponível).
 - Option digita os caracteres especiais do macOS por padrão; uma configuração faz o Option esquerdo
@@ -114,6 +117,7 @@ sistema (NSPasteboard); no Windows, a do Win32. O núcleo recebe só o texto fin
 - [ ] Colar um print de tela cola o caminho de um PNG que existe e abre a imagem.
 - [ ] Colar texto num programa com bracketed paste ativo não executa as linhas automaticamente.
 - [ ] ⌘K com o foco no terminal abre a paleta e não envia nada ao shell.
+- [ ] No zsh e no bash, ⌥← ⌥→ ⌘← ⌘→ ⌥⌫ ⌘⌫ movem e apagam como descrito em Teclado.
 - [ ] Em tela Retina, o texto em SF Mono 13 pt sai nítido (comparado lado a lado com o Terminal do
       macOS no mesmo tamanho).
 - [ ] `cat` de um arquivo de 100 MB não trava a janela, e Ctrl+C interrompe em menos de 1 segundo.
