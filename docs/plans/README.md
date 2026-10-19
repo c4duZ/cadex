@@ -1,6 +1,6 @@
 # Planos: do fim do terminal ao MVP no Mac
 
-Sete planos, um por entrega que o dono abre e usa. Cada plano é autocontido e dividido em fases que
+Oito planos, um por entrega que o dono abre e usa. Cada plano é autocontido e dividido em fases que
 cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal funcionando numa janela
 (shell num PTY, desenho em Metal, SF Mono nítido, teclado básico, edição estilo Mac com ⌥ e ⌘).
 
@@ -18,6 +18,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 5 | `docs/plans/5-viewers.md` | código, Markdown, mídia e preview web | feito; falta conferência manual |
 | 6 | `docs/plans/6-git.md` | source control e grafo do git | feito; falta conferência manual |
 | 7 | `docs/plans/7-mvp-release.md` | spaces que restauram, empacotamento, semana de uso | em andamento: fases A a D feitas; falta a semana de uso |
+| 8 | `docs/plans/8-panes-with-documents.md` | documentos em painéis ao lado do terminal (v1.0) | pendente |
 
 ## O que eu não quero
 - Executar plano sem ler antes o `CLAUDE.md` da raiz e o da feature que vai mexer.
