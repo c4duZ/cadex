@@ -60,6 +60,14 @@ o tree-sitter e o md4c já compilam; os erros ficam em `core/features/terminal/p
   (`wsl.exe -d <distro> --cd <pasta>`), conversão de caminho Windows ↔ Linux, ambiente atual exposto
   na API para a status bar. Spec de workspace atualizada.
 
+## Andamento (2026-10-19)
+Fases B a G feitas, cada uma em commits pequenos: o núcleo inteiro compila e liga para Windows 11
+x64 e arm64 (`make windows-core`), e os testes do Mac continuam passando. O script da VM
+(`tools/windows-vm.sh`, `make windows-core-test`) está pronto, mas ainda não há VM: os testes
+nunca rodaram no Windows. Falta: a VM (fase A, do dono), rodar e corrigir o que falhar lá, e a
+fase H (WSL). Pendências anotadas: integração de shell do PowerShell para o OSC 7 (o Windows não
+diz a pasta de outro processo) e o caminho padrão do git.exe quando ele não está no PATH.
+
 ## Como validar
 - `make check` passa no Mac ao fim de cada fase.
 - `make windows-core` gera as duas libcadex.a; `make windows-core-test` passa na VM sem vazamento.

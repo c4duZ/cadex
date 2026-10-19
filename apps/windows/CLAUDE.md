@@ -17,6 +17,13 @@
   features usam. Declarações de Win32/COM escritas à mão, só as usadas, em shared/win32.
 - Compila neste Mac por cross-compile; roda e testa numa VM Windows 11 ARM (UTM) por ssh.
 - Ainda vazio: o plano 9 prepara o núcleo, o plano 10 cria o esqueleto do app.
+- A VM de teste (uma vez, feita pelo dono): UTM com Windows 11 ARM (ISO arm64 da Microsoft); no
+  Windows, OpenSSH Server ligado (Configurações → Sistema → Recursos opcionais, depois
+  `Set-Service sshd -StartupType Automatic` e `Start-Service sshd`), Git for Windows, Modo de
+  Desenvolvedor (os testes criam links simbólicos) e, para a fase H, `wsl --install`. No Mac, um
+  `Host cadex-vm` no ~/.ssh/config com o IP e o usuário da VM; a chave pública vai em
+  C:\ProgramData\ssh\administrators_authorized_keys quando o usuário é administrador.
+  `make windows-core-test` compila os testes do núcleo e roda na VM por `tools/windows-vm.sh`.
 
 ## Como validar
 - Ainda não há o que validar no app; o núcleo no Windows é validado pelo plano 9.

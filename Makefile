@@ -1,4 +1,4 @@
-.PHONY: check manifests core core-test macos-test app run relink package windows-core
+.PHONY: check manifests core core-test macos-test app run relink package windows-core windows-core-test
 
 # Run before handing work over: manifests, core tests, app tests.
 check: manifests core-test macos-test
@@ -51,3 +51,9 @@ windows-core:
 	@cd core && for arch in x86_64 aarch64; do \
 		zig build -Doptimize=ReleaseFast -Dtarget=$$arch-windows.win11_zn-gnu --prefix zig-out/windows-$$arch || exit 1; \
 	done
+
+# The core tests on Windows 11 arm64, run in the UTM VM over ssh
+# (tools/windows-vm.sh; CADEX_VM names the ssh host).
+windows-core-test:
+	@cd core && zig build test-bin -Dtarget=aarch64-windows.win11_zn-gnu
+	@tools/windows-vm.sh core/zig-out/bin/cadex-core-tests.exe
