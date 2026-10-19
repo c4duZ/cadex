@@ -17,6 +17,10 @@ enum GeneralPages {
                              control: SettingsPage.toggle(g.confirmMultilinePaste) { on in
                                  store.update { $0.general.confirmMultilinePaste = on }
                              }),
+            SettingsPage.row("A árvore segue o terminal", "Ao mudar de pasta no terminal, a árvore vai para o projeto dela (a raiz do repositório git, ou a própria pasta).",
+                             control: SettingsPage.toggle(store.settings.explorer.followTerminal) { on in
+                                 store.update { $0.explorer.followTerminal = on }
+                             }),
             SettingsPage.row("Abrir Markdown como", "Código para editar, ou já renderizado. O botão no canto da aba troca a qualquer hora.",
                              control: SettingsPage.popup([("Código", "source"), ("Renderizado", "rendered")],
                                                          selected: store.settings.markdown.openAs) { value in

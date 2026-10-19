@@ -40,6 +40,7 @@ public enum SettingsFile {
         }
         if let e = reader.section(root, "explorer") {
             settings.explorer.showHidden = reader.bool(e, "explorer.showHidden") ?? settings.explorer.showHidden
+            settings.explorer.followTerminal = reader.bool(e, "explorer.followTerminal") ?? settings.explorer.followTerminal
         }
         if let m = reader.section(root, "markdown") {
             settings.markdown.openAs = reader.choice(m, "markdown.openAs", Settings.markdownOpenings) ?? settings.markdown.openAs
@@ -68,7 +69,7 @@ public enum SettingsFile {
             "appearance": ["theme": s.appearance.theme, "mode": s.appearance.mode, "vibrancy": s.appearance.vibrancy,
                            "backgroundImage": s.appearance.backgroundImage ?? NSNull(),
                            "backgroundOpacity": s.appearance.backgroundOpacity, "backgroundBlur": s.appearance.backgroundBlur],
-            "explorer": ["showHidden": s.explorer.showHidden],
+            "explorer": ["showHidden": s.explorer.showHidden, "followTerminal": s.explorer.followTerminal],
             "markdown": ["openAs": s.markdown.openAs],
             "shortcuts": shortcuts,
         ]

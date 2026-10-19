@@ -12,7 +12,12 @@ só mexe em arquivos dentro das pastas que o usuário abriu.
     ícone do Dock; com um arquivo, ele abre numa aba e, se estiver fora do workspace, a pasta dele
     vira o workspace;
   - pela paleta, com "Abrir pasta…", que mostra o seletor de pastas do sistema;
-  - pela paleta, com "Usar a pasta do terminal", que pega a pasta atual do painel com foco.
+  - pela paleta, com "Usar a pasta do terminal", que pega a pasta atual do painel com foco;
+  - sozinho, seguindo o terminal: quando a pasta do terminal com foco muda (`cd`), o workspace vai
+    para o projeto dela, a raiz do repositório git onde ela está ou a própria pasta fora de um.
+    `cd src` dentro de um projeto não troca o workspace. A opção "A árvore segue o terminal"
+    (explorer.followTerminal, ligada por padrão) desliga. O dono deu `cd` e a árvore ficou na pasta
+    pessoal (2026-10-19).
 - Sem nenhuma dessas, o workspace é a pasta pessoal do usuário.
 - Toda pasta que vira workspace entra na lista de **diretórios autorizados**. Ler, listar, criar,
   renomear, mover, copiar, apagar e buscar só valem dentro de um diretório autorizado (ou de uma
@@ -47,3 +52,4 @@ só mexe em arquivos dentro das pastas que o usuário abriu.
 - [x] O app abre na pasta passada pela linha de comando.
 - [ ] "Abrir pasta…" pela paleta troca o workspace e o explorer (falta conferir à mão: abre o seletor do sistema).
 - [x] "Usar a pasta do terminal" troca o workspace para a pasta do painel com foco.
+- [x] Um terminal dentro de um repositório leva a árvore para a raiz do repositório.

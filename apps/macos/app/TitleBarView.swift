@@ -2,29 +2,32 @@ import AppKit
 import Icons
 import Tabs
 
-/// The title bar, drawn by the app inside the window's title area as in
-/// Terax: room for the window buttons, sidebar and palette buttons, the
-/// space's name, its tabs, "+", and on the right the search and settings.
-/// Every button runs a command by id (ADR 0005).
+/// The title bar: the window buttons, one group on the left with the
+/// sidebar, the search (the palette, ⌘K) and the spaces, then the tabs,
+/// "+", and the settings on the right. Every button runs a command by id
+/// (ADR 0005).
 ///
-/// One height (26 pt) for every control and the tabs, one icon size per
-/// role, and gaps on a 4/8/12 pt scale; the bar mixed 16 and 13 pt icons
-/// and 4 to 14 pt gaps with no rule (UI review, 2026-10-19).
+/// The owner asked for the left icons together and for the tabs to lead
+/// (2026-10-19): the palette button and the wide search field opened the
+/// same palette, so they became one button that says ⌘K, and the tabs take
+/// the room the field used. One height (26 pt) for every control, one icon
+/// size per role, gaps on a 4/8/12 pt scale.
 final class TitleBarView: NSView {
     /// Matches the title area of a window with a unified compact toolbar,
     /// where macOS centers the window buttons.
     static let height: CGFloat = 38
-    /// Space the close, minimize and zoom buttons take on the left.
-    /// The first icon stays where it was: its 28 pt area starts 6 pt earlier.
-    private static let windowButtonsWidth: CGFloat = 72
+    /// Right after the close, minimize and zoom buttons.
+    private static let windowButtonsWidth: CGFloat = 76
 
     private let run: (String) -> Void
     private let sidebarButton = TitleBarButton(icon: .sidebar, tip: "Painel lateral (⌘B)")
-    private let paletteButton = TitleBarButton(icon: .command, tip: "Paleta de comandos (⌘K)")
+    /// The palette is the search for everything (files, commands, ⌘K).
+    private let searchButton = TitleBarButton(icon: .magnifyingGlass, title: "⌘K", tip: "Buscar arquivos e comandos (⌘K)")
     /// The space's name; clicking it switches spaces (docs/spec/spaces.md).
     private let spaceButton = TitleBarButton(icon: .stack, title: "", tip: "Trocar de space (⇧⌘S)")
+    /// The three as one group on a light fill.
+    private let group = NSView()
     private let newTabButton = TitleBarButton(icon: .plus, tip: "Nova aba (⌘T)")
-    private let searchButton = TitleBarSearch()
     private let settingsButton = TitleBarButton(icon: .gearSix, tip: "Configurações (⌘,)")
     /// The shown space's tabs; swapped when the space changes.
     private(set) var tabBar: TabBarView?
@@ -36,34 +39,37 @@ final class TitleBarView: NSView {
         self.run = run
         super.init(frame: .zero)
         sidebarButton.onPress = { [weak self] in self?.run("view.toggle-sidebar") }
-        paletteButton.onPress = { [weak self] in self?.run("palette.open") }
+        searchButton.onPress = { [weak self] in self?.run("palette.open") }
         spaceButton.onPress = { [weak self] in self?.run("space.switch") }
         newTabButton.onPress = { [weak self] in self?.run("tab.new") }
-        searchButton.onPress = { [weak self] in self?.run("palette.open") }
         settingsButton.onPress = { [weak self] in self?.run("settings.open") }
+
+        group.wantsLayer = true
+        group.layer?.cornerRadius = 8
+        let inside = NSStackView(views: [sidebarButton, searchButton, spaceButton])
+        inside.spacing = 0
+        inside.edgeInsets = NSEdgeInsets(top: 1, left: 1, bottom: 1, right: 1)
+        inside.translatesAutoresizingMaskIntoConstraints = false
+        group.addSubview(inside)
+        NSLayoutConstraint.activate([
+            inside.leadingAnchor.constraint(equalTo: group.leadingAnchor),
+            inside.trailingAnchor.constraint(equalTo: group.trailingAnchor),
+            inside.topAnchor.constraint(equalTo: group.topAnchor),
+            inside.bottomAnchor.constraint(equalTo: group.bottomAnchor),
+        ])
         spaceButton.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
 
-        let views: [NSView] = [sidebarButton, paletteButton, spaceButton, newTabButton, searchButton, settingsButton]
+        let views: [NSView] = [group, newTabButton, settingsButton]
         views.forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             addSubview($0)
         }
         NSLayoutConstraint.activate([
-            sidebarButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Self.windowButtonsWidth),
-            paletteButton.leadingAnchor.constraint(equalTo: sidebarButton.trailingAnchor, constant: 4),
-            spaceButton.leadingAnchor.constraint(equalTo: paletteButton.trailingAnchor, constant: 8),
+            group.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Self.windowButtonsWidth),
             spaceButton.widthAnchor.constraint(lessThanOrEqualToConstant: 160),
-            searchButton.leadingAnchor.constraint(greaterThanOrEqualTo: newTabButton.trailingAnchor, constant: 12),
-            searchButton.trailingAnchor.constraint(equalTo: settingsButton.leadingAnchor, constant: -6),
-            // Wide when there is room; the tabs give way before it shrinks.
-            searchButton.widthAnchor.constraint(lessThanOrEqualToConstant: 280),
-            searchButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 150),
+            settingsButton.leadingAnchor.constraint(greaterThanOrEqualTo: newTabButton.trailingAnchor, constant: 12),
             settingsButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
         ] + views.map { $0.centerYAnchor.constraint(equalTo: centerYAnchor) })
-        // Under the tabs' hold: in a narrow window the search shrinks first.
-        let wide = searchButton.widthAnchor.constraint(equalToConstant: 280)
-        wide.priority = NSLayoutConstraint.Priority(200)
-        wide.isActive = true
     }
 
     @available(*, unavailable)
@@ -87,7 +93,7 @@ final class TitleBarView: NSView {
         spaceButton.setTitle(title)
     }
 
-    /// Puts a space's tab bar between its name and "+".
+    /// Puts a space's tab bar between the group and "+".
     func setTabBar(_ bar: TabBarView) {
         guard bar !== tabBar else { return }
         tabBar?.removeFromSuperview()
@@ -95,7 +101,7 @@ final class TitleBarView: NSView {
         bar.translatesAutoresizingMaskIntoConstraints = false
         addSubview(bar)
         tabBarConstraints = [
-            bar.leadingAnchor.constraint(equalTo: spaceButton.trailingAnchor, constant: 4),
+            bar.leadingAnchor.constraint(equalTo: group.trailingAnchor, constant: 12),
             bar.heightAnchor.constraint(equalToConstant: 30),
             bar.centerYAnchor.constraint(equalTo: centerYAnchor),
             newTabButton.leadingAnchor.constraint(equalTo: bar.trailingAnchor, constant: 4),
@@ -117,9 +123,8 @@ final class TitleBarView: NSView {
         // The bar's own controls in near-full contrast: in the quiet gray
         // they disappeared next to the tabs (owner, 2026-10-19).
         let strong = text.withAlphaComponent(0.78)
-        for button in [sidebarButton, paletteButton, newTabButton, settingsButton] { button.colors = (text, strong) }
-        spaceButton.colors = (text, secondary)
-        searchButton.setColors(text: text, secondary: secondary, field: field)
+        for button in [sidebarButton, searchButton, spaceButton, newTabButton, settingsButton] { button.colors = (text, strong) }
+        group.layer?.backgroundColor = text.withAlphaComponent(0.06).cgColor
         setSpace(name: spaceTitle, count: spaceCount)
     }
 }

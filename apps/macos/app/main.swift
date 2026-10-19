@@ -37,7 +37,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var search: SearchController?
     var opener: FileOpener?
     private var markdown: MarkdownController?
-    private var git: SourceControlController?
+    var git: SourceControlController?
+    /// The focused terminal's folder last seen, and whether the tree follows
+    /// it (FolderFollow.swift).
+    var lastTerminalFolder: String?
+    var followTerminal = true
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpCommands()
@@ -142,6 +146,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         settings.onExplorer = { [weak self] prefs in
             guard let self else { return }
             self.explorer?.showHidden = prefs.showHidden
+            self.followTerminal = prefs.followTerminal
             self.search?.setRoot(self.folder.root, showHidden: prefs.showHidden)
         }
         folder.onChange = { [weak self] root in
@@ -157,10 +162,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     /// The status bar follows the focused terminal's folder, and its folder
     /// menu takes that terminal there (docs/spec/status-bar.md).
     func connectStatusBar(_ bar: StatusBarView, to tabs: TabsController) {
-        tabs.onActiveChange = { [weak tabs, weak bar] in
+        tabs.onActiveChange = { [weak self, weak tabs, weak bar] in
             let terminal = tabs?.activeTerminal
             bar?.path = terminal?.currentDirectory
             bar?.canNavigate = terminal?.hasForegroundProcess == false
+            self?.terminalFolderMoved(terminal?.currentDirectory)
         }
     }
 

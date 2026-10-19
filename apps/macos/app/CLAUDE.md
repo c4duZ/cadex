@@ -12,6 +12,8 @@
   preview, documentos reabertos, pasta do workspace devolvida); `tabs` em `main.swift` é sempre a
   do space que aparece, então os comandos agem nela. Sair e fechar a janela perguntam uma vez por
   todos os spaces e salvam.
+- `FolderFollow.swift`: o workspace segue o terminal com foco; a cada `cd` vai para a raiz do
+  repositório git da pasta (ou a própria pasta), a menos que explorer.followTerminal desligue.
 - `main.swift` registra os comandos de cada feature (e o view.toggle-sidebar da casca), monta menu e
   atalhos a partir deles, e abre a janela. Como delegate, pergunta às abas antes de fechar a janela
   ou sair (shouldCloseAll). Liga a barra de status ao terminal com foco. Cria o `WorkspaceFolder` do explorer, abre a
@@ -20,9 +22,10 @@
   abre numa aba, endereço http(s) abre no preview. `FileOpener.swift` decide onde um arquivo abre (mídia pelo tipo, o resto no editor; diffs do git numa aba DiffDocument, o histórico numa aba HistoryDocument que recebe as mudanças em .git), passa as
   mudanças do disco aos editores abertos e monta a aparência do editor (`EditorLooks`).
 - A casca da janela, no estilo do Terax: título transparente com barra de ferramentas compacta
-  (38 pt, botões da janela centrados); `TitleBarView.swift` (painel lateral, paleta, o space como migalha "Space 1 ›", abas, "+", a busca sem caixa, cada controle um `TitleBarButton.swift` de 26 pt com fundo ao passar e
-  ao clicar, a busca um campo de verdade (`TitleBarSearch.swift`, com ⌘K à direita, encolhe antes
-  das abas), o space só o ícone de pilha com um space e o nome com mais,
+  (38 pt, botões da janela centrados); `TitleBarView.swift` (um grupo à esquerda com painel
+  lateral, busca/paleta "⌘K" e spaces, o space só o ícone de pilha com um space e o nome com mais;
+  depois as abas, "+" e as configurações à direita; cada controle um `TitleBarButton.swift` de
+  26 pt com fundo ao passar e ao clicar,
   busca, todos por comando), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
   painel lateral recolhível, barra de status) e `SidebarView.swift` (duas páginas, Arquivos e Git, trocadas por abas largas embaixo do painel, como no Terax, que rodam explorer.focus e git.show). O explorer é criado
   junto com os comandos, antes de as configurações montarem os atalhos.

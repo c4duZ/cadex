@@ -13,6 +13,7 @@ let exitCode = await Checks.run([
         settings.appearance.theme = "tokyo-night"
         settings.appearance.backgroundImage = "/tmp/fundo.png"
         settings.explorer.showHidden = false
+        settings.explorer.followTerminal = false
         settings.markdown.openAs = "rendered"
         settings.shortcuts = ["cmd+shift+t": "tab.new", "cmd+t": nil]
         let (read, problems) = SettingsFile.read(SettingsFile.write(settings))

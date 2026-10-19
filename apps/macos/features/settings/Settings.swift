@@ -36,6 +36,8 @@ public struct Settings: Equatable, Sendable {
     public struct Explorer: Equatable, Sendable {
         /// Names starting with "." in the tree, dimmed (docs/spec/explorer.md).
         public var showHidden = true
+        /// The tree follows the folder of the terminal in use (docs/spec/workspace.md).
+        public var followTerminal = true
     }
 
     public struct Markdown: Equatable, Sendable {

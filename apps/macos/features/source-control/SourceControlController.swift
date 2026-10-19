@@ -57,6 +57,13 @@ public final class SourceControlController {
     }
 
     /// The workspace changed: find its repository again.
+    /// The top folder of the repository holding `folder`, or nil. Runs git:
+    /// call it off the main thread (the app asks when a terminal changes
+    /// folder, to follow it in the explorer).
+    public nonisolated static func repositoryRoot(containing folder: String) -> String? {
+        GitRepository.find(from: folder)?.root
+    }
+
     public func setFolder(_ path: String) {
         folder = path
         state = .loading
