@@ -1,15 +1,20 @@
 import AppKit
 
 /// Lays a tab's panes out by its PaneTree, draws the 1-point dividers and
-/// lets them be dragged, and outlines the focused pane when there are
+/// lets them be dragged, and dims the panes without focus when there are
 /// several (docs/spec/tabs.md, "Divisões").
+///
+/// The owner found the blue focus outline beside the divider crude and the
+/// divider hard to grab (2026-10-19): the outline gave way to dimming, as
+/// in iTerm2, and the divider grabs 6 pt each side and thickens under the
+/// pointer.
 final class PaneLayoutView: NSView {
     /// Space between panes, where the divider line is drawn and grabbed.
     static let gap: CGFloat = 1
     /// No pane gets smaller than this by dragging or splitting.
     static let minPaneSize = CGSize(width: 120, height: 60)
     /// How far from the line a drag still grabs the divider.
-    private static let grabSlack: CGFloat = 3
+    private static let grabSlack: CGFloat = 6
 
     var tree: PaneTree = .leaf(0) { didSet { needsLayout = true } }
     var panes: [Int: NSView] = [:]
@@ -19,6 +24,8 @@ final class PaneLayoutView: NSView {
 
     private let outline = FocusOutlineView()
     private var dragging: (path: [Bool], axis: PaneTree.Axis, area: CGRect)?
+    /// The divider under the pointer (or being dragged), drawn thicker.
+    private var hovered: [Bool]? { didSet { if hovered != oldValue { needsDisplay = true } } }
 
     override var isFlipped: Bool { true }
 
@@ -52,14 +59,23 @@ final class PaneLayoutView: NSView {
             panes[id]?.frame = frame
         }
         outline.frame = bounds
-        outline.focusFrame = tree.leaves.count > 1 ? focused.flatMap { frames[$0] } : nil
+        outline.dimmed = tree.leaves.count > 1 ? frames.filter { $0.key != focused }.map(\.value) : []
+        updateTrackingAreas()
     }
 
     /// Only the divider lines: filling the whole view would hide a
     /// background image behind the terminals.
     override func draw(_ dirtyRect: NSRect) {
-        NSColor.separatorColor.setFill()
-        for divider in dividers(of: tree, in: bounds, path: []) { divider.line.fill() }
+        for divider in dividers(of: tree, in: bounds, path: []) {
+            if divider.path == hovered || divider.path == dragging?.path {
+                NSColor.labelColor.withAlphaComponent(0.35).setFill()
+                let thick = divider.axis == .horizontal ? divider.line.insetBy(dx: -1.5, dy: 0) : divider.line.insetBy(dx: 0, dy: -1.5)
+                NSBezierPath(roundedRect: thick, xRadius: 2, yRadius: 2).fill()
+            } else {
+                NSColor.separatorColor.setFill()
+                divider.line.fill()
+            }
+        }
     }
 
     /// Whether pane `id` has room to be split along `axis`.
@@ -73,9 +89,30 @@ final class PaneLayoutView: NSView {
 
     // MARK: Dragging dividers
 
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.filter { $0.owner === self }.forEach(removeTrackingArea)
+        for divider in dividers(of: tree, in: bounds, path: []) {
+            addTrackingArea(NSTrackingArea(rect: grabArea(divider), options: [.mouseEnteredAndExited, .activeInKeyWindow],
+                                           owner: self, userInfo: ["path": divider.path]))
+        }
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        hovered = event.trackingArea?.userInfo?["path"] as? [Bool]
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        if dragging == nil { hovered = nil }
+    }
+
+    private func grabArea(_ divider: Divider) -> CGRect {
+        divider.line.insetBy(dx: -Self.grabSlack, dy: -Self.grabSlack)
+    }
+
     override func resetCursorRects() {
         for divider in dividers(of: tree, in: bounds, path: []) {
-            addCursorRect(divider.line.insetBy(dx: -Self.grabSlack, dy: -Self.grabSlack),
+            addCursorRect(grabArea(divider),
                           cursor: divider.axis == .horizontal ? .resizeLeftRight : .resizeUpDown)
         }
     }
@@ -108,6 +145,7 @@ final class PaneLayoutView: NSView {
 
     override func mouseUp(with event: NSEvent) {
         dragging = nil
+        hovered = divider(at: convert(event.locationInWindow, from: nil))?.path
     }
 
     private struct Divider {
@@ -119,9 +157,7 @@ final class PaneLayoutView: NSView {
     }
 
     private func divider(at point: CGPoint) -> Divider? {
-        dividers(of: tree, in: bounds, path: []).first {
-            $0.line.insetBy(dx: -Self.grabSlack, dy: -Self.grabSlack).contains(point)
-        }
+        dividers(of: tree, in: bounds, path: []).first { grabArea($0).contains(point) }
     }
 
     private func dividers(of node: PaneTree, in rect: CGRect, path: [Bool]) -> [Divider] {
@@ -136,20 +172,18 @@ final class PaneLayoutView: NSView {
     }
 }
 
-/// The discreet outline around the focused pane. Draws over the panes and
-/// lets every click through.
+/// A light shade over the panes without focus, so the focused one stands
+/// out without a line. Draws over the panes and lets every click through.
 private final class FocusOutlineView: NSView {
-    var focusFrame: CGRect? { didSet { needsDisplay = true } }
+    var dimmed: [CGRect] = [] { didSet { if dimmed != oldValue { needsDisplay = true } } }
 
     override var isFlipped: Bool { true }
 
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
 
     override func draw(_ dirtyRect: NSRect) {
-        guard let focusFrame else { return }
-        NSColor.controlAccentColor.withAlphaComponent(0.5).setStroke()
-        let path = NSBezierPath(rect: focusFrame.insetBy(dx: 0.5, dy: 0.5))
-        path.lineWidth = 1
-        path.stroke()
+        // 0.16 barely showed over dark themes (2026-10-19).
+        NSColor.black.withAlphaComponent(0.26).setFill()
+        dimmed.forEach { $0.fill() }
     }
 }

@@ -60,7 +60,7 @@ final class Tab {
 
     /// Splits the focused pane; the new one takes the focus.
     func split(axis: PaneTree.Axis, pane: Int, terminal: TerminalView) {
-        layout.tree = layout.tree.splitting(focusedPane, axis: axis, newPane: pane)
+        layout.tree = layout.tree.splitting(focusedPane, axis: axis, newPane: pane).balanced()
         panes[pane] = terminal
         layout.panes[pane] = terminal
         layout.syncSubviews()
@@ -75,7 +75,7 @@ final class Tab {
         let index = order.firstIndex(of: pane) ?? 0
         panes[pane] = nil
         layout.panes[pane] = nil
-        layout.tree = rest
+        layout.tree = rest.balanced()
         layout.syncSubviews()
         if focusedPane == pane {
             let remaining = rest.leaves

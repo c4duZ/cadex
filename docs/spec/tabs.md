@@ -27,12 +27,15 @@ mostram um arquivo e têm um ponto no título quando há mudança não salva.
 
 ### Divisões
 - ⌘D divide o painel com foco para a direita; ⌘⇧D, para baixo. O painel novo abre na mesma pasta e
-  ganha o foco; o espaço é dividido ao meio.
+  ganha o foco. Painéis numa mesma direção ficam do mesmo tamanho: três lado a lado têm um terço
+  cada, e fechar um devolve o espaço aos outros por igual (antes ficavam 50, 25 e 25 %).
 - Arrastar a linha entre dois painéis muda o tamanho; nenhum painel fica menor que algumas colunas.
+  A linha pega o mouse a 6 pt de cada lado, com o cursor de redimensionar, e engrossa sob o
+  ponteiro e enquanto arrasta.
 - ⌘] e ⌘[ passam o foco para o próximo e o anterior painel da aba, em volta. ⌘⌥ + seta passa para
   o painel vizinho naquela direção.
-- Clicar num painel dá o foco a ele. O painel com foco tem um destaque discreto; os outros continuam
-  recebendo saída e atualizando.
+- Clicar num painel dá o foco a ele. Os painéis sem foco ficam levemente escurecidos (sem contorno
+  azul, que o dono achou tosco); eles continuam recebendo saída e atualizando.
 
 ### Fechar
 - ⌘W fecha o painel com foco. O espaço dele vai para o vizinho. Se era o único da aba, fecha a aba.

@@ -101,6 +101,23 @@ indirect enum PaneTree: Equatable {
         }?.key
     }
 
+    /// The same tree with every pane in a row (or a column) the same size:
+    /// each split gives its sides space by how many panes they put side by
+    /// side in its direction. Splitting the focused pane in half left three
+    /// terminals at 50, 25 and 25 % (owner, 2026-10-19).
+    func balanced() -> PaneTree {
+        guard case .split(let axis, let a, let b, _) = self else { return self }
+        let wa = a.count(along: axis), wb = b.count(along: axis)
+        return .split(axis, a.balanced(), b.balanced(), ratio: CGFloat(wa) / CGFloat(wa + wb))
+    }
+
+    /// How many panes this subtree lines up along `axis`: a split the same
+    /// way adds its sides; anything else is one slot.
+    private func count(along axis: Axis) -> Int {
+        guard case .split(let own, let a, let b, _) = self, own == axis else { return 1 }
+        return a.count(along: axis) + b.count(along: axis)
+    }
+
     /// Sets the ratio of the split node at `path` (false: first child,
     /// true: second child, from the root). Dragging a divider does this.
     func settingRatio(_ ratio: CGFloat, at path: [Bool]) -> PaneTree {

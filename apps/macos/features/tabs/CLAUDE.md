@@ -22,8 +22,9 @@
   (a propriedade bar do controlador). `TabsView.swift`: só a aba ativa. `Tab.swift`: uma aba.
 - Divisões: `PaneTree.swift` é a árvore pura (dividir, remover dando o espaço ao irmão, retângulos,
   ordem de leitura, vizinho por direção, proporção por caminho), testada. `PaneLayoutView.swift`
-  posiciona os terminais pela árvore, divisor arrastável de 1 pt (tamanho mínimo de painel) e
-  contorno discreto no painel com foco. `Tab.swift` guarda árvore, painéis e foco.
+  posiciona os terminais pela árvore, divisor de 1 pt que pega o mouse a 6 pt e engrossa sob o
+  ponteiro (tamanho mínimo de painel), e escurece os painéis sem foco. `balanced()` na árvore deixa
+  do mesmo tamanho os painéis numa direção, a cada divisão e fechamento. `Tab.swift` guarda árvore, painéis e foco.
 - `TabsSnapshot.swift` e `TabsRestore.swift`: o estado das abas para salvar (ordem, árvore de cada
   aba com a pasta de cada painel e as proporções, nome dado, painel com foco, documentos pela
   identidade, aba ativa) e reconstruir com shells novos; `setShown` e `closeAll` para os spaces.

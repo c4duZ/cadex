@@ -164,5 +164,20 @@ let exitCode = await Checks.run([
         bar.otherMouseUp(with: middle(.otherMouseUp, x: 390))
         expect(closed == [1], "\(closed)")
     }),
+    ("panes in a row share the space equally, nested splits too", {
+        // 1 | 2 | 3 by splitting the last pane each time.
+        let three = PaneTree.leaf(1).splitting(1, axis: .horizontal, newPane: 2)
+            .splitting(2, axis: .horizontal, newPane: 3).balanced()
+        let frames = three.frames(in: CGRect(x: 0, y: 0, width: 300, height: 100))
+        expect(frames.values.allSatisfy { abs($0.width - 100) <= 1 }, "\(frames)")
+        // 1 | (2 over 3): the column counts once across, its two halves split down.
+        let mixed = PaneTree.leaf(1).splitting(1, axis: .horizontal, newPane: 2)
+            .splitting(2, axis: .vertical, newPane: 3).balanced()
+        let f = mixed.frames(in: CGRect(x: 0, y: 0, width: 200, height: 100))
+        expect(f[1]?.width == 100 && f[2]?.width == 100 && f[2]?.height == 50, "\(f)")
+        // Closing one of three gives the other two half each.
+        let two = three.removing(2)!.balanced()
+        expect(two.frames(in: CGRect(x: 0, y: 0, width: 300, height: 100)).values.allSatisfy { $0.width == 150 })
+    }),
 ])
 exit(exitCode)
