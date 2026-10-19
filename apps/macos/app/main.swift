@@ -24,19 +24,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var keymap: Keymap?
     private var settingsWindow: SettingsWindowController?
     private let folder = WorkspaceFolder()
+    private var explorer: ExplorerController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpCommands()
         let window = makeWindow()
         let tabs = TabsController(window: window)
-        let workspace = WorkspaceView(tabs: tabs) { [weak self] id in self?.commands.run(id) }
+        let explorer = self.explorer!
+        let workspace = WorkspaceView(tabs: tabs, explorer: explorer) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace
         self.window = window
         self.tabs = tabs
         self.workspace = workspace
         connectStatusBar(workspace.statusBar, to: tabs)
-        workspace.showFolder(folder.root)
-        folder.onChange = { [weak workspace] root in workspace?.showFolder(root) }
+        explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar() }
         settings.onLooks = { [weak workspace] image, vibrancy in workspace?.setLooks(image: image, vibrancy: vibrancy) }
         let looks = settings.store.settings.appearance
         workspace.setLooks(image: looks.backgroundImage.map { .init(path: $0, opacity: looks.backgroundOpacity, blur: looks.backgroundBlur) },
@@ -77,6 +78,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         return window
     }
 
+    /// The tree of the workspace folder; its commands act on the focused
+    /// terminal through the tabs, and hidden files are a saved preference.
+    /// Made with the commands, before settings build the keymap.
+    private func makeExplorer() {
+        let explorer = ExplorerController(root: folder.root) { [weak self] id in self?.commands.run(id) ?? false }
+        explorer.openInTerminal = { [weak self] path in self?.tabs?.activeTerminal?.changeDirectory(to: path) }
+        explorer.onShowHiddenChange = { [weak self] show in self?.settings.store.update { $0.explorer.showHidden = show } }
+        settings.onExplorer = { [weak explorer] prefs in explorer?.showHidden = prefs.showHidden }
+        folder.onChange = { [weak explorer] root in explorer?.setRoot(root) }
+        commands.register(ExplorerCommands.all(explorer))
+        self.explorer = explorer
+    }
+
     /// The status bar follows the focused terminal's folder, and its folder
     /// menu takes that terminal there (docs/spec/status-bar.md).
     private func connectStatusBar(_ bar: StatusBarView, to tabs: TabsController) {
@@ -111,6 +125,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         commands.register(WorkspaceCommands.all(folder, window: { [weak self] in self?.window },
                                                 terminalFolder: { [weak self] in self?.tabs?.activeTerminal?.currentDirectory }))
         commands.register(TabCommands.all { [weak self] in self?.tabs })
+        makeExplorer()
 
         settings.onShortcuts = { [weak self] shortcuts in self?.applyShortcuts(shortcuts) }
         settings.start()

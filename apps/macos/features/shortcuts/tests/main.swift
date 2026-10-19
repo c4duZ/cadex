@@ -2,6 +2,7 @@ import AppKit
 import Checks
 @testable import CommandPalette
 @testable import Shortcuts
+import Explorer
 import Tabs
 import Terminal
 
@@ -16,6 +17,7 @@ func appRegistry() -> CommandRegistry {
     registry.register(StandardCommands.all)
     registry.register(TerminalCommands.all)
     registry.register(TabCommands.all { nil })
+    registry.register(ExplorerCommands.all(ExplorerController(root: NSTemporaryDirectory()) { _ in false }))
     return registry
 }
 

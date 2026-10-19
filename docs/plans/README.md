@@ -14,7 +14,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 1 | `docs/plans/1-terminal.md` | terminal completo, no nível do Terax | feito; falta conferência manual |
 | 2 | `docs/plans/2-tabs-splits-palette.md` | abas, divisões e paleta ⌘K | feito |
 | 3 | `docs/plans/3-window-and-theme.md` | janela com a cara do Terax, tema, configurações | feito; falta conferência manual |
-| 4 | `docs/plans/4-files.md` | workspace, explorer e busca | em andamento: fases A e B feitas |
+| 4 | `docs/plans/4-files.md` | workspace, explorer e busca | em andamento: fases A a C feitas |
 | 5 | `docs/plans/5-viewers.md` | código, Markdown, mídia e preview web | pendente |
 | 6 | `docs/plans/6-git.md` | source control e grafo do git | pendente |
 | 7 | `docs/plans/7-mvp-release.md` | spaces que restauram, empacotamento, semana de uso | pendente |

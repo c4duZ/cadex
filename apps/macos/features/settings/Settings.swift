@@ -33,9 +33,15 @@ public struct Settings: Equatable, Sendable {
         public var backgroundBlur: Double = 0
     }
 
+    public struct Explorer: Equatable, Sendable {
+        /// Names starting with "." in the tree, dimmed (docs/spec/explorer.md).
+        public var showHidden = true
+    }
+
     public var general = General()
     public var terminal = Terminal()
     public var appearance = Appearance()
+    public var explorer = Explorer()
     /// "cmd+shift+t" → command id, or nil to turn a default off.
     public var shortcuts: [String: String?] = [:]
 

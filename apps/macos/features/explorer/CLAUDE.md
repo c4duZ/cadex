@@ -15,8 +15,28 @@
 - Comandos em `WorkspaceCommands.swift`: `workspace.open-folder` ("Abrir pasta…", ⌘O, seletor do
   sistema) e `workspace.use-terminal-folder` (a pasta do terminal com foco, que `apps/macos/app/main.swift`
   passa por closure: o explorer não vê terminais).
-- Spec: `docs/spec/explorer.md` e `docs/spec/workspace.md`. Status: workspace pronto (plano 4,
-  fase A); a árvore é a fase C. Até lá o painel lateral mostra o nome da pasta.
+- A árvore: `ExplorerController.swift` (porta de entrada: a view do painel lateral, a raiz, o
+  watcher, recarregar mantendo pastas abertas e seleção, mensagem curta embaixo da árvore),
+  `FileNode.swift` (uma linha; pasta lida só ao abrir; recarga reaproveita linhas iguais; notas
+  "Pasta vazia" e "Sem permissão"), `ExplorerDataSource.swift` (dados, células desenhadas à mão no
+  `layout()`, arrastar e soltar), `ExplorerOutline.swift` (teclas da árvore e menu de contexto),
+  `ExplorerRename.swift` (renomear no lugar), `ExplorerActions.swift` (o que cada comando faz e
+  quando está indisponível), `FileTypeIcon.swift` (ícone Phosphor por tipo e extensão).
+- Disco só pelo núcleo: `ExplorerFiles.swift` (API C do explorer; a Lixeira é a do sistema, com a
+  pasta do item checada no workspace) e `FileWatcher.swift` (FSEvents do núcleo; o callback é uma
+  função solta, fora da main actor, que passa o lote para a thread principal).
+- Comandos em `ExplorerCommands.swift` (categoria Arquivo). Atalhos globais só ⇧⌘E (focar a árvore)
+  e ⇧⌘. (ocultos). Enter, F2, ⌘⌫, ⌘C e ⌘V são teclas da árvore (`ExplorerOutline.swift`) que
+  disparam os mesmos comandos pelo id, porque o terminal precisa dessas teclas.
+- Arrastar linhas: para o terminal vira caminho escapado (o terminal já aceita arquivos), para o
+  Finder copia, para uma pasta da árvore move. Arquivos de fora soltos na árvore ainda não entram.
+- "Mostrar ocultos" é explorer.showHidden no settings.json (padrão: mostrar, apagados); o app liga.
+- Arquivo abre no app padrão do sistema até os visualizadores do plano 5. Marca de ignorado pelo
+  .gitignore entra na fase D; marca do git, no plano 6.
+- Spec: `docs/spec/explorer.md` e `docs/spec/workspace.md`. Status: plano 4, fases A e C prontas.
 
 ## Como validar
-- `make macos-test` passa.
+- `make macos-test` passa: árvore (recarga mantém linhas, ocultos, notas), operações recusadas,
+  ícones, watcher entregando na thread principal.
+- No app, sem roubar o teclado: a árvore é acessível (linhas, AXSelected, triângulo com AXPress) e
+  os comandos estão no menu Arquivo.

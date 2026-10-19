@@ -26,14 +26,16 @@ operações do Finder que importam para quem programa.
   para a pasta pai).
 - Enter abre o arquivo (visualizador do plano 5; até lá, no app padrão do sistema) ou abre e fecha
   a pasta.
-- F2 ou Enter com ⌥ renomeia; ⌘⌫ apaga para a Lixeira.
+- F2 renomeia; ⌘⌫ apaga para a Lixeira; ⌘C e ⌘V copiam e colam arquivos. Essas teclas valem só
+  com o foco na árvore (o terminal usa as mesmas). ⇧⌘E leva o foco para a árvore.
 
 ### Operações (todas são comandos, também no menu de contexto)
 - **Novo arquivo** e **Nova pasta**: criam dentro da pasta selecionada (ou na pasta do arquivo
   selecionado) e já entram no modo de renomear com o nome sugerido selecionado.
 - **Renomear**: edição no próprio lugar da linha. Enter confirma, Esc cancela. Nome vazio, com `/`
   ou igual a um irmão existente é recusado com a mensagem ao lado.
-- **Mover**: arrastar arquivos e pastas para outra pasta da árvore.
+- **Mover**: arrastar arquivos e pastas para outra pasta da árvore. Arquivos arrastados de fora
+  do app (Finder) ainda não entram; ficam para depois do MVP.
 - **Copiar** e **Colar**: copiam arquivos e pastas; colando ao lado de um homônimo, o novo ganha
   " cópia" no nome.
 - **Apagar**: vai para a Lixeira do sistema, nunca apaga de vez. Mais de um item pede confirmação.
@@ -67,7 +69,7 @@ operações do Finder que importam para quem programa.
 - [x] Mover uma pasta para dentro dela mesma é recusado.
 - [x] A observação avisa criação e remoção de arquivo numa pasta observada.
 - [x] Ler arquivo recusa binário e arquivo acima do limite.
-- [ ] Apagar manda para a Lixeira.
-- [ ] Expandir `core/features/` mostra as pastas das features com ícone de pasta.
+- [x] Apagar manda para a Lixeira.
+- [x] Expandir `core/features/` mostra as pastas das features com ícone de pasta.
 - [ ] Arrastar um arquivo para o terminal cola o caminho escapado.
-- [ ] Todas as operações estão registradas como comandos e aparecem na paleta.
+- [x] Todas as operações estão registradas como comandos e aparecem na paleta.

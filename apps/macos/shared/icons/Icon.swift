@@ -7,17 +7,32 @@ import CoreText
 /// same release as Resources/Phosphor-Regular.ttf. Add icons here by name.
 public enum Icon: UInt32, CaseIterable, Sendable {
     case arrowCounterClockwise = 0xE038
+    case arrowsClockwise = 0xE094
     case bell = 0xE0CE
+    case bracketsCurly = 0xE860
     case caretDown = 0xE136
     case caretRight = 0xE13A
     case caretUp = 0xE13C
     case check = 0xE182
     case command = 0xE1C4
+    case file = 0xE230
+    case fileArchive = 0xEB2A
+    case fileAudio = 0xEA20
+    case fileCode = 0xE914
+    case fileImage = 0xEA24
+    case fileMd = 0xED50
+    case filePdf = 0xE702
+    case filePlus = 0xE236
+    case fileText = 0xE23A
+    case fileVideo = 0xEA22
     case folder = 0xE24A
+    case folderOpen = 0xE256
+    case folderPlus = 0xE258
     case gearSix = 0xE272
     case gitBranch = 0xE278
     case info = 0xE2CE
     case keyboard = 0xE2D8
+    case link = 0xE2E2
     case magnifyingGlass = 0xE30C
     case palette = 0xE6C8
     case plus = 0xE3D4

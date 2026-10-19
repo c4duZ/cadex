@@ -100,7 +100,7 @@ let package = Package(
         // Shortcuts tests check the defaults of every feature's commands.
         .executableTarget(
             name: "ShortcutsTests",
-            dependencies: ["Shortcuts", "CommandPalette", "Terminal", "Tabs", "Checks"],
+            dependencies: ["Shortcuts", "CommandPalette", "Terminal", "Tabs", "Explorer", "Checks"],
             path: "features/shortcuts/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
@@ -130,7 +130,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "ExplorerTests",
-            dependencies: ["Explorer", "Checks"],
+            dependencies: ["Explorer", "Icons", "CCadex", "Checks"],
             path: "features/explorer/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),

@@ -44,5 +44,5 @@ só mexe em arquivos dentro das pastas que o usuário abriu.
 - [x] Pasta irmã com o mesmo prefixo de nome é recusada.
 - [x] Arquivo ainda inexistente numa pasta autorizada é aceito.
 - [x] O app abre na pasta passada pela linha de comando.
-- [ ] "Abrir pasta…" pela paleta troca o workspace e o explorer.
+- [ ] "Abrir pasta…" pela paleta troca o workspace e o explorer (falta conferir à mão: abre o seletor do sistema).
 - [x] "Usar a pasta do terminal" troca o workspace para a pasta do painel com foco.

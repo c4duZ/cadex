@@ -38,6 +38,9 @@ public enum SettingsFile {
             if let opacity = reader.number(a, "appearance.backgroundOpacity") { settings.appearance.backgroundOpacity = min(max(opacity, 0), 1) }
             if let blur = reader.number(a, "appearance.backgroundBlur") { settings.appearance.backgroundBlur = min(max(blur, 0), 50) }
         }
+        if let e = reader.section(root, "explorer") {
+            settings.explorer.showHidden = reader.bool(e, "explorer.showHidden") ?? settings.explorer.showHidden
+        }
         if let s = reader.section(root, "shortcuts") {
             for (combo, value) in s {
                 if value is NSNull { settings.shortcuts[combo] = .some(nil) }
@@ -62,6 +65,7 @@ public enum SettingsFile {
             "appearance": ["theme": s.appearance.theme, "mode": s.appearance.mode, "vibrancy": s.appearance.vibrancy,
                            "backgroundImage": s.appearance.backgroundImage ?? NSNull(),
                            "backgroundOpacity": s.appearance.backgroundOpacity, "backgroundBlur": s.appearance.backgroundBlur],
+            "explorer": ["showHidden": s.explorer.showHidden],
             "shortcuts": shortcuts,
         ]
         return (try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])) ?? Data()

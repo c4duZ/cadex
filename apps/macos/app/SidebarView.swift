@@ -1,33 +1,20 @@
 import AppKit
 
-/// The sidebar panel's content. Empty until the explorer and source
-/// control features exist (plans 4 and 6): a short note in the middle.
+/// The sidebar panel's content: the explorer's tree. Source control joins
+/// it with plan 6.
 final class SidebarView: NSView {
-    private let note = NSTextField(wrappingLabelWithString: "Arquivos e Git aparecem aqui.")
-
-    override init(frame: NSRect) {
-        super.init(frame: frame)
-        note.alignment = .center
-        note.font = .systemFont(ofSize: 12)
-        note.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(note)
+    init(content: NSView) {
+        super.init(frame: .zero)
+        content.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(content)
         NSLayoutConstraint.activate([
-            note.centerXAnchor.constraint(equalTo: centerXAnchor),
-            note.centerYAnchor.constraint(equalTo: centerYAnchor),
-            note.widthAnchor.constraint(lessThanOrEqualTo: widthAnchor, constant: -24),
+            content.topAnchor.constraint(equalTo: topAnchor),
+            content.leadingAnchor.constraint(equalTo: leadingAnchor),
+            content.trailingAnchor.constraint(equalTo: trailingAnchor),
+            content.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("SidebarView is created in code") }
-
-    /// The workspace folder's name, until the explorer tree takes this
-    /// place (plan 4, phase C).
-    func showFolder(_ path: String) {
-        note.stringValue = (path as NSString).lastPathComponent
-    }
-
-    func setColors(secondary: NSColor) {
-        note.textColor = secondary
-    }
 }

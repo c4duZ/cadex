@@ -16,7 +16,8 @@
 - A casca da janela, no estilo do Terax: título transparente com barra de ferramentas compacta
   (38 pt, botões da janela centrados); `TitleBarView.swift` (painel lateral, paleta, abas, "+",
   busca, todos por comando), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
-  painel lateral recolhível, barra de status) e `SidebarView.swift` (vazio até os planos 4 e 6).
+  painel lateral recolhível, barra de status) e `SidebarView.swift` (a árvore do explorer; o source control entra no plano 6). O explorer é criado
+  junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.
 - `WindowBackdrop.swift`: imagem de fundo atrás da área do terminal (desfoque calculado uma vez) e,

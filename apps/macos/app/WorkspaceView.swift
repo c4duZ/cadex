@@ -1,4 +1,5 @@
 import AppKit
+import Explorer
 import StatusBar
 import Tabs
 import Terminal
@@ -15,7 +16,8 @@ final class WorkspaceView: NSView {
     let titleBar: TitleBarView
     let statusBar = StatusBarView()
     private let sidebarPanel = PanelView()
-    private let sidebar = SidebarView()
+    private let sidebar: SidebarView
+    private let explorer: ExplorerController
     private let contentPanel = PanelView()
     private var sidebarWidth: NSLayoutConstraint!
     private var contentLeading: NSLayoutConstraint!
@@ -26,8 +28,10 @@ final class WorkspaceView: NSView {
     private var backgroundImage: WindowBackdrop.Image?
     private var vibrancy = false
 
-    init(tabs: TabsController, run: @escaping (String) -> Void) {
+    init(tabs: TabsController, explorer: ExplorerController, run: @escaping (String) -> Void) {
         titleBar = TitleBarView(tabBar: tabs.bar, run: run)
+        self.explorer = explorer
+        sidebar = SidebarView(content: explorer.view)
         super.init(frame: .zero)
         frost.blendingMode = .behindWindow
         frost.material = .underWindowBackground
@@ -71,9 +75,9 @@ final class WorkspaceView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("WorkspaceView is created in code") }
 
-    /// The workspace folder shown in the sidebar.
-    func showFolder(_ path: String) {
-        sidebar.showFolder(path)
+    /// Shows the sidebar if it is hidden (explorer.focus).
+    func showSidebar() {
+        if !sidebarVisible { toggleSidebar() }
     }
 
     /// The view.toggle-sidebar command.
@@ -124,7 +128,7 @@ final class WorkspaceView: NSView {
         window?.appearance = NSAppearance(named: theme.dark ? .darkAqua : .aqua)
         sidebarPanel.setColors(fill: ui.panel.nsColor, border: ui.panelBorder.nsColor)
         contentPanel.setColors(fill: theme.terminal.background.nsColor, border: ui.panelBorder.nsColor)
-        sidebar.setColors(secondary: ui.secondaryText.nsColor)
+        explorer.style = .init(text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor, accent: ui.accent.nsColor)
         titleBar.setColors(text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, field: ui.field.nsColor)
         statusBar.style = .init(text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor)
         (titleBar.subviews.first { $0 is TabBarView } as? TabBarView)?.style = .init(
