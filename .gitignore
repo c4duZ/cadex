@@ -1,0 +1,15 @@
+.DS_Store
+
+# Zig
+.zig-cache/
+zig-out/
+
+# Swift / Xcode
+.build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+.swiftpm/
+
+# Python
+__pycache__/
