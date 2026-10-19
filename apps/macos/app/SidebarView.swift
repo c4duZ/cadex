@@ -21,6 +21,12 @@ final class SidebarView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("SidebarView is created in code") }
 
+    /// The workspace folder's name, until the explorer tree takes this
+    /// place (plan 4, phase C).
+    func showFolder(_ path: String) {
+        note.stringValue = (path as NSString).lastPathComponent
+    }
+
     func setColors(secondary: NSColor) {
         note.textColor = secondary
     }

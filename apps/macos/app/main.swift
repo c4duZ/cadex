@@ -1,6 +1,7 @@
 import AppKit
 import StatusBar
 import CommandPalette
+import Explorer
 import Settings
 import Shortcuts
 import Tabs
@@ -22,6 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var keymapLabels: (String) -> String? = { _ in nil }
     private var keymap: Keymap?
     private var settingsWindow: SettingsWindowController?
+    private let folder = WorkspaceFolder()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpCommands()
@@ -33,11 +35,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         self.tabs = tabs
         self.workspace = workspace
         connectStatusBar(workspace.statusBar, to: tabs)
+        workspace.showFolder(folder.root)
+        folder.onChange = { [weak workspace] root in workspace?.showFolder(root) }
         settings.onLooks = { [weak workspace] image, vibrancy in workspace?.setLooks(image: image, vibrancy: vibrancy) }
         let looks = settings.store.settings.appearance
         workspace.setLooks(image: looks.backgroundImage.map { .init(path: $0, opacity: looks.backgroundOpacity, blur: looks.backgroundBlur) },
                            vibrancy: looks.vibrancy)
-        tabs.newTab(cwd: NSHomeDirectory())
+        tabs.newTab(cwd: folder.root)
         window.center()
         // CADEX_BACKGROUND=1 shows the window without taking the keyboard,
         // for checking the app while someone else uses the machine: opening
@@ -104,6 +108,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             keywords: ["sidebar", "explorer", "painel"], category: .view, defaultShortcut: "cmd+b",
             action: .run { [weak self] in self?.workspace?.toggleSidebar() }))
         commands.register(TerminalCommands.all)
+        commands.register(WorkspaceCommands.all(folder, window: { [weak self] in self?.window },
+                                                terminalFolder: { [weak self] in self?.tabs?.activeTerminal?.currentDirectory }))
         commands.register(TabCommands.all { [weak self] in self?.tabs })
 
         settings.onShortcuts = { [weak self] shortcuts in self?.applyShortcuts(shortcuts) }
@@ -131,6 +137,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             dispatcher.start()
             self.dispatcher = dispatcher
         }
+    }
+
+    /// A folder dropped on the Dock icon becomes the workspace
+    /// (docs/spec/workspace.md). Needs the .app bundle's document types,
+    /// which come with packaging (plan 7).
+    func application(_ application: NSApplication, open urls: [URL]) {
+        guard let url = urls.first(where: \.hasDirectoryPath) ?? urls.first else { return }
+        folder.open(url.path)
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

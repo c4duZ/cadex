@@ -36,6 +36,8 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   atual (OSC 7).
 - **Bracketed paste**: modo em que o programa pede que o texto colado venha marcado, para não ser
   executado como digitação.
+- **Diretório autorizado** (`authorized directory`): pasta que o usuário abriu nesta execução. O
+  núcleo só mexe em arquivos dentro de uma delas, com o caminho resolvido (sem `..` nem links).
 - **Ambiente** (`workspace environment`): onde os processos rodam. Local, ou uma distro WSL no
   Windows.
 

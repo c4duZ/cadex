@@ -26,6 +26,8 @@ typedef int32_t cadex_status;
 #define CADEX_OUT_OF_MEMORY 2
 #define CADEX_SPAWN_FAILED 3
 #define CADEX_IO_FAILED 4
+#define CADEX_NOT_FOUND 5      /* the path does not exist */
+#define CADEX_NOT_AUTHORIZED 6 /* outside every authorized directory */
 
 /* Releases a buffer returned by the core. NULL is accepted. */
 void cadex_free(void *ptr);
@@ -381,6 +383,30 @@ typedef struct {
 cadex_status cadex_fuzzy_rank(const uint8_t *query, size_t query_len,
                               const cadex_text *texts, size_t count, cadex_fuzzy_result *out);
 void cadex_fuzzy_result_free(cadex_fuzzy_result *result);
+
+/* ---- Workspace (core/features/workspace) ------------------------------ */
+
+/* Paths go in absolute and NUL-terminated. Paths that come out are
+ * canonical (realpath), not NUL-terminated, freed with cadex_free; passing
+ * NULL for out skips the copy. */
+
+/* Authorizes an existing directory for this run of the app: file operations
+ * and searches only act inside authorized directories. The list only grows. */
+cadex_status cadex_workspace_authorize(const char *path, uint8_t **out, size_t *out_len);
+
+/* Whether the path resolves (.., links) inside an authorized directory. */
+bool cadex_workspace_is_authorized(const char *path);
+
+/* Authorizes the current directory of a terminal session. Unknown directory:
+ * CADEX_NOT_FOUND. */
+cadex_status cadex_workspace_authorize_terminal(cadex_terminal *terminal, uint8_t **out, size_t *out_len);
+
+/* The folder the app was opened with: the first of argv[1...] naming an
+ * existing directory, relative ones resolved against cwd. macOS flags
+ * (-psn_..., -NSKey value) are skipped. None: CADEX_OK with *out NULL. Not
+ * authorized by this call. */
+cadex_status cadex_workspace_launch_directory(const char *const *argv, size_t argc, const char *cwd,
+                                              uint8_t **out, size_t *out_len);
 
 #ifdef __cplusplus
 }

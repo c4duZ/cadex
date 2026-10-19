@@ -74,6 +74,14 @@ let package = Package(
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
+        .target(
+            name: "Explorer",
+            dependencies: ["CCadex", "CommandPalette", "Icons"],
+            path: "features/explorer",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
         // Tests are an executable: see shared/checks/Checks.swift.
         .target(name: "Checks", path: "shared/checks"),
         .executableTarget(
@@ -121,6 +129,12 @@ let package = Package(
             path: "features/themes/tests"
         ),
         .executableTarget(
+            name: "ExplorerTests",
+            dependencies: ["Explorer", "Checks"],
+            path: "features/explorer/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+        .executableTarget(
             name: "IconsTests",
             dependencies: ["Icons", "Checks"],
             path: "shared/icons/tests"
@@ -128,7 +142,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons", "Settings"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons", "Settings", "Explorer"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

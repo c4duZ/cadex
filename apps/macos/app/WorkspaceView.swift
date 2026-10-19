@@ -71,6 +71,11 @@ final class WorkspaceView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("WorkspaceView is created in code") }
 
+    /// The workspace folder shown in the sidebar.
+    func showFolder(_ path: String) {
+        sidebar.showFolder(path)
+    }
+
     /// The view.toggle-sidebar command.
     func toggleSidebar() {
         sidebarVisible.toggle()

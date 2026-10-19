@@ -9,7 +9,14 @@
 
 ## Como eu quero
 - Árvore carregada sob demanda, pasta por pasta.
-- Spec de comportamento em docs/spec/explorer.md, escrita antes do código. Status: não iniciada.
+- A raiz da árvore é o workspace: `WorkspaceFolder.swift` guarda a pasta aberta (a da linha de
+  comando, senão a pasta pessoal), autoriza no núcleo cada pasta que vira raiz e avisa a troca por
+  `onChange`. A feature workspace não tem pasta no app; a parte dela que o usuário vê mora aqui.
+- Comandos em `WorkspaceCommands.swift`: `workspace.open-folder` ("Abrir pasta…", ⌘O, seletor do
+  sistema) e `workspace.use-terminal-folder` (a pasta do terminal com foco, que `apps/macos/app/main.swift`
+  passa por closure: o explorer não vê terminais).
+- Spec: `docs/spec/explorer.md` e `docs/spec/workspace.md`. Status: workspace pronto (plano 4,
+  fase A); a árvore é a fase C. Até lá o painel lateral mostra o nome da pasta.
 
 ## Como validar
 - `make macos-test` passa.
