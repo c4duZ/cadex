@@ -11,7 +11,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 
 | # | plano | entrega | status |
 |---|---|---|---|
-| 1 | `docs/plans/1-terminal.md` | terminal completo, no nível do Terax | pendente |
+| 1 | `docs/plans/1-terminal.md` | terminal completo, no nível do Terax | feito; falta conferência manual |
 | 2 | `docs/plans/2-tabs-splits-palette.md` | abas, divisões e paleta ⌘K | pendente |
 | 3 | `docs/plans/3-window-and-theme.md` | janela com a cara do Terax, tema, configurações | pendente |
 | 4 | `docs/plans/4-files.md` | workspace, explorer e busca | pendente |

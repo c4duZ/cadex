@@ -112,3 +112,11 @@ links pelos hyperlinks OSC 8 das células e detecção de URL no texto; recursos
   colar print e arquivo com espaço, ⌘F achando texto do histórico, ⌘+clique numa URL.
 - Ao terminar: marcar os critérios da spec, atualizar os `CLAUDE.md` do terminal (núcleo e app) e o
   status na tabela de `docs/plans/README.md`.
+
+## Situação (2026-10-19)
+Fases A a F feitas e conferidas no app com prints. Falta conferir à mão: acentos por tecla morta
+no ABNT2, edição estilo Mac no bash, htop e tmux (não instalados nesta máquina), redimensionar com
+vim aberto, Ctrl+→ (o macOS usa para trocar de Space), ⌘+clique abrindo o navegador e o Finder, o
+sino piscando e o cursor piscando. Os critérios de aceite que dependem de abas e da paleta ficam
+para o plano 2.
+

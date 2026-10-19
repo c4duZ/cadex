@@ -4,7 +4,7 @@ import Terminal
 /// Opens one window with a terminal. Tabs, spaces and the rest of the
 /// workspace come as their features are built (CLAUDE.md, atlas).
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var window: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -14,6 +14,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered, defer: false)
         window.title = "Cadex"
+        window.delegate = self
         window.contentView = TerminalView(frame: frame, cwd: NSHomeDirectory())
         window.center()
         window.makeKeyAndOrderFront(nil)
@@ -24,6 +25,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         true
+    }
+
+    /// The terminal asks before closing over a running program; close()
+    /// after the confirmation does not come back here.
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        guard let terminal = sender.contentView as? TerminalView else { return true }
+        return terminal.shouldClose(then: { sender.close() })
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard let terminal = window?.contentView as? TerminalView, window?.isVisible == true else { return .terminateNow }
+        let now = terminal.shouldClose(
+            then: { NSApp.reply(toApplicationShouldTerminate: true) },
+            cancelled: { NSApp.reply(toApplicationShouldTerminate: false) })
+        return now ? .terminateNow : .terminateLater
     }
 }
 

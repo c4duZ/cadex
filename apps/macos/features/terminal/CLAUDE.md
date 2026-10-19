@@ -37,6 +37,9 @@
 - Programas que pedem mouse recebem cliques, arrastos e a roda (`TerminalMouse.swift`); Shift
   força a seleção local. Foco, título da janela, sino (pisca a view, sem som) e cursor piscando em
   `TerminalSignals.swift`; o timer do cursor só roda com a janela na frente e o programa pedindo.
+- Fechar com programa em primeiro plano pede confirmação (`TerminalClose.swift:shouldClose`), que
+  o default "terminal.confirmClose" desliga. Quem fecha (janela hoje, aba no plano 2) chama
+  `shouldClose`. Botão "Cancelar" de alerta ganha Esc à mão: o NSAlert só dá Esc a "Cancel".
 - ⌘C, ⌘A, ⌘F, ⌘↑ e ⌘↓ estão no `performKeyEquivalent` até a paleta existir (plano 2).
 - Ações do terminal (limpar, buscar, copiar, colar) registradas como comandos.
 - Status: janela com um shell, desenho em Metal (SF Mono, nítido), teclado básico e colagem de
@@ -44,7 +47,9 @@
   Rolagem com barra discreta, seleção (arrastar, duplo e triplo clique, Shift+clique, ⌘A) e ⌘C.
   Colagem de texto (bracketed paste), arquivos e imagem, e arrastar arquivos.
   Links com ⌘ e busca (⌘F) no histórico. Mouse para programas, foco, título, sino e cursor
-  piscando.
+  piscando. Confirmação ao fechar. Desempenho medido em 2026-10-19: `cat` de 100 MB em 0,95 s,
+  Ctrl+C sob saída contínua em menos de 0,2 s; o redesenho por linha suja ficou para quando
+  medir lentidão.
 
 ## Como validar
 - `make macos-test` passa.

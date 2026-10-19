@@ -130,7 +130,7 @@ sistema (NSPasteboard); no Windows, a do Win32. O núcleo recebe só o texto fin
 - [ ] No zsh e no bash, ⌥← ⌥→ ⌘← ⌘→ ⌥⌫ ⌘⌫ movem e apagam como descrito em Teclado.
 - [ ] Em tela Retina, o texto em SF Mono 13 pt sai nítido (comparado lado a lado com o Terminal do
       macOS no mesmo tamanho).
-- [ ] `cat` de um arquivo de 100 MB não trava a janela, e Ctrl+C interrompe em menos de 1 segundo.
+- [x] `cat` de um arquivo de 100 MB não trava a janela, e Ctrl+C interrompe em menos de 1 segundo.
 - [ ] ⌘D, ⌘Shift+D, ⌘W e ⌘T funcionam e a aba nova abre na pasta da sessão ativa.
 - [ ] Fechar uma aba com `sleep 100` rodando pede confirmação; com o shell parado, fecha direto.
 - [ ] Reabrir o app restaura abas, divisões e pastas.

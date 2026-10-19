@@ -37,7 +37,8 @@ extension TerminalView {
         alert.messageText = lines > 1 ? "Colar \(lines) linhas?" : "Colar este texto?"
         alert.informativeText = "O programa em execução não marca colagens: cada linha pode rodar como um comando."
         alert.addButton(withTitle: "Colar")
-        alert.addButton(withTitle: "Cancelar")
+        // NSAlert gives Esc only to a button titled "Cancel" in English.
+        alert.addButton(withTitle: "Cancelar").keyEquivalent = "\u{1B}"
         alert.showsSuppressionButton = true
         alert.suppressionButton?.title = "Não perguntar de novo"
         alert.beginSheetModal(for: window) { [weak self] response in
