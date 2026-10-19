@@ -72,9 +72,9 @@ Fases A a D feitas, cada uma num commit; falta a E (semana de uso), que é do do
   do Finder (CADEX_DMG_PLAIN=1), para não abrir janelas na frente do dono.
 - **D. Medidas:** no README (DMG 7,5 MB, app 40 MB, 66 MB de memória com um terminal).
 
-Falta, com o dono: rodar `apps/macos/packaging/release.sh` numa sessão livre (o DMG com fundo e
-posições), publicar com `--publish` (cria a release v0.1.0 no GitHub), instalar pelo comando num
-usuário limpo, abrir num Mac Intel de verdade, trocar de space pela paleta (⇧⌘S e escolher) e a
+Release v0.1.0 publicada em 2026-10-19 (https://github.com/c4duZ/cadex/releases/tag/v0.1.0), com o
+DMG de fundo e posições; o comando do README instalou a versão publicada numa pasta de teste, com a
+assinatura e as duas arquiteturas conferidas. Falta, com o dono: instalar num usuário limpo, abrir num Mac Intel de verdade, trocar de space pela paleta (⇧⌘S e escolher) e a
 semana de uso. Decisões tomadas sem o dono, para confirmar: bundle id io.github.c4duz.cadex (mudar
 depois faz o macOS esquecer as permissões), atalhos ⇧⌘S, ⌃⌘N e ⌃⌘←/→ para spaces, e o checksum
 SHA-256 publicado junto do ZIP.
