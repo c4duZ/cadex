@@ -80,10 +80,11 @@ def from_tweakcn(c):
         "interface": {
             "chrome": c.get("muted", c["background"]), "panel": c["background"],
             "panelBorder": c.get("border", c["background"]),
-            # Neutral, from the title bar's own color: tweakcn's "accent" is a
-            # hover color, amber or green in some themes, and painted the
-            # active tab and the search field (owner's feedback, 2026-10-19).
-            "tabActive": mix(c.get("muted", c["background"]), c["foreground"], 0.12),
+            # The title bar's color with a little of the theme's primary: the
+            # solid tweakcn "accent" painted the active tab amber or green,
+            # and neutral gray made every theme look the same (owner's
+            # feedback, both on 2026-10-19).
+            "tabActive": mix(c.get("muted", c["background"]), c["primary"], 0.22),
             "field": mix(c.get("muted", c["background"]), c["foreground"], 0.06), "text": c["foreground"],
             "secondaryText": c.get("muted-foreground", c["foreground"]), "accent": c["primary"],
         },
@@ -100,7 +101,7 @@ def from_official(v):
     return {
         "interface": {
             "chrome": ui["surface"], "panel": v["background"], "panelBorder": ui["border"],
-            "tabActive": mix(ui["surface"], v["foreground"], 0.12), "field": ui["surface"],
+            "tabActive": mix(ui["surface"], ui["accent"], 0.22), "field": ui["surface"],
             "text": v["foreground"], "secondaryText": ui["muted"], "accent": ui["accent"],
         },
         "terminal": {"background": v["background"], "foreground": v["foreground"], "cursor": v["cursor"],

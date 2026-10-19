@@ -14,12 +14,15 @@ public final class TabBarView: NSView {
         public var hoverFill: NSColor
         public var text: NSColor
         public var secondaryText: NSColor
+        /// The active tab's icon: where the theme shows in the strip.
+        public var accent: NSColor
 
-        public init(activeFill: NSColor, hoverFill: NSColor, text: NSColor, secondaryText: NSColor) {
+        public init(activeFill: NSColor, hoverFill: NSColor, text: NSColor, secondaryText: NSColor, accent: NSColor = .controlAccentColor) {
             self.activeFill = activeFill
             self.hoverFill = hoverFill
             self.text = text
             self.secondaryText = secondaryText
+            self.accent = accent
         }
     }
 
@@ -138,7 +141,7 @@ public final class TabBarView: NSView {
         let color = item.active ? style.text : style.secondaryText
 
         let iconRect = NSRect(x: rect.minX + Self.padding, y: rect.midY - Self.iconSize / 2, width: Self.iconSize, height: Self.iconSize)
-        tinted(item.terminal ? .terminalWindow : .file, size: Self.iconSize, color: color).draw(in: iconRect)
+        tinted(item.terminal ? .terminalWindow : .file, size: Self.iconSize, color: item.active ? style.accent : color).draw(in: iconRect)
 
         let paragraph = NSMutableParagraphStyle()
         paragraph.lineBreakMode = .byTruncatingTail

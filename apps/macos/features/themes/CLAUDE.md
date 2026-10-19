@@ -11,8 +11,10 @@
 
 ## Como eu quero
 - `ThemeCatalog.swift`: os 46 temas embutidos, de `Resources/catalog.json`, gerado por
-  `../../../../tools/themes/build_catalog.py` (não editar à mão). A aba ativa e o campo são neutros
-  (a cor da barra de título misturada ao texto): o "accent" do tweakcn pintava de âmbar ou verde. `ThemeFamily.swift`: um tema com
+  `../../../../tools/themes/build_catalog.py` (não editar à mão). A aba ativa é a cor da barra de título
+  com 22% da cor principal do tema: o "accent" do tweakcn sólido pintava de âmbar ou verde, e cinza
+  neutro deixava todos os temas iguais. A cor principal aparece também nas pastas, na seleção da
+  árvore e no ícone da aba ativa. `ThemeFamily.swift`: um tema com
   versão escura e/ou clara, e o modo (sistema, escuro, claro). Padrão: Caffeine.
 - `Theme.swift`: o tema (cores da interface e do terminal, 16 ANSI). `BuiltInThemes.swift`: Cadex
   Escuro (cores da interface medidas num print do Terax) e Cadex Claro. `ThemeStore.swift`: o tema

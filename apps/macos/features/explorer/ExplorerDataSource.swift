@@ -46,6 +46,12 @@ extension ExplorerController: NSOutlineViewDataSource, NSOutlineViewDelegate {
         !node(item).isNote
     }
 
+    public func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
+        let row = (outlineView.makeView(withIdentifier: ExplorerRowView.identifier, owner: nil) as? ExplorerRowView) ?? ExplorerRowView()
+        row.accent = style.accent
+        return row
+    }
+
     public func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
         let file = node(item)
         let cell = (outlineView.makeView(withIdentifier: ExplorerCell.identifier, owner: nil) as? ExplorerCell) ?? ExplorerCell()
@@ -153,11 +159,36 @@ final class ExplorerCell: NSTableCellView {
         }
         textField?.font = .systemFont(ofSize: 12)
         imageView?.image = FileTypeIcon.icon(name: node.name, entry: node.entry, expanded: expanded).image(size: 14)
-        // Gray like the files: the accent of some themes (amber) made the
-        // tree loud next to Terax's (2026-10-19).
-        imageView?.contentTintColor = style.secondaryText
+        // Folders in the theme's accent: with them gray, a theme changed only
+        // the background (owner, 2026-10-19).
+        imageView?.contentTintColor = node.isFolder ? style.accent : style.secondaryText
         textField?.textColor = git.map { node.isFolder ? style.text : Self.gitColor($0) } ?? style.text
         alphaValue = node.isHidden || node.entry?.ignored == true ? 0.55 : 1
         toolTip = node.entry?.kind == .symlink && !cadex_workspace_is_authorized(node.path) ? "Aponta para fora da pasta aberta" : nil
     }
+}
+
+/// A selected row in the theme's accent, light enough to read the name,
+/// with or without the keyboard: the system's gray for a tree without focus
+/// barely showed, and its blue ignored the theme (owner, 2026-10-19).
+final class ExplorerRowView: NSTableRowView {
+    static let identifier = NSUserInterfaceItemIdentifier("explorer.row")
+    var accent: NSColor = .controlAccentColor { didSet { needsDisplay = true } }
+
+    init() {
+        super.init(frame: .zero)
+        identifier = Self.identifier
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("ExplorerRowView is created in code") }
+
+    override func drawSelection(in dirtyRect: NSRect) {
+        let alpha: CGFloat = isEmphasized ? 0.32 : 0.2
+        accent.withAlphaComponent(alpha).setFill()
+        NSBezierPath(roundedRect: bounds.insetBy(dx: 4, dy: 0.5), xRadius: 5, yRadius: 5).fill()
+    }
+
+    /// The text stays in its own colors on the light fill.
+    override var interiorBackgroundStyle: NSView.BackgroundStyle { .normal }
 }

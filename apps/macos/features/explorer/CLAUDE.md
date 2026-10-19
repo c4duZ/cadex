@@ -19,7 +19,8 @@
 - A árvore: `ExplorerController.swift` (porta de entrada: a view do painel lateral, com o nome da
   pasta pequeno e cinza e as ações à direita, buscar arquivo, novo arquivo, nova pasta, recarregar; a raiz, o
   watcher, recarregar mantendo pastas abertas e seleção, mensagem curta embaixo da árvore),
-  `FileNode.swift` (uma linha; pasta lida só ao abrir; recarga reaproveita linhas iguais; notas
+  `ExplorerRowView` (no `ExplorerDataSource.swift`: a seleção na cor do tema, visível com ou sem
+  foco), `FileNode.swift` (uma linha; pasta lida só ao abrir; recarga reaproveita linhas iguais; notas
   "Pasta vazia" e "Sem permissão"), `ExplorerDataSource.swift` (dados, células desenhadas à mão no
   `layout()`, arrastar e soltar), `ExplorerOutline.swift` (teclas da árvore e menu de contexto),
   `ExplorerRename.swift` (renomear no lugar), `ExplorerActions.swift` (o que cada comando faz e

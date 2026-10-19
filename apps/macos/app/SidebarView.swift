@@ -60,9 +60,9 @@ final class SidebarView: NSView {
         gitTab.selected = page == .git
     }
 
-    /// The theme's colors: text, quiet text and the fill of the chosen tab.
-    func setColors(text: NSColor, secondary: NSColor, fill: NSColor) {
-        for tab in [filesTab, gitTab] { tab.colors = (text, secondary, fill) }
+    /// The theme's colors: text, quiet text, the chosen tab's fill and its icon.
+    func setColors(text: NSColor, secondary: NSColor, fill: NSColor, accent: NSColor) {
+        for tab in [filesTab, gitTab] { tab.colors = (text, secondary, fill, accent) }
     }
 }
 
@@ -70,7 +70,7 @@ final class SidebarView: NSView {
 private final class SidebarTab: NSView {
     var onPress: (() -> Void)?
     var selected = false { didSet { restyle() } }
-    var colors: (text: NSColor, secondary: NSColor, fill: NSColor) = (.labelColor, .secondaryLabelColor, .quaternaryLabelColor) {
+    var colors: (text: NSColor, secondary: NSColor, fill: NSColor, accent: NSColor) = (.labelColor, .secondaryLabelColor, .quaternaryLabelColor, .controlAccentColor) {
         didSet { restyle() }
     }
     private let icon: NSImageView
@@ -108,8 +108,7 @@ private final class SidebarTab: NSView {
 
     private func restyle() {
         layer?.backgroundColor = selected ? colors.fill.cgColor : nil
-        let color = selected ? colors.text : colors.secondary
-        label.textColor = color
-        icon.contentTintColor = color
+        label.textColor = selected ? colors.text : colors.secondary
+        icon.contentTintColor = selected ? colors.accent : colors.secondary
     }
 }
