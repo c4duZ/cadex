@@ -1,4 +1,4 @@
-.PHONY: check manifests core core-test macos-test app run relink package
+.PHONY: check manifests core core-test macos-test app run relink package windows-core
 
 # Run before handing work over: manifests, core tests, app tests.
 check: manifests core-test macos-test
@@ -44,3 +44,10 @@ run: app
 # dist/Cadex.app, universal and signed ad hoc (apps/macos/packaging/build.sh).
 package:
 	@apps/macos/packaging/build.sh
+
+# libcadex.a for Windows 11, x64 and arm64, cross-compiled from this Mac
+# (docs/plans/9-windows-core.md). Each lands in core/zig-out/windows-<arch>.
+windows-core:
+	@cd core && for arch in x86_64 aarch64; do \
+		zig build -Doptimize=ReleaseFast -Dtarget=$$arch-windows.win11_zn-gnu --prefix zig-out/windows-$$arch || exit 1; \
+	done

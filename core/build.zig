@@ -23,15 +23,7 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
     });
 
-    // FSEvents, for the explorer's file watching (features/explorer/watch.zig).
-    // Zig does not look in the macOS SDK on its own when the target is not
-    // the bare host ("unable to find framework 'CoreServices'", 2026-10-19);
-    // usr/lib resolves the framework's own dependencies (libobjc). Setting
-    // the SDK as sysroot instead doubled the path in a warning.
-    const sdk = std.mem.trimEnd(u8, b.run(&.{ "xcrun", "--show-sdk-path" }), "\n");
-    root.addFrameworkPath(.{ .cwd_relative = b.pathJoin(&.{ sdk, "System/Library/Frameworks" }) });
-    root.addLibraryPath(.{ .cwd_relative = b.pathJoin(&.{ sdk, "usr/lib" }) });
-    root.linkFramework("CoreServices", .{});
+    linkSystem(b, root, target);
 
     // Only the terminal feature may import this (ADR 0003).
     const ghostty = b.lazyDependency("ghostty", .{
@@ -66,6 +58,30 @@ pub fn build(b: *std.Build) void {
     const tests = b.addTest(.{ .root_module = root });
     const run_tests = b.addRunArtifact(tests);
     b.step("test", "Run the core tests").dependOn(&run_tests.step);
+    // The tests as an executable, for a system this Mac cannot run: the
+    // Windows VM runs zig-out/bin/cadex-core-tests.exe (plan 9, phase A).
+    b.step("test-bin", "Build the core tests without running them").dependOn(&b.addInstallArtifact(tests, .{ .dest_sub_path = "cadex-core-tests.exe" }).step);
+}
+
+/// What each system adds to the core. The default target stays the Mac; the
+/// Windows app builds with -Dtarget=<arch>-windows.win11_zn-gnu (plan 9).
+fn linkSystem(b: *std.Build, root: *std.Build.Module, target: std.Build.ResolvedTarget) void {
+    switch (target.result.os.tag) {
+        .macos => {
+            // FSEvents, for the explorer's file watching (features/explorer/watch.zig).
+            // Zig does not look in the macOS SDK on its own when the target is not
+            // the bare host ("unable to find framework 'CoreServices'", 2026-10-19);
+            // usr/lib resolves the framework's own dependencies (libobjc). Setting
+            // the SDK as sysroot instead doubled the path in a warning.
+            const sdk = std.mem.trimEnd(u8, b.run(&.{ "xcrun", "--show-sdk-path" }), "\n");
+            root.addFrameworkPath(.{ .cwd_relative = b.pathJoin(&.{ sdk, "System/Library/Frameworks" }) });
+            root.addLibraryPath(.{ .cwd_relative = b.pathJoin(&.{ sdk, "usr/lib" }) });
+            root.linkFramework("CoreServices", .{});
+        },
+        // ConPTY, Job Objects and ReadDirectoryChangesW are all kernel32,
+        // which libc (mingw) already links.
+        else => {},
+    }
 }
 
 fn installMergedLibrary(
