@@ -27,7 +27,7 @@ final class ShortcutsPage {
     }
 
     func makeView() -> NSView {
-        message.textColor = .secondaryLabelColor
+        message.textColor = SettingsColors.secondaryText
         var rows: [NSView] = [message]
         for category in Command.Category.allCases {
             let commands = registry.commands.filter { $0.category == category }

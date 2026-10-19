@@ -12,13 +12,19 @@ public struct TerminalAppearance: Equatable, Sendable {
     public var cursor: UInt32
     public var selection: UInt32
     public var ansi: [UInt32]
+    /// Below 1 when a background image shows through the terminal: the
+    /// default background is drawn at this opacity. Cells with their own
+    /// background stay solid.
+    public var backgroundAlpha: Double = 1
 
-    public init(background: UInt32, foreground: UInt32, cursor: UInt32, selection: UInt32, ansi: [UInt32]) {
+    public init(background: UInt32, foreground: UInt32, cursor: UInt32, selection: UInt32, ansi: [UInt32],
+                backgroundAlpha: Double = 1) {
         self.background = background
         self.foreground = foreground
         self.cursor = cursor
         self.selection = selection
         self.ansi = ansi
+        self.backgroundAlpha = backgroundAlpha
     }
 
     /// Posted when `current` changes.

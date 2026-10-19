@@ -47,6 +47,7 @@ final class PaneLayoutView: NSView {
     override func layout() {
         super.layout()
         let frames = tree.frames(in: bounds, gap: Self.gap)
+        needsDisplay = true
         for (id, frame) in frames {
             panes[id]?.frame = frame
         }
@@ -54,9 +55,11 @@ final class PaneLayoutView: NSView {
         outline.focusFrame = tree.leaves.count > 1 ? focused.flatMap { frames[$0] } : nil
     }
 
+    /// Only the divider lines: filling the whole view would hide a
+    /// background image behind the terminals.
     override func draw(_ dirtyRect: NSRect) {
         NSColor.separatorColor.setFill()
-        bounds.fill()
+        for divider in dividers(of: tree, in: bounds, path: []) { divider.line.fill() }
     }
 
     /// Whether pane `id` has room to be split along `axis`.

@@ -16,7 +16,10 @@
   busca, todos por comando), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
   painel lateral recolhível, barra de status) e `SidebarView.swift` (vazio até os planos 4 e 6).
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
-  camada pintada cobria os botões da janela. Abas, spaces e a paleta
+  camada pintada cobria os botões da janela.
+- `WindowBackdrop.swift`: imagem de fundo atrás da área do terminal (desfoque calculado uma vez) e,
+  com vibrância, a moldura fosca; depois de ligar, os botões da janela voltam para cima da camada.
+- Abrir para teste com CADEX_BACKGROUND=1: a janela aparece sem tomar o foco do teclado. Abas, spaces e a paleta
   entram aqui conforme as features existirem.
 
 ## Como validar

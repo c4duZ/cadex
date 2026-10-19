@@ -2,6 +2,7 @@ import AppKit
 import CommandPalette
 import Icons
 import Shortcuts
+import Themes
 
 /// The settings window (⌘,), after the Terax one: the sections as tabs at
 /// the top, the page below. One window, brought back if open
@@ -74,7 +75,18 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         ])
         window.contentView = root
         window.center()
+        ThemeStore.shared.observe { [weak self] _ in self?.themeChanged() }
         return window
+    }
+
+    /// The window follows the theme like the rest of the app; the open page
+    /// is rebuilt with the new colors.
+    private func themeChanged() {
+        guard let window else { return }
+        window.appearance = NSAppearance(named: SettingsColors.isDark ? .darkAqua : .aqua)
+        window.backgroundColor = SettingsColors.background
+        tabs.selectedSegmentBezelColor = SettingsColors.accent
+        if window.isVisible { select(tabs.selectedSegment) }
     }
 
     @objc private func tabChanged() {
@@ -82,6 +94,10 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
     }
 
     private func select(_ section: Int) {
+        // Rebuilding the same page (a theme change) keeps where it was
+        // scrolled, or picking a card would jump the list to the top.
+        let sameSection = tabs.selectedSegment == section
+        let scrolled = (content.subviews.first as? NSScrollView)?.contentView.bounds.origin
         tabs.selectedSegment = section
         let page: NSView
         switch section {
@@ -100,5 +116,10 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
             page.trailingAnchor.constraint(equalTo: content.trailingAnchor),
             page.bottomAnchor.constraint(equalTo: content.bottomAnchor),
         ])
+        if sameSection, let scrolled, let scroll = page as? NSScrollView {
+            content.layoutSubtreeIfNeeded()
+            scroll.contentView.scroll(to: scrolled)
+            scroll.reflectScrolledClipView(scroll.contentView)
+        }
     }
 }

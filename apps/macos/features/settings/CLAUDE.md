@@ -16,11 +16,12 @@
   topo como no Terax; `GeneralPages.swift` (Geral, Terminal, Sobre), `ThemesPage.swift` (modo e
   grade de cartões de tema), `ShortcutsPage.swift` (grava a próxima combinação com os atalhos do
   app suspensos; Delete tira, Esc cancela, "Padrão" volta) e `SettingsPage.swift` (linhas, caixas e
-  controles que mudam o arquivo na hora).
+  controles que mudam o arquivo na hora). A janela segue o tema (`SettingsColors.swift`): a página
+  aberta se refaz com as cores novas, mantendo a rolagem.
 - O app (`../../app/SettingsBridge.swift`) passa as preferências ao `TerminalPreferences` do
   terminal, ao tema e aos atalhos, e salva o que um alerta desliga ("não perguntar de novo").
 - Spec em `../../../../docs/spec/settings.md`. Status: arquivo, store, aplicação ao vivo e janela
-  prontos; imagem de fundo e vibrância a fazer (plano 3, fase E).
+  prontos, com imagem de fundo (copiada para Application Support/Cadex/backgrounds) e vibrância.
 
 ## Como validar
 - `make macos-test` passa: ler, escrever, arquivo quebrado, campo errado, limites, edição à mão.

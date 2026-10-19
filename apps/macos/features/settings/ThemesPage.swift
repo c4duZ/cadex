@@ -1,5 +1,6 @@
 import AppKit
 import Themes
+import UniformTypeIdentifiers
 
 /// The "Temas" page, after the Terax one: the mode, then a grid of theme
 /// cards with a swatch, the name and one line about it. Picking a card
@@ -31,7 +32,47 @@ final class ThemesPage {
             if cards.count - i == 1 { pair.addArrangedSubview(NSView()) }
             return pair
         }
-        return SettingsPage.make(title: "Temas", subtitle: "As cores do app e do terminal.", rows: rows)
+        rows += looksRows()
+        return SettingsPage.make(title: "Temas", subtitle: "Tema, imagem de fundo e vibrância.", rows: rows)
+    }
+
+    /// Vibrancy and the background image: off by default, they cost
+    /// compositing on every frame (docs/spec/themes.md).
+    private func looksRows() -> [NSView] {
+        let a = store.settings.appearance
+        let image = a.backgroundImage.map { ($0 as NSString).lastPathComponent } ?? "Nenhuma"
+        let pick = SettingsPage.button("Escolher imagem…") { [weak self] in self?.pickImage() }
+        let remove = SettingsPage.button("Remover") { [store] in
+            if let old = store.settings.appearance.backgroundImage { try? FileManager.default.removeItem(atPath: old) }
+            store.update { $0.appearance.backgroundImage = nil }
+        }
+        remove.isEnabled = a.backgroundImage != nil
+        let buttons = NSStackView(views: [remove, pick])
+        buttons.spacing = 6
+        return [
+            SettingsPage.section("Janela"),
+            SettingsPage.row("Vibrância", "A moldura fica fosca sobre o que está atrás da janela. Os painéis continuam sólidos.",
+                             control: SettingsPage.toggle(a.vibrancy) { [store] on in store.update { $0.appearance.vibrancy = on } }),
+            SettingsPage.row("Imagem de fundo", "Atrás do terminal. Fica guardada no Cadex. Atual: \(image).", control: buttons),
+            SettingsPage.row("Opacidade da imagem", nil,
+                             control: SettingsPage.slider(a.backgroundOpacity, range: 0...1, format: "%.0f%%", shown: { $0 * 100 }) { [store] value in
+                                 store.update { $0.appearance.backgroundOpacity = value }
+                             }),
+            SettingsPage.row("Desfoque da imagem", nil,
+                             control: SettingsPage.slider(a.backgroundBlur, range: 0...50, format: "%.0f") { [store] value in
+                                 store.update { $0.appearance.backgroundBlur = value }
+                             }),
+        ]
+    }
+
+    private func pickImage() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.image]
+        panel.allowsMultipleSelection = false
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        guard let copy = try? BackgroundImages.keepCopy(of: url) else { NSSound.beep(); return }
+        if let old = store.settings.appearance.backgroundImage { try? FileManager.default.removeItem(atPath: old) }
+        store.update { $0.appearance.backgroundImage = copy }
     }
 
     private func pick(_ id: String) {
@@ -59,9 +100,10 @@ final class ThemeCard: NSView {
         let swatch = Swatch(theme: theme)
         let name = NSTextField(labelWithString: family.name)
         name.font = .systemFont(ofSize: 13, weight: .semibold)
+        name.textColor = SettingsColors.text
         let line = NSTextField(labelWithString: family.description)
         line.font = .systemFont(ofSize: 11)
-        line.textColor = .secondaryLabelColor
+        line.textColor = SettingsColors.secondaryText
         line.lineBreakMode = .byTruncatingTail
         let texts = NSStackView(views: [name, line])
         texts.orientation = .vertical
@@ -90,7 +132,8 @@ final class ThemeCard: NSView {
     }
 
     private func updateBorder() {
-        layer?.borderColor = (selected ? NSColor.controlAccentColor : NSColor.separatorColor).cgColor
+        layer?.borderColor = (selected ? SettingsColors.accent : SettingsColors.border).cgColor
+        layer?.backgroundColor = SettingsColors.box.cgColor
         layer?.borderWidth = selected ? 2 : 1
     }
 }

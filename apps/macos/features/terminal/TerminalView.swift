@@ -108,6 +108,10 @@ public final class TerminalView: MTKView {
         guard let appearance = TerminalAppearance.current else { return }
         session?.setColors(appearance)
         renderer?.selectionColor = appearance.selection
+        renderer?.backgroundAlpha = appearance.backgroundAlpha
+        // Opaque unless a background image shows through: an opaque layer
+        // costs less to composite.
+        layer?.isOpaque = appearance.backgroundAlpha >= 1
         needsDisplay = true
     }
 

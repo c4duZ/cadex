@@ -36,6 +36,8 @@ final class TerminalRenderer {
     private var builder = QuadBuilder()
     /// The theme's selection color; nil tints with the text color.
     var selectionColor: UInt32?
+    /// The default background's opacity (TerminalAppearance.backgroundAlpha).
+    var backgroundAlpha: Double = 1
 
     /// Several frames can be in flight; each writes its own buffer.
     private static let buffersInFlight = 3
@@ -83,7 +85,7 @@ final class TerminalRenderer {
         pass.colorAttachments[0].texture = drawable.texture
         pass.colorAttachments[0].loadAction = .clear
         pass.colorAttachments[0].storeAction = .store
-        pass.colorAttachments[0].clearColor = Self.clearColor(frame.background)
+        pass.colorAttachments[0].clearColor = Self.clearColor(frame.background, alpha: backgroundAlpha)
 
         if let encoder = commands.makeRenderCommandEncoder(descriptor: pass) {
             var uniforms = SIMD2<Float>(Float(size.width), Float(size.height))
@@ -130,9 +132,10 @@ final class TerminalRenderer {
         return try? device.makeRenderPipelineState(descriptor: descriptor)
     }
 
-    private static func clearColor(_ rgb: UInt32) -> MTLClearColor {
+    /// Premultiplied, like everything the pipeline blends.
+    private static func clearColor(_ rgb: UInt32, alpha: Double) -> MTLClearColor {
         let c = rgba(rgb)
-        return MTLClearColor(red: Double(c.x), green: Double(c.y), blue: Double(c.z), alpha: 1)
+        return MTLClearColor(red: Double(c.x) * alpha, green: Double(c.y) * alpha, blue: Double(c.z) * alpha, alpha: alpha)
     }
 }
 

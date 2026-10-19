@@ -54,3 +54,11 @@ core/zig-pkg/ghostty-*/src/terminal/color.zig e Terminal.zig).
   recolhendo e abrindo, barra de status com a pasta atual, tema claro/escuro seguindo o sistema,
   `ls --color` e `vim` com as cores do tema.
 - Atualizar specs, `CLAUDE.md` das features e o status em `docs/plans/README.md`.
+
+## Situação (2026-10-19)
+Fases A, B, C e E feitas. A fase D (importar temas do Terax) saiu do plano com o dono: os temas do
+Terax são os mesmos que o Cadex traz embutidos (46, do tweakcn e de paletas oficiais, gerados por
+`tools/themes/build_catalog.py`) e ninguém usa tema próprio. Ícones Phosphor
+(`docs/adr/0008-phosphor-icons.md`). A janela de configurações segue o tema. Falta conferir à mão:
+tema claro/escuro seguindo o sistema e `ls --color` e `vim` com as cores do tema.
+

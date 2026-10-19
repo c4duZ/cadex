@@ -35,6 +35,16 @@ let exitCode = await Checks.run([
         expect(read.terminal.fontSize == 32)
         expect(read.terminal.historyLines == 100_000)
     }),
+    ("a picked background image is kept as a copy", {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("cadex-bg-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: root) }
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        let original = root.appendingPathComponent("foto.png")
+        try Data([1, 2, 3]).write(to: original)
+        let copy = try BackgroundImages.keepCopy(of: original, into: root.appendingPathComponent("backgrounds"))
+        try FileManager.default.removeItem(at: original)
+        expect(FileManager.default.fileExists(atPath: copy) && copy.hasSuffix(".png"), copy)
+    }),
     ("the store saves on change and reads a hand edit back", {
         let file = FileManager.default.temporaryDirectory.appendingPathComponent("cadex-settings-\(UUID())/settings.json")
         defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }

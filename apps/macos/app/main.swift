@@ -33,6 +33,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         self.tabs = tabs
         self.workspace = workspace
         connectStatusBar(workspace.statusBar, to: tabs)
+        settings.onLooks = { [weak workspace] image, vibrancy in workspace?.setLooks(image: image, vibrancy: vibrancy) }
+        let looks = settings.store.settings.appearance
+        workspace.setLooks(image: looks.backgroundImage.map { .init(path: $0, opacity: looks.backgroundOpacity, blur: looks.backgroundBlur) },
+                           vibrancy: looks.vibrancy)
         tabs.newTab(cwd: NSHomeDirectory())
         window.center()
         // CADEX_BACKGROUND=1 shows the window without taking the keyboard,

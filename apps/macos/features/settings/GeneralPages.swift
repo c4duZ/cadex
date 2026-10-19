@@ -55,7 +55,7 @@ enum GeneralPages {
             "Workspace de desenvolvimento centrado no terminal, nativo, com código próprio sob a licença MIT. " +
             "O modelo do terminal é a libghostty-vt; os ícones são Phosphor; os temas vêm do tweakcn e das " +
             "paletas oficiais de temas abertos. Créditos completos no arquivo NOTICE.")
-        credits.textColor = .secondaryLabelColor
+        credits.textColor = SettingsColors.secondaryText
         return SettingsPage.make(title: "Cadex", subtitle: "Versão \(version)", rows: [credits])
     }
 }

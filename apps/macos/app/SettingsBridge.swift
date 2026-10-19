@@ -12,6 +12,8 @@ final class SettingsBridge {
     let store = SettingsStore()
     /// The shortcuts section changed.
     var onShortcuts: (([String: String?]) -> Void)?
+    /// The background image or vibrancy changed.
+    var onLooks: ((WindowBackdrop.Image?, Bool) -> Void)?
     private var lastShortcuts: [String: String?]?
 
     func start() {
@@ -26,6 +28,8 @@ final class SettingsBridge {
     private func apply(_ settings: Settings) {
         TerminalPreferences.current = Self.terminalPreferences(from: settings)
         ThemeStore.shared.select(id: settings.appearance.theme, mode: ThemeMode(rawValue: settings.appearance.mode) ?? .system)
+        let a = settings.appearance
+        onLooks?(a.backgroundImage.map { .init(path: $0, opacity: a.backgroundOpacity, blur: a.backgroundBlur) }, a.vibrancy)
         if settings.shortcuts != lastShortcuts {
             lastShortcuts = settings.shortcuts
             onShortcuts?(settings.shortcuts)

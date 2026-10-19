@@ -17,10 +17,13 @@ temas que ele já usava no Terax.
   incluídos, sem reabrir nada.
 - Programas que perguntam as cores do terminal (OSC 10, 11 e 4, como o vim faz para saber se o
   fundo é escuro) recebem as cores do tema.
-- Temas do usuário são arquivos JSON do Cadex numa pasta de temas em Application Support/Cadex.
-  Importar um tema do Terax converte o arquivo dele para esse formato, com as mesmas cores.
-- Imagem de fundo: opcional, com opacidade e desfoque. Desligada por padrão, porque custa
-  desempenho a cada quadro.
+- O formato do tema é um arquivo JSON do Cadex (as cores da interface e do terminal). Importar
+  temas do Terax ficou de fora: os temas do Terax são os mesmos que vêm embutidos, e o dono não usa
+  temas próprios (2026-10-19).
+- A janela de configurações também segue o tema.
+- Imagem de fundo: opcional, atrás da área do terminal, com opacidade e desfoque; a imagem escolhida
+  é copiada para o Cadex. Vibrância: a moldura fica fosca sobre o que está atrás da janela, e os
+  painéis continuam sólidos. As duas vêm desligadas, porque custam desempenho a cada quadro.
 
 ## Estados
 - **Tema do usuário com erro** (cor inválida, campo faltando): não é carregado; a mensagem diz o
@@ -30,10 +33,8 @@ temas que ele já usava no Terax.
 ## Casos de borda
 - Cor em `#RGB`, `#RRGGBB` ou `#RRGGBBAA`: aceitas. Qualquer outra forma é recusada.
 - Tema com menos de 16 cores ANSI: recusado.
-- Arquivo do Terax num formato que o importador não conhece: recusado com mensagem, nada é criado.
 
 ## Critérios de aceite
 - [x] Um tema JSON válido é lido; uma cor inválida é recusada com mensagem que cita o campo.
 - [ ] O terminal usa o fundo, o texto e as 16 cores do tema (`ls --color` e `vim` mostram as cores).
 - [ ] Com "seguir o sistema", trocar o modo do macOS troca o tema na hora.
-- [ ] Um tema exportado do Terax importado no Cadex tem as mesmas cores.

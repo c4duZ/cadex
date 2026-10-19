@@ -11,8 +11,9 @@ enum SettingsPage {
     static func make(title: String, subtitle: String, rows: [NSView]) -> NSView {
         let heading = NSTextField(labelWithString: title)
         heading.font = .systemFont(ofSize: 20, weight: .semibold)
+        heading.textColor = SettingsColors.text
         let caption = NSTextField(labelWithString: subtitle)
-        caption.textColor = .secondaryLabelColor
+        caption.textColor = SettingsColors.secondaryText
         let stack = NSStackView(views: [heading, caption] + rows)
         stack.orientation = .vertical
         stack.alignment = .leading
@@ -44,10 +45,11 @@ enum SettingsPage {
     static func row(_ label: String, _ detail: String?, control: NSView) -> NSView {
         let title = NSTextField(labelWithString: label)
         title.font = .systemFont(ofSize: 13, weight: .medium)
+        title.textColor = SettingsColors.text
         var texts: [NSView] = [title]
         if let detail {
             let note = NSTextField(wrappingLabelWithString: detail)
-            note.textColor = .secondaryLabelColor
+            note.textColor = SettingsColors.secondaryText
             note.font = .systemFont(ofSize: 11)
             texts.append(note)
         }
@@ -67,7 +69,7 @@ enum SettingsPage {
     static func section(_ text: String) -> NSView {
         let label = NSTextField(labelWithString: text)
         label.font = .systemFont(ofSize: 12, weight: .semibold)
-        label.textColor = .secondaryLabelColor
+        label.textColor = SettingsColors.secondaryText
         return label
     }
 
@@ -77,7 +79,8 @@ enum SettingsPage {
         box.wantsLayer = true
         box.layer?.cornerRadius = 8
         box.layer?.borderWidth = 1
-        box.layer?.borderColor = NSColor.separatorColor.cgColor
+        box.layer?.borderColor = SettingsColors.border.cgColor
+        box.layer?.backgroundColor = SettingsColors.box.cgColor
         content.translatesAutoresizingMaskIntoConstraints = false
         box.addSubview(content)
         NSLayoutConstraint.activate([
@@ -128,6 +131,35 @@ enum SettingsPage {
         let stack = NSStackView(views: [label, stepper])
         stack.spacing = 6
         return stack
+    }
+
+    /// A slider that reports when the drag ends, so the file is written once.
+    /// `shown` turns the value into what the label prints (0.5 → 50 for a
+    /// percentage); without it the label printed "0%" for 0.5.
+    static func slider(_ value: Double, range: ClosedRange<Double>, format: String, shown: @escaping (Double) -> Double = { $0 },
+                       _ changed: @escaping (Double) -> Void) -> NSView {
+        let label = NSTextField(labelWithString: String(format: format, shown(value)))
+        label.font = .monospacedDigitSystemFont(ofSize: 11, weight: .regular)
+        label.textColor = SettingsColors.secondaryText
+        let slider = NSSlider(value: value, minValue: range.lowerBound, maxValue: range.upperBound, target: nil, action: nil)
+        slider.isContinuous = true
+        slider.widthAnchor.constraint(equalToConstant: 160).isActive = true
+        slider.target = ActionBox.keep(slider) {
+            label.stringValue = String(format: format, shown(slider.doubleValue))
+            if NSApp.currentEvent?.type == .leftMouseUp { changed(slider.doubleValue) }
+        }
+        slider.action = #selector(ActionBox.fire)
+        let stack = NSStackView(views: [slider, label])
+        stack.spacing = 8
+        return stack
+    }
+
+    static func button(_ title: String, _ pressed: @escaping () -> Void) -> NSButton {
+        let button = NSButton(title: title, target: nil, action: nil)
+        button.bezelStyle = .rounded
+        button.target = ActionBox.keep(button) { pressed() }
+        button.action = #selector(ActionBox.fire)
+        return button
     }
 
     static func text(_ value: String, placeholder: String, _ changed: @escaping (String) -> Void) -> NSTextField {

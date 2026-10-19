@@ -3,16 +3,13 @@
 ## O que eu quero
 - Temas prontos e criados pelo usuário, com importar e exportar; imagem de fundo com opacidade e
   desfoque.
-- Importar os temas do Terax: o usuário traz os temas que já usa.
 - Tema do editor independente do tema do app.
 
 ## O que eu não quero
 - Transparência ligada por padrão (custa desempenho).
-- Descobrir o formato dos temas do Terax lendo o código dele (ADR 0004). O formato é levantado a partir
-  de arquivos de tema exportados pelo próprio app.
+- Copiar arquivos ou código do Terax (ADR 0004): os temas embutidos vêm das fontes abertas originais.
 
 ## Como eu quero
-- O importador converte o tema do Terax para o formato do Cadex; o Cadex só guarda o formato dele.
 - `ThemeCatalog.swift`: os 46 temas embutidos, de `Resources/catalog.json`, gerado por
   `../../../../tools/themes/build_catalog.py` (não editar à mão). `ThemeFamily.swift`: um tema com
   versão escura e/ou clara, e o modo (sistema, escuro, claro). Padrão: Caffeine.
@@ -23,10 +20,9 @@
 - As cores do terminal chegam a ele pelo `TerminalAppearance` da feature terminal, que o app
   preenche a partir do tema; a feature terminal não depende desta.
 - Spec em `../../../../docs/spec/themes.md`. Status: temas embutidos, troca pelo sistema, arquivo
-  JSON, cores no terminal e catálogo prontos; galeria nas configurações, importar e imagem de fundo
-  a fazer.
+  JSON, cores no terminal, catálogo, galeria nas configurações, imagem de fundo e vibrância prontos.
+  Importar temas do Terax saiu do plano.
 
 ## Como validar
 - `make macos-test` passa.
-- Teste: importar temas exportados do Terax (arquivos de exemplo na pasta de testes) gera as mesmas
-  cores.
+- Teste: o catálogo embutido carrega os 46 temas, o Caffeine primeiro.
