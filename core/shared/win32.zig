@@ -17,7 +17,7 @@ pub const INFINITE: DWORD = 0xFFFFFFFF;
 
 pub extern "kernel32" fn AcquireSRWLockExclusive(lock: *SRWLOCK) callconv(.winapi) void;
 pub extern "kernel32" fn ReleaseSRWLockExclusive(lock: *SRWLOCK) callconv(.winapi) void;
-pub extern "kernel32" fn SleepConditionVariableSRW(cond: *CONDITION_VARIABLE, lock: *SRWLOCK, ms: DWORD, flags: windows.ULONG) callconv(.winapi) BOOL;
+pub extern "kernel32" fn SleepConditionVariableSRW(cond: *CONDITION_VARIABLE, lock: *SRWLOCK, ms: DWORD, flags: u32) callconv(.winapi) BOOL;
 pub extern "kernel32" fn WakeConditionVariable(cond: *CONDITION_VARIABLE) callconv(.winapi) void;
 pub extern "kernel32" fn Sleep(ms: DWORD) callconv(.winapi) void;
 pub extern "kernel32" fn GetTickCount64() callconv(.winapi) u64;
@@ -124,3 +124,72 @@ pub extern "kernel32" fn CreateDirectoryW(name: LPCWSTR, security: ?*anyopaque) 
 pub extern "kernel32" fn MoveFileExW(from: LPCWSTR, to: LPCWSTR, flags: DWORD) callconv(.winapi) BOOL;
 pub extern "kernel32" fn CopyFileExW(from: LPCWSTR, to: LPCWSTR, progress: ?*anyopaque, data: ?*anyopaque, cancel: ?*BOOL, flags: DWORD) callconv(.winapi) BOOL;
 pub extern "kernel32" fn DeleteFileW(name: LPCWSTR) callconv(.winapi) BOOL;
+
+// Processes (process_windows.zig) and the terminal's ConPTY.
+
+pub const SECURITY_ATTRIBUTES = extern struct {
+    nLength: DWORD = @sizeOf(SECURITY_ATTRIBUTES),
+    lpSecurityDescriptor: ?*anyopaque = null,
+    bInheritHandle: BOOL = 0,
+};
+
+pub const STARTUPINFOW = extern struct {
+    cb: DWORD,
+    lpReserved: ?[*:0]WCHAR = null,
+    lpDesktop: ?[*:0]WCHAR = null,
+    lpTitle: ?[*:0]WCHAR = null,
+    dwX: DWORD = 0,
+    dwY: DWORD = 0,
+    dwXSize: DWORD = 0,
+    dwYSize: DWORD = 0,
+    dwXCountChars: DWORD = 0,
+    dwYCountChars: DWORD = 0,
+    dwFillAttribute: DWORD = 0,
+    dwFlags: DWORD = 0,
+    wShowWindow: u16 = 0,
+    cbReserved2: u16 = 0,
+    lpReserved2: ?*u8 = null,
+    hStdInput: ?HANDLE = null,
+    hStdOutput: ?HANDLE = null,
+    hStdError: ?HANDLE = null,
+};
+
+pub const STARTUPINFOEXW = extern struct {
+    StartupInfo: STARTUPINFOW,
+    lpAttributeList: ?*anyopaque,
+};
+
+pub const PROCESS_INFORMATION = extern struct {
+    hProcess: HANDLE,
+    hThread: HANDLE,
+    dwProcessId: DWORD,
+    dwThreadId: DWORD,
+};
+
+pub const STARTF_USESTDHANDLES: DWORD = 0x100;
+pub const CREATE_SUSPENDED: DWORD = 0x4;
+pub const CREATE_UNICODE_ENVIRONMENT: DWORD = 0x400;
+pub const CREATE_NO_WINDOW: DWORD = 0x08000000;
+pub const EXTENDED_STARTUPINFO_PRESENT: DWORD = 0x00080000;
+pub const PROC_THREAD_ATTRIBUTE_HANDLE_LIST: usize = 0x20002;
+pub const PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE: usize = 0x20016;
+pub const HANDLE_FLAG_INHERIT: DWORD = 0x1;
+pub const WAIT_OBJECT_0: DWORD = 0;
+pub const WAIT_TIMEOUT: DWORD = 258;
+pub const STILL_ACTIVE: DWORD = 259;
+
+pub extern "kernel32" fn CreatePipe(read: *HANDLE, write: *HANDLE, security: ?*const SECURITY_ATTRIBUTES, size: DWORD) callconv(.winapi) BOOL;
+pub extern "kernel32" fn SetHandleInformation(handle: HANDLE, mask: DWORD, flags: DWORD) callconv(.winapi) BOOL;
+pub extern "kernel32" fn CreateProcessW(app: ?LPCWSTR, command_line: ?[*:0]WCHAR, process_security: ?*anyopaque, thread_security: ?*anyopaque, inherit: BOOL, flags: DWORD, environment: ?*anyopaque, cwd: ?LPCWSTR, startup: *STARTUPINFOW, info: *PROCESS_INFORMATION) callconv(.winapi) BOOL;
+pub extern "kernel32" fn InitializeProcThreadAttributeList(list: ?*anyopaque, count: DWORD, flags: DWORD, size: *usize) callconv(.winapi) BOOL;
+pub extern "kernel32" fn UpdateProcThreadAttribute(list: *anyopaque, flags: DWORD, attribute: usize, value: *const anyopaque, size: usize, previous: ?*anyopaque, returned: ?*usize) callconv(.winapi) BOOL;
+pub extern "kernel32" fn DeleteProcThreadAttributeList(list: *anyopaque) callconv(.winapi) void;
+pub extern "kernel32" fn ResumeThread(thread: HANDLE) callconv(.winapi) DWORD;
+pub extern "kernel32" fn WaitForSingleObject(handle: HANDLE, ms: DWORD) callconv(.winapi) DWORD;
+pub extern "kernel32" fn GetExitCodeProcess(process: HANDLE, code: *DWORD) callconv(.winapi) BOOL;
+pub extern "kernel32" fn TerminateProcess(process: HANDLE, code: c_uint) callconv(.winapi) BOOL;
+pub extern "kernel32" fn CreateJobObjectW(security: ?*anyopaque, name: ?LPCWSTR) callconv(.winapi) ?HANDLE;
+pub extern "kernel32" fn AssignProcessToJobObject(job: HANDLE, process: HANDLE) callconv(.winapi) BOOL;
+pub extern "kernel32" fn TerminateJobObject(job: HANDLE, code: c_uint) callconv(.winapi) BOOL;
+pub extern "kernel32" fn GetEnvironmentStringsW() callconv(.winapi) ?[*]WCHAR;
+pub extern "kernel32" fn FreeEnvironmentStringsW(block: [*]WCHAR) callconv(.winapi) BOOL;

@@ -13,7 +13,8 @@
   `ignore.zig` e `glob.zig` (regras de .gitignore, .ignore e .git/info/exclude, como o git: a mais
   funda decide, a última linha vence, nada volta de dentro de pasta ignorada; usado pelo explorer e
   pela busca), `process.zig` (roda um programa sem shell, com pasta, tempo limite que mata o grupo, saída
-  limitada e ambiente extra; usado por source-control e git-history), `regex.zig` (regex POSIX da libc, ADR 0009; usado pela busca e pelos predicados de
+  limitada e ambiente extra; usado por source-control e git-history; `process_posix.zig` com
+  posix_spawn, `process_windows.zig` com CreateProcessW num Job Object e só os três pipes herdados), `regex.zig` (regex POSIX da libc, ADR 0009; usado pela busca e pelos predicados de
   destaque do editor), `test_dir.zig` (pasta temporária com caminho canônico, só nos testes),
   `sync.zig` (mutex e condição: pthread no Mac, SRWLOCK no Windows), `clock.zig` (espera e relógio
   em ms) e `win32.zig` (as funções do Win32 que o núcleo chama, declaradas à mão, ADR 0012).

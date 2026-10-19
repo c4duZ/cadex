@@ -124,5 +124,8 @@ test "pull refuses to merge diverged branches; branches are listed" {
 test "git outside the workspace is refused" {
     var registry = workspace.Registry.init(testing.allocator);
     defer registry.deinit();
-    try testing.expectError(error.Outside, git.run(testing.allocator, &registry, "/usr", &.{"status"}, .{}));
+    // A folder that exists on every system: the test's own temporary one.
+    var dir = try TestDir.init();
+    defer dir.deinit();
+    try testing.expectError(error.Outside, git.run(testing.allocator, &registry, dir.path(), &.{"status"}, .{}));
 }
