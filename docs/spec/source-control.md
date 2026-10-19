@@ -49,7 +49,9 @@ e pull. Os agentes mexem no código pelo terminal; aqui se confere e se faz o co
 ### O git
 - Tudo passa pelo binário `git` do usuário, com tempo limite (30 s; fetch, pull e push, 2 min) e
   saída limitada. Sem git instalado, o painel diz "O git não foi encontrado" com o comando para
-  instalar (`xcode-select --install`).
+  instalar (`xcode-select --install`; no Windows, o link do Git for Windows).
+- No Windows, o git é procurado no PATH e, se não estiver lá, onde o Git for Windows instala: em
+  Arquivos de Programas (instalação para todos) e em AppData\Local\Programs (só para o usuário).
 - Só roda git dentro do workspace autorizado.
 
 ## Estados

@@ -60,6 +60,11 @@
   Windows PowerShell) num Job Object; uma thread espera o processo e fecha o console, porque o
   ConPTY não fecha a saída sozinho quando o shell sai.
 - `shell_env.zig`: shell, argv de login e ambiente (TERM=xterm-256color, TERM_PROGRAM=Cadex).
+- `shell_windows.zig`: a linha de comando do shell no Windows. PowerShell aberto sem argumentos
+  ganha a integração de shell (-NoExit -EncodedCommand, depois do $PROFILE do usuário): avisa a
+  pasta por OSC 7 pelo LocationChangedAction do PowerShell 7, sem mexer no prompt; no Windows
+  PowerShell sem esse gancho, embrulha o prompt. `links.zig:windowsDirectory` traduz o aviso
+  (/C:/x vira C:\x).
 - `session.zig`: thread de leitura e mutex (`core/shared/sync.zig`) protegendo o modelo. O close
   pede ao Child para destravar a leitura (no Mac o poll acorda a cada 50 ms; no Windows fecha o
   console), espera a thread e encerra o shell (Mac: SIGHUP e, depois de 200 ms, SIGKILL; Windows:

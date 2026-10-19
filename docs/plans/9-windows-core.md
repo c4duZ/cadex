@@ -65,8 +65,9 @@ Fases B a G feitas, cada uma em commits pequenos: o núcleo inteiro compila e li
 x64 e arm64 (`make windows-core`), e os testes do Mac continuam passando. O script da VM
 (`tools/windows-vm.sh`, `make windows-core-test`) está pronto, mas ainda não há VM: os testes
 nunca rodaram no Windows. Falta: a VM (fase A, do dono), rodar e corrigir o que falhar lá, e a
-fase H (WSL). Pendências anotadas: integração de shell do PowerShell para o OSC 7 (o Windows não
-diz a pasta de outro processo) e o caminho padrão do git.exe quando ele não está no PATH.
+fase H (WSL). Depois, pelo comportamento descrito na documentação pública do Terax: integração de
+shell automática do PowerShell (OSC 7), pwsh → Windows PowerShell → cmd como shell padrão, pasta
+avisada convertida para C:\x, e git procurado onde o Git for Windows instala.
 
 ## Como validar
 - `make check` passa no Mac ao fim de cada fase.

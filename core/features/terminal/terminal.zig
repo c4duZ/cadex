@@ -19,6 +19,7 @@ pub const view = @import("session_view.zig");
 test {
     _ = @import("model.zig");
     _ = @import("shell_env.zig");
+    _ = @import("shell_windows.zig");
     _ = @import("pty.zig");
     _ = @import("session.zig");
     _ = @import("session_test.zig");

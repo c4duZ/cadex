@@ -4,6 +4,7 @@
 //! import it (ADR 0003).
 
 const std = @import("std");
+const builtin = @import("builtin");
 const fs = @import("../../shared/fs.zig");
 const vt = @import("ghostty-vt");
 const render = @import("render.zig");
@@ -137,10 +138,36 @@ pub fn directoryFromOsc7(report: []const u8, buf: []u8) ?[]const u8 {
     const encoded = rest[slash..];
     if (encoded.len > buf.len) return null;
     @memcpy(buf[0..encoded.len], encoded);
-    return std.Uri.percentDecodeInPlace(buf[0..encoded.len]);
+    const decoded = std.Uri.percentDecodeInPlace(buf[0..encoded.len]);
+    return if (builtin.os.tag == .windows) windowsDirectory(decoded) else decoded;
+}
+
+/// A reported Windows folder ("/C:/Users/x", or "///server/share" for a
+/// network one) as Windows writes it: "C:\Users\x", "\\server\share". Any
+/// other path (a Linux one from a WSL shell) stays as it came.
+pub fn windowsDirectory(decoded: []u8) []u8 {
+    const p = if (decoded.len > 0 and decoded[0] == '/') decoded[1..] else decoded;
+    const drive = p.len >= 2 and std.ascii.isAlphabetic(p[0]) and p[1] == ':';
+    const network = std.mem.startsWith(u8, p, "//");
+    if (!drive and !network) return decoded;
+    std.mem.replaceScalar(u8, p, '/', '\\');
+    return p;
 }
 
 const testing = std.testing;
+
+test "Windows folders reported by PowerShell keep the drive and the backslashes" {
+    var buf: [64]u8 = undefined;
+    const drive = "/C:/Users/Ana Lu";
+    @memcpy(buf[0..drive.len], drive);
+    try testing.expectEqualStrings("C:\\Users\\Ana Lu", windowsDirectory(buf[0..drive.len]));
+    const share = "///server/share/x";
+    @memcpy(buf[0..share.len], share);
+    try testing.expectEqualStrings("\\\\server\\share\\x", windowsDirectory(buf[0..share.len]));
+    const wsl = "/home/ana";
+    @memcpy(buf[0..wsl.len], wsl);
+    try testing.expectEqualStrings("/home/ana", windowsDirectory(buf[0..wsl.len]));
+}
 
 test "OSC 7 reports decode to a directory" {
     var buf: [256]u8 = undefined;

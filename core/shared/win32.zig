@@ -252,3 +252,12 @@ pub extern "kernel32" fn WaitForMultipleObjects(count: DWORD, handles: [*]const 
 pub extern "kernel32" fn ReadDirectoryChangesW(dir: HANDLE, buffer: *anyopaque, len: DWORD, subtree: BOOL, filter: DWORD, returned: ?*DWORD, overlapped: ?*OVERLAPPED, completion: ?*anyopaque) callconv(.winapi) BOOL;
 pub extern "kernel32" fn GetOverlappedResult(file: HANDLE, overlapped: *OVERLAPPED, transferred: *DWORD, wait: BOOL) callconv(.winapi) BOOL;
 pub extern "kernel32" fn CancelIoEx(file: HANDLE, overlapped: ?*OVERLAPPED) callconv(.winapi) BOOL;
+
+/// The environment variable `name` as UTF-8 in `out`, or null when unset
+/// (or too long for `out`).
+pub fn environmentVariable(comptime name: []const u8, out: []u8) ?[]const u8 {
+    var wide: [1024]u16 = undefined;
+    const n = GetEnvironmentVariableW(std.unicode.wtf8ToWtf16LeStringLiteral(name), &wide, wide.len);
+    if (n == 0 or n >= wide.len or n * 3 > out.len) return null;
+    return out[0..std.unicode.wtf16LeToWtf8(out, wide[0..n])];
+}

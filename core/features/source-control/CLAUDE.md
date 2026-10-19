@@ -13,7 +13,8 @@
 - Porta de entrada: `source_control.zig`. `git.zig` roda o git pelo executor de `core/shared/process.zig`:
   só em pasta autorizada, 30 s (rede: 2 min), GIT_TERMINAL_PROMPT=0 (senha pedida num terminal que
   não existe travaria até o limite), GIT_OPTIONAL_LOCKS=0, LC_ALL=C, sem editor nem pager; acha a
-  raiz do repositório e diz se o git existe (CADEX_GIT_MISSING).
+  raiz do repositório e diz se o git existe (CADEX_GIT_MISSING). No Windows, git fora do PATH é
+  procurado onde o Git for Windows instala (`git.zig:installedGit`).
 - `status.zig`: porcelain v2 com -z e --branch (branch, upstream, à frente/atrás, cada caminho com
   as letras do índice e da árvore; nomes com espaço, acento e aspas chegam inteiros).
 - `actions.zig`: stage, unstage (antes do primeiro commit, rm --cached), descartar (só rastreados;

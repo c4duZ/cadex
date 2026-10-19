@@ -13,6 +13,12 @@ do dia a dia, mais simples por dentro e com o texto nítido.
 - O terminal se apresenta como compatível com xterm-256color e suporta true color.
 - O terminal acompanha a pasta atual da sessão pelo aviso do shell (OSC 7). É ela que aparece na aba
   e na barra de status.
+- No Windows, o shell padrão é o PowerShell 7 (pwsh) quando instalado, senão o Windows PowerShell,
+  senão o cmd. O PowerShell recebe a integração de shell sozinho, sem o usuário editar nada: o
+  `$PROFILE` dele roda primeiro, e depois o prompt dele passa a avisar a pasta atual (OSC 7). Temas
+  de prompt (oh-my-posh, Starship) continuam iguais, porque o aviso só é acrescentado ao prompt. O
+  cmd fica sem integração, e a pasta da aba é a de abertura.
+- No Windows, a pasta avisada (file:///C:/Users/x) vira `C:\Users\x`, com barras invertidas.
 - Quando o shell termina (`exit`, Ctrl+D), o painel fecha. Se era o último painel da aba, a aba fecha.
 
 ### Abas

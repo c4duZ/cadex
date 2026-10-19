@@ -4,6 +4,7 @@
 //! formats do not change with the user's language.
 
 const std = @import("std");
+const builtin = @import("builtin");
 const workspace = @import("../workspace/workspace.zig");
 const process = @import("../../shared/process.zig");
 
@@ -39,7 +40,7 @@ pub fn run(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const 
     defer argv.deinit(gpa);
     try argv.append(gpa, "git");
     try argv.appendSlice(gpa, args);
-    const result = try process.run(gpa, argv.items, .{
+    const result = try spawn(gpa, argv.items, .{
         .cwd = real,
         .timeout_ms = options.timeout_ms,
         .env = &env,
@@ -56,9 +57,40 @@ pub fn run(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const 
 
 /// Whether a working `git` is on the PATH.
 pub fn available(gpa: std.mem.Allocator) bool {
-    var r = process.run(gpa, &.{ "git", "--version" }, .{ .timeout_ms = 10_000 }) catch return false;
+    var argv = [_][]const u8{ "git", "--version" };
+    var r = spawn(gpa, &argv, .{ .timeout_ms = 10_000 }) catch return false;
     defer r.deinit(gpa);
     return r.ok() and std.mem.startsWith(u8, r.stdout, "git version");
+}
+
+/// Runs `argv` (argv[0] is "git"). On Windows a git missing from the PATH
+/// is looked for where Git for Windows installs it
+/// (docs/spec/source-control.md).
+fn spawn(gpa: std.mem.Allocator, argv: [][]const u8, options: process.Options) !Result {
+    var result = try process.run(gpa, argv, options);
+    if (builtin.os.tag != .windows) return result;
+    if (result.code != -1) return result;
+    var buf: workspace.paths.Buffer = undefined;
+    const found = installedGit(&buf) orelse return result;
+    result.deinit(gpa);
+    argv[0] = found;
+    return process.run(gpa, argv, options);
+}
+
+/// Git for Windows for every user, then for this user only.
+fn installedGit(buf: *workspace.paths.Buffer) ?[]const u8 {
+    const w = @import("../../shared/win32.zig");
+    const fs = @import("../../shared/fs.zig");
+    var base: [1024]u8 = undefined;
+    if (w.environmentVariable("ProgramFiles", &base)) |dir| {
+        const path = std.fmt.bufPrint(buf, "{s}\\Git\\cmd\\git.exe", .{dir}) catch return null;
+        if (fs.exists(path)) return path;
+    }
+    if (w.environmentVariable("LOCALAPPDATA", &base)) |dir| {
+        const path = std.fmt.bufPrint(buf, "{s}\\Programs\\Git\\cmd\\git.exe", .{dir}) catch return null;
+        if (fs.exists(path)) return path;
+    }
+    return null;
 }
 
 /// The top folder of the repository holding `folder`, or null when it is

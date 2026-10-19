@@ -10,6 +10,7 @@ const std = @import("std");
 const w = @import("../../shared/win32.zig");
 const pty = @import("pty.zig");
 const shell_env = @import("shell_env.zig");
+const shell_windows = @import("shell_windows.zig");
 
 const Size = pty.Size;
 const unicode = std.unicode;
@@ -43,7 +44,8 @@ pub const Child = struct {
     state: *State,
 
     /// The configured shell, else PowerShell 7 (pwsh) when installed, else
-    /// Windows PowerShell, in `cwd`.
+    /// Windows PowerShell, else cmd, in `cwd`. PowerShell gets the shell
+    /// integration (shell_windows.zig).
     pub fn start(gpa: std.mem.Allocator, options: pty.StartOptions) !Child {
         var arena: std.heap.ArenaAllocator = .init(gpa);
         defer arena.deinit();
@@ -158,7 +160,7 @@ fn coord(size: Size) w.COORD {
 }
 
 fn startShell(a: std.mem.Allocator, console: w.HPCON, job: w.HANDLE, options: pty.StartOptions) !w.HANDLE {
-    const command_line = try unicode.wtf8ToWtf16LeAllocZ(a, try shellCommand(a, options.shell));
+    const command_line = try unicode.wtf8ToWtf16LeAllocZ(a, try shell_windows.commandLine(a, try shellProgram(a, options.shell)));
     const env = try sessionEnvironment(a);
     var attribute_size: usize = 0;
     _ = w.InitializeProcThreadAttributeList(null, 1, 0, &attribute_size);
@@ -171,7 +173,7 @@ fn startShell(a: std.mem.Allocator, console: w.HPCON, job: w.HANDLE, options: pt
     var startup: w.STARTUPINFOEXW = .{ .StartupInfo = .{ .cb = @sizeOf(w.STARTUPINFOEXW) }, .lpAttributeList = attributes };
     var info: w.PROCESS_INFORMATION = undefined;
     const flags = w.EXTENDED_STARTUPINFO_PRESENT | w.CREATE_UNICODE_ENVIRONMENT | w.CREATE_SUSPENDED;
-    const cwd = if (options.cwd) |dir| try unicode.wtf8ToWtf16LeAllocZ(a, dir) else null;
+    const cwd = if (options.cwd) |dir| try unicode.wtf8ToWtf16LeAllocZ(a, try shell_windows.systemPath(a, dir)) else null;
     var started = w.CreateProcessW(null, command_line.ptr, null, null, 0, flags, @constCast(env.ptr), if (cwd) |d| d.ptr else null, &startup.StartupInfo, &info) != 0;
     // A missing cwd is not fatal: the shell starts in the app's folder.
     if (!started and cwd != null)
@@ -183,17 +185,19 @@ fn startShell(a: std.mem.Allocator, console: w.HPCON, job: w.HANDLE, options: pt
     return info.hProcess;
 }
 
-/// The command line that starts the shell.
-fn shellCommand(a: std.mem.Allocator, configured: ?[]const u8) ![]const u8 {
+/// The shell to start, quoted when it is a found path.
+fn shellProgram(a: std.mem.Allocator, configured: ?[]const u8) ![]const u8 {
     if (configured) |s| if (s.len > 0) return s;
+    if (try findOnPath(a, std.unicode.wtf8ToWtf16LeStringLiteral("pwsh.exe"))) |path| return std.fmt.allocPrint(a, "\"{s}\"", .{path});
+    if (try findOnPath(a, std.unicode.wtf8ToWtf16LeStringLiteral("powershell.exe"))) |path| return std.fmt.allocPrint(a, "\"{s}\"", .{path});
+    return "cmd.exe";
+}
+
+fn findOnPath(a: std.mem.Allocator, name: [*:0]const u16) !?[]const u8 {
     var buf: [1024]u16 = undefined;
-    const pwsh = std.unicode.wtf8ToWtf16LeStringLiteral("pwsh.exe");
-    const n = w.SearchPathW(null, pwsh, null, buf.len, &buf, null);
-    if (n > 0 and n < buf.len) {
-        const path = try unicode.wtf16LeToWtf8Alloc(a, buf[0..n]);
-        return std.fmt.allocPrint(a, "\"{s}\" -NoLogo", .{path});
-    }
-    return "powershell.exe -NoLogo";
+    const n = w.SearchPathW(null, name, null, buf.len, &buf, null);
+    if (n == 0 or n >= buf.len) return null;
+    return try unicode.wtf16LeToWtf8Alloc(a, buf[0..n]);
 }
 
 /// The app's environment minus the variables the terminal owns, plus its
@@ -219,9 +223,5 @@ fn sessionEnvironment(a: std.mem.Allocator) ![:0]const u16 {
 
 /// %USERPROFILE%, for links written as ~/path.
 pub fn homeDirectory(buf: []u8) ?[]const u8 {
-    var wide: [512]u16 = undefined;
-    const name = std.unicode.wtf8ToWtf16LeStringLiteral("USERPROFILE");
-    const n = w.GetEnvironmentVariableW(name, &wide, wide.len);
-    if (n == 0 or n >= wide.len or n * 3 > buf.len) return null;
-    return buf[0..unicode.wtf16LeToWtf8(buf, wide[0..n])];
+    return w.environmentVariable("USERPROFILE", buf);
 }
