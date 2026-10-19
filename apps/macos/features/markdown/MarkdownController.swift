@@ -14,7 +14,6 @@ public final class MarkdownController {
     /// Opens a file in the app, at a 1-based line when known.
     private let open: (String, Int?) -> Void
     private var sessions: [ObjectIdentifier: MarkdownSession] = [:]
-    private var previews: [ObjectIdentifier: MarkdownPreview] = [:]
 
     public init(root: String, findFiles: @escaping (String) -> [String], open: @escaping (String, Int?) -> Void) {
         index = MarkdownIndex(root: root)
@@ -56,20 +55,20 @@ public final class MarkdownController {
     }
 
     /// markdown.toggle-preview: text and rendered page, in the same tab.
+    /// Back to the text, the page goes (WebKit's memory with it); the next
+    /// toggle renders a new one.
     public func togglePreview(_ document: EditorDocument) {
-        let id = ObjectIdentifier(document)
         if document.alternate != nil {
             document.showAlternate(nil)
             return
         }
-        let preview = previews[id] ?? MarkdownPreview(path: document.path)
+        let preview = MarkdownPreview(path: document.path)
         preview.onLink = { [weak self, weak document] url in
             guard let self, let document else { return }
             self.followRendered(url, from: document.path)
         }
-        previews[id] = preview
         preview.show(document.textView?.string ?? "")
-        document.showAlternate(preview.view)
+        document.showAlternate(preview.handOff())
     }
 
     /// markdown.open-link: the link under the cursor.

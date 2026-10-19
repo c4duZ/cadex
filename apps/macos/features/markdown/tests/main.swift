@@ -91,5 +91,23 @@ let exitCode = await Checks.run([
         expect(opened == [root + "/b.md"], "\(opened)")
         try? FileManager.default.removeItem(atPath: root)
     }),
+    ("back to the text, the rendered page is freed; rendering again makes a new one", {
+        let root = sandbox(["a.md": "# A\n\ntexto\n"])
+        let markdown = MarkdownController(root: root, findFiles: { _ in [] }, open: { _, _ in })
+        let doc = EditorDocument(path: root + "/a.md")
+        weak var first: NSView?
+        autoreleasepool {
+            markdown.togglePreview(doc)
+            first = doc.alternate
+        }
+        expect(first is RenderedNoteView, "\(String(describing: first))")
+        autoreleasepool { markdown.togglePreview(doc) }
+        expect(doc.alternate == nil)
+        let freed = await eventually { first == nil }
+        expect(freed, "a página continuou na memória")
+        markdown.togglePreview(doc)
+        expect(doc.alternate is RenderedNoteView)
+        try? FileManager.default.removeItem(atPath: root)
+    }),
 ])
 exit(exitCode)

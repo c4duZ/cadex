@@ -26,7 +26,9 @@
   que não toma o teclado; ↑ ↓ Enter Tab Esc vêm do delegate do texto).
 - `MarkdownPreview.swift`: WKWebView sem JavaScript, CSP que só deixa imagens cadex-file: e estilo
   embutido, imagens servidas só de dentro do workspace; clique em link volta para o app (nota abre no
-  Cadex no título, web no navegador). Cores do `EditorAppearance` (rgba, com o alfa).
+  Cadex no título, web no navegador). Cores do `EditorAppearance` (rgba, com o alfa). A página
+  é da nota enquanto aparece: voltar para o texto ou fechar a aba libera o WebKit, e alternar de
+  novo renderiza outra (o controlador não guarda nenhuma).
 - Comandos em `MarkdownCommands.swift`: markdown.toggle-preview (⇧⌘V), markdown.open-link,
   markdown.backlinks.
 - Spec: `docs/spec/markdown.md`. Status: plano 5, fase C pronta.
