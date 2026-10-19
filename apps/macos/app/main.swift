@@ -15,6 +15,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             backing: .buffered, defer: false)
         window.title = "Cadex"
         window.delegate = self
+        // A window made in code frees itself on close by default, leaving
+        // self.window dangling; applicationShouldTerminate then crashed
+        // reading it (EXC_BAD_ACCESS, crash reports of 2026-10-19).
+        window.isReleasedWhenClosed = false
         window.contentView = TerminalView(frame: frame, cwd: NSHomeDirectory())
         window.center()
         window.makeKeyAndOrderFront(nil)
