@@ -28,6 +28,22 @@ vez o macOS diz que não pode verificar o app: feche o aviso, vá em **Ajustes d
 Privacidade e Segurança**, role até o aviso sobre o Cadex e clique em **Abrir Mesmo Assim**. Depois
 disso ele abre normalmente. (Instalado pelo comando acima, esse aviso não aparece.)
 
+## Tamanho e memória
+
+Métrica do projeto, medida a cada release ([ADR 0007](docs/adr/0007-one-step-install.md)).
+Versão 0.1.0, 2026-10-19, num Mac com M4 e macOS 27:
+
+| | Cadex | Terax v0.9.0 |
+|---|---|---|
+| download (DMG) | 7,5 MB | — |
+| download (ZIP do instalador) | 7,1 MB | — |
+| app instalado (universal: Apple Silicon e Intel) | 40 MB | 10,2 MB |
+| memória com um terminal aberto (footprint) | 66 MB | — |
+
+O app instalado é maior que o do Terax porque leva as duas arquiteturas e as 18 gramáticas do
+tree-sitter compiladas dentro (as tabelas delas são 15 MB de cada fatia); o download comprimido fica
+abaixo. O pico de memória ao abrir foi 111 MB.
+
 ## Arquitetura
 
 ```
