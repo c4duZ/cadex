@@ -17,7 +17,7 @@ mostram um arquivo e têm um ponto no título quando há mudança não salva.
 - ⌘1 a ⌘9 vão para a aba daquela posição. Ctrl+Tab e Ctrl+⇧+Tab alternam pela ordem de uso
   (Ctrl+Tab volta para a aba usada antes da atual).
 - Arrastar uma aba na barra muda a posição dela.
-- Clicar numa aba vai para ela; o × da aba fecha a aba.
+- Clicar numa aba vai para ela; o × da aba ou o clique do meio (botão 3 do mouse) fecha a aba.
 - A barra de abas aparece mesmo com uma aba só (o visual final vem com a feature themes).
 
 ### Divisões

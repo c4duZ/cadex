@@ -145,5 +145,24 @@ let exitCode = await Checks.run([
         expect(TabsController.tabIcon(for: "history:/repo").0 == .gitCommit)
         expect(TabsController.tabIcon(for: "preview:http://localhost:3000").0 == .globe)
     }),
+    ("the middle button closes the tab under it, on release over the same tab", {
+        let bar = TabBarView(frame: NSRect(x: 0, y: 0, width: 400, height: 30))
+        bar.items = [.init(id: 1, title: "um", active: true), .init(id: 2, title: "dois", active: false)]
+        var closed: [Int] = []
+        bar.onClose = { closed.append($0) }
+        // Built in memory and handed to the view: never posted, so the
+        // owner's pointer and apps are untouched.
+        func middle(_ type: CGEventType, x: CGFloat) -> NSEvent {
+            let cg = CGEvent(mouseEventSource: nil, mouseType: type, mouseCursorPosition: CGPoint(x: x, y: 10), mouseButton: .center)!
+            return NSEvent(cgEvent: cg)!
+        }
+        bar.otherMouseDown(with: middle(.otherMouseDown, x: 20))
+        bar.otherMouseUp(with: middle(.otherMouseUp, x: 20))
+        expect(closed == [1], "\(closed)")
+        // Pressed on one tab, released on another: nothing closes.
+        bar.otherMouseDown(with: middle(.otherMouseDown, x: 20))
+        bar.otherMouseUp(with: middle(.otherMouseUp, x: 390))
+        expect(closed == [1], "\(closed)")
+    }),
 ])
 exit(exitCode)

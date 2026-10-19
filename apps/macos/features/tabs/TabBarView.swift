@@ -74,6 +74,8 @@ public final class TabBarView: NSView {
     var onMove: ((Int, Int) -> Void)?
 
     private var hovered: Int?
+    /// The tab the middle button went down on.
+    private var middlePressed: Int?
     private var dragging: (id: Int, startX: CGFloat, offset: CGFloat)?
 
     public override var isFlipped: Bool { true }
@@ -211,6 +213,20 @@ public final class TabBarView: NSView {
         drag.offset = convert(event.locationInWindow, from: nil).x - drag.startX
         dragging = drag
         needsDisplay = true
+    }
+
+    /// The middle button (mouse 3) closes the tab under it, as in browsers
+    /// and VS Code (owner, 2026-10-19). On release, so a press that wanders
+    /// off the tab closes nothing.
+    public override func otherMouseDown(with event: NSEvent) {
+        middlePressed = event.buttonNumber == 2 ? index(at: convert(event.locationInWindow, from: nil)).map { items[$0].id } : nil
+    }
+
+    public override func otherMouseUp(with event: NSEvent) {
+        defer { middlePressed = nil }
+        guard event.buttonNumber == 2, let pressed = middlePressed,
+              let i = index(at: convert(event.locationInWindow, from: nil)), items[i].id == pressed else { return }
+        onClose?(pressed)
     }
 
     public override func mouseUp(with event: NSEvent) {
