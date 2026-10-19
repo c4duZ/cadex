@@ -67,3 +67,12 @@ CommandPalette, Shortcuts e Tabs do mesmo jeito (pasta em `apps/macos/features/`
   ⌘T abre na pasta atual depois de um `cd`; ⌘D e ⌘Shift+D dividem; ⌘W com `sleep 100` pede
   confirmação; ⌘1–⌘9 trocam de aba.
 - Atualizar specs, `CLAUDE.md` das features e o status em `docs/plans/README.md`.
+
+## Situação (2026-10-19)
+Fases A a E feitas. A confirmação ao fechar (E) entrou junto com abas e painéis, em
+`apps/macos/features/tabs/CloseConfirmation.swift`. Conferido no app com prints: ⌘K com foco no
+terminal, busca e Enter na paleta, ⌘T na pasta atual, ⌘1 e Ctrl+Tab, confirmação do ⌘W com
+`sleep 100`, ⌘D, ⌘⇧D, foco por direção e fechar painel. Falta conferir à mão: renomear aba,
+arrastar aba e divisor, painel novo na mesma pasta depois de um `cd`, fechar depois de confirmar (o
+travamento que isso causava foi corrigido e tem teste no núcleo), fechar o último painel fechando a
+janela, e um arquivo shortcuts.json de verdade em Application Support/Cadex.
