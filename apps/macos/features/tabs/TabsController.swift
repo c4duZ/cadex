@@ -155,8 +155,23 @@ public final class TabsController {
     func wire(_ content: Pane, pane: Int, in tab: Tab) {
         switch content {
         case .terminal(let terminal): wire(terminal, pane: pane, in: tab)
-        case .document(let document): document.onChange = { [weak self] in self?.refreshBar() }
+        case .document(let document): wire(document, pane: pane, in: tab)
         }
+    }
+
+    /// A click anywhere in a document gives its pane the focus, as a
+    /// terminal's onFocus does (plan 8): the recognizer sees the press
+    /// first and lets it through, so text selection and links still work.
+    private func wire(_ document: TabDocument, pane: Int, in tab: Tab) {
+        document.onChange = { [weak self] in self?.refreshBar() }
+        document.view.gestureRecognizers.filter { $0 is PanePressRecognizer }.forEach(document.view.removeGestureRecognizer)
+        let press = PanePressRecognizer()
+        press.onPress = { [weak self, weak tab] in
+            guard let tab, tab.focusedPane != pane else { return }
+            tab.noteFocus(pane)
+            self?.refreshBar()
+        }
+        document.view.addGestureRecognizer(press)
     }
 
     private func wire(_ terminal: TerminalView, pane: Int, in tab: Tab) {

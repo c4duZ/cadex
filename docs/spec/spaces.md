@@ -47,4 +47,4 @@ que estavam, inclusive depois de fechar ou reabrir o app.
 - [x] Arquivo de spaces corrompido não impede o app de abrir: volta ao padrão e guarda o ruim ao lado.
 - [ ] Trocar de space pela paleta e pelos atalhos mostra as abas daquele space.
 - [x] Fechar o app pelo menu e reabrir traz os mesmos spaces e o mesmo space ativo.
-- [ ] Um terminal e um documento lado a lado voltam lado a lado.
+- [x] Um terminal e um documento lado a lado voltam lado a lado.

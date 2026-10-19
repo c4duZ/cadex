@@ -314,5 +314,54 @@ let exitCode = await Checks.run([
         expect(tabs.count == 3)
         tabs.closeAll()
     }),
+    ("a press in a document gives its pane the focus; ⌘] goes through it", {
+        let tabs = makeTabs()
+        tabs.newTab(cwd: "/")
+        tabs.view.layoutSubtreeIfNeeded()
+        let a = FakeDocument("/r/a.md")
+        tabs.open(a, beside: true)
+        tabs.focusPane(step: 1)
+        expect(tabs.activeTerminal != nil)
+        let press = a.view.gestureRecognizers.compactMap { $0 as? PanePressRecognizer }
+        expect(press.count == 1)
+        let down = NSEvent.mouseEvent(with: .leftMouseDown, location: .zero, modifierFlags: [], timestamp: 0,
+                                      windowNumber: 0, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)!
+        press.first?.mouseDown(with: down)
+        expect(tabs.activeDocument === a && tabs.activeTerminal == nil)
+        tabs.focusPane(step: 1)
+        expect(tabs.activeTerminal != nil)
+        tabs.closeAll()
+    }),
+    ("⌘D in a document opens a terminal beside it; ⌘W asks the document", {
+        let tabs = makeTabs()
+        tabs.newTab(cwd: "/")
+        tabs.view.layoutSubtreeIfNeeded()
+        let a = FakeDocument("/tmp/a.md")
+        tabs.open(a, beside: false)
+        tabs.view.layoutSubtreeIfNeeded()
+        tabs.split(.horizontal)
+        expect(tabs.activePaneCount == 2 && tabs.activeTerminal != nil)
+        tabs.focusPane(step: -1)
+        a.closes = false
+        tabs.closeFocusedPane()
+        expect(tabs.activePaneCount == 2 && !a.closed, "cancelled: the pane stays")
+        a.closes = true
+        tabs.closeFocusedPane()
+        expect(tabs.activePaneCount == 1 && a.closed && tabs.activeTerminal != nil)
+        tabs.closeAll()
+    }),
+    ("the tab's title and dot come from its panes", {
+        let tabs = makeTabs()
+        tabs.newTab(cwd: "/")
+        tabs.view.layoutSubtreeIfNeeded()
+        let a = FakeDocument("/r/a.md")
+        tabs.open(a, beside: true)
+        expect(tabs.bar.items.first?.title == "a.md" && tabs.bar.items.first?.icon == .fileMd)
+        a.hasUnsavedChanges = true
+        tabs.focusPane(step: 1)
+        expect(tabs.bar.items.first?.title.hasPrefix("● ") == true, "\(tabs.bar.items)")
+        a.hasUnsavedChanges = false
+        tabs.closeAll()
+    }),
 ])
 exit(exitCode)

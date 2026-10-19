@@ -17,7 +17,11 @@
   caminho); `activeTerminal`/`activeDocument` são os do painel com foco; `document(identity:)` e
   `allDocuments` procuram em todos os painéis. O título ganha "●" com mudança não salva, fechar
   pergunta ao documento, sair pergunta se há arquivo não salvo. Terminal novo abre na pasta do
-  painel com foco (a do arquivo, num documento). A oferta de preview de cada terminal sai por
+  painel com foco (a do arquivo, num documento). `open(_:beside:keeping:)` abre ao lado pelas quatro
+  regras da spec (o painel que já o mostra, troca do painel de documento sem mudança não salva,
+  divisão à direita, nova aba sem espaço); `keeping` é o documento que pediu, que não é trocado.
+  `PanePressRecognizer.swift`: o clique num documento dá o foco ao painel sem tomar o clique. Título
+  e ícone da aba vêm do painel com foco; "●" se qualquer painel tem mudança não salva. A oferta de preview de cada terminal sai por
   `onOpenPreview`. `TabList.swift`: as regras puras (ordem, ativa, recentes, mover), testadas.
 - `TabBarView.swift`: a barra de abas desenhada à mão, cada aba da largura do título (72 a 200 pt),
   com o ícone do que mostra (terminal; arquivo pelo tipo e cor do `FileIcons`, como na árvore;
@@ -26,7 +30,7 @@
   (a propriedade bar do controlador). `TabsView.swift`: só a aba ativa. `Tab.swift`: uma aba.
 - Divisões: `PaneTree.swift` é a árvore pura (dividir, remover dando o espaço ao irmão, retângulos,
   ordem de leitura, vizinho por direção, proporção por caminho), testada. `PaneLayoutView.swift`
-  posiciona os terminais pela árvore, divisor de 1 pt que pega o mouse a 6 pt e engrossa sob o
+  posiciona os painéis pela árvore, divisor de 1 pt que pega o mouse a 6 pt e engrossa sob o
   ponteiro (tamanho mínimo de painel), e escurece os painéis sem foco. `balanced()` na árvore deixa
   do mesmo tamanho os painéis numa direção, a cada divisão e fechamento. `Tab.swift` guarda árvore, painéis e foco.
 - `TabsSnapshot.swift` e `TabsRestore.swift`: o estado das abas para salvar (ordem, árvore de cada
@@ -41,8 +45,10 @@
   tab.least-recently-used, pane.close, pane.split-right, pane.split-down, pane.next, pane.previous,
   pane.focus-left/right/up/down. `CloseConfirmation.swift`: a pergunta ao fechar painel, aba ou
   janela com programa rodando.
-- Spec em `../../../../docs/spec/tabs.md`. Status: abas e divisões prontas.
+- Spec em `../../../../docs/spec/tabs.md`. Status: abas, divisões e documentos em painéis prontos
+  (plano 8).
 
 ## Como validar
 - `make macos-test` passa: `TabList` e `PaneTree` têm os testes das regras; o snapshot ida e volta
-  pelo JSON e um TabsController restaurado igual.
+  pelo JSON e um TabsController restaurado igual; com um `FakeDocument`, as regras de abrir ao lado,
+  foco por painel, fechar perguntando e o spaces.json do plano 7 lido igual.
