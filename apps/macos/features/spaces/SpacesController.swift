@@ -43,16 +43,16 @@ public final class SpacesController {
         self.makeTabs = makeTabs
     }
 
-    /// The saved spaces, or one with a terminal in `folder`. `reopen` opens
-    /// a document tab in the active tabs from its identity.
-    public func start(folder: String, reopen: (String) -> Void) {
+    /// The saved spaces, or one with a terminal in `folder`. `makeDocument`
+    /// makes a saved document from its identity (nil when it is gone).
+    public func start(folder: String, makeDocument: (String) -> TabDocument?) {
         restoring = true
         defer { restoring = false }
         let saved = SpacesFile.load(from: fileURL)
         for space in saved?.spaces ?? [] {
             let tabs = add(name: space.name)
             activeIndex = spaces.count - 1
-            tabs.restore(space.tabs, reopen: reopen)
+            tabs.restore(space.tabs, makeDocument: makeDocument)
             if tabs.count == 0 { tabs.newTab(cwd: folder) }
         }
         if spaces.isEmpty {

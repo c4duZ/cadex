@@ -63,6 +63,8 @@ segue a documentação pública do VS Code; o código de cores por tipo vem do C
 - **Copiar** e **Colar**: copiam arquivos e pastas; colando ao lado de um homônimo, o novo ganha
   " cópia" no nome.
 - **Apagar**: vai para a Lixeira do sistema, nunca apaga de vez. Mais de um item pede confirmação.
+- **Abrir arquivo** segue a configuração "Abrir arquivos" (ao lado ou em nova aba). **Abrir ao
+  lado** e **Abrir em nova aba**, logo depois dele no menu de contexto, escolhem na hora.
 - **Revelar no Finder**, **Copiar caminho** e **Copiar caminho relativo**.
 - **Abrir no terminal**: o painel com foco faz `cd` para a pasta (do arquivo, se for arquivo).
 - **Arrastar para o terminal**: soltar arquivos num painel cola os caminhos escapados para o shell,

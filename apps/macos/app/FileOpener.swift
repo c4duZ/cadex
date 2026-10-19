@@ -1,5 +1,6 @@
 import AppKit
 import Editor
+import Explorer
 import GitHistory
 import MediaPreview
 import SourceControl
@@ -29,17 +30,38 @@ final class FileOpener {
     func open(_ given: String, line: Int? = nil) {
         guard let tabs = currentTabs() else { return }
         let path = Self.canonical(given)
-        if let kind = MediaKind.of(path: path) {
-            let media = (tabs.document(identity: path) as? MediaDocument) ?? MediaDocument(path: path, kind: kind)
-            media.openExternally = { NSWorkspace.shared.open(URL(fileURLWithPath: $0)) }
-            return tabs.open(media)
-        }
-        let document = (tabs.document(identity: path) as? EditorDocument) ?? makeEditor(path)
+        let document = tabs.document(identity: path) ?? makeFile(path)
         tabs.open(document)
-        if let line {
+        if let line, let editor = document as? EditorDocument {
             // After the tab is in the window, so the view has its size.
-            DispatchQueue.main.async { document.reveal(line: line) }
+            DispatchQueue.main.async { editor.reveal(line: line) }
         }
+    }
+
+    /// A saved pane's document, made without opening it (the spaces place
+    /// it): files that still exist and the git history. Diffs and web
+    /// previews are passing things and stay closed. Its folder is
+    /// authorized again: the core forgets them between launches, and the
+    /// history of a repository outside the workspace failed (2026-10-19).
+    func makeDocument(identity: String) -> TabDocument? {
+        if identity.hasPrefix("/") {
+            guard FileManager.default.fileExists(atPath: identity),
+                  WorkspaceFolder.allow((identity as NSString).deletingLastPathComponent) != nil else { return nil }
+            return makeFile(identity)
+        }
+        guard identity.hasPrefix("history:") else { return nil }
+        let root = String(identity.dropFirst("history:".count))
+        guard FileManager.default.fileExists(atPath: root + "/.git"), WorkspaceFolder.allow(root) != nil else { return nil }
+        return makeHistory(root)
+    }
+
+    /// Media for images, video, audio, PDF and what Quick Look shows; the
+    /// editor for the rest.
+    private func makeFile(_ path: String) -> TabDocument {
+        guard let kind = MediaKind.of(path: path) else { return makeEditor(path) }
+        let media = MediaDocument(path: path, kind: kind)
+        media.openExternally = { NSWorkspace.shared.open(URL(fileURLWithPath: $0)) }
+        return media
     }
 
     /// A file's git diff in a tab; the same diff again selects its tab and
@@ -62,12 +84,16 @@ final class FileOpener {
             existing.reload()
             return tabs.open(existing)
         }
+        tabs.open(makeHistory(root))
+    }
+
+    private func makeHistory(_ root: String) -> HistoryDocument {
         let history = HistoryDocument(root: root)
         history.runCommand = { [weak self] id in self?.runCommand?(id) ?? false }
         history.onOpenDiff = { [weak self] repo, sha, path, orig in
             self?.openDiff(.init(repo: repo, path: path, orig: orig, staged: false, commit: sha))
         }
-        tabs.open(history)
+        return history
     }
 
     /// The real path, as the core compares them: /tmp/x is /private/tmp/x.

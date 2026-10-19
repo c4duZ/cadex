@@ -7,52 +7,64 @@ extension TabsController {
     /// ⌘W: closes the focused pane; the last pane closes the tab, and the
     /// last tab the window (docs/spec/tabs.md, "Fechar").
     public func closeFocusedPane() {
-        if let id = list.active, documents[id] != nil {
-            closeTab(id)
-            return
-        }
         guard let tab = activeTab else { return }
         let pane = tab.focusedPane
-        let running = tab.focused.hasForegroundProcess
-        CloseConfirmation.confirm(running: running, in: window, what: "o painel") { [weak self, weak tab] in
+        let close = { @MainActor [weak self, weak tab] in
             guard let tab else { return }
             self?.removePane(pane, from: tab)
+        }
+        switch tab.focused {
+        case .document(let document):
+            document.confirmClose(in: window, then: close)
+        case .terminal(let terminal):
+            CloseConfirmation.confirm(running: terminal.hasForegroundProcess, in: window, what: "o painel", then: close)
         }
     }
 
     func removePane(_ pane: Int, from tab: Tab) {
-        guard let terminal = tab.panes[pane] else { return }
-        if tab.terminals.count == 1 {
+        guard let content = tab.panes[pane] else { return }
+        if tab.panes.count == 1 {
             remove(tab.id)
             return
         }
-        terminal.closeSession()
+        end(content)
         _ = tab.remove(pane: pane)
         refreshBar()
     }
 
+    /// A pane's content is gone for good: the shell ends, the document
+    /// stops watching.
+    func end(_ content: Pane) {
+        switch content {
+        case .terminal(let terminal): terminal.closeSession()
+        case .document(let document): document.close()
+        }
+        content.view.removeFromSuperview()
+    }
+
+    /// The tab's ×: a lone document asks itself (save, discard); otherwise
+    /// one question for the unsaved files, then one for running programs.
     func closeTab(_ id: Int) {
-        if let document = documents[id] {
+        guard let tab = tabs[id] else { return }
+        if tab.panes.count == 1, let document = tab.focused.document {
             document.confirmClose(in: window) { [weak self] in self?.remove(id) }
             return
         }
-        guard let tab = tabs[id] else { return }
-        CloseConfirmation.confirm(running: tab.hasForegroundProcess, in: window, what: "a aba") { [weak self] in
-            self?.remove(id)
+        let window = window
+        let afterUnsaved = { @MainActor [weak self] in
+            CloseConfirmation.confirm(running: tab.hasForegroundProcess, in: window, what: "a aba") { self?.remove(id) }
         }
+        let unsaved = tab.unsavedCount
+        guard unsaved > 0 else { return afterUnsaved() }
+        CloseConfirmation.confirmUnsaved(count: unsaved, in: window, then: afterUnsaved, cancelled: {})
     }
 
-    /// Ends the tab's sessions and drops it; the last one closes the window.
+    /// Ends the tab's sessions and documents and drops it; the last one
+    /// closes the window.
     func remove(_ id: Int) {
-        if let document = documents.removeValue(forKey: id) {
-            document.close()
-            document.view.removeFromSuperview()
-        } else if let tab = tabs.removeValue(forKey: id) {
-            tab.terminals.forEach { $0.closeSession() }
-            tab.view.removeFromSuperview()
-        } else {
-            return
-        }
+        guard let tab = tabs.removeValue(forKey: id) else { return }
+        tab.ordered.forEach(end)
+        tab.view.removeFromSuperview()
         list.remove(id)
         if list.order.isEmpty {
             if let onEmpty { onEmpty() } else { window?.close() }
@@ -73,7 +85,7 @@ extension TabsController {
     public static func shouldClose(_ all: [TabsController], in window: NSWindow?, what: String = "a janela",
                                    then close: @escaping @MainActor () -> Void,
                                    cancelled: @escaping @MainActor () -> Void = {}) -> Bool {
-        let unsaved = all.reduce(0) { $0 + $1.documents.values.filter(\.hasUnsavedChanges).count }
+        let unsaved = all.reduce(0) { $0 + $1.tabs.values.reduce(0) { $0 + $1.unsavedCount } }
         if unsaved > 0 {
             CloseConfirmation.confirmUnsaved(count: unsaved, in: window, then: close, cancelled: cancelled)
             return false

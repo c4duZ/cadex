@@ -1,7 +1,8 @@
 # tabs (app macOS)
 
 ## O que eu quero
-- Abas de todos os tipos, divisões de painel no terminal, reordenar, renomear e fechar.
+- Abas divididas em painéis, cada painel com um terminal ou um documento; reordenar, renomear e
+  fechar.
 
 ## O que eu não quero
 - Fechar aba com processo rodando ou arquivo não salvo sem confirmar.
@@ -10,10 +11,13 @@
 
 ## Como eu quero
 - `TabsController.swift`: as abas de uma janela (abrir na pasta atual, trocar, renomear, fechar,
-  ordem de uso). Abas de documento: `TabDocument.swift` é o protocolo que o editor (e depois mídia e
-  preview) implementa; `open(_:)` abre ou vai para a aba da mesma identidade (o caminho), o título
-  ganha "●" com mudança não salva, fechar pergunta ao documento, sair pergunta se há arquivo não
-  salvo. Terminal novo abre na pasta do documento ativo. A oferta de preview de cada terminal sai por
+  ordem de uso). Documentos: `TabDocument.swift` é o protocolo que editor, mídia, preview, diff e
+  histórico implementam; um painel (`Pane` em `Tab.swift`) guarda um terminal ou um documento.
+  `TabsDocuments.swift`: `open(_:)` abre numa aba nova ou vai para o painel da mesma identidade (o
+  caminho); `activeTerminal`/`activeDocument` são os do painel com foco; `document(identity:)` e
+  `allDocuments` procuram em todos os painéis. O título ganha "●" com mudança não salva, fechar
+  pergunta ao documento, sair pergunta se há arquivo não salvo. Terminal novo abre na pasta do
+  painel com foco (a do arquivo, num documento). A oferta de preview de cada terminal sai por
   `onOpenPreview`. `TabList.swift`: as regras puras (ordem, ativa, recentes, mover), testadas.
 - `TabBarView.swift`: a barra de abas desenhada à mão, cada aba da largura do título (72 a 200 pt),
   com o ícone do que mostra (terminal; arquivo pelo tipo e cor do `FileIcons`, como na árvore;
@@ -26,8 +30,10 @@
   ponteiro (tamanho mínimo de painel), e escurece os painéis sem foco. `balanced()` na árvore deixa
   do mesmo tamanho os painéis numa direção, a cada divisão e fechamento. `Tab.swift` guarda árvore, painéis e foco.
 - `TabsSnapshot.swift` e `TabsRestore.swift`: o estado das abas para salvar (ordem, árvore de cada
-  aba com a pasta de cada painel e as proporções, nome dado, painel com foco, documentos pela
-  identidade, aba ativa) e reconstruir com shells novos; `setShown` e `closeAll` para os spaces.
+  aba com a pasta de cada terminal ou a identidade de cada documento e as proporções, nome dado,
+  painel com foco, aba ativa) e reconstruir com shells novos e os documentos feitos pelo app
+  (`restore(_:makeDocument:)`; documento sumido ao lado de outros vira terminal na pasta dele). O
+  item `.document` do plano 7 ainda é lido, como aba de um painel; `setShown` e `closeAll` para os spaces.
   `onStateChange` avisa cada mudança; `onEmpty`, a última aba fechada (sem ele, fecha a janela).
   `TabsClosing.swift`: fechar painel, aba e janela, e `shouldClose` para vários conjuntos de abas
   (uma pergunta só ao sair, contando os spaces escondidos).

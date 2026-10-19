@@ -9,54 +9,62 @@ extension TabsController {
         var items: [TabsSnapshot.Item] = []
         var active: Int?
         for id in list.order {
-            let item: TabsSnapshot.Item
-            if let document = documents[id] {
-                item = .document(identity: document.identity)
-            } else if let tab = tabs[id] {
-                item = tab.snapshot(home: home)
-            } else {
-                continue
-            }
+            guard let tab = tabs[id] else { continue }
             if id == list.active { active = items.count }
-            items.append(item)
+            items.append(tab.snapshot(home: home))
         }
         return TabsSnapshot(items: items, active: active)
     }
 
     /// Rebuilds saved tabs after the current ones: terminals with new
-    /// shells in the saved folders; documents through `reopen`, which opens
-    /// them here with open(_:) or skips the ones that are gone.
-    public func restore(_ snapshot: TabsSnapshot, reopen: (String) -> Void) {
+    /// shells in the saved folders; documents made by `makeDocument` from
+    /// their identity (nil when the file is gone). A lone document that is
+    /// gone drops its tab; one beside others becomes a terminal in its
+    /// folder, so the layout stays (docs/spec/spaces.md).
+    public func restore(_ snapshot: TabsSnapshot, makeDocument: (String) -> TabDocument?) {
         var ids: [Int?] = []
         for item in snapshot.items {
             switch item {
             case let .terminal(title, layout, focus):
-                ids.append(restoreTerminal(title: title, layout: layout, focus: focus))
+                ids.append(restoreTab(title: title, layout: layout, focus: focus, makeDocument: makeDocument))
             case let .document(identity):
-                reopen(identity)
-                ids.append(documents.first { $0.value.identity == identity }?.key)
+                ids.append(restoreTab(title: nil, layout: .document(identity: identity), focus: 0, makeDocument: makeDocument))
             }
         }
         if let index = snapshot.active, index < ids.count, let id = ids[index] { select(id) }
     }
 
-    private func restoreTerminal(title: String?, layout: TabsSnapshot.Layout, focus: Int) -> Int {
+    private func restoreTab(title: String?, layout: TabsSnapshot.Layout, focus: Int,
+                            makeDocument: (String) -> TabDocument?) -> Int? {
         var counter = nextPane
         let tree = PaneTree.from(layout) {
             defer { counter += 1 }
             return counter
         }
-        nextPane = counter
-        var panes: [Int: TerminalView] = [:]
-        for (pane, folder) in zip(tree.leaves, layout.folders) {
-            panes[pane] = makeTerminal(cwd: folder)
+        var panes: [Int: Pane] = [:]
+        for (pane, leaf) in zip(tree.leaves, layout.leaves) {
+            switch leaf {
+            case .pane(let folder):
+                panes[pane] = .terminal(makeTerminal(cwd: folder))
+            case .document(let identity):
+                if let document = makeDocument(identity) {
+                    panes[pane] = .document(document)
+                } else if tree.leaves.count > 1 {
+                    let folder = identity.hasPrefix("/") ? (identity as NSString).deletingLastPathComponent : home
+                    panes[pane] = .terminal(makeTerminal(cwd: folder))
+                }
+            case .split:
+                break
+            }
         }
+        guard panes.count == tree.leaves.count else { return nil }
+        nextPane = counter
         let leaves = tree.leaves
         let tab = Tab(id: nextId, tree: tree, panes: panes, focused: leaves[min(max(focus, 0), leaves.count - 1)])
         nextId += 1
         tab.customTitle = title
         add(tab)
-        for (pane, terminal) in panes { wire(terminal, pane: pane, in: tab) }
+        for (pane, content) in panes { wire(content, pane: pane, in: tab) }
         list.insert(tab.id)
         showActive()
         return tab.id
@@ -71,15 +79,10 @@ extension TabsController {
 
     /// Ends every tab without asking: the caller asked (shouldCloseAll).
     public func closeAll() {
-        for document in documents.values {
-            document.close()
-            document.view.removeFromSuperview()
-        }
         for tab in tabs.values {
-            tab.terminals.forEach { $0.closeSession() }
+            tab.ordered.forEach(end)
             tab.view.removeFromSuperview()
         }
-        documents = [:]
         tabs = [:]
         list = TabList()
     }

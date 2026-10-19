@@ -6,7 +6,7 @@
 ## O que eu não quero
 - Perder o layout se o app fechar inesperadamente.
 - Mexer no miolo das abas: os spaces usam a porta de entrada da feature tabs (`TabsController`,
-  `snapshot()`, `restore(_:reopen:)`, `setShown`, `closeAll`).
+  `snapshot()`, `restore(_:makeDocument:)`, `setShown`, `closeAll`).
 
 ## Como eu quero
 - `SpacesController.swift` é a porta de entrada: cada space é um TabsController com nome; um aparece

@@ -18,8 +18,8 @@ que estavam, inclusive depois de fechar ou reabrir o app.
   fecha a janela, como antes.
 - Os programas dos spaces escondidos continuam rodando; só não desenham.
 - Ao reabrir o app, cada space volta com as abas na mesma ordem, os nomes dados às abas, as
-  divisões com as proporções, a pasta de cada painel, o painel com foco, os arquivos e o histórico
-  do git abertos, e o space e a aba que estavam ativos. O conteúdo antigo do terminal não volta:
+  divisões com as proporções, a pasta de cada painel, os arquivos e o histórico do git abertos (em
+  aba própria ou num painel ao lado de um terminal), o painel com foco, e o space e a aba que estavam ativos. O conteúdo antigo do terminal não volta:
   cada painel começa um shell novo na pasta salva.
 - O estado é salvo sozinho, logo depois de cada mudança (abrir, fechar, dividir, mudar de pasta,
   trocar de space), num arquivo em Application Support/Cadex. Fechar o app de surpresa perde no
@@ -35,7 +35,9 @@ que estavam, inclusive depois de fechar ou reabrir o app.
 
 ## Casos de borda
 - Pasta de um painel apagada entre as sessões -> o shell abre na pasta pessoal.
-- Arquivo aberto que sumiu -> a aba dele não volta; o resto volta.
+- Arquivo aberto que sumiu -> a aba dele não volta; num painel dividido, o painel vira um terminal
+  na pasta do arquivo, para o layout não mudar. O resto volta.
+- `spaces.json` de versões anteriores (abas de documento à parte) abre igual.
 - Diff, preview web e janelas de mensagem não são restaurados (são passageiros).
 - Space salvo sem nenhuma aba -> volta com um terminal.
 - Dois spaces com o mesmo nome -> permitido; a paleta mostra a posição.
@@ -45,3 +47,4 @@ que estavam, inclusive depois de fechar ou reabrir o app.
 - [x] Arquivo de spaces corrompido não impede o app de abrir: volta ao padrão e guarda o ruim ao lado.
 - [ ] Trocar de space pela paleta e pelos atalhos mostra as abas daquele space.
 - [x] Fechar o app pelo menu e reabrir traz os mesmos spaces e o mesmo space ativo.
+- [ ] Um terminal e um documento lado a lado voltam lado a lado.

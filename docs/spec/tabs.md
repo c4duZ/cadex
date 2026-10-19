@@ -1,9 +1,9 @@
 # tabs
 
 ## Para que serve
-Ter vários terminais e arquivos abertos na mesma janela: abas lado a lado na barra; abas de
-terminal se dividem em painéis. Abas de documento (editor; mídia e preview com as features delas)
-mostram um arquivo e têm um ponto no título quando há mudança não salva.
+Ter vários terminais e arquivos abertos na mesma janela: abas lado a lado na barra, cada aba
+dividida em painéis. Um painel mostra um terminal ou um documento (código, Markdown, mídia, preview
+web, diff, histórico do git), e um documento tem um ponto no título quando há mudança não salva.
 
 ## Comportamento
 
@@ -37,12 +37,33 @@ mostram um arquivo e têm um ponto no título quando há mudança não salva.
 - Clicar num painel dá o foco a ele. Os painéis sem foco ficam levemente escurecidos (sem contorno
   azul, que o dono achou tosco); eles continuam recebendo saída e atualizando.
 
+### Documentos em painéis
+- Todo painel guarda um terminal ou um documento e funciona igual nos dois casos: dividir (⌘D,
+  ⌘⇧D), passar o foco (⌘], ⌘[, ⌘⌥ + seta, clique), fechar (⌘W, ×), arrastar o divisor, tamanhos
+  iguais, escurecer quando sem foco, salvar e restaurar nos spaces. Uma aba de documento é uma aba
+  com um painel só.
+- A configuração "Abrir arquivos" (Geral; `general.openFiles`) decide onde arquivos, mídia, diff,
+  histórico e preview web abrem: **Ao lado** (padrão) ou **Em nova aba**. "Abrir ao lado" e "Abrir
+  em nova aba" (explorer e paleta) escolhem na hora, sem mudar a configuração.
+- "Ao lado", nesta ordem: (1) o documento já está num painel de alguma aba → vai para ele (aba e
+  foco); (2) a aba ativa já tem um painel de documento sem mudança não salva → o novo toma o lugar
+  dele (o antigo fecha); (3) senão, o painel com foco divide para a direita e o documento entra no
+  painel novo, com o foco; (4) sem espaço para dividir → nova aba. Abrir vários arquivos ao lado
+  não empilha divisões.
+- "Em nova aba": o documento abre numa aba própria à direita da ativa, ou vai para a aba/painel
+  que já o mostra.
+- ⌘D e ⌘⇧D com o foco num documento abrem um terminal ao lado, na pasta do arquivo.
+- Título e ícone da aba vêm do painel com foco (terminal: pasta ou programa; documento: título e
+  ícone do tipo). "●" no título quando qualquer painel da aba tem mudança não salva.
+
 ### Fechar
 - ⌘W fecha o painel com foco. O espaço dele vai para o vizinho. Se era o único da aba, fecha a aba.
   Se era a última aba, fecha a janela.
 - Quando o shell de um painel termina (`exit`, Ctrl+D), o painel fecha da mesma forma.
 - Fechar painel, aba ou janela com um programa em primeiro plano (servidor, agente, `sleep 100`)
   pede confirmação, com "não perguntar de novo". Com o shell parado, fecha direto.
+- Fechar um painel de documento com mudança não salva pergunta ao documento (salvar, descartar,
+  cancelar). Fechar aba ou janela soma os arquivos não salvos de todos os painéis numa pergunta só.
 
 ### Desempenho
 - Abas que não estão visíveis não desenham; continuam lendo a saída do shell.
@@ -56,6 +77,8 @@ mostram um arquivo e têm um ponto no título quando há mudança não salva.
 - Dividir um painel muito pequeno: recusa se as metades ficariam abaixo do mínimo.
 - Fechar o painel do meio de três: o espaço vai para o vizinho da mesma divisão.
 - Pasta da sessão sumiu (apagada): a aba nova abre na pasta pessoal.
+- Abrir ao lado com o painel de documento da aba não salvo: divide em vez de trocar (nada se perde).
+- Abrir ao lado num painel pequeno demais para dividir: abre em nova aba.
 
 ## Critérios de aceite
 - [x] ⌘T abre na pasta atual depois de um `cd` na aba ativa.
@@ -66,3 +89,8 @@ mostram um arquivo e têm um ponto no título quando há mudança não salva.
 - [x] Fechar o último painel da última aba fecha a janela.
 - [x] Árvore de painéis: dividir, fechar e reequilibrar dão o layout esperado.
 - [x] Abas escondidas não desenham.
+- [ ] Abrir ao lado segue as quatro regras: painel existente, troca, divisão, nova aba.
+- [ ] Abrir ao lado com o documento da aba não salvo divide em vez de trocar.
+- [ ] Clicar num documento dá o foco a ele; ⌘], ⌘[ e ⌘⌥ + seta passam por documentos.
+- [ ] ⌘D num documento abre um terminal ao lado, na pasta do arquivo.
+- [ ] Fechar painel, aba ou janela com documento não salvo pergunta antes.

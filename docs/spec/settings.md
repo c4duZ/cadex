@@ -10,7 +10,8 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
   - **Geral:** shell (vazio usa o do sistema), perguntar antes de fechar com programa rodando,
     perguntar antes de colar várias linhas, e como uma nota Markdown abre: código (padrão) ou
     renderizada (`markdown.openAs`, "source" ou "rendered"), e se a árvore segue a pasta do
-    terminal (`explorer.followTerminal`).
+    terminal (`explorer.followTerminal`), e onde arquivos abrem: ao lado do painel com foco
+    (padrão) ou em nova aba (`general.openFiles`, "beside" ou "tab").
   - **Terminal:** fonte, tamanho, cursor (barra, bloco, sublinhado), cursor piscando, linhas de
     histórico, Option esquerdo como Meta, copiar ao selecionar.
   - **Aparência:** tema (seguir o sistema, ou um tema fixo), imagem de fundo com opacidade e
@@ -36,3 +37,4 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
 - [x] Mudar o tamanho da fonte redesenha os terminais abertos com as novas métricas.
 - [x] Um `settings.json` editado à mão com o app aberto vale na hora.
 - [x] Um `settings.json` quebrado não impede o app de abrir.
+- [ ] Sem `general.openFiles` no arquivo, arquivos abrem ao lado; "tab" abre em nova aba.

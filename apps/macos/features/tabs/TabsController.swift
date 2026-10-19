@@ -25,8 +25,6 @@ public final class TabsController {
     public var isShown = true
     var list = TabList()
     var tabs: [Int: Tab] = [:]
-    /// Tabs that show a document instead of terminals (TabDocument).
-    var documents: [Int: TabDocument] = [:]
     var nextId = 1
     var nextPane = 1
     weak var window: NSWindow?
@@ -46,31 +44,27 @@ public final class TabsController {
         }
     }
 
-    public var activeTerminal: TerminalView? { list.active.flatMap { tabs[$0]?.focused } }
+    /// The focused pane's terminal in the active tab, if it is one.
+    public var activeTerminal: TerminalView? { activeTab?.focused.terminal }
     var activeTab: Tab? { list.active.flatMap { tabs[$0] } }
     public var count: Int { list.order.count }
-    /// The document of the active tab, when it is not a terminal tab.
-    public var activeDocument: TabDocument? { list.active.flatMap { documents[$0] } }
-
-    /// The open document with this identity, if any.
-    public func document(identity: String) -> TabDocument? {
-        documents.values.first { $0.identity == identity }
-    }
-
-    /// Every open document, for passing on disk changes.
-    public var allDocuments: [TabDocument] { list.order.compactMap { documents[$0] } }
 
     // MARK: Opening and switching
 
     /// ⌘T: a terminal in `cwd`, or in the active terminal's folder, or home.
     public func newTab(cwd: String? = nil) {
         let terminal = makeTerminal(cwd: cwd)
+        addTab(.terminal(terminal))
+    }
+
+    /// A new tab with one pane, right of the active one, and selects it.
+    func addTab(_ content: Pane) {
         let pane = nextPane
         nextPane += 1
-        let tab = Tab(id: nextId, pane: pane, terminal: terminal)
+        let tab = Tab(id: nextId, pane: pane, content: content)
         nextId += 1
         add(tab)
-        wire(terminal, pane: pane, in: tab)
+        wire(content, pane: pane, in: tab)
         list.insert(tab.id)
         showActive()
     }
@@ -80,28 +74,9 @@ public final class TabsController {
         tab.onLayoutChange = { [weak self] in self?.onStateChange?() }
     }
 
-    /// Shows `document` in a new tab to the right of the active one, or
-    /// selects the tab that already shows the same identity.
-    public func open(_ document: TabDocument) {
-        if let id = documents.first(where: { $0.value.identity == document.identity })?.key {
-            select(id)
-            return
-        }
-        let id = nextId
-        nextId += 1
-        documents[id] = document
-        document.onChange = { [weak self] in self?.refreshBar() }
-        list.insert(id)
-        showActive()
-    }
-
-    /// The folder new terminals start in: the active terminal's, or the
-    /// active document's.
-    private var activeFolder: String? {
-        if let terminal = activeTerminal { return terminal.currentDirectory }
-        guard let path = activeDocument?.identity, path.hasPrefix("/") else { return nil }
-        return (path as NSString).deletingLastPathComponent
-    }
+    /// The folder new terminals start in: the focused pane's (a terminal's
+    /// folder, or a document's file's).
+    private var activeFolder: String? { activeTab?.focused.folder }
 
     /// A terminal in `cwd`, or in the active terminal's folder, or home
     /// when that folder is gone (docs/spec/tabs.md, casos de borda).
@@ -119,11 +94,15 @@ public final class TabsController {
             NSSound.beep()
             return
         }
-        let terminal = makeTerminal(cwd: tab.focused.currentDirectory)
+        split(tab, axis: axis, with: .terminal(makeTerminal(cwd: tab.focused.folder)))
+    }
+
+    /// Splits `tab`'s focused pane; `content` goes into the new one, focused.
+    func split(_ tab: Tab, axis: PaneTree.Axis, with content: Pane) {
         let pane = nextPane
         nextPane += 1
-        tab.split(axis: axis, pane: pane, terminal: terminal)
-        wire(terminal, pane: pane, in: tab)
+        tab.split(axis: axis, pane: pane, content: content)
+        wire(content, pane: pane, in: tab)
         refreshBar()
     }
 
@@ -167,19 +146,20 @@ public final class TabsController {
     }
 
     func showActive() {
-        if let document = activeDocument {
-            view.show(document.view)
-            if isShown { document.focus() }
-            refreshBar()
-            return
-        }
         guard let tab = activeTab else { return }
         view.show(tab.view)
-        if isShown { window?.makeFirstResponder(tab.focused) }
+        if isShown { tab.focusContent() }
         refreshBar()
     }
 
-    func wire(_ terminal: TerminalView, pane: Int, in tab: Tab) {
+    func wire(_ content: Pane, pane: Int, in tab: Tab) {
+        switch content {
+        case .terminal(let terminal): wire(terminal, pane: pane, in: tab)
+        case .document(let document): document.onChange = { [weak self] in self?.refreshBar() }
+        }
+    }
+
+    private func wire(_ terminal: TerminalView, pane: Int, in tab: Tab) {
         // The shell exited by itself: nothing to ask, the pane just goes.
         terminal.onShellExit = { [weak self, weak tab] in
             guard let tab else { return }
@@ -206,15 +186,7 @@ public final class TabsController {
     }
 
     func refreshBar() {
-        bar.items = list.order.compactMap { id in
-            if let document = documents[id] {
-                let title = document.hasUnsavedChanges ? "● " + document.title : document.title
-                let (icon, color) = Self.tabIcon(for: document.identity)
-                return TabBarView.Item(id: id, title: title, active: id == list.active, icon: icon, iconColor: color,
-                                       image: Self.tabImage(for: document.identity))
-            }
-            return tabs[id].map { TabBarView.Item(id: id, title: $0.title(home: home), active: id == list.active) }
-        }
+        bar.items = list.order.compactMap { id in tabs[id].map(barItem) }
         onStateChange?()
         guard isShown else { return }
         if let document = activeDocument {
@@ -222,9 +194,20 @@ public final class TabsController {
             onActiveChange?()
             return
         }
-        let program = activeTab?.focused.programTitle ?? ""
+        let program = activeTerminal?.programTitle ?? ""
         window?.title = program.isEmpty ? (activeTab?.title(home: home) ?? "Cadex") : program
         onActiveChange?()
+    }
+
+    /// A tab in the strip, titled and iconed by its focused pane.
+    private func barItem(_ tab: Tab) -> TabBarView.Item {
+        let title = tab.title(home: home)
+        guard let document = tab.focused.document else {
+            return TabBarView.Item(id: tab.id, title: title, active: tab.id == list.active)
+        }
+        let (icon, color) = Self.tabIcon(for: document.identity)
+        return TabBarView.Item(id: tab.id, title: title, active: tab.id == list.active, icon: icon, iconColor: color,
+                               image: Self.tabImage(for: document.identity))
     }
 
     /// "Renomear aba": empty goes back to the folder name.

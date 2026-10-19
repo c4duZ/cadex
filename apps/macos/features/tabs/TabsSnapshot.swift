@@ -2,29 +2,39 @@ import CoreGraphics
 import Foundation
 
 /// What a window's tabs are, in a form that can be saved and rebuilt
-/// (docs/spec/spaces.md): the order, each terminal tab's panes with their
-/// folders and proportions, the documents by identity, and the active tab.
-/// Not the terminals' content: each pane starts a new shell.
+/// (docs/spec/spaces.md): the order, each tab's panes (a terminal by its
+/// folder, a document by its identity) with their proportions, and the
+/// active tab. Not the terminals' content: each pane starts a new shell.
 public struct TabsSnapshot: Codable, Equatable, Sendable {
     public indirect enum Layout: Codable, Equatable, Sendable {
+        /// A terminal pane.
         case pane(folder: String)
+        /// A document pane, made again by the app from its identity (a
+        /// path, "history:<repo>"). Plan 8, 2026-10-19.
+        case document(identity: String)
         /// `sideBySide`: ⌘D's split; otherwise one above the other.
         case split(sideBySide: Bool, ratio: Double, first: Layout, second: Layout)
 
-        /// The panes' folders in reading order.
+        /// The terminal panes' folders in reading order.
         public var folders: [String] {
+            leaves.compactMap { if case .pane(let folder) = $0 { folder } else { nil } }
+        }
+
+        /// The panes (`.pane` and `.document`) in reading order.
+        public var leaves: [Layout] {
             switch self {
-            case .pane(let folder): [folder]
-            case .split(_, _, let a, let b): a.folders + b.folders
+            case .pane, .document: [self]
+            case .split(_, _, let a, let b): a.leaves + b.leaves
             }
         }
     }
 
     public enum Item: Codable, Equatable, Sendable {
-        /// `focus`: the focused pane's position in reading order.
+        /// Any tab, terminals and documents alike (the name stays for the
+        /// JSON). `focus`: the focused pane's position in reading order.
         case terminal(title: String?, layout: Layout, focus: Int)
-        /// A document tab, reopened by the app from its identity (a path,
-        /// "history:<repo>"); the ones it does not know stay closed.
+        /// A document tab as plan 7 saved it (before documents went into
+        /// panes): read as a tab with that one pane, never written.
         case document(identity: String)
     }
 
@@ -39,14 +49,14 @@ public struct TabsSnapshot: Codable, Equatable, Sendable {
 }
 
 extension PaneTree {
-    /// The layout of this tree, each pane by its folder.
-    func snapshot(folder: (Int) -> String) -> TabsSnapshot.Layout {
+    /// The layout of this tree, each pane as `pane` describes it.
+    func snapshot(pane: (Int) -> TabsSnapshot.Layout) -> TabsSnapshot.Layout {
         switch self {
         case .leaf(let id):
-            return .pane(folder: folder(id))
+            return pane(id)
         case .split(let axis, let a, let b, let ratio):
             return .split(sideBySide: axis == .horizontal, ratio: Double(ratio),
-                          first: a.snapshot(folder: folder), second: b.snapshot(folder: folder))
+                          first: a.snapshot(pane: pane), second: b.snapshot(pane: pane))
         }
     }
 
@@ -54,7 +64,7 @@ extension PaneTree {
     /// (each call gives a new id), in reading order.
     static func from(_ layout: TabsSnapshot.Layout, nextPane: () -> Int) -> PaneTree {
         switch layout {
-        case .pane:
+        case .pane, .document:
             return .leaf(nextPane())
         case .split(let sideBySide, let ratio, let first, let second):
             let a = from(first, nextPane: nextPane)

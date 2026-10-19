@@ -7,6 +7,33 @@ import Icons
 // Tests of the tabs feature. Run with `make macos-test` (see
 // shared/checks/Checks.swift for why this is an executable).
 
+/// A document that is nothing but its identity, for the tabs' rules.
+@MainActor
+final class FakeDocument: TabDocument {
+    let view = NSView()
+    let identity: String
+    var title: String { (identity as NSString).lastPathComponent }
+    var hasUnsavedChanges = false
+    var onChange: (() -> Void)?
+    var closed = false
+    /// What confirmClose answers: true closes, as "Descartar" would.
+    var closes = true
+
+    init(_ identity: String) { self.identity = identity }
+
+    func focus() {}
+    func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) { if closes { close() } }
+    func close() { closed = true }
+}
+
+@MainActor
+func makeTabs() -> TabsController {
+    let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1200, height: 600), styleMask: [.titled], backing: .buffered, defer: false)
+    let tabs = TabsController(window: window)
+    tabs.view.frame = NSRect(x: 0, y: 0, width: 1200, height: 600)
+    return tabs
+}
+
 @MainActor
 func eventually(_ body: () -> Bool) async -> Bool {
     for _ in 0..<100 {
@@ -107,7 +134,7 @@ let exitCode = await Checks.run([
         let tree = PaneTree.leaf(1).splitting(1, axis: .horizontal, newPane: 2).splitting(2, axis: .vertical, newPane: 3)
             .settingRatio(0.3, at: [])
         let folders = [1: "/a", 2: "/b", 3: "/c"]
-        let layout = tree.snapshot { folders[$0]! }
+        let layout = tree.snapshot { .pane(folder: folders[$0]!) }
         expect(layout.folders == ["/a", "/b", "/c"])
         let snapshot = TabsSnapshot(items: [.terminal(title: "api", layout: layout, focus: 2), .document(identity: "/x.md")], active: 1)
         let data = try! JSONEncoder().encode(snapshot)
@@ -128,7 +155,7 @@ let exitCode = await Checks.run([
             .document(identity: "/sumiu.txt"),
         ], active: 1)
         var asked: [String] = []
-        first.restore(saved) { asked.append($0) }
+        first.restore(saved) { asked.append($0); return nil }
         expect(asked == ["/sumiu.txt"] && first.count == 2, "\(asked) \(first.count)")
         // The document could not be reopened: the rest stays, the active one too.
         var expected = saved
@@ -178,6 +205,69 @@ let exitCode = await Checks.run([
         // Closing one of three gives the other two half each.
         let two = three.removing(2)!.balanced()
         expect(two.frames(in: CGRect(x: 0, y: 0, width: 300, height: 100)).values.allSatisfy { $0.width == 150 })
+    }),
+    ("a document opens in a tab of its own; its identity again goes back to it", {
+        let tabs = makeTabs()
+        tabs.newTab(cwd: "/")
+        let a = FakeDocument("/repo/a.md")
+        tabs.open(a)
+        expect(tabs.count == 2 && tabs.activeDocument === a && tabs.activeTerminal == nil)
+        tabs.select(position: 1)
+        expect(tabs.activeDocument == nil && tabs.activeTerminal != nil)
+        tabs.open(FakeDocument("/repo/a.md"))
+        expect(tabs.count == 2 && tabs.activeDocument === a, "\(tabs.count)")
+        tabs.closeAll()
+    }),
+    ("the focused pane decides the active terminal or document, in any tab", {
+        let tabs = makeTabs()
+        tabs.newTab(cwd: "/")
+        let tab = tabs.activeTab!
+        let b = FakeDocument("/repo/b.swift")
+        tabs.split(tab, axis: .horizontal, with: .document(b))
+        expect(tabs.activeDocument === b && tabs.activeTerminal == nil && tabs.activePaneCount == 2)
+        tabs.focusPane(step: 1)
+        expect(tabs.activeDocument == nil && tabs.activeTerminal != nil)
+        tabs.newTab(cwd: "/")
+        expect(tabs.document(identity: "/repo/b.swift") === b && tabs.allDocuments.count == 1)
+        // A new terminal beside a document starts in the document's folder.
+        tabs.open(b)
+        expect(tabs.activeTab === tab && tabs.activeDocument === b)
+        expect(tab.focused.folder == "/repo")
+        tabs.closeAll()
+        expect(b.closed)
+    }),
+    ("a plan 7 spaces.json comes back the same: a document tab is a tab of one pane", {
+        let json = """
+        {"items":[{"terminal":{"layout":{"pane":{"folder":"/"}},"focus":0}},{"document":{"identity":"/x.md"}}],"active":1}
+        """
+        let old = try! JSONDecoder().decode(TabsSnapshot.self, from: Data(json.utf8))
+        let tabs = makeTabs()
+        tabs.restore(old) { FakeDocument($0) }
+        expect(tabs.count == 2 && tabs.activeDocument?.identity == "/x.md")
+        let ok = await eventually {
+            tabs.snapshot() == TabsSnapshot(items: [
+                .terminal(title: nil, layout: .pane(folder: "/"), focus: 0),
+                .terminal(title: nil, layout: .document(identity: "/x.md"), focus: 0),
+            ], active: 1)
+        }
+        expect(ok, "\(tabs.snapshot())")
+        tabs.closeAll()
+    }),
+    ("a terminal and a document side by side come back side by side; a gone document becomes a terminal", {
+        let tmp = String(cString: realpath(NSTemporaryDirectory(), nil))
+        let layout = TabsSnapshot.Layout.split(sideBySide: true, ratio: 0.5, first: .pane(folder: "/"), second: .document(identity: tmp + "/a.md"))
+        let saved = TabsSnapshot(items: [.terminal(title: nil, layout: layout, focus: 1)], active: 0)
+        let tabs = makeTabs()
+        tabs.restore(saved) { FakeDocument($0) }
+        let same = await eventually { tabs.snapshot() == saved }
+        expect(same && tabs.activeDocument?.identity == tmp + "/a.md", "\(tabs.snapshot())")
+        let gone = makeTabs()
+        gone.restore(saved) { _ in nil }
+        let asTerminal = TabsSnapshot.Layout.split(sideBySide: true, ratio: 0.5, first: .pane(folder: "/"), second: .pane(folder: tmp))
+        let ok = await eventually { gone.snapshot().items == [.terminal(title: nil, layout: asTerminal, focus: 1)] }
+        expect(ok, "\(gone.snapshot())")
+        tabs.closeAll()
+        gone.closeAll()
     }),
 ])
 exit(exitCode)

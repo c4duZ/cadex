@@ -7,7 +7,7 @@ import Tabs
 
 /// The spaces in the window (docs/spec/spaces.md): each space's tabs are
 /// made here, wired like the window's (status bar, preview offers), and
-/// the saved documents reopen through the FileOpener.
+/// the saved documents are made again by the FileOpener.
 extension AppDelegate {
     /// Made with the commands, before the window, so the palette and the
     /// shortcuts know space.*; the tabs are made later, in startSpaces.
@@ -39,7 +39,7 @@ extension AppDelegate {
             folder.open(path)
         }
         spaces.workspaceFolder = { [weak self] in self?.folder.root }
-        spaces.start(folder: folder.root) { [weak self] identity in self?.reopen(identity) }
+        spaces.start(folder: folder.root) { [weak self] identity in self?.opener?.makeDocument(identity: identity) }
         // Opened on a folder: the old tabs come back and the folder gets its
         // own terminal in the shown space (docs/spec/spaces.md), unless one
         // is already there: opening the same folder again stacked tabs.
@@ -52,22 +52,6 @@ extension AppDelegate {
         tabs.snapshot().items.contains { item in
             if case let .terminal(_, layout, _) = item { return layout.folders.contains(folder) }
             return false
-        }
-    }
-
-    /// A saved document tab: files that still exist and the git history.
-    /// Diffs and web previews are passing things and stay closed. Its folder
-    /// is authorized again: the core forgets them between launches, and the
-    /// history of a repository outside the workspace failed (2026-10-19).
-    private func reopen(_ identity: String) {
-        if identity.hasPrefix("/") {
-            guard FileManager.default.fileExists(atPath: identity),
-                  WorkspaceFolder.allow((identity as NSString).deletingLastPathComponent) != nil else { return }
-            opener?.open(identity)
-        } else if identity.hasPrefix("history:") {
-            let root = String(identity.dropFirst("history:".count))
-            guard FileManager.default.fileExists(atPath: root + "/.git"), WorkspaceFolder.allow(root) != nil else { return }
-            opener?.openHistory(root)
         }
     }
 }
