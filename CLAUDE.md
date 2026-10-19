@@ -6,8 +6,8 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 - Recriar todas as funcionalidades do Terax com código próprio, licença MIT.
 - O app mais leve e rápido possível em cada sistema: macOS primeiro, Windows depois, sobre o mesmo
   núcleo.
-- Instalar em um passo: abrir o DMG, arrastar para Aplicativos, abrir. Assinado e notarizado, sem
-  dependências (`docs/adr/0007-one-step-install.md`).
+- Instalar em um passo: um comando (`curl ... | sh`) ou o DMG, sem dependências
+  (`docs/adr/0007-one-step-install.md`).
 - Tudo pode ser feito pelo ⌘K: toda ação do app é um comando que a paleta encontra e executa
   (`docs/adr/0005-every-action-is-a-command.md`).
 - As features abaixo, cada uma com pasta própria e o mesmo nome no núcleo e no app:
