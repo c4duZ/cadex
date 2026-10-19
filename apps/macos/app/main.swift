@@ -99,7 +99,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.titleVisibility = .hidden
         window.toolbar = NSToolbar()
         window.toolbarStyle = .unifiedCompact
-        window.minSize = NSSize(width: 600, height: 360)
+        // Room for the window buttons, the bar's group, one tab and a
+        // terminal of a few columns; 600 pt felt like a wall (2026-10-19).
+        window.minSize = NSSize(width: 480, height: 300)
         window.title = "Cadex"
         window.delegate = self
         // A window made in code frees itself on close by default, leaving
@@ -293,6 +295,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     /// The tabs ask before closing over a running program; close() after
     /// the confirmation does not come back here.
+    /// In full screen macOS puts the toolbar in a band of its own over the
+    /// content, which covered the title bar the app draws: the bar showed
+    /// empty (owner, 2026-10-19). The (empty) toolbar goes while in full
+    /// screen; the title bar view moves to the edge (TitleBarView).
+    func windowWillEnterFullScreen(_ notification: Notification) {
+        window?.toolbar?.isVisible = false
+    }
+
+    func windowDidExitFullScreen(_ notification: Notification) {
+        window?.toolbar?.isVisible = true
+    }
+
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         guard let spaces else { return true }
         spaces.saveNow()

@@ -32,6 +32,10 @@ public final class StatusBarView: NSView {
         super.init(frame: frame)
         trail.orientation = .horizontal
         trail.spacing = 2
+        // A long path is cut, it does not hold the window's width: its
+        // pieces resisted shrinking and kept the window from getting
+        // narrower (owner, 2026-10-19).
+        trail.setClippingResistancePriority(.defaultLow, for: .horizontal)
         for view in [trail, environment] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)

@@ -54,7 +54,8 @@ final class TitleBarView: NSView {
         group.layer?.cornerRadius = 8
         let inside = NSStackView(views: [sidebarButton, searchButton, spaceButton])
         inside.spacing = 0
-        inside.edgeInsets = NSEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
+        // 1 pt around 26 pt buttons: the group is 28 pt tall, as the tabs.
+        inside.edgeInsets = NSEdgeInsets(top: 1, left: 1, bottom: 1, right: 1)
         inside.translatesAutoresizingMaskIntoConstraints = false
         group.addSubview(inside)
         NSLayoutConstraint.activate([
