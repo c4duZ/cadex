@@ -31,6 +31,12 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 12 | `docs/plans/12-windows-files-viewers-git.md` | explorer, busca, visualizadores e git | escrito, compila e ligado no app; falta rodar na VM |
 | 13 | `docs/plans/13-windows-release.md` | spaces, painéis com documentos, instalador e release | A a C escritas; falta a VM, medir (D) e a semana de uso (E) |
 
+- Depois do port, nos dois apps (pedido do dono em 2026-10-20):
+
+| # | plano | entrega | status |
+|---|---|---|---|
+| 14 | `docs/plans/14-languages-and-settings.md` | inglês por padrão, português como opção, configurações refeitas | em andamento: fase A |
+
 ## O que eu não quero
 - Executar plano sem ler antes o `CLAUDE.md` da raiz e o da feature que vai mexer.
 - Código do Terax como referência (ADR 0004): a fonte é a spec em `docs/spec/`, a documentação
