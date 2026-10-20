@@ -25,6 +25,10 @@
 - `app_commands.zig`: palette.open, settings.open, app.quit, app.hide, window.new (outro processo),
   edit.* (para o terminal ou o documento com foco), terminal.clear/scroll-top/scroll-bottom, e o
   registro dos comandos das features. `settings_page.zig`: a página de configurações.
+- `sidebar.zig`: o painel lateral (Arquivos ou Git, abas embaixo, view.toggle-sidebar) e o
+  workspace seguindo o terminal com foco até a raiz do repositório. `git_page.zig`: a página Git.
+- `opener.zig`: onde um arquivo abre (o FileOpener do Mac): o tipo pela extensão, ao lado ou em
+  nova aba; sem visualizador para o tipo, o app do sistema.
 - `Cadex.manifest`: DPI por monitor v2, UTF-8 como página de código e caminhos longos.
 
 ## Como validar

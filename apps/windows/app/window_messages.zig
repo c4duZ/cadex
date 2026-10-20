@@ -191,6 +191,11 @@ pub fn handle(self: *Window, hwnd: c.HWND, msg: c.UINT, wparam: c.WPARAM, lparam
             self.redraw();
             return c.DefWindowProcW(hwnd, msg, wparam, lparam);
         },
+        window.WM_APP_WAKE => {
+            d.wake(d.context);
+            self.redraw();
+            return 0;
+        },
         window.WM_APP_TERMINAL => {
             d.terminal(d.context, lparam, wparam);
             return 0;

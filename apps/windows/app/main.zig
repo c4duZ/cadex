@@ -41,4 +41,7 @@ test {
     _ = @import("wiring.zig");
     _ = @import("app_commands.zig");
     _ = @import("settings_page.zig");
+    _ = @import("sidebar.zig");
+    _ = @import("git_page.zig");
+    _ = @import("opener.zig");
 }

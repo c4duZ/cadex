@@ -11,6 +11,10 @@ const themes = @import("themes");
 const terminal = @import("terminal");
 const tabs = @import("tabs");
 const shortcuts = @import("shortcuts");
+const explorer = @import("explorer");
+const search = @import("search");
+const palette = @import("command-palette");
+const opener = @import("opener.zig");
 const window_mod = @import("window.zig");
 const App = @import("app.zig").App;
 
@@ -29,6 +33,7 @@ pub fn delegate(app: *App) window_mod.Delegate {
         .terminal = terminalNotice,
         .close = close,
         .poll = poll,
+        .wake = wakeDrain,
         .appearance = appearance,
         .caption_holes = holes,
         .maximize_button = maximizeButton,
@@ -80,6 +85,15 @@ fn close(context: *anyopaque) bool {
     app.tabs.requestClose(.all);
     app.window.redraw();
     return false;
+}
+
+fn wakeDrain(context: *anyopaque) void {
+    _ = of(context).explorer.drain();
+}
+
+/// From any thread: the window drains the workers' news on its own thread.
+fn wake(context: *anyopaque) void {
+    _ = c.PostMessageW(of(context).window.hwnd, window_mod.WM_APP_WAKE, 0, 0);
 }
 
 fn poll(context: *anyopaque) void {
@@ -157,14 +171,11 @@ fn post(context: *anyopaque, session: *terminal.Session, event: terminal.Event) 
     _ = c.PostMessageW(app.window.hwnd, window_mod.WM_APP_TERMINAL, @intFromEnum(event), @bitCast(@intFromPtr(session)));
 }
 
+/// Ctrl+click on a terminal link: a URL in the browser, a file in the Cadex.
 fn openLink(context: ?*anyopaque, kind: u8, target: []const u8) void {
     const app = of(context.?);
-    // URLs in the browser; files open in the system's app until the
-    // viewers are wired (plan 12 opens them in the Cadex).
-    _ = kind;
-    const wide = std.unicode.wtf8ToWtf16LeAllocZ(app.gpa, target) catch return;
-    defer app.gpa.free(wide);
-    _ = c.ShellExecuteW(app.window.hwnd, w.L("open"), wide.ptr, null, null, c.SW_SHOWNORMAL);
+    if (kind == cadex.CADEX_LINK_URL) return opener.systemOpen(app, target);
+    opener.open(app, target, 0, .setting);
 }
 
 fn home(context: *anyopaque) ?[]const u8 {
@@ -196,6 +207,8 @@ pub fn applySettings(app: *App) void {
     defer prefs.deinit(app.gpa);
     for (s.shortcuts) |sc| prefs.append(app.gpa, .{ .keys = sc.keys, .id = sc.id }) catch {};
     app.shortcuts.reload(app.gpa, prefs.items);
+    app.explorer.setShowHidden(s.explorer.show_hidden);
+    if (app.explorer.root()) |r| app.search.setRoot(r, s.explorer.show_hidden);
     eachView(app, struct {
         fn apply(a: *App, v: *terminal.View) void {
             const cur = a.settings.current.terminal;
@@ -226,4 +239,95 @@ fn eachView(app: *App, comptime f: fn (*App, *terminal.View) void) void {
 
 test {
     @import("win32").refAllDeep(@This());
+}
+
+// ---- Explorer and search ----
+
+pub fn explorerHost(app: *App) explorer.Host {
+    return .{
+        .context = app,
+        .open_file = openFromExplorer,
+        .open_in_terminal = cdTerminal,
+        .terminal_folder = terminalFolder,
+        .wake = wake,
+    };
+}
+
+fn openFromExplorer(context: *anyopaque, path: []const u8, how: explorer.OpenHow) void {
+    opener.open(of(context), path, 0, switch (how) {
+        .setting => .setting,
+        .beside => .beside,
+        .tab => .tab,
+    });
+}
+
+fn cdTerminal(context: *anyopaque, folder: []const u8) void {
+    const app = of(context);
+    const view = app.tabs.focusedTerminal() orelse return app.tabs.newTab(folder);
+    if (view.session.hasForegroundProcess()) return app.tabs.newTab(folder);
+    const quoted = terminal.paste.quotePaths(app.gpa, &.{folder}) orelse return;
+    defer app.gpa.free(quoted);
+    const line = std.fmt.allocPrint(app.gpa, "cd {s}\r", .{quoted}) catch return;
+    defer app.gpa.free(line);
+    view.session.write(line);
+}
+
+fn terminalFolder(context: *anyopaque, out: []u8) ?[]const u8 {
+    const app = of(context);
+    const view = app.tabs.focusedTerminal() orelse return null;
+    const dir = view.session.workingDirectory() orelse return null;
+    defer dir.free();
+    if (dir.bytes.len > out.len) return null;
+    @memcpy(out[0..dir.bytes.len], dir.bytes);
+    return out[0..dir.bytes.len];
+}
+
+pub fn explorerWiring(app: *App) explorer.commands.Wiring {
+    return .{ .context = app, .ui = uiOf, .show = showFiles, .toggle_hidden = toggleHidden, .confirm_trash = confirmTrash };
+}
+
+fn uiOf(context: *anyopaque) *ui.Ui {
+    return &of(context).u;
+}
+
+fn showFiles(context: *anyopaque) void {
+    const app = of(context);
+    app.sidebar.visible = true;
+    app.sidebar.page = .files;
+    app.u.focus = app.explorer.focus_id;
+}
+
+fn toggleHidden(context: *anyopaque) void {
+    const app = of(context);
+    var s = app.settings.current;
+    s.explorer.show_hidden = !s.explorer.show_hidden;
+    app.settings.save(s);
+    applySettings(app);
+}
+
+fn confirmTrash(context: *anyopaque, count: usize) void {
+    of(context).pending_trash = count;
+}
+
+pub fn searchHost(app: *App) search.Host {
+    return .{ .context = app, .open = openFromSearch, .wake = wake, .show = showList, .content_open = contentOpen };
+}
+
+fn openFromSearch(context: *anyopaque, path: []const u8, line: u32, how: palette.How) void {
+    opener.open(of(context), path, line, switch (how) {
+        .normal => .setting,
+        .beside => .beside,
+        .new_tab => .tab,
+    });
+}
+
+fn showList(context: *anyopaque, source: palette.Source) void {
+    const app = of(context);
+    app.palette.toggle(&app.u, source);
+}
+
+fn contentOpen(context: *anyopaque) bool {
+    const app = of(context);
+    const opened = app.palette.opened orelse return false;
+    return opened.context == @as(*anyopaque, @ptrCast(&app.search)) and std.mem.eql(u8, opened.placeholder, "Buscar texto nos arquivos");
 }

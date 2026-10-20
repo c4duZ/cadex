@@ -12,6 +12,8 @@ const ui = @import("ui");
 const c = w.c;
 
 pub const WM_APP_TERMINAL = c.WM_APP + 1;
+/// A worker (the explorer's watcher, a search) has news: drain and redraw.
+pub const WM_APP_WAKE = c.WM_APP + 2;
 const timer_frame = 1;
 const timer_poll = 2;
 
@@ -28,6 +30,8 @@ pub const Delegate = struct {
     terminal: *const fn (context: *anyopaque, lparam: c.LPARAM, wparam: c.WPARAM) void,
     /// Closing the window (the close button, Alt+F4): true lets it close.
     close: *const fn (context: *anyopaque) bool,
+    /// A worker posted WM_APP_WAKE.
+    wake: *const fn (context: *anyopaque) void,
     /// Once a second: settings edited by hand.
     poll: *const fn (context: *anyopaque) void,
     /// The system switched light/dark or the DPI changed.

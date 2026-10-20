@@ -13,6 +13,9 @@ const settings = @import("settings");
 const terminal = @import("terminal");
 const tabs = @import("tabs");
 const status_bar = @import("status-bar");
+const explorer = @import("explorer");
+const search = @import("search");
+const sidebar = @import("sidebar.zig");
 const window_mod = @import("window.zig");
 const chrome = @import("chrome.zig");
 const wiring = @import("wiring.zig");
@@ -40,6 +43,11 @@ pub const App = struct {
     bar: tabs.Bar = .{},
     layout: tabs.Layout = .{},
     status: status_bar.StatusBar = .{},
+    explorer: explorer.Explorer = undefined,
+    search: search.Search = undefined,
+    sidebar: sidebar.Sidebar = .{},
+    /// Several items to the Recycle Bin wait for the user's answer.
+    pending_trash: usize = 0,
     plus_menu: ui.menu.Menu = .{},
     /// The title bar's buttons and tabs, last frame: not the caption.
     holes: std.ArrayList(gfx.Rect) = .empty,
@@ -87,13 +95,21 @@ pub const App = struct {
         self.u = .{ .gpa = gpa, .painter = &self.painter, .style = .{}, .input = &self.input, .hwnd = self.window.hwnd };
 
         self.tabs = tabs.Tabs.init(gpa, wiring.host(self));
+        self.explorer = explorer.Explorer.init(gpa, wiring.explorerHost(self));
+        self.search = .{ .gpa = gpa, .host = wiring.searchHost(self) };
         app_commands.register(self);
+        self.explorer.register(&self.registry, wiring.explorerWiring(self));
+        self.search.register(&self.registry);
+        self.palette.addPrefix(.{ .char = '/', .label = "arquivos", .source = self.search.filesSource() });
+        self.palette.addPrefix(.{ .char = '#', .label = "texto", .source = self.search.contentSource() });
         wiring.applySettings(self);
         terminal.paste.cleanOld(gpa);
     }
 
     /// Opens the first tab (in `folder`, or the user's folder) and shows the window.
     pub fn start(self: *App, folder: ?[]const u8, background: bool) void {
+        if (folder orelse self.home) |f| sidebar.setWorkspace(self, f);
+        self.explorer.launched_with_folder = folder != null;
         self.tabs.newTab(folder orelse self.home);
         self.window.show(background);
         self.window.run();
@@ -117,9 +133,15 @@ pub const App = struct {
         const title = area.takeTop(self.title_h);
         const status = area.takeBottom(u.px(26));
         const gap = u.px(6);
-        const body = area.inset(gap, 0);
+        var body = area.inset(gap, 0);
         self.holes.clearRetainingCapacity();
         chrome.titleBar(self, title);
+        sidebar.followTerminal(self);
+        if (self.sidebar.visible) {
+            const side = body.takeLeft(u.px(sidebar.width_dips));
+            _ = body.takeLeft(gap);
+            sidebar.draw(self, side);
+        }
         self.drawBody(body);
         self.drawStatus(status);
         self.drawOverlays();
@@ -178,6 +200,14 @@ pub const App = struct {
             const buttons: []const []const u8 = if (q.unsaved) &.{ "Salvar", "Descartar", "Cancelar" } else &.{ "Fechar", "Cancelar" };
             if (ui.menu.ask(u, .{ .title = q.title, .message = q.message, .buttons = buttons })) |choice| self.tabs.answer(choice);
         }
+        if (self.pending_trash > 0) {
+            var buf: [64]u8 = undefined;
+            const title = std.fmt.bufPrint(&buf, "Mover {d} itens para a Lixeira?", .{self.pending_trash}) catch "Mover para a Lixeira?";
+            if (ui.menu.ask(u, .{ .title = title, .buttons = &.{ "Mover para a Lixeira", "Cancelar" } })) |choice| {
+                if (choice == 0) explorer.actions.trash(&self.explorer);
+                self.pending_trash = 0;
+            }
+        }
         if (self.pending_paste) |plan| {
             if (ui.menu.ask(u, .{ .title = "Colar várias linhas?", .message = "O texto pode rodar comandos assim que for colado.", .buttons = &.{ "Colar", "Cancelar" } })) |choice| {
                 if (choice == 0) if (self.tabs.focusedTerminal()) |v| terminal.paste.send(v.session, plan);
@@ -197,7 +227,7 @@ pub const App = struct {
 
     /// Whether keys and text go straight to the focused terminal now.
     pub fn terminalHasKeys(self: *App) ?*terminal.View {
-        if (self.palette.isOpen() or self.tabs.question != null or self.pending_paste != null) return null;
+        if (self.palette.isOpen() or self.tabs.question != null or self.pending_paste != null or self.pending_trash > 0) return null;
         if (@import("settings_page.zig").isOpen()) return null;
         if (self.plus_menu.owner != ui.context.none or self.status.menu.owner != ui.context.none) return null;
         if (self.bar.renaming != null) return null;

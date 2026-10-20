@@ -118,6 +118,11 @@ fn redo(_: ?*anyopaque) void {
     edit(.redo);
 }
 
+fn toggleSidebar(_: ?*anyopaque) void {
+    app_ref.sidebar.visible = !app_ref.sidebar.visible;
+    app_ref.window.redraw();
+}
+
 fn hasFocusTarget(_: ?*anyopaque) bool {
     return focusedView() != null or app_ref.tabs.focusedDocument() != null;
 }
@@ -151,6 +156,7 @@ pub fn register(app: *App) void {
     r.add(.{ .id = "edit.paste", .title = "Colar", .keywords = &.{"paste"}, .shortcut = "cmd+v", .run = paste, .available = hasFocusTarget });
     r.add(.{ .id = "edit.find", .title = "Buscar", .keywords = &.{ "find", "procurar", "pesquisar" }, .shortcut = "cmd+f", .run = find, .available = hasFocusTarget });
     r.add(.{ .id = "edit.select-all", .title = "Selecionar tudo", .keywords = &.{"select all"}, .shortcut = "cmd+a", .run = selectAll, .available = hasFocusTarget });
+    r.add(.{ .id = "view.toggle-sidebar", .title = "Mostrar ou esconder o painel lateral", .keywords = &.{ "sidebar", "explorer", "painel" }, .shortcut = "cmd+b", .run = toggleSidebar });
     r.add(.{ .id = "terminal.clear", .title = "Limpar o terminal", .keywords = &.{ "clear", "cls", "tela" }, .shortcut = "cmd+l", .run = clear, .available = hasTerminal });
     r.add(.{ .id = "terminal.scroll-top", .title = "Ir ao topo do histórico", .keywords = &.{ "scroll", "rolar", "início" }, .shortcut = "cmd+up", .run = scrollTop, .available = hasTerminal });
     r.add(.{ .id = "terminal.scroll-bottom", .title = "Ir ao fim do histórico", .keywords = &.{ "scroll", "rolar", "final" }, .shortcut = "cmd+down", .run = scrollBottom, .available = hasTerminal });
