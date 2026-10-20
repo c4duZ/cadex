@@ -54,6 +54,8 @@
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Programas e scripts rodando nos terminais do Cadex podem pedir para controlar outros apps (osascript, create-dmg, automações).</string>
 	<key>NSDesktopFolderUsageDescription</key>
 	<string>Um programa no terminal do Cadex quer usar a Mesa.</string>
 	<key>NSDocumentsFolderUsageDescription</key>

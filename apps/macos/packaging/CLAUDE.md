@@ -5,7 +5,9 @@ scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem con
 
 - `build.sh` (ou `make package`): monta dist/Cadex.app na raiz do repositório, universal, com o
   `Info.plist` desta pasta (bundle id io.github.c4duz.cadex, versão, categoria, pastas e arquivos
-  soltos no ícone do Dock; http liberado só no conteúdo web, para o preview abrir sites sem https).
+  soltos no ícone do Dock; http liberado só no conteúdo web, para o preview abrir sites sem https;
+  NSAppleEventsUsageDescription, sem a qual o macOS recusava em silêncio o AppleScript de quem roda
+  num terminal do Cadex: o create-dmg da release falhou assim em 2026-10-20).
   Leva 1 min e meio.
 - `release.sh`: build, Cadex.zip com o Cadex.zip.sha256, Cadex.dmg (create-dmg com o
   `dmg-background.tiff`, gerado por `dmg-background.swift`) e o install.sh em dist/. Só publica com
