@@ -23,7 +23,8 @@
   foco), `FileNode.swift` (uma linha; pasta lida só ao abrir; recarga reaproveita linhas iguais; notas
   "Pasta vazia" e "Sem permissão"), `ExplorerDataSource.swift` (dados, células desenhadas à mão no
   `layout()`, arrastar e soltar), `ExplorerOutline.swift` (teclas da árvore; o clique direito abre o menu de
-  `ExplorerContextMenu.swift`, que monta pelo tipo, pasta ou arquivo, e deixa de fora o que não roda, no
+  `ExplorerContextMenu.swift`, que monta pelo tipo (pasta: terminal e Finder; arquivo: as formas de
+  abrir) e deixa de fora o que não roda, nada apagado, no
   menu do app de `apps/macos/shared/menus`),
   `ExplorerRename.swift` (renomear no lugar), `ExplorerActions.swift` (o que cada comando faz e
   quando está indisponível), `FileTypeIcon.swift` (pasta, link, e os arquivos pelo `FileIcons` compartilhado).

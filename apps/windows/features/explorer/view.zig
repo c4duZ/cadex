@@ -14,6 +14,7 @@ const w = @import("win32");
 const icons = @import("icons");
 const explorer = @import("explorer.zig");
 const actions = @import("actions.zig");
+const commands = @import("commands.zig");
 const tree_mod = @import("tree.zig");
 
 const Explorer = explorer.Explorer;
@@ -30,16 +31,32 @@ pub const Result = struct {
 var dragging = false;
 var drag_from: gfx.Point = .{};
 
-const menu_items = [_]struct { ?[]const u8, []const u8 }{
-    .{ "explorer.open", "Abrir arquivo" },               .{ "explorer.open-beside", "Abrir ao lado" },
-    .{ "explorer.open-in-tab", "Abrir em nova aba" },     .{ null, "" },
-    .{ "explorer.new-file", "Novo arquivo" },             .{ "explorer.new-folder", "Nova pasta" },
-    .{ null, "" },                                        .{ "explorer.rename", "Renomear" },
-    .{ "explorer.copy-files", "Copiar arquivos" },        .{ "explorer.paste-files", "Colar arquivos" },
-    .{ "explorer.trash", "Mover para a Lixeira" },        .{ null, "" },
-    .{ "explorer.copy-path", "Copiar caminho" },          .{ "explorer.copy-relative-path", "Copiar caminho relativo" },
-    .{ "explorer.reveal", "Revelar no Explorador" },      .{ "explorer.open-in-terminal", "Abrir no terminal" },
+/// The context menu by the clicked kind (docs/spec/explorer.md): a folder
+/// starts with the terminal and File Explorer, a file with the ways to open
+/// it; what cannot run now is left out, not greyed (owner, 2026-10-20).
+/// null is a separator.
+const common_menu = [_]?[]const u8{
+    null,                     "explorer.new-file",   "explorer.new-folder", null,
+    "explorer.rename",        "explorer.copy-files", "explorer.paste-files", "explorer.trash",
+    null,                     "explorer.copy-path",  "explorer.copy-relative-path", "explorer.reveal",
 };
+const file_menu = [_]?[]const u8{ "explorer.open", "explorer.open-beside", "explorer.open-in-tab" } ++ common_menu;
+const folder_menu = [_]?[]const u8{ "explorer.open-in-terminal", "explorer.open-in-finder" } ++ common_menu;
+
+/// Each item's icon and, for the tree's own keys, the key.
+fn menuLook(id: []const u8) struct { u21, []const u8 } {
+    const looks = [_]struct { []const u8, u21, []const u8 }{
+        .{ "explorer.open", p.file, "Enter" },                 .{ "explorer.open-beside", p.square_split_horizontal, "" },
+        .{ "explorer.open-in-tab", p.plus, "" },               .{ "explorer.open-in-terminal", p.terminal_window, "" },
+        .{ "explorer.open-in-finder", p.folder_open, "" },     .{ "explorer.new-file", p.file_plus, "" },
+        .{ "explorer.new-folder", p.folder_plus, "" },         .{ "explorer.rename", p.pencil_simple, "F2" },
+        .{ "explorer.copy-files", p.copy, "Ctrl+C" },          .{ "explorer.paste-files", p.clipboard_text, "Ctrl+V" },
+        .{ "explorer.trash", p.trash, "Del" },                 .{ "explorer.copy-path", p.path, "" },
+        .{ "explorer.copy-relative-path", p.link, "" },        .{ "explorer.reveal", p.arrow_square_out, "" },
+    };
+    for (looks) |l| if (std.mem.eql(u8, l[0], id)) return .{ l[1], l[2] };
+    return .{ p.file, "" };
+}
 
 /// `run` runs a command by id (the context menu and the tree's keys).
 pub fn draw(self: *Explorer, u: *ui.Ui, area: gfx.Rect, run: *const fn (context: *anyopaque, id: []const u8) void, run_context: *anyopaque) Result {
@@ -246,9 +263,26 @@ fn keys(self: *Explorer, u: *ui.Ui, rows: []const tree_mod.Row, run: *const fn (
 fn contextMenu(self: *Explorer, u: *ui.Ui, run: *const fn (*anyopaque, []const u8) void, ctx: *anyopaque) void {
     const owner = ui.id("explorer.menu", 0);
     if (!self.menu.isOpen(owner)) return;
-    var items: [menu_items.len]ui.menu.Item = undefined;
-    for (menu_items, 0..) |m, i| items[i] = if (m[0] == null) .{ .separator = true } else .{ .label = m[1] };
-    if (ui.menu.show(u, &self.menu, owner, &items)) |i| if (menu_items[i][0]) |id| run(ctx, id);
+    const node = self.selectedNode();
+    const list: []const ?[]const u8 = if (node != null and !node.?.isFolder()) &file_menu else &folder_menu;
+    var items: [file_menu.len]ui.menu.Item = undefined;
+    var ids: [file_menu.len]?[]const u8 = undefined;
+    var n: usize = 0;
+    for (list) |entry| {
+        if (entry) |id| {
+            if (!commands.available(self, id)) continue;
+            const look = menuLook(id);
+            items[n] = .{ .label = commands.title(id), .icon = look[0], .shortcut = look[1] };
+        } else {
+            // No separator first or twice in a row.
+            if (n == 0 or ids[n - 1] == null) continue;
+            items[n] = .{ .separator = true };
+        }
+        ids[n] = entry;
+        n += 1;
+    }
+    if (n > 0 and ids[n - 1] == null) n -= 1;
+    if (ui.menu.show(u, &self.menu, owner, items[0..n])) |i| if (ids[i]) |id| run(ctx, id);
 }
 
 test {

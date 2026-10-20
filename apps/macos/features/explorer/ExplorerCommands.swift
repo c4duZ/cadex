@@ -17,6 +17,7 @@ public enum ExplorerCommands {
         ("explorer.copy-files", "Copiar arquivos", ["copy", "copiar"], nil),
         ("explorer.paste-files", "Colar arquivos", ["paste", "colar"], nil),
         ("explorer.reveal", "Revelar no Finder", ["reveal", "finder", "mostrar"], nil),
+        ("explorer.open-in-finder", "Abrir no Finder", ["open in finder", "finder", "pasta"], nil),
         ("explorer.copy-path", "Copiar caminho", ["copy path", "caminho"], nil),
         ("explorer.copy-relative-path", "Copiar caminho relativo", ["copy relative path", "caminho"], nil),
         ("explorer.open-in-terminal", "Abrir no terminal", ["cd", "terminal", "pasta"], nil),
@@ -53,6 +54,7 @@ extension ExplorerController {
         case "explorer.copy-files": copySelection()
         case "explorer.paste-files": pasteFiles()
         case "explorer.reveal": revealInFinder()
+        case "explorer.open-in-finder": openFoldersInFinder()
         case "explorer.copy-path": copyPaths(relative: false)
         case "explorer.copy-relative-path": copyPaths(relative: true)
         case "explorer.open-in-terminal": openSelectionInTerminal()

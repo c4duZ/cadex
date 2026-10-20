@@ -25,6 +25,7 @@ pub const table = [_]Entry{
     .{ .id = "explorer.copy-files", .title = "Copiar arquivos", .keywords = &.{ "copy", "copiar" } },
     .{ .id = "explorer.paste-files", .title = "Colar arquivos", .keywords = &.{ "paste", "colar" } },
     .{ .id = "explorer.reveal", .title = "Revelar no Explorador", .keywords = &.{ "reveal", "explorer", "finder", "mostrar" } },
+    .{ .id = "explorer.open-in-finder", .title = "Abrir no Explorador", .keywords = &.{ "open in explorer", "explorer", "finder", "pasta" } },
     .{ .id = "explorer.copy-path", .title = "Copiar caminho", .keywords = &.{ "copy path", "caminho" } },
     .{ .id = "explorer.copy-relative-path", .title = "Copiar caminho relativo", .keywords = &.{ "copy relative path", "caminho" } },
     .{ .id = "explorer.open-in-terminal", .title = "Abrir no terminal", .keywords = &.{ "cd", "terminal", "pasta" } },
@@ -68,12 +69,22 @@ fn idOf(context: ?*anyopaque) []const u8 {
 }
 
 fn availableSlot(context: ?*anyopaque) bool {
-    const id = idOf(context);
-    const self = target;
+    return available(target, idOf(context));
+}
+
+/// Whether the command can run now; the context menu leaves out the rest.
+pub fn available(self: *Explorer, id: []const u8) bool {
     const needs_selection = [_][]const u8{ "explorer.open", "explorer.open-beside", "explorer.open-in-tab", "explorer.rename", "explorer.trash", "explorer.copy-files", "explorer.reveal", "explorer.copy-path", "explorer.copy-relative-path" };
     for (needs_selection) |n| if (std.mem.eql(u8, n, id)) return self.selectedNode() != null;
     if (std.mem.eql(u8, id, "explorer.paste-files")) return self.copied.items.len > 0 and self.tree != null;
+    if (std.mem.eql(u8, id, "explorer.open-in-finder")) return if (self.selectedNode()) |n| n.isFolder() else true;
     return true;
+}
+
+/// The command's title, for the context menu.
+pub fn title(id: []const u8) []const u8 {
+    for (table) |e| if (std.mem.eql(u8, e.id, id)) return e.title;
+    return id;
 }
 
 fn runSlot(context: ?*anyopaque) void {
@@ -107,6 +118,7 @@ pub fn perform(self: *Explorer, id: []const u8) void {
     if (eq(id, "explorer.copy-files")) return actions.copyFiles(self);
     if (eq(id, "explorer.paste-files")) return actions.pasteFiles(self);
     if (eq(id, "explorer.reveal")) return actions.reveal(self);
+    if (eq(id, "explorer.open-in-finder")) return actions.openFolder(self);
     if (eq(id, "explorer.copy-path")) return actions.copyPath(self, u, false);
     if (eq(id, "explorer.copy-relative-path")) return actions.copyPath(self, u, true);
     if (eq(id, "explorer.open-in-terminal")) {

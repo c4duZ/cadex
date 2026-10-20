@@ -16,7 +16,7 @@
 - Porta de entrada: `explorer.zig` (Explorer, Host: abrir arquivo, cd no terminal, pasta do
   terminal, letra do git, acordar a janela, pastas mudadas; setRoot autoriza a raiz no núcleo).
 - `tree.zig`: o modelo (nós lidos ao abrir, pastas compactas, recarga que mantém o que estava
-  aberto). `view.zig`: o desenho no estilo do VS Code e o mouse e as teclas da árvore.
+  aberto). `view.zig`: o desenho no estilo do VS Code e o mouse e as teclas da árvore; o menu de contexto pelo tipo (pasta: terminal e Explorador; arquivo: as formas de abrir), sem o que não roda (available, em `commands.zig`).
   `watcher.zig`: o observador do núcleo, entregue à janela por `drain`. `actions.zig`: o que cada
   comando faz (Lixeira pelo SHFileOperationW com desfazer). `commands.zig`: a tabela dos comandos
   (explorer.* e workspace.*). `expanded_store.zig`: %APPDATA%\Cadex\explorer.json.

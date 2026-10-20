@@ -20,6 +20,8 @@ extension ExplorerController {
             return Self.pasteboardFiles().isEmpty ? "Nenhum arquivo copiado" : nil
         case "explorer.open-in-terminal":
             return openInTerminal == nil ? "Nenhum terminal" : nil
+        case "explorer.open-in-finder":
+            return selection.isEmpty || selection.contains(where: \.isFolder) ? nil : "Nenhuma pasta selecionada"
         default:
             return nil
         }
@@ -136,6 +138,13 @@ extension ExplorerController {
 
     func revealInFinder() {
         NSWorkspace.shared.activateFileViewerSelecting(selectedNodes.map { URL(fileURLWithPath: $0.path) })
+    }
+
+    /// The selected folders in Finder windows; nothing selected, the
+    /// workspace folder.
+    func openFoldersInFinder() {
+        let folders = selectedNodes.isEmpty ? [root] : selectedNodes.filter(\.isFolder)
+        folders.forEach { NSWorkspace.shared.open(URL(fileURLWithPath: $0.path)) }
     }
 
     func copyPaths(relative: Bool) {

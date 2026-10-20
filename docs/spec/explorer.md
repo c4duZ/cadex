@@ -58,9 +58,11 @@ segue a documentação pública do VS Code; o código de cores por tipo vem do C
 ### Operações (todas são comandos, também no menu de contexto)
 - O menu de contexto (clique direito) é o do app, com a cara do ⌘K: cores do tema, ícone em cada
   item, seleção arredondada e as teclas da árvore (↩, F2, ⌘C, ⌘V, ⌘⌫) à direita. Mostra só o que
-  vale para o que foi clicado: numa pasta começa por "Abrir no terminal"; num arquivo, pelas formas
-  de abrir. O que não pode rodar agora (colar sem nada copiado) fica de fora. Clicar abaixo das
-  linhas é a pasta do workspace (novo arquivo, nova pasta, colar, abrir no terminal).
+  vale para o que foi clicado, nada apagado: numa pasta começa por "Abrir no terminal" e "Abrir no
+  Finder", sem as formas de abrir arquivo; num arquivo, por "Abrir arquivo", "Abrir ao lado" e
+  "Abrir em nova aba", sem terminal nem Finder. O que não pode rodar agora (colar sem nada copiado)
+  também fica de fora (o dono, 2026-10-20). Clicar abaixo das linhas é a pasta do workspace (novo
+  arquivo, nova pasta, colar, abrir no terminal, abrir no Finder).
 - **Novo arquivo** e **Nova pasta**: criam dentro da pasta selecionada (ou na pasta do arquivo
   selecionado) e já entram no modo de renomear com o nome sugerido selecionado.
 - **Renomear**: edição no próprio lugar da linha. Enter confirma, Esc cancela. Nome vazio, com `/`
@@ -73,6 +75,8 @@ segue a documentação pública do VS Code; o código de cores por tipo vem do C
 - **Abrir arquivo** segue a configuração "Abrir arquivos" (ao lado ou em nova aba). **Abrir ao
   lado** e **Abrir em nova aba**, logo depois dele no menu de contexto, escolhem na hora.
 - **Revelar no Finder**, **Copiar caminho** e **Copiar caminho relativo**.
+- **Abrir no Finder**: a pasta selecionada (ou a do workspace) numa janela do Finder; no Windows,
+  "Abrir no Explorador". Revelar mostra o item dentro da pasta dele; abrir entra na pasta.
 - **Abrir no terminal**: o painel com foco faz `cd` para a pasta (do arquivo, se for arquivo). Se
   ele roda um programa (um agente, um servidor) ou o foco está num documento, abre uma aba nova de
   terminal na pasta, para o `cd` não cair dentro do programa.

@@ -6,11 +6,13 @@ import Menus
 /// the clicked kind of row, without what cannot run now. Folders start
 /// with the terminal; files with the ways to open them.
 extension ExplorerCommands {
-    /// In order; nil is a separator.
+    /// In order; nil is a separator. A file has no terminal or Finder
+    /// opening and a folder no file opening: an item that cannot apply
+    /// to the row is not shown at all (owner, 2026-10-20).
     static func contextMenu(forFolders: Bool) -> [String?] {
         let opening: [String?] = forFolders
-            ? ["explorer.open-in-terminal"]
-            : ["explorer.open", "explorer.open-beside", "explorer.open-in-tab", nil, "explorer.open-in-terminal"]
+            ? ["explorer.open-in-terminal", "explorer.open-in-finder"]
+            : ["explorer.open", "explorer.open-beside", "explorer.open-in-tab"]
         return opening + [nil, "explorer.new-file", "explorer.new-folder", nil, "explorer.rename", "explorer.copy-files",
                           "explorer.paste-files", "explorer.trash", nil, "explorer.copy-path",
                           "explorer.copy-relative-path", "explorer.reveal"]
@@ -30,7 +32,8 @@ extension ExplorerCommands {
         "explorer.trash": (.trash, "⌘⌫"),
         "explorer.copy-path": (.path, nil),
         "explorer.copy-relative-path": (.link, nil),
-        "explorer.reveal": (.folderOpen, nil),
+        "explorer.open-in-finder": (.folderOpen, nil),
+        "explorer.reveal": (.arrowSquareOut, nil),
     ]
 }
 

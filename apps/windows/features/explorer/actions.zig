@@ -183,6 +183,15 @@ pub fn reveal(self: *Explorer) void {
     _ = c.ShellExecuteW(null, w.L("open"), w.L("explorer.exe"), wide.ptr, null, c.SW_SHOWNORMAL);
 }
 
+/// "Abrir no Explorador": the selected folder, or the workspace with
+/// nothing selected, in a File Explorer window.
+pub fn openFolder(self: *Explorer) void {
+    const path = if (self.selectedNode()) |node| (if (node.isFolder()) node.path else return) else self.root() orelse return;
+    const wide = std.unicode.wtf8ToWtf16LeAllocZ(self.gpa, path) catch return;
+    defer self.gpa.free(wide);
+    _ = c.ShellExecuteW(null, w.L("open"), wide.ptr, null, null, c.SW_SHOWNORMAL);
+}
+
 pub fn copyPath(self: *Explorer, u: *ui.Ui, relative: bool) void {
     const node = self.selectedNode() orelse return;
     var text: []const u8 = node.path;
