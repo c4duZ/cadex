@@ -15,6 +15,7 @@
 - `pane_tree.zig` e `tab_list.zig`: as regras puras do Mac (árvore, equilibrar, vizinho, ordem de
   uso), testadas. `tab.zig`: Tab e Pane (terminal ou Document). `document.zig`: o que um
   documento implementa (título, identidade, ícone, não salvo, desenhar, foco, salvar, pasta).
+  A aba de um arquivo mostra o desenho do Material dele quando o pacote tem (`bar.zig`).
 - `bar.zig`: a barra de abas (largura igual até 220, ativa com a linha do destaque, ×, clique do
   meio, duplo clique renomeia, arrastar reordena, "+"). `layout.zig`: os painéis pela árvore, o
   divisor que pega o mouse a 6 DIPs e engrossa, os painéis sem foco escurecidos.

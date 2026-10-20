@@ -8,6 +8,7 @@ manifests:
 	@python3 tools/check_manifests.py
 	@python3 -I tools/icons/windows_icons.py --check
 	@python3 -I tools/check_command_parity.py
+	@python3 -I tools/icons/windows_file_icons.py --check
 
 # libcadex.a + cadex.h in core/zig-out, which the macOS app links.
 core:
@@ -55,10 +56,14 @@ windows-core:
 		zig build -Doptimize=ReleaseFast -Dtarget=$$arch-windows.win11_zn-gnu --prefix zig-out/windows-$$arch || exit 1; \
 	done
 
-# The core tests on Windows 11 arm64, run in the UTM VM over ssh
-# (tools/windows-vm.sh; CADEX_VM names the ssh host).
+# The machine the Windows tests run on: the owner's PC, x64 (2026-10-20);
+# WINDOWS_ARCH=aarch64 for an ARM one.
+WINDOWS_ARCH ?= x86_64
+
+# The core tests on that Windows, run over ssh (tools/windows-vm.sh;
+# CADEX_VM names the ssh host).
 windows-core-test:
-	@cd core && zig build test-bin -Dtarget=aarch64-windows.win11_zn-gnu
+	@cd core && zig build test-bin -Dtarget=$(WINDOWS_ARCH)-windows.win11_zn-gnu
 	@tools/windows-vm.sh core/zig-out/bin/cadex-core-tests.exe
 
 # Cadex.exe for Windows 11, x64 and arm64, in apps/windows/zig-out/<arch>
@@ -67,15 +72,15 @@ windows-app: windows-core
 	@cd apps/windows && for arch in x86_64 aarch64; do \
 		zig build -Dtarget=$$arch-windows.win11_zn-gnu --prefix zig-out/$$arch || exit 1; \
 	done
-	@cd apps/windows && zig build test-bin -Dtarget=aarch64-windows.win11_zn-gnu --prefix zig-out/aarch64
+	@cd apps/windows && zig build test-bin -Dtarget=$(WINDOWS_ARCH)-windows.win11_zn-gnu --prefix zig-out/$(WINDOWS_ARCH)
 
-# Opens the arm64 build on the test VM's desktop.
+# Opens the build on the test machine's desktop.
 windows-run: windows-app
-	@tools/windows-vm.sh --gui apps/windows/zig-out/aarch64/bin/Cadex.exe
+	@tools/windows-vm.sh --gui apps/windows/zig-out/$(WINDOWS_ARCH)/bin/Cadex.exe
 
-# The app's tests (one exe per module) on the arm64 VM.
+# The app's tests (one exe per module) on the test machine.
 windows-app-test: windows-app
-	@for t in apps/windows/zig-out/aarch64/bin/cadex-*-tests.exe; do tools/windows-vm.sh $$t || exit 1; done
+	@for t in apps/windows/zig-out/$(WINDOWS_ARCH)/bin/cadex-*-tests.exe; do tools/windows-vm.sh $$t || exit 1; done
 
 # The Windows zips, their checksums and install.ps1 in dist/
 # (apps/windows/packaging/CLAUDE.md).

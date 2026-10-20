@@ -53,8 +53,21 @@ def pointer_errors(manifest, text):
     return errors
 
 
+def missing_manifests():
+    """Every feature folder, in the core and in each app, has its CLAUDE.md
+    (the root CLAUDE.md; explorer and search on Windows went without one
+    until 2026-10-20)."""
+    for features in [ROOT / "core" / "features", *(ROOT / "apps").glob("*/features")]:
+        for folder in sorted(p for p in features.iterdir() if p.is_dir()):
+            if not (folder / "CLAUDE.md").exists():
+                yield folder.relative_to(ROOT)
+
+
 def main():
     failures = 0
+    for folder in missing_manifests():
+        print(f"{folder}: feature sem CLAUDE.md")
+        failures += 1
     for manifest in sorted(manifests()):
         text = manifest.read_text()
         for error in section_errors(text) + pointer_errors(manifest, text):

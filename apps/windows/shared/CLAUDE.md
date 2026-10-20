@@ -17,6 +17,11 @@
 - `win32/dcomp.zig`: DirectComposition, que o mingw só declara em C++: Device, Target e Visual,
   com as posições da tabela contadas no header. O alvo não é topmost, para as janelas filhas do
   WebView2 aparecerem sobre a superfície.
+- `icons/` é o módulo `icons`: `icons/phosphor.zig` (gerado do Icon.swift do Mac), a fonte do Mac
+  embutida, o ícone e a cor por tipo de arquivo, e `icons/material.zig`, os desenhos do Material
+  Icon Theme por nome de arquivo e de pasta (ADR 0011), dos PNGs e da tabela
+  `icons/file_icons.zig` gerados por `../../../tools/icons/windows_file_icons.py` (não editar).
+  `gfx/painter.zig` desenha o PNG (Painter.png) e guarda o bitmap.
 - `webview/` é o módulo `webview` (`../../../docs/adr/0014-webview2-on-windows.md`): páginas web em
   painéis, para preview, Markdown renderizado e mídia. `webview/sdk/` é gerado por
   `../../../tools/webview2_sdk.py` (não editar): as tabelas do WebView2.h que o app usa, os ids

@@ -331,7 +331,8 @@ MIT. Copyright (c) 2022 CodeEdit
 
 Material Icon Theme — https://github.com/material-extensions/vscode-material-icon-theme
 File and folder icons of the explorer and the tabs (docs/adr/0011), a selection converted to PDF
-in apps/macos/shared/icons/Resources/FileIcons by tools/icons/build_file_icons.py.
+in apps/macos/shared/icons/Resources/FileIcons by tools/icons/build_file_icons.py, and the same
+selection as PNG in apps/windows/shared/icons/FileIcons by tools/icons/windows_file_icons.py.
 MIT. Copyright (c) 2025 Material Extensions
 
 Microsoft WebView2 SDK 1.0.4191.47 — https://www.nuget.org/packages/Microsoft.Web.WebView2

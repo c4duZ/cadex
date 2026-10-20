@@ -36,6 +36,10 @@ pub const Painter = struct {
     /// Kept by color across frames; a theme has a couple dozen.
     effects: [max_effects]Effect = undefined,
     effect_count: usize = 0,
+    /// Embedded images (the Material file icons) made into bitmaps once,
+    /// by the address of their bytes.
+    bitmaps: std.AutoHashMapUnmanaged(usize, *c.ID2D1Bitmap) = .empty,
+    gpa: std.mem.Allocator = std.heap.page_allocator,
     /// Scratch for UTF-16 conversions; text longer than this is cut.
     wide: [4096]u16 = undefined,
 
@@ -49,6 +53,9 @@ pub const Painter = struct {
     pub fn deinit(self: *Painter) void {
         w.release(self.brush);
         self.releaseEffects();
+        var it = self.bitmaps.valueIterator();
+        while (it.next()) |b| w.release(b.*);
+        self.bitmaps.deinit(self.gpa);
     }
 
     const max_effects = 48;
@@ -261,6 +268,33 @@ pub const Painter = struct {
         };
         const at: c.D2D1_POINT_2F = .{ .x = origin.x, .y = origin.y };
         w.call(self.context, "DrawGlyphRun", .{ at, &run, null, self.paint(color), c.DWRITE_MEASURING_MODE_NATURAL });
+    }
+
+    /// An embedded PNG, `size` pixels square, centered in `r`, smoothly
+    /// scaled (the icons come at 32 and 64 pixels). False when it could not
+    /// be decoded: the caller draws something else.
+    pub fn png(self: *Painter, bytes: []const u8, size: f32, r: Rect) bool {
+        const bitmap = self.bitmapOf(bytes) orelse return false;
+        const x = @round(r.x + (r.w - size) / 2);
+        const y = @round(r.y + (r.h - size) / 2);
+        const dest: c.D2D1_RECT_F = .{ .left = x, .top = y, .right = x + size, .bottom = y + size };
+        w.call(self.context, "DrawBitmap", .{ bitmap, &dest, 1.0, c.D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC, null, null });
+        return true;
+    }
+
+    fn bitmapOf(self: *Painter, bytes: []const u8) ?*c.ID2D1Bitmap {
+        const key = @intFromPtr(bytes.ptr);
+        if (self.bitmaps.get(key)) |b| return b;
+        const decoded = @import("wic.zig").decodeMemory(bytes) catch return null;
+        defer decoded.release();
+        var bitmap: [*c]c.ID2D1Bitmap1 = null;
+        if (w.call(self.context, "CreateBitmapFromWicBitmap", .{ decoded.source, null, &bitmap }) < 0 or bitmap == null) return null;
+        const plain: *c.ID2D1Bitmap = @ptrCast(bitmap);
+        self.bitmaps.put(self.gpa, key, plain) catch {
+            w.release(plain);
+            return null;
+        };
+        return plain;
     }
 
     /// A Phosphor icon (its code point from icons.zig) centered in `r`.

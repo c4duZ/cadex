@@ -7,6 +7,8 @@ const std = @import("std");
 const gfx = @import("gfx");
 
 pub const phosphor = @import("phosphor.zig");
+/// The Material Icon Theme for files and folders that it knows (ADR 0011).
+pub const material = @import("material.zig");
 
 /// Phosphor-Regular.ttf, loaded from memory by gfx.Fonts.
 pub const font_bytes = @embedFile("phosphor_font");

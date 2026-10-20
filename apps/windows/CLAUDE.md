@@ -16,7 +16,10 @@
 - Uma pasta por feature em features/, mesmos nomes do núcleo e do Mac; shared/ só com o que 2+
   features usam. O SDK do Windows vem dos headers do mingw que o Zig traz, por translate-c
   (`shared/win32/sdk.h`).
-- Compila neste Mac por cross-compile; roda e testa numa VM Windows 11 ARM (UTM) por ssh.
+- Compila neste Mac por cross-compile. O dono testa no PC Windows dele quando o port estiver todo
+  escrito (decisão de 2026-10-20, no lugar da VM): copiar `zig-out/x86_64/bin` para lá e rodar o
+  Cadex.exe e os cadex-*-tests.exe; com ssh ligado no PC, `tools/windows-vm.sh` serve com
+  CADEX_VM apontando para ele.
 - `build.zig`: o app sobre a libcadex.a do `make windows-core` e o módulo `cadex` (o header
   traduzido). Entrada em `app/` (`app/CLAUDE.md`), declarações do Win32 em `shared/`
   (`shared/CLAUDE.md`). Features em features/, a partir da fase C do plano 10.

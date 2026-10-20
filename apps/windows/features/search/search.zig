@@ -92,7 +92,7 @@ pub const Search = struct {
         const name_at: u32 = @intCast(rel.len - name.len);
         var bold: std.ArrayList(u32) = .empty;
         for (positions) |p| if (p >= name_at) bold.append(arena, p - name_at) catch {};
-        return .{ .id = rel, .title = name, .detail = if (cut) |c| rel[0..c] else "", .icon = icons.forFileNamed(name), .icon_color = icons.colorForFileNamed(name), .bold = bold.items };
+        return .{ .id = rel, .title = name, .detail = if (cut) |c| rel[0..c] else "", .icon = icons.forFileNamed(name), .icon_color = icons.colorForFileNamed(name), .file_name = name, .bold = bold.items };
     }
 
     fn searchFiles(context: *anyopaque, arena: std.mem.Allocator, query: []const u8, out: *std.ArrayList(palette.Item)) ?[]const u8 {
@@ -230,6 +230,7 @@ pub const Search = struct {
                 .detail = std.fmt.allocPrint(arena, "{s}:{d}", .{ h.path, h.line }) catch "",
                 .icon = icons.forFileNamed(name),
                 .icon_color = icons.colorForFileNamed(name),
+                .file_name = name,
                 .bold = shiftBold(arena, h.text, bold.items),
             }) catch {};
         }

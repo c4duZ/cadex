@@ -99,7 +99,13 @@ pub const Bar = struct {
             .terminal => null,
             .document => |d| d.iconColor(),
         };
-        u.painter.icon(icon, u.px(14), content.takeLeft(u.px(20)), icon_color orelse style.secondary_text);
+        const icon_rect = content.takeLeft(u.px(20));
+        // A file's tab shows its Material drawing, as the tree does.
+        const material = switch (pane) {
+            .terminal => false,
+            .document => |d| isFile(d.identity()) and icons.material.drawNamed(u.painter, std.fs.path.basenameWindows(d.identity()), false, @round(u.px(15)), icon_rect),
+        };
+        if (!material) u.painter.icon(icon, u.px(14), icon_rect, icon_color orelse style.secondary_text);
         if (is_active or over) {
             const x_rect = content.takeRight(u.px(20));
             const box: gfx.Rect = .{ .x = x_rect.x, .y = x_rect.center().y - u.px(9), .w = u.px(18), .h = u.px(18) };
@@ -121,6 +127,11 @@ pub const Bar = struct {
         u.painter.text(title, style.ui(), content, if (is_active) style.text else style.secondary_text, .{});
     }
 };
+
+/// A document that is a file on disk ("C:\\x\\a.zig"), not "history:..." or a URL.
+fn isFile(identity: []const u8) bool {
+    return (identity.len > 2 and identity[1] == ':') or std.mem.startsWith(u8, identity, "\\\\");
+}
 
 test {
     @import("win32").refAllDeep(@This());

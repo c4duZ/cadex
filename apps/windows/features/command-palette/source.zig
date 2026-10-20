@@ -14,6 +14,9 @@ pub const Item = struct {
     detail: []const u8 = "",
     icon: u21,
     icon_color: ?gfx.Color = null,
+    /// A file's name: its Material drawing replaces `icon` when the pack
+    /// has one (the file searches, as on the Mac).
+    file_name: []const u8 = "",
     /// "Ctrl+Shift+D", drawn as keys.
     shortcut: []const u8 = "",
     /// A title drawn above this row (the start of a section).

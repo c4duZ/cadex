@@ -54,15 +54,22 @@ pub const Decoded = struct {
     }
 };
 
-/// The first frame of an image file, as premultiplied BGRA.
-pub fn decodeFile(path: []const u8, gpa: std.mem.Allocator) !Decoded {
+/// An image in memory (the PNGs embedded in the exe), as premultiplied
+/// BGRA. `bytes` must outlive the result: WIC reads from it lazily.
+pub fn decodeMemory(bytes: []const u8) !Decoded {
     const f = try factory();
     defer w.release(f);
-    const wide = try std.unicode.wtf8ToWtf16LeAllocZ(gpa, path);
-    defer gpa.free(wide);
+    var stream: [*c]c.IWICStream = null;
+    try w.check(w.call(f, "CreateStream", .{&stream}));
+    defer w.release(stream);
+    try w.check(w.call(stream, "InitializeFromMemory", .{ @as([*c]u8, @constCast(bytes.ptr)), @as(c.DWORD, @intCast(bytes.len)) }));
     var decoder: [*c]c.IWICBitmapDecoder = null;
-    try w.check(w.call(f, "CreateDecoderFromFilename", .{ wide.ptr, null, c.GENERIC_READ, c.WICDecodeMetadataCacheOnDemand, &decoder }));
+    try w.check(w.call(f, "CreateDecoderFromStream", .{ @as(*c.IStream, @ptrCast(stream)), null, c.WICDecodeMetadataCacheOnLoad, &decoder }));
     defer w.release(decoder);
+    return convert(f, decoder);
+}
+
+fn convert(f: *c.IWICImagingFactory, decoder: *c.IWICBitmapDecoder) !Decoded {
     var frame: [*c]c.IWICBitmapFrameDecode = null;
     try w.check(w.call(decoder, "GetFrame", .{ 0, &frame }));
     defer w.release(frame);
@@ -74,6 +81,18 @@ pub fn decodeFile(path: []const u8, gpa: std.mem.Allocator) !Decoded {
     var height: c.UINT = 0;
     try w.check(w.call(converter, "GetSize", .{ &width, &height }));
     return .{ .source = @ptrCast(converter), .width = width, .height = height };
+}
+
+/// The first frame of an image file, as premultiplied BGRA.
+pub fn decodeFile(path: []const u8, gpa: std.mem.Allocator) !Decoded {
+    const f = try factory();
+    defer w.release(f);
+    const wide = try std.unicode.wtf8ToWtf16LeAllocZ(gpa, path);
+    defer gpa.free(wide);
+    var decoder: [*c]c.IWICBitmapDecoder = null;
+    try w.check(w.call(f, "CreateDecoderFromFilename", .{ wide.ptr, null, c.GENERIC_READ, c.WICDecodeMetadataCacheOnDemand, &decoder }));
+    defer w.release(decoder);
+    return convert(f, decoder);
 }
 
 test {

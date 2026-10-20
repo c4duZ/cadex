@@ -155,7 +155,9 @@ fn drawRow(self: *Explorer, u: *ui.Ui, row: tree_mod.Row, r: gfx.Rect, focused: 
     const icon_rect = content.takeLeft(u.px(20));
     const dim = node.ignored or (node.name.len > 0 and node.name[0] == '.');
     const alpha: f32 = if (dim) 0.55 else 1;
-    if (node.isFolder()) {
+    // The Material drawing for names the pack knows (ADR 0011), not dimmed:
+    // its colors are the point. The rest in Phosphor.
+    if (icons.material.drawNamed(u.painter, node.name, node.isFolder(), @round(u.px(16)), icon_rect)) {} else if (node.isFolder()) {
         u.painter.icon(if (node.expanded) p.folder_open else p.folder, u.px(15), icon_rect, u.style.accent.alpha(alpha));
     } else {
         const color = icons.colorForFileNamed(node.name) orelse u.style.secondary_text;

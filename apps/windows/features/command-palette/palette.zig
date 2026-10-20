@@ -11,6 +11,7 @@ const std = @import("std");
 const gfx = @import("gfx");
 const ui_mod = @import("ui");
 const w = @import("win32");
+const icons = @import("icons");
 const source_mod = @import("source.zig");
 
 const Ui = ui_mod.Ui;
@@ -222,7 +223,9 @@ pub const Palette = struct {
             if (ui.clickable(row_id, row)) self.choose(ui, source, item.id, .normal);
             if (i == self.selected) ui.painter.fillRounded(row, ui.px(8), ui.style.tab_active);
             var content = row.inset(ui.px(10), 0);
-            ui.painter.icon(item.icon, ui.px(16), content.takeLeft(ui.px(26)), item.icon_color orelse ui.style.secondary_text);
+            const icon_rect = content.takeLeft(ui.px(26));
+            const material = item.file_name.len > 0 and icons.material.drawNamed(ui.painter, item.file_name, false, @round(ui.px(16)), icon_rect);
+            if (!material) ui.painter.icon(item.icon, ui.px(16), icon_rect, item.icon_color orelse ui.style.secondary_text);
             if (item.shortcut.len > 0) {
                 const sw = ui.painter.measure(item.shortcut, ui.style.small()) + ui.px(16);
                 const chip = content.takeRight(sw);

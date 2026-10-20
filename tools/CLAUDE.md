@@ -9,6 +9,8 @@
 
 ## Como eu quero
 - Python 3 da biblioteca padrão, sem dependências. Cada checagem roda pelo Makefile.
+- `check_manifests.py`: as quatro seções, os caminhos citados e um `CLAUDE.md` em toda pasta de
+  feature do núcleo e dos apps.
 - `themes/build_catalog.py`: gera o catálogo de temas do app a partir dos temas do tweakcn (commit
   fixado no script; o arquivo de entrada é passado na linha de comando) e de
   `themes/official-palettes.json` (paletas oficiais, cada cor com a fonte). Cortes de temas
@@ -18,7 +20,10 @@
   Theme (commit fixado no script; o checkout é passado na linha de comando), com
   `icons/svg_to_pdf.swift` convertendo para PDF. A lista do que entra fica no script
   (`docs/adr/0011-material-file-icons.md`).
-
+- `icons/windows_file_icons.py`: os mesmos ícones Material para o app Windows, a partir dos PDFs
+  e do map.json do Mac: PNGs de 32 e 64 px (`icons/pdf_to_png.swift`) e a tabela
+  `../apps/windows/shared/icons/file_icons.zig`; `--check` (no `make manifests`) confere que a
+  tabela bate com o map.json. Rodar de novo depois do build_file_icons.py.
 - `check_command_parity.py` (no `make manifests`): todo id de comando do Mac existe no app Windows
   (ADR 0005, os mesmos ids nos dois). Nome de interface que não é comando vai em NOT_COMMANDS.
 - `webview2_sdk.py`: baixa o pacote Microsoft.Web.WebView2 (versão e sha256 fixados no script) e

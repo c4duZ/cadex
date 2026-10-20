@@ -35,8 +35,7 @@ source-control, git-history (app Windows) · Decisões: `docs/adr/0006-editor-re
 **Andamento (2026-10-20):** A a F escritas e compilando para x64 e arm64, ligadas no app
 (`apps/windows/app/viewers.zig`, `apps/windows/app/git_page.zig`, `apps/windows/app/web.zig`); nada
 rodou no Windows ainda. Desvios:
-- A: os ícones de arquivo seguem em Phosphor; os do Material pedem os SVGs (o script atual só gera
-  PDF para o Mac).
+- A: os ícones Material entram como PNG gerado dos PDFs do Mac (ADR 0011), não como vetor.
 - D: a mídia vai pelo WebView2 (vídeo, áudio, PDF, GIF e SVG) e a imagem parada pelo WIC, no
   lugar de IMFMediaEngine e Windows.Data.Pdf (`docs/adr/0014-webview2-on-windows.md`).
 - C: o Markdown renderizado abre num documento próprio, ao lado da nota, e não no lugar do texto.

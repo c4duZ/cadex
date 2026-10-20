@@ -24,3 +24,7 @@ nome. O pacote mais usado do VS Code para isso é o Material Icon Theme (licenç
 - Ícone novo: acrescentar o nome à lista do gerador e rodá-lo de novo, nunca editar o JSON à mão.
 - A licença do pacote está em `apps/macos/shared/icons/Resources/LICENSE-MaterialIconTheme.txt` e
   no `NOTICE`.
+- No Windows (2026-10-20), a mesma seleção e o mesmo map.json, como PNG de 32 e 64 px desenhado
+  pelo Direct2D (`tools/icons/windows_file_icons.py`, cerca de 360 KB no exe): o SVG do Direct2D
+  (ID2D1DeviceContext5) só tem declaração em C++ nos headers do mingw, e a tabela dele à mão seria
+  longa demais para acertar sem rodar. Explorer, abas e as buscas de arquivo usam os desenhos.
