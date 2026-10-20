@@ -133,5 +133,5 @@ fn measure(face: *c.IDWriteFontFace, em: f32) Metrics {
 }
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

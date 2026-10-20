@@ -150,5 +150,5 @@ test "ids are stable and differ by name and index" {
 }
 
 test {
-    @import("std").testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

@@ -250,5 +250,5 @@ fn underlineLink(p: *gfx.Painter, m: font_mod.Metrics, link: cadex.cadex_termina
 }
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

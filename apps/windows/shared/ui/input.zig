@@ -115,5 +115,5 @@ test "double and triple clicks count within time and distance" {
 }
 
 test {
-    @import("std").testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

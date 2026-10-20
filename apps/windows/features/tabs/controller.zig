@@ -340,5 +340,5 @@ pub const Tabs = struct {
 };
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

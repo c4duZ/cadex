@@ -182,5 +182,5 @@ fn copy(terminal: *cadex.cadex_terminal, comptime f: anytype) ?Owned {
 }
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

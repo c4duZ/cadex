@@ -113,5 +113,5 @@ test "reveal scrolls the least" {
 }
 
 test {
-    @import("std").testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

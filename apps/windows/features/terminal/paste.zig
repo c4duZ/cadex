@@ -137,5 +137,5 @@ pub fn cleanOld(gpa: std.mem.Allocator) void {
 }
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

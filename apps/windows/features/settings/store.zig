@@ -60,5 +60,5 @@ pub const Store = struct {
 };
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

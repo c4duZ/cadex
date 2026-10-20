@@ -55,6 +55,13 @@ pub fn loadCursor(cursor: Cursor) c.HCURSOR {
     return LoadCursorW(null, @intFromEnum(cursor));
 }
 
+extern "user32" fn LoadIconW(instance: c.HINSTANCE, name: usize) callconv(.winapi) c.HICON;
+
+/// The icon resource `id` of the exe (1: the app's, from packaging).
+pub fn loadIcon(instance: c.HINSTANCE, id: usize) c.HICON {
+    return LoadIconW(instance, id);
+}
+
 pub const Error = error{ComFailed};
 
 /// S_OK and the other success codes, or an error to log and give up on.
@@ -157,6 +164,44 @@ pub fn yParam(lparam: c.LPARAM) i32 {
     return @as(i16, @bitCast(HIWORD(lparam)));
 }
 
+/// For tests: references every public declaration of `T` and, inside the
+/// app's own types, of their methods too, so building the test exe
+/// type-checks code no test calls. std.testing.refAllDecls stops at the
+/// top level (a method's body went unchecked until the exe was built,
+/// 2026-10-20); refAllDeclsRecursive would walk into the whole SDK.
+pub fn refAllDeep(comptime T: type) void {
+    refDepth(T, 0);
+}
+
+fn refDepth(comptime T: type, comptime depth: u8) void {
+    if (!@import("builtin").is_test) return;
+    @setEvalBranchQuota(100_000);
+    if (depth > 6) return;
+    inline for (comptime std.meta.declarations(T)) |decl| {
+        const value = @field(T, decl.name);
+        if (@TypeOf(value) == type) {
+            if (comptime isOurs(value)) switch (@typeInfo(value)) {
+                .@"struct", .@"enum", .@"union", .@"opaque" => refDepth(value, depth + 1),
+                else => {},
+            };
+        } else {
+            _ = &value;
+        }
+    }
+}
+
+fn isOurs(comptime T: type) bool {
+    @setEvalBranchQuota(100_000);
+    const name = @typeName(T);
+    // The translated headers, the standard library, and the root of each.
+    const foreign = [_][]const u8{ "sdk", "std", "cadex", "builtin", "debug" };
+    for (foreign) |f| {
+        if (std.mem.eql(u8, name, f)) return false;
+        if (name.len > f.len and std.mem.startsWith(u8, name, f) and name[f.len] == '.') return false;
+    }
+    return true;
+}
+
 test "guids parse like the headers write them" {
     const g = guid("6f15aaf2-d208-4e89-9ab4-489535d34f9c");
     try std.testing.expectEqual(@as(c_ulong, 0x6f15aaf2), g.Data1);
@@ -164,7 +209,7 @@ test "guids parse like the headers write them" {
 }
 
 test {
-    @import("std").testing.refAllDecls(@This());
+    @import("win32.zig").refAllDeep(@This());
     _ = @import("dcomp.zig");
     _ = @import("files.zig");
 }

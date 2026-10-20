@@ -60,5 +60,5 @@ pub fn rank(arena: std.mem.Allocator, query: []const u8, texts: []const []const 
 pub const Ranked = struct { index: u32, bold: []const u32 };
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

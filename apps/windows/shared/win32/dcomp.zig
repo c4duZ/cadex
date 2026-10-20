@@ -69,5 +69,5 @@ pub const Visual = extern struct {
 pub extern "dcomp" fn DCompositionCreateDevice(dxgi_device: ?*anyopaque, iid: *const c.GUID, device: *?*anyopaque) callconv(.winapi) c.HRESULT;
 
 test {
-    @import("std").testing.refAllDecls(@This());
+    @import("win32.zig").refAllDeep(@This());
 }

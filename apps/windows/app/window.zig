@@ -83,7 +83,7 @@ pub const Window = struct {
             .lpfnWndProc = procedure,
             .hInstance = instance,
             .hCursor = w.loadCursor(.arrow),
-            .hIcon = c.LoadIconW(instance, @ptrFromInt(1)),
+            .hIcon = w.loadIcon(instance, 1),
             .lpszClassName = w.L("Cadex.Window"),
         };
         _ = c.RegisterClassExW(&class);
@@ -208,5 +208,5 @@ fn procedure(hwnd: c.HWND, msg: c.UINT, wparam: c.WPARAM, lparam: c.LPARAM) call
 }
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

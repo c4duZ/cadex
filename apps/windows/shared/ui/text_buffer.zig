@@ -176,5 +176,5 @@ test "a selection collapses to its side and words select whole" {
 }
 
 test {
-    @import("std").testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

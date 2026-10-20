@@ -271,5 +271,5 @@ test "utf16 keeps valid text and replaces bad bytes" {
 }
 
 test {
-    @import("std").testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

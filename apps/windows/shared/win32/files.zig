@@ -90,5 +90,5 @@ fn guidOf(comptime text: []const u8) c.GUID {
 }
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("win32.zig").refAllDeep(@This());
 }

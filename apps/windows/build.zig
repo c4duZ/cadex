@@ -61,7 +61,7 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("shared/icons/icons.zig"),
         .target = target,
         .optimize = optimize,
-        .imports = &.{.{ .name = "gfx", .module = gfx }},
+        .imports = &.{ .{ .name = "gfx", .module = gfx }, .{ .name = "win32", .module = win32 } },
     });
     // The same font file the Mac ships: one source for the icons (ADR 0008).
     icons.addAnonymousImport("phosphor_font", .{ .root_source_file = b.path("../macos/shared/icons/Resources/Phosphor-Regular.ttf") });

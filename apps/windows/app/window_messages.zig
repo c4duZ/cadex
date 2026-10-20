@@ -284,5 +284,5 @@ fn hitTest(self: *Window, hwnd: c.HWND, lparam: c.LPARAM) c.LRESULT {
 }
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

@@ -132,5 +132,5 @@ pub fn ask(ui: *Ui, question: Question) ?usize {
 }
 
 test {
-    @import("std").testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

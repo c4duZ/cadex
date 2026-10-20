@@ -71,5 +71,5 @@ pub fn isAltGr(m: ui.Mods) bool {
 }
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

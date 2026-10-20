@@ -199,5 +199,5 @@ fn applyRatios(node: *Node, lay: std.json.Value) void {
 }
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

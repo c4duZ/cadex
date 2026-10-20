@@ -138,5 +138,5 @@ fn listFolders(gpa: std.mem.Allocator, path: []const u8, out: *std.ArrayList([]u
 
 test {
     _ = @import("breadcrumb.zig");
-    std.testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

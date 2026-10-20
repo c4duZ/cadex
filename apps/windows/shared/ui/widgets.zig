@@ -104,5 +104,5 @@ pub fn keys(ui: *Ui, r: Rect, parts: []const []const u8) f32 {
 }
 
 test {
-    @import("std").testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

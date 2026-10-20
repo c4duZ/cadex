@@ -101,5 +101,5 @@ test "file icons by name and extension" {
 }
 
 test {
-    @import("std").testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

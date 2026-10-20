@@ -91,5 +91,5 @@ pub const Fonts = struct {
 };
 
 test {
-    @import("std").testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

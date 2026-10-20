@@ -73,5 +73,5 @@ pub fn dropFiles(gpa: std.mem.Allocator, drop: c.HDROP) [][]u8 {
 }
 
 test {
-    @import("std").testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

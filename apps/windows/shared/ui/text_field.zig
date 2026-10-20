@@ -168,5 +168,5 @@ fn drawCaret(ui: *Ui, buffer: *TextBuffer, spec: gfx.FontSpec, r: gfx.Rect, orig
 }
 
 test {
-    @import("std").testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

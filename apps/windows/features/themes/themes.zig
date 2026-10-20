@@ -61,12 +61,17 @@ pub const Store = struct {
     }
 };
 
+/// HKEY_CURRENT_USER is 0x80000001, an odd "pointer" Zig will not form,
+/// so the key goes in as a number.
+const hkey_current_user: usize = 0x80000001;
+extern "advapi32" fn RegGetValueW(key: usize, sub_key: [*:0]const u16, value: [*:0]const u16, flags: w.c.DWORD, kind: ?*w.c.DWORD, data: ?*anyopaque, size: ?*w.c.DWORD) callconv(.winapi) c_long;
+
 /// Whether Windows' apps are in dark mode (Settings > Personalization > Colors).
 pub fn systemIsDark() bool {
     var value: w.c.DWORD = 1;
     var size: w.c.DWORD = @sizeOf(w.c.DWORD);
-    const status = w.c.RegGetValueW(
-        w.c.HKEY_CURRENT_USER,
+    const status = RegGetValueW(
+        hkey_current_user,
         w.L("Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"),
         w.L("AppsUseLightTheme"),
         w.c.RRF_RT_REG_DWORD,

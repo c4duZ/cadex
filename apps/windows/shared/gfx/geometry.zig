@@ -111,5 +111,5 @@ test "colors come from 0xRRGGBB" {
 }
 
 test {
-    @import("std").testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

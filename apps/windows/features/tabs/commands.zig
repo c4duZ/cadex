@@ -130,5 +130,5 @@ fn hasSplitAny(_: ?*anyopaque) bool {
 }
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }

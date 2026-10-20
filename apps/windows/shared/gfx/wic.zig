@@ -77,5 +77,5 @@ pub fn decodeFile(path: []const u8, gpa: std.mem.Allocator) !Decoded {
 }
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("win32").refAllDeep(@This());
 }
