@@ -14,30 +14,33 @@ enum CadexMark {
     /// How much of the color the off state keeps: templates keep alpha.
     static let offAlpha: CGFloat = 0.4
 
-    /// While on, a flame rises from the top right, over the _ (owner,
-    /// 2026-10-20): the fill weight's fire-simple, this tall.
-    static let flameSize: CGFloat = 8
+    /// While on, a flame rises from the top of the > (owner, 2026-10-20):
+    /// the fill weight's fire-simple, this tall.
+    static let flameSize: CGFloat = 7
+    /// Room above the logo for the flame, in both states, so the logo
+    /// does not move when it turns on.
+    static let flameRoom: CGFloat = 4
 
-    static func image(on: Bool, height: CGFloat = 15) -> NSImage {
+    static func image(on: Bool, height: CGFloat = 14) -> NSImage {
         let scale = height / box.height
-        let logoWidth = ceil(box.width * scale) + 2
-        // Right of the >'s tip, with a point of air, so the two do not merge.
-        let flameX = (825 - box.minX) * scale + 2
-        let size = NSSize(width: max(logoWidth, on ? ceil(flameX + flameSize) + 1 : 0), height: height + 2)
+        let size = NSSize(width: ceil(box.width * scale) + 2, height: height + 2 + flameRoom)
         let flame = on ? Icon.fireSimple.image(size: flameSize, filled: true) : nil
         let image = NSImage(size: size, flipped: true) { _ in
-            if let flame {
-                // Its foot on the _'s top edge, rising out of it.
-                let underscoreTop = (804 - box.minY) * scale + 1
-                let rect = NSRect(x: flameX, y: underscoreTop - flameSize + 0.5, width: flameSize, height: flameSize)
-                flame.draw(in: rect, from: .zero, operation: .sourceOver, fraction: 1, respectFlipped: true, hints: nil)
-            }
-            var transform = AffineTransform(translationByX: 1 - box.minX * scale, byY: 1 - box.minY * scale)
+            var transform = AffineTransform(translationByX: 1 - box.minX * scale, byY: 1 + flameRoom - box.minY * scale)
             transform.scale(scale)
             NSColor.black.withAlphaComponent(on ? 1 : offAlpha).setFill()
             for path in paths() {
                 path.transform(using: transform)
                 path.fill()
+            }
+            if let flame {
+                // On the >'s upper arm (x 795, y 540 in the SVG), right
+                // enough to clear the C's top end (x 647): centered on the
+                // >, it merged with the C.
+                let center = 1 + (795 - box.minX) * scale
+                let foot = 1 + flameRoom + (540 - box.minY) * scale
+                flame.draw(in: NSRect(x: center - flameSize / 2, y: foot - flameSize, width: flameSize, height: flameSize),
+                           from: .zero, operation: .sourceOver, fraction: 1, respectFlipped: true, hints: nil)
             }
             return true
         }
