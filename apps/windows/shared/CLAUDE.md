@@ -17,6 +17,9 @@
 - `win32/dcomp.zig`: DirectComposition, que o mingw só declara em C++: Device, Target e Visual,
   com as posições da tabela contadas no header. O alvo não é topmost, para as janelas filhas do
   WebView2 aparecerem sobre a superfície.
+- `strings/` é o módulo `strings` (`../../../docs/adr/0015-english-default-two-languages.md`): `t(en,
+  pt)` dá o texto no idioma da interface, o `language` que o app define ao abrir, e `counterpart`
+  o do outro idioma, para a paleta achar pelos dois títulos.
 - `icons/` é o módulo `icons`: `icons/phosphor.zig` (gerado do Icon.swift do Mac), a fonte do Mac
   embutida, o ícone e a cor por tipo de arquivo, e `icons/material.zig`, os desenhos do Material
   Icon Theme por nome de arquivo e de pasta (ADR 0011), dos PNGs e da tabela

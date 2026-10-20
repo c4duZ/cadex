@@ -53,6 +53,13 @@ pub fn build(b: *std.Build) void {
         .imports = &.{.{ .name = "win32", .module = win32 }},
     });
 
+    // The interface's texts in English or Portuguese (ADR 0015).
+    const strings = b.createModule(.{
+        .root_source_file = b.path("shared/strings/strings.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
     const ui = b.createModule(.{
         .root_source_file = b.path("shared/ui/ui.zig"),
         .target = target,
@@ -84,7 +91,7 @@ pub fn build(b: *std.Build) void {
     b.getInstallStep().dependOn(&b.addInstallBinFile(b.path(b.fmt("shared/webview/sdk/{s}/WebView2Loader.dll", .{loader_arch})), "WebView2Loader.dll").step);
 
     for ([_]*std.Build.Module{ win32, gfx, ui, icons, webview }) |m| linkCore(m, b.pathFromRoot(core_lib));
-    const shared = Shared{ .cadex = cadex, .win32 = win32, .gfx = gfx, .ui = ui, .icons = icons, .core_lib = b.pathFromRoot(core_lib) };
+    const shared = Shared{ .cadex = cadex, .win32 = win32, .gfx = gfx, .ui = ui, .icons = icons, .strings = strings, .core_lib = b.pathFromRoot(core_lib) };
     const command_palette = feature(b, target, optimize, shared, "command-palette", "command_palette.zig", &.{});
     const themes = feature(b, target, optimize, shared, "themes", "themes.zig", &.{});
     // The same catalog the Mac ships: one source for the themes.
@@ -118,6 +125,7 @@ pub fn build(b: *std.Build) void {
             .{ .name = "gfx", .module = gfx },
             .{ .name = "ui", .module = ui },
             .{ .name = "icons", .module = icons },
+            .{ .name = "strings", .module = strings },
             .{ .name = "command-palette", .module = command_palette },
             .{ .name = "shortcuts", .module = shortcuts },
             .{ .name = "themes", .module = themes },
@@ -159,7 +167,7 @@ pub fn build(b: *std.Build) void {
     // also type-checks every declaration (Zig only analyzes what is used).
     const test_step = b.step("test-bin", "Build the app tests without running them");
     const tested = [_]struct { []const u8, *std.Build.Module }{
-        .{ "app", root },                       .{ "ui", ui }, .{ "gfx", gfx }, .{ "icons", icons }, .{ "win32", win32 },
+        .{ "app", root },                       .{ "ui", ui }, .{ "gfx", gfx }, .{ "icons", icons }, .{ "strings", strings }, .{ "win32", win32 },
         .{ "command-palette", command_palette }, .{ "shortcuts", shortcuts }, .{ "themes", themes }, .{ "settings", settings }, .{ "terminal", terminal }, .{ "tabs", tabs }, .{ "status-bar", status_bar }, .{ "power", power }, .{ "explorer", explorer }, .{ "search", search }, .{ "spaces", spaces }, .{ "editor", editor }, .{ "markdown", markdown },
         .{ "source-control", source_control }, .{ "git-history", git_history },
         .{ "webview", webview }, .{ "preview", preview }, .{ "media-preview", media_preview }, .{ "markdown-rendered", markdown_rendered },
@@ -177,6 +185,7 @@ const Shared = struct {
     gfx: *std.Build.Module,
     ui: *std.Build.Module,
     icons: *std.Build.Module,
+    strings: *std.Build.Module,
     core_lib: []const u8,
 };
 
@@ -215,6 +224,7 @@ fn feature(
             .{ .name = "gfx", .module = shared.gfx },
             .{ .name = "ui", .module = shared.ui },
             .{ .name = "icons", .module = shared.icons },
+            .{ .name = "strings", .module = shared.strings },
         },
     });
     for (uses) |entry| module.addImport(entry[0], entry[1]);
