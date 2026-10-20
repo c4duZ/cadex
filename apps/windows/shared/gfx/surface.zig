@@ -37,7 +37,9 @@ pub const Surface = struct {
         errdefer w.release(swap_chain);
 
         var target: ?*w.dcomp.Target = null;
-        try w.check(device.composition.createTargetForHwnd(hwnd, true, &target));
+        // Not topmost: the web panes are child windows (WebView2), and a
+        // topmost target would cover them (docs/adr/0014-webview2-on-windows.md).
+        try w.check(device.composition.createTargetForHwnd(hwnd, false, &target));
         errdefer target.?.release();
         var visual: ?*w.dcomp.Visual = null;
         try w.check(device.composition.createVisual(&visual));
