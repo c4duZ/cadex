@@ -108,10 +108,15 @@ fn openDocument(context: *anyopaque, doc: tabs.Document, how: palette.How) void 
     viewers.defer_(of(context), .{ .document = .{ .doc = doc, .how = how } });
 }
 
-fn openFile(context: *anyopaque, path: []const u8) void {
+fn openFile(context: *anyopaque, path: []const u8, how: palette.How) void {
     const app = of(context);
     const copy = app.gpa.dupe(u8, path) catch return;
-    viewers.defer_(app, .{ .file = .{ .path = copy, .line = 0, .how = .setting } });
+    const where: opener.How = switch (how) {
+        .normal => .setting,
+        .beside => .beside,
+        .new_tab => .tab,
+    };
+    viewers.defer_(app, .{ .file = .{ .path = copy, .line = 0, .how = where } });
 }
 
 fn openPalette(context: *anyopaque, source: palette.Source) void {

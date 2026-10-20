@@ -19,7 +19,8 @@
 - `SourceControlView.swift` (topo com branch e botões, listas, mensagem, estados) e
   `SourceControlRow.swift` (linhas, cores das letras, até 1000 por lista, menu de contexto no `MenuTableView` compartilhado).
 - Comandos em `SourceControlCommands.swift`: git.commit, git.stage-all, git.unstage-all, git.stage,
-  git.unstage, git.discard, git.open-diff, git.open-file, git.reveal, git.fetch, git.pull, git.push,
+  git.unstage, git.discard, git.open-diff e git.open-file (com -beside e -in-tab: ao lado, em nova aba; o menu mostra só o que vale
+  para a linha, em `SourceControlRow.swift`), git.reveal, git.fetch, git.pull, git.push,
   git.refresh, git.switch-branch (branches na paleta) e diff.toggle-layout. Botões, menu e ⌘Enter
   só disparam esses ids. O git.show (⇧⌘G, mostrar o painel) é registrado em `apps/macos/app/main.swift`.
 - `DiffDocument.swift`: aba de diff (TabDocument) com as cores do editor, linhas de `DiffLines.swift`

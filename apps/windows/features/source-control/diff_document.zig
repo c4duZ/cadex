@@ -132,7 +132,7 @@ pub const DiffDocument = struct {
     pub fn openFile(self: *DiffDocument) void {
         const path = repository.absolute(self.gpa, self.repo, self.path) catch return;
         defer self.gpa.free(path);
-        self.host.open_file(self.host.context, path);
+        self.host.open_file(self.host.context, path, .normal);
     }
 
     fn get(ptr: *anyopaque) *DiffDocument {

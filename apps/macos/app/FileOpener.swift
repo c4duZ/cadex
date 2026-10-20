@@ -75,7 +75,8 @@ final class FileOpener {
 
     /// A file's git diff in a tab; the same diff again selects its tab and
     /// reads it again.
-    func openDiff(_ request: SourceControlController.DiffRequest, from source: TabDocument? = nil) {
+    /// `beside` overrides the setting ("Ver o diff ao lado", "em nova aba").
+    func openDiff(_ request: SourceControlController.DiffRequest, from source: TabDocument? = nil, beside: Bool? = nil) {
         guard let tabs = currentTabs() else { return }
         if let existing = tabs.document(identity: DiffDocument.identity(for: request)) as? DiffDocument {
             existing.load()
@@ -83,7 +84,7 @@ final class FileOpener {
         }
         let diff = DiffDocument(request: request)
         diff.openFile = { [weak self, weak diff] path in self?.open(path, from: diff) }
-        tabs.open(diff, beside: opensBeside(), keeping: source)
+        tabs.open(diff, beside: beside ?? opensBeside(), keeping: source)
     }
 
     /// The repository's history in a tab; again, its tab, read again.
@@ -97,13 +98,13 @@ final class FileOpener {
     }
 
     /// A web page (a local server, a URL); again, its pane, loaded again.
-    func openPreview(_ url: String) {
+    func openPreview(_ url: String, beside: Bool? = nil) {
         guard let tabs = currentTabs() else { return }
         if let existing = tabs.document(identity: PreviewDocument.identity(for: url)) as? PreviewDocument {
             existing.reload()
             return tabs.open(existing)
         }
-        tabs.open(PreviewDocument(url: url), beside: opensBeside())
+        tabs.open(PreviewDocument(url: url), beside: beside ?? opensBeside())
     }
 
     private func makeHistory(_ root: String) -> HistoryDocument {

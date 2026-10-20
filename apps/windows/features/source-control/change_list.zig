@@ -21,21 +21,69 @@ const Rect = gfx.Rect;
 pub const list_id = ui.id("scm.list", 0);
 const menu_owner = ui.id("scm.menu", 0);
 
-/// The context menu: each item runs a registered command on the selection.
-const menu_items = [_]struct { label: []const u8, id: []const u8 }{
-    .{ .label = "Abrir o arquivo", .id = "git.open-file" },
-    .{ .label = "Ver o diff", .id = "git.open-diff" },
-    .{ .label = "Stage", .id = "git.stage" },
-    .{ .label = "Unstage", .id = "git.unstage" },
-    .{ .label = "Descartar as mudanças", .id = "git.discard" },
-    .{ .label = "Revelar no Explorador de Arquivos", .id = "git.reveal" },
+/// The context menu (the Mac's SourceControlMenu): only what applies to
+/// the clicked files (owner, 2026-10-20): Stage on changes, Unstage on
+/// staged ones, no file to open or reveal when every one was deleted. The
+/// diff and the file open where the settings say, beside or in a new tab.
+/// null is a separator.
+const MenuItem = struct { label: []const u8, id: []const u8, icon: u21, when: When };
+const When = enum { always, on_disk, unstaged, staged };
+const menu_items = [_]?MenuItem{
+    .{ .label = "Abrir o arquivo", .id = "git.open-file", .icon = icons.phosphor.file, .when = .on_disk },
+    .{ .label = "Abrir ao lado", .id = "git.open-file-beside", .icon = icons.phosphor.square_split_horizontal, .when = .on_disk },
+    .{ .label = "Abrir em nova aba", .id = "git.open-file-in-tab", .icon = icons.phosphor.plus, .when = .on_disk },
+    null,
+    .{ .label = "Ver o diff", .id = "git.open-diff", .icon = icons.phosphor.git_diff, .when = .always },
+    .{ .label = "Ver o diff ao lado", .id = "git.open-diff-beside", .icon = icons.phosphor.square_split_horizontal, .when = .always },
+    .{ .label = "Ver o diff em nova aba", .id = "git.open-diff-in-tab", .icon = icons.phosphor.plus, .when = .always },
+    null,
+    .{ .label = "Stage", .id = "git.stage", .icon = icons.phosphor.plus, .when = .unstaged },
+    .{ .label = "Unstage", .id = "git.unstage", .icon = icons.phosphor.minus, .when = .staged },
+    .{ .label = "Descartar as mudanças", .id = "git.discard", .icon = icons.phosphor.arrow_u_up_left, .when = .always },
+    null,
+    .{ .label = "Revelar no Explorador de Arquivos", .id = "git.reveal", .icon = icons.phosphor.folder_open, .when = .on_disk },
 };
 
-const menu_rows = blk: {
-    var items: [menu_items.len]ui.menu.Item = undefined;
-    for (menu_items, 0..) |m, i| items[i] = .{ .label = m.label };
-    break :blk items;
-};
+/// Gone from the disk: deleted in the working tree, or staged as deleted
+/// with nothing after.
+fn isDeleted(e: status_mod.Entry, staged: bool) bool {
+    return if (staged) e.index == 'D' and e.worktree == '.' else e.worktree == 'D';
+}
+
+/// The menu for the current selection, separators tidied; returns the count.
+fn buildMenu(sc: *SourceControl, items: *[menu_items.len]ui.menu.Item, ids: *[menu_items.len]?[]const u8) usize {
+    const picked = sc.selection.entries(sc.gpa, sc.status);
+    defer sc.gpa.free(picked);
+    if (picked.len == 0) return 0;
+    var on_disk = false;
+    var any_staged = false;
+    var any_unstaged = false;
+    for (picked) |p| {
+        if (!isDeleted(p.entry, p.staged)) on_disk = true;
+        if (p.staged) any_staged = true else any_unstaged = true;
+    }
+    var n: usize = 0;
+    for (menu_items) |slot| {
+        if (slot) |m| {
+            const applies = switch (m.when) {
+                .always => true,
+                .on_disk => on_disk,
+                .unstaged => any_unstaged,
+                .staged => any_staged,
+            };
+            if (!applies) continue;
+            items[n] = .{ .label = m.label, .icon = m.icon };
+            ids[n] = m.id;
+        } else {
+            if (n == 0 or ids[n - 1] == null) continue;
+            items[n] = .{ .separator = true };
+            ids[n] = null;
+        }
+        n += 1;
+    }
+    if (n > 0 and ids[n - 1] == null) n -= 1;
+    return n;
+}
 
 pub fn draw(sc: *SourceControl, u: *ui.Ui, area: Rect) void {
     const row_h = u.px(24);
@@ -44,7 +92,12 @@ pub fn draw(sc: *SourceControl, u: *ui.Ui, area: Rect) void {
     const view = ui.list.begin(u, list_id, area, sc.rows.len, row_h, &sc.view.list_scroll);
     for (view.first..view.last) |i| drawRow(sc, u, i, view.row(i).inset(u.px(4), 0));
     ui.list.end(u);
-    if (ui.menu.show(u, &sc.view.menu, menu_owner, &menu_rows)) |chosen| sc.run(menu_items[chosen].id);
+    if (sc.view.menu.isOpen(menu_owner)) {
+        var items: [menu_items.len]ui.menu.Item = undefined;
+        var ids: [menu_items.len]?[]const u8 = undefined;
+        const n = buildMenu(sc, &items, &ids);
+        if (ui.menu.show(u, &sc.view.menu, menu_owner, items[0..n])) |chosen| if (ids[chosen]) |id| sc.run(id);
+    }
 }
 
 /// Up and Down move between files, Enter opens the diff, Delete discards.
@@ -118,7 +171,7 @@ fn entry(sc: *SourceControl, u: *ui.Ui, i: usize, r: Rect, index: usize, staged:
     if (u.clickable(row_id, r)) {
         sc.view.cursor = i;
         select(sc, i, u.input.mods.ctrl);
-        if (!u.input.mods.ctrl) opening.openDiff(sc, e, staged);
+        if (!u.input.mods.ctrl) opening.openDiff(sc, e, staged, .normal);
     }
     if (u.pressedOn(r, .right)) {
         if (!selected) select(sc, i, false);

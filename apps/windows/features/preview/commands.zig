@@ -12,8 +12,9 @@ pub const Current = struct {
     context: *anyopaque,
     /// The document of the focused pane, if it is not a terminal.
     focused: *const fn (context: *anyopaque) ?tabs.Document,
-    /// A preview tab for `url` ("" for a blank one with the address ready).
-    open: *const fn (context: *anyopaque, url: []const u8) void,
+    /// A preview tab for `url` ("" for a blank one with the address ready),
+    /// where the settings say (.normal), beside or in a new tab.
+    open: *const fn (context: *anyopaque, url: []const u8, how: palette.How) void,
 };
 
 var current: Current = undefined;
@@ -28,7 +29,10 @@ fn hasPreview(_: ?*anyopaque) bool {
 }
 
 fn open(_: ?*anyopaque) void {
-    current.open(current.context, "");
+    current.open(current.context, "", .normal);
+}
+fn openInTab(_: ?*anyopaque) void {
+    current.open(current.context, "", .new_tab);
 }
 fn reload(_: ?*anyopaque) void {
     if (active()) |p| p.reload();
@@ -43,6 +47,7 @@ fn forward(_: ?*anyopaque) void {
 pub fn register(registry: *palette.Registry, where: Current) void {
     current = where;
     registry.add(.{ .id = "preview.open", .title = "Abrir preview web", .keywords = &.{ "browser", "navegador", "localhost", "site" }, .run = open });
+    registry.add(.{ .id = "preview.open-in-tab", .title = "Abrir preview web em nova aba", .keywords = &.{ "browser", "navegador", "localhost", "site", "aba" }, .run = openInTab });
     registry.add(.{ .id = "preview.reload", .title = "Recarregar o preview", .keywords = &.{ "reload", "atualizar" }, .shortcut = "cmd+r", .run = reload, .available = hasPreview });
     registry.add(.{ .id = "preview.back", .title = "Voltar no preview", .keywords = &.{ "back", "anterior" }, .run = back, .available = hasPreview });
     registry.add(.{ .id = "preview.forward", .title = "Avançar no preview", .keywords = &.{ "forward", "próxima" }, .run = forward, .available = hasPreview });

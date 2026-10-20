@@ -7,21 +7,23 @@ const status_mod = @import("status.zig");
 const repository = @import("repository.zig");
 const controller = @import("controller.zig");
 const diff_document = @import("diff_document.zig");
+const palette = @import("command-palette");
 
 const SourceControl = controller.SourceControl;
 const Entry = status_mod.Entry;
 
-pub fn openDiff(sc: *SourceControl, e: Entry, staged: bool) void {
+/// `how`: where the settings say (.normal), beside or in a new tab.
+pub fn openDiff(sc: *SourceControl, e: Entry, staged: bool, how: palette.How) void {
     const root = sc.root orelse return;
     const doc = diff_document.DiffDocument.create(sc.gpa, sc.host, .{ .repo = root, .path = e.path, .orig = e.orig, .staged = staged }) orelse return;
-    sc.host.open_document(sc.host.context, doc, .normal);
+    sc.host.open_document(sc.host.context, doc, how);
 }
 
-pub fn openFile(sc: *SourceControl, e: Entry) void {
+pub fn openFile(sc: *SourceControl, e: Entry, how: palette.How) void {
     const root = sc.root orelse return;
     const path = repository.absolute(sc.gpa, root, e.path) catch return;
     defer sc.gpa.free(path);
-    sc.host.open_file(sc.host.context, path);
+    sc.host.open_file(sc.host.context, path, how);
 }
 
 /// Deleted files are not there to show: they are left out.

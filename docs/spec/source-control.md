@@ -42,6 +42,13 @@ e pull. Os agentes mexem no código pelo terminal; aqui se confere e se faz o co
 - Arquivo binário: "Arquivo binário, sem diff". Arquivo acima de 2 MB: "Arquivo grande demais para o
   diff" com "Abrir o arquivo".
 
+### Menu de contexto
+- No menu do app (como o do explorer), só o que vale para os arquivos clicados, nada apagado (o
+  dono, 2026-10-20): "Abrir o arquivo", "Abrir ao lado" e "Abrir em nova aba"; "Ver o diff", "Ver o
+  diff ao lado" e "Ver o diff em nova aba"; "Stage" só em mudanças, "Unstage" só no que está em
+  stage; "Descartar as mudanças"; "Revelar no Finder". Arquivo apagado não tem abrir nem revelar.
+- "Ver o diff" e "Abrir o arquivo" seguem a configuração "Abrir arquivos"; as outras escolhem na hora.
+
 ### Explorer
 - Arquivos alterados aparecem no explorer com a cor do tipo de mudança, e pastas que contêm
   alterados com um ponto.

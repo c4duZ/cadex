@@ -17,6 +17,7 @@ const shortcuts = @import("shortcuts");
 const terminal = @import("terminal");
 const viewers = @import("viewers.zig");
 const opener = @import("opener.zig");
+const palette = @import("command-palette");
 const window_mod = @import("window.zig");
 const App = @import("app.zig").App;
 
@@ -102,11 +103,11 @@ fn previewHost(app: *App) preview.Host {
 
 /// preview.open and the offer: a preview of `url`, or the pane that
 /// already shows it.
-fn openPreview(context: *anyopaque, url: []const u8) void {
+fn openPreview(context: *anyopaque, url: []const u8, how: palette.How) void {
     const app = of(context);
     const env = environment(app) orelse return;
     const doc = preview.open(app.gpa, previewHost(app), env, url) catch return;
-    viewers.defer_(app, .{ .document = .{ .doc = doc, .how = .normal } });
+    viewers.defer_(app, .{ .document = .{ .doc = doc, .how = how } });
 }
 
 fn makeMedia(app: *App, path: []const u8, _: u32) ?tabs.Document {
@@ -177,7 +178,7 @@ pub fn drawOffer(app: *App) void {
     const r: gfx.Rect = .{ .x = app.panes_area.right() - width - u.px(12), .y = app.panes_area.bottom() - u.px(44), .w = width, .h = u.px(32) };
     if (ui.widgets.button(u, ui.id("preview.offer", 0), r, label, .{ .icon = icons.phosphor.globe, .icon_size = 14 })) {
         app.offer.len = 0;
-        openPreview(app, url);
+        openPreview(app, url, .normal);
     }
 }
 

@@ -64,15 +64,33 @@ fn discard(_: ?*anyopaque) void {
     defer target.gpa.free(list);
     target.discard(list);
 }
-fn openDiff(_: ?*anyopaque) void {
+fn openDiffHow(how: palette.How) void {
     const picked = target.selection.entries(target.gpa, target.status);
     defer target.gpa.free(picked);
-    if (picked.len > 0) opening.openDiff(target, picked[0].entry, picked[0].staged);
+    if (picked.len > 0) opening.openDiff(target, picked[0].entry, picked[0].staged, how);
 }
-fn openFile(_: ?*anyopaque) void {
+fn openDiff(_: ?*anyopaque) void {
+    openDiffHow(.normal);
+}
+fn openDiffBeside(_: ?*anyopaque) void {
+    openDiffHow(.beside);
+}
+fn openDiffInTab(_: ?*anyopaque) void {
+    openDiffHow(.new_tab);
+}
+fn openFileHow(how: palette.How) void {
     const list = selected();
     defer target.gpa.free(list);
-    if (list.len > 0) opening.openFile(target, list[0]);
+    if (list.len > 0) opening.openFile(target, list[0], how);
+}
+fn openFile(_: ?*anyopaque) void {
+    openFileHow(.normal);
+}
+fn openFileBeside(_: ?*anyopaque) void {
+    openFileHow(.beside);
+}
+fn openFileInTab(_: ?*anyopaque) void {
+    openFileHow(.new_tab);
 }
 fn reveal(_: ?*anyopaque) void {
     const list = selected();
@@ -108,7 +126,11 @@ pub fn register(registry: *palette.Registry, sc: *SourceControl) void {
     registry.add(.{ .id = "git.unstage", .title = "Unstage do arquivo", .keywords = &.{"git reset"}, .run = unstage, .available = hasSelection });
     registry.add(.{ .id = "git.discard", .title = "Descartar as mudanças do arquivo", .keywords = &.{ "git restore", "desfazer" }, .run = discard, .available = hasSelection });
     registry.add(.{ .id = "git.open-diff", .title = "Ver o diff do arquivo", .keywords = &.{"diff"}, .run = openDiff, .available = hasSelection });
+    registry.add(.{ .id = "git.open-diff-beside", .title = "Ver o diff ao lado", .keywords = &.{"diff"}, .run = openDiffBeside, .available = hasSelection });
+    registry.add(.{ .id = "git.open-diff-in-tab", .title = "Ver o diff em nova aba", .keywords = &.{"diff"}, .run = openDiffInTab, .available = hasSelection });
     registry.add(.{ .id = "git.open-file", .title = "Abrir o arquivo alterado", .keywords = &.{"abrir"}, .run = openFile, .available = hasSelection });
+    registry.add(.{ .id = "git.open-file-beside", .title = "Abrir o arquivo ao lado", .keywords = &.{"abrir"}, .run = openFileBeside, .available = hasSelection });
+    registry.add(.{ .id = "git.open-file-in-tab", .title = "Abrir o arquivo em nova aba", .keywords = &.{"abrir"}, .run = openFileInTab, .available = hasSelection });
     // The Mac says "no Finder"; here it is File Explorer.
     registry.add(.{ .id = "git.reveal", .title = "Revelar o arquivo alterado no Explorador de Arquivos", .keywords = &.{ "explorer", "finder", "mostrar" }, .run = reveal, .available = hasSelection });
     registry.add(.{ .id = "git.fetch", .title = "Git fetch", .keywords = &.{ "buscar", "remoto" }, .run = fetch, .available = hasRepo });

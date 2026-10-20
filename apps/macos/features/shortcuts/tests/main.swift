@@ -29,7 +29,7 @@ func appRegistry() -> CommandRegistry {
     registry.register(ExplorerCommands.all(ExplorerController(root: NSTemporaryDirectory()) { _ in false }))
     registry.register(EditorCommands.all { nil })
     registry.register(MediaCommands.all { nil })
-    registry.register(PreviewCommands.all(open: { _ in }, active: { nil }))
+    registry.register(PreviewCommands.all(open: { _, _ in }, active: { nil }))
     registry.register(SourceControlCommands.all(SourceControlController(folder: NSTemporaryDirectory()) { _ in false },
                                                 palette: palette))
     registry.register(HistoryCommands.all(open: {}, repository: { nil }, active: { nil }))

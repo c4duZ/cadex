@@ -45,7 +45,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         catalog.register(main.commands.commands)
         applyShortcuts()
         main.openLaunchItems(Self.launchFiles)
-        CommandLine.arguments.dropFirst().filter { $0.hasPrefix("http://") || $0.hasPrefix("https://") }.forEach(main.openPreview)
+        CommandLine.arguments.dropFirst().filter { $0.hasPrefix("http://") || $0.hasPrefix("https://") }.forEach { main.openPreview($0) }
         main.window.center()
         // CADEX_BACKGROUND=1 shows the window without taking the keyboard,
         // for checking the app while someone else uses the machine: opening

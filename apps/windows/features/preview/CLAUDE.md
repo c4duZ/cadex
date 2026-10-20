@@ -17,7 +17,7 @@
   (navegador do sistema, título mudou, atalho do app vindo da página).
 - `address.zig`: as regras do Mac, testadas: sem esquema, http para servidor local e https para o
   resto; só http e https; mesma aba para o mesmo endereço, aba em branco sempre nova.
-- `commands.zig`: preview.open, preview.reload (Ctrl+R), preview.back, preview.forward, os ids,
+- `commands.zig`: preview.open, preview.open-in-tab, preview.reload (Ctrl+R), preview.back, preview.forward, os ids,
   títulos e atalhos do Mac (`../../../macos/features/preview/PreviewCommands.swift`).
 - Spec: `../../../../docs/spec/preview.md`.
 

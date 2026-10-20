@@ -5,7 +5,9 @@ Ver no Cadex a página do servidor que um agente subiu no terminal (`npm run dev
 `python3 -m http.server`), ao lado do código, sem trocar para o navegador.
 
 ## Comportamento
-- Comando "Abrir preview web" abre uma aba com uma barra de endereço e a página. A barra tem voltar,
+- Comando "Abrir preview web" abre, ao lado ou em nova aba pela configuração "Abrir arquivos", um
+  documento com uma barra de endereço e a página; "Abrir preview web em nova aba" escolhe a aba
+  na hora. Onde houver o preview (o "+" e o topo do ⌘K) aparecem os dois (o dono, 2026-10-20). A barra tem voltar,
   avançar, recarregar e o endereço editável; Enter carrega. Sem esquema, vale `http://` para servidor local (localhost, 127.x, rede
   local) e `https://` para o resto. Sites só em http também abrem. Um erro some quando a página
   seguinte carrega.

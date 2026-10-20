@@ -16,8 +16,8 @@ pub const Host = struct {
     /// (the Mac's FileOpener), .beside or .new_tab. The tabs own it then.
     open_document: *const fn (context: *anyopaque, doc: tabs.Document, how: palette.How) void,
     /// Opens a file in the app (the editor, or the viewer of its kind).
-    /// Absolute, with Windows separators.
-    open_file: *const fn (context: *anyopaque, path: []const u8) void,
+    /// Absolute, with Windows separators. `how` as for open_document.
+    open_file: *const fn (context: *anyopaque, path: []const u8, how: palette.How) void,
     /// Sends a new, untracked file to the Recycle Bin (IFileOperation with
     /// FOFX_RECYCLEONDELETE, or SHFileOperationW with FOF_ALLOWUNDO), as
     /// "discard" does on the Mac with the Trash. False when it could not.

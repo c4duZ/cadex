@@ -16,6 +16,7 @@ extension WindowSession {
         PalettePin(id: "pane.split-down", title: "Terminal abaixo", icon: .squareSplitVertical),
         PalettePin(id: "search.files", title: "Arquivo…", icon: .file),
         PalettePin(id: "preview.open", title: "Preview web", icon: .globe),
+        PalettePin(id: "preview.open-in-tab", title: "Preview web em nova aba", icon: .globe),
         PalettePin(id: "git.history", title: "Grafo do git", icon: .gitBranch),
         PalettePin(id: "window.new", title: "Nova janela", icon: .appWindow),
     ]

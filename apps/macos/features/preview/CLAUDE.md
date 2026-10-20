@@ -15,7 +15,7 @@
   aparece pela primeira vez (carregada antes de estar numa janela, não desenhava).
 - Identidade da aba pelo endereço: a oferta do terminal para um endereço já aberto recarrega aquela
   aba; preview em branco é sempre aba nova.
-- Comandos em `PreviewCommands.swift`: preview.open, preview.reload (⌘R), preview.back,
+- Comandos em `PreviewCommands.swift`: preview.open (onde a configuração diz), preview.open-in-tab, preview.reload (⌘R), preview.back,
   preview.forward. A oferta "Abrir no preview" é da feature terminal (`../terminal/TerminalPreviewOffer.swift`)
   e chega aqui pelo app (`onOpenPreview` das abas).
 - Spec: `docs/spec/preview.md`. Status: plano 5, fase E pronta.

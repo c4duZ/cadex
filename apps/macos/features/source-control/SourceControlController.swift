@@ -44,9 +44,11 @@ public final class SourceControlController {
     /// Changed files for the explorer: absolute path -> letter (M A D R U ?).
     public var onMarks: (([String: Character]) -> Void)?
     /// A file of the lists was clicked: show its diff.
-    public var onOpenDiff: ((DiffRequest) -> Void)?
+    /// The diff to open; the Bool says beside (true) or in a new tab
+    /// (false), nil is the general.openFiles setting.
+    public var onOpenDiff: ((DiffRequest, Bool?) -> Void)?
     /// Opens a file in the app (context menu "Abrir o arquivo").
-    public var onOpenFile: ((String) -> Void)?
+    public var onOpenFile: ((String, Bool?) -> Void)?
     /// Runs a command by id (buttons and keys go through the registry).
     let run: (String) -> Bool
 
@@ -217,14 +219,14 @@ public final class SourceControlController {
         }
     }
 
-    func openDiff(_ entry: GitRepository.Entry, staged: Bool) {
+    func openDiff(_ entry: GitRepository.Entry, staged: Bool, beside: Bool? = nil) {
         guard let repo else { return }
-        onOpenDiff?(DiffRequest(repo: repo.root, path: entry.path, orig: entry.orig, staged: staged))
+        onOpenDiff?(DiffRequest(repo: repo.root, path: entry.path, orig: entry.orig, staged: staged), beside)
     }
 
-    func openFile(_ entry: GitRepository.Entry) {
+    func openFile(_ entry: GitRepository.Entry, beside: Bool? = nil) {
         guard let repo else { return }
-        onOpenFile?(repo.root + "/" + entry.path)
+        onOpenFile?(repo.root + "/" + entry.path, beside)
     }
 
     /// git.reveal: the changed files in the Finder (deleted ones are not there).

@@ -60,7 +60,7 @@ extension WindowSession {
             active: { [weak self] in self?.tabs?.activeDocument as? HistoryDocument }))
         commands.register(EditorCommands.all { [weak self] in self?.tabs?.activeDocument as? EditorDocument })
         commands.register(MediaCommands.all { [weak self] in self?.tabs?.activeDocument as? MediaDocument })
-        commands.register(PreviewCommands.all(open: { [weak self] url in self?.openPreview(url) },
+        commands.register(PreviewCommands.all(open: { [weak self] url, beside in self?.openPreview(url, beside: beside) },
                                               active: { [weak self] in self?.tabs?.activeDocument as? PreviewDocument }))
         makeMarkdown(palette: palette)
         connectFolder()

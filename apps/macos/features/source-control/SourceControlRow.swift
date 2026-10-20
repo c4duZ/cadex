@@ -147,17 +147,41 @@ final class SourceControlRowView: NSTableCellView {
 }
 
 /// The lists' context menu: each item runs a registered command on the
-/// clicked or selected files.
+/// clicked or selected files. Only what applies to them shows (owner,
+/// 2026-10-20): Stage on changes, Unstage on staged ones, and no file to
+/// open or reveal when every one was deleted. The diff and the file open
+/// where the setting says, beside or in a new tab.
 @MainActor
 enum SourceControlMenu {
     static func entries(for view: SourceControlView) -> [MenuEntry] {
-        let items: [(String, String, Icon)] = [
-            ("Abrir o arquivo", "git.open-file", .file), ("Ver o diff", "git.open-diff", .gitDiff),
-            ("Stage", "git.stage", .plus), ("Unstage", "git.unstage", .minus),
-            ("Descartar as mudanças", "git.discard", .arrowUUpLeft), ("Revelar no Finder", "git.reveal", .folderOpen),
+        let picked = view.selectedEntries()
+        guard !picked.isEmpty else { return [] }
+        let onDisk = picked.contains { !isDeleted($0.0, staged: $0.1) }
+        let items: [(String, String, Icon, Bool)?] = [
+            ("Abrir o arquivo", "git.open-file", .file, onDisk),
+            ("Abrir ao lado", "git.open-file-beside", .squareSplitHorizontal, onDisk),
+            ("Abrir em nova aba", "git.open-file-in-tab", .plus, onDisk),
+            nil,
+            ("Ver o diff", "git.open-diff", .gitDiff, true),
+            ("Ver o diff ao lado", "git.open-diff-beside", .squareSplitHorizontal, true),
+            ("Ver o diff em nova aba", "git.open-diff-in-tab", .plus, true),
+            nil,
+            ("Stage", "git.stage", .plus, picked.contains { !$0.1 }),
+            ("Unstage", "git.unstage", .minus, picked.contains { $0.1 }),
+            ("Descartar as mudanças", "git.discard", .arrowUUpLeft, true),
+            nil,
+            ("Revelar no Finder", "git.reveal", .folderOpen, onDisk),
         ]
-        return items.map { title, id, icon in
-            MenuEntry(title, icon: icon) { [weak view] in _ = view?.controller?.run(id) }
+        return items.compactMap { item in
+            guard let (title, id, icon, applies) = item else { return .separator }
+            guard applies else { return nil }
+            return MenuEntry(title, icon: icon) { [weak view] in _ = view?.controller?.run(id) }
         }
+    }
+
+    /// Gone from the disk: deleted in the working tree, or staged as
+    /// deleted with nothing after.
+    static func isDeleted(_ entry: GitRepository.Entry, staged: Bool) -> Bool {
+        staged ? entry.index == "D" && entry.worktree == "." : entry.worktree == "D"
     }
 }

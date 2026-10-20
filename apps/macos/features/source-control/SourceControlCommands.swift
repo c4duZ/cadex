@@ -23,11 +23,7 @@ public enum SourceControlCommands {
                     action: .run { git.unstage(selected()) }, unavailableReason: needsSelection),
             Command(id: "git.discard", title: "Descartar as mudanças do arquivo", keywords: ["git restore", "desfazer"],
                     category: .file, action: .run { git.discard(selected()) }, unavailableReason: needsSelection),
-            Command(id: "git.open-diff", title: "Ver o diff do arquivo", keywords: ["diff"], category: .file,
-                    action: .run { if let (e, staged) = git.panel.selectedEntries().first { git.openDiff(e, staged: staged) } },
-                    unavailableReason: needsSelection),
-            Command(id: "git.open-file", title: "Abrir o arquivo alterado", keywords: ["abrir"], category: .file,
-                    action: .run { if let e = selected().first { git.openFile(e) } }, unavailableReason: needsSelection),
+        ] + opening(git, needsSelection: needsSelection) + [
             Command(id: "git.reveal", title: "Revelar o arquivo alterado no Finder", keywords: ["finder", "mostrar"],
                     category: .file, action: .run { git.reveal(selected()) }, unavailableReason: needsSelection),
             Command(id: "git.fetch", title: "Git fetch", keywords: ["buscar", "remoto"], category: .file,
@@ -44,6 +40,32 @@ public enum SourceControlCommands {
             Command(id: "git.switch-branch", title: "Trocar de branch", keywords: ["checkout", "switch", "branch"], category: .file,
                     action: .run { palette.open(BranchSource(git: git)) }, unavailableReason: needsRepo),
         ]
+    }
+}
+
+extension SourceControlCommands {
+    /// The diff and the file, each where the setting says, beside or in a
+    /// new tab: wherever something opens, both ways are offered (owner,
+    /// 2026-10-20).
+    @MainActor
+    static func opening(_ git: SourceControlController, needsSelection: @escaping @MainActor () -> String?) -> [Command] {
+        func entry() -> (GitRepository.Entry, Bool)? { git.panel.selectedEntries().first }
+        let diffs: [(String, String, Bool?)] = [
+            ("git.open-diff", "Ver o diff do arquivo", nil), ("git.open-diff-beside", "Ver o diff ao lado", true),
+            ("git.open-diff-in-tab", "Ver o diff em nova aba", false),
+        ]
+        let files: [(String, String, Bool?)] = [
+            ("git.open-file", "Abrir o arquivo alterado", nil), ("git.open-file-beside", "Abrir o arquivo ao lado", true),
+            ("git.open-file-in-tab", "Abrir o arquivo em nova aba", false),
+        ]
+        return diffs.map { id, title, beside in
+            Command(id: id, title: title, keywords: ["diff"], category: .file,
+                    action: .run { if let (e, staged) = entry() { git.openDiff(e, staged: staged, beside: beside) } },
+                    unavailableReason: needsSelection)
+        } + files.map { id, title, beside in
+            Command(id: id, title: title, keywords: ["abrir"], category: .file,
+                    action: .run { if let (e, _) = entry() { git.openFile(e, beside: beside) } }, unavailableReason: needsSelection)
+        }
     }
 }
 

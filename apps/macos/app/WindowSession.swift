@@ -104,8 +104,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
         workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.openers) ?? [] }
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
         explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar(.files) }
-        git.onOpenFile = { [weak opener] path in opener?.open(path) }
-        git.onOpenDiff = { [weak opener] request in opener?.openDiff(request) }
+        git.onOpenFile = { [weak opener] path, beside in opener?.open(path, beside: beside) }
+        git.onOpenDiff = { [weak opener] request, beside in opener?.openDiff(request, beside: beside) }
         git.onMarks = { [weak explorer] marks in explorer?.gitMarks = marks }
     }
 
@@ -136,8 +136,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
 
     /// A preview tab for `url` (empty: a blank one); the tab already showing
     /// that address is reloaded instead (docs/spec/preview.md).
-    func openPreview(_ url: String) {
-        opener?.openPreview(url)
+    func openPreview(_ url: String, beside: Bool? = nil) {
+        opener?.openPreview(url, beside: beside)
     }
 
     /// Folders and files given at launch (command line) or dropped on the

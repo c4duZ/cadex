@@ -4,12 +4,16 @@ import CommandPalette
 /// preview of the active tab; without one, ⌘R goes on to the focused view.
 public enum PreviewCommands {
     @MainActor
-    public static func all(open: @escaping @MainActor (String) -> Void,
+    /// open: a preview for the address ("" a blank one), beside (true), in
+    /// a new tab (false) or where the setting says (nil).
+    public static func all(open: @escaping @MainActor (String, Bool?) -> Void,
                            active: @escaping @MainActor () -> PreviewDocument?) -> [Command] {
         func needsPreview() -> String? { active() == nil ? "Nenhum preview aberto" : nil }
         return [
             Command(id: "preview.open", title: "Abrir preview web", keywords: ["browser", "navegador", "localhost", "site"],
-                    category: .view, action: .run { open("") }),
+                    category: .view, action: .run { open("", nil) }),
+            Command(id: "preview.open-in-tab", title: "Abrir preview web em nova aba",
+                    keywords: ["browser", "navegador", "localhost", "site", "aba"], category: .view, action: .run { open("", false) }),
             Command(id: "preview.reload", title: "Recarregar o preview", keywords: ["reload", "atualizar"], category: .view,
                     defaultShortcut: "cmd+r", action: .run { active()?.reload() }, unavailableReason: needsPreview),
             Command(id: "preview.back", title: "Voltar no preview", keywords: ["back", "anterior"], category: .view,

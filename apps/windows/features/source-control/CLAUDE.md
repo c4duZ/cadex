@@ -31,7 +31,8 @@
   `diff_view.zig` (colunas com número de linha, rolagem proporcional) e `diff_lines.zig` (linhas
   marcadas pelo patch, testado).
 - Comandos em `commands.zig`: git.commit, git.stage-all, git.unstage-all, git.stage, git.unstage,
-  git.discard, git.open-diff, git.open-file, git.reveal, git.fetch, git.pull, git.push,
+  git.discard, git.open-diff e git.open-file (com -beside e -in-tab; o menu de `change_list.zig` mostra só o
+  que vale para a linha), git.reveal, git.fetch, git.pull, git.push,
   git.refresh, git.switch-branch e diff.toggle-layout. O git.show (mostrar a página) é do app.
 - Spec: `../../../../docs/spec/source-control.md`. Referência: `../../../macos/features/source-control/`.
 
