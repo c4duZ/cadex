@@ -24,8 +24,8 @@ app à parte como o Amphetamine e sem o comando `caffeinate`. Pedido do dono em 
   comandos do ⌘K. Passar o ponteiro diz o estado e o que o clique faz.
 - No Mac, o símbolo do Cadex (o C, o > e o _ do logo) fica na barra de menus do macOS, perto do
   relógio, enquanto o Cadex estiver aberto, visível com ele atrás de outros apps: o logo cheio,
-  cinza desligado e branco ligado (na barra clara, cinza e preto). O contorno para desligado ficou
-  fino e estranho (o dono, 2026-10-20). Clicar faz o mesmo que o café.
+  cinza desligado e branco ligado (na barra clara, cinza e preto), e ligado uma chama sai do _ do
+  logo. O contorno para desligado ficou fino e estranho (o dono, 2026-10-20). Clicar faz o mesmo que o café.
 - O que o ⌘K liga vale até desligar ou fechar o Cadex; não muda o padrão das configurações.
 - Usa o pedido de energia do próprio sistema (macOS: IOKit; Windows: SetThreadExecutionState),
   que o sistema solta sozinho se o Cadex fechar ou cair: o computador nunca fica preso acordado.

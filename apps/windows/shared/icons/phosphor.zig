@@ -36,6 +36,7 @@ pub const file_plus: u21 = 0xE236;
 pub const files: u21 = 0xE710;
 pub const file_text: u21 = 0xE23A;
 pub const file_video: u21 = 0xEA22;
+pub const fire_simple: u21 = 0xE620;
 pub const folder: u21 = 0xE24A;
 pub const folder_open: u21 = 0xE256;
 pub const folder_plus: u21 = 0xE258;

@@ -1,10 +1,12 @@
 import AppKit
+import Icons
 
 /// The Cadex symbol (the C, the > and the _ of docs/cadex-icon.svg) as a
 /// template image for the menu bar, always filled like the logo: full
 /// while on, faint (gray on a dark bar) while off. The outline for off
 /// looked thin and odd (owner, 2026-10-20). The paths are the SVG's, in
 /// its 1254-unit space.
+@MainActor
 enum CadexMark {
     /// The symbol's box in the SVG: x 280...964, y 337...902.
     private static let box = NSRect(x: 280, y: 337, width: 684, height: 565)
@@ -12,10 +14,24 @@ enum CadexMark {
     /// How much of the color the off state keeps: templates keep alpha.
     static let offAlpha: CGFloat = 0.4
 
+    /// While on, a flame rises from the top right, over the _ (owner,
+    /// 2026-10-20): the fill weight's fire-simple, this tall.
+    static let flameSize: CGFloat = 8
+
     static func image(on: Bool, height: CGFloat = 15) -> NSImage {
         let scale = height / box.height
-        let size = NSSize(width: ceil(box.width * scale) + 2, height: height + 2)
+        let logoWidth = ceil(box.width * scale) + 2
+        // Right of the >'s tip, with a point of air, so the two do not merge.
+        let flameX = (825 - box.minX) * scale + 2
+        let size = NSSize(width: max(logoWidth, on ? ceil(flameX + flameSize) + 1 : 0), height: height + 2)
+        let flame = on ? Icon.fireSimple.image(size: flameSize, filled: true) : nil
         let image = NSImage(size: size, flipped: true) { _ in
+            if let flame {
+                // Its foot on the _'s top edge, rising out of it.
+                let underscoreTop = (804 - box.minY) * scale + 1
+                let rect = NSRect(x: flameX, y: underscoreTop - flameSize + 0.5, width: flameSize, height: flameSize)
+                flame.draw(in: rect, from: .zero, operation: .sourceOver, fraction: 1, respectFlipped: true, hints: nil)
+            }
             var transform = AffineTransform(translationByX: 1 - box.minX * scale, byY: 1 - box.minY * scale)
             transform.scale(scale)
             NSColor.black.withAlphaComponent(on ? 1 : offAlpha).setFill()

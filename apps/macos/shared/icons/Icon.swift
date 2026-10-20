@@ -40,6 +40,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case files = 0xE710
     case fileText = 0xE23A
     case fileVideo = 0xEA22
+    case fireSimple = 0xE620
     case folder = 0xE24A
     case folderOpen = 0xE256
     case folderPlus = 0xE258
