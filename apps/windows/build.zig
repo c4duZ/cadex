@@ -68,6 +68,7 @@ pub fn build(b: *std.Build) void {
 
     const shared = Shared{ .cadex = cadex, .win32 = win32, .gfx = gfx, .ui = ui, .icons = icons, .core_lib = b.pathFromRoot(core_lib) };
     const command_palette = feature(b, target, optimize, shared, "command-palette", "command_palette.zig", &.{});
+    const shortcuts = feature(b, target, optimize, shared, "shortcuts", "shortcuts.zig", &.{.{ "command-palette", command_palette }});
 
     const root = b.createModule(.{
         .root_source_file = b.path("app/main.zig"),
@@ -81,6 +82,7 @@ pub fn build(b: *std.Build) void {
             .{ .name = "ui", .module = ui },
             .{ .name = "icons", .module = icons },
             .{ .name = "command-palette", .module = command_palette },
+            .{ .name = "shortcuts", .module = shortcuts },
         },
     });
     linkCore(root, b.pathFromRoot(core_lib));
@@ -99,7 +101,7 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test-bin", "Build the app tests without running them");
     const tested = [_]struct { []const u8, *std.Build.Module }{
         .{ "app", root },                       .{ "ui", ui }, .{ "gfx", gfx }, .{ "icons", icons }, .{ "win32", win32 },
-        .{ "command-palette", command_palette },
+        .{ "command-palette", command_palette }, .{ "shortcuts", shortcuts },
     };
     for (tested) |entry| {
         const t = b.addTest(.{ .name = entry[0], .root_module = entry[1] });
