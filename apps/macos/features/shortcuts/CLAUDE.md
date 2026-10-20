@@ -17,7 +17,8 @@
 - `KeyCombo.swift`: "cmd+shift+t" ↔ evento ↔ "⇧⌘T" ↔ menu. A tecla é o caractere do layout sem
   modificadores, como nos menus do macOS.
 - `ShortcutDispatcher.swift`: monitor local de teclado, antes de qualquer view. Comando
-  indisponível deixa a tecla seguir para a view.
+  indisponível deixa a tecla seguir para a view. `registry` é o da janela com foco: cada janela tem
+  os próprios comandos, e o app troca ao mudar de janela.
 - Spec em `../../../../docs/spec/shortcuts.md`. Status: modelo, preferências e despacho prontos;
   tela de configuração no plano 3.
 

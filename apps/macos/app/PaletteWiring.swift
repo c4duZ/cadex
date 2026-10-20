@@ -7,7 +7,7 @@ import Themes
 
 /// The palette in the app's colors and its prefixes (docs/spec/
 /// command-palette.md): "/" files, "#" text, "@" the tabs and spaces.
-extension AppDelegate {
+extension WindowSession {
     /// The ways to open things, first in ⌘K and in the "+" menu next to
     /// the tabs, as in Terax's "+" (owner, 2026-10-19).
     static let openers = [

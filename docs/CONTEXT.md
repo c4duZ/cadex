@@ -14,6 +14,8 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Spec**: a descrição do comportamento de uma feature em `docs/spec/`. É a referência da reescrita.
 
 ## Janela e layout
+- **Janela** (`window`): uma janela do app, com workspace, spaces, explorer, busca e git próprios.
+  ⌘N abre outra. A **janela principal** é a que abriu com o app: só ela é salva e restaurada.
 - **Space** (`space`): um grupo de abas com nome, que o usuário alterna. Restaurado entre sessões.
 - **Aba** (`tab`): um item da barra de abas. Pode ser terminal, editor, preview, markdown, mídia,
   diff ou histórico do git.

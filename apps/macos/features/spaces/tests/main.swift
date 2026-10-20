@@ -40,6 +40,26 @@ let exitCode = await Checks.run([
         expect(shown === spaces.active && spaces.active?.isShown == true && spaces.active?.count == 1)
         spaces.spaces.forEach { $0.tabs.closeAll() }
     }),
+    ("a passing window's spaces (no file) start fresh and save nothing", {
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 500), styleMask: [.titled], backing: .buffered, defer: false)
+        let spaces = SpacesController(fileURL: nil) { TabsController(window: window) }
+        spaces.start(folder: tmp) { _ in nil }
+        spaces.newSpace(folder: tmp)
+        spaces.saveNow()
+        expect(spaces.spaces.count == 2 && spaces.savedFile == nil)
+        spaces.spaces.forEach { $0.tabs.closeAll() }
+    }),
+    ("closing the window saves once and then nothing more", {
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 500), styleMask: [.titled], backing: .buffered, defer: false)
+        let url = tempFile()
+        let spaces = controller(url, window: window)
+        spaces.start(folder: tmp) { _ in nil }
+        spaces.closeAll()
+        let saved = spaces.savedFile
+        try? FileManager.default.removeItem(at: url)
+        spaces.saveNow()
+        expect(saved?.spaces.first?.tabs.items.count == 1 && spaces.savedFile == nil)
+    }),
     ("spaces saved and restored come back the same, with the active one", {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 500), styleMask: [.titled], backing: .buffered, defer: false)
         let url = tempFile()

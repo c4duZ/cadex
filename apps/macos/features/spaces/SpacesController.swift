@@ -28,17 +28,22 @@ public final class SpacesController {
     /// The workspace folder to save with the spaces.
     public var workspaceFolder: (() -> String?)?
     private let makeTabs: () -> TabsController
-    private let fileURL: URL
+    /// Nil for a passing window (⌘N): only the main window is saved
+    /// (docs/spec/workspace.md).
+    private let fileURL: URL?
     private var savePending = false
     /// While restoring, the half-built state must not overwrite the file.
     private var restoring = false
+    /// After the window closed nothing is saved: the shells ending must not
+    /// overwrite what the window had.
+    private var closed = false
     /// How long after a change the file is written: changes come in bursts
     /// (a split retitles, refocuses and resizes), and a crash loses at most this.
     static let saveDelay = 0.5
 
     /// `makeTabs` makes a TabsController wired to the window (status bar,
     /// preview offers); the spaces add the saving and the empty-space rule.
-    public init(fileURL: URL = SpacesFile.defaultURL, makeTabs: @escaping () -> TabsController) {
+    public init(fileURL: URL? = SpacesFile.defaultURL, makeTabs: @escaping () -> TabsController) {
         self.fileURL = fileURL
         self.makeTabs = makeTabs
     }
@@ -48,7 +53,7 @@ public final class SpacesController {
     public func start(folder: String, makeDocument: (String) -> TabDocument?) {
         restoring = true
         defer { restoring = false }
-        let saved = SpacesFile.load(from: fileURL)
+        let saved = fileURL.flatMap(SpacesFile.load(from:))
         for space in saved?.spaces ?? [] {
             let tabs = add(name: space.name)
             activeIndex = spaces.count - 1
@@ -158,6 +163,15 @@ public final class SpacesController {
         TabsController.shouldClose(spaces.map(\.tabs), in: active?.hostWindow, then: close, cancelled: cancelled)
     }
 
+    /// The window closed (after shouldCloseAll): saves, then ends every
+    /// space's shells. With other windows open the app goes on, and the
+    /// shells of a closed window kept running (docs/spec/workspace.md).
+    public func closeAll() {
+        saveNow()
+        closed = true
+        spaces.forEach { $0.tabs.closeAll() }
+    }
+
     // MARK: Saving
 
     public var saved: SavedSpaces {
@@ -167,12 +181,12 @@ public final class SpacesController {
 
     /// What was saved last time, read before start() (the workspace folder).
     public var savedFile: SavedSpaces? {
-        SpacesFile.load(from: fileURL)
+        fileURL.flatMap(SpacesFile.load(from:))
     }
 
     /// Something the spaces save changed outside the tabs (the folder).
     public func scheduleSave() {
-        guard !restoring, !savePending else { return }
+        guard !restoring, !closed, !savePending else { return }
         savePending = true
         DispatchQueue.main.asyncAfter(deadline: .now() + Self.saveDelay) { [weak self] in
             guard let self, self.savePending else { return }
@@ -183,7 +197,7 @@ public final class SpacesController {
     /// Writes now (quitting, closing the window).
     public func saveNow() {
         savePending = false
-        guard !restoring, !spaces.isEmpty else { return }
+        guard !restoring, !closed, !spaces.isEmpty, let fileURL else { return }
         try? SpacesFile.save(saved, to: fileURL)
     }
 }

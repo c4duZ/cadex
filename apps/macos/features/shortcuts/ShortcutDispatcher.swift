@@ -6,7 +6,9 @@ import CommandPalette
 /// A press whose command is unavailable goes on to the view as usual.
 @MainActor
 public final class ShortcutDispatcher {
-    private let registry: CommandRegistry
+    /// The key window's commands: each window has its own (⌘N), and the
+    /// app swaps this when another window comes to the front.
+    public var registry: CommandRegistry
     private var keymap: Keymap
     private var monitor: Any?
     /// While true, presses go to the views untouched (the settings window

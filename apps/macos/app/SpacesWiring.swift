@@ -8,11 +8,11 @@ import Tabs
 /// The spaces in the window (docs/spec/spaces.md): each space's tabs are
 /// made here, wired like the window's (status bar, preview offers), and
 /// the saved documents are made again by the FileOpener.
-extension AppDelegate {
+extension WindowSession {
     /// Made with the commands, before the window, so the palette and the
     /// shortcuts know space.*; the tabs are made later, in startSpaces.
     func makeSpaces(palette: CommandPaletteController) {
-        let spaces = SpacesController { [unowned self] in self.makeTabs() }
+        let spaces = SpacesController(fileURL: isMain ? SpacesFile.defaultURL : nil) { [unowned self] in self.makeTabs() }
         spaces.onSwitch = { [weak self] tabs in self?.workspace?.show(tabs) }
         spaces.onChange = { [weak self, weak spaces] in
             self?.workspace?.titleBar.setSpace(name: spaces?.activeName ?? "", count: spaces?.spaces.count ?? 1)
@@ -24,7 +24,7 @@ extension AppDelegate {
     }
 
     private func makeTabs() -> TabsController {
-        let tabs = TabsController(window: window!)
+        let tabs = TabsController(window: window)
         tabs.onOpenPreview = { [weak self] url in self?.openPreview(url) }
         if let bar = workspace?.statusBar { connectStatusBar(bar, to: tabs) }
         return tabs

@@ -32,6 +32,15 @@ só mexe em arquivos dentro das pastas que o usuário abriu.
   está dentro de um diretório autorizado.
 - A lista de autorizados dura enquanto o app está aberto. Trocar de workspace não tira a pasta
   anterior da lista nessa sessão.
+- **Várias janelas.** "Nova janela" (⌘N) abre outra janela com um terminal na pasta do workspace
+  da janela com foco. Cada janela tem o próprio workspace, os próprios spaces e abas, e o seu
+  explorer, busca e git: trocar a pasta numa não mexe na outra. Menus, atalhos e a paleta agem na
+  janela com foco. Pedido do dono em 2026-10-20.
+- Só a **janela principal** (a que abriu com o app) é salva e restaurada pelos spaces. As outras
+  são passageiras: fechar o app ou a janela não guarda nada delas. Fechada a principal, nenhuma
+  outra toma o lugar dela; o arquivo fica com o que ela tinha ao fechar.
+- Fechar uma janela pergunta só pelos programas e arquivos dela. Sair do app pergunta uma vez por
+  todas as janelas. Fechada a última janela, o app sai.
 - O comando `cadex` no terminal (abrir pasta pelo shell) fica fora do MVP (ADR 0007).
 
 ## Estados
@@ -57,3 +66,6 @@ só mexe em arquivos dentro das pastas que o usuário abriu.
 - [ ] "Abrir pasta…" pela paleta troca o workspace e o explorer (falta conferir à mão: abre o seletor do sistema).
 - [x] "Usar a pasta do terminal" troca o workspace para a pasta do painel com foco.
 - [x] Um terminal dentro de um repositório leva a árvore para a raiz do repositório.
+- [ ] ⌘N abre outra janela na pasta do workspace da janela com foco (macOS; no Windows o comando abre outro processo, sem atalho).
+- [ ] Trocar a pasta, o space ou a aba numa janela não muda a outra.
+- [ ] Sair e abrir de novo traz só a janela principal.

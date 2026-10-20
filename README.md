@@ -121,6 +121,7 @@ máquinas: ⌘ vira Ctrl+Shift (como no Windows Terminal), e ⌘ com ⇧, ⌥ ou
 |---|---|---|
 | Paleta de comandos | `⌘K` | `Ctrl+Shift+K` |
 | Nova aba / fechar painel | `⌘T` / `⌘W` | `Ctrl+Shift+T` / `Ctrl+Shift+W` |
+| Nova janela | `⌘N` | pela paleta (sem atalho) |
 | Dividir à direita / para baixo | `⌘D` / `⌘⇧D` | `Ctrl+Shift+D` / `Ctrl+Shift+Alt+D` |
 | Ir para a aba 1…9 | `⌘1…9` | `Ctrl+Shift+1…9` |
 | Abrir arquivo por nome / buscar no conteúdo | `⌘P` / `⌘⇧F` | `Ctrl+Shift+P` / `Ctrl+Shift+Alt+F` |

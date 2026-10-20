@@ -8,7 +8,7 @@ import SourceControl
 /// owner typed `cd` and the tree stayed on the home folder (2026-10-19).
 /// The repository's top keeps `cd src` inside a project from re-rooting the
 /// tree at every step. explorer.followTerminal in settings.json turns it off.
-extension AppDelegate {
+extension WindowSession {
     func terminalFolderMoved(_ folder: String?) {
         guard followTerminal, let folder, folder != lastTerminalFolder else { return }
         lastTerminalFolder = folder

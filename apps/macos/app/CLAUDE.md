@@ -2,6 +2,8 @@
 
 ## O que eu quero
 - Só o ponto de entrada: criar o NSApplication, as janelas e ligar as features.
+- Várias janelas (⌘N, window.new): cada uma com workspace, spaces, explorer, busca, git e comandos
+  próprios; só a principal (a que abriu com o app) salva os spaces (docs/spec/workspace.md).
 
 ## O que eu não quero
 - Lógica de feature aqui. Cada coisa que a janela mostra vem de uma feature, pela porta de
@@ -11,15 +13,20 @@
 - `PaletteWiring.swift`: a paleta nas cores do tema, os prefixos do ⌘K (`/` arquivos, `#` texto,
   `@` abas e spaces) e as aberturas (`openers`), primeiro no ⌘K e no menu do "+" das abas.
 - `SpacesWiring.swift`: os spaces na janela (abas de cada space ligadas à barra de status e ao
-  preview, documentos reabertos, pasta do workspace devolvida); `tabs` em `main.swift` é sempre a
-  do space que aparece, então os comandos agem nela. Sair e fechar a janela perguntam uma vez por
-  todos os spaces e salvam.
+  preview, documentos reabertos, pasta do workspace devolvida); `tabs` da `WindowSession` é sempre a
+  do space que aparece, então os comandos agem nela. Janela aberta pelo ⌘N tem spaces sem arquivo.
 - `FolderFollow.swift`: o workspace segue o terminal com foco; a cada `cd` vai para a raiz do
   repositório git da pasta (ou a própria pasta), a menos que explorer.followTerminal desligue.
-- `main.swift` registra os comandos de cada feature (e o view.toggle-sidebar da casca), monta menu e
-  atalhos a partir deles, e abre a janela. Como delegate, pergunta às abas antes de fechar a janela
-  ou sair (shouldCloseAll). Liga a barra de status ao terminal com foco. Cria o `WorkspaceFolder` do explorer, abre a
-  primeira aba na pasta dele; pastas e arquivos da linha de comando ou soltos no ícone do Dock
+- `main.swift` (AppDelegate) guarda o que as janelas dividem: configurações, a janela de
+  configurações, o keymap e o despachante de atalhos, que trocam para os comandos da janela com
+  foco (`sessionBecameKey`). Abre a janela principal e as do ⌘N (`newWindow`, na pasta da janela de
+  onde veio, deslocada um passo). Sair pergunta uma vez pelos programas e arquivos de todas as
+  janelas.
+- `WindowSession.swift`: uma janela. Cria o `WorkspaceFolder`, o explorer, a busca, o git e os spaces
+  dela; como delegate da janela pergunta às abas antes de fechar (shouldCloseAll) e, fechada,
+  encerra os shells dela (`closeAll`). `SessionCommands.swift` registra os comandos de cada feature
+  no registro da janela (e window.new, view.toggle-sidebar e git.show da casca) e liga a barra de
+  status ao terminal com foco. Pastas e arquivos da linha de comando ou soltos no ícone do Dock
   (`application(_:open:)`, o Dock só com o pacote .app do plano 7): pasta vira workspace, arquivo
   abre numa aba, endereço http(s) abre no preview. `FileOpener.swift` decide o que abre (mídia pelo
   tipo, o resto no editor; diffs do git num DiffDocument, o histórico num HistoryDocument que recebe
