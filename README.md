@@ -13,17 +13,18 @@
 
 <p align="center">
   <a href="https://github.com/c4duZ/cadex/releases/latest/download/Cadex.dmg"><img src="https://img.shields.io/badge/Baixar%20para%20Mac-macOS%2013%2B%20%C2%B7%20Intel%20e%20Apple%20Silicon-C06A2B?style=for-the-badge&logo=apple&logoColor=F2F2F2&labelColor=1E1E1E" alt="Baixar o Cadex para Mac" height="44"></a>
+  <a href="#instalar-no-windows"><img src="https://img.shields.io/badge/Baixar%20para%20Windows-Windows%2011%20%C2%B7%20x64%20e%20ARM64-2B6AC0?style=for-the-badge&labelColor=1E1E1E" alt="Baixar o Cadex para Windows" height="44"></a>
 </p>
 
 <p align="center">
-  <sub>Grátis e de código aberto (MIT) · 7,7 MB · <a href="#instalar-no-mac">como instalar</a> · <a href="#pelo-terminal">instalar com um comando</a></sub>
+  <sub>Grátis e de código aberto (MIT) · 7,7 MB no Mac, 3 MB no Windows · <a href="#instalar-no-mac">instalar no Mac</a> · <a href="#instalar-no-windows">instalar no Windows</a></sub>
 </p>
 
 ---
 
 ## O que é
 
-O Cadex junta num app nativo do macOS o que um dia de trabalho com agentes de código pede: o terminal
+O Cadex junta num app nativo do macOS e do Windows o que um dia de trabalho com agentes de código pede: o terminal
 onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tudo alcançável pelo ⌘K.
 
 - **Terminal** rápido e nítido (modelo da [libghostty](https://github.com/ghostty-org/ghostty),
@@ -78,10 +79,42 @@ de novo atualiza para a versão mais recente.
 
 </details>
 
+## Instalar no Windows
+
+> **Prévia.** O app do Windows tem todas as features do Mac e está em teste; os arquivos entram na
+> próxima release. Enquanto isso, os links abaixo respondem 404.
+
+No PowerShell, um comando baixa a última versão, confere o checksum e instala o Cadex para o seu
+usuário, com atalho no Menu Iniciar, sem pedir administrador:
+
+```powershell
+irm https://github.com/c4duZ/cadex/releases/latest/download/install.ps1 | iex
+```
+
+O script escolhe sozinho entre x64 e ARM64 e é curto para ler antes de rodar:
+[`install.ps1`](apps/windows/packaging/install.ps1). Rodar de novo atualiza para a versão mais recente.
+
+Prefere sem instalar? Baixe o ZIP portátil, extraia e abra o `Cadex.exe`:
+[x64 (Intel e AMD)](https://github.com/c4duZ/cadex/releases/latest/download/Cadex-windows-x64.zip) ·
+[ARM64 (Snapdragon)](https://github.com/c4duZ/cadex/releases/latest/download/Cadex-windows-arm64.zip).
+
+Requisitos: Windows 11, x64 ou ARM64. O terminal abre o PowerShell (ou o shell que você escolher, e
+as distros do WSL); o Git usa o [Git for Windows](https://git-scm.com/download/win), se estiver
+instalado. O preview web e os de mídia usam o WebView2, que já vem no Windows 11.
+
+<details>
+<summary><b>Problemas na instalação?</b></summary>
+
+- **O Windows avisa "O Windows protegeu o computador" ao abrir o ZIP:** o Cadex ainda não é assinado. Clique em **Mais informações → Executar assim mesmo**. Pelo comando do PowerShell o aviso não aparece.
+- **Para desinstalar:** Configurações → Apps → Aplicativos instalados → Cadex → Desinstalar. Suas configurações em `%APPDATA%\Cadex` ficam.
+- **Atalhos:** são os do Mac com ⌘ virando Ctrl+Shift (⌘T é Ctrl+Shift+T, ⌘K é Ctrl+Shift+K), como no Windows Terminal.
+
+</details>
+
 ## Atalhos
 
 Toda ação do Cadex é um comando: o **⌘K** acha e roda qualquer uma, e os atalhos podem ser trocados
-nas configurações (⌘,).
+nas configurações (⌘,). No Windows, ⌘ é Ctrl+Shift, e ⌘ com ⇧ ou ⌥ é Ctrl+Shift+Alt.
 
 | Ação | Atalho |
 |---|---|
@@ -128,10 +161,10 @@ abaixo. O pico de memória ao abrir foi 111 MB.
                ┌───────────────────────┴───────────────────────┐
                │                                               │
   ┌────────────┴────────────┐                    ┌─────────────┴────────────┐
-  │   App macOS (Swift)     │                    │   App Windows            │
-  │   AppKit · Metal        │                    │   (reservado)            │
-  │   PDFKit · AVKit ·      │                    │                          │
-  │   ImageIO · Quick Look  │                    │                          │
+  │   App macOS (Swift)     │                    │   App Windows (Zig)      │
+  │   AppKit · Metal        │                    │   Win32 · Direct3D 11    │
+  │   PDFKit · AVKit ·      │                    │   Direct2D · DirectWrite │
+  │   ImageIO · Quick Look  │                    │   WIC · WebView2         │
   └─────────────────────────┘                    └──────────────────────────┘
 ```
 
@@ -144,7 +177,8 @@ O porquê de cada escolha está nos ADRs:
 [macOS primeiro e app nativo](docs/adr/0001-macos-first-native-app.md) ·
 [núcleo em Zig](docs/adr/0002-zig-core-with-c-api.md) ·
 [libghostty-vt](docs/adr/0003-libghostty-vt-terminal-model.md) ·
-[reescrita do zero](docs/adr/0004-clean-rewrite.md).
+[reescrita do zero](docs/adr/0004-clean-rewrite.md) ·
+[Windows em Zig e Win32](docs/adr/0012-windows-zig-win32-d3d11.md).
 
 ## Organização do repositório
 
@@ -155,7 +189,9 @@ core/             núcleo em Zig
 apps/macos/       app Swift
   shared/         o que 2+ features do app usam
   features/<x>/   uma pasta por feature, mesmos nomes do núcleo
-apps/windows/     reservado
+apps/windows/     app Windows em Zig (Win32, Direct3D 11, Direct2D)
+  shared/         o que 2+ features do app usam
+  features/<x>/   uma pasta por feature, mesmos nomes do Mac
 docs/             vocabulário, decisões (adr/) e spec de comportamento (spec/)
 tools/            verificações do repositório
 ```
@@ -172,6 +208,8 @@ Requisitos: macOS 13+, as Command Line Tools (Swift 6; o Xcode completo não é 
 make check     # manifestos + testes do núcleo + testes do app
 make run       # compila e abre o app
 make package   # gera dist/Cadex.app universal (Intel + Apple Silicon), assinado ad hoc
+make windows-app      # compila o app Windows (x64 e ARM64) daqui do Mac
+make windows-package  # gera os ZIPs do Windows e o install.ps1 em dist/
 ```
 
 O identificador `io.github.c4duz.cadex` é fixo na assinatura para o macOS manter as permissões dadas
@@ -188,7 +226,8 @@ apps/macos/packaging/release.sh --publish "O que mudou nesta versão"
 
 O script gera o `Cadex.dmg`, o `Cadex.zip` com o checksum e o `install.sh`, e cria a release
 `vX.Y.Z`. Os arquivos sobem com nome fixo, sem a versão, para o botão de download e o comando de
-instalação do topo sempre pegarem a última. Sem `--publish`, ele só gera os arquivos em `dist/`.
+instalação do topo sempre pegarem a última. Sem `--publish`, ele só gera os arquivos em `dist/`. Com `CADEX_WINDOWS=1`, a mesma release leva os
+ZIPs do Windows e o `install.ps1`.
 
 ## Licença
 
