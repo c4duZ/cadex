@@ -64,6 +64,8 @@ command-palette · Decisões: `docs/adr/0008-phosphor-icons.md`, `docs/adr/0005-
   settings, themes.
 
 ## Como validar
+- `make perf` passa a cada fase: temas, destaque, contraste e cores não podem pesar o app (centenas
+  de temas lidos sob demanda, contraste calculado no build).
 - `make check` passa a cada fase; o build do catálogo recusa tema abaixo do contraste mínimo.
 - Fase A: a página de temas acha um tema pela busca e filtra claro/escuro; os temas do tweakcn
   mostram cores diferentes no `ls --color`; um .itermcolors importado aparece e funciona.

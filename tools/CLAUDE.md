@@ -26,6 +26,11 @@
   tabela bate com o map.json. Rodar de novo depois do build_file_icons.py.
 - `check_command_parity.py` (no `make manifests`): todo id de comando do Mac existe no app Windows
   (ADR 0005, os mesmos ids nos dois). Nome de interface que não é comando vai em NOT_COMMANDS.
+- `perf/run.py` (`make perf`, depois do `make package`): o orçamento de peso do Cadex no Mac. Abre o
+  app de release em instâncias de teste (CADEX_BACKGROUND=1, spaces num arquivo temporário) com o
+  "shell" `perf/loadshell.sh` rodando uma carga, e mede memória (footprint) e CPU (tempo de CPU
+  gasto na janela, não o %cpu do ps); os índices pela API C com `perf/index_probe.c`. Os limites
+  ficam no topo do script, cada um com o que foi medido ao lado.
 - `webview2_sdk.py`: baixa o pacote Microsoft.Web.WebView2 (versão e sha256 fixados no script) e
   gera `../apps/windows/shared/webview/sdk/` (as declarações em C das interfaces que o app usa, os
   ids e o WebView2Loader.dll por arquitetura) (`../docs/adr/0014-webview2-on-windows.md`). Só roda

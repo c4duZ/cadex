@@ -1,4 +1,4 @@
-.PHONY: check manifests core core-test macos-test app run relink package windows-core windows-core-test windows-app windows-run windows-app-test windows-package
+.PHONY: check manifests core core-test macos-test app run relink package perf windows-core windows-core-test windows-app windows-run windows-app-test windows-package
 
 # Run before handing work over: manifests, core tests, app tests, and the
 # Windows build (it cannot run here, but it must keep compiling).
@@ -46,6 +46,11 @@ app: core relink
 
 run: app
 	@cd apps/macos && swift run Cadex
+
+# The weight budget: the release app and the core's indexes through the
+# situations that once made Cadex heavy; fails over a limit (tools/perf/run.py).
+perf: package
+	@python3 tools/perf/run.py
 
 # dist/Cadex.app, universal and signed ad hoc (apps/macos/packaging/build.sh).
 package:

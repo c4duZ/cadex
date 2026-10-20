@@ -74,3 +74,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
   (`tools/check_manifests.py`).
 - `make core-test`: `zig build test` com o alocador de teste (pega vazamento de memória).
 - `make macos-test`: `swift test` do app.
+- `make perf`: o orçamento de peso (`tools/perf/run.py`), antes de cada release e de cada feature que
+  mexe em terminal, índices, árvore ou desenho: o app de release e os índices nas situações que já o
+  deixaram pesado (terminal jorrando, TUI, pasta pessoal, agente salvando arquivos); falha acima do
+  limite. Limite só sobe com o motivo escrito ao lado.
