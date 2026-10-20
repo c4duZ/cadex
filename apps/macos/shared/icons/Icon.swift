@@ -6,6 +6,7 @@ import CoreText
 /// is the codepoint from the style.css of @phosphor-icons/web 2.1.2, the
 /// same release as Resources/Phosphor-Regular.ttf. Add icons here by name.
 public enum Icon: UInt32, CaseIterable, Sendable {
+    case appWindow = 0xE5DA
     case arrowClockwise = 0xE036
     case arrowCounterClockwise = 0xE038
     case arrowDown = 0xE03E

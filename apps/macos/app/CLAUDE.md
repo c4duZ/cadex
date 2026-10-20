@@ -12,6 +12,8 @@
 ## Como eu quero
 - `PaletteWiring.swift`: a paleta nas cores do tema, os prefixos do ⌘K (`/` arquivos, `#` texto,
   `@` abas e spaces) e as aberturas (`openers`), primeiro no ⌘K e no menu do "+" das abas.
+  Comando novo que abre algo (terminal, arquivo, web, janela) entra nos `openers` daqui e nos de
+  `../../windows/app/app_commands.zig`, e na lista "Abrir" de `../../../docs/spec/command-palette.md`.
 - `SpacesWiring.swift`: os spaces na janela (abas de cada space ligadas à barra de status e ao
   preview, documentos reabertos, pasta do workspace devolvida); `tabs` da `WindowSession` é sempre a
   do space que aparece, então os comandos agem nela. Janela aberta pelo ⌘N tem spaces sem arquivo.

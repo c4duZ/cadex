@@ -17,6 +17,7 @@ extension WindowSession {
         PalettePin(id: "preview.open", title: "Preview web", icon: .globe),
         PalettePin(id: "git.history", title: "Grafo do git", icon: .gitBranch),
         PalettePin(id: "tab.new", title: "Terminal em nova aba", icon: .plus),
+        PalettePin(id: "window.new", title: "Nova janela", icon: .appWindow),
     ]
 
     func connectPalette(_ palette: CommandPaletteController) {

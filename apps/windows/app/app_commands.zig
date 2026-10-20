@@ -25,6 +25,7 @@ pub const openers = [_]palette.Pin{
     .{ .id = "preview.open", .title = "Preview web", .icon = p.globe },
     .{ .id = "git.history", .title = "Grafo do git", .icon = p.git_branch },
     .{ .id = "tab.new", .title = "Terminal em nova aba", .icon = p.plus },
+    .{ .id = "window.new", .title = "Nova janela", .icon = p.app_window },
 };
 
 pub const plus_items = blk: {

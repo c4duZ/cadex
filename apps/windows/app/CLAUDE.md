@@ -24,7 +24,9 @@
   aplicados a cada feature.
 - `app_commands.zig`: palette.open, settings.open, app.quit, app.hide, window.new (outro processo),
   edit.* (para o terminal ou o documento com foco), terminal.clear/scroll-top/scroll-bottom, e o
-  registro dos comandos das features. `settings_page.zig`: a página de configurações.
+  registro dos comandos das features; `openers`, as aberturas do "+" e do topo da paleta, iguais às
+  do Mac (`../../macos/app/PaletteWiring.swift`): comando novo que abre algo entra nas duas.
+  `settings_page.zig`: a página de configurações.
 - `sidebar.zig`: o painel lateral (Arquivos ou Git, abas embaixo, view.toggle-sidebar) e o
   workspace seguindo o terminal com foco até a raiz do repositório (que vai também à busca, ao
   markdown e ao git).
