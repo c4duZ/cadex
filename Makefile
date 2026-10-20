@@ -1,4 +1,4 @@
-.PHONY: check manifests core core-test macos-test app run relink package windows-core windows-core-test windows-app windows-run windows-app-test
+.PHONY: check manifests core core-test macos-test app run relink package windows-core windows-core-test windows-app windows-run windows-app-test windows-package
 
 # Run before handing work over: manifests, core tests, app tests, and the
 # Windows build (it cannot run here, but it must keep compiling).
@@ -75,3 +75,8 @@ windows-run: windows-app
 # The app's tests (one exe per module) on the arm64 VM.
 windows-app-test: windows-app
 	@for t in apps/windows/zig-out/aarch64/bin/cadex-*-tests.exe; do tools/windows-vm.sh $$t || exit 1; done
+
+# The Windows zips, their checksums and install.ps1 in dist/
+# (apps/windows/packaging/CLAUDE.md).
+windows-package:
+	@apps/windows/packaging/build.sh

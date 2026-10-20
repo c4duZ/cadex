@@ -108,6 +108,11 @@ pub fn build(b: *std.Build) void {
     });
     linkCore(root, b.pathFromRoot(core_lib));
 
+    // The icon and the version Explorer shows; the version comes from the
+    // Mac's Info.plist through packaging/build.sh, so both apps match.
+    const version = b.option([]const u8, "version", "The app's version, x.y.z") orelse "0.0.0";
+    root.addWin32ResourceFile(.{ .file = resourceScript(b, version) });
+
     const exe = b.addExecutable(.{
         .name = "Cadex",
         .root_module = root,
@@ -180,4 +185,40 @@ fn feature(
     for (uses) |entry| module.addImport(entry[0], entry[1]);
     linkCore(module, shared.core_lib);
     return module;
+}
+
+/// Cadex.rc for `version`, next to a copy of the icon (an .rc names its
+/// files relative to itself).
+fn resourceScript(b: *std.Build, version: []const u8) std.Build.LazyPath {
+    var parts: [3]u16 = .{ 0, 0, 0 };
+    var it = std.mem.tokenizeScalar(u8, version, '.');
+    for (&parts) |*part| part.* = std.fmt.parseInt(u16, it.next() orelse "0", 10) catch 0;
+    const files = b.addWriteFiles();
+    _ = files.addCopyFile(b.path("app/Cadex.ico"), "Cadex.ico");
+    return files.add("Cadex.rc", b.fmt(
+        \\1 ICON "Cadex.ico"
+        \\1 VERSIONINFO
+        \\FILEVERSION {d},{d},{d},0
+        \\PRODUCTVERSION {d},{d},{d},0
+        \\BEGIN
+        \\  BLOCK "StringFileInfo"
+        \\  BEGIN
+        \\    BLOCK "041604B0"
+        \\    BEGIN
+        \\      VALUE "CompanyName", "Cadex"
+        \\      VALUE "FileDescription", "Cadex"
+        \\      VALUE "FileVersion", "{s}"
+        \\      VALUE "ProductName", "Cadex"
+        \\      VALUE "ProductVersion", "{s}"
+        \\      VALUE "LegalCopyright", "MIT"
+        \\      VALUE "OriginalFilename", "Cadex.exe"
+        \\    END
+        \\  END
+        \\  BLOCK "VarFileInfo"
+        \\  BEGIN
+        \\    VALUE "Translation", 0x0416, 1200
+        \\  END
+        \\END
+        \\
+    , .{ parts[0], parts[1], parts[2], parts[0], parts[1], parts[2], version, version }));
 }

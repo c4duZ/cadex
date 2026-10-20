@@ -21,10 +21,15 @@ Decisões: `docs/adr/0007-one-step-install.md`, `docs/adr/0012-windows-zig-win32
 ## Como eu quero
 **Fases:**
 - **A. Spaces e documentos em painéis.** Mesmo modelo e mesmo arquivo do Mac, em %APPDATA%\Cadex.
-- **B. Pacote.** Script em apps/windows/packaging: build ReleaseFast nas duas arquiteturas, ícone
-  .ico a partir de `docs/cadex-icon.png`, recurso de versão no exe, NOTICE e LICENSE no ZIP.
+  *Spaces feitos em 2026-10-20 (`apps/windows/features/spaces/spaces.zig`); os documentos chegam
+  com os visualizadores do plano 12.*
+- **B. Pacote.** Script em apps/windows/packaging: build nas duas arquiteturas (núcleo ReleaseFast,
+  app ReleaseSmall), ícone .ico a partir de `docs/cadex-icon.png`, recurso de versão no exe, NOTICE e
+  LICENSE no ZIP. *Feito em 2026-10-20 (`apps/windows/packaging/build.sh`): ZIPs de 3 MB.*
 - **C. Instalador e release.** install.ps1 curto e legível; release.sh passa a subir os arquivos do
   Windows junto com os do Mac. A página de download explica o aviso do SmartScreen (sem assinatura).
+  *Escrito em 2026-10-20 (`apps/windows/packaging/install.ps1`), ainda não rodado no Windows; o
+  release.sh só leva o Windows com CADEX_WINDOWS=1, e a seção do README entra quando ele rodar.*
 - **D. Medir.** Tamanho do ZIP, do exe e memória com um terminal, no README ao lado dos do Mac.
 - **E. Semana de uso no Windows.**
 

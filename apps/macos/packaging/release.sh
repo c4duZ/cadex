@@ -1,6 +1,7 @@
 #!/bin/bash
 # Makes a Cadex release (docs/plans/7-mvp-release.md, fase C): Cadex.app,
-# Cadex.zip with its checksum, Cadex.dmg and install.sh in dist/, with names
+# Cadex.zip with its checksum, Cadex.dmg and install.sh in dist/, plus the
+# Windows zips and install.ps1 (docs/plans/13-windows-release.md), with names
 # without the version, so releases/latest/download/... always gets the last.
 #
 #   apps/macos/packaging/release.sh                         # only builds dist/
@@ -56,11 +57,20 @@ create-dmg ${PLAIN[@]+"${PLAIN[@]}"} \
     "$DIST/Cadex.dmg" "$STAGE" >/dev/null
 rm -rf "$STAGE"
 
+# The Windows app rides the same release, with the same version
+# (apps/windows/packaging/build.sh), once CADEX_WINDOWS=1 says so: until it
+# has run on a Windows machine (plan 13), a Mac release does not carry it.
+WINDOWS=()
+if [[ "${CADEX_WINDOWS:-}" == "1" ]]; then
+    "$ROOT/apps/windows/packaging/build.sh"
+    WINDOWS=("$DIST"/Cadex-windows-x64.zip "$DIST"/Cadex-windows-x64.zip.sha256 "$DIST"/Cadex-windows-arm64.zip "$DIST"/Cadex-windows-arm64.zip.sha256 "$DIST/install.ps1")
+fi
+
 echo "dist/: $(cd "$DIST" && ls -1 Cadex.dmg Cadex.zip Cadex.zip.sha256 install.sh | tr '\n' ' ')"
 du -h "$DIST/Cadex.dmg" "$DIST/Cadex.zip"
 
 if [[ "$PUBLISH" == "1" ]]; then
     gh release create "$TAG" -R "$REPO" --latest --title "Cadex $VERSION" --notes "$NOTES" \
-        "$DIST/Cadex.dmg" "$DIST/Cadex.zip" "$DIST/Cadex.zip.sha256" "$DIST/install.sh"
+        "$DIST/Cadex.dmg" "$DIST/Cadex.zip" "$DIST/Cadex.zip.sha256" "$DIST/install.sh" ${WINDOWS[@]+"${WINDOWS[@]}"}
     echo "Publicada: https://github.com/$REPO/releases/tag/$TAG"
 fi

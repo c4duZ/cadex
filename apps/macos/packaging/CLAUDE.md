@@ -11,6 +11,7 @@ scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem con
   `dmg-background.tiff`, gerado por `dmg-background.swift`) e o install.sh em dist/. Só publica com
   `--publish "notas"` (gh release create com nomes sem versão). `CADEX_DMG_PLAIN=1` faz o DMG sem
   mexer no Finder (sem fundo nem posições), para testar com alguém usando a máquina.
+  `CADEX_WINDOWS=1` também monta e sobe os arquivos do Windows (`../../windows/packaging/CLAUDE.md`).
 - `install.sh`: o instalador por comando (sh, sem sudo): baixa o ZIP e o checksum da última
   release, confere, põe em /Applications ou ~/Applications e tira a quarentena só do Cadex.
   `CADEX_DOWNLOAD` (URL ou pasta) e `CADEX_INSTALL_DIR` trocam a origem e o destino nos testes.
