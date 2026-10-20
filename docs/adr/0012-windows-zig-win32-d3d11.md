@@ -16,8 +16,10 @@ reescritas para o Windows.
   inclusive o terminal: glifos posicionados na grade com DrawGlyphRun, e layouts em cache para
   emoji e grafemas compostos. (Revisto em 2026-10-20: o atlas de glifos em shaders próprios, como o
   Metal no Mac, fica para quando a medição pedir; escrever shaders sem poder rodar era risco demais.)
-- Mídia e web pelos componentes do sistema: WIC (imagem), Media Foundation (vídeo e áudio),
-  Windows.Data.Pdf (PDF) e WebView2 só dentro da feature preview, que já é uma página web.
+- Mídia e web pelos componentes do sistema: WIC (imagem) e WebView2 nas páginas web (preview,
+  Markdown renderizado) e no que ele toca (GIF, SVG, vídeo, áudio e PDF). (Revisto em 2026-10-20 pelo
+  `0014-webview2-on-windows.md`: Media Foundation e Windows.Data.Pdf pediam ABI WinRT e controles à
+  mão, sem como testar.)
 - **Só Windows 11** (x64 e arm64): permite Mica, cantos arredondados e APIs novas sem caminho
   alternativo para o Windows 10.
 - O app fala com o núcleo **só pela API C** (`core/include/cadex.h`), mesmo sendo Zig dos dois lados:

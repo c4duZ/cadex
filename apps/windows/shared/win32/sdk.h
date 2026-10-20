@@ -18,3 +18,7 @@
 #include <d2d1_1.h>
 #include <dwrite_3.h>
 #include <wincodec.h>
+/* WebView2 (docs/adr/0014-webview2-on-windows.md): the interfaces the app
+ * uses, extracted from Microsoft's SDK by tools/webview2_sdk.py. Here and
+ * not in a module of its own, so HWND, RECT and IStream are one type. */
+#include "../webview/sdk/webview2.h"

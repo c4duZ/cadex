@@ -9,6 +9,8 @@ const std = @import("std");
 const system_libs = [_][]const u8{
     "user32", "gdi32",   "advapi32", "dwmapi", "uxtheme", "shcore",         "imm32", "ole32", "shell32",
     "d3d11",  "dxgi",    "d2d1",   "dwrite",  "d3dcompiler_47", "dcomp", "windowscodecs",
+    // SHCreateMemStream and SHCreateStreamOnFileEx for the pages the app serves (shared/webview).
+    "shlwapi",
 };
 
 pub fn build(b: *std.Build) void {
@@ -68,7 +70,19 @@ pub fn build(b: *std.Build) void {
 
     // The shared modules build test exes of their own, which need the
     // system DLLs too.
-    for ([_]*std.Build.Module{ win32, gfx, ui, icons }) |m| linkCore(m, b.pathFromRoot(core_lib));
+    // WebView2 child windows for the web panes (docs/adr/0014-webview2-on-windows.md).
+    const webview = b.createModule(.{
+        .root_source_file = b.path("shared/webview/webview.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{ .{ .name = "win32", .module = win32 }, .{ .name = "gfx", .module = gfx }, .{ .name = "ui", .module = ui } },
+    });
+    // Microsoft's loader goes next to Cadex.exe (and the test exes), where
+    // shared/webview/loader.zig looks for it.
+    const loader_arch = if (target.result.cpu.arch == .aarch64) "arm64" else "x64";
+    b.getInstallStep().dependOn(&b.addInstallBinFile(b.path(b.fmt("shared/webview/sdk/{s}/WebView2Loader.dll", .{loader_arch})), "WebView2Loader.dll").step);
+
+    for ([_]*std.Build.Module{ win32, gfx, ui, icons, webview }) |m| linkCore(m, b.pathFromRoot(core_lib));
     const shared = Shared{ .cadex = cadex, .win32 = win32, .gfx = gfx, .ui = ui, .icons = icons, .core_lib = b.pathFromRoot(core_lib) };
     const command_palette = feature(b, target, optimize, shared, "command-palette", "command_palette.zig", &.{});
     const themes = feature(b, target, optimize, shared, "themes", "themes.zig", &.{});
@@ -86,6 +100,10 @@ pub fn build(b: *std.Build) void {
     const shortcuts = feature(b, target, optimize, shared, "shortcuts", "shortcuts.zig", &.{.{ "command-palette", command_palette }});
     const source_control = feature(b, target, optimize, shared, "source-control", "source_control.zig", &.{ .{ "tabs", tabs }, .{ "command-palette", command_palette } });
     const git_history = feature(b, target, optimize, shared, "git-history", "git_history.zig", &.{ .{ "tabs", tabs }, .{ "command-palette", command_palette } });
+    const viewer_uses = [_]struct { []const u8, *std.Build.Module }{ .{ "tabs", tabs }, .{ "command-palette", command_palette }, .{ "webview", webview } };
+    const preview = feature(b, target, optimize, shared, "preview", "preview.zig", &viewer_uses);
+    const media_preview = feature(b, target, optimize, shared, "media-preview", "media_preview.zig", &viewer_uses);
+    const markdown_rendered = feature(b, target, optimize, shared, "markdown-rendered", "markdown_rendered.zig", &viewer_uses);
 
     const root = b.createModule(.{
         .root_source_file = b.path("app/main.zig"),
@@ -112,6 +130,10 @@ pub fn build(b: *std.Build) void {
             .{ .name = "spaces", .module = spaces },
             .{ .name = "source-control", .module = source_control },
             .{ .name = "git-history", .module = git_history },
+            .{ .name = "webview", .module = webview },
+            .{ .name = "preview", .module = preview },
+            .{ .name = "media-preview", .module = media_preview },
+            .{ .name = "markdown-rendered", .module = markdown_rendered },
         },
     });
     linkCore(root, b.pathFromRoot(core_lib));
@@ -137,6 +159,7 @@ pub fn build(b: *std.Build) void {
         .{ "app", root },                       .{ "ui", ui }, .{ "gfx", gfx }, .{ "icons", icons }, .{ "win32", win32 },
         .{ "command-palette", command_palette }, .{ "shortcuts", shortcuts }, .{ "themes", themes }, .{ "settings", settings }, .{ "terminal", terminal }, .{ "tabs", tabs }, .{ "status-bar", status_bar }, .{ "explorer", explorer }, .{ "search", search }, .{ "spaces", spaces }, .{ "editor", editor }, .{ "markdown", markdown },
         .{ "source-control", source_control }, .{ "git-history", git_history },
+        .{ "webview", webview }, .{ "preview", preview }, .{ "media-preview", media_preview }, .{ "markdown-rendered", markdown_rendered },
     };
     for (tested) |entry| {
         const t = b.addTest(.{ .name = entry[0], .root_module = entry[1] });

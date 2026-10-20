@@ -19,5 +19,10 @@
   `icons/svg_to_pdf.swift` convertendo para PDF. A lista do que entra fica no script
   (`docs/adr/0011-material-file-icons.md`).
 
+- `webview2_sdk.py`: baixa o pacote Microsoft.Web.WebView2 (versão e sha256 fixados no script) e
+  gera `../apps/windows/shared/webview/sdk/` (as declarações em C das interfaces que o app usa, os
+  ids e o WebView2Loader.dll por arquitetura) (`../docs/adr/0014-webview2-on-windows.md`). Só roda
+  de novo para trocar de versão.
+
 ## Como validar
 - `make manifests` passa.
