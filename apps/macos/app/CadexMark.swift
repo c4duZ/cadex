@@ -1,28 +1,27 @@
 import AppKit
 
 /// The Cadex symbol (the C, the > and the _ of docs/cadex-icon.svg) as a
-/// template image for the menu bar: filled, like the logo, or only its
-/// outline. The paths are the SVG's, in its 1254-unit space.
+/// template image for the menu bar, always filled like the logo: full
+/// while on, faint (gray on a dark bar) while off. The outline for off
+/// looked thin and odd (owner, 2026-10-20). The paths are the SVG's, in
+/// its 1254-unit space.
 enum CadexMark {
     /// The symbol's box in the SVG: x 280...964, y 337...902.
     private static let box = NSRect(x: 280, y: 337, width: 684, height: 565)
 
-    static func image(filled: Bool, height: CGFloat = 15) -> NSImage {
+    /// How much of the color the off state keeps: templates keep alpha.
+    static let offAlpha: CGFloat = 0.4
+
+    static func image(on: Bool, height: CGFloat = 15) -> NSImage {
         let scale = height / box.height
         let size = NSSize(width: ceil(box.width * scale) + 2, height: height + 2)
         let image = NSImage(size: size, flipped: true) { _ in
             var transform = AffineTransform(translationByX: 1 - box.minX * scale, byY: 1 - box.minY * scale)
             transform.scale(scale)
-            NSColor.black.set()
+            NSColor.black.withAlphaComponent(on ? 1 : offAlpha).setFill()
             for path in paths() {
                 path.transform(using: transform)
-                if filled {
-                    path.fill()
-                } else {
-                    path.lineWidth = 1.2
-                    path.lineJoinStyle = .miter
-                    path.stroke()
-                }
+                path.fill()
             }
             return true
         }

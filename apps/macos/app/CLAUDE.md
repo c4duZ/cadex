@@ -52,8 +52,8 @@
   volta ao sair, porque o macOS a punha numa faixa por cima da barra do app. Tamanho mínimo da
   janela 480×300.
 - `MenuBarItem.swift`: o símbolo do Cadex na barra de menus do macOS (NSStatusItem), desenhado por
-  `CadexMark.swift` com os caminhos do `docs/cadex-icon.svg`, preenchido com o manter acordado
-  ligado e só o contorno desligado; o clique roda o comando do café (`powerButtonCommand`).
+  `CadexMark.swift` com os caminhos do `docs/cadex-icon.svg`, branco com o manter acordado
+  ligado e cinza desligado (o logo cheio nos dois); o clique roda o comando do café (`powerButtonCommand`).
 - `WindowBackdrop.swift`: imagem de fundo atrás da área do terminal (desfoque calculado uma vez) e,
   com vibrância, a moldura fosca; depois de ligar, os botões da janela voltam para cima da camada.
 - Sem pacote .app (make run), `main.swift` põe o ícone de `docs/cadex-icon.png` no Dock; no .app ele

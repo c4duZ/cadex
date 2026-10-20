@@ -1,7 +1,7 @@
 import AppKit
 
 /// The Cadex symbol in the macOS menu bar, by the clock (docs/spec/power.md):
-/// filled while keep-awake is on, only the outline while off, seen even with
+/// white (the bar's full color) while keep-awake is on, gray while off, seen even with
 /// Cadex behind other apps, as Amphetamine's (owner, 2026-10-20). A click
 /// does what the coffee in the title bar does.
 @MainActor
@@ -17,7 +17,7 @@ final class MenuBarItem: NSObject {
     }
 
     func show(on: Bool, tip: String) {
-        item.button?.image = CadexMark.image(filled: on)
+        item.button?.image = CadexMark.image(on: on)
         item.button?.toolTip = tip
         item.button?.setAccessibilityLabel(tip)
     }
