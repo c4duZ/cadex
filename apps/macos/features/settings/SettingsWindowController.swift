@@ -47,6 +47,11 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         window.title = "Configurações"
         window.isReleasedWhenClosed = false
         window.minSize = NSSize(width: 720, height: 420)
+        // Over the app when it is in full screen, in the same Space: a plain
+        // window opened in another Space and took the user out of the app
+        // (owner's report, 2026-10-20). Auxiliary windows also cannot go
+        // full screen themselves.
+        window.collectionBehavior = [.fullScreenAuxiliary, .moveToActiveSpace]
         window.delegate = self
 
         tabs.segmentCount = Self.sections.count
