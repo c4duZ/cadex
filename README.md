@@ -114,20 +114,24 @@ instalado. O preview web e os de mídia usam o WebView2, que já vem no Windows 
 ## Atalhos
 
 Toda ação do Cadex é um comando: o **⌘K** acha e roda qualquer uma, e os atalhos podem ser trocados
-nas configurações (⌘,). No Windows, ⌘ é Ctrl+Shift, e ⌘ com ⇧ ou ⌥ é Ctrl+Shift+Alt.
+nas configurações. No Windows vale uma regra só, para o mesmo `settings.json` servir nas duas
+máquinas: ⌘ vira Ctrl+Shift (como no Windows Terminal), e ⌘ com ⇧, ⌥ ou ⌃ vira Ctrl+Shift+Alt.
 
-| Ação | Atalho |
-|---|---|
-| Paleta de comandos | `⌘K` |
-| Nova aba / fechar painel | `⌘T` / `⌘W` |
-| Dividir à direita / para baixo | `⌘D` / `⌘⇧D` |
-| Ir para a aba 1…9 | `⌘1…9` |
-| Abrir arquivo por nome / buscar no conteúdo | `⌘P` / `⌘⇧F` |
-| Abrir pasta | `⌘O` |
-| Painel lateral / arquivos / git | `⌘B` / `⌘⇧E` / `⌘⇧G` |
-| Histórico do git | `⌘⇧H` |
-| Trocar de space / novo space | `⌘⇧S` / `⌃⌘N` |
-| Buscar no terminal / limpar | `⌘F` / `⌘L` |
+| Ação | Mac | Windows |
+|---|---|---|
+| Paleta de comandos | `⌘K` | `Ctrl+Shift+K` |
+| Nova aba / fechar painel | `⌘T` / `⌘W` | `Ctrl+Shift+T` / `Ctrl+Shift+W` |
+| Dividir à direita / para baixo | `⌘D` / `⌘⇧D` | `Ctrl+Shift+D` / `Ctrl+Shift+Alt+D` |
+| Ir para a aba 1…9 | `⌘1…9` | `Ctrl+Shift+1…9` |
+| Abrir arquivo por nome / buscar no conteúdo | `⌘P` / `⌘⇧F` | `Ctrl+Shift+P` / `Ctrl+Shift+Alt+F` |
+| Abrir pasta | `⌘O` | `Ctrl+Shift+O` |
+| Painel lateral / arquivos / git | `⌘B` / `⌘⇧E` / `⌘⇧G` | `Ctrl+Shift+B` / `Ctrl+Shift+Alt+E` / `Ctrl+Shift+Alt+G` |
+| Histórico do git | `⌘⇧H` | `Ctrl+Shift+Alt+H` |
+| Trocar de space / novo space | `⌘⇧S` / `⌃⌘N` | `Ctrl+Shift+Alt+S` / `Ctrl+Shift+Alt+N` |
+| Próximo / anterior space | `⌃⌘→` / `⌃⌘←` | `Ctrl+Shift+Alt+PgDn` / `Ctrl+Shift+Alt+PgUp` |
+| Buscar no terminal / limpar | `⌘F` / `⌘L` | `Ctrl+Shift+F` / `Ctrl+Shift+L` |
+| Copiar / colar no terminal | `⌘C` / `⌘V` | `Ctrl+Shift+C` / `Ctrl+Shift+V` (ou `Ctrl+C` com texto selecionado) |
+| Configurações | `⌘,` | `Ctrl+Shift+,` |
 
 ## Tamanho e memória
 
