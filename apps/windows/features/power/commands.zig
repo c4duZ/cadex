@@ -7,6 +7,9 @@ const power = @import("power.zig");
 
 var target: *power.Power = undefined;
 
+fn toggle(_: ?*anyopaque) void {
+    target.toggle();
+}
 fn keepAwake(_: ?*anyopaque) void {
     target.set(.always);
 }
@@ -28,6 +31,7 @@ fn notOff(_: ?*anyopaque) bool {
 
 pub fn register(registry: *palette.Registry, p: *power.Power) void {
     target = p;
+    registry.add(.{ .id = "power.toggle", .title = "Ligar ou desligar o manter acordado", .keywords = &.{ "caffeinate", "amphetamine", "acordado", "awake", "dormir", "sleep" }, .shortcut = "cmd+shift+a", .run = toggle });
     registry.add(.{ .id = "power.keep-awake", .title = "Manter o computador acordado", .keywords = &.{ "caffeinate", "amphetamine", "dormir", "sleep", "energia" }, .run = keepAwake, .available = notAlways });
     registry.add(.{ .id = "power.keep-awake-while-running", .title = "Manter acordado com programa rodando", .keywords = &.{ "caffeinate", "amphetamine", "dormir", "sleep", "agente", "build" }, .run = keepAwakeWhileRunning, .available = notRunning });
     registry.add(.{ .id = "power.allow-sleep", .title = "Deixar o computador dormir", .keywords = &.{ "caffeinate", "amphetamine", "dormir", "sleep", "desligar" }, .run = allowSleep, .available = notOff });

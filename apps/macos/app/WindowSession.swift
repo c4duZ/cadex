@@ -102,7 +102,6 @@ final class WindowSession: NSObject, NSWindowDelegate {
         window.contentView = workspace
         self.workspace = workspace
         workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.openers) ?? [] }
-        workspace.titleBar.powerCommand = { [weak self] in self?.app.powerButtonCommand ?? "power.keep-awake" }
         showPower()
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
         explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar(.files) }

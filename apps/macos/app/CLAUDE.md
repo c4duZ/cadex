@@ -39,8 +39,8 @@
 - A casca da janela, no estilo do Terax: título transparente com barra de ferramentas compacta
   (38 pt, botões da janela centrados); `TitleBarView.swift` (um grupo à esquerda com painel
   lateral, busca/paleta "⌘K" e spaces, o space só o ícone de pilha com um space e o nome com mais;
-  o café do manter acordado no fim do grupo (cheio ligado, contorno desligado; o clique roda o
-  comando que `powerButtonCommand` diz, o modo padrão ou desligar); depois as abas, "+" e as
+  o café do manter acordado antes do space (cheio ligado, contorno desligado; o clique roda
+  power.toggle, o ⇧⌘A); depois as abas, "+" e as
   configurações à direita; cada controle um `TitleBarButton.swift` de
   26 pt com fundo ao passar e ao clicar,
   busca, todos por comando), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
@@ -53,7 +53,7 @@
   janela 480×300.
 - `MenuBarItem.swift`: o símbolo do Cadex na barra de menus do macOS (NSStatusItem), desenhado por
   `CadexMark.swift` com os caminhos do `docs/cadex-icon.svg`, branco com o manter acordado
-  ligado, com a chama (fire-simple do Phosphor fill) saindo do braço de cima do >, e cinza desligado (o logo cheio nos dois); o clique roda o comando do café (`powerButtonCommand`).
+  ligado, com a chama (fire-simple do Phosphor fill) saindo do braço de cima do >, e cinza desligado (o logo cheio nos dois); o clique roda power.toggle.
 - `WindowBackdrop.swift`: imagem de fundo atrás da área do terminal (desfoque calculado uma vez) e,
   com vibrância, a moldura fosca; depois de ligar, os botões da janela voltam para cima da camada.
 - Sem pacote .app (make run), `main.swift` põe o ícone de `docs/cadex-icon.png` no Dock; no .app ele

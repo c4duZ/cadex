@@ -258,12 +258,6 @@ pub const App = struct {
         };
     }
 
-    /// The coffee: off turns on the settings' mode, on turns off, by the
-    /// same commands as Ctrl+Shift+K (ADR 0005).
-    pub fn powerButtonCommand(self: *App) []const u8 {
-        if (self.power.mode != .off) return "power.allow-sleep";
-        return if (std.mem.eql(u8, self.settings.current.power.mode, "running")) "power.keep-awake-while-running" else "power.keep-awake";
-    }
 
     fn drawOverlays(self: *App) void {
         const u = &self.u;

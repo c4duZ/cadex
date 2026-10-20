@@ -279,6 +279,7 @@ pub fn applySettings(app: *App) void {
     app.shortcuts.reload(app.gpa, prefs.items);
     app.explorer.setShowHidden(s.explorer.show_hidden);
     app.power.setDisplay(s.power.keep_display_on);
+    app.power.default_mode = @import("power").Mode.parse(s.power.mode);
     if (app.explorer.root()) |r| app.search.setRoot(r, s.explorer.show_hidden);
     eachView(app, struct {
         fn apply(a: *App, v: *terminal.View) void {

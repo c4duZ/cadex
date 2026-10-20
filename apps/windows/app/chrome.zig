@@ -41,6 +41,13 @@ pub fn titleBar(app: *App, area: gfx.Rect) void {
     _ = row.takeLeft(u.px(8));
     const left_group = row.takeLeft(u.px(8));
     _ = left_group;
+    // Keep-awake, before the space as on the Mac: filled while on, the
+    // outline while off; a click runs power.toggle (docs/spec/power.md).
+    const power_r = hole(app, .{ .x = row.x, .y = top, .w = u.px(30), .h = h });
+    _ = row.takeLeft(u.px(30) + u.px(10));
+    if (ui.widgets.iconButton(u, ui.id("title.power", 0), power_r, icons.phosphor.coffee, .{ .icon_size = 15, .filled = app.power.mode != .off, .color = u.style.secondary_text })) {
+        _ = app.registry.run("power.toggle");
+    }
     // The space: its icon, and its name once there are several (the Mac's).
     const several = app.spaces.list.items.len > 1;
     const space_w = if (several) u.painter.measure(app.spaces.name(), u.style.small()) + u.px(36) else u.px(30);
@@ -54,13 +61,6 @@ pub fn titleBar(app: *App, area: gfx.Rect) void {
     u.painter.fillRounded(search, u.px(7), u.style.field);
     if (ui.widgets.button(u, ui.id("title.search", 0), search, search_label, .{ .icon = icons.phosphor.magnifying_glass, .icon_size = 14, .radius = 7, .color = u.style.secondary_text })) {
         _ = app.registry.run("palette.open");
-    }
-    // Keep-awake, next to the search: filled while on, the outline while
-    // off; a click turns it on in the settings' mode or off (docs/spec/power.md).
-    const power_r = hole(app, .{ .x = row.x, .y = top, .w = u.px(30), .h = h });
-    _ = row.takeLeft(u.px(30) + u.px(10));
-    if (ui.widgets.iconButton(u, ui.id("title.power", 0), power_r, icons.phosphor.coffee, .{ .icon_size = 15, .filled = app.power.mode != .off, .color = u.style.secondary_text })) {
-        _ = app.registry.run(app.powerButtonCommand());
     }
 
     const settings_r = hole(app, .{ .x = row.right() - u.px(34), .y = top, .w = u.px(30), .h = h });

@@ -37,10 +37,8 @@ final class TitleBarView: NSView {
     private let newTabButton = TitleBarButton(icon: .plus, tip: "Abrir terminal, arquivo, preview ou grafo do git")
     private let settingsButton = TitleBarButton(icon: .gearSix, tip: "Configurações (⌘,)")
     /// Keep-awake, in the group: filled while on, the outline while off; a
-    /// click turns it on in the settings' mode or off (docs/spec/power.md).
+    /// click runs power.toggle, as ⇧⌘A (docs/spec/power.md).
     private let powerButton = TitleBarButton(icon: .coffee, tip: "Manter acordado")
-    /// The command the coffee runs now (the app decides from the state).
-    var powerCommand: (() -> String)?
     /// The shown space's tabs; swapped when the space changes.
     private(set) var tabBar: TabBarView?
     private var tabBarConstraints: [NSLayoutConstraint] = []
@@ -63,14 +61,12 @@ final class TitleBarView: NSView {
         spaceButton.onPress = { [weak self] in self?.run("space.switch") }
         newTabButton.onPress = { [weak self] in self?.showNewMenu() }
         settingsButton.onPress = { [weak self] in self?.run("settings.open") }
-        powerButton.onPress = { [weak self] in
-            guard let self, let id = self.powerCommand?() else { return }
-            self.run(id)
-        }
+        powerButton.onPress = { [weak self] in self?.run("power.toggle") }
 
         group.wantsLayer = true
         group.layer?.cornerRadius = 8
-        let inside = NSStackView(views: [sidebarButton, searchButton, spaceButton, powerButton])
+        // The coffee before the spaces (owner, 2026-10-20).
+        let inside = NSStackView(views: [sidebarButton, searchButton, powerButton, spaceButton])
         inside.spacing = 0
         // 1 pt around 26 pt buttons: the group is 28 pt tall, as the tabs.
         inside.edgeInsets = NSEdgeInsets(top: 1, left: 1, bottom: 1, right: 1)

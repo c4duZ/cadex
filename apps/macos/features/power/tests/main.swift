@@ -43,6 +43,15 @@ let exitCode = await Checks.run([
         expect(!hold.held && !power.isHolding && power.mode == .running)
         power.set(.off)
     }),
+    ("toggle turns on the default mode and then off", {
+        let hold = FakeHold()
+        let power = PowerController(anyRunning: { false }, holder: hold)
+        power.defaultMode = .running
+        power.toggle()
+        expect(power.mode == .running)
+        power.toggle()
+        expect(power.mode == .off && !hold.held)
+    }),
     ("a request the system refuses goes back to off", {
         let hold = FakeHold()
         hold.refuse = true

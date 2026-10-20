@@ -16,7 +16,7 @@
   terminais a cada 5 s. `keepDisplayOn` vale na hora. `onChange` avisa o ícone.
 - `PowerHold.swift`: os pedidos do IOKit (PreventSystemSleep, que vale com a tampa fechada na
   tomada; PreventUserIdleSystemSleep; e o da tela, se pedido). Pedido recusado volta a off.
-- `PowerCommands.swift`: power.keep-awake, power.keep-awake-while-running e power.allow-sleep; cada
+- `PowerCommands.swift`: power.toggle (⇧⌘A: o modo padrão, `defaultMode`, ou desligar), power.keep-awake, power.keep-awake-while-running e power.allow-sleep; cada
   um some quando não muda nada.
 - Spec: `docs/spec/power.md`.
 

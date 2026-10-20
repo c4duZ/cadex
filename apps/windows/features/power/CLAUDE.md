@@ -14,7 +14,7 @@
 - `power.zig`: Power (modo, se segura agora, tela acesa) sobre SetThreadExecutionState
   (ES_SYSTEM_REQUIRED, e ES_DISPLAY_REQUIRED com a tela acesa); `check` roda na conferência de um
   segundo do app. `shouldHold` é a regra pura, testada.
-- `commands.zig`: power.keep-awake, power.keep-awake-while-running e power.allow-sleep, os ids do
+- `commands.zig`: power.toggle (Ctrl+Shift+Alt+A, o modo padrão ou desligar), power.keep-awake, power.keep-awake-while-running e power.allow-sleep, os ids do
   Mac; cada um some quando não muda nada.
 - Spec: `../../../../docs/spec/power.md`. Referência: `../../../macos/features/power/`.
 

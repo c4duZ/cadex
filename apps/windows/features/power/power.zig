@@ -36,11 +36,19 @@ pub const Power = struct {
     holding: bool = false,
     /// power.keepDisplayOn: the screen stays on too.
     keep_display_on: bool = false,
+    /// What toggle turns on: power.mode in settings.json.
+    default_mode: Mode = .always,
 
     pub fn set(self: *Power, mode: Mode) void {
         if (mode == self.mode) return;
         self.mode = mode;
         self.check(true);
+    }
+
+    /// Ctrl+Shift+Alt+A and the coffee: off turns on the default mode, on
+    /// turns off.
+    pub fn toggle(self: *Power) void {
+        self.set(if (self.mode == .off) self.default_mode else .off);
     }
 
     pub fn setDisplay(self: *Power, on: bool) void {

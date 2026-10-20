@@ -18,10 +18,10 @@ app à parte como o Amphetamine e sem o comando `caffeinate`. Pedido do dono em 
   acesa (padrão não: a tela pode apagar, o computador segue rodando). No settings.json:
   power.mode ("always" ou "running"), power.onAtLaunch e power.keepDisplayOn. No ⌘K (no Windows,
   Ctrl+Shift+K) os dois modos aparecem, para escolher qualquer um na hora.
-- O café fica no grupo da esquerda da barra de título, depois do painel lateral, da busca e dos
-  spaces (no Windows, depois da busca), sempre à vista: cheio ligado, só o contorno desligado.
-  Clicar liga no modo padrão das configurações, ou desliga se estiver ligado; roda os mesmos
-  comandos do ⌘K. Passar o ponteiro diz o estado e o que o clique faz.
+- O café fica no grupo da esquerda da barra de título, depois do painel lateral e da busca e antes
+  dos spaces (no Windows, antes dos spaces), sempre à vista: cheio ligado, só o contorno desligado.
+  Clicar liga no modo padrão das configurações, ou desliga se estiver ligado: é o comando "Ligar ou
+  desligar o manter acordado", também no ⇧⌘A (no Windows, Ctrl+Shift+Alt+A) e no ⌘K. Passar o ponteiro diz o estado e o que o clique faz.
 - No Mac, o símbolo do Cadex (o C, o > e o _ do logo) fica na barra de menus do macOS, perto do
   relógio, enquanto o Cadex estiver aberto, visível com ele atrás de outros apps: o logo cheio,
   cinza desligado e branco ligado (na barra clara, cinza e preto), e ligado uma chama sai do > do

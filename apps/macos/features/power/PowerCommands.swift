@@ -9,6 +9,9 @@ public enum PowerCommands {
             { [weak power] in power?.mode == mode ? reason : nil }
         }
         return [
+            Command(id: "power.toggle", title: "Ligar ou desligar o manter acordado",
+                    keywords: ["caffeinate", "amphetamine", "acordado", "awake", "dormir", "sleep"], category: .app,
+                    defaultShortcut: "cmd+shift+a", action: .run { [weak power] in power?.toggle() }),
             Command(id: "power.keep-awake", title: "Manter o computador acordado",
                     keywords: ["caffeinate", "amphetamine", "dormir", "sleep", "energia"], category: .app,
                     action: .run { [weak power] in power?.set(.always) }, unavailableReason: unless(.always, "Já está acordado")),

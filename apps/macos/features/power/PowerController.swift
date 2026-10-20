@@ -17,6 +17,8 @@ public final class PowerController {
     public var keepDisplayOn = false {
         didSet { if keepDisplayOn != oldValue, isHolding { holdNow() } }
     }
+    /// What toggle() turns on: power.mode in settings.json.
+    public var defaultMode: Mode = .always
     /// The mode or the hold changed (the title bar's icon).
     public var onChange: (() -> Void)?
 
@@ -48,6 +50,12 @@ public final class PowerController {
             }
         }
         check(force: true)
+    }
+
+    /// ⇧⌘A, the coffee and the menu bar symbol: off turns on the default
+    /// mode, on turns off (owner, 2026-10-20).
+    public func toggle() {
+        set(mode == .off ? defaultMode : .off)
     }
 
     /// Holds or releases as the mode and the terminals say now.
