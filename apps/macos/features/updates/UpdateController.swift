@@ -2,8 +2,9 @@ import Foundation
 import Strings
 
 /// The entry point of updates (docs/spec/updates.md): looks for a newer
-/// Cadex at launch and every 6 hours, and installs it on request. One for
-/// the whole app; every window's title bar shows its state.
+/// Cadex after launch and every 6 hours, opens the panel the first time it
+/// finds one, and installs it on request. One for the whole app; every
+/// window's title bar shows its state.
 @MainActor
 public final class UpdateController {
     public enum State: Equatable {
@@ -37,6 +38,14 @@ public final class UpdateController {
     private let feed: URL
     private var timer: Timer?
     private var panel: UpdatePanel?
+    private let defaults: UserDefaults
+    /// The version whose panel opened by itself in this run: "Later" means
+    /// until the next launch, not until the next 6-hour check.
+    private var promptedVersion: String?
+    /// Opens the panel for a version found by an automatic check; tests
+    /// replace it, since they have no windows.
+    var prompt: (() -> Void)?
+    static let skippedKey = "updates.skippedVersion"
 
     static let defaultFeed = URL(string: "https://github.com/c4duZ/cadex/releases/latest/download/latest.json")!
     /// Between automatic checks while Cadex stays open.
@@ -52,19 +61,24 @@ public final class UpdateController {
         self.init(currentVersion: version, feed: feed, installer: installer)
     }
 
-    init(currentVersion: String, feed: URL, installer: UpdateInstaller?) {
+    init(currentVersion: String, feed: URL, installer: UpdateInstaller?, defaults: UserDefaults = .standard) {
         self.currentVersion = currentVersion
         self.feed = feed
         self.installer = installer
+        self.defaults = defaults
     }
+
+    /// The version "Don't Remind Me Again" was pressed on: it no longer
+    /// opens the panel or shows the button; a newer one does.
+    var skippedVersion: String? { defaults.string(forKey: Self.skippedKey) }
 
     /// Why the commands cannot run here, or nil.
     public var unavailableReason: String? {
         installer == nil ? T("Only in the installed Cadex", "Só no Cadex instalado") : nil
     }
 
-    /// The first check a few seconds after launch, so it does not compete
-    /// with opening the window, then every 6 hours.
+    /// The first check a few seconds after launch, in the background, so
+    /// opening is not slower for it (owner, 2026-10-20); then every 6 hours.
     public func start() {
         guard installer != nil else { return }
         timer = Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { [weak self] _ in
@@ -92,7 +106,8 @@ public final class UpdateController {
     }
 
     /// Looks at latest.json. An automatic check that fails keeps quiet:
-    /// no internet is not worth a message (docs/spec/updates.md).
+    /// no internet is not worth a message (docs/spec/updates.md). One that
+    /// finds a version not skipped opens the panel, once per run.
     func check(manual: Bool) async {
         switch state {
         case .checking, .downloading, .installed: return
@@ -102,7 +117,13 @@ public final class UpdateController {
         if manual { state = .checking }
         do {
             let release = try await fetchRelease()
-            state = UpdateVersion.isNewer(release.version, than: currentVersion) ? .available(release) : .upToDate
+            guard UpdateVersion.isNewer(release.version, than: currentVersion) else { return state = .upToDate }
+            if !manual && release.version == skippedVersion { return state = .idle }
+            state = .available(release)
+            if !manual && promptedVersion != release.version {
+                promptedVersion = release.version
+                (prompt ?? showPanel)()
+            }
         } catch {
             state = manual ? .failed(Self.describe(error)) : before
         }
@@ -139,6 +160,15 @@ public final class UpdateController {
                 state = .failed(Self.describe(error))
             }
         }
+    }
+
+    /// "Don't Remind Me Again": this version stays quiet from now on, in
+    /// this run and the next ones. "Check for Updates" still offers it.
+    public func skip() {
+        guard case .available(let release) = state else { return }
+        defaults.set(release.version, forKey: Self.skippedKey)
+        state = .idle
+        panel?.hide()
     }
 
     /// The version waiting, for the title bar's tip.

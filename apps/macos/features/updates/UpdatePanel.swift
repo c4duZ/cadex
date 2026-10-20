@@ -14,6 +14,8 @@ final class UpdatePanel: NSObject {
     private lazy var notesScroll = NSScrollView()
     private let progress = NSProgressIndicator()
     private let secondButton = NSButton(title: "", target: nil, action: nil)
+    /// "Don't Remind Me Again", on the left as macOS puts the odd choice out.
+    private let skipButton = NSButton(title: "", target: nil, action: nil)
     private let mainButton = NSButton(title: "", target: nil, action: nil)
     /// The command the main button runs, if any; otherwise it closes.
     private var mainCommand: String?
@@ -27,7 +29,13 @@ final class UpdatePanel: NSObject {
         self.window = window
         render()
         if !window.isVisible { window.center() }
-        window.makeKeyAndOrderFront(nil)
+        // A test instance must not take the keyboard (CADEX_BACKGROUND,
+        // the same rule as its window).
+        if ProcessInfo.processInfo.environment["CADEX_BACKGROUND"] == "1" {
+            window.orderFrontRegardless()
+        } else {
+            window.makeKeyAndOrderFront(nil)
+        }
     }
 
     /// Follows the controller's state while open.
@@ -39,6 +47,7 @@ final class UpdatePanel: NSObject {
         progress.isHidden = true
         mainCommand = nil
         secondButton.isHidden = true
+        skipButton.isHidden = true
         switch state {
         case .idle, .checking:
             set(T("Checking for updates…", "Procurando atualizações…"), "")
@@ -51,6 +60,7 @@ final class UpdatePanel: NSObject {
             set(T("Cadex \(release.version) is available", "Cadex \(release.version) disponível"),
                 T("You are on \(current).", "Você está na \(current)."))
             notesText = release.notes
+            skipButton.isHidden = false
             secondButton.title = T("Later", "Depois")
             secondButton.isHidden = false
             mainButton.title = T("Install and Reopen", "Instalar e reabrir")
@@ -97,11 +107,15 @@ final class UpdatePanel: NSObject {
     }
 
     @objc private func mainPressed() {
-        guard let command = mainCommand else { return close() }
+        guard let command = mainCommand else { return hide() }
         controller.runCommand?(command)
     }
 
-    @objc private func close() {
+    @objc private func skipPressed() {
+        controller.runCommand?("app.skip-update")
+    }
+
+    @objc func hide() {
         window?.orderOut(nil)
     }
 
@@ -126,12 +140,15 @@ final class UpdatePanel: NSObject {
         progress.minValue = 0
         progress.maxValue = 1
         secondButton.target = self
-        secondButton.action = #selector(close)
+        secondButton.action = #selector(hide)
+        skipButton.title = T("Don't Remind Me Again", "Não lembrar de novo")
+        skipButton.target = self
+        skipButton.action = #selector(skipPressed)
         mainButton.target = self
         mainButton.action = #selector(mainPressed)
         mainButton.keyEquivalent = "\r"
         secondButton.keyEquivalent = "\u{1b}"
-        let buttons = NSStackView(views: [NSView(), secondButton, mainButton])
+        let buttons = NSStackView(views: [skipButton, NSView(), secondButton, mainButton])
         buttons.spacing = 8
         let stack = NSStackView(views: [titleLabel, detailLabel, notesScroll, progress, buttons])
         stack.orientation = .vertical

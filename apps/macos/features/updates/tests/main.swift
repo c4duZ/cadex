@@ -111,11 +111,42 @@ let exitCode = await Checks.run([
         let feed = folder.appendingPathComponent("latest.json")
         try Data(#"{"version":"1.3.0","notes":"","url":"https://example.com/Cadex.zip","sha256":"","signature":""}"#.utf8).write(to: feed)
         let newer = UpdateController(currentVersion: "1.2.0", feed: feed, installer: nil)
+        newer.prompt = {}
         await newer.check(manual: false)
         expect(newer.pendingVersion == "1.3.0" && newer.showsButton)
         let same = UpdateController(currentVersion: "1.3.0", feed: feed, installer: nil)
         await same.check(manual: true)
         expect(same.state == .upToDate && !same.showsButton)
+    }),
+    ("a found version opens the panel once per run; skipped, it stays quiet", {
+        let folder = try temporaryFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let feed = folder.appendingPathComponent("latest.json")
+        try Data(#"{"version":"1.3.0","notes":"","url":"https://example.com/Cadex.zip","sha256":"","signature":""}"#.utf8).write(to: feed)
+        let suite = "cadex-updates-test-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        var prompts = 0
+        let updates = UpdateController(currentVersion: "1.2.0", feed: feed, installer: nil, defaults: defaults)
+        updates.prompt = { prompts += 1 }
+        await updates.check(manual: false)
+        await updates.check(manual: false)
+        expect(prompts == 1 && updates.showsButton, "\(prompts) prompts")
+        updates.skip()
+        expect(!updates.showsButton && updates.skippedVersion == "1.3.0")
+        // The next launch: still quiet for 1.3.0, but a manual check offers it.
+        let next = UpdateController(currentVersion: "1.2.0", feed: feed, installer: nil, defaults: defaults)
+        next.prompt = { prompts += 1 }
+        await next.check(manual: false)
+        expect(prompts == 1 && !next.showsButton)
+        await next.check(manual: true)
+        expect(next.pendingVersion == "1.3.0" && prompts == 1)
+        // A newer version than the skipped one speaks up again.
+        try Data(#"{"version":"1.4.0","notes":"","url":"https://example.com/Cadex.zip","sha256":"","signature":""}"#.utf8).write(to: feed)
+        let later = UpdateController(currentVersion: "1.2.0", feed: feed, installer: nil, defaults: defaults)
+        later.prompt = { prompts += 1 }
+        await later.check(manual: false)
+        expect(prompts == 2 && later.pendingVersion == "1.4.0")
     }),
     ("an automatic check that fails keeps quiet; a manual one says why", {
         let missing = URL(fileURLWithPath: "/nonexistent/latest.json")

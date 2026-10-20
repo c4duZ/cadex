@@ -23,6 +23,15 @@ public enum UpdateCommands {
                         default: return T("No update found", "Nenhuma atualização encontrada")
                         }
                     }),
+            Command(id: "app.skip-update", title: T("Don't Remind Me About This Update", "Não lembrar desta atualização"),
+                    keywords: ["update", "skip", "ignore", "atualizar", "pular", "ignorar"], category: .app,
+                    action: .run { [weak updates] in updates?.skip() },
+                    unavailableReason: { [weak updates] in
+                        guard let updates, case .available = updates.state else {
+                            return T("No update waiting", "Nenhuma atualização esperando")
+                        }
+                        return nil
+                    }),
         ]
     }
 }
