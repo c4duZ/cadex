@@ -21,7 +21,7 @@
   terminal ou campo de texto) ou closure da feature dona. O atalho padrão mora no comando.
 - `CommandRegistry.swift`: registro, execução por id, recentes. `StandardCommands.swift`: sair,
   ocultar, desfazer, copiar, colar. `CommandMenu.swift`: menu da aplicação gerado do registro, e
-  `popup(_:)`, o menu do "+" com os pins.
+  `popup(_:)`, as linhas do menu do "+" com os pins (no menu do app de `apps/macos/shared/menus`).
 - Paleta: `CommandPaletteController.swift` (comando palette.open; `open(_:)` mostra qualquer fonte,
   o mesmo atalho de novo fecha, outro troca; `addPrefix` liga `/`, `#` e `@` a outras fontes no ⌘K;
   `style` recebe as cores do tema pelo app; descarta resultado de consulta velha; devolve o foco à

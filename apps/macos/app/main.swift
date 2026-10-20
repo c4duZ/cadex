@@ -1,9 +1,11 @@
 import AppKit
 import CommandPalette
 import Explorer
+import Menus
 import Settings
 import Shortcuts
 import Tabs
+import Themes
 
 /// What the windows share: settings, the settings window, the keymap and
 /// the shortcut dispatcher. Each window is a WindowSession; ⌘N opens
@@ -30,6 +32,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         connectSettings()
         settings.start()
+        // The popup menus take the theme's colors, the same as ⌘K's.
+        ThemeStore.shared.observe { theme in
+            let ui = theme.interface
+            MenuStyle.current = MenuStyle(
+                background: ui.panel.nsColor, border: ui.panelBorder.nsColor, text: ui.text.nsColor,
+                secondaryText: ui.secondaryText.nsColor, selection: ui.tabActive.nsColor, accent: ui.accent.nsColor,
+                keycap: ui.field.nsColor)
+        }
         let main = WindowSession(app: self, folder: WorkspaceFolder(), isMain: true)
         sessions.append(main)
         catalog.register(main.commands.commands)

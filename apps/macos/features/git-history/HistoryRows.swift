@@ -1,4 +1,6 @@
 import AppKit
+import Icons
+import Menus
 
 /// The commits' table: graph, subject with the refs, author, date and sha.
 /// Cells are made only for the rows on screen and reused; nearing the end
@@ -6,7 +8,7 @@ import AppKit
 @MainActor
 final class HistoryRows: NSObject, NSTableViewDataSource, NSTableViewDelegate {
     weak var document: HistoryDocument?
-    weak var table: NSTableView?
+    weak var table: MenuTableView?
     var commits: [HistoryCommit] = []
     var showsGraph = true
     /// Selecting a row from code (after a reload) does not reload details.
@@ -48,7 +50,7 @@ final class HistoryRows: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         table.usesAlternatingRowBackgroundColors = false
         table.dataSource = self
         table.delegate = self
-        table.menu = menu()
+        table.contextEntries = { [weak self] row in self?.menuEntries(row) ?? [] }
     }
 
     func numberOfRows(in tableView: NSTableView) -> Int { commits.count }
@@ -125,23 +127,18 @@ final class HistoryRows: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         return text
     }
 
-    /// Each item runs a registered command on the selected commit.
-    private func menu() -> NSMenu {
-        let menu = NSMenu()
-        for (title, id) in [("Copiar sha", "history.copy-sha"), ("Abrir no remoto", "history.open-remote")] {
-            let item = NSMenuItem(title: title, action: #selector(runMenuItem(_:)), keyEquivalent: "")
-            item.target = self
-            item.representedObject = id
-            menu.addItem(item)
+    /// Each item runs a registered command on the clicked commit, which
+    /// becomes the selection first so the command acts on it.
+    private func menuEntries(_ row: Int) -> [MenuEntry] {
+        guard row >= 0 else { return [] }
+        let items: [(String, String, Icon)] = [("Copiar sha", "history.copy-sha", .copy), ("Abrir no remoto", "history.open-remote", .arrowSquareOut)]
+        return items.map { title, id, icon in
+            MenuEntry(title, icon: icon) { [weak self] in
+                if let table = self?.table, row != table.selectedRow {
+                    table.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+                }
+                _ = self?.document?.runCommand?(id)
+            }
         }
-        return menu
-    }
-
-    @objc private func runMenuItem(_ item: NSMenuItem) {
-        // The clicked row becomes the selection, so the command acts on it.
-        if let table, table.clickedRow >= 0, table.clickedRow != table.selectedRow {
-            table.selectRowIndexes(IndexSet(integer: table.clickedRow), byExtendingSelection: false)
-        }
-        if let id = item.representedObject as? String { _ = document?.runCommand?(id) }
     }
 }

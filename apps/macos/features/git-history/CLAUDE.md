@@ -15,7 +15,7 @@
   atual, detalhes e URL do remoto do commit selecionado, recarga quando algo muda em .git
   (`diskChanged`, vindo do watcher do explorer pelo app).
 - `HistoryView.swift` (busca, lista, detalhes embaixo), `HistoryRows.swift` (células reaproveitadas
-  só das linhas na tela, etiquetas, datas em português, menu de contexto), `HistoryGraphView.swift`
+  só das linhas na tela, etiquetas, datas em português, menu de contexto no `MenuTableView` compartilhado), `HistoryGraphView.swift`
   (uma linha do grafo: retas, curvas nas bifurcações e merges, ponto vazado no merge) e
   `HistoryDetailsView.swift` (mensagem, autor, pais, arquivos com +/−; clicar abre o diff).
 - Comandos em `HistoryCommands.swift`: git.history (⇧⌘H), history.copy-sha, history.open-remote,

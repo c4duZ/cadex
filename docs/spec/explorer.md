@@ -26,6 +26,8 @@ segue a documentação pública do VS Code; o código de cores por tipo vem do C
 - Linhas de largura inteira, 22 pt de altura, recuo de 8 pt por nível depois da seta.
 - Um clique abre: arquivo na aba, pasta abre ou fecha. Com ⌘ ou ⇧ o clique só monta a seleção.
   Dois cliques para tudo foi a queixa do dono (2026-10-19).
+- Dois cliques numa pasta levam o terminal até ela ("Abrir no terminal"); a pasta fica aberta na
+  árvore. Pedido do dono em 2026-10-20.
 - Guias de recuo: linhas verticais finas que descem do centro da seta de cada pasta aberta e
   passam pelos filhos dela, com o ponteiro sobre a árvore.
 - Ao passar o ponteiro, a linha ganha um fundo leve. A selecionada tem o fundo na cor do tema e,
@@ -54,6 +56,11 @@ segue a documentação pública do VS Code; o código de cores por tipo vem do C
   com o foco na árvore (o terminal usa as mesmas). ⇧⌘E leva o foco para a árvore.
 
 ### Operações (todas são comandos, também no menu de contexto)
+- O menu de contexto (clique direito) é o do app, com a cara do ⌘K: cores do tema, ícone em cada
+  item, seleção arredondada e as teclas da árvore (↩, F2, ⌘C, ⌘V, ⌘⌫) à direita. Mostra só o que
+  vale para o que foi clicado: numa pasta começa por "Abrir no terminal"; num arquivo, pelas formas
+  de abrir. O que não pode rodar agora (colar sem nada copiado) fica de fora. Clicar abaixo das
+  linhas é a pasta do workspace (novo arquivo, nova pasta, colar, abrir no terminal).
 - **Novo arquivo** e **Nova pasta**: criam dentro da pasta selecionada (ou na pasta do arquivo
   selecionado) e já entram no modo de renomear com o nome sugerido selecionado.
 - **Renomear**: edição no próprio lugar da linha. Enter confirma, Esc cancela. Nome vazio, com `/`
@@ -66,7 +73,9 @@ segue a documentação pública do VS Code; o código de cores por tipo vem do C
 - **Abrir arquivo** segue a configuração "Abrir arquivos" (ao lado ou em nova aba). **Abrir ao
   lado** e **Abrir em nova aba**, logo depois dele no menu de contexto, escolhem na hora.
 - **Revelar no Finder**, **Copiar caminho** e **Copiar caminho relativo**.
-- **Abrir no terminal**: o painel com foco faz `cd` para a pasta (do arquivo, se for arquivo).
+- **Abrir no terminal**: o painel com foco faz `cd` para a pasta (do arquivo, se for arquivo). Se
+  ele roda um programa (um agente, um servidor) ou o foco está num documento, abre uma aba nova de
+  terminal na pasta, para o `cd` não cair dentro do programa.
 - **Arrastar para o terminal**: soltar arquivos num painel cola os caminhos escapados para o shell,
   como arrastar do Finder.
 

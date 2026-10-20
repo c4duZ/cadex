@@ -1,4 +1,5 @@
 import AppKit
+import Menus
 
 /// The history tab's view: search and "only the current branch" on top,
 /// the commits with the graph, and the selected commit's details below.
@@ -11,7 +12,7 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
     private let currentOnly = NSButton(checkboxWithTitle: "Só a branch atual", target: nil, action: nil)
     private let progress = NSProgressIndicator()
     private let count = NSTextField(labelWithString: "")
-    let table = NSTableView()
+    let table = MenuTableView()
     private let rows = HistoryRows()
     private let scroll = NSScrollView()
     let detailsView = HistoryDetailsView()

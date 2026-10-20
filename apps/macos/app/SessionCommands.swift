@@ -70,10 +70,23 @@ extension WindowSession {
     /// terminal through the tabs, and hidden files are a saved preference.
     private func makeExplorer() {
         let explorer = ExplorerController(root: folder.root) { [weak self] id in self?.commands.run(id) ?? false }
-        explorer.openInTerminal = { [weak self] path in self?.tabs?.activeTerminal?.changeDirectory(to: path) }
+        explorer.openInTerminal = { [weak self] path in self?.takeTerminal(to: path) }
         explorer.onShowHiddenChange = { [weak self] show in self?.settings.store.update { $0.explorer.showHidden = show } }
         commands.register(ExplorerCommands.all(explorer))
         self.explorer = explorer
+    }
+
+    /// "Abrir no terminal" and a double click on a folder: the focused
+    /// terminal goes there; one running a program (an agent, a server) or
+    /// a document in focus gets a new terminal tab there instead, since
+    /// `cd` would be typed into the program (docs/spec/explorer.md).
+    private func takeTerminal(to path: String) {
+        guard let tabs else { return }
+        if let terminal = tabs.activeTerminal, !terminal.hasForegroundProcess {
+            terminal.changeDirectory(to: path)
+        } else {
+            tabs.newTab(cwd: path)
+        }
     }
 
     /// ⌘P and ⌘⇧F over the workspace folder; the chosen file opens in a tab.

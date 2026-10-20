@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Menus
 
 /// The Git view of the sidebar (docs/spec/source-control.md): branch and
 /// sync buttons on top, the lists of changes, the commit message at the
@@ -11,7 +12,7 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
     private let sync = NSTextField(labelWithString: "")
     private var buttons: [NSButton] = []
     private let progress = NSProgressIndicator()
-    let table = NSTableView()
+    let table = MenuTableView()
     private let scroll = NSScrollView()
     private let messageView = NSTextView()
     private let messageScroll = NSScrollView()
@@ -92,7 +93,8 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
 
     /// The entries the context menu acts on: the clicked row, or the selection.
     func selectedEntries() -> [(GitRepository.Entry, Bool)] {
-        let indexes = table.clickedRow >= 0 && !table.selectedRowIndexes.contains(table.clickedRow) ? IndexSet(integer: table.clickedRow) : table.selectedRowIndexes
+        let clicked = table.menuRow
+        let indexes = clicked >= 0 && !table.selectedRowIndexes.contains(clicked) ? IndexSet(integer: clicked) : table.selectedRowIndexes
         return indexes.compactMap { i in
             if case let .entry(e, staged) = rows[i] { return (e, staged) }
             return nil
@@ -146,7 +148,7 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
         table.allowsMultipleSelection = true
         table.dataSource = self
         table.delegate = self
-        table.menu = SourceControlMenu.make(for: self)
+        table.contextEntries = { [weak self] _ in self.map(SourceControlMenu.entries) ?? [] }
         scroll.documentView = table
         scroll.drawsBackground = false
         scroll.hasVerticalScroller = true

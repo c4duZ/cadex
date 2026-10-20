@@ -101,7 +101,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         let workspace = WorkspaceView(explorer: explorer, git: git) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace
         self.workspace = workspace
-        workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.openers) }
+        workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.openers) ?? [] }
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
         explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar(.files) }
         git.onOpenFile = { [weak opener] path in opener?.open(path) }

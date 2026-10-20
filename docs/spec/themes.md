@@ -20,7 +20,9 @@ temas que ele já usava no Terax.
 - O formato do tema é um arquivo JSON do Cadex (as cores da interface e do terminal). Importar
   temas do Terax ficou de fora: os temas do Terax são os mesmos que vêm embutidos, e o dono não usa
   temas próprios (2026-10-19).
-- A janela de configurações também segue o tema.
+- A janela de configurações também segue o tema. Os menus que abrem pelo clique (clique direito, o
+  "+" das abas, as pastas da barra de status) também: as cores do ⌘K, não o menu translúcido do
+  sistema (o dono, 2026-10-20). Só a barra de menus do macOS fica do sistema.
 - Imagem de fundo: opcional, atrás da área do terminal, com opacidade e desfoque; a imagem escolhida
   é copiada para o Cadex. Vibrância: a moldura fica fosca sobre o que está atrás da janela, e os
   painéis continuam sólidos. As duas vêm desligadas, porque custam desempenho a cada quadro.

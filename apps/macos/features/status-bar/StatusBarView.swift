@@ -1,4 +1,5 @@
 import AppKit
+import Menus
 
 /// The bar at the bottom of the window: the focused terminal's folder as a
 /// trail of pieces, each with a menu of its subfolders, and the environment
@@ -86,25 +87,17 @@ public final class StatusBarView: NSView {
 
     @objc private func pieceClicked(_ sender: NSButton) {
         guard let folder = sender.identifier?.rawValue else { return }
-        let menu = NSMenu()
+        var entries: [MenuEntry]
         if let names = Breadcrumb.subfolders(of: folder) {
-            if names.isEmpty { menu.addItem(withTitle: "Sem subpastas", action: nil, keyEquivalent: "").isEnabled = false }
-            for name in names {
-                let item = NSMenuItem(title: name, action: #selector(folderPicked(_:)), keyEquivalent: "")
-                item.target = self
-                item.representedObject = (folder as NSString).appendingPathComponent(name)
-                item.isEnabled = canNavigate
-                menu.addItem(item)
+            entries = names.map { name in
+                let path = (folder as NSString).appendingPathComponent(name)
+                return MenuEntry(name, icon: .folder, isEnabled: canNavigate) { [weak self] in self?.onNavigate?(path) }
             }
+            if names.isEmpty { entries = [MenuEntry("Sem subpastas", isEnabled: false) {}] }
         } else {
-            menu.addItem(withTitle: "Sem acesso", action: nil, keyEquivalent: "").isEnabled = false
+            entries = [MenuEntry("Sem acesso", isEnabled: false) {}]
         }
-        menu.autoenablesItems = false
-        menu.popUp(positioning: nil, at: NSPoint(x: 0, y: sender.bounds.height + 4), in: sender)
-    }
-
-    @objc private func folderPicked(_ sender: NSMenuItem) {
-        guard let folder = sender.representedObject as? String else { return }
-        onNavigate?(folder)
+        // Above the bar: it sits at the bottom of the window.
+        PopupMenu.show(entries, above: sender)
     }
 }

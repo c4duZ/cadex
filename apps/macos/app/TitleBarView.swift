@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Menus
 import Tabs
 
 /// The title bar: the window buttons, one group on the left with the
@@ -42,11 +43,11 @@ final class TitleBarView: NSView {
     private var secondaryColor = NSColor.secondaryLabelColor
 
     /// The "+" menu (the openers, built by the app); without it, "+" is a new tab.
-    var newMenu: (() -> NSMenu?)?
+    var newMenu: (() -> [MenuEntry])?
 
     private func showNewMenu() {
-        guard let menu = newMenu?(), !menu.items.isEmpty else { return run("tab.new") }
-        menu.popUp(positioning: nil, at: NSPoint(x: 0, y: newTabButton.isFlipped ? newTabButton.bounds.maxY + 4 : -4), in: newTabButton)
+        guard let entries = newMenu?(), !entries.isEmpty else { return run("tab.new") }
+        PopupMenu.show(entries, below: newTabButton)
     }
 
     init(run: @escaping (String) -> Void) {

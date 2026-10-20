@@ -17,7 +17,7 @@
   descartar (arquivo novo vai para a Lixeira), commit sem nada staged e publicar a branch. Avisa o
   app por closures: `onMarks` (marcas do explorer), `onOpenDiff`, `onOpenFile`.
 - `SourceControlView.swift` (topo com branch e botões, listas, mensagem, estados) e
-  `SourceControlRow.swift` (linhas, cores das letras, até 1000 por lista, menu de contexto).
+  `SourceControlRow.swift` (linhas, cores das letras, até 1000 por lista, menu de contexto no `MenuTableView` compartilhado).
 - Comandos em `SourceControlCommands.swift`: git.commit, git.stage-all, git.unstage-all, git.stage,
   git.unstage, git.discard, git.open-diff, git.open-file, git.reveal, git.fetch, git.pull, git.push,
   git.refresh, git.switch-branch (branches na paleta) e diff.toggle-layout. Botões, menu e ⌘Enter

@@ -1,4 +1,5 @@
 import AppKit
+import Menus
 
 /// The tree's NSOutlineView. Keys that only make sense in the tree (Enter
 /// opens, F2 renames, ⌘⌫ trashes, ⌘C and ⌘V copy files) are handled here,
@@ -33,8 +34,6 @@ final class ExplorerOutline: NSOutlineView {
         registerForDraggedTypes([.fileURL])
         setDraggingSourceOperationMask([.move], forLocal: true)
         setDraggingSourceOperationMask([.copy], forLocal: false)
-        menu = NSMenu()
-        menu?.delegate = self
     }
 
     private func run(_ id: String) {
@@ -99,9 +98,15 @@ final class ExplorerOutline: NSOutlineView {
 
     /// A file opens in its tab, a folder opens or closes. Not with ⌘ or ⇧
     /// (they build a selection), and not on the arrow, which already did it.
+    /// The second click of a double click takes the terminal to the folder
+    /// (owner, 2026-10-20); the first one already opened it.
     @objc private func rowClicked() {
         guard clickedRow >= 0, let event = NSApp.currentEvent else { return }
         if !event.modifierFlags.intersection([.command, .shift]).isEmpty { return }
+        if event.clickCount >= 2 {
+            if (item(atRow: clickedRow) as? FileNode)?.isFolder == true { run("explorer.open-in-terminal") }
+            return
+        }
         let point = convert(event.locationInWindow, from: nil)
         if frameOfOutlineCell(atRow: clickedRow).insetBy(dx: -4, dy: 0).contains(point) { return }
         run("explorer.open")
@@ -121,37 +126,17 @@ final class ExplorerOutline: NSOutlineView {
     @objc func paste(_ sender: Any?) { run("explorer.paste-files") }
 
     /// Right-clicking a row outside the selection selects it first, as in
-    /// the Finder.
+    /// the Finder; below the rows, nothing is selected (the workspace
+    /// folder). The menu is the app's, not the system's (shared/menus).
     override func menu(for event: NSEvent) -> NSMenu? {
-        let row = self.row(at: convert(event.locationInWindow, from: nil))
-        if row >= 0, !selectedRowIndexes.contains(row) {
+        let point = convert(event.locationInWindow, from: nil)
+        let row = self.row(at: point)
+        if row < 0 {
+            deselectAll(nil)
+        } else if !selectedRowIndexes.contains(row) {
             selectRowIndexes([row], byExtendingSelection: false)
         }
-        return super.menu(for: event)
-    }
-}
-
-extension ExplorerOutline: NSMenuDelegate {
-    /// The context menu, rebuilt each time from the commands so availability
-    /// is current.
-    func menuNeedsUpdate(_ menu: NSMenu) {
-        menu.removeAllItems()
-        guard let controller else { return }
-        for id in ExplorerCommands.contextMenu {
-            guard let id else {
-                menu.addItem(.separator())
-                continue
-            }
-            let item = NSMenuItem(title: ExplorerCommands.title(id), action: #selector(runMenuItem(_:)), keyEquivalent: "")
-            item.target = self
-            item.representedObject = id
-            item.isEnabled = controller.unavailableReason(id) == nil
-            menu.addItem(item)
-        }
-        menu.autoenablesItems = false
-    }
-
-    @objc private func runMenuItem(_ item: NSMenuItem) {
-        if let id = item.representedObject as? String { run(id) }
+        if let controller { PopupMenu.show(controller.contextEntries(), at: point, in: self) }
+        return nil
     }
 }

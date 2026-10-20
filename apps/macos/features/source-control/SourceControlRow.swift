@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Menus
 
 /// A row of the Git lists: a section title or a changed file.
 enum SourceControlRow: Equatable {
@@ -149,22 +150,14 @@ final class SourceControlRowView: NSTableCellView {
 /// clicked or selected files.
 @MainActor
 enum SourceControlMenu {
-    static func make(for view: SourceControlView) -> NSMenu {
-        let menu = NSMenu()
-        for (title, id) in [("Abrir o arquivo", "git.open-file"), ("Ver o diff", "git.open-diff"), ("Stage", "git.stage"),
-                            ("Unstage", "git.unstage"), ("Descartar as mudanças", "git.discard"),
-                            ("Revelar no Finder", "git.reveal")] {
-            let item = NSMenuItem(title: title, action: #selector(SourceControlView.runMenuItem(_:)), keyEquivalent: "")
-            item.target = view
-            item.representedObject = id
-            menu.addItem(item)
+    static func entries(for view: SourceControlView) -> [MenuEntry] {
+        let items: [(String, String, Icon)] = [
+            ("Abrir o arquivo", "git.open-file", .file), ("Ver o diff", "git.open-diff", .gitDiff),
+            ("Stage", "git.stage", .plus), ("Unstage", "git.unstage", .minus),
+            ("Descartar as mudanças", "git.discard", .arrowUUpLeft), ("Revelar no Finder", "git.reveal", .folderOpen),
+        ]
+        return items.map { title, id, icon in
+            MenuEntry(title, icon: icon) { [weak view] in _ = view?.controller?.run(id) }
         }
-        return menu
-    }
-}
-
-extension SourceControlView {
-    @objc func runMenuItem(_ item: NSMenuItem) {
-        if let id = item.representedObject as? String { _ = controller?.run(id) }
     }
 }

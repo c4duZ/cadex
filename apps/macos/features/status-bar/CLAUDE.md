@@ -8,7 +8,7 @@
 
 ## Como eu quero
 - `Breadcrumb.swift`: os pedaços do caminho ("Home › … › cadex") e as subpastas de um nível, puros
-  e testados. `StatusBarView.swift`: a barra; cada pedaço abre um menu de subpastas e a escolhida
+  e testados. `StatusBarView.swift`: a barra; cada pedaço abre um menu de subpastas (o do app, `apps/macos/shared/menus`, para cima) e a escolhida
   vai para quem montou a barra (onNavigate), que leva o terminal com foco até ela.
 - A barra só se refaz quando a pasta muda, não a cada saída do terminal.
 - Spec em `../../../../docs/spec/status-bar.md`. Status: trilha, menu e ambiente prontos.

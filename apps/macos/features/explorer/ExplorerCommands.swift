@@ -25,13 +25,6 @@ public enum ExplorerCommands {
         ("explorer.collapse-all", "Recolher todas as pastas", ["collapse", "fechar"], nil),
     ]
 
-    /// The context menu, in order; nil is a separator.
-    static let contextMenu: [String?] = [
-        "explorer.open", "explorer.open-beside", "explorer.open-in-tab", nil, "explorer.new-file", "explorer.new-folder", nil, "explorer.rename",
-        "explorer.copy-files", "explorer.paste-files", "explorer.trash", nil, "explorer.copy-path",
-        "explorer.copy-relative-path", "explorer.reveal", "explorer.open-in-terminal",
-    ]
-
     static func title(_ id: String) -> String {
         table.first { $0.0 == id }?.1 ?? id
     }

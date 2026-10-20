@@ -23,6 +23,14 @@ let package = Package(
             exclude: ["CLAUDE.md", "Resources/LICENSE-Phosphor.txt", "Resources/LICENSE-MaterialIconTheme.txt", "tests"],
             resources: [.copy("Resources/Phosphor-Regular.ttf"), .copy("Resources/FileIcons")]
         ),
+        // The popup menus in the look of ⌘K (right click, "+", status bar).
+        .target(
+            name: "Menus",
+            dependencies: ["Icons"],
+            path: "shared/menus",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
         .target(
             name: "Themes",
             path: "features/themes",
@@ -39,13 +47,14 @@ let package = Package(
         ),
         .target(
             name: "StatusBar",
+            dependencies: ["Icons", "Menus"],
             path: "features/status-bar",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
         .target(
             name: "CommandPalette",
-            dependencies: ["CCadex", "Icons"],
+            dependencies: ["CCadex", "Icons", "Menus"],
             path: "features/command-palette",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -76,7 +85,7 @@ let package = Package(
         ),
         .target(
             name: "Explorer",
-            dependencies: ["CCadex", "CommandPalette", "Icons"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus"],
             path: "features/explorer",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -131,7 +140,7 @@ let package = Package(
         ),
         .target(
             name: "GitHistory",
-            dependencies: ["CCadex", "CommandPalette", "Tabs"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Tabs"],
             path: "features/git-history",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -139,7 +148,7 @@ let package = Package(
         ),
         .target(
             name: "SourceControl",
-            dependencies: ["CCadex", "CommandPalette", "Icons", "Editor", "Tabs"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Editor", "Tabs"],
             path: "features/source-control",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -246,6 +255,11 @@ let package = Package(
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
+            name: "MenusTests",
+            dependencies: ["Menus", "Checks"],
+            path: "shared/menus/tests"
+        ),
+        .executableTarget(
             name: "IconsTests",
             dependencies: ["Icons", "Checks"],
             path: "shared/icons/tests"
@@ -253,7 +267,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
