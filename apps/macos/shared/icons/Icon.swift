@@ -48,6 +48,8 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case palette = 0xE6C8
     case plus = 0xE3D4
     case sidebar = 0xEAB6
+    case squareSplitHorizontal = 0xE870
+    case squareSplitVertical = 0xE874
     case stack = 0xE466
     case terminalWindow = 0xEAE8
     case x = 0xE4F6

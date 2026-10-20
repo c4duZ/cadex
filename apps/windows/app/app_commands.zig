@@ -19,7 +19,8 @@ const p = icons.phosphor;
 /// The ways to open things, first in the palette and in the "+" menu (the
 /// Mac's openers).
 pub const openers = [_]palette.Pin{
-    .{ .id = "pane.split-right", .title = "Terminal ao lado", .icon = p.terminal_window },
+    .{ .id = "pane.split-right", .title = "Terminal ao lado", .icon = p.square_split_horizontal },
+    .{ .id = "pane.split-down", .title = "Terminal abaixo", .icon = p.square_split_vertical },
     .{ .id = "search.files", .title = "Arquivo…", .icon = p.file },
     .{ .id = "preview.open", .title = "Preview web", .icon = p.globe },
     .{ .id = "git.history", .title = "Grafo do git", .icon = p.git_branch },
