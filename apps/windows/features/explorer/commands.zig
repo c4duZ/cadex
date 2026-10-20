@@ -5,35 +5,37 @@
 const std = @import("std");
 const w = @import("win32");
 const ui = @import("ui");
+const strings = @import("strings");
 const palette = @import("command-palette");
 const explorer = @import("explorer.zig");
 const actions = @import("actions.zig");
 
 const Explorer = explorer.Explorer;
 
-pub const Entry = struct { id: []const u8, title: []const u8, keywords: []const []const u8, shortcut: ?[]const u8 = null };
+/// title: { English, Portuguese }, read with strings.t at registration.
+pub const Entry = struct { id: []const u8, title: [2][]const u8, keywords: []const []const u8, shortcut: ?[]const u8 = null };
 
 pub const table = [_]Entry{
-    .{ .id = "explorer.focus", .title = "Mostrar os arquivos", .keywords = &.{ "explorer", "árvore", "focus" }, .shortcut = "cmd+shift+e" },
-    .{ .id = "explorer.open", .title = "Abrir arquivo", .keywords = &.{ "open", "abrir" } },
-    .{ .id = "explorer.open-beside", .title = "Abrir ao lado", .keywords = &.{ "open beside", "split", "painel", "abrir" } },
-    .{ .id = "explorer.open-in-tab", .title = "Abrir em nova aba", .keywords = &.{ "open in tab", "aba", "abrir" } },
-    .{ .id = "explorer.new-file", .title = "Novo arquivo", .keywords = &.{ "new file", "criar" } },
-    .{ .id = "explorer.new-folder", .title = "Nova pasta", .keywords = &.{ "new folder", "criar", "diretório" } },
-    .{ .id = "explorer.rename", .title = "Renomear", .keywords = &.{ "rename", "nome" } },
-    .{ .id = "explorer.trash", .title = "Mover para a Lixeira", .keywords = &.{ "delete", "apagar", "excluir", "trash" } },
-    .{ .id = "explorer.copy-files", .title = "Copiar arquivos", .keywords = &.{ "copy", "copiar" } },
-    .{ .id = "explorer.paste-files", .title = "Colar arquivos", .keywords = &.{ "paste", "colar" } },
-    .{ .id = "explorer.reveal", .title = "Revelar no Explorador", .keywords = &.{ "reveal", "explorer", "finder", "mostrar" } },
-    .{ .id = "explorer.open-in-finder", .title = "Abrir no Explorador", .keywords = &.{ "open in explorer", "explorer", "finder", "pasta" } },
-    .{ .id = "explorer.copy-path", .title = "Copiar caminho", .keywords = &.{ "copy path", "caminho" } },
-    .{ .id = "explorer.copy-relative-path", .title = "Copiar caminho relativo", .keywords = &.{ "copy relative path", "caminho" } },
-    .{ .id = "explorer.open-in-terminal", .title = "Abrir no terminal", .keywords = &.{ "cd", "terminal", "pasta" } },
-    .{ .id = "explorer.toggle-hidden", .title = "Mostrar ou esconder arquivos ocultos", .keywords = &.{ "hidden", "ocultos", "dotfiles" }, .shortcut = "cmd+shift+." },
-    .{ .id = "explorer.refresh", .title = "Recarregar arquivos", .keywords = &.{ "refresh", "atualizar" } },
-    .{ .id = "explorer.collapse-all", .title = "Recolher todas as pastas", .keywords = &.{ "collapse", "fechar" } },
-    .{ .id = "workspace.open-folder", .title = "Abrir pasta…", .keywords = &.{ "open folder", "workspace", "projeto" }, .shortcut = "cmd+o" },
-    .{ .id = "workspace.use-terminal-folder", .title = "Usar a pasta do terminal", .keywords = &.{ "workspace", "cwd", "diretório", "seguir" } },
+    .{ .id = "explorer.focus", .title = .{ "Show Files", "Mostrar os arquivos" }, .keywords = &.{ "explorer", "árvore", "focus" }, .shortcut = "cmd+shift+e" },
+    .{ .id = "explorer.open", .title = .{ "Open File", "Abrir arquivo" }, .keywords = &.{ "open", "abrir", "open file" } },
+    .{ .id = "explorer.open-beside", .title = .{ "Open to the Side", "Abrir ao lado" }, .keywords = &.{ "open beside", "split", "painel", "abrir" } },
+    .{ .id = "explorer.open-in-tab", .title = .{ "Open in New Tab", "Abrir em nova aba" }, .keywords = &.{ "open in tab", "aba", "abrir" } },
+    .{ .id = "explorer.new-file", .title = .{ "New File", "Novo arquivo" }, .keywords = &.{ "new file", "criar" } },
+    .{ .id = "explorer.new-folder", .title = .{ "New Folder", "Nova pasta" }, .keywords = &.{ "new folder", "criar", "diretório" } },
+    .{ .id = "explorer.rename", .title = .{ "Rename", "Renomear" }, .keywords = &.{ "rename", "nome" } },
+    .{ .id = "explorer.trash", .title = .{ "Move to Recycle Bin", "Mover para a Lixeira" }, .keywords = &.{ "delete", "apagar", "excluir", "trash" } },
+    .{ .id = "explorer.copy-files", .title = .{ "Copy Files", "Copiar arquivos" }, .keywords = &.{ "copy", "copiar" } },
+    .{ .id = "explorer.paste-files", .title = .{ "Paste Files", "Colar arquivos" }, .keywords = &.{ "paste", "colar" } },
+    .{ .id = "explorer.reveal", .title = .{ "Reveal in File Explorer", "Revelar no Explorador" }, .keywords = &.{ "reveal", "explorer", "finder", "mostrar" } },
+    .{ .id = "explorer.open-in-finder", .title = .{ "Open in File Explorer", "Abrir no Explorador" }, .keywords = &.{ "open in explorer", "explorer", "finder", "pasta" } },
+    .{ .id = "explorer.copy-path", .title = .{ "Copy Path", "Copiar caminho" }, .keywords = &.{ "copy path", "caminho" } },
+    .{ .id = "explorer.copy-relative-path", .title = .{ "Copy Relative Path", "Copiar caminho relativo" }, .keywords = &.{ "copy relative path", "caminho" } },
+    .{ .id = "explorer.open-in-terminal", .title = .{ "Open in Terminal", "Abrir no terminal" }, .keywords = &.{ "cd", "terminal", "pasta" } },
+    .{ .id = "explorer.toggle-hidden", .title = .{ "Show or Hide Hidden Files", "Mostrar ou esconder arquivos ocultos" }, .keywords = &.{ "hidden", "ocultos", "dotfiles" }, .shortcut = "cmd+shift+." },
+    .{ .id = "explorer.refresh", .title = .{ "Reload Files", "Recarregar arquivos" }, .keywords = &.{ "refresh", "atualizar" } },
+    .{ .id = "explorer.collapse-all", .title = .{ "Collapse All Folders", "Recolher todas as pastas" }, .keywords = &.{ "collapse", "fechar" } },
+    .{ .id = "workspace.open-folder", .title = .{ "Open Folder…", "Abrir pasta…" }, .keywords = &.{ "open folder", "workspace", "projeto" }, .shortcut = "cmd+o" },
+    .{ .id = "workspace.use-terminal-folder", .title = .{ "Use the Terminal's Folder", "Usar a pasta do terminal" }, .keywords = &.{ "workspace", "cwd", "diretório", "seguir" } },
 };
 
 /// What the app gives the commands beyond the explorer: the window for
@@ -60,7 +62,7 @@ var slots: [table.len]usize = blk: {
 pub fn registerWith(self: *Explorer, registry: *palette.Registry, with: Wiring) void {
     target = self;
     wiring = with;
-    for (table, 0..) |e, i| registry.add(.{ .id = e.id, .title = e.title, .keywords = e.keywords, .shortcut = e.shortcut, .context = &slots[i], .run = runSlot, .available = availableSlot });
+    for (table, 0..) |e, i| registry.add(.{ .id = e.id, .title = strings.t(e.title[0], e.title[1]), .keywords = e.keywords, .shortcut = e.shortcut, .context = &slots[i], .run = runSlot, .available = availableSlot });
 }
 
 fn idOf(context: ?*anyopaque) []const u8 {
@@ -83,7 +85,7 @@ pub fn available(self: *Explorer, id: []const u8) bool {
 
 /// The command's title, for the context menu.
 pub fn title(id: []const u8) []const u8 {
-    for (table) |e| if (std.mem.eql(u8, e.id, id)) return e.title;
+    for (table) |e| if (std.mem.eql(u8, e.id, id)) return strings.t(e.title[0], e.title[1]);
     return id;
 }
 
@@ -143,7 +145,7 @@ pub fn perform(self: *Explorer, id: []const u8) void {
     }
     if (eq(id, "workspace.use-terminal-folder")) {
         var buf: [2048]u8 = undefined;
-        const folder = self.host.terminal_folder(self.host.context, &buf) orelse return self.say("O terminal ainda não disse a pasta");
+        const folder = self.host.terminal_folder(self.host.context, &buf) orelse return self.say(strings.t("The terminal hasn't told its folder yet", "O terminal ainda não disse a pasta"));
         const hidden = if (self.tree) |t| t.show_hidden else true;
         return self.setRoot(folder, hidden);
     }

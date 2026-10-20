@@ -5,6 +5,7 @@
 const std = @import("std");
 const w = @import("win32");
 const ui = @import("ui");
+const strings = @import("strings");
 const cadex = @import("cadex");
 const explorer = @import("explorer.zig");
 
@@ -24,7 +25,7 @@ fn targetFolder(self: *Explorer) ?[]const u8 {
 /// "sem título", "sem título 2", ... free in `folder`; created, then renamed in place.
 pub fn create(self: *Explorer, folder_kind: bool) void {
     const folder = targetFolder(self) orelse return;
-    const base = if (folder_kind) "pasta sem título" else "sem título";
+    const base = if (folder_kind) strings.t("untitled folder", "pasta sem título") else strings.t("untitled", "sem título");
     var n: usize = 1;
     while (n < 1000) : (n += 1) {
         var buf: [1024]u8 = undefined;
@@ -33,7 +34,7 @@ pub fn create(self: *Explorer, folder_kind: bool) void {
         defer self.gpa.free(path);
         const status = if (folder_kind) cadex.cadex_explorer_create_directory(path.ptr) else cadex.cadex_explorer_create_file(path.ptr);
         if (status == cadex.CADEX_ALREADY_EXISTS) continue;
-        if (status != cadex.CADEX_OK) return self.say("Não foi possível criar aqui");
+        if (status != cadex.CADEX_OK) return self.say(strings.t("Couldn't create it here", "Não foi possível criar aqui"));
         if (self.tree) |*t| {
             if (t.find(folder)) |node| {
                 if (!node.expanded) t.toggle(node) else t.load(node);
@@ -58,15 +59,15 @@ pub fn beginRename(self: *Explorer) void {
 
 /// Why `name` would be refused as the new name of `path`, or null.
 pub fn renameProblem(self: *Explorer, path: []const u8, name: []const u8) ?[]const u8 {
-    if (name.len == 0) return "O nome não pode ficar vazio";
-    if (std.mem.indexOfAny(u8, name, "\\/:*?\"<>|") != null) return "O nome não pode ter \\ / : * ? \" < > |";
+    if (name.len == 0) return strings.t("The name can't be empty", "O nome não pode ficar vazio");
+    if (std.mem.indexOfAny(u8, name, "\\/:*?\"<>|") != null) return strings.t("The name can't have \\ / : * ? \" < > |", "O nome não pode ter \\ / : * ? \" < > |");
     const t = &(self.tree orelse return null);
     const parent_path = std.fs.path.dirnameWindows(path) orelse return null;
     const parent = t.find(parent_path) orelse return null;
     for (parent.children.items) |sibling| {
         if (std.mem.eql(u8, sibling.path, path)) continue;
         // NTFS ignores case: README and readme are the same name.
-        if (std.ascii.eqlIgnoreCase(sibling.name, name)) return "Já existe um item com esse nome";
+        if (std.ascii.eqlIgnoreCase(sibling.name, name)) return strings.t("An item with this name already exists", "Já existe um item com esse nome");
     }
     return null;
 }
@@ -86,7 +87,7 @@ pub fn finishRename(self: *Explorer) void {
     defer self.gpa.free(to);
     var out: [*c]u8 = null;
     var len: usize = 0;
-    if (cadex.cadex_explorer_rename(from.ptr, to.ptr, &out, &len) != cadex.CADEX_OK) return self.say("Não foi possível renomear");
+    if (cadex.cadex_explorer_rename(from.ptr, to.ptr, &out, &len) != cadex.CADEX_OK) return self.say(strings.t("Couldn't rename", "Não foi possível renomear"));
     defer cadex.cadex_free(out);
     reloadParent(self, path);
     self.select(out[0..len], false);
@@ -119,7 +120,7 @@ pub fn trash(self: *Explorer) void {
     op.wFunc = c.FO_DELETE;
     op.pFrom = @ptrCast(list.items.ptr);
     op.fFlags = c.FOF_ALLOWUNDO | c.FOF_NOCONFIRMATION | c.FOF_SILENT;
-    if (c.SHFileOperationW(&op) != 0) self.say("Não foi possível mover para a Lixeira");
+    if (c.SHFileOperationW(&op) != 0) self.say(strings.t("Couldn't move to the Recycle Bin", "Não foi possível mover para a Lixeira"));
     for (self.selection.items) |p| reloadParent(self, p);
     self.clearSelection();
 }
@@ -145,7 +146,7 @@ pub fn pasteFiles(self: *Explorer) void {
         var out: [*c]u8 = null;
         var len: usize = 0;
         if (cadex.cadex_explorer_copy(from.ptr, dest.ptr, &out, &len) != cadex.CADEX_OK) {
-            self.say("Não foi possível colar");
+            self.say(strings.t("Couldn't paste", "Não foi possível colar"));
             continue;
         }
         cadex.cadex_free(out);
@@ -164,7 +165,7 @@ pub fn move(self: *Explorer, paths: []const []const u8, folder: []const u8) void
         var len: usize = 0;
         const status = cadex.cadex_explorer_move(from.ptr, dest.ptr, &out, &len);
         if (status != cadex.CADEX_OK) {
-            self.say(if (status == cadex.CADEX_ALREADY_EXISTS) "Já existe um item com esse nome lá" else "Não foi possível mover");
+            self.say(if (status == cadex.CADEX_ALREADY_EXISTS) strings.t("An item with this name already exists there", "Já existe um item com esse nome lá") else strings.t("Couldn't move", "Não foi possível mover"));
             continue;
         }
         cadex.cadex_free(out);

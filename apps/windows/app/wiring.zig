@@ -14,6 +14,7 @@ const shortcuts = @import("shortcuts");
 const explorer = @import("explorer");
 const search = @import("search");
 const palette = @import("command-palette");
+const strings = @import("strings");
 const opener = @import("opener.zig");
 const spaces = @import("spaces");
 const window_mod = @import("window.zig");
@@ -465,5 +466,5 @@ fn showList(context: *anyopaque, source: palette.Source) void {
 fn contentOpen(context: *anyopaque) bool {
     const app = of(context);
     const opened = app.palette.opened orelse return false;
-    return opened.context == @as(*anyopaque, @ptrCast(&app.search)) and std.mem.eql(u8, opened.placeholder, "Buscar texto nos arquivos");
+    return opened.context == @as(*anyopaque, @ptrCast(&app.search)) and std.mem.eql(u8, opened.placeholder, strings.t("Find text in files", "Buscar texto nos arquivos"));
 }

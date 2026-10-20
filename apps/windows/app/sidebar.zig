@@ -10,6 +10,7 @@ const w = @import("win32");
 const gfx = @import("gfx");
 const ui = @import("ui");
 const icons = @import("icons");
+const strings = @import("strings");
 const explorer = @import("explorer");
 const App = @import("app.zig").App;
 
@@ -44,7 +45,7 @@ pub fn draw(app: *App, area: gfx.Rect) void {
     const half = tabs_row.w / 2;
     const files_r: gfx.Rect = .{ .x = tabs_row.x, .y = tabs_row.y, .w = half - u.px(2), .h = tabs_row.h };
     const git_r: gfx.Rect = .{ .x = tabs_row.x + half + u.px(2), .y = tabs_row.y, .w = half - u.px(2), .h = tabs_row.h };
-    if (ui.widgets.button(u, ui.id("sidebar.files", 0), files_r, "Arquivos", .{ .icon = icons.phosphor.files, .icon_size = 14, .selected = app.sidebar.page == .files, .@"align" = .{ .@"align" = .center } })) _ = app.registry.run("explorer.focus");
+    if (ui.widgets.button(u, ui.id("sidebar.files", 0), files_r, strings.t("Files", "Arquivos"), .{ .icon = icons.phosphor.files, .icon_size = 14, .selected = app.sidebar.page == .files, .@"align" = .{ .@"align" = .center } })) _ = app.registry.run("explorer.focus");
     if (ui.widgets.button(u, ui.id("sidebar.git", 0), git_r, "Git", .{ .icon = icons.phosphor.git_branch, .icon_size = 14, .selected = app.sidebar.page == .git, .@"align" = .{ .@"align" = .center } })) {
         if (!app.registry.run("git.show")) app.sidebar.page = .git;
     }

@@ -10,6 +10,7 @@
 const std = @import("std");
 const gfx = @import("gfx");
 const ui_mod = @import("ui");
+const strings = @import("strings");
 const w = @import("win32");
 const icons = @import("icons");
 const source_mod = @import("source.zig");
@@ -244,13 +245,13 @@ pub const Palette = struct {
         var row = r.inset(ui.px(14), 0);
         const a = self.arena.allocator();
         var hints: std.ArrayList([]const u8) = .empty;
-        hints.append(a, "↩ executar") catch {};
+        hints.append(a, strings.t("↩ run", "↩ executar")) catch {};
         if (source.opens_files) {
-            hints.append(a, "Alt+↩ ao lado") catch {};
-            hints.append(a, "Ctrl+↩ nova aba") catch {};
+            hints.append(a, strings.t("Alt+↩ to the side", "Alt+↩ ao lado")) catch {};
+            hints.append(a, strings.t("Ctrl+↩ in new tab", "Ctrl+↩ nova aba")) catch {};
         }
-        hints.append(a, "↑↓ mover") catch {};
-        hints.append(a, "esc fechar") catch {};
+        hints.append(a, strings.t("↑↓ move", "↑↓ mover")) catch {};
+        hints.append(a, strings.t("esc close", "esc fechar")) catch {};
         if (self.query.text().len == 0 and source.context == self.commands.context) {
             for (self.prefixes.items) |p| hints.append(a, std.fmt.allocPrint(a, "{c} {s}", .{ p.char, p.label }) catch continue) catch {};
         }

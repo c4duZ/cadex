@@ -4,6 +4,7 @@
 
 const std = @import("std");
 const cadex = @import("cadex");
+const strings = @import("strings");
 
 /// What an action said: nothing when it worked, git's message otherwise,
 /// kept short and inline so a job owns it without another allocation.
@@ -71,14 +72,17 @@ fn outcome(s: cadex.cadex_status, out: [*c]u8, len: usize) Message {
     defer cadex.cadex_free(out);
     var m: Message = .{};
     if (s == cadex.CADEX_OK) return m;
+    // The worker's thread: picks by the language itself, since t keeps its
+    // pairs for the UI thread only.
+    const pt = strings.language == .pt;
     if (s == cadex.CADEX_GIT_MISSING) {
-        m.set("O git não foi encontrado");
+        m.set(if (pt) "O git não foi encontrado" else "Git was not found");
     } else if (s == cadex.CADEX_NOT_AUTHORIZED) {
-        m.set("Esta pasta não está autorizada no workspace");
+        m.set(if (pt) "Esta pasta não está autorizada no workspace" else "This folder is not authorized in the workspace");
     } else if (out != null and len > 0) {
         m.set(out[0..len]);
     } else {
-        m.set("O git falhou");
+        m.set(if (pt) "O git falhou" else "Git failed");
     }
     return m;
 }

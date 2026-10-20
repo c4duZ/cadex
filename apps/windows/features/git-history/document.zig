@@ -7,6 +7,7 @@
 const std = @import("std");
 const gfx = @import("gfx");
 const ui = @import("ui");
+const strings = @import("strings");
 const icons = @import("icons");
 const tabs = @import("tabs");
 const host_mod = @import("host.zig");
@@ -76,7 +77,7 @@ pub const HistoryDocument = struct {
         errdefer gpa.free(ident);
         const slash = std.mem.lastIndexOfAny(u8, root, "/\\");
         const name = if (slash) |s| root[s + 1 ..] else root;
-        const t = try std.fmt.allocPrint(gpa, "Histórico: {s}", .{name});
+        const t = try std.fmt.allocPrint(gpa, "{s}{s}", .{ strings.t("History: ", "Histórico: "), name });
         errdefer gpa.free(t);
         const l = try jobs.Log.create(gpa, root, "", false);
         errdefer l.destroy();

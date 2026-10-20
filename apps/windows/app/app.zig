@@ -6,6 +6,7 @@ const w = @import("win32");
 const gfx = @import("gfx");
 const ui = @import("ui");
 const icons = @import("icons");
+const strings = @import("strings");
 const palette = @import("command-palette");
 const shortcuts = @import("shortcuts");
 const themes = @import("themes");
@@ -107,9 +108,12 @@ pub const App = struct {
         _ = c.CoInitializeEx(null, c.COINIT_APARTMENTTHREADED);
         self.home = homeFolder(gpa);
         self.settings = try settings.Store.init(gpa);
+        // Before any text is made: every view reads its texts once (ADR 0015).
+        strings.language = strings.Language.parse(self.settings.current.general.language);
         self.themes = themes.Store.init(gpa);
         self.registry = .{ .gpa = gpa };
         self.shortcuts = shortcuts.Shortcuts.init(gpa, &self.registry);
+        app_commands.translateOpeners();
         self.commands = .{
             .registry = &self.registry,
             .pins = &app_commands.openers,
@@ -144,9 +148,9 @@ pub const App = struct {
         git_page.register(self);
         self.power = .{ .host = wiring.powerHost(self), .keep_display_on = self.settings.current.power.keep_display_on };
         power_mod.commands.register(&self.registry, &self.power);
-        self.palette.addPrefix(.{ .char = '/', .label = "arquivos", .source = self.search.filesSource() });
-        self.palette.addPrefix(.{ .char = '#', .label = "texto", .source = self.search.contentSource() });
-        self.palette.addPrefix(.{ .char = '@', .label = "abas e spaces", .source = @import("places_source.zig").source(self) });
+        self.palette.addPrefix(.{ .char = '/', .label = strings.t("files", "arquivos"), .source = self.search.filesSource() });
+        self.palette.addPrefix(.{ .char = '#', .label = strings.t("text", "texto"), .source = self.search.contentSource() });
+        self.palette.addPrefix(.{ .char = '@', .label = strings.t("tabs and spaces", "abas e spaces"), .source = @import("places_source.zig").source(self) });
         wiring.applySettings(self);
         // On at launch in the settings' mode, if they say so.
         if (self.settings.current.power.on_at_launch) self.power.set(power_mod.Mode.parse(self.settings.current.power.mode));
@@ -270,19 +274,19 @@ pub const App = struct {
         self.palette.draw(u);
         @import("space_ui.zig").draw(self);
         if (self.tabs.question) |q| {
-            const buttons: []const []const u8 = if (q.unsaved) &.{ "Salvar", "Descartar", "Cancelar" } else &.{ "Fechar", "Cancelar" };
+            const buttons: []const []const u8 = if (q.unsaved) &.{ strings.t("Save", "Salvar"), strings.t("Discard", "Descartar"), strings.t("Cancel", "Cancelar") } else &.{ strings.t("Close", "Fechar"), strings.t("Cancel", "Cancelar") };
             if (ui.menu.ask(u, .{ .title = q.title, .message = q.message, .buttons = buttons })) |choice| self.tabs.answer(choice);
         }
         if (self.pending_trash > 0) {
             var buf: [64]u8 = undefined;
-            const title = std.fmt.bufPrint(&buf, "Mover {d} itens para a Lixeira?", .{self.pending_trash}) catch "Mover para a Lixeira?";
-            if (ui.menu.ask(u, .{ .title = title, .buttons = &.{ "Mover para a Lixeira", "Cancelar" } })) |choice| {
+            const title = std.fmt.bufPrint(&buf, "{s} {d} {s}", .{ strings.t("Move", "Mover"), self.pending_trash, strings.t("items to the Trash?", "itens para a Lixeira?") }) catch strings.t("Move to the Trash?", "Mover para a Lixeira?");
+            if (ui.menu.ask(u, .{ .title = title, .buttons = &.{ strings.t("Move to Trash", "Mover para a Lixeira"), strings.t("Cancel", "Cancelar") } })) |choice| {
                 if (choice == 0) explorer.actions.trash(&self.explorer);
                 self.pending_trash = 0;
             }
         }
         if (self.pending_paste) |plan| {
-            if (ui.menu.ask(u, .{ .title = "Colar várias linhas?", .message = "O texto pode rodar comandos assim que for colado.", .buttons = &.{ "Colar", "Cancelar" } })) |choice| {
+            if (ui.menu.ask(u, .{ .title = strings.t("Paste several lines?", "Colar várias linhas?"), .message = strings.t("The text may run commands as soon as it is pasted.", "O texto pode rodar comandos assim que for colado."), .buttons = &.{ strings.t("Paste", "Colar"), strings.t("Cancel", "Cancelar") } })) |choice| {
                 if (choice == 0) if (self.tabs.focusedTerminal()) |v| terminal.paste.send(v.session, plan);
                 plan.deinit(self.gpa);
                 self.pending_paste = null;
@@ -312,7 +316,7 @@ pub const App = struct {
 
     /// The keys of a command as shown ("Ctrl+Shift+K"), or "Buscar" without any.
     pub fn shortcutLabelOrEmpty(self: *App, id: []const u8) []const u8 {
-        const combo = self.shortcuts.keymap.comboFor(id) orelse return "Buscar";
+        const combo = self.shortcuts.keymap.comboFor(id) orelse return strings.t("Search", "Buscar");
         return combo.label(&self.label_buf);
     }
 

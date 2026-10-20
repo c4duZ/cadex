@@ -7,6 +7,7 @@ const std = @import("std");
 const w = @import("win32");
 const gfx = @import("gfx");
 const ui = @import("ui");
+const strings = @import("strings");
 const zoom_mod = @import("zoom.zig");
 const c = w.c;
 
@@ -185,8 +186,9 @@ fn fileSize(gpa: std.mem.Allocator, path: []const u8) u64 {
     return (@as(u64, data.nFileSizeHigh) << 32) | data.nFileSizeLow;
 }
 
-/// The size the way the Mac's file formatter writes it, in Portuguese:
-/// "830 bytes", "12 KB", "1,2 MB", "3,45 GB" (powers of 1000).
+/// The size the way the Mac's file formatter writes it: "830 bytes",
+/// "12 KB", "1.2 MB", "3.45 GB" (powers of 1000), with the decimal comma
+/// in Portuguese ("1,2 MB").
 pub fn formatBytes(buf: []u8, bytes: u64) []const u8 {
     const b: f64 = @floatFromInt(bytes);
     const text = if (bytes < 1000)
@@ -198,6 +200,7 @@ pub fn formatBytes(buf: []u8, bytes: u64) []const u8 {
     else
         std.fmt.bufPrint(buf, "{d:.2} GB", .{b / 1_000_000_000});
     const out = text catch return "";
+    if (strings.language != .pt) return out;
     // The decimal comma of pt-BR.
     for (out) |*ch| if (ch.* == '.') {
         ch.* = ',';
@@ -209,6 +212,10 @@ test "sizes read like the Mac's" {
     var buf: [32]u8 = undefined;
     try std.testing.expectEqualStrings("830 bytes", formatBytes(&buf, 830));
     try std.testing.expectEqualStrings("12 KB", formatBytes(&buf, 12_345));
+    try std.testing.expectEqualStrings("1.2 MB", formatBytes(&buf, 1_234_567));
+    try std.testing.expectEqualStrings("3.46 GB", formatBytes(&buf, 3_456_789_012));
+    strings.language = .pt;
+    defer strings.language = .en;
     try std.testing.expectEqualStrings("1,2 MB", formatBytes(&buf, 1_234_567));
     try std.testing.expectEqualStrings("3,46 GB", formatBytes(&buf, 3_456_789_012));
 }

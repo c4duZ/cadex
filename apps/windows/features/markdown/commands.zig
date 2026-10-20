@@ -3,6 +3,7 @@
 //! the keyboard.
 
 const palette = @import("command-palette");
+const strings = @import("strings");
 const Markdown = @import("controller.zig").Markdown;
 const Session = @import("session.zig").Session;
 
@@ -34,9 +35,9 @@ fn backlinks(_: ?*anyopaque) void {
 pub fn register(registry: *palette.Registry, controller: *Markdown) void {
     markdown = controller;
     controller.registry = registry;
-    registry.add(.{ .id = "markdown.toggle-preview", .title = "Alternar Markdown renderizado", .keywords = &.{ "preview", "renderizar", "visualizar" }, .shortcut = "cmd+shift+v", .run = togglePreview, .available = hasNote });
-    registry.add(.{ .id = "markdown.open-link", .title = "Abrir o link sob o cursor", .keywords = &.{ "link", "seguir", "ir" }, .run = openLink, .available = hasNote });
-    registry.add(.{ .id = "markdown.backlinks", .title = "Quem aponta pra cá", .keywords = &.{ "backlinks", "referências", "links" }, .run = backlinks, .available = hasNote });
+    registry.add(.{ .id = "markdown.toggle-preview", .title = strings.t("Toggle Rendered Markdown", "Alternar Markdown renderizado"), .keywords = &.{ "preview", "renderizar", "visualizar" }, .shortcut = "cmd+shift+v", .run = togglePreview, .available = hasNote });
+    registry.add(.{ .id = "markdown.open-link", .title = strings.t("Open Link Under Cursor", "Abrir o link sob o cursor"), .keywords = &.{ "link", "seguir", "ir" }, .run = openLink, .available = hasNote });
+    registry.add(.{ .id = "markdown.backlinks", .title = strings.t("Show Backlinks", "Quem aponta pra cá"), .keywords = &.{ "backlinks", "referências", "links" }, .run = backlinks, .available = hasNote });
 }
 
 test {

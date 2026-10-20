@@ -16,6 +16,8 @@ pub fn main() !void {
     var flag: [4]u16 = undefined;
     const background = w.c.GetEnvironmentVariableW(w.L("CADEX_BACKGROUND"), &flag, flag.len) > 0;
     app.start(folder, background);
+    // "Reopen now" after the language changed: the window closed as usual.
+    @import("relaunch.zig").openAgainIfAsked();
 }
 
 /// The first argument, when it is a folder.
@@ -41,6 +43,8 @@ test {
     _ = @import("wiring.zig");
     _ = @import("app_commands.zig");
     _ = @import("settings_page.zig");
+    _ = @import("settings_rows.zig");
+    _ = @import("relaunch.zig");
     _ = @import("sidebar.zig");
     _ = @import("git_page.zig");
     _ = @import("opener.zig");

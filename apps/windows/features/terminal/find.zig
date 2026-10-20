@@ -4,6 +4,7 @@
 //! (docs/spec/terminal.md).
 
 const std = @import("std");
+const strings = @import("strings");
 const gfx = @import("gfx");
 const ui_mod = @import("ui");
 const cadex = @import("cadex");
@@ -40,10 +41,10 @@ pub const Find = struct {
         var current: u32 = 0;
         _ = cadex.cadex_terminal_search_counts(t, &total, &current);
         var count_buf: [32]u8 = undefined;
-        const count = if (self.query.text().len == 0) "" else if (total == 0) "nenhum" else std.fmt.bufPrint(&count_buf, "{d} de {d}", .{ current, total }) catch "";
+        const count = if (self.query.text().len == 0) "" else if (total == 0) strings.t("none", "nenhum") else std.fmt.bufPrint(&count_buf, "{d} {s} {d}", .{ current, strings.t("of", "de"), total }) catch "";
         const close_rect = row.takeRight(ui.px(26));
         const count_rect = row.takeRight(ui.px(76));
-        const result = ui_mod.text_field.textField(ui, self.field, row, &self.query, &self.scroll, .{ .placeholder = "Buscar", .framed = true });
+        const result = ui_mod.text_field.textField(ui, self.field, row, &self.query, &self.scroll, .{ .placeholder = strings.t("Find", "Buscar"), .framed = true });
         ui.painter.text(count, ui.style.small(), count_rect, ui.style.secondary_text, .{ .@"align" = .center });
         if (result.changed) _ = cadex.cadex_terminal_search_start(t, self.query.text().ptr, self.query.text().len);
         var found: bool = false;

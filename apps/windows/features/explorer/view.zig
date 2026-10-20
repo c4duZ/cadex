@@ -10,6 +10,7 @@
 const std = @import("std");
 const gfx = @import("gfx");
 const ui = @import("ui");
+const strings = @import("strings");
 const w = @import("win32");
 const icons = @import("icons");
 const explorer = @import("explorer.zig");
@@ -68,7 +69,7 @@ pub fn draw(self: *Explorer, u: *ui.Ui, area: gfx.Rect, run: *const fn (context:
         u.painter.text(self.message.items, u.style.small(), m.inset(u.px(10), 0), u.style.secondary_text, .{});
     }
     const t = &(self.tree orelse {
-        u.painter.text("Nenhuma pasta aberta", u.style.ui(), rest.inset(u.px(12), 0), u.style.secondary_text, .{});
+        u.painter.text(strings.t("No folder open", "Nenhuma pasta aberta"), u.style.ui(), rest.inset(u.px(12), 0), u.style.secondary_text, .{});
         return result;
     });
     var arena: std.heap.ArenaAllocator = .init(u.gpa);
@@ -85,7 +86,7 @@ pub fn draw(self: *Explorer, u: *ui.Ui, area: gfx.Rect, run: *const fn (context:
         const row = rows[i];
         const r = view.row(i);
         if (row.note != .none) {
-            const note = if (row.note == .empty) "Pasta vazia" else "Sem permissão";
+            const note = if (row.note == .empty) strings.t("Empty folder", "Pasta vazia") else strings.t("No permission", "Sem permissão");
             u.painter.text(note, u.style.small(), indent(u, r, row.depth).inset(u.px(20), 0), u.style.secondary_text.alpha(0.7), .{});
             continue;
         }

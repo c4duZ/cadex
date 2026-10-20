@@ -5,6 +5,7 @@
 //! "Visualizar" button. Talks to the editor through its Hooks only.
 
 const std = @import("std");
+const strings = @import("strings");
 const gfx = @import("gfx");
 const w = @import("win32");
 const ui_mod = @import("ui");
@@ -232,7 +233,7 @@ pub const Session = struct {
     /// "Visualizar" at the top right, which runs markdown.toggle-preview.
     /// Without it nobody found the rendered view (owner, 2026-10-19).
     fn drawToggle(self: *Session, u: *Ui, view: *editor.View, area: gfx.Rect) void {
-        const label = "Visualizar";
+        const label = strings.t("Preview", "Visualizar");
         const bw = u.painter.measure(label, u.style.small()) + u.px(36);
         const top = area.y + u.px(if (view.find.open) 50 else 8);
         const r: gfx.Rect = .{ .x = area.right() - bw - u.px(22), .y = top, .w = bw, .h = u.px(24) };

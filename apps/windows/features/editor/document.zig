@@ -5,6 +5,7 @@
 //! following the file when it changes on disk.
 
 const std = @import("std");
+const strings = @import("strings");
 const gfx = @import("gfx");
 const ui_mod = @import("ui");
 const icons = @import("icons");
@@ -74,16 +75,16 @@ pub const Editor = struct {
                 self.read_only = t.truncated or !t.valid;
                 const highlight = t.bytes.len <= file.max_highlight_bytes;
                 const made = View.create(self.gpa, self.id, self.title(), t.bytes, highlight, .{ .editable = self.editable and !self.read_only }) catch {
-                    self.state = .{ .failed = "Memória insuficiente para abrir o arquivo" };
+                    self.state = .{ .failed = strings.t("Not enough memory to open the file", "Memória insuficiente para abrir o arquivo") };
                     return;
                 };
                 self.state = .{ .text = made };
                 if (t.truncated) {
-                    self.banner.show("Arquivo grande: mostrando os primeiros 10 MB, só para leitura.", &.{});
+                    self.banner.show(strings.t("Large file: showing the first 10 MB, read-only.", "Arquivo grande: mostrando os primeiros 10 MB, só para leitura."), &.{});
                 } else if (!t.valid) {
-                    self.banner.show("O arquivo não é UTF-8 válido: aberto só para leitura.", &.{});
+                    self.banner.show(strings.t("The file is not valid UTF-8: opened read-only.", "O arquivo não é UTF-8 válido: aberto só para leitura."), &.{});
                 } else if (!highlight) {
-                    self.banner.show("Arquivo acima de 1 MB: sem cores nem dobras.", &.{});
+                    self.banner.show(strings.t("File over 1 MB: no colors or folding.", "Arquivo acima de 1 MB: sem cores nem dobras."), &.{});
                 }
             },
         }
@@ -119,7 +120,7 @@ pub const Editor = struct {
     pub fn save(self: *Editor) bool {
         const v = self.view() orelse return false;
         if (self.read_only) {
-            self.banner.show("Este arquivo está aberto só para leitura.", &.{});
+            self.banner.show(strings.t("This file is open read-only.", "Este arquivo está aberto só para leitura."), &.{});
             return false;
         }
         if (!v.editable) return true;
@@ -153,12 +154,12 @@ pub const Editor = struct {
                 defer self.gpa.free(t.bytes);
                 if (t.disk_hash == self.disk_hash) return;
                 if (self.unsaved()) {
-                    self.banner.show("O arquivo mudou no disco.", &.{ .reload, .keep_mine });
+                    self.banner.show(strings.t("The file changed on disk.", "O arquivo mudou no disco."), &.{ .reload, .keep_mine });
                     return;
                 }
                 self.takeDisk(v, t);
             },
-            .failed => self.banner.show("O arquivo foi apagado do disco. Salvar cria de novo.", &.{}),
+            .failed => self.banner.show(strings.t("The file was deleted from disk. Saving creates it again.", "O arquivo foi apagado do disco. Salvar cria de novo."), &.{}),
             .binary => {},
         }
     }
@@ -194,7 +195,7 @@ pub const Editor = struct {
         if (self.banner.draw(u, self.id, &rest)) |action| self.bannerAction(action);
         switch (self.state) {
             .text => |v| v.draw(u, rest, focused),
-            .binary => if (banner_mod.fullMessage(u, self.id, rest, "Arquivo binário", "Abrir no app padrão")) self.host.open_externally(self.host.context, self.path),
+            .binary => if (banner_mod.fullMessage(u, self.id, rest, strings.t("Binary file", "Arquivo binário"), strings.t("Open in Default App", "Abrir no app padrão"))) self.host.open_externally(self.host.context, self.path),
             .failed => |m| _ = banner_mod.fullMessage(u, self.id, rest, m, null),
         }
     }

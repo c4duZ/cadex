@@ -12,6 +12,9 @@ pub const Settings = struct {
         confirm_multiline_paste: bool = true,
         /// "beside" or "tab".
         open_files: []const u8 = "beside",
+        /// The interface's language, "en" or "pt"; counts when Cadex opens
+        /// (docs/adr/0015-english-default-two-languages.md).
+        language: []const u8 = "en",
     } = .{},
     terminal: struct {
         /// The Mac's default; a font Windows lacks falls back to Cascadia Mono.
@@ -62,6 +65,7 @@ const cursors = [_][]const u8{ "bar", "block", "underline" };
 const modes = [_][]const u8{ "system", "dark", "light" };
 const markdown_openings = [_][]const u8{ "source", "rendered" };
 const file_openings = [_][]const u8{ "beside", "tab" };
+const languages = [_][]const u8{ "en", "pt" };
 const keep_awake_modes = [_][]const u8{ "always", "running" };
 
 /// Reading the file: the settings live in `arena` (strings point into it).
@@ -87,6 +91,7 @@ pub fn read(arena: std.mem.Allocator, data: []const u8) Read {
         if (r.boolean(g, "general", "confirmClose")) |v| s.general.confirm_close = v;
         if (r.boolean(g, "general", "confirmMultilinePaste")) |v| s.general.confirm_multiline_paste = v;
         if (r.choice(g, "general", "openFiles", &file_openings)) |v| s.general.open_files = v;
+        if (r.choice(g, "general", "language", &languages)) |v| s.general.language = v;
     }
     if (r.section(root, "terminal")) |t| {
         if (r.string(t, "terminal", "fontFamily")) |v| s.terminal.font_family = v;
@@ -213,6 +218,7 @@ pub fn write(gpa: std.mem.Allocator, s: Settings) ![]u8 {
     try j.beginObject();
     try field(&j, "confirmClose", s.general.confirm_close);
     try field(&j, "confirmMultilinePaste", s.general.confirm_multiline_paste);
+    try field(&j, "language", s.general.language);
     try field(&j, "openFiles", s.general.open_files);
     try field(&j, "shell", s.general.shell);
     try j.endObject();

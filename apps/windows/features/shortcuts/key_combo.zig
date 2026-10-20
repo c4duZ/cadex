@@ -10,6 +10,7 @@
 
 const std = @import("std");
 const w = @import("win32");
+const strings = @import("strings");
 const c = w.c;
 
 pub const KeyCombo = struct {
@@ -128,7 +129,7 @@ fn keyName(vk: u16) []const u8 {
         c.VK_ESCAPE => "Esc",
         c.VK_BACK => "Backspace",
         c.VK_DELETE => "Del",
-        c.VK_SPACE => "Espaço",
+        c.VK_SPACE => strings.t("Space", "Espaço"),
         c.VK_HOME => "Home",
         c.VK_END => "End",
         c.VK_PRIOR => "PgUp",

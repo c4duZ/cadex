@@ -6,6 +6,7 @@
 const std = @import("std");
 const gfx = @import("gfx");
 const ui = @import("ui");
+const strings = @import("strings");
 const log = @import("log.zig");
 const dates = @import("dates.zig");
 const HistoryDocument = @import("document.zig").HistoryDocument;
@@ -16,7 +17,7 @@ const Color = gfx.Color;
 pub fn draw(doc: *HistoryDocument, u: *ui.Ui, area: Rect) void {
     var r = area.inset(u.px(10), u.px(8));
     const commit = selectedCommit(doc) orelse {
-        u.painter.text("Selecione um commit", u.style.ui(), r, u.style.secondary_text, .{ .vcenter = false });
+        u.painter.text(strings.t("Select a commit", "Selecione um commit"), u.style.ui(), r, u.style.secondary_text, .{ .vcenter = false });
         return;
     };
     const left = r.takeLeft(@floor(r.w / 2));
@@ -49,12 +50,12 @@ fn info(doc: *HistoryDocument, u: *ui.Ui, area: Rect, commit: log.Commit) void {
     u.painter.text(meta, u.style.mono(11), meta_r, u.style.secondary_text, .{ .vcenter = false, .ellipsis = false });
 }
 
-/// "Ana <ana@x>\n17 de outubro…\ncommit <sha>\npais abc1234 def5678".
+/// "Ana <ana@x>\nOctober 17…\ncommit <sha>\nparents abc1234 def5678".
 pub fn metaText(buf: []u8, commit: log.Commit, date: []const u8) []const u8 {
     var n = (std.fmt.bufPrint(buf, "{s} <{s}>\n{s}\ncommit {s}", .{ commit.author, commit.email, date, commit.sha }) catch return "").len;
     const parents = std.mem.trim(u8, commit.parents, " ");
     if (parents.len == 0) return buf[0..n];
-    const label = if (std.mem.indexOfScalar(u8, parents, ' ') != null) "pais" else "pai";
+    const label = if (std.mem.indexOfScalar(u8, parents, ' ') != null) strings.t("parents", "pais") else strings.t("parent", "pai");
     n += (std.fmt.bufPrint(buf[n..], "\n{s}", .{label}) catch return buf[0..n]).len;
     var it = std.mem.tokenizeScalar(u8, parents, ' ');
     while (it.next()) |p| {
@@ -97,8 +98,9 @@ fn fileRow(u: *ui.Ui, area: Rect, f: log.File) void {
         u.painter.text(minus, u.style.mono(11), r.takeRight(mw), Color.rgb(0xff453a), .{ .@"align" = .trailing });
         u.painter.text(plus, u.style.mono(11), r.takeRight(pw), Color.rgb(0x30d158), .{ .@"align" = .trailing });
     } else {
-        const bw = u.painter.measure("binário", u.style.small()) + u.px(6);
-        u.painter.text("binário", u.style.small(), r.takeRight(bw), u.style.secondary_text, .{ .@"align" = .trailing });
+        const binary = strings.t("binary", "binário");
+        const bw = u.painter.measure(binary, u.style.small()) + u.px(6);
+        u.painter.text(binary, u.style.small(), r.takeRight(bw), u.style.secondary_text, .{ .@"align" = .trailing });
     }
     var name_buf: [1024]u8 = undefined;
     const name = if (f.orig.len > 0) std.fmt.bufPrint(&name_buf, "{s} → {s}", .{ f.orig, f.path }) catch f.path else f.path;
@@ -118,6 +120,9 @@ fn letterColor(letter: u8) Color {
 test "the details' lines name the author, the commit and the parents" {
     const c: log.Commit = .{ .sha = "abcdef1234", .parents = "1111111aaa 2222222bbb", .author = "Ana", .email = "a@x", .time = 0, .refs = "", .subject = "s", .graph = null };
     var buf: [256]u8 = undefined;
+    try std.testing.expectEqualStrings("Ana <a@x>\ntoday\ncommit abcdef1234\nparents 1111111 2222222", metaText(&buf, c, "today"));
+    strings.language = .pt;
+    defer strings.language = .en;
     try std.testing.expectEqualStrings("Ana <a@x>\nhoje\ncommit abcdef1234\npais 1111111 2222222", metaText(&buf, c, "hoje"));
 }
 

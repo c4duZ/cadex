@@ -7,6 +7,7 @@
 const std = @import("std");
 const gfx = @import("gfx");
 const ui = @import("ui");
+const strings = @import("strings");
 const w = @import("win32");
 const icons = @import("icons");
 const controller = @import("controller.zig");
@@ -29,9 +30,9 @@ pub const message_id = ui.id("scm.message", 0);
 
 pub fn draw(sc: *SourceControl, u: *ui.Ui, area: Rect) void {
     switch (sc.state) {
-        .searching => _ = centered(u, area, "Procurando o repositório…", null),
+        .searching => _ = centered(u, area, strings.t("Looking for the repository…", "Procurando o repositório…"), null),
         .git_missing => gitMissing(sc, u, area),
-        .no_repository => if (centered(u, area, "Esta pasta não é um repositório git.", "Inicializar repositório")) sc.initRepository(),
+        .no_repository => if (centered(u, area, strings.t("This folder is not a git repository.", "Esta pasta não é um repositório git."), strings.t("Initialize Repository", "Inicializar repositório"))) sc.initRepository(),
         .ready => ready(sc, u, area),
     }
 }
@@ -53,7 +54,7 @@ fn gitMissing(sc: *SourceControl, u: *ui.Ui, area: Rect) void {
     _ = sc;
     const mid = area.y + area.h * 0.35;
     var y = mid;
-    for ([_][]const u8{ "O git não foi encontrado.", "Instale o Git for Windows:" }) |text| {
+    for ([_][]const u8{ strings.t("Git was not found.", "O git não foi encontrado."), strings.t("Install Git for Windows:", "Instale o Git for Windows:") }) |text| {
         const line: Rect = .{ .x = area.x + u.px(16), .y = y, .w = area.w - u.px(32), .h = u.px(22) };
         u.painter.text(text, u.style.ui(), line, u.style.secondary_text, .{ .@"align" = .center });
         y += u.px(22);
@@ -88,7 +89,7 @@ fn ready(sc: *SourceControl, u: *ui.Ui, area: Rect) void {
     // Ctrl+Enter commits, before the field takes the key (the Mac's ⌘Enter).
     if (u.focus == message_id and u.key(w.c.VK_RETURN, .{ .ctrl = true })) sc.run("git.commit");
     _ = ui.text_field.textField(u, message_id, field, &sc.message, &sc.view.message_scroll, .{
-        .placeholder = "Mensagem do commit (Ctrl+Enter)",
+        .placeholder = strings.t("Commit message (Ctrl+Enter)", "Mensagem do commit (Ctrl+Enter)"),
     });
     _ = r.takeBottom(u.px(4));
     change_list.draw(sc, u, r);
@@ -110,7 +111,7 @@ fn top(sc: *SourceControl, u: *ui.Ui, area: Rect) void {
     const s = sc.status orelse return;
     var name_buf: [96]u8 = undefined;
     const name = if (s.detached())
-        std.fmt.bufPrint(&name_buf, "HEAD destacado em {s}", .{s.oid[0..@min(s.oid.len, 7)]}) catch "HEAD"
+        std.fmt.bufPrint(&name_buf, "{s} {s}", .{ strings.t("HEAD detached at", "HEAD destacado em"), s.oid[0..@min(s.oid.len, 7)] }) catch "HEAD"
     else
         s.branch;
     var sync_buf: [48]u8 = undefined;
@@ -127,12 +128,12 @@ fn top(sc: *SourceControl, u: *ui.Ui, area: Rect) void {
     if (sync_text.len > 0) u.painter.text(sync_text, u.style.small(), r.takeLeft(sync_w).inset(u.px(5), 0), u.style.secondary_text, .{});
 }
 
-/// "↑2 ↓1", or "sem upstream".
+/// "↑2 ↓1", or "no upstream" ("sem upstream").
 pub fn syncText(buf: []u8, ahead: u32, behind: u32, no_upstream: bool) []const u8 {
     var n: usize = 0;
     if (ahead > 0) n += (std.fmt.bufPrint(buf[n..], "↑{d} ", .{ahead}) catch return "").len;
     if (behind > 0) n += (std.fmt.bufPrint(buf[n..], "↓{d} ", .{behind}) catch return "").len;
-    if (no_upstream) n += (std.fmt.bufPrint(buf[n..], "sem upstream", .{}) catch return "").len;
+    if (no_upstream) n += (std.fmt.bufPrint(buf[n..], "{s}", .{strings.t("no upstream", "sem upstream")}) catch return "").len;
     return std.mem.trimEnd(u8, buf[0..n], " ");
 }
 
@@ -155,8 +156,11 @@ pub fn spinner(u: *ui.Ui, r: Rect) void {
 test "ahead, behind and the missing upstream read like the Mac's" {
     var buf: [48]u8 = undefined;
     try std.testing.expectEqualStrings("↑2 ↓1", syncText(&buf, 2, 1, false));
-    try std.testing.expectEqualStrings("sem upstream", syncText(&buf, 0, 0, true));
+    try std.testing.expectEqualStrings("no upstream", syncText(&buf, 0, 0, true));
     try std.testing.expectEqualStrings("", syncText(&buf, 0, 0, false));
+    strings.language = .pt;
+    defer strings.language = .en;
+    try std.testing.expectEqualStrings("sem upstream", syncText(&buf, 0, 0, true));
 }
 
 test {

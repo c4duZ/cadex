@@ -83,7 +83,7 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("shared/webview/webview.zig"),
         .target = target,
         .optimize = optimize,
-        .imports = &.{ .{ .name = "win32", .module = win32 }, .{ .name = "gfx", .module = gfx }, .{ .name = "ui", .module = ui } },
+        .imports = &.{ .{ .name = "win32", .module = win32 }, .{ .name = "gfx", .module = gfx }, .{ .name = "ui", .module = ui }, .{ .name = "strings", .module = strings } },
     });
     // Microsoft's loader goes next to Cadex.exe (and the test exes), where
     // shared/webview/loader.zig looks for it.

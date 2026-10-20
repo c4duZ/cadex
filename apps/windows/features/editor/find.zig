@@ -4,6 +4,7 @@
 //! Esc closes and gives the keys back to the text. Ignores case.
 
 const std = @import("std");
+const strings = @import("strings");
 const gfx = @import("gfx");
 const w = @import("win32");
 const ui_mod = @import("ui");
@@ -127,7 +128,7 @@ pub const Find = struct {
         const count_r = inner.takeRight(u.px(78));
         const focused = u.focus == id;
         const back = focused and u.key(w.c.VK_RETURN, .{ .shift = true });
-        const result = ui_mod.text_field.textField(u, id, inner, &self.field, &self.field_scroll, .{ .placeholder = "Buscar no arquivo" });
+        const result = ui_mod.text_field.textField(u, id, inner, &self.field, &self.field_scroll, .{ .placeholder = strings.t("Find in file", "Buscar no arquivo") });
         self.search(view);
         if (result.changed) self.select(view);
         if (result.submitted) self.go(view, true);
@@ -135,9 +136,9 @@ pub const Find = struct {
         const label = if (self.query().len == 0)
             ""
         else if (self.matches.items.len == 0)
-            "Nenhum"
+            strings.t("None", "Nenhum")
         else
-            std.fmt.bufPrint(&count_buf, "{d} de {d}", .{ (self.current orelse 0) + 1, self.matches.items.len }) catch "";
+            std.fmt.bufPrint(&count_buf, "{d} {s} {d}", .{ (self.current orelse 0) + 1, strings.t("of", "de"), self.matches.items.len }) catch "";
         u.painter.text(label, u.style.small(), count_r, u.style.secondary_text, .{ .@"align" = .trailing });
         if (ui_mod.widgets.iconButton(u, ui_mod.child(id, 1), prev_r, icons.phosphor.caret_up, .{ .icon_size = 13 })) self.go(view, false);
         if (ui_mod.widgets.iconButton(u, ui_mod.child(id, 2), next_r, icons.phosphor.caret_down, .{ .icon_size = 13 })) self.go(view, true);

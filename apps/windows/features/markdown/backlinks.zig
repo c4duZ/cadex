@@ -3,6 +3,7 @@
 //! it there (the Mac's BacklinksSource).
 
 const std = @import("std");
+const strings = @import("strings");
 const icons = @import("icons");
 const palette = @import("command-palette");
 const index_mod = @import("index.zig");
@@ -42,8 +43,8 @@ pub const Backlinks = struct {
     pub fn source(self: *Backlinks) palette.Source {
         return .{
             .context = self,
-            .placeholder = "Quem aponta para esta nota",
-            .empty_text = "Nenhuma nota aponta para esta",
+            .placeholder = strings.t("Notes that link here", "Quem aponta para esta nota"),
+            .empty_text = strings.t("No notes link here", "Nenhuma nota aponta para esta"),
             .icon = icons.phosphor.link,
             .search = search,
             .choose = choose,
@@ -59,7 +60,7 @@ pub const Backlinks = struct {
         for (self.entries) |e| {
             if (query.len > 0 and std.ascii.indexOfIgnoreCase(e.rel, query) == null) continue;
             const id = std.fmt.allocPrint(arena, "{s}\t{d}", .{ e.path, e.line }) catch continue;
-            const detail = std.fmt.allocPrint(arena, "linha {d}", .{e.line}) catch "";
+            const detail = std.fmt.allocPrint(arena, "{s} {d}", .{ strings.t("line", "linha"), e.line }) catch "";
             out.append(arena, .{ .id = id, .title = e.rel, .detail = detail, .icon = icons.phosphor.file_md }) catch break;
         }
         return std.fmt.allocPrint(arena, "{d} links", .{self.entries.len}) catch null;

@@ -8,6 +8,7 @@ const w = @import("win32");
 const ui = @import("ui");
 const gfx = @import("gfx");
 const icons = @import("icons");
+const strings = @import("strings");
 const tabs = @import("tabs");
 const webview = @import("webview");
 const preview = @import("preview");
@@ -173,7 +174,7 @@ pub fn drawOffer(app: *App) void {
     u.requestFrame(@intCast(app.offer.until_ms - u.now_ms));
     const url = app.offer.url[0..app.offer.len];
     var label_buf: [300]u8 = undefined;
-    const label = std.fmt.bufPrint(&label_buf, "Abrir no preview  {s}", .{url}) catch "Abrir no preview";
+    const label = std.fmt.bufPrint(&label_buf, "{s}  {s}", .{ strings.t("Open in preview", "Abrir no preview"), url }) catch strings.t("Open in preview", "Abrir no preview");
     const width = @min(u.px(360), app.panes_area.w - u.px(24));
     const r: gfx.Rect = .{ .x = app.panes_area.right() - width - u.px(12), .y = app.panes_area.bottom() - u.px(44), .w = width, .h = u.px(32) };
     if (ui.widgets.button(u, ui.id("preview.offer", 0), r, label, .{ .icon = icons.phosphor.globe, .icon_size = 14 })) {

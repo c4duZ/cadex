@@ -5,6 +5,7 @@
 const std = @import("std");
 const gfx = @import("gfx");
 const ui = @import("ui");
+const strings = @import("strings");
 const diff_lines = @import("diff_lines.zig");
 const DiffDocument = @import("diff_document.zig").DiffDocument;
 
@@ -30,15 +31,15 @@ pub fn draw(doc: *DiffDocument, u: *ui.Ui, area: Rect, focused: bool) void {
     const base = ui.id("scm.diff-view", 0);
     const id = ui.child(base, @intFromPtr(doc));
     switch (doc.state) {
-        .loading => return message(u, area, "Carregando o diff…"),
-        .failed => return message(u, area, "Não foi possível ler o diff"),
+        .loading => return message(u, area, strings.t("Loading the diff…", "Carregando o diff…")),
+        .failed => return message(u, area, strings.t("Couldn't read the diff", "Não foi possível ler o diff")),
         .ready => {},
     }
     const d = doc.diff orelse return;
-    if (d.binary) return message(u, area, "Arquivo binário, sem diff");
+    if (d.binary) return message(u, area, strings.t("Binary file, no diff", "Arquivo binário, sem diff"));
     if (d.too_large) {
-        message(u, area, "Arquivo grande demais para o diff");
-        const title = "Abrir o arquivo";
+        message(u, area, strings.t("File too large to diff", "Arquivo grande demais para o diff"));
+        const title = strings.t("Open File", "Abrir o arquivo");
         const bw = u.painter.measure(title, u.style.ui()) + u.px(28);
         const r: Rect = .{ .x = area.x + (area.w - bw) / 2, .y = area.y + area.h * 0.4 + u.px(20), .w = bw, .h = u.px(30) };
         u.painter.fillRounded(r, u.px(6), u.style.field);
@@ -46,7 +47,7 @@ pub fn draw(doc: *DiffDocument, u: *ui.Ui, area: Rect, focused: bool) void {
         return;
     }
     if (!doc.side_by_side) {
-        if (d.patch.len == 0) return message(u, area, "Sem diferenças");
+        if (d.patch.len == 0) return message(u, area, strings.t("No differences", "Sem diferenças"));
         return patchColumn(u, ui.child(id, 3), area, d.patch, doc.patch_lines, &doc.view.patch);
     }
     var left = area;

@@ -6,6 +6,7 @@
 
 const std = @import("std");
 const ui = @import("ui");
+const strings = @import("strings");
 const palette = @import("command-palette");
 const host_mod = @import("host.zig");
 const status_mod = @import("status.zig");
@@ -40,7 +41,7 @@ pub const SourceControl = struct {
     /// A disk change came: refresh at this time (one per burst, as the Mac's 0.3 s).
     refresh_due_ms: ?i64 = null,
     disk_changed: bool = false,
-    /// git's last message, or ours ("Escreva uma mensagem para o commit").
+    /// git's last message, or ours ("Write a commit message").
     error_text: std.ArrayList(u8) = .empty,
     message: ui.TextBuffer = .{},
     selection: selection_mod.Selection = .{},
@@ -254,10 +255,10 @@ pub const SourceControl = struct {
     pub fn commit(self: *SourceControl) void {
         const root = self.root orelse return;
         const text = std.mem.trim(u8, self.message.text(), " \t\r\n");
-        if (text.len == 0) return self.showError("Escreva uma mensagem para o commit");
+        if (text.len == 0) return self.showError(strings.t("Write a commit message", "Escreva uma mensagem para o commit"));
         const s = self.status orelse return;
         if (!s.hasStaged()) {
-            if (s.entries.len == 0) return self.showError("Nenhuma mudança para o commit");
+            if (s.entries.len == 0) return self.showError(strings.t("No changes to commit", "Nenhuma mudança para o commit"));
             return question.askCommitAll(self);
         }
         self.commitNow(root, false);

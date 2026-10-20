@@ -4,6 +4,7 @@
 const std = @import("std");
 const gfx = @import("gfx");
 const ui = @import("ui");
+const strings = @import("strings");
 const App = @import("app.zig").App;
 const wiring = @import("wiring.zig");
 
@@ -18,7 +19,7 @@ pub fn draw(app: *App) void {
         u.painter.fillRounded(box.inset(-1, -1), u.px(10), u.style.panel_border);
         u.painter.fillRounded(box, u.px(10), u.style.panel);
         var inner = box.inset(u.px(16), u.px(14));
-        u.painter.text("Renomear space", u.style.bold(), inner.takeTop(u.px(24)), u.style.text, .{});
+        u.painter.text(strings.t("Rename space", "Renomear space"), u.style.bold(), inner.takeTop(u.px(24)), u.style.text, .{});
         const res = ui.text_field.textField(u, ui.id("space.rename", 0), inner.takeTop(u.px(32)), buffer, &app.space_rename_scroll, .{ .autofocus = true });
         if (res.submitted) app.spaces.rename(buffer.text());
         if (res.submitted or res.cancelled) {
@@ -28,11 +29,13 @@ pub fn draw(app: *App) void {
         }
     }
     if (app.quit_question) |q| {
-        const buttons: []const []const u8 = if (q.unsaved) &.{ "Salvar e sair", "Sair sem salvar", "Cancelar" } else &.{ "Sair", "Cancelar" };
-        const title = if (q.unsaved) "Há arquivos não salvos" else "Há programas rodando nos terminais";
-        if (ui.menu.ask(u, .{ .title = title, .message = "Sair do Cadex encerra todos os spaces.", .buttons = buttons })) |choice| {
+        const buttons: []const []const u8 = if (q.unsaved) &.{ strings.t("Save and quit", "Salvar e sair"), strings.t("Quit without saving", "Sair sem salvar"), strings.t("Cancel", "Cancelar") } else &.{ strings.t("Quit", "Sair"), strings.t("Cancel", "Cancelar") };
+        const title = if (q.unsaved) strings.t("There are unsaved files", "Há arquivos não salvos") else strings.t("Programs are running in the terminals", "Há programas rodando nos terminais");
+        if (ui.menu.ask(u, .{ .title = title, .message = strings.t("Quitting Cadex closes every space.", "Sair do Cadex encerra todos os spaces."), .buttons = buttons })) |choice| {
             app.quit_question = null;
             const cancel = choice == buttons.len - 1;
+            // A cancelled quit also cancels "Reopen now".
+            if (cancel) @import("relaunch.zig").cancel();
             if (!cancel) {
                 if (q.unsaved and choice == 0) for (app.spaces.list.items) |s| {
                     _ = s.tabs.saveAll(.all);

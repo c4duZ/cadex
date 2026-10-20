@@ -11,6 +11,7 @@
 //! editor's document, which calls draw, setText and destroy.
 
 const std = @import("std");
+const strings = @import("strings");
 const cadex = @import("cadex");
 const w = @import("win32");
 const gfx = @import("gfx");
@@ -71,7 +72,7 @@ pub const Rendered = struct {
             defer gpa.free(bytes);
             try self.markdown.appendSlice(gpa, bytes);
         } else {
-            self.message = "Não foi possível ler a nota";
+            self.message = strings.t("Couldn't read the note", "Não foi possível ler a nota");
         }
         self.view.navigate(self.url);
         return self;

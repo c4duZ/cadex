@@ -4,6 +4,7 @@
 //! goes on to the focused view.
 
 const palette = @import("command-palette");
+const strings = @import("strings");
 const tabs = @import("tabs");
 const Preview = @import("document.zig").Preview;
 
@@ -46,11 +47,11 @@ fn forward(_: ?*anyopaque) void {
 
 pub fn register(registry: *palette.Registry, where: Current) void {
     current = where;
-    registry.add(.{ .id = "preview.open", .title = "Abrir preview web", .keywords = &.{ "browser", "navegador", "localhost", "site" }, .run = open });
-    registry.add(.{ .id = "preview.open-in-tab", .title = "Abrir preview web em nova aba", .keywords = &.{ "browser", "navegador", "localhost", "site", "aba" }, .run = openInTab });
-    registry.add(.{ .id = "preview.reload", .title = "Recarregar o preview", .keywords = &.{ "reload", "atualizar" }, .shortcut = "cmd+r", .run = reload, .available = hasPreview });
-    registry.add(.{ .id = "preview.back", .title = "Voltar no preview", .keywords = &.{ "back", "anterior" }, .run = back, .available = hasPreview });
-    registry.add(.{ .id = "preview.forward", .title = "Avançar no preview", .keywords = &.{ "forward", "próxima" }, .run = forward, .available = hasPreview });
+    registry.add(.{ .id = "preview.open", .title = strings.t("Open Web Preview", "Abrir preview web"), .keywords = &.{ "browser", "navegador", "localhost", "site" }, .run = open });
+    registry.add(.{ .id = "preview.open-in-tab", .title = strings.t("Open Web Preview in New Tab", "Abrir preview web em nova aba"), .keywords = &.{ "browser", "navegador", "localhost", "site", "aba", "tab" }, .run = openInTab });
+    registry.add(.{ .id = "preview.reload", .title = strings.t("Reload Preview", "Recarregar o preview"), .keywords = &.{ "reload", "atualizar" }, .shortcut = "cmd+r", .run = reload, .available = hasPreview });
+    registry.add(.{ .id = "preview.back", .title = strings.t("Go Back in Preview", "Voltar no preview"), .keywords = &.{ "back", "anterior", "previous" }, .run = back, .available = hasPreview });
+    registry.add(.{ .id = "preview.forward", .title = strings.t("Go Forward in Preview", "Avançar no preview"), .keywords = &.{ "forward", "próxima", "next" }, .run = forward, .available = hasPreview });
 }
 
 test {

@@ -11,30 +11,39 @@ const icons = @import("icons");
 const palette = @import("command-palette");
 const terminal = @import("terminal");
 const tabs = @import("tabs");
+const strings = @import("strings");
 const App = @import("app.zig").App;
 
 const c = w.c;
 const p = icons.phosphor;
 
 /// The ways to open things, first in the palette and in the "+" menu (the
-/// Mac's openers).
-pub const openers = [_]palette.Pin{
-    .{ .id = "tab.new", .title = "Terminal em nova aba", .icon = p.plus },
-    .{ .id = "pane.split-right", .title = "Terminal ao lado", .icon = p.square_split_horizontal },
-    .{ .id = "pane.split-down", .title = "Terminal abaixo", .icon = p.square_split_vertical },
-    .{ .id = "search.files", .title = "Arquivo…", .icon = p.file },
-    .{ .id = "preview.open", .title = "Preview web", .icon = p.globe },
-    .{ .id = "preview.open-in-tab", .title = "Preview web em nova aba", .icon = p.globe },
-    .{ .id = "git.history", .title = "Grafo do git", .icon = p.git_branch },
-    .{ .id = "git.history-in-tab", .title = "Grafo do git em nova aba", .icon = p.git_branch },
-    .{ .id = "window.new", .title = "Nova janela", .icon = p.app_window },
+/// Mac's openers). Both languages here, since t runs at launch, not at
+/// comptime; translateOpeners fills openers and plus_items.
+const opener_texts = [_]struct { id: []const u8, en: []const u8, pt: []const u8, icon: u21 }{
+    .{ .id = "tab.new", .en = "Terminal in New Tab", .pt = "Terminal em nova aba", .icon = p.plus },
+    .{ .id = "pane.split-right", .en = "Terminal on the Right", .pt = "Terminal ao lado", .icon = p.square_split_horizontal },
+    .{ .id = "pane.split-down", .en = "Terminal Below", .pt = "Terminal abaixo", .icon = p.square_split_vertical },
+    .{ .id = "search.files", .en = "File…", .pt = "Arquivo…", .icon = p.file },
+    .{ .id = "preview.open", .en = "Web Preview", .pt = "Preview web", .icon = p.globe },
+    .{ .id = "preview.open-in-tab", .en = "Web Preview in New Tab", .pt = "Preview web em nova aba", .icon = p.globe },
+    .{ .id = "git.history", .en = "Git Graph", .pt = "Grafo do git", .icon = p.git_branch },
+    .{ .id = "git.history-in-tab", .en = "Git Graph in New Tab", .pt = "Grafo do git em nova aba", .icon = p.git_branch },
+    .{ .id = "window.new", .en = "New Window", .pt = "Nova janela", .icon = p.app_window },
 };
 
-pub const plus_items = blk: {
-    var items: [openers.len]ui.menu.Item = undefined;
-    for (openers, 0..) |o, i| items[i] = .{ .label = o.title, .icon = o.icon };
-    break :blk items;
-};
+pub var openers: [opener_texts.len]palette.Pin = undefined;
+pub var plus_items: [opener_texts.len]ui.menu.Item = undefined;
+
+/// The openers in the interface's language; once at launch, after the
+/// language is set.
+pub fn translateOpeners() void {
+    for (opener_texts, 0..) |o, i| {
+        const title = strings.t(o.en, o.pt);
+        openers[i] = .{ .id = o.id, .title = title, .icon = o.icon };
+        plus_items[i] = .{ .label = title, .icon = o.icon };
+    }
+}
 
 /// The icons of the palette's sections, in registry.sections' order, then "Cadex".
 pub const section_icons = [_]u21{
@@ -148,22 +157,22 @@ fn scrollBottom(_: ?*anyopaque) void {
 pub fn register(app: *App) void {
     app_ref = app;
     const r = &app.registry;
-    r.add(.{ .id = "palette.open", .title = "Abrir a paleta de comandos", .keywords = &.{ "comandos", "command palette" }, .shortcut = "cmd+k", .run = openPalette });
-    r.add(.{ .id = "settings.open", .title = "Abrir configurações", .keywords = &.{ "settings", "preferências", "ajustes" }, .shortcut = "cmd+,", .run = openSettings });
-    r.add(.{ .id = "app.quit", .title = "Sair do Cadex", .keywords = &.{ "quit", "fechar app" }, .shortcut = "cmd+q", .run = quit });
-    r.add(.{ .id = "app.hide", .title = "Ocultar o Cadex", .keywords = &.{ "hide", "minimizar" }, .shortcut = "cmd+h", .run = hide });
-    r.add(.{ .id = "window.new", .title = "Nova janela", .keywords = &.{ "new window", "janela" }, .run = newWindow });
-    r.add(.{ .id = "edit.undo", .title = "Desfazer", .keywords = &.{"undo"}, .shortcut = "cmd+z", .run = undo, .available = hasFocusTarget });
-    r.add(.{ .id = "edit.redo", .title = "Refazer", .keywords = &.{"redo"}, .shortcut = "cmd+shift+z", .run = redo, .available = hasFocusTarget });
-    r.add(.{ .id = "edit.cut", .title = "Recortar", .keywords = &.{"cut"}, .shortcut = "cmd+x", .run = cut, .available = hasFocusTarget });
-    r.add(.{ .id = "edit.copy", .title = "Copiar", .keywords = &.{ "copy", "seleção" }, .shortcut = "cmd+c", .run = copy, .available = hasFocusTarget });
-    r.add(.{ .id = "edit.paste", .title = "Colar", .keywords = &.{"paste"}, .shortcut = "cmd+v", .run = paste, .available = hasFocusTarget });
-    r.add(.{ .id = "edit.find", .title = "Buscar", .keywords = &.{ "find", "procurar", "pesquisar" }, .shortcut = "cmd+f", .run = find, .available = hasFocusTarget });
-    r.add(.{ .id = "edit.select-all", .title = "Selecionar tudo", .keywords = &.{"select all"}, .shortcut = "cmd+a", .run = selectAll, .available = hasFocusTarget });
-    r.add(.{ .id = "view.toggle-sidebar", .title = "Mostrar ou esconder o painel lateral", .keywords = &.{ "sidebar", "explorer", "painel" }, .shortcut = "cmd+b", .run = toggleSidebar });
-    r.add(.{ .id = "terminal.clear", .title = "Limpar o terminal", .keywords = &.{ "clear", "cls", "tela" }, .shortcut = "cmd+l", .run = clear, .available = hasTerminal });
-    r.add(.{ .id = "terminal.scroll-top", .title = "Ir ao topo do histórico", .keywords = &.{ "scroll", "rolar", "início" }, .shortcut = "cmd+up", .run = scrollTop, .available = hasTerminal });
-    r.add(.{ .id = "terminal.scroll-bottom", .title = "Ir ao fim do histórico", .keywords = &.{ "scroll", "rolar", "final" }, .shortcut = "cmd+down", .run = scrollBottom, .available = hasTerminal });
+    r.add(.{ .id = "palette.open", .title = strings.t("Open Command Palette", "Abrir a paleta de comandos"), .keywords = &.{ "comandos", "command palette" }, .shortcut = "cmd+k", .run = openPalette });
+    r.add(.{ .id = "settings.open", .title = strings.t("Open Settings", "Abrir configurações"), .keywords = &.{ "settings", "preferências", "ajustes" }, .shortcut = "cmd+,", .run = openSettings });
+    r.add(.{ .id = "app.quit", .title = strings.t("Quit Cadex", "Sair do Cadex"), .keywords = &.{ "quit", "fechar app" }, .shortcut = "cmd+q", .run = quit });
+    r.add(.{ .id = "app.hide", .title = strings.t("Hide Cadex", "Ocultar o Cadex"), .keywords = &.{ "hide", "minimizar" }, .shortcut = "cmd+h", .run = hide });
+    r.add(.{ .id = "window.new", .title = strings.t("New Window", "Nova janela"), .keywords = &.{ "new window", "janela" }, .run = newWindow });
+    r.add(.{ .id = "edit.undo", .title = strings.t("Undo", "Desfazer"), .keywords = &.{"undo"}, .shortcut = "cmd+z", .run = undo, .available = hasFocusTarget });
+    r.add(.{ .id = "edit.redo", .title = strings.t("Redo", "Refazer"), .keywords = &.{"redo"}, .shortcut = "cmd+shift+z", .run = redo, .available = hasFocusTarget });
+    r.add(.{ .id = "edit.cut", .title = strings.t("Cut", "Recortar"), .keywords = &.{"cut"}, .shortcut = "cmd+x", .run = cut, .available = hasFocusTarget });
+    r.add(.{ .id = "edit.copy", .title = strings.t("Copy", "Copiar"), .keywords = &.{ "copy", "seleção" }, .shortcut = "cmd+c", .run = copy, .available = hasFocusTarget });
+    r.add(.{ .id = "edit.paste", .title = strings.t("Paste", "Colar"), .keywords = &.{"paste"}, .shortcut = "cmd+v", .run = paste, .available = hasFocusTarget });
+    r.add(.{ .id = "edit.find", .title = strings.t("Find", "Buscar"), .keywords = &.{ "find", "procurar", "pesquisar" }, .shortcut = "cmd+f", .run = find, .available = hasFocusTarget });
+    r.add(.{ .id = "edit.select-all", .title = strings.t("Select All", "Selecionar tudo"), .keywords = &.{"select all"}, .shortcut = "cmd+a", .run = selectAll, .available = hasFocusTarget });
+    r.add(.{ .id = "view.toggle-sidebar", .title = strings.t("Show or Hide Sidebar", "Mostrar ou esconder o painel lateral"), .keywords = &.{ "sidebar", "explorer", "painel" }, .shortcut = "cmd+b", .run = toggleSidebar });
+    r.add(.{ .id = "terminal.clear", .title = strings.t("Clear Terminal", "Limpar o terminal"), .keywords = &.{ "clear", "cls", "tela" }, .shortcut = "cmd+l", .run = clear, .available = hasTerminal });
+    r.add(.{ .id = "terminal.scroll-top", .title = strings.t("Scroll to Top", "Ir ao topo do histórico"), .keywords = &.{ "scroll", "rolar", "início" }, .shortcut = "cmd+up", .run = scrollTop, .available = hasTerminal });
+    r.add(.{ .id = "terminal.scroll-bottom", .title = strings.t("Scroll to Bottom", "Ir ao fim do histórico"), .keywords = &.{ "scroll", "rolar", "final" }, .shortcut = "cmd+down", .run = scrollBottom, .available = hasTerminal });
     tabs.commands.register(r, .{
         .context = app,
         .tabs = currentTabs,

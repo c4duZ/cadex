@@ -1,7 +1,7 @@
 //! A web page in a tab (docs/spec/preview.md), the Mac's PreviewDocument:
 //! back, forward, reload and the address on a bar, the page under it
 //! (WebView2, shared/webview), a thin progress line while it loads and
-//! "Não foi possível conectar a <endereço>" with the reason when it fails.
+//! "Couldn't connect to <address>" with the reason when it fails.
 //! The page is isolated: InPrivate (data only while the app runs), no
 //! bridge to the app, file: refused, other schemes and new windows to the
 //! system browser, "Inspecionar" in the page's menu.
@@ -9,6 +9,7 @@
 const std = @import("std");
 const gfx = @import("gfx");
 const ui = @import("ui");
+const strings = @import("strings");
 const icons = @import("icons");
 const tabs = @import("tabs");
 const webview = @import("webview");
@@ -92,7 +93,10 @@ pub const Preview = struct {
 
     fn showFailure(self: *Preview, reason: []const u8) void {
         self.clearMessage();
-        self.message = std.fmt.allocPrint(self.gpa, "Não foi possível conectar a {s}\n{s}", .{ self.field.text(), reason }) catch null;
+        self.message = (if (strings.language == .pt)
+            std.fmt.allocPrint(self.gpa, "Não foi possível conectar a {s}\n{s}", .{ self.field.text(), reason })
+        else
+            std.fmt.allocPrint(self.gpa, "Couldn't connect to {s}\n{s}", .{ self.field.text(), reason })) catch null;
     }
 
     /// What happened in the page since the last frame.

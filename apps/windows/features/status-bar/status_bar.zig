@@ -9,6 +9,7 @@ const gfx = @import("gfx");
 const ui = @import("ui");
 const w = @import("win32");
 const icons = @import("icons");
+const strings = @import("strings");
 const breadcrumb = @import("breadcrumb.zig");
 
 pub const Piece = breadcrumb.Piece;
@@ -93,7 +94,7 @@ pub const StatusBar = struct {
         if (!self.menu.isOpen(owner)) return null;
         var items: std.ArrayList(ui.menu.Item) = .empty;
         defer items.deinit(u.gpa);
-        if (self.entries.items.len == 0) items.append(u.gpa, .{ .label = "Sem acesso", .enabled = false }) catch {};
+        if (self.entries.items.len == 0) items.append(u.gpa, .{ .label = strings.t("No access", "Sem acesso"), .enabled = false }) catch {};
         for (self.entries.items) |e| {
             const name = std.fs.path.basenameWindows(e);
             items.append(u.gpa, .{ .label = name, .icon = icons.phosphor.folder, .enabled = !busy }) catch {};

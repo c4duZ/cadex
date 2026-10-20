@@ -4,11 +4,12 @@
 
 const std = @import("std");
 const icons = @import("icons");
+const strings = @import("strings");
 const palette = @import("command-palette");
 const App = @import("app.zig").App;
 
 pub fn source(app: *App) palette.Source {
-    return .{ .context = app, .placeholder = "Ir para a aba ou o space", .empty_text = "Nenhuma aba ou space", .icon = icons.phosphor.stack, .search = search, .choose = choose };
+    return .{ .context = app, .placeholder = strings.t("Go to a tab or space", "Ir para a aba ou o space"), .empty_text = strings.t("No tabs or spaces", "Nenhuma aba ou space"), .icon = icons.phosphor.stack, .search = search, .choose = choose };
 }
 
 fn matches(text: []const u8, query: []const u8) bool {
@@ -25,9 +26,9 @@ fn search(context: *anyopaque, arena: std.mem.Allocator, query: []const u8, out:
         out.append(arena, .{
             .id = std.fmt.allocPrint(arena, "t{d}", .{id}) catch continue,
             .title = title,
-            .detail = std.fmt.allocPrint(arena, "aba {d} · {d} {s}", .{ i + 1, t.tree.count(), if (t.tree.count() == 1) "painel" else "painéis" }) catch "",
+            .detail = std.fmt.allocPrint(arena, "{s} {d} · {d} {s}", .{ strings.t("tab", "aba"), i + 1, t.tree.count(), if (t.tree.count() == 1) strings.t("pane", "painel") else strings.t("panes", "painéis") }) catch "",
             .icon = icons.phosphor.terminal_window,
-            .section = if (first) "Abas" else "",
+            .section = if (first) strings.t("Tabs", "Abas") else "",
         }) catch {};
         first = false;
     }
@@ -37,7 +38,7 @@ fn search(context: *anyopaque, arena: std.mem.Allocator, query: []const u8, out:
         out.append(arena, .{
             .id = std.fmt.allocPrint(arena, "s{d}", .{i}) catch continue,
             .title = s.name,
-            .detail = if (i == app.spaces.active) "atual" else "",
+            .detail = if (i == app.spaces.active) strings.t("current", "atual") else "",
             .icon = icons.phosphor.stack,
             .section = if (first) "Spaces" else "",
         }) catch {};

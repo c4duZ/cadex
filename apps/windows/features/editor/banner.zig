@@ -4,6 +4,7 @@
 //! whole pane instead of the text (a binary file, an error).
 
 const std = @import("std");
+const strings = @import("strings");
 const gfx = @import("gfx");
 const ui_mod = @import("ui");
 
@@ -26,8 +27,8 @@ pub const Banner = struct {
 
     fn title(action: Action) []const u8 {
         return switch (action) {
-            .reload => "Recarregar",
-            .keep_mine => "Manter o meu",
+            .reload => strings.t("Reload", "Recarregar"),
+            .keep_mine => strings.t("Keep Mine", "Manter o meu"),
         };
     }
 

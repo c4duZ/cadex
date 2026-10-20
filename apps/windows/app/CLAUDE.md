@@ -24,9 +24,13 @@
   aplicados a cada feature.
 - `app_commands.zig`: palette.open, settings.open, app.quit, app.hide, window.new (outro processo),
   edit.* (para o terminal ou o documento com foco), terminal.clear/scroll-top/scroll-bottom, e o
-  registro dos comandos das features; `openers`, as aberturas do "+" e do topo da paleta, iguais às
+  registro dos comandos das features; `openers`, as aberturas do "+" e do topo da paleta (traduzidas por `translateOpeners` ao abrir), iguais às
   do Mac (`../../macos/app/PaletteWiring.swift`): comando novo que abre algo entra nas duas.
-  `settings_page.zig`: a página de configurações.
+  `settings_page.zig`: a janela de configurações (as abas do Mac: General, Terminal, Themes,
+  Shortcuts, About; título de seção, linha com explicação, escolha), com as páginas em
+  `settings_rows.zig` (General com idioma, arquivos, árvore e manter acordado; Terminal; Themes).
+  `relaunch.zig`: "Reabrir agora" depois de trocar o idioma, que fecha como de costume e o `main.zig`
+  abre o Cadex.exe de novo; o idioma é lido no começo do App.init (ADR 0015).
 - `sidebar.zig`: o painel lateral (Arquivos ou Git, abas embaixo, view.toggle-sidebar) e o
   workspace seguindo o terminal com foco até a raiz do repositório (que vai também à busca, ao
   markdown e ao git).

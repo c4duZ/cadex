@@ -5,6 +5,7 @@
 const std = @import("std");
 const gfx = @import("gfx");
 const ui = @import("ui");
+const strings = @import("strings");
 const w = @import("win32");
 const HistoryDocument = @import("document.zig").HistoryDocument;
 const rows = @import("rows.zig");
@@ -67,14 +68,14 @@ fn topBar(doc: *HistoryDocument, u: *ui.Ui, area: Rect) void {
     var buf: [48]u8 = undefined;
     const n = shown.len();
     const count = if (doc.search != null)
-        std.fmt.bufPrint(&buf, "{d} encontrados", .{n}) catch ""
+        std.fmt.bufPrint(&buf, "{d} {s}", .{ n, strings.t("found", "encontrados") }) catch ""
     else if (n == 1) "1 commit" else std.fmt.bufPrint(&buf, "{d} commits", .{n}) catch "";
     const count_w = u.painter.measure(count, u.style.small()) + u.px(12);
     u.painter.text(count, u.style.small(), r.takeRight(count_w), u.style.secondary_text, .{ .@"align" = .trailing });
     const feed = if (doc.search) |*s| s else &doc.main;
     if (feed.loading) spinner(u, r.takeRight(r.h));
 
-    const label = "Só a branch atual";
+    const label = strings.t("Current branch only", "Só a branch atual");
     const label_w = u.painter.measure(label, u.style.ui()) + u.px(50);
     const toggle_r = r.takeRight(label_w);
     _ = r.takeRight(u.px(10));
@@ -84,7 +85,7 @@ fn topBar(doc: *HistoryDocument, u: *ui.Ui, area: Rect) void {
     const field_id = searchId(doc);
     if (u.focus == field_id and u.key(w.c.VK_DOWN, .{})) u.focus = listId(doc);
     const result = ui.text_field.textField(u, field_id, r, &doc.view.search, &doc.view.search_scroll, .{
-        .placeholder = "Filtrar por assunto, autor ou sha (Enter busca no repositório)",
+        .placeholder = strings.t("Filter by subject, author or SHA (Enter searches the repository)", "Filtrar por assunto, autor ou sha (Enter busca no repositório)"),
     });
     if (result.cancelled) {
         doc.view.search.set(u.gpa, "") catch {};
@@ -98,11 +99,11 @@ fn emptyText(doc: *HistoryDocument, u: *ui.Ui, area: Rect) void {
     const text = if (m.commits.items.len > 0 or doc.search != null)
         ""
     else if (m.failed)
-        "Não foi possível ler o histórico deste repositório"
+        strings.t("Couldn't read this repository's history", "Não foi possível ler o histórico deste repositório")
     else if (m.ended)
-        "Nenhum commit ainda"
+        strings.t("No commits yet", "Nenhum commit ainda")
     else
-        "Carregando o histórico…";
+        strings.t("Loading history…", "Carregando o histórico…");
     if (text.len == 0) return;
     u.painter.text(text, u.style.ui(), area, u.style.secondary_text, .{ .@"align" = .center });
 }

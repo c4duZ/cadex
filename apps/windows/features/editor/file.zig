@@ -3,6 +3,7 @@
 //! limits and messages (apps/macos/features/editor/EditorFile.swift).
 
 const std = @import("std");
+const strings = @import("strings");
 const cadex = @import("cadex");
 
 /// Above this the view shows the start only, read-only.
@@ -35,7 +36,7 @@ pub fn hash(bytes: []const u8) u64 {
 }
 
 pub fn read(gpa: std.mem.Allocator, path: []const u8) Loaded {
-    const z = gpa.dupeZ(u8, path) catch return .{ .failed = "Memória insuficiente para ler o arquivo" };
+    const z = gpa.dupeZ(u8, path) catch return .{ .failed = strings.t("Not enough memory to read the file", "Memória insuficiente para ler o arquivo") };
     defer gpa.free(z);
     var out: [*c]u8 = null;
     var len: usize = 0;
@@ -44,27 +45,27 @@ pub fn read(gpa: std.mem.Allocator, path: []const u8) Loaded {
     switch (status) {
         cadex.CADEX_OK => {},
         cadex.CADEX_BINARY => return .binary,
-        cadex.CADEX_NOT_FOUND => return .{ .failed = "O arquivo não existe mais" },
-        cadex.CADEX_NOT_AUTHORIZED => return .{ .failed = "O arquivo está fora da pasta aberta" },
-        cadex.CADEX_PERMISSION_DENIED => return .{ .failed = "Sem permissão para ler o arquivo" },
-        else => return .{ .failed = "Não foi possível ler o arquivo" },
+        cadex.CADEX_NOT_FOUND => return .{ .failed = strings.t("The file no longer exists", "O arquivo não existe mais") },
+        cadex.CADEX_NOT_AUTHORIZED => return .{ .failed = strings.t("The file is outside the open folder", "O arquivo está fora da pasta aberta") },
+        cadex.CADEX_PERMISSION_DENIED => return .{ .failed = strings.t("No permission to read the file", "Sem permissão para ler o arquivo") },
+        else => return .{ .failed = strings.t("Couldn't read the file", "Não foi possível ler o arquivo") },
     }
     defer cadex.cadex_free(out);
     const raw: []const u8 = if (out == null) "" else out[0..len];
     const valid = std.unicode.utf8ValidateSlice(raw);
-    const bytes = (if (valid) gpa.dupe(u8, raw) else replaceInvalid(gpa, raw)) catch return .{ .failed = "Memória insuficiente para ler o arquivo" };
+    const bytes = (if (valid) gpa.dupe(u8, raw) else replaceInvalid(gpa, raw)) catch return .{ .failed = strings.t("Not enough memory to read the file", "Memória insuficiente para ler o arquivo") };
     return .{ .text = .{ .bytes = bytes, .disk_hash = hash(raw), .disk_len = raw.len, .truncated = truncated, .valid = valid } };
 }
 
 /// Null when saved, otherwise why not.
 pub fn write(gpa: std.mem.Allocator, path: []const u8, bytes: []const u8) ?[]const u8 {
-    const z = gpa.dupeZ(u8, path) catch return "Memória insuficiente para salvar";
+    const z = gpa.dupeZ(u8, path) catch return strings.t("Not enough memory to save", "Memória insuficiente para salvar");
     defer gpa.free(z);
     return switch (cadex.cadex_explorer_write_text(z.ptr, bytes.ptr, bytes.len)) {
         cadex.CADEX_OK => null,
-        cadex.CADEX_NOT_AUTHORIZED => "O arquivo está fora da pasta aberta",
-        cadex.CADEX_PERMISSION_DENIED => "Sem permissão para gravar o arquivo",
-        else => "Não foi possível salvar o arquivo",
+        cadex.CADEX_NOT_AUTHORIZED => strings.t("The file is outside the open folder", "O arquivo está fora da pasta aberta"),
+        cadex.CADEX_PERMISSION_DENIED => strings.t("No permission to write the file", "Sem permissão para gravar o arquivo"),
+        else => strings.t("Couldn't save the file", "Não foi possível salvar o arquivo"),
     };
 }
 

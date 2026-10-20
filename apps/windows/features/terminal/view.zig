@@ -4,6 +4,7 @@
 //! (keyDown, typeText), before any widget, so nothing is lost or delayed.
 
 const std = @import("std");
+const strings = @import("strings");
 const gfx = @import("gfx");
 const ui_mod = @import("ui");
 const w = @import("win32");
@@ -122,7 +123,7 @@ pub const View = struct {
         if (self.find.open) self.find.draw(ui, self.session, area, self.id);
         if (self.exited) |code| {
             var buf: [96]u8 = undefined;
-            const note = std.fmt.bufPrint(&buf, "O shell saiu com o código {d}. Ctrl+Shift+W fecha o painel.", .{code}) catch "";
+            const note = std.fmt.bufPrint(&buf, "{s} {d}. {s}", .{ strings.t("The shell exited with code", "O shell saiu com o código"), code, strings.t("Ctrl+Shift+W closes the pane.", "Ctrl+Shift+W fecha o painel.") }) catch "";
             const bar: gfx.Rect = .{ .x = area.x, .y = area.bottom() - ui.px(34), .w = area.w, .h = ui.px(34) };
             ui.painter.fill(bar, ui.style.panel);
             ui.painter.text(note, ui.style.ui(), bar.inset(ui.px(12), 0), ui.style.secondary_text, .{});

@@ -35,7 +35,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 
 | # | plano | entrega | status |
 |---|---|---|---|
-| 14 | `docs/plans/14-languages-and-settings.md` | inglês por padrão, português como opção, configurações refeitas | em andamento: A e B feitas no Mac; falta C (Windows) e D (núcleo) |
+| 14 | `docs/plans/14-languages-and-settings.md` | inglês por padrão, português como opção, configurações refeitas | em andamento: A e B no Mac e C no Windows feitas; falta D (núcleo) |
 | 15 | `docs/plans/15-themes-and-personalization.md` | mais temas e personalização visual (claro/escuro, destaque, contraste, fonte, zoom, cores de space e aba) | escrito; começa depois do 14 |
 
 ## O que eu não quero

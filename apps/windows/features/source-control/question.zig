@@ -6,6 +6,7 @@
 
 const std = @import("std");
 const ui = @import("ui");
+const strings = @import("strings");
 const status_mod = @import("status.zig");
 const repository = @import("repository.zig");
 const jobs = @import("jobs.zig");
@@ -43,10 +44,15 @@ fn open(sc: *SourceControl, pending: Pending) void {
 pub fn askDiscard(sc: *SourceControl, entries: []const Entry) void {
     const gpa = sc.gpa;
     const title = if (entries.len == 1)
-        std.fmt.allocPrint(gpa, "Descartar as mudanças em {s}?", .{entries[0].path})
+        gpa.dupe(u8, entries[0].path)
     else
-        std.fmt.allocPrint(gpa, "Descartar as mudanças em {d} arquivos?", .{entries.len});
-    const title_text = title catch return;
+        std.fmt.allocPrint(gpa, "{d} {s}", .{ entries.len, strings.t("files", "arquivos") });
+    const what = title catch return;
+    defer gpa.free(what);
+    const title_text = (if (strings.language == .pt)
+        std.fmt.allocPrint(gpa, "Descartar as mudanças em {s}?", .{what})
+    else
+        std.fmt.allocPrint(gpa, "Discard the changes to {s}?", .{what})) catch return;
     var tracked: std.ArrayList([:0]u8) = .empty;
     var untracked: std.ArrayList([]u8) = .empty;
     for (entries) |e| {
@@ -59,8 +65,8 @@ pub fn askDiscard(sc: *SourceControl, entries: []const Entry) void {
     open(sc, .{
         .kind = .discard,
         .title = title_text,
-        .detail = "Isso não pode ser desfeito (arquivos novos vão para a Lixeira).",
-        .button = "Descartar",
+        .detail = strings.t("This can't be undone (new files go to the Recycle Bin).", "Isso não pode ser desfeito (arquivos novos vão para a Lixeira)."),
+        .button = strings.t("Discard", "Descartar"),
         .items = tracked.toOwnedSlice(gpa) catch &.{},
         .untracked = untracked.toOwnedSlice(gpa) catch &.{},
     });
@@ -69,9 +75,9 @@ pub fn askDiscard(sc: *SourceControl, entries: []const Entry) void {
 pub fn askCommitAll(sc: *SourceControl) void {
     open(sc, .{
         .kind = .commit_all,
-        .title = sc.gpa.dupe(u8, "Nada está staged. Fazer o commit de todas as mudanças?") catch return,
+        .title = sc.gpa.dupe(u8, strings.t("Nothing is staged. Commit all changes?", "Nada está staged. Fazer o commit de todas as mudanças?")) catch return,
         .detail = "",
-        .button = "Commit de tudo",
+        .button = strings.t("Commit All", "Commit de tudo"),
     });
 }
 
@@ -81,19 +87,19 @@ pub fn askPublish(sc: *SourceControl, branch: []const u8) void {
     items[0] = repository.z(gpa, branch) catch return gpa.free(items);
     open(sc, .{
         .kind = .publish,
-        .title = std.fmt.allocPrint(gpa, "Publicar a branch {s}?", .{branch}) catch {
+        .title = (if (strings.language == .pt) std.fmt.allocPrint(gpa, "Publicar a branch {s}?", .{branch}) else std.fmt.allocPrint(gpa, "Publish branch {s}?", .{branch})) catch {
             gpa.free(items[0]);
             return gpa.free(items);
         },
-        .detail = "Ela vai para o origin e passa a ser acompanhada.",
-        .button = "Publicar",
+        .detail = strings.t("It goes to origin and becomes tracked.", "Ela vai para o origin e passa a ser acompanhada."),
+        .button = strings.t("Publish", "Publicar"),
         .items = items,
     });
 }
 
 pub fn draw(sc: *SourceControl, u: *ui.Ui) void {
     const q = &(sc.question orelse return);
-    const choice = ui.menu.ask(u, .{ .title = q.title, .message = q.detail, .buttons = &.{ q.button, "Cancelar" } }) orelse return;
+    const choice = ui.menu.ask(u, .{ .title = q.title, .message = q.detail, .buttons = &.{ q.button, strings.t("Cancel", "Cancelar") } }) orelse return;
     var pending = q.*;
     sc.question = null;
     defer pending.deinit(sc.gpa);
@@ -108,7 +114,7 @@ fn answer(sc: *SourceControl, q: *Pending) void {
                 const path = repository.absolute(sc.gpa, root, rel) catch continue;
                 defer sc.gpa.free(path);
                 if (!sc.host.trash(sc.host.context, path)) {
-                    const text = std.fmt.allocPrint(sc.gpa, "Não foi possível mandar {s} para a Lixeira", .{rel}) catch continue;
+                    const text = (if (strings.language == .pt) std.fmt.allocPrint(sc.gpa, "Não foi possível mandar {s} para a Lixeira", .{rel}) else std.fmt.allocPrint(sc.gpa, "Couldn't move {s} to the Recycle Bin", .{rel})) catch continue;
                     defer sc.gpa.free(text);
                     sc.showError(text);
                 }

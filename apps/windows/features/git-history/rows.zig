@@ -6,6 +6,7 @@
 const std = @import("std");
 const gfx = @import("gfx");
 const ui = @import("ui");
+const strings = @import("strings");
 const w = @import("win32");
 const log = @import("log.zig");
 const graph = @import("graph.zig");
@@ -21,11 +22,11 @@ const Color = gfx.Color;
 /// The next page is asked this many rows before the end (the Mac's).
 const prefetch = 100;
 
-const menu_items = [_]struct { label: []const u8, id: []const u8 }{
-    .{ .label = "Copiar sha", .id = "history.copy-sha" },
-    .{ .label = "Abrir no remoto", .id = "history.open-remote" },
+/// English then Portuguese: t runs at draw time, not in a const table.
+const menu_items = [_]struct { label: [2][]const u8, id: []const u8 }{
+    .{ .label = .{ "Copy SHA", "Copiar sha" }, .id = "history.copy-sha" },
+    .{ .label = .{ "Open on Remote", "Abrir no remoto" }, .id = "history.open-remote" },
 };
-const menu_rows = [_]ui.menu.Item{ .{ .label = menu_items[0].label }, .{ .label = menu_items[1].label } };
 
 const Columns = struct { graph: Rect, subject: Rect, author: ?Rect, date: ?Rect, sha: Rect };
 
@@ -57,6 +58,8 @@ pub fn draw(doc: *HistoryDocument, u: *ui.Ui, area: Rect) void {
     const now = dates.nowUnix();
     for (list.first..list.last) |i| row(doc, u, i, list.row(i), shown.at(i), graph_w, now);
     ui.list.end(u);
+    var menu_rows: [menu_items.len]ui.menu.Item = undefined;
+    for (menu_items, &menu_rows) |m, *item| item.* = .{ .label = strings.t(m.label[0], m.label[1]) };
     if (ui.menu.show(u, &doc.view.menu, ui.child(id, 0x6e), &menu_rows)) |chosen| commands.run(menu_items[chosen].id);
 }
 
@@ -64,9 +67,9 @@ fn header(u: *ui.Ui, r: Rect, graph_w: f32) void {
     const cols = columns(u, r.inset(u.px(4), 0), graph_w);
     const spec = u.style.small();
     const fg = u.style.secondary_text;
-    u.painter.text("Descrição", spec, cols.subject.inset(u.px(4), 0), fg, .{});
-    if (cols.author) |a| u.painter.text("Autor", spec, a.inset(u.px(4), 0), fg, .{});
-    if (cols.date) |d| u.painter.text("Data", spec, d.inset(u.px(4), 0), fg, .{});
+    u.painter.text(strings.t("Description", "Descrição"), spec, cols.subject.inset(u.px(4), 0), fg, .{});
+    if (cols.author) |a| u.painter.text(strings.t("Author", "Autor"), spec, a.inset(u.px(4), 0), fg, .{});
+    if (cols.date) |d| u.painter.text(strings.t("Date", "Data"), spec, d.inset(u.px(4), 0), fg, .{});
     u.painter.text("Commit", spec, cols.sha.inset(u.px(4), 0), fg, .{});
     ui.widgets.separator(u, .{ .x = r.x, .y = r.bottom() - 1, .w = r.w, .h = 1 });
 }

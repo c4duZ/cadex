@@ -30,6 +30,9 @@ Decisões: `docs/adr/0015-english-default-two-languages.md`.
   settings.json e dos atalhos, erros de arquivo de tema).*
 - **C. Windows.** O mesmo par no Zig, o seletor e a página de configurações refeita com as mesmas
   seções e textos.
+  *Feita em 2026-10-20: cerca de 330 textos em `strings.t` (`apps/windows/shared/strings/strings.zig`);
+  tabelas `const` guardam o par e escolhem ao usar; a página em `apps/windows/app/settings_rows.zig`;
+  "Reabrir agora" em `apps/windows/app/relaunch.zig`. Compila; falta rodar no Windows.*
 - **D. Núcleo.** As mensagens de erro que o núcleo devolve, nos dois idiomas.
 
 ## Como validar

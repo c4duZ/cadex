@@ -4,6 +4,7 @@
 const std = @import("std");
 const gfx = @import("gfx");
 const palette = @import("command-palette");
+const strings = @import("strings");
 const controller = @import("controller.zig");
 const bar = @import("bar.zig");
 
@@ -72,11 +73,11 @@ fn previous(_: ?*anyopaque) void {
     if (tabs()) |t| t.cycleFocus(-1);
 }
 
-const directions = [_]struct { id: []const u8, title: []const u8, key: []const u8, dir: @import("pane_tree.zig").Direction }{
-    .{ .id = "pane.focus-left", .title = "Ir para o painel à esquerda", .key = "cmd+opt+left", .dir = .left },
-    .{ .id = "pane.focus-right", .title = "Ir para o painel à direita", .key = "cmd+opt+right", .dir = .right },
-    .{ .id = "pane.focus-up", .title = "Ir para o painel acima", .key = "cmd+opt+up", .dir = .up },
-    .{ .id = "pane.focus-down", .title = "Ir para o painel abaixo", .key = "cmd+opt+down", .dir = .down },
+const directions = [_]struct { id: []const u8, en: []const u8, pt: []const u8, key: []const u8, dir: @import("pane_tree.zig").Direction }{
+    .{ .id = "pane.focus-left", .en = "Go to Left Pane", .pt = "Ir para o painel à esquerda", .key = "cmd+opt+left", .dir = .left },
+    .{ .id = "pane.focus-right", .en = "Go to Right Pane", .pt = "Ir para o painel à direita", .key = "cmd+opt+right", .dir = .right },
+    .{ .id = "pane.focus-up", .en = "Go to Pane Above", .pt = "Ir para o painel acima", .key = "cmd+opt+up", .dir = .up },
+    .{ .id = "pane.focus-down", .en = "Go to Pane Below", .pt = "Ir para o painel abaixo", .key = "cmd+opt+down", .dir = .down },
 };
 var direction_slots: [directions.len]usize = .{ 0, 1, 2, 3 };
 
@@ -100,22 +101,22 @@ fn hasPosition(context: ?*anyopaque) bool {
 
 pub fn register(registry: *palette.Registry, where: Current) void {
     current = where;
-    registry.add(.{ .id = "tab.new", .title = "Nova aba", .keywords = &.{ "new tab", "terminal", "abrir" }, .shortcut = "cmd+t", .run = newTab });
-    registry.add(.{ .id = "pane.close", .title = "Fechar painel", .keywords = &.{ "close", "fechar aba" }, .shortcut = "cmd+w", .run = closePane, .available = hasTabs });
-    registry.add(.{ .id = "tab.rename", .title = "Renomear aba", .keywords = &.{ "rename", "nome" }, .run = rename, .available = hasTabs });
-    registry.add(.{ .id = "tab.previous-used", .title = "Voltar para a aba anterior", .keywords = &.{ "recent", "alternar" }, .shortcut = "ctrl+tab", .run = previousUsed, .available = hasTwo });
-    registry.add(.{ .id = "tab.least-recently-used", .title = "Ir para a aba usada há mais tempo", .keywords = &.{ "recent", "alternar" }, .shortcut = "ctrl+shift+tab", .run = leastRecent, .available = hasTwo });
-    registry.add(.{ .id = "pane.split-right", .title = "Dividir à direita", .keywords = &.{ "split", "painel", "lado" }, .shortcut = "cmd+d", .run = splitRight, .available = hasTabs });
-    registry.add(.{ .id = "pane.split-down", .title = "Dividir para baixo", .keywords = &.{ "split", "painel", "embaixo" }, .shortcut = "cmd+shift+d", .run = splitDown, .available = hasTabs });
-    registry.add(.{ .id = "pane.next", .title = "Próximo painel", .keywords = &.{ "pane", "foco" }, .shortcut = "cmd+]", .run = next, .available = hasSplit });
-    registry.add(.{ .id = "pane.previous", .title = "Painel anterior", .keywords = &.{ "pane", "foco" }, .shortcut = "cmd+[", .run = previous, .available = hasSplit });
+    registry.add(.{ .id = "tab.new", .title = strings.t("New Tab", "Nova aba"), .keywords = &.{ "new tab", "terminal", "abrir" }, .shortcut = "cmd+t", .run = newTab });
+    registry.add(.{ .id = "pane.close", .title = strings.t("Close Pane", "Fechar painel"), .keywords = &.{ "close", "close tab", "fechar aba" }, .shortcut = "cmd+w", .run = closePane, .available = hasTabs });
+    registry.add(.{ .id = "tab.rename", .title = strings.t("Rename Tab", "Renomear aba"), .keywords = &.{ "rename", "nome" }, .run = rename, .available = hasTabs });
+    registry.add(.{ .id = "tab.previous-used", .title = strings.t("Back to Previous Tab", "Voltar para a aba anterior"), .keywords = &.{ "recent", "alternar" }, .shortcut = "ctrl+tab", .run = previousUsed, .available = hasTwo });
+    registry.add(.{ .id = "tab.least-recently-used", .title = strings.t("Go to Least Recently Used Tab", "Ir para a aba usada há mais tempo"), .keywords = &.{ "recent", "alternar" }, .shortcut = "ctrl+shift+tab", .run = leastRecent, .available = hasTwo });
+    registry.add(.{ .id = "pane.split-right", .title = strings.t("Split Right", "Dividir à direita"), .keywords = &.{ "split", "painel", "lado" }, .shortcut = "cmd+d", .run = splitRight, .available = hasTabs });
+    registry.add(.{ .id = "pane.split-down", .title = strings.t("Split Down", "Dividir para baixo"), .keywords = &.{ "split", "painel", "embaixo" }, .shortcut = "cmd+shift+d", .run = splitDown, .available = hasTabs });
+    registry.add(.{ .id = "pane.next", .title = strings.t("Next Pane", "Próximo painel"), .keywords = &.{ "pane", "foco" }, .shortcut = "cmd+]", .run = next, .available = hasSplit });
+    registry.add(.{ .id = "pane.previous", .title = strings.t("Previous Pane", "Painel anterior"), .keywords = &.{ "pane", "foco" }, .shortcut = "cmd+[", .run = previous, .available = hasSplit });
     for (directions, 0..) |d, i| {
-        registry.add(.{ .id = d.id, .title = d.title, .keywords = &.{ "pane", "foco" }, .shortcut = d.key, .context = &direction_slots[i], .run = focusDirection, .available = hasSplitAny });
+        registry.add(.{ .id = d.id, .title = strings.t(d.en, d.pt), .keywords = &.{ "pane", "foco" }, .shortcut = d.key, .context = &direction_slots[i], .run = focusDirection, .available = hasSplitAny });
     }
     inline for (1..10) |n| {
         registry.add(.{
             .id = std.fmt.comptimePrint("tab.select-{d}", .{n}),
-            .title = std.fmt.comptimePrint("Ir para a aba {d}", .{n}),
+            .title = strings.t(std.fmt.comptimePrint("Go to Tab {d}", .{n}), std.fmt.comptimePrint("Ir para a aba {d}", .{n})),
             .keywords = &.{std.fmt.comptimePrint("tab {d}", .{n})},
             .shortcut = std.fmt.comptimePrint("cmd+{d}", .{n}),
             .context = &position_slots[n - 1],

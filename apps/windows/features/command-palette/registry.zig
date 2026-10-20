@@ -4,6 +4,7 @@
 //! ids are the Mac's, so settings.json and the habits carry over.
 
 const std = @import("std");
+const strings = @import("strings");
 
 pub const Command = struct {
     /// Stable, English, feature-prefixed: "tab.new", "pane.split-right".
@@ -83,21 +84,22 @@ pub const Registry = struct {
 /// The palette's sections with an empty field, by id prefix, in the order
 /// of docs/spec/command-palette.md.
 pub const Section = struct {
-    title: []const u8,
+    /// { English, Portuguese }, read with strings.t by sectionTitle.
+    title: [2][]const u8,
     prefixes: []const []const u8,
 };
 
 pub const sections = [_]Section{
-    .{ .title = "Abas", .prefixes = &.{"tab"} },
-    .{ .title = "Painéis", .prefixes = &.{"pane"} },
-    .{ .title = "Arquivos", .prefixes = &.{ "explorer", "workspace" } },
-    .{ .title = "Busca", .prefixes = &.{"search"} },
-    .{ .title = "Editor", .prefixes = &.{ "editor", "markdown" } },
-    .{ .title = "Terminal", .prefixes = &.{"terminal"} },
-    .{ .title = "Git", .prefixes = &.{ "git", "history", "diff" } },
-    .{ .title = "Web e mídia", .prefixes = &.{ "preview", "media" } },
-    .{ .title = "Spaces", .prefixes = &.{"space"} },
-    .{ .title = "Editar", .prefixes = &.{"edit"} },
+    .{ .title = .{ "Tabs", "Abas" }, .prefixes = &.{"tab"} },
+    .{ .title = .{ "Panes", "Painéis" }, .prefixes = &.{"pane"} },
+    .{ .title = .{ "Files", "Arquivos" }, .prefixes = &.{ "explorer", "workspace" } },
+    .{ .title = .{ "Search", "Busca" }, .prefixes = &.{"search"} },
+    .{ .title = .{ "Editor", "Editor" }, .prefixes = &.{ "editor", "markdown" } },
+    .{ .title = .{ "Terminal", "Terminal" }, .prefixes = &.{"terminal"} },
+    .{ .title = .{ "Git", "Git" }, .prefixes = &.{ "git", "history", "diff" } },
+    .{ .title = .{ "Web and media", "Web e mídia" }, .prefixes = &.{ "preview", "media" } },
+    .{ .title = .{ "Spaces", "Spaces" }, .prefixes = &.{"space"} },
+    .{ .title = .{ "Edit", "Editar" }, .prefixes = &.{"edit"} },
 };
 
 /// Anything else: the app, settings, the palette, the window.
@@ -112,7 +114,7 @@ pub fn sectionOf(id: []const u8) usize {
 }
 
 pub fn sectionTitle(index: usize) []const u8 {
-    return if (index < sections.len) sections[index].title else "Cadex";
+    return if (index < sections.len) strings.t(sections[index].title[0], sections[index].title[1]) else "Cadex";
 }
 
 const testing = std.testing;
@@ -139,7 +141,7 @@ test "commands run by id, unavailable ones do not, and recents keep order" {
 }
 
 test "sections follow the id prefix" {
-    try testing.expectEqualStrings("Painéis", sectionTitle(sectionOf("pane.split-right")));
+    try testing.expectEqualStrings("Panes", sectionTitle(sectionOf("pane.split-right")));
     try testing.expectEqualStrings("Git", sectionTitle(sectionOf("history.refresh")));
     try testing.expectEqualStrings("Cadex", sectionTitle(sectionOf("settings.open")));
 }

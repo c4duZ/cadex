@@ -10,6 +10,7 @@ const gfx = @import("gfx");
 const ui = @import("ui");
 const w = @import("win32");
 const icons = @import("icons");
+const strings = @import("strings");
 const status_mod = @import("status.zig");
 const controller = @import("controller.zig");
 const opening = @import("opening.zig");
@@ -25,23 +26,24 @@ const menu_owner = ui.id("scm.menu", 0);
 /// the clicked files (owner, 2026-10-20): Stage on changes, Unstage on
 /// staged ones, no file to open or reveal when every one was deleted. The
 /// diff and the file open where the settings say, beside or in a new tab.
-/// null is a separator.
-const MenuItem = struct { label: []const u8, id: []const u8, icon: u21, when: When };
+/// null is a separator. The label is English then Portuguese: t runs at
+/// draw time, not in a const table.
+const MenuItem = struct { label: [2][]const u8, id: []const u8, icon: u21, when: When };
 const When = enum { always, on_disk, unstaged, staged };
 const menu_items = [_]?MenuItem{
-    .{ .label = "Abrir o arquivo", .id = "git.open-file", .icon = icons.phosphor.file, .when = .on_disk },
-    .{ .label = "Abrir ao lado", .id = "git.open-file-beside", .icon = icons.phosphor.square_split_horizontal, .when = .on_disk },
-    .{ .label = "Abrir em nova aba", .id = "git.open-file-in-tab", .icon = icons.phosphor.plus, .when = .on_disk },
+    .{ .label = .{ "Open File", "Abrir o arquivo" }, .id = "git.open-file", .icon = icons.phosphor.file, .when = .on_disk },
+    .{ .label = .{ "Open Beside", "Abrir ao lado" }, .id = "git.open-file-beside", .icon = icons.phosphor.square_split_horizontal, .when = .on_disk },
+    .{ .label = .{ "Open in New Tab", "Abrir em nova aba" }, .id = "git.open-file-in-tab", .icon = icons.phosphor.plus, .when = .on_disk },
     null,
-    .{ .label = "Ver o diff", .id = "git.open-diff", .icon = icons.phosphor.git_diff, .when = .always },
-    .{ .label = "Ver o diff ao lado", .id = "git.open-diff-beside", .icon = icons.phosphor.square_split_horizontal, .when = .always },
-    .{ .label = "Ver o diff em nova aba", .id = "git.open-diff-in-tab", .icon = icons.phosphor.plus, .when = .always },
+    .{ .label = .{ "Open Diff", "Ver o diff" }, .id = "git.open-diff", .icon = icons.phosphor.git_diff, .when = .always },
+    .{ .label = .{ "Open Diff Beside", "Ver o diff ao lado" }, .id = "git.open-diff-beside", .icon = icons.phosphor.square_split_horizontal, .when = .always },
+    .{ .label = .{ "Open Diff in New Tab", "Ver o diff em nova aba" }, .id = "git.open-diff-in-tab", .icon = icons.phosphor.plus, .when = .always },
     null,
-    .{ .label = "Stage", .id = "git.stage", .icon = icons.phosphor.plus, .when = .unstaged },
-    .{ .label = "Unstage", .id = "git.unstage", .icon = icons.phosphor.minus, .when = .staged },
-    .{ .label = "Descartar as mudanças", .id = "git.discard", .icon = icons.phosphor.arrow_u_up_left, .when = .always },
+    .{ .label = .{ "Stage", "Stage" }, .id = "git.stage", .icon = icons.phosphor.plus, .when = .unstaged },
+    .{ .label = .{ "Unstage", "Unstage" }, .id = "git.unstage", .icon = icons.phosphor.minus, .when = .staged },
+    .{ .label = .{ "Discard Changes", "Descartar as mudanças" }, .id = "git.discard", .icon = icons.phosphor.arrow_u_up_left, .when = .always },
     null,
-    .{ .label = "Revelar no Explorador de Arquivos", .id = "git.reveal", .icon = icons.phosphor.folder_open, .when = .on_disk },
+    .{ .label = .{ "Reveal in File Explorer", "Revelar no Explorador de Arquivos" }, .id = "git.reveal", .icon = icons.phosphor.folder_open, .when = .on_disk },
 };
 
 /// Gone from the disk: deleted in the working tree, or staged as deleted
@@ -72,7 +74,7 @@ fn buildMenu(sc: *SourceControl, items: *[menu_items.len]ui.menu.Item, ids: *[me
                 .staged => any_staged,
             };
             if (!applies) continue;
-            items[n] = .{ .label = m.label, .icon = m.icon };
+            items[n] = .{ .label = strings.t(m.label[0], m.label[1]), .icon = m.icon };
             ids[n] = m.id;
         } else {
             if (n == 0 or ids[n - 1] == null) continue;
@@ -132,16 +134,25 @@ fn drawRow(sc: *SourceControl, u: *ui.Ui, i: usize, r: Rect) void {
         .entry => |e| entry(sc, u, i, r, e.index, e.staged),
         .overflow => |o| {
             var buf: [96]u8 = undefined;
-            const text = std.fmt.bufPrint(&buf, "Mostrando {d} de {d}: veja o resto com git status", .{ o.shown, o.total }) catch "";
+            const text = if (strings.language == .pt)
+                std.fmt.bufPrint(&buf, "Mostrando {d} de {d}: veja o resto com git status", .{ o.shown, o.total }) catch ""
+            else
+                std.fmt.bufPrint(&buf, "Showing {d} of {d}: see the rest with git status", .{ o.shown, o.total }) catch "";
             u.painter.text(text, u.style.small(), r.inset(u.px(6), 0), u.style.secondary_text, .{});
         },
     }
 }
 
-/// The Mac's titles are uppercase; ç has no ASCII uppercase.
+/// The Mac's titles are uppercase; ç has no ASCII uppercase. status.zig's
+/// titles are the keys, each with its English and Portuguese.
 fn upper(title: []const u8) []const u8 {
-    const map = [_][2][]const u8{ .{ "Conflitos", "CONFLITOS" }, .{ "Staged", "STAGED" }, .{ "Mudanças", "MUDANÇAS" }, .{ "Nenhuma mudança", "NENHUMA MUDANÇA" } };
-    for (map) |m| if (std.mem.eql(u8, m[0], title)) return m[1];
+    const map = [_][3][]const u8{
+        .{ "Conflitos", "CONFLICTS", "CONFLITOS" },
+        .{ "Staged", "STAGED", "STAGED" },
+        .{ "Mudanças", "CHANGES", "MUDANÇAS" },
+        .{ "Nenhuma mudança", "NO CHANGES", "NENHUMA MUDANÇA" },
+    };
+    for (map) |m| if (std.mem.eql(u8, m[0], title)) return strings.t(m[1], m[2]);
     return title;
 }
 

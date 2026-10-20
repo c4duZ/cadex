@@ -6,6 +6,7 @@
 const std = @import("std");
 const gfx = @import("gfx");
 const ui = @import("ui");
+const strings = @import("strings");
 const terminal = @import("terminal");
 const pane_tree = @import("pane_tree.zig");
 const tab_mod = @import("tab.zig");
@@ -183,9 +184,9 @@ pub const Tabs = struct {
         var running: usize = 0;
         self.tally(closing, &unsaved, &running);
         if (unsaved > 0) {
-            self.question = .{ .closing = closing, .title = if (unsaved == 1) "Salvar as mudanças?" else "Salvar os arquivos alterados?", .message = "Há mudanças que ainda não foram salvas.", .unsaved = true };
+            self.question = .{ .closing = closing, .title = if (unsaved == 1) strings.t("Save the changes?", "Salvar as mudanças?") else strings.t("Save the changed files?", "Salvar os arquivos alterados?"), .message = strings.t("There are changes that haven't been saved yet.", "Há mudanças que ainda não foram salvas."), .unsaved = true };
         } else if (running > 0 and self.host.confirm_close(self.host.context)) {
-            self.question = .{ .closing = closing, .title = "Fechar com um programa rodando?", .message = "O programa no terminal será encerrado.", .unsaved = false };
+            self.question = .{ .closing = closing, .title = strings.t("Close with a program running?", "Fechar com um programa rodando?"), .message = strings.t("The program in the terminal will be ended.", "O programa no terminal será encerrado."), .unsaved = false };
         } else {
             self.finishClose(closing);
         }

@@ -6,6 +6,7 @@
 
 const std = @import("std");
 const gfx = @import("gfx");
+const strings = @import("strings");
 const registry_mod = @import("registry.zig");
 const source_mod = @import("source.zig");
 
@@ -32,8 +33,8 @@ pub const Commands = struct {
     pub fn source(self: *Commands, icon: u21) source_mod.Source {
         return .{
             .context = self,
-            .placeholder = "Buscar comandos",
-            .empty_text = "Nenhum comando encontrado",
+            .placeholder = strings.t("Find commands", "Buscar comandos"),
+            .empty_text = strings.t("No commands found", "Nenhum comando encontrado"),
             .icon = icon,
             .search = search,
             .choose = choose,
@@ -62,7 +63,7 @@ pub const Commands = struct {
         for (self.pins) |pin| {
             if (!r.isAvailable(pin.id)) continue;
             const command = r.find(pin.id).?;
-            var row = self.item(arena, command, if (first) "Abrir" else "");
+            var row = self.item(arena, command, if (first) strings.t("Open", "Abrir") else "");
             row.title = pin.title;
             row.icon = pin.icon;
             try out.append(arena, row);
@@ -71,7 +72,7 @@ pub const Commands = struct {
         first = true;
         for (r.recent.items) |id| {
             if (!r.isAvailable(id)) continue;
-            var row = self.item(arena, r.find(id).?, if (first) "Recentes" else "");
+            var row = self.item(arena, r.find(id).?, if (first) strings.t("Recent", "Recentes") else "");
             row.icon = self.recent_icon;
             try out.append(arena, row);
             first = false;
@@ -102,7 +103,9 @@ pub const Commands = struct {
             if (command.available) |f| if (!f(command.context)) continue;
             try commands.append(arena, command);
             try titles.append(arena, command.title);
-            try keywords.append(arena, try std.mem.join(arena, " ", command.keywords));
+            // The title in the other language finds it too (ADR 0015), as on the Mac.
+            const other = strings.counterpart(command.title) orelse "";
+            try keywords.append(arena, try std.fmt.allocPrint(arena, "{s} {s}", .{ other, try std.mem.join(arena, " ", command.keywords) }));
         }
         const seen = try arena.alloc(bool, commands.items.len);
         @memset(seen, false);

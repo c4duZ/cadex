@@ -8,6 +8,7 @@
 const std = @import("std");
 const w = @import("win32");
 const icons = @import("icons");
+const strings = @import("strings");
 const palette = @import("command-palette");
 const tabs = @import("tabs");
 
@@ -195,7 +196,7 @@ pub const Spaces = struct {
     // ---- The palette's list and the commands ----
 
     pub fn source(self: *Spaces) palette.Source {
-        return .{ .context = self, .placeholder = "Trocar de space", .empty_text = "Nenhum space", .icon = icons.phosphor.stack, .search = search, .choose = choose };
+        return .{ .context = self, .placeholder = strings.t("Switch space", "Trocar de space"), .empty_text = strings.t("No spaces", "Nenhum space"), .icon = icons.phosphor.stack, .search = search, .choose = choose };
     }
 
     fn search(context: *anyopaque, arena: std.mem.Allocator, query: []const u8, out: *std.ArrayList(palette.Item)) ?[]const u8 {
@@ -207,7 +208,7 @@ pub const Spaces = struct {
                 .id = std.fmt.allocPrint(arena, "{d}", .{i}) catch continue,
                 .title = s.name,
                 // Two spaces with one name: the position tells them apart.
-                .detail = std.fmt.allocPrint(arena, "{d}º · {d} {s}{s}", .{ i + 1, tabs_count, if (tabs_count == 1) "aba" else "abas", if (i == self.active) " · atual" else "" }) catch "",
+                .detail = std.fmt.allocPrint(arena, "{d}{s} · {d} {s}{s}", .{ i + 1, strings.t("", "º"), tabs_count, if (tabs_count == 1) strings.t("tab", "aba") else strings.t("tabs", "abas"), if (i == self.active) strings.t(" · current", " · atual") else "" }) catch "",
                 .icon = icons.phosphor.stack,
             }) catch {};
         }
@@ -221,12 +222,12 @@ pub const Spaces = struct {
 
     pub fn register(self: *Spaces, registry: *palette.Registry) void {
         target = self;
-        registry.add(.{ .id = "space.switch", .title = "Trocar de space", .keywords = &.{ "space", "grupo", "projeto" }, .shortcut = "cmd+shift+s", .run = switchSpace });
-        registry.add(.{ .id = "space.new", .title = "Novo space", .keywords = &.{ "space", "grupo", "criar" }, .shortcut = "ctrl+cmd+n", .run = newSpace });
-        registry.add(.{ .id = "space.rename", .title = "Renomear space", .keywords = &.{ "space", "nome" }, .run = renameSpace });
-        registry.add(.{ .id = "space.close", .title = "Fechar space", .keywords = &.{ "space", "fechar" }, .run = closeSpace, .available = hasTwo });
-        registry.add(.{ .id = "space.next", .title = "Próximo space", .keywords = &.{ "space", "alternar" }, .shortcut = "ctrl+cmd+right", .windows_shortcut = "cmd+shift+pagedown", .run = nextSpace, .available = hasTwo });
-        registry.add(.{ .id = "space.previous", .title = "Space anterior", .keywords = &.{ "space", "alternar" }, .shortcut = "ctrl+cmd+left", .windows_shortcut = "cmd+shift+pageup", .run = previousSpace, .available = hasTwo });
+        registry.add(.{ .id = "space.switch", .title = strings.t("Switch Space", "Trocar de space"), .keywords = &.{ "space", "grupo", "projeto", "switch", "group", "project" }, .shortcut = "cmd+shift+s", .run = switchSpace });
+        registry.add(.{ .id = "space.new", .title = strings.t("New Space", "Novo space"), .keywords = &.{ "space", "grupo", "criar", "new" }, .shortcut = "ctrl+cmd+n", .run = newSpace });
+        registry.add(.{ .id = "space.rename", .title = strings.t("Rename Space", "Renomear space"), .keywords = &.{ "space", "nome", "rename" }, .run = renameSpace });
+        registry.add(.{ .id = "space.close", .title = strings.t("Close Space", "Fechar space"), .keywords = &.{ "space", "fechar", "close" }, .run = closeSpace, .available = hasTwo });
+        registry.add(.{ .id = "space.next", .title = strings.t("Next Space", "Próximo space"), .keywords = &.{ "space", "alternar", "next" }, .shortcut = "ctrl+cmd+right", .windows_shortcut = "cmd+shift+pagedown", .run = nextSpace, .available = hasTwo });
+        registry.add(.{ .id = "space.previous", .title = strings.t("Previous Space", "Space anterior"), .keywords = &.{ "space", "alternar", "previous" }, .shortcut = "ctrl+cmd+left", .windows_shortcut = "cmd+shift+pageup", .run = previousSpace, .available = hasTwo });
     }
 };
 

@@ -1,12 +1,13 @@
 //! An image, a video, an audio file or a PDF in a tab
 //! (docs/spec/media-preview.md), the Mac's MediaDocument: read only after
 //! the core says the file is inside the workspace; a file the system
-//! cannot show says so, with "Abrir no app padrão".
+//! cannot show says so, with "Open in Default App".
 
 const std = @import("std");
 const cadex = @import("cadex");
 const gfx = @import("gfx");
 const ui = @import("ui");
+const strings = @import("strings");
 const icons = @import("icons");
 const tabs = @import("tabs");
 const webview = @import("webview");
@@ -17,7 +18,7 @@ const page = @import("page.zig");
 /// What a media tab needs from the app.
 pub const Host = struct {
     context: *anyopaque,
-    /// "Abrir no app padrão" (ShellExecute "open").
+    /// "Open in Default App" (ShellExecute "open").
     open_externally: *const fn (context: *anyopaque, path: []const u8) void,
     /// A shortcut of the app pressed while the player or the PDF had the
     /// keyboard: run it as if typed in the window.
@@ -47,15 +48,15 @@ pub const Media = struct {
         self.* = .{ .gpa = gpa, .host = host, .path = try gpa.dupe(u8, path), .kind = kind, .id = ui.id("media", next_id) };
         next_id += 1;
         if (!authorized(gpa, path)) {
-            self.message = "O arquivo está fora da pasta aberta";
+            self.message = strings.t("The file is outside the open folder", "O arquivo está fora da pasta aberta");
             return self;
         }
         if (kind == .image) {
             self.image = Image.load(gpa, self.path);
-            if (self.image == null) self.message = "Não é possível mostrar esta imagem";
+            if (self.image == null) self.message = strings.t("Can't show this image", "Não é possível mostrar esta imagem");
         } else {
             self.openPage(env) catch {
-                self.message = "Não é possível mostrar este arquivo";
+                self.message = strings.t("Can't show this file", "Não é possível mostrar este arquivo");
             };
         }
         return self;
@@ -113,7 +114,7 @@ pub const Media = struct {
     /// The file changed on disk (the explorer's watcher): show it again.
     pub fn diskMayHaveChanged(self: *Media) void {
         if (self.image) |*i| {
-            if (!i.reload()) self.message = "Não é possível mostrar esta imagem";
+            if (!i.reload()) self.message = strings.t("Can't show this image", "Não é possível mostrar esta imagem");
         } else if (self.view) |v| {
             if (self.kind == .pdf) v.reload() else self.loadPage() catch {};
         }
@@ -123,11 +124,11 @@ pub const Media = struct {
         const view = self.view orelse return;
         while (view.poll()) |event| switch (event) {
             .message => |m| if (std.mem.eql(u8, m, "error")) {
-                self.message = if (self.kind == .web_image) "Não é possível mostrar esta imagem" else "Não é possível tocar este arquivo";
+                self.message = if (self.kind == .web_image) strings.t("Can't show this image", "Não é possível mostrar esta imagem") else strings.t("Can't play this file", "Não é possível tocar este arquivo");
             },
             .failed => |why| self.message = why,
             .finished => |f| if (!f.ok) {
-                self.message = "Não é possível mostrar este arquivo";
+                self.message = strings.t("Can't show this file", "Não é possível mostrar este arquivo");
             },
             .key => |k| self.host.on_key(self.host.context, k.vk, k.mods),
             // A link inside a PDF goes to the system browser.
@@ -156,7 +157,7 @@ pub const Media = struct {
         const c = area.center();
         const text_rect: gfx.Rect = .{ .x = area.x, .y = c.y - u.px(30), .w = area.w, .h = u.px(24) };
         u.painter.text(message, u.style.font(14), text_rect, u.style.secondary_text, .{ .@"align" = .center });
-        const label = "Abrir no app padrão";
+        const label = strings.t("Open in Default App", "Abrir no app padrão");
         const bw = u.painter.measure(label, u.style.ui()) + u.px(24);
         const button: gfx.Rect = .{ .x = c.x - bw / 2, .y = c.y + u.px(4), .w = bw, .h = u.px(28) };
         u.painter.fillRounded(button, u.px(6), u.style.field);

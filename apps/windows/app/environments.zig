@@ -7,6 +7,7 @@
 const std = @import("std");
 const cadex = @import("cadex");
 const icons = @import("icons");
+const strings = @import("strings");
 const palette = @import("command-palette");
 const terminal = @import("terminal");
 const App = @import("app.zig").App;
@@ -15,7 +16,7 @@ var app_ref: *App = undefined;
 
 pub fn source(app: *App) palette.Source {
     app_ref = app;
-    return .{ .context = app, .placeholder = "Ambiente dos terminais novos", .empty_text = "Nenhum ambiente", .icon = icons.phosphor.terminal_window, .search = search, .choose = choose };
+    return .{ .context = app, .placeholder = strings.t("Environment for new terminals", "Ambiente dos terminais novos"), .empty_text = strings.t("No environments", "Nenhum ambiente"), .icon = icons.phosphor.terminal_window, .search = search, .choose = choose };
 }
 
 fn search(context: *anyopaque, arena: std.mem.Allocator, query: []const u8, out: *std.ArrayList(palette.Item)) ?[]const u8 {
@@ -32,9 +33,9 @@ fn search(context: *anyopaque, arena: std.mem.Allocator, query: []const u8, out:
     const current = app.environment orelse "Local";
     for (names.items) |n| {
         if (query.len > 0 and std.ascii.indexOfIgnoreCase(n, query) == null) continue;
-        out.append(arena, .{ .id = n, .title = n, .detail = if (std.mem.eql(u8, n, current)) "em uso" else if (std.mem.eql(u8, n, "Local")) "Windows" else "WSL", .icon = icons.phosphor.terminal_window }) catch {};
+        out.append(arena, .{ .id = n, .title = n, .detail = if (std.mem.eql(u8, n, current)) strings.t("in use", "em uso") else if (std.mem.eql(u8, n, "Local")) "Windows" else "WSL", .icon = icons.phosphor.terminal_window }) catch {};
     }
-    return if (names.items.len == 1) "Sem WSL instalado" else null;
+    return if (names.items.len == 1) strings.t("WSL is not installed", "Sem WSL instalado") else null;
 }
 
 fn choose(context: *anyopaque, id: []const u8, _: palette.How) void {
@@ -49,7 +50,7 @@ fn open(_: ?*anyopaque) void {
 
 pub fn register(app: *App) void {
     app_ref = app;
-    app.registry.add(.{ .id = "workspace.environment", .title = "Escolher o ambiente dos terminais (Local ou WSL)", .keywords = &.{ "wsl", "linux", "ubuntu", "ambiente", "environment" }, .run = open });
+    app.registry.add(.{ .id = "workspace.environment", .title = strings.t("Choose Terminal Environment (Local or WSL)", "Escolher o ambiente dos terminais (Local ou WSL)"), .keywords = &.{ "wsl", "linux", "ubuntu", "ambiente", "environment" }, .run = open });
 }
 
 /// The name the status bar shows for the focused terminal.

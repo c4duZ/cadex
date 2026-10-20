@@ -7,6 +7,7 @@ const std = @import("std");
 const w = @import("win32");
 const gfx = @import("gfx");
 const tabs = @import("tabs");
+const strings = @import("strings");
 const palette = @import("command-palette");
 const source_control = @import("source-control");
 const git_history = @import("git-history");
@@ -46,7 +47,7 @@ pub fn create(app: *App) !void {
 pub fn register(app: *App) void {
     source_control.register(&app.registry, app.git);
     git_history.register(&app.registry, app.gpa, historyHost(app));
-    app.registry.add(.{ .id = "git.show", .title = "Mostrar o Git", .keywords = &.{ "source control", "git", "mudanças", "commit" }, .shortcut = "cmd+shift+g", .run = show, .context = app });
+    app.registry.add(.{ .id = "git.show", .title = strings.t("Show Git", "Mostrar o Git"), .keywords = &.{ "source control", "git", "mudanças", "commit" }, .shortcut = "cmd+shift+g", .run = show, .context = app });
 }
 
 fn historyHost(app: *App) git_history.Host {

@@ -9,6 +9,7 @@
 const std = @import("std");
 const cadex = @import("cadex");
 const icons = @import("icons");
+const strings = @import("strings");
 const palette = @import("command-palette");
 
 pub const Host = struct {
@@ -83,7 +84,7 @@ pub const Search = struct {
     // ---- Files by name ----
 
     pub fn filesSource(self: *Search) palette.Source {
-        return .{ .context = self, .placeholder = "Buscar arquivo pelo nome", .empty_text = "Nenhum arquivo encontrado", .icon = icons.phosphor.file, .opens_files = true, .search = searchFiles, .choose = chooseFile };
+        return .{ .context = self, .placeholder = strings.t("Find file by name", "Buscar arquivo pelo nome"), .empty_text = strings.t("No files found", "Nenhum arquivo encontrado"), .icon = icons.phosphor.file, .opens_files = true, .search = searchFiles, .choose = chooseFile };
     }
 
     fn fileItem(arena: std.mem.Allocator, rel: []const u8, positions: []const u32) palette.Item {
@@ -99,9 +100,9 @@ pub const Search = struct {
         const self: *Search = @ptrCast(@alignCast(context));
         if (query.len == 0) {
             for (self.recent.items) |r| out.append(arena, fileItem(arena, r, &.{})) catch {};
-            return if (self.recent.items.len == 0) "Digite para buscar arquivos" else "Recentes";
+            return if (self.recent.items.len == 0) strings.t("Type to find files", "Digite para buscar arquivos") else strings.t("Recent", "Recentes");
         }
-        const index = self.index orelse return "Abra uma pasta";
+        const index = self.index orelse return strings.t("Open a folder", "Abra uma pasta");
         var result: cadex.cadex_search_files_result = undefined;
         if (cadex.cadex_search_files(index, query.ptr, query.len, file_rows, &result) == cadex.CADEX_OK) {
             defer cadex.cadex_search_files_result_free(&result);
@@ -114,7 +115,7 @@ pub const Search = struct {
         var ready = false;
         const count = cadex.cadex_search_index_count(index, &ready);
         if (ready) return null;
-        return std.fmt.allocPrint(arena, "Indexando… {d}", .{count}) catch null;
+        return std.fmt.allocPrint(arena, "{s} {d}", .{ strings.t("Indexing…", "Indexando…"), count }) catch null;
     }
 
     fn chooseFile(context: *anyopaque, id: []const u8, how: palette.How) void {
@@ -138,7 +139,7 @@ pub const Search = struct {
     // ---- Text in files ----
 
     pub fn contentSource(self: *Search) palette.Source {
-        return .{ .context = self, .placeholder = "Buscar texto nos arquivos", .empty_text = "Nenhum resultado", .icon = icons.phosphor.magnifying_glass, .opens_files = true, .search = searchContent, .choose = chooseHit, .reset = resetContent };
+        return .{ .context = self, .placeholder = strings.t("Find text in files", "Buscar texto nos arquivos"), .empty_text = strings.t("No results", "Nenhum resultado"), .icon = icons.phosphor.magnifying_glass, .opens_files = true, .search = searchContent, .choose = chooseHit, .reset = resetContent };
     }
 
     fn clearHits(self: *Search) void {
@@ -181,7 +182,7 @@ pub const Search = struct {
         var out: ?*cadex.cadex_search_content = null;
         const started = cadex.cadex_search_content_start(z.ptr, query.ptr, query.len, &options, &callbacks, &out);
         if (started != cadex.CADEX_OK) {
-            self.failed = if (started == cadex.CADEX_INVALID_ARGUMENT and self.regex) "Expressão regular inválida" else "A busca falhou";
+            self.failed = if (started == cadex.CADEX_INVALID_ARGUMENT and self.regex) strings.t("Invalid regular expression", "Expressão regular inválida") else strings.t("The search failed", "A busca falhou");
             return;
         }
         self.running = out;
@@ -251,11 +252,11 @@ pub const Search = struct {
         if (self.failed) |f| return std.fmt.allocPrint(arena, "{s}{s}", .{ opts, f }) catch f;
         if (query.len == 0) return if (opts.len > 0) opts[0 .. opts.len - 3] else null;
         if (self.done) |d| {
-            if (d.truncated) return std.fmt.allocPrint(arena, "{s}Resultados demais, refine a busca", .{opts}) catch null;
-            return std.fmt.allocPrint(arena, "{s}{d} resultados em {d} arquivos", .{ opts, self.hits.items.len, d.files }) catch null;
+            if (d.truncated) return std.fmt.allocPrint(arena, "{s}{s}", .{ opts, strings.t("Too many results, refine the search", "Resultados demais, refine a busca") }) catch null;
+            return std.fmt.allocPrint(arena, "{s}{d} {s} {d} {s}", .{ opts, self.hits.items.len, strings.t("results in", "resultados em"), d.files, strings.t("files", "arquivos") }) catch null;
         }
-        if (self.hits.items.len == 0) return std.fmt.allocPrint(arena, "{s}Buscando…", .{opts}) catch null;
-        return std.fmt.allocPrint(arena, "{s}{d} resultados", .{ opts, self.hits.items.len }) catch null;
+        if (self.hits.items.len == 0) return std.fmt.allocPrint(arena, "{s}{s}", .{ opts, strings.t("Searching…", "Buscando…") }) catch null;
+        return std.fmt.allocPrint(arena, "{s}{d} {s}", .{ opts, self.hits.items.len, strings.t("results", "resultados") }) catch null;
     }
 
     fn chooseHit(context: *anyopaque, id: []const u8, how: palette.How) void {
@@ -279,10 +280,10 @@ pub const Search = struct {
 
     pub fn register(self: *Search, registry: *palette.Registry) void {
         target = self;
-        registry.add(.{ .id = "search.files", .title = "Buscar arquivo pelo nome", .keywords = &.{ "go to file", "abrir", "quick open" }, .shortcut = "cmd+p", .run = openFiles });
-        registry.add(.{ .id = "search.content", .title = "Buscar texto nos arquivos", .keywords = &.{ "find in files", "grep", "procurar" }, .shortcut = "cmd+shift+f", .run = openContent });
-        registry.add(.{ .id = "search.toggle-case", .title = "Diferenciar maiúsculas na busca de texto", .keywords = &.{ "case", "caixa" }, .shortcut = "cmd+opt+c", .run = toggleCase, .available = contentOpen });
-        registry.add(.{ .id = "search.toggle-regex", .title = "Usar expressão regular na busca de texto", .keywords = &.{ "regex", "regular" }, .shortcut = "cmd+opt+r", .run = toggleRegex, .available = contentOpen });
+        registry.add(.{ .id = "search.files", .title = strings.t("Find File by Name", "Buscar arquivo pelo nome"), .keywords = &.{ "go to file", "abrir", "quick open", "find file" }, .shortcut = "cmd+p", .run = openFiles });
+        registry.add(.{ .id = "search.content", .title = strings.t("Find Text in Files", "Buscar texto nos arquivos"), .keywords = &.{ "find in files", "grep", "procurar" }, .shortcut = "cmd+shift+f", .run = openContent });
+        registry.add(.{ .id = "search.toggle-case", .title = strings.t("Match Case in Text Search", "Diferenciar maiúsculas na busca de texto"), .keywords = &.{ "case", "caixa", "match case" }, .shortcut = "cmd+opt+c", .run = toggleCase, .available = contentOpen });
+        registry.add(.{ .id = "search.toggle-regex", .title = strings.t("Use Regular Expression in Text Search", "Usar expressão regular na busca de texto"), .keywords = &.{ "regex", "regular" }, .shortcut = "cmd+opt+r", .run = toggleRegex, .available = contentOpen });
     }
 };
 

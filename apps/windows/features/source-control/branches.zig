@@ -6,6 +6,7 @@
 const std = @import("std");
 const icons = @import("icons");
 const palette = @import("command-palette");
+const strings = @import("strings");
 const jobs = @import("jobs.zig");
 const controller = @import("controller.zig");
 
@@ -40,8 +41,8 @@ pub const Branches = struct {
     pub fn source(self: *Branches) palette.Source {
         return .{
             .context = self,
-            .placeholder = "Trocar para a branch",
-            .empty_text = "Nenhuma branch",
+            .placeholder = strings.t("Switch to branch", "Trocar para a branch"),
+            .empty_text = strings.t("No branches", "Nenhuma branch"),
             .icon = icons.phosphor.git_branch,
             .search = search,
             .choose = choose,
@@ -50,7 +51,7 @@ pub const Branches = struct {
 
     fn search(context: *anyopaque, arena: std.mem.Allocator, query: []const u8, out: *std.ArrayList(palette.Item)) ?[]const u8 {
         const self: *Branches = @ptrCast(@alignCast(context));
-        const text = self.text orelse return if (self.loading) "Carregando…" else null;
+        const text = self.text orelse return if (self.loading) strings.t("Loading…", "Carregando…") else null;
         const current = if (self.owner.status) |s| s.branch else "";
         var lines = std.mem.splitScalar(u8, text, '\n');
         while (lines.next()) |line| {
@@ -62,7 +63,7 @@ pub const Branches = struct {
             out.append(arena, .{
                 .id = line,
                 .title = name,
-                .detail = if (std.mem.eql(u8, name, current)) "atual" else if (remote) "remota" else "",
+                .detail = if (std.mem.eql(u8, name, current)) strings.t("current", "atual") else if (remote) strings.t("remote", "remota") else "",
                 .icon = icons.phosphor.git_branch,
             }) catch break;
         }
