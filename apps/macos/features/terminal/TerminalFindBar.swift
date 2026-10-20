@@ -1,6 +1,7 @@
 import AppKit
 import Icons
 import Menus
+import Strings
 
 /// The find bar (⌘F) over the top-right corner of the terminal: the text to
 /// find, "3 de 12", previous and next, close. Enter goes to the next (older)
@@ -22,7 +23,7 @@ final class TerminalFindBar: NSVisualEffectView, NSSearchFieldDelegate {
         wantsLayer = true
         layer?.cornerRadius = 8
 
-        field.placeholderString = "Buscar"
+        field.placeholderString = T("Find", "Buscar")
         field.delegate = self
         field.sendsSearchStringImmediately = true
         field.target = self
@@ -32,9 +33,9 @@ final class TerminalFindBar: NSVisualEffectView, NSSearchFieldDelegate {
 
         let stack = NSStackView(views: [
             field, countLabel,
-            button(.caretUp, "Anterior (⇧↩)", #selector(previousClicked)),
-            button(.caretDown, "Próxima (↩)", #selector(nextClicked)),
-            button(.x, "Fechar (Esc)", #selector(closeClicked)),
+            button(.caretUp, T("Previous (⇧↩)", "Anterior (⇧↩)"), #selector(previousClicked)),
+            button(.caretDown, T("Next (↩)", "Próxima (↩)"), #selector(nextClicked)),
+            button(.x, T("Close (Esc)", "Fechar (Esc)"), #selector(closeClicked)),
         ])
         stack.spacing = 6
         stack.edgeInsets = NSEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
@@ -59,14 +60,14 @@ final class TerminalFindBar: NSVisualEffectView, NSSearchFieldDelegate {
 
     var text: String { field.stringValue }
 
-    /// "3 de 12", "Sem resultados", or nothing while the field is empty.
+    /// "3 de 12", T("No results", "Sem resultados"), or nothing while the field is empty.
     func showCounts(total: Int, current: Int) {
         if field.stringValue.isEmpty {
             countLabel.stringValue = ""
         } else if total == 0 {
-            countLabel.stringValue = "Sem resultados"
+            countLabel.stringValue = T("No results", "Sem resultados")
         } else {
-            countLabel.stringValue = current > 0 ? "\(current) de \(total)" : "\(total)"
+            countLabel.stringValue = current > 0 ? T("\(current) of \(total)", "\(current) de \(total)") : "\(total)"
         }
     }
 

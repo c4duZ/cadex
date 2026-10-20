@@ -1,6 +1,7 @@
 import AppKit
 import Icons
 import Menus
+import Strings
 
 /// A row of the Git lists: a section title or a changed file.
 enum SourceControlRow: Equatable {
@@ -17,7 +18,7 @@ enum SourceControlRow: Equatable {
         let changes = status.entries.filter(\.isUnstaged)
         var rows: [SourceControlRow] = []
         if !conflicts.isEmpty {
-            rows.append(.header(title: "Conflitos", staged: nil, count: conflicts.count))
+            rows.append(.header(title: T("Conflicts", "Conflitos"), staged: nil, count: conflicts.count))
             rows += capped(conflicts, staged: false)
         }
         if !staged.isEmpty {
@@ -25,7 +26,7 @@ enum SourceControlRow: Equatable {
             rows += capped(staged, staged: true)
         }
         if !changes.isEmpty || staged.isEmpty {
-            rows.append(.header(title: changes.isEmpty && conflicts.isEmpty ? "Nenhuma mudança" : "Mudanças", staged: false, count: changes.count))
+            rows.append(.header(title: changes.isEmpty && conflicts.isEmpty ? T("No changes", "Nenhuma mudança") : T("Changes", "Mudanças"), staged: false, count: changes.count))
             rows += capped(changes, staged: false)
         }
         return rows
@@ -35,7 +36,7 @@ enum SourceControlRow: Equatable {
     private static func capped(_ entries: [GitRepository.Entry], staged: Bool) -> [SourceControlRow] {
         var rows = entries.prefix(limit).map { SourceControlRow.entry($0, staged: staged) }
         if entries.count > limit {
-            rows.append(.header(title: "Mostrando \(limit) de \(entries.count): veja o resto com git status", staged: nil, count: 0))
+            rows.append(.header(title: T("Showing \(limit) of \(entries.count): see the rest with git status", "Mostrando \(limit) de \(entries.count): veja o resto com git status"), staged: nil, count: 0))
         }
         return rows
     }
@@ -76,7 +77,7 @@ final class SourceControlRowView: NSTableCellView {
         label.font = .systemFont(ofSize: 10, weight: .semibold)
         label.textColor = .secondaryLabelColor
         var views: [NSView] = [label, NSView()]
-        if let staged, count > 0 { views.append(actionButton(staged ? "−" : "+", tip: staged ? "Unstage tudo" : "Stage tudo")) }
+        if let staged, count > 0 { views.append(actionButton(staged ? "−" : "+", tip: staged ? T("Unstage all", "Unstage tudo") : T("Stage all", "Stage tudo"))) }
         place(NSStackView(views: views))
     }
 
@@ -158,19 +159,19 @@ enum SourceControlMenu {
         guard !picked.isEmpty else { return [] }
         let onDisk = picked.contains { !isDeleted($0.0, staged: $0.1) }
         let items: [(String, String, Icon, Bool)?] = [
-            ("Abrir o arquivo", "git.open-file", .file, onDisk),
-            ("Abrir ao lado", "git.open-file-beside", .squareSplitHorizontal, onDisk),
-            ("Abrir em nova aba", "git.open-file-in-tab", .plus, onDisk),
+            (T("Open File", "Abrir o arquivo"), "git.open-file", .file, onDisk),
+            (T("Open Beside", "Abrir ao lado"), "git.open-file-beside", .squareSplitHorizontal, onDisk),
+            (T("Open in New Tab", "Abrir em nova aba"), "git.open-file-in-tab", .plus, onDisk),
             nil,
-            ("Ver o diff", "git.open-diff", .gitDiff, true),
-            ("Ver o diff ao lado", "git.open-diff-beside", .squareSplitHorizontal, true),
-            ("Ver o diff em nova aba", "git.open-diff-in-tab", .plus, true),
+            (T("Open Diff", "Ver o diff"), "git.open-diff", .gitDiff, true),
+            (T("Open Diff Beside", "Ver o diff ao lado"), "git.open-diff-beside", .squareSplitHorizontal, true),
+            (T("Open Diff in New Tab", "Ver o diff em nova aba"), "git.open-diff-in-tab", .plus, true),
             nil,
             ("Stage", "git.stage", .plus, picked.contains { !$0.1 }),
             ("Unstage", "git.unstage", .minus, picked.contains { $0.1 }),
-            ("Descartar as mudanças", "git.discard", .arrowUUpLeft, true),
+            (T("Discard Changes", "Descartar as mudanças"), "git.discard", .arrowUUpLeft, true),
             nil,
-            ("Revelar no Finder", "git.reveal", .folderOpen, onDisk),
+            (T("Reveal in Finder", "Revelar no Finder"), "git.reveal", .folderOpen, onDisk),
         ]
         return items.compactMap { item in
             guard let (title, id, icon, applies) = item else { return .separator }

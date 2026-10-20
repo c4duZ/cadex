@@ -1,6 +1,7 @@
 import AppKit
 import CommandPalette
 import Editor
+import Strings
 
 /// Entry point of the markdown feature (docs/spec/markdown.md): the index of
 /// the workspace's notes, the help attached to each note open in the
@@ -168,12 +169,12 @@ private final class BacklinksSource: PaletteSource {
         self.open = open
         items = list.map { entry in
             let rel = entry.path.hasPrefix(root + "/") ? String(entry.path.dropFirst(root.count + 1)) : entry.path
-            return PaletteItem(id: "\(entry.path)\t\(entry.line)", title: rel, detail: "linha \(entry.line)")
+            return PaletteItem(id: "\(entry.path)\t\(entry.line)", title: rel, detail: T("line \(entry.line)", "linha \(entry.line)"))
         }
     }
 
-    var placeholder: String { "Quem aponta para esta nota" }
-    var emptyText: String { "Nenhuma nota aponta para esta" }
+    var placeholder: String { T("Notes that link here", "Quem aponta para esta nota") }
+    var emptyText: String { T("No notes link here", "Nenhuma nota aponta para esta") }
 
     func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
         let shown = query.isEmpty ? items : items.filter { $0.title.localizedCaseInsensitiveContains(query) }

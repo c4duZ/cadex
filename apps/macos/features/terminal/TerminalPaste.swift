@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 
 /// ⌘V and dropping files on the terminal. What to paste comes from
 /// PasteContent; encoding (bracketed paste) and escaping paths are the
@@ -32,13 +33,13 @@ extension TerminalView {
         }
         let alert = NSAlert()
         let lines = text.split(separator: "\n", omittingEmptySubsequences: false).count
-        alert.messageText = lines > 1 ? "Colar \(lines) linhas?" : "Colar este texto?"
-        alert.informativeText = "O programa em execução não marca colagens: cada linha pode rodar como um comando."
-        alert.addButton(withTitle: "Colar")
+        alert.messageText = lines > 1 ? T("Paste \(lines) lines?", "Colar \(lines) linhas?") : T("Paste this text?", "Colar este texto?")
+        alert.informativeText = T("The running program does not mark pastes: each line may run as a command.", "O programa em execução não marca colagens: cada linha pode rodar como um comando.")
+        alert.addButton(withTitle: T("Paste", "Colar"))
         // NSAlert gives Esc only to a button titled "Cancel" in English.
-        alert.addButton(withTitle: "Cancelar").keyEquivalent = "\u{1B}"
+        alert.addButton(withTitle: T("Cancel", "Cancelar")).keyEquivalent = "\u{1B}"
         alert.showsSuppressionButton = true
-        alert.suppressionButton?.title = "Não perguntar de novo"
+        alert.suppressionButton?.title = T("Don't ask again", "Não perguntar de novo")
         alert.beginSheetModal(for: window) { [weak self] response in
             MainActor.assumeIsolated {
                 if alert.suppressionButton?.state == .on {

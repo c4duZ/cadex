@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 
 /// The selected commit (docs/spec/git-history.md): the whole message,
 /// author, date and parents on the left; its files with the kind of change
@@ -29,7 +30,7 @@ final class HistoryDetailsView: NSView, NSTableViewDataSource, NSTableViewDelega
     static func text(_ commit: HistoryCommit?, details: CommitDetails?) -> NSAttributedString {
         let text = NSMutableAttributedString()
         guard let commit else {
-            text.append(NSAttributedString(string: "Selecione um commit", attributes: [.font: NSFont.systemFont(ofSize: 12), .foregroundColor: NSColor.secondaryLabelColor]))
+            text.append(NSAttributedString(string: T("Select a commit", "Selecione um commit"), attributes: [.font: NSFont.systemFont(ofSize: 12), .foregroundColor: NSColor.secondaryLabelColor]))
             return text
         }
         let message = details?.message ?? commit.subject
@@ -38,7 +39,7 @@ final class HistoryDetailsView: NSView, NSTableViewDataSource, NSTableViewDelega
         var meta = "\(commit.author) <\(commit.email)>\n\(date)\ncommit \(commit.sha)"
         if !commit.parents.isEmpty {
             let shas: [String] = commit.parents.map { String($0.prefix(7)) }
-            let label = commit.parents.count > 1 ? "pais" : "pai"
+            let label = commit.parents.count > 1 ? T("parents", "pais") : T("parent", "pai")
             meta += "\n\(label) \(shas.joined(separator: " "))"
         }
         text.append(NSAttributedString(string: meta, attributes: [.font: NSFont.monospacedSystemFont(ofSize: 11, weight: .regular), .foregroundColor: NSColor.secondaryLabelColor]))
@@ -78,7 +79,7 @@ final class HistoryDetailsView: NSView, NSTableViewDataSource, NSTableViewDelega
             text.append(NSAttributedString(string: "  +\(added)", attributes: [.font: small, .foregroundColor: NSColor.systemGreen]))
             text.append(NSAttributedString(string: " −\(removed)", attributes: [.font: small, .foregroundColor: NSColor.systemRed]))
         } else {
-            text.append(NSAttributedString(string: "  binário", attributes: [.font: small, .foregroundColor: NSColor.secondaryLabelColor]))
+            text.append(NSAttributedString(string: T("  binary", "  binário"), attributes: [.font: small, .foregroundColor: NSColor.secondaryLabelColor]))
         }
         return text
     }

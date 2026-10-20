@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 
 /// Renaming in place: Enter (or leaving the field) renames through the
 /// core, Esc puts the old name back. A refused name keeps the file as it
@@ -34,7 +35,7 @@ extension ExplorerController: NSTextFieldDelegate {
         guard name != node.name else { return redrawRow(of: node) }
         guard !name.isEmpty, !name.contains("/") else {
             redrawRow(of: node)
-            return showMessage("Nome inválido")
+            return showMessage(T("Invalid name", "Nome inválido"))
         }
         let parent = parentFolder(of: node)
         do {

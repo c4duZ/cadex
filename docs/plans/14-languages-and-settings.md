@@ -25,6 +25,9 @@ Decisões: `docs/adr/0015-english-default-two-languages.md`.
   páginas em `apps/macos/features/settings/`); o resto da interface segue em português até a fase B.*
 - **B. O resto do Mac.** Comandos (títulos e palavras-chave), menus, barra de título, dicas,
   paleta, explorer, git, editor, preview, mídia, Markdown, spaces, alertas e mensagens.
+  *Feita em 2026-10-20: cerca de 360 textos em par em 68 arquivos; as datas do histórico seguem o
+  idioma. Ficam em português só mensagens que vão para o log ou para os testes (problemas do
+  settings.json e dos atalhos, erros de arquivo de tema).*
 - **C. Windows.** O mesmo par no Zig, o seletor e a página de configurações refeita com as mesmas
   seções e textos.
 - **D. Núcleo.** As mensagens de erro que o núcleo devolve, nos dois idiomas.

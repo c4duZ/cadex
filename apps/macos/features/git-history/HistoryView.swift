@@ -1,5 +1,6 @@
 import AppKit
 import Menus
+import Strings
 
 /// The history tab's view: search and "only the current branch" on top,
 /// the commits with the graph, and the selected commit's details below.
@@ -9,7 +10,7 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         didSet { rows.document = document }
     }
     let searchField = NSSearchField()
-    private let currentOnly = NSButton(checkboxWithTitle: "Só a branch atual", target: nil, action: nil)
+    private let currentOnly = NSButton(checkboxWithTitle: T("Current branch only", "Só a branch atual"), target: nil, action: nil)
     private let progress = NSProgressIndicator()
     private let count = NSTextField(labelWithString: "")
     let table = MenuTableView()
@@ -48,11 +49,11 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         }
         currentOnly.state = document.currentOnly ? .on : .off
         let n = rows.commits.count
-        count.stringValue = document.searchResults != nil ? "\(n) encontrados" : n == 1 ? "1 commit" : "\(n) commits"
+        count.stringValue = document.searchResults != nil ? T("\(n) found", "\(n) encontrados") : n == 1 ? "1 commit" : "\(n) commits"
         switch document.state {
-        case .loading where document.commits.isEmpty: empty.stringValue = "Carregando o histórico…"
-        case .empty: empty.stringValue = "Nenhum commit ainda"
-        case .failed: empty.stringValue = "Não foi possível ler o histórico deste repositório"
+        case .loading where document.commits.isEmpty: empty.stringValue = T("Loading history…", "Carregando o histórico…")
+        case .empty: empty.stringValue = T("No commits yet", "Nenhum commit ainda")
+        case .failed: empty.stringValue = T("Couldn't read this repository's history", "Não foi possível ler o histórico deste repositório")
         default: empty.stringValue = ""
         }
         empty.isHidden = empty.stringValue.isEmpty
@@ -81,7 +82,7 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
     // MARK: Layout
 
     private func build() {
-        searchField.placeholderString = "Filtrar por assunto, autor ou sha (Enter busca no repositório)"
+        searchField.placeholderString = T("Filter by subject, author or SHA (Enter searches the repository)", "Filtrar por assunto, autor ou sha (Enter busca no repositório)")
         searchField.delegate = self
         searchField.sendsWholeSearchString = false
         currentOnly.target = self

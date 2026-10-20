@@ -62,7 +62,7 @@ let exitCode = await Checks.run([
         let empty = deep.children![0]
         empty.load()
         let note = empty.visibleChildren(showHidden: true)
-        expect(note.count == 1 && note[0].isNote && note[0].name == "Pasta vazia")
+        expect(note.count == 1 && note[0].isNote && note[0].name == "Empty folder")
         expect(empty.visibleChildren(showHidden: true)[0] === note[0])
         try? FileManager.default.removeItem(atPath: root.path)
     }),
@@ -78,7 +78,7 @@ let exitCode = await Checks.run([
             try ExplorerFiles.createFile("/private/var/cadex-outside.txt")
             expect(false, "created outside")
         } catch {
-            expect(error.message == "Fora da pasta aberta")
+            expect(error.message == "Outside the open folder")
         }
         let renamed = try ExplorerFiles.rename(root + "/b.txt", to: "c.txt")
         expect(renamed == root + "/c.txt")

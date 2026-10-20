@@ -122,10 +122,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var powerTip: String {
         switch power.mode {
         case .off:
-            settings.store.settings.power.mode == "running" ? "Manter acordado com programa rodando" : "Manter acordado"
-        case .always: "Mantendo o computador acordado (clique para desligar)"
-        case .running: power.isHolding ? "Acordado: um programa está rodando (clique para desligar)"
-            : "Acordado quando um programa rodar (clique para desligar)"
+            settings.store.settings.power.mode == "running"
+                ? T("Keep awake while a program runs", "Manter acordado com programa rodando")
+                : T("Keep awake", "Manter acordado")
+        case .always: T("Keeping the computer awake (click to turn off)", "Mantendo o computador acordado (clique para desligar)")
+        case .running: power.isHolding
+            ? T("Awake: a program is running (click to turn off)", "Acordado: um programa está rodando (clique para desligar)")
+            : T("Awake when a program runs (click to turn off)", "Acordado quando um programa rodar (clique para desligar)")
         }
     }
 

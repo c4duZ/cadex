@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import Tabs
 
 /// Entry point of the spaces feature (docs/spec/spaces.md): named sets of
@@ -139,7 +140,7 @@ public final class SpacesController {
             tabs.closeAll()
             self?.remove(at: index)
         }
-        if TabsController.shouldClose([tabs], in: tabs.hostWindow, what: "o space", then: close) { close() }
+        if TabsController.shouldClose([tabs], in: tabs.hostWindow, what: T("the space", "o space"), then: close) { close() }
     }
 
     private func remove(at index: Int) {

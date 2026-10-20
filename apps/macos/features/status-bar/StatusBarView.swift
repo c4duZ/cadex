@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import Menus
 
 /// The bar at the bottom of the window: the focused terminal's folder as a
@@ -93,9 +94,9 @@ public final class StatusBarView: NSView {
                 let path = (folder as NSString).appendingPathComponent(name)
                 return MenuEntry(name, icon: .folder, isEnabled: canNavigate) { [weak self] in self?.onNavigate?(path) }
             }
-            if names.isEmpty { entries = [MenuEntry("Sem subpastas", isEnabled: false) {}] }
+            if names.isEmpty { entries = [MenuEntry(T("No subfolders", "Sem subpastas"), isEnabled: false) {}] }
         } else {
-            entries = [MenuEntry("Sem acesso", isEnabled: false) {}]
+            entries = [MenuEntry(T("No access", "Sem acesso"), isEnabled: false) {}]
         }
         // Above the bar: it sits at the bottom of the window.
         PopupMenu.show(entries, above: sender)

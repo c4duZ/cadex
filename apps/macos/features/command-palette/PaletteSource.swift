@@ -1,5 +1,6 @@
 import Foundation
 import Icons
+import Strings
 
 /// What the palette lists and runs. Commands are one source (⌘K); other
 /// features add theirs (files on ⌘P, text on ⌘⇧F) without this feature
@@ -27,7 +28,7 @@ public protocol PaletteSource: AnyObject {
 
 extension PaletteSource {
     public func choose(_ item: PaletteItem, as choice: PaletteChoice) { choose(item) }
-    public var hints: [PaletteHint] { [PaletteHint("↩", "escolher")] }
+    public var hints: [PaletteHint] { [PaletteHint("↩", T("choose", "escolher"))] }
     public var icon: Icon { .magnifyingGlass }
 }
 
@@ -44,11 +45,11 @@ final class CommandSource: PaletteSource {
         self.shortcut = shortcut
     }
 
-    var placeholder: String { "Digite um comando" }
-    var emptyText: String { "Nenhum comando encontrado" }
+    var placeholder: String { T("Type a command", "Digite um comando") }
+    var emptyText: String { T("No commands found", "Nenhum comando encontrado") }
 
     var icon: Icon { .command }
-    var hints: [PaletteHint] { [PaletteHint("↩", "executar")] }
+    var hints: [PaletteHint] { [PaletteHint("↩", T("run", "executar"))] }
 
     func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
         show(PaletteModel.items(for: query, registry: registry, pins: pins, shortcut: shortcut), nil)

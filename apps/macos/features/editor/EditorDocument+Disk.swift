@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 
 /// Saving, closing with unsaved changes, going to a line, and following
 /// the file on disk (docs/spec/editor.md, "Editar" and "Disco").
@@ -8,7 +9,7 @@ extension EditorDocument {
     public func save() -> Bool {
         guard let codeView else { return false }
         guard !readOnly else {
-            banner.show("Este arquivo está aberto só para leitura.")
+            banner.show(T("This file is open read-only.", "Este arquivo está aberto só para leitura."))
             return false
         }
         let data = Data(codeView.string.utf8)
@@ -24,11 +25,11 @@ extension EditorDocument {
     public func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) {
         guard hasUnsavedChanges, let window else { return close() }
         let alert = NSAlert()
-        alert.messageText = "Salvar as mudanças em \(title)?"
-        alert.informativeText = "Sem salvar, as mudanças se perdem."
-        alert.addButton(withTitle: "Salvar")
-        alert.addButton(withTitle: "Não salvar")
-        alert.addButton(withTitle: "Cancelar").keyEquivalent = "\u{1B}"
+        alert.messageText = T("Save the changes to \(title)?", "Salvar as mudanças em \(title)?")
+        alert.informativeText = T("If you don't save, your changes will be lost.", "Sem salvar, as mudanças se perdem.")
+        alert.addButton(withTitle: T("Save", "Salvar"))
+        alert.addButton(withTitle: T("Don't Save", "Não salvar"))
+        alert.addButton(withTitle: T("Cancel", "Cancelar")).keyEquivalent = "\u{1B}"
         alert.beginSheetModal(for: window) { [weak self] response in
             MainActor.assumeIsolated {
                 switch response {
@@ -61,15 +62,15 @@ extension EditorDocument {
         case let .text(text, data, _, _):
             guard data != diskDataForComparison else { return }
             if hasUnsavedChanges {
-                banner.show("O arquivo mudou no disco.", actions: [
-                    ("Recarregar", { [weak self] in self?.replaceText(text, data: data) }),
-                    ("Manter o meu", { [weak self] in self?.keepMine(data) }),
+                banner.show(T("The file changed on disk.", "O arquivo mudou no disco."), actions: [
+                    (T("Reload", "Recarregar"), { [weak self] in self?.replaceText(text, data: data) }),
+                    (T("Keep Mine", "Manter o meu"), { [weak self] in self?.keepMine(data) }),
                 ])
             } else {
                 replaceText(text, data: data)
             }
         case .failed:
-            banner.show("O arquivo foi apagado do disco. Salvar cria de novo.")
+            banner.show(T("The file was deleted from disk. Saving creates it again.", "O arquivo foi apagado do disco. Salvar cria de novo."))
         case .binary:
             break
         }

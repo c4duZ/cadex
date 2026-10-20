@@ -1,5 +1,6 @@
 import AppKit
 import PDFKit
+import Strings
 
 /// A PDF in a tab (docs/spec/media-preview.md): pages that scroll, zoom,
 /// and ⌘F searching the text with a small bar (PDFView has no find bar of
@@ -17,7 +18,7 @@ final class PDFViewer: NSView, NSSearchFieldDelegate {
         pdfView.autoScales = true
         pdfView.displayMode = .singlePageContinuous
         pdfView.backgroundColor = .clear
-        findField.placeholderString = "Buscar no PDF"
+        findField.placeholderString = T("Search in PDF", "Buscar no PDF")
         findField.delegate = self
         findField.target = self
         findField.action = #selector(findNext)
@@ -55,11 +56,11 @@ final class PDFViewer: NSView, NSSearchFieldDelegate {
     private func askPassword() {
         guard let window, let document = pdfView.document else { return }
         let alert = NSAlert()
-        alert.messageText = "Este PDF pede uma senha"
+        alert.messageText = T("This PDF requires a password", "Este PDF pede uma senha")
         let field = NSSecureTextField(frame: NSRect(x: 0, y: 0, width: 240, height: 24))
         alert.accessoryView = field
-        alert.addButton(withTitle: "Abrir")
-        alert.addButton(withTitle: "Cancelar").keyEquivalent = "\u{1B}"
+        alert.addButton(withTitle: T("Open", "Abrir"))
+        alert.addButton(withTitle: T("Cancel", "Cancelar")).keyEquivalent = "\u{1B}"
         alert.window.initialFirstResponder = field
         alert.beginSheetModal(for: window) { [weak self] response in
             MainActor.assumeIsolated {

@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Strings
 import Terminal
 
 /// The tabs of a window: opening, closing, switching, renaming and
@@ -240,14 +241,14 @@ public final class TabsController {
     func rename(_ id: Int) {
         guard let tab = tabs[id], let window else { return }
         let alert = NSAlert()
-        alert.messageText = "Renomear aba"
-        alert.informativeText = "Deixe vazio para voltar ao nome da pasta."
+        alert.messageText = T("Rename tab", "Renomear aba")
+        alert.informativeText = T("Leave empty to go back to the folder name.", "Deixe vazio para voltar ao nome da pasta.")
         let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 260, height: 24))
         field.stringValue = tab.customTitle ?? ""
         field.placeholderString = tab.title(home: home)
         alert.accessoryView = field
-        alert.addButton(withTitle: "Renomear")
-        alert.addButton(withTitle: "Cancelar").keyEquivalent = "\u{1B}"
+        alert.addButton(withTitle: T("Rename", "Renomear"))
+        alert.addButton(withTitle: T("Cancel", "Cancelar")).keyEquivalent = "\u{1B}"
         alert.window.initialFirstResponder = field
         alert.beginSheetModal(for: window) { [weak self] response in
             MainActor.assumeIsolated {

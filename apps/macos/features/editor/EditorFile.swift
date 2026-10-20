@@ -1,5 +1,6 @@
 import Foundation
 import CCadex
+import Strings
 
 /// Reading and saving the file through the core's explorer feature, which
 /// checks the workspace (docs/spec/editor.md, "Limites").
@@ -25,10 +26,10 @@ enum EditorFile {
         switch status {
         case CADEX_OK: break
         case CADEX_BINARY: return .binary
-        case CADEX_NOT_FOUND: return .failed("O arquivo não existe mais")
-        case CADEX_NOT_AUTHORIZED: return .failed("O arquivo está fora da pasta aberta")
-        case CADEX_PERMISSION_DENIED: return .failed("Sem permissão para ler o arquivo")
-        default: return .failed("Não foi possível ler o arquivo")
+        case CADEX_NOT_FOUND: return .failed(T("The file no longer exists", "O arquivo não existe mais"))
+        case CADEX_NOT_AUTHORIZED: return .failed(T("The file is outside the open folder", "O arquivo está fora da pasta aberta"))
+        case CADEX_PERMISSION_DENIED: return .failed(T("No permission to read the file", "Sem permissão para ler o arquivo"))
+        default: return .failed(T("Couldn't read the file", "Não foi possível ler o arquivo"))
         }
         guard let bytes else { return .text("", data: Data(), truncated: false, valid: true) }
         defer { cadex_free(bytes) }
@@ -46,9 +47,9 @@ enum EditorFile {
         }
         switch status {
         case CADEX_OK: return nil
-        case CADEX_NOT_AUTHORIZED: return "O arquivo está fora da pasta aberta"
-        case CADEX_PERMISSION_DENIED: return "Sem permissão para gravar o arquivo"
-        default: return "Não foi possível salvar o arquivo"
+        case CADEX_NOT_AUTHORIZED: return T("The file is outside the open folder", "O arquivo está fora da pasta aberta")
+        case CADEX_PERMISSION_DENIED: return T("No permission to write the file", "Sem permissão para gravar o arquivo")
+        default: return T("Couldn't save the file", "Não foi possível salvar o arquivo")
         }
     }
 }

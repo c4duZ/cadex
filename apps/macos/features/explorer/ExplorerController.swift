@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import Icons
 import Menus
 
@@ -206,11 +207,11 @@ public final class ExplorerController: NSObject {
         scroll.autohidesScrollers = true
         scroll.drawsBackground = false
         buttons = [
-            button(.magnifyingGlass, "search.files", "Buscar arquivo (⌘P)"),
-            button(.filePlus, "explorer.new-file", "Novo arquivo"),
-            button(.folderPlus, "explorer.new-folder", "Nova pasta"),
-            button(.arrowsClockwise, "explorer.refresh", "Recarregar"),
-            button(.arrowsInLineVertical, "explorer.collapse-all", "Recolher todas as pastas"),
+            button(.magnifyingGlass, "search.files", T("Find file (⌘P)", "Buscar arquivo (⌘P)")),
+            button(.filePlus, "explorer.new-file", T("New file", "Novo arquivo")),
+            button(.folderPlus, "explorer.new-folder", T("New folder", "Nova pasta")),
+            button(.arrowsClockwise, "explorer.refresh", T("Reload", "Recarregar")),
+            button(.arrowsInLineVertical, "explorer.collapse-all", T("Collapse all folders", "Recolher todas as pastas")),
         ]
         let bar = NSStackView(views: [header, NSView()] + buttons)
         bar.spacing = 0

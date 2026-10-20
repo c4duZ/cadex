@@ -1,6 +1,7 @@
 import AppKit
 import Icons
 import Menus
+import Strings
 
 /// The commits' table: graph, subject with the refs, author, date and sha.
 /// Cells are made only for the rows on screen and reused; nearing the end
@@ -18,16 +19,16 @@ final class HistoryRows: NSObject, NSTableViewDataSource, NSTableViewDelegate {
 
     private static let dates: RelativeDateTimeFormatter = {
         let f = RelativeDateTimeFormatter()
-        f.locale = Locale(identifier: "pt_BR")
+        f.locale = Locale(identifier: Strings.language == .pt ? "pt_BR" : "en_US")
         f.unitsStyle = .full
         return f
     }()
 
-    /// The full date, in Portuguese like the relative one (the system's
+    /// The full date, in the interface language like the relative one (the system's
     /// language may differ: the details read "17 October" on 2026-10-19).
     static let fullDates: DateFormatter = {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "pt_BR")
+        f.locale = Locale(identifier: Strings.language == .pt ? "pt_BR" : "en_US")
         f.dateStyle = .long
         f.timeStyle = .short
         return f
@@ -35,7 +36,7 @@ final class HistoryRows: NSObject, NSTableViewDataSource, NSTableViewDelegate {
 
     func build() {
         guard let table else { return }
-        for (id, title, width) in [("graph", "", 60.0), ("subject", "Descrição", 420), ("author", "Autor", 140), ("date", "Data", 120), ("sha", "Commit", 70)] {
+        for (id, title, width) in [("graph", "", 60.0), ("subject", T("Description", "Descrição"), 420), ("author", T("Author", "Autor"), 140), ("date", T("Date", "Data"), 120), ("sha", "Commit", 70)] {
             let column = NSTableColumn(identifier: .init(id))
             column.title = title
             column.width = width
@@ -131,7 +132,7 @@ final class HistoryRows: NSObject, NSTableViewDataSource, NSTableViewDelegate {
     /// becomes the selection first so the command acts on it.
     private func menuEntries(_ row: Int) -> [MenuEntry] {
         guard row >= 0 else { return [] }
-        let items: [(String, String, Icon)] = [("Copiar sha", "history.copy-sha", .copy), ("Abrir no remoto", "history.open-remote", .arrowSquareOut)]
+        let items: [(String, String, Icon)] = [(T("Copy SHA", "Copiar sha"), "history.copy-sha", .copy), (T("Open on Remote", "Abrir no remoto"), "history.open-remote", .arrowSquareOut)]
         return items.map { title, id, icon in
             MenuEntry(title, icon: icon) { [weak self] in
                 if let table = self?.table, row != table.selectedRow {

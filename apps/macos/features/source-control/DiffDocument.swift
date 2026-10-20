@@ -1,6 +1,7 @@
 import AppKit
 import Editor
 import Tabs
+import Strings
 
 /// A file's diff in a tab (docs/spec/source-control.md, "Diff"): before and
 /// after side by side with the editor's colors, removed lines red on the
@@ -63,9 +64,9 @@ public final class DiffDocument: TabDocument {
 
     private func show(_ diff: GitRepository.Diff?) {
         self.diff = diff
-        guard let diff else { return place(message("Não foi possível ler o diff")) }
-        if diff.binary { return place(message("Arquivo binário, sem diff")) }
-        if diff.tooLarge { return place(message("Arquivo grande demais para o diff", action: "Abrir o arquivo")) }
+        guard let diff else { return place(message(T("Couldn't read the diff", "Não foi possível ler o diff"))) }
+        if diff.binary { return place(message(T("Binary file, no diff", "Arquivo binário, sem diff"))) }
+        if diff.tooLarge { return place(message(T("File too large to diff", "Arquivo grande demais para o diff"), action: T("Open File", "Abrir o arquivo"))) }
         sideBySide ? showSides(diff) : showPatch(diff)
         onChange?()
     }
@@ -108,7 +109,7 @@ public final class DiffDocument: TabDocument {
 
     private func showPatch(_ diff: GitRepository.Diff) {
         let look = EditorAppearance.current
-        let text = NSMutableAttributedString(string: diff.patch.isEmpty ? "Sem diferenças" : diff.patch,
+        let text = NSMutableAttributedString(string: diff.patch.isEmpty ? T("No differences", "Sem diferenças") : diff.patch,
                                              attributes: [.font: look.font, .foregroundColor: look.foreground])
         var at = 0
         for line in diff.patch.components(separatedBy: "\n") {

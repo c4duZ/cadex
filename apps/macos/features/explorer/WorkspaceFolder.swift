@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import CCadex
 
 /// The folder open in the window: the root of the explorer and of the
@@ -44,7 +45,7 @@ public final class WorkspaceFolder {
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
         panel.directoryURL = URL(fileURLWithPath: root)
-        panel.prompt = "Abrir"
+        panel.prompt = T("Open", "Abrir")
         let pick: (NSApplication.ModalResponse) -> Void = { [weak self, weak panel] response in
             guard response == .OK, let url = panel?.url else { return }
             self?.open(url.path)

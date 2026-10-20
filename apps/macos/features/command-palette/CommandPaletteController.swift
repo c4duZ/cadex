@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Strings
 
 /// The palette over the key window: ⌘K lists commands; other features open
 /// it with their own source (⌘P files, ⌘⇧F text). Registers palette.open.
@@ -47,7 +48,7 @@ public final class CommandPaletteController {
 
     /// The command that opens the palette, and closes it when open.
     public var openCommand: Command {
-        Command(id: "palette.open", title: "Abrir a paleta de comandos", keywords: ["comandos", "command palette"],
+        Command(id: "palette.open", title: T("Open Command Palette", "Abrir a paleta de comandos"), keywords: ["comandos", "command palette"],
                 category: .app, defaultShortcut: "cmd+k", action: .run { [weak self] in self?.toggle() })
     }
 
@@ -123,9 +124,9 @@ public final class CommandPaletteController {
     private func footer(for list: PaletteSource?, empty: Bool) -> [PaletteHint] {
         let own = list?.hints ?? []
         if empty, list === commands, !prefixes.isEmpty {
-            return own + [PaletteHint(">", "comandos")] + prefixes.map { PaletteHint(String($0.prefix), $0.label) }
+            return own + [PaletteHint(">", T("commands", "comandos"))] + prefixes.map { PaletteHint(String($0.prefix), $0.label) }
         }
-        return own + [PaletteHint("↑↓", "mover"), PaletteHint("esc", "fechar")]
+        return own + [PaletteHint("↑↓", T("move", "mover")), PaletteHint("esc", T("close", "fechar"))]
     }
 
     /// Closes first and gives the focus back, so a command that acts on

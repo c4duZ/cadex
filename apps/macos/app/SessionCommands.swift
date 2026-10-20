@@ -10,6 +10,7 @@ import Preview
 import Search
 import SourceControl
 import StatusBar
+import Strings
 import Tabs
 import Terminal
 import Updates
@@ -27,13 +28,13 @@ extension WindowSession {
         commands.register(StandardCommands.all)
         commands.register(app.settingsCommand)
         commands.register(Command(
-            id: "window.new", title: "Nova janela", keywords: ["new window", "janela"], category: .file,
+            id: "window.new", title: T("New Window", "Nova janela"), keywords: ["new window", "janela"], category: .file,
             defaultShortcut: "cmd+n", action: .run { [weak self] in
                 guard let self else { return }
                 self.app.newWindow(from: self)
             }))
         commands.register(Command(
-            id: "view.toggle-sidebar", title: "Mostrar ou esconder o painel lateral",
+            id: "view.toggle-sidebar", title: T("Show or Hide Sidebar", "Mostrar ou esconder o painel lateral"),
             keywords: ["sidebar", "explorer", "painel"], category: .view, defaultShortcut: "cmd+b",
             action: .run { [weak self] in self?.workspace?.toggleSidebar() }))
         commands.register(PowerCommands.all(app.power))
@@ -52,7 +53,7 @@ extension WindowSession {
             self?.tabs?.activeDocument as? DiffDocument
         })
         commands.register(Command(
-            id: "git.show", title: "Mostrar o Git", keywords: ["source control", "git", "mudanças", "commit"],
+            id: "git.show", title: T("Show Git", "Mostrar o Git"), keywords: ["source control", "git", "mudanças", "changes", "commit"],
             category: .view, defaultShortcut: "cmd+shift+g",
             action: .run { [weak self] in
                 self?.workspace?.showSidebar(.git)

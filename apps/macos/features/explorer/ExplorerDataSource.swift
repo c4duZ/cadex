@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import CCadex
 import Icons
 
@@ -182,7 +183,7 @@ final class ExplorerCell: NSTableCellView {
         }
         textField?.textColor = git.map { node.isFolder ? style.text : Self.gitColor($0) } ?? style.text
         alphaValue = node.isHidden || node.entry?.ignored == true ? 0.55 : 1
-        toolTip = node.entry?.kind == .symlink && !cadex_workspace_is_authorized(node.path) ? "Aponta para fora da pasta aberta" : nil
+        toolTip = node.entry?.kind == .symlink && !cadex_workspace_is_authorized(node.path) ? T("Points outside the open folder", "Aponta para fora da pasta aberta") : nil
     }
 }
 

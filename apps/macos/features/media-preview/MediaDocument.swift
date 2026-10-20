@@ -3,6 +3,7 @@ import AVKit
 import CCadex
 import Quartz
 import Tabs
+import Strings
 
 /// An image, a video, an audio file, a PDF or anything Quick Look shows,
 /// in a tab (docs/spec/media-preview.md). The file is read by the system's
@@ -25,7 +26,7 @@ public final class MediaDocument: TabDocument {
         self.path = path
         self.kind = kind
         guard cadex_workspace_is_authorized(path) else {
-            show(message: "O arquivo está fora da pasta aberta")
+            show(message: T("The file is outside the open folder", "O arquivo está fora da pasta aberta"))
             return
         }
         switch kind {
@@ -79,14 +80,14 @@ public final class MediaDocument: TabDocument {
 
     private func showImage() {
         let viewer = ImageViewer(path: path)
-        guard viewer.hasImage else { return show(message: "Não é possível mostrar esta imagem") }
+        guard viewer.hasImage else { return show(message: T("Can't show this image", "Não é possível mostrar esta imagem")) }
         image = viewer
         fill(viewer)
     }
 
     private func showPDF() {
         let viewer = PDFViewer(path: path)
-        guard viewer.hasDocument else { return show(message: "Não é possível abrir este PDF") }
+        guard viewer.hasDocument else { return show(message: T("Can't open this PDF", "Não é possível abrir este PDF")) }
         pdf = viewer
         fill(viewer)
     }
@@ -104,14 +105,14 @@ public final class MediaDocument: TabDocument {
         Task { @MainActor [weak self] in
             // A file the system cannot decode: say so instead of a black view.
             guard let playable = try? await item.asset.load(.isPlayable), playable else {
-                self?.show(message: "Não é possível tocar este arquivo")
+                self?.show(message: T("Can't play this file", "Não é possível tocar este arquivo"))
                 return
             }
         }
     }
 
     private func showQuickLook() {
-        guard let preview = QLPreviewView(frame: .zero, style: .normal) else { return show(message: "Não é possível mostrar este arquivo") }
+        guard let preview = QLPreviewView(frame: .zero, style: .normal) else { return show(message: T("Can't show this file", "Não é possível mostrar este arquivo")) }
         preview.previewItem = URL(fileURLWithPath: path) as NSURL
         preview.shouldCloseWithWindow = false
         quickLook = preview
@@ -127,7 +128,7 @@ public final class MediaDocument: TabDocument {
             self.openExternally?(self.path)
         }
         buttonAction = action
-        let button = NSButton(title: "Abrir no app padrão", target: action, action: #selector(ButtonAction.run))
+        let button = NSButton(title: T("Open in Default App", "Abrir no app padrão"), target: action, action: #selector(ButtonAction.run))
         let stack = NSStackView(views: [label, button])
         stack.orientation = .vertical
         stack.spacing = 12

@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import Terminal
 
 /// Closing panes, tabs and the window (docs/spec/tabs.md, "Fechar"),
@@ -17,7 +18,7 @@ extension TabsController {
         case .document(let document):
             document.confirmClose(in: window, then: close)
         case .terminal(let terminal):
-            CloseConfirmation.confirm(running: terminal.hasForegroundProcess, in: window, what: "o painel", then: close)
+            CloseConfirmation.confirm(running: terminal.hasForegroundProcess, in: window, what: T("the pane", "o painel"), then: close)
         }
     }
 
@@ -52,7 +53,7 @@ extension TabsController {
         }
         let window = window
         let afterUnsaved = { @MainActor [weak self] in
-            CloseConfirmation.confirm(running: tab.hasForegroundProcess, in: window, what: "a aba") { self?.remove(id) }
+            CloseConfirmation.confirm(running: tab.hasForegroundProcess, in: window, what: T("the tab", "a aba")) { self?.remove(id) }
         }
         let unsaved = tab.unsavedCount
         guard unsaved > 0 else { return afterUnsaved() }
@@ -82,7 +83,7 @@ extension TabsController {
 
     /// The same for several sets of tabs (every space), with one question:
     /// a program running in a hidden space counts too.
-    public static func shouldClose(_ all: [TabsController], in window: NSWindow?, what: String = "a janela",
+    public static func shouldClose(_ all: [TabsController], in window: NSWindow?, what: String = T("the window", "a janela"),
                                    then close: @escaping @MainActor () -> Void,
                                    cancelled: @escaping @MainActor () -> Void = {}) -> Bool {
         let unsaved = all.reduce(0) { $0 + $1.tabs.values.reduce(0) { $0 + $1.unsavedCount } }

@@ -28,7 +28,7 @@ let exitCode = await Checks.run([
         registry.run("terminal.clear")
         let items = PaletteModel.items(for: "", registry: registry) { _ in nil }
         expect(items.map(\.id) == ["terminal.clear", "tab.new", "window.new"], "\(items.map(\.id))")
-        expect(items.map(\.section) == ["Recentes", "Abas", "Cadex"], "\(items.map(\.section))")
+        expect(items.map(\.section) == ["Recent", "Tabs", "Cadex"], "\(items.map(\.section))")
         expect(items[1].icon == .files && items[2].icon == .gearSix)
     }),
     ("titles go where the section changes; arrows skip them", {
@@ -90,8 +90,8 @@ let exitCode = await Checks.run([
                     PalettePin(id: "tab.new", title: "Terminal em nova aba", icon: .plus)]
         let items = PaletteModel.items(for: "", registry: registry, pins: pins) { $0 == "pane.split-right" ? "⌘D" : nil }
         expect(items.prefix(2).map(\.title) == ["Terminal ao lado", "Terminal em nova aba"], "\(items.map(\.title))")
-        expect(items[0].section == "Abrir" && items[0].shortcut == "⌘D")
-        expect(items.filter { $0.id == "tab.new" }.count == 1 && !items.contains { $0.section == "Recentes" })
+        expect(items[0].section == "Open" && items[0].shortcut == "⌘D")
+        expect(items.filter { $0.id == "tab.new" }.count == 1 && !items.contains { $0.section == "Recent" })
     }),
     ("a registered command runs by id and goes to the recent list", {
         let registry = CommandRegistry()
@@ -110,7 +110,7 @@ let exitCode = await Checks.run([
         expect(!registry.run("test.blocked"))
         expect(!ran)
         expect(registry.unavailableReason("test.blocked") == "Sem editor ativo")
-        expect(registry.unavailableReason("test.missing") == "Comando desconhecido")
+        expect(registry.unavailableReason("test.missing") == "Unknown command")
     }),
     ("every standard command has a title and a unique id", {
         let registry = CommandRegistry()
@@ -124,7 +124,7 @@ let exitCode = await Checks.run([
         let menu = CommandMenu(registry: registry) { _ in nil }.build()
         expect(menu.items.map(\.title) == ["Cadex", "Edit"], "\(menu.items.map(\.title))")
         let copy = menu.items[1].submenu?.items.first { ($0.representedObject as? String) == "edit.copy" }
-        expect(copy?.title == "Copiar")
+        expect(copy?.title == "Copy")
     }),
 ])
 exit(exitCode)

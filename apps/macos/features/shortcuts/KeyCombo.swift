@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 
 /// A key combination: "cmd+shift+d", ⌘⇧D. The key is the character the
 /// keyboard layout gives without modifiers (so ⌘[ follows the layout, as
@@ -98,7 +99,7 @@ public struct KeyCombo: Hashable, Sendable, CustomStringConvertible {
 
     private static let symbols: [String: String] = [
         "left": "←", "right": "→", "up": "↑", "down": "↓", "tab": "⇥", "return": "↩",
-        "escape": "⎋", "delete": "⌫", "space": "Espaço",
+        "escape": "⎋", "delete": "⌫", "space": T("Space", "Espaço"),
     ]
 
     private static let menuKeys: [String: String] = [

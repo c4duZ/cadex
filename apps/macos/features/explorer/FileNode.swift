@@ -1,4 +1,5 @@
 import CCadex
+import Strings
 import Foundation
 
 /// A row of the tree. Folders read their contents only when opened, and a
@@ -55,7 +56,7 @@ final class FileNode {
             problem = nil
         } catch {
             children = []
-            problem = error.status == CADEX_PERMISSION_DENIED ? "Sem permissão" : "Pasta indisponível"
+            problem = error.status == CADEX_PERMISSION_DENIED ? T("No permission", "Sem permissão") : T("Folder unavailable", "Pasta indisponível")
         }
     }
 
@@ -65,7 +66,7 @@ final class FileNode {
         guard let children else { return [] }
         if let problem { return [noteRow(problem)] }
         let shown = showHidden ? children : children.filter { !$0.isHidden }
-        return shown.isEmpty ? [noteRow("Pasta vazia")] : shown
+        return shown.isEmpty ? [noteRow(T("Empty folder", "Pasta vazia"))] : shown
     }
 
     /// Notes are made once per folder and text, so the outline sees the same

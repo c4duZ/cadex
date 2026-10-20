@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 
 /// An image in a tab (docs/spec/media-preview.md): fitted to the tab when
 /// bigger, zoom with ⌘+ ⌘− ⌘0 ⌘1, a soft checkerboard behind transparency,
@@ -51,7 +52,7 @@ final class ImageViewer: NSView {
     func load(_ path: String) {
         guard let image = NSImage(contentsOfFile: path) else {
             imageView.image = nil
-            info.stringValue = "Não é possível mostrar esta imagem"
+            info.stringValue = T("Can't show this image", "Não é possível mostrar esta imagem")
             return
         }
         // The largest representation's pixels: an @2x PNG shows its real size.

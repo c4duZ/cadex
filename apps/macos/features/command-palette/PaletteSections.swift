@@ -1,4 +1,5 @@
 import Icons
+import Strings
 
 /// The sections of ⌘K with an empty field (docs/spec/command-palette.md):
 /// each command goes to the area of its id prefix, in this order. Only
@@ -10,19 +11,19 @@ enum CommandSections {
         let prefixes: [String]
     }
 
-    static let recent = Section(title: "Recentes", icon: .arrowCounterClockwise, prefixes: [])
+    static let recent = Section(title: T("Recent", "Recentes"), icon: .arrowCounterClockwise, prefixes: [])
 
     static let all: [Section] = [
-        Section(title: "Abas", icon: .files, prefixes: ["tab"]),
-        Section(title: "Painéis", icon: .sidebar, prefixes: ["pane"]),
-        Section(title: "Arquivos", icon: .folder, prefixes: ["explorer", "workspace"]),
-        Section(title: "Busca", icon: .magnifyingGlass, prefixes: ["search"]),
+        Section(title: T("Tabs", "Abas"), icon: .files, prefixes: ["tab"]),
+        Section(title: T("Panes", "Painéis"), icon: .sidebar, prefixes: ["pane"]),
+        Section(title: T("Files", "Arquivos"), icon: .folder, prefixes: ["explorer", "workspace"]),
+        Section(title: T("Search", "Busca"), icon: .magnifyingGlass, prefixes: ["search"]),
         Section(title: "Editor", icon: .code, prefixes: ["editor", "markdown"]),
         Section(title: "Terminal", icon: .terminalWindow, prefixes: ["terminal"]),
         Section(title: "Git", icon: .gitBranch, prefixes: ["git", "history", "diff"]),
-        Section(title: "Web e mídia", icon: .globe, prefixes: ["preview", "media"]),
+        Section(title: T("Web and media", "Web e mídia"), icon: .globe, prefixes: ["preview", "media"]),
         Section(title: "Spaces", icon: .stack, prefixes: ["space"]),
-        Section(title: "Editar", icon: .keyboard, prefixes: ["edit"]),
+        Section(title: T("Edit", "Editar"), icon: .keyboard, prefixes: ["edit"]),
     ]
 
     /// Anything else: the app, settings, the palette, windows.

@@ -1,3 +1,4 @@
+import Strings
 /// A theme as the user picks it: one name with a dark and/or a light
 /// version (docs/spec/themes.md). The mode chooses which one shows.
 public struct ThemeFamily: Equatable, Sendable, Identifiable {
@@ -31,6 +32,6 @@ public enum ThemeMode: String, Sendable, CaseIterable {
 public extension ThemeFamily {
     /// The Cadex's own pair, until the catalog of plan 3, fase D.
     static let cadex = ThemeFamily(
-        id: "cadex", name: "Cadex", description: "Cinza-grafite em volta de painéis quase pretos.",
+        id: "cadex", name: "Cadex", description: T("Graphite gray around near-black panels.", "Cinza-grafite em volta de painéis quase pretos."),
         dark: .cadexDark, light: .cadexLight)
 }

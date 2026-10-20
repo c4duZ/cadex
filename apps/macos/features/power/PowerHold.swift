@@ -1,4 +1,5 @@
 import Foundation
+import Strings
 import IOKit.pwr_mgt
 
 /// What keeps the computer awake: the system's own power requests (IOKit
@@ -16,7 +17,7 @@ protocol PowerHold: AnyObject {
 @MainActor
 final class SystemPowerHold: PowerHold {
     private var ids: [IOPMAssertionID] = []
-    private static let reason = "Cadex: manter o computador acordado" as CFString
+    private static let reason = T("Cadex: keeping the computer awake", "Cadex: manter o computador acordado") as CFString
 
     /// PreventSystemSleep keeps a Mac on the power adapter running with
     /// the lid closed, as `caffeinate -s` does; on battery macOS sleeps on

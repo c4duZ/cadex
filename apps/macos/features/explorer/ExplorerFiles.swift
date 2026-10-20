@@ -1,5 +1,6 @@
 import AppKit
 import CCadex
+import Strings
 
 /// One row of a folder listing, from the core (core/features/explorer/listing.zig).
 struct FileEntry: Equatable {
@@ -21,12 +22,12 @@ struct ExplorerError: Error, Equatable {
 
     var message: String {
         switch status {
-        case CADEX_ALREADY_EXISTS: "Já existe um item com esse nome"
-        case CADEX_NOT_AUTHORIZED: "Fora da pasta aberta"
-        case CADEX_NOT_FOUND: "O item não existe mais"
-        case CADEX_PERMISSION_DENIED: "Sem permissão"
-        case CADEX_INVALID_ARGUMENT: "Nome ou destino inválido"
-        default: "A operação falhou"
+        case CADEX_ALREADY_EXISTS: T("An item with this name already exists", "Já existe um item com esse nome")
+        case CADEX_NOT_AUTHORIZED: T("Outside the open folder", "Fora da pasta aberta")
+        case CADEX_NOT_FOUND: T("The item no longer exists", "O item não existe mais")
+        case CADEX_PERMISSION_DENIED: T("No permission", "Sem permissão")
+        case CADEX_INVALID_ARGUMENT: T("Invalid name or destination", "Nome ou destino inválido")
+        default: T("The operation failed", "A operação falhou")
         }
     }
 }

@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import CommandPalette
 
 /// Entry point of the search feature: the two palette sources (⌘P files,
@@ -39,16 +40,16 @@ public final class SearchController {
 public enum SearchCommands {
     @MainActor
     public static func all(_ search: SearchController, palette: CommandPaletteController) -> [Command] {
-        func onScreen() -> String? { palette.currentSource === search.content ? nil : "A busca de texto não está aberta" }
+        func onScreen() -> String? { palette.currentSource === search.content ? nil : T("Text search is not open", "A busca de texto não está aberta") }
         return [
-            Command(id: "search.files", title: "Buscar arquivo pelo nome", keywords: ["go to file", "abrir", "quick open"],
+            Command(id: "search.files", title: T("Find File by Name", "Buscar arquivo pelo nome"), keywords: ["go to file", "abrir", "quick open", "find file"],
                     category: .file, defaultShortcut: "cmd+p", action: .run { palette.open(search.files) }),
-            Command(id: "search.content", title: "Buscar texto nos arquivos", keywords: ["find in files", "grep", "procurar"],
+            Command(id: "search.content", title: T("Find Text in Files", "Buscar texto nos arquivos"), keywords: ["find in files", "grep", "procurar"],
                     category: .file, defaultShortcut: "cmd+shift+f", action: .run { palette.open(search.content) }),
-            Command(id: "search.toggle-case", title: "Diferenciar maiúsculas na busca de texto", keywords: ["case", "caixa"],
+            Command(id: "search.toggle-case", title: T("Match Case in Text Search", "Diferenciar maiúsculas na busca de texto"), keywords: ["case", "caixa", "match case"],
                     category: .file, defaultShortcut: "cmd+opt+c",
                     action: .run { search.content.caseSensitive.toggle(); palette.refresh() }, unavailableReason: onScreen),
-            Command(id: "search.toggle-regex", title: "Usar expressão regular na busca de texto", keywords: ["regex", "regular"],
+            Command(id: "search.toggle-regex", title: T("Use Regular Expression in Text Search", "Usar expressão regular na busca de texto"), keywords: ["regex", "regular"],
                     category: .file, defaultShortcut: "cmd+opt+r",
                     action: .run { search.content.regex.toggle(); palette.refresh() }, unavailableReason: onScreen),
         ]

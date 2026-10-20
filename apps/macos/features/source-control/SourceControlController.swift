@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 
 /// Entry point of the source-control feature (docs/spec/source-control.md):
 /// the Git view of the sidebar for the workspace's repository. git runs on
@@ -169,8 +170,8 @@ public final class SourceControlController {
     public func push() {
         guard !status.upstream.isEmpty || status.detached else {
             let branch = status.branch
-            return confirm("Publicar a branch \(branch)?", detail: "Ela vai para o origin e passa a ser acompanhada.",
-                           action: "Publicar") { [weak self] in self?.perform { $0.push(publish: branch) } }
+            return confirm(T("Publish branch \(branch)?", "Publicar a branch \(branch)?"), detail: T("It goes to origin and becomes tracked.", "Ela vai para o origin e passa a ser acompanhada."),
+                           action: T("Publish", "Publicar")) { [weak self] in self?.perform { $0.push(publish: branch) } }
         }
         perform { $0.push(publish: nil) }
     }
@@ -179,15 +180,15 @@ public final class SourceControlController {
     public func commit() {
         let message = panel.message
         guard !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return panel.show(error: "Escreva uma mensagem para o commit")
+            return panel.show(error: T("Write a commit message", "Escreva uma mensagem para o commit"))
         }
         let commitAll: @MainActor (Bool) -> Void = { [weak self] all in
             self?.panel.clearMessage()
             self?.perform { $0.commit(message, all: all) }
         }
         guard status.entries.contains(where: \.isStaged) else {
-            guard !status.entries.isEmpty else { return panel.show(error: "Nenhuma mudança para o commit") }
-            return confirm("Nada está staged. Fazer o commit de todas as mudanças?", detail: "", action: "Commit de tudo") { commitAll(true) }
+            guard !status.entries.isEmpty else { return panel.show(error: T("No changes to commit", "Nenhuma mudança para o commit")) }
+            return confirm(T("Nothing is staged. Commit all changes?", "Nada está staged. Fazer o commit de todas as mudanças?"), detail: "", action: T("Commit All", "Commit de tudo")) { commitAll(true) }
         }
         commitAll(false)
     }
@@ -195,9 +196,9 @@ public final class SourceControlController {
     /// Discards with confirmation; new files go to the Trash.
     func discard(_ entries: [GitRepository.Entry]) {
         guard let repo, !entries.isEmpty else { return }
-        let what = entries.count == 1 ? entries[0].path : "\(entries.count) arquivos"
-        confirm("Descartar as mudanças em \(what)?", detail: "Isso não pode ser desfeito (arquivos novos vão para a Lixeira).",
-                action: "Descartar") { [weak self] in
+        let what = entries.count == 1 ? entries[0].path : T("\(entries.count) files", "\(entries.count) arquivos")
+        confirm(T("Discard the changes to \(what)?", "Descartar as mudanças em \(what)?"), detail: T("This can't be undone (new files go to the Trash).", "Isso não pode ser desfeito (arquivos novos vão para a Lixeira)."),
+                action: T("Discard", "Descartar")) { [weak self] in
             for e in entries where e.kind == .untracked {
                 try? FileManager.default.trashItem(at: URL(fileURLWithPath: repo.root + "/" + e.path), resultingItemURL: nil)
             }
@@ -243,7 +244,7 @@ public final class SourceControlController {
         alert.messageText = title
         alert.informativeText = detail
         alert.addButton(withTitle: action)
-        alert.addButton(withTitle: "Cancelar").keyEquivalent = "\u{1B}"
+        alert.addButton(withTitle: T("Cancel", "Cancelar")).keyEquivalent = "\u{1B}"
         alert.beginSheetModal(for: window) { response in
             if response == .alertFirstButtonReturn { MainActor.assumeIsolated { go() } }
         }

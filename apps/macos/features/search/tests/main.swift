@@ -58,14 +58,14 @@ let exitCode = await Checks.run([
         var shown: [PaletteItem] = []
         var status: String?
         search.content.search("libghostty") { items, s in shown = items; status = s }
-        let done = await eventually { status?.contains("arquivos") == true }
+        let done = await eventually { status?.contains("files") == true }
         expect(done, status ?? "nil")
         expect(shown.map(\.detail) == ["README.md:2", "core/features/terminal/render.zig:1"], "\(shown.map(\.detail))")
         search.content.choose(shown[1])
         expect(opened.first?.0 == root + "/core/features/terminal/render.zig" && opened.first?.1 == 1)
         search.content.regex = true
         search.content.search("(") { _, s in status = s }
-        expect(status == ".* · Expressão regular inválida", status ?? "nil")
+        expect(status == ".* · Invalid regular expression", status ?? "nil")
         search.content.stop()
         try? FileManager.default.removeItem(atPath: root)
     }),
@@ -77,7 +77,7 @@ let exitCode = await Checks.run([
         var shown: [PaletteItem] = []
         var status: String?
         search.content.search("draws") { items, s in shown = items; status = s }
-        _ = await eventually { status?.contains("arquivos") == true }
+        _ = await eventually { status?.contains("files") == true }
         expect(fromOld == 0, "\(fromOld)")
         expect(shown.map(\.detail) == ["core/features/terminal/render.zig:1"])
         try? FileManager.default.removeItem(atPath: root)

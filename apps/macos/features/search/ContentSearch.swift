@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import CCadex
 import CommandPalette
 import Icons
@@ -40,11 +41,11 @@ public final class ContentSearch: PaletteSource {
         self.showHidden = showHidden
     }
 
-    public var placeholder: String { "Buscar texto nos arquivos" }
-    public var emptyText: String { "Nenhum resultado" }
+    public var placeholder: String { T("Find text in files", "Buscar texto nos arquivos") }
+    public var emptyText: String { T("No results", "Nenhum resultado") }
     public var icon: Icon { .magnifyingGlass }
     public var hints: [PaletteHint] {
-        [PaletteHint("↩", "abrir"), PaletteHint("⌥↩", "ao lado"), PaletteHint("⌘↩", "em nova aba")]
+        [PaletteHint("↩", T("open", "abrir")), PaletteHint("⌥↩", T("to the side", "ao lado")), PaletteHint("⌘↩", T("in new tab", "em nova aba"))]
     }
 
     public func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
@@ -63,10 +64,10 @@ public final class ContentSearch: PaletteSource {
             cadex_search_content_start(root, $0.baseAddress, $0.count, &options, &callbacks, &out)
         }
         guard status == CADEX_OK else {
-            return show([], labeled(status == CADEX_INVALID_ARGUMENT && regex ? "Expressão regular inválida" : "A busca falhou"))
+            return show([], labeled(status == CADEX_INVALID_ARGUMENT && regex ? T("Invalid regular expression", "Expressão regular inválida") : T("The search failed", "A busca falhou")))
         }
         running = out
-        show([], labeled("Buscando…"))
+        show([], labeled(T("Searching…", "Buscando…")))
     }
 
     public func choose(_ item: PaletteItem) {
@@ -95,11 +96,11 @@ public final class ContentSearch: PaletteSource {
     /// A batch from the core, on the main thread.
     fileprivate func received(_ batch: [Hit]) {
         hits += batch
-        show?(items(), labeled("\(hits.count) resultados"))
+        show?(items(), labeled(T("\(hits.count) results", "\(hits.count) resultados")))
     }
 
     fileprivate func finished(truncated: Bool, files: Int) {
-        let summary = truncated ? "Resultados demais, refine a busca" : "\(hits.count) resultados em \(files) arquivos"
+        let summary = truncated ? T("Too many results, refine the search", "Resultados demais, refine a busca") : T("\(hits.count) results in \(files) files", "\(hits.count) resultados em \(files) arquivos")
         show?(items(), labeled(summary))
     }
 

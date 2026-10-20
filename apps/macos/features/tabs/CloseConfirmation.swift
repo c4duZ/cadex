@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import Terminal
 
 /// Asks before closing panes with a program in the foreground (a server,
@@ -16,13 +17,13 @@ enum CloseConfirmation {
             return
         }
         let alert = NSAlert()
-        alert.messageText = "Fechar \(what) com um programa rodando?"
-        alert.informativeText = "O programa em primeiro plano vai ser encerrado."
-        alert.addButton(withTitle: "Fechar")
+        alert.messageText = T("Close \(what) with a program running?", "Fechar \(what) com um programa rodando?")
+        alert.informativeText = T("The program in the foreground will be ended.", "O programa em primeiro plano vai ser encerrado.")
+        alert.addButton(withTitle: T("Close", "Fechar"))
         // NSAlert gives Esc only to a button titled "Cancel" in English.
-        alert.addButton(withTitle: "Cancelar").keyEquivalent = "\u{1B}"
+        alert.addButton(withTitle: T("Cancel", "Cancelar")).keyEquivalent = "\u{1B}"
         alert.showsSuppressionButton = true
-        alert.suppressionButton?.title = "Não perguntar de novo"
+        alert.suppressionButton?.title = T("Don't ask again", "Não perguntar de novo")
         alert.beginSheetModal(for: window) { response in
             MainActor.assumeIsolated {
                 if alert.suppressionButton?.state == .on {
@@ -41,10 +42,10 @@ enum CloseConfirmation {
             return
         }
         let alert = NSAlert()
-        alert.messageText = count == 1 ? "Fechar com 1 arquivo não salvo?" : "Fechar com \(count) arquivos não salvos?"
-        alert.informativeText = "As mudanças não salvas serão perdidas."
-        alert.addButton(withTitle: "Fechar sem salvar")
-        alert.addButton(withTitle: "Cancelar").keyEquivalent = "\u{1B}"
+        alert.messageText = count == 1 ? T("Close with 1 unsaved file?", "Fechar com 1 arquivo não salvo?") : T("Close with \(count) unsaved files?", "Fechar com \(count) arquivos não salvos?")
+        alert.informativeText = T("Unsaved changes will be lost.", "As mudanças não salvas serão perdidas.")
+        alert.addButton(withTitle: T("Close Without Saving", "Fechar sem salvar"))
+        alert.addButton(withTitle: T("Cancel", "Cancelar")).keyEquivalent = "\u{1B}"
         alert.beginSheetModal(for: window) { response in
             MainActor.assumeIsolated { response == .alertFirstButtonReturn ? close() : cancelled() }
         }

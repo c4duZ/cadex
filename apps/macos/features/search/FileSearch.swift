@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import CCadex
 import CommandPalette
 import Icons
@@ -34,16 +35,16 @@ public final class FileSearch: PaletteSource {
         if cadex_search_index_open(path, showHidden, &out) == CADEX_OK { index = out }
     }
 
-    public var placeholder: String { "Buscar arquivo pelo nome" }
-    public var emptyText: String { "Nenhum arquivo encontrado" }
+    public var placeholder: String { T("Find file by name", "Buscar arquivo pelo nome") }
+    public var emptyText: String { T("No files found", "Nenhum arquivo encontrado") }
     public var icon: Icon { .files }
     public var hints: [PaletteHint] {
-        [PaletteHint("↩", "abrir"), PaletteHint("⌥↩", "ao lado"), PaletteHint("⌘↩", "em nova aba")]
+        [PaletteHint("↩", T("open", "abrir")), PaletteHint("⌥↩", T("to the side", "ao lado")), PaletteHint("⌘↩", T("in new tab", "em nova aba"))]
     }
 
     public func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
         guard !query.isEmpty else {
-            return show(recent.map { item(path: $0, positions: []) }, recent.isEmpty ? "Digite para buscar arquivos" : "Recentes")
+            return show(recent.map { item(path: $0, positions: []) }, recent.isEmpty ? T("Type to find files", "Digite para buscar arquivos") : T("Recent", "Recentes"))
         }
         show(rank(query).map { item(path: $0.path, positions: $0.positions) }, indexStatus())
     }
@@ -86,7 +87,7 @@ public final class FileSearch: PaletteSource {
     private func indexStatus() -> String? {
         var ready = false
         let count = cadex_search_index_count(index, &ready)
-        return ready ? nil : "Indexando… \(count)"
+        return ready ? nil : T("Indexing… \(count)", "Indexando… \(count)")
     }
 
     /// The name as the title, its folder in grey, the type's icon: the

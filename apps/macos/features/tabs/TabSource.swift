@@ -1,6 +1,7 @@
 import AppKit
 import CommandPalette
 import Icons
+import Strings
 
 /// The window's tabs in the palette ("@", with the spaces): each by its
 /// title and what its focused pane shows; choosing one selects it
@@ -13,8 +14,8 @@ final class TabSource: PaletteSource {
         self.tabs = tabs
     }
 
-    var placeholder: String { "Ir para a aba" }
-    var emptyText: String { "Nenhuma aba" }
+    var placeholder: String { T("Go to tab", "Ir para a aba") }
+    var emptyText: String { T("No tabs", "Nenhuma aba") }
     var icon: Icon { .files }
 
     func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
@@ -24,8 +25,8 @@ final class TabSource: PaletteSource {
             let title = tab.title(home: controller.home)
             let found = query.isEmpty ? nil : title.range(of: query, options: [.caseInsensitive, .diacriticInsensitive])
             guard query.isEmpty || found != nil else { return nil }
-            let panes = tab.panes.count == 1 ? "" : " · \(tab.panes.count) painéis"
-            let where_ = id == controller.list.active ? "atual" : "⌘\(position + 1)"
+            let panes = tab.panes.count == 1 ? "" : T(" · \(tab.panes.count) panes", " · \(tab.panes.count) painéis")
+            let where_ = id == controller.list.active ? T("current", "atual") : "⌘\(position + 1)"
             let identity = tab.focused.document?.identity
             return PaletteItem(id: String(id), title: title, bold: found.map { [$0] } ?? [], detail: where_ + panes,
                                icon: identity.map { TabsController.tabIcon(for: $0).0 } ?? .terminalWindow,

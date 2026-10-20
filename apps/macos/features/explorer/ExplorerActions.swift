@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import CCadex
 
 /// What the explorer commands do (ExplorerCommands registers them).
@@ -10,18 +11,18 @@ extension ExplorerController {
         switch id {
         case "explorer.open", "explorer.trash", "explorer.copy-files", "explorer.reveal", "explorer.copy-path",
              "explorer.copy-relative-path":
-            return selection.isEmpty ? "Nenhum arquivo selecionado" : nil
+            return selection.isEmpty ? T("No file selected", "Nenhum arquivo selecionado") : nil
         case "explorer.open-beside", "explorer.open-in-tab":
-            if openFileAs == nil { return "Nada onde abrir" }
-            return selection.contains { !$0.isFolder } ? nil : "Nenhum arquivo selecionado"
+            if openFileAs == nil { return T("Nowhere to open it", "Nada onde abrir") }
+            return selection.contains { !$0.isFolder } ? nil : T("No file selected", "Nenhum arquivo selecionado")
         case "explorer.rename":
-            return selection.count == 1 ? nil : "Selecione um arquivo"
+            return selection.count == 1 ? nil : T("Select one file", "Selecione um arquivo")
         case "explorer.paste-files":
-            return Self.pasteboardFiles().isEmpty ? "Nenhum arquivo copiado" : nil
+            return Self.pasteboardFiles().isEmpty ? T("No files copied", "Nenhum arquivo copiado") : nil
         case "explorer.open-in-terminal":
-            return openInTerminal == nil ? "Nenhum terminal" : nil
+            return openInTerminal == nil ? T("No terminal", "Nenhum terminal") : nil
         case "explorer.open-in-finder":
-            return selection.isEmpty || selection.contains(where: \.isFolder) ? nil : "Nenhuma pasta selecionada"
+            return selection.isEmpty || selection.contains(where: \.isFolder) ? nil : T("No folder selected", "Nenhuma pasta selecionada")
         default:
             return nil
         }
@@ -42,13 +43,13 @@ extension ExplorerController {
                 else if let openFile { openFile(node.path) }
                 else { NSWorkspace.shared.open(URL(fileURLWithPath: node.path)) }
             } else {
-                showMessage("Aponta para fora da pasta aberta")
+                showMessage(T("Points outside the open folder", "Aponta para fora da pasta aberta"))
             }
         }
     }
 
-    func newFile() { create(base: "sem título", folder: false) }
-    func newFolder() { create(base: "pasta sem título", folder: true) }
+    func newFile() { create(base: T("untitled", "sem título"), folder: false) }
+    func newFolder() { create(base: T("untitled folder", "pasta sem título"), folder: true) }
 
     /// Creates under the target folder with a free name, then renames it in
     /// place with the name selected.
@@ -100,9 +101,9 @@ extension ExplorerController {
         }
         guard nodes.count > 1, let window = outline.window else { return go() }
         let alert = NSAlert()
-        alert.messageText = "Mover \(nodes.count) itens para a Lixeira?"
-        alert.addButton(withTitle: "Mover para a Lixeira")
-        alert.addButton(withTitle: "Cancelar").keyEquivalent = "\u{1b}"
+        alert.messageText = T("Move \(nodes.count) items to the Trash?", "Mover \(nodes.count) itens para a Lixeira?")
+        alert.addButton(withTitle: T("Move to Trash", "Mover para a Lixeira"))
+        alert.addButton(withTitle: T("Cancel", "Cancelar")).keyEquivalent = "\u{1b}"
         alert.beginSheetModal(for: window) { response in
             if response == .alertFirstButtonReturn { MainActor.assumeIsolated { go() } }
         }

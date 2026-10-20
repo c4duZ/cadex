@@ -1,5 +1,6 @@
 import Foundation
 import CCadex
+import Strings
 
 /// One repository, through the core's source-control feature (cadex_git_*).
 /// Every call blocks on `git`: callers run them on `queue`, never on the
@@ -135,8 +136,8 @@ final class GitRepository: @unchecked Sendable {
         let status = call(&out, &len)
         defer { cadex_free(out) }
         if status == CADEX_OK { return nil }
-        if status == CADEX_GIT_MISSING { return "O git não foi encontrado" }
-        guard let out else { return "O git falhou" }
+        if status == CADEX_GIT_MISSING { return T("Git was not found", "O git não foi encontrado") }
+        guard let out else { return T("Git failed", "O git falhou") }
         return String(decoding: UnsafeBufferPointer(start: out, count: len), as: UTF8.self)
     }
 

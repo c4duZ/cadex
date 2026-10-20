@@ -1,6 +1,7 @@
 import AppKit
 import Icons
 import Menus
+import Strings
 
 /// The Git view of the sidebar (docs/spec/source-control.md): branch and
 /// sync buttons on top, the lists of changes, the commit message at the
@@ -19,7 +20,7 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
     private let commitButton = NSButton(title: "Commit", target: nil, action: nil)
     private let error = NSTextField(wrappingLabelWithString: "")
     private let empty = NSTextField(wrappingLabelWithString: "")
-    private let initButton = NSButton(title: "Inicializar repositório", target: nil, action: nil)
+    private let initButton = NSButton(title: T("Initialize Repository", "Inicializar repositório"), target: nil, action: nil)
     private(set) var rows: [SourceControlRow] = []
 
     init() {
@@ -52,17 +53,17 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
         empty.isHidden = ready
         initButton.isHidden = controller.state != .noRepository
         switch controller.state {
-        case .gitMissing: empty.stringValue = "O git não foi encontrado.\nInstale com:\nxcode-select --install"
-        case .noRepository: empty.stringValue = "Esta pasta não é um repositório git."
-        case .loading where controller.repo == nil: empty.stringValue = "Procurando o repositório…"
+        case .gitMissing: empty.stringValue = T("Git was not found.\nInstall it with:\nxcode-select --install", "O git não foi encontrado.\nInstale com:\nxcode-select --install")
+        case .noRepository: empty.stringValue = T("This folder is not a git repository.", "Esta pasta não é um repositório git.")
+        case .loading where controller.repo == nil: empty.stringValue = T("Looking for the repository…", "Procurando o repositório…")
         default: empty.stringValue = ""
         }
         let s = controller.status
-        branch.title = s.detached ? "HEAD destacado em \(s.oid.prefix(7))" : s.branch
+        branch.title = s.detached ? T("HEAD detached at \(s.oid.prefix(7))", "HEAD destacado em \(s.oid.prefix(7))") : s.branch
         var parts: [String] = []
         if s.ahead > 0 { parts.append("↑\(s.ahead)") }
         if s.behind > 0 { parts.append("↓\(s.behind)") }
-        if s.upstream.isEmpty && !s.detached { parts.append("sem upstream") }
+        if s.upstream.isEmpty && !s.detached { parts.append(T("no upstream", "sem upstream")) }
         sync.stringValue = parts.joined(separator: " ")
         rows = SourceControlRow.rows(for: s)
         table.reloadData()
@@ -166,7 +167,7 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
         commitButton.target = self
         commitButton.action = #selector(runButton(_:))
         commitButton.identifier = .init("git.commit")
-        HoverTip.attach("Commit (⌘Enter na mensagem)", to: commitButton)
+        HoverTip.attach(T("Commit (⌘Enter in the message)", "Commit (⌘Enter na mensagem)"), to: commitButton)
         error.font = .systemFont(ofSize: 11)
         error.textColor = .systemRed
         error.isHidden = true

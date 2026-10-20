@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Strings
 
 /// The offer to open a local server in the preview (docs/spec/preview.md):
 /// a small button in the bottom-right corner of the terminal, for a few
@@ -14,7 +15,7 @@ final class TerminalPreviewOffer: NSView {
         self.url = url
         self.open = open
         let shown = url.replacingOccurrences(of: "http://", with: "")
-        button = NSButton(title: "Abrir no preview  \(shown)", target: nil, action: nil)
+        button = NSButton(title: T("Open in preview  \(shown)", "Abrir no preview  \(shown)"), target: nil, action: nil)
         super.init(frame: .zero)
         wantsLayer = true
         layer?.cornerRadius = 8

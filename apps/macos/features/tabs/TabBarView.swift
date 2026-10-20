@@ -1,6 +1,7 @@
 import AppKit
 import Icons
 import Menus
+import Strings
 
 /// The tab strip in the title bar, the bar's main element: tabs of equal
 /// width side by side, as macOS's own tabs (Safari, Ghostty), each with its
@@ -207,7 +208,7 @@ public final class TabBarView: NSView {
         guard dragging == nil, let i = index(at: point), i < items.count else { return HoverTip.hide() }
         let tab = frame(at: i)
         let close = closeFrame(in: tab)
-        if close.insetBy(dx: -3, dy: -3).contains(point) { return HoverTip.hover("Fechar aba", over: close, in: self) }
+        if close.insetBy(dx: -3, dy: -3).contains(point) { return HoverTip.hover(T("Close tab", "Fechar aba"), over: close, in: self) }
         HoverTip.hover(items[i].tip ?? items[i].title, over: tab, in: self)
     }
 

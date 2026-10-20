@@ -1,5 +1,6 @@
 import AppKit
 import Tabs
+import Strings
 
 /// A file open in an editor tab (docs/spec/editor.md): the text view with
 /// line numbers, folds and colors, saving through the core, and following
@@ -86,14 +87,14 @@ public final class EditorDocument: TabDocument {
             readOnly = truncated || !valid
             showText(text)
             if truncated {
-                banner.show("Arquivo grande: mostrando os primeiros 10 MB, só para leitura.")
+                banner.show(T("Large file: showing the first 10 MB, read-only.", "Arquivo grande: mostrando os primeiros 10 MB, só para leitura."))
             } else if !valid {
-                banner.show("O arquivo não é UTF-8 válido: aberto só para leitura.")
+                banner.show(T("The file is not valid UTF-8: opened read-only.", "O arquivo não é UTF-8 válido: aberto só para leitura."))
             } else if data.count > EditorFile.maxHighlightBytes {
-                banner.show("Arquivo acima de 1 MB: sem cores nem dobras.")
+                banner.show(T("File over 1 MB: no colors or folding.", "Arquivo acima de 1 MB: sem cores nem dobras."))
             }
         case .binary:
-            showMessage("Arquivo binário", action: "Abrir no app padrão")
+            showMessage(T("Binary file", "Arquivo binário"), action: T("Open in Default App", "Abrir no app padrão"))
         case let .failed(message):
             showMessage(message, action: nil)
         }

@@ -2,6 +2,7 @@ import AppKit
 import CommandPalette
 import Search
 import Spaces
+import Strings
 import Tabs
 import Themes
 
@@ -11,15 +12,15 @@ extension WindowSession {
     /// The ways to open things, first in ⌘K and in the "+" menu next to
     /// the tabs, as in Terax's "+" (owner, 2026-10-19).
     static let openers = [
-        PalettePin(id: "tab.new", title: "Terminal em nova aba", icon: .plus),
-        PalettePin(id: "pane.split-right", title: "Terminal ao lado", icon: .squareSplitHorizontal),
-        PalettePin(id: "pane.split-down", title: "Terminal abaixo", icon: .squareSplitVertical),
-        PalettePin(id: "search.files", title: "Arquivo…", icon: .file),
-        PalettePin(id: "preview.open", title: "Preview web", icon: .globe),
-        PalettePin(id: "preview.open-in-tab", title: "Preview web em nova aba", icon: .globe),
-        PalettePin(id: "git.history", title: "Grafo do git", icon: .gitBranch),
-        PalettePin(id: "git.history-in-tab", title: "Grafo do git em nova aba", icon: .gitBranch),
-        PalettePin(id: "window.new", title: "Nova janela", icon: .appWindow),
+        PalettePin(id: "tab.new", title: T("Terminal in New Tab", "Terminal em nova aba"), icon: .plus),
+        PalettePin(id: "pane.split-right", title: T("Terminal on the Right", "Terminal ao lado"), icon: .squareSplitHorizontal),
+        PalettePin(id: "pane.split-down", title: T("Terminal Below", "Terminal abaixo"), icon: .squareSplitVertical),
+        PalettePin(id: "search.files", title: T("File…", "Arquivo…"), icon: .file),
+        PalettePin(id: "preview.open", title: T("Web Preview", "Preview web"), icon: .globe),
+        PalettePin(id: "preview.open-in-tab", title: T("Web Preview in New Tab", "Preview web em nova aba"), icon: .globe),
+        PalettePin(id: "git.history", title: T("Git Graph", "Grafo do git"), icon: .gitBranch),
+        PalettePin(id: "git.history-in-tab", title: T("Git Graph in New Tab", "Grafo do git em nova aba"), icon: .gitBranch),
+        PalettePin(id: "window.new", title: T("New Window", "Nova janela"), icon: .appWindow),
     ]
 
     func connectPalette(_ palette: CommandPaletteController) {
@@ -32,12 +33,13 @@ extension WindowSession {
                 keycap: ui.field.nsColor)
         }
         if let search {
-            palette.addPrefix("/", label: "arquivos", source: search.files)
-            palette.addPrefix("#", label: "texto", source: search.content)
+            palette.addPrefix("/", label: T("files", "arquivos"), source: search.files)
+            palette.addPrefix("#", label: T("text", "texto"), source: search.content)
         }
-        var places: [(String, PaletteSource)] = [("Abas", TabCommands.source { [weak self] in self?.tabs })]
+        var places: [(String, PaletteSource)] = [(T("Tabs", "Abas"), TabCommands.source { [weak self] in self?.tabs })]
         if let spaces { places.append(("Spaces", SpacesCommands.source(spaces))) }
-        palette.addPrefix("@", label: "abas e spaces", source: MergedSource(
-            placeholder: "Ir para a aba ou o space", emptyText: "Nenhuma aba ou space", icon: .stack, parts: places))
+        palette.addPrefix("@", label: T("tabs and spaces", "abas e spaces"), source: MergedSource(
+            placeholder: T("Go to a tab or space", "Ir para a aba ou o space"),
+            emptyText: T("No tabs or spaces", "Nenhuma aba ou space"), icon: .stack, parts: places))
     }
 }

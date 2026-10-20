@@ -3,6 +3,7 @@ import Icons
 import Menus
 import Tabs
 import WebKit
+import Strings
 
 /// A web page in a tab (docs/spec/preview.md): the server an agent started
 /// in the terminal, next to the code. The page is isolated: no bridge to
@@ -40,8 +41,8 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         configuration.websiteDataStore = .nonPersistent()
         configuration.applicationNameForUserAgent = Self.safariUserAgent
         web = WKWebView(frame: .zero, configuration: configuration)
-        back = Self.button(.arrowLeft, "Voltar")
-        forward = Self.button(.arrowRight, "Avançar")
+        back = Self.button(.arrowLeft, T("Back", "Voltar"))
+        forward = Self.button(.arrowRight, T("Forward", "Avançar"))
         super.init()
         web.navigationDelegate = self
         web.uiDelegate = self
@@ -131,7 +132,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
         // Cancelled: a new address replaced it, not a failure.
         if (error as NSError).code == NSURLErrorCancelled { return }
-        message.stringValue = "Não foi possível conectar a \(address.stringValue)\n\(error.localizedDescription)"
+        message.stringValue = T("Couldn't connect to \(address.stringValue)\n\(error.localizedDescription)", "Não foi possível conectar a \(address.stringValue)\n\(error.localizedDescription)")
         message.isHidden = false
     }
 
@@ -174,7 +175,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     }
 
     private func layout() {
-        let reload = Self.button(.arrowClockwise, "Recarregar")
+        let reload = Self.button(.arrowClockwise, T("Reload", "Recarregar"))
         back.target = self
         back.action = #selector(backPressed)
         forward.target = self

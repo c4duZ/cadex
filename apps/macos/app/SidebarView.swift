@@ -1,6 +1,7 @@
 import AppKit
 import Icons
 import Menus
+import Strings
 
 /// The sidebar: the explorer's tree or the Git view, switched by two tabs
 /// at the bottom, "Arquivos" and "Git", as in Terax (they run the
@@ -20,7 +21,7 @@ final class SidebarView: NSView {
         self.files = files
         self.git = git
         self.run = run
-        filesTab = SidebarTab(icon: .files, title: "Arquivos", tip: "Arquivos (⇧⌘E)")
+        filesTab = SidebarTab(icon: .files, title: T("Files", "Arquivos"), tip: T("Files (⇧⌘E)", "Arquivos (⇧⌘E)"))
         gitTab = SidebarTab(icon: .gitBranch, title: "Git", tip: "Git (⇧⌘G)")
         super.init(frame: .zero)
         filesTab.onPress = { [weak self] in self?.run("explorer.focus") }

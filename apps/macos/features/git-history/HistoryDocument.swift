@@ -1,5 +1,6 @@
 import AppKit
 import Tabs
+import Strings
 
 /// Entry point of the git-history feature (docs/spec/git-history.md): the
 /// repository's history in a tab. Pages come from the core on the log's
@@ -42,7 +43,7 @@ public final class HistoryDocument: TabDocument {
 
     public static func identity(for root: String) -> String { "history:\(root)" }
     public var identity: String { Self.identity(for: root) }
-    public var title: String { "Histórico: " + (root as NSString).lastPathComponent }
+    public var title: String { T("History: ", "Histórico: ") + (root as NSString).lastPathComponent }
     public var hasUnsavedChanges: Bool { false }
     public func focus() { view.window?.makeFirstResponder(historyView.table) }
     public func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) { close() }

@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 
 /// The one list of commands. Each feature registers its own through its
 /// entry point; the app builds the menu, the shortcuts and the palette
@@ -32,7 +33,7 @@ public final class CommandRegistry {
 
     /// Nil when the command can run, otherwise why not. Unknown ids say so.
     public func unavailableReason(_ id: String) -> String? {
-        guard let command = command(id) else { return "Comando desconhecido" }
+        guard let command = command(id) else { return T("Unknown command", "Comando desconhecido") }
         return command.unavailableReason()
     }
 

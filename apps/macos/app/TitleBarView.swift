@@ -1,6 +1,7 @@
 import AppKit
 import Icons
 import Menus
+import Strings
 import Tabs
 
 /// The title bar: the window buttons, one group on the left with the
@@ -27,15 +28,16 @@ final class TitleBarView: NSView {
     private var groupLeading: NSLayoutConstraint!
 
     private let run: (String) -> Void
-    private let sidebarButton = TitleBarButton(icon: .sidebar, tip: "Painel lateral (⌘B)")
+    private let sidebarButton = TitleBarButton(icon: .sidebar, tip: T("Sidebar (⌘B)", "Painel lateral (⌘B)"))
     /// The palette is the search for everything (files, commands, ⌘K).
-    private let searchButton = TitleBarButton(icon: .magnifyingGlass, title: "⌘K", tip: "Buscar arquivos e comandos (⌘K)")
+    private let searchButton = TitleBarButton(icon: .magnifyingGlass, title: "⌘K", tip: T("Search files and commands (⌘K)", "Buscar arquivos e comandos (⌘K)"))
     /// The space's name; clicking it switches spaces (docs/spec/spaces.md).
-    private let spaceButton = TitleBarButton(icon: .stack, title: "", tip: "Trocar de space (⇧⌘S)")
+    private let spaceButton = TitleBarButton(icon: .stack, title: "", tip: T("Switch space (⇧⌘S)", "Trocar de space (⇧⌘S)"))
     /// The four as one group on a light fill.
     private let group = NSView()
-    private let newTabButton = TitleBarButton(icon: .plus, tip: "Abrir terminal, arquivo, preview ou grafo do git")
-    private let settingsButton = TitleBarButton(icon: .gearSix, tip: "Configurações (⌘,)")
+    private let newTabButton = TitleBarButton(
+        icon: .plus, tip: T("Open a terminal, file, preview or git graph", "Abrir terminal, arquivo, preview ou grafo do git"))
+    private let settingsButton = TitleBarButton(icon: .gearSix, tip: T("Settings (⌘,)", "Configurações (⌘,)"))
     /// A newer Cadex: shown only while there is one, left of the settings;
     /// a click opens the update panel (docs/spec/updates.md).
     private let updateButton = TitleBarButton(icon: .arrowCircleUp, tip: "")
@@ -44,7 +46,7 @@ final class TitleBarView: NSView {
     private let trailing = NSStackView()
     /// Keep-awake, in the group: filled while on, the outline while off; a
     /// click runs power.toggle, as ⇧⌘A (docs/spec/power.md).
-    private let powerButton = TitleBarButton(icon: .coffee, tip: "Manter acordado")
+    private let powerButton = TitleBarButton(icon: .coffee, tip: T("Keep awake", "Manter acordado"))
     /// The shown space's tabs; swapped when the space changes.
     private(set) var tabBar: TabBarView?
     private var tabBarConstraints: [NSLayoutConstraint] = []

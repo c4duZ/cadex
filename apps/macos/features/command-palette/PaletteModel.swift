@@ -9,7 +9,7 @@ import Strings
 /// now is not listed (owner, 2026-10-19: "então pra que mostrar?").
 @MainActor
 enum PaletteModel {
-    static let openSection = "Abrir"
+    static let openSection = T("Open", "Abrir")
 
     static func items(for query: String, registry: CommandRegistry, pins: [PalettePin] = [],
                       shortcut: (String) -> String?) -> [PaletteItem] {
