@@ -41,6 +41,12 @@ o comportamento (não o código), está em `apps/macos/features/terminal/CLAUDE.
   (precisão do touchpad), links com Ctrl+clique, busca no terminal, sino, fechar com processo rodando.
 - **F. Medir.** Tempo de abertura, memória com um terminal e tamanho do `.exe`, registrados no README.
 
+## Andamento (2026-10-20)
+Fases A a E escritas e compilando para x64 e arm64 (o dono pediu para terminar tudo e testar depois
+no Windows): janela com frame próprio, Snap Layouts e Mica (`apps/windows/app/window.zig`), desenho
+por Direct2D/DirectWrite também no terminal (ADR 0012 revisto), teclado com AltGr, acentos e IME,
+mouse, links, busca, colagem. A fase F (medir) e toda a conferência dependem da VM.
+
 ## Como validar
 - `make check` passa no Mac; `make windows-core-test` e os testes do app passam na VM.
 - Na VM: vim, htop do WSL, `git log` paginado, cores de 24 bits, emoji, CJK, acentos no ABNT2,

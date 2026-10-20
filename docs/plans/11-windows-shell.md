@@ -35,6 +35,12 @@ shortcuts (mapa do Windows), settings (onde fica o arquivo).
 - **E. Tema, configurações e status bar.** Temas do catálogo comum, janela de configurações com as
   mesmas páginas, status bar com o ambiente (Local ou a distro WSL).
 
+## Andamento (2026-10-20)
+Escrito e compilando: camada de interface (`apps/windows/shared/ui/`), paleta, atalhos (⌘ vira
+Ctrl+Shift), abas e divisões, temas e configurações lendo os mesmos catalog.json e settings.json do
+Mac (embutidos e no %APPDATA%, sem mover arquivos do Mac: o build do Windows lê do lugar deles),
+barra de status. Falta o teste de paridade de comandos e a conferência na VM.
+
 ## Como validar
 - `make check` passa no Mac; testes do app Windows passam na VM.
 - Teste de paridade de comandos passa. O settings.json do Mac abre no Windows sem perder nada.
