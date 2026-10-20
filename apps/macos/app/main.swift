@@ -29,6 +29,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         suspendShortcuts: { [weak self] on in self?.dispatcher?.isSuspended = on })
 
     var settingsCommand: Command { settingsWindow.openCommand }
+    /// The Cadex symbol by the clock: filled while keep-awake is on.
+    private var menuBarItem: MenuBarItem?
     /// Keep-awake, for the whole app: a program running in any window counts.
     private(set) lazy var power = PowerController { [weak self] in self?.sessions.contains(where: \.hasRunningProgram) ?? false }
 
@@ -92,8 +94,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func startPower() {
         let prefs = settings.store.settings.power
         power.keepDisplayOn = prefs.keepDisplayOn
-        power.onChange = { [weak self] in self?.sessions.forEach { $0.showPower() } }
+        power.onChange = { [weak self] in self?.showPower() }
+        menuBarItem = MenuBarItem { [weak self] in self?.runPowerButton() }
         if prefs.onAtLaunch { power.set(PowerController.Mode(rawValue: prefs.mode) ?? .always) }
+        showPower()
+    }
+
+    /// The coffee and the menu bar symbol show the state, the tip what a
+    /// click does.
+    func showPower() {
+        sessions.forEach { $0.showPower() }
+        menuBarItem?.show(on: power.mode != .off, tip: powerTip)
+    }
+
+    var powerTip: String {
+        switch power.mode {
+        case .off:
+            settings.store.settings.power.mode == "running" ? "Manter acordado com programa rodando" : "Manter acordado"
+        case .always: "Mantendo o computador acordado (clique para desligar)"
+        case .running: power.isHolding ? "Acordado: um programa está rodando (clique para desligar)"
+            : "Acordado quando um programa rodar (clique para desligar)"
+        }
+    }
+
+    /// The menu bar symbol runs the coffee's command, in the window in
+    /// front or any other.
+    private func runPowerButton() {
+        _ = (current ?? sessions.first)?.commands.run(powerButtonCommand)
     }
 
     /// The coffee: off turns on the settings' mode, on turns off. It runs
@@ -118,7 +145,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         settings.onMarkdown = { [weak self] prefs in self?.sessions.forEach { $0.applyMarkdown(prefs) } }
         settings.onPower = { [weak self] prefs in
             self?.power.keepDisplayOn = prefs.keepDisplayOn
-            self?.sessions.forEach { $0.showPower() }
+            self?.showPower()
         }
         settings.onLooks = { [weak self] image, vibrancy in self?.sessions.forEach { $0.applyLooks(image, vibrancy: vibrancy) } }
         settings.onShortcuts = { [weak self] shortcuts in

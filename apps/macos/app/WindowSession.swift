@@ -116,15 +116,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
 
     /// Keep-awake's icon in the title bar: filled while on, its tip the state.
     func showPower() {
-        let power = app.power
-        let off = settings.store.settings.power.mode == "running" ? "Manter acordado com programa rodando" : "Manter acordado"
-        let tip = switch power.mode {
-        case .off: off
-        case .always: "Mantendo o computador acordado (clique para desligar)"
-        case .running: power.isHolding ? "Acordado: um programa está rodando (clique para desligar)"
-            : "Acordado quando um programa rodar (clique para desligar)"
-        }
-        workspace?.titleBar.setPower(on: power.mode != .off, tip: tip)
+        workspace?.titleBar.setPower(on: app.power.mode != .off, tip: app.powerTip)
     }
 
     /// The menu and the shortcut labels from the keymap in effect.
