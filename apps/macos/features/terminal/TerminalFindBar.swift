@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Menus
 
 /// The find bar (⌘F) over the top-right corner of the terminal: the text to
 /// find, "3 de 12", previous and next, close. Enter goes to the next (older)
@@ -95,7 +96,7 @@ final class TerminalFindBar: NSVisualEffectView, NSSearchFieldDelegate {
         let button = NSButton(image: icon.image(size: 14), target: self, action: action)
         button.setAccessibilityLabel(tip)
         button.isBordered = false
-        button.toolTip = tip
+        HoverTip.attach(tip, to: button)
         return button
     }
 

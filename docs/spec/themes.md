@@ -23,6 +23,8 @@ temas que ele já usava no Terax.
 - A janela de configurações também segue o tema. Os menus que abrem pelo clique (clique direito, o
   "+" das abas, as pastas da barra de status) também: as cores do ⌘K, não o menu translúcido do
   sistema (o dono, 2026-10-20). Só a barra de menus do macOS fica do sistema.
+- Botões de ícone mostram o nome ao passar o ponteiro, em 0,2 s, embaixo do botão e nas mesmas
+  cores dos menus (o dono, 2026-10-20).
 - Imagem de fundo: opcional, atrás da área do terminal, com opacidade e desfoque; a imagem escolhida
   é copiada para o Cadex. Vibrância: a moldura fica fosca sobre o que está atrás da janela, e os
   painéis continuam sólidos. As duas vêm desligadas, porque custam desempenho a cada quadro.

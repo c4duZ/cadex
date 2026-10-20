@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Menus
 
 /// The sidebar: the explorer's tree or the Git view, switched by two tabs
 /// at the bottom, "Arquivos" and "Git", as in Terax (they run the
@@ -82,7 +83,7 @@ private final class SidebarTab: NSView {
         super.init(frame: .zero)
         wantsLayer = true
         layer?.cornerRadius = 6
-        toolTip = tip
+        HoverTip.attach(tip, to: self)
         setAccessibilityRole(.button)
         setAccessibilityLabel(title)
         label.font = .systemFont(ofSize: 12, weight: .medium)

@@ -118,7 +118,7 @@ final class SourceControlRowView: NSTableCellView {
         let b = NSButton(title: title, target: self, action: #selector(pressed))
         b.isBordered = false
         b.font = .systemFont(ofSize: 13, weight: .medium)
-        b.toolTip = tip
+        HoverTip.attach(tip, to: b)
         b.contentTintColor = .secondaryLabelColor
         return b
     }

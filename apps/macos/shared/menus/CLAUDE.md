@@ -19,8 +19,12 @@
 - `PopupMenuPanel.swift`: a janela do menu (pega o teclado: setas, Return, Esc; fecha ao perder o
   foco, que é o clique fora) e a lista desenhada à mão. A ação roda depois de fechar, com o
   teclado já de volta na janela de onde o menu abriu.
+- `HoverTip.swift`: o nome de um botão de ícone, embaixo dele 0,2 s depois de o ponteiro chegar (o
+  do sistema levava cerca de 1 s e tinha outra cara; o dono, 2026-10-20), nas cores dos menus. Some
+  ao sair, no clique, numa tecla ou na rolagem. `HoverTip.attach(_:to:)` troca o toolTip do sistema;
+  o toolTip fica só para textos longos de linhas (caminhos, datas).
 - `MenuTableView.swift`: tabela cujo clique direito abre o PopupMenu; `menuRow` é a linha clicada
   enquanto o menu está aberto e a ação roda (source control e histórico do git).
 
 ## Como validar
-- `make macos-test` passa: separadores, setas, medidas e atalhos.
+- `make macos-test` passa: separadores, setas, medidas, atalhos e a posição da dica.

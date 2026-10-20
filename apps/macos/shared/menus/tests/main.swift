@@ -32,6 +32,14 @@ let exitCode = await Checks.run([
         expect(MenuLayout.width([item("a")]) == MenuLayout.minWidth)
         expect(MenuLayout.width(entries) > MenuLayout.minWidth)
     }),
+    ("a hover tip goes centered under its button, above it at the bottom of the screen", {
+        let screen = NSRect(x: 0, y: 0, width: 1000, height: 800)
+        let size = NSSize(width: 100, height: 22)
+        expect(HoverTip.origin(for: size, under: NSRect(x: 450, y: 500, width: 20, height: 20), screen: screen) == NSPoint(x: 410, y: 472))
+        expect(HoverTip.origin(for: size, under: NSRect(x: 450, y: 10, width: 20, height: 20), screen: screen).y == 36)
+        expect(HoverTip.origin(for: size, under: NSRect(x: 990, y: 500, width: 10, height: 20), screen: screen).x == 896)
+        expect(HoverTip.delay == 0.2)
+    }),
     ("shortcuts are written and split into keys as in the palette", {
         expect(MenuEntry.shortcutLabel(key: "d", modifiers: [.command, .shift]) == "⇧⌘D")
         expect(MenuLayout.keys(of: "⇧⌘D") == ["⇧", "⌘", "D"] && MenuLayout.keys(of: "F2") == ["F2"])

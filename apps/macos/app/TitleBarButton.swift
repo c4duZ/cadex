@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Menus
 
 /// A control of the title bar: an icon, words, or both, in a 26 pt rounded
 /// area that lights up under the pointer and when pressed, like the tabs
@@ -29,7 +30,7 @@ final class TitleBarButton: NSView {
         super.init(frame: .zero)
         wantsLayer = true
         layer?.cornerRadius = 6
-        toolTip = tip
+        HoverTip.attach(tip, to: self)
         setAccessibilityElement(true)
         setAccessibilityRole(.button)
         setAccessibilityLabel(title ?? tip)

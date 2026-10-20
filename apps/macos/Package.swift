@@ -68,7 +68,7 @@ let package = Package(
         ),
         .target(
             name: "Terminal",
-            dependencies: ["CCadex", "CommandPalette", "Icons"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus"],
             path: "features/terminal",
             exclude: ["CLAUDE.md", "tests"],
             // @testable access for the feature's test executable.
@@ -109,7 +109,7 @@ let package = Package(
         ),
         .target(
             name: "Markdown",
-            dependencies: ["CCadex", "CommandPalette", "Editor", "Icons"],
+            dependencies: ["CCadex", "CommandPalette", "Editor", "Icons", "Menus"],
             path: "features/markdown",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -125,7 +125,7 @@ let package = Package(
         ),
         .target(
             name: "Preview",
-            dependencies: ["CommandPalette", "Icons", "Tabs"],
+            dependencies: ["CommandPalette", "Icons", "Menus", "Tabs"],
             path: "features/preview",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]

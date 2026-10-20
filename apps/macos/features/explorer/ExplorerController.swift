@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Menus
 
 /// Colors of the tree, from the theme (the app fills them; this feature
 /// does not depend on themes).
@@ -239,7 +240,7 @@ public final class ExplorerController: NSObject {
         let b = NSButton(image: icon.image(size: 13), target: self, action: #selector(runButton(_:)))
         b.isBordered = false
         b.identifier = NSUserInterfaceItemIdentifier(command)
-        b.toolTip = tip
+        HoverTip.attach(tip, to: b)
         b.widthAnchor.constraint(equalToConstant: 22).isActive = true
         return b
     }

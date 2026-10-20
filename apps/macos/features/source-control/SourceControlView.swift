@@ -127,7 +127,7 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
         buttons = [("git.fetch", Icon.arrowsClockwise, "Fetch"), ("git.pull", Icon.arrowDown, "Pull"), ("git.push", Icon.arrowUp, "Push")].map { id, icon, tip in
             let b = NSButton(image: icon.image(size: 13), target: self, action: #selector(runButton(_:)))
             b.isBordered = false
-            b.toolTip = tip
+            HoverTip.attach(tip, to: b)
             b.identifier = .init(id)
             b.contentTintColor = .secondaryLabelColor
             return b
@@ -166,7 +166,7 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
         commitButton.target = self
         commitButton.action = #selector(runButton(_:))
         commitButton.identifier = .init("git.commit")
-        commitButton.toolTip = "Commit (⌘Enter na mensagem)"
+        HoverTip.attach("Commit (⌘Enter na mensagem)", to: commitButton)
         error.font = .systemFont(ofSize: 11)
         error.textColor = .systemRed
         error.isHidden = true

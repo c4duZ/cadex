@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Menus
 import Tabs
 import WebKit
 
@@ -167,7 +168,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     private static func button(_ icon: Icon, _ tip: String) -> NSButton {
         let b = NSButton(image: icon.image(size: 14), target: nil, action: nil)
         b.isBordered = false
-        b.toolTip = tip
+        HoverTip.attach(tip, to: b)
         b.widthAnchor.constraint(equalToConstant: 24).isActive = true
         return b
     }

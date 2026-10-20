@@ -1,6 +1,7 @@
 import AppKit
 import Editor
 import Icons
+import Menus
 
 /// The button at the top right of a note's tab: "Visualizar" over the text,
 /// "Código" over the rendered page. It runs markdown.toggle-preview, the
@@ -45,7 +46,7 @@ final class MarkdownToggle: NSView {
     func show(rendered: Bool) {
         icon.image = (rendered ? Icon.code : Icon.eye).image(size: 12)
         label.stringValue = rendered ? "Código" : "Visualizar"
-        toolTip = rendered ? "Voltar para o texto (⇧⌘V)" : "Ver o Markdown renderizado (⇧⌘V)"
+        HoverTip.attach(rendered ? "Voltar para o texto (⇧⌘V)" : "Ver o Markdown renderizado (⇧⌘V)", to: self)
         setAccessibilityLabel(label.stringValue)
         restyle()
     }
