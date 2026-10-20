@@ -26,9 +26,18 @@
   edit.* (para o terminal ou o documento com foco), terminal.clear/scroll-top/scroll-bottom, e o
   registro dos comandos das features. `settings_page.zig`: a página de configurações.
 - `sidebar.zig`: o painel lateral (Arquivos ou Git, abas embaixo, view.toggle-sidebar) e o
-  workspace seguindo o terminal com foco até a raiz do repositório. `git_page.zig`: a página Git.
+  workspace seguindo o terminal com foco até a raiz do repositório (que vai também à busca, ao
+  markdown e ao git).
+- `git_page.zig`: a página Git (source-control desenha), os Hosts de source-control e git-history,
+  git.show, as letras do git no explorer, as mudanças do disco no status e nos históricos, e o
+  histórico salvo num space reaberto.
+- `viewers.zig`: os Hosts do editor e do markdown, os makers de código e nota no opener, a aparência
+  do editor pelo tema do terminal, as notas e editores recarregando com o disco, os documentos
+  salvos nos spaces refeitos (arquivo que ainda existe, com a pasta autorizada de novo) e as
+  aberturas pedidas no meio do quadro (Ctrl+clique numa nota, arquivo de um commit), feitas depois
+  dele para não liberar o documento que desenha.
 - `opener.zig`: onde um arquivo abre (o FileOpener do Mac): o tipo pela extensão, ao lado ou em
-  nova aba; sem visualizador para o tipo, o app do sistema.
+  nova aba; sem visualizador para o tipo (ainda mídia e o Markdown renderizado), o app do sistema.
 - `Cadex.manifest`: DPI por monitor v2, UTF-8 como página de código e caminhos longos.
 
 ## Como validar

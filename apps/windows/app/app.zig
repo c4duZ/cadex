@@ -17,6 +17,10 @@ const explorer = @import("explorer");
 const search = @import("search");
 const sidebar = @import("sidebar.zig");
 const spaces = @import("spaces");
+const markdown = @import("markdown");
+const source_control = @import("source-control");
+const viewers = @import("viewers.zig");
+const git_page = @import("git_page.zig");
 const window_mod = @import("window.zig");
 const chrome = @import("chrome.zig");
 const wiring = @import("wiring.zig");
@@ -60,6 +64,10 @@ pub const App = struct {
     explorer: explorer.Explorer = undefined,
     search: search.Search = undefined,
     sidebar: sidebar.Sidebar = .{},
+    markdown: markdown.Markdown = undefined,
+    git: *source_control.SourceControl = undefined,
+    /// Opens asked for while the frame drew, done after it (viewers.zig).
+    deferred: std.ArrayList(viewers.Deferred) = .empty,
     /// Several items to the Recycle Bin wait for the user's answer.
     pending_trash: usize = 0,
     plus_menu: ui.menu.Menu = .{},
@@ -114,11 +122,15 @@ pub const App = struct {
         self.spaces = .{ .gpa = gpa, .host = wiring.spacesHost(self) };
         self.explorer = explorer.Explorer.init(gpa, wiring.explorerHost(self));
         self.search = .{ .gpa = gpa, .host = wiring.searchHost(self) };
+        self.markdown = markdown.Markdown.init(gpa, viewers.markdownHost(self));
+        try git_page.create(self);
         app_commands.register(self);
         @import("environments.zig").register(self);
         self.explorer.register(&self.registry, wiring.explorerWiring(self));
         self.search.register(&self.registry);
         self.spaces.register(&self.registry);
+        viewers.register(self);
+        git_page.register(self);
         self.palette.addPrefix(.{ .char = '/', .label = "arquivos", .source = self.search.filesSource() });
         self.palette.addPrefix(.{ .char = '#', .label = "texto", .source = self.search.contentSource() });
         self.palette.addPrefix(.{ .char = '@', .label = "abas e spaces", .source = @import("places_source.zig").source(self) });
@@ -169,6 +181,7 @@ pub const App = struct {
         }
         self.drawBody(body);
         self.drawStatus(status);
+        git_page.frame(self);
         self.drawOverlays();
 
         u.endFrame();
@@ -193,6 +206,7 @@ pub const App = struct {
             p.source.choose(p.source.context, p.id, p.how);
             self.window.redraw();
         }
+        viewers.runDeferred(self);
     }
 
     fn drawBody(self: *App, body: gfx.Rect) void {
@@ -268,7 +282,7 @@ pub const App = struct {
     /// Whether keys and text go straight to the focused terminal now.
     pub fn terminalHasKeys(self: *App) ?*terminal.View {
         if (self.palette.isOpen() or self.tabs.question != null or self.pending_paste != null or self.pending_trash > 0) return null;
-        if (self.quit_question != null or self.space_rename != null) return null;
+        if (self.quit_question != null or self.space_rename != null or self.git.question != null) return null;
         if (@import("settings_page.zig").isOpen()) return null;
         if (self.plus_menu.owner != ui.context.none or self.status.menu.owner != ui.context.none) return null;
         if (self.bar.renaming != null) return null;

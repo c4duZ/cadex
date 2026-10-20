@@ -102,6 +102,22 @@ pub const SourceControl = struct {
         return self.root;
     }
 
+    /// The explorer's letter for `path` (absolute, either separator): the
+    /// file's change, or for a folder the first change inside it; 0 for
+    /// none. As the Mac's marks: unstaged first, a conflict is U.
+    pub fn markOf(self: *const SourceControl, path: []const u8) u8 {
+        const root = self.root orelse return 0;
+        const s = self.status orelse return 0;
+        if (path.len <= root.len or !samePath(path[0..root.len], root) or !isSeparator(path[root.len])) return 0;
+        const rel = path[root.len + 1 ..];
+        for (s.entries) |e| {
+            const exact = samePath(e.path, rel);
+            const inside = e.path.len > rel.len and samePath(e.path[0..rel.len], rel) and e.path[rel.len] == '/';
+            if (exact or inside) return if (e.kind == .conflict) 'U' else e.letter(!e.isUnstaged());
+        }
+        return 0;
+    }
+
     /// Something changed on disk (the explorer's watcher, .git included):
     /// read the status again, once per burst.
     pub fn diskChanged(self: *SourceControl, paths: []const []const u8) void {
@@ -296,4 +312,18 @@ test "a disk change counts inside the repository only" {
 
 test {
     @import("win32").refAllDeep(@This());
+}
+
+fn isSeparator(b: u8) bool {
+    return b == '/' or b == '\\';
+}
+
+/// Equal ignoring case and which separator (Windows paths).
+fn samePath(a: []const u8, b: []const u8) bool {
+    if (a.len != b.len) return false;
+    for (a, b) |x, y| {
+        if (isSeparator(x) and isSeparator(y)) continue;
+        if (std.ascii.toLower(x) != std.ascii.toLower(y)) return false;
+    }
+    return true;
 }

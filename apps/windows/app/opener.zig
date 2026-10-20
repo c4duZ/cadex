@@ -35,6 +35,17 @@ pub const Maker = *const fn (app: *App, path: []const u8, line: u32) ?tabs.Docum
 
 pub var makers: std.EnumArray(Kind, ?Maker) = .initFill(null);
 
+/// The rendered page of a note (markdown.toggle-preview), set when the
+/// rendered view is wired; until then the note opens in the system's app.
+pub var rendered: ?Maker = null;
+
+pub fn openRendered(app: *App, path: []const u8) void {
+    const make = rendered orelse return systemOpen(app, path);
+    const doc = make(app, path, 0) orelse return;
+    app.tabs.open(doc, .beside, null);
+    app.window.redraw();
+}
+
 pub fn open(app: *App, path: []const u8, line: u32, how: How) void {
     const kind = kindOf(path);
     if (makers.get(kind)) |make| if (make(app, path, line)) |doc| {

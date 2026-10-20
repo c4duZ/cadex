@@ -268,6 +268,7 @@ pub fn applySettings(app: *App) void {
 
 fn applyTheme(app: *App) void {
     app.window.setDark(app.themes.current.dark);
+    @import("viewers.zig").applyTheme(app);
     eachView(app, struct {
         fn apply(a: *App, v: *terminal.View) void {
             v.session.setColors(themes.terminalColors(a.themes.current));
@@ -309,12 +310,9 @@ fn makeTabs(context: *anyopaque) ?*tabs.Tabs {
     return t;
 }
 
-/// A saved document again: a file by its path, through the opener.
+/// A saved document again (viewers.makeSaved).
 fn makeDocument(context: *anyopaque, identity: []const u8) ?tabs.Document {
-    const app = of(context);
-    const kind = opener.kindOf(identity);
-    const make = opener.makers.get(kind) orelse return null;
-    return make(app, identity, 0);
+    return @import("viewers.zig").makeSaved(of(context), identity);
 }
 
 fn workspaceFolder(context: *anyopaque) ?[]const u8 {
@@ -354,8 +352,17 @@ pub fn explorerHost(app: *App) explorer.Host {
         .open_file = openFromExplorer,
         .open_in_terminal = cdTerminal,
         .terminal_folder = terminalFolder,
+        .git_mark = @import("git_page.zig").mark,
         .wake = wake,
+        .folders_changed = foldersChanged,
     };
+}
+
+/// The watcher saw folders change: editors reload, git reads the status.
+fn foldersChanged(context: *anyopaque, paths: []const []const u8) void {
+    const app = of(context);
+    @import("viewers.zig").diskChanged(app, paths);
+    @import("git_page.zig").diskChanged(app, paths);
 }
 
 fn openFromExplorer(context: *anyopaque, path: []const u8, how: explorer.OpenHow) void {

@@ -90,7 +90,10 @@ pub fn followTerminal(app: *App) void {
 pub fn setWorkspace(app: *App, folder: []const u8) void {
     const hidden = app.settings.current.explorer.show_hidden;
     app.explorer.setRoot(folder, hidden);
-    if (app.explorer.root()) |r| app.search.setRoot(r, hidden);
+    const r = app.explorer.root() orelse return;
+    app.search.setRoot(r, hidden);
+    app.markdown.setRoot(r);
+    @import("git_page.zig").setFolder(app, r);
 }
 
 /// The nearest folder at or above `folder` holding a `.git`, or null.
