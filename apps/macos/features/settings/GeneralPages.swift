@@ -30,7 +30,7 @@ enum GeneralPages {
                                                          selected: store.settings.markdown.openAs) { value in
                                  store.update { $0.markdown.openAs = value }
                              }),
-            SettingsPage.row("Manter acordado", "O que o café na barra de título liga: sempre acordado, ou acordado só com um programa rodando no terminal. O ⌘K escolhe qualquer um na hora.",
+            SettingsPage.row("Manter acordado", "O que o café e o ⇧⌘A ligam: sempre, ou só enquanto um programa roda num terminal. Pelo ⌘K, dá para escolher qualquer um na hora. Na tomada, vale também com a tampa fechada.",
                              control: SettingsPage.popup([("Sempre", "always"), ("Com programa rodando", "running")],
                                                          selected: store.settings.power.mode) { value in
                                  store.update { $0.power.mode = value }
@@ -39,7 +39,7 @@ enum GeneralPages {
                              control: SettingsPage.toggle(store.settings.power.onAtLaunch) { on in
                                  store.update { $0.power.onAtLaunch = on }
                              }),
-            SettingsPage.row("Manter a tela acesa", "Desligado, a tela pode apagar e o computador segue rodando. Na tomada, segue rodando também com a tampa fechada.",
+            SettingsPage.row("Manter a tela acesa", "Com o manter acordado ligado, a tela também não apaga. Desligado, só a tela apaga; o computador segue rodando.",
                              control: SettingsPage.toggle(store.settings.power.keepDisplayOn) { on in
                                  store.update { $0.power.keepDisplayOn = on }
                              }),
