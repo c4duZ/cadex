@@ -94,6 +94,10 @@ pub const Session = struct {
         _ = self.links_arena.reset(.retain_capacity);
         const arena = self.links_arena.allocator();
         const text = view.text();
+        // Asked before the links: that query starts the (lazy) index, and a
+        // small workspace is read before a later look, leaving links
+        // checked too early (2026-10-20).
+        const ready_before = self.controller.index.ready();
         const found = self.controller.index.links(arena, self.path(), text);
         const out = arena.alloc(Link, found.len) catch return;
         var walker: trigger.Utf16Walker = .{ .text = text };
@@ -106,7 +110,7 @@ pub const Session = struct {
         self.links = out;
         self.links_stale = false;
         self.stale_since = null;
-        self.checked_ready = self.controller.index.ready();
+        self.checked_ready = ready_before;
     }
 
     fn linkAt(self: *const Session, at: usize) ?Link {

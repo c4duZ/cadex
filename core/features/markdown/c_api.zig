@@ -37,8 +37,17 @@ pub export fn cadex_markdown_index_close(index: ?*Index) callconv(.c) void {
     if (index) |i| i.close();
 }
 
+/// The folder of the note in use (absolute): the index keeps at most 5 000
+/// notes and spends them nearest this folder first.
+pub export fn cadex_markdown_index_focus(index: ?*Index, folder: ?[*:0]const u8) callconv(.c) void {
+    const i = index orelse return;
+    i.setFocus(std.mem.span(folder orelse return));
+}
+
 pub export fn cadex_markdown_index_ready(index: ?*Index) callconv(.c) bool {
     const i = index orelse return false;
+
+    i.start();
     return i.ready.load(.acquire);
 }
 
@@ -46,6 +55,8 @@ pub export fn cadex_markdown_index_ready(index: ?*Index) callconv(.c) bool {
 pub export fn cadex_markdown_notes(index: ?*Index, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) status.Code {
     c_buffer.clearOut(out, out_len);
     const i = index orelse return status.invalid_argument;
+
+    i.start();
     var text: std.ArrayList(u8) = .empty;
     defer text.deinit(gpa);
     i.lock();
@@ -66,6 +77,8 @@ fn unlockOom(i: *Index) status.Code {
 pub export fn cadex_markdown_headings(index: ?*Index, path: ?[*:0]const u8, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) status.Code {
     c_buffer.clearOut(out, out_len);
     const i = index orelse return status.invalid_argument;
+
+    i.start();
     const rel = i.relative(std.mem.span(path orelse return status.invalid_argument)) orelse return status.not_authorized;
     var text: std.ArrayList(u8) = .empty;
     defer text.deinit(gpa);
@@ -85,6 +98,8 @@ pub export fn cadex_markdown_headings(index: ?*Index, path: ?[*:0]const u8, out:
 pub export fn cadex_markdown_links(index: ?*Index, path: ?[*:0]const u8, text: ?[*]const u8, len: usize, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) status.Code {
     c_buffer.clearOut(out, out_len);
     const i = index orelse return status.invalid_argument;
+
+    i.start();
     const rel = i.relative(std.mem.span(path orelse return status.invalid_argument)) orelse return status.not_authorized;
     const t = bytes(text, len) orelse return status.invalid_argument;
     var arena: std.heap.ArenaAllocator = .init(gpa);
@@ -105,6 +120,8 @@ pub export fn cadex_markdown_links(index: ?*Index, path: ?[*:0]const u8, text: ?
 pub export fn cadex_markdown_backlinks(index: ?*Index, path: ?[*:0]const u8, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) status.Code {
     c_buffer.clearOut(out, out_len);
     const i = index orelse return status.invalid_argument;
+
+    i.start();
     const rel = i.relative(std.mem.span(path orelse return status.invalid_argument)) orelse return status.not_authorized;
     var arena: std.heap.ArenaAllocator = .init(gpa);
     defer arena.deinit();
@@ -120,6 +137,8 @@ pub export fn cadex_markdown_backlinks(index: ?*Index, path: ?[*:0]const u8, out
 pub export fn cadex_markdown_resolve(index: ?*Index, path: ?[*:0]const u8, destination: ?[*:0]const u8, wiki: bool, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) status.Code {
     c_buffer.clearOut(out, out_len);
     const i = index orelse return status.invalid_argument;
+
+    i.start();
     const rel = i.relative(std.mem.span(path orelse return status.invalid_argument)) orelse return status.not_authorized;
     const dest = std.mem.span(destination orelse return status.invalid_argument);
     var arena: std.heap.ArenaAllocator = .init(gpa);

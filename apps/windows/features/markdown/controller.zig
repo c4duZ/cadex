@@ -72,6 +72,8 @@ pub const Markdown = struct {
 
     /// A note in an editable editor pane, with the Markdown help.
     pub fn open(self: *Markdown, path: []const u8) !tabs.Document {
+        // The index is read from this note's folder outward (docs/spec/markdown.md).
+        self.index.setFocus(self.gpa, std.fs.path.dirnameWindows(path) orelse path);
         const e = try editor.Editor.create(self.gpa, self.host.editor, path, .{ .editable = true });
         errdefer e.destroy();
         const session = try Session.create(self, e);

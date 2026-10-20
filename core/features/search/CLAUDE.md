@@ -13,9 +13,14 @@
 - Porta de entrada: `search.zig`. `fuzzy.zig` pontua um texto (letras em ordem; caixa e acentos do
   português não importam; começo de palavra vale mais) e `rank.zig` ordena uma lista (paleta).
 - `walker.zig` percorre o workspace: só arquivos, sem `.git`, sem ignorados (`core/shared/ignore.zig`),
-  ocultos só se pedido, sem seguir links, até 300 000 arquivos, ordem por nome.
+  sem as pastas de dependência, cache e build de `skipped_folders` (e Library/AppData na pasta
+  pessoal), ocultos só se pedido, sem seguir links, até o orçamento (`limit`), ordem por nome.
+  `nearby.zig`: o caminho de perto para longe a partir de um foco (a pasta e tudo abaixo, depois
+  as vizinhas de cada nível acima) e `Covered`, as pastas lidas por inteiro.
 - ⌘P: `index.zig` guarda os nomes em memória numa thread própria e se atualiza com o watcher do
-  explorer, relendo só a pasta que mudou (subpastas novas inteiras, sumidas removidas);
+  explorer, relendo só a pasta que mudou (subpastas novas inteiras, sumidas removidas). Só começa
+  na primeira consulta (`start`), guarda até 100 000 nomes a partir do foco (`setFocus`, a pasta
+  do terminal), refaz quando o foco cai fora do que leu e ignora mudanças fora dele;
   `files.zig` ordena (nome do arquivo vale mais que as pastas, filtro barato antes do fuzzy).
 - ⌘⇧F: `content.zig` busca numa thread, entrega em lotes de 64, uma ocorrência por linha, até 2 000,
   pula binário e arquivo acima de 2 MB; `cancel()` só volta depois do último callback.

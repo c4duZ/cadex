@@ -27,6 +27,12 @@ public final class SearchController {
 
     /// The workspace or the hidden-files preference changed. The same
     /// values again (settings apply on every change) keep the index.
+    /// The focused terminal's folder: in a workspace too big to index
+    /// whole, ⌘P keeps the files nearest it (docs/spec/search.md).
+    public func setFocus(_ folder: String) {
+        files.setFocus(folder)
+    }
+
     public func setRoot(_ root: String, showHidden: Bool) {
         if let current, current == (root, showHidden) { return }
         current = (root, showHidden)

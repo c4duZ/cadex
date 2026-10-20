@@ -32,6 +32,7 @@ test "links to files, headings and notes; broken ones; who points here" {
     defer registry.deinit();
     _ = try registry.authorize(dir.path());
     const index = try Index.open(testing.allocator, &registry, dir.path());
+    index.start();
     defer index.close();
     try waitReady(index, 3);
 
@@ -69,6 +70,7 @@ test "a new note on disk joins the index" {
     defer registry.deinit();
     _ = try registry.authorize(dir.path());
     const index = try Index.open(testing.allocator, &registry, dir.path());
+    index.start();
     defer index.close();
     try waitReady(index, 1);
     clock.sleepMs(200);

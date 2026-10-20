@@ -21,7 +21,8 @@
   Os textos vão para a arena do outline (o índice libera o arquivo lido). `resolve.zig`: caminho
   relativo à nota (ou à raiz com `/`), nota wiki mais próxima, título pela âncora. `index.zig`: as
   notas do workspace numa thread, seguindo o watcher do explorer pasta por pasta (o caminhante é o
-  da busca, pela porta de entrada dela). `queries.zig`: links de um texto não salvo com quebrados
+  da busca, pela porta de entrada dela); só começa na primeira consulta e guarda até 5 000 notas a
+  partir do foco (`setFocus`, a pasta da nota aberta), lidas de perto para longe (`nearby` da busca). `queries.zig`: links de um texto não salvo com quebrados
   marcados, quem aponta pra cá, para onde vai um destino.
 - API C em `c_api.zig`: respostas em linhas com campos separados por tab; offsets de links em UTF-16.
 - Spec: `docs/spec/markdown.md`. Status: núcleo pronto (plano 5, fase C).

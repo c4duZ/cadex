@@ -14,13 +14,28 @@ const resolve = @import("resolve.zig");
 const watch = explorer.watch;
 const paths = workspace.paths;
 const Walker = search.walker.Walker;
+const nearby = search.nearby;
 
 /// Notes above this size are skipped: not hand-written notes.
 const max_note_bytes = 2 * 1024 * 1024;
 
+/// How many notes the index keeps: far more than a project's docs, spent
+/// near the focus first; a home folder has 60 000 .md files (measured
+/// 2026-10-20), and each kept outline costs memory.
+pub const note_budget = 5_000;
+
 pub const Index = struct {
     gpa: std.mem.Allocator,
+    registry: *workspace.Registry,
     root: []u8,
+    /// Nothing is read until the first query: a workspace with no note
+    /// open costs nothing.
+    started: bool = false,
+    /// Where the budget is spent first (the open note's folder), relative.
+    focus: []u8 = &.{},
+    covered: nearby.Covered,
+    truncated: std.atomic.Value(bool) = .init(false),
+    refocus: bool = false,
     mutex: sync.Mutex = .{},
     wake: sync.Condition = .{},
     /// Relative path (owned) -> its outline.
@@ -38,11 +53,35 @@ pub const Index = struct {
         if (!paths.isDirectory(real)) return error.NotDirectory;
         const self = try gpa.create(Index);
         errdefer gpa.destroy(self);
-        self.* = .{ .gpa = gpa, .root = try gpa.dupe(u8, real) };
-        errdefer gpa.free(self.root);
-        self.thread = try std.Thread.spawn(.{}, run, .{self});
-        self.watcher = watch.Watcher.start(gpa, registry, real, onChanges, self, watch.default_latency_s) catch null;
+        self.* = .{ .gpa = gpa, .registry = registry, .root = try gpa.dupe(u8, real), .covered = .{ .gpa = gpa } };
         return self;
+    }
+
+    /// Starts reading, once: every query calls it.
+    pub fn start(self: *Index) void {
+        self.lock();
+        defer self.unlock();
+        if (self.started) return;
+        self.thread = std.Thread.spawn(.{}, run, .{self}) catch return;
+        self.started = true;
+        self.watcher = watch.Watcher.start(self.gpa, self.registry, self.root, onChanges, self, watch.default_latency_s) catch null;
+    }
+
+    /// The folder of the note in use (absolute); outside what was read,
+    /// the index reads again from it.
+    pub fn setFocus(self: *Index, folder: []const u8) void {
+        const rel = if (paths.isWithin(self.root, folder)) std.mem.trim(u8, folder[self.root.len..], "/\\") else "";
+        self.lock();
+        defer self.unlock();
+        if (std.mem.eql(u8, rel, self.focus)) return;
+        const copy = self.gpa.dupe(u8, rel) catch return;
+        std.mem.replaceScalar(u8, copy, '\\', '/');
+        self.gpa.free(self.focus);
+        self.focus = copy;
+        if (self.started and self.truncated.load(.acquire) and !self.covered.contains(copy)) {
+            self.refocus = true;
+            self.wake.signal();
+        }
     }
 
     pub fn close(self: *Index) void {
@@ -51,8 +90,11 @@ pub const Index = struct {
         self.lock();
         self.stop = true;
         self.wake.signal();
+        const running = self.started;
         self.unlock();
-        self.thread.join();
+        if (running) self.thread.join();
+        self.gpa.free(self.focus);
+        self.covered.deinit();
         for (self.pending.items) |p| self.gpa.free(p);
         self.pending.deinit(self.gpa);
         for (self.notes.keys(), self.notes.values()) |k, v| self.free(k, v);
@@ -99,32 +141,69 @@ pub const Index = struct {
     fn run(self: *Index) void {
         var walker = Walker.init(self.gpa, self.root, .{ .cancel = &self.cancelled }) catch return;
         defer walker.deinit();
-        self.readTree(&walker, "");
+        self.build(&walker);
         self.ready.store(true, .release);
-        while (self.nextPending()) |folder| {
-            defer self.gpa.free(folder);
-            self.refresh(&walker, folder);
-        }
+        while (self.nextWork()) |work| switch (work) {
+            .rebuild => self.build(&walker),
+            .folder => |folder| {
+                defer self.gpa.free(folder);
+                self.refresh(&walker, folder);
+            },
+        };
     }
 
-    fn nextPending(self: *Index) ?[]u8 {
+    const Work = union(enum) { rebuild, folder: []u8 };
+
+    fn nextWork(self: *Index) ?Work {
         self.lock();
         defer self.unlock();
-        while (!self.stop and self.pending.items.len == 0) self.wake.wait(&self.mutex);
+        while (!self.stop and !self.refocus and self.pending.items.len == 0) self.wake.wait(&self.mutex);
         if (self.stop) return null;
-        return self.pending.orderedRemove(0);
+        if (self.refocus) {
+            self.refocus = false;
+            return .rebuild;
+        }
+        return .{ .folder = self.pending.orderedRemove(0) };
+    }
+
+    /// Reads the notes from the focus outward, up to the budget, replacing
+    /// what was there.
+    fn build(self: *Index, walker: *Walker) void {
+        self.lock();
+        const focus = self.gpa.dupe(u8, self.focus) catch {
+            self.unlock();
+            return;
+        };
+        for (self.notes.keys(), self.notes.values()) |k, v| self.free(k, v);
+        self.notes.clearRetainingCapacity();
+        self.unlock();
+        defer self.gpa.free(focus);
+        walker.count = 0;
+        var covered: nearby.Covered = .{ .gpa = self.gpa };
+        nearby.walk(walker, focus, self, visitNote, &covered) catch {};
+        self.lock();
+        defer self.unlock();
+        self.covered.deinit();
+        self.covered = covered;
+        self.truncated.store(!covered.all, .release);
+    }
+
+    fn visitNote(context: *anyopaque, rel: []const u8, size: u64) bool {
+        const index: *Index = @ptrCast(@alignCast(context));
+        if (resolve.isMarkdown(rel) and size <= max_note_bytes) {
+            index.lock();
+            const full = index.notes.count() >= note_budget;
+            index.unlock();
+            if (full) return false;
+            index.readNote(rel);
+        }
+        return !index.cancelled.load(.acquire);
     }
 
     /// Every note under `folder`.
     fn readTree(self: *Index, walker: *Walker, folder: []const u8) void {
-        const Visit = struct {
-            fn visit(context: *anyopaque, rel: []const u8, size: u64) bool {
-                const index: *Index = @ptrCast(@alignCast(context));
-                if (resolve.isMarkdown(rel) and size <= max_note_bytes) index.readNote(rel);
-                return !index.cancelled.load(.acquire);
-            }
-        };
-        _ = walker.walk(folder, self, Visit.visit) catch {};
+        walker.count = 0;
+        _ = walker.walk(folder, self, visitNote) catch {};
     }
 
     /// A changed folder: its own notes read again or dropped, new
@@ -191,6 +270,8 @@ pub const Index = struct {
             if (!paths.isWithin(self.root, abs)) continue;
             const rel = std.mem.trimStart(u8, abs[self.root.len..], "/");
             if (std.mem.startsWith(u8, rel, ".git")) continue;
+            // Outside what the budget covers, changes do not matter.
+            if (self.truncated.load(.acquire) and !self.covered.contains(rel)) continue;
             const copy = self.gpa.dupe(u8, rel) catch continue;
             self.pending.append(self.gpa, copy) catch self.gpa.free(copy);
         }

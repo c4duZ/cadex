@@ -2,8 +2,9 @@
 //! switched by two tabs at the bottom, "Arquivos" and "Git" (they run the
 //! explorer.focus and git.show commands); view.toggle-sidebar hides it.
 //! Also the workspace following the focused terminal: a `cd` takes the tree
-//! to the repository root of the new folder, or the folder itself, unless
-//! explorer.followTerminal is off (docs/spec/workspace.md).
+//! to the repository root of the new folder; outside a repository it stays
+//! (following there took the whole home folder, 2026-10-20). Off with
+//! explorer.followTerminal (docs/spec/workspace.md).
 
 const std = @import("std");
 const w = @import("win32");
@@ -72,7 +73,6 @@ fn dropIntoTerminal(app: *App, paths: []const []const u8, at: gfx.Point) void {
 /// Called every frame: if the focused terminal moved to another folder,
 /// the workspace follows it to that folder's repository root.
 pub fn followTerminal(app: *App) void {
-    if (!app.settings.current.explorer.follow_terminal) return;
     const view = app.tabs.focusedTerminal() orelse return;
     const dir = view.session.workingDirectory() orelse return;
     defer dir.free();
@@ -81,8 +81,12 @@ pub fn followTerminal(app: *App) void {
     app.sidebar.followed.appendSlice(app.gpa, dir.bytes) catch return;
     var windows_buf: [2048]u8 = undefined;
     const folder = @import("environments.zig").windowsFolder(view, dir.bytes, &windows_buf);
+    // Ctrl+Shift+P keeps the files nearest the terminal in a workspace too
+    // big to index whole (docs/spec/search.md).
+    app.search.setFocus(folder);
+    if (!app.settings.current.explorer.follow_terminal) return;
     var buf: [2048]u8 = undefined;
-    const root = repositoryRoot(folder, &buf) orelse folder;
+    const root = repositoryRoot(folder, &buf) orelse return;
     // Inside the current workspace (cd src) the tree stays where it is.
     if (app.explorer.root()) |current| if (std.ascii.startsWithIgnoreCase(root, current) and (root.len == current.len or root[current.len] == '\\')) return;
     setWorkspace(app, root);

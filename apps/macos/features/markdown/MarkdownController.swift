@@ -37,6 +37,12 @@ public final class MarkdownController {
     /// Adds the Markdown help to a note open in the editor.
     public func attach(_ document: EditorDocument) {
         guard Self.isMarkdown(document.path), document.textView != nil else { return }
+        // The index is read from this note's folder outward (docs/spec/markdown.md).
+        index.setFocus((document.path as NSString).deletingLastPathComponent)
+        // Asked before the note checks its links, which starts the (lazy)
+        // index: a small workspace is read before refreshWhenReady could
+        // look, and the note kept links checked too early (2026-10-20).
+        let readyBefore = index.isReady
         sessions[ObjectIdentifier(document)] = MarkdownSession(document: document, controller: self)
         let toggle = MarkdownToggle()
         toggle.onPress = { [weak self, weak document] in
@@ -46,13 +52,12 @@ public final class MarkdownController {
         }
         document.accessory = toggle
         if opensRendered { togglePreview(document) }
-        refreshWhenReady()
+        if !readyBefore { refreshWhenReady() }
     }
 
     /// Links checked before the index's first read finished look broken
     /// or unknown: check again once it is ready.
     private func refreshWhenReady() {
-        guard !index.isReady else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
             guard let self else { return }
             if self.index.isReady {

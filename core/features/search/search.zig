@@ -8,12 +8,14 @@ pub const files = @import("files.zig");
 pub const Index = @import("index.zig").Index;
 pub const content = @import("content.zig");
 pub const walker = @import("walker.zig");
+pub const nearby = @import("nearby.zig");
 
 test {
     _ = fuzzy;
     _ = rank;
     _ = files;
     _ = @import("index.zig");
+    _ = @import("nearby.zig");
     _ = content;
     _ = walker;
 }

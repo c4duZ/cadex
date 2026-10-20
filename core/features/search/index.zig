@@ -10,14 +10,33 @@ const c = std.c;
 const workspace = @import("../workspace/workspace.zig");
 const explorer = @import("../explorer/explorer.zig");
 const Walker = @import("walker.zig").Walker;
+const nearby = @import("nearby.zig");
 
 const watch = explorer.watch;
 const paths = workspace.paths;
 
+/// How many file names ⌘P keeps: far more than a project has, and spent
+/// near the focus first, so a home folder keeps the folder in use (a blind
+/// limit of 300 000 held 267 MB, measured 2026-10-20).
+pub const file_budget = 100_000;
+
 pub const Index = struct {
     gpa: std.mem.Allocator,
+    registry: *workspace.Registry,
     root: []u8,
     show_hidden: bool,
+    /// Nothing is read until the first query (start): a workspace nobody
+    /// searches costs nothing.
+    started: bool = false,
+    /// Where the budget is spent first, relative to the root (the focused
+    /// terminal's folder). Guarded by the mutex.
+    focus: []u8 = &.{},
+    /// The folders read completely; with the budget spent, what is outside
+    /// them is left out, and changes there are ignored. Guarded.
+    covered: nearby.Covered,
+    truncated: std.atomic.Value(bool) = .init(false),
+    /// The focus moved outside `covered`: read again from it.
+    refocus: bool = false,
     mutex: sync.Mutex = .{},
     wake: sync.Condition = .{},
     /// Paths relative to the root, owned.
@@ -43,11 +62,36 @@ pub const Index = struct {
         if (!paths.isDirectory(real)) return error.NotDirectory;
         const self = try gpa.create(Index);
         errdefer gpa.destroy(self);
-        self.* = .{ .gpa = gpa, .root = try gpa.dupe(u8, real), .show_hidden = show_hidden };
-        errdefer gpa.free(self.root);
-        self.thread = try std.Thread.spawn(.{}, run, .{self});
-        self.watcher = watch.Watcher.start(gpa, registry, real, onChanges, self, watch.default_latency_s) catch null;
+        self.* = .{ .gpa = gpa, .registry = registry, .root = try gpa.dupe(u8, real), .show_hidden = show_hidden, .covered = .{ .gpa = gpa } };
         return self;
+    }
+
+    /// Starts reading, once: the first query calls it.
+    pub fn start(self: *Index) void {
+        self.lock();
+        defer self.unlock();
+        if (self.started) return;
+        self.thread = std.Thread.spawn(.{}, run, .{self}) catch return;
+        self.started = true;
+        self.watcher = watch.Watcher.start(self.gpa, self.registry, self.root, onChanges, self, watch.default_latency_s) catch null;
+    }
+
+    /// The folder the user is in (absolute); outside the root, the root.
+    /// A focus outside what was read makes the index read again from it.
+    pub fn setFocus(self: *Index, folder: []const u8) void {
+        const rel = if (paths.isWithin(self.root, folder)) std.mem.trim(u8, folder[self.root.len..], "/\\") else "";
+        self.lock();
+        defer self.unlock();
+        if (std.mem.eql(u8, rel, self.focus)) return;
+        const copy = self.gpa.dupe(u8, rel) catch return;
+        // Relative paths use '/' on every system (the walker's).
+        std.mem.replaceScalar(u8, copy, '\\', '/');
+        self.gpa.free(self.focus);
+        self.focus = copy;
+        if (self.started and self.truncated.load(.acquire) and !self.covered.contains(rel)) {
+            self.refocus = true;
+            self.wake.signal();
+        }
     }
 
     /// Stops the watcher and the thread, and frees everything.
@@ -57,8 +101,11 @@ pub const Index = struct {
         self.mutex.lock();
         self.stop = true;
         self.wake.signal();
+        const running = self.started;
         self.mutex.unlock();
-        self.thread.join();
+        if (running) self.thread.join();
+        self.gpa.free(self.focus);
+        self.covered.deinit();
         for (self.pending.items) |p| self.gpa.free(p.rel);
         self.pending.deinit(self.gpa);
         for (self.files.keys()) |key| self.gpa.free(key);
@@ -87,23 +134,65 @@ pub const Index = struct {
     }
 
     fn run(self: *Index) void {
-        var walker = Walker.init(self.gpa, self.root, .{ .show_hidden = self.show_hidden, .cancel = &self.cancelled }) catch return;
+        var walker = Walker.init(self.gpa, self.root, .{ .show_hidden = self.show_hidden, .cancel = &self.cancelled, .limit = file_budget }) catch return;
         defer walker.deinit();
-        self.rescan(&walker, "", true);
+        self.build(&walker);
         self.ready.store(true, .release);
-        while (self.nextPending()) |p| {
-            defer self.gpa.free(p.rel);
-            self.rescan(&walker, p.rel, p.subtree);
-        }
+        while (self.nextWork()) |work| switch (work) {
+            .rebuild => self.build(&walker),
+            .folder => |p| {
+                defer self.gpa.free(p.rel);
+                self.rescan(&walker, p.rel, p.subtree);
+            },
+        };
     }
 
-    /// Waits for a changed folder; null when closing.
-    fn nextPending(self: *Index) ?Pending {
+    const Work = union(enum) { rebuild, folder: Pending };
+
+    /// Waits for a refocus or a changed folder; null when closing.
+    fn nextWork(self: *Index) ?Work {
         self.lock();
         defer self.unlock();
-        while (!self.stop and self.pending.items.len == 0) self.wake.wait(&self.mutex);
+        while (!self.stop and !self.refocus and self.pending.items.len == 0) self.wake.wait(&self.mutex);
         if (self.stop) return null;
-        return self.pending.orderedRemove(0);
+        if (self.refocus) {
+            self.refocus = false;
+            return .rebuild;
+        }
+        return .{ .folder = self.pending.orderedRemove(0) };
+    }
+
+    /// Reads the workspace from the focus outward, up to the budget,
+    /// replacing what was there.
+    fn build(self: *Index, walker: *Walker) void {
+        self.lock();
+        const focus = self.gpa.dupe(u8, self.focus) catch {
+            self.unlock();
+            return;
+        };
+        for (self.files.keys()) |key| self.gpa.free(key);
+        self.files.clearRetainingCapacity();
+        self.covered.clear();
+        self.unlock();
+        defer self.gpa.free(focus);
+        const Insert = struct {
+            fn visit(context: *anyopaque, rel: []const u8, _: u64) bool {
+                const index: *Index = @ptrCast(@alignCast(context));
+                index.lock();
+                defer index.unlock();
+                const key = index.gpa.dupe(u8, rel) catch return false;
+                index.files.put(index.gpa, key, {}) catch index.gpa.free(key);
+                return !index.cancelled.load(.acquire);
+            }
+        };
+        walker.count = 0;
+        var covered: nearby.Covered = .{ .gpa = self.gpa };
+        nearby.walk(walker, focus, self, Insert.visit, &covered) catch {};
+        self.lock();
+        defer self.unlock();
+        self.covered.deinit();
+        self.covered = covered;
+        self.truncated.store(!covered.all, .release);
     }
 
     /// Reads `folder` again: its files always; below it, everything when
@@ -112,6 +201,10 @@ pub const Index = struct {
         var arena: std.heap.ArenaAllocator = .init(self.gpa);
         defer arena.deinit();
         const a = arena.allocator();
+        // The budget counts what the index keeps.
+        self.lock();
+        walker.count = self.files.count();
+        self.unlock();
         const contents = walker.readFolder(a, folder) catch return;
         var fresh: std.ArrayList([]const u8) = .empty;
         for (contents.files) |f| fresh.append(a, f.rel) catch return;
@@ -176,6 +269,8 @@ pub const Index = struct {
             if (!paths.isWithin(self.root, abs)) continue;
             const rel = std.mem.trimStart(u8, abs[self.root.len..], "/");
             if (std.mem.eql(u8, rel, ".git") or std.mem.startsWith(u8, rel, ".git/")) continue;
+            // Outside what the budget covers, changes do not matter.
+            if (self.truncated.load(.acquire) and !self.covered.contains(rel)) continue;
             const copy = self.gpa.dupe(u8, rel) catch continue;
             self.pending.append(self.gpa, .{ .rel = copy, .subtree = change.subtree }) catch self.gpa.free(copy);
         }
@@ -225,6 +320,7 @@ test "indexes the workspace and follows files created and removed" {
 
     const index = try Index.open(testing.allocator, &registry, dir.path(), false);
     defer index.close();
+    index.start();
     try waitFor(index, struct {
         fn f(i: *Index) bool {
             return i.files.contains("core/features/terminal/render.zig") and i.files.contains("README.md");
@@ -252,6 +348,7 @@ test "closing during the first read does not wait for it" {
     // A big tree that takes far longer than the limit below to walk.
     _ = try registry.authorize("/usr");
     const index = try Index.open(testing.allocator, &registry, "/usr", true);
+    index.start();
     clock.sleepMs(20);
     const before = clock.monotonicMs();
     index.close();

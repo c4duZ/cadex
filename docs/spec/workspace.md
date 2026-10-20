@@ -14,8 +14,9 @@ só mexe em arquivos dentro das pastas que o usuário abriu.
   - pela paleta, com "Abrir pasta…", que mostra o seletor de pastas do sistema;
   - pela paleta, com "Usar a pasta do terminal", que pega a pasta atual do painel com foco;
   - sozinho, seguindo o terminal: quando a pasta do terminal com foco muda (`cd`), o workspace vai
-    para o projeto dela, a raiz do repositório git onde ela está ou a própria pasta fora de um.
-    `cd src` dentro de um projeto não troca o workspace. A opção "A árvore segue o terminal"
+    para a raiz do repositório git onde ela está. Fora de um repositório (`cd ~`, `cd /tmp`) o
+    workspace fica onde está: seguir até a própria pasta levava a pasta pessoal inteira como
+    workspace (o dono, 2026-10-20). `cd src` dentro de um projeto não troca o workspace. A opção "A árvore segue o terminal"
     (explorer.followTerminal, ligada por padrão) desliga. O dono deu `cd` e a árvore ficou na pasta
     pessoal (2026-10-19).
 - Sem nenhuma dessas, o workspace é a pasta pessoal do usuário.

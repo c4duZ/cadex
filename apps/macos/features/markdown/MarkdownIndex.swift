@@ -49,6 +49,11 @@ final class MarkdownIndex {
     /// The first read of the workspace is done.
     var isReady: Bool { cadex_markdown_index_ready(handle) }
 
+    /// The folder of the note in use: the index keeps the notes nearest it.
+    func setFocus(_ folder: String) {
+        cadex_markdown_index_focus(handle, folder)
+    }
+
     /// Relative paths of every note.
     func notes() -> [String] {
         lines { cadex_markdown_notes(handle, &$0, &$1) }.map { $0[0] }

@@ -41,11 +41,28 @@ pub export fn cadex_search_index_close(index: ?*Index) callconv(.c) void {
     if (index) |i| i.close();
 }
 
-/// Files indexed so far, and whether the first full read is done.
+/// Files indexed so far, and whether the first full read is done. Starts
+/// the reading if nothing asked before (the index is lazy).
 pub export fn cadex_search_index_count(index: ?*Index, ready: ?*bool) callconv(.c) usize {
     const i = index orelse return 0;
+    i.start();
     if (ready) |r| r.* = i.ready.load(.acquire);
     return i.count();
+}
+
+/// The folder the user is in (absolute, e.g. the focused terminal's): the
+/// index spends its budget there first, and reads again from it when it
+/// was left out.
+pub export fn cadex_search_index_focus(index: ?*Index, folder: ?[*:0]const u8) callconv(.c) void {
+    const i = index orelse return;
+    i.setFocus(std.mem.span(folder orelse return));
+}
+
+/// Whether the workspace was too big to read whole: what is far from the
+/// focus was left out.
+pub export fn cadex_search_index_partial(index: ?*Index) callconv(.c) bool {
+    const i = index orelse return false;
+    return i.truncated.load(.acquire);
 }
 
 pub export fn cadex_search_files(index: ?*Index, query: ?[*]const u8, query_len: usize, limit: usize, out: ?*FilesResult) callconv(.c) status.Code {
@@ -53,6 +70,7 @@ pub export fn cadex_search_files(index: ?*Index, query: ?[*]const u8, query_len:
     result.* = .{ .matches = null, .count = 0, .paths = null, .positions = null };
     const i = index orelse return status.invalid_argument;
     const q: []const u8 = if (query_len == 0) "" else (query orelse return status.invalid_argument)[0..query_len];
+    i.start();
     i.lock();
     defer i.unlock();
     const list = i.lockedPaths();

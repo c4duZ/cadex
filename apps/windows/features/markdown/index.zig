@@ -44,6 +44,14 @@ pub const Index = struct {
         self.handle = null;
     }
 
+    /// The folder of the note in use: the index keeps the notes nearest it.
+    pub fn setFocus(self: *Index, gpa: std.mem.Allocator, folder: []const u8) void {
+        const h = self.handle orelse return;
+        const z = gpa.dupeZ(u8, folder) catch return;
+        defer gpa.free(z);
+        cadex.cadex_markdown_index_focus(h, z.ptr);
+    }
+
     /// The first read of the workspace is done.
     pub fn ready(self: *const Index) bool {
         const h = self.handle orelse return false;

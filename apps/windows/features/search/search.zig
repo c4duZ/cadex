@@ -32,6 +32,8 @@ pub const Search = struct {
     root: ?[]u8 = null,
     show_hidden: bool = true,
     index: ?*cadex.cadex_search_index = null,
+    /// The focused terminal's folder, applied again to a new index.
+    focus: std.ArrayList(u8) = .empty,
     recent: std.ArrayList([]u8) = .empty,
     case_sensitive: bool = false,
     regex: bool = false,
@@ -58,6 +60,7 @@ pub const Search = struct {
         self.clearHits();
         self.hits.deinit(self.gpa);
         self.last_query.deinit(self.gpa);
+        self.focus.deinit(self.gpa);
     }
 
     /// The workspace changed (or "show hidden"): a new index; the same values do nothing.
@@ -72,6 +75,23 @@ pub const Search = struct {
         defer self.gpa.free(z);
         var out: ?*cadex.cadex_search_index = null;
         if (cadex.cadex_search_index_open(z.ptr, show_hidden, &out) == cadex.CADEX_OK) self.index = out;
+        if (self.focus.items.len > 0) self.applyFocus();
+    }
+
+    /// The folder the user is in (the focused terminal's): the index keeps
+    /// what is nearest it when the workspace is too big to read whole.
+    pub fn setFocus(self: *Search, folder: []const u8) void {
+        if (std.mem.eql(u8, folder, self.focus.items)) return;
+        self.focus.clearRetainingCapacity();
+        self.focus.appendSlice(self.gpa, folder) catch return;
+        self.applyFocus();
+    }
+
+    fn applyFocus(self: *Search) void {
+        const i = self.index orelse return;
+        const z = self.gpa.dupeZ(u8, self.focus.items) catch return;
+        defer self.gpa.free(z);
+        cadex.cadex_search_index_focus(i, z.ptr);
     }
 
     fn absolute(self: *Search, arena: std.mem.Allocator, rel: []const u8) []const u8 {

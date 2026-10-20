@@ -39,7 +39,17 @@ Achar um arquivo pelo nome ou um trecho de texto dentro do workspace, sem sair d
 ## Estados
 - **Vazio (arquivos):** recentes; sem recentes, "Digite para buscar arquivos".
 - **Indexando:** workspace grande sendo lido pela primeira vez: a lista aparece com o que já foi lido
-  e um indicador.
+  e um indicador. O índice só começa na primeira busca por nome: workspace que ninguém busca não
+  custa nada.
+- **Pasta grande:** o índice guarda até 100 mil arquivos, começando pela pasta do terminal com foco
+  e tudo abaixo dela, depois as pastas vizinhas, das mais próximas para as mais distantes. A pasta
+  em que se trabalha nunca fica de fora; o que é longe fica. Se o terminal vai para uma pasta que
+  ficou de fora, o índice é refeito a partir dela. A paleta avisa: "Pasta grande: os N arquivos mais
+  perto da pasta do terminal". Nunca entram, mesmo sem .gitignore: `node_modules`,
+  `bower_components`, `.Trash`, `__pycache__`, `.venv`, `.zig-cache`, `.build`, `.next`, `.gradle`,
+  `.cache`, e, com a pasta pessoal como workspace, `Library` (Mac) e `AppData` (Windows). A pasta
+  pessoal tinha 1,2 milhão de arquivos e segurava 267 MB; agora são 100 mil em 3 s e +22 MB
+  (medido em 2026-10-20).
 - **Buscando (conteúdo):** indicador enquanto a busca roda; os resultados vão entrando.
 - **Sem resultados:** "Nenhum arquivo encontrado" / "Nenhum resultado".
 - **Erro de regex:** expressão inválida: a mensagem aparece embaixo do campo, nada é buscado.

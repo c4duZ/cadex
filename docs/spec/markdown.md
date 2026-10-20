@@ -37,7 +37,9 @@ ao editar, ter links que funcionam entre os arquivos (ADR 0006).
 
 ### Índice
 - O núcleo mantém um índice dos `.md` do workspace (títulos e links), atualizado quando arquivos
-  mudam no disco. Respeita o .gitignore como a busca.
+  mudam no disco. Respeita o .gitignore e as pastas que a busca nunca lê. Só começa quando uma nota
+  é aberta, e guarda até 5 000 notas, começando pela pasta da nota aberta e indo para as mais
+  distantes, como o índice da busca (docs/spec/search.md, "Pasta grande").
 
 ## Estados
 - **Indexando:** primeira leitura do workspace; autocomplete mostra o que já foi lido.

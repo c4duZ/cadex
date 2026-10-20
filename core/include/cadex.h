@@ -401,14 +401,23 @@ void cadex_fuzzy_result_free(cadex_fuzzy_result *result);
 /* -- File names (⌘P) -- */
 
 /* The file names of a folder (inside an authorized directory) in memory:
- * read on a thread of the core, then kept current by watching the disk.
+ * read on a thread of the core from the first query, nearest the focus
+ * first, then kept current by watching the disk.
  * .git, .gitignore'd and (unless show_hidden) hidden paths are left out;
  * symbolic links are not followed. Close with cadex_search_index_close. */
 typedef struct cadex_search_index cadex_search_index;
 cadex_status cadex_search_index_open(const char *root, bool show_hidden, cadex_search_index **out);
 void cadex_search_index_close(cadex_search_index *index);
-/* Files indexed so far; *ready (optional) turns true after the first full read. */
+/* Files indexed so far; *ready (optional) turns true after the first full read.
+ * Nothing is read until this or cadex_search_files is called. */
 size_t cadex_search_index_count(cadex_search_index *index, bool *ready);
+/* The folder the user is in (absolute): the index keeps at most 100 000 names
+ * and spends them nearest this folder first; a focus left out reads again.
+ * node_modules, caches and build output are never read (Library and AppData
+ * neither, when the root is the home folder). */
+void cadex_search_index_focus(cadex_search_index *index, const char *folder);
+/* True when the workspace was too big to read whole. */
+bool cadex_search_index_partial(cadex_search_index *index);
 
 typedef struct {
     uint32_t path_offset; /* into cadex_search_files_result.paths; relative to the root */
@@ -659,12 +668,15 @@ cadex_status cadex_editor_folds(cadex_editor_document *document, cadex_editor_fo
  * cadex_free. */
 cadex_status cadex_markdown_render(const uint8_t *text, size_t len, uint8_t **out, size_t *out_len);
 
-/* The headings and links of every note of a folder, kept current from the
- * disk. Answers are lines of tab-separated fields (free with cadex_free);
- * paths in and out are absolute. */
+/* The headings and links of the notes of a folder, kept current from the
+ * disk. Nothing is read until the first query (any call below); then at most
+ * 5 000 notes, nearest the focus first. Answers are lines of tab-separated
+ * fields (free with cadex_free); paths in and out are absolute. */
 typedef struct cadex_markdown_index cadex_markdown_index;
 cadex_status cadex_markdown_index_open(const char *root, cadex_markdown_index **out);
 void cadex_markdown_index_close(cadex_markdown_index *index);
+/* The folder of the note in use (absolute): a focus left out reads again. */
+void cadex_markdown_index_focus(cadex_markdown_index *index, const char *folder);
 bool cadex_markdown_index_ready(cadex_markdown_index *index);
 /* One note path (relative to the root) per line. */
 cadex_status cadex_markdown_notes(cadex_markdown_index *index, uint8_t **out, size_t *out_len);

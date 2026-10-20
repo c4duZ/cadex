@@ -6,12 +6,26 @@ const std = @import("std");
 const fs = @import("../../shared/fs.zig");
 const ignore = @import("../../shared/ignore.zig");
 
-/// A walk stops after this many files: a home folder opened by mistake
-/// should not eat the memory.
+/// A walk stops after this many files by default: a home folder opened by
+/// mistake should not eat the memory. The indexes pass smaller budgets and
+/// spend them near the user's folder first (nearby.zig).
 pub const max_files = 300_000;
+
+/// Folders no search wants, left out even without a .gitignore saying so:
+/// dependencies, caches and build output, which made a home folder's walk
+/// read 1.2 million files (measured 2026-10-20).
+pub const skipped_folders = [_][]const u8{
+    "node_modules", "bower_components", ".Trash", "__pycache__", ".venv", ".zig-cache", ".build", ".next", ".gradle", ".cache",
+};
+
+/// Left out only when the root is the user's home folder: the system's
+/// own data, always changing (the Mac's Library, Windows' AppData).
+pub const skipped_in_home = [_][]const u8{ "Library", "AppData" };
 
 pub const Options = struct {
     show_hidden: bool = false,
+    /// How many files a walk visits before it stops.
+    limit: usize = max_files,
     /// Checked between folders; the walk returns early when it turns true.
     cancel: ?*const std.atomic.Value(bool) = null,
 };
@@ -25,10 +39,25 @@ pub const Walker = struct {
     root: []const u8,
     matcher: ignore.Matcher,
     options: Options,
+    /// Files visited so far; the indexes set it to what they hold before
+    /// reading a folder again, so the budget counts what is kept.
     count: usize = 0,
+    /// The root is the user's home folder: skipped_in_home applies.
+    at_home: bool,
 
     pub fn init(gpa: std.mem.Allocator, root: []const u8, options: Options) !Walker {
-        return .{ .gpa = gpa, .root = root, .matcher = try ignore.Matcher.init(gpa, root), .options = options };
+        return .{ .gpa = gpa, .root = root, .matcher = try ignore.Matcher.init(gpa, root), .options = options, .at_home = isHome(root) };
+    }
+
+    /// Whether the walk stopped at its budget.
+    pub fn full(self: *const Walker) bool {
+        return self.count >= self.options.limit;
+    }
+
+    fn skipped(self: *const Walker, folder: []const u8, name: []const u8) bool {
+        for (skipped_folders) |s| if (std.mem.eql(u8, name, s)) return true;
+        if (self.at_home and folder.len == 0) for (skipped_in_home) |s| if (std.mem.eql(u8, name, s)) return true;
+        return false;
     }
 
     pub fn deinit(self: *Walker) void {
@@ -78,6 +107,7 @@ pub const Walker = struct {
             if (std.mem.eql(u8, name, ".git")) continue;
             if (!self.options.show_hidden and name[0] == '.') continue;
             if (entry.kind != .file and entry.kind != .directory) continue;
+            if (entry.kind == .directory and self.skipped(folder, name)) continue;
             const rel = try join(a, folder, try a.dupe(u8, name));
             if (self.matcher.decide(rel, entry.kind == .directory)) continue;
             if (entry.kind == .directory) try folders.append(a, rel) else try files.append(a, .{ .rel = rel, .size = entry.size });
@@ -106,15 +136,22 @@ pub const Walker = struct {
             try pending.append(self.gpa, try self.gpa.dupe(u8, contents.folders[i]));
         }
         for (contents.files) |file| {
+            if (self.count >= self.options.limit) return false;
             self.count += 1;
-            if (self.count > max_files) return false;
             if (!visit(context, file.rel, file.size)) return false;
         }
         return true;
     }
 };
 
-fn join(a: std.mem.Allocator, folder: []const u8, name: []const u8) ![]const u8 {
+/// The user's home folder ($HOME, or %USERPROFILE% on Windows).
+fn isHome(root: []const u8) bool {
+    const name = if (@import("builtin").os.tag == .windows) "USERPROFILE" else "HOME";
+    const home = std.mem.span(std.c.getenv(name) orelse return false);
+    return std.mem.eql(u8, std.mem.trimEnd(u8, home, "/\\"), std.mem.trimEnd(u8, root, "/\\"));
+}
+
+pub fn join(a: std.mem.Allocator, folder: []const u8, name: []const u8) ![]const u8 {
     if (folder.len == 0) return name;
     return std.fmt.allocPrint(a, "{s}/{s}", .{ folder, name });
 }

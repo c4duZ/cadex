@@ -33,6 +33,15 @@ public final class FileSearch: PaletteSource {
         root = path
         var out: OpaquePointer?
         if cadex_search_index_open(path, showHidden, &out) == CADEX_OK { index = out }
+        if let focus { cadex_search_index_focus(index, focus) }
+    }
+
+    /// The folder the user is in (the focused terminal's): the index keeps
+    /// what is nearest it when the workspace is too big to read whole.
+    private var focus: String?
+    func setFocus(_ folder: String) {
+        focus = folder
+        cadex_search_index_focus(index, folder)
     }
 
     public var placeholder: String { T("Find file by name", "Buscar arquivo pelo nome") }
@@ -83,11 +92,15 @@ public final class FileSearch: PaletteSource {
         }
     }
 
-    /// "Indexando… 1234" until the first full read is done.
+    /// "Indexando… 1234" until the first full read is done; then, for a
+    /// folder too big to read whole, that only the nearest files are in.
     private func indexStatus() -> String? {
         var ready = false
         let count = cadex_search_index_count(index, &ready)
-        return ready ? nil : T("Indexing… \(count)", "Indexando… \(count)")
+        if !ready { return T("Indexing… \(count)", "Indexando… \(count)") }
+        return cadex_search_index_partial(index)
+            ? T("Big folder: the \(count) files nearest the terminal's folder", "Pasta grande: os \(count) arquivos mais perto da pasta do terminal")
+            : nil
     }
 
     /// The name as the title, its folder in grey, the type's icon: the
