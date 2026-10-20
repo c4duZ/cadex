@@ -112,3 +112,7 @@ pub const Surface = struct {
         try w.check(w.call(self.swap_chain, "Present", .{ 1, 0 }));
     }
 };
+
+test {
+    @import("std").testing.refAllDecls(@This());
+}

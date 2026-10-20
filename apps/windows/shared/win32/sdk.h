@@ -9,6 +9,8 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <imm.h>
+#include <shellapi.h>
+#include <shlobj.h>
 #include <dwmapi.h>
 #include <shellscalingapi.h>
 #include <d3d11.h>

@@ -1,4 +1,4 @@
-.PHONY: check manifests core core-test macos-test app run relink package windows-core windows-core-test windows-app windows-run
+.PHONY: check manifests core core-test macos-test app run relink package windows-core windows-core-test windows-app windows-run windows-app-test
 
 # Run before handing work over: manifests, core tests, app tests, and the
 # Windows build (it cannot run here, but it must keep compiling).
@@ -6,6 +6,7 @@ check: manifests core-test macos-test windows-app
 
 manifests:
 	@python3 tools/check_manifests.py
+	@python3 -I tools/icons/windows_icons.py --check
 
 # libcadex.a + cadex.h in core/zig-out, which the macOS app links.
 core:
@@ -65,7 +66,12 @@ windows-app: windows-core
 	@cd apps/windows && for arch in x86_64 aarch64; do \
 		zig build -Dtarget=$$arch-windows.win11_zn-gnu --prefix zig-out/$$arch || exit 1; \
 	done
+	@cd apps/windows && zig build test-bin -Dtarget=aarch64-windows.win11_zn-gnu --prefix zig-out/aarch64
 
 # Opens the arm64 build on the test VM's desktop.
 windows-run: windows-app
 	@tools/windows-vm.sh --gui apps/windows/zig-out/aarch64/bin/Cadex.exe
+
+# The app's tests (one exe per module) on the arm64 VM.
+windows-app-test: windows-app
+	@for t in apps/windows/zig-out/aarch64/bin/cadex-*-tests.exe; do tools/windows-vm.sh $$t || exit 1; done

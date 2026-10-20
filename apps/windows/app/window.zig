@@ -21,7 +21,7 @@ pub fn open() !c.HWND {
         .style = c.CS_HREDRAW | c.CS_VREDRAW,
         .lpfnWndProc = procedure,
         .hInstance = instance,
-        .hCursor = c.LoadCursorW(null, w.IDC_ARROW),
+        .hCursor = w.loadCursor(.arrow),
         .lpszClassName = class_name,
     };
     if (c.RegisterClassExW(&class) == 0) return error.WindowFailed;

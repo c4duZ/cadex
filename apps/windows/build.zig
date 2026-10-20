@@ -51,6 +51,21 @@ pub fn build(b: *std.Build) void {
         .imports = &.{.{ .name = "win32", .module = win32 }},
     });
 
+    const ui = b.createModule(.{
+        .root_source_file = b.path("shared/ui/ui.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{ .{ .name = "win32", .module = win32 }, .{ .name = "gfx", .module = gfx } },
+    });
+    const icons = b.createModule(.{
+        .root_source_file = b.path("shared/icons/icons.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{.{ .name = "gfx", .module = gfx }},
+    });
+    // The same font file the Mac ships: one source for the icons (ADR 0008).
+    icons.addAnonymousImport("phosphor_font", .{ .root_source_file = b.path("../macos/shared/icons/Resources/Phosphor-Regular.ttf") });
+
     const root = b.createModule(.{
         .root_source_file = b.path("app/main.zig"),
         .target = target,
@@ -60,6 +75,8 @@ pub fn build(b: *std.Build) void {
             .{ .name = "cadex", .module = cadex },
             .{ .name = "win32", .module = win32 },
             .{ .name = "gfx", .module = gfx },
+            .{ .name = "ui", .module = ui },
+            .{ .name = "icons", .module = icons },
         },
     });
     root.addObjectFile(.{ .cwd_relative = b.pathFromRoot(core_lib) });
@@ -75,4 +92,16 @@ pub fn build(b: *std.Build) void {
     });
     exe.subsystem = .windows;
     b.installArtifact(exe);
+
+    // Each module's tests as a Windows exe, run in the VM. A test build only
+    // covers its root module, so every module gets its own; building them
+    // also type-checks every declaration (Zig only analyzes what is used).
+    const test_step = b.step("test-bin", "Build the app tests without running them");
+    const tested = [_]struct { []const u8, *std.Build.Module }{
+        .{ "app", root }, .{ "ui", ui }, .{ "gfx", gfx }, .{ "icons", icons }, .{ "win32", win32 },
+    };
+    for (tested) |entry| {
+        const t = b.addTest(.{ .name = entry[0], .root_module = entry[1] });
+        test_step.dependOn(&b.addInstallArtifact(t, .{ .dest_sub_path = b.fmt("cadex-{s}-tests.exe", .{entry[0]}) }).step);
+    }
 }

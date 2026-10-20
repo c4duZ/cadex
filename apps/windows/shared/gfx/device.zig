@@ -76,3 +76,7 @@ pub const Device = struct {
         w.release(self.d3d);
     }
 };
+
+test {
+    @import("std").testing.refAllDecls(@This());
+}

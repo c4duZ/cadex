@@ -109,3 +109,7 @@ test "colors come from 0xRRGGBB" {
     try std.testing.expectEqual(@as(f32, 1), c.r);
     try std.testing.expect(c.g > 0.5 and c.g < 0.51);
 }
+
+test {
+    @import("std").testing.refAllDecls(@This());
+}

@@ -30,7 +30,7 @@ pub fn guid(comptime text: []const u8) c.GUID {
     };
     var data4: [8]u8 = undefined;
     const tail = text[19..23] ++ text[24..36];
-    for (&data4, 0..) |*byte, i| byte.* = hex.parse(tail[i * 2 ..][0..2]);
+    inline for (0..8) |i| data4[i] = hex.parse(tail[i * 2 ..][0..2]);
     return .{
         .Data1 = hex.parse(text[0..8]),
         .Data2 = hex.parse(text[9..13]),
@@ -39,13 +39,16 @@ pub fn guid(comptime text: []const u8) c.GUID {
     };
 }
 
-/// The standard arrow; IDC_ARROW itself goes through a macro translate-c
-/// cannot follow (MAKEINTRESOURCE).
-pub const IDC_ARROW: [*:0]const u16 = @ptrFromInt(32512);
-pub const IDC_IBEAM: [*:0]const u16 = @ptrFromInt(32513);
-pub const IDC_SIZEWE: [*:0]const u16 = @ptrFromInt(32644);
-pub const IDC_SIZENS: [*:0]const u16 = @ptrFromInt(32645);
-pub const IDC_HAND: [*:0]const u16 = @ptrFromInt(32649);
+/// The standard cursors by id (IDC_ARROW and the others go through
+/// MAKEINTRESOURCE, which translate-c cannot follow, and their odd values
+/// are no valid u16 pointer).
+pub const Cursor = enum(usize) { arrow = 32512, ibeam = 32513, size_we = 32644, size_ns = 32645, hand = 32649 };
+
+extern "user32" fn LoadCursorW(instance: ?*anyopaque, name: usize) callconv(.winapi) c.HCURSOR;
+
+pub fn loadCursor(cursor: Cursor) c.HCURSOR {
+    return LoadCursorW(null, @intFromEnum(cursor));
+}
 
 pub const Error = error{ComFailed};
 
@@ -153,4 +156,9 @@ test "guids parse like the headers write them" {
     const g = guid("6f15aaf2-d208-4e89-9ab4-489535d34f9c");
     try std.testing.expectEqual(@as(c_ulong, 0x6f15aaf2), g.Data1);
     try std.testing.expectEqual(@as(u8, 0x9c), g.Data4[7]);
+}
+
+test {
+    @import("std").testing.refAllDecls(@This());
+    _ = @import("dcomp.zig");
 }

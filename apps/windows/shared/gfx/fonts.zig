@@ -89,3 +89,7 @@ pub const Fonts = struct {
         return made;
     }
 };
+
+test {
+    @import("std").testing.refAllDecls(@This());
+}

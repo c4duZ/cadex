@@ -13,3 +13,11 @@ pub fn main() !void {
     _ = w.c.ShowWindow(hwnd, w.c.SW_SHOWDEFAULT);
     window.run();
 }
+
+test {
+    _ = @import("ui");
+    _ = @import("icons");
+    _ = @import("gfx");
+    _ = @import("win32");
+    _ = @import("window.zig");
+}

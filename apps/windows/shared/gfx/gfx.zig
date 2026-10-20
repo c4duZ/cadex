@@ -16,6 +16,13 @@ pub const Point = geometry.Point;
 pub const Color = geometry.Color;
 
 test {
-    _ = geometry;
+    _ = @import("geometry.zig");
     _ = @import("painter.zig");
+    _ = @import("device.zig");
+    _ = @import("surface.zig");
+    _ = @import("fonts.zig");
+}
+
+test {
+    @import("std").testing.refAllDecls(@This());
 }

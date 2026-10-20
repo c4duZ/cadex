@@ -143,6 +143,31 @@ pub const Painter = struct {
         _ = w.call(made, "SetTrimming", .{ &trimming, sign });
     }
 
+    /// The x of the caret before byte `at` of `value`, from its left edge.
+    pub fn caretX(self: *Painter, value: []const u8, spec: Spec, at: usize) f32 {
+        if (at == 0 or value.len == 0) return 0;
+        const made = self.layout(value, spec, 100_000, 1000) catch return 0;
+        defer w.release(made);
+        var x: f32 = 0;
+        var y: f32 = 0;
+        var metrics: c.DWRITE_HIT_TEST_METRICS = undefined;
+        _ = w.call(made, "HitTestTextPosition", .{ utf16Index(value, at), 0, &x, &y, &metrics });
+        return x;
+    }
+
+    /// The byte of `value` nearest to `x` (a click in a field).
+    pub fn hitIndex(self: *Painter, value: []const u8, spec: Spec, x: f32) usize {
+        if (value.len == 0) return 0;
+        const made = self.layout(value, spec, 100_000, 1000) catch return 0;
+        defer w.release(made);
+        var trailing: c.BOOL = 0;
+        var inside: c.BOOL = 0;
+        var metrics: c.DWRITE_HIT_TEST_METRICS = undefined;
+        if (w.call(made, "HitTestPoint", .{ x, 1, &trailing, &inside, &metrics }) < 0) return value.len;
+        const pos = metrics.textPosition + if (trailing != 0) metrics.length else 0;
+        return byteIndex(value, pos);
+    }
+
     /// A Phosphor icon (its code point from icons.zig) centered in `r`.
     pub fn icon(self: *Painter, codepoint: u21, size: f32, r: Rect, color: Color) void {
         var buf: [4]u8 = undefined;
@@ -150,6 +175,30 @@ pub const Painter = struct {
         self.text(buf[0..n], .{ .family = "Phosphor", .size = size, .embedded = true }, r, color, .{ .@"align" = .center, .ellipsis = false });
     }
 };
+
+/// The UTF-16 index of byte `at` of UTF-8 `value`.
+pub fn utf16Index(value: []const u8, at: usize) u32 {
+    var n: u32 = 0;
+    var i: usize = 0;
+    while (i < at and i < value.len) {
+        const len = std.unicode.utf8ByteSequenceLength(value[i]) catch 1;
+        n += if (len == 4) 2 else 1;
+        i += len;
+    }
+    return n;
+}
+
+/// The byte of UTF-8 `value` at UTF-16 index `pos`.
+pub fn byteIndex(value: []const u8, pos: u32) usize {
+    var n: u32 = 0;
+    var i: usize = 0;
+    while (i < value.len and n < pos) {
+        const len = std.unicode.utf8ByteSequenceLength(value[i]) catch 1;
+        n += if (len == 4) 2 else 1;
+        i += len;
+    }
+    return @min(i, value.len);
+}
 
 /// `value` as UTF-16 in `out`, cut when it does not fit. Invalid UTF-8 (a
 /// file name from an old disk) still draws, each bad byte as U+FFFD.
@@ -182,4 +231,8 @@ test "utf16 keeps valid text and replaces bad bytes" {
     try std.testing.expectEqual(@as(usize, 5), got.len);
     try std.testing.expectEqual(@as(u16, 0xFFFD), got[1]);
     try std.testing.expectEqual(@as(u16, 0xE9), got[2]);
+}
+
+test {
+    @import("std").testing.refAllDecls(@This());
 }
