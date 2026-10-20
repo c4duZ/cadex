@@ -21,6 +21,8 @@ const markdown = @import("markdown");
 const source_control = @import("source-control");
 const viewers = @import("viewers.zig");
 const git_page = @import("git_page.zig");
+const web = @import("web.zig");
+const webview = @import("webview");
 const window_mod = @import("window.zig");
 const chrome = @import("chrome.zig");
 const wiring = @import("wiring.zig");
@@ -68,6 +70,11 @@ pub const App = struct {
     git: *source_control.SourceControl = undefined,
     /// Opens asked for while the frame drew, done after it (viewers.zig).
     deferred: std.ArrayList(viewers.Deferred) = .empty,
+    /// The web panes' WebView2, made when the first one opens (web.zig).
+    web_env: ?*webview.Environment = null,
+    /// "Abrir no preview" for a terminal's local server, and those offered.
+    offer: web.Offer = .{},
+    offered: std.ArrayList([]u8) = .empty,
     /// Several items to the Recycle Bin wait for the user's answer.
     pending_trash: usize = 0,
     plus_menu: ui.menu.Menu = .{},
@@ -130,6 +137,7 @@ pub const App = struct {
         self.search.register(&self.registry);
         self.spaces.register(&self.registry);
         viewers.register(self);
+        web.register(self);
         git_page.register(self);
         self.palette.addPrefix(.{ .char = '/', .label = "arquivos", .source = self.search.filesSource() });
         self.palette.addPrefix(.{ .char = '#', .label = "texto", .source = self.search.contentSource() });
@@ -198,6 +206,7 @@ pub const App = struct {
             self.tabs = self.spaces.current();
         }
         self.surface.end() catch |err| std.log.warn("o quadro não foi mostrado: {s}", .{@errorName(err)});
+        web.endFrame(self);
         window_mod.Window.setCursor(u.cursor);
         if (u.ime_caret) |caret| self.window.placeIme(caret);
         if (u.wants_frame_in_ms) |ms| self.window.redrawIn(ms);
@@ -247,6 +256,7 @@ pub const App = struct {
         if (ui.menu.show(u, &self.plus_menu, ui.id("plus.menu", 0), &app_commands.plus_items)) |i| {
             _ = self.registry.run(app_commands.openers[i].id);
         }
+        web.drawOffer(self);
         @import("settings_page.zig").draw(self);
         self.palette.draw(u);
         @import("space_ui.zig").draw(self);

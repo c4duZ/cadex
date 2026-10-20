@@ -39,6 +39,7 @@ pub fn delegate(app: *App) window_mod.Delegate {
         .caption_holes = holes,
         .maximize_button = maximizeButton,
         .title_height = titleHeight,
+        .moved = @import("web.zig").moved,
     };
 }
 
@@ -70,7 +71,8 @@ fn terminalNotice(context: *anyopaque, lparam: c.LPARAM, wparam: c.WPARAM) void 
     const found = findSession(app, session) orelse return;
     const event: terminal.Event = @enumFromInt(@as(u8, @intCast(wparam)));
     switch (event) {
-        .output, .title, .local_url => {},
+        .output, .title => {},
+        .local_url => @import("web.zig").localServer(app, session),
         .bell => found.found.view.bell(@intCast(c.GetTickCount64())),
         .exit => {
             const code = session.exitCode() orelse 0;

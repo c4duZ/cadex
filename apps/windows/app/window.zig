@@ -41,6 +41,8 @@ pub const Delegate = struct {
     /// The maximize button's rectangle (Snap Layouts on hover).
     maximize_button: *const fn (context: *anyopaque) gfx.Rect,
     title_height: *const fn (context: *anyopaque) f32,
+    /// The window moved on screen (the web panes' child windows follow).
+    moved: ?*const fn (context: *anyopaque) void = null,
 };
 
 pub const Window = struct {

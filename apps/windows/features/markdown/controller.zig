@@ -133,6 +133,18 @@ pub const Markdown = struct {
         self.host.open_file(self.host.context, link.target, if (link.line > 0) link.line else null);
     }
 
+    /// A link clicked in the rendered page of the note `from` (a note by
+    /// name, a file and its heading): opens where the core resolves it.
+    pub fn openDestination(self: *Markdown, from: []const u8, destination: []const u8, wiki: bool) void {
+        var arena: std.heap.ArenaAllocator = .init(self.gpa);
+        defer arena.deinit();
+        const place = self.index.resolve(arena.allocator(), from, destination, wiki) orelse {
+            _ = w.c.MessageBeep(0);
+            return;
+        };
+        self.host.open_file(self.host.context, place.path, if (place.line > 0) place.line else null);
+    }
+
     /// What the trigger offers, in `arena` (the Mac's suggestions(for:from:)).
     pub fn suggestions(self: *Markdown, arena: std.mem.Allocator, t: trigger.Trigger, note: []const u8) []const completion_mod.Item {
         var list: std.ArrayList(completion_mod.Item) = .empty;

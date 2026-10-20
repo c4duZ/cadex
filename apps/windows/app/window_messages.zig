@@ -70,6 +70,9 @@ pub fn handle(self: *Window, hwnd: c.HWND, msg: c.UINT, wparam: c.WPARAM, lparam
                 else => .left,
             };
             _ = c.SetCapture(hwnd);
+            // A click outside a web page takes the keyboard back from it
+            // (its child window keeps the focus otherwise).
+            _ = c.SetFocus(hwnd);
             self.input.mods = window.currentMods();
             self.input.press(button, window_point(lparam), @intCast(c.GetTickCount64()), c.GetDoubleClickTime(), @floatFromInt(c.GetSystemMetrics(c.SM_CXDOUBLECLK)));
             self.redraw();
@@ -159,6 +162,10 @@ pub fn handle(self: *Window, hwnd: c.HWND, msg: c.UINT, wparam: c.WPARAM, lparam
         c.WM_ERASEBKGND => return 1,
         c.WM_SIZE => {
             self.redraw();
+            return 0;
+        },
+        c.WM_MOVE => {
+            if (d.moved) |f| f(d.context);
             return 0;
         },
         c.WM_TIMER => {

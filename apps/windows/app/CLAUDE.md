@@ -36,8 +36,14 @@
   salvos nos spaces refeitos (arquivo que ainda existe, com a pasta autorizada de novo) e as
   aberturas pedidas no meio do quadro (Ctrl+clique numa nota, arquivo de um commit), feitas depois
   dele para não liberar o documento que desenha.
+- `web.zig`: o ambiente WebView2 da janela (feito no primeiro painel web; endFrame depois de cada
+  quadro, a janela movida, atalhos do app tirados da página menos os de edição), os Hosts de
+  preview, media-preview e markdown-rendered, os makers de mídia e da nota renderizada, e a oferta
+  "Abrir no preview" no canto dos painéis quando um terminal mostra um servidor local (uma vez por
+  endereço, por 6 s). Um clique fora da página devolve o teclado à janela
+  (`window_messages.zig`).
 - `opener.zig`: onde um arquivo abre (o FileOpener do Mac): o tipo pela extensão, ao lado ou em
-  nova aba; sem visualizador para o tipo (ainda mídia e o Markdown renderizado), o app do sistema.
+  nova aba; sem visualizador para o tipo, o app do sistema.
 - `Cadex.manifest`: DPI por monitor v2, UTF-8 como página de código e caminhos longos.
 
 ## Como validar
