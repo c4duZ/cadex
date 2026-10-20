@@ -75,6 +75,7 @@ pub fn build(b: *std.Build) void {
     // The same catalog the Mac ships: one source for the themes.
     themes.addAnonymousImport("theme_catalog", .{ .root_source_file = b.path("../macos/features/themes/Resources/catalog.json") });
     const terminal = feature(b, target, optimize, shared, "terminal", "terminal.zig", &.{});
+    const tabs = feature(b, target, optimize, shared, "tabs", "tabs.zig", &.{ .{ "terminal", terminal }, .{ "command-palette", command_palette } });
     const settings = feature(b, target, optimize, shared, "settings", "settings.zig", &.{});
     const shortcuts = feature(b, target, optimize, shared, "shortcuts", "shortcuts.zig", &.{.{ "command-palette", command_palette }});
 
@@ -94,6 +95,7 @@ pub fn build(b: *std.Build) void {
             .{ .name = "themes", .module = themes },
             .{ .name = "settings", .module = settings },
             .{ .name = "terminal", .module = terminal },
+            .{ .name = "tabs", .module = tabs },
         },
     });
     linkCore(root, b.pathFromRoot(core_lib));
@@ -112,7 +114,7 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test-bin", "Build the app tests without running them");
     const tested = [_]struct { []const u8, *std.Build.Module }{
         .{ "app", root },                       .{ "ui", ui }, .{ "gfx", gfx }, .{ "icons", icons }, .{ "win32", win32 },
-        .{ "command-palette", command_palette }, .{ "shortcuts", shortcuts }, .{ "themes", themes }, .{ "settings", settings }, .{ "terminal", terminal },
+        .{ "command-palette", command_palette }, .{ "shortcuts", shortcuts }, .{ "themes", themes }, .{ "settings", settings }, .{ "terminal", terminal }, .{ "tabs", tabs },
     };
     for (tested) |entry| {
         const t = b.addTest(.{ .name = entry[0], .root_module = entry[1] });
