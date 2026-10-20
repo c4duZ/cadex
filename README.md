@@ -81,8 +81,8 @@ de novo atualiza para a versão mais recente.
 
 ## Instalar no Windows
 
-> **Prévia.** O app do Windows tem todas as features do Mac e está em teste; os arquivos entram na
-> próxima release. Enquanto isso, os links abaixo respondem 404.
+> **Prévia.** Primeira versão do Windows (1.1.0), com todas as features do Mac e ainda pouco usada.
+> Se algo falhar, [abra uma issue](https://github.com/c4duZ/cadex/issues) contando o que aconteceu.
 
 No PowerShell, um comando baixa a última versão, confere o checksum e instala o Cadex para o seu
 usuário, com atalho no Menu Iniciar, sem pedir administrador:
