@@ -27,6 +27,8 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Idioma** (`language`): inglês (padrão) ou português, a interface inteira; vale ao reabrir.
 - **Manter acordado** (`power`): o pedido ao sistema para o computador não dormir, sempre ou só
   com um programa rodando num terminal. O ícone de café na barra de título mostra e muda.
+- **Atualização** (`updates`): versão nova do Cadex publicada no GitHub, descrita pelo `latest.json`
+  assinado da release; o app baixa, confere e troca a si mesmo.
 - **Comando** (`command`): uma ação do app, com id, título e a função que executa. Menus, botões e
   atalhos só disparam comandos.
 

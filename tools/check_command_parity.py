@@ -17,8 +17,9 @@ LITERAL = re.compile(r'"((?:%s)\.[a-z0-9-]+)"' % PREFIXES)
 # Names of views and keys in the Mac's code, not commands (2026-10-20).
 # power.mode is a settings.json key, read by name in SettingsFile.swift.
 NOT_COMMANDS = {"explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode"}
-# Mac-only by design: none yet. Windows-only ones (workspace.environment) need no entry.
-MAC_ONLY = set()
+# Mac-only for now: the in-app updater (docs/adr/0016-in-app-updates.md) comes
+# to Windows later. Windows-only ones (workspace.environment) need no entry.
+MAC_ONLY = {"app.check-for-updates", "app.install-update"}
 
 
 def literals(folder, suffix):

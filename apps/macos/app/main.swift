@@ -8,6 +8,7 @@ import Shortcuts
 import Strings
 import Tabs
 import Themes
+import Updates
 
 /// What the windows share: settings, the settings window, the keymap and
 /// the shortcut dispatcher. Each window is a WindowSession; ⌘N opens
@@ -38,6 +39,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var menuBarItem: MenuBarItem?
     /// Keep-awake, for the whole app: a program running in any window counts.
     private(set) lazy var power = PowerController { [weak self] in self?.sessions.contains(where: \.hasRunningProgram) ?? false }
+    /// The in-app updater: one state for every window's title bar.
+    let updates = UpdateController()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Before any text is made: every view reads its texts once (ADR 0015).
@@ -53,6 +56,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 keycap: ui.field.nsColor)
         }
         startPower()
+        startUpdates()
         let main = WindowSession(app: self, folder: WorkspaceFolder(), isMain: true)
         sessions.append(main)
         catalog.register(main.commands.commands)
@@ -131,6 +135,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         _ = (current ?? sessions.first)?.commands.run("power.toggle")
     }
 
+
+    /// The panel's buttons run commands in the window in front; installing
+    /// reopens as "Reopen now" does (docs/adr/0016-in-app-updates.md).
+    private func startUpdates() {
+        updates.onChange = { [weak self] in self?.sessions.forEach { $0.showUpdate() } }
+        updates.runCommand = { [weak self] id in _ = (self?.current ?? self?.sessions.first)?.commands.run(id) }
+        updates.relaunch = { [weak self] in self?.relaunch() }
+        updates.start()
+    }
 
     func sessionClosed(_ session: WindowSession) {
         sessions.removeAll { $0 === session }
@@ -235,8 +248,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/bin/sh")
         if Bundle.main.bundleIdentifier != nil {
-            process.arguments = ["-c", "while kill -0 \"$1\" 2>/dev/null; do sleep 0.2; done; open -n \"$0\"",
-                                 Bundle.main.bundlePath, String(getpid())]
+            // The CADEX_ variables go along: a test instance reopened by an
+            // update would otherwise take the keyboard and the owner's spaces.
+            let env = ProcessInfo.processInfo.environment.filter { $0.key.hasPrefix("CADEX_") }
+                .flatMap { ["--env", "\($0.key)=\($0.value)"] }
+            process.arguments = ["-c", "pid=$1; shift; while kill -0 \"$pid\" 2>/dev/null; do sleep 0.2; done; open -n \"$@\"",
+                                 "sh", String(getpid())] + env + [Bundle.main.bundlePath]
         } else if let executable = Bundle.main.executablePath {
             process.arguments = ["-c", "while kill -0 \"$1\" 2>/dev/null; do sleep 0.2; done; \"$0\" >/dev/null 2>&1 &",
                                  executable, String(getpid())]

@@ -20,8 +20,9 @@
 - `FolderFollow.swift`: o workspace segue o terminal com foco; a cada `cd` vai para a raiz do
   repositório git da pasta (ou a própria pasta), a menos que explorer.followTerminal desligue.
 - Antes de montar qualquer tela, `main.swift` define Strings.language pelo general.language (ADR
-  0015); "Reabrir agora" nas configurações sai como de costume e um shell abre o Cadex de novo
-  (`openAgain`).
+  0015); "Reabrir agora" nas configurações e a atualização (`startUpdates`) saem como de costume e um
+  shell abre o Cadex de novo (`openAgain`), levando as variáveis CADEX_ (uma instância de teste
+  reabre em segundo plano, com o arquivo de spaces dela).
 - `main.swift` (AppDelegate) guarda o que as janelas dividem: configurações, a janela de
   configurações, o keymap e o despachante de atalhos, que trocam para os comandos da janela com
   foco (`sessionBecameKey`). Abre a janela principal e as do ⌘N (`newWindow`, na pasta da janela de
@@ -43,8 +44,9 @@
   (38 pt, botões da janela centrados); `TitleBarView.swift` (um grupo à esquerda com painel
   lateral, busca/paleta "⌘K" e spaces, o space só o ícone de pilha com um space e o nome com mais;
   o café do manter acordado antes do space (cheio ligado, contorno desligado; o clique roda
-  power.toggle, o ⇧⌘A); depois as abas, "+" e as
-  configurações à direita; cada controle um `TitleBarButton.swift` de
+  power.toggle, o ⇧⌘A); depois as abas, "+" e, à direita, o botão de atualização (na cor de
+  destaque do tema, só com versão nova para instalar; roda app.check-for-updates) e as
+  configurações; cada controle um `TitleBarButton.swift` de
   26 pt com fundo ao passar e ao clicar,
   busca, todos por comando), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
   painel lateral recolhível, barra de status) e `SidebarView.swift` (duas páginas, Arquivos e Git, trocadas por abas largas embaixo do painel, como no Terax, que rodam explorer.focus e git.show). O explorer é criado

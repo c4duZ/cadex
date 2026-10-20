@@ -36,6 +36,12 @@ final class TitleBarView: NSView {
     private let group = NSView()
     private let newTabButton = TitleBarButton(icon: .plus, tip: "Abrir terminal, arquivo, preview ou grafo do git")
     private let settingsButton = TitleBarButton(icon: .gearSix, tip: "Configurações (⌘,)")
+    /// A newer Cadex: shown only while there is one, left of the settings;
+    /// a click opens the update panel (docs/spec/updates.md).
+    private let updateButton = TitleBarButton(icon: .arrowCircleUp, tip: "")
+    /// The update button and the settings: a stack, so the hidden button
+    /// takes no room.
+    private let trailing = NSStackView()
     /// Keep-awake, in the group: filled while on, the outline while off; a
     /// click runs power.toggle, as ⇧⌘A (docs/spec/power.md).
     private let powerButton = TitleBarButton(icon: .coffee, tip: "Manter acordado")
@@ -62,6 +68,11 @@ final class TitleBarView: NSView {
         newTabButton.onPress = { [weak self] in self?.showNewMenu() }
         settingsButton.onPress = { [weak self] in self?.run("settings.open") }
         powerButton.onPress = { [weak self] in self?.run("power.toggle") }
+        updateButton.onPress = { [weak self] in self?.run("app.check-for-updates") }
+        updateButton.setIcon(.arrowCircleUp, filled: true)
+        updateButton.isHidden = true
+        trailing.setViews([updateButton, settingsButton], in: .leading)
+        trailing.spacing = 4
 
         group.wantsLayer = true
         group.layer?.cornerRadius = 8
@@ -80,7 +91,7 @@ final class TitleBarView: NSView {
         ])
         spaceButton.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
 
-        let views: [NSView] = [group, newTabButton, settingsButton]
+        let views: [NSView] = [group, newTabButton, trailing]
         views.forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             addSubview($0)
@@ -89,8 +100,8 @@ final class TitleBarView: NSView {
         NSLayoutConstraint.activate([
             groupLeading,
             spaceButton.widthAnchor.constraint(lessThanOrEqualToConstant: 160),
-            settingsButton.leadingAnchor.constraint(greaterThanOrEqualTo: newTabButton.trailingAnchor, constant: 12),
-            settingsButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
+            trailing.leadingAnchor.constraint(greaterThanOrEqualTo: newTabButton.trailingAnchor, constant: 12),
+            trailing.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
         ] + views.map { $0.centerYAnchor.constraint(equalTo: centerYAnchor) })
     }
 
@@ -119,6 +130,12 @@ final class TitleBarView: NSView {
     func setPower(on: Bool, tip: String) {
         powerButton.setIcon(.coffee, filled: on)
         HoverTip.attach(tip, to: powerButton)
+    }
+
+    /// The update button: hidden with nothing to install, its tip the state.
+    func setUpdate(visible: Bool, tip: String) {
+        updateButton.isHidden = !visible
+        HoverTip.attach(tip, to: updateButton)
     }
 
     /// Puts a space's tab bar between the group and "+".
@@ -160,13 +177,15 @@ final class TitleBarView: NSView {
     /// Empty parts of the bar drag the window, like a normal title bar.
     override var mouseDownCanMoveWindow: Bool { true }
 
-    func setColors(text: NSColor, secondary: NSColor, field: NSColor) {
+    func setColors(text: NSColor, secondary: NSColor, field: NSColor, accent: NSColor) {
         textColor = text
         secondaryColor = secondary
         // The bar's own controls in near-full contrast: in the quiet gray
         // they disappeared next to the tabs (owner, 2026-10-19).
         let strong = text.withAlphaComponent(0.78)
         for button in [sidebarButton, searchButton, spaceButton, newTabButton, powerButton, settingsButton] { button.colors = (text, strong) }
+        // The update in the theme's accent: it is news, not a tool.
+        updateButton.colors = (accent, accent)
         group.layer?.backgroundColor = text.withAlphaComponent(0.06).cgColor
         setSpace(name: spaceTitle, count: spaceCount)
     }

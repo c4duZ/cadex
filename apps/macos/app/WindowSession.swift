@@ -103,6 +103,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         self.workspace = workspace
         workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.openers) ?? [] }
         showPower()
+        showUpdate()
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
         explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar(.files) }
         git.onOpenFile = { [weak opener] path, beside in opener?.open(path, beside: beside) }
@@ -116,6 +117,11 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// Keep-awake's icon in the title bar: filled while on, its tip the state.
     func showPower() {
         workspace?.titleBar.setPower(on: app.power.mode != .off, tip: app.powerTip)
+    }
+
+    /// The update button, only while there is one to install or finish.
+    func showUpdate() {
+        workspace?.titleBar.setUpdate(visible: app.updates.showsButton, tip: app.updates.buttonTip)
     }
 
     /// The menu and the shortcut labels from the keymap in effect.

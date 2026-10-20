@@ -9,7 +9,8 @@ scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem con
   NSAppleEventsUsageDescription, sem a qual o macOS recusava em silêncio o AppleScript de quem roda
   num terminal do Cadex: o create-dmg da release falhou assim em 2026-10-20).
   Leva 1 min e meio.
-- `release.sh`: build, Cadex.zip com o Cadex.zip.sha256, Cadex.dmg (create-dmg com o
+- `release.sh`: build, Cadex.zip com o Cadex.zip.sha256, latest.json (para o app se atualizar,
+  assinado por `sign-update.swift` com a chave do Keychain), Cadex.dmg (create-dmg com o
   `dmg-background.tiff`, gerado por `dmg-background.swift`) e o install.sh em dist/. Só publica com
   `--publish "notas"` (gh release create com nomes sem versão). `CADEX_DMG_PLAIN=1` faz o DMG sem
   mexer no Finder (sem fundo nem posições), para testar com alguém usando a máquina.
@@ -21,7 +22,7 @@ scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem con
 ## O que eu quero
 - Um `.app` universal (Apple Silicon + Intel) gerado só com as Command Line Tools.
 - Um DMG de "arrastar para Aplicativos" com fundo e ícone próprios, e um ZIP do mesmo app.
-- Release publicada no GitHub com DMG, ZIP e, se houver atualização automática, o appcast assinado.
+- Release publicada no GitHub com DMG, ZIP e o latest.json assinado que o app lê para se atualizar.
 - O instalador por comando do ADR 0007 baixando o mesmo ZIP da release.
 
 ## O que eu não quero
@@ -57,8 +58,14 @@ scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem con
   ícones combinando com as do build.
 - Publicar com `gh release create` usando nomes sem versão (Cadex.dmg) para os links
   `releases/latest/download/...` do README sempre baixarem a última.
-- Atualização automática, se entrar (decisão própria, ADR 0007): Sparkle, com a chave EdDSA no
-  Keychain e `generate_appcast` apontando para o ZIP; o app lê SUFeedURL e SUPublicEDKey do Info.plist.
+- Atualização dentro do app sem Sparkle (`../../../docs/adr/0016-in-app-updates.md`): o
+  `sign-update.swift` assina o Cadex.zip com Ed25519 e escreve o latest.json (versão, notas, ZIP
+  desta versão, SHA-256, assinatura). A chave privada fica no Keychain, item
+  `cadex-update-signing` (conta `cadex`), e chega ao script pela entrada padrão; a pública está em
+  `../features/updates/UpdateVerifier.swift`. Sem a chave, `release.sh --publish` recusa. Chave
+  nova: `swift sign-update.swift keygen`, a privada no Keychain com `security
+  add-generic-password -s cadex-update-signing -a cadex -w <privada>`, a pública no código; quem
+  estiver numa versão antiga atualiza uma vez pelo install.sh.
 
 ## Como validar
 - `codesign -dv --verbose=2 Cadex.app` mostra `Identifier=` com o bundle id e `Signature=adhoc`.
@@ -67,6 +74,8 @@ scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem con
   Sem Mac Intel à mão: `arch -x86_64 dist/Cadex.app/Contents/MacOS/Cadex` roda a fatia Intel no
   Rosetta (conferido em 2026-10-19; falta um Mac Intel de verdade).
 - `spctl -a -vv Cadex.app` dá `rejected` enquanto não houver notarização: esperado, não é bug.
+- O latest.json de dist/ confere com a chave pública do app; com ele, `CADEX_UPDATE_FEED=dist/latest.json`
+  numa cópia mais velha do app mostra o botão de atualização (`../features/updates/CLAUDE.md`).
 - `CADEX_DOWNLOAD=dist CADEX_INSTALL_DIR=<pasta de teste> sh install.sh` instala e a assinatura
   confere; com o ZIP alterado, recusa sem instalar nada. O DMG montado com `hdiutil attach
   -nobrowse` tem o Cadex.app assinado e o atalho para Aplicativos.

@@ -7,6 +7,7 @@ import CoreText
 /// same release as Resources/Phosphor-Regular.ttf. Add icons here by name.
 public enum Icon: UInt32, CaseIterable, Sendable {
     case appWindow = 0xE5DA
+    case arrowCircleUp = 0xE030
     case arrowClockwise = 0xE036
     case arrowCounterClockwise = 0xE038
     case arrowDown = 0xE03E

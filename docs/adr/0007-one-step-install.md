@@ -32,4 +32,5 @@ de quarentena, e o Gatekeeper não bloqueia.
 - **Rever quando o Cadex tiver público fora dos desenvolvedores:** aí a conta Apple Developer (Developer
   ID + notarização) passa a valer o custo, e o DMG vira o caminho principal.
 - Atualização automática, Homebrew e comando `cadex` no terminal são extras possíveis, cada um com a
-  própria decisão; nenhum pode virar requisito para instalar.
+  própria decisão; nenhum pode virar requisito para instalar. A atualização dentro do app foi
+  decidida em `0016-in-app-updates.md`.

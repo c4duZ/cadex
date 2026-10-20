@@ -34,6 +34,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | shortcuts | não | sim | atalhos configuráveis |
 | status-bar | não | sim | barra de status |
 | power | não | sim | manter o computador acordado, sempre ou com programa rodando |
+| updates | não | sim | procurar versão nova e atualizar o app com um clique |
 
 ## O que eu não quero
 - Código do Terax copiado, traduzido ou aberto como referência. A referência é o comportamento em

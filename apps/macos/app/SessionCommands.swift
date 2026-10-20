@@ -12,6 +12,7 @@ import SourceControl
 import StatusBar
 import Tabs
 import Terminal
+import Updates
 
 /// Every feature registers its commands in the window's registry; the menu
 /// and the shortcuts come from it (ADR 0005). Each window has its own, so
@@ -36,6 +37,7 @@ extension WindowSession {
             keywords: ["sidebar", "explorer", "painel"], category: .view, defaultShortcut: "cmd+b",
             action: .run { [weak self] in self?.workspace?.toggleSidebar() }))
         commands.register(PowerCommands.all(app.power))
+        commands.register(UpdateCommands.all(app.updates))
         commands.register(TerminalCommands.all)
         commands.register(WorkspaceCommands.all(folder, window: { [weak self] in self?.window },
                                                 terminalFolder: { [weak self] in self?.tabs?.activeTerminal?.currentDirectory }))
