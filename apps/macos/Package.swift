@@ -33,20 +33,21 @@ let package = Package(
         // The popup menus in the look of ⌘K (right click, "+", status bar).
         .target(
             name: "Menus",
-            dependencies: ["Icons"],
+            dependencies: ["Icons", "Strings"],
             path: "shared/menus",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
         .target(
             name: "Power",
-            dependencies: ["CommandPalette"],
+            dependencies: ["CommandPalette", "Strings"],
             path: "features/power",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
         .target(
             name: "Themes",
+            dependencies: ["Strings"],
             path: "features/themes",
             exclude: ["CLAUDE.md", "tests"],
             resources: [.copy("Resources/catalog.json")],
@@ -61,7 +62,7 @@ let package = Package(
         ),
         .target(
             name: "StatusBar",
-            dependencies: ["Icons", "Menus"],
+            dependencies: ["Icons", "Menus", "Strings"],
             path: "features/status-bar",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -75,14 +76,14 @@ let package = Package(
         ),
         .target(
             name: "Shortcuts",
-            dependencies: ["CommandPalette"],
+            dependencies: ["CommandPalette", "Strings"],
             path: "features/shortcuts",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
         .target(
             name: "Terminal",
-            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Strings"],
             path: "features/terminal",
             exclude: ["CLAUDE.md", "tests"],
             // @testable access for the feature's test executable.
@@ -91,7 +92,7 @@ let package = Package(
         ),
         .target(
             name: "Tabs",
-            dependencies: ["Terminal", "CommandPalette", "Icons", "Menus"],
+            dependencies: ["Terminal", "CommandPalette", "Icons", "Menus", "Strings"],
             path: "features/tabs",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -99,7 +100,7 @@ let package = Package(
         ),
         .target(
             name: "Explorer",
-            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Strings"],
             path: "features/explorer",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -107,7 +108,7 @@ let package = Package(
         ),
         .target(
             name: "Search",
-            dependencies: ["CCadex", "CommandPalette", "Icons"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Strings"],
             path: "features/search",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -115,7 +116,7 @@ let package = Package(
         ),
         .target(
             name: "Editor",
-            dependencies: ["CCadex", "CommandPalette", "Icons", "Tabs"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Tabs", "Strings"],
             path: "features/editor",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -123,7 +124,7 @@ let package = Package(
         ),
         .target(
             name: "Markdown",
-            dependencies: ["CCadex", "CommandPalette", "Editor", "Icons", "Menus"],
+            dependencies: ["CCadex", "CommandPalette", "Editor", "Icons", "Menus", "Strings"],
             path: "features/markdown",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -131,7 +132,7 @@ let package = Package(
         ),
         .target(
             name: "MediaPreview",
-            dependencies: ["CCadex", "CommandPalette", "Tabs"],
+            dependencies: ["CCadex", "CommandPalette", "Tabs", "Strings"],
             path: "features/media-preview",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -139,14 +140,14 @@ let package = Package(
         ),
         .target(
             name: "Preview",
-            dependencies: ["CommandPalette", "Icons", "Menus", "Tabs"],
+            dependencies: ["CommandPalette", "Icons", "Menus", "Tabs", "Strings"],
             path: "features/preview",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
         .target(
             name: "Spaces",
-            dependencies: ["CommandPalette", "Tabs", "Icons"],
+            dependencies: ["CommandPalette", "Tabs", "Icons", "Strings"],
             path: "features/spaces",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -154,7 +155,7 @@ let package = Package(
         ),
         .target(
             name: "GitHistory",
-            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Tabs"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Tabs", "Strings"],
             path: "features/git-history",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -162,7 +163,7 @@ let package = Package(
         ),
         .target(
             name: "SourceControl",
-            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Editor", "Tabs"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Editor", "Tabs", "Strings"],
             path: "features/source-control",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
