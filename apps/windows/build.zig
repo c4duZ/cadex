@@ -79,6 +79,7 @@ pub fn build(b: *std.Build) void {
     const status_bar = feature(b, target, optimize, shared, "status-bar", "status_bar.zig", &.{});
     const explorer = feature(b, target, optimize, shared, "explorer", "explorer.zig", &.{.{ "command-palette", command_palette }});
     const search = feature(b, target, optimize, shared, "search", "search.zig", &.{.{ "command-palette", command_palette }});
+    const spaces = feature(b, target, optimize, shared, "spaces", "spaces.zig", &.{ .{ "command-palette", command_palette }, .{ "tabs", tabs } });
     const settings = feature(b, target, optimize, shared, "settings", "settings.zig", &.{});
     const shortcuts = feature(b, target, optimize, shared, "shortcuts", "shortcuts.zig", &.{.{ "command-palette", command_palette }});
 
@@ -102,6 +103,7 @@ pub fn build(b: *std.Build) void {
             .{ .name = "status-bar", .module = status_bar },
             .{ .name = "explorer", .module = explorer },
             .{ .name = "search", .module = search },
+            .{ .name = "spaces", .module = spaces },
         },
     });
     linkCore(root, b.pathFromRoot(core_lib));
@@ -120,7 +122,7 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test-bin", "Build the app tests without running them");
     const tested = [_]struct { []const u8, *std.Build.Module }{
         .{ "app", root },                       .{ "ui", ui }, .{ "gfx", gfx }, .{ "icons", icons }, .{ "win32", win32 },
-        .{ "command-palette", command_palette }, .{ "shortcuts", shortcuts }, .{ "themes", themes }, .{ "settings", settings }, .{ "terminal", terminal }, .{ "tabs", tabs }, .{ "status-bar", status_bar }, .{ "explorer", explorer }, .{ "search", search },
+        .{ "command-palette", command_palette }, .{ "shortcuts", shortcuts }, .{ "themes", themes }, .{ "settings", settings }, .{ "terminal", terminal }, .{ "tabs", tabs }, .{ "status-bar", status_bar }, .{ "explorer", explorer }, .{ "search", search }, .{ "spaces", spaces },
     };
     for (tested) |entry| {
         const t = b.addTest(.{ .name = entry[0], .root_module = entry[1] });

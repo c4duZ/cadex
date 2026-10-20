@@ -148,7 +148,7 @@ pub fn register(app: *App) void {
     r.add(.{ .id = "settings.open", .title = "Abrir configurações", .keywords = &.{ "settings", "preferências", "ajustes" }, .shortcut = "cmd+,", .run = openSettings });
     r.add(.{ .id = "app.quit", .title = "Sair do Cadex", .keywords = &.{ "quit", "fechar app" }, .shortcut = "cmd+q", .run = quit });
     r.add(.{ .id = "app.hide", .title = "Ocultar o Cadex", .keywords = &.{ "hide", "minimizar" }, .shortcut = "cmd+h", .run = hide });
-    r.add(.{ .id = "window.new", .title = "Nova janela", .keywords = &.{ "new window", "janela" }, .shortcut = "cmd+n", .run = newWindow });
+    r.add(.{ .id = "window.new", .title = "Nova janela", .keywords = &.{ "new window", "janela" }, .run = newWindow });
     r.add(.{ .id = "edit.undo", .title = "Desfazer", .keywords = &.{"undo"}, .shortcut = "cmd+z", .run = undo, .available = hasFocusTarget });
     r.add(.{ .id = "edit.redo", .title = "Refazer", .keywords = &.{"redo"}, .shortcut = "cmd+shift+z", .run = redo, .available = hasFocusTarget });
     r.add(.{ .id = "edit.cut", .title = "Recortar", .keywords = &.{"cut"}, .shortcut = "cmd+x", .run = cut, .available = hasFocusTarget });
@@ -170,7 +170,7 @@ pub fn register(app: *App) void {
 }
 
 fn currentTabs(context: *anyopaque) ?*tabs.Tabs {
-    return &@as(*App, @ptrCast(@alignCast(context))).tabs;
+    return @as(*App, @ptrCast(@alignCast(context))).tabs;
 }
 fn currentBar(context: *anyopaque) *tabs.Bar {
     return &@as(*App, @ptrCast(@alignCast(context))).bar;

@@ -45,4 +45,6 @@ test {
     _ = @import("git_page.zig");
     _ = @import("opener.zig");
     _ = @import("environments.zig");
+    _ = @import("space_ui.zig");
+    _ = @import("places_source.zig");
 }

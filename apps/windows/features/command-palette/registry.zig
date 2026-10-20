@@ -14,6 +14,9 @@ pub const Command = struct {
     /// The default keys, in the Mac's notation ("cmd+shift+d"); the
     /// shortcuts feature turns ⌘ into Ctrl+Shift on Windows.
     shortcut: ?[]const u8 = null,
+    /// Only where the one rule makes two Mac shortcuts collide (⌘⌥→ and
+    /// ⌃⌘→ are both Ctrl+Shift+Alt+→): the Windows keys, same notation.
+    windows_shortcut: ?[]const u8 = null,
     context: ?*anyopaque = null,
     run: *const fn (context: ?*anyopaque) void,
     /// Null or true: can run now. The palette hides what cannot.

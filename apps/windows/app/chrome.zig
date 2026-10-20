@@ -41,6 +41,12 @@ pub fn titleBar(app: *App, area: gfx.Rect) void {
     _ = row.takeLeft(u.px(8));
     const left_group = row.takeLeft(u.px(8));
     _ = left_group;
+    // The space: its icon, and its name once there are several (the Mac's).
+    const several = app.spaces.list.items.len > 1;
+    const space_w = if (several) u.painter.measure(app.spaces.name(), u.style.small()) + u.px(36) else u.px(30);
+    const space_r = hole(app, .{ .x = row.x, .y = top, .w = space_w, .h = h });
+    _ = row.takeLeft(space_w + u.px(6));
+    if (ui.widgets.button(u, ui.id("title.space", 0), space_r, if (several) app.spaces.name() else "", .{ .icon = icons.phosphor.stack, .icon_size = 14, .radius = 7, .color = u.style.secondary_text })) _ = app.registry.run("space.switch");
     const search_label = app.shortcutLabelOrEmpty("palette.open");
     const search_w = u.painter.measure(search_label, u.style.small()) + u.px(40);
     const search = hole(app, .{ .x = row.x, .y = top, .w = search_w, .h = h });
@@ -55,7 +61,7 @@ pub fn titleBar(app: *App, area: gfx.Rect) void {
     if (ui.widgets.iconButton(u, ui.id("title.settings", 0), settings_r, icons.phosphor.gear_six, .{ .icon_size = 15 })) _ = app.registry.run("settings.open");
 
     // Tabs take what is left; each one is a hole.
-    const result = app.bar.draw(u, &app.tabs, row);
+    const result = app.bar.draw(u, app.tabs, row);
     var arena: std.heap.ArenaAllocator = .init(app.gpa);
     defer arena.deinit();
     const tab_count: f32 = @floatFromInt(@max(app.tabs.list.order.items.len, 1));

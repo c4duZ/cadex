@@ -3,7 +3,7 @@
 //! serves both systems (docs/spec/shortcuts.md):
 //! - "cmd" is Ctrl+Shift: Ctrl alone with a letter belongs to the programs
 //!   in the terminal, and Windows Terminal uses Ctrl+Shift the same way;
-//! - "cmd" with "shift" or "opt" is Ctrl+Shift+Alt;
+//! - "cmd" with "shift", "opt" or "ctrl" is Ctrl+Shift+Alt;
 //! - "ctrl", "shift", "opt"/"alt" without "cmd" are those keys as written.
 //! A symbol key follows the keyboard layout ("cmd+[" is wherever [ is, on
 //! ABNT2 too), as the Mac's menus do.
@@ -51,7 +51,7 @@ pub const KeyCombo = struct {
         if (cmd) {
             combo.ctrl = true;
             combo.shift = true;
-            if (shift or alt) combo.alt = true;
+            if (shift or alt or ctrl) combo.alt = true;
         }
         combo.ctrl = combo.ctrl or ctrl;
         combo.shift = combo.shift or shift;

@@ -15,6 +15,7 @@ const explorer = @import("explorer");
 const search = @import("search");
 const palette = @import("command-palette");
 const opener = @import("opener.zig");
+const spaces = @import("spaces");
 const window_mod = @import("window.zig");
 const App = @import("app.zig").App;
 
@@ -64,27 +65,51 @@ fn text(context: *anyopaque, utf8: []const u8) void {
 fn terminalNotice(context: *anyopaque, lparam: c.LPARAM, wparam: c.WPARAM) void {
     const app = of(context);
     const session: *terminal.Session = @ptrFromInt(@as(usize, @bitCast(lparam)));
-    // A notice queued before its pane closed finds nothing: ignored.
-    const found = app.tabs.find(session) orelse return;
+    // A notice queued before its pane closed finds nothing: ignored. The
+    // shells of hidden spaces keep running, so every space is searched.
+    const found = findSession(app, session) orelse return;
     const event: terminal.Event = @enumFromInt(@as(u8, @intCast(wparam)));
     switch (event) {
         .output, .title, .local_url => {},
-        .bell => found.view.bell(@intCast(c.GetTickCount64())),
+        .bell => found.found.view.bell(@intCast(c.GetTickCount64())),
         .exit => {
             const code = session.exitCode() orelse 0;
             // An error stays on screen with its code (docs/spec/terminal.md).
-            if (code == 0) app.tabs.closePaneNow(found.tab.id, found.pane) else found.view.exited = code;
+            if (code == 0) found.owner.closePaneNow(found.found.tab.id, found.found.pane) else found.found.view.exited = code;
         },
     }
     app.window.redraw();
 }
 
+const Found = struct { owner: *tabs.Tabs, found: @typeInfo(@typeInfo(@TypeOf(tabs.Tabs.find)).@"fn".return_type.?).optional.child };
+
+fn findSession(app: *App, session: *terminal.Session) ?Found {
+    for (app.spaces.list.items) |s| if (s.tabs.find(session)) |f| return .{ .owner = s.tabs, .found = f };
+    return null;
+}
+
+/// The close button and Alt+F4: one question for every space (programs
+/// running, unsaved files), then the spaces are saved and the window goes.
 fn close(context: *anyopaque) bool {
     const app = of(context);
-    if (app.tabs.closed_all) return true;
-    app.tabs.requestClose(.all);
-    app.window.redraw();
+    if (app.closing_window) return true;
+    var unsaved: usize = 0;
+    var running: usize = 0;
+    for (app.spaces.list.items) |s| s.tabs.tally(.all, &unsaved, &running);
+    if (unsaved > 0 or (running > 0 and app.settings.current.general.confirm_close)) {
+        app.quit_question = .{ .unsaved = unsaved > 0 };
+        app.window.redraw();
+        return false;
+    }
+    quitNow(app);
     return false;
+}
+
+/// After the question (or with nothing to ask): save the spaces and go.
+pub fn quitNow(app: *App) void {
+    app.spaces.save();
+    app.closing_window = true;
+    _ = c.DestroyWindow(app.window.hwnd);
 }
 
 fn wakeDrain(context: *anyopaque) void {
@@ -199,14 +224,24 @@ fn confirmClose(context: *anyopaque) bool {
     return of(context).settings.current.general.confirm_close;
 }
 
+/// The last tab of the space on screen closed: another space takes the
+/// window; the only one closes it (docs/spec/spaces.md).
 fn onEmpty(context: *anyopaque) void {
     const app = of(context);
-    app.tabs.closed_all = true;
-    _ = c.DestroyWindow(app.window.hwnd);
+    if (app.closing_window) return;
+    if (app.spaces.list.items.len > 1) {
+        // Inside a Tabs method: the space goes after the frame.
+        app.remove_space = true;
+        app.window.redraw();
+        return;
+    }
+    quitNow(app);
 }
 
 fn onChange(context: *anyopaque) void {
-    of(context).window.redraw();
+    const app = of(context);
+    app.save_due_ms = @as(i64, @intCast(c.GetTickCount64())) + 500;
+    app.window.redraw();
 }
 
 // ---- Settings and theme ----
@@ -243,11 +278,68 @@ fn applyTheme(app: *App) void {
 }
 
 fn eachView(app: *App, comptime f: fn (*App, *terminal.View) void) void {
-    var it = app.tabs.tabs.valueIterator();
-    while (it.next()) |t| for (t.*.panes.values()) |p| switch (p) {
-        .terminal => |v| f(app, v),
-        .document => {},
+    for (app.spaces.list.items) |s| {
+        var it = s.tabs.tabs.valueIterator();
+        while (it.next()) |t| for (t.*.panes.values()) |p| switch (p) {
+            .terminal => |v| f(app, v),
+            .document => {},
+        };
+    }
+}
+
+// ---- Spaces ----
+
+pub fn spacesHost(app: *App) spaces.Host {
+    return .{
+        .context = app,
+        .make_tabs = makeTabs,
+        .make_document = .{ .context = app, .make = makeDocument },
+        .folder = workspaceFolder,
+        .shown = spaceShown,
+        .schedule_save = scheduleSave,
+        .show_list = showList,
+        .ask_name = askSpaceName,
     };
+}
+
+fn makeTabs(context: *anyopaque) ?*tabs.Tabs {
+    const app = of(context);
+    const t = app.gpa.create(tabs.Tabs) catch return null;
+    t.* = tabs.Tabs.init(app.gpa, host(app));
+    return t;
+}
+
+/// A saved document again: a file by its path, through the opener.
+fn makeDocument(context: *anyopaque, identity: []const u8) ?tabs.Document {
+    const app = of(context);
+    const kind = opener.kindOf(identity);
+    const make = opener.makers.get(kind) orelse return null;
+    return make(app, identity, 0);
+}
+
+fn workspaceFolder(context: *anyopaque) ?[]const u8 {
+    const app = of(context);
+    return app.explorer.root() orelse app.home;
+}
+
+fn spaceShown(context: *anyopaque) void {
+    const app = of(context);
+    app.tabs = app.spaces.current();
+    app.u.focus = ui.context.none;
+    app.window.redraw();
+}
+
+fn scheduleSave(context: *anyopaque) void {
+    onChange(context);
+}
+
+fn askSpaceName(context: *anyopaque, current: []const u8) void {
+    const app = of(context);
+    var buffer: ui.TextBuffer = .{};
+    buffer.set(app.gpa, current) catch return;
+    buffer.selectAll();
+    app.space_rename = buffer;
+    app.u.focus = ui.id("space.rename", 0);
 }
 
 test {

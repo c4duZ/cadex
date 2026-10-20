@@ -181,7 +181,7 @@ pub const Tabs = struct {
         if (self.question != null) return;
         var unsaved: usize = 0;
         var running: usize = 0;
-        self.count(closing, &unsaved, &running);
+        self.tally(closing, &unsaved, &running);
         if (unsaved > 0) {
             self.question = .{ .closing = closing, .title = if (unsaved == 1) "Salvar as mudanças?" else "Salvar os arquivos alterados?", .message = "Há mudanças que ainda não foram salvas.", .unsaved = true };
         } else if (running > 0 and self.host.confirm_close(self.host.context)) {
@@ -191,8 +191,9 @@ pub const Tabs = struct {
         }
     }
 
-    fn count(self: *Tabs, closing: Closing, unsaved: *usize, running: *usize) void {
-        const tally = struct {
+    /// How many panes of `closing` hold unsaved documents and running programs.
+    pub fn tally(self: *Tabs, closing: Closing, unsaved: *usize, running: *usize) void {
+        const add = struct {
             fn pane(p: Pane, u: *usize, r: *usize) void {
                 switch (p) {
                     .terminal => |v| if (v.session.hasForegroundProcess()) {
@@ -205,11 +206,11 @@ pub const Tabs = struct {
             }
         };
         switch (closing) {
-            .pane => |pp| if (self.tabs.get(pp.tab)) |t| if (t.panes.get(pp.pane)) |p| tally.pane(p, unsaved, running),
-            .tab => |id| if (self.tabs.get(id)) |t| for (t.panes.values()) |p| tally.pane(p, unsaved, running),
+            .pane => |pp| if (self.tabs.get(pp.tab)) |t| if (t.panes.get(pp.pane)) |p| add.pane(p, unsaved, running),
+            .tab => |id| if (self.tabs.get(id)) |t| for (t.panes.values()) |p| add.pane(p, unsaved, running),
             .all => {
                 var it = self.tabs.valueIterator();
-                while (it.next()) |t| for (t.*.panes.values()) |p| tally.pane(p, unsaved, running);
+                while (it.next()) |t| for (t.*.panes.values()) |p| add.pane(p, unsaved, running);
             },
         }
     }
@@ -225,7 +226,8 @@ pub const Tabs = struct {
         self.finishClose(q.closing);
     }
 
-    fn saveAll(self: *Tabs, closing: Closing) bool {
+    /// Saves the unsaved documents of `closing`; false when one could not.
+    pub fn saveAll(self: *Tabs, closing: Closing) bool {
         var ok = true;
         const each = struct {
             fn save(p: Pane, all_ok: *bool) void {

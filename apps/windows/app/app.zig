@@ -16,6 +16,7 @@ const status_bar = @import("status-bar");
 const explorer = @import("explorer");
 const search = @import("search");
 const sidebar = @import("sidebar.zig");
+const spaces = @import("spaces");
 const window_mod = @import("window.zig");
 const chrome = @import("chrome.zig");
 const wiring = @import("wiring.zig");
@@ -39,7 +40,20 @@ pub const App = struct {
     themes: themes.Store = undefined,
     settings: settings.Store = undefined,
     term_font: terminal.SharedFont = undefined,
-    tabs: tabs.Tabs = undefined,
+    /// The tabs of the space on screen (spaces.current()).
+    tabs: *tabs.Tabs = undefined,
+    spaces: spaces.Spaces = undefined,
+    /// The window is closing: an empty space ends the window, not the space.
+    closing_window: bool = false,
+    /// A space emptied itself during a frame; removed after it.
+    remove_space: bool = false,
+    /// Closing the window with programs or unsaved files in any space asks once.
+    quit_question: ?struct { unsaved: bool } = null,
+    /// space.rename's field.
+    space_rename: ?ui.TextBuffer = null,
+    space_rename_scroll: ui.text_field.Scroll = .{},
+    /// When the spaces are saved next (0: nothing to save).
+    save_due_ms: i64 = 0,
     bar: tabs.Bar = .{},
     layout: tabs.Layout = .{},
     status: status_bar.StatusBar = .{},
@@ -97,24 +111,31 @@ pub const App = struct {
         self.painter = try gfx.Painter.init(self.surface.context, self.device.dwrite, &self.fonts);
         self.u = .{ .gpa = gpa, .painter = &self.painter, .style = .{}, .input = &self.input, .hwnd = self.window.hwnd };
 
-        self.tabs = tabs.Tabs.init(gpa, wiring.host(self));
+        self.spaces = .{ .gpa = gpa, .host = wiring.spacesHost(self) };
         self.explorer = explorer.Explorer.init(gpa, wiring.explorerHost(self));
         self.search = .{ .gpa = gpa, .host = wiring.searchHost(self) };
         app_commands.register(self);
         @import("environments.zig").register(self);
         self.explorer.register(&self.registry, wiring.explorerWiring(self));
         self.search.register(&self.registry);
+        self.spaces.register(&self.registry);
         self.palette.addPrefix(.{ .char = '/', .label = "arquivos", .source = self.search.filesSource() });
         self.palette.addPrefix(.{ .char = '#', .label = "texto", .source = self.search.contentSource() });
+        self.palette.addPrefix(.{ .char = '@', .label = "abas e spaces", .source = @import("places_source.zig").source(self) });
         wiring.applySettings(self);
         terminal.paste.cleanOld(gpa);
     }
 
     /// Opens the first tab (in `folder`, or the user's folder) and shows the window.
     pub fn start(self: *App, folder: ?[]const u8, background: bool) void {
-        if (folder orelse self.home) |f| sidebar.setWorkspace(self, f);
+        const restored = self.spaces.restore();
+        if (!restored) _ = self.spaces.add(null);
+        self.tabs = self.spaces.current();
+        // Without a folder on the command line, the workspace of last time.
+        const workspace = folder orelse self.spaces.saved_folder orelse self.home;
+        if (workspace) |f| sidebar.setWorkspace(self, f);
         self.explorer.launched_with_folder = folder != null;
-        self.tabs.newTab(folder orelse self.home);
+        if (!restored or folder != null) self.tabs.newTab(folder orelse self.home);
         self.window.show(background);
         self.window.run();
     }
@@ -151,6 +172,18 @@ pub const App = struct {
         self.drawOverlays();
 
         u.endFrame();
+        if (self.save_due_ms != 0) {
+            const now: i64 = @intCast(c.GetTickCount64());
+            if (now >= self.save_due_ms) {
+                self.save_due_ms = 0;
+                self.spaces.save();
+            } else self.window.redrawIn(@intCast(self.save_due_ms - now));
+        }
+        if (self.remove_space) {
+            self.remove_space = false;
+            self.spaces.removeActive();
+            self.tabs = self.spaces.current();
+        }
         self.surface.end() catch |err| std.log.warn("o quadro não foi mostrado: {s}", .{@errorName(err)});
         window_mod.Window.setCursor(u.cursor);
         if (u.ime_caret) |caret| self.window.placeIme(caret);
@@ -173,7 +206,7 @@ pub const App = struct {
         defer u.painter.popClip();
         const s = self.settings.current;
         const font = self.term_font.get(s.terminal.font_family, @floatCast(s.terminal.font_size), self.window.scale());
-        self.layout.draw(u, &self.tabs, font, self.panes_area);
+        self.layout.draw(u, self.tabs, font, self.panes_area);
         self.dropFiles();
     }
 
@@ -202,6 +235,7 @@ pub const App = struct {
         }
         @import("settings_page.zig").draw(self);
         self.palette.draw(u);
+        @import("space_ui.zig").draw(self);
         if (self.tabs.question) |q| {
             const buttons: []const []const u8 = if (q.unsaved) &.{ "Salvar", "Descartar", "Cancelar" } else &.{ "Fechar", "Cancelar" };
             if (ui.menu.ask(u, .{ .title = q.title, .message = q.message, .buttons = buttons })) |choice| self.tabs.answer(choice);
@@ -234,6 +268,7 @@ pub const App = struct {
     /// Whether keys and text go straight to the focused terminal now.
     pub fn terminalHasKeys(self: *App) ?*terminal.View {
         if (self.palette.isOpen() or self.tabs.question != null or self.pending_paste != null or self.pending_trash > 0) return null;
+        if (self.quit_question != null or self.space_rename != null) return null;
         if (@import("settings_page.zig").isOpen()) return null;
         if (self.plus_menu.owner != ui.context.none or self.status.menu.owner != ui.context.none) return null;
         if (self.bar.renaming != null) return null;

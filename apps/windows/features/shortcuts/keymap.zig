@@ -22,7 +22,7 @@ pub const Keymap = struct {
     pub fn init(gpa: std.mem.Allocator, registry: *const palette.Registry) Keymap {
         var self: Keymap = .{ .gpa = gpa, .arena = .init(gpa) };
         for (registry.commands.items) |command| {
-            const text = command.shortcut orelse continue;
+            const text = command.windows_shortcut orelse command.shortcut orelse continue;
             const combo = KeyCombo.parse(text) orelse {
                 self.note("atalho padrão inválido em {s}: {s}", .{ command.id, text });
                 continue;
