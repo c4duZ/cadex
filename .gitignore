@@ -17,3 +17,6 @@ __pycache__/
 
 # Release builds (apps/macos/packaging/build.sh)
 dist/
+
+# Local secrets: the update signing key (apps/macos/packaging/CLAUDE.md)
+.env

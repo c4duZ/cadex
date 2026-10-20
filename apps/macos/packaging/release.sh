@@ -9,7 +9,8 @@
 #
 # Before publishing, raise CFBundleShortVersionString and CFBundleVersion in
 # Info.plist. latest.json, which the app reads to update itself, is signed
-# with the Keychain item cadex-update-signing (docs/adr/0016-in-app-updates.md):
+# with the Keychain item cadex-update-signing, or CADEX_UPDATE_KEY in the
+# repository's .env (git-ignored, docs/adr/0016-in-app-updates.md):
 # without it a release does not publish. Needs create-dmg (brew) and gh logged in to the account that
 # owns the repository. create-dmg arranges the DMG window by driving the
 # Finder: run it in a logged-in session (CADEX_DMG_PLAIN=1 skips that step
@@ -33,10 +34,16 @@ if [[ "${1:-}" == "--publish" ]]; then
     fi
 fi
 command -v create-dmg >/dev/null || { echo "create-dmg não encontrado: brew install create-dmg" >&2; exit 1; }
+# The signing key on stdout, for a pipe: the Keychain first, then .env (a
+# copy the owner keeps to carry to another Mac, 2026-10-20).
+update_key() {
+    security find-generic-password -s cadex-update-signing -a cadex -w 2>/dev/null \
+        || sed -n 's/^CADEX_UPDATE_KEY=//p' "$ROOT/.env" 2>/dev/null
+}
 HAS_UPDATE_KEY=0
-security find-generic-password -s cadex-update-signing -a cadex >/dev/null 2>&1 && HAS_UPDATE_KEY=1
+[[ -n "$(update_key)" ]] && HAS_UPDATE_KEY=1
 if [[ "$PUBLISH" == "1" && "$HAS_UPDATE_KEY" == "0" ]]; then
-    echo "Chave de atualização não encontrada no Keychain (cadex-update-signing): ver docs/adr/0016-in-app-updates.md" >&2
+    echo "Chave de atualização não encontrada (Keychain cadex-update-signing ou CADEX_UPDATE_KEY no .env): ver docs/adr/0016-in-app-updates.md" >&2
     exit 1
 fi
 
@@ -51,7 +58,7 @@ cp "$PACKAGING/install.sh" "$DIST/install.sh"
 # the file signed is the file downloaded), its checksum and signature.
 rm -f "$DIST/latest.json"
 if [[ "$HAS_UPDATE_KEY" == "1" ]]; then
-    security find-generic-password -s cadex-update-signing -a cadex -w \
+    update_key \
         | swift "$PACKAGING/sign-update.swift" manifest "$DIST/Cadex.zip" "$VERSION" \
             "https://github.com/$REPO/releases/download/$TAG/Cadex.zip" "$NOTES" > "$DIST/latest.json"
 else

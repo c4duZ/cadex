@@ -27,7 +27,8 @@ não tem conta Apple Developer (ADR 0007).
 ## Consequências
 - `release.sh` só publica se achar a chave no Keychain; perder a chave obriga a trocar a pública
   no código, e quem estiver numa versão antiga terá que atualizar uma vez pelo `install.sh`.
-  Guardar uma cópia da chave fora deste Mac.
+  Uma cópia fica em `CADEX_UPDATE_KEY` no `.env` da raiz do repositório, fora do git (o dono,
+  2026-10-20); o `.env` está no mesmo disco, então guardar outra fora deste Mac.
 - Quem está na 1.2.0 ou antes não tem o botão: atualiza uma vez pelo `install.sh` ou pelo DMG.
 - O app só se atualiza onde pode escrever: em /Applications de um usuário administrador ou em
   ~/Applications. Aberto direto do DMG ou de Downloads (translocado pelo macOS), ele explica e

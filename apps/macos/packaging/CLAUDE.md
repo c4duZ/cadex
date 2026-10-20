@@ -61,7 +61,8 @@ scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem con
 - Atualização dentro do app sem Sparkle (`../../../docs/adr/0016-in-app-updates.md`): o
   `sign-update.swift` assina o Cadex.zip com Ed25519 e escreve o latest.json (versão, notas, ZIP
   desta versão, SHA-256, assinatura). A chave privada fica no Keychain, item
-  `cadex-update-signing` (conta `cadex`), e chega ao script pela entrada padrão; a pública está em
+  `cadex-update-signing` (conta `cadex`), com uma cópia em `CADEX_UPDATE_KEY` no .env da raiz
+  (fora do git; o release.sh usa se o Keychain não tiver), e chega ao script pela entrada padrão; a pública está em
   `../features/updates/UpdateVerifier.swift`. Sem a chave, `release.sh --publish` recusa. Chave
   nova: `swift sign-update.swift keygen`, a privada no Keychain com `security
   add-generic-password -s cadex-update-signing -a cadex -w <privada>`, a pública no código; quem
