@@ -13,6 +13,9 @@ const Color = geometry.Color;
 const Point = geometry.Point;
 pub const Spec = fonts_mod.Spec;
 
+/// Bytes [start, end) of a text drawn in `color` (Painter.textColored).
+pub const ColorRun = struct { start: usize, end: usize, color: Color };
+
 pub const Align = enum { leading, center, trailing };
 
 pub const TextOptions = struct {
@@ -28,6 +31,11 @@ pub const Painter = struct {
     factory: *c.IDWriteFactory5,
     fonts: *fonts_mod.Fonts,
     brush: *c.ID2D1SolidColorBrush,
+    /// Brushes for colored ranges of one layout (textColored): DirectWrite
+    /// keeps a brush per range, so the one recolored brush cannot serve.
+    /// Kept by color across frames; a theme has a couple dozen.
+    effects: [max_effects]Effect = undefined,
+    effect_count: usize = 0,
     /// Scratch for UTF-16 conversions; text longer than this is cut.
     wide: [4096]u16 = undefined,
 
@@ -40,6 +48,37 @@ pub const Painter = struct {
 
     pub fn deinit(self: *Painter) void {
         w.release(self.brush);
+        self.releaseEffects();
+    }
+
+    const max_effects = 48;
+    const Effect = struct { key: u32, brush: *c.ID2D1SolidColorBrush };
+
+    fn releaseEffects(self: *Painter) void {
+        for (self.effects[0..self.effect_count]) |e| w.release(e.brush);
+        self.effect_count = 0;
+    }
+
+    /// A brush of its own for `color`, made once.
+    fn effectBrush(self: *Painter, color: Color) ?*c.ID2D1SolidColorBrush {
+        const key = colorKey(color);
+        for (self.effects[0..self.effect_count]) |e| if (e.key == key) return e.brush;
+        if (self.effect_count == max_effects) self.releaseEffects();
+        var brush: [*c]c.ID2D1SolidColorBrush = null;
+        const value: c.D2D1_COLOR_F = .{ .r = color.r, .g = color.g, .b = color.b, .a = color.a };
+        if (w.call(self.context, "CreateSolidColorBrush", .{ &value, null, &brush }) < 0 or brush == null) return null;
+        self.effects[self.effect_count] = .{ .key = key, .brush = brush };
+        self.effect_count += 1;
+        return brush;
+    }
+
+    fn colorKey(color: Color) u32 {
+        const byte = struct {
+            fn of(v: f32) u32 {
+                return @intFromFloat(std.math.clamp(v, 0, 1) * 255 + 0.5);
+            }
+        }.of;
+        return byte(color.r) << 24 | byte(color.g) << 16 | byte(color.b) << 8 | byte(color.a);
     }
 
     fn paint(self: *Painter, color: Color) *c.ID2D1Brush {
@@ -152,6 +191,25 @@ pub const Painter = struct {
         self.trimWithEllipsis(made);
         const origin: c.D2D1_POINT_2F = .{ .x = r.x, .y = r.y };
         w.call(self.context, "DrawTextLayout", .{ origin, made, self.paint(color), c.D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT | c.D2D1_DRAW_TEXT_OPTIONS_CLIP });
+    }
+
+    /// One line of text from `r`'s left edge, centered on its height, in
+    /// `color` except the byte ranges of `runs` (a code view's tokens). One
+    /// layout for the line, so the glyphs sit as one run would put them.
+    pub fn textColored(self: *Painter, value: []const u8, spec: Spec, r: Rect, color: Color, runs: []const ColorRun) void {
+        if (value.len == 0 or r.w <= 0) return;
+        const made = self.layout(value, spec, 100_000, r.h) catch return;
+        defer w.release(made);
+        _ = w.call(made, "SetParagraphAlignment", .{c.DWRITE_PARAGRAPH_ALIGNMENT_CENTER});
+        for (runs) |run| {
+            if (run.end <= run.start or run.start >= value.len) continue;
+            const brush = self.effectBrush(run.color) orelse continue;
+            const from = utf16Index(value, run.start);
+            const range: c.DWRITE_TEXT_RANGE = .{ .startPosition = from, .length = utf16Index(value, @min(run.end, value.len)) - from };
+            _ = w.call(made, "SetDrawingEffect", .{ @as(*c.IUnknown, @ptrCast(brush)), range });
+        }
+        const origin: c.D2D1_POINT_2F = .{ .x = r.x, .y = r.y };
+        w.call(self.context, "DrawTextLayout", .{ origin, made, self.paint(color), c.D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT });
     }
 
     fn trimWithEllipsis(self: *Painter, made: *c.IDWriteTextLayout) void {
