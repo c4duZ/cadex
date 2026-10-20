@@ -432,7 +432,7 @@ typedef struct cadex_search_content cadex_search_content;
 
 typedef struct {
     bool case_sensitive;
-    bool regex;        /* POSIX extended syntax with Apple's \d \w \s \b (ADR 0009) */
+    bool regex;        /* POSIX extended syntax with \d \w \s \b, through TRE (ADR 0013) */
     bool show_hidden;
     uint32_t max_results; /* 0: 2000 */
 } cadex_search_content_options;
@@ -490,6 +490,17 @@ cadex_status cadex_workspace_authorize_terminal(cadex_terminal *terminal, uint8_
  * authorized by this call. */
 cadex_status cadex_workspace_launch_directory(const char *const *argv, size_t argc, const char *cwd,
                                               uint8_t **out, size_t *out_len);
+
+/* The WSL distributions installed (Windows), one per line, not
+ * NUL-terminated; free with cadex_free. None: *out NULL (docs/spec/workspace.md). */
+cadex_status cadex_workspace_wsl_distros(uint8_t **out, size_t *out_len);
+
+/* A path between Windows and a WSL distro. to_linux: C:\x -> /mnt/c/x and
+ * \\wsl.localhost\<d>\y -> /y; otherwise /mnt/c/x -> C:\x and
+ * /y -> \\wsl.localhost\<distro>\y. Free with cadex_free. No counterpart:
+ * CADEX_NOT_FOUND. */
+cadex_status cadex_workspace_wsl_path(const char *distro, const char *path, bool to_linux,
+                                      uint8_t **out, size_t *out_len);
 
 /* ---- Explorer (core/features/explorer) -------------------------------- */
 

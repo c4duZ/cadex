@@ -149,7 +149,17 @@ fn makeTerminal(context: *anyopaque, cwd: ?[]const u8) ?*terminal.View {
         .cursor = cursorShape(s.terminal.cursor),
         .cursor_blink = s.terminal.cursor_blink,
     };
-    const session = terminal.Session.open(app.gpa, cwd, 80, 24, prefs, .{ .context = app, .post = post }) catch |err| {
+    var shell_buf: [1024]u8 = undefined;
+    var session_prefs = prefs;
+    if (app.environment) |distro| if (s.general.shell.len == 0) {
+        // The distro's shell, starting in the same folder (wsl.exe takes
+        // a Windows path for --cd).
+        session_prefs.shell = if (cwd) |d|
+            std.fmt.bufPrint(&shell_buf, "wsl.exe -d {s} --cd \"{s}\"", .{ distro, d }) catch prefs.shell
+        else
+            std.fmt.bufPrint(&shell_buf, "wsl.exe -d {s} --cd ~", .{distro}) catch prefs.shell;
+    };
+    const session = terminal.Session.open(app.gpa, cwd, 80, 24, session_prefs, .{ .context = app, .post = post }) catch |err| {
         std.log.warn("o shell não abriu: {s}", .{@errorName(err)});
         return null;
     };
@@ -162,6 +172,9 @@ fn makeTerminal(context: *anyopaque, cwd: ?[]const u8) ?*terminal.View {
     view.selection_color = app.themes.current.terminal.selection;
     view.copy_on_select = s.terminal.copy_on_select;
     view.hooks = .{ .context = app, .open_link = openLink };
+    if (app.environment) |e| if (s.general.shell.len == 0) {
+        view.environment = app.gpa.dupe(u8, e) catch null;
+    };
     return view;
 }
 

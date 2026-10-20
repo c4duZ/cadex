@@ -57,6 +57,9 @@ pub const App = struct {
     /// A paste of several lines waiting for the user's answer.
     pending_paste: ?terminal.paste.Plan = null,
     home: ?[]u8 = null,
+    /// The environment new terminals open in: null is Windows ("Local"),
+    /// else a WSL distribution (workspace.environment, Windows only).
+    environment: ?[]u8 = null,
     next_view: u32 = 1,
     label_buf: [48]u8 = undefined,
 
@@ -98,6 +101,7 @@ pub const App = struct {
         self.explorer = explorer.Explorer.init(gpa, wiring.explorerHost(self));
         self.search = .{ .gpa = gpa, .host = wiring.searchHost(self) };
         app_commands.register(self);
+        @import("environments.zig").register(self);
         self.explorer.register(&self.registry, wiring.explorerWiring(self));
         self.search.register(&self.registry);
         self.palette.addPrefix(.{ .char = '/', .label = "arquivos", .source = self.search.filesSource() });
@@ -179,7 +183,9 @@ pub const App = struct {
         const view = self.tabs.focusedTerminal();
         const folder = self.tabs.currentFolder(arena.allocator());
         const busy = if (view) |v| v.session.hasForegroundProcess() else true;
-        const result = self.status.draw(&self.u, area, folder, self.home, "Local", busy);
+        var converted: [2048]u8 = undefined;
+        const shown = if (folder) |f| (if (view) |v| @import("environments.zig").windowsFolder(v, f, &converted) else f) else null;
+        const result = self.status.draw(&self.u, area, shown, self.home, @import("environments.zig").label(view), busy);
         if (result.go_to) |dir| if (view) |v| if (!busy) {
             const quoted = terminal.paste.quotePaths(self.gpa, &.{dir}) orelse return;
             defer self.gpa.free(quoted);

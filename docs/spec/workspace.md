@@ -19,6 +19,10 @@ só mexe em arquivos dentro das pastas que o usuário abriu.
     (explorer.followTerminal, ligada por padrão) desliga. O dono deu `cd` e a árvore ficou na pasta
     pessoal (2026-10-19).
 - Sem nenhuma dessas, o workspace é a pasta pessoal do usuário.
+- No Windows, o **ambiente** dos terminais novos é Local (o próprio Windows) ou uma distro do WSL,
+  escolhido pela paleta ("Escolher o ambiente dos terminais"). Um terminal numa distro abre o shell
+  dela na mesma pasta; a pasta que ele avisa (/home/ana) vira \\wsl.localhost\<distro>\home\ana
+  para a árvore e a barra de status, que mostra o nome da distro.
 - Toda pasta que vira workspace entra na lista de **diretórios autorizados**. Ler, listar, criar,
   renomear, mover, copiar, apagar e buscar só valem dentro de um diretório autorizado (ou de uma
   subpasta dele).

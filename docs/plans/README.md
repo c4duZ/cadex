@@ -25,7 +25,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 
 | # | plano | entrega | status |
 |---|---|---|---|
-| 9 | `docs/plans/9-windows-core.md` | núcleo compilando e testado no Windows, ConPTY, WSL | em andamento: B a G feitas; falta a VM (A) e o WSL (H) |
+| 9 | `docs/plans/9-windows-core.md` | núcleo compilando e testado no Windows, ConPTY, WSL | B a H feitas; falta a VM (A) |
 | 10 | `docs/plans/10-windows-terminal.md` | janela e terminal completo no Windows | escrito, compila; falta rodar na VM |
 | 11 | `docs/plans/11-windows-shell.md` | abas, divisões, paleta, tema, configurações | escrito, compila; falta rodar na VM |
 | 12 | `docs/plans/12-windows-files-viewers-git.md` | explorer, busca, visualizadores e git | em andamento |

@@ -78,8 +78,10 @@ pub fn followTerminal(app: *App) void {
     if (std.mem.eql(u8, dir.bytes, app.sidebar.followed.items)) return;
     app.sidebar.followed.clearRetainingCapacity();
     app.sidebar.followed.appendSlice(app.gpa, dir.bytes) catch return;
+    var windows_buf: [2048]u8 = undefined;
+    const folder = @import("environments.zig").windowsFolder(view, dir.bytes, &windows_buf);
     var buf: [2048]u8 = undefined;
-    const root = repositoryRoot(dir.bytes, &buf) orelse dir.bytes;
+    const root = repositoryRoot(folder, &buf) orelse folder;
     // Inside the current workspace (cd src) the tree stays where it is.
     if (app.explorer.root()) |current| if (std.ascii.startsWithIgnoreCase(root, current) and (root.len == current.len or root[current.len] == '\\')) return;
     setWorkspace(app, root);

@@ -54,12 +54,16 @@ pub const View = struct {
     /// The shell ended with an error: the pane stays and says the code
     /// (docs/spec/terminal.md, "Sessão encerrada por erro").
     exited: ?i32 = null,
+    /// The WSL distribution the shell runs in, or null for Windows itself
+    /// (the status bar shows it; its folders are converted for the tree).
+    environment: ?[]u8 = null,
 
     pub fn init(gpa: std.mem.Allocator, session: *Session, id: ui_mod.Id) View {
         return .{ .gpa = gpa, .session = session, .id = id };
     }
 
     pub fn deinit(self: *View) void {
+        if (self.environment) |e| self.gpa.free(e);
         self.find.deinit(self.gpa);
         self.session.close();
     }

@@ -44,4 +44,5 @@ test {
     _ = @import("sidebar.zig");
     _ = @import("git_page.zig");
     _ = @import("opener.zig");
+    _ = @import("environments.zig");
 }

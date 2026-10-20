@@ -78,3 +78,34 @@ test "finds the launch directory in argv" {
     defer std.c.free(out);
     try testing.expectEqualStrings("/usr/bin", out.?[0..len]);
 }
+
+/// The WSL distributions installed, one per line ("Ubuntu\nDebian"), not
+/// NUL-terminated; free with cadex_free. None (or not Windows): *out NULL.
+pub export fn cadex_workspace_wsl_distros(out: ?*?[*]u8, out_len: ?*usize) callconv(.c) status.Code {
+    clearOut(out, out_len);
+    const gpa = std.heap.c_allocator;
+    const list = workspace.wsl.distros(gpa) catch return status.out_of_memory;
+    defer {
+        for (list) |d| gpa.free(d);
+        gpa.free(list);
+    }
+    if (list.len == 0) return status.ok;
+    const joined = std.mem.join(gpa, "\n", list) catch return status.out_of_memory;
+    defer gpa.free(joined);
+    return handOut(joined, out, out_len);
+}
+
+/// A path between Windows and a WSL distro: to_linux turns C:\x into
+/// /mnt/c/x (and \\wsl.localhost\<d>\y into /y); otherwise /mnt/c/x into
+/// C:\x and /y into \\wsl.localhost\<distro>\y. Free with cadex_free. A
+/// path with no counterpart: CADEX_NOT_FOUND.
+pub export fn cadex_workspace_wsl_path(distro: ?[*:0]const u8, path: ?[*:0]const u8, to_linux: bool, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) status.Code {
+    clearOut(out, out_len);
+    const p = std.mem.span(path orelse return status.invalid_argument);
+    var buf: [4096]u8 = undefined;
+    const converted = if (to_linux)
+        workspace.wsl.toLinux(p, &buf)
+    else
+        workspace.wsl.toWindows(std.mem.span(distro orelse return status.invalid_argument), p, &buf);
+    return handOut(converted orelse return status.not_found, out, out_len);
+}
