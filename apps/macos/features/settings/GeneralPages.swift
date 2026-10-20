@@ -12,7 +12,8 @@ enum GeneralPages {
         let e = store.settings.explorer
         return SettingsPage.make(
             title: T("General", "Geral"),
-            subtitle: T("Language, where files open, and the file tree.", "Idioma, onde os arquivos abrem e a árvore de arquivos."),
+            subtitle: T("Language, where files open, the file tree and keeping the computer awake.",
+                        "Idioma, onde os arquivos abrem, a árvore de arquivos e manter o computador acordado."),
             rows: [
                 SettingsPage.section(T("Language", "Idioma")),
                 SettingsPage.row(T("Language", "Idioma"),
@@ -47,7 +48,7 @@ enum GeneralPages {
                                  T("Files and folders whose names start with a dot, dimmed. ⇧⌘. switches too.",
                                    "Arquivos e pastas cujo nome começa com ponto, apagados. O ⇧⌘. também troca."),
                                  control: SettingsPage.toggle(e.showHidden) { on in store.update { $0.explorer.showHidden = on } }),
-            ])
+            ] + KeepAwakeRows.make(store))
     }
 
     static func about() -> NSView {

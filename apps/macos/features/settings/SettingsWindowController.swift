@@ -17,8 +17,7 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let tabs = NSSegmentedControl()
     private let content = NSView()
     private static let sections: [(title: String, icon: Icon)] = [
-        (T("General", "Geral"), .gearSix), ("Terminal", .terminalWindow), (T("Keep awake", "Manter acordado"), .coffee),
-        (T("Themes", "Temas"), .palette), (T("Shortcuts", "Atalhos"), .keyboard), (T("About", "Sobre"), .info),
+        (T("General", "Geral"), .gearSix), ("Terminal", .terminalWindow), (T("Themes", "Temas"), .palette), (T("Shortcuts", "Atalhos"), .keyboard), (T("About", "Sobre"), .info),
     ]
     /// Reopens Cadex (the language counts at launch).
     private let relaunch: () -> Void
@@ -112,10 +111,9 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         let page: NSView
         switch section {
         case 1: page = TerminalPage.make(store)
-        case 2: page = KeepAwakePage.make(store)
-        case 3: page = themes.makeView()
-        case 4: page = shortcuts.makeView()
-        case 5: page = GeneralPages.about()
+        case 2: page = themes.makeView()
+        case 3: page = shortcuts.makeView()
+        case 4: page = GeneralPages.about()
         default: page = GeneralPages.general(store) { [weak self] language in self?.askRelaunch(language) }
         }
         content.subviews.forEach { $0.removeFromSuperview() }

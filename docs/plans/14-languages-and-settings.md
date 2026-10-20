@@ -20,9 +20,8 @@ Decisões: `docs/adr/0015-english-default-two-languages.md`.
 - **A. Base e configurações.** Módulo compartilhado de textos no Mac (`T(en, pt)`, o idioma lido
   uma vez ao abrir, a paleta achando pelos dois títulos); general.language no settings.json; o
   seletor com "Reabrir agora"; a janela de configurações refeita, com seções e explicações novas nos
-  dois idiomas: General (idioma, arquivos, árvore), Terminal (shell, perguntas, texto e cursor,
-  histórico e teclado), Keep awake (modo, ao abrir, tela, e a tampa explicada à parte), Themes,
-  Shortcuts, About. *Feita em 2026-10-20 no Mac (`apps/macos/shared/strings/Strings.swift`, as
+  dois idiomas: General (idioma, arquivos, árvore e as seções do manter acordado), Terminal (shell,
+  perguntas, texto e cursor, histórico e teclado), Themes, Shortcuts, About. *Feita em 2026-10-20 no Mac (`apps/macos/shared/strings/Strings.swift`, as
   páginas em `apps/macos/features/settings/`); o resto da interface segue em português até a fase B.*
 - **B. O resto do Mac.** Comandos (títulos e palavras-chave), menus, barra de título, dicas,
   paleta, explorer, git, editor, preview, mídia, Markdown, spaces, alertas e mensagens.

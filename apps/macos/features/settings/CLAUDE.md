@@ -14,7 +14,7 @@
   mudança e relê edição à mão observando a pasta (salvar atômico) e o arquivo (edição no lugar).
 - A janela (⌘,, comando settings.open): `SettingsWindowController.swift`, com as seções em abas no
   topo como no Terax, auxiliar de tela cheia (com o app em tela cheia, abre por cima dele, na mesma
-  mesa, e não numa mesa à parte); `GeneralPages.swift` (General e About), `TerminalPage.swift`, `KeepAwakePage.swift`, `ThemesPage.swift` (modo e
+  mesa, e não numa mesa à parte); `GeneralPages.swift` (General e About), `TerminalPage.swift`, `KeepAwakeRows.swift` (as seções do manter acordado em General), `ThemesPage.swift` (modo e
   grade de cartões de tema), `ShortcutsPage.swift` (grava a próxima combinação com os atalhos do
   app suspensos; Delete tira, Esc cancela, "Padrão" volta) e `SettingsPage.swift` (linhas, títulos de
   seção, notas, caixas e controles que mudam o arquivo na hora). Textos em par inglês/português

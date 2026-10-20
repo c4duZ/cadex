@@ -13,13 +13,12 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
     `../adr/0015-english-default-two-languages.md`). Arquivos: onde abrem, ao lado do painel com
     foco (padrão) ou em nova aba (`general.openFiles`), e como uma nota Markdown abre
     (`markdown.openAs`). Árvore de arquivos: seguir o terminal (`explorer.followTerminal`) e
-    mostrar os ocultos (`explorer.showHidden`).
+    mostrar os ocultos (`explorer.showHidden`). Manter acordado: como liga e desliga, o modo
+    (`power.mode`), manter a tela acesa, ligar ao abrir (`power.onAtLaunch`) e a tampa fechada
+    explicada à parte (ver `power.md`). Numa página própria ficou demais (o dono, 2026-10-20).
   - **Terminal:** Shell (o programa, vazio usa o do usuário; perguntar antes de fechar um programa
     rodando; perguntar antes de colar várias linhas). Texto e cursor (fonte, tamanho, cursor,
     piscando). Histórico e teclado (linhas, Option esquerdo como Meta, copiar ao selecionar).
-  - **Keep awake / Manter acordado:** como liga e desliga; Quando ligado (o modo, `power.mode`, e
-    manter a tela acesa); Ao abrir (`power.onAtLaunch`); Tampa fechada, explicada à parte. Ver
-    `power.md`.
   - **Themes / Temas:** modo claro ou escuro, o tema, a vibrância e a imagem de fundo.
   - **Shortcuts / Atalhos:** a lista de comandos com o atalho de cada um, editável, com aviso de
     conflito.
