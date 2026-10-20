@@ -79,6 +79,8 @@ pub fn build(b: *std.Build) void {
     const status_bar = feature(b, target, optimize, shared, "status-bar", "status_bar.zig", &.{});
     const settings = feature(b, target, optimize, shared, "settings", "settings.zig", &.{});
     const shortcuts = feature(b, target, optimize, shared, "shortcuts", "shortcuts.zig", &.{.{ "command-palette", command_palette }});
+    const source_control = feature(b, target, optimize, shared, "source-control", "source_control.zig", &.{ .{ "tabs", tabs }, .{ "command-palette", command_palette } });
+    const git_history = feature(b, target, optimize, shared, "git-history", "git_history.zig", &.{ .{ "tabs", tabs }, .{ "command-palette", command_palette } });
 
     const root = b.createModule(.{
         .root_source_file = b.path("app/main.zig"),
@@ -98,6 +100,8 @@ pub fn build(b: *std.Build) void {
             .{ .name = "terminal", .module = terminal },
             .{ .name = "tabs", .module = tabs },
             .{ .name = "status-bar", .module = status_bar },
+            .{ .name = "source-control", .module = source_control },
+            .{ .name = "git-history", .module = git_history },
         },
     });
     linkCore(root, b.pathFromRoot(core_lib));
@@ -117,6 +121,7 @@ pub fn build(b: *std.Build) void {
     const tested = [_]struct { []const u8, *std.Build.Module }{
         .{ "app", root },                       .{ "ui", ui }, .{ "gfx", gfx }, .{ "icons", icons }, .{ "win32", win32 },
         .{ "command-palette", command_palette }, .{ "shortcuts", shortcuts }, .{ "themes", themes }, .{ "settings", settings }, .{ "terminal", terminal }, .{ "tabs", tabs }, .{ "status-bar", status_bar },
+        .{ "source-control", source_control }, .{ "git-history", git_history },
     };
     for (tested) |entry| {
         const t = b.addTest(.{ .name = entry[0], .root_module = entry[1] });
