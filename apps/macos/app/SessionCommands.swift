@@ -5,6 +5,7 @@ import Explorer
 import GitHistory
 import Markdown
 import MediaPreview
+import Power
 import Preview
 import Search
 import SourceControl
@@ -34,6 +35,7 @@ extension WindowSession {
             id: "view.toggle-sidebar", title: "Mostrar ou esconder o painel lateral",
             keywords: ["sidebar", "explorer", "painel"], category: .view, defaultShortcut: "cmd+b",
             action: .run { [weak self] in self?.workspace?.toggleSidebar() }))
+        commands.register(PowerCommands.all(app.power))
         commands.register(TerminalCommands.all)
         commands.register(WorkspaceCommands.all(folder, window: { [weak self] in self?.window },
                                                 terminalFolder: { [weak self] in self?.tabs?.activeTerminal?.currentDirectory }))

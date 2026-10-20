@@ -30,6 +30,15 @@ enum GeneralPages {
                                                          selected: store.settings.markdown.openAs) { value in
                                  store.update { $0.markdown.openAs = value }
                              }),
+            SettingsPage.row("Manter acordado ao abrir", "Como o Cadex abre: deixando o computador dormir, sempre acordado, ou acordado só com um programa rodando no terminal. O ícone de café na barra e o ⌘K mudam na hora.",
+                             control: SettingsPage.popup([("Não", "off"), ("Sempre", "always"), ("Com programa rodando", "running")],
+                                                         selected: store.settings.power.keepAwake) { value in
+                                 store.update { $0.power.keepAwake = value }
+                             }),
+            SettingsPage.row("Manter a tela acesa", "Desligado, a tela pode apagar e o computador segue rodando. Na tomada, segue rodando também com a tampa fechada.",
+                             control: SettingsPage.toggle(store.settings.power.keepDisplayOn) { on in
+                                 store.update { $0.power.keepDisplayOn = on }
+                             }),
         ])
     }
 

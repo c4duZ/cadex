@@ -16,6 +16,8 @@ final class SettingsBridge {
     var onExplorer: ((Settings.Explorer) -> Void)?
     /// The markdown section changed (how notes open).
     var onMarkdown: ((Settings.Markdown) -> Void)?
+    /// The power section changed (the display; the mode counts at launch).
+    var onPower: ((Settings.Power) -> Void)?
     /// The background image or vibrancy changed.
     var onLooks: ((WindowBackdrop.Image?, Bool) -> Void)?
     private var lastShortcuts: [String: String?]?
@@ -41,6 +43,7 @@ final class SettingsBridge {
         onLooks?(a.backgroundImage.map { .init(path: $0, opacity: a.backgroundOpacity, blur: a.backgroundBlur) }, a.vibrancy)
         onExplorer?(settings.explorer)
         onMarkdown?(settings.markdown)
+        onPower?(settings.power)
         if settings.shortcuts != lastShortcuts {
             lastShortcuts = settings.shortcuts
             onShortcuts?(settings.shortcuts)

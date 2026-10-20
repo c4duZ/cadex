@@ -24,6 +24,8 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Barra lateral** (`sidebar`): a coluna com o explorer ou o source control.
 - **Barra de status** (`status-bar`): a faixa inferior com diretório e ambiente.
 - **Paleta de comandos** (`command-palette`): a busca de ações aberta pelo ⌘K. Executa qualquer comando.
+- **Manter acordado** (`power`): o pedido ao sistema para o computador não dormir, sempre ou só
+  com um programa rodando num terminal. O ícone de café na barra de título mostra e muda.
 - **Comando** (`command`): uma ação do app, com id, título e a função que executa. Menus, botões e
   atalhos só disparam comandos.
 

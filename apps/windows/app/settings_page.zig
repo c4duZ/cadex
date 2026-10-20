@@ -133,6 +133,14 @@ fn general(app: *App, area_in: gfx.Rect) void {
         s.markdown.open_as = v;
         commit(app, s);
     }
+    if (choice(u, row(u, &area, "Manter acordado ao abrir"), "keepAwake", s.power.keep_awake, &.{ .{ "off", "Não" }, .{ "always", "Sempre" }, .{ "running", "Com programa" } })) |v| {
+        s.power.keep_awake = v;
+        commit(app, s);
+    }
+    if (ui.widgets.toggle(u, ui.id("settings.keepDisplayOn", 0), row(u, &area, "Manter a tela acesa"), s.power.keep_display_on)) |v| {
+        s.power.keep_display_on = v;
+        commit(app, s);
+    }
     if (ui.widgets.toggle(u, ui.id("settings.follow", 0), row(u, &area, "A árvore segue a pasta do terminal"), s.explorer.follow_terminal)) |v| {
         s.explorer.follow_terminal = v;
         commit(app, s);

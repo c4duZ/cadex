@@ -99,4 +99,8 @@ extension TabsController {
 
     /// The window these tabs live in, for a space's questions.
     public var hostWindow: NSWindow? { window }
+
+    /// Whether a terminal in any tab runs a program (keep-awake's
+    /// "com programa rodando", docs/spec/power.md).
+    public var hasRunningProgram: Bool { tabs.values.contains { $0.hasForegroundProcess } }
 }

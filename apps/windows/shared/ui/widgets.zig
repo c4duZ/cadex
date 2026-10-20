@@ -13,6 +13,8 @@ pub const ButtonOptions = struct {
     /// A Phosphor code point (shared/icons) drawn before the label.
     icon: ?u21 = null,
     icon_size: f32 = 16,
+    /// The icon in the fill weight (on), instead of the outline.
+    filled: bool = false,
     selected: bool = false,
     enabled: bool = true,
     /// A filled button (the default choice of a dialog).
@@ -46,7 +48,7 @@ pub fn button(ui: *Ui, widget: Id, r: Rect, title: []const u8, options: ButtonOp
     if (options.icon) |cp| {
         const size = ui.px(options.icon_size);
         const box = if (title.len == 0) r else content.takeLeft(size + ui.px(6));
-        ui.painter.icon(cp, size, if (title.len == 0) box else .{ .x = box.x, .y = box.y, .w = size, .h = box.h }, fg);
+        ui.painter.iconWeight(cp, size, if (title.len == 0) box else .{ .x = box.x, .y = box.y, .w = size, .h = box.h }, fg, options.filled);
     }
     if (title.len > 0) ui.painter.text(title, style.ui(), content, fg, if (options.icon != null) .{} else options.@"align");
     return clicked;

@@ -13,6 +13,7 @@ const settings = @import("settings");
 const terminal = @import("terminal");
 const tabs = @import("tabs");
 const status_bar = @import("status-bar");
+const power_mod = @import("power");
 const explorer = @import("explorer");
 const search = @import("search");
 const sidebar = @import("sidebar.zig");
@@ -78,6 +79,9 @@ pub const App = struct {
     /// Several items to the Recycle Bin wait for the user's answer.
     pending_trash: usize = 0,
     plus_menu: ui.menu.Menu = .{},
+    /// Keep-awake (docs/spec/power.md) and the coffee's menu in the title bar.
+    power: power_mod.Power = undefined,
+    power_menu: ui.menu.Menu = .{},
     /// The title bar's buttons and tabs, last frame: not the caption.
     holes: std.ArrayList(gfx.Rect) = .empty,
     max_button: gfx.Rect = .{},
@@ -118,7 +122,7 @@ pub const App = struct {
         self.palette = palette.Palette.init(gpa, self.commands.source(icons.phosphor.command));
 
         self.device = try gfx.Device.create();
-        self.fonts = try gfx.Fonts.init(gpa, self.device.dwrite, &.{icons.font_bytes});
+        self.fonts = try gfx.Fonts.init(gpa, self.device.dwrite, &.{ icons.font_bytes, icons.fill_font_bytes });
         self.term_font = .{ .gpa = gpa, .factory = self.device.dwrite };
         try self.window.create(gpa, &self.input, wiring.delegate(self));
         const size = self.window.size();
@@ -139,10 +143,14 @@ pub const App = struct {
         viewers.register(self);
         web.register(self);
         git_page.register(self);
+        self.power = .{ .host = wiring.powerHost(self), .keep_display_on = self.settings.current.power.keep_display_on };
+        power_mod.commands.register(&self.registry, &self.power);
         self.palette.addPrefix(.{ .char = '/', .label = "arquivos", .source = self.search.filesSource() });
         self.palette.addPrefix(.{ .char = '#', .label = "texto", .source = self.search.contentSource() });
         self.palette.addPrefix(.{ .char = '@', .label = "abas e spaces", .source = @import("places_source.zig").source(self) });
         wiring.applySettings(self);
+        // The mode settings.json opens with; the menu and ⌘K change it.
+        self.power.set(power_mod.Mode.parse(self.settings.current.power.keep_awake));
         terminal.paste.cleanOld(gpa);
     }
 
@@ -251,11 +259,28 @@ pub const App = struct {
         };
     }
 
+    /// The coffee's menu: the power commands that change something now.
+    fn drawPowerMenu(self: *App) void {
+        const owner = ui.id("power.menu", 0);
+        if (!self.power_menu.isOpen(owner)) return;
+        var items: [app_commands.power_pins.len]ui.menu.Item = undefined;
+        var ids: [app_commands.power_pins.len][]const u8 = undefined;
+        var n: usize = 0;
+        for (app_commands.power_pins) |pin| {
+            if (!self.registry.isAvailable(pin.id)) continue;
+            items[n] = .{ .label = pin.title, .icon = pin.icon };
+            ids[n] = pin.id;
+            n += 1;
+        }
+        if (ui.menu.show(&self.u, &self.power_menu, owner, items[0..n])) |i| _ = self.registry.run(ids[i]);
+    }
+
     fn drawOverlays(self: *App) void {
         const u = &self.u;
         if (ui.menu.show(u, &self.plus_menu, ui.id("plus.menu", 0), &app_commands.plus_items)) |i| {
             _ = self.registry.run(app_commands.openers[i].id);
         }
+        self.drawPowerMenu();
         web.drawOffer(self);
         @import("settings_page.zig").draw(self);
         self.palette.draw(u);
@@ -295,6 +320,7 @@ pub const App = struct {
         if (self.quit_question != null or self.space_rename != null or self.git.question != null) return null;
         if (@import("settings_page.zig").isOpen()) return null;
         if (self.plus_menu.owner != ui.context.none or self.status.menu.owner != ui.context.none) return null;
+        if (self.power_menu.owner != ui.context.none) return null;
         if (self.bar.renaming != null) return null;
         const view = self.tabs.focusedTerminal() orelse return null;
         if (self.u.focus != view.id and self.u.focus != ui.context.none) return null;

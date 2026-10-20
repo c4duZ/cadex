@@ -12,6 +12,9 @@ pub const material = @import("material.zig");
 
 /// Phosphor-Regular.ttf, loaded from memory by gfx.Fonts.
 pub const font_bytes = @embedFile("phosphor_font");
+/// Phosphor-Fill.ttf, the same codepoints filled: an icon that shows on
+/// (filled) or off (the outline), as keep-awake's (ADR 0008).
+pub const fill_font_bytes = @embedFile("phosphor_fill_font");
 
 pub fn forFileNamed(name: []const u8) u21 {
     var lower_buf: [256]u8 = undefined;

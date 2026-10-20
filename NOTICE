@@ -176,7 +176,7 @@ https://www.unicode.org/license.txt
 
 Phosphor Icons
 https://github.com/phosphor-icons/web
-Icon font (regular weight) of @phosphor-icons/web 2.1.2, in apps/macos/shared/icons. Shipped in the app.
+Icon fonts (regular and fill weights) of @phosphor-icons/web 2.1.2, in apps/macos/shared/icons. Shipped in the app.
 
     MIT License
 

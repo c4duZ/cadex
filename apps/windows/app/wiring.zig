@@ -125,10 +125,30 @@ fn wake(context: *anyopaque) void {
 
 fn poll(context: *anyopaque) void {
     const app = of(context);
+    // Keep-awake's "com programa rodando" looks at the terminals each second.
+    app.power.check(false);
     if (app.settings.poll()) {
         applySettings(app);
         app.window.redraw();
     }
+}
+
+/// What keep-awake needs: a program running in any space, and a redraw for
+/// the title bar's coffee.
+pub fn powerHost(app: *App) @import("power").Host {
+    return .{ .context = app, .any_running = anyRunning, .changed = powerChanged };
+}
+
+fn anyRunning(context: *anyopaque) bool {
+    const app = of(context);
+    var unsaved: usize = 0;
+    var running: usize = 0;
+    for (app.spaces.list.items) |s| s.tabs.tally(.all, &unsaved, &running);
+    return running > 0;
+}
+
+fn powerChanged(context: *anyopaque) void {
+    of(context).window.redraw();
 }
 
 fn appearance(context: *anyopaque) void {
@@ -258,6 +278,7 @@ pub fn applySettings(app: *App) void {
     for (s.shortcuts) |sc| prefs.append(app.gpa, .{ .keys = sc.keys, .id = sc.id }) catch {};
     app.shortcuts.reload(app.gpa, prefs.items);
     app.explorer.setShowHidden(s.explorer.show_hidden);
+    app.power.setDisplay(s.power.keep_display_on);
     if (app.explorer.root()) |r| app.search.setRoot(r, s.explorer.show_hidden);
     eachView(app, struct {
         fn apply(a: *App, v: *terminal.View) void {

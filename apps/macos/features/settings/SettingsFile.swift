@@ -46,6 +46,10 @@ public enum SettingsFile {
         if let m = reader.section(root, "markdown") {
             settings.markdown.openAs = reader.choice(m, "markdown.openAs", Settings.markdownOpenings) ?? settings.markdown.openAs
         }
+        if let p = reader.section(root, "power") {
+            settings.power.keepAwake = reader.choice(p, "power.keepAwake", Settings.keepAwakeModes) ?? settings.power.keepAwake
+            settings.power.keepDisplayOn = reader.bool(p, "power.keepDisplayOn") ?? settings.power.keepDisplayOn
+        }
         if let s = reader.section(root, "shortcuts") {
             for (combo, value) in s {
                 if value is NSNull { settings.shortcuts[combo] = .some(nil) }
@@ -72,6 +76,7 @@ public enum SettingsFile {
                            "backgroundOpacity": s.appearance.backgroundOpacity, "backgroundBlur": s.appearance.backgroundBlur],
             "explorer": ["showHidden": s.explorer.showHidden, "followTerminal": s.explorer.followTerminal],
             "markdown": ["openAs": s.markdown.openAs],
+            "power": ["keepAwake": s.power.keepAwake, "keepDisplayOn": s.power.keepDisplayOn],
             "shortcuts": shortcuts,
         ]
         return (try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])) ?? Data()

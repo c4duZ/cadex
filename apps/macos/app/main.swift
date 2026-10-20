@@ -2,6 +2,7 @@ import AppKit
 import CommandPalette
 import Explorer
 import Menus
+import Power
 import Settings
 import Shortcuts
 import Tabs
@@ -28,6 +29,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         suspendShortcuts: { [weak self] on in self?.dispatcher?.isSuspended = on })
 
     var settingsCommand: Command { settingsWindow.openCommand }
+    /// Keep-awake, for the whole app: a program running in any window counts.
+    private(set) lazy var power = PowerController { [weak self] in self?.sessions.contains(where: \.hasRunningProgram) ?? false }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         connectSettings()
@@ -40,6 +43,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 secondaryText: ui.secondaryText.nsColor, selection: ui.tabActive.nsColor, accent: ui.accent.nsColor,
                 keycap: ui.field.nsColor)
         }
+        startPower()
         let main = WindowSession(app: self, folder: WorkspaceFolder(), isMain: true)
         sessions.append(main)
         catalog.register(main.commands.commands)
@@ -83,6 +87,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let menu = session.mainMenu { NSApp.mainMenu = menu }
     }
 
+    /// The mode settings.json opens with; the display setting counts live.
+    private func startPower() {
+        let prefs = settings.store.settings.power
+        power.keepDisplayOn = prefs.keepDisplayOn
+        power.onChange = { [weak self] in self?.sessions.forEach { $0.showPower() } }
+        power.set(PowerController.Mode(rawValue: prefs.keepAwake) ?? .off)
+    }
+
     func sessionClosed(_ session: WindowSession) {
         sessions.removeAll { $0 === session }
     }
@@ -96,6 +108,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func connectSettings() {
         settings.onExplorer = { [weak self] prefs in self?.sessions.forEach { $0.applyExplorer(prefs) } }
         settings.onMarkdown = { [weak self] prefs in self?.sessions.forEach { $0.applyMarkdown(prefs) } }
+        settings.onPower = { [weak self] prefs in self?.power.keepDisplayOn = prefs.keepDisplayOn }
         settings.onLooks = { [weak self] image, vibrancy in self?.sessions.forEach { $0.applyLooks(image, vibrancy: vibrancy) } }
         settings.onShortcuts = { [weak self] shortcuts in
             self?.shortcuts = shortcuts

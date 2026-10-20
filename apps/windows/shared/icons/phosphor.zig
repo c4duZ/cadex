@@ -21,6 +21,7 @@ pub const caret_up: u21 = 0xE13C;
 pub const check: u21 = 0xE182;
 pub const clipboard_text: u21 = 0xE198;
 pub const code: u21 = 0xE1BC;
+pub const coffee: u21 = 0xE1C2;
 pub const command: u21 = 0xE1C4;
 pub const copy: u21 = 0xE1CA;
 pub const eye: u21 = 0xE220;

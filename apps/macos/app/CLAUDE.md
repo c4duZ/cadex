@@ -39,7 +39,8 @@
 - A casca da janela, no estilo do Terax: título transparente com barra de ferramentas compacta
   (38 pt, botões da janela centrados); `TitleBarView.swift` (um grupo à esquerda com painel
   lateral, busca/paleta "⌘K" e spaces, o space só o ícone de pilha com um space e o nome com mais;
-  depois as abas, "+" e as configurações à direita; cada controle um `TitleBarButton.swift` de
+  depois as abas, "+", o café do manter acordado (cheio ligado, contorno desligado, menu com os
+  comandos power.*, `powerPins`) e as configurações à direita; cada controle um `TitleBarButton.swift` de
   26 pt com fundo ao passar e ao clicar,
   busca, todos por comando), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
   painel lateral recolhível, barra de status) e `SidebarView.swift` (duas páginas, Arquivos e Git, trocadas por abas largas embaixo do painel, como no Terax, que rodam explorer.focus e git.show). O explorer é criado

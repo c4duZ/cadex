@@ -33,6 +33,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | command-palette | não | sim | ⌘K: registro de todos os comandos e a paleta que executa qualquer um |
 | shortcuts | não | sim | atalhos configuráveis |
 | status-bar | não | sim | barra de status |
+| power | não | sim | manter o computador acordado, sempre ou com programa rodando |
 
 ## O que eu não quero
 - Código do Terax copiado, traduzido ou aberto como referência. A referência é o comportamento em

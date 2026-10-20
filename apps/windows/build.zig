@@ -67,6 +67,7 @@ pub fn build(b: *std.Build) void {
     });
     // The same font file the Mac ships: one source for the icons (ADR 0008).
     icons.addAnonymousImport("phosphor_font", .{ .root_source_file = b.path("../macos/shared/icons/Resources/Phosphor-Regular.ttf") });
+    icons.addAnonymousImport("phosphor_fill_font", .{ .root_source_file = b.path("../macos/shared/icons/Resources/Phosphor-Fill.ttf") });
 
     // The shared modules build test exes of their own, which need the
     // system DLLs too.
@@ -93,6 +94,7 @@ pub fn build(b: *std.Build) void {
     const editor = feature(b, target, optimize, shared, "editor", "editor.zig", &.{ .{ "tabs", tabs }, .{ "command-palette", command_palette } });
     const markdown = feature(b, target, optimize, shared, "markdown", "markdown.zig", &.{ .{ "editor", editor }, .{ "tabs", tabs }, .{ "command-palette", command_palette } });
     const status_bar = feature(b, target, optimize, shared, "status-bar", "status_bar.zig", &.{});
+    const power = feature(b, target, optimize, shared, "power", "power.zig", &.{.{ "command-palette", command_palette }});
     const explorer = feature(b, target, optimize, shared, "explorer", "explorer.zig", &.{.{ "command-palette", command_palette }});
     const search = feature(b, target, optimize, shared, "search", "search.zig", &.{.{ "command-palette", command_palette }});
     const spaces = feature(b, target, optimize, shared, "spaces", "spaces.zig", &.{ .{ "command-palette", command_palette }, .{ "tabs", tabs } });
@@ -125,6 +127,7 @@ pub fn build(b: *std.Build) void {
             .{ .name = "editor", .module = editor },
             .{ .name = "markdown", .module = markdown },
             .{ .name = "status-bar", .module = status_bar },
+            .{ .name = "power", .module = power },
             .{ .name = "explorer", .module = explorer },
             .{ .name = "search", .module = search },
             .{ .name = "spaces", .module = spaces },
@@ -157,7 +160,7 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test-bin", "Build the app tests without running them");
     const tested = [_]struct { []const u8, *std.Build.Module }{
         .{ "app", root },                       .{ "ui", ui }, .{ "gfx", gfx }, .{ "icons", icons }, .{ "win32", win32 },
-        .{ "command-palette", command_palette }, .{ "shortcuts", shortcuts }, .{ "themes", themes }, .{ "settings", settings }, .{ "terminal", terminal }, .{ "tabs", tabs }, .{ "status-bar", status_bar }, .{ "explorer", explorer }, .{ "search", search }, .{ "spaces", spaces }, .{ "editor", editor }, .{ "markdown", markdown },
+        .{ "command-palette", command_palette }, .{ "shortcuts", shortcuts }, .{ "themes", themes }, .{ "settings", settings }, .{ "terminal", terminal }, .{ "tabs", tabs }, .{ "status-bar", status_bar }, .{ "power", power }, .{ "explorer", explorer }, .{ "search", search }, .{ "spaces", spaces }, .{ "editor", editor }, .{ "markdown", markdown },
         .{ "source-control", source_control }, .{ "git-history", git_history },
         .{ "webview", webview }, .{ "preview", preview }, .{ "media-preview", media_preview }, .{ "markdown-rendered", markdown_rendered },
     };

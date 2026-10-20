@@ -25,6 +25,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case check = 0xE182
     case clipboardText = 0xE198
     case code = 0xE1BC
+    case coffee = 0xE1C2
     case command = 0xE1C4
     case copy = 0xE1CA
     case eye = 0xE220
@@ -64,13 +65,16 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case trash = 0xE4A6
     case x = 0xE4F6
 
-    /// The font's family name inside the TTF.
+    /// The fonts' family names inside the TTFs.
     static let fontName = "Phosphor"
+    static let fillFontName = "Phosphor-Fill"
 
     /// The icon as a template image: buttons tint it with their color.
+    /// `filled` draws the fill weight: an icon that shows on (filled) or
+    /// off (the outline), as keep-awake's (docs/adr/0008-phosphor-icons.md).
     @MainActor
-    public func image(size: CGFloat = 16) -> NSImage {
-        let font = Self.font(size: size)
+    public func image(size: CGFloat = 16, filled: Bool = false) -> NSImage {
+        let font = filled ? Self.fillFont(size: size) : Self.font(size: size)
         let glyph = String(UnicodeScalar(rawValue)!)
         let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: NSColor.black]
         let image = NSImage(size: NSSize(width: size, height: size), flipped: false) { rect in
@@ -90,6 +94,13 @@ public enum Icon: UInt32, CaseIterable, Sendable {
         return NSFont(name: fontName, size: size) ?? .systemFont(ofSize: size)
     }
 
+    /// The fill weight at `size` (same codepoints as the regular one).
+    @MainActor
+    public static func fillFont(size: CGFloat) -> NSFont {
+        registerFont()
+        return NSFont(name: fillFontName, size: size) ?? font(size: size)
+    }
+
     @MainActor private static var registered = false
 
     @MainActor
@@ -99,8 +110,10 @@ public enum Icon: UInt32, CaseIterable, Sendable {
         // In Cadex.app the font is in Contents/Resources (packaging/build.sh):
         // SwiftPM's Bundle.module looks in the app's root folder, which the
         // signature does not allow, then at a path on the build machine.
-        guard let url = Bundle.main.url(forResource: "Phosphor-Regular", withExtension: "ttf")
-            ?? Bundle.module.url(forResource: "Phosphor-Regular", withExtension: "ttf") else { return }
-        CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+        for name in ["Phosphor-Regular", "Phosphor-Fill"] {
+            guard let url = Bundle.main.url(forResource: name, withExtension: "ttf")
+                ?? Bundle.module.url(forResource: name, withExtension: "ttf") else { continue }
+            CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+        }
     }
 }

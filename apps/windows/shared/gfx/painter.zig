@@ -299,9 +299,15 @@ pub const Painter = struct {
 
     /// A Phosphor icon (its code point from icons.zig) centered in `r`.
     pub fn icon(self: *Painter, codepoint: u21, size: f32, r: Rect, color: Color) void {
+        self.iconWeight(codepoint, size, r, color, false);
+    }
+
+    /// The same, in the fill weight when `filled` (an icon that shows on).
+    pub fn iconWeight(self: *Painter, codepoint: u21, size: f32, r: Rect, color: Color, filled: bool) void {
         var buf: [4]u8 = undefined;
         const n = std.unicode.utf8Encode(codepoint, &buf) catch return;
-        self.text(buf[0..n], .{ .family = "Phosphor", .size = size, .embedded = true }, r, color, .{ .@"align" = .center, .ellipsis = false });
+        const family = if (filled) "Phosphor-Fill" else "Phosphor";
+        self.text(buf[0..n], .{ .family = family, .size = size, .embedded = true }, r, color, .{ .@"align" = .center, .ellipsis = false });
     }
 };
 

@@ -22,6 +22,14 @@ extension WindowSession {
         PalettePin(id: "window.new", title: "Nova janela", icon: .appWindow),
     ]
 
+    /// The coffee's menu in the title bar: the power commands that change
+    /// something now (docs/spec/power.md).
+    static let powerPins = [
+        PalettePin(id: "power.keep-awake", title: "Manter acordado", icon: .coffee),
+        PalettePin(id: "power.keep-awake-while-running", title: "Manter acordado com programa rodando", icon: .terminalWindow),
+        PalettePin(id: "power.allow-sleep", title: "Deixar o computador dormir", icon: .x),
+    ]
+
     func connectPalette(_ palette: CommandPaletteController) {
         palette.pins = Self.openers
         ThemeStore.shared.observe { [weak palette] theme in

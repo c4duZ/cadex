@@ -49,11 +49,20 @@ public struct Settings: Equatable, Sendable {
         public var openAs = "source"
     }
 
+    public struct Power: Equatable, Sendable {
+        /// How Cadex opens: "off", "always" or "running" (only while a
+        /// terminal runs a program) (docs/spec/power.md).
+        public var keepAwake = "off"
+        /// The screen stays on too while the computer is held.
+        public var keepDisplayOn = false
+    }
+
     public var general = General()
     public var terminal = Terminal()
     public var appearance = Appearance()
     public var explorer = Explorer()
     public var markdown = Markdown()
+    public var power = Power()
     /// "cmd+shift+t" → command id, or nil to turn a default off.
     public var shortcuts: [String: String?] = [:]
 
@@ -66,4 +75,5 @@ public struct Settings: Equatable, Sendable {
     static let modes = ["system", "dark", "light"]
     static let markdownOpenings = ["source", "rendered"]
     static let fileOpenings = ["beside", "tab"]
+    static let keepAwakeModes = ["off", "always", "running"]
 }

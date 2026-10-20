@@ -17,6 +17,13 @@ let exitCode = await Checks.run([
             expect(found && glyphs[0] != 0, "\(icon) has no glyph")
         }
     }),
+    ("the fill weight loads, with the same codepoints (keep-awake's coffee)", {
+        let font = Icon.fillFont(size: 16)
+        expect(font.fontName == Icon.fillFontName, font.fontName)
+        var unichars = Array(String(UnicodeScalar(Icon.coffee.rawValue)!).utf16)
+        var glyphs = [CGGlyph](repeating: 0, count: unichars.count)
+        expect(CTFontGetGlyphsForCharacters(font as CTFont, &unichars, &glyphs, unichars.count) && glyphs[0] != 0)
+    }),
     ("icons are template images of the asked size", {
         let image = Icon.plus.image(size: 20)
         expect(image.isTemplate && image.size == NSSize(width: 20, height: 20))

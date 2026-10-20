@@ -66,6 +66,11 @@ final class TitleBarButton: NSView {
         if attributed.length > 0 { setAccessibilityLabel(attributed.string) }
     }
 
+    /// Another icon, the fill weight when `filled` (keep-awake on).
+    func setIcon(_ icon: Icon, filled: Bool) {
+        self.icon?.image = icon.image(size: Self.iconSize, filled: filled)
+    }
+
     private func restyle() {
         let fill: CGFloat = pressed ? 0.16 : hovered ? 0.09 : 0
         layer?.backgroundColor = fill > 0 ? colors.text.withAlphaComponent(fill).cgColor : nil

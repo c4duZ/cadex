@@ -1,0 +1,34 @@
+//! The power commands (ADR 0005), the Mac's ids and titles
+//! (apps/macos/features/power/PowerCommands.swift). Each shows only when it
+//! changes something; the title bar's menu runs the same ids.
+
+const palette = @import("command-palette");
+const power = @import("power.zig");
+
+var target: *power.Power = undefined;
+
+fn keepAwake(_: ?*anyopaque) void {
+    target.set(.always);
+}
+fn keepAwakeWhileRunning(_: ?*anyopaque) void {
+    target.set(.running);
+}
+fn allowSleep(_: ?*anyopaque) void {
+    target.set(.off);
+}
+fn notAlways(_: ?*anyopaque) bool {
+    return target.mode != .always;
+}
+fn notRunning(_: ?*anyopaque) bool {
+    return target.mode != .running;
+}
+fn notOff(_: ?*anyopaque) bool {
+    return target.mode != .off;
+}
+
+pub fn register(registry: *palette.Registry, p: *power.Power) void {
+    target = p;
+    registry.add(.{ .id = "power.keep-awake", .title = "Manter o computador acordado", .keywords = &.{ "caffeinate", "amphetamine", "dormir", "sleep", "energia" }, .run = keepAwake, .available = notAlways });
+    registry.add(.{ .id = "power.keep-awake-while-running", .title = "Manter acordado com programa rodando", .keywords = &.{ "caffeinate", "amphetamine", "dormir", "sleep", "agente", "build" }, .run = keepAwakeWhileRunning, .available = notRunning });
+    registry.add(.{ .id = "power.allow-sleep", .title = "Deixar o computador dormir", .keywords = &.{ "caffeinate", "amphetamine", "dormir", "sleep", "desligar" }, .run = allowSleep, .available = notOff });
+}

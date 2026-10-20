@@ -41,6 +41,13 @@ pub const Settings = struct {
         /// "source" or "rendered".
         open_as: []const u8 = "source",
     } = .{},
+    /// Keep-awake (docs/spec/power.md).
+    power: struct {
+        /// How Cadex opens: "off", "always" or "running".
+        keep_awake: []const u8 = "off",
+        /// The screen stays on too while the computer is held.
+        keep_display_on: bool = false,
+    } = .{},
     /// Key combination → command id, or null to turn a default off.
     shortcuts: []const Shortcut = &.{},
 };
@@ -53,6 +60,7 @@ const cursors = [_][]const u8{ "bar", "block", "underline" };
 const modes = [_][]const u8{ "system", "dark", "light" };
 const markdown_openings = [_][]const u8{ "source", "rendered" };
 const file_openings = [_][]const u8{ "beside", "tab" };
+const keep_awake_modes = [_][]const u8{ "off", "always", "running" };
 
 /// Reading the file: the settings live in `arena` (strings point into it).
 pub const Read = struct {
@@ -101,6 +109,10 @@ pub fn read(arena: std.mem.Allocator, data: []const u8) Read {
     }
     if (r.section(root, "markdown")) |m| {
         if (r.choice(m, "markdown", "openAs", &markdown_openings)) |v| s.markdown.open_as = v;
+    }
+    if (r.section(root, "power")) |p| {
+        if (r.choice(p, "power", "keepAwake", &keep_awake_modes)) |v| s.power.keep_awake = v;
+        if (r.boolean(p, "power", "keepDisplayOn")) |v| s.power.keep_display_on = v;
     }
     if (r.section(root, "shortcuts")) |map| {
         var list: std.ArrayList(Shortcut) = .empty;
@@ -204,6 +216,11 @@ pub fn write(gpa: std.mem.Allocator, s: Settings) ![]u8 {
     try j.objectField("markdown");
     try j.beginObject();
     try field(&j, "openAs", s.markdown.open_as);
+    try j.endObject();
+    try j.objectField("power");
+    try j.beginObject();
+    try field(&j, "keepAwake", s.power.keep_awake);
+    try field(&j, "keepDisplayOn", s.power.keep_display_on);
     try j.endObject();
     try j.objectField("shortcuts");
     try j.beginObject();
