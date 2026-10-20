@@ -10,6 +10,7 @@ pub const FontSpec = @import("fonts.zig").Spec;
 pub const Weight = @import("fonts.zig").Weight;
 pub const Painter = @import("painter.zig").Painter;
 pub const TextOptions = @import("painter.zig").TextOptions;
+pub const ColorRun = @import("painter.zig").ColorRun;
 pub const utf16 = @import("painter.zig").utf16;
 pub const wic = @import("wic.zig");
 pub const Rect = geometry.Rect;
