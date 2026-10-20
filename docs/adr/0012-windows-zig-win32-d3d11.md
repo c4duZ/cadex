@@ -1,6 +1,6 @@
 # 0012 — App Windows: Zig com Win32 e Direct3D 11
 
-Data: 2026-10-19 · Status: aceita
+Data: 2026-10-19 · Status: aceita (revista em 2026-10-20: as declarações do app vêm dos headers)
 
 ## Contexto
 O macOS chegou à v1.0.0 (planos 1 a 8). O dono pediu para começar o Windows mantendo todas as
@@ -19,8 +19,10 @@ reescritas para o Windows.
   alternativo para o Windows 10.
 - O app fala com o núcleo **só pela API C** (`core/include/cadex.h`), mesmo sendo Zig dos dois lados:
   importa o header, liga a `libcadex.a`. Nada de `@import` de arquivo de `core/`.
-- As declarações de Win32, Direct3D, DirectWrite e COM são escritas à mão, só as usadas, em
-  `apps/windows/shared/win32/`. Sem pacote de bindings gerados.
+- As declarações de Win32, Direct3D, DirectWrite e COM do app saem dos headers do Windows que o
+  Zig já traz (mingw-w64), pelo `translate-c`, a partir de um header que lista só o que o app
+  inclui (`apps/windows/shared/win32/`). Sem pacote de bindings de terceiros. O núcleo, que usa
+  poucas funções, segue com as dele escritas à mão (`core/shared/win32.zig`).
 - Testes de verdade numa VM com Windows 11 ARM neste Mac; o build sai daqui por cross-compile.
 
 ## Por que não as outras
@@ -30,6 +32,9 @@ reescritas para o Windows.
   muito maior, abertura mais lenta e instalação com dependência (contra o ADR 0007).
 - Pacote de bindings gerados (zigwin32): dezenas de MB de código gerado para usar uma fração; vira
   dependência a acompanhar a cada versão do Zig.
+- Tabelas COM escritas à mão (a decisão de 2026-10-19): o app é escrito sem poder rodar no Windows
+  até a VM existir, e um método fora de ordem numa tabela só aparece como crash. Os headers do
+  mingw que vêm com o Zig dão a ordem exata, sem dependência nova.
 
 ## Consequências
 - Não há controles prontos com a cara do Cadex: lista, árvore, campo de texto, rolagem e menus são

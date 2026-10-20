@@ -1,38 +1,39 @@
 //! The main window: its class, its procedure and the message loop.
 
 const w = @import("win32");
-const user32 = w.user32;
+const c = w.c;
 
 const class_name = w.L("Cadex.Window");
 
-pub fn open() error{WindowFailed}!w.HWND {
-    const instance = w.kernel32.GetModuleHandleW(null);
-    const class: user32.WNDCLASSEXW = .{
-        .style = user32.CS_HREDRAW | user32.CS_VREDRAW,
+pub fn open() error{WindowFailed}!c.HWND {
+    const instance = c.GetModuleHandleW(null);
+    const class: c.WNDCLASSEXW = .{
+        .cbSize = @sizeOf(c.WNDCLASSEXW),
+        .style = c.CS_HREDRAW | c.CS_VREDRAW,
         .lpfnWndProc = procedure,
         .hInstance = instance,
-        .hCursor = user32.LoadCursorW(null, user32.IDC_ARROW),
+        .hCursor = c.LoadCursorW(null, w.IDC_ARROW),
         .lpszClassName = class_name,
     };
-    if (user32.RegisterClassExW(&class) == 0) return error.WindowFailed;
-    return user32.CreateWindowExW(0, class_name, w.L("Cadex"), user32.WS_OVERLAPPEDWINDOW, user32.CW_USEDEFAULT, user32.CW_USEDEFAULT, 1100, 720, null, null, instance, null) orelse error.WindowFailed;
+    if (c.RegisterClassExW(&class) == 0) return error.WindowFailed;
+    return c.CreateWindowExW(0, class_name, w.L("Cadex"), c.WS_OVERLAPPEDWINDOW, c.CW_USEDEFAULT, c.CW_USEDEFAULT, 1100, 720, null, null, instance, null) orelse error.WindowFailed;
 }
 
 /// Until the window closes.
 pub fn run() void {
-    var msg: user32.MSG = undefined;
-    while (user32.GetMessageW(&msg, null, 0, 0) > 0) {
-        _ = user32.TranslateMessage(&msg);
-        _ = user32.DispatchMessageW(&msg);
+    var msg: c.MSG = undefined;
+    while (c.GetMessageW(&msg, null, 0, 0) > 0) {
+        _ = c.TranslateMessage(&msg);
+        _ = c.DispatchMessageW(&msg);
     }
 }
 
-fn procedure(hwnd: w.HWND, msg: w.UINT, wparam: w.WPARAM, lparam: w.LPARAM) callconv(.winapi) w.LRESULT {
+fn procedure(hwnd: c.HWND, msg: c.UINT, wparam: c.WPARAM, lparam: c.LPARAM) callconv(.winapi) c.LRESULT {
     switch (msg) {
-        user32.WM_DESTROY => {
-            user32.PostQuitMessage(0);
+        c.WM_DESTROY => {
+            c.PostQuitMessage(0);
             return 0;
         },
-        else => return user32.DefWindowProcW(hwnd, msg, wparam, lparam),
+        else => return c.DefWindowProcW(hwnd, msg, wparam, lparam),
     }
 }

@@ -8,8 +8,8 @@ const window = @import("window.zig");
 
 pub fn main() !void {
     // Proves the core is linked and callable through its C API.
-    if (!cadex.cadex_git_available()) w.kernel32.OutputDebugStringW(w.L("Cadex: git not found\n"));
+    if (!cadex.cadex_git_available()) w.c.OutputDebugStringW(w.L("Cadex: git not found\n"));
     const hwnd = try window.open();
-    _ = w.user32.ShowWindow(hwnd, w.user32.SW_SHOWDEFAULT);
+    _ = w.c.ShowWindow(hwnd, w.c.SW_SHOWDEFAULT);
     window.run();
 }

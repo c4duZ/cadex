@@ -5,6 +5,12 @@
 
 const std = @import("std");
 
+/// The system DLLs the app calls (import libraries from mingw).
+const system_libs = [_][]const u8{
+    "user32", "gdi32",   "dwmapi", "uxtheme", "shcore",         "imm32", "ole32", "shell32",
+    "d3d11",  "dxgi",    "d2d1",   "dwrite",  "d3dcompiler_47", "dcomp", "windowscodecs",
+};
+
 pub fn build(b: *std.Build) void {
     // x64 by default; the arm64 test VM builds with -Dtarget=aarch64-windows.win11_zn-gnu.
     const target = b.standardTargetOptions(.{ .default_target = .{
@@ -23,7 +29,20 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     }).createModule();
-    const win32 = b.createModule(.{ .root_source_file = b.path("shared/win32/win32.zig"), .target = target, .optimize = optimize });
+    // The Windows SDK from the headers Zig ships, with the COM vtables in
+    // their exact order (docs/adr/0012-windows-zig-win32-d3d11.md).
+    const sdk = b.addTranslateC(.{
+        .root_source_file = b.path("shared/win32/sdk.h"),
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+    }).createModule();
+    const win32 = b.createModule(.{
+        .root_source_file = b.path("shared/win32/win32.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{.{ .name = "sdk", .module = sdk }},
+    });
 
     const root = b.createModule(.{
         .root_source_file = b.path("app/main.zig"),
@@ -39,7 +58,7 @@ pub fn build(b: *std.Build) void {
     // simdutf and highway inside libcadex.a are C++ (built without libc++,
     // but they still need its ABI pieces).
     root.link_libcpp = true;
-    for ([_][]const u8{ "user32", "gdi32", "dwmapi" }) |lib| root.linkSystemLibrary(lib, .{});
+    for (system_libs) |lib| root.linkSystemLibrary(lib, .{});
 
     const exe = b.addExecutable(.{
         .name = "Cadex",

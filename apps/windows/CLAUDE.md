@@ -8,13 +8,14 @@
 - WebView para a interface (a exceção é a feature preview, que é uma página web), .NET ou WinUI.
 - Lógica de negócio no app: ela mora no núcleo e chega pela API C (`../../core/include/cadex.h`),
   mesmo o app sendo Zig. Nada de importar arquivo de `../../core/`.
-- Pacote de bindings gerados para o Win32.
+- Pacote de bindings de terceiros para o Win32.
 
 ## Como eu quero
 - Zig com Win32, Direct3D 11 no terminal e Direct2D com DirectWrite no resto
   (`../../docs/adr/0012-windows-zig-win32-d3d11.md`).
 - Uma pasta por feature em features/, mesmos nomes do núcleo e do Mac; shared/ só com o que 2+
-  features usam. Declarações de Win32/COM escritas à mão, só as usadas, em shared/win32.
+  features usam. O SDK do Windows vem dos headers do mingw que o Zig traz, por translate-c
+  (`shared/win32/sdk.h`).
 - Compila neste Mac por cross-compile; roda e testa numa VM Windows 11 ARM (UTM) por ssh.
 - `build.zig`: o app sobre a libcadex.a do `make windows-core` e o módulo `cadex` (o header
   traduzido). Entrada em `app/` (`app/CLAUDE.md`), declarações do Win32 em `shared/`
