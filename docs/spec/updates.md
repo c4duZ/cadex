@@ -13,9 +13,9 @@ em 2026-10-20, no comportamento do botão de atualização do Terax. Decisão em
   notas e três botões: **Instalar e reabrir**, **Depois** e **Não lembrar de novo** (o dono,
   2026-10-20).
   - **Depois** fecha a janela; ela volta na próxima vez que o Cadex abrir.
-  - **Não lembrar de novo** pula essa versão: a janela não abre mais sozinha e o botão da barra
-    some. Uma versão mais nova volta a avisar. "Procurar atualizações" ainda oferece a pulada.
-- Com versão nova (não pulada), aparece também um botão na barra de título, à esquerda das
+  - **Não lembrar de novo**: a janela não abre mais sozinha para essa versão, mas o botão da barra
+    fica (o dono, 2026-10-20). Uma versão mais nova volta a abrir a janela.
+- Com versão nova, pulada ou não, aparece também um botão na barra de título, à esquerda das
   configurações: uma seta para cima num círculo, na cor de destaque. Passar o ponteiro diz
   "Atualizar para 1.3.0". Sem versão nova, o botão não existe.
 - Clicar no botão, ou rodar "Procurar atualizações" no ⌘K (também no menu Cadex), abre uma janela
@@ -54,8 +54,8 @@ em 2026-10-20, no comportamento do botão de atualização do Terax. Decisão em
 ## Critérios de aceite
 - [ ] Com uma release mais nova publicada, a janela de atualização abre sozinha e o botão aparece
   na barra em até alguns segundos depois de abrir.
-- [ ] "Não lembrar de novo" faz a janela não abrir mais para essa versão, nem depois de reabrir o
-  Cadex; uma versão mais nova abre de novo.
+- [ ] "Não lembrar de novo" faz a janela não abrir mais sozinha para essa versão, nem depois de
+  reabrir o Cadex, e o botão da barra continua; uma versão mais nova abre a janela de novo.
 - [ ] "Instalar e reabrir" troca o app em /Applications e o Cadex reabre na versão nova, com as
   mesmas abas, sem "Abrir mesmo assim".
 - [ ] Um `latest.json` com assinatura errada é recusado e o app instalado não muda.

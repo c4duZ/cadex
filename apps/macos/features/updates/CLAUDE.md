@@ -2,8 +2,9 @@
 
 ## O que eu quero
 - Atualizar o Cadex com um clique: procura versão nova em segundo plano depois de abrir e a cada 6
-  horas; achando, abre a janela sozinha (uma vez por abertura) com Instalar e reabrir, Depois e Não
-  lembrar de novo, e mostra um botão na barra de título.
+  horas; achando, mostra um botão na barra de título e abre a janela sozinha (uma vez por abertura)
+  com Instalar e reabrir, Depois e Não lembrar de novo, que só deixa de abrir a janela para aquela
+  versão (o botão fica).
   Spec: `../../../../docs/spec/updates.md`; decisão: `../../../../docs/adr/0016-in-app-updates.md`.
 
 ## O que eu não quero

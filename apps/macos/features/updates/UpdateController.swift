@@ -69,7 +69,8 @@ public final class UpdateController {
     }
 
     /// The version "Don't Remind Me Again" was pressed on: it no longer
-    /// opens the panel or shows the button; a newer one does.
+    /// opens the panel by itself, but the title bar's button stays (owner,
+    /// 2026-10-20); a newer version opens it again.
     var skippedVersion: String? { defaults.string(forKey: Self.skippedKey) }
 
     /// Why the commands cannot run here, or nil.
@@ -118,9 +119,8 @@ public final class UpdateController {
         do {
             let release = try await fetchRelease()
             guard UpdateVersion.isNewer(release.version, than: currentVersion) else { return state = .upToDate }
-            if !manual && release.version == skippedVersion { return state = .idle }
             state = .available(release)
-            if !manual && promptedVersion != release.version {
+            if !manual && release.version != skippedVersion && promptedVersion != release.version {
                 promptedVersion = release.version
                 (prompt ?? showPanel)()
             }
@@ -162,13 +162,18 @@ public final class UpdateController {
         }
     }
 
-    /// "Don't Remind Me Again": this version stays quiet from now on, in
-    /// this run and the next ones. "Check for Updates" still offers it.
+    /// "Don't Remind Me Again": the panel stops opening by itself for this
+    /// version, in this run and the next ones; the button stays.
     public func skip() {
         guard case .available(let release) = state else { return }
         defaults.set(release.version, forKey: Self.skippedKey)
-        state = .idle
         panel?.hide()
+    }
+
+    /// Whether the version waiting is the one skipped.
+    var isSkipped: Bool {
+        if case .available(let release) = state { return release.version == skippedVersion }
+        return false
     }
 
     /// The version waiting, for the title bar's tip.

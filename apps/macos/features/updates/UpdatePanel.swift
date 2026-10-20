@@ -60,7 +60,7 @@ final class UpdatePanel: NSObject {
             set(T("Cadex \(release.version) is available", "Cadex \(release.version) disponível"),
                 T("You are on \(current).", "Você está na \(current)."))
             notesText = release.notes
-            skipButton.isHidden = false
+            skipButton.isHidden = controller.isSkipped
             secondButton.title = T("Later", "Depois")
             secondButton.isHidden = false
             mainButton.title = T("Install and Reopen", "Instalar e reabrir")

@@ -118,7 +118,7 @@ let exitCode = await Checks.run([
         await same.check(manual: true)
         expect(same.state == .upToDate && !same.showsButton)
     }),
-    ("a found version opens the panel once per run; skipped, it stays quiet", {
+    ("a found version opens the panel once per run; skipped, only the button stays", {
         let folder = try temporaryFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         let feed = folder.appendingPathComponent("latest.json")
@@ -133,12 +133,12 @@ let exitCode = await Checks.run([
         await updates.check(manual: false)
         expect(prompts == 1 && updates.showsButton, "\(prompts) prompts")
         updates.skip()
-        expect(!updates.showsButton && updates.skippedVersion == "1.3.0")
-        // The next launch: still quiet for 1.3.0, but a manual check offers it.
+        expect(updates.showsButton && updates.isSkipped && updates.skippedVersion == "1.3.0")
+        // The next launch: no panel for 1.3.0, the button still there.
         let next = UpdateController(currentVersion: "1.2.0", feed: feed, installer: nil, defaults: defaults)
         next.prompt = { prompts += 1 }
         await next.check(manual: false)
-        expect(prompts == 1 && !next.showsButton)
+        expect(prompts == 1 && next.showsButton)
         await next.check(manual: true)
         expect(next.pendingVersion == "1.3.0" && prompts == 1)
         // A newer version than the skipped one speaks up again.

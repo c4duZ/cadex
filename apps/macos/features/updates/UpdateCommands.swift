@@ -30,7 +30,7 @@ public enum UpdateCommands {
                         guard let updates, case .available = updates.state else {
                             return T("No update waiting", "Nenhuma atualização esperando")
                         }
-                        return nil
+                        return updates.isSkipped ? T("Already not reminding", "Já não vai lembrar") : nil
                     }),
         ]
     }
