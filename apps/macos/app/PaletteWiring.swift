@@ -11,12 +11,12 @@ extension WindowSession {
     /// The ways to open things, first in ⌘K and in the "+" menu next to
     /// the tabs, as in Terax's "+" (owner, 2026-10-19).
     static let openers = [
+        PalettePin(id: "tab.new", title: "Terminal em nova aba", icon: .plus),
         PalettePin(id: "pane.split-right", title: "Terminal ao lado", icon: .squareSplitHorizontal),
         PalettePin(id: "pane.split-down", title: "Terminal abaixo", icon: .squareSplitVertical),
         PalettePin(id: "search.files", title: "Arquivo…", icon: .file),
         PalettePin(id: "preview.open", title: "Preview web", icon: .globe),
         PalettePin(id: "git.history", title: "Grafo do git", icon: .gitBranch),
-        PalettePin(id: "tab.new", title: "Terminal em nova aba", icon: .plus),
         PalettePin(id: "window.new", title: "Nova janela", icon: .appWindow),
     ]
 

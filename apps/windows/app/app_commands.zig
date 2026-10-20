@@ -19,12 +19,12 @@ const p = icons.phosphor;
 /// The ways to open things, first in the palette and in the "+" menu (the
 /// Mac's openers).
 pub const openers = [_]palette.Pin{
+    .{ .id = "tab.new", .title = "Terminal em nova aba", .icon = p.plus },
     .{ .id = "pane.split-right", .title = "Terminal ao lado", .icon = p.square_split_horizontal },
     .{ .id = "pane.split-down", .title = "Terminal abaixo", .icon = p.square_split_vertical },
     .{ .id = "search.files", .title = "Arquivo…", .icon = p.file },
     .{ .id = "preview.open", .title = "Preview web", .icon = p.globe },
     .{ .id = "git.history", .title = "Grafo do git", .icon = p.git_branch },
-    .{ .id = "tab.new", .title = "Terminal em nova aba", .icon = p.plus },
     .{ .id = "window.new", .title = "Nova janela", .icon = p.app_window },
 };
 

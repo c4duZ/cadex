@@ -19,8 +19,8 @@ ação do app (ADR 0005). Quando existirem, acha também abas, spaces e arquivos
 - A paleta aparece no topo da janela, centralizada: um campo de busca e a lista de resultados
   embaixo. Abre na hora, sem animação perceptível.
 - Com o campo vazio, lista em seções com título. Primeiro "Abrir", as formas de abrir coisas ao
-  lado do terminal, com nome próprio: Terminal ao lado (⌘D), Terminal abaixo (⇧⌘D), Arquivo… (⌘P),
-  Preview web, Grafo do git, Terminal em nova aba (⌘T), Nova janela (⌘N). Depois "Recentes" e uma seção por área (Abas, Painéis, Arquivos,
+  lado do terminal, com nome próprio: Terminal em nova aba (⌘T), Terminal ao lado (⌘D), Terminal abaixo (⇧⌘D),
+  Arquivo… (⌘P), Preview web, Grafo do git, Nova janela (⌘N). Depois "Recentes" e uma seção por área (Abas, Painéis, Arquivos,
   Busca, Editor, Terminal, Git, Web e mídia, Spaces, Editar, Cadex), cada uma em ordem alfabética.
   O dono sentiu falta das seções e de ter as aberturas primeiro (2026-10-19).
 - Comando que não pode rodar agora não aparece, nem na lista nem na busca (o dono, 2026-10-19:
