@@ -28,9 +28,14 @@ pub const Document = struct {
         save: ?*const fn (ptr: *anyopaque) bool = null,
         /// The folder a terminal opened beside it starts in (the file's).
         folder: ?*const fn (ptr: *anyopaque) ?[]const u8 = null,
+        /// Copy, paste, select all, find, undo, redo from the edit.* commands;
+        /// false when the document has nothing to do with it.
+        edit: ?*const fn (ptr: *anyopaque, u: *ui.Ui, action: EditAction) bool = null,
         /// The pane is gone: stop watching, free everything.
         destroy: *const fn (ptr: *anyopaque) void,
     };
+
+    pub const EditAction = enum { copy, cut, paste, select_all, find, undo, redo };
 
     pub fn title(self: Document) []const u8 {
         return self.vtable.title(self.ptr);
@@ -58,6 +63,9 @@ pub const Document = struct {
     }
     pub fn folder(self: Document) ?[]const u8 {
         return if (self.vtable.folder) |f| f(self.ptr) else null;
+    }
+    pub fn edit(self: Document, u: *ui.Ui, action: EditAction) bool {
+        return if (self.vtable.edit) |f| f(self.ptr, u, action) else false;
     }
     pub fn destroy(self: Document) void {
         self.vtable.destroy(self.ptr);

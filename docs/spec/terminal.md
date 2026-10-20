@@ -51,6 +51,8 @@ do dia a dia, mais simples por dentro e com o texto nítido.
 ### Seleção e copiar
 - Arrastar seleciona; duplo clique seleciona a palavra; triplo clique, a linha.
 - ⌘C copia a seleção. Sem seleção, ⌘C não faz nada (Ctrl+C continua sendo o interromper do shell).
+- No Windows, além do Ctrl+Shift+C (o ⌘C), Ctrl+C com texto selecionado copia, como no Windows
+  Terminal; sem seleção, Ctrl+C é o interromper do shell.
 - ⌘A seleciona todo o conteúdo do painel, inclusive o histórico.
 - A configuração "copiar ao selecionar" decide se selecionar copia. Desligada (padrão), a área de
   transferência só muda com ⌘C ou o comando de copiar: passar o mouse, clicar ou selecionar não

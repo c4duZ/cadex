@@ -49,6 +49,11 @@ pub const View = struct {
     /// The program asked for the mouse and got the press.
     tracking_press: ?u8 = null,
     wheel_rest: i32 = 0,
+    /// terminal.copyOnSelect: finishing a selection copies it.
+    copy_on_select: bool = false,
+    /// The shell ended with an error: the pane stays and says the code
+    /// (docs/spec/terminal.md, "Sessão encerrada por erro").
+    exited: ?i32 = null,
 
     pub fn init(gpa: std.mem.Allocator, session: *Session, id: ui_mod.Id) View {
         return .{ .gpa = gpa, .session = session, .id = id };
@@ -111,6 +116,13 @@ pub const View = struct {
             };
         }
         if (self.find.open) self.find.draw(ui, self.session, area, self.id);
+        if (self.exited) |code| {
+            var buf: [96]u8 = undefined;
+            const note = std.fmt.bufPrint(&buf, "O shell saiu com o código {d}. Ctrl+Shift+W fecha o painel.", .{code}) catch "";
+            const bar: gfx.Rect = .{ .x = area.x, .y = area.bottom() - ui.px(34), .w = area.w, .h = ui.px(34) };
+            ui.painter.fill(bar, ui.style.panel);
+            ui.painter.text(note, ui.style.ui(), bar.inset(ui.px(12), 0), ui.style.secondary_text, .{});
+        }
         if (self.autoscroll != 0 and ui.input.down[0]) ui.requestFrame(15);
     }
 
@@ -190,6 +202,7 @@ pub const View = struct {
             _ = cadex.cadex_terminal_select_release(t, &p);
             self.selecting = false;
             self.autoscroll = 0;
+            if (self.copy_on_select and self.hasSelection()) _ = self.copySelection(ui);
         }
     }
 
@@ -235,8 +248,15 @@ pub const View = struct {
 
     /// A key press while the pane has the focus, before WM_CHAR. True when
     /// it went to the shell (the window then drops its WM_CHAR).
-    pub fn keyDown(self: *View, vk: u16, scan: u16, mods: ui_mod.Mods) bool {
-        if (self.find.open) return false;
+    pub fn keyDown(self: *View, ui: *Ui, vk: u16, scan: u16, mods: ui_mod.Mods) bool {
+        if (self.find.open or self.exited != null) return false;
+        // Ctrl+C with text selected copies it, as Windows Terminal does;
+        // without a selection it is the shell's interrupt.
+        if (vk == 'C' and mods.ctrl and !mods.shift and !mods.alt and self.hasSelection()) {
+            _ = self.copySelection(ui);
+            cadex.cadex_terminal_select_clear(self.session.terminal);
+            return true;
+        }
         if (keys.isAltGr(mods)) return false;
         const named = keys.named(vk);
         if (named == null and !mods.ctrl and !mods.alt) return false;
