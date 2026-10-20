@@ -4,6 +4,7 @@
 
 const std = @import("std");
 const fs = @import("../../shared/fs.zig");
+const language = @import("../../shared/language.zig");
 const workspace = @import("../workspace/workspace.zig");
 const errors = @import("errors.zig");
 
@@ -52,8 +53,8 @@ pub fn move(registry: *Registry, path: []const u8, destination: []const u8, out:
 }
 
 /// Copies `path` (a folder with everything in it) into `destination`.
-/// Next to a namesake, the copy is named "name cópia.ext", then
-/// "name cópia 2.ext". Returns the new path, in `out`.
+/// Next to a namesake, the copy is named "name copy.ext", then
+/// "name copy 2.ext" ("cópia" in Portuguese, as the app's language). Returns the new path, in `out`.
 pub fn copy(registry: *Registry, path: []const u8, destination: []const u8, out: *paths.Buffer) Error![]const u8 {
     var from_buf: paths.Buffer = undefined;
     const from = try registry.resolveEntry(path, &from_buf);
@@ -76,7 +77,7 @@ fn join(out: *paths.Buffer, dir: []const u8, name: []const u8) Error![]const u8 
     return fs.join(out, dir, name);
 }
 
-/// `name` in `dir` if free, else "stem cópia.ext", "stem cópia 2.ext", ...
+/// `name` in `dir` if free, else "stem copy.ext", "stem copy 2.ext", ...
 fn freeName(out: *paths.Buffer, dir: []const u8, name: []const u8) Error![]const u8 {
     const candidate = try join(out, dir, name);
     if (!exists(candidate)) return candidate;
@@ -87,10 +88,11 @@ fn freeName(out: *paths.Buffer, dir: []const u8, name: []const u8) Error![]const
     var n: usize = 1;
     while (n < 1000) : (n += 1) {
         var name_buf: paths.Buffer = undefined;
+        const word = language.t("copy", "cópia");
         const numbered = if (n == 1)
-            std.fmt.bufPrint(&name_buf, "{s} cópia{s}", .{ stem, ext })
+            std.fmt.bufPrint(&name_buf, "{s} {s}{s}", .{ stem, word, ext })
         else
-            std.fmt.bufPrint(&name_buf, "{s} cópia {d}{s}", .{ stem, n, ext });
+            std.fmt.bufPrint(&name_buf, "{s} {s} {d}{s}", .{ stem, word, n, ext });
         const next = try join(out, dir, numbered catch return error.NameTooLong);
         if (!exists(next)) return next;
     }
@@ -173,10 +175,10 @@ test "copies files and folders, naming the copy next to a namesake" {
     var a: [1024]u8 = undefined;
     var out: paths.Buffer = undefined;
     const first = try copy(&registry, try dir.joinInto(&a, "notes.md"), dir.path(), &out);
-    try testing.expect(std.mem.endsWith(u8, first, sep ++ "notes cópia.md"));
+    try testing.expect(std.mem.endsWith(u8, first, sep ++ "notes copy.md"));
     const second = try copy(&registry, try dir.joinInto(&a, "notes.md"), dir.path(), &out);
-    try testing.expect(std.mem.endsWith(u8, second, sep ++ "notes cópia 2.md"));
+    try testing.expect(std.mem.endsWith(u8, second, sep ++ "notes copy 2.md"));
     _ = try copy(&registry, try dir.joinInto(&a, "folder"), dir.path(), &out);
-    try testing.expect(dir.exists("folder cópia/sub/deep.txt"));
+    try testing.expect(dir.exists("folder copy/sub/deep.txt"));
     try testing.expectError(error.IntoItself, copy(&registry, try dir.joinInto(&a, "folder"), try dir.join("folder/sub"), &out));
 }

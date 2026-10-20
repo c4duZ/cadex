@@ -44,7 +44,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Before any text is made: every view reads its texts once (ADR 0015).
-        Strings.language = Language(rawValue: settings.store.settings.general.language) ?? .en
+        Strings.setLanguage(Language(rawValue: settings.store.settings.general.language) ?? .en)
         connectSettings()
         settings.start()
         // The popup menus take the theme's colors, the same as ⌘K's.

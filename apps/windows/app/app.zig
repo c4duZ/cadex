@@ -110,6 +110,8 @@ pub const App = struct {
         self.settings = try settings.Store.init(gpa);
         // Before any text is made: every view reads its texts once (ADR 0015).
         strings.language = strings.Language.parse(self.settings.current.general.language);
+        // The core's few texts too (a git message, the name of a pasted copy).
+        @import("cadex").cadex_set_language(if (strings.language == .pt) "pt" else "en");
         self.themes = themes.Store.init(gpa);
         self.registry = .{ .gpa = gpa };
         self.shortcuts = shortcuts.Shortcuts.init(gpa, &self.registry);

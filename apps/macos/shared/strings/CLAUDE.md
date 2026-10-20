@@ -10,8 +10,9 @@
 
 ## Como eu quero
 - `Strings.swift`: `T(en, pt)` devolve o texto no idioma da interface e guarda o outro, que a
-  paleta usa para achar um comando pelos dois títulos (Strings.counterpart). O app define
-  Strings.language a partir do general.language do settings.json antes de montar qualquer tela.
+  paleta usa para achar um comando pelos dois títulos (Strings.counterpart). O app chama
+  Strings.setLanguage com o general.language do settings.json antes de montar qualquer tela, o que
+  também passa o idioma ao núcleo (cadex_set_language, para as mensagens do git e o nome de cópia).
 
 ## Como validar
 - `make macos-test` passa: idioma escolhido e a versão do outro idioma.

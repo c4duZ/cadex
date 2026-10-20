@@ -30,10 +30,13 @@ Decisões: `docs/adr/0015-english-default-two-languages.md`.
   settings.json e dos atalhos, erros de arquivo de tema).*
 - **C. Windows.** O mesmo par no Zig, o seletor e a página de configurações refeita com as mesmas
   seções e textos.
-  *Feita em 2026-10-20: cerca de 330 textos em `strings.t` (`apps/windows/shared/strings/strings.zig`);
+  *Feita em 2026-10-20: cerca de 330 textos em strings.t (`apps/windows/shared/strings/strings.zig`);
   tabelas `const` guardam o par e escolhem ao usar; a página em `apps/windows/app/settings_rows.zig`;
   "Reabrir agora" em `apps/windows/app/relaunch.zig`. Compila; falta rodar no Windows.*
 - **D. Núcleo.** As mensagens de erro que o núcleo devolve, nos dois idiomas.
+  *Feita em 2026-10-20: são só quatro textos (commit sem mensagem, branches divergidas, git que
+  falhou ou demorou, e o nome de uma cópia, "x copy.ext" ou "x cópia.ext"), em
+  `core/shared/language.zig`; os apps chamam cadex_set_language ao abrir.*
 
 ## Como validar
 - `make check` passa a cada fase.

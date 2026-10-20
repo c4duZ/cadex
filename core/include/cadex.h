@@ -37,6 +37,11 @@ typedef int32_t cadex_status;
 /* Releases a buffer returned by the core. NULL is accepted. */
 void cadex_free(void *ptr);
 
+/* The language of the few texts the core writes for people (git messages,
+ * the name of a pasted copy): "pt" for Portuguese, anything else English.
+ * Call once at launch, before any other call (docs/adr/0015). */
+void cadex_set_language(const char *code);
+
 /* ---- Terminal (core/features/terminal) --------------------------------- */
 
 typedef struct cadex_terminal cadex_terminal;

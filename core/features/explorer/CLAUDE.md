@@ -17,7 +17,7 @@
 - Porta de entrada: `explorer.zig`. `listing.zig` lista uma pasta (pastas primeiro, ordem natural
   de `natural.zig`, `.git` fora); `operations.zig` cria, renomeia (nome ocupado é recusado sem corrida:
   renamex_np com RENAME_EXCL no Mac, MoveFileExW sem substituir no Windows), move e copia (recursivo;
-  copyfile com clone no APFS, nome "x cópia.ext"); `read.zig` lê texto com limite (10 MB) e recusa binário (byte nulo nos primeiros
+  copyfile com clone no APFS, nome "x copy.ext", ou "x cópia.ext" em português); `read.zig` lê texto com limite (10 MB) e recusa binário (byte nulo nos primeiros
   8 KB, como o git); `watch.zig` observa (interface; `watch_macos.zig` com FSEvents numa fila própria,
   `watch_windows.zig` com ReadDirectoryChangesW numa thread, juntando a janela de latência), uma
   chamada por lote com cada pasta uma vez, e nenhuma chamada depois de stop(); `errors.zig` junta os erros do workspace, os do sistema de arquivos e os próprios.

@@ -5,6 +5,7 @@
 const std = @import("std");
 const workspace = @import("../workspace/workspace.zig");
 const git = @import("git.zig");
+const language = @import("../../shared/language.zig");
 
 const Registry = workspace.Registry;
 
@@ -44,7 +45,7 @@ pub fn discard(gpa: std.mem.Allocator, registry: *Registry, repo: []const u8, pa
 
 /// Commits what is staged, or everything tracked with `all`.
 pub fn commit(gpa: std.mem.Allocator, registry: *Registry, repo: []const u8, message: []const u8, all: bool) !?[]u8 {
-    if (std.mem.trim(u8, message, " \n\t").len == 0) return try gpa.dupe(u8, "Escreva uma mensagem para o commit");
+    if (std.mem.trim(u8, message, " \n\t").len == 0) return try gpa.dupe(u8, language.t("Write a commit message", "Escreva uma mensagem para o commit"));
     if (all) {
         if (try stage(gpa, registry, repo, &.{"."})) |err| return err;
     }
@@ -64,7 +65,7 @@ pub fn pull(gpa: std.mem.Allocator, registry: *Registry, repo: []const u8) !?[]u
     if (r.ok()) return null;
     const text = git.message(r);
     if (std.mem.indexOf(u8, r.stderr, "Not possible to fast-forward") != null or std.mem.indexOf(u8, r.stderr, "diverg") != null) {
-        return try gpa.dupe(u8, "As branches divergiram: faça merge ou rebase no terminal");
+        return try gpa.dupe(u8, language.t("The branches have diverged: merge or rebase in the terminal", "As branches divergiram: faça merge ou rebase no terminal"));
     }
     return try gpa.dupe(u8, text);
 }

@@ -1,3 +1,4 @@
+import CCadex
 import Foundation
 
 /// The interface's language (docs/adr/0015-english-default-two-languages.md):
@@ -11,6 +12,13 @@ public enum Strings {
     /// Set by the app at launch, before any text is made, and not after:
     /// every view reads its texts once.
     nonisolated(unsafe) public static var language: Language = .en
+
+    /// At launch: the interface and the core's few texts (a git message,
+    /// the name of a pasted copy) in `language`.
+    public static func setLanguage(_ language: Language) {
+        self.language = language
+        cadex_set_language(language.rawValue)
+    }
 
     private static let lock = NSLock()
     nonisolated(unsafe) private static var counterparts: [String: String] = [:]

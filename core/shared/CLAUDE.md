@@ -17,7 +17,8 @@
   posix_spawn, `process_windows.zig` com CreateProcessW num Job Object e só os três pipes herdados), `regex.zig` (regex ERE pela TRE compilada no núcleo, ADR 0013; usado pela busca e pelos predicados de
   destaque do editor), `test_dir.zig` (pasta temporária com caminho canônico, só nos testes),
   `sync.zig` (mutex e condição: pthread no Mac, SRWLOCK no Windows), `clock.zig` (espera e relógio
-  em ms) e `win32.zig` (as funções do Win32 que o núcleo chama, declaradas à mão, ADR 0012).
+  em ms), `language.zig` (o idioma dos poucos textos do núcleo, `cadex_set_language`, ADR 0015; usado
+  por explorer e source-control) e `win32.zig` (as funções do Win32 que o núcleo chama, declaradas à mão, ADR 0012).
 - `fs.zig`: o sistema de arquivos das features (ler, listar, renomear, copiar, caminho real, salvar
   com troca atômica), escolhendo `fs_posix.zig` ou `fs_windows.zig` num ponto só. Caminhos em UTF-8;
   relativos ao workspace usam `/` nas duas plataformas.

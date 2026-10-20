@@ -7,6 +7,7 @@ const std = @import("std");
 const builtin = @import("builtin");
 const workspace = @import("../workspace/workspace.zig");
 const process = @import("../../shared/process.zig");
+const language = @import("../../shared/language.zig");
 
 pub const Result = process.Result;
 
@@ -113,5 +114,5 @@ pub fn message(r: Result) []const u8 {
         const l = std.mem.trim(u8, line, " ");
         if (l.len > 0 and !std.mem.startsWith(u8, l, "hint:")) return l;
     }
-    return if (r.timed_out) "git demorou demais" else "git falhou";
+    return if (r.timed_out) language.t("git took too long", "git demorou demais") else language.t("git failed", "git falhou");
 }

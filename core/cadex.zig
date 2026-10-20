@@ -25,6 +25,7 @@ comptime {
     _ = @import("features/markdown/c_api.zig");
     _ = @import("features/source-control/c_api.zig");
     _ = @import("features/git-history/c_api.zig");
+    _ = @import("shared/language.zig");
 }
 
 test {
@@ -45,4 +46,5 @@ test {
     _ = @import("shared/process.zig");
     _ = @import("shared/sync.zig");
     _ = @import("shared/clock.zig");
+    _ = @import("shared/language.zig");
 }

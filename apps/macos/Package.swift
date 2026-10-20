@@ -26,6 +26,7 @@ let package = Package(
         // The interface's texts in English or Portuguese (ADR 0015).
         .target(
             name: "Strings",
+            dependencies: ["CCadex"],
             path: "shared/strings",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -210,7 +211,8 @@ let package = Package(
         .executableTarget(
             name: "StatusBarTests",
             dependencies: ["StatusBar", "Checks"],
-            path: "features/status-bar/tests"
+            path: "features/status-bar/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
             name: "SettingsTests",
@@ -221,7 +223,8 @@ let package = Package(
         .executableTarget(
             name: "ThemesTests",
             dependencies: ["Themes", "Checks"],
-            path: "features/themes/tests"
+            path: "features/themes/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
             name: "ExplorerTests",
@@ -292,17 +295,20 @@ let package = Package(
         .executableTarget(
             name: "StringsTests",
             dependencies: ["Strings", "Checks"],
-            path: "shared/strings/tests"
+            path: "shared/strings/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
             name: "MenusTests",
             dependencies: ["Menus", "Checks"],
-            path: "shared/menus/tests"
+            path: "shared/menus/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
             name: "IconsTests",
             dependencies: ["Icons", "Checks"],
-            path: "shared/icons/tests"
+            path: "shared/icons/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
 
         .executableTarget(

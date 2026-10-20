@@ -110,7 +110,7 @@ test "pull refuses to merge diverged branches; branches are listed" {
     try testing.expectEqual(@as(u32, 1), s.behind);
     const refused = (try actions.pull(testing.allocator, &registry, clone)).?;
     defer testing.allocator.free(refused);
-    try testing.expectEqualStrings("As branches divergiram: faça merge ou rebase no terminal", refused);
+    try testing.expectEqualStrings("The branches have diverged: merge or rebase in the terminal", refused);
 
     try sh(&registry, clone, &.{ "branch", "outra" });
     const list = try actions.branches(testing.allocator, &registry, clone);
