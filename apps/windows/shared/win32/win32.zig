@@ -11,6 +11,7 @@ const std = @import("std");
 
 pub const c = @import("sdk");
 pub const dcomp = @import("dcomp.zig");
+pub const files = @import("files.zig");
 
 pub const HRESULT = c.HRESULT;
 pub const HWND = c.HWND;
@@ -161,4 +162,5 @@ test "guids parse like the headers write them" {
 test {
     @import("std").testing.refAllDecls(@This());
     _ = @import("dcomp.zig");
+    _ = @import("files.zig");
 }

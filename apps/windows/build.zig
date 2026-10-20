@@ -7,7 +7,7 @@ const std = @import("std");
 
 /// The system DLLs the app calls (import libraries from mingw).
 const system_libs = [_][]const u8{
-    "user32", "gdi32",   "dwmapi", "uxtheme", "shcore",         "imm32", "ole32", "shell32",
+    "user32", "gdi32",   "advapi32", "dwmapi", "uxtheme", "shcore",         "imm32", "ole32", "shell32",
     "d3d11",  "dxgi",    "d2d1",   "dwrite",  "d3dcompiler_47", "dcomp", "windowscodecs",
 };
 
@@ -66,8 +66,15 @@ pub fn build(b: *std.Build) void {
     // The same font file the Mac ships: one source for the icons (ADR 0008).
     icons.addAnonymousImport("phosphor_font", .{ .root_source_file = b.path("../macos/shared/icons/Resources/Phosphor-Regular.ttf") });
 
+    // The shared modules build test exes of their own, which need the
+    // system DLLs too.
+    for ([_]*std.Build.Module{ win32, gfx, ui, icons }) |m| linkCore(m, b.pathFromRoot(core_lib));
     const shared = Shared{ .cadex = cadex, .win32 = win32, .gfx = gfx, .ui = ui, .icons = icons, .core_lib = b.pathFromRoot(core_lib) };
     const command_palette = feature(b, target, optimize, shared, "command-palette", "command_palette.zig", &.{});
+    const themes = feature(b, target, optimize, shared, "themes", "themes.zig", &.{});
+    // The same catalog the Mac ships: one source for the themes.
+    themes.addAnonymousImport("theme_catalog", .{ .root_source_file = b.path("../macos/features/themes/Resources/catalog.json") });
+    const settings = feature(b, target, optimize, shared, "settings", "settings.zig", &.{});
     const shortcuts = feature(b, target, optimize, shared, "shortcuts", "shortcuts.zig", &.{.{ "command-palette", command_palette }});
 
     const root = b.createModule(.{
@@ -83,6 +90,8 @@ pub fn build(b: *std.Build) void {
             .{ .name = "icons", .module = icons },
             .{ .name = "command-palette", .module = command_palette },
             .{ .name = "shortcuts", .module = shortcuts },
+            .{ .name = "themes", .module = themes },
+            .{ .name = "settings", .module = settings },
         },
     });
     linkCore(root, b.pathFromRoot(core_lib));
@@ -101,7 +110,7 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test-bin", "Build the app tests without running them");
     const tested = [_]struct { []const u8, *std.Build.Module }{
         .{ "app", root },                       .{ "ui", ui }, .{ "gfx", gfx }, .{ "icons", icons }, .{ "win32", win32 },
-        .{ "command-palette", command_palette }, .{ "shortcuts", shortcuts },
+        .{ "command-palette", command_palette }, .{ "shortcuts", shortcuts }, .{ "themes", themes }, .{ "settings", settings },
     };
     for (tested) |entry| {
         const t = b.addTest(.{ .name = entry[0], .root_module = entry[1] });
