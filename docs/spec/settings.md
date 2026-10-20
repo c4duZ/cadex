@@ -6,18 +6,24 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
 ## Comportamento
 - ⌘, (ou o comando "Abrir configurações") abre a janela de configurações. Uma só, mesmo chamada
   de novo.
-- Seções:
-  - **Geral:** shell (vazio usa o do sistema), perguntar antes de fechar com programa rodando,
-    perguntar antes de colar várias linhas, e como uma nota Markdown abre: código (padrão) ou
-    renderizada (`markdown.openAs`, "source" ou "rendered"), e se a árvore segue a pasta do
-    terminal (`explorer.followTerminal`), e onde arquivos abrem: ao lado do painel com foco
-    (padrão) ou em nova aba (`general.openFiles`, "beside" ou "tab"), e o manter acordado
-    (`power.mode`, "always" ou "running", `power.onAtLaunch` e `power.keepDisplayOn`; ver `power.md`).
-  - **Terminal:** fonte, tamanho, cursor (barra, bloco, sublinhado), cursor piscando, linhas de
-    histórico, Option esquerdo como Meta, copiar ao selecionar.
-  - **Aparência:** tema (seguir o sistema, ou um tema fixo), imagem de fundo com opacidade e
-    desfoque.
-  - **Atalhos:** a lista de comandos com o atalho de cada um, editável, com aviso de conflito.
+- Páginas, em abas no topo, cada uma com seções; cada opção diz o que muda (refeitas em
+  2026-10-20: as explicações estavam mal montadas e o shell estava em Geral):
+  - **General / Geral:** Idioma (`general.language`, "en" padrão ou "pt"; vale ao reabrir, e a
+    troca oferece "Reabrir agora", com as abas e os spaces de volta; ver
+    `../adr/0015-english-default-two-languages.md`). Arquivos: onde abrem, ao lado do painel com
+    foco (padrão) ou em nova aba (`general.openFiles`), e como uma nota Markdown abre
+    (`markdown.openAs`). Árvore de arquivos: seguir o terminal (`explorer.followTerminal`) e
+    mostrar os ocultos (`explorer.showHidden`).
+  - **Terminal:** Shell (o programa, vazio usa o do usuário; perguntar antes de fechar um programa
+    rodando; perguntar antes de colar várias linhas). Texto e cursor (fonte, tamanho, cursor,
+    piscando). Histórico e teclado (linhas, Option esquerdo como Meta, copiar ao selecionar).
+  - **Keep awake / Manter acordado:** como liga e desliga; Quando ligado (o modo, `power.mode`, e
+    manter a tela acesa); Ao abrir (`power.onAtLaunch`); Tampa fechada, explicada à parte. Ver
+    `power.md`.
+  - **Themes / Temas:** modo claro ou escuro, o tema, a vibrância e a imagem de fundo.
+  - **Shortcuts / Atalhos:** a lista de comandos com o atalho de cada um, editável, com aviso de
+    conflito.
+  - **About / Sobre:** versão e créditos.
 - Toda mudança vale na hora, em todas as janelas, sem botão de salvar.
 - As escolhas ficam num arquivo só, `settings.json` em Application Support/Cadex, que o usuário
   também pode editar à mão. Os atalhos personalizados moram nele, na seção `shortcuts`.

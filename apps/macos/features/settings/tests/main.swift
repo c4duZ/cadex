@@ -16,6 +16,7 @@ let exitCode = await Checks.run([
         settings.explorer.followTerminal = false
         settings.markdown.openAs = "rendered"
         settings.general.openFiles = "tab"
+        settings.general.language = "pt"
         settings.power.mode = "running"
         settings.power.onAtLaunch = true
         settings.power.keepDisplayOn = true
@@ -23,6 +24,11 @@ let exitCode = await Checks.run([
         let (read, problems) = SettingsFile.read(SettingsFile.write(settings))
         expect(problems.isEmpty, "\(problems)")
         expect(read == settings, "\(read)")
+    }),
+    ("the interface is in English unless the file says pt; anything else is a problem", {
+        expect(SettingsFile.read(Data("{}".utf8)).0.general.language == "en")
+        let (read, problems) = SettingsFile.read(Data(#"{"general": {"language": "fr"}}"#.utf8))
+        expect(read.general.language == "en" && problems.count == 1, "\(problems)")
     }),
     ("the coffee turns on always unless the file says running; off at launch", {
         let defaults = SettingsFile.read(Data("{}".utf8)).0.power

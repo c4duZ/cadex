@@ -35,7 +35,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 
 | # | plano | entrega | status |
 |---|---|---|---|
-| 14 | `docs/plans/14-languages-and-settings.md` | inglês por padrão, português como opção, configurações refeitas | em andamento: fase A |
+| 14 | `docs/plans/14-languages-and-settings.md` | inglês por padrão, português como opção, configurações refeitas | em andamento: A feita no Mac; falta B (o resto do Mac), C (Windows) e D (núcleo) |
 
 ## O que eu não quero
 - Executar plano sem ler antes o `CLAUDE.md` da raiz e o da feature que vai mexer.

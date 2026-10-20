@@ -122,7 +122,7 @@ let exitCode = await Checks.run([
         let registry = CommandRegistry()
         registry.register(StandardCommands.all)
         let menu = CommandMenu(registry: registry) { _ in nil }.build()
-        expect(menu.items.map(\.title) == ["Cadex", "Editar"], "\(menu.items.map(\.title))")
+        expect(menu.items.map(\.title) == ["Cadex", "Edit"], "\(menu.items.map(\.title))")
         let copy = menu.items[1].submenu?.items.first { ($0.representedObject as? String) == "edit.copy" }
         expect(copy?.title == "Copiar")
     }),

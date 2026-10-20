@@ -11,6 +11,9 @@ public struct Settings: Equatable, Sendable {
         /// Where files, diffs, the git history and web previews open:
         /// "beside" the focused pane or in a new "tab" (docs/spec/tabs.md).
         public var openFiles = "beside"
+        /// The interface's language, "en" or "pt"; counts when Cadex opens
+        /// (docs/adr/0015-english-default-two-languages.md).
+        public var language = "en"
     }
 
     public struct Terminal: Equatable, Sendable {
@@ -78,5 +81,6 @@ public struct Settings: Equatable, Sendable {
     static let modes = ["system", "dark", "light"]
     static let markdownOpenings = ["source", "rendered"]
     static let fileOpenings = ["beside", "tab"]
+    static let languages = ["en", "pt"]
     static let keepAwakeModes = ["always", "running"]
 }

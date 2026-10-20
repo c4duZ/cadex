@@ -2,6 +2,7 @@ import AppKit
 import CommandPalette
 import Icons
 import Shortcuts
+import Strings
 import Themes
 
 /// The settings window (⌘,), after the Terax one: the sections as tabs at
@@ -16,19 +17,23 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let tabs = NSSegmentedControl()
     private let content = NSView()
     private static let sections: [(title: String, icon: Icon)] = [
-        ("Geral", .gearSix), ("Terminal", .terminalWindow), ("Temas", .palette), ("Atalhos", .keyboard), ("Sobre", .info),
+        (T("General", "Geral"), .gearSix), ("Terminal", .terminalWindow), (T("Keep awake", "Manter acordado"), .coffee),
+        (T("Themes", "Temas"), .palette), (T("Shortcuts", "Atalhos"), .keyboard), (T("About", "Sobre"), .info),
     ]
+    /// Reopens Cadex (the language counts at launch).
+    private let relaunch: () -> Void
 
     public init(store: SettingsStore, registry: CommandRegistry, keymap: @escaping () -> Keymap,
-                suspendShortcuts: @escaping (Bool) -> Void) {
+                suspendShortcuts: @escaping (Bool) -> Void, relaunch: @escaping () -> Void) {
         self.store = store
+        self.relaunch = relaunch
         shortcuts = ShortcutsPage(store: store, registry: registry, keymap: keymap, suspendShortcuts: suspendShortcuts)
         themes = ThemesPage(store: store)
     }
 
     /// The command that opens this window.
     public var openCommand: Command {
-        Command(id: "settings.open", title: "Abrir configurações", keywords: ["settings", "preferências", "ajustes"],
+        Command(id: "settings.open", title: T("Open settings", "Abrir configurações"), keywords: ["settings", "preferências", "ajustes"],
                 category: .app, defaultShortcut: "cmd+,", action: .run { [weak self] in self?.show() })
     }
 
@@ -44,7 +49,7 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
                               styleMask: [.titled, .closable, .resizable, .fullSizeContentView], backing: .buffered, defer: true)
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
-        window.title = "Configurações"
+        window.title = T("Settings", "Configurações")
         window.isReleasedWhenClosed = false
         window.minSize = NSSize(width: 720, height: 420)
         // Over the app when it is in full screen, in the same Space: a plain
@@ -106,11 +111,12 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         tabs.selectedSegment = section
         let page: NSView
         switch section {
-        case 1: page = GeneralPages.terminal(store)
-        case 2: page = themes.makeView()
-        case 3: page = shortcuts.makeView()
-        case 4: page = GeneralPages.about()
-        default: page = GeneralPages.general(store)
+        case 1: page = TerminalPage.make(store)
+        case 2: page = KeepAwakePage.make(store)
+        case 3: page = themes.makeView()
+        case 4: page = shortcuts.makeView()
+        case 5: page = GeneralPages.about()
+        default: page = GeneralPages.general(store) { [weak self] language in self?.askRelaunch(language) }
         }
         content.subviews.forEach { $0.removeFromSuperview() }
         page.translatesAutoresizingMaskIntoConstraints = false
@@ -125,6 +131,21 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
             content.layoutSubtreeIfNeeded()
             scroll.contentView.scroll(to: scrolled)
             scroll.reflectScrolledClipView(scroll.contentView)
+        }
+    }
+
+    /// The language counts when Cadex opens: offer to reopen now, asked in
+    /// the language just chosen.
+    private func askRelaunch(_ language: String) {
+        guard let window else { return }
+        let pt = language == "pt"
+        let alert = NSAlert()
+        alert.messageText = pt ? "Reabrir o Cadex em português?" : "Reopen Cadex in English?"
+        alert.informativeText = pt ? "As abas e os spaces voltam como estão." : "Your tabs and spaces come back as they are."
+        alert.addButton(withTitle: pt ? "Reabrir agora" : "Reopen now")
+        alert.addButton(withTitle: pt ? "Depois" : "Later")
+        alert.beginSheetModal(for: window) { [weak self] answer in
+            if answer == .alertFirstButtonReturn { self?.relaunch() }
         }
     }
 }

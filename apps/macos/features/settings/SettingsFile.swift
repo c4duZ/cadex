@@ -16,6 +16,7 @@ public enum SettingsFile {
             settings.general.confirmClose = reader.bool(g, "general.confirmClose") ?? settings.general.confirmClose
             settings.general.confirmMultilinePaste = reader.bool(g, "general.confirmMultilinePaste") ?? settings.general.confirmMultilinePaste
             settings.general.openFiles = reader.choice(g, "general.openFiles", Settings.fileOpenings) ?? settings.general.openFiles
+            settings.general.language = reader.choice(g, "general.language", Settings.languages) ?? settings.general.language
         }
         if let t = reader.section(root, "terminal") {
             settings.terminal.fontFamily = reader.string(t, "terminal.fontFamily") ?? settings.terminal.fontFamily
@@ -68,7 +69,8 @@ public enum SettingsFile {
         for (combo, id) in s.shortcuts { shortcuts[combo] = id ?? NSNull() }
         let object: [String: Any] = [
             "general": ["shell": s.general.shell, "confirmClose": s.general.confirmClose,
-                        "confirmMultilinePaste": s.general.confirmMultilinePaste, "openFiles": s.general.openFiles],
+                        "confirmMultilinePaste": s.general.confirmMultilinePaste, "openFiles": s.general.openFiles,
+                        "language": s.general.language],
             "terminal": ["fontFamily": s.terminal.fontFamily, "fontSize": s.terminal.fontSize, "cursor": s.terminal.cursor,
                          "cursorBlink": s.terminal.cursorBlink, "historyLines": s.terminal.historyLines,
                          "optionAsMeta": s.terminal.optionAsMeta, "copyOnSelect": s.terminal.copyOnSelect],

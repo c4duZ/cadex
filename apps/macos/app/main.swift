@@ -5,6 +5,7 @@ import Menus
 import Power
 import Settings
 import Shortcuts
+import Strings
 import Tabs
 import Themes
 
@@ -26,7 +27,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var settingsWindow = SettingsWindowController(
         store: settings.store, registry: catalog,
         keymap: { [weak self] in self?.keymap ?? Keymap(registry: CommandRegistry()) },
-        suspendShortcuts: { [weak self] on in self?.dispatcher?.isSuspended = on })
+        suspendShortcuts: { [weak self] on in self?.dispatcher?.isSuspended = on },
+        relaunch: { [weak self] in self?.relaunch() })
+    /// Quitting to open again (the language changed): applicationWillTerminate
+    /// starts the new Cadex.
+    private var relaunching = false
 
     var settingsCommand: Command { settingsWindow.openCommand }
     /// The Cadex symbol by the clock: filled while keep-awake is on.
@@ -35,6 +40,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private(set) lazy var power = PowerController { [weak self] in self?.sessions.contains(where: \.hasRunningProgram) ?? false }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Before any text is made: every view reads its texts once (ADR 0015).
+        Strings.language = Language(rawValue: settings.store.settings.general.language) ?? .en
         connectSettings()
         settings.start()
         // The popup menus take the theme's colors, the same as ⌘K's.
@@ -202,13 +209,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let now = TabsController.shouldClose(
             tabs, in: (current ?? open[0]).window,
             then: { NSApp.reply(toApplicationShouldTerminate: true) },
-            cancelled: { NSApp.reply(toApplicationShouldTerminate: false) })
+            cancelled: { [weak self] in
+                self?.relaunching = false
+                NSApp.reply(toApplicationShouldTerminate: false)
+            })
         return now ? .terminateNow : .terminateLater
     }
 
     /// The main window's spaces as they were at the end, for the next launch.
     func applicationWillTerminate(_ notification: Notification) {
         sessions.first { $0.isMain }?.spaces?.saveNow()
+        if relaunching { openAgain() }
+    }
+
+    /// "Reopen now" after the language changed: quits as usual (asking over
+    /// running programs, saving the spaces), then a new Cadex opens.
+    private func relaunch() {
+        relaunching = true
+        NSApp.terminate(nil)
+    }
+
+    /// A shell waits for this process to end and opens Cadex again: the
+    /// bundle through `open`, or the bare executable during development.
+    private func openAgain() {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        if Bundle.main.bundleIdentifier != nil {
+            process.arguments = ["-c", "while kill -0 \"$1\" 2>/dev/null; do sleep 0.2; done; open -n \"$0\"",
+                                 Bundle.main.bundlePath, String(getpid())]
+        } else if let executable = Bundle.main.executablePath {
+            process.arguments = ["-c", "while kill -0 \"$1\" 2>/dev/null; do sleep 0.2; done; \"$0\" >/dev/null 2>&1 &",
+                                 executable, String(getpid())]
+        }
+        try? process.run()
     }
 }
 

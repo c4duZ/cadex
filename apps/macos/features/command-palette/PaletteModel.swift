@@ -1,5 +1,6 @@
 import CCadex
 import Foundation
+import Strings
 
 /// What the palette lists for a query (docs/spec/command-palette.md):
 /// empty, the pins under "Abrir", the recent commands, then a section per
@@ -41,7 +42,8 @@ enum PaletteModel {
             let title = commands[match.index].title
             return item(commands[match.index], bold: PaletteItem.boldRanges(in: title, byteOffsets: match.positions))
         }
-        let keywordTexts = commands.map { $0.keywords.joined(separator: " ") }
+        // The title in the other language counts as a keyword (ADR 0015).
+        let keywordTexts = commands.map { ([Strings.counterpart(of: $0.title)].compactMap { $0 } + $0.keywords).joined(separator: " ") }
         for match in FuzzyRank.rank(query, keywordTexts) where !seen.contains(match.index) {
             seen.insert(match.index)
             items.append(item(commands[match.index]))

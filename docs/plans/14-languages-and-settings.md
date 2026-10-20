@@ -22,7 +22,8 @@ Decisões: `docs/adr/0015-english-default-two-languages.md`.
   seletor com "Reabrir agora"; a janela de configurações refeita, com seções e explicações novas nos
   dois idiomas: General (idioma, arquivos, árvore), Terminal (shell, perguntas, texto e cursor,
   histórico e teclado), Keep awake (modo, ao abrir, tela, e a tampa explicada à parte), Themes,
-  Shortcuts, About.
+  Shortcuts, About. *Feita em 2026-10-20 no Mac (`apps/macos/shared/strings/Strings.swift`, as
+  páginas em `apps/macos/features/settings/`); o resto da interface segue em português até a fase B.*
 - **B. O resto do Mac.** Comandos (títulos e palavras-chave), menus, barra de título, dicas,
   paleta, explorer, git, editor, preview, mídia, Markdown, spaces, alertas e mensagens.
 - **C. Windows.** O mesmo par no Zig, o seletor e a página de configurações refeita com as mesmas

@@ -23,6 +23,13 @@ let package = Package(
             exclude: ["CLAUDE.md", "Resources/LICENSE-Phosphor.txt", "Resources/LICENSE-MaterialIconTheme.txt", "tests"],
             resources: [.copy("Resources/Phosphor-Regular.ttf"), .copy("Resources/Phosphor-Fill.ttf"), .copy("Resources/FileIcons")]
         ),
+        // The interface's texts in English or Portuguese (ADR 0015).
+        .target(
+            name: "Strings",
+            path: "shared/strings",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
         // The popup menus in the look of ⌘K (right click, "+", status bar).
         .target(
             name: "Menus",
@@ -47,7 +54,7 @@ let package = Package(
         ),
         .target(
             name: "Settings",
-            dependencies: ["Themes", "CommandPalette", "Shortcuts", "Icons"],
+            dependencies: ["Themes", "CommandPalette", "Shortcuts", "Icons", "Strings"],
             path: "features/settings",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -61,7 +68,7 @@ let package = Package(
         ),
         .target(
             name: "CommandPalette",
-            dependencies: ["CCadex", "Icons", "Menus"],
+            dependencies: ["CCadex", "Icons", "Menus", "Strings"],
             path: "features/command-palette",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -268,6 +275,11 @@ let package = Package(
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
+            name: "StringsTests",
+            dependencies: ["Strings", "Checks"],
+            path: "shared/strings/tests"
+        ),
+        .executableTarget(
             name: "MenusTests",
             dependencies: ["Menus", "Checks"],
             path: "shared/menus/tests"
@@ -280,7 +292,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

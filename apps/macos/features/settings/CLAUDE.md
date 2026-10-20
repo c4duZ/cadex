@@ -14,10 +14,11 @@
   mudança e relê edição à mão observando a pasta (salvar atômico) e o arquivo (edição no lugar).
 - A janela (⌘,, comando settings.open): `SettingsWindowController.swift`, com as seções em abas no
   topo como no Terax, auxiliar de tela cheia (com o app em tela cheia, abre por cima dele, na mesma
-  mesa, e não numa mesa à parte); `GeneralPages.swift` (Geral, Terminal, Sobre), `ThemesPage.swift` (modo e
+  mesa, e não numa mesa à parte); `GeneralPages.swift` (General e About), `TerminalPage.swift`, `KeepAwakePage.swift`, `ThemesPage.swift` (modo e
   grade de cartões de tema), `ShortcutsPage.swift` (grava a próxima combinação com os atalhos do
-  app suspensos; Delete tira, Esc cancela, "Padrão" volta) e `SettingsPage.swift` (linhas, caixas e
-  controles que mudam o arquivo na hora). A janela segue o tema (`SettingsColors.swift`): a página
+  app suspensos; Delete tira, Esc cancela, "Padrão" volta) e `SettingsPage.swift` (linhas, títulos de
+  seção, notas, caixas e controles que mudam o arquivo na hora). Textos em par inglês/português
+  (`T`, `../../shared/strings`); trocar o idioma pergunta "Reabrir agora" e chama `relaunch`, do app. A janela segue o tema (`SettingsColors.swift`): a página
   aberta se refaz com as cores novas, mantendo a rolagem.
 - O app (`../../app/SettingsBridge.swift`) passa as preferências ao `TerminalPreferences` do
   terminal, ao tema e aos atalhos, e salva o que um alerta desliga ("não perguntar de novo").

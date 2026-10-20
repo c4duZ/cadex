@@ -29,7 +29,7 @@
   rodapé e escolha com ⌥↩/⌘↩, e a fonte de comandos), `PaletteItem.swift` (a linha: seção, ícone ou
   imagem, detalhe, atalho), `PaletteSections.swift` (a seção de cada comando pelo prefixo do id, e
   `MergedSource`, várias fontes numa lista com títulos), `PaletteModel.swift` (recentes e seções com
-  o campo vazio; fuzzy no título, depois palavra-chave; indisponíveis no fim; fuzzy do núcleo),
+  o campo vazio; fuzzy no título, depois palavra-chave e o título no outro idioma; indisponíveis no fim; fuzzy do núcleo),
   `CommandPalettePanel.swift` (NSPanel sem borda, feito uma vez e reaproveitado: ícone da lista,
   campo, status, linhas com títulos de seção, rodapé com as teclas; fecha ao perder o foco) e
   `PaletteRows.swift` (as linhas, os títulos, as teclas desenhadas e o `PaletteStyle`).

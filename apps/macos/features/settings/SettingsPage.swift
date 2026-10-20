@@ -20,6 +20,11 @@ enum SettingsPage {
         stack.spacing = 14
         stack.setCustomSpacing(4, after: heading)
         stack.setCustomSpacing(24, after: caption)
+        // A section title sits closer to its rows than to the group above.
+        for (i, row) in rows.enumerated() where row.identifier == sectionID {
+            if i > 0 { stack.setCustomSpacing(28, after: rows[i - 1]) }
+            stack.setCustomSpacing(8, after: row)
+        }
         stack.translatesAutoresizingMaskIntoConstraints = false
         for row in rows { row.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true }
 
@@ -65,12 +70,24 @@ enum SettingsPage {
         return boxed(row)
     }
 
+    private static let sectionID = NSUserInterfaceItemIdentifier("settingsSectionTitle")
+
     /// A section title between groups of rows.
     static func section(_ text: String) -> NSView {
-        let label = NSTextField(labelWithString: text)
-        label.font = .systemFont(ofSize: 12, weight: .semibold)
+        let label = NSTextField(labelWithString: text.uppercased())
+        label.font = .systemFont(ofSize: 11, weight: .semibold)
         label.textColor = SettingsColors.secondaryText
+        label.identifier = sectionID
         return label
+    }
+
+    /// Words to read, in a box like a row but without a control (how the
+    /// lid works with keep awake).
+    static func note(_ text: String) -> NSView {
+        let label = NSTextField(wrappingLabelWithString: text)
+        label.font = .systemFont(ofSize: 12)
+        label.textColor = SettingsColors.secondaryText
+        return boxed(label)
     }
 
     /// The rounded box around a row, as in Terax.

@@ -19,6 +19,9 @@
   do space que aparece, então os comandos agem nela. Janela aberta pelo ⌘N tem spaces sem arquivo.
 - `FolderFollow.swift`: o workspace segue o terminal com foco; a cada `cd` vai para a raiz do
   repositório git da pasta (ou a própria pasta), a menos que explorer.followTerminal desligue.
+- Antes de montar qualquer tela, `main.swift` define Strings.language pelo general.language (ADR
+  0015); "Reabrir agora" nas configurações sai como de costume e um shell abre o Cadex de novo
+  (`openAgain`).
 - `main.swift` (AppDelegate) guarda o que as janelas dividem: configurações, a janela de
   configurações, o keymap e o despachante de atalhos, que trocam para os comandos da janela com
   foco (`sessionBecameKey`). Abre a janela principal e as do ⌘N (`newWindow`, na pasta da janela de

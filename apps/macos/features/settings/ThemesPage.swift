@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import Themes
 import UniformTypeIdentifiers
 
@@ -16,14 +17,17 @@ final class ThemesPage {
 
     func makeView() -> NSView {
         let appearance = store.settings.appearance
-        let mode = SettingsPage.popup([("Seguir o sistema", "system"), ("Escuro", "dark"), ("Claro", "light")],
+        let mode = SettingsPage.popup([(T("Follow the system", "Seguir o sistema"), "system"), (T("Dark", "Escuro"), "dark"), (T("Light", "Claro"), "light")],
                                       selected: appearance.mode) { [store] value in store.update { $0.appearance.mode = value } }
         cards = ThemeStore.shared.families.map { family in
             ThemeCard(family: family, selected: family.id == appearance.theme) { [weak self] id in self?.pick(id) }
         }
         var rows: [NSView] = [
-            SettingsPage.row("Modo", "Qual versão do tema aparece: a do modo do sistema, ou sempre a mesma.", control: mode),
-            SettingsPage.section("Tema"),
+            SettingsPage.row(T("Mode", "Modo"),
+                             T("Which version of the theme shows: the one for the system's light or dark mode, or always the same.",
+                               "Qual versão do tema aparece: a do modo claro ou escuro do sistema, ou sempre a mesma."),
+                             control: mode),
+            SettingsPage.section(T("Theme", "Tema")),
         ]
         rows += stride(from: 0, to: cards.count, by: 2).map { i in
             let pair = NSStackView(views: Array(cards[i..<min(i + 2, cards.count)]))
@@ -33,16 +37,16 @@ final class ThemesPage {
             return pair
         }
         rows += looksRows()
-        return SettingsPage.make(title: "Temas", subtitle: "Tema, imagem de fundo e vibrância.", rows: rows)
+        return SettingsPage.make(title: T("Themes", "Temas"), subtitle: T("The theme, the window's frame and a background image.", "O tema, a moldura da janela e uma imagem de fundo."), rows: rows)
     }
 
     /// Vibrancy and the background image: off by default, they cost
     /// compositing on every frame (docs/spec/themes.md).
     private func looksRows() -> [NSView] {
         let a = store.settings.appearance
-        let image = a.backgroundImage.map { ($0 as NSString).lastPathComponent } ?? "Nenhuma"
-        let pick = SettingsPage.button("Escolher imagem…") { [weak self] in self?.pickImage() }
-        let remove = SettingsPage.button("Remover") { [store] in
+        let image = a.backgroundImage.map { ($0 as NSString).lastPathComponent } ?? T("none", "nenhuma")
+        let pick = SettingsPage.button(T("Choose image…", "Escolher imagem…")) { [weak self] in self?.pickImage() }
+        let remove = SettingsPage.button(T("Remove", "Remover")) { [store] in
             if let old = store.settings.appearance.backgroundImage { try? FileManager.default.removeItem(atPath: old) }
             store.update { $0.appearance.backgroundImage = nil }
         }
@@ -50,15 +54,19 @@ final class ThemesPage {
         let buttons = NSStackView(views: [remove, pick])
         buttons.spacing = 6
         return [
-            SettingsPage.section("Janela"),
-            SettingsPage.row("Vibrância", "A moldura fica fosca sobre o que está atrás da janela. Os painéis continuam sólidos.",
+            SettingsPage.section(T("Window", "Janela")),
+            SettingsPage.row(T("Vibrancy", "Vibrância"),
+                             T("The window's frame turns frosted over what is behind it. The panels stay solid.",
+                               "A moldura da janela fica fosca sobre o que está atrás dela. Os painéis continuam sólidos."),
                              control: SettingsPage.toggle(a.vibrancy) { [store] on in store.update { $0.appearance.vibrancy = on } }),
-            SettingsPage.row("Imagem de fundo", "Atrás do terminal. Fica guardada no Cadex. Atual: \(image).", control: buttons),
-            SettingsPage.row("Opacidade da imagem", nil,
+            SettingsPage.row(T("Background image", "Imagem de fundo"),
+                             T("Shown behind the terminal; Cadex keeps a copy. Now: \(image).", "Aparece atrás do terminal; o Cadex guarda uma cópia. Agora: \(image)."),
+                             control: buttons),
+            SettingsPage.row(T("Image opacity", "Opacidade da imagem"), nil,
                              control: SettingsPage.slider(a.backgroundOpacity, range: 0...1, format: "%.0f%%", shown: { $0 * 100 }) { [store] value in
                                  store.update { $0.appearance.backgroundOpacity = value }
                              }),
-            SettingsPage.row("Desfoque da imagem", nil,
+            SettingsPage.row(T("Image blur", "Desfoque da imagem"), nil,
                              control: SettingsPage.slider(a.backgroundBlur, range: 0...50, format: "%.0f") { [store] value in
                                  store.update { $0.appearance.backgroundBlur = value }
                              }),

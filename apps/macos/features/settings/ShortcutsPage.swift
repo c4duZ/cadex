@@ -1,6 +1,7 @@
 import AppKit
 import CommandPalette
 import Shortcuts
+import Strings
 
 /// The "Atalhos" page: every command with its shortcut. Clicking a shortcut
 /// records the next key combination; Delete clears it, Esc cancels. A
@@ -36,7 +37,9 @@ final class ShortcutsPage {
             rows += commands.map(row)
         }
         refreshLabels()
-        return SettingsPage.make(title: "Atalhos", subtitle: "Clique num atalho e aperte as teclas novas.", rows: rows)
+        return SettingsPage.make(title: T("Shortcuts", "Atalhos"),
+                                 subtitle: T("Click a shortcut and press the new keys. Delete removes it, Esc cancels.",
+                                             "Clique num atalho e aperte as teclas novas. Delete tira, Esc cancela."), rows: rows)
     }
 
     private func row(_ command: Command) -> NSView {
@@ -46,11 +49,11 @@ final class ShortcutsPage {
         button.target = ActionBox.keep(button) { [weak self] in self?.record(command.id) }
         button.action = #selector(ActionBox.fire)
         buttons[command.id] = button
-        let reset = NSButton(title: "Padrão", target: nil, action: nil)
+        let reset = NSButton(title: T("Default", "Padrão"), target: nil, action: nil)
         reset.bezelStyle = .inline
         reset.target = ActionBox.keep(reset) { [weak self] in self?.restoreDefault(command) }
         reset.action = #selector(ActionBox.fire)
-        reset.toolTip = "Voltar ao atalho padrão"
+        reset.toolTip = T("Back to the default shortcut", "Voltar ao atalho padrão")
         resets[command.id] = reset
         let controls = NSStackView(views: [reset, button])
         controls.spacing = 6
@@ -72,7 +75,7 @@ final class ShortcutsPage {
 
     private func record(_ id: String) {
         stopRecording()
-        buttons[id]?.title = "Aperte as teclas…"
+        buttons[id]?.title = T("Press the keys…", "Aperte as teclas…")
         suspendShortcuts(true)
         let monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             nonisolated(unsafe) let pressed = event
@@ -89,12 +92,13 @@ final class ShortcutsPage {
             store.update { settings in
                 for (combo, target) in keymap().bindings where target == id { settings.shortcuts[combo.description] = .some(nil) }
             }
-            message.stringValue = "Atalho removido."
+            message.stringValue = T("Shortcut removed.", "Atalho removido.")
             return
         }
         guard let combo = KeyCombo(event: event) else { return }
         guard !combo.isTerminalControlKey else {
-            message.stringValue = "\(combo.label) é dos programas no terminal; escolha outra combinação."
+            message.stringValue = T("\(combo.label) belongs to the programs in the terminal; pick another combination.",
+                                    "\(combo.label) é dos programas no terminal; escolha outra combinação.")
             return
         }
         let previous = keymap().command(for: combo)
@@ -105,7 +109,9 @@ final class ShortcutsPage {
             settings.shortcuts[combo.description] = .some(id)
         }
         if let previous, previous != id {
-            message.stringValue = "\(combo.label) era de \"\(registry.command(previous)?.title ?? previous)\" e agora é deste comando."
+            let other = registry.command(previous)?.title ?? previous
+            message.stringValue = T("\(combo.label) was “\(other)”'s and is now this command's.",
+                                    "\(combo.label) era de “\(other)” e agora é deste comando.")
         } else {
             message.stringValue = ""
         }

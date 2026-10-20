@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 
 /// An action of the app (ADR 0005). Menus, shortcuts, buttons and the
 /// palette run commands by id; nothing implements an action on its own.
@@ -7,16 +8,16 @@ public struct Command {
     public enum Category: Int, CaseIterable, Sendable {
         case app, file, edit, view, terminal, tabs, panes
 
-        /// The menu title, in Portuguese like the rest of the interface.
+        /// The menu title, in the interface's language (ADR 0015).
         public var title: String {
             switch self {
             case .app: "Cadex"
-            case .file: "Arquivo"
-            case .edit: "Editar"
-            case .view: "Visualizar"
+            case .file: T("File", "Arquivo")
+            case .edit: T("Edit", "Editar")
+            case .view: T("View", "Visualizar")
             case .terminal: "Terminal"
-            case .tabs: "Abas"
-            case .panes: "Painéis"
+            case .tabs: T("Tabs", "Abas")
+            case .panes: T("Panes", "Painéis")
             }
         }
     }
