@@ -11,8 +11,11 @@ reescritas para o Windows.
 ## Decisão
 - O app Windows fica em `apps/windows/`, escrito em **Zig**, sobre **Win32** puro: janela, mensagens,
   DPI por monitor, área de transferência e IME pelas APIs do sistema.
-- Desenho: **Direct3D 11** no terminal (grade de células com atlas de glifos, como o Metal no Mac) e
-  **Direct2D com DirectWrite** no resto da interface e no texto.
+- Desenho: um device **Direct3D 11** por processo, uma swap chain por janela composta pelo
+  DirectComposition (permite o Mica atrás), e **Direct2D com DirectWrite** desenhando tudo nela,
+  inclusive o terminal: glifos posicionados na grade com DrawGlyphRun, e layouts em cache para
+  emoji e grafemas compostos. (Revisto em 2026-10-20: o atlas de glifos em shaders próprios, como o
+  Metal no Mac, fica para quando a medição pedir; escrever shaders sem poder rodar era risco demais.)
 - Mídia e web pelos componentes do sistema: WIC (imagem), Media Foundation (vídeo e áudio),
   Windows.Data.Pdf (PDF) e WebView2 só dentro da feature preview, que já é uma página web.
 - **Só Windows 11** (x64 e arm64): permite Mica, cantos arredondados e APIs novas sem caminho

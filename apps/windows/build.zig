@@ -44,6 +44,13 @@ pub fn build(b: *std.Build) void {
         .imports = &.{.{ .name = "sdk", .module = sdk }},
     });
 
+    const gfx = b.createModule(.{
+        .root_source_file = b.path("shared/gfx/gfx.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{.{ .name = "win32", .module = win32 }},
+    });
+
     const root = b.createModule(.{
         .root_source_file = b.path("app/main.zig"),
         .target = target,
@@ -52,6 +59,7 @@ pub fn build(b: *std.Build) void {
         .imports = &.{
             .{ .name = "cadex", .module = cadex },
             .{ .name = "win32", .module = win32 },
+            .{ .name = "gfx", .module = gfx },
         },
     });
     root.addObjectFile(.{ .cwd_relative = b.pathFromRoot(core_lib) });

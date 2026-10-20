@@ -57,17 +57,49 @@ pub fn check(hr: HRESULT) Error!void {
     }
 }
 
-/// The return type of a COM method on `T` (a pointer to an interface).
-fn MethodResult(comptime T: type, comptime method: []const u8) type {
+/// The vtable field holding `method`, looked up through the `Base` chain
+/// the headers use for inherited interfaces (all of D2D).
+fn MethodPtr(comptime Vtbl: type, comptime method: []const u8) type {
+    if (@hasField(Vtbl, method)) return @typeInfo(@FieldType(Vtbl, method)).optional.child;
+    if (@hasField(Vtbl, "Base")) return MethodPtr(@FieldType(Vtbl, "Base"), method);
+    @compileError("no COM method " ++ method ++ " on " ++ @typeName(Vtbl));
+}
+
+inline fn methodOf(vtbl: anytype, comptime method: []const u8) MethodPtr(@typeInfo(@TypeOf(vtbl)).pointer.child, method) {
+    const Vtbl = @typeInfo(@TypeOf(vtbl)).pointer.child;
+    if (@hasField(Vtbl, method)) return @field(vtbl.*, method).?;
+    return methodOf(&vtbl.Base, method);
+}
+
+fn VtblOf(comptime T: type) type {
     const Interface = @typeInfo(T).pointer.child;
-    const Vtbl = @typeInfo(@FieldType(Interface, "lpVtbl")).pointer.child;
-    const Fn = @typeInfo(@typeInfo(@FieldType(Vtbl, method)).optional.child).pointer.child;
+    return @typeInfo(@FieldType(Interface, "lpVtbl")).pointer.child;
+}
+
+fn MethodResult(comptime T: type, comptime method: []const u8) type {
+    const Fn = @typeInfo(MethodPtr(VtblOf(T), method)).pointer.child;
     return @typeInfo(Fn).@"fn".return_type.?;
 }
 
-/// obj->lpVtbl->method(obj, args...) for the translated interfaces.
+/// obj->lpVtbl->method(obj, args...) for the translated interfaces; an
+/// inherited method gets `obj` as the base interface it expects.
 pub inline fn call(obj: anytype, comptime method: []const u8, args: anytype) MethodResult(@TypeOf(obj), method) {
-    return @call(.auto, @field(obj.*.lpVtbl.*, method).?, .{obj} ++ args);
+    // A single-item pointer: [*c] pointers have no field access.
+    const vtbl: *const VtblOf(@TypeOf(obj)) = @ptrCast(obj.*.lpVtbl);
+    const f = methodOf(vtbl, method);
+    const Fn = @typeInfo(@TypeOf(f)).pointer.child;
+    var full: std.meta.ArgsTuple(Fn) = undefined;
+    full[0] = @ptrCast(obj);
+    inline for (args, 1..) |arg, i| full[i] = coerce(@TypeOf(full[i]), arg);
+    return @call(.auto, f, full);
+}
+
+/// The headers mix signed and unsigned for the same enums (a c_int
+/// constant for a UINT parameter): integers are cast, the rest passes as is.
+inline fn coerce(comptime T: type, arg: anytype) T {
+    const A = @TypeOf(arg);
+    if (@typeInfo(T) == .int and (@typeInfo(A) == .int or A == comptime_int)) return @intCast(arg);
+    return arg;
 }
 
 /// Release on any interface pointer (optional too).
