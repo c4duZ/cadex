@@ -16,7 +16,9 @@
 - Uma pasta por feature em features/, mesmos nomes do núcleo e do Mac; shared/ só com o que 2+
   features usam. Declarações de Win32/COM escritas à mão, só as usadas, em shared/win32.
 - Compila neste Mac por cross-compile; roda e testa numa VM Windows 11 ARM (UTM) por ssh.
-- Ainda vazio: o plano 9 prepara o núcleo, o plano 10 cria o esqueleto do app.
+- `build.zig`: o app sobre a libcadex.a do `make windows-core` e o módulo `cadex` (o header
+  traduzido). Entrada em `app/` (`app/CLAUDE.md`), declarações do Win32 em `shared/`
+  (`shared/CLAUDE.md`). Features em features/, a partir da fase C do plano 10.
 - A VM de teste (uma vez, feita pelo dono): UTM com Windows 11 ARM (ISO arm64 da Microsoft); no
   Windows, OpenSSH Server ligado (Configurações → Sistema → Recursos opcionais, depois
   `Set-Service sshd -StartupType Automatic` e `Start-Service sshd`), Git for Windows, Modo de
@@ -26,4 +28,5 @@
   `make windows-core-test` compila os testes do núcleo e roda na VM por `tools/windows-vm.sh`.
 
 ## Como validar
-- Ainda não há o que validar no app; o núcleo no Windows é validado pelo plano 9.
+- `make windows-app` compila x64 e arm64 daqui; `make windows-run` abre na VM
+  (`../../tools/windows-vm.sh --gui`); o núcleo no Windows é validado pelo plano 9.

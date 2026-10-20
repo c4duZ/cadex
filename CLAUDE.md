@@ -66,7 +66,8 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 - Termo novo do domínio entra em `docs/CONTEXT.md`. Decisão que alguém proporia desfazer vira ADR.
 
 ## Como validar
-- `make check` antes de entregar: manifestos, testes do núcleo e testes do app.
+- `make check` antes de entregar: manifestos, testes do núcleo, testes do app macOS e o build do
+  app Windows (compila daqui; roda só na VM, com `make windows-core-test` e `make windows-run`).
 - `make manifests`: todo `CLAUDE.md` tem as quatro seções e todo caminho citado entre crases existe
   (`tools/check_manifests.py`).
 - `make core-test`: `zig build test` com o alocador de teste (pega vazamento de memória).
