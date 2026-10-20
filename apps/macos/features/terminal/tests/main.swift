@@ -225,5 +225,42 @@ let exitCode = await Checks.run([
         }
         expect(found, "the arrow key never reached the shell")
     }),
+    ("image tags are found by cell, wide characters kept apart", {
+        let row = ["❯", "", " "] + "[Image #12] e [Image #3]".map(String.init)
+        let tags = PastedImageTag.find(inRow: row, row: 4)
+        expect(tags == [PastedImageTag(number: 12, row: 4, firstCol: 3, lastCol: 13),
+                        PastedImageTag(number: 3, row: 4, firstCol: 17, lastCol: 26)], "\(tags)")
+        expect(PastedImageTag.find(inRow: "[Image #] [Image 2] [Image #4".map(String.init), row: 0).isEmpty)
+    }),
+    ("a paste takes the first new tag number, even one seen before", {
+        let a = URL(fileURLWithPath: "/tmp/a.png"), b = URL(fileURLWithPath: "/tmp/b.png")
+        let now = Date()
+        var links = PastedImageLinks()
+        // #1 already on screen (an old message): only a second #1 or a new number counts.
+        links.pasted(a, visible: [1: 1], now: now)
+        links.pasted(b, visible: [1: 1], now: now)
+        links.screenChanged(visible: [1: 1], now: now)
+        expect(links.isWaiting && links.files.isEmpty)
+        links.screenChanged(visible: [1: 2, 2: 1], now: now)
+        expect(links.file(for: 1) == a && links.file(for: 2) == b && !links.isWaiting, "\(links.files)")
+        expect(links.latest == b)
+    }),
+    ("a paste without a tag gives up after a while", {
+        let now = Date()
+        var links = PastedImageLinks()
+        links.pasted(URL(fileURLWithPath: "/tmp/a.png"), visible: [:], now: now)
+        links.screenChanged(visible: [7: 1], now: now.addingTimeInterval(PastedImageLinks.wait + 1))
+        expect(links.files.isEmpty && !links.isWaiting)
+    }),
+    ("the session reads image tags off the screen", {
+        let session = try TerminalSession(cols: 80, rows: 24, shell: "/bin/sh")
+        session.write("printf '[Image #%d]\\n' 5\r")
+        var tags: [PastedImageTag] = []
+        for _ in 0..<250 where tags.isEmpty {
+            try await Task.sleep(for: .milliseconds(20))
+            tags = session.visibleImageTags().filter { $0.firstCol == 0 }
+        }
+        expect(tags.first?.number == 5, "\(tags)")
+    }),
 ])
 exit(exitCode)

@@ -41,6 +41,8 @@ extension TerminalView {
         window?.makeFirstResponder(self)
         let location = convert(event.locationInWindow, from: nil)
         if event.modifierFlags.contains(.command), openLink(at: location) { return }
+        if event.modifierFlags.intersection([.command, .shift, .option, .control]).isEmpty, event.clickCount == 1,
+           openPastedImage(at: location) { return }
         if reportPress(event, button: CADEX_MOUSE_BUTTON_LEFT) { return }
         session?.selectPress(
             geometry.pointer(at: location),

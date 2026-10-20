@@ -17,6 +17,7 @@ extension TerminalView {
                 return
             }
             session.paste(TerminalSession.quotePaths([url.path]))
+            notePastedImage(url)
         case .text(let text):
             pasteText(text)
         }

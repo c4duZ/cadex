@@ -7,6 +7,7 @@ import Strings
 /// terminal with focus and is unavailable when no terminal has it.
 public enum TerminalCommands {
     private static let noTerminal = T("No terminal has focus", "Nenhum terminal com foco")
+    private static let noImage = T("No image was pasted in this terminal", "Nenhuma imagem colada neste terminal")
 
     @MainActor
     public static var all: [Command] {
@@ -20,6 +21,12 @@ public enum TerminalCommands {
             .responder("terminal.scroll-bottom", T("Scroll to Bottom", "Ir ao fim do histórico"), keywords: ["scroll", "rolar", "final", "bottom", "history"],
                        category: .terminal, shortcut: "cmd+down",
                        selector: #selector(TerminalView.terminalScrollToBottom(_:)), reason: noTerminal),
+            .responder("terminal.open-pasted-image-beside", T("Open Last Pasted Image Beside", "Abrir a última imagem colada ao lado"),
+                       keywords: ["image", "imagem", "paste", "colar", "print", "screenshot"], category: .terminal,
+                       selector: #selector(TerminalView.openLastPastedImageBeside(_:)), reason: noImage),
+            .responder("terminal.open-pasted-image-in-tab", T("Open Last Pasted Image in New Tab", "Abrir a última imagem colada em nova aba"),
+                       keywords: ["image", "imagem", "paste", "colar", "print", "screenshot"], category: .terminal,
+                       selector: #selector(TerminalView.openLastPastedImageInTab(_:)), reason: noImage),
         ]
     }
 }

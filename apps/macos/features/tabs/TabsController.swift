@@ -15,6 +15,9 @@ public final class TabsController {
     public var onActiveChange: (() -> Void)?
     /// "Abrir no preview" was clicked in a terminal, for a local address.
     public var onOpenPreview: ((String) -> Void)?
+    /// A terminal opens a file in the app (a pasted image's tag): the path
+    /// and beside, in a new tab, or nil for the setting.
+    public var onOpenFile: ((String, Bool?) -> Void)?
     /// Anything the snapshot holds changed (tabs, panes, folders, titles):
     /// the spaces save it.
     public var onStateChange: (() -> Void)?
@@ -183,6 +186,7 @@ public final class TabsController {
         }
         terminal.onActivity = { [weak self] in self?.scheduleTitleRefresh() }
         terminal.onOpenPreview = { [weak self] url in self?.onOpenPreview?(url) }
+        terminal.onOpenFile = { [weak self] path, beside in self?.onOpenFile?(path, beside) }
         terminal.onProgramTitle = { [weak self] _ in self?.refreshBar() }
         terminal.onFocus = { [weak self, weak tab] in
             tab?.noteFocus(pane)

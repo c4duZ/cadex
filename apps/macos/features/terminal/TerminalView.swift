@@ -40,6 +40,14 @@ public final class TerminalView: MTKView {
     /// offer shows only when this is set).
     public var onOpenPreview: ((String) -> Void)?
     var previewOffer: TerminalPreviewOffer?
+    /// Opens a file in the app (a pasted image's tag was clicked): the
+    /// path, and beside (true), in a new tab (false) or as the setting says
+    /// (nil). Without it the tags stay text.
+    public var onOpenFile: ((String, Bool?) -> Void)?
+    /// Which pasted file each "[Image #N]" tag stands for (TerminalPastedImages.swift).
+    var pastedImages = PastedImageLinks()
+    var pastedImageMatchScheduled = false
+    var imageHover: PastedImageHover?
 
     public init(frame: CGRect, cwd: String? = nil) {
         super.init(frame: frame, device: MTLCreateSystemDefaultDevice())
@@ -61,6 +69,7 @@ public final class TerminalView: MTKView {
         session?.onOutput = { [weak self] in
             self?.needsDisplay = true
             self?.refreshFindCounts()
+            self?.matchPastedImagesSoon()
             self?.onActivity?()
         }
         session?.onExit = { [weak self] _ in
@@ -190,6 +199,7 @@ public final class TerminalView: MTKView {
 
     public override func keyDown(with event: NSEvent) {
         restartBlink()
+        hideImageHover()
         // A dead key is waiting (´ before e): the input system decides what
         // Backspace, Escape or the next letter do with it.
         if hasMarkedText() {

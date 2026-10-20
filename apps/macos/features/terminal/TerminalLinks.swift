@@ -6,21 +6,28 @@ extension TerminalView {
     public override func updateTrackingAreas() {
         super.updateTrackingAreas()
         if let area = mouse.trackingArea { removeTrackingArea(area) }
-        let area = NSTrackingArea(rect: .zero, options: [.mouseMoved, .activeInKeyWindow, .inVisibleRect], owner: self)
+        let area = NSTrackingArea(rect: .zero, options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect], owner: self)
         addTrackingArea(area)
         mouse.trackingArea = area
     }
 
     public override func mouseMoved(with event: NSEvent) {
-        refreshHoveredLink(at: convert(event.locationInWindow, from: nil), command: event.modifierFlags.contains(.command))
+        let location = convert(event.locationInWindow, from: nil)
+        let onImage = !event.modifierFlags.contains(.command) && refreshImageHover(at: location)
+        if !onImage { hideImageHover() }
+        refreshHoveredLink(at: location, command: event.modifierFlags.contains(.command), onImage: onImage)
         reportHover(event)
+    }
+
+    public override func mouseExited(with event: NSEvent) {
+        hideImageHover()
     }
 
     public override func flagsChanged(with event: NSEvent) {
         super.flagsChanged(with: event)
         guard let window else { return }
         let location = convert(window.mouseLocationOutsideOfEventStream, from: nil)
-        refreshHoveredLink(at: location, command: event.modifierFlags.contains(.command))
+        refreshHoveredLink(at: location, command: event.modifierFlags.contains(.command), onImage: imageHover != nil)
     }
 
     /// Cell indices (row-major) of the hovered link, for the renderer.
@@ -47,13 +54,14 @@ extension TerminalView {
         return true
     }
 
-    private func refreshHoveredLink(at location: CGPoint, command: Bool) {
+    /// `onImage`: the pointer is on a pasted image's tag, whose hand cursor stays.
+    private func refreshHoveredLink(at location: CGPoint, command: Bool, onImage: Bool) {
         let link = command && bounds.contains(location) ? linkUnder(location) : nil
         if link != mouse.hoveredLink {
             mouse.hoveredLink = link
             needsDisplay = true
         }
-        (link == nil ? NSCursor.iBeam : NSCursor.pointingHand).set()
+        (link == nil && !onImage ? NSCursor.iBeam : NSCursor.pointingHand).set()
     }
 
     private func linkUnder(_ location: CGPoint) -> TerminalSession.Link? {

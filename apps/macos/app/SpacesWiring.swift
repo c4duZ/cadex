@@ -26,6 +26,12 @@ extension WindowSession {
     private func makeTabs() -> TabsController {
         let tabs = TabsController(window: window)
         tabs.onOpenPreview = { [weak self] url in self?.openPreview(url) }
+        tabs.onOpenFile = { [weak self] path, beside in
+            // A pasted image lives in the temporary folder, outside the
+            // workspace: the media viewer reads only authorized folders.
+            WorkspaceFolder.allow((path as NSString).deletingLastPathComponent)
+            self?.opener?.open(path, beside: beside)
+        }
         if let bar = workspace?.statusBar { connectStatusBar(bar, to: tabs) }
         return tabs
     }

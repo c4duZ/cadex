@@ -19,7 +19,10 @@ LITERAL = re.compile(r'"((?:%s)\.[a-z0-9-]+)"' % PREFIXES)
 NOT_COMMANDS = {"explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode"}
 # Mac-only for now: the in-app updater (docs/adr/0016-in-app-updates.md) comes
 # to Windows later. Windows-only ones (workspace.environment) need no entry.
-MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update"}
+# The pasted-image tags (docs/spec/terminal.md, Ver a imagem colada) also
+# start on the Mac, 2026-10-20.
+MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
+            "terminal.open-pasted-image-beside", "terminal.open-pasted-image-in-tab"}
 
 
 def literals(folder, suffix):

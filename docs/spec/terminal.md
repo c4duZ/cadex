@@ -82,6 +82,22 @@ existir:
 Colar é responsabilidade da interface de cada plataforma: no macOS, a área de transferência do
 sistema (NSPasteboard); no Windows, a do Win32. O núcleo recebe só o texto final a enviar.
 
+### Ver a imagem colada
+Agentes como o Claude Code trocam o caminho da imagem colada por uma etiqueta (`[Image #3]`), e a
+imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou na colagem:
+
+- Depois de colar uma imagem, a primeira etiqueta `[Image #N]` nova que aparece na tela da aba, em
+  até 5 s, fica ligada àquele arquivo. Várias imagens coladas em seguida se ligam na ordem.
+- Passar o mouse sobre uma etiqueta ligada mostra a miniatura da imagem ao lado do ponteiro (no
+  máximo 320 × 240 pt) e o cursor de mão; tirar o mouse esconde.
+- Clicar na etiqueta abre a imagem no visualizador de mídia, onde os arquivos abrem
+  (configuração "Abrir arquivos": ao lado ou em nova aba).
+- Comandos: "Abrir a última imagem colada ao lado" e "Abrir a última imagem colada em nova aba";
+  só aparecem com um terminal com foco que já colou uma imagem.
+- Vale só para o que foi colado com ⌘V no Cadex, enquanto a aba existe. Imagem colada por outro
+  caminho (Ctrl+V direto no programa) não tem arquivo conhecido, e a etiqueta fica como texto.
+- O mesmo número de novo (o agente reiniciou e voltou ao `#1`) passa a apontar para a colagem nova.
+
 ### Arrastar arquivos
 - Arquivos arrastados do Finder ou do explorer para um painel viram caminhos escapados, separados
   por espaço, como na colagem de arquivos.
@@ -131,6 +147,8 @@ sistema (NSPasteboard); no Windows, a do Win32. O núcleo recebe só o texto fin
 - [x] Copiar um arquivo com espaço no nome no Finder e colar resulta num caminho que o shell aceita.
 - [x] Colar um print de tela cola o caminho de um PNG que existe e abre a imagem.
 - [x] Colar texto num programa com bracketed paste ativo não executa as linhas automaticamente.
+- [ ] Colar um print no Claude Code: passar o mouse em `[Image #N]` mostra a miniatura e clicar
+      abre a imagem no visualizador.
 - [x] Com "copiar ao selecionar" desligado e qualquer coisa copiada, passar o mouse e selecionar
       texto no terminal não muda a área de transferência; ⌘V ainda cola o que estava lá.
 - [x] Com "copiar ao selecionar" ligado, terminar uma seleção copia o texto dela.

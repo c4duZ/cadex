@@ -43,6 +43,8 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   atual (OSC 7).
 - **Bracketed paste**: modo em que o programa pede que o texto colado venha marcado, para não ser
   executado como digitação.
+- **Etiqueta de imagem** (`image tag`): o texto `[Image #N]` que um agente mostra no lugar do
+  caminho de uma imagem colada; o terminal a liga ao PNG salvo na colagem.
 - **Diretório autorizado** (`authorized directory`): pasta que o usuário abriu nesta execução. O
   núcleo só mexe em arquivos dentro de uma delas, com o caminho resolvido (sem `..` nem links).
 - **Ignorado** (`ignored`): o que .gitignore, .ignore ou .git/info/exclude deixam de fora. Aparece
