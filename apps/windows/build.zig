@@ -66,6 +66,9 @@ pub fn build(b: *std.Build) void {
     // The same font file the Mac ships: one source for the icons (ADR 0008).
     icons.addAnonymousImport("phosphor_font", .{ .root_source_file = b.path("../macos/shared/icons/Resources/Phosphor-Regular.ttf") });
 
+    const shared = Shared{ .cadex = cadex, .win32 = win32, .gfx = gfx, .ui = ui, .icons = icons, .core_lib = b.pathFromRoot(core_lib) };
+    const command_palette = feature(b, target, optimize, shared, "command-palette", "command_palette.zig", &.{});
+
     const root = b.createModule(.{
         .root_source_file = b.path("app/main.zig"),
         .target = target,
@@ -77,13 +80,10 @@ pub fn build(b: *std.Build) void {
             .{ .name = "gfx", .module = gfx },
             .{ .name = "ui", .module = ui },
             .{ .name = "icons", .module = icons },
+            .{ .name = "command-palette", .module = command_palette },
         },
     });
-    root.addObjectFile(.{ .cwd_relative = b.pathFromRoot(core_lib) });
-    // simdutf and highway inside libcadex.a are C++ (built without libc++,
-    // but they still need its ABI pieces).
-    root.link_libcpp = true;
-    for (system_libs) |lib| root.linkSystemLibrary(lib, .{});
+    linkCore(root, b.pathFromRoot(core_lib));
 
     const exe = b.addExecutable(.{
         .name = "Cadex",
@@ -98,10 +98,63 @@ pub fn build(b: *std.Build) void {
     // also type-checks every declaration (Zig only analyzes what is used).
     const test_step = b.step("test-bin", "Build the app tests without running them");
     const tested = [_]struct { []const u8, *std.Build.Module }{
-        .{ "app", root }, .{ "ui", ui }, .{ "gfx", gfx }, .{ "icons", icons }, .{ "win32", win32 },
+        .{ "app", root },                       .{ "ui", ui }, .{ "gfx", gfx }, .{ "icons", icons }, .{ "win32", win32 },
+        .{ "command-palette", command_palette },
     };
     for (tested) |entry| {
         const t = b.addTest(.{ .name = entry[0], .root_module = entry[1] });
         test_step.dependOn(&b.addInstallArtifact(t, .{ .dest_sub_path = b.fmt("cadex-{s}-tests.exe", .{entry[0]}) }).step);
     }
+}
+
+/// The modules every feature may import: the core's C API and the shared layers.
+const Shared = struct {
+    cadex: *std.Build.Module,
+    win32: *std.Build.Module,
+    gfx: *std.Build.Module,
+    ui: *std.Build.Module,
+    icons: *std.Build.Module,
+    core_lib: []const u8,
+};
+
+/// libcadex.a and the system DLLs, on every module that ends up in an exe
+/// (the app and each feature's test exe); the same archive twice in one
+/// link is harmless.
+fn linkCore(module: *std.Build.Module, core_lib: []const u8) void {
+    module.addObjectFile(.{ .cwd_relative = core_lib });
+    // simdutf and highway inside libcadex.a are C++ (built without libc++,
+    // but they still need its ABI pieces).
+    module.link_libcpp = true;
+    for (system_libs) |lib| module.linkSystemLibrary(lib, .{});
+}
+
+/// A feature as its own module (features/<dir>/<root>): it sees the shared
+/// layers and only the entry points of the features in `uses`, so "a
+/// feature never reaches into another" is enforced by the compiler, as
+/// SwiftPM does on the Mac.
+fn feature(
+    b: *std.Build,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+    shared: Shared,
+    comptime dir: []const u8,
+    comptime root: []const u8,
+    uses: []const struct { []const u8, *std.Build.Module },
+) *std.Build.Module {
+    const module = b.createModule(.{
+        .root_source_file = b.path("features/" ++ dir ++ "/" ++ root),
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+        .imports = &.{
+            .{ .name = "cadex", .module = shared.cadex },
+            .{ .name = "win32", .module = shared.win32 },
+            .{ .name = "gfx", .module = shared.gfx },
+            .{ .name = "ui", .module = shared.ui },
+            .{ .name = "icons", .module = shared.icons },
+        },
+    });
+    for (uses) |entry| module.addImport(entry[0], entry[1]);
+    linkCore(module, shared.core_lib);
+    return module;
 }

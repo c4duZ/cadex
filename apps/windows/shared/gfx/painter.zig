@@ -135,6 +135,25 @@ pub const Painter = struct {
         w.call(self.context, "DrawTextLayout", .{ origin, made, self.paint(color), c.D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT | c.D2D1_DRAW_TEXT_OPTIONS_CLIP });
     }
 
+    /// Text with some code points in bold (the letters a search matched),
+    /// given as byte offsets into `value`.
+    pub fn textBold(self: *Painter, value: []const u8, spec: Spec, r: Rect, color: Color, bold: []const u32) void {
+        if (bold.len == 0) return self.text(value, spec, r, color, .{});
+        if (value.len == 0 or r.w <= 0) return;
+        const made = self.layout(value, spec, r.w, r.h) catch return;
+        defer w.release(made);
+        _ = w.call(made, "SetParagraphAlignment", .{c.DWRITE_PARAGRAPH_ALIGNMENT_CENTER});
+        for (bold) |at| {
+            if (at >= value.len) continue;
+            const len = std.unicode.utf8ByteSequenceLength(value[at]) catch 1;
+            const range: c.DWRITE_TEXT_RANGE = .{ .startPosition = utf16Index(value, at), .length = if (len == 4) 2 else 1 };
+            _ = w.call(made, "SetFontWeight", .{ c.DWRITE_FONT_WEIGHT_BOLD, range });
+        }
+        self.trimWithEllipsis(made);
+        const origin: c.D2D1_POINT_2F = .{ .x = r.x, .y = r.y };
+        w.call(self.context, "DrawTextLayout", .{ origin, made, self.paint(color), c.D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT | c.D2D1_DRAW_TEXT_OPTIONS_CLIP });
+    }
+
     fn trimWithEllipsis(self: *Painter, made: *c.IDWriteTextLayout) void {
         var sign: [*c]c.IDWriteInlineObject = null;
         if (w.call(self.factory, "CreateEllipsisTrimmingSign", .{ @as(*c.IDWriteTextFormat, @ptrCast(made)), &sign }) < 0) return;
