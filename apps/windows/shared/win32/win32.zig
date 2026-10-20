@@ -3,6 +3,10 @@
 //! headers cannot give: UTF-16 literals, COM calls, the interface ids the
 //! missing libuuid would hold, and DirectComposition (C++ only in mingw).
 //!
+//! sdk.h defines UNICODE, so a vtable field named like a GDI macro carries
+//! the macro's W name (IDWriteFontFace's "GetGlyphIndicesW"); call errors
+//! name the vtable to look in.
+//!
 //! Avoid COM methods that return a struct by value (ID2D1RenderTarget's
 //! GetSize, GetPixelFormat): their C declarations do not match the ABI the
 //! system DLLs use.

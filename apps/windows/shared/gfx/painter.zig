@@ -187,6 +187,24 @@ pub const Painter = struct {
         return byteIndex(value, pos);
     }
 
+    /// Glyphs of one font face on one baseline, each `advance` apart (the
+    /// terminal's cells): the fast path for text on a grid.
+    pub fn glyphRun(self: *Painter, face: *c.IDWriteFontFace, em: f32, glyphs: []const u16, advances: []const f32, origin: Point, color: Color) void {
+        if (glyphs.len == 0) return;
+        const run: c.DWRITE_GLYPH_RUN = .{
+            .fontFace = face,
+            .fontEmSize = em,
+            .glyphCount = @intCast(glyphs.len),
+            .glyphIndices = glyphs.ptr,
+            .glyphAdvances = advances.ptr,
+            .glyphOffsets = null,
+            .isSideways = 0,
+            .bidiLevel = 0,
+        };
+        const at: c.D2D1_POINT_2F = .{ .x = origin.x, .y = origin.y };
+        w.call(self.context, "DrawGlyphRun", .{ at, &run, null, self.paint(color), c.DWRITE_MEASURING_MODE_NATURAL });
+    }
+
     /// A Phosphor icon (its code point from icons.zig) centered in `r`.
     pub fn icon(self: *Painter, codepoint: u21, size: f32, r: Rect, color: Color) void {
         var buf: [4]u8 = undefined;

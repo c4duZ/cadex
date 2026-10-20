@@ -17,3 +17,4 @@
 #include <dxgi1_3.h>
 #include <d2d1_1.h>
 #include <dwrite_3.h>
+#include <wincodec.h>
