@@ -7,6 +7,7 @@ check: manifests core-test macos-test windows-app
 manifests:
 	@python3 tools/check_manifests.py
 	@python3 -I tools/icons/windows_icons.py --check
+	@python3 -I tools/check_command_parity.py
 
 # libcadex.a + cadex.h in core/zig-out, which the macOS app links.
 core:

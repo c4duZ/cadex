@@ -139,6 +139,11 @@ fn makeCode(app: *App, path: []const u8, line: u32) ?tabs.Document {
 }
 
 fn makeNote(app: *App, path: []const u8, line: u32) ?tabs.Document {
+    // markdown.openAs "rendered": the page, unless a line was asked for
+    // (a search result, a link to a heading), which only the text has.
+    if (line == 0 and std.mem.eql(u8, app.settings.current.markdown.open_as, "rendered")) {
+        if (opener.rendered) |make| if (make(app, path, 0)) |doc| return doc;
+    }
     const doc = app.markdown.open(path) catch return null;
     if (line > 0) editor.goToLine(doc, line);
     return doc;

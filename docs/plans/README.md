@@ -28,8 +28,8 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 9 | `docs/plans/9-windows-core.md` | núcleo compilando e testado no Windows, ConPTY, WSL | B a H feitas; falta a VM (A) |
 | 10 | `docs/plans/10-windows-terminal.md` | janela e terminal completo no Windows | escrito, compila; falta rodar na VM |
 | 11 | `docs/plans/11-windows-shell.md` | abas, divisões, paleta, tema, configurações | escrito, compila; falta rodar na VM |
-| 12 | `docs/plans/12-windows-files-viewers-git.md` | explorer, busca, visualizadores e git | em andamento |
-| 13 | `docs/plans/13-windows-release.md` | spaces, painéis com documentos, instalador e release | a fazer |
+| 12 | `docs/plans/12-windows-files-viewers-git.md` | explorer, busca, visualizadores e git | escrito, compila e ligado no app; falta rodar na VM |
+| 13 | `docs/plans/13-windows-release.md` | spaces, painéis com documentos, instalador e release | A a C escritas; falta a VM, medir (D) e a semana de uso (E) |
 
 ## O que eu não quero
 - Executar plano sem ler antes o `CLAUDE.md` da raiz e o da feature que vai mexer.

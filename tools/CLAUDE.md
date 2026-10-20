@@ -19,6 +19,8 @@
   `icons/svg_to_pdf.swift` convertendo para PDF. A lista do que entra fica no script
   (`docs/adr/0011-material-file-icons.md`).
 
+- `check_command_parity.py` (no `make manifests`): todo id de comando do Mac existe no app Windows
+  (ADR 0005, os mesmos ids nos dois). Nome de interface que não é comando vai em NOT_COMMANDS.
 - `webview2_sdk.py`: baixa o pacote Microsoft.Web.WebView2 (versão e sha256 fixados no script) e
   gera `../apps/windows/shared/webview/sdk/` (as declarações em C das interfaces que o app usa, os
   ids e o WebView2Loader.dll por arquitetura) (`../docs/adr/0014-webview2-on-windows.md`). Só roda

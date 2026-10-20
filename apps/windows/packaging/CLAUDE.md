@@ -16,7 +16,9 @@
 ## Como eu quero
 - `build.sh` (ou `make windows-package`): núcleo ReleaseFast e app ReleaseSmall nas duas
   arquiteturas, com a versão do `../../macos/packaging/Info.plist` passada em -Dversion; ZIPs, os
-  .sha256 e o install.ps1 em dist/ na raiz. Leva uns 40 s; cada ZIP tem uns 3 MB.
+  .sha256 e o install.ps1 em dist/ na raiz, levando o WebView2Loader.dll que o build instala ao lado
+  do exe. Leva uns 40 s; cada ZIP tem uns 3 MB (o exe tem 20 MB, quase tudo as gramáticas do
+  tree-sitter, como no Mac).
 - O ícone: `../app/Cadex.ico`, gerado de `docs/cadex-icon.png` por
   `../../../tools/icons/windows_ico.py` (9 tamanhos, PNG dentro do ICO). O `../build.zig` escreve o
   Cadex.rc (ícone 1, que a janela carrega, e VERSIONINFO) e liga com addWin32ResourceFile.

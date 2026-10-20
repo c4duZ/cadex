@@ -32,6 +32,15 @@ source-control, git-history (app Windows) · Decisões: `docs/adr/0006-editor-re
 - **F. Git.** Source control (status, diff, stage, commit, push, pull) e grafo do histórico, com o
   git.exe do Git for Windows e o aviso quando ele não estiver instalado.
 
+**Andamento (2026-10-20):** A a F escritas e compilando para x64 e arm64, ligadas no app
+(`apps/windows/app/viewers.zig`, `apps/windows/app/git_page.zig`, `apps/windows/app/web.zig`); nada
+rodou no Windows ainda. Desvios:
+- A: os ícones de arquivo seguem em Phosphor; os do Material pedem os SVGs (o script atual só gera
+  PDF para o Mac).
+- D: a mídia vai pelo WebView2 (vídeo, áudio, PDF, GIF e SVG) e a imagem parada pelo WIC, no
+  lugar de IMFMediaEngine e Windows.Data.Pdf (`docs/adr/0014-webview2-on-windows.md`).
+- C: o Markdown renderizado abre num documento próprio, ao lado da nota, e não no lugar do texto.
+
 ## Como validar
 - `make check` passa no Mac; testes do app Windows passam na VM.
 - Critérios de aceite das specs dessas features conferidos na VM, marcados com "(Windows)".
