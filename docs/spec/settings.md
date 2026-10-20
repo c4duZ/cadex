@@ -12,7 +12,7 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
     renderizada (`markdown.openAs`, "source" ou "rendered"), e se a árvore segue a pasta do
     terminal (`explorer.followTerminal`), e onde arquivos abrem: ao lado do painel com foco
     (padrão) ou em nova aba (`general.openFiles`, "beside" ou "tab"), e o manter acordado
-    (`power.keepAwake`, "off", "always" ou "running", e `power.keepDisplayOn`; ver `power.md`).
+    (`power.mode`, "always" ou "running", `power.onAtLaunch` e `power.keepDisplayOn`; ver `power.md`).
   - **Terminal:** fonte, tamanho, cursor (barra, bloco, sublinhado), cursor piscando, linhas de
     histórico, Option esquerdo como Meta, copiar ao selecionar.
   - **Aparência:** tema (seguir o sistema, ou um tema fixo), imagem de fundo com opacidade e

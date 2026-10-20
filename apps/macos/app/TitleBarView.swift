@@ -32,15 +32,15 @@ final class TitleBarView: NSView {
     private let searchButton = TitleBarButton(icon: .magnifyingGlass, title: "⌘K", tip: "Buscar arquivos e comandos (⌘K)")
     /// The space's name; clicking it switches spaces (docs/spec/spaces.md).
     private let spaceButton = TitleBarButton(icon: .stack, title: "", tip: "Trocar de space (⇧⌘S)")
-    /// The three as one group on a light fill.
+    /// The four as one group on a light fill.
     private let group = NSView()
     private let newTabButton = TitleBarButton(icon: .plus, tip: "Abrir terminal, arquivo, preview ou grafo do git")
     private let settingsButton = TitleBarButton(icon: .gearSix, tip: "Configurações (⌘,)")
-    /// Keep-awake: filled while on, the outline while off; its menu turns
-    /// it on or off (docs/spec/power.md).
-    private let powerButton = TitleBarButton(icon: .coffee, tip: "Manter o computador acordado")
-    /// The power menu's lines (the app builds them from the commands).
-    var powerMenu: (() -> [MenuEntry])?
+    /// Keep-awake, in the group: filled while on, the outline while off; a
+    /// click turns it on in the settings' mode or off (docs/spec/power.md).
+    private let powerButton = TitleBarButton(icon: .coffee, tip: "Manter acordado")
+    /// The command the coffee runs now (the app decides from the state).
+    var powerCommand: (() -> String)?
     /// The shown space's tabs; swapped when the space changes.
     private(set) var tabBar: TabBarView?
     private var tabBarConstraints: [NSLayoutConstraint] = []
@@ -64,13 +64,13 @@ final class TitleBarView: NSView {
         newTabButton.onPress = { [weak self] in self?.showNewMenu() }
         settingsButton.onPress = { [weak self] in self?.run("settings.open") }
         powerButton.onPress = { [weak self] in
-            guard let self, let entries = self.powerMenu?(), !entries.isEmpty else { return }
-            PopupMenu.show(entries, below: self.powerButton)
+            guard let self, let id = self.powerCommand?() else { return }
+            self.run(id)
         }
 
         group.wantsLayer = true
         group.layer?.cornerRadius = 8
-        let inside = NSStackView(views: [sidebarButton, searchButton, spaceButton])
+        let inside = NSStackView(views: [sidebarButton, searchButton, spaceButton, powerButton])
         inside.spacing = 0
         // 1 pt around 26 pt buttons: the group is 28 pt tall, as the tabs.
         inside.edgeInsets = NSEdgeInsets(top: 1, left: 1, bottom: 1, right: 1)
@@ -84,7 +84,7 @@ final class TitleBarView: NSView {
         ])
         spaceButton.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
 
-        let views: [NSView] = [group, newTabButton, powerButton, settingsButton]
+        let views: [NSView] = [group, newTabButton, settingsButton]
         views.forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             addSubview($0)
@@ -93,8 +93,7 @@ final class TitleBarView: NSView {
         NSLayoutConstraint.activate([
             groupLeading,
             spaceButton.widthAnchor.constraint(lessThanOrEqualToConstant: 160),
-            powerButton.leadingAnchor.constraint(greaterThanOrEqualTo: newTabButton.trailingAnchor, constant: 12),
-            settingsButton.leadingAnchor.constraint(equalTo: powerButton.trailingAnchor),
+            settingsButton.leadingAnchor.constraint(greaterThanOrEqualTo: newTabButton.trailingAnchor, constant: 12),
             settingsButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
         ] + views.map { $0.centerYAnchor.constraint(equalTo: centerYAnchor) })
     }

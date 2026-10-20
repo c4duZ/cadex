@@ -2,7 +2,8 @@
 
 ## O que eu quero
 - O manter acordado do Mac: desligado, sempre, ou só com um programa rodando num terminal, pelo
-  Ctrl+Shift+K e pelo café na barra de título, com o padrão nas configurações.
+  Ctrl+Shift+K (os dois modos) e pelo café depois da busca na barra de título, que liga o modo
+  padrão das configurações (power.mode) ou desliga.
 
 ## O que eu não quero
 - Mudar o plano de energia do Windows (powercfg) ou a opção da tampa: o pedido é do processo e

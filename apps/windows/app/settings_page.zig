@@ -133,8 +133,12 @@ fn general(app: *App, area_in: gfx.Rect) void {
         s.markdown.open_as = v;
         commit(app, s);
     }
-    if (choice(u, row(u, &area, "Manter acordado ao abrir"), "keepAwake", s.power.keep_awake, &.{ .{ "off", "Não" }, .{ "always", "Sempre" }, .{ "running", "Com programa" } })) |v| {
-        s.power.keep_awake = v;
+    if (choice(u, row(u, &area, "O café mantém acordado"), "keepAwake", s.power.mode, &.{ .{ "always", "Sempre" }, .{ "running", "Com programa" } })) |v| {
+        s.power.mode = v;
+        commit(app, s);
+    }
+    if (ui.widgets.toggle(u, ui.id("settings.powerOnAtLaunch", 0), row(u, &area, "Ligar ao abrir o Cadex"), s.power.on_at_launch)) |v| {
+        s.power.on_at_launch = v;
         commit(app, s);
     }
     if (ui.widgets.toggle(u, ui.id("settings.keepDisplayOn", 0), row(u, &area, "Manter a tela acesa"), s.power.keep_display_on)) |v| {

@@ -17,7 +17,7 @@
   sombra do DWM, Mica), bordas e título por hit test, maximizar como HTMAXBUTTON (Snap Layouts),
   mouse, roda, texto (pares substitutos), IME, arquivos soltos, DPI e tema. As teclas vão ao app
   antes do TranslateMessage (`window.zig:run`): atalho ou terminal que usou a tecla não gera WM_CHAR.
-- `chrome.zig`: a barra de título (busca/paleta, abas, "+", configurações e os botões do Windows
+- `chrome.zig`: a barra de título (busca/paleta, o café do manter acordado, abas, "+", configurações e os botões do Windows
   com a fonte Segoe Fluent Icons); os botões viram buracos no título para o hit test.
 - `wiring.zig`: o Delegate da janela (teclas: atalhos, depois o terminal com foco), o Host das abas
   (criar terminal, avisos da thread de leitura por PostMessage), e as configurações e o tema

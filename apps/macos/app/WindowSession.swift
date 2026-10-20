@@ -102,7 +102,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         window.contentView = workspace
         self.workspace = workspace
         workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.openers) ?? [] }
-        workspace.titleBar.powerMenu = { [weak self] in self?.menu?.popup(Self.powerPins) ?? [] }
+        workspace.titleBar.powerCommand = { [weak self] in self?.app.powerButtonCommand ?? "power.keep-awake" }
         showPower()
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
         explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar(.files) }
@@ -117,10 +117,12 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// Keep-awake's icon in the title bar: filled while on, its tip the state.
     func showPower() {
         let power = app.power
+        let off = settings.store.settings.power.mode == "running" ? "Manter acordado com programa rodando" : "Manter acordado"
         let tip = switch power.mode {
-        case .off: "Manter o computador acordado"
-        case .always: "Mantendo o computador acordado"
-        case .running: power.isHolding ? "Acordado: um programa está rodando" : "Acordado quando um programa rodar"
+        case .off: off
+        case .always: "Mantendo o computador acordado (clique para desligar)"
+        case .running: power.isHolding ? "Acordado: um programa está rodando (clique para desligar)"
+            : "Acordado quando um programa rodar (clique para desligar)"
         }
         workspace?.titleBar.setPower(on: power.mode != .off, tip: tip)
     }

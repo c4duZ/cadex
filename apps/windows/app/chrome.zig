@@ -55,18 +55,17 @@ pub fn titleBar(app: *App, area: gfx.Rect) void {
     if (ui.widgets.button(u, ui.id("title.search", 0), search, search_label, .{ .icon = icons.phosphor.magnifying_glass, .icon_size = 14, .radius = 7, .color = u.style.secondary_text })) {
         _ = app.registry.run("palette.open");
     }
+    // Keep-awake, next to the search: filled while on, the outline while
+    // off; a click turns it on in the settings' mode or off (docs/spec/power.md).
+    const power_r = hole(app, .{ .x = row.x, .y = top, .w = u.px(30), .h = h });
+    _ = row.takeLeft(u.px(30) + u.px(10));
+    if (ui.widgets.iconButton(u, ui.id("title.power", 0), power_r, icons.phosphor.coffee, .{ .icon_size = 15, .filled = app.power.mode != .off, .color = u.style.secondary_text })) {
+        _ = app.registry.run(app.powerButtonCommand());
+    }
 
     const settings_r = hole(app, .{ .x = row.right() - u.px(34), .y = top, .w = u.px(30), .h = h });
     _ = row.takeRight(u.px(40));
     if (ui.widgets.iconButton(u, ui.id("title.settings", 0), settings_r, icons.phosphor.gear_six, .{ .icon_size = 15 })) _ = app.registry.run("settings.open");
-    // Keep-awake: filled while on, the outline while off; its menu turns it
-    // on or off (docs/spec/power.md).
-    const power_r = hole(app, .{ .x = row.right() - u.px(30), .y = top, .w = u.px(30), .h = h });
-    _ = row.takeRight(u.px(34));
-    if (ui.widgets.iconButton(u, ui.id("title.power", 0), power_r, icons.phosphor.coffee, .{ .icon_size = 15, .filled = app.power.mode != .off })) {
-        app.power_menu.open(ui.id("power.menu", 0), .{ .x = power_r.x, .y = power_r.bottom() + u.px(4) });
-    }
-
     // Tabs take what is left; each one is a hole.
     const result = app.bar.draw(u, app.tabs, row);
     var arena: std.heap.ArenaAllocator = .init(app.gpa);

@@ -15,7 +15,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 PREFIXES = "tab|pane|explorer|workspace|search|editor|markdown|terminal|git|history|diff|preview|media|space|edit|palette|settings|app|window|view|theme|power"
 LITERAL = re.compile(r'"((?:%s)\.[a-z0-9-]+)"' % PREFIXES)
 # Names of views and keys in the Mac's code, not commands (2026-10-20).
-NOT_COMMANDS = {"explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor"}
+# power.mode is a settings.json key, read by name in SettingsFile.swift.
+NOT_COMMANDS = {"explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode"}
 # Mac-only by design: none yet. Windows-only ones (workspace.environment) need no entry.
 MAC_ONLY = set()
 

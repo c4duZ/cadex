@@ -16,17 +16,19 @@ let exitCode = await Checks.run([
         settings.explorer.followTerminal = false
         settings.markdown.openAs = "rendered"
         settings.general.openFiles = "tab"
-        settings.power.keepAwake = "running"
+        settings.power.mode = "running"
+        settings.power.onAtLaunch = true
         settings.power.keepDisplayOn = true
         settings.shortcuts = ["cmd+shift+t": "tab.new", "cmd+t": nil]
         let (read, problems) = SettingsFile.read(SettingsFile.write(settings))
         expect(problems.isEmpty, "\(problems)")
         expect(read == settings, "\(read)")
     }),
-    ("keep-awake starts off; an unknown mode is a problem", {
-        expect(SettingsFile.read(Data("{}".utf8)).0.power.keepAwake == "off")
-        let (read, problems) = SettingsFile.read(Data(#"{"power": {"keepAwake": "forever"}}"#.utf8))
-        expect(read.power.keepAwake == "off" && problems.count == 1, "\(problems)")
+    ("the coffee turns on always unless the file says running; off at launch", {
+        let defaults = SettingsFile.read(Data("{}".utf8)).0.power
+        expect(defaults.mode == "always" && !defaults.onAtLaunch)
+        let (read, problems) = SettingsFile.read(Data(#"{"power": {"mode": "forever"}}"#.utf8))
+        expect(read.power.mode == "always" && problems.count == 1, "\(problems)")
     }),
     ("a note opens as source unless the file says rendered; anything else is a problem", {
         let (read, problems) = SettingsFile.read(Data(#"{"markdown": {"openAs": "slides"}}"#.utf8))

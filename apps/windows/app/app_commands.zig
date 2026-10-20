@@ -30,13 +30,6 @@ pub const openers = [_]palette.Pin{
     .{ .id = "window.new", .title = "Nova janela", .icon = p.app_window },
 };
 
-/// The coffee's menu in the title bar (the Mac's powerPins).
-pub const power_pins = [_]palette.Pin{
-    .{ .id = "power.keep-awake", .title = "Manter acordado", .icon = p.coffee },
-    .{ .id = "power.keep-awake-while-running", .title = "Manter acordado com programa rodando", .icon = p.terminal_window },
-    .{ .id = "power.allow-sleep", .title = "Deixar o computador dormir", .icon = p.x },
-};
-
 pub const plus_items = blk: {
     var items: [openers.len]ui.menu.Item = undefined;
     for (openers, 0..) |o, i| items[i] = .{ .label = o.title, .icon = o.icon };

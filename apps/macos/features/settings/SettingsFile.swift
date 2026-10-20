@@ -47,7 +47,8 @@ public enum SettingsFile {
             settings.markdown.openAs = reader.choice(m, "markdown.openAs", Settings.markdownOpenings) ?? settings.markdown.openAs
         }
         if let p = reader.section(root, "power") {
-            settings.power.keepAwake = reader.choice(p, "power.keepAwake", Settings.keepAwakeModes) ?? settings.power.keepAwake
+            settings.power.mode = reader.choice(p, "power.mode", Settings.keepAwakeModes) ?? settings.power.mode
+            settings.power.onAtLaunch = reader.bool(p, "power.onAtLaunch") ?? settings.power.onAtLaunch
             settings.power.keepDisplayOn = reader.bool(p, "power.keepDisplayOn") ?? settings.power.keepDisplayOn
         }
         if let s = reader.section(root, "shortcuts") {
@@ -76,7 +77,7 @@ public enum SettingsFile {
                            "backgroundOpacity": s.appearance.backgroundOpacity, "backgroundBlur": s.appearance.backgroundBlur],
             "explorer": ["showHidden": s.explorer.showHidden, "followTerminal": s.explorer.followTerminal],
             "markdown": ["openAs": s.markdown.openAs],
-            "power": ["keepAwake": s.power.keepAwake, "keepDisplayOn": s.power.keepDisplayOn],
+            "power": ["mode": s.power.mode, "onAtLaunch": s.power.onAtLaunch, "keepDisplayOn": s.power.keepDisplayOn],
             "shortcuts": shortcuts,
         ]
         return (try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])) ?? Data()

@@ -81,7 +81,6 @@ pub const App = struct {
     plus_menu: ui.menu.Menu = .{},
     /// Keep-awake (docs/spec/power.md) and the coffee's menu in the title bar.
     power: power_mod.Power = undefined,
-    power_menu: ui.menu.Menu = .{},
     /// The title bar's buttons and tabs, last frame: not the caption.
     holes: std.ArrayList(gfx.Rect) = .empty,
     max_button: gfx.Rect = .{},
@@ -149,8 +148,8 @@ pub const App = struct {
         self.palette.addPrefix(.{ .char = '#', .label = "texto", .source = self.search.contentSource() });
         self.palette.addPrefix(.{ .char = '@', .label = "abas e spaces", .source = @import("places_source.zig").source(self) });
         wiring.applySettings(self);
-        // The mode settings.json opens with; the menu and ⌘K change it.
-        self.power.set(power_mod.Mode.parse(self.settings.current.power.keep_awake));
+        // On at launch in the settings' mode, if they say so.
+        if (self.settings.current.power.on_at_launch) self.power.set(power_mod.Mode.parse(self.settings.current.power.mode));
         terminal.paste.cleanOld(gpa);
     }
 
@@ -259,20 +258,11 @@ pub const App = struct {
         };
     }
 
-    /// The coffee's menu: the power commands that change something now.
-    fn drawPowerMenu(self: *App) void {
-        const owner = ui.id("power.menu", 0);
-        if (!self.power_menu.isOpen(owner)) return;
-        var items: [app_commands.power_pins.len]ui.menu.Item = undefined;
-        var ids: [app_commands.power_pins.len][]const u8 = undefined;
-        var n: usize = 0;
-        for (app_commands.power_pins) |pin| {
-            if (!self.registry.isAvailable(pin.id)) continue;
-            items[n] = .{ .label = pin.title, .icon = pin.icon };
-            ids[n] = pin.id;
-            n += 1;
-        }
-        if (ui.menu.show(&self.u, &self.power_menu, owner, items[0..n])) |i| _ = self.registry.run(ids[i]);
+    /// The coffee: off turns on the settings' mode, on turns off, by the
+    /// same commands as Ctrl+Shift+K (ADR 0005).
+    pub fn powerButtonCommand(self: *App) []const u8 {
+        if (self.power.mode != .off) return "power.allow-sleep";
+        return if (std.mem.eql(u8, self.settings.current.power.mode, "running")) "power.keep-awake-while-running" else "power.keep-awake";
     }
 
     fn drawOverlays(self: *App) void {
@@ -280,7 +270,7 @@ pub const App = struct {
         if (ui.menu.show(u, &self.plus_menu, ui.id("plus.menu", 0), &app_commands.plus_items)) |i| {
             _ = self.registry.run(app_commands.openers[i].id);
         }
-        self.drawPowerMenu();
+
         web.drawOffer(self);
         @import("settings_page.zig").draw(self);
         self.palette.draw(u);
@@ -320,7 +310,6 @@ pub const App = struct {
         if (self.quit_question != null or self.space_rename != null or self.git.question != null) return null;
         if (@import("settings_page.zig").isOpen()) return null;
         if (self.plus_menu.owner != ui.context.none or self.status.menu.owner != ui.context.none) return null;
-        if (self.power_menu.owner != ui.context.none) return null;
         if (self.bar.renaming != null) return null;
         const view = self.tabs.focusedTerminal() orelse return null;
         if (self.u.focus != view.id and self.u.focus != ui.context.none) return null;

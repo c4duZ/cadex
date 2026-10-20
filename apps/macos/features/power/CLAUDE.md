@@ -2,7 +2,8 @@
 
 ## O que eu quero
 - Manter o computador acordado, sempre ou só enquanto um terminal roda um programa, ligado e
-  desligado pelo ⌘K e pelo ícone de café na barra de título, com o padrão nas configurações.
+  desligado pelo ⌘K (os dois modos) e pelo café no grupo da esquerda da barra de título, que liga o
+  modo padrão das configurações (power.mode) ou desliga.
 - Com a tampa fechada na tomada, o Mac segue rodando.
 
 ## O que eu não quero

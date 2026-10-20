@@ -87,12 +87,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let menu = session.mainMenu { NSApp.mainMenu = menu }
     }
 
-    /// The mode settings.json opens with; the display setting counts live.
+    /// On at launch in the settings' mode, if they say so; the display
+    /// setting counts live.
     private func startPower() {
         let prefs = settings.store.settings.power
         power.keepDisplayOn = prefs.keepDisplayOn
         power.onChange = { [weak self] in self?.sessions.forEach { $0.showPower() } }
-        power.set(PowerController.Mode(rawValue: prefs.keepAwake) ?? .off)
+        if prefs.onAtLaunch { power.set(PowerController.Mode(rawValue: prefs.mode) ?? .always) }
+    }
+
+    /// The coffee: off turns on the settings' mode, on turns off. It runs
+    /// the same commands as ⌘K (ADR 0005).
+    var powerButtonCommand: String {
+        guard power.mode == .off else { return "power.allow-sleep" }
+        return settings.store.settings.power.mode == "running" ? "power.keep-awake-while-running" : "power.keep-awake"
     }
 
     func sessionClosed(_ session: WindowSession) {
@@ -108,7 +116,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func connectSettings() {
         settings.onExplorer = { [weak self] prefs in self?.sessions.forEach { $0.applyExplorer(prefs) } }
         settings.onMarkdown = { [weak self] prefs in self?.sessions.forEach { $0.applyMarkdown(prefs) } }
-        settings.onPower = { [weak self] prefs in self?.power.keepDisplayOn = prefs.keepDisplayOn }
+        settings.onPower = { [weak self] prefs in
+            self?.power.keepDisplayOn = prefs.keepDisplayOn
+            self?.sessions.forEach { $0.showPower() }
+        }
         settings.onLooks = { [weak self] image, vibrancy in self?.sessions.forEach { $0.applyLooks(image, vibrancy: vibrancy) } }
         settings.onShortcuts = { [weak self] shortcuts in
             self?.shortcuts = shortcuts

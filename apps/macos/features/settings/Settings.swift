@@ -50,9 +50,12 @@ public struct Settings: Equatable, Sendable {
     }
 
     public struct Power: Equatable, Sendable {
-        /// How Cadex opens: "off", "always" or "running" (only while a
-        /// terminal runs a program) (docs/spec/power.md).
-        public var keepAwake = "off"
+        /// What the coffee in the title bar turns on: "always" or
+        /// "running" (only while a terminal runs a program); ⌘K picks
+        /// either on the spot (docs/spec/power.md).
+        public var mode = "always"
+        /// Turned on when Cadex opens.
+        public var onAtLaunch = false
         /// The screen stays on too while the computer is held.
         public var keepDisplayOn = false
     }
@@ -75,5 +78,5 @@ public struct Settings: Equatable, Sendable {
     static let modes = ["system", "dark", "light"]
     static let markdownOpenings = ["source", "rendered"]
     static let fileOpenings = ["beside", "tab"]
-    static let keepAwakeModes = ["off", "always", "running"]
+    static let keepAwakeModes = ["always", "running"]
 }
