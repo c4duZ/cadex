@@ -27,31 +27,51 @@ public enum HoverTip {
     private static var panel: HoverTipPanel?
     private static var monitor: Any?
 
+    /// For a view that draws several targets itself (the tab strip): the
+    /// tip of the part under the pointer, `rect` in the view's coordinates;
+    /// nil when the pointer is over none. Called on every move: the same
+    /// part again changes nothing.
+    public static func hover(_ text: String?, over rect: NSRect, in view: NSView) {
+        guard let text, !text.isEmpty else { return hide() }
+        if let target, target.text == text, target.rect == rect, target.view === view { return }
+        schedule(text, over: rect, in: view)
+    }
+
+    /// What the pointer is over now, shown or about to be.
+    private static var target: (text: String, rect: NSRect, view: NSView?)?
+
     static func pointerEntered(_ tracker: HoverTipTracker) {
-        hide()
-        let work = DispatchWorkItem { [weak tracker] in
-            MainActor.assumeIsolated { if let tracker { show(tracker) } }
-        }
-        pending = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
+        guard let view = tracker.view else { return }
+        schedule(tracker.text, over: view.bounds, in: view)
     }
 
     static func pointerExited() {
         hide()
     }
 
-    private static func show(_ tracker: HoverTipTracker) {
-        guard let view = tracker.view, let window = view.window, window.isVisible, !PopupMenu.isOpen else { return }
+    private static func schedule(_ text: String, over rect: NSRect, in view: NSView) {
+        hide()
+        target = (text, rect, view)
+        let work = DispatchWorkItem { [weak view] in
+            MainActor.assumeIsolated { if let view { show(text, over: rect, in: view) } }
+        }
+        pending = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
+    }
+
+    private static func show(_ text: String, over rect: NSRect, in view: NSView) {
+        guard let window = view.window, window.isVisible, !PopupMenu.isOpen else { return }
         let panel = self.panel ?? HoverTipPanel()
         self.panel = panel
-        panel.show(tracker.text, under: view, in: window)
+        panel.show(text, under: window.convertToScreen(view.convert(rect, to: nil)), in: window)
         monitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .keyDown, .scrollWheel]) { event in
             MainActor.assumeIsolated { hide() }
             return event
         }
     }
 
-    static func hide() {
+    public static func hide() {
+        target = nil
         pending?.cancel()
         pending = nil
         panel?.orderOut(nil)
@@ -125,14 +145,14 @@ final class HoverTipPanel: NSPanel {
 
     override var canBecomeKey: Bool { false }
 
-    func show(_ text: String, under view: NSView, in window: NSWindow) {
+    /// `anchor` in screen coordinates.
+    func show(_ text: String, under anchor: NSRect, in window: NSWindow) {
         let style = MenuStyle.current
         label.stringValue = text
         label.textColor = style.text
         contentView?.layer?.backgroundColor = style.background.cgColor
         contentView?.layer?.borderColor = style.border.cgColor
         let size = NSSize(width: ceil(label.intrinsicContentSize.width) + 16, height: 22)
-        let anchor = window.convertToScreen(view.convert(view.bounds, to: nil))
         let screen = (window.screen ?? NSScreen.main)?.visibleFrame ?? .infinite
         setFrame(NSRect(origin: HoverTip.origin(for: size, under: anchor, screen: screen), size: size), display: true)
         orderFront(nil)

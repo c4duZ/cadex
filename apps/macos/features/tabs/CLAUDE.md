@@ -23,7 +23,8 @@
   `PanePressRecognizer.swift`: o clique num documento dá o foco ao painel sem tomar o clique. Título
   e ícone da aba vêm do painel com foco; "●" se qualquer painel tem mudança não salva. A oferta de preview de cada terminal sai por
   `onOpenPreview`. `TabList.swift`: as regras puras (ordem, ativa, recentes, mover), testadas.
-- `TabBarView.swift`: a barra de abas desenhada à mão, cada aba da largura do título (72 a 200 pt),
+- `TabBarView.swift`: a barra de abas desenhada à mão (dica de cada aba e do × por HoverTip.hover,
+  do menus compartilhado), cada aba da largura do título (72 a 200 pt),
   com o ícone do que mostra (terminal; arquivo pelo tipo e cor do `FileIcons`, como na árvore;
   histórico; página web), a ativa com fundo neutro e × ao passar o mouse, como no Terax
   (clique, duplo clique renomeia, clique do meio fecha, arrastar reordena), com cores de fora (`style`); fica na barra de título da janela

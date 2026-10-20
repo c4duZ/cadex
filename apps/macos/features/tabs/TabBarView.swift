@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Menus
 
 /// The tab strip in the title bar, the bar's main element: tabs of equal
 /// width side by side, as macOS's own tabs (Safari, Ghostty), each with its
@@ -40,6 +41,9 @@ public final class TabBarView: NSView {
         var iconColor: NSColor?
         /// The Material drawing of the file, drawn as it is (over `icon`).
         var image: NSImage?
+        /// Shown on hover: the terminal's folder or the file's path, which
+        /// the title shortens.
+        var tip: String?
     }
 
     static let height: CGFloat = 30
@@ -87,7 +91,7 @@ public final class TabBarView: NSView {
 
     public override func updateTrackingAreas() {
         super.updateTrackingAreas()
-        trackingAreas.forEach(removeTrackingArea)
+        trackingAreas.filter { $0.owner === self }.forEach(removeTrackingArea)
         addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect], owner: self))
     }
 
@@ -189,11 +193,22 @@ public final class TabBarView: NSView {
             hovered = id
             needsDisplay = true
         }
+        showTip(at: point)
     }
 
     public override func mouseExited(with event: NSEvent) {
         hovered = nil
         needsDisplay = true
+        HoverTip.hide()
+    }
+
+    /// The tab's folder or path, or what × does (shared/menus HoverTip).
+    private func showTip(at point: NSPoint) {
+        guard dragging == nil, let i = index(at: point), i < items.count else { return HoverTip.hide() }
+        let tab = frame(at: i)
+        let close = closeFrame(in: tab)
+        if close.insetBy(dx: -3, dy: -3).contains(point) { return HoverTip.hover("Fechar aba", over: close, in: self) }
+        HoverTip.hover(items[i].tip ?? items[i].title, over: tab, in: self)
     }
 
     public override func mouseDown(with event: NSEvent) {

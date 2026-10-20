@@ -218,11 +218,18 @@ public final class TabsController {
     private func barItem(_ tab: Tab) -> TabBarView.Item {
         let title = tab.title(home: home)
         guard let document = tab.focused.document else {
-            return TabBarView.Item(id: tab.id, title: title, active: tab.id == list.active)
+            return TabBarView.Item(id: tab.id, title: title, active: tab.id == list.active,
+                                   tip: tab.focused.terminal?.currentDirectory.map(shortPath))
         }
         let (icon, color) = Self.tabIcon(for: document.identity)
         return TabBarView.Item(id: tab.id, title: title, active: tab.id == list.active, icon: icon, iconColor: color,
-                               image: Self.tabImage(for: document.identity))
+                               image: Self.tabImage(for: document.identity),
+                               tip: document.identity.hasPrefix("/") ? shortPath(document.identity) : nil)
+    }
+
+    /// The home folder as ~, as the shell writes it.
+    private func shortPath(_ path: String) -> String {
+        path == home || path.hasPrefix(home + "/") ? "~" + path.dropFirst(home.count) : path
     }
 
     /// "Renomear aba": empty goes back to the folder name.

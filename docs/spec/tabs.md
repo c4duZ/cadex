@@ -18,6 +18,8 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   (Ctrl+Tab volta para a aba usada antes da atual).
 - Arrastar uma aba na barra muda a posição dela.
 - Clicar numa aba vai para ela; o × da aba ou o clique do meio (botão 3 do mouse) fecha a aba.
+- Com o ponteiro sobre uma aba, em 0,2 s aparece a pasta do terminal (~ no lugar da pasta pessoal)
+  ou o caminho do arquivo; sobre o ×, "Fechar aba" (o dono, 2026-10-20).
 - As abas são o elemento principal da barra de cima: largura igual (até 220 pt, encolhendo quando
   não cabem), cada uma com fundo próprio, a ativa com fundo mais forte e uma linha na cor do tema
   embaixo; ícone do que mostram (terminal, arquivo pelo tipo, histórico, página web). O × aparece

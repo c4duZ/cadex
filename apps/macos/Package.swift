@@ -77,7 +77,7 @@ let package = Package(
         ),
         .target(
             name: "Tabs",
-            dependencies: ["Terminal", "CommandPalette", "Icons"],
+            dependencies: ["Terminal", "CommandPalette", "Icons", "Menus"],
             path: "features/tabs",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
