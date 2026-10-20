@@ -32,7 +32,7 @@ func appRegistry() -> CommandRegistry {
     registry.register(PreviewCommands.all(open: { _, _ in }, active: { nil }))
     registry.register(SourceControlCommands.all(SourceControlController(folder: NSTemporaryDirectory()) { _ in false },
                                                 palette: palette))
-    registry.register(HistoryCommands.all(open: {}, repository: { nil }, active: { nil }))
+    registry.register(HistoryCommands.all(open: { _ in }, repository: { nil }, active: { nil }))
     registry.register(SpacesCommands.all(SpacesController { fatalError("not called") }, palette: palette) { "/" })
     registry.register(MarkdownCommands.all(MarkdownController(root: NSTemporaryDirectory(), findFiles: { _ in [] }, open: { _, _ in }),
                                            palette: palette) { nil })

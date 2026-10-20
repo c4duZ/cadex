@@ -55,7 +55,7 @@ extension WindowSession {
                 self?.git?.refresh()
             }))
         commands.register(HistoryCommands.all(
-            open: { [weak self] in if let root = self?.git?.repositoryRoot { self?.opener?.openHistory(root) } },
+            open: { [weak self] beside in if let root = self?.git?.repositoryRoot { self?.opener?.openHistory(root, beside: beside) } },
             repository: { [weak self] in self?.git?.repositoryRoot },
             active: { [weak self] in self?.tabs?.activeDocument as? HistoryDocument }))
         commands.register(EditorCommands.all { [weak self] in self?.tabs?.activeDocument as? EditorDocument })

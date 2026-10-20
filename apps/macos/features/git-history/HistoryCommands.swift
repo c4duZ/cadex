@@ -6,15 +6,21 @@ import CommandPalette
 /// Git panel's repository and the tabs.
 public enum HistoryCommands {
     @MainActor
-    public static func all(open: @escaping @MainActor () -> Void,
+    /// open: the history beside (true), in a new tab (false) or where the
+    /// setting says (nil).
+    public static func all(open: @escaping @MainActor (Bool?) -> Void,
                            repository: @escaping @MainActor () -> String?,
                            active: @escaping @MainActor () -> HistoryDocument?) -> [Command] {
+        func needsRepository() -> String? { repository() == nil ? "Nenhum repositório git aberto" : nil }
         func needsTab() -> String? { active() == nil ? "Nenhum histórico aberto" : nil }
         func needsCommit() -> String? { active()?.hasSelection == true ? nil : "Nenhum commit selecionado" }
         return [
             Command(id: "git.history", title: "Abrir o histórico do git", keywords: ["log", "grafo", "graph", "commits"],
-                    category: .view, defaultShortcut: "cmd+shift+h", action: .run { open() },
-                    unavailableReason: { repository() == nil ? "Nenhum repositório git aberto" : nil }),
+                    category: .view, defaultShortcut: "cmd+shift+h", action: .run { open(nil) },
+                    unavailableReason: needsRepository),
+            Command(id: "git.history-in-tab", title: "Abrir o histórico do git em nova aba",
+                    keywords: ["log", "grafo", "graph", "commits", "aba"], category: .view, action: .run { open(false) },
+                    unavailableReason: needsRepository),
             Command(id: "history.copy-sha", title: "Copiar o sha do commit", keywords: ["sha", "hash", "copiar"],
                     category: .edit, action: .run { active()?.copySha() }, unavailableReason: needsCommit),
             Command(id: "history.open-remote", title: "Abrir o commit no remoto", keywords: ["github", "gitlab", "bitbucket", "navegador"],

@@ -26,6 +26,7 @@ pub const openers = [_]palette.Pin{
     .{ .id = "preview.open", .title = "Preview web", .icon = p.globe },
     .{ .id = "preview.open-in-tab", .title = "Preview web em nova aba", .icon = p.globe },
     .{ .id = "git.history", .title = "Grafo do git", .icon = p.git_branch },
+    .{ .id = "git.history-in-tab", .title = "Grafo do git em nova aba", .icon = p.git_branch },
     .{ .id = "window.new", .title = "Nova janela", .icon = p.app_window },
 };
 

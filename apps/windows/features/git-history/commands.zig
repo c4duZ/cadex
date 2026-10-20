@@ -34,10 +34,16 @@ fn hasCommit(_: ?*anyopaque) bool {
 
 /// git.history: the Git page's repository in a pane (the same one again
 /// goes to the pane that shows it: the tabs compare identities).
-fn open(_: ?*anyopaque) void {
+fn openHow(how: palette.How) void {
     const root = host.repository(host.context) orelse return;
     const doc = HistoryDocument.create(gpa, host, root) orelse return;
-    host.open_document(host.context, doc, .normal);
+    host.open_document(host.context, doc, how);
+}
+fn open(_: ?*anyopaque) void {
+    openHow(.normal);
+}
+fn openInTab(_: ?*anyopaque) void {
+    openHow(.new_tab);
 }
 fn copySha(_: ?*anyopaque) void {
     if (active()) |d| d.copySha();
@@ -60,6 +66,7 @@ pub fn register(into: *palette.Registry, allocator: std.mem.Allocator, with: hos
     gpa = allocator;
     registry = into;
     into.add(.{ .id = "git.history", .title = "Abrir o histórico do git", .keywords = &.{ "log", "grafo", "graph", "commits" }, .shortcut = "cmd+shift+h", .run = open, .available = hasRepository });
+    into.add(.{ .id = "git.history-in-tab", .title = "Abrir o histórico do git em nova aba", .keywords = &.{ "log", "grafo", "graph", "commits", "aba" }, .run = openInTab, .available = hasRepository });
     into.add(.{ .id = "history.copy-sha", .title = "Copiar o sha do commit", .keywords = &.{ "sha", "hash", "copiar" }, .run = copySha, .available = hasCommit });
     into.add(.{ .id = "history.open-remote", .title = "Abrir o commit no remoto", .keywords = &.{ "github", "gitlab", "bitbucket", "navegador" }, .run = openRemote, .available = hasCommit });
     into.add(.{ .id = "history.search", .title = "Buscar no histórico", .keywords = &.{ "filtrar", "commit", "autor" }, .run = search, .available = hasTab });
