@@ -48,8 +48,10 @@ struct PastedImageTag: Equatable {
 /// when the paste began; that number becomes the file.
 struct PastedImageLinks {
     /// How long a paste waits for its tag: a shell keeps the path as text
-    /// and never shows one.
-    static let wait: TimeInterval = 5
+    /// and never shows one. Was 5 s; Claude Code came to take almost 8 s to
+    /// show "[Image #1]" for a screenshot, and the tag stayed plain text (log
+    /// of the owner's run, 2026-10-21).
+    static let wait: TimeInterval = 30
 
     private var pending: [(file: URL, deadline: Date)] = []
     /// Tag counts on screen when the first pending paste began.

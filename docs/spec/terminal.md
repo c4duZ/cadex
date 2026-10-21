@@ -87,7 +87,8 @@ Agentes como o Claude Code trocam o caminho da imagem colada por uma etiqueta (`
 imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou na colagem:
 
 - Depois de colar uma imagem, a primeira etiqueta `[Image #N]` nova que aparece na tela da aba, em
-  até 5 s, fica ligada àquele arquivo. Várias imagens coladas em seguida se ligam na ordem.
+  até 30 s, fica ligada àquele arquivo (eram 5 s; o Claude Code passou a levar quase 8 s para
+  mostrar a etiqueta de um print, 2026-10-21). Várias imagens coladas em seguida se ligam na ordem.
 - Passar o mouse sobre uma etiqueta ligada mostra a miniatura da imagem ao lado do ponteiro (no
   máximo 320 × 240 pt) e o cursor de mão; tirar o mouse esconde.
 - Clicar na etiqueta abre a imagem no visualizador de mídia, onde os arquivos abrem

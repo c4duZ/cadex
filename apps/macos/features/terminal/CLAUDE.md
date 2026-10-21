@@ -34,7 +34,7 @@
 - Links em `TerminalLinks.swift`: com ⌘ pressionado, o link sob o ponteiro é sublinhado; ⌘+clique
   abre a URL no navegador e mostra o arquivo no Finder (até os visualizadores, plano 5).
 - Imagem colada: `TerminalPastedImages.swift` liga a etiqueta `[Image #N]` que o agente mostra ao
-  PNG da colagem (a primeira etiqueta nova em até 5 s; regra pura em `PastedImageTags.swift`,
+  PNG da colagem (a primeira etiqueta nova em até 30 s; regra pura em `PastedImageTags.swift`,
   testada). Passar o mouse mostra `PastedImageHover.swift`; clique sem modificador abre pelo
   `onOpenFile` de quem segura o terminal. Comandos terminal.open-pasted-image-beside e
   terminal.open-pasted-image-in-tab (só no Mac por enquanto; a última imagem colada na aba).
