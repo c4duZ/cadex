@@ -23,11 +23,14 @@
 - `SidebarIconRow.swift` e `SidebarIconButton.swift`: os ícones; arrastar para o lado reordena
   (depois de 4 pt), o que não cabe vai para o "…" (menu de `../../shared/menus`), o botão de
   personalizar fica à direita.
-- `SidebarCustomizePanel.swift`: o cartão Customize, embaixo do botão, nas cores do tema como a janela de
-  configurações (o dono recusou o popover do sistema em 2026-10-21: chave azul, anel de foco);
-  fecha com Esc ou clicando fora. `SidebarCustomizeRows.swift`: as linhas em caixas (alça,
-  ícone, nome, atalho numa coluna fixa, chave própria na cor de destaque) e o arrastar para cima
-  e para baixo.
+- `SidebarCustomizePanel.swift`: a janela Customize, na frente do app e centrada sobre ele, como a de
+  configurações, nas cores do tema (o dono recusou o popover do sistema e depois o cartão preso ao
+  botão, em 2026-10-21); fecha com Esc, ⌘W ou o botão. `SidebarCustomizeRows.swift`: as linhas em
+  caixas (alça, ícone, nome, atalho numa coluna fixa, chave própria na cor de destaque) e o arrastar
+  para cima e para baixo, que reorganiza enquanto o mouse se move.
+- A fileira fica sob a barra de título transparente: nenhuma view dela move a janela
+  (mouseDownCanMoveWindow). O que se arrasta vai para cima dos vizinhos e anda a partir de onde
+  estava no começo; a vaga é a que está sob o meio dele (`dropIndex`).
 - `SidebarCommands.swift`: sidebar.customize e sidebar.toggle-page (a lista de páginas no ⌘K).
 - O catálogo do app está em `../../app/SidebarWiring.swift`: files, search, git (padrão), history,
   preview e spaces (escondidos).
@@ -35,6 +38,7 @@
   voltando com os spaces.
 
 ## Como validar
-- `make macos-test` passa: as regras do layout, a view mostrando a primeira página, o clique que
+- `make macos-test` passa: o arrastar com eventos de mouse (uma vaga, duas, a lista do Customize
+  reorganizando antes de soltar, o arrastado por cima), as regras do layout, a view mostrando a primeira página, o clique que
   roda o comando ou recolhe, mostrar/esconder salvando. Com CADEX_SNAPSHOT_DIR, o teste salva
   sidebar.png, sidebar-narrow.png e customize.png para ver sem captura de tela.

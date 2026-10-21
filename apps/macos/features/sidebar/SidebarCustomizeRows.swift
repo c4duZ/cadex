@@ -50,7 +50,9 @@ final class SidebarCustomizeList: NSView {
         guard let row = rows.first(where: { $0.frame.contains(point) }) else { return }
         if row.toggle.frame.contains(row.convert(point, from: self)) { return row.toggle.flip() }
         drag = (row, point, row.frame.minY, false)
-        row.layer?.zPosition = 1
+        // On top of the others while it moves: it slid under them and
+        // vanished in the owner's test (2026-10-21).
+        addSubview(row, positioned: .above, relativeTo: nil)
     }
 
     override func mouseDragged(with event: NSEvent) {
@@ -77,7 +79,6 @@ final class SidebarCustomizeList: NSView {
     override func mouseUp(with event: NSEvent) {
         guard let current = drag else { return }
         drag = nil
-        current.row.layer?.zPosition = 0
         NSCursor.arrow.set()
         needsLayout = true
         if current.moved, let index = rows.firstIndex(where: { $0 === current.row }) {

@@ -71,6 +71,70 @@ let exitCode = await Checks.run([
         view.toggle("nope")
         expect(saved == [["files", "git"]], "\(saved)")
     }),
+    ("dragging an icon sideways reorders it, one slot or more, and it stays on top", {
+        let row = SidebarIconRow()
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 240, height: 40), styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentView?.addSubview(row)
+        row.frame = NSRect(x: 0, y: 0, width: 240, height: SidebarIconButton.size.height)
+        row.setItems(catalog())
+        row.layoutSubtreeIfNeeded()
+        var orders: [[String]] = []
+        row.onReorder = { orders.append($0) }
+        let step = SidebarIconButton.size.width + SidebarIconRow.spacing
+        @MainActor func drag(from: CGFloat, to: CGFloat) {
+            let y = SidebarIconButton.size.height / 2
+            @MainActor func event(_ type: NSEvent.EventType, _ x: CGFloat) -> NSEvent {
+                NSEvent.mouseEvent(with: type, location: row.convert(NSPoint(x: x, y: y), to: nil), modifierFlags: [], timestamp: 0,
+                                   windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)!
+            }
+            row.mouseDown(with: event(.leftMouseDown, from))
+            var x = from
+            while x < to {
+                x = min(x + 5, to)
+                row.mouseDragged(with: event(.leftMouseDragged, x))
+            }
+            if row.subviews.last?.accessibilityLabel() != "Files" { expect(false, "the dragged icon is not on top") }
+            row.mouseUp(with: event(.leftMouseUp, to))
+            row.layoutSubtreeIfNeeded()
+        }
+        drag(from: step / 2, to: step * 1.5)
+        expect(orders.count == 1, "one save per drop")
+        expect(orders.last == ["search", "files", "git"], "\(orders)")
+        drag(from: step * 1.5, to: step * 2.6)
+        expect(orders.last == ["search", "git", "files"], "\(orders)")
+        let xs = row.buttons.map(\.frame.minX)
+        expect(xs == [0, step, step * 2], "each icon back in its slot: \(xs)")
+        row.setItems(catalog())
+        row.layoutSubtreeIfNeeded()
+        expect(row.buttons.map(\.id) == ["files", "search", "git"])
+        drag(from: step / 2, to: step * 2.6)
+        expect(orders.last == ["search", "git", "files"], "two slots in one drag: \(orders)")
+    }),
+    ("dragging a Customize row reorders the list while the mouse moves, the row on top", {
+        let list = SidebarCustomizeList()
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 300, height: 200), styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentView?.addSubview(list)
+        list.frame = NSRect(x: 0, y: 0, width: 300, height: 120)
+        list.show(catalog(), shown: ["files", "git"], colors: SidebarColors())
+        list.layoutSubtreeIfNeeded()
+        var moves: [String] = []
+        list.onMove = { id, index in moves.append("\(id)@\(index)") }
+        let step = SidebarCustomizeList.rowHeight + SidebarCustomizeList.spacing
+        @MainActor func event(_ type: NSEvent.EventType, _ y: CGFloat) -> NSEvent {
+            NSEvent.mouseEvent(with: type, location: list.convert(NSPoint(x: 20, y: y), to: nil), modifierFlags: [], timestamp: 0,
+                               windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)!
+        }
+        list.mouseDown(with: event(.leftMouseDown, step / 2))
+        var y = step / 2
+        while y < step * 1.5 {
+            y += 4
+            list.mouseDragged(with: event(.leftMouseDragged, y))
+        }
+        expect(list.rows.map(\.id) == ["search", "files", "git"], "reordered before the mouse goes up: \(list.rows.map(\.id))")
+        expect(list.subviews.last === list.rows[1], "the dragged row is on top")
+        list.mouseUp(with: event(.leftMouseUp, y))
+        expect(moves == ["files@1"], "\(moves)")
+    }),
     ("a picture of the sidebar, with CADEX_SNAPSHOT_DIR", {
         for (name, width) in [("sidebar", 260.0), ("sidebar-narrow", 150.0)] {
             let page = NSTextField(labelWithString: "  apps\n  core\n  docs\n  CLAUDE.md")

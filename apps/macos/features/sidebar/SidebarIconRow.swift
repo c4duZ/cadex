@@ -23,7 +23,8 @@ final class SidebarIconRow: NSView {
     let customize = SidebarIconButton(id: "customize", icon: .slidersHorizontal,
                                               tip: T("Customize Sidebar", "Personalizar o painel lateral"))
     private var fitCount = 0
-    private var drag: (button: SidebarIconButton, start: NSPoint, moved: Bool)?
+    /// The icon being dragged, where the mouse went down and where the icon was then.
+    private var drag: (button: SidebarIconButton, start: NSPoint, originX: CGFloat, moved: Bool)?
     private var pressed: SidebarIconButton?
 
     init() {
@@ -99,7 +100,7 @@ final class SidebarIconRow: NSView {
         let hit = (buttons + [more, customize]).first { !$0.isHidden && $0.frame.contains(point) }
         pressed = hit
         if let hit, buttons.prefix(fitCount).contains(where: { $0 === hit }) {
-            drag = (hit, point, false)
+            drag = (hit, point, hit.frame.minX, false)
         }
     }
 
@@ -108,12 +109,20 @@ final class SidebarIconRow: NSView {
         let point = convert(event.locationInWindow, from: nil)
         let dx = point.x - current.start.x
         if !current.moved && abs(dx) < Self.dragThreshold { return }
+        if !current.moved {
+            // On top of its neighbours while it moves: it slid under Files
+            // in the owner's test (2026-10-21).
+            addSubview(current.button, positioned: .above, relativeTo: nil)
+            current.button.layer?.shadowOpacity = 0.35
+            current.button.layer?.shadowRadius = 4
+            current.button.layer?.shadowOffset = .zero
+        }
         current.moved = true
         drag = current
         guard let from = buttons.firstIndex(where: { $0 === current.button }) else { return }
-        let origin = slot(from)
-        let lastX = slot(fitCount - 1).x
-        current.button.frame.origin.x = min(max(origin.x + dx, 0), lastX)
+        // From where it was when the drag began: adding the whole move to
+        // its new slot after a swap made it jump past its neighbour.
+        current.button.frame.origin.x = min(max(current.originX + dx, 0), slot(fitCount - 1).x)
         let widths = Array(repeating: SidebarIconButton.size.width, count: fitCount)
         let to = SidebarLayout.dropIndex(at: current.button.frame.midX, widths: widths, spacing: Self.spacing)
         if to != from {
@@ -131,6 +140,7 @@ final class SidebarIconRow: NSView {
     override func mouseUp(with event: NSEvent) {
         defer { drag = nil; pressed = nil }
         if let current = drag, current.moved {
+            current.button.layer?.shadowOpacity = 0
             needsLayout = true
             onReorder?(buttons.map(\.id))
             return

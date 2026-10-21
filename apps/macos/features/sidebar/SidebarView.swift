@@ -146,9 +146,9 @@ public final class SidebarView: NSView {
     }
 
     private func customize(from anchor: NSView) {
-        panel?.dismiss()
+        if let panel, panel.isVisible { return panel.makeKeyAndOrderFront(nil) }
         let panel = SidebarCustomizePanel(catalog: catalog, shown: items, colors: colors) { [weak self] ids in self?.change(ids) }
-        panel.show(below: anchor)
+        panel.show(over: anchor.window)
         self.panel = panel
     }
 

@@ -43,12 +43,14 @@ public enum SidebarLayout {
         shown + known.filter { !shown.contains($0) }
     }
 
-    /// Where a dragged icon lands: the slot under `x`, given each icon's
-    /// width and the space between them.
+    /// Where a dragged icon lands: the slot under `x` (the dragged icon's
+    /// middle), given each icon's width and the space between them.
+    /// Comparing with the slot's middle instead moved Files two slots for
+    /// one (owner's test, 2026-10-21).
     public static func dropIndex(at x: CGFloat, widths: [CGFloat], spacing: CGFloat) -> Int {
         var edge: CGFloat = 0
         for (index, width) in widths.enumerated() {
-            if x < edge + width / 2 { return index }
+            if x < edge + width + spacing / 2 { return index }
             edge += width + spacing
         }
         return max(widths.count - 1, 0)
