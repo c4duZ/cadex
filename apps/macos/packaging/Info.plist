@@ -19,6 +19,24 @@
 			</array>
 		</dict>
 		<dict>
+			<!-- What the editor and media preview open, by name: Finder's
+			     "Open With" leaves out apps that only claim public.item or
+			     public.data (owner, 2026-10-20). Alternate: never the default. -->
+			<key>CFBundleTypeName</key>
+			<string>Texto, código e mídia</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.text</string>
+				<string>public.image</string>
+				<string>public.audiovisual-content</string>
+				<string>com.adobe.pdf</string>
+			</array>
+		</dict>
+		<dict>
 			<key>CFBundleTypeName</key>
 			<string>Arquivo</string>
 			<key>CFBundleTypeRole</key>

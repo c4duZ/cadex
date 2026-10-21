@@ -5,7 +5,9 @@ scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem con
 
 - `build.sh` (ou `make package`): monta dist/Cadex.app na raiz do repositório, universal, com o
   `Info.plist` desta pasta (bundle id io.github.c4duz.cadex, versão, categoria, pastas e arquivos
-  soltos no ícone do Dock; http liberado só no conteúdo web, para o preview abrir sites sem https;
+  soltos no ícone do Dock; texto, código, imagem, vídeo, áudio e PDF declarados um a um, porque o
+  "Abrir com" do Finder esconde app que só declara public.item, e sempre Alternate, para nunca virar
+  o padrão de nada; http liberado só no conteúdo web, para o preview abrir sites sem https;
   NSAppleEventsUsageDescription, sem a qual o macOS recusava em silêncio o AppleScript de quem roda
   num terminal do Cadex: o create-dmg da release falhou assim em 2026-10-20).
   Leva 1 min e meio.
@@ -74,6 +76,9 @@ scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem con
 - O app abre num Mac Intel e num Apple Silicon, e as permissões dadas continuam depois de um build novo.
   Sem Mac Intel à mão: `arch -x86_64 dist/Cadex.app/Contents/MacOS/Cadex` roda a fatia Intel no
   Rosetta (conferido em 2026-10-19; falta um Mac Intel de verdade).
+- "Abrir com" de um .json, .md ou .png lista o Cadex. Para conferir sem o Finder, registrar uma
+  cópia com outro bundle id fora de /tmp (o macOS desativa app em pasta temporária) com `lsregister
+  -f` e perguntar a `NSWorkspace.urlsForApplications(toOpen:)`.
 - `spctl -a -vv Cadex.app` dá `rejected` enquanto não houver notarização: esperado, não é bug.
 - O latest.json de dist/ confere com a chave pública do app; com ele, `CADEX_UPDATE_FEED=dist/latest.json`
   numa cópia mais velha do app mostra o botão de atualização (`../features/updates/CLAUDE.md`).
