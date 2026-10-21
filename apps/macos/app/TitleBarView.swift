@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Icons
 import Menus
 import Strings
@@ -17,7 +18,9 @@ import Tabs
 final class TitleBarView: NSView {
     /// Matches the title area of a window with a unified compact toolbar,
     /// where macOS centers the window buttons.
-    static let height: CGFloat = 38
+    /// Zoomed but never compact: macOS places the window buttons itself,
+    /// and a shorter bar would leave them off center (plan 15, phase D).
+    static var height: CGFloat { UILooks.pt(38) }
     /// Where the close, minimize and zoom buttons end, and the one gap used
     /// before and after the group: 6 and 12 pt there read as crooked.
     // Measured in a capture: the zoom button ends at 72 pt (2026-10-19).
@@ -53,6 +56,9 @@ final class TitleBarView: NSView {
     private var textColor = NSColor.labelColor
     private var secondaryColor = NSColor.secondaryLabelColor
 
+    /// The space button's right click menu (rename, color, close), from commands.
+    var spaceMenu: (() -> [MenuEntry])?
+
     /// The "+" menu (the openers, built by the app); without it, "+" is a new tab.
     var newMenu: (() -> [MenuEntry])?
 
@@ -67,6 +73,10 @@ final class TitleBarView: NSView {
         sidebarButton.onPress = { [weak self] in self?.run("view.toggle-sidebar") }
         searchButton.onPress = { [weak self] in self?.run("palette.open") }
         spaceButton.onPress = { [weak self] in self?.run("space.switch") }
+        spaceButton.onRightPress = { [weak self] in
+            guard let self, let entries = self.spaceMenu?(), !entries.isEmpty else { return }
+            PopupMenu.show(entries, below: self.spaceButton)
+        }
         newTabButton.onPress = { [weak self] in self?.showNewMenu() }
         settingsButton.onPress = { [weak self] in self?.run("settings.open") }
         powerButton.onPress = { [weak self] in self?.run("power.toggle") }
@@ -120,10 +130,10 @@ final class TitleBarView: NSView {
         spaceCount = count
         guard count > 1 else { return spaceButton.setTitle(NSAttributedString()) }
         let title = NSMutableAttributedString(string: name, attributes: [
-            .font: NSFont.systemFont(ofSize: 12), .foregroundColor: secondaryColor,
+            .font: UILooks.font(12), .foregroundColor: secondaryColor,
         ])
         title.append(NSAttributedString(string: " ▾", attributes: [
-            .font: NSFont.systemFont(ofSize: 9), .foregroundColor: secondaryColor.withAlphaComponent(0.7),
+            .font: UILooks.font(9), .foregroundColor: secondaryColor.withAlphaComponent(0.7),
         ]))
         spaceButton.setTitle(title)
     }

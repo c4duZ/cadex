@@ -1,6 +1,6 @@
 //! The panes of the active tab: placed by the tree, a 1-DIP divider that
 //! takes the mouse 6 DIPs to each side and thickens under the pointer, and
-//! the panes without the focus slightly darker (docs/spec/tabs.md).
+//! the panes without the focus darker by tabs.unfocusedDim (docs/spec/tabs.md).
 
 const std = @import("std");
 const gfx = @import("gfx");
@@ -18,6 +18,9 @@ const min_ratio = 0.08;
 pub const Layout = struct {
     /// The split being dragged (its node), while the button is down.
     dragging: ?*Node = null,
+    /// The black shade over the panes without focus (tabs.unfocusedDim,
+    /// plan 15): one value for light and dark themes, as on the Mac.
+    unfocused_dim: f32 = 0.26,
 
     pub fn draw(self: *Layout, u: *ui.Ui, tabs: *Tabs, font: ?*terminal.Font, area: gfx.Rect) void {
         const t = tabs.active() orelse return;
@@ -39,7 +42,7 @@ pub const Layout = struct {
                 .document => |d| d.draw(u, f.rect, has_keys),
             }
             if (focused and u.focus == ui.context.none) u.focus = focusIdOf(pane);
-            if (several and !focused) u.painter.fill(f.rect, gfx.Color.black.alpha(if (u.style.dark) 0.22 else 0.08));
+            if (several and !focused and self.unfocused_dim > 0) u.painter.fill(f.rect, gfx.Color.black.alpha(self.unfocused_dim));
         }
         self.dividers(u, t.tree.root, area, gap);
     }

@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Icons
 
 /// The palette's colors, from the theme (the app sets them): the panels'
@@ -76,7 +77,7 @@ final class KeycapsView: NSStackView {
         spacing = 3
         for key in Self.keys(of: label ?? "") {
             let text = NSTextField(labelWithString: key)
-            text.font = .systemFont(ofSize: 11, weight: .medium)
+            text.font = UILooks.font(11, weight: .medium)
             text.textColor = style.secondaryText
             text.alignment = .center
             text.translatesAutoresizingMaskIntoConstraints = false
@@ -131,7 +132,7 @@ final class PaletteHeaderView: NSView {
 
     func show(_ text: String, style: PaletteStyle) {
         title.attributedStringValue = NSAttributedString(string: text.uppercased(), attributes: [
-            .font: NSFont.systemFont(ofSize: 11, weight: .semibold), .foregroundColor: style.secondaryText, .kern: 0.6,
+            .font: UILooks.font(11, weight: .semibold), .foregroundColor: style.secondaryText, .kern: 0.6,
         ])
     }
 }
@@ -152,7 +153,7 @@ final class PaletteRowView: NSTableCellView {
         super.init(frame: .zero)
         identifier = Self.identifier
         detail.alignment = .right
-        detail.font = .systemFont(ofSize: 12)
+        detail.font = UILooks.font(12)
         for view in [icon, title, detail, keys] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
@@ -183,10 +184,10 @@ final class PaletteRowView: NSTableCellView {
         available = item.unavailableReason == nil
         let color = available ? style.text : style.secondaryText.withAlphaComponent(0.6)
         let text = NSMutableAttributedString(string: item.title, attributes: [
-            .font: NSFont.systemFont(ofSize: 14), .foregroundColor: color,
+            .font: UILooks.font(14), .foregroundColor: color,
         ])
         for range in item.bold {
-            text.addAttributes([.font: NSFont.systemFont(ofSize: 14, weight: .semibold), .foregroundColor: available ? style.accent : color],
+            text.addAttributes([.font: UILooks.font(14, weight: .semibold), .foregroundColor: available ? style.accent : color],
                                range: NSRange(range, in: item.title))
         }
         title.attributedStringValue = text
@@ -213,7 +214,7 @@ final class PaletteFooterView: NSStackView {
             let keys = KeycapsView()
             keys.show(hint.keys, style: style)
             let label = NSTextField(labelWithString: hint.label)
-            label.font = .systemFont(ofSize: 12)
+            label.font = UILooks.font(12)
             label.textColor = style.secondaryText
             let pair = NSStackView(views: [keys, label])
             pair.spacing = 6

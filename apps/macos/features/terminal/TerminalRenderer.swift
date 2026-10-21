@@ -10,10 +10,11 @@ struct QuadInstance {
     var uv: SIMD4<Float>
     var color: SIMD4<Float>
     var kind: UInt32
-    // Three scalars, not SIMD3: SIMD3<UInt32> is 16 bytes and made the
+    /// A glyph's cell background, 0xRRGGBB, for the minimum contrast.
+    var background: UInt32 = 0
+    // Scalars, not SIMD3: SIMD3<UInt32> is 16 bytes and made the
     // stride 80 instead of the shader.s 64, scrambling every glyph after the
     // first (found 2026-10-19, first run of the app).
-    var pad0: UInt32 = 0
     var pad1: UInt32 = 0
     var pad2: UInt32 = 0
 
@@ -38,6 +39,9 @@ final class TerminalRenderer {
     var selectionColor: UInt32?
     /// The default background's opacity (TerminalAppearance.backgroundAlpha).
     var backgroundAlpha: Double = 1
+    /// The WCAG ratio text keeps against its cell (terminal.minimumContrast);
+    /// 1 leaves the colors alone. Applied in the vertex shader, once per glyph.
+    var minimumContrast: Float = 1
 
     /// Several frames can be in flight; each writes its own buffer.
     private static let buffersInFlight = 3
@@ -88,10 +92,10 @@ final class TerminalRenderer {
         pass.colorAttachments[0].clearColor = Self.clearColor(frame.background, alpha: backgroundAlpha)
 
         if let encoder = commands.makeRenderCommandEncoder(descriptor: pass) {
-            var uniforms = SIMD2<Float>(Float(size.width), Float(size.height))
+            var uniforms = SIMD4<Float>(Float(size.width), Float(size.height), minimumContrast, 0)
             encoder.setRenderPipelineState(pipeline)
             encoder.setVertexBuffer(buffer, offset: 0, index: 0)
-            encoder.setVertexBytes(&uniforms, length: MemoryLayout<SIMD2<Float>>.size, index: 1)
+            encoder.setVertexBytes(&uniforms, length: MemoryLayout<SIMD4<Float>>.size, index: 1)
             encoder.setFragmentTexture(atlas.texture, index: 0)
             if !quads.isEmpty {
                 encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4, instanceCount: quads.count)

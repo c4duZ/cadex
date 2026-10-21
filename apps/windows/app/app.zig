@@ -113,6 +113,8 @@ pub const App = struct {
         // The core's few texts too (a git message, the name of a pasted copy).
         @import("cadex").cadex_set_language(if (strings.language == .pt) "pt" else "en");
         self.themes = themes.Store.init(gpa);
+        // The interface's zoom, density and font count from here to the end.
+        @import("looks.zig").captureLaunch(self.settings.current);
         self.registry = .{ .gpa = gpa };
         self.shortcuts = shortcuts.Shortcuts.init(gpa, &self.registry);
         app_commands.translateOpeners();
@@ -151,6 +153,9 @@ pub const App = struct {
         self.power = .{ .host = wiring.powerHost(self), .keep_display_on = self.settings.current.power.keep_display_on };
         power_mod.commands.register(&self.registry, &self.power);
         @import("theme_commands.zig").register(self);
+        @import("theme_looks.zig").register(self);
+        @import("work_colors.zig").register(self);
+        @import("settings_page.zig").register(self);
         self.palette.addPrefix(.{ .char = '/', .label = strings.t("files", "arquivos"), .source = self.search.filesSource() });
         self.palette.addPrefix(.{ .char = '#', .label = strings.t("text", "texto"), .source = self.search.contentSource() });
         self.palette.addPrefix(.{ .char = '@', .label = strings.t("tabs and spaces", "abas e spaces"), .source = @import("places_source.zig").source(self) });
@@ -181,16 +186,16 @@ pub const App = struct {
         self.surface.resize(@intFromFloat(size.x), @intFromFloat(size.y)) catch {};
         const u = &self.u;
         u.size = size;
-        u.style = themes.style(self.themes.current, self.window.scale());
+        u.style = @import("looks.zig").frameStyle(self);
         u.beginFrame(@intCast(c.GetTickCount64()));
         self.surface.begin();
-        const vibrancy = self.settings.current.appearance.vibrancy;
+        const vibrancy = @import("looks.zig").vibrancy(self);
         self.painter.clear(if (vibrancy) gfx.Color.transparent else u.style.chrome);
 
         var area: gfx.Rect = .{ .w = size.x, .h = size.y };
         self.title_h = u.px(38);
         const title = area.takeTop(self.title_h);
-        const status = area.takeBottom(u.px(26));
+        const status = area.takeBottom(u.rowPx(26));
         const gap = u.px(6);
         var body = area.inset(gap, 0);
         self.holes.clearRetainingCapacity();
@@ -241,8 +246,7 @@ pub const App = struct {
         self.panes_area = inner.inset(u.px(2), u.px(2));
         u.painter.pushClip(self.panes_area);
         defer u.painter.popClip();
-        const s = self.settings.current;
-        const font = self.term_font.get(s.terminal.font_family, @floatCast(s.terminal.font_size), self.window.scale());
+        const font = @import("looks.zig").terminalFont(self);
         self.layout.draw(u, self.tabs, font, self.panes_area);
         self.dropFiles();
     }

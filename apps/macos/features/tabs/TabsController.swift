@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Menus
 import Strings
 import Terminal
 
@@ -21,6 +22,9 @@ public final class TabsController {
     /// Anything the snapshot holds changed (tabs, panes, folders, titles):
     /// the spaces save it.
     public var onStateChange: (() -> Void)?
+    /// The right click's menu on a tab, built by the app from commands
+    /// (rename, color, close), for the tab already selected.
+    public var contextMenu: (() -> [MenuEntry])?
     /// The last tab closed. Without it, the window closes (one space).
     public var onEmpty: (() -> Void)?
     /// Whether these tabs are the ones in the window. Spaces keep the
@@ -42,6 +46,10 @@ public final class TabsController {
         bar.onSelect = { [weak self] in self?.select($0) }
         bar.onClose = { [weak self] in self?.closeTab($0) }
         bar.onRename = { [weak self] in self?.rename($0) }
+        bar.onContextMenu = { [weak self] _, point in
+            guard let self, let entries = self.contextMenu?(), !entries.isEmpty else { return }
+            PopupMenu.show(entries, at: point, in: self.bar)
+        }
         bar.onMove = { [weak self] id, index in
             self?.list.move(id, to: index)
             self?.refreshBar()
@@ -127,6 +135,15 @@ public final class TabsController {
     }
 
     public var activePaneCount: Int { activeTab?.tree.leaves.count ?? 0 }
+
+    /// The active tab's work color (tab.set-color); the app paints the
+    /// window's accent with it over the space's (plan 15, phase D).
+    public var activeColor: String? { activeTab?.color }
+
+    public func setActiveColor(_ name: String?) {
+        activeTab?.color = name
+        refreshBar()
+    }
 
     func select(_ id: Int) {
         list.select(id)

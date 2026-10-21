@@ -28,13 +28,16 @@ final class ThemesPage {
                                       selected: appearance.mode) { [store] value in store.update { $0.appearance.mode = value } }
         let (families, problems) = ThemeLibrary.all()
         library = families
-        grid.selected = [appearance.theme]
+        let (dark, light) = ThemeLooksRows.inUse(appearance)
+        grid.selected = [dark, light]
         applyFilter()
         var rows: [NSView] = [
             SettingsPage.row(T("Mode", "Modo"),
                              T("Which version of the theme shows: the one for the system's light or dark mode, or always the same.",
                                "Qual versão do tema aparece: a do modo claro ou escuro do sistema, ou sempre a mesma."),
                              control: mode),
+            ThemeLooksRows.pair(store),
+            ThemeLooksRows.accent(store),
             filesRow(),
             SettingsPage.section(T("Theme", "Tema")),
             toolbar(count: families.count),
@@ -44,6 +47,7 @@ final class ThemesPage {
                                           + problems.joined(separator: "\n")))
         }
         rows.append(grid)
+        rows += [SettingsPage.section(T("Reading", "Leitura"))] + ThemeLooksRows.contrast(store)
         rows += looksRows()
         return SettingsPage.make(title: T("Themes", "Temas"), subtitle: T("The theme, the window's frame and a background image.", "O tema, a moldura da janela e uma imagem de fundo."), rows: rows)
     }
@@ -136,8 +140,17 @@ final class ThemesPage {
         store.update { $0.appearance.backgroundImage = copy }
     }
 
+    /// With the Dark or Light filter, the theme for that mode only;
+    /// otherwise one theme for both (plan 15, phase B).
     private func pick(_ family: ThemeFamily) {
-        store.update { $0.appearance.theme = family.id }
-        grid.selected = [family.id]
+        store.update {
+            switch filter {
+            case .dark: $0.appearance.darkTheme = family.id
+            case .light: $0.appearance.lightTheme = family.id
+            case .all: ($0.appearance.theme, $0.appearance.darkTheme, $0.appearance.lightTheme) = (family.id, "", "")
+            }
+        }
+        let (dark, light) = ThemeLooksRows.inUse(store.settings.appearance)
+        grid.selected = [dark, light]
     }
 }

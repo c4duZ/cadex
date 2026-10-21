@@ -83,7 +83,7 @@ pub const Completion = struct {
     /// Draws below `caret` (above when there is no room); a clicked item, once.
     pub fn draw(self: *Completion, u: *Ui, id: ui_mod.Id, caret: gfx.Rect, area: gfx.Rect) ?Item {
         if (!self.visible()) return null;
-        const row_h = u.px(24);
+        const row_h = u.rowPx(24);
         const shown = @min(self.items.len - self.top, max_shown);
         const pad = u.px(4);
         var box: gfx.Rect = .{ .x = caret.x, .y = caret.bottom() + u.px(2), .w = @min(u.px(360), area.w), .h = @as(f32, @floatFromInt(shown)) * row_h + 2 * pad };

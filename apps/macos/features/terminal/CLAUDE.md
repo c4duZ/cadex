@@ -60,6 +60,12 @@
   com foco responde, junto com copy:, paste: e selectAll: dos comandos de edição. O
   `performKeyEquivalent` só trata a edição estilo Mac (⌘← ⌘→ ⌘⌫ ⌘⌦), que é entrada para o shell.
 - Ações do terminal (limpar, buscar, copiar, colar) registradas como comandos.
+- Leitura (plano 15, fase C): `TerminalFont.swift` monta a fonte com a `Typesetting` (altura de linha,
+  espaçamento centrado na célula, recursos OpenType); `TerminalShaders.swift` aplica o contraste
+  mínimo no vertex shader, com o fundo de cada letra no `QuadInstance`; com "calt"/"liga",
+  `QuadBuilder+Ligatures.swift` acha as sequências de símbolos e o joins do `GlyphAtlas.swift` diz se a fonte as
+  junta, e a sequência vira uma imagem só. Mudar fonte refaz o atlas; mudar o contraste, não
+  (`fontKey`).
 - Status: janela com um shell, desenho em Metal (SF Mono, nítido), teclado básico e colagem de
   texto, teclas pelo núcleo (modo de aplicação, F-keys, modificadores, kitty, Option como Meta).
   Rolagem com barra discreta, seleção (arrastar, duplo e triplo clique, Shift+clique, ⌘A) e ⌘C.

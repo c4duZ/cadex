@@ -9,6 +9,7 @@ import Strings
 import Tabs
 import Themes
 import Updates
+import UILooks
 
 /// What the windows share: settings, the settings window, the keymap and
 /// the shortcut dispatcher. Each window is a WindowSession; ⌘N opens
@@ -35,6 +36,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var relaunching = false
 
     var settingsCommand: Command { settingsWindow.openCommand }
+    var settingsPageCommands: [Command] { settingsWindow.pageCommands }
     /// The Cadex symbol by the clock: filled while keep-awake is on.
     private var menuBarItem: MenuBarItem?
     /// Keep-awake, for the whole app: a program running in any window counts.
@@ -45,6 +47,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Before any text is made: every view reads its texts once (ADR 0015).
         Strings.setLanguage(Language(rawValue: settings.store.settings.general.language) ?? .en)
+        // The same for the interface's zoom, density and font (plan 15, phase D).
+        let a = settings.store.settings.appearance
+        UILooks.configure(zoom: a.uiZoom, compact: a.density == "compact", fontFamily: a.uiFont, fontSize: a.uiFontSize)
         connectSettings()
         settings.start()
         // The popup menus take the theme's colors, the same as ⌘K's.

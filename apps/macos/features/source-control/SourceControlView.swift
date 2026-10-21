@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Icons
 import Menus
 import Strings
@@ -118,12 +119,12 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
         branch.isBordered = false
         branch.image = Icon.gitBranch.image(size: 13)
         branch.imagePosition = .imageLeading
-        branch.font = .systemFont(ofSize: 12, weight: .semibold)
+        branch.font = UILooks.font(12, weight: .semibold)
         branch.target = self
         branch.action = #selector(runButton(_:))
         branch.identifier = .init("git.switch-branch")
         branch.lineBreakMode = .byTruncatingTail
-        sync.font = .systemFont(ofSize: 11)
+        sync.font = UILooks.font(11)
         sync.textColor = .secondaryLabelColor
         buttons = [("git.fetch", Icon.arrowsClockwise, "Fetch"), ("git.pull", Icon.arrowDown, "Pull"), ("git.push", Icon.arrowUp, "Push")].map { id, icon, tip in
             let b = NSButton(image: icon.image(size: 13), target: self, action: #selector(runButton(_:)))
@@ -143,7 +144,7 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
 
         table.addTableColumn(NSTableColumn(identifier: .init("change")))
         table.headerView = nil
-        table.rowHeight = 22
+        table.rowHeight = UILooks.rowHeight(22)
         table.style = .plain
         table.backgroundColor = .clear
         table.allowsMultipleSelection = true
@@ -155,7 +156,7 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
         scroll.hasVerticalScroller = true
         scroll.autohidesScrollers = true
 
-        messageView.font = .systemFont(ofSize: 12)
+        messageView.font = UILooks.font(12)
         messageView.isRichText = false
         messageView.delegate = self
         messageView.textContainerInset = NSSize(width: 4, height: 4)
@@ -168,7 +169,7 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
         commitButton.action = #selector(runButton(_:))
         commitButton.identifier = .init("git.commit")
         HoverTip.attach(T("Commit (⌘Enter in the message)", "Commit (⌘Enter na mensagem)"), to: commitButton)
-        error.font = .systemFont(ofSize: 11)
+        error.font = UILooks.font(11)
         error.textColor = .systemRed
         error.isHidden = true
         empty.alignment = .center

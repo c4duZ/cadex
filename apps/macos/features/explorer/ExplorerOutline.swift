@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Menus
 
 /// The tree's NSOutlineView. Keys that only make sense in the tree (Enter
@@ -19,7 +20,7 @@ final class ExplorerOutline: NSOutlineView {
         outlineTableColumn = column
         headerView = nil
         // VS Code's tree: 22 pt rows, 8 pt per level (docs/spec/explorer.md).
-        rowHeight = 22
+        rowHeight = UILooks.rowHeight(22)
         indentationPerLevel = 8
         backgroundColor = .clear
         style = .plain

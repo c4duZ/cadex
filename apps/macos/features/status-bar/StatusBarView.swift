@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Strings
 import Menus
 
@@ -6,7 +7,7 @@ import Menus
 /// trail of pieces, each with a menu of its subfolders, and the environment
 /// on the right (docs/spec/status-bar.md).
 public final class StatusBarView: NSView {
-    public static let height: CGFloat = 26
+    public static var height: CGFloat { UILooks.rowHeight(26) }
 
     public struct Style {
         public var text: NSColor
@@ -59,7 +60,7 @@ public final class StatusBarView: NSView {
     required init?(coder: NSCoder) { fatalError("StatusBarView is created in code") }
 
     private func rebuild() {
-        environment.font = .systemFont(ofSize: 11)
+        environment.font = UILooks.font(11)
         environment.textColor = style.secondaryText
         trail.arrangedSubviews.forEach { $0.removeFromSuperview() }
         guard let path else { return }
@@ -85,14 +86,14 @@ public final class StatusBarView: NSView {
 
     private static func title(_ text: String, last: Bool, style: Style) -> NSAttributedString {
         NSAttributedString(string: text, attributes: [
-            .font: NSFont.systemFont(ofSize: 11, weight: last ? .semibold : .regular),
+            .font: UILooks.font(11, weight: last ? .semibold : .regular),
             .foregroundColor: last ? style.text : style.secondaryText,
         ])
     }
 
     private func label(_ text: String, color: NSColor) -> NSTextField {
         let label = NSTextField(labelWithString: text)
-        label.font = .systemFont(ofSize: 11)
+        label.font = UILooks.font(11)
         label.textColor = color
         return label
     }

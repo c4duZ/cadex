@@ -28,6 +28,10 @@ que estavam, inclusive depois de fechar ou reabrir o app.
   pedido no space ativo (a pasta ganha uma aba de terminal). Abrir sem pasta (pelo Dock) volta à
   pasta do workspace da última vez.
 
+- Um space pode ter uma cor (space.set-color, ou clique direito no botão do space), salva no
+  spaces.json; a cor pinta a barra de abas e o painel lateral enquanto o space aparece
+  (`docs/spec/themes.md`, cores de trabalho).
+
 ## Estados
 - **Primeira abertura (sem arquivo):** um space "Space 1" com um terminal na pasta do workspace.
 - **Arquivo ilegível:** como a primeira abertura; o arquivo ruim fica ao lado, com outro nome, para

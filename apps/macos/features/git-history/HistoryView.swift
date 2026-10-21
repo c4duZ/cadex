@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Menus
 import Strings
 
@@ -87,11 +88,11 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         searchField.sendsWholeSearchString = false
         currentOnly.target = self
         currentOnly.action = #selector(toggleCurrentOnly(_:))
-        currentOnly.font = .systemFont(ofSize: 12)
+        currentOnly.font = UILooks.font(12)
         progress.style = .spinning
         progress.controlSize = .small
         progress.isDisplayedWhenStopped = false
-        count.font = .systemFont(ofSize: 11)
+        count.font = UILooks.font(11)
         count.textColor = .secondaryLabelColor
         let top = NSStackView(views: [searchField, currentOnly, progress, count])
         top.spacing = 10

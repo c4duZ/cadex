@@ -51,4 +51,11 @@ test {
     _ = @import("environments.zig");
     _ = @import("space_ui.zig");
     _ = @import("places_source.zig");
+    _ = @import("themes_page.zig");
+    _ = @import("theme_commands.zig");
+    _ = @import("theme_looks.zig");
+    _ = @import("looks.zig");
+    _ = @import("work_colors.zig");
+    _ = @import("interface_rows.zig");
+    _ = @import("terminal_text_rows.zig");
 }

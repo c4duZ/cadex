@@ -22,9 +22,31 @@ let exitCode = await Checks.run([
         settings.power.onAtLaunch = true
         settings.power.keepDisplayOn = true
         settings.shortcuts = ["cmd+shift+t": "tab.new", "cmd+t": nil]
+        settings.appearance.darkTheme = "catppuccin-macchiato"
+        settings.appearance.lightTheme = "github"
+        settings.appearance.accent = "#FF8800"
+        settings.appearance.highContrast = true
+        settings.appearance.uiZoom = 1.25
+        settings.appearance.density = "compact"
+        settings.appearance.uiFont = "Avenir Next"
+        settings.appearance.uiFontSize = 14
+        settings.terminal.minimumContrast = 4.5
+        settings.terminal.lineHeight = 1.2
+        settings.terminal.letterSpacing = 0.5
+        settings.terminal.fontFeatures = ["calt", "liga", "ss01", "-zero"]
+        settings.tabs.unfocusedDim = 0.4
         let (read, problems) = SettingsFile.read(SettingsFile.write(settings))
         expect(problems.isEmpty, "\(problems)")
         expect(read == settings, "\(read)")
+    }),
+    ("plan 15's values out of range are clamped; a bad accent or feature is a problem", {
+        let json = #"{"terminal": {"lineHeight": 9, "letterSpacing": -5, "minimumContrast": 40, "fontFeatures": ["calt", "ligatures"]},"#
+            + #" "appearance": {"accent": "orange", "uiZoom": 3, "density": "tiny"}, "tabs": {"unfocusedDim": 2}}"#
+        let (read, problems) = SettingsFile.read(Data(json.utf8))
+        expect(read.terminal.lineHeight == 2 && read.terminal.letterSpacing == -1 && read.terminal.minimumContrast == 21)
+        expect(read.terminal.fontFeatures == ["calt"] && read.appearance.accent.isEmpty, "\(read.terminal.fontFeatures)")
+        expect(read.appearance.uiZoom == 1.5 && read.appearance.density == "normal" && read.tabs.unfocusedDim == 0.6)
+        expect(problems.count == 3, "\(problems)")
     }),
     ("the interface is in English unless the file says pt; anything else is a problem", {
         expect(SettingsFile.read(Data("{}".utf8)).0.general.language == "en")

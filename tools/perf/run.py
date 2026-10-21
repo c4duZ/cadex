@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Cadex's weight budget (`make perf`): runs the release app and the core's
 indexes through the situations that once made it heavy, and fails when one
-goes over its limit. Mac only; takes about four minutes.
+goes over its limit. Mac only; takes about five minutes.
 
 Each scenario starts a test Cadex (CADEX_BACKGROUND=1, its own spaces file,
 so the owner's are untouched) whose "shell" runs a load (loadshell.sh), and
@@ -12,6 +12,7 @@ The limits leave room over what was measured on 2026-10-20 (in the comment
 of each), so a real regression fails and noise does not. Raise one only
 with a reason written next to it.
 """
+import json
 import os
 import pathlib
 import shutil
@@ -41,7 +42,11 @@ LIMITS = {
     "notes_home_mb": 60,          # +22 MB
     "files_repo_s": 2,            # 0.2 s for this repository
     "agent_cpu": 10.0,            # 2-4 % while a file is saved every 0.1 s
+    "theme_switch_mb": 6,         # 0 MB over 300 switches after 150 to warm up (90 -> 90, 2026-10-20)
+    "reading_flood_peak_mb": 200, # flood with minimum contrast 7 and ligatures on
 }
+# Themes the switch scenario goes through: official, tweakcn and base16.
+SWITCH_THEMES = ["caffeine", "catppuccin", "github-high-contrast", "gruvbox-soft", "tokyonight-storm", "0x96f", "nord"]
 
 
 def footprint_mb(pid):
@@ -70,9 +75,12 @@ class TestApp:
     """A test Cadex with `load` in its terminal, opened on `folder` (None:
     no folder, the home one)."""
 
-    def __init__(self, load, folder, seconds=20):
+    def __init__(self, load, folder, seconds=20, settings=None):
         self.dir = tempfile.mkdtemp(prefix="cadex-perf-")
+        self.settings_file = pathlib.Path(self.dir) / "settings.json"
+        self.settings_file.write_text(json.dumps(settings or {}))
         env = dict(os.environ, CADEX_BACKGROUND="1", CADEX_SPACES_FILE=f"{self.dir}/spaces.json",
+                   CADEX_SETTINGS_FILE=str(self.settings_file), CADEX_THEMES_DIR=f"{self.dir}/themes",
                    SHELL=str(HERE / "loadshell.sh"), CADEX_LOAD=load, CADEX_LOAD_SECONDS=str(seconds))
         args = [str(EXE)] + ([str(folder)] if folder else [])
         self.process = subprocess.Popen(args, env=env, cwd=str(folder or HOME),
@@ -102,8 +110,8 @@ class TestApp:
         shutil.rmtree(self.dir, ignore_errors=True)
 
 
-def scenario(name, load, folder, run, seconds=20):
-    app = TestApp(load, folder, seconds)
+def scenario(name, load, folder, run, seconds=20, settings=None):
+    app = TestApp(load, folder, seconds, settings)
     try:
         return run(app)
     finally:
@@ -150,6 +158,29 @@ def measure_agent(app):
     return {"agent_cpu": 100 * ((cpu_seconds(app.process.pid) or 0) - used) / (time.time() - start)}
 
 
+def measure_theme_switch(app):
+    """Settings edited by hand switch the theme 300 times: memory must not
+    grow (explorer and status bar leaked ~10 MB per 100 switches until
+    2026-10-20)."""
+    def switch(count):
+        for i in range(count):
+            theme = SWITCH_THEMES[i % len(SWITCH_THEMES)]
+            app.settings_file.write_text(json.dumps({"appearance": {"theme": theme, "mode": "dark" if (i // 7) % 2 else "light"}}))
+            time.sleep(0.12)
+    app.sample(12)
+    # The first switches grow the app once (~25 MB: each theme's first
+    # drawing), then it stays flat (2026-10-20); the growth after is the leak.
+    switch(150)
+    before = app.sample(4)[-1][0]
+    switch(300)
+    after = app.sample(4)[-1][0]
+    return {"theme_switch_mb": after - before}
+
+
+def measure_reading_flood(app):
+    return {"reading_flood_peak_mb": max(m for m, _ in app.sample(20))}
+
+
 def build_probe():
     probe = pathlib.Path(tempfile.mkdtemp(prefix="cadex-probe-")) / "index_probe"
     subprocess.run(["clang", "-O2", "-I", str(ROOT / "core/include"), "-o", str(probe), str(HERE / "index_probe.c"),
@@ -188,7 +219,11 @@ def main():
              ("a program flooding the terminal", lambda: scenario("flood", "flood", ROOT, measure_flood)),
              ("a TUI redrawing the screen", lambda: scenario("tui", "tui", ROOT, measure_tui)),
              ("the home folder as the workspace", lambda: scenario("home", "idle", None, measure_home)),
-             ("an agent saving files", lambda: scenario("agent", "idle", ROOT, measure_agent))]
+             ("an agent saving files", lambda: scenario("agent", "idle", ROOT, measure_agent)),
+             ("switching themes 300 times", lambda: scenario("themes", "idle", ROOT, measure_theme_switch)),
+             ("flooding with minimum contrast and ligatures", lambda: scenario(
+                 "reading", "flood", ROOT, measure_reading_flood,
+                 settings={"terminal": {"minimumContrast": 7, "fontFeatures": ["calt", "liga"]}}))]
     failures = []
     for title, step in steps:
         print(f"… {title}", flush=True)

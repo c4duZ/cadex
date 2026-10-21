@@ -21,6 +21,8 @@
   comando faz (Lixeira pelo SHFileOperationW com desfazer). `commands.zig`: a tabela dos comandos
   (explorer.* e workspace.*). `expanded_store.zig`: %APPDATA%\Cadex\explorer.json.
 - Spec: `../../../../docs/spec/explorer.md` e `../../../../docs/spec/workspace.md`.
+- Altura das linhas por `rowPx` (densidade compacta, plano 15) e o texto da linha selecionada em
+  `tab_active_text`, legível sobre o destaque.
 
 ## Como validar
 - `make windows-app` compila os testes (cadex-explorer-tests.exe); rodam no Windows.

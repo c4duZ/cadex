@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Strings
 import CCadex
 import Icons
@@ -119,7 +120,7 @@ final class ExplorerCell: NSTableCellView {
         let icon = NSImageView()
         let label = NSTextField(labelWithString: "")
         label.lineBreakMode = .byTruncatingMiddle
-        label.font = .systemFont(ofSize: 12)
+        label.font = UILooks.font(12)
         label.cell?.isScrollable = true
         addSubview(icon)
         addSubview(label)
@@ -149,7 +150,7 @@ final class ExplorerCell: NSTableCellView {
         if let existing = subviews.first(where: { $0.identifier == Self.markIdentifier }) as? NSTextField { return existing }
         let field = NSTextField(labelWithString: "")
         field.identifier = Self.markIdentifier
-        field.font = .monospacedSystemFont(ofSize: 10, weight: .bold)
+        field.font = UILooks.monospaced(10, weight: .bold)
         field.alignment = .right
         addSubview(field)
         return field
@@ -164,11 +165,11 @@ final class ExplorerCell: NSTableCellView {
         textField?.isEditable = false
         if node.isNote {
             imageView?.image = nil
-            textField?.font = NSFontManager.shared.convert(.systemFont(ofSize: 11), toHaveTrait: .italicFontMask)
+            textField?.font = NSFontManager.shared.convert(UILooks.font(11), toHaveTrait: .italicFontMask)
             textField?.textColor = style.secondaryText
             return
         }
-        textField?.font = .systemFont(ofSize: 12)
+        textField?.font = UILooks.font(12)
         // The Material Icon Theme's drawing when it knows the name (Docker,
         // Python, src, tests...; docs/adr/0011), in its own colors; else the
         // Phosphor glyph, folders in the theme's accent (with them gray, a

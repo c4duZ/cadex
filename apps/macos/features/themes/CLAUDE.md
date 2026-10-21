@@ -23,7 +23,11 @@
   versão escura e/ou clara, e o modo (sistema, escuro, claro). Padrão: Caffeine.
 - `Theme.swift`: o tema (cores da interface e do terminal, 16 ANSI). `BuiltInThemes.swift`: Cadex
   Escuro (cores da interface medidas num print do Terax) e Cadex Claro. `ThemeStore.swift`: o tema
-  em uso (só a família dele fica na memória), seguindo o modo do sistema, e quem observa a troca. `ThemeFile.swift`: o arquivo JSON do
+  em uso (só as famílias do escuro e do claro ficam na memória), pela escolha das configurações
+  (`Choice`: tema do escuro e do claro, modo, destaque, alto contraste), seguindo o modo do sistema e o
+  "Aumentar contraste", e quem observa a troca. `HighContrast.swift`: o alto contraste (texto a 7:1,
+  superfícies médias movidas até dar, bordas a 3:1), `readable` (a mesma regra do shader do terminal)
+  e o texto sobre a aba ativa (`textOnTabActive`, preto ou branco quando o destaque do usuário pede). `ThemeFile.swift`: o arquivo JSON do
   tema (ler com validação que cita o campo, escrever).
 - As cores do terminal chegam a ele pelo `TerminalAppearance` da feature terminal, que o app
   preenche a partir do tema; a feature terminal não depende desta.

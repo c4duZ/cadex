@@ -17,6 +17,13 @@
 - `win32/dcomp.zig`: DirectComposition, que o mingw só declara em C++: Device, Target e Visual,
   com as posições da tabela contadas no header. O alvo não é topmost, para as janelas filhas do
   WebView2 aparecerem sobre a superfície.
+- `win32/color_dialog.zig`: o seletor de cor do Windows (ChooseColorW), declarado à mão porque o
+  commdlg.h não traduz em C com CINTERFACE; a cor de destaque (plano 15) usa.
+- `ui/style.zig`: o Style de todo widget: as cores do tema (com `tab_active_text`, o texto que lê
+  sobre a aba ativa), `scale` (DPI × zoom da interface), `window_scale` (só o DPI, para o terminal e
+  o código do editor), `density` (0,85 no compacto; `rowPx` para alturas de linha e barra) e a fonte
+  da interface com o tamanho base (plano 15, fase D). `ui/context.zig`: Ui; `mouse_clip` tira o
+  mouse do que uma página rolada deixou fora da vista.
 - `strings/` é o módulo `strings` (`../../../docs/adr/0015-english-default-two-languages.md`): `t(en,
   pt)` dá o texto no idioma da interface, o `language` que o app define ao abrir, e `counterpart`
   o do outro idioma, para a paleta achar pelos dois títulos.

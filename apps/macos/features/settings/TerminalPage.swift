@@ -52,6 +52,7 @@ enum TerminalPage {
                                                              selected: t.cursor) { value in store.update { $0.terminal.cursor = value } }),
                 SettingsPage.row(T("Blinking cursor", "Cursor piscando"), nil,
                                  control: SettingsPage.toggle(t.cursorBlink) { on in store.update { $0.terminal.cursorBlink = on } }),
+            ] + TerminalTextRows.make(store) + [
 
                 SettingsPage.section(T("History and keyboard", "Histórico e teclado")),
                 SettingsPage.row(T("History lines", "Linhas de histórico"),

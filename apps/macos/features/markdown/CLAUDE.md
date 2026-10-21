@@ -35,6 +35,7 @@
 - Comandos em `MarkdownCommands.swift`: markdown.toggle-preview (⇧⌘V), markdown.open-link,
   markdown.backlinks.
 - Spec: `docs/spec/markdown.md`. Status: plano 5, fase C pronta.
+- Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
 ## Como validar
 - `make macos-test` passa: o que completar, caminhos relativos, página sem script, links quebrados,

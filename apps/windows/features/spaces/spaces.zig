@@ -2,7 +2,8 @@
 //! one shown at a time, saved by themselves half a second after each change
 //! to %APPDATA%\Cadex\spaces.json, in the Mac's format (SpacesFile.swift):
 //! { "version": 1, "active": 0, "folder": "...", "spaces": [{ "name": ...,
-//! "tabs": <the tabs' snapshot> }] }, and restored at start. An unreadable
+//! "color": "blue", "tabs": <the tabs' snapshot> }] } (the color only when
+//! set, plan 15), and restored at start. An unreadable
 //! file is kept aside under another name and the app starts fresh.
 
 const std = @import("std");
@@ -15,6 +16,8 @@ const tabs = @import("tabs");
 pub const Space = struct {
     name: []u8,
     tabs: *tabs.Tabs,
+    /// A work color's name ("blue"): space.set-color, plan 15 phase D.
+    color: ?[]u8 = null,
 };
 
 /// What the spaces need from the app.
@@ -49,6 +52,7 @@ pub const Spaces = struct {
             s.tabs.deinit();
             self.gpa.destroy(s.tabs);
             self.gpa.free(s.name);
+            if (s.color) |c| self.gpa.free(c);
         }
         self.list.deinit(self.gpa);
         if (self.saved_folder) |f| self.gpa.free(f);
@@ -60,6 +64,19 @@ pub const Spaces = struct {
 
     pub fn name(self: *Spaces) []const u8 {
         return self.list.items[self.active].name;
+    }
+
+    /// The shown space's work color, if it has one.
+    pub fn activeColor(self: *Spaces) ?[]const u8 {
+        return self.list.items[self.active].color;
+    }
+
+    /// null takes the color off; saved like any other change.
+    pub fn setActiveColor(self: *Spaces, color: ?[]const u8) void {
+        const space = &self.list.items[self.active];
+        if (space.color) |c| self.gpa.free(c);
+        space.color = if (color) |c| self.gpa.dupe(u8, c) catch null else null;
+        self.host.schedule_save(self.host.context);
     }
 
     fn path(self: *Spaces) ?[]u8 {
@@ -104,6 +121,9 @@ pub const Spaces = struct {
             if (s != .object) continue;
             const n = if (s.object.get("name")) |v| (if (v == .string) v.string else null) else null;
             const t = self.add(n) orelse continue;
+            if (s.object.get("color")) |c| if (c == .string) {
+                self.list.items[self.list.items.len - 1].color = self.gpa.dupe(u8, c.string) catch null;
+            };
             if (s.object.get("tabs")) |saved| tabs.snapshot.restore(t, saved, self.host.make_document);
             // A space saved without tabs comes back with a terminal.
             if (t.list.order.items.len == 0) t.newTab(self.host.folder(self.host.context));
@@ -146,6 +166,10 @@ pub const Spaces = struct {
         try j.beginArray();
         for (self.list.items) |s| {
             try j.beginObject();
+            if (s.color) |c| {
+                try j.objectField("color");
+                try j.write(c);
+            }
             try j.objectField("name");
             try j.write(s.name);
             try j.objectField("tabs");
@@ -188,6 +212,7 @@ pub const Spaces = struct {
         gone.tabs.deinit();
         self.gpa.destroy(gone.tabs);
         self.gpa.free(gone.name);
+        if (gone.color) |c| self.gpa.free(c);
         self.active -|= 1;
         self.host.shown(self.host.context);
         self.host.schedule_save(self.host.context);

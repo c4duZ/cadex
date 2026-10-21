@@ -127,8 +127,7 @@ fn makeRendered(app: *App, path: []const u8, _: u32) ?tabs.Document {
 }
 
 fn editorFamily(app: *App) []const u8 {
-    const s = app.settings.current.terminal;
-    const font = app.term_font.get(s.font_family, @floatCast(s.font_size), app.window.scale()) orelse return "Cascadia Mono";
+    const font = @import("looks.zig").terminalFont(app) orelse return "Cascadia Mono";
     return font.family;
 }
 

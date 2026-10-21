@@ -31,10 +31,17 @@ let package = Package(
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
+        // The interface's zoom, density and font, apart from the terminal's (plan 15, phase D).
+        .target(
+            name: "UILooks",
+            path: "shared/looks",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
         // The popup menus in the look of ⌘K (right click, "+", status bar).
         .target(
             name: "Menus",
-            dependencies: ["Icons", "Strings"],
+            dependencies: ["Icons", "Strings", "UILooks"],
             path: "shared/menus",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -49,7 +56,7 @@ let package = Package(
         // Check, download and install a newer Cadex (docs/adr/0016-in-app-updates.md).
         .target(
             name: "Updates",
-            dependencies: ["CommandPalette", "Strings"],
+            dependencies: ["CommandPalette", "Strings", "UILooks"],
             path: "features/updates",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -71,14 +78,14 @@ let package = Package(
         ),
         .target(
             name: "StatusBar",
-            dependencies: ["Icons", "Menus", "Strings"],
+            dependencies: ["Icons", "Menus", "Strings", "UILooks"],
             path: "features/status-bar",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
         .target(
             name: "CommandPalette",
-            dependencies: ["CCadex", "Icons", "Menus", "Strings"],
+            dependencies: ["CCadex", "Icons", "Menus", "Strings", "UILooks"],
             path: "features/command-palette",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -101,7 +108,7 @@ let package = Package(
         ),
         .target(
             name: "Tabs",
-            dependencies: ["Terminal", "CommandPalette", "Icons", "Menus", "Strings"],
+            dependencies: ["Terminal", "CommandPalette", "Icons", "Menus", "Strings", "UILooks"],
             path: "features/tabs",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -109,7 +116,7 @@ let package = Package(
         ),
         .target(
             name: "Explorer",
-            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Strings"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Strings", "UILooks"],
             path: "features/explorer",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -125,7 +132,7 @@ let package = Package(
         ),
         .target(
             name: "Editor",
-            dependencies: ["CCadex", "CommandPalette", "Icons", "Tabs", "Strings"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Tabs", "Strings", "UILooks"],
             path: "features/editor",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -133,7 +140,7 @@ let package = Package(
         ),
         .target(
             name: "Markdown",
-            dependencies: ["CCadex", "CommandPalette", "Editor", "Icons", "Menus", "Strings"],
+            dependencies: ["CCadex", "CommandPalette", "Editor", "Icons", "Menus", "Strings", "UILooks"],
             path: "features/markdown",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -141,7 +148,7 @@ let package = Package(
         ),
         .target(
             name: "MediaPreview",
-            dependencies: ["CCadex", "CommandPalette", "Tabs", "Strings"],
+            dependencies: ["CCadex", "CommandPalette", "Tabs", "Strings", "UILooks"],
             path: "features/media-preview",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -149,7 +156,7 @@ let package = Package(
         ),
         .target(
             name: "Preview",
-            dependencies: ["CommandPalette", "Icons", "Menus", "Tabs", "Strings"],
+            dependencies: ["CommandPalette", "Icons", "Menus", "Tabs", "Strings", "UILooks"],
             path: "features/preview",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -164,7 +171,7 @@ let package = Package(
         ),
         .target(
             name: "GitHistory",
-            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Tabs", "Strings"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Tabs", "Strings", "UILooks"],
             path: "features/git-history",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -172,7 +179,7 @@ let package = Package(
         ),
         .target(
             name: "SourceControl",
-            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Editor", "Tabs", "Strings"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Editor", "Tabs", "Strings", "UILooks"],
             path: "features/source-control",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -305,6 +312,12 @@ let package = Package(
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
+            name: "UILooksTests",
+            dependencies: ["UILooks", "Checks"],
+            path: "shared/looks/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+        .executableTarget(
             name: "IconsTests",
             dependencies: ["Icons", "Checks"],
             path: "shared/icons/tests",
@@ -313,7 +326,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

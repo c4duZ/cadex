@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Strings
 import Icons
 import Menus
@@ -195,9 +196,9 @@ public final class ExplorerController: NSObject {
     private func buildView() {
         // The folder's name small and quiet, the actions on the right, as in
         // Terax (owner's comparison, 2026-10-19).
-        header.font = .systemFont(ofSize: 11, weight: .semibold)
+        header.font = UILooks.font(11, weight: .semibold)
         header.lineBreakMode = .byTruncatingMiddle
-        message.font = .systemFont(ofSize: 11)
+        message.font = UILooks.font(11)
         message.isHidden = true
         message.lineBreakMode = .byWordWrapping
         outline.configure(controller: self)

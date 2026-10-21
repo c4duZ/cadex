@@ -42,8 +42,8 @@ pub const Menu = struct {
 /// A click outside or Escape closes it.
 pub fn show(ui: *Ui, menu: *Menu, owner: Id, items: []const Item) ?usize {
     if (!menu.isOpen(owner)) return null;
-    const row_h = ui.px(28);
-    const sep_h = ui.px(9);
+    const row_h = ui.rowPx(28);
+    const sep_h = ui.rowPx(9);
     const pad = ui.px(5);
     var width: f32 = ui.px(180);
     var height: f32 = 2 * pad;

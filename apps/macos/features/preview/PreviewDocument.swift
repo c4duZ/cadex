@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Icons
 import Menus
 import Tabs
@@ -186,7 +187,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         forward.isEnabled = false
         address.delegate = self
         address.placeholderString = "http://localhost:3000"
-        address.font = .systemFont(ofSize: 12)
+        address.font = UILooks.font(12)
         address.bezelStyle = .roundedBezel
         progress.style = .bar
         progress.isIndeterminate = false

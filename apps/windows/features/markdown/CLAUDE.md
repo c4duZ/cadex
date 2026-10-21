@@ -27,6 +27,7 @@
 - Comandos em `commands.zig`: markdown.toggle-preview (⇧⌘V), markdown.open-link,
   markdown.backlinks.
 - Spec: `../../../../docs/spec/markdown.md`.
+- Altura das linhas do autocomplete por `rowPx` (densidade compacta, plano 15).
 
 ## Como validar
 - `make windows-app` compila os testes (gatilhos, caminhos relativos, listas, respostas do núcleo);

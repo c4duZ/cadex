@@ -32,7 +32,8 @@ public struct TabsSnapshot: Codable, Equatable, Sendable {
     public enum Item: Codable, Equatable, Sendable {
         /// Any tab, terminals and documents alike (the name stays for the
         /// JSON). `focus`: the focused pane's position in reading order.
-        case terminal(title: String?, layout: Layout, focus: Int)
+        /// `color`: a work color's name ("red"), plan 15, phase D.
+        case terminal(title: String?, layout: Layout, focus: Int, color: String? = nil)
         /// A document tab as plan 7 saved it (before documents went into
         /// panes): read as a tab with that one pane, never written.
         case document(identity: String)

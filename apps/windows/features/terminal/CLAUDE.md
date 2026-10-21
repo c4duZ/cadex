@@ -22,12 +22,24 @@
 - `renderer.zig`: o quadro do núcleo na ordem do Mac (fundos, seleção, buscas em âmbar e laranja,
   cursor de bloco com o texto na cor do fundo, glifos em runs por face e cor, sublinhados, cursores
   finos, barra de rolagem); célula que a fonte não tem (emoji) vai por layout do DirectWrite.
+  O terminal desenha com glyph runs do Direct2D, sem shader próprio: o contraste mínimo
+  (terminal.minimumContrast, `min_contrast.zig`, 8 metades como o shader do Mac) roda por glifo
+  contra o fundo da célula (o do cursor de bloco, a seleção, o da célula ou o padrão), guardando a
+  última resposta.
 - `font.zig`: Font (as quatro faces, a célula em pixels inteiros, cache de glifos); fonte que o
   Windows não tem cai em Cascadia Mono; tamanho em pontos (4/3 de pixel a 96 dpi).
+  `typesetting.zig` (plano 15, fase C): altura da linha (a sobra dividida acima e abaixo),
+  espaçamento entre letras em pontos (célula mais larga, glifo centrado) e as etiquetas OpenType.
+  `shaping.zig`: o IDWriteTextAnalyzer com os recursos (GetGlyphs; o script vem de um
+  AnalyzeScript feito uma vez), para a letra sozinha ("ss01", "zero") e para as ligaduras.
+  `ligatures.zig`: com "calt" ou "liga", uma sequência de 2 a 8 símbolos ASCII na mesma linha, cor
+  e estilo, fora do cursor, que a fonte molda diferente de letra por letra vira um run só sobre as
+  células (cache por texto e estilo).
 - `find.zig`: a barra de busca ("3 de 12", Enter, Shift+Enter, Esc). `paste.zig`: arquivos, imagem
   (PNG em %TEMP%\cadex-paste, apagada depois de 7 dias) e texto, com a pergunta de várias linhas.
 - Spec: `../../../../docs/spec/terminal.md`.
 
 ## Como validar
-- `make windows-app` compila os testes desta feature; vim, htop do WSL, acentos no ABNT2, IME e
+- `make windows-app` compila os testes desta feature (`typesetting.zig` e `min_contrast.zig` rodam
+  também no Mac com `zig test`); vim, htop do WSL, acentos no ABNT2, IME e
   colagem conferidos na VM.

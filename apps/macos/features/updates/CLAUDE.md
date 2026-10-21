@@ -28,6 +28,7 @@
   `MAC_ONLY` em `../../../../tools/check_command_parity.py`).
 - A release publica o latest.json assinado: `../../packaging/sign-update.swift`, chamado pelo
   `../../packaging/release.sh`.
+- Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
 ## Como validar
 - `make macos-test` passa: versões, latest.json, assinatura certa e errada, instalação sobre um app

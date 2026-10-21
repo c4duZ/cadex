@@ -102,6 +102,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         window.contentView = workspace
         self.workspace = workspace
         workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.openers) ?? [] }
+        workspace.titleBar.spaceMenu = { [weak self] in self?.menu?.popup(Self.spaceActions) ?? [] }
         showPower()
         showUpdate()
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }

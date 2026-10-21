@@ -64,7 +64,8 @@ let exitCode = await Checks.run([
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 500), styleMask: [.titled], backing: .buffered, defer: false)
         let url = tempFile()
         let saved = SavedSpaces(spaces: [
-            .init(name: "api", tabs: TabsSnapshot(items: [.terminal(title: nil, layout: .pane(folder: tmp), focus: 0)], active: 0)),
+            .init(name: "api", tabs: TabsSnapshot(items: [.terminal(title: nil, layout: .pane(folder: tmp), focus: 0, color: "red")], active: 0),
+                  color: "blue"),
             .init(name: "site", tabs: TabsSnapshot(items: [
                 .terminal(title: "logs", layout: .split(sideBySide: false, ratio: 0.7, first: .pane(folder: "/"), second: .pane(folder: tmp)), focus: 1),
                 .document(identity: "/nota.md"),

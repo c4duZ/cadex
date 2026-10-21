@@ -154,7 +154,7 @@ fn makeNote(app: *App, path: []const u8, line: u32) ?tabs.Document {
 pub fn applyTheme(app: *App) void {
     const s = app.settings.current.terminal;
     const t = app.themes.current.terminal;
-    const font = app.term_font.get(s.font_family, @floatCast(s.font_size), app.window.scale());
+    const font = @import("looks.zig").terminalFont(app);
     const secondary = app.u.style.secondary_text;
     editor.appearance.current = editor.Appearance.fromTerminal(.{
         .font_family = if (font) |f| f.family else "Cascadia Mono",

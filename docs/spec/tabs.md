@@ -70,6 +70,10 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
 ### Desempenho
 - Abas que não estão visíveis não desenham; continuam lendo a saída do shell.
 
+- O escurecimento dos painéis sem foco é ajustável (tabs.unfocusedDim, de 0 a 0,6; 0,26 por
+  padrão; 0 desliga).
+- Clique direito numa aba: renomear, cor da aba e fechar painel, pelos comandos (plano 15, fase D).
+
 ## Estados
 - **Uma aba, um painel:** como o terminal sozinho, com a barra de abas em cima.
 - **Shell não abre** (shell configurado não existe): a aba abre mostrando o erro (spec do terminal).

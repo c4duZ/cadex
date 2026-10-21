@@ -23,8 +23,24 @@ public struct TerminalPreferences: Equatable, Sendable {
     public var copyOnSelect = false
     public var confirmMultilinePaste = true
     public var confirmClose = true
+    /// The WCAG ratio text keeps against its background (terminal.minimumContrast);
+    /// 1 leaves the colors as the program sent them (plan 15, phase C).
+    public var minimumContrast: Double = 1
+    /// Line height as a multiple of the font's (terminal.lineHeight).
+    public var lineHeight: Double = 1
+    /// Extra space between letters, in points; may be negative (terminal.letterSpacing).
+    public var letterSpacing: Double = 0
+    /// OpenType features of the font, "-" turning one off: "calt", "liga"
+    /// (ligatures), "ss01", "zero" (terminal.fontFeatures).
+    public var fontFeatures: [String] = []
 
     public init() {}
+
+    /// What the font is made from: a change here redraws every glyph; any
+    /// other change does not.
+    var fontKey: [String] {
+        [fontFamily, "\(fontSize)", "\(lineHeight)", "\(letterSpacing)"] + fontFeatures
+    }
 
     /// Posted when `current` changes.
     public static let didChange = Notification.Name("TerminalPreferences.didChange")

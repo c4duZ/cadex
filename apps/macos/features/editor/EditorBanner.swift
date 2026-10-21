@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 
 /// A strip at the top of an editor tab for notes that need attention: a
 /// big file shown in part, a change on disk, a failed save.
@@ -12,7 +13,7 @@ final class EditorBanner: NSView {
         super.init(frame: .zero)
         wantsLayer = true
         layer?.backgroundColor = NSColor.systemYellow.withAlphaComponent(0.18).cgColor
-        label.font = .systemFont(ofSize: 12)
+        label.font = UILooks.font(12)
         buttons.spacing = 6
         let row = NSStackView(views: [label, buttons])
         row.spacing = 10
@@ -66,7 +67,7 @@ final class EditorMessageView: NSView {
         action = run
         super.init(frame: .zero)
         let label = NSTextField(labelWithString: text)
-        label.font = .systemFont(ofSize: 14)
+        label.font = UILooks.font(14)
         label.textColor = .secondaryLabelColor
         var views: [NSView] = [label]
         if let title { views.append(NSButton(title: title, target: self, action: #selector(press))) }

@@ -28,6 +28,7 @@ extension WindowSession {
         commands.register(palette.openCommand)
         commands.register(StandardCommands.all)
         commands.register(app.settingsCommand)
+        commands.register(app.settingsPageCommands)
         commands.register(Command(
             id: "window.new", title: T("New Window", "Nova janela"), keywords: ["new window", "janela"], category: .file,
             defaultShortcut: "cmd+n", action: .run { [weak self] in
@@ -46,6 +47,7 @@ extension WindowSession {
                                                 terminalFolder: { [weak self] in self?.tabs?.activeTerminal?.currentDirectory }))
         commands.register(TabCommands.all { [weak self] in self?.tabs })
         makeSpaces(palette: palette)
+        registerWorkColors(palette: palette)
         makeExplorer()
         makeSearch(palette: palette)
         connectPalette(palette)
@@ -136,6 +138,7 @@ extension WindowSession {
             bar?.path = terminal?.currentDirectory
             bar?.canNavigate = terminal?.hasForegroundProcess == false
             self?.terminalFolderMoved(terminal?.currentDirectory)
+            self?.refreshWorkColor()
         }
     }
 }

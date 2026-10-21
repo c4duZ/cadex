@@ -2,8 +2,9 @@
 //! (TabsSnapshot.swift, Swift's Codable shape): {"active": 0, "items":
 //! [{"terminal": {"title": null, "focus": 1, "layout": {"split":
 //! {"sideBySide": true, "ratio": 0.5, "first": {"pane": {"folder": ...}},
-//! "second": {"document": {"identity": ...}}}}}}]}. Not the terminals'
-//! content: every pane starts a new shell (docs/spec/spaces.md).
+//! "second": {"document": {"identity": ...}}}}, "color": "red"}}]}, the
+//! color only when the tab has one (plan 15). Not the terminals' content:
+//! every pane starts a new shell (docs/spec/spaces.md).
 
 const std = @import("std");
 const controller = @import("controller.zig");
@@ -40,6 +41,10 @@ pub fn write(tabs: *Tabs, j: *std.json.Stringify) !void {
         try j.write(std.mem.indexOfScalar(u32, leaves.items, t.focus) orelse 0);
         try j.objectField("layout");
         try layout(tabs, t, t.tree.root, j, arena.allocator());
+        if (t.color) |name| {
+            try j.objectField("color");
+            try j.write(name);
+        }
         try j.endObject();
         try j.endObject();
     }
@@ -117,6 +122,7 @@ pub fn restore(tabs: *Tabs, value: std.json.Value, make_document: MakeDocument) 
         if (tabs.list.order.items.len == before) continue;
         const t = tabs.active().?;
         if (term.object.get("title")) |title| if (title == .string) t.setName(title.string);
+        if (term.object.get("color")) |color| if (color == .string) t.setColor(color.string);
         if (term.object.get("focus")) |f| if (f == .integer) {
             var leaves: std.ArrayList(u32) = .empty;
             defer leaves.deinit(tabs.gpa);

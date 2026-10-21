@@ -29,6 +29,9 @@ pub const Tab = struct {
     focus: u32,
     /// Set by renaming; null shows the focused pane's folder or title.
     name: ?[]u8 = null,
+    /// A work color's name ("red"): tab.set-color, plan 15 phase D. The
+    /// app paints it as the theme's ANSI color of that name.
+    color: ?[]u8 = null,
 
     pub fn init(gpa: std.mem.Allocator, id: u32, pane_id: u32, pane: Pane) !*Tab {
         const self = try gpa.create(Tab);
@@ -43,6 +46,7 @@ pub const Tab = struct {
         self.panes.deinit(self.gpa);
         self.tree.deinit();
         if (self.name) |n| self.gpa.free(n);
+        if (self.color) |n| self.gpa.free(n);
         self.gpa.destroy(self);
     }
 
@@ -55,6 +59,12 @@ pub const Tab = struct {
         const trimmed = std.mem.trim(u8, name, " ");
         // An empty name goes back to the folder's (docs/spec/tabs.md).
         self.name = if (trimmed.len == 0) null else self.gpa.dupe(u8, trimmed) catch null;
+    }
+
+    /// null takes the color off.
+    pub fn setColor(self: *Tab, name: ?[]const u8) void {
+        if (self.color) |n| self.gpa.free(n);
+        self.color = if (name) |n| self.gpa.dupe(u8, n) catch null else null;
     }
 
     /// Splits the focused pane; the new one gets the focus.

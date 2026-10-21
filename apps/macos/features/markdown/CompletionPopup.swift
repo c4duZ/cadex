@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 
 /// The list of suggestions under the cursor while writing a link. A panel
 /// that never takes the keyboard: the text view keeps typing, and the
@@ -16,8 +17,8 @@ final class CompletionPopup: NSObject, NSTableViewDataSource, NSTableViewDelegat
     private let table = NSTableView()
     private(set) var items: [Item] = []
     var onChoose: ((Item) -> Void)?
-    private static let rowHeight: CGFloat = 22
-    private static let width: CGFloat = 360
+    private static var rowHeight: CGFloat { UILooks.rowHeight(22) }
+    private static var width: CGFloat { UILooks.pt(360) }
 
     override init() {
         panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: Self.width, height: 100),
@@ -90,10 +91,10 @@ final class CompletionPopup: NSObject, NSTableViewDataSource, NSTableViewDelegat
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         let label = NSTextField(labelWithString: "")
         let item = items[row]
-        let text = NSMutableAttributedString(string: item.title, attributes: [.font: NSFont.systemFont(ofSize: 13)])
+        let text = NSMutableAttributedString(string: item.title, attributes: [.font: UILooks.font(13)])
         if !item.detail.isEmpty {
             text.append(NSAttributedString(string: "  " + item.detail, attributes: [
-                .font: NSFont.systemFont(ofSize: 11), .foregroundColor: NSColor.secondaryLabelColor,
+                .font: UILooks.font(11), .foregroundColor: NSColor.secondaryLabelColor,
             ]))
         }
         label.attributedStringValue = text

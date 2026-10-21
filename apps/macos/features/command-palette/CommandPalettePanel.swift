@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Icons
 
 /// The palette window: the field with the list's icon, the rows in
@@ -6,12 +7,12 @@ import Icons
 /// window, in the theme's colors (docs/spec/command-palette.md). Made once
 /// and reused, so ⌘K shows it in the same frame.
 final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate {
-    static let width: CGFloat = 640
-    static let rowHeight: CGFloat = 36
-    static let headerHeight: CGFloat = 30
-    static let listMaxHeight: CGFloat = 400
-    private static let fieldHeight: CGFloat = 54
-    private static let footerHeight: CGFloat = 36
+    static var width: CGFloat { UILooks.pt(640) }
+    static var rowHeight: CGFloat { UILooks.rowHeight(36) }
+    static var headerHeight: CGFloat { UILooks.rowHeight(30) }
+    static var listMaxHeight: CGFloat { UILooks.pt(400) }
+    private static var fieldHeight: CGFloat { UILooks.rowHeight(54) }
+    private static var footerHeight: CGFloat { UILooks.rowHeight(36) }
 
     var onQuery: ((String) -> Void)?
     var onChoose: ((Int, PaletteChoice) -> Void)?
@@ -71,7 +72,7 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
     /// The list on screen changed without a new field (a prefix typed).
     func setLook(placeholder: String, emptyText: String, icon: Icon) {
         field.placeholderAttributedString = NSAttributedString(string: placeholder, attributes: [
-            .font: NSFont.systemFont(ofSize: 18), .foregroundColor: style.secondaryText.withAlphaComponent(0.7),
+            .font: UILooks.font(18), .foregroundColor: style.secondaryText.withAlphaComponent(0.7),
         ])
         emptyLabel.stringValue = emptyText
         fieldIcon.image = icon.image(size: 18)
@@ -101,7 +102,7 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         background.layer?.borderWidth = 1
         contentView = background
 
-        field.font = .systemFont(ofSize: 18)
+        field.font = UILooks.font(18)
         field.isBordered = false
         field.drawsBackground = false
         field.focusRingType = .none
@@ -126,8 +127,8 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         scroll.scrollerStyle = .overlay
         scroll.automaticallyAdjustsContentInsets = false
         emptyLabel.isHidden = true
-        emptyLabel.font = .systemFont(ofSize: 13)
-        statusLabel.font = .systemFont(ofSize: 12)
+        emptyLabel.font = UILooks.font(13)
+        statusLabel.font = UILooks.font(12)
         statusLabel.alignment = .right
         statusLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
         for line in [topLine, bottomLine] { line.wantsLayer = true }

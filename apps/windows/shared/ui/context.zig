@@ -54,6 +54,9 @@ pub const Ui = struct {
     ime_caret: ?gfx.Rect = null,
     /// The window, for the clipboard.
     hwnd: @import("win32").c.HWND = null,
+    /// While a scrolled page draws: the part on screen. Widgets scrolled
+    /// out of it get no mouse (a row under the page's title is not clicked).
+    mouse_clip: ?gfx.Rect = null,
 
     pub fn deinit(self: *Ui) void {
         self.overlay_rects.deinit(self.gpa);
@@ -92,6 +95,7 @@ pub const Ui = struct {
     /// Whether the mouse can reach `r` in the current layer.
     pub fn mouseOver(self: *Ui, r: gfx.Rect) bool {
         if (!self.input.mouse_inside or !r.contains(self.input.mouse)) return false;
+        if (self.mouse_clip) |clip| if (!clip.contains(self.input.mouse)) return false;
         if (self.layer == .base) {
             for (self.overlay_rects.items) |o| if (o.contains(self.input.mouse)) return false;
         }
@@ -139,6 +143,11 @@ pub const Ui = struct {
 
     pub fn px(self: *const Ui, dips: f32) f32 {
         return self.style.px(dips);
+    }
+
+    /// A row's height: zoomed and tighter in compact density.
+    pub fn rowPx(self: *const Ui, dips: f32) f32 {
+        return self.style.rowPx(dips);
     }
 };
 

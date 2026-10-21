@@ -8,10 +8,13 @@ public struct SavedSpaces: Codable, Equatable, Sendable {
     public struct Space: Codable, Equatable, Sendable {
         public var name: String
         public var tabs: TabsSnapshot
+        /// A work color's name ("blue"), plan 15, phase D; absent before.
+        public var color: String?
 
-        public init(name: String, tabs: TabsSnapshot) {
+        public init(name: String, tabs: TabsSnapshot, color: String? = nil) {
             self.name = name
             self.tabs = tabs
+            self.color = color
         }
     }
 

@@ -56,6 +56,11 @@
 - Tela cheia: a barra de ferramentas (vazia, só dá a altura da barra de título) some ao entrar e
   volta ao sair, porque o macOS a punha numa faixa por cima da barra do app. Tamanho mínimo da
   janela 480×300.
+- `WorkColors.swift` (plano 15, fase D): as cores de space e de aba pelo nome, desenhadas com o ANSI
+  do tema; registra space.set-color e tab.set-color (lista no ⌘K) e põe a cor da aba ativa, ou a do
+  space, no lugar do destaque da janela (workColor do WorkspaceView). O clique direito numa aba e no
+  botão do space mostra `tabActions`/`spaceActions` (`PaletteWiring.swift`). `main.swift` chama
+  UILooks.configure com o zoom, a densidade e a fonte da interface antes de qualquer tela.
 - `MenuBarItem.swift`: o símbolo do Cadex na barra de menus do macOS (NSStatusItem), desenhado por
   `CadexMark.swift` com os caminhos do `docs/cadex-icon.svg`, branco com o manter acordado
   ligado, com a chama (fire-simple do Phosphor fill) saindo do braço de cima do >, e cinza desligado (o logo cheio nos dois); o clique roda power.toggle.
@@ -65,6 +70,7 @@
   vem do AppIcon.icns.
 - Abrir para teste com CADEX_BACKGROUND=1: a janela aparece sem tomar o foco do teclado. Abas, spaces e a paleta
   entram aqui conforme as features existirem.
+- Barra de título, botões dela, painel lateral e as abas dele medem por UILooks (`../shared/looks/CLAUDE.md`); a barra de título leva o zoom e não a densidade, porque o macOS põe os botões da janela.
 
 ## Como validar
 - `make app` compila; `make run` abre a janela com um shell.

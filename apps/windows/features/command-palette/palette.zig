@@ -133,8 +133,8 @@ pub const Palette = struct {
         const width = @min(ui.px(640), ui.size.x - ui.px(32));
         const box_x = (ui.size.x - width) / 2;
         const field_h = ui.px(46);
-        const row_h = ui.px(34);
-        const header_h = ui.px(26);
+        const row_h = ui.rowPx(34);
+        const header_h = ui.rowPx(26);
         const footer_h = ui.px(30);
         var content_h: f32 = 0;
         for (items.items) |item| content_h += row_h + if (item.section.len > 0) header_h else 0;
@@ -234,7 +234,7 @@ pub const Palette = struct {
                 ui.painter.text(item.shortcut, ui.style.small(), chip, ui.style.secondary_text, .{ .@"align" = .center, .ellipsis = false });
             }
             const title_w = ui.painter.measure(item.title, ui.style.ui()) + ui.px(10);
-            ui.painter.textBold(item.title, ui.style.ui(), content.takeLeft(@min(title_w, content.w)), ui.style.text, item.bold);
+            ui.painter.textBold(item.title, ui.style.ui(), content.takeLeft(@min(title_w, content.w)), if (i == self.selected) ui.style.tab_active_text else ui.style.text, item.bold);
             if (item.detail.len > 0) ui.painter.text(item.detail, ui.style.small(), content, ui.style.secondary_text, .{});
         }
         if (self.opened == null) return;

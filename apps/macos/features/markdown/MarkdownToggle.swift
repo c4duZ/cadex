@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Editor
 import Icons
 import Menus
@@ -20,7 +21,7 @@ final class MarkdownToggle: NSView {
         layer?.cornerRadius = 6
         layer?.borderWidth = 1
         setAccessibilityRole(.button)
-        label.font = .systemFont(ofSize: 11, weight: .medium)
+        label.font = UILooks.font(11, weight: .medium)
         let content = NSStackView(views: [icon, label])
         content.spacing = 4
         content.edgeInsets = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 9)

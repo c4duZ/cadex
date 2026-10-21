@@ -23,6 +23,8 @@
 - `palette.zig`: a caixa no topo, campo, linhas com títulos de seção, rodapé com as teclas, fecha
   ao clicar fora ou com Esc; a mesma lista de novo fecha, outra troca.
 - Spec: `../../../../docs/spec/command-palette.md`.
+- Altura das linhas e dos títulos de seção por `rowPx` (densidade compacta, plano 15); o título da
+  linha escolhida em `tab_active_text`, legível sobre o destaque.
 
 ## Como validar
 - `make windows-app` compila os testes (cadex-command-palette-tests.exe); rodam na VM.

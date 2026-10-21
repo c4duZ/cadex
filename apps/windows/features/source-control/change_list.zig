@@ -88,7 +88,7 @@ fn buildMenu(sc: *SourceControl, items: *[menu_items.len]ui.menu.Item, ids: *[me
 }
 
 pub fn draw(sc: *SourceControl, u: *ui.Ui, area: Rect) void {
-    const row_h = u.px(24);
+    const row_h = u.rowPx(24);
     if (u.pressedOn(area, .left) or u.pressedOn(area, .right)) u.focus = list_id;
     keyboard(sc, u, area, row_h);
     const view = ui.list.begin(u, list_id, area, sc.rows.len, row_h, &sc.view.list_scroll);

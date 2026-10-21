@@ -40,6 +40,8 @@ pub const View = struct {
     cell_h: f32 = 0,
     /// The theme's selection color.
     selection_color: ?u32 = null,
+    /// terminal.minimumContrast (at least 7 in high contrast); 1 is off.
+    min_contrast: f32 = 1,
     find: find_mod.Find = .{},
     /// Bell flash start (ms), to fade it.
     flash_from: i64 = 0,
@@ -69,8 +71,10 @@ pub const View = struct {
         self.session.close();
     }
 
+    /// By the window's scale, not the interface's zoom: the terminal keeps
+    /// its own size (plan 15, phase D).
     fn padding(ui: *const Ui) f32 {
-        return ui.px(padding_dips);
+        return @round(padding_dips * ui.style.window_scale);
     }
 
     /// The grid for `area`; resizes the session when it changes.
@@ -110,6 +114,7 @@ pub const View = struct {
             .focused = focused,
             .composition = if (focused) ui.input.composition.items else "",
             .show_scrollbar = scrollbar,
+            .min_contrast = self.min_contrast,
         });
         if (focused) {
             const pad = padding(ui);

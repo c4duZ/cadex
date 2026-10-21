@@ -75,7 +75,7 @@ pub fn draw(self: *Explorer, u: *ui.Ui, area: gfx.Rect, run: *const fn (context:
     var arena: std.heap.ArenaAllocator = .init(u.gpa);
     defer arena.deinit();
     const rows = t.rows(arena.allocator()) catch return result;
-    const row_h = u.px(22);
+    const row_h = u.rowPx(22);
     const focused = u.focus == self.focus_id;
     if (u.pressedOn(rest, .left) or u.pressedOn(rest, .right)) u.focus = self.focus_id;
     if (focused) keys(self, u, rows, run, run_context);
@@ -203,7 +203,7 @@ fn drawRow(self: *Explorer, u: *ui.Ui, row: tree_mod.Row, r: gfx.Rect, focused: 
         }
         return;
     };
-    const fg = (git orelse u.style.text).alpha(alpha);
+    const fg = (git orelse if (selected) u.style.tab_active_text else u.style.text).alpha(alpha);
     u.painter.text(row.label, u.style.ui(), content, fg, .{});
 }
 

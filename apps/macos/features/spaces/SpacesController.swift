@@ -11,6 +11,8 @@ public final class SpacesController {
     public final class Space {
         public var name: String
         public let tabs: TabsController
+        /// A work color's name (space.set-color, plan 15, phase D).
+        public var color: String?
 
         init(name: String, tabs: TabsController) {
             self.name = name
@@ -57,6 +59,7 @@ public final class SpacesController {
         let saved = fileURL.flatMap(SpacesFile.load(from:))
         for space in saved?.spaces ?? [] {
             let tabs = add(name: space.name)
+            spaces[spaces.count - 1].color = space.color
             activeIndex = spaces.count - 1
             tabs.restore(space.tabs, makeDocument: makeDocument)
             if tabs.count == 0 { tabs.newTab(cwd: folder) }
@@ -122,6 +125,16 @@ public final class SpacesController {
         select(spaces.count - 1)
     }
 
+    public var activeColor: String? { spaces.indices.contains(activeIndex) ? spaces[activeIndex].color : nil }
+
+    /// The active space's work color; nil takes it off.
+    public func setActiveColor(_ name: String?) {
+        guard spaces.indices.contains(activeIndex) else { return }
+        spaces[activeIndex].color = name
+        onChange?()
+        scheduleSave()
+    }
+
     public func rename(at index: Int, to name: String) {
         guard spaces.indices.contains(index) else { return }
         let trimmed = name.trimmingCharacters(in: .whitespaces)
@@ -176,7 +189,7 @@ public final class SpacesController {
     // MARK: Saving
 
     public var saved: SavedSpaces {
-        SavedSpaces(spaces: spaces.map { .init(name: $0.name, tabs: $0.tabs.snapshot()) }, active: max(activeIndex, 0),
+        SavedSpaces(spaces: spaces.map { .init(name: $0.name, tabs: $0.tabs.snapshot(), color: $0.color) }, active: max(activeIndex, 0),
                     folder: workspaceFolder?())
     }
 

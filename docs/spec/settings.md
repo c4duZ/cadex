@@ -28,6 +28,13 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
   também pode editar à mão. Os atalhos personalizados moram nele, na seção `shortcuts`.
 - Editar o arquivo com o Cadex aberto também vale na hora.
 
+- Plano 15: Temas ganha escuro e claro, cor de destaque, alto contraste e painéis sem foco;
+  Terminal ganha a seção Leitura (contraste mínimo, altura de linha, espaçamento, ligaduras,
+  recursos da fonte); Geral ganha Interface (zoom, densidade, fonte e tamanho da interface:
+  appearance.uiZoom, appearance.density, appearance.uiFont, appearance.uiFontSize), que valem ao
+  reabrir o Cadex, como o idioma. settings.open-themes e settings.open-terminal abrem essas páginas
+  pelo ⌘K.
+
 ## Estados
 - **Sem arquivo:** valem os padrões; o arquivo nasce na primeira mudança.
 - **Arquivo com erro:** valem os padrões para o que estiver errado; o aviso vai para o log e o resto

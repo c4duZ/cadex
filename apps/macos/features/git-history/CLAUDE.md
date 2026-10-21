@@ -22,6 +22,7 @@
   history.search, history.current-branch, history.refresh. O menu e a caixa de seleção só disparam
   esses ids.
 - Spec: `docs/spec/git-history.md`. Status: pronto (plano 6, fase E).
+- Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
 ## Como validar
 - `make macos-test` passa: linha do log e detalhes lidos, e a aba num repositório temporário com

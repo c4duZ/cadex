@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Icons
 import Menus
 
@@ -7,16 +8,18 @@ import Menus
 /// next to it. The bare icon buttons gave no feedback and could only be hit
 /// on their 16 pt glyph (UI review, 2026-10-19).
 final class TitleBarButton: NSView {
-    static let height: CGFloat = 26
-    static let iconSize: CGFloat = 15
+    static var height: CGFloat { UILooks.pt(26) }
+    static var iconSize: CGFloat { UILooks.pt(15) }
     /// The same margin on both sides of every button, with words or not, so
     /// icons side by side sit at equal distances: an icon alone is 28 pt.
     /// Mixed margins (8 and 9 pt next to a 28 pt icon button) left the
     /// group's gaps uneven (owner, 2026-10-19).
-    static let margin: CGFloat = 6.5
-    static let iconOnlyWidth: CGFloat = iconSize + margin * 2
+    static var margin: CGFloat { UILooks.pt(6.5) }
+    static var iconOnlyWidth: CGFloat { iconSize + margin * 2 }
 
     var onPress: (() -> Void)?
+    /// A right click; nil leaves it to the window.
+    var onRightPress: (() -> Void)?
     var colors: (text: NSColor, secondary: NSColor) = (.labelColor, .secondaryLabelColor) { didSet { restyle() } }
     private let icon: NSImageView?
     private let label = NSTextField(labelWithString: "")
@@ -35,7 +38,7 @@ final class TitleBarButton: NSView {
         setAccessibilityRole(.button)
         setAccessibilityLabel(title ?? tip)
         label.stringValue = title ?? ""
-        label.font = .systemFont(ofSize: 12)
+        label.font = UILooks.font(12)
         let views: [NSView] = (self.icon.map { [$0] } ?? []) + (title == nil ? [] : [label])
         let content = NSStackView(views: views)
         content.spacing = 4
@@ -97,6 +100,10 @@ final class TitleBarButton: NSView {
     override func mouseExited(with event: NSEvent) { hovered = false }
     /// Clicks press the button; they must not drag the window.
     override var mouseDownCanMoveWindow: Bool { false }
+
+    override func rightMouseDown(with event: NSEvent) {
+        if let onRightPress { onRightPress() } else { super.rightMouseDown(with: event) }
+    }
 
     override func mouseDown(with event: NSEvent) { pressed = true }
 

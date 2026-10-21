@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Icons
 
 /// The app's popup menus (right click, the "+" by the tabs, the status
@@ -44,13 +45,14 @@ public enum PopupMenu {
 }
 
 /// Sizes and keyboard moves, apart from drawing so the tests can check them.
+@MainActor
 enum MenuLayout {
-    static let padding: CGFloat = 5
-    static let itemHeight: CGFloat = 28
-    static let separatorHeight: CGFloat = 9
-    static let minWidth: CGFloat = 200
-    static var font: NSFont { .systemFont(ofSize: 13) }
-    static var keyFont: NSFont { .systemFont(ofSize: 11, weight: .medium) }
+    static var padding: CGFloat { UILooks.pt(5) }
+    static var itemHeight: CGFloat { UILooks.rowHeight(28) }
+    static var separatorHeight: CGFloat { UILooks.rowHeight(9) }
+    static var minWidth: CGFloat { UILooks.pt(200) }
+    static var font: NSFont { UILooks.font(13) }
+    static var keyFont: NSFont { UILooks.font(11, weight: .medium) }
 
     static func height(of entry: MenuEntry) -> CGFloat {
         entry.isSeparator ? separatorHeight : itemHeight

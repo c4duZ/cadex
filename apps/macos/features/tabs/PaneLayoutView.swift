@@ -172,18 +172,38 @@ final class PaneLayoutView: NSView {
     }
 }
 
+/// How dark the panes without focus are (tabs.unfocusedDim, plan 15): the
+/// app sets it from the settings, and every window redraws.
+@MainActor
+public enum PaneLooks {
+    public static let didChange = Notification.Name("PaneLooks.didChange")
+    /// 0.16 barely showed over dark themes (2026-10-19); 0.26 is the default.
+    public static var unfocusedDim: CGFloat = 0.26 {
+        didSet { if unfocusedDim != oldValue { NotificationCenter.default.post(name: didChange, object: nil) } }
+    }
+}
+
 /// A light shade over the panes without focus, so the focused one stands
 /// out without a line. Draws over the panes and lets every click through.
 private final class FocusOutlineView: NSView {
     var dimmed: [CGRect] = [] { didSet { if dimmed != oldValue { needsDisplay = true } } }
+
+    override init(frame: NSRect) {
+        super.init(frame: frame)
+        NotificationCenter.default.addObserver(forName: PaneLooks.didChange, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.needsDisplay = true }
+        }
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("FocusOutlineView is created in code") }
 
     override var isFlipped: Bool { true }
 
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
 
     override func draw(_ dirtyRect: NSRect) {
-        // 0.16 barely showed over dark themes (2026-10-19).
-        NSColor.black.withAlphaComponent(0.26).setFill()
+        NSColor.black.withAlphaComponent(PaneLooks.unfocusedDim).setFill()
         dimmed.forEach { $0.fill() }
     }
 }

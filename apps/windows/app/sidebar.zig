@@ -42,7 +42,7 @@ pub fn draw(app: *App, area: gfx.Rect) void {
     const inner = area.inset(1, 1);
     u.painter.fillRounded(inner, radius, u.style.panel);
     var content = inner;
-    const tabs_row = content.takeBottom(u.px(34)).inset(u.px(6), u.px(4));
+    const tabs_row = content.takeBottom(u.rowPx(34)).inset(u.px(6), u.px(4));
     const half = tabs_row.w / 2;
     const files_r: gfx.Rect = .{ .x = tabs_row.x, .y = tabs_row.y, .w = half - u.px(2), .h = tabs_row.h };
     const git_r: gfx.Rect = .{ .x = tabs_row.x + half + u.px(2), .y = tabs_row.y, .w = half - u.px(2), .h = tabs_row.h };

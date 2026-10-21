@@ -86,20 +86,28 @@ public final class TerminalView: MTKView {
 
     static func preferredFont(scale: CGFloat) -> TerminalFont {
         let preferences = TerminalPreferences.current
-        return TerminalFont(family: preferences.fontFamily, pointSize: preferences.fontSize, scale: scale)
+        return TerminalFont(family: preferences.fontFamily, pointSize: preferences.fontSize, scale: scale,
+                            typesetting: Typesetting(lineHeight: preferences.lineHeight, letterSpacing: preferences.letterSpacing,
+                                                     features: preferences.fontFeatures))
     }
 
     /// Font and cursor follow the preferences live; the rest is read when
     /// needed (TerminalPreferences.swift).
     private func followPreferences() {
         applyCursorPreference()
+        var fontKey = TerminalPreferences.current.fontKey
         NotificationCenter.default.addObserver(forName: TerminalPreferences.didChange, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self else { return }
                 self.applyCursorPreference()
-                self.renderer?.setFont(Self.preferredFont(scale: self.scale))
-                self.lastSize = (0, 0)
-                self.resizeSession()
+                // Only a font change redraws the glyphs (the atlas is made
+                // again); the minimum contrast is a uniform of the shader.
+                if TerminalPreferences.current.fontKey != fontKey {
+                    fontKey = TerminalPreferences.current.fontKey
+                    self.renderer?.setFont(Self.preferredFont(scale: self.scale))
+                    self.lastSize = (0, 0)
+                    self.resizeSession()
+                }
                 self.needsDisplay = true
             }
         }
@@ -108,6 +116,7 @@ public final class TerminalView: MTKView {
     private func applyCursorPreference() {
         let preferences = TerminalPreferences.current
         session?.setCursor(shape: preferences.cursorShape.rawValue, blink: preferences.cursorBlink)
+        renderer?.minimumContrast = Float(preferences.minimumContrast)
     }
 
     /// Takes the current theme colors now and whenever they change.

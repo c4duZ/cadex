@@ -35,6 +35,7 @@
   que vale para a linha), git.reveal, git.fetch, git.pull, git.push,
   git.refresh, git.switch-branch e diff.toggle-layout. O git.show (mostrar a página) é do app.
 - Spec: `../../../../docs/spec/source-control.md`. Referência: `../../../macos/features/source-control/`.
+- Altura das linhas das mudanças por `rowPx` (densidade compacta, plano 15).
 
 ## Como validar
 - `make windows-app` compila os testes (status, linhas, seleção, diff, caminhos); rodam na VM.

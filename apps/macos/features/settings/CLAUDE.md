@@ -17,8 +17,13 @@
   topo como no Terax, auxiliar de tela cheia (com o app em tela cheia, abre por cima dele, na mesma
   mesa, e não numa mesa à parte); `GeneralPages.swift` (General e About), `TerminalPage.swift`, `KeepAwakeRows.swift` (as seções do manter acordado em General), `ThemesPage.swift` (modo, seus temas,
   busca e filtro claro/escuro, a grade e a moldura), `ThemeGrid.swift` (os cartões, só das linhas na
-  tela, reaproveitados ao rolar), `ThemeActions.swift` (comandos theme.choose com a lista no ⌘K,
-  theme.import, theme.open-folder, theme.mode-system/-dark/-light; a página usa as mesmas ações), `ShortcutsPage.swift` (grava a próxima combinação com os atalhos do
+  tela, reaproveitados ao rolar), `ThemeActions.swift` (comandos theme.choose, -dark e -light com a lista no ⌘K,
+  theme.import, theme.open-folder, theme.mode-system/-dark/-light, theme.accent, theme.accent-reset,
+  theme.toggle-high-contrast; a página usa as mesmas ações), `ThemeLooksRows.swift` (escuro e claro,
+  destaque com o `AccentPicker`, alto contraste, painéis sem foco), `TerminalTextRows.swift` (a seção
+  Leitura do terminal), `InterfaceRows.swift` (zoom, densidade e fonte da interface em General: valem
+  ao reabrir, pergunta "Reabrir agora"); a janela registra settings.open-terminal,
+  settings.open-themes e terminal.toggle-ligatures (`pageCommands`), `ShortcutsPage.swift` (grava a próxima combinação com os atalhos do
   app suspensos; Delete tira, Esc cancela, "Padrão" volta) e `SettingsPage.swift` (linhas, títulos de
   seção, notas, caixas e controles que mudam o arquivo na hora). Textos em par inglês/português
   (`T`, `../../shared/strings`); trocar o idioma pergunta "Reabrir agora" e chama `relaunch`, do app. A janela segue o tema (`SettingsColors.swift`): a página

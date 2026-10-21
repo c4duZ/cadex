@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Icons
 import Menus
 import Strings
@@ -47,16 +48,16 @@ public final class TabBarView: NSView {
         var tip: String?
     }
 
-    static let height: CGFloat = 30
+    static var height: CGFloat { UILooks.pt(30) }
     /// Tabs shrink to this when many are open, then the strip clips.
-    private static let minWidth: CGFloat = 96
-    private static let maxWidth: CGFloat = 220
-    private static let closeSize: CGFloat = 14
-    private static let iconSize: CGFloat = 13
-    private static let padding: CGFloat = 10
-    private static let pillHeight: CGFloat = 28
-    private static let pillRadius: CGFloat = 7
-    private static let gap: CGFloat = 4
+    private static var minWidth: CGFloat { UILooks.pt(96) }
+    private static var maxWidth: CGFloat { UILooks.pt(220) }
+    private static var closeSize: CGFloat { UILooks.pt(14) }
+    private static var iconSize: CGFloat { UILooks.pt(13) }
+    private static var padding: CGFloat { UILooks.pt(10) }
+    private static var pillHeight: CGFloat { UILooks.pt(28) }
+    private static var pillRadius: CGFloat { UILooks.pt(7) }
+    private static var gap: CGFloat { UILooks.pt(4) }
 
     public var style = Style(activeFill: .controlBackgroundColor, hoverFill: .quaternaryLabelColor,
                              text: .labelColor, secondaryText: .secondaryLabelColor) {
@@ -78,6 +79,8 @@ public final class TabBarView: NSView {
     var onSelect: ((Int) -> Void)?
     var onClose: ((Int) -> Void)?
     var onRename: ((Int) -> Void)?
+    /// A right click on a tab, at a point of the bar (the tab is selected first).
+    var onContextMenu: ((Int, NSPoint) -> Void)?
     /// A tab dropped at a new position (index in the order).
     var onMove: ((Int, Int) -> Void)?
 
@@ -99,7 +102,7 @@ public final class TabBarView: NSView {
     // MARK: Layout
 
     private func font(_ item: Item) -> NSFont {
-        .systemFont(ofSize: 12, weight: item.active ? .medium : .regular)
+        UILooks.font(12, weight: item.active ? .medium : .regular)
     }
 
     /// Every tab at full width: the strip asks for this much.
@@ -226,6 +229,13 @@ public final class TabBarView: NSView {
         }
         onSelect?(item.id)
         dragging = (item.id, point.x, 0)
+    }
+
+    public override func rightMouseDown(with event: NSEvent) {
+        let point = convert(event.locationInWindow, from: nil)
+        guard let i = index(at: point) else { return }
+        onSelect?(items[i].id)
+        onContextMenu?(items[i].id, point)
     }
 
     public override func mouseDragged(with event: NSEvent) {

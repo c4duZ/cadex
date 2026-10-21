@@ -3,12 +3,17 @@
 //! cursor, glyphs, underline and strikethrough, thin cursors, the
 //! scrollbar. Glyphs go in runs of one face and color per row; a cell the
 //! font cannot draw alone (emoji, a combined grapheme) goes through a
-//! DirectWrite layout, which picks a fallback font.
+//! DirectWrite layout, which picks a fallback font. With a minimum contrast
+//! each glyph's color is checked against its cell's background
+//! (min_contrast.zig); with ligatures on, runs of symbols the font joins
+//! are drawn as one (ligatures.zig).
 
 const std = @import("std");
 const gfx = @import("gfx");
 const cadex = @import("cadex");
 const font_mod = @import("font.zig");
+const min_contrast = @import("min_contrast.zig");
+const ligatures = @import("ligatures.zig");
 
 const Font = font_mod.Font;
 const Color = gfx.Color;
@@ -32,6 +37,8 @@ pub const Overlay = struct {
     /// The IME's text in progress, at the cursor.
     composition: []const u8 = "",
     show_scrollbar: bool = false,
+    /// terminal.minimumContrast: a WCAG ratio; 1 leaves the colors alone.
+    min_contrast: f32 = 1,
 };
 
 const max_run = 512;
@@ -81,7 +88,16 @@ pub fn draw(p: *gfx.Painter, font: *Font, frame: *const cadex.cadex_terminal_fra
     }
     if (cursor_at) |at| if (block) p.fill(cell_rect(ox, oy, m, at % cols, at / cols, 1), cursor_color);
 
-    drawGlyphs(p, font, frame, cells, text, ox, oy, cursor_at, block);
+    var paint: Paint = .{
+        .frame = frame,
+        .cells = cells,
+        .text = text,
+        .cursor_at = cursor_at,
+        .block = block,
+        .selection = overlay.selection,
+        .cache = if (overlay.min_contrast > 1) .{ .minimum = overlay.min_contrast } else null,
+    };
+    drawGlyphs(p, font, &paint, ox, oy);
     drawLines(p, font, cells, ox, oy, cols, frame.background);
     if (overlay.link) |link| underlineLink(p, m, link, ox, oy, cols, Color.rgb(frame.foreground));
 
@@ -138,49 +154,108 @@ fn flush(p: *gfx.Painter, font: *Font, run: *Run, baseline_y: f32) void {
     run.len = 0;
 }
 
-fn drawGlyphs(p: *gfx.Painter, font: *Font, frame: *const cadex.cadex_terminal_frame, cells: []const cadex.cadex_terminal_cell, text: []const u8, ox: f32, oy: f32, cursor_at: ?usize, block: bool) void {
+/// What every glyph of the frame needs to pick its color.
+const Paint = struct {
+    frame: *const cadex.cadex_terminal_frame,
+    cells: []const cadex.cadex_terminal_cell,
+    text: []const u8,
+    cursor_at: ?usize,
+    block: bool,
+    selection: ?u32,
+    cache: ?min_contrast.Cache,
+
+    /// The cell's background as the eye sees it, for the minimum contrast:
+    /// the cursor under a block cursor, the selection, the cell's own, or
+    /// the default (QuadBuilder.swift).
+    fn background(self: *const Paint, i: usize) u32 {
+        const cell = self.cells[i];
+        const f = self.frame;
+        if (self.block and self.cursor_at == i) return if (f.has_cursor_color) f.cursor_color else f.foreground;
+        if (cell.flags & cadex.CADEX_CELL_SELECTED != 0) return self.selection orelse f.background;
+        if (cell.flags & cadex.CADEX_CELL_HAS_BACKGROUND != 0) return cell.bg;
+        return f.background;
+    }
+
+    fn color(self: *Paint, i: usize) Color {
+        const cell = self.cells[i];
+        // Under a block cursor the glyph takes the background, to stay readable.
+        const fg = if (self.block and self.cursor_at == i) self.frame.background else cell.fg;
+        const faint = cell.flags & cadex.CADEX_CELL_FAINT != 0;
+        var out = Color.rgb(fg);
+        if (self.cache) |*cache| {
+            const rgb = cache.get(fg, self.background(i));
+            out = .{ .r = rgb[0], .g = rgb[1], .b = rgb[2] };
+        }
+        return out.alpha(if (faint) 0.5 else 1);
+    }
+};
+
+fn drawGlyphs(p: *gfx.Painter, font: *Font, paint: *Paint, ox: f32, oy: f32) void {
     const m = font.metrics;
-    const cols: usize = frame.cols;
+    const cols: usize = paint.frame.cols;
     var run: Run = .{};
-    for (0..frame.rows) |row| {
+    for (0..paint.frame.rows) |row| {
         const top = oy + @as(f32, @floatFromInt(row)) * m.cell_height;
         const baseline = top + m.baseline;
-        for (0..cols) |col| {
+        var col: usize = 0;
+        while (col < cols) {
             const i = row * cols + col;
-            const cell = cells[i];
-            if (cell.text_len == 0 or cell.flags & cadex.CADEX_CELL_SPACER != 0) continue;
-            const bytes = text[cell.text_offset..][0..cell.text_len];
-            // Under a block cursor the glyph takes the background, to stay readable.
-            const fg = if (block and cursor_at == i) frame.background else cell.fg;
-            const faint = cell.flags & cadex.CADEX_CELL_FAINT != 0;
-            const color = Color.rgb(fg).alpha(if (faint) 0.5 else 1);
-            const style = styleOf(cell.flags);
-            const wide = cell.flags & cadex.CADEX_CELL_WIDE != 0;
             const x = ox + @as(f32, @floatFromInt(col)) * m.cell_width;
-            const span: f32 = if (wide) 2 else 1;
-            const single = singleCodepoint(bytes);
-            const g = if (single) |cp| font.glyph(cp, style) else null;
-            const continues = run.len > 0 and run.style == style and colorEql(run.color, color) and
-                @abs(run.x + sum(run.advances[0..run.len]) - x) < 0.5 and run.len < max_run;
-            if (g == null) {
-                flush(p, font, &run, baseline);
-                // The layout picks a font that has it and centers it in its cells.
-                const spec: gfx.FontSpec = .{ .family = font.family, .size = m.em, .weight = if (style == .bold or style == .bold_italic) .bold else .regular, .italic = style == .italic or style == .bold_italic };
-                p.text(bytes, spec, .{ .x = x, .y = top, .w = m.cell_width * span, .h = m.cell_height }, color, .{ .@"align" = .center, .ellipsis = false });
+            if (font.joins_letters) if (ligature(p, font, paint, &run, i, (row + 1) * cols, x, baseline)) |n| {
+                col += n;
                 continue;
-            }
-            if (!continues) {
-                flush(p, font, &run, baseline);
-                run.x = x;
-                run.style = style;
-                run.color = color;
-            }
-            run.glyphs[run.len] = g.?;
-            run.advances[run.len] = m.cell_width * span;
-            run.len += 1;
+            };
+            col += 1;
+            drawCell(p, font, paint, &run, i, x, top, baseline);
         }
         flush(p, font, &run, baseline);
     }
+}
+
+fn drawCell(p: *gfx.Painter, font: *Font, paint: *Paint, run: *Run, i: usize, x: f32, top: f32, baseline: f32) void {
+    const m = font.metrics;
+    const cell = paint.cells[i];
+    if (cell.text_len == 0 or cell.flags & cadex.CADEX_CELL_SPACER != 0) return;
+    const bytes = paint.text[cell.text_offset..][0..cell.text_len];
+    const color = paint.color(i);
+    const style = styleOf(cell.flags);
+    const span: f32 = if (cell.flags & cadex.CADEX_CELL_WIDE != 0) 2 else 1;
+    const g = if (singleCodepoint(bytes)) |cp| font.glyph(cp, style) else null;
+    if (g == null) {
+        flush(p, font, run, baseline);
+        // The layout picks a font that has it and centers it in its cells.
+        const spec: gfx.FontSpec = .{ .family = font.family, .size = m.em, .weight = if (style == .bold or style == .bold_italic) .bold else .regular, .italic = style == .italic or style == .bold_italic };
+        p.text(bytes, spec, .{ .x = x, .y = top, .w = m.cell_width * span, .h = m.cell_height }, color, .{ .@"align" = .center, .ellipsis = false });
+        return;
+    }
+    // Inside its cell, a glyph starts half the letter spacing in.
+    const gx = x + m.glyph_offset;
+    const continues = run.len > 0 and run.style == style and colorEql(run.color, color) and
+        @abs(run.x + sum(run.advances[0..run.len]) - gx) < 0.5 and run.len < max_run;
+    if (!continues) {
+        flush(p, font, run, baseline);
+        run.x = gx;
+        run.style = style;
+        run.color = color;
+    }
+    run.glyphs[run.len] = g.?;
+    run.advances[run.len] = m.cell_width * span;
+    run.len += 1;
+}
+
+/// A run of symbols from cell `i` the font joins, drawn shaped over its
+/// cells; how many cells it took, or null to draw cell by cell.
+fn ligature(p: *gfx.Painter, font: *Font, paint: *Paint, run: *Run, i: usize, row_end: usize, x: f32, baseline: f32) ?usize {
+    const symbols = ligatures.symbolRun(paint.cells, paint.text, i, row_end, paint.cursor_at) orelse return null;
+    const style = styleOf(paint.cells[i].flags);
+    const joined = font.ligature(symbols.text(), style) orelse return null;
+    flush(p, font, run, baseline);
+    var advances: [32]f32 = undefined;
+    const glyphs = joined.slice();
+    const each = ligatures.advance(symbols.count, glyphs.len, font.metrics.cell_width);
+    for (advances[0..glyphs.len]) |*a| a.* = each;
+    p.glyphRun(font.faces[@intFromEnum(style)], font.metrics.em, glyphs, advances[0..glyphs.len], .{ .x = x + font.metrics.glyph_offset, .y = baseline }, paint.color(i));
+    return symbols.count;
 }
 
 fn sum(values: []const f32) f32 {

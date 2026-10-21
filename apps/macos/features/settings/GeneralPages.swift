@@ -6,8 +6,9 @@ import Strings
 /// what it changes (owner, 2026-10-20: the old texts were badly put).
 @MainActor
 enum GeneralPages {
-    /// askRelaunch: the language changed; it counts when Cadex reopens.
-    static func general(_ store: SettingsStore, askRelaunch: @escaping (String) -> Void) -> NSView {
+    /// askRelaunch: the language (or, with nil, the interface's size or
+    /// font) changed; it counts when Cadex reopens.
+    static func general(_ store: SettingsStore, askRelaunch: @escaping (String?) -> Void) -> NSView {
         let g = store.settings.general
         let e = store.settings.explorer
         return SettingsPage.make(
@@ -48,14 +49,14 @@ enum GeneralPages {
                                  T("Files and folders whose names start with a dot, dimmed. ⇧⌘. switches too.",
                                    "Arquivos e pastas cujo nome começa com ponto, apagados. O ⇧⌘. também troca."),
                                  control: SettingsPage.toggle(e.showHidden) { on in store.update { $0.explorer.showHidden = on } }),
-            ] + KeepAwakeRows.make(store))
+            ] + InterfaceRows.make(store, askRelaunch: askRelaunch) + KeepAwakeRows.make(store))
     }
 
     static func about() -> NSView {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? T("development", "desenvolvimento")
         let credits = NSTextField(wrappingLabelWithString: T(
-            "A terminal-centered development workspace, native, with its own code under the MIT license. The terminal model is libghostty-vt; the icons are Phosphor; the themes come from tweakcn and from the official palettes of open themes. Full credits in the NOTICE file.",
-            "Workspace de desenvolvimento centrado no terminal, nativo, com código próprio sob a licença MIT. O modelo do terminal é a libghostty-vt; os ícones são Phosphor; os temas vêm do tweakcn e das paletas oficiais de temas abertos. Créditos completos no arquivo NOTICE."))
+            "A terminal-centered development workspace, native, with its own code under the MIT license. The terminal model is libghostty-vt; the icons are Phosphor; the themes come from the official palettes of open themes, tweakcn and the base16 schemes of tinted-theming. Full credits in the NOTICE file.",
+            "Workspace de desenvolvimento centrado no terminal, nativo, com código próprio sob a licença MIT. O modelo do terminal é a libghostty-vt; os ícones são Phosphor; os temas vêm das paletas oficiais de temas abertos, do tweakcn e dos esquemas base16 do tinted-theming. Créditos completos no arquivo NOTICE."))
         credits.textColor = SettingsColors.secondaryText
         return SettingsPage.make(title: "Cadex", subtitle: T("Version", "Versão") + " \(version)", rows: [credits])
     }

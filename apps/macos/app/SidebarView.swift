@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Icons
 import Menus
 import Strings
@@ -46,7 +47,7 @@ final class SidebarView: NSView {
             bar.leadingAnchor.constraint(equalTo: leadingAnchor),
             bar.trailingAnchor.constraint(equalTo: trailingAnchor),
             bar.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -6),
-            bar.heightAnchor.constraint(equalToConstant: 26),
+            bar.heightAnchor.constraint(equalToConstant: UILooks.rowHeight(26)),
         ])
         show(.files)
     }
@@ -79,7 +80,7 @@ private final class SidebarTab: NSView {
     private let label: NSTextField
 
     init(icon: Icon, title: String, tip: String) {
-        self.icon = NSImageView(image: icon.image(size: 13))
+        self.icon = NSImageView(image: icon.image(size: UILooks.pt(13)))
         label = NSTextField(labelWithString: title)
         super.init(frame: .zero)
         wantsLayer = true
@@ -87,7 +88,7 @@ private final class SidebarTab: NSView {
         HoverTip.attach(tip, to: self)
         setAccessibilityRole(.button)
         setAccessibilityLabel(title)
-        label.font = .systemFont(ofSize: 12, weight: .medium)
+        label.font = UILooks.font(12, weight: .medium)
         let content = NSStackView(views: [self.icon, label])
         content.spacing = 5
         content.translatesAutoresizingMaskIntoConstraints = false

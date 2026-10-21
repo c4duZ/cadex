@@ -96,6 +96,28 @@ let exitCode = await Checks.run([
         let all = ThemeLibrary.all()
         expect(all.families.first?.id == id && all.problems.count == 1 && all.problems[0].hasPrefix("broken.json"))
     }),
+    ("high contrast puts every text at 7:1 and borders at 3:1", {
+        for family in ThemeCatalog.all() {
+            for theme in [family.dark, family.light].compactMap({ $0 }) {
+                let ui = theme.withHighContrast().interface
+                for bg in [ui.panel, ui.chrome, ui.field] {
+                    expect(ui.text.contrast(with: bg) >= 6.95 && ui.secondaryText.contrast(with: bg) >= 6.95, "\(family.id)")
+                }
+                expect(ui.panelBorder.contrast(with: ui.panel) >= 2.95, "\(family.id) border")
+                let terminal = theme.withHighContrast().terminal
+                expect(terminal.foreground.contrast(with: terminal.background) >= 6.95, family.id)
+            }
+        }
+    }),
+    ("text over a light accent turns dark, over a dark one light", {
+        var light = Theme.cadexDark.interface
+        light.tabActive = RGB(0xF5E663)
+        expect(light.textOnTabActive == RGB(0x000000))
+        var dark = Theme.cadexLight.interface
+        dark.tabActive = RGB(0x1A237E)
+        expect(dark.textOnTabActive == RGB(0xFFFFFF))
+        expect(Theme.cadexDark.interface.textOnTabActive == Theme.cadexDark.interface.text)
+    }),
     ("colors print as #RRGGBB", {
         expect(RGB(0x252525).hex == "#252525")
         expect(RGB(0x1FFFFFF).value == 0xFFFFFF)

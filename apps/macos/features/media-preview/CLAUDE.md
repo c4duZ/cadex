@@ -17,6 +17,7 @@
 - Comandos em `MediaCommands.swift`: media.zoom-in (⌘=), media.zoom-out (⌘-), media.zoom-fit (⌘0),
   media.zoom-actual (⌥⌘0; ⌘1 é das abas).
 - Spec: `docs/spec/media-preview.md`. Status: plano 5, fase D pronta.
+- Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
 ## Como validar
 - `make macos-test` passa: tipo de arquivo -> visualizador; imagem abre dentro e não abre fora do

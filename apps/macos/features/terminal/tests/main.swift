@@ -130,6 +130,23 @@ let exitCode = await Checks.run([
         expect(retina.width >= standard.width * 2 - 1 && retina.width <= standard.width * 2 + 1, "\(retina) vs \(standard)")
         expect(retina.baseline < retina.height)
     }),
+    ("line height and letter spacing widen the cell, the glyph centered", {
+        let plain = TerminalFont(scale: 2).metrics
+        let spaced = TerminalFont(scale: 2, typesetting: Typesetting(lineHeight: 1.5, letterSpacing: 1, features: ["calt", "-liga", "zero"])).metrics
+        expect(spaced.height >= plain.height * 3 / 2 && spaced.height <= plain.height * 3 / 2 + 1, "\(spaced) vs \(plain)")
+        expect(spaced.width == plain.width + 2 && spaced.glyphOffset == 1, "\(spaced)")
+        expect(spaced.baseline > plain.baseline && spaced.baseline < spaced.height)
+    }),
+    ("SF Mono sets symbols letter by letter: no ligature", {
+        guard let device = MTLCreateSystemDefaultDevice(),
+              let atlas = GlyphAtlas(device: device, font: TerminalFont(scale: 2, typesetting: Typesetting(features: ["calt", "liga"]))) else { return }
+        expect(!atlas.joins("->", bold: false, italic: false))
+        expect(atlas.font.typesetting.joinsLetters)
+    }),
+    ("the shaders compile, minimum contrast included", {
+        guard let device = MTLCreateSystemDefaultDevice() else { return }
+        expect((try? device.makeLibrary(source: TerminalShaders.source, options: nil)) != nil)
+    }),
     ("GPU quad layout matches the shader", {
         expect(MemoryLayout<QuadInstance>.stride == QuadInstance.shaderStride, "stride \(MemoryLayout<QuadInstance>.stride)")
     }),

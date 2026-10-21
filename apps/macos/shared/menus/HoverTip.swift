@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 
 /// The name of an icon button, shown under it 0.2 s after the pointer
 /// arrives, in the menus' colors. The system tooltip took about a second
@@ -132,7 +133,7 @@ final class HoverTipPanel: NSPanel {
         box.layer?.cornerRadius = 6
         box.layer?.cornerCurve = .continuous
         box.layer?.borderWidth = 1
-        label.font = .systemFont(ofSize: 11)
+        label.font = UILooks.font(11)
         label.translatesAutoresizingMaskIntoConstraints = false
         box.addSubview(label)
         NSLayoutConstraint.activate([

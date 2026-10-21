@@ -1,8 +1,10 @@
 //! The Themes page of the settings, as the Mac's ThemesPage.swift: the mode,
-//! Mica, the user's themes (open the folder, import), a search with an
-//! All/Dark/Light filter, the files of the folder that could not be read,
-//! and the themes as a list that draws only the rows in view. Picking one
-//! changes the theme at once (docs/spec/themes.md).
+//! the themes for dark and light, the accent, Mica, the user's themes (open
+//! the folder, import), a search with an All/Dark/Light filter, the files
+//! of the folder that could not be read, the themes as a list that draws
+//! only the rows in view, and Reading (high contrast, panes without focus).
+//! Picking one changes the theme at once (docs/spec/themes.md); with the
+//! Dark or Light filter, only that mode's (plan 15, phase B).
 //!
 //! The list of every theme is read when the page shows and freed when it
 //! does not (releaseWhenHidden, after each frame): hundreds of themes must
@@ -16,6 +18,8 @@ const themes = @import("themes");
 const App = @import("app.zig").App;
 const page = @import("settings_page.zig");
 const commands = @import("theme_commands.zig");
+const theme_looks = @import("theme_looks.zig");
+const looks = @import("looks.zig");
 
 const t = strings.t;
 
@@ -29,7 +33,8 @@ var query_scroll: ui.text_field.Scroll = .{};
 var filter: []const u8 = "all";
 var placeholder_buf: [64]u8 = undefined;
 
-pub fn draw(app: *App, area_in: gfx.Rect) void {
+/// The page in a scrolled area (settings_page.scrolled); the height it took.
+pub fn draw(app: *App, area_in: gfx.Rect, visible_h: f32) f32 {
     const u = &app.u;
     var area = area_in;
     var s = app.settings.current;
@@ -37,6 +42,9 @@ pub fn draw(app: *App, area_in: gfx.Rect) void {
         s.appearance.mode = v;
         page.commit(app, s);
     }
+    theme_looks.pairRow(app, &area);
+    theme_looks.accentRow(app, &area);
+    s = app.settings.current;
     if (ui.widgets.toggle(u, ui.id("settings.vibrancy", 0), page.row(u, &area, t("Mica behind the frame", "Mica atrás da moldura"), t("The frame shows the desktop, blurred; panels stay solid.", "A moldura mostra a área de trabalho, desfocada; os painéis seguem sólidos.")), s.appearance.vibrancy)) |v| {
         s.appearance.vibrancy = v;
         page.commit(app, s);
@@ -46,7 +54,10 @@ pub fn draw(app: *App, area_in: gfx.Rect) void {
     const l = loaded(app);
     toolbar(app, &area, l.families.len);
     problems(u, &area, l.problems);
-    themeList(app, area, l.families);
+    // The list keeps most of the window's height; the page scrolls past it.
+    themeList(app, area.takeTop(@max(visible_h - u.px(120), u.px(220))), l.families);
+    theme_looks.readingRows(app, &area);
+    return area_in.h - area.h;
 }
 
 /// Opening the themes folder and importing a theme file.
@@ -87,19 +98,20 @@ fn problems(u: *ui.Ui, area: *gfx.Rect, lines: []const []const u8) void {
 
 fn themeList(app: *App, area: gfx.Rect, families: []const themes.Family) void {
     const u = &app.u;
-    var s = app.settings.current;
+    const a = app.settings.current.appearance;
+    const dark = looks.inUseDark(a);
+    const light = looks.inUseLight(a);
     const view = ui.list.begin(u, ui.id("settings.themes", 0), area, shown.items.len, u.px(44), &page.scroll);
     defer ui.list.end(u);
     for (view.first..view.last) |i| {
         const f = families[shown.items[i]];
         const r = view.row(i).inset(0, u.px(1));
-        if (ui.widgets.button(u, ui.child(ui.id("settings.theme", 0), i), r, "", .{ .selected = std.mem.eql(u8, f.id, s.appearance.theme) })) {
-            s.appearance.theme = f.id;
-            page.commit(app, s);
-        }
+        const selected = std.mem.eql(u8, f.id, dark) or std.mem.eql(u8, f.id, light);
+        // The pick saves the settings, whose strings `dark` and `light` were.
+        if (ui.widgets.button(u, ui.child(ui.id("settings.theme", 0), i), r, "", .{ .selected = selected })) return pick(app, f.id);
         var inner = r.inset(u.px(10), u.px(4));
         swatches(u, inner.takeRight(u.px(5 * 18)), f.theme(app.themes.current.dark));
-        u.painter.text(f.name, u.style.ui(), inner.takeTop(inner.h * 0.5), u.style.text, .{});
+        u.painter.text(f.name, u.style.ui(), inner.takeTop(inner.h * 0.5), if (selected) u.style.tab_active_text else u.style.text, .{});
         u.painter.text(f.description, u.style.small(), inner, u.style.secondary_text, .{});
     }
 }
@@ -112,6 +124,13 @@ fn swatches(u: *ui.Ui, area: gfx.Rect, th: themes.Theme) void {
         u.painter.fillRounded(dot, u.px(3), gfx.Color.rgb(color));
         _ = sw.takeRight(u.px(4));
     }
+}
+
+/// With the Dark or Light filter, the theme for that mode only; otherwise
+/// one theme for both.
+fn pick(app: *App, id: []const u8) void {
+    const slot: commands.Slot = if (std.mem.eql(u8, filter, "dark")) .dark else if (std.mem.eql(u8, filter, "light")) .light else .both;
+    commands.setTheme(app, id, slot);
 }
 
 fn loaded(app: *App) *themes.library.List {

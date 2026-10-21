@@ -66,7 +66,7 @@ pub fn metaText(buf: []u8, commit: log.Commit, date: []const u8) []const u8 {
 
 fn files(doc: *HistoryDocument, u: *ui.Ui, area: Rect) void {
     const d = doc.details orelse return;
-    const row_h = u.px(20);
+    const row_h = u.rowPx(20);
     const base = ui.child(ui.id("history.files", 0), @intFromPtr(doc));
     const list = ui.list.begin(u, base, area, d.files.len, row_h, &doc.view.files_scroll);
     defer ui.list.end(u);

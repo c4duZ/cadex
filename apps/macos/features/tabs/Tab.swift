@@ -49,6 +49,8 @@ final class Tab {
     /// Set by "Renomear aba"; stays when the folder changes. Nil shows the
     /// focused pane's folder or document (docs/spec/tabs.md).
     var customTitle: String?
+    /// A work color's name ("red"): tab.set-color, plan 15, phase D.
+    var color: String?
     private(set) var panes: [Int: Pane] = [:]
     private(set) var focusedPane: Int
     let layout = PaneLayoutView(frame: .zero)
@@ -81,7 +83,7 @@ final class Tab {
             if let document = panes[id]?.document { return .document(identity: document.identity) }
             return .pane(folder: panes[id]?.terminal?.currentDirectory ?? home)
         }
-        return .terminal(title: customTitle, layout: layout, focus: tree.leaves.firstIndex(of: focusedPane) ?? 0)
+        return .terminal(title: customTitle, layout: layout, focus: tree.leaves.firstIndex(of: focusedPane) ?? 0, color: color)
     }
 
     var view: NSView { layout }

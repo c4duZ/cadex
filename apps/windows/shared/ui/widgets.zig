@@ -43,7 +43,7 @@ pub fn button(ui: *Ui, widget: Id, r: Rect, title: []const u8, options: ButtonOp
     if (ui.isHot(widget) and options.enabled) ui.cursor = .arrow;
     const fg = options.color orelse if (options.primary)
         (if (style.accent.luminance() > 0.5) Color.black else Color.white)
-    else if (options.enabled) style.text else style.secondary_text.alpha(0.6);
+    else if (!options.enabled) style.secondary_text.alpha(0.6) else if (options.selected) style.tab_active_text else style.text;
     var content = r.inset(ui.px(8), 0);
     if (options.icon) |cp| {
         const size = ui.px(options.icon_size);

@@ -124,7 +124,7 @@ pub const Bar = struct {
         }
         var title = tabs.title(t, arena);
         if (t.unsaved()) title = std.fmt.allocPrint(arena, "● {s}", .{title}) catch title;
-        u.painter.text(title, style.ui(), content, if (is_active) style.text else style.secondary_text, .{});
+        u.painter.text(title, style.ui(), content, if (is_active) style.tab_active_text else style.secondary_text, .{});
     }
 };
 

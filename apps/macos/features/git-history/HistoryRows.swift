@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Icons
 import Menus
 import Strings
@@ -45,7 +46,7 @@ final class HistoryRows: NSObject, NSTableViewDataSource, NSTableViewDelegate {
             table.addTableColumn(column)
         }
         table.columnAutoresizingStyle = .firstColumnOnlyAutoresizingStyle
-        table.rowHeight = 22
+        table.rowHeight = UILooks.rowHeight(22)
         table.intercellSpacing = NSSize(width: 0, height: 0)
         table.style = .plain
         table.usesAlternatingRowBackgroundColors = false
@@ -96,7 +97,7 @@ final class HistoryRows: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         cell.identifier = .init(id)
         let label = NSTextField(labelWithString: "")
         label.lineBreakMode = .byTruncatingTail
-        label.font = id == "sha" ? .monospacedSystemFont(ofSize: 11, weight: .regular) : .systemFont(ofSize: 12)
+        label.font = id == "sha" ? UILooks.monospaced(11) : UILooks.font(12)
         if id != "subject" { label.textColor = .secondaryLabelColor }
         label.translatesAutoresizingMaskIntoConstraints = false
         cell.addSubview(label)
@@ -118,13 +119,13 @@ final class HistoryRows: NSObject, NSTableViewDataSource, NSTableViewDelegate {
             let name = current ? String(ref.dropFirst(8)) : ref.hasPrefix("tag: ") ? String(ref.dropFirst(5)) : ref
             let color: NSColor = ref.hasPrefix("tag: ") ? .systemYellow : name.contains("/") ? .systemGray : .systemBlue
             text.append(NSAttributedString(string: " \(name) ", attributes: [
-                .font: NSFont.systemFont(ofSize: 11, weight: current ? .bold : .medium),
+                .font: UILooks.font(11, weight: current ? .bold : .medium),
                 .foregroundColor: color,
                 .backgroundColor: color.withAlphaComponent(0.15),
             ]))
             text.append(NSAttributedString(string: " "))
         }
-        text.append(NSAttributedString(string: commit.subject, attributes: [.font: NSFont.systemFont(ofSize: 12)]))
+        text.append(NSAttributedString(string: commit.subject, attributes: [.font: UILooks.font(12)]))
         return text
     }
 

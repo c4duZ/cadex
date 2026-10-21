@@ -36,6 +36,7 @@
 - Outras features entram na paleta implementando `PaletteSource` (a busca: ⌘P e ⌘⇧F; as abas e os
   spaces no `@`).
 - Spec em `../../../../docs/spec/command-palette.md`. Status: registro, menu e paleta prontos.
+- Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
 ## Como validar
 - `make macos-test` passa.

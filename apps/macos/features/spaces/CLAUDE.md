@@ -20,6 +20,7 @@
   spaces, o ativo e a pasta do workspace. Arquivo ilegível vai para spaces.bad-<data>.json e o app
   começa do zero. CADEX_SPACES_FILE aponta para outro arquivo: conferir o app em teste não pode
   apagar os spaces do dono.
+- Cada space guarda a cor de trabalho (`color` no spaces.json; `activeColor`/`setActiveColor`).
 - Comandos em `SpacesCommands.swift`: space.switch (⇧⌘S, lista na paleta), space.new (⌃⌘N),
   space.rename, space.close, space.next (⌃⌘→), space.previous (⌃⌘←). O nome na barra de título roda
   space.switch.

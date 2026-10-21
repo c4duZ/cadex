@@ -33,6 +33,8 @@ final class GlyphAtlas {
     let padY: Int
 
     private var glyphs: [Key: AtlasGlyph] = [:]
+    /// Runs of symbols already shaped: whether the font joins them.
+    private var joined: [Key: Bool] = [:]
     private var shelfX = 0
     private var shelfY = 0
     private var shelfHeight = 0
@@ -71,13 +73,9 @@ final class GlyphAtlas {
             else { return false }
             // White text: monochrome glyphs become a coverage mask in alpha;
             // color fonts (emoji) ignore the fill and keep their colors.
-            let attributes: [NSAttributedString.Key: Any] = [
-                NSAttributedString.Key(kCTFontAttributeName as String): font.font(bold: key.bold, italic: key.italic),
-                NSAttributedString.Key(kCTForegroundColorAttributeName as String): CGColor(gray: 1, alpha: 1),
-            ]
-            let line = CTLineCreateWithAttributedString(NSAttributedString(string: key.text, attributes: attributes))
+            let line = Self.line(key.text, font: font.font(bold: key.bold, italic: key.italic), kern: m.width - m.advance)
             // CoreGraphics' origin is bottom-left: baseline measured from the bottom.
-            context.textPosition = CGPoint(x: padX, y: height - padY - m.baseline)
+            context.textPosition = CGPoint(x: padX + m.glyphOffset, y: height - padY - m.baseline)
             CTLineDraw(line, context)
             return true
         }
@@ -87,6 +85,37 @@ final class GlyphAtlas {
             region: MTLRegionMake2D(slot.x, slot.y, width, height), mipmapLevel: 0,
             withBytes: pixels, bytesPerRow: width * 4)
         return AtlasGlyph(x: slot.x, y: slot.y, width: width, height: height, isColor: Self.hasColor(pixels))
+    }
+
+    /// White text in `font`, each letter spaced to the cell's width (the
+    /// letter spacing), so a run of several cells keeps them in their cells.
+    private static func line(_ text: String, font: CTFont, kern: Int) -> CTLine {
+        var attributes: [NSAttributedString.Key: Any] = [
+            NSAttributedString.Key(kCTFontAttributeName as String): font,
+            NSAttributedString.Key(kCTForegroundColorAttributeName as String): CGColor(gray: 1, alpha: 1),
+        ]
+        if kern != 0 { attributes[NSAttributedString.Key(kCTKernAttributeName as String)] = kern }
+        return CTLineCreateWithAttributedString(NSAttributedString(string: text, attributes: attributes))
+    }
+
+    /// Whether the font sets `text` (a run of symbols, one per cell) with
+    /// other glyphs than letter by letter: a ligature or contextual
+    /// alternates, as Fira Code and JetBrains Mono do for "->" and "!=".
+    func joins(_ text: String, bold: Bool, italic: Bool) -> Bool {
+        let key = Key(text: text, bold: bold, italic: italic, cells: text.utf16.count)
+        if let known = joined[key] { return known }
+        let ctFont = font.font(bold: bold, italic: italic)
+        var shaped: [CGGlyph] = []
+        for run in (CTLineGetGlyphRuns(Self.line(text, font: ctFont, kern: 0)) as? [CTRun]) ?? [] {
+            var glyphs = [CGGlyph](repeating: 0, count: CTRunGetGlyphCount(run))
+            CTRunGetGlyphs(run, CFRange(location: 0, length: 0), &glyphs)
+            shaped += glyphs
+        }
+        var plain = [CGGlyph](repeating: 0, count: text.utf16.count)
+        CTFontGetGlyphsForCharacters(ctFont, Array(text.utf16), &plain, plain.count)
+        let result = shaped != plain
+        joined[key] = result
+        return result
     }
 
     /// Shelf packing: fill rows left to right. When the texture is full,

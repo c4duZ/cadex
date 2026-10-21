@@ -33,12 +33,12 @@ macos-test: core relink
 		&& swift build --product SourceControlTests \
 		&& swift build --product GitHistoryTests && swift build --product SpacesTests \
 		&& swift build --product MenusTests && swift build --product PowerTests && swift build --product StringsTests \
-		&& swift build --product UpdatesTests
+		&& swift build --product UpdatesTests && swift build --product UILooksTests
 	@cd apps/macos && .build/debug/TerminalTests && .build/debug/CommandPaletteTests && .build/debug/ShortcutsTests \
 		&& .build/debug/TabsTests && .build/debug/StatusBarTests && .build/debug/IconsTests \
 		&& .build/debug/ThemesTests && .build/debug/SettingsTests \
 		&& .build/debug/ExplorerTests && .build/debug/SearchTests && .build/debug/EditorTests && .build/debug/MarkdownTests && .build/debug/MediaPreviewTests && .build/debug/PreviewTests && .build/debug/SourceControlTests && .build/debug/GitHistoryTests \
-		&& .build/debug/SpacesTests && .build/debug/MenusTests && .build/debug/PowerTests && .build/debug/StringsTests && .build/debug/UpdatesTests
+		&& .build/debug/SpacesTests && .build/debug/MenusTests && .build/debug/PowerTests && .build/debug/StringsTests && .build/debug/UpdatesTests && .build/debug/UILooksTests
 
 # Debug build of the app; `make run` opens it.
 app: core relink

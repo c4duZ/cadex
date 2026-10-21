@@ -36,10 +36,28 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
                 category: .app, defaultShortcut: "cmd+,", action: .run { [weak self] in self?.show() })
     }
 
-    public func show(section: Int = 0) {
+    /// The settings' pages in ⌘K, so every option is a command away (ADR
+    /// 0005, plan 15), and terminal.toggle-ligatures.
+    public var pageCommands: [Command] {
+        [Command(id: "settings.open-terminal", title: T("Open Terminal Settings", "Abrir configurações do terminal"),
+                 keywords: ["font", "fonte", "line height", "altura da linha", "spacing", "espaçamento", "contrast", "contraste", "cursor"],
+                 category: .app, action: .run { [weak self] in self?.show(section: 1) }),
+         Command(id: "settings.open-themes", title: T("Open Theme Settings", "Abrir configurações de temas"),
+                 keywords: ["theme", "tema", "accent", "destaque", "contrast", "contraste", "background", "fundo"],
+                 category: .app, action: .run { [weak self] in self?.show(section: 2) }),
+         Command(id: "terminal.toggle-ligatures", title: T("Turn Ligatures On or Off", "Ligar ou desligar as ligaduras"),
+                 keywords: ["ligatures", "ligaduras", "fira code", "font", "fonte"], category: .terminal,
+                 action: .run { [store] in
+                     store.update { $0.terminal.fontFeatures = TerminalTextRows.setLigatures(
+                         !TerminalTextRows.ligatures.allSatisfy($0.terminal.fontFeatures.contains), in: $0.terminal.fontFeatures) }
+                 })]
+    }
+
+    /// `section` shows that page; nil keeps the one open (⌘,).
+    public func show(section: Int? = nil) {
         let window = self.window ?? makeWindow()
         self.window = window
-        if !window.isVisible { select(section) }
+        if let section { select(section) } else if !window.isVisible { select(0) }
         window.makeKeyAndOrderFront(nil)
     }
 
@@ -132,13 +150,15 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         }
     }
 
-    /// The language counts when Cadex opens: offer to reopen now, asked in
-    /// the language just chosen.
-    private func askRelaunch(_ language: String) {
-        guard let window else { return }
-        let pt = language == "pt"
+    /// The language, the interface's size and font count when Cadex opens:
+    /// offer to reopen now, asked in the language just chosen (nil: the
+    /// size or font changed, asked in the current one).
+    private func askRelaunch(_ language: String?) {
+        guard let window, window.attachedSheet == nil else { return }
+        let pt = (language ?? store.settings.general.language) == "pt"
         let alert = NSAlert()
-        alert.messageText = pt ? "Reabrir o Cadex em português?" : "Reopen Cadex in English?"
+        alert.messageText = language == nil ? (pt ? "Reabrir o Cadex com a nova interface?" : "Reopen Cadex with the new interface?")
+            : pt ? "Reabrir o Cadex em português?" : "Reopen Cadex in English?"
         alert.informativeText = pt ? "As abas e os spaces voltam como estão." : "Your tabs and spaces come back as they are."
         alert.addButton(withTitle: pt ? "Reabrir agora" : "Reopen now")
         alert.addButton(withTitle: pt ? "Depois" : "Later")

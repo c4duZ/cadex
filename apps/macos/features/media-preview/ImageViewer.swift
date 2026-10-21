@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Strings
 
 /// An image in a tab (docs/spec/media-preview.md): fitted to the tab when
@@ -25,7 +26,7 @@ final class ImageViewer: NSView {
         imageView.imageScaling = .scaleNone
         imageView.animates = true
         scroll.documentView = imageView
-        info.font = .systemFont(ofSize: 11)
+        info.font = UILooks.font(11)
         info.textColor = .secondaryLabelColor
         info.alignment = .center
         for v in [scroll, info] as [NSView] {

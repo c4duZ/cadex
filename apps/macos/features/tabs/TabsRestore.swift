@@ -25,8 +25,10 @@ extension TabsController {
         var ids: [Int?] = []
         for item in snapshot.items {
             switch item {
-            case let .terminal(title, layout, focus):
-                ids.append(restoreTab(title: title, layout: layout, focus: focus, makeDocument: makeDocument))
+            case let .terminal(title, layout, focus, color):
+                let id = restoreTab(title: title, layout: layout, focus: focus, makeDocument: makeDocument)
+                if let id { tabs[id]?.color = color }
+                ids.append(id)
             case let .document(identity):
                 ids.append(restoreTab(title: nil, layout: .document(identity: identity), focus: 0, makeDocument: makeDocument))
             }

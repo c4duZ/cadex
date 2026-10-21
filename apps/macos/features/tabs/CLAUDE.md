@@ -32,7 +32,7 @@
 - Divisões: `PaneTree.swift` é a árvore pura (dividir, remover dando o espaço ao irmão, retângulos,
   ordem de leitura, vizinho por direção, proporção por caminho), testada. `PaneLayoutView.swift`
   posiciona os painéis pela árvore, divisor de 1 pt que pega o mouse a 6 pt e engrossa sob o
-  ponteiro (tamanho mínimo de painel), e escurece os painéis sem foco. `balanced()` na árvore deixa
+  ponteiro (tamanho mínimo de painel), e escurece os painéis sem foco (PaneLooks.unfocusedDim, tabs.unfocusedDim, que o app define). `balanced()` na árvore deixa
   do mesmo tamanho os painéis numa direção, a cada divisão e fechamento. `Tab.swift` guarda árvore, painéis e foco.
 - `TabsSnapshot.swift` e `TabsRestore.swift`: o estado das abas para salvar (ordem, árvore de cada
   aba com a pasta de cada terminal ou a identidade de cada documento e as proporções, nome dado,
@@ -43,12 +43,15 @@
   `TabsClosing.swift`: fechar painel, aba e janela, e `shouldClose` para vários conjuntos de abas
   (uma pergunta só ao sair, contando os spaces escondidos); `hasRunningProgram` para o manter acordado.
 - `TabSource.swift`: as abas como lista da paleta (TabCommands.source, o `@` do app).
+- Clique direito numa aba: seleciona e mostra `contextMenu` (as entradas vêm do app, por comandos).
+  Cada aba guarda a cor de trabalho (`color`, no snapshot), `activeColor`/`setActiveColor`.
 - `TabCommands.swift`: tab.new, tab.rename, tab.select-1…9, tab.previous-used,
   tab.least-recently-used, pane.close, pane.split-right, pane.split-down, pane.next, pane.previous,
   pane.focus-left/right/up/down. `CloseConfirmation.swift`: a pergunta ao fechar painel, aba ou
   janela com programa rodando.
 - Spec em `../../../../docs/spec/tabs.md`. Status: abas, divisões e documentos em painéis prontos
   (plano 8).
+- Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
 ## Como validar
 - `make macos-test` passa: `TabList` e `PaneTree` têm os testes das regras; o snapshot ida e volta

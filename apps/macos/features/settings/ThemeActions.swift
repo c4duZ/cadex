@@ -17,7 +17,23 @@ public enum ThemeCommands {
         return [
             Command(id: "theme.choose", title: T("Choose Theme", "Escolher tema"),
                     keywords: ["theme", "tema", "cores", "colors", "palette", "aparência", "appearance"], category: .view,
-                    action: .run { palette.open(ThemeSource(store: store)) }),
+                    action: .run { palette.open(ThemeSource(store: store, slot: .both)) }),
+            Command(id: "theme.choose-dark", title: T("Choose Theme for Dark Mode", "Escolher tema do modo escuro"),
+                    keywords: ["theme", "tema", "dark", "escuro", "noite"], category: .view,
+                    action: .run { palette.open(ThemeSource(store: store, slot: .dark)) }),
+            Command(id: "theme.choose-light", title: T("Choose Theme for Light Mode", "Escolher tema do modo claro"),
+                    keywords: ["theme", "tema", "light", "claro", "dia"], category: .view,
+                    action: .run { palette.open(ThemeSource(store: store, slot: .light)) }),
+            Command(id: "theme.accent", title: T("Choose Accent Color", "Escolher cor de destaque"),
+                    keywords: ["accent", "destaque", "cor", "color", "highlight"], category: .view,
+                    action: .run { AccentPicker.show(store) }),
+            Command(id: "theme.accent-reset", title: T("Use the Theme's Accent Color", "Usar a cor de destaque do tema"),
+                    keywords: ["accent", "destaque", "cor", "color", "reset"], category: .view,
+                    action: .run { store.update { $0.appearance.accent = "" } },
+                    unavailableReason: { store.settings.appearance.accent.isEmpty ? T("Already the theme's", "Já é a do tema") : nil }),
+            Command(id: "theme.toggle-high-contrast", title: T("Turn High Contrast On or Off", "Ligar ou desligar o alto contraste"),
+                    keywords: ["contrast", "contraste", "accessibility", "acessibilidade", "legibilidade"], category: .view,
+                    action: .run { store.update { $0.appearance.highContrast.toggle() } }),
             Command(id: "theme.import", title: T("Import Theme…", "Importar tema…"),
                     keywords: ["theme", "tema", "itermcolors", "ghostty", "base16", "import"], category: .view,
                     action: .run { ThemeActions.importTheme(store: store) }),
@@ -58,23 +74,39 @@ enum ThemeActions {
     }
 }
 
-/// ⌘K's list of themes (theme.choose): every theme, the one in use first.
+/// ⌘K's list of themes (theme.choose, -dark, -light): every theme, the
+/// one in use first; for one mode, only the themes with that version.
 @MainActor
 final class ThemeSource: PaletteSource {
+    enum Slot { case both, dark, light }
     private let store: SettingsStore
+    private let slot: Slot
     private let families: [ThemeFamily]
 
-    init(store: SettingsStore) {
+    init(store: SettingsStore, slot: Slot) {
         self.store = store
-        families = ThemeLibrary.all().families
+        self.slot = slot
+        let all = ThemeLibrary.all().families
+        switch slot {
+        case .both: families = all
+        case .dark: families = all.filter { $0.dark != nil }
+        case .light: families = all.filter { $0.light != nil }
+        }
     }
 
-    var placeholder: String { T("Choose a theme", "Escolher um tema") }
+    var placeholder: String {
+        switch slot {
+        case .both: T("Choose a theme", "Escolher um tema")
+        case .dark: T("Choose the theme for dark mode", "Escolher o tema do modo escuro")
+        case .light: T("Choose the theme for light mode", "Escolher o tema do modo claro")
+        }
+    }
     var emptyText: String { T("No themes found", "Nenhum tema encontrado") }
     var icon: Icon { .palette }
 
     func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
-        let current = store.settings.appearance.theme
+        let inUse = ThemeLooksRows.inUse(store.settings.appearance)
+        let current = slot == .light ? inUse.light : inUse.dark
         let found = families.filter { family in
             query.isEmpty || [family.name, family.description].contains {
                 $0.range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil
@@ -96,7 +128,13 @@ final class ThemeSource: PaletteSource {
     }
 
     func choose(_ item: PaletteItem) {
-        store.update { $0.appearance.theme = item.id }
+        store.update {
+            switch slot {
+            case .both: ($0.appearance.theme, $0.appearance.darkTheme, $0.appearance.lightTheme) = (item.id, "", "")
+            case .dark: $0.appearance.darkTheme = item.id
+            case .light: $0.appearance.lightTheme = item.id
+            }
+        }
     }
 
     func stop() {}

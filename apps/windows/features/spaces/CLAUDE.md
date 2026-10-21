@@ -13,6 +13,8 @@
   select, step, rename, removeActive; a lista da paleta; os comandos space.switch, space.new,
   space.rename, space.close, space.next e space.previous com os atalhos do Mac, e Ctrl+Shift+Alt+PgDn
   e PgUp para próximo e anterior no Windows, onde a regra do ⌘ juntava com ir ao painel ao lado).
+- Cada space guarda o nome da sua cor de trabalho (`setActiveColor`, `activeColor`; space.set-color
+  do app, plano 15), salva como "color" no space quando existe.
 - O snapshot de cada space é o da feature tabs (`../tabs/snapshot.zig`). Host: criar as abas de um
   space, refazer um documento, a pasta do workspace, mostrar, agendar o salvamento, abrir a lista,
   pedir um nome.

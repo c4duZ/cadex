@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import AVKit
 import CCadex
 import Quartz
@@ -121,7 +122,7 @@ public final class MediaDocument: TabDocument {
 
     private func show(message: String) {
         let label = NSTextField(labelWithString: message)
-        label.font = .systemFont(ofSize: 14)
+        label.font = UILooks.font(14)
         label.textColor = .secondaryLabelColor
         let action = ButtonAction { [weak self] in
             guard let self else { return }

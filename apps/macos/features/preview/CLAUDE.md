@@ -19,6 +19,7 @@
   preview.forward. A oferta "Abrir no preview" é da feature terminal (`../terminal/TerminalPreviewOffer.swift`)
   e chega aqui pelo app (`onOpenPreview` das abas).
 - Spec: `docs/spec/preview.md`. Status: plano 5, fase E pronta.
+- Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
 ## Como validar
 - `make macos-test` passa: sem esquema, http para servidor local e https para o resto, e só esquemas web, mesma aba para o mesmo

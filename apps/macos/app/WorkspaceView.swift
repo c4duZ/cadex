@@ -5,12 +5,13 @@ import StatusBar
 import Tabs
 import Terminal
 import Themes
+import UILooks
 
 /// The window's content, laid out like Terax: the title bar with the tabs,
 /// a collapsible sidebar and the terminal area as rounded panels, and the
 /// status bar at the bottom (docs/plans/3-window-and-theme.md, fase A).
 final class WorkspaceView: NSView {
-    static let sidebarWidth: CGFloat = 240
+    static var sidebarWidth: CGFloat { UILooks.pt(240) }
     /// Space around and between the panels, as in Terax.
     static let gap: CGFloat = 6
 
@@ -113,6 +114,11 @@ final class WorkspaceView: NSView {
         ])
     }
 
+    /// The active tab's or space's color, over the accent (app/WorkColors.swift).
+    var workColor: WorkColor? {
+        didSet { if workColor != oldValue { apply(ThemeStore.shared.current) } }
+    }
+
     /// The background image and vibrancy from settings.
     func setLooks(image: WindowBackdrop.Image?, vibrancy: Bool) {
         backgroundImage = image
@@ -131,7 +137,11 @@ final class WorkspaceView: NSView {
             backgroundAlpha: picture == nil ? 1 : 1 - (backgroundImage?.opacity ?? 0))
         if TerminalAppearance.current != colors { TerminalAppearance.current = colors }
         EditorLooks.refresh()
-        let ui = theme.interface
+        var ui = theme.interface
+        if let workColor {
+            ui.accent = workColor.rgb(in: theme)
+            ui.tabActive = ui.chrome.mixed(ui.accent, 0.22)
+        }
         // The chrome color goes on the window, not on this view's layer: a
         // filled layer here covered the close, minimize and zoom buttons in
         // the transparent title bar (2026-10-19). With vibrancy the window is
@@ -145,11 +155,13 @@ final class WorkspaceView: NSView {
         contentPanel.setColors(fill: theme.terminal.background.nsColor, border: ui.panelBorder.nsColor)
         explorer.style = .init(text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor, accent: ui.accent.nsColor)
         titleBar.setColors(text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, field: ui.field.nsColor, accent: ui.accent.nsColor)
-        sidebar.setColors(text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, fill: ui.tabActive.nsColor, accent: ui.accent.nsColor)
+        // Over the active fill: black or white if a user's accent made it too
+        // close to the text (plan 15, phase B).
+        sidebar.setColors(text: ui.textOnTabActive.nsColor, secondary: ui.secondaryText.nsColor, fill: ui.tabActive.nsColor, accent: ui.accent.nsColor)
         statusBar.style = .init(text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor)
         let style = TabBarView.Style(
             activeFill: ui.tabActive.nsColor, hoverFill: ui.tabActive.color(alpha: 0.5),
-            text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor, accent: ui.accent.nsColor)
+            text: ui.textOnTabActive.nsColor, secondaryText: ui.secondaryText.nsColor, accent: ui.accent.nsColor)
         tabBarStyle = style
         titleBar.tabBar?.style = style
     }

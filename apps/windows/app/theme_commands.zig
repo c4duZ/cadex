@@ -1,7 +1,9 @@
 //! The theme commands (ADR 0005), the Mac's ids and titles
 //! (apps/macos/features/settings/ThemeActions.swift): choosing a theme in
-//! ⌘K, the mode, importing a theme file and opening the user's themes
-//! folder. The themes page's buttons run the same code.
+//! ⌘K (for both modes, or for dark or light only), the mode, importing a
+//! theme file and opening the user's themes folder. The themes page's
+//! buttons run the same code; the accent and high contrast are in
+//! theme_looks.zig.
 
 const std = @import("std");
 const w = @import("win32");
@@ -11,6 +13,7 @@ const palette = @import("command-palette");
 const themes = @import("themes");
 const App = @import("app.zig").App;
 const page = @import("settings_page.zig");
+const looks = @import("looks.zig");
 
 const t = strings.t;
 const c = w.c;
@@ -21,6 +24,8 @@ pub fn register(app: *App) void {
     app_ref = app;
     const r = &app.registry;
     r.add(.{ .id = "theme.choose", .title = t("Choose Theme", "Escolher tema"), .keywords = &.{ "theme", "tema", "cores", "colors", "palette", "aparência", "appearance" }, .run = choose });
+    r.add(.{ .id = "theme.choose-dark", .title = t("Choose Theme for Dark Mode", "Escolher tema do modo escuro"), .keywords = &.{ "theme", "tema", "dark", "escuro", "noite" }, .run = chooseDark });
+    r.add(.{ .id = "theme.choose-light", .title = t("Choose Theme for Light Mode", "Escolher tema do modo claro"), .keywords = &.{ "theme", "tema", "light", "claro", "dia" }, .run = chooseLight });
     r.add(.{ .id = "theme.import", .title = t("Import Theme…", "Importar tema…"), .keywords = &.{ "theme", "tema", "itermcolors", "ghostty", "base16", "import" }, .run = importRun });
     r.add(.{ .id = "theme.open-folder", .title = t("Open Themes Folder", "Abrir a pasta de temas"), .keywords = &.{ "theme", "tema", "pasta", "folder", "explorer" }, .run = openFolderRun });
     r.add(.{ .id = "theme.mode-system", .title = t("Theme Follows the System", "Tema segue o sistema"), .keywords = &.{ "theme", "tema", "mode", "modo", "system", "sistema", "auto" }, .run = modeSystem, .available = notSystem });
@@ -59,11 +64,29 @@ fn notLight(_: ?*anyopaque) bool {
     return modeIsNot("light");
 }
 
-/// Uses the theme `id` (settings.json's appearance.theme).
-pub fn setTheme(app: *App, id: []const u8) void {
+/// Which theme a pick sets: one for both modes (and the per-mode ones
+/// cleared), or the dark or light mode's only.
+pub const Slot = enum { both, dark, light };
+
+/// Uses the theme `id` (settings.json's appearance.theme, darkTheme or lightTheme).
+pub fn setTheme(app: *App, id: []const u8, slot: Slot) void {
     var s = app.settings.current;
-    s.appearance.theme = id;
+    switch (slot) {
+        .both => {
+            s.appearance.theme = id;
+            s.appearance.dark_theme = "";
+            s.appearance.light_theme = "";
+        },
+        .dark => s.appearance.dark_theme = id,
+        .light => s.appearance.light_theme = id,
+    }
     page.commit(app, s);
+}
+
+/// The theme the list marks for a slot: the dark one for both.
+pub fn inUse(app: *App, slot: Slot) []const u8 {
+    const a = app.settings.current.appearance;
+    return if (slot == .light) looks.inUseLight(a) else looks.inUseDark(a);
 }
 
 // ---- ⌘K's list of themes ----
@@ -71,12 +94,24 @@ pub fn setTheme(app: *App, id: []const u8) void {
 /// Every theme, read when the list opens and freed when the palette
 /// closes (releaseWhenClosed), as the Mac's ThemeSource.
 var listed: ?themes.library.List = null;
-var source_tag: u8 = 0;
+var slots = [_]Slot{ .both, .dark, .light };
 
 fn choose(_: ?*anyopaque) void {
+    openList(&slots[0], t("Choose a theme", "Escolher um tema"));
+}
+
+fn chooseDark(_: ?*anyopaque) void {
+    openList(&slots[1], t("Choose the theme for dark mode", "Escolher o tema do modo escuro"));
+}
+
+fn chooseLight(_: ?*anyopaque) void {
+    openList(&slots[2], t("Choose the theme for light mode", "Escolher o tema do modo claro"));
+}
+
+fn openList(slot: *Slot, placeholder: []const u8) void {
     app_ref.palette.toggle(&app_ref.u, .{
-        .context = &source_tag,
-        .placeholder = t("Choose a theme", "Escolher um tema"),
+        .context = slot,
+        .placeholder = placeholder,
         .empty_text = t("No themes found", "Nenhum tema encontrado"),
         .icon = icons.phosphor.palette,
         .search = search,
@@ -85,13 +120,15 @@ fn choose(_: ?*anyopaque) void {
 }
 
 /// The name or the description holds the query (case does not matter);
-/// the theme in use first.
-fn search(_: *anyopaque, arena: std.mem.Allocator, query: []const u8, out: *std.ArrayList(palette.Item)) ?[]const u8 {
+/// the theme in use first; for one mode, only themes with that version.
+fn search(context: *anyopaque, arena: std.mem.Allocator, query: []const u8, out: *std.ArrayList(palette.Item)) ?[]const u8 {
+    const slot: *Slot = @ptrCast(@alignCast(context));
     if (listed == null) listed = themes.library.all(app_ref.gpa, app_ref.themes.folder);
-    const current = app_ref.settings.current.appearance.theme;
+    const current = inUse(app_ref, slot.*);
     var count: usize = 0;
     for ([_]bool{ true, false }) |in_use_pass| {
         for (listed.?.families) |f| {
+            if ((slot.* == .dark and f.dark == null) or (slot.* == .light and f.light == null)) continue;
             if (std.mem.eql(u8, f.id, current) != in_use_pass or !matches(f, query)) continue;
             out.append(arena, .{ .id = f.id, .title = f.name, .detail = if (in_use_pass) t("in use", "em uso") else versions(f), .icon = icons.phosphor.palette }) catch {};
             count += 1;
@@ -110,15 +147,18 @@ pub fn versions(f: themes.Family) []const u8 {
     return if (f.dark != null) t("dark", "escuro") else t("light", "claro");
 }
 
-fn chooseItem(_: *anyopaque, id: []const u8, _: palette.How) void {
-    setTheme(app_ref, id);
+fn chooseItem(context: *anyopaque, id: []const u8, _: palette.How) void {
+    const slot: *Slot = @ptrCast(@alignCast(context));
+    setTheme(app_ref, id, slot.*);
 }
 
 /// After the palette's frame: the list goes once the palette shows
 /// something else or nothing (the chosen id is the palette's own copy).
 pub fn releaseWhenClosed(app: *App) void {
     if (listed == null) return;
-    if (app.palette.opened) |o| if (o.context == @as(*anyopaque, &source_tag)) return;
+    if (app.palette.opened) |o| for (&slots) |*slot| {
+        if (o.context == @as(*anyopaque, slot)) return;
+    };
     listed.?.deinit();
     listed = null;
 }
@@ -148,7 +188,7 @@ pub fn importTheme(app: *App) void {
     // The same name again replaces the file in use: read it anew.
     _ = app.themes.reload();
     @import("themes_page.zig").invalidate(app);
-    setTheme(app, id);
+    setTheme(app, id, .both);
 }
 
 /// Reads `path` as a theme and saves it in the folder; its id, owned.

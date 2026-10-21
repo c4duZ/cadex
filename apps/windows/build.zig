@@ -11,6 +11,8 @@ const system_libs = [_][]const u8{
     "d3d11",  "dxgi",    "d2d1",   "dwrite",  "d3dcompiler_47", "dcomp", "windowscodecs",
     // SHCreateMemStream and SHCreateStreamOnFileEx for the pages the app serves (shared/webview).
     "shlwapi",
+    // ChooseColorW, the accent color's dialog (plan 15).
+    "comdlg32",
 };
 
 pub fn build(b: *std.Build) void {

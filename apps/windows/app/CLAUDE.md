@@ -27,16 +27,33 @@
   registro dos comandos das features; `openers`, as aberturas do "+" e do topo da paleta (traduzidas por `translateOpeners` ao abrir), iguais às
   do Mac (`../../macos/app/PaletteWiring.swift`): comando novo que abre algo entra nas duas.
   `settings_page.zig`: a janela de configurações (as abas do Mac: General, Terminal, Themes,
-  Shortcuts, About; título de seção, linha com explicação, escolha), com as páginas em
-  `settings_rows.zig` (General com idioma, arquivos, árvore e manter acordado; Terminal) e
-  `themes_page.zig` (modo, Mica, "Seus temas" com abrir pasta e importar, busca por nome ou
-  descrição, filtro Todos/Escuros/Claros, os arquivos da pasta que não deu para ler e a lista
-  virtualizada; a lista de todos os temas só existe enquanto a página está na tela).
-  `theme_commands.zig`: theme.choose (a lista de temas no ⌘K, lida ao abrir e liberada quando a
-  paleta fecha), theme.import (o seletor de arquivo do Windows, salva na pasta de temas e usa),
-  theme.open-folder e theme.mode-system/dark/light (some quando já é o modo), como o Mac.
-  `relaunch.zig`: "Reabrir agora" depois de trocar o idioma, que fecha como de costume e o `main.zig`
-  abre o Cadex.exe de novo; o idioma é lido no começo do App.init (ADR 0015).
+  Shortcuts, About; título de seção, linha com explicação, escolha), as páginas roladas quando
+  passam da janela, e settings.open-terminal, settings.open-themes e terminal.toggle-ligatures. As
+  páginas em `settings_rows.zig` (General com idioma, arquivos, árvore, interface e manter
+  acordado; Terminal com a leitura), `interface_rows.zig` (zoom, densidade, fonte e tamanho da
+  interface, com "Reabrir agora"), `terminal_text_rows.zig` (contraste mínimo, altura da linha,
+  espaçamento, ligaduras e recursos da fonte) e `themes_page.zig` (modo, escuro e claro, destaque,
+  Mica, "Seus temas" com abrir pasta e importar, busca por nome ou descrição, filtro
+  Todos/Escuros/Claros que também diz qual modo a escolha muda, os arquivos da pasta que não deu
+  para ler, a lista virtualizada e Leitura; a lista de todos os temas só existe enquanto a página
+  está na tela).
+  `theme_commands.zig`: theme.choose, theme.choose-dark e theme.choose-light (a lista de temas no
+  ⌘K, lida ao abrir e liberada quando a paleta fecha; para um modo, só os temas com essa versão),
+  theme.import (o seletor de arquivo do Windows, salva na pasta de temas e usa), theme.open-folder
+  e theme.mode-system/dark/light (some quando já é o modo), como o Mac.
+  `theme_looks.zig` (plano 15, fases B e C): theme.accent (o seletor de cor do Windows no lugar do
+  poço de cor do Mac), theme.accent-reset (some sem destaque próprio), theme.toggle-high-contrast e
+  as linhas da página de temas (escuro e claro com "Usar um tema só", destaque, Leitura).
+  `looks.zig`: o que as configurações do plano 15 viram na janela: a Choice do Store de temas, o
+  Style do quadro (cor de trabalho sobre o destaque, zoom, densidade e fonte da interface lidos uma
+  vez ao abrir), a fonte do terminal com a tipografia (todo quem pede a fonte passa por
+  `terminalFont`), o contraste mínimo (7 no alto contraste), sem Mica no alto contraste e o
+  escurecimento dos painéis sem foco.
+  `work_colors.zig`: space.set-color e tab.set-color (Sem cor e as seis do Mac no ⌘K); a cor é o
+  ANSI do tema em uso; a da aba ativa, senão a do space, vira o destaque da janela.
+  `relaunch.zig`: "Reabrir agora" depois de trocar o idioma ou o zoom, a densidade e a fonte da
+  interface, que fecha como de costume e o `main.zig` abre o Cadex.exe de novo; o idioma é lido no
+  começo do App.init (ADR 0015).
 - `sidebar.zig`: o painel lateral (Arquivos ou Git, abas embaixo, view.toggle-sidebar) e o
   workspace seguindo o terminal com foco até a raiz do repositório (que vai também à busca, ao
   markdown e ao git).

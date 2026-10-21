@@ -38,6 +38,8 @@
 - Comandos em `commands.zig`: editor.save (⌘S, só com edição ligada), editor.fold-all,
   editor.unfold-all.
 - Spec: `../../../../docs/spec/editor.md`.
+- O código fica no `window_scale` do Style: o zoom da interface (plano 15) não muda a fonte do
+  editor, que é a do terminal.
 
 ## Como validar
 - `make windows-app` compila os testes (buffer, histórico, quebra, dobras, linhas na tela, bytes

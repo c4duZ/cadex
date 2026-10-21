@@ -186,7 +186,7 @@ pub const View = struct {
     fn measure(self: *View, u: *Ui, area: gfx.Rect) void {
         const look = &appearance.current;
         var m = &self.metrics;
-        m.spec = look.font(u.style.scale);
+        m.spec = look.font(u.style.window_scale);
         if (m.spec.size != self.measured_size) {
             self.measured_size = m.spec.size;
             // Ten cells measured at once: the width of one, without rounding.

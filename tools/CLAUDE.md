@@ -30,7 +30,8 @@
   (ADR 0005, os mesmos ids nos dois). Nome de interface que não é comando vai em NOT_COMMANDS.
 - `perf/run.py` (`make perf`, depois do `make package`): o orçamento de peso do Cadex no Mac. Abre o
   app de release em instâncias de teste (CADEX_BACKGROUND=1, spaces num arquivo temporário) com o
-  "shell" `perf/loadshell.sh` rodando uma carga, e mede memória (footprint) e CPU (tempo de CPU
+  "shell" `perf/loadshell.sh` rodando uma carga (e, nos cenários do plano 15, settings.json próprio:
+  trocar de tema 300 vezes depois de aquecer, e o jorro com contraste mínimo e ligaduras), e mede memória (footprint) e CPU (tempo de CPU
   gasto na janela, não o %cpu do ps); os índices pela API C com `perf/index_probe.c`. Os limites
   ficam no topo do script, cada um com o que foi medido ao lado.
 - `webview2_sdk.py`: baixa o pacote Microsoft.Web.WebView2 (versão e sha256 fixados no script) e

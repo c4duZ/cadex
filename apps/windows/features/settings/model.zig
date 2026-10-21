@@ -4,6 +4,7 @@
 //! becomes a problem for the log; the rest of the file still counts.
 
 const std = @import("std");
+const Reader = @import("reader.zig").Reader;
 
 pub const Settings = struct {
     general: struct {
@@ -26,15 +27,45 @@ pub const Settings = struct {
         history_lines: u32 = 10_000,
         option_as_meta: bool = false,
         copy_on_select: bool = false,
+        /// The WCAG ratio text keeps against its background; 1 is off (plan 15).
+        minimum_contrast: f64 = 1,
+        /// Line height as a multiple of the font's.
+        line_height: f64 = 1,
+        /// Extra space between letters, in points.
+        letter_spacing: f64 = 0,
+        /// OpenType tags: "calt" and "liga" join ligatures, "-" turns one off.
+        font_features: []const []const u8 = &.{},
     } = .{},
     appearance: struct {
         theme: []const u8 = "caffeine",
+        /// Another theme for the light or dark mode; empty uses `theme`
+        /// (plan 15, phase B).
+        light_theme: []const u8 = "",
+        dark_theme: []const u8 = "",
+        /// "#RRGGBB" in place of the theme's accent; empty keeps the theme's.
+        accent: []const u8 = "",
         /// "system", "dark" or "light".
         mode: []const u8 = "system",
         vibrancy: bool = false,
         background_image: ?[]const u8 = null,
         background_opacity: f64 = 0.5,
         background_blur: f64 = 0,
+        /// Text at 7:1, stronger borders, no transparency; also on with a
+        /// contrast theme of Windows (plan 15, phase C).
+        high_contrast: bool = false,
+        /// The interface's zoom, density and font, apart from the
+        /// terminal's; they count when Cadex opens (plan 15, phase D).
+        ui_zoom: f64 = 1,
+        /// "normal" or "compact".
+        density: []const u8 = "normal",
+        /// Empty: the system's (Segoe UI Variable).
+        ui_font: []const u8 = "",
+        ui_font_size: f64 = 13,
+    } = .{},
+    tabs: struct {
+        /// The shade over the panes without focus, 0 to 0.6 (0.26 measured
+        /// against dark themes on 2026-10-19, on the Mac).
+        unfocused_dim: f64 = 0.26,
     } = .{},
     explorer: struct {
         show_hidden: bool = true,
@@ -67,6 +98,32 @@ const markdown_openings = [_][]const u8{ "source", "rendered" };
 const file_openings = [_][]const u8{ "beside", "tab" };
 const languages = [_][]const u8{ "en", "pt" };
 const keep_awake_modes = [_][]const u8{ "always", "running" };
+const densities = [_][]const u8{ "normal", "compact" };
+pub const contrast_range = [2]f64{ 1, 21 };
+pub const line_heights = [2]f64{ 0.8, 2.0 };
+pub const letter_spacings = [2]f64{ -1, 4 };
+pub const dim_range = [2]f64{ 0, 0.6 };
+pub const zoom_range = [2]f64{ 0.8, 1.5 };
+pub const ui_font_sizes = [2]f64{ 9, 24 };
+
+fn clamp(v: f64, range: [2]f64) f64 {
+    return std.math.clamp(v, range[0], range[1]);
+}
+
+/// "calt", "ss01", "-liga": a 4-letter OpenType tag, "-" to turn it off.
+pub fn isFontFeature(text: []const u8) bool {
+    const tag = if (text.len > 0 and text[0] == '-') text[1..] else text;
+    if (tag.len != 4) return false;
+    for (tag) |ch| if (!std.ascii.isAlphanumeric(ch)) return false;
+    return true;
+}
+
+/// "#RRGGBB", the accent's only form.
+pub fn isHexColor(text: []const u8) bool {
+    if (text.len != 7 or text[0] != '#') return false;
+    for (text[1..]) |ch| if (!std.ascii.isHex(ch)) return false;
+    return true;
+}
 
 /// Reading the file: the settings live in `arena` (strings point into it).
 pub const Read = struct {
@@ -101,6 +158,7 @@ pub fn read(arena: std.mem.Allocator, data: []const u8) Read {
         if (r.number(t, "terminal", "historyLines")) |v| s.terminal.history_lines = @intFromFloat(std.math.clamp(v, history_range[0], history_range[1]));
         if (r.boolean(t, "terminal", "optionAsMeta")) |v| s.terminal.option_as_meta = v;
         if (r.boolean(t, "terminal", "copyOnSelect")) |v| s.terminal.copy_on_select = v;
+        readTerminalText(&r, t, &s);
     }
     if (r.section(root, "appearance")) |a| {
         if (r.string(a, "appearance", "theme")) |v| s.appearance.theme = v;
@@ -109,6 +167,10 @@ pub fn read(arena: std.mem.Allocator, data: []const u8) Read {
         if (a.get("backgroundImage")) |v| s.appearance.background_image = if (v == .string) v.string else null;
         if (r.number(a, "appearance", "backgroundOpacity")) |v| s.appearance.background_opacity = std.math.clamp(v, 0, 1);
         if (r.number(a, "appearance", "backgroundBlur")) |v| s.appearance.background_blur = std.math.clamp(v, 0, 50);
+        readLooks(&r, a, &s);
+    }
+    if (r.section(root, "tabs")) |t| {
+        if (r.number(t, "tabs", "unfocusedDim")) |v| s.tabs.unfocused_dim = clamp(v, dim_range);
     }
     if (r.section(root, "explorer")) |e| {
         if (r.boolean(e, "explorer", "showHidden")) |v| s.explorer.show_hidden = v;
@@ -138,61 +200,33 @@ pub fn read(arena: std.mem.Allocator, data: []const u8) Read {
     return .{ .settings = s, .problems = r.problems.items };
 }
 
-const Reader = struct {
-    arena: std.mem.Allocator,
-    problems: std.ArrayList([]const u8) = .empty,
-
-    fn note(self: *Reader, comptime fmt: []const u8, args: anytype) void {
-        const text = std.fmt.allocPrint(self.arena, fmt, args) catch return;
-        self.problems.append(self.arena, text) catch {};
+/// terminal.minimumContrast, lineHeight, letterSpacing and fontFeatures (plan 15).
+fn readTerminalText(r: *Reader, t: std.json.ObjectMap, s: *Settings) void {
+    if (r.number(t, "terminal", "minimumContrast")) |v| s.terminal.minimum_contrast = clamp(v, contrast_range);
+    if (r.number(t, "terminal", "lineHeight")) |v| s.terminal.line_height = clamp(v, line_heights);
+    if (r.number(t, "terminal", "letterSpacing")) |v| s.terminal.letter_spacing = clamp(v, letter_spacings);
+    if (r.strings(t, "terminal", "fontFeatures")) |list| {
+        var kept: std.ArrayList([]const u8) = .empty;
+        for (list) |f| if (isFontFeature(f)) kept.append(r.arena, f) catch {};
+        if (kept.items.len != list.len) r.note("terminal.fontFeatures: cada item é uma etiqueta OpenType de 4 letras, como \"calt\" ou \"-liga\"", .{});
+        s.terminal.font_features = kept.items;
     }
+}
 
-    fn section(self: *Reader, root: std.json.ObjectMap, key: []const u8) ?std.json.ObjectMap {
-        const value = root.get(key) orelse return null;
-        if (value != .object) {
-            self.note("{s}: esperava uma seção", .{key});
-            return null;
-        }
-        return value.object;
+/// The appearance keys of plan 15: themes per mode, accent, high contrast,
+/// the interface's zoom, density and font.
+fn readLooks(r: *Reader, a: std.json.ObjectMap, s: *Settings) void {
+    if (r.string(a, "appearance", "lightTheme")) |v| s.appearance.light_theme = v;
+    if (r.string(a, "appearance", "darkTheme")) |v| s.appearance.dark_theme = v;
+    if (r.string(a, "appearance", "accent")) |v| {
+        if (v.len == 0 or isHexColor(v)) s.appearance.accent = v else r.note("appearance.accent: \"{s}\" não é uma cor #RRGGBB", .{v});
     }
-
-    fn string(self: *Reader, object: std.json.ObjectMap, group: []const u8, key: []const u8) ?[]const u8 {
-        const value = object.get(key) orelse return null;
-        if (value != .string) {
-            self.note("{s}.{s}: esperava um texto", .{ group, key });
-            return null;
-        }
-        return value.string;
-    }
-
-    fn boolean(self: *Reader, object: std.json.ObjectMap, group: []const u8, key: []const u8) ?bool {
-        const value = object.get(key) orelse return null;
-        if (value != .bool) {
-            self.note("{s}.{s}: esperava true ou false", .{ group, key });
-            return null;
-        }
-        return value.bool;
-    }
-
-    fn number(self: *Reader, object: std.json.ObjectMap, group: []const u8, key: []const u8) ?f64 {
-        const value = object.get(key) orelse return null;
-        return switch (value) {
-            .integer => |i| @floatFromInt(i),
-            .float => |f| f,
-            else => {
-                self.note("{s}.{s}: esperava um número", .{ group, key });
-                return null;
-            },
-        };
-    }
-
-    fn choice(self: *Reader, object: std.json.ObjectMap, group: []const u8, key: []const u8, options: []const []const u8) ?[]const u8 {
-        const text = self.string(object, group, key) orelse return null;
-        for (options) |o| if (std.mem.eql(u8, o, text)) return o;
-        self.note("{s}.{s}: \"{s}\" não é uma das opções", .{ group, key, text });
-        return null;
-    }
-};
+    if (r.boolean(a, "appearance", "highContrast")) |v| s.appearance.high_contrast = v;
+    if (r.number(a, "appearance", "uiZoom")) |v| s.appearance.ui_zoom = clamp(v, zoom_range);
+    if (r.choice(a, "appearance", "density", &densities)) |v| s.appearance.density = v;
+    if (r.string(a, "appearance", "uiFont")) |v| s.appearance.ui_font = v;
+    if (r.number(a, "appearance", "uiFontSize")) |v| s.appearance.ui_font_size = clamp(v, ui_font_sizes);
+}
 
 /// The file's text, in the Mac's layout (sorted keys, two spaces).
 pub fn write(gpa: std.mem.Allocator, s: Settings) ![]u8 {
@@ -202,11 +236,19 @@ pub fn write(gpa: std.mem.Allocator, s: Settings) ![]u8 {
     try j.beginObject();
     try j.objectField("appearance");
     try j.beginObject();
+    try field(&j, "accent", s.appearance.accent);
     try field(&j, "backgroundBlur", s.appearance.background_blur);
     try field(&j, "backgroundImage", s.appearance.background_image);
     try field(&j, "backgroundOpacity", s.appearance.background_opacity);
+    try field(&j, "darkTheme", s.appearance.dark_theme);
+    try field(&j, "density", s.appearance.density);
+    try field(&j, "highContrast", s.appearance.high_contrast);
+    try field(&j, "lightTheme", s.appearance.light_theme);
     try field(&j, "mode", s.appearance.mode);
     try field(&j, "theme", s.appearance.theme);
+    try field(&j, "uiFont", s.appearance.ui_font);
+    try field(&j, "uiFontSize", s.appearance.ui_font_size);
+    try field(&j, "uiZoom", s.appearance.ui_zoom);
     try field(&j, "vibrancy", s.appearance.vibrancy);
     try j.endObject();
     try j.objectField("explorer");
@@ -236,14 +278,22 @@ pub fn write(gpa: std.mem.Allocator, s: Settings) ![]u8 {
     try j.beginObject();
     for (s.shortcuts) |sc| try field(&j, sc.keys, sc.id);
     try j.endObject();
+    try j.objectField("tabs");
+    try j.beginObject();
+    try field(&j, "unfocusedDim", s.tabs.unfocused_dim);
+    try j.endObject();
     try j.objectField("terminal");
     try j.beginObject();
     try field(&j, "copyOnSelect", s.terminal.copy_on_select);
     try field(&j, "cursor", s.terminal.cursor);
     try field(&j, "cursorBlink", s.terminal.cursor_blink);
     try field(&j, "fontFamily", s.terminal.font_family);
+    try field(&j, "fontFeatures", s.terminal.font_features);
     try field(&j, "fontSize", s.terminal.font_size);
     try field(&j, "historyLines", s.terminal.history_lines);
+    try field(&j, "letterSpacing", s.terminal.letter_spacing);
+    try field(&j, "lineHeight", s.terminal.line_height);
+    try field(&j, "minimumContrast", s.terminal.minimum_contrast);
     try field(&j, "optionAsMeta", s.terminal.option_as_meta);
     try j.endObject();
     try j.endObject();
@@ -255,40 +305,6 @@ fn field(j: *std.json.Stringify, name: []const u8, value: anytype) !void {
     try j.write(value);
 }
 
-const testing = std.testing;
-
-test "a wrong field keeps its default and the rest still counts" {
-    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
-    defer arena.deinit();
-    const got = read(arena.allocator(),
-        \\{"terminal": {"fontSize": 99, "cursor": "triangle", "copyOnSelect": true},
-        \\ "general": {"openFiles": "tab"}, "shortcuts": {"cmd+shift+t": "tab.new", "cmd+w": null}}
-    );
-    try testing.expectEqual(@as(f64, 32), got.settings.terminal.font_size);
-    try testing.expectEqualStrings("bar", got.settings.terminal.cursor);
-    try testing.expect(got.settings.terminal.copy_on_select);
-    try testing.expectEqualStrings("tab", got.settings.general.open_files);
-    try testing.expectEqual(@as(usize, 2), got.settings.shortcuts.len);
-    try testing.expectEqual(@as(usize, 1), got.problems.len);
-}
-
-test "written settings read back the same" {
-    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
-    defer arena.deinit();
-    var s: Settings = .{};
-    s.terminal.font_size = 15;
-    s.appearance.mode = "dark";
-    const text = try write(arena.allocator(), s);
-    const back = read(arena.allocator(), text);
-    try testing.expectEqual(@as(f64, 15), back.settings.terminal.font_size);
-    try testing.expectEqualStrings("dark", back.settings.appearance.mode);
-    try testing.expectEqual(@as(usize, 0), back.problems.len);
-}
-
-test "a broken file gives the defaults" {
-    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
-    defer arena.deinit();
-    const got = read(arena.allocator(), "{oops");
-    try testing.expectEqualStrings("caffeine", got.settings.appearance.theme);
-    try testing.expectEqual(@as(usize, 1), got.problems.len);
+test {
+    _ = @import("model_test.zig");
 }

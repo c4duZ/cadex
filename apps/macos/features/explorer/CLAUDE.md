@@ -55,6 +55,7 @@
   .gitignore entra na fase D. `gitMarks` (caminho -> letra, vindo do source control pelo app) pinta
   o nome com a cor do tipo de mudança e põe um ponto nas pastas que contêm alterados.
 - Spec: `docs/spec/explorer.md` e `docs/spec/workspace.md`. Status: plano 4, fases A e C prontas.
+- Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
 ## Como validar
 - `make macos-test` passa: árvore (recarga mantém linhas, ocultos, notas), operações recusadas,

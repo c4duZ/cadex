@@ -13,9 +13,13 @@ extension WindowSession {
     /// shortcuts know space.*; the tabs are made later, in startSpaces.
     func makeSpaces(palette: CommandPaletteController) {
         let spaces = SpacesController(fileURL: isMain ? SpacesFile.defaultURL : nil) { [unowned self] in self.makeTabs() }
-        spaces.onSwitch = { [weak self] tabs in self?.workspace?.show(tabs) }
+        spaces.onSwitch = { [weak self] tabs in
+            self?.workspace?.show(tabs)
+            self?.refreshWorkColor()
+        }
         spaces.onChange = { [weak self, weak spaces] in
             self?.workspace?.titleBar.setSpace(name: spaces?.activeName ?? "", count: spaces?.spaces.count ?? 1)
+            self?.refreshWorkColor()
         }
         commands.register(SpacesCommands.all(spaces, palette: palette) { [weak self] in
             self?.folder.root ?? NSHomeDirectory()
@@ -25,6 +29,7 @@ extension WindowSession {
 
     private func makeTabs() -> TabsController {
         let tabs = TabsController(window: window)
+        tabs.contextMenu = { [weak self] in self?.menu?.popup(Self.tabActions) ?? [] }
         tabs.onOpenPreview = { [weak self] url in self?.openPreview(url) }
         tabs.onOpenFile = { [weak self] path, beside in
             // A pasted image lives in the temporary folder, outside the
@@ -56,7 +61,7 @@ extension WindowSession {
 
     private func hasTerminal(in folder: String, _ tabs: TabsController) -> Bool {
         tabs.snapshot().items.contains { item in
-            if case let .terminal(_, layout, _) = item { return layout.folders.contains(folder) }
+            if case let .terminal(_, layout, _, _) = item { return layout.folders.contains(folder) }
             return false
         }
     }

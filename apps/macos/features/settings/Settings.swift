@@ -25,11 +25,25 @@ public struct Settings: Equatable, Sendable {
         public var historyLines = 10_000
         public var optionAsMeta = false
         public var copyOnSelect = false
+        /// The WCAG ratio text keeps against its background; 1 is off (plan 15).
+        public var minimumContrast: Double = 1
+        /// Line height as a multiple of the font's.
+        public var lineHeight: Double = 1
+        /// Extra space between letters, in points.
+        public var letterSpacing: Double = 0
+        /// OpenType features: "calt" and "liga" join ligatures, "-" turns one off.
+        public var fontFeatures: [String] = []
     }
 
     public struct Appearance: Equatable, Sendable {
         /// The theme family id ("caffeine").
         public var theme = "caffeine"
+        /// With the mode following the system, another theme for its light
+        /// or dark mode; empty uses `theme` (plan 15, phase B).
+        public var lightTheme = ""
+        public var darkTheme = ""
+        /// "#RRGGBB" in place of the theme's accent; empty keeps the theme's.
+        public var accent = ""
         /// "system", "dark" or "light".
         public var mode = "system"
         public var vibrancy = false
@@ -37,6 +51,23 @@ public struct Settings: Equatable, Sendable {
         public var backgroundImage: String?
         public var backgroundOpacity: Double = 0.5
         public var backgroundBlur: Double = 0
+        /// Text at 7:1, stronger borders, no transparency; also on with the
+        /// system's "Increase contrast" (plan 15, phase C).
+        public var highContrast = false
+        /// The interface's zoom, density and font, apart from the terminal's;
+        /// they count when Cadex opens (plan 15, phase D).
+        public var uiZoom: Double = 1
+        /// "normal" or "compact".
+        public var density = "normal"
+        /// Empty: the system font.
+        public var uiFont = ""
+        public var uiFontSize: Double = 13
+    }
+
+    public struct Tabs: Equatable, Sendable {
+        /// The shade over the panes without focus, 0 to 0.6 (0.26 measured
+        /// against dark themes on 2026-10-19).
+        public var unfocusedDim: Double = 0.26
     }
 
     public struct Explorer: Equatable, Sendable {
@@ -66,6 +97,7 @@ public struct Settings: Equatable, Sendable {
     public var general = General()
     public var terminal = Terminal()
     public var appearance = Appearance()
+    public var tabs = Tabs()
     public var explorer = Explorer()
     public var markdown = Markdown()
     public var power = Power()
@@ -83,4 +115,11 @@ public struct Settings: Equatable, Sendable {
     static let fileOpenings = ["beside", "tab"]
     static let languages = ["en", "pt"]
     static let keepAwakeModes = ["always", "running"]
+    static let contrastRange = 1.0...21.0
+    static let lineHeights = 0.8...2.0
+    static let letterSpacings = -1.0...4.0
+    static let dimRange = 0.0...0.6
+    static let zoomRange = 0.8...1.5
+    static let densities = ["normal", "compact"]
+    static let uiFontSizes = 9.0...24.0
 }

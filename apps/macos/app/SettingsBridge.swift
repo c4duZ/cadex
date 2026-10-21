@@ -1,5 +1,6 @@
 import AppKit
 import Settings
+import Tabs
 import Terminal
 import Themes
 
@@ -28,6 +29,13 @@ final class SettingsBridge {
 
     func start() {
         store.observe { [weak self] settings in self?.apply(settings) }
+        // "Increase contrast" in the system changes the theme, not the settings.
+        var wasHighContrast = ThemeStore.shared.isHighContrast
+        ThemeStore.shared.observe { [weak self] _ in
+            guard ThemeStore.shared.isHighContrast != wasHighContrast else { return }
+            wasHighContrast = ThemeStore.shared.isHighContrast
+            self?.applyLooks()
+        }
         store.watchForEdits()
         NotificationCenter.default.addObserver(forName: TerminalPreferences.didChange, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.saveTerminalChoices() }
@@ -35,11 +43,15 @@ final class SettingsBridge {
     }
 
     private func apply(_ settings: Settings) {
-        TerminalPreferences.current = Self.terminalPreferences(from: settings)
         EditorLooks.refresh()
-        ThemeStore.shared.select(id: settings.appearance.theme, mode: ThemeMode(rawValue: settings.appearance.mode) ?? .system)
         let a = settings.appearance
-        onLooks?(a.backgroundImage.map { .init(path: $0, opacity: a.backgroundOpacity, blur: a.backgroundBlur) }, a.vibrancy)
+        ThemeStore.shared.apply(.init(
+            dark: a.darkTheme.isEmpty ? a.theme : a.darkTheme, light: a.lightTheme.isEmpty ? a.theme : a.lightTheme,
+            mode: ThemeMode(rawValue: a.mode) ?? .system,
+            accent: a.accent.isEmpty ? nil : try? ThemeFile.parse(a.accent, field: "appearance.accent"),
+            highContrast: a.highContrast))
+        PaneLooks.unfocusedDim = CGFloat(settings.tabs.unfocusedDim)
+        applyLooks()
         onExplorer?(settings.explorer)
         onMarkdown?(settings.markdown)
         onPower?(settings.power)
@@ -47,6 +59,19 @@ final class SettingsBridge {
             lastShortcuts = settings.shortcuts
             onShortcuts?(settings.shortcuts)
         }
+    }
+
+    /// The background image and vibrancy, both off in high contrast (no
+    /// transparency, plan 15); the system's "Increase contrast" changing
+    /// comes through the theme.
+    private func applyLooks() {
+        let a = store.settings.appearance
+        let plain = ThemeStore.shared.isHighContrast
+        onLooks?(plain ? nil : a.backgroundImage.map { .init(path: $0, opacity: a.backgroundOpacity, blur: a.backgroundBlur) },
+                 a.vibrancy && !plain)
+        var preferences = Self.terminalPreferences(from: store.settings)
+        if plain { preferences.minimumContrast = max(preferences.minimumContrast, Theme.highContrastText) }
+        TerminalPreferences.current = preferences
     }
 
     static func terminalPreferences(from settings: Settings) -> TerminalPreferences {
@@ -61,6 +86,10 @@ final class SettingsBridge {
         p.historyLines = settings.terminal.historyLines
         p.optionAsMeta = settings.terminal.optionAsMeta
         p.copyOnSelect = settings.terminal.copyOnSelect
+        p.minimumContrast = settings.terminal.minimumContrast
+        p.lineHeight = settings.terminal.lineHeight
+        p.letterSpacing = settings.terminal.letterSpacing
+        p.fontFeatures = settings.terminal.fontFeatures
         return p
     }
 

@@ -17,7 +17,7 @@ struct DrawOverlay {
 /// scrollbar on top.
 /// Pure apart from the atlas lookups, so the layout rules are testable.
 struct QuadBuilder {
-    private var quads: [QuadInstance] = []
+    var quads: [QuadInstance] = []
 
     /// Selection tint over the cells: the text color at low opacity, so it
     /// reads on any theme. Picked by eye against the default dark theme.
@@ -69,13 +69,30 @@ struct QuadBuilder {
             solid(origin(cursorAt), SIMD2(cellW, cellH), cursorColor)
         }
 
-        for index in 0..<(cols * rows) {
+        let joins = atlas.font.typesetting.joinsLetters
+        var index = 0
+        while index < cols * rows {
             let cell = cells[index]
+            // The cell's background, for the minimum contrast (the shader
+            // moves text that would not read on it).
+            let underCursor = index == cursorAt && blockCursor
+            let bg = underCursor ? (frame.has_cursor_color ? frame.cursor_color : frame.foreground)
+                : cell.flags & UInt16(CADEX_CELL_SELECTED) != 0 ? (selection ?? frame.background)
+                : cell.flags & UInt16(CADEX_CELL_HAS_BACKGROUND) != 0 ? cell.bg : frame.background
+            if joins, let run = symbolRun(cells, from: index, cols: cols, frame: frame, cursorAt: cursorAt),
+               atlas.joins(run.text, bold: run.bold, italic: run.italic) {
+                let faint = cell.flags & UInt16(CADEX_CELL_FAINT) != 0
+                glyph(text: run.text, bold: run.bold, italic: run.italic, cells: run.count, at: origin(index),
+                      color: rgba(cell.fg, alpha: faint ? 0.5 : 1), background: bg, atlas: atlas)
+                index += run.count
+                continue
+            }
+            defer { index += 1 }
             if cell.text_len == 0 || cell.flags & UInt16(CADEX_CELL_SPACER) != 0 { continue }
             // The glyph under a block cursor takes the background color to stay readable.
-            let fgRGB = (index == cursorAt && blockCursor) ? frame.background : cell.fg
+            let fgRGB = underCursor ? frame.background : cell.fg
             let faint = cell.flags & UInt16(CADEX_CELL_FAINT) != 0
-            glyph(cell, frame: frame, at: origin(index), color: rgba(fgRGB, alpha: faint ? 0.5 : 1), atlas: atlas, metrics: m)
+            glyph(cell, frame: frame, at: origin(index), color: rgba(fgRGB, alpha: faint ? 0.5 : 1), background: bg, atlas: atlas)
         }
 
         for index in 0..<(cols * rows) {
@@ -99,24 +116,23 @@ struct QuadBuilder {
     }
 
     private mutating func glyph(_ cell: cadex_terminal_cell, frame: cadex_terminal_frame, at origin: SIMD2<Float>,
-                                color: SIMD4<Float>, atlas: GlyphAtlas, metrics m: CellMetrics) {
+                                color: SIMD4<Float>, background: UInt32, atlas: GlyphAtlas) {
         guard let textBase = frame.text else { return }
         let bytes = UnsafeBufferPointer(start: textBase + Int(cell.text_offset), count: Int(cell.text_len))
-        let text = String(decoding: bytes, as: UTF8.self)
-        let wide = cell.flags & UInt16(CADEX_CELL_WIDE) != 0
-        guard let g = atlas.glyph(
-            text: text,
-            bold: cell.flags & UInt16(CADEX_CELL_BOLD) != 0,
-            italic: cell.flags & UInt16(CADEX_CELL_ITALIC) != 0,
-            cells: wide ? 2 : 1)
-        else { return }
+        glyph(text: String(decoding: bytes, as: UTF8.self), bold: cell.flags & UInt16(CADEX_CELL_BOLD) != 0,
+              italic: cell.flags & UInt16(CADEX_CELL_ITALIC) != 0, cells: cell.flags & UInt16(CADEX_CELL_WIDE) != 0 ? 2 : 1,
+              at: origin, color: color, background: background, atlas: atlas)
+    }
 
+    mutating func glyph(text: String, bold: Bool, italic: Bool, cells: Int, at origin: SIMD2<Float>,
+                        color: SIMD4<Float>, background: UInt32, atlas: GlyphAtlas) {
+        guard let g = atlas.glyph(text: text, bold: bold, italic: italic, cells: cells) else { return }
         let size = Float(GlyphAtlas.size)
         let uv = SIMD4(Float(g.x) / size, Float(g.y) / size, Float(g.x + g.width) / size, Float(g.y + g.height) / size)
         let topLeft = origin - SIMD2(Float(atlas.padX), Float(atlas.padY))
         quads.append(QuadInstance(
             origin: topLeft, size: SIMD2(Float(g.width), Float(g.height)), uv: uv, color: color,
-            kind: g.isColor ? QuadInstance.colorGlyph : QuadInstance.maskGlyph))
+            kind: g.isColor ? QuadInstance.colorGlyph : QuadInstance.maskGlyph, background: background))
     }
 
     private mutating func decorations(_ cell: cadex_terminal_cell, at origin: SIMD2<Float>, metrics m: CellMetrics) {

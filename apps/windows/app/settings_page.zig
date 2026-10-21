@@ -2,8 +2,10 @@
 //! the Mac's tabs (General, Terminal, Themes, Shortcuts, About), each page in
 //! sections whose rows say what they change (docs/spec/settings.md). Every
 //! change is saved to settings.json at once and counts everywhere; the
-//! language counts when Cadex reopens. The pages are in settings_rows.zig
-//! and themes_page.zig.
+//! language and the interface's zoom, density and font count when Cadex
+//! reopens. The pages are in settings_rows.zig and themes_page.zig; they
+//! scroll when taller than the window. settings.open-terminal and
+//! settings.open-themes open it on that page (plan 15).
 
 const std = @import("std");
 const gfx = @import("gfx");
@@ -22,7 +24,48 @@ const Section = enum { general, terminal, themes, shortcuts, about };
 
 var open = false;
 var section: Section = .general;
+/// The themes list's and the shortcuts list's scroll.
 pub var scroll: ui.list.Scroll = .{};
+/// The page's own scroll, and how tall it was last frame.
+var page_scroll: ui.list.Scroll = .{};
+var content_h: f32 = 0;
+
+var app_ref: *App = undefined;
+
+/// settings.open-terminal, settings.open-themes and terminal.toggle-ligatures,
+/// as the Mac's SettingsWindowController.pageCommands.
+pub fn register(app: *App) void {
+    app_ref = app;
+    const r = &app.registry;
+    r.add(.{ .id = "settings.open-terminal", .title = t("Open Terminal Settings", "Abrir configurações do terminal"), .keywords = &.{ "font", "fonte", "line height", "altura da linha", "spacing", "espaçamento", "contrast", "contraste", "cursor" }, .run = openTerminal });
+    r.add(.{ .id = "settings.open-themes", .title = t("Open Theme Settings", "Abrir configurações de temas"), .keywords = &.{ "theme", "tema", "accent", "destaque", "contrast", "contraste", "background", "fundo" }, .run = openThemes });
+    r.add(.{ .id = "terminal.toggle-ligatures", .title = t("Turn Ligatures On or Off", "Ligar ou desligar as ligaduras"), .keywords = &.{ "ligatures", "ligaduras", "fira code", "font", "fonte" }, .run = toggleLigatures });
+}
+
+fn openTerminal(_: ?*anyopaque) void {
+    show(app_ref, .terminal);
+}
+
+fn openThemes(_: ?*anyopaque) void {
+    show(app_ref, .themes);
+}
+
+fn toggleLigatures(_: ?*anyopaque) void {
+    @import("terminal_text_rows.zig").toggleLigatures(app_ref);
+}
+
+/// Opens the settings on `page_section` (or moves there when open).
+fn show(app: *App, page_section: Section) void {
+    if (!open) toggle(app);
+    select(page_section);
+    app.window.redraw();
+}
+
+fn select(next: Section) void {
+    section = next;
+    scroll = .{};
+    page_scroll = .{};
+}
 
 pub fn toggle(app: *App) void {
     open = !open;
@@ -77,20 +120,35 @@ pub fn draw(app: *App) void {
     };
     for (tabs, 0..) |entry, i| {
         const r = nav.takeTop(u.px(32));
-        if (ui.widgets.button(u, ui.child(ui.id("settings.nav", 0), i), r, entry[1], .{ .icon = entry[2], .selected = section == entry[0], .@"align" = .{} })) {
-            section = entry[0];
-            scroll = .{};
-        }
+        if (ui.widgets.button(u, ui.child(ui.id("settings.nav", 0), i), r, entry[1], .{ .icon = entry[2], .selected = section == entry[0], .@"align" = .{} })) select(entry[0]);
         _ = nav.takeTop(u.px(2));
     }
     switch (section) {
-        .general => rows.general(app, inner),
-        .terminal => rows.terminal(app, inner),
-        .themes => @import("themes_page.zig").draw(app, inner),
+        .general => scrolled(app, inner, rows.general),
+        .terminal => scrolled(app, inner, rows.terminal),
+        .themes => scrolled(app, inner, @import("themes_page.zig").draw),
         .shortcuts => shortcutsSection(app, inner),
         .about => about(app, inner),
     }
     if (u.key(w.c.VK_ESCAPE, .{})) toggle(app);
+}
+
+/// A page taller than the window scrolls: it draws into a tall rectangle
+/// moved up by the scroll, clipped to `area`, and says how tall it was.
+/// Widgets scrolled out of view get no mouse (Ui.mouse_clip).
+fn scrolled(app: *App, area: gfx.Rect, comptime drawPage: fn (*App, gfx.Rect, f32) f32) void {
+    const u = &app.u;
+    const before = page_scroll.offset;
+    const tall: gfx.Rect = .{ .x = area.x, .y = area.y - page_scroll.offset, .w = area.w - u.px(12), .h = @max(content_h, area.h) + u.px(400) };
+    u.painter.pushClip(area);
+    const outer = u.mouse_clip;
+    u.mouse_clip = area;
+    content_h = drawPage(app, tall, area.h);
+    u.mouse_clip = outer;
+    u.painter.popClip();
+    // After the page: a list inside it took the wheel first.
+    ui.list.scrollArea(u, ui.id("settings.page-scroll", 0), area, content_h, &page_scroll);
+    if (page_scroll.offset != before) app.window.redraw();
 }
 
 // ---- The pieces every page uses ----

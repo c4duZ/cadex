@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Icons
 import Menus
 import Strings
@@ -74,7 +75,7 @@ final class SourceControlRowView: NSTableCellView {
 
     private func buildHeader(_ title: String, staged: Bool?, count: Int) {
         let label = NSTextField(labelWithString: count > 0 ? "\(title.uppercased())  \(count)" : title.uppercased())
-        label.font = .systemFont(ofSize: 10, weight: .semibold)
+        label.font = UILooks.font(10, weight: .semibold)
         label.textColor = .secondaryLabelColor
         var views: [NSView] = [label, NSView()]
         if let staged, count > 0 { views.append(actionButton(staged ? "−" : "+", tip: staged ? T("Unstage all", "Unstage tudo") : T("Stage all", "Stage tudo"))) }
@@ -85,11 +86,11 @@ final class SourceControlRowView: NSTableCellView {
         let name = (entry.path as NSString).lastPathComponent
         let folder = (entry.path as NSString).deletingLastPathComponent
         let label = NSTextField(labelWithString: "")
-        let text = NSMutableAttributedString(string: name, attributes: [.font: NSFont.systemFont(ofSize: 12)])
+        let text = NSMutableAttributedString(string: name, attributes: [.font: UILooks.font(12)])
         let detail = entry.kind == .renamed ? (entry.orig as NSString).lastPathComponent + " → " : ""
         if !folder.isEmpty || !detail.isEmpty {
             text.append(NSAttributedString(string: "  " + detail + folder, attributes: [
-                .font: NSFont.systemFont(ofSize: 11), .foregroundColor: NSColor.secondaryLabelColor,
+                .font: UILooks.font(11), .foregroundColor: NSColor.secondaryLabelColor,
             ]))
         }
         // One line, the folder cut at the end: the attributed text wrapped and the
@@ -104,7 +105,7 @@ final class SourceControlRowView: NSTableCellView {
         label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         let letter = entry.letter(staged: staged)
         let mark = NSTextField(labelWithString: String(letter))
-        mark.font = .monospacedSystemFont(ofSize: 11, weight: .bold)
+        mark.font = UILooks.monospaced(11, weight: .bold)
         mark.textColor = SourceControlRow.color(for: letter)
         let icon = NSImageView(image: Icon.file.image(size: 13))
         icon.contentTintColor = .secondaryLabelColor
@@ -118,7 +119,7 @@ final class SourceControlRowView: NSTableCellView {
     private func actionButton(_ title: String, tip: String) -> NSButton {
         let b = NSButton(title: title, target: self, action: #selector(pressed))
         b.isBordered = false
-        b.font = .systemFont(ofSize: 13, weight: .medium)
+        b.font = UILooks.font(13, weight: .medium)
         HoverTip.attach(tip, to: b)
         b.contentTintColor = .secondaryLabelColor
         return b

@@ -1,8 +1,9 @@
 //! The General and Terminal pages of the settings, in the Mac's
 //! sections (apps/macos/features/settings/): General has the language, the
-//! files, the file tree and keep awake; Terminal has the shell and the
-//! questions (in General before 2026-10-20), the text and the cursor, the
-//! history. Every row says what it changes, in English or Portuguese (ADR
+//! files, the file tree, the interface (interface_rows.zig) and keep
+//! awake; Terminal has the shell and the questions (in General before
+//! 2026-10-20), the text and the cursor, reading (terminal_text_rows.zig),
+//! the history. Every row says what it changes, in English or Portuguese (ADR
 //! 0015). The pieces (heading, row, choice) are in settings_page.zig.
 
 const std = @import("std");
@@ -13,6 +14,8 @@ const settings = @import("settings");
 const App = @import("app.zig").App;
 const page = @import("settings_page.zig");
 const relaunch = @import("relaunch.zig");
+const interface_rows = @import("interface_rows.zig");
+const terminal_text_rows = @import("terminal_text_rows.zig");
 
 const t = strings.t;
 
@@ -26,9 +29,12 @@ pub fn prepare(app: *App) void {
     const s = app.settings.current;
     shell_text.set(app.gpa, s.general.shell) catch {};
     font_text.set(app.gpa, s.terminal.font_family) catch {};
+    interface_rows.prepare(app);
+    terminal_text_rows.prepare(app);
 }
 
-pub fn general(app: *App, area_in: gfx.Rect) void {
+/// In a scrolled area (settings_page.scrolled); the height it took.
+pub fn general(app: *App, area_in: gfx.Rect, _: f32) f32 {
     const u = &app.u;
     var area = area_in;
     var s = app.settings.current;
@@ -63,7 +69,10 @@ pub fn general(app: *App, area_in: gfx.Rect) void {
         page.commit(app, s);
     }
 
+    interface_rows.draw(app, &area);
+    s = app.settings.current;
     keepAwake(app, &area, &s);
+    return area_in.h - area.h;
 }
 
 /// Keep awake as a section of General, as on the Mac (docs/spec/power.md).
@@ -85,7 +94,7 @@ fn keepAwake(app: *App, area: *gfx.Rect, s: *settings.Settings) void {
     page.note(u, area, t("The coffee in the title bar and Ctrl+Shift+Alt+A turn it on and off. A closed lid follows Windows' own setting.", "O café na barra de título e o Ctrl+Shift+Alt+A ligam e desligam. A tampa fechada segue a opção do próprio Windows."));
 }
 
-pub fn terminal(app: *App, area_in: gfx.Rect) void {
+pub fn terminal(app: *App, area_in: gfx.Rect, _: f32) f32 {
     const u = &app.u;
     var area = area_in;
     var s = app.settings.current;
@@ -128,6 +137,8 @@ pub fn terminal(app: *App, area_in: gfx.Rect) void {
         s.terminal.cursor_blink = v;
         page.commit(app, s);
     }
+    terminal_text_rows.draw(app, &area);
+    s = app.settings.current;
 
     page.heading(u, &area, t("History and selection", "Histórico e seleção"));
     if (page.stepper(u, page.row(u, &area, t("History lines", "Linhas de histórico"), t("How far back you can scroll; new terminals.", "Até onde dá para rolar; terminais novos.")), 1, @floatFromInt(s.terminal.history_lines), 5000, "")) |v| {
@@ -138,6 +149,7 @@ pub fn terminal(app: *App, area_in: gfx.Rect) void {
         s.terminal.copy_on_select = v;
         page.commit(app, s);
     }
+    return area_in.h - area.h;
 }
 
 test {

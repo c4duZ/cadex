@@ -25,6 +25,7 @@
   o toolTip fica só para textos longos de linhas (caminhos, datas).
 - `MenuTableView.swift`: tabela cujo clique direito abre o PopupMenu; `menuRow` é a linha clicada
   enquanto o menu está aberto e a ação roda (source control e histórico do git).
+- Fontes e medidas de MenuLayout e da dica vêm de UILooks (`../looks/CLAUDE.md`).
 
 ## Como validar
 - `make macos-test` passa: separadores, setas, medidas, atalhos e a posição da dica.

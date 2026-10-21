@@ -16,6 +16,7 @@ const std = @import("std");
 pub const c = @import("sdk");
 pub const dcomp = @import("dcomp.zig");
 pub const files = @import("files.zig");
+pub const color_dialog = @import("color_dialog.zig");
 
 pub const HRESULT = c.HRESULT;
 pub const HWND = c.HWND;
@@ -212,4 +213,5 @@ test {
     @import("win32.zig").refAllDeep(@This());
     _ = @import("dcomp.zig");
     _ = @import("files.zig");
+    _ = @import("color_dialog.zig");
 }

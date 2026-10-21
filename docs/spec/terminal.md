@@ -121,6 +121,17 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
 - Ao reabrir o app, os spaces voltam com as abas, as divisões e a pasta de cada painel. O conteúdo
   antigo da tela não volta: cada painel começa um shell novo.
 
+- Leitura (plano 15, fase C):
+  - **Contraste mínimo** (terminal.minimumContrast, de 1 a 21; 1 desliga): texto que um programa
+    pinta perto demais do fundo da célula vai para o branco ou o preto até a razão WCAG pedida.
+    A conta é feita no shader, uma vez por letra.
+  - **Altura de linha** (terminal.lineHeight, 0,8 a 2 vezes a da fonte) e **espaçamento entre
+    letras** (terminal.letterSpacing, -1 a 4 pt, com a letra centrada na célula).
+  - **Recursos OpenType** (terminal.fontFeatures: "ss01", "zero", "-liga"…). Com "calt" ou "liga"
+    ligados, uma sequência de 2 a 8 símbolos na mesma linha e na mesma cor (`->`, `!=`, `===`) é
+    desenhada como um sinal só sobre as células dela, quando a fonte junta essas letras (Fira Code,
+    JetBrains Mono). O SF Mono não tem ligaduras. terminal.toggle-ligatures liga e desliga.
+
 ## Estados
 - **Abrindo:** o painel aparece na hora; o prompt surge assim que o shell responde.
 - **Erro ao abrir o shell** (shell configurado não existe, pasta sem permissão): o painel mostra a
@@ -144,6 +155,8 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
   tmux e terminal suspenso por atalho global. Podem entrar depois, cada um com a própria decisão.
 
 ## Critérios de aceite
+- [ ] Com contraste mínimo 7, texto azul-escuro sobre fundo preto fica legível; com 1, fica como veio.
+- [ ] A altura de linha e as ligaduras mudam o terminal na hora (com Fira Code, `->` vira uma seta).
 - [x] Copiar um arquivo com espaço no nome no Finder e colar resulta num caminho que o shell aceita.
 - [x] Colar um print de tela cola o caminho de um PNG que existe e abre a imagem.
 - [x] Colar texto num programa com bracketed paste ativo não executa as linhas automaticamente.

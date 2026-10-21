@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Strings
 
 /// The small window of "Check for Updates" (docs/spec/updates.md): what was
@@ -124,12 +125,12 @@ final class UpdatePanel: NSObject {
                             styleMask: [.titled, .closable], backing: .buffered, defer: true)
         panel.isReleasedWhenClosed = false
         panel.hidesOnDeactivate = false
-        titleLabel.font = .boldSystemFont(ofSize: 14)
-        detailLabel.font = .systemFont(ofSize: 12)
+        titleLabel.font = UILooks.font(14, weight: .bold)
+        detailLabel.font = UILooks.font(12)
         detailLabel.textColor = .secondaryLabelColor
         detailLabel.preferredMaxLayoutWidth = 400
         notes.isEditable = false
-        notes.font = .systemFont(ofSize: 12)
+        notes.font = UILooks.font(12)
         notes.textContainerInset = NSSize(width: 6, height: 6)
         notes.autoresizingMask = [.width]
         notesScroll.documentView = notes

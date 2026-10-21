@@ -18,6 +18,7 @@ const strings = @import("strings");
 const opener = @import("opener.zig");
 const spaces = @import("spaces");
 const window_mod = @import("window.zig");
+const looks = @import("looks.zig");
 const App = @import("app.zig").App;
 
 const c = w.c;
@@ -218,6 +219,7 @@ fn makeTerminal(context: *anyopaque, cwd: ?[]const u8) ?*terminal.View {
     };
     view.* = terminal.View.init(app.gpa, session, app.nextViewId());
     view.selection_color = app.themes.current.terminal.selection;
+    view.min_contrast = looks.minContrast(app);
     view.copy_on_select = s.terminal.copy_on_select;
     view.hooks = .{ .context = app, .open_link = openLink };
     if (app.environment) |e| if (s.general.shell.len == 0) {
@@ -271,8 +273,8 @@ fn onChange(context: *anyopaque) void {
 
 pub fn applySettings(app: *App) void {
     const s = app.settings.current;
-    const mode: themes.Mode = if (std.mem.eql(u8, s.appearance.mode, "dark")) .dark else if (std.mem.eql(u8, s.appearance.mode, "light")) .light else .system;
-    _ = app.themes.select(s.appearance.theme, mode);
+    _ = app.themes.apply(looks.choice(s));
+    looks.applyPanes(app);
     applyTheme(app);
     var prefs: std.ArrayList(shortcuts.Preference) = .empty;
     defer prefs.deinit(app.gpa);
@@ -298,6 +300,7 @@ fn applyTheme(app: *App) void {
         fn apply(a: *App, v: *terminal.View) void {
             v.session.setColors(themes.terminalColors(a.themes.current));
             v.selection_color = a.themes.current.terminal.selection;
+            v.min_contrast = looks.minContrast(a);
         }
     }.apply);
     app.window.redraw();

@@ -11,6 +11,18 @@ import Themes
 extension WindowSession {
     /// The ways to open things, first in ⌘K and in the "+" menu next to
     /// the tabs, as in Terax's "+" (owner, 2026-10-19).
+    /// The right click on a tab and on the space button (plan 15, phase D).
+    static let tabActions = [
+        PalettePin(id: "tab.rename", title: T("Rename Tab", "Renomear aba"), icon: .pencilSimple),
+        PalettePin(id: "tab.set-color", title: T("Tab Color…", "Cor da aba…"), icon: .palette),
+        PalettePin(id: "pane.close", title: T("Close Pane", "Fechar painel"), icon: .x),
+    ]
+    static let spaceActions = [
+        PalettePin(id: "space.rename", title: T("Rename Space", "Renomear space"), icon: .pencilSimple),
+        PalettePin(id: "space.set-color", title: T("Space Color…", "Cor do space…"), icon: .palette),
+        PalettePin(id: "space.close", title: T("Close Space", "Fechar space"), icon: .x),
+    ]
+
     static let openers = [
         PalettePin(id: "tab.new", title: T("Terminal in New Tab", "Terminal em nova aba"), icon: .plus),
         PalettePin(id: "pane.split-right", title: T("Terminal on the Right", "Terminal ao lado"), icon: .squareSplitHorizontal),

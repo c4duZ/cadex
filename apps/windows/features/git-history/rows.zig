@@ -47,7 +47,7 @@ pub fn draw(doc: *HistoryDocument, u: *ui.Ui, area: Rect) void {
     const graph_w = if (doc.showsGraph()) u.px(graph.width(doc.main.lanes)) else u.px(6);
     var r = area;
     header(u, r.takeTop(u.px(24)), graph_w);
-    const row_h = u.px(22);
+    const row_h = u.rowPx(22);
     if (u.pressedOn(r, .left) or u.pressedOn(r, .right)) u.focus = id;
     keyboard(doc, u, shown, r, row_h);
     const list = ui.list.begin(u, id, r, count, row_h, &doc.view.list_scroll);

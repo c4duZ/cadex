@@ -30,15 +30,38 @@ public enum SettingsFile {
             }
             settings.terminal.optionAsMeta = reader.bool(t, "terminal.optionAsMeta") ?? settings.terminal.optionAsMeta
             settings.terminal.copyOnSelect = reader.bool(t, "terminal.copyOnSelect") ?? settings.terminal.copyOnSelect
+            if let v = reader.number(t, "terminal.minimumContrast") { settings.terminal.minimumContrast = v.clamped(to: Settings.contrastRange) }
+            if let v = reader.number(t, "terminal.lineHeight") { settings.terminal.lineHeight = v.clamped(to: Settings.lineHeights) }
+            if let v = reader.number(t, "terminal.letterSpacing") { settings.terminal.letterSpacing = v.clamped(to: Settings.letterSpacings) }
+            if let list = reader.strings(t, "terminal.fontFeatures") {
+                settings.terminal.fontFeatures = list.filter { Settings.isFontFeature($0) }
+                if settings.terminal.fontFeatures.count != list.count {
+                    reader.problems.append("terminal.fontFeatures: cada item é uma etiqueta OpenType de 4 letras, como \"calt\" ou \"-liga\"")
+                }
+            }
         }
         if let a = reader.section(root, "appearance") {
             settings.appearance.theme = reader.string(a, "appearance.theme") ?? settings.appearance.theme
+            settings.appearance.lightTheme = reader.string(a, "appearance.lightTheme") ?? settings.appearance.lightTheme
+            settings.appearance.darkTheme = reader.string(a, "appearance.darkTheme") ?? settings.appearance.darkTheme
+            if let accent = reader.string(a, "appearance.accent") {
+                if accent.isEmpty || Settings.isHexColor(accent) { settings.appearance.accent = accent }
+                else { reader.problems.append("appearance.accent: \"\(accent)\" não é uma cor #RRGGBB") }
+            }
             settings.appearance.mode = reader.choice(a, "appearance.mode", Settings.modes) ?? settings.appearance.mode
             settings.appearance.vibrancy = reader.bool(a, "appearance.vibrancy") ?? settings.appearance.vibrancy
             if a["backgroundImage"] is NSNull { settings.appearance.backgroundImage = nil }
             else { settings.appearance.backgroundImage = reader.string(a, "appearance.backgroundImage") }
             if let opacity = reader.number(a, "appearance.backgroundOpacity") { settings.appearance.backgroundOpacity = min(max(opacity, 0), 1) }
             if let blur = reader.number(a, "appearance.backgroundBlur") { settings.appearance.backgroundBlur = min(max(blur, 0), 50) }
+            settings.appearance.highContrast = reader.bool(a, "appearance.highContrast") ?? settings.appearance.highContrast
+            if let v = reader.number(a, "appearance.uiZoom") { settings.appearance.uiZoom = v.clamped(to: Settings.zoomRange) }
+            settings.appearance.density = reader.choice(a, "appearance.density", Settings.densities) ?? settings.appearance.density
+            settings.appearance.uiFont = reader.string(a, "appearance.uiFont") ?? settings.appearance.uiFont
+            if let v = reader.number(a, "appearance.uiFontSize") { settings.appearance.uiFontSize = v.clamped(to: Settings.uiFontSizes) }
+        }
+        if let t = reader.section(root, "tabs") {
+            if let v = reader.number(t, "tabs.unfocusedDim") { settings.tabs.unfocusedDim = v.clamped(to: Settings.dimRange) }
         }
         if let e = reader.section(root, "explorer") {
             settings.explorer.showHidden = reader.bool(e, "explorer.showHidden") ?? settings.explorer.showHidden
@@ -73,10 +96,16 @@ public enum SettingsFile {
                         "language": s.general.language],
             "terminal": ["fontFamily": s.terminal.fontFamily, "fontSize": s.terminal.fontSize, "cursor": s.terminal.cursor,
                          "cursorBlink": s.terminal.cursorBlink, "historyLines": s.terminal.historyLines,
-                         "optionAsMeta": s.terminal.optionAsMeta, "copyOnSelect": s.terminal.copyOnSelect],
-            "appearance": ["theme": s.appearance.theme, "mode": s.appearance.mode, "vibrancy": s.appearance.vibrancy,
+                         "optionAsMeta": s.terminal.optionAsMeta, "copyOnSelect": s.terminal.copyOnSelect,
+                         "minimumContrast": s.terminal.minimumContrast, "lineHeight": s.terminal.lineHeight,
+                         "letterSpacing": s.terminal.letterSpacing, "fontFeatures": s.terminal.fontFeatures],
+            "appearance": ["theme": s.appearance.theme, "lightTheme": s.appearance.lightTheme, "darkTheme": s.appearance.darkTheme,
+                           "accent": s.appearance.accent, "mode": s.appearance.mode, "vibrancy": s.appearance.vibrancy,
                            "backgroundImage": s.appearance.backgroundImage ?? NSNull(),
-                           "backgroundOpacity": s.appearance.backgroundOpacity, "backgroundBlur": s.appearance.backgroundBlur],
+                           "backgroundOpacity": s.appearance.backgroundOpacity, "backgroundBlur": s.appearance.backgroundBlur,
+                           "highContrast": s.appearance.highContrast, "uiZoom": s.appearance.uiZoom,
+                           "density": s.appearance.density, "uiFont": s.appearance.uiFont, "uiFontSize": s.appearance.uiFontSize],
+            "tabs": ["unfocusedDim": s.tabs.unfocusedDim],
             "explorer": ["showHidden": s.explorer.showHidden, "followTerminal": s.explorer.followTerminal],
             "markdown": ["openAs": s.markdown.openAs],
             "power": ["mode": s.power.mode, "onAtLaunch": s.power.onAtLaunch, "keepDisplayOn": s.power.keepDisplayOn],
@@ -111,6 +140,10 @@ private struct FieldReader {
         typed(object, field, "um número") { ($0 as? NSNumber).flatMap { CFGetTypeID($0) == CFBooleanGetTypeID() ? nil : $0.doubleValue } }
     }
 
+    mutating func strings(_ object: [String: Any], _ field: String) -> [String]? {
+        typed(object, field, "uma lista de textos") { $0 as? [String] }
+    }
+
     mutating func choice(_ object: [String: Any], _ field: String, _ options: [String]) -> String? {
         guard let text = string(object, field) else { return nil }
         guard options.contains(text) else {
@@ -128,5 +161,21 @@ private struct FieldReader {
             return nil
         }
         return typed
+    }
+}
+
+extension Double {
+    func clamped(to range: ClosedRange<Double>) -> Double { Swift.min(Swift.max(self, range.lowerBound), range.upperBound) }
+}
+
+extension Settings {
+    /// "calt", "ss01", "-liga": a 4-letter OpenType tag, "-" to turn it off.
+    static func isHexColor(_ text: String) -> Bool {
+        text.count == 7 && text.hasPrefix("#") && UInt32(text.dropFirst(), radix: 16) != nil
+    }
+
+    static func isFontFeature(_ text: String) -> Bool {
+        let tag = text.hasPrefix("-") ? text.dropFirst() : Substring(text)
+        return tag.count == 4 && tag.allSatisfy { $0.isASCII && ($0.isLetter || $0.isNumber) }
     }
 }
