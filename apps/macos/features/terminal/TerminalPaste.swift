@@ -19,7 +19,7 @@ extension TerminalView {
         case .files(let urls):
             session.paste(TerminalSession.quotePaths(urls.map(\.path)))
         case .image(let png):
-            guard let url = try? TempImageStore.pastes.save(png) else {
+            guard let url = try? TempImageStore.pastes.save(TempImageStore.fitted(png)) else {
                 NSSound.beep()
                 return
             }

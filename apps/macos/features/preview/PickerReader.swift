@@ -82,7 +82,7 @@ final class PickerReader {
             MainActor.assumeIsolated {
                 guard let image, let tiff = image.tiffRepresentation,
                       let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]),
-                      let url = try? Self.pictures.save(png) else { return done(nil) }
+                      let url = try? Self.pictures.save(TempImageStore.fitted(png)) else { return done(nil) }
                 done(url.path)
             }
         }

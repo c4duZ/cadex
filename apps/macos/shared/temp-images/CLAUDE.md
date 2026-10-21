@@ -11,6 +11,8 @@
 ## Como eu quero
 - `TempImageStore.swift`: uma pasta e um começo de nome por uso; `save` grava com data e um sufixo,
   `removeOld` apaga as de mais de uma semana. Quem usa chama `removeOld` uma vez por abertura do app.
+  `fitted` reduz a imagem a 1568 px no lado maior (ImageIO, sem decodificar a imagem inteira):
+  quem salva passa a imagem por ele.
 
 ## Como validar
 - `make macos-test` passa: grava PNG, apaga só as antigas, cada uso na sua pasta.

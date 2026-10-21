@@ -76,7 +76,7 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
   do script nomeia (sem linha), ou nada. Site de produção não tem nada disso: as linhas não
   aparecem.
 - `screenshot` é um PNG do elemento como está na tela, com 8 pt de margem, cortado ao que o preview
-  mostra e com no máximo 1600 pt de largura, em cadex-pick/ da pasta temporária, apagado depois de 7
+  mostra e com no máximo 1568 px no lado maior (como as imagens coladas), em cadex-pick/ da pasta temporária, apagado depois de 7
   dias. `preview.pickScreenshot` (ligado por padrão) desliga.
 - No terminal, cada elemento vai em duas colagens: o bloco e, logo depois, o caminho do print
   sozinho, como o ⌘V cola uma imagem. O agente mostra `[Image #N]` e recebe a imagem; o Cadex liga

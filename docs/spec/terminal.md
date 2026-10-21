@@ -75,7 +75,9 @@ existir:
 1. **Arquivos copiados** (por exemplo, no Finder): cola os caminhos completos, cada um escapado para
    o shell (espaços e caracteres especiais protegidos), separados por espaço.
 2. **Imagem** (print de tela, imagem copiada do navegador): salva a imagem como PNG num arquivo
-   temporário e cola o caminho desse arquivo, escapado para o shell.
+   temporário e cola o caminho desse arquivo, escapado para o shell. Com o lado maior passando de
+   1568 px, a imagem é reduzida a 1568 px antes: a API do Claude reduz a esse tamanho de qualquer
+   jeito, e o Claude Code levou quase 8 s para anexar um print de 2940 × 1912 (2026-10-21).
 3. **Texto**: cola o texto. Se o programa em execução ativou o modo bracketed paste, o texto vai
    marcado como colagem, para não ser executado linha a linha como digitação.
 
