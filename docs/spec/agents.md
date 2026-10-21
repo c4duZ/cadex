@@ -20,8 +20,9 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
 - Clicar numa sessão abre ou fecha os subagentes dela: "4 subagents" e uma linha por subagente,
   com sinal (girando se escreveu nos últimos 30 s, senão ✓), a descrição e há quanto tempo. No
   máximo 10, os mais recentes primeiro.
-- Duplo clique numa sessão que roda num terminal do Cadex foca esse terminal, trocando de aba e de
-  space se preciso (o terminal certo é o que tem o processo da sessão na frente). Sessão de fora do
+- Duplo clique numa sessão que roda num terminal do Cadex foca esse terminal em qualquer janela,
+  trazendo a janela para a frente e trocando de space e de aba se preciso; clique num subagente leva
+  ao terminal da sessão dele (o terminal certo é o que tem o processo da sessão na frente). Sessão de fora do
   Cadex (outro terminal) mostra "outside Cadex" e o duplo clique mostra a pasta dela na árvore do
   explorer, quando ela está no workspace.
 - Depois: a aba de terminal com um agente mostra o mesmo sinal de estado no título.

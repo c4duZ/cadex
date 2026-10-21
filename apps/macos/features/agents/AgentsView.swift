@@ -209,6 +209,10 @@ public final class AgentsView: NSView {
             line.spacing = 7
             let row = AgentRow(line, inset: 25)
             row.toolTip = "\(agent.type): \(agent.description)"
+            // A subagent runs inside its session: a click goes to that terminal.
+            if let session = controller.sessions.first(where: { $0.id == controller.openSession }) {
+                row.onClick = { [weak self] in self?.onOpen?(session) }
+            }
             add(row)
         }
     }

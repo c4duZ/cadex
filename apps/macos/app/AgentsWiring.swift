@@ -141,10 +141,16 @@ extension WindowSession {
 
     /// A double click: the agent's terminal, its space and tab in front;
     /// outside Cadex, its folder in the tree when it is in the workspace.
+    /// In any window: the one holding the agent's terminal comes to the
+    /// front, on that space and tab (the owner, 2026-10-21: two windows,
+    /// a click in one goes to the other).
     func openAgent(_ session: AgentSession) {
-        if let found = terminal(of: session), let spaces {
+        for window in app.sessions {
+            guard let found = window.terminal(of: session), let spaces = window.spaces else { continue }
+            NSApp.activate(ignoringOtherApps: true)
+            window.window.makeKeyAndOrderFront(nil)
             spaces.select(found.space)
-            tabs?.focus(found.terminal)
+            window.tabs?.focus(found.terminal)
             return
         }
         if explorer?.reveal(session.cwd) == true { workspace?.showSidebar("files") } else { NSSound.beep() }
@@ -164,10 +170,8 @@ extension AppDelegate {
         }
         notifier.onOpen = { [weak self] id in
             guard let session = AgentsController.shared.sessions.first(where: { $0.id == id }) else { return }
-            let owner = self?.sessions.first { $0.terminal(of: session) != nil } ?? self?.sessions.first
             NSApp.activate(ignoringOtherApps: true)
-            owner?.window.makeKeyAndOrderFront(nil)
-            owner?.openAgent(session)
+            self?.sessions.first?.openAgent(session)
         }
         ThemeStore.shared.observe { theme in AgentNotifier.shared.accent = theme.interface.accent.nsColor }
         notifier.start()
