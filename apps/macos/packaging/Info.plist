@@ -19,9 +19,6 @@
 			</array>
 		</dict>
 		<dict>
-			<!-- What the editor and media preview open, by name: Finder's
-			     "Open With" leaves out apps that only claim public.item or
-			     public.data (owner, 2026-10-20). Alternate: never the default. -->
 			<key>CFBundleTypeName</key>
 			<string>Texto, código e mídia</string>
 			<key>CFBundleTypeRole</key>
@@ -34,21 +31,10 @@
 				<string>public.image</string>
 				<string>public.audiovisual-content</string>
 				<string>com.adobe.pdf</string>
-				<!-- Roblox's place file is XML, but its own type only says data. -->
 				<string>com.roblox.robloxstudio-document</string>
 			</array>
 		</dict>
 		<dict>
-			<!-- Developer files macOS has no type for (.toml, .lock, .tf...)
-			     get a made-up one that only an extension claim reaches; a
-			     wildcard ("*", public.data) is hidden from "Open With" like
-			     public.item (measured with lsregister, 2026-10-20). -->
-			<key>CFBundleTypeName</key>
-			<string>Arquivo de desenvolvimento</string>
-			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
-			<key>LSHandlerRank</key>
-			<string>Alternate</string>
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>toml</string>
@@ -208,6 +194,12 @@
 				<string>asc</string>
 				<string>sig</string>
 			</array>
+			<key>CFBundleTypeName</key>
+			<string>Arquivo de desenvolvimento</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
 		</dict>
 		<dict>
 			<key>CFBundleTypeName</key>
@@ -233,9 +225,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.2.0</string>
+	<string>2.0.0</string>
 	<key>CFBundleVersion</key>
-	<string>6</string>
+	<string>7</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.developer-tools</string>
 	<key>LSMinimumSystemVersion</key>
