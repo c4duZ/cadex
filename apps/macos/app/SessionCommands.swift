@@ -69,10 +69,22 @@ extension WindowSession {
             id: "git.show-history", title: T("Show Git History in Sidebar", "Mostrar o histórico do Git no painel lateral"),
             keywords: ["history", "log", "commits", "histórico", "sidebar", "painel"], category: .view,
             action: .run { [weak self] in self?.workspace?.showSidebar("history") }))
+        commands.register(Command(
+            id: "history.show-in-tab", title: T("Show Commit Details in a Tab", "Mostrar o commit numa aba"),
+            keywords: ["commit", "details", "message", "detalhes", "mensagem", "history", "histórico"], category: .view,
+            action: .run { [weak self] in
+                guard let history = self?.sidebarHistory, let sha = history.selectedSha else { return }
+                self?.opener?.openHistory(history.root, beside: false, selecting: sha)
+            },
+            unavailableReason: { [weak self] in
+                self?.sidebarHistory?.selectedSha == nil ? T("Pick a commit in the sidebar's Git History", "Escolha um commit no histórico do painel lateral") : nil
+            }))
         commands.register(HistoryCommands.all(
             open: { [weak self] beside in if let root = self?.git?.repositoryRoot { self?.opener?.openHistory(root, beside: beside) } },
             repository: { [weak self] in self?.git?.repositoryRoot },
-            active: { [weak self] in self?.tabs?.activeDocument as? HistoryDocument }))
+            // The sidebar's history when the tab in front is not one: its
+            // right-click menu runs these too.
+            active: { [weak self] in self?.tabs?.activeDocument as? HistoryDocument ?? self?.sidebarHistory }))
         commands.register(EditorCommands.all { [weak self] in self?.tabs?.activeDocument as? EditorDocument })
         commands.register(MediaCommands.all { [weak self] in self?.tabs?.activeDocument as? MediaDocument })
         commands.register(PreviewCommands.all(open: { [weak self] url, beside in self?.openPreview(url, beside: beside) },

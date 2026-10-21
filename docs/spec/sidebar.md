@@ -14,8 +14,12 @@ em que ordem.
 - Só entra na barra o que mostra uma página nela. Files, Git e Git History são páginas; Search, por
   enquanto, abre a busca no ⌘K. Web Preview e Spaces abriam coisa em outro lugar e saíram (o dono,
   2026-10-21).
-- Git History na barra lateral: o grafo e a descrição de cada commit numa linha, sem as colunas de
-  autor, data e commit, e os detalhes do commit escolhido embaixo; clicar num arquivo abre o diff.
+- Git History na barra lateral: cada commit em duas linhas, o grafo e a descrição (com as
+  etiquetas de branch e tag) sobre o autor, há quanto tempo e o hash curto. Clicar num commit abre
+  os arquivos dele logo abaixo, com o grafo continuando por trás; clicar de novo fecha; clicar
+  num arquivo abre o diff no painel principal. Sem painel de detalhes na barra: o clique direito
+  (e o ⌘K) tem "Show Commit Details in a Tab", que abre a aba do histórico com o commit escolhido,
+  "Copy SHA" e "Open on Remote".
   Fora de um repositório, "Not a Git repository". A aba do histórico (git.history) continua igual.
 - Página que ninguém abriu não existe: o histórico só é lido na primeira vez que a página aparece.
 - Cada ícone pode ter um sinal pequeno: o Git, o número de mudanças; o Agents, um ponto quando algum

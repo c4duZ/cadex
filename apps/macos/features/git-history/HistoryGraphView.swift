@@ -19,6 +19,11 @@ final class HistoryGraphView: NSView {
     var graph: HistoryCommit.Graph? {
         didSet { needsDisplay = true }
     }
+    /// Lanes that only pass through, top to bottom, without a dot: under
+    /// an open commit in the sidebar, behind its files.
+    var passing: [HistoryCommit.Segment] = [] {
+        didSet { needsDisplay = true }
+    }
     /// A merge's dot is hollow.
     var isMerge = false
     var isHead = false
@@ -38,6 +43,7 @@ final class HistoryGraphView: NSView {
     }
 
     override func draw(_ dirtyRect: NSRect) {
+        for s in passing { line(from: NSPoint(x: x(s.to), y: 0), to: NSPoint(x: x(s.to), y: bounds.height), color: s.color) }
         guard let graph else { return }
         let mid = bounds.midY
         let height = bounds.height

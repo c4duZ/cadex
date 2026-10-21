@@ -91,6 +91,7 @@ public final class HistoryDocument: TabDocument {
             return
         }
         historyView.render()
+        if let pendingSha, commits.contains(where: { $0.sha == pendingSha }) { select(sha: pendingSha) }
         if reloadPending {
             reloadPending = false
             reload()
@@ -143,6 +144,22 @@ public final class HistoryDocument: TabDocument {
         historyView.render()
         if searchLog != nil { searchRepository(filter) }
         reload()
+    }
+
+    /// The selected commit's SHA (the sidebar's history.show-in-tab).
+    public var selectedSha: String? { selected?.sha }
+    private var pendingSha: String?
+
+    /// Selects a commit by SHA, now if it is loaded, or when its page comes
+    /// (a tab opened from the sidebar is still reading its log).
+    public func select(sha: String) {
+        if let commit = commits.first(where: { $0.sha == sha }) {
+            pendingSha = nil
+            select(commit)
+            historyView.render()
+        } else {
+            pendingSha = sha
+        }
     }
 
     func select(_ commit: HistoryCommit?) {

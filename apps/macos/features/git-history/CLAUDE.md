@@ -15,7 +15,13 @@
   atual, detalhes e URL do remoto do commit selecionado, recarga quando algo muda em .git
   (`diskChanged`, vindo do watcher do explorer pelo app).
 - `compact` (a página Git History da barra lateral): só o grafo e a descrição, sem títulos de
-  coluna, autor, data, sha, caixa de seleção e contagem. A descrição nunca quebra linha (com
+  coluna, autor, data, sha, caixa de seleção, contagem nem painel de detalhes. As linhas são de
+  `HistoryCompactRows.swift`: cada commit em duas linhas (descrição; autor · tempo · sha), clicar
+  abre os arquivos dele embaixo com o grafo passando por trás (`passing` do
+  `HistoryGraphView.swift`), clicar num arquivo abre o diff; o clique direito roda
+  history.show-in-tab (registrado pelo app, abre a aba com o commit: `select(sha:)`),
+  history.copy-sha e history.open-remote, que agem no histórico da barra quando a aba da frente não
+  é um. Como VS Code e GitLens fazem na barra lateral, pela documentação deles (2026-10-21). A descrição nunca quebra linha (com
   etiquetas, quebrava por cima da linha de baixo; print do dono, 2026-10-21); os detalhes ficam um
   embaixo do outro. O separador entre a lista e os detalhes tem 1 pt fixo: sem isso, na página
   estreita ele tomou a altura toda e a lista ficou com zero (conferido no app, 2026-10-21).

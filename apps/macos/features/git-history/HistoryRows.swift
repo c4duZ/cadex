@@ -25,6 +25,9 @@ final class HistoryRows: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         return f
     }()
 
+    /// "2 hours ago", in the interface's language.
+    static func relative(_ date: Date) -> String { dates.localizedString(for: date, relativeTo: Date()) }
+
     /// The full date, in the interface language like the relative one (the system's
     /// language may differ: the details read "17 October" on 2026-10-19).
     static let fullDates: DateFormatter = {
@@ -138,7 +141,7 @@ final class HistoryRows: NSObject, NSTableViewDataSource, NSTableViewDelegate {
 
     /// Each item runs a registered command on the clicked commit, which
     /// becomes the selection first so the command acts on it.
-    private func menuEntries(_ row: Int) -> [MenuEntry] {
+    func menuEntries(_ row: Int) -> [MenuEntry] {
         guard row >= 0 else { return [] }
         let items: [(String, String, Icon)] = [(T("Copy SHA", "Copiar sha"), "history.copy-sha", .copy), (T("Open on Remote", "Abrir no remoto"), "history.open-remote", .arrowSquareOut)]
         return items.map { title, id, icon in

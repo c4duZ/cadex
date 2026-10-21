@@ -92,13 +92,16 @@ final class FileOpener {
     }
 
     /// The repository's history in a tab; again, its tab, read again.
-    func openHistory(_ root: String, beside: Bool? = nil) {
+    func openHistory(_ root: String, beside: Bool? = nil, selecting sha: String? = nil) {
         guard let tabs = currentTabs() else { return }
         if let existing = tabs.document(identity: HistoryDocument.identity(for: root)) as? HistoryDocument {
             existing.reload()
+            if let sha { existing.select(sha: sha) }
             return tabs.open(existing)
         }
-        tabs.open(makeHistory(root), beside: beside ?? opensBeside())
+        let history = makeHistory(root)
+        if let sha { history.select(sha: sha) }
+        tabs.open(history, beside: beside ?? opensBeside())
     }
 
     /// A web page (a local server, a URL); again, its pane, loaded again.

@@ -8,7 +8,10 @@ import Strings
 @MainActor
 final class HistoryView: NSView, NSSearchFieldDelegate {
     weak var document: HistoryDocument? {
-        didSet { rows.document = document }
+        didSet {
+            rows.document = document
+            compactRows.document = document
+        }
     }
     let searchField = NSSearchField()
     private let currentOnly = NSButton(checkboxWithTitle: T("Current branch only", "Só a branch atual"), target: nil, action: nil)
@@ -16,6 +19,10 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
     private let count = NSTextField(labelWithString: "")
     let table = MenuTableView()
     private let rows = HistoryRows()
+    private let compactRows = HistoryCompactRows()
+    private(set) var isCompact = false
+    private var detailsShare: NSLayoutConstraint!
+    private var detailsNone: NSLayoutConstraint!
     private let scroll = NSScrollView()
     let detailsView = HistoryDetailsView()
     private let separator = NSBox()
@@ -38,12 +45,14 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         guard let document else { return }
         rows.commits = document.shown
         rows.showsGraph = document.showsGraph
+        compactRows.commits = rows.commits
+        compactRows.showsGraph = rows.showsGraph
         let lanes = rows.showsGraph ? rows.commits.lazy.compactMap(\.graph?.width).max() ?? 1 : 0
         let graphColumn = table.tableColumns[0]
         graphColumn.isHidden = !rows.showsGraph
         graphColumn.width = HistoryGraphView.width(lanes: lanes)
-        table.reloadData()
-        if let sha = document.selected?.sha, let row = rows.commits.firstIndex(where: { $0.sha == sha }) {
+        if isCompact { compactRows.reload() } else { table.reloadData() }
+        if !isCompact, let sha = document.selected?.sha, let row = rows.commits.firstIndex(where: { $0.sha == sha }) {
             rows.selecting = true
             table.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
             rows.selecting = false
@@ -78,9 +87,26 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
             : T("Filter by subject, author or SHA (Enter searches the repository)", "Filtrar por assunto, autor ou sha (Enter busca no repositório)")
         table.sizeLastColumnToFit()
         detailsView.setCompact(compact)
+        // The sidebar's rows: two lines per commit, files opening under it,
+        // and no details pane (HistoryCompactRows).
+        isCompact = compact
+        table.dataSource = compact ? compactRows : rows
+        table.delegate = compact ? compactRows : rows
+        table.contextEntries = compact
+            ? { [weak self] row in self?.compactRows.menuEntries(row) ?? [] }
+            : { [weak self] row in self?.rows.menuEntries(row) ?? [] }
+        table.target = compact ? compactRows : nil
+        table.action = compact ? #selector(HistoryCompactRows.clicked(_:)) : nil
+        compactRows.table = table
+        separator.isHidden = compact
+        detailsView.isHidden = compact
+        detailsShare.isActive = !compact
+        detailsNone.isActive = compact
+        render()
     }
 
     func showDetails() {
+        if isCompact { return compactRows.detailsArrived() }
         detailsView.show(document?.selected, details: document?.details)
     }
 
@@ -134,6 +160,8 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
             v.translatesAutoresizingMaskIntoConstraints = false
             addSubview(v)
         }
+        detailsShare = detailsView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 0.34)
+        detailsNone = detailsView.heightAnchor.constraint(equalToConstant: 0)
         NSLayoutConstraint.activate([
             top.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             top.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -157,7 +185,7 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
             detailsView.leadingAnchor.constraint(equalTo: leadingAnchor),
             detailsView.trailingAnchor.constraint(equalTo: trailingAnchor),
             detailsView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            detailsView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 0.34),
+            detailsShare,
             empty.centerXAnchor.constraint(equalTo: scroll.centerXAnchor),
             empty.centerYAnchor.constraint(equalTo: scroll.centerYAnchor),
         ])

@@ -152,10 +152,39 @@ let exitCode = await Checks.run([
         let table = document.historyView.table
         let listHeight = table.enclosingScrollView?.frame.height ?? 0
         expect(table.numberOfRows > 0 && listHeight > 200, "rows \(table.numberOfRows), list \(listHeight) high")
+        (table.dataSource as? HistoryCompactRows)?.press(0)
+        _ = await eventually { table.numberOfRows == 5 }
+        outer.layoutSubtreeIfNeeded()
         if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"], let bitmap = outer.bitmapImageRepForCachingDisplay(in: outer.bounds) {
             outer.cacheDisplay(in: outer.bounds, to: bitmap)
             try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/history-repro.png"))
         }
+        try? FileManager.default.removeItem(atPath: repo)
+    }),
+    ("the sidebar's rows: a commit opens its files under it, a file opens its diff, a click closes it", {
+        expect(HistoryCompactRows.items(commits: 3, expandedAt: 1, files: 2) == [.commit(0), .commit(1), .file(1, 0), .file(1, 1), .commit(2)])
+        expect(HistoryCompactRows.items(commits: 2, expandedAt: nil, files: 5) == [.commit(0), .commit(1)])
+        let repo = mergedRepository()
+        let document = HistoryDocument(root: repo)
+        document.compact = true
+        _ = await eventually { document.state == .ready && document.commits.count == 4 }
+        let table = document.historyView.table
+        expect(table.numberOfRows == 4 && table.delegate?.tableView?(table, heightOfRow: 0) ?? 0 > 30, "two lines per commit")
+        let rows = table.dataSource as? HistoryCompactRows
+        rows?.press(0)
+        let opened = await eventually { table.numberOfRows == 5 }
+        expect(opened, "the merge's file shows under it: \(table.numberOfRows) rows")
+        var diffs: [String] = []
+        document.onOpenDiff = { _, _, path, _ in diffs.append(path) }
+        rows?.press(1)
+        expect(diffs == ["b.txt"], "\(diffs)")
+        rows?.press(0)
+        expect(table.numberOfRows == 4, "a second click closes it")
+        let sha = document.commits[2].sha
+        let other = HistoryDocument(root: repo)
+        other.select(sha: sha)
+        let picked = await eventually { other.selectedSha == sha }
+        expect(picked, "a SHA asked before the log came is selected when it comes")
         try? FileManager.default.removeItem(atPath: repo)
     }),
 ])
