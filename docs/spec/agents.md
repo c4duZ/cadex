@@ -37,6 +37,21 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
   cartão e no ⌘K ("Agents: Refresh Usage").
 - O Cadex só lê o login que o Claude Code guardou. Nunca renova, troca ou grava o login.
 
+### Notificações
+- Quando uma sessão que trabalhava passa a esperar você, o Cadex manda uma notificação do sistema
+  dizendo por quê: "Asks permission to run Bash", "Asked you a question" (também um plano para
+  aprovar) ou "Finished". O título é o projeto e a conta; o texto, o motivo e o nome da sessão.
+- O motivo vem do fim do log da conversa (os últimos 64 KB), lido uma vez por parada: a última
+  ferramenta pedida sem resposta é uma permissão, a de pergunta é uma pergunta, o fim de turno é
+  "terminou". Sem dizer, "Stopped and waits for you", contado como pergunta.
+- Cada tipo tem a sua imagem ao lado do texto (cadeado com chave, interrogação, ✓), branca na cor de
+  destaque do tema; o ícone à esquerda é o do app, que o macOS não deixa trocar.
+- Clicar leva ao terminal do agente, trazendo a janela, o space e a aba. Não avisa enquanto você
+  olha aquele terminal na janela da frente. Uma notificação por sessão: a nova troca a anterior.
+- Três chaves, cada tipo desligável sozinho: agents.notifyPermission, agents.notifyQuestion e
+  agents.notifyFinished, ligadas por padrão; com agents.sessions desligado, nenhuma.
+- Só no Mac por enquanto; no Windows chega com o port (lá dá para trocar o ícone da notificação).
+
 ### Configurações
 - Três chaves, cada uma desliga uma leitura por inteiro (nada vigiado, nenhuma requisição):
   agents.sessions, agents.accounts e, em ssh, ssh.ping. Ligadas por padrão.

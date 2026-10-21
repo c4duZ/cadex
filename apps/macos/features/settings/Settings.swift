@@ -115,6 +115,11 @@ public struct Settings: Equatable, Sendable {
         /// Read the agent sessions of every Claude Code account on this Mac
         /// (docs/spec/agents.md). Off: no file of theirs is opened.
         public var sessions = true
+        /// Notify when an agent stops: it asks permission, it asked a
+        /// question, it finished (docs/spec/agents.md, Notificações).
+        public var notifyPermission = true
+        public var notifyQuestion = true
+        public var notifyFinished = true
     }
 
     public struct StatusBar: Equatable, Sendable {

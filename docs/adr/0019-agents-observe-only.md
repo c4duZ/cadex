@@ -31,6 +31,13 @@ quanto custam:
   as duas leituras ficarem iguais, a parte comum desce para o núcleo.
 - **Formato de outro programa, lido com defesa.** Os arquivos são internos do Claude Code e podem
   mudar. Campo que falta é pulado; nada trava; a página diz o que não conseguiu ler.
+- **O fim do log, só numa parada (2026-10-21, notificações).** Para dizer por que um agente parou
+  (permissão, pergunta, terminou), o Cadex lê os últimos 64 KB do log da conversa daquela sessão,
+  uma vez, quando ela passa de trabalhando para esperando. Nunca o log inteiro, nunca fora de uma
+  parada. Os hooks do Claude Code dariam o motivo exato, mas exigem escrever na configuração dele.
+- **Sem fingir ser outro programa.** O ai-usagebar se identifica como o Claude Code nas
+  requisições (auditoria de 2026-10-21, `docs/plans/17-sidebar-agents-status.md`); o Cadex se
+  identifica como Cadex e espera quando o serviço pede.
 - **Tudo desligável e com custo zero desligado.** Cada leitura tem uma chave; desligada, nenhum
   arquivo é vigiado e nenhuma requisição sai. O orçamento: tudo ligado, no máximo 10% acima do app
   sem as leituras no `make perf`.

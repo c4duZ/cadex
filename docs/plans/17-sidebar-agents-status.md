@@ -67,6 +67,15 @@ command-palette, shortcuts, tabs, terminal · Decisões: `docs/adr/0019-agents-o
   sinal no título da aba do agente (o terminal diz quais pids são filhos de cada PTY) e o duplo
   clique que foca o terminal. Configuração agents.sessions. Comando agents.show (⇧⌘J; o ⇧⌘A é do
   manter acordado). Features: agents, sidebar, status-bar, tabs, terminal, settings.
+- **C2. Notificações (pedido do dono, 2026-10-21).** Quando um agente para e espera: pede permissão,
+  fez uma pergunta ou terminou, cada um com a sua chave e a sua imagem; o motivo pelo fim do log
+  (ADR 0019); clique leva ao terminal; nada enquanto você olha o terminal dele. Só Mac; no Windows
+  com o port. Features: agents, settings.
+- **Antes da D: auditoria do ai-usagebar** (autorizada pelo dono como exceção à ADR 0004, só
+  comportamento, 2026-10-21). Ele renova e regrava o OAuth dos CLIs e se identifica como Claude
+  Code; nada disso entra no Cadex. Serve: campos five_hour, seven_day, seven_day_sonnet e limits;
+  cache de 60 s, dado velho até 7 dias, pausa de 5 min depois de 429, timeouts de 10 s; o estado
+  "waiting" das sessões.
 - **D. Agents › Accounts e uso.** O token pelo `/usr/bin/security`, uma requisição por conta, a cada
   5 min só com alguém mostrando, espera crescente em erro, 429 respeitado, login vencido sem
   requisição até o registro da conta mudar. A página Accounts, o item Agent usage da barra de

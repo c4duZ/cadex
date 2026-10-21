@@ -6,6 +6,7 @@ import Sidebar
 import StatusBar
 import Strings
 import Terminal
+import Themes
 
 /// The Agents page, its icon's dot and the status bar's Agents item in this
 /// window (docs/spec/agents.md). All of them read through the one
@@ -78,5 +79,28 @@ extension WindowSession {
             return
         }
         if explorer?.reveal(session.cwd) == true { workspace?.showSidebar("files") } else { NSSound.beep() }
+    }
+}
+
+/// The notifications when an agent stops, for the whole app: not while you
+/// look at that agent's terminal in the key window; a click goes to it in
+/// whichever window holds it (docs/spec/agents.md, Notificações).
+extension AppDelegate {
+    func startAgentNotifications() {
+        let notifier = AgentNotifier.shared
+        notifier.isLooking = { [weak self] session in
+            guard NSApp.isActive, let key = self?.sessions.first(where: { $0.window.isKeyWindow }),
+                  let found = key.terminal(of: session) else { return false }
+            return key.tabs?.activeTerminal === found.terminal
+        }
+        notifier.onOpen = { [weak self] id in
+            guard let session = AgentsController.shared.sessions.first(where: { $0.id == id }) else { return }
+            let owner = self?.sessions.first { $0.terminal(of: session) != nil } ?? self?.sessions.first
+            NSApp.activate(ignoringOtherApps: true)
+            owner?.window.makeKeyAndOrderFront(nil)
+            owner?.openAgent(session)
+        }
+        ThemeStore.shared.observe { theme in AgentNotifier.shared.accent = theme.interface.accent.nsColor }
+        notifier.start()
     }
 }

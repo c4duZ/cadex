@@ -71,6 +71,10 @@ final class SettingsBridge {
         onSidebar?(settings.sidebar)
         onStatusBar?(settings.statusBar)
         AgentsController.shared.isEnabled = settings.agents.sessions
+        let agents = settings.agents
+        AgentNotifier.shared.kinds = .init(permission: agents.sessions && agents.notifyPermission,
+                                           question: agents.sessions && agents.notifyQuestion,
+                                           finished: agents.sessions && agents.notifyFinished)
         if settings.shortcuts != lastShortcuts {
             lastShortcuts = settings.shortcuts
             onShortcuts?(settings.shortcuts)

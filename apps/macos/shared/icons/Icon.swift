@@ -24,6 +24,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case caretRight = 0xE13A
     case caretUp = 0xE13C
     case check = 0xE182
+    case checkCircle = 0xE184
     case clipboardText = 0xE198
     case clockCounterClockwise = 0xE1A0
     case code = 0xE1BC
@@ -58,6 +59,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case info = 0xE2CE
     case keyboard = 0xE2D8
     case link = 0xE2E2
+    case lockKey = 0xE2FE
     case magnifyingGlass = 0xE30C
     case memory = 0xE9C4
     case minus = 0xE32A
@@ -65,6 +67,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case path = 0xE39C
     case pencilSimple = 0xE3B4
     case plus = 0xE3D4
+    case question = 0xE3E8
     case sidebar = 0xEAB6
     case slidersHorizontal = 0xE434
     case sparkle = 0xE6A2

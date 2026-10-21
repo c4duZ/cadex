@@ -85,6 +85,9 @@ public enum SettingsFile {
         }
         if let s = reader.section(root, "agents") {
             settings.agents.sessions = reader.bool(s, "agents.sessions") ?? settings.agents.sessions
+            settings.agents.notifyPermission = reader.bool(s, "agents.notifyPermission") ?? settings.agents.notifyPermission
+            settings.agents.notifyQuestion = reader.bool(s, "agents.notifyQuestion") ?? settings.agents.notifyQuestion
+            settings.agents.notifyFinished = reader.bool(s, "agents.notifyFinished") ?? settings.agents.notifyFinished
         }
         if let s = reader.section(root, "statusBar") {
             settings.statusBar.left = reader.strings(s, "statusBar.left") ?? settings.statusBar.left
@@ -127,7 +130,8 @@ public enum SettingsFile {
             "power": ["mode": s.power.mode, "onAtLaunch": s.power.onAtLaunch, "keepDisplayOn": s.power.keepDisplayOn],
             "sidebar": ["items": s.sidebar.items],
             "statusBar": ["left": s.statusBar.left, "right": s.statusBar.right],
-            "agents": ["sessions": s.agents.sessions],
+            "agents": ["sessions": s.agents.sessions, "notifyPermission": s.agents.notifyPermission,
+                       "notifyQuestion": s.agents.notifyQuestion, "notifyFinished": s.agents.notifyFinished],
             "shortcuts": shortcuts,
         ]
         return (try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])) ?? Data()

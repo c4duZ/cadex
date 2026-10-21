@@ -1,6 +1,7 @@
 import AppKit
 import Checks
 import Foundation
+import Icons
 @testable import Agents
 
 // Tests of the agents feature, on a fake home folder laid out the way
@@ -60,6 +61,7 @@ let exitCode = await Checks.run([
         expect(read.sessions.map(\.name) == ["tree-2"] && read.sessions.first?.status == .waiting, "\(read.sessions)")
         expect(read.unreadable == 1, "the broken file is counted, not fatal")
         expect(AgentSession.parse(["pid": 1, "sessionId": "x", "cwd": "/", "status": "thinking"], account: work)?.status == .other("thinking"))
+        expect(AgentSession.parse(["pid": 1, "sessionId": "x", "cwd": "/", "status": "waiting"], account: work)?.status == .waiting)
         expect(AgentSession.parse(["sessionId": "x"], account: work) == nil, "no pid, no session")
     }),
     ("projects: the repository above the folder and its branch, a worktree too", {
@@ -121,6 +123,63 @@ let exitCode = await Checks.run([
         let seen = await eventually { controller.sessions.contains { $0.id == "s9" } }
         expect(seen, "FSEvents brought it in")
         controller.stop(token)
+    }),
+    ("why it stopped, from the end of its log", {
+        func line(_ object: [String: Any]) -> String { String(decoding: try! JSONSerialization.data(withJSONObject: object), as: UTF8.self) }
+        func assistant(_ content: [[String: Any]], stop: String) -> String { line(["type": "assistant", "message": ["stop_reason": stop, "content": content]]) }
+        let bash = assistant([["type": "tool_use", "id": "t1", "name": "Bash"]], stop: "tool_use")
+        let result = line(["type": "user", "message": ["content": [["type": "tool_result", "tool_use_id": "t1"]]]])
+        let done = assistant([["type": "text", "text": "pronto"]], stop: "end_turn")
+        let meta = line(["type": "system", "subtype": "turn_duration"])
+        expect(AgentStop.classify([assistant([["type": "thinking"]], stop: "tool_use"), bash]) == .permission("Bash"))
+        expect(AgentStop.classify([assistant([["type": "tool_use", "id": "q", "name": "AskUserQuestion"]], stop: "tool_use")]) == .question)
+        expect(AgentStop.classify([assistant([["type": "tool_use", "id": "p", "name": "ExitPlanMode"]], stop: "tool_use")]) == .question, "a plan to approve")
+        expect(AgentStop.classify([bash, result, done, meta]) == .finished, "\(AgentStop.classify([bash, result, done, meta]))")
+        expect(AgentStop.classify([bash, result]) == .unknown, "answered: working, not waiting")
+        expect(AgentStop.classify([done, line(["type": "user", "message": ["content": "e agora?"]])]) == .unknown, "you wrote after it")
+        expect(AgentStop.classify(["not json", meta]) == .unknown)
+    }),
+    ("a notification only when a working agent starts waiting, by kind, and not while you look", {
+        let home = fakeHome()
+        defer { try? fm.removeItem(atPath: home) }
+        let controller = AgentsController.shared
+        controller.home = home
+        let notifier = AgentNotifier(controller: controller)
+        var stops: [String] = []
+        notifier.didStop = { session, _ in stops.append(session.name) }
+        notifier.kinds = .init(permission: false, question: true, finished: true)
+        let me = ProcessInfo.processInfo.processIdentifier
+        let file = home + "/.claude/sessions/1.json"
+        let log = AgentStop.log(of: AgentSession.read(AgentAccount.find(home: home)[0]).sessions[0])
+        write(log, #"{"type":"assistant","message":{"stop_reason":"end_turn","content":[{"type":"text","text":"ok"}]}}"#)
+        write(file, #"{"pid":\#(me),"sessionId":"s1","cwd":"\#(home)/repo/sub","name":"repo-1","status":"idle","statusUpdatedAt":1792000200000}"#)
+        controller.reload()
+        notifier.changed()
+        expect(stops == ["repo-1"], "working → waiting, finished: \(stops)")
+        notifier.changed()
+        expect(stops == ["repo-1"], "still waiting: once")
+        write(file, #"{"pid":\#(me),"sessionId":"s1","cwd":"\#(home)/repo/sub","name":"repo-1","status":"busy","statusUpdatedAt":1792000300000}"#)
+        controller.reload()
+        notifier.changed()
+        notifier.isLooking = { _ in true }
+        write(file, #"{"pid":\#(me),"sessionId":"s1","cwd":"\#(home)/repo/sub","name":"repo-1","status":"idle","statusUpdatedAt":1792000400000}"#)
+        controller.reload()
+        notifier.changed()
+        expect(stops == ["repo-1"], "you were looking: none")
+        expect(!notifier.wants(.permission("Bash")) && notifier.wants(.question) && notifier.wants(.finished))
+        notifier.kinds = .init(permission: false, question: false, finished: false)
+        expect(!controller.isRunning, "all three off: it stops reading")
+    }),
+    ("an icon per kind, white on the accent", {
+        let png = AgentNotifyIcon.draw(.lockKey, accent: .orange)
+        expect((png?.count ?? 0) > 500)
+        expect(AgentNotifyIcon.icon(for: .permission("Bash")) == .lockKey && AgentNotifyIcon.icon(for: .question) == .question
+               && AgentNotifyIcon.icon(for: .finished) == .checkCircle)
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
+            for (name, icon) in [("permission", Icon.lockKey), ("question", .question), ("finished", .checkCircle)] {
+                try? AgentNotifyIcon.draw(icon, accent: NSColor(red: 0.85, green: 0.6, blue: 0.4, alpha: 1))?.write(to: URL(fileURLWithPath: dir + "/notify-\(name).png"))
+            }
+        }
     }),
     ("a picture of the page, with CADEX_SNAPSHOT_DIR", {
         guard let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }

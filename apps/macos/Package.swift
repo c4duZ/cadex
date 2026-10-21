@@ -248,7 +248,7 @@ let package = Package(
 
         .executableTarget(
             name: "AgentsTests",
-            dependencies: ["Agents", "Checks"],
+            dependencies: ["Agents", "Icons", "Checks"],
             path: "features/agents/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),

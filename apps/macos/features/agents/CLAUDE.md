@@ -31,10 +31,16 @@
 - `AgentsView.swift`: a página da barra lateral; lê só enquanto aparece. Clique abre e fecha os
   subagentes; duplo clique chama `onOpen`. `AgentRows.swift`: o sinal (anel girando, ponto azul,
   ✓), a linha clicável e os rótulos.
+- `AgentStop.swift`: por que uma sessão parou, do fim do log (64 KB, uma vez por parada):
+  permissão (ferramenta pedida sem resposta), pergunta (AskUserQuestion, ExitPlanMode), terminou
+  (fim de turno). `AgentNotifier.swift`: a notificação do sistema quando uma sessão passa de
+  trabalhando para esperando, por tipo (agents.notifyPermission, -Question, -Finished), nunca
+  enquanto você olha o terminal dele; só de dentro de um .app (fora dele a central do sistema para o
+  processo). `AgentNotifyIcon.swift`: a imagem de cada tipo, desenhada uma vez por cor no cache.
 - O app (`../../app/AgentsWiring.swift`) põe a página no catálogo da barra lateral (agents.show,
   ⇧⌘J), o ponto no ícone enquanto o ícone está lá, o item Agents da barra de status, e acha o
   terminal de cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo).
-- Status: fase C no código. Ainda não: a aba Accounts e o uso (fase D), o sinal no título da aba do
+- Status: fases C e C2 (notificações) no código. Ainda não: a aba Accounts e o uso (fase D), o sinal no título da aba do
   agente.
 
 ## Como validar
