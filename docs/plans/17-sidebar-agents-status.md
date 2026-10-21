@@ -81,6 +81,12 @@ command-palette, shortcuts, tabs, terminal · Decisões: `docs/adr/0019-agents-o
   requisição até o registro da conta mudar. A página Accounts, o item Agent usage da barra de
   status, renomear e esconder conta (agents.accountNames, agents.hiddenAccounts), agents.accounts.
   Comando agents.refresh-usage. Features: agents, status-bar, settings.
+- **D3. Uso por terminal, Codex e logos (pedido do dono, 2026-10-21, depois da E).** O item de uso
+  segue o terminal com foco: a conta do agente que roda nele, ou a última usada; passar o mouse abre
+  um popover com todas as contas de todos os provedores (sessão, semana, mês onde houver). Codex
+  como provedor (~/.codex e outras pastas dele; os limites talvez venham dos logos locais dele, a
+  conferir). Logos dos provedores pelo Simple Icons (CC0), exceção à regra do Phosphor numa ADR
+  nova, no NOTICE.
 - **E. SSH e portas.** Feature nova `ssh` (só app macOS): ler o `~/.ssh/config` com `Include`,
   vigiar o arquivo, testar por TCP (`Network`, 3 s) ao abrir e a cada 10 min com o item visível, o
   item SSH com o menu e o comando ssh.connect (abre aba com `ssh <host>`; lista no ⌘K), ssh.ping. O

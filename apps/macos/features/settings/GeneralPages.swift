@@ -79,6 +79,11 @@ enum GeneralPages {
                 SettingsPage.row(T("Notify when an agent finishes", "Avisar quando um agente termina"), nil,
                                  control: SettingsPage.toggle(store.settings.agents.notifyFinished) { on in store.update { $0.agents.notifyFinished = on } }),
 
+                SettingsPage.row(T("Test SSH hosts", "Testar os hosts SSH"),
+                                 T("While the SSH item shows in the status bar, each host of ~/.ssh/config gets a connection to its port, on open and every 10 minutes. No login, no command.",
+                                   "Enquanto o item SSH aparece na barra de status, cada host do ~/.ssh/config recebe uma conexão na porta dele, ao abrir e a cada 10 minutos. Sem login, sem comando."),
+                                 control: SettingsPage.toggle(store.settings.ssh.ping) { on in store.update { $0.ssh.ping = on } }),
+
                 SettingsPage.section(T("File tree", "Árvore de arquivos")),
                 SettingsPage.row(T("Follow the terminal", "Seguir o terminal"),
                                  T("When you cd in the focused terminal, the tree moves to that project: the top of its git repository, or the folder itself.",

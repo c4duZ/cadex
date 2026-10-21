@@ -129,6 +129,12 @@ public struct Settings: Equatable, Sendable {
         public var hiddenAccounts: [String] = []
     }
 
+    public struct SSH: Equatable, Sendable {
+        /// Test each host of ~/.ssh/config with a TCP connection while the
+        /// SSH item shows (docs/spec/ssh.md). Off: the list only.
+        public var ping = true
+    }
+
     public struct StatusBar: Equatable, Sendable {
         /// The items on each side, in order; an item in neither is hidden
         /// (docs/spec/status-bar.md). The app drops unknown ids.
@@ -147,6 +153,7 @@ public struct Settings: Equatable, Sendable {
     public var sidebar = Sidebar()
     public var statusBar = StatusBar()
     public var agents = Agents()
+    public var ssh = SSH()
     /// "cmd+shift+t" → command id, or nil to turn a default off.
     public var shortcuts: [String: String?] = [:]
 

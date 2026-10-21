@@ -1,6 +1,7 @@
 import Agents
 import AppKit
 import Settings
+import SSH
 import Tabs
 import Terminal
 import Themes
@@ -72,6 +73,7 @@ final class SettingsBridge {
         onStatusBar?(settings.statusBar)
         AgentsController.shared.isEnabled = settings.agents.sessions
         AgentUsageController.shared.isEnabled = settings.agents.accounts
+        SSHController.shared.pings = settings.ssh.ping
         AgentsController.shared.names = settings.agents.accountNames.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }
         AgentsController.shared.hidden = Set(settings.agents.hiddenAccounts.map(Self.expand))
         let agents = settings.agents

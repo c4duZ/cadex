@@ -30,7 +30,7 @@ extension WindowSession {
         terminalsItem.onVisible = { [weak self] visible in if visible { self?.countTerminals() } }
         self.terminalsLabel = terminals
         self.terminalsItem = terminalsItem
-        bar.add([branchItem, terminalsItem, makeAgentsItem(), makeUsageItem()] + SystemItems.all { [weak self] in _ = self?.commands.run("statusBar.activity-monitor") })
+        bar.add([branchItem, terminalsItem, makeAgentsItem(), makeUsageItem(), makePortsItem(), makeSSHItem()] + SystemItems.all { [weak self] in _ = self?.commands.run("statusBar.activity-monitor") })
         bar.run = { [weak self] id in _ = self?.commands.run(id) }
         bar.onLayoutChange = { [weak self] left, right in
             self?.settings.store.update {

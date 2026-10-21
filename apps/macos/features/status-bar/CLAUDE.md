@@ -29,12 +29,14 @@
   diferença de ticks) e a memória do próprio Cadex (phys_footprint), lidos a cada 2 s uma vez para o
   app inteiro, só com alguém olhando; sem ninguém, sem timer. `SystemItems.swift`: os itens RAM,
   CPU e Cadex memory.
+- `ListeningPorts.swift`: as portas TCP em LISTEN dos processos de um grupo (o da frente de cada
+  terminal), pelo libproc, sem lsof; o app faz o item Ports (`../../app/SSHWiring.swift`), lido a
+  cada 10 s e na troca de aba só enquanto aparece, e só com algum terminal rodando programa.
 - `StatusBarCommands.swift`: statusBar.customize, statusBar.toggle-item (a lista no ⌘K) e
   statusBar.activity-monitor (o clique em RAM, CPU e memória).
 - O app (`../../app/StatusBarWiring.swift`) soma Git branch (do status que o painel do Git já lê) e
   Terminals, e salva os lados.
-- Spec em `../../../../docs/spec/status-bar.md`. Status: fase B no código; Agents, Agent usage, SSH
-  e Ports chegam nas fases C a E.
+- Spec em `../../../../docs/spec/status-bar.md`. Status: fases B a E no código (itens Agents, Agent usage, SSH e Ports somados pelo app).
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
 ## Como validar

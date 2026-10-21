@@ -56,6 +56,9 @@ final class WindowSession: NSObject, NSWindowDelegate {
     weak var agentsPage: AgentsView?
     /// The status bar's Agent usage item, for the theme's colors.
     weak var usageStrip: AgentUsageStrip?
+    /// The Ports item's label and what it last read (SSHWiring.swift).
+    weak var portsLabel: StatusLabel?
+    var ports: [UInt16] = []
 
     var settings: SettingsBridge { app.settings }
 

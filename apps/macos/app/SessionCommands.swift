@@ -10,6 +10,7 @@ import Power
 import Preview
 import Search
 import Settings
+import SSH
 import Sidebar
 import SourceControl
 import StatusBar
@@ -49,6 +50,7 @@ extension WindowSession {
                                                 terminalFolder: { [weak self] in self?.tabs?.activeTerminal?.currentDirectory }))
         commands.register(TabCommands.all { [weak self] in self?.tabs })
         commands.register(SidebarCommands.all({ [weak self] in self?.workspace?.sidebar }, palette: palette))
+        commands.register(SSHCommands.all(palette: palette) { [weak self] alias in self?.connectSSH(alias) })
         commands.register(StatusBarCommands.all({ [weak self] in self?.workspace?.statusBar }, palette: palette,
                                                 customize: { [weak self] in self?.openCustomize("statusBar") }))
         makeSpaces(palette: palette)
@@ -183,6 +185,8 @@ extension WindowSession {
             self?.terminalFolderMoved(terminal?.currentDirectory)
             self?.refreshWorkColor()
             self?.countTerminals()
+            // Ports are read again on a tab or pane switch, only while the item shows.
+            if let self, let label = self.portsLabel, label.window != nil { self.readPorts(into: label) }
         }
     }
 }

@@ -56,6 +56,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case gitCommit = 0xE27A
     case gitDiff = 0xE27C
     case globe = 0xE288
+    case hardDrives = 0xE2A0
     case info = 0xE2CE
     case keyboard = 0xE2D8
     case link = 0xE2E2
@@ -66,6 +67,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case palette = 0xE6C8
     case path = 0xE39C
     case pencilSimple = 0xE3B4
+    case plug = 0xE946
     case plus = 0xE3D4
     case question = 0xE3E8
     case sidebar = 0xEAB6

@@ -95,6 +95,9 @@ public enum SettingsFile {
                 else { reader.problems.append("agents.accountNames: esperava nomes por pasta") }
             }
         }
+        if let s = reader.section(root, "ssh") {
+            settings.ssh.ping = reader.bool(s, "ssh.ping") ?? settings.ssh.ping
+        }
         if let s = reader.section(root, "statusBar") {
             settings.statusBar.left = reader.strings(s, "statusBar.left") ?? settings.statusBar.left
             settings.statusBar.right = reader.strings(s, "statusBar.right") ?? settings.statusBar.right
@@ -136,6 +139,7 @@ public enum SettingsFile {
             "power": ["mode": s.power.mode, "onAtLaunch": s.power.onAtLaunch, "keepDisplayOn": s.power.keepDisplayOn],
             "sidebar": ["items": s.sidebar.items],
             "statusBar": ["left": s.statusBar.left, "right": s.statusBar.right],
+            "ssh": ["ping": s.ssh.ping],
             "agents": ["sessions": s.agents.sessions, "notifyPermission": s.agents.notifyPermission,
                        "notifyQuestion": s.agents.notifyQuestion, "notifyFinished": s.agents.notifyFinished,
                        "accounts": s.agents.accounts, "accountNames": s.agents.accountNames, "hiddenAccounts": s.agents.hiddenAccounts],
