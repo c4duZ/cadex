@@ -35,12 +35,6 @@ let exitCode = await Checks.run([
         let order = SidebarLayout.customizeOrder(shown: ["git", "files"], known: known)
         expect(order == ["git", "files", "search", "history", "preview"], "\(order)")
     }),
-    ("a dragged icon lands in the slot under it", {
-        let widths: [CGFloat] = [30, 30, 30]
-        expect(SidebarLayout.dropIndex(at: 5, widths: widths, spacing: 2) == 0)
-        expect(SidebarLayout.dropIndex(at: 40, widths: widths, spacing: 2) == 1)
-        expect(SidebarLayout.dropIndex(at: 200, widths: widths, spacing: 2) == 2)
-    }),
     ("icons that do not fit leave room for the more button", {
         expect(SidebarLayout.fitting(4, iconWidth: 30, spacing: 2, width: 200) == 4)
         // 4 icons need 126; with 100, 2 icons and "…" fit (94).
@@ -110,30 +104,16 @@ let exitCode = await Checks.run([
         drag(from: step / 2, to: step * 2.6)
         expect(orders.last == ["search", "git", "files"], "two slots in one drag: \(orders)")
     }),
-    ("dragging a Customize row reorders the list while the mouse moves, the row on top", {
-        let list = SidebarCustomizeList()
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 300, height: 200), styleMask: [.borderless], backing: .buffered, defer: false)
-        window.contentView?.addSubview(list)
-        list.frame = NSRect(x: 0, y: 0, width: 300, height: 120)
-        list.show(catalog(), shown: ["files", "git"], colors: SidebarColors())
-        list.layoutSubtreeIfNeeded()
-        var moves: [String] = []
-        list.onMove = { id, index in moves.append("\(id)@\(index)") }
-        let step = SidebarCustomizeList.rowHeight + SidebarCustomizeList.spacing
-        @MainActor func event(_ type: NSEvent.EventType, _ y: CGFloat) -> NSEvent {
-            NSEvent.mouseEvent(with: type, location: list.convert(NSPoint(x: 20, y: y), to: nil), modifierFlags: [], timestamp: 0,
-                               windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)!
-        }
-        list.mouseDown(with: event(.leftMouseDown, step / 2))
-        var y = step / 2
-        while y < step * 1.5 {
-            y += 4
-            list.mouseDragged(with: event(.leftMouseDragged, y))
-        }
-        expect(list.rows.map(\.id) == ["search", "files", "git"], "reordered before the mouse goes up: \(list.rows.map(\.id))")
-        expect(list.subviews.last === list.rows[1], "the dragged row is on top")
-        list.mouseUp(with: event(.leftMouseUp, y))
-        expect(moves == ["files@1"], "\(moves)")
+    ("Customize lists every page under one title, the shown ones first, with switch and shortcut", {
+        let items = catalog() + [SidebarItem(id: "history", icon: .clockCounterClockwise, title: "Git History", command: "git.show-history",
+                                             shortcut: "⇧⌘Y", kind: .page(NSView()))]
+        let view = SidebarView(catalog: items) { _ in }
+        view.setItems(["git", "files"])
+        let entries = view.customizeEntries()
+        expect(entries.first == .header("Sidebar icons"))
+        expect(entries.compactMap(\.row).map(\.id) == ["git", "files", "search", "history"])
+        expect(entries.compactMap(\.row).map(\.on) == [true, true, false, false])
+        expect(entries.compactMap(\.row).last?.trailing == "⇧⌘Y")
     }),
     ("a picture of the sidebar, with CADEX_SNAPSHOT_DIR", {
         for (name, width) in [("sidebar", 260.0), ("sidebar-narrow", 150.0)] {
@@ -152,18 +132,6 @@ let exitCode = await Checks.run([
             view.frame = NSRect(x: 0, y: 0, width: width, height: 200)
             snapshot(view, name)
         }
-    }),
-    ("a picture of the Customize card, with CADEX_SNAPSHOT_DIR", {
-        let colors = SidebarColors(text: .white, secondary: NSColor(white: 0.62, alpha: 1), fill: NSColor(white: 0.2, alpha: 1),
-                                   accent: NSColor(red: 0.88, green: 0.64, blue: 0.35, alpha: 1), panel: NSColor(white: 0.11, alpha: 1),
-                                   box: NSColor(white: 0.15, alpha: 1), border: NSColor(white: 0.22, alpha: 1))
-        let items = catalog() + [SidebarItem(id: "history", icon: .clockCounterClockwise, title: "Git History", command: "git.history", kind: .action),
-                                 SidebarItem(id: "preview", icon: .globe, title: "Web Preview", command: "preview.open", shortcut: "⇧⌘H", kind: .action)]
-        let panel = SidebarCustomizePanel(catalog: items, shown: ["files", "search", "git"], colors: colors) { _ in }
-        guard let card = panel.contentView else { return expect(false) }
-        card.layoutSubtreeIfNeeded()
-        card.frame = NSRect(origin: .zero, size: card.fittingSize)
-        snapshot(card, "customize")
     }),
 ])
 

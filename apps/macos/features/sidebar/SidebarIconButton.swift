@@ -1,4 +1,5 @@
 import AppKit
+import Customize
 import Icons
 import Menus
 import UILooks
@@ -109,4 +110,7 @@ public struct SidebarColors {
         self.box = box
         self.border = border
     }
+
+    /// For the Customize window.
+    var customize: CustomizeColors { CustomizeColors(text: text, secondary: secondary, accent: accent, panel: panel, box: box) }
 }

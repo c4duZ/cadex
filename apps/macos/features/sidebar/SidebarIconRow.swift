@@ -1,4 +1,5 @@
 import AppKit
+import Customize
 import Icons
 import Strings
 import UILooks
@@ -124,7 +125,7 @@ final class SidebarIconRow: NSView {
         // its new slot after a swap made it jump past its neighbour.
         current.button.frame.origin.x = min(max(current.originX + dx, 0), slot(fitCount - 1).x)
         let widths = Array(repeating: SidebarIconButton.size.width, count: fitCount)
-        let to = SidebarLayout.dropIndex(at: current.button.frame.midX, widths: widths, spacing: Self.spacing)
+        let to = CustomizeLayout.dropIndex(at: current.button.frame.midX, widths: widths, spacing: Self.spacing)
         if to != from {
             buttons.remove(at: from)
             buttons.insert(current.button, at: to)

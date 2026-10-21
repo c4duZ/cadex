@@ -83,17 +83,25 @@ let package = Package(
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
+        // The Customize window: show, hide and drag things into place (sidebar, status bar).
+        .target(
+            name: "Customize",
+            dependencies: ["Icons", "Strings", "UILooks"],
+            path: "shared/customize",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
         // The column on the left: icons on top, the chosen page below (docs/spec/sidebar.md).
         .target(
             name: "Sidebar",
-            dependencies: ["CommandPalette", "Icons", "Menus", "Strings", "UILooks"],
+            dependencies: ["CommandPalette", "Customize", "Icons", "Menus", "Strings", "UILooks"],
             path: "features/sidebar",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
         .target(
             name: "StatusBar",
-            dependencies: ["Icons", "Menus", "Strings", "UILooks"],
+            dependencies: ["CommandPalette", "Customize", "Icons", "Menus", "Strings", "UILooks"],
             path: "features/status-bar",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -230,6 +238,12 @@ let package = Package(
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
 
+        .executableTarget(
+            name: "CustomizeTests",
+            dependencies: ["Customize", "Checks"],
+            path: "shared/customize/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
         .executableTarget(
             name: "SidebarTests",
             dependencies: ["Sidebar", "Checks"],
