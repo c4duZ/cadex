@@ -5,9 +5,11 @@ scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem con
 
 - `build.sh` (ou `make package`): monta dist/Cadex.app na raiz do repositório, universal, com o
   `Info.plist` desta pasta (bundle id io.github.c4duz.cadex, versão, categoria, pastas e arquivos
-  soltos no ícone do Dock; texto, código, imagem, vídeo, áudio e PDF declarados um a um, porque o
-  "Abrir com" do Finder esconde app que só declara public.item, e sempre Alternate, para nunca virar
-  o padrão de nada; http liberado só no conteúdo web, para o preview abrir sites sem https;
+  soltos no ícone do Dock; texto, código, imagem, vídeo, áudio e PDF declarados por tipo, ~150
+  extensões de desenvolvimento que o macOS não conhece (.toml, .lock, .tf) e o tipo do Roblox,
+  porque o "Abrir com" do Finder esconde app que só declara public.item, public.data ou "*"; sempre
+  Alternate, para nunca virar o padrão de nada. Arquivo sem extensão começado por ponto (.env,
+  .gitignore) não tem "Abrir com" para app nenhum; http liberado só no conteúdo web, para o preview abrir sites sem https;
   NSAppleEventsUsageDescription, sem a qual o macOS recusava em silêncio o AppleScript de quem roda
   num terminal do Cadex: o create-dmg da release falhou assim em 2026-10-20).
   Leva 1 min e meio.
