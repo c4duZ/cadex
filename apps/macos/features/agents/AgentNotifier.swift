@@ -59,8 +59,19 @@ public final class AgentNotifier: NSObject {
     /// Starts following the sessions (called once settings are read), and
     /// takes the clicks on notifications posted before a relaunch.
     public func start() {
-        if Self.canPost { UNUserNotificationCenter.current().delegate = self }
+        if Self.canPost {
+            UNUserNotificationCenter.current().delegate = self
+            // Asked when the app opens, not at the first stop: a notification
+            // added while the question is up is dropped (found testing, 2026-10-21).
+            if kinds.any { askPermission() }
+        }
         update()
+    }
+
+    private func askPermission() {
+        guard !asked else { return }
+        asked = true
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
     }
 
     /// A session that was working and now waits: why, and a notification
@@ -89,10 +100,7 @@ public final class AgentNotifier: NSObject {
     private func post(_ session: AgentSession, _ stop: AgentStop) {
         guard Self.canPost else { return }
         let center = UNUserNotificationCenter.current()
-        if !asked {
-            asked = true
-            center.requestAuthorization(options: [.alert, .sound]) { _, _ in }
-        }
+        askPermission()
         let content = UNMutableNotificationContent()
         let project = AgentProject.of(session.cwd).name
         content.title = "\(project) · \(session.account.name)"
