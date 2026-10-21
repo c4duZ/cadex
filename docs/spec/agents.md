@@ -29,6 +29,21 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
 - As linhas acendem ao passar o ponteiro (0,12 s) e escurecem ao apertar: o clique responde antes
   de a ação acontecer. Antes o ponto ficava acima do nome e nada se mexia (o dono achou travado,
   2026-10-21); o clique indo ao terminal foi testado e desfeito no mesmo dia.
+### Conversa do subagente
+- Clicar num subagente (rodando ou já terminado) abre a conversa dele numa aba só de leitura, ao
+  lado ou em aba nova como os arquivos (general.openFiles); de novo, vai à aba que já existe. Só
+  abre por esse clique: não há comando nem atalho (o dono, 2026-10-21).
+- O jeito é o do Claude Code no terminal, na fonte monoespaçada: a tarefa e as mensagens depois de
+  "> " num fundo suave; as respostas com "●" e o Markdown delas (negrito, código, títulos, listas);
+  cada ferramenta como "● Bash(make test)" e embaixo "⎿" com as três primeiras linhas do que voltou
+  e "… +N lines" (em vermelho se falhou); um Edit mostra as linhas que saem em vermelho e as que
+  entram em verde. O raciocínio e as marcas do Esc ficam de fora.
+- Enquanto o subagente escreve, a aba acompanha: o sistema avisa que o arquivo cresceu e só o trecho
+  novo é lido; se a vista estava no fim, ela desce junto.
+- Peso: o log é lido em pedaços de 256 KB fora da linha principal; um resultado longo nunca é
+  guardado (os primeiros 4 KB dão a prévia, as linhas são contadas enquanto os bytes passam). Uma
+  vista de texto só, que desenha só o que aparece. Fechada a aba, nada fica: nenhuma leitura,
+  nenhum arquivo vigiado. O `make perf` abre um log de 34 MB e confere aberto e fechado.
 - Depois: a aba de terminal com um agente mostra o mesmo sinal de estado no título.
 
 ### Accounts

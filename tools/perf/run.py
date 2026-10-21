@@ -44,6 +44,9 @@ LIMITS = {
     "agent_cpu": 10.0,            # 2-4 % while a file is saved every 0.1 s
     "theme_switch_mb": 6,         # 0 MB over 300 switches after 150 to warm up (90 -> 90, 2026-10-20)
     "reading_flood_peak_mb": 200, # flood with minimum contrast 7 and ligatures on
+    "subagent_first_mb": 20,      # +6 to +9 MB: a 34 MB log's first opening, the text system included (2026-10-21)
+    "subagent_open_mb": 8,        # 0 to +2 MB each opening after (TextKit 1 had kept +20 and jumped 70)
+    "subagent_closed_mb": 5,      # +1 to +3 MB once its tab is closed again
 }
 # Themes the switch scenario goes through: official, tweakcn and base16.
 SWITCH_THEMES = ["caffeine", "catppuccin", "github-high-contrast", "gruvbox-soft", "tokyonight-storm", "0x96f", "nord"]
@@ -75,13 +78,14 @@ class TestApp:
     """A test Cadex with `load` in its terminal, opened on `folder` (None:
     no folder, the home one)."""
 
-    def __init__(self, load, folder, seconds=20, settings=None):
+    def __init__(self, load, folder, seconds=20, settings=None, extra_env=None):
         self.dir = tempfile.mkdtemp(prefix="cadex-perf-")
         self.settings_file = pathlib.Path(self.dir) / "settings.json"
         self.settings_file.write_text(json.dumps(settings or {}))
         env = dict(os.environ, CADEX_BACKGROUND="1", CADEX_SPACES_FILE=f"{self.dir}/spaces.json",
                    CADEX_SETTINGS_FILE=str(self.settings_file), CADEX_THEMES_DIR=f"{self.dir}/themes",
-                   SHELL=str(HERE / "loadshell.sh"), CADEX_LOAD=load, CADEX_LOAD_SECONDS=str(seconds))
+                   SHELL=str(HERE / "loadshell.sh"), CADEX_LOAD=load, CADEX_LOAD_SECONDS=str(seconds),
+                   **(extra_env or {}))
         args = [str(EXE)] + ([str(folder)] if folder else [])
         self.process = subprocess.Popen(args, env=env, cwd=str(folder or HOME),
                                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -110,8 +114,8 @@ class TestApp:
         shutil.rmtree(self.dir, ignore_errors=True)
 
 
-def scenario(name, load, folder, run, seconds=20, settings=None):
-    app = TestApp(load, folder, seconds, settings)
+def scenario(name, load, folder, run, seconds=20, settings=None, extra_env=None):
+    app = TestApp(load, folder, seconds, settings, extra_env)
     try:
         return run(app)
     finally:
@@ -181,6 +185,53 @@ def measure_reading_flood(app):
     return {"reading_flood_peak_mb": max(m for m, _ in app.sample(20))}
 
 
+def write_subagent_log(path):
+    """A log shaped like the largest on the owner's Mac (34 MB, ~30 KB of
+    replies, 2026-10-21): 150 short replies and tool calls, and 40 tool
+    results of ~800 KB, the weight the tab must never hold."""
+    with open(path, "w") as out:
+        out.write(json.dumps({"type": "user", "message": {"content": "Read every screen and report"}}) + "\n")
+        for i in range(150):
+            out.write(json.dumps({"type": "assistant", "message": {"content": [
+                {"type": "text", "text": f"Step {i}: " + "reading the next screen and comparing it. " * 4},
+                {"type": "tool_use", "id": f"t{i}", "name": "Read", "input": {"file_path": f"/repo/screen{i}.swift"}}]}}) + "\n")
+            if i % 4 == 0:
+                out.write(json.dumps({"type": "user", "message": {"content": [
+                    {"type": "tool_result", "tool_use_id": f"t{i}", "content": "x" * 800_000}]}}) + "\n")
+
+
+def measure_subagent(app):
+    """A subagent's conversation opened at 12 s and 36 s and closed 12 s
+    after each by the app (CADEX_PERF_SUBAGENT_LOG). Memory every 0.5 s,
+    the median of each stretch so the 1 s jumps of switching tabs do not
+    count. The first opening also loads the text system once; the second
+    is what each one adds; after it closes nothing must stay."""
+    start = time.time()
+    curve = []
+    while time.time() - start < 55:
+        if app.process.poll() is not None:
+            raise RuntimeError(f"the app quit (status {app.process.returncode})")
+        curve.append((time.time() - start, footprint_mb(app.process.pid) or 0))
+        time.sleep(0.5)
+
+    def median(begin, end):
+        values = sorted(m for t, m in curve if begin <= t <= end)
+        return values[len(values) // 2] if values else 0
+    base, first, closed, second, after = median(7, 11), median(17, 23), median(30, 35), median(42, 47), median(52, 55)
+    print(f"    base {base:.0f} MB, first open {first:.0f}, closed {closed:.0f}, second open {second:.0f}, closed {after:.0f}")
+    return {"subagent_first_mb": first - base, "subagent_open_mb": second - closed, "subagent_closed_mb": after - closed}
+
+
+def subagent_scenario():
+    folder = tempfile.mkdtemp(prefix="cadex-perf-log-")
+    log = os.path.join(folder, "agent-perf.jsonl")
+    try:
+        write_subagent_log(log)
+        return scenario("subagent", "idle", ROOT, measure_subagent, seconds=70, extra_env={"CADEX_PERF_SUBAGENT_LOG": log})
+    finally:
+        shutil.rmtree(folder, ignore_errors=True)
+
+
 def build_probe():
     probe = pathlib.Path(tempfile.mkdtemp(prefix="cadex-probe-")) / "index_probe"
     subprocess.run(["clang", "-O2", "-I", str(ROOT / "core/include"), "-o", str(probe), str(HERE / "index_probe.c"),
@@ -221,6 +272,7 @@ def main():
              ("the home folder as the workspace", lambda: scenario("home", "idle", None, measure_home)),
              ("an agent saving files", lambda: scenario("agent", "idle", ROOT, measure_agent)),
              ("switching themes 300 times", lambda: scenario("themes", "idle", ROOT, measure_theme_switch)),
+             ("a subagent's 34 MB conversation, opened and closed", subagent_scenario),
              ("flooding with minimum contrast and ligatures", lambda: scenario(
                  "reading", "flood", ROOT, measure_reading_flood,
                  settings={"terminal": {"minimumContrast": 7, "fontFeatures": ["calt", "liga"]}}))]

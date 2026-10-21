@@ -102,7 +102,7 @@ let package = Package(
         // The agents running on this Mac, read only (docs/adr/0019-agents-observe-only.md).
         .target(
             name: "Agents",
-            dependencies: ["CommandPalette", "Icons", "Menus", "Strings", "UILooks"],
+            dependencies: ["CommandPalette", "Icons", "Menus", "Strings", "Tabs", "UILooks"],
             path: "features/agents",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]

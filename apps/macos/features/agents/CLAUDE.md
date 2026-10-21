@@ -10,8 +10,8 @@
   (`../../../../docs/adr/0019-agents-observe-only.md`). A exceção: abrir o agente de uma conta, que é
   digitar o comando dele num terminal.
 - Ler ou vigiar alguma coisa com ninguém olhando, ou com agents.sessions desligado.
-- Ler os logs das conversas: só o registro de cada sessão, as descrições dos subagentes e a data
-  dos logs deles.
+- Ler os logs das conversas: só o registro de cada sessão, as descrições dos subagentes, a data
+  dos logs deles e, num clique num subagente, a conversa dele enquanto a aba está aberta.
 - Travar ou mostrar erro porque uma versão nova do Claude Code mudou um arquivo: pula e conta.
 
 ## Como eu quero
@@ -58,6 +58,14 @@
   `CODEX_HOME`, a flag sem permissões), agents.open-account e agents.customize-accounts; a única coisa
   que o Cadex inicia (ADR 0019). Conta escondida volta quando o login muda (`fingerprint`,
   `onLoginChanged`).
+- A conversa de um subagente numa aba (`AgentTranscriptDocument.swift`, um `TabDocument`): só pelo
+  clique num subagente (`onOpenSubagent`). `AgentTranscript.swift` lê o log em pedaços, só o novo,
+  e nunca guarda um resultado longo (prévia dos primeiros 4 KB, linhas contadas);
+  `AgentTranscriptParse.swift` transforma cada linha em entradas (tarefa, resposta, ferramenta com o
+  diff de um Edit, prévia do resultado); `AgentTranscriptStyle.swift` e `AgentMarkdown.swift`
+  escrevem no jeito do Claude Code ("● Bash(…)", "⎿", Markdown) e `AgentTranscriptView.swift` mostra
+  tudo numa vista de texto só (uma view por entrada custava 25 MB). Vigia o arquivo por um evento do
+  sistema enquanto aberta; fechada, solta tudo.
 - O app (`../../app/AgentsWiring.swift`) põe as páginas Agents (agents.show, ⇧⌘J) e Accounts
   (agents.show-accounts) no catálogo da barra lateral, o ponto no ícone enquanto o ícone está lá, o item Agents da barra de status, e acha o
   terminal de cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo).

@@ -35,6 +35,13 @@ quanto custam:
   (permissão, pergunta, terminou), o Cadex lê os últimos 64 KB do log da conversa daquela sessão,
   uma vez, quando ela passa de trabalhando para esperando. Nunca o log inteiro, nunca fora de uma
   parada. Os hooks do Claude Code dariam o motivo exato, mas exigem escrever na configuração dele.
+- **A conversa de um subagente, só num clique (2026-10-21, pedido do dono).** Clicar num subagente
+  em Agents lê o log dele (`agent-<id>.jsonl`) para mostrar a conversa numa aba só de leitura. Só
+  enquanto a aba está aberta e só daquele subagente; nada é guardado em disco; resultados de
+  ferramentas viram três linhas de prévia e nunca ficam inteiros na memória. Não abre por comando,
+  atalho ou sozinho. Abrir o subagente dentro do próprio Claude Code foi estudado e recusado: só um
+  mod dele faria isso com segurança (contar setas no painel abre o errado) e isso exigiria escrever
+  na configuração do Claude Code.
 - **Sem fingir ser outro programa.** O ai-usagebar se identifica como o Claude Code nas
   requisições (auditoria de 2026-10-21, `docs/plans/17-sidebar-agents-status.md`); o Cadex se
   identifica como Cadex e espera quando o serviço pede.

@@ -16,6 +16,8 @@ public final class AgentsView: NSView {
     public var isInCadex: (AgentSession) -> Bool = { _ in false }
     /// A click: its terminal, or its folder when outside Cadex.
     public var onOpen: ((AgentSession) -> Void)?
+    /// A click on a subagent: its conversation in a tab (the app opens it).
+    public var onOpenSubagent: ((AgentSession, AgentSubagent) -> Void)?
     /// "Turn On" when agents.sessions is off.
     public var onEnable: (() -> Void)?
     public var colors = AgentColors() { didSet { render() } }

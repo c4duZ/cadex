@@ -382,6 +382,112 @@ let exitCode = await Checks.run([
         expect(page.folded.count == 1, "folded: \(page.folded)")
         window.contentView = nil
     }),
+    ("a subagent's log reads as task, replies and tools; results, thinking and Esc marks stay out", {
+        func line(_ object: [String: Any]) -> String { String(decoding: try! JSONSerialization.data(withJSONObject: object), as: UTF8.self) }
+        let lines = [
+            line(["type": "user", "message": ["role": "user", "content": "Find the bug in render.zig"]]),
+            line(["type": "attachment", "attachment": ["x": 1]]),
+            line(["type": "assistant", "message": ["content": [["type": "thinking", "thinking": "hmm"]]]]),
+            line(["type": "assistant", "message": ["content": [["type": "tool_use", "id": "t", "name": "Read", "input": ["file_path": "/a/b/render.zig"]]]]]),
+            line(["type": "user", "message": ["content": [["type": "tool_result", "tool_use_id": "t", "content": String(repeating: "x", count: 50_000)]]]]),
+            line(["type": "assistant", "message": ["content": [["type": "text", "text": "  Found it.  "]]]]),
+            line(["type": "user", "message": ["content": [["type": "text", "text": "[Request interrupted by user]"]]]]),
+            line(["type": "user", "message": ["content": [["type": "text", "text": "Now fix it"]]]]),
+            line(["type": "assistant", "message": ["content": [["type": "tool_use", "id": "b", "name": "Bash", "input": ["command": "make test\necho done"]]]]]),
+        ]
+        let path = NSTemporaryDirectory() + "agent-\(UUID().uuidString).jsonl"
+        defer { try? fm.removeItem(atPath: path) }
+        // The last line comes in two writes, as a subagent still writing it.
+        let all = lines.joined(separator: "\n") + "\n"
+        let split = all.index(all.endIndex, offsetBy: -20)
+        try! String(all[..<split]).write(toFile: path, atomically: false, encoding: .utf8)
+        let reader = AgentTranscriptReader(path: path)
+        let first = reader.readNew()
+        let cut = String(repeating: "x", count: 160) + "…"
+        expect(first == [.prompt("Find the bug in render.zig"), .tool(name: "Read", subject: "render.zig", diff: []),
+                         .result(lines: [cut], more: 0, failed: false), .reply("Found it."), .prompt("Now fix it")], "\(first)")
+        let handle = FileHandle(forWritingAtPath: path)!
+        handle.seekToEndOfFile()
+        handle.write(Data(all[split...].utf8))
+        try? handle.close()
+        expect(reader.readNew() == [.tool(name: "Bash", subject: "make test", diff: [])], "only the new line, whole")
+        expect(reader.readNew().isEmpty)
+        expect(AgentTranscriptReader.entries(Data("{broken".utf8)).isEmpty)
+        // A long result: its first lines and how many more, never parsed whole.
+        let rows = (1...100).map { "line \($0) " + String(repeating: "é", count: 600) }.joined(separator: "\n")
+        let long = line(["type": "user", "message": ["content": [["tool_use_id": "t", "type": "tool_result", "content": rows]]]])
+        guard case .result(let shown, let more, false) = AgentTranscriptReader.entries(Data(long.utf8)).first else { return expect(false, "no preview") }
+        expect(shown.count == 3 && shown[0].hasPrefix("line 1 éé") && more == 97, "\(shown.map { $0.prefix(10) }) +\(more)")
+        // The same line read in pieces, as from a log on disk.
+        try! (long + "\n" + lines[5] + "\n").write(toFile: path, atomically: true, encoding: .utf8)
+        let pieces = AgentTranscriptReader(path: path).readNew()
+        expect(pieces.count == 2 && pieces.last == .reply("Found it."), "\(pieces.count)")
+        if case .result(_, let more, _) = pieces.first { expect(more == 97, "\(more)") } else { expect(false, "no preview in pieces") }
+        // An edit shows its lines out and in.
+        let edit = line(["type": "assistant", "message": ["content": [["type": "tool_use", "id": "e", "name": "Edit",
+                         "input": ["file_path": "/a/App.swift", "old_string": "let a = 1", "new_string": "let a = 2\nlet b = 3"]]]]])
+        expect(AgentTranscriptReader.entries(Data(edit.utf8)) == [.tool(name: "Edit", subject: "App.swift", diff: [
+            AgentDiffLine(added: false, text: "let a = 1"), AgentDiffLine(added: true, text: "let a = 2"), AgentDiffLine(added: true, text: "let b = 3")])])
+        let markdown = AgentMarkdown.render("## Found\n- **bold** and `code`", font: .systemFont(ofSize: 12), bold: .boldSystemFont(ofSize: 12), colors: AgentColors())
+        expect(markdown.string == "Found\n• bold and code", markdown.string)
+    }),
+    ("the conversation tab's weight on a real log, with CADEX_TRANSCRIPT_LOG", {
+        guard let path = ProcessInfo.processInfo.environment["CADEX_TRANSCRIPT_LOG"] else { return }
+        func footprint() -> Double {
+            var info = task_vm_info_data_t()
+            var count = mach_msg_type_number_t(MemoryLayout<task_vm_info_data_t>.size / MemoryLayout<integer_t>.size)
+            _ = withUnsafeMutablePointer(to: &info) { $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) { task_info(mach_task_self_, task_flavor_t(TASK_VM_INFO), $0, &count) } }
+            return Double(info.phys_footprint) / 1_048_576
+        }
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 720, height: 900), styleMask: [.borderless], backing: .buffered, defer: false)
+        // The window's own cost out of the count: one empty page laid out first.
+        let empty = AgentTranscriptDocument(path: "/nonexistent", title: "", detail: "", colors: AgentColors())
+        window.contentView = empty.view
+        empty.view.layoutSubtreeIfNeeded()
+        try? await Task.sleep(nanoseconds: 200_000_000)
+        let before = footprint()
+        if ProcessInfo.processInfo.environment["CADEX_TRANSCRIPT_REPEAT"] != nil {
+            for round in 1...5 {
+                let t = Date()
+                let entries = AgentTranscriptReader(path: path).readNew()
+                let again = AgentTranscriptDocument(path: path, title: "x", detail: "y", colors: AgentColors())
+                window.contentView = again.view
+                _ = await eventually { !again.drawnText.contains("Reading…") }
+                again.view.layoutSubtreeIfNeeded()
+                again.close()
+                window.contentView = empty.view
+                print(String(format: "round %d: %d entries, reader %.0f ms, footprint %.1f MB", round, entries.count, Date().timeIntervalSince(t) * 1000, footprint()))
+            }
+        }
+        let start = Date()
+        var document: AgentTranscriptDocument? = AgentTranscriptDocument(path: path, title: "Biggest log", detail: "general-purpose", colors: AgentColors(text: .white, secondary: NSColor(white: 0.62, alpha: 1), accent: .orange, fill: NSColor(white: 0.2, alpha: 1), border: NSColor(white: 0.3, alpha: 1)))
+        window.appearance = NSAppearance(named: .darkAqua)
+        window.backgroundColor = NSColor(white: 0.1, alpha: 1)
+        window.contentView = document!.view
+        _ = await eventually { !(document?.drawnText.contains("Reading…") ?? true) }
+        document!.view.layoutSubtreeIfNeeded()
+        let open = footprint()
+        let took = Date().timeIntervalSince(start)
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"], let page = document?.view {
+            let view = NSView(frame: page.bounds)
+            view.wantsLayer = true
+            view.layer?.backgroundColor = NSColor(white: 0.1, alpha: 1).cgColor
+            page.removeFromSuperview()
+            view.addSubview(page)
+            window.contentView = view
+            view.layoutSubtreeIfNeeded()
+            let scrollTo = Double(ProcessInfo.processInfo.environment["CADEX_TRANSCRIPT_AT"] ?? "0") ?? 0
+            if let document = (page.subviews.first as? NSScrollView)?.documentView { document.scroll(NSPoint(x: 0, y: document.frame.height * scrollTo)) }
+            guard let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
+            view.cacheDisplay(in: view.bounds, to: bitmap)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/subagent-conversation.png"))
+        }
+        document?.close()
+        window.contentView = nil
+        document = nil
+        try? await Task.sleep(nanoseconds: 300_000_000)
+        print(String(format: "transcript: before %.1f MB, open %.1f MB (+%.1f), closed %.1f MB, %.0f ms", before, open, open - before, footprint(), took * 1000))
+    }),
     ("a picture of the page, with CADEX_SNAPSHOT_DIR", {
         guard let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }
         let home = fakeHome()

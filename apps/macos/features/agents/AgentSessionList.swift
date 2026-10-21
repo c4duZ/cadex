@@ -113,10 +113,9 @@ extension AgentsView {
                                            AgentText.label(AgentTime.short(since: agent.lastWrite), size: 11, color: colors.secondary)])
             line.spacing = 7
             let row = AgentRow(line, inset: 25)
-            row.toolTip = "\(agent.type): \(agent.description)"
+            row.toolTip = "\(agent.type): \(agent.description)\n" + T("Click: its conversation in a tab", "Clique: a conversa dele numa aba")
             row.hoverFill = colors.fill.withAlphaComponent(0.5)
-            // A subagent runs inside its session: a click goes to that terminal.
-            row.onClick = { [weak self] in self?.onOpen?(session) }
+            row.onClick = { [weak self] in self?.onOpenSubagent?(session, agent) }
             rows.append(row)
         }
         return rows

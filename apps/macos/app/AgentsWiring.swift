@@ -20,6 +20,8 @@ extension WindowSession {
         page.subtab = list
         page.isInCadex = { [weak self] session in self?.terminal(of: session) != nil }
         page.onOpen = { [weak self] session in self?.openAgent(session) }
+        page.onOpenSubagent = { [weak self] session, agent in self?.openSubagent(agent, of: session) }
+        if list == "sessions" { openPerfTranscript() }
         page.onEnable = { [weak self] in self?.settings.store.update { $0.agents.sessions = true } }
         page.onHide = { [weak self] account, hide in self?.hideAccount(account, hide) }
         page.onLaunch = { [weak self] account in self?.launchAgent(for: account) }
@@ -120,6 +122,34 @@ extension WindowSession {
             if let terminal = space.tabs.allTerminals.first(where: { $0.foregroundGroup == group }) { return (index, terminal) }
         }
         return nil
+    }
+
+    /// A subagent's conversation in a tab, beside or new as files open; the
+    /// same subagent again selects its tab (docs/spec/agents.md).
+    func openSubagent(_ agent: AgentSubagent, of session: AgentSession) {
+        guard let tabs else { return }
+        let identity = AgentTranscriptDocument.identity(for: AgentTranscriptDocument.path(of: agent, in: session))
+        if let existing = tabs.document(identity: identity) { return tabs.open(existing) }
+        let document = AgentTranscriptDocument(session: session, agent: agent, colors: Self.agentColors())
+        ThemeStore.shared.observe { [weak document] _ in document?.colors = Self.agentColors() }
+        tabs.open(document, beside: settings.opensBeside)
+    }
+
+    /// `make perf` only (tools/perf/run.py): CADEX_PERF_SUBAGENT_LOG opens
+    /// that log's conversation at 12 s and 36 s after launch and closes it
+    /// 12 s after each, so the scenario tells the first opening's one-time
+    /// cost from each opening's and sees what stays once closed, no click.
+    private func openPerfTranscript() {
+        guard let path = ProcessInfo.processInfo.environment["CADEX_PERF_SUBAGENT_LOG"] else { return }
+        for start in [12.0, 36.0] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + start) { [weak self] in
+                self?.tabs?.open(AgentTranscriptDocument(path: path, title: "perf", detail: "", colors: Self.agentColors()), beside: false)
+            }
+            // Its tab has the focus: closing the focused pane closes it.
+            DispatchQueue.main.asyncAfter(deadline: .now() + start + 12) { [weak self] in
+                if self?.tabs?.activeDocument is AgentTranscriptDocument { self?.tabs?.closeFocusedPane() }
+            }
+        }
     }
 
     /// "Rename…" on an account: its name in Agents, the usage item and the
