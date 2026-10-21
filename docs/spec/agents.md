@@ -62,7 +62,10 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
 - "Send Test Notifications" (agents.test-notifications, no ⌘K) manda as três de exemplo; com as
   notificações do Cadex desligadas no macOS, abre a página dele nos Ajustes do Sistema.
 - Qualquer estado depois de trabalhando conta como parada (idle, waiting e shell, este o de um
-  turno que acabou de terminar, visto ao vivo em 2026-10-21); o fim do log diz o motivo.
+  turno que acabou de terminar, visto ao vivo em 2026-10-21); o fim do log diz o motivo, lido 1 s
+  depois da parada (o estado muda antes de o log receber a marca do Esc) e nada se voltou a trabalhar.
+- Parada por você (Esc; o log termina com "[Request interrupted by user…]") não avisa: você sabe
+  que parou (o dono, 2026-10-21).
 - Só no Mac por enquanto; no Windows chega com o port (lá dá para trocar o ícone da notificação).
 
 ### Configurações

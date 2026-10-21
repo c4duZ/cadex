@@ -139,6 +139,11 @@ let exitCode = await Checks.run([
         expect(AgentStop.classify([bash, result]) == .unknown, "answered: working, not waiting")
         expect(AgentStop.classify([done, line(["type": "user", "message": ["content": "e agora?"]])]) == .unknown, "you wrote after it")
         expect(AgentStop.classify(["not json", meta]) == .unknown)
+        // Esc: Claude Code's mark, after a tool asked or mid-answer, notifies nothing.
+        let esc = line(["type": "user", "message": ["content": [["type": "text", "text": "[Request interrupted by user for tool use]"]]]])
+        expect(AgentStop.classify([bash, esc]) == .interrupted)
+        expect(AgentStop.classify([done, line(["type": "user", "message": ["content": "[Request interrupted by user]"]])]) == .interrupted)
+        expect(!AgentNotifier.shared.wants(.interrupted))
     }),
     ("a notification only when a working agent starts waiting, by kind, and not while you look", {
         let home = fakeHome()
@@ -146,6 +151,7 @@ let exitCode = await Checks.run([
         let controller = AgentsController.shared
         controller.home = home
         let notifier = AgentNotifier(controller: controller)
+        notifier.stopDelay = 0
         var stops: [String] = []
         notifier.didStop = { session, _ in stops.append(session.name) }
         notifier.kinds = .init(permission: false, question: true, finished: true)
@@ -283,7 +289,7 @@ let exitCode = await Checks.run([
         expect(strip.shown()?.dir == "/a")
         strip.focused = nil
         expect(strip.shown()?.dir == "/a", "no agent in the terminal: the last one")
-        // The bar takes the free room, between 40 and 136 pt, and gives
+        // The bar takes the free room, between 40 and 88 pt, and gives
         // way first when a long left side pushes on it.
         strip.focused = "/b"
         func meterWidth(_ width: CGFloat, left: String) -> CGFloat {
@@ -301,8 +307,8 @@ let exitCode = await Checks.run([
         }
         let roomy = meterWidth(900, left: "folder")
         let tight = meterWidth(320, left: String(repeating: "long folder name ", count: 8))
-        expect(roomy == 136, "roomy: \(roomy)")
-        expect(tight >= 40 && tight < 136, "tight: \(tight)")
+        expect(roomy == 88, "roomy: \(roomy)")
+        expect(tight >= 40 && tight < 88, "tight: \(tight)")
         expect(AgentUsageStrip.short(AgentUsage(session: .init(percent: 19.4, resets: nil), week: .init(percent: 97, resets: nil), sonnetWeek: nil)) == "19% 5h · 97% wk")
         if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
             usage.plans["/a"] = "team"

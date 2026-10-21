@@ -13,7 +13,7 @@ A barra tem dois lados, esquerda e direita, e cada lado é uma lista de itens em
 | Folder | a trilha "Home › Cadu › Trabalho › cadex" do terminal com foco | ligado, esquerda |
 | Environment | "Local" no macOS (no Windows, a distro WSL) | ligado, direita |
 | Git branch | o branch do workspace, com ↑↓ de commits a enviar/receber | desligado |
-| Agent usage | por conta: barra da sessão de 5 h (cresce com o espaço livre, de 40 a 136 pt, metade das do popover), "58% 5h · 41% wk" (`agents.md`) | desligado |
+| Agent usage | por conta: barra da sessão de 5 h (cresce com o espaço livre, de 40 a 88 pt), "58% 5h · 41% wk" (`agents.md`) | desligado |
 | Agents | "◐ 1 · ● 2": trabalhando e esperando você | desligado |
 | RAM | memória do sistema em uso: "12.4 / 16 GB" | desligado |
 | CPU | uso do processador do sistema: "CPU 18%" | desligado |

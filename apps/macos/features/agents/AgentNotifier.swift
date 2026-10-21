@@ -33,6 +33,8 @@ public final class AgentNotifier: NSObject {
 
     /// Each stop that notifies, before it is posted (the tests' window in).
     var didStop: ((AgentSession, AgentStop) -> Void)?
+    /// How long after a stop its log is read; the tests read at once.
+    var stopDelay: TimeInterval = 1
     private let controller: AgentsController
     private var token: UUID?
     private var lastStatus: [String: AgentSession.Status] = [:]
@@ -82,12 +84,24 @@ public final class AgentNotifier: NSObject {
             now[session.id] = session.status
             // Any status after working is a stop: the end of the log says why.
             guard lastStatus[session.id] == .working, session.status != .working else { continue }
-            let stop = AgentStop.read(session)
-            guard wants(stop), !isLooking(session) else { continue }
-            didStop?(session, stop)
-            post(session, stop)
+            if stopDelay > 0 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + stopDelay) { [weak self] in MainActor.assumeIsolated { self?.stopped(session.id) } }
+            } else {
+                stopped(session.id)
+            }
         }
         lastStatus = now
+    }
+
+    /// Why the session stopped, read a moment after it did: the status
+    /// file can change before the log gets the Esc's mark, which read
+    /// at once looked like a finished turn. Nothing if it works again.
+    private func stopped(_ id: String) {
+        guard let session = controller.sessions.first(where: { $0.id == id }), session.status != .working else { return }
+        let stop = AgentStop.read(session)
+        guard wants(stop), !isLooking(session) else { return }
+        didStop?(session, stop)
+        post(session, stop)
     }
 
     func wants(_ stop: AgentStop) -> Bool {
@@ -95,6 +109,7 @@ public final class AgentNotifier: NSObject {
         case .permission: kinds.permission
         case .question, .unknown: kinds.question
         case .finished: kinds.finished
+        case .interrupted: false
         }
     }
 

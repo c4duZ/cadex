@@ -11,6 +11,9 @@ public enum AgentStop: Equatable, Sendable {
     case question
     /// It finished its turn.
     case finished
+    /// You stopped it (Esc): it waits because you asked, so nothing to
+    /// tell (the owner got "finished" after his own Esc, 2026-10-21).
+    case interrupted
     /// The log did not say.
     case unknown
 
@@ -48,6 +51,9 @@ public enum AgentStop: Equatable, Sendable {
             let content = message["content"] as? [[String: Any]] ?? []
             switch object["type"] as? String {
             case "user":
+                // Claude Code's mark for an Esc, with or without a tool asked.
+                let texts = content.compactMap { $0["text"] as? String } + [message["content"] as? String].compactMap { $0 }
+                if texts.contains(where: { $0.hasPrefix("[Request interrupted by user") }) { return .interrupted }
                 for part in content where part["type"] as? String == "tool_result" {
                     if let id = part["tool_use_id"] as? String { answered.insert(id) }
                 }
@@ -74,6 +80,7 @@ public enum AgentStop: Equatable, Sendable {
         case .permission(let tool): T("Asks permission to run \(tool)", "Pede permissão para rodar \(tool)")
         case .question: T("Asked you a question", "Fez uma pergunta")
         case .finished: T("Finished", "Terminou")
+        case .interrupted: T("Stopped by you", "Parado por você")
         case .unknown: T("Stopped and waits for you", "Parou e espera você")
         }
     }

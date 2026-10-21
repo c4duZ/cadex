@@ -73,17 +73,17 @@ public final class AgentUsageStrip: NSView {
         card?.refresh()
     }
 
-    /// The bar takes the status bar's free room, from 40 pt up to half the
-    /// popover's bars (136 pt): at 30 pt it was too small to read (the
-    /// owner, 2026-10-21). Below the other items' resistance, so it gives
+    /// The bar takes the status bar's free room, from 40 pt up to 88 pt: at
+    /// 30 pt it was too small to read, at 136 (half the popover's bars) too
+    /// long (the owner, 2026-10-21). Below the other items' resistance, so it gives
     /// way first when the window narrows.
     private func fit(_ meter: NSView) {
-        let wide = meter.widthAnchor.constraint(equalToConstant: UILooks.pt(136))
+        let wide = meter.widthAnchor.constraint(equalToConstant: UILooks.pt(88))
         wide.priority = NSLayoutConstraint.Priority(240)
         NSLayoutConstraint.activate([
             wide,
             meter.widthAnchor.constraint(greaterThanOrEqualToConstant: UILooks.pt(40)),
-            meter.widthAnchor.constraint(lessThanOrEqualToConstant: UILooks.pt(136)),
+            meter.widthAnchor.constraint(lessThanOrEqualToConstant: UILooks.pt(88)),
         ])
         meter.setContentCompressionResistancePriority(NSLayoutConstraint.Priority(240), for: .horizontal)
     }

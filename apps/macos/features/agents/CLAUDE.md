@@ -34,9 +34,9 @@
   ✓), a linha clicável e os rótulos.
 - `AgentStop.swift`: por que uma sessão parou, do fim do log (64 KB, uma vez por parada):
   permissão (ferramenta pedida sem resposta), pergunta (AskUserQuestion, ExitPlanMode), terminou
-  (fim de turno). `AgentNotifier.swift`: a notificação do sistema quando uma sessão passa de
-  trabalhando para esperando, por tipo (agents.notifyPermission, -Question, -Finished), nunca
-  enquanto você olha o terminal dele; só de dentro de um .app (fora dele a central do sistema para o
+  (fim de turno), parada por você (o Esc, que não avisa). `AgentNotifier.swift`: a notificação do sistema quando uma sessão passa de
+  trabalhando para esperando, por tipo (agents.notifyPermission, -Question, -Finished), lido 1 s depois da
+  parada, nunca enquanto você olha o terminal dele; só de dentro de um .app (fora dele a central do sistema para o
   processo). `AgentNotifyIcon.swift`: a imagem de cada tipo, desenhada uma vez por cor no cache.
 - `AgentUsage.swift`: o login (`AgentLogin`: o item do Keychain pelo hash da pasta, lido pelo
   `/usr/bin/security` a cada leitura, ou o .credentials.json; nunca guardado, renovado ou escrito),

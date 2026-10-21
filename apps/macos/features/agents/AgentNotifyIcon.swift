@@ -14,7 +14,7 @@ enum AgentNotifyIcon {
         switch stop {
         case .permission: .lockKey
         case .question, .unknown: .question
-        case .finished: .checkCircle
+        case .finished, .interrupted: .checkCircle
         }
     }
 
