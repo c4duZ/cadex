@@ -21,7 +21,7 @@ let package = Package(
             name: "Icons",
             path: "shared/icons",
             exclude: ["CLAUDE.md", "Resources/LICENSE-Phosphor.txt", "Resources/LICENSE-MaterialIconTheme.txt", "tests"],
-            resources: [.copy("Resources/Phosphor-Regular.ttf"), .copy("Resources/Phosphor-Fill.ttf"), .copy("Resources/FileIcons")]
+            resources: [.copy("Resources/Phosphor-Regular.ttf"), .copy("Resources/Phosphor-Fill.ttf"), .copy("Resources/FileIcons"), .copy("Resources/ProviderLogos")]
         ),
         // PNGs an agent can open, removed after a week: pasted images
         // (terminal) and pictures of picked elements (preview).

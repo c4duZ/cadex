@@ -19,5 +19,10 @@
   `../../../../tools/icons/build_file_icons.py`, ver `../../../../docs/adr/0011-material-file-icons.md`);
   sem ele, o glifo Phosphor pela extensão, com a cor da tabela do CodeEdit (MIT, no NOTICE).
 
+- `ProviderLogo.swift`: os logos dos provedores de IA (Lobe Icons e o Gemini do Simple Icons), só
+  para dizer de qual provedor é uma conta; exceção ao Phosphor na
+  `../../../../docs/adr/0020-provider-logos.md`. PDFs em `Resources/ProviderLogos`, gerados por
+  `../../../../tools/icons/build_provider_logos.py`.
+
 ## Como validar
-- `make macos-test` passa: todo caso tem glifo na fonte.
+- `make macos-test` passa: todo caso tem glifo na fonte, todo logo desenha alguma coisa.

@@ -67,7 +67,8 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 - Componente de terceiros entra no `NOTICE` na mesma tarefa que o adiciona.
 - Ícones: Phosphor em todo o app, pela fonte de ícones em `apps/macos/shared/icons/`
   (`docs/adr/0008-phosphor-icons.md`). Nada de SF Symbols. Exceção: ícones de tipo de arquivo e
-  pasta do Material Icon Theme (`docs/adr/0011-material-file-icons.md`).
+  pasta do Material Icon Theme (`docs/adr/0011-material-file-icons.md`) e logos dos provedores de IA
+  numa conta (`docs/adr/0020-provider-logos.md`).
 - Ao mudar ponto de entrada, regra ou comando de uma feature, atualize o `CLAUDE.md` dela junto.
 - Termo novo do domínio entra em `docs/CONTEXT.md`. Decisão que alguém proporia desfazer vira ADR.
 

@@ -38,5 +38,32 @@ let exitCode = await Checks.run([
         expect(FileIcons.folderImage(named: ".github") != nil)
         expect(FileIcons.folderImage(named: "minha-pasta") == nil)
     }),
+    ("each provider logo draws something, and a picture of them with CADEX_SNAPSHOT_DIR", {
+        let side: CGFloat = 48
+        let strip = NSImage(size: NSSize(width: side * CGFloat(ProviderLogo.allCases.count), height: side), flipped: false) { _ in
+            NSColor(white: 0.1, alpha: 1).setFill()
+            NSRect(x: 0, y: 0, width: side * CGFloat(ProviderLogo.allCases.count), height: side).fill()
+            for (index, logo) in ProviderLogo.allCases.enumerated() {
+                let image = logo.image(size: side - 12)
+                let tinted = NSImage(size: image.size, flipped: false) { r in
+                    image.draw(in: r)
+                    NSColor.white.set()
+                    r.fill(using: .sourceAtop)
+                    return true
+                }
+                tinted.draw(in: NSRect(x: CGFloat(index) * side + 6, y: 6, width: side - 12, height: side - 12))
+            }
+            return true
+        }
+        for logo in ProviderLogo.allCases {
+            let bitmap = NSBitmapImageRep(data: logo.image(size: 32).tiffRepresentation ?? Data())
+            var ink = 0
+            if let bitmap { for x in 0..<bitmap.pixelsWide { for y in 0..<bitmap.pixelsHigh where (bitmap.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.5 { ink += 1 } } }
+            expect(ink > 20, "\(logo) draws nothing")
+        }
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"], let tiff = strip.tiffRepresentation {
+            try? NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/provider-logos.png"))
+        }
+    }),
 ])
 exit(exitCode)

@@ -26,6 +26,8 @@
   e do map.json do Mac: PNGs de 32 e 64 px (`icons/pdf_to_png.swift`) e a tabela
   `../apps/windows/shared/icons/file_icons.zig`; `--check` (no `make manifests`) confere que a
   tabela bate com o map.json. Rodar de novo depois do build_file_icons.py.
+- `icons/build_provider_logos.py`: os logos dos provedores de IA (Lobe Icons e Simple Icons, versões
+  fixadas) em PDF para o app (`../docs/adr/0020-provider-logos.md`).
 - `check_command_parity.py` (no `make manifests`): todo id de comando do Mac existe no app Windows
   (ADR 0005, os mesmos ids nos dois). Nome de interface que não é comando vai em NOT_COMMANDS.
 - `perf/run.py` (`make perf`, depois do `make package`): o orçamento de peso do Cadex no Mac. Abre o
