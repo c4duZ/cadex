@@ -12,19 +12,21 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-PREFIXES = "tab|pane|explorer|workspace|search|editor|markdown|terminal|git|history|diff|preview|media|space|edit|palette|settings|app|window|view|theme|power"
+PREFIXES = "tab|pane|explorer|workspace|search|editor|markdown|terminal|git|history|diff|preview|media|space|edit|palette|settings|app|window|view|theme|power|sidebar"
 LITERAL = re.compile(r'"((?:%s)\.[a-z0-9-]+)"' % PREFIXES)
 # Names of views and keys in the Mac's code, not commands (2026-10-20).
-# power.mode is a settings.json key, read by name in SettingsFile.swift.
-NOT_COMMANDS = {"explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode"}
+# power.mode and sidebar.items are settings.json keys, read by name in SettingsFile.swift.
+NOT_COMMANDS = {"explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode", "sidebar.items"}
 # Mac-only for now: the in-app updater (docs/adr/0016-in-app-updates.md) comes
 # to Windows later. Windows-only ones (workspace.environment) need no entry.
 # The pasted-image tags (docs/spec/terminal.md, Ver a imagem colada) also
 # start on the Mac, 2026-10-20. The preview's element picker needs a content
-# world WebView2 lacks (docs/adr/0018-element-picker.md).
+# world WebView2 lacks (docs/adr/0018-element-picker.md). The sidebar's icons
+# (plan 17) start on the Mac, 2026-10-21.
 MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "terminal.open-pasted-image-beside", "terminal.open-pasted-image-in-tab",
-            "preview.pick-element", "preview.stop-picking"}
+            "preview.pick-element", "preview.stop-picking",
+            "sidebar.customize", "sidebar.toggle-page"}
 
 
 def literals(folder, suffix):
