@@ -9,6 +9,7 @@ import Power
 import Preview
 import Search
 import Settings
+import Sidebar
 import SourceControl
 import StatusBar
 import Strings
@@ -46,6 +47,7 @@ extension WindowSession {
         commands.register(WorkspaceCommands.all(folder, window: { [weak self] in self?.window },
                                                 terminalFolder: { [weak self] in self?.tabs?.activeTerminal?.currentDirectory }))
         commands.register(TabCommands.all { [weak self] in self?.tabs })
+        commands.register(SidebarCommands.all({ [weak self] in self?.workspace?.sidebar }, palette: palette))
         makeSpaces(palette: palette)
         registerWorkColors(palette: palette)
         makeExplorer()
@@ -60,7 +62,7 @@ extension WindowSession {
             id: "git.show", title: T("Show Git", "Mostrar o Git"), keywords: ["source control", "git", "mudanças", "changes", "commit"],
             category: .view, defaultShortcut: "cmd+shift+g",
             action: .run { [weak self] in
-                self?.workspace?.showSidebar(.git)
+                self?.workspace?.showSidebar("git")
                 self?.git?.refresh()
             }))
         commands.register(HistoryCommands.all(
@@ -123,6 +125,7 @@ extension WindowSession {
         folder.onChange = { [weak self] root in
             guard let self else { return }
             self.explorer?.setRoot(root)
+            self.workspace?.sidebar.setTitle(Self.folderName(root), for: "files")
             self.search?.setRoot(root, showHidden: self.explorer?.showHidden ?? true)
             self.markdown?.setRoot(root)
             self.git?.setFolder(root)

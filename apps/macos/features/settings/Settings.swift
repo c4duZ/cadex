@@ -105,6 +105,12 @@ public struct Settings: Equatable, Sendable {
         public var keepDisplayOn = false
     }
 
+    public struct Sidebar: Equatable, Sendable {
+        /// The icons on top of the sidebar, in order; a page left out is
+        /// hidden (docs/spec/sidebar.md). The app drops unknown ids.
+        public var items = ["files", "search", "git"]
+    }
+
     public var general = General()
     public var terminal = Terminal()
     public var appearance = Appearance()
@@ -113,6 +119,7 @@ public struct Settings: Equatable, Sendable {
     public var markdown = Markdown()
     public var preview = Preview()
     public var power = Power()
+    public var sidebar = Sidebar()
     /// "cmd+shift+t" → command id, or nil to turn a default off.
     public var shortcuts: [String: String?] = [:]
 

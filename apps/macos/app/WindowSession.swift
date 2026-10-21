@@ -103,7 +103,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
             opener?.foldersChanged(folders)
             self?.git?.diskChanged(folders)
         }
-        let workspace = WorkspaceView(explorer: explorer, git: git) { [weak self] id in self?.commands.run(id) }
+        let workspace = WorkspaceView(explorer: explorer, sidebar: makeSidebar(explorer: explorer, git: git)) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace
         self.workspace = workspace
         workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.openers) ?? [] }
@@ -111,10 +111,13 @@ final class WindowSession: NSObject, NSWindowDelegate {
         showPower()
         showUpdate()
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
-        explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar(.files) }
+        explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar("files") }
         git.onOpenFile = { [weak opener] path, beside in opener?.open(path, beside: beside) }
         git.onOpenDiff = { [weak opener] request, beside in opener?.openDiff(request, beside: beside) }
-        git.onMarks = { [weak explorer] marks in explorer?.gitMarks = marks }
+        git.onMarks = { [weak self, weak explorer] marks in
+            explorer?.gitMarks = marks
+            self?.showGitBadge(marks)
+        }
     }
 
     /// Whether a terminal in any space of this window runs a program.

@@ -83,6 +83,14 @@ let package = Package(
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
+        // The column on the left: icons on top, the chosen page below (docs/spec/sidebar.md).
+        .target(
+            name: "Sidebar",
+            dependencies: ["CommandPalette", "Icons", "Menus", "Strings", "UILooks"],
+            path: "features/sidebar",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
         .target(
             name: "StatusBar",
             dependencies: ["Icons", "Menus", "Strings", "UILooks"],
@@ -223,6 +231,12 @@ let package = Package(
         ),
 
         .executableTarget(
+            name: "SidebarTests",
+            dependencies: ["Sidebar", "Checks"],
+            path: "features/sidebar/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+        .executableTarget(
             name: "StatusBarTests",
             dependencies: ["StatusBar", "Checks"],
             path: "features/status-bar/tests",
@@ -338,7 +352,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

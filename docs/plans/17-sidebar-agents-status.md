@@ -40,7 +40,7 @@ command-palette, shortcuts, tabs, terminal · Decisões: `docs/adr/0019-agents-o
 **Fases:**
 - **A. Barra lateral com ícones.** Feature nova `sidebar` (só app macOS): pasta com `CLAUDE.md`,
   testes e linha na tabela do `CLAUDE.md` da raiz. O que hoje está em
-  `apps/macos/app/SidebarView.swift` vira a feature: a fileira de ícones, o título com as sub-abas,
+  app/SidebarView.swift (agora apagado) vira a feature: a fileira de ícones, o título com as sub-abas,
   o registro de páginas (id, ícone, título, comando, sub-abas, sinal) que o app preenche com as
   views de explorer, search, source-control e git-history pela porta de entrada de cada uma, e o
   painel Customize com arrastar. Configuração sidebar.items (lista em ordem) e a página aberta e as

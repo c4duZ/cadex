@@ -17,6 +17,8 @@ final class SettingsBridge {
     var onExplorer: ((Settings.Explorer) -> Void)?
     /// The markdown section changed (how notes open).
     var onMarkdown: ((Settings.Markdown) -> Void)?
+    /// The sidebar section changed (which icons, in what order).
+    var onSidebar: ((Settings.Sidebar) -> Void)?
     /// The power section changed (the display; the mode counts at launch).
     var onPower: ((Settings.Power) -> Void)?
     /// The background image or vibrancy changed.
@@ -63,6 +65,7 @@ final class SettingsBridge {
         onExplorer?(settings.explorer)
         onMarkdown?(settings.markdown)
         onPower?(settings.power)
+        onSidebar?(settings.sidebar)
         if settings.shortcuts != lastShortcuts {
             lastShortcuts = settings.shortcuts
             onShortcuts?(settings.shortcuts)

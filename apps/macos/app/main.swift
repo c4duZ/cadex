@@ -166,6 +166,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func connectSettings() {
         settings.onExplorer = { [weak self] prefs in self?.sessions.forEach { $0.applyExplorer(prefs) } }
         settings.onMarkdown = { [weak self] prefs in self?.sessions.forEach { $0.applyMarkdown(prefs) } }
+        settings.onSidebar = { [weak self] prefs in self?.sessions.forEach { $0.applySidebar(prefs) } }
         settings.onPower = { [weak self] prefs in
             self?.power.keepDisplayOn = prefs.keepDisplayOn
             self?.power.defaultMode = PowerController.Mode(rawValue: prefs.mode) ?? .always

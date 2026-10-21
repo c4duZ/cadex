@@ -80,6 +80,9 @@ public enum SettingsFile {
             settings.power.onAtLaunch = reader.bool(p, "power.onAtLaunch") ?? settings.power.onAtLaunch
             settings.power.keepDisplayOn = reader.bool(p, "power.keepDisplayOn") ?? settings.power.keepDisplayOn
         }
+        if let s = reader.section(root, "sidebar") {
+            settings.sidebar.items = reader.strings(s, "sidebar.items") ?? settings.sidebar.items
+        }
         if let s = reader.section(root, "shortcuts") {
             for (combo, value) in s {
                 if value is NSNull { settings.shortcuts[combo] = .some(nil) }
@@ -115,6 +118,7 @@ public enum SettingsFile {
             "markdown": ["openAs": s.markdown.openAs],
             "preview": ["pickTarget": s.preview.pickTarget, "pickScreenshot": s.preview.pickScreenshot],
             "power": ["mode": s.power.mode, "onAtLaunch": s.power.onAtLaunch, "keepDisplayOn": s.power.keepDisplayOn],
+            "sidebar": ["items": s.sidebar.items],
             "shortcuts": shortcuts,
         ]
         return (try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])) ?? Data()

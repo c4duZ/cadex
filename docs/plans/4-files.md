@@ -68,7 +68,7 @@ existem (plano 2, função fuzzy em core/features/search). As pastas das feature
 Nada deste plano começou. Antes de escrever código: ler `CLAUDE.md`, `docs/plans/README.md` (inclui
 como testar o app sem roubar o teclado do dono) e este plano; escrever as specs workspace, explorer
 e search. O que já existe e este plano usa:
-- Painel lateral vazio e recolhível: `apps/macos/app/SidebarView.swift` e `apps/macos/app/WorkspaceView.swift`.
+- Painel lateral vazio e recolhível: `apps/macos/app/WorkspaceView.swift` (o painel lateral é hoje a feature `apps/macos/features/sidebar/`).
 - Paleta e registro de comandos: `apps/macos/features/command-palette/` (comando novo = um
   `Command` registrado em `apps/macos/app/main.swift`; atalho padrão mora no comando).
 - Fuzzy no núcleo: `core/features/search/fuzzy.zig` e `core/features/search/rank.zig`, API `cadex_fuzzy_rank`.

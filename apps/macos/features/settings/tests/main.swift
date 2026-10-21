@@ -48,6 +48,14 @@ let exitCode = await Checks.run([
         expect(read.appearance.uiZoom == 1.5 && read.appearance.density == "normal" && read.tabs.unfocusedDim == 0.6)
         expect(problems.count == 3, "\(problems)")
     }),
+    ("the sidebar's icons default to Files, Search and Git, and keep the saved order", {
+        expect(SettingsFile.read(Data("{}".utf8)).0.sidebar.items == ["files", "search", "git"])
+        var settings = Settings()
+        settings.sidebar.items = ["git", "files"]
+        expect(SettingsFile.read(SettingsFile.write(settings)).0.sidebar.items == ["git", "files"])
+        let (read, problems) = SettingsFile.read(Data(#"{"sidebar": {"items": "git"}}"#.utf8))
+        expect(read.sidebar.items == ["files", "search", "git"] && problems.count == 1, "\(problems)")
+    }),
     ("the interface is in English unless the file says pt; anything else is a problem", {
         expect(SettingsFile.read(Data("{}".utf8)).0.general.language == "en")
         let (read, problems) = SettingsFile.read(Data(#"{"general": {"language": "fr"}}"#.utf8))
