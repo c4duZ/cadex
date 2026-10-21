@@ -73,6 +73,10 @@ extension WindowSession {
             defaultShortcut: "cmd+shift+j",
             action: .run { [weak self] in self?.workspace?.showSidebar("agents") }))
         commands.register(Command(
+            id: "agents.test-notifications", title: T("Send Test Notifications", "Mandar notificações de teste"),
+            keywords: ["notifications", "agents", "test", "notificações", "teste", "avisos"], category: .view,
+            action: .run { [weak self] in self?.sendTestNotifications() }))
+        commands.register(Command(
             id: "git.show-history", title: T("Show Git History in Sidebar", "Mostrar o histórico do Git no painel lateral"),
             keywords: ["history", "log", "commits", "histórico", "sidebar", "painel"], category: .view,
             action: .run { [weak self] in self?.workspace?.showSidebar("history") }))

@@ -81,11 +81,12 @@ public struct AgentSession: Equatable, Sendable {
     static func parse(_ object: [String: Any], account: AgentAccount) -> AgentSession? {
         guard let pid = (object["pid"] as? NSNumber)?.int32Value, let id = object["sessionId"] as? String,
               let cwd = object["cwd"] as? String else { return nil }
-        // busy works; idle and waiting both wait for you (waiting: on a
-        // prompt such as a permission, the ai-usagebar audit, 2026-10-21).
+        // busy works; idle, waiting and shell all wait for you. waiting is a
+        // prompt such as a permission (the ai-usagebar audit); shell is what
+        // a turn that just ended reads (seen live, 2026-10-21).
         let status: Status = switch object["status"] as? String ?? "" {
         case "busy": .working
-        case "idle", "waiting": .waiting
+        case "idle", "waiting", "shell": .waiting
         case let other: .other(other)
         }
         let millis = (object["statusUpdatedAt"] as? NSNumber)?.doubleValue ?? (object["startedAt"] as? NSNumber)?.doubleValue ?? 0

@@ -27,7 +27,7 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "terminal.open-pasted-image-beside", "terminal.open-pasted-image-in-tab",
             "preview.pick-element", "preview.stop-picking",
             "sidebar.customize", "sidebar.toggle-page", "git.show-history", "history.show-in-tab",
-            "statusBar.customize", "statusBar.toggle-item", "statusBar.activity-monitor", "agents.show"}
+            "statusBar.customize", "statusBar.toggle-item", "statusBar.activity-monitor", "agents.show", "agents.test-notifications"}
 
 
 def literals(folder, suffix):

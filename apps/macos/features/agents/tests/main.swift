@@ -62,6 +62,7 @@ let exitCode = await Checks.run([
         expect(read.unreadable == 1, "the broken file is counted, not fatal")
         expect(AgentSession.parse(["pid": 1, "sessionId": "x", "cwd": "/", "status": "thinking"], account: work)?.status == .other("thinking"))
         expect(AgentSession.parse(["pid": 1, "sessionId": "x", "cwd": "/", "status": "waiting"], account: work)?.status == .waiting)
+        expect(AgentSession.parse(["pid": 1, "sessionId": "x", "cwd": "/", "status": "shell"], account: work)?.status == .waiting, "a turn that just ended")
         expect(AgentSession.parse(["sessionId": "x"], account: work) == nil, "no pid, no session")
     }),
     ("projects: the repository above the folder and its branch, a worktree too", {

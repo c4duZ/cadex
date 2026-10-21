@@ -50,6 +50,10 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
   olha aquele terminal na janela da frente. Uma notificação por sessão: a nova troca a anterior.
 - Três chaves, cada tipo desligável sozinho: agents.notifyPermission, agents.notifyQuestion e
   agents.notifyFinished, ligadas por padrão; com agents.sessions desligado, nenhuma.
+- "Send Test Notifications" (agents.test-notifications, no ⌘K) manda as três de exemplo; com as
+  notificações do Cadex desligadas no macOS, abre a página dele nos Ajustes do Sistema.
+- Qualquer estado depois de trabalhando conta como parada (idle, waiting e shell, este o de um
+  turno que acabou de terminar, visto ao vivo em 2026-10-21); o fim do log diz o motivo.
 - Só no Mac por enquanto; no Windows chega com o port (lá dá para trocar o ícone da notificação).
 
 ### Configurações

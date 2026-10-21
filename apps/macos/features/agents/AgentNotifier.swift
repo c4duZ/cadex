@@ -80,7 +80,8 @@ public final class AgentNotifier: NSObject {
         var now: [String: AgentSession.Status] = [:]
         for session in controller.sessions {
             now[session.id] = session.status
-            guard lastStatus[session.id] == .working, session.status == .waiting else { continue }
+            // Any status after working is a stop: the end of the log says why.
+            guard lastStatus[session.id] == .working, session.status != .working else { continue }
             let stop = AgentStop.read(session)
             guard wants(stop), !isLooking(session) else { continue }
             didStop?(session, stop)
@@ -98,19 +99,50 @@ public final class AgentNotifier: NSObject {
     }
 
     private func post(_ session: AgentSession, _ stop: AgentStop) {
+        post(id: session.id, project: AgentProject.of(session.cwd).name, account: session.account.name, name: session.name, stop)
+    }
+
+    /// agents.test-notifications: one of each kind, as they will look, a
+    /// second apart. Notifications off for Cadex in System Settings: opens
+    /// that page instead.
+    public func sendTest(project: String, account: String) {
+        guard Self.canPost else { return }
+        let center = UNUserNotificationCenter.current()
+        center.delegate = self
+        center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    guard granted else {
+                        let page = "x-apple.systempreferences:com.apple.Notifications-Settings.extension?id=" + (Bundle.main.bundleIdentifier ?? "")
+                        if let url = URL(string: page) { NSWorkspace.shared.open(url) }
+                        return
+                    }
+                    let samples: [AgentStop] = [.permission("Bash"), .question, .finished]
+                    for (index, stop) in samples.enumerated() {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + Double(index)) {
+                            MainActor.assumeIsolated {
+                                AgentNotifier.shared.post(id: "test-\(index)", project: project, account: account, name: "test", stop)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func post(id: String, project: String, account: String, name: String, _ stop: AgentStop) {
         guard Self.canPost else { return }
         let center = UNUserNotificationCenter.current()
         askPermission()
         let content = UNMutableNotificationContent()
-        let project = AgentProject.of(session.cwd).name
-        content.title = "\(project) · \(session.account.name)"
-        content.body = "\(stop.text) — \(session.name)"
+        content.title = "\(project) · \(account)"
+        content.body = "\(stop.text) — \(name)"
         content.sound = .default
-        content.threadIdentifier = session.id
-        content.userInfo = ["session": session.id]
+        content.threadIdentifier = id
+        content.userInfo = ["session": id]
         if let picture = AgentNotifyIcon.attachment(for: stop, accent: accent) { content.attachments = [picture] }
         // One per session: a new stop replaces the one before it.
-        center.add(UNNotificationRequest(identifier: "agent-" + session.id, content: content, trigger: nil))
+        center.add(UNNotificationRequest(identifier: "agent-" + id, content: content, trigger: nil))
     }
 }
 

@@ -70,6 +70,13 @@ extension WindowSession {
         return nil
     }
 
+    /// agents.test-notifications: the three kinds, named after this window's project.
+    func sendTestNotifications() {
+        let project = (folder.root as NSString).lastPathComponent
+        let account = AgentsController.shared.accounts.first?.name ?? "Claude"
+        AgentNotifier.shared.sendTest(project: project, account: account)
+    }
+
     /// A double click: the agent's terminal, its space and tab in front;
     /// outside Cadex, its folder in the tree when it is in the workspace.
     func openAgent(_ session: AgentSession) {
@@ -102,5 +109,9 @@ extension AppDelegate {
         }
         ThemeStore.shared.observe { theme in AgentNotifier.shared.accent = theme.interface.accent.nsColor }
         notifier.start()
+        // A test instance shows the three kinds without a click (2026-10-21).
+        if ProcessInfo.processInfo.environment["CADEX_TEST_NOTIFICATIONS"] != nil {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in self?.sessions.first?.sendTestNotifications() }
+        }
     }
 }
