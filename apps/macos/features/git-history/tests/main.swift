@@ -128,5 +128,35 @@ let exitCode = await Checks.run([
         }
         try? FileManager.default.removeItem(atPath: repo)
     }),
+    ("in the sidebar, hidden and sized late as the app builds it, the list still gets the height", {
+        let repo = mergedRepository()
+        let host = NSView()
+        let outer = NSView(frame: NSRect(x: 0, y: 0, width: 240, height: 600))
+        let window = NSWindow(contentRect: outer.frame, styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentView = outer
+        host.translatesAutoresizingMaskIntoConstraints = false
+        host.isHidden = true
+        outer.addSubview(host)
+        NSLayoutConstraint.activate([host.topAnchor.constraint(equalTo: outer.topAnchor), host.bottomAnchor.constraint(equalTo: outer.bottomAnchor),
+                                     host.leadingAnchor.constraint(equalTo: outer.leadingAnchor), host.trailingAnchor.constraint(equalTo: outer.trailingAnchor)])
+        let document = HistoryDocument(root: repo)
+        document.compact = true
+        let view = document.view
+        view.translatesAutoresizingMaskIntoConstraints = false
+        host.addSubview(view)
+        NSLayoutConstraint.activate([view.topAnchor.constraint(equalTo: host.topAnchor), view.bottomAnchor.constraint(equalTo: host.bottomAnchor),
+                                     view.leadingAnchor.constraint(equalTo: host.leadingAnchor), view.trailingAnchor.constraint(equalTo: host.trailingAnchor)])
+        host.isHidden = false
+        _ = await eventually { document.state == .ready && document.commits.count == 4 }
+        outer.layoutSubtreeIfNeeded()
+        let table = document.historyView.table
+        let listHeight = table.enclosingScrollView?.frame.height ?? 0
+        expect(table.numberOfRows > 0 && listHeight > 200, "rows \(table.numberOfRows), list \(listHeight) high")
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"], let bitmap = outer.bitmapImageRepForCachingDisplay(in: outer.bounds) {
+            outer.cacheDisplay(in: outer.bounds, to: bitmap)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/history-repro.png"))
+        }
+        try? FileManager.default.removeItem(atPath: repo)
+    }),
 ])
 exit(exitCode)

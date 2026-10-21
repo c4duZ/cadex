@@ -77,6 +77,7 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
             ? T("Filter commits", "Filtrar commits")
             : T("Filter by subject, author or SHA (Enter searches the repository)", "Filtrar por assunto, autor ou sha (Enter busca no repositório)")
         table.sizeLastColumnToFit()
+        detailsView.setCompact(compact)
     }
 
     func showDetails() {
@@ -146,6 +147,10 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
             separator.topAnchor.constraint(equalTo: scroll.bottomAnchor),
             separator.leadingAnchor.constraint(equalTo: leadingAnchor),
             separator.trailingAnchor.constraint(equalTo: trailingAnchor),
+            // One point: without it, in the sidebar's narrow page the
+            // separator took the free height, drew upright and left the list
+            // none (owner's print, 2026-10-21).
+            separator.heightAnchor.constraint(equalToConstant: 1),
             // A third for the details. A split view put its divider at the
             // bottom and hid them, as it hid a side of the diff (2026-10-19).
             detailsView.topAnchor.constraint(equalTo: separator.bottomAnchor),

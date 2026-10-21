@@ -16,7 +16,9 @@
   (`diskChanged`, vindo do watcher do explorer pelo app).
 - `compact` (a página Git History da barra lateral): só o grafo e a descrição, sem títulos de
   coluna, autor, data, sha, caixa de seleção e contagem. A descrição nunca quebra linha (com
-  etiquetas, quebrava por cima da linha de baixo; print do dono, 2026-10-21).
+  etiquetas, quebrava por cima da linha de baixo; print do dono, 2026-10-21); os detalhes ficam um
+  embaixo do outro. O separador entre a lista e os detalhes tem 1 pt fixo: sem isso, na página
+  estreita ele tomou a altura toda e a lista ficou com zero (conferido no app, 2026-10-21).
 - `HistoryView.swift` (busca, lista, detalhes embaixo), `HistoryRows.swift` (células reaproveitadas
   só das linhas na tela, etiquetas, datas em português, menu de contexto no `MenuTableView` compartilhado), `HistoryGraphView.swift`
   (uma linha do grafo: retas, curvas nas bifurcações e merges, ponto vazado no merge) e

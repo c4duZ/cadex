@@ -14,6 +14,14 @@ final class HistoryDetailsView: NSView, NSTableViewDataSource, NSTableViewDelega
     private let filesScroll = NSScrollView()
     private(set) var shownFiles: [CommitDetails.File] = []
 
+    private let columns = NSStackView()
+
+    /// The sidebar: the message above the files, not side by side (two
+    /// columns of 120 points showed neither).
+    func setCompact(_ compact: Bool) {
+        columns.orientation = compact ? .vertical : .horizontal
+    }
+
     init() {
         super.init(frame: .zero)
         build()
@@ -120,7 +128,7 @@ final class HistoryDetailsView: NSView, NSTableViewDataSource, NSTableViewDelega
         filesScroll.autohidesScrollers = true
         filesScroll.drawsBackground = false
 
-        let columns = NSStackView(views: [infoScroll, filesScroll])
+        columns.setViews([infoScroll, filesScroll], in: .leading)
         columns.distribution = .fillEqually
         columns.spacing = 1
         columns.translatesAutoresizingMaskIntoConstraints = false
