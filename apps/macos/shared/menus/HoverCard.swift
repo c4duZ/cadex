@@ -46,7 +46,9 @@ public final class HoverCard: NSObject {
     // The tracking area calls its owner by the Objective-C names; Swift's
     // own would be mouseEnteredWithEvent:, which nothing calls: the card
     // never opened (the owner's test, 2026-10-21).
-    @objc(mouseEntered:) public func mouseEntered(with event: NSEvent) { schedule(open: true) }
+    @objc(mouseEntered:) public func mouseEntered(with event: NSEvent) {
+        if panel?.isVisible == true { schedule(open: false) } else { schedule(open: true) }
+    }
     @objc(mouseExited:) public func mouseExited(with event: NSEvent) { schedule(open: false) }
 
     private func schedule(open: Bool) {
@@ -54,17 +56,34 @@ public final class HoverCard: NSObject {
         let work = DispatchWorkItem { [weak self] in
             MainActor.assumeIsolated {
                 guard let self else { return }
-                if open { self.open() } else if self.panel?.hasPointer != true { self.panel?.orderOut(nil) }
+                if open { self.open() } else { self.closeIfLeft() }
             }
         }
         pending = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + (open ? 0.25 : 0.4), execute: work)
+        DispatchQueue.main.asyncAfter(deadline: .now() + (open ? 0.25 : 0.15), execute: work)
+    }
+
+    /// Closes unless the pointer is on the item or the card, by where it
+    /// really is: the card's own "left" could be lost when its content was
+    /// redrawn, and it stayed open after the pointer went (owner, 2026-10-21).
+    /// While the pointer is on one of them it looks again in 0.15 s, so
+    /// leaving either way closes it at once.
+    private func closeIfLeft() {
+        guard let panel, panel.isVisible else { return }
+        let pointer = NSEvent.mouseLocation
+        let itemRect = view.flatMap { v in v.window.map { $0.convertToScreen(v.convert(v.bounds, to: nil)) } } ?? .zero
+        if panel.frame.contains(pointer) || itemRect.insetBy(dx: -2, dy: -4).contains(pointer) {
+            schedule(open: false)
+        } else {
+            panel.orderOut(nil)
+        }
     }
 
     private func open() {
         guard let view, view.window != nil, !PopupMenu.isOpen else { return }
         let panel = self.panel ?? HoverCardPanel()
-        panel.onEnter = { [weak self] in self?.pending?.cancel() }
+        // Coming in or going out, the pointer's place decides (closeIfLeft).
+        panel.onEnter = { [weak self] in self?.schedule(open: false) }
         panel.onLeave = { [weak self] in self?.schedule(open: false) }
         self.panel = panel
         panel.show(content(), above: view)

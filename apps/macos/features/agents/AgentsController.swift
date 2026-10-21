@@ -27,13 +27,20 @@ public final class AgentsController {
     /// Every account of every provider (Claude Code and Codex), with the
     /// names given, hidden ones too: the Accounts tab.
     public func everyAccount() -> [AgentAccount] {
-        (AgentAccount.find(home: home) + CodexUsage.accounts(home: home)).map { account in
+        // Kept 10 s: each .claude.json is ~120 KB, and the usage item, its
+        // card and Accounts ask on every redraw; reading them each time made
+        // the bar stutter while agents worked (owner, 2026-10-21).
+        if let kept = keptAccounts, Date().timeIntervalSince(kept.at) < 10, kept.names == names, kept.home == home { return kept.list }
+        let list = (AgentAccount.find(home: home) + CodexUsage.accounts(home: home)).map { account in
             guard let name = names[account.dir] else { return account }
             var renamed = AgentAccount(dir: account.dir, name: name, isDefault: account.isDefault)
             renamed.provider = account.provider
             return renamed
         }
+        keptAccounts = (list, Date(), names, home)
+        return list
     }
+    private var keptAccounts: (list: [AgentAccount], at: Date, names: [String: String], home: String)?
     /// agents.sessions: off, nothing is read at all.
     public var isEnabled = true { didSet { if isEnabled != oldValue { restart() } } }
     /// The folder accounts are looked for in (tests use a temporary one).

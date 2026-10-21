@@ -29,7 +29,8 @@
   aberto 0,25 s depois de o ponteiro chegar ou no clique, como popover: uma seta embaixo aponta o meio
   do item, com a ponta encostada nele; fica aberto enquanto o ponteiro
   está no item ou no cartão (subir para dentro dele o mantém; o dono, 2026-10-21); fecha 0,4 s depois
-  de sair dos dois. Nas cores dos menus, nunca pega o teclado. `HoverRow`, a linha clicável dele, com
+  de sair dos dois, pela posição real do ponteiro (o aviso de saída do cartão se perdia quando o
+  conteúdo era redesenhado e ele ficava aberto; o dono, 2026-10-21). Nas cores dos menus, nunca pega o teclado. `HoverRow`, a linha clicável dele, com
   fundo ao passar.
 - `MenuTableView.swift`: tabela cujo clique direito abre o PopupMenu; `menuRow` é a linha clicada
   enquanto o menu está aberto e a ação roda (source control e histórico do git).
