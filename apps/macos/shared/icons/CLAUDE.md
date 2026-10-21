@@ -9,7 +9,10 @@
 
 ## Como eu quero
 - `Icon.swift`: um caso por ícone usado, com o código do glifo tirado do style.css do pacote
-  @phosphor-icons/web 2.1.2; `image(size:)` dá uma imagem modelo que o botão pinta. Ver
+  @phosphor-icons/web 2.1.2; `image(size:)` dá uma imagem modelo que o botão pinta;
+  `fittedImage(size:)`, para ícones lado a lado (a fileira da barra lateral), centra cada um pelo
+  contorno e iguala o lado maior, porque os glifos do Phosphor não ficam no meio da caixa nem têm o
+  mesmo tamanho. Ver
   `../../../../docs/adr/0008-phosphor-icons.md`.
 - `Resources/Phosphor-Regular.ttf` é a fonte desse mesmo pacote, inteira; a licença está ao lado e
   no `NOTICE`. Ícone novo: achar o nome em phosphoricons.com, pegar o código no style.css da mesma

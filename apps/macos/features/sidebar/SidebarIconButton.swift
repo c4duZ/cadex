@@ -22,7 +22,7 @@ final class SidebarIconButton: NSView {
 
     init(id: String, icon: Icon, tip: String) {
         self.id = id
-        self.icon = NSImageView(image: icon.image(size: UILooks.pt(16)))
+        self.icon = NSImageView(image: icon.fittedImage(size: UILooks.pt(16)))
         super.init(frame: NSRect(origin: .zero, size: Self.size))
         wantsLayer = true
         layer?.cornerRadius = 6

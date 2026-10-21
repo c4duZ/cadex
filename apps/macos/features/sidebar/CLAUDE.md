@@ -30,7 +30,8 @@
   (mouseDownCanMoveWindow). O que se arrasta vai para cima dos vizinhos e anda a partir de onde
   estava no começo; a vaga é a que está sob o meio dele (CustomizeLayout.dropIndex).
 - `SidebarCommands.swift`: sidebar.customize, sidebar.toggle-page (a lista de páginas no ⌘K) e
-  sidebar.page-1 a -9 (⌃⌘1 a ⌃⌘9): o ícone na posição, como um clique nele (`press(position:)`);
+  sidebar.page-1 a -9 (⌃⌘1 a ⌃⌘9): o comando do ícone na posição (`press(position:)`), sem
+  recolher a barra como o clique no ícone aberto;
   ⇧⌘3 a ⇧⌘5 são as capturas de tela do sistema, por isso ⌃⌘ (o dono, 2026-10-21).
 - O catálogo do app está em `../../app/SidebarWiring.swift`: files, search, git, agents, accounts
   (padrão) e history (escondido). Só entra o que mostra uma página na barra; preview e spaces saíram (o dono,

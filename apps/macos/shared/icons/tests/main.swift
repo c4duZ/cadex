@@ -28,6 +28,25 @@ let exitCode = await Checks.run([
         let image = Icon.plus.image(size: 20)
         expect(image.isTemplate && image.size == NSSize(width: 20, height: 20))
     }),
+    ("a fitted icon is drawn in the middle, its longer side the same for all", {
+        // The inked box of each icon at 64 pt, from its pixels.
+        @MainActor func inked(_ icon: Icon) -> NSRect {
+            let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 64, pixelsHigh: 64, bitsPerSample: 8, samplesPerPixel: 4,
+                                       hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+            icon.fittedImage(size: 64).draw(in: NSRect(x: 0, y: 0, width: 64, height: 64))
+            NSGraphicsContext.restoreGraphicsState()
+            var box = NSRect.null
+            for x in 0..<64 { for y in 0..<64 where (rep.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.5 { box = box.union(NSRect(x: x, y: y, width: 1, height: 1)) } }
+            return box
+        }
+        for icon in [Icon.files, .gitBranch, .sparkle, .gauge] {
+            let box = inked(icon)
+            expect(abs(box.midX - 32) <= 1 && abs(box.midY - 32) <= 1, "\(icon) off the middle: \(box)")
+            expect(abs(max(box.width, box.height) - 52) <= 2, "\(icon) longer side: \(box)")
+        }
+    }),
     ("file and folder icons from the Material pack, Phosphor for the rest", {
         expect(FileIcons.image(forFileNamed: "Dockerfile") != nil)
         expect(FileIcons.image(forFileNamed: "main.py") != nil)

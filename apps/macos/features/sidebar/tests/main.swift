@@ -57,12 +57,14 @@ let exitCode = await Checks.run([
         view.press("search")
         expect(ran == ["git.show", "view.toggle-sidebar", "search.content"], "\(ran)")
     }),
-    ("⌃⌘N presses the Nth shown icon, in the saved order; past the last, nothing", {
+    ("⌃⌘N runs the Nth shown icon's command, in the saved order, never hiding the sidebar; past the last, nothing", {
         var ran: [String] = []
         let view = SidebarView(catalog: catalog()) { ran.append($0) }
         view.setItems(["search", "git", "files"])
         expect(view.press(position: 2) && ran == ["git.show"], "\(ran)")
         expect(!view.press(position: 4) && !view.press(position: 0) && ran.count == 1)
+        // The open page's keys show it again and never hide the sidebar.
+        expect(view.press(position: 3) && ran.last == "explorer.focus", "\(ran)")
     }),
     ("toggling a page saves the new list", {
         var saved: [[String]] = []

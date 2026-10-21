@@ -173,13 +173,15 @@ public final class SidebarView: NSView {
         change(SidebarLayout.toggled(items, id))
     }
 
-    /// The icon at `position` (from 1), as a click on it: ⌃⌘1 to ⌃⌘9
-    /// (sidebar.page-N), as ⌘1 to ⌘9 pick the tabs (the owner, 2026-10-21;
-    /// ⇧⌘3 to ⇧⌘5 are the system's screenshots). False when there is none.
+    /// The icon at `position` (from 1): ⌃⌘1 to ⌃⌘9 (sidebar.page-N), as
+    /// ⌘1 to ⌘9 pick the tabs (the owner, 2026-10-21; ⇧⌘3 to ⇧⌘5 are the
+    /// system's screenshots). Runs its command and never hides the sidebar,
+    /// as a click on the open page's icon does: the owner pressed the open
+    /// page's keys and lost the sidebar (2026-10-21). False when none.
     @discardableResult
     public func press(position: Int) -> Bool {
-        guard items.indices.contains(position - 1) else { return false }
-        press(items[position - 1])
+        guard items.indices.contains(position - 1), let item = catalog.first(where: { $0.id == items[position - 1] }) else { return false }
+        run(item.command)
         return true
     }
 

@@ -103,6 +103,35 @@ public enum Icon: UInt32, CaseIterable, Sendable {
         return image
     }
 
+    /// The icon centred on its own outline and scaled so its longer side is
+    /// 13/16 of `size`, for a row of icons side by side: Phosphor's glyphs
+    /// sit off the middle of their box and differ in size (Git 12/256 to
+    /// the right, the gauge 12/256 up and 152 tall against the sparkle's
+    /// 232), which made the sidebar's row look uneven (the owner, 2026-10-21).
+    @MainActor
+    public func fittedImage(size: CGFloat = 16) -> NSImage {
+        let font = Self.font(size: 256)
+        var code = UniChar(rawValue)
+        var glyph: CGGlyph = 0
+        guard CTFontGetGlyphsForCharacters(font, &code, &glyph, 1), let path = CTFontCreatePathForGlyph(font, glyph, nil) else {
+            return image(size: size)
+        }
+        let box = path.boundingBoxOfPath
+        let scale = size * 13 / 16 / max(box.width, box.height, 1)
+        let image = NSImage(size: NSSize(width: size, height: size), flipped: false) { rect in
+            guard let context = NSGraphicsContext.current?.cgContext else { return false }
+            context.translateBy(x: rect.midX, y: rect.midY)
+            context.scaleBy(x: scale, y: scale)
+            context.translateBy(x: -box.midX, y: -box.midY)
+            context.addPath(path)
+            context.setFillColor(NSColor.black.cgColor)
+            context.fillPath()
+            return true
+        }
+        image.isTemplate = true
+        return image
+    }
+
     /// The icon font at `size`, registered on first use.
     @MainActor
     public static func font(size: CGFloat) -> NSFont {
