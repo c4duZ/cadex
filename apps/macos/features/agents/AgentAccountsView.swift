@@ -4,52 +4,50 @@ import Menus
 import Strings
 import UILooks
 
-/// Agents › Accounts (docs/spec/agents.md, Accounts): a card per Claude
-/// Code account on this Mac, named by its organization or as renamed; the
-/// right click renames or hides it. Hidden ones stay at the end, dimmed,
-/// with "Show", so none is lost.
+/// Agents › Accounts (docs/spec/agents.md, Accounts): the same blocks as
+/// the card over the usage item, one per account in use, on the page's
+/// ground with a thin line between them; no boxes (the owner, 2026-10-21).
+/// An account with no login, or one expired for more than a day, is left
+/// out; hidden ones are shown again from Customize › Accounts. A click
+/// opens that account's agent in the focused terminal; the right click
+/// renames or hides it.
 extension AgentsView {
     func renderAccounts() {
-        let accounts = controllerAccounts
-        if accounts.all.isEmpty {
-            return note(T("No Claude Code account on this Mac.", "Nenhuma conta do Claude Code neste Mac."))
+        let accounts = usage.visibleAccounts()
+        if accounts.isEmpty {
+            return note(T("No account in use on this Mac. Hidden and unused ones are in Customize › Accounts.",
+                          "Nenhuma conta em uso neste Mac. As escondidas e sem uso estão em Personalizar › Contas."))
         }
-        for account in accounts.shown { add(paddedTop(card(account, hidden: false))) }
-        if !accounts.hidden.isEmpty {
-            add(paddedTop(AgentText.label(T("HIDDEN", "ESCONDIDAS"), size: 11, weight: .semibold, color: colors.secondary)))
-            for account in accounts.hidden { add(paddedTop(card(account, hidden: true))) }
+        for (index, account) in accounts.enumerated() {
+            if index > 0 { add(line()) }
+            add(block(account))
         }
     }
 
-    private func card(_ account: AgentAccount, hidden: Bool) -> NSView {
-        let title = AgentText.label(account.name, size: 13, weight: .semibold, color: hidden ? colors.secondary : colors.text)
-        let logo = NSImageView(image: account.logo.image(size: UILooks.pt(15)))
-        logo.contentTintColor = hidden ? colors.secondary : colors.text
-        logo.setContentHuggingPriority(.required, for: .horizontal)
-        let name = NSStackView(views: [logo, title])
-        name.spacing = 6
-        let folder = AgentText.label("~/" + (account.dir as NSString).lastPathComponent, size: 11, color: colors.secondary)
-        var lines: [NSView] = [name, folder]
-        // A hidden account is not read: nothing about its usage.
-        if !hidden { lines += usageLines(account) }
-        let stack = NSStackView(views: lines)
-        stack.orientation = .vertical
-        stack.alignment = .leading
-        stack.spacing = 3
-        let row = AgentRow(stack, inset: 10)
-        row.fill = colors.fill.withAlphaComponent(hidden ? 0.4 : 1)
-        row.layer?.cornerRadius = 9
-        row.toolTip = account.dir
+    private func block(_ account: AgentAccount) -> NSView {
+        let row = AgentRow(AgentUsageCard.block(account, colors: colors, width: nil), inset: 8)
+        row.toolTip = "~/" + (account.dir as NSString).lastPathComponent + "\n" + T("Click: open its agent in the terminal", "Clique: abrir o agente dela no terminal")
+        row.hoverFill = colors.fill.withAlphaComponent(0.5)
+        row.onClick = { [weak self] in self?.onLaunch?(account) }
         row.onRightClick = { [weak self, weak row] in
             guard let self, let row else { return }
-            PopupMenu.show(self.accountMenu(account, hidden: hidden), below: row)
+            PopupMenu.show(self.accountMenu(account), below: row)
         }
         return row
     }
 
-    func accountMenu(_ account: AgentAccount, hidden: Bool) -> [MenuEntry] {
-        [MenuEntry(T("Rename…", "Renomear…"), icon: .pencilSimple) { [weak self] in self?.onRename?(account) },
-         hidden ? MenuEntry(T("Show", "Mostrar"), icon: .eye) { [weak self] in self?.onHide?(account, false) }
-                : MenuEntry(T("Hide", "Esconder"), icon: .x) { [weak self] in self?.onHide?(account, true) }]
+    private func line() -> NSView {
+        let line = NSView()
+        line.wantsLayer = true
+        line.layer?.backgroundColor = colors.secondary.withAlphaComponent(0.15).cgColor
+        line.translatesAutoresizingMaskIntoConstraints = false
+        line.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        return line
+    }
+
+    func accountMenu(_ account: AgentAccount) -> [MenuEntry] {
+        [MenuEntry(T("Open Its Agent", "Abrir o agente dela"), icon: .terminalWindow) { [weak self] in self?.onLaunch?(account) },
+         MenuEntry(T("Rename…", "Renomear…"), icon: .pencilSimple) { [weak self] in self?.onRename?(account) },
+         MenuEntry(T("Hide", "Esconder"), icon: .x) { [weak self] in self?.onHide?(account, true) }]
     }
 }

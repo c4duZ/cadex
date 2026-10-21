@@ -306,6 +306,26 @@ let exitCode = await Checks.run([
             }
         }
     }),
+    ("opening an account's agent: its folder in the environment, the flag only when asked", {
+        let work = AgentAccount(dir: "/Users/me/.claude-work", name: "W", isDefault: false)
+        expect(AgentLaunch.command(for: work, skipPermissions: false) == "CLAUDE_CONFIG_DIR='/Users/me/.claude-work' claude")
+        expect(AgentLaunch.command(for: work, skipPermissions: true) == "CLAUDE_CONFIG_DIR='/Users/me/.claude-work' claude --dangerously-skip-permissions")
+        expect(AgentLaunch.command(for: AgentAccount(dir: "/Users/me/.claude", name: "D", isDefault: true), skipPermissions: false) == "claude")
+        var codex = AgentAccount(dir: "/Users/me/.codex-2", name: "C", isDefault: false)
+        codex.provider = .codex
+        expect(AgentLaunch.command(for: codex, skipPermissions: true) == "CODEX_HOME='/Users/me/.codex-2' codex --dangerously-bypass-approvals-and-sandbox")
+        let odd = AgentAccount(dir: "/tmp/it's", name: "x", isDefault: false)
+        expect(AgentLaunch.command(for: odd, skipPermissions: false) == "CLAUDE_CONFIG_DIR='/tmp/it'\\''s' claude", AgentLaunch.command(for: odd, skipPermissions: false))
+    }),
+    ("an account with no login, or out for over a day, is left out; a short pause is not", {
+        let usage = AgentUsageController.shared
+        usage.states["/x/none"] = .noLogin
+        usage.states["/x/old"] = .expired
+        usage.expiredSince["/x/old"] = Date().addingTimeInterval(-3 * 86_400)
+        usage.states["/x/pause"] = .expired
+        usage.expiredSince["/x/pause"] = Date().addingTimeInterval(-3600)
+        expect(usage.isStale("/x/none") && usage.isStale("/x/old") && !usage.isStale("/x/pause") && !usage.isStale("/x/unread"))
+    }),
     ("a picture of the page, with CADEX_SNAPSHOT_DIR", {
         guard let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }
         let home = fakeHome()
@@ -332,8 +352,9 @@ let exitCode = await Checks.run([
         }
         AgentsController.shared.hidden = [home + "/.claude-band"]
         let usage = AgentUsageController.shared
-        usage.accounts = { [] }
+        usage.accounts = { AgentsController.shared.everyAccount().filter { !AgentsController.shared.hidden.contains($0.dir) } }
         usage.states[home + "/.claude"] = .expired
+        usage.expiredSince[home + "/.claude"] = Date().addingTimeInterval(-600)
         usage.plans[home + "/.claude-work"] = "team"
         usage.states[home + "/.claude-work"] = .ready(AgentUsage(session: .init(percent: 19, resets: Date().addingTimeInterval(5400)),
                                                                    week: .init(percent: 97, resets: Date().addingTimeInterval(86400 * 3)), sonnetWeek: nil), Date())

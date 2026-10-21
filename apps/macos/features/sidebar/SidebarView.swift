@@ -20,7 +20,7 @@ public final class SidebarView: NSView {
     public var onSubtab: ((String, String) -> Void)?
     /// The sub-tab each page shows, the first until one is picked.
     public private(set) var subtab: [String: String] = [:]
-    private let subtabs = NSSegmentedControl()
+    private let subtabs = SidebarSubtabs()
     public private(set) var items: [String] = []
     private let catalog: [SidebarItem]
     private let run: (String) -> Void
@@ -49,12 +49,7 @@ public final class SidebarView: NSView {
         row.onReorder = { [weak self] ids in self?.change(ids) }
         row.onCustomize = { [weak self] _ in self?.customize() }
         row.onOverflow = { [weak self] ids, anchor in self?.overflow(ids, below: anchor) }
-        subtabs.segmentStyle = .rounded
-        subtabs.controlSize = .small
-        subtabs.font = UILooks.font(11)
-        subtabs.trackingMode = .selectOne
-        subtabs.target = self
-        subtabs.action = #selector(subtabPicked)
+        subtabs.onPick = { [weak self] index in self?.subtabPicked(index) }
         subtabs.isHidden = true
         for view in [row, title, subtabs, content, empty] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
@@ -138,17 +133,15 @@ public final class SidebarView: NSView {
     private func showSubtabs(of item: SidebarItem) {
         subtabs.isHidden = item.subtabs.isEmpty
         guard !item.subtabs.isEmpty else { return }
-        subtabs.segmentCount = item.subtabs.count
-        for (index, tab) in item.subtabs.enumerated() { subtabs.setLabel(tab.title, forSegment: index) }
         let current = subtab[item.id] ?? item.subtabs[0].id
         subtab[item.id] = current
-        subtabs.selectedSegment = item.subtabs.firstIndex { $0.id == current } ?? 0
+        subtabs.set(item.subtabs.map(\.title), selected: item.subtabs.firstIndex { $0.id == current } ?? 0)
         onSubtab?(item.id, current)
     }
 
-    @objc private func subtabPicked() {
-        guard let page, let item = catalog.first(where: { $0.id == page }), item.subtabs.indices.contains(subtabs.selectedSegment) else { return }
-        let sub = item.subtabs[subtabs.selectedSegment].id
+    private func subtabPicked(_ index: Int) {
+        guard let page, let item = catalog.first(where: { $0.id == page }), item.subtabs.indices.contains(index) else { return }
+        let sub = item.subtabs[index].id
         subtab[page] = sub
         onSubtab?(page, sub)
     }
@@ -165,6 +158,7 @@ public final class SidebarView: NSView {
     public func setColors(_ colors: SidebarColors) {
         self.colors = colors
         row.colors = colors
+        subtabs.colors = colors
         title.textColor = colors.text
     }
 

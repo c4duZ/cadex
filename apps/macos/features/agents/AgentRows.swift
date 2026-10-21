@@ -95,7 +95,22 @@ final class AgentRow: NSView {
     var onClick: (() -> Void)?
     var onDoubleClick: (() -> Void)?
     var onRightClick: (() -> Void)?
-    var fill: NSColor? { didSet { layer?.backgroundColor = fill?.cgColor } }
+    var fill: NSColor? { didSet { restyle() } }
+    /// The soft fill under the pointer, for rows that do something on a click.
+    var hoverFill: NSColor? {
+        didSet {
+            trackingAreas.forEach(removeTrackingArea)
+            if hoverFill != nil {
+                addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect], owner: self))
+            }
+        }
+    }
+    private var hovering = false { didSet { restyle() } }
+
+    private func restyle() { layer?.backgroundColor = (hovering ? hoverFill ?? fill : fill)?.cgColor }
+
+    override func mouseEntered(with event: NSEvent) { hovering = true }
+    override func mouseExited(with event: NSEvent) { hovering = false }
 
     init(_ content: NSView, inset: CGFloat = 6) {
         super.init(frame: .zero)

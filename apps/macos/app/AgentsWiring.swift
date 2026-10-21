@@ -19,13 +19,8 @@ extension WindowSession {
         page.isInCadex = { [weak self] session in self?.terminal(of: session) != nil }
         page.onOpen = { [weak self] session in self?.openAgent(session) }
         page.onEnable = { [weak self] in self?.settings.store.update { $0.agents.sessions = true } }
-        page.onHide = { [weak self] account, hide in
-            let key = SettingsBridge.tilde(account.dir)
-            self?.settings.store.update { s in
-                s.agents.hiddenAccounts.removeAll { $0 == key }
-                if hide { s.agents.hiddenAccounts.append(key) }
-            }
-        }
+        page.onHide = { [weak self] account, hide in self?.hideAccount(account, hide) }
+        page.onLaunch = { [weak self] account in self?.launchAgent(for: account) }
         page.onRename = { [weak self] account in self?.renameAccount(account) }
         agentsPage = page
         ThemeStore.shared.observe { [weak page, weak self] _ in
@@ -195,6 +190,15 @@ extension AppDelegate {
             self?.sessions.first?.openAgent(session)
         }
         ThemeStore.shared.observe { theme in AgentNotifier.shared.accent = theme.interface.accent.nsColor }
+        // A hidden account whose login changed (a new login, a renewal by
+        // use) comes back; a window's reset does not count.
+        AgentUsageController.shared.onLoginChanged = { [weak self] dir in
+            let key = SettingsBridge.tilde(dir)
+            self?.settings.store.update { s in
+                s.agents.hiddenAccounts.removeAll { $0 == key }
+                s.agents.hiddenLogins[key] = nil
+            }
+        }
         notifier.start()
         // A test instance shows the three kinds without a click (2026-10-21).
         if ProcessInfo.processInfo.environment["CADEX_TEST_NOTIFICATIONS"] != nil {

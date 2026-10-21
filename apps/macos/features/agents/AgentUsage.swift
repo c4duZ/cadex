@@ -38,6 +38,18 @@ struct AgentLogin: Equatable, Sendable {
         return FileManager.default.contents(atPath: account.dir + "/.credentials.json").flatMap(parse)
     }
 
+    /// What changes when the account logs in again or Claude Code renews
+    /// its token by use: a hidden account comes back on a change of this,
+    /// never on a window's reset (the owner, 2026-10-21). "none" without a login.
+    static func fingerprint(_ account: AgentAccount) -> String {
+        if account.provider == .codex {
+            let auth = json(account.dir + "/auth.json")
+            return auth?["last_refresh"] as? String ?? (auth == nil ? "none" : "login")
+        }
+        guard let login = read(account) else { return "none" }
+        return login.expires.map { String(Int($0.timeIntervalSince1970)) } ?? "login"
+    }
+
     static func parse(_ data: Data) -> AgentLogin? {
         guard let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
               let oauth = object["claudeAiOauth"] as? [String: Any], let token = oauth["accessToken"] as? String, !token.isEmpty else { return nil }

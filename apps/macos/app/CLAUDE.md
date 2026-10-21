@@ -54,7 +54,9 @@
   painel lateral recolhível, barra de status) e `SidebarWiring.swift` (o catálogo da feature `sidebar`: a árvore do explorer, o painel do git e o histórico compacto como páginas, a busca como ação; salva sidebar.items e põe a contagem de mudanças no ícone do Git; `openCustomize` abre a janela
   Customize única na aba pedida, com as abas da barra lateral e da barra de status desta janela, nas
   cores do tema como as configurações e não nas da janela, e a repinta quando o tema muda) e
-  `StatusBarWiring.swift` (os itens Git branch e Terminals, e os lados salvos). O explorer é criado
+  `StatusBarWiring.swift` (os itens Git branch e Terminals, e os lados salvos). `AgentsLaunch.swift`:
+  esconder contas guardando o login, a aba Accounts do Customize e abrir o agente de uma conta no
+  terminal com foco (no prompt) ou numa aba nova. O explorer é criado
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.

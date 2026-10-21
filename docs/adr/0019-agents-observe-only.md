@@ -38,6 +38,13 @@ quanto custam:
 - **Sem fingir ser outro programa.** O ai-usagebar se identifica como o Claude Code nas
   requisições (auditoria de 2026-10-21, `docs/plans/17-sidebar-agents-status.md`); o Cadex se
   identifica como Cadex e espera quando o serviço pede.
+- **Abrir o agente de uma conta (2026-10-21, pedido do dono).** A única coisa que o Cadex inicia:
+  clicar numa conta (Agents › Accounts, ⌘K "Open an Account's Agent") digita no terminal com foco,
+  se ele está no prompt, ou numa aba nova, `claude` com a pasta da conta em `CLAUDE_CONFIG_DIR`
+  (ou `codex` com `CODEX_HOME`), e Enter. Com agents.launchSkipPermissions, o
+  `--dangerously-skip-permissions` (Codex: `--dangerously-bypass-approvals-and-sandbox`), desligado
+  por padrão. Como o ssh.connect: digitar um comando. O Cadex continua sem mandar prompt, sem ler
+  resposta e sem falar com modelo; o "launcher de agentes" de várias tarefas continua fora.
 - **Tudo desligável e com custo zero desligado.** Cada leitura tem uma chave; desligada, nenhum
   arquivo é vigiado e nenhuma requisição sai. O orçamento: tudo ligado, no máximo 10% acima do app
   sem as leituras no `make perf`.

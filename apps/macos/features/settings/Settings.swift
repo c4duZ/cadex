@@ -127,6 +127,13 @@ public struct Settings: Equatable, Sendable {
         public var accountNames: [String: String] = [:]
         /// Accounts left out of Accounts and the usage item, by folder.
         public var hiddenAccounts: [String] = []
+        /// Each hidden account's login when it was hidden: it comes back when
+        /// that changes (a new login, a renewal by use), by folder.
+        public var hiddenLogins: [String: String] = [:]
+        /// Clicking an account opens its agent without permission prompts
+        /// (Claude Code's --dangerously-skip-permissions, Codex's
+        /// --dangerously-bypass-approvals-and-sandbox). Off by default.
+        public var launchSkipPermissions = false
     }
 
     public struct SSH: Equatable, Sendable {

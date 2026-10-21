@@ -42,7 +42,7 @@ public final class AgentUsageStrip: NSView {
     /// with numbers.
     func shown() -> AgentAccount? {
         let usage = AgentUsageController.shared
-        let accounts = usage.accounts()
+        let accounts = usage.visibleAccounts()
         let wanted = focused ?? last
         return accounts.first { $0.dir == wanted } ?? accounts.first { usage.states[$0.dir]?.usage != nil }
     }

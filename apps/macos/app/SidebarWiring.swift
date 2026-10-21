@@ -82,7 +82,7 @@ extension WindowSession {
     }
 
     private func customizePages(_ workspace: WorkspaceView) -> [CustomizePage] {
-        [workspace.sidebar.customizePage, workspace.statusBar.customizePage]
+        [workspace.sidebar.customizePage, workspace.statusBar.customizePage, accountsPage()]
     }
 
     /// The Git History page: the repository's history, compact, made the

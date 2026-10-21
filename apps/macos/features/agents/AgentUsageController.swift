@@ -21,6 +21,49 @@ public final class AgentUsageController {
         let agents = AgentsController.shared
         return agents.everyAccount().filter { !agents.hidden.contains($0.dir) }
     }
+    /// When each expired login ran out, by account folder.
+    public internal(set) var expiredSince: [String: Date] = [:]
+
+    /// An account not worth a line: no login, or a login out for more than
+    /// a day (Claude Code renews it while the account is used, so a short
+    /// one is a pause, a long one an account left aside; the owner,
+    /// 2026-10-21).
+    public func isStale(_ dir: String, now: Date = Date()) -> Bool {
+        switch states[dir] {
+        case .noLogin: return true
+        case .expired: return (expiredSince[dir] ?? .distantPast) < now.addingTimeInterval(-86_400)
+        default: return false
+        }
+    }
+
+    /// The accounts the card, the item and Accounts list: shown and in use.
+    public func visibleAccounts() -> [AgentAccount] { accounts().filter { !isStale($0.dir) } }
+
+    /// The hidden accounts' login when they were hidden (agents.hiddenLogins).
+    public var hiddenLogins: [String: String] = [:]
+    /// A hidden account logged in again (or was used): the app shows it.
+    public var onLoginChanged: ((String) -> Void)?
+    private var lastLoginCheck = Date.distantPast
+
+    /// The login now, for hiding an account (off the main thread).
+    public func fingerprint(_ account: AgentAccount) async -> String {
+        await Task.detached { AgentLogin.fingerprint(account) }.value
+    }
+
+    /// Every 5 min while something reads: has a hidden account's login moved?
+    private func checkHidden() {
+        guard Date().timeIntervalSince(lastLoginCheck) >= Self.every, !hiddenLogins.isEmpty else { return }
+        lastLoginCheck = Date()
+        let hidden = AgentsController.shared.everyAccount().filter { hiddenLogins[$0.dir] != nil }
+        let kept = hiddenLogins
+        Task {
+            for account in hidden {
+                let now = await fingerprint(account)
+                if let before = kept[account.dir], now != before, now != "none" { onLoginChanged?(account.dir) }
+            }
+        }
+    }
+
     var fetch: (URLRequest) async throws -> (Data, URLResponse) = { try await URLSession.shared.data(for: $0) }
 
     static let endpoint = URL(string: "https://api.anthropic.com/api/oauth/usage")!
@@ -82,6 +125,7 @@ public final class AgentUsageController {
             inFlight.insert(account.dir)
             Task { await self.read(account) }
         }
+        checkHidden()
         publish()
     }
 
@@ -95,7 +139,10 @@ public final class AgentUsageController {
         let login = await Task.detached { AgentLogin.read(account) }.value
         guard let login else { return states[account.dir] = .noLogin }
         if let plan = login.plan { plans[account.dir] = plan }
-        if login.isExpired { return states[account.dir] = .expired }
+        if login.isExpired {
+            expiredSince[account.dir] = login.expires
+            return states[account.dir] = .expired
+        }
         var request = URLRequest(url: Self.endpoint, timeoutInterval: 10)
         request.setValue("Bearer " + login.token, forHTTPHeaderField: "Authorization")
         request.setValue("oauth-2025-04-20", forHTTPHeaderField: "anthropic-beta")

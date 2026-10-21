@@ -68,8 +68,20 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
 ### Configurações
 - Três chaves, cada uma desliga uma leitura por inteiro (nada vigiado, nenhuma requisição):
   agents.sessions, agents.accounts e, em ssh, ssh.ping. Ligadas por padrão.
-- Esconder uma conta (agents.hiddenAccounts) a tira de Accounts e do item de uso (as sessões dela
-  continuam em Sessions); ela fica no fim de Accounts, apagada, com "Show", e não é lida.
+- Accounts tem a cara do cartão do item de uso: um bloco por conta (logo, nome, "· plano", as
+  barras), separados por uma linha fina, sem caixa; a pasta fica na dica.
+- Conta sem login, ou com login vencido há mais de um dia, não aparece em Accounts, no item de uso
+  nem no cartão; vencido há menos (o Claude Code renova enquanto a conta é usada) aparece com o aviso.
+- Clicar numa conta abre o agente dela (ADR 0019): no terminal com foco, se ele está no prompt, ou
+  numa aba nova na pasta dele, digita `claude` com `CLAUDE_CONFIG_DIR` da conta (ou `codex` com
+  `CODEX_HOME`) e Enter; com agents.launchSkipPermissions, sem pedir permissões. Também no ⌘K ("Open
+  an Account's Agent") e no clique direito.
+- Esconder uma conta (clique direito, ou a chave em Customize › Accounts; agents.hiddenAccounts) a
+  tira de Accounts, do item e do cartão (as sessões dela continuam em Sessions) e ela não é lida.
+  Ela volta sozinha quando o login dela muda (novo login, renovação por uso; guardado em
+  agents.hiddenLogins na hora de esconder, conferido a cada 5 min com alguém olhando), nunca por um
+  reinício de janela. Customize › Accounts lista todas, com o estado de cada uma, e a opção "Without
+  permission prompts".
 - Renomear (agents.accountNames, pelo botão direito no cartão): o nome novo vale em Sessions, nas
   notificações e na barra de status; vazio volta ao da organização.
 - agents.accounts desliga a leitura do uso: nenhum login lido, nenhuma requisição.

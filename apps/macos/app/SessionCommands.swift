@@ -86,6 +86,8 @@ extension WindowSession {
             id: "agents.refresh-usage", title: T("Refresh Agent Usage", "Atualizar o uso dos agentes"),
             keywords: ["usage", "plan", "limit", "refresh", "uso", "plano", "limite", "atualizar"], category: .view,
             action: .run { AgentUsageController.shared.refreshNow() }))
+        commands.register(AgentLaunch.commands(palette: palette, launch: { [weak self] account in self?.launchAgent(for: account) },
+                                               customize: { [weak self] in self?.openCustomize("accounts") }))
         commands.register(Command(
             id: "agents.test-notifications", title: T("Send Test Notifications", "Mandar notificações de teste"),
             keywords: ["notifications", "agents", "test", "notificações", "teste", "avisos"], category: .view,

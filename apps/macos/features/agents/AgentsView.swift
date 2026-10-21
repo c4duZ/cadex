@@ -24,13 +24,10 @@ public final class AgentsView: NSView {
     /// the app saves agents.accountNames and agents.hiddenAccounts.
     public var onRename: ((AgentAccount) -> Void)?
     public var onHide: ((AgentAccount, Bool) -> Void)?
+    /// A click on an account: open its agent in the focused terminal (the app's).
+    public var onLaunch: ((AgentAccount) -> Void)?
 
     let controller: AgentsController
-    /// The accounts split as the Accounts tab shows them.
-    var controllerAccounts: (all: [AgentAccount], shown: [AgentAccount], hidden: [AgentAccount]) {
-        let all = controller.everyAccount()
-        return (all, all.filter { !controller.hidden.contains($0.dir) }, all.filter { controller.hidden.contains($0.dir) })
-    }
     /// Usage is read while Accounts shows (AgentUsageController).
     var usage: AgentUsageController { .shared }
     private let stack = NSStackView()

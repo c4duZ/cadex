@@ -151,9 +151,9 @@ final class CustomizeRowView: NSView {
         layer?.backgroundColor = colors.box.cgColor
         let handle = NSImageView(image: Icon.dotsSixVertical.image(size: UILooks.pt(13)))
         handle.contentTintColor = colors.secondary.withAlphaComponent(0.6)
-        let icon = NSImageView(image: (row.icon ?? .dotsThree).image(size: UILooks.pt(15)))
-        icon.contentTintColor = colors.secondary
-        icon.isHidden = row.icon == nil
+        let icon = NSImageView(image: row.logo?.image(size: UILooks.pt(15)) ?? (row.icon ?? .dotsThree).image(size: UILooks.pt(15)))
+        icon.contentTintColor = row.logo == nil ? colors.secondary : colors.text
+        icon.isHidden = row.icon == nil && row.logo == nil
         let title = NSTextField(labelWithString: row.title)
         title.font = .systemFont(ofSize: 13, weight: .medium)
         title.textColor = colors.text
@@ -175,7 +175,7 @@ final class CustomizeRowView: NSView {
             addSubview(view)
         }
         texts.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        let textStart = row.icon == nil ? handle.trailingAnchor : icon.trailingAnchor
+        let textStart = row.icon == nil && row.logo == nil ? handle.trailingAnchor : icon.trailingAnchor
         NSLayoutConstraint.activate([
             handle.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
             handle.centerYAnchor.constraint(equalTo: centerYAnchor),

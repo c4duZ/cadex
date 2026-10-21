@@ -6,6 +6,8 @@ import Icons
 public struct CustomizeRow: Equatable, Sendable {
     public let id: String
     public let icon: Icon?
+    /// An AI provider's logo in place of the icon (Customize › Accounts).
+    public var logo: ProviderLogo?
     public let title: String
     /// A quieter line under the title ("every 2 s").
     public let subtitle: String?

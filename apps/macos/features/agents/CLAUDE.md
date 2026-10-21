@@ -6,8 +6,9 @@
   (plano 17, fase C; `../../../../docs/spec/agents.md`).
 
 ## O que eu não quero
-- Rodar, mandar prompt ou falar com agente, nem mexer nos arquivos do Claude Code: só ler
-  (`../../../../docs/adr/0019-agents-observe-only.md`).
+- Mandar prompt ou falar com agente, nem mexer nos arquivos do Claude Code: só ler
+  (`../../../../docs/adr/0019-agents-observe-only.md`). A exceção: abrir o agente de uma conta, que é
+  digitar o comando dele num terminal.
 - Ler ou vigiar alguma coisa com ninguém olhando, ou com agents.sessions desligado.
 - Ler os logs das conversas: só o registro de cada sessão, as descrições dos subagentes e a data
   dos logs deles.
@@ -48,7 +49,12 @@
   Agent usage, com a conta do terminal com foco (`focused`, que o app diz) ou a última, e o popover
   ao passar o ponteiro (`AgentUsageCard.swift` no `HoverCard` compartilhado, todas as contas; subir para dentro dele o mantém aberto). `CodexUsage.swift`: as contas
   do Codex e o uso tirado dos logs dele (os limites de cada uso), sem rede. `AgentAccountsView.swift`: a aba
-  Accounts, com renomear e esconder pelo botão direito.
+  Accounts nos blocos do cartão (`AgentUsageCard.swift:block`), só as contas em uso (`visibleAccounts`:
+  sem login ou vencida há mais de um dia ficam fora); clique abre o agente, clique direito renomeia e
+  esconde. `AgentLaunch.swift`: o comando que abre o agente de uma conta (`CLAUDE_CONFIG_DIR` ou
+  `CODEX_HOME`, a flag sem permissões), agents.open-account e agents.customize-accounts; a única coisa
+  que o Cadex inicia (ADR 0019). Conta escondida volta quando o login muda (`fingerprint`,
+  `onLoginChanged`).
 - O app (`../../app/AgentsWiring.swift`) põe a página no catálogo da barra lateral (agents.show,
   ⇧⌘J), o ponto no ícone enquanto o ícone está lá, o item Agents da barra de status, e acha o
   terminal de cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo).

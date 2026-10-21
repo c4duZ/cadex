@@ -76,6 +76,7 @@ final class SettingsBridge {
         SSHController.shared.pings = settings.ssh.ping
         AgentsController.shared.names = settings.agents.accountNames.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }
         AgentsController.shared.hidden = Set(settings.agents.hiddenAccounts.map(Self.expand))
+        AgentUsageController.shared.hiddenLogins = settings.agents.hiddenLogins.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }
         let agents = settings.agents
         AgentNotifier.shared.kinds = .init(permission: agents.sessions && agents.notifyPermission,
                                            question: agents.sessions && agents.notifyQuestion,
