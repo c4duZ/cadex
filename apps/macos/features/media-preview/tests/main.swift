@@ -7,6 +7,15 @@ import Checks
 // shared/checks/Checks.swift for why this is an executable).
 
 let exitCode = await Checks.run([
+    ("⌘+scroll zooms around the pointer; dragging moves the image with the hand", {
+        expect(ImageScrollView.zoomFactor(deltaY: 10, precise: true) == 1.1)
+        expect(ImageScrollView.zoomFactor(deltaY: -10, precise: true) == 0.9)
+        expect(ImageScrollView.zoomFactor(deltaY: 500, precise: true) == 2, "a fling zooms at most 2× a step")
+        expect(abs(ImageScrollView.zoomFactor(deltaY: 1, precise: false) - 1.1) < 0.0001)
+        let origin = ImageScrollView.dragOrigin(start: NSPoint(x: 100, y: 100), from: NSPoint(x: 50, y: 50),
+                                                to: NSPoint(x: 70, y: 40), magnification: 2)
+        expect(origin == NSPoint(x: 90, y: 105), "\(origin)")
+    }),
     ("the viewer comes from the file type", {
         expect(MediaKind.of(path: "a/icon.png") == .image)
         expect(MediaKind.of(path: "logo.SVG") == .image)

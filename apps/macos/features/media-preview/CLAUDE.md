@@ -12,7 +12,8 @@
   arquivo depois de o núcleo dizer que está dentro do workspace; sem conseguir mostrar, oferece
   "Abrir no app padrão". `MediaKind.swift` escolhe o visualizador pelo tipo do sistema (texto e
   extensão desconhecida ficam com o editor). `ImageViewer.swift` (ajusta à aba, zoom, xadrez, tamanho
-  e dimensões), `PDFViewer.swift` (páginas, zoom, ⌘F por uma barra própria, PDF com senha), vídeo e
+  e dimensões; `ImageScrollView.swift`: ⌘+rolagem dá zoom em torno do ponteiro, arrastar move com a
+  mão, pinça pelo allowsMagnification), `PDFViewer.swift` (páginas, zoom, ⌘F por uma barra própria, PDF com senha), vídeo e
   áudio no AVPlayerView parados, o resto no QLPreviewView.
 - Comandos em `MediaCommands.swift`: media.zoom-in (⌘=), media.zoom-out (⌘-), media.zoom-fit (⌘0),
   media.zoom-actual (⌥⌘0; ⌘1 é das abas).

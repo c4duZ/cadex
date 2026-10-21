@@ -3,11 +3,12 @@ import UILooks
 import Strings
 
 /// An image in a tab (docs/spec/media-preview.md): fitted to the tab when
-/// bigger, zoom with ⌘+ ⌘− ⌘0 ⌘1, a soft checkerboard behind transparency,
-/// size and dimensions at the bottom. GIFs animate.
+/// bigger, zoom with ⌘+ ⌘− ⌘0 ⌥⌘0, ⌘+scroll and pinch, dragged with the
+/// hand (ImageScrollView), a soft checkerboard behind transparency, size
+/// and dimensions at the bottom. GIFs animate.
 @MainActor
 final class ImageViewer: NSView {
-    private let scroll = NSScrollView()
+    private let scroll = ImageScrollView()
     private let imageView = NSImageView()
     private let info = NSTextField(labelWithString: "")
     private var fitted = true
@@ -26,6 +27,7 @@ final class ImageViewer: NSView {
         imageView.imageScaling = .scaleNone
         imageView.animates = true
         scroll.documentView = imageView
+        scroll.onZoomByHand = { [weak self] in self?.fitted = false }
         info.font = UILooks.font(11)
         info.textColor = .secondaryLabelColor
         info.alignment = .center

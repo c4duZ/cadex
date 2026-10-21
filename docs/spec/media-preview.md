@@ -9,7 +9,10 @@ sabe mostrar.
   vídeo (MP4, MOV, M4V, WebM quando o sistema toca), áudio (MP3, WAV, AAC, M4A, FLAC, AIFF), PDF.
   Outros arquivos que não são texto abrem pelo Quick Look, se ele souber mostrar.
 - **Imagem:** centralizada, ajustada à aba quando maior que ela; ⌘+ e ⌘− dão zoom, ⌘0 volta a
-  ajustar, ⌥⌘0 mostra no tamanho real (⌘1 é da troca de abas). Fundo xadrez discreto para transparência. Na parte de baixo,
+  ajustar, ⌥⌘0 mostra no tamanho real (⌘1 é da troca de abas). ⌘ + rolagem e a pinça do trackpad
+  também dão zoom, em torno do ponteiro; arrastar a imagem a move, com o cursor de mão (como no
+  Pré-Visualização do macOS; o dono, 2026-10-21). Depois de um zoom à mão, a imagem deixa de se
+  ajustar sozinha quando a aba muda de tamanho; ⌘0 volta. Fundo xadrez discreto para transparência. Na parte de baixo,
   dimensões e tamanho do arquivo. GIF anima.
 - **Vídeo e áudio:** controles do sistema (tocar, pausar, barra de tempo, volume, tela cheia no
   vídeo). Não começa a tocar sozinho.
