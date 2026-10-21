@@ -40,7 +40,8 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 - Código de outro app copiado, traduzido ou aberto como referência. A referência é o comportamento em
   `docs/spec/`. Ver `docs/adr/0004-clean-rewrite.md`.
 - WebView, Electron ou Tauri para a interface (`docs/adr/0001-macos-first-native-app.md`).
-- IA embutida no app. Agentes de código rodam numa aba de terminal.
+- IA embutida no app. Agentes de código rodam numa aba de terminal; o Cadex só observa as sessões e
+  o uso deles (`docs/adr/0019-agents-observe-only.md`).
 - Modo em blocos, terminal privado e launcher de agentes: ficaram de fora do Cadex.
 - Ação que não é um comando registrado (que só existe num botão, menu ou atalho).
 - Feature importando o miolo de outra feature.

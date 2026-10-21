@@ -21,8 +21,18 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   diff ou histórico do git.
 - **Painel** (`pane`): uma divisão dentro de uma aba de terminal. Uma aba pode ter vários painéis.
 - **Folha** (`leaf`): um painel final da árvore de divisões, que contém uma sessão de terminal.
-- **Barra lateral** (`sidebar`): a coluna com o explorer ou o source control.
-- **Barra de status** (`status-bar`): a faixa inferior com diretório e ambiente.
+- **Barra lateral** (`sidebar`): a coluna à esquerda; a fileira de ícones no topo escolhe a página
+  (arquivos, busca, git, agentes) e quem usa escolhe quais ícones aparecem.
+- **Página da barra lateral** (`sidebar page`): o que um ícone da fileira mostra. **Sub-aba**
+  (`subtab`): uma vista dentro da página, no controle logo abaixo dos ícones (Changes e History no Git).
+- **Barra de status** (`status-bar`): a faixa inferior, montada com itens que quem usa escolhe e
+  arrasta. **Item da barra de status** (`status item`): uma peça dela (pasta, ambiente, RAM, CPU, SSH...).
+- **Conta** (`agent account`): uma pasta de configuração do Claude Code (`~/.claude`, `~/.claude-*`), com
+  login e uso próprios. **Uso** (`usage`): quanto da sessão de 5 h e da semana a conta já gastou.
+- **Sessão de agente** (`agent session`): um Claude Code vivo, com estado (trabalhando, esperando
+  você), pasta e conta; não confundir com a sessão do terminal. **Subagente** (`subagent`): um
+  agente que a sessão abriu para uma tarefa, com descrição.
+- **Host SSH** (`ssh host`): um `Host` com nome fixo do `~/.ssh/config`.
 - **Paleta de comandos** (`command-palette`): a busca de ações aberta pelo ⌘K. Executa qualquer comando.
 - **Idioma** (`language`): inglês (padrão) ou português, a interface inteira; vale ao reabrir.
 - **Manter acordado** (`power`): o pedido ao sistema para o computador não dormir, sempre ou só
