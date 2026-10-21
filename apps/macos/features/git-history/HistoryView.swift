@@ -60,6 +60,25 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         empty.isHidden = empty.stringValue.isEmpty
     }
 
+    private var header: NSTableHeaderView?
+
+    /// The sidebar's narrow look: the columns a pane of 240 points cannot
+    /// show go, and so do the column titles, the checkbox and the count
+    /// (the checkbox's command stays in ⌘K).
+    func setCompact(_ compact: Bool) {
+        if header == nil { header = table.headerView }
+        table.headerView = compact ? nil : header
+        for column in table.tableColumns where ["author", "date", "sha"].contains(column.identifier.rawValue) {
+            column.isHidden = compact
+        }
+        currentOnly.isHidden = compact
+        count.isHidden = compact
+        searchField.placeholderString = compact
+            ? T("Filter commits", "Filtrar commits")
+            : T("Filter by subject, author or SHA (Enter searches the repository)", "Filtrar por assunto, autor ou sha (Enter busca no repositório)")
+        table.sizeLastColumnToFit()
+    }
+
     func showDetails() {
         detailsView.show(document?.selected, details: document?.details)
     }

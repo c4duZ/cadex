@@ -26,7 +26,7 @@ NOT_COMMANDS = {"explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal
 MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "terminal.open-pasted-image-beside", "terminal.open-pasted-image-in-tab",
             "preview.pick-element", "preview.stop-picking",
-            "sidebar.customize", "sidebar.toggle-page"}
+            "sidebar.customize", "sidebar.toggle-page", "git.show-history"}
 
 
 def literals(folder, suffix):

@@ -115,7 +115,7 @@ final class FileOpener {
         tabs.open(preview, beside: beside ?? opensBeside())
     }
 
-    private func makeHistory(_ root: String) -> HistoryDocument {
+    func makeHistory(_ root: String) -> HistoryDocument {
         let history = HistoryDocument(root: root)
         history.runCommand = { [weak self] id in self?.runCommand?(id) ?? false }
         history.onOpenDiff = { [weak self, weak history] repo, sha, path, orig in

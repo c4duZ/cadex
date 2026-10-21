@@ -1,4 +1,5 @@
 import AppKit
+import GitHistory
 import CommandPalette
 import Editor
 import Explorer
@@ -40,6 +41,10 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// it (FolderFollow.swift).
     var lastTerminalFolder: String?
     var followTerminal = true
+    /// The sidebar's Git History page, made the first time it shows
+    /// (SidebarWiring.swift); nil while nobody opened it, so it costs nothing.
+    var sidebarHistory: HistoryDocument?
+    let sidebarHistoryHost = NSView()
 
     var settings: SettingsBridge { app.settings }
 
@@ -102,6 +107,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         explorer.onFolderChange = { [weak self, weak opener] folders in
             opener?.foldersChanged(folders)
             self?.git?.diskChanged(folders)
+            self?.sidebarHistory?.diskChanged(folders)
         }
         let workspace = WorkspaceView(explorer: explorer, sidebar: makeSidebar(explorer: explorer, git: git)) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace

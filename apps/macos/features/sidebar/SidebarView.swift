@@ -8,6 +8,9 @@ import UILooks
 /// order, is sidebar.items; the app passes it in and saves what changes.
 @MainActor
 public final class SidebarView: NSView {
+    /// A page came into view: the app makes a page's content only then
+    /// (Git History), so a page nobody opens costs nothing.
+    public var onShow: ((String) -> Void)?
     /// The shown ids changed here (switch, drag); the app saves them.
     public var onItemsChange: (([String]) -> Void)?
     public private(set) var page: String?
@@ -105,6 +108,7 @@ public final class SidebarView: NSView {
         for other in catalog { other.view?.isHidden = other.id != id }
         row.select(id)
         title.stringValue = titles[id] ?? item.title
+        onShow?(id)
     }
 
     /// The text under the icons for a page: the folder's name for Files.

@@ -31,7 +31,10 @@ command-palette, shortcuts, tabs, terminal · Decisões: `docs/adr/0019-agents-o
 - Iniciar agente, mandar prompt, chamar modelo ou renovar login (ADR 0019).
 - Ler os logs completos das sessões a cada mudança: só o registro da sessão e as descrições dos
   subagentes; do log, só a data de modificação.
-- Medida rodando sem ninguém olhar: item escondido, página fechada ou janela fora da tela não lê.
+- Nada desligado ou escondido pesando (o dono, 2026-10-21, sobre as fases B, C e D): sem memória,
+  sem arquivo vigiado, sem timer, sem requisição. Item escondido, página fechada ou janela fora da
+  tela não lê; página só é criada quando aparece (como o Git History na barra lateral). Cada fase
+  confere no `make perf` que, desligado, os números são os de antes.
 - Ação que só existe no arrastar ou no botão direito: cada uma é um comando com id.
 - Por enquanto: Codex, sessões na nuvem, o Windows (fica para depois, com o port) e o painel de
   Tasks e Automations do Orca.

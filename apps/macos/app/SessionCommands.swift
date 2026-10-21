@@ -65,6 +65,10 @@ extension WindowSession {
                 self?.workspace?.showSidebar("git")
                 self?.git?.refresh()
             }))
+        commands.register(Command(
+            id: "git.show-history", title: T("Show Git History in Sidebar", "Mostrar o histórico do Git no painel lateral"),
+            keywords: ["history", "log", "commits", "histórico", "sidebar", "painel"], category: .view,
+            action: .run { [weak self] in self?.workspace?.showSidebar("history") }))
         commands.register(HistoryCommands.all(
             open: { [weak self] beside in if let root = self?.git?.repositoryRoot { self?.opener?.openHistory(root, beside: beside) } },
             repository: { [weak self] in self?.git?.repositoryRoot },
@@ -129,6 +133,7 @@ extension WindowSession {
             self.search?.setRoot(root, showHidden: self.explorer?.showHidden ?? true)
             self.markdown?.setRoot(root)
             self.git?.setFolder(root)
+            self.sidebarFolderChanged()
             self.spaces?.scheduleSave()
         }
     }

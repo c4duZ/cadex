@@ -101,5 +101,32 @@ let exitCode = await Checks.run([
         expect(updated, "\(document.commits.map(\.subject))")
         try? FileManager.default.removeItem(atPath: repo)
     }),
+    ("in the sidebar the history shows the graph and the subject on one line, nothing else", {
+        let repo = mergedRepository()
+        let document = HistoryDocument(root: repo)
+        document.compact = true
+        _ = await eventually { document.state == .ready && document.commits.count == 4 }
+        let table = document.historyView.table
+        let shown = table.tableColumns.filter { !$0.isHidden }.map(\.identifier.rawValue)
+        expect(shown == ["graph", "subject"] && table.headerView == nil, "\(shown)")
+        let subject = HistoryRows.subject(document.commits[0])
+        let style = subject.attribute(.paragraphStyle, at: subject.length - 1, effectiveRange: nil) as? NSParagraphStyle
+        expect(style?.lineBreakMode == .byTruncatingTail, "the subject never wraps over the next row")
+        document.compact = false
+        expect(table.tableColumns.allSatisfy { !$0.isHidden } && table.headerView != nil, "the tab gets its columns back")
+        document.compact = true
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
+            let view = document.view
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 240, height: 420), styleMask: [.borderless], backing: .buffered, defer: false)
+            window.appearance = NSAppearance(named: .darkAqua)
+            window.contentView = view
+            view.layoutSubtreeIfNeeded()
+            if let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
+                view.cacheDisplay(in: view.bounds, to: bitmap)
+                try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/history-compact.png"))
+            }
+        }
+        try? FileManager.default.removeItem(atPath: repo)
+    }),
 ])
 exit(exitCode)

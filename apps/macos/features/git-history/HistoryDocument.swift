@@ -41,6 +41,12 @@ public final class HistoryDocument: TabDocument {
         loadMore()
     }
 
+    /// In the sidebar: the graph and the subject only, no column titles,
+    /// author, date or SHA, and a short search field (docs/spec/git-history.md).
+    public var compact = false {
+        didSet { historyView.setCompact(compact) }
+    }
+
     public static func identity(for root: String) -> String { "history:\(root)" }
     public var identity: String { Self.identity(for: root) }
     public var title: String { T("History: ", "Histórico: ") + (root as NSString).lastPathComponent }

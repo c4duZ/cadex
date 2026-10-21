@@ -97,6 +97,7 @@ final class HistoryRows: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         cell.identifier = .init(id)
         let label = NSTextField(labelWithString: "")
         label.lineBreakMode = .byTruncatingTail
+        label.maximumNumberOfLines = 1
         label.font = id == "sha" ? UILooks.monospaced(11) : UILooks.font(12)
         if id != "subject" { label.textColor = .secondaryLabelColor }
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -126,6 +127,12 @@ final class HistoryRows: NSObject, NSTableViewDataSource, NSTableViewDelegate {
             text.append(NSAttributedString(string: " "))
         }
         text.append(NSAttributedString(string: commit.subject, attributes: [.font: UILooks.font(12)]))
+        // One line, cut at the end: an attributed value drops the label's
+        // own line break, and in a narrow pane the subject wrapped over the
+        // next row (owner's print, 2026-10-21).
+        let line = NSMutableParagraphStyle()
+        line.lineBreakMode = .byTruncatingTail
+        text.addAttribute(.paragraphStyle, value: line, range: NSRange(location: 0, length: text.length))
         return text
     }
 

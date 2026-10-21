@@ -9,10 +9,15 @@ em que ordem.
 - No topo, ao lado dos botões da janela, a fileira de ícones (Phosphor). Clicar num ícone mostra a
   página dele; clicar no ícone da página aberta recolhe a barra lateral (como view.toggle-sidebar).
 - Os ícones padrão, nesta ordem: Files (⇧⌘E, explorer.focus), Search (⇧⌘F, search.content) e Git
-  (⇧⌘G, git.show); Agents (⇧⌘J, agents.show) entra com a página dele. Git History, Web Preview e
-  Spaces existem escondidos e podem ser ligados.
-- Files e Git são páginas: mostram a view na barra lateral. Search, Git History, Web Preview e
-  Spaces são ações: o clique só roda o comando (a busca abre no ⌘K, o histórico numa aba).
+  (⇧⌘G, git.show); Agents (⇧⌘J, agents.show) entra com a página dele. Git History
+  (git.show-history) existe escondido e pode ser ligado.
+- Só entra na barra o que mostra uma página nela. Files, Git e Git History são páginas; Search, por
+  enquanto, abre a busca no ⌘K. Web Preview e Spaces abriam coisa em outro lugar e saíram (o dono,
+  2026-10-21).
+- Git History na barra lateral: o grafo e a descrição de cada commit numa linha, sem as colunas de
+  autor, data e commit, e os detalhes do commit escolhido embaixo; clicar num arquivo abre o diff.
+  Fora de um repositório, "Not a Git repository". A aba do histórico (git.history) continua igual.
+- Página que ninguém abriu não existe: o histórico só é lido na primeira vez que a página aparece.
 - Cada ícone pode ter um sinal pequeno: o Git, o número de mudanças; o Agents, um ponto quando algum
   agente espera resposta. O sinal some quando não há nada a dizer.
 - Embaixo da fileira, o título da página à esquerda e as sub-abas dela à direita, num controle
