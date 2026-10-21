@@ -12,7 +12,7 @@ em que ordem.
   (⇧⌘G, git.show); Agents (⇧⌘J, agents.show) e Accounts (agents.show-accounts) entram com as
   páginas deles, separadas para cada uma ter o próprio ícone e atalho (o dono, 2026-10-21). Git History
   (git.show-history) existe escondido e pode ser ligado.
-- ⌥⌘1 a ⌥⌘9 (sidebar.page-1 a -9) valem como clicar no ícone daquela posição, na ordem que
+- ⌃⌘1 a ⌃⌘9 (sidebar.page-1 a -9) valem como clicar no ícone daquela posição, na ordem que
   aparece, como ⌘1 a ⌘9 nas abas; ⇧⌘ não, porque ⇧⌘3 a ⇧⌘5 são as capturas de tela do macOS.
 - Só entra na barra o que mostra uma página nela. Files, Git e Git History são páginas; Search, por
   enquanto, abre a busca no ⌘K. Web Preview e Spaces abriam coisa em outro lugar e saíram (o dono,

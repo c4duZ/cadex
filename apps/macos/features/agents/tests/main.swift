@@ -283,6 +283,26 @@ let exitCode = await Checks.run([
         expect(strip.shown()?.dir == "/a")
         strip.focused = nil
         expect(strip.shown()?.dir == "/a", "no agent in the terminal: the last one")
+        // The bar takes the free room, between 40 and 136 pt, and gives
+        // way first when a long left side pushes on it.
+        strip.focused = "/b"
+        func meterWidth(_ width: CGFloat, left: String) -> CGFloat {
+            let bar = NSView(frame: NSRect(x: 0, y: 0, width: width, height: 24))
+            let label = NSTextField(labelWithString: left)
+            label.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+            for view in [label, strip] as [NSView] { view.translatesAutoresizingMaskIntoConstraints = false; bar.addSubview(view) }
+            NSLayoutConstraint.activate([label.leadingAnchor.constraint(equalTo: bar.leadingAnchor), label.trailingAnchor.constraint(lessThanOrEqualTo: strip.leadingAnchor),
+                                         strip.trailingAnchor.constraint(equalTo: bar.trailingAnchor), label.centerYAnchor.constraint(equalTo: bar.centerYAnchor),
+                                         strip.centerYAnchor.constraint(equalTo: bar.centerYAnchor)])
+            bar.layoutSubtreeIfNeeded()
+            let found = strip.subviews.first?.subviews.first { $0 is AgentMeter }?.frame.width ?? -1
+            strip.removeFromSuperview()
+            return found
+        }
+        let roomy = meterWidth(900, left: "folder")
+        let tight = meterWidth(320, left: String(repeating: "long folder name ", count: 8))
+        expect(roomy == 136, "roomy: \(roomy)")
+        expect(tight >= 40 && tight < 136, "tight: \(tight)")
         expect(AgentUsageStrip.short(AgentUsage(session: .init(percent: 19.4, resets: nil), week: .init(percent: 97, resets: nil), sonnetWeek: nil)) == "19% 5h · 97% wk")
         if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
             usage.plans["/a"] = "team"

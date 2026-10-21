@@ -173,7 +173,7 @@ public final class SidebarView: NSView {
         change(SidebarLayout.toggled(items, id))
     }
 
-    /// The icon at `position` (from 1), as a click on it: ⌥⌘1 to ⌥⌘9
+    /// The icon at `position` (from 1), as a click on it: ⌃⌘1 to ⌃⌘9
     /// (sidebar.page-N), as ⌘1 to ⌘9 pick the tabs (the owner, 2026-10-21;
     /// ⇧⌘3 to ⇧⌘5 are the system's screenshots). False when there is none.
     @discardableResult

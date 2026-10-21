@@ -6,7 +6,7 @@ import UILooks
 
 /// The status bar's Agent usage item (docs/spec/agents.md, Accounts): the
 /// account of the agent in the focused terminal, or the last one shown,
-/// with its logo, name, a small bar of the 5 hour session and "5h · wk".
+/// with its logo, name, a bar of the 5 hour session that takes the free room and "5h · wk".
 /// The pointer over it opens a popover with every account of every
 /// provider (the owner, 2026-10-21). The app watches the usage while the
 /// item shows and says which account the terminal's agent uses.
@@ -64,13 +64,28 @@ public final class AgentUsageStrip: NSView {
         }
         if let session = numbers.session {
             let meter = AgentMeter(share: session.percent / 100, color: AgentMeter.color(session.percent, accent: colors.accent), track: colors.secondary)
-            meter.widthAnchor.constraint(equalToConstant: UILooks.pt(30)).isActive = true
+            fit(meter)
             stack.addArrangedSubview(meter)
         }
         let text = AgentText.label(Self.short(numbers), size: 11, color: colors.secondary)
         text.font = UILooks.monospacedDigits(11)
         stack.addArrangedSubview(text)
         card?.refresh()
+    }
+
+    /// The bar takes the status bar's free room, from 40 pt up to half the
+    /// popover's bars (136 pt): at 30 pt it was too small to read (the
+    /// owner, 2026-10-21). Below the other items' resistance, so it gives
+    /// way first when the window narrows.
+    private func fit(_ meter: NSView) {
+        let wide = meter.widthAnchor.constraint(equalToConstant: UILooks.pt(136))
+        wide.priority = NSLayoutConstraint.Priority(240)
+        NSLayoutConstraint.activate([
+            wide,
+            meter.widthAnchor.constraint(greaterThanOrEqualToConstant: UILooks.pt(40)),
+            meter.widthAnchor.constraint(lessThanOrEqualToConstant: UILooks.pt(136)),
+        ])
+        meter.setContentCompressionResistancePriority(NSLayoutConstraint.Priority(240), for: .horizontal)
     }
 
     /// "19% 5h · 97% wk"
