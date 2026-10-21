@@ -22,9 +22,10 @@ extension AgentsView {
         let list = NSStackView(views: accounts.map(block))
         list.orientation = .vertical
         list.alignment = .leading
-        // Each row pads its block by 5 pt above and below, so 2 pt between
-        // rows leaves the card's 12 pt between blocks (AgentUsageCard.make).
-        list.spacing = 2
+        // Each row pads its block by 5 pt above and below: 12 pt between
+        // rows leaves 22 pt between blocks; the card's 12 pt looked cramped
+        // in the tab (the owner, 2026-10-21).
+        list.spacing = 12
         for row in list.arrangedSubviews { row.widthAnchor.constraint(equalTo: list.widthAnchor).isActive = true }
         add(list)
     }

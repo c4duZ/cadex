@@ -69,7 +69,7 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
 - Três chaves, cada uma desliga uma leitura por inteiro (nada vigiado, nenhuma requisição):
   agents.sessions, agents.accounts e, em ssh, ssh.ping. Ligadas por padrão.
 - Accounts tem a cara do cartão do item de uso: um bloco por conta (logo, nome, "· plano", as
-  barras), com o mesmo espaço entre eles que o cartão e sem linha nem caixa; a pasta fica na dica.
+  barras), com espaço largo entre eles e sem linha nem caixa; a pasta fica na dica.
 - Conta sem login, ou com login vencido há mais de um dia, não aparece em Accounts, no item de uso
   nem no cartão; vencido há menos (o Claude Code renova enquanto a conta é usada) aparece com o aviso.
 - Clicar numa conta com o agente dela já rodando num terminal do Cadex vai a esse terminal (o usado

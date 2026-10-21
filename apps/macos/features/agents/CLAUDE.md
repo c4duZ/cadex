@@ -50,7 +50,7 @@
   ao passar o ponteiro (`AgentUsageCard.swift` no `HoverCard` compartilhado, todas as contas; subir para dentro dele o mantém aberto). `CodexUsage.swift`: as contas
   do Codex e o uso tirado dos logs dele (os limites de cada uso), sem rede. `AgentAccountsView.swift`: a aba
   Accounts nos blocos do cartão (`AgentUsageCard.swift:block`), só as contas em uso (`visibleAccounts`:
-  sem login ou vencida há mais de um dia ficam fora), com o espaço do cartão e sem linha entre elas; clique leva ao agente já aberto ou abre um, clique direito renomeia e
+  sem login ou vencida há mais de um dia ficam fora), com mais espaço entre elas que o cartão e sem linha; clique leva ao agente já aberto ou abre um, clique direito renomeia e
   esconde. `AgentLaunch.swift`: o comando que abre o agente de uma conta (`CLAUDE_CONFIG_DIR` ou
   `CODEX_HOME`, a flag sem permissões), agents.open-account e agents.customize-accounts; a única coisa
   que o Cadex inicia (ADR 0019). Conta escondida volta quando o login muda (`fingerprint`,
