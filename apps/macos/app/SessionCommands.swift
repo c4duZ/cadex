@@ -185,6 +185,7 @@ extension WindowSession {
             self?.terminalFolderMoved(terminal?.currentDirectory)
             self?.refreshWorkColor()
             self?.countTerminals()
+            self?.showFocusedAccount()
             // Ports are read again on a tab or pane switch, only while the item shows.
             if let self, let label = self.portsLabel, label.window != nil { self.readPorts(into: label) }
         }

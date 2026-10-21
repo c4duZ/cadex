@@ -44,7 +44,10 @@
   ativo; 5 min entre leituras, 60 s de frescor, espera de 5/10/20/60 min nos erros e a pedida no
   429; login vencido sem requisição; se identifica como Cadex (ADR 0019). `AgentUsageViews.swift`:
   as barras do cartão (destaque, laranja a partir de 70%, vermelho a partir de 90%) e
-  `AgentUsageStrip`, o item Agent usage da barra de status. `AgentAccountsView.swift`: a aba
+  `AgentUsageRows`, as barras que o cartão e o popover dividem. `AgentUsageStrip.swift`: o item
+  Agent usage, com a conta do terminal com foco (`focused`, que o app diz) ou a última, e o popover
+  ao passar o ponteiro (`AgentUsagePopover.swift`, todas as contas). `CodexUsage.swift`: as contas
+  do Codex e o uso tirado dos logs dele (os limites de cada uso), sem rede. `AgentAccountsView.swift`: a aba
   Accounts, com renomear e esconder pelo botão direito.
 - O app (`../../app/AgentsWiring.swift`) põe a página no catálogo da barra lateral (agents.show,
   ⇧⌘J), o ponto no ícone enquanto o ícone está lá, o item Agents da barra de status, e acha o

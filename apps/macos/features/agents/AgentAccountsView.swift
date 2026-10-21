@@ -22,7 +22,12 @@ extension AgentsView {
     }
 
     private func card(_ account: AgentAccount, hidden: Bool) -> NSView {
-        let name = AgentText.label(account.name, size: 13, weight: .semibold, color: hidden ? colors.secondary : colors.text)
+        let title = AgentText.label(account.name, size: 13, weight: .semibold, color: hidden ? colors.secondary : colors.text)
+        let logo = NSImageView(image: account.logo.image(size: UILooks.pt(15)))
+        logo.contentTintColor = hidden ? colors.secondary : colors.text
+        logo.setContentHuggingPriority(.required, for: .horizontal)
+        let name = NSStackView(views: [logo, title])
+        name.spacing = 6
         let folder = AgentText.label("~/" + (account.dir as NSString).lastPathComponent, size: 11, color: colors.secondary)
         var lines: [NSView] = [name, folder]
         // A hidden account is not read: nothing about its usage.

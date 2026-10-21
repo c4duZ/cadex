@@ -256,6 +256,48 @@ let exitCode = await Checks.run([
         usage.stop(token)
         expect(!usage.isRunning)
     }),
+    ("Codex: its accounts by the login's email, and the limits its own logs carry", {
+        let home = NSTemporaryDirectory() + "cadex-codex-\(UUID().uuidString)"
+        defer { try? fm.removeItem(atPath: home) }
+        let claims = Data(#"{"email":"me@x.com"}"#.utf8).base64EncodedString().replacingOccurrences(of: "=", with: "")
+        write(home + "/.codex/auth.json", #"{"tokens":{"id_token":"h.\#(claims).s"}}"#)
+        let soon = Date().timeIntervalSince1970 + 3600
+        write(home + "/.codex/sessions/2026/10/20/rollout-a.jsonl", #"{"type":"event_msg","payload":{"type":"token_count","rate_limits":{"primary":{"used_percent":12.0,"window_minutes":300,"resets_at":1},"secondary":{"used_percent":46.0,"window_minutes":10080,"resets_at":\#(soon)},"plan_type":"plus"}}}"#)
+        write(home + "/.codex/sessions/2026/09/01/rollout-old.jsonl", "{}")
+        let accounts = CodexUsage.accounts(home: home)
+        expect(accounts.map(\.name) == ["me@x.com"] && accounts.first?.provider == .codex && accounts.first?.logo == .openai)
+        let read = CodexUsage.read(accounts[0])
+        expect(read?.usage.session?.percent == 0, "the 5 h window reset since: 0%")
+        expect(read?.usage.week?.percent == 46 && read?.plan == "plus", "\(String(describing: read))")
+    }),
+    ("the usage item shows the focused terminal's account, else the last one", {
+        let usage = AgentUsageController.shared
+        let a = AgentAccount(dir: "/a", name: "A", isDefault: false)
+        var b = AgentAccount(dir: "/b", name: "B", isDefault: false)
+        b.provider = .codex
+        usage.accounts = { [a, b] }
+        usage.states["/b"] = .ready(AgentUsage(session: .init(percent: 10, resets: nil), week: nil, sonnetWeek: nil), Date())
+        let strip = AgentUsageStrip()
+        expect(strip.shown()?.dir == "/b", "none focused: the first with numbers")
+        strip.focused = "/a"
+        expect(strip.shown()?.dir == "/a")
+        strip.focused = nil
+        expect(strip.shown()?.dir == "/a", "no agent in the terminal: the last one")
+        expect(AgentUsageStrip.short(AgentUsage(session: .init(percent: 19.4, resets: nil), week: .init(percent: 97, resets: nil), sonnetWeek: nil)) == "19% 5h · 97% wk")
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
+            usage.plans["/a"] = "team"
+            usage.states["/a"] = .ready(AgentUsage(session: .init(percent: 19, resets: Date().addingTimeInterval(4000)),
+                                                   week: .init(percent: 97, resets: Date().addingTimeInterval(200_000)), sonnetWeek: nil), Date())
+            usage.plans["/b"] = "plus"
+            let popover = AgentUsagePopover()
+            popover.render(colors: AgentColors(text: .white, secondary: NSColor(white: 0.62, alpha: 1), accent: NSColor(red: 0.88, green: 0.64, blue: 0.35, alpha: 1),
+                                               panel: NSColor(white: 0.12, alpha: 1), border: NSColor(white: 0.25, alpha: 1)))
+            if let view = popover.contentView, let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
+                view.cacheDisplay(in: view.bounds, to: bitmap)
+                try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/usage-popover.png"))
+            }
+        }
+    }),
     ("a picture of the page, with CADEX_SNAPSHOT_DIR", {
         guard let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }
         let home = fakeHome()

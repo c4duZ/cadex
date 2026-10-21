@@ -66,17 +66,38 @@ extension WindowSession {
                               subtitle: T("Each account's 5 h session and week, every 5 min", "A sessão de 5 h e a semana de cada conta, a cada 5 min"),
                               icon: .sparkle, side: .left, view: strip)
         var token: UUID?
-        item.onVisible = { [weak strip] visible in
+        var sessions: UUID?
+        item.onVisible = { [weak strip, weak self] visible in
             if visible {
                 token = AgentUsageController.shared.watch { strip?.render() }
-            } else if let id = token {
-                AgentUsageController.shared.stop(id)
+                // Whose agent the focused terminal runs: the sessions say.
+                sessions = AgentsController.shared.watch { self?.showFocusedAccount() }
+            } else {
+                if let id = token { AgentUsageController.shared.stop(id) }
+                if let id = sessions { AgentsController.shared.stop(id) }
                 token = nil
+                sessions = nil
             }
         }
         strip.colors = Self.agentColors()
         usageStrip = strip
         return item
+    }
+
+    /// The usage item shows the account of the agent in the focused
+    /// terminal: a Claude Code session whose process group is the
+    /// terminal's, or Codex by its program's name; none keeps the last.
+    func showFocusedAccount() {
+        guard let strip = usageStrip, strip.window != nil else { return }
+        guard let terminal = tabs?.activeTerminal, terminal.foregroundGroup > 0 else { return strip.focused = nil }
+        let group = terminal.foregroundGroup
+        if let session = AgentsController.shared.sessions.first(where: { getpgid($0.pid) == group }) {
+            return strip.focused = session.account.dir
+        }
+        var name = [CChar](repeating: 0, count: 64)
+        proc_name(group, &name, UInt32(name.count))
+        if String(cString: name) == "codex" { return strip.focused = NSHomeDirectory() + "/.codex" }
+        strip.focused = nil
     }
 
     /// The dot on the Agents icon while some agent waits for an answer;
@@ -129,7 +150,7 @@ extension WindowSession {
     static func agentColors() -> AgentColors {
         let ui = ThemeStore.shared.current.interface
         return AgentColors(text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, accent: ui.accent.nsColor,
-                           waiting: .systemBlue, fill: ui.tabActive.nsColor)
+                           waiting: .systemBlue, fill: ui.tabActive.nsColor, panel: ui.panel.nsColor, border: ui.panelBorder.nsColor)
     }
 
     /// agents.test-notifications: the three kinds, named after this window's project.

@@ -24,6 +24,16 @@ public final class AgentsController {
     public var hidden: Set<String> = [] { didSet { if hidden != oldValue { publish() } } }
     /// The accounts not hidden: Accounts' cards, the usage item.
     public var shownAccounts: [AgentAccount] { accounts.filter { !hidden.contains($0.dir) } }
+    /// Every account of every provider (Claude Code and Codex), with the
+    /// names given, hidden ones too: the Accounts tab.
+    public func everyAccount() -> [AgentAccount] {
+        (AgentAccount.find(home: home) + CodexUsage.accounts(home: home)).map { account in
+            guard let name = names[account.dir] else { return account }
+            var renamed = AgentAccount(dir: account.dir, name: name, isDefault: account.isDefault)
+            renamed.provider = account.provider
+            return renamed
+        }
+    }
     /// agents.sessions: off, nothing is read at all.
     public var isEnabled = true { didSet { if isEnabled != oldValue { restart() } } }
     /// The folder accounts are looked for in (tests use a temporary one).

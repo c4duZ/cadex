@@ -1,13 +1,21 @@
 import Foundation
+import Icons
 
 /// A Claude Code configuration folder: ~/.claude or one of ~/.claude-*,
 /// each with its own login (docs/spec/agents.md, Accounts).
+/// Whose account it is: a Claude Code folder or a Codex one.
+public enum AgentProvider: String, Equatable, Sendable {
+    case claude
+    case codex
+}
+
 public struct AgentAccount: Equatable, Sendable {
     public let dir: String
     /// The organization's name, or the folder's suffix when the name is
     /// only "x's Organization" ("bhband" for ~/.claude-bhband).
     public let name: String
     public let isDefault: Bool
+    public var provider: AgentProvider = .claude
 
     /// Every account folder in `home`: ~/.claude when it exists, then each
     /// ~/.claude-* holding a .claude.json, by name. Reading stops at what
@@ -173,4 +181,10 @@ public struct AgentSubagent: Equatable, Sendable {
 func json(_ path: String) -> [String: Any]? {
     guard let data = FileManager.default.contents(atPath: path) else { return nil }
     return (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+}
+
+extension AgentAccount {
+    /// The provider's logo (docs/adr/0020-provider-logos.md): Claude, or
+    /// OpenAI for a ChatGPT login used by Codex.
+    public var logo: ProviderLogo { provider == .codex ? .openai : .claude }
 }

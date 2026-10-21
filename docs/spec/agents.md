@@ -32,7 +32,15 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
   plano, e duas barras: a sessão de 5 horas e a semana, com a porcentagem e quando reinicia.
 - A barra fica na cor de alerta a partir de 70% e na de perigo a partir de 90%.
 - Conta é cada pasta de configuração do Claude Code na pasta pessoal (`~/.claude` e as
-  `~/.claude-*`). Achar as contas não pede configuração.
+  `~/.claude-*`) e cada uma do Codex (`~/.codex` e as `~/.codex-*` com login, pelo e-mail do
+  login). Achar as contas não pede configuração. Cada cartão tem o logo do provedor
+  (`docs/adr/0020-provider-logos.md`).
+- O uso do Codex vem dos logs do próprio Codex (os limites que ele grava a cada uso), sem
+  requisição nem token: é o número do último uso, com "em <hora>"; janela que já reiniciou desde
+  então mostra 0%.
+- O item Agent usage da barra de status mostra a conta do agente que roda no terminal com foco (o
+  Claude Code pela sessão, o Codex pelo nome do programa); sem agente, a última mostrada. O ponteiro
+  sobre ele abre um popover com todas as contas de todos os provedores, com plano, sessão e semana.
 - O uso é lido a cada 5 minutos, só enquanto alguém o mostra (a página Accounts ou o item da barra
   de status) e com o app ativo. Abrir a página com o dado vencido lê na hora. "Refresh" no menu do
   cartão e no ⌘K ("Agents: Refresh Usage").

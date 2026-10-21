@@ -19,9 +19,7 @@ public final class AgentUsageController {
     /// The accounts to read: the shown ones, as AgentsController names them.
     var accounts: () -> [AgentAccount] = {
         let agents = AgentsController.shared
-        return AgentAccount.find(home: agents.home)
-            .filter { !agents.hidden.contains($0.dir) }
-            .map { account in agents.names[account.dir].map { AgentAccount(dir: account.dir, name: $0, isDefault: account.isDefault) } ?? account }
+        return agents.everyAccount().filter { !agents.hidden.contains($0.dir) }
     }
     var fetch: (URLRequest) async throws -> (Data, URLResponse) = { try await URLSession.shared.data(for: $0) }
 
@@ -93,6 +91,7 @@ public final class AgentUsageController {
             publish()
         }
         lastRead[account.dir] = Date()
+        if account.provider == .codex { return await readCodex(account) }
         let login = await Task.detached { AgentLogin.read(account) }.value
         guard let login else { return states[account.dir] = .noLogin }
         if let plan = login.plan { plans[account.dir] = plan }
@@ -123,6 +122,14 @@ public final class AgentUsageController {
             nextTry[account.dir] = Date().addingTimeInterval(Self.waits[min(count, Self.waits.count) - 1])
             states[account.dir] = .failed(last, lastGood(account))
         }
+    }
+
+    /// Codex: the limits its own logs carry, no request (CodexUsage).
+    private func readCodex(_ account: AgentAccount) async {
+        let read = await Task.detached { CodexUsage.read(account) }.value
+        guard let read else { return states[account.dir] = .noLogin }
+        if let plan = read.plan { plans[account.dir] = plan }
+        states[account.dir] = .ready(read.usage, read.at)
     }
 
     private func lastGood(_ account: AgentAccount) -> Date? {

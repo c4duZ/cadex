@@ -10,14 +10,20 @@ public struct AgentColors {
     public var accent: NSColor
     public var waiting: NSColor
     public var fill: NSColor
+    /// The popover's ground and border, the menus' colors.
+    public var panel: NSColor
+    public var border: NSColor
 
     public init(text: NSColor = .labelColor, secondary: NSColor = .secondaryLabelColor, accent: NSColor = .controlAccentColor,
-                waiting: NSColor = .systemBlue, fill: NSColor = .quaternaryLabelColor) {
+                waiting: NSColor = .systemBlue, fill: NSColor = .quaternaryLabelColor,
+                panel: NSColor = .windowBackgroundColor, border: NSColor = .separatorColor) {
         self.text = text
         self.secondary = secondary
         self.accent = accent
         self.waiting = waiting
         self.fill = fill
+        self.panel = panel
+        self.border = border
     }
 }
 

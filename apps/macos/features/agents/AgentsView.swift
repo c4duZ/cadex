@@ -28,8 +28,8 @@ public final class AgentsView: NSView {
     let controller: AgentsController
     /// The accounts split as the Accounts tab shows them.
     var controllerAccounts: (all: [AgentAccount], shown: [AgentAccount], hidden: [AgentAccount]) {
-        let all = controller.accounts
-        return (all, controller.shownAccounts, all.filter { controller.hidden.contains($0.dir) })
+        let all = controller.everyAccount()
+        return (all, all.filter { !controller.hidden.contains($0.dir) }, all.filter { controller.hidden.contains($0.dir) })
     }
     /// Usage is read while Accounts shows (AgentUsageController).
     var usage: AgentUsageController { .shared }
