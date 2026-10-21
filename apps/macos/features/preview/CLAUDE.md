@@ -25,7 +25,8 @@
   navegação, sem `WKUserScript`), uma pergunta por vez no hover, e entrega o clique por
   PreviewDocument.onPickElement, que o app liga (`../../app/ElementPickDelivery.swift`); sem ele,
   copia. `PickingWebView.swift` engole movimento, clique e arrasto com o modo ligado (a página não
-  recebe hover nem clique; a rolagem passa) e o modo acaba quando a web view perde o foco.
+  recebe hover nem clique; a rolagem passa): as áreas de rastreamento do WebKit, de um objeto
+  dele e não da view, saem durante a seleção e uma nossa fica no lugar e o modo acaba quando a web view perde o foco.
   `PickerOverlay.swift` desenha contorno, etiqueta, faixa e o aviso verde/âmbar por cima, fora do
   DOM. `PickedElement.swift` é o texto entregue (limites, sem caracteres de controle, entre
   `<picked_element>`), puro e testado. Fase B: no clique, o mundo do seletor marca o elemento com

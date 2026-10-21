@@ -26,7 +26,9 @@ Content-Security-Policy da página.
   em x,y?") e o script responde; a página nunca inicia nada.
 - **O mouse fica com o app.** Com o modo ligado, a subclasse do `WKWebView` não repassa movimento,
   clique nem arrasto ao WebKit: a página não recebe hover (nem `:hover` do CSS) nem clique. A
-  rolagem passa.
+  rolagem passa. O WebKit ouve o movimento por áreas de rastreamento de um objeto dele
+  (`WKMouseTrackingObserver`), não pela view: durante a seleção essas áreas saem e uma do app
+  entra no lugar, e voltam ao fim (a primeira versão não via o hover, 2026-10-21).
 - **Contorno nativo.** O destaque é uma `NSView` sobre a página, fora do DOM: o CSS, a CSP e os
   scripts da página não o alcançam nem o escondem.
 - **Colado sem Enter.** O texto vai por bracketed paste para o terminal do agente, nunca com Enter,

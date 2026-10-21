@@ -87,6 +87,24 @@ document.getElementById('vue').__vueParentComponent = { type: { __file: '/w/app/
 """
 
 let exitCode = await Checks.run([
+    ("while picking, WebKit's mouse areas are put aside for ours, and come back after", {
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 400, height: 300), styleMask: [.titled], backing: .buffered, defer: false)
+        let doc = PreviewDocument(url: "")
+        doc.view.frame = window.contentView!.bounds
+        window.contentView!.addSubview(doc.view)
+        doc.web.updateTrackingAreas()
+        let webkit = doc.web.trackingAreas
+        expect(webkit.contains { $0.options.contains(.mouseMoved) && $0.owner !== doc.web }, "WebKit hears moves through its own observer")
+        doc.web.isPicking = true
+        let areas = doc.web.trackingAreas
+        expect(areas.count == 1 && areas[0].owner === doc.web && areas[0].options.contains(.mouseMoved), "\(areas.map(\.options))")
+        expect(doc.web.parkedAreas.count == webkit.count)
+        doc.web.updateTrackingAreas()
+        expect(doc.web.trackingAreas.count == 1, "a resize does not give WebKit the mouse back")
+        doc.web.isPicking = false
+        expect(doc.web.trackingAreas.count == webkit.count && doc.web.parkedAreas.isEmpty, "\(doc.web.trackingAreas.count)")
+        expect(!doc.web.trackingAreas.contains { $0.owner === doc.web && $0.options.contains(.mouseMoved) })
+    }),
     ("the picture: the element with a margin, cut to what the view shows", {
         let bounds = CGRect(x: 0, y: 0, width: 800, height: 600)
         expect(PreviewPicker.pictureRect(CGRect(x: 100, y: 100, width: 150, height: 40), in: bounds) == CGRect(x: 92, y: 92, width: 166, height: 56))
