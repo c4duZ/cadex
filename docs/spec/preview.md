@@ -80,7 +80,7 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
 - [x] Endereços locais são detectados nos formatos acima; os de fora (`https://example.com`) não.
 - [x] A página não acessa `file://` nem objetos do app.
 - [ ] Voltar, avançar e recarregar funcionam.
-- [ ] Com o Vite no preview e `claude` num painel ao lado: ⌘⇧C, o hover contorna sem a página
+- [x] Com o Vite no preview e `claude` num painel ao lado: ⌘⇧C, o hover contorna sem a página
   reagir, o clique cola o bloco no prompt sem enviar e o foco vai para o terminal.
 - [ ] ⇧+clique junta vários; ⌥+clique copia; Esc sai; sem agente, copia com aviso.
 - [x] Ligar o modo não deixa script nenhum no mundo da página; a página não vê o seletor.
