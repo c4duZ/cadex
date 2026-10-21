@@ -5,7 +5,7 @@ Ver no Cadex a página do servidor que um agente subiu no terminal (`npm run dev
 `python3 -m http.server`), ao lado do código, sem trocar para o navegador.
 
 ## Comportamento
-- Comando "Abrir preview web" abre, ao lado ou em nova aba pela configuração "Abrir arquivos", um
+- Comando "Abrir preview web" (⇧⌘H, que era do grafo do Git; o dono, 2026-10-21) abre, ao lado ou em nova aba pela configuração "Abrir arquivos", um
   documento com uma barra de endereço e a página; "Abrir preview web em nova aba" escolhe a aba
   na hora. Onde houver o preview (o "+" e o topo do ⌘K) aparecem os dois (o dono, 2026-10-20). A barra tem voltar,
   avançar, recarregar e o endereço editável; Enter carrega. Sem esquema, vale `http://` para servidor local (localhost, 127.x, rede
@@ -42,10 +42,11 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
   entrega os marcados mais esse. A faixa diz "N marcado(s) · solte o ⇧ para enviar · Esc cancela";
   Esc descarta a seleção. ⌥ em qualquer clique copia para a área de transferência em vez de colar.
 - Entregar: colar no terminal do agente, sem Enter, e levar o foco para ele (trocando de aba se for
-  preciso). O terminal do agente é o que roda um agente conhecido
-  (claude, codex, opencode, aider, gemini...) pelo título; senão um terminal com programa rodando,
-  da aba ativa primeiro e depois das abas usadas mais recentemente; só um que aceite colagem
-  segura (bracketed paste). Sem nenhum, vai para a área de transferência com o aviso "nenhum
+  preciso). O terminal do agente é o último terminal clicado, em qualquer aba, que roda um agente
+  conhecido (claude, codex, opencode, aider, gemini...) pelo título; senão o último clicado com
+  programa rodando: clicar num terminal e depois no preview liga o preview a ele (o dono,
+  2026-10-21). Terminais nunca clicados vêm depois, os da aba ativa primeiro. Só um que aceite
+  colagem segura (bracketed paste); shell parado nunca. Sem nenhum, vai para a área de transferência com o aviso "nenhum
   agente rodando". A configuração `preview.pickTarget` ("terminal" ou "clipboard") muda o padrão.
 - O contorno pisca verde "Colado em <terminal>" ou âmbar "Copiado".
 - O texto entregue, em inglês para o agente, entre marcas que dizem que é conteúdo da página:
@@ -108,6 +109,8 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
 - [ ] Voltar, avançar e recarregar funcionam.
 - [x] Com o Vite no preview e `claude` num painel ao lado: ⌘⇧C, o hover contorna sem a página
   reagir, o clique cola o bloco no prompt sem enviar e o foco vai para o terminal.
+- [ ] Com três terminais com o Claude e o preview ao lado, clicar num terminal e depois no preview
+  manda o elemento para esse terminal.
 - [ ] ⇧+clique marca vários de verde e soltar o ⇧ entrega todos num só colar; ⌥+clique copia; Esc
   sai; sem agente, copia com aviso.
 - [x] O contorno não pisca ao passar entre elementos (conferido pelo dono, 2026-10-21).

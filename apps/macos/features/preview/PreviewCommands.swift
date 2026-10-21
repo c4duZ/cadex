@@ -12,8 +12,10 @@ public enum PreviewCommands {
         func needsPreview() -> String? { active() == nil ? T("No preview open", "Nenhum preview aberto") : nil }
         func needsPicking() -> String? { active()?.isPicking == true ? nil : T("Not picking an element", "Não está escolhendo elemento") }
         return [
+            // ⇧⌘H was the git graph's: the preview is used far more, now
+            // that elements are picked in it (owner, 2026-10-21).
             Command(id: "preview.open", title: T("Open Web Preview", "Abrir preview web"), keywords: ["browser", "navegador", "localhost", "site"],
-                    category: .view, action: .run { open("", nil) }),
+                    category: .view, defaultShortcut: "cmd+shift+h", action: .run { open("", nil) }),
             Command(id: "preview.open-in-tab", title: T("Open Web Preview in New Tab", "Abrir preview web em nova aba"),
                     keywords: ["browser", "navegador", "localhost", "site", "aba"], category: .view, action: .run { open("", false) }),
             Command(id: "preview.reload", title: T("Reload Preview", "Recarregar o preview"), keywords: ["reload", "refresh", "atualizar"], category: .view,

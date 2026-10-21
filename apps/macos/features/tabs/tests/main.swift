@@ -54,6 +54,13 @@ let exitCode = await Checks.run([
         ])
         expect(order == [2, 4, 1], "\(order)")
     }),
+    ("a pick goes to the terminal clicked last, in any tab; never clicked ones after", {
+        // Terminals 1, 2, 3 in the tabs' order; 3 was clicked, then the
+        // preview, then 1, then the preview again: 1 first, then 3.
+        expect(AgentCandidate.recentFirst([1, 2, 3], recent: [1, 3]) == [1, 3, 2])
+        expect(AgentCandidate.recentFirst([1, 2], recent: [9, 2]) == [2, 1], "a closed terminal is skipped")
+        expect(AgentCandidate.recentFirst([1, 2], recent: []) == [1, 2])
+    }),
     ("splitting puts the new pane after the old one, half and half", {
         let tree = PaneTree.leaf(1).splitting(1, axis: .horizontal, newPane: 2)
         expect(tree == .split(.horizontal, .leaf(1), .leaf(2), ratio: 0.5))

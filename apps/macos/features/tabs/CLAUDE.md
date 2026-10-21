@@ -43,9 +43,10 @@
   `TabsClosing.swift`: fechar painel, aba e janela, e `shouldClose` para vários conjuntos de abas
   (uma pergunta só ao sair, contando os spaces escondidos); `hasRunningProgram` para o manter acordado.
 - `TabsTerminals.swift`: `agentTerminals` (um agente conhecido pelo título, depois qualquer
-  terminal com programa rodando; aba ativa primeiro, depois as usadas mais recentemente; shell
-  parado nunca) e `focus(_:)`, para o elemento escolhido no preview. A ordem é `AgentCandidate`,
-  pura e testada.
+  terminal com programa rodando; em cada grupo o último terminal clicado primeiro, em qualquer
+  aba, pela lista recentTerminals que o onFocus de cada terminal alimenta; nunca clicados depois;
+  shell parado nunca) e `focus(_:)`, para o elemento escolhido no preview. A ordem é
+  `AgentCandidate`, pura e testada.
 - `TabSource.swift`: as abas como lista da paleta (TabCommands.source, o `@` do app).
 - Clique direito numa aba: seleciona e mostra `contextMenu` (as entradas vêm do app, por comandos).
   Cada aba guarda a cor de trabalho (`color`, no snapshot), `activeColor`/`setActiveColor`.

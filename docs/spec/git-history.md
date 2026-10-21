@@ -5,7 +5,8 @@ Ver o histórico do repositório como um grafo: o que os agentes commitaram, de 
 coisa, e abrir qualquer commit, seus arquivos e diffs.
 
 ## Comportamento
-- Comando "Abrir o histórico do git" (⇧⌘H) abre, ao lado ou em nova aba pela configuração "Abrir
+- Comando "Abrir o histórico do git" (sem atalho; o ⇧⌘H passou para o preview web, o dono,
+  2026-10-21) abre, ao lado ou em nova aba pela configuração "Abrir
   arquivos" ("Abrir o histórico do git em nova aba" escolhe a aba na hora), um documento com a lista de commits, do mais novo para o mais
   antigo, de todas as branches.
 - Cada linha: o grafo à esquerda (faixas coloridas, um ponto no commit, linhas para os pais, curvas

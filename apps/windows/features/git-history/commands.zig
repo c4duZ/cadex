@@ -66,7 +66,7 @@ pub fn register(into: *palette.Registry, allocator: std.mem.Allocator, with: hos
     host = with;
     gpa = allocator;
     registry = into;
-    into.add(.{ .id = "git.history", .title = strings.t("Open Git History", "Abrir o histórico do git"), .keywords = &.{ "log", "grafo", "graph", "commits" }, .shortcut = "cmd+shift+h", .run = open, .available = hasRepository });
+    into.add(.{ .id = "git.history", .title = strings.t("Open Git History", "Abrir o histórico do git"), .keywords = &.{ "log", "grafo", "graph", "commits" }, .run = open, .available = hasRepository });
     into.add(.{ .id = "git.history-in-tab", .title = strings.t("Open Git History in New Tab", "Abrir o histórico do git em nova aba"), .keywords = &.{ "log", "grafo", "graph", "commits", "aba", "tab" }, .run = openInTab, .available = hasRepository });
     into.add(.{ .id = "history.copy-sha", .title = strings.t("Copy Commit SHA", "Copiar o sha do commit"), .keywords = &.{ "sha", "hash", "copiar", "copy" }, .run = copySha, .available = hasCommit });
     into.add(.{ .id = "history.open-remote", .title = strings.t("Open Commit on Remote", "Abrir o commit no remoto"), .keywords = &.{ "github", "gitlab", "bitbucket", "navegador", "browser" }, .run = openRemote, .available = hasCommit });

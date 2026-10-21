@@ -23,7 +23,7 @@
 - `view.zig` (busca, alternador, contagem, terço de baixo), `rows.zig` (colunas, etiquetas, página
   seguinte 100 linhas antes do fim, menu), `graph.zig` (retas, curvas em S em oito pedaços, ponto
   vazado no merge) e `details.zig` (mensagem, autor, pais, arquivos clicáveis).
-- Comandos em `commands.zig`: git.history (⇧⌘H, onde a configuração diz), git.history-in-tab, history.copy-sha, history.open-remote,
+- Comandos em `commands.zig`: git.history (sem atalho, onde a configuração diz), git.history-in-tab, history.copy-sha, history.open-remote,
   history.search, history.current-branch, history.refresh.
 - Spec: `../../../../docs/spec/git-history.md`. Referência: `../../../macos/features/git-history/`.
 - Altura das linhas da lista e dos arquivos por `rowPx` (densidade compacta, plano 15).

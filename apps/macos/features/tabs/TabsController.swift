@@ -35,6 +35,8 @@ public final class TabsController {
     var tabs: [Int: Tab] = [:]
     var nextId = 1
     var nextPane = 1
+    /// Terminals by their last focus, newest first (TabsTerminals.swift).
+    var recentTerminals: [ObjectIdentifier] = []
     weak var window: NSWindow?
     let home = NSHomeDirectory()
     /// Coalesces title refreshes while output streams in.
@@ -205,8 +207,9 @@ public final class TabsController {
         terminal.onOpenPreview = { [weak self] url in self?.onOpenPreview?(url) }
         terminal.onOpenFile = { [weak self] path, beside in self?.onOpenFile?(path, beside) }
         terminal.onProgramTitle = { [weak self] _ in self?.refreshBar() }
-        terminal.onFocus = { [weak self, weak tab] in
+        terminal.onFocus = { [weak self, weak tab, weak terminal] in
             tab?.noteFocus(pane)
+            if let terminal { self?.noteFocus(terminal) }
             self?.refreshBar()
         }
     }

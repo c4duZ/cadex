@@ -17,7 +17,7 @@ public enum HistoryCommands {
         func needsCommit() -> String? { active()?.hasSelection == true ? nil : T("No commit selected", "Nenhum commit selecionado") }
         return [
             Command(id: "git.history", title: T("Open Git History", "Abrir o histórico do git"), keywords: ["log", "grafo", "graph", "commits"],
-                    category: .view, defaultShortcut: "cmd+shift+h", action: .run { open(nil) },
+                    category: .view, action: .run { open(nil) },
                     unavailableReason: needsRepository),
             Command(id: "git.history-in-tab", title: T("Open Git History in New Tab", "Abrir o histórico do git em nova aba"),
                     keywords: ["log", "grafo", "graph", "commits", "aba"], category: .view, action: .run { open(false) },

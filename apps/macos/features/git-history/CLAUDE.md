@@ -18,7 +18,7 @@
   só das linhas na tela, etiquetas, datas em português, menu de contexto no `MenuTableView` compartilhado), `HistoryGraphView.swift`
   (uma linha do grafo: retas, curvas nas bifurcações e merges, ponto vazado no merge) e
   `HistoryDetailsView.swift` (mensagem, autor, pais, arquivos com +/−; clicar abre o diff).
-- Comandos em `HistoryCommands.swift`: git.history (⇧⌘H, onde a configuração diz), git.history-in-tab, history.copy-sha, history.open-remote,
+- Comandos em `HistoryCommands.swift`: git.history (sem atalho, onde a configuração diz), git.history-in-tab, history.copy-sha, history.open-remote,
   history.search, history.current-branch, history.refresh. O menu e a caixa de seleção só disparam
   esses ids.
 - Spec: `docs/spec/git-history.md`. Status: pronto (plano 6, fase E).
