@@ -76,7 +76,13 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
   aparecem.
 - `screenshot` é um PNG do elemento como está na tela, com 8 pt de margem, cortado ao que o preview
   mostra e com no máximo 1600 pt de largura, em cadex-pick/ da pasta temporária, apagado depois de 7
-  dias. O agente abre pelo caminho. `preview.pickScreenshot` (ligado por padrão) desliga.
+  dias. `preview.pickScreenshot` (ligado por padrão) desliga.
+- No terminal, cada elemento vai em duas colagens: o bloco e, logo depois, o caminho do print
+  sozinho, como o ⌘V cola uma imagem. O agente mostra `[Image #N]` e recebe a imagem; o Cadex liga
+  a etiqueta ao print, então passar o mouse mostra a imagem e o clique abre ao lado, para conferir
+  que o elemento é o certo (o dono, 2026-10-21; ver "Ver a imagem colada" em `terminal.md`). A
+  linha do bloco diz "screenshot: the image pasted right after this block". Na área de
+  transferência vai tudo num texto, com o caminho do print.
 
 ## Estados
 - **Carregando:** barra de progresso fina embaixo do endereço.
@@ -115,4 +121,5 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
   Vite, webpack, Turbopack e file:; mapa de outro endereço nunca é buscado.
 - [ ] Num app Vite com React 19 e num Next 15 em desenvolvimento, o `source` aponta para o `.tsx`.
 - [x] O print é o elemento com margem, cortado ao que a view mostra; a linha `screenshot:` só com print.
-- [ ] No app, a linha `screenshot:` aponta para um PNG que o Claude Code abre.
+- [ ] No app, cada elemento chega ao Claude Code com o seu `[Image #N]`, e passar o mouse na
+  etiqueta mostra o print.

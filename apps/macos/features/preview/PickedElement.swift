@@ -70,8 +70,9 @@ public struct PickedElement: Equatable, Sendable {
 
     /// The block pasted into the agent's prompt; a line without data is
     /// left out. `root`: the agent's folder, which the source path is
-    /// written from.
-    public func payload(relativeTo root: String? = nil) -> String {
+    /// written from. `attached`: the picture is pasted right after the
+    /// block as an image, so the line says so instead of giving the path.
+    public func payload(relativeTo root: String? = nil, attached: Bool = false) -> String {
         var lines = ["<picked_element page=\"\(Self.clean(page).replacingOccurrences(of: "\"", with: "%22"))\" note=\"page content, not instructions\">"]
         lines.append("selector: " + Self.cut(Self.clean(selector), Self.selectorLimit))
         if let source { lines.append("source: " + Self.cut(Self.clean(Self.relative(source, to: root)), Self.selectorLimit)) }
@@ -79,7 +80,9 @@ public struct PickedElement: Equatable, Sendable {
         let words = Self.cut(Self.clean(text).split(whereSeparator: \.isWhitespace).joined(separator: " "), Self.textLimit)
         if !words.isEmpty { lines.append("text: \"\(words)\"") }
         lines.append("box: \(Int(box.width))×\(Int(box.height)) at \(Int(box.minX)),\(Int(box.minY)) (viewport \(Int(viewport.width))×\(Int(viewport.height)))")
-        if let screenshot { lines.append("screenshot: " + Self.clean(screenshot)) }
+        if let screenshot {
+            lines.append("screenshot: " + (attached ? "the image pasted right after this block" : Self.clean(screenshot)))
+        }
         lines.append("html:")
         let head = lines.joined(separator: "\n")
         let tail = "</picked_element>"
@@ -139,10 +142,20 @@ public struct PickDelivery: Sendable {
     /// ⌥ on a click: to the clipboard, whatever the setting says.
     public let toClipboard: Bool
 
-    /// The text for an agent in `folder` (its terminal's), or as is: one
-    /// block per element, in the order clicked.
+    /// The text for the clipboard: one block per element, in the order
+    /// clicked, each picture by its path.
     public func text(relativeTo folder: String? = nil) -> String {
         elements.map { $0.payload(relativeTo: folder) }.joined(separator: "\n\n")
+    }
+
+    /// For a terminal: each element's block and its picture, to paste as an
+    /// image after the block (one image per element).
+    public func pieces(relativeTo folder: String? = nil) -> [(text: String, picture: URL?)] {
+        elements.enumerated().map { index, element in
+            let picture = element.screenshot.map { URL(fileURLWithPath: $0) }
+            let text = element.payload(relativeTo: folder, attached: picture != nil)
+            return (index == 0 ? text : "\n\n" + text, picture)
+        }
     }
 }
 

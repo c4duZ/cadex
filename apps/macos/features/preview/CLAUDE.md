@@ -39,7 +39,8 @@
   (`SourceMap.swift`, VLQ), buscando em Swift só do mesmo endereço da página, 1,5 s no máximo.
   Fase D: antes de entregar, o print do elemento (takeSnapshot, com margem, cortado à view) vai
   para cadex-pick/ pelo `TempImageStore` (`../../shared/temp-images/CLAUDE.md`), se
-  preview.pickScreenshot deixar (takesPictures, ligado pelo app). Comandos preview.pick-element (⌘⇧C, também o botão de mira
+  preview.pickScreenshot deixar (takesPictures, ligado pelo app). No terminal, PickDelivery.pieces
+  dá o bloco e o print de cada elemento, e o print vai como imagem (`[Image #N]`), para o dono ver. Comandos preview.pick-element (⌘⇧C, também o botão de mira
   da barra, que roda o comando pelo `runCommand`) e preview.stop-picking (Esc, só escolhendo e com o
   preview focado); só no Mac.
 - Spec: `docs/spec/preview.md`. Status: plano 5, fase E pronta; plano 16, fases A a D no código.

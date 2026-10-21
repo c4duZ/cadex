@@ -242,6 +242,18 @@ let exitCode = await Checks.run([
         expect(text.range(of: "selector: a")!.lowerBound < text.range(of: "selector: b")!.lowerBound)
         expect(text.contains("</picked_element>\n\n<picked_element "))
     }),
+    ("in a terminal, each picture goes as an image right after its block", {
+        var a = PickedElement(page: "http://x", selector: "a", text: "", html: "<a></a>", box: .zero, viewport: .zero)
+        a.screenshot = "/tmp/cadex-pick/pick-a.png"
+        let b = PickedElement(page: "http://x", selector: "b", text: "", html: "<b></b>", box: .zero, viewport: .zero)
+        let pieces = PickDelivery(elements: [a, b], toClipboard: false).pieces()
+        expect(pieces.count == 2 && pieces[0].picture?.path == "/tmp/cadex-pick/pick-a.png" && pieces[1].picture == nil)
+        expect(pieces[0].text.contains("\nscreenshot: the image pasted right after this block\n"))
+        expect(!pieces[0].text.contains("/tmp/cadex-pick"))
+        expect(pieces[1].text.hasPrefix("\n\n<picked_element "))
+        let copied = PickDelivery(elements: [a, b], toClipboard: true).text()
+        expect(copied.contains("\nscreenshot: /tmp/cadex-pick/pick-a.png\n"), "the clipboard keeps the path")
+    }),
     ("a line without data is left out; the total holds with wide characters", {
         let empty = PickedElement(page: "http://x", selector: "div", text: " ", html: "<div></div>",
                                   box: .zero, viewport: .zero).payload()
