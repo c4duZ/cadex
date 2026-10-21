@@ -31,10 +31,13 @@
   `<picked_element>`), puro e testado. Fase B: no clique, o mundo do seletor marca o elemento com
   data-cadex-pick e lê os atributos de build; `PageSourceScript.swift` roda uma vez no mundo da
   página (callAsyncJavaScript), lê lovable-tagger, Svelte, React até o 18 e Vue, e tira a marca.
-  O caminho sai relativo à pasta do terminal do agente. Comandos preview.pick-element (⌘⇧C, também o botão de mira
+  O caminho sai relativo à pasta do terminal do agente. Fase C: sem fonte e com React 19, a página
+  devolve o _debugStack; `StackFrames.swift` acha o primeiro quadro do app, `SourceLookup.swift`
+  pergunta ao Next (/__nextjs_original-stack-frames) ou lê o source map do script
+  (`SourceMap.swift`, VLQ), buscando em Swift só do mesmo endereço da página, 1,5 s no máximo. Comandos preview.pick-element (⌘⇧C, também o botão de mira
   da barra, que roda o comando pelo `runCommand`) e preview.stop-picking (Esc, só escolhendo e com o
   preview focado); só no Mac.
-- Spec: `docs/spec/preview.md`. Status: plano 5, fase E pronta; plano 16, fases A e B no código.
+- Spec: `docs/spec/preview.md`. Status: plano 5, fase E pronta; plano 16, fases A a C no código.
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
 ## Como validar

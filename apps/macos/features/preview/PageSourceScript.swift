@@ -2,7 +2,7 @@
 /// click (docs/adr/0018-element-picker.md): what frameworks hang on the
 /// node in development is JavaScript, which the picker's world cannot see.
 /// Finds the element by the one-time mark the picker's world set, takes the
-/// mark off and answers JSON `{source, components}`. The page could fake
+/// mark off and answers JSON `{source, components, stack}`. The page could fake
 /// the answer: it is page content like the rest, cut and cleaned in Swift.
 enum PageSourceScript {
     /// The body of an async function with the argument `mark`
@@ -11,7 +11,7 @@ enum PageSourceScript {
     const el = document.querySelector('[data-cadex-pick="' + mark + '"]');
     if (!el) return null;
     el.removeAttribute('data-cadex-pick');
-    const out = { source: null, components: [] };
+    const out = { source: null, components: [], stack: null };
     const at = (file, line, column) =>
       file ? file + (line ? ':' + line + (column ? ':' + column : '') : '') : null;
     // Framework parts, not the app's components.
@@ -32,13 +32,19 @@ enum PageSourceScript {
     }
 
     // React: the fiber on the node. Up to 18, _debugSource is where the
-    // element was written; 19 dropped it (plan 16, phase C).
+    // element was written. 19 dropped it and keeps _debugStack instead, the
+    // stack where the JSX ran, in the served code: Swift maps it back
+    // (SourceLookup).
     const key = Object.keys(el).find((k) => k.startsWith('__reactFiber$') || k.startsWith('__reactInternalInstance$'));
     const fiber = key ? el[key] : null;
     if (fiber) {
       for (let f = fiber, n = 0; f && !out.source && n < 50; f = f._debugOwner, n++) {
         const s = f._debugSource;
         if (s && s.fileName) out.source = at(s.fileName, s.lineNumber, s.columnNumber);
+      }
+      for (let f = fiber, n = 0; f && !out.source && !out.stack && n < 5; f = f._debugOwner, n++) {
+        const s = f._debugStack;
+        if (s && s.stack) out.stack = String(s.stack).slice(0, 8000);
       }
       for (let f = fiber.return, n = 0; f && out.components.length < 4 && n < 500; f = f.return, n++) {
         const t = f.type;

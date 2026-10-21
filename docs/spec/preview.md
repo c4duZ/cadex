@@ -63,9 +63,11 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
   (Provider, Router, Boundary...). Lidos nesta ordem, o primeiro que achar vale: atributo de plugin
   de build (`data-insp-path` do code-inspector-plugin, `data-v-inspector` do
   vite-plugin-vue-inspector); o do lovable-tagger; Svelte em desenvolvimento; React até o 18; o
-  arquivo do componente Vue. Sem nenhum (site de produção, React 19 por enquanto), as linhas não
-  aparecem. React 19 e Next pelos source maps, e o print do elemento, chegam nas fases C e D do
-  plano 16.
+  arquivo do componente Vue; React 19, pela pilha que ele guarda do JSX, traduzida pelo servidor de
+  desenvolvimento do Next ou pelo source map do script (Vite e outros). O app busca o script e o
+  mapa só do mesmo endereço da página, até 1,5 s cada; sem resposta, vale o arquivo que o endereço
+  do script nomeia (sem linha), ou nada. Site de produção não tem nada disso: as linhas não
+  aparecem.
 
 ## Estados
 - **Carregando:** barra de progresso fina embaixo do endereço.
@@ -98,3 +100,6 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
   ordem; a marca do clique não fica na página.
 - [ ] Num app Vite com React 18, num SvelteKit e num projeto com code-inspector-plugin, o clique no
   app traz o arquivo e a linha certos.
+- [x] Source maps: números VLQ, o lugar original de uma linha e coluna servidas, os caminhos do
+  Vite, webpack, Turbopack e file:; mapa de outro endereço nunca é buscado.
+- [ ] Num app Vite com React 19 e num Next 15 em desenvolvimento, o `source` aponta para o `.tsx`.

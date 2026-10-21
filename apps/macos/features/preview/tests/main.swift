@@ -68,6 +68,7 @@ let sourcesPage = """
 <div id="lovable" style="position:absolute;top:300px;height:50px;width:50px"></div>
 <div id="vue" style="position:absolute;top:400px;height:50px;width:50px"></div>
 <button id="both" data-v-inspector="src/Both.vue:7:3" style="position:absolute;top:500px;height:50px">b</button>
+<button id="react19" style="position:absolute;left:300px;top:0;height:50px">n</button>
 <script>
 function SaveButton() {}
 function ProfileForm() {}
@@ -75,6 +76,7 @@ function ThemeProvider() {}
 const fiber = { _debugSource: { fileName: '/w/app/src/Save.tsx', lineNumber: 46, columnNumber: 19 },
   return: { type: SaveButton, return: { type: { render: function Inner() {} }, return: { type: ThemeProvider, return: { type: ProfileForm, return: null } } } } };
 document.getElementById('react')['__reactFiber$x1'] = fiber;
+document.getElementById('react19')['__reactFiber$x1'] = { _debugStack: new Error('react-stack-top-frame'), return: { type: SaveButton, return: null } };
 document.getElementById('both')['__reactFiber$x1'] = fiber;
 document.getElementById('svelte').__svelte_meta = { loc: { file: 'src/App.svelte', line: 9, column: 2 } };
 document.getElementById('lovable')[Symbol.for('__jsxSource__')] = { fileName: 'src/Card.tsx', lineNumber: 3, columnNumber: 7 };
@@ -85,6 +87,49 @@ document.getElementById('vue').__vueParentComponent = { type: { __file: '/w/app/
 """
 
 let exitCode = await Checks.run([
+    ("source maps: VLQ numbers, and the original place of a served line and column", {
+        expect(SourceMap.vlq("AAAA") == [0, 0, 0, 0])
+        expect(SourceMap.vlq("C") == [1] && SourceMap.vlq("D") == [-1] && SourceMap.vlq("gB") == [16] && SourceMap.vlq("2H") == [123])
+        expect(SourceMap.vlq("g") == nil, "a digit that says more follow, at the end")
+        let json = #"{"version":3,"sources":["SaveButton.tsx"],"sourceRoot":"","mappings":"AAAA;AACA,UAAU"}"#
+        let map = SourceMap(json: Data(json.utf8))
+        expect(map?.original(line: 1, column: 12).map { "\($0.source):\($0.line):\($0.column)" } == "SaveButton.tsx:2:11")
+        expect(map?.original(line: 1, column: 5).map { "\($0.line):\($0.column)" } == "2:1")
+        expect(map?.original(line: 7, column: 0) == nil)
+        expect(SourceMap(json: Data(#"{"sections":[]}"#.utf8)) == nil)
+    }),
+    ("map sources as paths: Vite, webpack, Turbopack, file", {
+        let script = URL(string: "http://localhost:5173/src/components/SaveButton.tsx?t=1")!
+        expect(SourceLookup.resolved("SaveButton.tsx", script: script) == "src/components/SaveButton.tsx")
+        expect(SourceLookup.resolved("/Users/a/p/src/X.tsx", script: script) == "/Users/a/p/src/X.tsx")
+        expect(SourceLookup.resolved("webpack://_N_E/./src/app/page.tsx", script: script) == "src/app/page.tsx")
+        expect(SourceLookup.resolved("turbopack:///[project]/src/app/page.tsx", script: script) == "src/app/page.tsx")
+        expect(SourceLookup.resolved("file:///Users/a/p/x.ts", script: script) == "/Users/a/p/x.ts")
+        let fs = URL(string: "http://localhost:5173/@fs/Users/a/lib/Button.tsx")!
+        expect(SourceLookup.resolved("Button.tsx", script: fs) == "/Users/a/lib/Button.tsx")
+        expect(SourceLookup.mapLink(in: "x\n//# sourceMappingURL=data:application/json;base64,e30=\n") == "data:application/json;base64,e30=")
+        expect(SourceLookup.sameOrigin(URL(string: "http://localhost:5173/a.js")!, URL(string: "http://localhost:5173/")!))
+        expect(!SourceLookup.sameOrigin(URL(string: "http://localhost:3000/a.js")!, URL(string: "http://localhost:5173/")!))
+        expect(!SourceLookup.sameOrigin(URL(string: "https://cdn.example.com/a.js")!, URL(string: "http://localhost:5173/")!))
+    }),
+    ("React 19's stack: WebKit's and Chrome's frames, the app's code first", {
+        let stack = """
+        jsxDEV@http://localhost:5173/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=9:250:30
+        SaveButton@http://localhost:5173/src/components/SaveButton.tsx?t=1712:46:19
+        ProfileForm@http://localhost:5173/@fs/Users/a/p/src/ProfileForm.tsx:12:5
+        """
+        let frames = StackFrame.appFrames(in: stack)
+        expect(frames.map(\.url) == ["http://localhost:5173/src/components/SaveButton.tsx?t=1712", "http://localhost:5173/@fs/Users/a/p/src/ProfileForm.tsx"], "\(frames)")
+        expect(frames.first?.line == 46 && frames.first?.column == 19)
+        expect(frames.first?.pathInURL == "src/components/SaveButton.tsx")
+        expect(frames.last?.pathInURL == "/Users/a/p/src/ProfileForm.tsx")
+        let chrome = StackFrame.parse("    at Page (http://localhost:3000/_next/static/chunks/app_page_tsx.js:12:5)")
+        expect(chrome == StackFrame(url: "http://localhost:3000/_next/static/chunks/app_page_tsx.js", line: 12, column: 5))
+        expect(chrome?.pathInURL == nil, "a Next chunk names no source")
+        let webpack = StackFrame.parse("Page@webpack-internal:///(app-pages-browser)/./src/app/page.tsx:10:3")
+        expect(webpack?.pathInURL == "src/app/page.tsx")
+        expect(StackFrame.isLibrary("node_modules/react-dom/cjs/react-dom.development.js:1:1"))
+    }),
     ("where the element was written: build attribute, React, Svelte, lovable-tagger, Vue, in that order", {
         let doc = PreviewDocument(url: "")
         try await loaded(doc.web, sourcesPage)
@@ -103,6 +148,11 @@ let exitCode = await Checks.run([
         expect(vue?.source == "/w/app/src/Panel.vue" && vue?.components == ["Panel", "App"], "\(vue?.source ?? "nil") \(vue?.components ?? [])")
         let both = try await pick(doc.web, x: 5, y: 510)
         expect(both?.source == "src/Both.vue:7:3" && both?.components == ["SaveButton", "Inner", "ProfileForm"], both?.source ?? "nil")
+        let answer = try await evaluate(doc.web, PickerScript.call("describe", x: 305, y: 10, mark: "m2", inject: false), PickerScript.world) as? String
+        var react19 = answer.flatMap { PickedElement(json: $0, page: "http://localhost/") }
+        let page = try await callAsync(doc.web, PageSourceScript.body, ["mark": "m2"]) as? String
+        let stack = page.flatMap { react19?.merge(pageSource: $0) }
+        expect(react19?.source == nil && stack?.isEmpty == false && react19?.components == ["SaveButton"], stack ?? "no stack")
         let left = try await evaluate(doc.web, "document.querySelectorAll('[data-cadex-pick]').length", .page) as? Int
         expect(left == 0, "the mark stays: \(left ?? -1)")
     }),
@@ -188,6 +238,15 @@ let exitCode = await Checks.run([
     ("the page sees Safari, so Google serves its real page", {
         let ua = PreviewDocument.safariUserAgent
         expect(ua.hasPrefix("Version/") && ua.hasSuffix("Safari/605.1.15"), ua)
+    }),
+    // Last: awaiting off the main actor leaves the tests after it on the
+    // main queue, where WebKit's answers no longer arrive (2026-10-21).
+    ("an inline map is read without the network", {
+        let page = URL(string: "http://localhost:5173/")!
+        let data = await SourceLookup.mapData("data:application/json;base64,eyJhIjoxfQ==", script: page, page: page)
+        expect(data.flatMap { String(data: $0, encoding: .utf8) } == #"{"a":1}"#)
+        let away = await SourceLookup.mapData("https://cdn.example.com/x.map", script: page, page: page)
+        expect(away == nil, "another origin is never fetched")
     }),
 ])
 exit(exitCode)

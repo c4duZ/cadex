@@ -46,11 +46,14 @@ public struct PickedElement: Equatable, Sendable {
     }
 
     /// Adds what the page's world read (PageSourceScript); a build
-    /// attribute, already set, wins.
-    mutating func merge(pageSource json: String) {
-        guard let object = Self.object(json) else { return }
+    /// attribute, already set, wins. Returns React 19's stack when that is
+    /// all there is, for SourceLookup.
+    @discardableResult
+    mutating func merge(pageSource json: String) -> String? {
+        guard let object = Self.object(json) else { return nil }
         if source == nil, let found = object["source"] as? String, !found.isEmpty { source = found }
         components = (object["components"] as? [String] ?? []).prefix(4).map { Self.cut($0, 80) }
+        return source == nil ? object["stack"] as? String : nil
     }
 
     /// "file:line:col:tag" (code-inspector-plugin) or "file:line:col"

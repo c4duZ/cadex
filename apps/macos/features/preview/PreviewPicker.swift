@@ -80,9 +80,15 @@ final class PreviewPicker {
             guard let self, let answer, let element = PickedElement(json: answer, page: page) else { return }
             guard PickedElement.object(answer)?["marked"] as? Bool == true else { return deliver(element, flags) }
             readPageSource(mark) { [weak self] json in
-                var element = element
-                if let json { element.merge(pageSource: json) }
-                self?.deliver(element, flags)
+                var read = element
+                let stack = json.flatMap { read.merge(pageSource: $0) }
+                guard let stack, let self else { self?.deliver(read, flags); return }
+                // React 19: map the stack back, then deliver (plan 16, phase C).
+                let page = web.url
+                Task { @MainActor [weak self] in
+                    read.source = await SourceLookup.resolve(stack: stack, page: page)
+                    self?.deliver(read, flags)
+                }
             }
         }
     }
