@@ -41,7 +41,7 @@ ação do app (ADR 0005). Quando existirem, acha também abas, spaces e arquivos
   fecha sem executar. Clicar numa linha executa.
 - ⌘K com a paleta aberta fecha a paleta.
 - O "+" ao lado das abas abre um menu com as mesmas aberturas de "Abrir", cada uma com ícone e
-  atalho, como o "+" do Terax.
+  atalho, como o "+" da barra de abas.
 
 ### Outras listas
 - A mesma paleta mostra arquivos (⌘P) e texto nos arquivos (⌘⇧F), da feature search. O atalho de

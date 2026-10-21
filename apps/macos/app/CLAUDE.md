@@ -42,7 +42,7 @@
   documentos salvos nos spaces. O elemento escolhido num preview vai por `ElementPickDelivery.swift`:
   colado sem Enter no terminal do agente, que ganha o foco, ou copiado (⌥, preview.pickTarget em
   `SettingsBridge.swift`, ou nenhum agente). Passa as mudanças do disco aos documentos abertos e monta a aparência do editor (`EditorLooks`).
-- A casca da janela, no estilo do Terax: título transparente com barra de ferramentas compacta
+- A casca da janela: título transparente com barra de ferramentas compacta
   (38 pt, botões da janela centrados); `TitleBarView.swift` (um grupo à esquerda com painel
   lateral, busca/paleta "⌘K" e spaces, o space só o ícone de pilha com um space e o nome com mais;
   o café do manter acordado antes do space (cheio ligado, contorno desligado; o clique roda
@@ -51,7 +51,7 @@
   configurações; cada controle um `TitleBarButton.swift` de
   26 pt com fundo ao passar e ao clicar,
   busca, todos por comando), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
-  painel lateral recolhível, barra de status) e `SidebarView.swift` (duas páginas, Arquivos e Git, trocadas por abas largas embaixo do painel, como no Terax, que rodam explorer.focus e git.show). O explorer é criado
+  painel lateral recolhível, barra de status) e `SidebarView.swift` (duas páginas, Arquivos e Git, trocadas por abas largas embaixo do painel, que rodam explorer.focus e git.show). O explorer é criado
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.

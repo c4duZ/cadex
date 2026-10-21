@@ -8,7 +8,7 @@ import Strings
 /// holds only the themes in use (plan 15: hundreds of themes must not
 /// weigh on the app).
 public enum ThemeCatalog {
-    /// The family the app starts with: the one the owner uses in Terax.
+    /// The family the app starts with: the one the owner uses.
     public static let defaultId = "caffeine"
 
     /// Every built-in family, the default first. Empty only if the bundled

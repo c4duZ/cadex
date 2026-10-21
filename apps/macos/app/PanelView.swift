@@ -1,6 +1,6 @@
 import AppKit
 
-/// A rounded panel inside the window frame, as in Terax: the sidebar and
+/// A rounded panel inside the window frame: the sidebar and
 /// the terminal area. Clips what it holds to its corners.
 final class PanelView: NSView {
     static let cornerRadius: CGFloat = 8

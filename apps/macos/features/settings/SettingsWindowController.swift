@@ -5,7 +5,7 @@ import Shortcuts
 import Strings
 import Themes
 
-/// The settings window (⌘,), after the Terax one: the sections as tabs at
+/// The settings window (⌘,): the sections as tabs at
 /// the top, the page below. One window, brought back if open
 /// (docs/spec/settings.md).
 @MainActor

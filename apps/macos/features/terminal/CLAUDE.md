@@ -5,7 +5,7 @@
 - Teclado completo, colagem (texto, caminhos de arquivo e imagem como arquivo temporário), arrastar
   arquivos. A ordem da colagem está em `../../../../docs/spec/terminal.md`.
 - Busca dentro do terminal.
-- Comportamento inicial igual ao terminal do Terax, e de preferência mais leve.
+- Comportamento de um terminal moderno, e de preferência mais leve.
 - Texto nítido: desenhado na resolução real da tela, alinhado aos pixels. SF Mono 13 pt por padrão.
 
 ## O que eu não quero

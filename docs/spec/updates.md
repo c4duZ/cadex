@@ -2,7 +2,7 @@
 
 ## Para que serve
 Atualizar o Cadex com um clique, sem rodar o `install.sh` nem baixar o DMG de novo. Pedido do dono
-em 2026-10-20, no comportamento do botão de atualização do Terax. Decisão em
+em 2026-10-20. Decisão em
 `docs/adr/0016-in-app-updates.md`.
 
 ## Comportamento

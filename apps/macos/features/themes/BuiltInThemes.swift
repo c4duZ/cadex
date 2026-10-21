@@ -2,8 +2,8 @@ import Strings
 
 /// The themes that come with the app (docs/spec/themes.md).
 public extension Theme {
-    /// Dark, in the style of Terax: graphite chrome around near-black
-    /// panels. Interface colors measured from a print of Terax (2026-10-19);
+    /// Dark: graphite chrome around near-black
+    /// panels. Interface colors measured from a print (2026-10-19);
     /// the ANSI palette is the Cadex's own.
     static let cadexDark = Theme(
         name: T("Cadex Dark", "Cadex Escuro"), dark: true,

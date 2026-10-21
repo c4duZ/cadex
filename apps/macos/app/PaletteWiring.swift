@@ -10,7 +10,7 @@ import Themes
 /// command-palette.md): "/" files, "#" text, "@" the tabs and spaces.
 extension WindowSession {
     /// The ways to open things, first in ⌘K and in the "+" menu next to
-    /// the tabs, as in Terax's "+" (owner, 2026-10-19).
+    /// the tabs (owner, 2026-10-19).
     /// The right click on a tab and on the space button (plan 15, phase D).
     static let tabActions = [
         PalettePin(id: "tab.rename", title: T("Rename Tab", "Renomear aba"), icon: .pencilSimple),

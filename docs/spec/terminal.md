@@ -2,7 +2,7 @@
 
 ## Para que serve
 Rodar o shell do usuário dentro do Cadex, em abas e painéis, com a resposta de um terminal nativo
-rápido. É onde os agentes de código rodam. Comportamento inicial igual ao terminal do Terax no uso
+rápido. É onde os agentes de código rodam. Comportamento inicial igual ao de um terminal moderno no uso
 do dia a dia, mais simples por dentro e com o texto nítido.
 
 ## Comportamento
@@ -39,7 +39,7 @@ do dia a dia, mais simples por dentro e com o texto nítido.
 - Fonte padrão: SF Mono, 13 pt. Fonte, tamanho e espaçamento entre letras são configuráveis.
 - O texto é desenhado na resolução real da tela (Retina incluída), alinhado aos pixels, sem escalar
   uma imagem pronta. Nada de texto borrado em nenhum tamanho de fonte ou zoom.
-- Cores vêm do tema ativo (ver a spec de themes). Temas do Terax podem ser importados.
+- Cores vêm do tema ativo (ver a spec de themes).
 - Cursor em barra, sem piscar, por padrão. Estilo (barra, bloco, sublinhado) e piscar configuráveis.
 - ⌘+ e ⌘- mudam o tamanho da fonte; ⌘0 volta ao padrão.
 

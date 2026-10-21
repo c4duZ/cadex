@@ -7,12 +7,12 @@ import Terminal
 import Themes
 import UILooks
 
-/// The window's content, laid out like Terax: the title bar with the tabs,
+/// The window's content, laid out as: the title bar with the tabs,
 /// a collapsible sidebar and the terminal area as rounded panels, and the
 /// status bar at the bottom (docs/plans/3-window-and-theme.md, fase A).
 final class WorkspaceView: NSView {
     static var sidebarWidth: CGFloat { UILooks.pt(240) }
-    /// Space around and between the panels, as in Terax.
+    /// Space around and between the panels.
     static let gap: CGFloat = 6
 
     let titleBar: TitleBarView

@@ -14,7 +14,7 @@
   mudança e relê edição à mão observando a pasta (salvar atômico) e o arquivo (edição no lugar). CADEX_SETTINGS_FILE
   aponta para outro arquivo (os cenários do `make perf`).
 - A janela (⌘,, comando settings.open): `SettingsWindowController.swift`, com as seções em abas no
-  topo como no Terax, auxiliar de tela cheia (com o app em tela cheia, abre por cima dele, na mesma
+  topo, auxiliar de tela cheia (com o app em tela cheia, abre por cima dele, na mesma
   mesa, e não numa mesa à parte); `GeneralPages.swift` (General e About), `TerminalPage.swift`, `KeepAwakeRows.swift` (as seções do manter acordado em General), `ThemesPage.swift` (modo, seus temas,
   busca e filtro claro/escuro, a grade e a moldura), `ThemeGrid.swift` (os cartões, só das linhas na
   tela, reaproveitados ao rolar), `ThemeActions.swift` (comandos theme.choose, -dark e -light com a lista no ⌘K,

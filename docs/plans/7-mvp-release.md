@@ -15,7 +15,7 @@ Depende de: planos 1 a 6 · Features: spaces (app), empacotamento (`apps/macos/p
   alternativa, com a explicação do "Abrir mesmo assim" na página de download.
 - **Release no GitHub** com Cadex.dmg, Cadex.zip e install.sh, nomes sem versão para o link
   releases/latest/download/ sempre pegar a última.
-- **Semana de uso:** o dono usa o Cadex no lugar do Terax por uma semana; o que faltar vira plano.
+- **Semana de uso:** o dono usa o Cadex como seu terminal por uma semana; o que faltar vira plano.
 
 ## O que eu não quero
 - Depender do Xcode completo para gerar a release, ou de conta Apple Developer (ADR 0007).
@@ -42,7 +42,7 @@ completa, testada no projeto vizinho BKDict, está em `apps/macos/packaging/CLAU
   legível (baixa, confere, move para /Applications ou ~/Applications se não tiver permissão, remove
   quarentena só do próprio app); release.sh com `gh release create`.
 - **D. Medir:** tamanho do DMG, do app e memória com um terminal aberto, registrados no README (é
-  métrica do projeto, ADR 0007), comparados com o Terax (10,2 MB de app no upstream v0.9.0).
+  métrica do projeto, ADR 0007).
 - **E. Semana de uso:** lista do que faltou ou incomodou, cada item vira spec e plano novo.
 
 ## Como validar

@@ -63,7 +63,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
 
     /// The title area is the app's (fullSizeContentView, transparent title
     /// bar); an empty compact toolbar makes it 38 points tall with the window
-    /// buttons centered in it, as in Terax.
+    /// buttons centered in it.
     private static func makeWindow() -> NSWindow {
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 1100, height: 700),

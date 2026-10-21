@@ -24,7 +24,7 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   não cabem), cada uma com fundo próprio, a ativa com fundo mais forte e uma linha na cor do tema
   embaixo; ícone do que mostram (terminal, arquivo pelo tipo, histórico, página web). O × aparece
   na ativa e na que está sob o ponteiro. O dono escolheu esse estilo, o das abas nativas do macOS,
-  no lugar das pílulas discretas do Terax (2026-10-19).
+  no lugar de pílulas discretas (2026-10-19).
 - A barra de abas aparece mesmo com uma aba só (o visual final vem com a feature themes).
 
 ### Divisões

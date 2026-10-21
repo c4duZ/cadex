@@ -2,7 +2,7 @@
 
 ## Para que serve
 Dar ao Cadex a cara que o usuário quer: as cores da interface e do terminal, claro ou escuro, e os
-temas que ele já usava no Terax.
+temas que ele já usava em outros apps.
 
 ## Comportamento
 - Um tema define as cores da interface (moldura da janela, painéis, abas, campos, texto, destaque)
@@ -32,7 +32,7 @@ temas que ele já usava no Terax.
 - Programas que perguntam as cores do terminal (OSC 10, 11 e 4, como o vim faz para saber se o
   fundo é escuro) recebem as cores do tema.
 - O formato do tema é um arquivo JSON do Cadex (as cores da interface e do terminal). Importar
-  temas do Terax ficou de fora: os temas do Terax são os mesmos que vêm embutidos, e o dono não usa
+  temas de outros apps ficou de fora: os temas que o dono usava são os mesmos que vêm embutidos, e ele não usa
   temas próprios (2026-10-19).
 - A janela de configurações também segue o tema. Os menus que abrem pelo clique (clique direito, o
   "+" das abas, as pastas da barra de status) também: as cores do ⌘K, não o menu translúcido do

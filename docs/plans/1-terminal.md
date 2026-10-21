@@ -3,7 +3,7 @@
 Spec: `docs/spec/terminal.md` · Features: terminal (núcleo e app) · Seis fases, uma por sessão.
 
 ## O que eu quero
-O terminal no nível do Terax no uso do dia a dia, mais leve. Ao fim do plano, numa janela só (abas
+O terminal completo para o uso do dia a dia, leve. Ao fim do plano, numa janela só (abas
 e divisões são o plano 2):
 - **A. Teclas pelo núcleo:** setas em modo de aplicação (vim, less, htop), F1–F12, Home/End/PgUp/PgDn
   com modificadores, protocolo de teclado do kitty quando o programa pede, Option como Meta

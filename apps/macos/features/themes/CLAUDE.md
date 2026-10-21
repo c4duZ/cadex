@@ -7,7 +7,7 @@
 
 ## O que eu não quero
 - Transparência ligada por padrão (custa desempenho).
-- Copiar arquivos ou código do Terax (ADR 0004): os temas embutidos vêm das fontes abertas originais.
+- Copiar arquivos ou código de outro app (ADR 0004): os temas embutidos vêm das fontes abertas originais.
 
 ## Como eu quero
 - `ThemeCatalog.swift`: os temas embutidos (centenas, `../../../../docs/adr/0017-base16-themes.md`),
@@ -22,7 +22,7 @@
   árvore e no ícone da aba ativa. `ThemeFamily.swift`: um tema com
   versão escura e/ou clara, e o modo (sistema, escuro, claro). Padrão: Caffeine.
 - `Theme.swift`: o tema (cores da interface e do terminal, 16 ANSI). `BuiltInThemes.swift`: Cadex
-  Escuro (cores da interface medidas num print do Terax) e Cadex Claro. `ThemeStore.swift`: o tema
+  Escuro (cores da interface medidas num print, 2026-10-19) e Cadex Claro. `ThemeStore.swift`: o tema
   em uso (só as famílias do escuro e do claro ficam na memória), pela escolha das configurações
   (`Choice`: tema do escuro e do claro, modo, destaque, alto contraste), seguindo o modo do sistema e o
   "Aumentar contraste", e quem observa a troca. `HighContrast.swift`: o alto contraste (texto a 7:1,
@@ -33,7 +33,7 @@
   preenche a partir do tema; a feature terminal não depende desta.
 - Spec em `../../../../docs/spec/themes.md`. Status: temas embutidos, troca pelo sistema, arquivo
   JSON, cores no terminal, catálogo, galeria nas configurações, imagem de fundo e vibrância prontos.
-  Importar temas do Terax saiu do plano.
+  Importar temas de outro app saiu do plano.
 
 ## Como validar
 - `make macos-test` passa.

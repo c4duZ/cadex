@@ -5,7 +5,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 ## O que eu quero
 - **Trabalho em andamento:** seguir `docs/plans/README.md` (planos do fim do terminal até o MVP no
   Mac, em ordem). Começar uma sessão lendo este arquivo, o índice e o plano da vez.
-- Recriar todas as funcionalidades do Terax com código próprio, licença MIT.
+- Código próprio, licença MIT.
 - O app mais leve e rápido possível em cada sistema: macOS primeiro, Windows depois, sobre o mesmo
   núcleo.
 - Instalar em um passo: um comando (`curl ... | sh`) ou o DMG, sem dependências
@@ -37,7 +37,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | updates | não | sim | procurar versão nova e atualizar o app com um clique |
 
 ## O que eu não quero
-- Código do Terax copiado, traduzido ou aberto como referência. A referência é o comportamento em
+- Código de outro app copiado, traduzido ou aberto como referência. A referência é o comportamento em
   `docs/spec/`. Ver `docs/adr/0004-clean-rewrite.md`.
 - WebView, Electron ou Tauri para a interface (`docs/adr/0001-macos-first-native-app.md`).
 - IA embutida no app. Agentes de código rodam numa aba de terminal.

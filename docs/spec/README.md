@@ -10,7 +10,7 @@ implementar. É a referência da reescrita: ver `../adr/0004-clean-rewrite.md`.
 - Critérios de aceite: frases verificáveis que viram teste.
 
 ## O que não entra
-- Como o Terax implementa: nomes de funções, arquivos, estruturas internas, trechos de código.
+- Como outro app implementa: nomes de funções, arquivos, estruturas internas, trechos de código.
 - Decisões de arquitetura do Cadex: essas vão para `../adr/`.
 
 ## Modelo de página

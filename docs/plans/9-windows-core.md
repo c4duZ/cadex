@@ -66,7 +66,7 @@ x64 e arm64 (`make windows-core`), e os testes do Mac continuam passando. O scri
 (`tools/windows-vm.sh`, `make windows-core-test`) está pronto, mas ainda não há VM: os testes
 nunca rodaram no Windows. Falta: a VM (fase A, do dono), rodar e corrigir o que falhar lá. A fase
 H (WSL) foi feita em 2026-10-20 (`core/features/workspace/wsl.zig`: distros, caminhos entre os lados;
-no app, o ambiente dos terminais novos). Depois, pelo comportamento descrito na documentação pública do Terax: integração de
+no app, o ambiente dos terminais novos). Depois, pelo comportamento descrito nas specs: integração de
 shell automática do PowerShell (OSC 7), pwsh → Windows PowerShell → cmd como shell padrão, pasta
 avisada convertida para C:\x, e git procurado onde o Git for Windows instala.
 

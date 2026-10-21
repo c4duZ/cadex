@@ -8,7 +8,7 @@ import Strings
 /// width side by side, as macOS's own tabs (Safari, Ghostty), each with its
 /// own light fill so it reads as a tab, the active one stronger and marked
 /// with a line in the theme's accent; × on the active tab and under the
-/// pointer. The owner chose this over Terax's quiet pills, which gave the
+/// pointer. The owner chose this over quiet pills, which gave the
 /// space and the tabs the same weight (2026-10-19). Click selects,
 /// double-click renames, dragging reorders, the middle button closes.
 /// Drawn by hand so dragging is simple; colors come from the theme.

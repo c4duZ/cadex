@@ -29,7 +29,7 @@
 - `TabBarView.swift`: a barra de abas desenhada à mão (dica de cada aba e do × por HoverTip.hover,
   do menus compartilhado), cada aba da largura do título (72 a 200 pt),
   com o ícone do que mostra (terminal; arquivo pelo tipo e cor do `FileIcons`, como na árvore;
-  histórico; página web), a ativa com fundo neutro e × ao passar o mouse, como no Terax
+  histórico; página web), a ativa com fundo neutro e × ao passar o mouse
   (clique, duplo clique renomeia, clique do meio fecha, arrastar reordena), com cores de fora (`style`); fica na barra de título da janela
   (a propriedade bar do controlador). `TabsView.swift`: só a aba ativa. `Tab.swift`: uma aba.
 - Divisões: `PaneTree.swift` é a árvore pura (dividir, remover dando o espaço ao irmão, retângulos,

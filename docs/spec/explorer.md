@@ -21,7 +21,7 @@ operações do Finder que importam para quem programa.
   abertas continuam abertas e a seleção é mantida.
 
 ### Aparência (no estilo do explorador do VS Code)
-O dono comparou com o Terax e preferiu o explorador do VS Code (2026-10-19). O comportamento abaixo
+O dono preferiu o explorador do VS Code (2026-10-19). O comportamento abaixo
 segue a documentação pública do VS Code; o código de cores por tipo vem do CodeEdit (MIT).
 - Linhas de largura inteira, 22 pt de altura, recuo de 8 pt por nível depois da seta.
 - Um clique abre: arquivo na aba, pasta abre ou fecha. Com ⌘ ou ⇧ o clique só monta a seleção.

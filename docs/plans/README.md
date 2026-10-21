@@ -5,15 +5,15 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 (shell num PTY, desenho em Metal, SF Mono nítido, teclado básico, edição estilo Mac com ⌥ e ⌘).
 
 ## O que eu quero
-- Chegar ao MVP do Cadex no macOS: um app que substitui o Terax no dia a dia do dono, mais leve,
+- Chegar ao MVP do Cadex no macOS: um app que o dono usa no dia a dia, leve,
   com código próprio e licença MIT.
 - Executar nesta ordem; cada plano começa com o anterior concluído:
 
 | # | plano | entrega | status |
 |---|---|---|---|
-| 1 | `docs/plans/1-terminal.md` | terminal completo, no nível do Terax | feito; falta conferência manual |
+| 1 | `docs/plans/1-terminal.md` | terminal completo | feito; falta conferência manual |
 | 2 | `docs/plans/2-tabs-splits-palette.md` | abas, divisões e paleta ⌘K | feito |
-| 3 | `docs/plans/3-window-and-theme.md` | janela com a cara do Terax, tema, configurações | feito; falta conferência manual |
+| 3 | `docs/plans/3-window-and-theme.md` | janela, tema, configurações | feito; falta conferência manual |
 | 4 | `docs/plans/4-files.md` | workspace, explorer e busca | feito; falta conferência manual |
 | 5 | `docs/plans/5-viewers.md` | código, Markdown, mídia e preview web | feito; falta conferência manual |
 | 6 | `docs/plans/6-git.md` | source control e grafo do git | feito; falta conferência manual |
@@ -41,8 +41,8 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 
 ## O que eu não quero
 - Executar plano sem ler antes o `CLAUDE.md` da raiz e o da feature que vai mexer.
-- Código do Terax como referência (ADR 0004): a fonte é a spec em `docs/spec/`, a documentação
-  pública do Terax e o que o dono descreve. Feature nova começa escrevendo a spec dela
+- Código de outro app como referência (ADR 0004): a fonte é a spec em `docs/spec/` e o que o dono
+  descreve. Feature nova começa escrevendo a spec dela
   (`docs/spec/README.md` tem o modelo).
 - Começar uma fase com a anterior pela metade, ou terminar uma fase sem commit.
 - Inflar o MVP: o que não está nos planos entra depois, com plano próprio.
@@ -72,4 +72,4 @@ marcar o status na tabela acima.
 ## Como validar
 - `make check` passa ao fim de cada fase.
 - O MVP está pronto quando todos os critérios de aceite das specs das features do atlas
-  (`CLAUDE.md` da raiz) estão marcados e o dono usa o Cadex uma semana no lugar do Terax.
+  (`CLAUDE.md` da raiz) estão marcados e o dono usa o Cadex uma semana como seu terminal.

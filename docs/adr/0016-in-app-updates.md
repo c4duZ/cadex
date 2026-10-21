@@ -4,8 +4,8 @@ Data: 2026-10-20 · Status: aceita · Revê a última linha de `0007-one-step-in
 
 ## Contexto
 Até a 1.2.0, atualizar o Cadex era rodar o `install.sh` de novo ou baixar o DMG: o app não sabia
-que havia versão nova. O dono quer um botão que atualiza com um clique, como o do Terax
-(2026-10-20). O Terax usa o atualizador do Tauri, que não serve para um app Swift; o caminho comum
+que havia versão nova. O dono quer um botão que atualiza com um clique
+(2026-10-20). O caminho comum
 no Mac é o Sparkle, uma dependência grande que pede o app notarizado para funcionar bem, e o Cadex
 não tem conta Apple Developer (ADR 0007).
 

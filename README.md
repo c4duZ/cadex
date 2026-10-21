@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <sub>Grátis e de código aberto (MIT) · 7,7 MB no Mac, 3 MB no Windows · <a href="#instalar-no-mac">instalar no Mac</a> · <a href="#instalar-no-windows">instalar no Windows</a></sub>
+  <sub>Grátis e de código aberto (MIT) · 9 MB no Mac, 4 MB no Windows · em inglês ou português · <a href="#instalar-no-mac">instalar no Mac</a> · <a href="#instalar-no-windows">instalar no Windows</a></sub>
 </p>
 
 ---
@@ -37,7 +37,14 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
 - **Markdown** renderizado, com links entre notas, links quebrados e quem aponta pra cá.
 - **Git:** mudanças, stage, commit, push e pull, diff lado a lado e o grafo do histórico.
 - **Previews:** servidores locais e páginas web, imagem, vídeo, áudio e PDF.
-- **Temas:** 46 embutidos, imagem de fundo e vibrância.
+- **Escolher elemento para o agente** (Mac): no preview web, `⇧⌘C` e um clique mandam o elemento
+  para o terminal do agente, com o arquivo e a linha onde ele foi escrito (React, Next, Vue, Svelte)
+  e um print dele.
+- **Temas:** centenas, com busca, importação e pasta própria; claro e escuro, cor de destaque, alto
+  contraste, zoom da interface, cores de space e de aba, imagem de fundo e vibrância.
+- **Atualiza sozinho** (Mac): avisa quando sai versão nova e atualiza com um clique, conferindo a
+  assinatura antes de trocar o app.
+- **Inglês por padrão**, português nas configurações.
 
 ## Instalar no Mac
 
@@ -55,7 +62,8 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
 </table>
 
 Requisitos: macOS 13 ou superior, Intel ou Apple Silicon. Tudo o que o Cadex usa vem dentro do app: não
-precisa instalar Xcode, Homebrew nem nada antes, e funciona offline.
+precisa instalar Xcode, Homebrew nem nada antes, e funciona offline. Depois de instalado, o próprio
+Cadex avisa quando há versão nova e se atualiza com um clique.
 
 ### Pelo terminal
 
@@ -81,7 +89,8 @@ de novo atualiza para a versão mais recente.
 
 ## Instalar no Windows
 
-> **Prévia.** Primeira versão do Windows (1.1.0), com todas as features do Mac e ainda pouco usada.
+> **Prévia.** O Windows sai na mesma release do Mac, com quase todas as features (menos o seletor de
+> elementos e a atualização dentro do app) e ainda pouco usado.
 > Se algo falhar, [abra uma issue](https://github.com/c4duZ/cadex/issues) contando o que aconteceu.
 
 No PowerShell, um comando baixa a última versão, confere o checksum e instala o Cadex para o seu
@@ -92,7 +101,8 @@ irm https://github.com/c4duZ/cadex/releases/latest/download/install.ps1 | iex
 ```
 
 O script escolhe sozinho entre x64 e ARM64 e é curto para ler antes de rodar:
-[`install.ps1`](apps/windows/packaging/install.ps1). Rodar de novo atualiza para a versão mais recente.
+[`install.ps1`](apps/windows/packaging/install.ps1). Rodar de novo atualiza para a versão mais recente
+(no Windows, o app ainda não se atualiza sozinho).
 
 Prefere sem instalar? Baixe o ZIP portátil, extraia e abra o `Cadex.exe`:
 [x64 (Intel e AMD)](https://github.com/c4duZ/cadex/releases/latest/download/Cadex-windows-x64.zip) ·
@@ -128,7 +138,9 @@ máquinas: ⌘ vira Ctrl+Shift (como no Windows Terminal), e ⌘ com ⇧, ⌥ ou
 | Abrir arquivo por nome / buscar no conteúdo | `⌘P` / `⌘⇧F` | `Ctrl+Shift+P` / `Ctrl+Shift+Alt+F` |
 | Abrir pasta | `⌘O` | `Ctrl+Shift+O` |
 | Painel lateral / arquivos / git | `⌘B` / `⌘⇧E` / `⌘⇧G` | `Ctrl+Shift+B` / `Ctrl+Shift+Alt+E` / `Ctrl+Shift+Alt+G` |
-| Histórico do git | `⌘⇧H` | `Ctrl+Shift+Alt+H` |
+| Preview web | `⌘⇧H` | `Ctrl+Shift+Alt+H` |
+| Escolher elemento no preview / parar | `⌘⇧C` / `Esc` | só no Mac |
+| Histórico do git | pela paleta (sem atalho) | pela paleta (sem atalho) |
 | Trocar de space / novo space | `⌘⇧S` / `⌃⌘N` | `Ctrl+Shift+Alt+S` / `Ctrl+Shift+Alt+N` |
 | Próximo / anterior space | `⌃⌘→` / `⌃⌘←` | `Ctrl+Shift+Alt+PgDn` / `Ctrl+Shift+Alt+PgUp` |
 | Buscar no terminal / limpar | `⌘F` / `⌘L` | `Ctrl+Shift+F` / `Ctrl+Shift+L` |
@@ -138,16 +150,17 @@ máquinas: ⌘ vira Ctrl+Shift (como no Windows Terminal), e ⌘ com ⇧, ⌥ ou
 ## Tamanho e memória
 
 Métrica do projeto, medida a cada release ([ADR 0007](docs/adr/0007-one-step-install.md)).
-Versão 0.1.0, 2026-10-19, num Mac com M4 e macOS 27:
+Tamanhos da versão 2.1.0 (2026-10-21); memória medida na 0.1.0 (2026-10-19), num Mac com M4 e macOS 27:
 
-| | Cadex | Terax v0.9.0 |
-|---|---|---|
-| download (DMG) | 7,5 MB | — |
-| download (ZIP do instalador) | 7,1 MB | — |
-| app instalado (universal: Apple Silicon e Intel) | 40 MB | 10,2 MB |
-| memória com um terminal aberto (footprint) | 66 MB | — |
+| | Cadex |
+|---|---|
+| download (DMG) | 9,0 MB |
+| download (ZIP do instalador) | 9,4 MB |
+| download Windows (ZIP x64 / ARM64) | 4,1 MB / 3,9 MB |
+| app instalado (universal: Apple Silicon e Intel) | 44 MB |
+| memória com um terminal aberto (footprint) | 66 MB |
 
-O app instalado é maior que o do Terax porque leva as duas arquiteturas e as 18 gramáticas do
+O app instalado leva as duas arquiteturas e as 18 gramáticas do
 tree-sitter compiladas dentro (as tabelas delas são 15 MB de cada fatia); o download comprimido fica
 abaixo. O pico de memória ao abrir foi 111 MB.
 
@@ -214,6 +227,7 @@ Requisitos: macOS 13+, as Command Line Tools (Swift 6; o Xcode completo não é 
 make check     # manifestos + testes do núcleo + testes do app
 make run       # compila e abre o app
 make package   # gera dist/Cadex.app universal (Intel + Apple Silicon), assinado ad hoc
+make perf      # orçamento de peso: o app de release nas situações que já o deixaram pesado
 make windows-app      # compila o app Windows (x64 e ARM64) daqui do Mac
 make windows-package  # gera os ZIPs do Windows e o install.ps1 em dist/
 ```
@@ -226,18 +240,17 @@ ao Cadex entre um build e outro.
 ```bash
 # 1. Suba CFBundleShortVersionString (ex.: 0.2.0) e CFBundleVersion (inteiro, sempre maior)
 #    em apps/macos/packaging/Info.plist
-# 2. Gere e publique (requer: brew install create-dmg, e o gh logado na conta dona do repositório)
+# 2. Gere e publique (requer: brew install create-dmg, o gh logado na conta dona do repositório
+#    e a chave de atualização no Keychain, item cadex-update-signing, ou CADEX_UPDATE_KEY no .env)
 apps/macos/packaging/release.sh --publish "O que mudou nesta versão"
 ```
 
-O script gera o `Cadex.dmg`, o `Cadex.zip` com o checksum e o `install.sh`, e cria a release
-`vX.Y.Z`. Os arquivos sobem com nome fixo, sem a versão, para o botão de download e o comando de
+O script gera o `Cadex.dmg`, o `Cadex.zip` com o checksum, o `install.sh` e o `latest.json` assinado
+que o app lê para se atualizar ([ADR 0016](docs/adr/0016-in-app-updates.md)), e cria a release
+`vX.Y.Z`. Sem a chave de atualização ele não publica. Os arquivos sobem com nome fixo, sem a versão, para o botão de download e o comando de
 instalação do topo sempre pegarem a última. Sem `--publish`, ele só gera os arquivos em `dist/`. Com `CADEX_WINDOWS=1`, a mesma release leva os
 ZIPs do Windows e o `install.ps1`.
 
 ## Licença
 
 [MIT](LICENSE), © 2026 Carlos Teixeira. Componentes de terceiros estão listados em [`NOTICE`](NOTICE).
-
-O Cadex recria funcionalidades do [Terax](https://github.com/crynta/terax-ai) com código próprio,
-escrito do zero (ver [ADR 0004](docs/adr/0004-clean-rewrite.md)).

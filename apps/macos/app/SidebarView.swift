@@ -5,7 +5,7 @@ import Menus
 import Strings
 
 /// The sidebar: the explorer's tree or the Git view, switched by two tabs
-/// at the bottom, "Arquivos" and "Git", as in Terax (they run the
+/// at the bottom, "Arquivos" and "Git" (they run the
 /// explorer.focus and git.show commands). The owner compared the two
 /// side by side on 2026-10-19: loose icons on top read as decoration.
 final class SidebarView: NSView {

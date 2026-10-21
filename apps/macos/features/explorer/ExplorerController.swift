@@ -194,8 +194,8 @@ public final class ExplorerController: NSObject {
     // MARK: View
 
     private func buildView() {
-        // The folder's name small and quiet, the actions on the right, as in
-        // Terax (owner's comparison, 2026-10-19).
+        // The folder's name small and quiet, the actions on the right
+        // (owner, 2026-10-19).
         header.font = UILooks.font(11, weight: .semibold)
         header.lineBreakMode = .byTruncatingMiddle
         message.font = UILooks.font(11)

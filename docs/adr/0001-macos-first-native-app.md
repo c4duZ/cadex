@@ -3,8 +3,8 @@
 Data: 2026-10-19 · Status: aceita
 
 ## Contexto
-O ponto de partida é o Terax, um app Tauri (Rust + WebView + React). Ele roda em macOS, Linux e
-Windows, mas carrega um runtime web inteiro e o JavaScript da interface. O objetivo do Cadex é ser o
+Apps desse tipo costumam ser feitos com Tauri ou Electron: rodam em macOS, Linux e Windows, mas
+carregam um runtime web inteiro e o JavaScript da interface. O objetivo do Cadex é ser o
 mais leve e rápido possível em cada sistema.
 
 ## Decisão

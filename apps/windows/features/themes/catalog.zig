@@ -12,7 +12,7 @@ const theme = @import("theme.zig");
 
 const Family = theme.Family;
 
-/// The family the app starts with: the one the owner uses in Terax.
+/// The family the app starts with: the one the owner uses.
 pub const default_id = "caffeine";
 
 const bytes = @embedFile("theme_catalog");

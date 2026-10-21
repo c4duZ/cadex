@@ -1,6 +1,6 @@
 import AppKit
 
-/// The building blocks every settings page uses, in the look of the Terax
+/// The building blocks every settings page uses, in the look of the
 /// settings: a title and subtitle, then rows of label, explanation and
 /// control, centered in a column.
 @MainActor
@@ -90,7 +90,7 @@ enum SettingsPage {
         return boxed(label)
     }
 
-    /// The rounded box around a row, as in Terax.
+    /// The rounded box around a row.
     static func boxed(_ content: NSView) -> NSView {
         let box = NSView()
         box.wantsLayer = true
