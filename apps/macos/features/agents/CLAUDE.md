@@ -37,11 +37,20 @@
   trabalhando para esperando, por tipo (agents.notifyPermission, -Question, -Finished), nunca
   enquanto você olha o terminal dele; só de dentro de um .app (fora dele a central do sistema para o
   processo). `AgentNotifyIcon.swift`: a imagem de cada tipo, desenhada uma vez por cor no cache.
+- `AgentUsage.swift`: o login (`AgentLogin`: o item do Keychain pelo hash da pasta, lido pelo
+  `/usr/bin/security` a cada leitura, ou o .credentials.json; nunca guardado, renovado ou escrito),
+  o uso (sessão de 5 h, semana, semana do Sonnet, cada um com o reinício) e o estado do cartão.
+  `AgentUsageController.swift`: uma leitura para o app, só com Accounts ou o item na tela e o app
+  ativo; 5 min entre leituras, 60 s de frescor, espera de 5/10/20/60 min nos erros e a pedida no
+  429; login vencido sem requisição; se identifica como Cadex (ADR 0019). `AgentUsageViews.swift`:
+  as barras do cartão (destaque, laranja a partir de 70%, vermelho a partir de 90%) e
+  `AgentUsageStrip`, o item Agent usage da barra de status. `AgentAccountsView.swift`: a aba
+  Accounts, com renomear e esconder pelo botão direito.
 - O app (`../../app/AgentsWiring.swift`) põe a página no catálogo da barra lateral (agents.show,
   ⇧⌘J), o ponto no ícone enquanto o ícone está lá, o item Agents da barra de status, e acha o
   terminal de cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo).
-- Status: fases C e C2 (notificações) no código. Ainda não: a aba Accounts e o uso (fase D), o sinal no título da aba do
-  agente.
+- Status: fases C, C2 (notificações) e D (Accounts e uso) no código. Ainda não: o sinal no título
+  da aba do agente.
 
 ## Como validar
 - `make macos-test` passa: contas, sessões vivas e mortas, arquivo quebrado, projeto e worktree,

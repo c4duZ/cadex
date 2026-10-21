@@ -1,3 +1,4 @@
+import Agents
 import AppKit
 import CommandPalette
 import Editor
@@ -79,6 +80,10 @@ extension WindowSession {
                 self?.workspace?.showSidebar("agents")
                 self?.workspace?.sidebar.select(subtab: "accounts", of: "agents")
             }))
+        commands.register(Command(
+            id: "agents.refresh-usage", title: T("Refresh Agent Usage", "Atualizar o uso dos agentes"),
+            keywords: ["usage", "plan", "limit", "refresh", "uso", "plano", "limite", "atualizar"], category: .view,
+            action: .run { AgentUsageController.shared.refreshNow() }))
         commands.register(Command(
             id: "agents.test-notifications", title: T("Send Test Notifications", "Mandar notificações de teste"),
             keywords: ["notifications", "agents", "test", "notificações", "teste", "avisos"], category: .view,

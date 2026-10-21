@@ -59,7 +59,13 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
 ### Configurações
 - Três chaves, cada uma desliga uma leitura por inteiro (nada vigiado, nenhuma requisição):
   agents.sessions, agents.accounts e, em ssh, ssh.ping. Ligadas por padrão.
-- Esconder uma conta (agents.hiddenAccounts) a tira da página e da barra de status.
+- Esconder uma conta (agents.hiddenAccounts) a tira de Accounts e do item de uso (as sessões dela
+  continuam em Sessions); ela fica no fim de Accounts, apagada, com "Show", e não é lida.
+- Renomear (agents.accountNames, pelo botão direito no cartão): o nome novo vale em Sessions, nas
+  notificações e na barra de status; vazio volta ao da organização.
+- agents.accounts desliga a leitura do uso: nenhum login lido, nenhuma requisição.
+- O Cadex se identifica como Cadex na requisição; com isso o serviço respondeu 200 nas três contas
+  do dono (2026-10-21). Um 429 espera o que o serviço pedir.
 
 ## Estados
 - **Nenhum agente rodando**: "No agents running. Start one in a terminal: claude".

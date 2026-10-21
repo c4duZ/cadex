@@ -71,6 +71,7 @@ final class SettingsBridge {
         onSidebar?(settings.sidebar)
         onStatusBar?(settings.statusBar)
         AgentsController.shared.isEnabled = settings.agents.sessions
+        AgentUsageController.shared.isEnabled = settings.agents.accounts
         AgentsController.shared.names = settings.agents.accountNames.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }
         AgentsController.shared.hidden = Set(settings.agents.hiddenAccounts.map(Self.expand))
         let agents = settings.agents

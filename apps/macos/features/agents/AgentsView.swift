@@ -19,7 +19,7 @@ public final class AgentsView: NSView {
     public var onEnable: (() -> Void)?
     public var colors = AgentColors() { didSet { render() } }
     /// The sub-tab shown: "sessions" or "accounts" (AgentAccountsView.swift).
-    public var subtab = "sessions" { didSet { if subtab != oldValue { render() } } }
+    public var subtab = "sessions" { didSet { if subtab != oldValue { updateWatching(); render() } } }
     /// Rename an account (nil: back to its own name) or hide and show it;
     /// the app saves agents.accountNames and agents.hiddenAccounts.
     public var onRename: ((AgentAccount) -> Void)?
@@ -31,11 +31,12 @@ public final class AgentsView: NSView {
         let all = controller.accounts
         return (all, controller.shownAccounts, all.filter { controller.hidden.contains($0.dir) })
     }
-    /// The usage lines of an account's card (phase D2 fills them).
-    var usageLines: (AgentAccount) -> [NSView] = { _ in [] }
+    /// Usage is read while Accounts shows (AgentUsageController).
+    var usage: AgentUsageController { .shared }
     private let stack = NSStackView()
     private let scroll = NSScrollView()
     private var token: UUID?
+    private var usageToken: UUID?
     private var clock: Timer?
 
     public init(controller: AgentsController = .shared) {
@@ -88,7 +89,7 @@ public final class AgentsView: NSView {
         updateWatching()
     }
 
-    private func updateWatching() {
+    func updateWatching() {
         let shows = window != nil && !isHiddenOrHasHiddenAncestor
         if shows, token == nil {
             token = controller.watch { [weak self] in self?.render() }
@@ -102,6 +103,14 @@ public final class AgentsView: NSView {
             self.token = nil
             clock?.invalidate()
             clock = nil
+        }
+        // The plans' usage only while Accounts is the tab on screen.
+        let accounts = shows && subtab == "accounts"
+        if accounts, usageToken == nil {
+            usageToken = usage.watch { [weak self] in if self?.subtab == "accounts" { self?.render() } }
+        } else if !accounts, let usageToken {
+            usage.stop(usageToken)
+            self.usageToken = nil
         }
     }
 

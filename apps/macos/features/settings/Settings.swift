@@ -120,6 +120,9 @@ public struct Settings: Equatable, Sendable {
         public var notifyPermission = true
         public var notifyQuestion = true
         public var notifyFinished = true
+        /// Read each account's plan usage (Accounts, the usage item). Off:
+        /// no login is read and no request is made.
+        public var accounts = true
         /// Names you gave accounts, by folder ("~/.claude-diogo": "Liderhub").
         public var accountNames: [String: String] = [:]
         /// Accounts left out of Accounts and the usage item, by folder.

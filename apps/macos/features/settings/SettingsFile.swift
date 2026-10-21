@@ -89,6 +89,7 @@ public enum SettingsFile {
             settings.agents.notifyQuestion = reader.bool(s, "agents.notifyQuestion") ?? settings.agents.notifyQuestion
             settings.agents.notifyFinished = reader.bool(s, "agents.notifyFinished") ?? settings.agents.notifyFinished
             settings.agents.hiddenAccounts = reader.strings(s, "agents.hiddenAccounts") ?? settings.agents.hiddenAccounts
+            settings.agents.accounts = reader.bool(s, "agents.accounts") ?? settings.agents.accounts
             if let names = s["accountNames"] {
                 if let names = names as? [String: String] { settings.agents.accountNames = names }
                 else { reader.problems.append("agents.accountNames: esperava nomes por pasta") }
@@ -137,7 +138,7 @@ public enum SettingsFile {
             "statusBar": ["left": s.statusBar.left, "right": s.statusBar.right],
             "agents": ["sessions": s.agents.sessions, "notifyPermission": s.agents.notifyPermission,
                        "notifyQuestion": s.agents.notifyQuestion, "notifyFinished": s.agents.notifyFinished,
-                       "accountNames": s.agents.accountNames, "hiddenAccounts": s.agents.hiddenAccounts],
+                       "accounts": s.agents.accounts, "accountNames": s.agents.accountNames, "hiddenAccounts": s.agents.hiddenAccounts],
             "shortcuts": shortcuts,
         ]
         return (try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])) ?? Data()

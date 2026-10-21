@@ -28,6 +28,10 @@ extension WindowSession {
         }
         page.onRename = { [weak self] account in self?.renameAccount(account) }
         agentsPage = page
+        ThemeStore.shared.observe { [weak page, weak self] _ in
+            page?.colors = Self.agentColors()
+            self?.usageStrip?.colors = Self.agentColors()
+        }
         return page
     }
 
@@ -50,6 +54,28 @@ extension WindowSession {
                 token = nil
             }
         }
+        return item
+    }
+
+    /// Agent usage in the status bar: per account, the session's bar and
+    /// "5h · wk"; reads only while the item shows.
+    func makeUsageItem() -> StatusItem {
+        let strip = AgentUsageStrip()
+        strip.onClick = { [weak self] in _ = self?.commands.run("agents.show-accounts") }
+        let item = StatusItem(id: "usage", title: T("Agent usage", "Uso dos agentes"),
+                              subtitle: T("Each account's 5 h session and week, every 5 min", "A sessão de 5 h e a semana de cada conta, a cada 5 min"),
+                              icon: .sparkle, side: .left, view: strip)
+        var token: UUID?
+        item.onVisible = { [weak strip] visible in
+            if visible {
+                token = AgentUsageController.shared.watch { strip?.render() }
+            } else if let id = token {
+                AgentUsageController.shared.stop(id)
+                token = nil
+            }
+        }
+        strip.colors = Self.agentColors()
+        usageStrip = strip
         return item
     }
 
@@ -97,6 +123,13 @@ extension WindowSession {
             let key = SettingsBridge.tilde(account.dir)
             self?.settings.store.update { $0.agents.accountNames[key] = name.isEmpty ? nil : name }
         }
+    }
+
+    /// The theme's colors for the Agents page and the usage item.
+    static func agentColors() -> AgentColors {
+        let ui = ThemeStore.shared.current.interface
+        return AgentColors(text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, accent: ui.accent.nsColor,
+                           waiting: .systemBlue, fill: ui.tabActive.nsColor)
     }
 
     /// agents.test-notifications: the three kinds, named after this window's project.

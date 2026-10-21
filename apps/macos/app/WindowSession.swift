@@ -54,6 +54,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
     var agentsDotToken: UUID?
     /// The Agents page, for its sub-tabs (AgentsWiring.swift).
     weak var agentsPage: AgentsView?
+    /// The status bar's Agent usage item, for the theme's colors.
+    weak var usageStrip: AgentUsageStrip?
 
     var settings: SettingsBridge { app.settings }
 

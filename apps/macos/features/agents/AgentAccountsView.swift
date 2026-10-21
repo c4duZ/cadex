@@ -25,7 +25,8 @@ extension AgentsView {
         let name = AgentText.label(account.name, size: 13, weight: .semibold, color: hidden ? colors.secondary : colors.text)
         let folder = AgentText.label("~/" + (account.dir as NSString).lastPathComponent, size: 11, color: colors.secondary)
         var lines: [NSView] = [name, folder]
-        lines += usageLines(account)
+        // A hidden account is not read: nothing about its usage.
+        if !hidden { lines += usageLines(account) }
         let stack = NSStackView(views: lines)
         stack.orientation = .vertical
         stack.alignment = .leading
