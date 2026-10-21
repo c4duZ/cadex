@@ -45,6 +45,7 @@ extension WindowSession {
     func applyStatusBar(_ prefs: Settings.StatusBar) {
         guard let bar = workspace?.statusBar, prefs.left != bar.left || prefs.right != bar.right else { return }
         for problem in bar.setLayout(left: prefs.left, right: prefs.right) { NSLog("Cadex settings: %@", problem) }
+        refreshCustomize()
     }
 
     /// The Terminals item, when it shows: every terminal of every space.

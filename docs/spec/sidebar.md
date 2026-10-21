@@ -29,8 +29,9 @@ em que ordem.
 - Embaixo da fileira, o título da página à esquerda e as sub-abas dela à direita, num controle
   segmentado: Agents tem Sessions e Accounts. Página sem sub-aba mostra
   só o título (Files mostra o nome da pasta do workspace).
-- Personalizar: o último ícone da fileira (controles deslizantes) abre o painel "Customize", com a
-  lista dos ícones (arrastar para reordenar, chave para mostrar ou esconder). O mesmo vale arrastando
+- Personalizar: o último ícone da fileira (controles deslizantes) abre a janela "Customize", uma só
+  para o app e com uma aba por coisa a arrumar (Sidebar, Status Bar), como a de configurações e por
+  cima do app em tela cheia; na aba Sidebar, a lista dos ícones (arrastar para reordenar, chave para mostrar ou esconder). O mesmo vale arrastando
   o próprio ícone na fileira, e pelo ⌘K: "Customize Sidebar" e "Show or Hide a Sidebar Page" (a
   lista das páginas, cada uma marcada como aparece ou escondida).
 - A escolha vale para todas as janelas na hora e fica no settings.json (sidebar.items, a lista em

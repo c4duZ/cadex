@@ -23,7 +23,6 @@ public final class SidebarView: NSView {
     private let content = NSView()
     private let empty: NSStackView
     private var titles: [String: String] = [:]
-    private var panel: CustomizeWindow?
     private var colors = SidebarColors()
 
     public init(catalog: [SidebarItem], run: @escaping (String) -> Void) {
@@ -42,7 +41,7 @@ public final class SidebarView: NSView {
         title.lineBreakMode = .byTruncatingTail
         row.onPress = { [weak self] id in self?.press(id) }
         row.onReorder = { [weak self] ids in self?.change(ids) }
-        row.onCustomize = { [weak self] anchor in self?.customize(from: anchor) }
+        row.onCustomize = { [weak self] _ in self?.customize() }
         row.onOverflow = { [weak self] ids, anchor in self?.overflow(ids, below: anchor) }
         for view in [row, title, content, empty] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
@@ -127,8 +126,10 @@ public final class SidebarView: NSView {
         title.textColor = colors.text
     }
 
-    /// The sidebar.customize command: the panel under the customize button.
-    public func customize() { customize(from: row.customize) }
+    /// The customize button: the app opens the Customize window on the
+    /// Sidebar tab (sidebar.customize).
+    public var onCustomize: (() -> Void)?
+    public func customize() { onCustomize?() }
 
     /// Shows or hides one page's icon (sidebar.toggle-page from ⌘K).
     public func toggle(_ id: String) {
@@ -150,18 +151,6 @@ public final class SidebarView: NSView {
         onItemsChange?(ids)
     }
 
-    private func customize(from anchor: NSView) {
-        if let panel, panel.isVisible { return panel.makeKeyAndOrderFront(nil) }
-        let panel = CustomizeWindow(title: T("Customize", "Personalizar"),
-                                    note: T("Drag to reorder. Also in ⌘K: “Customize Sidebar”.",
-                                            "Arraste para reordenar. Também no ⌘K: “Personalizar o painel lateral”."),
-                                    entries: customizeEntries(), colors: colors.customize) { [weak self] entries in
-            self?.change(CustomizeLayout.sections(entries).flatMap { $0 }.filter(\.on).map(\.id))
-        }
-        panel.show(over: anchor.window)
-        self.panel = panel
-    }
-
     /// The window's list: every page, the shown ones first, in order.
     func customizeEntries() -> [CustomizeEntry] {
         let rows = SidebarLayout.customizeOrder(shown: items, known: known).compactMap { id in
@@ -172,7 +161,18 @@ public final class SidebarView: NSView {
         return [.header(T("Sidebar icons", "Ícones do painel lateral"))] + rows
     }
 
-    @objc private func customizeFromEmpty() { customize(from: empty) }
+    @objc private func customizeFromEmpty() { customize() }
+
+    /// The Sidebar tab of the Customize window: the shown ids go back to
+    /// sidebar.items.
+    public var customizePage: CustomizePage {
+        CustomizePage(id: "sidebar", title: T("Sidebar", "Painel lateral"), icon: .sidebar,
+                      note: T("Drag to reorder. Also in ⌘K: “Customize Sidebar”.",
+                              "Arraste para reordenar. Também no ⌘K: “Personalizar o painel lateral”."),
+                      entries: customizeEntries()) { [weak self] entries in
+            self?.change(CustomizeLayout.sections(entries).flatMap { $0 }.filter(\.on).map(\.id))
+        }
+    }
 
     private func overflow(_ ids: [String], below anchor: NSView) {
         let entries = ids.compactMap { id in catalog.first { $0.id == id } }.map { item in

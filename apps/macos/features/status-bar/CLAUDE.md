@@ -19,8 +19,8 @@
   ou repetido sai e vira aviso), mostrar/esconder, a lista Left/Right do Customize e a volta.
 - `StatusBarView.swift`: a porta de entrada. Os itens próprios (folder, environment) e os que o app
   soma (`add`), `setLayout` com statusBar.left/right, `onLayoutChange` para o app salvar, o menu do
-  botão direito (cada item com marca e "Customize Status Bar…") e a janela Customize compartilhada
-  (`../../shared/customize/`). Avisa cada item quando ele pode ser visto (na barra e a janela na
+  botão direito (cada item com marca e "Customize Status Bar…") e a aba Status Bar
+  (`customizePage`) da janela única de `../../shared/customize/`, que o app abre. Avisa cada item quando ele pode ser visto (na barra e a janela na
   tela, pela oclusão). `path`, `canNavigate` e `onNavigate` vão para a trilha.
 - `FolderTrail.swift`: a trilha "Home › … › cadex" com o menu de subpastas de cada pedaço (o do app,
   `../../shared/menus`, para cima); só se refaz quando a pasta muda. `Breadcrumb.swift`: os pedaços

@@ -52,7 +52,6 @@ public final class StatusBarView: NSView {
     private let environment = StatusLabel(icon: nil)
     private let leftStack = NSStackView()
     private let rightStack = NSStackView()
-    private var panel: CustomizeWindow?
 
     public override init(frame: NSRect) {
         super.init(frame: frame)
@@ -115,19 +114,16 @@ public final class StatusBarView: NSView {
         change(sides.left, sides.right)
     }
 
-    /// The statusBar.customize command.
-    public func customize() {
-        if let panel, panel.isVisible { return panel.makeKeyAndOrderFront(nil) }
-        let panel = CustomizeWindow(title: T("Customize Status Bar", "Personalizar a barra de status"),
-                                    note: T("Drag between Left and Right. A hidden item measures nothing. Also in ⌘K and on a right click.",
-                                            "Arraste entre Esquerda e Direita. Item escondido não mede nada. Também no ⌘K e no botão direito."),
-                                    entries: StatusBarLayout.entries(left: left, right: right, catalog: catalog),
-                                    colors: style.customize) { [weak self] entries in
+    /// The Status Bar tab of the Customize window: Left and Right, the
+    /// sides going back to statusBar.left and statusBar.right.
+    public var customizePage: CustomizePage {
+        CustomizePage(id: "statusBar", title: T("Status Bar", "Barra de status"), icon: .slidersHorizontal,
+                      note: T("Drag between Left and Right. A hidden item measures nothing. Also on a right click on the bar.",
+                              "Arraste entre Esquerda e Direita. Item escondido não mede nada. Também no botão direito na barra."),
+                      entries: StatusBarLayout.entries(left: left, right: right, catalog: catalog)) { [weak self] entries in
             let sides = StatusBarLayout.sides(from: entries)
             self?.change(sides.left, sides.right)
         }
-        panel.show(over: window)
-        self.panel = panel
     }
 
     private func change(_ left: [String], _ right: [String]) {

@@ -26,7 +26,7 @@ Sem mexer em nada, a barra é a de sempre: trilha à esquerda e ambiente à dire
 
 ### Personalizar
 - Botão direito na barra: menu com cada item (marcado se aparece) e "Customize Status Bar…".
-- "Customize Status Bar…" abre a janela Customize, a mesma da barra lateral: as seções Left e
+- "Customize Status Bar…" abre a janela Customize, a mesma da barra lateral, na aba Status Bar: as seções Left e
   Right com todos os itens, cada um com chave; arrastar uma linha reordena, e passando para a outra
   seção ela muda de lado. Os escondidos ficam embaixo do lado de costume deles.
 - No ⌘K: "Customize Status Bar" e "Show or Hide a Status Bar Item" (a lista dos itens, cada um

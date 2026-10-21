@@ -10,10 +10,7 @@ public enum SidebarCommands {
         [
             Command(id: "sidebar.customize", title: T("Customize Sidebar", "Personalizar o painel lateral"),
                     keywords: ["sidebar", "icons", "pages", "ícones", "páginas", "painel"], category: .view,
-                    action: .run {
-                        guard let sidebar = sidebar() else { return }
-                        if sidebar.window?.isVisible == true { sidebar.customize() }
-                    }),
+                    action: .run { sidebar()?.customize() }),
             Command(id: "sidebar.toggle-page", title: T("Show or Hide a Sidebar Page", "Mostrar ou esconder uma página do painel lateral"),
                     keywords: ["sidebar", "icon", "page", "ícone", "página", "painel"], category: .view,
                     action: .run {

@@ -51,7 +51,9 @@
   configurações; cada controle um `TitleBarButton.swift` de
   26 pt com fundo ao passar e ao clicar,
   busca, todos por comando), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
-  painel lateral recolhível, barra de status) e `SidebarWiring.swift` (o catálogo da feature `sidebar`: a árvore do explorer e o painel do git como páginas, busca, histórico, preview e spaces como ações; salva sidebar.items e põe a contagem de mudanças no ícone do Git). O explorer é criado
+  painel lateral recolhível, barra de status) e `SidebarWiring.swift` (o catálogo da feature `sidebar`: a árvore do explorer, o painel do git e o histórico compacto como páginas, a busca como ação; salva sidebar.items e põe a contagem de mudanças no ícone do Git; `openCustomize` abre a janela
+  Customize única na aba pedida, com as abas da barra lateral e da barra de status desta janela) e
+  `StatusBarWiring.swift` (os itens Git branch e Terminals, e os lados salvos). O explorer é criado
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.

@@ -1,4 +1,5 @@
 import AppKit
+import Customize
 import Explorer
 import GitHistory
 import Icons
@@ -24,6 +25,7 @@ extension WindowSession {
         let sidebar = SidebarView(catalog: catalog) { [weak self] id in _ = self?.commands.run(id) }
         sidebar.onItemsChange = { [weak self] ids in self?.settings.store.update { $0.sidebar.items = ids } }
         sidebar.onShow = { [weak self] id in if id == "history" { self?.showSidebarHistory() } }
+        sidebar.onCustomize = { [weak self] in self?.openCustomize("sidebar") }
         sidebar.setTitle(Self.folderName(folder.root), for: "files")
         applySidebar(settings.store.settings.sidebar, to: sidebar)
         return sidebar
@@ -38,6 +40,25 @@ extension WindowSession {
     private func applySidebar(_ prefs: Settings.Sidebar, to sidebar: SidebarView) {
         guard prefs.items != sidebar.items else { return }
         for problem in sidebar.setItems(prefs.items) { NSLog("Cadex settings: %@", problem) }
+        refreshCustomize()
+    }
+
+    /// The one Customize window, on a tab (sidebar or statusBar), with this
+    /// window's sidebar and status bar; over this window, in full screen too.
+    func openCustomize(_ page: String) {
+        guard let workspace else { return }
+        CustomizeWindow.shared.show(customizePages(workspace), selecting: page,
+                                    colors: workspace.statusBar.style.customize, over: window)
+    }
+
+    /// Settings changed while it is open: it shows them.
+    func refreshCustomize() {
+        guard let workspace, window.isKeyWindow || CustomizeWindow.shared.isKeyWindow else { return }
+        CustomizeWindow.shared.refresh(customizePages(workspace))
+    }
+
+    private func customizePages(_ workspace: WorkspaceView) -> [CustomizePage] {
+        [workspace.sidebar.customizePage, workspace.statusBar.customizePage]
     }
 
     /// The Git History page: the repository's history, compact, made the

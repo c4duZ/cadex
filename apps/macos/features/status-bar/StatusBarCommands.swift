@@ -8,11 +8,12 @@ import Strings
 /// Monitor, which the RAM, CPU and Cadex memory items open.
 @MainActor
 public enum StatusBarCommands {
-    public static func all(_ bar: @escaping @MainActor () -> StatusBarView?, palette: CommandPaletteController) -> [Command] {
+    public static func all(_ bar: @escaping @MainActor () -> StatusBarView?, palette: CommandPaletteController,
+                           customize: @escaping @MainActor () -> Void) -> [Command] {
         [
             Command(id: "statusBar.customize", title: T("Customize Status Bar", "Personalizar a barra de status"),
                     keywords: ["status bar", "items", "ram", "cpu", "barra de status", "itens"], category: .view,
-                    action: .run { bar()?.customize() }),
+                    action: .run { customize() }),
             Command(id: "statusBar.toggle-item", title: T("Show or Hide a Status Bar Item", "Mostrar ou esconder um item da barra de status"),
                     keywords: ["status bar", "item", "ram", "cpu", "branch", "barra de status"], category: .view,
                     action: .run {

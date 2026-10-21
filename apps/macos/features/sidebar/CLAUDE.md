@@ -23,8 +23,9 @@
 - `SidebarIconRow.swift` e `SidebarIconButton.swift`: os ícones; arrastar para o lado reordena
   (depois de 4 pt), o que não cabe vai para o "…" (menu de `../../shared/menus`), o botão de
   personalizar fica à direita.
-- Personalizar: a janela compartilhada de `../../shared/customize/` (`customizeEntries`: o título
-  "Sidebar icons" e todas as páginas, as que aparecem primeiro); o que volta dela vira sidebar.items.
+- Personalizar: a aba Sidebar (`customizePage`) da janela única de `../../shared/customize/`, que o
+  app abre (`onCustomize`, sidebar.customize): o título "Sidebar icons" e todas as páginas, as que
+  aparecem primeiro; o que volta dela vira sidebar.items.
 - A fileira fica sob a barra de título transparente: nenhuma view dela move a janela
   (mouseDownCanMoveWindow). O que se arrasta vai para cima dos vizinhos e anda a partir de onde
   estava no começo; a vaga é a que está sob o meio dele (CustomizeLayout.dropIndex).

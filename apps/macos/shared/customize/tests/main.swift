@@ -60,26 +60,50 @@ let exitCode = await Checks.run([
         list.mouseUp(with: event(.leftMouseUp, y))
         expect(changes.count == 1, "one change per drop")
     }),
-    ("a picture of the window's list, with CADEX_SNAPSHOT_DIR", {
+    ("one window for the app: a tab per page, each change goes to the open tab's owner", {
+        var sidebar: [[CustomizeEntry]] = []
+        var status: [[CustomizeEntry]] = []
+        let pages = [
+            CustomizePage(id: "sidebar", title: "Sidebar", icon: .sidebar, note: "n", entries: [.header("Icons"), row("files")]) { sidebar.append($0) },
+            CustomizePage(id: "statusBar", title: "Status Bar", icon: .slidersHorizontal, note: "n",
+                          entries: [.header("Left"), row("folder"), .header("Right"), row("ram", false)]) { status.append($0) },
+        ]
+        let window = CustomizeWindow.shared
+        window.show(pages, selecting: "statusBar", colors: CustomizeColors(), over: nil)
+        expect(window.selected == 1 && window.entries.compactMap(\.row).map(\.id) == ["folder", "ram"])
+        expect(window.collectionBehavior.contains(.fullScreenAuxiliary) && window.collectionBehavior.contains(.moveToActiveSpace),
+               "over the app in full screen, as settings")
+        window.show(pages, selecting: "sidebar", colors: CustomizeColors(), over: nil)
+        expect(window.selected == 0 && CustomizeWindow.shared === window, "the same window, another tab")
+        window.close()
+        expect(sidebar.isEmpty && status.isEmpty)
+    }),
+    ("a picture of the window, with CADEX_SNAPSHOT_DIR", {
         guard let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }
         let colors = CustomizeColors(text: .white, secondary: NSColor(white: 0.62, alpha: 1), accent: NSColor(red: 0.88, green: 0.64, blue: 0.35, alpha: 1),
                                      panel: NSColor(white: 0.11, alpha: 1), box: NSColor(white: 0.15, alpha: 1))
-        let window = CustomizeWindow(title: "Customize Status Bar", note: "Drag between Left and Right. Hidden items cost nothing.",
-                                     entries: [.header("Left"), row("folder"), .header("Right"), row("environment"),
-                                               row("ram", false, subtitle: "Memory in use, every 2 s"), row("cpu", false)],
-                                     colors: colors) { _ in }
+        let pages = [
+            CustomizePage(id: "sidebar", title: "Sidebar", icon: .sidebar, note: "", entries: [.header("Icons"), row("files")]) { _ in },
+            CustomizePage(id: "statusBar", title: "Status Bar", icon: .slidersHorizontal, note: "Drag between Left and Right. A hidden item measures nothing.",
+                          entries: [.header("Left"), row("folder"), .header("Right"), row("environment"),
+                                    row("ram", false, subtitle: "Memory in use, every 2 s"), row("cpu", false)]) { _ in },
+        ]
+        let window = CustomizeWindow.shared
+        window.appearance = NSAppearance(named: .darkAqua)
+        window.show(pages, selecting: "statusBar", colors: colors, over: nil)
         guard let view = window.contentView else { return expect(false) }
         view.layoutSubtreeIfNeeded()
-        view.frame = NSRect(origin: .zero, size: view.fittingSize)
-        let root = NSView(frame: view.bounds)
+        let root = NSView(frame: NSRect(origin: .zero, size: view.fittingSize))
         root.wantsLayer = true
         root.layer?.backgroundColor = colors.panel.cgColor
+        view.frame = root.bounds
         root.addSubview(view)
         root.layoutSubtreeIfNeeded()
         if let bitmap = root.bitmapImageRepForCachingDisplay(in: root.bounds) {
             root.cacheDisplay(in: root.bounds, to: bitmap)
             try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/customize-status.png"))
         }
+        window.close()
     }),
 ])
 exit(exitCode)

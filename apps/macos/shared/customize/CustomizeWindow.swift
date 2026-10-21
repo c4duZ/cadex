@@ -1,8 +1,9 @@
 import AppKit
+import Icons
 import Strings
 import UILooks
 
-/// The theme's colors for a Customize window, the same as the settings
+/// The theme's colors for the Customize window, the same as the settings
 /// window's: text, quiet text, the accent, the ground, the rows' boxes.
 public struct CustomizeColors {
     public var text: NSColor
@@ -21,74 +22,133 @@ public struct CustomizeColors {
     }
 }
 
-/// "Customize": a window of its own in front of the app, like the settings
-/// window, listing things to show, hide and drag into place (the sidebar's
-/// pages, the status bar's items). The owner asked on 2026-10-21 for the
-/// prototype's look: first a system popover (blue switches, focus ring),
-/// then a card under the button, both refused. Each change goes out at
-/// once; Esc, ⌘W or the close button closes it.
+/// One tab of the Customize window: the sidebar's icons, the status bar's
+/// items. Its owner builds it and takes back each change.
+public struct CustomizePage {
+    public let id: String
+    public let title: String
+    public let icon: Icon
+    public let note: String
+    public let entries: [CustomizeEntry]
+    public let onChange: ([CustomizeEntry]) -> Void
+
+    public init(id: String, title: String, icon: Icon, note: String, entries: [CustomizeEntry], onChange: @escaping ([CustomizeEntry]) -> Void) {
+        self.id = id
+        self.title = title
+        self.icon = icon
+        self.note = note
+        self.entries = entries
+        self.onChange = onChange
+    }
+}
+
+/// "Customize": one window for the whole app, like the settings window,
+/// with a tab per thing to arrange (the owner, 2026-10-21: one window with
+/// tabs, not a window per bar). Over the app in full screen, in the same
+/// Space, as settings; Esc, ⌘W or the close button closes it. The look is
+/// the prototype's (a system popover and a card under the button were
+/// refused). Each change goes out at once.
 @MainActor
 public final class CustomizeWindow: NSWindow {
-    private let list = CustomizeList()
-    private let colors: CustomizeColors
-    private let onChange: ([CustomizeEntry]) -> Void
-    static var width: CGFloat { UILooks.pt(420) }
+    public static let shared = CustomizeWindow()
 
-    public init(title: String, note: String, entries: [CustomizeEntry], colors: CustomizeColors,
-                onChange: @escaping ([CustomizeEntry]) -> Void) {
-        self.colors = colors
-        self.onChange = onChange
+    private let tabs = NSSegmentedControl()
+    private let note = NSTextField(wrappingLabelWithString: "")
+    private let list = CustomizeList()
+    private var pages: [CustomizePage] = []
+    private var colors = CustomizeColors()
+    private(set) var selected = 0
+    static var width: CGFloat { UILooks.pt(440) }
+
+    private init() {
         super.init(contentRect: NSRect(x: 0, y: 0, width: Self.width, height: 300),
                    styleMask: [.titled, .closable, .fullSizeContentView], backing: .buffered, defer: true)
         titlebarAppearsTransparent = true
         titleVisibility = .hidden
-        self.title = title
+        title = T("Customize", "Personalizar")
         isReleasedWhenClosed = false
-        // Over the app in full screen, in the same Space, as the settings window.
+        // Over the app in full screen, in the same Space: a plain window
+        // opened in another Space and took the user out of the app (the
+        // settings window's lesson, 2026-10-20).
         collectionBehavior = [.fullScreenAuxiliary, .moveToActiveSpace]
-        backgroundColor = colors.panel
-        contentView = makeContent(title: title, note: note)
-        list.onChange = { [weak self] entries in self?.onChange(entries) }
-        list.show(entries, colors: colors)
+        contentView = makeContent()
+        tabs.target = self
+        tabs.action = #selector(tabChanged)
+        list.onChange = { [weak self] entries in
+            guard let self, self.pages.indices.contains(self.selected) else { return }
+            self.pages[self.selected].onChange(entries)
+        }
     }
 
-    /// What the list shows now.
-    public var entries: [CustomizeEntry] { list.entries }
-
-    /// Centered over the window it was opened from, with its look.
-    public func show(over parent: NSWindow?) {
+    /// Opens on the page `id` with these pages (from the window that
+    /// asked), centered over that window the first time.
+    public func show(_ pages: [CustomizePage], selecting id: String, colors: CustomizeColors, over parent: NSWindow?) {
+        let wasVisible = isVisible
+        self.pages = pages
+        self.colors = colors
+        backgroundColor = colors.panel
         appearance = parent?.effectiveAppearance
-        contentView?.layoutSubtreeIfNeeded()
-        if let size = contentView?.fittingSize { setContentSize(size) }
-        if let parent {
+        tabs.segmentCount = pages.count
+        for (index, page) in pages.enumerated() {
+            tabs.setLabel(page.title, forSegment: index)
+            tabs.setImage(page.icon.image(size: 14), forSegment: index)
+            tabs.setImageScaling(.scaleNone, forSegment: index)
+        }
+        tabs.selectedSegmentBezelColor = colors.accent
+        select(pages.firstIndex { $0.id == id } ?? 0)
+        if !wasVisible, let parent {
             let frame = parent.frame
             setFrameOrigin(NSPoint(x: frame.midX - self.frame.width / 2, y: frame.midY - self.frame.height / 2))
-        } else {
-            center()
         }
         makeKeyAndOrderFront(nil)
     }
 
+    /// The settings changed elsewhere (⌘K, another window): the open page
+    /// shows them, keeping the tab.
+    public func refresh(_ pages: [CustomizePage]) {
+        guard isVisible, pages.map(\.id) == self.pages.map(\.id) else { return }
+        self.pages = pages
+        if list.entries != pages[selected].entries { list.show(pages[selected].entries, colors: colors) }
+    }
+
+    /// What the open page shows now.
+    public var entries: [CustomizeEntry] { list.entries }
+
     override public func cancelOperation(_ sender: Any?) { close() }
 
-    private func makeContent(title: String, note: String) -> NSView {
-        let heading = NSTextField(labelWithString: title)
-        heading.font = UILooks.font(15, weight: .semibold)
-        heading.textColor = colors.text
-        let noteLabel = NSTextField(wrappingLabelWithString: note)
-        noteLabel.font = UILooks.font(12)
-        noteLabel.textColor = colors.secondary
-        let stack = NSStackView(views: [heading, noteLabel, list])
-        stack.orientation = .vertical
-        stack.alignment = .leading
-        stack.spacing = 6
-        stack.setCustomSpacing(10, after: noteLabel)
-        // The top leaves room for the close button in the transparent title bar.
-        stack.edgeInsets = NSEdgeInsets(top: 40, left: 22, bottom: 22, right: 22)
-        stack.translatesAutoresizingMaskIntoConstraints = false
+    @objc private func tabChanged() { select(tabs.selectedSegment) }
+
+    private func select(_ index: Int) {
+        guard pages.indices.contains(index) else { return }
+        selected = index
+        tabs.selectedSegment = index
+        note.stringValue = pages[index].note
+        note.textColor = colors.secondary
+        list.show(pages[index].entries, colors: colors)
+        contentView?.layoutSubtreeIfNeeded()
+        if let size = contentView?.fittingSize {
+            // Grows or shrinks from the top edge, so the tabs stay put.
+            let top = frame.maxY
+            setContentSize(size)
+            setFrameOrigin(NSPoint(x: frame.minX, y: top - frame.height))
+        }
+    }
+
+    private func makeContent() -> NSView {
+        tabs.segmentStyle = .automatic
+        tabs.trackingMode = .selectOne
+        note.font = UILooks.font(12)
         let width = Self.width - 44
-        for view in [noteLabel, list] as [NSView] { view.widthAnchor.constraint(equalToConstant: width).isActive = true }
-        noteLabel.preferredMaxLayoutWidth = width
+        note.preferredMaxLayoutWidth = width
+        let stack = NSStackView(views: [tabs, note, list])
+        stack.orientation = .vertical
+        stack.alignment = .centerX
+        stack.spacing = 10
+        stack.setCustomSpacing(16, after: tabs)
+        // The top leaves room for the close button in the transparent title bar.
+        stack.edgeInsets = NSEdgeInsets(top: 36, left: 22, bottom: 22, right: 22)
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        for view in [note, list] as [NSView] { view.widthAnchor.constraint(equalToConstant: width).isActive = true }
         let root = NSView()
         root.addSubview(stack)
         NSLayoutConstraint.activate([

@@ -17,10 +17,13 @@
 - `CustomizeList.swift`: a lista desenhada (títulos, linhas em caixa com alça, ícone, nome, linha
   menor opcional, valor numa coluna fixa e chave); arrastar reorganiza enquanto o mouse se move,
   com a linha por cima das outras, e avisa uma vez ao soltar.
-- `CustomizeWindow.swift`: a janela na frente do app, centrada sobre ele, nas cores do tema
-  (`CustomizeColors`); fecha com Esc, ⌘W ou o botão. Cada mudança sai na hora por `onChange` com a
-  lista inteira; quem abriu tira dela o que guardar. `CustomizeToggle`, a chave na cor de destaque.
+- `CustomizeWindow.swift`: uma janela só para o app (`shared`), como a de configurações, com uma aba
+  por `CustomizePage` (Sidebar, Status Bar; o dono pediu uma janela com abas, 2026-10-21). Por cima
+  do app em tela cheia, na mesma mesa (fullScreenAuxiliary e moveToActiveSpace, a lição das
+  configurações); centrada sobre a janela de onde abriu; fecha com Esc, ⌘W ou o botão. Cada mudança
+  vai na hora para o `onChange` da aba aberta, com a lista inteira; `refresh` mostra o que mudou por
+  fora. `CustomizeColors`; `CustomizeToggle`, a chave na cor de destaque.
 
 ## Como validar
-- `make macos-test` passa: seções, mover entre seções, chave, a vaga e o arrastar com eventos de
-  mouse. Com CADEX_SNAPSHOT_DIR, o teste salva customize-status.png para ver sem captura de tela.
+- `make macos-test` passa: seções, mover entre seções, chave, a vaga, o arrastar com eventos de
+  mouse e a janela única com abas. Com CADEX_SNAPSHOT_DIR, o teste salva customize-status.png para ver sem captura de tela.

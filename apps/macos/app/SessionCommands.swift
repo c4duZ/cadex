@@ -48,7 +48,8 @@ extension WindowSession {
                                                 terminalFolder: { [weak self] in self?.tabs?.activeTerminal?.currentDirectory }))
         commands.register(TabCommands.all { [weak self] in self?.tabs })
         commands.register(SidebarCommands.all({ [weak self] in self?.workspace?.sidebar }, palette: palette))
-        commands.register(StatusBarCommands.all({ [weak self] in self?.workspace?.statusBar }, palette: palette))
+        commands.register(StatusBarCommands.all({ [weak self] in self?.workspace?.statusBar }, palette: palette,
+                                                customize: { [weak self] in self?.openCustomize("statusBar") }))
         makeSpaces(palette: palette)
         registerWorkColors(palette: palette)
         makeExplorer()
