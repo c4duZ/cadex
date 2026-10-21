@@ -83,6 +83,9 @@ public enum SettingsFile {
         if let s = reader.section(root, "sidebar") {
             settings.sidebar.items = reader.strings(s, "sidebar.items") ?? settings.sidebar.items
         }
+        if let s = reader.section(root, "agents") {
+            settings.agents.sessions = reader.bool(s, "agents.sessions") ?? settings.agents.sessions
+        }
         if let s = reader.section(root, "statusBar") {
             settings.statusBar.left = reader.strings(s, "statusBar.left") ?? settings.statusBar.left
             settings.statusBar.right = reader.strings(s, "statusBar.right") ?? settings.statusBar.right
@@ -124,6 +127,7 @@ public enum SettingsFile {
             "power": ["mode": s.power.mode, "onAtLaunch": s.power.onAtLaunch, "keepDisplayOn": s.power.keepDisplayOn],
             "sidebar": ["items": s.sidebar.items],
             "statusBar": ["left": s.statusBar.left, "right": s.statusBar.right],
+            "agents": ["sessions": s.agents.sessions],
             "shortcuts": shortcuts,
         ]
         return (try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])) ?? Data()

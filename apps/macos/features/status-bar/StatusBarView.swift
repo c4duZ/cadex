@@ -143,6 +143,12 @@ public final class StatusBarView: NSView {
 
     // MARK: Seen or not
 
+    /// The window closes: every item stops reading, whatever it shows.
+    public func stopReading() {
+        NotificationCenter.default.removeObserver(self)
+        for item in catalog { item.setVisible(false) }
+    }
+
     public override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         NotificationCenter.default.removeObserver(self)

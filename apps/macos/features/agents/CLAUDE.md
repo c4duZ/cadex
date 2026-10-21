@@ -1,0 +1,43 @@
+# agents (app macOS)
+
+## O que eu quero
+- Ver os agentes de código rodando em todas as contas do Claude Code deste Mac: as sessões vivas por
+  projeto, o estado (trabalhando, esperando você), os subagentes, e ir ao terminal de cada uma
+  (plano 17, fase C; `../../../../docs/spec/agents.md`).
+
+## O que eu não quero
+- Rodar, mandar prompt ou falar com agente, nem mexer nos arquivos do Claude Code: só ler
+  (`../../../../docs/adr/0019-agents-observe-only.md`).
+- Ler ou vigiar alguma coisa com ninguém olhando, ou com agents.sessions desligado.
+- Ler os logs das conversas: só o registro de cada sessão, as descrições dos subagentes e a data
+  dos logs deles.
+- Travar ou mostrar erro porque uma versão nova do Claude Code mudou um arquivo: pula e conta.
+
+## Como eu quero
+- `AgentSessions.swift`: o modelo e a leitura, puros e testados com uma pasta pessoal falsa.
+  `AgentAccount` (~/.claude e as ~/.claude-* com .claude.json; nome da organização, ou a pasta
+  quando é só "x's Organization"; nomes iguais ganham a pasta), `AgentSession` (o
+  sessions/<pid>.json de cada conta com o processo vivo: busy é trabalhando, idle é esperando),
+  `AgentProject` (o .git acima da pasta, worktree também, e o branch lido do HEAD, sem rodar git) e
+  `AgentSubagent` (os .meta.json da pasta de subagentes da sessão; trabalhando se o log mudou nos
+  últimos 30 s, uma estimativa).
+- `AgentsController.swift`: a porta de entrada, uma para o app (`shared`). `watch` liga a leitura
+  e `stop` desliga; sem ninguém, nenhum FSEvents e nenhum timer. Vigia por FSEvents com eventos
+  por arquivo as pastas sessions das contas e a de subagentes da sessão aberta; a cada 10 s confere
+  quem ainda está vivo (um agente que caiu não avisa) e acha pasta sessions nova. `isEnabled` é o
+  agents.sessions.
+- `AgentsLayout.swift`: grupos por projeto (o mais recente primeiro; esperando antes de
+  trabalhando) e a linha de baixo ("main · conta", "esperando você · conta · fora do Cadex").
+- `AgentsView.swift`: a página da barra lateral; lê só enquanto aparece. Clique abre e fecha os
+  subagentes; duplo clique chama `onOpen`. `AgentRows.swift`: o sinal (anel girando, ponto azul,
+  ✓), a linha clicável e os rótulos.
+- O app (`../../app/AgentsWiring.swift`) põe a página no catálogo da barra lateral (agents.show,
+  ⇧⌘J), o ponto no ícone enquanto o ícone está lá, o item Agents da barra de status, e acha o
+  terminal de cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo).
+- Status: fase C no código. Ainda não: a aba Accounts e o uso (fase D), o sinal no título da aba do
+  agente.
+
+## Como validar
+- `make macos-test` passa: contas, sessões vivas e mortas, arquivo quebrado, projeto e worktree,
+  subagentes, grupos, sem leitura com ninguém olhando ou desligado, sessão nova aparecendo sozinha.
+  Com CADEX_SNAPSHOT_DIR, o teste salva agents-page.png.

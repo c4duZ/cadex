@@ -21,9 +21,10 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
   com sinal (girando se escreveu nos últimos 30 s, senão ✓), a descrição e há quanto tempo. No
   máximo 10, os mais recentes primeiro.
 - Duplo clique numa sessão que roda num terminal do Cadex foca esse terminal, trocando de aba e de
-  space se preciso. Sessão de fora do Cadex (outro terminal) mostra "outside Cadex" e o duplo clique
-  abre a pasta dela no explorer.
-- A aba de terminal com um agente mostra o mesmo sinal de estado no título.
+  space se preciso (o terminal certo é o que tem o processo da sessão na frente). Sessão de fora do
+  Cadex (outro terminal) mostra "outside Cadex" e o duplo clique mostra a pasta dela na árvore do
+  explorer, quando ela está no workspace.
+- Depois: a aba de terminal com um agente mostra o mesmo sinal de estado no título.
 
 ### Accounts
 - Agents › Accounts mostra um cartão por conta: o nome (a organização da conta; renomeável), o
@@ -53,7 +54,10 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
 ## Casos de borda
 - O formato dos arquivos do Claude Code mudou (versão nova): o que não der para ler é pulado, a
   página mostra o que conseguiu e nada trava. Um aviso discreto: "Some sessions could not be read".
-- Processo morto deixou o registro da sessão para trás: a sessão não aparece.
+- Processo morto deixou o registro da sessão para trás: a sessão não aparece (conferido a cada 10 s
+  enquanto alguém olha).
+- Conta nova, sem nenhuma sessão ainda: a pasta sessions dela entra na conferência de 10 s.
+- Duas contas da mesma organização: o nome ganha a pasta ("BKDG · bkdg").
 - Duas sessões na mesma pasta: as duas aparecem no mesmo grupo, cada uma com o próprio estado.
 - Muitas sessões (mais de 50): a lista rola e só as linhas na tela são desenhadas.
 - Pedido negado pelo serviço por excesso (429): espera o tempo pedido antes de tentar de novo.

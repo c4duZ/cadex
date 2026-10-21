@@ -69,6 +69,17 @@ let exitCode = await Checks.run([
         let item = bar.catalogItems.first { $0.id == "ram" }
         expect(item?.isVisible == false)
     }),
+    ("a closing window stops every item's reading", {
+        let bar = StatusBarView()
+        var seen: [Bool] = []
+        let item = StatusItem(id: "probe", title: "Probe", view: NSView())
+        item.onVisible = { seen.append($0) }
+        bar.add([item])
+        bar.setLayout(left: [], right: ["probe"])
+        item.setVisible(true)
+        bar.stopReading()
+        expect(seen == [true, false] && !item.isVisible, "\(seen)")
+    }),
     ("the stats run while something watches and stop with the last one", {
         var readings: [SystemStats.Reading] = []
         let token = SystemStats.shared.watch { readings.append($0) }

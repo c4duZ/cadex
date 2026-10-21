@@ -1,0 +1,136 @@
+import AppKit
+import Icons
+import UILooks
+
+/// The page's colors, from the theme: text, quiet text, the accent (a
+/// working agent's ring, a project's folder) and the waiting dot's blue.
+public struct AgentColors {
+    public var text: NSColor
+    public var secondary: NSColor
+    public var accent: NSColor
+    public var waiting: NSColor
+    public var fill: NSColor
+
+    public init(text: NSColor = .labelColor, secondary: NSColor = .secondaryLabelColor, accent: NSColor = .controlAccentColor,
+                waiting: NSColor = .systemBlue, fill: NSColor = .quaternaryLabelColor) {
+        self.text = text
+        self.secondary = secondary
+        self.accent = accent
+        self.waiting = waiting
+        self.fill = fill
+    }
+}
+
+/// "3m", "2h", "1d": how long a session has been in its status.
+enum AgentTime {
+    static func short(since date: Date, now: Date = Date()) -> String {
+        let seconds = max(0, now.timeIntervalSince(date))
+        if seconds < 60 { return "now" }
+        if seconds < 3600 { return "\(Int(seconds / 60))m" }
+        if seconds < 86_400 { return "\(Int(seconds / 3600))h" }
+        return "\(Int(seconds / 86_400))d"
+    }
+}
+
+/// A session's sign: a turning ring while it works, a dot while it waits
+/// for an answer, a grey dot for a status the page does not know.
+@MainActor
+final class AgentSign: NSView {
+    enum Kind { case working, waiting, done, unknown }
+
+    private let shape = CAShapeLayer()
+
+    init(_ kind: Kind, colors: AgentColors, size: CGFloat) {
+        super.init(frame: NSRect(x: 0, y: 0, width: size, height: size))
+        wantsLayer = true
+        shape.frame = bounds
+        layer?.addSublayer(shape)
+        let inset = size * 0.15
+        let box = bounds.insetBy(dx: inset, dy: inset)
+        switch kind {
+        case .working:
+            shape.path = CGPath(ellipseIn: box, transform: nil)
+            shape.fillColor = nil
+            shape.strokeColor = colors.accent.cgColor
+            shape.lineWidth = max(1.5, size * 0.16)
+            shape.strokeEnd = 0.72
+            shape.lineCap = .round
+            let spin = CABasicAnimation(keyPath: "transform.rotation.z")
+            spin.fromValue = 0
+            spin.toValue = -2 * Double.pi
+            spin.duration = 1
+            spin.repeatCount = .infinity
+            shape.add(spin, forKey: "spin")
+        case .waiting, .unknown:
+            shape.path = CGPath(ellipseIn: box.insetBy(dx: size * 0.08, dy: size * 0.08), transform: nil)
+            shape.fillColor = (kind == .waiting ? colors.waiting : colors.secondary).cgColor
+        case .done:
+            let path = CGMutablePath()
+            path.move(to: CGPoint(x: box.minX, y: box.midY))
+            path.addLine(to: CGPoint(x: box.minX + box.width * 0.38, y: box.minY + box.height * 0.2))
+            path.addLine(to: CGPoint(x: box.maxX, y: box.maxY - box.height * 0.1))
+            shape.path = path
+            shape.fillColor = nil
+            shape.strokeColor = NSColor.systemGreen.cgColor
+            shape.lineWidth = 1.6
+            shape.lineCap = .round
+        }
+        translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([widthAnchor.constraint(equalToConstant: size), heightAnchor.constraint(equalToConstant: size)])
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("AgentSign is created in code") }
+}
+
+/// A row of the page that answers clicks: one click and a double click.
+@MainActor
+final class AgentRow: NSView {
+    var onClick: (() -> Void)?
+    var onDoubleClick: (() -> Void)?
+    var fill: NSColor? { didSet { layer?.backgroundColor = fill?.cgColor } }
+
+    init(_ content: NSView, inset: CGFloat = 6) {
+        super.init(frame: .zero)
+        wantsLayer = true
+        layer?.cornerRadius = 7
+        content.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(content)
+        NSLayoutConstraint.activate([
+            content.topAnchor.constraint(equalTo: topAnchor, constant: 5),
+            content.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -5),
+            content.leadingAnchor.constraint(equalTo: leadingAnchor, constant: inset),
+            content.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
+        ])
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("AgentRow is created in code") }
+
+    override var mouseDownCanMoveWindow: Bool { false }
+
+    override func mouseUp(with event: NSEvent) {
+        guard bounds.contains(convert(event.locationInWindow, from: nil)) else { return }
+        if event.clickCount == 2 { onDoubleClick?() } else if event.clickCount == 1 { onClick?() }
+    }
+}
+
+/// Text helpers for the rows.
+@MainActor
+enum AgentText {
+    static func label(_ text: String, size: CGFloat, weight: NSFont.Weight = .regular, color: NSColor) -> NSTextField {
+        let label = NSTextField(labelWithString: text)
+        label.font = UILooks.font(size, weight: weight)
+        label.textColor = color
+        label.lineBreakMode = .byTruncatingTail
+        label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        return label
+    }
+
+    static func icon(_ icon: Icon, size: CGFloat, color: NSColor) -> NSImageView {
+        let view = NSImageView(image: icon.image(size: UILooks.pt(size)))
+        view.contentTintColor = color
+        view.setContentHuggingPriority(.required, for: .horizontal)
+        return view
+    }
+}

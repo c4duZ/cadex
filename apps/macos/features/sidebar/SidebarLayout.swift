@@ -4,8 +4,8 @@ import Foundation
 /// sidebar.items in settings.json is the list, in order; an id left out is
 /// hidden. Pure, so the rules are tested without a window.
 public enum SidebarLayout {
-    /// Files, Search and Git, the sidebar before it had icons on top.
-    public static let defaultItems = ["files", "search", "git"]
+    /// Files, Search, Git and Agents (plan 17).
+    public static let defaultItems = ["files", "search", "git", "agents"]
 
     /// The saved list against the ids the app knows: unknown and repeated
     /// ids are dropped, each one noted.

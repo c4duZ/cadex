@@ -105,6 +105,9 @@ extension TabsController {
     /// "com programa rodando", docs/spec/power.md).
     public var hasRunningProgram: Bool { tabs.values.contains { $0.hasForegroundProcess } }
 
+    /// Every terminal in every tab and pane (an agent's terminal, docs/spec/agents.md).
+    public var allTerminals: [TerminalView] { tabs.values.flatMap(\.terminals) }
+
     /// The terminals in every tab and pane (the status bar's Terminals item).
     public var terminalCount: Int { tabs.values.reduce(0) { $0 + $1.terminals.count } }
 }

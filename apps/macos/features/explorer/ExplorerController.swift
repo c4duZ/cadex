@@ -118,6 +118,15 @@ public final class ExplorerController: NSObject {
         return parentFolder(of: node)
     }
 
+    /// Shows `path` in the tree when it is inside the workspace (a double
+    /// click on an agent outside Cadex, docs/spec/agents.md); false outside.
+    @discardableResult
+    public func reveal(_ path: String) -> Bool {
+        guard path == root.path || path.hasPrefix(root.path + "/") else { return false }
+        select(path: path)
+        return true
+    }
+
     /// Opens the folders down to `path` (inside the root) and selects it.
     func select(path: String) {
         var folder = root

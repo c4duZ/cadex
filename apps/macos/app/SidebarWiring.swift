@@ -11,8 +11,8 @@ import SourceControl
 import Strings
 
 /// The sidebar's catalog in this window: each page's view comes from its
-/// feature, each icon runs a command (docs/spec/sidebar.md). Files, Git and
-/// Git History are pages; Search only runs its command (⌘K). Only what
+/// feature, each icon runs a command (docs/spec/sidebar.md). Files, Git,
+/// Git History and Agents are pages; Search only runs its command (⌘K). Only what
 /// shows in the sidebar belongs here: Web Preview and Spaces opened
 /// something elsewhere and were taken out (owner, 2026-10-21).
 extension WindowSession {
@@ -22,6 +22,7 @@ extension WindowSession {
             item("search", .magnifyingGlass, T("Search", "Busca"), "search.content", .action),
             item("git", .gitBranch, "Git", "git.show", .page(git.view)),
             item("history", .clockCounterClockwise, T("Git History", "Histórico do Git"), "git.show-history", .page(sidebarHistoryHost)),
+            item("agents", .sparkle, T("Agents", "Agentes"), "agents.show", .page(makeAgentsPage())),
         ]
         let sidebar = SidebarView(catalog: catalog) { [weak self] id in _ = self?.commands.run(id) }
         sidebar.onItemsChange = { [weak self] ids in self?.settings.store.update { $0.sidebar.items = ids } }
@@ -39,9 +40,11 @@ extension WindowSession {
     }
 
     private func applySidebar(_ prefs: Settings.Sidebar, to sidebar: SidebarView) {
-        guard prefs.items != sidebar.items else { return }
-        for problem in sidebar.setItems(prefs.items) { NSLog("Cadex settings: %@", problem) }
-        refreshCustomize()
+        if prefs.items != sidebar.items {
+            for problem in sidebar.setItems(prefs.items) { NSLog("Cadex settings: %@", problem) }
+            refreshCustomize()
+        }
+        updateAgentsDot(shown: sidebar.items.contains("agents"), on: sidebar)
     }
 
     /// The one Customize window, on a tab (sidebar or statusBar), with this

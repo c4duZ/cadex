@@ -68,6 +68,11 @@ extension WindowSession {
                 self?.git?.refresh()
             }))
         commands.register(Command(
+            id: "agents.show", title: T("Show Agents", "Mostrar os agentes"),
+            keywords: ["agents", "claude", "sessions", "agentes", "sessões", "subagents"], category: .view,
+            defaultShortcut: "cmd+shift+j",
+            action: .run { [weak self] in self?.workspace?.showSidebar("agents") }))
+        commands.register(Command(
             id: "git.show-history", title: T("Show Git History in Sidebar", "Mostrar o histórico do Git no painel lateral"),
             keywords: ["history", "log", "commits", "histórico", "sidebar", "painel"], category: .view,
             action: .run { [weak self] in self?.workspace?.showSidebar("history") }))

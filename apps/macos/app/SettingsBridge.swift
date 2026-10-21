@@ -1,3 +1,4 @@
+import Agents
 import AppKit
 import Settings
 import Tabs
@@ -69,6 +70,7 @@ final class SettingsBridge {
         onPower?(settings.power)
         onSidebar?(settings.sidebar)
         onStatusBar?(settings.statusBar)
+        AgentsController.shared.isEnabled = settings.agents.sessions
         if settings.shortcuts != lastShortcuts {
             lastShortcuts = settings.shortcuts
             onShortcuts?(settings.shortcuts)

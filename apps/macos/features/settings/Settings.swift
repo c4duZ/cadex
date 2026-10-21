@@ -108,7 +108,13 @@ public struct Settings: Equatable, Sendable {
     public struct Sidebar: Equatable, Sendable {
         /// The icons on top of the sidebar, in order; a page left out is
         /// hidden (docs/spec/sidebar.md). The app drops unknown ids.
-        public var items = ["files", "search", "git"]
+        public var items = ["files", "search", "git", "agents"]
+    }
+
+    public struct Agents: Equatable, Sendable {
+        /// Read the agent sessions of every Claude Code account on this Mac
+        /// (docs/spec/agents.md). Off: no file of theirs is opened.
+        public var sessions = true
     }
 
     public struct StatusBar: Equatable, Sendable {
@@ -128,6 +134,7 @@ public struct Settings: Equatable, Sendable {
     public var power = Power()
     public var sidebar = Sidebar()
     public var statusBar = StatusBar()
+    public var agents = Agents()
     /// "cmd+shift+t" → command id, or nil to turn a default off.
     public var shortcuts: [String: String?] = [:]
 

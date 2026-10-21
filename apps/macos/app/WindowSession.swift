@@ -49,6 +49,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// The status bar's Terminals item (StatusBarWiring.swift).
     var terminalsLabel: StatusLabel?
     var terminalsItem: StatusItem?
+    /// The Agents icon's dot, watched while the icon is in the sidebar (AgentsWiring.swift).
+    var agentsDotToken: UUID?
 
     var settings: SettingsBridge { app.settings }
 
@@ -218,6 +220,9 @@ final class WindowSession: NSObject, NSWindowDelegate {
 
     /// Its shells end with it: with another window open the app goes on.
     func windowWillClose(_ notification: Notification) {
+        // What this window watched lets go: the agents' dot, the bar's items.
+        if let workspace { updateAgentsDot(shown: false, on: workspace.sidebar) }
+        workspace?.statusBar.stopReading()
         spaces?.closeAll()
         app.sessionClosed(self)
     }

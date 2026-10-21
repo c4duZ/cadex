@@ -28,6 +28,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | markdown | sim | sim | Markdown renderizado; ao editar: autocomplete de link, ⌘+clique, links quebrados, quem aponta pra cá |
 | tabs | não | sim | abas e divisões de painel |
 | sidebar | não | sim | ícones no topo que escolhem a página do painel lateral, personalizáveis |
+| agents | não | sim | as sessões de agente rodando nas contas do Claude Code, só lidas |
 | spaces | não | sim | grupos de abas restaurados entre sessões |
 | themes | não | sim | temas do app e do editor, imagem de fundo |
 | settings | não | sim | janela de configurações e preferências salvas |

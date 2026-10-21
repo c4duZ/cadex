@@ -61,6 +61,12 @@ enum GeneralPages {
                                      store.update { $0.preview.pickScreenshot = on }
                                  }),
 
+                SettingsPage.section(T("Agents", "Agentes")),
+                SettingsPage.row(T("Read agent sessions", "Ler as sessões dos agentes"),
+                                 T("The Agents page lists the Claude Code sessions of every account on this Mac. Cadex only reads their files, never runs an agent. Off, nothing of theirs is opened.",
+                                   "A página Agents lista as sessões do Claude Code de todas as contas deste Mac. O Cadex só lê os arquivos delas, nunca roda um agente. Desligado, nada delas é aberto."),
+                                 control: SettingsPage.toggle(store.settings.agents.sessions) { on in store.update { $0.agents.sessions = on } }),
+
                 SettingsPage.section(T("File tree", "Árvore de arquivos")),
                 SettingsPage.row(T("Follow the terminal", "Seguir o terminal"),
                                  T("When you cd in the focused terminal, the tree moves to that project: the top of its git repository, or the folder itself.",
