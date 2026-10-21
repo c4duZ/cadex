@@ -30,7 +30,8 @@
 - `AgentsLayout.swift`: grupos por projeto (o mais recente primeiro; esperando antes de
   trabalhando) e a linha de baixo ("main · conta", "esperando você · conta · fora do Cadex").
 - `AgentsView.swift`: a página da barra lateral; lê só enquanto aparece. `AgentSessionList.swift`:
-  as sessões, com o logo da conta; clique chama `onOpen` (o terminal), a seta abre os subagentes,
+  as sessões, com o logo da conta; clique (ou a seta) abre os subagentes, duplo clique chama
+  `onOpen` (o terminal),
   o título do projeto recolhe o grupo. `AgentMotion.swift`: a seta que gira e o `AgentReveal`, que
   desdobra e dobra (altura e opacidade, 0,2 s). `AgentRows.swift`: o sinal (anel girando, ponto
   azul, ✓), a linha clicável que acende ao passar e escurece ao apertar, e os rótulos.

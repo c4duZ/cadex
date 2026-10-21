@@ -3,10 +3,11 @@ import Strings
 import UILooks
 
 /// The Sessions list of the Agents page: a title per project that folds it,
-/// and a row per session whose click goes to its terminal while its arrow
-/// unfolds its subagents. Each session shows its account's logo, and its
+/// and a row per session whose click (or arrow) unfolds its subagents and
+/// whose double click goes to its terminal (the owner's choice after
+/// trying one click to the terminal, 2026-10-21). Each session shows its account's logo, and its
 /// sign sits on the middle of the name's line (the owner, 2026-10-21: the
-/// dot sat high, one click did two things and opening seemed to freeze).
+/// dot sat high and opening seemed to freeze).
 extension AgentsView {
     func renderGroups(_ groups: [AgentsLayout.Group]) {
         var carets: [String: AgentCaret] = [:]
@@ -94,9 +95,10 @@ extension AgentsView {
         row.fill = controller.openSession == session.id ? colors.fill.withAlphaComponent(0.35) : nil
         row.hoverFill = colors.fill.withAlphaComponent(0.5)
         row.toolTip = "\(session.cwd)\n\(session.account.name) · pid \(session.pid)\n"
-            + T("Click: go to its terminal. Arrow: its subagents.", "Clique: ir ao terminal dela. Seta: os subagentes.")
-        row.onClick = { [weak self] in self?.onOpen?(session) }
+            + T("Click: its subagents. Double click: its terminal.", "Clique: os subagentes. Duplo clique: o terminal dela.")
         caret.onClick = { [weak self, weak caret] in if let caret { self?.toggleSubagents(of: session, caret: caret) } }
+        row.onClick = caret.onClick
+        row.onDoubleClick = { [weak self] in self?.onOpen?(session) }
         return row
     }
 

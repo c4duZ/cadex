@@ -17,17 +17,18 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
   - Estado desconhecido: ponto cinza, com o nome do estado na dica.
 - A lista acompanha na hora: sessão nova aparece, sessão encerrada some, estado muda, sem botão de
   atualizar.
-- A seta abre ou fecha os subagentes dela, desdobrando em 0,2 s (a seta gira junto): "4 subagents" e uma linha por subagente,
+- Clicar numa sessão (ou na seta) abre ou fecha os subagentes dela, desdobrando em 0,2 s (a seta
+  gira junto): "4 subagents" e uma linha por subagente,
   com sinal (girando se escreveu nos últimos 30 s, senão ✓), a descrição e há quanto tempo. No
   máximo 10, os mais recentes primeiro.
-- Clicar numa sessão que roda num terminal do Cadex foca esse terminal em qualquer janela,
+- Duplo clique numa sessão que roda num terminal do Cadex foca esse terminal em qualquer janela,
   trazendo a janela para a frente e trocando de space e de aba se preciso; clique num subagente leva
   ao terminal da sessão dele (o terminal certo é o que tem o processo da sessão na frente). Sessão de fora do
-  Cadex (outro terminal) mostra "outside Cadex" e o clique mostra a pasta dela na árvore do
+  Cadex (outro terminal) mostra "outside Cadex" e o duplo clique mostra a pasta dela na árvore do
   explorer, quando ela está no workspace.
 - As linhas acendem ao passar o ponteiro (0,12 s) e escurecem ao apertar: o clique responde antes
-  de a ação acontecer. Antes um clique abria os subagentes, o duplo ia ao terminal, o ponto ficava
-  acima do nome e nada se mexia (o dono achou travado, 2026-10-21).
+  de a ação acontecer. Antes o ponto ficava acima do nome e nada se mexia (o dono achou travado,
+  2026-10-21); o clique indo ao terminal foi testado e desfeito no mesmo dia.
 - Depois: a aba de terminal com um agente mostra o mesmo sinal de estado no título.
 
 ### Accounts
