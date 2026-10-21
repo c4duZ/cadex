@@ -60,7 +60,9 @@ public final class TerminalView: MTKView {
 
         let scale = window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
         if let device {
-            renderer = TerminalRenderer(device: device, font: Self.preferredFont(scale: scale), pixelFormat: colorPixelFormat)
+            if let atlas = Self.preferredAtlas(device: device, scale: scale) {
+                renderer = TerminalRenderer(device: device, atlas: atlas, pixelFormat: colorPixelFormat)
+            }
         }
         let size = gridSize()
         let preferences = TerminalPreferences.current
@@ -85,6 +87,13 @@ public final class TerminalView: MTKView {
         Self.cleanPastedImagesOnce()
     }
 
+    /// The atlas of the preferred font at `scale`, shared by the terminals
+    /// that use the same (TerminalGPU.swift).
+    static func preferredAtlas(device: MTLDevice, scale: CGFloat) -> GlyphAtlas? {
+        let key = (TerminalPreferences.current.fontKey + ["\(scale)"]).joined(separator: "\u{1}")
+        return TerminalGPU.atlas(device, key: key) { preferredFont(scale: scale) }
+    }
+
     static func preferredFont(scale: CGFloat) -> TerminalFont {
         let preferences = TerminalPreferences.current
         return TerminalFont(family: preferences.fontFamily, pointSize: preferences.fontSize, scale: scale,
@@ -105,7 +114,7 @@ public final class TerminalView: MTKView {
                 // again); the minimum contrast is a uniform of the shader.
                 if TerminalPreferences.current.fontKey != fontKey {
                     fontKey = TerminalPreferences.current.fontKey
-                    self.renderer?.setFont(Self.preferredFont(scale: self.scale))
+                    if let device = self.device, let atlas = Self.preferredAtlas(device: device, scale: self.scale) { self.renderer?.setAtlas(atlas) }
                     self.lastSize = (0, 0)
                     self.resizeSession()
                 }
@@ -175,7 +184,7 @@ public final class TerminalView: MTKView {
         // they are scaled and blurry. Only then: this also runs when the
         // view comes back to a window (its tab shown again), where a new
         // 16 MB atlas and every glyph drawn again bought nothing (2026-10-21).
-        if renderer?.metrics.scale != scale { renderer?.setFont(Self.preferredFont(scale: scale)) }
+        if renderer?.metrics.scale != scale, let device, let atlas = Self.preferredAtlas(device: device, scale: scale) { renderer?.setAtlas(atlas) }
         resizeSession()
     }
 

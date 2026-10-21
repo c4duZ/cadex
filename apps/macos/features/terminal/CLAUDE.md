@@ -65,6 +65,11 @@
   com foco responde, junto com copy:, paste: e selectAll: dos comandos de edição. O
   `performKeyEquivalent` só trata a edição estilo Mac (⌘← ⌘→ ⌘⌫ ⌘⌦), que é entrada para o shell.
 - Ações do terminal (limpar, buscar, copiar, colar) registradas como comandos.
+- GPU compartilhada (`TerminalGPU.swift`): uma fila de comandos e um pipeline por device para o app,
+  e um atlas de glifos por fonte e escala, dividido pelos terminais com a mesma fonte e solto quando
+  nenhum usa (cada terminal fazia o seu: ~43 MB por aba, agora ~22, `make perf`, 2026-10-21).
+  Terminal fora da janela (aba escondida) solta o drawable que segura; o pool da camada Metal fica
+  (só sairia com a view) e é quase todo o custo que resta de cada aba.
 - Leitura (plano 15, fase C): `TerminalFont.swift` monta a fonte com a `Typesetting` (altura de linha,
   espaçamento centrado na célula, recursos OpenType); `TerminalShaders.swift` aplica o contraste
   mínimo no vertex shader, com o fundo de cada letra no `QuadInstance`; com "calt"/"liga",

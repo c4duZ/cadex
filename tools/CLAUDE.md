@@ -34,7 +34,8 @@
   app de release em instâncias de teste (CADEX_BACKGROUND=1, spaces num arquivo temporário) com o
   "shell" `perf/loadshell.sh` rodando uma carga (e, nos cenários do plano 15, settings.json próprio:
   trocar de tema 300 vezes depois de aquecer, e o jorro com contraste mínimo e ligaduras; no plano 17,
-  a conversa de um subagente de 34 MB aberta e fechada pelo CADEX_PERF_SUBAGENT_LOG), e mede memória (footprint) e CPU (tempo de CPU
+  a conversa de um subagente de 34 MB aberta e fechada pelo CADEX_PERF_SUBAGENT_LOG e cinco abas de
+  terminal a mais pelo CADEX_PERF_TABS; os gatilhos ficam em `../apps/macos/app/PerfHooks.swift`), e mede memória (footprint) e CPU (tempo de CPU
   gasto na janela, não o %cpu do ps); os índices pela API C com `perf/index_probe.c`. Os limites
   ficam no topo do script, cada um com o que foi medido ao lado.
 - `webview2_sdk.py`: baixa o pacote Microsoft.Web.WebView2 (versão e sha256 fixados no script) e

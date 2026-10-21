@@ -45,7 +45,12 @@ extension TerminalView {
         let center = NotificationCenter.default
         center.removeObserver(self, name: NSWindow.didBecomeKeyNotification, object: nil)
         center.removeObserver(self, name: NSWindow.didResignKeyNotification, object: nil)
-        guard let window else { return }
+        // Out of the window (its tab hidden): the drawable it holds goes
+        // (~9 MB less per hidden tab at a large window). The layer's pool
+        // stays: a 1 px drawable did not drop it, and a new layer left the
+        // view blank (MTKView keeps its own), so it goes only with the view
+        // (make perf, 2026-10-21).
+        guard let window else { return releaseDrawables() }
         // Output that came while the view had no window had nothing to draw
         // into: a space's first terminal stayed blank until the shell wrote
         // again (2026-10-19).

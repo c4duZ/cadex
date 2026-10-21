@@ -130,6 +130,18 @@ let exitCode = await Checks.run([
         expect(!atlas.joins("->", bold: false, italic: false))
         expect(atlas.font.typesetting.joinsLetters)
     }),
+    ("terminals with the same font share one atlas, the queue and the pipeline", {
+        guard let device = MTLCreateSystemDefaultDevice() else { return }
+        var made = 0
+        let first = TerminalGPU.atlas(device, key: "test SF Mono 2") { made += 1; return TerminalFont(scale: 2) }
+        let second = TerminalGPU.atlas(device, key: "test SF Mono 2") { made += 1; return TerminalFont(scale: 2) }
+        let other = TerminalGPU.atlas(device, key: "test SF Mono 1") { made += 1; return TerminalFont(scale: 1) }
+        expect(first != nil && first === second && other !== first && made == 2, "made \(made)")
+        guard let atlas = first else { return }
+        let a = TerminalRenderer(device: device, atlas: atlas, pixelFormat: .bgra8Unorm)
+        let b = TerminalRenderer(device: device, atlas: atlas, pixelFormat: .bgra8Unorm)
+        expect(a != nil && a?.atlas === b?.atlas && a?.metrics == atlas.font.metrics)
+    }),
     ("the shaders compile, minimum contrast included", {
         guard let device = MTLCreateSystemDefaultDevice() else { return }
         expect((try? device.makeLibrary(source: TerminalShaders.source, options: nil)) != nil)

@@ -140,6 +140,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
             explorer?.gitMarks = marks
             self?.showGitBadge(marks)
         }
+        startPerfHooks()
     }
 
     /// Whether a terminal in any space of this window runs a program.

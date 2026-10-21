@@ -61,6 +61,9 @@
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.
+- `PerfHooks.swift`: só para o `make perf` (`../../../tools/perf/run.py`): cada variável CADEX_PERF_
+  faz a instância de teste agir sozinha em horas marcadas (abrir a conversa de um subagente, abrir
+  abas); sem a variável, nada roda.
 - Tela cheia: a barra de ferramentas (vazia, só dá a altura da barra de título) some ao entrar e
   volta ao sair, porque o macOS a punha numa faixa por cima da barra do app. Tamanho mínimo da
   janela 480×300.

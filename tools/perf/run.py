@@ -44,6 +44,7 @@ LIMITS = {
     "agent_cpu": 10.0,            # 2-4 % while a file is saved every 0.1 s
     "theme_switch_mb": 6,         # 0 MB over 300 switches after 150 to warm up (90 -> 90, 2026-10-20)
     "reading_flood_peak_mb": 200, # flood with minimum contrast 7 and ligatures on
+    "terminal_tab_mb": 30,        # ~22 MB each hidden tab; 43 before the shared atlas and pipeline (2026-10-21)
     "subagent_first_mb": 20,      # +6 to +9 MB: a 34 MB log's first opening, the text system included (2026-10-21)
     "subagent_open_mb": 8,        # 0 to +2 MB each opening after (TextKit 1 had kept +20 and jumped 70)
     "subagent_closed_mb": 5,      # +1 to +3 MB once its tab is closed again
@@ -222,6 +223,23 @@ def measure_subagent(app):
     return {"subagent_first_mb": first - base, "subagent_open_mb": second - closed, "subagent_closed_mb": after - closed}
 
 
+def measure_tabs(app):
+    """Five more terminal tabs opened by the app (CADEX_PERF_TABS) from
+    12 s, then back to the first: what each one adds, hidden."""
+    start = time.time()
+    curve = []
+    while time.time() - start < 30:
+        if app.process.poll() is not None:
+            raise RuntimeError(f"the app quit (status {app.process.returncode})")
+        curve.append((time.time() - start, footprint_mb(app.process.pid) or 0))
+        time.sleep(0.5)
+    values = lambda begin, end: sorted(m for t, m in curve if begin <= t <= end)
+    base, after = values(7, 11), values(24, 30)
+    base, after = base[len(base) // 2], after[len(after) // 2]
+    print(f"    base {base:.0f} MB, with five more tabs {after:.0f}")
+    return {"terminal_tab_mb": (after - base) / 5}
+
+
 def subagent_scenario():
     folder = tempfile.mkdtemp(prefix="cadex-perf-log-")
     log = os.path.join(folder, "agent-perf.jsonl")
@@ -273,6 +291,7 @@ def main():
              ("an agent saving files", lambda: scenario("agent", "idle", ROOT, measure_agent)),
              ("switching themes 300 times", lambda: scenario("themes", "idle", ROOT, measure_theme_switch)),
              ("a subagent's 34 MB conversation, opened and closed", subagent_scenario),
+             ("five more terminal tabs", lambda: scenario("tabs", "idle", ROOT, measure_tabs, extra_env={"CADEX_PERF_TABS": "5"})),
              ("flooding with minimum contrast and ligatures", lambda: scenario(
                  "reading", "flood", ROOT, measure_reading_flood,
                  settings={"terminal": {"minimumContrast": 7, "fontFeatures": ["calt", "liga"]}}))]

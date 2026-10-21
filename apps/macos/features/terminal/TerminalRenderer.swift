@@ -49,24 +49,24 @@ final class TerminalRenderer {
     private var bufferIndex = 0
     private let inFlight = DispatchSemaphore(value: buffersInFlight)
 
-    init?(device: MTLDevice, font: TerminalFont, pixelFormat: MTLPixelFormat) {
-        guard let queue = device.makeCommandQueue(),
-              let atlas = GlyphAtlas(device: device, font: font),
-              let pipeline = Self.makePipeline(device: device, pixelFormat: pixelFormat)
+    /// The queue and the pipeline are the app's, the atlas is shared by the
+    /// terminals with the same font (TerminalGPU.swift).
+    init?(device: MTLDevice, atlas: GlyphAtlas, pixelFormat: MTLPixelFormat) {
+        guard let queue = TerminalGPU.queue(device),
+              let pipeline = TerminalGPU.pipeline(device, pixelFormat: pixelFormat, make: Self.makePipeline)
         else { return nil }
         self.device = device
         self.queue = queue
         self.atlas = atlas
-        self.font = font
+        self.font = atlas.font
         self.pipeline = pipeline
     }
 
     var metrics: CellMetrics { font.metrics }
 
-    /// The display scale or font size changed: glyphs must be redrawn.
-    func setFont(_ newFont: TerminalFont) {
-        guard let newAtlas = GlyphAtlas(device: device, font: newFont) else { return }
-        font = newFont
+    /// The display scale or font changed: the atlas for the new one.
+    func setAtlas(_ newAtlas: GlyphAtlas) {
+        font = newAtlas.font
         atlas = newAtlas
     }
 
@@ -121,7 +121,7 @@ final class TerminalRenderer {
         return created
     }
 
-    private static func makePipeline(device: MTLDevice, pixelFormat: MTLPixelFormat) -> MTLRenderPipelineState? {
+    private static func makePipeline(_ device: MTLDevice, _ pixelFormat: MTLPixelFormat) -> MTLRenderPipelineState? {
         guard let library = try? device.makeLibrary(source: TerminalShaders.source, options: nil) else { return nil }
         let descriptor = MTLRenderPipelineDescriptor()
         descriptor.vertexFunction = library.makeFunction(name: "terminal_vertex")
