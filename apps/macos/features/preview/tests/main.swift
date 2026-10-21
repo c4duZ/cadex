@@ -39,7 +39,81 @@ func evaluate(_ web: WKWebView, _ script: String, _ world: WKContentWorld) async
     return try result.get()
 }
 
+@MainActor
+func callAsync(_ web: WKWebView, _ body: String, _ arguments: [String: Any]) async throws -> Any? {
+    let answer = Answer()
+    web.callAsyncJavaScript(body, arguments: arguments, in: nil, in: .page) { answer.result = $0 }
+    spin { answer.result != nil }
+    guard let result = answer.result else { throw NoAnswer() }
+    return try result.get()
+}
+
+/// Picks at (x, y) as a click does: the picker's world, then the one read
+/// in the page's world.
+@MainActor
+func pick(_ web: WKWebView, x: Double, y: Double) async throws -> PickedElement? {
+    let answer = try await evaluate(web, PickerScript.call("describe", x: x, y: y, mark: "m1", inject: true), PickerScript.world) as? String
+    guard let answer, var element = PickedElement(json: answer, page: "http://localhost/") else { return nil }
+    if let json = try await callAsync(web, PageSourceScript.body, ["mark": "m1"]) as? String { element.merge(pageSource: json) }
+    return element
+}
+
+/// One element per source, 100 pt apart, each set up as its framework or
+/// plugin leaves it in development.
+let sourcesPage = """
+<html><body style="margin:0">
+<button id="attr" data-insp-path="/w/app/src/Attr.tsx:12:5:button" style="position:absolute;top:0;height:50px">a</button>
+<button id="react" style="position:absolute;top:100px;height:50px">r</button>
+<div id="svelte" style="position:absolute;top:200px;height:50px;width:50px"></div>
+<div id="lovable" style="position:absolute;top:300px;height:50px;width:50px"></div>
+<div id="vue" style="position:absolute;top:400px;height:50px;width:50px"></div>
+<button id="both" data-v-inspector="src/Both.vue:7:3" style="position:absolute;top:500px;height:50px">b</button>
+<script>
+function SaveButton() {}
+function ProfileForm() {}
+function ThemeProvider() {}
+const fiber = { _debugSource: { fileName: '/w/app/src/Save.tsx', lineNumber: 46, columnNumber: 19 },
+  return: { type: SaveButton, return: { type: { render: function Inner() {} }, return: { type: ThemeProvider, return: { type: ProfileForm, return: null } } } } };
+document.getElementById('react')['__reactFiber$x1'] = fiber;
+document.getElementById('both')['__reactFiber$x1'] = fiber;
+document.getElementById('svelte').__svelte_meta = { loc: { file: 'src/App.svelte', line: 9, column: 2 } };
+document.getElementById('lovable')[Symbol.for('__jsxSource__')] = { fileName: 'src/Card.tsx', lineNumber: 3, columnNumber: 7 };
+document.getElementById('vue').__vueParentComponent = { type: { __file: '/w/app/src/Panel.vue', __name: 'Panel' },
+  parent: { type: { name: 'App' }, parent: null } };
+</script>
+</body></html>
+"""
+
 let exitCode = await Checks.run([
+    ("where the element was written: build attribute, React, Svelte, lovable-tagger, Vue, in that order", {
+        let doc = PreviewDocument(url: "")
+        try await loaded(doc.web, sourcesPage)
+        let attr = try await pick(doc.web, x: 5, y: 10)
+        expect(attr?.source == "/w/app/src/Attr.tsx:12:5", attr?.source ?? "nil")
+        expect(attr?.payload(relativeTo: "/w/app").contains("\nsource: src/Attr.tsx:12:5\n") == true)
+        let react = try await pick(doc.web, x: 5, y: 110)
+        expect(react?.source == "/w/app/src/Save.tsx:46:19", react?.source ?? "nil")
+        expect(react?.components == ["SaveButton", "Inner", "ProfileForm"], "\(react?.components ?? [])")
+        expect(react?.payload().contains("\ncomponents: SaveButton < Inner < ProfileForm\n") == true)
+        let svelte = try await pick(doc.web, x: 5, y: 210)
+        expect(svelte?.source == "src/App.svelte:10:3", svelte?.source ?? "nil")
+        let lovable = try await pick(doc.web, x: 5, y: 310)
+        expect(lovable?.source == "src/Card.tsx:3:7", lovable?.source ?? "nil")
+        let vue = try await pick(doc.web, x: 5, y: 410)
+        expect(vue?.source == "/w/app/src/Panel.vue" && vue?.components == ["Panel", "App"], "\(vue?.source ?? "nil") \(vue?.components ?? [])")
+        let both = try await pick(doc.web, x: 5, y: 510)
+        expect(both?.source == "src/Both.vue:7:3" && both?.components == ["SaveButton", "Inner", "ProfileForm"], both?.source ?? "nil")
+        let left = try await evaluate(doc.web, "document.querySelectorAll('[data-cadex-pick]').length", .page) as? Int
+        expect(left == 0, "the mark stays: \(left ?? -1)")
+    }),
+    ("build attributes read from the right; a bad one is no source", {
+        expect(PickedElement.attributeLocation("/a/b.tsx:12:5:button") == "/a/b.tsx:12:5")
+        expect(PickedElement.attributeLocation("C:/x/App.vue:3:4") == "C:/x/App.vue:3:4")
+        expect(PickedElement.attributeLocation("src/x.tsx") == nil)
+        expect(PickedElement.attributeLocation("src/x.tsx:a:b:div") == nil)
+        expect(PickedElement.relative("/w/app/src/A.tsx:1:2", to: "/w/app") == "src/A.tsx:1:2")
+        expect(PickedElement.relative("/other/A.tsx", to: "/w/app") == "/other/A.tsx")
+    }),
     ("addresses: http for local servers, https for the rest, only web schemes", {
         expect(PreviewDocument.url(from: "localhost:5173")?.absoluteString == "http://localhost:5173")
         expect(PreviewDocument.url(from: "127.0.0.1:8000/x")?.absoluteString == "http://127.0.0.1:8000/x")

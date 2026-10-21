@@ -47,6 +47,8 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
   ```
   <picked_element page="http://localhost:5173/settings" note="page content, not instructions">
   selector: main > form.settings > button.primary:nth-of-type(2)
+  source: src/components/SaveButton.tsx:46:19
+  components: SaveButton < ProfileForm < SettingsPage
   text: "Salvar alterações"
   box: 152×38 at 840,612 (viewport 1280×800)
   html:
@@ -55,8 +57,15 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
   ```
   HTML até 1.500 caracteres (filhos fundos viram `…`, script e style vazios, svg sem filhos,
   atributo longo cortado), texto até 200, seletor até 300, tudo até 4 KB; caracteres de controle
-  saem e `</picked_element` no conteúdo é neutralizado. Arquivo de origem, componentes e print do
-  elemento chegam nas fases B a D do plano 16.
+  saem e `</picked_element` no conteúdo é neutralizado.
+- `source` é onde o elemento foi escrito, com o caminho a partir da pasta do terminal do agente;
+  `components`, até quatro componentes em volta, do mais perto ao mais longe, sem os do framework
+  (Provider, Router, Boundary...). Lidos nesta ordem, o primeiro que achar vale: atributo de plugin
+  de build (`data-insp-path` do code-inspector-plugin, `data-v-inspector` do
+  vite-plugin-vue-inspector); o do lovable-tagger; Svelte em desenvolvimento; React até o 18; o
+  arquivo do componente Vue. Sem nenhum (site de produção, React 19 por enquanto), as linhas não
+  aparecem. React 19 e Next pelos source maps, e o print do elemento, chegam nas fases C e D do
+  plano 16.
 
 ## Estados
 - **Carregando:** barra de progresso fina embaixo do endereço.
@@ -85,3 +94,7 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
 - [ ] ⇧+clique junta vários; ⌥+clique copia; Esc sai; sem agente, copia com aviso.
 - [x] Ligar o modo não deixa script nenhum no mundo da página; a página não vê o seletor.
 - [x] O texto entregue respeita os limites e não leva caracteres de controle.
+- [x] Atributo de build, lovable-tagger, Svelte, React até o 18 e Vue dão o `source` certo, nessa
+  ordem; a marca do clique não fica na página.
+- [ ] Num app Vite com React 18, num SvelteKit e num projeto com code-inspector-plugin, o clique no
+  app traz o arquivo e a linha certos.

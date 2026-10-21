@@ -75,21 +75,37 @@ final class PreviewPicker {
 
     private func click(_ point: CGPoint, _ flags: NSEvent.ModifierFlags) {
         let page = web.url?.absoluteString ?? ""
-        ask("describe", point) { [weak self] answer in
+        let mark = UUID().uuidString
+        ask("describe", point, mark: mark) { [weak self] answer in
             guard let self, let answer, let element = PickedElement(json: answer, page: page) else { return }
-            let delivery = PickDelivery(text: element.payload(), toClipboard: flags.contains(.option),
-                                        keepPicking: flags.contains(.shift))
-            let outcome = onDeliver?(delivery) ?? Self.copy(delivery.text)
-            if !delivery.keepPicking { stop() }
-            overlay.flash(PickerOverlay.Mark(box: viewBox(element.box), label: Self.flashText(outcome)),
-                          color: Self.flashColor(outcome))
+            guard PickedElement.object(answer)?["marked"] as? Bool == true else { return deliver(element, flags) }
+            readPageSource(mark) { [weak self] json in
+                var element = element
+                if let json { element.merge(pageSource: json) }
+                self?.deliver(element, flags)
+            }
         }
     }
 
+    /// The one read in the page's world, for where the element was written.
+    private func readPageSource(_ mark: String, then done: @escaping @MainActor (String?) -> Void) {
+        web.callAsyncJavaScript(PageSourceScript.body, arguments: ["mark": mark], in: nil, in: .page) { result in
+            MainActor.assumeIsolated { done((try? result.get()) as? String) }
+        }
+    }
+
+    private func deliver(_ element: PickedElement, _ flags: NSEvent.ModifierFlags) {
+        let delivery = PickDelivery(element: element, toClipboard: flags.contains(.option), keepPicking: flags.contains(.shift))
+        let outcome = onDeliver?(delivery) ?? Self.copy(delivery.text())
+        if !delivery.keepPicking { stop() }
+        overlay.flash(PickerOverlay.Mark(box: viewBox(element.box), label: Self.flashText(outcome)),
+                      color: Self.flashColor(outcome))
+    }
+
     /// Asks the picker's world; the script goes along the first time.
-    private func ask(_ function: String, _ point: CGPoint, then done: @escaping @MainActor (String?) -> Void) {
+    private func ask(_ function: String, _ point: CGPoint, mark: String? = nil, then done: @escaping @MainActor (String?) -> Void) {
         let zoom = web.pageZoom > 0 ? web.pageZoom : 1
-        let script = PickerScript.call(function, x: point.x / zoom, y: point.y / zoom, inject: !injected)
+        let script = PickerScript.call(function, x: point.x / zoom, y: point.y / zoom, mark: mark, inject: !injected)
         web.evaluateJavaScript(script, in: nil, in: PickerScript.world) { [weak self] result in
             MainActor.assumeIsolated {
                 switch result {

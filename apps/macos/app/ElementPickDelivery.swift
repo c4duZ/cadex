@@ -10,14 +10,15 @@ import Tabs
 @MainActor
 enum ElementPickDelivery {
     static func deliver(_ delivery: PickDelivery, tabs: TabsController?, toClipboard: Bool) -> PickOutcome {
-        if delivery.toClipboard || toClipboard { return copy(delivery.text, note: nil) }
-        for terminal in tabs?.agentTerminals ?? [] where terminal.pasteFromApp(delivery.text) {
+        if delivery.toClipboard || toClipboard { return copy(delivery.text(), note: nil) }
+        // The source path from the agent's folder, which it works in.
+        for terminal in tabs?.agentTerminals ?? [] where terminal.pasteFromApp(delivery.text(relativeTo: terminal.currentDirectory)) {
             // ⇧ keeps picking: the keyboard stays with the preview.
             if !delivery.keepPicking { tabs?.focus(terminal) }
             let title = terminal.programTitle
             return .pasted(into: title.isEmpty ? T("the terminal", "o terminal") : title)
         }
-        return copy(delivery.text, note: T("Copied — no agent running", "Copiado — nenhum agente rodando"))
+        return copy(delivery.text(), note: T("Copied — no agent running", "Copiado — nenhum agente rodando"))
     }
 
     private static func copy(_ text: String, note: String?) -> PickOutcome {

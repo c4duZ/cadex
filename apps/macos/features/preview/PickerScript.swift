@@ -3,16 +3,20 @@ import WebKit
 /// The element picker's script (docs/adr/0018-element-picker.md). It runs
 /// in its own content world: it shares the page's DOM but not its
 /// JavaScript, so the page never sees it. The app asks, it answers:
-/// `at(x, y)` while hovering, `describe(x, y)` on the click, both in CSS
-/// pixels of the top viewport. Injected when picking starts and again after
+/// `at(x, y)` while hovering, `describe(x, y, mark)` on the click, both in
+/// CSS pixels of the top viewport. `mark` tags the element for the one
+/// read in the page's world (PageSourceScript); build attributes
+/// (code-inspector-plugin, vite-plugin-vue-inspector) are in the DOM and
+/// read here. Injected when picking starts and again after
 /// each navigation; running it twice changes nothing.
 enum PickerScript {
     @MainActor static var world: WKContentWorld { .world(name: "cadex-picker") }
 
     /// The call for one question; the script goes first when the document
     /// does not have it yet. The answer is JSON text ("null": nothing there).
-    static func call(_ function: String, x: Double, y: Double, inject: Bool) -> String {
-        let call = "JSON.stringify(window.__cadexPicker.\(function)(\(x), \(y)))"
+    static func call(_ function: String, x: Double, y: Double, mark: String? = nil, inject: Bool) -> String {
+        let extra = mark.map { ", '\($0)'" } ?? ""
+        let call = "JSON.stringify(window.__cadexPicker.\(function)(\(x), \(y)\(extra)))"
         return inject ? source + "\n" + call : call
     }
 
@@ -122,6 +126,16 @@ enum PickerScript {
           return (copy.outerHTML || '').slice(0, 6000);
         }
 
+        // The nearest build attribute: "file:line:col:tag" (code-inspector)
+        // or "file:line:col" (vue-inspector); Swift reads it from the right.
+        function attributeSource(el) {
+          for (const name of ['data-insp-path', 'data-v-inspector']) {
+            const owner = el.closest('[' + name + ']');
+            if (owner) return owner.getAttribute(name);
+          }
+          return null;
+        }
+
         function label(h) {
           return short(h.el) + '  ' + Math.round(h.box.w) + '×' + Math.round(h.box.h);
         }
@@ -131,11 +145,16 @@ enum PickerScript {
             const h = hit(x, y);
             return h ? { box: h.box, label: label(h) } : null;
           },
-          describe(x, y) {
+          describe(x, y, mark) {
             const h = hit(x, y);
             if (!h) return null;
             const frames = h.frames.map(selector);
+            // Only the top document: the page's world looks it up there.
+            const marked = !!mark && h.frames.length === 0 && h.el.getRootNode() === document;
+            if (marked) h.el.setAttribute('data-cadex-pick', mark);
             return {
+              marked,
+              attributeSource: attributeSource(h.el),
               box: h.box,
               label: label(h),
               selector: frames.concat([selector(h.el)]).join(' >>> '),
