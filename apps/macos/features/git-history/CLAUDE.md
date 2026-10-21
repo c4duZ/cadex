@@ -17,7 +17,9 @@
 - `compact` (a página Git History da barra lateral): só o grafo e a descrição, sem títulos de
   coluna, autor, data, sha, caixa de seleção, contagem nem painel de detalhes. As linhas são de
   `HistoryCompactRows.swift`: cada commit em duas linhas (descrição; autor · tempo · sha), clicar
-  abre os arquivos dele embaixo com o grafo passando por trás (`passing` do
+  abre os arquivos dele embaixo com o grafo passando por trás; parar o mouse num commit mostra a
+  dica com a descrição inteira, branches, autor e e-mail, data e sha inteiro (`tip`); num arquivo,
+  o caminho (`passing` do
   `HistoryGraphView.swift`), clicar num arquivo abre o diff; o clique direito roda
   history.show-in-tab (registrado pelo app, abre a aba com o commit: `select(sha:)`),
   history.copy-sha e history.open-remote, que agem no histórico da barra quando a aba da frente não

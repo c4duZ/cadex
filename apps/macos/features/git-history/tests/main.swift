@@ -164,6 +164,11 @@ let exitCode = await Checks.run([
     ("the sidebar's rows: a commit opens its files under it, a file opens its diff, a click closes it", {
         expect(HistoryCompactRows.items(commits: 3, expandedAt: 1, files: 2) == [.commit(0), .commit(1), .file(1, 0), .file(1, 1), .commit(2)])
         expect(HistoryCompactRows.items(commits: 2, expandedAt: nil, files: 5) == [.commit(0), .commit(1)])
+        let tipped = HistoryCommit(sha: "abc1234567", parents: [], author: "Ana", email: "a@x", date: Date(timeIntervalSince1970: 0),
+                                   refs: ["HEAD -> main", "origin/main"], subject: "a subject far too long for 240 points", graph: nil)
+        let tip = HistoryCompactRows.tip(tipped).split(separator: "\n").map(String.init)
+        expect(tip.count == 5 && tip[0] == "a subject far too long for 240 points" && tip[1] == "main, origin/main"
+               && tip[2] == "Ana <a@x>" && tip[4] == "abc1234567", "\(tip)")
         let repo = mergedRepository()
         let document = HistoryDocument(root: repo)
         document.compact = true

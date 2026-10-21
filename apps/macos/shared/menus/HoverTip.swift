@@ -116,7 +116,10 @@ final class HoverTipTracker: NSResponder {
 /// The tip's window: a small rounded label that never takes the mouse or
 /// the keyboard.
 final class HoverTipPanel: NSPanel {
-    private let label = NSTextField(labelWithString: "")
+    /// Wider texts wrap: a commit's whole subject and details in the
+    /// sidebar's history (2026-10-21).
+    static let maxWidth: CGFloat = 360
+    private let label = NSTextField(wrappingLabelWithString: "")
 
     init() {
         super.init(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
@@ -134,6 +137,7 @@ final class HoverTipPanel: NSPanel {
         box.layer?.cornerCurve = .continuous
         box.layer?.borderWidth = 1
         label.font = UILooks.font(11)
+        label.preferredMaxLayoutWidth = Self.maxWidth
         label.translatesAutoresizingMaskIntoConstraints = false
         box.addSubview(label)
         NSLayoutConstraint.activate([
@@ -153,7 +157,11 @@ final class HoverTipPanel: NSPanel {
         label.textColor = style.text
         contentView?.layer?.backgroundColor = style.background.cgColor
         contentView?.layer?.borderColor = style.border.cgColor
-        let size = NSSize(width: ceil(label.intrinsicContentSize.width) + 16, height: 22)
+        // One line as before (22 high); more lines grow down, 4 points of
+        // room above and below.
+        let oneLine = ceil(label.cell?.cellSize(forBounds: NSRect(x: 0, y: 0, width: CGFloat.greatestFiniteMagnitude, height: 100)).width ?? 0)
+        let fitted = label.cell?.cellSize(forBounds: NSRect(x: 0, y: 0, width: min(oneLine, Self.maxWidth), height: .greatestFiniteMagnitude)) ?? .zero
+        let size = NSSize(width: min(oneLine, Self.maxWidth) + 16, height: max(22, ceil(fitted.height) + 8))
         let screen = (window.screen ?? NSScreen.main)?.visibleFrame ?? .infinite
         setFrame(NSRect(origin: HoverTip.origin(for: size, under: anchor, screen: screen), size: size), display: true)
         orderFront(nil)

@@ -44,5 +44,20 @@ let exitCode = await Checks.run([
         expect(MenuEntry.shortcutLabel(key: "d", modifiers: [.command, .shift]) == "⇧⌘D")
         expect(MenuLayout.keys(of: "⇧⌘D") == ["⇧", "⌘", "D"] && MenuLayout.keys(of: "F2") == ["F2"])
     }),
+    ("a tip of one line stays 22 high; a longer one wraps at 360 and grows", {
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 400, height: 300), styleMask: [.borderless], backing: .buffered, defer: false)
+        let panel = HoverTipPanel()
+        panel.show("Files (⇧⌘E)", under: NSRect(x: 100, y: 400, width: 30, height: 30), in: window)
+        expect(panel.frame.height == 22, "\(panel.frame)")
+        panel.show("a subject far too long to fit in a single line of a narrow sidebar, and more\nmain, origin/main\nAna <a@x>\n1 January 1970\nabc1234567",
+                   under: NSRect(x: 100, y: 400, width: 30, height: 30), in: window)
+        expect(panel.frame.width <= HoverTipPanel.maxWidth + 16 && panel.frame.height > 80, "\(panel.frame)")
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"], let view = panel.contentView,
+           let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
+            view.cacheDisplay(in: view.bounds, to: bitmap)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/hover-tip.png"))
+        }
+        panel.orderOut(nil)
+    }),
 ])
 exit(exitCode)

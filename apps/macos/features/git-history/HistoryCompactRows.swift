@@ -122,7 +122,7 @@ final class HistoryCompactRows: NSObject, NSTableViewDataSource, NSTableViewDele
         cell.top.attributedStringValue = HistoryRows.subject(commit)
         let when = HistoryRows.relative(commit.date)
         cell.bottom.stringValue = "\(commit.author) · \(when) · \(commit.shortSha)"
-        cell.toolTip = HistoryRows.fullDates.string(from: commit.date)
+        HoverTip.attach(Self.tip(commit), to: cell)
         return cell
     }
 
@@ -142,8 +142,20 @@ final class HistoryCompactRows: NSObject, NSTableViewDataSource, NSTableViewDele
         style.lineBreakMode = .byTruncatingMiddle
         line.addAttribute(.paragraphStyle, value: style, range: NSRange(location: 0, length: line.length))
         cell.top.attributedStringValue = line
-        cell.toolTip = file.path
+        HoverTip.attach(file.path, to: cell)
         return cell
+    }
+
+    /// The hover tip of a commit: the whole subject, its branches and tags,
+    /// who, when and the full SHA (the owner missed it, 2026-10-21).
+    static func tip(_ commit: HistoryCommit) -> String {
+        let refs = commit.refs.filter { $0 != "HEAD" }.map { $0.hasPrefix("HEAD -> ") ? String($0.dropFirst(8)) : $0 }
+        var lines = [commit.subject]
+        if !refs.isEmpty { lines.append(refs.joined(separator: ", ")) }
+        lines.append(commit.email.isEmpty ? commit.author : "\(commit.author) <\(commit.email)>")
+        lines.append(HistoryRows.fullDates.string(from: commit.date))
+        lines.append(commit.sha)
+        return lines.joined(separator: "\n")
     }
 
     static func color(of letter: Character) -> NSColor {

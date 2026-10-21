@@ -17,7 +17,9 @@ em que ordem.
 - Git History na barra lateral: cada commit em duas linhas, o grafo e a descrição (com as
   etiquetas de branch e tag) sobre o autor, há quanto tempo e o hash curto. Clicar num commit abre
   os arquivos dele logo abaixo, com o grafo continuando por trás; clicar de novo fecha; clicar
-  num arquivo abre o diff no painel principal. Sem painel de detalhes na barra: o clique direito
+  num arquivo abre o diff no painel principal. Parar o mouse num commit mostra, em 0,2 s, a
+  descrição inteira, as branches e tags, o autor com e-mail, a data completa e o hash inteiro; num
+  arquivo, o caminho completo. Sem painel de detalhes na barra: o clique direito
   (e o ⌘K) tem "Show Commit Details in a Tab", que abre a aba do histórico com o commit escolhido,
   "Copy SHA" e "Open on Remote".
   Fora de um repositório, "Not a Git repository". A aba do histórico (git.history) continua igual.
