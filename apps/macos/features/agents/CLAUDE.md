@@ -29,9 +29,11 @@
   agents.sessions.
 - `AgentsLayout.swift`: grupos por projeto (o mais recente primeiro; esperando antes de
   trabalhando) e a linha de baixo ("main · conta", "esperando você · conta · fora do Cadex").
-- `AgentsView.swift`: a página da barra lateral; lê só enquanto aparece. Clique abre e fecha os
-  subagentes; duplo clique chama `onOpen`. `AgentRows.swift`: o sinal (anel girando, ponto azul,
-  ✓), a linha clicável e os rótulos.
+- `AgentsView.swift`: a página da barra lateral; lê só enquanto aparece. `AgentSessionList.swift`:
+  as sessões, com o logo da conta; clique chama `onOpen` (o terminal), a seta abre os subagentes,
+  o título do projeto recolhe o grupo. `AgentMotion.swift`: a seta que gira e o `AgentReveal`, que
+  desdobra e dobra (altura e opacidade, 0,2 s). `AgentRows.swift`: o sinal (anel girando, ponto
+  azul, ✓), a linha clicável que acende ao passar e escurece ao apertar, e os rótulos.
 - `AgentStop.swift`: por que uma sessão parou, do fim do log (64 KB, uma vez por parada):
   permissão (ferramenta pedida sem resposta), pergunta (AskUserQuestion, ExitPlanMode), terminou
   (fim de turno), parada por você (o Esc, que não avisa). `AgentNotifier.swift`: a notificação do sistema quando uma sessão passa de

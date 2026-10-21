@@ -352,6 +352,34 @@ let exitCode = await Checks.run([
         usage.expiredSince["/x/pause"] = Date().addingTimeInterval(-3600)
         expect(usage.isStale("/x/none") && usage.isStale("/x/old") && !usage.isStale("/x/pause") && !usage.isStale("/x/unread"))
     }),
+    ("a click on a session goes to it; its arrow unfolds the subagents; a project's title folds it", {
+        let home = fakeHome()
+        defer { try? fm.removeItem(atPath: home) }
+        AgentsController.shared.home = home
+        if AgentsController.shared.openSession != nil { AgentsController.shared.toggle(AgentsController.shared.openSession!) }
+        let page = AgentsView()
+        var opened: [String] = []
+        page.onOpen = { opened.append($0.id) }
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 260, height: 320), styleMask: [.borderless], backing: .buffered, defer: false)
+        page.frame = NSRect(x: 0, y: 0, width: 260, height: 320)
+        window.contentView = page
+        page.layoutSubtreeIfNeeded()
+        func all<T: NSView>(_ type: T.Type, in view: NSView = page) -> [T] {
+            view.subviews.flatMap { ($0 as? T).map { [$0] } ?? [] } + view.subviews.flatMap { all(type, in: $0) }
+        }
+        guard let row = all(AgentRow.self).first(where: { $0.toolTip?.contains("pid") == true }),
+              let caret = all(AgentCaret.self, in: row).first else { return expect(false, "no session row") }
+        row.onClick?()
+        expect(opened.count == 1 && AgentsController.shared.openSession == nil, "the row goes, nothing unfolds")
+        caret.onClick?()
+        expect(AgentsController.shared.openSession == opened.first, "the arrow unfolds its subagents")
+        let header = all(AgentRow.self).first { $0.toolTip == AgentsController.shared.sessions.first { $0.id == opened[0] }.map { AgentProject.of($0.cwd).root } }
+        header?.onClick?()
+        try? await Task.sleep(nanoseconds: 500_000_000)
+        expect(page.folded.count == 1, "folded: \(page.folded)")
+        AgentsController.shared.toggle(opened[0])
+        window.contentView = nil
+    }),
     ("a picture of the page, with CADEX_SNAPSHOT_DIR", {
         guard let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }
         let home = fakeHome()

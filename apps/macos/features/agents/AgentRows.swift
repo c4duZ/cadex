@@ -105,12 +105,37 @@ final class AgentRow: NSView {
             }
         }
     }
-    private var hovering = false { didSet { restyle() } }
+    private var hovering = false { didSet { if hovering != oldValue { restyle(animated: true) } } }
+    private var pressed = false { didSet { if pressed != oldValue { restyle(animated: !pressed) } } }
 
-    private func restyle() { layer?.backgroundColor = (hovering ? hoverFill ?? fill : fill)?.cgColor }
+    /// The fill fades in 0.12 s under the pointer and darkens at once on a
+    /// press: a click that changed the colour later felt stuck (the owner,
+    /// 2026-10-21).
+    private func restyle(animated: Bool = false) {
+        var color = hovering ? hoverFill ?? fill : fill
+        if pressed, let hoverFill { color = hoverFill.withAlphaComponent(min(1, hoverFill.alphaComponent * 1.8)) }
+        guard let layer else { return }
+        if animated {
+            let fade = CABasicAnimation(keyPath: "backgroundColor")
+            fade.fromValue = layer.presentation()?.backgroundColor ?? layer.backgroundColor
+            fade.duration = 0.12
+            layer.add(fade, forKey: "fill")
+        }
+        layer.backgroundColor = color?.cgColor
+    }
 
     override func mouseEntered(with event: NSEvent) { hovering = true }
-    override func mouseExited(with event: NSEvent) { hovering = false }
+    override func mouseExited(with event: NSEvent) { hovering = false; pressed = false }
+
+    /// A list drawn again under a still pointer: the row there starts lit,
+    /// as it would after a move.
+    override func layout() {
+        super.layout()
+        guard hoverFill != nil, !checkedPointer, let window, bounds.width > 0 else { return }
+        checkedPointer = true
+        if bounds.contains(convert(window.mouseLocationOutsideOfEventStream, from: nil)) { hovering = true; restyle() }
+    }
+    private var checkedPointer = false
 
     init(_ content: NSView, inset: CGFloat = 6) {
         super.init(frame: .zero)
@@ -135,7 +160,12 @@ final class AgentRow: NSView {
         if let onRightClick { onRightClick() } else { super.rightMouseDown(with: event) }
     }
 
+    override func mouseDown(with event: NSEvent) {
+        if onClick != nil || onDoubleClick != nil { pressed = true }
+    }
+
     override func mouseUp(with event: NSEvent) {
+        pressed = false
         guard bounds.contains(convert(event.locationInWindow, from: nil)) else { return }
         if event.clickCount == 2 { onDoubleClick?() } else if event.clickCount == 1 { onClick?() }
     }
