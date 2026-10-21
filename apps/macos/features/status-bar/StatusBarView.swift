@@ -1,125 +1,183 @@
 import AppKit
-import UILooks
-import Strings
+import Customize
 import Menus
+import Strings
+import UILooks
 
-/// The bar at the bottom of the window: the focused terminal's folder as a
-/// trail of pieces, each with a menu of its subfolders, and the environment
-/// on the right (docs/spec/status-bar.md).
+/// The bar at the bottom of the window, made of items the user picks and
+/// drags between left and right (docs/spec/status-bar.md). With nothing
+/// set, the bar from before: the folder trail on the left, the environment
+/// on the right. Each item is told when it can be seen (shown, and the
+/// window on screen), so a hidden one costs nothing.
+@MainActor
 public final class StatusBarView: NSView {
     public static var height: CGFloat { UILooks.rowHeight(26) }
 
     public struct Style {
         public var text: NSColor
         public var secondaryText: NSColor
+        public var customize: CustomizeColors
 
-        public init(text: NSColor, secondaryText: NSColor) {
+        public init(text: NSColor, secondaryText: NSColor, customize: CustomizeColors = CustomizeColors()) {
             self.text = text
             self.secondaryText = secondaryText
+            self.customize = customize
         }
     }
 
-    /// A theme change repaints the pieces in place: rebuilding them left
-    /// AppKit's bookkeeping of every new button behind, ~8 KB per theme
-    /// change (measured 2026-10-20).
     public var style = Style(text: .labelColor, secondaryText: .secondaryLabelColor) { didSet { restyle() } }
     /// The folder shown; nil while unknown.
-    public var path: String? { didSet { if path != oldValue { rebuild() } } }
+    public var path: String? {
+        get { folder.path }
+        set { folder.path = newValue }
+    }
     /// Whether picking a folder may move the terminal (the shell is idle).
-    public var canNavigate = true
+    public var canNavigate: Bool {
+        get { folder.canNavigate }
+        set { folder.canNavigate = newValue }
+    }
     /// A folder picked in a piece's menu.
-    public var onNavigate: ((String) -> Void)?
-
-    private let trail = NSStackView()
-    private let environment = NSTextField(labelWithString: "Local")
-    private let home = NSHomeDirectory()
+    public var onNavigate: ((String) -> Void)? {
+        get { folder.onNavigate }
+        set { folder.onNavigate = newValue }
+    }
+    /// The sides changed here (right click, Customize); the app saves them.
+    public var onLayoutChange: (([String], [String]) -> Void)?
+    /// Runs a command by id (statusBar.customize from the right-click menu).
+    public var run: ((String) -> Void)?
+    public private(set) var left: [String] = []
+    public private(set) var right: [String] = []
+    private(set) var catalog: [StatusItem] = []
+    private let folder = FolderTrail()
+    private let environment = StatusLabel(icon: nil)
+    private let leftStack = NSStackView()
+    private let rightStack = NSStackView()
+    private var panel: CustomizeWindow?
 
     public override init(frame: NSRect) {
         super.init(frame: frame)
-        trail.orientation = .horizontal
-        trail.spacing = 2
-        // A long path is cut, it does not hold the window's width: its
-        // pieces resisted shrinking and kept the window from getting
-        // narrower (owner, 2026-10-19).
-        trail.setClippingResistancePriority(.defaultLow, for: .horizontal)
-        for view in [trail, environment] as [NSView] {
-            view.translatesAutoresizingMaskIntoConstraints = false
-            addSubview(view)
+        environment.text = "Local"
+        catalog = [
+            StatusItem(id: "folder", title: T("Folder", "Pasta"), subtitle: T("The focused terminal's folder", "A pasta do terminal com foco"),
+                       icon: .folder, side: .left, view: folder),
+            StatusItem(id: "environment", title: T("Environment", "Ambiente"), subtitle: T("Where programs run", "Onde os programas rodam"),
+                       icon: .terminalWindow, side: .right, view: environment),
+        ]
+        for stack in [leftStack, rightStack] {
+            stack.orientation = .horizontal
+            stack.spacing = UILooks.pt(16)
+            stack.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(stack)
         }
+        leftStack.setClippingResistancePriority(.defaultLow, for: .horizontal)
+        rightStack.setContentCompressionResistancePriority(.required, for: .horizontal)
         NSLayoutConstraint.activate([
-            trail.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
-            trail.centerYAnchor.constraint(equalTo: centerYAnchor),
-            trail.trailingAnchor.constraint(lessThanOrEqualTo: environment.leadingAnchor, constant: -12),
-            environment.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
-            environment.centerYAnchor.constraint(equalTo: centerYAnchor),
+            leftStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            leftStack.centerYAnchor.constraint(equalTo: centerYAnchor),
+            leftStack.trailingAnchor.constraint(lessThanOrEqualTo: rightStack.leadingAnchor, constant: -16),
+            rightStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+            rightStack.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
-        rebuild()
+        setLayout(left: StatusBarLayout.defaultLeft, right: StatusBarLayout.defaultRight)
+        restyle()
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("StatusBarView is created in code") }
 
-    private func rebuild() {
-        environment.font = UILooks.font(11)
-        environment.textColor = style.secondaryText
-        trail.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        guard let path else { return }
-        let segments = Breadcrumb.segments(of: path, home: home)
-        for (i, segment) in segments.enumerated() {
-            if i > 0 { trail.addArrangedSubview(label("›", color: style.secondaryText)) }
-            trail.addArrangedSubview(button(for: segment, last: i == segments.count - 1))
+    /// The items the app adds after the bar's own (Git branch, terminals, RAM...).
+    public func add(_ items: [StatusItem]) {
+        catalog += items.filter { item in !catalog.contains { $0.id == item.id } }
+        restyle()
+        setLayout(left: left, right: right)
+    }
+
+    public var known: [String] { catalog.map(\.id) }
+    var catalogItems: [StatusItem] { catalog }
+
+    /// statusBar.left and statusBar.right from settings; unknown ids are
+    /// dropped (and returned).
+    @discardableResult
+    public func setLayout(left: [String], right: [String]) -> [String] {
+        let placed = StatusBarLayout.placed(left: left, right: right, known: known)
+        self.left = placed.left
+        self.right = placed.right
+        arrange(leftStack, placed.left)
+        arrange(rightStack, placed.right)
+        updateVisibility()
+        return placed.problems
+    }
+
+    /// Shows or hides one item (statusBar.toggle-item, the right-click menu).
+    public func toggle(_ id: String) {
+        guard let item = catalog.first(where: { $0.id == id }) else { return }
+        let sides = StatusBarLayout.toggled(left: left, right: right, id, side: item.side)
+        change(sides.left, sides.right)
+    }
+
+    /// The statusBar.customize command.
+    public func customize() {
+        if let panel, panel.isVisible { return panel.makeKeyAndOrderFront(nil) }
+        let panel = CustomizeWindow(title: T("Customize Status Bar", "Personalizar a barra de status"),
+                                    note: T("Drag between Left and Right. A hidden item measures nothing. Also in ⌘K and on a right click.",
+                                            "Arraste entre Esquerda e Direita. Item escondido não mede nada. Também no ⌘K e no botão direito."),
+                                    entries: StatusBarLayout.entries(left: left, right: right, catalog: catalog),
+                                    colors: style.customize) { [weak self] entries in
+            let sides = StatusBarLayout.sides(from: entries)
+            self?.change(sides.left, sides.right)
         }
+        panel.show(over: window)
+        self.panel = panel
+    }
+
+    private func change(_ left: [String], _ right: [String]) {
+        setLayout(left: left, right: right)
+        onLayoutChange?(left, right)
+    }
+
+    private func arrange(_ stack: NSStackView, _ ids: [String]) {
+        let views = ids.compactMap { id in catalog.first { $0.id == id }?.view }
+        guard stack.arrangedSubviews != views else { return }
+        stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        views.forEach(stack.addArrangedSubview)
     }
 
     private func restyle() {
-        environment.textColor = style.secondaryText
-        let pieces = trail.arrangedSubviews
-        for (i, view) in pieces.enumerated() {
-            if let button = view as? NSButton {
-                let last = i == pieces.count - 1
-                button.attributedTitle = Self.title(button.attributedTitle.string, last: last, style: style)
-            } else if let label = view as? NSTextField {
-                label.textColor = style.secondaryText
-            }
+        folder.colors = (style.text, style.secondaryText)
+        for item in catalog { (item.view as? StatusLabel)?.color = style.secondaryText }
+    }
+
+    // MARK: Seen or not
+
+    public override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        NotificationCenter.default.removeObserver(self)
+        if let window {
+            NotificationCenter.default.addObserver(self, selector: #selector(occlusionChanged), name: NSWindow.didChangeOcclusionStateNotification, object: window)
         }
+        updateVisibility()
     }
 
-    private static func title(_ text: String, last: Bool, style: Style) -> NSAttributedString {
-        NSAttributedString(string: text, attributes: [
-            .font: UILooks.font(11, weight: last ? .semibold : .regular),
-            .foregroundColor: last ? style.text : style.secondaryText,
-        ])
+    @objc private func occlusionChanged() { updateVisibility() }
+
+    /// An item is seen when it is in the bar and the window is on screen
+    /// (not minimized, not hidden, not behind another Space).
+    private func updateVisibility() {
+        let onScreen = window?.occlusionState.contains(.visible) == true
+        for item in catalog { item.setVisible(onScreen && (left.contains(item.id) || right.contains(item.id))) }
     }
 
-    private func label(_ text: String, color: NSColor) -> NSTextField {
-        let label = NSTextField(labelWithString: text)
-        label.font = UILooks.font(11)
-        label.textColor = color
-        return label
-    }
+    // MARK: Right click
 
-    private func button(for segment: Breadcrumb.Segment, last: Bool) -> NSView {
-        guard let folder = segment.path else { return label(segment.title, color: style.secondaryText) }
-        let button = NSButton(title: segment.title, target: self, action: #selector(pieceClicked(_:)))
-        button.isBordered = false
-        button.attributedTitle = Self.title(segment.title, last: last, style: style)
-        button.identifier = NSUserInterfaceItemIdentifier(folder)
-        return button
-    }
-
-    @objc private func pieceClicked(_ sender: NSButton) {
-        guard let folder = sender.identifier?.rawValue else { return }
-        var entries: [MenuEntry]
-        if let names = Breadcrumb.subfolders(of: folder) {
-            entries = names.map { name in
-                let path = (folder as NSString).appendingPathComponent(name)
-                return MenuEntry(name, icon: .folder, isEnabled: canNavigate) { [weak self] in self?.onNavigate?(path) }
-            }
-            if names.isEmpty { entries = [MenuEntry(T("No subfolders", "Sem subpastas"), isEnabled: false) {}] }
-        } else {
-            entries = [MenuEntry(T("No access", "Sem acesso"), isEnabled: false) {}]
+    public override func rightMouseDown(with event: NSEvent) {
+        let shown = Set(left + right)
+        var entries = catalog.map { item in
+            MenuEntry(item.title, icon: shown.contains(item.id) ? .check : nil) { [weak self] in self?.toggle(item.id) }
         }
-        // Above the bar: it sits at the bottom of the window.
-        PopupMenu.show(entries, above: sender)
+        entries.append(.separator)
+        entries.append(MenuEntry(T("Customize Status Bar…", "Personalizar a barra de status…"), icon: .slidersHorizontal) { [weak self] in
+            self?.run?("statusBar.customize")
+        })
+        PopupMenu.show(entries, at: convert(event.locationInWindow, from: nil), in: self, upward: true)
     }
 }

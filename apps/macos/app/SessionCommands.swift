@@ -48,6 +48,7 @@ extension WindowSession {
                                                 terminalFolder: { [weak self] in self?.tabs?.activeTerminal?.currentDirectory }))
         commands.register(TabCommands.all { [weak self] in self?.tabs })
         commands.register(SidebarCommands.all({ [weak self] in self?.workspace?.sidebar }, palette: palette))
+        commands.register(StatusBarCommands.all({ [weak self] in self?.workspace?.statusBar }, palette: palette))
         makeSpaces(palette: palette)
         registerWorkColors(palette: palette)
         makeExplorer()
@@ -159,6 +160,7 @@ extension WindowSession {
             bar?.canNavigate = terminal?.hasForegroundProcess == false
             self?.terminalFolderMoved(terminal?.currentDirectory)
             self?.refreshWorkColor()
+            self?.countTerminals()
         }
     }
 }

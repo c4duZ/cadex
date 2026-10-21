@@ -26,11 +26,11 @@ Sem mexer em nada, a barra é a de sempre: trilha à esquerda e ambiente à dire
 
 ### Personalizar
 - Botão direito na barra: menu com cada item (marcado se aparece) e "Customize Status Bar…".
-- "Customize Status Bar…" põe a barra em modo de edição: os itens tremem de leve e podem ser
-  arrastados dentro de um lado, de um lado para o outro e para fora (some). Uma faixa acima da barra
-  mostra os itens escondidos para arrastar para dentro, e "Done" (ou Esc) sai.
-- A mesma lista na página de configurações (General › Status Bar), com arrastar e chaves, e no ⌘K:
-  "Status Bar: Customize", "Status Bar: Show/Hide <item>".
+- "Customize Status Bar…" abre a janela Customize, a mesma da barra lateral: as seções Left e
+  Right com todos os itens, cada um com chave; arrastar uma linha reordena, e passando para a outra
+  seção ela muda de lado. Os escondidos ficam embaixo do lado de costume deles.
+- No ⌘K: "Customize Status Bar" e "Show or Hide a Status Bar Item" (a lista dos itens, cada um
+  marcado como aparece ou escondido).
 - Vale para todas as janelas na hora e fica no settings.json (statusBar.left e statusBar.right).
 - Item escondido não custa nada: não mede, não vigia, não pergunta à rede.
 

@@ -44,6 +44,17 @@ public final class SourceControlController {
 
     /// Changed files for the explorer: absolute path -> letter (M A D R U ?).
     public var onMarks: (([String: Character]) -> Void)?
+    /// The branch, and the commits to push and to pull, after each status
+    /// (the status bar's Git branch item); nil outside a repository. It
+    /// rides on the status the panel reads anyway: no git run of its own.
+    public var onBranch: ((Branch?) -> Void)?
+
+    public struct Branch: Equatable, Sendable {
+        /// The branch's name, or the short commit when detached.
+        public let name: String
+        public let ahead: Int
+        public let behind: Int
+    }
     /// A file of the lists was clicked: show its diff.
     /// The diff to open; the Bool says beside (true) or in a new tab
     /// (false), nil is the general.openFiles setting.
@@ -124,6 +135,9 @@ public final class SourceControlController {
     }
 
     private func publishMarks() {
+        // Before the first status the name is empty: nothing to show yet.
+        let name = status.detached ? String(status.oid.prefix(7)) : status.branch
+        onBranch?(repo == nil || name.isEmpty ? nil : Branch(name: name, ahead: status.ahead, behind: status.behind))
         guard let root = repo?.root else { return onMarks?([:]) ?? () }
         var marks: [String: Character] = [:]
         for e in status.entries {

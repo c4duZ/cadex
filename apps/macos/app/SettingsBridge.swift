@@ -19,6 +19,8 @@ final class SettingsBridge {
     var onMarkdown: ((Settings.Markdown) -> Void)?
     /// The sidebar section changed (which icons, in what order).
     var onSidebar: ((Settings.Sidebar) -> Void)?
+    /// The status bar section changed (which items, on which side).
+    var onStatusBar: ((Settings.StatusBar) -> Void)?
     /// The power section changed (the display; the mode counts at launch).
     var onPower: ((Settings.Power) -> Void)?
     /// The background image or vibrancy changed.
@@ -66,6 +68,7 @@ final class SettingsBridge {
         onMarkdown?(settings.markdown)
         onPower?(settings.power)
         onSidebar?(settings.sidebar)
+        onStatusBar?(settings.statusBar)
         if settings.shortcuts != lastShortcuts {
             lastShortcuts = settings.shortcuts
             onShortcuts?(settings.shortcuts)

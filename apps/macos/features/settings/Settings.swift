@@ -111,6 +111,13 @@ public struct Settings: Equatable, Sendable {
         public var items = ["files", "search", "git"]
     }
 
+    public struct StatusBar: Equatable, Sendable {
+        /// The items on each side, in order; an item in neither is hidden
+        /// (docs/spec/status-bar.md). The app drops unknown ids.
+        public var left = ["folder"]
+        public var right = ["environment"]
+    }
+
     public var general = General()
     public var terminal = Terminal()
     public var appearance = Appearance()
@@ -120,6 +127,7 @@ public struct Settings: Equatable, Sendable {
     public var preview = Preview()
     public var power = Power()
     public var sidebar = Sidebar()
+    public var statusBar = StatusBar()
     /// "cmd+shift+t" → command id, or nil to turn a default off.
     public var shortcuts: [String: String?] = [:]
 

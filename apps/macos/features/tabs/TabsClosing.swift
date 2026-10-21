@@ -104,4 +104,7 @@ extension TabsController {
     /// Whether a terminal in any tab runs a program (keep-awake's
     /// "com programa rodando", docs/spec/power.md).
     public var hasRunningProgram: Bool { tabs.values.contains { $0.hasForegroundProcess } }
+
+    /// The terminals in every tab and pane (the status bar's Terminals item).
+    public var terminalCount: Int { tabs.values.reduce(0) { $0 + $1.terminals.count } }
 }

@@ -1,4 +1,5 @@
 import AppKit
+import StatusBar
 import GitHistory
 import CommandPalette
 import Editor
@@ -45,6 +46,9 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// (SidebarWiring.swift); nil while nobody opened it, so it costs nothing.
     var sidebarHistory: HistoryDocument?
     let sidebarHistoryHost = NSView()
+    /// The status bar's Terminals item (StatusBarWiring.swift).
+    var terminalsLabel: StatusLabel?
+    var terminalsItem: StatusItem?
 
     var settings: SettingsBridge { app.settings }
 
@@ -117,6 +121,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         showPower()
         showUpdate()
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
+        setUpStatusBar(workspace.statusBar, git: git)
         explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar("files") }
         git.onOpenFile = { [weak opener] path, beside in opener?.open(path, beside: beside) }
         git.onOpenDiff = { [weak opener] request, beside in opener?.openDiff(request, beside: beside) }
