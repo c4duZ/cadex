@@ -94,7 +94,7 @@ let package = Package(
         // The servers of ~/.ssh/config, and whether each answers (docs/spec/ssh.md).
         .target(
             name: "SSH",
-            dependencies: ["CommandPalette", "Icons", "Strings"],
+            dependencies: ["CommandPalette", "Icons", "Menus", "Strings", "UILooks"],
             path: "features/ssh",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]

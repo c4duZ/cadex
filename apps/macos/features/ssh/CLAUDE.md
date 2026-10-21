@@ -17,8 +17,13 @@
   olhando, lê o arquivo, vigia mudanças (escrita, troca atômica do editor, remoção) e testa cada
   host direto (`Network`, 3 s) ao começar e a cada 10 min; `counts` dá o "3/3".
 - `SSHCommands.swift`: ssh.connect (a lista de hosts no ⌘K, sem testar nada) e ssh.test-again.
-- O app (`../../app/SSHWiring.swift`) faz o item SSH da barra de status (menu com os hosts e "Test
-  Again") e o ssh.connect (aba nova com `ssh '<host>'`).
+- `SSHStrip.swift`: o item SSH da barra de status: bolinha verde (todos abaixo de 100 ms), amarela
+  (algum mais lento), vermelha (algum fora do ar), cinza antes do teste; pulsa só quando não está
+  verde ou testando. Passar o ponteiro (ou clicar) abre o cartão (`HoverCard` de
+  `../../shared/menus`) com cada host, a cor, o endereço e a resposta; clicar num host conecta,
+  "Test Again" testa. Sem menu: o cartão é o caminho (o dono, 2026-10-21).
+- O app (`../../app/SSHWiring.swift`) põe o item na barra e faz o ssh.connect (aba nova com `ssh
+  '<host>'`).
 - Status: fase E no código.
 
 ## Como validar

@@ -10,15 +10,17 @@ num deles com um clique.
 - Ao abrir o app, e de novo a cada 10 minutos enquanto o item SSH aparece na barra de status, o
   Cadex testa cada host com uma conexão TCP na porta dele (a 22, ou a do `Port`), com 3 s de limite.
   Não autentica, não manda comando e não lê chave.
-- O item da barra de status mostra "SSH 3/3" (no ar/total) com um ponto verde, âmbar se algum caiu,
-  cinza antes do primeiro teste. A dica lista cada host com a latência ou "down".
-- Clicar no item abre um menu com os hosts: escolher um abre uma aba de terminal com
-  `ssh <host>` (comando ssh.connect, com a lista no ⌘K: "SSH: Connect to <host>"). "Test Again"
-  testa na hora.
+- O item da barra de status mostra "SSH 3/3" (no ar/total) com uma bolinha: verde com todos abaixo
+  de 100 ms, amarela com algum mais lento, vermelha com algum fora do ar, cinza antes do primeiro
+  teste. Ela pulsa devagar quando amarela, vermelha ou testando; verde fica parada.
+- Passar o ponteiro (ou clicar) abre um cartão com cada host: a bolinha dele, o nome, o endereço e a
+  resposta ("up 20 ms", "down", "via bastion"). Subir o ponteiro para o cartão o mantém aberto; ele
+  fecha quando o ponteiro sai dos dois. Clicar num host abre uma aba com `ssh <host>` (ssh.connect,
+  também no ⌘K); "Test Again" testa na hora.
 - Mudar o `~/.ssh/config` atualiza a lista sem reabrir o app.
 
 ## Estados
-- **Sem `~/.ssh/config` ou sem hosts**: o item mostra "SSH" apagado; o menu diz "No hosts in
+- **Sem `~/.ssh/config` ou sem hosts**: o item mostra "SSH" apagado; o cartão diz "No hosts in
   ~/.ssh/config".
 - **Testando**: o ponto pisca devagar até o primeiro resultado.
 - **ssh.ping desligado**: a lista e o "Connect" continuam; nenhum teste de rede.

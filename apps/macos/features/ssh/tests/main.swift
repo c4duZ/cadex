@@ -1,4 +1,5 @@
 import Checks
+import AppKit
 import Foundation
 @testable import SSH
 
@@ -88,6 +89,49 @@ let exitCode = await Checks.run([
     ("a real refused connection is down, fast", {
         let reach = await SSHController.connect(SSHHost(alias: "x", hostName: "127.0.0.1", port: 1, proxy: nil))
         expect(reach == .down, "\(reach)")
+    }),
+    ("the dot: green under 100 ms, yellow above, red when one is down; it breathes only then", {
+        expect(SSHStrip.level(of: [.up(20), .up(40)]) == .good)
+        expect(SSHStrip.level(of: [.up(20), .up(180)]) == .slow)
+        expect(SSHStrip.level(of: [.up(20), .down, .up(180)]) == .down)
+        expect(SSHStrip.level(of: [.proxied, .unknown]) == .unknown)
+        let dot = StatusDot()
+        dot.set(color: .systemGreen, breathing: false)
+        expect(!dot.isBreathing)
+        dot.set(color: .systemRed, breathing: true)
+        expect(dot.isBreathing)
+        dot.set(color: .systemGreen, breathing: false)
+        expect(!dot.isBreathing, "all well again: still")
+    }),
+    ("a picture of the card, with CADEX_SNAPSHOT_DIR", {
+        guard let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }
+        let home = NSTemporaryDirectory() + "cadex-ssh-pic-\(UUID().uuidString)"
+        defer { try? fm.removeItem(atPath: home) }
+        write(home + "/.ssh/config", "Host vps-bhband\n HostName 72.60.0.1\nHost bkdg-vps\n HostName 31.97.0.1\nHost vps-bkdg\n HostName 76.13.0.1\n Port 2222\nHost inner\n ProxyJump bastion\n")
+        let controller = SSHController.shared
+        controller.home = home
+        controller.probe = { host in host.alias == "vps-bhband" ? .up(203) : host.alias == "vps-bkdg" ? .down : .up(20) }
+        let token = controller.watch {}
+        _ = await eventually { controller.counts.tested == 3 }
+        let strip = SSHStrip()
+        strip.text = .white
+        strip.secondary = NSColor(white: 0.62, alpha: 1)
+        let card = strip.cardContent()
+        let view = NSView()
+        view.wantsLayer = true
+        view.layer?.backgroundColor = NSColor(white: 0.12, alpha: 1).cgColor
+        card.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(card)
+        NSLayoutConstraint.activate([card.topAnchor.constraint(equalTo: view.topAnchor, constant: 14), card.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 14),
+                                     card.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -14), card.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -14)])
+        view.layoutSubtreeIfNeeded()
+        view.frame = NSRect(origin: .zero, size: view.fittingSize)
+        view.layoutSubtreeIfNeeded()
+        if let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
+            view.cacheDisplay(in: view.bounds, to: bitmap)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/ssh-card.png"))
+        }
+        controller.stop(token)
     }),
 ])
 

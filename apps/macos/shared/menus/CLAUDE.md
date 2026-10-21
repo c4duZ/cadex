@@ -25,6 +25,11 @@
   em até 360 pt e cresce para baixo (os commits do histórico na barra lateral, 2026-10-21).
   `HoverTip.attach(_:to:)` troca o toolTip do sistema;
   o toolTip fica só para textos longos de linhas (caminhos, datas).
+- `HoverCard.swift`: o cartão sobre um item da barra de status (uso das contas, hosts SSH, portas),
+  aberto 0,25 s depois de o ponteiro chegar ou no clique, colado no item e aberto enquanto o ponteiro
+  está no item ou no cartão (subir para dentro dele o mantém; o dono, 2026-10-21); fecha 0,4 s depois
+  de sair dos dois. Nas cores dos menus, nunca pega o teclado. `HoverRow`, a linha clicável dele, com
+  fundo ao passar.
 - `MenuTableView.swift`: tabela cujo clique direito abre o PopupMenu; `menuRow` é a linha clicada
   enquanto o menu está aberto e a ação roda (source control e histórico do git).
 - Fontes e medidas de MenuLayout e da dica vêm de UILooks (`../looks/CLAUDE.md`).

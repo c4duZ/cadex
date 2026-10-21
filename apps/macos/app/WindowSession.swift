@@ -1,5 +1,6 @@
 import Agents
 import AppKit
+import Menus
 import StatusBar
 import GitHistory
 import CommandPalette
@@ -59,6 +60,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// The Ports item's label and what it last read (SSHWiring.swift).
     weak var portsLabel: StatusLabel?
     var ports: [UInt16] = []
+    var portsCard: HoverCard?
 
     var settings: SettingsBridge { app.settings }
 

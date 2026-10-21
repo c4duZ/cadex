@@ -46,7 +46,7 @@
   as barras do cartão (destaque, laranja a partir de 70%, vermelho a partir de 90%) e
   `AgentUsageRows`, as barras que o cartão e o popover dividem. `AgentUsageStrip.swift`: o item
   Agent usage, com a conta do terminal com foco (`focused`, que o app diz) ou a última, e o popover
-  ao passar o ponteiro (`AgentUsagePopover.swift`, todas as contas). `CodexUsage.swift`: as contas
+  ao passar o ponteiro (`AgentUsageCard.swift` no `HoverCard` compartilhado, todas as contas; subir para dentro dele o mantém aberto). `CodexUsage.swift`: as contas
   do Codex e o uso tirado dos logs dele (os limites de cada uso), sem rede. `AgentAccountsView.swift`: a aba
   Accounts, com renomear e esconder pelo botão direito.
 - O app (`../../app/AgentsWiring.swift`) põe a página no catálogo da barra lateral (agents.show,

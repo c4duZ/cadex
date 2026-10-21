@@ -1,6 +1,7 @@
 import AppKit
 import Icons
 import Strings
+import Menus
 import UILooks
 
 /// The status bar's Agent usage item (docs/spec/agents.md, Accounts): the
@@ -17,8 +18,7 @@ public final class AgentUsageStrip: NSView {
     public var focused: String? { didSet { if let focused { last = focused }; render() } }
     private(set) var last: String?
     private let stack = NSStackView()
-    private var popover: AgentUsagePopover?
-    private var pending: DispatchWorkItem?
+    private var card: HoverCard?
 
     public init() {
         super.init(frame: .zero)
@@ -32,6 +32,7 @@ public final class AgentUsageStrip: NSView {
             heightAnchor.constraint(equalToConstant: UILooks.pt(20)),
         ])
         render()
+        card = HoverCard(over: self) { [weak self] in AgentUsageCard.make(colors: self?.colors ?? AgentColors()) }
     }
 
     @available(*, unavailable)
@@ -69,7 +70,7 @@ public final class AgentUsageStrip: NSView {
         let text = AgentText.label(Self.short(numbers), size: 11, color: colors.secondary)
         text.font = UILooks.monospacedDigits(11)
         stack.addArrangedSubview(text)
-        popover?.render(colors: colors)
+        card?.refresh()
     }
 
     /// "19% 5h · 97% wk"
@@ -78,49 +79,10 @@ public final class AgentUsageStrip: NSView {
             .compactMap { $0 }.joined(separator: " · ")
     }
 
-    // MARK: The popover on hover
-
-    public override func updateTrackingAreas() {
-        super.updateTrackingAreas()
-        trackingAreas.forEach(removeTrackingArea)
-        addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseEnteredAndExited, .activeAlways], owner: self))
-    }
-
-    public override func mouseEntered(with event: NSEvent) { schedule(open: true) }
-    public override func mouseExited(with event: NSEvent) { schedule(open: false) }
-
     public override func mouseUp(with event: NSEvent) {
         if bounds.contains(convert(event.locationInWindow, from: nil)) {
-            closePopover()
+            card?.close()
             onClick?()
         }
-    }
-
-    /// Opens after 0.25 s; closes 0.3 s after the pointer leaves both the
-    /// item and the popover, so it can move from one to the other.
-    func schedule(open: Bool) {
-        pending?.cancel()
-        let work = DispatchWorkItem { [weak self] in
-            MainActor.assumeIsolated {
-                guard let self else { return }
-                if open { self.openPopover() } else if self.popover?.hasPointer != true { self.closePopover() }
-            }
-        }
-        pending = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + (open ? 0.25 : 0.3), execute: work)
-    }
-
-    private func openPopover() {
-        guard window != nil else { return }
-        let popover = self.popover ?? AgentUsagePopover()
-        popover.onLeave = { [weak self] in self?.schedule(open: false) }
-        popover.onEnter = { [weak self] in self?.pending?.cancel() }
-        self.popover = popover
-        popover.render(colors: colors)
-        popover.show(above: self)
-    }
-
-    func closePopover() {
-        popover?.orderOut(nil)
     }
 }

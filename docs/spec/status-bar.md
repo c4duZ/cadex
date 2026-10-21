@@ -45,8 +45,8 @@ Sem mexer em nada, a barra é a de sempre: trilha à esquerda e ambiente à dire
   janela escondida ou minimizada, param.
 - Ports é lido quando um terminal abre, fecha ou um programa termina, e a cada 10 s enquanto um
   programa roda num terminal.
-- Clicar em RAM, CPU ou Cadex memory abre o Monitor de Atividade; em Ports, um menu com cada porta
-  ("Open localhost:3000" abre no preview); em Agent usage ou Agents, a página Agents; em Git branch,
+- Clicar em RAM, CPU ou Cadex memory abre o Monitor de Atividade; em Ports, o cartão com cada porta
+  (passar o ponteiro também abre; "localhost:3000" abre no preview); em Agent usage ou Agents, a página Agents; em Git branch,
   a página Git.
 
 ## Estados

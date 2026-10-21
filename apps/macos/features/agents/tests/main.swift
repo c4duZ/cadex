@@ -289,10 +289,18 @@ let exitCode = await Checks.run([
             usage.states["/a"] = .ready(AgentUsage(session: .init(percent: 19, resets: Date().addingTimeInterval(4000)),
                                                    week: .init(percent: 97, resets: Date().addingTimeInterval(200_000)), sonnetWeek: nil), Date())
             usage.plans["/b"] = "plus"
-            let popover = AgentUsagePopover()
-            popover.render(colors: AgentColors(text: .white, secondary: NSColor(white: 0.62, alpha: 1), accent: NSColor(red: 0.88, green: 0.64, blue: 0.35, alpha: 1),
-                                               panel: NSColor(white: 0.12, alpha: 1), border: NSColor(white: 0.25, alpha: 1)))
-            if let view = popover.contentView, let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
+            let card = AgentUsageCard.make(colors: AgentColors(text: .white, secondary: NSColor(white: 0.62, alpha: 1), accent: NSColor(red: 0.88, green: 0.64, blue: 0.35, alpha: 1)))
+            let view = NSView()
+            view.wantsLayer = true
+            view.layer?.backgroundColor = NSColor(white: 0.12, alpha: 1).cgColor
+            card.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(card)
+            NSLayoutConstraint.activate([card.topAnchor.constraint(equalTo: view.topAnchor, constant: 14), card.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 14),
+                                         card.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -14), card.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -14)])
+            view.layoutSubtreeIfNeeded()
+            view.frame = NSRect(origin: .zero, size: view.fittingSize)
+            view.layoutSubtreeIfNeeded()
+            if let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
                 view.cacheDisplay(in: view.bounds, to: bitmap)
                 try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/usage-popover.png"))
             }

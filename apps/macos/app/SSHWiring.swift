@@ -4,6 +4,8 @@ import Menus
 import SSH
 import StatusBar
 import Strings
+import Themes
+import UILooks
 
 /// The status bar's SSH and Ports items in this window (docs/spec/ssh.md,
 /// docs/spec/status-bar.md). SSH: "SSH 3/3" from ~/.ssh/config, a click
@@ -12,46 +14,25 @@ import Strings
 /// while it shows.
 extension WindowSession {
     func makeSSHItem() -> StatusItem {
-        let label = StatusLabel(icon: .hardDrives, tip: "SSH")
+        let strip = SSHStrip()
         let item = StatusItem(id: "ssh", title: "SSH", subtitle: T("Hosts of ~/.ssh/config that answer, tested on open and every 10 min",
                                                                   "Hosts do ~/.ssh/config que respondem, testados ao abrir e a cada 10 min"),
-                              icon: .hardDrives, side: .right, view: label)
-        label.onClick = { [weak self, weak label] in
-            guard let self, let label else { return }
-            PopupMenu.show(self.sshEntries(), above: label)
+                              icon: .hardDrives, side: .right, view: strip)
+        strip.onConnect = { [weak self] alias in self?.connectSSH(alias) }
+        ThemeStore.shared.observe { [weak strip] theme in
+            strip?.text = theme.interface.text.nsColor
+            strip?.secondary = theme.interface.secondaryText.nsColor
         }
         var token: UUID?
-        item.onVisible = { [weak label] visible in
+        item.onVisible = { [weak strip] visible in
             if visible {
-                token = SSHController.shared.watch { if let label { Self.showSSH(on: label) } }
+                token = SSHController.shared.watch { strip?.render() }
             } else if let id = token {
                 SSHController.shared.stop(id)
                 token = nil
             }
         }
         return item
-    }
-
-    private static func showSSH(on label: StatusLabel) {
-        let ssh = SSHController.shared
-        let counts = ssh.counts
-        label.text = ssh.hosts.isEmpty || counts.tested == 0 ? "SSH" : "SSH \(counts.up)/\(counts.tested)"
-        label.tint = counts.tested == 0 ? nil : counts.up == counts.tested ? .systemGreen : .systemOrange
-        let lines = ssh.hosts.map { "\($0.alias): " + SSHCommands.describe(ssh.reach[$0.alias] ?? .unknown, host: $0) }
-        label.setTip(lines.isEmpty ? T("No hosts in ~/.ssh/config", "Nenhum host no ~/.ssh/config") : lines.joined(separator: "\n"))
-    }
-
-    private func sshEntries() -> [MenuEntry] {
-        let ssh = SSHController.shared
-        guard !ssh.hosts.isEmpty else { return [MenuEntry(T("No hosts in ~/.ssh/config", "Nenhum host no ~/.ssh/config"), isEnabled: false) {}] }
-        var entries = ssh.hosts.map { host in
-            MenuEntry(host.alias, icon: .terminalWindow, shortcut: SSHCommands.describe(ssh.reach[host.alias] ?? .unknown, host: host)) { [weak self] in
-                self?.connectSSH(host.alias)
-            }
-        }
-        entries.append(.separator)
-        entries.append(MenuEntry(T("Test Again", "Testar de novo"), icon: .arrowClockwise) { [weak self] in _ = self?.commands.run("ssh.test-again") })
-        return entries
     }
 
     /// ssh.connect: a new terminal tab typing `ssh <alias>` and Enter; the
@@ -69,13 +50,10 @@ extension WindowSession {
                               subtitle: T("What your terminals' programs listen on, every 10 s while one runs",
                                           "O que os programas dos terminais ouvem, a cada 10 s com um rodando"),
                               icon: .plug, side: .right, view: label)
-        label.onClick = { [weak self, weak label] in
-            guard let self, let label else { return }
-            let entries = self.ports.isEmpty
-                ? [MenuEntry(T("No program is listening", "Nenhum programa ouvindo"), isEnabled: false) {}]
-                : self.ports.map { port in MenuEntry("localhost:\(port)", icon: .globe) { [weak self] in self?.openPreview("http://localhost:\(port)") } }
-            PopupMenu.show(entries, above: label)
-        }
+        // The card on hover (or a click): each port opens in the preview.
+        let card = HoverCard(over: label) { [weak self] in self?.portsCardContent() ?? NSView() }
+        label.onClick = { card.openNow() }
+        portsCard = card
         var timer: Timer?
         item.onVisible = { [weak self, weak label] visible in
             timer?.invalidate()
@@ -93,12 +71,49 @@ extension WindowSession {
         return item
     }
 
+    private func portsCardContent() -> NSView {
+        let ui = ThemeStore.shared.current.interface
+        let title = NSTextField(labelWithString: T("Listening ports", "Portas ouvindo"))
+        title.font = UILooks.font(12, weight: .semibold)
+        title.textColor = ui.text.nsColor
+        var rows: [NSView] = [title]
+        if ports.isEmpty {
+            let none = NSTextField(labelWithString: T("No program in your terminals is listening", "Nenhum programa dos terminais está ouvindo"))
+            none.font = UILooks.font(11)
+            none.textColor = ui.secondaryText.nsColor
+            rows.append(none)
+        }
+        for port in ports {
+            let name = NSTextField(labelWithString: "localhost:\(port)")
+            name.font = UILooks.monospacedDigits(12)
+            name.textColor = ui.text.nsColor
+            let open = NSTextField(labelWithString: T("Open in preview", "Abrir no preview"))
+            open.font = UILooks.font(11)
+            open.textColor = ui.secondaryText.nsColor
+            let line = NSStackView(views: [name, NSView(), open])
+            let row = HoverRow(line)
+            row.onClick = { [weak self] in
+                self?.portsCard?.close()
+                self?.openPreview("http://localhost:\(port)")
+            }
+            row.widthAnchor.constraint(equalToConstant: UILooks.pt(240)).isActive = true
+            rows.append(row)
+        }
+        let stack = NSStackView(views: rows)
+        stack.orientation = .vertical
+        stack.alignment = .leading
+        stack.spacing = 4
+        stack.setCustomSpacing(8, after: title)
+        return stack
+    }
+
     /// Only terminals running a program are asked: a shell at its prompt
     /// listens on nothing, and with none running nothing is read.
     func readPorts(into label: StatusLabel) {
         let groups = (spaces?.spaces ?? []).flatMap { $0.tabs.allTerminals }.map(\.foregroundGroup).filter { $0 > 0 }
         ports = groups.isEmpty ? [] : ListeningPorts.ports(inGroups: groups)
         label.text = "\(ports.count)"
+        portsCard?.refresh()
         label.setTip(ports.isEmpty ? T("No program is listening", "Nenhum programa ouvindo") : ports.map { ":\($0)" }.joined(separator: " "))
     }
 }
