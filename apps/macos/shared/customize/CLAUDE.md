@@ -25,7 +25,7 @@
   fora; `recolor` repinta na troca de tema. O desenho é o das configurações: abas no topo, título
   da página em 20 pt, legenda, linhas em caixa com cantos de 8 pt e borda de 1 pt (o dono pediu as
   duas janelas iguais, 2026-10-21). `CustomizeColors` vem do tema, pelo app, nunca do destaque da
-  janela (que a cor do space troca); `CustomizeToggle`, a chave na cor de destaque.
+  janela (que a cor do space troca); `ThemeSwitch`, a chave do app na cor de destaque, pública: as configurações usam a mesma.
 
 ## Como validar
 - `make macos-test` passa: seções, mover entre seções, chave, a vaga, o arrastar com eventos de

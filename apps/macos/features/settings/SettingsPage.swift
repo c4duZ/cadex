@@ -1,4 +1,5 @@
 import AppKit
+import Customize
 
 /// The building blocks every settings page uses, in the look of the
 /// settings: a title and subtitle, then rows of label, explanation and
@@ -49,6 +50,7 @@ enum SettingsPage {
     /// A row: the label and its explanation on the left, the control right.
     static func row(_ label: String, _ detail: String?, control: NSView) -> NSView {
         let title = NSTextField(labelWithString: label)
+        if let toggle = control as? ThemeSwitch { toggle.setAccessibilityLabel(label) }
         title.font = .systemFont(ofSize: 13, weight: .medium)
         title.textColor = SettingsColors.text
         var texts: [NSView] = [title]
@@ -109,11 +111,10 @@ enum SettingsPage {
         return box
     }
 
-    static func toggle(_ on: Bool, _ changed: @escaping (Bool) -> Void) -> NSSwitch {
-        let control = NSSwitch()
-        control.state = on ? .on : .off
-        control.target = ActionBox.keep(control) { changed(control.state == .on) }
-        control.action = #selector(ActionBox.fire)
+    /// The app's switch, the same as Customize's, in the theme's accent.
+    static func toggle(_ on: Bool, _ changed: @escaping (Bool) -> Void) -> ThemeSwitch {
+        let control = ThemeSwitch(on: on, accent: SettingsColors.accent, off: SettingsColors.secondaryText.withAlphaComponent(0.3), label: "")
+        control.onChange = changed
         return control
     }
 

@@ -78,7 +78,7 @@ let package = Package(
         ),
         .target(
             name: "Settings",
-            dependencies: ["Themes", "CommandPalette", "Shortcuts", "Icons", "Strings"],
+            dependencies: ["Themes", "CommandPalette", "Customize", "Shortcuts", "Icons", "Strings"],
             path: "features/settings",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]

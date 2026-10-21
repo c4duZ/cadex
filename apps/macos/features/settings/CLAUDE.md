@@ -25,7 +25,9 @@
   ao reabrir, pergunta "Reabrir agora"); a janela registra settings.open-terminal,
   settings.open-themes e terminal.toggle-ligatures (`pageCommands`), `ShortcutsPage.swift` (grava a próxima combinação com os atalhos do
   app suspensos; Delete tira, Esc cancela, "Padrão" volta) e `SettingsPage.swift` (linhas, títulos de
-  seção, notas, caixas e controles que mudam o arquivo na hora). Textos em par inglês/português
+  seção, notas, caixas e controles que mudam o arquivo na hora; a chave é o `ThemeSwitch` de
+  `../../shared/customize/`, a mesma do Customize, na cor de destaque do tema, pedido do dono em
+  2026-10-21). Textos em par inglês/português
   (`T`, `../../shared/strings`); trocar o idioma pergunta "Reabrir agora" e chama `relaunch`, do app. A janela segue o tema (`SettingsColors.swift`): a página
   aberta se refaz com as cores novas, mantendo a rolagem.
 - O app (`../../app/SettingsBridge.swift`) passa as preferências ao `TerminalPreferences` do

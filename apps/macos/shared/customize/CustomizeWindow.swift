@@ -185,54 +185,70 @@ public final class CustomizeWindow: NSWindow {
     }
 }
 
-/// The switch of the prototype: a pill in the accent when on, the knob at
-/// the end it points to.
+/// The app's switch, from the prototype approved on 2026-10-21: a pill in
+/// the theme's accent when on, the knob at the end it points to. Customize
+/// and the settings window use it, so the two look the same (the owner,
+/// 2026-10-21); the system's switch ignored the theme's accent.
 @MainActor
-final class CustomizeToggle: NSView {
-    private(set) var isOn: Bool
-    var onChange: ((Bool) -> Void)?
-    private let colors: CustomizeColors
+public final class ThemeSwitch: NSView {
+    public private(set) var isOn: Bool
+    public var onChange: ((Bool) -> Void)?
+    private let accent: NSColor
+    private let off: NSColor
     private let knob = NSView()
 
-    init(on: Bool, colors: CustomizeColors, label: String) {
+    public init(on: Bool, accent: NSColor, off: NSColor, label: String) {
         isOn = on
-        self.colors = colors
+        self.accent = accent
+        self.off = off
         super.init(frame: .zero)
         wantsLayer = true
         knob.wantsLayer = true
         knob.layer?.backgroundColor = NSColor.white.cgColor
+        knob.layer?.shadowOpacity = 0.2
+        knob.layer?.shadowRadius = 1
+        knob.layer?.shadowOffset = .zero
         addSubview(knob)
         setAccessibilityElement(true)
         setAccessibilityRole(.checkBox)
         setAccessibilityLabel(label)
+        setContentHuggingPriority(.required, for: .horizontal)
         restyle(animated: false)
     }
 
+    convenience init(on: Bool, colors: CustomizeColors, label: String) {
+        self.init(on: on, accent: colors.accent, off: colors.secondary.withAlphaComponent(0.3), label: label)
+    }
+
     @available(*, unavailable)
-    required init?(coder: NSCoder) { fatalError("CustomizeToggle is created in code") }
+    required init?(coder: NSCoder) { fatalError("ThemeSwitch is created in code") }
 
-    override var intrinsicContentSize: NSSize { NSSize(width: UILooks.pt(32), height: UILooks.pt(19)) }
+    override public var intrinsicContentSize: NSSize { NSSize(width: UILooks.pt(32), height: UILooks.pt(19)) }
 
-    func flip() {
+    public func flip() {
         isOn.toggle()
         restyle(animated: true)
         onChange?(isOn)
     }
 
-    override func accessibilityValue() -> Any? { isOn }
-    override func accessibilityPerformPress() -> Bool {
+    // A click anywhere on it flips it (inside Customize the list does that).
+    override public func mouseDown(with event: NSEvent) { flip() }
+    override public var mouseDownCanMoveWindow: Bool { false }
+
+    override public func accessibilityValue() -> Any? { isOn }
+    override public func accessibilityPerformPress() -> Bool {
         flip()
         return true
     }
 
-    override func layout() {
+    override public func layout() {
         super.layout()
         layer?.cornerRadius = bounds.height / 2
         restyle(animated: false)
     }
 
     private func restyle(animated: Bool) {
-        layer?.backgroundColor = (isOn ? colors.accent : colors.secondary.withAlphaComponent(0.3)).cgColor
+        layer?.backgroundColor = (isOn ? accent : off).cgColor
         let side = max(bounds.height - 4, 0)
         let frame = NSRect(x: isOn ? bounds.width - side - 2 : 2, y: 2, width: side, height: side)
         knob.layer?.cornerRadius = side / 2

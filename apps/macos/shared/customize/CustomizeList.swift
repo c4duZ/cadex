@@ -137,11 +137,11 @@ final class CustomizeList: NSView {
 @MainActor
 final class CustomizeRowView: NSView {
     let id: String
-    let toggle: CustomizeToggle
+    let toggle: ThemeSwitch
 
     init(row: CustomizeRow, colors: CustomizeColors) {
         id = row.id
-        toggle = CustomizeToggle(on: row.on, colors: colors, label: row.title)
+        toggle = ThemeSwitch(on: row.on, colors: colors, label: row.title)
         super.init(frame: .zero)
         // The settings window's row box: 8 pt corners, a 1 pt border.
         wantsLayer = true
