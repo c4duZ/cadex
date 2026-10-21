@@ -11,7 +11,8 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
   - **General / Geral:** Idioma (`general.language`, "en" padrão ou "pt"; vale ao reabrir, e a
     troca oferece "Reabrir agora", com as abas e os spaces de volta; ver
     `../adr/0015-english-default-two-languages.md`). Arquivos: onde abrem, ao lado do painel com
-    foco (padrão) ou em nova aba (`general.openFiles`), e como uma nota Markdown abre
+    foco (padrão) ou em nova aba (`general.openFiles`), de que lado fica o arquivo aberto ao lado,
+    com metade da aba (`tabs.documentSide`, direita por padrão), e como uma nota Markdown abre
     (`markdown.openAs`), e para onde vai o elemento escolhido no preview, o terminal do agente
     (padrão) ou a área de transferência (`preview.pickTarget`, ver `preview.md`), com print do
     elemento ou não (`preview.pickScreenshot`, ligado). Árvore de arquivos: seguir o terminal (`explorer.followTerminal`) e

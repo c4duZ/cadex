@@ -303,6 +303,43 @@ let exitCode = await Checks.run([
         expect(tabs.count == 2 && tabs.activeDocument === b && tabs.activePaneCount == 2)
         tabs.closeAll()
     }),
+    ("docking: a pane at one side of the outermost split keeps its share", {
+        let three = PaneTree.split(.horizontal, .leaf(1), .split(.horizontal, .leaf(2), .leaf(3), ratio: 0.5), ratio: 0.5)
+        let docked = three.docking(9, first: false)
+        expect(docked == .split(.horizontal, three, .leaf(9), ratio: 0.5))
+        expect(three.docking(9, first: true) == .split(.horizontal, .leaf(9), three, ratio: 0.5))
+        guard case .split(_, let rest, _, let ratio) = docked.balanced(keeping: 9) else { return expect(false) }
+        expect(ratio == 0.5, "the file keeps half: \(ratio)")
+        expect(rest == three.balanced(), "the panes beside it share theirs evenly")
+        guard case .split(_, _, _, let even) = docked.balanced(keeping: nil) else { return expect(false) }
+        expect(abs(even - 0.75) < 0.001, "without docking, four in a row")
+    }),
+    ("beside: the file takes half the tab, the terminals share the rest and get it back (issue #5)", {
+        let tabs = makeTabs()
+        tabs.newTab(cwd: "/")
+        tabs.view.layoutSubtreeIfNeeded()
+        tabs.split(.horizontal)
+        let terminals = tabs.activeTab!.tree
+        let doc = FakeDocument("/r/notes.md")
+        tabs.open(doc, beside: true)
+        guard let tab = tabs.activeTab, case .split(.horizontal, let rest, .leaf(let docPane), let ratio) = tab.tree else {
+            return expect(false, "\(tabs.activeTab!.tree)")
+        }
+        expect(ratio == 0.5 && rest == terminals && tab.panes[docPane]?.document === doc, "\(tab.tree)")
+        // A new terminal splits the terminals' half; the file keeps its own.
+        tab.focus(rest.leaves[0])
+        tabs.split(.horizontal)
+        guard case .split(_, let more, .leaf(docPane), 0.5) = tab.tree else { return expect(false, "\(tab.tree)") }
+        expect(more.leaves.count == 3, "\(more)")
+        tabs.removePane(docPane, from: tab)
+        expect(tab.tree == more.balanced(), "closing the file gives the terminals the whole tab")
+        TabsController.documentsOnLeft = true
+        tabs.open(FakeDocument("/r/left.md"), beside: true)
+        guard case .split(.horizontal, .leaf(let leftPane), more.balanced(), 0.5) = tab.tree else { return expect(false, "\(tab.tree)") }
+        expect(tab.panes[leftPane]?.document != nil)
+        TabsController.documentsOnLeft = false
+        tabs.closeAll()
+    }),
     ("beside: an unsaved document is not replaced, and the asking one stays", {
         let tabs = makeTabs()
         tabs.newTab(cwd: "/")

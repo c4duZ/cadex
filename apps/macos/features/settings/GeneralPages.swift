@@ -32,6 +32,13 @@ enum GeneralPages {
                                    "Onde abre um arquivo, um diff ou um preview web: ao lado do painel com foco, ou numa aba nova. “Abrir ao lado” e “Abrir em nova aba” escolhem na hora."),
                                  control: SettingsPage.popup([(T("Beside", "Ao lado"), "beside"), (T("New tab", "Em nova aba"), "tab")],
                                                              selected: g.openFiles) { value in store.update { $0.general.openFiles = value } }),
+                SettingsPage.row(T("Side of a file opened beside", "Lado do arquivo aberto ao lado"),
+                                 T("A file opened beside takes half the tab, on this side; the terminals share the other half and get it back when it closes.",
+                                   "Um arquivo aberto ao lado fica com metade da aba, deste lado; os terminais dividem a outra metade e a recebem de volta quando ele fecha."),
+                                 control: SettingsPage.popup([(T("Right", "Direita"), "right"), (T("Left", "Esquerda"), "left")],
+                                                             selected: store.settings.tabs.documentSide) { value in
+                                     store.update { $0.tabs.documentSide = value }
+                                 }),
                 SettingsPage.row(T("Open Markdown as", "Abrir Markdown como"),
                                  T("How a note opens. The button in the tab's corner switches at any time.",
                                    "Como uma nota abre. O botão no canto da aba troca a qualquer hora."),

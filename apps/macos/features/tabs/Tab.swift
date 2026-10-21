@@ -108,9 +108,31 @@ final class Tab {
         layout.canSplit(focusedPane, axis: axis)
     }
 
+    /// A document at one side of the outermost split: it keeps half the tab
+    /// while the panes beside it split and close (issue #5).
+    var dockedPane: Int? {
+        guard case .split(.horizontal, let a, let b, _) = tree else { return nil }
+        if case .leaf(let id) = b, panes[id]?.document != nil { return id }
+        if case .leaf(let id) = a, panes[id]?.document != nil { return id }
+        return nil
+    }
+
+    /// Room for a document beside everything, half the tab.
+    var canDock: Bool { layout.canDock }
+
+    /// `content` beside all the panes, half the tab, at the left (`first`)
+    /// or the right; it takes the focus.
+    func dock(pane: Int, content: Pane, first: Bool) {
+        layout.tree = layout.tree.docking(pane, first: first)
+        panes[pane] = content
+        layout.panes[pane] = content.view
+        layout.syncSubviews()
+        focus(pane)
+    }
+
     /// Splits the focused pane; the new one takes the focus.
     func split(axis: PaneTree.Axis, pane: Int, content: Pane) {
-        layout.tree = layout.tree.splitting(focusedPane, axis: axis, newPane: pane).balanced()
+        layout.tree = layout.tree.splitting(focusedPane, axis: axis, newPane: pane).balanced(keeping: dockedPane)
         panes[pane] = content
         layout.panes[pane] = content.view
         layout.syncSubviews()
@@ -132,9 +154,10 @@ final class Tab {
         let order = layout.tree.leaves
         guard let rest = layout.tree.removing(pane) else { return false }
         let index = order.firstIndex(of: pane) ?? 0
+        let docked = dockedPane
         panes[pane] = nil
         layout.panes[pane] = nil
-        layout.tree = rest.balanced()
+        layout.tree = rest.balanced(keeping: docked == pane ? nil : docked)
         layout.syncSubviews()
         if focusedPane == pane {
             let remaining = rest.leaves

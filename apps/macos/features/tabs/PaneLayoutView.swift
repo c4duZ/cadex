@@ -79,6 +79,9 @@ final class PaneLayoutView: NSView {
     }
 
     /// Whether pane `id` has room to be split along `axis`.
+    /// Half the tab is wide enough for a pane.
+    var canDock: Bool { (bounds.width - Self.gap) / 2 >= Self.minPaneSize.width }
+
     func canSplit(_ id: Int, axis: PaneTree.Axis) -> Bool {
         guard let frame = tree.frames(in: bounds, gap: Self.gap)[id] else { return false }
         switch axis {

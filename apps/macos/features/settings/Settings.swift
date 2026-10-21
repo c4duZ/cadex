@@ -68,6 +68,9 @@ public struct Settings: Equatable, Sendable {
         /// The shade over the panes without focus, 0 to 0.6 (0.26 measured
         /// against dark themes on 2026-10-19).
         public var unfocusedDim: Double = 0.26
+        /// Where a file opened beside goes, with half the tab: "right" or
+        /// "left" (issue #5).
+        public var documentSide = "right"
     }
 
     public struct Explorer: Equatable, Sendable {
@@ -122,6 +125,7 @@ public struct Settings: Equatable, Sendable {
     static let modes = ["system", "dark", "light"]
     static let markdownOpenings = ["source", "rendered"]
     static let pickTargets = ["terminal", "clipboard"]
+    static let documentSides = ["right", "left"]
     static let fileOpenings = ["beside", "tab"]
     static let languages = ["en", "pt"]
     static let keepAwakeModes = ["always", "running"]

@@ -58,6 +58,7 @@ final class SettingsBridge {
             accent: a.accent.isEmpty ? nil : try? ThemeFile.parse(a.accent, field: "appearance.accent"),
             highContrast: a.highContrast))
         PaneLooks.unfocusedDim = CGFloat(settings.tabs.unfocusedDim)
+        TabsController.documentsOnLeft = settings.tabs.documentSide == "left"
         applyLooks()
         onExplorer?(settings.explorer)
         onMarkdown?(settings.markdown)

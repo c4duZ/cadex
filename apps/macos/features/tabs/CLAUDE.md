@@ -17,9 +17,12 @@
   caminho); `activeTerminal`/`activeDocument` são os do painel com foco; `document(identity:)` e
   `allDocuments` procuram em todos os painéis. O título ganha "●" com mudança não salva, fechar
   pergunta ao documento, sair pergunta se há arquivo não salvo. Terminal novo abre na pasta do
-  painel com foco (a do arquivo, num documento). `open(_:beside:keeping:)` abre ao lado pelas quatro
-  regras da spec (o painel que já o mostra, troca do painel de documento sem mudança não salva,
-  divisão à direita, nova aba sem espaço); `keeping` é o documento que pediu, que não é trocado.
+  painel com foco (a do arquivo, num documento). `open(_:beside:keeping:)` abre ao lado pelas regras
+  da spec (o painel que já o mostra, troca do painel de documento sem mudança não salva, encostado
+  num lado com metade da aba, divisão à direita, nova aba sem espaço); `keeping` é o documento que
+  pediu, que não é trocado. Encostado (issue #5): Tab.dockedPane é um documento num lado da
+  divisão de fora; `PaneTree.balanced(keeping:)` reequilibra só o outro lado; o lado vem de
+  documentsOnLeft (tabs.documentSide, que o app define).
   `PanePressRecognizer.swift`: o clique num documento dá o foco ao painel sem tomar o clique. Título
   e ícone da aba vêm do painel com foco; "●" se qualquer painel tem mudança não salva. A oferta de preview de cada terminal sai por
   `onOpenPreview`. `TabList.swift`: as regras puras (ordem, ativa, recentes, mover), testadas.

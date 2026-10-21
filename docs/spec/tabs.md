@@ -49,9 +49,16 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   em nova aba" (explorer e paleta) escolhem na hora, sem mudar a configuração.
 - "Ao lado", nesta ordem: (1) o documento já está num painel de alguma aba → vai para ele (aba e
   foco); (2) a aba ativa já tem um painel de documento sem mudança não salva → o novo toma o lugar
-  dele (o antigo fecha); (3) senão, o painel com foco divide para a direita e o documento entra no
-  painel novo, com o foco; (4) sem espaço para dividir → nova aba. Abrir vários arquivos ao lado
-  não empilha divisões.
+  dele (o antigo fecha); (3) senão, o documento entra encostado num lado da aba, com metade dela e o
+  foco, e os painéis que já existiam ficam na outra metade, do jeito que estavam (issue #5, o dono,
+  2026-10-21); o lado é a configuração "Lado do arquivo aberto ao lado" (`tabs.documentSide`,
+  direita por padrão, ou esquerda); (4) com um documento já encostado e não salvo, o painel com
+  foco divide para a direita; (5) sem espaço → nova aba. Abrir vários arquivos ao lado não empilha
+  divisões.
+- O documento encostado guarda a metade dele: dividir ou fechar terminais reparte só a outra
+  metade, e arrastar o divisor entre os dois lados mantém a proporção escolhida. Fechar o documento
+  devolve a aba inteira aos painéis, no arranjo de antes. Um documento num lado da divisão de fora
+  da aba é tratado como encostado, inclusive numa aba restaurada pelos spaces.
 - "Em nova aba": o documento abre numa aba própria à direita da ativa, ou vai para a aba/painel
   que já o mostra.
 - ⌘D e ⌘⇧D com o foco num documento abrem um terminal ao lado, na pasta do arquivo.
@@ -97,6 +104,9 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
 - [x] Abas escondidas não desenham.
 - [x] Abrir ao lado segue as quatro regras: painel existente, troca, divisão, nova aba.
 - [x] Abrir ao lado com o documento da aba não salvo divide em vez de trocar.
+- [x] Com terminais divididos, o arquivo aberto ao lado fica com metade da aba; dividir um terminal
+  não tira espaço dele; fechá-lo devolve a aba aos terminais; com `tabs.documentSide` "left", ele
+  encosta à esquerda.
 - [x] Clicar num documento dá o foco a ele; ⌘], ⌘[ e ⌘⌥ + seta passam por documentos.
 - [x] ⌘D num documento abre um terminal ao lado, na pasta do arquivo.
 - [x] Fechar painel, aba ou janela com documento não salvo pergunta antes.

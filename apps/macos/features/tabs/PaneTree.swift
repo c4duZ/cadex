@@ -111,6 +111,22 @@ indirect enum PaneTree: Equatable {
         return .split(axis, a.balanced(), b.balanced(), ratio: CGFloat(wa) / CGFloat(wa + wb))
     }
 
+    /// Balanced, except that a pane docked at one side of the outermost
+    /// split keeps its share: an opened file keeps half the tab while the
+    /// panes beside it split and close (issue #5, 2026-10-21).
+    func balanced(keeping docked: Int?) -> PaneTree {
+        guard let docked, case .split(let axis, let a, let b, let ratio) = self else { return balanced() }
+        if a == .leaf(docked) { return .split(axis, a, b.balanced(), ratio: ratio) }
+        if b == .leaf(docked) { return .split(axis, a.balanced(), b, ratio: ratio) }
+        return balanced()
+    }
+
+    /// `pane` docked beside the whole tree, half and half: first (left) or
+    /// second (right).
+    func docking(_ pane: Int, first: Bool) -> PaneTree {
+        first ? .split(.horizontal, .leaf(pane), self, ratio: 0.5) : .split(.horizontal, self, .leaf(pane), ratio: 0.5)
+    }
+
     /// How many panes this subtree lines up along `axis`: a split the same
     /// way adds its sides; anything else is one slot.
     private func count(along axis: Axis) -> Int {

@@ -21,18 +21,24 @@ extension TabsController {
         open(document, beside: false)
     }
 
-    /// Shows `document` beside the focused pane, or in a new tab when
-    /// `beside` is false. Beside, in this order (docs/spec/tabs.md): the
-    /// pane that already shows it; the active tab's document pane with
-    /// nothing unsaved, which it replaces; a split to the right of the
-    /// focused pane; a new tab when there is no room. Opening file after
-    /// file never stacks splits. `keeping`: the document that asked (the
-    /// history opening a diff), never replaced by what it opens.
+    /// tabs.documentSide: a document opened beside docks at the left.
+    nonisolated(unsafe) public static var documentsOnLeft = false
+
+    /// Shows `document` beside the panes, or in a new tab when `beside` is
+    /// false. Beside, in this order (docs/spec/tabs.md): the pane that
+    /// already shows it; the active tab's document pane with nothing
+    /// unsaved, which it replaces; docked at one side with half the tab,
+    /// the other panes sharing the other half (issue #5); a split to the
+    /// right of the focused pane; a new tab when there is no room. Opening
+    /// file after file never stacks splits. `keeping`: the document that
+    /// asked (the history opening a diff), never replaced by what it opens.
     public func open(_ document: TabDocument, beside: Bool, keeping: TabDocument? = nil) {
         if reveal(identity: document.identity) { return }
         guard beside, let tab = activeTab else { return addTab(.document(document)) }
         if let pane = reusablePane(in: tab, keeping: keeping) {
             replace(pane, in: tab, with: document)
+        } else if tab.dockedPane == nil, tab.canDock {
+            dock(document, in: tab)
         } else if tab.canSplit(axis: .horizontal) {
             split(tab, axis: .horizontal, with: .document(document))
         } else {
@@ -48,6 +54,14 @@ extension TabsController {
         }
         if clean(tab.focusedPane) { return tab.focusedPane }
         return tab.tree.leaves.first(where: clean)
+    }
+
+    private func dock(_ document: TabDocument, in tab: Tab) {
+        let pane = nextPane
+        nextPane += 1
+        tab.dock(pane: pane, content: .document(document), first: Self.documentsOnLeft)
+        wire(.document(document), pane: pane, in: tab)
+        refreshBar()
     }
 
     private func replace(_ pane: Int, in tab: Tab, with document: TabDocument) {
