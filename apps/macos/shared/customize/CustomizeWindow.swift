@@ -11,14 +11,16 @@ public struct CustomizeColors {
     public var accent: NSColor
     public var panel: NSColor
     public var box: NSColor
+    public var border: NSColor
 
     public init(text: NSColor = .labelColor, secondary: NSColor = .secondaryLabelColor, accent: NSColor = .controlAccentColor,
-                panel: NSColor = .windowBackgroundColor, box: NSColor = .controlBackgroundColor) {
+                panel: NSColor = .windowBackgroundColor, box: NSColor = .controlBackgroundColor, border: NSColor = .separatorColor) {
         self.text = text
         self.secondary = secondary
         self.accent = accent
         self.panel = panel
         self.box = box
+        self.border = border
     }
 }
 
@@ -53,12 +55,13 @@ public final class CustomizeWindow: NSWindow {
     public static let shared = CustomizeWindow()
 
     private let tabs = NSSegmentedControl()
+    private let heading = NSTextField(labelWithString: "")
     private let note = NSTextField(wrappingLabelWithString: "")
     private let list = CustomizeList()
     private var pages: [CustomizePage] = []
     private var colors = CustomizeColors()
     private(set) var selected = 0
-    static var width: CGFloat { UILooks.pt(440) }
+    static var width: CGFloat { UILooks.pt(480) }
 
     private init() {
         super.init(contentRect: NSRect(x: 0, y: 0, width: Self.width, height: 300),
@@ -111,6 +114,16 @@ public final class CustomizeWindow: NSWindow {
         if list.entries != pages[selected].entries { list.show(pages[selected].entries, colors: colors) }
     }
 
+    /// The theme changed while it is open: the same page in the new colors,
+    /// as the settings window does.
+    public func recolor(_ colors: CustomizeColors) {
+        self.colors = colors
+        guard isVisible else { return }
+        backgroundColor = colors.panel
+        tabs.selectedSegmentBezelColor = colors.accent
+        select(selected)
+    }
+
     /// What the open page shows now.
     public var entries: [CustomizeEntry] { list.entries }
 
@@ -122,6 +135,8 @@ public final class CustomizeWindow: NSWindow {
         guard pages.indices.contains(index) else { return }
         selected = index
         tabs.selectedSegment = index
+        heading.stringValue = pages[index].title
+        heading.textColor = colors.text
         note.stringValue = pages[index].note
         note.textColor = colors.secondary
         list.show(pages[index].entries, colors: colors)
@@ -134,21 +149,29 @@ public final class CustomizeWindow: NSWindow {
         }
     }
 
+    /// The settings window's layout: the tabs on top, then the page's
+    /// title (20 pt), its caption and the rows (the owner, 2026-10-21: the
+    /// two windows must look the same).
     private func makeContent() -> NSView {
         tabs.segmentStyle = .automatic
         tabs.trackingMode = .selectOne
-        note.font = UILooks.font(12)
-        let width = Self.width - 44
+        heading.font = .systemFont(ofSize: 20, weight: .semibold)
+        note.font = .systemFont(ofSize: 13)
+        let width = Self.width - 56
         note.preferredMaxLayoutWidth = width
-        let stack = NSStackView(views: [tabs, note, list])
+        let page = NSStackView(views: [heading, note, list])
+        page.orientation = .vertical
+        page.alignment = .leading
+        page.spacing = 4
+        page.setCustomSpacing(20, after: note)
+        for view in [note, list] as [NSView] { view.widthAnchor.constraint(equalToConstant: width).isActive = true }
+        let stack = NSStackView(views: [tabs, page])
         stack.orientation = .vertical
         stack.alignment = .centerX
-        stack.spacing = 10
-        stack.setCustomSpacing(16, after: tabs)
-        // The top leaves room for the close button in the transparent title bar.
-        stack.edgeInsets = NSEdgeInsets(top: 36, left: 22, bottom: 22, right: 22)
+        stack.spacing = 22
+        // The tabs sit in the transparent title bar's band, as in settings.
+        stack.edgeInsets = NSEdgeInsets(top: 8, left: 28, bottom: 28, right: 28)
         stack.translatesAutoresizingMaskIntoConstraints = false
-        for view in [note, list] as [NSView] { view.widthAnchor.constraint(equalToConstant: width).isActive = true }
         let root = NSView()
         root.addSubview(stack)
         NSLayoutConstraint.activate([

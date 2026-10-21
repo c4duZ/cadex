@@ -1,5 +1,4 @@
 import AppKit
-import Customize
 import Icons
 import Menus
 import UILooks
@@ -87,30 +86,18 @@ final class SidebarIconButton: NSView {
 }
 
 /// The theme's colors for the sidebar: text, quiet text, the chosen fill
-/// and the accent; and for the Customize card, its ground, the rows' boxes
-/// and the border, the same as the settings window's.
+/// and the accent.
 public struct SidebarColors {
     public var text: NSColor
     public var secondary: NSColor
     public var fill: NSColor
     public var accent: NSColor
-    public var panel: NSColor
-    public var box: NSColor
-    public var border: NSColor
 
     public init(text: NSColor = .labelColor, secondary: NSColor = .secondaryLabelColor,
-                fill: NSColor = .quaternaryLabelColor, accent: NSColor = .controlAccentColor,
-                panel: NSColor = .windowBackgroundColor, box: NSColor = .controlBackgroundColor,
-                border: NSColor = .separatorColor) {
+                fill: NSColor = .quaternaryLabelColor, accent: NSColor = .controlAccentColor) {
         self.text = text
         self.secondary = secondary
         self.fill = fill
         self.accent = accent
-        self.panel = panel
-        self.box = box
-        self.border = border
     }
-
-    /// For the Customize window.
-    var customize: CustomizeColors { CustomizeColors(text: text, secondary: secondary, accent: accent, panel: panel, box: box) }
 }

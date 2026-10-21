@@ -81,7 +81,7 @@ let exitCode = await Checks.run([
     ("a picture of the window, with CADEX_SNAPSHOT_DIR", {
         guard let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }
         let colors = CustomizeColors(text: .white, secondary: NSColor(white: 0.62, alpha: 1), accent: NSColor(red: 0.88, green: 0.64, blue: 0.35, alpha: 1),
-                                     panel: NSColor(white: 0.11, alpha: 1), box: NSColor(white: 0.15, alpha: 1))
+                                     panel: NSColor(white: 0.11, alpha: 1), box: NSColor(white: 0.15, alpha: 1), border: NSColor(white: 0.22, alpha: 1))
         let pages = [
             CustomizePage(id: "sidebar", title: "Sidebar", icon: .sidebar, note: "", entries: [.header("Icons"), row("files")]) { _ in },
             CustomizePage(id: "statusBar", title: "Status Bar", icon: .slidersHorizontal, note: "Drag between Left and Right. A hidden item measures nothing.",

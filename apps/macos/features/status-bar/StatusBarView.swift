@@ -16,12 +16,10 @@ public final class StatusBarView: NSView {
     public struct Style {
         public var text: NSColor
         public var secondaryText: NSColor
-        public var customize: CustomizeColors
 
-        public init(text: NSColor, secondaryText: NSColor, customize: CustomizeColors = CustomizeColors()) {
+        public init(text: NSColor, secondaryText: NSColor) {
             self.text = text
             self.secondaryText = secondaryText
-            self.customize = customize
         }
     }
 

@@ -1,5 +1,4 @@
 import AppKit
-import Customize
 import Explorer
 import Sidebar
 import StatusBar
@@ -159,11 +158,8 @@ final class WorkspaceView: NSView {
         // Over the active fill: black or white if a user's accent made it too
         // close to the text (plan 15, phase B).
         sidebar.setColors(.init(text: ui.textOnTabActive.nsColor, secondary: ui.secondaryText.nsColor, fill: ui.tabActive.nsColor,
-                                accent: ui.accent.nsColor, panel: ui.panel.nsColor, box: ui.chrome.color(alpha: 0.6),
-                                border: ui.panelBorder.nsColor))
-        statusBar.style = .init(text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor,
-                                customize: .init(text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, accent: ui.accent.nsColor,
-                                                 panel: ui.panel.nsColor, box: ui.chrome.color(alpha: 0.6)))
+                                accent: ui.accent.nsColor))
+        statusBar.style = .init(text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor)
         let style = TabBarView.Style(
             activeFill: ui.tabActive.nsColor, hoverFill: ui.tabActive.color(alpha: 0.5),
             text: ui.textOnTabActive.nsColor, secondaryText: ui.secondaryText.nsColor, accent: ui.accent.nsColor)

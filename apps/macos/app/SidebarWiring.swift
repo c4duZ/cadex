@@ -1,4 +1,5 @@
 import AppKit
+import Themes
 import Customize
 import Explorer
 import GitHistory
@@ -47,8 +48,26 @@ extension WindowSession {
     /// window's sidebar and status bar; over this window, in full screen too.
     func openCustomize(_ page: String) {
         guard let workspace else { return }
-        CustomizeWindow.shared.show(customizePages(workspace), selecting: page,
-                                    colors: workspace.statusBar.style.customize, over: window)
+        Self.followThemeInCustomize()
+        CustomizeWindow.shared.show(customizePages(workspace), selecting: page, colors: Self.customizeColors(), over: window)
+    }
+
+    /// The settings window's colors, from the theme itself: not the window's
+    /// accent, which a space's or tab's color replaces (the owner saw blue
+    /// switches under Caffeine, 2026-10-21).
+    static func customizeColors() -> CustomizeColors {
+        let ui = ThemeStore.shared.current.interface
+        return CustomizeColors(text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, accent: ui.accent.nsColor,
+                               panel: ui.panel.nsColor, box: ui.chrome.color(alpha: 0.6), border: ui.panelBorder.nsColor)
+    }
+
+    private static var followsTheme = false
+
+    /// Once for the app: a theme change repaints the open Customize window.
+    private static func followThemeInCustomize() {
+        guard !followsTheme else { return }
+        followsTheme = true
+        ThemeStore.shared.observe { _ in CustomizeWindow.shared.recolor(customizeColors()) }
     }
 
     /// Settings changed while it is open: it shows them.

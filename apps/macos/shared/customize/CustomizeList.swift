@@ -46,7 +46,7 @@ final class CustomizeList: NSView {
     static func height(of entry: CustomizeEntry) -> CGFloat {
         switch entry {
         case .header: UILooks.rowHeight(26)
-        case .row(let row): UILooks.rowHeight(row.subtitle == nil ? 34 : 44)
+        case .row(let row): UILooks.rowHeight(row.subtitle == nil ? 40 : 52)
         }
     }
 
@@ -143,8 +143,11 @@ final class CustomizeRowView: NSView {
         id = row.id
         toggle = CustomizeToggle(on: row.on, colors: colors, label: row.title)
         super.init(frame: .zero)
+        // The settings window's row box: 8 pt corners, a 1 pt border.
         wantsLayer = true
-        layer?.cornerRadius = 7
+        layer?.cornerRadius = 8
+        layer?.borderWidth = 1
+        layer?.borderColor = colors.border.cgColor
         layer?.backgroundColor = colors.box.cgColor
         let handle = NSImageView(image: Icon.dotsSixVertical.image(size: UILooks.pt(13)))
         handle.contentTintColor = colors.secondary.withAlphaComponent(0.6)
@@ -152,7 +155,7 @@ final class CustomizeRowView: NSView {
         icon.contentTintColor = colors.secondary
         icon.isHidden = row.icon == nil
         let title = NSTextField(labelWithString: row.title)
-        title.font = UILooks.font(13)
+        title.font = .systemFont(ofSize: 13, weight: .medium)
         title.textColor = colors.text
         title.lineBreakMode = .byTruncatingTail
         let subtitle = NSTextField(labelWithString: row.subtitle ?? "")
