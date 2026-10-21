@@ -48,7 +48,7 @@ public final class AgentsController {
     /// Opens or closes a session's subagents (a click on it in the page).
     public func toggle(_ sessionID: String) {
         openSession = openSession == sessionID ? nil : sessionID
-        reload()
+        reload(accounts: false)
     }
 
     /// How many work and how many wait for an answer: the status item, the dot.
@@ -72,11 +72,13 @@ public final class AgentsController {
         liveness = timer
     }
 
-    /// Reads everything again: the accounts, their live sessions, the open
-    /// one's subagents; watches the folders that matter now.
-    func reload() {
+    /// Reads again: the live sessions, the open one's subagents, and the
+    /// accounts when `accounts` (at start and on the 10 s check; each
+    /// .claude.json is ~120 KB, too much to parse on every session event);
+    /// watches the folders that matter now.
+    func reload(accounts findAccounts: Bool = true) {
         guard isEnabled, !watchers.isEmpty else { return }
-        accounts = AgentAccount.find(home: home)
+        if findAccounts || accounts.isEmpty { accounts = AgentAccount.find(home: home) }
         var all: [AgentSession] = []
         var bad = 0
         for account in accounts {
@@ -112,7 +114,7 @@ public final class AgentsController {
         guard !paths.isEmpty else { return }
         var context = FSEventStreamContext()
         let callback: FSEventStreamCallback = { _, _, _, _, _, _ in
-            DispatchQueue.main.async { MainActor.assumeIsolated { AgentsController.shared.reload() } }
+            DispatchQueue.main.async { MainActor.assumeIsolated { AgentsController.shared.reload(accounts: false) } }
         }
         let flags = FSEventStreamCreateFlags(kFSEventStreamCreateFlagFileEvents | kFSEventStreamCreateFlagNoDefer)
         guard let stream = FSEventStreamCreate(nil, callback, &context, paths as CFArray,
