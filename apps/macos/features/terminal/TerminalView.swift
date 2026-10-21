@@ -4,14 +4,20 @@ import MetalKit
 import TempImages
 
 /// The terminal on screen: draws the session with Metal, sends keys and
-/// pasted text to it, and resizes it with the view.
+/// pasted text to it, and resizes it with the view. It draws into a
+/// TerminalCanvas that exists only while it is in a window.
 @MainActor
-public final class TerminalView: MTKView {
+public final class TerminalView: NSView {
     /// Space between the window edge and the text, in points.
     private static let paddingPoints: CGFloat = 8
 
     public private(set) var session: TerminalSession?
     private var renderer: TerminalRenderer?
+    let device = MTLCreateSystemDefaultDevice()
+    /// The Metal surface, only while in a window (TerminalCanvas.swift).
+    var canvas: TerminalCanvas?
+    /// Opaque unless a background image shows through (applyAppearance).
+    private var canvasOpaque = true
     private var lastSize: (cols: UInt16, rows: UInt16) = (0, 0)
     var markedText = NSAttributedString()
     /// Left Option as Meta (Option+B goes to the shell as Meta+B) instead of
@@ -51,17 +57,11 @@ public final class TerminalView: MTKView {
     var imageHover: PastedImageHover?
 
     public init(frame: CGRect, cwd: String? = nil) {
-        super.init(frame: frame, device: MTLCreateSystemDefaultDevice())
-        colorPixelFormat = .bgra8Unorm
-        framebufferOnly = true
-        // Draw on demand: only when the shell sends output or the view changes.
-        isPaused = true
-        enableSetNeedsDisplay = true
-
+        super.init(frame: frame)
         let scale = window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
         if let device {
             if let atlas = Self.preferredAtlas(device: device, scale: scale) {
-                renderer = TerminalRenderer(device: device, atlas: atlas, pixelFormat: colorPixelFormat)
+                renderer = TerminalRenderer(device: device, atlas: atlas, pixelFormat: .bgra8Unorm)
             }
         }
         let size = gridSize()
@@ -144,7 +144,8 @@ public final class TerminalView: MTKView {
         renderer?.backgroundAlpha = appearance.backgroundAlpha
         // Opaque unless a background image shows through: an opaque layer
         // costs less to composite.
-        layer?.isOpaque = appearance.backgroundAlpha >= 1
+        canvasOpaque = appearance.backgroundAlpha >= 1
+        canvas?.layer?.isOpaque = canvasOpaque
         needsDisplay = true
     }
 
@@ -163,14 +164,39 @@ public final class TerminalView: MTKView {
 
     // MARK: Drawing
 
-    public override func draw(_ dirtyRect: NSRect) {
-        guard let renderer, let session, let drawable = currentDrawable,
+    /// Asks the canvas for a frame; nothing to do while there is none (the
+    /// tab is hidden), as showing again draws the current screen.
+    public override var needsDisplay: Bool {
+        get { canvas?.needsDisplay ?? false }
+        set { if newValue { canvas?.needsDisplay = true } }
+    }
+
+    func drawFrame(in canvas: TerminalCanvas, synchronously: Bool) {
+        guard let renderer, let session, let drawable = canvas.currentDrawable,
               let frame = session.currentFrame()
         else { return }
         let padding = Float(Self.paddingPoints * scale)
         updateBlink(programWantsBlink: frame.pointee.cursor_blinking)
         let overlay = DrawOverlay(linkCells: hoveredLinkCells, hideCursor: !signals.cursorShown, flash: isFlashing)
-        renderer.draw(frame.pointee, padding: SIMD2(padding, padding), in: drawable, size: drawableSize, overlay: overlay)
+        renderer.draw(frame.pointee, padding: SIMD2(padding, padding), in: drawable, size: canvas.drawableSize,
+                      overlay: overlay, synchronously: synchronously)
+    }
+
+    /// In a window: a new canvas, under the find bar and the hovers, with
+    /// its first frame drawn before it shows. Out of one: the canvas goes.
+    func placeCanvas() {
+        guard window != nil else {
+            canvas?.removeFromSuperview()
+            canvas = nil
+            return
+        }
+        guard canvas == nil, let device else { return }
+        let canvas = TerminalCanvas(terminal: self, device: device)
+        canvas.frame = bounds
+        canvas.layer?.isOpaque = canvasOpaque
+        addSubview(canvas, positioned: .below, relativeTo: nil)
+        self.canvas = canvas
+        canvas.drawFirstFrame()
     }
 
     public override func setFrameSize(_ newSize: NSSize) {

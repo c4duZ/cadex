@@ -44,7 +44,7 @@ LIMITS = {
     "agent_cpu": 10.0,            # 2-4 % while a file is saved every 0.1 s
     "theme_switch_mb": 6,         # 0 MB over 300 switches after 150 to warm up (90 -> 90, 2026-10-20)
     "reading_flood_peak_mb": 200, # flood with minimum contrast 7 and ligatures on
-    "terminal_tab_mb": 30,        # ~22 MB each hidden tab; 43 before the shared atlas and pipeline (2026-10-21)
+    "terminal_tab_mb": 6,         # 0-1 MB each hidden tab (its canvas goes); 22 with the canvas kept, 43 before the shared atlas (2026-10-21)
     "subagent_first_mb": 20,      # +6 to +9 MB: a 34 MB log's first opening, the text system included (2026-10-21)
     "subagent_open_mb": 8,        # 0 to +2 MB each opening after (TextKit 1 had kept +20 and jumped 70)
     "subagent_closed_mb": 5,      # +1 to +3 MB once its tab is closed again
@@ -206,7 +206,9 @@ def measure_subagent(app):
     after each by the app (CADEX_PERF_SUBAGENT_LOG). Memory every 0.5 s,
     the median of each stretch so the 1 s jumps of switching tabs do not
     count. The first opening also loads the text system once; the second
-    is what each one adds; after it closes nothing must stay."""
+    is what each one adds; after it closes nothing must stay. Since the
+    hidden terminal lets go of its canvas (2026-10-21) the open numbers can
+    be below zero: the tab costs less than the terminal it hides."""
     start = time.time()
     curve = []
     while time.time() - start < 55:

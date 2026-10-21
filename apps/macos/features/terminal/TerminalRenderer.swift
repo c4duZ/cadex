@@ -71,7 +71,7 @@ final class TerminalRenderer {
     }
 
     func draw(_ frame: cadex_terminal_frame, padding: SIMD2<Float>, in drawable: CAMetalDrawable, size: CGSize,
-              overlay: DrawOverlay = DrawOverlay()) {
+              overlay: DrawOverlay = DrawOverlay(), synchronously: Bool = false) {
         let quads = builder.build(frame: frame, atlas: atlas, metrics: font.metrics, padding: padding,
                                   viewSize: SIMD2(Float(size.width), Float(size.height)), overlay: overlay,
                                   selection: selectionColor)
@@ -102,8 +102,16 @@ final class TerminalRenderer {
             }
             encoder.endEncoding()
         }
-        commands.present(drawable)
-        commands.commit()
+        // With the layer's transaction (a new surface's first frame), the
+        // drawable is shown once the work is scheduled, with the frame.
+        if synchronously {
+            commands.commit()
+            commands.waitUntilScheduled()
+            drawable.present()
+        } else {
+            commands.present(drawable)
+            commands.commit()
+        }
     }
 
     private func buffer(for quads: [QuadInstance]) -> MTLBuffer? {
