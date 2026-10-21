@@ -29,9 +29,11 @@
 - A fileira fica sob a barra de título transparente: nenhuma view dela move a janela
   (mouseDownCanMoveWindow). O que se arrasta vai para cima dos vizinhos e anda a partir de onde
   estava no começo; a vaga é a que está sob o meio dele (CustomizeLayout.dropIndex).
-- `SidebarCommands.swift`: sidebar.customize e sidebar.toggle-page (a lista de páginas no ⌘K).
-- O catálogo do app está em `../../app/SidebarWiring.swift`: files, search, git (padrão) e history
-  (escondido). Só entra o que mostra uma página na barra; preview e spaces saíram (o dono,
+- `SidebarCommands.swift`: sidebar.customize, sidebar.toggle-page (a lista de páginas no ⌘K) e
+  sidebar.page-1 a -9 (⌥⌘1 a ⌥⌘9): o ícone na posição, como um clique nele (`press(position:)`);
+  ⇧⌘3 a ⇧⌘5 são as capturas de tela do sistema, por isso ⌥⌘ (o dono, 2026-10-21).
+- O catálogo do app está em `../../app/SidebarWiring.swift`: files, search, git, agents, accounts
+  (padrão) e history (escondido). Só entra o que mostra uma página na barra; preview e spaces saíram (o dono,
   2026-10-21). `onShow` avisa quando uma página aparece, para o app só criar o conteúdo então.
 - Status: fase A no código. Ainda não: sub-abas (chegam com Agents na fase C) e a página aberta
   voltando com os spaces.

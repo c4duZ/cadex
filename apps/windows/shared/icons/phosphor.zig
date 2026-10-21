@@ -47,6 +47,7 @@ pub const fire_simple: u21 = 0xE620;
 pub const folder: u21 = 0xE24A;
 pub const folder_open: u21 = 0xE256;
 pub const folder_plus: u21 = 0xE258;
+pub const gauge: u21 = 0xE628;
 pub const gear_six: u21 = 0xE272;
 pub const git_branch: u21 = 0xE278;
 pub const git_commit: u21 = 0xE27A;
