@@ -73,6 +73,7 @@ test "reports a foreground program and the shell exit code" {
     var attempts: u32 = 0;
     while (!session.hasForegroundProcess() and attempts < 250) : (attempts += 1) clock.sleepMs(20);
     try testing.expect(session.hasForegroundProcess());
+    try testing.expect(session.foregroundGroup() > 0);
 
     // Ctrl+C ends sleep; then the shell exits with code 7.
     try session.write("\x03");

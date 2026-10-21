@@ -128,6 +128,10 @@ cadex_status cadex_terminal_resize(cadex_terminal *terminal, uint16_t cols, uint
 /* True while a program other than the shell runs in the foreground. */
 bool cadex_terminal_has_foreground_process(cadex_terminal *terminal);
 
+/* The foreground program's process group, 0 when the shell owns the terminal
+ * (or on Windows). The app matches an agent's pid to its terminal with it. */
+int32_t cadex_terminal_foreground_group(cadex_terminal *terminal);
+
 /* The title the program set (OSC 0/2), not NUL-terminated. Free with
  * cadex_free. No title: *out is NULL and *out_len is 0. */
 cadex_status cadex_terminal_copy_title(cadex_terminal *terminal, uint8_t **out, size_t *out_len);

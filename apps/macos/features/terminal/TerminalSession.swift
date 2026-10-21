@@ -130,6 +130,13 @@ public final class TerminalSession {
         return cadex_terminal_has_foreground_process(handle)
     }
 
+    /// The foreground program's process group, 0 when the shell owns the
+    /// terminal: an agent session's pid has it as its group (docs/spec/agents.md).
+    public var foregroundGroup: Int32 {
+        guard let handle else { return 0 }
+        return cadex_terminal_foreground_group(handle)
+    }
+
     /// The screen to draw. Valid until the next call; main thread only.
     func currentFrame() -> UnsafePointer<cadex_terminal_frame>? {
         guard let handle else { return nil }

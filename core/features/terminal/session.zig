@@ -165,6 +165,11 @@ pub const Session = struct {
         return !self.reaped and self.child.hasForegroundProcess();
     }
 
+    /// The foreground program's process group, 0 for none (the shell).
+    pub fn foregroundGroup(self: *Session) i32 {
+        return if (self.reaped) 0 else self.child.foregroundGroup();
+    }
+
     /// Visible text, one line per row. Caller frees with `gpa`.
     pub fn copyText(self: *Session, gpa: std.mem.Allocator) ![]const u8 {
         self.lock();

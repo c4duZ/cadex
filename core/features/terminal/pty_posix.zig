@@ -102,6 +102,14 @@ pub const Child = struct {
         return group > 0 and group != self.pid;
     }
 
+    /// The foreground program's process group, 0 when the shell itself
+    /// owns the terminal: the app matches an agent's pid to its terminal
+    /// with it (docs/spec/agents.md).
+    pub fn foregroundGroup(self: Child) i32 {
+        const group = tcgetpgrp(self.fd);
+        return if (group > 0 and group != self.pid) @intCast(group) else 0;
+    }
+
     /// The current directory of the program in the foreground (the shell,
     /// or what it runs), written into `buf`. Null if the system does not
     /// say. Used when the shell does not report its directory with OSC 7.

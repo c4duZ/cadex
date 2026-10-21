@@ -113,6 +113,13 @@ pub const Child = struct {
         return info.ActiveProcesses > 1;
     }
 
+    /// No process groups on a console; agents are matched on the Mac only
+    /// for now (plan 17).
+    pub fn foregroundGroup(self: Child) i32 {
+        _ = self;
+        return 0;
+    }
+
     /// Windows does not tell another process's folder; OSC 7 from the
     /// shell does (docs/plans/9-windows-core.md, phase E).
     pub fn currentDirectory(self: Child, buf: *DirectoryBuffer) ?[]const u8 {

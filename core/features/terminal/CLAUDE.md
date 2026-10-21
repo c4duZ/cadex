@@ -4,7 +4,9 @@
 - Abrir, redimensionar e fechar sessões de shell num PTY, com o shell de login do usuário.
 - Alimentar a libghostty-vt com a saída e expor ao app o que ele precisa desenhar.
 - Integração de shell (OSC 7) para saber o diretório atual de cada sessão.
-- Saber se uma sessão tem um processo rodando em primeiro plano (para avisar antes de fechar).
+- Saber se uma sessão tem um processo rodando em primeiro plano (para avisar antes de fechar) e o
+  grupo de processos dele (`cadex_terminal_foreground_group`: o app liga a sessão de um agente ao
+  terminal onde ela roda; 0 no Windows por enquanto).
 
 ## O que eu não quero
 - Qualquer outra feature, do núcleo ou do app, falando direto com a libghostty: só `model.zig`,

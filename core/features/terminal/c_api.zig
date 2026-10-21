@@ -101,6 +101,11 @@ pub export fn cadex_terminal_has_foreground_process(session: ?*Session) callconv
     return s.hasForegroundProcess();
 }
 
+pub export fn cadex_terminal_foreground_group(session: ?*Session) callconv(.c) i32 {
+    const s = session orelse return 0;
+    return s.foregroundGroup();
+}
+
 /// Visible text, one line per row, not NUL-terminated. Free with cadex_free.
 pub export fn cadex_terminal_copy_text(session: ?*Session, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) status.Code {
     const s = session orelse return status.invalid_argument;
