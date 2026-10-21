@@ -10,6 +10,7 @@ public enum PreviewCommands {
     public static func all(open: @escaping @MainActor (String, Bool?) -> Void,
                            active: @escaping @MainActor () -> PreviewDocument?) -> [Command] {
         func needsPreview() -> String? { active() == nil ? T("No preview open", "Nenhum preview aberto") : nil }
+        func needsPicking() -> String? { active()?.isPicking == true ? nil : T("Not picking an element", "Não está escolhendo elemento") }
         return [
             Command(id: "preview.open", title: T("Open Web Preview", "Abrir preview web"), keywords: ["browser", "navegador", "localhost", "site"],
                     category: .view, action: .run { open("", nil) }),
@@ -21,6 +22,13 @@ public enum PreviewCommands {
                     action: .run { active()?.goBack() }, unavailableReason: needsPreview),
             Command(id: "preview.forward", title: T("Go Forward in Preview", "Avançar no preview"), keywords: ["forward", "next", "próxima"], category: .view,
                     action: .run { active()?.goForward() }, unavailableReason: needsPreview),
+            // Mac only for now (docs/adr/0018-element-picker.md).
+            Command(id: "preview.pick-element", title: T("Pick Element in Preview", "Escolher elemento no preview"),
+                    keywords: ["inspect", "inspecionar", "select", "selecionar", "element", "elemento", "agent", "agente", "copy", "copiar"],
+                    category: .view, defaultShortcut: "cmd+shift+c", action: .run { active()?.togglePicking() },
+                    unavailableReason: needsPreview),
+            Command(id: "preview.stop-picking", title: T("Stop Picking", "Parar de escolher"), keywords: ["element", "elemento", "esc"],
+                    category: .view, defaultShortcut: "escape", action: .run { active()?.stopPicking() }, unavailableReason: needsPicking),
         ]
     }
 }

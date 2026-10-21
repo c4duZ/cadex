@@ -12,7 +12,8 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
     troca oferece "Reabrir agora", com as abas e os spaces de volta; ver
     `../adr/0015-english-default-two-languages.md`). Arquivos: onde abrem, ao lado do painel com
     foco (padrão) ou em nova aba (`general.openFiles`), e como uma nota Markdown abre
-    (`markdown.openAs`). Árvore de arquivos: seguir o terminal (`explorer.followTerminal`) e
+    (`markdown.openAs`), e para onde vai o elemento escolhido no preview, o terminal do agente
+    (padrão) ou a área de transferência (`preview.pickTarget`, ver `preview.md`). Árvore de arquivos: seguir o terminal (`explorer.followTerminal`) e
     mostrar os ocultos (`explorer.showHidden`). Manter acordado: como liga e desliga, o modo
     (`power.mode`), manter a tela acesa, ligar ao abrir (`power.onAtLaunch`) e a tampa fechada
     explicada à parte (ver `power.md`). Numa página própria ficou demais (o dono, 2026-10-20).

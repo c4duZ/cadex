@@ -39,7 +39,9 @@
   as mudanças em .git, páginas web num PreviewDocument) e onde: ao lado do painel com foco ou em
   nova aba, por general.openFiles (opensBeside em `SettingsBridge.swift`), ou pela escolha do explorer; quem
   pede (o histórico abrindo um diff) fica no painel dele. `makeDocument(identity:)` refaz os
-  documentos salvos nos spaces. Passa as mudanças do disco aos documentos abertos e monta a aparência do editor (`EditorLooks`).
+  documentos salvos nos spaces. O elemento escolhido num preview vai por `ElementPickDelivery.swift`:
+  colado sem Enter no terminal do agente, que ganha o foco, ou copiado (⌥, preview.pickTarget em
+  `SettingsBridge.swift`, ou nenhum agente). Passa as mudanças do disco aos documentos abertos e monta a aparência do editor (`EditorLooks`).
 - A casca da janela, no estilo do Terax: título transparente com barra de ferramentas compacta
   (38 pt, botões da janela centrados); `TitleBarView.swift` (um grupo à esquerda com painel
   lateral, busca/paleta "⌘K" e spaces, o space só o ícone de pilha com um space e o nome com mais;

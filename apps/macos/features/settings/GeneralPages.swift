@@ -39,6 +39,14 @@ enum GeneralPages {
                                                              selected: store.settings.markdown.openAs) { value in
                                      store.update { $0.markdown.openAs = value }
                                  }),
+                SettingsPage.row(T("Picked element goes to", "Elemento escolhido vai para"),
+                                 T("In the web preview, ⌘⇧C picks an element of the page. It is pasted into the agent running in a terminal, without Enter, or copied. ⌥+click copies either way.",
+                                   "No preview web, ⌘⇧C escolhe um elemento da página. Ele é colado no agente que roda num terminal, sem Enter, ou copiado. ⌥+clique copia de qualquer jeito."),
+                                 control: SettingsPage.popup([(T("The agent's terminal", "O terminal do agente"), "terminal"),
+                                                              (T("The clipboard", "A área de transferência"), "clipboard")],
+                                                             selected: store.settings.preview.pickTarget) { value in
+                                     store.update { $0.preview.pickTarget = value }
+                                 }),
 
                 SettingsPage.section(T("File tree", "Árvore de arquivos")),
                 SettingsPage.row(T("Follow the terminal", "Seguir o terminal"),

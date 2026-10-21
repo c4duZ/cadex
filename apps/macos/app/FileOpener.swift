@@ -23,6 +23,8 @@ final class FileOpener {
     var onEditorOpened: ((EditorDocument) -> Void)?
     /// Runs a command by id, for tabs whose menus fire commands (history).
     var runCommand: ((String) -> Bool)?
+    /// Hands an element picked in a preview over (ElementPickDelivery).
+    var onPickElement: ((PickDelivery) -> PickOutcome)?
     /// The setting: beside (true) or in a new tab.
     private let opensBeside: () -> Bool
 
@@ -104,7 +106,10 @@ final class FileOpener {
             existing.reload()
             return tabs.open(existing)
         }
-        tabs.open(PreviewDocument(url: url), beside: beside ?? opensBeside())
+        let preview = PreviewDocument(url: url)
+        preview.runCommand = { [weak self] id in self?.runCommand?(id) ?? false }
+        preview.onPickElement = { [weak self] delivery in self?.onPickElement?(delivery) ?? .copied(note: nil) }
+        tabs.open(preview, beside: beside ?? opensBeside())
     }
 
     private func makeHistory(_ root: String) -> HistoryDocument {

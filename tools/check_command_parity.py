@@ -20,9 +20,11 @@ NOT_COMMANDS = {"explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal
 # Mac-only for now: the in-app updater (docs/adr/0016-in-app-updates.md) comes
 # to Windows later. Windows-only ones (workspace.environment) need no entry.
 # The pasted-image tags (docs/spec/terminal.md, Ver a imagem colada) also
-# start on the Mac, 2026-10-20.
+# start on the Mac, 2026-10-20. The preview's element picker needs a content
+# world WebView2 lacks (docs/adr/0018-element-picker.md).
 MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
-            "terminal.open-pasted-image-beside", "terminal.open-pasted-image-in-tab"}
+            "terminal.open-pasted-image-beside", "terminal.open-pasted-image-in-tab",
+            "preview.pick-element", "preview.stop-picking"}
 
 
 def literals(folder, suffix):

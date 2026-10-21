@@ -44,6 +44,16 @@ func eventually(_ body: () -> Bool) async -> Bool {
 }
 
 let exitCode = await Checks.run([
+    ("a picked element goes to an agent first, then any running program, never an idle shell", {
+        let order = AgentCandidate.order([
+            AgentCandidate(title: "~/painel", running: false),
+            AgentCandidate(title: "npm run dev", running: true),
+            AgentCandidate(title: "✳ Ajustar o botão", running: true),
+            AgentCandidate(title: "claude", running: false),
+            AgentCandidate(title: "Codex", running: true),
+        ])
+        expect(order == [2, 4, 1], "\(order)")
+    }),
     ("splitting puts the new pane after the old one, half and half", {
         let tree = PaneTree.leaf(1).splitting(1, axis: .horizontal, newPane: 2)
         expect(tree == .split(.horizontal, .leaf(1), .leaf(2), ratio: 0.5))

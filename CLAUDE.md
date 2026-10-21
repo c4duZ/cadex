@@ -23,7 +23,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | git-history | sim | sim | log de commits e grafo |
 | workspace | sim | não | diretórios autorizados, diretório de lançamento, ambiente (WSL no Windows) |
 | editor | sim | sim | ler código: números de linha, dobrar, destaque de sintaxe (tree-sitter), linha atual |
-| preview | não | sim | preview web de servidores locais e URLs |
+| preview | não | sim | preview web de servidores locais e URLs; escolher elemento para o agente |
 | media-preview | não | sim | imagem, vídeo, áudio e PDF com os frameworks do sistema |
 | markdown | sim | sim | Markdown renderizado; ao editar: autocomplete de link, ⌘+clique, links quebrados, quem aponta pra cá |
 | tabs | não | sim | abas e divisões de painel |

@@ -3,6 +3,7 @@ import CommandPalette
 import Editor
 import Explorer
 import Markdown
+import Preview
 import Search
 import Settings
 import Shortcuts
@@ -90,6 +91,9 @@ final class WindowSession: NSObject, NSWindowDelegate {
                                 opensBeside: { [weak self] in self?.settings.opensBeside ?? true })
         opener.onEditorOpened = { [weak self] document in self?.markdown?.attach(document) }
         opener.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
+        opener.onPickElement = { [weak self] delivery in
+            ElementPickDelivery.deliver(delivery, tabs: self?.tabs, toClipboard: self?.settings.picksToClipboard ?? false)
+        }
         self.opener = opener
         guard let explorer, let git else { return }
         explorer.openFile = { [weak opener] path in opener?.open(path) }

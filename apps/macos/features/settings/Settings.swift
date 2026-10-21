@@ -83,6 +83,12 @@ public struct Settings: Equatable, Sendable {
         public var openAs = "source"
     }
 
+    public struct Preview: Equatable, Sendable {
+        /// Where a picked element goes: "terminal" (pasted into the agent's
+        /// prompt, without Enter) or "clipboard" (docs/spec/preview.md).
+        public var pickTarget = "terminal"
+    }
+
     public struct Power: Equatable, Sendable {
         /// What the coffee in the title bar turns on: "always" or
         /// "running" (only while a terminal runs a program); ⌘K picks
@@ -100,6 +106,7 @@ public struct Settings: Equatable, Sendable {
     public var tabs = Tabs()
     public var explorer = Explorer()
     public var markdown = Markdown()
+    public var preview = Preview()
     public var power = Power()
     /// "cmd+shift+t" → command id, or nil to turn a default off.
     public var shortcuts: [String: String?] = [:]
@@ -112,6 +119,7 @@ public struct Settings: Equatable, Sendable {
     static let cursors = ["bar", "block", "underline"]
     static let modes = ["system", "dark", "light"]
     static let markdownOpenings = ["source", "rendered"]
+    static let pickTargets = ["terminal", "clipboard"]
     static let fileOpenings = ["beside", "tab"]
     static let languages = ["en", "pt"]
     static let keepAwakeModes = ["always", "running"]

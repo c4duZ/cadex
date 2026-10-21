@@ -40,6 +40,9 @@
 - Preview: `TerminalPreviewOffer.swift` mostra "Abrir no preview" no canto de baixo por 10 s
   quando o núcleo acha um servidor local na saída (onLocalURL da sessão); só aparece se quem
   segura o terminal pôs `onOpenPreview`.
+- Colar vindo de outra feature: `TerminalAppPaste.swift` (`pasteFromApp`, o elemento escolhido no
+  preview), bracketed e sem Enter, sem perguntar; recusa (false) quando a colagem não é segura e
+  quem chamou copia.
 - Busca: `TerminalFind.swift` liga o ⌘F (comando edit.find da paleta, que chega pelo
   `showFind(_:)` de quem tem o foco) ao núcleo; `TerminalFindBar.swift` é a barra no canto
   superior direito ("3 de 12", ↩ próxima, ⇧↩ anterior, Esc fecha).

@@ -25,6 +25,7 @@ pub const code: u21 = 0xE1BC;
 pub const coffee: u21 = 0xE1C2;
 pub const command: u21 = 0xE1C4;
 pub const copy: u21 = 0xE1CA;
+pub const crosshair: u21 = 0xE1D6;
 pub const eye: u21 = 0xE220;
 pub const file: u21 = 0xE230;
 pub const file_archive: u21 = 0xEB2A;

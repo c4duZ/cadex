@@ -7,14 +7,21 @@ import WebKit
 import Strings
 
 /// A web page in a tab (docs/spec/preview.md): the server an agent started
-/// in the terminal, next to the code. The page is isolated: no bridge to
-/// the app, no file: URLs, website data only while the app runs.
+/// in the terminal, next to the code. The page is isolated: no object of
+/// the app and no message channel in it, no file: URLs, website data only
+/// while the app runs. The element picker reads it from a world of its own
+/// (PreviewPicker, docs/adr/0018-element-picker.md).
 @MainActor
 public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate, WKUIDelegate, NSTextFieldDelegate {
     public let view = NSView()
     public var onChange: (() -> Void)?
-    let web: WKWebView
+    let web: PickingWebView
     let address = NSTextField()
+    private let overlay = PickerOverlay()
+    private let pick: NSButton
+    private lazy var picker = PreviewPicker(web: web, overlay: overlay)
+    /// Runs a command by id: the bar's pick button fires preview.pick-element.
+    public var runCommand: ((String) -> Bool)?
     private let progress = NSProgressIndicator()
     private let back: NSButton
     private let forward: NSButton
@@ -41,10 +48,12 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
         configuration.applicationNameForUserAgent = Self.safariUserAgent
-        web = WKWebView(frame: .zero, configuration: configuration)
+        web = PickingWebView(frame: .zero, configuration: configuration)
         back = Self.button(.arrowLeft, T("Back", "Voltar"))
         forward = Self.button(.arrowRight, T("Forward", "Avançar"))
+        pick = Self.button(.crosshair, T("Pick an element (⌘⇧C)", "Escolher elemento (⌘⇧C)"))
         super.init()
+        picker.onStateChange = { [weak self] in self?.showPicking() }
         web.navigationDelegate = self
         web.uiDelegate = self
         // "Inspecionar elemento" in the page's context menu (macOS 13.3+).
@@ -80,7 +89,27 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         view.window?.makeFirstResponder(address.stringValue.isEmpty ? address as NSView : web)
     }
     public func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) { close() }
-    public func close() { web.stopLoading() }
+    public func close() {
+        picker.stop()
+        web.stopLoading()
+    }
+
+    // MARK: Picking
+
+    /// Hands a picked element over (the app: the agent's terminal or the
+    /// clipboard) and says where it went. Nil copies it.
+    public var onPickElement: ((PickDelivery) -> PickOutcome)? {
+        get { picker.onDeliver }
+        set { picker.onDeliver = newValue }
+    }
+
+    public var isPicking: Bool { picker.isPicking }
+    public func togglePicking() { picker.toggle() }
+    public func stopPicking() { picker.stop() }
+
+    private func showPicking() {
+        pick.contentTintColor = picker.isPicking ? .controlAccentColor : nil
+    }
 
     /// Loads an address; without a scheme, http:// for local servers and
     /// https:// for the rest.
@@ -128,6 +157,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     /// over the next page, 2026-10-19).
     public func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
         message.isHidden = true
+        picker.pageChanged()
     }
 
     public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
@@ -183,6 +213,8 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         forward.action = #selector(forwardPressed)
         reload.target = self
         reload.action = #selector(reloadPressed)
+        pick.target = self
+        pick.action = #selector(pickPressed)
         back.isEnabled = false
         forward.isEnabled = false
         address.delegate = self
@@ -196,10 +228,10 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         message.alignment = .center
         message.textColor = .secondaryLabelColor
         message.isHidden = true
-        let bar = NSStackView(views: [back, forward, reload, address])
+        let bar = NSStackView(views: [back, forward, reload, address, pick])
         bar.spacing = 4
         bar.edgeInsets = NSEdgeInsets(top: 6, left: 8, bottom: 4, right: 8)
-        for v in [bar, progress, web, message] as [NSView] {
+        for v in [bar, progress, web, overlay, message] as [NSView] {
             v.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(v)
         }
@@ -215,6 +247,10 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
             web.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             web.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             web.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            overlay.topAnchor.constraint(equalTo: web.topAnchor),
+            overlay.leadingAnchor.constraint(equalTo: web.leadingAnchor),
+            overlay.trailingAnchor.constraint(equalTo: web.trailingAnchor),
+            overlay.bottomAnchor.constraint(equalTo: web.bottomAnchor),
             message.centerXAnchor.constraint(equalTo: web.centerXAnchor),
             message.centerYAnchor.constraint(equalTo: web.centerYAnchor),
             message.widthAnchor.constraint(lessThanOrEqualTo: web.widthAnchor, constant: -40),
@@ -224,4 +260,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     @objc private func backPressed() { goBack() }
     @objc private func forwardPressed() { goForward() }
     @objc private func reloadPressed() { reload() }
+    @objc private func pickPressed() {
+        if runCommand?("preview.pick-element") != true { togglePicking() }
+    }
 }

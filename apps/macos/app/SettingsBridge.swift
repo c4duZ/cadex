@@ -27,6 +27,10 @@ final class SettingsBridge {
     /// says "tab". Read at each opening, so a change counts at once.
     var opensBeside: Bool { store.settings.general.openFiles != "tab" }
 
+    /// preview.pickTarget: a picked element is copied, not pasted into the
+    /// agent's terminal. Read at each pick.
+    var picksToClipboard: Bool { store.settings.preview.pickTarget == "clipboard" }
+
     func start() {
         store.observe { [weak self] settings in self?.apply(settings) }
         // "Increase contrast" in the system changes the theme, not the settings.

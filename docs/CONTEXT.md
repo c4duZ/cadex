@@ -29,6 +29,9 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   com um programa rodando num terminal. O ícone de café na barra de título mostra e muda.
 - **Atualização** (`updates`): versão nova do Cadex publicada no GitHub, descrita pelo `latest.json`
   assinado da release; o app baixa, confere e troca a si mesmo.
+- **Escolher elemento** (`element picker`): o modo do preview web em que clicar num elemento da
+  página manda a descrição dele (seletor, HTML, texto) para o agente no terminal, colada sem Enter,
+  ou para a área de transferência (`docs/spec/preview.md`).
 - **Comando** (`command`): uma ação do app, com id, título e a função que executa. Menus, botões e
   atalhos só disparam comandos.
 

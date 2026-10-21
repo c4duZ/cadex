@@ -70,6 +70,9 @@ public enum SettingsFile {
         if let m = reader.section(root, "markdown") {
             settings.markdown.openAs = reader.choice(m, "markdown.openAs", Settings.markdownOpenings) ?? settings.markdown.openAs
         }
+        if let v = reader.section(root, "preview") {
+            settings.preview.pickTarget = reader.choice(v, "preview.pickTarget", Settings.pickTargets) ?? settings.preview.pickTarget
+        }
         if let p = reader.section(root, "power") {
             settings.power.mode = reader.choice(p, "power.mode", Settings.keepAwakeModes) ?? settings.power.mode
             settings.power.onAtLaunch = reader.bool(p, "power.onAtLaunch") ?? settings.power.onAtLaunch
@@ -108,6 +111,7 @@ public enum SettingsFile {
             "tabs": ["unfocusedDim": s.tabs.unfocusedDim],
             "explorer": ["showHidden": s.explorer.showHidden, "followTerminal": s.explorer.followTerminal],
             "markdown": ["openAs": s.markdown.openAs],
+            "preview": ["pickTarget": s.preview.pickTarget],
             "power": ["mode": s.power.mode, "onAtLaunch": s.power.onAtLaunch, "keepDisplayOn": s.power.keepDisplayOn],
             "shortcuts": shortcuts,
         ]
