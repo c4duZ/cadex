@@ -89,6 +89,18 @@ let exitCode = await Checks.run([
             snapshot(view, name)
         }
     }),
+    ("a picture of the Customize card, with CADEX_SNAPSHOT_DIR", {
+        let colors = SidebarColors(text: .white, secondary: NSColor(white: 0.62, alpha: 1), fill: NSColor(white: 0.2, alpha: 1),
+                                   accent: NSColor(red: 0.88, green: 0.64, blue: 0.35, alpha: 1), panel: NSColor(white: 0.11, alpha: 1),
+                                   box: NSColor(white: 0.15, alpha: 1), border: NSColor(white: 0.22, alpha: 1))
+        let items = catalog() + [SidebarItem(id: "history", icon: .clockCounterClockwise, title: "Git History", command: "git.history", kind: .action),
+                                 SidebarItem(id: "preview", icon: .globe, title: "Web Preview", command: "preview.open", shortcut: "⇧⌘H", kind: .action)]
+        let panel = SidebarCustomizePanel(catalog: items, shown: ["files", "search", "git"], colors: colors) { _ in }
+        guard let card = panel.contentView else { return expect(false) }
+        card.layoutSubtreeIfNeeded()
+        card.frame = NSRect(origin: .zero, size: card.fittingSize)
+        snapshot(card, "customize")
+    }),
 ])
 
 /// With CADEX_SNAPSHOT_DIR set, saves a picture of `view` there: the way to

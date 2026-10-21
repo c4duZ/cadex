@@ -23,7 +23,11 @@
 - `SidebarIconRow.swift` e `SidebarIconButton.swift`: os ícones; arrastar para o lado reordena
   (depois de 4 pt), o que não cabe vai para o "…" (menu de `../../shared/menus`), o botão de
   personalizar fica à direita.
-- `SidebarCustomizePanel.swift`: o popover Customize, com arrastar (NSTableView) e chave por item.
+- `SidebarCustomizePanel.swift`: o cartão Customize, embaixo do botão, nas cores do tema como a janela de
+  configurações (o dono recusou o popover do sistema em 2026-10-21: chave azul, anel de foco);
+  fecha com Esc ou clicando fora. `SidebarCustomizeRows.swift`: as linhas em caixas (alça,
+  ícone, nome, atalho numa coluna fixa, chave própria na cor de destaque) e o arrastar para cima
+  e para baixo.
 - `SidebarCommands.swift`: sidebar.customize e sidebar.toggle-page (a lista de páginas no ⌘K).
 - O catálogo do app está em `../../app/SidebarWiring.swift`: files, search, git (padrão), history,
   preview e spaces (escondidos).
@@ -33,4 +37,4 @@
 ## Como validar
 - `make macos-test` passa: as regras do layout, a view mostrando a primeira página, o clique que
   roda o comando ou recolhe, mostrar/esconder salvando. Com CADEX_SNAPSHOT_DIR, o teste salva
-  sidebar.png e sidebar-narrow.png para ver sem captura de tela.
+  sidebar.png, sidebar-narrow.png e customize.png para ver sem captura de tela.

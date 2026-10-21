@@ -53,6 +53,8 @@ final class SidebarIconButton: NSView {
         badgeLabel.layer?.cornerRadius = h / 2
     }
 
+    override var mouseDownCanMoveWindow: Bool { false }
+
     override func accessibilityPerformPress() -> Bool {
         onPress?()
         return true
@@ -84,18 +86,27 @@ final class SidebarIconButton: NSView {
 }
 
 /// The theme's colors for the sidebar: text, quiet text, the chosen fill
-/// and the accent.
+/// and the accent; and for the Customize card, its ground, the rows' boxes
+/// and the border, the same as the settings window's.
 public struct SidebarColors {
-    public var text: NSColor = .labelColor
-    public var secondary: NSColor = .secondaryLabelColor
-    public var fill: NSColor = .quaternaryLabelColor
-    public var accent: NSColor = .controlAccentColor
+    public var text: NSColor
+    public var secondary: NSColor
+    public var fill: NSColor
+    public var accent: NSColor
+    public var panel: NSColor
+    public var box: NSColor
+    public var border: NSColor
 
     public init(text: NSColor = .labelColor, secondary: NSColor = .secondaryLabelColor,
-                fill: NSColor = .quaternaryLabelColor, accent: NSColor = .controlAccentColor) {
+                fill: NSColor = .quaternaryLabelColor, accent: NSColor = .controlAccentColor,
+                panel: NSColor = .windowBackgroundColor, box: NSColor = .controlBackgroundColor,
+                border: NSColor = .separatorColor) {
         self.text = text
         self.secondary = secondary
         self.fill = fill
         self.accent = accent
+        self.panel = panel
+        self.box = box
+        self.border = border
     }
 }

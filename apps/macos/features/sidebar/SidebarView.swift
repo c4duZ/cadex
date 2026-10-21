@@ -19,7 +19,8 @@ public final class SidebarView: NSView {
     private let content = NSView()
     private let empty: NSStackView
     private var titles: [String: String] = [:]
-    private var popover: NSPopover?
+    private var panel: SidebarCustomizePanel?
+    private var colors = SidebarColors()
 
     public init(catalog: [SidebarItem], run: @escaping (String) -> Void) {
         self.catalog = catalog
@@ -116,6 +117,7 @@ public final class SidebarView: NSView {
     public func setBadge(_ badge: String?, for id: String) { row.setBadge(badge, for: id) }
 
     public func setColors(_ colors: SidebarColors) {
+        self.colors = colors
         row.colors = colors
         title.textColor = colors.text
     }
@@ -144,13 +146,10 @@ public final class SidebarView: NSView {
     }
 
     private func customize(from anchor: NSView) {
-        popover?.close()
-        let panel = SidebarCustomizePanel(catalog: catalog, shown: items) { [weak self] ids in self?.change(ids) }
-        let popover = NSPopover()
-        popover.behavior = .transient
-        popover.contentViewController = panel
-        popover.show(relativeTo: anchor.bounds, of: anchor, preferredEdge: .maxY)
-        self.popover = popover
+        panel?.dismiss()
+        let panel = SidebarCustomizePanel(catalog: catalog, shown: items, colors: colors) { [weak self] ids in self?.change(ids) }
+        panel.show(below: anchor)
+        self.panel = panel
     }
 
     @objc private func customizeFromEmpty() { customize(from: empty) }

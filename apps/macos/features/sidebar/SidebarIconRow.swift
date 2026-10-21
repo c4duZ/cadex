@@ -38,6 +38,10 @@ final class SidebarIconRow: NSView {
 
     override var intrinsicContentSize: NSSize { NSSize(width: NSView.noIntrinsicMetric, height: SidebarIconButton.size.height) }
     override var isFlipped: Bool { true }
+    // The row sits under the transparent title bar, where a press on a
+    // view that allows it drags the window: dragging Files sideways did
+    // nothing in the owner's test (2026-10-21). TitleBarButton does the same.
+    override var mouseDownCanMoveWindow: Bool { false }
 
     /// The shown items, in order; each button is made once per id.
     func setItems(_ items: [SidebarItem]) {
