@@ -1,35 +1,38 @@
 import AppKit
 
 /// A card over a status bar item while the pointer is on it: the usage of
-/// every account, the SSH hosts (the owner liked the usage one, 2026-10-21,
-/// and asked the same care for the others). It opens 0.25 s after the
-/// pointer arrives and stays while the pointer is on the item or on the
-/// card: moving up into it keeps it open (the owner, 2026-10-21); it closes
-/// 0.4 s after the pointer leaves both. It sits right on the item, so no gap
-/// lets the pointer fall out on the way. In the menus' colors, never
-/// taking the keyboard or the focus.
+/// every account, the SSH hosts, the ports (the owner liked the usage one,
+/// 2026-10-21, and asked the same care for the others). It comes in softly
+/// 0.18 s after the pointer arrives (rising 4 pt as it fades in, 0.15 s),
+/// stays while the pointer is on the item, on the card or on the strip
+/// between them, and goes the moment the pointer is on none of them (0.1 s
+/// fade). While open it looks at the pointer 30 times a second; closed, it
+/// costs nothing. Its first version waited on "pointer left" notices and
+/// chained delays: it popped in and hung about a second on the way out
+/// (owner, 2026-10-21). In the menus' colors, never taking the keyboard.
 @MainActor
 public final class HoverCard: NSObject {
     private weak var view: NSView?
     private let content: () -> NSView
     private(set) var panel: HoverCardPanel?
     private var pending: DispatchWorkItem?
-    private var tracking: NSTrackingArea?
+    private var watch: Timer?
 
     /// Shows `content()`, rebuilt each time it opens, over `view`.
     public init(over view: NSView, content: @escaping () -> NSView) {
         self.view = view
         self.content = content
         super.init()
-        let area = NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect], owner: self)
-        view.addTrackingArea(area)
-        tracking = area
+        view.addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect], owner: self))
     }
 
-    /// The card's content changed while it shows (a new reading).
+    var isOpen: Bool { watch != nil }
+
+    /// The card's content changed while it shows (a new reading): the new
+    /// content in place, no animation, no new window.
     public func refresh() {
-        guard let panel, panel.isVisible else { return }
-        panel.show(content(), above: view)
+        guard isOpen, let panel else { return }
+        panel.place(content(), above: view)
     }
 
     /// A click on the item: open now, no wait.
@@ -40,62 +43,54 @@ public final class HoverCard: NSObject {
 
     public func close() {
         pending?.cancel()
-        panel?.orderOut(nil)
+        watch?.invalidate()
+        watch = nil
+        panel?.dismiss()
     }
 
     // The tracking area calls its owner by the Objective-C names; Swift's
     // own would be mouseEnteredWithEvent:, which nothing calls: the card
     // never opened (the owner's test, 2026-10-21).
     @objc(mouseEntered:) public func mouseEntered(with event: NSEvent) {
-        if panel?.isVisible == true { schedule(open: false) } else { schedule(open: true) }
-    }
-    @objc(mouseExited:) public func mouseExited(with event: NSEvent) { schedule(open: false) }
-
-    private func schedule(open: Bool) {
+        guard !isOpen else { return }
         pending?.cancel()
-        let work = DispatchWorkItem { [weak self] in
-            MainActor.assumeIsolated {
-                guard let self else { return }
-                if open { self.open() } else { self.closeIfLeft() }
-            }
-        }
+        let work = DispatchWorkItem { [weak self] in MainActor.assumeIsolated { self?.open() } }
         pending = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + (open ? 0.25 : 0.15), execute: work)
+        // Passing over the bar on the way elsewhere does not open it.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18, execute: work)
     }
 
-    /// Closes unless the pointer is on the item or the card, by where it
-    /// really is: the card's own "left" could be lost when its content was
-    /// redrawn, and it stayed open after the pointer went (owner, 2026-10-21).
-    /// While the pointer is on one of them it looks again in 0.15 s, so
-    /// leaving either way closes it at once.
-    private func closeIfLeft() {
-        guard let panel, panel.isVisible else { return }
-        let pointer = NSEvent.mouseLocation
-        let itemRect = view.flatMap { v in v.window.map { $0.convertToScreen(v.convert(v.bounds, to: nil)) } } ?? .zero
-        if panel.frame.contains(pointer) || itemRect.insetBy(dx: -2, dy: -4).contains(pointer) {
-            schedule(open: false)
-        } else {
-            panel.orderOut(nil)
-        }
+    @objc(mouseExited:) public func mouseExited(with event: NSEvent) {
+        // Not open yet: the pointer only passed. Open: the watch decides.
+        if !isOpen { pending?.cancel() }
     }
 
     private func open() {
-        guard let view, view.window != nil, !PopupMenu.isOpen else { return }
+        guard let view, view.window?.isVisible == true, !PopupMenu.isOpen, !isOpen else { return }
         let panel = self.panel ?? HoverCardPanel()
-        // Coming in or going out, the pointer's place decides (closeIfLeft).
-        panel.onEnter = { [weak self] in self?.schedule(open: false) }
-        panel.onLeave = { [weak self] in self?.schedule(open: false) }
         self.panel = panel
-        panel.show(content(), above: view)
+        panel.place(content(), above: view)
+        panel.present()
+        let timer = Timer(timeInterval: 1.0 / 30, repeats: true) { [weak self] _ in MainActor.assumeIsolated { self?.look() } }
+        RunLoop.main.add(timer, forMode: .common)
+        watch = timer
+    }
+
+    /// The pointer on the item, the card or the strip between: stay.
+    private func look() {
+        guard let view, let window = view.window, window.isVisible, let panel else { return close() }
+        let pointer = NSEvent.mouseLocation
+        let item = window.convertToScreen(view.convert(view.bounds, to: nil)).insetBy(dx: -2, dy: -2)
+        let card = panel.frame.insetBy(dx: -2, dy: -2)
+        let bridge = NSRect(x: min(item.minX, card.minX), y: item.maxY - 2, width: max(item.maxX, card.maxX) - min(item.minX, card.minX),
+                            height: max(card.minY - item.maxY, 0) + 4)
+        if !(item.contains(pointer) || card.contains(pointer) || bridge.contains(pointer)) { close() }
     }
 }
 
 /// The card's window: rounded, the menus' ground and border.
 @MainActor
 final class HoverCardPanel: NSPanel {
-    var onEnter: (() -> Void)?
-    var onLeave: (() -> Void)?
-    private(set) var hasPointer = false
     private let box = CardBox()
 
     init() {
@@ -106,23 +101,15 @@ final class HoverCardPanel: NSPanel {
         level = .popUpMenu
         isReleasedWhenClosed = false
         collectionBehavior = [.fullScreenAuxiliary, .moveToActiveSpace, .transient]
-        box.onEnter = { [weak self] in
-            self?.hasPointer = true
-            self?.onEnter?()
-        }
-        box.onExit = { [weak self] in
-            self?.hasPointer = false
-            self?.onLeave?()
-        }
         contentView = box
     }
 
     override var canBecomeKey: Bool { false }
 
-    /// Above `view` like a popover: the arrow on its bottom edge points at
-    /// the item's middle, its tip on the item's top, so the pointer goes
-    /// straight in. Kept on screen; the arrow follows the item.
-    func show(_ content: NSView, above view: NSView?) {
+    /// The content, sized, above `view` like a popover: the arrow on its
+    /// bottom edge points at the item's middle, its tip on the item's top,
+    /// so the pointer goes straight in. Kept on screen.
+    func place(_ content: NSView, above view: NSView?) {
         guard let view, let window = view.window else { return }
         let style = MenuStyle.current
         box.fill = style.background
@@ -137,27 +124,54 @@ final class HoverCardPanel: NSPanel {
             content.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -14),
         ])
         box.layoutSubtreeIfNeeded()
-        setContentSize(box.fittingSize)
+        let size = box.fittingSize
         let rect = window.convertToScreen(view.convert(view.bounds, to: nil))
-        var origin = NSPoint(x: rect.midX - frame.width / 2, y: rect.maxY - 2)
+        var origin = NSPoint(x: rect.midX - size.width / 2, y: rect.maxY - 2)
         if let screen = window.screen?.visibleFrame {
-            origin.x = min(max(origin.x, screen.minX + 6), screen.maxX - frame.width - 6)
-            origin.y = min(origin.y, screen.maxY - frame.height - 6)
+            origin.x = min(max(origin.x, screen.minX + 6), screen.maxX - size.width - 6)
+            origin.y = min(origin.y, screen.maxY - size.height - 6)
         }
-        setFrameOrigin(origin)
-        box.arrowX = min(max(rect.midX - origin.x, 18), frame.width - 18)
+        target = NSRect(origin: origin, size: size)
+        if isVisible { setFrame(target, display: true) }
+        box.arrowX = min(max(rect.midX - origin.x, 18), size.width - 18)
         box.needsDisplay = true
+    }
+
+    private var target = NSRect.zero
+
+    /// In softly: from 4 pt lower and clear to its place, 0.15 s.
+    func present() {
+        alphaValue = 0
+        setFrame(target.offsetBy(dx: 0, dy: -4), display: false)
         orderFront(nil)
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.15
+            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            animator().alphaValue = 1
+            animator().setFrame(target, display: true)
+        }
+    }
+
+    /// Out in 0.1 s.
+    func dismiss() {
+        guard isVisible else { return }
+        NSAnimationContext.runAnimationGroup({ context in
+            context.duration = 0.1
+            animator().alphaValue = 0
+        }, completionHandler: { [weak self] in
+            MainActor.assumeIsolated {
+                // Opened again meanwhile: stay.
+                guard let self, self.alphaValue == 0 else { return }
+                self.orderOut(nil)
+            }
+        })
     }
 }
 
 /// The card's ground, drawn as a popover: a rounded box with an arrow on
-/// its bottom edge pointing at the item; says when the pointer comes in and
-/// goes out.
+/// its bottom edge pointing at the item.
 private final class CardBox: NSView {
     static let arrow: CGFloat = 7
-    var onEnter: (() -> Void)?
-    var onExit: (() -> Void)?
     var fill: NSColor = .windowBackgroundColor
     var stroke: NSColor = .separatorColor
     var arrowX: CGFloat = 40
@@ -187,14 +201,6 @@ private final class CardBox: NSView {
         sides.stroke()
     }
 
-    override func updateTrackingAreas() {
-        super.updateTrackingAreas()
-        trackingAreas.forEach(removeTrackingArea)
-        addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseEnteredAndExited, .activeAlways], owner: self))
-    }
-
-    override func mouseEntered(with event: NSEvent) { onEnter?() }
-    override func mouseExited(with event: NSEvent) { onExit?() }
 }
 
 /// A line of a card that answers the pointer: a soft fill under it, the

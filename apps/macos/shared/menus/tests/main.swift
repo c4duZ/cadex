@@ -59,8 +59,11 @@ let exitCode = await Checks.run([
         }
         panel.orderOut(nil)
     }),
-    ("a hover card opens by the names the system calls, and draws as a popover", {
-        let window = NSWindow(contentRect: NSRect(x: 200, y: 200, width: 300, height: 60), styleMask: [.borderless], backing: .buffered, defer: false)
+    ("a hover card opens by the names the system calls, draws as a popover, and goes when the pointer is away", {
+        // Far from the pointer, so the card's watch sees it away.
+        let window = NSWindow(contentRect: NSRect(x: 12000, y: 12000, width: 300, height: 60), styleMask: [.borderless], backing: .buffered, defer: false)
+        window.orderFront(nil)
+        defer { window.orderOut(nil) }
         let item = NSView(frame: NSRect(x: 100, y: 10, width: 80, height: 20))
         window.contentView?.addSubview(item)
         let card = HoverCard(over: item) {
@@ -70,17 +73,21 @@ let exitCode = await Checks.run([
         }
         expect(card.responds(to: Selector(("mouseEntered:"))) && card.responds(to: Selector(("mouseExited:"))),
                "the tracking area calls mouseEntered: and mouseExited:")
-        let event = NSEvent.enterExitEvent(with: .mouseEntered, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: window.windowNumber,
-                                           context: nil, eventNumber: 0, trackingNumber: 0, userData: nil)!
-        _ = card.perform(Selector(("mouseEntered:")), with: event)
-        try? await Task.sleep(nanoseconds: 400_000_000)
-        expect(card.panel?.isVisible == true, "it opened")
+        card.openNow()
+        expect(card.isOpen && card.panel?.isVisible == true, "it opened")
         if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"], let view = card.panel?.contentView,
            let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
             view.cacheDisplay(in: view.bounds, to: bitmap)
             try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/hover-card.png"))
         }
-        card.close()
+        try? await Task.sleep(nanoseconds: 300_000_000)
+        expect(!card.isOpen, "the pointer is on neither the item nor the card: it went at once")
+        let event = NSEvent.enterExitEvent(with: .mouseEntered, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: window.windowNumber,
+                                           context: nil, eventNumber: 0, trackingNumber: 0, userData: nil)!
+        _ = card.perform(Selector(("mouseEntered:")), with: event)
+        _ = card.perform(Selector(("mouseExited:")), with: event)
+        try? await Task.sleep(nanoseconds: 300_000_000)
+        expect(!card.isOpen, "passing over the item without stopping does not open it")
     }),
 ])
 exit(exitCode)

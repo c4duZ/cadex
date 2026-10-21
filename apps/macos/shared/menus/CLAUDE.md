@@ -26,12 +26,13 @@
   `HoverTip.attach(_:to:)` troca o toolTip do sistema;
   o toolTip fica só para textos longos de linhas (caminhos, datas).
 - `HoverCard.swift`: o cartão sobre um item da barra de status (uso das contas, hosts SSH, portas),
-  aberto 0,25 s depois de o ponteiro chegar ou no clique, como popover: uma seta embaixo aponta o meio
-  do item, com a ponta encostada nele; fica aberto enquanto o ponteiro
-  está no item ou no cartão (subir para dentro dele o mantém; o dono, 2026-10-21); fecha 0,4 s depois
-  de sair dos dois, pela posição real do ponteiro (o aviso de saída do cartão se perdia quando o
-  conteúdo era redesenhado e ele ficava aberto; o dono, 2026-10-21). Nas cores dos menus, nunca pega o teclado. `HoverRow`, a linha clicável dele, com
-  fundo ao passar.
+  como popover (seta embaixo apontando o meio do item, a ponta encostada nele). Entra suave 0,18 s
+  depois de o ponteiro parar no item (sobe 4 pt aparecendo, 0,15 s), ou na hora no clique; fica
+  enquanto o ponteiro está no item, no cartão ou na faixa entre eles, e sai no instante em que não
+  está em nenhum (some em 0,1 s). Aberto, olha o ponteiro 30 vezes por segundo; fechado, não custa
+  nada. A primeira versão esperava avisos de saída com atrasos encadeados: piscava ao entrar e ficava
+  quase 1 s ao sair (o dono, 2026-10-21). `refresh` troca o conteúdo no lugar, sem reabrir. Nas cores
+  dos menus, nunca pega o teclado. `HoverRow`, a linha clicável dele, com fundo ao passar.
 - `MenuTableView.swift`: tabela cujo clique direito abre o PopupMenu; `menuRow` é a linha clicada
   enquanto o menu está aberto e a ação roda (source control e histórico do git).
 - Fontes e medidas de MenuLayout e da dica vêm de UILooks (`../looks/CLAUDE.md`).
