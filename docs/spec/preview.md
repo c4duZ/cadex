@@ -100,11 +100,11 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
 - [x] Endereços locais são detectados nos formatos acima; os de fora (`https://example.com`) não.
 - [x] A página não acessa `file://` nem objetos do app.
 - [ ] Voltar, avançar e recarregar funcionam.
-- [ ] Com o Vite no preview e `claude` num painel ao lado: ⌘⇧C, o hover contorna sem a página
+- [x] Com o Vite no preview e `claude` num painel ao lado: ⌘⇧C, o hover contorna sem a página
   reagir, o clique cola o bloco no prompt sem enviar e o foco vai para o terminal.
 - [ ] ⇧+clique marca vários de verde e soltar o ⇧ entrega todos num só colar; ⌥+clique copia; Esc
   sai; sem agente, copia com aviso.
-- [ ] O contorno não pisca ao passar entre elementos.
+- [x] O contorno não pisca ao passar entre elementos (conferido pelo dono, 2026-10-21).
 - [x] Ligar o modo não deixa script nenhum no mundo da página; a página não vê o seletor.
 - [x] O texto entregue respeita os limites e não leva caracteres de controle.
 - [x] Atributo de build, lovable-tagger, Svelte, React até o 18 e Vue dão o `source` certo, nessa

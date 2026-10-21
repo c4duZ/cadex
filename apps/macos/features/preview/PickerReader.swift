@@ -17,6 +17,11 @@ final class PickerReader {
     private static var cleanedPictures = false
     /// Whether this document has the script; a navigation clears it.
     private var injected = false
+    /// Held for as long as the preview: WebKit drops a content world nobody
+    /// holds, and the script with it. Made anew for each question, every
+    /// other hover answer came back empty in the release build and the
+    /// outline flashed (log of 2026-10-21).
+    private let world = PickerScript.world
 
     init(web: PickingWebView) {
         self.web = web
@@ -90,19 +95,28 @@ final class PickerReader {
         return rect.isNull || rect.width < 1 || rect.height < 1 ? nil : rect
     }
 
-    /// Asks the picker's world; the script goes along the first time.
+    /// Asks the picker's world; the script goes along the first time, and
+    /// again on a failed question (a navigation took it), once.
     func ask(_ function: String, _ point: CGPoint, mark: String? = nil, then done: @escaping @MainActor (String?) -> Void) {
+        ask(function, point, mark: mark, retry: true, then: done)
+    }
+
+    private func ask(_ function: String, _ point: CGPoint, mark: String?, retry: Bool,
+                     then done: @escaping @MainActor (String?) -> Void) {
         let zoom = web.pageZoom > 0 ? web.pageZoom : 1
         let script = PickerScript.call(function, x: point.x / zoom, y: point.y / zoom, mark: mark, inject: !injected)
-        web.evaluateJavaScript(script, in: nil, in: PickerScript.world) { [weak self] result in
+        web.evaluateJavaScript(script, in: nil, in: world) { [weak self] result in
             MainActor.assumeIsolated {
+                guard let self else { return }
                 switch result {
                 case .success(let value):
-                    self?.injected = true
+                    self.injected = true
                     done(value as? String)
+                case .failure where retry && self.injected:
+                    self.injected = false
+                    self.ask(function, point, mark: mark, retry: false, then: done)
                 case .failure:
-                    // A navigation took the script with it: inject again next time.
-                    self?.injected = false
+                    self.injected = false
                     done(nil)
                 }
             }
