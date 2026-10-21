@@ -236,6 +236,12 @@ let exitCode = await Checks.run([
                         PastedImageTag(number: 3, row: 4, firstCol: 17, lastCol: 26)], "\(tags)")
         expect(PastedImageTag.find(inRow: "[Image #] [Image 2] [Image #4".map(String.init), row: 0).isEmpty)
     }),
+    ("a tag whose space was never written is still a tag (Claude Code's second image)", {
+        var row = "[Image #1][Image #2]".map(String.init)
+        row[16] = ""
+        let tags = PastedImageTag.find(inRow: row, row: 0)
+        expect(tags.map(\.number) == [1, 2], "\(tags)")
+    }),
     ("a paste takes the first new tag number, even one seen before", {
         let a = URL(fileURLWithPath: "/tmp/a.png"), b = URL(fileURLWithPath: "/tmp/b.png")
         let now = Date()

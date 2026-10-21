@@ -100,6 +100,8 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
 - Vale só para o que foi colado com ⌘V no Cadex, enquanto a aba existe. Imagem colada por outro
   caminho (Ctrl+V direto no programa) não tem arquivo conhecido, e a etiqueta fica como texto.
 - O mesmo número de novo (o agente reiniciou e voltou ao `#1`) passa a apontar para a colagem nova.
+- Uma célula que o programa nunca escreveu conta como espaço: o Claude Code redesenha
+  `[Image #1][Image #2]` pulando o espaço, e a segunda etiqueta não era achada (2026-10-21).
 
 ### Arrastar arquivos
 - Arquivos arrastados do Finder ou do explorer para um painel viram caminhos escapados, separados

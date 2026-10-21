@@ -12,7 +12,11 @@ struct PastedImageTag: Equatable {
 
     /// The tags in one screen row, given as one string per cell (empty for
     /// the second half of a wide character, so columns stay true).
-    static func find(inRow cells: [String], row: Int) -> [PastedImageTag] {
+    static func find(inRow given: [String], row: Int) -> [PastedImageTag] {
+        // A cell never written reads empty: Claude Code redraws "[Image #1]
+        // [Image #2]" by moving over the space instead of writing it, and
+        // the second tag went unseen (2026-10-21). Empty counts as a space.
+        let cells = given.map { $0.isEmpty ? " " : $0 }
         let prefix = Array("[Image #")
         var tags: [PastedImageTag] = []
         var col = 0
