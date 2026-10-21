@@ -26,7 +26,8 @@
   `HoverTip.attach(_:to:)` troca o toolTip do sistema;
   o toolTip fica só para textos longos de linhas (caminhos, datas).
 - `HoverCard.swift`: o cartão sobre um item da barra de status (uso das contas, hosts SSH, portas),
-  aberto 0,25 s depois de o ponteiro chegar ou no clique, colado no item e aberto enquanto o ponteiro
+  aberto 0,25 s depois de o ponteiro chegar ou no clique, como popover: uma seta embaixo aponta o meio
+  do item, com a ponta encostada nele; fica aberto enquanto o ponteiro
   está no item ou no cartão (subir para dentro dele o mantém; o dono, 2026-10-21); fecha 0,4 s depois
   de sair dos dois. Nas cores dos menus, nunca pega o teclado. `HoverRow`, a linha clicável dele, com
   fundo ao passar.

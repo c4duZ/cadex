@@ -59,5 +59,28 @@ let exitCode = await Checks.run([
         }
         panel.orderOut(nil)
     }),
+    ("a hover card opens by the names the system calls, and draws as a popover", {
+        let window = NSWindow(contentRect: NSRect(x: 200, y: 200, width: 300, height: 60), styleMask: [.borderless], backing: .buffered, defer: false)
+        let item = NSView(frame: NSRect(x: 100, y: 10, width: 80, height: 20))
+        window.contentView?.addSubview(item)
+        let card = HoverCard(over: item) {
+            let label = NSTextField(labelWithString: "vps-bkdg   up 20 ms")
+            label.textColor = .white
+            return label
+        }
+        expect(card.responds(to: Selector(("mouseEntered:"))) && card.responds(to: Selector(("mouseExited:"))),
+               "the tracking area calls mouseEntered: and mouseExited:")
+        let event = NSEvent.enterExitEvent(with: .mouseEntered, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: window.windowNumber,
+                                           context: nil, eventNumber: 0, trackingNumber: 0, userData: nil)!
+        _ = card.perform(Selector(("mouseEntered:")), with: event)
+        try? await Task.sleep(nanoseconds: 400_000_000)
+        expect(card.panel?.isVisible == true, "it opened")
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"], let view = card.panel?.contentView,
+           let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
+            view.cacheDisplay(in: view.bounds, to: bitmap)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/hover-card.png"))
+        }
+        card.close()
+    }),
 ])
 exit(exitCode)

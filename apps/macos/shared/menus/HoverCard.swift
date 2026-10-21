@@ -12,7 +12,7 @@ import AppKit
 public final class HoverCard: NSObject {
     private weak var view: NSView?
     private let content: () -> NSView
-    private var panel: HoverCardPanel?
+    private(set) var panel: HoverCardPanel?
     private var pending: DispatchWorkItem?
     private var tracking: NSTrackingArea?
 
@@ -43,8 +43,11 @@ public final class HoverCard: NSObject {
         panel?.orderOut(nil)
     }
 
-    @objc public func mouseEntered(with event: NSEvent) { schedule(open: true) }
-    @objc public func mouseExited(with event: NSEvent) { schedule(open: false) }
+    // The tracking area calls its owner by the Objective-C names; Swift's
+    // own would be mouseEnteredWithEvent:, which nothing calls: the card
+    // never opened (the owner's test, 2026-10-21).
+    @objc(mouseEntered:) public func mouseEntered(with event: NSEvent) { schedule(open: true) }
+    @objc(mouseExited:) public func mouseExited(with event: NSEvent) { schedule(open: false) }
 
     private func schedule(open: Bool) {
         pending?.cancel()
@@ -84,9 +87,6 @@ final class HoverCardPanel: NSPanel {
         level = .popUpMenu
         isReleasedWhenClosed = false
         collectionBehavior = [.fullScreenAuxiliary, .moveToActiveSpace, .transient]
-        box.wantsLayer = true
-        box.layer?.cornerRadius = 10
-        box.layer?.borderWidth = 1
         box.onEnter = { [weak self] in
             self?.hasPointer = true
             self?.onEnter?()
@@ -100,39 +100,73 @@ final class HoverCardPanel: NSPanel {
 
     override var canBecomeKey: Bool { false }
 
-    /// Above `view`, its left edge lined up, kept on screen.
+    /// Above `view` like a popover: the arrow on its bottom edge points at
+    /// the item's middle, its tip on the item's top, so the pointer goes
+    /// straight in. Kept on screen; the arrow follows the item.
     func show(_ content: NSView, above view: NSView?) {
         guard let view, let window = view.window else { return }
         let style = MenuStyle.current
-        box.layer?.backgroundColor = style.background.cgColor
-        box.layer?.borderColor = style.border.cgColor
+        box.fill = style.background
+        box.stroke = style.border
         box.subviews.forEach { $0.removeFromSuperview() }
         content.translatesAutoresizingMaskIntoConstraints = false
         box.addSubview(content)
         NSLayoutConstraint.activate([
             content.topAnchor.constraint(equalTo: box.topAnchor, constant: 14),
-            content.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -14),
+            content.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -(14 + CardBox.arrow)),
             content.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 14),
             content.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -14),
         ])
         box.layoutSubtreeIfNeeded()
         setContentSize(box.fittingSize)
         let rect = window.convertToScreen(view.convert(view.bounds, to: nil))
-        // Its bottom edge on the item's top: the pointer goes straight in.
-        var origin = NSPoint(x: rect.minX - 8, y: rect.maxY - 1)
+        var origin = NSPoint(x: rect.midX - frame.width / 2, y: rect.maxY - 2)
         if let screen = window.screen?.visibleFrame {
             origin.x = min(max(origin.x, screen.minX + 6), screen.maxX - frame.width - 6)
             origin.y = min(origin.y, screen.maxY - frame.height - 6)
         }
         setFrameOrigin(origin)
+        box.arrowX = min(max(rect.midX - origin.x, 18), frame.width - 18)
+        box.needsDisplay = true
         orderFront(nil)
     }
 }
 
-/// The card's ground: says when the pointer comes in and goes out.
+/// The card's ground, drawn as a popover: a rounded box with an arrow on
+/// its bottom edge pointing at the item; says when the pointer comes in and
+/// goes out.
 private final class CardBox: NSView {
+    static let arrow: CGFloat = 7
     var onEnter: (() -> Void)?
     var onExit: (() -> Void)?
+    var fill: NSColor = .windowBackgroundColor
+    var stroke: NSColor = .separatorColor
+    var arrowX: CGFloat = 40
+
+    override func draw(_ dirtyRect: NSRect) {
+        let a = Self.arrow
+        let body = NSRect(x: 0.5, y: a + 0.5, width: bounds.width - 1, height: bounds.height - a - 1)
+        let path = NSBezierPath(roundedRect: body, xRadius: 10, yRadius: 10)
+        let tip = NSBezierPath()
+        tip.move(to: NSPoint(x: arrowX - a - 1, y: a + 0.5))
+        tip.line(to: NSPoint(x: arrowX, y: 0.5))
+        tip.line(to: NSPoint(x: arrowX + a + 1, y: a + 0.5))
+        tip.close()
+        path.append(tip)
+        fill.setFill()
+        path.fill()
+        stroke.setStroke()
+        // The border around the box and the arrow's two sides, not across
+        // the arrow's root.
+        NSBezierPath(roundedRect: body, xRadius: 10, yRadius: 10).stroke()
+        fill.setFill()
+        NSRect(x: arrowX - a, y: a - 0.5, width: a * 2, height: 2).fill()
+        let sides = NSBezierPath()
+        sides.move(to: NSPoint(x: arrowX - a - 1, y: a + 0.5))
+        sides.line(to: NSPoint(x: arrowX, y: 0.5))
+        sides.line(to: NSPoint(x: arrowX + a + 1, y: a + 0.5))
+        sides.stroke()
+    }
 
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
