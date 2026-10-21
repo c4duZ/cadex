@@ -31,6 +31,9 @@ final class SettingsBridge {
     /// agent's terminal. Read at each pick.
     var picksToClipboard: Bool { store.settings.preview.pickTarget == "clipboard" }
 
+    /// preview.pickScreenshot: a picture of the picked element goes along.
+    var picksScreenshot: Bool { store.settings.preview.pickScreenshot }
+
     func start() {
         store.observe { [weak self] settings in self?.apply(settings) }
         // "Increase contrast" in the system changes the theme, not the settings.

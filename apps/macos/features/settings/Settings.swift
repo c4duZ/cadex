@@ -87,6 +87,8 @@ public struct Settings: Equatable, Sendable {
         /// Where a picked element goes: "terminal" (pasted into the agent's
         /// prompt, without Enter) or "clipboard" (docs/spec/preview.md).
         public var pickTarget = "terminal"
+        /// A picture of the picked element goes with it, as a PNG path.
+        public var pickScreenshot = true
     }
 
     public struct Power: Equatable, Sendable {

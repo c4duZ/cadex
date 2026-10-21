@@ -1,5 +1,6 @@
 import AppKit
 import Strings
+import TempImages
 import WebKit
 
 /// Picking an element of the page (docs/spec/preview.md, "Escolher
@@ -15,6 +16,12 @@ final class PreviewPicker {
     var onDeliver: ((PickDelivery) -> PickOutcome)?
     /// Picking started or ended (the bar's button follows).
     var onStateChange: (() -> Void)?
+    /// Whether a pick carries a picture of the element
+    /// (preview.pickScreenshot); nil takes one.
+    var takesPictures: (() -> Bool)?
+    /// Pictures of picked elements, in <temporary directory>/cadex-pick/.
+    static let pictures = TempImageStore(folder: "cadex-pick", prefix: "pick")
+    private static var cleanedPictures = false
     private(set) var isPicking = false
     /// Whether this document has the script; a navigation clears it.
     private var injected = false
@@ -29,6 +36,10 @@ final class PreviewPicker {
         web.onPickClick = { [weak self] in self?.click($0, $1) }
         web.onPickExit = { [weak self] in self?.overlay.target = nil }
         web.onResign = { [weak self] in self?.stop() }
+        if !Self.cleanedPictures {
+            Self.cleanedPictures = true
+            DispatchQueue.global(qos: .utility).async { Self.pictures.removeOld() }
+        }
     }
 
     func toggle() { isPicking ? stop() : start() }
@@ -100,7 +111,39 @@ final class PreviewPicker {
         }
     }
 
+    /// The picture first (plan 16, phase D), then the hand-over.
     private func deliver(_ element: PickedElement, _ flags: NSEvent.ModifierFlags) {
+        picture(of: element.box) { [weak self] path in
+            var element = element
+            element.screenshot = path
+            self?.handOver(element, flags)
+        }
+    }
+
+    private func picture(of box: CGRect, then done: @escaping @MainActor (String?) -> Void) {
+        guard takesPictures?() ?? true, let rect = Self.pictureRect(viewBox(box), in: web.bounds) else { return done(nil) }
+        let configuration = WKSnapshotConfiguration()
+        configuration.rect = rect
+        // Wide elements (a whole page) come out at most 1600 points across.
+        if rect.width > 1600 { configuration.snapshotWidth = 1600 }
+        web.takeSnapshot(with: configuration) { image, _ in
+            MainActor.assumeIsolated {
+                guard let image, let tiff = image.tiffRepresentation,
+                      let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]),
+                      let url = try? Self.pictures.save(png) else { return done(nil) }
+                done(url.path)
+            }
+        }
+    }
+
+    /// The element with a margin of 8 points, cut to what the view shows:
+    /// a snapshot must lie inside the view's bounds (WKSnapshotConfiguration).
+    static func pictureRect(_ box: CGRect, in bounds: CGRect) -> CGRect? {
+        let rect = box.insetBy(dx: -8, dy: -8).intersection(bounds)
+        return rect.isNull || rect.width < 1 || rect.height < 1 ? nil : rect
+    }
+
+    private func handOver(_ element: PickedElement, _ flags: NSEvent.ModifierFlags) {
         let delivery = PickDelivery(element: element, toClipboard: flags.contains(.option), keepPicking: flags.contains(.shift))
         let outcome = onDeliver?(delivery) ?? Self.copy(delivery.text())
         if !delivery.keepPicking { stop() }

@@ -34,10 +34,13 @@
   O caminho sai relativo à pasta do terminal do agente. Fase C: sem fonte e com React 19, a página
   devolve o _debugStack; `StackFrames.swift` acha o primeiro quadro do app, `SourceLookup.swift`
   pergunta ao Next (/__nextjs_original-stack-frames) ou lê o source map do script
-  (`SourceMap.swift`, VLQ), buscando em Swift só do mesmo endereço da página, 1,5 s no máximo. Comandos preview.pick-element (⌘⇧C, também o botão de mira
+  (`SourceMap.swift`, VLQ), buscando em Swift só do mesmo endereço da página, 1,5 s no máximo.
+  Fase D: antes de entregar, o print do elemento (takeSnapshot, com margem, cortado à view) vai
+  para cadex-pick/ pelo `TempImageStore` (`../../shared/temp-images/CLAUDE.md`), se
+  preview.pickScreenshot deixar (takesPictures, ligado pelo app). Comandos preview.pick-element (⌘⇧C, também o botão de mira
   da barra, que roda o comando pelo `runCommand`) e preview.stop-picking (Esc, só escolhendo e com o
   preview focado); só no Mac.
-- Spec: `docs/spec/preview.md`. Status: plano 5, fase E pronta; plano 16, fases A a C no código.
+- Spec: `docs/spec/preview.md`. Status: plano 5, fase E pronta; plano 16, fases A a D no código.
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
 ## Como validar

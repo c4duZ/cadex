@@ -33,38 +33,3 @@ enum PasteContent: Equatable {
     }
 }
 
-/// Pasted images become PNG files the shell can point to, kept in
-/// <temporary directory>/cadex-paste/ and removed after a week so they do
-/// not pile up (docs/plans/1-terminal.md).
-enum PastedImageStore {
-    static let maxAge: TimeInterval = 7 * 24 * 60 * 60
-
-    static var directory: URL {
-        FileManager.default.temporaryDirectory.appendingPathComponent("cadex-paste", isDirectory: true)
-    }
-
-    static func save(_ png: Data, in directory: URL = directory, now: Date = Date()) throws -> URL {
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyyMMdd-HHmmss"
-        // The suffix keeps two pastes in the same second apart.
-        let name = "paste-\(formatter.string(from: now))-\(UUID().uuidString.prefix(4)).png"
-        let url = directory.appendingPathComponent(name)
-        try png.write(to: url)
-        return url
-    }
-
-    /// Deletes images older than maxAge. Errors are ignored: a file that
-    /// stays is harmless, and this runs while the app opens.
-    static func removeOld(in directory: URL = directory, now: Date = Date()) {
-        let files = (try? FileManager.default.contentsOfDirectory(
-            at: directory, includingPropertiesForKeys: [.contentModificationDateKey])) ?? []
-        for file in files where file.pathExtension == "png" {
-            let modified = (try? file.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
-            if let modified, now.timeIntervalSince(modified) > maxAge {
-                try? FileManager.default.removeItem(at: file)
-            }
-        }
-    }
-}

@@ -19,6 +19,8 @@ public struct PickedElement: Equatable, Sendable {
     public var source: String?
     /// The components it sits in, nearest first.
     public var components: [String] = []
+    /// A PNG of the element as shown (preview.pickScreenshot).
+    public var screenshot: String?
 
     static let htmlLimit = 1500
     static let textLimit = 200
@@ -77,6 +79,7 @@ public struct PickedElement: Equatable, Sendable {
         let words = Self.cut(Self.clean(text).split(whereSeparator: \.isWhitespace).joined(separator: " "), Self.textLimit)
         if !words.isEmpty { lines.append("text: \"\(words)\"") }
         lines.append("box: \(Int(box.width))×\(Int(box.height)) at \(Int(box.minX)),\(Int(box.minY)) (viewport \(Int(viewport.width))×\(Int(viewport.height)))")
+        if let screenshot { lines.append("screenshot: " + Self.clean(screenshot)) }
         lines.append("html:")
         let head = lines.joined(separator: "\n")
         let tail = "</picked_element>"

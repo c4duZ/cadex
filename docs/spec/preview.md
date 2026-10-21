@@ -51,6 +51,7 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
   components: SaveButton < ProfileForm < SettingsPage
   text: "Salvar alterações"
   box: 152×38 at 840,612 (viewport 1280×800)
+  screenshot: /var/folders/…/T/cadex-pick/pick-20261021-142233-ab12.png
   html:
   <button class="primary" type="submit">Salvar alterações</button>
   </picked_element>
@@ -68,6 +69,9 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
   mapa só do mesmo endereço da página, até 1,5 s cada; sem resposta, vale o arquivo que o endereço
   do script nomeia (sem linha), ou nada. Site de produção não tem nada disso: as linhas não
   aparecem.
+- `screenshot` é um PNG do elemento como está na tela, com 8 pt de margem, cortado ao que o preview
+  mostra e com no máximo 1600 pt de largura, em cadex-pick/ da pasta temporária, apagado depois de 7
+  dias. O agente abre pelo caminho. `preview.pickScreenshot` (ligado por padrão) desliga.
 
 ## Estados
 - **Carregando:** barra de progresso fina embaixo do endereço.
@@ -103,3 +107,5 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
 - [x] Source maps: números VLQ, o lugar original de uma linha e coluna servidas, os caminhos do
   Vite, webpack, Turbopack e file:; mapa de outro endereço nunca é buscado.
 - [ ] Num app Vite com React 19 e num Next 15 em desenvolvimento, o `source` aponta para o `.tsx`.
+- [x] O print é o elemento com margem, cortado ao que a view mostra; a linha `screenshot:` só com print.
+- [ ] No app, a linha `screenshot:` aponta para um PNG que o Claude Code abre.

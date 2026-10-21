@@ -47,6 +47,12 @@ enum GeneralPages {
                                                              selected: store.settings.preview.pickTarget) { value in
                                      store.update { $0.preview.pickTarget = value }
                                  }),
+                SettingsPage.row(T("Picture of the picked element", "Print do elemento escolhido"),
+                                 T("A picture of the element goes along, as the path of a PNG the agent can open.",
+                                   "Um print do elemento vai junto, como o caminho de um PNG que o agente consegue abrir."),
+                                 control: SettingsPage.toggle(store.settings.preview.pickScreenshot) { on in
+                                     store.update { $0.preview.pickScreenshot = on }
+                                 }),
 
                 SettingsPage.section(T("File tree", "Árvore de arquivos")),
                 SettingsPage.row(T("Follow the terminal", "Seguir o terminal"),

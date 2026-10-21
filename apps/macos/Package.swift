@@ -23,6 +23,13 @@ let package = Package(
             exclude: ["CLAUDE.md", "Resources/LICENSE-Phosphor.txt", "Resources/LICENSE-MaterialIconTheme.txt", "tests"],
             resources: [.copy("Resources/Phosphor-Regular.ttf"), .copy("Resources/Phosphor-Fill.ttf"), .copy("Resources/FileIcons")]
         ),
+        // PNGs an agent can open, removed after a week: pasted images
+        // (terminal) and pictures of picked elements (preview).
+        .target(
+            name: "TempImages",
+            path: "shared/temp-images",
+            exclude: ["CLAUDE.md", "tests"]
+        ),
         // The interface's texts in English or Portuguese (ADR 0015).
         .target(
             name: "Strings",
@@ -99,7 +106,7 @@ let package = Package(
         ),
         .target(
             name: "Terminal",
-            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Strings"],
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Strings", "TempImages"],
             path: "features/terminal",
             exclude: ["CLAUDE.md", "tests"],
             // @testable access for the feature's test executable.
@@ -156,7 +163,7 @@ let package = Package(
         ),
         .target(
             name: "Preview",
-            dependencies: ["CommandPalette", "Icons", "Menus", "Tabs", "Strings", "UILooks"],
+            dependencies: ["CommandPalette", "Icons", "Menus", "Tabs", "Strings", "TempImages", "UILooks"],
             path: "features/preview",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -322,6 +329,11 @@ let package = Package(
             dependencies: ["Icons", "Checks"],
             path: "shared/icons/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+        .executableTarget(
+            name: "TempImagesTests",
+            dependencies: ["TempImages", "Checks"],
+            path: "shared/temp-images/tests"
         ),
 
         .executableTarget(

@@ -1,6 +1,7 @@
 import AppKit
 import CCadex
 import MetalKit
+import TempImages
 
 /// The terminal on screen: draws the session with Metal, sends keys and
 /// pasted text to it, and resizes it with the view.
@@ -143,7 +144,7 @@ public final class TerminalView: MTKView {
     private static func cleanPastedImagesOnce() {
         guard !cleanedPastedImages else { return }
         cleanedPastedImages = true
-        DispatchQueue.global(qos: .utility).async { PastedImageStore.removeOld() }
+        DispatchQueue.global(qos: .utility).async { TempImageStore.pastes.removeOld() }
     }
 
     @available(*, unavailable)

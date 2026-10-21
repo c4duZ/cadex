@@ -110,19 +110,6 @@ let exitCode = await Checks.run([
         expect(TerminalSession.quotePaths(["/tmp/it's"]) == "'/tmp/it'\\''s'")
         expect(TerminalSession.quotePaths([]) == "")
     }),
-    ("pasted images are saved as PNG and removed after a week", {
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("cadex-test-\(UUID().uuidString)")
-        defer { try? FileManager.default.removeItem(at: dir) }
-        let old = try PastedImageStore.save(Data([0x89, 0x50]), in: dir)
-        let recent = try PastedImageStore.save(Data([0x89, 0x50]), in: dir)
-        let eightDaysAgo = Date().addingTimeInterval(-8 * 24 * 60 * 60)
-        try FileManager.default.setAttributes([.modificationDate: eightDaysAgo], ofItemAtPath: old.path)
-        expect(old != recent && old.pathExtension == "png")
-
-        PastedImageStore.removeOld(in: dir)
-        expect(!FileManager.default.fileExists(atPath: old.path), "old image stayed")
-        expect(FileManager.default.fileExists(atPath: recent.path), "recent image removed")
-    }),
     ("cell metrics are whole pixels and scale with the display", {
         let retina = TerminalFont(scale: 2).metrics
         let standard = TerminalFont(scale: 1).metrics

@@ -94,6 +94,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         opener.onPickElement = { [weak self] delivery in
             ElementPickDelivery.deliver(delivery, tabs: self?.tabs, toClipboard: self?.settings.picksToClipboard ?? false)
         }
+        opener.picksScreenshot = { [weak self] in self?.settings.picksScreenshot ?? true }
         self.opener = opener
         guard let explorer, let git else { return }
         explorer.openFile = { [weak opener] path in opener?.open(path) }

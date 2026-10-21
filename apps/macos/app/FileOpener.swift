@@ -25,6 +25,8 @@ final class FileOpener {
     var runCommand: ((String) -> Bool)?
     /// Hands an element picked in a preview over (ElementPickDelivery).
     var onPickElement: ((PickDelivery) -> PickOutcome)?
+    /// The setting: a picked element carries a picture of itself.
+    var picksScreenshot: (() -> Bool)?
     /// The setting: beside (true) or in a new tab.
     private let opensBeside: () -> Bool
 
@@ -109,6 +111,7 @@ final class FileOpener {
         let preview = PreviewDocument(url: url)
         preview.runCommand = { [weak self] id in self?.runCommand?(id) ?? false }
         preview.onPickElement = { [weak self] delivery in self?.onPickElement?(delivery) ?? .copied(note: nil) }
+        preview.takesPictures = { [weak self] in self?.picksScreenshot?() ?? true }
         tabs.open(preview, beside: beside ?? opensBeside())
     }
 

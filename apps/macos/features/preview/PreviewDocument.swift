@@ -103,6 +103,12 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         set { picker.onDeliver = newValue }
     }
 
+    /// Whether a pick carries a picture of the element (preview.pickScreenshot).
+    public var takesPictures: (() -> Bool)? {
+        get { picker.takesPictures }
+        set { picker.takesPictures = newValue }
+    }
+
     public var isPicking: Bool { picker.isPicking }
     public func togglePicking() { picker.toggle() }
     public func stopPicking() { picker.stop() }

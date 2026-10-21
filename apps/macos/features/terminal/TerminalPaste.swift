@@ -1,5 +1,12 @@
 import AppKit
 import Strings
+import TempImages
+
+/// Pasted images become PNG files the shell can point to, in
+/// <temporary directory>/cadex-paste/ (docs/plans/1-terminal.md).
+extension TempImageStore {
+    static let pastes = TempImageStore(folder: "cadex-paste", prefix: "paste")
+}
 
 /// ⌘V and dropping files on the terminal. What to paste comes from
 /// PasteContent; encoding (bracketed paste) and escaping paths are the
@@ -12,7 +19,7 @@ extension TerminalView {
         case .files(let urls):
             session.paste(TerminalSession.quotePaths(urls.map(\.path)))
         case .image(let png):
-            guard let url = try? PastedImageStore.save(png) else {
+            guard let url = try? TempImageStore.pastes.save(png) else {
                 NSSound.beep()
                 return
             }

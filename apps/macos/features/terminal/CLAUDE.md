@@ -28,7 +28,8 @@
   "terminal.copyOnSelect" (desligado); ligado, copia ao soltar o botão com seleção feita.
 - Colar e arrastar em `TerminalPaste.swift`; a ordem do ⌘V (arquivos, imagem, texto) em
   `PasteboardContent.swift`. Imagem vira PNG em cadex-paste/ dentro da pasta temporária, apagado
-  depois de 7 dias (ao abrir o app). Várias linhas sem bracketed paste pedem confirmação, que o
+  depois de 7 dias (ao abrir o app), pelo `TempImageStore` compartilhado
+  (`../../shared/temp-images/CLAUDE.md`). Várias linhas sem bracketed paste pedem confirmação, que o
   default "terminal.confirmMultilinePaste" desliga.
 - Links em `TerminalLinks.swift`: com ⌘ pressionado, o link sob o ponteiro é sublinhado; ⌘+clique
   abre a URL no navegador e mostra o arquivo no Finder (até os visualizadores, plano 5).

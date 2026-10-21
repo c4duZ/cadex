@@ -87,6 +87,17 @@ document.getElementById('vue').__vueParentComponent = { type: { __file: '/w/app/
 """
 
 let exitCode = await Checks.run([
+    ("the picture: the element with a margin, cut to what the view shows", {
+        let bounds = CGRect(x: 0, y: 0, width: 800, height: 600)
+        expect(PreviewPicker.pictureRect(CGRect(x: 100, y: 100, width: 150, height: 40), in: bounds) == CGRect(x: 92, y: 92, width: 166, height: 56))
+        expect(PreviewPicker.pictureRect(CGRect(x: 700, y: 550, width: 300, height: 300), in: bounds) == CGRect(x: 692, y: 542, width: 108, height: 58))
+        expect(PreviewPicker.pictureRect(CGRect(x: 0, y: 900, width: 100, height: 100), in: bounds) == nil, "off the view")
+        expect(PreviewPicker.pictures.directory.lastPathComponent == "cadex-pick")
+        var element = PickedElement(page: "http://x", selector: "b", text: "", html: "<b></b>", box: .zero, viewport: .zero)
+        expect(!element.payload().contains("screenshot:"))
+        element.screenshot = "/tmp/cadex-pick/pick-1.png"
+        expect(element.payload().contains("(viewport 0×0)\nscreenshot: /tmp/cadex-pick/pick-1.png\nhtml:"))
+    }),
     ("source maps: VLQ numbers, and the original place of a served line and column", {
         expect(SourceMap.vlq("AAAA") == [0, 0, 0, 0])
         expect(SourceMap.vlq("C") == [1] && SourceMap.vlq("D") == [-1] && SourceMap.vlq("gB") == [16] && SourceMap.vlq("2H") == [123])
