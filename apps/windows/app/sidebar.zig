@@ -2,8 +2,9 @@
 //! switched by two tabs at the bottom, "Arquivos" and "Git" (they run the
 //! explorer.focus and git.show commands); view.toggle-sidebar hides it.
 //! Also the workspace following the focused terminal: a `cd` takes the tree
-//! to the repository root of the new folder; outside a repository it stays
-//! (following there took the whole home folder, 2026-10-20). Off with
+//! to the repository root of the new folder, or to the folder itself outside
+//! one (the owner wants folders without .git in the tree, 2026-10-21; the
+//! indexes stay light even on the home folder). Off with
 //! explorer.followTerminal (docs/spec/workspace.md).
 
 const std = @import("std");
@@ -71,7 +72,8 @@ fn dropIntoTerminal(app: *App, paths: []const []const u8, at: gfx.Point) void {
 }
 
 /// Called every frame: if the focused terminal moved to another folder,
-/// the workspace follows it to that folder's repository root.
+/// the workspace follows it to that folder's repository root, or to the
+/// folder itself outside a repository.
 pub fn followTerminal(app: *App) void {
     const view = app.tabs.focusedTerminal() orelse return;
     const dir = view.session.workingDirectory() orelse return;
@@ -86,9 +88,14 @@ pub fn followTerminal(app: *App) void {
     app.search.setFocus(folder);
     if (!app.settings.current.explorer.follow_terminal) return;
     var buf: [2048]u8 = undefined;
-    const root = repositoryRoot(folder, &buf) orelse return;
-    // Inside the current workspace (cd src) the tree stays where it is.
-    if (app.explorer.root()) |current| if (std.ascii.startsWithIgnoreCase(root, current) and (root.len == current.len or root[current.len] == '\\')) return;
+    const repository = repositoryRoot(folder, &buf);
+    const root = repository orelse folder;
+    if (app.explorer.root()) |current| {
+        // Inside the current project (cd src) the tree stays where it is;
+        // outside a repository only the same folder does.
+        const inside = std.ascii.startsWithIgnoreCase(root, current) and (root.len == current.len or root[current.len] == '\\');
+        if (if (repository != null) inside else std.ascii.eqlIgnoreCase(root, current)) return;
+    }
     setWorkspace(app, root);
 }
 
