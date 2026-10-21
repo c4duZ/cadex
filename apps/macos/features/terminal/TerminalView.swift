@@ -172,10 +172,9 @@ public final class TerminalView: MTKView {
     public override func viewDidChangeBackingProperties() {
         super.viewDidChangeBackingProperties()
         // Moved to a screen with another scale: rasterize glyphs for it, or
-        // they are scaled and blurry. Only then: this also runs each time
-        // the view comes back to a window (its tab shown again), and a new
-        // 16 MB atlas each time made memory jump 45 MB for a second at every
-        // return to a terminal tab (make perf, 2026-10-21).
+        // they are scaled and blurry. Only then: this also runs when the
+        // view comes back to a window (its tab shown again), where a new
+        // 16 MB atlas and every glyph drawn again bought nothing (2026-10-21).
         if renderer?.metrics.scale != scale { renderer?.setFont(Self.preferredFont(scale: scale)) }
         resizeSession()
     }
