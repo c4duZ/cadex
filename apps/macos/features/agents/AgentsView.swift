@@ -18,7 +18,8 @@ public final class AgentsView: NSView {
     /// "Turn On" when agents.sessions is off.
     public var onEnable: (() -> Void)?
     public var colors = AgentColors() { didSet { render() } }
-    /// The sub-tab shown: "sessions" or "accounts" (AgentAccountsView.swift).
+    /// The list shown: "sessions" or "accounts" (AgentAccountsView.swift);
+    /// each is its own sidebar page, so each has its own icon and shortcut.
     public var subtab = "sessions" { didSet { if subtab != oldValue { updateWatching(); render() } } }
     /// Rename an account (nil: back to its own name) or hide and show it;
     /// the app saves agents.accountNames and agents.hiddenAccounts.

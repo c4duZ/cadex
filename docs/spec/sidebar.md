@@ -9,7 +9,8 @@ em que ordem.
 - No topo, ao lado dos botões da janela, a fileira de ícones (Phosphor). Clicar num ícone mostra a
   página dele; clicar no ícone da página aberta recolhe a barra lateral (como view.toggle-sidebar).
 - Os ícones padrão, nesta ordem: Files (⇧⌘E, explorer.focus), Search (⇧⌘F, search.content) e Git
-  (⇧⌘G, git.show); Agents (⇧⌘J, agents.show) entra com a página dele. Git History
+  (⇧⌘G, git.show); Agents (⇧⌘J, agents.show) e Accounts (agents.show-accounts) entram com as
+  páginas deles, separadas para cada uma ter o próprio ícone e atalho (o dono, 2026-10-21). Git History
   (git.show-history) existe escondido e pode ser ligado.
 - Só entra na barra o que mostra uma página nela. Files, Git e Git History são páginas; Search, por
   enquanto, abre a busca no ⌘K. Web Preview e Spaces abriam coisa em outro lugar e saíram (o dono,
@@ -27,7 +28,7 @@ em que ordem.
 - Cada ícone pode ter um sinal pequeno: o Git, o número de mudanças; o Agents, um ponto quando algum
   agente espera resposta. O sinal some quando não há nada a dizer.
 - Embaixo da fileira, o título da página à esquerda e as sub-abas dela à direita, num controle
-  segmentado: Agents tem Sessions e Accounts. Página sem sub-aba mostra
+  segmentado (nenhuma página usa hoje: Sessions e Accounts viraram páginas). Página sem sub-aba mostra
   só o título (Files mostra o nome da pasta do workspace).
 - Personalizar: o último ícone da fileira (controles deslizantes) abre a janela "Customize", uma só
   para o app e com uma aba por coisa a arrumar (Sidebar, Status Bar), como a de configurações e por

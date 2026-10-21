@@ -14,15 +14,16 @@ import Themes
 /// screen, the dot while the icon is in the sidebar, the item while it is
 /// in the bar.
 extension WindowSession {
-    func makeAgentsPage() -> AgentsView {
+    /// Sessions or Accounts: the same view on either list.
+    func makeAgentsPage(_ list: String) -> AgentsView {
         let page = AgentsView()
+        page.subtab = list
         page.isInCadex = { [weak self] session in self?.terminal(of: session) != nil }
         page.onOpen = { [weak self] session in self?.openAgent(session) }
         page.onEnable = { [weak self] in self?.settings.store.update { $0.agents.sessions = true } }
         page.onHide = { [weak self] account, hide in self?.hideAccount(account, hide) }
         page.onLaunch = { [weak self] account in self?.launchAgent(for: account) }
         page.onRename = { [weak self] account in self?.renameAccount(account) }
-        agentsPage = page
         ThemeStore.shared.observe { [weak page, weak self] _ in
             page?.colors = Self.agentColors()
             self?.usageStrip?.colors = Self.agentColors()

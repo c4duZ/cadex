@@ -48,15 +48,15 @@
   `AgentUsageRows`, as barras que o cartão e o popover dividem. `AgentUsageStrip.swift`: o item
   Agent usage, com a conta do terminal com foco (`focused`, que o app diz) ou a última, e o popover
   ao passar o ponteiro (`AgentUsageCard.swift` no `HoverCard` compartilhado, todas as contas; subir para dentro dele o mantém aberto). `CodexUsage.swift`: as contas
-  do Codex e o uso tirado dos logs dele (os limites de cada uso), sem rede. `AgentAccountsView.swift`: a aba
-  Accounts nos blocos do cartão (`AgentUsageCard.swift:block`), só as contas em uso (`visibleAccounts`:
+  do Codex e o uso tirado dos logs dele (os limites de cada uso), sem rede. `AgentAccountsView.swift`: a página
+  Accounts (outra página da barra lateral, com o mesmo `AgentsView`) nos blocos do cartão (`AgentUsageCard.swift:block`), só as contas em uso (`visibleAccounts`:
   sem login ou vencida há mais de um dia ficam fora), com mais espaço entre elas que o cartão e sem linha; clique leva ao agente já aberto ou abre um, clique direito renomeia e
   esconde. `AgentLaunch.swift`: o comando que abre o agente de uma conta (`CLAUDE_CONFIG_DIR` ou
   `CODEX_HOME`, a flag sem permissões), agents.open-account e agents.customize-accounts; a única coisa
   que o Cadex inicia (ADR 0019). Conta escondida volta quando o login muda (`fingerprint`,
   `onLoginChanged`).
-- O app (`../../app/AgentsWiring.swift`) põe a página no catálogo da barra lateral (agents.show,
-  ⇧⌘J), o ponto no ícone enquanto o ícone está lá, o item Agents da barra de status, e acha o
+- O app (`../../app/AgentsWiring.swift`) põe as páginas Agents (agents.show, ⇧⌘J) e Accounts
+  (agents.show-accounts) no catálogo da barra lateral, o ponto no ícone enquanto o ícone está lá, o item Agents da barra de status, e acha o
   terminal de cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo).
 - Status: fases C, C2 (notificações) e D (Accounts e uso) no código. Ainda não: o sinal no título
   da aba do agente.

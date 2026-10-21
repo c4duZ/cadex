@@ -78,10 +78,7 @@ extension WindowSession {
         commands.register(Command(
             id: "agents.show-accounts", title: T("Show Agent Accounts", "Mostrar as contas dos agentes"),
             keywords: ["accounts", "usage", "plan", "limit", "contas", "uso", "plano", "limite", "claude"], category: .view,
-            action: .run { [weak self] in
-                self?.workspace?.showSidebar("agents")
-                self?.workspace?.sidebar.select(subtab: "accounts", of: "agents")
-            }))
+            action: .run { [weak self] in self?.workspace?.showSidebar("accounts") }))
         commands.register(Command(
             id: "agents.refresh-usage", title: T("Refresh Agent Usage", "Atualizar o uso dos agentes"),
             keywords: ["usage", "plan", "limit", "refresh", "uso", "plano", "limite", "atualizar"], category: .view,

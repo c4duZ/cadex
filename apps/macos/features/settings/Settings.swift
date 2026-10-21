@@ -108,7 +108,7 @@ public struct Settings: Equatable, Sendable {
     public struct Sidebar: Equatable, Sendable {
         /// The icons on top of the sidebar, in order; a page left out is
         /// hidden (docs/spec/sidebar.md). The app drops unknown ids.
-        public var items = ["files", "search", "git", "agents"]
+        public var items = ["files", "search", "git", "agents", "accounts"]
     }
 
     public struct Agents: Equatable, Sendable {

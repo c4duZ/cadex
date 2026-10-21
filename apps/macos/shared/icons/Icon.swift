@@ -51,6 +51,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case folder = 0xE24A
     case folderOpen = 0xE256
     case folderPlus = 0xE258
+    case gauge = 0xE628
     case gearSix = 0xE272
     case gitBranch = 0xE278
     case gitCommit = 0xE27A

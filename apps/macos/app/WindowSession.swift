@@ -54,7 +54,6 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// The Agents icon's dot, watched while the icon is in the sidebar (AgentsWiring.swift).
     var agentsDotToken: UUID?
     /// The Agents page, for its sub-tabs (AgentsWiring.swift).
-    weak var agentsPage: AgentsView?
     /// The status bar's Agent usage item, for the theme's colors.
     weak var usageStrip: AgentUsageStrip?
     /// The Ports item's label and what it last read (SSHWiring.swift).

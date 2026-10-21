@@ -7,7 +7,7 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
 
 ## Comportamento
 ### Sessions
-- A página Agents › Sessions lista as sessões vivas do Claude Code de todas as contas da máquina,
+- A página Agents (as sessões) lista as sessões vivas do Claude Code de todas as contas da máquina,
   agrupadas por projeto (a raiz do repositório git da pasta da sessão, ou a própria pasta). O grupo
   mostra o nome da pasta e quantas sessões tem.
 - Cada sessão: um sinal de estado, o nome da sessão, há quanto tempo está naquele estado e, embaixo,
@@ -28,7 +28,7 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
 - Depois: a aba de terminal com um agente mostra o mesmo sinal de estado no título.
 
 ### Accounts
-- Agents › Accounts mostra um cartão por conta: o nome (a organização da conta; renomeável), o
+- A página Accounts, com ícone próprio na barra lateral (o medidor), mostra um cartão por conta: o nome (a organização da conta; renomeável), o
   plano, e duas barras: a sessão de 5 horas e a semana, com a porcentagem e quando reinicia.
 - A barra fica na cor de alerta a partir de 70% e na de perigo a partir de 90%.
 - Conta é cada pasta de configuração do Claude Code na pasta pessoal (`~/.claude` e as
