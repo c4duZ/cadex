@@ -26,9 +26,13 @@ extension WindowSession {
         }
     }
 
-    /// A click on an account: in the focused terminal when its shell is at
-    /// the prompt, else in a new tab in that terminal's folder.
+    /// A click on an account: its agent already running in a Cadex terminal
+    /// comes to the front, the terminal used last when there are several,
+    /// in any window (the owner, 2026-10-21: a click should not open another
+    /// one). Else it opens in the focused terminal when its shell is at the
+    /// prompt, or in a new tab in that terminal's folder.
     func launchAgent(for account: AgentAccount) {
+        if let session = lastUsedSession(of: account) { return openAgent(session) }
         guard let tabs else { return }
         let command = AgentLaunch.command(for: account, skipPermissions: settings.store.settings.agents.launchSkipPermissions)
         if let terminal = tabs.activeTerminal, !terminal.hasForegroundProcess {
@@ -38,6 +42,22 @@ extension WindowSession {
         }
         tabs.newTab(cwd: tabs.activeTerminal?.currentDirectory)
         tabs.activeTerminal?.session?.write(command + "\n")
+    }
+
+    /// The account's live session whose terminal was used last: this
+    /// window's first, then the others'; nil when none runs in Cadex.
+    private func lastUsedSession(of account: AgentAccount) -> AgentSession? {
+        let sessions = AgentsController.shared.sessions.filter { $0.account.dir == account.dir }
+        guard !sessions.isEmpty else { return nil }
+        let windows = [self] + app.sessions.filter { $0 !== self }
+        for window in windows {
+            let order = window.tabs?.agentTerminals ?? []
+            let found = sessions.compactMap { session in
+                window.terminal(of: session).flatMap { found in order.firstIndex { $0 === found.terminal }.map { ($0, session) } }
+            }
+            if let best = found.min(by: { $0.0 < $1.0 }) { return best.1 }
+        }
+        return nil
     }
 
     /// Customize › Accounts: every account with a switch to show it, the
