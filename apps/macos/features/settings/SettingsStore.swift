@@ -13,7 +13,13 @@ public final class SettingsStore {
     /// Set while saving, so our own write does not count as a hand edit.
     private var lastWritten: Data?
 
+    /// CADEX_SETTINGS_FILE points to another file: the perf scenarios try
+    /// themes and effects without touching the owner's settings (as
+    /// CADEX_SPACES_FILE does for the spaces).
     public static var defaultFile: URL {
+        if let path = ProcessInfo.processInfo.environment["CADEX_SETTINGS_FILE"], !path.isEmpty {
+            return URL(fileURLWithPath: path)
+        }
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         return base.appendingPathComponent("Cadex/settings.json")
     }

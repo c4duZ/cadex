@@ -67,7 +67,7 @@ public final class ExplorerController: NSObject {
                 while folder.count > 1, folders.insert(folder).inserted { folder = (folder as NSString).deletingLastPathComponent }
             }
             changedFolders = folders
-            outline.reloadData(forRowIndexes: IndexSet(integersIn: 0..<outline.numberOfRows), columnIndexes: [0])
+            refreshVisibleRows()
         }
     }
     private var changedFolders: Set<String> = []
@@ -254,6 +254,23 @@ public final class ExplorerController: NSObject {
         header.textColor = style.secondaryText
         message.textColor = style.secondaryText
         buttons.forEach { $0.contentTintColor = style.secondaryText }
-        outline.reloadData()
+        refreshVisibleRows()
+    }
+
+    /// The rows on screen take the colors and git marks again, in place. A
+    /// reload rebuilt every row, and AppKit kept each row's old disclosure
+    /// button with its observers: 10 MB more every 100 theme changes, and
+    /// on every git status change (measured 2026-10-20).
+    func refreshVisibleRows() {
+        outline.enumerateAvailableRowViews { rowView, row in
+            if let rowView = rowView as? ExplorerRowView {
+                rowView.accent = style.accent
+                rowView.guide = style.secondaryText.withAlphaComponent(0.25)
+                rowView.needsDisplay = true
+            }
+            guard let item = outline.item(atRow: row), let cell = rowView.view(atColumn: 0) as? ExplorerCell else { return }
+            let file = node(item)
+            cell.show(file, title: title(of: file), expanded: outline.isItemExpanded(item), style: style, git: gitMark(for: file))
+        }
     }
 }

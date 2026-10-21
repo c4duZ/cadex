@@ -18,7 +18,10 @@ public final class StatusBarView: NSView {
         }
     }
 
-    public var style = Style(text: .labelColor, secondaryText: .secondaryLabelColor) { didSet { rebuild() } }
+    /// A theme change repaints the pieces in place: rebuilding them left
+    /// AppKit's bookkeeping of every new button behind, ~8 KB per theme
+    /// change (measured 2026-10-20).
+    public var style = Style(text: .labelColor, secondaryText: .secondaryLabelColor) { didSet { restyle() } }
     /// The folder shown; nil while unknown.
     public var path: String? { didSet { if path != oldValue { rebuild() } } }
     /// Whether picking a folder may move the terminal (the shell is idle).
@@ -67,6 +70,26 @@ public final class StatusBarView: NSView {
         }
     }
 
+    private func restyle() {
+        environment.textColor = style.secondaryText
+        let pieces = trail.arrangedSubviews
+        for (i, view) in pieces.enumerated() {
+            if let button = view as? NSButton {
+                let last = i == pieces.count - 1
+                button.attributedTitle = Self.title(button.attributedTitle.string, last: last, style: style)
+            } else if let label = view as? NSTextField {
+                label.textColor = style.secondaryText
+            }
+        }
+    }
+
+    private static func title(_ text: String, last: Bool, style: Style) -> NSAttributedString {
+        NSAttributedString(string: text, attributes: [
+            .font: NSFont.systemFont(ofSize: 11, weight: last ? .semibold : .regular),
+            .foregroundColor: last ? style.text : style.secondaryText,
+        ])
+    }
+
     private func label(_ text: String, color: NSColor) -> NSTextField {
         let label = NSTextField(labelWithString: text)
         label.font = .systemFont(ofSize: 11)
@@ -78,10 +101,7 @@ public final class StatusBarView: NSView {
         guard let folder = segment.path else { return label(segment.title, color: style.secondaryText) }
         let button = NSButton(title: segment.title, target: self, action: #selector(pieceClicked(_:)))
         button.isBordered = false
-        button.attributedTitle = NSAttributedString(string: segment.title, attributes: [
-            .font: NSFont.systemFont(ofSize: 11, weight: last ? .semibold : .regular),
-            .foregroundColor: last ? style.text : style.secondaryText,
-        ])
+        button.attributedTitle = Self.title(segment.title, last: last, style: style)
         button.identifier = NSUserInterfaceItemIdentifier(folder)
         return button
     }

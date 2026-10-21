@@ -11,7 +11,8 @@
 - `Settings.swift`: o modelo (geral com general.openFiles, terminal, aparência, explorer, markdown, power, atalhos) e os limites da spec.
   `SettingsFile.swift`: lê o JSON campo a campo (campo errado volta ao padrão e vira aviso, o resto
   vale) e escreve. `SettingsStore.swift`: memória e disco (Application Support/Cadex), salva a cada
-  mudança e relê edição à mão observando a pasta (salvar atômico) e o arquivo (edição no lugar).
+  mudança e relê edição à mão observando a pasta (salvar atômico) e o arquivo (edição no lugar). CADEX_SETTINGS_FILE
+  aponta para outro arquivo (os cenários do `make perf`).
 - A janela (⌘,, comando settings.open): `SettingsWindowController.swift`, com as seções em abas no
   topo como no Terax, auxiliar de tela cheia (com o app em tela cheia, abre por cima dele, na mesma
   mesa, e não numa mesa à parte); `GeneralPages.swift` (General e About), `TerminalPage.swift`, `KeepAwakeRows.swift` (as seções do manter acordado em General), `ThemesPage.swift` (modo e

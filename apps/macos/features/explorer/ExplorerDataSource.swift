@@ -7,7 +7,7 @@ import Icons
 /// file URLs, which the terminal turns into quoted paths and the Finder
 /// copies; dropping rows on a folder of the tree moves them there.
 extension ExplorerController: NSOutlineViewDataSource, NSOutlineViewDelegate {
-    private func node(_ item: Any?) -> FileNode {
+    func node(_ item: Any?) -> FileNode {
         (item as? FileNode) ?? root
     }
 
