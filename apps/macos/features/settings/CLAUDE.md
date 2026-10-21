@@ -15,8 +15,10 @@
   aponta para outro arquivo (os cenários do `make perf`).
 - A janela (⌘,, comando settings.open): `SettingsWindowController.swift`, com as seções em abas no
   topo como no Terax, auxiliar de tela cheia (com o app em tela cheia, abre por cima dele, na mesma
-  mesa, e não numa mesa à parte); `GeneralPages.swift` (General e About), `TerminalPage.swift`, `KeepAwakeRows.swift` (as seções do manter acordado em General), `ThemesPage.swift` (modo e
-  grade de cartões de tema), `ShortcutsPage.swift` (grava a próxima combinação com os atalhos do
+  mesa, e não numa mesa à parte); `GeneralPages.swift` (General e About), `TerminalPage.swift`, `KeepAwakeRows.swift` (as seções do manter acordado em General), `ThemesPage.swift` (modo, seus temas,
+  busca e filtro claro/escuro, a grade e a moldura), `ThemeGrid.swift` (os cartões, só das linhas na
+  tela, reaproveitados ao rolar), `ThemeActions.swift` (comandos theme.choose com a lista no ⌘K,
+  theme.import, theme.open-folder, theme.mode-system/-dark/-light; a página usa as mesmas ações), `ShortcutsPage.swift` (grava a próxima combinação com os atalhos do
   app suspensos; Delete tira, Esc cancela, "Padrão" volta) e `SettingsPage.swift` (linhas, títulos de
   seção, notas, caixas e controles que mudam o arquivo na hora). Textos em par inglês/português
   (`T`, `../../shared/strings`); trocar o idioma pergunta "Reabrir agora" e chama `relaunch`, do app. A janela segue o tema (`SettingsColors.swift`): a página
@@ -27,4 +29,6 @@
   prontos, com imagem de fundo (copiada para Application Support/Cadex/backgrounds) e vibrância.
 
 ## Como validar
-- `make macos-test` passa: ler, escrever, arquivo quebrado, campo errado, limites, edição à mão.
+- `make macos-test` passa: ler, escrever, arquivo quebrado, campo errado, limites, edição à mão, a
+  página de temas com cartões só na tela. Com CADEX_SNAPSHOT_DIR, o teste salva um PNG da página
+  (para ver sem captura de tela).

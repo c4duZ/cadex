@@ -11,11 +11,13 @@
 - Python 3 da biblioteca padrão, sem dependências. Cada checagem roda pelo Makefile.
 - `check_manifests.py`: as quatro seções, os caminhos citados e um `CLAUDE.md` em toda pasta de
   feature do núcleo e dos apps.
-- `themes/build_catalog.py`: gera o catálogo de temas do app a partir dos temas do tweakcn (commit
-  fixado no script; o arquivo de entrada é passado na linha de comando) e de
-  `themes/official-palettes.json` (paletas oficiais, cada cor com a fonte). Cortes de temas
-  parecidos e o padrão ficam no script; descrições em `themes/descriptions.json`; licenças em
-  `themes/licenses/` e no `NOTICE`.
+- `themes/build_catalog.py`: gera o catálogo de temas do app a partir de
+  `themes/official-palettes.json` (paletas oficiais, cada cor com a fonte), dos temas do tweakcn
+  (`themes/tweakcn.py`, ANSI tirado das cores de cada um) e dos esquemas base16/base24 do
+  tinted-theming (`themes/tinted.py`); os commits ficam fixados no script e os dois checkouts são
+  passados na linha de comando (`../docs/adr/0017-base16-themes.md`). Contraste conferido e ajustado
+  em OKLCH por `themes/colors.py`; quase iguais e recusados saem na saída. Descrições em par
+  inglês/português em `themes/descriptions.json`; licenças em `themes/licenses/` e no `NOTICE`.
 - `icons/build_file_icons.py`: gera os ícones de arquivo e pasta do app a partir do Material Icon
   Theme (commit fixado no script; o checkout é passado na linha de comando), com
   `icons/svg_to_pdf.swift` convertendo para PDF. A lista do que entra fica no script

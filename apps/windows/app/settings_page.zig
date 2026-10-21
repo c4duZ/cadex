@@ -2,7 +2,8 @@
 //! the Mac's tabs (General, Terminal, Themes, Shortcuts, About), each page in
 //! sections whose rows say what they change (docs/spec/settings.md). Every
 //! change is saved to settings.json at once and counts everywhere; the
-//! language counts when Cadex reopens. The pages are in settings_rows.zig.
+//! language counts when Cadex reopens. The pages are in settings_rows.zig
+//! and themes_page.zig.
 
 const std = @import("std");
 const gfx = @import("gfx");
@@ -34,6 +35,12 @@ pub fn toggle(app: *App) void {
 
 pub fn isOpen() bool {
     return open;
+}
+
+/// Whether the Themes page is on screen (it keeps the list of themes
+/// only while it is).
+pub fn showsThemes() bool {
+    return open and section == .themes;
 }
 
 /// Saves `next` and applies it to every feature.
@@ -79,7 +86,7 @@ pub fn draw(app: *App) void {
     switch (section) {
         .general => rows.general(app, inner),
         .terminal => rows.terminal(app, inner),
-        .themes => rows.themes(app, inner),
+        .themes => @import("themes_page.zig").draw(app, inner),
         .shortcuts => shortcutsSection(app, inner),
         .about => about(app, inner),
     }

@@ -8,6 +8,7 @@ import MediaPreview
 import Power
 import Preview
 import Search
+import Settings
 import SourceControl
 import StatusBar
 import Strings
@@ -38,6 +39,7 @@ extension WindowSession {
             keywords: ["sidebar", "explorer", "painel"], category: .view, defaultShortcut: "cmd+b",
             action: .run { [weak self] in self?.workspace?.toggleSidebar() }))
         commands.register(PowerCommands.all(app.power))
+        commands.register(ThemeCommands.all(store: app.settings.store, palette: palette))
         commands.register(UpdateCommands.all(app.updates))
         commands.register(TerminalCommands.all)
         commands.register(WorkspaceCommands.all(folder, window: { [weak self] in self?.window },

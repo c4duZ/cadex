@@ -1,6 +1,7 @@
 import Checks
-import Foundation
+import AppKit
 @testable import Settings
+import Themes
 
 // Tests of the settings feature. Run with `make macos-test` (see
 // shared/checks/Checks.swift for why this is an executable).
@@ -89,5 +90,41 @@ let exitCode = await Checks.run([
         expect(store.settings.terminal.fontSize == 18)
         expect(seen == [13, 16, 18], "\(seen)")
     }),
+    ("the themes page builds cards only for the rows on screen", {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("cadex-themes-page-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let store = await SettingsStore(file: folder.appendingPathComponent("settings.json"))
+        await MainActor.run {
+            let page = ThemesPage(store: store).makeView()
+            page.frame = NSRect(x: 0, y: 0, width: 900, height: 640)
+            page.layoutSubtreeIfNeeded()
+            let cards = cardViews(in: page)
+            expect(cards > 0 && cards < 40, "\(cards) cards")
+            snapshot(page, "themes-page")
+        }
+    }),
 ])
+
+/// The card views in a view tree.
+@MainActor func cardViews(in view: NSView) -> Int {
+    (view is ThemeCard ? 1 : 0) + view.subviews.reduce(0) { $0 + cardViews(in: $1) }
+}
+
+/// With CADEX_SNAPSHOT_DIR set, saves a picture of `view` there: the way to
+/// look at a page when the screen cannot be captured.
+@MainActor func snapshot(_ view: NSView, _ name: String) {
+    guard let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }
+    // In a window, for the window's background and the controls' looks.
+    let window = NSWindow(contentRect: view.bounds, styleMask: [.borderless], backing: .buffered, defer: false)
+    window.appearance = NSAppearance(named: SettingsColors.isDark ? .darkAqua : .aqua)
+    let root = NSView(frame: view.bounds)
+    root.wantsLayer = true
+    root.layer?.backgroundColor = SettingsColors.background.cgColor
+    root.addSubview(view)
+    window.contentView = root
+    root.layoutSubtreeIfNeeded()
+    guard let bitmap = root.bitmapImageRepForCachingDisplay(in: root.bounds) else { return }
+    root.cacheDisplay(in: root.bounds, to: bitmap)
+    try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir).appendingPathComponent(name + ".png"))
+}
 exit(exitCode)

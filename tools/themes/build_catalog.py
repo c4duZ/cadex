@@ -1,99 +1,48 @@
-"""Builds the Cadex theme catalog from two sources (docs/spec/themes.md):
+"""Builds the Cadex theme catalog from three sources (docs/spec/themes.md,
+docs/adr/0017-base16-themes.md):
 
+- the official palettes of open-source themes in official-palettes.json,
+  each read from its project's own terminal files (sources inside);
 - the theme presets of tweakcn (Apache-2.0), utils/theme-presets.ts at commit
   TWEAKCN_COMMIT, minus the ones cut as near duplicates (CUT);
-- the official palettes of open-source themes in official-palettes.json,
-  each read from its project's own terminal files (sources inside).
+- the base16 and base24 schemes of tinted-theming/schemes (MIT) at commit
+  TINTED_COMMIT, minus ports of the official ones.
 
-    python3 tools/themes/build_catalog.py path/to/theme-presets.ts
+    python3 tools/themes/build_catalog.py path/to/theme-presets.ts path/to/schemes
 
-writes apps/macos/features/themes/Resources/catalog.json. tweakcn presets
-carry no terminal colors: background, text and cursor come from the theme,
-red from its "destructive" color, and the rest from a Cadex base palette.
+writes apps/macos/features/themes/Resources/catalog.json. A theme whose
+terminal text is not readable on its background is refused; interface
+colors below the minimum contrast are moved in OKLCH lightness until they
+pass. A theme too close to one already in is left out, unless official.
 """
 import json
 import math
-import re
 import sys
 from pathlib import Path
+
+import tinted
+import tweakcn
+from colors import contrast, mix, readable, to_oklch
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE.parent.parent / "apps/macos/features/themes/Resources/catalog.json"
 TWEAKCN_COMMIT = "a3b47b37cba97dd637de517aab52c45ec0f83456"
+TINTED_COMMIT = "3ac91137e879502c442ab89ba0f1a98077d0da9d"
 # Near duplicates cut on 2026-10-19 with the owner, by color distance and a
 # contact sheet: the official Catppuccin replaces tweakcn's.
 CUT = {"catppuccin", "mono", "notebook", "pastel-dreams", "mocha-mousse", "clean-slate"}
 DEFAULT = "caffeine"
-BASE_ANSI = {
-    True: ["#1e1e1e", "#e5636e", "#8cc570", "#e2c06b", "#6ca5f0", "#c27be0", "#5fc3c9", "#c8c8c8",
-           "#5c5c5c", "#f07a84", "#a3d98a", "#f0d388", "#8dbbf7", "#d59aec", "#7dd6db", "#f2f2f2"],
-    False: ["#1f1f1f", "#c4323f", "#3c8c2c", "#9c7a10", "#2f62c8", "#9b3fb8", "#1f8a92", "#bdbdbd",
-            "#6b6b6b", "#d9505c", "#4fa63c", "#b8921e", "#4a7de0", "#b45bd0", "#2fa3ab", "#e6e6e6"],
-}
-
-
-def oklch_hex(text):
-    """oklch(L C H) -> sRGB hex, with Björn Ottosson's OKLab matrices."""
-    L, C, H = [float(x) for x in text[6:-1].split("/")[0].split()[:3]]
-    a, b = C * math.cos(math.radians(H)), C * math.sin(math.radians(H))
-    l_ = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3
-    m_ = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3
-    s_ = (L - 0.0894841775 * a - 1.2914855480 * b) ** 3
-    rgb = (4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_,
-           -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_,
-           -0.0041960863 * l_ - 0.7034186147 * m_ + 1.7076147010 * s_)
-    enc = lambda c: 12.92 * c if c <= 0.0031308 else 1.055 * c ** (1 / 2.4) - 0.055
-    return "#" + "".join(f"{round(min(max(enc(c), 0), 1) * 255):02x}" for c in rgb)
-
-
-def mix(a, b, t):
-    """a moved a fraction t toward b."""
-    pa, pb = [int(a[i:i + 2], 16) for i in (1, 3, 5)], [int(b[i:i + 2], 16) for i in (1, 3, 5)]
-    return "#" + "".join(f"{round(x + (y - x) * t):02x}" for x, y in zip(pa, pb))
-
-
-def is_dark(hex_color):
-    r, g, b = [int(hex_color[i:i + 2], 16) for i in (1, 3, 5)]
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b < 128
-
-
-def read_tweakcn(path):
-    src = Path(path).read_text()
-    starts = [(m.group(1), m.group(2), m.start())
-              for m in re.finditer(r'^  "?([a-z0-9-]+)"?: \{\n    label: "([^"]+)"', src, re.M)]
-    presets = {}
-    for i, (key, label, start) in enumerate(starts):
-        end = starts[i + 1][2] if i + 1 < len(starts) else len(src)
-        body = src[start:end]
-        modes = {}
-        for mode in ("light", "dark"):
-            block = re.search(mode + r": \{(.*?)\n      \}", body, re.S)
-            pairs = re.findall(r'"?([a-z0-9-]+)"?: "(#[0-9a-fA-F]{6}|oklch\([^)]*\))"', block.group(1)) if block else []
-            modes[mode] = {k: (v if v.startswith("#") else oklch_hex(v)).lower() for k, v in pairs}
-        presets[key] = (label, modes)
-    return presets
-
-
-def from_tweakcn(c):
-    dark = is_dark(c["background"])
-    return {
-        "interface": {
-            "chrome": c.get("muted", c["background"]), "panel": c["background"],
-            "panelBorder": c.get("border", c["background"]),
-            # The title bar's color with a little of the theme's primary: the
-            # solid tweakcn "accent" painted the active tab amber or green,
-            # and neutral gray made every theme look the same (owner's
-            # feedback, both on 2026-10-19).
-            "tabActive": mix(c.get("muted", c["background"]), c["primary"], 0.22),
-            "field": mix(c.get("muted", c["background"]), c["foreground"], 0.06), "text": c["foreground"],
-            "secondaryText": c.get("muted-foreground", c["foreground"]), "accent": c["primary"],
-        },
-        "terminal": {
-            "background": c["background"], "foreground": c["foreground"], "cursor": c["primary"],
-            "selection": mix(c["background"], c["primary"], 0.3),
-            "ansi": [c.get("destructive", x) if i in (1, 9) else x for i, x in enumerate(BASE_ANSI[dark])],
-        },
-    }
+# WCAG ratios (plan 15: "contraste sempre conferido"). Terminal text is
+# refused below its minimum: moving it would change the theme's look. 4.0,
+# not AA's 4.5: the official Solarized Light is 4.1 (2026-10-20), and
+# terminal.minimumContrast lets the user raise any theme.
+TERMINAL_TEXT = 4.0
+TEXT = 4.5
+SECONDARY = 3.0
+ACCENT = 2.0
+# Mean OKLab distance under which two themes look the same (the cut of
+# 2026-10-19 measured near duplicates around 0.02 to 0.03).
+NEAR = 0.025
 
 
 def from_official(v):
@@ -109,23 +58,77 @@ def from_official(v):
     }
 
 
-def build(tweakcn_path):
-    descriptions = json.loads((HERE / "descriptions.json").read_text())
-    families = []
-    for theme in json.loads((HERE / "official-palettes.json").read_text())["themes"]:
-        families.append({"id": theme["id"], "name": theme["name"], "description": descriptions[theme["id"]],
-                         "source": "official", **{m: from_official(v) for m, v in theme["variants"].items()}})
-    for key, (label, modes) in read_tweakcn(tweakcn_path).items():
-        if key in CUT:
+def checked(variant):
+    """The variant with its interface colors readable, or None."""
+    ui, term = variant["interface"], variant["terminal"]
+    if contrast(term["foreground"], term["background"]) < TERMINAL_TEXT:
+        return None
+    for key, ratio in (("text", TEXT), ("secondaryText", SECONDARY)):
+        # Text sits on both: moved against one, then the other.
+        fixed = readable(ui[key], ui["panel"], ratio)
+        fixed = fixed and readable(fixed, ui["chrome"], ratio)
+        if fixed is None or contrast(fixed, ui["panel"]) < ratio:
+            return None
+        ui[key] = fixed
+    ui["accent"] = readable(ui["accent"], ui["chrome"], ACCENT) or ui["accent"]
+    ui["tabActive"] = mix(ui["chrome"], ui["accent"], 0.22)
+    return variant
+
+
+def signature(family):
+    """OKLab points of the colors that make a theme's look."""
+    points = []
+    for mode in ("dark", "light"):
+        v = family.get(mode)
+        if not v:
             continue
-        families.append({"id": key, "name": label, "description": descriptions[key], "source": "tweakcn",
-                         **{m: from_tweakcn(c) for m, c in modes.items() if c}})
+        colors = [v["terminal"]["background"], v["terminal"]["foreground"], v["interface"]["accent"]] + v["terminal"]["ansi"][1:7]
+        for c in colors:
+            L, C, H = to_oklch(c)
+            points.append((L, C * math.cos(math.radians(H)), C * math.sin(math.radians(H))))
+    return points
+
+
+def too_close(a, b):
+    if len(a) != len(b):
+        return False
+    return sum(math.dist(p, q) for p, q in zip(a, b)) / len(a) < NEAR
+
+
+def build(tweakcn_path, schemes_path):
+    descriptions = json.loads((HERE / "descriptions.json").read_text())
+    candidates = []
+    for theme in json.loads((HERE / "official-palettes.json").read_text())["themes"]:
+        candidates.append({"id": theme["id"], "name": theme["name"], "description": descriptions[theme["id"]],
+                           "source": "official", **{m: from_official(v) for m, v in theme["variants"].items()}})
+    for key, (label, modes) in tweakcn.read(tweakcn_path).items():
+        if key not in CUT:
+            candidates.append({"id": key, "name": label, "description": descriptions[key], "source": "tweakcn",
+                               **{m: tweakcn.variant(c) for m, c in modes.items() if c}})
+    candidates += tinted.read(schemes_path)
+    families, seen, refused = [], [], []
+    for f in candidates:
+        for mode in ("dark", "light"):
+            if mode in f and not checked(f[mode]):
+                refused.append(f"{f['id']} ({mode})")
+                del f[mode]
+        if "dark" not in f and "light" not in f:
+            continue
+        sig = signature(f)
+        # Official variants stay even when close (Gruvbox hard, medium
+        # and soft differ only in the background, by design).
+        close = f["source"] != "official" and any(too_close(sig, s) for s in seen)
+        if any(f["id"] == g["id"] for g in families) or close:
+            continue
+        families.append(f)
+        seen.append(sig)
     families.sort(key=lambda f: (f["id"] != DEFAULT, f["name"].lower()))
-    return families
+    return families, refused
 
 
 if __name__ == "__main__":
-    catalog = build(sys.argv[1])
+    catalog, refused = build(sys.argv[1], sys.argv[2])
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps({"tweakcnCommit": TWEAKCN_COMMIT, "families": catalog}, indent=1, ensure_ascii=False) + "\n")
-    print(f"{len(catalog)} temas em {OUT}")
+    OUT.write_text(json.dumps({"tweakcnCommit": TWEAKCN_COMMIT, "tintedCommit": TINTED_COMMIT, "families": catalog},
+                              separators=(",", ":"), ensure_ascii=False) + "\n")
+    print(f"{len(catalog)} temas em {OUT}; recusados por contraste: {', '.join(refused) or 'nenhum'}")

@@ -50,4 +50,28 @@ public struct RGB: Equatable, Hashable, Sendable {
 
     /// "#1E1E1E"
     public var hex: String { String(format: "#%06X", value) }
+
+    /// This color moved a fraction `t` toward `other`.
+    public func mixed(_ other: RGB, _ t: Double) -> RGB {
+        func channel(_ shift: UInt32) -> UInt32 {
+            let a = Double((value >> shift) & 0xFF), b = Double((other.value >> shift) & 0xFF)
+            return UInt32((a + (b - a) * t).rounded()) << shift
+        }
+        return RGB(channel(16) | channel(8) | channel(0))
+    }
+
+    /// WCAG relative luminance, 0 (black) to 1 (white).
+    public var luminance: Double {
+        func linear(_ shift: UInt32) -> Double {
+            let c = Double((value >> shift) & 0xFF) / 255
+            return c <= 0.04045 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4)
+        }
+        return 0.2126 * linear(16) + 0.7152 * linear(8) + 0.0722 * linear(0)
+    }
+
+    /// WCAG contrast ratio with `other`, 1 to 21.
+    public func contrast(with other: RGB) -> Double {
+        let (a, b) = (luminance, other.luminance)
+        return (max(a, b) + 0.05) / (min(a, b) + 0.05)
+    }
 }

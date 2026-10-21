@@ -28,7 +28,13 @@
   do Mac (`../../macos/app/PaletteWiring.swift`): comando novo que abre algo entra nas duas.
   `settings_page.zig`: a janela de configurações (as abas do Mac: General, Terminal, Themes,
   Shortcuts, About; título de seção, linha com explicação, escolha), com as páginas em
-  `settings_rows.zig` (General com idioma, arquivos, árvore e manter acordado; Terminal; Themes).
+  `settings_rows.zig` (General com idioma, arquivos, árvore e manter acordado; Terminal) e
+  `themes_page.zig` (modo, Mica, "Seus temas" com abrir pasta e importar, busca por nome ou
+  descrição, filtro Todos/Escuros/Claros, os arquivos da pasta que não deu para ler e a lista
+  virtualizada; a lista de todos os temas só existe enquanto a página está na tela).
+  `theme_commands.zig`: theme.choose (a lista de temas no ⌘K, lida ao abrir e liberada quando a
+  paleta fecha), theme.import (o seletor de arquivo do Windows, salva na pasta de temas e usa),
+  theme.open-folder e theme.mode-system/dark/light (some quando já é o modo), como o Mac.
   `relaunch.zig`: "Reabrir agora" depois de trocar o idioma, que fecha como de costume e o `main.zig`
   abre o Cadex.exe de novo; o idioma é lido no começo do App.init (ADR 0015).
 - `sidebar.zig`: o painel lateral (Arquivos ou Git, abas embaixo, view.toggle-sidebar) e o

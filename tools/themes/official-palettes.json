@@ -3,7 +3,7 @@
     {
       "id": "kanagawa",
       "name": "Kanagawa",
-      "description": "Dark theme inspired by the colors of Katsushika Hokusai's The Great Wave off Kanagawa (Wave variant).",
+      "description": "Theme inspired by the colors of Katsushika Hokusai's The Great Wave off Kanagawa: Wave (dark) and Lotus (light).",
       "variants": {
         "dark": {
           "background": "#1F1F28",
@@ -34,17 +34,48 @@
             "muted": "#727169",
             "accent": "#7E9CD8"
           }
+        },
+        "light": {
+          "background": "#f2ecbc",
+          "foreground": "#545464",
+          "cursor": "#43436c",
+          "selection": "#c9cbd1",
+          "ansi": [
+            "#1F1F28",
+            "#c84053",
+            "#6f894e",
+            "#77713f",
+            "#4d699b",
+            "#b35b79",
+            "#597b75",
+            "#545464",
+            "#8a8980",
+            "#d7474b",
+            "#6e915f",
+            "#836f4a",
+            "#6693bf",
+            "#624c83",
+            "#5e857a",
+            "#43436c"
+          ],
+          "ui": {
+            "surface": "#d5cea3",
+            "border": "#716e61",
+            "muted": "#8a8980",
+            "accent": "#4d699b"
+          }
         }
       },
       "license": "MIT",
       "copyright": "Copyright (c) 2021 Tommaso Laurenzi",
       "sources": [
         "https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/extras/kitty/kanagawa.conf",
+        "https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/extras/kitty/kanagawa_light.conf",
         "https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/lua/kanagawa/colors.lua",
         "https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/lua/kanagawa/themes.lua",
         "https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/LICENSE"
       ],
-      "notes": "Terminal values from extras/kitty/kanagawa.conf. UI: surface=float.bg (sumiInk0), border=float.fg_border (sumiInk6), muted=syn.comment (fujiGray), accent=syn.fun (crystalBlue), from themes.lua wave."
+      "notes": "Terminal values from extras/kitty/kanagawa.conf (Wave) and extras/kitty/kanagawa_light.conf (Lotus; identical to extras/ghostty/kanagawa-lotus). UI: surface=float.bg, border=float.fg_border, muted=syn.comment, accent=syn.fun, from themes.lua: wave = sumiInk0 / sumiInk6 / fujiGray / crystalBlue, lotus = lotusWhite0 / lotusGray2 / lotusGray3 / lotusBlue4."
     },
     {
       "id": "kanagawa-dragon",
@@ -170,6 +201,96 @@
       "notes": "Variants: dark=night, light=day. Repo LICENSE is Apache-2.0, but the generated kitty extras headers say '## license: MIT' - treat as Apache-2.0 to be safe. UI: surface=bg_dark, border=fg_gutter (the palette's 'border' key equals black #15161e/#b4b5b9, nearly invisible), muted=comment, accent=blue, from extras/lua."
     },
     {
+      "id": "tokyonight-storm",
+      "name": "Tokyo Night Storm",
+      "description": "Tokyo Night Storm: the bluer, slightly lighter dark variant of Tokyo Night.",
+      "variants": {
+        "dark": {
+          "background": "#24283b",
+          "foreground": "#c0caf5",
+          "cursor": "#c0caf5",
+          "selection": "#2e3c64",
+          "ansi": [
+            "#1d202f",
+            "#f7768e",
+            "#9ece6a",
+            "#e0af68",
+            "#7aa2f7",
+            "#bb9af7",
+            "#7dcfff",
+            "#a9b1d6",
+            "#414868",
+            "#ff899d",
+            "#9fe044",
+            "#faba4a",
+            "#8db0ff",
+            "#c7a9ff",
+            "#a4daff",
+            "#c0caf5"
+          ],
+          "ui": {
+            "surface": "#1f2335",
+            "border": "#3b4261",
+            "muted": "#565f89",
+            "accent": "#7aa2f7"
+          }
+        }
+      },
+      "license": "Apache-2.0",
+      "copyright": "No copyright line: the repository LICENSE is the unmodified Apache-2.0 text with the template line 'Copyright [yyyy] [name of copyright owner]'. Author: Folke Lemaitre.",
+      "sources": [
+        "https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/extras/kitty/tokyonight_storm.conf",
+        "https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/extras/lua/tokyonight_storm.lua",
+        "https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/LICENSE"
+      ],
+      "notes": "Terminal values from extras/kitty/tokyonight_storm.conf. Repo LICENSE is Apache-2.0 (the generated extras headers say MIT) - treated as Apache-2.0, like the tokyonight entry. UI: surface=bg_dark, border=fg_gutter, muted=comment, accent=blue, from extras/lua/tokyonight_storm.lua."
+    },
+    {
+      "id": "tokyonight-moon",
+      "name": "Tokyo Night Moon",
+      "description": "Tokyo Night Moon: a softer, warmer dark variant of Tokyo Night.",
+      "variants": {
+        "dark": {
+          "background": "#222436",
+          "foreground": "#c8d3f5",
+          "cursor": "#c8d3f5",
+          "selection": "#2d3f76",
+          "ansi": [
+            "#1b1d2b",
+            "#ff757f",
+            "#c3e88d",
+            "#ffc777",
+            "#82aaff",
+            "#c099ff",
+            "#86e1fc",
+            "#828bb8",
+            "#444a73",
+            "#ff8d94",
+            "#c7fb6d",
+            "#ffd8ab",
+            "#9ab8ff",
+            "#caabff",
+            "#b2ebff",
+            "#c8d3f5"
+          ],
+          "ui": {
+            "surface": "#1e2030",
+            "border": "#3b4261",
+            "muted": "#636da6",
+            "accent": "#82aaff"
+          }
+        }
+      },
+      "license": "Apache-2.0",
+      "copyright": "No copyright line: the repository LICENSE is the unmodified Apache-2.0 text with the template line 'Copyright [yyyy] [name of copyright owner]'. Author: Folke Lemaitre.",
+      "sources": [
+        "https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/extras/kitty/tokyonight_moon.conf",
+        "https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/extras/lua/tokyonight_moon.lua",
+        "https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/LICENSE"
+      ],
+      "notes": "Terminal values from extras/kitty/tokyonight_moon.conf. Repo LICENSE is Apache-2.0 (the generated extras headers say MIT) - treated as Apache-2.0, like the tokyonight entry. UI: surface=bg_dark, border=fg_gutter, muted=comment, accent=blue, from extras/lua/tokyonight_moon.lua."
+    },
+    {
       "id": "catppuccin",
       "name": "Catppuccin",
       "description": "Soothing pastel theme: Mocha (dark) and Latte (light) flavors.",
@@ -244,6 +365,96 @@
         "https://raw.githubusercontent.com/catppuccin/palette/07d02aa110ef9eb7e7427afca5c73ba9cf7f8ebd/palette.json"
       ],
       "notes": "Kitty selection_background is rosewater with selection_foreground=base (inverted look); if a translucent-style selection is preferred, surface2 (#585b70 / #acb0be) is a palette alternative, not what the kitty port uses. UI: surface=mantle, border=surface0, muted=overlay1, accent=mauve, from palette.json. catppuccin/palette LICENSE also MIT (not separately checked for copyright line)."
+    },
+    {
+      "id": "catppuccin-frappe",
+      "name": "Catppuccin Frappé",
+      "description": "Catppuccin Frappé: the muted, cooler dark flavor between Latte and Macchiato.",
+      "variants": {
+        "dark": {
+          "background": "#303446",
+          "foreground": "#c6d0f5",
+          "cursor": "#f2d5cf",
+          "selection": "#f2d5cf",
+          "ansi": [
+            "#51576d",
+            "#e78284",
+            "#a6d189",
+            "#e5c890",
+            "#8caaee",
+            "#f4b8e4",
+            "#81c8be",
+            "#b5bfe2",
+            "#626880",
+            "#e78284",
+            "#a6d189",
+            "#e5c890",
+            "#8caaee",
+            "#f4b8e4",
+            "#81c8be",
+            "#a5adce"
+          ],
+          "ui": {
+            "surface": "#292c3c",
+            "border": "#414559",
+            "muted": "#838ba7",
+            "accent": "#ca9ee6"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 Catppuccin",
+      "sources": [
+        "https://raw.githubusercontent.com/catppuccin/kitty/43098316202b84d6a71f71aaf8360f102f4d3f1a/themes/frappe.conf",
+        "https://raw.githubusercontent.com/catppuccin/kitty/43098316202b84d6a71f71aaf8360f102f4d3f1a/LICENSE",
+        "https://raw.githubusercontent.com/catppuccin/palette/07d02aa110ef9eb7e7427afca5c73ba9cf7f8ebd/palette.json"
+      ],
+      "notes": "Terminal values from catppuccin/kitty themes/frappe.conf. Kitty selection_background is rosewater with selection_foreground=base (inverted look), kept as the port defines it. UI: surface=mantle, border=surface0, muted=overlay1, accent=mauve, from palette.json (frappe), same roles as the catppuccin entry."
+    },
+    {
+      "id": "catppuccin-macchiato",
+      "name": "Catppuccin Macchiato",
+      "description": "Catppuccin Macchiato: a medium-contrast dark flavor between Frappé and Mocha.",
+      "variants": {
+        "dark": {
+          "background": "#24273a",
+          "foreground": "#cad3f5",
+          "cursor": "#f4dbd6",
+          "selection": "#f4dbd6",
+          "ansi": [
+            "#494d64",
+            "#ed8796",
+            "#a6da95",
+            "#eed49f",
+            "#8aadf4",
+            "#f5bde6",
+            "#8bd5ca",
+            "#b8c0e0",
+            "#5b6078",
+            "#ed8796",
+            "#a6da95",
+            "#eed49f",
+            "#8aadf4",
+            "#f5bde6",
+            "#8bd5ca",
+            "#a5adcb"
+          ],
+          "ui": {
+            "surface": "#1e2030",
+            "border": "#363a4f",
+            "muted": "#8087a2",
+            "accent": "#c6a0f6"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 Catppuccin",
+      "sources": [
+        "https://raw.githubusercontent.com/catppuccin/kitty/43098316202b84d6a71f71aaf8360f102f4d3f1a/themes/macchiato.conf",
+        "https://raw.githubusercontent.com/catppuccin/kitty/43098316202b84d6a71f71aaf8360f102f4d3f1a/LICENSE",
+        "https://raw.githubusercontent.com/catppuccin/palette/07d02aa110ef9eb7e7427afca5c73ba9cf7f8ebd/palette.json"
+      ],
+      "notes": "Terminal values from catppuccin/kitty themes/macchiato.conf. Kitty selection_background is rosewater with selection_foreground=base (inverted look), kept as the port defines it. UI: surface=mantle, border=surface0, muted=overlay1, accent=mauve, from palette.json (macchiato), same roles as the catppuccin entry."
     },
     {
       "id": "rose-pine",
@@ -322,6 +533,51 @@
       "notes": "Kitty cursor is highlight-high (#524f67 / #cecacd) with cursor_text_color=text. UI from rose-pine-palette: surface=surface, border=highlight-med, muted=muted, accent=iris (choice of accent is ours; the kitty port uses pine for the active border). rose-pine-palette LICENSE says 'Copyright (c) mvllow'."
     },
     {
+      "id": "rose-pine-moon",
+      "name": "Rosé Pine Moon",
+      "description": "Rosé Pine Moon: the softer, slightly lighter dark variant of Rosé Pine.",
+      "variants": {
+        "dark": {
+          "background": "#232136",
+          "foreground": "#e0def4",
+          "cursor": "#56526e",
+          "selection": "#44415a",
+          "ansi": [
+            "#393552",
+            "#eb6f92",
+            "#3e8fb0",
+            "#f6c177",
+            "#9ccfd8",
+            "#c4a7e7",
+            "#ea9a97",
+            "#e0def4",
+            "#6e6a86",
+            "#eb6f92",
+            "#3e8fb0",
+            "#f6c177",
+            "#9ccfd8",
+            "#c4a7e7",
+            "#ea9a97",
+            "#e0def4"
+          ],
+          "ui": {
+            "surface": "#2a273f",
+            "border": "#44415a",
+            "muted": "#6e6a86",
+            "accent": "#c4a7e7"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) Rosé Pine",
+      "sources": [
+        "https://raw.githubusercontent.com/rose-pine/kitty/efd4f01cb9887feaa7114ff21a887464295d0205/dist/rose-pine-moon.conf",
+        "https://raw.githubusercontent.com/rose-pine/kitty/efd4f01cb9887feaa7114ff21a887464295d0205/LICENSE",
+        "https://raw.githubusercontent.com/rose-pine/rose-pine-palette/92af52b465ab6e47437aca223c9b8d3009a2023b/dist/css/rose-pine-class.css"
+      ],
+      "notes": "Terminal values from rose-pine/kitty dist/rose-pine-moon.conf. Kitty cursor is highlight-high (#56526e) with cursor_text_color=text. UI from rose-pine-palette .theme-rp-moon: surface=surface, border=highlight-med, muted=muted, accent=iris (same roles as the rose-pine entry). rose-pine-palette LICENSE says 'Copyright (c) mvllow'."
+    },
+    {
       "id": "everforest",
       "name": "Everforest",
       "description": "Green-based, warm, soft-contrast theme designed to be easy on the eyes (medium contrast).",
@@ -396,6 +652,158 @@
         "https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/LICENSE"
       ],
       "notes": "sainnhe/everforest ships no kitty/alacritty file; ANSI values come from the Vim scheme's own terminal mapping (colors/everforest.vim 'Terminal' section: black=bg3 (dark) / fg (light), white=fg (dark) / bg3 (light), bright = normal) with the medium palette in autoload/everforest.vim. Selection=bg_visual. Cursor is NOT defined by the theme (Cursor uses 'reverse' / terminal default) - cursor=foreground is our derivation. UI: surface=bg1, border=bg4 (VertSplit fg), muted=grey1, accent=green."
+    },
+    {
+      "id": "everforest-hard",
+      "name": "Everforest Hard",
+      "description": "Everforest with hard contrast: the same green forest palette on a deeper background.",
+      "variants": {
+        "dark": {
+          "background": "#272e33",
+          "foreground": "#d3c6aa",
+          "cursor": "#d3c6aa",
+          "selection": "#4c3743",
+          "ansi": [
+            "#414b50",
+            "#e67e80",
+            "#a7c080",
+            "#dbbc7f",
+            "#7fbbb3",
+            "#d699b6",
+            "#83c092",
+            "#d3c6aa",
+            "#414b50",
+            "#e67e80",
+            "#a7c080",
+            "#dbbc7f",
+            "#7fbbb3",
+            "#d699b6",
+            "#83c092",
+            "#d3c6aa"
+          ],
+          "ui": {
+            "surface": "#2e383c",
+            "border": "#495156",
+            "muted": "#859289",
+            "accent": "#a7c080"
+          }
+        },
+        "light": {
+          "background": "#fffbef",
+          "foreground": "#5c6a72",
+          "cursor": "#5c6a72",
+          "selection": "#f0f2d4",
+          "ansi": [
+            "#5c6a72",
+            "#f85552",
+            "#8da101",
+            "#dfa000",
+            "#3a94c5",
+            "#df69ba",
+            "#35a77c",
+            "#edeada",
+            "#5c6a72",
+            "#f85552",
+            "#8da101",
+            "#dfa000",
+            "#3a94c5",
+            "#df69ba",
+            "#35a77c",
+            "#edeada"
+          ],
+          "ui": {
+            "surface": "#f8f5e4",
+            "border": "#e8e5d5",
+            "muted": "#939f91",
+            "accent": "#8da101"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2019 sainnhe",
+      "sources": [
+        "https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/autoload/everforest.vim",
+        "https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/colors/everforest.vim",
+        "https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/palette.md",
+        "https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/LICENSE"
+      ],
+      "notes": "Source: sainnhe/everforest at the same commit as the everforest entry, hard palette in autoload/everforest.vim (g:everforest_background='hard'). Only the background shades change with contrast: background=bg0, selection=bg_visual, ANSI black (dark) / white (light) = bg3, surface=bg1, border=bg4. Foreground and accent colors are shared by all contrasts, so the rest of the ANSI mapping, cursor=foreground (our derivation), muted=grey1 and accent=green equal the everforest entry."
+    },
+    {
+      "id": "everforest-soft",
+      "name": "Everforest Soft",
+      "description": "Everforest with soft contrast: the same green forest palette on a softer background.",
+      "variants": {
+        "dark": {
+          "background": "#333c43",
+          "foreground": "#d3c6aa",
+          "cursor": "#d3c6aa",
+          "selection": "#5c3f4f",
+          "ansi": [
+            "#4d5960",
+            "#e67e80",
+            "#a7c080",
+            "#dbbc7f",
+            "#7fbbb3",
+            "#d699b6",
+            "#83c092",
+            "#d3c6aa",
+            "#4d5960",
+            "#e67e80",
+            "#a7c080",
+            "#dbbc7f",
+            "#7fbbb3",
+            "#d699b6",
+            "#83c092",
+            "#d3c6aa"
+          ],
+          "ui": {
+            "surface": "#3a464c",
+            "border": "#555f66",
+            "muted": "#859289",
+            "accent": "#a7c080"
+          }
+        },
+        "light": {
+          "background": "#f3ead3",
+          "foreground": "#5c6a72",
+          "cursor": "#5c6a72",
+          "selection": "#e1e4bd",
+          "ansi": [
+            "#5c6a72",
+            "#f85552",
+            "#8da101",
+            "#dfa000",
+            "#3a94c5",
+            "#df69ba",
+            "#35a77c",
+            "#ddd8be",
+            "#5c6a72",
+            "#f85552",
+            "#8da101",
+            "#dfa000",
+            "#3a94c5",
+            "#df69ba",
+            "#35a77c",
+            "#ddd8be"
+          ],
+          "ui": {
+            "surface": "#eae4ca",
+            "border": "#d8d3ba",
+            "muted": "#939f91",
+            "accent": "#8da101"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2019 sainnhe",
+      "sources": [
+        "https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/autoload/everforest.vim",
+        "https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/colors/everforest.vim",
+        "https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/palette.md",
+        "https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/LICENSE"
+      ],
+      "notes": "Source: sainnhe/everforest at the same commit as the everforest entry, soft palette in autoload/everforest.vim (g:everforest_background='soft'). Only the background shades change with contrast: background=bg0, selection=bg_visual, ANSI black (dark) / white (light) = bg3, surface=bg1, border=bg4. Foreground and accent colors are shared by all contrasts, so the rest of the ANSI mapping, cursor=foreground (our derivation), muted=grey1 and accent=green equal the everforest entry."
     },
     {
       "id": "nord",
@@ -521,6 +929,156 @@
       "notes": "ANSI from gruvbox.vim's own Neovim terminal mapping (g:terminal_color_0..15), medium contrast. Dark matches gruvbox-contrib xresources exactly; light differs only in color0: xresources has #fdf4c1 (an older light0), vim uses bg0=#fbf1c7 (used here). gruvbox-contrib has no license. Cursor: theme uses 'inverse' (no explicit color) - cursor=foreground is our derivation. Selection=Visual bg (bg3). UI: surface=bg1, border=bg3 (VertSplit), muted=gray, accent=orange (hls_cursor default; accent choice is ours)."
     },
     {
+      "id": "gruvbox-hard",
+      "name": "Gruvbox Hard",
+      "description": "Gruvbox with hard contrast: a darker (dark) and brighter (light) background, same retro groove palette.",
+      "variants": {
+        "dark": {
+          "background": "#1d2021",
+          "foreground": "#ebdbb2",
+          "cursor": "#ebdbb2",
+          "selection": "#665c54",
+          "ansi": [
+            "#1d2021",
+            "#cc241d",
+            "#98971a",
+            "#d79921",
+            "#458588",
+            "#b16286",
+            "#689d6a",
+            "#a89984",
+            "#928374",
+            "#fb4934",
+            "#b8bb26",
+            "#fabd2f",
+            "#83a598",
+            "#d3869b",
+            "#8ec07c",
+            "#ebdbb2"
+          ],
+          "ui": {
+            "surface": "#3c3836",
+            "border": "#665c54",
+            "muted": "#928374",
+            "accent": "#fe8019"
+          }
+        },
+        "light": {
+          "background": "#f9f5d7",
+          "foreground": "#3c3836",
+          "cursor": "#3c3836",
+          "selection": "#bdae93",
+          "ansi": [
+            "#f9f5d7",
+            "#cc241d",
+            "#98971a",
+            "#d79921",
+            "#458588",
+            "#b16286",
+            "#689d6a",
+            "#7c6f64",
+            "#928374",
+            "#9d0006",
+            "#79740e",
+            "#b57614",
+            "#076678",
+            "#8f3f71",
+            "#427b58",
+            "#3c3836"
+          ],
+          "ui": {
+            "surface": "#ebdbb2",
+            "border": "#bdae93",
+            "muted": "#928374",
+            "accent": "#af3a03"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "No LICENSE file in morhetz/gruvbox: README.md 'License' section says MIT/X11 and package.json says license MIT, author 'Pavel Pertsev <morhetz@gmail.com>'. No copyright line exists.",
+      "sources": [
+        "https://raw.githubusercontent.com/morhetz/gruvbox/ef8864bb42bf244f0295d1c5a403b27e3d139695/colors/gruvbox.vim",
+        "https://raw.githubusercontent.com/morhetz/gruvbox/ef8864bb42bf244f0295d1c5a403b27e3d139695/README.md",
+        "https://raw.githubusercontent.com/morhetz/gruvbox/ef8864bb42bf244f0295d1c5a403b27e3d139695/package.json"
+      ],
+      "notes": "Source: morhetz/gruvbox colors/gruvbox.vim (the same file as the gruvbox entry, not gruvbox-community). g:gruvbox_contrast_dark/light='hard' only changes bg0: dark0_hard=#1d2021, light0_hard=#f9f5d7. bg0 is both the background and g:terminal_color_0, so those two values change; every other value equals the medium gruvbox entry (ANSI from the Neovim terminal mapping, cursor=foreground as our derivation since the theme uses 'inverse', selection=bg3, UI: surface=bg1, border=bg3, muted=gray, accent=orange)."
+    },
+    {
+      "id": "gruvbox-soft",
+      "name": "Gruvbox Soft",
+      "description": "Gruvbox with soft contrast: a lifted (dark) and dimmer (light) background, same retro groove palette.",
+      "variants": {
+        "dark": {
+          "background": "#32302f",
+          "foreground": "#ebdbb2",
+          "cursor": "#ebdbb2",
+          "selection": "#665c54",
+          "ansi": [
+            "#32302f",
+            "#cc241d",
+            "#98971a",
+            "#d79921",
+            "#458588",
+            "#b16286",
+            "#689d6a",
+            "#a89984",
+            "#928374",
+            "#fb4934",
+            "#b8bb26",
+            "#fabd2f",
+            "#83a598",
+            "#d3869b",
+            "#8ec07c",
+            "#ebdbb2"
+          ],
+          "ui": {
+            "surface": "#3c3836",
+            "border": "#665c54",
+            "muted": "#928374",
+            "accent": "#fe8019"
+          }
+        },
+        "light": {
+          "background": "#f2e5bc",
+          "foreground": "#3c3836",
+          "cursor": "#3c3836",
+          "selection": "#bdae93",
+          "ansi": [
+            "#f2e5bc",
+            "#cc241d",
+            "#98971a",
+            "#d79921",
+            "#458588",
+            "#b16286",
+            "#689d6a",
+            "#7c6f64",
+            "#928374",
+            "#9d0006",
+            "#79740e",
+            "#b57614",
+            "#076678",
+            "#8f3f71",
+            "#427b58",
+            "#3c3836"
+          ],
+          "ui": {
+            "surface": "#ebdbb2",
+            "border": "#bdae93",
+            "muted": "#928374",
+            "accent": "#af3a03"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "No LICENSE file in morhetz/gruvbox: README.md 'License' section says MIT/X11 and package.json says license MIT, author 'Pavel Pertsev <morhetz@gmail.com>'. No copyright line exists.",
+      "sources": [
+        "https://raw.githubusercontent.com/morhetz/gruvbox/ef8864bb42bf244f0295d1c5a403b27e3d139695/colors/gruvbox.vim",
+        "https://raw.githubusercontent.com/morhetz/gruvbox/ef8864bb42bf244f0295d1c5a403b27e3d139695/README.md",
+        "https://raw.githubusercontent.com/morhetz/gruvbox/ef8864bb42bf244f0295d1c5a403b27e3d139695/package.json"
+      ],
+      "notes": "Source: morhetz/gruvbox colors/gruvbox.vim (the same file as the gruvbox entry, not gruvbox-community). g:gruvbox_contrast_dark/light='soft' only changes bg0: dark0_soft=#32302f, light0_soft=#f2e5bc. bg0 is both the background and g:terminal_color_0, so those two values change; every other value equals the medium gruvbox entry (ANSI from the Neovim terminal mapping, cursor=foreground as our derivation since the theme uses 'inverse', selection=bg3, UI: surface=bg1, border=bg3, muted=gray, accent=orange)."
+    },
+    {
       "id": "dracula",
       "name": "Dracula",
       "description": "Dark theme with vivid purple, pink and green accents.",
@@ -641,6 +1199,961 @@
         "https://raw.githubusercontent.com/altercation/solarized/62f656a02f93c5190a8753159e34b385588d5ff3/LICENSE"
       ],
       "notes": "Hex values are the sRGB values from the README 'SOLARIZED HEX / 16/8 TERMCOL' table (ANSI slot per color from that table; same 16 for dark and light). The official .itermcolors files store calibrated (non-sRGB) floats that convert to different hex (e.g. #001e27), so they were used only for roles: bg=Ansi8/base03 (dark) or Ansi15/base3 (light), fg=cursor=base0 (dark) / base00 (light), selection=base02 (dark) / base2 (light). UI: surface=base02/base2 (background highlights), border and muted=base01 (dark) / base1 (light) (comments), accent=blue (our choice)."
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "description": "GitHub's default dark and light themes.",
+      "variants": {
+        "dark": {
+          "background": "#0d1117",
+          "foreground": "#e6edf3",
+          "cursor": "#e6edf3",
+          "selection": "#1e4273",
+          "ansi": [
+            "#484f58",
+            "#ff7b72",
+            "#3fb950",
+            "#d29922",
+            "#58a6ff",
+            "#bc8cff",
+            "#39c5cf",
+            "#b1bac4",
+            "#6e7681",
+            "#ffa198",
+            "#56d364",
+            "#e3b341",
+            "#79c0ff",
+            "#d2a8ff",
+            "#56d4dd",
+            "#ffffff"
+          ],
+          "ui": {
+            "surface": "#161b22",
+            "border": "#30363d",
+            "muted": "#848d97",
+            "accent": "#2f81f7"
+          }
+        },
+        "light": {
+          "background": "#ffffff",
+          "foreground": "#1F2328",
+          "cursor": "#1F2328",
+          "selection": "#bbdfff",
+          "ansi": [
+            "#24292f",
+            "#cf222e",
+            "#116329",
+            "#4d2d00",
+            "#0969da",
+            "#8250df",
+            "#1b7c83",
+            "#6e7781",
+            "#57606a",
+            "#a40e26",
+            "#1a7f37",
+            "#633c01",
+            "#218bff",
+            "#a475f9",
+            "#3192aa",
+            "#8c959f"
+          ],
+          "ui": {
+            "surface": "#f6f8fa",
+            "border": "#d0d7de",
+            "muted": "#656d76",
+            "accent": "#0969da"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 projekt0n̅",
+      "sources": [
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/primitives/dark.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/primitives/light.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/github_dark_default.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/github_light_default.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/LICENSE"
+      ],
+      "notes": "Values from the GitHub Primer color tokens (primer/primitives 7.15.6) that github-nvim-theme vendors in lua/github-theme/palette/primitives/ (the file embeds primer's MIT license, 'Copyright (c) 2018 GitHub Inc.'). ANSI = Primer's top-level 'ansi' tokens (black..white, then the *Bright ones), GitHub's own terminal colors (the theme's nvim palette derives slightly different terminal colors from the scales; Primer's are used). background=canvas.default, foreground=fg.default, cursor=codemirror.cursor, selection=codemirror.selectionBg alpha-composited over the background (dark rgba(56,139,253,0.4) over canvas.default -> #1e4273; light rgba(84,174,255,0.4) over canvas.default -> #bbdfff). UI: surface=canvas.subtle, border=border.default, muted=fg.muted, accent=accent.fg. These are the primitives of github_dark_default / github_light_default (GitHub's current default themes), not the older github_dark / github_light palettes."
+    },
+    {
+      "id": "github-dimmed",
+      "name": "GitHub Dimmed",
+      "description": "GitHub's dimmed dark theme: softer contrast on a gray-blue background.",
+      "variants": {
+        "dark": {
+          "background": "#22272e",
+          "foreground": "#adbac7",
+          "cursor": "#adbac7",
+          "selection": "#2e4c77",
+          "ansi": [
+            "#545d68",
+            "#f47067",
+            "#57ab5a",
+            "#c69026",
+            "#539bf5",
+            "#b083f0",
+            "#39c5cf",
+            "#909dab",
+            "#636e7b",
+            "#ff938a",
+            "#6bc46d",
+            "#daaa3f",
+            "#6cb6ff",
+            "#dcbdfb",
+            "#56d4dd",
+            "#cdd9e5"
+          ],
+          "ui": {
+            "surface": "#2d333b",
+            "border": "#444c56",
+            "muted": "#768390",
+            "accent": "#539bf5"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 projekt0n̅",
+      "sources": [
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/primitives/dark_dimmed.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/github_dark_dimmed.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/LICENSE"
+      ],
+      "notes": "Values from the GitHub Primer color tokens (primer/primitives 7.15.6) that github-nvim-theme vendors in lua/github-theme/palette/primitives/ (the file embeds primer's MIT license, 'Copyright (c) 2018 GitHub Inc.'). ANSI = Primer's top-level 'ansi' tokens (black..white, then the *Bright ones), GitHub's own terminal colors (the theme's nvim palette derives slightly different terminal colors from the scales; Primer's are used). background=canvas.default, foreground=fg.default, cursor=codemirror.cursor, selection=codemirror.selectionBg alpha-composited over the background (dark rgba(65,132,228,0.4) over canvas.default -> #2e4c77). UI: surface=canvas.subtle, border=border.default, muted=fg.muted, accent=accent.fg."
+    },
+    {
+      "id": "github-high-contrast",
+      "name": "GitHub High Contrast",
+      "description": "GitHub's high contrast themes, dark and light.",
+      "variants": {
+        "dark": {
+          "background": "#0a0c10",
+          "foreground": "#f0f3f6",
+          "cursor": "#f0f3f6",
+          "selection": "#204670",
+          "ansi": [
+            "#7a828e",
+            "#ff9492",
+            "#26cd4d",
+            "#f0b72f",
+            "#71b7ff",
+            "#cb9eff",
+            "#39c5cf",
+            "#d9dee3",
+            "#9ea7b3",
+            "#ffb1af",
+            "#4ae168",
+            "#f7c843",
+            "#91cbff",
+            "#dbb7ff",
+            "#56d4dd",
+            "#ffffff"
+          ],
+          "ui": {
+            "surface": "#272b33",
+            "border": "#7a828e",
+            "muted": "#f0f3f6",
+            "accent": "#71b7ff"
+          }
+        },
+        "light": {
+          "background": "#ffffff",
+          "foreground": "#0e1116",
+          "cursor": "#0e1116",
+          "selection": "#368cf9",
+          "ansi": [
+            "#0e1116",
+            "#a0111f",
+            "#024c1a",
+            "#3f2200",
+            "#0349b4",
+            "#622cbc",
+            "#1b7c83",
+            "#66707b",
+            "#4b535d",
+            "#86061d",
+            "#055d20",
+            "#4e2c00",
+            "#1168e3",
+            "#844ae7",
+            "#3192aa",
+            "#88929d"
+          ],
+          "ui": {
+            "surface": "#e7ecf0",
+            "border": "#20252c",
+            "muted": "#0e1116",
+            "accent": "#0349b4"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 projekt0n̅",
+      "sources": [
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/primitives/dark_high_contrast.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/primitives/light_high_contrast.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/github_dark_high_contrast.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/github_light_high_contrast.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/LICENSE"
+      ],
+      "notes": "Values from the GitHub Primer color tokens (primer/primitives 7.15.6) that github-nvim-theme vendors in lua/github-theme/palette/primitives/ (the file embeds primer's MIT license, 'Copyright (c) 2018 GitHub Inc.'). ANSI = Primer's top-level 'ansi' tokens (black..white, then the *Bright ones), GitHub's own terminal colors (the theme's nvim palette derives slightly different terminal colors from the scales; Primer's are used). background=canvas.default, foreground=fg.default, cursor=codemirror.cursor, selection=codemirror.selectionBg alpha-composited over the background (dark rgba(64,158,255,0.4) over canvas.default -> #204670; light #368cf9 (opaque, used as is)). UI: surface=canvas.subtle, border=border.default, muted=fg.muted, accent=accent.fg. In both high contrast themes fg.muted equals fg.default (GitHub raises secondary text to full contrast), so muted=foreground."
+    },
+    {
+      "id": "github-colorblind",
+      "name": "GitHub Colorblind",
+      "description": "GitHub's protanopia and deuteranopia themes, dark and light.",
+      "variants": {
+        "dark": {
+          "background": "#0d1117",
+          "foreground": "#c9d1d9",
+          "cursor": "#c9d1d9",
+          "selection": "#1e4273",
+          "ansi": [
+            "#484f58",
+            "#ec8e2c",
+            "#58a6ff",
+            "#d29922",
+            "#58a6ff",
+            "#bc8cff",
+            "#39c5cf",
+            "#b1bac4",
+            "#6e7681",
+            "#fdac54",
+            "#79c0ff",
+            "#e3b341",
+            "#79c0ff",
+            "#d2a8ff",
+            "#56d4dd",
+            "#ffffff"
+          ],
+          "ui": {
+            "surface": "#161b22",
+            "border": "#30363d",
+            "muted": "#8b949e",
+            "accent": "#58a6ff"
+          }
+        },
+        "light": {
+          "background": "#ffffff",
+          "foreground": "#24292f",
+          "cursor": "#24292f",
+          "selection": "#bbdfff",
+          "ansi": [
+            "#24292f",
+            "#b35900",
+            "#0550ae",
+            "#4d2d00",
+            "#0969da",
+            "#8250df",
+            "#1b7c83",
+            "#6e7781",
+            "#57606a",
+            "#8a4600",
+            "#0969da",
+            "#633c01",
+            "#218bff",
+            "#a475f9",
+            "#3192aa",
+            "#8c959f"
+          ],
+          "ui": {
+            "surface": "#f6f8fa",
+            "border": "#d0d7de",
+            "muted": "#57606a",
+            "accent": "#0969da"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 projekt0n̅",
+      "sources": [
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/primitives/dark_colorblind.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/primitives/light_colorblind.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/github_dark_colorblind.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/github_light_colorblind.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/LICENSE"
+      ],
+      "notes": "Values from the GitHub Primer color tokens (primer/primitives 7.15.6) that github-nvim-theme vendors in lua/github-theme/palette/primitives/ (the file embeds primer's MIT license, 'Copyright (c) 2018 GitHub Inc.'). ANSI = Primer's top-level 'ansi' tokens (black..white, then the *Bright ones), GitHub's own terminal colors (the theme's nvim palette derives slightly different terminal colors from the scales; Primer's are used). background=canvas.default, foreground=fg.default, cursor=codemirror.cursor, selection=codemirror.selectionBg alpha-composited over the background (dark rgba(56,139,253,0.4) over canvas.default -> #1e4273; light rgba(84,174,255,0.4) over canvas.default -> #bbdfff). UI: surface=canvas.subtle, border=border.default, muted=fg.muted, accent=accent.fg."
+    },
+    {
+      "id": "github-tritanopia",
+      "name": "GitHub Tritanopia",
+      "description": "GitHub's tritanopia themes, dark and light.",
+      "variants": {
+        "dark": {
+          "background": "#0d1117",
+          "foreground": "#c9d1d9",
+          "cursor": "#c9d1d9",
+          "selection": "#1e4273",
+          "ansi": [
+            "#484f58",
+            "#ff7b72",
+            "#58a6ff",
+            "#d29922",
+            "#58a6ff",
+            "#bc8cff",
+            "#39c5cf",
+            "#b1bac4",
+            "#6e7681",
+            "#ffa198",
+            "#79c0ff",
+            "#e3b341",
+            "#79c0ff",
+            "#d2a8ff",
+            "#56d4dd",
+            "#ffffff"
+          ],
+          "ui": {
+            "surface": "#161b22",
+            "border": "#30363d",
+            "muted": "#8b949e",
+            "accent": "#58a6ff"
+          }
+        },
+        "light": {
+          "background": "#ffffff",
+          "foreground": "#24292f",
+          "cursor": "#24292f",
+          "selection": "#bbdfff",
+          "ansi": [
+            "#24292f",
+            "#cf222e",
+            "#0550ae",
+            "#4d2d00",
+            "#0969da",
+            "#8250df",
+            "#1b7c83",
+            "#6e7781",
+            "#57606a",
+            "#a40e26",
+            "#0969da",
+            "#633c01",
+            "#218bff",
+            "#a475f9",
+            "#3192aa",
+            "#8c959f"
+          ],
+          "ui": {
+            "surface": "#f6f8fa",
+            "border": "#d0d7de",
+            "muted": "#57606a",
+            "accent": "#0969da"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 projekt0n̅",
+      "sources": [
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/primitives/dark_tritanopia.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/primitives/light_tritanopia.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/github_dark_tritanopia.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/github_light_tritanopia.lua",
+        "https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/LICENSE"
+      ],
+      "notes": "Values from the GitHub Primer color tokens (primer/primitives 7.15.6) that github-nvim-theme vendors in lua/github-theme/palette/primitives/ (the file embeds primer's MIT license, 'Copyright (c) 2018 GitHub Inc.'). ANSI = Primer's top-level 'ansi' tokens (black..white, then the *Bright ones), GitHub's own terminal colors (the theme's nvim palette derives slightly different terminal colors from the scales; Primer's are used). background=canvas.default, foreground=fg.default, cursor=codemirror.cursor, selection=codemirror.selectionBg alpha-composited over the background (dark rgba(56,139,253,0.4) over canvas.default -> #1e4273; light rgba(84,174,255,0.4) over canvas.default -> #bbdfff). UI: surface=canvas.subtle, border=border.default, muted=fg.muted, accent=accent.fg."
+    },
+    {
+      "id": "ayu",
+      "name": "Ayu",
+      "description": "Simple, bright-accented theme: Ayu Dark and Ayu Light.",
+      "variants": {
+        "dark": {
+          "background": "#0d1017",
+          "foreground": "#bfbdb6",
+          "cursor": "#e6b450",
+          "selection": "#172e51",
+          "ansi": [
+            "#1b1f29",
+            "#f06b73",
+            "#70bf56",
+            "#fdb04c",
+            "#4fbfff",
+            "#d0a1ff",
+            "#93e2c8",
+            "#c7c7c7",
+            "#686868",
+            "#f07178",
+            "#aad94c",
+            "#ffb454",
+            "#59c2ff",
+            "#d2a6ff",
+            "#95e6cb",
+            "#ffffff"
+          ],
+          "ui": {
+            "surface": "#010102",
+            "border": "#1b1f29",
+            "muted": "#5a6378",
+            "accent": "#e6b450"
+          }
+        },
+        "light": {
+          "background": "#f8f9fa",
+          "foreground": "#5c6166",
+          "cursor": "#f29718",
+          "selection": "#d3e1f5",
+          "ansi": [
+            "#000000",
+            "#f06b6c",
+            "#6cbf43",
+            "#e7a100",
+            "#21a1e2",
+            "#a176cb",
+            "#4abc96",
+            "#c7c7c7",
+            "#686868",
+            "#f07171",
+            "#86b300",
+            "#eba400",
+            "#22a4e6",
+            "#a37acc",
+            "#4cbf99",
+            "#d1d1d1"
+          ],
+          "ui": {
+            "surface": "#ebeef0",
+            "border": "#e7eaed",
+            "muted": "#828e9f",
+            "accent": "#f29718"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2016 Ike Kurghinyan",
+      "sources": [
+        "https://raw.githubusercontent.com/ayu-theme/vscode-ayu/7f438df22446f02e79cdfc2f3771b0b273f34654/ayu-dark.json",
+        "https://raw.githubusercontent.com/ayu-theme/vscode-ayu/7f438df22446f02e79cdfc2f3771b0b273f34654/ayu-light.json",
+        "https://raw.githubusercontent.com/ayu-theme/vscode-ayu/7f438df22446f02e79cdfc2f3771b0b273f34654/LICENSE"
+      ],
+      "notes": "Source: ayu-theme/vscode-ayu (MIT, the VS Code port in the ayu-theme organization), whose committed ayu-*.json files are generated from ayu-theme/ayu-colors; ayu-colors itself only stores OKLCH formulas, so the resolved hex values are read from the port. Terminal: terminal.background, terminal.foreground and terminal.ansi*. cursor=editorCursor.foreground (no terminalCursor key). selection=editor.selectionBackground alpha-composited over terminal.background (dark #3388ff40 -> #172e51; light #035bd626 -> #d3e1f5). UI: surface=titleBar.activeBackground, border=panel.border (light: #6b7d8f1f alpha-composited over the background -> #e7eaed), muted=foreground (ayu's UI text color), accent=focusBorder (ayu's accent)."
+    },
+    {
+      "id": "ayu-mirage",
+      "name": "Ayu Mirage",
+      "description": "Ayu Mirage: the medium-dark, blue-gray variant of Ayu.",
+      "variants": {
+        "dark": {
+          "background": "#1f2430",
+          "foreground": "#cccac2",
+          "cursor": "#ffcc66",
+          "selection": "#274364",
+          "ansi": [
+            "#171b24",
+            "#f28273",
+            "#87d96c",
+            "#fcca60",
+            "#6acdff",
+            "#ddbbff",
+            "#93e2c8",
+            "#c7c7c7",
+            "#686868",
+            "#f28779",
+            "#d5ff80",
+            "#ffcd66",
+            "#73d0ff",
+            "#dfbfff",
+            "#95e6cb",
+            "#ffffff"
+          ],
+          "ui": {
+            "surface": "#181c26",
+            "border": "#171b24",
+            "muted": "#707a8c",
+            "accent": "#ffcc66"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2016 Ike Kurghinyan",
+      "sources": [
+        "https://raw.githubusercontent.com/ayu-theme/vscode-ayu/7f438df22446f02e79cdfc2f3771b0b273f34654/ayu-mirage.json",
+        "https://raw.githubusercontent.com/ayu-theme/vscode-ayu/7f438df22446f02e79cdfc2f3771b0b273f34654/LICENSE"
+      ],
+      "notes": "Source: ayu-theme/vscode-ayu (MIT, the VS Code port in the ayu-theme organization), whose committed ayu-*.json files are generated from ayu-theme/ayu-colors; ayu-colors itself only stores OKLCH formulas, so the resolved hex values are read from the port. Terminal: terminal.background, terminal.foreground and terminal.ansi*. cursor=editorCursor.foreground (no terminalCursor key). selection=editor.selectionBackground alpha-composited over terminal.background (mirage #409fff40 -> #274364). UI: surface=titleBar.activeBackground, border=panel.border, muted=foreground (ayu's UI text color), accent=focusBorder (ayu's accent)."
+    },
+    {
+      "id": "one",
+      "name": "One",
+      "description": "Atom's One Dark and One Light, the classic editor pair.",
+      "variants": {
+        "dark": {
+          "background": "#282c34",
+          "foreground": "#abb2bf",
+          "cursor": "#c678dd",
+          "selection": "#c678dd",
+          "ansi": [
+            "#282c34",
+            "#e06c75",
+            "#98c379",
+            "#e5c07b",
+            "#61afef",
+            "#c678dd",
+            "#56b6c2",
+            "#abb2bf",
+            "#5c6370",
+            "#e9969d",
+            "#b3d39c",
+            "#edd4a6",
+            "#8fc6f4",
+            "#d7a1e7",
+            "#7bc6d0",
+            "#c8cdd5"
+          ],
+          "ui": {
+            "surface": "#2c323c",
+            "border": "#3b4048",
+            "muted": "#7f848e",
+            "accent": "#61afef"
+          }
+        },
+        "light": {
+          "background": "#fafafa",
+          "foreground": "#6a6a6a",
+          "cursor": "#9a77cf",
+          "selection": "#9a77cf",
+          "ansi": [
+            "#6a6a6a",
+            "#e05661",
+            "#1da912",
+            "#eea825",
+            "#118dc3",
+            "#9a77cf",
+            "#56b6c2",
+            "#fafafa",
+            "#bebebe",
+            "#e88189",
+            "#25d717",
+            "#f2bb54",
+            "#1caceb",
+            "#b69ddc",
+            "#7bc6d0",
+            "#ffffff"
+          ],
+          "ui": {
+            "surface": "#f0f0f0",
+            "border": "#d3d3d3",
+            "muted": "#9b9fa6",
+            "accent": "#118dc3"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2023 Oli Morris",
+      "sources": [
+        "https://raw.githubusercontent.com/olimorris/onedarkpro.nvim/24c806cb85c1f84d9faaff457cf7aa87c685a070/extras/ghostty/onedarkpro_onedark",
+        "https://raw.githubusercontent.com/olimorris/onedarkpro.nvim/24c806cb85c1f84d9faaff457cf7aa87c685a070/extras/ghostty/onedarkpro_onelight",
+        "https://raw.githubusercontent.com/olimorris/onedarkpro.nvim/24c806cb85c1f84d9faaff457cf7aa87c685a070/lua/onedarkpro/themes/onedark.lua",
+        "https://raw.githubusercontent.com/olimorris/onedarkpro.nvim/24c806cb85c1f84d9faaff457cf7aa87c685a070/lua/onedarkpro/themes/onelight.lua",
+        "https://raw.githubusercontent.com/olimorris/onedarkpro.nvim/24c806cb85c1f84d9faaff457cf7aa87c685a070/LICENSE",
+        "https://raw.githubusercontent.com/rakr/vim-one/187f5c85b682c1933f8780d4d419c55d26a82e24/colors/one.vim",
+        "https://raw.githubusercontent.com/rakr/vim-one/187f5c85b682c1933f8780d4d419c55d26a82e24/LICENSE"
+      ],
+      "notes": "Terminal values from olimorris/onedarkpro.nvim (MIT) extras/ghostty/onedarkpro_onedark and onedarkpro_onelight: the ghostty files are the only ones that define cursor and selection (the kitty files say 'cursor none'; the alacritty files use different bright blacks). The port uses purple for both cursor and selection (selection-foreground=foreground). UI: muted=comment and accent=blue from onedarkpro lua/onedarkpro/themes/*.lua; onedarkpro computes its surface shades at runtime (darken/blend), so surface=syntax_cursor (StatusLine bg) and border=special_grey come from rakr/vim-one colors/one.vim (MIT, 'Copyright (c) 2016 Ramzi Akremi'), an Atom One port with explicit hex for both variants."
+    },
+    {
+      "id": "nightfox",
+      "name": "Nightfox",
+      "description": "Nightfox: the original dark blue fox, calm and balanced.",
+      "variants": {
+        "dark": {
+          "background": "#192330",
+          "foreground": "#cdcecf",
+          "cursor": "#cdcecf",
+          "selection": "#2b3b51",
+          "ansi": [
+            "#393b44",
+            "#c94f6d",
+            "#81b29a",
+            "#dbc074",
+            "#719cd6",
+            "#9d79d6",
+            "#63cdcf",
+            "#dfdfe0",
+            "#575860",
+            "#d16983",
+            "#8ebaa4",
+            "#e0c989",
+            "#86abdc",
+            "#baa1e2",
+            "#7ad5d6",
+            "#e4e4e5"
+          ],
+          "ui": {
+            "surface": "#131a24",
+            "border": "#39506d",
+            "muted": "#71839b",
+            "accent": "#719cd6"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 James Simpson",
+      "sources": [
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/nightfox/kitty.conf",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/nightfox/nightfox.tmux",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/nightfox/base16.yaml",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/lua/nightfox/palette/nightfox.lua",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/LICENSE"
+      ],
+      "notes": "Terminal values from EdenEast/nightfox.nvim extra/nightfox/kitty.conf. UI from the theme's own generated extras (spec roles in lua/nightfox/palette/nightfox.lua): surface=bg0 (status line and float bg, the tmux status-style bg), border=bg4 (border fg, kitty inactive_border_color), muted=fg3 (darker fg for line numbers, base16 base04), accent=blue.base (kitty active_border_color)."
+    },
+    {
+      "id": "duskfox",
+      "name": "Duskfox",
+      "description": "Duskfox: a dark purple twilight take on Nightfox, Rosé Pine inspired.",
+      "variants": {
+        "dark": {
+          "background": "#232136",
+          "foreground": "#e0def4",
+          "cursor": "#e0def4",
+          "selection": "#433c59",
+          "ansi": [
+            "#393552",
+            "#eb6f92",
+            "#a3be8c",
+            "#f6c177",
+            "#569fba",
+            "#c4a7e7",
+            "#9ccfd8",
+            "#e0def4",
+            "#47407d",
+            "#f083a2",
+            "#b1d196",
+            "#f9cb8c",
+            "#65b1cd",
+            "#ccb1ed",
+            "#a6dae3",
+            "#e2e0f7"
+          ],
+          "ui": {
+            "surface": "#191726",
+            "border": "#4b4673",
+            "muted": "#6e6a86",
+            "accent": "#569fba"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 James Simpson",
+      "sources": [
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/duskfox/kitty.conf",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/duskfox/duskfox.tmux",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/duskfox/base16.yaml",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/lua/nightfox/palette/duskfox.lua",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/LICENSE"
+      ],
+      "notes": "Terminal values from EdenEast/nightfox.nvim extra/duskfox/kitty.conf. UI from the theme's own generated extras (spec roles in lua/nightfox/palette/duskfox.lua): surface=bg0 (status line and float bg, the tmux status-style bg), border=bg4 (border fg, kitty inactive_border_color), muted=fg3 (darker fg for line numbers, base16 base04), accent=blue.base (kitty active_border_color)."
+    },
+    {
+      "id": "nordfox",
+      "name": "Nordfox",
+      "description": "Nordfox: Nightfox colors on the Nord arctic palette.",
+      "variants": {
+        "dark": {
+          "background": "#2e3440",
+          "foreground": "#cdcecf",
+          "cursor": "#cdcecf",
+          "selection": "#3e4a5b",
+          "ansi": [
+            "#3b4252",
+            "#bf616a",
+            "#a3be8c",
+            "#ebcb8b",
+            "#81a1c1",
+            "#b48ead",
+            "#88c0d0",
+            "#e5e9f0",
+            "#465780",
+            "#d06f79",
+            "#b1d196",
+            "#f0d399",
+            "#8cafd2",
+            "#c895bf",
+            "#93ccdc",
+            "#e7ecf4"
+          ],
+          "ui": {
+            "surface": "#232831",
+            "border": "#5a657d",
+            "muted": "#7e8188",
+            "accent": "#81a1c1"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 James Simpson",
+      "sources": [
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/nordfox/kitty.conf",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/nordfox/nordfox.tmux",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/nordfox/base16.yaml",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/lua/nightfox/palette/nordfox.lua",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/LICENSE"
+      ],
+      "notes": "Terminal values from EdenEast/nightfox.nvim extra/nordfox/kitty.conf. UI from the theme's own generated extras (spec roles in lua/nightfox/palette/nordfox.lua): surface=bg0 (status line and float bg, the tmux status-style bg), border=bg4 (border fg, kitty inactive_border_color), muted=fg3 (darker fg for line numbers, base16 base04), accent=blue.base (kitty active_border_color)."
+    },
+    {
+      "id": "terafox",
+      "name": "Terafox",
+      "description": "Terafox: a dark teal, earthy variant of Nightfox.",
+      "variants": {
+        "dark": {
+          "background": "#152528",
+          "foreground": "#e6eaea",
+          "cursor": "#e6eaea",
+          "selection": "#293e40",
+          "ansi": [
+            "#2f3239",
+            "#e85c51",
+            "#7aa4a1",
+            "#fda47f",
+            "#5a93aa",
+            "#ad5c7c",
+            "#a1cdd8",
+            "#ebebeb",
+            "#4e5157",
+            "#eb746b",
+            "#8eb2af",
+            "#fdb292",
+            "#73a3b7",
+            "#b97490",
+            "#afd4de",
+            "#eeeeee"
+          ],
+          "ui": {
+            "surface": "#0f1c1e",
+            "border": "#2d4f56",
+            "muted": "#587b7b",
+            "accent": "#5a93aa"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 James Simpson",
+      "sources": [
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/terafox/kitty.conf",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/terafox/terafox.tmux",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/terafox/base16.yaml",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/lua/nightfox/palette/terafox.lua",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/LICENSE"
+      ],
+      "notes": "Terminal values from EdenEast/nightfox.nvim extra/terafox/kitty.conf. UI from the theme's own generated extras (spec roles in lua/nightfox/palette/terafox.lua): surface=bg0 (status line and float bg, the tmux status-style bg), border=bg4 (border fg, kitty inactive_border_color), muted=fg3 (darker fg for line numbers, base16 base04), accent=blue.base (kitty active_border_color)."
+    },
+    {
+      "id": "carbonfox",
+      "name": "Carbonfox",
+      "description": "Carbonfox: a near-black variant of Nightfox with IBM Carbon colors.",
+      "variants": {
+        "dark": {
+          "background": "#161616",
+          "foreground": "#f2f4f8",
+          "cursor": "#f2f4f8",
+          "selection": "#2a2a2a",
+          "ansi": [
+            "#282828",
+            "#ee5396",
+            "#25be6a",
+            "#08bdba",
+            "#78a9ff",
+            "#be95ff",
+            "#33b1ff",
+            "#dfdfe0",
+            "#484848",
+            "#f16da6",
+            "#46c880",
+            "#2dc7c4",
+            "#8cb6ff",
+            "#c8a5ff",
+            "#52bdff",
+            "#e4e4e5"
+          ],
+          "ui": {
+            "surface": "#0c0c0c",
+            "border": "#535353",
+            "muted": "#7b7c7e",
+            "accent": "#78a9ff"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 James Simpson",
+      "sources": [
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/carbonfox/kitty.conf",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/carbonfox/carbonfox.tmux",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/carbonfox/base16.yaml",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/lua/nightfox/palette/carbonfox.lua",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/LICENSE"
+      ],
+      "notes": "Terminal values from EdenEast/nightfox.nvim extra/carbonfox/kitty.conf. UI from the theme's own generated extras (spec roles in lua/nightfox/palette/carbonfox.lua): surface=bg0 (status line and float bg, the tmux status-style bg), border=bg4 (border fg, kitty inactive_border_color), muted=fg3 (darker fg for line numbers, base16 base04), accent=blue.base (kitty active_border_color)."
+    },
+    {
+      "id": "dayfox",
+      "name": "Dayfox",
+      "description": "Dayfox: a warm light variant of Nightfox.",
+      "variants": {
+        "light": {
+          "background": "#f6f2ee",
+          "foreground": "#3d2b5a",
+          "cursor": "#3d2b5a",
+          "selection": "#e7d2be",
+          "ansi": [
+            "#352c24",
+            "#a5222f",
+            "#396847",
+            "#ac5402",
+            "#2848a9",
+            "#6e33ce",
+            "#287980",
+            "#f2e9e1",
+            "#534c45",
+            "#b3434e",
+            "#577f63",
+            "#b86e28",
+            "#4863b6",
+            "#8452d5",
+            "#488d93",
+            "#f4ece6"
+          ],
+          "ui": {
+            "surface": "#e4dcd4",
+            "border": "#aab0ad",
+            "muted": "#824d5b",
+            "accent": "#2848a9"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 James Simpson",
+      "sources": [
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/dayfox/kitty.conf",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/dayfox/dayfox.tmux",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/dayfox/base16.yaml",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/lua/nightfox/palette/dayfox.lua",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/LICENSE"
+      ],
+      "notes": "Terminal values from EdenEast/nightfox.nvim extra/dayfox/kitty.conf. UI from the theme's own generated extras (spec roles in lua/nightfox/palette/dayfox.lua): surface=bg0 (status line and float bg, the tmux status-style bg), border=bg4 (border fg, kitty inactive_border_color), muted=fg3 (darker fg for line numbers, base16 base04), accent=blue.base (kitty active_border_color)."
+    },
+    {
+      "id": "dawnfox",
+      "name": "Dawnfox",
+      "description": "Dawnfox: a light, Rosé Pine Dawn inspired variant of Nightfox.",
+      "variants": {
+        "light": {
+          "background": "#faf4ed",
+          "foreground": "#575279",
+          "cursor": "#575279",
+          "selection": "#d0d8d8",
+          "ansi": [
+            "#575279",
+            "#b4637a",
+            "#618774",
+            "#ea9d34",
+            "#286983",
+            "#907aa9",
+            "#56949f",
+            "#e5e9f0",
+            "#5f5695",
+            "#c26d85",
+            "#629f81",
+            "#eea846",
+            "#2d81a3",
+            "#9a80b9",
+            "#5ca7b4",
+            "#e6ebf3"
+          ],
+          "ui": {
+            "surface": "#ebe5df",
+            "border": "#bdbfc9",
+            "muted": "#a8a3b3",
+            "accent": "#286983"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2021 James Simpson",
+      "sources": [
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/dawnfox/kitty.conf",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/dawnfox/dawnfox.tmux",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/dawnfox/base16.yaml",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/lua/nightfox/palette/dawnfox.lua",
+        "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/LICENSE"
+      ],
+      "notes": "Terminal values from EdenEast/nightfox.nvim extra/dawnfox/kitty.conf. UI from the theme's own generated extras (spec roles in lua/nightfox/palette/dawnfox.lua): surface=bg0 (status line and float bg, the tmux status-style bg), border=bg4 (border fg, kitty inactive_border_color), muted=fg3 (darker fg for line numbers, base16 base04), accent=blue.base (kitty active_border_color)."
+    },
+    {
+      "id": "night-owl",
+      "name": "Night Owl",
+      "description": "Night Owl for night owls, with the Light Owl daytime variant.",
+      "variants": {
+        "dark": {
+          "background": "#011627",
+          "foreground": "#d6deeb",
+          "cursor": "#80a4c2",
+          "selection": "#093b5e",
+          "ansi": [
+            "#011627",
+            "#EF5350",
+            "#22da6e",
+            "#c5e478",
+            "#82AAFF",
+            "#C792EA",
+            "#21c7a8",
+            "#ffffff",
+            "#575656",
+            "#EF5350",
+            "#22da6e",
+            "#ffeb95",
+            "#82AAFF",
+            "#C792EA",
+            "#7fdbca",
+            "#ffffff"
+          ],
+          "ui": {
+            "surface": "#01111d",
+            "border": "#262A39",
+            "muted": "#637777",
+            "accent": "#7e57c2"
+          }
+        },
+        "light": {
+          "background": "#F6F6F6",
+          "foreground": "#403f53",
+          "cursor": "#90A7B2",
+          "selection": "#E0E0E0",
+          "ansi": [
+            "#403f53",
+            "#de3d3b",
+            "#08916a",
+            "#E0AF02",
+            "#288ed7",
+            "#d6438a",
+            "#2AA298",
+            "#93A1A1",
+            "#403f53",
+            "#de3d3b",
+            "#08916a",
+            "#daaa01",
+            "#288ed7",
+            "#d6438a",
+            "#2AA298",
+            "#93A1A1"
+          ],
+          "ui": {
+            "surface": "#F0F0F0",
+            "border": "#d9d9d9",
+            "muted": "#989fb1",
+            "accent": "#2AA298"
+          }
+        }
+      },
+      "license": "MIT",
+      "copyright": "Copyright (c) 2018 Sarah Drasner",
+      "sources": [
+        "https://raw.githubusercontent.com/sdras/night-owl-vscode-theme/cc291eba7976b20d7c66bde6883c27b902196b07/themes/Night%20Owl-color-theme.json",
+        "https://raw.githubusercontent.com/sdras/night-owl-vscode-theme/cc291eba7976b20d7c66bde6883c27b902196b07/themes/Night%20Owl-Light-color-theme.json",
+        "https://raw.githubusercontent.com/sdras/night-owl-vscode-theme/cc291eba7976b20d7c66bde6883c27b902196b07/LICENSE.md"
+      ],
+      "notes": "ANSI from the themes' own terminal.ansi* keys. Light Owl: background/foreground=terminal.background/terminal.foreground, selection=editor.selectionBackground (no terminal.selectionBackground key). Night Owl has no terminal.background/foreground keys, so VS Code's fallbacks are used: background=panel.background (= editor.background), foreground=foreground (= editor.foreground); selection=terminal.selectionBackground #1b90dd4d alpha-composited over the background -> #093b5e. cursor=editorCursor.foreground in both (no terminalCursor.foreground key). UI dark: surface=tab.inactiveBackground (the title bar and side bar share the editor background), border=statusBar.border, muted=Comment token color, accent=button.hoverBackground (the signature purple; button.background is the same color at 80% alpha). UI light: surface=titleBar.activeBackground, border=panel.border, muted=Comment token color, accent=button.background."
     }
   ]
 }

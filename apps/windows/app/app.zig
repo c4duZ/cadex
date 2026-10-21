@@ -150,6 +150,7 @@ pub const App = struct {
         git_page.register(self);
         self.power = .{ .host = wiring.powerHost(self), .keep_display_on = self.settings.current.power.keep_display_on };
         power_mod.commands.register(&self.registry, &self.power);
+        @import("theme_commands.zig").register(self);
         self.palette.addPrefix(.{ .char = '/', .label = strings.t("files", "arquivos"), .source = self.search.filesSource() });
         self.palette.addPrefix(.{ .char = '#', .label = strings.t("text", "texto"), .source = self.search.contentSource() });
         self.palette.addPrefix(.{ .char = '@', .label = strings.t("tabs and spaces", "abas e spaces"), .source = @import("places_source.zig").source(self) });
@@ -274,6 +275,9 @@ pub const App = struct {
         web.drawOffer(self);
         @import("settings_page.zig").draw(self);
         self.palette.draw(u);
+        // The lists of every theme live only while they are on screen.
+        @import("theme_commands.zig").releaseWhenClosed(self);
+        @import("themes_page.zig").releaseWhenHidden(self);
         @import("space_ui.zig").draw(self);
         if (self.tabs.question) |q| {
             const buttons: []const []const u8 = if (q.unsaved) &.{ strings.t("Save", "Salvar"), strings.t("Discard", "Descartar"), strings.t("Cancel", "Cancelar") } else &.{ strings.t("Close", "Fechar"), strings.t("Cancel", "Cancelar") };

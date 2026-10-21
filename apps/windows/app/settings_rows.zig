@@ -1,4 +1,4 @@
-//! The General, Terminal and Themes pages of the settings, in the Mac's
+//! The General and Terminal pages of the settings, in the Mac's
 //! sections (apps/macos/features/settings/): General has the language, the
 //! files, the file tree and keep awake; Terminal has the shell and the
 //! questions (in General before 2026-10-20), the text and the cursor, the
@@ -137,40 +137,6 @@ pub fn terminal(app: *App, area_in: gfx.Rect) void {
     if (ui.widgets.toggle(u, ui.id("settings.copySelect", 0), page.row(u, &area, t("Copy on select", "Copiar ao selecionar"), t("Off, only Ctrl+Shift+C copies.", "Desligado, só o Ctrl+Shift+C copia.")), s.terminal.copy_on_select)) |v| {
         s.terminal.copy_on_select = v;
         page.commit(app, s);
-    }
-}
-
-pub fn themes(app: *App, area_in: gfx.Rect) void {
-    const u = &app.u;
-    var area = area_in;
-    var s = app.settings.current;
-    if (page.choice(u, page.row(u, &area, t("Mode", "Modo"), t("The theme's light or dark version, or the system's.", "A versão clara ou escura do tema, ou a do sistema.")), "mode", s.appearance.mode, &.{ .{ "system", t("System", "Sistema") }, .{ "dark", t("Dark", "Escuro") }, .{ "light", t("Light", "Claro") } })) |v| {
-        s.appearance.mode = v;
-        page.commit(app, s);
-    }
-    if (ui.widgets.toggle(u, ui.id("settings.vibrancy", 0), page.row(u, &area, t("Mica behind the frame", "Mica atrás da moldura"), t("The frame shows the desktop, blurred; panels stay solid.", "A moldura mostra a área de trabalho, desfocada; os painéis seguem sólidos.")), s.appearance.vibrancy)) |v| {
-        s.appearance.vibrancy = v;
-        page.commit(app, s);
-    }
-    page.heading(u, &area, t("Theme", "Tema"));
-    const families = app.themes.families();
-    const view = ui.list.begin(u, ui.id("settings.themes", 0), area, families.len, u.px(32), &page.scroll);
-    defer ui.list.end(u);
-    for (view.first..view.last) |i| {
-        const f = families[i];
-        const r = view.row(i);
-        if (ui.widgets.button(u, ui.child(ui.id("settings.theme", 0), i), r.inset(0, u.px(1)), f.name, .{ .selected = std.mem.eql(u8, f.id, s.appearance.theme), .@"align" = .{} })) {
-            s.appearance.theme = f.id;
-            page.commit(app, s);
-        }
-        // The family's colors as swatches on the right.
-        const th = f.theme(app.themes.current.dark);
-        var sw = r.inset(u.px(8), u.px(9));
-        for ([_]u32{ th.terminal.background, th.interface.accent, th.terminal.ansi[1], th.terminal.ansi[2], th.terminal.ansi[4] }) |color| {
-            const dot = sw.takeRight(u.px(14));
-            u.painter.fillRounded(dot, u.px(3), gfx.Color.rgb(color));
-            _ = sw.takeRight(u.px(4));
-        }
     }
 }
 

@@ -1,48 +1,286 @@
 {
-  "caffeine": "Tons de café: creme e espresso.",
-  "kanagawa": "Tinta escura inspirada em Hokusai.",
-  "kanagawa-dragon": "A variante Dragon, quase preta e terrosa.",
-  "tokyonight": "Calmo, puxado para o azul.",
-  "catppuccin": "Mocha e Latte, pastel e suave.",
-  "rose-pine": "Pinho, rosa e um ar de Soho.",
-  "everforest": "Floresta verde de pouco contraste.",
-  "nord": "Ártico, azulado e limpo.",
-  "gruvbox": "Retrô, quente e terroso.",
-  "dracula": "Roxo clássico de alto contraste.",
-  "solarized": "A paleta precisa de Ethan Schoonover.",
-  "amber-minimal": "Neutro com toque âmbar.",
-  "amethyst-haze": "Névoa lilás.",
-  "bold-tech": "Roxo vibrante sobre azul-noite.",
-  "bubblegum": "Rosa chiclete divertido.",
-  "candyland": "Doce e colorido.",
-  "claude": "Argila quente sobre papel.",
-  "claymorphism": "Superfícies macias de argila.",
-  "cosmic-night": "Céu noturno violeta.",
-  "cyberpunk": "Neon magenta e ciano.",
-  "darkmatter": "Escuro com laranja e verde-água.",
-  "doom-64": "Retrô de jogo dos anos 90.",
-  "elegant-luxury": "Vinho e dourado.",
-  "graphite": "Cinza grafite neutro.",
-  "kodama-grove": "Bosque verde-oliva.",
-  "midnight-bloom": "Flor da meia-noite em roxo.",
-  "modern-minimal": "Minimalista com azul.",
-  "nature": "Verdes da natureza.",
-  "neo-brutalism": "Contraste duro e cores puras.",
-  "northern-lights": "Aurora boreal em verde e azul.",
-  "ocean-breeze": "Brisa do mar em verde e azul.",
-  "perpetuity": "Ciano sobre petróleo.",
-  "quantum-rose": "Rosa elétrico.",
-  "retro-arcade": "Fliperama em tons de petróleo.",
-  "sage-garden": "Verde-sálvia calmo.",
-  "soft-pop": "Pop suave e alegre.",
-  "solar-dusk": "Entardecer laranja.",
-  "starry-night": "Noite estrelada em azul e amarelo.",
-  "sunset-horizon": "Pôr do sol em coral.",
-  "supabase": "Verde Supabase.",
-  "t3-chat": "Ameixa e rosa.",
-  "tangerine": "Tangerina sobre ardósia.",
-  "twitter": "Azul do Twitter.",
-  "vercel": "Preto e branco puros.",
-  "vintage-paper": "Papel envelhecido.",
-  "violet-bloom": "Violeta florescendo."
+ "caffeine": {
+  "en": "Coffee tones: cream and espresso.",
+  "pt": "Tons de café: creme e espresso."
+ },
+ "kanagawa": {
+  "en": "Hokusai ink: dark Wave and light Lotus.",
+  "pt": "Tinta de Hokusai: Wave escuro e Lotus claro."
+ },
+ "kanagawa-dragon": {
+  "en": "The Dragon variant, near-black and earthy.",
+  "pt": "A variante Dragon, quase preta e terrosa."
+ },
+ "tokyonight": {
+  "en": "Calm, leaning blue.",
+  "pt": "Calmo, puxado para o azul."
+ },
+ "catppuccin": {
+  "en": "Mocha and Latte, soft pastels.",
+  "pt": "Mocha e Latte, pastel e suave."
+ },
+ "rose-pine": {
+  "en": "Pine, rose and a touch of Soho.",
+  "pt": "Pinho, rosa e um ar de Soho."
+ },
+ "everforest": {
+  "en": "Low-contrast green forest.",
+  "pt": "Floresta verde de pouco contraste."
+ },
+ "nord": {
+  "en": "Arctic, bluish and clean.",
+  "pt": "Ártico, azulado e limpo."
+ },
+ "gruvbox": {
+  "en": "Retro, warm and earthy.",
+  "pt": "Retrô, quente e terroso."
+ },
+ "dracula": {
+  "en": "Classic high-contrast purple.",
+  "pt": "Roxo clássico de alto contraste."
+ },
+ "solarized": {
+  "en": "Ethan Schoonover's precise palette.",
+  "pt": "A paleta precisa de Ethan Schoonover."
+ },
+ "amber-minimal": {
+  "en": "Neutral with a touch of amber.",
+  "pt": "Neutro com toque âmbar."
+ },
+ "amethyst-haze": {
+  "en": "A lilac haze.",
+  "pt": "Névoa lilás."
+ },
+ "bold-tech": {
+  "en": "Vivid purple on midnight blue.",
+  "pt": "Roxo vibrante sobre azul-noite."
+ },
+ "bubblegum": {
+  "en": "Playful bubblegum pink.",
+  "pt": "Rosa chiclete divertido."
+ },
+ "candyland": {
+  "en": "Sweet and colorful.",
+  "pt": "Doce e colorido."
+ },
+ "claude": {
+  "en": "Warm clay on paper.",
+  "pt": "Argila quente sobre papel."
+ },
+ "claymorphism": {
+  "en": "Soft clay surfaces.",
+  "pt": "Superfícies macias de argila."
+ },
+ "cosmic-night": {
+  "en": "A violet night sky.",
+  "pt": "Céu noturno violeta."
+ },
+ "cyberpunk": {
+  "en": "Neon magenta and cyan.",
+  "pt": "Neon magenta e ciano."
+ },
+ "darkmatter": {
+  "en": "Dark, with orange and teal.",
+  "pt": "Escuro com laranja e verde-água."
+ },
+ "doom-64": {
+  "en": "Retro, like a 90s game.",
+  "pt": "Retrô de jogo dos anos 90."
+ },
+ "elegant-luxury": {
+  "en": "Wine and gold.",
+  "pt": "Vinho e dourado."
+ },
+ "graphite": {
+  "en": "Neutral graphite gray.",
+  "pt": "Cinza grafite neutro."
+ },
+ "kodama-grove": {
+  "en": "An olive-green grove.",
+  "pt": "Bosque verde-oliva."
+ },
+ "midnight-bloom": {
+  "en": "A purple midnight bloom.",
+  "pt": "Flor da meia-noite em roxo."
+ },
+ "modern-minimal": {
+  "en": "Minimal, with blue.",
+  "pt": "Minimalista com azul."
+ },
+ "nature": {
+  "en": "The greens of nature.",
+  "pt": "Verdes da natureza."
+ },
+ "neo-brutalism": {
+  "en": "Hard contrast, pure colors.",
+  "pt": "Contraste duro e cores puras."
+ },
+ "northern-lights": {
+  "en": "Aurora in green and blue.",
+  "pt": "Aurora boreal em verde e azul."
+ },
+ "ocean-breeze": {
+  "en": "Sea breeze in green and blue.",
+  "pt": "Brisa do mar em verde e azul."
+ },
+ "perpetuity": {
+  "en": "Cyan on deep teal.",
+  "pt": "Ciano sobre petróleo."
+ },
+ "quantum-rose": {
+  "en": "Electric pink.",
+  "pt": "Rosa elétrico."
+ },
+ "retro-arcade": {
+  "en": "An arcade in teal tones.",
+  "pt": "Fliperama em tons de petróleo."
+ },
+ "sage-garden": {
+  "en": "Calm sage green.",
+  "pt": "Verde-sálvia calmo."
+ },
+ "soft-pop": {
+  "en": "Soft, cheerful pop.",
+  "pt": "Pop suave e alegre."
+ },
+ "solar-dusk": {
+  "en": "An orange dusk.",
+  "pt": "Entardecer laranja."
+ },
+ "starry-night": {
+  "en": "Starry night in blue and yellow.",
+  "pt": "Noite estrelada em azul e amarelo."
+ },
+ "sunset-horizon": {
+  "en": "A coral sunset.",
+  "pt": "Pôr do sol em coral."
+ },
+ "supabase": {
+  "en": "Supabase green.",
+  "pt": "Verde Supabase."
+ },
+ "t3-chat": {
+  "en": "Plum and pink.",
+  "pt": "Ameixa e rosa."
+ },
+ "tangerine": {
+  "en": "Tangerine on slate.",
+  "pt": "Tangerina sobre ardósia."
+ },
+ "twitter": {
+  "en": "Twitter blue.",
+  "pt": "Azul do Twitter."
+ },
+ "vercel": {
+  "en": "Pure black and white.",
+  "pt": "Preto e branco puros."
+ },
+ "vintage-paper": {
+  "en": "Aged paper.",
+  "pt": "Papel envelhecido."
+ },
+ "violet-bloom": {
+  "en": "Violet in bloom.",
+  "pt": "Violeta florescendo."
+ },
+ "tokyonight-storm": {
+  "en": "Tokyo Night on a stormy slate blue.",
+  "pt": "Tokyo Night num azul-ardósia de tempestade."
+ },
+ "tokyonight-moon": {
+  "en": "Tokyo Night, softer under the moon.",
+  "pt": "Tokyo Night mais suave, sob a lua."
+ },
+ "catppuccin-frappe": {
+  "en": "Frappé: muted, cool pastels.",
+  "pt": "Frappé: pastel frio e discreto."
+ },
+ "catppuccin-macchiato": {
+  "en": "Macchiato: pastels on a deeper blue.",
+  "pt": "Macchiato: pastel sobre um azul mais fundo."
+ },
+ "rose-pine-moon": {
+  "en": "Rosé Pine by moonlight, a bit lighter.",
+  "pt": "Rosé Pine ao luar, um pouco mais claro."
+ },
+ "everforest-hard": {
+  "en": "Everforest with more contrast.",
+  "pt": "Everforest com mais contraste."
+ },
+ "everforest-soft": {
+  "en": "Everforest, even softer.",
+  "pt": "Everforest ainda mais suave."
+ },
+ "gruvbox-hard": {
+  "en": "Gruvbox with more contrast.",
+  "pt": "Gruvbox com mais contraste."
+ },
+ "gruvbox-soft": {
+  "en": "Gruvbox with gentler contrast.",
+  "pt": "Gruvbox com contraste mais suave."
+ },
+ "github": {
+  "en": "GitHub's own dark and light.",
+  "pt": "O escuro e o claro do próprio GitHub."
+ },
+ "github-dimmed": {
+  "en": "GitHub in dim gray-blue.",
+  "pt": "GitHub em cinza-azulado e penumbra."
+ },
+ "github-high-contrast": {
+  "en": "GitHub with maximum contrast.",
+  "pt": "GitHub com o máximo de contraste."
+ },
+ "github-colorblind": {
+  "en": "GitHub for red-green color blindness.",
+  "pt": "GitHub para daltonismo vermelho-verde."
+ },
+ "github-tritanopia": {
+  "en": "GitHub for blue-yellow color blindness.",
+  "pt": "GitHub para daltonismo azul-amarelo."
+ },
+ "ayu": {
+  "en": "Simple, with bright accents.",
+  "pt": "Simples, com destaques vivos."
+ },
+ "ayu-mirage": {
+  "en": "Ayu in a soft blue-gray.",
+  "pt": "Ayu num cinza-azulado suave."
+ },
+ "one": {
+  "en": "Atom's classic One Dark and One Light.",
+  "pt": "O clássico One Dark e One Light do Atom."
+ },
+ "nightfox": {
+  "en": "Deep night blue, calm.",
+  "pt": "Azul de noite funda, tranquilo."
+ },
+ "duskfox": {
+  "en": "Purple dusk.",
+  "pt": "Entardecer em roxo."
+ },
+ "nordfox": {
+  "en": "Nightfox in arctic tones.",
+  "pt": "Nightfox em tons árticos."
+ },
+ "terafox": {
+  "en": "Earthy teal.",
+  "pt": "Verde-petróleo terroso."
+ },
+ "carbonfox": {
+  "en": "Near-black, like carbon.",
+  "pt": "Quase preto, cor de carvão."
+ },
+ "dayfox": {
+  "en": "Warm light for the daytime.",
+  "pt": "Claro e quente para o dia."
+ },
+ "dawnfox": {
+  "en": "Rosy dawn light.",
+  "pt": "Claro e rosado de amanhecer."
+ },
+ "night-owl": {
+  "en": "For night owls, with Light Owl for daytime.",
+  "pt": "Para quem vira a noite, com o Light Owl de dia."
+ }
 }

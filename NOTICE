@@ -210,6 +210,12 @@ tweakcn theme presets
 https://github.com/jnsahaj/tweakcn (utils/theme-presets.ts, commit a3b47b3)
 Licensed under the Apache License, Version 2.0.
 
+tinted-theming base16 and base24 schemes
+https://github.com/tinted-theming/schemes (base16/ and base24/, commit 3ac9113)
+MIT. Copyright (c) 2022 Tinted Theming (https://github.com/tinted-theming)
+Each scheme names its author in its file; the catalog keeps the author in the
+theme's description (docs/adr/0017-base16-themes.md).
+
 Kanagawa
 https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/extras/kitty/kanagawa.conf
 MIT. Copyright (c) 2021 Tommaso Laurenzi
@@ -222,15 +228,43 @@ Tokyo Night
 https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/extras/kitty/tokyonight_night.conf
 Apache-2.0. No copyright line: the repository LICENSE is the unmodified Apache-2.0 text with the template line 'Copyright [yyyy] [name of copyright owner]'. Author: Folke Lemaitre.
 
+Tokyo Night Storm
+https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/extras/kitty/tokyonight_storm.conf
+Apache-2.0. No copyright line: the repository LICENSE is the unmodified Apache-2.0 text with the template line 'Copyright [yyyy] [name of copyright owner]'. Author: Folke Lemaitre.
+
+Tokyo Night Moon
+https://raw.githubusercontent.com/folke/tokyonight.nvim/cdc07ac78467a233fd62c493de29a17e0cf2b2b6/extras/kitty/tokyonight_moon.conf
+Apache-2.0. No copyright line: the repository LICENSE is the unmodified Apache-2.0 text with the template line 'Copyright [yyyy] [name of copyright owner]'. Author: Folke Lemaitre.
+
 Catppuccin
 https://raw.githubusercontent.com/catppuccin/kitty/43098316202b84d6a71f71aaf8360f102f4d3f1a/themes/mocha.conf
+MIT. Copyright (c) 2021 Catppuccin
+
+Catppuccin Frappé
+https://raw.githubusercontent.com/catppuccin/kitty/43098316202b84d6a71f71aaf8360f102f4d3f1a/themes/frappe.conf
+MIT. Copyright (c) 2021 Catppuccin
+
+Catppuccin Macchiato
+https://raw.githubusercontent.com/catppuccin/kitty/43098316202b84d6a71f71aaf8360f102f4d3f1a/themes/macchiato.conf
 MIT. Copyright (c) 2021 Catppuccin
 
 Rosé Pine
 https://raw.githubusercontent.com/rose-pine/kitty/efd4f01cb9887feaa7114ff21a887464295d0205/dist/rose-pine.conf
 MIT. Copyright (c) Rosé Pine
 
+Rosé Pine Moon
+https://raw.githubusercontent.com/rose-pine/kitty/efd4f01cb9887feaa7114ff21a887464295d0205/dist/rose-pine-moon.conf
+MIT. Copyright (c) Rosé Pine
+
 Everforest
+https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/autoload/everforest.vim
+MIT. Copyright (c) 2019 sainnhe
+
+Everforest Hard
+https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/autoload/everforest.vim
+MIT. Copyright (c) 2019 sainnhe
+
+Everforest Soft
 https://raw.githubusercontent.com/sainnhe/everforest/85a86eb62409e3ec88713bff3d1b9d7374e112e4/autoload/everforest.vim
 MIT. Copyright (c) 2019 sainnhe
 
@@ -242,6 +276,14 @@ Gruvbox
 https://raw.githubusercontent.com/morhetz/gruvbox/ef8864bb42bf244f0295d1c5a403b27e3d139695/colors/gruvbox.vim
 MIT. No LICENSE file in morhetz/gruvbox: README.md 'License' section says MIT/X11 and package.json says license MIT, author 'Pavel Pertsev <morhetz@gmail.com>'. No copyright line exists.
 
+Gruvbox Hard
+https://raw.githubusercontent.com/morhetz/gruvbox/ef8864bb42bf244f0295d1c5a403b27e3d139695/colors/gruvbox.vim
+MIT. No LICENSE file in morhetz/gruvbox: README.md 'License' section says MIT/X11 and package.json says license MIT, author 'Pavel Pertsev <morhetz@gmail.com>'. No copyright line exists.
+
+Gruvbox Soft
+https://raw.githubusercontent.com/morhetz/gruvbox/ef8864bb42bf244f0295d1c5a403b27e3d139695/colors/gruvbox.vim
+MIT. No LICENSE file in morhetz/gruvbox: README.md 'License' section says MIT/X11 and package.json says license MIT, author 'Pavel Pertsev <morhetz@gmail.com>'. No copyright line exists.
+
 Dracula
 https://raw.githubusercontent.com/dracula/kitty/87717a3f00e3dff0fc10c93f5ff535ea4092de70/dracula.conf
 MIT. Copyright (c) 2018 Dracula Theme
@@ -249,6 +291,70 @@ MIT. Copyright (c) 2018 Dracula Theme
 Solarized
 https://raw.githubusercontent.com/altercation/solarized/62f656a02f93c5190a8753159e34b385588d5ff3/README.md
 MIT. Copyright (c) 2011 Ethan Schoonover
+
+GitHub
+https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/primitives/dark.lua
+MIT. Copyright (c) 2021 projekt0n̅
+
+GitHub Dimmed
+https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/primitives/dark_dimmed.lua
+MIT. Copyright (c) 2021 projekt0n̅
+
+GitHub High Contrast
+https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/primitives/dark_high_contrast.lua
+MIT. Copyright (c) 2021 projekt0n̅
+
+GitHub Colorblind
+https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/primitives/dark_colorblind.lua
+MIT. Copyright (c) 2021 projekt0n̅
+
+GitHub Tritanopia
+https://raw.githubusercontent.com/projekt0n/github-nvim-theme/c106c9472154d6b2c74b74565616b877ae8ed31d/lua/github-theme/palette/primitives/dark_tritanopia.lua
+MIT. Copyright (c) 2021 projekt0n̅
+
+Ayu
+https://raw.githubusercontent.com/ayu-theme/vscode-ayu/7f438df22446f02e79cdfc2f3771b0b273f34654/ayu-dark.json
+MIT. Copyright (c) 2016 Ike Kurghinyan
+
+Ayu Mirage
+https://raw.githubusercontent.com/ayu-theme/vscode-ayu/7f438df22446f02e79cdfc2f3771b0b273f34654/ayu-mirage.json
+MIT. Copyright (c) 2016 Ike Kurghinyan
+
+One
+https://raw.githubusercontent.com/olimorris/onedarkpro.nvim/24c806cb85c1f84d9faaff457cf7aa87c685a070/extras/ghostty/onedarkpro_onedark
+MIT. Copyright (c) 2023 Oli Morris
+
+Nightfox
+https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/nightfox/kitty.conf
+MIT. Copyright (c) 2021 James Simpson
+
+Duskfox
+https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/duskfox/kitty.conf
+MIT. Copyright (c) 2021 James Simpson
+
+Nordfox
+https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/nordfox/kitty.conf
+MIT. Copyright (c) 2021 James Simpson
+
+Terafox
+https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/terafox/kitty.conf
+MIT. Copyright (c) 2021 James Simpson
+
+Carbonfox
+https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/carbonfox/kitty.conf
+MIT. Copyright (c) 2021 James Simpson
+
+Dayfox
+https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/dayfox/kitty.conf
+MIT. Copyright (c) 2021 James Simpson
+
+Dawnfox
+https://raw.githubusercontent.com/EdenEast/nightfox.nvim/4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a/extra/dawnfox/kitty.conf
+MIT. Copyright (c) 2021 James Simpson
+
+Night Owl
+https://raw.githubusercontent.com/sdras/night-owl-vscode-theme/cc291eba7976b20d7c66bde6883c27b902196b07/themes/Night%20Owl-color-theme.json
+MIT. Copyright (c) 2018 Sarah Drasner
 
 The MIT-licensed palettes above are used under the MIT License, whose text is the one
 reproduced for libghostty-vt at the top of this file, with each project's copyright line.

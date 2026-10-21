@@ -2,14 +2,13 @@ import AppKit
 
 /// The theme in use and who wants to know when it changes: the family the
 /// user picked, in the mode they picked (following the system by default),
-/// docs/spec/themes.md.
+/// docs/spec/themes.md. Only the family in use is kept; the list of every
+/// theme is read when the settings or ⌘K show it (ThemeLibrary).
 @MainActor
 public final class ThemeStore {
     public static let shared = ThemeStore()
 
-    /// Every theme the user can pick, in the order the settings show them.
-    public private(set) var families: [ThemeFamily] = [.cadex]
-    public private(set) var familyId = ThemeFamily.cadex.id
+    public private(set) var family: ThemeFamily = .cadex
     public private(set) var mode = ThemeMode.system
     public private(set) var current: Theme = .cadexDark
     private var observers: [(Theme) -> Void] = []
@@ -28,21 +27,19 @@ public final class ThemeStore {
         observer(current)
     }
 
-    public func setFamilies(_ list: [ThemeFamily]) {
-        guard !list.isEmpty else { return }
-        families = list
-        refresh()
-    }
-
-    /// Picks a theme and a mode. An unknown id keeps the first family.
+    /// Picks a theme and a mode. An unknown id falls back to the default.
     public func select(id: String, mode: ThemeMode) {
-        familyId = id
+        if id != family.id {
+            family = ThemeLibrary.family(id: id) ?? ThemeCatalog.family(id: ThemeCatalog.defaultId) ?? .cadex
+        }
         self.mode = mode
         refresh()
     }
 
-    public var family: ThemeFamily {
-        families.first { $0.id == familyId } ?? families[0]
+    /// The user's themes folder changed: the theme in use may be one of them.
+    public func reload() {
+        if let fresh = ThemeLibrary.family(id: family.id) { family = fresh }
+        refresh()
     }
 
     func refresh() {

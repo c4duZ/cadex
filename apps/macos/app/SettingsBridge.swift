@@ -27,7 +27,6 @@ final class SettingsBridge {
     var opensBeside: Bool { store.settings.general.openFiles != "tab" }
 
     func start() {
-        ThemeStore.shared.setFamilies(ThemeCatalog.builtIn)
         store.observe { [weak self] settings in self?.apply(settings) }
         store.watchForEdits()
         NotificationCenter.default.addObserver(forName: TerminalPreferences.didChange, object: nil, queue: .main) { [weak self] _ in
