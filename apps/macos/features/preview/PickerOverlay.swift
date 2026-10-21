@@ -1,11 +1,11 @@
 import AppKit
-import Strings
 import UILooks
 
 /// The picker's drawing over the page: the outline and label of the element
-/// under the mouse, the banner while picking, and the green or amber flash
-/// after a pick. Native, outside the DOM, so the page's CSS cannot hide or
-/// restyle it (docs/adr/0018-element-picker.md). Clicks go through.
+/// under the mouse, the marked ones in green with their number, the banner
+/// while picking, and the green or amber flash after sending. Native,
+/// outside the DOM, so the page's CSS cannot hide or restyle it
+/// (docs/adr/0018-element-picker.md). Clicks go through.
 @MainActor
 final class PickerOverlay: NSView {
     struct Mark: Equatable {
@@ -15,19 +15,22 @@ final class PickerOverlay: NSView {
 
     /// The element under the mouse, in view points.
     var target: Mark? { didSet { if target != oldValue { needsDisplay = true } } }
-    var showsBanner = false { didSet { needsDisplay = true } }
-    private var flash: (mark: Mark, color: NSColor)?
+    /// Marked with ⇧+click, labeled with their number.
+    var selected: [Mark] = [] { didSet { if selected != oldValue { needsDisplay = true } } }
+    var banner: String? { didSet { if banner != oldValue { needsDisplay = true } } }
+    private var flash: (marks: [Mark], color: NSColor)?
     private var flashTimer: Timer?
 
     static let pastedColor = NSColor.systemGreen
+    static let selectedColor = NSColor.systemGreen
     static let copiedColor = NSColor.systemOrange
 
     override var isFlipped: Bool { true }
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
 
-    /// Shows where a pick went for a moment, after picking may have ended.
-    func flash(_ mark: Mark, color: NSColor) {
-        flash = (mark, color)
+    /// Shows where the picks went for a moment, after picking has ended.
+    func flash(_ marks: [Mark], color: NSColor) {
+        flash = (marks, color)
         needsDisplay = true
         flashTimer?.invalidate()
         flashTimer = Timer.scheduledTimer(withTimeInterval: 1.2, repeats: false) { [weak self] _ in
@@ -39,9 +42,11 @@ final class PickerOverlay: NSView {
     }
 
     override func draw(_ dirtyRect: NSRect) {
-        if let flash { draw(flash.mark, color: flash.color) }
-        else if let target { draw(target, color: .controlAccentColor) }
-        if showsBanner { drawBanner() }
+        if let flash { flash.marks.forEach { draw($0, color: flash.color) } }
+        selected.forEach { draw($0, color: Self.selectedColor) }
+        // Over a marked one, its green stays and the outline adds nothing.
+        if let target, flash == nil, !selected.contains(where: { $0.box == target.box }) { draw(target, color: .controlAccentColor) }
+        if let banner { drawBanner(banner) }
     }
 
     private func draw(_ mark: Mark, color: NSColor) {
@@ -65,9 +70,8 @@ final class PickerOverlay: NSView {
         text.draw(at: CGPoint(x: chip.minX + 5, y: chip.minY + 2))
     }
 
-    private func drawBanner() {
-        let text = NSAttributedString(string: T("Click an element · ⇧ for several · ⌥ copies · Esc stops",
-                                                "Clique num elemento · ⇧ para vários · ⌥ copia · Esc sai"), attributes: [
+    private func drawBanner(_ banner: String) {
+        let text = NSAttributedString(string: banner, attributes: [
             .font: UILooks.font(12, weight: .medium), .foregroundColor: NSColor.white,
         ])
         let size = text.size()

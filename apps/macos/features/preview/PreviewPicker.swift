@@ -1,45 +1,46 @@
 import AppKit
 import Strings
-import TempImages
 import WebKit
 
-/// Picking an element of the page (docs/spec/preview.md, "Escolher
-/// elemento"): the mouse goes to the script in the picker's world, the
-/// answer to the overlay, and the click to whoever delivers it (the app:
-/// the agent's terminal or the clipboard). Nothing is left in the page:
-/// no user script, no message handler (docs/adr/0018-element-picker.md).
+/// Picking elements of the page (docs/spec/preview.md, "Escolher
+/// elemento"): the outline follows the mouse; a click sends the element; ⇧
+/// +click marks it green and adds it to the selection, which goes out all at
+/// once when ⇧ is let go. Whoever delivers is the app (the agent's terminal
+/// or the clipboard). Nothing is left in the page: no user script, no
+/// message handler (docs/adr/0018-element-picker.md).
 @MainActor
 final class PreviewPicker {
     private let web: PickingWebView
     private let overlay: PickerOverlay
-    /// Hands a pick over and says where it went; nil copies it.
+    let reader: PickerReader
+    /// Hands the picks over and says where they went; nil copies them.
     var onDeliver: ((PickDelivery) -> PickOutcome)?
     /// Picking started or ended (the bar's button follows).
     var onStateChange: (() -> Void)?
-    /// Whether a pick carries a picture of the element
-    /// (preview.pickScreenshot); nil takes one.
-    var takesPictures: (() -> Bool)?
-    /// Pictures of picked elements, in <temporary directory>/cadex-pick/.
-    static let pictures = TempImageStore(folder: "cadex-pick", prefix: "pick")
-    private static var cleanedPictures = false
     private(set) var isPicking = false
-    /// Whether this document has the script; a navigation clears it.
-    private var injected = false
-    /// One question at a time while hovering; the newest point waits.
+    /// Marked with ⇧, in the order clicked.
+    private(set) var selection: [PickedElement] = []
+    /// Clicks still being read; the selection goes out when they are done.
+    private var reading = 0
+    private var sendWhenRead = false
+    /// ⌥ on any click: the selection goes to the clipboard.
+    private var copies = false
+    /// One hover question at a time, at most every 30 ms, for the newest
+    /// point: answers to every move made the outline jump (owner,
+    /// 2026-10-21).
     private var asking = false
     private var waiting: CGPoint?
+    private var lastAsk = Date.distantPast
 
     init(web: PickingWebView, overlay: PickerOverlay) {
         self.web = web
         self.overlay = overlay
+        reader = PickerReader(web: web)
         web.onPickMove = { [weak self] in self?.hover($0) }
         web.onPickClick = { [weak self] in self?.click($0, $1) }
         web.onPickExit = { [weak self] in self?.overlay.target = nil }
+        web.onShiftUp = { [weak self] in self?.shiftUp() }
         web.onResign = { [weak self] in self?.stop() }
-        if !Self.cleanedPictures {
-            Self.cleanedPictures = true
-            DispatchQueue.global(qos: .utility).async { Self.pictures.removeOld() }
-        }
     }
 
     func toggle() { isPicking ? stop() : start() }
@@ -48,137 +49,122 @@ final class PreviewPicker {
         guard !isPicking else { return }
         isPicking = true
         web.isPicking = true
-        overlay.showsBanner = true
-        // So Esc reaches the preview and a click elsewhere ends picking.
+        showSelection()
+        // So Esc and ⇧ reach the preview, and a click elsewhere ends picking.
         web.window?.makeFirstResponder(web)
         onStateChange?()
     }
 
+    /// Ends picking; a selection not sent is dropped (Esc).
     func stop() {
         guard isPicking else { return }
         isPicking = false
         web.isPicking = false
-        overlay.showsBanner = false
-        overlay.target = nil
+        selection = []
+        reading = 0
+        sendWhenRead = false
+        copies = false
         waiting = nil
+        overlay.target = nil
+        overlay.selected = []
+        overlay.banner = nil
         onStateChange?()
     }
 
-    /// A new document: the script is gone and the outline is stale.
+    /// A new document: the script is gone, the outlines are stale.
     func pageChanged() {
-        injected = false
+        reader.pageChanged()
         overlay.target = nil
     }
 
+    // MARK: Hover
+
     private func hover(_ point: CGPoint) {
-        guard !asking else { return waiting = point }
+        waiting = point
+        guard !asking else { return }
+        let wait = 0.03 - Date().timeIntervalSince(lastAsk)
+        guard wait <= 0 else {
+            asking = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + wait) { [weak self] in
+                self?.asking = false
+                self?.askWaiting()
+            }
+            return
+        }
+        askWaiting()
+    }
+
+    private func askWaiting() {
+        guard isPicking, let point = waiting else { return }
+        waiting = nil
         asking = true
-        ask("at", point) { [weak self] answer in
+        lastAsk = Date()
+        reader.ask("at", point) { [weak self] answer in
             guard let self else { return }
             asking = false
             if isPicking { overlay.target = answer.flatMap(mark) }
-            if let next = waiting {
-                waiting = nil
-                hover(next)
-            }
+            if let next = waiting { hover(next) }
         }
-    }
-
-    private func click(_ point: CGPoint, _ flags: NSEvent.ModifierFlags) {
-        let page = web.url?.absoluteString ?? ""
-        let mark = UUID().uuidString
-        ask("describe", point, mark: mark) { [weak self] answer in
-            guard let self, let answer, let element = PickedElement(json: answer, page: page) else { return }
-            guard PickedElement.object(answer)?["marked"] as? Bool == true else { return deliver(element, flags) }
-            readPageSource(mark) { [weak self] json in
-                var read = element
-                let stack = json.flatMap { read.merge(pageSource: $0) }
-                guard let stack, let self else { self?.deliver(read, flags); return }
-                // React 19: map the stack back, then deliver (plan 16, phase C).
-                let page = web.url
-                Task { @MainActor [weak self] in
-                    read.source = await SourceLookup.resolve(stack: stack, page: page)
-                    self?.deliver(read, flags)
-                }
-            }
-        }
-    }
-
-    /// The one read in the page's world, for where the element was written.
-    private func readPageSource(_ mark: String, then done: @escaping @MainActor (String?) -> Void) {
-        web.callAsyncJavaScript(PageSourceScript.body, arguments: ["mark": mark], in: nil, in: .page) { result in
-            MainActor.assumeIsolated { done((try? result.get()) as? String) }
-        }
-    }
-
-    /// The picture first (plan 16, phase D), then the hand-over.
-    private func deliver(_ element: PickedElement, _ flags: NSEvent.ModifierFlags) {
-        picture(of: element.box) { [weak self] path in
-            var element = element
-            element.screenshot = path
-            self?.handOver(element, flags)
-        }
-    }
-
-    private func picture(of box: CGRect, then done: @escaping @MainActor (String?) -> Void) {
-        guard takesPictures?() ?? true, let rect = Self.pictureRect(viewBox(box), in: web.bounds) else { return done(nil) }
-        let configuration = WKSnapshotConfiguration()
-        configuration.rect = rect
-        // Wide elements (a whole page) come out at most 1600 points across.
-        if rect.width > 1600 { configuration.snapshotWidth = 1600 }
-        web.takeSnapshot(with: configuration) { image, _ in
-            MainActor.assumeIsolated {
-                guard let image, let tiff = image.tiffRepresentation,
-                      let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]),
-                      let url = try? Self.pictures.save(png) else { return done(nil) }
-                done(url.path)
-            }
-        }
-    }
-
-    /// The element with a margin of 8 points, cut to what the view shows:
-    /// a snapshot must lie inside the view's bounds (WKSnapshotConfiguration).
-    static func pictureRect(_ box: CGRect, in bounds: CGRect) -> CGRect? {
-        let rect = box.insetBy(dx: -8, dy: -8).intersection(bounds)
-        return rect.isNull || rect.width < 1 || rect.height < 1 ? nil : rect
-    }
-
-    private func handOver(_ element: PickedElement, _ flags: NSEvent.ModifierFlags) {
-        let delivery = PickDelivery(element: element, toClipboard: flags.contains(.option), keepPicking: flags.contains(.shift))
-        let outcome = onDeliver?(delivery) ?? Self.copy(delivery.text())
-        if !delivery.keepPicking { stop() }
-        overlay.flash(PickerOverlay.Mark(box: viewBox(element.box), label: Self.flashText(outcome)),
-                      color: Self.flashColor(outcome))
-    }
-
-    /// Asks the picker's world; the script goes along the first time.
-    private func ask(_ function: String, _ point: CGPoint, mark: String? = nil, then done: @escaping @MainActor (String?) -> Void) {
-        let zoom = web.pageZoom > 0 ? web.pageZoom : 1
-        let script = PickerScript.call(function, x: point.x / zoom, y: point.y / zoom, mark: mark, inject: !injected)
-        web.evaluateJavaScript(script, in: nil, in: PickerScript.world) { [weak self] result in
-            MainActor.assumeIsolated {
-                switch result {
-                case .success(let value):
-                    self?.injected = true
-                    done(value as? String)
-                case .failure:
-                    // A navigation took the script with it: inject again next time.
-                    self?.injected = false
-                    done(nil)
-                }
-            }
-        }
-    }
-
-    /// CSS pixels to view points.
-    private func viewBox(_ box: CGRect) -> CGRect {
-        let zoom = web.pageZoom > 0 ? web.pageZoom : 1
-        return CGRect(x: box.minX * zoom, y: box.minY * zoom, width: box.width * zoom, height: box.height * zoom)
     }
 
     private func mark(_ json: String) -> PickerOverlay.Mark? {
         guard let object = PickedElement.object(json), let box = PickedElement.rect(object["box"]) else { return nil }
-        return PickerOverlay.Mark(box: viewBox(box), label: object["label"] as? String ?? "")
+        return PickerOverlay.Mark(box: reader.viewBox(box), label: object["label"] as? String ?? "")
+    }
+
+    // MARK: Selecting and sending
+
+    private func click(_ point: CGPoint, _ flags: NSEvent.ModifierFlags) {
+        let adding = flags.contains(.shift)
+        if flags.contains(.option) { copies = true }
+        if !adding { sendWhenRead = true }
+        reading += 1
+        reader.read(at: point) { [weak self] element in
+            guard let self, isPicking else { return }
+            reading -= 1
+            if let element { select(element, toggling: adding) }
+            if sendWhenRead, reading == 0 { send() }
+        }
+    }
+
+    /// ⇧+click on a marked element unmarks it.
+    private func select(_ element: PickedElement, toggling: Bool) {
+        if let index = selection.firstIndex(where: { $0.selector == element.selector }) {
+            if toggling { selection.remove(at: index) }
+        } else {
+            selection.append(element)
+        }
+        showSelection()
+    }
+
+    private func shiftUp() {
+        guard isPicking, !selection.isEmpty || reading > 0 else { return }
+        sendWhenRead = true
+        if reading == 0 { send() }
+    }
+
+    private func send() {
+        let picked = selection
+        guard !picked.isEmpty else { return stop() }
+        let delivery = PickDelivery(elements: picked, toClipboard: copies)
+        let outcome = onDeliver?(delivery) ?? Self.copy(delivery.text())
+        stop()
+        let marks = picked.enumerated().map { index, element in
+            PickerOverlay.Mark(box: reader.viewBox(element.box),
+                               label: index == 0 ? Self.flashText(outcome, count: picked.count) : "\(index + 1)")
+        }
+        overlay.flash(marks, color: Self.flashColor(outcome))
+    }
+
+    private func showSelection() {
+        overlay.selected = selection.enumerated().map { index, element in
+            PickerOverlay.Mark(box: reader.viewBox(element.box), label: "\(index + 1)")
+        }
+        overlay.banner = selection.isEmpty
+            ? T("Click an element · ⇧+click marks several · ⌥ copies · Esc stops",
+                "Clique num elemento · ⇧+clique marca vários · ⌥ copia · Esc sai")
+            : T("\(selection.count) marked · let go of ⇧ to send · Esc cancels",
+                "\(selection.count) marcado(s) · solte o ⇧ para enviar · Esc cancela")
     }
 
     static func copy(_ text: String) -> PickOutcome {
@@ -187,10 +173,11 @@ final class PreviewPicker {
         return .copied(note: nil)
     }
 
-    static func flashText(_ outcome: PickOutcome) -> String {
+    static func flashText(_ outcome: PickOutcome, count: Int) -> String {
+        let what = count > 1 ? T("\(count) elements · ", "\(count) elementos · ") : ""
         switch outcome {
-        case .pasted(let name): T("Pasted into \(name)", "Colado em \(name)")
-        case .copied(let note): note ?? T("Copied", "Copiado")
+        case .pasted(let name): return what + T("Pasted into \(name)", "Colado em \(name)")
+        case .copied(let note): return what + (note ?? T("Copied", "Copiado"))
         }
     }
 

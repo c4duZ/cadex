@@ -64,7 +64,7 @@ let sourcesPage = """
 <html><body style="margin:0">
 <button id="attr" data-insp-path="/w/app/src/Attr.tsx:12:5:button" style="position:absolute;top:0;height:50px">a</button>
 <button id="react" style="position:absolute;top:100px;height:50px">r</button>
-<div id="svelte" style="position:absolute;top:200px;height:50px;width:50px"></div>
+<div id="svelte-part" style="position:absolute;top:200px;height:50px;width:50px"></div>
 <div id="lovable" style="position:absolute;top:300px;height:50px;width:50px"></div>
 <div id="vue" style="position:absolute;top:400px;height:50px;width:50px"></div>
 <button id="both" data-v-inspector="src/Both.vue:7:3" style="position:absolute;top:500px;height:50px">b</button>
@@ -78,7 +78,7 @@ const fiber = { _debugSource: { fileName: '/w/app/src/Save.tsx', lineNumber: 46,
 document.getElementById('react')['__reactFiber$x1'] = fiber;
 document.getElementById('react19')['__reactFiber$x1'] = { _debugStack: new Error('react-stack-top-frame'), return: { type: SaveButton, return: null } };
 document.getElementById('both')['__reactFiber$x1'] = fiber;
-document.getElementById('svelte').__svelte_meta = { loc: { file: 'src/App.svelte', line: 9, column: 2 } };
+document.getElementById('svelte-part').__svelte_meta = { loc: { file: 'src/App.svelte', line: 9, column: 2 } };
 document.getElementById('lovable')[Symbol.for('__jsxSource__')] = { fileName: 'src/Card.tsx', lineNumber: 3, columnNumber: 7 };
 document.getElementById('vue').__vueParentComponent = { type: { __file: '/w/app/src/Panel.vue', __name: 'Panel' },
   parent: { type: { name: 'App' }, parent: null } };
@@ -107,10 +107,10 @@ let exitCode = await Checks.run([
     }),
     ("the picture: the element with a margin, cut to what the view shows", {
         let bounds = CGRect(x: 0, y: 0, width: 800, height: 600)
-        expect(PreviewPicker.pictureRect(CGRect(x: 100, y: 100, width: 150, height: 40), in: bounds) == CGRect(x: 92, y: 92, width: 166, height: 56))
-        expect(PreviewPicker.pictureRect(CGRect(x: 700, y: 550, width: 300, height: 300), in: bounds) == CGRect(x: 692, y: 542, width: 108, height: 58))
-        expect(PreviewPicker.pictureRect(CGRect(x: 0, y: 900, width: 100, height: 100), in: bounds) == nil, "off the view")
-        expect(PreviewPicker.pictures.directory.lastPathComponent == "cadex-pick")
+        expect(PickerReader.pictureRect(CGRect(x: 100, y: 100, width: 150, height: 40), in: bounds) == CGRect(x: 92, y: 92, width: 166, height: 56))
+        expect(PickerReader.pictureRect(CGRect(x: 700, y: 550, width: 300, height: 300), in: bounds) == CGRect(x: 692, y: 542, width: 108, height: 58))
+        expect(PickerReader.pictureRect(CGRect(x: 0, y: 900, width: 100, height: 100), in: bounds) == nil, "off the view")
+        expect(PickerReader.pictures.directory.lastPathComponent == "cadex-pick")
         var element = PickedElement(page: "http://x", selector: "b", text: "", html: "<b></b>", box: .zero, viewport: .zero)
         expect(!element.payload().contains("screenshot:"))
         element.screenshot = "/tmp/cadex-pick/pick-1.png"
@@ -234,6 +234,14 @@ let exitCode = await Checks.run([
         let html = text.components(separatedBy: "\nhtml:\n")[1]
         expect(html.count <= PickedElement.htmlLimit + "\n</picked_element>".count, "\(html.count)")
     }),
+    ("several picks go as one paste, a block each, in the order clicked", {
+        let a = PickedElement(page: "http://x", selector: "a", text: "", html: "<a></a>", box: .zero, viewport: .zero)
+        let b = PickedElement(page: "http://x", selector: "b", text: "", html: "<b></b>", box: .zero, viewport: .zero)
+        let text = PickDelivery(elements: [a, b], toClipboard: false).text()
+        expect(text.components(separatedBy: "<picked_element ").count == 3)
+        expect(text.range(of: "selector: a")!.lowerBound < text.range(of: "selector: b")!.lowerBound)
+        expect(text.contains("</picked_element>\n\n<picked_element "))
+    }),
     ("a line without data is left out; the total holds with wide characters", {
         let empty = PickedElement(page: "http://x", selector: "div", text: " ", html: "<div></div>",
                                   box: .zero, viewport: .zero).payload()
@@ -261,6 +269,8 @@ let exitCode = await Checks.run([
         expect(element?.box == CGRect(x: 10, y: 100, width: 150, height: 38), "\(String(describing: element?.box))")
         let title = try await evaluate(doc.web, PickerScript.call("at", x: 5, y: 5, inject: false), PickerScript.world) as? String
         expect(title?.contains("h1#title") == true, title ?? "nil")
+        let background = try await evaluate(doc.web, PickerScript.call("at", x: 700, y: 500, inject: false), PickerScript.world) as? String
+        expect(background == "null", "the page's background is no element: \(background ?? "nil")")
         let seen = try await evaluate(doc.web, "typeof window.__cadexPicker", .page) as? String
         expect(seen == "undefined", seen ?? "nil")
     }),

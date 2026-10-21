@@ -132,16 +132,18 @@ public struct PickedElement: Equatable, Sendable {
     }
 }
 
-/// What a picked element is handed over as, and where it went.
+/// What the picked elements are handed over as (one or several, marked
+/// with ⇧), and where they went.
 public struct PickDelivery: Sendable {
-    public let element: PickedElement
-    /// ⌥+click: to the clipboard, whatever the setting says.
+    public let elements: [PickedElement]
+    /// ⌥ on a click: to the clipboard, whatever the setting says.
     public let toClipboard: Bool
-    /// ⇧+click: still picking, so the focus stays in the preview.
-    public let keepPicking: Bool
 
-    /// The text for an agent in `folder` (its terminal's), or as is.
-    public func text(relativeTo folder: String? = nil) -> String { element.payload(relativeTo: folder) }
+    /// The text for an agent in `folder` (its terminal's), or as is: one
+    /// block per element, in the order clicked.
+    public func text(relativeTo folder: String? = nil) -> String {
+        elements.map { $0.payload(relativeTo: folder) }.joined(separator: "\n\n")
+    }
 }
 
 public enum PickOutcome: Equatable, Sendable {

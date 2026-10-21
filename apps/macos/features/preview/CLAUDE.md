@@ -20,11 +20,12 @@
 - Comandos em `PreviewCommands.swift`: preview.open (onde a configuração diz), preview.open-in-tab, preview.reload (⌘R), preview.back,
   preview.forward. A oferta "Abrir no preview" é da feature terminal (`../terminal/TerminalPreviewOffer.swift`)
   e chega aqui pelo app (`onOpenPreview` das abas).
-- Escolher elemento (plano 16): `PreviewPicker.swift` liga e desliga o modo, pergunta ao script do
-  mundo isolado `cadex-picker` (`PickerScript.swift`, injetado sob demanda e de novo a cada
-  navegação, sem `WKUserScript`), uma pergunta por vez no hover, e entrega o clique por
-  PreviewDocument.onPickElement, que o app liga (`../../app/ElementPickDelivery.swift`); sem ele,
-  copia. `PickingWebView.swift` engole movimento, clique e arrasto com o modo ligado (a página não
+- Escolher elemento (plano 16): `PreviewPicker.swift` liga e desliga o modo, cuida do hover (uma
+  pergunta por vez, no máximo a cada 30 ms), da seleção com ⇧ (marcados em verde, enviados ao
+  soltar o ⇧) e entrega por PreviewDocument.onPickElement, que o app liga
+  (`../../app/ElementPickDelivery.swift`); sem ele, copia. `PickerReader.swift` lê a página: pergunta
+  ao script do mundo isolado `cadex-picker` (`PickerScript.swift`, injetado sob demanda e de novo a
+  cada navegação, sem `WKUserScript`; o fundo da página não é elemento), a origem e o print. `PickingWebView.swift` engole movimento, clique e arrasto com o modo ligado (a página não
   recebe hover nem clique; a rolagem passa): as áreas de rastreamento do WebKit, de um objeto
   dele e não da view, saem durante a seleção e uma nossa fica no lugar e o modo acaba quando a web view perde o foco.
   `PickerOverlay.swift` desenha contorno, etiqueta, faixa e o aviso verde/âmbar por cima, fora do

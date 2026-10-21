@@ -13,8 +13,7 @@ enum ElementPickDelivery {
         if delivery.toClipboard || toClipboard { return copy(delivery.text(), note: nil) }
         // The source path from the agent's folder, which it works in.
         for terminal in tabs?.agentTerminals ?? [] where terminal.pasteFromApp(delivery.text(relativeTo: terminal.currentDirectory)) {
-            // ⇧ keeps picking: the keyboard stays with the preview.
-            if !delivery.keepPicking { tabs?.focus(terminal) }
+            tabs?.focus(terminal)
             let title = terminal.programTitle
             return .pasted(into: title.isEmpty ? T("the terminal", "o terminal") : title)
         }

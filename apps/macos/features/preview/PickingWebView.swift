@@ -26,6 +26,8 @@ final class PickingWebView: WKWebView {
     var onPickMove: ((CGPoint) -> Void)?
     var onPickClick: ((CGPoint, NSEvent.ModifierFlags) -> Void)?
     var onPickExit: (() -> Void)?
+    /// ⇧ was let go: the marked elements go out.
+    var onShiftUp: (() -> Void)?
     /// The view lost the keyboard: picking ends with the focus.
     var onResign: (() -> Void)?
 
@@ -89,6 +91,11 @@ final class PickingWebView: WKWebView {
     override func mouseExited(with event: NSEvent) {
         guard isPicking else { return super.mouseExited(with: event) }
         onPickExit?()
+    }
+
+    override func flagsChanged(with event: NSEvent) {
+        guard isPicking else { return super.flagsChanged(with: event) }
+        if !event.modifierFlags.contains(.shift) { onShiftUp?() }
     }
 
     override func cursorUpdate(with event: NSEvent) {

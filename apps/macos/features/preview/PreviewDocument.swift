@@ -105,8 +105,8 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
 
     /// Whether a pick carries a picture of the element (preview.pickScreenshot).
     public var takesPictures: (() -> Bool)? {
-        get { picker.takesPictures }
-        set { picker.takesPictures = newValue }
+        get { picker.reader.takesPictures }
+        set { picker.reader.takesPictures = newValue }
     }
 
     public var isPicking: Bool { picker.isPicking }

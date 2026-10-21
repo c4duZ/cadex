@@ -50,8 +50,19 @@ enum PickerScript {
             frames.push(el);
             doc = inner;
           }
+          if (background(el)) return null;
           const r = el.getBoundingClientRect();
           return { el, frames, box: { x: r.left + ox, y: r.top + oy, w: r.width, h: r.height } };
+        }
+
+        // The page itself, not something on it: between two elements the
+        // mouse is over these, and outlining them made the outline flash
+        // over the whole page (owner, 2026-10-21).
+        const ROOTS = ['root', '__next', 'app', '__nuxt', 'svelte', '___gatsby'];
+        function background(el) {
+          const tag = el.tagName;
+          if (tag === 'HTML' || tag === 'BODY') return true;
+          return !!el.id && ROOTS.includes(el.id) && el.parentElement === el.ownerDocument.body;
         }
 
         function classes(el) { return Array.from(el.classList || []); }

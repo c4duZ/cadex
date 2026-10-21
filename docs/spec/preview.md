@@ -29,15 +29,20 @@ Ver no Cadex a página do servidor que um agente subiu no terminal (`npm run dev
 Clicar num elemento da página e mandar a descrição dele para o agente que roda numa aba de terminal,
 como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
 - "Escolher elemento no preview" (⌘⇧C, o botão de mira na barra ou o ⌘K) liga e desliga o modo. O
-  cursor vira cruz e uma faixa no topo diz "Clique num elemento · ⇧ para vários · ⌥ copia · Esc
-  sai". Esc ("Parar de escolher") sai, com o preview focado; fora dele o Esc segue para onde está.
+  cursor vira cruz e uma faixa no topo diz "Clique num elemento · ⇧+clique marca vários · ⌥ copia ·
+  Esc sai". Esc ("Parar de escolher") sai, com o preview focado; fora dele o Esc segue para onde está.
 - Passar o mouse contorna o elemento na cor de destaque, com uma etiqueta (tag, id ou classes,
-  tamanho). A página não recebe hover, clique nem arrasto enquanto o modo está ligado; a rolagem
-  continua.
-- O clique entrega o elemento e sai do modo. ⇧+clique entrega e continua no modo, para juntar
-  vários no mesmo prompt. ⌥+clique copia para a área de transferência em vez de colar.
+  tamanho); o contorno muda no máximo a cada 30 ms. O fundo da página (`html`, `body` e a raiz do
+  app: `#root`, `#__next`, `#app`, `#__nuxt`, `#svelte`) não é elemento: sem contorno, e o clique
+  ali não faz nada (entre dois elementos o contorno piscava sobre a página inteira, 2026-10-21). A
+  página não recebe hover, clique nem arrasto enquanto o modo está ligado; a rolagem continua.
+- O clique entrega o elemento e sai do modo. ⇧+clique marca o elemento de verde, com o número da
+  ordem, sem entregar; ⇧+clique num marcado desmarca. Soltar o ⇧ entrega todos os marcados de uma
+  vez, um bloco por elemento na ordem dos cliques, e sai do modo; um clique sem ⇧ com marcados
+  entrega os marcados mais esse. A faixa diz "N marcado(s) · solte o ⇧ para enviar · Esc cancela";
+  Esc descarta a seleção. ⌥ em qualquer clique copia para a área de transferência em vez de colar.
 - Entregar: colar no terminal do agente, sem Enter, e levar o foco para ele (trocando de aba se for
-  preciso; com ⇧ o foco fica no preview). O terminal do agente é o que roda um agente conhecido
+  preciso). O terminal do agente é o que roda um agente conhecido
   (claude, codex, opencode, aider, gemini...) pelo título; senão um terminal com programa rodando,
   da aba ativa primeiro e depois das abas usadas mais recentemente; só um que aceite colagem
   segura (bracketed paste). Sem nenhum, vai para a área de transferência com o aviso "nenhum
@@ -97,7 +102,9 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
 - [ ] Voltar, avançar e recarregar funcionam.
 - [ ] Com o Vite no preview e `claude` num painel ao lado: ⌘⇧C, o hover contorna sem a página
   reagir, o clique cola o bloco no prompt sem enviar e o foco vai para o terminal.
-- [ ] ⇧+clique junta vários; ⌥+clique copia; Esc sai; sem agente, copia com aviso.
+- [ ] ⇧+clique marca vários de verde e soltar o ⇧ entrega todos num só colar; ⌥+clique copia; Esc
+  sai; sem agente, copia com aviso.
+- [ ] O contorno não pisca ao passar entre elementos.
 - [x] Ligar o modo não deixa script nenhum no mundo da página; a página não vê o seletor.
 - [x] O texto entregue respeita os limites e não leva caracteres de controle.
 - [x] Atributo de build, lovable-tagger, Svelte, React até o 18 e Vue dão o `source` certo, nessa
