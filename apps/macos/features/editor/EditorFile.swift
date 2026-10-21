@@ -9,6 +9,10 @@ enum EditorFile {
     static let maxBytes: UInt64 = 10 * 1024 * 1024
     /// Above this, no colors or folds (the core's limit too).
     static let maxHighlightBytes = 1024 * 1024
+    /// Up to this size the whole text is laid out, so it never jumps
+    /// (CodeTextView.laysOutWholeText). A 1 MB note took 1.8 s more to open
+    /// that way in a debug build; notes rarely pass 256 KB (2026-10-21).
+    static let wholeLayoutBytes = 256 * 1024
 
     enum Loaded: Equatable {
         /// `truncated`: only the first maxBytes. `valid`: the bytes were

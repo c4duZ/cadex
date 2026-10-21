@@ -11,6 +11,29 @@ final class CodeTextView: NSTextView {
     var currentLineColor: NSColor = .quaternaryLabelColor {
         didSet { needsDisplay = true }
     }
+    /// Lay out the whole text, not only what shows. TextKit 2 estimates the
+    /// height of the lines off screen and corrects it while scrolling and
+    /// typing: a wrapped Markdown note changed height by thousands of points
+    /// and the text jumped (issue #2, measured 2026-10-21). Off for big files.
+    var laysOutWholeText = false
+    private var laidOutWidth: CGFloat = 0
+
+    func layoutWholeText() {
+        guard laysOutWholeText, let layout = textLayoutManager else { return }
+        layout.ensureLayout(for: layout.documentRange)
+        // The view takes the real height now, not at the next scroll.
+        layout.textViewportLayoutController.layoutViewport()
+    }
+
+    /// A new width wraps the lines anew: lay them all out again, once the
+    /// text container has it (on the frame change it still had the old one,
+    /// and the layout made then was thrown away).
+    override func layout() {
+        super.layout()
+        guard laysOutWholeText, let width = textContainer?.size.width, width != laidOutWidth else { return }
+        laidOutWidth = width
+        layoutWholeText()
+    }
 
     /// edit.find (⌘F) with the editor focused.
     @objc func showFind(_ sender: Any?) {

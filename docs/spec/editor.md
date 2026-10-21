@@ -26,7 +26,9 @@ lê, confere e corrige uma linha (ADR 0006).
   objetos). Clicar dobra: fica a primeira linha, com a setinha fechada, e as outras somem. Clicar de
   novo desdobra. Comandos "Dobrar todos os blocos" e "Desdobrar todos os blocos". Editar o texto
   desdobra tudo.
-- Linhas longas quebram na largura da aba (sem rolagem horizontal).
+- Linhas longas quebram na largura da aba (sem rolagem horizontal). O texto não pula ao rolar nem
+  ao digitar: até 256 KB o editor mede o arquivo inteiro, não só o que aparece (issue #2,
+  2026-10-21). Acima disso, mede o que aparece, para abrir rápido.
 
 ### Editar
 - Digitar, apagar, desfazer (⌘Z), refazer (⇧⌘Z), buscar (⌘F) e selecionar funcionam como em

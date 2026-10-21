@@ -45,14 +45,18 @@ final class EditorFolding: NSObject, NSTextContentStorageDelegate {
         recompute()
     }
 
+    /// The hidden lines again; the layout is redone only when they changed.
+    /// Every key sets the regions anew, and redoing the whole layout each
+    /// time made the text jump while typing (issue #2, 2026-10-21).
     private func recompute() {
         var set = IndexSet()
         for start in folded {
             guard let region = regions[start], region.end > start else { continue }
             set.insert(integersIn: (start + 1)...region.end)
         }
+        let changed = set != snapshot.hidden
         snapshot = (set, lines)
-        onChange?()
+        if changed { onChange?() }
     }
 
     /// Whether the paragraph starting at `offset` is hidden by a fold.

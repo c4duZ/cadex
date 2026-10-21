@@ -16,7 +16,10 @@
   binário vira mensagem com "Abrir no app padrão"), salva pelo núcleo (gravação atômica, dentro do
   workspace), segue o disco (`EditorDocument+Disk.swift`: recarrega sem edição pendente, pergunta
   com edição), vai para uma linha, pergunta ao fechar com mudança.
-- Texto: `CodeTextView.swift` (NSTextView com TextKit 2; linha atual, Tab com a indentação do
+- Texto: `CodeTextView.swift` (NSTextView com TextKit 2; até EditorFile.wholeLayoutBytes (256 KB)
+  faz o layout do texto inteiro ao abrir, a cada largura nova e a cada edição, porque o TextKit 2
+  estima o que está fora da tela e o texto pulava (issue #2); as dobras só refazem o layout quando
+  as linhas escondidas mudam; linha atual, Tab com a indentação do
   arquivo, ⌘F pelo comando edit.find), `LineRuler.swift` (números e setinhas de dobra; lê só o
   TextKit 2, porque tocar no layoutManager antigo volta o NSTextView ao TextKit 1),
   `EditorFolding.swift` (dobra escondendo parágrafos pelo delegate do NSTextContentStorage, sem

@@ -17,6 +17,36 @@ func sandbox(_ files: [String: String]) -> String {
 }
 
 let exitCode = await Checks.run([
+    ("a wrapped Markdown note keeps its height while scrolling and typing (issue #2)", {
+        var text = ""
+        for n in 0..<150 {
+            text += "## Seção \(n)\n\n" + String(repeating: "Um parágrafo longo de nota que quebra em várias linhas. ", count: 8 + n % 5) + "\n\n"
+        }
+        let root = sandbox(["nota.md": text])
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 700, height: 500), styleMask: [.titled], backing: .buffered, defer: false)
+        let doc = EditorDocument(path: root + "/nota.md")
+        doc.view.frame = window.contentView!.bounds
+        window.contentView!.addSubview(doc.view)
+        doc.view.layoutSubtreeIfNeeded()
+        try await Task.sleep(for: .milliseconds(100))
+        guard let tv = doc.textView, let scroll = tv.enclosingScrollView else { return expect(false, "no text view") }
+        var heights = Set<Int>()
+        for step in 0...8 {
+            scroll.contentView.scroll(to: NSPoint(x: 0, y: tv.frame.height * CGFloat(step) / 10))
+            scroll.reflectScrolledClipView(scroll.contentView)
+            tv.layoutSubtreeIfNeeded()
+            try await Task.sleep(for: .milliseconds(20))
+            heights.insert(Int(tv.frame.height))
+        }
+        expect(heights.count == 1, "the height changed while scrolling: \(heights.sorted())")
+        let mid = (tv.string as NSString).length / 2
+        tv.setSelectedRange(NSRange(location: mid, length: 0))
+        tv.scrollRangeToVisible(NSRange(location: mid, length: 0))
+        let top = scroll.contentView.bounds.origin.y
+        for _ in 0..<5 { tv.insertText("x", replacementRange: tv.selectedRange()) }
+        try await Task.sleep(for: .milliseconds(50))
+        expect(scroll.contentView.bounds.origin.y == top, "the view moved while typing")
+    }),
     ("line index: lines, ranges and whole lines", {
         let index = LineIndex("ab\ncd\n\nef" as NSString)
         expect(index.count == 4)

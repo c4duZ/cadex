@@ -107,6 +107,7 @@ public final class EditorDocument: TabDocument {
         loading = false
         codeView.isEditable = !readOnly
         codeView.indentUnit = CodeTextView.detectIndent(text)
+        codeView.laysOutWholeText = text.utf8.count <= EditorFile.wholeLayoutBytes
         let highlighter = EditorHighlighter(storage: codeView.textStorage!, fileName: path, appearance: EditorAppearance.current,
                                             highlight: text.utf8.count <= EditorFile.maxHighlightBytes)
         highlighter.onTextChange = { [weak self] in self?.textChanged() }
@@ -117,6 +118,7 @@ public final class EditorDocument: TabDocument {
         applyAppearance()
         textContainer = scroll
         place(scroll)
+        codeView.layoutWholeText()
     }
 
     private func makeTextView() -> (NSScrollView, CodeTextView) {
@@ -198,12 +200,14 @@ public final class EditorDocument: TabDocument {
         folding.setRegions(highlighter.folds())
         ruler?.updateThickness()
         ruler?.needsDisplay = true
+        codeView?.layoutWholeText()
         if !loading { hasUnsavedChanges = true }
     }
 
     private func foldsChanged() {
         guard let codeView, let layout = codeView.textLayoutManager else { return }
         layout.invalidateLayout(for: layout.documentRange)
+        codeView.layoutWholeText()
         codeView.needsLayout = true
         codeView.needsDisplay = true
         ruler?.needsDisplay = true
