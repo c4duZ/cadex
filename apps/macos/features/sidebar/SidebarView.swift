@@ -15,6 +15,12 @@ public final class SidebarView: NSView {
     /// The shown ids changed here (switch, drag); the app saves them.
     public var onItemsChange: (([String]) -> Void)?
     public private(set) var page: String?
+    /// A page's sub-tab was picked (or the page came with one): the app
+    /// switches the page's view.
+    public var onSubtab: ((String, String) -> Void)?
+    /// The sub-tab each page shows, the first until one is picked.
+    public private(set) var subtab: [String: String] = [:]
+    private let subtabs = NSSegmentedControl()
     public private(set) var items: [String] = []
     private let catalog: [SidebarItem]
     private let run: (String) -> Void
@@ -43,7 +49,14 @@ public final class SidebarView: NSView {
         row.onReorder = { [weak self] ids in self?.change(ids) }
         row.onCustomize = { [weak self] _ in self?.customize() }
         row.onOverflow = { [weak self] ids, anchor in self?.overflow(ids, below: anchor) }
-        for view in [row, title, content, empty] as [NSView] {
+        subtabs.segmentStyle = .rounded
+        subtabs.controlSize = .small
+        subtabs.font = UILooks.font(11)
+        subtabs.trackingMode = .selectOne
+        subtabs.target = self
+        subtabs.action = #selector(subtabPicked)
+        subtabs.isHidden = true
+        for view in [row, title, subtabs, content, empty] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
@@ -67,7 +80,9 @@ public final class SidebarView: NSView {
             row.heightAnchor.constraint(equalToConstant: SidebarIconButton.size.height),
             title.topAnchor.constraint(equalTo: row.bottomAnchor, constant: UILooks.pt(8)),
             title.leadingAnchor.constraint(equalTo: leadingAnchor, constant: inset + UILooks.pt(4)),
-            title.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -inset),
+            title.trailingAnchor.constraint(lessThanOrEqualTo: subtabs.leadingAnchor, constant: -UILooks.pt(6)),
+            subtabs.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -inset),
+            subtabs.centerYAnchor.constraint(equalTo: title.centerYAnchor),
             content.topAnchor.constraint(equalTo: title.bottomAnchor, constant: UILooks.pt(4)),
             content.leadingAnchor.constraint(equalTo: leadingAnchor),
             content.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -97,6 +112,7 @@ public final class SidebarView: NSView {
         empty.isHidden = !none
         content.isHidden = none
         title.isHidden = none
+        if none { subtabs.isHidden = true }
         if page == nil, let first = ids.first(where: { id in catalog.first { $0.id == id }?.view != nil }) { show(first) }
         return problems
     }
@@ -108,7 +124,33 @@ public final class SidebarView: NSView {
         for other in catalog { other.view?.isHidden = other.id != id }
         row.select(id)
         title.stringValue = titles[id] ?? item.title
+        showSubtabs(of: item)
         onShow?(id)
+    }
+
+    /// Picks a page's sub-tab from code (a command, a click elsewhere).
+    public func select(subtab sub: String, of id: String) {
+        guard let item = catalog.first(where: { $0.id == id }), item.subtabs.contains(where: { $0.id == sub }) else { return }
+        subtab[id] = sub
+        if page == id { showSubtabs(of: item) } else { onSubtab?(id, sub) }
+    }
+
+    private func showSubtabs(of item: SidebarItem) {
+        subtabs.isHidden = item.subtabs.isEmpty
+        guard !item.subtabs.isEmpty else { return }
+        subtabs.segmentCount = item.subtabs.count
+        for (index, tab) in item.subtabs.enumerated() { subtabs.setLabel(tab.title, forSegment: index) }
+        let current = subtab[item.id] ?? item.subtabs[0].id
+        subtab[item.id] = current
+        subtabs.selectedSegment = item.subtabs.firstIndex { $0.id == current } ?? 0
+        onSubtab?(item.id, current)
+    }
+
+    @objc private func subtabPicked() {
+        guard let page, let item = catalog.first(where: { $0.id == page }), item.subtabs.indices.contains(subtabs.selectedSegment) else { return }
+        let sub = item.subtabs[subtabs.selectedSegment].id
+        subtab[page] = sub
+        onSubtab?(page, sub)
     }
 
     /// The text under the icons for a page: the folder's name for Files.

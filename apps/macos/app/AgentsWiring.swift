@@ -19,6 +19,15 @@ extension WindowSession {
         page.isInCadex = { [weak self] session in self?.terminal(of: session) != nil }
         page.onOpen = { [weak self] session in self?.openAgent(session) }
         page.onEnable = { [weak self] in self?.settings.store.update { $0.agents.sessions = true } }
+        page.onHide = { [weak self] account, hide in
+            let key = SettingsBridge.tilde(account.dir)
+            self?.settings.store.update { s in
+                s.agents.hiddenAccounts.removeAll { $0 == key }
+                if hide { s.agents.hiddenAccounts.append(key) }
+            }
+        }
+        page.onRename = { [weak self] account in self?.renameAccount(account) }
+        agentsPage = page
         return page
     }
 
@@ -68,6 +77,26 @@ extension WindowSession {
             if let terminal = space.tabs.allTerminals.first(where: { $0.foregroundGroup == group }) { return (index, terminal) }
         }
         return nil
+    }
+
+    /// "Rename…" on an account: its name in Agents, the usage item and the
+    /// notifications; empty goes back to the organization's.
+    func renameAccount(_ account: AgentAccount) {
+        let alert = NSAlert()
+        alert.messageText = T("Rename the account", "Renomear a conta")
+        alert.informativeText = "~/" + (account.dir as NSString).lastPathComponent + T(". Empty: the organization's name.", ". Vazio: o nome da organização.")
+        let field = NSTextField(string: account.name)
+        field.frame = NSRect(x: 0, y: 0, width: 260, height: 24)
+        alert.accessoryView = field
+        alert.addButton(withTitle: T("Rename", "Renomear"))
+        alert.addButton(withTitle: T("Cancel", "Cancelar"))
+        alert.window.initialFirstResponder = field
+        alert.beginSheetModal(for: window) { [weak self] response in
+            guard response == .alertFirstButtonReturn else { return }
+            let name = field.stringValue.trimmingCharacters(in: .whitespaces)
+            let key = SettingsBridge.tilde(account.dir)
+            self?.settings.store.update { $0.agents.accountNames[key] = name.isEmpty ? nil : name }
+        }
     }
 
     /// agents.test-notifications: the three kinds, named after this window's project.

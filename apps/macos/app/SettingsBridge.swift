@@ -71,6 +71,8 @@ final class SettingsBridge {
         onSidebar?(settings.sidebar)
         onStatusBar?(settings.statusBar)
         AgentsController.shared.isEnabled = settings.agents.sessions
+        AgentsController.shared.names = settings.agents.accountNames.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }
+        AgentsController.shared.hidden = Set(settings.agents.hiddenAccounts.map(Self.expand))
         let agents = settings.agents
         AgentNotifier.shared.kinds = .init(permission: agents.sessions && agents.notifyPermission,
                                            question: agents.sessions && agents.notifyQuestion,
@@ -93,6 +95,12 @@ final class SettingsBridge {
         if plain { preferences.minimumContrast = max(preferences.minimumContrast, Theme.highContrastText) }
         TerminalPreferences.current = preferences
     }
+
+    /// "~/.claude-x" in settings.json, the full folder in the app.
+    static func expand(_ path: String) -> String { (path as NSString).expandingTildeInPath }
+
+    /// The other way, so settings.json reads the same on another Mac.
+    static func tilde(_ path: String) -> String { (path as NSString).abbreviatingWithTildeInPath }
 
     static func terminalPreferences(from settings: Settings) -> TerminalPreferences {
         var p = TerminalPreferences()

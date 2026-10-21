@@ -18,8 +18,21 @@ public final class AgentsView: NSView {
     /// "Turn On" when agents.sessions is off.
     public var onEnable: (() -> Void)?
     public var colors = AgentColors() { didSet { render() } }
+    /// The sub-tab shown: "sessions" or "accounts" (AgentAccountsView.swift).
+    public var subtab = "sessions" { didSet { if subtab != oldValue { render() } } }
+    /// Rename an account (nil: back to its own name) or hide and show it;
+    /// the app saves agents.accountNames and agents.hiddenAccounts.
+    public var onRename: ((AgentAccount) -> Void)?
+    public var onHide: ((AgentAccount, Bool) -> Void)?
 
-    private let controller: AgentsController
+    let controller: AgentsController
+    /// The accounts split as the Accounts tab shows them.
+    var controllerAccounts: (all: [AgentAccount], shown: [AgentAccount], hidden: [AgentAccount]) {
+        let all = controller.accounts
+        return (all, controller.shownAccounts, all.filter { controller.hidden.contains($0.dir) })
+    }
+    /// The usage lines of an account's card (phase D2 fills them).
+    var usageLines: (AgentAccount) -> [NSView] = { _ in [] }
     private let stack = NSStackView()
     private let scroll = NSScrollView()
     private var token: UUID?
@@ -99,6 +112,7 @@ public final class AgentsView: NSView {
         guard controller.isEnabled else {
             return note(T("Agent sessions are off.", "As sessões de agentes estão desligadas."), button: T("Turn On", "Ligar"))
         }
+        if subtab == "accounts" { return renderAccounts() }
         let groups = AgentsLayout.groups(controller.sessions)
         if groups.isEmpty {
             note(T("No agents running. Start one in a terminal: claude", "Nenhum agente rodando. Abra um num terminal: claude"))
@@ -115,7 +129,7 @@ public final class AgentsView: NSView {
         }
     }
 
-    private func add(_ view: NSView) {
+    func add(_ view: NSView) {
         stack.addArrangedSubview(view)
         view.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -12).isActive = true
     }
@@ -130,7 +144,7 @@ public final class AgentsView: NSView {
         return paddedTop(row)
     }
 
-    private func paddedTop(_ view: NSView) -> NSView {
+    func paddedTop(_ view: NSView) -> NSView {
         let box = NSView()
         view.translatesAutoresizingMaskIntoConstraints = false
         box.addSubview(view)
@@ -190,7 +204,7 @@ public final class AgentsView: NSView {
         }
     }
 
-    private func note(_ text: String, button: String? = nil) {
+    func note(_ text: String, button: String? = nil) {
         let label = NSTextField(wrappingLabelWithString: text)
         label.font = UILooks.font(12)
         label.textColor = colors.secondary

@@ -88,6 +88,11 @@ public enum SettingsFile {
             settings.agents.notifyPermission = reader.bool(s, "agents.notifyPermission") ?? settings.agents.notifyPermission
             settings.agents.notifyQuestion = reader.bool(s, "agents.notifyQuestion") ?? settings.agents.notifyQuestion
             settings.agents.notifyFinished = reader.bool(s, "agents.notifyFinished") ?? settings.agents.notifyFinished
+            settings.agents.hiddenAccounts = reader.strings(s, "agents.hiddenAccounts") ?? settings.agents.hiddenAccounts
+            if let names = s["accountNames"] {
+                if let names = names as? [String: String] { settings.agents.accountNames = names }
+                else { reader.problems.append("agents.accountNames: esperava nomes por pasta") }
+            }
         }
         if let s = reader.section(root, "statusBar") {
             settings.statusBar.left = reader.strings(s, "statusBar.left") ?? settings.statusBar.left
@@ -131,7 +136,8 @@ public enum SettingsFile {
             "sidebar": ["items": s.sidebar.items],
             "statusBar": ["left": s.statusBar.left, "right": s.statusBar.right],
             "agents": ["sessions": s.agents.sessions, "notifyPermission": s.agents.notifyPermission,
-                       "notifyQuestion": s.agents.notifyQuestion, "notifyFinished": s.agents.notifyFinished],
+                       "notifyQuestion": s.agents.notifyQuestion, "notifyFinished": s.agents.notifyFinished,
+                       "accountNames": s.agents.accountNames, "hiddenAccounts": s.agents.hiddenAccounts],
             "shortcuts": shortcuts,
         ]
         return (try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])) ?? Data()

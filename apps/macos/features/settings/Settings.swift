@@ -120,6 +120,10 @@ public struct Settings: Equatable, Sendable {
         public var notifyPermission = true
         public var notifyQuestion = true
         public var notifyFinished = true
+        /// Names you gave accounts, by folder ("~/.claude-diogo": "Liderhub").
+        public var accountNames: [String: String] = [:]
+        /// Accounts left out of Accounts and the usage item, by folder.
+        public var hiddenAccounts: [String] = []
     }
 
     public struct StatusBar: Equatable, Sendable {

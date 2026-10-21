@@ -88,6 +88,7 @@ final class AgentSign: NSView {
 final class AgentRow: NSView {
     var onClick: (() -> Void)?
     var onDoubleClick: (() -> Void)?
+    var onRightClick: (() -> Void)?
     var fill: NSColor? { didSet { layer?.backgroundColor = fill?.cgColor } }
 
     init(_ content: NSView, inset: CGFloat = 6) {
@@ -108,6 +109,10 @@ final class AgentRow: NSView {
     required init?(coder: NSCoder) { fatalError("AgentRow is created in code") }
 
     override var mouseDownCanMoveWindow: Bool { false }
+
+    override func rightMouseDown(with event: NSEvent) {
+        if let onRightClick { onRightClick() } else { super.rightMouseDown(with: event) }
+    }
 
     override func mouseUp(with event: NSEvent) {
         guard bounds.contains(convert(event.locationInWindow, from: nil)) else { return }

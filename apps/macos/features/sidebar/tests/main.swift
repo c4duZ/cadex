@@ -104,6 +104,23 @@ let exitCode = await Checks.run([
         drag(from: step / 2, to: step * 2.6)
         expect(orders.last == ["search", "git", "files"], "two slots in one drag: \(orders)")
     }),
+    ("a page with sub-tabs shows them and says which one is picked", {
+        let items = catalog() + [SidebarItem(id: "agents", icon: .sparkle, title: "Agents", command: "agents.show", kind: .page(NSView()),
+                                             subtabs: [.init(id: "sessions", title: "Sessions"), .init(id: "accounts", title: "Accounts")])]
+        let view = SidebarView(catalog: items) { _ in }
+        var picked: [String] = []
+        view.onSubtab = { page, sub in picked.append("\(page)/\(sub)") }
+        view.setItems(["files", "agents"])
+        view.show("agents")
+        expect(picked == ["agents/sessions"], "the first by default: \(picked)")
+        view.select(subtab: "accounts", of: "agents")
+        expect(picked.last == "agents/accounts" && view.subtab["agents"] == "accounts")
+        view.show("files")
+        view.show("agents")
+        expect(picked.last == "agents/accounts", "the page keeps its sub-tab")
+        view.select(subtab: "nope", of: "agents")
+        expect(view.subtab["agents"] == "accounts")
+    }),
     ("Customize lists every page under one title, the shown ones first, with switch and shortcut", {
         let items = catalog() + [SidebarItem(id: "history", icon: .clockCounterClockwise, title: "Git History", command: "git.show-history",
                                              shortcut: "⇧⌘Y", kind: .page(NSView()))]

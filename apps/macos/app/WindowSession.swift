@@ -1,3 +1,4 @@
+import Agents
 import AppKit
 import StatusBar
 import GitHistory
@@ -51,6 +52,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
     var terminalsItem: StatusItem?
     /// The Agents icon's dot, watched while the icon is in the sidebar (AgentsWiring.swift).
     var agentsDotToken: UUID?
+    /// The Agents page, for its sub-tabs (AgentsWiring.swift).
+    weak var agentsPage: AgentsView?
 
     var settings: SettingsBridge { app.settings }
 

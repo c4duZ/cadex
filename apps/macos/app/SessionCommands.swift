@@ -73,6 +73,13 @@ extension WindowSession {
             defaultShortcut: "cmd+shift+j",
             action: .run { [weak self] in self?.workspace?.showSidebar("agents") }))
         commands.register(Command(
+            id: "agents.show-accounts", title: T("Show Agent Accounts", "Mostrar as contas dos agentes"),
+            keywords: ["accounts", "usage", "plan", "limit", "contas", "uso", "plano", "limite", "claude"], category: .view,
+            action: .run { [weak self] in
+                self?.workspace?.showSidebar("agents")
+                self?.workspace?.sidebar.select(subtab: "accounts", of: "agents")
+            }))
+        commands.register(Command(
             id: "agents.test-notifications", title: T("Send Test Notifications", "Mandar notificações de teste"),
             keywords: ["notifications", "agents", "test", "notificações", "teste", "avisos"], category: .view,
             action: .run { [weak self] in self?.sendTestNotifications() }))

@@ -19,6 +19,11 @@ public final class AgentsController {
     /// The session whose subagents show, and those subagents.
     public private(set) var openSession: String?
     public private(set) var subagents: [AgentSubagent] = []
+    /// agents.accountNames (folder → name) and agents.hiddenAccounts.
+    public var names: [String: String] = [:] { didSet { if names != oldValue { reload(accounts: true) } } }
+    public var hidden: Set<String> = [] { didSet { if hidden != oldValue { publish() } } }
+    /// The accounts not hidden: Accounts' cards, the usage item.
+    public var shownAccounts: [AgentAccount] { accounts.filter { !hidden.contains($0.dir) } }
     /// agents.sessions: off, nothing is read at all.
     public var isEnabled = true { didSet { if isEnabled != oldValue { restart() } } }
     /// The folder accounts are looked for in (tests use a temporary one).
@@ -78,7 +83,11 @@ public final class AgentsController {
     /// watches the folders that matter now.
     func reload(accounts findAccounts: Bool = true) {
         guard isEnabled, !watchers.isEmpty else { return }
-        if findAccounts || accounts.isEmpty { accounts = AgentAccount.find(home: home) }
+        if findAccounts || accounts.isEmpty {
+            accounts = AgentAccount.find(home: home).map { account in
+                names[account.dir].map { AgentAccount(dir: account.dir, name: $0, isDefault: account.isDefault) } ?? account
+            }
+        }
         var all: [AgentSession] = []
         var bad = 0
         for account in accounts {
@@ -100,7 +109,7 @@ public final class AgentsController {
         publish()
     }
 
-    private func publish() {
+    func publish() {
         for changed in watchers.values { changed() }
     }
 

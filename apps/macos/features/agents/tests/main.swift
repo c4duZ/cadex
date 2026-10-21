@@ -182,6 +182,21 @@ let exitCode = await Checks.run([
             }
         }
     }),
+    ("a renamed account takes its new name; a hidden one leaves Accounts", {
+        let home = fakeHome()
+        defer { try? fm.removeItem(atPath: home) }
+        let controller = AgentsController.shared
+        controller.home = home
+        let token = controller.watch {}
+        controller.names = [home + "/.claude-work": "Liderhub"]
+        controller.hidden = [home + "/.claude-band"]
+        expect(controller.accounts.map(\.name) == ["Team Default", "band", "Liderhub"], "\(controller.accounts.map(\.name))")
+        expect(controller.shownAccounts.map(\.name) == ["Team Default", "Liderhub"])
+        expect(controller.sessions.first { $0.id == "s2" }?.account.name == "Liderhub", "its sessions carry the new name")
+        controller.names = [:]
+        controller.hidden = []
+        controller.stop(token)
+    }),
     ("a picture of the page, with CADEX_SNAPSHOT_DIR", {
         guard let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }
         let home = fakeHome()
@@ -206,6 +221,14 @@ let exitCode = await Checks.run([
             root.cacheDisplay(in: root.bounds, to: bitmap)
             try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/agents-page.png"))
         }
+        AgentsController.shared.hidden = [home + "/.claude-band"]
+        page.subtab = "accounts"
+        root.layoutSubtreeIfNeeded()
+        if let bitmap = root.bitmapImageRepForCachingDisplay(in: root.bounds) {
+            root.cacheDisplay(in: root.bounds, to: bitmap)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/agents-accounts.png"))
+        }
+        AgentsController.shared.hidden = []
         page.removeFromSuperview()
     }),
 ])

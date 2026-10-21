@@ -22,14 +22,27 @@ public struct SidebarItem {
     /// The shortcut as the menus show it ("⇧⌘E"), for the tip.
     public let shortcut: String?
     public let kind: Kind
+    /// The page's views, picked under the icons (Agents: Sessions,
+    /// Accounts); the page shows the one the app is told.
+    public let subtabs: [Subtab]
 
-    public init(id: String, icon: Icon, title: String, command: String, shortcut: String? = nil, kind: Kind) {
+    public struct Subtab: Equatable, Sendable {
+        public let id: String
+        public let title: String
+        public init(id: String, title: String) {
+            self.id = id
+            self.title = title
+        }
+    }
+
+    public init(id: String, icon: Icon, title: String, command: String, shortcut: String? = nil, kind: Kind, subtabs: [Subtab] = []) {
         self.id = id
         self.icon = icon
         self.title = title
         self.command = command
         self.shortcut = shortcut
         self.kind = kind
+        self.subtabs = subtabs
     }
 
     var view: NSView? {
