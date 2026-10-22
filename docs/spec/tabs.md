@@ -29,8 +29,10 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
 
 - Arrastar uma aba pela barra muda a ordem: ela vai por cima seguindo o ponteiro e as outras deslizam
   para a vaga nova enquanto ela passa (0,15 s), como os ícones da barra lateral; cai onde o meio dela
-  está. Enquanto uma aba é arrastada a janela não se move: na barra de título o macOS pegava o
-  arraste e levava a janela inteira (o dono, 2026-10-22).
+  está. Nada clicável da barra de cima (abas e botões) arrasta a janela: ela fica travada enquanto o
+  ponteiro está neles e solta ao sair; a parte vazia da barra continua movendo a janela. O macOS
+  decide mover a janela antes de o app ver o clique, então travar só no clique não bastava (o dono,
+  2026-10-22).
 
 ### Divisões
 - ⌘D divide o painel com foco para a direita; ⌘⇧D, para baixo. O painel novo abre na mesma pasta e

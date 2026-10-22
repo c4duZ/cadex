@@ -93,11 +93,11 @@ final class TitleBarButton: NSView {
         // Only its own: removing them all took the hover tip's away (the
         // title bar showed no names, owner, 2026-10-20).
         trackingAreas.filter { $0.owner === self }.forEach(removeTrackingArea)
-        addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect], owner: self))
+        addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect], owner: self))
     }
 
-    override func mouseEntered(with event: NSEvent) { hovered = true }
-    override func mouseExited(with event: NSEvent) { hovered = false }
+    override func mouseEntered(with event: NSEvent) { hovered = true; TitleBarHold.entered(self) }
+    override func mouseExited(with event: NSEvent) { hovered = false; TitleBarHold.exited(self, holding: pressed) }
     /// Clicks press the button; they must not drag the window.
     override var mouseDownCanMoveWindow: Bool { false }
 
@@ -109,6 +109,7 @@ final class TitleBarButton: NSView {
 
     override func mouseUp(with event: NSEvent) {
         pressed = false
+        TitleBarHold.released(self, event)
         if bounds.contains(convert(event.locationInWindow, from: nil)) { onPress?() }
     }
 

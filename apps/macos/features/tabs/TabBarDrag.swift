@@ -5,8 +5,8 @@ import AppKit
 /// their new places as it passes them (0.15 s), as the sidebar's icons do;
 /// it lands where its middle is. Only the strip moves: the tabs reorder on
 /// release (the owner saw the dragged tab hold still and the order change
-/// only when let go, 2026-10-22). While a tab is held the window cannot be
-/// moved: in the title bar, macOS took the drag to move the whole window.
+/// only when let go, 2026-10-22). The window does not move meanwhile:
+/// TitleBarHold locks it while the pointer is on the strip.
 extension TabBarView {
     static let slideDuration: CFTimeInterval = 0.15
 
@@ -14,7 +14,6 @@ extension TabBarView {
         dragging = (id, x, 0)
         dragOrder = items.map(\.id)
         slideFrom = [:]
-        window?.isMovable = false
     }
 
     func moveDrag(to x: CGFloat) {
@@ -32,7 +31,6 @@ extension TabBarView {
             slideTimer?.invalidate()
             slideTimer = nil
             slideFrom = [:]
-            window?.isMovable = true
             needsDisplay = true
         }
         guard let drag = dragging, abs(drag.offset) > 4, let from = items.firstIndex(where: { $0.id == drag.id }),

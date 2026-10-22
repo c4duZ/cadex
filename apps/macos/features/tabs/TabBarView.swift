@@ -104,7 +104,7 @@ public final class TabBarView: NSView {
     public override func updateTrackingAreas() {
         super.updateTrackingAreas()
         trackingAreas.filter { $0.owner === self }.forEach(removeTrackingArea)
-        addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect], owner: self))
+        addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseMoved, .mouseEnteredAndExited, .activeAlways, .inVisibleRect], owner: self))
     }
 
     // MARK: Layout
@@ -207,7 +207,12 @@ public final class TabBarView: NSView {
         showTip(at: point)
     }
 
+    public override func mouseEntered(with event: NSEvent) {
+        TitleBarHold.entered(self)
+    }
+
     public override func mouseExited(with event: NSEvent) {
+        TitleBarHold.exited(self, holding: dragging != nil)
         hovered = nil
         needsDisplay = true
         HoverTip.hide()
@@ -265,5 +270,6 @@ public final class TabBarView: NSView {
 
     public override func mouseUp(with event: NSEvent) {
         endDrag()
+        TitleBarHold.released(self, event)
     }
 }

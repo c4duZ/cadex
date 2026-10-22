@@ -14,6 +14,8 @@
 - Fonte ou medida principal da interface fixa no código, fora de UILooks.
 
 ## Como eu quero
+- `TitleBarHold.swift`: nada clicável da barra de título move a janela; abas e botões da barra a
+  travam enquanto o ponteiro está neles (o macOS decide mover a janela antes de o app ver o clique).
 - `UILooks.swift`: o app chama UILooks.configure uma vez, antes de montar qualquer tela. As telas
   pedem `font(_:weight:)` (tamanho do desenho × zoom × fontSize/13, na família escolhida com o
   mesmo peso), `monospaced`/`monospacedDigits` (código curto e números), `pt` (larguras, margens,
