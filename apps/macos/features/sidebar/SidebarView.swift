@@ -185,13 +185,11 @@ public final class SidebarView: NSView {
         return true
     }
 
+    /// A click on an icon shows its page, the open one's too: hiding the
+    /// sidebar on a second click surprised the owner (2026-10-22); ⌘B hides it.
     func press(_ id: String) {
         guard let item = catalog.first(where: { $0.id == id }) else { return }
-        if item.view != nil, page == id, !isHidden {
-            run("view.toggle-sidebar")
-        } else {
-            run(item.command)
-        }
+        run(item.command)
     }
 
     private func change(_ ids: [String]) {

@@ -9,13 +9,14 @@ em que ordem.
 - No topo, ao lado dos botões da janela, a fileira de ícones (Phosphor), agrupada numa moldura
   arredondada de fundo leve que vai de ponta a ponta, com personalizar na ponta direita, como o grupo
   de botões da barra de título. Clicar num ícone mostra a
-  página dele; clicar no ícone da página aberta recolhe a barra lateral (como view.toggle-sidebar).
+  página dele, o da página aberta também: o clique nunca recolhe a barra lateral (o dono, 2026-10-22;
+  ⌘B recolhe). Os ícones e o de personalizar formam um bloco centrado na moldura, 2 pt entre eles.
 - Os ícones padrão, nesta ordem: Files (⇧⌘E, explorer.focus), Git (⇧⌘G, git.show), Agents (⇧⌘J,
   agents.show) e Accounts (⇧⌘U, agents.show-accounts, de uso); Agents e Accounts separados para cada
   um ter o próprio ícone e atalho (o dono, 2026-10-21). Git History (⇧⌘L, git.show-history, de log)
   existe escondido e pode ser ligado. Atalhos de ⇧⌘ com a inicial, para lembrar (2026-10-22).
 - ⌃⌘1 a ⌃⌘9 (sidebar.page-1 a -9) mostram a página do ícone daquela posição, na ordem que
-  aparece, sem nunca recolher a barra lateral (só o clique no ícone aberto recolhe), como ⌘1 a ⌘9 nas abas; ⇧⌘ não, porque ⇧⌘3 a ⇧⌘5 são as capturas de tela do macOS.
+  aparece, sem recolher a barra lateral, como ⌘1 a ⌘9 nas abas; ⇧⌘ não, porque ⇧⌘3 a ⇧⌘5 são as capturas de tela do macOS.
 - Só entra na barra o que mostra uma página nela. Search saiu: é o ⌘P e o ⇧⌘F, não uma página (o dono,
   2026-10-22); Web Preview e Spaces abriam coisa em outro lugar e saíram (2026-10-21). Numa lista
   salva, esses ids somem sem aviso (SidebarLayout.retired).
@@ -56,7 +57,7 @@ em que ordem.
 - settings.json com id de página desconhecido: o id é ignorado e vira aviso; o resto vale.
 
 ## Critérios de aceite
-- [ ] Clicar em cada ícone mostra a página dele; clicar no da página aberta recolhe a barra.
+- [ ] Clicar em cada ícone mostra a página dele; clicar no da página aberta não recolhe a barra.
 - [ ] Esconder o Git no painel tira o ícone na hora em todas as janelas; reabrir o app mantém.
 - [ ] Arrastar o Agents para o primeiro lugar muda a ordem, e o settings.json guarda a ordem nova.
 - [ ] Cada ação do painel também está no ⌘K.

@@ -80,18 +80,27 @@ final class SidebarIconRow: NSView {
         let size = SidebarIconButton.size
         let room = bounds.width - size.width - UILooks.pt(8)
         fitCount = SidebarLayout.fitting(buttons.count, iconWidth: size.width, spacing: Self.spacing, width: room)
+        more.isHidden = fitCount == buttons.count
         for (index, button) in buttons.enumerated() {
             button.isHidden = index >= fitCount
             if drag?.button !== button { button.frame = NSRect(origin: slot(index), size: size) }
         }
-        more.isHidden = fitCount == buttons.count
         more.frame = NSRect(origin: slot(fitCount), size: size)
         group.frame = NSRect(x: 0, y: 0, width: bounds.width, height: size.height)
-        customize.frame = NSRect(x: bounds.width - size.width, y: 0, width: size.width, height: size.height)
+        customize.frame = NSRect(origin: slot(fitCount + (more.isHidden ? 0 : 1)), size: size)
+    }
+
+    /// The icons as one block, customize last, centered in the group with
+    /// the usual 2 pt between them (the owner, 2026-10-22: centered, the
+    /// spacing as it was).
+    private var blockStart: CGFloat {
+        let count = CGFloat(fitCount + (more.isHidden ? 0 : 1) + 1)
+        let width = count * SidebarIconButton.size.width + (count - 1) * Self.spacing
+        return max((bounds.width - width) / 2, 0)
     }
 
     private func slot(_ index: Int) -> NSPoint {
-        NSPoint(x: CGFloat(index) * (SidebarIconButton.size.width + Self.spacing), y: 0)
+        NSPoint(x: blockStart + CGFloat(index) * (SidebarIconButton.size.width + Self.spacing), y: 0)
     }
 
     private func restyle() {
@@ -132,9 +141,9 @@ final class SidebarIconRow: NSView {
         guard let from = buttons.firstIndex(where: { $0 === current.button }) else { return }
         // From where it was when the drag began: adding the whole move to
         // its new slot after a swap made it jump past its neighbour.
-        current.button.frame.origin.x = min(max(current.originX + dx, 0), slot(fitCount - 1).x)
+        current.button.frame.origin.x = min(max(current.originX + dx, slot(0).x), slot(fitCount - 1).x)
         let widths = Array(repeating: SidebarIconButton.size.width, count: fitCount)
-        let to = CustomizeLayout.dropIndex(at: current.button.frame.midX, widths: widths, spacing: Self.spacing)
+        let to = CustomizeLayout.dropIndex(at: current.button.frame.midX - blockStart, widths: widths, spacing: Self.spacing)
         if to != from {
             buttons.remove(at: from)
             buttons.insert(current.button, at: to)

@@ -52,14 +52,14 @@ let exitCode = await Checks.run([
         expect(view.items == ["git"] && problems.count == 1, "\(view.items) \(problems)")
         expect(view.page == "files", "a page whose icon is hidden stays shown")
     }),
-    ("pressing an icon runs its command; the open page's icon hides the sidebar", {
+    ("pressing an icon runs its command, the open page's too: it never hides the sidebar", {
         var ran: [String] = []
         let view = SidebarView(catalog: catalog()) { ran.append($0) }
         view.setItems(["files", "find", "git"])
         view.press("git")
         view.press("files")
         view.press("find")
-        expect(ran == ["git.show", "view.toggle-sidebar", "search.content"], "\(ran)")
+        expect(ran == ["git.show", "explorer.focus", "search.content"], "\(ran)")
     }),
     ("⌃⌘N runs the Nth shown icon's command, in the saved order, never hiding the sidebar; past the last, nothing", {
         var ran: [String] = []
@@ -88,7 +88,11 @@ let exitCode = await Checks.run([
         var orders: [[String]] = []
         row.onReorder = { orders.append($0) }
         let step = SidebarIconButton.size.width + SidebarIconRow.spacing
+        // The icons are centered in the row: drags count from the first one.
+        let start = row.buttons[0].frame.minX
+        expect(start > 0 && abs((row.customize.frame.maxX + start) - row.bounds.width) < 1, "centered: \(start)")
         @MainActor func drag(from: CGFloat, to: CGFloat) {
+            let (from, to) = (from + start, to + start)
             let y = SidebarIconButton.size.height / 2
             @MainActor func event(_ type: NSEvent.EventType, _ x: CGFloat) -> NSEvent {
                 NSEvent.mouseEvent(with: type, location: row.convert(NSPoint(x: x, y: y), to: nil), modifierFlags: [], timestamp: 0,
@@ -110,7 +114,7 @@ let exitCode = await Checks.run([
         drag(from: step * 1.5, to: step * 2.6)
         expect(orders.last == ["find", "git", "files"], "\(orders)")
         let xs = row.buttons.map(\.frame.minX)
-        expect(xs == [0, step, step * 2], "each icon back in its slot: \(xs)")
+        expect(xs == [start, start + step, start + step * 2], "each icon back in its slot: \(xs)")
         row.setItems(catalog())
         row.layoutSubtreeIfNeeded()
         expect(row.buttons.map(\.id) == ["files", "find", "git"])

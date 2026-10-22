@@ -18,10 +18,10 @@
   o ícone arrastado e quantos cabem antes do "…".
 - `SidebarView.swift`: a porta de entrada. A fileira, o título da página (o nome da pasta em Files,
   `setTitle`) e as páginas; `setItems` recebe o sidebar.items, `onItemsChange` devolve o que mudou
-  para o app salvar, `setBadge` põe a contagem ou o ponto num ícone. Clicar no ícone da página
-  aberta roda view.toggle-sidebar.
-- `SidebarIconRow.swift` e `SidebarIconButton.swift`: os ícones, numa moldura arredondada como o
-  grupo da barra de título; arrastar para o lado reordena
+  para o app salvar, `setBadge` põe a contagem ou o ponto num ícone. Clicar num ícone mostra a página
+  dele, o da aberta também: nunca recolhe a barra (o dono, 2026-10-22; ⌘B recolhe).
+- `SidebarIconRow.swift` e `SidebarIconButton.swift`: os ícones, numa moldura arredondada de ponta a
+  ponta como o grupo da barra de título, num bloco centrado com 2 pt entre eles, personalizar no fim; arrastar para o lado reordena
   (depois de 4 pt), o que não cabe vai para o "…" (menu de `../../shared/menus`), o botão de
   personalizar fica à direita.
 - Personalizar: a aba Sidebar (`customizePage`) da janela única de `../../shared/customize/`, que o
@@ -31,8 +31,8 @@
   (mouseDownCanMoveWindow). O que se arrasta vai para cima dos vizinhos e anda a partir de onde
   estava no começo; a vaga é a que está sob o meio dele (CustomizeLayout.dropIndex).
 - `SidebarCommands.swift`: sidebar.customize, sidebar.toggle-page (a lista de páginas no ⌘K) e
-  sidebar.page-1 a -9 (⌃⌘1 a ⌃⌘9): o comando do ícone na posição (`press(position:)`), sem
-  recolher a barra como o clique no ícone aberto;
+  sidebar.page-1 a -9 (⌃⌘1 a ⌃⌘9): o comando do ícone na posição (`press(position:)`), como o
+  clique;
   ⇧⌘3 a ⇧⌘5 são as capturas de tela do sistema, por isso ⌃⌘ (o dono, 2026-10-21).
 - O catálogo do app está em `../../app/SidebarWiring.swift`: files, git, agents, accounts
   (padrão) e history (escondido). Só entra o que mostra uma página na barra; preview e spaces saíram (o dono,
@@ -43,5 +43,5 @@
 ## Como validar
 - `make macos-test` passa: o arrastar dos ícones com eventos de mouse (uma vaga, duas, o arrastado por
   cima), a lista que vai para o Customize, as regras do layout, a view mostrando a primeira página, o clique que
-  roda o comando ou recolhe, mostrar/esconder salvando. Com CADEX_SNAPSHOT_DIR, o teste salva
+  roda o comando (sem recolher), mostrar/esconder salvando. Com CADEX_SNAPSHOT_DIR, o teste salva
   sidebar.png e sidebar-narrow.png para ver sem captura de tela.
