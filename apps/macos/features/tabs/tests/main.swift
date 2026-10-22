@@ -362,15 +362,22 @@ let exitCode = await Checks.run([
         PaneLooks.paneHeaders = "split"
         tabs.closeAll()
     }),
-    ("dragging a pane by its header: beside the pane under the pointer, on its nearest side", {
+    ("dragging a pane: zones by the diagonals, center and header swap, measured on the start", {
         let three = PaneTree.split(.horizontal, .leaf(1), .split(.horizontal, .leaf(2), .leaf(3), ratio: 0.5), ratio: 0.5)
-        expect(three.moving(1, beside: 3, edge: .down) == .split(.horizontal, .leaf(2), .split(.vertical, .leaf(3), .leaf(1), ratio: 0.5), ratio: 0.5),
-               "\(three.moving(1, beside: 3, edge: .down))")
-        expect(three.moving(3, beside: 1, edge: .left) == .split(.horizontal, .split(.horizontal, .leaf(3), .leaf(1), ratio: 0.5), .leaf(2), ratio: 0.5))
-        expect(three.moving(2, beside: 2, edge: .left) == three && three.moving(9, beside: 1, edge: .left) == three)
-        let box = CGRect(x: 0, y: 0, width: 200, height: 100)
-        expect(PaneTree.dropEdge(at: CGPoint(x: 10, y: 50), in: box) == .left && PaneTree.dropEdge(at: CGPoint(x: 190, y: 50), in: box) == .right)
-        expect(PaneTree.dropEdge(at: CGPoint(x: 100, y: 5), in: box) == .up && PaneTree.dropEdge(at: CGPoint(x: 100, y: 95), in: box) == .down)
+        expect(three.moving(1, beside: 3, edge: .down) == .split(.horizontal, .leaf(2), .split(.vertical, .leaf(3), .leaf(1), ratio: 0.5), ratio: 0.5))
+        expect(three.swapping(1, 3) == .split(.horizontal, .leaf(3), .split(.horizontal, .leaf(2), .leaf(1), ratio: 0.5), ratio: 0.5))
+        // Two panes side by side: 1 on the left (0-600), 2 on the right (600-1200), 24 pt headers.
+        let frames: [Int: CGRect] = [1: CGRect(x: 0, y: 0, width: 600, height: 600), 2: CGRect(x: 600, y: 0, width: 600, height: 600)]
+        func drop(_ x: CGFloat, _ y: CGFloat) -> PaneDrop? { PaneDrop.at(CGPoint(x: x, y: y), dragged: 1, frames: frames, header: 24) }
+        expect(drop(900, 10) == PaneDrop(target: 2, side: nil), "the owner's case: right along the header row swaps")
+        expect(drop(900, 312) == PaneDrop(target: 2, side: nil), "the center swaps")
+        expect(drop(1180, 300) == PaneDrop(target: 2, side: .right) && drop(900, 590) == PaneDrop(target: 2, side: .down))
+        expect(drop(1150, 150) == PaneDrop(target: 2, side: .right) && drop(1150, 40) == PaneDrop(target: 2, side: .up), "corners go by the diagonal")
+        expect(drop(300, 300) == nil, "over itself: nothing")
+        let two = PaneTree.split(.horizontal, .leaf(1), .leaf(2), ratio: 0.5)
+        expect(PaneDrop(target: 2, side: .left).applied(to: two, dragged: 1) == .split(.horizontal, .leaf(2), .leaf(1), ratio: 0.5), "a drop that changes nothing swaps")
+        expect(PaneDrop(target: 2, side: .down).applied(to: two, dragged: 1) == .split(.vertical, .leaf(2), .leaf(1), ratio: 0.5))
+        // A real tab: gray windows while dragging, the real panes only on release.
         let tabs = makeTabs()
         tabs.newTab(cwd: "/")
         tabs.view.layoutSubtreeIfNeeded()
@@ -378,17 +385,14 @@ let exitCode = await Checks.run([
         guard let layout = tabs.activeTab?.layout else { return expect(false) }
         layout.layoutSubtreeIfNeeded()
         let (terminal, document) = (layout.tree.leaves[0], layout.tree.leaves[1])
-        // The document's header dragged to the left edge of the terminal: the two swap sides.
-        let start = layout.convert(CGPoint(x: 900, y: 10), to: nil), over = layout.convert(CGPoint(x: 20, y: 300), to: nil)
+        let start = layout.convert(CGPoint(x: 900, y: 10), to: nil)
+        let left = layout.convert(CGPoint(x: 20, y: 300), to: nil)
         layout.onHeaderAction?(document, .drag(.began, start))
-        layout.onHeaderAction?(document, .drag(.moved, over))
-        expect(layout.subviews.contains { $0 is PaneDragChip }, "a label follows the pointer")
-        expect((layout.panes[terminal] as? TerminalView)?.holdsGridSize == true, "the shell is not resized at every step")
+        layout.onHeaderAction?(document, .drag(.moved, left))
+        expect(layout.subviews.contains { $0 is PaneDragBoard } && layout.tree.leaves == [terminal, document], "gray windows, real panes untouched")
         if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
-            try? await Task.sleep(nanoseconds: 400_000_000)
+            try? await Task.sleep(nanoseconds: 500_000_000)
             let root = NSView(frame: NSRect(x: 0, y: 0, width: 1200, height: 600))
-            root.wantsLayer = true
-            root.layer?.backgroundColor = NSColor(white: 0.11, alpha: 1).cgColor
             let window = NSWindow(contentRect: root.bounds, styleMask: [.borderless], backing: .buffered, defer: false)
             window.appearance = NSAppearance(named: .darkAqua)
             window.contentView = root
@@ -397,7 +401,6 @@ let exitCode = await Checks.run([
             layout.translatesAutoresizingMaskIntoConstraints = true
             layout.frame = root.bounds
             root.addSubview(layout)
-            root.layoutSubtreeIfNeeded()
             if let bitmap = root.bitmapImageRepForCachingDisplay(in: root.bounds) {
                 root.cacheDisplay(in: root.bounds, to: bitmap)
                 try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/pane-drag.png"))
@@ -405,14 +408,10 @@ let exitCode = await Checks.run([
             layout.removeFromSuperview()
             parent?.addSubview(layout)
         }
-        expect(layout.tree.leaves == [document, terminal], "the panes move while dragging")
-        // The middle of a pane changes nothing.
-        expect(PaneLayoutView.dropping(document, at: CGPoint(x: 900, y: 300), in: layout.tree, bounds: layout.bounds) == nil)
-        layout.onHeaderAction?(document, .drag(.ended, over))
-        expect(layout.tree.leaves == [document, terminal] && !layout.subviews.contains { $0 is PaneDragChip }, "\(layout.tree)")
-        expect((layout.panes[terminal] as? TerminalView)?.holdsGridSize == false, "one resize when it ends")
-        // Dropped over itself: nothing changes.
-        layout.onHeaderAction?(terminal, .drag(.began, over))
+        layout.onHeaderAction?(document, .drag(.ended, left))
+        expect(layout.tree.leaves == [document, terminal], "\(layout.tree)")
+        // Dropped with no zone (over itself): nothing changes.
+        layout.onHeaderAction?(terminal, .drag(.began, left))
         layout.onHeaderAction?(terminal, .drag(.ended, layout.convert(CGPoint(x: 900, y: 300), to: nil)))
         expect(layout.tree.leaves == [document, terminal])
         tabs.closeAll()

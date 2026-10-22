@@ -1,5 +1,4 @@
 import AppKit
-import Terminal
 
 /// Lays a tab's panes out by its PaneTree, draws the 1-point dividers and
 /// lets them be dragged, and dims the panes without focus when there are
@@ -30,9 +29,8 @@ final class PaneLayoutView: NSView {
     var onHeaderAction: ((Int, PaneHeaderView.Action) -> Void)?
     var headerStyle: TabBarView.Style? { didSet { refreshHeaders() } }
     private var headers: [Int: PaneHeaderView] = [:]
-    /// A pane being dragged by its header: its id, the tree before the
-    /// drag, and the label under the pointer.
-    private var paneDrag: (id: Int, original: PaneTree, chip: PaneDragChip)?
+    /// A pane being dragged by its header (PaneDragState).
+    private var paneDrag: PaneDragState?
     var headerViews: [Int: PaneHeaderView] { headers }
 
     private let outline = FocusOutlineView()
@@ -149,66 +147,80 @@ final class PaneLayoutView: NSView {
 
     // MARK: Dragging a pane by its header
 
-    /// A header's drag: the panes themselves move to where the dragged one
-    /// would go, with a little overshoot, each time the pointer enters the
-    /// edge of another pane; a label with its name follows the pointer.
-    /// The middle of a pane changes nothing, so the layout does not jump
-    /// as the pointer crosses it. Released outside the tab, it goes back.
+    /// A pane in flight: the tree and frames when it began (what the
+    /// pointer is measured on), the gray windows, the label, the zone now
+    /// and where the pointer was when it last changed.
+    struct PaneDragState {
+        let id: Int
+        let original: PaneTree
+        let frames: [Int: CGRect]
+        let board: PaneDragBoard
+        let chip: PaneDragChip
+        var drop: PaneDrop?
+        var droppedAt: CGPoint
+        var escape: Any?
+    }
+
+    /// A header's drag: the panes turn into gray windows that glide live to
+    /// where they would be; the zone under the pointer is read on the
+    /// layout of the start (PaneDrop.swift). Esc or a release outside puts
+    /// everything back; a release elsewhere moves the real panes once.
     func dragPane(_ id: Int, _ phase: PaneHeaderView.DragPhase, at windowPoint: NSPoint) {
         let point = convert(windowPoint, from: nil)
         switch phase {
-        case .began:
-            guard tree.leaves.count > 1, zoomed == nil, paneDrag == nil else { return }
-            let info = describe?(id) ?? PaneHeaderView.Info(title: "", icon: .terminalWindow)
-            let chip = PaneDragChip(info: info, style: headerStyle ?? TabBarView().style)
-            addSubview(chip)
-            chip.follow(point, in: bounds)
-            paneDrag = (id, tree, chip)
-            holdGridSizes(true)
-        case .moved:
-            guard let drag = paneDrag else { return }
-            drag.chip.follow(point, in: bounds)
-            if let next = Self.dropping(drag.id, at: point, in: tree, bounds: bounds), next != tree { glide(to: next) }
-        case .ended:
-            guard let drag = paneDrag else { return }
-            paneDrag = nil
-            drag.chip.removeFromSuperview()
-            if !bounds.contains(point), tree != drag.original { glide(to: drag.original) }
-            holdGridSizes(false)
-            if tree != drag.original { onTreeChange?(tree) }
+        case .began: beginPaneDrag(id, at: point)
+        case .moved: movePaneDrag(to: point)
+        case .ended: endPaneDrag(at: point, cancelled: false)
         }
     }
 
-    /// The panes move to `next` with a slight overshoot (0.32 s).
-    private func glide(to next: PaneTree) {
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.32
-            context.timingFunction = CAMediaTimingFunction(controlPoints: 0.34, 1.32, 0.64, 1)
-            context.allowsImplicitAnimation = true
-            tree = next
-            layoutSubtreeIfNeeded()
+    private func beginPaneDrag(_ id: Int, at point: CGPoint) {
+        guard tree.leaves.count > 1, zoomed == nil, paneDrag == nil else { return }
+        let style = headerStyle ?? TabBarView().style
+        let frames = tree.frames(in: bounds, gap: Self.gap)
+        var infos: [Int: PaneHeaderView.Info] = [:]
+        for leaf in tree.leaves { infos[leaf] = describe?(leaf) }
+        let board = PaneDragBoard(frame: bounds, frames: frames, infos: infos, dragged: id, style: style)
+        board.autoresizingMask = [.width, .height]
+        addSubview(board)
+        let chip = PaneDragChip(info: infos[id] ?? PaneHeaderView.Info(title: "", icon: .terminalWindow), style: style)
+        addSubview(chip)
+        chip.follow(point, in: bounds)
+        let escape = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard event.keyCode == 53, let self, self.paneDrag != nil else { return event }
+            self.endPaneDrag(at: point, cancelled: true)
+            return nil
         }
+        paneDrag = PaneDragState(id: id, original: tree, frames: frames, board: board, chip: chip, drop: nil, droppedAt: point, escape: escape)
     }
 
-    /// Terminals keep their grid while the panes glide: one resize for the
-    /// shell when the drag ends.
-    private func holdGridSizes(_ hold: Bool) {
-        for view in panes.values { (view as? TerminalView)?.holdsGridSize = hold }
+    private func movePaneDrag(to point: CGPoint) {
+        guard var drag = paneDrag else { return }
+        drag.chip.follow(point, in: bounds)
+        let next = PaneDrop.at(point, dragged: drag.id, frames: drag.frames, header: PaneHeaderView.height)
+        // A new zone only after the pointer goes a few points on, so the
+        // windows do not flick at a boundary.
+        let moved = hypot(point.x - drag.droppedAt.x, point.y - drag.droppedAt.y)
+        guard next != drag.drop, drag.drop == nil || moved >= PaneDrop.hysteresis else { return paneDrag = drag }
+        drag.drop = next
+        drag.droppedAt = point
+        paneDrag = drag
+        let result = next?.applied(to: drag.original, dragged: drag.id) ?? drag.original
+        drag.board.show(result.frames(in: bounds, gap: Self.gap))
     }
 
-    /// The share of a pane, from each edge, that moves the dragged one
-    /// beside it; the rest of the pane changes nothing.
-    static let edgeZone: CGFloat = 0.3
-
-    /// The tree if `id` were dropped at `point`: beside the pane under it,
-    /// on the side whose edge the pointer is near; nil in the middle of a
-    /// pane, over the dragged one or outside.
-    static func dropping(_ id: Int, at point: CGPoint, in tree: PaneTree, bounds: CGRect) -> PaneTree? {
-        let frames = tree.frames(in: bounds, gap: gap)
-        guard let (target, frame) = frames.first(where: { $0.key != id && $0.value.contains(point) }) else { return nil }
-        let x = (point.x - frame.minX) / max(frame.width, 1), y = (point.y - frame.minY) / max(frame.height, 1)
-        guard min(x, 1 - x, y, 1 - y) < edgeZone else { return nil }
-        return tree.moving(id, beside: target, edge: PaneTree.dropEdge(at: point, in: frame))
+    private func endPaneDrag(at point: CGPoint, cancelled: Bool) {
+        guard let drag = paneDrag else { return }
+        paneDrag = nil
+        if let escape = drag.escape { NSEvent.removeMonitor(escape) }
+        drag.chip.removeFromSuperview()
+        drag.board.dismiss()
+        guard !cancelled, bounds.contains(point), let drop = drag.drop else { return }
+        let result = drop.applied(to: drag.original, dragged: drag.id)
+        guard result != tree else { return }
+        tree = result
+        onTreeChange?(result)
+        syncSubviews()
     }
 
     // MARK: Dragging dividers

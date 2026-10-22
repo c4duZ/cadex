@@ -65,8 +65,6 @@
   com foco responde, junto com copy:, paste: e selectAll: dos comandos de edição. O
   `performKeyEquivalent` só trata a edição estilo Mac (⌘← ⌘→ ⌘⌫ ⌘⌦), que é entrada para o shell.
 - Ações do terminal (limpar, buscar, copiar, colar) registradas como comandos.
-- `holdsGridSize`: enquanto um painel é arrastado, o terminal desenha no tamanho novo e só manda o
-  tamanho ao shell quando o arraste acaba, uma vez.
 - GPU compartilhada (`TerminalGPU.swift`): uma fila de comandos e um pipeline por device para o app,
   e um atlas de glifos por fonte e escala, dividido pelos terminais com a mesma fonte e solto quando
   nenhum usa. O `TerminalView` (sessão, teclado, mouse, seleção, busca) desenha numa

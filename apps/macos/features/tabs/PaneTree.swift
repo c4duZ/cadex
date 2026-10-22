@@ -158,6 +158,22 @@ indirect enum PaneTree: Equatable {
         }
     }
 
+    /// The same layout whatever the ratios: what a drop changes or not.
+    var shape: PaneTree {
+        guard case .split(let axis, let a, let b, _) = self else { return self }
+        return .split(axis, a.shape, b.shape, ratio: 0.5)
+    }
+
+    /// The tree with panes `a` and `b` in each other's place.
+    func swapping(_ a: Int, _ b: Int) -> PaneTree {
+        switch self {
+        case .leaf(a): .leaf(b)
+        case .leaf(b): .leaf(a)
+        case .leaf: self
+        case .split(let axis, let x, let y, let ratio): .split(axis, x.swapping(a, b), y.swapping(a, b), ratio: ratio)
+        }
+    }
+
     /// The side of `frame` nearest to `point`, by its share of the width
     /// or height: where a pane dropped there goes.
     static func dropEdge(at point: CGPoint, in frame: CGRect) -> Direction {

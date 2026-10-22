@@ -75,13 +75,17 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   fecha uma aba; o painel com foco tem
   uma linha da cor de destaque em cima e o nome mais forte. Mais leve que as abas da janela, para não
   parecer uma segunda fileira de abas. Resolve o issue #1: o arquivo aberto ao lado tinha só o ⌘W.
-- Arrastar o cabeçalho move o painel ao vivo: quando o ponteiro entra na faixa de borda (30%) de
-  outro painel, os painéis de verdade vão para onde ficariam, com uma animação de 0,32 s que passa um
-  pouco do ponto e volta; o painel arrastado fica do lado daquela borda, dividindo o espaço do outro.
-  O meio de um painel não muda nada, para o layout não pular enquanto o ponteiro passa. Uma etiqueta
-  com o ícone e o nome segue o ponteiro. Solto fora da aba, tudo volta como estava. Durante o
-  arraste os terminais desenham no tamanho novo mas só mandam o tamanho ao shell ao soltar, uma vez.
-  Cartões cinza e uma área azul de destino foram tentados e recusados pelo dono (2026-10-22).
+- Arrastar o cabeçalho move o painel (a ideia do dono, 2026-10-22): a aba vira um quadro em que cada
+  painel é uma janela cinza só com o cabeçalho (ícone e nome), e as janelas se reorganizam ao vivo,
+  com uma animação de 0,3 s que passa um pouco do ponto, mostrando como vai ficar; a do painel
+  arrastado tem o contorno da cor de destaque, e uma etiqueta com o nome segue o ponteiro. Os painéis
+  de verdade ficam parados atrás e só mudam ao soltar (o terminal recebe o tamanho novo uma vez).
+- Onde cai é medido no layout do começo do arraste, não nas janelas que se mexem (medir nelas fazia o
+  destino escorregar e o layout tremer): sobre outro painel, os lados pelas diagonais (esquerda,
+  direita, cima, baixo, dividindo o espaço dele); o centro (40%) e o cabeçalho dele trocam os dois de
+  lugar (arrastar para a direita pela linha dos cabeçalhos troca, em vez de dividir); um lado que não
+  mudaria nada também troca. Só muda de área depois de o ponteiro andar 8 pt. Sobre o próprio painel
+  ou fora, nada; Esc cancela. Como o Zed, o yabai e o VS Code decidem (pesquisa de 2026-10-22).
 - Clique no cabeçalho dá o foco ao painel; duplo clique maximiza. Cada botão roda um comando
   (pane.close, pane.zoom, pane.split-right, pane.split-down).
 - Maximizar (pane.zoom, ⇧⌘↩): o painel ocupa a aba toda, os outros saem de vista e voltam ao
