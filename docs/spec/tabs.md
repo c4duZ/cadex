@@ -32,7 +32,9 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   ganha o foco. Painéis numa mesma direção ficam do mesmo tamanho: três lado a lado têm um terço
   cada, e fechar um devolve o espaço aos outros por igual (antes ficavam 50, 25 e 25 %).
 - Arrastar a linha entre dois painéis muda o tamanho; nenhum painel fica menor que algumas colunas.
-  A linha pega o mouse a 6 pt de cada lado, com o cursor de redimensionar, e engrossa sob o
+  A linha pega o mouse a 8 pt de cada lado, numa faixa por cima do terminal e dos cabeçalhos, com o
+  cursor de redimensionar firme em toda ela (por baixo, o terminal trocava o cursor e ele ia e voltava,
+  2026-10-22), e engrossa sob o
   ponteiro e enquanto arrasta.
 - ⌘] e ⌘[ passam o foco para o próximo e o anterior painel da aba, em volta. ⌘⌥ + seta passa para
   o painel vizinho naquela direção.

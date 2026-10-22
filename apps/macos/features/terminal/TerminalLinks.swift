@@ -12,6 +12,10 @@ extension TerminalView {
     }
 
     public override func mouseMoved(with event: NSEvent) {
+        // Something on top owns the pointer (a split's divider handle): its
+        // cursor stays. Setting the I-beam here at every move fought the
+        // resize cursor along the divider (the owner, 2026-10-22).
+        guard isUnderPointer(event) else { return }
         let location = convert(event.locationInWindow, from: nil)
         let onImage = !event.modifierFlags.contains(.command) && refreshImageHover(at: location)
         if !onImage { hideImageHover() }
@@ -21,6 +25,13 @@ extension TerminalView {
 
     public override func mouseExited(with event: NSEvent) {
         hideImageHover()
+    }
+
+    /// Whether this terminal is the view the pointer is on, not one above it.
+    private func isUnderPointer(_ event: NSEvent) -> Bool {
+        guard let content = window?.contentView, let superview = content.superview ?? Optional(content) else { return true }
+        guard let hit = superview.hitTest(superview.convert(event.locationInWindow, from: nil)) else { return true }
+        return hit === self || hit.isDescendant(of: self)
     }
 
     public override func flagsChanged(with event: NSEvent) {

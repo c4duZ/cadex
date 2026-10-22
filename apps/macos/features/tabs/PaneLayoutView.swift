@@ -14,7 +14,7 @@ final class PaneLayoutView: NSView {
     /// No pane gets smaller than this by dragging or splitting.
     static let minPaneSize = CGSize(width: 120, height: 60)
     /// How far from the line a drag still grabs the divider.
-    private static let grabSlack: CGFloat = 6
+    private static let grabSlack: CGFloat = 8
 
     var tree: PaneTree = .leaf(0) { didSet { needsLayout = true } }
     var panes: [Int: NSView] = [:]
@@ -29,6 +29,7 @@ final class PaneLayoutView: NSView {
     var onHeaderAction: ((Int, PaneHeaderView.Action) -> Void)?
     var headerStyle: TabBarView.Style? { didSet { refreshHeaders() } }
     private var headers: [Int: PaneHeaderView] = [:]
+    private var handles: [DividerHandle] = []
     /// A pane being dragged by its header (PaneDragState).
     private var paneDrag: PaneDragState?
     var headerViews: [Int: PaneHeaderView] { headers }
@@ -81,7 +82,7 @@ final class PaneLayoutView: NSView {
         }
         outline.frame = bounds
         outline.dimmed = zoomed == nil && tree.leaves.count > 1 ? frames.filter { $0.key != focused }.map(\.value) : []
-        updateTrackingAreas()
+        placeHandles()
     }
 
     /// tabs.paneHeaders: "split" (with 2+ panes, or one maximized), "always", "never".
@@ -225,38 +226,35 @@ final class PaneLayoutView: NSView {
 
     // MARK: Dragging dividers
 
-    override func updateTrackingAreas() {
-        super.updateTrackingAreas()
-        trackingAreas.filter { $0.owner === self }.forEach(removeTrackingArea)
-        for divider in dividers(of: tree, in: bounds, path: []) {
-            addTrackingArea(NSTrackingArea(rect: grabArea(divider), options: [.mouseEnteredAndExited, .activeInKeyWindow],
-                                           owner: self, userInfo: ["path": divider.path]))
+    /// One handle per divider, on top of the panes and their headers: the
+    /// resize cursor holds along the whole divider. With cursor rects on
+    /// this view, the terminal and the headers under the band set their
+    /// own cursor and the resize one came and went (the owner, 2026-10-22).
+    private func placeHandles() {
+        let all = zoomed == nil ? dividers(of: tree, in: bounds, path: []) : []
+        while handles.count > all.count { handles.removeLast().removeFromSuperview() }
+        while handles.count < all.count {
+            let handle = DividerHandle()
+            handle.layout = self
+            addSubview(handle, positioned: .above, relativeTo: nil)
+            handles.append(handle)
+        }
+        for (handle, divider) in zip(handles, all) {
+            handle.path = divider.path
+            handle.axis = divider.axis
+            if handle.frame != grabArea(divider) {
+                handle.frame = grabArea(divider)
+                window?.invalidateCursorRects(for: handle)
+            }
         }
     }
 
-    override func mouseEntered(with event: NSEvent) {
-        hovered = event.trackingArea?.userInfo?["path"] as? [Bool]
-    }
-
-    override func mouseExited(with event: NSEvent) {
-        if dragging == nil { hovered = nil }
+    func handleHovered(_ path: [Bool]?) {
+        if dragging == nil { hovered = path }
     }
 
     private func grabArea(_ divider: Divider) -> CGRect {
         divider.line.insetBy(dx: -Self.grabSlack, dy: -Self.grabSlack)
-    }
-
-    override func resetCursorRects() {
-        for divider in dividers(of: tree, in: bounds, path: []) {
-            addCursorRect(grabArea(divider),
-                          cursor: divider.axis == .horizontal ? .resizeLeftRight : .resizeUpDown)
-        }
-    }
-
-    override func hitTest(_ point: NSPoint) -> NSView? {
-        let local = convert(point, from: superview)
-        if divider(at: local) != nil { return self }
-        return super.hitTest(point)
     }
 
     override func mouseDown(with event: NSEvent) {
@@ -276,7 +274,7 @@ final class PaneLayoutView: NSView {
         let ratio = min(max(offset, minimum), length - minimum) / length
         tree = tree.settingRatio(ratio, at: drag.path)
         onTreeChange?(tree)
-        window?.invalidateCursorRects(for: self)
+        placeHandles()
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -346,4 +344,35 @@ private final class FocusOutlineView: NSView {
         NSColor.black.withAlphaComponent(PaneLooks.unfocusedDim).setFill()
         dimmed.forEach { $0.fill() }
     }
+}
+
+/// The grab band of a divider: the resize cursor over all of it, and its
+/// clicks and drags handed to the layout (PaneLayoutView).
+@MainActor
+final class DividerHandle: NSView {
+    weak var layout: PaneLayoutView?
+    var path: [Bool] = []
+    var axis: PaneTree.Axis = .horizontal { didSet { if axis != oldValue { window?.invalidateCursorRects(for: self) } } }
+
+    private var cursor: NSCursor { axis == .horizontal ? .resizeLeftRight : .resizeUpDown }
+
+    override var mouseDownCanMoveWindow: Bool { false }
+
+    override func resetCursorRects() {
+        addCursorRect(bounds, cursor: cursor)
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.forEach(removeTrackingArea)
+        addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .cursorUpdate, .activeInKeyWindow, .inVisibleRect],
+                                       owner: self))
+    }
+
+    override func cursorUpdate(with event: NSEvent) { cursor.set() }
+    override func mouseEntered(with event: NSEvent) { cursor.set(); layout?.handleHovered(path) }
+    override func mouseExited(with event: NSEvent) { layout?.handleHovered(nil) }
+    override func mouseDown(with event: NSEvent) { layout?.mouseDown(with: event) }
+    override func mouseDragged(with event: NSEvent) { cursor.set(); layout?.mouseDragged(with: event) }
+    override func mouseUp(with event: NSEvent) { layout?.mouseUp(with: event) }
 }

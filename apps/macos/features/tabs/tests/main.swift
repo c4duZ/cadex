@@ -315,6 +315,14 @@ let exitCode = await Checks.run([
         tabs.open(doc, beside: true)
         layout.layoutSubtreeIfNeeded()
         expect(layout.headerViews.count == 2, "\(layout.headerViews.count)")
+        // The divider's grab band sits on top, along all of it, wider than the line.
+        let handles = layout.subviews.compactMap { $0 as? DividerHandle }
+        expect(handles.count == 1 && handles[0].frame.height == layout.bounds.height + 16 && handles[0].frame.width == 17,
+               "\(handles.map(\.frame))")
+        for y in stride(from: CGFloat(5), to: layout.bounds.height, by: 120) {
+            let hit = layout.hitTest(layout.convert(CGPoint(x: handles[0].frame.midX + 6, y: y), to: layout.superview))
+            expect(hit is DividerHandle, "the handle at y \(y), not \(String(describing: hit))")
+        }
         let docPane = tabs.activeTab!.tree.leaves.last!
         expect(layout.headerViews[docPane]?.info.title == doc.title && layout.headerViews[docPane]?.focused == true)
         expect(layout.panes[docPane]!.frame.minY == PaneHeaderView.height, "the pane starts under its header")
