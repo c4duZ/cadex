@@ -46,7 +46,7 @@ public final class StatusItem {
 /// color; a click runs `onClick` (a command, from the app).
 @MainActor
 public final class StatusLabel: NSView {
-    public var onClick: (() -> Void)?
+    public var onClick: (() -> Void)? { didSet { if onClick != nil { HoverHighlight.attach(self) } } }
     public var text = "" {
         didSet {
             guard text != oldValue else { return }
@@ -82,8 +82,8 @@ public final class StatusLabel: NSView {
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: StatusBarView.itemInset),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -StatusBarView.itemInset),
             stack.centerYAnchor.constraint(equalTo: centerYAnchor),
             heightAnchor.constraint(equalToConstant: UILooks.pt(20)),
         ])

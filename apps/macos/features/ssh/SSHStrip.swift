@@ -28,14 +28,15 @@ public final class SSHStrip: NSView {
 
     public init() {
         super.init(frame: .zero)
+        HoverHighlight.attach(self)
         label.font = UILooks.monospacedDigits(11)
         let stack = NSStackView(views: [dot, label])
         stack.spacing = 5
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 6),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
             stack.centerYAnchor.constraint(equalTo: centerYAnchor),
             heightAnchor.constraint(equalToConstant: UILooks.pt(20)),
         ])

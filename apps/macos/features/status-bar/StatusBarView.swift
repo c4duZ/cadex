@@ -48,6 +48,8 @@ public final class StatusBarView: NSView {
     private(set) var catalog: [StatusItem] = []
     private let folder = FolderTrail()
     private let environment = StatusLabel(icon: nil)
+    /// The space each item keeps around its content, where its hover fill shows.
+    public static let itemInset: CGFloat = 6
     private let leftStack = SlidingStack()
     private let rightStack = SlidingStack()
 
@@ -62,17 +64,19 @@ public final class StatusBarView: NSView {
         ]
         for stack in [leftStack, rightStack] {
             stack.orientation = .horizontal
-            stack.spacing = UILooks.pt(16)
+            // 16 pt between texts, as before: each item pads its own 6 pt so
+            // its hover fill surrounds it.
+            stack.spacing = UILooks.pt(16) - 2 * Self.itemInset
             stack.translatesAutoresizingMaskIntoConstraints = false
             addSubview(stack)
         }
         leftStack.setClippingResistancePriority(.defaultLow, for: .horizontal)
         rightStack.setContentCompressionResistancePriority(.required, for: .horizontal)
         NSLayoutConstraint.activate([
-            leftStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            leftStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12 - Self.itemInset),
             leftStack.centerYAnchor.constraint(equalTo: centerYAnchor),
             leftStack.trailingAnchor.constraint(lessThanOrEqualTo: rightStack.leadingAnchor, constant: -16),
-            rightStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+            rightStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12 + Self.itemInset),
             rightStack.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
         setLayout(left: StatusBarLayout.defaultLeft, right: StatusBarLayout.defaultRight)

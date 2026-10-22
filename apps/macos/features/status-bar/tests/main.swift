@@ -2,6 +2,7 @@ import Checks
 import AppKit
 import Customize
 import Icons
+import Menus
 import Foundation
 @testable import StatusBar
 
@@ -9,6 +10,17 @@ import Foundation
 // shared/checks/Checks.swift for why this is an executable).
 
 let exitCode = await Checks.run([
+    ("a clickable item lights up under the pointer, with room around it; a plain one does not", {
+        let branch = StatusLabel(icon: .gitBranch)
+        let plain = StatusLabel(icon: nil)
+        branch.onClick = {}
+        let highlight = branch.trackingAreas.compactMap { $0.owner as? HoverHighlight }.first
+        expect(highlight != nil && plain.trackingAreas.allSatisfy { !($0.owner is HoverHighlight) })
+        highlight?.mouseEntered(NSEvent())
+        expect(branch.layer?.backgroundColor != nil && branch.layer?.cornerRadius == 5)
+        highlight?.mouseExited(NSEvent())
+        expect(branch.layer?.backgroundColor == nil)
+    }),
     ("an item that grows makes the next one slide to its place, not jump", {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 30), styleMask: [.borderless], backing: .buffered, defer: false)
         let stack = SlidingStack()

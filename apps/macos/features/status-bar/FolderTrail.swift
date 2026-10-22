@@ -28,10 +28,11 @@ final class FolderTrail: NSView {
         trail.translatesAutoresizingMaskIntoConstraints = false
         addSubview(trail)
         NSLayoutConstraint.activate([
-            trail.leadingAnchor.constraint(equalTo: leadingAnchor),
+            // The bar's items keep 6 pt around them (StatusBarView.itemInset).
+            trail.leadingAnchor.constraint(equalTo: leadingAnchor, constant: StatusBarView.itemInset),
             // As wide as its pieces, so an item after it sits right after it
             // (with "less or equal" the trail stretched and pushed it away).
-            trail.trailingAnchor.constraint(equalTo: trailingAnchor),
+            trail.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -StatusBarView.itemInset),
             trail.centerYAnchor.constraint(equalTo: centerYAnchor),
             heightAnchor.constraint(equalToConstant: UILooks.pt(20)),
         ])

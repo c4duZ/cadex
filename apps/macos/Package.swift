@@ -280,7 +280,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "StatusBarTests",
-            dependencies: ["StatusBar", "Checks"],
+            dependencies: ["StatusBar", "Checks", "Menus"],
             path: "features/status-bar/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),

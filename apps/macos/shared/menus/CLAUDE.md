@@ -10,6 +10,8 @@
 - Ação no menu que não seja um comando registrado ou uma escolha da própria lista (ADR 0005).
 
 ## Como eu quero
+- `HoverHighlight.swift`: o fundo arredondado sob o ponteiro dos itens clicáveis da barra de status
+  (status-bar, agents, ssh).
 - `MenuEntry.swift`: uma linha (título, ícone, atalho, ativa ou não, a ação) ou separador;
   `tidy` tira separadores sobrando; MenuStyle.current são as cores, que o app troca junto com o
   tema.

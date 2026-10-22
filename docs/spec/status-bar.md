@@ -25,6 +25,9 @@ A barra tem dois lados, esquerda e direita, e cada lado é uma lista de itens em
 Sem mexer em nada, a barra é a de sempre: trilha à esquerda e ambiente à direita.
 
 ### Mudanças sem pulo
+- Os itens clicáveis (branch, terminais, agentes, uso, portas, SSH, RAM, CPU, memória do Cadex)
+  acendem com um fundo arredondado ao passar o ponteiro, como os botões da barra de cima; cada item
+  guarda 6 pt em volta para o fundo, sem mudar o espaço entre os textos (o dono, 2026-10-22).
 - Quando um item muda de largura (a pasta, o branch, a conta, ao trocar de aba ou de conta), os que
   estão depois dele deslizam para o lugar novo (0,22 s) em vez de pular, e o texto que muda esmaece
   para o novo (0,18 s). O branch passa de 180 pt e o nome da conta de 150 pt cortados com "…" (inteiros
