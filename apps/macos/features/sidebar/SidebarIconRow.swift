@@ -24,12 +24,18 @@ final class SidebarIconRow: NSView {
     let customize = SidebarIconButton(id: "customize", icon: .slidersHorizontal,
                                               tip: T("Customize Sidebar", "Personalizar o painel lateral"))
     private var fitCount = 0
+    /// The pages' icons as one group on a light rounded fill, as the title
+    /// bar's buttons are (the owner, 2026-10-22); customize stays apart.
+    private let group = NSView()
     /// The icon being dragged, where the mouse went down and where the icon was then.
     private var drag: (button: SidebarIconButton, start: NSPoint, originX: CGFloat, moved: Bool)?
     private var pressed: SidebarIconButton?
 
     init() {
         super.init(frame: .zero)
+        group.wantsLayer = true
+        group.layer?.cornerRadius = 8
+        addSubview(group)
         for button in [more, customize] { addSubview(button) }
         customize.onPress = { [weak self] in self.map { $0.onCustomize?($0.customize) } }
         more.onPress = { [weak self] in self?.showOverflow() }
@@ -79,6 +85,9 @@ final class SidebarIconRow: NSView {
         }
         more.isHidden = fitCount == buttons.count
         more.frame = NSRect(origin: slot(fitCount), size: size)
+        let shown = fitCount + (more.isHidden ? 0 : 1)
+        group.isHidden = shown == 0
+        group.frame = NSRect(x: 0, y: 0, width: slot(max(shown - 1, 0)).x + size.width, height: size.height)
         customize.frame = NSRect(x: bounds.width - size.width, y: 0, width: size.width, height: size.height)
     }
 
@@ -87,6 +96,7 @@ final class SidebarIconRow: NSView {
     }
 
     private func restyle() {
+        group.layer?.backgroundColor = colors.text.withAlphaComponent(0.06).cgColor
         for button in buttons + [more, customize] { button.colors = colors }
     }
 

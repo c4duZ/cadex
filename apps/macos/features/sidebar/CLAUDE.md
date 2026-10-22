@@ -20,7 +20,8 @@
   `setTitle`) e as páginas; `setItems` recebe o sidebar.items, `onItemsChange` devolve o que mudou
   para o app salvar, `setBadge` põe a contagem ou o ponto num ícone. Clicar no ícone da página
   aberta roda view.toggle-sidebar.
-- `SidebarIconRow.swift` e `SidebarIconButton.swift`: os ícones; arrastar para o lado reordena
+- `SidebarIconRow.swift` e `SidebarIconButton.swift`: os ícones, numa moldura arredondada como o
+  grupo da barra de título; arrastar para o lado reordena
   (depois de 4 pt), o que não cabe vai para o "…" (menu de `../../shared/menus`), o botão de
   personalizar fica à direita.
 - Personalizar: a aba Sidebar (`customizePage`) da janela única de `../../shared/customize/`, que o
