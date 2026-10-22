@@ -5,12 +5,14 @@ import Strings
 /// Notificações): read from the end of its conversation log, the last
 /// 64 KB, once per stop, never the whole log (ADR 0019 allows this much).
 public enum AgentStop: Equatable, Sendable {
-    /// It asks to run a tool: "Bash", "Edit"...
-    case permission(String)
-    /// It asked you something (or a plan to approve).
-    case question
-    /// It finished its turn.
-    case finished
+    /// It asks to run a tool ("Bash", "Edit") on something ("make test",
+    /// "App.swift"), what the notification says (the owner, 2026-10-22).
+    case permission(tool: String, subject: String)
+    /// It asked you something, with the question when the log has it (or
+    /// a plan to approve).
+    case question(String)
+    /// It finished its turn: the first line of its last reply.
+    case finished(String)
     /// You stopped it (Esc): it waits because you asked, so nothing to
     /// tell (the owner got "finished" after his own Esc, 2026-10-21).
     case interrupted
@@ -63,9 +65,13 @@ public enum AgentStop: Equatable, Sendable {
                 let calls = content.filter { $0["type"] as? String == "tool_use" }
                 if let call = calls.last(where: { !answered.contains($0["id"] as? String ?? "") }) {
                     let name = call["name"] as? String ?? "?"
-                    return questionTools.contains(name) ? .question : .permission(name)
+                    let input = call["input"] as? [String: Any] ?? [:]
+                    if questionTools.contains(name) { return .question(question(name, input)) }
+                    return .permission(tool: name, subject: AgentTranscriptParse.subject(input))
                 }
-                if message["stop_reason"] as? String == "end_turn" { return .finished }
+                if message["stop_reason"] as? String == "end_turn" {
+                    return .finished(firstLine(content.compactMap { $0["text"] as? String }.joined(separator: "\n")))
+                }
                 if !calls.isEmpty { return .unknown }
             default:
                 continue
@@ -74,14 +80,17 @@ public enum AgentStop: Equatable, Sendable {
         return .unknown
     }
 
-    /// The notification's words.
-    public var text: String {
-        switch self {
-        case .permission(let tool): T("Asks permission to run \(tool)", "Pede permissão para rodar \(tool)")
-        case .question: T("Asked you a question", "Fez uma pergunta")
-        case .finished: T("Finished", "Terminou")
-        case .interrupted: T("Stopped by you", "Parado por você")
-        case .unknown: T("Stopped and waits for you", "Parou e espera você")
-        }
+    /// The question asked, or that a plan waits for review.
+    static func question(_ tool: String, _ input: [String: Any]) -> String {
+        if tool == "ExitPlanMode" { return T("A plan is ready for your review.", "Um plano espera a sua revisão.") }
+        let questions = input["questions"] as? [[String: Any]] ?? []
+        return firstLine(questions.first?["question"] as? String ?? "")
+    }
+
+    /// The first line with words, Markdown marks out, short.
+    static func firstLine(_ text: String) -> String {
+        let line = text.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.first { !$0.isEmpty } ?? ""
+        let plain = line.replacingOccurrences(of: #"^#+\s*|\*\*|`"#, with: "", options: .regularExpression)
+        return AgentTranscriptParse.cut(plain, to: 200)
     }
 }

@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import UserNotifications
 
 /// The system notification when an agent stops and waits for you: it asks
@@ -23,6 +24,9 @@ public final class AgentNotifier: NSObject {
 
     /// Which stops notify (agents.notifyPermission, -Question, -Finished).
     public var kinds = Kinds() { didSet { if kinds != oldValue { update() } } }
+    /// Each kind's sound: "none", "default", a macOS sound's name or a file
+    /// (agents.soundPermission, -Question, -Finished; AgentNotifySound.swift).
+    public var sounds: [AgentNotifyText.Kind: String] = [:]
     /// Whether you are looking at that agent now (its terminal in front in
     /// the key window): then nothing is posted.
     public var isLooking: (AgentSession) -> Bool = { _ in false }
@@ -112,7 +116,15 @@ public final class AgentNotifier: NSObject {
     }
 
     private func post(_ session: AgentSession, _ stop: AgentStop) {
-        post(id: session.id, project: AgentProject.of(session.cwd).name, account: session.account.name, name: session.name, stop)
+        post(id: session.id, agent: session.account.provider == .codex ? "Codex" : "Claude", project: AgentProject.of(session.cwd).name,
+             account: session.account.name, name: session.name, stop)
+    }
+
+    /// You went to the session's terminal: what it said is read, so its
+    /// notification leaves Notification Center (as Ghostty does for a tab).
+    public func forget(_ sessionID: String) {
+        guard Self.canPost else { return }
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ["agent-" + sessionID])
     }
 
     /// agents.test-notifications: one of each kind, as they will look, a
@@ -130,11 +142,14 @@ public final class AgentNotifier: NSObject {
                         if let url = URL(string: page) { NSWorkspace.shared.open(url) }
                         return
                     }
-                    let samples: [AgentStop] = [.permission("Bash"), .question, .finished]
+                    let samples: [AgentStop] = [.permission(tool: "Bash", subject: "npm test"),
+                                                .question(T("Which branch should it merge into?", "Em qual branch fazer o merge?")),
+                                                .finished(T("All tests pass and the change is committed.", "Os testes passam e a mudança está commitada."))]
+                    // Two seconds apart, so each sound is heard on its own.
                     for (index, stop) in samples.enumerated() {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + Double(index)) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 2) {
                             MainActor.assumeIsolated {
-                                AgentNotifier.shared.post(id: "test-\(index)", project: project, account: account, name: "test", stop)
+                                AgentNotifier.shared.post(id: "test-\(index)", agent: "Claude", project: project, account: account, name: "test", stop)
                             }
                         }
                     }
@@ -143,17 +158,19 @@ public final class AgentNotifier: NSObject {
         }
     }
 
-    private func post(id: String, project: String, account: String, name: String, _ stop: AgentStop) {
+    private func post(id: String, agent: String, project: String, account: String, name: String, _ stop: AgentStop) {
         guard Self.canPost else { return }
         let center = UNUserNotificationCenter.current()
         askPermission()
+        let text = AgentNotifyText.make(stop, agent: agent, project: project, session: name, account: account)
         let content = UNMutableNotificationContent()
-        content.title = "\(project) · \(account)"
-        content.body = "\(stop.text) — \(name)"
-        content.sound = .default
+        content.title = text.title
+        content.subtitle = text.subtitle
+        content.body = text.body
+        let kind = AgentNotifyText.kind(of: stop)
+        content.sound = AgentNotifySound.sound(sounds[kind] ?? "default", kind: kind)
         content.threadIdentifier = id
         content.userInfo = ["session": id]
-        if let picture = AgentNotifyIcon.attachment(for: stop) { content.attachments = [picture] }
         // One per session: a new stop replaces the one before it.
         center.add(UNNotificationRequest(identifier: "agent-" + id, content: content, trigger: nil))
     }

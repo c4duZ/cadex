@@ -88,6 +88,9 @@ public enum SettingsFile {
             settings.agents.notifyPermission = reader.bool(s, "agents.notifyPermission") ?? settings.agents.notifyPermission
             settings.agents.notifyQuestion = reader.bool(s, "agents.notifyQuestion") ?? settings.agents.notifyQuestion
             settings.agents.notifyFinished = reader.bool(s, "agents.notifyFinished") ?? settings.agents.notifyFinished
+            settings.agents.soundPermission = reader.string(s, "agents.soundPermission") ?? settings.agents.soundPermission
+            settings.agents.soundQuestion = reader.string(s, "agents.soundQuestion") ?? settings.agents.soundQuestion
+            settings.agents.soundFinished = reader.string(s, "agents.soundFinished") ?? settings.agents.soundFinished
             settings.agents.hiddenAccounts = reader.strings(s, "agents.hiddenAccounts") ?? settings.agents.hiddenAccounts
             settings.agents.accounts = reader.bool(s, "agents.accounts") ?? settings.agents.accounts
             settings.agents.launchSkipPermissions = reader.bool(s, "agents.launchSkipPermissions") ?? settings.agents.launchSkipPermissions
@@ -147,6 +150,8 @@ public enum SettingsFile {
             "ssh": ["ping": s.ssh.ping],
             "agents": ["sessions": s.agents.sessions, "notifyPermission": s.agents.notifyPermission,
                        "notifyQuestion": s.agents.notifyQuestion, "notifyFinished": s.agents.notifyFinished,
+                       "soundPermission": s.agents.soundPermission, "soundQuestion": s.agents.soundQuestion,
+                       "soundFinished": s.agents.soundFinished,
                        "accounts": s.agents.accounts, "accountNames": s.agents.accountNames, "hiddenAccounts": s.agents.hiddenAccounts,
                        "hiddenLogins": s.agents.hiddenLogins, "launchSkipPermissions": s.agents.launchSkipPermissions],
             "shortcuts": shortcuts,

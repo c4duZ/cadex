@@ -40,8 +40,10 @@
   (fim de turno), parada por você (o Esc, que não avisa). `AgentNotifier.swift`: a notificação do sistema quando uma sessão passa de
   trabalhando para esperando, por tipo (agents.notifyPermission, -Question, -Finished), lido 1 s depois da
   parada, nunca enquanto você olha o terminal dele; só de dentro de um .app (fora dele a central do sistema para o
-  processo). `AgentNotifyIcon.swift`: a imagem de cada tipo, o ícone do app com um selo da cor do tipo,
-  desenhada uma vez no cache.
+  processo). `AgentNotifyText.swift`: as palavras de cada notificação (tipo no
+  título, onde no subtítulo, o detalhe no texto), sem imagem. `AgentNotifySound.swift`: o som de cada
+  tipo, copiado para ~/Library/Sounds e tocado pelo sistema com a notificação. `forget` tira a
+  notificação de uma sessão da Central quando o terminal dela ganha o foco.
 - `AgentUsage.swift`: o login (`AgentLogin`: o item do Keychain pelo hash da pasta, lido pelo
   `/usr/bin/security` a cada leitura, ou o .credentials.json; nunca guardado, renovado ou escrito),
   o uso (sessão de 5 h, semana, semana do Sonnet, cada um com o reinício) e o estado do cartão.

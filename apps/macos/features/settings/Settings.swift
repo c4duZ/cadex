@@ -120,6 +120,12 @@ public struct Settings: Equatable, Sendable {
         public var notifyPermission = true
         public var notifyQuestion = true
         public var notifyFinished = true
+        /// Each kind's sound: "none", "default", a macOS sound's name or
+        /// the path of a file (the owner wants every one to sound, his own
+        /// way, 2026-10-22). Three different ones by default.
+        public var soundPermission = "Funk"
+        public var soundQuestion = "Ping"
+        public var soundFinished = "Glass"
         /// Read each account's plan usage (Accounts, the usage item). Off:
         /// no login is read and no request is made.
         public var accounts = true

@@ -70,15 +70,7 @@ enum GeneralPages {
                                  T("Agents › Accounts and the status bar show how much of each account's plan is used, every 5 minutes while one of them shows. Cadex reads the login Claude Code keeps and never renews or changes it.",
                                    "Agents › Contas e a barra de status mostram quanto do plano de cada conta foi usado, a cada 5 minutos enquanto um deles aparece. O Cadex lê o login que o Claude Code guarda e nunca o renova nem o muda."),
                                  control: SettingsPage.toggle(store.settings.agents.accounts) { on in store.update { $0.agents.accounts = on } }),
-                SettingsPage.row(T("Notify when an agent asks permission", "Avisar quando um agente pede permissão"),
-                                 T("A notification from macOS; a click goes to its terminal. Not while you look at that terminal.",
-                                   "Uma notificação do macOS; o clique leva ao terminal dele. Não enquanto você olha aquele terminal."),
-                                 control: SettingsPage.toggle(store.settings.agents.notifyPermission) { on in store.update { $0.agents.notifyPermission = on } }),
-                SettingsPage.row(T("Notify when an agent asks a question", "Avisar quando um agente faz uma pergunta"), nil,
-                                 control: SettingsPage.toggle(store.settings.agents.notifyQuestion) { on in store.update { $0.agents.notifyQuestion = on } }),
-                SettingsPage.row(T("Notify when an agent finishes", "Avisar quando um agente termina"), nil,
-                                 control: SettingsPage.toggle(store.settings.agents.notifyFinished) { on in store.update { $0.agents.notifyFinished = on } }),
-
+            ] + NotificationRows.make(store) + [
                 SettingsPage.row(T("Test SSH hosts", "Testar os hosts SSH"),
                                  T("While the SSH item shows in the status bar, each host of ~/.ssh/config gets a connection to its port, on open and every 10 minutes. No login, no command.",
                                    "Enquanto o item SSH aparece na barra de status, cada host do ~/.ssh/config recebe uma conexão na porta dele, ao abrir e a cada 10 minutos. Sem login, sem comando."),

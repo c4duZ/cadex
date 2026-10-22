@@ -21,7 +21,8 @@
   theme.import, theme.open-folder, theme.mode-system/-dark/-light, theme.accent, theme.accent-reset,
   theme.toggle-high-contrast; a página usa as mesmas ações), `ThemeLooksRows.swift` (escuro e claro,
   destaque com o `AccentPicker`, alto contraste, painéis sem foco), `TerminalTextRows.swift` (a seção
-  Leitura do terminal), `InterfaceRows.swift` (zoom, densidade e fonte da interface em General: valem
+  Leitura do terminal), `NotificationRows.swift` (as notificações dos agentes em General: o som de cada tipo, que toca
+  ao escolher, e a chave), `InterfaceRows.swift` (zoom, densidade e fonte da interface em General: valem
   ao reabrir, pergunta "Reabrir agora"); a janela registra settings.open-terminal,
   settings.open-themes e terminal.toggle-ligatures (`pageCommands`), `ShortcutsPage.swift` (grava a próxima combinação com os atalhos do
   app suspensos; Delete tira, Esc cancela, "Padrão" volta) e `SettingsPage.swift` (linhas, títulos de

@@ -128,14 +128,17 @@ let exitCode = await Checks.run([
     ("why it stopped, from the end of its log", {
         func line(_ object: [String: Any]) -> String { String(decoding: try! JSONSerialization.data(withJSONObject: object), as: UTF8.self) }
         func assistant(_ content: [[String: Any]], stop: String) -> String { line(["type": "assistant", "message": ["stop_reason": stop, "content": content]]) }
-        let bash = assistant([["type": "tool_use", "id": "t1", "name": "Bash"]], stop: "tool_use")
+        let bash = assistant([["type": "tool_use", "id": "t1", "name": "Bash", "input": ["command": "npm test"]]], stop: "tool_use")
         let result = line(["type": "user", "message": ["content": [["type": "tool_result", "tool_use_id": "t1"]]]])
-        let done = assistant([["type": "text", "text": "pronto"]], stop: "end_turn")
+        let done = assistant([["type": "text", "text": "\n**Pronto**: os testes passam.\nDetalhes"]], stop: "end_turn")
         let meta = line(["type": "system", "subtype": "turn_duration"])
-        expect(AgentStop.classify([assistant([["type": "thinking"]], stop: "tool_use"), bash]) == .permission("Bash"))
-        expect(AgentStop.classify([assistant([["type": "tool_use", "id": "q", "name": "AskUserQuestion"]], stop: "tool_use")]) == .question)
-        expect(AgentStop.classify([assistant([["type": "tool_use", "id": "p", "name": "ExitPlanMode"]], stop: "tool_use")]) == .question, "a plan to approve")
-        expect(AgentStop.classify([bash, result, done, meta]) == .finished, "\(AgentStop.classify([bash, result, done, meta]))")
+        expect(AgentStop.classify([assistant([["type": "thinking"]], stop: "tool_use"), bash]) == .permission(tool: "Bash", subject: "npm test"))
+        let ask = ["type": "tool_use", "id": "q", "name": "AskUserQuestion", "input": ["questions": [["question": "Qual branch?"]]]] as [String: Any]
+        expect(AgentStop.classify([assistant([ask], stop: "tool_use")]) == .question("Qual branch?"))
+        if case .question(let plan) = AgentStop.classify([assistant([["type": "tool_use", "id": "p", "name": "ExitPlanMode"]], stop: "tool_use")]) {
+            expect(!plan.isEmpty, "a plan to approve")
+        } else { expect(false, "a plan is a question") }
+        expect(AgentStop.classify([bash, result, done, meta]) == .finished("Pronto: os testes passam."), "\(AgentStop.classify([bash, result, done, meta]))")
         expect(AgentStop.classify([bash, result]) == .unknown, "answered: working, not waiting")
         expect(AgentStop.classify([done, line(["type": "user", "message": ["content": "e agora?"]])]) == .unknown, "you wrote after it")
         expect(AgentStop.classify(["not json", meta]) == .unknown)
@@ -173,22 +176,31 @@ let exitCode = await Checks.run([
         controller.reload()
         notifier.changed()
         expect(stops == ["repo-1"], "you were looking: none")
-        expect(!notifier.wants(.permission("Bash")) && notifier.wants(.question) && notifier.wants(.finished))
+        expect(!notifier.wants(.permission(tool: "Bash", subject: "")) && notifier.wants(.question("")) && notifier.wants(.finished("")))
         notifier.kinds = .init(permission: false, question: false, finished: false)
         expect(!controller.isRunning, "all three off: it stops reading")
     }),
-    ("a picture per kind: the app's icon with a badge", {
-        let docs = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../../../../../docs/cadex-icon.png").standardized
-        if let icon = NSImage(contentsOf: docs) { AgentNotifyIcon.appIcon = { icon } }
-        let png = AgentNotifyIcon.draw(.lockKey)
-        expect((png?.count ?? 0) > 500)
-        expect(AgentNotifyIcon.icon(for: .permission("Bash")) == .lockKey && AgentNotifyIcon.icon(for: .question) == .questionMark
-               && AgentNotifyIcon.icon(for: .finished) == .check)
-        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
-            for (name, icon) in [("permission", Icon.lockKey), ("question", .questionMark), ("finished", .check)] {
-                try? AgentNotifyIcon.draw(icon)?.write(to: URL(fileURLWithPath: dir + "/notify-\(name).png"))
-            }
-        }
+    ("a notification says its kind in the title, where in the subtitle, the detail in the body", {
+        let run = AgentNotifyText.make(.permission(tool: "Bash", subject: "npm test"), agent: "Claude", project: "cadex", session: "cadex-95", account: "bhband")
+        expect(run.title == "Claude Wants to Run a Command" && run.subtitle == "cadex · cadex-95 · bhband" && run.body == "npm test", "\(run)")
+        expect(AgentNotifyText.make(.permission(tool: "Edit", subject: "App.swift"), agent: "Codex", project: "p", session: "s", account: "").title == "Codex Wants to Edit a File")
+        expect(AgentNotifyText.make(.permission(tool: "WebFetch", subject: ""), agent: "Claude", project: "p", session: "s", account: "a").body == "WebFetch")
+        expect(AgentNotifyText.make(.question("Qual branch?"), agent: "Claude", project: "p", session: "s", account: "a").body == "Qual branch?")
+        let done = AgentNotifyText.make(.finished(""), agent: "Claude", project: "p", session: "s", account: "a")
+        expect(done.title == "Claude Finished" && !done.body.isEmpty)
+        expect(AgentNotifyText.kind(of: .finished("x")) == .finished && AgentNotifyText.kind(of: .unknown) == .question)
+    }),
+    ("each kind's sound: none, default, a macOS sound or a file, copied once to ~/Library/Sounds", {
+        let home = NSTemporaryDirectory() + "cadex-sounds-\(UUID().uuidString)"
+        defer { try? fm.removeItem(atPath: home) }
+        expect(AgentNotifySound.sound("none", kind: .finished, home: home) == nil)
+        expect(AgentNotifySound.sound("default", kind: .finished, home: home) == .default)
+        expect(AgentNotifySound.sound("Nope-not-a-sound", kind: .finished, home: home) == .default, "a missing sound falls back to the default")
+        guard AgentNotifySound.file("Glass") != nil else { return }
+        _ = AgentNotifySound.sound("Glass", kind: .finished, home: home)
+        expect(fm.fileExists(atPath: home + "/Library/Sounds/Cadex Finished.aiff"))
+        _ = AgentNotifySound.sound("Ping", kind: .finished, home: home)
+        expect(fm.contentsEqual(atPath: home + "/Library/Sounds/Cadex Finished.aiff", andPath: "/System/Library/Sounds/Ping.aiff"), "a new choice replaces the copy")
     }),
     ("a renamed account takes its new name; a hidden one leaves Accounts", {
         let home = fakeHome()

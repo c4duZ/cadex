@@ -66,20 +66,31 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
 - O Cadex só lê o login que o Claude Code guardou. Nunca renova, troca ou grava o login.
 
 ### Notificações
-- Quando uma sessão que trabalhava passa a esperar você, o Cadex manda uma notificação do sistema
-  dizendo por quê: "Asks permission to run Bash", "Asked you a question" (também um plano para
-  aprovar) ou "Finished". O título é o projeto e a conta; o texto, o motivo e o nome da sessão.
+- Quando uma sessão que trabalhava passa a esperar você, o Cadex manda uma notificação do sistema,
+  escrita como as dos terminais e ferramentas de agente: o tipo no título, com o nome do agente
+  (Claude ou Codex, pela conta): "Claude Wants to Run a Command" (Bash), "… to Edit a File"
+  (Edit, Write), "… to Use <ferramenta>", "Claude Has a Question", "Claude Finished". O subtítulo é
+  projeto · sessão · conta; o texto, o detalhe: o comando ou o arquivo, a pergunta (ou "A plan is
+  ready for your review"), a primeira linha da última resposta.
 - O motivo vem do fim do log da conversa (os últimos 64 KB), lido uma vez por parada: a última
   ferramenta pedida sem resposta é uma permissão, a de pergunta é uma pergunta, o fim de turno é
   "terminou". Sem dizer, "Stopped and waits for you", contado como pergunta.
-- Cada tipo tem a sua imagem ao lado do texto: o ícone do Cadex com um selo no canto, cadeado em
-  âmbar (permissão), interrogação em azul (pergunta), ✓ em verde (terminou). O ícone à esquerda é o
-  do app, que o macOS não deixa trocar; o símbolo branco no quadrado da cor de destaque destoava
-  (o dono, 2026-10-22).
+- Sem imagem: à esquerda fica o ícone do Cadex, que o macOS não deixa trocar por notificação (só
+  as de comunicação, com permissão paga da Apple, mostram a foto de quem mandou; a API privada do
+  terminal-notifier saiu dele), e a imagem à direita, com o símbolo do tipo, destoava (o dono,
+  2026-10-22, depois de pesquisa).
+- Cada tipo toca o seu som, escolhido em Configurações › General ao lado da chave dele: um som do
+  macOS (padrão: Funk, Ping e Glass), o alerta padrão, nenhum, ou um arquivo seu (.aiff, .wav,
+  .caf); escolher toca o som. O macOS toca o som com a notificação (o Foco e a chave de som do
+  Cadex nos Ajustes valem): o Cadex copia o escolhido para `~/Library/Sounds` como "Cadex
+  Permission" (Question, Finished), onde o sistema procura os sons de um app fora de sandbox.
+- Ao ir ao terminal de um agente, a notificação dele sai da Central de Notificações.
 - Clicar leva ao terminal do agente, trazendo a janela, o space e a aba. Não avisa enquanto você
   olha aquele terminal na janela da frente. Uma notificação por sessão: a nova troca a anterior.
 - Três chaves, cada tipo desligável sozinho: agents.notifyPermission, agents.notifyQuestion e
-  agents.notifyFinished, ligadas por padrão; com agents.sessions desligado, nenhuma.
+  agents.notifyFinished, ligadas por padrão; com agents.sessions desligado, nenhuma. Os sons em
+  agents.soundPermission, agents.soundQuestion e agents.soundFinished ("none", "default", o nome de
+  um som do macOS ou o caminho de um arquivo).
 - "Send Test Notifications" (agents.test-notifications, no ⌘K) manda as três de exemplo; com as
   notificações do Cadex desligadas no macOS, abre a página dele nos Ajustes do Sistema.
 - Qualquer estado depois de trabalhando conta como parada (idle, waiting e shell, este o de um

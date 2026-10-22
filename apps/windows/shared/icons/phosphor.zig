@@ -67,7 +67,6 @@ pub const pencil_simple: u21 = 0xE3B4;
 pub const plug: u21 = 0xE946;
 pub const plus: u21 = 0xE3D4;
 pub const question: u21 = 0xE3E8;
-pub const question_mark: u21 = 0xE3E9;
 pub const sidebar: u21 = 0xEAB6;
 pub const sliders_horizontal: u21 = 0xE434;
 pub const sparkle: u21 = 0xE6A2;

@@ -134,6 +134,15 @@ extension WindowSession {
         tabs.open(document, beside: settings.opensBeside)
     }
 
+    /// The terminal with the focus runs an agent: its notification is read
+    /// now, so it leaves Notification Center (docs/spec/agents.md).
+    func forgetFocusedAgentNotification() {
+        guard let active = tabs?.activeTerminal else { return }
+        for session in AgentsController.shared.sessions where terminal(of: session)?.terminal === active {
+            AgentNotifier.shared.forget(session.id)
+        }
+    }
+
     /// "Rename…" on an account: its name in Agents, the usage item and the
     /// notifications; empty goes back to the organization's.
     func renameAccount(_ account: AgentAccount) {

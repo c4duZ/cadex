@@ -81,6 +81,7 @@ final class SettingsBridge {
         AgentNotifier.shared.kinds = .init(permission: agents.sessions && agents.notifyPermission,
                                            question: agents.sessions && agents.notifyQuestion,
                                            finished: agents.sessions && agents.notifyFinished)
+        AgentNotifier.shared.sounds = [.permission: agents.soundPermission, .question: agents.soundQuestion, .finished: agents.soundFinished]
         if settings.shortcuts != lastShortcuts {
             lastShortcuts = settings.shortcuts
             onShortcuts?(settings.shortcuts)
