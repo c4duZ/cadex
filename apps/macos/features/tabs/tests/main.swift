@@ -361,6 +361,57 @@ let exitCode = await Checks.run([
         PaneLooks.paneHeaders = "split"
         tabs.closeAll()
     }),
+    ("dragging a pane by its header: beside the pane under the pointer, on its nearest side", {
+        let three = PaneTree.split(.horizontal, .leaf(1), .split(.horizontal, .leaf(2), .leaf(3), ratio: 0.5), ratio: 0.5)
+        expect(three.moving(1, beside: 3, edge: .down) == .split(.horizontal, .leaf(2), .split(.vertical, .leaf(3), .leaf(1), ratio: 0.5), ratio: 0.5),
+               "\(three.moving(1, beside: 3, edge: .down))")
+        expect(three.moving(3, beside: 1, edge: .left) == .split(.horizontal, .split(.horizontal, .leaf(3), .leaf(1), ratio: 0.5), .leaf(2), ratio: 0.5))
+        expect(three.moving(2, beside: 2, edge: .left) == three && three.moving(9, beside: 1, edge: .left) == three)
+        let box = CGRect(x: 0, y: 0, width: 200, height: 100)
+        expect(PaneTree.dropEdge(at: CGPoint(x: 10, y: 50), in: box) == .left && PaneTree.dropEdge(at: CGPoint(x: 190, y: 50), in: box) == .right)
+        expect(PaneTree.dropEdge(at: CGPoint(x: 100, y: 5), in: box) == .up && PaneTree.dropEdge(at: CGPoint(x: 100, y: 95), in: box) == .down)
+        let tabs = makeTabs()
+        tabs.newTab(cwd: "/")
+        tabs.view.layoutSubtreeIfNeeded()
+        tabs.open(FakeDocument("/r/a.md"), beside: true)
+        guard let layout = tabs.activeTab?.layout else { return expect(false) }
+        layout.layoutSubtreeIfNeeded()
+        let (terminal, document) = (layout.tree.leaves[0], layout.tree.leaves[1])
+        // The document's header dragged to the left edge of the terminal: the two swap sides.
+        let start = layout.convert(CGPoint(x: 900, y: 10), to: nil), over = layout.convert(CGPoint(x: 20, y: 300), to: nil)
+        layout.onHeaderAction?(document, .drag(.began, start))
+        layout.onHeaderAction?(document, .drag(.moved, over))
+        expect(layout.subviews.contains { $0 is PaneDragOverlay }, "the cards show while dragging")
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
+            try? await Task.sleep(nanoseconds: 400_000_000)
+            let root = NSView(frame: NSRect(x: 0, y: 0, width: 1200, height: 600))
+            root.wantsLayer = true
+            root.layer?.backgroundColor = NSColor(white: 0.11, alpha: 1).cgColor
+            let window = NSWindow(contentRect: root.bounds, styleMask: [.borderless], backing: .buffered, defer: false)
+            window.appearance = NSAppearance(named: .darkAqua)
+            window.contentView = root
+            let parent = layout.superview
+            layout.removeFromSuperview()
+            layout.translatesAutoresizingMaskIntoConstraints = true
+            layout.frame = root.bounds
+            root.addSubview(layout)
+            root.layoutSubtreeIfNeeded()
+            if let bitmap = root.bitmapImageRepForCachingDisplay(in: root.bounds) {
+                root.cacheDisplay(in: root.bounds, to: bitmap)
+                try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/pane-drag.png"))
+            }
+            layout.removeFromSuperview()
+            parent?.addSubview(layout)
+        }
+        expect(layout.tree.leaves == [terminal, document], "nothing moves before the drop")
+        layout.onHeaderAction?(document, .drag(.ended, over))
+        expect(layout.tree.leaves == [document, terminal], "\(layout.tree)")
+        // Dropped over itself: nothing changes.
+        layout.onHeaderAction?(terminal, .drag(.began, over))
+        layout.onHeaderAction?(terminal, .drag(.ended, layout.convert(CGPoint(x: 900, y: 300), to: nil)))
+        expect(layout.tree.leaves == [document, terminal])
+        tabs.closeAll()
+    }),
     ("docking: a pane at one side of the outermost split keeps its share", {
         let three = PaneTree.split(.horizontal, .leaf(1), .split(.horizontal, .leaf(2), .leaf(3), ratio: 0.5), ratio: 0.5)
         let docked = three.docking(9, first: false)

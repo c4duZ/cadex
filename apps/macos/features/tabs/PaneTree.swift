@@ -136,6 +136,37 @@ indirect enum PaneTree: Equatable {
 
     /// Sets the ratio of the split node at `path` (false: first child,
     /// true: second child, from the root). Dragging a divider does this.
+    /// The tree with pane `id` moved to the `edge` side of `target`,
+    /// halving the target's space (a pane header dragged onto another).
+    func moving(_ id: Int, beside target: Int, edge: Direction) -> PaneTree {
+        guard id != target, leaves.contains(id), let rest = removing(id), rest.leaves.contains(target) else { return self }
+        return rest.replacing(target) {
+            switch edge {
+            case .left: .split(.horizontal, .leaf(id), .leaf(target), ratio: 0.5)
+            case .right: .split(.horizontal, .leaf(target), .leaf(id), ratio: 0.5)
+            case .up: .split(.vertical, .leaf(id), .leaf(target), ratio: 0.5)
+            case .down: .split(.vertical, .leaf(target), .leaf(id), ratio: 0.5)
+            }
+        }
+    }
+
+    private func replacing(_ id: Int, with node: () -> PaneTree) -> PaneTree {
+        switch self {
+        case .leaf(id): node()
+        case .leaf: self
+        case .split(let axis, let a, let b, let ratio): .split(axis, a.replacing(id, with: node), b.replacing(id, with: node), ratio: ratio)
+        }
+    }
+
+    /// The side of `frame` nearest to `point`, by its share of the width
+    /// or height: where a pane dropped there goes.
+    static func dropEdge(at point: CGPoint, in frame: CGRect) -> Direction {
+        let x = (point.x - frame.minX) / max(frame.width, 1)
+        let y = (point.y - frame.minY) / max(frame.height, 1)
+        let sides: [(Direction, CGFloat)] = [(.left, x), (.right, 1 - x), (.up, y), (.down, 1 - y)]
+        return sides.min { $0.1 < $1.1 }!.0
+    }
+
     func settingRatio(_ ratio: CGFloat, at path: [Bool]) -> PaneTree {
         guard case .split(let ax, let a, let b, let r) = self else { return self }
         guard let step = path.first else { return .split(ax, a, b, ratio: ratio) }

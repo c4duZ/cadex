@@ -24,7 +24,8 @@ final class PaneHeaderView: NSView {
         var dirty = false
     }
 
-    enum Action { case focus, close, zoom, menu(NSView) }
+    enum DragPhase { case began, moved, ended }
+    enum Action { case focus, close, zoom, menu(NSView), drag(DragPhase, NSPoint) }
 
     var info = Info(title: "", icon: .terminalWindow) { didSet { if info != oldValue { refresh() } } }
     var focused = false { didSet { if focused != oldValue { refresh() } } }
@@ -81,9 +82,30 @@ final class PaneHeaderView: NSView {
     override func mouseEntered(with event: NSEvent) { hovering = true }
     override func mouseExited(with event: NSEvent) { hovering = false }
 
+    private var pressedAt: NSPoint?
+    private var dragging = false
+
+    override func mouseDown(with event: NSEvent) {
+        pressedAt = event.locationInWindow
+        dragging = false
+    }
+
+    /// Past 4 pt the press becomes a drag of the pane (PaneDragOverlay).
+    override func mouseDragged(with event: NSEvent) {
+        guard let start = pressedAt else { return }
+        let point = event.locationInWindow
+        if !dragging, hypot(point.x - start.x, point.y - start.y) > 4 {
+            dragging = true
+            onAction?(.drag(.began, start))
+        }
+        if dragging { onAction?(.drag(.moved, point)) }
+    }
+
     /// A click focuses the pane; a double click maximizes it, as a window's
-    /// title bar zooms the window.
+    /// title bar zooms the window; the end of a drag drops the pane.
     override func mouseUp(with event: NSEvent) {
+        defer { pressedAt = nil; dragging = false }
+        if dragging { return onAction?(.drag(.ended, event.locationInWindow)) ?? () }
         onAction?(event.clickCount == 2 ? .zoom : .focus)
     }
 

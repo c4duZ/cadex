@@ -26,7 +26,9 @@
   `PaneHeaderView.swift`: o cabeçalho de cada painel com 2+ painéis (nome, ⋯, maximizar, ✕; issue
   #1), posto pelo `PaneLayoutView.swift`, que também mostra só o painel maximizado (`zoomed`);
   `TabsPaneHeaders.swift` diz o que cada um mostra e liga os botões aos comandos pelo `runCommand`
-  (pane.close, pane.zoom, as divisões). tabs.paneHeaders vem do app em PaneLooks.paneHeaders.
+  (pane.close, pane.zoom; o menu do + vem do app em `paneMenu`). Arrastar o cabeçalho move o
+  painel (PaneTree.moving, o lado pelo dropEdge), com os cartões de `PaneDragOverlay.swift`
+  deslizando para onde os painéis ficariam. tabs.paneHeaders vem do app em PaneLooks.paneHeaders.
   `PanePressRecognizer.swift`: o clique num documento dá o foco ao painel sem tomar o clique. Título
   e ícone da aba vêm do painel com foco; "●" se qualquer painel tem mudança não salva. A oferta de preview de cada terminal sai por
   `onOpenPreview`. `TabList.swift`: as regras puras (ordem, ativa, recentes, mover), testadas.

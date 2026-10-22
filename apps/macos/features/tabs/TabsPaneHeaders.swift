@@ -16,6 +16,7 @@ extension TabsController {
         }
         tab.layout.onHeaderAction = { [weak self, weak tab] id, action in
             guard let self, let tab else { return }
+            if case .drag(let phase, let point) = action { return tab.layout.dragPane(id, phase, at: point) }
             tab.focus(id)
             self.refreshBar()
             switch action {
@@ -23,6 +24,7 @@ extension TabsController {
             case .close: self.run("pane.close") { self.closeFocusedPane() }
             case .zoom: self.run("pane.zoom") { self.toggleZoom() }
             case .menu(let anchor): PopupMenu.show(self.paneMenu?() ?? [], below: anchor)
+            case .drag: break
             }
         }
     }

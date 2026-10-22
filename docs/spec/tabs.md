@@ -73,6 +73,12 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   foco e aparecem ao passar o ponteiro nos outros; o painel com foco tem
   uma linha da cor de destaque em cima e o nome mais forte. Mais leve que as abas da janela, para não
   parecer uma segunda fileira de abas. Resolve o issue #1: o arquivo aberto ao lado tinha só o ⌘W.
+- Arrastar o cabeçalho move o painel: cada painel vira um cartão com o nome, os outros deslizam
+  (0,2 s) para onde ficariam, a vaga do arrastado aparece contornada na cor de destaque e o cartão
+  dele segue o ponteiro. Solto sobre outro painel, vai para o lado dele mais próximo do ponteiro
+  (esquerda, direita, cima, baixo), dividindo o espaço dele; solto sobre si mesmo ou fora, nada muda.
+  Cartões e não os painéis, porque um terminal redimensionado a cada passo mandaria um resize ao shell
+  a cada vez (o dono pediu o arrastar animado como o dos ícones, 2026-10-22).
 - Clique no cabeçalho dá o foco ao painel; duplo clique maximiza. Cada botão roda um comando
   (pane.close, pane.zoom, pane.split-right, pane.split-down).
 - Maximizar (pane.zoom, ⇧⌘↩): o painel ocupa a aba toda, os outros saem de vista e voltam ao
