@@ -163,14 +163,14 @@ máquinas: ⌘ vira Ctrl+Shift (como no Windows Terminal), e ⌘ com ⇧, ⌥ ou
 ## Tamanho e memória
 
 Métrica do projeto, medida a cada release ([ADR 0007](docs/adr/0007-one-step-install.md)).
-Tamanhos da versão 2.1.0 (2026-10-21); memória medida na 0.1.0 (2026-10-19), num Mac com M4 e macOS 27:
+Tamanhos da versão 2.2.0 (2026-10-22); memória medida na 0.1.0 (2026-10-19), num Mac com M4 e macOS 27:
 
 | | Cadex |
 |---|---|
-| download (DMG) | 9,0 MB |
-| download (ZIP do instalador) | 9,4 MB |
-| download Windows (ZIP x64 / ARM64) | 4,1 MB / 3,9 MB |
-| app instalado (universal: Apple Silicon e Intel) | 44 MB |
+| download (DMG) | 9,4 MB |
+| download (ZIP do instalador) | 9,8 MB |
+| download Windows (ZIP x64 / ARM64) | 3,9 MB / 3,7 MB |
+| app instalado (universal: Apple Silicon e Intel) | 46 MB |
 | memória com um terminal aberto (footprint) | 66 MB |
 | cada aba de terminal a mais, escondida (2.2.0) | 1 MB |
 | tudo da barra lateral e da barra de status ligado (2.2.0) | +7% |
