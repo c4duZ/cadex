@@ -3,6 +3,7 @@ import CoreGraphics
 import Checks
 @testable import Tabs
 import Icons
+import Terminal
 
 // Tests of the tabs feature. Run with `make macos-test` (see
 // shared/checks/Checks.swift for why this is an executable).
@@ -381,7 +382,8 @@ let exitCode = await Checks.run([
         let start = layout.convert(CGPoint(x: 900, y: 10), to: nil), over = layout.convert(CGPoint(x: 20, y: 300), to: nil)
         layout.onHeaderAction?(document, .drag(.began, start))
         layout.onHeaderAction?(document, .drag(.moved, over))
-        expect(layout.subviews.contains { $0 is PaneDragOverlay }, "the cards show while dragging")
+        expect(layout.subviews.contains { $0 is PaneDragChip }, "a label follows the pointer")
+        expect((layout.panes[terminal] as? TerminalView)?.holdsGridSize == true, "the shell is not resized at every step")
         if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
             try? await Task.sleep(nanoseconds: 400_000_000)
             let root = NSView(frame: NSRect(x: 0, y: 0, width: 1200, height: 600))
@@ -403,9 +405,12 @@ let exitCode = await Checks.run([
             layout.removeFromSuperview()
             parent?.addSubview(layout)
         }
-        expect(layout.tree.leaves == [terminal, document], "nothing moves before the drop")
+        expect(layout.tree.leaves == [document, terminal], "the panes move while dragging")
+        // The middle of a pane changes nothing.
+        expect(PaneLayoutView.dropping(document, at: CGPoint(x: 900, y: 300), in: layout.tree, bounds: layout.bounds) == nil)
         layout.onHeaderAction?(document, .drag(.ended, over))
-        expect(layout.tree.leaves == [document, terminal], "\(layout.tree)")
+        expect(layout.tree.leaves == [document, terminal] && !layout.subviews.contains { $0 is PaneDragChip }, "\(layout.tree)")
+        expect((layout.panes[terminal] as? TerminalView)?.holdsGridSize == false, "one resize when it ends")
         // Dropped over itself: nothing changes.
         layout.onHeaderAction?(terminal, .drag(.began, over))
         layout.onHeaderAction?(terminal, .drag(.ended, layout.convert(CGPoint(x: 900, y: 300), to: nil)))

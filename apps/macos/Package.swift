@@ -249,7 +249,7 @@ let package = Package(
 
         .executableTarget(
             name: "TabsTests",
-            dependencies: ["Tabs", "Icons", "Checks"],
+            dependencies: ["Tabs", "Terminal", "Icons", "Checks"],
             path: "features/tabs/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),

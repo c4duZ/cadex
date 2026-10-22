@@ -90,7 +90,7 @@ final class PaneHeaderView: NSView {
         dragging = false
     }
 
-    /// Past 4 pt the press becomes a drag of the pane (PaneDragOverlay).
+    /// Past 4 pt the press becomes a drag of the pane (PaneLayoutView.dragPane).
     override func mouseDragged(with event: NSEvent) {
         guard let start = pressedAt else { return }
         let point = event.locationInWindow

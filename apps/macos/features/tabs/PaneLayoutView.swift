@@ -1,4 +1,5 @@
 import AppKit
+import Terminal
 
 /// Lays a tab's panes out by its PaneTree, draws the 1-point dividers and
 /// lets them be dragged, and dims the panes without focus when there are
@@ -29,9 +30,9 @@ final class PaneLayoutView: NSView {
     var onHeaderAction: ((Int, PaneHeaderView.Action) -> Void)?
     var headerStyle: TabBarView.Style? { didSet { refreshHeaders() } }
     private var headers: [Int: PaneHeaderView] = [:]
-    /// A pane being dragged by its header: its id, the tree it would make
-    /// if dropped now, and the cards on top.
-    private var paneDrag: (id: Int, tentative: PaneTree, overlay: PaneDragOverlay)?
+    /// A pane being dragged by its header: its id, the tree before the
+    /// drag, and the label under the pointer.
+    private var paneDrag: (id: Int, original: PaneTree, chip: PaneDragChip)?
     var headerViews: [Int: PaneHeaderView] { headers }
 
     private let outline = FocusOutlineView()
@@ -148,46 +149,65 @@ final class PaneLayoutView: NSView {
 
     // MARK: Dragging a pane by its header
 
-    /// A header's drag: cards of the panes glide to where they would be,
-    /// and on release the pane moves beside the one under the pointer, on
-    /// its nearest side. Released over itself or outside, nothing changes.
+    /// A header's drag: the panes themselves move to where the dragged one
+    /// would go, with a little overshoot, each time the pointer enters the
+    /// edge of another pane; a label with its name follows the pointer.
+    /// The middle of a pane changes nothing, so the layout does not jump
+    /// as the pointer crosses it. Released outside the tab, it goes back.
     func dragPane(_ id: Int, _ phase: PaneHeaderView.DragPhase, at windowPoint: NSPoint) {
         let point = convert(windowPoint, from: nil)
         switch phase {
         case .began:
             guard tree.leaves.count > 1, zoomed == nil, paneDrag == nil else { return }
-            let frames = tree.frames(in: bounds, gap: Self.gap)
-            let cards = tree.leaves.map { PaneDragOverlay.Card(id: $0, title: describe?($0)?.title ?? "") }
-            let overlay = PaneDragOverlay(frame: bounds, cards: cards, frames: frames, dragged: id, style: headerStyle ?? TabBarView().style)
-            overlay.autoresizingMask = [.width, .height]
-            addSubview(overlay)
-            paneDrag = (id, tree, overlay)
-            overlay.show(frames, pointer: point)
+            let info = describe?(id) ?? PaneHeaderView.Info(title: "", icon: .terminalWindow)
+            let chip = PaneDragChip(info: info, style: headerStyle ?? TabBarView().style)
+            addSubview(chip)
+            chip.follow(point, in: bounds)
+            paneDrag = (id, tree, chip)
+            holdGridSizes(true)
         case .moved:
             guard let drag = paneDrag else { return }
-            let tentative = Self.dropping(drag.id, at: point, in: tree, bounds: bounds)
-            paneDrag?.tentative = tentative
-            drag.overlay.show(tentative.frames(in: bounds, gap: Self.gap), pointer: point)
+            drag.chip.follow(point, in: bounds)
+            if let next = Self.dropping(drag.id, at: point, in: tree, bounds: bounds), next != tree { glide(to: next) }
         case .ended:
             guard let drag = paneDrag else { return }
             paneDrag = nil
-            NSAnimationContext.runAnimationGroup({ context in
-                context.duration = 0.12
-                drag.overlay.animator().alphaValue = 0
-            }, completionHandler: { drag.overlay.removeFromSuperview() })
-            let dropped = Self.dropping(drag.id, at: point, in: tree, bounds: bounds)
-            guard dropped != tree else { return }
-            tree = dropped
-            onTreeChange?(dropped)
-            syncSubviews()
+            drag.chip.removeFromSuperview()
+            if !bounds.contains(point), tree != drag.original { glide(to: drag.original) }
+            holdGridSizes(false)
+            if tree != drag.original { onTreeChange?(tree) }
         }
     }
 
+    /// The panes move to `next` with a slight overshoot (0.32 s).
+    private func glide(to next: PaneTree) {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.32
+            context.timingFunction = CAMediaTimingFunction(controlPoints: 0.34, 1.32, 0.64, 1)
+            context.allowsImplicitAnimation = true
+            tree = next
+            layoutSubtreeIfNeeded()
+        }
+    }
+
+    /// Terminals keep their grid while the panes glide: one resize for the
+    /// shell when the drag ends.
+    private func holdGridSizes(_ hold: Bool) {
+        for view in panes.values { (view as? TerminalView)?.holdsGridSize = hold }
+    }
+
+    /// The share of a pane, from each edge, that moves the dragged one
+    /// beside it; the rest of the pane changes nothing.
+    static let edgeZone: CGFloat = 0.3
+
     /// The tree if `id` were dropped at `point`: beside the pane under it,
-    /// on its nearest side; over itself or outside, the tree as it is.
-    static func dropping(_ id: Int, at point: CGPoint, in tree: PaneTree, bounds: CGRect) -> PaneTree {
+    /// on the side whose edge the pointer is near; nil in the middle of a
+    /// pane, over the dragged one or outside.
+    static func dropping(_ id: Int, at point: CGPoint, in tree: PaneTree, bounds: CGRect) -> PaneTree? {
         let frames = tree.frames(in: bounds, gap: gap)
-        guard let (target, frame) = frames.first(where: { $0.key != id && $0.value.contains(point) }) else { return tree }
+        guard let (target, frame) = frames.first(where: { $0.key != id && $0.value.contains(point) }) else { return nil }
+        let x = (point.x - frame.minX) / max(frame.width, 1), y = (point.y - frame.minY) / max(frame.height, 1)
+        guard min(x, 1 - x, y, 1 - y) < edgeZone else { return nil }
         return tree.moving(id, beside: target, edge: PaneTree.dropEdge(at: point, in: frame))
     }
 

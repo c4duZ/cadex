@@ -201,7 +201,14 @@ public final class TerminalView: NSView {
 
     public override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
-        resizeSession()
+        if !holdsGridSize { resizeSession() }
+    }
+
+    /// While a pane is dragged the panes glide to new sizes: the drawing
+    /// follows, but the shell gets the new size once, when it ends, not a
+    /// resize at every step of the animation (2026-10-22).
+    public var holdsGridSize = false {
+        didSet { if !holdsGridSize && oldValue { resizeSession() } }
     }
 
     public override func viewDidChangeBackingProperties() {
