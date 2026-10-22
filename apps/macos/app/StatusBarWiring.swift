@@ -19,7 +19,8 @@ extension WindowSession {
                                     subtitle: T("With commits to push ↑ and to pull ↓", "Com commits a enviar ↑ e a receber ↓"),
                                     icon: .gitBranch, side: .right, view: branch)
         // The panel reads the status anyway; the item only shows it.
-        git.onBranch = { [weak branch, weak branchItem] info in
+        git.onBranch = { [weak self, weak branch, weak branchItem] info in
+            self?.showSidebarBranch(info)
             guard let branch, branchItem?.isVisible == true else { return }
             branch.text = info.map { Self.branchText($0) } ?? ""
             branch.toolTip = info.map { Self.branchText($0) }

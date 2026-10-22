@@ -9,8 +9,9 @@ e pull. Os agentes mexem no código pelo terminal; aqui se confere e se faz o co
 ### Painel
 - O painel lateral tem duas vistas: Arquivos (o explorer) e Git. O comando "Mostrar o Git" (⇧⌘G)
   troca para a vista Git; "Mostrar os arquivos" (⇧⌘E) volta.
-- No topo: a branch atual (ou "HEAD destacado em <sha curto>"), o upstream e quantos commits à frente
-  (↑) e atrás (↓). Clicar na branch abre a troca de branch.
+- No cabeçalho da barra lateral (`sidebar.md`, "Cabeçalho da página"): a branch atual (ou o sha curto,
+  destacado) e quantos commits à frente (↑) e atrás (↓); clicar na branch abre a troca de branch.
+  Fetch, pull e push à direita, o resto no "⋯".
 - Duas listas: "Staged" e "Mudanças" (não staged, inclusive arquivos novos). Cada linha tem o ícone
   do arquivo, o nome, a pasta em cinza e a letra do tipo com a cor dele: M modificado, A adicionado,
   D apagado, R renomeado (com o nome antigo), U em conflito, ? novo não rastreado.
@@ -64,9 +65,9 @@ e pull. Os agentes mexem no código pelo terminal; aqui se confere e se faz o co
 ## Estados
 - **Sem repositório:** "Esta pasta não é um repositório git" com "Inicializar repositório".
 - **Git ausente:** a mensagem acima.
-- **Carregando:** indicador no topo enquanto o status roda.
+- **Carregando:** indicador no cabeçalho enquanto uma ação roda.
 - **Limpo:** "Nenhuma mudança".
-- **Erro:** a mensagem do git, curta, embaixo dos botões.
+- **Erro:** a mensagem do git, curta, embaixo do botão de commit.
 
 ## Casos de borda
 - Nome com espaço, acento ou aspas -> aparece e funciona como os outros.

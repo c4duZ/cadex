@@ -24,19 +24,12 @@ final class SidebarIconRow: NSView {
     let customize = SidebarIconButton(id: "customize", icon: .slidersHorizontal,
                                               tip: T("Customize Sidebar", "Personalizar o painel lateral"))
     private var fitCount = 0
-    /// The whole row as one group on a light rounded fill, as the title
-    /// bar's buttons are, customize at its right end (the owner, 2026-10-22:
-    /// stopping at the last page looked cut).
-    private let group = NSView()
     /// The icon being dragged, where the mouse went down and where the icon was then.
     private var drag: (button: SidebarIconButton, start: NSPoint, originX: CGFloat, moved: Bool)?
     private var pressed: SidebarIconButton?
 
     init() {
         super.init(frame: .zero)
-        group.wantsLayer = true
-        group.layer?.cornerRadius = 8
-        addSubview(group)
         for button in [more, customize] { addSubview(button) }
         customize.onPress = { [weak self] in self.map { $0.onCustomize?($0.customize) } }
         more.onPress = { [weak self] in self?.showOverflow() }
@@ -86,13 +79,12 @@ final class SidebarIconRow: NSView {
             if drag?.button !== button { button.frame = NSRect(origin: slot(index), size: size) }
         }
         more.frame = NSRect(origin: slot(fitCount), size: size)
-        group.frame = NSRect(x: 0, y: 0, width: bounds.width, height: size.height)
         customize.frame = NSRect(origin: slot(fitCount + (more.isHidden ? 0 : 1)), size: size)
     }
 
-    /// The icons as one block, customize last, centered in the group with
-    /// the usual 2 pt between them (the owner, 2026-10-22: centered, the
-    /// spacing as it was).
+    /// The icons as one block, customize last, centered in the row with the
+    /// usual 2 pt between them (the owner, 2026-10-22; a rounded fill behind
+    /// them was tried and taken out the same day).
     private var blockStart: CGFloat {
         let count = CGFloat(fitCount + (more.isHidden ? 0 : 1) + 1)
         let width = count * SidebarIconButton.size.width + (count - 1) * Self.spacing
@@ -104,7 +96,6 @@ final class SidebarIconRow: NSView {
     }
 
     private func restyle() {
-        group.layer?.backgroundColor = colors.text.withAlphaComponent(0.06).cgColor
         for button in buttons + [more, customize] { button.colors = colors }
     }
 

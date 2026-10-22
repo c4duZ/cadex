@@ -169,7 +169,7 @@ extension WindowSession {
         folder.onChange = { [weak self] root in
             guard let self else { return }
             self.explorer?.setRoot(root)
-            self.workspace?.sidebar.setTitle(Self.folderName(root), for: "files")
+            self.workspace?.sidebar.setTitle(Self.folderTitle(root), for: "files")
             self.search?.setRoot(root, showHidden: self.explorer?.showHidden ?? true)
             self.markdown?.setRoot(root)
             self.git?.setFolder(root)

@@ -35,7 +35,15 @@ public struct SidebarItem {
         }
     }
 
-    public init(id: String, icon: Icon, title: String, command: String, shortcut: String? = nil, kind: Kind, subtabs: [Subtab] = []) {
+    /// The page's buttons in the header row, in order; past
+    /// SidebarHeader.maxShown they go under "⋯", after them `more`.
+    public let actions: [SidebarAction]
+    public let more: [SidebarAction]
+
+    public init(id: String, icon: Icon, title: String, command: String, shortcut: String? = nil, kind: Kind, subtabs: [Subtab] = [],
+                actions: [SidebarAction] = [], more: [SidebarAction] = []) {
+        self.actions = actions
+        self.more = more
         self.id = id
         self.icon = icon
         self.title = title

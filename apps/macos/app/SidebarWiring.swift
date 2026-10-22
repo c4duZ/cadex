@@ -18,18 +18,42 @@ import Strings
 /// (2026-10-22); Web Preview and Spaces opened something elsewhere (2026-10-21).
 extension WindowSession {
     func makeSidebar(explorer: ExplorerController, git: SourceControlController) -> SidebarView {
+        // Each page's header: up to three buttons, the rest under "⋯"
+        // (docs/spec/sidebar.md, "Cabeçalho da página").
         let catalog = [
-            item("files", .files, T("Files", "Arquivos"), "explorer.focus", .page(explorer.view)),
-            item("git", .gitBranch, "Git", "git.show", .page(git.view)),
-            item("history", .clockCounterClockwise, T("Git History", "Histórico do Git"), "git.show-history", .page(sidebarHistoryHost)),
+            item("files", .files, T("Files", "Arquivos"), "explorer.focus", .page(explorer.view), actions: [
+                SidebarAction("explorer.new-file", .filePlus, T("New File", "Novo arquivo")),
+                SidebarAction("explorer.new-folder", .folderPlus, T("New Folder", "Nova pasta")),
+                SidebarAction("explorer.collapse-all", .arrowsInLineVertical, T("Collapse All Folders", "Recolher todas as pastas")),
+            ], more: [
+                SidebarAction("search.files", .magnifyingGlass, T("Find File", "Buscar arquivo")),
+                SidebarAction("explorer.refresh", .arrowsClockwise, T("Reload", "Recarregar")),
+            ]),
+            item("git", .gitBranch, "Git", "git.show", .page(git.view), actions: [
+                SidebarAction("git.fetch", .arrowsClockwise, "Fetch"),
+                SidebarAction("git.pull", .arrowDown, "Pull"),
+                SidebarAction("git.push", .arrowUp, "Push"),
+            ], more: [
+                SidebarAction("git.switch-branch", .gitBranch, T("Switch Branch…", "Trocar de branch…")),
+                SidebarAction("git.stage-all", .plus, T("Stage All", "Adicionar tudo ao stage")),
+                SidebarAction("git.unstage-all", .minus, T("Unstage All", "Tirar tudo do stage")),
+                SidebarAction("git.refresh", .arrowClockwise, T("Refresh", "Atualizar")),
+            ]),
+            item("history", .clockCounterClockwise, T("Git History", "Histórico do Git"), "git.show-history", .page(sidebarHistoryHost), actions: [
+                SidebarAction("git.history-in-tab", .arrowSquareOut, T("Open Git History in New Tab", "Abrir o histórico do git em nova aba")),
+            ]),
             item("agents", .sparkle, T("Agents", "Agentes"), "agents.show", .page(makeAgentsPage("sessions"))),
-            item("accounts", .gauge, T("Accounts", "Contas"), "agents.show-accounts", .page(makeAgentsPage("accounts"))),
+            item("accounts", .gauge, T("Accounts", "Contas"), "agents.show-accounts", .page(makeAgentsPage("accounts")), actions: [
+                SidebarAction("agents.refresh-usage", .arrowsClockwise, T("Refresh Usage", "Atualizar o uso")),
+                SidebarAction("agents.customize-accounts", .slidersHorizontal, T("Customize Accounts", "Personalizar as contas")),
+            ]),
         ]
         let sidebar = SidebarView(catalog: catalog) { [weak self] id in _ = self?.commands.run(id) }
         sidebar.onItemsChange = { [weak self] ids in self?.settings.store.update { $0.sidebar.items = ids } }
         sidebar.onShow = { [weak self] id in if id == "history" { self?.showSidebarHistory() } }
         sidebar.onCustomize = { [weak self] in self?.openCustomize("sidebar") }
-        sidebar.setTitle(Self.folderName(folder.root), for: "files")
+        sidebar.setTitle(Self.folderTitle(folder.root), for: "files")
+        git.onBusy = { [weak sidebar] busy in sidebar?.setBusy(busy, for: "git") }
         applySidebar(settings.store.settings.sidebar, to: sidebar)
         return sidebar
     }
@@ -149,10 +173,23 @@ extension WindowSession {
 
     static func folderName(_ path: String) -> String { (path as NSString).lastPathComponent }
 
+    /// Files' header: the folder's name as typed, the whole path in the tip.
+    static func folderTitle(_ path: String) -> SidebarTitle { SidebarTitle(folderName(path), tip: path) }
+
+    /// Git's header: the branch with ↑ and ↓, the click switches branch;
+    /// "Git" outside a repository. From the status the panel reads anyway.
+    func showSidebarBranch(_ branch: SourceControlController.Branch?) {
+        workspace?.sidebar.setTitle(branch.map {
+            SidebarTitle(Self.branchText($0), icon: .gitBranch, command: "git.switch-branch",
+                         tip: T("Switch branch", "Trocar de branch"))
+        }, for: "git")
+    }
+
     private func item(_ id: String, _ icon: Icon, _ title: String, _ command: String, _ kind: SidebarItem.Kind,
-                      subtabs: [SidebarItem.Subtab] = []) -> SidebarItem {
+                      subtabs: [SidebarItem.Subtab] = [], actions: [SidebarAction] = [], more: [SidebarAction] = []) -> SidebarItem {
         let shortcut = app.keymapLabel(command)
             ?? commands.command(command)?.defaultShortcut.flatMap { KeyCombo($0)?.label }
-        return SidebarItem(id: id, icon: icon, title: title, command: command, shortcut: shortcut, kind: kind, subtabs: subtabs)
+        return SidebarItem(id: id, icon: icon, title: title, command: command, shortcut: shortcut, kind: kind, subtabs: subtabs,
+                           actions: actions, more: more)
     }
 }

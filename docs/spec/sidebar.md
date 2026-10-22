@@ -6,11 +6,10 @@ agentes...) e, logo abaixo, as sub-abas da página escolhida. Quem usa decide qu
 em que ordem.
 
 ## Comportamento
-- No topo, ao lado dos botões da janela, a fileira de ícones (Phosphor), agrupada numa moldura
-  arredondada de fundo leve que vai de ponta a ponta, com personalizar na ponta direita, como o grupo
-  de botões da barra de título. Clicar num ícone mostra a
+- No topo, ao lado dos botões da janela, a fileira de ícones (Phosphor), sem moldura (uma moldura
+  arredondada foi testada e saiu, o dono, 2026-10-22), com personalizar no fim. Clicar num ícone mostra a
   página dele, o da página aberta também: o clique nunca recolhe a barra lateral (o dono, 2026-10-22;
-  ⌘B recolhe). Os ícones e o de personalizar formam um bloco centrado na moldura, 2 pt entre eles.
+  ⌘B recolhe). Os ícones e o de personalizar formam um bloco centrado, 2 pt entre eles.
 - Os ícones padrão, nesta ordem: Files (⇧⌘E, explorer.focus), Git (⇧⌘G, git.show), Agents (⇧⌘J,
   agents.show) e Accounts (⇧⌘U, agents.show-accounts, de uso); Agents e Accounts separados para cada
   um ter o próprio ícone e atalho (o dono, 2026-10-21). Git History (⇧⌘L, git.show-history, de log)
@@ -32,9 +31,22 @@ em que ordem.
 - Página que ninguém abriu não existe: o histórico só é lido na primeira vez que a página aparece.
 - Cada ícone pode ter um sinal pequeno: o Git, o número de mudanças; o Agents, um ponto quando algum
   agente espera resposta. O sinal some quando não há nada a dizer.
-- Embaixo da fileira, o título da página à esquerda e as sub-abas dela à direita, num controle
-  segmentado (nenhuma página usa hoje: Sessions e Accounts viraram páginas). Página sem sub-aba mostra
-  só o título (Files mostra o nome da pasta do workspace).
+- Cabeçalho da página: uma linha só, igual em todas, 6 pt abaixo dos ícones e com 28 pt de altura;
+  o conteúdo começa logo embaixo. Nenhuma página tem cabeçalho próprio: um título sobre o cabeçalho
+  do explorer repetia o nome da pasta com um vão grande, e tirar o título só em Files deixava as
+  páginas diferentes (o dono, 2026-10-22).
+  - À esquerda, o nome, em 12 pt seminegrito na cor discreta, como escrito (sem maiúsculas): Files
+    mostra o nome da pasta (o caminho na dica); Git, a branch com o ícone de branch e ↑ ↓, e o clique
+    troca de branch (git.switch-branch), ou "Git" fora de um repositório; as outras, o nome da página.
+  - À direita, os botões da página, do mesmo tamanho e com o mesmo espaço, até 3; o resto vai para
+    o "⋯". Sempre à vista, discretos, acesos sob o ponteiro. Cada um roda um comando.
+  - Files: novo arquivo, nova pasta, recolher tudo; no "⋯", buscar arquivo e recarregar.
+  - Git: fetch, pull, push, e um indicador girando enquanto uma ação roda; no "⋯", trocar de branch,
+    tudo para o stage, tudo fora do stage e atualizar.
+  - Git History: abrir o histórico numa aba. Accounts: atualizar o uso e personalizar as contas.
+    Agents: só o nome.
+  - Sub-abas, se uma página tiver (nenhuma tem hoje: Sessions e Accounts viraram páginas), ficam
+    antes dos botões.
 - Personalizar: o último ícone da fileira (controles deslizantes) abre a janela "Customize", uma só
   para o app e com uma aba por coisa a arrumar (Sidebar, Status Bar), como a de configurações e por
   cima do app em tela cheia; na aba Sidebar, a lista dos ícones (arrastar para reordenar, chave para mostrar ou esconder). O mesmo vale arrastando

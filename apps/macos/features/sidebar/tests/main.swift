@@ -15,6 +15,25 @@ func catalog() -> [SidebarItem] {
      SidebarItem(id: "git", icon: .gitBranch, title: "Git", command: "git.show", kind: .page(NSView()))]
 }
 
+@MainActor
+func headerRow() {
+        let actions: [SidebarAction] = [SidebarAction("explorer.new-file", .filePlus, "New file"), SidebarAction("explorer.new-folder", .folderPlus, "New folder"),
+                       SidebarAction("explorer.collapse-all", .arrowsInLineVertical, "Collapse"), SidebarAction("explorer.refresh", .arrowsClockwise, "Reload")]
+        let files = SidebarItem(id: "files", icon: .files, title: "Files", command: "explorer.focus", kind: .page(NSView()), actions: actions)
+        let git = SidebarItem(id: "git", icon: .gitBranch, title: "Git", command: "git.show", kind: .page(NSView()))
+        let view = SidebarView(catalog: [files, git]) { _ in }
+        view.frame = NSRect(x: 0, y: 0, width: 240, height: 400)
+        view.setItems(["files", "git"])
+        view.setTitle(SidebarTitle("cadex"), for: "files")
+        expect(view.headerTitle == "cadex", "the folder, as typed: \(view.headerTitle)")
+        expect(view.headerButtons == ["explorer.new-file", "explorer.new-folder", "explorer.collapse-all"], "\(view.headerButtons)")
+        view.setTitle(SidebarTitle("main", icon: .gitBranch, command: "git.switch-branch"), for: "git")
+        view.show("git")
+        expect(view.headerTitle == "main" && view.headerButtons.isEmpty, "Git: \(view.headerTitle)")
+        view.setTitle(nil, for: "git")
+        expect(view.headerTitle == "Git", "back to the page's name: \(view.headerTitle)")
+}
+
 let exitCode = await Checks.run([
     ("the saved list keeps its order and drops unknown and repeated ids", {
         let (ids, problems) = SidebarLayout.shown(["git", "agents", "files", "git"], known: known)
@@ -70,6 +89,7 @@ let exitCode = await Checks.run([
         // The open page's keys show it again and never hide the sidebar.
         expect(view.press(position: 3) && ran.last == "explorer.focus", "\(ran)")
     }),
+    ("every page has one header row: its name on the left, its actions on the right, the rest under ⋯", headerRow),
     ("toggling a page saves the new list", {
         var saved: [[String]] = []
         let view = SidebarView(catalog: catalog()) { _ in }
@@ -153,13 +173,17 @@ let exitCode = await Checks.run([
         for (name, width) in [("sidebar", 260.0), ("sidebar-narrow", 150.0)] {
             let page = NSTextField(labelWithString: "  apps\n  core\n  docs\n  CLAUDE.md")
             page.textColor = .white
-            let items = [SidebarItem(id: "files", icon: .files, title: "Files", command: "explorer.focus", shortcut: "⇧⌘E", kind: .page(page)),
+            let items = [SidebarItem(id: "files", icon: .files, title: "Files", command: "explorer.focus", shortcut: "⇧⌘E", kind: .page(page),
+                                     actions: [SidebarAction("explorer.new-file", .filePlus, "New File"),
+                                               SidebarAction("explorer.new-folder", .folderPlus, "New Folder"),
+                                               SidebarAction("explorer.collapse-all", .arrowsInLineVertical, "Collapse")],
+                                     more: [SidebarAction("explorer.refresh", .arrowsClockwise, "Reload")]),
                          SidebarItem(id: "find", icon: .magnifyingGlass, title: "Search", command: "search.content", kind: .action),
                          SidebarItem(id: "git", icon: .gitBranch, title: "Git", command: "git.show", kind: .page(NSView())),
                          SidebarItem(id: "history", icon: .clockCounterClockwise, title: "History", command: "git.history", kind: .action)]
             let view = SidebarView(catalog: items) { _ in }
             view.setItems(["files", "find", "git", "history"])
-            view.setTitle("cadex", for: "files")
+            view.setTitle(SidebarTitle("cadex"), for: "files")
             view.setBadge("3", for: "git")
             view.setColors(.init(text: .white, secondary: NSColor(white: 0.62, alpha: 1),
                                  fill: NSColor(white: 0.2, alpha: 1), accent: NSColor(red: 0.88, green: 0.64, blue: 0.35, alpha: 1)))

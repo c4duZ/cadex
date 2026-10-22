@@ -26,10 +26,8 @@ public struct ExplorerStyle: Equatable {
 public final class ExplorerController: NSObject {
     public let view = NSView()
     let outline = ExplorerOutline()
-    private let header = NSTextField(labelWithString: "")
     private let message = NSTextField(labelWithString: "")
     private var messageTimer: Timer?
-    private var buttons: [NSButton] = []
     private(set) var root: FileNode
     private var watcher: FileWatcher?
     /// The row whose name is being edited (ExplorerRename.swift).
@@ -97,8 +95,6 @@ public final class ExplorerController: NSObject {
         root = FileNode(path: path, entry: nil)
         root.load()
         compactHeads = [:]
-        header.stringValue = (path as NSString).lastPathComponent.uppercased()
-        header.toolTip = path
         outline.reloadData()
         restoreExpanded()
         watcher = FileWatcher(path: path) { [weak self] changes in self?.apply(changes) }
@@ -203,10 +199,9 @@ public final class ExplorerController: NSObject {
     // MARK: View
 
     private func buildView() {
-        // The folder's name small and quiet, the actions on the right
-        // (owner, 2026-10-19).
-        header.font = UILooks.font(11, weight: .semibold)
-        header.lineBreakMode = .byTruncatingMiddle
+        // No header of its own: the folder's name and the buttons are in the
+        // sidebar's header row, the same in every page (the owner,
+        // 2026-10-22: the name twice, a big gap).
         message.font = UILooks.font(11)
         message.isHidden = true
         message.lineBreakMode = .byWordWrapping
@@ -216,27 +211,12 @@ public final class ExplorerController: NSObject {
         scroll.hasVerticalScroller = true
         scroll.autohidesScrollers = true
         scroll.drawsBackground = false
-        buttons = [
-            button(.magnifyingGlass, "search.files", T("Find file (⌘P)", "Buscar arquivo (⌘P)")),
-            button(.filePlus, "explorer.new-file", T("New file", "Novo arquivo")),
-            button(.folderPlus, "explorer.new-folder", T("New folder", "Nova pasta")),
-            button(.arrowsClockwise, "explorer.refresh", T("Reload", "Recarregar")),
-            button(.arrowsInLineVertical, "explorer.collapse-all", T("Collapse all folders", "Recolher todas as pastas")),
-        ]
-        let bar = NSStackView(views: [header, NSView()] + buttons)
-        bar.spacing = 0
-        bar.setHuggingPriority(.defaultLow, for: .horizontal)
-        header.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        for v in [bar, scroll, message] as [NSView] {
+        for v in [scroll, message] as [NSView] {
             v.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(v)
         }
         NSLayoutConstraint.activate([
-            bar.topAnchor.constraint(equalTo: view.topAnchor, constant: 6),
-            bar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
-            bar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -6),
-            bar.heightAnchor.constraint(equalToConstant: 24),
-            scroll.topAnchor.constraint(equalTo: bar.bottomAnchor, constant: 4),
+            scroll.topAnchor.constraint(equalTo: view.topAnchor),
             scroll.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scroll.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scroll.bottomAnchor.constraint(equalTo: message.topAnchor, constant: -4),
@@ -247,23 +227,8 @@ public final class ExplorerController: NSObject {
         applyStyle()
     }
 
-    private func button(_ icon: Icon, _ command: String, _ tip: String) -> NSButton {
-        let b = NSButton(image: icon.image(size: 13), target: self, action: #selector(runButton(_:)))
-        b.isBordered = false
-        b.identifier = NSUserInterfaceItemIdentifier(command)
-        HoverTip.attach(tip, to: b)
-        b.widthAnchor.constraint(equalToConstant: 22).isActive = true
-        return b
-    }
-
-    @objc private func runButton(_ sender: NSButton) {
-        _ = run(sender.identifier?.rawValue ?? "")
-    }
-
     private func applyStyle() {
-        header.textColor = style.secondaryText
         message.textColor = style.secondaryText
-        buttons.forEach { $0.contentTintColor = style.secondaryText }
         refreshVisibleRows()
     }
 

@@ -5,7 +5,7 @@ import Strings
 import UILooks
 
 /// The sidebar (docs/spec/sidebar.md): the row of icons on top, the page's
-/// title under it and the page itself. Which icons show, and in what
+/// header under it (name and actions, SidebarHeader) and the page itself. Which icons show, and in what
 /// order, is sidebar.items; the app passes it in and saves what changes.
 @MainActor
 public final class SidebarView: NSView {
@@ -20,15 +20,15 @@ public final class SidebarView: NSView {
     public var onSubtab: ((String, String) -> Void)?
     /// The sub-tab each page shows, the first until one is picked.
     public private(set) var subtab: [String: String] = [:]
-    private let subtabs = SidebarSubtabs()
+    let header = SidebarHeader()
+    private var subtabs: SidebarSubtabs { header.subtabs }
     public private(set) var items: [String] = []
     private let catalog: [SidebarItem]
     private let run: (String) -> Void
     private let row = SidebarIconRow()
-    private let title = NSTextField(labelWithString: "")
     private let content = NSView()
     private let empty: NSStackView
-    private var titles: [String: String] = [:]
+    private var titles: [String: SidebarTitle] = [:]
     private var colors = SidebarColors()
 
     public init(catalog: [SidebarItem], run: @escaping (String) -> Void) {
@@ -43,15 +43,14 @@ public final class SidebarView: NSView {
         super.init(frame: .zero)
         emptyButton.target = self
         emptyButton.action = #selector(customizeFromEmpty)
-        title.font = UILooks.font(12, weight: .semibold)
-        title.lineBreakMode = .byTruncatingTail
+        header.run = run
         row.onPress = { [weak self] id in self?.press(id) }
         row.onReorder = { [weak self] ids in self?.change(ids) }
         row.onCustomize = { [weak self] _ in self?.customize() }
         row.onOverflow = { [weak self] ids, anchor in self?.overflow(ids, below: anchor) }
         subtabs.onPick = { [weak self] index in self?.subtabPicked(index) }
         subtabs.isHidden = true
-        for view in [row, title, subtabs, content, empty] as [NSView] {
+        for view in [row, header, content, empty] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
@@ -73,12 +72,11 @@ public final class SidebarView: NSView {
             row.leadingAnchor.constraint(equalTo: leadingAnchor, constant: inset),
             row.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -inset),
             row.heightAnchor.constraint(equalToConstant: SidebarIconButton.size.height),
-            title.topAnchor.constraint(equalTo: row.bottomAnchor, constant: UILooks.pt(8)),
-            title.leadingAnchor.constraint(equalTo: leadingAnchor, constant: inset + UILooks.pt(4)),
-            title.trailingAnchor.constraint(lessThanOrEqualTo: subtabs.leadingAnchor, constant: -UILooks.pt(6)),
-            subtabs.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -inset),
-            subtabs.centerYAnchor.constraint(equalTo: title.centerYAnchor),
-            content.topAnchor.constraint(equalTo: title.bottomAnchor, constant: UILooks.pt(4)),
+            header.topAnchor.constraint(equalTo: row.bottomAnchor, constant: UILooks.pt(6)),
+            header.leadingAnchor.constraint(equalTo: leadingAnchor, constant: inset),
+            header.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -inset),
+            header.heightAnchor.constraint(equalToConstant: SidebarHeader.height),
+            content.topAnchor.constraint(equalTo: header.bottomAnchor),
             content.leadingAnchor.constraint(equalTo: leadingAnchor),
             content.trailingAnchor.constraint(equalTo: trailingAnchor),
             content.bottomAnchor.constraint(equalTo: bottomAnchor),
@@ -106,7 +104,7 @@ public final class SidebarView: NSView {
         let none = ids.isEmpty
         empty.isHidden = !none
         content.isHidden = none
-        title.isHidden = none
+        header.isHidden = none
         if none { subtabs.isHidden = true }
         if page == nil, let first = ids.first(where: { id in catalog.first { $0.id == id }?.view != nil }) { show(first) }
         return problems
@@ -118,7 +116,7 @@ public final class SidebarView: NSView {
         page = id
         for other in catalog { other.view?.isHidden = other.id != id }
         row.select(id)
-        title.stringValue = titles[id] ?? item.title
+        showHeader(of: item)
         showSubtabs(of: item)
         onShow?(id)
     }
@@ -130,8 +128,14 @@ public final class SidebarView: NSView {
         if page == id { showSubtabs(of: item) } else { onSubtab?(id, sub) }
     }
 
+    private func showHeader(of item: SidebarItem) {
+        header.set(titles[item.id] ?? SidebarTitle(item.title), actions: item.actions, extra: item.more)
+        header.busy = busyPages.contains(item.id)
+    }
+
     private func showSubtabs(of item: SidebarItem) {
         subtabs.isHidden = item.subtabs.isEmpty
+        header.needsLayout = true
         guard !item.subtabs.isEmpty else { return }
         let current = subtab[item.id] ?? item.subtabs[0].id
         subtab[item.id] = current
@@ -146,11 +150,23 @@ public final class SidebarView: NSView {
         onSubtab?(page, sub)
     }
 
-    /// The text under the icons for a page: the folder's name for Files.
-    public func setTitle(_ text: String?, for id: String) {
-        titles[id] = text
-        if page == id { title.stringValue = text ?? catalog.first { $0.id == id }?.title ?? "" }
+    /// The header's name for a page: the folder's name for Files, the
+    /// branch for Git; nil goes back to the page's title.
+    public func setTitle(_ title: SidebarTitle?, for id: String) {
+        titles[id] = title
+        if page == id, let item = catalog.first(where: { $0.id == id }) { showHeader(of: item) }
     }
+
+    /// A page's action is running: its header spins while it shows.
+    public func setBusy(_ busy: Bool, for id: String) {
+        if busy { busyPages.insert(id) } else { busyPages.remove(id) }
+        header.busy = page.map(busyPages.contains) ?? false
+    }
+    private var busyPages: Set<String> = []
+
+    /// The header's name as it shows, for tests.
+    var headerTitle: String { header.titleView.label.stringValue }
+    var headerButtons: [String] { header.buttons.map(\.id) }
 
     /// The mark on an icon: a count, "" for a dot, nil for none.
     public func setBadge(_ badge: String?, for id: String) { row.setBadge(badge, for: id) }
@@ -158,8 +174,7 @@ public final class SidebarView: NSView {
     public func setColors(_ colors: SidebarColors) {
         self.colors = colors
         row.colors = colors
-        subtabs.colors = colors
-        title.textColor = colors.text
+        header.colors = colors
     }
 
     /// The customize button: the app opens the Customize window on the

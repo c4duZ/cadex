@@ -4,16 +4,13 @@ import Icons
 import Menus
 import Strings
 
-/// The Git view of the sidebar (docs/spec/source-control.md): branch and
-/// sync buttons on top, the lists of changes, the commit message at the
-/// bottom, and a message for the states without a repository.
+/// The Git view of the sidebar (docs/spec/source-control.md): the lists of
+/// changes, the commit message at the bottom, and a message for the states
+/// without a repository. The branch and the sync buttons are in the
+/// sidebar's header row, which the app fills from onBranch and onBusy.
 @MainActor
 final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegate, NSTextViewDelegate {
     weak var controller: SourceControlController?
-    private let branch = NSButton(title: "", target: nil, action: nil)
-    private let sync = NSTextField(labelWithString: "")
-    private var buttons: [NSButton] = []
-    private let progress = NSProgressIndicator()
     let table = MenuTableView()
     private let scroll = NSScrollView()
     private let messageView = NSTextView()
@@ -36,10 +33,6 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
     func messageForTests(_ text: String) { messageView.string = text }
     func clearMessage() { messageView.string = "" }
 
-    func setBusy(_ busy: Bool) {
-        busy ? progress.startAnimation(nil) : progress.stopAnimation(nil)
-    }
-
     func show(error text: String?) {
         error.stringValue = text ?? ""
         error.isHidden = text == nil
@@ -49,8 +42,7 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
     func render() {
         guard let controller else { return }
         let ready = controller.state == .ready || controller.state == .loading && controller.repo != nil
-        [table, scroll, messageScroll, commitButton, branch, sync].forEach { $0.isHidden = !ready }
-        buttons.forEach { $0.isHidden = !ready }
+        [table, scroll, messageScroll, commitButton].forEach { $0.isHidden = !ready }
         empty.isHidden = ready
         initButton.isHidden = controller.state != .noRepository
         switch controller.state {
@@ -60,12 +52,6 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
         default: empty.stringValue = ""
         }
         let s = controller.status
-        branch.title = s.detached ? T("HEAD detached at \(s.oid.prefix(7))", "HEAD destacado em \(s.oid.prefix(7))") : s.branch
-        var parts: [String] = []
-        if s.ahead > 0 { parts.append("↑\(s.ahead)") }
-        if s.behind > 0 { parts.append("↓\(s.behind)") }
-        if s.upstream.isEmpty && !s.detached { parts.append(T("no upstream", "sem upstream")) }
-        sync.stringValue = parts.joined(separator: " ")
         rows = SourceControlRow.rows(for: s)
         table.reloadData()
     }
@@ -116,32 +102,6 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
     // MARK: Layout
 
     private func build() {
-        branch.isBordered = false
-        branch.image = Icon.gitBranch.image(size: 13)
-        branch.imagePosition = .imageLeading
-        branch.font = UILooks.font(12, weight: .semibold)
-        branch.target = self
-        branch.action = #selector(runButton(_:))
-        branch.identifier = .init("git.switch-branch")
-        branch.lineBreakMode = .byTruncatingTail
-        sync.font = UILooks.font(11)
-        sync.textColor = .secondaryLabelColor
-        buttons = [("git.fetch", Icon.arrowsClockwise, "Fetch"), ("git.pull", Icon.arrowDown, "Pull"), ("git.push", Icon.arrowUp, "Push")].map { id, icon, tip in
-            let b = NSButton(image: icon.image(size: 13), target: self, action: #selector(runButton(_:)))
-            b.isBordered = false
-            HoverTip.attach(tip, to: b)
-            b.identifier = .init(id)
-            b.contentTintColor = .secondaryLabelColor
-            return b
-        }
-        progress.style = .spinning
-        progress.controlSize = .small
-        progress.isDisplayedWhenStopped = false
-        let top = NSStackView(views: [branch, sync, NSView(), progress] + buttons)
-        top.spacing = 4
-        top.setHuggingPriority(.defaultLow, for: .horizontal)
-        branch.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-
         table.addTableColumn(NSTableColumn(identifier: .init("change")))
         table.headerView = nil
         table.rowHeight = UILooks.rowHeight(22)
@@ -178,16 +138,12 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
         initButton.target = self
         initButton.action = #selector(initPressed)
 
-        for v in [top, scroll, messageScroll, commitButton, error, empty, initButton] as [NSView] {
+        for v in [scroll, messageScroll, commitButton, error, empty, initButton] as [NSView] {
             v.translatesAutoresizingMaskIntoConstraints = false
             addSubview(v)
         }
         NSLayoutConstraint.activate([
-            top.topAnchor.constraint(equalTo: topAnchor, constant: 6),
-            top.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
-            top.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
-            top.heightAnchor.constraint(equalToConstant: 24),
-            scroll.topAnchor.constraint(equalTo: top.bottomAnchor, constant: 4),
+            scroll.topAnchor.constraint(equalTo: topAnchor),
             scroll.leadingAnchor.constraint(equalTo: leadingAnchor),
             scroll.trailingAnchor.constraint(equalTo: trailingAnchor),
             messageScroll.topAnchor.constraint(equalTo: scroll.bottomAnchor, constant: 6),

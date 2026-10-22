@@ -19,10 +19,13 @@ final class SidebarIconButton: NSView {
     private let icon: NSImageView
     private let badgeLabel = NSTextField(labelWithString: "")
     private var hovering = false { didSet { restyle() } }
+    /// 16 in the row of pages, 14 in a page's header.
+    private let iconSide: CGFloat
 
-    init(id: String, icon: Icon, tip: String) {
+    init(id: String, icon: Icon, tip: String, iconSide: CGFloat = 16) {
         self.id = id
-        self.icon = NSImageView(image: icon.fittedImage(size: UILooks.pt(16)))
+        self.iconSide = iconSide
+        self.icon = NSImageView(image: icon.fittedImage(size: UILooks.pt(iconSide)))
         super.init(frame: NSRect(origin: .zero, size: Self.size))
         wantsLayer = true
         layer?.cornerRadius = 6
@@ -44,7 +47,7 @@ final class SidebarIconButton: NSView {
 
     override func layout() {
         super.layout()
-        let side = UILooks.pt(16)
+        let side = UILooks.pt(iconSide)
         icon.frame = NSRect(x: (bounds.width - side) / 2, y: (bounds.height - side) / 2, width: side, height: side)
         let dot = badge?.isEmpty == true
         let h = dot ? UILooks.pt(7) : UILooks.pt(12)

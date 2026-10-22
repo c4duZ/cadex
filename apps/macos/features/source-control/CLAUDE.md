@@ -16,7 +16,8 @@
   (`diskChanged`, as mudanças do watcher do explorer, inclusive em .git) e faz as ações; confirma
   descartar (arquivo novo vai para a Lixeira), commit sem nada staged e publicar a branch. Avisa o
   app por closures: `onMarks` (marcas do explorer), `onOpenDiff`, `onOpenFile`.
-- `SourceControlView.swift` (topo com branch e botões, listas, mensagem, estados) e
+- `SourceControlView.swift` (listas, mensagem, estados; a branch e os botões ficam no cabeçalho da
+  barra lateral, que o app enche por `onBranch` e `onBusy`) e
   `SourceControlRow.swift` (linhas, cores das letras, até 1000 por lista, menu de contexto no `MenuTableView` compartilhado).
 - Comandos em `SourceControlCommands.swift`: git.commit, git.stage-all, git.unstage-all, git.stage,
   git.unstage, git.discard, git.open-diff e git.open-file (com -beside e -in-tab: ao lado, em nova aba; o menu mostra só o que vale

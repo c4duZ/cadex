@@ -11,17 +11,20 @@
 - A ordem guardada em outro lugar que não o sidebar.items do settings.json.
 
 ## Como eu quero
-- `SidebarItem.swift`: um item do catálogo (id, ícone Phosphor, título, comando, atalho para a dica);
-  página (com view) ou ação (só roda o comando, como Search e History).
+- `SidebarItem.swift`: um item do catálogo (id, ícone Phosphor, título, comando, atalho para a dica,
+  botões do cabeçalho em `actions` e `more`); página (com view) ou ação (só roda o comando).
 - `SidebarLayout.swift`: as regras puras e testadas: a lista salva contra os ids conhecidos (id
   desconhecido ou repetido sai e vira aviso), mostrar/esconder, mover, a ordem do painel, onde cai
   o ícone arrastado e quantos cabem antes do "…".
-- `SidebarView.swift`: a porta de entrada. A fileira, o título da página (o nome da pasta em Files,
-  `setTitle`) e as páginas; `setItems` recebe o sidebar.items, `onItemsChange` devolve o que mudou
+- `SidebarView.swift`: a porta de entrada. A fileira, o cabeçalho da página e as páginas; `setTitle`
+  troca o nome do cabeçalho (a pasta em Files, a branch em Git) e `setBusy` gira o indicador; `setItems` recebe o sidebar.items, `onItemsChange` devolve o que mudou
   para o app salvar, `setBadge` põe a contagem ou o ponto num ícone. Clicar num ícone mostra a página
   dele, o da aberta também: nunca recolhe a barra (o dono, 2026-10-22; ⌘B recolhe).
-- `SidebarIconRow.swift` e `SidebarIconButton.swift`: os ícones, numa moldura arredondada de ponta a
-  ponta como o grupo da barra de título, num bloco centrado com 2 pt entre eles, personalizar no fim; arrastar para o lado reordena
+- `SidebarHeader.swift`: o cabeçalho único de toda página, logo abaixo dos ícones: o nome à esquerda
+  (`SidebarTitle`, com ícone e comando opcionais) e até 3 botões (`SidebarAction`) à direita, o resto
+  no "⋯"; nenhuma página tem cabeçalho próprio (o dono, 2026-10-22).
+- `SidebarIconRow.swift` e `SidebarIconButton.swift`: os ícones, sem moldura, num bloco centrado com
+  2 pt entre eles, personalizar no fim; arrastar para o lado reordena
   (depois de 4 pt), o que não cabe vai para o "…" (menu de `../../shared/menus`), o botão de
   personalizar fica à direita.
 - Personalizar: a aba Sidebar (`customizePage`) da janela única de `../../shared/customize/`, que o
@@ -41,7 +44,7 @@
   voltando com os spaces.
 
 ## Como validar
-- `make macos-test` passa: o arrastar dos ícones com eventos de mouse (uma vaga, duas, o arrastado por
+- `make macos-test` passa: o cabeçalho (nome, botões, volta ao nome da página), o arrastar dos ícones com eventos de mouse (uma vaga, duas, o arrastado por
   cima), a lista que vai para o Customize, as regras do layout, a view mostrando a primeira página, o clique que
   roda o comando (sem recolher), mostrar/esconder salvando. Com CADEX_SNAPSHOT_DIR, o teste salva
   sidebar.png e sidebar-narrow.png para ver sem captura de tela.

@@ -48,6 +48,9 @@ public final class SourceControlController {
     /// (the status bar's Git branch item); nil outside a repository. It
     /// rides on the status the panel reads anyway: no git run of its own.
     public var onBranch: ((Branch?) -> Void)?
+    /// An action (fetch, pull, push, commit…) started or ended: the
+    /// sidebar's header spins while it runs.
+    public var onBusy: ((Bool) -> Void)?
 
     public struct Branch: Equatable, Sendable {
         /// The branch's name, or the short commit when detached.
@@ -162,12 +165,12 @@ public final class SourceControlController {
     /// refreshes.
     func perform(_ work: @escaping @Sendable (GitRepository) -> String?) {
         guard let repo else { return }
-        panel.setBusy(true)
+        onBusy?(true)
         repo.queue.async { [weak self] in
             let message = work(repo)
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
-                    self?.panel.setBusy(false)
+                    self?.onBusy?(false)
                     self?.panel.show(error: message)
                     self?.refresh()
                 }

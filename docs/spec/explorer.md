@@ -41,8 +41,8 @@ segue a documentação pública do VS Code; o código de cores por tipo vem do C
   do tipo ou cinza (ADR 0011). As abas usam os mesmos ícones.
 - Git: o nome do arquivo alterado fica na cor da mudança, com a letra (M, A, U, D) alinhada à
   direita; a pasta que contém alterados ganha o nome levemente colorido e um ponto.
-- Cabeçalho: o nome da pasta raiz em maiúsculas, pequeno; à direita, buscar arquivo, novo arquivo,
-  nova pasta, recarregar e recolher tudo.
+- Cabeçalho: o da barra lateral (`sidebar.md`, "Cabeçalho da página"): o nome da pasta raiz como
+  escrito; à direita, novo arquivo, nova pasta e recolher tudo; no "⋯", buscar arquivo e recarregar.
 - As pastas abertas são lembradas por raiz: reabrir o app ou voltar àquela pasta abre as mesmas.
 - Renomeando, um nome inválido (vazio, com `/`, ou de um irmão que já existe) deixa o campo
   vermelho antes de confirmar.
