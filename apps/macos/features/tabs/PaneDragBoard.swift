@@ -18,7 +18,7 @@ final class PaneDragBoard: NSView {
         layer?.backgroundColor = style.activeFill.blended(withFraction: 0.55, of: .black)?.cgColor
         for (id, frame) in frames {
             let window = Self.window(infos[id], style: style, dragged: id == dragged)
-            window.frame = frame.insetBy(dx: 4, dy: 4)
+            window.frame = frame.insetBy(dx: Self.inset, dy: Self.inset)
             Self.place(window)
             layer?.addSublayer(window)
             windows[id] = window
@@ -43,7 +43,7 @@ final class PaneDragBoard: NSView {
         CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(controlPoints: 0.34, 1.3, 0.64, 1))
         for (id, window) in windows {
             if let frame = frames[id] {
-                window.frame = frame.insetBy(dx: 4, dy: 4)
+                window.frame = frame.insetBy(dx: Self.inset, dy: Self.inset)
                 Self.place(window)
             }
         }
@@ -59,13 +59,17 @@ final class PaneDragBoard: NSView {
     }
 
     private static let headerHeight: CGFloat = 26
+    private static let inset: CGFloat = 3
 
     /// A gray window: a rounded body, a header strip with the icon's
     /// place and the name.
     private static func window(_ info: PaneHeaderView.Info?, style: TabBarView.Style, dragged: Bool) -> CALayer {
         let window = CALayer()
         window.backgroundColor = style.activeFill.cgColor
-        window.cornerRadius = 10
+        // Concentric with the pane's 8 pt corners around it, and the
+        // continuous curve macOS draws: 10 pt inside 8 looked off at the corner.
+        window.cornerRadius = 6
+        window.cornerCurve = .continuous
         window.borderWidth = 1
         window.borderColor = NSColor.white.withAlphaComponent(0.08).cgColor
         // The dragged one just fades: no accent outline over it (the owner, 2026-10-22).
