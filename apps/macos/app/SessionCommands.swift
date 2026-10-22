@@ -179,7 +179,9 @@ extension WindowSession {
     func connectStatusBar(_ bar: StatusBarView, to tabs: TabsController) {
         tabs.onActiveChange = { [weak self, weak tabs, weak bar] in
             let terminal = tabs?.activeTerminal
-            bar?.path = terminal?.currentDirectory
+            // A read that fails for a moment keeps the last folder: the
+            // trail emptied and came back, moving the whole bar (2026-10-22).
+            if let folder = terminal?.currentDirectory { bar?.path = folder }
             bar?.canNavigate = terminal?.hasForegroundProcess == false
             self?.terminalFolderMoved(terminal?.currentDirectory)
             self?.refreshWorkColor()

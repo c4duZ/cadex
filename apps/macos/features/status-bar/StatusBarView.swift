@@ -48,8 +48,8 @@ public final class StatusBarView: NSView {
     private(set) var catalog: [StatusItem] = []
     private let folder = FolderTrail()
     private let environment = StatusLabel(icon: nil)
-    private let leftStack = NSStackView()
-    private let rightStack = NSStackView()
+    private let leftStack = SlidingStack()
+    private let rightStack = SlidingStack()
 
     public override init(frame: NSRect) {
         super.init(frame: frame)

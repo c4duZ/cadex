@@ -47,7 +47,24 @@ public final class StatusItem {
 @MainActor
 public final class StatusLabel: NSView {
     public var onClick: (() -> Void)?
-    public var text = "" { didSet { if text != oldValue { label.stringValue = text; invalidateIntrinsicContentSize() } } }
+    public var text = "" {
+        didSet {
+            guard text != oldValue else { return }
+            if !oldValue.isEmpty { SlidingStack.fade(label) }
+            label.stringValue = text
+            invalidateIntrinsicContentSize()
+        }
+    }
+    /// A longer text is cut with "…" (the whole of it in the tip): a very
+    /// long branch pushed the whole bar (the owner, 2026-10-22).
+    public var maxTextWidth: CGFloat? {
+        didSet {
+            textCap?.isActive = false
+            textCap = maxTextWidth.map { label.widthAnchor.constraint(lessThanOrEqualToConstant: $0) }
+            textCap?.isActive = true
+        }
+    }
+    private var textCap: NSLayoutConstraint?
     /// The text in the accent or a warning color; nil for the quiet one.
     public var tint: NSColor? { didSet { restyle() } }
     var color: NSColor = .secondaryLabelColor { didSet { restyle() } }

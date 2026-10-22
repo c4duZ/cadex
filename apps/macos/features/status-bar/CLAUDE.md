@@ -15,6 +15,9 @@
 - `StatusItem.swift`: o item (id, título, linha do Customize, ícone, lado de costume, view) e
   `onVisible`, que liga e desliga a leitura dele; `StatusLabel`, a cara da maioria (ícone, texto,
   cor de alerta, dica, clique que roda um comando).
+- `SlidingStack.swift`: cada lado da barra; os itens que mudam de lugar deslizam do lugar antigo
+  (transform, sem mexer no layout) e os textos que mudam esmaecem. StatusLabel.maxTextWidth corta
+  um texto longo (o branch).
 - `StatusBarLayout.swift`: as regras puras: os lados salvos contra os ids conhecidos (desconhecido
   ou repetido sai e vira aviso), mostrar/esconder, a lista Left/Right do Customize e a volta.
 - `StatusBarView.swift`: a porta de entrada. Os itens próprios (folder, environment) e os que o app

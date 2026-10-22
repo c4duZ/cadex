@@ -4,6 +4,7 @@ import Settings
 import SourceControl
 import StatusBar
 import Strings
+import UILooks
 
 /// The status bar's catalog in this window (docs/spec/status-bar.md): the
 /// bar's own Folder and Environment, then Git branch, Terminals, RAM, CPU
@@ -12,6 +13,7 @@ import Strings
 extension WindowSession {
     func setUpStatusBar(_ bar: StatusBarView, git: SourceControlController) {
         let branch = StatusLabel(icon: .gitBranch, tip: T("Git branch", "Branch do Git"))
+        branch.maxTextWidth = UILooks.pt(180)
         branch.onClick = { [weak self] in _ = self?.commands.run("git.show") }
         let branchItem = StatusItem(id: "branch", title: T("Git branch", "Branch do Git"),
                                     subtitle: T("With commits to push ↑ and to pull ↓", "Com commits a enviar ↑ e a receber ↓"),
@@ -20,6 +22,7 @@ extension WindowSession {
         git.onBranch = { [weak branch, weak branchItem] info in
             guard let branch, branchItem?.isVisible == true else { return }
             branch.text = info.map { Self.branchText($0) } ?? ""
+            branch.toolTip = info.map { Self.branchText($0) }
             branch.isHidden = info == nil
         }
         branchItem.onVisible = { [weak git] visible in if visible { git?.refresh() } }

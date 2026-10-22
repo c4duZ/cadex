@@ -15,7 +15,15 @@ public final class AgentUsageStrip: NSView {
     public var onClick: (() -> Void)?
     public var colors = AgentColors() { didSet { render() } }
     /// The focused terminal's agent account, by folder; nil keeps the last.
-    public var focused: String? { didSet { if let focused { last = focused }; render() } }
+    /// Set at every output of the focused terminal: drawn again only when
+    /// the account changes, or the item flickered as an agent wrote (the
+    /// owner, 2026-10-22).
+    public var focused: String? {
+        didSet {
+            if let focused { last = focused }
+            if focused != oldValue && (focused != nil || oldValue == nil) { render() }
+        }
+    }
     private(set) var last: String?
     private let stack = NSStackView()
     private var card: HoverCard?
@@ -48,6 +56,7 @@ public final class AgentUsageStrip: NSView {
     }
 
     public func render() {
+        if !stack.arrangedSubviews.isEmpty, window != nil { fade() }
         stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         let usage = AgentUsageController.shared
         guard let account = shown() else {
@@ -57,7 +66,10 @@ public final class AgentUsageStrip: NSView {
         let logo = NSImageView(image: account.logo.image(size: UILooks.pt(12)))
         logo.contentTintColor = colors.secondary
         stack.addArrangedSubview(logo)
-        stack.addArrangedSubview(AgentText.label(account.name, size: 11, color: colors.text))
+        let name = AgentText.label(account.name, size: 11, color: colors.text)
+        // A long account name is cut, not pushing the bar (the owner, 2026-10-22).
+        name.widthAnchor.constraint(lessThanOrEqualToConstant: UILooks.pt(150)).isActive = true
+        stack.addArrangedSubview(name)
         guard let numbers = usage.states[account.dir]?.usage else {
             stack.addArrangedSubview(AgentText.label("–", size: 11, color: colors.secondary))
             return
@@ -86,6 +98,15 @@ public final class AgentUsageStrip: NSView {
             meter.widthAnchor.constraint(lessThanOrEqualToConstant: UILooks.pt(88)),
         ])
         meter.setContentCompressionResistancePriority(NSLayoutConstraint.Priority(240), for: .horizontal)
+    }
+
+    /// The account's switch fades in, as the bar's other texts do.
+    private func fade() {
+        stack.wantsLayer = true
+        let fade = CATransition()
+        fade.type = .fade
+        fade.duration = 0.18
+        stack.layer?.add(fade, forKey: "fade")
     }
 
     /// "19% 5h · 97% wk"

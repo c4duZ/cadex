@@ -64,6 +64,9 @@ public final class SourceControlController {
     /// Runs a command by id (buttons and keys go through the registry).
     let run: (String) -> Bool
 
+    /// The last branch seen in each repository, shown while its status is read.
+    private var knownBranches: [String: Branch] = [:]
+
     public init(folder: String, run: @escaping (String) -> Bool) {
         self.run = run
         panel.controller = self
@@ -92,7 +95,12 @@ public final class SourceControlController {
                     self.state = !available ? .gitMissing : (found == nil ? .noRepository : .loading)
                     self.status = GitRepository.Status()
                     self.panel.render()
-                    self.publishMarks()
+                    // A repository's last branch shows at once, and nothing is
+                    // said before its status comes: an empty status hid the
+                    // branch and moved the status bar, then it came back
+                    // (the owner, 2026-10-22).
+                    if let root = found?.root, let known = self.knownBranches[root] { self.onBranch?(known) }
+                    if found == nil { self.publishMarks() }
                     self.refresh()
                 }
             }
@@ -137,7 +145,9 @@ public final class SourceControlController {
     private func publishMarks() {
         // Before the first status the name is empty: nothing to show yet.
         let name = status.detached ? String(status.oid.prefix(7)) : status.branch
-        onBranch?(repo == nil || name.isEmpty ? nil : Branch(name: name, ahead: status.ahead, behind: status.behind))
+        let branch = repo == nil || name.isEmpty ? nil : Branch(name: name, ahead: status.ahead, behind: status.behind)
+        if let root = repo?.root, let branch { knownBranches[root] = branch }
+        onBranch?(branch)
         guard let root = repo?.root else { return onMarks?([:]) ?? () }
         var marks: [String: Character] = [:]
         for e in status.entries {

@@ -24,6 +24,17 @@ A barra tem dois lados, esquerda e direita, e cada lado é uma lista de itens em
 
 Sem mexer em nada, a barra é a de sempre: trilha à esquerda e ambiente à direita.
 
+### Mudanças sem pulo
+- Quando um item muda de largura (a pasta, o branch, a conta, ao trocar de aba ou de conta), os que
+  estão depois dele deslizam para o lugar novo (0,22 s) em vez de pular, e o texto que muda esmaece
+  para o novo (0,18 s). O branch passa de 180 pt e o nome da conta de 150 pt cortados com "…" (inteiros
+  na dica), para um nome longo não empurrar a barra inteira.
+- O branch nunca passa por "nenhum" ao trocar de pasta: o anterior fica até o novo chegar, e um
+  repositório já visto mostra o último branch dele na hora. A pasta de um terminal que falha ao ser
+  lida por um instante fica a última conhecida. O item da conta só se redesenha quando a conta muda
+  (antes se refazia a cada saída do terminal). O dono via a barra piscar e mudar as coisas de lugar
+  (2026-10-22).
+
 ### Personalizar
 - Botão direito na barra: menu com cada item (marcado se aparece) e "Customize Status Bar…".
 - "Customize Status Bar…" abre a janela Customize, a mesma da barra lateral, na aba Status Bar: as seções Left e

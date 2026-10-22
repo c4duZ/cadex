@@ -9,6 +9,26 @@ import Foundation
 // shared/checks/Checks.swift for why this is an executable).
 
 let exitCode = await Checks.run([
+    ("an item that grows makes the next one slide to its place, not jump", {
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 30), styleMask: [.borderless], backing: .buffered, defer: false)
+        let stack = SlidingStack()
+        stack.frame = NSRect(x: 0, y: 0, width: 600, height: 30)
+        window.contentView?.addSubview(stack)
+        let first = StatusLabel(icon: nil), second = StatusLabel(icon: nil)
+        first.text = "main"
+        second.text = "bhband"
+        stack.addArrangedSubview(first)
+        stack.addArrangedSubview(second)
+        stack.layoutSubtreeIfNeeded()
+        let before = second.frame.minX
+        first.text = "feature/a-very-long-branch-name"
+        stack.layoutSubtreeIfNeeded()
+        expect(second.frame.minX > before, "\(before) → \(second.frame.minX)")
+        expect(second.layer?.animation(forKey: "slide") != nil, "it slides from where it was")
+        first.maxTextWidth = 60
+        stack.layoutSubtreeIfNeeded()
+        expect(first.frame.width < 90, "a long text is capped: \(first.frame.width)")
+    }),
     ("a folder under home starts at Home", {
         let titles = Breadcrumb.segments(of: "/Users/cadu/Trabalho/cadex", home: "/Users/cadu").map(\.title)
         expect(titles == ["Home", "Trabalho", "cadex"], "\(titles)")

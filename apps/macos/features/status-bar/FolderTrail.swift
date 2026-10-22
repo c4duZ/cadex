@@ -41,6 +41,7 @@ final class FolderTrail: NSView {
     required init?(coder: NSCoder) { fatalError("FolderTrail is created in code") }
 
     private func rebuild() {
+        SlidingStack.fade(self)
         trail.arrangedSubviews.forEach { $0.removeFromSuperview() }
         guard let path else { return }
         let segments = Breadcrumb.segments(of: path, home: home)
