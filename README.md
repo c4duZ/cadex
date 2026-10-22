@@ -31,6 +31,9 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   desenho em Metal), com abas, divisões, busca, links e colagem de imagens.
 - **Documentos ao lado do terminal:** código, Markdown, mídia, diffs, histórico e previews abrem
   num painel da mesma aba (ou em aba própria, se preferir), divididos como terminais.
+- **Painéis que se arrumam** (Mac): com a aba dividida, cada painel ganha um cabeçalho fino com o
+  nome, abrir ao lado, maximizar e fechar (o clique do meio também fecha). Arrastar o cabeçalho
+  move o painel para um lado de outro, ou troca os dois, vendo o resultado ao vivo.
 - **Spaces:** grupos de abas com nome, que voltam como estavam ao reabrir o app.
 - **Explorador e busca** de arquivos por nome e por conteúdo, respeitando o `.gitignore`.
 - **Editor de código** com destaque de sintaxe (tree-sitter), números de linha e dobras.
@@ -47,7 +50,8 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
 - **Barra lateral e barra de status do seu jeito** (Mac): os ícones do topo da barra lateral (Files,
   Git, Git History, Agents, Accounts) e os itens da barra de status (pasta, branch,
   terminais, agentes, uso, RAM, CPU, memória do Cadex, portas abertas, hosts SSH) são escolhidos e
-  arrastados para o lugar; o que fica desligado não pesa nada.
+  arrastados para o lugar; o que fica desligado não pesa nada. Toda página da barra lateral tem o
+  mesmo cabeçalho: o nome (a pasta, a branch) à esquerda e as ações dela à direita.
 - **Hosts SSH** (Mac): os do `~/.ssh/config`, se respondem, e um clique conecta numa aba.
 - **Escolher elemento para o agente** (Mac): no preview web, `⇧⌘C` e um clique mandam o elemento
   para o terminal do agente, com o arquivo e a linha onde ele foi escrito (React, Next, Vue, Svelte)
@@ -146,6 +150,7 @@ máquinas: ⌘ vira Ctrl+Shift (como no Windows Terminal), e ⌘ com ⇧, ⌥ ou
 | Nova janela | `⌘N` | pela paleta (sem atalho) |
 | Manter acordado (ligar ou desligar) | `⇧⌘A` | `Ctrl+Shift+Alt+A` |
 | Dividir à direita / para baixo | `⌘D` / `⌘⇧D` | `Ctrl+Shift+D` / `Ctrl+Shift+Alt+D` |
+| Maximizar o painel (e voltar) | `⌘⇧↩` | só no Mac |
 | Ir para a aba 1…9 | `⌘1…9` | `Ctrl+Shift+1…9` |
 | Abrir arquivo por nome / buscar no conteúdo | `⌘P` / `⌘⇧F` | `Ctrl+Shift+P` / `Ctrl+Shift+Alt+F` |
 | Abrir pasta | `⌘O` | `Ctrl+Shift+O` |
