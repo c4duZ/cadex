@@ -66,12 +66,6 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   ícone do tipo). "●" no título quando qualquer painel da aba tem mudança não salva.
 
 ### Cabeçalho dos painéis
-- Com 2 ou mais painéis, cada um é um cartão com os quatro cantos arredondados (8 pt, curva contínua),
-  com 6 pt da cor da moldura da janela entre eles: a divisão fica clara (o dono achou a linha de 1 pt
-  dentro de uma moldura só tosca, 2026-10-22). O painel com foco tem um contorno fino da cor de
-  destaque que segue o cartão inteiro, cantos incluídos; os outros escurecem nos mesmos cantos. A
-  faixa de cor no topo do cabeçalho saiu: os cantos cortavam as pontas dela. O divisor continua
-  arrastável no espaço entre os cartões e mostra uma alça ao passar o ponteiro.
 - Com 2 ou mais painéis numa aba, cada um ganha em cima uma linha fina (24 pt, sem fundo, um fio
   embaixo): à esquerda o ícone e o nome (o arquivo, com ● se não salvo; o programa do terminal, ou a
   pasta); à direita + (terminal ao lado, terminal abaixo, preview web ao lado, maximizar, fechar o
@@ -79,7 +73,7 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   foco e ao passar o ponteiro nos outros, e guardam o lugar quando somem, para o cabeçalho não mexer
   (o maximizar aparecendo sozinho mexia, 2026-10-22). O botão do meio do mouse fecha o painel, como
   fecha uma aba; o painel com foco tem
-  o nome mais forte. Mais leve que as abas da janela, para não
+  uma linha da cor de destaque em cima e o nome mais forte. Mais leve que as abas da janela, para não
   parecer uma segunda fileira de abas. Resolve o issue #1: o arquivo aberto ao lado tinha só o ⌘W.
 - Arrastar o cabeçalho move o painel (a ideia do dono, 2026-10-22): a aba vira um quadro em que cada
   painel é uma janela cinza só com o cabeçalho (ícone e nome), e as janelas se reorganizam ao vivo,

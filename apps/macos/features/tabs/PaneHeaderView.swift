@@ -137,14 +137,17 @@ final class PaneHeaderView: NSView {
         needsDisplay = true
     }
 
-    /// The card's ground and a hairline below.
+    /// A hairline below; the focused pane's header gets the accent on top.
     override func draw(_ dirtyRect: NSRect) {
-        PaneLooks.cardColor.setFill()
-        bounds.fill()
         NSColor.separatorColor.setFill()
         NSRect(x: 0, y: bounds.height - 1, width: bounds.width, height: 1).fill()
-        // The focus is the card's accent outline (PaneLayoutView), along
-        // the rounded corners; a line here across the top looked cut.
+        // The accent stops short of the pane's rounded corners (8 pt) with
+        // round ends: drawn edge to edge, the corners shaved its ends and it
+        // looked cut (the owner, 2026-10-22).
+        if focused, bounds.width > 32 {
+            style.accent.setFill()
+            NSBezierPath(roundedRect: NSRect(x: 10, y: 0, width: bounds.width - 20, height: 2), xRadius: 1, yRadius: 1).fill()
+        }
     }
 }
 

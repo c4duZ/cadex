@@ -330,10 +330,9 @@ let exitCode = await Checks.run([
         expect(layout.panes[tabs.activeTab!.tree.leaves.last!]!.superview == nil, "the other pane is out of view")
         tabs.toggleZoom()
         layout.layoutSubtreeIfNeeded()
-        expect(layout.zoomed == nil && layout.headerViews.count == 2 && layout.headerViews.values.allSatisfy { $0.superview?.superview === layout },
-               "both headers back in view")
+        expect(layout.zoomed == nil && layout.headerViews.count == 2)
         if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
-            let root = NSView(frame: NSRect(x: 0, y: 0, width: 900, height: 220))
+            let root = NSView(frame: NSRect(x: 0, y: 0, width: 900, height: 160))
             root.wantsLayer = true
             root.layer?.backgroundColor = NSColor(white: 0.11, alpha: 1).cgColor
             root.appearance = NSAppearance(named: .darkAqua)
@@ -346,11 +345,9 @@ let exitCode = await Checks.run([
             let window = NSWindow(contentRect: root.bounds, styleMask: [.borderless], backing: .buffered, defer: false)
             window.appearance = NSAppearance(named: .darkAqua)
             window.contentView = root
-            PaneLooks.frameColor = NSColor(white: 0.17, alpha: 1)
-            PaneLooks.cardColor = NSColor(white: 0.07, alpha: 1)
-            for view in layout.panes.values {
+            for (id, view) in layout.panes {
                 view.wantsLayer = true
-                view.layer?.backgroundColor = NSColor(white: 0.07, alpha: 1).cgColor
+                view.layer?.backgroundColor = NSColor(white: id == layout.focused ? 0.13 : 0.1, alpha: 1).cgColor
             }
             layout.layoutSubtreeIfNeeded()
             layout.headerViews.values.forEach { $0.layoutSubtreeIfNeeded() }

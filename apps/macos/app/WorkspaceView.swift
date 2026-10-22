@@ -153,9 +153,6 @@ final class WorkspaceView: NSView {
         window?.appearance = NSAppearance(named: theme.dark ? .darkAqua : .aqua)
         sidebarPanel.setColors(fill: ui.panel.nsColor, border: ui.panelBorder.nsColor)
         contentPanel.setColors(fill: theme.terminal.background.nsColor, border: ui.panelBorder.nsColor)
-        // Split panes are cards on the frame's color (docs/spec/tabs.md).
-        PaneLooks.frameColor = ui.chrome.nsColor
-        PaneLooks.cardColor = theme.terminal.background.nsColor
         explorer.style = .init(text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor, accent: ui.accent.nsColor)
         titleBar.setColors(text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, field: ui.field.nsColor, accent: ui.accent.nsColor)
         // Over the active fill: black or white if a user's accent made it too

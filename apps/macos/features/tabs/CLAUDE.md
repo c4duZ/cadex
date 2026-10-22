@@ -23,8 +23,6 @@
   pediu, que não é trocado. Encostado (issue #5): Tab.dockedPane é um documento num lado da
   divisão de fora; `PaneTree.balanced(keeping:)` reequilibra só o outro lado; o lado vem de
   documentsOnLeft (tabs.documentSide, que o app define).
-  Com 2+ painéis, cada um fica num `PaneCard` (em `PaneLayoutView.swift`) arredondado nos quatro cantos,
-  6 pt entre eles na cor PaneLooks.frameColor, o com foco com contorno da cor de destaque.
   `PaneHeaderView.swift`: o cabeçalho de cada painel com 2+ painéis (nome, ⋯, maximizar, ✕; issue
   #1), posto pelo `PaneLayoutView.swift`, que também mostra só o painel maximizado (`zoomed`);
   `TabsPaneHeaders.swift` diz o que cada um mostra e liga os botões aos comandos pelo `runCommand`

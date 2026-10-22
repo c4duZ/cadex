@@ -10,12 +10,7 @@ import AppKit
 /// pointer.
 final class PaneLayoutView: NSView {
     /// Space between panes, where the divider line is drawn and grabbed.
-    /// Space between panes: each pane is its own rounded card on the
-    /// window's frame color, so the division reads clearly (the owner,
-    /// 2026-10-22; a 1 pt line inside one panel looked crude).
-    static let gap: CGFloat = 6
-    /// The cards' corners, the same as the panels' (PanelView, 8 pt).
-    static let cardRadius: CGFloat = 8
+    static let gap: CGFloat = 1
     /// No pane gets smaller than this by dragging or splitting.
     static let minPaneSize = CGSize(width: 120, height: 60)
     /// How far from the line a drag still grabs the divider.
@@ -34,8 +29,6 @@ final class PaneLayoutView: NSView {
     var onHeaderAction: ((Int, PaneHeaderView.Action) -> Void)?
     var headerStyle: TabBarView.Style? { didSet { refreshHeaders() } }
     private var headers: [Int: PaneHeaderView] = [:]
-    /// Each shown pane's card: its header and its view, clipped round.
-    private var cards: [Int: PaneCard] = [:]
     /// A pane being dragged by its header (PaneDragState).
     private var paneDrag: PaneDragState?
     var headerViews: [Int: PaneHeaderView] { headers }
@@ -59,25 +52,17 @@ final class PaneLayoutView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("PaneLayoutView is created in code") }
 
-    /// Puts exactly the tree's panes in the view, each in its card, the
-    /// outline on top.
+    /// Puts exactly the tree's panes in the view, outline on top.
     func syncSubviews() {
         if let zoomed, !tree.leaves.contains(zoomed) { self.zoomed = nil }
         let shown = zoomed.map { [$0] } ?? tree.leaves
-        for (id, card) in cards where !shown.contains(id) {
-            card.subviews.forEach { $0.removeFromSuperview() }
-            card.removeFromSuperview()
-            cards[id] = nil
+        let wanted = Set(shown.compactMap { panes[$0] }.map(ObjectIdentifier.init))
+        for view in subviews where view !== outline && !(view is PaneHeaderView) && !wanted.contains(ObjectIdentifier(view)) {
+            view.removeFromSuperview()
         }
         for id in shown {
-            let card = cards[id] ?? PaneCard()
-            if cards[id] == nil {
-                cards[id] = card
-                addSubview(card, positioned: .below, relativeTo: outline)
-            }
-            // What left the tab (or the card) goes; the pane comes in.
-            for view in card.subviews where !(view is PaneHeaderView) && view !== panes[id] { view.removeFromSuperview() }
-            if let view = panes[id], view.superview !== card { card.addSubview(view, positioned: .below, relativeTo: nil) }
+            guard let view = panes[id], view.superview !== self else { continue }
+            addSubview(view, positioned: .below, relativeTo: outline)
         }
         needsLayout = true
     }
@@ -88,20 +73,14 @@ final class PaneLayoutView: NSView {
         needsDisplay = true
         let withHeaders = showsHeaders
         placeHeaders(withHeaders ? Array(frames.keys) : [])
-        let asCards = frames.count > 1
         for (id, frame) in frames {
-            guard let card = cards[id] else { continue }
-            card.frame = frame
-            card.layer?.cornerRadius = asCards ? Self.cardRadius : 0
-            guard withHeaders, let header = headers[id] else { panes[id]?.frame = card.bounds; continue }
+            guard withHeaders, let header = headers[id] else { panes[id]?.frame = frame; continue }
             let height = min(PaneHeaderView.height, frame.height)
-            header.frame = CGRect(x: 0, y: 0, width: frame.width, height: height)
-            panes[id]?.frame = CGRect(x: 0, y: height, width: frame.width, height: frame.height - height)
+            header.frame = CGRect(x: frame.minX, y: frame.minY, width: frame.width, height: height)
+            panes[id]?.frame = CGRect(x: frame.minX, y: frame.minY + height, width: frame.width, height: frame.height - height)
         }
         outline.frame = bounds
-        outline.dimmed = asCards ? frames.filter { $0.key != focused }.map(\.value) : []
-        outline.focusedCard = asCards ? focused.flatMap { frames[$0] } : nil
-        outline.accent = headerStyle?.accent ?? .controlAccentColor
+        outline.dimmed = zoomed == nil && tree.leaves.count > 1 ? frames.filter { $0.key != focused }.map(\.value) : []
         updateTrackingAreas()
     }
 
@@ -120,16 +99,10 @@ final class PaneLayoutView: NSView {
             header.removeFromSuperview()
             headers[id] = nil
         }
-        for id in ids {
-            guard let card = cards[id] else { continue }
-            if let header = headers[id] {
-                // Back from a hidden card (a pane was maximized): in its card again.
-                if header.superview !== card { card.addSubview(header) }
-                continue
-            }
+        for id in ids where headers[id] == nil {
             let header = PaneHeaderView(frame: .zero)
             header.onAction = { [weak self] action in self?.onHeaderAction?(id, action) }
-            card.addSubview(header)
+            addSubview(header, positioned: .below, relativeTo: outline)
             headers[id] = header
         }
         refreshHeaders()
@@ -145,20 +118,18 @@ final class PaneLayoutView: NSView {
         }
     }
 
-    /// With 2+ panes, the window's frame color shows between the cards
-    /// (PaneLooks.frameColor); a dragged divider shows a short handle.
-    /// One pane draws nothing: a filled view would hide a background image.
+    /// Only the divider lines: filling the whole view would hide a
+    /// background image behind the terminals.
     override func draw(_ dirtyRect: NSRect) {
-        guard tree.leaves.count > 1, zoomed == nil else { return }
-        PaneLooks.frameColor.setFill()
-        bounds.fill()
-        for divider in dividers(of: tree, in: bounds, path: []) where divider.path == hovered || divider.path == dragging?.path {
-            NSColor.labelColor.withAlphaComponent(0.35).setFill()
-            let line = divider.line
-            let handle = divider.axis == .horizontal
-                ? CGRect(x: line.midX - 1.5, y: line.midY - 20, width: 3, height: 40)
-                : CGRect(x: line.midX - 20, y: line.midY - 1.5, width: 40, height: 3)
-            NSBezierPath(roundedRect: handle, xRadius: 1.5, yRadius: 1.5).fill()
+        for divider in dividers(of: tree, in: bounds, path: []) {
+            if divider.path == hovered || divider.path == dragging?.path {
+                NSColor.labelColor.withAlphaComponent(0.35).setFill()
+                let thick = divider.axis == .horizontal ? divider.line.insetBy(dx: -1.5, dy: 0) : divider.line.insetBy(dx: 0, dy: -1.5)
+                NSBezierPath(roundedRect: thick, xRadius: 2, yRadius: 2).fill()
+            } else {
+                NSColor.separatorColor.setFill()
+                divider.line.fill()
+            }
         }
     }
 
@@ -346,15 +317,6 @@ public enum PaneLooks {
     public static var unfocusedDim: CGFloat = 0.26 {
         didSet { if unfocusedDim != oldValue { NotificationCenter.default.post(name: didChange, object: nil) } }
     }
-    /// The window's frame color, between the panes' cards; the app sets it
-    /// from the theme.
-    public static var frameColor: NSColor = .windowBackgroundColor {
-        didSet { if frameColor != oldValue { NotificationCenter.default.post(name: didChange, object: nil) } }
-    }
-    /// A card's own color (the terminal's background): the headers' ground.
-    public static var cardColor: NSColor = .textBackgroundColor {
-        didSet { if cardColor != oldValue { NotificationCenter.default.post(name: didChange, object: nil) } }
-    }
     /// tabs.paneHeaders: "split" (default), "always" or "never".
     public static var paneHeaders = "split" {
         didSet { if paneHeaders != oldValue { NotificationCenter.default.post(name: didChange, object: nil) } }
@@ -365,11 +327,6 @@ public enum PaneLooks {
 /// out without a line. Draws over the panes and lets every click through.
 private final class FocusOutlineView: NSView {
     var dimmed: [CGRect] = [] { didSet { if dimmed != oldValue { needsDisplay = true } } }
-    /// The focused card: a thin accent outline along its whole rounded
-    /// edge, in place of a line across its top that the corners cut (the
-    /// owner, 2026-10-22).
-    var focusedCard: CGRect? { didSet { if focusedCard != oldValue { needsDisplay = true } } }
-    var accent: NSColor = .controlAccentColor { didSet { if accent != oldValue { needsDisplay = true } } }
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -386,31 +343,7 @@ private final class FocusOutlineView: NSView {
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
 
     override func draw(_ dirtyRect: NSRect) {
-        let radius = PaneLayoutView.cardRadius
         NSColor.black.withAlphaComponent(PaneLooks.unfocusedDim).setFill()
-        dimmed.forEach { NSBezierPath(roundedRect: $0, xRadius: radius, yRadius: radius).fill() }
-        guard let focusedCard else { return }
-        accent.withAlphaComponent(0.75).setStroke()
-        let edge = NSBezierPath(roundedRect: focusedCard.insetBy(dx: 0.5, dy: 0.5), xRadius: radius - 0.5, yRadius: radius - 0.5)
-        edge.lineWidth = 1
-        edge.stroke()
+        dimmed.forEach { $0.fill() }
     }
-}
-
-/// A pane's card: its header and its view, clipped to round corners on all
-/// four sides when the tab is split (the owner, 2026-10-22). One container
-/// clips both, where masking each one's corners came out upside down.
-@MainActor
-final class PaneCard: NSView {
-    init() {
-        super.init(frame: .zero)
-        wantsLayer = true
-        layer?.masksToBounds = true
-        layer?.cornerCurve = .continuous
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) { fatalError("PaneCard is created in code") }
-
-    override var isFlipped: Bool { true }
 }
