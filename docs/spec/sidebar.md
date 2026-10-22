@@ -7,7 +7,8 @@ em que ordem.
 
 ## Comportamento
 - No topo, ao lado dos botões da janela, a fileira de ícones (Phosphor), agrupada numa moldura
-  arredondada de fundo leve, como o grupo de botões da barra de título; personalizar fica à parte. Clicar num ícone mostra a
+  arredondada de fundo leve que vai de ponta a ponta, com personalizar na ponta direita, como o grupo
+  de botões da barra de título. Clicar num ícone mostra a
   página dele; clicar no ícone da página aberta recolhe a barra lateral (como view.toggle-sidebar).
 - Os ícones padrão, nesta ordem: Files (⇧⌘E, explorer.focus), Git (⇧⌘G, git.show), Agents (⇧⌘J,
   agents.show) e Accounts (⇧⌘U, agents.show-accounts, de uso); Agents e Accounts separados para cada
