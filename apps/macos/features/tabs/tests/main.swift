@@ -424,6 +424,23 @@ let exitCode = await Checks.run([
         expect(layout.tree.leaves == [document, terminal])
         tabs.closeAll()
     }),
+    ("dragging a tab: the others slide live, the window cannot move meanwhile, it lands at its middle", {
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 40), styleMask: [.titled], backing: .buffered, defer: false)
+        let bar = TabBarView(frame: NSRect(x: 0, y: 0, width: 600, height: 30))
+        window.contentView?.addSubview(bar)
+        bar.items = [1, 2, 3].map { TabBarView.Item(id: $0, title: "t\($0)", active: $0 == 1) }
+        var moved: (Int, Int)?
+        bar.onMove = { moved = ($0, $1) }
+        let width = bar.frame(at: 0).width
+        bar.beginDrag(1, at: 10)
+        expect(window.isMovable == false, "the title bar does not take the drag")
+        bar.moveDrag(to: 10 + width * 1.2)
+        expect(bar.dragOrder == [2, 1, 3], "the second slid left while dragging: \(bar.dragOrder)")
+        bar.moveDrag(to: 10 + width * 2.2)
+        expect(bar.dragOrder == [2, 3, 1])
+        bar.endDrag()
+        expect(moved?.0 == 1 && moved?.1 == 2 && window.isMovable, "\(String(describing: moved))")
+    }),
     ("docking: a pane at one side of the outermost split keeps its share", {
         let three = PaneTree.split(.horizontal, .leaf(1), .split(.horizontal, .leaf(2), .leaf(3), ratio: 0.5), ratio: 0.5)
         let docked = three.docking(9, first: false)

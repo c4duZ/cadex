@@ -27,6 +27,11 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   no lugar de pílulas discretas (2026-10-19).
 - A barra de abas aparece mesmo com uma aba só (o visual final vem com a feature themes).
 
+- Arrastar uma aba pela barra muda a ordem: ela vai por cima seguindo o ponteiro e as outras deslizam
+  para a vaga nova enquanto ela passa (0,15 s), como os ícones da barra lateral; cai onde o meio dela
+  está. Enquanto uma aba é arrastada a janela não se move: na barra de título o macOS pegava o
+  arraste e levava a janela inteira (o dono, 2026-10-22).
+
 ### Divisões
 - ⌘D divide o painel com foco para a direita; ⌘⇧D, para baixo. O painel novo abre na mesma pasta e
   ganha o foco. Painéis numa mesma direção ficam do mesmo tamanho: três lado a lado têm um terço

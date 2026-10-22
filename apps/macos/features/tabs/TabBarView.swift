@@ -89,7 +89,13 @@ public final class TabBarView: NSView {
     private var hovered: Int?
     /// The tab the middle button went down on.
     private var middlePressed: Int?
-    private var dragging: (id: Int, startX: CGFloat, offset: CGFloat)?
+    var dragging: (id: Int, startX: CGFloat, offset: CGFloat)?
+    /// The other tabs sliding to their new places while one is dragged
+    /// (TabBarDrag.swift): where each started and when.
+    var slideFrom: [Int: CGFloat] = [:]
+    var slideStart: CFTimeInterval = 0
+    var slideTimer: Timer?
+    var dragOrder: [Int] = []
 
     public override var isFlipped: Bool { true }
     /// Clicks on tabs must not drag the window from the title bar.
@@ -113,7 +119,7 @@ public final class TabBarView: NSView {
     }
 
     /// Equal widths, the most that fits, never under `minWidth`.
-    private var frames: [NSRect] {
+    var frames: [NSRect] {
         let gaps = Self.gap * CGFloat(max(items.count - 1, 0))
         let fit = items.isEmpty ? Self.maxWidth : (bounds.width - gaps) / CGFloat(items.count)
         let width = min(max(fit, Self.minWidth), Self.maxWidth).rounded(.down)
@@ -122,7 +128,7 @@ public final class TabBarView: NSView {
         }
     }
 
-    private func frame(at index: Int) -> NSRect {
+    func frame(at index: Int) -> NSRect {
         let all = frames
         return index < all.count ? all[index] : .zero
     }
@@ -138,15 +144,14 @@ public final class TabBarView: NSView {
     // MARK: Drawing
 
     public override func draw(_ dirtyRect: NSRect) {
-        let all = frames
-        for (i, item) in items.enumerated() where i < all.count {
-            var rect = all[i]
-            if let drag = dragging, drag.id == item.id { rect.origin.x += drag.offset }
-            drawTab(item, in: rect, hovered: hovered == item.id)
+        guard dragging != nil else {
+            for (item, rect) in zip(items, frames) { drawTab(item, in: rect, hovered: hovered == item.id) }
+            return
         }
+        drawWhileDragging()
     }
 
-    private func drawTab(_ item: Item, in rect: NSRect, hovered: Bool) {
+    func drawTab(_ item: Item, in rect: NSRect, hovered: Bool) {
         let pill = NSRect(x: rect.minX, y: rect.midY - Self.pillHeight / 2, width: rect.width, height: Self.pillHeight)
         let fill = item.active ? style.activeFill : hovered ? style.hoverFill : style.text.withAlphaComponent(0.05)
         fill.setFill()
@@ -230,7 +235,7 @@ public final class TabBarView: NSView {
             return
         }
         onSelect?(item.id)
-        dragging = (item.id, point.x, 0)
+        beginDrag(item.id, at: point.x)
     }
 
     public override func rightMouseDown(with event: NSEvent) {
@@ -241,10 +246,7 @@ public final class TabBarView: NSView {
     }
 
     public override func mouseDragged(with event: NSEvent) {
-        guard var drag = dragging else { return }
-        drag.offset = convert(event.locationInWindow, from: nil).x - drag.startX
-        dragging = drag
-        needsDisplay = true
+        moveDrag(to: convert(event.locationInWindow, from: nil).x)
     }
 
     /// The middle button (mouse 3) closes the tab under it, as in browsers
@@ -262,14 +264,6 @@ public final class TabBarView: NSView {
     }
 
     public override func mouseUp(with event: NSEvent) {
-        defer {
-            dragging = nil
-            needsDisplay = true
-        }
-        guard let drag = dragging, abs(drag.offset) > 4, let from = items.firstIndex(where: { $0.id == drag.id }) else { return }
-        // The tab lands where its center is.
-        let center = frame(at: from).midX + drag.offset
-        let to = frames.lastIndex { $0.minX <= center } ?? 0
-        if to != from { onMove?(drag.id, to) }
+        endDrag()
     }
 }
