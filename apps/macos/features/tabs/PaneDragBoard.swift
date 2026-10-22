@@ -5,7 +5,7 @@ import UILooks
 /// gray window with only its header, gliding live to where it would be
 /// (the owner's idea, 2026-10-22: "turn the panes into gray windows").
 /// The real panes stay untouched behind it, so no terminal is resized until
-/// the drop. The dragged pane's window has the accent outline.
+/// the drop. The dragged pane's window is faded, the same gray.
 @MainActor
 final class PaneDragBoard: NSView {
     private var windows: [Int: CALayer] = [:]
@@ -66,8 +66,10 @@ final class PaneDragBoard: NSView {
         let window = CALayer()
         window.backgroundColor = style.activeFill.cgColor
         window.cornerRadius = 10
-        window.borderWidth = dragged ? 2 : 1
-        window.borderColor = (dragged ? style.accent : NSColor.white.withAlphaComponent(0.08)).cgColor
+        window.borderWidth = 1
+        window.borderColor = NSColor.white.withAlphaComponent(0.08).cgColor
+        // The dragged one just fades: no accent outline over it (the owner, 2026-10-22).
+        window.opacity = dragged ? 0.55 : 1
         window.shadowOpacity = 0.3
         window.shadowRadius = 8
         window.shadowOffset = CGSize(width: 0, height: -2)

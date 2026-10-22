@@ -78,7 +78,7 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
 - Arrastar o cabeçalho move o painel (a ideia do dono, 2026-10-22): a aba vira um quadro em que cada
   painel é uma janela cinza só com o cabeçalho (ícone e nome), e as janelas se reorganizam ao vivo,
   com uma animação de 0,3 s que passa um pouco do ponto, mostrando como vai ficar; a do painel
-  arrastado tem o contorno da cor de destaque, e uma etiqueta com o nome segue o ponteiro. Os painéis
+  arrastado fica esmaecida, no mesmo cinza, sem contorno colorido (o dono, 2026-10-22), e uma etiqueta com o nome segue o ponteiro. Os painéis
   de verdade ficam parados atrás e só mudam ao soltar (o terminal recebe o tamanho novo uma vez).
 - Onde cai é medido no layout do começo do arraste, não nas janelas que se mexem (medir nelas fazia o
   destino escorregar e o layout tremer): sobre outro painel, os lados pelas diagonais (esquerda,
