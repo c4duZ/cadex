@@ -25,6 +25,8 @@ public final class TabsController {
     /// The right click's menu on a tab, built by the app from commands
     /// (rename, color, close), for the tab already selected.
     public var contextMenu: (() -> [MenuEntry])?
+    /// Runs a command by id: the pane headers' buttons (ADR 0005).
+    public var runCommand: ((String) -> Bool)?
     /// The last tab closed. Without it, the window closes (one space).
     public var onEmpty: (() -> Void)?
     /// Whether these tabs are the ones in the window. Spaces keep the
@@ -52,6 +54,7 @@ public final class TabsController {
             guard let self, let entries = self.contextMenu?(), !entries.isEmpty else { return }
             PopupMenu.show(entries, at: point, in: self.bar)
         }
+        bar.onStyleChange = { [weak self] in self?.refreshHeaders() }
         bar.onMove = { [weak self] id, index in
             self?.list.move(id, to: index)
             self?.refreshBar()
@@ -86,6 +89,7 @@ public final class TabsController {
     func add(_ tab: Tab) {
         tabs[tab.id] = tab
         tab.onLayoutChange = { [weak self] in self?.onStateChange?() }
+        wireHeaders(tab)
     }
 
     /// The folder new terminals start in: the focused pane's (a terminal's
@@ -227,6 +231,7 @@ public final class TabsController {
 
     func refreshBar() {
         bar.items = list.order.compactMap { id in tabs[id].map(barItem) }
+        activeTab?.layout.refreshHeaders()
         onStateChange?()
         guard isShown else { return }
         if let document = activeDocument {

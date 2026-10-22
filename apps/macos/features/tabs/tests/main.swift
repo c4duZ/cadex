@@ -303,6 +303,64 @@ let exitCode = await Checks.run([
         expect(tabs.count == 2 && tabs.activeDocument === b && tabs.activePaneCount == 2)
         tabs.closeAll()
     }),
+    ("pane headers: only with 2+ panes; ✕ closes that pane alone; maximize; never", {
+        let tabs = makeTabs()
+        tabs.newTab(cwd: "/")
+        tabs.view.layoutSubtreeIfNeeded()
+        guard let layout = tabs.activeTab?.layout else { return expect(false) }
+        layout.layoutSubtreeIfNeeded()
+        expect(layout.headerViews.isEmpty, "one pane, no header")
+        let doc = FakeDocument("/r/CLAUDE.md")
+        tabs.open(doc, beside: true)
+        layout.layoutSubtreeIfNeeded()
+        expect(layout.headerViews.count == 2, "\(layout.headerViews.count)")
+        let docPane = tabs.activeTab!.tree.leaves.last!
+        expect(layout.headerViews[docPane]?.info.title == doc.title && layout.headerViews[docPane]?.focused == true)
+        expect(layout.panes[docPane]!.frame.minY == PaneHeaderView.height, "the pane starts under its header")
+        // Issue #1: the file's ✕ closes the file only, never the tab or the window.
+        layout.onHeaderAction?(docPane, .close)
+        layout.layoutSubtreeIfNeeded()
+        expect(doc.closed && tabs.count == 1 && tabs.activePaneCount == 1 && layout.headerViews.isEmpty)
+        tabs.open(FakeDocument("/r/b.md"), beside: true)
+        let terminalPane = tabs.activeTab!.tree.leaves.first!
+        layout.onHeaderAction?(terminalPane, .zoom)
+        layout.layoutSubtreeIfNeeded()
+        expect(layout.zoomed == terminalPane && layout.panes[terminalPane]!.frame.height == layout.bounds.height - PaneHeaderView.height)
+        expect(layout.panes[tabs.activeTab!.tree.leaves.last!]!.superview == nil, "the other pane is out of view")
+        tabs.toggleZoom()
+        layout.layoutSubtreeIfNeeded()
+        expect(layout.zoomed == nil && layout.headerViews.count == 2)
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
+            let root = NSView(frame: NSRect(x: 0, y: 0, width: 900, height: 160))
+            root.wantsLayer = true
+            root.layer?.backgroundColor = NSColor(white: 0.11, alpha: 1).cgColor
+            root.appearance = NSAppearance(named: .darkAqua)
+            layout.removeFromSuperview()
+            layout.translatesAutoresizingMaskIntoConstraints = true
+            layout.frame = root.bounds
+            layout.headerStyle = TabBarView.Style(activeFill: .darkGray, hoverFill: .gray, text: .white, secondaryText: NSColor(white: 0.6, alpha: 1),
+                                                  accent: NSColor(red: 0.98, green: 0.45, blue: 0.2, alpha: 1))
+            root.addSubview(layout)
+            let window = NSWindow(contentRect: root.bounds, styleMask: [.borderless], backing: .buffered, defer: false)
+            window.appearance = NSAppearance(named: .darkAqua)
+            window.contentView = root
+            for (id, view) in layout.panes {
+                view.wantsLayer = true
+                view.layer?.backgroundColor = NSColor(white: id == layout.focused ? 0.13 : 0.1, alpha: 1).cgColor
+            }
+            layout.layoutSubtreeIfNeeded()
+            layout.headerViews.values.forEach { $0.layoutSubtreeIfNeeded() }
+            if let bitmap = root.bitmapImageRepForCachingDisplay(in: root.bounds) {
+                root.cacheDisplay(in: root.bounds, to: bitmap)
+                try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/pane-headers.png"))
+            }
+        }
+        PaneLooks.paneHeaders = "never"
+        layout.layoutSubtreeIfNeeded()
+        expect(layout.headerViews.isEmpty)
+        PaneLooks.paneHeaders = "split"
+        tabs.closeAll()
+    }),
     ("docking: a pane at one side of the outermost split keeps its share", {
         let three = PaneTree.split(.horizontal, .leaf(1), .split(.horizontal, .leaf(2), .leaf(3), ratio: 0.5), ratio: 0.5)
         let docked = three.docking(9, first: false)

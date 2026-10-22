@@ -31,6 +31,8 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case coffee = 0xE1C2
     case command = 0xE1C4
     case copy = 0xE1CA
+    case cornersIn = 0xE1CE
+    case cornersOut = 0xE1D0
     case cpu = 0xE610
     case crosshair = 0xE1D6
     case dotsSixVertical = 0xEAE2

@@ -31,6 +31,11 @@ public enum TabCommands {
             Command(id: "pane.split-down", title: T("Split Down", "Dividir para baixo"), keywords: ["split", "painel", "embaixo"],
                     category: .panes, defaultShortcut: "cmd+shift+d", action: .run { tabs()?.split(.vertical) },
                     unavailableReason: needsTabs),
+            Command(id: "pane.zoom", title: T("Maximize or Restore Pane", "Maximizar ou restaurar o painel"),
+                    keywords: ["zoom", "maximize", "maximizar", "restore", "restaurar", "pane", "painel"], category: .panes,
+                    defaultShortcut: "cmd+shift+return", action: .run { tabs()?.toggleZoom() },
+                    unavailableReason: { (tabs()?.activePaneCount ?? 0) > 1 || tabs()?.activePaneZoomed == true ? nil
+                        : T("Only one pane in this tab", "Só um painel nesta aba") }),
             Command(id: "pane.next", title: T("Next Pane", "Próximo painel"), keywords: ["pane", "foco"], category: .panes,
                     defaultShortcut: "cmd+]", action: .run { tabs()?.focusPane(step: 1) }, unavailableReason: needsSplit),
             Command(id: "pane.previous", title: T("Previous Pane", "Painel anterior"), keywords: ["pane", "foco"], category: .panes,

@@ -168,6 +168,8 @@ final class Tab {
 
     func focus(_ pane: Int) {
         guard let content = panes[pane] else { return }
+        // Another pane taking the focus brings the maximized one back down.
+        if let zoomed = layout.zoomed, zoomed != pane { layout.zoomed = nil }
         noteFocus(pane)
         giveKeyboard(content)
     }

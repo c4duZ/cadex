@@ -59,6 +59,14 @@ enum ThemeLooksRows {
                              control: SettingsPage.slider(store.settings.tabs.unfocusedDim, range: Settings.dimRange, format: "%.0f%%", shown: { $0 * 100 }) { value in
                                  store.update { $0.tabs.unfocusedDim = value }
                              }),
+            SettingsPage.row(T("Pane headers", "Cabeçalho dos painéis"),
+                             T("A slim line on top of each pane with its name, maximize and close.",
+                               "Uma linha fina em cima de cada painel com o nome, maximizar e fechar."),
+                             control: SettingsPage.popup([(T("When Split", "Com divisões"), "split"), (T("Always", "Sempre"), "always"),
+                                                          (T("Never", "Nunca"), "never")],
+                                                         selected: store.settings.tabs.paneHeaders) { value in
+                                 store.update { $0.tabs.paneHeaders = value }
+                             }),
         ]
     }
 }

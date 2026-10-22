@@ -30,6 +30,7 @@ extension WindowSession {
     private func makeTabs() -> TabsController {
         let tabs = TabsController(window: window)
         tabs.contextMenu = { [weak self] in self?.menu?.popup(Self.tabActions) ?? [] }
+        tabs.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
         tabs.onOpenPreview = { [weak self] url in self?.openPreview(url) }
         tabs.onOpenFile = { [weak self] path, beside in
             // A pasted image lives in the temporary folder, outside the

@@ -21,6 +21,15 @@ final class PaneLayoutView: NSView {
     var focused: Int? { didSet { outline.needsDisplay = true; needsLayout = true } }
     /// The tree after a divider drag.
     var onTreeChange: ((PaneTree) -> Void)?
+    /// The one pane taking the whole tab (pane.zoom), the others out of view.
+    var zoomed: Int? { didSet { if zoomed != oldValue { syncSubviews() } } }
+    /// What each pane's header says, from the tab.
+    var describe: ((Int) -> PaneHeaderView.Info?)?
+    /// A header's click or button, by pane.
+    var onHeaderAction: ((Int, PaneHeaderView.Action) -> Void)?
+    var headerStyle: TabBarView.Style? { didSet { refreshHeaders() } }
+    private var headers: [Int: PaneHeaderView] = [:]
+    var headerViews: [Int: PaneHeaderView] { headers }
 
     private let outline = FocusOutlineView()
     private var dragging: (path: [Bool], axis: PaneTree.Axis, area: CGRect)?
@@ -33,6 +42,9 @@ final class PaneLayoutView: NSView {
         super.init(frame: frame)
         outline.autoresizingMask = [.width, .height]
         addSubview(outline)
+        NotificationCenter.default.addObserver(forName: PaneLooks.didChange, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.needsLayout = true }
+        }
     }
 
     @available(*, unavailable)
@@ -40,11 +52,13 @@ final class PaneLayoutView: NSView {
 
     /// Puts exactly the tree's panes in the view, outline on top.
     func syncSubviews() {
-        let wanted = Set(tree.leaves.compactMap { panes[$0] }.map(ObjectIdentifier.init))
-        for view in subviews where view !== outline && !wanted.contains(ObjectIdentifier(view)) {
+        if let zoomed, !tree.leaves.contains(zoomed) { self.zoomed = nil }
+        let shown = zoomed.map { [$0] } ?? tree.leaves
+        let wanted = Set(shown.compactMap { panes[$0] }.map(ObjectIdentifier.init))
+        for view in subviews where view !== outline && !(view is PaneHeaderView) && !wanted.contains(ObjectIdentifier(view)) {
             view.removeFromSuperview()
         }
-        for id in tree.leaves {
+        for id in shown {
             guard let view = panes[id], view.superview !== self else { continue }
             addSubview(view, positioned: .below, relativeTo: outline)
         }
@@ -53,14 +67,53 @@ final class PaneLayoutView: NSView {
 
     override func layout() {
         super.layout()
-        let frames = tree.frames(in: bounds, gap: Self.gap)
+        let frames = zoomed.map { [$0: bounds] } ?? tree.frames(in: bounds, gap: Self.gap)
         needsDisplay = true
+        let withHeaders = showsHeaders
+        placeHeaders(withHeaders ? Array(frames.keys) : [])
         for (id, frame) in frames {
-            panes[id]?.frame = frame
+            guard withHeaders, let header = headers[id] else { panes[id]?.frame = frame; continue }
+            let height = min(PaneHeaderView.height, frame.height)
+            header.frame = CGRect(x: frame.minX, y: frame.minY, width: frame.width, height: height)
+            panes[id]?.frame = CGRect(x: frame.minX, y: frame.minY + height, width: frame.width, height: frame.height - height)
         }
         outline.frame = bounds
-        outline.dimmed = tree.leaves.count > 1 ? frames.filter { $0.key != focused }.map(\.value) : []
+        outline.dimmed = zoomed == nil && tree.leaves.count > 1 ? frames.filter { $0.key != focused }.map(\.value) : []
         updateTrackingAreas()
+    }
+
+    /// tabs.paneHeaders: "split" (with 2+ panes, or one maximized), "always", "never".
+    var showsHeaders: Bool {
+        switch PaneLooks.paneHeaders {
+        case "always": true
+        case "never": false
+        default: tree.leaves.count > 1 || zoomed != nil
+        }
+    }
+
+    /// One header per shown pane, under the dimming like its pane.
+    private func placeHeaders(_ ids: [Int]) {
+        for (id, header) in headers where !ids.contains(id) {
+            header.removeFromSuperview()
+            headers[id] = nil
+        }
+        for id in ids where headers[id] == nil {
+            let header = PaneHeaderView(frame: .zero)
+            header.onAction = { [weak self] action in self?.onHeaderAction?(id, action) }
+            addSubview(header, positioned: .below, relativeTo: outline)
+            headers[id] = header
+        }
+        refreshHeaders()
+    }
+
+    /// The headers say again what their panes show (a title, a cwd changed).
+    func refreshHeaders() {
+        for (id, header) in headers {
+            if let info = describe?(id) { header.info = info }
+            if let headerStyle { header.style = headerStyle }
+            header.focused = id == focused
+            header.zoomed = id == zoomed
+        }
     }
 
     /// Only the divider lines: filling the whole view would hide a
@@ -164,7 +217,7 @@ final class PaneLayoutView: NSView {
     }
 
     private func dividers(of node: PaneTree, in rect: CGRect, path: [Bool]) -> [Divider] {
-        guard case .split(let axis, let a, let b, let ratio) = node else { return [] }
+        guard zoomed == nil, case .split(let axis, let a, let b, let ratio) = node else { return [] }
         let (first, second) = PaneTree.divide(rect, axis: axis, ratio: ratio, gap: Self.gap)
         let line = axis == .horizontal
             ? CGRect(x: first.maxX, y: rect.minY, width: Self.gap, height: rect.height)
@@ -183,6 +236,10 @@ public enum PaneLooks {
     /// 0.16 barely showed over dark themes (2026-10-19); 0.26 is the default.
     public static var unfocusedDim: CGFloat = 0.26 {
         didSet { if unfocusedDim != oldValue { NotificationCenter.default.post(name: didChange, object: nil) } }
+    }
+    /// tabs.paneHeaders: "split" (default), "always" or "never".
+    public static var paneHeaders = "split" {
+        didSet { if paneHeaders != oldValue { NotificationCenter.default.post(name: didChange, object: nil) } }
     }
 }
 

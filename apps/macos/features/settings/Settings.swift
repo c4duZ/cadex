@@ -71,6 +71,9 @@ public struct Settings: Equatable, Sendable {
         /// Where a file opened beside goes, with half the tab: "right" or
         /// "left" (issue #5).
         public var documentSide = "right"
+        /// A slim header on each pane with its name and a close button:
+        /// "split" (when a tab has 2+ panes), "always" or "never" (issue #1).
+        public var paneHeaders = "split"
     }
 
     public struct Explorer: Equatable, Sendable {
@@ -180,6 +183,7 @@ public struct Settings: Equatable, Sendable {
     static let markdownOpenings = ["source", "rendered"]
     static let pickTargets = ["terminal", "clipboard"]
     static let documentSides = ["right", "left"]
+    static let paneHeaderModes = ["split", "always", "never"]
     static let fileOpenings = ["beside", "tab"]
     static let languages = ["en", "pt"]
     static let keepAwakeModes = ["always", "running"]

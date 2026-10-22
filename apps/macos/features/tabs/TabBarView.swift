@@ -61,8 +61,10 @@ public final class TabBarView: NSView {
 
     public var style = Style(activeFill: .controlBackgroundColor, hoverFill: .quaternaryLabelColor,
                              text: .labelColor, secondaryText: .secondaryLabelColor) {
-        didSet { needsDisplay = true }
+        didSet { needsDisplay = true; onStyleChange?() }
     }
+    /// The theme changed the strip's colors: the pane headers take them too.
+    var onStyleChange: (() -> Void)?
 
     var items: [Item] = [] {
         didSet {

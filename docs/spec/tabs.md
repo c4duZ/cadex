@@ -65,6 +65,23 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
 - Título e ícone da aba vêm do painel com foco (terminal: pasta ou programa; documento: título e
   ícone do tipo). "●" no título quando qualquer painel da aba tem mudança não salva.
 
+### Cabeçalho dos painéis
+- Com 2 ou mais painéis numa aba, cada um ganha em cima uma linha fina (24 pt, sem fundo, um fio
+  embaixo): à esquerda o ícone e o nome (o arquivo, com ● se não salvo; o programa do terminal, ou a
+  pasta); à direita ⋯ (dividir à direita, para baixo, maximizar, fechar), maximizar e ✕. O ✕ fica
+  sempre à vista no painel com foco e aparece ao passar o ponteiro nos outros; o painel com foco tem
+  uma linha da cor de destaque em cima e o nome mais forte. Mais leve que as abas da janela, para não
+  parecer uma segunda fileira de abas. Resolve o issue #1: o arquivo aberto ao lado tinha só o ⌘W.
+- Clique no cabeçalho dá o foco ao painel; duplo clique maximiza. Cada botão roda um comando
+  (pane.close, pane.zoom, pane.split-right, pane.split-down).
+- Maximizar (pane.zoom, ⇧⌘↩): o painel ocupa a aba toda, os outros saem de vista e voltam ao
+  restaurar; dar o foco a outro painel também restaura.
+- Com um painel só, nada muda: sem cabeçalho. tabs.paneHeaders: "split" (padrão), "always" ou
+  "never" (Configurações › Temas, ao lado de "Painéis sem foco"), como a opção do iTerm2.
+- Escolhido depois de pesquisa (2026-10-22): editores dão abas a cada painel (VS Code, Zed); os
+  terminais, nenhum cabeçalho ou um só com divisões (iTerm2). Abas por painel trariam um segundo
+  nível de aba atual e o caso do grupo vazio; o cabeçalho fino basta para fechar o certo.
+
 ### Fechar
 - ⌘W fecha o painel com foco. O espaço dele vai para o vizinho. Se era o único da aba, fecha a aba.
   Se era a última aba, fecha a janela.

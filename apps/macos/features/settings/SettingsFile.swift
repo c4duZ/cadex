@@ -63,6 +63,7 @@ public enum SettingsFile {
         if let t = reader.section(root, "tabs") {
             if let v = reader.number(t, "tabs.unfocusedDim") { settings.tabs.unfocusedDim = v.clamped(to: Settings.dimRange) }
             settings.tabs.documentSide = reader.choice(t, "tabs.documentSide", Settings.documentSides) ?? settings.tabs.documentSide
+            settings.tabs.paneHeaders = reader.choice(t, "tabs.paneHeaders", Settings.paneHeaderModes) ?? settings.tabs.paneHeaders
         }
         if let e = reader.section(root, "explorer") {
             settings.explorer.showHidden = reader.bool(e, "explorer.showHidden") ?? settings.explorer.showHidden
@@ -140,7 +141,7 @@ public enum SettingsFile {
                            "backgroundOpacity": s.appearance.backgroundOpacity, "backgroundBlur": s.appearance.backgroundBlur,
                            "highContrast": s.appearance.highContrast, "uiZoom": s.appearance.uiZoom,
                            "density": s.appearance.density, "uiFont": s.appearance.uiFont, "uiFontSize": s.appearance.uiFontSize],
-            "tabs": ["unfocusedDim": s.tabs.unfocusedDim, "documentSide": s.tabs.documentSide],
+            "tabs": ["unfocusedDim": s.tabs.unfocusedDim, "documentSide": s.tabs.documentSide, "paneHeaders": s.tabs.paneHeaders],
             "explorer": ["showHidden": s.explorer.showHidden, "followTerminal": s.explorer.followTerminal],
             "markdown": ["openAs": s.markdown.openAs],
             "preview": ["pickTarget": s.preview.pickTarget, "pickScreenshot": s.preview.pickScreenshot],

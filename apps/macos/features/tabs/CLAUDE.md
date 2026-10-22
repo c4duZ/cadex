@@ -23,6 +23,10 @@
   pediu, que não é trocado. Encostado (issue #5): Tab.dockedPane é um documento num lado da
   divisão de fora; `PaneTree.balanced(keeping:)` reequilibra só o outro lado; o lado vem de
   documentsOnLeft (tabs.documentSide, que o app define).
+  `PaneHeaderView.swift`: o cabeçalho de cada painel com 2+ painéis (nome, ⋯, maximizar, ✕; issue
+  #1), posto pelo `PaneLayoutView.swift`, que também mostra só o painel maximizado (`zoomed`);
+  `TabsPaneHeaders.swift` diz o que cada um mostra e liga os botões aos comandos pelo `runCommand`
+  (pane.close, pane.zoom, as divisões). tabs.paneHeaders vem do app em PaneLooks.paneHeaders.
   `PanePressRecognizer.swift`: o clique num documento dá o foco ao painel sem tomar o clique. Título
   e ícone da aba vêm do painel com foco; "●" se qualquer painel tem mudança não salva. A oferta de preview de cada terminal sai por
   `onOpenPreview`. `TabList.swift`: as regras puras (ordem, ativa, recentes, mover), testadas.
@@ -54,7 +58,7 @@
 - Clique direito numa aba: seleciona e mostra `contextMenu` (as entradas vêm do app, por comandos).
   Cada aba guarda a cor de trabalho (`color`, no snapshot), `activeColor`/`setActiveColor`.
 - `TabCommands.swift`: tab.new, tab.rename, tab.select-1…9, tab.previous-used,
-  tab.least-recently-used, pane.close, pane.split-right, pane.split-down, pane.next, pane.previous,
+  tab.least-recently-used, pane.close, pane.zoom (⇧⌘↩), pane.split-right, pane.split-down, pane.next, pane.previous,
   pane.focus-left/right/up/down. `CloseConfirmation.swift`: a pergunta ao fechar painel, aba ou
   janela com programa rodando.
 - Spec em `../../../../docs/spec/tabs.md`. Status: abas, divisões e documentos em painéis prontos
