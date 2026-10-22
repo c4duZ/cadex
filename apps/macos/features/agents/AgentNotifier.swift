@@ -26,8 +26,6 @@ public final class AgentNotifier: NSObject {
     /// Whether you are looking at that agent now (its terminal in front in
     /// the key window): then nothing is posted.
     public var isLooking: (AgentSession) -> Bool = { _ in false }
-    /// The theme's accent, for the picture beside the text.
-    public var accent: NSColor = .controlAccentColor
     /// A click on a notification: go to the session, by its id.
     public var onOpen: ((String) -> Void)?
 
@@ -155,7 +153,7 @@ public final class AgentNotifier: NSObject {
         content.sound = .default
         content.threadIdentifier = id
         content.userInfo = ["session": id]
-        if let picture = AgentNotifyIcon.attachment(for: stop, accent: accent) { content.attachments = [picture] }
+        if let picture = AgentNotifyIcon.attachment(for: stop) { content.attachments = [picture] }
         // One per session: a new stop replaces the one before it.
         center.add(UNNotificationRequest(identifier: "agent-" + id, content: content, trigger: nil))
     }

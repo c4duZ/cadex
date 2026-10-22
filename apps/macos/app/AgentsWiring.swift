@@ -202,7 +202,6 @@ extension AppDelegate {
             NSApp.activate(ignoringOtherApps: true)
             self?.sessions.first?.openAgent(session)
         }
-        ThemeStore.shared.observe { theme in AgentNotifier.shared.accent = theme.interface.accent.nsColor }
         // A hidden account whose login changed (a new login, a renewal by
         // use) comes back; a window's reset does not count.
         AgentUsageController.shared.onLoginChanged = { [weak self] dir in

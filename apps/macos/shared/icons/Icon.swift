@@ -71,6 +71,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case plug = 0xE946
     case plus = 0xE3D4
     case question = 0xE3E8
+    case questionMark = 0xE3E9
     case sidebar = 0xEAB6
     case slidersHorizontal = 0xE434
     case sparkle = 0xE6A2

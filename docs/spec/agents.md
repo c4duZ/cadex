@@ -72,8 +72,10 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
 - O motivo vem do fim do log da conversa (os últimos 64 KB), lido uma vez por parada: a última
   ferramenta pedida sem resposta é uma permissão, a de pergunta é uma pergunta, o fim de turno é
   "terminou". Sem dizer, "Stopped and waits for you", contado como pergunta.
-- Cada tipo tem a sua imagem ao lado do texto (cadeado com chave, interrogação, ✓), branca na cor de
-  destaque do tema; o ícone à esquerda é o do app, que o macOS não deixa trocar.
+- Cada tipo tem a sua imagem ao lado do texto: o ícone do Cadex com um selo no canto, cadeado em
+  âmbar (permissão), interrogação em azul (pergunta), ✓ em verde (terminou). O ícone à esquerda é o
+  do app, que o macOS não deixa trocar; o símbolo branco no quadrado da cor de destaque destoava
+  (o dono, 2026-10-22).
 - Clicar leva ao terminal do agente, trazendo a janela, o space e a aba. Não avisa enquanto você
   olha aquele terminal na janela da frente. Uma notificação por sessão: a nova troca a anterior.
 - Três chaves, cada tipo desligável sozinho: agents.notifyPermission, agents.notifyQuestion e

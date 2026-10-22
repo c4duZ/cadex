@@ -177,14 +177,16 @@ let exitCode = await Checks.run([
         notifier.kinds = .init(permission: false, question: false, finished: false)
         expect(!controller.isRunning, "all three off: it stops reading")
     }),
-    ("an icon per kind, white on the accent", {
-        let png = AgentNotifyIcon.draw(.lockKey, accent: .orange)
+    ("a picture per kind: the app's icon with a badge", {
+        let docs = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../../../../../docs/cadex-icon.png").standardized
+        if let icon = NSImage(contentsOf: docs) { AgentNotifyIcon.appIcon = { icon } }
+        let png = AgentNotifyIcon.draw(.lockKey)
         expect((png?.count ?? 0) > 500)
-        expect(AgentNotifyIcon.icon(for: .permission("Bash")) == .lockKey && AgentNotifyIcon.icon(for: .question) == .question
-               && AgentNotifyIcon.icon(for: .finished) == .checkCircle)
+        expect(AgentNotifyIcon.icon(for: .permission("Bash")) == .lockKey && AgentNotifyIcon.icon(for: .question) == .questionMark
+               && AgentNotifyIcon.icon(for: .finished) == .check)
         if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
-            for (name, icon) in [("permission", Icon.lockKey), ("question", .question), ("finished", .checkCircle)] {
-                try? AgentNotifyIcon.draw(icon, accent: NSColor(red: 0.85, green: 0.6, blue: 0.4, alpha: 1))?.write(to: URL(fileURLWithPath: dir + "/notify-\(name).png"))
+            for (name, icon) in [("permission", Icon.lockKey), ("question", .questionMark), ("finished", .check)] {
+                try? AgentNotifyIcon.draw(icon)?.write(to: URL(fileURLWithPath: dir + "/notify-\(name).png"))
             }
         }
     }),
