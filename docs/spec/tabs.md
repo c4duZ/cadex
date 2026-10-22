@@ -69,8 +69,10 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
 - Com 2 ou mais painéis numa aba, cada um ganha em cima uma linha fina (24 pt, sem fundo, um fio
   embaixo): à esquerda o ícone e o nome (o arquivo, com ● se não salvo; o programa do terminal, ou a
   pasta); à direita + (terminal ao lado, terminal abaixo, preview web ao lado, maximizar, fechar o
-  painel, cada um com ícone e atalho), maximizar e ✕. O + e o ✕ ficam sempre à vista no painel com
-  foco e aparecem ao passar o ponteiro nos outros; o painel com foco tem
+  painel, cada um com ícone e atalho), maximizar e ✕. Os três aparecem juntos, sempre no painel com
+  foco e ao passar o ponteiro nos outros, e guardam o lugar quando somem, para o cabeçalho não mexer
+  (o maximizar aparecendo sozinho mexia, 2026-10-22). O botão do meio do mouse fecha o painel, como
+  fecha uma aba; o painel com foco tem
   uma linha da cor de destaque em cima e o nome mais forte. Mais leve que as abas da janela, para não
   parecer uma segunda fileira de abas. Resolve o issue #1: o arquivo aberto ao lado tinha só o ⌘W.
 - Arrastar o cabeçalho move o painel ao vivo: quando o ponteiro entra na faixa de borda (30%) de

@@ -82,6 +82,11 @@ final class PaneHeaderView: NSView {
     override func mouseEntered(with event: NSEvent) { hovering = true }
     override func mouseExited(with event: NSEvent) { hovering = false }
 
+    /// The middle button closes the pane, as it closes a tab.
+    override func otherMouseUp(with event: NSEvent) {
+        if event.buttonNumber == 2 { onAction?(.close) } else { super.otherMouseUp(with: event) }
+    }
+
     private var pressedAt: NSPoint?
     private var dragging = false
 
@@ -124,11 +129,11 @@ final class PaneHeaderView: NSView {
         zoomButton.icon = zoomed ? .cornersIn : .cornersOut
         zoomButton.toolTip = zoomed ? T("Restore Pane (⇧⌘↩)", "Restaurar painel (⇧⌘↩)") : T("Maximize Pane (⇧⌘↩)", "Maximizar painel (⇧⌘↩)")
         closeButton.toolTip = T("Close Pane (⌘W)", "Fechar painel (⌘W)")
-        // Close stays in view on the focused pane: the way out is never hidden.
-        // "+" sits by ✕ and shows with it (the owner, 2026-10-22).
-        menuButton.isHidden = !hovering && !focused
-        zoomButton.isHidden = !hovering && !zoomed
-        closeButton.isHidden = !hovering && !focused
+        // The three show together, on the focused pane and under the
+        // pointer, and keep their room when they fade: maximize showing
+        // apart from the others moved the header (the owner, 2026-10-22).
+        let shown = hovering || focused || zoomed
+        for button in [menuButton, zoomButton, closeButton] { button.alphaValue = shown ? 1 : 0 }
         needsDisplay = true
     }
 
@@ -185,6 +190,6 @@ final class PaneHeaderButton: NSView {
     override func mouseExited(with event: NSEvent) { hovering = false }
     override func mouseDown(with event: NSEvent) {}
     override func mouseUp(with event: NSEvent) {
-        if bounds.contains(convert(event.locationInWindow, from: nil)) { onPress?() }
+        if alphaValue > 0, bounds.contains(convert(event.locationInWindow, from: nil)) { onPress?() }
     }
 }
