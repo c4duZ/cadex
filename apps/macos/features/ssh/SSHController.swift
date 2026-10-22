@@ -25,7 +25,8 @@ public final class SSHController {
     /// ssh.ping: off, the list stays and nothing is tested.
     public var pings = true { didSet { if pings != oldValue { restart() } } }
     /// The home folder Includes resolve from, and its ~/.ssh/config.
-    var home = NSHomeDirectory()
+    /// CADEX_PERF_HOME: `make perf`'s folder with a test ~/.ssh/config.
+    var home = ProcessInfo.processInfo.environment["CADEX_PERF_HOME"] ?? NSHomeDirectory()
     var config: String { home + "/.ssh/config" }
     /// The connection test (tests put a fake one).
     var probe: (SSHHost) async -> Reach = SSHController.connect

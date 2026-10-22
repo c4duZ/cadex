@@ -119,3 +119,17 @@ command-palette, shortcuts, tabs, terminal · Decisões: `docs/adr/0019-agents-o
   Claude Code, nem o `~/.ssh/config`, nem saindo para a rede.
 - Conferência à mão pelo método do `docs/plans/README.md` (`CADEX_BACKGROUND=1`, menus,
   `screencapture -l`), comparando com o protótipo.
+
+## Fechamento (2026-10-22)
+- Fases A a F no código e conferidas pelo dono no app ao longo de 2026-10-21. Depois do plano
+  escrito, a pedido do dono: Accounts virou página própria (ícone de medidor) e ⌃⌘1–9 escolhem os
+  ícones da barra; um clique num subagente abre a conversa dele numa aba (ADR 0019 ampliada); o Esc
+  não gera notificação; terminais dividem atlas, fila e pipeline e a aba escondida solta a canvas
+  Metal (43 → 1 MB por aba).
+- `make perf` com tudo ligado (`all_on_scenario`: todos os itens, Agents aberto, 3 contas, 3
+  sessões e 3 hosts numa pasta de teste por CADEX_PERF_HOME): 85 a 88 MB contra 82 a 85 MB parado
+  (até +7%), CPU 0,3% contra 0,1%. Uma medição isolada deu 131 MB e não se repetiu em cinco.
+- Os ids novos já passam no `tools/check_command_parity.py` (sidebar.page-N é montado no código e
+  não é visto pelo script).
+- Ficou para depois: o sinal do agente no título da aba do terminal e a página aberta voltando com
+  os spaces.

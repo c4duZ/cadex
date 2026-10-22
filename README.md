@@ -37,6 +37,18 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
 - **Markdown** renderizado, com links entre notas, links quebrados e quem aponta pra cá.
 - **Git:** mudanças, stage, commit, push e pull, diff lado a lado e o grafo do histórico.
 - **Previews:** servidores locais e páginas web, imagem, vídeo, áudio e PDF.
+- **Agentes à vista** (Mac): a página Agents mostra as sessões do Claude Code rodando em todas as
+  contas deste Mac, por projeto, com o estado (trabalhando, esperando você) e os subagentes. Um clique
+  num subagente abre a conversa dele numa aba, no jeito do Claude Code; um duplo clique na sessão
+  vai ao terminal dela. Uma notificação avisa quando um agente pede permissão, pergunta ou termina.
+  O Cadex só lê: não manda prompt nem fala com modelo.
+- **Uso dos planos** (Mac): a página Accounts mostra quanto cada conta do Claude Code e do Codex usou
+  da sessão de 5 horas e da semana, e quando reinicia; um clique abre o agente daquela conta.
+- **Barra lateral e barra de status do seu jeito** (Mac): os ícones do topo da barra lateral (Files,
+  Search, Git, Git History, Agents, Accounts) e os itens da barra de status (pasta, branch,
+  terminais, agentes, uso, RAM, CPU, memória do Cadex, portas abertas, hosts SSH) são escolhidos e
+  arrastados para o lugar; o que fica desligado não pesa nada.
+- **Hosts SSH** (Mac): os do `~/.ssh/config`, se respondem, e um clique conecta numa aba.
 - **Escolher elemento para o agente** (Mac): no preview web, `⇧⌘C` e um clique mandam o elemento
   para o terminal do agente, com o arquivo e a linha onde ele foi escrito (React, Next, Vue, Svelte)
   e um print dele.
@@ -139,6 +151,7 @@ máquinas: ⌘ vira Ctrl+Shift (como no Windows Terminal), e ⌘ com ⇧, ⌥ ou
 | Abrir pasta | `⌘O` | `Ctrl+Shift+O` |
 | Painel lateral / arquivos / git | `⌘B` / `⌘⇧E` / `⌘⇧G` | `Ctrl+Shift+B` / `Ctrl+Shift+Alt+E` / `Ctrl+Shift+Alt+G` |
 | Preview web | `⌘⇧H` | `Ctrl+Shift+Alt+H` |
+| Agents / ícone 1…9 da barra lateral | `⌘⇧J` / `⌃⌘1…9` | só no Mac |
 | Escolher elemento no preview / parar | `⌘⇧C` / `Esc` | só no Mac |
 | Histórico do git | pela paleta (sem atalho) | pela paleta (sem atalho) |
 | Trocar de space / novo space | `⌘⇧S` / `⌃⌘N` | `Ctrl+Shift+Alt+S` / `Ctrl+Shift+Alt+N` |
@@ -159,6 +172,8 @@ Tamanhos da versão 2.1.0 (2026-10-21); memória medida na 0.1.0 (2026-10-19), n
 | download Windows (ZIP x64 / ARM64) | 4,1 MB / 3,9 MB |
 | app instalado (universal: Apple Silicon e Intel) | 44 MB |
 | memória com um terminal aberto (footprint) | 66 MB |
+| cada aba de terminal a mais, escondida (2.2.0) | 1 MB |
+| tudo da barra lateral e da barra de status ligado (2.2.0) | +7% |
 
 O app instalado leva as duas arquiteturas e as 18 gramáticas do
 tree-sitter compiladas dentro (as tabelas delas são 15 MB de cada fatia); o download comprimido fica

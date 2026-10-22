@@ -45,6 +45,8 @@ LIMITS = {
     "theme_switch_mb": 6,         # 0 MB over 300 switches after 150 to warm up (90 -> 90, 2026-10-20)
     "reading_flood_peak_mb": 200, # flood with minimum contrast 7 and ligatures on
     "terminal_tab_mb": 6,         # 0-1 MB each hidden tab (its canvas goes); 22 with the canvas kept, 43 before the shared atlas (2026-10-21)
+    "all_on_over_idle_pct": 10,   # plan 17: everything on, at most 10% over idle_mb
+    "all_on_cpu": 2.0,            # the same as idle_cpu
     "subagent_first_mb": 20,      # +6 to +9 MB: a 34 MB log's first opening, the text system included (2026-10-21)
     "subagent_open_mb": 8,        # 0 to +2 MB each opening after (TextKit 1 had kept +20 and jumped 70)
     "subagent_closed_mb": 5,      # +1 to +3 MB once its tab is closed again
@@ -242,6 +244,43 @@ def measure_tabs(app):
     return {"terminal_tab_mb": (after - base) / 5}
 
 
+def write_agents_home(home, pid):
+    """Three accounts with a live session each (`pid`, a process that waits)
+    and three SSH hosts on this Mac, none listening: what the all-on
+    scenario reads (plan 17, phase F)."""
+    def write(path, text):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as out:
+            out.write(text)
+    for i, folder in enumerate([".claude", ".claude-work", ".claude-side"]):
+        config = f"{home}/.claude.json" if folder == ".claude" else f"{home}/{folder}/.claude.json"
+        write(config, json.dumps({"oauthAccount": {"organizationName": f"Perf {i}"}}))
+        write(f"{home}/{folder}/sessions/{i}.json", json.dumps({
+            "pid": pid, "sessionId": f"perf-{i}", "cwd": str(ROOT), "name": f"perf-{i}",
+            "status": "busy" if i == 0 else "idle", "statusUpdatedAt": int(time.time() * 1000)}))
+    write(f"{home}/.ssh/config", "".join(f"Host perf{i}\n  HostName 127.0.0.1\n  Port {9 + i}\n" for i in range(3)))
+
+
+ALL_ON = {"sidebar": {"items": ["agents", "files", "search", "git", "accounts"]},
+          "statusBar": {"left": ["folder", "branch", "terminals", "agents", "usage"],
+                        "right": ["ports", "ssh", "ram", "cpu", "cadexMemory", "environment"]}}
+
+
+def all_on_scenario():
+    """Every status bar item, the Agents page open, three accounts and
+    sessions and three SSH hosts: at most 10% over the idle scenario and
+    the same CPU (plan 17, phase F)."""
+    home = tempfile.mkdtemp(prefix="cadex-perf-home-")
+    waiter = subprocess.Popen(["sleep", "120"])
+    try:
+        write_agents_home(home, waiter.pid)
+        found = scenario("all-on", "idle", ROOT, measure_idle, settings=ALL_ON, extra_env={"CADEX_PERF_HOME": home})
+        return {"all_on_mb": found["idle_mb"], "all_on_cpu": found["idle_cpu"]}
+    finally:
+        waiter.kill()
+        shutil.rmtree(home, ignore_errors=True)
+
+
 def subagent_scenario():
     folder = tempfile.mkdtemp(prefix="cadex-perf-log-")
     log = os.path.join(folder, "agent-perf.jsonl")
@@ -292,6 +331,7 @@ def main():
              ("the home folder as the workspace", lambda: scenario("home", "idle", None, measure_home)),
              ("an agent saving files", lambda: scenario("agent", "idle", ROOT, measure_agent)),
              ("switching themes 300 times", lambda: scenario("themes", "idle", ROOT, measure_theme_switch)),
+             ("everything of plan 17 on: every status bar item, Agents open, accounts, hosts", all_on_scenario),
              ("a subagent's 34 MB conversation, opened and closed", subagent_scenario),
              ("five more terminal tabs", lambda: scenario("tabs", "idle", ROOT, measure_tabs, extra_env={"CADEX_PERF_TABS": "5"})),
              ("flooding with minimum contrast and ligatures", lambda: scenario(
@@ -310,6 +350,9 @@ def main():
     failures += [f"{name}: the focus's file was left out" for name in missing]
 
     print()
+    # Plan 17's rule: all of it on weighs at most 10% over the app with it off.
+    if "all_on_mb" in results and "idle_mb" in results:
+        results["all_on_over_idle_pct"] = 100 * (results["all_on_mb"] - results["idle_mb"]) / results["idle_mb"]
     for key, limit in LIMITS.items():
         value = results.get(key)
         if value is None:

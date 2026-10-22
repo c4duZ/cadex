@@ -44,7 +44,8 @@ public final class AgentsController {
     /// agents.sessions: off, nothing is read at all.
     public var isEnabled = true { didSet { if isEnabled != oldValue { restart() } } }
     /// The folder accounts are looked for in (tests use a temporary one).
-    var home = NSHomeDirectory()
+    /// CADEX_PERF_HOME: `make perf`'s folder of test accounts and sessions.
+    var home = ProcessInfo.processInfo.environment["CADEX_PERF_HOME"] ?? NSHomeDirectory()
 
     private var watchers: [UUID: () -> Void] = [:]
     private var stream: FSEventStreamRef?
