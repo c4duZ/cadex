@@ -78,6 +78,8 @@ extension WindowSession {
         commands.register(Command(
             id: "agents.show-accounts", title: T("Show Agent Accounts", "Mostrar as contas dos agentes"),
             keywords: ["accounts", "usage", "plan", "limit", "contas", "uso", "plano", "limite", "claude"], category: .view,
+            // U for usage (the owner asked shortcuts as memorable as ⇧⌘E and ⇧⌘G, 2026-10-22).
+            defaultShortcut: "cmd+shift+u",
             action: .run { [weak self] in self?.workspace?.showSidebar("accounts") }))
         commands.register(Command(
             id: "agents.refresh-usage", title: T("Refresh Agent Usage", "Atualizar o uso dos agentes"),
@@ -92,6 +94,8 @@ extension WindowSession {
         commands.register(Command(
             id: "git.show-history", title: T("Show Git History in Sidebar", "Mostrar o histórico do Git no painel lateral"),
             keywords: ["history", "log", "commits", "histórico", "sidebar", "painel"], category: .view,
+            // L for log, as in git log.
+            defaultShortcut: "cmd+shift+l",
             action: .run { [weak self] in self?.workspace?.showSidebar("history") }))
         commands.register(Command(
             id: "history.show-in-tab", title: T("Show Commit Details in a Tab", "Mostrar o commit numa aba"),

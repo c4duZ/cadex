@@ -13,14 +13,13 @@ import Strings
 /// The sidebar's catalog in this window: each page's view comes from its
 /// feature, each icon runs a command (docs/spec/sidebar.md). Files, Git,
 /// Git History, Agents and Accounts are pages (Agents and Accounts apart,
-/// each with its icon and so its own shortcut: the owner, 2026-10-21); Search only runs its command (⌘K). Only what
-/// shows in the sidebar belongs here: Web Preview and Spaces opened
-/// something elsewhere and were taken out (owner, 2026-10-21).
+/// each with its icon and so its own shortcut: the owner, 2026-10-21). Only
+/// what shows in the sidebar belongs here: Search is ⌘P and ⇧⌘F, not a page
+/// (2026-10-22); Web Preview and Spaces opened something elsewhere (2026-10-21).
 extension WindowSession {
     func makeSidebar(explorer: ExplorerController, git: SourceControlController) -> SidebarView {
         let catalog = [
             item("files", .files, T("Files", "Arquivos"), "explorer.focus", .page(explorer.view)),
-            item("search", .magnifyingGlass, T("Search", "Busca"), "search.content", .action),
             item("git", .gitBranch, "Git", "git.show", .page(git.view)),
             item("history", .clockCounterClockwise, T("Git History", "Histórico do Git"), "git.show-history", .page(sidebarHistoryHost)),
             item("agents", .sparkle, T("Agents", "Agentes"), "agents.show", .page(makeAgentsPage("sessions"))),

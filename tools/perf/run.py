@@ -261,7 +261,7 @@ def write_agents_home(home, pid):
     write(f"{home}/.ssh/config", "".join(f"Host perf{i}\n  HostName 127.0.0.1\n  Port {9 + i}\n" for i in range(3)))
 
 
-ALL_ON = {"sidebar": {"items": ["agents", "files", "search", "git", "accounts"]},
+ALL_ON = {"sidebar": {"items": ["agents", "files", "git", "accounts"]},
           "statusBar": {"left": ["folder", "branch", "terminals", "agents", "usage"],
                         "right": ["ports", "ssh", "ram", "cpu", "cadexMemory", "environment"]}}
 

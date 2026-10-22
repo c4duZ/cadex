@@ -45,7 +45,7 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
 - **Uso dos planos** (Mac): a página Accounts mostra quanto cada conta do Claude Code e do Codex usou
   da sessão de 5 horas e da semana, e quando reinicia; um clique abre o agente daquela conta.
 - **Barra lateral e barra de status do seu jeito** (Mac): os ícones do topo da barra lateral (Files,
-  Search, Git, Git History, Agents, Accounts) e os itens da barra de status (pasta, branch,
+  Git, Git History, Agents, Accounts) e os itens da barra de status (pasta, branch,
   terminais, agentes, uso, RAM, CPU, memória do Cadex, portas abertas, hosts SSH) são escolhidos e
   arrastados para o lugar; o que fica desligado não pesa nada.
 - **Hosts SSH** (Mac): os do `~/.ssh/config`, se respondem, e um clique conecta numa aba.
@@ -151,7 +151,7 @@ máquinas: ⌘ vira Ctrl+Shift (como no Windows Terminal), e ⌘ com ⇧, ⌥ ou
 | Abrir pasta | `⌘O` | `Ctrl+Shift+O` |
 | Painel lateral / arquivos / git | `⌘B` / `⌘⇧E` / `⌘⇧G` | `Ctrl+Shift+B` / `Ctrl+Shift+Alt+E` / `Ctrl+Shift+Alt+G` |
 | Preview web | `⌘⇧H` | `Ctrl+Shift+Alt+H` |
-| Agents / ícone 1…9 da barra lateral | `⌘⇧J` / `⌃⌘1…9` | só no Mac |
+| Agents / Accounts / Git History / ícone 1…9 da barra lateral | `⌘⇧J` / `⌘⇧U` / `⌘⇧L` / `⌃⌘1…9` | só no Mac |
 | Escolher elemento no preview / parar | `⌘⇧C` / `Esc` | só no Mac |
 | Histórico do git | pela paleta (sem atalho) | pela paleta (sem atalho) |
 | Trocar de space / novo space | `⌘⇧S` / `⌃⌘N` | `Ctrl+Shift+Alt+S` / `Ctrl+Shift+Alt+N` |

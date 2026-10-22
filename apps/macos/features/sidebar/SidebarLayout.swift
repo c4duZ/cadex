@@ -4,15 +4,19 @@ import Foundation
 /// sidebar.items in settings.json is the list, in order; an id left out is
 /// hidden. Pure, so the rules are tested without a window.
 public enum SidebarLayout {
-    /// Files, Search, Git, Agents and Accounts (plan 17).
-    public static let defaultItems = ["files", "search", "git", "agents", "accounts"]
+    /// Files, Git, Agents and Accounts (plan 17).
+    public static let defaultItems = ["files", "git", "agents", "accounts"]
+    /// Ids that were icons once and left the bar: dropped from a saved list
+    /// without a warning. Search runs ⌘P and ⇧⌘F, not a page (the owner,
+    /// 2026-10-22); Web Preview and Spaces opened things elsewhere (2026-10-21).
+    public static let retired: Set<String> = ["search", "preview", "spaces"]
 
     /// The saved list against the ids the app knows: unknown and repeated
     /// ids are dropped, each one noted.
     public static func shown(_ saved: [String], known: [String]) -> (ids: [String], problems: [String]) {
         var ids: [String] = []
         var problems: [String] = []
-        for id in saved {
+        for id in saved where !retired.contains(id) {
             if !known.contains(id) {
                 problems.append("sidebar.items: \"\(id)\" is not a sidebar page")
             } else if ids.contains(id) {

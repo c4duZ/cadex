@@ -6,12 +6,12 @@ import Foundation
 // Tests of the sidebar feature. Run with `make macos-test` (see
 // shared/checks/Checks.swift for why this is an executable).
 
-let known = ["files", "search", "git", "history", "preview"]
+let known = ["files", "find", "git", "history", "preview"]
 
 @MainActor
 func catalog() -> [SidebarItem] {
     [SidebarItem(id: "files", icon: .files, title: "Files", command: "explorer.focus", kind: .page(NSView())),
-     SidebarItem(id: "search", icon: .magnifyingGlass, title: "Search", command: "search.content", kind: .action),
+     SidebarItem(id: "find", icon: .magnifyingGlass, title: "Search", command: "search.content", kind: .action),
      SidebarItem(id: "git", icon: .gitBranch, title: "Git", command: "git.show", kind: .page(NSView()))]
 }
 
@@ -22,18 +22,22 @@ let exitCode = await Checks.run([
         expect(problems.count == 2, "\(problems)")
         expect(SidebarLayout.shown([], known: known).ids.isEmpty)
     }),
+    ("retired ids (Search, Web Preview, Spaces) leave a saved list without a warning", {
+        let (ids, problems) = SidebarLayout.shown(["files", "search", "git", "preview"], known: ["files", "git"])
+        expect(ids == ["files", "git"] && problems.isEmpty, "\(ids) \(problems)")
+    }),
     ("toggling shows at the end and hides in place", {
         expect(SidebarLayout.toggled(["files", "git"], "history") == ["files", "git", "history"])
         expect(SidebarLayout.toggled(["files", "git", "history"], "git") == ["files", "history"])
     }),
     ("moving puts an id at the index, clamped", {
-        expect(SidebarLayout.moved(["files", "search", "git"], "git", to: 0) == ["git", "files", "search"])
-        expect(SidebarLayout.moved(["files", "search", "git"], "files", to: 9) == ["search", "git", "files"])
+        expect(SidebarLayout.moved(["files", "find", "git"], "git", to: 0) == ["git", "files", "find"])
+        expect(SidebarLayout.moved(["files", "find", "git"], "files", to: 9) == ["find", "git", "files"])
         expect(SidebarLayout.moved(["files"], "nope", to: 0) == ["files"])
     }),
     ("the customize list shows the shown first, then the hidden in catalog order", {
         let order = SidebarLayout.customizeOrder(shown: ["git", "files"], known: known)
-        expect(order == ["git", "files", "search", "history", "preview"], "\(order)")
+        expect(order == ["git", "files", "find", "history", "preview"], "\(order)")
     }),
     ("icons that do not fit leave room for the more button", {
         expect(SidebarLayout.fitting(4, iconWidth: 30, spacing: 2, width: 200) == 4)
@@ -51,16 +55,16 @@ let exitCode = await Checks.run([
     ("pressing an icon runs its command; the open page's icon hides the sidebar", {
         var ran: [String] = []
         let view = SidebarView(catalog: catalog()) { ran.append($0) }
-        view.setItems(["files", "search", "git"])
+        view.setItems(["files", "find", "git"])
         view.press("git")
         view.press("files")
-        view.press("search")
+        view.press("find")
         expect(ran == ["git.show", "view.toggle-sidebar", "search.content"], "\(ran)")
     }),
     ("⌃⌘N runs the Nth shown icon's command, in the saved order, never hiding the sidebar; past the last, nothing", {
         var ran: [String] = []
         let view = SidebarView(catalog: catalog()) { ran.append($0) }
-        view.setItems(["search", "git", "files"])
+        view.setItems(["find", "git", "files"])
         expect(view.press(position: 2) && ran == ["git.show"], "\(ran)")
         expect(!view.press(position: 4) && !view.press(position: 0) && ran.count == 1)
         // The open page's keys show it again and never hide the sidebar.
@@ -70,9 +74,9 @@ let exitCode = await Checks.run([
         var saved: [[String]] = []
         let view = SidebarView(catalog: catalog()) { _ in }
         view.onItemsChange = { saved.append($0) }
-        view.toggle("search")
+        view.toggle("find")
         view.toggle("nope")
-        expect(saved == [["files", "git"]], "\(saved)")
+        expect(saved == [["files", "git", "find"]], "\(saved)")
     }),
     ("dragging an icon sideways reorders it, one slot or more, and it stays on top", {
         let row = SidebarIconRow()
@@ -102,16 +106,16 @@ let exitCode = await Checks.run([
         }
         drag(from: step / 2, to: step * 1.5)
         expect(orders.count == 1, "one save per drop")
-        expect(orders.last == ["search", "files", "git"], "\(orders)")
+        expect(orders.last == ["find", "files", "git"], "\(orders)")
         drag(from: step * 1.5, to: step * 2.6)
-        expect(orders.last == ["search", "git", "files"], "\(orders)")
+        expect(orders.last == ["find", "git", "files"], "\(orders)")
         let xs = row.buttons.map(\.frame.minX)
         expect(xs == [0, step, step * 2], "each icon back in its slot: \(xs)")
         row.setItems(catalog())
         row.layoutSubtreeIfNeeded()
-        expect(row.buttons.map(\.id) == ["files", "search", "git"])
+        expect(row.buttons.map(\.id) == ["files", "find", "git"])
         drag(from: step / 2, to: step * 2.6)
-        expect(orders.last == ["search", "git", "files"], "two slots in one drag: \(orders)")
+        expect(orders.last == ["find", "git", "files"], "two slots in one drag: \(orders)")
     }),
     ("a page with sub-tabs shows them and says which one is picked", {
         let items = catalog() + [SidebarItem(id: "agents", icon: .sparkle, title: "Agents", command: "agents.show", kind: .page(NSView()),
@@ -137,7 +141,7 @@ let exitCode = await Checks.run([
         view.setItems(["git", "files"])
         let entries = view.customizeEntries()
         expect(entries.first == .header("Sidebar icons"))
-        expect(entries.compactMap(\.row).map(\.id) == ["git", "files", "search", "history"])
+        expect(entries.compactMap(\.row).map(\.id) == ["git", "files", "find", "history"])
         expect(entries.compactMap(\.row).map(\.on) == [true, true, false, false])
         expect(entries.compactMap(\.row).last?.trailing == "⇧⌘Y")
     }),
@@ -146,11 +150,11 @@ let exitCode = await Checks.run([
             let page = NSTextField(labelWithString: "  apps\n  core\n  docs\n  CLAUDE.md")
             page.textColor = .white
             let items = [SidebarItem(id: "files", icon: .files, title: "Files", command: "explorer.focus", shortcut: "⇧⌘E", kind: .page(page)),
-                         SidebarItem(id: "search", icon: .magnifyingGlass, title: "Search", command: "search.content", kind: .action),
+                         SidebarItem(id: "find", icon: .magnifyingGlass, title: "Search", command: "search.content", kind: .action),
                          SidebarItem(id: "git", icon: .gitBranch, title: "Git", command: "git.show", kind: .page(NSView())),
                          SidebarItem(id: "history", icon: .clockCounterClockwise, title: "History", command: "git.history", kind: .action)]
             let view = SidebarView(catalog: items) { _ in }
-            view.setItems(["files", "search", "git", "history"])
+            view.setItems(["files", "find", "git", "history"])
             view.setTitle("cadex", for: "files")
             view.setBadge("3", for: "git")
             view.setColors(.init(text: .white, secondary: NSColor(white: 0.62, alpha: 1),

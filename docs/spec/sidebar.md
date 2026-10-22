@@ -8,15 +8,15 @@ em que ordem.
 ## Comportamento
 - No topo, ao lado dos botões da janela, a fileira de ícones (Phosphor). Clicar num ícone mostra a
   página dele; clicar no ícone da página aberta recolhe a barra lateral (como view.toggle-sidebar).
-- Os ícones padrão, nesta ordem: Files (⇧⌘E, explorer.focus), Search (⇧⌘F, search.content) e Git
-  (⇧⌘G, git.show); Agents (⇧⌘J, agents.show) e Accounts (agents.show-accounts) entram com as
-  páginas deles, separadas para cada uma ter o próprio ícone e atalho (o dono, 2026-10-21). Git History
-  (git.show-history) existe escondido e pode ser ligado.
+- Os ícones padrão, nesta ordem: Files (⇧⌘E, explorer.focus), Git (⇧⌘G, git.show), Agents (⇧⌘J,
+  agents.show) e Accounts (⇧⌘U, agents.show-accounts, de uso); Agents e Accounts separados para cada
+  um ter o próprio ícone e atalho (o dono, 2026-10-21). Git History (⇧⌘L, git.show-history, de log)
+  existe escondido e pode ser ligado. Atalhos de ⇧⌘ com a inicial, para lembrar (2026-10-22).
 - ⌃⌘1 a ⌃⌘9 (sidebar.page-1 a -9) mostram a página do ícone daquela posição, na ordem que
   aparece, sem nunca recolher a barra lateral (só o clique no ícone aberto recolhe), como ⌘1 a ⌘9 nas abas; ⇧⌘ não, porque ⇧⌘3 a ⇧⌘5 são as capturas de tela do macOS.
-- Só entra na barra o que mostra uma página nela. Files, Git e Git History são páginas; Search, por
-  enquanto, abre a busca no ⌘K. Web Preview e Spaces abriam coisa em outro lugar e saíram (o dono,
-  2026-10-21).
+- Só entra na barra o que mostra uma página nela. Search saiu: é o ⌘P e o ⇧⌘F, não uma página (o dono,
+  2026-10-22); Web Preview e Spaces abriam coisa em outro lugar e saíram (2026-10-21). Numa lista
+  salva, esses ids somem sem aviso (SidebarLayout.retired).
 - Git History na barra lateral: cada commit em duas linhas, o grafo e a descrição (com as
   etiquetas de branch e tag) sobre o autor, há quanto tempo e o hash curto. Clicar num commit abre
   os arquivos dele logo abaixo, com o grafo continuando por trás; clicar de novo fecha; clicar
