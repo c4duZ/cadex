@@ -137,17 +137,12 @@ final class PaneHeaderView: NSView {
         needsDisplay = true
     }
 
-    /// A hairline below; the focused pane's header gets the accent on top.
+    /// A hairline below. No accent line: the focus shows by the other
+    /// panes' dimming and this title's stronger text, as in terminals (the
+    /// owner found the colored line and the outline crude, 2026-10-22).
     override func draw(_ dirtyRect: NSRect) {
         NSColor.separatorColor.setFill()
         NSRect(x: 0, y: bounds.height - 1, width: bounds.width, height: 1).fill()
-        // The accent stops short of the pane's rounded corners (8 pt) with
-        // round ends: drawn edge to edge, the corners shaved its ends and it
-        // looked cut (the owner, 2026-10-22).
-        if focused, bounds.width > 32 {
-            style.accent.setFill()
-            NSBezierPath(roundedRect: NSRect(x: 10, y: 0, width: bounds.width - 20, height: 2), xRadius: 1, yRadius: 1).fill()
-        }
     }
 }
 

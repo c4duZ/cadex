@@ -73,7 +73,8 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   foco e ao passar o ponteiro nos outros, e guardam o lugar quando somem, para o cabeçalho não mexer
   (o maximizar aparecendo sozinho mexia, 2026-10-22). O botão do meio do mouse fecha o painel, como
   fecha uma aba; o painel com foco tem
-  uma linha da cor de destaque em cima e o nome mais forte. Mais leve que as abas da janela, para não
+  o nome mais forte e os outros escurecem, como nos terminais, sem faixa nem contorno de cor; os
+  painéis continuam colados, com a linha fina de sempre entre eles (o dono, 2026-10-22). Mais leve que as abas da janela, para não
   parecer uma segunda fileira de abas. Resolve o issue #1: o arquivo aberto ao lado tinha só o ⌘W.
 - Arrastar o cabeçalho move o painel (a ideia do dono, 2026-10-22): a aba vira um quadro em que cada
   painel é uma janela cinza só com o cabeçalho (ícone e nome), e as janelas se reorganizam ao vivo,
