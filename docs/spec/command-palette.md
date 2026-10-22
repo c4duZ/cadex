@@ -20,8 +20,8 @@ ação do app (ADR 0005). Quando existirem, acha também abas, spaces e arquivos
   embaixo. Abre na hora, sem animação perceptível.
 - Com o campo vazio, lista em seções com título. Primeiro "Abrir", as formas de abrir coisas ao
   lado do terminal, com nome próprio: Terminal em nova aba (⌘T), Terminal ao lado (⌘D), Terminal abaixo (⇧⌘D),
-  Arquivo… (⌘P), Preview web, Preview web em nova aba, Grafo do git, Grafo do git em nova aba,
-  Nova janela (⌘N). Depois "Recentes" e uma seção por área (Abas, Painéis, Arquivos,
+  Arquivo… (⌘P), Preview web, Preview web em nova aba, Nova janela (⌘N). O grafo do git saiu daqui e
+  dos menus "+" (o dono, 2026-10-22); continua no ⌘K pelo nome. Depois "Recentes" e uma seção por área (Abas, Painéis, Arquivos,
   Busca, Editor, Terminal, Git, Web e mídia, Spaces, Editar, Cadex), cada uma em ordem alfabética.
   O dono sentiu falta das seções e de ter as aberturas primeiro (2026-10-19).
 - Comando que não pode rodar agora não aparece, nem na lista nem na busca (o dono, 2026-10-19:
@@ -40,8 +40,10 @@ ação do app (ADR 0005). Quando existirem, acha também abas, spaces e arquivos
 - ↑ e ↓ movem a seleção; Enter executa o comando selecionado e fecha a paleta; Esc ou clicar fora
   fecha sem executar. Clicar numa linha executa.
 - ⌘K com a paleta aberta fecha a paleta.
-- O "+" ao lado das abas abre um menu com as mesmas aberturas de "Abrir", cada uma com ícone e
-  atalho, como o "+" da barra de abas.
+- O "+" ao lado das abas abre um menu com as aberturas que saem da aba atual (terminal em nova aba,
+  arquivo, preview web em nova aba, nova janela), cada uma com ícone e atalho. O que abre ao lado do
+  painel (terminal ao lado e abaixo, preview web ao lado) fica no "+" do cabeçalho de cada painel
+  (`tabs.md`), com maximizar e fechar o painel.
 
 ### Outras listas
 - A mesma paleta mostra arquivos (⌘P) e texto nos arquivos (⌘⇧F), da feature search. O atalho de

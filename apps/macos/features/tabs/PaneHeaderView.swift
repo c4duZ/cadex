@@ -5,7 +5,8 @@ import UILooks
 
 /// The slim line on top of a pane when its tab has more than one
 /// (docs/spec/tabs.md, "Cabeçalho dos painéis"): what the pane shows on the
-/// left, and on the right a menu, maximize and close. It fixes issue #1: a
+/// left, and on the right "+" (what opens beside, maximize, close),
+/// maximize and close. It fixes issue #1: a
 /// file opened beside the terminal had no visible way to close only it.
 /// Lighter than the tab strip above it (no fill, a hairline below), so the
 /// window does not read as two rows of tabs; the close button always shows
@@ -34,7 +35,7 @@ final class PaneHeaderView: NSView {
 
     private let iconView = NSImageView()
     private let label = NSTextField(labelWithString: "")
-    private let menuButton = PaneHeaderButton(icon: .dotsThree)
+    private let menuButton = PaneHeaderButton(icon: .plus)
     private let zoomButton = PaneHeaderButton(icon: .cornersOut)
     private let closeButton = PaneHeaderButton(icon: .x)
     private var hovering = false { didSet { if hovering != oldValue { refresh() } } }
@@ -48,7 +49,7 @@ final class PaneHeaderView: NSView {
         menuButton.onPress = { [weak self] in self.map { $0.onAction?(.menu($0.menuButton)) } }
         zoomButton.onPress = { [weak self] in self?.onAction?(.zoom) }
         closeButton.onPress = { [weak self] in self?.onAction?(.close) }
-        menuButton.toolTip = T("More", "Mais")
+        menuButton.toolTip = T("Open Beside, Split, Maximize, Close", "Abrir ao lado, dividir, maximizar, fechar")
         let buttons = NSStackView(views: [menuButton, zoomButton, closeButton])
         buttons.spacing = 2
         let row = NSStackView(views: [iconView, label, NSView(), buttons])
@@ -102,7 +103,8 @@ final class PaneHeaderView: NSView {
         zoomButton.toolTip = zoomed ? T("Restore Pane (⇧⌘↩)", "Restaurar painel (⇧⌘↩)") : T("Maximize Pane (⇧⌘↩)", "Maximizar painel (⇧⌘↩)")
         closeButton.toolTip = T("Close Pane (⌘W)", "Fechar painel (⌘W)")
         // Close stays in view on the focused pane: the way out is never hidden.
-        menuButton.isHidden = !hovering
+        // "+" sits by ✕ and shows with it (the owner, 2026-10-22).
+        menuButton.isHidden = !hovering && !focused
         zoomButton.isHidden = !hovering && !zoomed
         closeButton.isHidden = !hovering && !focused
         needsDisplay = true

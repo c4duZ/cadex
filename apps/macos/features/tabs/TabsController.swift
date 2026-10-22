@@ -27,6 +27,8 @@ public final class TabsController {
     public var contextMenu: (() -> [MenuEntry])?
     /// Runs a command by id: the pane headers' buttons (ADR 0005).
     public var runCommand: ((String) -> Bool)?
+    /// The pane header's "+" menu, built by the app from commands.
+    public var paneMenu: (() -> [MenuEntry])?
     /// The last tab closed. Without it, the window closes (one space).
     public var onEmpty: (() -> Void)?
     /// Whether these tabs are the ones in the window. Spaces keep the

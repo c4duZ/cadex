@@ -5,7 +5,7 @@ import Strings
 
 /// The pane headers of every tab (PaneHeaderView.swift): what each one
 /// says, and its buttons, which focus their pane and run a command by id
-/// (ADR 0005): pane.close, pane.zoom, the splits. Apart from
+/// (ADR 0005): pane.close, pane.zoom; the "+" menu is the app's (paneMenu). Apart from
 /// TabsController.swift, at its size limit.
 extension TabsController {
     func wireHeaders(_ tab: Tab) {
@@ -22,7 +22,7 @@ extension TabsController {
             case .focus: break
             case .close: self.run("pane.close") { self.closeFocusedPane() }
             case .zoom: self.run("pane.zoom") { self.toggleZoom() }
-            case .menu(let anchor): PopupMenu.show(self.paneMenu(tab), below: anchor)
+            case .menu(let anchor): PopupMenu.show(self.paneMenu?() ?? [], below: anchor)
             }
         }
     }
@@ -56,17 +56,6 @@ extension TabsController {
     }
 
     public var activePaneZoomed: Bool { activeTab?.layout.zoomed != nil }
-
-    private func paneMenu(_ tab: Tab) -> [MenuEntry] {
-        let zoomed = tab.layout.zoomed != nil
-        return [
-            MenuEntry(T("Split Right", "Dividir à direita"), icon: .squareSplitHorizontal) { [weak self] in self?.run("pane.split-right") { self?.split(.horizontal) } },
-            MenuEntry(T("Split Down", "Dividir para baixo"), icon: .squareSplitVertical) { [weak self] in self?.run("pane.split-down") { self?.split(.vertical) } },
-            MenuEntry(zoomed ? T("Restore Pane", "Restaurar painel") : T("Maximize Pane", "Maximizar painel"),
-                      icon: zoomed ? .cornersIn : .cornersOut) { [weak self] in self?.run("pane.zoom") { self?.toggleZoom() } },
-            MenuEntry(T("Close Pane", "Fechar painel"), icon: .x) { [weak self] in self?.run("pane.close") { self?.closeFocusedPane() } },
-        ]
-    }
 
     /// The command by id, or `fallback` where no registry runs it (tests).
     private func run(_ command: String, fallback: () -> Void) {

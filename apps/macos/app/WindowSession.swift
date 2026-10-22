@@ -127,7 +127,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         let workspace = WorkspaceView(explorer: explorer, sidebar: makeSidebar(explorer: explorer, git: git)) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace
         self.workspace = workspace
-        workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.openers) ?? [] }
+        workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.newOpeners) ?? [] }
         workspace.titleBar.spaceMenu = { [weak self] in self?.menu?.popup(Self.spaceActions) ?? [] }
         showPower()
         showUpdate()

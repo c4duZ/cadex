@@ -1,5 +1,6 @@
 import AppKit
 import CommandPalette
+import Menus
 import Search
 import Spaces
 import Strings
@@ -30,10 +31,28 @@ extension WindowSession {
         PalettePin(id: "search.files", title: T("File…", "Arquivo…"), icon: .file),
         PalettePin(id: "preview.open", title: T("Web Preview", "Preview web"), icon: .globe),
         PalettePin(id: "preview.open-in-tab", title: T("Web Preview in New Tab", "Preview web em nova aba"), icon: .globe),
-        PalettePin(id: "git.history", title: T("Git Graph", "Grafo do git"), icon: .gitBranch),
-        PalettePin(id: "git.history-in-tab", title: T("Git Graph in New Tab", "Grafo do git em nova aba"), icon: .gitBranch),
         PalettePin(id: "window.new", title: T("New Window", "Nova janela"), icon: .appWindow),
     ]
+    /// The "+" next to the tabs: what opens outside the tab you are in.
+    /// What opens beside the pane moved to the pane header's "+", and the
+    /// Git graph left both menus (the owner, 2026-10-22).
+    static let newOpeners = openers.filter { !["pane.split-right", "pane.split-down", "preview.open"].contains($0.id) }
+    /// The pane header's "+": what opens in this tab, then the pane itself.
+    static let besideOpeners = [
+        PalettePin(id: "pane.split-right", title: T("Terminal on the Right", "Terminal ao lado"), icon: .squareSplitHorizontal),
+        PalettePin(id: "pane.split-down", title: T("Terminal Below", "Terminal abaixo"), icon: .squareSplitVertical),
+        PalettePin(id: "preview.open", title: T("Web Preview on the Right", "Preview web ao lado"), icon: .globe),
+    ]
+
+    /// The pane header's menu, with Maximize or Restore as the pane is.
+    func paneMenu() -> [MenuEntry] {
+        guard let menu else { return [] }
+        let zoomed = tabs?.activePaneZoomed == true
+        let pane = [PalettePin(id: "pane.zoom", title: zoomed ? T("Restore Pane", "Restaurar painel") : T("Maximize Pane", "Maximizar painel"),
+                               icon: zoomed ? .cornersIn : .cornersOut),
+                    PalettePin(id: "pane.close", title: T("Close Pane", "Fechar painel"), icon: .x)]
+        return MenuEntry.tidy(menu.popup(Self.besideOpeners) + [.separator] + menu.popup(pane))
+    }
 
     func connectPalette(_ palette: CommandPaletteController) {
         palette.pins = Self.openers
