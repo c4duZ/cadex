@@ -14,7 +14,7 @@ pub fn build(b: *std.Build) void {
     // -Dtarget (the Linux app builds on Linux, plan 18).
     const default_target: std.Target.Query = if (b.graph.host.result.os.tag == .macos)
         .{ .os_tag = .macos, .os_version_min = .{ .semver = .{ .major = 13, .minor = 0, .patch = 0 } } }
-    else .{};
+    else .{ .cpu_model = .baseline };
     const target = b.standardTargetOptions(.{ .default_target = default_target });
     const optimize = b.standardOptimizeOption(.{});
 

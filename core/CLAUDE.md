@@ -14,7 +14,8 @@
 - Zig (`../docs/adr/0002-zig-core-with-c-api.md`). Uma pasta por feature em features/, e shared/ só com o que 2+ features usam.
 - O build junta núcleo, simdutf e highway num único libcadex.a com o `zig ar` (ver `build.zig`).
   Alvo padrão: macOS 13, CPU base (o app roda em outros Macs, não só nesta máquina); num host
-  Linux, o alvo padrão é o próprio host, para `zig build test` funcionar sem `-Dtarget`.
+  Linux, o alvo padrão é o próprio host com CPU base, para `zig build test` funcionar sem
+  `-Dtarget` e o binário rodar em máquinas mais antigas.
 - Linux: `shared/fs_posix.zig` usa `renameat2` e uma cópia recursiva própria; o watcher é
   inotify (`features/explorer/watch_linux.zig`); o PTY lê o diretório por /proc e usa o
   `TIOCSWINSZ` do Linux (`features/terminal/pty_posix.zig`). `forkpty` está na libc do glibc
