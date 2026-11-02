@@ -103,6 +103,9 @@ pub const Walker = struct {
         var files: std.ArrayList(File) = .empty;
         var folders: std.ArrayList([]const u8) = .empty;
         while (dir.next()) |entry| {
+            // A folder can hold thousands of entries; cancel inside it too,
+            // or closing waits for the whole folder (Linux /usr, 2026-11-01).
+            if (self.cancelled()) return .{ .files = &.{}, .folders = &.{} };
             const name = entry.name;
             if (std.mem.eql(u8, name, ".git")) continue;
             if (!self.options.show_hidden and name[0] == '.') continue;
