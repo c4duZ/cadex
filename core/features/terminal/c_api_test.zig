@@ -3,6 +3,7 @@
 
 const std = @import("std");
 const clock = @import("../../shared/clock.zig");
+const fs = @import("../../shared/fs.zig");
 const testing = std.testing;
 const api = @import("c_api.zig");
 const view_api = @import("c_api_view.zig");
@@ -176,6 +177,10 @@ test "the working directory follows the shell" {
 
     const input = "cd /bin\n";
     try testing.expectEqual(status.ok, api.cadex_terminal_write(session, input.ptr, input.len));
+    // /bin is a symlink to /usr/bin on Fedora, and /proc resolves it; the
+    // Mac returns /bin. Compare the canonical path on either system.
+    var expected_buf: fs.Buffer = undefined;
+    const expected = fs.realPath("/bin", &expected_buf) orelse "/bin";
     var found = false;
     var attempts: u32 = 0;
     while (!found and attempts < 250) : (attempts += 1) {
@@ -183,7 +188,7 @@ test "the working directory follows the shell" {
         var ptr: ?[*]u8 = null;
         var len: usize = 0;
         try testing.expectEqual(status.ok, api.cadex_terminal_copy_working_directory(session, &ptr, &len));
-        if (ptr) |p| found = std.mem.eql(u8, p[0..len], "/bin");
+        if (ptr) |p| found = std.mem.eql(u8, p[0..len], expected);
         status.cadex_free(ptr);
     }
     try testing.expect(found);

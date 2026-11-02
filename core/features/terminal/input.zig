@@ -6,6 +6,7 @@
 //! import it (ADR 0003).
 
 const std = @import("std");
+const builtin = @import("builtin");
 const vt = @import("ghostty-vt");
 
 /// Physical keys that are not text. The values are the C API's CADEX_KEY_*.
@@ -121,7 +122,8 @@ pub fn encodeKey(
 
     var options: vt.input.KeyEncodeOptions = .fromTerminal(terminal);
     // The app only reports Alt when Option should be Meta, so honor it.
-    options.macos_option_as_alt = .true;
+    // On Linux Alt is always Meta; the macOS Option-as-Meta rule is not used.
+    options.macos_option_as_alt = if (builtin.os.tag == .macos) .true else .false;
 
     var writer: std.Io.Writer = .fixed(out);
     vt.input.encodeKey(&writer, event, options) catch return error.KeyTooLong;

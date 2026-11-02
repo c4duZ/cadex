@@ -51,7 +51,8 @@ typedef struct {
     uint16_t rows;
     /* Directory the shell starts in. NULL: the inherited directory. */
     const char *cwd;
-    /* Shell to run. NULL or "": $SHELL, then /bin/zsh. */
+    /* Shell to run. NULL or "": $SHELL, then /bin/zsh on macOS and
+     * /bin/bash on Linux (/bin/sh when bash is missing). */
     const char *shell;
     /* Passed back to the callbacks. */
     void *context;

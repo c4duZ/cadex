@@ -3,6 +3,7 @@
 //! event, not an argument, so the app handles that one itself.
 
 const std = @import("std");
+const builtin = @import("builtin");
 const paths = @import("paths.zig");
 
 /// The first argument after the program name that names an existing
@@ -42,7 +43,8 @@ const testing = std.testing;
 test "the first directory argument wins; flags and their values are skipped" {
     var buf: paths.Buffer = undefined;
     const args = [_][]const u8{ "Cadex", "-NSDocumentRevisionsDebugMode", "/usr", "-psn_0_123", "/tmp" };
-    try testing.expectEqualStrings("/private/tmp", launchDirectory(&args, "/", &buf).?);
+    const tmp = if (builtin.os.tag == .macos) "/private/tmp" else "/tmp";
+    try testing.expectEqualStrings(tmp, launchDirectory(&args, "/", &buf).?);
 }
 
 test "relative arguments resolve against the working directory" {

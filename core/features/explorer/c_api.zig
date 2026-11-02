@@ -177,5 +177,5 @@ test "lists, creates, renames and reads through the C API" {
     try testing.expectEqualStrings("bee", out.?[0..len]);
     std.c.free(out);
     try testing.expectEqual(status.too_large, cadex_explorer_read_text(try dir.join("c.txt"), 2, &out, &len));
-    try testing.expectEqual(status.not_authorized, cadex_explorer_create_file("/private/tmp/cadex-outside.txt"));
+    try testing.expectEqual(status.not_authorized, cadex_explorer_create_file("/tmp/cadex-outside.txt"));
 }

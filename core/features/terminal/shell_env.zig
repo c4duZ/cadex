@@ -2,10 +2,12 @@
 //! environment. Pure functions, so the rules are testable without spawning.
 
 const std = @import("std");
+const builtin = @import("builtin");
 
 /// Used when neither the settings nor $SHELL name a shell. zsh is the
-/// macOS default since 10.15.
-pub const fallback_shell = "/bin/zsh";
+/// macOS default since 10.15; Linux uses bash. `pty_posix.zig` falls back
+/// to /bin/sh when bash is not installed.
+pub const fallback_shell = if (builtin.os.tag == .linux) "/bin/bash" else "/bin/zsh";
 
 /// Variables the terminal owns. The user's values are dropped so a Cadex
 /// session started from another terminal does not claim to be that terminal.
