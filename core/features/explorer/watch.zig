@@ -13,7 +13,11 @@ const clock = @import("../../shared/clock.zig");
 const fs = @import("../../shared/fs.zig");
 const workspace = @import("../workspace/workspace.zig");
 
-const impl = if (builtin.os.tag == .windows) @import("watch_windows.zig") else @import("watch_macos.zig");
+const impl = switch (builtin.os.tag) {
+    .windows => @import("watch_windows.zig"),
+    .linux => @import("watch_linux.zig"),
+    else => @import("watch_macos.zig"),
+};
 
 /// One changed folder. `subtree`: the system lost detail (dropped events,
 /// root moved or deleted), so everything below must be read again.

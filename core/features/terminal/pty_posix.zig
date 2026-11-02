@@ -2,7 +2,9 @@
 //! the shell. The interface is `pty.zig`; `pty_windows.zig` is ConPTY.
 
 const std = @import("std");
+const builtin = @import("builtin");
 const clock = @import("../../shared/clock.zig");
+const fs = @import("../../shared/fs.zig");
 const c = std.c;
 const shell_env = @import("shell_env.zig");
 const pty = @import("pty.zig");
@@ -16,6 +18,7 @@ extern "c" fn ioctl(fd: c_int, request: c_ulong, ...) c_int;
 extern "c" fn tcgetpgrp(fd: c_int) c.pid_t;
 extern "c" fn fcntl(fd: c_int, cmd: c_int, ...) c_int;
 extern "c" fn proc_pidinfo(pid: c_int, flavor: c_int, arg: u64, buffer: ?*anyopaque, size: c_int) c_int;
+extern "c" fn readlink(path: [*:0]const u8, buf: [*]u8, len: usize) isize;
 
 /// <sys/proc_info.h>: PROC_PIDVNODEPATHINFO and struct proc_vnodepathinfo,
 /// whose pvi_cdir.vip_path (the current directory) starts after a 152-byte
@@ -24,8 +27,8 @@ const PROC_PIDVNODEPATHINFO: c_int = 9;
 const vnode_path_info_size = 2352;
 const cwd_path_offset = 152;
 
-/// _IOW('t', 103, struct winsize) on macOS.
-const TIOCSWINSZ: c_ulong = 0x80087467;
+/// _IOW('t', 103, struct winsize): the request number differs on Linux.
+const TIOCSWINSZ: c_ulong = if (builtin.os.tag == .linux) 0x5414 else 0x80087467;
 const F_SETFD: c_int = 2;
 const FD_CLOEXEC: c_int = 1;
 
@@ -54,7 +57,7 @@ pub const Child = struct {
         defer arena.deinit();
         const a = arena.allocator();
         const env_shell = if (c.getenv("SHELL")) |sh| std.mem.span(sh) else null;
-        const shell = try a.dupeZ(u8, shell_env.resolveShell(options.shell, env_shell));
+        const shell = try defaultShell(a, options.shell, env_shell);
         const cwd = if (options.cwd) |dir| (try a.dupeZ(u8, dir)).ptr else null;
         const argv = try shell_env.loginArgv(a, shell);
         const envp = try shell_env.sessionEnv(a, try parentEnv(a));
@@ -114,12 +117,26 @@ pub const Child = struct {
     /// or what it runs), written into `buf`. Null if the system does not
     /// say. Used when the shell does not report its directory with OSC 7.
     pub fn currentDirectory(self: Child, buf: *DirectoryBuffer) ?[]const u8 {
+        if (builtin.os.tag == .linux) return self.linuxCurrentDirectory(buf);
+        if (builtin.os.tag != .macos) return null;
         const group = tcgetpgrp(self.fd);
         const pid = if (group > 0) group else self.pid;
         const got = proc_pidinfo(pid, PROC_PIDVNODEPATHINFO, 0, buf, vnode_path_info_size);
         if (got != vnode_path_info_size) return null;
         const path = std.mem.sliceTo(buf[cwd_path_offset..], 0);
         return if (path.len == 0) null else path;
+    }
+
+    /// /proc/<pid>/cwd, where pid is the foreground program (the shell when
+    /// it owns the terminal). Null when the process belongs to another user.
+    fn linuxCurrentDirectory(self: Child, buf: *DirectoryBuffer) ?[]const u8 {
+        const group = tcgetpgrp(self.fd);
+        const pid = if (group > 0) group else self.pid;
+        var path_buf: [64]u8 = undefined;
+        const path = std.fmt.bufPrintZ(&path_buf, "/proc/{d}/cwd", .{pid}) catch return null;
+        const n = readlink(path.ptr, buf, buf.len);
+        if (n <= 0) return null;
+        return buf[0..@intCast(n)];
     }
 
     /// After read() gave null on its own: the shell's exit code.
@@ -135,21 +152,35 @@ pub const Child = struct {
     /// After the reader stopped: ends the shell (SIGHUP, then SIGKILL)
     /// unless it was reaped already, and frees the pty.
     pub fn finish(self: Child, reaped: bool) void {
+        // Capture the foreground process group before closing the master:
+        // a shell waiting on a job (dash + `yes`) does not exit on a SIGHUP
+        // sent only to the shell, and the bounded SIGKILL fallback pushed
+        // close past 600 ms in the Ubuntu 24.04 run (2026-11-01).
+        const foreground = if (reaped) 0 else tcgetpgrp(self.fd);
         // Close our side of the pty before waiting for the shell. With the
         // reader stopped nobody drains its output, and an exiting shell
         // waits in the kernel for that drain: the app hung forever in
         // waitpid closing a tab that ran `sleep 100` (2026-10-19, sample of
         // the main thread in __wait4, zsh in state E).
         _ = c.close(self.fd);
-        if (!reaped) hangUp(self, hangup_grace_ms);
+        if (!reaped) hangUp(self, foreground, hangup_grace_ms);
     }
 
     /// A session that failed to open: kill the shell at once.
     pub fn kill(self: Child) void {
         _ = c.close(self.fd);
-        killNow(self);
+        killNow(self, 0);
     }
 };
+
+/// Configured shell, then $SHELL, then the platform default. On Linux a
+/// missing /bin/bash falls back to /bin/sh (some minimal images).
+fn defaultShell(a: std.mem.Allocator, configured: ?[]const u8, env_shell: ?[]const u8) ![:0]const u8 {
+    if (configured) |s| if (s.len > 0) return a.dupeZ(u8, s);
+    if (env_shell) |s| if (s.len > 0) return a.dupeZ(u8, s);
+    if (builtin.os.tag == .linux and !fs.exists("/bin/bash")) return a.dupeZ(u8, "/bin/sh");
+    return a.dupeZ(u8, shell_env.fallback_shell);
+}
 
 fn parentEnv(arena: std.mem.Allocator) ![]const [*:0]const u8 {
     var list: std.ArrayList([*:0]const u8) = .empty;
@@ -192,7 +223,10 @@ fn spawn(
     return .{ .fd = fd, .pid = pid };
 }
 
-pub const DirectoryBuffer = [vnode_path_info_size]u8;
+pub const DirectoryBuffer = if (builtin.os.tag == .linux)
+    [std.fs.max_path_bytes]u8
+else
+    [vnode_path_info_size]u8;
 
 fn waitPid(pid: c.pid_t) i32 {
     var status: c_int = 0;
@@ -211,22 +245,24 @@ fn decodeStatus(status: c_int) i32 {
 }
 
 /// SIGHUP, then SIGKILL if the child is still there after grace_ms.
-fn hangUp(child: Child, grace_ms: u32) void {
+fn hangUp(child: Child, foreground: c.pid_t, grace_ms: u32) void {
     _ = c.kill(child.pid, .HUP);
+    if (foreground > 0 and foreground != child.pid) _ = c.kill(-foreground, .HUP);
     var waited: u32 = 0;
     while (waited < grace_ms) : (waited += 10) {
         if (c.waitpid(child.pid, null, c.W.NOHANG) != 0) return;
         clock.sleepMs(10);
     }
-    killNow(child);
+    killNow(child, foreground);
 }
 
 /// How long close() waits for a killed shell before reaping it in the
 /// background instead: closing must never hang the app.
 const kill_wait_ms = 500;
 
-fn killNow(child: Child) void {
+fn killNow(child: Child, foreground: c.pid_t) void {
     _ = c.kill(child.pid, .KILL);
+    if (foreground > 0 and foreground != child.pid) _ = c.kill(-foreground, .KILL);
     var waited: u32 = 0;
     while (waited < kill_wait_ms) : (waited += 10) {
         if (c.waitpid(child.pid, null, c.W.NOHANG) != 0) return;

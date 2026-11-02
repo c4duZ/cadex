@@ -90,24 +90,30 @@ test "plain names reject dots and slashes" {
 }
 
 test "canonicalize resolves dots and keeps a missing last component" {
-    // Mac paths; fs.zig tests the same resolution with a temporary folder.
-    if (builtin.os.tag != .macos) return error.SkipZigTest;
+    // fs.zig tests the same resolution with a temporary folder.
+    if (builtin.os.tag == .windows) return error.SkipZigTest;
+    // /tmp is a link to /private/tmp on macOS; on Linux it is itself.
+    const tmp = if (builtin.os.tag == .macos) "/private/tmp" else "/tmp";
     var buf: Buffer = undefined;
-    // /tmp is a link to /private/tmp on macOS.
     const real = try canonicalize("/tmp/../tmp/./", &buf);
-    try testing.expectEqualStrings("/private/tmp", real);
+    try testing.expectEqualStrings(tmp, real);
+    var expected_buf: [64]u8 = undefined;
+    const expected = try std.fmt.bufPrint(&expected_buf, "{s}/cadex-does-not-exist", .{tmp});
     const missing = try canonicalize("/tmp/cadex-does-not-exist", &buf);
-    try testing.expectEqualStrings("/private/tmp/cadex-does-not-exist", missing);
+    try testing.expectEqualStrings(expected, missing);
     try testing.expectError(error.NotAbsolute, canonicalize("tmp", &buf));
     try testing.expectError(error.NotFound, canonicalize("/tmp/missing-dir/file", &buf));
     try testing.expectError(error.NameInvalid, canonicalize("/tmp/missing-dir/..", &buf));
 }
 
 test "canonicalizeEntry keeps the last component unresolved" {
-    // Mac paths; fs.zig tests the same resolution with a temporary folder.
-    if (builtin.os.tag != .macos) return error.SkipZigTest;
+    // fs.zig tests the same resolution with a temporary folder.
+    if (builtin.os.tag == .windows) return error.SkipZigTest;
+    const tmp = if (builtin.os.tag == .macos) "/private/tmp" else "/tmp";
     var buf: Buffer = undefined;
     try testing.expectEqualStrings("/etc", try canonicalizeEntry("/etc", &buf));
-    try testing.expectEqualStrings("/private/tmp/x", try canonicalizeEntry("/tmp/x/", &buf));
+    var expected_buf: [64]u8 = undefined;
+    const expected = try std.fmt.bufPrint(&expected_buf, "{s}/x", .{tmp});
+    try testing.expectEqualStrings(expected, try canonicalizeEntry("/tmp/x/", &buf));
     try testing.expectError(error.NameInvalid, canonicalizeEntry("/", &buf));
 }

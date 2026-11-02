@@ -1,4 +1,4 @@
-.PHONY: check manifests core core-test macos-test app run relink package perf windows-core windows-core-test windows-app windows-run windows-app-test windows-package
+.PHONY: check manifests core core-test linux-core linux-core-test linux-check macos-test app run relink package perf windows-core windows-core-test windows-app windows-run windows-app-test windows-package
 
 # Run before handing work over: manifests, core tests, app tests, and the
 # Windows build (it cannot run here, but it must keep compiling).
@@ -16,6 +16,15 @@ core:
 
 core-test:
 	@cd core && zig build test
+
+# The core on Linux: the host target by default (plan 18, phase 1).
+linux-core:
+	@cd core && zig build -Doptimize=ReleaseFast
+
+linux-core-test:
+	@cd core && zig build test
+
+linux-check: manifests linux-core-test
 
 # swift build does not notice a new libcadex.a: drop the linked binaries so
 # they link again (tests ran against an old core, 2026-10-19).

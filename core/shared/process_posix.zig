@@ -2,6 +2,7 @@
 //! group for the timeout. The interface is `process.zig`.
 
 const std = @import("std");
+const builtin = @import("builtin");
 const clock = @import("clock.zig");
 const process = @import("process.zig");
 const c = std.c;
@@ -9,7 +10,29 @@ const c = std.c;
 const Options = process.Options;
 const Result = process.Result;
 
-extern "c" fn posix_spawnattr_setpgroup(attr: *c.posix_spawnattr_t, pgroup: c.pid_t) c_int;
+// Zig 0.16 aliases every std.c.posix_spawn* to the Darwin declarations,
+// whose comptime assert fires on Linux. These are the libc symbols, with
+// opaque buffers: only the pointer crosses the ABI, and 512 bytes is larger
+// than both glibc's and Darwin's structures.
+const SpawnFileActions = extern struct { data: [512]u8 align(16) };
+const SpawnAttr = extern struct { data: [512]u8 align(16) };
+/// POSIX_SPAWN_SETPGROUP, plus POSIX_SPAWN_CLOEXEC_DEFAULT on macOS.
+/// glibc has no CLOEXEC_DEFAULT: it rejects the unknown bit, so on Linux the
+/// pipe ends carry FD_CLOEXEC instead (see cloexecPipe).
+const spawn_flags: c_short = if (builtin.os.tag == .macos) 0x4000 | 0x02 else 0x02;
+const F_SETFD: c_int = 2;
+const FD_CLOEXEC: c_int = 1;
+extern "c" fn fcntl(fd: c_int, cmd: c_int, ...) c_int;
+
+extern "c" fn posix_spawn_file_actions_init(actions: *SpawnFileActions) c_int;
+extern "c" fn posix_spawn_file_actions_destroy(actions: *SpawnFileActions) c_int;
+extern "c" fn posix_spawn_file_actions_adddup2(actions: *SpawnFileActions, fd: c_int, newfd: c_int) c_int;
+extern "c" fn posix_spawn_file_actions_addchdir_np(actions: *SpawnFileActions, path: [*:0]const u8) c_int;
+extern "c" fn posix_spawnattr_init(attr: *SpawnAttr) c_int;
+extern "c" fn posix_spawnattr_destroy(attr: *SpawnAttr) c_int;
+extern "c" fn posix_spawnattr_setflags(attr: *SpawnAttr, flags: c_short) c_int;
+extern "c" fn posix_spawnattr_setpgroup(attr: *SpawnAttr, pgroup: c.pid_t) c_int;
+extern "c" fn posix_spawnp(pid: *c.pid_t, file: [*:0]const u8, actions: *const SpawnFileActions, attr: *const SpawnAttr, argv: [*:null]const ?[*:0]const u8, envp: [*:null]const ?[*:0]const u8) c_int;
 
 pub fn run(gpa: std.mem.Allocator, argv: []const []const u8, options: Options) !Result {
     var arena: std.heap.ArenaAllocator = .init(gpa);
@@ -23,31 +46,31 @@ pub fn run(gpa: std.mem.Allocator, argv: []const []const u8, options: Options) !
     var out_pipe: [2]c.fd_t = undefined;
     var err_pipe: [2]c.fd_t = undefined;
     var in_pipe: [2]c.fd_t = undefined;
-    if (c.pipe(&out_pipe) != 0) return error.SpawnFailed;
+    if (cloexecPipe(&out_pipe) != 0) return error.SpawnFailed;
     defer closeBoth(out_pipe);
-    if (c.pipe(&err_pipe) != 0) return error.SpawnFailed;
+    if (cloexecPipe(&err_pipe) != 0) return error.SpawnFailed;
     defer closeBoth(err_pipe);
-    if (c.pipe(&in_pipe) != 0) return error.SpawnFailed;
+    if (cloexecPipe(&in_pipe) != 0) return error.SpawnFailed;
     defer closeBoth(in_pipe);
 
-    var actions: c.posix_spawn_file_actions_t = undefined;
-    if (c.posix_spawn_file_actions_init(&actions) != 0) return error.SpawnFailed;
-    defer _ = c.posix_spawn_file_actions_destroy(&actions);
-    _ = c.posix_spawn_file_actions_adddup2(&actions, in_pipe[0], 0);
-    _ = c.posix_spawn_file_actions_adddup2(&actions, out_pipe[1], 1);
-    _ = c.posix_spawn_file_actions_adddup2(&actions, err_pipe[1], 2);
-    if (options.cwd) |dir| _ = c.posix_spawn_file_actions_addchdir_np(&actions, (try a.dupeZ(u8, dir)).ptr);
+    var actions: SpawnFileActions = undefined;
+    if (posix_spawn_file_actions_init(&actions) != 0) return error.SpawnFailed;
+    defer _ = posix_spawn_file_actions_destroy(&actions);
+    _ = posix_spawn_file_actions_adddup2(&actions, in_pipe[0], 0);
+    _ = posix_spawn_file_actions_adddup2(&actions, out_pipe[1], 1);
+    _ = posix_spawn_file_actions_adddup2(&actions, err_pipe[1], 2);
+    if (options.cwd) |dir| _ = posix_spawn_file_actions_addchdir_np(&actions, (try a.dupeZ(u8, dir)).ptr);
 
-    var attr: c.posix_spawnattr_t = undefined;
-    if (c.posix_spawnattr_init(&attr) != 0) return error.SpawnFailed;
-    defer _ = c.posix_spawnattr_destroy(&attr);
+    var attr: SpawnAttr = undefined;
+    if (posix_spawnattr_init(&attr) != 0) return error.SpawnFailed;
+    defer _ = posix_spawnattr_destroy(&attr);
     // Only the three standard descriptors reach the child, and it leads its
     // own process group so a timeout kills what it started too (ssh).
-    _ = c.posix_spawnattr_setflags(&attr, .{ .CLOEXEC_DEFAULT = true, .SETPGROUP = true });
-    _ = posix_spawnattr_setpgroup(&attr, 0);
+    if (posix_spawnattr_setflags(&attr, spawn_flags) != 0) return error.SpawnFailed;
+    if (posix_spawnattr_setpgroup(&attr, 0) != 0) return error.SpawnFailed;
 
     var pid: c.pid_t = 0;
-    if (c.posix_spawnp(&pid, args[0].?, &actions, &attr, args, env) != 0) {
+    if (posix_spawnp(&pid, args[0].?, &actions, &attr, args, env) != 0) {
         return .{ .code = -1, .stdout = try gpa.alloc(u8, 0), .stderr = try gpa.dupe(u8, "program not found"), .timed_out = false, .truncated = false };
     }
     // Our copies of the child's ends: closed so EOF arrives when it exits.
@@ -65,6 +88,14 @@ pub fn run(gpa: std.mem.Allocator, argv: []const []const u8, options: Options) !
     errdefer collected.deinit(gpa);
     collected.code = waitCode(pid);
     return collected;
+}
+
+/// pipe() with FD_CLOEXEC on both ends, so a child that fails to exec (or
+/// an inherited copy) cannot keep the other end open and block EOF.
+fn cloexecPipe(fds: *[2]c.fd_t) c_int {
+    if (c.pipe(fds) != 0) return -1;
+    for (fds) |fd| _ = fcntl(fd, F_SETFD, FD_CLOEXEC);
+    return 0;
 }
 
 fn closeBoth(fds: [2]c.fd_t) void {

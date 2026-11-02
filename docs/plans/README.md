@@ -40,6 +40,12 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 16 | `docs/plans/16-element-picker.md` | escolher elemento no preview e mandar para o agente no terminal (só Mac) | fase A feita e conferida pelo dono (2026-10-21; falta ⇧, ⌥ e Esc à mão); B a D no código, falta conferir em projetos reais |
 | 17 | `docs/plans/17-sidebar-agents-status.md` | barra lateral com ícones, página Agents (sessões e uso das contas), barra de status personalizável, SSH (só Mac) | feito (v2.2.0); falta o sinal do agente no título da aba |
 
+- Linux, depois do Windows (pedido do dono em 2026-11-01), sobre o mesmo núcleo, só Wayland:
+
+| # | plano | entrega | status |
+|---|---|---|---|
+| 18 | `docs/plans/18-linux.md` | Linux nativo em GTK4 e Wayland | proposta; ADR 0021 em revisão |
+
 ## O que eu não quero
 - Executar plano sem ler antes o `CLAUDE.md` da raiz e o da feature que vai mexer.
 - Código de outro app como referência (ADR 0004): a fonte é a spec em `docs/spec/` e o que o dono
