@@ -95,3 +95,10 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Grafo** (`git graph`): o desenho das linhas de commits e merges no histórico.
 - **Faixa** (`lane`): uma coluna do grafo, que espera um commit; o primeiro pai continua a faixa,
   os outros pais de um merge abrem ou encontram outra.
+
+## Linux
+- **App Linux** (`apps/linux`): a interface nativa do Linux, em Zig sobre GTK4 e Wayland.
+- **Wayland**: o protocolo gráfico do Linux; o Cadex só roda nele.
+- **SNI** (`StatusNotifierItem`): o ícone de bandeja do Linux, por D-Bus; no Mango não aparece.
+- **Camada de sistema** (`system`): o módulo do app Linux que traduz os headers do GTK, GDK,
+  GLib/GIO, WebKitGTK e GStreamer.

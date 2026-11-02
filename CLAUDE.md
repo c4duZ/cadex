@@ -6,8 +6,8 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 - **Trabalho em andamento:** seguir `docs/plans/README.md` (planos do fim do terminal até o MVP no
   Mac, em ordem). Começar uma sessão lendo este arquivo, o índice e o plano da vez.
 - Código próprio, licença MIT.
-- O app mais leve e rápido possível em cada sistema: macOS primeiro, Windows depois, sobre o mesmo
-  núcleo.
+- O app mais leve e rápido possível em cada sistema: macOS primeiro, Windows depois e Linux
+  depois, sobre o mesmo núcleo.
 - Instalar em um passo: um comando (`curl ... | sh`) ou o DMG, sem dependências
   (`docs/adr/0007-one-step-install.md`).
 - Tudo pode ser feito pelo ⌘K: toda ação do app é um comando que a paleta encontra e executa
@@ -57,6 +57,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 - `core/`: núcleo em Zig, exposto por uma API C (`docs/adr/0002-zig-core-with-c-api.md`).
   `apps/macos/`: Swift com AppKit e Metal. `apps/windows/`: Zig com Win32 e
   Direct3D 11, Windows 11 (`docs/adr/0012-windows-zig-win32-d3d11.md`).
+  `apps/linux/`: Zig com GTK4 e Wayland (`docs/adr/0021-linux-gtk4-wayland.md`).
 - Toda ação é um comando registrado na feature `command-palette`; menus, botões e atalhos só
   disparam comandos pelo id.
 - O que 2+ features usam sobe para `core/shared/` ou `apps/macos/shared/`. Só isso vai para lá.
@@ -80,6 +81,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
   (`tools/check_manifests.py`).
 - `make core-test`: `zig build test` com o alocador de teste (pega vazamento de memória).
 - `make macos-test`: `swift test` do app.
+- `make linux-check`: manifestos e testes do núcleo no Linux (o app Linux tem CI próprio).
 - `make perf`: o orçamento de peso (`tools/perf/run.py`), antes de cada release e de cada feature que
   mexe em terminal, índices, árvore ou desenho: o app de release e os índices nas situações que já o
   deixaram pesado (terminal jorrando, TUI, pasta pessoal, agente salvando arquivos); falha acima do
