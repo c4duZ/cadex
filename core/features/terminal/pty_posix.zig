@@ -152,19 +152,24 @@ pub const Child = struct {
     /// After the reader stopped: ends the shell (SIGHUP, then SIGKILL)
     /// unless it was reaped already, and frees the pty.
     pub fn finish(self: Child, reaped: bool) void {
+        // Capture the foreground process group before closing the master:
+        // a shell waiting on a job (dash + `yes`) does not exit on a SIGHUP
+        // sent only to the shell, and the bounded SIGKILL fallback pushed
+        // close past 600 ms in the Ubuntu 24.04 run (2026-11-01).
+        const foreground = if (reaped) 0 else tcgetpgrp(self.fd);
         // Close our side of the pty before waiting for the shell. With the
         // reader stopped nobody drains its output, and an exiting shell
         // waits in the kernel for that drain: the app hung forever in
         // waitpid closing a tab that ran `sleep 100` (2026-10-19, sample of
         // the main thread in __wait4, zsh in state E).
         _ = c.close(self.fd);
-        if (!reaped) hangUp(self, hangup_grace_ms);
+        if (!reaped) hangUp(self, foreground, hangup_grace_ms);
     }
 
     /// A session that failed to open: kill the shell at once.
     pub fn kill(self: Child) void {
         _ = c.close(self.fd);
-        killNow(self);
+        killNow(self, 0);
     }
 };
 
@@ -240,22 +245,24 @@ fn decodeStatus(status: c_int) i32 {
 }
 
 /// SIGHUP, then SIGKILL if the child is still there after grace_ms.
-fn hangUp(child: Child, grace_ms: u32) void {
+fn hangUp(child: Child, foreground: c.pid_t, grace_ms: u32) void {
     _ = c.kill(child.pid, .HUP);
+    if (foreground > 0 and foreground != child.pid) _ = c.kill(-foreground, .HUP);
     var waited: u32 = 0;
     while (waited < grace_ms) : (waited += 10) {
         if (c.waitpid(child.pid, null, c.W.NOHANG) != 0) return;
         clock.sleepMs(10);
     }
-    killNow(child);
+    killNow(child, foreground);
 }
 
 /// How long close() waits for a killed shell before reaping it in the
 /// background instead: closing must never hang the app.
 const kill_wait_ms = 500;
 
-fn killNow(child: Child) void {
+fn killNow(child: Child, foreground: c.pid_t) void {
     _ = c.kill(child.pid, .KILL);
+    if (foreground > 0 and foreground != child.pid) _ = c.kill(-foreground, .KILL);
     var waited: u32 = 0;
     while (waited < kill_wait_ms) : (waited += 10) {
         if (c.waitpid(child.pid, null, c.W.NOHANG) != 0) return;
