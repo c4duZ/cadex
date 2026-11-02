@@ -8,12 +8,14 @@ const grammars = @import("build_grammars.zig");
 const vt_features = "-kitty_graphics,-glyph_protocol,-snapshot";
 
 pub fn build(b: *std.Build) void {
-    // Not the host: the app ships to other Macs. Baseline CPU (no features
-    // of this machine's chip) and macOS 13 as the oldest supported version.
-    const target = b.standardTargetOptions(.{ .default_target = .{
-        .os_tag = .macos,
-        .os_version_min = .{ .semver = .{ .major = 13, .minor = 0, .patch = 0 } },
-    } });
+    // On a Mac, not the host: the app ships to other Macs. Baseline CPU (no
+    // features of this machine's chip) and macOS 13 as the oldest supported
+    // version. Elsewhere, target the host so `zig build test` works without
+    // -Dtarget (the Linux app builds on Linux, plan 18).
+    const default_target: std.Target.Query = if (b.graph.host.result.os.tag == .macos)
+        .{ .os_tag = .macos, .os_version_min = .{ .semver = .{ .major = 13, .minor = 0, .patch = 0 } } }
+    else .{};
+    const target = b.standardTargetOptions(.{ .default_target = default_target });
     const optimize = b.standardOptimizeOption(.{});
 
     const root = b.createModule(.{
@@ -81,7 +83,9 @@ fn linkSystem(b: *std.Build, root: *std.Build.Module, target: std.Build.Resolved
             root.linkFramework("CoreServices", .{});
         },
         // ConPTY, Job Objects and ReadDirectoryChangesW are all kernel32,
-        // which libc (mingw) already links.
+        // which libc (mingw) already links. Linux uses libc for the POSIX
+        // pieces: forkpty is in glibc 2.34+ (the Ubuntu 24.04/Fedora 44
+        // baseline), so there is no libutil to link.
         else => {},
     }
 }

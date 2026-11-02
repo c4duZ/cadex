@@ -59,7 +59,14 @@ pub fn add(b: *std.Build, root: *std.Build.Module, target: std.Build.ResolvedTar
     runtime.root_module.addCSourceFile(.{ .file = runtime_dep.path("lib/src/lib.c"), .flags = &.{"-std=c11"} });
     runtime.root_module.addIncludePath(runtime_dep.path("lib/include"));
     runtime.root_module.addIncludePath(runtime_dep.path("lib/src"));
-    runtime.root_module.addCMacro("_DARWIN_C_SOURCE", "");
+    // _DARWIN_C_SOURCE opens the BSD declarations on macOS; glibc needs
+    // _DEFAULT_SOURCE for the same names (fdopen is the one that broke the
+    // tree-sitter build on Linux, 2026-11-01).
+    if (target.result.os.tag == .macos) {
+        runtime.root_module.addCMacro("_DARWIN_C_SOURCE", "");
+    } else {
+        runtime.root_module.addCMacro("_DEFAULT_SOURCE", "");
+    }
     root.addIncludePath(runtime_dep.path("lib/include"));
     libs.append(b.allocator, runtime) catch @panic("OOM");
 
@@ -106,6 +113,7 @@ pub fn addTre(b: *std.Build, root: *std.Build.Module, target: std.Build.Resolved
     const headers = b.addWriteFiles();
     _ = headers.add("config.h",
         \\#define HAVE_SYS_TYPES_H 1
+        \\#define HAVE_CTYPE_H 1
         \\#define HAVE_ISASCII 1
         \\#define HAVE_ISBLANK 1
         \\#define TRE_REGEX_T_FIELD value
@@ -129,7 +137,7 @@ pub fn addTre(b: *std.Build, root: *std.Build.Module, target: std.Build.Resolved
     lib.root_module.addCSourceFiles(.{
         .root = dep.path("lib"),
         .files = &.{ "tre-ast.c", "tre-compile.c", "tre-match-backtrack.c", "tre-match-parallel.c", "tre-mem.c", "tre-parse.c", "tre-stack.c", "regcomp.c", "regexec.c", "regerror.c" },
-        .flags = treFlags(b),
+        .flags = treFlags(b, target),
     });
     root.linkLibrary(lib);
     return lib;
@@ -193,9 +201,11 @@ const tre_symbols = [_][]const u8{
     "tre_version",
 };
 
-fn treFlags(b: *std.Build) []const []const u8 {
+fn treFlags(b: *std.Build, target: std.Build.ResolvedTarget) []const []const u8 {
     var flags: std.ArrayList([]const u8) = .empty;
     flags.appendSlice(b.allocator, &.{ "-std=c99", "-DHAVE_CONFIG_H" }) catch @panic("OOM");
+    // isascii is hidden under -std=c99 on glibc unless _DEFAULT_SOURCE is on.
+    if (target.result.os.tag != .macos) flags.append(b.allocator, "-D_DEFAULT_SOURCE") catch @panic("OOM");
     for (tre_symbols) |name| flags.append(b.allocator, b.fmt("-D{s}=cadex_{s}", .{ name, name })) catch @panic("OOM");
     return flags.items;
 }

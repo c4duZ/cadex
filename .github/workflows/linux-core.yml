@@ -1,0 +1,28 @@
+name: linux core
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  core:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: ubuntu:24.04
+            deps: apt-get update && apt-get install -y git curl xz-utils
+          - image: fedora:44
+            deps: dnf install -y git curl xz tar gcc
+    runs-on: ubuntu-24.04
+    container: ${{ matrix.image }}
+    steps:
+      # git is installed before checkout: the base images do not carry it.
+      - name: deps
+        run: ${{ matrix.deps }}
+      - uses: actions/checkout@v4
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: "0.16.0"
+      - name: core tests
+        run: cd core && zig build test
