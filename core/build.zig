@@ -80,6 +80,11 @@ fn addCli(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin
             .link_libc = true,
         }),
     });
+    // Room in the header for codesign's load command: without it the
+    // packaging's ad hoc signature overwrote the start of the x86_64 slice's
+    // first section and it crashed (exit 139 under Rosetta, found 2026-11-14;
+    // the arm64 slice, which Zig signs itself, already had room).
+    cli.headerpad_size = 0x1000;
     b.installArtifact(cli);
 }
 

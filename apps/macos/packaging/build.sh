@@ -47,6 +47,16 @@ mkdir -p "$APP/Contents/Helpers"
 lipo -create "$DIST/core-aarch64/bin/cadex" "$DIST/core-x86_64/bin/cadex" -output "$APP/Contents/Helpers/cadex"
 strip -x "$APP/Contents/Helpers/cadex"
 codesign --force --sign - -i "$BUNDLE_ID.cadex" "$APP/Contents/Helpers/cadex"
+# Each slice must run after lipo, strip and the signature: the x86_64 one once
+# crashed after codesign (exit 139, 2026-11-14; core/build.zig, headerpad).
+SMOKE="$(mktemp -d)"
+for slice in arm64 x86_64; do
+    if ! arch -"$slice" /usr/bin/true 2>/dev/null; then echo "skip: no $slice runtime (Rosetta) to test cadex"; continue; fi
+    echo '{"session_id":"smoke","rate_limits":{"five_hour":{"used_percentage":1,"resets_at":1}}}' \
+        | CLAUDE_CONFIG_DIR="$SMOKE/none" CADEX_USAGE_DIR="$SMOKE/$slice" arch -"$slice" "$APP/Contents/Helpers/cadex" statusline >/dev/null \
+        && [ -f "$SMOKE/$slice/sessions/smoke.json" ] || { echo "cadex ($slice) failed in the bundle"; exit 1; }
+done
+rm -rf "$SMOKE"
 # Resources the code finds in the main bundle (Icon.swift, ThemeCatalog.swift):
 # SwiftPM's own resource bundles would have to sit in the app's root folder.
 cp "$MACOS/shared/icons/Resources/Phosphor-Regular.ttf" "$APP/Contents/Resources/"

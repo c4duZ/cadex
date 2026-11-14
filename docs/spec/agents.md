@@ -222,10 +222,13 @@ continua uma conversa em outra conta, sem nunca tocar em token
 - [ ] Mandar uma mensagem troca o sinal para "trabalhando"; quando o agente termina, "esperando você".
 - [ ] Fechar a aba do agente tira a sessão da lista.
 - [ ] Os subagentes de uma sessão aparecem ao clicar, com descrição e tempo.
-- [ ] Com uma sessão aberta pelo Cadex em cada uma de duas contas, Accounts mostra as duas com os
-      mesmos números do `/usage` de cada uma.
-- [ ] O Cadex nunca roda `/usr/bin/security` nem sai para a rede para ler uso (conferido com
-      `fs_usage` e `nettop`).
+- [x] Com uma sessão aberta pelo Cadex em cada uma de duas contas, Accounts mostra as duas com os
+      mesmos números do `/usage` de cada uma (bhband 4% e 56%, bkdg 60% e 36%, sessões ao mesmo
+      tempo, 2026-11-14).
+- [x] O Cadex nunca roda `/usr/bin/security` nem sai para a rede para ler uso: 6,5 min com o uso na
+      tela, sem processo filho além do shell e sem socket de rede (`ps` e `lsof` no processo, a cada
+      0,5 s), e nenhuma das strings do caminho antigo nos binários (2026-11-14). Falta a mesma
+      conferência com `fs_usage`, que pede root.
 - [ ] Com agents.sessions, agents.accounts e agents.history desligados, o Cadex não abre nenhum
       arquivo do Claude Code (conferido com `fs_usage`).
 - [x] Sessão aberta pelo Cadex: a status line do dono aparece igual, os hooks dele rodam, o ambiente
