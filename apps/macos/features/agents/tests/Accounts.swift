@@ -1,6 +1,8 @@
+import AppKit
 import Checks
 import Foundation
 @testable import Agents
+@testable import Menus
 
 // Managed accounts and the shared configuration (plan 18 phase C;
 // docs/spec/agents.md, Contas gerenciadas), on a fake home folder.
@@ -101,6 +103,21 @@ let accountChecks: [(name: String, body: Checks.Body)] = [
         expect(link(old + "/settings.json") == source + "/settings.json" && fm.fileExists(atPath: old + "/projects/p/x.jsonl"))
         expect(AgentConfigShare.follows(account: old, source: source, managed: false), "it follows now")
         expect(fm.contents(atPath: old + "/.claude.json") == Data("{}".utf8), "its .claude.json untouched")
+    }),
+    ("the active account's card says so; the card's menu sets it", {
+        let usage = AgentUsageController.shared
+        let account = AgentAccount(dir: "/x/.claude-active", name: "A", isDefault: false)
+        func texts(_ view: NSView) -> [String] { ((view as? NSTextField).map { [$0.stringValue] } ?? []) + view.subviews.flatMap(texts) }
+        usage.plans[account.dir] = "max"
+        usage.activeAccount = account.dir
+        expect(texts(AgentUsageCard.block(account, colors: AgentColors(), width: 200)).contains("· Max · active"))
+        usage.activeAccount = nil
+        expect(texts(AgentUsageCard.block(account, colors: AgentColors(), width: 200)).contains("· Max"))
+        var chosen: String?
+        let page = AgentsView()
+        page.onSetActive = { chosen = $0.dir }
+        page.accountMenu(account).first { $0.title == "Use for New Sessions" }?.action()
+        expect(chosen == account.dir, "the menu entry runs onSetActive")
     }),
     ("the account of a new session: the project's beats the active one, then the default", {
         let a = AgentAccount(dir: "/h/.claude", name: "d", isDefault: true)

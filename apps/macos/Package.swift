@@ -270,7 +270,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "AgentsTests",
-            dependencies: ["Agents", "Icons", "SessionKit", "Checks"],
+            dependencies: ["Agents", "Icons", "Menus", "SessionKit", "Checks"],
             path: "features/agents/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
