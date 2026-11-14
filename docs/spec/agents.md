@@ -111,11 +111,14 @@ continua uma conversa em outra conta, sem nunca tocar em token
     nunca é apagado.
   - Uma conta segue a fonte quando foi criada pelo Cadex ou tem algum link para ela.
 - **Conta ativa:** a das sessões novas abertas pelo Cadex (agents.activeAccount; vazia é a conta
-  padrão), escolhida no ⌘K ("Set Active Agent Account", agents.set-active-account) e no clique
-  direito do cartão em Accounts ("Use for New Sessions"). O cartão dela diz "· active". **Conta do
-  projeto** (agents.projectAccounts, raiz git → conta, no settings.json) vence a ativa naquele
-  projeto; conta que não existe mais cai na padrão. Quem usa a conta ativa são as sessões novas do
-  plano 19 (Nova tarefa); abrir o agente de uma conta pelo clique continua abrindo aquela conta.
+  padrão). Escolhida no item Agent usage (clique direito: "New Sessions Use", com a marca na ativa),
+  no ⌘K ("Set Active Agent Account", agents.set-active-account) e no clique direito do cartão em
+  Accounts ("Use for New Sessions"). O cartão dela diz "· active".
+- **Conta do projeto:** "Set This Project's Agent Account" (agents.set-project-account) dá ao
+  projeto da janela (a raiz git do workspace) uma conta própria, que vence a ativa naquele projeto;
+  "Use the Active Account" na mesma lista desfaz. Guardada em agents.projectAccounts; conta que não
+  existe mais cai na padrão. Quem usa essas duas escolhas são as sessões novas sem conta escolhida
+  (Nova tarefa, plano 19); clicar numa conta continua abrindo aquela conta.
 - **Kit da sessão:** toda sessão que o Cadex abre (abrir o agente de uma conta, Retomar, Continuar em
   outra conta, e depois Nova tarefa) recebe a status line do Cadex, os hooks, skills e MCPs que as
   features acrescentam, os MCPs da conta padrão, `CLAUDE_CONFIG_DIR` da conta e o ambiente limpo
@@ -247,7 +250,14 @@ continua uma conversa em outra conta, sem nunca tocar em token
       não tem CLAUDECODE nem CLAUDE_CODE_* herdados e o transcript é gravado (bhband, 2026-11-14).
 - [ ] "Add Agent Account" cria a pasta e os links certos (nenhum item do estado da conta; uma pasta
       desconhecida da fonte também vira link) e abre a aba com o `/login`; depois do login, a conta
-      aparece em Accounts.
+      aparece em Accounts. Conferido em 2026-11-14 até o login: conta real criada pelo código do
+      app com 15 links (gsd-core incluído) e nenhum item de estado; o `claude` nela, pelo kit,
+      chegou a "Select login method"; o estado novo nasceu na pasta dela e o ~/.claude não mudou.
+      Falta o login, que é do dono.
+- [x] Um MCP da conta padrão aparece na sessão de outra conta sem nenhum .claude.json mudar (servidor
+      de teste passado pelo kit apareceu no `/mcp` de uma sessão da bhband, 2026-11-14).
+- [x] A conta ativa se escolhe no clique direito do item Agent usage, no ⌘K e no cartão, e o cartão
+      dela diz "active" (testes e PNG com as contas reais, 2026-11-14).
 - [x] Uma skill nova em `~/.claude/skills` aparece na conta gerenciada sem nada a fazer (teste com
       pasta pessoal falsa; o link de pasta inteira já carregava skills no teste de 2026-11-14).
 - [ ] Nenhuma conta que já existia muda de lugar nem perde o login; nenhum `.claude.json` muda.

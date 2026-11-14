@@ -119,6 +119,26 @@ let accountChecks: [(name: String, body: Checks.Body)] = [
         page.accountMenu(account).first { $0.title == "Use for New Sessions" }?.action()
         expect(chosen == account.dir, "the menu entry runs onSetActive")
     }),
+    ("the usage item's right click: New Sessions Use, the active account checked, a choice sets it", {
+        let usage = AgentUsageController.shared
+        let d = AgentAccount(dir: "/y/.claude", name: "D", isDefault: true)
+        let w = AgentAccount(dir: "/y/.claude-w", name: "W", isDefault: false)
+        usage.accounts = { [d, w] }
+        usage.states = [d.dir: .noUsage, w.dir: .noUsage]
+        usage.activeAccount = nil
+        let strip = AgentUsageStrip()
+        var menu = strip.activeMenu()
+        expect(menu.map(\.title) == ["New Sessions Use", "D", "W"], "\(menu.map(\.title))")
+        expect(menu[1].icon == .check && menu[2].icon == nil, "none chosen: the default account")
+        var chosen: String?
+        strip.onSetActive = { chosen = $0.dir }
+        menu[2].action()
+        expect(chosen == w.dir)
+        usage.activeAccount = w.dir
+        menu = strip.activeMenu()
+        expect(menu[1].icon == nil && menu[2].icon == .check)
+        usage.activeAccount = nil
+    }),
     ("the account of a new session: the project's beats the active one, then the default", {
         let a = AgentAccount(dir: "/h/.claude", name: "d", isDefault: true)
         let b = AgentAccount(dir: "/h/.claude-b", name: "b", isDefault: false)

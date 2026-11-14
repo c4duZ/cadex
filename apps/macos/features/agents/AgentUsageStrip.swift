@@ -13,6 +13,9 @@ import UILooks
 @MainActor
 public final class AgentUsageStrip: NSView {
     public var onClick: (() -> Void)?
+    /// The right click's choice of the active account (docs/spec/agents.md,
+    /// Contas gerenciadas: chosen in this item and in ⌘K, plan 18).
+    public var onSetActive: ((AgentAccount) -> Void)?
     public var colors = AgentColors() { didSet { render() } }
     /// The focused terminal's agent account, by folder; nil keeps the last.
     /// Set at every output of the focused terminal: drawn again only when
@@ -114,6 +117,23 @@ public final class AgentUsageStrip: NSView {
     static func short(_ numbers: AgentUsage) -> String {
         [numbers.session.map { "\(Int($0.percent.rounded()))% 5h" }, numbers.week.map { "\(Int($0.percent.rounded()))% wk" }]
             .compactMap { $0 }.joined(separator: " · ")
+    }
+
+    /// "New sessions use": the Claude accounts in use, the active one checked.
+    func activeMenu() -> [MenuEntry] {
+        let usage = AgentUsageController.shared
+        let accounts = usage.visibleAccounts().filter { $0.provider == .claude }
+        let active = usage.activeAccount ?? accounts.first { $0.isDefault }?.dir
+        var entries = [MenuEntry(T("New Sessions Use", "Sessões novas usam"), isEnabled: false) {}]
+        entries += accounts.map { account in
+            MenuEntry(account.name, icon: account.dir == active ? .check : nil) { [weak self] in self?.onSetActive?(account) }
+        }
+        return entries
+    }
+
+    public override func rightMouseDown(with event: NSEvent) {
+        card?.close()
+        PopupMenu.show(activeMenu(), at: convert(event.locationInWindow, from: nil), in: self, upward: true)
     }
 
     public override func mouseUp(with event: NSEvent) {

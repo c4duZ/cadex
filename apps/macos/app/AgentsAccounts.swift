@@ -20,7 +20,22 @@ extension WindowSession {
             follow: { [weak self] dir, item in
                 self?.accountChange { try AgentConfigShare.follow(item, account: dir, source: Self.claudeSource, trash: AgentManagedAccounts.moveToTrash) }
             },
-            remove: { [weak self] dir in self?.removeAccount(dir) })
+            remove: { [weak self] dir in self?.removeAccount(dir) },
+            setProject: { [weak self] account in self?.setProjectAccount(account) },
+            projectAccount: { [weak self] in
+                guard let self else { return nil }
+                return self.settings.store.settings.agents.projectAccounts[SettingsBridge.tilde(self.projectRoot)].map(SettingsBridge.expand)
+            })
+    }
+
+    /// This window's project: the git root of its workspace folder.
+    var projectRoot: String { AgentProject.of(folder.root).root }
+
+    /// agents.set-project-account: the project's new sessions use this
+    /// account, whatever the active one is; nil follows the active one again.
+    func setProjectAccount(_ account: AgentAccount?) {
+        let key = SettingsBridge.tilde(projectRoot)
+        settings.store.update { $0.agents.projectAccounts[key] = account.map { SettingsBridge.tilde($0.dir) } }
     }
 
     static var claudeSource: String { AgentsController.shared.homeFolder + "/.claude" }

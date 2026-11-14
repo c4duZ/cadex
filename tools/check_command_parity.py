@@ -31,7 +31,7 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "statusBar.customize", "statusBar.toggle-item", "statusBar.activity-monitor", "agents.show", "agents.test-notifications", "agents.show-accounts", "agents.refresh-usage", "ssh.connect", "ssh.test-again", "agents.open-account", "agents.customize-accounts",
             "pane.zoom",
             # Managed accounts (plan 18, phase C), Mac only like the rest of agents.
-            "agents.add-account", "agents.set-active-account", "agents.sync-account-config", "agents.share-account-config",
+            "agents.add-account", "agents.set-active-account", "agents.set-project-account", "agents.sync-account-config", "agents.share-account-config",
             "agents.use-own-copy", "agents.follow-default-config", "agents.remove-account"}
 
 

@@ -27,11 +27,17 @@ public struct AgentAccountActions {
     public var ownCopy: @MainActor (_ account: String, _ item: String) -> Void
     public var follow: @MainActor (_ account: String, _ item: String) -> Void
     public var remove: @MainActor (_ account: String) -> Void
+    /// This window's project gets its own account; nil goes back to the active one.
+    public var setProject: @MainActor (AgentAccount?) -> Void = { _ in }
+    /// The account this window's project has now, by folder.
+    public var projectAccount: @MainActor () -> String? = { nil }
 
     public init(add: @escaping @MainActor () -> Void, setActive: @escaping @MainActor (AgentAccount) -> Void,
                 sync: @escaping @MainActor () -> Void, share: @escaping @MainActor (AgentAccount) -> Void,
                 ownCopy: @escaping @MainActor (String, String) -> Void, follow: @escaping @MainActor (String, String) -> Void,
-                remove: @escaping @MainActor (String) -> Void) {
+                remove: @escaping @MainActor (String) -> Void,
+                setProject: @escaping @MainActor (AgentAccount?) -> Void = { _ in },
+                projectAccount: @escaping @MainActor () -> String? = { nil }) {
         self.add = add
         self.setActive = setActive
         self.sync = sync
@@ -39,6 +45,8 @@ public struct AgentAccountActions {
         self.ownCopy = ownCopy
         self.follow = follow
         self.remove = remove
+        self.setProject = setProject
+        self.projectAccount = projectAccount
     }
 }
 
@@ -66,6 +74,18 @@ public enum AgentAccountCommands {
                         }
                     }) { dir in
                         if let account = agents.everyAccount().first(where: { $0.dir == dir }) { actions.setActive(account) }
+                    }),
+            Command(id: "agents.set-project-account", title: T("Set This Project's Agent Account", "Escolher a conta de agente deste projeto"),
+                    keywords: ["account", "project", "repository", "conta", "projeto", "repositório", "claude"], category: .terminal,
+                    action: list(T("The account of this project's new sessions", "A conta das sessões novas deste projeto"), T("No account in use", "Nenhuma conta em uso"), {
+                        let current = actions.projectAccount()
+                        let follow = PaletteItem(id: "", title: T("Use the Active Account", "Usar a conta ativa"),
+                                                 detail: current == nil ? T("now", "agora") : nil, icon: .arrowCounterClockwise)
+                        return [follow] + AgentUsageController.shared.visibleAccounts().filter { $0.provider == .claude }.map { account in
+                            PaletteItem(id: account.dir, title: account.name, detail: account.dir == current ? T("this project", "este projeto") : nil, icon: .gauge)
+                        }
+                    }) { dir in
+                        actions.setProject(dir.isEmpty ? nil : agents.everyAccount().first { $0.dir == dir })
                     }),
             Command(id: "agents.sync-account-config", title: T("Sync Agent Accounts' Config", "Sincronizar a configuração das contas"),
                     keywords: ["sync", "skills", "settings", "link", "sincronizar", "configuração", "contas"], category: .terminal,

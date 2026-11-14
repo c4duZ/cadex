@@ -89,10 +89,12 @@
   `apply` (lixeira, links, tira link de item que saiu da fonte), `ownCopy` e `follow`;
   `AgentManagedAccounts`, as contas criadas pelo Cadex em Application Support/Cadex/accounts
   (`create`, `folderName`, `all`, `isManaged`, `moveToTrash`: nada é apagado de vez).
-  `AgentAccountCommands.swift`: agents.add-account, -set-active-account, -sync-account-config,
+  `AgentAccountCommands.swift`: agents.add-account, -set-active-account, -set-project-account (o
+  projeto da janela, ou de volta à ativa), -sync-account-config,
   -share-account-config, -use-own-copy, -follow-default-config e -remove-account, com as listas no
   ⌘K (`AgentChoiceSource`); o que pergunta e confirma é do app (`AgentAccountActions`).
-  AgentNewSession.account: a conta de uma sessão nova (a do projeto, a ativa, a padrão).
+  O item Agent usage escolhe a conta ativa no clique direito (`AgentUsageStrip.swift`, "New
+  Sessions Use"). AgentNewSession.account: a conta de uma sessão nova (a do projeto, a ativa, a padrão).
   AgentAccount.find inclui as contas criadas pelo Cadex quando já têm .claude.json.
 - A conversa de um subagente numa aba (`AgentTranscriptDocument.swift`, um `TabDocument`): só pelo
   clique num subagente (`onOpenSubagent`). `AgentTranscript.swift` lê o log em pedaços, só o novo,
