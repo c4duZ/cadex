@@ -29,6 +29,21 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   arrasta. **Item da barra de status** (`status item`): uma peça dela (pasta, ambiente, RAM, CPU, SSH...).
 - **Conta** (`agent account`): uma pasta de configuração do Claude Code (`~/.claude`, `~/.claude-*`), com
   login e uso próprios. **Uso** (`usage`): quanto da sessão de 5 h e da semana a conta já gastou.
+- **Conta gerenciada** (`managed account`): conta que o Cadex criou, na pasta dele
+  (`~/Library/Application Support/Cadex/accounts/<nome>`), com o login feito pelo `claude` numa aba.
+  As contas de antes ficam onde estão. **Conta padrão** (`default account`): `~/.claude`, a fonte da
+  configuração compartilhada. **Conta ativa** (`active account`): a das sessões novas que o Cadex
+  abre; a conta padrão de um projeto (`project account`) vence a ativa nele.
+- **Configuração compartilhada** (`shared config`): os links que a conta gerenciada recebe para tudo
+  do topo da conta padrão, menos o estado da conta (conversas, sessões, `.claude.json`, caches).
+  **Cópia própria** (`own copy`): um item que deixou de ser link e não segue mais a fonte.
+- **Kit da sessão** (`session kit`): o que o Cadex passa a cada sessão que abre: `--settings`,
+  `--plugin-dir`, `--mcp-config` e o ambiente da aba. A única porta pela qual o Cadex põe algo numa
+  sessão do Claude Code (`docs/adr/0021-cadex-managed-accounts.md`).
+- **Histórico de sessões** (`session history`): todas as conversas de todas as contas, indexadas
+  para busca, na página History. **Retomar** (`resume`): abrir uma conversa antiga na conta dona.
+  **Continuar em outra conta** (`continue in account`): abrir uma cópia da conversa em outra conta
+  (`--fork-session`), deixando o original intacto.
 - **Sessão de agente** (`agent session`): um Claude Code vivo, com estado (trabalhando, esperando
   você), pasta e conta; não confundir com a sessão do terminal. **Subagente** (`subagent`): um
   agente que a sessão abriu para uma tarefa, com descrição.

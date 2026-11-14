@@ -1,6 +1,6 @@
 # 0019 — Agents: o Cadex observa os agentes, não roda nem fala com IA
 
-Data: 2026-10-21 · Status: aceita · Revê a linha "IA embutida no app" do `CLAUDE.md` da raiz
+Data: 2026-10-21 · Status: aceita, revista em parte por `docs/adr/0021-cadex-managed-accounts.md` (login, uso e o que o Cadex inicia) · Revê a linha "IA embutida no app" do `CLAUDE.md` da raiz
 
 ## Contexto
 O dono quer ver, no Cadex, as sessões de agente rodando em todas as contas do Claude Code da

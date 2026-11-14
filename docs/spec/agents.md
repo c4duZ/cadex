@@ -3,7 +3,10 @@
 ## Para que serve
 Ver, sem sair do Cadex, os agentes de código que estão rodando (o que cada um faz, quem espera
 resposta, os subagentes) e quanto do plano de cada conta já foi usado. O Cadex só observa: os
-agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-only.md`).
+agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-only.md`). O Cadex
+também cria contas, abre as sessões delas com o kit da sessão, guarda o histórico de todas e
+continua uma conversa em outra conta, sem nunca tocar em token
+(`docs/adr/0021-cadex-managed-accounts.md`).
 
 ## Comportamento
 ### Sessions
@@ -69,10 +72,65 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
 - O item Agent usage da barra de status mostra a conta do agente que roda no terminal com foco (o
   Claude Code pela sessão, o Codex pelo nome do programa); sem agente, a última mostrada. O ponteiro
   sobre ele abre um popover com todas as contas de todos os provedores, com plano, sessão e semana.
-- O uso é lido a cada 5 minutos, só enquanto alguém o mostra (a página Accounts ou o item da barra
-  de status) e com o app ativo. Abrir a página com o dado vencido lê na hora. "Refresh" no menu do
-  cartão e no ⌘K ("Agents: Refresh Usage").
-- O Cadex só lê o login que o Claude Code guardou. Nunca renova, troca ou grava o login.
+- O uso do Claude Code vem do `rate_limits` que o próprio Claude Code entrega à status line, nas
+  sessões que o Cadex abre (o kit da sessão põe a status line do Cadex, que chama a do dono). Cada
+  sessão grava o último valor da conta; o cartão mostra esse valor e, sem sessão aberta pelo Cadex
+  agora, "em <hora>". Janela que já reiniciou desde então mostra 0%. Conta usada só fora do Cadex
+  não tem número: o cartão diz "Open the agent from Cadex to see usage".
+- O arquivo de uso é vigiado só enquanto alguém mostra o uso (a página Accounts ou o item da barra
+  de status). "Refresh" no menu do cartão e no ⌘K ("Agents: Refresh Usage") relê o arquivo.
+- O Cadex nunca lê, guarda, renova ou repassa login ou token, nem chama o serviço de uso. "Conta com
+  login" é a que tem `oauthAccount` no `.claude.json` (lido, nunca escrito).
+
+### Contas gerenciadas
+- "Add Account" (agents.add-account, no ⌘K e em Accounts) pede um nome, cria a pasta da conta em
+  `~/Library/Application Support/Cadex/accounts/<nome>`, liga a configuração compartilhada e abre
+  uma aba na pasta do workspace com `claude` naquela conta, com o aviso "Run /login in this tab". O
+  login é do próprio Claude Code; o Cadex não o vê. A conta aparece em Accounts quando o
+  `.claude.json` dela ganha `oauthAccount`.
+- As contas que já existem (`~/.claude`, `~/.claude-*`) ficam onde estão: mover desloga.
+- **Configuração compartilhada:** `~/.claude` é a conta padrão e a fonte. A conta gerenciada recebe
+  link de tudo o que existe no topo da fonte, menos o estado da conta (`.claude.json`, `projects/`,
+  `sessions/`, `history.jsonl`, `jobs/`, `daemon/`, `state/`, `file-history/`, `paste-cache/`,
+  `shell-snapshots/`, `cache/`, `backups/`, `downloads/`, `feedback/`, `session-env/`,
+  `stats-cache.json`, `daemon-*`, `.last-*`). Pasta desconhecida (como a de uma ferramenta instalada
+  ali) também vira link.
+  - Instalar uma skill, um plugin ou mudar o `settings.json` da fonte vale em todas na hora. O que o
+    Claude grava num arquivo lincado, de qualquer conta, vale para todas.
+  - Item novo no topo da fonte entra no próximo "Sync Account Config" (agents.sync-account-config).
+  - "Use Own Copy of <item>" troca o link por uma cópia que deixa de seguir a fonte; "Follow the
+    Default Account Again" desfaz, com a cópia indo para a lixeira.
+  - Numa conta que já existia, "Share the Default Account's Config" é opcional e mostra antes o que
+    vira link e o que já existe ali; o que existe vai para a lixeira, nunca é apagado.
+- **Conta ativa:** a das sessões novas abertas pelo Cadex (agents.activeAccount), escolhida no item
+  Agent usage e no ⌘K ("Set Active Account", agents.set-active-account). **Conta padrão do projeto**
+  (agents.projectAccounts, raiz git → conta) vence a ativa naquele projeto.
+- **Kit da sessão:** toda sessão que o Cadex abre (abrir o agente de uma conta, Retomar, Continuar em
+  outra conta, e depois Nova tarefa) recebe a status line do Cadex, os hooks, skills e MCPs que as
+  features acrescentam, os MCPs da conta padrão, `CLAUDE_CONFIG_DIR` da conta e o ambiente limpo
+  (sem `CLAUDECODE` nem `CLAUDE_CODE_*` herdados). Os hooks do dono continuam rodando junto; a status
+  line dele continua aparecendo, chamada pela do Cadex. Nada é escrito na configuração da conta.
+- "Remove Account" (agents.remove-account) tira a conta do Cadex; a pasta só vai para a lixeira
+  depois de confirmar, e só se for uma pasta criada pelo Cadex.
+
+### Histórico
+- A página History, ao lado de Sessions, lista todas as conversas de todas as contas: título (o que o
+  Claude deu, ou o primeiro prompt), pasta, branch, conta e data. A pasta é a de onde a conversa
+  rodou (uma conversa do repositório retomada numa worktree aparece na worktree).
+- Busca por título, pasta, branch e trecho das mensagens; agrupa por projeto, pasta ou conta; escopo
+  projeto atual ou tudo.
+- "Resume" (agents.resume-session) abre uma aba na pasta original e digita `claude --resume <id>`
+  na conta dona, com o kit da sessão. Sem prompt: o Cadex só digita o comando.
+- "Continue in Another Account" (agents.continue-in-account) escolhe a conta e digita
+  `claude --resume <caminho da conversa> --fork-session` nela: a outra conta recebe a conversa
+  inteira e grava a cópia na pasta dela; o original fica intacto. A cópia lembra de onde veio, e a
+  conversa de um subagente dela é procurada também na conta de origem, onde ficou.
+- Também: "Copy Resume Command" (agents.copy-resume-command), "Reveal Session Log"
+  (agents.reveal-session-log) e abrir a pasta da conversa no workspace.
+- Peso: o índice lê só o que foi acrescentado a cada arquivo, em pedaços fora da linha principal, e
+  nunca guarda resultado de ferramenta. Vigia as pastas de conversas só com a página aberta;
+  fechada, o índice fica em disco e nada roda. agents.history (ligada) desliga tudo: nada indexado
+  nem vigiado.
 
 ### Notificações
 - Quando uma sessão que trabalhava passa a esperar você, o Cadex manda uma notificação do sistema,
@@ -110,12 +168,14 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
 - Só no Mac por enquanto; no Windows chega com o port (lá dá para trocar o ícone da notificação).
 
 ### Configurações
-- Três chaves, cada uma desliga uma leitura por inteiro (nada vigiado, nenhuma requisição):
-  agents.sessions, agents.accounts e, em ssh, ssh.ping. Ligadas por padrão.
+- Quatro chaves, cada uma desliga uma leitura por inteiro (nada vigiado nem lido):
+  agents.sessions, agents.accounts, agents.history e, em ssh, ssh.ping. Ligadas por padrão.
 - Accounts tem a cara do cartão do item de uso: um bloco por conta (logo, nome, "· plano", as
   barras), com espaço largo entre eles e sem linha nem caixa; a pasta fica na dica.
-- Conta sem login, ou com login vencido há mais de um dia, não aparece em Accounts, no item de uso
-  nem no cartão; vencido há menos (o Claude Code renova enquanto a conta é usada) aparece com o aviso.
+- Conta sem `oauthAccount` não aparece em Accounts, no item de uso nem no cartão. "Login vencido"
+  aparece quando uma sessão daquela conta falha com erro de autenticação ("Failed to
+  authenticate…"), ou pelo `credential_expires_at` de um `claude -p` que o Cadex já rode por outro
+  motivo; o Cadex não roda nada só para saber.
 - Clicar numa conta com o agente dela já rodando num terminal do Cadex vai a esse terminal (o usado
   por último, se há vários; em qualquer janela), sem abrir outro.
 - Sem nenhum, clicar abre o agente dela (ADR 0019): no terminal com foco, se ele está no prompt, ou
@@ -124,23 +184,24 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
   an Account's Agent") e no clique direito.
 - Esconder uma conta (clique direito, ou a chave em Customize › Accounts; agents.hiddenAccounts) a
   tira de Accounts, do item e do cartão (as sessões dela continuam em Sessions) e ela não é lida.
-  Ela volta sozinha quando o login dela muda (novo login, renovação por uso; guardado em
-  agents.hiddenLogins na hora de esconder, conferido a cada 5 min com alguém olhando), nunca por um
-  reinício de janela. Customize › Accounts lista todas, com o estado de cada uma, e a opção "Without
+  Ela volta sozinha quando o `oauthAccount` dela muda (outra conta ou organização; guardado em
+  agents.hiddenLogins na hora de esconder), nunca por um reinício de janela. Customize › Accounts lista todas, com o estado de cada uma, e a opção "Without
   permission prompts".
 - Renomear (agents.accountNames, pelo botão direito no cartão): o nome novo vale em Sessions, nas
   notificações e na barra de status; vazio volta ao da organização.
-- agents.accounts desliga a leitura do uso: nenhum login lido, nenhuma requisição.
-- O Cadex se identifica como Cadex na requisição; com isso o serviço respondeu 200 nas três contas
-  do dono (2026-10-21). Um 429 espera o que o serviço pedir.
+- agents.accounts desliga a leitura do uso: nenhum arquivo de uso lido nem vigiado.
 
 ## Estados
 - **Nenhum agente rodando**: "No agents running. Start one in a terminal: claude".
 - **Claude Code não instalado ou nenhuma conta**: a página diz isso e Accounts fica vazia, sem erro.
 - **Login vencido**: o cartão diz "Login expired. Run claude with this account to renew it." e a
   barra de status esconde a conta.
-- **Sem rede ou erro do serviço**: o cartão mantém o último valor, apagado, com "updated 12 min ago";
-  tenta de novo com espera crescente (5, 10, 20 min, até 1 h).
+- **Uso antigo**: sem sessão do Cadex na conta, o cartão mostra o último valor, apagado, com
+  "updated 3 h ago".
+- **Sem uso nenhum**: conta que nunca teve sessão aberta pelo Cadex mostra "Open the agent from
+  Cadex to see usage", sem barras.
+- **Histórico indexando**: a página History mostra o que já leu e uma linha "Indexing 120 of 800";
+  a lista cresce sem pular.
 - **Leitura desligada**: a página explica qual chave está desligada, com o botão para ligar.
 
 ## Casos de borda
@@ -152,14 +213,29 @@ agentes continuam rodando em abas de terminal (`docs/adr/0019-agents-observe-onl
 - Duas contas da mesma organização: o nome ganha a pasta ("BKDG · bkdg").
 - Duas sessões na mesma pasta: as duas aparecem no mesmo grupo, cada uma com o próprio estado.
 - Muitas sessões (mais de 50): a lista rola e só as linhas na tela são desenhadas.
-- Pedido negado pelo serviço por excesso (429): espera o tempo pedido antes de tentar de novo.
+- Status line do dono quebrada ou lenta: a do Cadex grava o uso primeiro e mostra a saída da do
+  dono como vier (vazia se ela falhar); a sessão não sente.
+- Arquivo de uso quebrado ou com campo faltando: o cartão fica com o último valor bom.
 
 ## Critérios de aceite
 - [ ] Rodar `claude` numa aba faz a sessão aparecer em até 1 s, no projeto certo, com a conta certa.
 - [ ] Mandar uma mensagem troca o sinal para "trabalhando"; quando o agente termina, "esperando você".
 - [ ] Fechar a aba do agente tira a sessão da lista.
 - [ ] Os subagentes de uma sessão aparecem ao clicar, com descrição e tempo.
-- [ ] Com duas contas logadas, Accounts mostra as duas com os mesmos números do `/usage` de cada uma.
-- [ ] Conta com login vencido mostra o aviso e não faz requisição a cada 5 min.
-- [ ] Com agents.sessions e agents.accounts desligados, o Cadex não abre nenhum arquivo do Claude
-      Code nem faz nenhuma requisição (conferido com `fs_usage` e `nettop`).
+- [ ] Com uma sessão aberta pelo Cadex em cada uma de duas contas, Accounts mostra as duas com os
+      mesmos números do `/usage` de cada uma.
+- [ ] O Cadex nunca roda `/usr/bin/security` nem sai para a rede para ler uso (conferido com
+      `fs_usage` e `nettop`).
+- [ ] Com agents.sessions, agents.accounts e agents.history desligados, o Cadex não abre nenhum
+      arquivo do Claude Code (conferido com `fs_usage`).
+- [ ] Sessão aberta pelo Cadex: a status line do dono aparece igual, os hooks dele rodam, o ambiente
+      não tem CLAUDECODE nem CLAUDE_CODE_* herdados e o transcript é gravado.
+- [ ] "Add Account" cria a pasta e os links certos (nenhum item do estado da conta; uma pasta
+      desconhecida da fonte também vira link) e abre a aba com o `/login`; depois do login, a conta
+      aparece em Accounts.
+- [ ] Uma skill nova em `~/.claude/skills` aparece na conta gerenciada sem nada a fazer.
+- [ ] Nenhuma conta que já existia muda de lugar nem perde o login; nenhum `.claude.json` muda.
+- [ ] History mostra as sessões de duas contas nos projetos certos; "Resume" abre na conta dona.
+- [ ] "Continue in Another Account" continua a conversa (a outra conta lembra o que foi dito), o
+      arquivo original fica com o mesmo hash e a cópia vai para a pasta da outra conta.
+- [ ] Um transcript crescendo só tem o trecho novo lido; formato desconhecido é pulado sem travar.
