@@ -46,6 +46,8 @@ public final class AgentsController {
     /// The folder accounts are looked for in (tests use a temporary one).
     /// CADEX_PERF_HOME: `make perf`'s folder of test accounts and sessions.
     var home = ProcessInfo.processInfo.environment["CADEX_PERF_HOME"] ?? NSHomeDirectory()
+    /// The home folder the accounts are found in (CADEX_PERF_HOME in perf).
+    public var homeFolder: String { home }
 
     private var watchers: [UUID: () -> Void] = [:]
     private var stream: FSEventStreamRef?

@@ -48,6 +48,16 @@ let exitCode = await Checks.run([
         expect(read.appearance.uiZoom == 1.5 && read.appearance.density == "normal" && read.tabs.unfocusedDim == 0.6)
         expect(problems.count == 3, "\(problems)")
     }),
+    ("the active account and the projects' accounts are kept; a wrong one is a warning", {
+        var settings = Settings()
+        expect(settings.agents.activeAccount.isEmpty && settings.agents.projectAccounts.isEmpty)
+        settings.agents.activeAccount = "~/.claude-work"
+        settings.agents.projectAccounts = ["~/code/app": "~/.claude-bkdg"]
+        let read = SettingsFile.read(SettingsFile.write(settings)).0
+        expect(read.agents.activeAccount == "~/.claude-work" && read.agents.projectAccounts == ["~/code/app": "~/.claude-bkdg"])
+        let (bad, problems) = SettingsFile.read(Data(#"{"agents": {"projectAccounts": ["x"]}}"#.utf8))
+        expect(bad.agents.projectAccounts.isEmpty && problems.count == 1, "\(problems)")
+    }),
     ("the sidebar's icons default to Files, Search and Git, and keep the saved order", {
         expect(SettingsFile.read(Data("{}".utf8)).0.sidebar.items == ["files", "git", "agents", "accounts"])
         var settings = Settings()

@@ -143,6 +143,12 @@ public struct Settings: Equatable, Sendable {
         /// (Claude Code's --dangerously-skip-permissions, Codex's
         /// --dangerously-bypass-approvals-and-sandbox). Off by default.
         public var launchSkipPermissions = false
+        /// The account of the new sessions Cadex opens ("~/.claude-work");
+        /// empty is the default account (docs/spec/agents.md, Contas gerenciadas).
+        public var activeAccount = ""
+        /// A project's own account, by git root ("~/code/app": "~/.claude-work"):
+        /// it beats the active account in that project.
+        public var projectAccounts: [String: String] = [:]
     }
 
     public struct SSH: Equatable, Sendable {

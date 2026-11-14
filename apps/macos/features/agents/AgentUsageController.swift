@@ -24,6 +24,8 @@ public final class AgentUsageController {
     }
     /// Where `cadex statusline` writes (AgentUsageFile).
     var folder = AgentUsageFile.folder()
+    /// The account of new sessions (agents.activeAccount, expanded); nil is the default one.
+    public var activeAccount: String?
     /// When a session of each account failed to authenticate, by folder.
     public internal(set) var expiredSince: [String: Date] = [:]
 

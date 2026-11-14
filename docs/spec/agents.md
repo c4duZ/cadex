@@ -83,35 +83,47 @@ continua uma conversa em outra conta, sem nunca tocar em token
   login" é a que tem `oauthAccount` no `.claude.json` (lido, nunca escrito).
 
 ### Contas gerenciadas
-- "Add Account" (agents.add-account, no ⌘K e em Accounts) pede um nome, cria a pasta da conta em
-  `~/Library/Application Support/Cadex/accounts/<nome>`, liga a configuração compartilhada e abre
-  uma aba na pasta do workspace com `claude` naquela conta, com o aviso "Run /login in this tab". O
-  login é do próprio Claude Code; o Cadex não o vê. A conta aparece em Accounts quando o
-  `.claude.json` dela ganha `oauthAccount`.
+- "Add Agent Account" (agents.add-account, no ⌘K) pede um nome, cria a pasta da conta em
+  `~/Library/Application Support/Cadex/accounts/<nome>` (o nome em minúsculas, sem acento, com
+  "-"), liga a configuração compartilhada e abre uma aba na pasta do workspace com `claude` naquela
+  conta, pelo kit da sessão. O pedido do nome já diz para fazer o login ali com /login. O login é
+  do próprio Claude Code; o Cadex não o vê. A conta aparece em Accounts quando o `.claude.json`
+  dela ganha `oauthAccount`, com o nome dado (agents.accountNames).
 - As contas que já existem (`~/.claude`, `~/.claude-*`) ficam onde estão: mover desloga.
 - **Configuração compartilhada:** `~/.claude` é a conta padrão e a fonte. A conta gerenciada recebe
-  link de tudo o que existe no topo da fonte, menos o estado da conta (`.claude.json`, `projects/`,
-  `sessions/`, `history.jsonl`, `jobs/`, `daemon/`, `state/`, `file-history/`, `paste-cache/`,
-  `shell-snapshots/`, `cache/`, `backups/`, `downloads/`, `feedback/`, `session-env/`,
-  `stats-cache.json`, `daemon-*`, `.last-*`). Pasta desconhecida (como a de uma ferramenta instalada
-  ali) também vira link.
+  link de tudo o que existe no topo da fonte, menos o estado da conta (`.claude.json`,
+  `.credentials.json`, `projects/`, `sessions/`, `history.jsonl`, `jobs/`, `daemon/`, `state/`,
+  `file-history/`, `paste-cache/`, `shell-snapshots/`, `cache/`, `backups/`, `downloads/`,
+  `feedback/`, `session-env/`, `stats-cache.json`, `tasks/`, `todos/`, `telemetry/`, `statsig/`,
+  `ide/`, `debug/`, `chrome/`, `daemon-*`, `.last-*`, os `policy-limits*` e `remote-settings*` da
+  organização e os `*-cache.json`; os nomes vistos nas pastas do dono em 2026-11-14). Pasta
+  desconhecida (como a de uma ferramenta instalada ali) também vira link.
   - Instalar uma skill, um plugin ou mudar o `settings.json` da fonte vale em todas na hora. O que o
     Claude grava num arquivo lincado, de qualquer conta, vale para todas.
-  - Item novo no topo da fonte entra no próximo "Sync Account Config" (agents.sync-account-config).
-  - "Use Own Copy of <item>" troca o link por uma cópia que deixa de seguir a fonte; "Follow the
-    Default Account Again" desfaz, com a cópia indo para a lixeira.
-  - Numa conta que já existia, "Share the Default Account's Config" é opcional e mostra antes o que
-    vira link e o que já existe ali; o que existe vai para a lixeira, nunca é apagado.
-- **Conta ativa:** a das sessões novas abertas pelo Cadex (agents.activeAccount), escolhida no item
-  Agent usage e no ⌘K ("Set Active Account", agents.set-active-account). **Conta padrão do projeto**
-  (agents.projectAccounts, raiz git → conta) vence a ativa naquele projeto.
+  - Item novo no topo da fonte entra no próximo "Sync Agent Accounts' Config"
+    (agents.sync-account-config), em todas as contas que seguem a fonte; ele diz o que ligou. Link
+    para item que saiu da fonte é tirado.
+  - "Use an Account's Own Copy…" (agents.use-own-copy, lista "conta › item") troca o link por uma
+    cópia que deixa de seguir a fonte; "Follow the Default Account Again…"
+    (agents.follow-default-config) desfaz, com a cópia indo para a lixeira.
+  - Numa conta que já existia, "Share the Default Account's Config…" (agents.share-account-config) é
+    opcional e mostra antes o que vira link e o que já existe ali; o que existe vai para a lixeira,
+    nunca é apagado.
+  - Uma conta segue a fonte quando foi criada pelo Cadex ou tem algum link para ela.
+- **Conta ativa:** a das sessões novas abertas pelo Cadex (agents.activeAccount; vazia é a conta
+  padrão), escolhida no ⌘K ("Set Active Agent Account", agents.set-active-account) e no clique
+  direito do cartão em Accounts ("Use for New Sessions"). O cartão dela diz "· active". **Conta do
+  projeto** (agents.projectAccounts, raiz git → conta, no settings.json) vence a ativa naquele
+  projeto; conta que não existe mais cai na padrão. Quem usa a conta ativa são as sessões novas do
+  plano 19 (Nova tarefa); abrir o agente de uma conta pelo clique continua abrindo aquela conta.
 - **Kit da sessão:** toda sessão que o Cadex abre (abrir o agente de uma conta, Retomar, Continuar em
   outra conta, e depois Nova tarefa) recebe a status line do Cadex, os hooks, skills e MCPs que as
   features acrescentam, os MCPs da conta padrão, `CLAUDE_CONFIG_DIR` da conta e o ambiente limpo
   (sem `CLAUDECODE` nem `CLAUDE_CODE_*` herdados). Os hooks do dono continuam rodando junto; a status
   line dele continua aparecendo, chamada pela do Cadex. Nada é escrito na configuração da conta.
-- "Remove Account" (agents.remove-account) tira a conta do Cadex; a pasta só vai para a lixeira
-  depois de confirmar, e só se for uma pasta criada pelo Cadex.
+- "Remove Agent Account…" (agents.remove-account) lista só as contas criadas pelo Cadex; depois de
+  confirmar, a pasta vai para a lixeira e o Cadex esquece o nome, o esconder e a conta ativa ou de
+  projeto que apontavam para ela. As contas de antes não são removidas: elas se escondem.
 
 ### Histórico
 - A página History, ao lado de Sessions, lista todas as conversas de todas as contas: título (o que o
@@ -233,10 +245,11 @@ continua uma conversa em outra conta, sem nunca tocar em token
       arquivo do Claude Code (conferido com `fs_usage`).
 - [x] Sessão aberta pelo Cadex: a status line do dono aparece igual, os hooks dele rodam, o ambiente
       não tem CLAUDECODE nem CLAUDE_CODE_* herdados e o transcript é gravado (bhband, 2026-11-14).
-- [ ] "Add Account" cria a pasta e os links certos (nenhum item do estado da conta; uma pasta
+- [ ] "Add Agent Account" cria a pasta e os links certos (nenhum item do estado da conta; uma pasta
       desconhecida da fonte também vira link) e abre a aba com o `/login`; depois do login, a conta
       aparece em Accounts.
-- [ ] Uma skill nova em `~/.claude/skills` aparece na conta gerenciada sem nada a fazer.
+- [x] Uma skill nova em `~/.claude/skills` aparece na conta gerenciada sem nada a fazer (teste com
+      pasta pessoal falsa; o link de pasta inteira já carregava skills no teste de 2026-11-14).
 - [ ] Nenhuma conta que já existia muda de lugar nem perde o login; nenhum `.claude.json` muda.
 - [ ] History mostra as sessões de duas contas nos projetos certos; "Resume" abre na conta dona.
 - [ ] "Continue in Another Account" continua a conversa (a outra conta lembra o que foi dito), o

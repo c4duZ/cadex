@@ -83,6 +83,17 @@
   SessionKit.claudeCommand, com a status line do Cadex; o Codex com `CODEX_HOME`; a flag sem
   permissões), agents.open-account e agents.customize-accounts (ADR 0019 e 0021). Conta escondida
   volta quando o `oauthAccount` muda (`fingerprint`, `onLoginChanged`).
+- `AgentAccounts.swift` (plano 18, fase C): `AgentConfigShare`, a configuração compartilhada por
+  link a partir do ~/.claude, lista negra do estado da conta (`isAccountState`; .credentials.json
+  nunca), `plan` (o que vira link e, numa conta antiga que entra, o que vai antes para a lixeira),
+  `apply` (lixeira, links, tira link de item que saiu da fonte), `ownCopy` e `follow`;
+  `AgentManagedAccounts`, as contas criadas pelo Cadex em Application Support/Cadex/accounts
+  (`create`, `folderName`, `all`, `isManaged`, `moveToTrash`: nada é apagado de vez).
+  `AgentAccountCommands.swift`: agents.add-account, -set-active-account, -sync-account-config,
+  -share-account-config, -use-own-copy, -follow-default-config e -remove-account, com as listas no
+  ⌘K (`AgentChoiceSource`); o que pergunta e confirma é do app (`AgentAccountActions`).
+  AgentNewSession.account: a conta de uma sessão nova (a do projeto, a ativa, a padrão).
+  AgentAccount.find inclui as contas criadas pelo Cadex quando já têm .claude.json.
 - A conversa de um subagente numa aba (`AgentTranscriptDocument.swift`, um `TabDocument`): só pelo
   clique num subagente (`onOpenSubagent`). `AgentTranscript.swift` lê o log em pedaços, só o novo,
   e nunca guarda um resultado longo (prévia dos primeiros 4 KB, linhas contadas);
@@ -96,7 +107,8 @@
   terminal de cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo).
 - Status: fases C, C2 (notificações) e D (Accounts e uso) do plano 17 no código; plano 18 fase B
   (uso sem token, kit da sessão) feita e conferida numa sessão real (bhband, 2026-11-14). Ainda não: o sinal no
-  título da aba do agente.
+  título da aba do agente. Fase C do plano 18 (contas gerenciadas) no código; falta criar uma conta de
+  verdade e fazer o /login nela.
 
 ## Como validar
 - `make macos-test` passa: contas, sessões vivas e mortas, arquivo quebrado, projeto e worktree,

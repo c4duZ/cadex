@@ -1,0 +1,162 @@
+import CommandPalette
+import Foundation
+import Icons
+import Strings
+
+/// Which account a new session opened by Cadex uses (docs/spec/agents.md,
+/// Contas gerenciadas): the project's own account (by git root) beats the
+/// active one; an account that is no longer there falls back to the default.
+public enum AgentNewSession {
+    public static func account(cwd: String, accounts: [AgentAccount], active: String?, projects: [String: String],
+                               projectRoot: (String) -> String = { AgentProject.of($0).root }) -> AgentAccount? {
+        let claude = accounts.filter { $0.provider == .claude }
+        if let dir = projects[projectRoot(cwd)], let found = claude.first(where: { $0.dir == dir }) { return found }
+        if let active, let found = claude.first(where: { $0.dir == active }) { return found }
+        return claude.first { $0.isDefault }
+    }
+}
+
+/// What the app does for each account command: the asking, confirming and
+/// the tab are the app's (apps/macos/app/AgentsAccounts.swift); the folders'
+/// work is AgentManagedAccounts and AgentConfigShare.
+public struct AgentAccountActions {
+    public var add: @MainActor () -> Void
+    public var setActive: @MainActor (AgentAccount) -> Void
+    public var sync: @MainActor () -> Void
+    public var share: @MainActor (AgentAccount) -> Void
+    public var ownCopy: @MainActor (_ account: String, _ item: String) -> Void
+    public var follow: @MainActor (_ account: String, _ item: String) -> Void
+    public var remove: @MainActor (_ account: String) -> Void
+
+    public init(add: @escaping @MainActor () -> Void, setActive: @escaping @MainActor (AgentAccount) -> Void,
+                sync: @escaping @MainActor () -> Void, share: @escaping @MainActor (AgentAccount) -> Void,
+                ownCopy: @escaping @MainActor (String, String) -> Void, follow: @escaping @MainActor (String, String) -> Void,
+                remove: @escaping @MainActor (String) -> Void) {
+        self.add = add
+        self.setActive = setActive
+        self.sync = sync
+        self.share = share
+        self.ownCopy = ownCopy
+        self.follow = follow
+        self.remove = remove
+    }
+}
+
+/// The account commands (ADR 0005: every action is a command). The ones
+/// that need a choice open a list in ⌘K.
+public enum AgentAccountCommands {
+    @MainActor
+    public static func commands(palette: CommandPaletteController, actions: AgentAccountActions) -> [Command] {
+        let agents = AgentsController.shared
+        let source = agents.home + "/.claude"
+        func list(_ placeholder: String, _ empty: String, _ items: @escaping @MainActor () -> [PaletteItem],
+                  _ choose: @escaping @MainActor (String) -> Void) -> Command.Action {
+            .run { palette.open(AgentChoiceSource(placeholder: placeholder, empty: empty, items: items, choose: choose)) }
+        }
+        return [
+            Command(id: "agents.add-account", title: T("Add Agent Account", "Adicionar conta de agente"),
+                    keywords: ["account", "claude", "login", "new", "conta", "nova", "agente"], category: .terminal,
+                    action: .run { actions.add() }),
+            Command(id: "agents.set-active-account", title: T("Set Active Agent Account", "Escolher a conta ativa dos agentes"),
+                    keywords: ["account", "active", "default", "conta", "ativa", "padrão", "claude"], category: .terminal,
+                    action: list(T("The account of new sessions", "A conta das sessões novas"), T("No account in use", "Nenhuma conta em uso"), {
+                        AgentUsageController.shared.visibleAccounts().filter { $0.provider == .claude }.map { account in
+                            PaletteItem(id: account.dir, title: account.name,
+                                        detail: account.dir == AgentUsageController.shared.activeAccount ? T("active", "ativa") : nil, icon: .gauge)
+                        }
+                    }) { dir in
+                        if let account = agents.everyAccount().first(where: { $0.dir == dir }) { actions.setActive(account) }
+                    }),
+            Command(id: "agents.sync-account-config", title: T("Sync Agent Accounts' Config", "Sincronizar a configuração das contas"),
+                    keywords: ["sync", "skills", "settings", "link", "sincronizar", "configuração", "contas"], category: .terminal,
+                    action: .run { actions.sync() }),
+            Command(id: "agents.share-account-config", title: T("Share the Default Account's Config…", "Compartilhar a configuração da conta padrão…"),
+                    keywords: ["share", "link", "skills", "settings", "compartilhar", "configuração", "conta"], category: .terminal,
+                    action: list(T("The account that follows ~/.claude", "A conta que segue o ~/.claude"), T("Every account already follows it", "Todas as contas já seguem"), {
+                        agents.everyAccount().filter { account in
+                            account.provider == .claude && !account.isDefault
+                                && !AgentConfigShare.follows(account: account.dir, source: source, managed: AgentManagedAccounts.isManaged(account.dir, home: agents.home))
+                        }.map { PaletteItem(id: $0.dir, title: $0.name, detail: "~/" + ($0.dir as NSString).lastPathComponent, icon: .gauge) }
+                    }) { dir in
+                        if let account = agents.everyAccount().first(where: { $0.dir == dir }) { actions.share(account) }
+                    }),
+            Command(id: "agents.use-own-copy", title: T("Use an Account's Own Copy…", "Usar uma cópia própria numa conta…"),
+                    keywords: ["copy", "own", "unlink", "cópia", "própria", "configuração"], category: .terminal,
+                    action: list(T("The item that stops following ~/.claude", "O item que deixa de seguir o ~/.claude"), T("Nothing linked", "Nada lincado"), {
+                        items(.linked)
+                    }) { id in split(id).map { actions.ownCopy($0.0, $0.1) } }),
+            Command(id: "agents.follow-default-config", title: T("Follow the Default Account Again…", "Voltar a seguir a conta padrão…"),
+                    keywords: ["follow", "link", "copy", "seguir", "cópia", "configuração"], category: .terminal,
+                    action: list(T("The own copy that follows ~/.claude again", "A cópia própria que volta a seguir o ~/.claude"), T("No own copies", "Nenhuma cópia própria"), {
+                        items(.own)
+                    }) { id in split(id).map { actions.follow($0.0, $0.1) } }),
+            Command(id: "agents.remove-account", title: T("Remove Agent Account…", "Remover conta de agente…"),
+                    keywords: ["remove", "delete", "account", "remover", "apagar", "conta"], category: .terminal,
+                    action: list(T("The account Cadex made to remove", "A conta criada pelo Cadex a remover"), T("Cadex made no account", "O Cadex não criou nenhuma conta"), {
+                        AgentManagedAccounts.all(home: agents.home).map { dir in
+                            PaletteItem(id: dir, title: agents.everyAccount().first { $0.dir == dir }?.name ?? (dir as NSString).lastPathComponent,
+                                        detail: (dir as NSString).lastPathComponent, icon: .trash)
+                        }
+                    }) { dir in actions.remove(dir) }),
+        ]
+    }
+
+    /// "account › item" for every account that follows the default one.
+    @MainActor
+    static func items(_ wanted: AgentConfigShare.Item) -> [PaletteItem] {
+        let agents = AgentsController.shared
+        let source = agents.home + "/.claude"
+        return followers().flatMap { account in
+            AgentConfigShare.sharable(source: source).filter { AgentConfigShare.item($0, account: account.dir, source: source) == wanted }.map { name in
+                PaletteItem(id: account.dir + "\n" + name, title: account.name + " › " + name, icon: wanted == .linked ? .copy : .link)
+            }
+        }
+    }
+
+    /// The accounts that follow ~/.claude: the managed ones and those with a link into it.
+    @MainActor
+    public static func followers() -> [AgentAccount] {
+        let agents = AgentsController.shared
+        let source = agents.home + "/.claude"
+        var list = agents.everyAccount().filter {
+            $0.provider == .claude && !$0.isDefault
+                && AgentConfigShare.follows(account: $0.dir, source: source, managed: AgentManagedAccounts.isManaged($0.dir, home: agents.home))
+        }
+        // A managed account before its first run has no .claude.json, so it is not an account yet.
+        for dir in AgentManagedAccounts.all(home: agents.home) where !list.contains(where: { $0.dir == dir }) {
+            list.append(AgentAccount(dir: dir, name: (dir as NSString).lastPathComponent, isDefault: false))
+        }
+        return list
+    }
+
+    static func split(_ id: String) -> (String, String)? {
+        let parts = id.split(separator: "\n", maxSplits: 1).map(String.init)
+        return parts.count == 2 ? (parts[0], parts[1]) : nil
+    }
+}
+
+/// A ⌘K list of choices for one command.
+@MainActor
+final class AgentChoiceSource: PaletteSource {
+    let placeholder: String
+    let emptyText: String
+    private let items: () -> [PaletteItem]
+    private let pick: (String) -> Void
+
+    init(placeholder: String, empty: String, items: @escaping () -> [PaletteItem], choose: @escaping (String) -> Void) {
+        self.placeholder = placeholder
+        self.emptyText = empty
+        self.items = items
+        self.pick = choose
+    }
+
+    var icon: Icon { .gauge }
+
+    func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
+        show(items().filter { query.isEmpty || $0.title.localizedCaseInsensitiveContains(query) }, nil)
+    }
+
+    func choose(_ item: PaletteItem) { pick(item.id) }
+
+    func stop() {}
+}

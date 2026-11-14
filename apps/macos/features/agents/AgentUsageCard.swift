@@ -29,7 +29,9 @@ enum AgentUsageCard {
         logo.contentTintColor = colors.text
         logo.setContentHuggingPriority(.required, for: .horizontal)
         let name = AgentText.label(account.name, size: 12, weight: .semibold, color: colors.text)
-        let plan = AgentText.label(usage.plans[account.dir].map { "· " + $0.capitalized } ?? "", size: 11, color: colors.secondary)
+        // "· Max · active": the active account is the one new sessions open in.
+        let marks = [usage.plans[account.dir]?.capitalized, usage.activeAccount == account.dir ? T("active", "ativa") : nil].compactMap { $0 }
+        let plan = AgentText.label(marks.map { "· " + $0 }.joined(separator: " "), size: 11, color: colors.secondary)
         plan.setContentCompressionResistancePriority(.required, for: .horizontal)
         let head = NSStackView(views: [logo, name, plan])
         head.spacing = 6

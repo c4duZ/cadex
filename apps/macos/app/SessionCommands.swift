@@ -87,6 +87,7 @@ extension WindowSession {
             action: .run { AgentUsageController.shared.refreshNow() }))
         commands.register(AgentLaunch.commands(palette: palette, launch: { [weak self] account in self?.launchAgent(for: account) },
                                                customize: { [weak self] in self?.openCustomize("accounts") }))
+        commands.register(AgentAccountCommands.commands(palette: palette, actions: accountActions()))
         commands.register(Command(
             id: "agents.test-notifications", title: T("Send Test Notifications", "Mandar notificações de teste"),
             keywords: ["notifications", "agents", "test", "notificações", "teste", "avisos"], category: .view,

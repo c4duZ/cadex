@@ -44,6 +44,7 @@ extension AgentsView {
 
     func accountMenu(_ account: AgentAccount) -> [MenuEntry] {
         [MenuEntry(T("Open Its Agent", "Abrir o agente dela"), icon: .terminalWindow) { [weak self] in self?.onLaunch?(account) },
+         MenuEntry(T("Use for New Sessions", "Usar nas sessões novas"), icon: .gauge) { [weak self] in self?.onSetActive?(account) },
          MenuEntry(T("Rename…", "Renomear…"), icon: .pencilSimple) { [weak self] in self?.onRename?(account) },
          MenuEntry(T("Hide", "Esconder"), icon: .x) { [weak self] in self?.onHide?(account, true) }]
     }

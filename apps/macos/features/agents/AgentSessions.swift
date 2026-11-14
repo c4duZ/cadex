@@ -18,9 +18,10 @@ public struct AgentAccount: Equatable, Sendable {
     public var provider: AgentProvider = .claude
 
     /// Every account folder in `home`: ~/.claude when it exists, then each
-    /// ~/.claude-* holding a .claude.json, by name. Reading stops at what
-    /// is there; nothing is asked of the user (the proof of concept,
-    /// 2026-10-21).
+    /// ~/.claude-* holding a .claude.json, by name, then the accounts Cadex
+    /// made (AgentManagedAccounts) once Claude Code wrote their .claude.json.
+    /// Reading stops at what is there; nothing is asked of the user (the
+    /// proof of concept, 2026-10-21).
     public static func find(home: String) -> [AgentAccount] {
         let fm = FileManager.default
         var accounts: [AgentAccount] = []
@@ -34,6 +35,9 @@ public struct AgentAccount: Equatable, Sendable {
             guard fm.fileExists(atPath: dir + "/.claude.json") else { continue }
             accounts.append(AgentAccount(dir: dir, name: label(json(dir + "/.claude.json"), fallback: String(name.dropFirst(8))), isDefault: false))
         }
+        for dir in AgentManagedAccounts.all(home: home) where fm.fileExists(atPath: dir + "/.claude.json") {
+            accounts.append(AgentAccount(dir: dir, name: label(json(dir + "/.claude.json"), fallback: (dir as NSString).lastPathComponent), isDefault: false))
+        }
         return distinct(accounts)
     }
 
@@ -42,7 +46,8 @@ public struct AgentAccount: Equatable, Sendable {
     static func distinct(_ accounts: [AgentAccount]) -> [AgentAccount] {
         accounts.map { account in
             guard accounts.filter({ $0.name == account.name }).count > 1 else { return account }
-            let folder = account.isDefault ? "default" : String((account.dir as NSString).lastPathComponent.dropFirst(8))
+            let last = (account.dir as NSString).lastPathComponent
+            let folder = account.isDefault ? "default" : last.hasPrefix(".claude-") ? String(last.dropFirst(8)) : last
             return AgentAccount(dir: account.dir, name: "\(account.name) · \(folder)", isDefault: account.isDefault)
         }
     }

@@ -25,6 +25,7 @@ extension WindowSession {
         page.onHide = { [weak self] account, hide in self?.hideAccount(account, hide) }
         page.onLaunch = { [weak self] account in self?.launchAgent(for: account) }
         page.onRename = { [weak self] account in self?.renameAccount(account) }
+        page.onSetActive = { [weak self] account in self?.setActiveAccount(account) }
         ThemeStore.shared.observe { [weak page, weak self] _ in
             page?.colors = Self.agentColors()
             self?.usageStrip?.colors = Self.agentColors()

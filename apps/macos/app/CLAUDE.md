@@ -59,7 +59,10 @@
   `StatusBarWiring.swift` (os itens Git branch e Terminals, e os lados salvos). `AgentsLaunch.swift`:
   esconder contas guardando o login, a aba Accounts do Customize e o clique numa conta: o agente dela
   já rodando num terminal do Cadex vem para a frente (o usado por último, em qualquer janela); sem
-  nenhum, abre no terminal com foco (no prompt) ou numa aba nova. O explorer é criado
+  nenhum, abre no terminal com foco (no prompt) ou numa aba nova. `AgentsAccounts.swift`: as contas
+  gerenciadas (plano 18, fase C): pedir o nome e abrir a aba com o claude da conta nova pelo kit,
+  conta ativa no settings.json, sincronizar, compartilhar numa conta antiga mostrando antes o que
+  muda, cópia própria, voltar a seguir e remover (só as do Cadex, para a lixeira). O explorer é criado
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.

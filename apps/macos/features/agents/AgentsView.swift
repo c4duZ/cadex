@@ -27,6 +27,8 @@ public final class AgentsView: NSView {
     /// Rename an account (nil: back to its own name) or hide and show it;
     /// the app saves agents.accountNames and agents.hiddenAccounts.
     public var onRename: ((AgentAccount) -> Void)?
+    /// "Use for New Sessions": the account becomes the active one.
+    public var onSetActive: ((AgentAccount) -> Void)?
     public var onHide: ((AgentAccount, Bool) -> Void)?
     /// A click on an account: open its agent in the focused terminal (the app's).
     public var onLaunch: ((AgentAccount) -> Void)?

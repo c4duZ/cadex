@@ -95,6 +95,11 @@ public enum SettingsFile {
             settings.agents.hiddenAccounts = reader.strings(s, "agents.hiddenAccounts") ?? settings.agents.hiddenAccounts
             settings.agents.accounts = reader.bool(s, "agents.accounts") ?? settings.agents.accounts
             settings.agents.launchSkipPermissions = reader.bool(s, "agents.launchSkipPermissions") ?? settings.agents.launchSkipPermissions
+            settings.agents.activeAccount = reader.string(s, "agents.activeAccount") ?? settings.agents.activeAccount
+            if let projects = s["projectAccounts"] {
+                if let projects = projects as? [String: String] { settings.agents.projectAccounts = projects }
+                else { reader.problems.append("agents.projectAccounts: esperava a conta por pasta de projeto") }
+            }
             if let logins = s["hiddenLogins"] {
                 if let logins = logins as? [String: String] { settings.agents.hiddenLogins = logins }
                 else { reader.problems.append("agents.hiddenLogins: esperava o login por pasta") }
@@ -154,7 +159,8 @@ public enum SettingsFile {
                        "soundPermission": s.agents.soundPermission, "soundQuestion": s.agents.soundQuestion,
                        "soundFinished": s.agents.soundFinished,
                        "accounts": s.agents.accounts, "accountNames": s.agents.accountNames, "hiddenAccounts": s.agents.hiddenAccounts,
-                       "hiddenLogins": s.agents.hiddenLogins, "launchSkipPermissions": s.agents.launchSkipPermissions],
+                       "hiddenLogins": s.agents.hiddenLogins, "launchSkipPermissions": s.agents.launchSkipPermissions,
+                       "activeAccount": s.agents.activeAccount, "projectAccounts": s.agents.projectAccounts],
             "shortcuts": shortcuts,
         ]
         return (try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])) ?? Data()

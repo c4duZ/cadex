@@ -489,4 +489,5 @@ let exitCode = await Checks.run([
     return condition()
 }
 let usageExit = await Checks.run(usageChecks)
-exit(folderExit != 0 ? folderExit : usageExit != 0 ? usageExit : exitCode)
+let accountExit = await Checks.run(accountChecks)
+exit([folderExit, usageExit, accountExit, exitCode].first { $0 != 0 } ?? 0)
