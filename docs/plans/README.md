@@ -1,6 +1,7 @@
 # Planos: do fim do terminal ao MVP no Mac, e o port para o Windows
 
-Oito planos, um por entrega que o dono abre e usa. Cada plano é autocontido e dividido em fases que
+Um plano por entrega que o dono abre e usa (os oito primeiros levam ao MVP no Mac; os seguintes,
+nas tabelas abaixo). Cada plano é autocontido e dividido em fases que
 cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal funcionando numa janela
 (shell num PTY, desenho em Metal, SF Mono nítido, teclado básico, edição estilo Mac com ⌥ e ⌘).
 
@@ -39,6 +40,20 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 15 | `docs/plans/15-themes-and-personalization.md` | mais temas e personalização visual (claro/escuro, destaque, contraste, fonte, zoom, cores de space e aba) | fases A a D no código, Mac e Windows (2026-10-20); falta conferir à mão no Mac e no PC Windows |
 | 16 | `docs/plans/16-element-picker.md` | escolher elemento no preview e mandar para o agente no terminal (só Mac) | fase A feita e conferida pelo dono (2026-10-21; falta ⇧, ⌥ e Esc à mão); B a D no código, falta conferir em projetos reais |
 | 17 | `docs/plans/17-sidebar-agents-status.md` | barra lateral com ícones, página Agents (sessões e uso das contas), barra de status personalizável, SSH (só Mac) | feito (v2.2.0); falta o sinal do agente no título da aba |
+
+- Depois do 17, o Cadex dono da sessão do agente: o comportamento do Orca, a memória do AI Memory e
+  as máquinas pelo Tailscale (pedido do dono em 2026-11-14, depois do estudo
+  "Cadex × Claude Code"; o motor stream-json e o celular ficam para depois), nesta ordem:
+
+| # | plano | entrega | status |
+|---|---|---|---|
+| 18 | `docs/plans/18-accounts-and-sessions.md` | contas em pastas do Cadex, configuração por link, uso sem token, histórico unificado e continuar em outra conta | escrito |
+| 19 | `docs/plans/19-agent-sessions-and-worktrees.md` | worktree por tarefa, estado por hooks, quadro "Precisa de você", daemon do terminal, hibernar | escrito |
+| 20 | `docs/plans/20-agent-drives-cadex.md` | CLI `cadex` e skills, preview como navegador do agente, computer use | escrito |
+| 21 | `docs/plans/21-review.md` | diff de revisão, comentar no diff e mandar em lote, autoria por linha | escrito |
+| 22 | `docs/plans/22-memory.md` | memória: ai-memory ao lado ou nativa, consolidação sem token, página Memory | escrito |
+| 23 | `docs/plans/23-machines.md` | máquinas da tailnet, "Rodar em", Docker pela tailnet, ambiente descartável por worktree | escrito |
+| 24 | `docs/plans/24-many-agents.md` | mesma tarefa em N agentes, orquestração, automações agendadas | escrito |
 
 ## O que eu não quero
 - Executar plano sem ler antes o `CLAUDE.md` da raiz e o da feature que vai mexer.
