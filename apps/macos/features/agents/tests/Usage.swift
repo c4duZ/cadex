@@ -71,6 +71,9 @@ let usageChecks: [(name: String, body: Checks.Body)] = [
         expect(!usage.isRunning)
         usage.folder = AgentUsageFile.folder()
     }),
+    ("a hidden login kept before plan 18 (the token's expiry) does not bring the account back", {
+        expect(AgentUsageController.isLegacy("1763100000000") && !AgentUsageController.isLegacy("a1/o1") && !AgentUsageController.isLegacy("login"))
+    }),
     ("a turn that failed to log in is a stop of its own", {
         let line = #"{"type":"assistant","error":"authentication_failed","isApiErrorMessage":true,"message":{"role":"assistant","content":[{"type":"text","text":"Login expired · Please run /login"}]}}"#
         expect(AgentStop.classify([line]) == .loginExpired)

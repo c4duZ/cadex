@@ -130,14 +130,14 @@ public struct Settings: Equatable, Sendable {
         public var soundQuestion = "Ping"
         public var soundFinished = "Glass"
         /// Read each account's plan usage (Accounts, the usage item). Off:
-        /// no login is read and no request is made.
+        /// no usage file is read or watched (ADR 0021: no login is ever read).
         public var accounts = true
         /// Names you gave accounts, by folder ("~/.claude-diogo": "Liderhub").
         public var accountNames: [String: String] = [:]
         /// Accounts left out of Accounts and the usage item, by folder.
         public var hiddenAccounts: [String] = []
         /// Each hidden account's login when it was hidden: it comes back when
-        /// that changes (a new login, a renewal by use), by folder.
+        /// that changes (another account or organization logs in), by folder.
         public var hiddenLogins: [String: String] = [:]
         /// Clicking an account opens its agent without permission prompts
         /// (Claude Code's --dangerously-skip-permissions, Codex's

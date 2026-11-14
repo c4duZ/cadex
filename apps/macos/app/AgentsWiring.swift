@@ -60,7 +60,7 @@ extension WindowSession {
         let strip = AgentUsageStrip()
         strip.onClick = { [weak self] in _ = self?.commands.run("agents.show-accounts") }
         let item = StatusItem(id: "usage", title: T("Agent usage", "Uso dos agentes"),
-                              subtitle: T("Each account's 5 h session and week, every 5 min", "A sessão de 5 h e a semana de cada conta, a cada 5 min"),
+                              subtitle: T("Each account's 5 h session and week", "A sessão de 5 h e a semana de cada conta"),
                               icon: .sparkle, side: .left, view: strip)
         var token: UUID?
         var sessions: UUID?
@@ -220,8 +220,8 @@ extension AppDelegate {
             NSApp.activate(ignoringOtherApps: true)
             self?.sessions.first?.openAgent(session)
         }
-        // A hidden account whose login changed (a new login, a renewal by
-        // use) comes back; a window's reset does not count.
+        // A hidden account whose login changed (another account or
+        // organization) comes back; a window's reset does not count.
         AgentUsageController.shared.onLoginChanged = { [weak self] dir in
             let key = SettingsBridge.tilde(dir)
             self?.settings.store.update { s in

@@ -67,8 +67,8 @@ enum GeneralPages {
                                    "A página Agents lista as sessões do Claude Code de todas as contas deste Mac. O Cadex só lê os arquivos delas, nunca roda um agente. Desligado, nada delas é aberto."),
                                  control: SettingsPage.toggle(store.settings.agents.sessions) { on in store.update { $0.agents.sessions = on } }),
                 SettingsPage.row(T("Read plan usage", "Ler o uso dos planos"),
-                                 T("Agents › Accounts and the status bar show how much of each account's plan is used, every 5 minutes while one of them shows. Cadex reads the login Claude Code keeps and never renews or changes it.",
-                                   "Agents › Contas e a barra de status mostram quanto do plano de cada conta foi usado, a cada 5 minutos enquanto um deles aparece. O Cadex lê o login que o Claude Code guarda e nunca o renova nem o muda."),
+                                 T("Agents › Accounts and the status bar show how much of each account's plan is used, as Claude Code tells it to the sessions Cadex opens. Cadex never reads a login or token and asks no service.",
+                                   "Agents › Contas e a barra de status mostram quanto do plano de cada conta foi usado, como o Claude Code conta às sessões que o Cadex abre. O Cadex nunca lê login nem token e não pergunta a serviço nenhum."),
                                  control: SettingsPage.toggle(store.settings.agents.accounts) { on in store.update { $0.agents.accounts = on } }),
             ] + NotificationRows.make(store) + [
                 SettingsPage.row(T("Test SSH hosts", "Testar os hosts SSH"),

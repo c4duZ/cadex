@@ -59,6 +59,13 @@ public final class AgentUsageController {
         publish()
     }
 
+    /// A login kept before plan 18 was the token's expiry from the Keychain
+    /// (digits): it would differ from any oauthAccount fingerprint and bring
+    /// every hidden account back after the update, so it is ignored.
+    static func isLegacy(_ fingerprint: String) -> Bool {
+        !fingerprint.isEmpty && fingerprint.allSatisfy(\.isNumber)
+    }
+
     static let every: TimeInterval = 60
     static let loginsEvery: TimeInterval = 300
 
@@ -140,7 +147,7 @@ public final class AgentUsageController {
             logins[dir] = login
             codexReads[dir] = codex
             if let plan = login?.plan ?? codex?.plan { plans[dir] = plan }
-            if let before = hiddenLogins[dir], let now = login?.fingerprint, now != before { onLoginChanged?(dir) }
+            if let before = hiddenLogins[dir], !Self.isLegacy(before), let now = login?.fingerprint, now != before { onLoginChanged?(dir) }
         }
         tick()
     }
