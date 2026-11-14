@@ -115,6 +115,9 @@ extension WindowSession {
     /// group is the agent's (the core's cadex_terminal_foreground_group),
     /// with the index of its space.
     func terminal(of session: AgentSession) -> (space: Int, terminal: TerminalView)? {
+        // A parked background session has no process (pid 0), and
+        // getpgid(0) is Cadex's own group.
+        guard session.pid > 0 else { return nil }
         let group = getpgid(session.pid)
         guard group > 0, let spaces else { return nil }
         for (index, space) in spaces.spaces.enumerated() {
@@ -189,6 +192,12 @@ extension WindowSession {
             window.window.makeKeyAndOrderFront(nil)
             spaces.select(found.space)
             window.tabs?.focus(found.terminal)
+            return
+        }
+        // A background session: its screen in a new tab, in its folder.
+        if let job = session.job, let tabs {
+            tabs.newTab(cwd: session.cwd)
+            tabs.activeTerminal?.session?.write(AgentLaunch.attachCommand(job: job, account: session.account) + "\n")
             return
         }
         if explorer?.reveal(session.cwd) == true { workspace?.showSidebar("files") } else { NSSound.beep() }

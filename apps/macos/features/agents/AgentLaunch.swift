@@ -23,6 +23,15 @@ public enum AgentLaunch {
         }
     }
 
+    /// `claude attach <job>` for a background session, with its account's
+    /// folder: the session's own screen, where a permission or question is
+    /// answered (test loop, 2026-11-14). Typed like the command above.
+    public static func attachCommand(job: String, account: AgentAccount) -> String {
+        let quoted = "'" + account.dir.replacingOccurrences(of: "'", with: "'\\''") + "'"
+        let safeJob = job.filter { $0.isLetter || $0.isNumber || $0 == "-" }
+        return (account.isDefault ? "" : "CLAUDE_CONFIG_DIR=\(quoted) ") + "claude attach " + safeJob
+    }
+
     /// agents.open-account (the accounts in ⌘K) and agents.customize-accounts.
     @MainActor
     public static func commands(palette: CommandPaletteController, launch: @escaping @MainActor (AgentAccount) -> Void,

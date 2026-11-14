@@ -46,7 +46,11 @@ public enum AgentsLayout {
         default: if let branch = project.branch { parts.append(branch) }
         }
         parts.append(session.account.name)
-        if !inCadex { parts.append(T("outside Cadex", "fora do Cadex")) }
+        if session.job != nil {
+            parts.append(T("in the background", "em segundo plano"))
+        } else if !inCadex {
+            parts.append(T("outside Cadex", "fora do Cadex"))
+        }
         return parts.joined(separator: " · ")
     }
 }

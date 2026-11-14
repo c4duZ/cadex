@@ -51,6 +51,13 @@ public final class AgentsController {
     private var stream: FSEventStreamRef?
     private var watchedPaths: [String] = []
     private var liveness: Timer?
+    /// Background sessions (AgentBackground), read again only when a jobs/
+    /// folder changes, at most every 5 s; the `claude` binary is looked up
+    /// once (nil: none installed, no background reading at all).
+    private var background: [AgentSession] = []
+    private var lastBackgroundRead = Date.distantPast
+    private var backgroundPending = false
+    lazy var claude: String? = AgentBackground.claudePath(home: home)
 
     /// Whether anything is read now: false means no stream and no timer.
     var isRunning: Bool { stream != nil || liveness != nil }
@@ -85,10 +92,12 @@ public final class AgentsController {
             accounts = []
             sessions = []
             subagents = []
+            background = []
             publish()
             return
         }
         reload()
+        readBackground()
         let timer = Timer(timeInterval: 10, repeats: true) { _ in MainActor.assumeIsolated { AgentsController.shared.reload() } }
         timer.tolerance = 2
         RunLoop.main.add(timer, forMode: .common)
@@ -113,7 +122,8 @@ public final class AgentsController {
             all += read.sessions
             bad += read.unreadable
         }
-        sessions = all
+        // A background session that runs also has a registry: keep that one.
+        sessions = all + background.filter { job in !all.contains { $0.id == job.id } }
         unreadable = bad
         if let open = openSession, let session = sessions.first(where: { $0.id == open }) {
             subagents = AgentSubagent.read(session)
@@ -122,6 +132,7 @@ public final class AgentsController {
             subagents = []
         }
         var paths = accounts.map { $0.dir + "/sessions" }
+        if claude != nil { paths += accounts.map { $0.dir + "/jobs" } }
         if let open = openSession, let session = sessions.first(where: { $0.id == open }) { paths.append(AgentSubagent.folder(of: session)) }
         watchFolders(paths.filter { FileManager.default.fileExists(atPath: $0) })
         publish()
@@ -129,6 +140,30 @@ public final class AgentsController {
 
     func publish() {
         for changed in watchers.values { changed() }
+    }
+
+    /// Reads the background sessions of every account off the main thread,
+    /// then merges them in; a change while one read runs, or within 5 s of
+    /// the last, waits for the next slot instead of starting another.
+    func readBackground() {
+        guard isEnabled, !watchers.isEmpty, let claude else { return }
+        let wait = 5 - Date().timeIntervalSince(lastBackgroundRead)
+        guard !backgroundPending else { return }
+        backgroundPending = true
+        let accounts = self.accounts
+        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + max(0, wait)) {
+            let found = accounts.flatMap { AgentBackground.read($0, claude: claude) }
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    let controller = AgentsController.shared
+                    controller.backgroundPending = false
+                    controller.lastBackgroundRead = Date()
+                    guard controller.isEnabled, !controller.watchers.isEmpty else { return }
+                    controller.background = found
+                    controller.reload(accounts: false)
+                }
+            }
+        }
     }
 
     // MARK: FSEvents
@@ -140,10 +175,19 @@ public final class AgentsController {
         watchedPaths = paths
         guard !paths.isEmpty else { return }
         var context = FSEventStreamContext()
-        let callback: FSEventStreamCallback = { _, _, _, _, _, _ in
-            DispatchQueue.main.async { MainActor.assumeIsolated { AgentsController.shared.reload(accounts: false) } }
+        let callback: FSEventStreamCallback = { _, _, count, paths, _, _ in
+            // A change under an account's jobs/ is a background session: only
+            // that runs `claude agents --json` (AgentBackground).
+            let changed = (unsafeBitCast(paths, to: NSArray.self) as? [String]) ?? []
+            let jobs = changed.prefix(count).contains { $0.contains("/jobs/") || $0.hasSuffix("/jobs") }
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    AgentsController.shared.reload(accounts: false)
+                    if jobs { AgentsController.shared.readBackground() }
+                }
+            }
         }
-        let flags = FSEventStreamCreateFlags(kFSEventStreamCreateFlagFileEvents | kFSEventStreamCreateFlagNoDefer)
+        let flags = FSEventStreamCreateFlags(kFSEventStreamCreateFlagFileEvents | kFSEventStreamCreateFlagNoDefer | kFSEventStreamCreateFlagUseCFTypes)
         guard let stream = FSEventStreamCreate(nil, callback, &context, paths as CFArray,
                                                FSEventStreamEventId(kFSEventStreamEventIdSinceNow), 0.3, flags) else { return }
         FSEventStreamSetDispatchQueue(stream, .main)

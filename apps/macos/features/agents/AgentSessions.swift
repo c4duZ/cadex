@@ -70,6 +70,11 @@ public struct AgentSession: Equatable, Sendable {
     public let status: Status
     /// Since when it is in that status.
     public let since: Date
+    /// A background session (agent view, `claude --bg`): its job id, which
+    /// `claude attach <job>` opens; nil for one running in a terminal.
+    public var job: String? = nil
+    /// What a background session waits for ("permission prompt").
+    public var waitingFor: String? = nil
 
     /// The sessions of `account` whose process is alive. A file that does
     /// not read (another Claude Code version) is skipped, never fatal; the
@@ -145,21 +150,34 @@ public struct AgentProject: Equatable, Sendable {
 }
 
 /// A subagent a session started for a task, from the description file
-/// Claude Code keeps beside its log; "running" when the log changed in the
-/// last 30 s (there is no status of its own: an estimate, said so in the spec).
+/// Claude Code keeps beside its log.
 public struct AgentSubagent: Equatable, Sendable {
     public let id: String
     public let type: String
     public let description: String
     public let lastWrite: Date
+    /// The description file's `finished`: true once the subagent is done,
+    /// missing while it runs (Claude Code 2.1.325, 2026-11-14). nil also for
+    /// an older file without the field (`knowsFinished` false).
+    public var finished: Bool? = nil
+    /// Whether this Claude Code writes `finished` (its files carry
+    /// `spawnDepth` beside it); an older one gets the 30 s estimate.
+    public var knowsFinished = false
 
-    public var isRunning: Bool { Date().timeIntervalSince(lastWrite) < 30 }
+    /// Running: not finished, on a Claude Code that says so; on an older
+    /// one, the log changed in the last 30 s. A long command left the log
+    /// silent for 12 s while the subagent worked (test loop, 2026-11-14), so
+    /// the estimate alone called it done too soon. No write in 10 min ends
+    /// it either way: a subagent killed with its session never says done.
+    public var isRunning: Bool {
+        let quiet = Date().timeIntervalSince(lastWrite)
+        guard knowsFinished else { return quiet < 30 }
+        return finished != true && quiet < 600
+    }
 
-    /// The folder Claude Code keeps a session's subagents in: the cwd with
-    /// "/" and "." as "-", under the account's projects.
+    /// The folder Claude Code keeps a session's subagents in.
     public static func folder(of session: AgentSession) -> String {
-        let encoded = session.cwd.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ".", with: "-")
-        return "\(session.account.dir)/projects/\(encoded)/\(session.id)/subagents"
+        "\(AgentProjectFolder.path(for: session.cwd, in: session.account))/\(session.id)/subagents"
     }
 
     /// The newest 10 first.
@@ -172,7 +190,9 @@ public struct AgentSubagent: Equatable, Sendable {
             let log = dir + "/" + id + ".jsonl"
             let date = (try? fm.attributesOfItem(atPath: log))?[.modificationDate] as? Date ?? .distantPast
             return AgentSubagent(id: id, type: meta["agentType"] as? String ?? "agent",
-                                 description: meta["description"] as? String ?? id, lastWrite: date)
+                                 description: meta["description"] as? String ?? id, lastWrite: date,
+                                 finished: meta["finished"] as? Bool,
+                                 knowsFinished: meta["finished"] != nil || meta["spawnDepth"] != nil)
         }
         return Array(found.sorted { $0.lastWrite > $1.lastWrite }.prefix(10))
     }

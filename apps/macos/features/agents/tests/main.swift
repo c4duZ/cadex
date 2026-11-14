@@ -15,6 +15,13 @@ func write(_ path: String, _ text: String) {
     fm.createFile(atPath: path, contents: Data(text.utf8))
 }
 
+/// Claude Code's folder name for a path up to 200 characters, written apart
+/// from the code under test: every character not an ASCII letter or digit
+/// becomes "-" (seen with Claude Code 2.1.325, 2026-11-14).
+func claudeFolder(_ cwd: String) -> String {
+    cwd.replacingOccurrences(of: "[^A-Za-z0-9]", with: "-", options: .regularExpression)
+}
+
 /// A home with the default account and two others; one live session in a
 /// repository, one waiting in a worktree, a dead one and a broken file.
 func fakeHome() -> String {
@@ -32,7 +39,7 @@ func fakeHome() -> String {
     write(home + "/repo/sub/file.txt", "")
     write(home + "/gitdirs/tree/HEAD", "ref: refs/heads/feature/x\n")
     write(home + "/tree/.git", "gitdir: \(home)/gitdirs/tree\n")
-    let sub = home + "/.claude/projects/" + (home + "/repo/sub").replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ".", with: "-") + "/s1/subagents"
+    let sub = home + "/.claude/projects/" + claudeFolder(home + "/repo/sub") + "/s1/subagents"
     write(sub + "/agent-a.meta.json", #"{"agentType":"general-purpose","description":"Mover Kakashi"}"#)
     write(sub + "/agent-a.jsonl", "{}\n")
     write(sub + "/agent-b.meta.json", #"{"agentType":"Explore","description":"Achar o bug"}"#)
@@ -41,6 +48,7 @@ func fakeHome() -> String {
     return home
 }
 
+let folderExit = await Checks.run(folderChecks)
 let exitCode = await Checks.run([
     ("accounts: ~/.claude and each ~/.claude-* with a login, named by organization or folder", {
         let home = fakeHome()
@@ -100,6 +108,7 @@ let exitCode = await Checks.run([
         defer { try? fm.removeItem(atPath: home) }
         let controller = AgentsController.shared
         controller.home = home
+        controller.claude = nil  // no real `claude agents --json` in tests
         expect(!controller.isRunning, "nobody watching")
         var changes = 0
         let token = controller.watch { changes += 1 }
@@ -118,6 +127,7 @@ let exitCode = await Checks.run([
         defer { try? fm.removeItem(atPath: home) }
         let controller = AgentsController.shared
         controller.home = home
+        controller.claude = nil  // no real `claude agents --json` in tests
         let token = controller.watch {}
         let me = ProcessInfo.processInfo.processIdentifier
         write(home + "/.claude-work/sessions/9.json", #"{"pid":\#(me),"sessionId":"s9","cwd":"\#(home)","name":"new-9","status":"busy"}"#)
@@ -153,6 +163,7 @@ let exitCode = await Checks.run([
         defer { try? fm.removeItem(atPath: home) }
         let controller = AgentsController.shared
         controller.home = home
+        controller.claude = nil  // no real `claude agents --json` in tests
         let notifier = AgentNotifier(controller: controller)
         notifier.stopDelay = 0
         var stops: [String] = []
@@ -207,6 +218,7 @@ let exitCode = await Checks.run([
         defer { try? fm.removeItem(atPath: home) }
         let controller = AgentsController.shared
         controller.home = home
+        controller.claude = nil  // no real `claude agents --json` in tests
         let token = controller.watch {}
         controller.names = [home + "/.claude-work": "Liderhub"]
         controller.hidden = [home + "/.claude-band"]
@@ -552,4 +564,4 @@ let exitCode = await Checks.run([
     }
     return condition()
 }
-exit(exitCode)
+exit(folderExit != 0 ? folderExit : exitCode)

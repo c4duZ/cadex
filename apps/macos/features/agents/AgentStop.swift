@@ -25,8 +25,7 @@ public enum AgentStop: Equatable, Sendable {
 
     /// The conversation log of a session: its id, beside its subagents' folder.
     public static func log(of session: AgentSession) -> String {
-        let encoded = session.cwd.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ".", with: "-")
-        return "\(session.account.dir)/projects/\(encoded)/\(session.id).jsonl"
+        "\(AgentProjectFolder.path(for: session.cwd, in: session.account))/\(session.id).jsonl"
     }
 
     /// Reads the end of the session's log and says why it stopped.

@@ -20,18 +20,32 @@
   quando é só "x's Organization"; nomes iguais ganham a pasta), `AgentSession` (o
   sessions/<pid>.json de cada conta com o processo vivo: busy é trabalhando, idle é esperando),
   `AgentProject` (o .git acima da pasta, worktree também, e o branch lido do HEAD, sem rodar git) e
-  `AgentSubagent` (os .meta.json da pasta de subagentes da sessão; trabalhando se o log mudou nos
-  últimos 30 s, uma estimativa).
+  `AgentSubagent` (os .meta.json da pasta de subagentes da sessão; terminado pelo `finished` que o
+  Claude Code escreve ao fim; arquivo antigo, sem `finished` nem `spawnDepth`, cai na estimativa de
+  "o log mudou nos últimos 30 s"; 10 min sem escrever encerra de qualquer jeito).
+- `AgentProjectFolder.swift`: a pasta de conversas de uma pasta de trabalho dentro de projects/,
+  pela regra do Claude Code (todo caractere que não é letra ou número ASCII vira "-"; acima de 200,
+  os 200 primeiros + "-" + hash em base 36), com busca pelo prefixo se o hash não bater. Uma regra
+  só para subagentes, conversa do subagente e o fim do log (`AgentStop`); antes só "/" e "." viravam
+  "-" e pastas com espaço, "_" ou acento perdiam subagentes e o motivo da parada (2026-11-14).
+- `AgentBackground.swift`: as sessões em segundo plano (agent view, `claude --bg`) abertas
+  (trabalhando ou "blocked", que espera você), pelo `claude agents --json` da conta, a interface que
+  a doc do Claude Code suporta (a pasta jobs/ é interna). Custa 0,15 s de CPU por chamada: roda só
+  quando a pasta jobs/ de uma conta muda, no máximo a cada 5 s, fora da linha principal; sem o
+  binário `claude` (~/.local/bin, /opt/homebrew/bin, /usr/local/bin), nada. O ambiente perde
+  CLAUDECODE e CLAUDE_CODE_*.
 - `AgentsController.swift`: a porta de entrada, uma para o app (`shared`). `watch` liga a leitura
   e `stop` desliga; sem ninguém, nenhum FSEvents e nenhum timer. Vigia por FSEvents com eventos
-  por arquivo as pastas sessions das contas e a de subagentes da sessão aberta; a cada 10 s confere
-  quem ainda está vivo (um agente que caiu não avisa) e acha pasta sessions nova. `isEnabled` é o
-  agents.sessions.
+  por arquivo as pastas sessions e jobs das contas e a de subagentes da sessão aberta; a cada 10 s
+  confere quem ainda está vivo (um agente que caiu não avisa) e acha pasta sessions nova. As sessões
+  em segundo plano entram na mesma lista (`job`, `waitingFor`). `isEnabled` é o agents.sessions.
 - `AgentsLayout.swift`: grupos por projeto (o mais recente primeiro; esperando antes de
-  trabalhando) e a linha de baixo ("main · conta", "esperando você · conta · fora do Cadex").
+  trabalhando) e a linha de baixo ("main · conta", "esperando você · conta · fora do Cadex", "… ·
+  em segundo plano").
 - `AgentsView.swift`: a página da barra lateral; lê só enquanto aparece. `AgentSessionList.swift`:
   as sessões, com o logo da conta; clique (ou a seta) abre os subagentes, duplo clique chama
-  `onOpen` (o terminal),
+  `onOpen` (o terminal; numa sessão em segundo plano, uma aba nova com `claude attach <job>`, de
+  `AgentLaunch.swift:attachCommand`),
   o título do projeto recolhe o grupo. `AgentMotion.swift`: a seta que gira e o `AgentReveal`, que
   desdobra e dobra (altura e opacidade, 0,2 s). `AgentRows.swift`: o sinal (anel girando, ponto
   azul, ✓), a linha clicável que acende ao passar e escurece ao apertar, e os rótulos.

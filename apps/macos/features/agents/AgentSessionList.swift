@@ -94,8 +94,11 @@ extension AgentsView {
         let row = AgentRow(line)
         row.fill = controller.openSession == session.id ? colors.fill.withAlphaComponent(0.35) : nil
         row.hoverFill = colors.fill.withAlphaComponent(0.5)
-        row.toolTip = "\(session.cwd)\n\(session.account.name) · pid \(session.pid)\n"
-            + T("Click: its subagents. Double click: its terminal.", "Clique: os subagentes. Duplo clique: o terminal dela.")
+        row.toolTip = session.job != nil
+            ? "\(session.cwd)\n\(session.account.name) · \(session.waitingFor ?? "background")\n"
+                + T("Double click: open it in a tab (claude attach).", "Duplo clique: abrir numa aba (claude attach).")
+            : "\(session.cwd)\n\(session.account.name) · pid \(session.pid)\n"
+                + T("Click: its subagents. Double click: its terminal.", "Clique: os subagentes. Duplo clique: o terminal dela.")
         caret.onClick = { [weak self, weak caret] in if let caret { self?.toggleSubagents(of: session, caret: caret) } }
         row.onClick = caret.onClick
         row.onDoubleClick = { [weak self] in self?.onOpen?(session) }
