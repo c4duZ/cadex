@@ -37,5 +37,6 @@ Cadex).
 - [x] Com o JSON de uma sessão, grava o arquivo da conta com o `rate_limits` e o da sessão com
       contexto e custo, e imprime a saída da status line do dono (teste do núcleo e na mão,
       2026-11-14).
-- [ ] Numa sessão real aberta pelo Cadex, o cartão da conta mostra os mesmos números do `/usage`.
-- [ ] A status line do dono aparece igual numa sessão aberta pelo Cadex.
+- [x] Numa sessão real aberta com o comando do kit, o cartão da conta mostra os mesmos números do
+      `/usage` (bhband, Claude Code 2.1.325, 2026-11-14: 3% e 56%, reinícios iguais).
+- [x] A status line do dono aparece igual numa sessão aberta pelo Cadex (mesma sessão).

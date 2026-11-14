@@ -95,7 +95,7 @@
   (agents.show-accounts) no catálogo da barra lateral, o ponto no ícone enquanto o ícone está lá, o item Agents da barra de status, e acha o
   terminal de cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo).
 - Status: fases C, C2 (notificações) e D (Accounts e uso) do plano 17 no código; plano 18 fase B
-  (uso sem token, kit da sessão) no código, falta conferir numa sessão real. Ainda não: o sinal no
+  (uso sem token, kit da sessão) feita e conferida numa sessão real (bhband, 2026-11-14). Ainda não: o sinal no
   título da aba do agente.
 
 ## Como validar

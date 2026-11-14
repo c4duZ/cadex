@@ -228,8 +228,8 @@ continua uma conversa em outra conta, sem nunca tocar em token
       `fs_usage` e `nettop`).
 - [ ] Com agents.sessions, agents.accounts e agents.history desligados, o Cadex não abre nenhum
       arquivo do Claude Code (conferido com `fs_usage`).
-- [ ] Sessão aberta pelo Cadex: a status line do dono aparece igual, os hooks dele rodam, o ambiente
-      não tem CLAUDECODE nem CLAUDE_CODE_* herdados e o transcript é gravado.
+- [x] Sessão aberta pelo Cadex: a status line do dono aparece igual, os hooks dele rodam, o ambiente
+      não tem CLAUDECODE nem CLAUDE_CODE_* herdados e o transcript é gravado (bhband, 2026-11-14).
 - [ ] "Add Account" cria a pasta e os links certos (nenhum item do estado da conta; uma pasta
       desconhecida da fonte também vira link) e abre a aba com o `/login`; depois do login, a conta
       aparece em Accounts.

@@ -67,6 +67,10 @@ let usageChecks: [(name: String, body: Checks.Body)] = [
         usageFile(usage.folder, home + "/.claude-ok", at: Date().timeIntervalSince1970 + 10, session: 3, resets: Int(Date().timeIntervalSince1970) + 3600)
         usage.tick()
         expect(usage.states[home + "/.claude-ok"]?.usage?.session?.percent == 3, "a later session works: the failure is gone")
+        write(home + "/.claude-later/.claude.json", #"{"oauthAccount":{"accountUuid":"w"}}"#)
+        usage.tick()
+        let later = await eventually { usage.states[home + "/.claude-later"] == .noUsage }
+        expect(later, "an account that shows up later is read at once, not in 5 min")
         usage.stop(token)
         expect(!usage.isRunning)
         usage.folder = AgentUsageFile.folder()

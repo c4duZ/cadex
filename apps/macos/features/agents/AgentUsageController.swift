@@ -75,6 +75,7 @@ public final class AgentUsageController {
     private var logins: [String: AgentAccountLogin?] = [:]
     private var codexReads: [String: CodexUsage.Reading?] = [:]
     private var loginsRead = Date.distantPast
+    private var readingLogins = false
 
     var isRunning: Bool { timer != nil }
 
@@ -126,9 +127,17 @@ public final class AgentUsageController {
     func tick() {
         guard isEnabled, !watchers.isEmpty else { return }
         let accounts = accounts()
-        if Date().timeIntervalSince(loginsRead) >= Self.loginsEvery {
+        // Every 5 min, and at once for an account not seen yet (a new
+        // one would otherwise wait 5 min on "Reading…").
+        let unseen = accounts.contains { logins[$0.dir] == nil }
+        if !readingLogins, unseen || Date().timeIntervalSince(loginsRead) >= Self.loginsEvery {
             loginsRead = Date()
-            Task { await readLogins(accounts) }
+            readingLogins = true
+            Task {
+                await readLogins(accounts)
+                readingLogins = false
+                if accounts.contains(where: { logins[$0.dir] == nil }) == false { tick() }
+            }
         }
         for account in accounts { read(account) }
         publish()
@@ -144,12 +153,11 @@ public final class AgentUsageController {
             }
         }.value
         for (dir, login, codex) in read {
-            logins[dir] = login
+            logins[dir] = .some(login)
             codexReads[dir] = codex
             if let plan = login?.plan ?? codex?.plan { plans[dir] = plan }
             if let before = hiddenLogins[dir], !Self.isLegacy(before), let now = login?.fingerprint, now != before { onLoginChanged?(dir) }
         }
-        tick()
     }
 
     /// An account's state from what is known: a login not read yet stays
