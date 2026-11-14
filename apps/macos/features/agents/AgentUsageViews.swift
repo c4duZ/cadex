@@ -17,13 +17,14 @@ extension AgentsView {
         case .noLogin:
             lines.append(line(T("No login found for this account.", "Nenhum login encontrado para esta conta.")))
         case .ready(let numbers, let at):
-            lines += AgentUsageRows.bars(numbers, colors: colors, dim: false)
-            // Codex's numbers are those of its last use: say when.
+            // Claude's numbers are those of the last session Cadex opened:
+            // old ones are dimmed, with their age; Codex's, of its last use.
+            let old = account.provider == .claude && Date().timeIntervalSince(at) > agentUsageOld
+            lines += AgentUsageRows.bars(numbers, colors: colors, dim: old)
             if account.provider == .codex { lines.append(line(T("as of ", "em ") + AgentResetTime.text(at))) }
-        case .failed(let numbers, let at):
-            if let numbers { lines += AgentUsageRows.bars(numbers, colors: colors, dim: true) }
-            let when = at.map { T("updated ", "atualizado há ") + AgentTime.short(since: $0) } ?? T("could not read", "não deu para ler")
-            lines.append(line(T("No connection or the service refused; ", "Sem conexão ou o serviço recusou; ") + when))
+            else if old { lines.append(line(T("updated ", "atualizado há ") + AgentTime.short(since: at))) }
+        case .noUsage:
+            lines.append(line(T("Open the agent from Cadex to see usage.", "Abra o agente pelo Cadex para ver o uso.")))
         }
         if let plan { lines.insert(line(plan), at: 0) }
         return lines

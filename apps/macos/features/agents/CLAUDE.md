@@ -8,7 +8,9 @@
 ## O que eu não quero
 - Mandar prompt ou falar com agente, nem mexer nos arquivos do Claude Code: só ler
   (`../../../../docs/adr/0019-agents-observe-only.md`). A exceção: abrir o agente de uma conta, que é
-  digitar o comando dele num terminal.
+  digitar o comando dele num terminal, com o kit da sessão
+  (`../../../../docs/adr/0021-cadex-managed-accounts.md`).
+- Ler, guardar ou repassar token, login ou credencial, ou chamar o serviço de uso: nunca (ADR 0021).
 - Ler ou vigiar alguma coisa com ninguém olhando, ou com agents.sessions desligado.
 - Ler os logs das conversas: só o registro de cada sessão, as descrições dos subagentes, a data
   dos logs deles e, num clique num subagente, a conversa dele enquanto a aba está aberta.
@@ -51,19 +53,25 @@
   azul, ✓), a linha clicável que acende ao passar e escurece ao apertar, e os rótulos.
 - `AgentStop.swift`: por que uma sessão parou, do fim do log (64 KB, uma vez por parada):
   permissão (ferramenta pedida sem resposta), pergunta (AskUserQuestion, ExitPlanMode), terminou
-  (fim de turno), parada por você (o Esc, que não avisa). `AgentNotifier.swift`: a notificação do sistema quando uma sessão passa de
+  (fim de turno), parada por você (o Esc, que não avisa), login vencido (`"error":
+  "authentication_failed"`, que marca a conta com AgentUsageController.loginFailed). `AgentNotifier.swift`: a notificação do sistema quando uma sessão passa de
   trabalhando para esperando, por tipo (agents.notifyPermission, -Question, -Finished), lido 1 s depois da
   parada, nunca enquanto você olha o terminal dele; só de dentro de um .app (fora dele a central do sistema para o
   processo). `AgentNotifyText.swift`: as palavras de cada notificação (tipo no
   título, onde no subtítulo, o detalhe no texto), sem imagem. `AgentNotifySound.swift`: o som de cada
   tipo, copiado para ~/Library/Sounds e tocado pelo sistema com a notificação. `forget` tira a
   notificação de uma sessão da Central quando o terminal dela ganha o foco.
-- `AgentUsage.swift`: o login (`AgentLogin`: o item do Keychain pelo hash da pasta, lido pelo
-  `/usr/bin/security` a cada leitura, ou o .credentials.json; nunca guardado, renovado ou escrito),
-  o uso (sessão de 5 h, semana, semana do Sonnet, cada um com o reinício) e o estado do cartão.
-  `AgentUsageController.swift`: uma leitura para o app, só com Accounts ou o item na tela e o app
-  ativo; 5 min entre leituras, 60 s de frescor, espera de 5/10/20/60 min nos erros e a pedida no
-  429; login vencido sem requisição; se identifica como Cadex (ADR 0019). `AgentUsageViews.swift`:
+- `AgentUsage.swift`: sem token (ADR 0021). `AgentAccountLogin`: o `oauthAccount` do .claude.json
+  da conta, só lido (tem login, o plano pelo `organizationType`, e os ids que trazem de volta uma
+  conta escondida). `AgentUsageFile`: onde o `cadex statusline` grava o `rate_limits` de cada conta
+  (`CADEX_USAGE_DIR` ou Application Support/Cadex/usage, nome por SessionKit.accountKey).
+  AgentUsage.parseFile: as porcentagens e os reinícios (segundos ou ISO; janela que já reiniciou é
+  0%). `AgentUsageState`: lendo, pronto (com a hora do arquivo; mais de 10 min fica apagado com a
+  idade), login vencido, sem login, sem uso ("Abra o agente pelo Cadex").
+  `AgentUsageController.swift`: uma leitura para o app, só com Accounts ou o item na tela; vigia a
+  pasta de uso (um descritor, o rename de cada arquivo avisa), relê a cada 60 s e lê os logins e os
+  logs do Codex a cada 5 min fora da linha principal; uma falha de login vale até uma sessão
+  posterior gravar uso. `AgentUsageViews.swift`:
   as barras do cartão (destaque, laranja a partir de 70%, vermelho a partir de 90%) e
   `AgentUsageRows`, as barras que o cartão e o popover dividem. `AgentUsageStrip.swift`: o item
   Agent usage, com a conta do terminal com foco (`focused`, que o app diz) ou a última, e o popover
@@ -71,10 +79,10 @@
   do Codex e o uso tirado dos logs dele (os limites de cada uso), sem rede. `AgentAccountsView.swift`: a página
   Accounts (outra página da barra lateral, com o mesmo `AgentsView`) nos blocos do cartão (`AgentUsageCard.swift:block`), só as contas em uso (`visibleAccounts`:
   sem login ou vencida há mais de um dia ficam fora), com mais espaço entre elas que o cartão e sem linha; clique leva ao agente já aberto ou abre um, clique direito renomeia e
-  esconde. `AgentLaunch.swift`: o comando que abre o agente de uma conta (`CLAUDE_CONFIG_DIR` ou
-  `CODEX_HOME`, a flag sem permissões), agents.open-account e agents.customize-accounts; a única coisa
-  que o Cadex inicia (ADR 0019). Conta escondida volta quando o login muda (`fingerprint`,
-  `onLoginChanged`).
+  esconde. `AgentLaunch.swift`: o comando que abre o agente de uma conta (o Claude pelo
+  SessionKit.claudeCommand, com a status line do Cadex; o Codex com `CODEX_HOME`; a flag sem
+  permissões), agents.open-account e agents.customize-accounts (ADR 0019 e 0021). Conta escondida
+  volta quando o `oauthAccount` muda (`fingerprint`, `onLoginChanged`).
 - A conversa de um subagente numa aba (`AgentTranscriptDocument.swift`, um `TabDocument`): só pelo
   clique num subagente (`onOpenSubagent`). `AgentTranscript.swift` lê o log em pedaços, só o novo,
   e nunca guarda um resultado longo (prévia dos primeiros 4 KB, linhas contadas);
@@ -86,8 +94,9 @@
 - O app (`../../app/AgentsWiring.swift`) põe as páginas Agents (agents.show, ⇧⌘J) e Accounts
   (agents.show-accounts) no catálogo da barra lateral, o ponto no ícone enquanto o ícone está lá, o item Agents da barra de status, e acha o
   terminal de cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo).
-- Status: fases C, C2 (notificações) e D (Accounts e uso) no código. Ainda não: o sinal no título
-  da aba do agente.
+- Status: fases C, C2 (notificações) e D (Accounts e uso) do plano 17 no código; plano 18 fase B
+  (uso sem token, kit da sessão) no código, falta conferir numa sessão real. Ainda não: o sinal no
+  título da aba do agente.
 
 ## Como validar
 - `make macos-test` passa: contas, sessões vivas e mortas, arquivo quebrado, projeto e worktree,

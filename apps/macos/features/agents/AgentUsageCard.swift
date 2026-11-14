@@ -36,13 +36,15 @@ enum AgentUsageCard {
         var views: [NSView] = [head]
         switch usage.states[account.dir] ?? .loading {
         case .ready(let numbers, let at):
-            views += AgentUsageRows.bars(numbers, colors: colors, dim: false)
+            let old = account.provider == .claude && Date().timeIntervalSince(at) > agentUsageOld
+            views += AgentUsageRows.bars(numbers, colors: colors, dim: old)
             if account.provider == .codex {
                 views.append(AgentText.label(T("as of ", "em ") + AgentResetTime.text(at), size: 11, color: colors.secondary))
+            } else if old {
+                views.append(AgentText.label(T("updated ", "atualizado há ") + AgentTime.short(since: at), size: 11, color: colors.secondary))
             }
-        case .failed(let numbers, _):
-            if let numbers { views += AgentUsageRows.bars(numbers, colors: colors, dim: true) }
-            views.append(AgentText.label(T("Could not read now", "Não deu para ler agora"), size: 11, color: colors.secondary))
+        case .noUsage:
+            views.append(AgentText.label(T("Open the agent from Cadex to see usage", "Abra o agente pelo Cadex para ver o uso"), size: 11, color: colors.secondary))
         case .expired:
             let note = NSTextField(wrappingLabelWithString: T("Login expired. Click to open claude with this account and renew it.",
                                                               "Login vencido. Clique para abrir o claude nesta conta e renovar."))

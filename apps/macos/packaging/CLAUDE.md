@@ -43,6 +43,9 @@ scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem con
   - `lipo -create <bin arm64> <bin x86_64> -output Cadex.app/Contents/MacOS/Cadex`;
   - o núcleo Zig também nas duas arquiteturas (zig build -Dtarget=x86_64-macos.13.0 e
     aarch64-macos.13.0), juntando as duas libcadex.a com lipo antes do link.
+- O programa `cadex` (`../../../core/features/agent-tools/CLAUDE.md`), das duas arquiteturas
+  juntadas com lipo, vai em Contents/Helpers/cadex, assinado antes do app: em Contents/MacOS ele
+  colidiria com "Cadex" num disco que não diferencia maiúsculas (plano 18, fase B).
 - Montar o bundle à mão: Info.plist, ícone (`sips` gera os tamanhos a partir do
   `docs/cadex-icon.png` e `iconutil -c icns` monta o .icns), LICENSE e NOTICE em Resources.
 - Recursos do código (a fonte Phosphor, o catálogo de temas) vão soltos em Contents/Resources e o

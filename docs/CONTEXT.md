@@ -39,7 +39,9 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   **Cópia própria** (`own copy`): um item que deixou de ser link e não segue mais a fonte.
 - **Kit da sessão** (`session kit`): o que o Cadex passa a cada sessão que abre: `--settings`,
   `--plugin-dir`, `--mcp-config` e o ambiente da aba. A única porta pela qual o Cadex põe algo numa
-  sessão do Claude Code (`docs/adr/0021-cadex-managed-accounts.md`).
+  sessão do Claude Code (`docs/adr/0021-cadex-managed-accounts.md`). **Programa `cadex`**
+  (`agent-tools`): o executável sem interface que essas sessões rodam; hoje, a status line que grava
+  o uso da conta.
 - **Histórico de sessões** (`session history`): todas as conversas de todas as contas, indexadas
   para busca, na página History. **Retomar** (`resume`): abrir uma conversa antiga na conta dona.
   **Continuar em outra conta** (`continue in account`): abrir uma cópia da conversa em outra conta

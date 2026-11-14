@@ -17,7 +17,7 @@ public struct AgentNotifyText: Equatable, Sendable {
     public static func kind(of stop: AgentStop) -> Kind {
         switch stop {
         case .permission: .permission
-        case .question, .unknown: .question
+        case .question, .unknown, .loginExpired: .question
         case .finished, .interrupted: .finished
         }
     }
@@ -34,6 +34,9 @@ public struct AgentNotifyText: Equatable, Sendable {
         case .finished(let reply):
             return AgentNotifyText(title: T("\(agent) Finished", "\(agent) terminou"), subtitle: subtitle,
                                    body: reply.isEmpty ? T("Ready for your next message.", "Pronto para a próxima mensagem.") : reply)
+        case .loginExpired:
+            return AgentNotifyText(title: T("\(agent) Needs a Login", "\(agent) precisa de login"), subtitle: subtitle,
+                                   body: T("Login expired. Run /login in its terminal.", "Login vencido. Rode /login no terminal dele."))
         case .interrupted, .unknown:
             return AgentNotifyText(title: T("\(agent) Is Waiting for You", "\(agent) espera você"), subtitle: subtitle,
                                    body: T("It stopped and waits for you.", "Parou e espera você."))

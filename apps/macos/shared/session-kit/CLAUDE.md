@@ -1,0 +1,35 @@
+# session-kit (app macOS)
+
+## O que eu quero
+- A única peça que monta o que uma sessão do Claude Code aberta pelo Cadex recebe: `--settings`,
+  `--plugin-dir`, `--mcp-config` e o ambiente da aba
+  (`../../../../docs/adr/0021-cadex-managed-accounts.md`, plano 18 fase B).
+- Fica em shared antes de ter dois usuários porque os planos 19 a 24 (worktrees, review, memória,
+  orquestração) acrescentam itens a ela pela porta de contribuição; hoje só a feature agents a usa.
+
+## O que eu não quero
+- Escrever na configuração de conta nenhuma (.claude.json, settings.json): o kit só passa
+  argumentos e arquivos próprios.
+- Token, login ou credencial.
+- Feature importando outra para contribuir: cada uma chama `contribute` pelo app.
+
+## Como eu quero
+- `SessionKit.swift`: SessionKit.shared; `claudeCommand` devolve o comando digitado no terminal
+  (`[env -u …] [CLAUDE_CONFIG_DIR=…] claude --settings … [--plugin-dir …] [--mcp-config …] args`),
+  escrevendo antes os arquivos. O ambiente perde CLAUDECODE e CLAUDE_CODE_* herdados (um
+  CLAUDE_CODE_CHILD_SESSION herdado desligou o transcript, 2026-11-14) e, na conta padrão, um
+  CLAUDE_CONFIG_DIR solto. `contribute`/`withdraw` com um `SessionKitPart`. `findTools` acha o `cadex`
+  em Contents/Helpers ou, no `make run`, em `core/zig-out/bin`. `accountKey` é a regra do nome do
+  arquivo de uso, igual à do `cadex statusline`.
+- `SessionKitFiles.swift`: em `~/Library/Application Support/Cadex/kit`, um `settings-<conta>.json`
+  com a status line do Cadex (com o `padding` da do dono) e o que as features contribuem (objetos se
+  juntam, listas se somam: hooks de duas features no mesmo evento rodam os dois); e, para contas que
+  não são a padrão, `mcp-<conta>.json` (0600) com os `mcpServers` do .claude.json da conta padrão,
+  lidos sem escrever.
+- Ainda não: `CLAUDE_CODE_FORCE_SYNC_OUTPUT` e `preferredNotifChannel` (teste 24 de 2026-11-14)
+  esperam o terminal respeitar DEC 2026 e OSC 777 (plano 19, fase E). O `cadex` no PATH da aba
+  entra com o primeiro subcomando que o agente usa (plano 20).
+
+## Como validar
+- `make macos-test` (SessionKitTests): comando por conta, ambiente limpo, status line com o padding
+  do dono, MCP só para as outras contas e com 0600, contribuições somadas, aspas só quando precisa.

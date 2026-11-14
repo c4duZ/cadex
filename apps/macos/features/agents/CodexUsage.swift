@@ -60,7 +60,9 @@ enum CodexUsage {
 
     /// The last limits in the end of the newest log (256 KB, once per reading),
     /// the plan, and when they were written.
-    static func read(_ account: AgentAccount, now: Date = Date()) -> (usage: AgentUsage, plan: String?, at: Date)? {
+    typealias Reading = (usage: AgentUsage, plan: String?, at: Date)
+
+    static func read(_ account: AgentAccount, now: Date = Date()) -> Reading? {
         guard let log = newestLog(account.dir), let handle = FileHandle(forReadingAtPath: log) else { return nil }
         defer { try? handle.close() }
         let size = (try? handle.seekToEnd()) ?? 0

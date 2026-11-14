@@ -101,6 +101,7 @@ public final class AgentNotifier: NSObject {
     private func stopped(_ id: String) {
         guard let session = controller.sessions.first(where: { $0.id == id }), session.status != .working else { return }
         let stop = AgentStop.read(session)
+        if stop == .loginExpired { AgentUsageController.shared.loginFailed(session.account.dir) }
         guard wants(stop), !isLooking(session) else { return }
         didStop?(session, stop)
         post(session, stop)
@@ -109,7 +110,7 @@ public final class AgentNotifier: NSObject {
     func wants(_ stop: AgentStop) -> Bool {
         switch stop {
         case .permission: kinds.permission
-        case .question, .unknown: kinds.question
+        case .question, .unknown, .loginExpired: kinds.question
         case .finished: kinds.finished
         case .interrupted: false
         }

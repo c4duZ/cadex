@@ -229,64 +229,8 @@ let exitCode = await Checks.run([
         controller.hidden = []
         controller.stop(token)
     }),
-    ("the login: the Keychain item named after the folder, the plan, an expired one", {
-        expect(AgentLogin.service(for: AgentAccount(dir: "/Users/cadu/.claude-diogo", name: "x", isDefault: false)) == "Claude Code-credentials-3bf25f07",
-               "the hash the proof of concept found")
-        expect(AgentLogin.service(for: AgentAccount(dir: "/Users/cadu/.claude", name: "x", isDefault: true)) == "Claude Code-credentials")
-        let login = AgentLogin.parse(Data(#"{"claudeAiOauth":{"accessToken":"t","expiresAt":1000,"subscriptionType":"max"}}"#.utf8))
-        expect(login?.token == "t" && login?.plan == "max" && login?.isExpired == true)
-        expect(AgentLogin.parse(Data(#"{"claudeAiOauth":{"accessToken":""}}"#.utf8)) == nil)
-    }),
-    ("usage: the session, the week and when each resets", {
-        let json = #"{"five_hour":{"utilization":38.0,"resets_at":"2026-10-21T17:09:59.708997+00:00"},"seven_day":{"utilization":6.0,"resets_at":"2026-10-28T10:59:59+00:00"},"extra_usage":null}"#
-        let usage = AgentUsage.parse(Data(json.utf8))
-        expect(usage?.session?.percent == 38 && usage?.week?.percent == 6 && usage?.session?.resets != nil, "\(String(describing: usage))")
-        expect(usage?.sonnetWeek == nil)
-        expect(AgentUsage.parse(Data("{}".utf8)) == nil)
+    ("the bar's colors: accent, orange from 70%, red from 90%", {
         expect(AgentMeter.color(95, accent: .blue) == .systemRed && AgentMeter.color(75, accent: .blue) == .systemOrange && AgentMeter.color(10, accent: .blue) == .blue)
-    }),
-    ("reading usage: 200, 401, 429 and a failure, and an expired login asks nothing", {
-        let home = NSTemporaryDirectory() + "cadex-usage-\(UUID().uuidString)"
-        defer { try? fm.removeItem(atPath: home) }
-        let future = (Date().timeIntervalSince1970 + 3600) * 1000
-        for (name, expires) in [("ok", future), ("gone", 1000.0), ("busy", future), ("down", future)] {
-            write(home + "/.claude-\(name)/.claude.json", "{}")
-            write(home + "/.claude-\(name)/.credentials.json", #"{"claudeAiOauth":{"accessToken":"\#(name)","expiresAt":\#(expires),"subscriptionType":"team"}}"#)
-        }
-        let usage = AgentUsageController.shared
-        usage.accounts = { AgentAccount.find(home: home) }
-        var asked: [String] = []
-        var agents: [String] = []
-        usage.fetch = { request in
-            let token = String((request.value(forHTTPHeaderField: "Authorization") ?? "").dropFirst(7))
-            asked.append(token)
-            agents.append(request.value(forHTTPHeaderField: "User-Agent") ?? "")
-            let url = request.url!
-            switch token {
-            case "ok": return (Data(#"{"five_hour":{"utilization":2},"seven_day":{"utilization":94}}"#.utf8), HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!)
-            case "busy": return (Data(), HTTPURLResponse(url: url, statusCode: 429, httpVersion: nil, headerFields: ["Retry-After": "120"])!)
-            default: throw URLError(.notConnectedToInternet)
-            }
-        }
-        expect(!usage.isRunning, "nobody watching: no timer")
-        let token = usage.watch {}
-        let done = await eventually { ["ok", "busy", "down"].allSatisfy { name in
-            if case .loading = usage.states[home + "/.claude-\(name)"] ?? .loading { return false }
-            return true
-        } && usage.states[home + "/.claude-gone"] != nil }
-        expect(done, "\(usage.states)")
-        expect(usage.states[home + "/.claude-ok"]?.usage?.week?.percent == 94)
-        expect(usage.states[home + "/.claude-gone"] == .expired && !asked.contains("gone"), "an expired login asks nothing: \(asked)")
-        if case .failed = usage.states[home + "/.claude-busy"] {} else { expect(false, "429 is a failure that waits") }
-        if case .failed(nil, nil) = usage.states[home + "/.claude-down"] {} else { expect(false, "no connection, nothing to keep") }
-        expect(usage.plans[home + "/.claude-ok"] == "team")
-        expect(agents.allSatisfy { $0.hasPrefix("Cadex/") }, "Cadex says it is Cadex: \(agents)")
-        let before = asked.count
-        usage.tick()
-        try? await Task.sleep(nanoseconds: 300_000_000)
-        expect(asked.count == before, "fresh readings and waits are not repeated: \(asked)")
-        usage.stop(token)
-        expect(!usage.isRunning)
     }),
     ("Codex: its accounts by the login's email, and the limits its own logs carry", {
         let home = NSTemporaryDirectory() + "cadex-codex-\(UUID().uuidString)"
@@ -357,26 +301,6 @@ let exitCode = await Checks.run([
                 try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/usage-popover.png"))
             }
         }
-    }),
-    ("opening an account's agent: its folder in the environment, the flag only when asked", {
-        let work = AgentAccount(dir: "/Users/me/.claude-work", name: "W", isDefault: false)
-        expect(AgentLaunch.command(for: work, skipPermissions: false) == "CLAUDE_CONFIG_DIR='/Users/me/.claude-work' claude")
-        expect(AgentLaunch.command(for: work, skipPermissions: true) == "CLAUDE_CONFIG_DIR='/Users/me/.claude-work' claude --dangerously-skip-permissions")
-        expect(AgentLaunch.command(for: AgentAccount(dir: "/Users/me/.claude", name: "D", isDefault: true), skipPermissions: false) == "claude")
-        var codex = AgentAccount(dir: "/Users/me/.codex-2", name: "C", isDefault: false)
-        codex.provider = .codex
-        expect(AgentLaunch.command(for: codex, skipPermissions: true) == "CODEX_HOME='/Users/me/.codex-2' codex --dangerously-bypass-approvals-and-sandbox")
-        let odd = AgentAccount(dir: "/tmp/it's", name: "x", isDefault: false)
-        expect(AgentLaunch.command(for: odd, skipPermissions: false) == "CLAUDE_CONFIG_DIR='/tmp/it'\\''s' claude", AgentLaunch.command(for: odd, skipPermissions: false))
-    }),
-    ("an account with no login, or out for over a day, is left out; a short pause is not", {
-        let usage = AgentUsageController.shared
-        usage.states["/x/none"] = .noLogin
-        usage.states["/x/old"] = .expired
-        usage.expiredSince["/x/old"] = Date().addingTimeInterval(-3 * 86_400)
-        usage.states["/x/pause"] = .expired
-        usage.expiredSince["/x/pause"] = Date().addingTimeInterval(-3600)
-        expect(usage.isStale("/x/none") && usage.isStale("/x/old") && !usage.isStale("/x/pause") && !usage.isStale("/x/unread"))
     }),
     ("a click on a session unfolds its subagents, a double click goes to it; a project's title folds it", {
         let home = fakeHome()
@@ -564,4 +488,5 @@ let exitCode = await Checks.run([
     }
     return condition()
 }
-exit(folderExit != 0 ? folderExit : exitCode)
+let usageExit = await Checks.run(usageChecks)
+exit(folderExit != 0 ? folderExit : usageExit != 0 ? usageExit : exitCode)

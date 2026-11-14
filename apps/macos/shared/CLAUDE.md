@@ -7,7 +7,8 @@
 - Código de uma feature só morando aqui "porque pode ser útil".
 
 ## Como eu quero
-- Antes de mover algo para cá, as duas features que usam têm que existir.
+- Antes de mover algo para cá, as duas features que usam têm que existir. Exceção decidida no
+  plano 18: `session-kit/`, a porta que os planos 19 a 24 vão usar (o `CLAUDE.md` dela explica).
 
 ## Como validar
 - `make macos-test` passa.

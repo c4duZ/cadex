@@ -1,60 +1,54 @@
-import CryptoKit
 import Foundation
+import SessionKit
 
-/// An account's login as Claude Code keeps it: the Keychain item named
-/// after the folder ("Claude Code-credentials", or "-" plus the first 8 hex
-/// of the SHA-256 of its path), else the folder's .credentials.json. Read
-/// for each request and never kept, refreshed or written (ADR 0019).
-struct AgentLogin: Equatable, Sendable {
-    let token: String
-    let expires: Date?
-    /// "max", "team", "pro".
+/// What an account's .claude.json says about its login, read only and
+/// never written (docs/adr/0021-cadex-managed-accounts.md): whether it has
+/// one (`oauthAccount`), the plan ("max", "team") and what changes when
+/// another account or organization logs in. No token is read: Cadex never
+/// touches the Keychain or the credentials file.
+struct AgentAccountLogin: Equatable, Sendable {
     let plan: String?
+    /// The account and organization ids: a hidden account comes back when
+    /// this changes, never on a window's reset (the owner, 2026-10-21).
+    let fingerprint: String
 
-    var isExpired: Bool { expires.map { $0 < Date() } ?? false }
-
-    static func service(for account: AgentAccount) -> String {
-        if account.isDefault { return "Claude Code-credentials" }
-        let hash = SHA256.hash(data: Data(account.dir.utf8)).map { String(format: "%02x", $0) }.joined()
-        return "Claude Code-credentials-" + hash.prefix(8)
+    /// The default account keeps its .claude.json beside ~/.claude, the
+    /// others inside their folder.
+    static func file(of account: AgentAccount) -> String {
+        account.isDefault ? (account.dir as NSString).deletingLastPathComponent + "/.claude.json" : account.dir + "/.claude.json"
     }
 
-    /// Off the main thread: the Keychain answers through /usr/bin/security,
-    /// which reads Claude Code's items without asking (the proof of concept,
-    /// 2026-10-21); an app's own Keychain call would ask once per account.
-    static func read(_ account: AgentAccount) -> AgentLogin? {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/security")
-        process.arguments = ["find-generic-password", "-s", service(for: account), "-w"]
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = FileHandle.nullDevice
-        var data = Data()
-        if (try? process.run()) != nil {
-            data = pipe.fileHandleForReading.readDataToEndOfFile()
-            process.waitUntilExit()
-        }
-        if let login = parse(data) { return login }
-        return FileManager.default.contents(atPath: account.dir + "/.credentials.json").flatMap(parse)
-    }
-
-    /// What changes when the account logs in again or Claude Code renews
-    /// its token by use: a hidden account comes back on a change of this,
-    /// never on a window's reset (the owner, 2026-10-21). "none" without a login.
-    static func fingerprint(_ account: AgentAccount) -> String {
+    /// Off the main thread: the default .claude.json can be a few MB.
+    static func read(_ account: AgentAccount) -> AgentAccountLogin? {
         if account.provider == .codex {
-            let auth = json(account.dir + "/auth.json")
-            return auth?["last_refresh"] as? String ?? (auth == nil ? "none" : "login")
+            guard let auth = json(account.dir + "/auth.json") else { return nil }
+            return AgentAccountLogin(plan: nil, fingerprint: auth["last_refresh"] as? String ?? "login")
         }
-        guard let login = read(account) else { return "none" }
-        return login.expires.map { String(Int($0.timeIntervalSince1970)) } ?? "login"
+        return FileManager.default.contents(atPath: file(of: account)).flatMap(parse)
     }
 
-    static func parse(_ data: Data) -> AgentLogin? {
+    static func parse(_ data: Data) -> AgentAccountLogin? {
         guard let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
-              let oauth = object["claudeAiOauth"] as? [String: Any], let token = oauth["accessToken"] as? String, !token.isEmpty else { return nil }
-        let expires = (oauth["expiresAt"] as? NSNumber).map { Date(timeIntervalSince1970: $0.doubleValue / 1000) }
-        return AgentLogin(token: token, expires: expires, plan: oauth["subscriptionType"] as? String)
+              let oauth = object["oauthAccount"] as? [String: Any], !oauth.isEmpty else { return nil }
+        let type = oauth["organizationType"] as? String
+        let plan = type.map { $0.hasPrefix("claude_") ? String($0.dropFirst(7)) : $0 }
+        let ids = [oauth["accountUuid"], oauth["organizationUuid"]].compactMap { $0 as? String }
+        return AgentAccountLogin(plan: plan, fingerprint: ids.isEmpty ? "login" : ids.joined(separator: "/"))
+    }
+}
+
+/// The usage files `cadex statusline` writes from the `rate_limits` Claude
+/// Code hands its status line (core/features/agent-tools/statusline.zig):
+/// one per account, named by `SessionKit.accountKey`.
+enum AgentUsageFile {
+    /// CADEX_USAGE_DIR (tests, perf), else Cadex's folder in Application Support.
+    static func folder(environment: [String: String] = ProcessInfo.processInfo.environment) -> String {
+        if let dir = environment["CADEX_USAGE_DIR"], !dir.isEmpty { return dir }
+        return FileManager.default.homeDirectoryForCurrentUser.path + "/Library/Application Support/Cadex/usage"
+    }
+
+    static func path(of account: AgentAccount, in folder: String) -> String {
+        folder + "/" + SessionKit.accountKey(account.dir) + ".json"
     }
 }
 
@@ -72,17 +66,31 @@ public struct AgentUsage: Equatable, Sendable {
     public let week: Window?
     public let sonnetWeek: Window?
 
-    static func parse(_ data: Data) -> AgentUsage? {
-        guard let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else { return nil }
+    /// An account's usage file: the numbers and when a session wrote them.
+    /// A window that reset since then shows 0%. Missing fields are
+    /// skipped; a broken file is nil.
+    static func parseFile(_ data: Data, now: Date = Date()) -> (AgentUsage, Date)? {
+        guard let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              let limits = object["rate_limits"] as? [String: Any] else { return nil }
+        let at = (object["at"] as? NSNumber).map { Date(timeIntervalSince1970: $0.doubleValue) } ?? now
         func window(_ key: String) -> Window? {
-            guard let part = object[key] as? [String: Any], let percent = (part["utilization"] as? NSNumber)?.doubleValue else { return nil }
-            return Window(percent: percent, resets: (part["resets_at"] as? String).flatMap(date))
+            guard let part = limits[key] as? [String: Any], let percent = (part["used_percentage"] as? NSNumber)?.doubleValue else { return nil }
+            let resets = date(part["resets_at"])
+            if let resets, resets <= now { return Window(percent: 0, resets: nil) }
+            return Window(percent: percent, resets: resets)
         }
         let usage = AgentUsage(session: window("five_hour"), week: window("seven_day"), sonnetWeek: window("seven_day_sonnet"))
-        return usage.session == nil && usage.week == nil ? nil : usage
+        return usage.session == nil && usage.week == nil ? nil : (usage, at)
     }
 
-    static func date(_ text: String) -> Date? {
+    /// Seconds since 1970 (milliseconds when that large) or ISO 8601 text:
+    /// the field's form is Claude Code's to change.
+    static func date(_ value: Any?) -> Date? {
+        if let number = value as? NSNumber {
+            let seconds = number.doubleValue > 1e12 ? number.doubleValue / 1000 : number.doubleValue
+            return Date(timeIntervalSince1970: seconds)
+        }
+        guard let text = value as? String else { return nil }
         let full = ISO8601DateFormatter()
         full.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return full.date(from: text) ?? ISO8601DateFormatter().date(from: text)
@@ -92,20 +100,20 @@ public struct AgentUsage: Equatable, Sendable {
 /// What an account's card and the usage item show.
 public enum AgentUsageState: Equatable, Sendable {
     case loading
-    /// The numbers, and when they were read.
+    /// The numbers, and when a session wrote them.
     case ready(AgentUsage, Date)
-    /// The login ran out: run claude with that account to renew it.
+    /// A session of this account failed to authenticate: run claude to log in.
     case expired
-    /// No login found for the account.
+    /// No login in the account's .claude.json.
     case noLogin
-    /// The last reading failed; the last good numbers, if any, stay shown.
-    case failed(AgentUsage?, Date?)
+    /// Logged in, but no session opened by Cadex has told the usage yet.
+    case noUsage
 
     public var usage: AgentUsage? {
-        switch self {
-        case .ready(let usage, _): usage
-        case .failed(let usage, _): usage
-        default: nil
-        }
+        if case .ready(let usage, _) = self { return usage }
+        return nil
     }
 }
+
+/// Numbers older than this are shown dimmed, with their age.
+let agentUsageOld: TimeInterval = 600

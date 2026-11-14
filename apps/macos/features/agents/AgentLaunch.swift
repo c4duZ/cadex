@@ -1,22 +1,27 @@
 import CommandPalette
 import Foundation
 import Icons
+import SessionKit
 import Strings
 
-/// Opening an account's agent (docs/spec/agents.md, Accounts): the one
-/// thing Cadex starts, at the owner's request (2026-10-21, ADR 0019). It is
-/// a command typed in a terminal, like ssh.connect; Cadex never sends a
-/// prompt, reads an answer or talks to a model.
+/// Opening an account's agent (docs/spec/agents.md, Accounts): what Cadex
+/// starts, at the owner's request (2026-10-21, ADR 0019, widened by ADR
+/// 0021). It is a command typed in a terminal, like ssh.connect; Cadex
+/// never sends a prompt, reads an answer or talks to a model.
 public enum AgentLaunch {
-    /// `claude` with the account's folder in CLAUDE_CONFIG_DIR (none for
-    /// the default one), or `codex` with CODEX_HOME; the no-prompts flag when
-    /// asked for.
-    public static func command(for account: AgentAccount, skipPermissions: Bool) -> String {
+    /// `claude` in the account (CLAUDE_CONFIG_DIR, none for the default one)
+    /// with the session kit (`--settings` with Cadex's status line, which
+    /// tells the usage without a token; the environment cleaned), or `codex`
+    /// with CODEX_HOME; the no-prompts flag when asked for.
+    @MainActor
+    public static func command(for account: AgentAccount, skipPermissions: Bool, kit: SessionKit = .shared,
+                               defaultClaudeJSON: String = FileManager.default.homeDirectoryForCurrentUser.path + "/.claude.json") -> String {
         let quoted = "'" + account.dir.replacingOccurrences(of: "'", with: "'\\''") + "'"
         switch account.provider {
         case .claude:
-            let env = account.isDefault ? "" : "CLAUDE_CONFIG_DIR=\(quoted) "
-            return env + "claude" + (skipPermissions ? " --dangerously-skip-permissions" : "")
+            return kit.claudeCommand(configDir: account.isDefault ? nil : account.dir,
+                                     arguments: skipPermissions ? ["--dangerously-skip-permissions"] : [],
+                                     defaultClaudeJSON: defaultClaudeJSON)
         case .codex:
             let env = account.isDefault ? "" : "CODEX_HOME=\(quoted) "
             return env + "codex" + (skipPermissions ? " --dangerously-bypass-approvals-and-sandbox" : "")

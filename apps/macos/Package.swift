@@ -99,10 +99,18 @@ let package = Package(
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
+        // What a session opened by Cadex gets: --settings, --plugin-dir,
+        // --mcp-config and the tab's environment (docs/adr/0021-cadex-managed-accounts.md).
+        .target(
+            name: "SessionKit",
+            path: "shared/session-kit",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
         // The agents running on this Mac, read only (docs/adr/0019-agents-observe-only.md).
         .target(
             name: "Agents",
-            dependencies: ["CommandPalette", "Icons", "Menus", "Strings", "Tabs", "UILooks"],
+            dependencies: ["CommandPalette", "Icons", "Menus", "SessionKit", "Strings", "Tabs", "UILooks"],
             path: "features/agents",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -262,7 +270,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "AgentsTests",
-            dependencies: ["Agents", "Icons", "Checks"],
+            dependencies: ["Agents", "Icons", "SessionKit", "Checks"],
             path: "features/agents/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
@@ -387,6 +395,11 @@ let package = Package(
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
+            name: "SessionKitTests",
+            dependencies: ["SessionKit", "Checks"],
+            path: "shared/session-kit/tests"
+        ),
+        .executableTarget(
             name: "TempImagesTests",
             dependencies: ["TempImages", "Checks"],
             path: "shared/temp-images/tests"
@@ -394,7 +407,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "SSH", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "SessionKit", "SSH", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

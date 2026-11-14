@@ -16,6 +16,10 @@ public enum AgentStop: Equatable, Sendable {
     /// You stopped it (Esc): it waits because you asked, so nothing to
     /// tell (the owner got "finished" after his own Esc, 2026-10-21).
     case interrupted
+    /// The last turn failed to authenticate ("Login expired · Please run
+    /// /login", `"error":"authentication_failed"` in the log, seen in the
+    /// owner's logs 2026-11-14): the account's card asks to log in.
+    case loginExpired
     /// The log did not say.
     case unknown
 
@@ -61,6 +65,7 @@ public enum AgentStop: Equatable, Sendable {
                 // A message from you after the last answer: nothing to wait on.
                 if content.isEmpty || content.contains(where: { $0["type"] as? String == "text" }) { return .unknown }
             case "assistant":
+                if object["error"] as? String == "authentication_failed" { return .loginExpired }
                 let calls = content.filter { $0["type"] as? String == "tool_use" }
                 if let call = calls.last(where: { !answered.contains($0["id"] as? String ?? "") }) {
                     let name = call["name"] as? String ?? "?"

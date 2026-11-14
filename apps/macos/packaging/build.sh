@@ -40,6 +40,13 @@ lipo -create "${SLICES[@]}" -output "$APP/Contents/MacOS/Cadex"
 # Local symbols only serve a debugger: about 3 MB less (2026-10-19).
 strip -x "$APP/Contents/MacOS/Cadex"
 cp "$PACKAGING/Info.plist" "$APP/Contents/Info.plist"
+# The `cadex` program the agent sessions Cadex opens run (core/features/agent-tools):
+# Contents/Helpers, since Contents/MacOS/cadex would clash with Cadex on a
+# case-insensitive disk. Signed first: the app's signature seals it.
+mkdir -p "$APP/Contents/Helpers"
+lipo -create "$DIST/core-aarch64/bin/cadex" "$DIST/core-x86_64/bin/cadex" -output "$APP/Contents/Helpers/cadex"
+strip -x "$APP/Contents/Helpers/cadex"
+codesign --force --sign - -i "$BUNDLE_ID.cadex" "$APP/Contents/Helpers/cadex"
 # Resources the code finds in the main bundle (Icon.swift, ThemeCatalog.swift):
 # SwiftPM's own resource bundles would have to sit in the app's root folder.
 cp "$MACOS/shared/icons/Resources/Phosphor-Regular.ttf" "$APP/Contents/Resources/"

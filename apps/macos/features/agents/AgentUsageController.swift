@@ -1,33 +1,35 @@
 import AppKit
 import Foundation
 
-/// Every account's plan usage, read for the whole app and only while
-/// something shows it (Accounts, the usage item) with the app active
-/// (docs/spec/agents.md, Accounts). One request per account, every 5 min;
-/// a reading younger than 60 s is not repeated; errors wait 5, 10, 20 and
-/// then 60 min; a 429 waits what the service asks, or 5 min. An expired
-/// login makes no request. Cadex says it is Cadex (ADR 0019).
+/// Every account's plan usage, for the whole app, read only while something
+/// shows it (Accounts, the usage item) (docs/spec/agents.md, Accounts).
+/// The numbers come from the files `cadex statusline` writes in the
+/// sessions Cadex opens (docs/adr/0021-cadex-managed-accounts.md): no
+/// token, no Keychain, no request. The usage folder is watched while
+/// someone looks; a minute's tick ages the numbers and zeroes windows that
+/// reset; the logins (.claude.json) are read at the start and every 5 min.
 @MainActor
 public final class AgentUsageController {
     public static let shared = AgentUsageController()
 
     public internal(set) var states: [String: AgentUsageState] = [:]
-    /// The plan each login says ("max", "team"), by account folder.
+    /// The plan each account's .claude.json names ("max", "team"), by folder.
     public internal(set) var plans: [String: String] = [:]
-    /// agents.accounts: off, no login is read and no request is made.
+    /// agents.accounts: off, no file is read or watched.
     public var isEnabled = true { didSet { if isEnabled != oldValue { restart() } } }
     /// The accounts to read: the shown ones, as AgentsController names them.
     var accounts: () -> [AgentAccount] = {
         let agents = AgentsController.shared
         return agents.everyAccount().filter { !agents.hidden.contains($0.dir) }
     }
-    /// When each expired login ran out, by account folder.
+    /// Where `cadex statusline` writes (AgentUsageFile).
+    var folder = AgentUsageFile.folder()
+    /// When a session of each account failed to authenticate, by folder.
     public internal(set) var expiredSince: [String: Date] = [:]
 
     /// An account not worth a line: no login, or a login out for more than
-    /// a day (Claude Code renews it while the account is used, so a short
-    /// one is a pause, a long one an account left aside; the owner,
-    /// 2026-10-21).
+    /// a day (the owner, 2026-10-21: a short one is a pause, a long one an
+    /// account left aside).
     public func isStale(_ dir: String, now: Date = Date()) -> Bool {
         switch states[dir] {
         case .noLogin: return true
@@ -41,42 +43,31 @@ public final class AgentUsageController {
 
     /// The hidden accounts' login when they were hidden (agents.hiddenLogins).
     public var hiddenLogins: [String: String] = [:]
-    /// A hidden account logged in again (or was used): the app shows it.
+    /// A hidden account got another login: the app shows it.
     public var onLoginChanged: ((String) -> Void)?
-    private var lastLoginCheck = Date.distantPast
 
     /// The login now, for hiding an account (off the main thread).
     public func fingerprint(_ account: AgentAccount) async -> String {
-        await Task.detached { AgentLogin.fingerprint(account) }.value
+        await Task.detached { AgentAccountLogin.read(account)?.fingerprint ?? "none" }.value
     }
 
-    /// Every 5 min while something reads: has a hidden account's login moved?
-    private func checkHidden() {
-        guard Date().timeIntervalSince(lastLoginCheck) >= Self.every, !hiddenLogins.isEmpty else { return }
-        lastLoginCheck = Date()
-        let hidden = AgentsController.shared.everyAccount().filter { hiddenLogins[$0.dir] != nil }
-        let kept = hiddenLogins
-        Task {
-            for account in hidden {
-                let now = await fingerprint(account)
-                if let before = kept[account.dir], now != before, now != "none" { onLoginChanged?(account.dir) }
-            }
-        }
+    /// A session of the account stopped on "authentication_failed"
+    /// (AgentStop): the card asks to log in until a later session works.
+    public func loginFailed(_ dir: String, at: Date = Date()) {
+        expiredSince[dir] = at
+        states[dir] = .expired
+        publish()
     }
 
-    var fetch: (URLRequest) async throws -> (Data, URLResponse) = { try await URLSession.shared.data(for: $0) }
-
-    static let endpoint = URL(string: "https://api.anthropic.com/api/oauth/usage")!
-    static let every: TimeInterval = 300
-    static let fresh: TimeInterval = 60
-    static let waits: [TimeInterval] = [300, 600, 1200, 3600]
+    static let every: TimeInterval = 60
+    static let loginsEvery: TimeInterval = 300
 
     private var watchers: [UUID: () -> Void] = [:]
     private var timer: Timer?
-    private var lastRead: [String: Date] = [:]
-    private var nextTry: [String: Date] = [:]
-    private var failures: [String: Int] = [:]
-    private var inFlight: Set<String> = []
+    private var source: DispatchSourceFileSystemObject?
+    private var logins: [String: AgentAccountLogin?] = [:]
+    private var codexReads: [String: CodexUsage.Reading?] = [:]
+    private var loginsRead = Date.distantPast
 
     var isRunning: Bool { timer != nil }
 
@@ -92,99 +83,81 @@ public final class AgentUsageController {
         if watchers.isEmpty { restart() }
     }
 
-    /// agents.refresh-usage: read now, past the 60 s and the error waits
-    /// (not past a 429's).
+    /// agents.refresh-usage: read the files and the logins now.
     public func refreshNow() {
-        for account in accounts() where failures[account.dir] != -1 {
-            lastRead[account.dir] = nil
-            nextTry[account.dir] = nil
-        }
+        loginsRead = .distantPast
         tick()
     }
 
     private func restart() {
         timer?.invalidate()
         timer = nil
+        source?.cancel()
+        source = nil
         guard isEnabled, !watchers.isEmpty else { return publish() }
-        let timer = Timer(timeInterval: 30, repeats: true) { _ in MainActor.assumeIsolated { AgentUsageController.shared.tick() } }
+        let timer = Timer(timeInterval: Self.every, repeats: true) { _ in MainActor.assumeIsolated { AgentUsageController.shared.tick() } }
         timer.tolerance = 10
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
+        watchFolder()
         tick()
     }
 
-    /// Every 30 s it looks; an account is read when its 5 min (or its wait)
-    /// is up, and only with Cadex active: in the background nobody reads it.
+    /// The folder's own events: `cadex statusline` renames each file into
+    /// place, which the folder sees. One descriptor for every account.
+    private func watchFolder() {
+        try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
+        let fd = open(folder, O_EVTONLY)
+        guard fd >= 0 else { return }
+        let source = DispatchSource.makeFileSystemObjectSource(fileDescriptor: fd, eventMask: [.write, .rename, .delete], queue: .main)
+        source.setEventHandler { MainActor.assumeIsolated { AgentUsageController.shared.tick() } }
+        source.setCancelHandler { close(fd) }
+        source.resume()
+        self.source = source
+    }
+
     func tick() {
-        guard isEnabled, !watchers.isEmpty, NSApp?.isActive != false else { return }
-        let now = Date()
-        for account in accounts() where !inFlight.contains(account.dir) {
-            if let wait = nextTry[account.dir], wait > now { continue }
-            if let last = lastRead[account.dir], now.timeIntervalSince(last) < (states[account.dir] == nil ? Self.fresh : Self.every) { continue }
-            if states[account.dir] == nil { states[account.dir] = .loading }
-            inFlight.insert(account.dir)
-            Task { await self.read(account) }
+        guard isEnabled, !watchers.isEmpty else { return }
+        let accounts = accounts()
+        if Date().timeIntervalSince(loginsRead) >= Self.loginsEvery {
+            loginsRead = Date()
+            Task { await readLogins(accounts) }
         }
-        checkHidden()
+        for account in accounts { read(account) }
         publish()
     }
 
-    private func read(_ account: AgentAccount) async {
-        defer {
-            inFlight.remove(account.dir)
-            publish()
+    /// The logins and Codex's logs, off the main thread (both can be a few
+    /// MB); a hidden account whose login moved comes back.
+    private func readLogins(_ accounts: [AgentAccount]) async {
+        let everyone = AgentsController.shared.everyAccount().filter { hiddenLogins[$0.dir] != nil } + accounts
+        let read = await Task.detached {
+            everyone.map { account in
+                (account.dir, AgentAccountLogin.read(account), account.provider == .codex ? CodexUsage.read(account) : nil)
+            }
+        }.value
+        for (dir, login, codex) in read {
+            logins[dir] = login
+            codexReads[dir] = codex
+            if let plan = login?.plan ?? codex?.plan { plans[dir] = plan }
+            if let before = hiddenLogins[dir], let now = login?.fingerprint, now != before { onLoginChanged?(dir) }
         }
-        lastRead[account.dir] = Date()
-        if account.provider == .codex { return await readCodex(account) }
-        let login = await Task.detached { AgentLogin.read(account) }.value
-        guard let login else { return states[account.dir] = .noLogin }
-        if let plan = login.plan { plans[account.dir] = plan }
-        if login.isExpired {
-            expiredSince[account.dir] = login.expires
-            return states[account.dir] = .expired
-        }
-        var request = URLRequest(url: Self.endpoint, timeoutInterval: 10)
-        request.setValue("Bearer " + login.token, forHTTPHeaderField: "Authorization")
-        request.setValue("oauth-2025-04-20", forHTTPHeaderField: "anthropic-beta")
-        request.setValue("Cadex/" + (Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"), forHTTPHeaderField: "User-Agent")
-        let result = try? await fetch(request)
-        let code = (result?.1 as? HTTPURLResponse)?.statusCode ?? 0
-        let last = states[account.dir]?.usage
-        switch code {
-        case 200 where result.flatMap({ AgentUsage.parse($0.0) }) != nil:
-            states[account.dir] = .ready(AgentUsage.parse(result!.0)!, Date())
-            failures[account.dir] = 0
-            nextTry[account.dir] = nil
-        case 401, 403:
-            states[account.dir] = .expired
-        case 429:
-            let asked = (result?.1 as? HTTPURLResponse)?.value(forHTTPHeaderField: "Retry-After").flatMap(TimeInterval.init)
-            nextTry[account.dir] = Date().addingTimeInterval(asked ?? Self.waits[0])
-            // -1 marks a wait the service asked for: Refresh does not skip it.
-            failures[account.dir] = -1
-            states[account.dir] = .failed(last, lastGood(account))
-        default:
-            let count = max(failures[account.dir] ?? 0, 0) + 1
-            failures[account.dir] = count
-            nextTry[account.dir] = Date().addingTimeInterval(Self.waits[min(count, Self.waits.count) - 1])
-            states[account.dir] = .failed(last, lastGood(account))
-        }
+        tick()
     }
 
-    /// Codex: the limits its own logs carry, no request (CodexUsage).
-    private func readCodex(_ account: AgentAccount) async {
-        let read = await Task.detached { CodexUsage.read(account) }.value
-        guard let read else { return states[account.dir] = .noLogin }
-        if let plan = read.plan { plans[account.dir] = plan }
-        states[account.dir] = .ready(read.usage, read.at)
-    }
-
-    private func lastGood(_ account: AgentAccount) -> Date? {
-        switch states[account.dir] {
-        case .ready(_, let at): at
-        case .failed(_, let at): at
-        default: nil
+    /// An account's state from what is known: a login not read yet stays
+    /// loading; Codex shows what its logs said at the last reading.
+    private func read(_ account: AgentAccount) {
+        guard let known = logins[account.dir] else { return states[account.dir] = states[account.dir] ?? .loading }
+        if account.provider == .codex {
+            guard let reading = codexReads[account.dir] ?? nil else { return states[account.dir] = .noLogin }
+            return states[account.dir] = .ready(reading.usage, reading.at)
         }
+        guard known != nil else { return states[account.dir] = .noLogin }
+        let file = FileManager.default.contents(atPath: AgentUsageFile.path(of: account, in: folder)).flatMap { AgentUsage.parseFile($0) }
+        if let since = expiredSince[account.dir], (file?.1 ?? .distantPast) <= since { return states[account.dir] = .expired }
+        expiredSince[account.dir] = nil
+        states[account.dir] = file.map { .ready($0.0, $0.1) } ?? .noUsage
     }
 
     private func publish() {

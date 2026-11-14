@@ -57,12 +57,30 @@ pub fn build(b: *std.Build) void {
         .install_subdir = "",
     });
 
+    // The `cadex` program the agent sessions Cadex opens run (features/agent-tools,
+    // plan 18 phase B). Mac only for now; packaging puts it in Contents/Helpers.
+    if (target.result.os.tag == .macos) addCli(b, target, optimize);
+
     const tests = b.addTest(.{ .root_module = root });
     const run_tests = b.addRunArtifact(tests);
     b.step("test", "Run the core tests").dependOn(&run_tests.step);
     // The tests as an executable, for a system this Mac cannot run: the
     // Windows VM runs zig-out/bin/cadex-core-tests.exe (plan 9, phase A).
     b.step("test-bin", "Build the core tests without running them").dependOn(&b.addInstallArtifact(tests, .{ .dest_sub_path = "cadex-core-tests.exe" }).step);
+}
+
+/// zig-out/bin/cadex: only libc and the core's shared files, not libghostty.
+fn addCli(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) void {
+    const cli = b.addExecutable(.{
+        .name = "cadex",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("cadex_cli.zig"),
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
+    });
+    b.installArtifact(cli);
 }
 
 /// What each system adds to the core. The default target stays the Mac; the

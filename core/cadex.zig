@@ -38,6 +38,7 @@ test {
     _ = markdown;
     _ = source_control;
     _ = git_history;
+    _ = @import("features/agent-tools/agent_tools.zig");
     _ = @import("features/terminal/c_api_test.zig");
     _ = @import("shared/c_buffer.zig");
     _ = @import("shared/glob.zig");

@@ -98,12 +98,13 @@ extension WindowSession {
         let usage = AgentUsageController.shared
         let plan = usage.plans[account.dir].map { $0.capitalized + " · " } ?? ""
         switch usage.states[account.dir] {
-        case .ready(let numbers, _), .failed(let numbers?, _):
+        case .ready(let numbers, _):
             return plan + (numbers.session.map { T("\(Int($0.percent.rounded()))% of the session", "\(Int($0.percent.rounded()))% da sessão") } ?? "")
         case .expired:
             let since = usage.expiredSince[account.dir].map { " " + AgentResetTime.relative($0) } ?? ""
             return T("Login out", "Login vencido") + since
         case .noLogin: return T("No login", "Sem login")
+        case .noUsage: return plan + T("Usage shows once opened from Cadex", "O uso aparece ao abrir pelo Cadex")
         default: return plan.isEmpty ? T("Not read yet", "Ainda não lido") : String(plan.dropLast(3))
         }
     }
