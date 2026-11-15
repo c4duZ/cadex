@@ -50,6 +50,12 @@ LIMITS = {
     "subagent_first_mb": 20,      # +6 to +9 MB: a 34 MB log's first opening, the text system included (2026-10-21)
     "subagent_open_mb": 8,        # 0 to +2 MB each opening after (TextKit 1 had kept +20 and jumped 70)
     "subagent_closed_mb": 5,      # +1 to +3 MB once its tab is closed again
+    "history_open_over_idle_pct": 10,   # plan 18: 3 accounts (one managed), 200 transcripts, History open
+    "history_open_cpu": 2.0,            # the same as idle_cpu once the first reading is done
+    "history_closed_over_idle_pct": 10, # History closed: nothing indexed or watched
+    "history_closed_cpu": 2.0,
+    "history_open_index_wrong": 0,      # open, the index file is made: the page did show
+    "history_closed_index_wrong": 0,    # closed, the index file is not even made
 }
 # Themes the switch scenario goes through: official, tweakcn and base16.
 SWITCH_THEMES = ["caffeine", "catppuccin", "github-high-contrast", "gruvbox-soft", "tokyonight-storm", "0x96f", "nord"]
@@ -261,6 +267,60 @@ def write_agents_home(home, pid):
     write(f"{home}/.ssh/config", "".join(f"Host perf{i}\n  HostName 127.0.0.1\n  Port {9 + i}\n" for i in range(3)))
 
 
+def write_history_home(home):
+    """Plan 18's accounts: the default one, ~/.claude-work and one Cadex
+    made (linked to ~/.claude's settings and skills), with 200 transcripts in
+    Claude Code's format among them, tool results and API requests included."""
+    def write(path, text):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as out:
+            out.write(text)
+    write(f"{home}/.claude/settings.json", "{}")
+    write(f"{home}/.claude/skills/perf/SKILL.md", "perf")
+    managed = f"{home}/Library/Application Support/Cadex/accounts/perf"
+    os.makedirs(managed, exist_ok=True)
+    for name in ["settings.json", "skills"]:
+        os.symlink(f"{home}/.claude/{name}", f"{managed}/{name}")
+    dirs = [f"{home}/.claude", f"{home}/.claude-work", managed]
+    for i, folder in enumerate(dirs):
+        config = f"{home}/.claude.json" if i == 0 else f"{folder}/.claude.json"
+        write(config, json.dumps({"oauthAccount": {"organizationName": f"Perf {i}", "accountUuid": f"u{i}"}}))
+    project = "-" + "".join(c if c.isalnum() else "-" for c in str(ROOT))[1:]
+    filler = "lorem ipsum dolor sit amet " * 40
+    for n in range(200):
+        sid = f"00000000-0000-4000-8000-{n:012d}"
+        lines = [json.dumps({"type": "ai-title", "aiTitle": f"Perf conversation {n}", "sessionId": sid})]
+        for turn in range(12):
+            at = f"2026-11-14T{10 + turn % 10:02d}:{n % 60:02d}:00Z"
+            base = {"sessionId": sid, "cwd": str(ROOT), "gitBranch": "main", "timestamp": at}
+            lines.append(json.dumps({**base, "type": "user", "message": {"role": "user", "content": f"request {turn} of {n}"}}))
+            lines.append(json.dumps({**base, "type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": filler}]}}))
+            lines.append(json.dumps({**base, "type": "user", "toolUseResult": {"stdout": filler * 3},
+                                     "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "t", "content": filler * 3}]}}))
+            lines.append(json.dumps({"type": "api-request-blob", "sessionId": sid, "message": filler * 2}))
+        write(f"{dirs[n % 3]}/projects/{project}/{sid}.jsonl", "\n".join(lines) + "\n")
+
+
+def history_scenario(open_page):
+    """History open or closed over plan 18's accounts and transcripts."""
+    home = tempfile.mkdtemp(prefix="cadex-perf-history-")
+    try:
+        write_history_home(home)
+        first = ["agent-history", "files"] if open_page else ["files", "agent-history"]
+        settings = {"sidebar": {"items": first + ["git", "agents", "accounts"]}}
+        env = {"CADEX_PERF_HOME": home} | ({"CADEX_PERF_SIDEBAR": "agent-history"} if open_page else {})
+        found = scenario("history", "idle", ROOT, measure_idle, settings=settings, extra_env=env)
+        key = "history_open" if open_page else "history_closed"
+        index = os.path.exists(f"{home}/Library/Application Support/Cadex/history.sqlite")
+        print(f"    {found['idle_mb']:.0f} MB, index file {'made' if index else 'not made'}")
+        out = {f"{key}_mb": found["idle_mb"], f"{key}_cpu": found["idle_cpu"]}
+        # Open, the index must be made (else the page never showed); closed, never.
+        out[f"{key}_index_wrong"] = 0 if index == open_page else 1
+        return out
+    finally:
+        shutil.rmtree(home, ignore_errors=True)
+
+
 ALL_ON = {"sidebar": {"items": ["agents", "files", "git", "accounts"]},
           "statusBar": {"left": ["folder", "branch", "terminals", "agents", "usage"],
                         "right": ["ports", "ssh", "ram", "cpu", "cadexMemory", "environment"]}}
@@ -274,7 +334,8 @@ def all_on_scenario():
     waiter = subprocess.Popen(["sleep", "120"])
     try:
         write_agents_home(home, waiter.pid)
-        found = scenario("all-on", "idle", ROOT, measure_idle, settings=ALL_ON, extra_env={"CADEX_PERF_HOME": home})
+        found = scenario("all-on", "idle", ROOT, measure_idle, settings=ALL_ON,
+                         extra_env={"CADEX_PERF_HOME": home, "CADEX_PERF_SIDEBAR": "agents"})
         return {"all_on_mb": found["idle_mb"], "all_on_cpu": found["idle_cpu"]}
     finally:
         waiter.kill()
@@ -333,6 +394,8 @@ def main():
              ("switching themes 300 times", lambda: scenario("themes", "idle", ROOT, measure_theme_switch)),
              ("everything of plan 17 on: every status bar item, Agents open, accounts, hosts", all_on_scenario),
              ("a subagent's 34 MB conversation, opened and closed", subagent_scenario),
+             ("plan 18: three accounts, 200 conversations, History open", lambda: history_scenario(True)),
+             ("plan 18: the same with History closed", lambda: history_scenario(False)),
              ("five more terminal tabs", lambda: scenario("tabs", "idle", ROOT, measure_tabs, extra_env={"CADEX_PERF_TABS": "5"})),
              ("flooding with minimum contrast and ligatures", lambda: scenario(
                  "reading", "flood", ROOT, measure_reading_flood,
@@ -353,6 +416,10 @@ def main():
     # Plan 17's rule: all of it on weighs at most 10% over the app with it off.
     if "all_on_mb" in results and "idle_mb" in results:
         results["all_on_over_idle_pct"] = 100 * (results["all_on_mb"] - results["idle_mb"]) / results["idle_mb"]
+    # Plan 18's rule: the History open or closed weighs at most 10% over idle.
+    for key in ["history_open", "history_closed"]:
+        if f"{key}_mb" in results and "idle_mb" in results:
+            results[f"{key}_over_idle_pct"] = 100 * (results[f"{key}_mb"] - results["idle_mb"]) / results["idle_mb"]
     for key, limit in LIMITS.items():
         value = results.get(key)
         if value is None:

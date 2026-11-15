@@ -1,3 +1,4 @@
+import AppKit
 import Checks
 import SessionKit
 import Foundation
@@ -157,5 +158,18 @@ let historyChecks: [(name: String, body: Checks.Body)] = [
         expect(AgentTranscriptDocument.path(of: old, in: session) == originDir + "/subagents/agent-old.jsonl", "the origin's file opens")
         let plain = AgentSession(account: a, pid: 1, id: "orig", name: "o", cwd: cwd, status: .working, since: Date())
         expect(AgentSubagent.origins(of: plain, accounts: [a, b]).isEmpty, "a session that was not continued has none")
+    }),
+    ("the History page reads only while it shows: hidden in a window, nothing is watched", {
+        let history = AgentHistoryController.shared
+        let page = AgentHistoryView(frame: NSRect(x: 0, y: 0, width: 300, height: 400))
+        page.isHidden = true
+        let window = NSWindow(contentRect: page.frame, styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentView?.addSubview(page)
+        expect(!history.isWatching, "hidden: no watch")
+        page.isHidden = false
+        expect(history.isWatching || history.accounts().isEmpty, "shown: it watches")
+        page.isHidden = true
+        expect(!history.isWatching, "hidden again: the watch stops")
+        page.removeFromSuperview()
     }),
 ]

@@ -78,12 +78,29 @@ public final class AgentHistoryView: NSView {
         ])
     }
 
-    /// Reads only while on screen: the watch starts with the window and stops without it.
+    /// Reads only while on screen: in a window and not hidden. The sidebar
+    /// keeps every page in the window and hides the others, so the window
+    /// alone indexed with the page closed (make perf, 2026-11-14).
     public override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        if window != nil, token == nil {
+        updateWatching()
+    }
+
+    public override func viewDidHide() {
+        super.viewDidHide()
+        updateWatching()
+    }
+
+    public override func viewDidUnhide() {
+        super.viewDidUnhide()
+        updateWatching()
+    }
+
+    func updateWatching() {
+        let shows = window != nil && !isHiddenOrHasHiddenAncestor
+        if shows, token == nil {
             token = history.watch { [weak self] in self?.render() }
-        } else if window == nil, let id = token {
+        } else if !shows, let id = token {
             history.stop(id)
             token = nil
         }

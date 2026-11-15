@@ -36,7 +36,9 @@
   trocar de tema 300 vezes depois de aquecer, e o jorro com contraste mínimo e ligaduras; no plano 17,
   a conversa de um subagente de 34 MB aberta e fechada pelo CADEX_PERF_SUBAGENT_LOG, cinco abas de
   terminal a mais pelo CADEX_PERF_TABS e tudo da barra lateral e da barra de status ligado, com contas,
-  sessões e hosts de teste pelo CADEX_PERF_HOME, no máximo 10% acima do parado; os gatilhos ficam em `../apps/macos/app/PerfHooks.swift`), e mede memória (footprint) e CPU (tempo de CPU
+  sessões e hosts de teste pelo CADEX_PERF_HOME, no máximo 10% acima do parado; no plano 18, três
+  contas (uma gerenciada, com links) e 200 conversas pelo CADEX_PERF_HOME, com a página History aberta e
+  fechada, no máximo 10% acima do parado, e fechada nem o arquivo do índice nasce; os gatilhos ficam em `../apps/macos/app/PerfHooks.swift`), e mede memória (footprint) e CPU (tempo de CPU
   gasto na janela, não o %cpu do ps); os índices pela API C com `perf/index_probe.c`. Os limites
   ficam no topo do script, cada um com o que foi medido ao lado.
 - `webview2_sdk.py`: baixa o pacote Microsoft.Web.WebView2 (versão e sha256 fixados no script) e

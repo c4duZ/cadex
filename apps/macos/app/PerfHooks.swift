@@ -9,6 +9,15 @@ extension WindowSession {
         let environment = ProcessInfo.processInfo.environment
         if let path = environment["CADEX_PERF_SUBAGENT_LOG"] { openPerfTranscript(path) }
         if let count = environment["CADEX_PERF_TABS"].flatMap(Int.init) { openPerfTabs(count) }
+        if let page = environment["CADEX_PERF_SIDEBAR"] { showPerfPage(page) }
+    }
+
+    /// That sidebar page shown from the start: the sidebar opens on its
+    /// default page, not on the first of sidebar.items, so a scenario that
+    /// wants Agents or History open asks for it (found 2026-11-14: the
+    /// History "open" scenario had never shown the page).
+    private func showPerfPage(_ page: String) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in self?.workspace?.showSidebar(page) }
     }
 
     /// That log's conversation opened at 12 s and 36 s and closed 12 s

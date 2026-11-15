@@ -46,9 +46,21 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   vai ao terminal dela. Uma notificação avisa quando um agente pede permissão, pergunta ou termina.
   O Cadex só lê: não manda prompt nem fala com modelo.
 - **Uso dos planos** (Mac): a página Accounts mostra quanto cada conta do Claude Code e do Codex usou
-  da sessão de 5 horas e da semana, e quando reinicia; um clique abre o agente daquela conta.
+  da sessão de 5 horas e da semana, e quando reinicia; um clique abre o agente daquela conta. O
+  número do Claude Code vem do próprio Claude Code, pela status line das sessões que o Cadex abre: o
+  Cadex nunca lê login nem token e não pergunta a serviço nenhum
+  ([ADR 0021](docs/adr/0021-cadex-managed-accounts.md)). A sua status line continua aparecendo igual.
+- **Várias contas, uma configuração** (Mac): "Add Agent Account" cria uma conta na pasta do Cadex e
+  abre o `claude` nela para o `/login`; ela segue a configuração do `~/.claude` por links (skills,
+  hooks, settings, plugins), menos o que é da conta (login, conversas, histórico). As contas que já
+  existem ficam onde estão e podem passar a seguir também. A conta ativa (clique direito no item de
+  uso) e a de cada projeto escolhem onde as sessões novas abrem.
+- **Histórico de todas as conversas** (Mac): a página History junta as conversas de todas as contas,
+  com busca pelo que foi dito, por projeto, pasta ou conta. Duplo clique retoma na conta dona;
+  "Continue in Another Account" leva a conversa para outra conta quando o limite de uma acaba, com o
+  original intacto.
 - **Barra lateral e barra de status do seu jeito** (Mac): os ícones do topo da barra lateral (Files,
-  Git, Git History, Agents, Accounts) e os itens da barra de status (pasta, branch,
+  Git, Git History, Agents, History, Accounts) e os itens da barra de status (pasta, branch,
   terminais, agentes, uso, RAM, CPU, memória do Cadex, portas abertas, hosts SSH) são escolhidos e
   arrastados para o lugar; o que fica desligado não pesa nada. Toda página da barra lateral tem o
   mesmo cabeçalho: o nome (a pasta, a branch) à esquerda e as ações dela à direita.

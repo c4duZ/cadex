@@ -196,3 +196,49 @@ settings, command-palette, tabs, terminal · Decisões: `docs/adr/0019-agents-ob
   relê o acrescentado; formato desconhecido é pulado sem travar.
 - Conferência à mão pelo método do `docs/plans/README.md` (`CADEX_BACKGROUND=1`, menus,
   `screencapture -l`).
+
+## Fechamento (2026-11-14)
+- Fases A a E no código e conferidas em sessões reais do Claude Code 2.1.325, nas contas bhband e
+  bkdg do dono:
+  - B: o cartão de cada conta com os números do `/usage` dela (bhband 4% e 56%, bkdg 60% e 36%,
+    sessões ao mesmo tempo); a status line e os hooks do dono rodando; 6,5 min sem processo filho
+    além do shell nem socket de rede. Achado no caminho: a fatia x86_64 do `cadex` travava depois do
+    `codesign` (folga no cabeçalho, `core/build.zig`; o empacotamento testa as duas fatias).
+  - C: conta criada pelo código do app com 15 links e nenhum item de estado, o `claude` nela até
+    "Select login method", o ~/.claude intacto; um MCP passado pelo kit no `/mcp` de outra conta.
+    Falta o `/login` de uma conta nova, que é do dono.
+  - D: GIRASSOL-47 retomada na bhband e continuada na bkdg (original com o mesmo hash, cópia na
+    bkdg, origem achada nos dois formatos do Claude Code); uma conversa longa (198 pedidos, três
+    compactações) continuada com tudo o que a conta original carregaria. Primeira leitura das 236
+    conversas (2,5 GB) em 13 s e 97 MB de pico, depois 0,01 s.
+- `make perf` (`history_scenario`: 3 contas, uma gerenciada com links, e 200 conversas pelo
+  CADEX_PERF_HOME): History aberta 85 MB contra 85 MB parado (0%), CPU 0,1%; fechada 79 MB, CPU 0%,
+  e o arquivo do índice nem nasce. O cenário pegou a página vigiando escondida (a barra lateral
+  guarda todas as páginas na janela) e mostrou que a barra lateral não abre o primeiro ícone ao
+  iniciar: os cenários pedem a página por CADEX_PERF_SIDEBAR, e o "tudo ligado" do plano 17 passou a
+  abrir Agents de verdade (+1,2%).
+- Os ids novos estão em MAC_ONLY no `tools/check_command_parity.py`.
+- Diferenças do plano escrito: `CLAUDE_CODE_FORCE_SYNC_OUTPUT`, `preferredNotifChannel` e o `cadex`
+  no PATH da aba ficaram para os planos 19 (fase E) e 20; o login vencido só é notado com alguma
+  notificação ligada (é a leitura da parada que o acha).
+
+## Notas da release (inglês)
+
+```markdown
+## Many Claude Code accounts, one setup (Mac)
+
+- **Usage without your login.** Each account's 5-hour and weekly usage now comes from Claude Code itself, through the status line of the sessions Cadex opens. Cadex no longer reads the Keychain or calls any service, and your own status line keeps showing as before. An account only used outside Cadex says "Open the agent from Cadex to see usage".
+- **Add Agent Account** makes a new account in Cadex's folder and opens `claude` in it for `/login`. It follows `~/.claude` through links — skills, hooks, settings, plugins — but keeps its own login, conversations and history. Existing accounts stay where they are and can follow too (Share the Default Account's Config…). Sync, own copy and follow again are commands.
+- **Active account**: right-click the Agent usage item to choose where new sessions open; a project can have its own (Set This Project's Agent Account).
+
+## Every conversation, one History (Mac)
+
+- **The History page** lists the conversations of all your accounts — title, folder, branch, account — searchable by what was said, by project, folder or account, in this project or all.
+- **Double-click resumes** in the account that owns it. **Continue in Another Account** carries a conversation to another account when one runs out of limit; the original stays untouched, and subagents from before the copy are still found.
+- The first reading of a big history runs in the background (2.5 GB in about 13 s); then only what grows is read, and nothing runs while the page is closed.
+
+## Smaller fixes (Mac)
+
+- The `cadex` helper ships in both slices; the Intel one crashed after signing.
+- Conversation titles never show a compaction summary or "[Request interrupted by user]".
+```
