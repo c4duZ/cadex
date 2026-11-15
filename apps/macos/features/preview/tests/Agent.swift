@@ -133,6 +133,11 @@ let agentChecks: [(name: String, body: Checks.Body)] = [
         doc.notes.field.stringValue = "bigger"
         _ = doc.notes.control(doc.notes.field, textView: NSTextView(), doCommandBy: #selector(NSResponder.insertNewline(_:)))
         expect(doc.noteCount == 2)
+        // Esc in the field gives the note up.
+        doc.notes.edit(plain, at: .zero)
+        doc.notes.field.stringValue = "never mind"
+        _ = doc.notes.control(doc.notes.field, textView: NSTextView(), doCommandBy: #selector(NSResponder.cancelOperation(_:)))
+        expect(doc.noteCount == 2 && !doc.notesForAgent().contains("never mind"), "Esc keeps nothing")
         let forAgent = doc.notesForAgent()
         expect(forAgent.contains("Note 1 from the owner: make it blue") && forAgent.contains("Note 2 from the owner: bigger"), forAgent)
         doc.clearNotes()
