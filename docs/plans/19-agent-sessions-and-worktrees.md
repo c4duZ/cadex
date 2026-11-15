@@ -153,9 +153,11 @@ docs/adr/0021-cadex-managed-accounts.md (do plano 18), `docs/adr/0019-agents-obs
     e a memória automática é uma só para o repositório e as worktrees. O Cadex retoma pelo id.
   - Confiança da pasta: numa pasta nunca aberta o diálogo "trust this folder" segura o prompt e o
     `claude --bg` sai com erro; a confiança vale para as pastas filhas, inclusive as criadas depois
-    (testado em 2026-11-14). Na primeira "Nova tarefa" de um repositório, o Cadex abre uma aba com
-    `claude` em `<repo>.worktrees/` e explica: o dono aceita uma vez e toda worktree nova lá dentro
-    já nasce confiada. O Cadex não escreve no .claude.json.
+    (testado em 2026-11-14). Corrigido em 2026-11-15: numa worktree a confiança que vale é a do
+    repositório principal, então aceitar em `<repo>.worktrees/` não cobre as tarefas; aceitar na aba
+    da primeira tarefa grava a do repositório e cobre todas, as de antes e as de depois. Sem aba a
+    mais: na primeira "Nova tarefa" o Cadex explica numa folha que o dono aceita uma vez, ali. O
+    Cadex não escreve no .claude.json.
   - Status e comentário: guardados pelo Cadex (não no git), mostrados na lista de worktrees e no
     título do grupo em Agents › Sessions; worktrees.set-status e worktrees.set-comment.
   - Hooks de preparo por repositório nas configurações (worktrees.setupHooks), mostrados antes da
@@ -207,7 +209,7 @@ docs/adr/0021-cadex-managed-accounts.md (do plano 18), `docs/adr/0019-agents-obs
   cartão; o número do Dock some ao visitar; nada é mandado ao agente sem clique.
 - Fase D: "Nova tarefa" num repositório com `.worktreeinclude` e um hook de preparo cria a
   worktree, copia o `.env`, roda o hook e abre o agente na conta do projeto; a pasta fora do
-  workspace pede autorização; depois de aceitar a confiança uma vez em `<repo>.worktrees/`, a
+  workspace pede autorização; depois de aceitar a confiança uma vez na primeira tarefa, a
   segunda tarefa abre sem diálogo; remover com mudanças não salvas é recusado; testes do núcleo com
   repositório falso (`make core-test`, sem vazamento).
 - Fase E: `top` rodando, fechar e reabrir o Cadex mostra o mesmo `top` com o scrollback; matar o

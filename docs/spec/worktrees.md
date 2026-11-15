@@ -19,9 +19,11 @@ comando, e o Cadex mostra em que pé cada uma está (`docs/plans/19-agent-sessio
 - A pasta das worktrees pode cair fora dos diretórios autorizados (feature `workspace`): na primeira
   tarefa de um repositório, o Cadex pede para autorizá-la, uma vez; recusar deixa escolher outra raiz.
 - Confiança do Claude Code: numa pasta nunca aberta, o diálogo "trust this folder" segura o agente.
-  Na primeira tarefa de um repositório, o Cadex abre uma aba com `claude` em `<repo>.worktrees/` e
-  explica: aceitar ali uma vez vale para toda worktree criada dentro (testado em 2026-11-14). O
-  Cadex não escreve no `.claude.json`.
+  Numa worktree, a confiança que vale é a do repositório principal: aceitar na aba de uma tarefa
+  grava a confiança do repositório e cobre todas as tarefas dele, as de antes e as de depois; aceitar
+  só em `<repo>.worktrees/` não cobre as worktrees (testado em 2026-11-15, Claude Code 2.1.325).
+  Repositório já confiado não pergunta nada. Na primeira tarefa de um repositório, o Cadex explica
+  isso numa folha, sem abrir aba a mais. O Cadex não escreve no `.claude.json`.
 - A conversa não é copiada entre worktrees: de dentro de uma worktree, `claude --resume <id>` acha a
   conversa do repositório, e a memória automática é uma só (teste de 2026-11-14).
 
@@ -57,9 +59,11 @@ comando, e o Cadex mostra em que pé cada uma está (`docs/plans/19-agent-sessio
 
 ## Critérios de aceite
 - [ ] New Task num repositório com `.worktreeinclude` e um hook de preparo cria a worktree e o
-      branch, copia o `.env`, roda o hook e abre o agente na conta do projeto.
-- [ ] A pasta das worktrees fora do workspace pede autorização uma vez.
-- [ ] Depois de aceitar a confiança em `<repo>.worktrees/`, a segunda tarefa abre sem diálogo.
-- [ ] Remover com mudanças não salvas é recusado e diz quais arquivos.
-- [ ] Status e comentário voltam iguais depois de reabrir o app.
-- [ ] Testes do núcleo com um repositório falso, sem vazamento (`make core-test`).
+      branch, copia o `.env`, roda o hook e abre o agente na conta do projeto. (Conferido por partes
+      em 2026-11-15: núcleo e app num repositório de verdade, e o comando "hooks && claude" com o
+      `claude` real; falta o clique no app, visto pelo dono.)
+- [x] A pasta das worktrees fora do workspace pede autorização uma vez.
+- [x] Depois de aceitar a confiança na primeira tarefa, a segunda abre sem diálogo.
+- [x] Remover com mudanças não salvas é recusado e diz quais arquivos.
+- [x] Status e comentário voltam iguais depois de reabrir o app.
+- [x] Testes do núcleo com um repositório falso, sem vazamento (`make core-test`).

@@ -65,10 +65,10 @@ extension WindowSession {
             say(T("The task was not made", "A tarefa não foi criada"), message)
         case .success(let made):
             AgentAttention.shared.note(.taskCreated, text: plan.branch, project: (plan.repo as NSString).lastPathComponent)
-            if plan.explainTrust { explainTrust(plan) }
             let agent = agentCommand(cwd: made.path)
             tabs?.newTab(cwd: made.path)
             tabs?.activeTerminal?.session?.write((plan.hooks + [agent]).joined(separator: " && ") + "\n")
+            if plan.explainTrust { explainTrust(plan) }
             if !made.unmatched.isEmpty {
                 say(T("Some .worktreeinclude lines matched nothing", "Algumas linhas do .worktreeinclude não acharam nada"), made.unmatched.joined(separator: "\n"))
             }
@@ -76,14 +76,15 @@ extension WindowSession {
     }
 
     /// The first task of a repository: Claude Code asks to trust a folder it
-    /// never saw, and trusting the tasks' folder once covers every task made
-    /// inside later (tested 2026-11-14). A tab there, and why.
+    /// never saw, and for a worktree the trust is the main repository's:
+    /// accepting in the task's tab covers the repository and every task, made
+    /// before or after (tested 2026-11-15; the tasks' folder alone did not).
+    /// No extra tab: a repository already trusted asks nothing.
     private func explainTrust(_ plan: TaskPlan) {
-        tabs?.newTab(cwd: plan.root)
-        tabs?.activeTerminal?.session?.write(agentCommand(cwd: plan.root) + "\n")
-        say(T("Trust the tasks' folder once", "Confie uma vez na pasta das tarefas"),
-            T("Claude Code asks whether to trust \(plan.root). Accept it in this tab: every task made inside opens without asking again.",
-              "O Claude Code pergunta se confia em \(plan.root). Aceite nesta aba: toda tarefa criada ali dentro abre sem perguntar de novo."))
+        let name = (plan.repo as NSString).lastPathComponent
+        say(T("If Claude Code asks to trust the folder", "Se o Claude Code perguntar se confia na pasta"),
+            T("Accept it in the task's tab: it counts for \(name) and every task of it, so it asks only once.",
+              "Aceite na aba da tarefa: vale para \(name) e todas as tarefas dele, então só pergunta uma vez."))
     }
 
     /// `claude` with the kit, in the project's account or the active one.

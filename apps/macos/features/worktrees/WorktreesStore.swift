@@ -26,7 +26,7 @@ public struct TaskInfo: Codable, Equatable, Sendable {
 }
 
 /// Per repository: the setup hooks the owner already saw, and whether the
-/// folder-trust tab was shown.
+/// folder-trust note was shown.
 public struct RepoInfo: Codable, Equatable, Sendable {
     public var confirmedHooks: [String] = []
     public var trustExplained = false

@@ -69,8 +69,8 @@
   as permissões do socket no quadro, leva um cartão ao terminal dele, o número do sininho em cada
   janela e o do Dock, e a página do sininho. `WorktreesWiring.swift`: as tarefas (plano 19, fase D):
   New Task pede o nome, mostra o que pede um sim (a pasta, os hooks), cria pelo núcleo e abre uma
-  aba com os hooks e o agente (kit, conta do projeto ou a ativa); a aba da confiança na primeira
-  tarefa; abrir, remover sem perder trabalho, comentar, os hooks de preparo. O explorer é criado
+  aba com os hooks e o agente (kit, conta do projeto ou a ativa); o aviso da confiança na primeira
+  tarefa (a do repositório, aceita uma vez na aba da tarefa); abrir, remover sem perder trabalho, comentar, os hooks de preparo. O explorer é criado
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.

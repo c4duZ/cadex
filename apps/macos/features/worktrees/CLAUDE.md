@@ -15,7 +15,7 @@
   atual e a autorização da pasta).
 - `WorktreesStore.swift`: as notas em `…/Cadex/worktrees.json`: por tarefa o status (a fazer, em
   andamento, em revisão, pronto), o comentário, o ponto de partida e a data; por repositório os hooks
-  já vistos e se a aba da confiança já foi mostrada.
+  já vistos e se o aviso da confiança já foi mostrado.
 - `WorktreesController.swift`: WorktreesController.shared. `plan` (branch único, pasta
   `<repo>.worktrees/<branch>` ou worktrees.root, ponto de partida, o que pede um sim: autorizar a
   pasta, hooks novos, a confiança), `make`, `tasks`, `note` (para o grupo em Agents),

@@ -16,7 +16,8 @@ public struct TaskPlan: Equatable, Sendable {
     /// The repository's setup hooks, and whether the owner has not seen them yet.
     public let hooks: [String]
     public let hooksNeedConfirmation: Bool
-    /// First task of the repository: the tab that explains Claude Code's folder trust.
+    /// First task of the repository: say that Claude Code's folder trust, if it
+    /// asks, is accepted once for the repository and all its tasks.
     public let explainTrust: Bool
 }
 
