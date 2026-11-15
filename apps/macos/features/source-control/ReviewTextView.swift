@@ -20,6 +20,14 @@ final class ReviewTextView: NSView {
     var onOpenFold: ((Int, Int) -> Void)?
     /// The cursor moved (the tree follows the file).
     var onCursor: ((Int) -> Void)?
+    /// A click on an annotation (its id), and on the "+" of the margin
+    /// (the rows from where the press began to where it ended).
+    var onAnnotation: ((String) -> Void)?
+    var onComment: ((ClosedRange<Int>) -> Void)?
+    /// The line under the pointer, for the "+".
+    private(set) var hovered: Int?
+    private var commentFrom: Int?
+    static let plusWidth: CGFloat = 16
 
     let look = EditorAppearance.current
     lazy var charWidth: CGFloat = ("M" as NSString).size(withAttributes: [.font: look.font]).width
@@ -56,7 +64,7 @@ final class ReviewTextView: NSView {
     var gutterWidth: CGFloat {
         let biggest = files.map { max($0.before.count, $0.after.count) }.max() ?? 1
         let digits = CGFloat(max(String(biggest).count, 3))
-        return 2 * (digits * charWidth + 10) + charWidth + 10
+        return Self.plusWidth + 2 * (digits * charWidth + 10) + charWidth + 10
     }
 
     /// Columns of text a row holds before wrapping.
@@ -66,6 +74,9 @@ final class ReviewTextView: NSView {
         switch row {
         case .header: return headerHeight
         case .image: return 360
+        case .annotation(_, let index):
+            guard layout.annotations.indices.contains(index) else { return lineHeight }
+            return annotationHeight(layout.annotations[index])
         case .line where wrap:
             let length = ReviewLayout.text(of: row, in: files).replacingOccurrences(of: "\t", with: "    ").count
             return lineHeight * CGFloat(max(1, (length + columns - 1) / columns))
@@ -105,7 +116,34 @@ final class ReviewTextView: NSView {
 
     override func resize(withOldSuperviewSize oldSize: NSSize) {
         super.resize(withOldSuperviewSize: oldSize)
-        if wrap { relayout() }
+        if wrap || !layout.annotations.isEmpty { relayout() }
+    }
+
+    /// The annotation box: its title line and its text wrapped to the width.
+    func annotationHeight(_ note: ReviewAnnotation) -> CGFloat {
+        let width = max(bounds.width - gutterWidth - 40, 100)
+        let body = (note.text as NSString).boundingRect(with: NSSize(width: width, height: 10_000), options: [.usesLineFragmentOrigin],
+                                                         attributes: [.font: NSFont.systemFont(ofSize: 12)])
+        return ceil(body.height) + lineHeight + 22
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.forEach(removeTrackingArea)
+        addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect], owner: self))
+    }
+
+    override func mouseMoved(with event: NSEvent) {
+        let point = convert(event.locationInWindow, from: nil)
+        let index = row(at: point.y).flatMap { if case .line = layout.rows[$0] { return $0 } else { return nil } }
+        guard index != hovered else { return }
+        for old in [hovered, index].compactMap({ $0 }) { setNeedsDisplay(rect(of: old)) }
+        hovered = index
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        if let hovered { setNeedsDisplay(rect(of: hovered)) }
+        hovered = nil
     }
 
     /// The row at a height (binary search over the tops).
@@ -145,6 +183,12 @@ final class ReviewTextView: NSView {
         let point = convert(event.locationInWindow, from: nil)
         guard let index = row(at: point.y) else { return }
         if case .fold(let file, let region, _) = layout.rows[index] { return onOpenFold?(file, region) ?? () }
+        if case .annotation(_, let note) = layout.rows[index], layout.annotations.indices.contains(note) {
+            move(to: index, extending: false)
+            return onAnnotation?(layout.annotations[note].id) ?? ()
+        }
+        // The "+" of the margin: press, drag over the lines, let go.
+        if point.x < Self.plusWidth, case .line = layout.rows[index] { commentFrom = index }
         move(to: index, extending: event.modifierFlags.contains(.shift))
     }
 
@@ -152,6 +196,12 @@ final class ReviewTextView: NSView {
         let point = convert(event.locationInWindow, from: nil)
         if let index = row(at: point.y) { move(to: index, extending: true) }
         autoscroll(with: event)
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        guard let from = commentFrom else { return }
+        commentFrom = nil
+        onComment?(min(from, cursor)...max(from, cursor))
     }
 
     override func keyDown(with event: NSEvent) {
@@ -185,6 +235,7 @@ final class ReviewTextView: NSView {
         case .fold(let file, let region, _): "f\(file):\(region)"
         case .note(let file, _): "n\(file)"
         case .image(let file): "i\(file)"
+        case .annotation(_, let index): "a\(layout.annotations.indices.contains(index) ? layout.annotations[index].id : "")"
         }
     }
 }

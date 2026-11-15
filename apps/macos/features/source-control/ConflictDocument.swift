@@ -229,6 +229,10 @@ public final class ConflictDocument: NSObject, TabDocument, NSTextViewDelegate {
 /// A button that runs a closure (the command by id).
 @MainActor
 final class CommandButton: NSButton {
+    var onPress: (() -> Void)? {
+        get { run }
+        set { run = newValue }
+    }
     private var run: (() -> Void)?
 
     convenience init(title: String, run: @escaping () -> Void) {

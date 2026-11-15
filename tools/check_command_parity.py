@@ -12,7 +12,7 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-PREFIXES = "tab|pane|explorer|workspace|search|editor|markdown|terminal|git|history|diff|preview|media|space|edit|palette|settings|app|window|view|theme|power|sidebar|statusBar|agents|ssh|worktrees|agent-tools|computer-use"
+PREFIXES = "tab|pane|explorer|workspace|search|editor|markdown|terminal|git|history|diff|preview|media|space|edit|palette|settings|app|window|view|theme|power|sidebar|statusBar|agents|ssh|worktrees|agent-tools|computer-use|review"
 LITERAL = re.compile(r'"((?:%s)\.[a-z0-9-]+)"' % PREFIXES)
 # Names of views and keys in the Mac's code, not commands (2026-10-20).
 # power.mode, sidebar.items and statusBar.left/right are settings.json keys, read by name in SettingsFile.swift.
@@ -53,6 +53,8 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "git.review-prev-file", "git.review-next-hunk", "git.review-prev-hunk", "git.review-toggle-collapse",
             "git.review-toggle-wrap", "git.review-toggle-whitespace",
             # Image and conflict (plan 21 phase C): the core has them, the tabs are the Mac's for now.
+            "review.add-comment", "review.edit-comment", "review.delete-comment", "review.send-comments",
+            "review.clear-comments", "review.show-sent",
             "git.review-image-mode", "git.accept-ours", "git.accept-theirs", "git.accept-both", "git.mark-resolved",
             # Tasks' worktrees (plan 19, phase D), until Windows gets the view.
             "worktrees.show", "worktrees.new-task", "worktrees.open", "worktrees.remove", "worktrees.set-status",

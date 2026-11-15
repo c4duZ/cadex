@@ -60,6 +60,13 @@
   marcador sobrando (o cursor vai à linha). Abre pelo painel (DiffRequest.conflict) e pela revisão
   (clique direito no arquivo U). `ConflictCommands.swift`: git.accept-ours, git.accept-theirs,
   git.accept-both, git.mark-resolved e git.review-image-mode; os botões da barra só rodam os ids.
+- A porta da revisão para os comentários (plano 21, fase D), sem saber deles: `ReviewAnnotation.swift`
+  (ReviewAnnotation, a nota que o app prende sob uma linha, ou no topo do arquivo quando
+  desatualizada, e abre a região recolhida em que cai; ReviewLineSelection, as linhas marcadas com o
+  texto e 3 linhas em volta) e `ReviewDocumentNotes.swift` (a seleção, os textos de cada arquivo, a
+  nota do cursor, onde ancorar o popover, o botão da barra, `announce`). A aba desenha a nota numa
+  caixa, mostra "+" na margem ao passar sobre uma linha (apertar e arrastar ali pede um comentário
+  das linhas) e avisa por onLoaded, onAnnotation e onCommentRequest.
 - Spec de comportamento em `docs/spec/source-control.md`. Status: pronto (plano 6).
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 

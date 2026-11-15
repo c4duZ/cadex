@@ -88,11 +88,13 @@ do source-control (`source-control.md`); comentários e autoria são desta featu
 - [ ] j / k / n / p levam ao próximo e ao anterior arquivo e trecho; regiões sem mudança recolhem e
       expandem.
 - [ ] 5 mil linhas em 50 arquivos abrem e rolam sem engasgo (`make perf`).
-- [ ] Um comentário numa linha e outro num intervalo, enviados juntos, chegam ao terminal do agente
-      num texto só, sem Enter, com caminho, linhas e trecho citado.
-- [ ] Depois de o agente editar o arquivo, o comentário segue a linha certa; sem achar, fica
-      "desatualizado".
-- [ ] Comentários sobrevivem a fechar e abrir o app.
+- [x] Um comentário numa linha e outro num intervalo, enviados juntos, chegam ao terminal do agente
+      num texto só, sem Enter, com caminho, linhas e trecho citado (2026-11-15, no app de release:
+      o texto dos dois conferido; a colagem segura, sem Enter, num agente falso que gravou o que
+      recebeu).
+- [x] Depois de o agente editar o arquivo, o comentário segue a linha certa; sem achar, fica
+      "desatualizado" (testes da feature review e da aba).
+- [x] Comentários sobrevivem a fechar e abrir o app (teste: lidos de novo do arquivo da worktree).
 - [ ] Uma edição do agente marca as linhas dele; uma edição do dono no editor marca as do dono.
 - [ ] O que o `cadex hook` manda ao app no PostToolUse não tem o arquivo inteiro nem o texto da
       conversa.

@@ -52,6 +52,8 @@ struct ReviewLayout: Equatable {
         case note(file: Int, text: String)
         /// A changed image, drawn by an ImageDiffView over the row.
         case image(file: Int)
+        /// An annotation (a comment) under its line: `index` into `annotations`.
+        case annotation(file: Int, index: Int)
     }
 
     struct Options: Equatable {
@@ -66,41 +68,61 @@ struct ReviewLayout: Equatable {
     private(set) var fileStarts: [Int] = []
     private(set) var changeStarts: [Int] = []
 
-    init(files: [ReviewFileDiff], options: Options, notes: (ReviewFileDiff) -> String?) {
+    /// The notes the app pins (comments, plan 21 phase D), by index in rows.
+    private(set) var annotations: [ReviewAnnotation] = []
+
+    init(files: [ReviewFileDiff], options: Options, annotations: [ReviewAnnotation] = [], notes: (ReviewFileDiff) -> String?) {
+        self.annotations = annotations
         var change = 0
         for (index, diff) in files.enumerated() {
             fileStarts.append(rows.count)
-            rows.append(.header(file: index))
+            var mine: [Row] = [.header(file: index)]
             if diff.showsImage {
-                rows.append(.image(file: index))
-                continue
+                mine.append(.image(file: index))
+            } else if let note = notes(diff) {
+                mine.append(.note(file: index, text: note))
+            } else {
+                // An unchanged run holding a commented line stays open.
+                var keep = options
+                let pinned = annotations.filter { $0.path == diff.file.path && !$0.stale }
+                mine += Self.lines(of: diff, file: index, options: &keep, pinned: pinned, change: &change)
             }
-            if let note = notes(diff) {
-                rows.append(.note(file: index, text: note))
-                continue
-            }
-            let items = Self.align(diff)
-            var region = 0
-            var at = 0
-            while at < items.count {
-                let item = items[at]
-                if item.kind != .context {
-                    if at == 0 || items[at - 1].kind == .context {
-                        changeStarts.append(rows.count)
-                        change += 1
-                    }
-                    rows.append(.line(file: index, kind: item.kind, old: item.old, new: item.new, change: change - 1))
-                    at += 1
-                    continue
-                }
-                var end = at
-                while end < items.count, items[end].kind == .context { end += 1 }
-                let run = Array(items[at..<end])
-                rows += Self.unchanged(run, file: index, region: region, first: at == 0, last: end == items.count, options: options)
-                region += 1
-                at = end
+            for row in Self.annotationRows(for: index, path: diff.file.path, rows: mine, annotations: annotations) {
+                if case .line(_, _, _, _, let id?) = row, rows.last.map({ Self.change(of: $0) != id }) ?? true { changeStarts.append(rows.count) }
+                rows.append(row)
             }
         }
+    }
+
+    private static func change(of row: Row) -> Int? {
+        if case .line(_, _, _, _, let id) = row { return id }
+        return nil
+    }
+
+    private static func lines(of diff: ReviewFileDiff, file index: Int, options: inout Options, pinned: [ReviewAnnotation], change: inout Int) -> [Row] {
+        var rows: [Row] = []
+        let items = Self.align(diff)
+        var region = 0
+        var at = 0
+        while at < items.count {
+            let item = items[at]
+            if item.kind != .context {
+                if at == 0 || items[at - 1].kind == .context { change += 1 }
+                rows.append(.line(file: index, kind: item.kind, old: item.old, new: item.new, change: change - 1))
+                at += 1
+                continue
+            }
+            var end = at
+            while end < items.count, items[end].kind == .context { end += 1 }
+            let run = Array(items[at..<end])
+            if run.contains(where: { item in pinned.contains { $0.old ? $0.line == item.old : $0.line == item.new } }) {
+                options.opened.insert("\(index):\(region)")
+            }
+            rows += Self.unchanged(run, file: index, region: region, first: at == 0, last: end == items.count, options: options)
+            region += 1
+            at = end
+        }
+        return rows
     }
 
     /// The unchanged run between two changes (or at a file's edge): the
@@ -170,7 +192,7 @@ struct ReviewLayout: Equatable {
     /// The file a row belongs to.
     static func file(of row: Row) -> Int {
         switch row {
-        case .header(let file), .line(let file, _, _, _, _), .fold(let file, _, _), .note(let file, _), .image(let file): file
+        case .header(let file), .line(let file, _, _, _, _), .fold(let file, _, _), .note(let file, _), .image(let file), .annotation(let file, _): file
         }
     }
 }

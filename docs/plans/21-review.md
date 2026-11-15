@@ -134,6 +134,14 @@ docs/adr/0021-cadex-managed-accounts.md e docs/adr/0022-terminal-daemon.md (plan
   - Comandos review.add-comment, review.edit-comment, review.delete-comment, review.send-comments,
     review.clear-comments, review.show-sent. Features: review, source-control, worktrees, agents,
     terminal.
+  - Feita em 2026-11-15: a feature `apps/macos/features/review/` (comentário e recolocação pelo
+    contexto, o arquivo por worktree, a mensagem, o editor, os seis comandos) e, no source-control,
+    a porta genérica (anotações sob as linhas, o "+" da margem, a seleção com o contexto), ligadas
+    pelo app. Conferido no app de release: um comentário pelo "+" e outro num intervalo pelo c, as
+    caixas sob as linhas e "Send to Agent (2)", o texto dos dois copiado sem agente, e a colagem
+    segura sem Enter num agente falso (o que ele recebeu, gravado). Os testes do computer use
+    (`apps/macos/features/computer-use/tests/main.swift`) nunca tinham entrado no `make macos-test`:
+    entraram agora, com os desta fase.
 - **E. Autoria por linha.** Na feature `review`, com o hook da ADR 0027.
   - O hook PostToolUse (entra pelo kit da sessão do plano 18; `cadex hook` manda ao app.sock do
     plano 19) leva a sessão, a ferramenta, o arquivo e as linhas escritas. Testado em 2026-11-14

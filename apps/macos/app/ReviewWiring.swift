@@ -25,6 +25,7 @@ extension WindowSession {
             conflict: { [weak self] in self?.tabs?.activeDocument as? ConflictDocument },
             review: { [weak self] in self?.tabs?.activeDocument as? ReviewDocument },
             diff: { [weak self] in self?.tabs?.activeDocument as? DiffDocument }))
+        registerReviewComments(palette: palette)
     }
 
     /// The repository to review: the focused terminal's, else the workspace's.
@@ -57,6 +58,7 @@ extension WindowSession {
                 $0.git.reviewShowWhitespace = whitespace
             }
         }
+        attachComments(to: review)
         tabs.open(review, beside: false)
     }
 

@@ -59,6 +59,24 @@ let reviewChecks: [(name: String, body: Checks.Body)] = [
         let all = ReviewLayout(files: files, options: options) { _ in nil }
         expect(!all.rows.contains { if case .fold = $0 { return true } else { return false } })
     }),
+    ("annotations: under their line, a folded line opened, a stale one at the top; the marked lines with their context", {
+        let files = [reviewFile("a.txt", changes: [10, 25], total: 40)]
+        let note = ReviewAnnotation(id: "n1", path: "a.txt", old: false, line: 18, title: "a.txt, line 18", text: "why?", stale: false)
+        let stale = ReviewAnnotation(id: "n2", path: "a.txt", old: false, line: 99, title: "gone", text: "old", stale: true)
+        let layout = ReviewLayout(files: files, options: .init(), annotations: [note, stale]) { _ in nil }
+        expect(layout.rows[1] == .annotation(file: 0, index: 1), "stale under the header: \(layout.rows[1])")
+        guard let at = layout.rows.firstIndex(of: .annotation(file: 0, index: 0)) else { return expect(false, "no note") }
+        expect(layout.rows[at - 1] == .line(file: 0, kind: .context, old: 18, new: 18, change: nil), "\(layout.rows[at - 1])")
+        expect(layout.changeStarts.count == 2)
+        let review = ReviewDocument(request: .init(repo: "/nonexistent", base: "HEAD"))
+        review.files = files
+        review.relayout()
+        guard let row = review.text.layout.rows.firstIndex(of: .line(file: 0, kind: .added, old: nil, new: 10, change: 0)) else { return expect(false, "no line 10") }
+        review.text.go(to: row)
+        let selection = review.markedSelection()
+        expect(selection == ReviewLineSelection(path: "a.txt", old: false, start: 10, end: 10, lines: ["L10"], before: ["l7", "l8", "l9"], after: ["l11", "l12", "l13"]),
+               "\(String(describing: selection))")
+    }),
     ("a new file is all added lines; a binary says so", {
         let new = GitRepository.ReviewFile(status: "?", added: 2, removed: 0, path: "n.txt", orig: "")
         let diff = ReviewFileDiff(file: new, diff: GitRepository.Diff(before: "", after: "x\ny\n", patch: "@@ -0,0 +1,2 @@\n+x\n+y\n", binary: false, tooLarge: false))

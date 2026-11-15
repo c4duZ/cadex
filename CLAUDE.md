@@ -31,6 +31,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | sidebar | não | sim | ícones no topo que escolhem a página do painel lateral, personalizáveis |
 | agents | não | sim | as sessões de agente nas contas do Claude Code: lidas, o quadro do que precisa de você, hibernar |
 | agent-tools | sim | sim | o programa `cadex` que as sessões abertas pelo Cadex rodam (status line, hooks) e o socket do app |
+| review | não | sim | comentários na revisão de uma tarefa, mandados ao agente dela num texto só |
 | computer-use | não | sim | o agente opera outros apps do Mac pela acessibilidade, com permissão do dono por app |
 | ssh | não | sim | os hosts do ~/.ssh/config, se respondem, e conectar numa aba |
 | spaces | não | sim | grupos de abas restaurados entre sessões |

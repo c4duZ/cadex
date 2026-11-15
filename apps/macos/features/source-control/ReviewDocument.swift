@@ -31,11 +31,21 @@ public final class ReviewDocument: TabDocument {
     public var openFile: ((String) -> Void)?
     /// A file in conflict: the app opens it in three columns (repo, path).
     public var onOpenConflict: ((String, String) -> Void)?
+    /// Notes under lines (the review feature's comments), set by the app.
+    public var annotations: [ReviewAnnotation] = [] { didSet { if annotations != oldValue { relayout() } } }
+    /// A read finished (the app places the comments again), a note was
+    /// clicked (its id), lines were asked a comment ("+" in the margin).
+    public var onLoaded: (() -> Void)?
+    public var onAnnotation: ((String) -> Void)?
+    public var onCommentRequest: ((ReviewLineSelection) -> Void)?
+    /// A button on the bar ("Send to Agent (2)"), running what the app gives.
+    public var barAction: (title: String, run: () -> Void)? { didSet { showBarAction() } }
+    let barButton = CommandButton(title: "") {}
     /// A setting changed from the tab (context, wrap, whitespace): the app saves it.
     public var onSetting: ((Int, Bool, Bool) -> Void)?
     let text = ReviewTextView()
     let tree = ReviewTree()
-    private let bar = NSTextField(labelWithString: "")
+    let bar = NSTextField(labelWithString: "")
     private let scroll = NSScrollView()
     private let repo: GitRepository
     var files: [ReviewFileDiff] = []
@@ -134,6 +144,7 @@ public final class ReviewDocument: TabDocument {
             say(T("Base \(shown)\(origin) · \(files.count) files · +\(added) −\(removed)",
                   "Base \(shown)\(origin) · \(files.count) arquivos · +\(added) −\(removed)"))
         }
+        onLoaded?()
         if again { again = false; load() }
     }
 
@@ -150,7 +161,7 @@ public final class ReviewDocument: TabDocument {
     public var hasImages: Bool { text.layout.rows.contains { if case .image = $0 { return true } else { return false } } }
 
     func relayout() {
-        let layout = ReviewLayout(files: files, options: options) { diff in
+        let layout = ReviewLayout(files: files, options: options, annotations: annotations) { diff in
             // Short: the note is one line (the long one was cut, 2026-11-15).
             if diff.file.status == "U" { return T("Merge conflict · right-click it on the left: Resolve Conflict",
                                                     "Conflito de merge · clique direito nele à esquerda: Resolver o conflito") }
@@ -239,7 +250,13 @@ public final class ReviewDocument: TabDocument {
             guard let self, files.indices.contains(file) else { return }
             openFile?(request.repo + "/" + files[file].file.path)
         }
-        let top = NSStackView(views: [bar])
+        text.onAnnotation = { [weak self] id in self?.onAnnotation?(id) }
+        text.onComment = { [weak self] rows in
+            guard let self, let selection = selection(of: Array(rows)) else { return }
+            onCommentRequest?(selection)
+        }
+        barButton.isHidden = true
+        let top = NSStackView(views: [bar, NSView(), barButton])
         top.edgeInsets = NSEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
         let body = NSSplitView()
         body.isVertical = true

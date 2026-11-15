@@ -95,6 +95,11 @@
   branch que o New Task guardou, pela worktrees); Tasks, o grupo da tarefa em Agents e o cabeçalho do
   Git rodam o mesmo; os botões da aba salvam git.reviewContextLines, git.reviewWrap e
   git.reviewShowWhitespace; mudança no disco dentro do repositório relê a aba.
+- `ReviewCommentsWiring.swift` (plano 21, fase D): os comentários da feature review por worktree
+  (ReviewCommentsHub, divididos pelas janelas) viram as anotações da aba de revisão, recolocados a
+  cada leitura; o "+" e o c abrem o editor; o clique num comentário oferece editar e apagar (pelos
+  ids); enviar cola, sem Enter, no agente da worktree que aceita colagem segura, senão copia com aviso;
+  os dois casos vão para o histórico.
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.

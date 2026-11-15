@@ -28,6 +28,8 @@ extension ReviewTextView {
             label(text, at: NSPoint(x: gutterWidth + 8, y: rect.minY + 2), color: look.lineNumber)
         case .image:
             break  // its ImageDiffView sits over the row
+        case .annotation(_, let index):
+            if layout.annotations.indices.contains(index) { drawAnnotation(layout.annotations[index], in: rect) }
         }
         if cursor, window?.firstResponder === self {
             look.foreground.withAlphaComponent(0.35).setStroke()
@@ -61,11 +63,15 @@ extension ReviewTextView {
             NSColor.controlAccentColor.withAlphaComponent(0.28).setFill()
             NSRect(x: 0, y: rect.minY, width: gutterWidth, height: rect.height).fill()
         }
-        let numberWidth = (gutterWidth - charWidth - 10) / 2
-        if let old { number(old, rightAt: numberWidth - 6, y: rect.minY) }
-        if let new { number(new, rightAt: numberWidth * 2 - 6, y: rect.minY) }
+        if hovered.map({ rect.minY >= tops[$0] && rect.minY < tops[$0 + 1] }) == true {
+            label("+", at: NSPoint(x: 3, y: rect.minY + 1), color: .controlAccentColor, weight: .bold)
+        }
+        let numberWidth = (gutterWidth - Self.plusWidth - charWidth - 10) / 2
+        let left = Self.plusWidth
+        if let old { number(old, rightAt: left + numberWidth - 6, y: rect.minY) }
+        if let new { number(new, rightAt: left + numberWidth * 2 - 6, y: rect.minY) }
         let sign = kind == .added ? "+" : kind == .removed ? "−" : ""
-        label(sign, at: NSPoint(x: numberWidth * 2 + 2, y: rect.minY + 1), color: kind == .added ? .systemGreen : .systemRed)
+        label(sign, at: NSPoint(x: left + numberWidth * 2 + 2, y: rect.minY + 1), color: kind == .added ? .systemGreen : .systemRed)
         let text = lineText(file: file, side: kind == .removed ? "before" : "after", number: kind == .removed ? old : (new ?? old))
         let box = NSRect(x: gutterWidth + 8, y: rect.minY + 1, width: rect.width - gutterWidth - 16, height: rect.height)
         text.draw(with: box, options: wrap ? [.usesLineFragmentOrigin] : [.usesLineFragmentOrigin, .truncatesLastVisibleLine])
@@ -111,6 +117,20 @@ extension ReviewTextView {
                 search = NSRange(location: next, length: text.length - next)
             }
         }
+    }
+
+    /// A comment box under its lines: an accent bar, the title, the text.
+    private func drawAnnotation(_ note: ReviewAnnotation, in rect: NSRect) {
+        let box = NSRect(x: gutterWidth + 4, y: rect.minY + 4, width: rect.width - gutterWidth - 16, height: rect.height - 8)
+        (note.stale ? NSColor.systemOrange : NSColor.controlAccentColor).withAlphaComponent(0.10).setFill()
+        NSBezierPath(roundedRect: box, xRadius: 6, yRadius: 6).fill()
+        (note.stale ? NSColor.systemOrange : NSColor.controlAccentColor).setFill()
+        NSRect(x: box.minX, y: box.minY, width: 3, height: box.height).fill()
+        let titleAttributes: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 11, weight: .semibold), .foregroundColor: look.lineNumber]
+        (note.title as NSString).draw(at: NSPoint(x: box.minX + 12, y: box.minY + 5), withAttributes: titleAttributes)
+        let body = NSRect(x: box.minX + 12, y: box.minY + lineHeight + 6, width: box.width - 24, height: box.height - lineHeight - 8)
+        (note.text as NSString).draw(with: body, options: [.usesLineFragmentOrigin],
+                                     attributes: [.font: NSFont.systemFont(ofSize: 12), .foregroundColor: look.foreground])
     }
 
     private func number(_ value: Int, rightAt x: CGFloat, y: CGFloat) {
