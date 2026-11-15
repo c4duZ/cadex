@@ -26,9 +26,15 @@ enum AuthorshipHub {
         return tracker
     }
 
+    private static var swept = false
+
     /// The setting: the hook in the kit, or not (then nothing is kept either).
     static func apply(_ enabled: Bool) {
         on = enabled
+        if !swept {
+            swept = true
+            ReviewAuthorshipTracker.sweep()
+        }
         let kit = SessionKit.shared
         guard enabled, let tools = kit.toolsPath else { return kit.withdraw("review") }
         let command = "'" + tools.replacingOccurrences(of: "'", with: "'\\''") + "' hook PostToolUse"

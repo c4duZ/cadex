@@ -22,7 +22,9 @@ public final class ReviewAuthorshipTracker {
         self.root = root
         let store = ReviewCommentStore(repo: repo, worktree: worktree + "-authorship", dir: dir)
         file = store.path
-        versions = (store.path as NSString).deletingPathExtension.replacingOccurrences(of: "-authorship", with: "-versions")
+        // Only the name's ending changes: a folder called "-authorship"
+        // elsewhere in the path broke it (found by the test, 2026-11-15).
+        versions = String((store.path as NSString).deletingPathExtension.dropLast("-authorship".count)) + "-versions"
         if let data = FileManager.default.contents(atPath: file), let read = try? JSONDecoder().decode([String: FileAuthorship].self, from: data) { files = read }
     }
 
@@ -79,6 +81,7 @@ public final class ReviewAuthorshipTracker {
     public func forget() {
         try? FileManager.default.removeItem(atPath: file)
         try? FileManager.default.removeItem(atPath: versions)
+        try? FileManager.default.removeItem(atPath: rootFile)
         files = [:]
         onChange?()
     }
@@ -126,8 +129,32 @@ public final class ReviewAuthorshipTracker {
         try? data.write(to: URL(fileURLWithPath: versionPath(relative)), options: .atomic)
     }
 
+    /// Beside the authorship, the worktree's folder: the sweep at launch
+    /// forgets the ones removed outside Cadex (git worktree remove).
+    var rootFile: String { (file as NSString).deletingPathExtension + ".root" }
+
+    /// At launch: every worktree whose folder is gone loses its
+    /// authorship and kept versions (they live only while it exists).
+    public static func sweep(dir: String? = nil) {
+        let root = dir ?? ProcessInfo.processInfo.environment["CADEX_REVIEW_DIR"]
+            ?? (NSHomeDirectory() + "/Library/Application Support/Cadex/review")
+        let fm = FileManager.default
+        for repo in (try? fm.contentsOfDirectory(atPath: root)) ?? [] {
+            let folder = root + "/" + repo
+            for name in (try? fm.contentsOfDirectory(atPath: folder)) ?? [] where name.hasSuffix("-authorship.root") {
+                let marker = folder + "/" + name
+                guard let worktree = try? String(contentsOfFile: marker, encoding: .utf8), !fm.fileExists(atPath: worktree) else { continue }
+                let base = String(marker.dropLast(".root".count))
+                try? fm.removeItem(atPath: base + ".json")
+                try? fm.removeItem(atPath: String(base.dropLast("-authorship".count)) + "-versions")
+                try? fm.removeItem(atPath: marker)
+            }
+        }
+    }
+
     private func save() {
         try? FileManager.default.createDirectory(atPath: (file as NSString).deletingLastPathComponent, withIntermediateDirectories: true)
+        try? root.write(toFile: rootFile, atomically: true, encoding: .utf8)
         if let data = try? JSONEncoder().encode(files) { try? data.write(to: URL(fileURLWithPath: file), options: .atomic) }
         onChange?()
     }

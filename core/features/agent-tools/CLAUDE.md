@@ -40,8 +40,9 @@
   também volta como imagem.
 - Plano 21, fase E (`../../../docs/adr/0027-local-authorship.md`): `edits.zig` corta o PostToolUse
   antes do socket: a sessão, a pasta, a ferramenta, o arquivo e os intervalos de linhas escritas,
-  tirados do `structuredPatch` (o `newStart` e as linhas `+`); um Write que cria marca o arquivo
-  inteiro; nunca o arquivo (`originalFile`) nem o texto das linhas.
+  tirados do `structuredPatch` (o `newStart` e as linhas `+`); um Write sem patch (o que cria)
+  marca o arquivo inteiro, o que reescreve traz patch; nunca o arquivo (`originalFile`) nem o texto
+  das linhas.
 - O build (`../../build.zig`, `addCli`) instala `zig-out/bin/cadex` só no Mac; o empacotamento o põe em
   Contents/Helpers.
 

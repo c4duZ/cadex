@@ -31,7 +31,8 @@
   edição do agente marca as linhas dele; a mudança no disco sem evento compara com a última versão
   e passa as linhas tocadas ao dono; guarda em `<worktree>-authorship.json` (intervalos, nunca
   texto) e as últimas versões em `<worktree>-versions/` só enquanto a worktree existe, até 2 MB por
-  arquivo e 50 MB por worktree (passou, o arquivo para); exportar e esquecer.
+  arquivo e 50 MB por worktree (passou, o arquivo para); exportar e esquecer; ao lado, um `.root`
+  com a pasta da worktree, para a varredura da abertura (`sweep`) esquecer as removidas fora do Cadex.
   `ReviewAuthorshipCommands.swift`: review.toggle-authorship e review.export-authorship. A ligação:
   `../../app/ReviewAuthorshipWiring.swift`.
 

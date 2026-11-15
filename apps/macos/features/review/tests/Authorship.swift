@@ -39,7 +39,11 @@ let authorshipChecks: [(name: String, body: Checks.Body)] = [
         expect(tracker.files["big.txt"]?.stopped == true)
         let exported = tracker.export().flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
         expect((exported?["files"] as? [[String: Any]])?.count == 3)
-        tracker.forget()
-        expect(!FileManager.default.fileExists(atPath: dir + "/store/app/wt-authorship.json"))
+        // Removed outside Cadex: the sweep at launch forgets it.
+        expect(FileManager.default.fileExists(atPath: dir + "/store/app/wt-versions"))
+        try? FileManager.default.removeItem(atPath: root)
+        ReviewAuthorshipTracker.sweep(dir: dir + "/store")
+        expect(!FileManager.default.fileExists(atPath: dir + "/store/app/wt-authorship.json")
+               && !FileManager.default.fileExists(atPath: dir + "/store/app/wt-versions"), "swept")
     }),
 ]

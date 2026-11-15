@@ -168,7 +168,12 @@ docs/adr/0021-cadex-managed-accounts.md e docs/adr/0022-terminal-daemon.md (plan
     socket vão só os intervalos de linhas, calculados no `cadex hook` (`core/features/agent-tools/edits.zig`),
     nem o patch, ainda menos que o plano pedia. Conferido de ponta a ponta: o `claude` real editou e
     escreveu numa worktree, o app de release gravou as linhas dele e o Notes.md inteiro, e uma edição
-    do dono no disco tirou a marca da linha que tocou.
+    do dono no disco tirou a marca da linha que tocou. A conferência contra o plano achou e corrigiu:
+    "Write sem patch" ficou "Write de criação" (o Write que reescreve traz patch, conferido, e o sem
+    patch agora marca inteiro); as versões de uma worktree removida fora do Cadex ficavam no disco
+    (agora a abertura do app as varre); o caminho das versões quebrava com "-authorship" em outra
+    pasta do caminho; o tooltip definido no hover não aparecia (agora responde pelo ponto). O dono é
+    quem não tem marca: a lista guarda os intervalos do agente.
 - **F. Peso e fechamento.** Cenário no `tools/perf/run.py`: uma worktree falsa com 50 arquivos e 5
   mil linhas mudadas, a aba de revisão aberta e rolando, 20 comentários e autoria ligada com 200
   eventos falsos; limites de memória e tempo para abrir escritos ao lado com o motivo; tudo

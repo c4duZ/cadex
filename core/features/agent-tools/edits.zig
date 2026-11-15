@@ -19,10 +19,12 @@ pub fn trimmed(gpa: std.mem.Allocator, payload: std.json.Value) ![]u8 {
     const tool = string(root.get("tool_name")) orelse "";
     const file = string(fieldOf(input, "file_path")) orelse string(fieldOf(input, "notebook_path")) orelse string(fieldOf(response, "filePath")) orelse "";
     const patch = fieldOf(response, "structuredPatch");
-    const created = std.mem.eql(u8, string(fieldOf(response, "type")) orelse "", "create");
+    // A Write with no patch (one that makes the file) is the agent's whole
+    // file; a Write over a file comes with a patch (checked 2026-11-15).
+    const patchless = if (patch) |p| (p != .array or p.array.items.len == 0) else true;
     try out.print(gpa, "{{\"session_id\":{f},\"cwd\":{f},\"tool_name\":{f},\"file\":{f},\"whole\":{},\"lines\":[", .{
         std.json.fmt(string(root.get("session_id")) orelse "", .{}), std.json.fmt(string(root.get("cwd")) orelse "", .{}),
-        std.json.fmt(tool, .{}), std.json.fmt(file, .{}), created and std.mem.eql(u8, tool, "Write"),
+        std.json.fmt(tool, .{}), std.json.fmt(file, .{}), patchless and std.mem.eql(u8, tool, "Write"),
     });
     if (patch) |p| try ranges(gpa, &out, p);
     try out.appendSlice(gpa, "]}");
