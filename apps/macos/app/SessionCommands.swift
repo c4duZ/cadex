@@ -89,6 +89,11 @@ extension WindowSession {
                                                customize: { [weak self] in self?.openCustomize("accounts") }))
         commands.register(AgentAccountCommands.commands(palette: palette, actions: accountActions()))
         commands.register(Command(
+            id: "agents.show-history", title: T("Show Agent History", "Mostrar o histórico dos agentes"),
+            keywords: ["history", "conversations", "resume", "claude", "histórico", "conversas", "retomar"], category: .view,
+            action: .run { [weak self] in self?.workspace?.showSidebar("agent-history") }))
+        commands.register(AgentHistoryCommands.commands(palette: palette, actions: historyActions(), accountName: Self.accountName))
+        commands.register(Command(
             id: "agents.test-notifications", title: T("Send Test Notifications", "Mandar notificações de teste"),
             keywords: ["notifications", "agents", "test", "notificações", "teste", "avisos"], category: .view,
             action: .run { [weak self] in self?.sendTestNotifications() }))

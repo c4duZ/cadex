@@ -111,7 +111,7 @@ public struct Settings: Equatable, Sendable {
     public struct Sidebar: Equatable, Sendable {
         /// The icons on top of the sidebar, in order; a page left out is
         /// hidden (docs/spec/sidebar.md). The app drops unknown ids.
-        public var items = ["files", "git", "agents", "accounts"]
+        public var items = ["files", "git", "agents", "agent-history", "accounts"]
     }
 
     public struct Agents: Equatable, Sendable {
@@ -143,6 +143,9 @@ public struct Settings: Equatable, Sendable {
         /// (Claude Code's --dangerously-skip-permissions, Codex's
         /// --dangerously-bypass-approvals-and-sandbox). Off by default.
         public var launchSkipPermissions = false
+        /// Index every account's conversations for the History page (plan 18,
+        /// phase D). Off: nothing indexed or watched.
+        public var history = true
         /// The account of the new sessions Cadex opens ("~/.claude-work");
         /// empty is the default account (docs/spec/agents.md, Contas gerenciadas).
         public var activeAccount = ""

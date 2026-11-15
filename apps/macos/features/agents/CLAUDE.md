@@ -96,6 +96,17 @@
   O item Agent usage escolhe a conta ativa no clique direito (`AgentUsageStrip.swift`, "New
   Sessions Use"). AgentNewSession.account: a conta de uma sessão nova (a do projeto, a ativa, a padrão).
   AgentAccount.find inclui as contas criadas pelo Cadex quando já têm .claude.json.
+- O histórico (plano 18, fase D): `AgentHistory.swift` (`AgentHistoryEntry`, uma conversa com a
+  pasta, o branch, as datas, os títulos e a origem; `AgentHistoryReader`, que lê só o acrescentado,
+  em pedaços com o próprio autorelease pool, acha o fim de linha com memchr, olha o nível de cima da
+  linha pelos bytes antes de montar o JSON, pula linha acima de 64 KB e nunca guarda resultado de
+  ferramenta), `AgentHistoryStore.swift` (o índice no `../../shared/text-index/`, uma fila só, lê o
+  que cresceu e esquece o que sumiu), `AgentHistoryController.swift` (vigia as pastas projects/ das
+  contas só com alguém olhando; `AgentHistoryLaunch`, os comandos de retomar e continuar com o kit),
+  `AgentHistoryList.swift` (filtro e grupos puros, `AgentHistoryRows`, e a tabela que só desenha o
+  que aparece), `AgentHistoryView.swift` (a página, com busca, escopo e agrupamento) e
+  `AgentHistoryCommands.swift` (agents.resume-session, -continue-in-account, -copy-resume-command e
+  -reveal-session-log, com a lista de conversas no ⌘K). agents.history é o `isEnabled`.
 - A conversa de um subagente numa aba (`AgentTranscriptDocument.swift`, um `TabDocument`): só pelo
   clique num subagente (`onOpenSubagent`). `AgentTranscript.swift` lê o log em pedaços, só o novo,
   e nunca guarda um resultado longo (prévia dos primeiros 4 KB, linhas contadas);

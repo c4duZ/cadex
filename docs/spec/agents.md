@@ -129,23 +129,35 @@ continua uma conversa em outra conta, sem nunca tocar em token
   projeto que apontavam para ela. As contas de antes não são removidas: elas se escondem.
 
 ### Histórico
-- A página History, ao lado de Sessions, lista todas as conversas de todas as contas: título (o que o
-  Claude deu, ou o primeiro prompt), pasta, branch, conta e data. A pasta é a de onde a conversa
-  rodou (uma conversa do repositório retomada numa worktree aparece na worktree).
-- Busca por título, pasta, branch e trecho das mensagens; agrupa por projeto, pasta ou conta; escopo
-  projeto atual ou tudo.
-- "Resume" (agents.resume-session) abre uma aba na pasta original e digita `claude --resume <id>`
-  na conta dona, com o kit da sessão. Sem prompt: o Cadex só digita o comando.
-- "Continue in Another Account" (agents.continue-in-account) escolhe a conta e digita
-  `claude --resume <caminho da conversa> --fork-session` nela: a outra conta recebe a conversa
-  inteira e grava a cópia na pasta dela; o original fica intacto. A cópia lembra de onde veio, e a
-  conversa de um subagente dela é procurada também na conta de origem, onde ficou.
-- Também: "Copy Resume Command" (agents.copy-resume-command), "Reveal Session Log"
-  (agents.reveal-session-log) e abrir a pasta da conversa no workspace.
-- Peso: o índice lê só o que foi acrescentado a cada arquivo, em pedaços fora da linha principal, e
-  nunca guarda resultado de ferramenta. Vigia as pastas de conversas só com a página aberta;
-  fechada, o índice fica em disco e nada roda. agents.history (ligada) desliga tudo: nada indexado
-  nem vigiado.
+- A página History (agents.show-history), ao lado de Sessions, lista todas as conversas de todas as
+  contas: título (o que você deu com /rename, senão o que o Claude deu, senão o primeiro pedido),
+  e embaixo pasta · branch · conta · há quanto tempo. A pasta é a de onde a conversa rodou (uma
+  conversa do repositório retomada numa worktree aparece na worktree). Conversa sem mensagem
+  nenhuma (aberta e fechada) não aparece. O primeiro pedido nunca é o resumo de uma compactação nem
+  a marca do Esc.
+- Busca por título, pasta, branch e trecho do que foi dito (as palavras como começo de palavra, sem
+  acento nem caixa); agrupa por projeto (raiz git), pasta ou conta; escopo "This Project" (o projeto
+  da janela) ou "All Projects".
+- Duplo clique ou "Resume" (agents.resume-session) abre uma aba na pasta original (ou na pessoal, se
+  ela sumiu) e digita `claude --resume <id>` na conta dona, com o kit da sessão. Sem prompt: o Cadex
+  só digita o comando.
+- "Continue in Another Account…" (agents.continue-in-account) escolhe a conta no ⌘K e digita
+  `claude --resume <caminho da conversa> --fork-session` nela: a outra conta recebe a conversa e
+  grava a cópia na pasta dela; o original fica intacto. Numa pasta que a outra conta ainda não
+  confia, o próprio Claude Code pergunta antes. A cópia mostra a mesma conversa e o índice guarda de
+  onde ela veio: as linhas copiadas levam o id da origem (em `sessionId` nas versões antigas, em
+  `session_id` na primeira mensagem no 2.1.325); a conversa de um subagente dela é procurada também
+  na conta de origem, onde ficou.
+- Também no clique direito e no ⌘K: "Copy Resume Command" (agents.copy-resume-command, com o `cd`
+  para a pasta), "Reveal Session Log" (agents.reveal-session-log, no Finder) e abrir a pasta da
+  conversa no workspace. Pelo ⌘K, cada um abre a lista de conversas, buscada como a página.
+- Peso: o índice (SQLite do sistema com FTS5, `~/Library/Application Support/Cadex/history.sqlite`)
+  lê só o que foi acrescentado a cada arquivo, em pedaços fora da linha principal, nunca monta o JSON
+  de linha que não interessa e nunca guarda resultado de ferramenta. A primeira leitura das contas do
+  dono (236 conversas, 2,5 GB) levou 13 s com 97 MB de pico; depois, 0,01 s por passada (2026-11-14).
+  Enquanto a primeira roda, a página diz "Indexing 120 of 236". Vigia as pastas de conversas só com
+  a página (ou a lista do ⌘K) aberta; fechada, o índice fica em disco e nada roda. agents.history
+  (ligada) desliga tudo: nada indexado nem vigiado.
 
 ### Notificações
 - Quando uma sessão que trabalhava passa a esperar você, o Cadex manda uma notificação do sistema,
@@ -261,7 +273,11 @@ continua uma conversa em outra conta, sem nunca tocar em token
 - [x] Uma skill nova em `~/.claude/skills` aparece na conta gerenciada sem nada a fazer (teste com
       pasta pessoal falsa; o link de pasta inteira já carregava skills no teste de 2026-11-14).
 - [ ] Nenhuma conta que já existia muda de lugar nem perde o login; nenhum `.claude.json` muda.
-- [ ] History mostra as sessões de duas contas nos projetos certos; "Resume" abre na conta dona.
-- [ ] "Continue in Another Account" continua a conversa (a outra conta lembra o que foi dito), o
-      arquivo original fica com o mesmo hash e a cópia vai para a pasta da outra conta.
-- [ ] Um transcript crescendo só tem o trecho novo lido; formato desconhecido é pulado sem travar.
+- [x] History mostra as sessões de duas contas nos projetos certos; "Resume" abre na conta dona
+      (as 236 conversas das quatro contas do dono; a conversa da bhband reaberta nela, 2026-11-14).
+- [x] "Continue in Another Account" continua a conversa (a outra conta lembra o que foi dito), o
+      arquivo original fica com o mesmo hash e a cópia vai para a pasta da outra conta (GIRASSOL-47
+      lembrado na bkdg; e uma conversa longa, 198 pedidos e três compactações: a cópia levou tudo o
+      que a conta original carregaria, 2026-11-14).
+- [x] Um transcript crescendo só tem o trecho novo lido; formato desconhecido é pulado sem travar
+      (testes; nas contas do dono, nenhuma linha ilegível).

@@ -155,6 +155,20 @@ public enum AgentAccountCommands {
     }
 }
 
+/// ⌘K's list of accounts for a choice another feature's action needs
+/// ("Continue in another account").
+public enum AgentAccountPicker {
+    @MainActor
+    public static func open(palette: CommandPaletteController, accounts: [AgentAccount], placeholder: String,
+                            choose: @escaping @MainActor (AgentAccount) -> Void) {
+        palette.open(AgentChoiceSource(placeholder: placeholder, empty: T("No other account in use", "Nenhuma outra conta em uso"), items: {
+            accounts.map { PaletteItem(id: $0.dir, title: $0.name, detail: "~/" + ($0.dir as NSString).lastPathComponent, icon: .gauge) }
+        }) { dir in
+            if let account = accounts.first(where: { $0.dir == dir }) { choose(account) }
+        })
+    }
+}
+
 /// A ⌘K list of choices for one command.
 @MainActor
 final class AgentChoiceSource: PaletteSource {

@@ -107,10 +107,17 @@ let package = Package(
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
+        // Full-text search in one SQLite file, the system's own with FTS5 (agents' history, memory).
+        .target(
+            name: "TextIndex",
+            path: "shared/text-index",
+            exclude: ["CLAUDE.md", "tests"],
+            linkerSettings: [.linkedLibrary("sqlite3")]
+        ),
         // The agents running on this Mac, read only (docs/adr/0019-agents-observe-only.md).
         .target(
             name: "Agents",
-            dependencies: ["CommandPalette", "Icons", "Menus", "SessionKit", "Strings", "Tabs", "UILooks"],
+            dependencies: ["CommandPalette", "Icons", "Menus", "SessionKit", "Strings", "Tabs", "TextIndex", "UILooks"],
             path: "features/agents",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -393,6 +400,11 @@ let package = Package(
             dependencies: ["Icons", "Checks"],
             path: "shared/icons/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+        .executableTarget(
+            name: "TextIndexTests",
+            dependencies: ["TextIndex", "Checks"],
+            path: "shared/text-index/tests"
         ),
         .executableTarget(
             name: "SessionKitTests",

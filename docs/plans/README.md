@@ -47,7 +47,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 
 | # | plano | entrega | status |
 |---|---|---|---|
-| 18 | `docs/plans/18-accounts-and-sessions.md` | contas em pastas do Cadex, configuração por link, uso sem token, histórico unificado e continuar em outra conta | A e B feitas; C no código e conferida até o /login (falta o login do dono) |
+| 18 | `docs/plans/18-accounts-and-sessions.md` | contas em pastas do Cadex, configuração por link, uso sem token, histórico unificado e continuar em outra conta | A, B e D feitas; C conferida até o /login (falta o login do dono) |
 | 19 | `docs/plans/19-agent-sessions-and-worktrees.md` | worktree por tarefa, estado por hooks, quadro "Precisa de você", daemon do terminal, hibernar | escrito |
 | 20 | `docs/plans/20-agent-drives-cadex.md` | CLI `cadex` e skills, preview como navegador do agente, computer use | escrito |
 | 21 | `docs/plans/21-review.md` | diff de revisão, comentar no diff e mandar em lote, autoria por linha | escrito |
