@@ -43,6 +43,39 @@ e pull. Os agentes mexem no código pelo terminal; aqui se confere e se faz o co
 - Arquivo binário: "Arquivo binário, sem diff". Arquivo acima de 2 MB: "Arquivo grande demais para o
   diff" com "Abrir o arquivo".
 
+### Diff contra base (plano 21)
+- O diff de uma worktree inteira contra uma base, que a aba de revisão mostra (`review.md`): as
+  mudanças commitadas desde a base, as staged, as não staged e os arquivos novos, numa lista de
+  arquivos com os trechos de cada um.
+- A base padrão é o merge-base entre a worktree e o branch de partida que o New Task gravou
+  (`worktrees.md`); sem ele, o merge-base com a branch padrão do repositório. Qualquer commit ou
+  branch serve de base.
+- Também o diff entre as pontas de duas worktrees (dois branches), para comparar duas tentativas da
+  mesma tarefa.
+- Calculado fora da linha principal, pelo binário `git`, com o tempo limite de sempre.
+
+### Stage parcial (plano 21)
+- Stage e unstage de um trecho ou de linhas escolhidas de um trecho, na aba de revisão: só aquelas
+  linhas entram (ou saem) do índice; o resto do arquivo fica como estava.
+- Arquivo novo: a primeira linha posta no stage faz o git conhecer o arquivo, e só ela entra.
+- Pelo `git`, dentro do workspace autorizado. O git recusou (o arquivo mudou embaixo): a mensagem
+  dele, e o diff é recalculado.
+
+### Imagem (plano 21)
+- Imagem mudada (png, jpg, gif, webp, heic, pdf de uma página) mostra antes e depois em três modos
+  (git.review-image-mode): lado a lado, deslizar (uma barra separa antes e depois) e sobrepor (com
+  opacidade). Tamanho e dimensões dos dois lados embaixo.
+- Imagem nova ou apagada: só o lado que existe. Acima de 20 MB: só os tamanhos e "Abrir o arquivo".
+
+### Conflito em três vias (plano 21)
+- Arquivo em conflito (U) abre em três colunas, a base comum, a nossa versão e a deles, e o
+  resultado embaixo, editável.
+- Por bloco em conflito: "Ficar com a nossa" (git.accept-ours), "Ficar com a deles"
+  (git.accept-theirs), "As duas" (git.accept-both, a nossa e depois a deles) ou editar à mão no
+  resultado.
+- "Marcar resolvido" (git.mark-resolved) grava o resultado e faz o stage. Se ainda houver marcador de
+  conflito (`<<<<<<<`, `=======`, `>>>>>>>`) no resultado, recusa com aviso dizendo a linha.
+
 ### Menu de contexto
 - No menu do app (como o do explorer), só o que vale para os arquivos clicados, nada apagado (o
   dono, 2026-10-20): "Abrir o arquivo", "Abrir ao lado" e "Abrir em nova aba"; "Ver o diff", "Ver o
@@ -84,3 +117,10 @@ e pull. Os agentes mexem no código pelo terminal; aqui se confere e se faz o co
 - [x] O painel atualiza depois de um commit feito no terminal.
 - [x] O explorer marca os alterados.
 - [x] O diff lado a lado mostra removidas e adicionadas com destaque de sintaxe.
+- [ ] O diff contra base de uma worktree traz commitadas, staged, não staged e novas; o diff entre
+      duas worktrees traz o que difere nas pontas.
+- [ ] Stage de duas linhas de um trecho põe só elas no índice; unstage as tira; num arquivo novo,
+      só a linha escolhida entra.
+- [ ] Uma imagem mudada aparece lado a lado, com a barra de deslizar e sobreposta.
+- [ ] Um conflito resolvido bloco a bloco ("nossa" num, "deles" noutro) grava o resultado e faz o
+      stage; com um marcador sobrando, "Marcar resolvido" recusa.

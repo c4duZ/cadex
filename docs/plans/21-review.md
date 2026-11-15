@@ -51,6 +51,10 @@ docs/adr/0021-cadex-managed-accounts.md e docs/adr/0022-terminal-daemon.md (plan
     envio, autoria, estados e critérios. `docs/spec/source-control.md` ganha Diff contra base,
     Stage parcial, Imagem e Conflito em três vias.
   - Termos no `docs/CONTEXT.md`: Revisão, Base da revisão, Comentário de revisão, Autoria.
+  - Feita em 2026-11-15: a ADR 0027, `docs/spec/review.md` (aba, comentários, envio, autoria) e
+    `docs/spec/source-control.md` (Diff contra base, Stage parcial, Imagem, Conflito em três vias),
+    os quatro termos. O New Task do plano 19 grava o branch de partida, não um commit: a base padrão
+    é o merge-base com ele, e assim continua certa quando o branch anda.
 - **B1. Diff de revisão no núcleo** (`core/features/source-control/`), uma sessão:
   - diff.zig ganha o diff de uma worktree contra uma base: a base é o ponto de partida gravado
     pelo plano 19 (worktrees.new-task); sem ele, o merge-base com a branch padrão; trocar para

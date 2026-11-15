@@ -137,3 +137,11 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Grafo** (`git graph`): o desenho das linhas de commits e merges no histórico.
 - **Faixa** (`lane`): uma coluna do grafo, que espera um commit; o primeiro pai continua a faixa,
   os outros pais de um merge abrem ou encontram outra.
+- **Revisão** (`review`): a aba que mostra todas as mudanças de uma worktree juntas, contra a base,
+  para o dono ler, comentar e fazer stage antes de aceitar o trabalho do agente.
+- **Base da revisão** (`review base`): o commit contra o qual a revisão compara; por padrão, o ponto
+  onde a tarefa saiu do branch de partida (o merge-base com ele).
+- **Comentário de revisão** (`review comment`): uma nota do dono presa a uma linha ou a um intervalo
+  do diff, que vai ao agente junto com as outras, num texto só.
+- **Autoria** (`authorship`): quem escreveu cada linha, o agente ou o dono, gravada só no Cadex a
+  partir das edições dos agentes que ele abriu.
