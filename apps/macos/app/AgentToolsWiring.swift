@@ -30,8 +30,13 @@ extension AppDelegate {
             AgentToolsActivity.shared.record(kitSession: request.kitSession, session: session, command: id, ok: false)
             return .failed("\(id) is not allowed for agents")
         }
-        let asked = CommandRequest(arguments: request.arguments, folder: found.terminal.currentDirectory ?? NSHomeDirectory(),
-                                   terminal: Self.key(found.terminal), session: session)
+        // The agent's folder, symlinks resolved (/tmp is /private/tmp, and git
+        // answers the resolved one: found 2026-11-15), and authorized: the
+        // core runs git only in authorized folders, and the agent's shell is
+        // there already.
+        let folder = Self.resolved(found.terminal.currentDirectory ?? NSHomeDirectory())
+        WorkspaceFolder.allow(folder)
+        let asked = CommandRequest(arguments: request.arguments, folder: folder, terminal: Self.key(found.terminal), session: session)
         let answer = found.window.commands.run(id, request: asked)
         switch answer {
         case .ok(let text):
@@ -49,6 +54,10 @@ extension AppDelegate {
         let byKit = locate { $0.agentResume?.kitSession == request.kitSession }
         let found = byKit ?? locate { request.pids.contains($0.foregroundGroup) }
         return found.map { ($0.window, $0.terminal) }
+    }
+
+    static func resolved(_ path: String) -> String {
+        URL(fileURLWithPath: path).resolvingSymlinksInPath().path
     }
 
     /// `cadex commands`: what the agent may run, with its arguments.
@@ -75,8 +84,8 @@ extension WindowSession {
     /// that folder, or the folder): nil and the reason otherwise.
     private func agentPath(_ given: String?, _ request: CommandRequest) -> (path: String, root: String)? {
         guard let given, !given.isEmpty else { return nil }
-        let root = WorktreesCore.repository(of: request.folder) ?? request.folder
-        let path = ((given.hasPrefix("/") ? given : (request.folder as NSString).appendingPathComponent(given)) as NSString).standardizingPath
+        let root = AppDelegate.resolved(WorktreesCore.repository(of: request.folder) ?? request.folder)
+        let path = AppDelegate.resolved(((given.hasPrefix("/") ? given : (request.folder as NSString).appendingPathComponent(given)) as NSString).standardizingPath)
         guard path == root || path.hasPrefix(root + "/") else { return nil }
         return (path, root)
     }
@@ -85,12 +94,13 @@ extension WindowSession {
         guard let found = agentPath(request["path"], request) else { return .failed("path=<file> inside this task is needed") }
         guard FileManager.default.fileExists(atPath: found.path) else { return .failed("no such file: \(request["path"] ?? "")") }
         WorkspaceFolder.allow(found.root)
+        besideAgent(request)
         opener?.open(found.path, line: request["line"].flatMap(Int.init), beside: true)
         return .ok("opened \(request["path"] ?? found.path)")
     }
 
     private func agentOpenDiff(_ request: CommandRequest) -> CommandReply {
-        guard let root = WorktreesCore.repository(of: request.folder) else { return .failed("this terminal is not in a git repository") }
+        guard let root = WorktreesCore.repository(of: request.folder).map(AppDelegate.resolved) else { return .failed("this terminal is not in a git repository") }
         guard request["path"] != nil else {
             folder.open(root)
             workspace?.showSidebar("git")
@@ -98,6 +108,7 @@ extension WindowSession {
         }
         guard let found = agentPath(request["path"], request) else { return .failed("the file must be inside this task") }
         let relative = String(found.path.dropFirst(root.count + 1))
+        besideAgent(request)
         opener?.openDiff(.init(repo: root, path: relative, orig: relative, staged: false), beside: true)
         return .ok("opened the diff of \(relative)")
     }
@@ -120,8 +131,18 @@ extension WindowSession {
         let local = ["localhost", "127.", "0.0.0.0", "[::1]"].contains { given.hasPrefix($0) }
         let url = given.contains("://") ? given : (local ? "http://" : "https://") + given
         guard let scheme = URL(string: url)?.scheme, ["http", "https"].contains(scheme) else { return .failed("only http and https pages open in the preview") }
+        besideAgent(request)
         openPreview(url, beside: true)
         return .ok("opened \(url) in the preview")
+    }
+
+    /// What the agent opens goes beside its terminal (docs/spec/agent-tools.md):
+    /// that terminal's space and tab come forward in this window, its pane
+    /// takes the focus; the window does not jump in front of the owner's work.
+    private func besideAgent(_ request: CommandRequest) {
+        guard let found = app.locate({ AppDelegate.key($0) == request.terminal }), found.window === self else { return }
+        spaces?.select(found.space)
+        tabs?.focus(found.terminal)
     }
 
     /// agent-tools.show-sessions: the sessions that used the Cadex and their last request.

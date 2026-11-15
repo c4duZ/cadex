@@ -90,15 +90,18 @@ pub fn send(gpa: std.mem.Allocator, id: ?[]const u8, args: []const Arg) !Reply {
 // pbi_ppid is at byte 16 of 136 (measured with clang, 2026-11-15).
 extern "c" fn proc_pidinfo(pid: c_int, flavor: c_int, arg: u64, buffer: ?*anyopaque, size: c_int) c_int;
 extern "c" fn getppid() c_int;
+extern "c" fn getpid() c_int;
 const PROC_PIDTBSDINFO: c_int = 3;
 const bsdinfo_size = 136;
 const ppid_offset = 16;
 
-/// This process's parent, its parent and so on, up to launchd or `out`'s
-/// size: the agent's `claude` is one of them (its Bash tool runs a shell).
+/// This process, its parent, its parent and so on, up to launchd or
+/// `out`'s size: the agent's `claude` is one of them (its Bash tool runs a
+/// shell), or, typed at a terminal's shell, `cadex` itself leads the
+/// terminal's foreground group (found 2026-11-15).
 pub fn ancestors(out: []c_int) []const c_int {
     var n: usize = 0;
-    var pid = getppid();
+    var pid = getpid();
     while (pid > 1 and n < out.len) {
         out[n] = pid;
         n += 1;
@@ -134,8 +137,8 @@ test "the app's answer: the result, the error, or a line that is not JSON" {
     try testing.expect(!odd.ok and std.mem.eql(u8, odd.text, "garbage"));
 }
 
-test "the pids above this process start with its parent" {
+test "the pids start with this process, then its parent" {
     var buf: [12]c_int = undefined;
     const pids = ancestors(&buf);
-    try testing.expect(pids.len >= 1 and pids[0] == getppid());
+    try testing.expect(pids.len >= 2 and pids[0] == getpid() and pids[1] == getppid());
 }
