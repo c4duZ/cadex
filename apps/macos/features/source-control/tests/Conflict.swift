@@ -86,6 +86,12 @@ let conflictChecks: [(name: String, body: Checks.Body)] = [
         expect(drawn, "the panel's diff shows the image")
         diff.cycleImageMode()
         expect(diff.imageMode == .slide && diff.imageView?.mode == .slide)
+        // Above 20 MB: no image, the sizes.
+        var big = review.files[0]
+        big.afterData = Data(count: ImageDiffView.maxBytes + 1)
+        expect(!big.showsImage)
+        let layout = ReviewLayout(files: [big], options: .init()) { _ in "sizes" }
+        expect(layout.rows == [.header(file: 0), .note(file: 0, text: "sizes")])
         let text = ImageDiffView.describe("After", png(.blue, size: 16), NSImage(data: png(.blue, size: 16)))
         expect(text.hasPrefix("After: 16×16"), text)
     }),

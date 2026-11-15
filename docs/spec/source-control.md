@@ -117,10 +117,12 @@ e pull. Os agentes mexem no código pelo terminal; aqui se confere e se faz o co
 - [x] O painel atualiza depois de um commit feito no terminal.
 - [x] O explorer marca os alterados.
 - [x] O diff lado a lado mostra removidas e adicionadas com destaque de sintaxe.
-- [ ] O diff contra base de uma worktree traz commitadas, staged, não staged e novas; o diff entre
-      duas worktrees traz o que difere nas pontas.
-- [ ] Stage de duas linhas de um trecho põe só elas no índice; unstage as tira; num arquivo novo,
-      só a linha escolhida entra.
-- [ ] Uma imagem mudada aparece lado a lado, com a barra de deslizar e sobreposta.
-- [ ] Um conflito resolvido bloco a bloco ("nossa" num, "deles" noutro) grava o resultado e faz o
-      stage; com um marcador sobrando, "Marcar resolvido" recusa.
+- [x] O diff contra base de uma worktree traz commitadas, staged, não staged e novas; o diff entre
+      duas worktrees traz o que difere nas pontas (`core/features/source-control/review_test.zig`).
+- [x] Stage de duas linhas de um trecho põe só elas no índice; unstage as tira; num arquivo novo,
+      só a linha escolhida entra (o mesmo teste, e no app de release a mudança do cursor).
+- [x] Uma imagem mudada aparece lado a lado, com a barra de deslizar e sobreposta (conferido no app
+      de release, 2026-11-15).
+- [x] Um conflito resolvido bloco a bloco ("nossa" num, "deles" noutro) grava o resultado e faz o
+      stage; com um marcador sobrando, "Marcar resolvido" recusa (dois blocos no teste do núcleo; no
+      app de release, "A deles" e "Marcar resolvido").

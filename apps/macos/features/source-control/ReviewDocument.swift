@@ -154,6 +154,12 @@ public final class ReviewDocument: TabDocument {
             // Short: the note is one line (the long one was cut, 2026-11-15).
             if diff.file.status == "U" { return T("Merge conflict · right-click it on the left: Resolve Conflict",
                                                     "Conflito de merge · clique direito nele à esquerda: Resolver o conflito") }
+            // An image too big to compare: its sizes, and Open File on the left (plan 21 phase C).
+            if diff.beforeData != nil || diff.afterData != nil {
+                let sizes = [ImageDiffView.describe(T("before", "antes"), diff.beforeData, nil), ImageDiffView.describe(T("after", "depois"), diff.afterData, nil)]
+                return T("Image too large to compare (\(sizes.joined(separator: ", "))) · right-click it on the left: Open File",
+                         "Imagem grande demais para comparar (\(sizes.joined(separator: ", "))) · clique direito à esquerda: Abrir o arquivo")
+            }
             if diff.binary { return T("Binary file", "Arquivo binário") }
             if diff.tooLarge { return T("File too large to diff", "Arquivo grande demais para o diff") }
             // No hunk: a rename or a mode change, with the same content.
