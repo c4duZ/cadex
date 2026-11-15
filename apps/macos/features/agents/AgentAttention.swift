@@ -125,8 +125,13 @@ public final class AgentAttention {
         let request = AgentRequest(id: id, kind: .permission, key: key, pid: pid, title: tool, detail: subject,
                                    project: project, session: session, account: account, at: Date(), canAnswer: true)
         pending[id] = (request, reply)
-        record(.permission, key: key, text: [tool, subject].filter { !$0.isEmpty }.joined(separator: ": "),
-               project: project, session: session, account: account)
+        // The agent may have reported "blocked" a moment before its hook
+        // arrived: that line already says it (one line per request).
+        let already = feed.first.map { $0.kind == .permission && $0.key == key && key != nil && Date().timeIntervalSince($0.at) < 10 } ?? false
+        if !already {
+            record(.permission, key: key, text: [tool, subject].filter { !$0.isEmpty }.joined(separator: ": "),
+                   project: project, session: session, account: account)
+        }
         publish()
         return id
     }

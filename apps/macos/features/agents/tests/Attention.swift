@@ -83,4 +83,11 @@ let attentionChecks: [(name: String, body: Checks.Body)] = [
         page.removeFromSuperview()
         expect(!page.isWatching)
     }),
+    ("a permission reported by the agent and then by its hook is one line in the feed", {
+        let attention = AgentAttention()
+        attention.update([report("t9", pid: 90, .working)])
+        attention.update([report("t9", pid: 90, .blocked, .permission, "approve Bash: rm x")])
+        _ = attention.addPermission(pid: 90, tool: "Bash", subject: "rm x", project: "cadex", session: "s", account: "a", key: "t9") { _ in }
+        expect(attention.feed.filter { $0.kind == .permission }.count == 1, "\(attention.feed.map(\.text))")
+    }),
 ]

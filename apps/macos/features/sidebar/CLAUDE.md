@@ -38,11 +38,13 @@
   clique;
   ⇧⌘3 a ⇧⌘5 são as capturas de tela do sistema, por isso ⌃⌘ (o dono, 2026-10-21).
 - O catálogo do app está em `../../app/SidebarWiring.swift`: files, git, agents, agent-history (as
-  conversas dos agentes, plano 18), accounts (padrão, em `SidebarLayout.swift`) e history (o do Git,
+  conversas dos agentes, plano 18), attention (o sininho, com o número dos pedidos e as sub-abas
+  Needs You e Feed, plano 19), accounts (padrão, em `SidebarLayout.swift`) e history (o do Git,
   escondido). Só entra o que mostra uma página na barra; preview e spaces saíram (o dono,
   2026-10-21). `onShow` avisa quando uma página aparece, para o app só criar o conteúdo então.
-- Status: fase A no código. Ainda não: sub-abas (chegam com Agents na fase C) e a página aberta
-  voltando com os spaces.
+- Sub-abas: a página com `subtabs` mostra o controle abaixo do cabeçalho; `select(subtab:of:)` escolhe
+  por código e `onSubtab` avisa o app da escolha (a página do sininho, plano 19).
+- Status: fase A no código, com sub-abas. Ainda não: a página aberta voltando com os spaces.
 
 ## Como validar
 - `make macos-test` passa: o cabeçalho (nome, botões, volta ao nome da página), o arrastar dos ícones com eventos de mouse (uma vaga, duas, o arrastado por
