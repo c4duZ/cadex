@@ -53,6 +53,11 @@ let exitCode = await Checks.run([
         expect(plan.branch == "corrigir-login" && plan.base == "main", "\(plan)")
         expect(plan.root == repo + ".worktrees" && plan.path == repo + ".worktrees/corrigir-login")
         expect(plan.needsAuthorization && plan.hooksNeedConfirmation && plan.explainTrust)
+        // Saying no to that folder and choosing another root (worktrees.root).
+        controller.rootSetting = home + "/elsewhere"
+        let moved = controller.plan(name: "Corrigir login!", repo: repo)
+        let name = (repo as NSString).lastPathComponent
+        expect(moved.root == home + "/elsewhere/" + name && moved.path == moved.root + "/corrigir-login", "\(moved)")
     }),
     ("a task made: its worktree and branch, the .env copied, the note in progress; the second plan needs no yes", {
         let (home, repo) = fakeRepo()

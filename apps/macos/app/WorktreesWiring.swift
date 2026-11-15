@@ -48,14 +48,46 @@ extension WindowSession {
                                             "O nome vira um branch e uma worktree ao lado do repositório; o agente abre nela."),
             placeholder: T("Fix the login", "Corrigir o login")) { [weak self] name in
             guard let self, !name.isEmpty else { return }
-            let plan = WorktreesController.shared.plan(name: name, repo: repo)
-            var asks: [String] = []
-            if plan.needsAuthorization { asks.append(T("Cadex will make tasks in \(plan.root).", "O Cadex vai criar tarefas em \(plan.root).")) }
-            if plan.hooksNeedConfirmation { asks.append(T("Setup hooks that will run: ", "Hooks de preparo que vão rodar: ") + plan.hooks.joined(separator: " && ")) }
-            let go = { self.makeTask(plan) }
-            guard !asks.isEmpty else { return go() }
-            self.confirm(T("Make the task \(plan.branch)?", "Criar a tarefa \(plan.branch)?"), asks.joined(separator: "\n\n"),
-                         button: T("Make Task", "Criar tarefa"), then: go)
+            self.confirmTask(WorktreesController.shared.plan(name: name, repo: repo))
+        }
+    }
+
+    /// Shows what needs a yes (the folder, new setup hooks) before making the
+    /// task. Saying no to the folder lets the owner choose another root.
+    private func confirmTask(_ plan: TaskPlan) {
+        var asks: [String] = []
+        if plan.needsAuthorization { asks.append(T("Cadex will make tasks in \(plan.root).", "O Cadex vai criar tarefas em \(plan.root).")) }
+        if plan.hooksNeedConfirmation { asks.append(T("Setup hooks that will run: ", "Hooks de preparo que vão rodar: ") + plan.hooks.joined(separator: " && ")) }
+        guard !asks.isEmpty else { return makeTask(plan) }
+        let alert = NSAlert()
+        alert.messageText = T("Make the task \(plan.branch)?", "Criar a tarefa \(plan.branch)?")
+        alert.informativeText = asks.joined(separator: "\n\n")
+        alert.addButton(withTitle: T("Make Task", "Criar tarefa"))
+        alert.addButton(withTitle: T("Cancel", "Cancelar"))
+        if plan.needsAuthorization { alert.addButton(withTitle: T("Choose Another Folder…", "Escolher outra pasta…")) }
+        alert.beginSheetModal(for: window) { [weak self] response in
+            switch response {
+            case .alertFirstButtonReturn: self?.makeTask(plan)
+            case .alertThirdButtonReturn: self?.chooseTasksRoot(then: plan)
+            default: break
+            }
+        }
+    }
+
+    /// worktrees.root from a folder panel; the plan is made again under it.
+    private func chooseTasksRoot(then plan: TaskPlan) {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = true
+        panel.prompt = T("Use for Tasks", "Usar para as tarefas")
+        panel.message = T("Every repository's tasks go in a folder with its name inside this one (worktrees.root).",
+                          "As tarefas de cada repositório vão numa pasta com o nome dele dentro desta (worktrees.root).")
+        panel.beginSheetModal(for: window) { [weak self] response in
+            guard let self, response == .OK, let url = panel.url else { return }
+            self.settings.store.update { $0.worktrees.root = SettingsBridge.tilde(url.path) }
+            WorktreesController.shared.rootSetting = url.path
+            DispatchQueue.main.async { self.confirmTask(WorktreesController.shared.plan(name: plan.name, repo: plan.repo)) }
         }
     }
 

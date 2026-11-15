@@ -100,6 +100,14 @@ enum GeneralPages {
                                    "Enquanto o item SSH aparece na barra de status, cada host do ~/.ssh/config recebe uma conexão na porta dele, ao abrir e a cada 10 minutos. Sem login, sem comando."),
                                  control: SettingsPage.toggle(store.settings.ssh.ping) { on in store.update { $0.ssh.ping = on } }),
 
+                SettingsPage.section(T("Tasks", "Tarefas")),
+                SettingsPage.row(T("Folder of the tasks", "Pasta das tarefas"),
+                                 T("Where New Task makes each repository's worktrees, in a folder with the repository's name. Empty: beside the repository, in <repo>.worktrees. The setup hooks are edited per repository on the Tasks page.",
+                                   "Onde o Nova tarefa cria as worktrees de cada repositório, numa pasta com o nome dele. Vazio: ao lado do repositório, em <repo>.worktrees. Os hooks de preparo se editam por repositório na página Tarefas."),
+                                 control: SettingsPage.text(store.settings.worktrees.root, placeholder: T("Beside each repository", "Ao lado de cada repositório")) { value in
+                                     store.update { $0.worktrees.root = value.trimmingCharacters(in: .whitespaces) }
+                                 }),
+
                 SettingsPage.section(T("File tree", "Árvore de arquivos")),
                 SettingsPage.row(T("Follow the terminal", "Seguir o terminal"),
                                  T("When you cd in the focused terminal, the tree moves to that project: the top of its git repository, or the folder itself.",
