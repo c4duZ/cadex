@@ -78,6 +78,8 @@ cp "$MACOS/shared/icons/Resources/Phosphor-Fill.ttf" "$APP/Contents/Resources/"
 cp "$MACOS/features/themes/Resources/catalog.json" "$APP/Contents/Resources/"
 cp -R "$MACOS/shared/icons/Resources/FileIcons" "$APP/Contents/Resources/"
 cp -R "$MACOS/shared/icons/Resources/ProviderLogos" "$APP/Contents/Resources/"
+# The skills plugin the session kit passes by --plugin-dir (plan 20, ADR 0024).
+cp -R "$MACOS/features/agent-tools/plugin" "$APP/Contents/Resources/agent-plugin"
 cp "$ROOT/LICENSE" "$ROOT/NOTICE" "$APP/Contents/Resources/"
 
 # The icon in every size macOS asks for, from the large PNG.

@@ -61,6 +61,11 @@ let exitCode = await Checks.run([
         expect(Set(hooks?.keys.map { $0 } ?? []) == ["SessionStart", "Stop", "Notification", "PermissionRequest", "SessionEnd", "CwdChanged"], "\(String(describing: hooks?.keys))")
         let stop = ((hooks?["Stop"] as? [[String: Any]])?.first?["hooks"] as? [[String: Any]])?.first
         expect(stop?["command"] as? String == "/App/Cadex.app/Contents/Helpers/cadex hook Stop")
+        // agentTools.enabled: the folder of cadex first on the session's PATH (plan 20).
+        kit.agentToolsOnPath = true
+        let withTools = kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json")
+        expect(withTools.hasPrefix("env -u CLAUDECODE -u CLAUDE_CODE_CHILD_SESSION PATH=/App/Cadex.app/Contents/Helpers:\"$PATH\" CLAUDE_CONFIG_DIR="), withTools)
+        kit.agentToolsOnPath = false
         kit.hooksEnabled = false
         expect(json(settingsPath(kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json")))["hooks"] == nil, "agents.stateHooks off: no hooks")
     }),

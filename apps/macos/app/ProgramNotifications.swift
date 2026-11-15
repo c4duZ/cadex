@@ -27,16 +27,21 @@ extension AppDelegate {
     private func postProgramNotification(from view: TerminalView, title: String, body: String) {
         guard settings.store.settings.terminal.programNotifications, AgentNotifier.canPost, !view.isLookedAt else { return }
         guard !title.isEmpty || !body.isEmpty else { return }
+        // OSC 9 has only a body: the terminal's name is the title then.
+        let place = Self.conversationName(view)
+        postTerminalNotification(title: title.isEmpty ? place : title, subtitle: title.isEmpty ? "" : place, body: body, key: Self.key(view))
+    }
+
+    /// One macOS notification for a terminal (a program's, an agent's
+    /// `cadex notify`): a new one from it replaces the last; the click goes there.
+    func postTerminalNotification(title: String, subtitle: String, body: String, key: String) {
         let center = UNUserNotificationCenter.current()
         center.requestAuthorization(options: [.alert, .sound]) { _, _ in }
         let content = UNMutableNotificationContent()
-        // OSC 9 has only a body: the terminal's name is the title then.
-        let place = Self.conversationName(view)
-        content.title = title.isEmpty ? place : title
-        content.subtitle = title.isEmpty ? "" : place
+        content.title = title
+        content.subtitle = subtitle
         content.body = body
         content.sound = .default
-        let key = Self.key(view)
         content.userInfo = ["terminal": key]
         center.add(UNNotificationRequest(identifier: "terminal-" + key, content: content, trigger: nil))
     }

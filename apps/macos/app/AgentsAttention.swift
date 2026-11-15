@@ -76,7 +76,7 @@ extension AppDelegate {
         pid > 0 ? locate { $0.foregroundGroup == pid } : nil
     }
 
-    private func locate(_ match: (TerminalView) -> Bool) -> (window: WindowSession, space: Int, terminal: TerminalView)? {
+    func locate(_ match: (TerminalView) -> Bool) -> (window: WindowSession, space: Int, terminal: TerminalView)? {
         for window in sessions {
             for (index, space) in (window.spaces?.spaces ?? []).enumerated() {
                 if let terminal = space.tabs.allTerminals.first(where: match) { return (window, index, terminal) }

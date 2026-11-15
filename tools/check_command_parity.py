@@ -12,7 +12,7 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-PREFIXES = "tab|pane|explorer|workspace|search|editor|markdown|terminal|git|history|diff|preview|media|space|edit|palette|settings|app|window|view|theme|power|sidebar|statusBar|agents|ssh"
+PREFIXES = "tab|pane|explorer|workspace|search|editor|markdown|terminal|git|history|diff|preview|media|space|edit|palette|settings|app|window|view|theme|power|sidebar|statusBar|agents|ssh|worktrees|agent-tools|computer-use"
 LITERAL = re.compile(r'"((?:%s)\.[a-z0-9-]+)"' % PREFIXES)
 # Names of views and keys in the Mac's code, not commands (2026-10-20).
 # power.mode, sidebar.items and statusBar.left/right are settings.json keys, read by name in SettingsFile.swift.
@@ -39,6 +39,9 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             # Attention and the board (plan 19, phase C).
             "agents.show-attention", "agents.show-feed", "agents.approve", "agents.deny", "agents.mark-unread",
             "agents.hibernate", "agents.restart",
+            # Plan 20: the agent uses the Cadex (ADR 0024), Mac only for now.
+            "agent-tools.open-file", "agent-tools.open-diff", "agent-tools.notify", "agent-tools.toggle",
+            "agent-tools.show-sessions",
             # Tasks' worktrees (plan 19, phase D), until Windows gets the view.
             "worktrees.show", "worktrees.new-task", "worktrees.open", "worktrees.remove", "worktrees.set-status",
             "worktrees.set-comment", "worktrees.edit-setup-hooks"}

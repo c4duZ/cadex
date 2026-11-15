@@ -90,6 +90,10 @@ enum GeneralPages {
                                          if on { s.agents.mutedMachines.append("local") }
                                      }
                                  }),
+                SettingsPage.row(T("Agents can use Cadex", "Os agentes podem usar o Cadex"),
+                                 T("Sessions Cadex opens get the cadex command and its MCP tools: they can open files, diffs and pages beside you, notify you and mark their task's progress. Nothing can close, delete or change a setting. Off, they get none of it.",
+                                   "As sessões que o Cadex abre ganham o comando cadex e as ferramentas MCP dele: abrem arquivos, diffs e páginas ao seu lado, avisam você e marcam o andamento da tarefa. Nada fecha, apaga ou muda configuração. Desligado, não ganham nada disso."),
+                                 control: SettingsPage.toggle(store.settings.agentTools.enabled) { on in store.update { $0.agentTools.enabled = on } }),
                 SettingsPage.row(T("Hibernate quiet agents after", "Hibernar agentes parados depois de"),
                                  T("An agent opened by Cadex that finished, that you are not looking at, ends after this many minutes to free memory, and comes back with its conversation when you open its terminal again. 0 turns it off.",
                                    "Um agente aberto pelo Cadex que terminou, e que você não está olhando, encerra depois desses minutos para liberar memória, e volta com a conversa quando você abre o terminal dele de novo. 0 desliga."),

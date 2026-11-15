@@ -56,7 +56,7 @@ public struct AgentRequest: Equatable, Sendable {
 
 /// One line of the feed: what happened, where and when.
 public struct AgentFeedEntry: Equatable, Sendable {
-    public enum Kind: String, Sendable { case finished, permission, question, failed, taskCreated }
+    public enum Kind: String, Sendable { case finished, permission, question, failed, taskCreated, note }
 
     public let at: Date
     public let kind: Kind
@@ -194,9 +194,10 @@ public final class AgentAttention {
         publish()
     }
 
-    /// Something outside the agents' reports (a task created, plan 19 phase D).
-    public func note(_ kind: AgentFeedEntry.Kind, text: String, project: String) {
-        record(kind, key: nil, text: text, project: project, session: "", account: "")
+    /// Something outside the agents' reports: a task created (plan 19 phase
+    /// D), an agent's `cadex notify` (plan 20), with its terminal's key.
+    public func note(_ kind: AgentFeedEntry.Kind, text: String, project: String, session: String = "", key: String? = nil) {
+        record(kind, key: key, text: text, project: project, session: session, account: "")
         publish()
     }
 

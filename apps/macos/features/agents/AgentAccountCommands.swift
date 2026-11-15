@@ -169,28 +169,28 @@ public enum AgentAccountPicker {
     }
 }
 
-/// A ⌘K list of choices for one command.
+/// A ⌘K list of choices for one command (the app's agent-tools.show-sessions too).
 @MainActor
-final class AgentChoiceSource: PaletteSource {
-    let placeholder: String
-    let emptyText: String
+public final class AgentChoiceSource: PaletteSource {
+    public let placeholder: String
+    public let emptyText: String
     private let items: () -> [PaletteItem]
     private let pick: (String) -> Void
 
-    init(placeholder: String, empty: String, items: @escaping () -> [PaletteItem], choose: @escaping (String) -> Void) {
+    public init(placeholder: String, empty: String, items: @escaping () -> [PaletteItem], choose: @escaping (String) -> Void) {
         self.placeholder = placeholder
         self.emptyText = empty
         self.items = items
         self.pick = choose
     }
 
-    var icon: Icon { .gauge }
+    public var icon: Icon { .gauge }
 
-    func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
+    public func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
         show(items().filter { query.isEmpty || $0.title.localizedCaseInsensitiveContains(query) }, nil)
     }
 
-    func choose(_ item: PaletteItem) { pick(item.id) }
+    public func choose(_ item: PaletteItem) { pick(item.id) }
 
-    func stop() {}
+    public func stop() {}
 }

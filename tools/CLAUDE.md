@@ -28,7 +28,8 @@
   tabela bate com o map.json. Rodar de novo depois do build_file_icons.py.
 - `icons/build_provider_logos.py`: os logos dos provedores de IA (Lobe Icons e Simple Icons, versões
   fixadas) em PDF para o app (`../docs/adr/0020-provider-logos.md`).
-- `check_command_parity.py` (no `make manifests`): todo id de comando do Mac existe no app Windows
+- `check_command_parity.py` (no `make manifests`), com os prefixos das features (worktrees,
+  agent-tools e computer-use entraram em 2026-11-15; antes não eram conferidos): todo id de comando do Mac existe no app Windows
   (ADR 0005, os mesmos ids nos dois). Nome de interface que não é comando vai em NOT_COMMANDS.
 - `perf/run.py` (`make perf`, depois do `make package`): o orçamento de peso do Cadex no Mac. Abre o
   app de release em instâncias de teste (CADEX_BACKGROUND=1, spaces num arquivo temporário) com o

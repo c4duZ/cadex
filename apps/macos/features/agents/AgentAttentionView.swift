@@ -24,6 +24,7 @@ public final class AgentAttentionView: NSView {
     static let kinds: [(AgentFeedEntry.Kind?, String)] = [
         (nil, T("Everything", "Tudo")), (.finished, T("Finished", "Terminou")), (.permission, T("Permissions", "Permissões")),
         (.question, T("Questions", "Perguntas")), (.failed, T("Failures", "Falhas")), (.taskCreated, T("Tasks", "Tarefas")),
+        (.note, T("Notes", "Avisos")),
     ]
     private let stack = NSStackView()
     private let scroll = NSScrollView()
@@ -144,6 +145,7 @@ public final class AgentAttentionView: NSView {
             case .question: what = T("Asked a question", "Fez uma pergunta")
             case .failed: what = T("Failed", "Falhou")
             case .taskCreated: what = T("Task created", "Tarefa criada")
+            case .note: what = T("Said", "Avisou")
             }
             let top = AgentText.label(what + (entry.text.isEmpty ? "" : ": " + entry.text), size: 12, color: colors.text)
             let bottom = AgentText.label(([entry.project, entry.session, entry.account].filter { !$0.isEmpty } + [AgentTime.short(since: entry.at)])

@@ -93,9 +93,13 @@ Cadex: `docs/adr/0024-agent-tools.md`).
 - [x] Numa sessão real aberta com o comando do kit, o cartão da conta mostra os mesmos números do
       `/usage` (bhband, Claude Code 2.1.325, 2026-11-14: 3% e 56%, reinícios iguais).
 - [x] A status line do dono aparece igual numa sessão aberta pelo Cadex (mesma sessão).
-- [ ] Numa aba aberta pelo Cadex, `cadex notify "oi"` mostra a notificação e `cadex worktree status
-      review` muda o status da tarefa; num terminal de fora (sem o token), `cadex` é recusado.
-- [ ] Um comando fora da lista (fechar o app) é recusado e nada acontece.
-- [ ] `cadex skills get preview` devolve o guia da mesma versão do app.
-- [ ] O `~/.claude` do dono não muda (datas dos arquivos antes e depois).
-- [ ] O Claude Code de uma sessão do Cadex chama `mcp__cadex__cadex_notify` e o dono vê a notificação.
+- [x] Numa aba aberta pelo Cadex, `cadex notify "oi"` avisa o dono e `cadex worktree status review`
+      muda o status da tarefa; num terminal de fora (sem o token), `cadex` é recusado. (2026-11-15, o
+      `claude` real numa instância de teste do app de release: "the task is review", "the owner was
+      notified", e o app gravou o status; a notificação na tela, sem captura, não vista.)
+- [x] Um comando fora da lista (fechar o app) é recusado e nada acontece ("app.quit is not allowed
+      for agents", saída 1).
+- [x] `cadex skills get preview` devolve o guia da mesma versão do app (os guias vêm do binário).
+- [x] O `~/.claude` do dono não muda (datas dos arquivos antes e depois do teste).
+- [x] O Claude Code de uma sessão do Cadex chama uma ferramenta `mcp__cadex__*` e o app age
+      (`cadex_worktree_comment`: o comentário gravado).

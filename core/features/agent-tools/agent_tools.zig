@@ -6,9 +6,11 @@
 pub const statusline = @import("statusline.zig");
 pub const cli = @import("cli.zig");
 pub const hook = @import("hook.zig");
+pub const agent = @import("agent.zig");
 
 test {
     _ = statusline;
     _ = hook;
     _ = cli;
+    _ = agent;
 }

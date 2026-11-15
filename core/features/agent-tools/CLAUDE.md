@@ -3,7 +3,8 @@
 ## O que eu quero
 - O programa `cadex` que as sessões de agente abertas pelo Cadex rodam (`../../../docs/spec/agent-tools.md`,
   `../../../docs/adr/0021-cadex-managed-accounts.md`, `../../../docs/adr/0022-terminal-daemon.md`):
-  `cadex statusline` e `cadex hook <evento>`; o plano 20 acrescenta mais.
+  `cadex statusline` e `cadex hook <evento>`; no plano 20 (`../../../docs/adr/0024-agent-tools.md`), os
+  comandos com que o agente usa o Cadex, as skills e o servidor MCP.
 
 ## O que eu não quero
 - Ler, guardar ou repassar token, login ou credencial do Claude Code; falar com a rede. (O token
@@ -23,9 +24,18 @@
   (CADEX_SESSION_TOKEN), o evento, o pid do `claude` (o pai do hook) e o JSON reescrito numa linha;
   espera 200 ms (a permissão, 10 min: ADR 0023) e imprime o `stdout` da resposta. App fechado: sai
   na hora. Sempre 0.
+- Plano 20, fase B: `agent.zig` escolhe entre `mcp`, `skills` e os subcomandos que pedem ao app;
+  `commands.zig` traduz `run`, `commands` e os atalhos (`open`, `diff`, `preview`, `notify`,
+  `worktree status|comment`) em id e argumentos; `request.zig` manda ao socket do app uma linha com o
+  token, o id (ou a lista), os argumentos e os pids acima do processo (o app acha o terminal do
+  agente), espera até 40 s e lê `{"ok", "result"|"error"}`; `skills.zig` traz os guias de `guides/`
+  embutidos no binário (`cadex skills list|get`); `mcp.zig` é o servidor MCP (JSON-RPC por linha:
+  initialize, tools/list, tools/call, ping), cada ferramenta um pedido de comando. Saída 0 feito, 1
+  recusado ou app fechado (o motivo no stderr), 2 uso.
 - O build (`../../build.zig`, `addCli`) instala `zig-out/bin/cadex` só no Mac; o empacotamento o põe em
   Contents/Helpers.
 
 ## Como validar
-- `make core-test`: arquivos, nome da conta, status line do dono, JSON quebrado e a chamada de dentro.
+- `make core-test`: arquivos, nome da conta, status line do dono, JSON quebrado e a chamada de dentro;
+  a linha do pedido e a resposta, os atalhos virando ids, os guias e o servidor MCP com um app falso.
 - Na mão: `echo '<json>' | CLAUDE_CONFIG_DIR=<pasta> CADEX_USAGE_DIR=<pasta> core/zig-out/bin/cadex statusline`.

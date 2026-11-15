@@ -1,3 +1,4 @@
+import AgentTools
 import Agents
 import AppKit
 import Worktrees
@@ -138,8 +139,12 @@ extension WindowSession {
             active: { [weak self] in self?.tabs?.activeDocument as? HistoryDocument ?? self?.sidebarHistory }))
         commands.register(EditorCommands.all { [weak self] in self?.tabs?.activeDocument as? EditorDocument })
         commands.register(MediaCommands.all { [weak self] in self?.tabs?.activeDocument as? MediaDocument })
+        // preview.open also takes url= from the agent (docs/adr/0024-agent-tools.md).
         commands.register(PreviewCommands.all(open: { [weak self] url, beside in self?.openPreview(url, beside: beside) },
-                                              active: { [weak self] in self?.tabs?.activeDocument as? PreviewDocument }))
+                                              active: { [weak self] in self?.tabs?.activeDocument as? PreviewDocument }).map { command in
+            command.id == "preview.open" ? command.accepting("url=<address>") { [weak self] in self?.agentOpenPreview($0) ?? .failed("the window is gone") } : command
+        })
+        commands.register(AgentToolsCommands.commands(agentToolsActions()))
         makeMarkdown(palette: palette)
         connectFolder()
     }

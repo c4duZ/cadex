@@ -20,6 +20,8 @@
   `<repo>.worktrees/<branch>` ou worktrees.root, ponto de partida, o que pede um sim: autorizar a
   pasta, hooks novos, a confiança), `make`, `tasks`, `note` (para o grupo em Agents),
   `whatWouldBeLost`, `remove`, `setStatus`, `setComment`.
+- worktrees.set-status e -set-comment também aceitam `status=` e `comment=` do agente (plano 20): da
+  tarefa do terminal dele (`taskOf`, só uma worktree de tarefa, nunca o repositório), sem lista.
 - `WorktreesView.swift`: a página Tasks (lê só enquanto aparece). `WorktreesCommands.swift`:
   worktrees.new-task, -open, -remove, -set-status, -set-comment e -edit-setup-hooks, com as listas
   no ⌘K; o que pergunta e abre abas é do app (`../../app/WorktreesWiring.swift`).

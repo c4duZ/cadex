@@ -1,3 +1,4 @@
+import AgentTools
 import Agents
 import SessionKit
 import Worktrees
@@ -81,6 +82,7 @@ final class SettingsBridge {
         AgentsController.shared.hidden = Set(settings.agents.hiddenAccounts.map(Self.expand))
         AgentHistoryController.shared.isEnabled = settings.agents.history
         SessionKit.shared.hooksEnabled = settings.agents.stateHooks
+        Self.applyAgentTools(settings.agentTools.enabled)
         WorktreesController.shared.rootSetting = settings.worktrees.root
         WorktreesController.shared.setupHooks = settings.worktrees.setupHooks.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }
         AgentUsageController.shared.activeAccount = settings.agents.activeAccount.isEmpty ? nil : Self.expand(settings.agents.activeAccount)
@@ -145,5 +147,17 @@ final class SettingsBridge {
             $0.general.confirmClose = current.confirmClose
             $0.general.confirmMultilinePaste = current.confirmMultilinePaste
         }
+    }
+
+    /// agentTools.enabled (docs/adr/0024-agent-tools.md): the kit puts
+    /// `cadex` first on the session's PATH, registers `cadex mcp` (which
+    /// inherits the session's token) and passes the skills plugin; off,
+    /// none of it, and the socket refuses command requests.
+    static func applyAgentTools(_ on: Bool) {
+        let kit = SessionKit.shared
+        kit.agentToolsOnPath = on && kit.toolsPath != nil
+        guard on, let tools = kit.toolsPath else { return kit.withdraw("agent-tools") }
+        kit.contribute("agent-tools", SessionKitPart(pluginDirs: AgentToolsPlugin.folder.map { [$0] } ?? [],
+                                                     mcpServers: ["cadex": ["command": tools, "args": ["mcp"]]]))
     }
 }

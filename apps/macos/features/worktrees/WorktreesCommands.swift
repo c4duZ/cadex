@@ -52,15 +52,36 @@ public enum WorktreesCommands {
                     keywords: ["task", "status", "review", "done", "tarefa", "status", "pronto"], category: .terminal,
                     action: pick(T("The task", "A tarefa")) { task in
                         palette.open(StatusSource(task: task))
-                    }),
+                    })
+                .accepting("status=<todo|doing|review|done>") { request in
+                    guard let status = request["status"].flatMap(TaskStatus.init(rawValue:)) else { return .failed("status is one of todo, doing, review, done") }
+                    guard let task = taskOf(request.folder) else { return .failed("this terminal is not in a task (New Task makes one)") }
+                    WorktreesController.shared.setStatus(status, of: task)
+                    return .ok("the task is \(status.rawValue)")
+                },
             Command(id: "worktrees.set-comment", title: T("Comment on a Task…", "Comentar uma tarefa…"),
                     keywords: ["task", "comment", "note", "tarefa", "comentário"], category: .terminal,
-                    action: pick(T("The task to comment on", "A tarefa a comentar"), actions.comment)),
+                    action: pick(T("The task to comment on", "A tarefa a comentar"), actions.comment))
+                .accepting("comment=<a few words>") { request in
+                    guard let comment = request["comment"]?.trimmingCharacters(in: .whitespacesAndNewlines) else { return .failed("comment=<text> is needed") }
+                    guard let task = taskOf(request.folder) else { return .failed("this terminal is not in a task (New Task makes one)") }
+                    WorktreesController.shared.setComment(String(comment.prefix(200)), of: task)
+                    return .ok(comment.isEmpty ? "the comment is cleared" : "commented")
+                },
             Command(id: "worktrees.edit-setup-hooks", title: T("Edit Task Setup Hooks…", "Editar os hooks de preparo das tarefas…"),
                     keywords: ["setup", "hooks", "install", "worktree", "preparo", "hooks"], category: .terminal,
                     action: .run { actions.editSetupHooks() }),
         ]
     }
+}
+
+/// The task worktree holding `folder` (the agent's terminal), nil when it is
+/// the repository itself or no repository: the agent's status goes only to a
+/// task (plan 20 phase B).
+@MainActor
+func taskOf(_ folder: String) -> String? {
+    guard let root = WorktreesCore.repository(of: folder), let main = WorktreesCore.list(repo: root).first, main.path != root else { return nil }
+    return root
 }
 
 /// ⌘K's list of the repository's tasks.

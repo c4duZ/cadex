@@ -44,6 +44,11 @@ public struct Command {
     /// out in the palette). Responder actions are unavailable when nothing
     /// in focus handles them.
     public let unavailableReason: @MainActor () -> String?
+    /// What it does run with arguments (CommandRequest.swift); nil: it
+    /// takes none, and the agent's run does the action as the owner's would.
+    public var withArguments: (@MainActor (CommandRequest) -> CommandReply)?
+    /// The arguments it takes, for `cadex commands`.
+    public var argumentHelp = ""
 
     public init(
         id: String, title: String, keywords: [String] = [], category: Category,

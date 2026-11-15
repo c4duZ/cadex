@@ -39,6 +39,9 @@ public final class SessionKit {
     public var hooksEnabled = true
     /// CLAUDE_CODE_FORCE_SYNC_OUTPUT=1 in the settings' env (SessionKitFiles).
     public var synchronizedOutput = true
+    /// agentTools.enabled (plan 20): the folder of `cadex` goes first on the
+    /// session's PATH, so the agent runs it (docs/adr/0024-agent-tools.md).
+    public var agentToolsOnPath = false
     /// Where each session's token is kept (0600), read by the app's socket.
     public var tokens: String = SessionKit.tokensFolder
 
@@ -113,7 +116,8 @@ public final class SessionKit {
         if let settings = writeSettings(session: session, token: token, accountDir: accountDir) { args += ["--settings", settings] }
         for dir in parts.values.flatMap(\.pluginDirs).sorted() { args += ["--plugin-dir", dir] }
         if let mcp = writeMCP(key: key, isDefault: configDir == nil, defaultClaudeJSON: defaultClaudeJSON) { args += ["--mcp-config", mcp] }
-        return Self.compose(unset: unsetNames(isDefault: configDir == nil), configDir: configDir, arguments: args + arguments)
+        return Self.compose(unset: unsetNames(isDefault: configDir == nil), configDir: configDir, arguments: args + arguments,
+                            pathFirst: agentToolsOnPath ? toolsPath.map { ($0 as NSString).deletingLastPathComponent } : nil)
     }
 
     /// What the tab must not inherit: CLAUDECODE and CLAUDE_CODE_* (a
@@ -127,9 +131,12 @@ public final class SessionKit {
 
     /// `[env -u X] [CLAUDE_CONFIG_DIR=dir] claude args…`, each word quoted
     /// only when the shell needs it.
-    static func compose(unset: [String], configDir: String?, arguments: [String]) -> String {
+    static func compose(unset: [String], configDir: String?, arguments: [String], pathFirst: String? = nil) -> String {
         var words: [String] = []
         if !unset.isEmpty { words += ["env"] + unset.flatMap { ["-u", $0] } }
+        // The shell expands "$PATH" before claude (or env) runs: the agent's
+        // Bash tool finds `cadex` first (tested 2026-11-15).
+        if let pathFirst { words.append("PATH=" + quote(pathFirst) + ":\"$PATH\"") }
         if let configDir { words.append("CLAUDE_CONFIG_DIR=" + quote(configDir)) }
         words.append("claude")
         words += arguments.map(quote)

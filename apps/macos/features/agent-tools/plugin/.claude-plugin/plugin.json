@@ -1,0 +1,5 @@
+{
+  "name": "cadex",
+  "description": "Use the Cadex app this session runs in: open files, diffs and pages beside the terminal, notify the owner, mark the task's progress.",
+  "version": "1.0.0"
+}

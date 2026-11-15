@@ -75,6 +75,10 @@
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.
+- `AgentToolsWiring.swift` (plano 20, fase B): o pedido de comando do agente acha o terminal dele
+  (pela sessão do kit, senão pelos pids acima do `cadex`), confere agentTools.enabled e a lista do
+  agente e roda na janela daquele terminal, com a pasta e a conversa; abrir arquivo e diff (só dentro
+  da tarefa), avisar (notificação e feed), preview.open com url=, a lista de sessões no ⌘K.
 - `AgentsHibernate.swift` (plano 19, fase F): os hooks guardam no terminal o que traz o agente de
   volta; um relógio só, armado para o primeiro agente parado (agents.hibernateAfterMinutes, ninguém
   olhando), encerra com SIGTERM e marca a aba; o foco no terminal digita o `--resume` pelo kit; o fim

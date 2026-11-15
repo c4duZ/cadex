@@ -16,6 +16,20 @@ func sampleRegistry() -> CommandRegistry {
 }
 
 let exitCode = await Checks.run([
+    ("the agent's run: with arguments when the command takes them; a plain one runs its action; unknown says so", {
+        let registry = CommandRegistry()
+        var ran = 0
+        registry.register(Command(id: "x.plain", title: "Plain", category: .view, action: .run { ran += 1 }))
+        registry.register(Command(id: "x.args", title: "Args", category: .view, action: .run { ran += 100 })
+            .accepting("text=<t>") { request in request["text"].map { .ok("got \($0) in \(request.folder)") } ?? .failed("text= is needed") })
+        expect(registry.run("x.args", request: CommandRequest(arguments: ["text": "oi"], folder: "/w")) == .ok("got oi in /w"))
+        expect(registry.run("x.args", request: CommandRequest(arguments: [:], folder: "/w")) == .failed("text= is needed"))
+        expect(ran == 0, "the argument handler runs, not the owner's action")
+        expect(registry.run("x.plain", request: CommandRequest(arguments: [:], folder: "/w")) == .ok("done") && ran == 1)
+        expect(registry.run("x.plain", request: CommandRequest(arguments: ["a": "b"], folder: "/w")) == .failed("x.plain takes no arguments"))
+        expect(registry.run("x.nope", request: CommandRequest(arguments: [:], folder: "/w")) == .failed("unknown command x.nope"))
+        expect(registry.command("x.args")?.argumentHelp == "text=<t>")
+    }),
     ("'na' ranks Nova aba above Abrir nova janela, with the letters in bold", {
         let items = PaletteModel.items(for: "na", registry: sampleRegistry()) { _ in nil }
         let ids = items.map(\.id)

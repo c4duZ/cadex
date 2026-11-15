@@ -100,6 +100,13 @@ docs/adr/0023-answer-agent-permissions.md (planos 18 e 19), `docs/adr/0002-zig-c
   - Comandos novos: agent-tools.toggle, agent-tools.show-sessions (quem está ligado e o que pediu
     por último). Configuração agentTools.enabled (ligada). Features: agent-tools, agents,
     worktrees, command-palette, settings.
+  - Feita em 2026-11-15: os comandos aceitam argumentos (`CommandRequest`); o socket responde a
+    pedidos de comando com a lista fechada; o `cadex` ganhou `run`, `commands`, os atalhos,
+    `skills` e já o `cadex mcp` com as ações da fase B (a C acrescenta as do navegador); o kit põe o
+    `cadex` no `PATH` e passa o MCP e o plugin. O MCP herda o token da sessão (testado), então o
+    arquivo dele não leva token. Conferido com o `claude` real no app de release (status, aviso,
+    recusa, lista e uma ferramenta MCP). Os permissions.allow das ferramentas que só leem ficam
+    para a C, onde nascem as primeiras (árvore da página, print, console).
 - **C. Navegador do agente (o essencial).** No `preview`, que é dono da WKWebView, exposto pelo app
   ao `agent-tools` (sem uma feature importar o miolo da outra):
   - `cadex mcp` (stdio, com o token) oferece as ferramentas `browser_goto`, `browser_wait`,

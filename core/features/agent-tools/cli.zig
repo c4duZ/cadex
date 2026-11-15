@@ -5,12 +5,14 @@
 const std = @import("std");
 const statusline = @import("statusline.zig");
 const hook = @import("hook.zig");
+const agent = @import("agent.zig");
 
 const usage_text =
     \\usage: cadex statusline       (Claude Code's status line, from a session Cadex opened)
     \\       cadex hook <event>     (a Claude Code hook: tells the Cadex app, never waits)
+    \\       cadex mcp              (the MCP server of the sessions Cadex opens)
     \\
-;
+++ @import("commands.zig").usage;
 
 pub fn main(init: std.process.Init.Minimal) u8 {
     var args = init.args.iterate();
@@ -18,7 +20,14 @@ pub fn main(init: std.process.Init.Minimal) u8 {
     const sub = args.next() orelse return fail(usage_text);
     if (std.mem.eql(u8, sub, "statusline")) return runStatusline();
     if (std.mem.eql(u8, sub, "hook")) return runHook(args.next() orelse return fail(usage_text));
-    return fail(usage_text);
+    // The agent's subcommands (plan 20): every word after the subcommand.
+    var words_buf: [64][]const u8 = undefined;
+    var n: usize = 0;
+    while (args.next()) |word| : (n += 1) {
+        if (n == words_buf.len) return fail(usage_text);
+        words_buf[n] = word;
+    }
+    return agent.main(sub, words_buf[0..n], usage_text);
 }
 
 fn runHook(event: []const u8) u8 {

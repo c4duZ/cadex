@@ -37,6 +37,17 @@ public final class CommandRegistry {
         return command.unavailableReason()
     }
 
+    /// Runs a command for the agent (docs/adr/0024-agent-tools.md): with its
+    /// arguments when it takes them; one that takes none runs its action.
+    /// Whether it may run at all (the agent's list) is the caller's check.
+    public func run(_ id: String, request: CommandRequest) -> CommandReply {
+        guard let command = command(id) else { return .failed("unknown command \(id)") }
+        if let reason = command.unavailableReason() { return .failed(reason) }
+        if let handler = command.withArguments { return handler(request) }
+        guard request.arguments.isEmpty else { return .failed("\(id) takes no arguments") }
+        return run(id) ? .ok("done") : .failed("\(id) did not run")
+    }
+
     /// Runs a command if it exists and is available. Returns whether it ran.
     @discardableResult
     public func run(_ id: String) -> Bool {

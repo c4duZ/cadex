@@ -1,9 +1,10 @@
 # agent-tools (app macOS)
 
 ## O que eu quero
-- O socket do app (app.sock), por onde as sessões que o Cadex abre falam com ele: hoje os hooks
-  pelo `cadex hook` (`../../../../core/features/agent-tools/CLAUDE.md`), depois a CLI e o MCP do
-  plano 20 (`../../../../docs/adr/0022-terminal-daemon.md`).
+- O socket do app (app.sock), por onde as sessões que o Cadex abre falam com ele: os hooks pelo
+  `cadex hook` (`../../../../core/features/agent-tools/CLAUDE.md`) e, no plano 20, os pedidos de
+  comando da CLI e do MCP (`../../../../docs/adr/0022-terminal-daemon.md`,
+  `../../../../docs/adr/0024-agent-tools.md`).
 
 ## O que eu não quero
 - Ouvir qualquer processo: só os deste usuário (`getpeereid`) com o token de uma sessão do Cadex;
@@ -24,11 +25,20 @@
 - `AgentHookEvent.swift`: o evento, o pid do `claude` e o que o Claude Code deu ao hook
   (session_id, transcript_path, cwd, source, notification_type, tool_name) e `kitSession`, a sessão
   do kit dona do token (o nome do arquivo dele), que o agente hibernado reaproveita (plano 19, fase F).
+- Pedidos de comando (plano 20, fase B): `AgentCommandRequest.swift` (o id ou a lista, os argumentos,
+  os pids e a sessão do kit; a resposta `AgentCommandAnswer`; a lista fechada `AgentCommandList`, que
+  só uma ADR amplia); o servidor os passa a `onCommand`, que responde uma vez (pode esperar uma página).
+  `AgentToolsCommands.swift`: agent-tools.open-file, -open-diff e -notify (com argumentos; pelo dono,
+  o comando mais próximo dele), agent-tools.toggle e agent-tools.show-sessions;
+  `AgentToolsActivity.swift`: quem usou o Cadex e o último pedido, só em memória;
+  `AgentToolsPlugin.swift` e `plugin/`: o plugin de skills curtas que o kit passa por `--plugin-dir`
+  (no pacote, em Resources/agent-plugin). O app acha o terminal e roda (`../../app/AgentToolsWiring.swift`).
 - O app (`../../app/AgentsWiring.swift`) liga o servidor ao abrir e manda cada evento à feature
   agents (`noteHook`: o id da sessão por pid, certo depois de /clear e --resume).
 
 ## Como validar
 - `make macos-test` (AgentToolsTests): socket de verdade numa pasta temporária, token certo, errado
-  e ausente, token de sessão aberta depois, e o `stdout` de volta ao hook.
+  e ausente, token de sessão aberta depois, e o `stdout` de volta ao hook; o pedido de comando com a
+  sessão do kit e os pids, a resposta, a recusa sem token; a lista do agente; o plugin.
 - Conferido em 2026-11-15 com o `claude` real: SessionStart, /clear (SessionEnd e o id novo), o
   servidor desligado no meio (o Claude não esperou) e de volta com o mesmo token, SessionEnd no /exit.

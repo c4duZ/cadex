@@ -117,9 +117,9 @@ let package = Package(
         // The app's socket: where the sessions Cadex opened talk to it (docs/adr/0022-terminal-daemon.md).
         .target(
             name: "AgentTools",
-            dependencies: ["SessionKit"],
+            dependencies: ["SessionKit", "CommandPalette", "Strings"],
             path: "features/agent-tools",
-            exclude: ["CLAUDE.md", "tests"],
+            exclude: ["CLAUDE.md", "tests", "plugin"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
         // A task's worktree: made, opened and taken away (docs/spec/worktrees.md).
@@ -427,7 +427,8 @@ let package = Package(
         .executableTarget(
             name: "AgentToolsTests",
             dependencies: ["AgentTools", "SessionKit", "Checks"],
-            path: "features/agent-tools/tests"
+            path: "features/agent-tools/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
             name: "TextIndexTests",

@@ -68,6 +68,9 @@ let exitCode = await Checks.run([
         let plan = controller.plan(name: "Corrigir login", repo: repo)
         guard case .success(let made) = controller.make(plan) else { return expect(false, "not made") }
         expect(made.copied == 1 && made.unmatched.isEmpty && fm.fileExists(atPath: plan.path + "/.env"), "\(made)")
+        // The agent's status goes to its task only (plan 20): a task's folder, not the repository's.
+        expect(taskOf(plan.path) == plan.path, "a task: \(String(describing: taskOf(plan.path)))")
+        expect(taskOf(repo) == nil, "the repository itself is no task")
         let tasks = controller.tasks(repo: repo)
         expect(tasks.count == 1 && tasks[0].worktree.branch == "corrigir-login" && tasks[0].info?.status == .doing && tasks[0].info?.base == "main")
         expect(controller.note(for: plan.path) == "In Progress")

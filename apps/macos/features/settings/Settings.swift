@@ -172,6 +172,13 @@ public struct Settings: Equatable, Sendable {
         public var projectAccounts: [String: String] = [:]
     }
 
+    /// The agent uses the Cadex (docs/adr/0024-agent-tools.md, plan 20).
+    public struct AgentTools: Equatable, Sendable {
+        /// The sessions Cadex opens get `cadex` on their PATH, its MCP and
+        /// skills, and the socket takes their command requests.
+        public var enabled = true
+    }
+
     /// Tasks' worktrees (docs/spec/worktrees.md, plan 19 phase D).
     public struct Worktrees: Equatable, Sendable {
         /// Where tasks go: empty is beside each repository (`<repo>.worktrees`).
@@ -206,6 +213,7 @@ public struct Settings: Equatable, Sendable {
     public var agents = Agents()
     public var ssh = SSH()
     public var worktrees = Worktrees()
+    public var agentTools = AgentTools()
     /// "cmd+shift+t" → command id, or nil to turn a default off.
     public var shortcuts: [String: String?] = [:]
 

@@ -20,6 +20,10 @@ public final class AgentToolsServer: @unchecked Sendable {
     /// decides). `cancelled` runs if the hook goes away first: Claude Code
     /// was answered in the terminal (docs/adr/0023-answer-agent-permissions.md).
     public var onPermission: (@MainActor (AgentHookEvent, _ reply: @escaping @MainActor (String?) -> Void, _ cancelled: AgentToolsCancel) -> Void)?
+    /// A command the agent asks for (docs/adr/0024-agent-tools.md): the app
+    /// checks its list and runs it, answering once through `reply` (a
+    /// command may wait on a page). Without it, every request is refused.
+    public var onCommand: (@MainActor (AgentCommandRequest, _ reply: @escaping @MainActor (AgentCommandAnswer) -> Void) -> Void)?
     public let path: String
     let tokens: AgentSessionTokens
     private let queue = DispatchQueue(label: "cadex.agent-tools.server", qos: .utility)
@@ -75,8 +79,9 @@ public final class AgentToolsServer: @unchecked Sendable {
         setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
         guard let line = Self.readLine(client),
               let object = (try? JSONSerialization.jsonObject(with: line)) as? [String: Any],
-              let token = object["token"] as? String, let kit = tokens.kitSession(of: token),
-              var event = AgentHookEvent.parse(object) else { close(client); return }
+              let token = object["token"] as? String, let kit = tokens.kitSession(of: token) else { close(client); return }
+        if let request = AgentCommandRequest.parse(object, kitSession: kit) { return answerCommand(request, client) }
+        guard var event = AgentHookEvent.parse(object) else { close(client); return }
         event.kitSession = kit
         if event.event == "PermissionRequest" { return waitForOwner(event, client) }
         DispatchQueue.main.async { [weak self] in
@@ -115,6 +120,27 @@ public final class AgentToolsServer: @unchecked Sendable {
                 }, cancel)
             }
         }
+    }
+
+    private func answerCommand(_ request: AgentCommandRequest, _ client: Int32) {
+        let once = AgentToolsOnce()
+        DispatchQueue.main.async { [weak self] in
+            MainActor.assumeIsolated {
+                let reply: @MainActor (AgentCommandAnswer) -> Void = { answer in
+                    guard once.take() else { return }
+                    Self.send(client, answer.json)
+                }
+                guard let handler = self?.onCommand else { return reply(.failed("Agent tools are off in Cadex")) }
+                handler(request, reply)
+            }
+        }
+    }
+
+    static func send(_ client: Int32, _ object: [String: Any]) {
+        var data = (try? JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])) ?? Data("{\"ok\":false}".utf8)
+        data.append(0x0A)
+        _ = data.withUnsafeBytes { Darwin.write(client, $0.baseAddress, $0.count) }
+        close(client)
     }
 
     static func answer(_ client: Int32, _ printed: String?) {
