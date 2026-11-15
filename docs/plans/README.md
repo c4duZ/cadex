@@ -48,7 +48,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | # | plano | entrega | status |
 |---|---|---|---|
 | 18 | `docs/plans/18-accounts-and-sessions.md` | contas em pastas do Cadex, configuração por link, uso sem token, histórico unificado e continuar em outra conta | feito (2026-11-14); falta o /login do dono numa conta nova (fase C) |
-| 19 | `docs/plans/19-agent-sessions-and-worktrees.md` | worktree por tarefa, estado por hooks, quadro "Precisa de você", daemon do terminal, hibernar | fases A e B feitas (B: o estado pelo OSC 7501 e os hooks conferidos com o `claude` real) |
+| 19 | `docs/plans/19-agent-sessions-and-worktrees.md` | worktree por tarefa, estado por hooks, quadro "Precisa de você", daemon do terminal, hibernar | fases A a C no código e conferidas com o `claude` real; falta o `make perf` da C passar limpo (duas medidas de memória instáveis com a máquina em swap) |
 | 20 | `docs/plans/20-agent-drives-cadex.md` | CLI `cadex` e skills, preview como navegador do agente, computer use | escrito |
 | 21 | `docs/plans/21-review.md` | diff de revisão, comentar no diff e mandar em lote, autoria por linha | escrito |
 | 22 | `docs/plans/22-memory.md` | memória: ai-memory ao lado ou nativa, consolidação sem token, página Memory | escrito |
