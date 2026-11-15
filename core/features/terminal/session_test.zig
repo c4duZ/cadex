@@ -142,3 +142,25 @@ test "a local server's address in the output is reported once" {
     try testing.expectEqual(@as(u32, 1), Seen.count.load(.acquire));
     try testing.expectEqualStrings("http://localhost:8000/", std.mem.sliceTo(&Seen.last, 0));
 }
+
+fn frameHas(session: *Session, needle: []const u8) !bool {
+    const frame = try session.updateFrame();
+    return std.mem.indexOf(u8, frame.text[0..frame.text_len], needle) != null;
+}
+
+test "a synchronized update (DEC 2026) holds the last frame until it ends, or for 200 ms" {
+    quietLogs();
+    const session = try Session.open(testing.allocator, .{ .size = .{ .cols = 80, .rows = 24 }, .shell = "/bin/sh" });
+    defer session.close();
+    try session.write("echo ready-$((1+1))\n");
+    try waitForText(session, "ready-2");
+    _ = try session.updateFrame();
+    // Begins an update, draws half of it and waits: the frame stays.
+    try session.write("printf '\\033[?2026hhalf-%s' $((2+3)); sleep 0.5; printf '\\033[?2026l'\n");
+    try waitForText(session, "half-5");
+    try testing.expect(!try frameHas(session, "half-5"));
+    try testing.expect(@import("session_view.zig").holdRemainingMs(session) > 0);
+    // Past the hold, the frame shows what there is even mid-update.
+    clock.sleepMs(@import("session.zig").sync_hold_ms + 20);
+    try testing.expect(try frameHas(session, "half-5"));
+}

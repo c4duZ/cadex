@@ -180,6 +180,12 @@ public final class TerminalView: NSView {
         let overlay = DrawOverlay(linkCells: hoveredLinkCells, hideCursor: !signals.cursorShown, flash: isFlashing)
         renderer.draw(frame.pointee, padding: SIMD2(padding, padding), in: drawable, size: canvas.drawableSize,
                       overlay: overlay, synchronously: synchronously)
+        // A synchronized update (DEC 2026) held the last frame: look again
+        // when the hold runs out, in case the program never ends it.
+        let held = session.holdRemainingMs
+        if held > 0 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(Int(held) + 1)) { [weak self] in self?.needsDisplay = true }
+        }
     }
 
     /// In a window: a new canvas, under the find bar and the hovers, with

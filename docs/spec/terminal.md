@@ -131,6 +131,14 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
   roda; ao reabrir, cada painel religa ao seu shell e a tela e o scrollback voltam. Depois de
   reiniciar o Mac, volta o scrollback salvo de cada painel, num shell novo (processo não volta). Sem
   nenhum terminal aberto, o daemon sai sozinho. Desligado, nenhum daemon roda.
+- O daemon (fase E1, 2026-11-15): o programa `cadex-terminald`, no socket
+  `terminal-<versão do protocolo>.sock` da pasta de sockets. Guarda de cada sessão os últimos 2 MiB
+  da saída crua e os modos que o programa ligou (tela alternativa, colagem entre colchetes, mouse,
+  teclado kitty); ao religar, o app recebe essa saída e, depois dela, os modos que ela sozinha não
+  deixaria ligados. O app escreve, redimensiona e pergunta o programa em primeiro plano direto no
+  PTY, que o daemon passa a ele. Sessão que terminou sem app ligado guarda a saída e o código de
+  saída até o app religar. Enquanto nenhum app está ligado, as perguntas do programa ao terminal
+  (cor de fundo, `ESC]7501;?`) ficam sem resposta.
 
 ### Agentes no terminal (plano 19)
 - O terminal responde à pergunta `ESC]7501;?` do Claude Code com `ESC]7501;?;1` e passa a receber o

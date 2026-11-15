@@ -201,6 +201,13 @@ pub export fn cadex_terminal_update_frame(session: ?*Session, out: ?*?*const ter
     return status.ok;
 }
 
+/// Milliseconds the frame stays held by a synchronized update (DEC mode
+/// 2026), 0 when it is not: the app draws again after that long.
+pub export fn cadex_terminal_hold_remaining_ms(session: ?*Session) callconv(.c) u32 {
+    const s = session orelse return 0;
+    return terminal.view.holdRemainingMs(s);
+}
+
 // ---- Paste ----
 
 /// Pastes text, encoded for the program: bracketed paste when it asked for

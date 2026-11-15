@@ -77,6 +77,13 @@
   pede ao Child para destravar a leitura (no Mac o poll acorda a cada 50 ms; no Windows fecha o
   console), espera a thread e encerra o shell (Mac: SIGHUP e, depois de 200 ms, SIGKILL; Windows:
   o Job Object inteiro).
+- O daemon do terminal (plano 19 fase E1, `../../../docs/adr/0022-terminal-daemon.md`), só no Mac,
+  sem a libghostty: `daemon_main.zig` é o programa `cadex-terminald` (raiz em
+  `../../cadex_terminal_daemon.zig`); `daemon.zig` o laço (um `poll`, SIGCHLD por pipe, sai sem
+  sessão nem app); `daemon_handle.zig` cada frame do app (hello com versão, open, attach, list,
+  close); `daemon_state.zig` sessões e conexões; `daemon_wire.zig` os frames e a passagem do master
+  (SCM_RIGHTS); `daemon_ring.zig` a saída crua guardada (2 MiB); `daemon_modes.zig` os modos lidos da
+  saída para depois do replay; `daemon_client.zig` o lado do app (testes agora, a sessão na E2).
 - Spec em `../../../docs/spec/terminal.md`. Status: sessão, PTY, quadro para desenhar, teclas pelo
   núcleo, rolagem, seleção, colagem, busca, links, mouse
   para programas, foco, título, sino e API C prontos. Reflow ao redimensionar coberto por teste.
@@ -90,3 +97,6 @@
   linhas, caminho relativo, OSC 8).
 - `input.zig` testa setas em modo de aplicação, F-keys, modificadores, Ctrl/Meta e kitty.
 - `render_test.zig` cobre cores, estilos, inversão, largura dupla, emoji e cursor.
+- `daemon_test.zig`: o daemon numa thread com shells de verdade: a sessão sobrevive ao app, religa
+  com o replay, termina sem app e guarda o código, close mata o shell, o segundo daemon e a versão
+  errada são recusados, e o daemon sai sozinho sem sessão nem app.

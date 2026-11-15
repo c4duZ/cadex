@@ -16,6 +16,8 @@
 - No Mac, o build também gera o programa `cadex` (`features/agent-tools/CLAUDE.md`, raiz em
   `cadex_cli.zig`): não é uma porta para o app, é o que as sessões de agente abertas pelo Cadex rodam.
   Usa só libc e `shared/`, sem a libghostty, e reserva folga no cabeçalho para a assinatura.
+- No Mac, também o programa `cadex-terminald`, o daemon do terminal (`features/terminal/CLAUDE.md`,
+  raiz em `cadex_terminal_daemon.zig`): o PTY e `shared/`, sem a libghostty, com a mesma folga.
 - Memória: quem aloca libera; a API C deixa claro de quem é cada buffer.
 - Funções da API C com prefixo cadex_ e o nome da feature (ex.: cadex_terminal_open).
 

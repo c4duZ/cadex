@@ -37,6 +37,8 @@ public final class SessionKit {
     /// agents.stateHooks: the hooks that tell the app what a session does
     /// (plan 19). Off, only the status line and the token.
     public var hooksEnabled = true
+    /// CLAUDE_CODE_FORCE_SYNC_OUTPUT=1 in the settings' env (SessionKitFiles).
+    public var synchronizedOutput = true
     /// Where each session's token is kept (0600), read by the app's socket.
     public var tokens: String = SessionKit.tokensFolder
 
@@ -63,8 +65,12 @@ public final class SessionKit {
 
     /// A kit that writes in `folder`, with no tools and an empty environment:
     /// other features' tests check their commands with it.
+    /// A kit with nothing of its own (no tools, no synchronized output):
+    /// other features' tests see the plain command.
     public static func forTests(folder: String) -> SessionKit {
-        SessionKit(folder: folder, toolsPath: nil, environment: [:])
+        let kit = SessionKit(folder: folder, toolsPath: nil, environment: [:])
+        kit.synchronizedOutput = false
+        return kit
     }
 
     public func contribute(_ id: String, _ part: SessionKitPart) { parts[id] = part }

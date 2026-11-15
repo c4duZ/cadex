@@ -59,7 +59,10 @@ pub fn build(b: *std.Build) void {
 
     // The `cadex` program the agent sessions Cadex opens run (features/agent-tools,
     // plan 18 phase B). Mac only for now; packaging puts it in Contents/Helpers.
-    if (target.result.os.tag == .macos) addCli(b, target, optimize);
+    if (target.result.os.tag == .macos) {
+        addCli(b, target, optimize);
+        addTerminalDaemon(b, target, optimize);
+    }
 
     const tests = b.addTest(.{ .root_module = root });
     const run_tests = b.addRunArtifact(tests);
@@ -86,6 +89,23 @@ fn addCli(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin
     // the arm64 slice, which Zig signs itself, already had room).
     cli.headerpad_size = 0x1000;
     b.installArtifact(cli);
+}
+
+/// zig-out/bin/cadex-terminald: the terminal daemon (docs/adr/0022-terminal-daemon.md),
+/// the pty and shared/ only, not libghostty.
+fn addTerminalDaemon(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) void {
+    const daemon = b.addExecutable(.{
+        .name = "cadex-terminald",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("cadex_terminal_daemon.zig"),
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
+    });
+    // Room for codesign's load command, as for `cadex` (addCli).
+    daemon.headerpad_size = 0x1000;
+    b.installArtifact(daemon);
 }
 
 /// What each system adds to the core. The default target stays the Mac; the

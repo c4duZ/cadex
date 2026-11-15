@@ -50,6 +50,7 @@ let exitCode = await Checks.run([
         // The session's token in env, never in the command; its file 0600 in the kit's tokens.
         let token = (file["env"] as? [String: String])?["CADEX_SESSION_TOKEN"] ?? ""
         expect(token.count == 64 && !command.contains(token), "a 32-byte token, kept out of the typed command")
+        expect((file["env"] as? [String: String])?["CLAUDE_CODE_FORCE_SYNC_OUTPUT"] == "1", "synchronized output on: the terminal honors DEC 2026")
         let tokenFiles = (try? fm.contentsOfDirectory(atPath: dir + "/kit/tokens")) ?? []
         expect(tokenFiles.count == 1 && (try? String(contentsOfFile: dir + "/kit/tokens/" + tokenFiles[0], encoding: .utf8)) == token)
         let mode = (try? fm.attributesOfItem(atPath: settings)[.posixPermissions] as? Int) ?? 0
@@ -61,14 +62,17 @@ let exitCode = await Checks.run([
         kit.hooksEnabled = false
         expect(json(settingsPath(kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json")))["hooks"] == nil, "agents.stateHooks off: no hooks")
     }),
-    ("the default account: no folder, a stray CLAUDE_CONFIG_DIR dropped; no tools, no settings", {
+    ("the default account: no folder, a stray CLAUDE_CONFIG_DIR dropped; no tools, only the synchronized output", {
         let dir = scratch()
         defer { try? fm.removeItem(atPath: dir) }
         let kit = SessionKit(folder: dir + "/kit", toolsPath: nil, environment: ["CLAUDE_CONFIG_DIR": "/other"])
-        expect(kit.claudeCommand(configDir: nil, defaultClaudeJSON: dir + "/none.json") == "env -u CLAUDE_CONFIG_DIR claude")
+        let command = kit.claudeCommand(configDir: nil, defaultClaudeJSON: dir + "/none.json")
+        expect(command == "env -u CLAUDE_CONFIG_DIR claude --settings \(settingsPath(command))", command)
+        let file = json(settingsPath(command))
+        expect(file.keys.sorted() == ["env"] && (file["env"] as? [String: String]) == ["CLAUDE_CODE_FORCE_SYNC_OUTPUT": "1"], "\(file)")
         let clean = SessionKit(folder: dir + "/kit", toolsPath: nil, environment: [:])
-        expect(clean.claudeCommand(configDir: nil, arguments: ["--dangerously-skip-permissions"], defaultClaudeJSON: dir + "/none.json")
-               == "claude --dangerously-skip-permissions")
+        let plain = clean.claudeCommand(configDir: nil, arguments: ["--dangerously-skip-permissions"], defaultClaudeJSON: dir + "/none.json")
+        expect(plain == "claude --settings \(settingsPath(plain)) --dangerously-skip-permissions", plain)
     }),
     ("the default account's MCP servers reach the others in a private file, never the default itself", {
         let dir = scratch()

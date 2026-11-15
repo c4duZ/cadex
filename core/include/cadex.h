@@ -254,6 +254,10 @@ _Static_assert(sizeof(cadex_terminal_frame) == 56, "cadex_terminal_frame layout"
 /* Captures the screen for drawing. Call only from the thread that draws;
  * the frame stays valid until the next call or cadex_terminal_close. */
 cadex_status cadex_terminal_update_frame(cadex_terminal *terminal, const cadex_terminal_frame **out);
+/* While the program is in a synchronized update (DEC mode 2026) the frame
+ * drawn last comes back, for at most 200 ms: the milliseconds left, 0 when
+ * not held. Draw again after that long. */
+uint32_t cadex_terminal_hold_remaining_ms(cadex_terminal *terminal);
 
 /* Visible text, one line per row, not NUL-terminated. Free with cadex_free.
  * Empty screen: *out is NULL and *out_len is 0. */

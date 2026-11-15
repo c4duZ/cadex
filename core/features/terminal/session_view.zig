@@ -3,7 +3,8 @@
 //! the session lock for as long as it touches the model.
 
 const std = @import("std");
-const Session = @import("session.zig").Session;
+const session = @import("session.zig");
+const Session = session.Session;
 const selection = @import("selection.zig");
 const search = @import("search.zig");
 const links = @import("links.zig");
@@ -191,4 +192,15 @@ pub fn focus(s: *Session, focused: bool) !void {
     const bytes = mouse.encodeFocus(&buf, &s.model.terminal, focused);
     s.unlock();
     if (bytes.len > 0) try s.child.write(bytes);
+}
+
+/// Synchronized output (DEC 2026, session.zig:holding): how long the
+/// frame stays held; 0 when it is not. The app draws again after this, in
+/// case the program never ends the update.
+pub fn holdRemainingMs(self: *Session) u32 {
+    self.lock();
+    defer self.unlock();
+    if (!self.model.terminal.modes.get(.synchronized_output)) return 0;
+    const since = self.sync_since orelse return 0;
+    return @intCast(std.math.clamp(session.sync_hold_ms - (@import("../../shared/clock.zig").monotonicMs() - since), 0, session.sync_hold_ms));
 }

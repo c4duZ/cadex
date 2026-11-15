@@ -11,10 +11,11 @@ extension SessionKit {
     /// passed this way add to the account's and the project's (tested), so
     /// the owner's keep running.
     ///
-    /// Not yet: CLAUDE_CODE_FORCE_SYNC_OUTPUT and preferredNotifChannel
-    /// (test 24, 2026-11-14) wait for the terminal to honor DEC 2026 and
-    /// OSC 777 (plan 19, phase E); turning them on before would change
-    /// nothing on screen.
+    /// CLAUDE_CODE_FORCE_SYNC_OUTPUT=1: Claude Code wraps each redraw in a
+    /// synchronized update only for terminals it knows by TERM_PROGRAM; with
+    /// it, 10 updates in a session's first seconds instead of 0 (tested
+    /// 2026-11-15, 2.1.325, also through this env), and the terminal holds
+    /// the frame until each ends (plan 19, phase E).
     func writeSettings(session: String, token: String?, accountDir: String) -> String? {
         var settings: [String: Any] = [:]
         if let tools = toolsPath {
@@ -25,7 +26,10 @@ extension SessionKit {
         }
         // The settings' env reaches the hooks (tested 2026-11-15): the token
         // travels here, never typed in the terminal or kept in shell history.
-        if let token, toolsPath != nil { settings["env"] = ["CADEX_SESSION_TOKEN": token] }
+        var env: [String: String] = [:]
+        if synchronizedOutput { env["CLAUDE_CODE_FORCE_SYNC_OUTPUT"] = "1" }
+        if let token, toolsPath != nil { env["CADEX_SESSION_TOKEN"] = token }
+        if !env.isEmpty { settings["env"] = env }
         for id in parts.keys.sorted() { settings = Self.merge(settings, parts[id]!.settings) }
         guard !settings.isEmpty else { return nil }
         pruneSessions()

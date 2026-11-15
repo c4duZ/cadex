@@ -1,6 +1,7 @@
 //! Entry point of the terminal feature. Other features and the C API use
 //! only what is re-exported here.
 
+const builtin = @import("builtin");
 const session = @import("session.zig");
 
 pub const Session = session.Session;
@@ -37,4 +38,11 @@ test {
     _ = @import("agent_status_test.zig");
     _ = @import("mouse.zig");
     _ = @import("local_url.zig");
+    // The daemon is the Mac's for now (docs/adr/0022-terminal-daemon.md).
+    if (builtin.os.tag != .windows) {
+        _ = @import("daemon_ring.zig");
+        _ = @import("daemon_modes.zig");
+        _ = @import("daemon_wire.zig");
+        _ = @import("daemon_test.zig");
+    }
 }

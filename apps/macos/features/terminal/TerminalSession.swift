@@ -160,6 +160,12 @@ public final class TerminalSession {
         return frame
     }
 
+    /// Milliseconds a synchronized update (DEC 2026) still holds the frame.
+    var holdRemainingMs: UInt32 {
+        guard let handle else { return 0 }
+        return cadex_terminal_hold_remaining_ms(handle)
+    }
+
     fileprivate func deliverOutput() { onOutput?() }
     fileprivate func deliverExit(_ code: Int32) { onExit?(code) }
 }

@@ -3,6 +3,7 @@
 
 const std = @import("std");
 const sync = @import("../../shared/sync.zig");
+const clock = @import("../../shared/clock.zig");
 const Model = @import("model.zig").Model;
 const pty = @import("pty.zig");
 const render = @import("render.zig");
@@ -46,6 +47,9 @@ pub const Options = struct {
 };
 
 const read_buffer_size = 64 * 1024;
+/// The longest a synchronized update holds the screen: a program that
+/// never ends one (crashed mid-frame) is drawn anyway after this.
+pub const sync_hold_ms = 200;
 
 pub const Session = struct {
     gpa: std.mem.Allocator,
@@ -61,6 +65,13 @@ pub const Session = struct {
     renderer: render.Renderer = .{},
     /// Only used by the reader thread.
     local_urls: local_url.Detector = undefined,
+    /// Synchronized output (DEC mode 2026, plan 19 phase E): while the
+    /// program holds it, the frame drawn last is drawn again, up to
+    /// `sync_hold_ms`. Main thread: when the hold started and whether a
+    /// frame exists to hold. Reader: whether this hold was told already.
+    sync_since: ?i64 = null,
+    has_frame: bool = false,
+    sync_told: bool = false,
 
     pub fn open(gpa: std.mem.Allocator, options: Options) !*Session {
         const self = try gpa.create(Session);
@@ -157,10 +168,28 @@ pub const Session = struct {
     /// only (the one that draws); the frame is valid until the next call.
     pub fn updateFrame(self: *Session) !*const Frame {
         self.lock();
+        if (self.holding()) {
+            self.unlock();
+            return &self.renderer.frame;
+        }
         const captured = self.renderer.capture(self.gpa, &self.model.terminal, &self.model.search);
         self.unlock();
         try captured;
+        self.has_frame = true;
         return self.renderer.build(self.gpa, &self.model.search);
+    }
+
+    /// With the lock held, on the drawing thread: true while the program is
+    /// in the middle of a synchronized update, for at most `sync_hold_ms`.
+    fn holding(self: *Session) bool {
+        if (!self.model.terminal.modes.get(.synchronized_output)) {
+            self.sync_since = null;
+            return false;
+        }
+        const now = clock.monotonicMs();
+        const since = self.sync_since orelse now;
+        self.sync_since = since;
+        return self.has_frame and now - since < sync_hold_ms;
     }
 
     pub fn hasForegroundProcess(self: *Session) bool {
@@ -194,8 +223,14 @@ pub const Session = struct {
         while (self.child.read(&buf, &self.stop)) |n| {
             self.lock();
             self.model.feed(buf[0..n]);
+            const synchronized = self.model.terminal.modes.get(.synchronized_output);
             self.unlock();
-            if (self.callbacks.on_output) |notify| notify(self.callbacks.context);
+            // In a synchronized update only its first piece asks for a
+            // draw (which holds the last frame and looks again after the
+            // hold); its end asks again.
+            const tell = !synchronized or !self.sync_told;
+            self.sync_told = synchronized;
+            if (tell) if (self.callbacks.on_output) |notify| notify(self.callbacks.context);
             if (self.callbacks.on_local_url != null) self.local_urls.scan(buf[0..n], self, reportLocalUrl);
         }
         if (self.stop.load(.acquire)) return;

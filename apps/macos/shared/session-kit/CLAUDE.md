@@ -31,8 +31,9 @@
   juntam, listas se somam: hooks de duas features no mesmo evento rodam os dois); e, para contas que
   não são a padrão, `mcp-<conta>.json` (0600) com os `mcpServers` do .claude.json da conta padrão,
   lidos sem escrever.
-- Ainda não: `CLAUDE_CODE_FORCE_SYNC_OUTPUT` e `preferredNotifChannel` (teste 24 de 2026-11-14)
-  esperam o terminal respeitar DEC 2026 e OSC 777 (plano 19, fase E). O `cadex` no PATH da aba
+- `CLAUDE_CODE_FORCE_SYNC_OUTPUT=1` na `env` do `--settings` (`synchronizedOutput`): o terminal respeita
+  o modo DEC 2026 (plano 19, fase E) e, com ele, o Claude Code manda cada redesenho num bloco
+  (testado em 2026-11-15). Ainda não: `preferredNotifChannel` (OSC 777). O `cadex` no PATH da aba
   entra com o primeiro subcomando que o agente usa (plano 20).
 
 ## Como validar

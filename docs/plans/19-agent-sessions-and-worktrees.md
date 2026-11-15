@@ -168,7 +168,9 @@ docs/adr/0021-cadex-managed-accounts.md (do plano 18), `docs/adr/0019-agents-obs
 - **E. Daemon do terminal.** Pela ADR 0022, em duas partes, cada uma numa sessão:
   - **E1. O daemon e o protocolo.** O núcleo ganha o modo daemon (PTYs, buffer da saída crua,
     terminal.sock, aperto de mão com versão, saída sozinho sem sessão); testes do núcleo com um
-    shell falso (`make core-test`, sem vazamento). O app ainda não usa.
+    shell falso (`make core-test`, sem vazamento). O app ainda não usa. Feito em 2026-11-15
+    (`cadex-terminald`; detalhes na ADR 0022): falta à E2 o launchd ("mantido pelo launchd só
+    enquanto há sessão"), o empacotamento em Contents/Helpers e o app usar o daemon.
   - **E2. O app pelo daemon.** Com terminal.keepSessions ligado, o app abre e liga terminais pelo
     daemon; fechar a janela ou o app deixa as sessões lá; reabrir religa e reaplica o buffer no
     modelo (scrollback); travar o app não derruba nada. Ao reiniciar o Mac, o scrollback salvo de
@@ -181,7 +183,9 @@ docs/adr/0021-cadex-managed-accounts.md (do plano 18), `docs/adr/0019-agents-obs
     Cadex exporta `TERM_PROGRAM=Cadex` e não ganha nenhum. O renderizador passa a respeitar o modo
     DEC 2026 (desenhar só no fim do bloco) e só então o kit liga `CLAUDE_CODE_FORCE_SYNC_OUTPUT=1`
     (plano 18); a notificação vem por `preferredNotifChannel`. Kitty keyboard e OSC 9;4 não voltam
-    sem fingir ser outro terminal: trocar o `TERM_PROGRAM` só com ADR.
+    sem fingir ser outro terminal: trocar o `TERM_PROGRAM` só com ADR. Feito em 2026-11-15: o
+    quadro fica parado durante o bloco (no máximo 200 ms) e o kit liga a variável pelo `env` do
+    `--settings`; com ela o `claude` real mandou 10 blocos nos primeiros segundos, sem ela nenhum.
 - **F. Hibernar e reiniciar.** Sessão terminada, sem foco e parada há agents.hibernateAfterMinutes
   (padrão 30; 0 desliga) é encerrada, guardando o id, a pasta, a conta, o comando e o token.
   Abrir a worktree ou a aba relança com `CLAUDE_CONFIG_DIR=<conta> claude --resume <id>` na mesma

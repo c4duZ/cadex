@@ -52,6 +52,20 @@ passa a receber `state=idle|working|blocked|done`, `kind=permission|question` e 
   (teste 24 de 2026-11-14). Kitty keyboard e OSC 9;4 só voltariam fingindo ser outro terminal:
   trocar o `TERM_PROGRAM` pede outra ADR, e a decisão é do dono.
 
+## Detalhes da fase E1 (2026-11-15)
+- **Uma conexão por painel**, presa a uma sessão: abrir (`open`) ou religar (`attach`); fechar a
+  conexão é soltar a sessão, que segue rodando; `close` encerra (SIGHUP e, 200 ms depois, SIGKILL).
+- **O master do PTY vai ao app** junto do `ready` (SCM_RIGHTS): o app escreve, redimensiona e lê o
+  programa em primeiro plano direto nele, como hoje; o protocolo só leva a saída, o fim e a lista.
+  O daemon confere com `getpeereid` que o outro lado é o mesmo usuário.
+- **O socket leva a versão no nome** (`terminal-1.sock`), além do aperto de mão: um app atualizado
+  com o mesmo protocolo religa às sessões do daemon velho; com outro, sobe o seu ao lado.
+- **Os modos fora do buffer:** o daemon lê da saída inteira os modos DEC (`CSI ? n h/l`) e a pilha do
+  teclado kitty, sem modelo; ao religar, manda depois do buffer só o que ele sozinho deixaria
+  diferente.
+- **Sem timer:** SIGCHLD acorda o laço por um pipe; parado, o daemon só espera o `poll`. Iniciado e
+  ninguém conectou em 10 s, sai.
+
 ## Alternativas recusadas
 - **O daemon guardar o modelo e mandar o estado da tela:** o daemon carregaria a libghostty e o
   modelo inteiro de cada painel; só volta à mesa se a recomendada falhar no `make perf` ou na

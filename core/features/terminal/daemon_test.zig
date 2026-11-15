@@ -1,0 +1,179 @@
+//! The terminal daemon with real shells (/bin/sh standing in for the user's)
+//! on a socket of its own, the loop on a thread, and the app played by
+//! `daemon_client.zig` (plan 19 phase E1).
+
+const std = @import("std");
+const c = std.c;
+const testing = std.testing;
+const clock = @import("../../shared/clock.zig");
+const daemon = @import("daemon.zig");
+const client = @import("daemon_client.zig");
+const wire = @import("daemon_wire.zig");
+
+const size: @import("pty.zig").Size = .{ .cols = 80, .rows = 24 };
+
+const Running = struct {
+    server: daemon.Server,
+    thread: std.Thread = undefined,
+    path_buf: [64]u8 = undefined,
+    path: []const u8 = "",
+    result: ?anyerror = null,
+
+    fn start(self: *Running, name: []const u8) !void {
+        self.path = try std.fmt.bufPrint(&self.path_buf, "/tmp/cadex-td-{d}-{s}.sock", .{ c.getpid(), name });
+        self.server = try daemon.Server.listen(testing.allocator, self.path);
+        self.thread = try std.Thread.spawn(.{}, loop, .{self});
+    }
+
+    fn loop(self: *Running) void {
+        self.server.run() catch |err| {
+            self.result = err;
+        };
+    }
+
+    /// Waits for the loop to end on its own (idle), or stops it.
+    fn finish(self: *Running, expect_idle: bool) !void {
+        if (!expect_idle) self.server.requestStop();
+        self.thread.join();
+        self.server.deinit();
+        var z: [65]u8 = @splat(0);
+        @memcpy(z[0..self.path.len], self.path);
+        _ = c.unlink(@ptrCast(&z));
+        if (self.result) |err| return err;
+    }
+};
+
+/// Output frames until `needle` shows up in them, within ~5 s.
+fn waitOutput(conn: *client.Connection, needle: []const u8) !void {
+    var seen: std.ArrayList(u8) = .empty;
+    defer seen.deinit(testing.allocator);
+    const deadline = clock.monotonicMs() + 5000;
+    while (clock.monotonicMs() < deadline) {
+        const f = try conn.next(testing.allocator, 100) orelse continue;
+        if (f.kind == .output) try seen.appendSlice(testing.allocator, f.payload);
+        if (std.mem.indexOf(u8, seen.items, needle) != null) return;
+    }
+    return error.NeverSaw;
+}
+
+/// The exit code from the next "exited" frame, within ~5 s.
+fn waitExit(conn: *client.Connection) !i32 {
+    const deadline = clock.monotonicMs() + 5000;
+    while (clock.monotonicMs() < deadline) {
+        const f = try conn.next(testing.allocator, 100) orelse continue;
+        if (f.kind == .exited) {
+            var r: wire.Reader = .{ .rest = f.payload };
+            return r.int(i32);
+        }
+    }
+    return error.NeverExited;
+}
+
+fn type_(conn: *client.Connection, text: []const u8) !void {
+    try wire.writeAll(conn.master.?, text);
+}
+
+test "a session outlives its app: detach, attach again with the replay, end" {
+    var d: Running = .{ .server = undefined };
+    try d.start("life");
+    {
+        var app = try client.Connection.connect(testing.allocator, d.path);
+        defer app.deinit(testing.allocator);
+        const ready = try app.open(testing.allocator, "pane-1", size, "/tmp", "/bin/sh");
+        try testing.expect(ready.alive and ready.pid > 0 and app.master != null);
+        // Arithmetic, so the match is the shell's output and not the echo.
+        try type_(&app, "echo kept-$((40+2))\n");
+        try waitOutput(&app, "kept-42");
+        // A second open of the same name is refused.
+        var other = try client.Connection.connect(testing.allocator, d.path);
+        defer other.deinit(testing.allocator);
+        try testing.expectError(error.Refused, other.open(testing.allocator, "pane-1", size, "", "/bin/sh"));
+    }
+    // The app went away (closed, crashed): the shell is still there.
+    var app = try client.Connection.connect(testing.allocator, d.path);
+    defer app.deinit(testing.allocator);
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+    const listed = try client.list(testing.allocator, arena.allocator(), &app);
+    try testing.expect(listed.len == 1 and listed[0].alive and !listed[0].attached);
+    try testing.expect(c.kill(listed[0].pid, @enumFromInt(0)) == 0);
+    const back = try app.attach(testing.allocator, "pane-1");
+    try testing.expect(back.alive and app.master != null);
+    try waitOutput(&app, "kept-42");
+    try type_(&app, "echo again-$((1+1)); exit 3\n");
+    try waitOutput(&app, "again-2");
+    try testing.expectEqual(@as(i32, 3), try waitExit(&app));
+    // Told and let go: the ended session is gone. A second app connects
+    // first, or the daemon would leave as soon as the last one does.
+    var second = try client.Connection.connect(testing.allocator, d.path);
+    app.deinit(testing.allocator);
+    app = .{ .sock = -1 };
+    var gone = false;
+    var waited: u32 = 0;
+    while (!gone and waited < 2000) : (waited += 20) {
+        clock.sleepMs(20);
+        gone = (try client.list(testing.allocator, arena.allocator(), &second)).len == 0;
+    }
+    try testing.expect(gone);
+    // No session and now no app: the daemon leaves by itself.
+    second.deinit(testing.allocator);
+    try d.finish(true);
+}
+
+test "a session that ended with no app keeps its output and code for the next attach" {
+    var d: Running = .{ .server = undefined };
+    try d.start("ended");
+    {
+        var app = try client.Connection.connect(testing.allocator, d.path);
+        defer app.deinit(testing.allocator);
+        _ = try app.open(testing.allocator, "pane-2", size, "", "/bin/sh");
+        try type_(&app, "sleep 0.3; echo last-$((2+2)); exit 4\n");
+    }
+    clock.sleepMs(900);
+    var app = try client.Connection.connect(testing.allocator, d.path);
+    defer app.deinit(testing.allocator);
+    const back = try app.attach(testing.allocator, "pane-2");
+    try testing.expect(!back.alive and back.exit_code == 4 and app.master == null);
+    try waitOutput(&app, "last-4");
+    try testing.expectEqual(@as(i32, 4), try waitExit(&app));
+    try d.finish(false);
+}
+
+test "closing a session ends its program; a second daemon on the same socket is refused" {
+    var d: Running = .{ .server = undefined };
+    try d.start("close");
+    var app = try client.Connection.connect(testing.allocator, d.path);
+    defer app.deinit(testing.allocator);
+    const ready = try app.open(testing.allocator, "pane-3", size, "", "/bin/sh");
+    try testing.expectError(error.Running, daemon.Server.listen(testing.allocator, d.path));
+    try app.close(testing.allocator);
+    var gone = false;
+    var waited: u32 = 0;
+    while (waited < 2000 and !gone) : (waited += 20) {
+        clock.sleepMs(20);
+        var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+        defer arena.deinit();
+        var probe = try client.Connection.connect(testing.allocator, d.path);
+        defer probe.deinit(testing.allocator);
+        gone = (try client.list(testing.allocator, arena.allocator(), &probe)).len == 0;
+    }
+    try testing.expect(gone);
+    try testing.expect(c.kill(ready.pid, @enumFromInt(0)) != 0);
+    try d.finish(false);
+}
+
+test "a hello of another version is refused" {
+    var d: Running = .{ .server = undefined };
+    try d.start("version");
+    const sock = wire.connect(d.path).?;
+    defer _ = c.close(sock);
+    var out: std.ArrayList(u8) = .empty;
+    defer out.deinit(testing.allocator);
+    try wire.frame(testing.allocator, &out, .hello, &.{ 99, 0 });
+    try wire.writeAll(sock, out.items);
+    var conn: client.Connection = .{ .sock = sock };
+    defer conn.inbox.deinit(testing.allocator);
+    const f = (try conn.next(testing.allocator, 2000)).?;
+    try testing.expectEqual(wire.Kind.refused, f.kind);
+    try d.finish(false);
+}
