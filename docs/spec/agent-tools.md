@@ -30,9 +30,9 @@ Cadex: `docs/adr/0024-agent-tools.md`).
 
 ### O agente usa o Cadex (plano 20, `docs/adr/0024-agent-tools.md`)
 - Só nas sessões que o Cadex abre: o comando que abre o agente põe a pasta do `cadex`
-  (Contents/Helpers do app) no `PATH`, o `--mcp-config` do kit registra `cadex mcp` com o token no
-  `env` do servidor, o `--plugin-dir` traz as skills, e para a CLI o token já está no `env` do
-  `--settings` (chega à ferramenta Bash, testado em 2026-11-15). Uma sessão aberta fora do Cadex não tem o `cadex` no `PATH` nem o token.
+  (Contents/Helpers do app) no `PATH`, o `--mcp-config` do kit registra `cadex mcp`, o `--plugin-dir`
+  traz as skills, e o token está no `env` do `--settings`, que chega à ferramenta Bash e ao servidor
+  MCP (testado em 2026-11-15); o arquivo do MCP, um por conta, nunca leva o token. Uma sessão aberta fora do Cadex não tem o `cadex` no `PATH` nem o token.
 - `cadex run <id> [chave=valor…]` pede ao app que rode o comando `<id>` com os argumentos; responde
   com o resultado (texto, ou JSON com `--json`) e sai com 0, ou com o erro e sai com 1.
   `cadex commands` lista o que o agente pode rodar, com os argumentos de cada um.

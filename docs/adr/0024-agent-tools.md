@@ -17,7 +17,8 @@ do plano 18 (Zig, no núcleo), que as sessões já rodam para a status line e os
 
 Testado em 2026-11-15 (Claude Code 2.1.325), sem tocar o `~/.claude`:
 - o `env` do `--settings` do kit chega aos comandos que o agente roda pela ferramenta Bash
-  (`printenv CADEX_SESSION_TOKEN` devolveu o token), não só aos hooks;
+  (`printenv CADEX_SESSION_TOKEN` devolveu o token) e a um servidor MCP stdio passado por
+  `--mcp-config` (a ferramenta devolveu o token), não só aos hooks;
 - um `PATH` posto no comando que o Cadex digita para abrir o agente chega à ferramenta Bash;
 - (2026-11-14) um plugin mínimo passado só por `--plugin-dir` teve a skill carregada pela descrição,
   e um servidor MCP stdio passado só por `--mcp-config` teve a ferramenta chamada; sem regra de
@@ -41,9 +42,11 @@ Testado em 2026-11-15 (Claude Code 2.1.325), sem tocar o `~/.claude`:
 - **Pelo kit da sessão, nunca pelo `~/.claude`.** O `cadex` mora no bundle, em
   `Cadex.app/Contents/Helpers/cadex` (em Contents/MacOS ele colidiria com "Cadex" num disco que não
   diferencia maiúsculas; plano 18). O comando que abre o agente põe essa pasta no `PATH`; o
-  `--mcp-config` do kit registra `cadex mcp`, com o token no `env` do servidor (é o Claude Code que o
-  inicia); o `--plugin-dir` traz as skills. Para a CLI, o token já está no `env` do `--settings`, que
-  chega à ferramenta Bash. Sessão aberta fora do Cadex não ganha nada disso.
+  `--mcp-config` do kit registra `cadex mcp`; o `--plugin-dir` traz as skills. O token está no `env`
+  do `--settings`, que chega à ferramenta Bash e ao servidor MCP que o Claude Code inicia (testado em
+  2026-11-15): por isso ele não vai escrito no arquivo do `--mcp-config`, que é um por conta e
+  compartilhado entre sessões (o plano previa o token ali). Sessão aberta fora do Cadex não ganha
+  nada disso.
 - **Skills curtas, guia no binário.** Cada SKILL.md diz quando usar o Cadex e manda rodar
   `cadex skills get <tema>`; o guia completo vem do binário da mesma versão do app, e nunca fica
   desatualizado.
