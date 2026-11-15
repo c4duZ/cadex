@@ -19,9 +19,14 @@ const Client = state.Client;
 /// SIGHUP first, SIGKILL this long after, as a tab closing does
 /// (pty_posix.zig: hangup_grace_ms).
 pub const hangup_grace_ms = 200;
-/// Started and nobody connected in this time: the app that started it is
+/// Started and no app said hello in this time: the app that started it is
 /// gone, and the daemon leaves.
 pub const startup_grace_ms = 10_000;
+/// With no session and no app, it leaves after this long: an app checking
+/// the socket, or taking a gone session back and then opening a new one,
+/// connects again within it (found 2026-11-15: the app's check alone made
+/// the daemon leave before the app's session came).
+pub const linger_ms = 3_000;
 
 pub const Server = struct {
     gpa: std.mem.Allocator,
@@ -29,12 +34,19 @@ pub const Server = struct {
     sessions: std.ArrayList(*Session) = .empty,
     clients: std.ArrayList(*Client) = .empty,
     started_ms: i64,
+    /// An app said hello (a bare connect, the app's check, does not count).
     ever_connected: bool = false,
+    /// Since when it has had no session and no app.
+    empty_since: ?i64 = null,
     /// Tests stop the loop from another thread.
     stop: std.atomic.Value(bool) = .init(false),
     /// SIGCHLD writes a byte here (`childEnded`): an ended program wakes
     /// the poll, with no timer.
     wake: [2]c_int = .{ -1, -1 },
+    /// Where SIGTERM (the Mac shutting down) saves each session's output,
+    /// `<id>.raw`, for the app to show in a new shell (scrollback-only
+    /// restore, docs/adr/0022-terminal-daemon.md). Null: not saved.
+    scrollback_dir: ?[]const u8 = null,
 
     /// Listens on `path` (its folder must exist). error.Running when a
     /// daemon already answers there; a dead one's socket file is replaced.
@@ -63,6 +75,7 @@ pub const Server = struct {
         }
         wake_fd.store(wake[1], .release);
         _ = signal(sigchld, &childEnded);
+        _ = signal(sigterm, &terminated);
         return .{ .gpa = gpa, .listener = fd, .started_ms = clock.monotonicMs(), .wake = wake };
     }
 
@@ -77,6 +90,7 @@ pub const Server = struct {
         self.sessions.deinit(self.gpa);
         _ = c.close(self.listener);
         _ = signal(sigchld, null);
+        _ = signal(sigterm, null);
         wake_fd.store(-1, .release);
         for (self.wake) |end| _ = c.close(end);
     }
@@ -135,7 +149,14 @@ pub const Server = struct {
         }
         if (fds[1].revents & c.POLL.IN != 0) {
             var buf: [64]u8 = undefined;
-            while (c.read(self.wake[0], &buf, buf.len) > 0) {}
+            while (true) {
+                const n = c.read(self.wake[0], &buf, buf.len);
+                if (n <= 0) break;
+                if (std.mem.indexOfScalar(u8, buf[0..@intCast(n)], 't') != null) {
+                    self.saveAll();
+                    self.stop.store(true, .release);
+                }
+            }
         }
         if (fds[0].revents & c.POLL.IN != 0) self.accept();
     }
@@ -160,7 +181,6 @@ pub const Server = struct {
                 client.destroy(self.gpa);
                 return;
             };
-            self.ever_connected = true;
         }
     }
 
@@ -253,9 +273,21 @@ pub const Server = struct {
         s.master = -1;
     }
 
-    fn idle(self: *const Server) bool {
-        if (self.sessions.items.len > 0 or self.clients.items.len > 0) return false;
-        return self.ever_connected or clock.monotonicMs() - self.started_ms >= startup_grace_ms;
+    /// Each running session's replay, for after the Mac restarts.
+    pub fn saveAll(self: *Server) void {
+        if (self.scrollback_dir) |dir| state.saveAll(self.gpa, self.sessions.items, dir);
+    }
+
+    fn idle(self: *Server) bool {
+        if (self.sessions.items.len > 0 or self.clients.items.len > 0) {
+            self.empty_since = null;
+            return false;
+        }
+        const now = clock.monotonicMs();
+        if (!self.ever_connected) return now - self.started_ms >= startup_grace_ms;
+        const since = self.empty_since orelse now;
+        self.empty_since = since;
+        return now - since >= linger_ms;
     }
 
     /// Until the next thing that needs time: a kill or the startup grace.
@@ -264,6 +296,7 @@ pub const Server = struct {
         const now = clock.monotonicMs();
         var next: ?i64 = null;
         if (!self.ever_connected and self.sessions.items.len == 0) next = self.started_ms + startup_grace_ms;
+        if (self.empty_since) |since| next = since + linger_ms;
         for (self.sessions.items) |s| {
             if (!s.alive()) continue;
             if (s.kill_at) |t| next = if (next) |n| @min(n, t) else t;
@@ -275,8 +308,15 @@ pub const Server = struct {
 };
 
 const sigchld: c_int = 20;
+const sigterm: c_int = 15;
 extern "c" fn signal(sig: c_int, handler: ?*const fn (c_int) callconv(.c) void) ?*const anyopaque;
 var wake_fd: std.atomic.Value(c_int) = .init(-1);
+
+/// SIGTERM: the loop saves the sessions' output and leaves.
+fn terminated(_: c_int) callconv(.c) void {
+    const fd = wake_fd.load(.acquire);
+    if (fd >= 0) _ = c.write(fd, "t", 1);
+}
 
 /// SIGCHLD: only an async-signal-safe write, the loop does the rest.
 fn childEnded(_: c_int) callconv(.c) void {
@@ -290,3 +330,4 @@ fn decodeStatus(status: c_int) i32 {
     if (sig == 0) return (status >> 8) & 0xff;
     return 128 + sig;
 }
+

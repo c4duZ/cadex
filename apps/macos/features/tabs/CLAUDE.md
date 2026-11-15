@@ -51,6 +51,10 @@
   painel com foco, aba ativa) e reconstruir com shells novos e os documentos feitos pelo app
   (`restore(_:makeDocument:)`; documento sumido ao lado de outros vira terminal na pasta dele). O
   item `.document` do plano 7 ainda é lido, como aba de um painel; `setShown` e `closeAll` para os spaces.
+  Com `keepsSessions` (a janela principal, terminal.keepSessions), o painel guarda o nome do shell no
+  daemon (`.pane(folder:session:)`) e o restore religa por ele; `closeAll(keepingSessions:)` solta
+  esses shells em vez de encerrar, e a pergunta ao fechar a janela ou sair não conta programa que
+  segue rodando no daemon (plano 19, fase E2).
   `onStateChange` avisa cada mudança; `onEmpty`, a última aba fechada (sem ele, fecha a janela).
   `TabsClosing.swift`: fechar painel, aba e janela, e `shouldClose` para vários conjuntos de abas
   (uma pergunta só ao sair, contando os spaces escondidos); `hasRunningProgram` para o manter acordado.

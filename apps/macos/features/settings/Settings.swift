@@ -35,6 +35,9 @@ public struct Settings: Equatable, Sendable {
         public var fontFeatures: [String] = []
         /// A program's own notifications (OSC 777, OSC 9) as macOS ones.
         public var programNotifications = true
+        /// The main window's terminals outlive the app, in the terminal
+        /// daemon (plan 19 phase E); off until it passes `make perf`.
+        public var keepSessions = false
     }
 
     public struct Appearance: Equatable, Sendable {

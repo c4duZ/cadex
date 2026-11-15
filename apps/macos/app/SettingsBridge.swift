@@ -134,6 +134,7 @@ final class SettingsBridge {
         p.lineHeight = settings.terminal.lineHeight
         p.letterSpacing = settings.terminal.letterSpacing
         p.fontFeatures = settings.terminal.fontFeatures
+        p.keepSessions = settings.terminal.keepSessions
         return p
     }
 

@@ -56,7 +56,13 @@ public final class TerminalView: NSView {
     var pastedImageMatchScheduled = false
     var imageHover: PastedImageHover?
 
-    public init(frame: CGRect, cwd: String? = nil) {
+    /// The terminal daemon's name for this shell (TerminalKeep.swift); nil
+    /// on a pty of its own. Saved with the spaces to take it back.
+    public private(set) var keptID: String?
+
+    /// `keep`: the daemon may keep it (the main window's terminals);
+    /// `keptID`: the name to take back.
+    public init(frame: CGRect, cwd: String? = nil, keep: Bool = false, keptID: String? = nil) {
         super.init(frame: frame)
         let scale = window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
         if let device {
@@ -65,10 +71,9 @@ public final class TerminalView: NSView {
             }
         }
         let size = gridSize()
-        let preferences = TerminalPreferences.current
-        session = try? TerminalSession(cols: size.cols, rows: size.rows, cwd: cwd,
-                                       shell: preferences.shell.isEmpty ? nil : preferences.shell,
-                                       historyLines: UInt32(clamping: preferences.historyLines))
+        let opened = Self.openSession(cols: size.cols, rows: size.rows, cwd: cwd, keep: keep, keptID: keptID)
+        session = opened.session
+        self.keptID = opened.keptID
         session?.onOutput = { [weak self] in
             self?.needsDisplay = true
             self?.refreshFindCounts()

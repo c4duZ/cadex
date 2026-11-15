@@ -140,3 +140,32 @@ pub fn sessionsPayload(gpa: std.mem.Allocator, sessions: []const *Session) !wire
     }
     return p;
 }
+
+/// Each running session's replay into `<scrollback_dir>/<id>.raw` (0600).
+pub fn saveAll(gpa: std.mem.Allocator, sessions: []const *Session, dir: []const u8) void {
+    for (sessions) |s| {
+        if (!s.alive()) continue;
+        var out: std.ArrayList(u8) = .empty;
+        defer out.deinit(gpa);
+        s.replay(gpa, &out) catch continue;
+        var path: [1024]u8 = undefined;
+        const p = savedPath(&path, dir, s.id) orelse continue;
+        const fd = c.open(p, .{ .ACCMODE = .WRONLY, .CREAT = true, .TRUNC = true }, @as(c.mode_t, 0o600));
+        if (fd < 0) continue;
+        defer _ = c.close(fd);
+        wire.writeAll(fd, out.items) catch {};
+    }
+}
+
+/// `<dir>/<id>.raw`, NUL-terminated; an id byte that is not a letter, a
+/// digit, "-" or "_" becomes "_" (the id is the app's, but it names a file).
+pub fn savedPath(out: []u8, dir: []const u8, id: []const u8) ?[*:0]const u8 {
+    if (dir.len + id.len + 6 > out.len) return null;
+    @memcpy(out[0..dir.len], dir);
+    out[dir.len] = '/';
+    for (id, 0..) |ch, i| out[dir.len + 1 + i] = if (std.ascii.isAlphanumeric(ch) or ch == '-' or ch == '_') ch else '_';
+    const end = dir.len + 1 + id.len;
+    @memcpy(out[end .. end + 4], ".raw");
+    out[end + 4] = 0;
+    return out[0 .. end + 4 :0].ptr;
+}

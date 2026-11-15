@@ -139,6 +139,16 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
   PTY, que o daemon passa a ele. Sessão que terminou sem app ligado guarda a saída e o código de
   saída até o app religar. Enquanto nenhum app está ligado, as perguntas do programa ao terminal
   (cor de fundo, `ESC]7501;?`) ficam sem resposta.
+- O app pelo daemon (fase E2, 2026-11-15): com a opção ligada (Configurações › Terminal), cada
+  terminal da janela principal abre no daemon com um nome (`<instância>-<uuid>`, a instância vinda do
+  arquivo de spaces, para outra cópia do Cadex nunca encerrar as sessões desta) e o nome vai nos
+  spaces; reabrir religa por ele, com a saída guardada e dois redimensionamentos para um programa de
+  tela cheia se redesenhar. Sessão que o daemon não tem mais (o Mac reiniciou) vira um shell novo que
+  mostra antes a saída gravada no SIGTERM (`scrollback/<nome>.raw`, apagado depois de lido). Depois
+  de restaurar, as sessões desta instância que nenhum painel pegou de volta são encerradas. O app
+  inicia o daemon (`cadex-terminald` em Contents/Helpers) na primeira vez que precisa; sem sessão e
+  sem app por 3 s, ele sai. Daemon que não sobe deixa o terminal num PTY do app, como com a opção
+  desligada.
 
 ### Notificações dos programas
 - Um programa pode pedir uma notificação ao terminal (OSC 777 `notify;título;texto` ou OSC 9
@@ -210,7 +220,9 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
 - [ ] `vim`, `htop` e `less` funcionam, inclusive com rolagem e redimensionamento.
 - [ ] Com terminal.keepSessions ligado, `top` rodando, fechar e reabrir o Cadex mostra o mesmo `top`
       com o scrollback; `kill -9` no app não derruba o terminal; atualizar o app mantém a sessão.
-- [ ] Com terminal.keepSessions desligado, nenhum daemon roda (`ps`).
+      (Conferido em 2026-11-15 com o app de release: o `top` com o mesmo pid depois do `kill -9` e o
+      app reaberto religado à mesma sessão; o desenho da tela religada falta ver.)
+- [x] Com terminal.keepSessions desligado, nenhum daemon roda (`ps`) e o `top` sai junto com o app.
 - [ ] `printf '\e]777;notify;Build;pronto\a'` numa aba em segundo plano mostra a notificação; o
       clique leva à aba; com a aba à vista, nada aparece.
 - [ ] O Claude Code numa aba recebe a resposta ao `ESC]7501;?` e manda o estado; chaves desconhecidas

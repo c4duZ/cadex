@@ -55,4 +55,6 @@ que estavam, inclusive depois de fechar ou reabrir o app.
 - [x] Fechar o app pelo menu e reabrir traz os mesmos spaces e o mesmo space ativo.
 - [x] Um terminal e um documento lado a lado voltam lado a lado.
 - [ ] Com terminal.keepSessions ligado, reabrir o app traz a tela e o scrollback de cada painel;
-      depois de reiniciar o Mac, o scrollback salvo volta num shell novo.
+      depois de reiniciar o Mac, o scrollback salvo volta num shell novo. (2026-11-15: a sessão
+      religada pelo nome e, com SIGTERM no daemon, a saída gravada lida e apagada num shell novo
+      dentro do daemon; falta ver a tela.)

@@ -183,7 +183,7 @@ public final class SpacesController {
     public func closeAll() {
         saveNow()
         closed = true
-        spaces.forEach { $0.tabs.closeAll() }
+        spaces.forEach { $0.tabs.closeAll(keepingSessions: $0.tabs.keepsSessions) }
     }
 
     // MARK: Saving

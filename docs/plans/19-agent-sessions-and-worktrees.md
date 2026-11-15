@@ -171,6 +171,11 @@ docs/adr/0021-cadex-managed-accounts.md (do plano 18), `docs/adr/0019-agents-obs
     shell falso (`make core-test`, sem vazamento). O app ainda não usa. Feito em 2026-11-15
     (`cadex-terminald`; detalhes na ADR 0022): falta à E2 o launchd ("mantido pelo launchd só
     enquanto há sessão"), o empacotamento em Contents/Helpers e o app usar o daemon.
+  - E2 feita em 2026-11-15 (detalhes na ADR 0022): só a janela principal mantém; o app inicia o
+    daemon sem LaunchAgent; o reinício do Mac volta pela saída gravada no SIGTERM. Conferido com o
+    app de release: `top` vivo depois do `kill -9` no app, o app reaberto religado à mesma sessão, o
+    reinício simulado mostrando a saída num shell novo e, desligado, nenhum daemon. Falta ver a tela
+    religada e o fechar da janela principal pelo clique.
   - **E2. O app pelo daemon.** Com terminal.keepSessions ligado, o app abre e liga terminais pelo
     daemon; fechar a janela ou o app deixa as sessões lá; reabrir religa e reaplica o buffer no
     modelo (scrollback); travar o app não derruba nada. Ao reiniciar o Mac, o scrollback salvo de

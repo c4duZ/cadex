@@ -81,6 +81,16 @@ typedef struct {
      * notification (OSC 777 notify, OSC 9); title and body are UTF-8, cut
      * to 256 and 1024 bytes, valid during the call. NULL: dropped. */
     void (*on_notification)(void *context, const char *title, const char *body);
+    /* terminal.keepSessions (macOS): the session lives in the terminal daemon
+     * on daemon_socket, named daemon_session; daemon_attach takes an existing
+     * one back (CADEX_NOT_FOUND when the daemon has none by that name).
+     * NULL socket: a pty of the session's own, as before. */
+    const char *daemon_socket;
+    const char *daemon_session;
+    bool daemon_attach;
+    /* Output saved before the Mac restarted, shown before the shell's own;
+     * the file is deleted once read. NULL: none. */
+    const char *replay_path;
 } cadex_terminal_options;
 
 /* What an agent in the terminal last said it is doing (OSC 7501, the root
@@ -262,6 +272,18 @@ cadex_status cadex_terminal_update_frame(cadex_terminal *terminal, const cadex_t
  * drawn last comes back, for at most 200 ms: the milliseconds left, 0 when
  * not held. Draw again after that long. */
 uint32_t cadex_terminal_hold_remaining_ms(cadex_terminal *terminal);
+/* Like cadex_terminal_close, but a session the daemon keeps goes on running
+ * there (the app quits, the window that saves the spaces goes). */
+void cadex_terminal_detach(cadex_terminal *terminal);
+/* macOS: makes sure the terminal daemon answers on socket, starting helper
+ * (cadex-terminald) when none does; scrollback (or NULL) is the folder where
+ * it saves each session's output when the Mac shuts down. */
+cadex_status cadex_terminal_daemon_ensure(const char *helper, const char *socket, const char *scrollback);
+/* macOS: ends the daemon's sessions whose name starts with prefix, held by
+ * no app and not among the count names in claimed (taken back by panes
+ * after a launch); closed gets how many (may be NULL). */
+cadex_status cadex_terminal_daemon_close_unclaimed(const char *socket, const char *prefix,
+                                                   const char *const *claimed, uint32_t count, uint32_t *closed);
 
 /* Visible text, one line per row, not NUL-terminated. Free with cadex_free.
  * Empty screen: *out is NULL and *out_len is 0. */

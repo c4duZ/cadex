@@ -81,7 +81,8 @@ final class Tab {
     func snapshot(home: String) -> TabsSnapshot.Item {
         let layout = tree.snapshot { id in
             if let document = panes[id]?.document { return .document(identity: document.identity) }
-            return .pane(folder: panes[id]?.terminal?.currentDirectory ?? home)
+            let terminal = panes[id]?.terminal
+            return .pane(folder: terminal?.currentDirectory ?? home, session: terminal?.keptID)
         }
         return .terminal(title: customTitle, layout: layout, focus: tree.leaves.firstIndex(of: focusedPane) ?? 0, color: color)
     }

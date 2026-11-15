@@ -33,6 +33,10 @@ public struct TerminalPreferences: Equatable, Sendable {
     /// OpenType features of the font, "-" turning one off: "calt", "liga"
     /// (ligatures), "ss01", "zero" (terminal.fontFeatures).
     public var fontFeatures: [String] = []
+    /// terminal.keepSessions: the main window's terminals live in the
+    /// terminal daemon and outlive the app (docs/adr/0022-terminal-daemon.md).
+    /// Read when a terminal opens.
+    public var keepSessions = false
 
     public init() {}
 

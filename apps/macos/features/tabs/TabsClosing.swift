@@ -91,7 +91,11 @@ extension TabsController {
             CloseConfirmation.confirmUnsaved(count: unsaved, in: window, then: close, cancelled: cancelled)
             return false
         }
-        let running = all.contains { $0.tabs.values.contains { $0.hasForegroundProcess } }
+        // A shell the daemon keeps goes on running (plan 19 E2): only the
+        // others would be lost.
+        let running = all.contains { tabs in
+            tabs.allTerminals.contains { $0.hasForegroundProcess && !(tabs.keepsSessions && $0.keptID != nil) }
+        }
         let asks = TerminalPreferences.current.confirmClose
         guard running, asks else { return true }
         CloseConfirmation.confirm(running: true, in: window, what: what, then: close, cancelled: cancelled)

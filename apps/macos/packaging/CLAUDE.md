@@ -48,6 +48,9 @@ scripts/release.sh), que já distribui um app Swift sem Xcode completo e sem con
   colidiria com "Cadex" num disco que não diferencia maiúsculas (plano 18, fase B). O build roda as
   duas fatias dele depois da assinatura e falha se uma travar: a x86_64 travava depois do `codesign`
   por falta de folga no cabeçalho, que o `../../../core/build.zig` agora reserva (2026-11-14).
+- O daemon do terminal (`cadex-terminald`, terminal.keepSessions) vai em Contents/Helpers do mesmo
+  jeito, assinado; o build sobe cada fatia num socket temporário e confere que uma segunda acha a
+  primeira (plano 19, fase E2).
 - Montar o bundle à mão: Info.plist, ícone (`sips` gera os tamanhos a partir do
   `docs/cadex-icon.png` e `iconutil -c icns` monta o .icns), LICENSE e NOTICE em Resources.
 - Recursos do código (a fonte Phosphor, o catálogo de temas) vão soltos em Contents/Resources e o

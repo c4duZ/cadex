@@ -56,6 +56,20 @@ for slice in arm64 x86_64; do
         | CLAUDE_CONFIG_DIR="$SMOKE/none" CADEX_USAGE_DIR="$SMOKE/$slice" arch -"$slice" "$APP/Contents/Helpers/cadex" statusline >/dev/null \
         && [ -f "$SMOKE/$slice/sessions/smoke.json" ] || { echo "cadex ($slice) failed in the bundle"; exit 1; }
 done
+# The terminal daemon (terminal.keepSessions, core/features/terminal): the same
+# signing and check; a second one on the same socket must find the first.
+lipo -create "$DIST/core-aarch64/bin/cadex-terminald" "$DIST/core-x86_64/bin/cadex-terminald" \
+    -output "$APP/Contents/Helpers/cadex-terminald"
+strip -x "$APP/Contents/Helpers/cadex-terminald"
+codesign --force --sign - -i "$BUNDLE_ID.terminald" "$APP/Contents/Helpers/cadex-terminald"
+for slice in arm64 x86_64; do
+    if ! arch -"$slice" /usr/bin/true 2>/dev/null; then echo "skip: no $slice runtime (Rosetta) to test cadex-terminald"; continue; fi
+    arch -"$slice" "$APP/Contents/Helpers/cadex-terminald" --socket "$SMOKE/$slice.sock" & daemon=$!
+    for _ in 1 2 3 4 5 6 7 8 9 10; do [ -S "$SMOKE/$slice.sock" ] && break; sleep 0.2; done
+    [ -S "$SMOKE/$slice.sock" ] && arch -"$slice" "$APP/Contents/Helpers/cadex-terminald" --socket "$SMOKE/$slice.sock" \
+        || { kill $daemon 2>/dev/null; echo "cadex-terminald ($slice) failed in the bundle"; exit 1; }
+    kill $daemon; wait $daemon 2>/dev/null || true
+done
 rm -rf "$SMOKE"
 # Resources the code finds in the main bundle (Icon.swift, ThemeCatalog.swift):
 # SwiftPM's own resource bundles would have to sit in the app's root folder.

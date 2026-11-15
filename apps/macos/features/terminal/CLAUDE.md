@@ -55,8 +55,13 @@
   currentDirectory, closeSession) e os ganchos onShellExit, onActivity, onProgramTitle e onAgentStatus do
   `TerminalView`; a pergunta ao fechar com programa rodando é da feature tabs. Botão "Cancelar" de
   alerta ganha Esc à mão: o NSAlert só dá Esc a "Cancel".
+- Terminais mantidos (terminal.keepSessions, plano 19 fase E2): `TerminalDaemon.swift` (o programa,
+  o socket, a pasta da saída gravada, iniciar uma vez, os nomes `<instância>-<uuid>`,
+  `closeUnclaimed` depois de restaurar) e `TerminalKeep.swift` (`openSession`: abrir no daemon, religar
+  por `keptID`, um shell novo com a saída gravada quando o daemon não tem mais, PTY próprio se o
+  daemon falhar; `detachSession`). O `TerminalView` guarda `keptID`.
 - Preferências: `TerminalPreferences.swift` (fonte, cursor, histórico, Option como Meta, copiar ao
-  selecionar, perguntas, shell), preenchida pelo app a partir do settings.json; fonte e cursor
+  selecionar, perguntas, shell, keepSessions), preenchida pelo app a partir do settings.json; fonte e cursor
   valem na hora, histórico e shell nos terminais novos.
 - Cores: `TerminalAppearance.swift` guarda as cores que todo terminal usa (quem aplica o tema
   preenche `current`); cada `TerminalView` passa ao núcleo e usa a cor de seleção do tema.

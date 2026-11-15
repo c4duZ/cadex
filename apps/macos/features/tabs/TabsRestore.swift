@@ -46,8 +46,8 @@ extension TabsController {
         var panes: [Int: Pane] = [:]
         for (pane, leaf) in zip(tree.leaves, layout.leaves) {
             switch leaf {
-            case .pane(let folder):
-                panes[pane] = .terminal(makeTerminal(cwd: folder))
+            case .pane(let folder, let session):
+                panes[pane] = .terminal(makeTerminal(cwd: folder, keptID: session))
             case .document(let identity):
                 if let document = makeDocument(identity) {
                     panes[pane] = .document(document)
@@ -80,9 +80,18 @@ extension TabsController {
     }
 
     /// Ends every tab without asking: the caller asked (shouldCloseAll).
-    public func closeAll() {
+    /// `keepingSessions`: shells the daemon keeps go on running there (the
+    /// main window closing, plan 19 E2); the rest ends.
+    public func closeAll(keepingSessions: Bool = false) {
         for tab in tabs.values {
-            tab.ordered.forEach(end)
+            for pane in tab.ordered {
+                if keepingSessions, let terminal = pane.terminal, terminal.keptID != nil {
+                    terminal.detachSession()
+                    pane.view.removeFromSuperview()
+                } else {
+                    end(pane)
+                }
+            }
             tab.view.removeFromSuperview()
         }
         tabs = [:]

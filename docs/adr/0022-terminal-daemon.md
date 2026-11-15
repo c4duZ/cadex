@@ -68,6 +68,20 @@ passa a receber `state=idle|working|blocked|done`, `kind=permission|question` e 
 - **Sem timer:** SIGCHLD acorda o laço por um pipe; parado, o daemon só espera o `poll`. Iniciado e
   ninguém conectou em 10 s, sai.
 
+## Detalhes da fase E2 (2026-11-15)
+- **"Mantido pelo launchd":** o app inicia o daemon com `posix_spawn` numa sessão própria (SETSID),
+  sem nenhum descritor do app; quando o app sai, o daemon passa a ser filho do launchd. Sem
+  LaunchAgent: um job do launchd com KeepAlive o reiniciaria depois de sair por não ter sessão, e o
+  SMAppService mostraria o aviso de item em segundo plano. Enquanto o app roda, uma thread dele colhe
+  o daemon quando ele sai (sem zumbi).
+- **Sai depois de 3 s vazio**, não na hora: a checagem do socket pelo app e o "religar" recusado antes
+  de abrir uma sessão nova são conexões que vêm e vão; saindo na hora, o daemon saía antes da sessão
+  do app chegar (achado no teste com o app de release).
+- **Reinício do Mac:** no SIGTERM o daemon grava a saída de cada sessão em
+  `…/Cadex/scrollback/<nome>.raw` (0600) e sai; o app mostra o arquivo num shell novo e o apaga.
+- **Só a janela principal mantém:** as janelas do ⌘N não salvam spaces, então ninguém religaria os
+  terminais delas.
+
 ## Alternativas recusadas
 - **O daemon guardar o modelo e mandar o estado da tela:** o daemon carregaria a libghostty e o
   modelo inteiro de cada painel; só volta à mesa se a recomendada falhar no `make perf` ou na

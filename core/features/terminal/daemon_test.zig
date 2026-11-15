@@ -177,3 +177,92 @@ test "a hello of another version is refused" {
     try testing.expectEqual(wire.Kind.refused, f.kind);
     try d.finish(false);
 }
+
+const Session = @import("session.zig").Session;
+
+/// The model's text has `needle` within ~5 s.
+fn waitText(s: *Session, needle: []const u8) !void {
+    var tries: u32 = 0;
+    while (tries < 250) : (tries += 1) {
+        const text = try s.copyText(testing.allocator);
+        defer testing.allocator.free(text);
+        if (std.mem.indexOf(u8, text, needle) != null) return;
+        clock.sleepMs(20);
+    }
+    return error.TextNeverAppeared;
+}
+
+test "an app session through the daemon: detached, taken back with its screen, then closed" {
+    testing.log_level = .err;
+    var d: Running = .{ .server = undefined };
+    try d.start("session");
+    const keep: @import("session_child.zig").Daemon = .{ .socket = d.path, .id = "pane-s", .attach = false };
+    {
+        const s = try Session.open(testing.allocator, .{ .size = size, .shell = "/bin/sh", .daemon = keep });
+        try s.write("echo first-$((3+4))\n");
+        try waitText(s, "first-7");
+        try testing.expect(s.foregroundGroup() == 0);
+        // The app quits: the shell goes on in the daemon.
+        s.detach();
+    }
+    var back = keep;
+    back.attach = true;
+    const s = try Session.open(testing.allocator, .{ .size = size, .shell = "/bin/sh", .daemon = back });
+    try waitText(s, "first-7");
+    try s.write("echo second-$((4+4))\n");
+    try waitText(s, "second-8");
+    // A name the daemon does not know.
+    var gone = keep;
+    gone.id = "pane-gone";
+    gone.attach = true;
+    try testing.expectError(error.NotFound, Session.open(testing.allocator, .{ .size = size, .daemon = gone }));
+    s.close();
+    try d.finish(true);
+}
+
+test "SIGTERM's saved output comes back in a new session, once" {
+    testing.log_level = .err;
+    var d: Running = .{ .server = undefined };
+    try d.start("saved");
+    var dir_buf: [64]u8 = undefined;
+    const dir = try std.fmt.bufPrint(&dir_buf, "/tmp/cadex-td-{d}-saved", .{c.getpid()});
+    var dz: [65]u8 = @splat(0);
+    @memcpy(dz[0..dir.len], dir);
+    _ = c.mkdir(@ptrCast(&dz), 0o700);
+    d.server.scrollback_dir = dir;
+    var app = try client.Connection.connect(testing.allocator, d.path);
+    defer app.deinit(testing.allocator);
+    _ = try app.open(testing.allocator, "pane-t", size, "", "/bin/sh");
+    try type_(&app, "echo before-$((5+5))\n");
+    try waitOutput(&app, "before-10");
+    d.server.saveAll();
+    var path_buf: [128]u8 = undefined;
+    const path = std.mem.span(@import("daemon_state.zig").savedPath(&path_buf, dir, "pane-t").?);
+    const s = try Session.open(testing.allocator, .{ .size = size, .shell = "/bin/sh", .replay_path = path });
+    defer s.close();
+    try waitText(s, "before-10");
+    try testing.expect(!@import("../../shared/fs.zig").exists(path));
+    _ = c.rmdir(@ptrCast(&dz));
+    try d.finish(false);
+}
+
+test "the app's check of the socket, or a refused attach, does not make the daemon leave" {
+    var d: Running = .{ .server = undefined };
+    try d.start("check");
+    // The app's check: connect and close, no hello.
+    _ = c.close(wire.connect(d.path).?);
+    clock.sleepMs(300);
+    {
+        // Taking back a session the daemon lost, then opening a new one.
+        var probe = try client.Connection.connect(testing.allocator, d.path);
+        defer probe.deinit(testing.allocator);
+        try testing.expectError(error.Refused, probe.attach(testing.allocator, "gone"));
+    }
+    clock.sleepMs(300);
+    var app = try client.Connection.connect(testing.allocator, d.path);
+    defer app.deinit(testing.allocator);
+    const ready = try app.open(testing.allocator, "pane-c", size, "", "/bin/sh");
+    try testing.expect(ready.alive);
+    try app.close(testing.allocator);
+    try d.finish(false);
+}

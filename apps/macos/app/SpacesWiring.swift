@@ -4,6 +4,7 @@ import Explorer
 import GitHistory
 import Spaces
 import Tabs
+import Terminal
 
 /// The spaces in the window (docs/spec/spaces.md): each space's tabs are
 /// made here, wired like the window's (status bar, preview offers), and
@@ -12,6 +13,7 @@ extension WindowSession {
     /// Made with the commands, before the window, so the palette and the
     /// shortcuts know space.*; the tabs are made later, in startSpaces.
     func makeSpaces(palette: CommandPaletteController) {
+        if isMain { TerminalDaemon.shared.instance = Self.instanceName(SpacesFile.defaultURL.path) }
         let spaces = SpacesController(fileURL: isMain ? SpacesFile.defaultURL : nil) { [unowned self] in self.makeTabs() }
         spaces.onSwitch = { [weak self] tabs in
             self?.workspace?.show(tabs)
@@ -29,6 +31,7 @@ extension WindowSession {
 
     private func makeTabs() -> TabsController {
         let tabs = TabsController(window: window)
+        tabs.keepsSessions = isMain
         tabs.contextMenu = { [weak self] in self?.menu?.popup(Self.tabActions) ?? [] }
         tabs.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
         tabs.paneMenu = { [weak self] in self?.paneMenu() ?? [] }
@@ -59,6 +62,26 @@ extension WindowSession {
         if folder.launchedWithFolder, saved != nil, let tabs, !hasTerminal(in: folder.root, tabs) {
             tabs.newTab(cwd: folder.root)
         }
+        if isMain { closeUnclaimedTerminals(spaces) }
+    }
+
+    /// The main window came back (plan 19 E2): the daemon's sessions of this
+    /// Cadex that no restored pane took back end, as does their saved output.
+    private func closeUnclaimedTerminals(_ spaces: SpacesController) {
+        guard TerminalPreferences.current.keepSessions else { return }
+        let claimed = spaces.spaces.flatMap { $0.tabs.allTerminals.compactMap(\.keptID) }
+        TerminalDaemon.shared.closeUnclaimed(claimed: claimed)
+        // On disk now: after a crash the next launch takes these names back.
+        spaces.saveNow()
+    }
+
+    /// The daemon's names of this Cadex's sessions start with this: the
+    /// spaces file's path, hashed (FNV-1a, the same in every launch), so a
+    /// test instance with its own file never ends the owner's sessions.
+    static func instanceName(_ path: String) -> String {
+        var hash: UInt32 = 2_166_136_261
+        for byte in path.utf8 { hash = (hash ^ UInt32(byte)) &* 16_777_619 }
+        return "c" + String(hash, radix: 16)
     }
 
     private func hasTerminal(in folder: String, _ tabs: TabsController) -> Bool {

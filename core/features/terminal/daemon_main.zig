@@ -9,7 +9,7 @@ const c = std.c;
 const wire = @import("daemon_wire.zig");
 const daemon = @import("daemon.zig");
 
-const usage_text = "usage: cadex-terminald [--socket <path>]\n";
+const usage_text = "usage: cadex-terminald [--socket <path>] [--scrollback <folder>]\n";
 
 extern "c" fn signal(sig: c_int, handler: usize) usize;
 const sighup: c_int = 1;
@@ -20,9 +20,12 @@ pub fn main(init: std.process.Init.Minimal) u8 {
     _ = args.next();
     var path_buf: [104]u8 = undefined;
     var path: []const u8 = defaultPath(&path_buf) orelse return fail("no HOME\n");
+    var scrollback: ?[]const u8 = null;
     while (args.next()) |arg| {
         if (std.mem.eql(u8, arg, "--socket")) {
             path = args.next() orelse return fail(usage_text);
+        } else if (std.mem.eql(u8, arg, "--scrollback")) {
+            scrollback = args.next() orelse return fail(usage_text);
         } else return fail(usage_text);
     }
     _ = c.setsid();
@@ -36,6 +39,7 @@ pub fn main(init: std.process.Init.Minimal) u8 {
         else => return fail("could not listen on the socket\n"),
     };
     defer server.deinit();
+    server.scrollback_dir = scrollback;
     server.run() catch return 1;
     var z: [105]u8 = @splat(0);
     @memcpy(z[0..path.len], path);

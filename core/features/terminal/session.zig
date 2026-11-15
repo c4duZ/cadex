@@ -6,6 +6,7 @@ const sync = @import("../../shared/sync.zig");
 const clock = @import("../../shared/clock.zig");
 const Model = @import("model.zig").Model;
 const pty = @import("pty.zig");
+const session_child = @import("session_child.zig");
 const render = @import("render.zig");
 const input = @import("input.zig");
 const selection = @import("selection.zig");
@@ -46,6 +47,12 @@ pub const Options = struct {
     shell: ?[]const u8 = null,
     /// Lines of history to keep; 0 is the default (model.zig).
     history_lines: u32 = 0,
+    /// Through the terminal daemon (terminal.keepSessions, Mac only): the
+    /// socket, the session's name and whether to take it back.
+    daemon: ?session_child.Daemon = null,
+    /// Output saved before the Mac restarted (the daemon's, on SIGTERM):
+    /// shown first, then the file goes.
+    replay_path: ?[]const u8 = null,
     callbacks: Callbacks = .{},
 };
 
@@ -57,7 +64,7 @@ pub const sync_hold_ms = 200;
 pub const Session = struct {
     gpa: std.mem.Allocator,
     model: *Model,
-    child: pty.Child,
+    child: session_child.Child,
     callbacks: Callbacks,
     mutex: sync.Mutex = .{},
     reader: std.Thread = undefined,
@@ -90,17 +97,27 @@ pub const Session = struct {
         self.* = .{
             .gpa = gpa,
             .model = model,
-            .child = try pty.Child.start(gpa, .{ .size = options.size, .cwd = options.cwd, .shell = options.shell }),
+            .child = try session_child.start(gpa, options.size, options.cwd, options.shell, options.daemon),
             .callbacks = options.callbacks,
             .local_urls = .{ .gpa = gpa },
         };
         errdefer self.child.kill();
+        if (options.replay_path) |path| if (session_child.takeSaved(gpa, path)) |saved| {
+            defer gpa.free(saved);
+            model.feed(saved);
+        };
 
         model.setReply(&replyToShell, self);
         model.setNotice(&forwardNotice);
         model.program_notice = &forwardProgramNotice;
         self.reader = try std.Thread.spawn(.{}, readLoop, .{self});
         return self;
+    }
+
+    /// Like close(), but a program the daemon keeps goes on running there.
+    pub fn detach(self: *Session) void {
+        self.child.setDetach();
+        self.close();
     }
 
     /// Ends the shell, stops the reader and frees everything. No callback

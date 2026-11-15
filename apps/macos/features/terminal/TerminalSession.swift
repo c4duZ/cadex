@@ -30,7 +30,21 @@ public final class TerminalSession {
     nonisolated(unsafe) private(set) var handle: OpaquePointer?
     private let relay: CallbackRelay
 
-    public init(cols: UInt16, rows: UInt16, cwd: String? = nil, shell: String? = nil, historyLines: UInt32 = 0) throws {
+    /// A session the terminal daemon keeps (terminal.keepSessions): its
+    /// socket, its name, and whether to take an existing one back.
+    public struct Kept: Sendable {
+        public let socket: String
+        public let id: String
+        public let attach: Bool
+        public init(socket: String, id: String, attach: Bool) {
+            self.socket = socket
+            self.id = id
+            self.attach = attach
+        }
+    }
+
+    public init(cols: UInt16, rows: UInt16, cwd: String? = nil, shell: String? = nil, historyLines: UInt32 = 0,
+                kept: Kept? = nil, replayPath: String? = nil) throws {
         relay = CallbackRelay()
         var options = cadex_terminal_options()
         options.cols = cols
@@ -56,6 +70,13 @@ public final class TerminalSession {
             CallbackRelay.from(context).onMain { $0.onLocalURL?(address) }
         }
 
+        // The daemon's strings live until the open returns.
+        let owned = [kept?.socket, kept?.id, replayPath].map { $0.flatMap { strdup($0) } }
+        defer { owned.forEach { free($0) } }
+        options.daemon_socket = UnsafePointer(owned[0])
+        options.daemon_session = UnsafePointer(owned[1])
+        options.daemon_attach = kept?.attach ?? false
+        options.replay_path = UnsafePointer(owned[2])
         var opened: OpaquePointer?
         let status = withOptionalCString(cwd) { cwdPtr in
             withOptionalCString(shell) { shellPtr in
@@ -88,6 +109,13 @@ public final class TerminalSession {
     /// Ends the shell. No callback runs after this returns.
     public func close() {
         cadex_terminal_close(handle)
+        handle = nil
+    }
+
+    /// Lets go of a session the daemon keeps, which goes on running there
+    /// (closes it like close() when it is the session's own pty).
+    public func detach() {
+        cadex_terminal_detach(handle)
         handle = nil
     }
 

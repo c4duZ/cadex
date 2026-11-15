@@ -7,8 +7,9 @@ import Foundation
 /// active tab. Not the terminals' content: each pane starts a new shell.
 public struct TabsSnapshot: Codable, Equatable, Sendable {
     public indirect enum Layout: Codable, Equatable, Sendable {
-        /// A terminal pane.
-        case pane(folder: String)
+        /// A terminal pane; `session`: the terminal daemon's name for its
+        /// shell, taken back on restore (terminal.keepSessions, plan 19 E2).
+        case pane(folder: String, session: String? = nil)
         /// A document pane, made again by the app from its identity (a
         /// path, "history:<repo>"). Plan 8, 2026-10-19.
         case document(identity: String)
@@ -17,7 +18,7 @@ public struct TabsSnapshot: Codable, Equatable, Sendable {
 
         /// The terminal panes' folders in reading order.
         public var folders: [String] {
-            leaves.compactMap { if case .pane(let folder) = $0 { folder } else { nil } }
+            leaves.compactMap { if case .pane(let folder, _) = $0 { folder } else { nil } }
         }
 
         /// The panes (`.pane` and `.document`) in reading order.

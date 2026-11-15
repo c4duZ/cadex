@@ -30,6 +30,12 @@ enum TerminalPage {
                                  control: SettingsPage.toggle(store.settings.terminal.programNotifications) { on in
                                      store.update { $0.terminal.programNotifications = on }
                                  }),
+                SettingsPage.row(T("Keep terminals when Cadex quits", "Manter os terminais quando o Cadex fecha"),
+                                 T("The main window's shells and agents run in a process of their own: quitting, a crash or an update leaves them running, and reopening shows them again with their history. After the Mac restarts, the history comes back in new shells. For terminals opened from now on.",
+                                   "Os shells e agentes da janela principal rodam num processo à parte: fechar, travar ou atualizar o Cadex os deixa rodando, e reabrir os mostra de novo com o histórico. Depois de reiniciar o Mac, o histórico volta em shells novos. Vale para os terminais abertos daqui em diante."),
+                                 control: SettingsPage.toggle(store.settings.terminal.keepSessions) { on in
+                                     store.update { $0.terminal.keepSessions = on }
+                                 }),
                 SettingsPage.row(T("Ask before closing a running program", "Perguntar antes de fechar um programa rodando"),
                                  T("Closing a pane, tab or window where a program is running, such as a server or an agent, asks first.",
                                    "Fechar um painel, aba ou janela com um programa rodando, como um servidor ou um agente, pergunta antes."),

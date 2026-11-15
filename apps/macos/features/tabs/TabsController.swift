@@ -35,6 +35,9 @@ public final class TabsController {
     /// others alive but hidden: they must not retitle the window or take
     /// the keyboard.
     public var isShown = true
+    /// The main window's tabs: with terminal.keepSessions their terminals
+    /// live in the terminal daemon and outlive the app (plan 19 phase E2).
+    public var keepsSessions = false
     var list = TabList()
     var tabs: [Int: Tab] = [:]
     var nextId = 1
@@ -100,10 +103,11 @@ public final class TabsController {
 
     /// A terminal in `cwd`, or in the active terminal's folder, or home
     /// when that folder is gone (docs/spec/tabs.md, casos de borda).
-    func makeTerminal(cwd: String?) -> TerminalView {
+    /// `keptID`: the daemon's name of a saved pane's shell, to take back.
+    func makeTerminal(cwd: String?, keptID: String? = nil) -> TerminalView {
         let folder = cwd ?? activeFolder ?? home
         let start = FileManager.default.fileExists(atPath: folder) ? folder : home
-        return TerminalView(frame: view.bounds, cwd: start)
+        return TerminalView(frame: view.bounds, cwd: start, keep: keepsSessions, keptID: keptID)
     }
 
     // MARK: Panes

@@ -24,6 +24,13 @@ pub const Options = extern struct {
     on_local_url: ?*const fn (?*anyopaque, [*:0]const u8) callconv(.c) void,
     on_agent_status: ?*const fn (?*anyopaque) callconv(.c) void,
     on_notification: ?*const fn (?*anyopaque, [*:0]const u8, [*:0]const u8) callconv(.c) void,
+    /// terminal.keepSessions (Mac): the daemon's socket and the session's
+    /// name; attach takes it back (CADEX_NOT_FOUND when it is gone).
+    daemon_socket: ?[*:0]const u8 = null,
+    daemon_session: ?[*:0]const u8 = null,
+    daemon_attach: bool = false,
+    /// Output saved before the Mac restarted, shown first; the file goes.
+    replay_path: ?[*:0]const u8 = null,
 };
 
 pub export fn cadex_terminal_open(options: ?*const Options, out: ?*?*Session) callconv(.c) status.Code {
@@ -36,6 +43,12 @@ pub export fn cadex_terminal_open(options: ?*const Options, out: ?*?*Session) ca
         .cwd = if (o.cwd) |s| std.mem.span(s) else null,
         .shell = if (o.shell) |s| std.mem.span(s) else null,
         .history_lines = o.history_lines,
+        .daemon = if (o.daemon_socket) |sock| .{
+            .socket = std.mem.span(sock),
+            .id = if (o.daemon_session) |id| std.mem.span(id) else return status.invalid_argument,
+            .attach = o.daemon_attach,
+        } else null,
+        .replay_path = if (o.replay_path) |p| std.mem.span(p) else null,
         .callbacks = .{
             .context = o.context,
             .on_output = o.on_output,
@@ -52,6 +65,11 @@ pub export fn cadex_terminal_open(options: ?*const Options, out: ?*?*Session) ca
 
 pub export fn cadex_terminal_close(session: ?*Session) callconv(.c) void {
     if (session) |s| s.close();
+}
+
+/// Like close, but a session the daemon keeps goes on running there.
+pub export fn cadex_terminal_detach(session: ?*Session) callconv(.c) void {
+    if (session) |s| s.detach();
 }
 
 pub export fn cadex_terminal_write(session: ?*Session, bytes: ?[*]const u8, len: usize) callconv(.c) status.Code {

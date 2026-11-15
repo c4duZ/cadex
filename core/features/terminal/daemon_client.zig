@@ -124,3 +124,65 @@ pub fn list(gpa: std.mem.Allocator, arena: std.mem.Allocator, connection: *Conne
     };
     return out;
 }
+
+/// The daemon answering on `socket`, started from `helper` when none does:
+/// its own session (SETSID), no descriptor of the app's, its output to
+/// /dev/null; a thread of the app reaps it when it leaves, so no zombie
+/// stays while the app runs. Waits up to 2 s for the socket.
+pub fn ensure(helper: [*:0]const u8, socket: [*:0]const u8, scrollback: ?[*:0]const u8) !void {
+    const path = std.mem.span(socket);
+    if (wire.connect(path)) |fd| {
+        _ = c.close(fd);
+        return;
+    }
+    var actions: c.posix_spawn_file_actions_t = undefined;
+    if (c.posix_spawn_file_actions_init(&actions) != 0) return error.SpawnFailed;
+    defer _ = c.posix_spawn_file_actions_destroy(&actions);
+    for ([_]c_int{ 0, 1, 2 }) |fd| _ = c.posix_spawn_file_actions_addopen(&actions, fd, "/dev/null", @as(c_int, @bitCast(c.O{ .ACCMODE = .RDWR })), 0);
+    var attr: c.posix_spawnattr_t = undefined;
+    if (c.posix_spawnattr_init(&attr) != 0) return error.SpawnFailed;
+    defer _ = c.posix_spawnattr_destroy(&attr);
+    _ = c.posix_spawnattr_setflags(&attr, .{ .SETSID = true, .CLOEXEC_DEFAULT = true });
+    var argv_scrollback = [_:null]?[*:0]const u8{ helper, "--socket", socket, "--scrollback", scrollback orelse "", null };
+    var argv_plain = [_:null]?[*:0]const u8{ helper, "--socket", socket, null };
+    const argv: [*:null]const ?[*:0]const u8 = if (scrollback != null) &argv_scrollback else &argv_plain;
+    var pid: c.pid_t = 0;
+    if (c.posix_spawn(&pid, helper, &actions, &attr, argv, c.environ) != 0) return error.SpawnFailed;
+    if (std.Thread.spawn(.{}, reap, .{pid})) |t| t.detach() else |_| {}
+    var waited: u32 = 0;
+    while (waited < 2000) : (waited += 20) {
+        if (wire.connect(path)) |fd| {
+            _ = c.close(fd);
+            return;
+        }
+        @import("../../shared/clock.zig").sleepMs(20);
+    }
+    return error.NoDaemon;
+}
+
+fn reap(pid: c.pid_t) void {
+    var status: c_int = 0;
+    while (c.waitpid(pid, &status, 0) < 0 and c.errno(@as(c_int, -1)) == .INTR) {}
+}
+
+/// Ends the daemon's sessions whose name starts with `prefix` (this app's)
+/// and that no pane took back after a launch: nobody could see them again.
+/// Returns how many.
+pub fn closeUnclaimed(gpa: std.mem.Allocator, socket: []const u8, prefix: []const u8, claimed: []const []const u8) !usize {
+    var arena: std.heap.ArenaAllocator = .init(gpa);
+    defer arena.deinit();
+    var conn = try Connection.connect(gpa, socket);
+    defer conn.deinit(gpa);
+    const sessions = try list(gpa, arena.allocator(), &conn);
+    var closed: usize = 0;
+    for (sessions) |s| {
+        if (!std.mem.startsWith(u8, s.id, prefix) or s.attached) continue;
+        if (for (claimed) |id| (if (std.mem.eql(u8, id, s.id)) break true) else false) continue;
+        var one = Connection.connect(gpa, socket) catch continue;
+        defer one.deinit(gpa);
+        _ = one.attach(gpa, s.id) catch continue;
+        one.close(gpa) catch continue;
+        closed += 1;
+    }
+    return closed;
+}

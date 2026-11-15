@@ -2,6 +2,7 @@
 //! exports its C functions from its own c_api.zig; importing them here
 //! puts them in the library.
 
+const builtin = @import("builtin");
 pub const status = @import("status.zig");
 pub const terminal = @import("features/terminal/terminal.zig");
 pub const search = @import("features/search/search.zig");
@@ -16,6 +17,8 @@ pub const worktrees = @import("features/worktrees/worktrees.zig");
 comptime {
     _ = @import("features/terminal/c_api.zig");
     _ = @import("features/terminal/c_api_view.zig");
+    // The terminal daemon is the Mac's (docs/adr/0022-terminal-daemon.md).
+    if (builtin.os.tag != .windows) _ = @import("features/terminal/c_api_daemon.zig");
     _ = @import("features/search/c_api.zig");
     _ = @import("features/search/c_api_files.zig");
     _ = @import("features/search/c_api_content.zig");

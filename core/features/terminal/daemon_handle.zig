@@ -47,6 +47,7 @@ fn answer(server: *Server, client: *Client, f: wire.Frame) !void {
             return;
         }
         client.said_hello = true;
+        server.ever_connected = true;
         var p: wire.Payload = .{ .gpa = gpa };
         defer p.deinit();
         try p.int(u16, wire.version);
