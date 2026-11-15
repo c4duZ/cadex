@@ -123,6 +123,9 @@ public final class AgentHistoryView: NSView {
             note.stringValue = history.entries.isEmpty
                 ? T("No conversations yet. Start one in a terminal: claude", "Nenhuma conversa ainda. Comece uma num terminal: claude")
                 : T("Nothing matches.", "Nada corresponde.")
+        } else if history.unreadable > 0 {
+            // The format changed in a newer Claude Code: what read is shown, the rest is skipped.
+            note.stringValue = T("Some lines could not be read (\(history.unreadable)).", "Algumas linhas não deu para ler (\(history.unreadable)).")
         } else {
             note.stringValue = ""
         }

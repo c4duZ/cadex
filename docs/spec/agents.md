@@ -147,7 +147,8 @@ continua uma conversa em outra conta, sem nunca tocar em token
   confia, o próprio Claude Code pergunta antes. A cópia mostra a mesma conversa e o índice guarda de
   onde ela veio: as linhas copiadas levam o id da origem (em `sessionId` nas versões antigas, em
   `session_id` na primeira mensagem no 2.1.325); a conversa de um subagente dela é procurada também
-  na conta de origem, onde ficou.
+  na conta de origem, onde ficou: a lista de subagentes de uma sessão continuada (página Agents)
+  mostra os dela e os da origem, e a conversa de cada um abre do arquivo dele.
 - Também no clique direito e no ⌘K: "Copy Resume Command" (agents.copy-resume-command, com o `cd`
   para a pasta), "Reveal Session Log" (agents.reveal-session-log, no Finder) e abrir a pasta da
   conversa no workspace. Pelo ⌘K, cada um abre a lista de conversas, buscada como a página.
@@ -157,7 +158,8 @@ continua uma conversa em outra conta, sem nunca tocar em token
   dono (236 conversas, 2,5 GB) levou 13 s com 97 MB de pico; depois, 0,01 s por passada (2026-11-14).
   Enquanto a primeira roda, a página diz "Indexing 120 of 236". Vigia as pastas de conversas só com
   a página (ou a lista do ⌘K) aberta; fechada, o índice fica em disco e nada roda. agents.history
-  (ligada) desliga tudo: nada indexado nem vigiado.
+  (ligada) desliga tudo: nada indexado nem vigiado. Linha que não lê (versão nova do Claude Code) é
+  pulada e contada: "Some lines could not be read (N)" embaixo da busca.
 
 ### Notificações
 - Quando uma sessão que trabalhava passa a esperar você, o Cadex manda uma notificação do sistema,
@@ -196,7 +198,8 @@ continua uma conversa em outra conta, sem nunca tocar em token
 
 ### Configurações
 - Quatro chaves, cada uma desliga uma leitura por inteiro (nada vigiado nem lido):
-  agents.sessions, agents.accounts, agents.history e, em ssh, ssh.ping. Ligadas por padrão.
+  agents.sessions, agents.accounts, agents.history e, em ssh, ssh.ping. Ligadas por padrão, cada uma
+  com a sua linha em Configurações › General ("Index conversation history" é a do histórico).
 - Accounts tem a cara do cartão do item de uso: um bloco por conta (logo, nome, "· plano", as
   barras), com espaço largo entre eles e sem linha nem caixa; a pasta fica na dica.
 - Conta sem `oauthAccount` não aparece em Accounts, no item de uso nem no cartão. "Login vencido"

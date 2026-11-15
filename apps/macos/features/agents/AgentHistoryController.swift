@@ -12,6 +12,8 @@ public final class AgentHistoryController {
 
     /// The conversations with at least one message, newest first.
     public internal(set) var entries: [AgentHistoryEntry] = []
+    /// Lines no conversation could read (another Claude Code version): skipped, counted.
+    public var unreadable: Int { entries.reduce(0) { $0 + $1.unreadable } }
     /// While the first reading runs: files done of the total.
     public internal(set) var progress: (done: Int, total: Int)?
     public var isEnabled = true { didSet { if isEnabled != oldValue { restart() } } }

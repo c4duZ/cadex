@@ -19,6 +19,8 @@ public final class AgentsController {
     /// The session whose subagents show, and those subagents.
     public private(set) var openSession: String?
     public private(set) var subagents: [AgentSubagent] = []
+    /// A continued session's origin subagents folders, by session id.
+    private var originFolders: [String: [String]] = [:]
     /// agents.accountNames (folder → name) and agents.hiddenAccounts.
     public var names: [String: String] = [:] { didSet { if names != oldValue { reload(accounts: true) } } }
     public var hidden: Set<String> = [] { didSet { if hidden != oldValue { publish() } } }
@@ -128,7 +130,9 @@ public final class AgentsController {
         sessions = all + background.filter { job in !all.contains { $0.id == job.id } }
         unreadable = bad
         if let open = openSession, let session = sessions.first(where: { $0.id == open }) {
-            subagents = AgentSubagent.read(session)
+            // Where a continued session came from never changes: read once per session.
+            if originFolders[session.id] == nil { originFolders[session.id] = AgentSubagent.origins(of: session, accounts: accounts) }
+            subagents = AgentSubagent.read(session, origins: originFolders[session.id] ?? [])
         } else {
             openSession = nil
             subagents = []

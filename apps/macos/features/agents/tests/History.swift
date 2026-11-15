@@ -132,5 +132,30 @@ let historyChecks: [(name: String, body: Checks.Body)] = [
         expect(AgentHistoryLaunch.continueIn(e, account: home, kit: kit) == "claude --resume /h/.claude-b/projects/-w/abc.jsonl --fork-session")
         expect(AgentHistoryLaunch.folder(e) == NSHomeDirectory(), "a folder that is gone opens home")
     }),
+    ("a continued session lists its own subagents and the origin's, and opens each in its folder", {
+        let home = NSTemporaryDirectory() + "cadex-history-\(UUID().uuidString)"
+        defer { try? fm.removeItem(atPath: home) }
+        let a = AgentAccount(dir: home + "/.claude", name: "A", isDefault: true)
+        let b = AgentAccount(dir: home + "/.claude-b", name: "B", isDefault: false)
+        let cwd = home + "/w"
+        let folder = AgentProjectFolder.name(for: cwd)
+        let originDir = a.dir + "/projects/" + folder + "/orig"
+        write(originDir + ".jsonl", userLine("hi", session: "orig", cwd: cwd, at: "2026-11-14T09:00:00Z"))
+        write(originDir + "/subagents/agent-old.meta.json", #"{"agentType":"Explore","description":"Found the bug","finished":true}"#)
+        write(originDir + "/subagents/agent-old.jsonl", "")
+        let copyDir = b.dir + "/projects/" + folder + "/copy"
+        write(copyDir + ".jsonl", line(["type": "user", "sessionId": "copy", "session_id": "orig", "cwd": cwd, "timestamp": "2026-11-14T09:00:00Z",
+                                        "message": ["role": "user", "content": "hi"]]))
+        write(copyDir + "/subagents/agent-new.meta.json", #"{"agentType":"Plan","description":"New one"}"#)
+        write(copyDir + "/subagents/agent-new.jsonl", "")
+        let session = AgentSession(account: b, pid: 1, id: "copy", name: "copy", cwd: cwd, status: .working, since: Date())
+        let origins = AgentSubagent.origins(of: session, accounts: [a, b])
+        expect(origins == [originDir + "/subagents"], "\(origins)")
+        let agents = AgentSubagent.read(session, origins: origins)
+        expect(Set(agents.map(\.description)) == ["Found the bug", "New one"], "\(agents.map(\.description))")
+        let old = agents.first { $0.id == "agent-old" }!
+        expect(AgentTranscriptDocument.path(of: old, in: session) == originDir + "/subagents/agent-old.jsonl", "the origin's file opens")
+        let plain = AgentSession(account: a, pid: 1, id: "orig", name: "o", cwd: cwd, status: .working, since: Date())
+        expect(AgentSubagent.origins(of: plain, accounts: [a, b]).isEmpty, "a session that was not continued has none")
+    }),
 ]
-

@@ -106,7 +106,10 @@
   `AgentHistoryList.swift` (filtro e grupos puros, `AgentHistoryRows`, e a tabela que só desenha o
   que aparece), `AgentHistoryView.swift` (a página, com busca, escopo e agrupamento) e
   `AgentHistoryCommands.swift` (agents.resume-session, -continue-in-account, -copy-resume-command e
-  -reveal-session-log, com a lista de conversas no ⌘K). agents.history é o `isEnabled`.
+  -reveal-session-log, com a lista de conversas no ⌘K). agents.history é o `isEnabled`. Sessão
+  continuada de outra conta: AgentSubagent.origins acha a pasta de subagentes da origem (pelas
+  primeiras linhas do transcript, AgentHistoryReader.origin) e cada subagente guarda a pasta dele
+  (`dir`), que a aba da conversa abre.
 - A conversa de um subagente numa aba (`AgentTranscriptDocument.swift`, um `TabDocument`): só pelo
   clique num subagente (`onOpenSubagent`). `AgentTranscript.swift` lê o log em pedaços, só o novo,
   e nunca guarda um resultado longo (prévia dos primeiros 4 KB, linhas contadas);

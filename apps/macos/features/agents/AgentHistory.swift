@@ -104,6 +104,22 @@ public enum AgentHistoryReader {
 
     static let wanted: Set<String> = ["user", "assistant", "ai-title", "custom-title"]
 
+    /// The conversation a transcript was continued from, from its first
+    /// 256 KB only (the copied lines come first); nil when it was not.
+    public static func origin(ofFile path: String, id: String) -> String? {
+        guard let handle = FileHandle(forReadingAtPath: path) else { return nil }
+        defer { try? handle.close() }
+        var entry = AgentHistoryEntry(id: id, path: path, account: "")
+        let head = (try? handle.read(upToCount: chunk)) ?? Data()
+        var start = head.startIndex
+        while entry.origin == nil, let end = head[start...].firstIndex(of: 0x0A) {
+            let line = head[start..<end]
+            if line.count <= longLine { _ = read(line, into: &entry) }
+            start = head.index(after: end)
+        }
+        return entry.origin
+    }
+
     /// One line: its place, dates, titles and origin into the entry; its texts out.
     static func read(_ line: Data, into entry: inout AgentHistoryEntry) -> [String] {
         guard !line.isEmpty else { return [] }

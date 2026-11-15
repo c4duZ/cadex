@@ -19,9 +19,10 @@ public final class AgentTranscriptDocument: TabDocument {
     private let queue = DispatchQueue(label: "cadex.agents.transcript", qos: .userInitiated)
     private var watch: DispatchSourceFileSystemObject?
 
-    /// The log of `agent` in `session`'s subagents folder.
+    /// The log of `agent`: in its own folder (the origin's, for one from
+    /// before a copy to another account), else the session's.
     public static func path(of agent: AgentSubagent, in session: AgentSession) -> String {
-        AgentSubagent.folder(of: session) + "/" + agent.id + ".jsonl"
+        (agent.dir.isEmpty ? AgentSubagent.folder(of: session) : agent.dir) + "/" + agent.id + ".jsonl"
     }
 
     public convenience init(session: AgentSession, agent: AgentSubagent, colors: AgentColors) {

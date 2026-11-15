@@ -37,8 +37,9 @@
   sidebar.page-1 a -9 (⌃⌘1 a ⌃⌘9): o comando do ícone na posição (`press(position:)`), como o
   clique;
   ⇧⌘3 a ⇧⌘5 são as capturas de tela do sistema, por isso ⌃⌘ (o dono, 2026-10-21).
-- O catálogo do app está em `../../app/SidebarWiring.swift`: files, git, agents, accounts
-  (padrão) e history (escondido). Só entra o que mostra uma página na barra; preview e spaces saíram (o dono,
+- O catálogo do app está em `../../app/SidebarWiring.swift`: files, git, agents, agent-history (as
+  conversas dos agentes, plano 18), accounts (padrão, em `SidebarLayout.swift`) e history (o do Git,
+  escondido). Só entra o que mostra uma página na barra; preview e spaces saíram (o dono,
   2026-10-21). `onShow` avisa quando uma página aparece, para o app só criar o conteúdo então.
 - Status: fase A no código. Ainda não: sub-abas (chegam com Agents na fase C) e a página aberta
   voltando com os spaces.

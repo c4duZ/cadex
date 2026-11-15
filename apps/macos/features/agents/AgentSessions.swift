@@ -168,6 +168,10 @@ public struct AgentSubagent: Equatable, Sendable {
     /// Whether this Claude Code writes `finished` (its files carry
     /// `spawnDepth` beside it); an older one gets the 30 s estimate.
     public var knowsFinished = false
+    /// The folder its files are in: its session's, or, for a session
+    /// continued from another account's conversation, the origin's, where
+    /// the subagents from before the copy stayed (test of 2026-11-14).
+    public var dir = ""
 
     /// Running: not finished, on a Claude Code that says so; on an older
     /// one, the log changed in the last 30 s. A long command left the log
@@ -185,11 +189,37 @@ public struct AgentSubagent: Equatable, Sendable {
         "\(AgentProjectFolder.path(for: session.cwd, in: session.account))/\(session.id)/subagents"
     }
 
-    /// The newest 10 first.
-    public static func read(_ session: AgentSession) -> [AgentSubagent] {
-        let dir = folder(of: session)
+    /// The newest 10 first: the session's own and, given `origins` (the
+    /// origin conversations' subagents folders), those from before a copy.
+    public static func read(_ session: AgentSession, origins: [String] = []) -> [AgentSubagent] {
+        let found = ([folder(of: session)] + origins).flatMap(read(folder:))
+        return Array(found.sorted { $0.lastWrite > $1.lastWrite }.prefix(10))
+    }
+
+    /// The subagents folders of the conversation `session` was continued
+    /// from, if any: the origin's id from the first lines of its transcript
+    /// (AgentHistoryReader's rule), its transcript looked up in every account.
+    public static func origins(of session: AgentSession, accounts: [AgentAccount]) -> [String] {
+        let transcript = "\(AgentProjectFolder.path(for: session.cwd, in: session.account))/\(session.id).jsonl"
+        guard let origin = AgentHistoryReader.origin(ofFile: transcript, id: session.id) else { return [] }
+        let folder = (AgentProjectFolder.path(for: session.cwd, in: session.account) as NSString).lastPathComponent
         let fm = FileManager.default
-        let found = ((try? fm.contentsOfDirectory(atPath: dir)) ?? []).filter { $0.hasSuffix(".meta.json") }.compactMap { file -> AgentSubagent? in
+        for account in accounts where account.provider == .claude {
+            let near = account.dir + "/projects/" + folder + "/" + origin
+            if fm.fileExists(atPath: near + ".jsonl") { return [near + "/subagents"] }
+        }
+        for account in accounts where account.provider == .claude {
+            for project in (try? fm.contentsOfDirectory(atPath: account.dir + "/projects")) ?? [] {
+                let path = account.dir + "/projects/" + project + "/" + origin
+                if fm.fileExists(atPath: path + ".jsonl") { return [path + "/subagents"] }
+            }
+        }
+        return []
+    }
+
+    private static func read(folder dir: String) -> [AgentSubagent] {
+        let fm = FileManager.default
+        return ((try? fm.contentsOfDirectory(atPath: dir)) ?? []).filter { $0.hasSuffix(".meta.json") }.compactMap { file -> AgentSubagent? in
             guard let meta = json(dir + "/" + file) else { return nil }
             let id = String(file.dropLast(".meta.json".count))
             let log = dir + "/" + id + ".jsonl"
@@ -197,9 +227,8 @@ public struct AgentSubagent: Equatable, Sendable {
             return AgentSubagent(id: id, type: meta["agentType"] as? String ?? "agent",
                                  description: meta["description"] as? String ?? id, lastWrite: date,
                                  finished: meta["finished"] as? Bool,
-                                 knowsFinished: meta["finished"] != nil || meta["spawnDepth"] != nil)
+                                 knowsFinished: meta["finished"] != nil || meta["spawnDepth"] != nil, dir: dir)
         }
-        return Array(found.sorted { $0.lastWrite > $1.lastWrite }.prefix(10))
     }
 }
 
