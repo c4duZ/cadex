@@ -64,6 +64,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         startPower()
         startUpdates()
         startAgentNotifications()
+        startAttention()
         let main = WindowSession(app: self, folder: WorkspaceFolder(), isMain: true)
         sessions.append(main)
         catalog.register(main.commands.commands)

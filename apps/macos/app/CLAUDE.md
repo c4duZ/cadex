@@ -64,7 +64,10 @@
   conta ativa no settings.json, sincronizar, compartilhar numa conta antiga mostrando antes o que
   muda, cópia própria, voltar a seguir e remover (só as do Cadex, para a lixeira). `AgentsHistory.swift`:
   a página History e o que cada ação faz (aba com o comando, área de transferência, Finder,
-  workspace; a conta para continuar escolhida no ⌘K). O explorer é criado
+  workspace; a conta para continuar escolhida no ⌘K). `AgentsAttention.swift`: a atenção (plano 19,
+  fase C): junta o que cada terminal de cada janela relatou (aviso TerminalView.agentDidChange), põe
+  as permissões do socket no quadro, leva um cartão ao terminal dele, o número do sininho em cada
+  janela e o do Dock, e a página do sininho. O explorer é criado
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.

@@ -111,7 +111,7 @@ public struct Settings: Equatable, Sendable {
     public struct Sidebar: Equatable, Sendable {
         /// The icons on top of the sidebar, in order; a page left out is
         /// hidden (docs/spec/sidebar.md). The app drops unknown ids.
-        public var items = ["files", "git", "agents", "agent-history", "accounts"]
+        public var items = ["files", "git", "agents", "agent-history", "attention", "accounts"]
     }
 
     public struct Agents: Equatable, Sendable {
@@ -146,6 +146,13 @@ public struct Settings: Equatable, Sendable {
         /// The hooks that tell the app what a session Cadex opened does (plan
         /// 19): its id after /clear and --resume. Off: none in the kit.
         public var stateHooks = true
+        /// The bell, the feed and the board (plan 19, phase C). Off: none.
+        public var attention = true
+        /// The bell's number on the Dock's icon too.
+        public var dockBadge = true
+        /// Machines whose agents notify nothing: "local" is this Mac (plan 23
+        /// adds remote ones).
+        public var mutedMachines: [String] = []
         /// Index every account's conversations for the History page (plan 18,
         /// phase D). Off: nothing indexed or watched.
         public var history = true

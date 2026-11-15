@@ -21,6 +21,18 @@ extension TerminalView {
         set { signals.onAgent = newValue }
     }
 
+    /// Posted when any terminal's agent reports or is seen: the app gathers
+    /// every terminal's state for the bell, the Dock and the board.
+    public static let agentDidChange = Notification.Name("CadexTerminalAgentDidChange")
+
+    /// "Mark as Unread": a finished agent counts as not seen again.
+    public func markAgentUnseen() {
+        guard signals.agent?.state == .done else { return }
+        signals.agentUnseen = true
+        signals.onAgent?()
+        NotificationCenter.default.post(name: Self.agentDidChange, object: self)
+    }
+
     func agentReported() {
         let before = signals.agent?.state
         signals.agent = session?.agentStatus()
@@ -28,11 +40,13 @@ extension TerminalView {
         if signals.agent?.state == .done, before != .done, !looked { signals.agentUnseen = true }
         if signals.agent?.state != .done { signals.agentUnseen = false }
         signals.onAgent?()
+        NotificationCenter.default.post(name: Self.agentDidChange, object: self)
     }
 
     func agentSeen() {
         guard signals.agentUnseen else { return }
         signals.agentUnseen = false
         signals.onAgent?()
+        NotificationCenter.default.post(name: Self.agentDidChange, object: self)
     }
 }

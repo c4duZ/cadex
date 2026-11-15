@@ -15,6 +15,11 @@ public final class AgentToolsServer: @unchecked Sendable {
     /// What the app does with an event; returns what the hook prints (nil:
     /// nothing). Called on the main thread.
     public var onEvent: (@MainActor (AgentHookEvent) -> String?)?
+    /// A permission request: the app answers later, on the owner's click,
+    /// through `reply` (once; nil answers nothing and the TUI's dialog
+    /// decides). `cancelled` runs if the hook goes away first: Claude Code
+    /// was answered in the terminal (docs/adr/0023-answer-agent-permissions.md).
+    public var onPermission: (@MainActor (AgentHookEvent, _ reply: @escaping @MainActor (String?) -> Void, _ cancelled: AgentToolsCancel) -> Void)?
     public let path: String
     let tokens: AgentSessionTokens
     private let queue = DispatchQueue(label: "cadex.agent-tools.server", qos: .utility)
@@ -72,15 +77,52 @@ public final class AgentToolsServer: @unchecked Sendable {
               let object = (try? JSONSerialization.jsonObject(with: line)) as? [String: Any],
               let token = object["token"] as? String, tokens.isValid(token),
               let event = AgentHookEvent.parse(object) else { close(client); return }
+        if event.event == "PermissionRequest" { return waitForOwner(event, client) }
         DispatchQueue.main.async { [weak self] in
             let printed = MainActor.assumeIsolated { self?.onEvent?(event) ?? nil }
-            var reply: [String: Any] = ["ok": true]
-            if let printed { reply["stdout"] = printed }
-            var data = (try? JSONSerialization.data(withJSONObject: reply)) ?? Data("{\"ok\":true}".utf8)
-            data.append(0x0A)
-            _ = data.withUnsafeBytes { write(client, $0.baseAddress, $0.count) }
-            close(client)
+            Self.answer(client, printed)
         }
+    }
+
+    /// Holds the hook's connection until the owner clicks, or until the
+    /// hook goes away (Claude Code was answered in the TUI and stops
+    /// listening), whichever comes first; one answer at most.
+    private func waitForOwner(_ event: AgentHookEvent, _ client: Int32) {
+        let cancel = AgentToolsCancel()
+        let state = AgentToolsOnce()
+        let watch = DispatchSource.makeReadSource(fileDescriptor: client, queue: queue)
+        watch.setEventHandler {
+            // Readable with nothing to read: the other end closed.
+            var byte: UInt8 = 0
+            if recv(client, &byte, 1, MSG_PEEK) <= 0, state.take() {
+                watch.cancel()
+                close(client)
+                DispatchQueue.main.async { MainActor.assumeIsolated { cancel.fire() } }
+            }
+        }
+        watch.resume()
+        DispatchQueue.main.async { [weak self] in
+            MainActor.assumeIsolated {
+                guard let handler = self?.onPermission else {
+                    if state.take() { watch.cancel(); Self.answer(client, nil) }
+                    return
+                }
+                handler(event, { printed in
+                    guard state.take() else { return }
+                    watch.cancel()
+                    Self.answer(client, printed)
+                }, cancel)
+            }
+        }
+    }
+
+    static func answer(_ client: Int32, _ printed: String?) {
+        var reply: [String: Any] = ["ok": true]
+        if let printed { reply["stdout"] = printed }
+        var data = (try? JSONSerialization.data(withJSONObject: reply)) ?? Data("{\"ok\":true}".utf8)
+        data.append(0x0A)
+        _ = data.withUnsafeBytes { write(client, $0.baseAddress, $0.count) }
+        close(client)
     }
 
     /// One line, at most 1 MB, within the read timeout.

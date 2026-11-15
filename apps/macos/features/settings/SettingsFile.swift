@@ -98,6 +98,9 @@ public enum SettingsFile {
             settings.agents.activeAccount = reader.string(s, "agents.activeAccount") ?? settings.agents.activeAccount
             settings.agents.history = reader.bool(s, "agents.history") ?? settings.agents.history
             settings.agents.stateHooks = reader.bool(s, "agents.stateHooks") ?? settings.agents.stateHooks
+            settings.agents.attention = reader.bool(s, "agents.attention") ?? settings.agents.attention
+            settings.agents.dockBadge = reader.bool(s, "agents.dockBadge") ?? settings.agents.dockBadge
+            settings.agents.mutedMachines = reader.strings(s, "agents.mutedMachines") ?? settings.agents.mutedMachines
             if let projects = s["projectAccounts"] {
                 if let projects = projects as? [String: String] { settings.agents.projectAccounts = projects }
                 else { reader.problems.append("agents.projectAccounts: esperava a conta por pasta de projeto") }
@@ -163,7 +166,8 @@ public enum SettingsFile {
                        "accounts": s.agents.accounts, "accountNames": s.agents.accountNames, "hiddenAccounts": s.agents.hiddenAccounts,
                        "hiddenLogins": s.agents.hiddenLogins, "launchSkipPermissions": s.agents.launchSkipPermissions,
                        "activeAccount": s.agents.activeAccount, "projectAccounts": s.agents.projectAccounts,
-                       "history": s.agents.history, "stateHooks": s.agents.stateHooks],
+                       "history": s.agents.history, "stateHooks": s.agents.stateHooks,
+                       "attention": s.agents.attention, "dockBadge": s.agents.dockBadge, "mutedMachines": s.agents.mutedMachines],
             "shortcuts": shortcuts,
         ]
         return (try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])) ?? Data()

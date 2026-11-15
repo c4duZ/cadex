@@ -16,6 +16,9 @@
 - `AgentToolsServer.swift`: AgentToolsServer.shared, `start` (pasta `…/Cadex/sockets` 0700, socket
   0600, troca um velho de um travamento), `stop`, `onEvent` (no main; devolve o que o hook imprime).
   Uma linha JSON entra, uma sai (`{"ok":true}` e, se houver, `stdout`).
+- A permissão (ADR 0023): `onPermission` recebe o pedido, a resposta para mandar depois (uma vez,
+  no clique) e um aviso de que o hook saiu antes (`AgentToolsOnce.swift`); a conexão fica aberta
+  até lá.
 - `AgentSessionTokens.swift`: os tokens que o kit da sessão grava (`…/Cadex/sessions/<chave>.token`);
   um token desconhecido faz reler a pasta (sessão que acabou de abrir).
 - `AgentHookEvent.swift`: o evento, o pid do `claude` e o que o Claude Code deu ao hook

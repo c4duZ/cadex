@@ -74,6 +74,22 @@ enum GeneralPages {
                                  T("Sessions Cadex opens tell it, through Claude Code's hooks, which conversation they run (after /clear and --resume). They never make the agent wait. Off, no hooks are added.",
                                    "As sessões que o Cadex abre contam a ele, pelos hooks do Claude Code, qual conversa estão rodando (depois de /clear e --resume). Nunca fazem o agente esperar. Desligado, nenhum hook é posto."),
                                  control: SettingsPage.toggle(store.settings.agents.stateHooks) { on in store.update { $0.agents.stateHooks = on } }),
+                SettingsPage.row(T("What needs you", "O que precisa de você"),
+                                 T("A bell in the sidebar counts the agents' open requests and the ones that finished while you were away; its page has the board, with Allow and Deny, and the feed.",
+                                   "Um sininho na barra lateral conta os pedidos abertos dos agentes e os que terminaram enquanto você não olhava; a página dele tem o quadro, com Permitir e Negar, e o feed."),
+                                 control: SettingsPage.toggle(store.settings.agents.attention) { on in store.update { $0.agents.attention = on } }),
+                SettingsPage.row(T("Number on the Dock", "Número no Dock"),
+                                 T("The same count on Cadex's icon in the Dock.", "A mesma contagem no ícone do Cadex no Dock."),
+                                 control: SettingsPage.toggle(store.settings.agents.dockBadge) { on in store.update { $0.agents.dockBadge = on } }),
+                SettingsPage.row(T("Mute this Mac's agents", "Silenciar os agentes deste Mac"),
+                                 T("No notification from the agents running on this Mac; the bell still counts.",
+                                   "Nenhuma notificação dos agentes que rodam neste Mac; o sininho continua contando."),
+                                 control: SettingsPage.toggle(store.settings.agents.mutedMachines.contains("local")) { on in
+                                     store.update { s in
+                                         s.agents.mutedMachines.removeAll { $0 == "local" }
+                                         if on { s.agents.mutedMachines.append("local") }
+                                     }
+                                 }),
                 SettingsPage.row(T("Index conversation history", "Indexar o histórico de conversas"),
                                  T("Agents › History searches every conversation of every account. Cadex reads the conversation files only while the page shows, never a tool's result, and keeps the index on this Mac. Off, nothing is indexed or watched.",
                                    "Agents › Histórico busca todas as conversas de todas as contas. O Cadex lê os arquivos das conversas só com a página aberta, nunca o resultado de uma ferramenta, e guarda o índice neste Mac. Desligado, nada é indexado nem vigiado."),

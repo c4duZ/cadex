@@ -83,9 +83,12 @@ final class SettingsBridge {
         AgentUsageController.shared.activeAccount = settings.agents.activeAccount.isEmpty ? nil : Self.expand(settings.agents.activeAccount)
         AgentUsageController.shared.hiddenLogins = settings.agents.hiddenLogins.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }
         let agents = settings.agents
-        AgentNotifier.shared.kinds = .init(permission: agents.sessions && agents.notifyPermission,
-                                           question: agents.sessions && agents.notifyQuestion,
-                                           finished: agents.sessions && agents.notifyFinished)
+        // This Mac muted (agents.mutedMachines): no agent notifies (plan 19).
+        let speaks = agents.sessions && !agents.mutedMachines.contains("local")
+        AgentNotifier.shared.kinds = .init(permission: speaks && agents.notifyPermission,
+                                           question: speaks && agents.notifyQuestion,
+                                           finished: speaks && agents.notifyFinished)
+        AgentAttention.shared.isEnabled = agents.attention
         AgentNotifier.shared.sounds = [.permission: agents.soundPermission, .question: agents.soundQuestion, .finished: agents.soundFinished]
         if settings.shortcuts != lastShortcuts {
             lastShortcuts = settings.shortcuts

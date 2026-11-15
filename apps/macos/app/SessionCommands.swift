@@ -94,6 +94,15 @@ extension WindowSession {
             action: .run { [weak self] in self?.workspace?.showSidebar("agent-history") }))
         commands.register(AgentHistoryCommands.commands(palette: palette, actions: historyActions(), accountName: Self.accountName))
         commands.register(Command(
+            id: "agents.show-attention", title: T("Show What Needs You", "Mostrar o que precisa de você"),
+            keywords: ["attention", "needs you", "permission", "bell", "atenção", "precisa", "permissão", "sininho"], category: .view,
+            action: .run { [weak self] in self?.showAttention("needs") }))
+        commands.register(Command(
+            id: "agents.show-feed", title: T("Show Agents' Feed", "Mostrar o feed dos agentes"),
+            keywords: ["feed", "timeline", "agents", "linha do tempo", "agentes"], category: .view,
+            action: .run { [weak self] in self?.showAttention("feed") }))
+        commands.register(AgentAttentionCommands.commands(palette: palette))
+        commands.register(Command(
             id: "agents.test-notifications", title: T("Send Test Notifications", "Mandar notificações de teste"),
             keywords: ["notifications", "agents", "test", "notificações", "teste", "avisos"], category: .view,
             action: .run { [weak self] in self?.sendTestNotifications() }))

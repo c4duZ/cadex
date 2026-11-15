@@ -15,6 +15,8 @@ public struct AgentHookEvent: Sendable, Equatable {
     /// Notification's: "permission_prompt", "idle_prompt"….
     public let notificationType: String?
     public let toolName: String?
+    /// What the tool would act on: the command, the file, the pattern or the address.
+    public let toolSubject: String?
 
     /// The line `cadex hook` sent, without its token; nil when it does not read.
     static func parse(_ object: [String: Any]) -> AgentHookEvent? {
@@ -23,6 +25,16 @@ public struct AgentHookEvent: Sendable, Equatable {
         return AgentHookEvent(event: event, pid: (object["pid"] as? NSNumber)?.int32Value ?? 0,
                               sessionID: payload["session_id"] as? String, transcriptPath: payload["transcript_path"] as? String,
                               cwd: payload["cwd"] as? String, source: payload["source"] as? String,
-                              notificationType: payload["notification_type"] as? String, toolName: payload["tool_name"] as? String)
+                              notificationType: payload["notification_type"] as? String, toolName: payload["tool_name"] as? String,
+                              toolSubject: subject(payload["tool_input"] as? [String: Any] ?? [:]))
+    }
+
+    /// The part of a tool's input a person reads first, as the permission
+    /// dialog shows it.
+    static func subject(_ input: [String: Any]) -> String? {
+        for key in ["command", "file_path", "path", "pattern", "url", "query", "prompt", "description"] {
+            if let value = input[key] as? String, !value.isEmpty { return value }
+        }
+        return input.values.compactMap { $0 as? String }.first
     }
 }

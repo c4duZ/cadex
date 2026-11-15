@@ -122,6 +122,12 @@
   continuada de outra conta: AgentSubagent.origins acha a pasta de subagentes da origem (pelas
   primeiras linhas do transcript, AgentHistoryReader.origin) e cada subagente guarda a pasta dele
   (`dir`), que a aba da conversa abre.
+- A atenção (plano 19, fase C): `AgentAttention.swift` (AgentAttention.shared: os cartões do quadro,
+  com as permissões cujo hook espera, que só Permitir e Negar respondem, no formato do Claude Code
+  testado em 2026-11-15, e os pedidos vistos pelo OSC 7501; o feed, até 200; `unseen`, o número do
+  sininho e do Dock; `update` recebe do app o que cada terminal relatou e fecha o hook quando o
+  agente sai do "blocked"), `AgentAttentionView.swift` (a página do sininho: Needs You e Feed) e
+  `AgentAttentionCommands.swift` (agents.approve, agents.deny e agents.mark-unread com a lista no ⌘K).
 - A conversa de um subagente numa aba (`AgentTranscriptDocument.swift`, um `TabDocument`): só pelo
   clique num subagente (`onOpenSubagent`). `AgentTranscript.swift` lê o log em pedaços, só o novo,
   e nunca guarda um resultado longo (prévia dos primeiros 4 KB, linhas contadas);

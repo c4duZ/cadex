@@ -491,4 +491,5 @@ let exitCode = await Checks.run([
 let usageExit = await Checks.run(usageChecks)
 let accountExit = await Checks.run(accountChecks)
 let historyExit = await Checks.run(historyChecks)
-exit([folderExit, usageExit, accountExit, historyExit, exitCode].first { $0 != 0 } ?? 0)
+let attentionExit = await Checks.run(attentionChecks)
+exit([folderExit, usageExit, accountExit, historyExit, attentionExit, exitCode].first { $0 != 0 } ?? 0)

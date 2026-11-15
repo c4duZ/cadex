@@ -177,19 +177,24 @@ continua uma conversa em outra conta, sem nunca tocar em token
 - agents.stateHooks (ligada) desliga os hooks do kit; o 7501 continua.
 
 ### Atenção (plano 19)
-- Um sininho no topo da barra lateral conta os pedidos não vistos de todas as sessões (permissão,
-  pergunta, terminou sem você ver); o mesmo número no ícone do Dock (agents.dockBadge). Ir ao
-  terminal do agente marca como visto; "Mark as Unread" (agents.mark-unread) volta.
-- Feed (agents.show-feed): a linha do tempo de terminou, pediu permissão, perguntou e tarefa criada,
-  de todas as sessões, com filtro por tipo e projeto; página da barra lateral.
+- O sininho ("Needs You", um ícone da barra lateral, padrão) conta os pedidos abertos de todas as
+  sessões (permissão, pergunta) e os agentes que terminaram sem você ver; o mesmo número no ícone do
+  Dock (agents.dockBadge). Ir ao terminal do agente marca como visto; "Mark as Unread"
+  (agents.mark-unread, ou o clique direito numa linha do feed) volta.
+- A página do sininho tem duas sub-abas: "Needs You" (o quadro) e "Feed" (agents.show-feed): a linha
+  do tempo de terminou, pediu permissão, perguntou, falhou e tarefa criada, de todas as sessões, a
+  mais nova em cima, até 200; clicar leva ao terminal.
 - Silenciar as notificações de uma máquina (agents.mutedMachines; este Mac agora, as remotas no
   plano 23). agents.attention desliga o sininho, o feed e o número.
 
 ### Quadro "Precisa de você" (plano 19)
 - agents.show-attention mostra um cartão por pedido aberto. Permissão: a ferramenta e o comando ou o
   arquivo, com Permitir e Negar (agents.approve, agents.deny), só por clique, com o diálogo da TUI
-  aberto: quem responder primeiro vence e o cartão some (`docs/adr/0023-answer-agent-permissions.md`).
-  Pergunta e plano: o texto e "Go to Terminal"; não são respondidos pelo Cadex.
+  aberto: quem responder primeiro vence (`docs/adr/0023-answer-agent-permissions.md`). Pergunta e
+  plano: o texto; não são respondidos pelo Cadex. Todo cartão tem "Go to Terminal".
+- O cartão some quando o pedido se resolve: pelo clique aqui, ou quando o agente deixa de estar
+  "blocked" no OSC 7501 (respondido na TUI). O Claude Code não fecha o hook quando a TUI responde
+  (teste de 2026-11-15), então é a saída do "blocked" que tira o cartão e fecha o hook que esperava.
 - Sessão aberta fora do Cadex mostra o cartão sem Permitir e Negar (não tem o hook do kit).
 
 ### Hibernação (plano 19)
@@ -333,8 +338,12 @@ continua uma conversa em outra conta, sem nunca tocar em token
       2026-11-15: SessionStart, /clear com o id novo, o socket fora e de volta, /exit).
 - [x] Um processo sem token, ou de outro usuário, é recusado no socket do app (teste com socket de
       verdade; outro usuário pelo `getpeereid`, que o teste não tem como simular).
-- [ ] Permitir no quadro faz o comando rodar e fecha o diálogo da TUI; responder na TUI tira o
-      cartão; nada é mandado ao agente sem clique.
-- [ ] O número do Dock some ao visitar o terminal; "Mark as Unread" o traz de volta.
+- [x] Permitir no quadro faz o comando rodar e fecha o diálogo da TUI; responder na TUI tira o
+      cartão; nada é mandado ao agente sem clique. Conferido em 2026-11-15 com o `claude` real e o
+      socket de verdade: a resposta do app liberou o `touch`; respondendo na TUI primeiro, o comando
+      rodou e o hook ficou esperando (o cartão sai pela saída do "blocked", coberta por teste com o
+      terminal real avisando o app). Negar: o agente recebeu "denied" com a mensagem.
+- [ ] O número do Dock some ao visitar o terminal; "Mark as Unread" o traz de volta. A contagem e o
+      "visto" têm teste; o ícone do Dock em si não foi fotografado.
 - [ ] Depois do tempo, a sessão hibernada some do `ps`; abrir a aba retoma a conversa (a
       palavra-código lembrada).

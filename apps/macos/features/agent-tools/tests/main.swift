@@ -45,7 +45,13 @@ let exitCode = await Checks.run([
         var events: [AgentHookEvent] = []
         server.onEvent = { event in
             events.append(event)
-            return event.event == "PermissionRequest" ? "{\"decision\":\"x\"}" : nil
+            return nil
+        }
+        // A permission waits for the click: here it comes 0.3 s later.
+        var asked: [AgentHookEvent] = []
+        server.onPermission = { event, reply, _ in
+            asked.append(event)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { reply("{\"decision\":\"x\"}") }
         }
         let mode = (try? FileManager.default.attributesOfItem(atPath: dir + "/sockets")[.posixPermissions] as? Int) ?? 0
         expect(mode == 0o700, "the sockets folder is 0700: \(String(mode, radix: 8))")
@@ -54,19 +60,54 @@ let exitCode = await Checks.run([
         let answer = await sendAsync(server.path, line)
         expect(answer?.contains("\"ok\":true") == true, "\(String(describing: answer))")
         expect(events == [AgentHookEvent(event: "SessionStart", pid: 77, sessionID: "s-1", transcriptPath: "/t.jsonl", cwd: "/w", source: "clear",
-                                         notificationType: nil, toolName: nil)], "\(events)")
+                                         notificationType: nil, toolName: nil, toolSubject: nil)], "\(events)")
 
-        let permission = await sendAsync(server.path, #"{"v":1,"token":"\#(token)","event":"PermissionRequest","pid":77,"payload":{"tool_name":"Bash"}}"#)
-        expect(permission?.contains("decision") == true, "the hook gets what to print")
+        let permission = await sendAsync(server.path, #"{"v":1,"token":"\#(token)","event":"PermissionRequest","pid":77,"payload":{"tool_name":"Bash","tool_input":{"command":"rm x","description":"d"}}}"#)
+        expect(permission?.contains("decision") == true, "the hook gets the owner's answer: \(String(describing: permission))")
+        expect(asked.first?.toolName == "Bash" && asked.first?.toolSubject == "rm x", "\(asked)")
+        expect(events.count == 1, "a permission goes to onPermission, not onEvent")
 
         let refused = await sendAsync(server.path, #"{"v":1,"token":"\#(String(repeating: "cd", count: 32))","event":"Stop","pid":1,"payload":{}}"#)
-        expect(refused == nil && events.count == 2, "a wrong token is closed unheard")
+        expect(refused == nil && events.count == 1, "a wrong token is closed unheard")
         expect(await sendAsync(server.path, #"{"v":1,"event":"Stop"}"#) == nil, "no token, no answer")
 
         let later = String(repeating: "ef", count: 32)
         FileManager.default.createFile(atPath: tokens + "/s2.token", contents: Data(later.utf8))
         let fresh = await sendAsync(server.path, #"{"v":1,"token":"\#(later)","event":"Stop","pid":2,"payload":{}}"#)
         expect(fresh?.contains("ok") == true, "a session opened after the app started is known at its first word")
+    }),
+    ("a hook that goes away before the click (answered in the TUI) cancels the request", {
+        let dir = "/tmp/cx-\(UUID().uuidString.prefix(8))"
+        defer { try? FileManager.default.removeItem(atPath: dir) }
+        let tokens = dir + "/tokens"
+        try FileManager.default.createDirectory(atPath: tokens, withIntermediateDirectories: true)
+        let token = String(repeating: "12", count: 32)
+        FileManager.default.createFile(atPath: tokens + "/s.token", contents: Data(token.utf8))
+        let server = AgentToolsServer(folder: dir + "/sockets", tokens: AgentSessionTokens(folder: tokens))
+        try server.start()
+        defer { server.stop() }
+        var cancelled = false
+        var answer: ((String?) -> Void)?
+        server.onPermission = { _, reply, cancel in
+            answer = reply
+            cancel.onCancel = { cancelled = true }
+        }
+        // The hook connects, asks, and leaves without waiting for the answer.
+        let path = server.path
+        DispatchQueue.global().async {
+            let fd = socket(AF_UNIX, SOCK_STREAM, 0)
+            var address = sockaddr_un()
+            address.sun_family = sa_family_t(AF_UNIX)
+            withUnsafeMutableBytes(of: &address.sun_path) { $0.copyBytes(from: Array(path.utf8)) }
+            _ = withUnsafePointer(to: &address) { $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { connect(fd, $0, socklen_t(MemoryLayout<sockaddr_un>.size)) } }
+            let line = #"{"v":1,"token":"\#(token)","event":"PermissionRequest","pid":5,"payload":{"tool_name":"Bash"}}"# + "\n"
+            _ = Array(line.utf8).withUnsafeBytes { write(fd, $0.baseAddress, $0.count) }
+            usleep(300_000)
+            close(fd)
+        }
+        for _ in 0..<40 where !cancelled { try await Task.sleep(nanoseconds: 50_000_000) }
+        expect(answer != nil && cancelled, "the app hears the hook left")
+        answer?("{}")
     }),
 ])
 exit(exitCode)

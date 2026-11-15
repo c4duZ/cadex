@@ -49,10 +49,15 @@ let exitCode = await Checks.run([
         let tabs = makeTabs()
         tabs.newTab()
         guard let terminal = tabs.activeTerminal else { return expect(false, "no terminal") }
+        // The app gathers every terminal's state on this notice (the bell, the board).
+        var notices = 0
+        let observer = NotificationCenter.default.addObserver(forName: TerminalView.agentDidChange, object: terminal, queue: .main) { _ in notices += 1 }
+        defer { NotificationCenter.default.removeObserver(observer) }
         // As Claude Code does: it names the conversation (OSC 2) and reports blocked (OSC 7501), and keeps running.
         terminal.session?.write("sh -c \"printf '\\\\033]2;Fix login\\\\007\\\\033]7501;state=blocked:app=claude-code:kind=permission:msg=YXBwcm92ZSBCYXNoOiBybSB4\\\\007'; sleep 20\"\n")
         let shown = await eventually { tabs.bar.items.first?.title == "● Fix login" }
         expect(shown, "\(tabs.bar.items.map(\.title))")
+        expect(notices >= 1, "the terminal tells the app its agent changed")
         expect(tabs.bar.items.first?.tip?.hasPrefix("approve Bash: rm x") == true, "\(String(describing: tabs.bar.items.first?.tip))")
         terminal.session?.write("\u{3}")
         let back = await eventually { !(tabs.bar.items.first?.title.hasPrefix("●") ?? true) }

@@ -11,7 +11,8 @@ em que ordem.
   página dele, o da página aberta também: o clique nunca recolhe a barra lateral (o dono, 2026-10-22;
   ⌘B recolhe). Os ícones e o de personalizar formam um bloco centrado, 2 pt entre eles.
 - Os ícones padrão, nesta ordem: Files (⇧⌘E, explorer.focus), Git (⇧⌘G, git.show), Agents (⇧⌘J,
-  agents.show), History (agents.show-history, as conversas dos agentes, plano 18) e Accounts (⇧⌘U,
+  agents.show), History (agents.show-history, as conversas dos agentes, plano 18), Needs You
+  (agents.show-attention, o sininho com o quadro e o feed, plano 19) e Accounts (⇧⌘U,
   agents.show-accounts, de uso); Agents e Accounts separados para cada um ter o próprio ícone e
   atalho (o dono, 2026-10-21). Quem já salvou a lista de ícones liga History em Personalizar. Git History (⇧⌘L, git.show-history, de log)
   existe escondido e pode ser ligado. Atalhos de ⇧⌘ com a inicial, para lembrar (2026-10-22).

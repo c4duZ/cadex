@@ -46,6 +46,8 @@ extension WindowSession {
             item("agent-history", .clipboardText, T("History", "Histórico"), "agents.show-history", .page(makeHistoryPage()), actions: [
                 SidebarAction("agents.resume-session", .terminalWindow, T("Resume a Conversation", "Retomar uma conversa")),
             ]),
+            item("attention", .bell, T("Needs You", "Precisa de você"), "agents.show-attention", .page(makeAttentionPage()),
+                 subtabs: [SidebarItem.Subtab(id: "needs", title: T("Needs You", "Precisa de você")), SidebarItem.Subtab(id: "feed", title: "Feed")]),
             item("accounts", .gauge, T("Accounts", "Contas"), "agents.show-accounts", .page(makeAgentsPage("accounts")), actions: [
                 SidebarAction("agents.refresh-usage", .arrowsClockwise, T("Refresh Usage", "Atualizar o uso")),
                 SidebarAction("agents.customize-accounts", .slidersHorizontal, T("Customize Accounts", "Personalizar as contas")),
@@ -55,6 +57,7 @@ extension WindowSession {
         sidebar.onItemsChange = { [weak self] ids in self?.settings.store.update { $0.sidebar.items = ids } }
         sidebar.onShow = { [weak self] id in if id == "history" { self?.showSidebarHistory() } }
         sidebar.onCustomize = { [weak self] in self?.openCustomize("sidebar") }
+        sidebar.onSubtab = { [weak self] page, sub in if page == "attention" { self?.attentionPage?.subtab = sub } }
         sidebar.setTitle(Self.folderTitle(folder.root), for: "files")
         git.onBusy = { [weak sidebar] busy in sidebar?.setBusy(busy, for: "git") }
         applySidebar(settings.store.settings.sidebar, to: sidebar)
