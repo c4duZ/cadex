@@ -20,6 +20,8 @@ public final class TerminalSession {
     public var onBell: (() -> Void)?
     /// A local server's address showed up in the output (once each).
     public var onLocalURL: ((String) -> Void)?
+    /// An agent in the terminal reported its state (OSC 7501); read it with agentStatus().
+    public var onAgentStatus: (() -> Void)?
 
     // Touched from deinit, which is not main-actor isolated. Safe because
     // cadex_terminal_close may be called from any thread.
@@ -37,6 +39,7 @@ public final class TerminalSession {
         options.on_exit = { context, code in CallbackRelay.from(context).exited(code: code) }
         options.on_title = { context in CallbackRelay.from(context).onMain { $0.onTitle?() } }
         options.on_bell = { context in CallbackRelay.from(context).onMain { $0.onBell?() } }
+        options.on_agent_status = { context in CallbackRelay.from(context).onMain { $0.onAgentStatus?() } }
         options.on_local_url = { context, url in
             guard let url else { return }
             let address = String(cString: url)
@@ -58,6 +61,18 @@ public final class TerminalSession {
 
     deinit {
         cadex_terminal_close(handle)
+    }
+
+    /// What the agent in this terminal last reported (OSC 7501), or nil
+    /// when none did (docs/adr/0022-terminal-daemon.md).
+    public func agentStatus() -> TerminalAgentStatus? {
+        guard let handle else { return nil }
+        var raw = cadex_agent_status()
+        guard cadex_terminal_agent_status(handle, &raw) == CADEX_OK,
+              let state = TerminalAgentStatus.State(rawValue: raw.state), state != .none else { return nil }
+        let app = withUnsafeBytes(of: &raw.app) { String(decoding: $0.prefix(Int(raw.app_len)), as: UTF8.self) }
+        let message = withUnsafeBytes(of: &raw.msg) { String(decoding: $0.prefix(Int(raw.msg_len)), as: UTF8.self) }
+        return TerminalAgentStatus(state: state, kind: TerminalAgentStatus.Kind(rawValue: raw.kind) ?? .none, app: app, message: message)
     }
 
     /// Ends the shell. No callback runs after this returns.

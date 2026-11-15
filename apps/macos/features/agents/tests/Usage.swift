@@ -78,6 +78,12 @@ let usageChecks: [(name: String, body: Checks.Body)] = [
     ("a hidden login kept before plan 18 (the token's expiry) does not bring the account back", {
         expect(AgentUsageController.isLegacy("1763100000000") && !AgentUsageController.isLegacy("a1/o1") && !AgentUsageController.isLegacy("login"))
     }),
+    ("the agent's own report says why it stopped: permission, question, finished", {
+        expect(AgentStop.fromReport(state: "blocked", kind: "permission", message: "approve Bash: touch x") == .permission(tool: "Bash", subject: "touch x"))
+        expect(AgentStop.fromReport(state: "blocked", kind: "question", message: "answer: Qual cor? (Azul · Verde)") == .question("Qual cor? (Azul · Verde)"))
+        expect(AgentStop.fromReport(state: "done", kind: "none", message: "") == .finished(""))
+        expect(AgentStop.fromReport(state: "working", kind: "none", message: "Creating…") == nil, "working is no stop")
+    }),
     ("a turn that failed to log in is a stop of its own", {
         let line = #"{"type":"assistant","error":"authentication_failed","isApiErrorMessage":true,"message":{"role":"assistant","content":[{"type":"text","text":"Login expired · Please run /login"}]}}"#
         expect(AgentStop.classify([line]) == .loginExpired)

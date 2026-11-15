@@ -35,6 +35,9 @@ public final class AgentNotifier: NSObject {
 
     /// Each stop that notifies, before it is posted (the tests' window in).
     var didStop: ((AgentSession, AgentStop) -> Void)?
+    /// What the session's terminal heard from the agent (OSC 7501), when it
+    /// runs in a Cadex terminal; the app says. Without it, the end of the log.
+    public var reportedStop: ((AgentSession) -> AgentStop?)?
     /// How long after a stop its log is read; the tests read at once.
     var stopDelay: TimeInterval = 1
     private let controller: AgentsController
@@ -100,7 +103,10 @@ public final class AgentNotifier: NSObject {
     /// at once looked like a finished turn. Nothing if it works again.
     private func stopped(_ id: String) {
         guard let session = controller.sessions.first(where: { $0.id == id }), session.status != .working else { return }
-        let stop = AgentStop.read(session)
+        // The agent's own report first; the log for sessions in other
+        // terminals, and for the finished turn's text the report lacks.
+        var stop = reportedStop?(session) ?? AgentStop.read(session)
+        if case .finished("") = stop, case .finished(let text) = AgentStop.read(session) { stop = .finished(text) }
         if stop == .loginExpired { AgentUsageController.shared.loginFailed(session.account.dir) }
         guard wants(stop), !isLooking(session) else { return }
         didStop?(session, stop)

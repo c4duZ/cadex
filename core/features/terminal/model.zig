@@ -17,9 +17,15 @@ const Handler = @FieldType(Stream, "handler");
 pub const ReplyFn = *const fn (context: ?*anyopaque, bytes: []const u8) void;
 
 /// Something the app shows outside the grid: the title changed (OSC 0/2),
-/// or the program rang the bell. Called on the thread that feeds output.
-pub const Notice = enum { title, bell };
+/// the program rang the bell, or an agent reported its state (OSC 7501).
+/// Called on the thread that feeds output.
+pub const Notice = enum { title, bell, agent };
 pub const NoticeFn = *const fn (context: ?*anyopaque, notice: Notice) void;
+
+const agent_status = @import("agent_status.zig");
+pub const AgentState = agent_status.AgentState;
+pub const AgentKind = agent_status.AgentKind;
+pub const AgentStatus = agent_status.AgentStatus;
 
 pub const Size = struct { cols: u16, rows: u16 };
 
@@ -63,6 +69,7 @@ pub const Model = struct {
     last_mouse_cell: ?vt.Coordinate = null,
     selector: selection.Selector = .{},
     search: search.Search = .{},
+    agent: AgentStatus = .{},
 
     /// Heap-allocated because the stream's handler keeps a pointer to the
     /// terminal; the model must not move after init.
@@ -100,6 +107,9 @@ pub const Model = struct {
         handler.effects.write_pty = &writePty;
         handler.effects.title_changed = &titleChanged;
         handler.effects.bell = &bellRang;
+        // Setting this also answers the program's `OSC 7501 ; ?` support
+        // query, so Claude Code starts reporting (libghostty-vt).
+        handler.effects.program_status = &programStatus;
         self.stream = .init(.{ .allocator = gpa, .handler = handler });
         return self;
     }
@@ -212,6 +222,35 @@ pub const Model = struct {
     fn titleChanged(handler: *Handler) void {
         const self = fromHandler(handler);
         if (self.notice) |notify| notify(self.reply_context, .title);
+    }
+
+    fn programStatus(handler: *Handler, report: vt.osc.Command.ProgramStatus.Report) void {
+        const self = fromHandler(handler);
+        if (report.readOption(.id) != null) return;
+        var next: AgentStatus = .{};
+        next.state = switch (report.state) {
+            .idle => .idle,
+            .working => .working,
+            .done => .done,
+            .blocked => .blocked,
+            .@"error" => .failed,
+            .clear => .none,
+        };
+        if (report.readOption(.kind)) |kind| next.kind = switch (kind) {
+            .permission => .permission,
+            .question => .question,
+            .auth => .auth,
+        };
+        if (report.readOption(.app)) |app| {
+            const n = @min(app.len, next.app.len);
+            @memcpy(next.app[0..n], app[0..n]);
+            next.app_len = n;
+        }
+        var writer: std.Io.Writer = .fixed(&next.msg);
+        report.writeText(.msg, &writer) catch {};
+        next.msg_len = writer.buffered().len;
+        self.agent = next;
+        if (self.notice) |notify| notify(self.reply_context, .agent);
     }
 
     fn bellRang(handler: *Handler) void {
@@ -329,6 +368,7 @@ test "the title and the bell reach the notice callback" {
             switch (n) {
                 .title => titles += 1,
                 .bell => bells += 1,
+                .agent => {},
             }
         }
     };

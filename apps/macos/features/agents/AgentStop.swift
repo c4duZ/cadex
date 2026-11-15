@@ -32,6 +32,27 @@ public enum AgentStop: Equatable, Sendable {
         "\(AgentProjectFolder.path(for: session.cwd, in: session.account))/\(session.id).jsonl"
     }
 
+    /// Why it stopped, from what the agent reported to its terminal (OSC
+    /// 7501, plan 19): "blocked" with kind permission ("approve Bash: touch
+    /// x") or question ("answer: Which color? (Blue · Green)"), and "done".
+    /// Plain strings, so this feature needs nothing of the terminal's. nil
+    /// when the report says nothing to notify about.
+    public static func fromReport(state: String, kind: String, message: String) -> AgentStop? {
+        switch (state, kind) {
+        case ("blocked", "permission"):
+            let body = message.hasPrefix("approve ") ? String(message.dropFirst("approve ".count)) : message
+            guard let colon = body.firstIndex(of: ":") else { return .permission(tool: body, subject: "") }
+            return .permission(tool: String(body[..<colon]), subject: body[body.index(after: colon)...].trimmingCharacters(in: .whitespaces))
+        case ("blocked", _):
+            let text = message.hasPrefix("answer: ") ? String(message.dropFirst("answer: ".count)) : message
+            return .question(firstLine(text))
+        case ("done", _):
+            return .finished(firstLine(message))
+        default:
+            return nil
+        }
+    }
+
     /// Reads the end of the session's log and says why it stopped.
     public static func read(_ session: AgentSession) -> AgentStop {
         guard let handle = FileHandle(forReadingAtPath: log(of: session)) else { return .unknown }

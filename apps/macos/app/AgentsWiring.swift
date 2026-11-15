@@ -231,6 +231,11 @@ extension AppDelegate {
                 s.agents.hiddenLogins[key] = nil
             }
         }
+        // In a Cadex terminal the agent says why it stopped (OSC 7501).
+        notifier.reportedStop = { [weak self] session in
+            guard let status = self?.sessions.lazy.compactMap({ $0.terminal(of: session)?.terminal.agentStatus }).first else { return nil }
+            return AgentStop.fromReport(state: "\(status.state)", kind: "\(status.kind)", message: status.message)
+        }
         notifier.start()
         // A test instance shows the three kinds without a click (2026-10-21).
         if ProcessInfo.processInfo.environment["CADEX_TEST_NOTIFICATIONS"] != nil {

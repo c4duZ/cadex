@@ -7,6 +7,11 @@ struct SignalState {
     var blinkTimer: Timer?
     /// Off during the hidden half of a blink.
     var cursorShown = true
+    /// The agent's last report (OSC 7501) and whether it finished while
+    /// nobody looked at this terminal (TerminalAgent.swift).
+    var agent: TerminalAgentStatus?
+    var agentUnseen = false
+    var onAgent: (() -> Void)?
 }
 
 /// Signals between the view and the program: focus in and out (for
@@ -21,6 +26,7 @@ extension TerminalView {
     func connectSignals() {
         session?.onTitle = { [weak self] in self?.titleChanged() }
         session?.onBell = { [weak self] in self?.bellRang() }
+        session?.onAgentStatus = { [weak self] in self?.agentReported() }
     }
 
     // MARK: Focus
@@ -29,6 +35,7 @@ extension TerminalView {
         let accepted = super.becomeFirstResponder()
         if accepted {
             focusChanged()
+            agentSeen()
             onFocus?()
         }
         return accepted

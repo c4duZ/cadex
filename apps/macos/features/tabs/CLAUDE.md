@@ -70,6 +70,10 @@
   (plano 8).
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
+- `TabAgentTitle.swift` (plano 19): o sinal do estado do agente antes do título (◐ trabalhando,
+  ● esperando você, ✓ terminou sem você ver, ✕ falhou), o nome da conversa no lugar da pasta e a
+  frase do que ele faz na dica; o nome dado à mão continua, com o sinal.
+
 ## Como validar
 - `make macos-test` passa: `TabList` e `PaneTree` têm os testes das regras; o snapshot ida e volta
   pelo JSON e um TabsController restaurado igual; com um `FakeDocument`, as regras de abrir ao lado,

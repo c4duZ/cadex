@@ -22,6 +22,7 @@ pub const Options = extern struct {
     on_bell: ?*const fn (?*anyopaque) callconv(.c) void,
     history_lines: u32,
     on_local_url: ?*const fn (?*anyopaque, [*:0]const u8) callconv(.c) void,
+    on_agent_status: ?*const fn (?*anyopaque) callconv(.c) void,
 };
 
 pub export fn cadex_terminal_open(options: ?*const Options, out: ?*?*Session) callconv(.c) status.Code {
@@ -41,6 +42,7 @@ pub export fn cadex_terminal_open(options: ?*const Options, out: ?*?*Session) ca
             .on_title = o.on_title,
             .on_bell = o.on_bell,
             .on_local_url = o.on_local_url,
+            .on_agent_status = o.on_agent_status,
         },
     }) catch |err| return status.fromError(err);
     return status.ok;
@@ -116,6 +118,30 @@ pub export fn cadex_terminal_copy_text(session: ?*Session, out: ?*?[*]u8, out_le
     // hand out NULL so cadex_free never sees it.
     ptr.* = if (text.len == 0) null else @constCast(text.ptr);
     len.* = text.len;
+    return status.ok;
+}
+
+/// What the agent in the terminal last reported (OSC 7501). Mirrors
+/// cadex_agent_status in include/cadex.h.
+pub const AgentStatusC = extern struct {
+    state: u8,
+    kind: u8,
+    app_len: u8,
+    app: [32]u8,
+    msg_len: u16,
+    msg: [2048]u8,
+};
+
+pub export fn cadex_terminal_agent_status(session: ?*Session, out: ?*AgentStatusC) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const o = out orelse return status.invalid_argument;
+    const agent = s.agentStatus();
+    o.state = @intFromEnum(agent.state);
+    o.kind = @intFromEnum(agent.kind);
+    o.app_len = @intCast(agent.app_len);
+    @memcpy(o.app[0..agent.app_len], agent.appName());
+    o.msg_len = @intCast(agent.msg_len);
+    @memcpy(o.msg[0..agent.msg_len], agent.message());
     return status.ok;
 }
 

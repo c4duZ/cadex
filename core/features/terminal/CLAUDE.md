@@ -47,6 +47,12 @@
   programa trocou por OSC continua, e as consultas OSC 10/11/4 respondem com essas cores.
 - Título (OSC 0/2) e sino chegam ao app pelos callbacks on_title e on_bell (`model.zig:Notice`),
   na thread de leitura, como on_output.
+- O estado de um agente pelo OSC 7501 (plano 19, `../../../docs/adr/0022-terminal-daemon.md`): o
+  efeito program_status da libghostty, ligado no `model.zig`, responde à pergunta do programa e
+  entrega cada relatório; só o registro principal (sem id) fica, nos tipos de `agent_status.zig`.
+  Chega ao app pelo callback on_agent_status e por `cadex_terminal_agent_status` (estado, tipo e o
+  texto já decodificado). Testado com o Claude Code de verdade em 2026-11-15: idle, working com a
+  frase, blocked com "approve Bash: …".
 - `local_url.zig`: endereços de servidor local na saída (localhost, 127.0.0.1, 0.0.0.0, [::1], com ou
   sem http://), sem sequências de escape (o Vite pinta a porta no meio do endereço), achados mesmo
   partidos entre duas leituras, uma vez por sessão; chegam ao app pelo callback on_local_url

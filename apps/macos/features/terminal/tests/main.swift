@@ -164,6 +164,20 @@ let exitCode = await Checks.run([
         }
         expect(found, "shell output never reached the frame")
     }),
+    ("an agent's OSC 7501 report reaches the app with its state, kind and text", {
+        let session = try TerminalSession(cols: 80, rows: 24, shell: "/bin/sh")
+        defer { session.close() }
+        expect(session.agentStatus() == nil, "nothing reported yet")
+        var notices = 0
+        session.onAgentStatus = { notices += 1 }
+        // As Claude Code 2.1.325 sends it while it waits for a permission (2026-11-14).
+        session.write("printf '\\033]7501;state=blocked:app=claude-code:kind=permission:msg=YXBwcm92ZSBCYXNoOiB0b3VjaCB4\\007'\n")
+        for _ in 0..<250 where session.agentStatus() == nil { try await Task.sleep(for: .milliseconds(20)) }
+        let status = session.agentStatus()
+        expect(status == TerminalAgentStatus(state: .blocked, kind: .permission, app: "claude-code", message: "approve Bash: touch x"),
+               "\(String(describing: status))")
+        expect(notices >= 1 && status?.needsYou == true)
+    }),
     ("select all and copy through the core; typing clears the selection", {
         let session = try TerminalSession(cols: 80, rows: 24, shell: "/bin/sh")
         defer { session.close() }

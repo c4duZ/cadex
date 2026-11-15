@@ -213,6 +213,7 @@ public final class TabsController {
         terminal.onOpenPreview = { [weak self] url in self?.onOpenPreview?(url) }
         terminal.onOpenFile = { [weak self] path, beside in self?.onOpenFile?(path, beside) }
         terminal.onProgramTitle = { [weak self] _ in self?.refreshBar() }
+        terminal.onAgentStatus = { [weak self] in self?.refreshBar() }
         terminal.onFocus = { [weak self, weak tab, weak terminal] in
             tab?.noteFocus(pane)
             if let terminal { self?.noteFocus(terminal) }
@@ -250,8 +251,9 @@ public final class TabsController {
     private func barItem(_ tab: Tab) -> TabBarView.Item {
         let title = tab.title(home: home)
         guard let document = tab.focused.document else {
+            let terminal = tab.focused.terminal
             return TabBarView.Item(id: tab.id, title: title, active: tab.id == list.active,
-                                   tip: tab.focused.terminal?.currentDirectory.map(shortPath))
+                                   tip: TabAgentTitle.tip(terminal?.agentStatus, folder: terminal?.currentDirectory.map(shortPath)))
         }
         let (icon, color) = Self.tabIcon(for: document.identity)
         return TabBarView.Item(id: tab.id, title: title, active: tab.id == list.active, icon: icon, iconColor: color,

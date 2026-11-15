@@ -31,6 +31,8 @@ pub const Callbacks = struct {
     /// A local server's address showed up in the output (local_url.zig),
     /// NUL-terminated, valid during the call. Once per address.
     on_local_url: ?*const fn (context: ?*anyopaque, url: [*:0]const u8) callconv(.c) void = null,
+    /// An agent reported its state (OSC 7501): read it with agentStatus().
+    on_agent_status: ?*const fn (context: ?*anyopaque) callconv(.c) void = null,
 };
 
 pub const Options = struct {
@@ -216,6 +218,7 @@ pub const Session = struct {
         const callback = switch (notice) {
             .title => self.callbacks.on_title,
             .bell => self.callbacks.on_bell,
+            .agent => self.callbacks.on_agent_status,
         };
         if (callback) |notify| notify(self.callbacks.context);
     }
@@ -231,6 +234,13 @@ pub const Session = struct {
         self.lock();
         defer self.unlock();
         try self.model.setColors(colors);
+    }
+
+    /// What the agent in this terminal last reported (OSC 7501), copied.
+    pub fn agentStatus(self: *Session) @import("model.zig").AgentStatus {
+        self.lock();
+        defer self.unlock();
+        return self.model.agent;
     }
 
     /// The title the program set (OSC 0/2), empty if none. Caller frees.

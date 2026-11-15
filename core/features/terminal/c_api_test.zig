@@ -21,6 +21,7 @@ fn options() api.Options {
         .on_bell = null,
         .history_lines = 0,
         .on_local_url = null,
+        .on_agent_status = null,
     };
 }
 

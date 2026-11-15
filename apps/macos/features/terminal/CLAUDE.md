@@ -52,7 +52,7 @@
   força a seleção local. Foco, título da janela, sino (pisca a view, sem som) e cursor piscando em
   `TerminalSignals.swift`; o timer do cursor só roda com a janela na frente e o programa pedindo.
 - Quem segura o terminal (aba, painel) usa `TerminalClose.swift` (hasForegroundProcess,
-  currentDirectory, closeSession) e os ganchos onShellExit, onActivity e onProgramTitle do
+  currentDirectory, closeSession) e os ganchos onShellExit, onActivity, onProgramTitle e onAgentStatus do
   `TerminalView`; a pergunta ao fechar com programa rodando é da feature tabs. Botão "Cancelar" de
   alerta ganha Esc à mão: o NSAlert só dá Esc a "Cancel".
 - Preferências: `TerminalPreferences.swift` (fonte, cursor, histórico, Option como Meta, copiar ao
@@ -86,6 +86,10 @@
   piscando. Desempenho medido em 2026-10-19: `cat` de 100 MB em 0,95 s,
   Ctrl+C sob saída contínua em menos de 0,2 s; o redesenho por linha suja ficou para quando
   medir lentidão.
+
+- `TerminalAgent.swift` e `TerminalAgentStatus.swift` (plano 19): o que o agente disse ao terminal
+  pelo OSC 7501 (`TerminalSession.agentStatus`), só enquanto um programa roda em primeiro plano, e
+  "terminou sem você ver" até o terminal ganhar o foco.
 
 ## Como validar
 - `make macos-test` passa.

@@ -60,6 +60,8 @@ pub const Session = struct {
             .on_bell = onBell,
             .history_lines = prefs.history_lines,
             .on_local_url = onLocalUrl,
+            // The agent's state (OSC 7501) is shown by the Mac app first (plan 19).
+            .on_agent_status = null,
         };
         var terminal: ?*cadex.cadex_terminal = null;
         if (cadex.cadex_terminal_open(&options, &terminal) != cadex.CADEX_OK) return error.OpenFailed;

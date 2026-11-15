@@ -34,6 +34,7 @@ test {
     _ = @import("search.zig");
     _ = @import("search_test.zig");
     _ = @import("links_test.zig");
+    _ = @import("agent_status_test.zig");
     _ = @import("mouse.zig");
     _ = @import("local_url.zig");
 }

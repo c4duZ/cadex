@@ -96,9 +96,17 @@ final class Tab {
 
     func title(home: String) -> String {
         let dot = documents.contains { $0.hasUnsavedChanges } ? "● " : ""
-        if let customTitle, !customTitle.isEmpty { return dot + customTitle }
+        let terminal = focused.terminal
+        let agent = terminal?.agentStatus
+        // The agent's sign shows even over a name given by hand (docs/spec/tabs.md).
+        let sign = TabAgentTitle.sign(agent, finishedUnseen: terminal?.agentFinishedUnseen ?? false)
+        if let customTitle, !customTitle.isEmpty { return dot + sign + customTitle }
         if let document = focused.document { return dot + document.title }
-        return dot + folderTitle(focused.terminal?.currentDirectory, home: home)
+        if agent != nil, let terminal {
+            let name = TabAgentTitle.name(programTitle: terminal.programTitle)
+            if !name.isEmpty { return dot + sign + name }
+        }
+        return dot + sign + folderTitle(terminal?.currentDirectory, home: home)
     }
 
     var hasForegroundProcess: Bool { terminals.contains { $0.hasForegroundProcess } }

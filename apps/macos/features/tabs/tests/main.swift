@@ -45,6 +45,17 @@ func eventually(_ body: () -> Bool) async -> Bool {
 }
 
 let exitCode = await Checks.run([
+    ("a tab with an agent: the sign of its state, the conversation's name, what it does in the tip", {
+        let working = TerminalAgentStatus(state: .working, kind: .none, app: "claude-code", message: "Creating empty file…")
+        let waiting = TerminalAgentStatus(state: .blocked, kind: .permission, app: "claude-code", message: "approve Bash: touch x")
+        let done = TerminalAgentStatus(state: .done, kind: .none, app: "claude-code", message: "")
+        expect(TabAgentTitle.sign(working, finishedUnseen: false) == "◐ " && TabAgentTitle.sign(waiting, finishedUnseen: false) == "● ")
+        expect(TabAgentTitle.sign(done, finishedUnseen: true) == "✓ " && TabAgentTitle.sign(done, finishedUnseen: false) == "")
+        expect(TabAgentTitle.sign(nil, finishedUnseen: true) == "", "no agent, no sign")
+        expect(TabAgentTitle.name(programTitle: "✳ Fix login") == "Fix login" && TabAgentTitle.name(programTitle: "  ") == "")
+        expect(TabAgentTitle.tip(waiting, folder: "~/code/app") == "approve Bash: touch x\n~/code/app")
+        expect(TabAgentTitle.tip(nil, folder: "~/code/app") == "~/code/app")
+    }),
     ("a picked element goes to an agent first, then any running program, never an idle shell", {
         let order = AgentCandidate.order([
             AgentCandidate(title: "~/painel", running: false),

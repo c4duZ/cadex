@@ -72,7 +72,39 @@ typedef struct {
      * the output (http://localhost:5173/), once per address per session;
      * url is valid during the call. NULL: no detection. */
     void (*on_local_url)(void *context, const char *url);
+    /* Called on the reader thread when an agent reports its state by the
+     * program status protocol (OSC 7501); read it with
+     * cadex_terminal_agent_status. NULL: no notice (the query is still
+     * answered and the state kept). */
+    void (*on_agent_status)(void *context);
 } cadex_terminal_options;
+
+/* What an agent in the terminal last said it is doing (OSC 7501, the root
+ * record only). Claude Code sends state, kind and a line of text. */
+enum {
+    CADEX_AGENT_NONE = 0,
+    CADEX_AGENT_IDLE = 1,
+    CADEX_AGENT_WORKING = 2,
+    CADEX_AGENT_DONE = 3,
+    CADEX_AGENT_BLOCKED = 4,
+    CADEX_AGENT_FAILED = 5,
+};
+enum {
+    CADEX_AGENT_KIND_NONE = 0,
+    CADEX_AGENT_KIND_PERMISSION = 1,
+    CADEX_AGENT_KIND_QUESTION = 2,
+    CADEX_AGENT_KIND_AUTH = 3,
+};
+typedef struct {
+    uint8_t state; /* CADEX_AGENT_* */
+    uint8_t kind;  /* CADEX_AGENT_KIND_*, when blocked */
+    uint8_t app_len;
+    char app[32];  /* "claude-code", not NUL-terminated */
+    uint16_t msg_len;
+    char msg[2048]; /* the decoded text, UTF-8, not NUL-terminated */
+} cadex_agent_status;
+
+cadex_status cadex_terminal_agent_status(cadex_terminal *session, cadex_agent_status *out);
 
 /* Starts a login shell on a new pty. */
 cadex_status cadex_terminal_open(const cadex_terminal_options *options, cadex_terminal **out);
