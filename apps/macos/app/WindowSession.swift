@@ -126,6 +126,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
             opener?.foldersChanged(folders)
             self?.git?.diskChanged(folders)
             self?.sidebarHistory?.diskChanged(folders)
+            self?.reviewsDiskChanged(folders)
         }
         let workspace = WorkspaceView(explorer: explorer, sidebar: makeSidebar(explorer: explorer, git: git)) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace

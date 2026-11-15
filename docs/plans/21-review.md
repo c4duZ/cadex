@@ -87,6 +87,15 @@ docs/adr/0021-cadex-managed-accounts.md e docs/adr/0022-terminal-daemon.md (plan
     git.review-toggle-whitespace. Configurações git.reviewContextLines, git.reviewWrap,
     git.reviewShowWhitespace. Features: source-control, worktrees, shortcuts, command-palette,
     settings.
+  - Feita em 2026-11-15: a aba numa vista só que desenha o que aparece (50 arquivos com 100 mudanças
+    montam em menos de 1,5 s, testado), a lista à esquerda, os 14 comandos, as três configurações, e
+    as entradas em Tasks, no grupo da tarefa em Agents e no cabeçalho do Git. j/k/n/p são atalhos
+    comuns de comandos que ficam indisponíveis fora da revisão em foco, e a tecla segue adiante. O
+    stage casa as linhas da revisão com as do patch (`ReviewStaging.swift`). Conferido no app de
+    release com um repositório de teste: a aba, as regiões recolhidas, rename e apagado, n andando
+    entre as mudanças com a lista acompanhando, e o stage de uma mudança só pelo ⌘K. Achou e
+    corrigiu: o fundo cinza da lista e o rename sem conteúdo mostrando o arquivo. O app ficou em
+    49,7 MB (limite 50).
 - **C. Imagem e conflito.**
   - Imagem (png, jpg, gif, webp, heic, pdf de uma página): os dois lados pelo ImageIO, em três
     modos: lado a lado, deslizar (uma barra separa antes e depois) e sobrepor (opacidade). Comando

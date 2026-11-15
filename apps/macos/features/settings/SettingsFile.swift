@@ -135,6 +135,11 @@ public enum SettingsFile {
                 else { reader.problems.append("worktrees.setupHooks: esperava a lista de comandos por repositório") }
             }
         }
+        if let s = reader.section(root, "git") {
+            if let lines = reader.number(s, "git.reviewContextLines") { settings.git.reviewContextLines = min(max(Int(lines), 0), 50) }
+            settings.git.reviewWrap = reader.bool(s, "git.reviewWrap") ?? settings.git.reviewWrap
+            settings.git.reviewShowWhitespace = reader.bool(s, "git.reviewShowWhitespace") ?? settings.git.reviewShowWhitespace
+        }
         if let s = reader.section(root, "ssh") {
             settings.ssh.ping = reader.bool(s, "ssh.ping") ?? settings.ssh.ping
         }
@@ -181,6 +186,8 @@ public enum SettingsFile {
             "sidebar": ["items": s.sidebar.items],
             "statusBar": ["left": s.statusBar.left, "right": s.statusBar.right],
             "ssh": ["ping": s.ssh.ping],
+            "git": ["reviewContextLines": s.git.reviewContextLines, "reviewWrap": s.git.reviewWrap,
+                    "reviewShowWhitespace": s.git.reviewShowWhitespace],
             "worktrees": ["root": s.worktrees.root, "setupHooks": s.worktrees.setupHooks],
             "agentTools": ["enabled": s.agentTools.enabled, "browser": s.agentTools.browser],
             "computerUse": ["enabled": s.computerUse.enabled, "allowedApps": s.computerUse.allowedApps, "blockedApps": s.computerUse.blockedApps],

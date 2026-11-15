@@ -19,6 +19,8 @@ public final class AgentsView: NSView {
     /// A task's status and comment for a project's group ("In Progress ·
     /// fixing the header"), by the group's folder; the app asks worktrees.
     public var projectNote: ((String) -> String?)?
+    /// The review button on a task's group: the app opens its review tab.
+    public var onReview: ((String) -> Void)?
     /// A click on a subagent: its conversation in a tab (the app opens it).
     public var onOpenSubagent: ((AgentSession, AgentSubagent) -> Void)?
     /// "Turn On" when agents.sessions is off.

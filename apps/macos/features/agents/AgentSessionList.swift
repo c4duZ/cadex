@@ -1,4 +1,5 @@
 import AppKit
+import Icons
 import Strings
 import UILooks
 
@@ -45,7 +46,11 @@ extension AgentsView {
                                AgentText.label(group.project.name, size: 12, weight: .semibold, color: colors.text),
                                AgentText.label("\(group.sessions.count)", size: 11, color: colors.secondary)]
         // A task's worktree says where it stands (docs/spec/worktrees.md).
-        if let note = projectNote?(group.project.root), !note.isEmpty { views.append(AgentText.label(note, size: 11, color: colors.secondary)) }
+        if let note = projectNote?(group.project.root), !note.isEmpty {
+            views.append(AgentText.label(note, size: 11, color: colors.secondary))
+            // A task's changes, in its review tab (docs/spec/review.md).
+            if onReview != nil { views.append(reviewButton(group.project.root)) }
+        }
         let line = NSStackView(views: views + [NSView(), caret])
         line.spacing = 7
         let row = AgentRow(line, inset: 6)
@@ -55,6 +60,15 @@ extension AgentsView {
         row.onClick = { [weak self, weak caret] in if let caret { self?.fold(project: root, caret: caret) } }
         caret.onClick = row.onClick
         return Self.padded(row, top: 8)
+    }
+
+    private func reviewButton(_ root: String) -> NSView {
+        let button = ClickIcon(image: Icon.gitDiff.image(size: UILooks.pt(13)))
+        button.contentTintColor = colors.secondary
+        button.setContentHuggingPriority(.required, for: .horizontal)
+        button.toolTip = T("Review Changes", "Revisar as mudanças")
+        button.onClick = { [weak self] in self?.onReview?(root) }
+        return button
     }
 
     private func row(for session: AgentSession, project: AgentProject, caret: AgentCaret) -> NSView {
@@ -166,4 +180,17 @@ extension AgentsView {
         ])
         return box
     }
+}
+
+/// An icon that answers a click, without folding the group under it.
+private final class ClickIcon: NSImageView {
+    var onClick: (() -> Void)?
+
+    convenience init(image: NSImage) {
+        self.init(frame: .zero)
+        self.image = image
+    }
+
+    override func mouseDown(with event: NSEvent) { onClick?() }
+    override func resetCursorRects() { addCursorRect(bounds, cursor: .pointingHand) }
 }

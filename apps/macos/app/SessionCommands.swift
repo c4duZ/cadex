@@ -66,6 +66,7 @@ extension WindowSession {
         commands.register(SourceControlCommands.all(git, palette: palette) { [weak self] in
             self?.tabs?.activeDocument as? DiffDocument
         })
+        registerReview(palette: palette)
         commands.register(Command(
             id: "git.show", title: T("Show Git", "Mostrar o Git"), keywords: ["source control", "git", "mudanças", "changes", "commit"],
             category: .view, defaultShortcut: "cmd+shift+g",

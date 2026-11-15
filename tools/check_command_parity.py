@@ -47,6 +47,11 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             # Computer use (plan 20, phase E; ADR 0026): accessibility is the Mac's.
             "computer-use.toggle", "computer-use.open-permissions", "computer-use.revoke-apps", "computer-use.stop",
             "computer-use.agent",
+            # The review tab (plan 21): Windows gets the core, the tab comes with the port.
+            "git.review-open", "git.review-compare-worktrees", "git.review-set-base", "git.review-stage-hunk",
+            "git.review-unstage-hunk", "git.review-stage-lines", "git.review-unstage-lines", "git.review-next-file",
+            "git.review-prev-file", "git.review-next-hunk", "git.review-prev-hunk", "git.review-toggle-collapse",
+            "git.review-toggle-wrap", "git.review-toggle-whitespace",
             # Tasks' worktrees (plan 19, phase D), until Windows gets the view.
             "worktrees.show", "worktrees.new-task", "worktrees.open", "worktrees.remove", "worktrees.set-status",
             "worktrees.set-comment", "worktrees.edit-setup-hooks"}

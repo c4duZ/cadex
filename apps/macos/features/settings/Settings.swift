@@ -203,6 +203,14 @@ public struct Settings: Equatable, Sendable {
         public var ping = true
     }
 
+    /// The review tab (docs/spec/review.md, plan 21).
+    public struct Git: Equatable, Sendable {
+        /// Unchanged lines kept around each change; the rest folds.
+        public var reviewContextLines = 3
+        public var reviewWrap = false
+        public var reviewShowWhitespace = false
+    }
+
     public struct StatusBar: Equatable, Sendable {
         /// The items on each side, in order; an item in neither is hidden
         /// (docs/spec/status-bar.md). The app drops unknown ids.
@@ -222,6 +230,7 @@ public struct Settings: Equatable, Sendable {
     public var statusBar = StatusBar()
     public var agents = Agents()
     public var ssh = SSH()
+    public var git = Git()
     public var worktrees = Worktrees()
     public var agentTools = AgentTools()
     public var computerUse = ComputerUse()

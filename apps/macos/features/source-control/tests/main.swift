@@ -75,4 +75,5 @@ let exitCode = await Checks.run([
         try? FileManager.default.removeItem(atPath: dir)
     }),
 ])
-exit(exitCode)
+let reviewExit = await Checks.run(reviewChecks)
+exit(exitCode != 0 ? exitCode : reviewExit)

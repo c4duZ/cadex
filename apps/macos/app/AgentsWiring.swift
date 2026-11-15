@@ -29,6 +29,7 @@ extension WindowSession {
         page.onRename = { [weak self] account in self?.renameAccount(account) }
         page.onSetActive = { [weak self] account in self?.setActiveAccount(account) }
         page.projectNote = { root in WorktreesController.shared.note(for: root) }
+        page.onReview = { [weak self] root in self?.openReview(repo: root) }
         ThemeStore.shared.observe { [weak page, weak self] _ in
             page?.colors = Self.agentColors()
             self?.usageStrip?.colors = Self.agentColors()

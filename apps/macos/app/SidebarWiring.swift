@@ -34,6 +34,7 @@ extension WindowSession {
                 SidebarAction("git.fetch", .arrowsClockwise, "Fetch"),
                 SidebarAction("git.pull", .arrowDown, "Pull"),
                 SidebarAction("git.push", .arrowUp, "Push"),
+                SidebarAction("git.review-open", .gitDiff, T("Review Changes", "Revisar as mudanças")),
             ], more: [
                 SidebarAction("git.switch-branch", .gitBranch, T("Switch Branch…", "Trocar de branch…")),
                 SidebarAction("git.stage-all", .plus, T("Stage All", "Adicionar tudo ao stage")),

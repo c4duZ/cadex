@@ -15,6 +15,8 @@ public final class WorktreesView: NSView {
     /// The window's repository, or nil outside one.
     public var repository: (() -> String?)?
     public var onOpen: ((TaskWorktree) -> Void)?
+    /// "Review Changes": the task's review tab (the app runs git.review-open for it).
+    public var onReview: ((TaskWorktree) -> Void)?
     public var onNewTask: (() -> Void)?
     public var onComment: ((TaskWorktree) -> Void)?
     public var onRemove: ((TaskWorktree) -> Void)?
@@ -82,7 +84,8 @@ public final class WorktreesView: NSView {
     }
 
     func menu(_ task: TaskWorktree) -> [MenuEntry] {
-        var entries = [MenuEntry(T("Open", "Abrir"), icon: .folderOpen) { [weak self] in self?.onOpen?(task) }, .separator]
+        var entries = [MenuEntry(T("Open", "Abrir"), icon: .folderOpen) { [weak self] in self?.onOpen?(task) },
+                       MenuEntry(T("Review Changes", "Revisar as mudanças"), icon: .gitDiff) { [weak self] in self?.onReview?(task) }, .separator]
         for status in TaskStatus.allCases {
             entries.append(MenuEntry(status.title, icon: controller.store.task(task.path)?.status == status ? .check : nil) { [weak self] in
                 self?.controller.setStatus(status, of: task.path)

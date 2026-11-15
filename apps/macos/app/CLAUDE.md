@@ -90,6 +90,11 @@
   (computerUse.enabled, allowedApps, blockedApps; o sim do dono é salvo), pergunta ao dono num alerta
   "o agente quer usar <app>", explica ao ligar e abre os Ajustes da Acessibilidade e da Gravação de
   Tela (computer-use.open-permissions); desligar para o que estiver agindo.
+- `ReviewWiring.swift` (plano 21, fase B2): registra os comandos da revisão; git.review-open revisa
+  o repositório da pasta do terminal com foco (senão a do workspace) contra onde a tarefa começou (o
+  branch que o New Task guardou, pela worktrees); Tasks, o grupo da tarefa em Agents e o cabeçalho do
+  Git rodam o mesmo; os botões da aba salvam git.reviewContextLines, git.reviewWrap e
+  git.reviewShowWhitespace; mudança no disco dentro do repositório relê a aba.
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.

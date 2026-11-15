@@ -26,6 +26,7 @@ extension WindowSession {
         page.repository = { [weak self] in self?.repository }
         let actions = worktreesActions()
         page.onOpen = actions.open
+        page.onReview = { [weak self] task in self?.openReview(repo: task.path) }
         page.onNewTask = actions.newTask
         page.onComment = actions.comment
         page.onRemove = actions.remove
