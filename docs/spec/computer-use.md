@@ -8,7 +8,9 @@ mostra, clicar, digitar, rolar, conferir pelo print), com o dono sabendo e permi
 ## Comportamento
 - Desligado por padrão (`computerUse.enabled`). Ligar (computer-use.toggle, ou em Configurações ›
   Geral › Agentes) mostra o que vai ser pedido e abre os Ajustes do Sistema nas duas permissões do
-  Cadex: Acessibilidade (ler e agir em outros apps) e Gravação de Tela (o print de uma janela).
+  Cadex: Acessibilidade (ler e agir em outros apps; nos macOS novos ela fica em Controle do
+  Dispositivo e Acesso a Dados) e Gravação de Tela (o print de uma janela). Abre a página
+  Privacidade e Segurança, não um painel dentro dela, que muda de nome entre versões.
   computer-use.open-permissions abre de novo. Desligado, nenhuma permissão é pedida e as ferramentas
   recusam com "Computer use is off in Cadex".
 - As ferramentas chegam ao agente pelo `cadex mcp` (`agent-tools.md`), só nas sessões que o Cadex
@@ -23,7 +25,8 @@ mostra, clicar, digitar, rolar, conferir pelo print), com o dono sabendo e permi
     pasta temporária como os prints do preview.
 - Permissão por app: a primeira ação num app (ler a árvore conta, listar não) mostra ao dono
   "<agente> quer usar <app>" com Permitir e Negar; a escolha fica em `computerUse.allowedApps`.
-  Negado, a ferramenta recusa com "the owner did not allow <app>". computer-use.revoke-apps esquece
+  Negado, a ferramenta recusa com "the owner did not allow <app>" e um sim anterior é esquecido.
+  No alerta, o padrão (Enter) é Não permitir; Permitir sempre só com clique. computer-use.revoke-apps esquece
   todas as escolhas.
 - Bloqueados sempre (recusa sem perguntar): Ajustes do Sistema, Acesso às Chaves, Terminal e o
   próprio Cadex, mais o que o dono puser em `computerUse.blockedApps`.
@@ -52,9 +55,10 @@ mostra, clicar, digitar, rolar, conferir pelo print), com o dono sabendo e permi
 
 ## Critérios de aceite
 - [x] Desligado, nenhuma permissão do sistema é pedida e `computer_list_apps` recusa (conferido com o `claude` real, 2026-11-15; ligado sem Acessibilidade, a resposta diz qual permissão falta).
-- [ ] Ligado, o agente lê a árvore do TextEdit, digita um texto num documento e confere pelo print.
-- [ ] O primeiro uso no TextEdit pergunta ao dono; negar recusa as ações seguintes.
-- [ ] Um campo de senha não mostra o valor e recusa digitação; Ajustes do Sistema é recusado sem
-      perguntar.
-- [ ] "Parar" interrompe na hora: a ação seguinte recusa.
-- [ ] O texto lido de outro app chega ao agente marcado como conteúdo.
+- [x] Ligado, o agente lê a árvore do TextEdit, digita um texto num documento e confere pelo print
+      (com o `claude` real e as permissões do dono, 2026-11-15).
+- [x] O primeiro uso no TextEdit pergunta ao dono; negar recusa as ações seguintes (idem).
+- [x] Um campo de senha não mostra o valor e recusa digitação (testes, com nós falsos); Ajustes do
+      Sistema é recusado sem perguntar (com o `claude` real).
+- [x] "Parar" interrompe na hora: a ação seguinte pergunta de novo e o não recusa (idem).
+- [x] O texto lido de outro app chega ao agente marcado como conteúdo.

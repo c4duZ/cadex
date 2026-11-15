@@ -25,7 +25,9 @@ final class ComputerUseBand {
         hideWork?.cancel()
         let work = DispatchWorkItem { [weak self] in self?.hide() }
         hideWork = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4, execute: work)
+        // 15 s, not 4: an agent acting every few seconds made the band blink
+        // away before the owner could reach Stop (2026-11-15).
+        DispatchQueue.main.asyncAfter(deadline: .now() + 15, execute: work)
     }
 
     func hide() {
@@ -46,7 +48,7 @@ final class ComputerUseBand {
         box.layer?.cornerRadius = 10
         label.textColor = .white
         label.font = .systemFont(ofSize: 12, weight: .semibold)
-        let button = NSButton(title: T("Stop", "Parar"), target: self, action: #selector(stopPressed))
+        let button = FirstClickButton(title: T("Stop", "Parar"), target: self, action: #selector(stopPressed))
         button.bezelStyle = .rounded
         let row = NSStackView(views: [label, button])
         row.spacing = 12
@@ -63,4 +65,11 @@ final class ComputerUseBand {
     }
 
     @objc private func stopPressed() { stop() }
+}
+
+/// Stop works on the first click: the agent's app is in front and Cadex is
+/// not, and a plain button's first click only woke the panel; the owner
+/// pressed Stop and the agent went on (2026-11-15).
+private final class FirstClickButton: NSButton {
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 }

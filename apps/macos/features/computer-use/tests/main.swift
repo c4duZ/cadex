@@ -42,8 +42,8 @@ func fakeController(window: Fake, answers: [Bool]) -> (ComputerUseController, ()
     controller.isTrusted = { true }
     controller.findApp = { name in
         switch name.lowercased() {
-        case "textedit": ComputerUseApp(pid: 42, bundleID: "com.apple.TextEdit", name: "TextEdit", activate: {})
-        case "keychain access": ComputerUseApp(pid: 43, bundleID: "com.apple.keychainaccess", name: "Keychain Access", activate: {})
+        case "textedit": ComputerUseApp(pid: 42, bundleID: "com.apple.TextEdit", name: "TextEdit", activate: {}, isActive: { true })
+        case "keychain access": ComputerUseApp(pid: 43, bundleID: "com.apple.keychainaccess", name: "Keychain Access", activate: {}, isActive: { true })
         default: nil
         }
     }
@@ -95,6 +95,7 @@ let exitCode = await Checks.run([
         controller.stop()
         expect(controller.stopped)
         expect(ask { controller.getState("TextEdit", reply: $0) } == .failed("the owner did not allow TextEdit") && asks() == 2, "asked again after Stop")
+        expect(!controller.rules.allowed.contains("com.apple.TextEdit"), "the no forgets the earlier yes")
         controller.isTrusted = { false }
         expect(ask { controller.getState("TextEdit", reply: $0) }.map { if case .failed(let t) = $0 { t.contains("Accessibility permission") } else { false } } == true)
     }),

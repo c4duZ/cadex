@@ -75,19 +75,26 @@ public final class ComputerUseController {
         element(name, index, reply: reply) { app, node in
             if node.actions.contains(kAXPressAction as String), node.perform(kAXPressAction as String) { return reply(.ok("clicked #\(index)")) }
             guard let frame = node.frame else { return reply(.failed("#\(index) has no place on screen to click")) }
-            app.activate()
-            ComputerUseInput.click(at: CGPoint(x: frame.midX, y: frame.midY))
-            reply(.ok("clicked #\(index)"))
+            self.inFront(app, reply: reply) {
+                ComputerUseInput.click(at: CGPoint(x: frame.midX, y: frame.midY))
+                reply(.ok("clicked #\(index)"))
+            }
         }
     }
 
     public func type(_ name: String, index: Int, text: String, reply: @escaping (CommandReply) -> Void) {
         element(name, index, reply: reply) { app, node in
             guard !node.isSecure else { return reply(.failed("#\(index) is a password field: agents never type there")) }
-            app.activate()
-            _ = node.focus()
-            ComputerUseInput.type(text)
-            reply(.ok("typed into #\(index)"))
+            self.inFront(app, reply: reply) {
+                _ = node.focus()
+                // The first key sent right after the focus was lost (TextEdit, 2026-11-15).
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    MainActor.assumeIsolated {
+                        ComputerUseInput.type(text, to: app.pid)
+                        reply(.ok("typed into #\(index)"))
+                    }
+                }
+            }
         }
     }
 
@@ -101,9 +108,10 @@ public final class ComputerUseController {
     public func scroll(_ name: String, index: Int, down: Bool, reply: @escaping (CommandReply) -> Void) {
         element(name, index, reply: reply) { app, node in
             guard let frame = node.frame else { return reply(.failed("#\(index) has no place on screen")) }
-            app.activate()
-            ComputerUseInput.scroll(at: CGPoint(x: frame.midX, y: frame.midY), down: down)
-            reply(.ok("scrolled \(down ? "down" : "up") at #\(index)"))
+            self.inFront(app, reply: reply) {
+                ComputerUseInput.scroll(at: CGPoint(x: frame.midX, y: frame.midY), down: down)
+                reply(.ok("scrolled \(down ? "down" : "up") at #\(index)"))
+            }
         }
     }
 
@@ -140,7 +148,12 @@ public final class ComputerUseController {
         guard let askOwner else { return reply(.failed("the owner did not allow \(shown)")) }
         askOwner(shown) { [weak self] yes in
             guard let self else { return }
-            guard yes else { return reply(.failed("the owner did not allow \(shown)")) }
+            guard yes else {
+                // A no forgets an earlier yes: otherwise, after a Stop and a
+                // no, the next launch let the agent in without asking (2026-11-15).
+                if rules.allowed.remove(id) != nil { onAllowed?(rules.allowed) }
+                return reply(.failed("the owner did not allow \(shown)"))
+            }
             stopped = false
             if !id.isEmpty, rules.allowed.insert(id).inserted { onAllowed?(rules.allowed) }
             act(app)
@@ -160,8 +173,24 @@ public final class ComputerUseController {
     }
 
 
+    /// The app in front before events at a point of the screen: activating
+    /// is asynchronous, and a click sent at once landed on what was in front
+    /// (2026-11-15). Up to 1.5 s, then refused rather than sent elsewhere.
+    private func inFront(_ app: ComputerUseApp, reply: @escaping (CommandReply) -> Void, then act: @escaping @MainActor () -> Void) {
+        app.activate()
+        waitFront(app, tries: 0, reply: reply, then: act)
+    }
+
+    private func waitFront(_ app: ComputerUseApp, tries: Int, reply: @escaping (CommandReply) -> Void, then act: @escaping @MainActor () -> Void) {
+        if app.isActive() { return act() }
+        guard tries < 30 else { return reply(.failed("\(app.name) did not come to the front; nothing was sent")) }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+            MainActor.assumeIsolated { self?.waitFront(app, tries: tries + 1, reply: reply, then: act) }
+        }
+    }
+
     static func permissionText(_ which: String) -> String {
-        "Cadex has no \(which) permission yet: the owner turns it on in System Settings › Privacy & Security › \(which) (computer-use.open-permissions)"
+        "Cadex does not have macOS's \(which) permission yet: the owner gives it in System Settings › Privacy & Security (computer-use.open-permissions)"
     }
 
     /// Another app's text for the agent, marked as data.
@@ -178,6 +207,7 @@ public struct ComputerUseApp {
     public let bundleID: String
     public let name: String
     public let activate: () -> Void
+    public let isActive: () -> Bool
 
     static func running(_ name: String) -> ComputerUseApp? {
         let wanted = name.lowercased()
@@ -185,6 +215,6 @@ public struct ComputerUseApp {
             $0.activationPolicy == .regular && ($0.bundleIdentifier?.lowercased() == wanted || $0.localizedName?.lowercased() == wanted)
         }) else { return nil }
         return ComputerUseApp(pid: app.processIdentifier, bundleID: app.bundleIdentifier ?? "", name: app.localizedName ?? name,
-                              activate: { app.activate() })
+                              activate: { app.activate() }, isActive: { app.isActive })
     }
 }

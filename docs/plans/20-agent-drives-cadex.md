@@ -163,7 +163,11 @@ docs/adr/0023-answer-agent-permissions.md (planos 18 e 19), `docs/adr/0002-zig-c
   - Feita em 2026-11-15: a feature com a árvore, as ações, as regras, a pergunta por app, a faixa
     com Parar e os quatro comandos, mais computer-use.agent (a lista do agente); `computer_*` no MCP
     e `cadex computer …` na CLI, nenhuma liberada pelo kit (todas perguntam). Testes com nós falsos.
-    Falta o dono dar Acessibilidade e Gravação de Tela ao Cadex e conferir com o TextEdit.
+    Conferido com o dono e o `claude` real no TextEdit: ler, digitar, o print, Ajustes recusado, o
+    alerta (o padrão é Não permitir), o Parar e o não. A conferência achou e corrigiu: as teclas iam
+    para o app da frente (agora vão ao processo do app), o primeiro caractere sumia, o Parar não
+    aceitava o primeiro clique, a faixa piscava, o painel Privacy_Accessibility não existe nos macOS
+    novos e um não esquecia de tirar o sim. A permissão sobreviveu ao rebuild (ADR 0016 vale).
 - **F. Peso e fechamento.** Cenários no `tools/perf/run.py`: tudo desligado igual ao de hoje (nada
   ouvindo no socket além do plano 19, nenhum script na página); um agente falso fazendo 100
   snapshots e cliques numa página de teste, memória e CPU medidos. Os ids novos em `MAC_ONLY` de

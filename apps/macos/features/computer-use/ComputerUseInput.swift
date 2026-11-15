@@ -14,15 +14,17 @@ enum ComputerUseInput {
         }
     }
 
-    /// Text typed as keys, a character at a time (the element has the focus).
-    static func type(_ text: String) {
+    /// Text typed as keys, a character at a time, to that app's process: keys
+    /// posted to the system went to whatever was in front, the agent's own
+    /// terminal included, while the app was still coming up (2026-11-15).
+    static func type(_ text: String, to pid: pid_t) {
         let source = CGEventSource(stateID: .hidSystemState)
         for character in text {
             let units = Array(String(character).utf16)
             for down in [true, false] {
                 guard let event = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: down) else { continue }
                 event.keyboardSetUnicodeString(stringLength: units.count, unicodeString: units)
-                event.post(tap: .cghidEventTap)
+                event.postToPid(pid)
             }
         }
     }
