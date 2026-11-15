@@ -62,7 +62,7 @@
   `PickerScript.swift` também lê os estilos calculados do layout; PickedElement.styles vai na linha
   `styles:` só com o agente ligado à aba, e a entrega prefere o terminal dele
   (PickDelivery.agentTerminal). `PreviewNotes.swift`: ⌘+clique escolhendo (ou preview.add-note)
-  prende uma nota a um elemento, com marcadores numerados que seguem a rolagem; preview.send-notes
+  prende uma nota a um elemento (o modo continua ligado depois dela), com marcadores numerados que seguem a rolagem; preview.send-notes
   cola todas no agente, cada nota do dono antes do bloco do elemento (PickDelivery.notes), e
   preview.clear-notes apaga.
 - Spec: `docs/spec/preview.md`. Status: plano 5, fase E pronta; plano 16, fases A a D no código.

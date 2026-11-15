@@ -24,6 +24,8 @@ final class PreviewPicker {
     /// element (PreviewNotes), with its box in the view.
     var onNote: ((PickedElement, CGRect) -> Void)?
     var takesNote = false
+    /// A note is being written: losing the focus to its field does not stop picking.
+    var holdsWhileNoting = false
     private(set) var isPicking = false
     /// Marked with ⇧, in the order clicked.
     private(set) var selection: [PickedElement] = []
@@ -47,7 +49,12 @@ final class PreviewPicker {
         web.onPickClick = { [weak self] in self?.click($0, $1) }
         web.onPickExit = { [weak self] in self?.overlay.target = nil }
         web.onShiftUp = { [weak self] in self?.shiftUp() }
-        web.onResign = { [weak self] in self?.stop() }
+        web.onResign = { [weak self] in
+            // The note's field takes the keyboard: picking goes on, so the
+            // owner pins several notes in a row (2026-11-15).
+            guard self?.holdsWhileNoting != true else { return }
+            self?.stop()
+        }
     }
 
     func toggle() { isPicking ? stop() : start() }
@@ -147,11 +154,15 @@ final class PreviewPicker {
         }
     }
 
-    /// The element under the click gets a note; picking ends, the field takes the keys.
+    /// The element under the click gets a note; the field takes the keys and
+    /// picking goes on after it, for the next note (it ended here until
+    /// 2026-11-15, so each note asked for ⌘⇧C again).
     private func note(at point: CGPoint) {
         reader.read(at: point) { [weak self] element in
             guard let self, isPicking else { return }
-            stop()
+            takesNote = false
+            overlay.target = nil
+            showSelection()
             if let element { onNote?(element, reader.viewBox(element.box)) }
         }
     }

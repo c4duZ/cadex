@@ -126,7 +126,8 @@ vê, no lugar do Claude in Chrome ou do Playwright, pelo `cadex mcp` ou pela CLI
   fundo, fonte, tamanho, espaçamento, borda, display, posição), até 600 caracteres. Continua colado
   sem Enter: o dono lê e aperta Enter.
 - Notas: no modo de escolher, ⌘+clique num elemento abre um campo de texto preso a ele (o ⌥ já copia);
-  Enter guarda a nota, Esc desiste. As notas aparecem como marcadores numerados sobre a página,
+  Enter guarda a nota, Esc desiste; o modo de escolher continua ligado, para a próxima nota (clicar
+  fora do campo desiste e desliga o modo). As notas aparecem como marcadores numerados sobre a página,
   ficam na aba enquanto ela está aberta (somem ao fechar) e seguem o elemento ao rolar.
   preview.add-note liga o modo já pronto para uma nota; preview.clear-notes apaga todas.
 - preview.send-notes manda todas de uma vez ao terminal do agente, coladas sem Enter, um bloco por
@@ -187,6 +188,7 @@ vê, no lugar do Claude in Chrome ou do Playwright, pelo `cadex mcp` ou pela CLI
 - [x] Nenhum `WKUserScript` registrado, com o agente ligado ou não.
 - [x] Um erro jogado pela página aparece em `browser_console` (2026-11-15, o `claude` real no app
       de release: o `console.error` e o `TypeError` de um clique).
-- [ ] O elemento escolhido chega ao agente com os estilos e o print; duas notas chegam juntas em
-      `browser_notes`. (Os estilos, o bloco com a nota do dono e as duas notas juntas têm teste com a
-      view de verdade; escolher com o mouse e ver chegar ao terminal falta o dono ver.)
+- [x] O elemento escolhido chega ao agente com os estilos e o print; duas notas chegam juntas em
+      `browser_notes` (2026-11-15, no app de release com mouse e teclado de verdade e o `claude`
+      real: o bloco com `styles:` e a imagem no prompt dele; duas notas seguidas, cada uma com o
+      texto do dono, sem a marca data-cadex-pick no HTML).

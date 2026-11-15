@@ -146,8 +146,10 @@ docs/adr/0023-answer-agent-permissions.md (planos 18 e 19), `docs/adr/0002-zig-c
   - Feita em 2026-11-15: o console (com a limitação do carregamento, na spec), os estilos no
     elemento escolhido com o agente ligado e a entrega ao terminal dele, as notas com marcadores e os
     três comandos; `browser_console` e `browser_notes` no MCP e na CLI, liberados pelo kit por só
-    lerem. Conferido com o `claude` real: o erro da página em `browser_console`. Escolher e prender
-    notas com o mouse falta o dono ver.
+    lerem. Conferido com o `claude` real: o erro da página em `browser_console`. Depois, com mouse e
+    teclado de verdade no app de release: o elemento escolhido no prompt do agente com `styles:` e a
+    imagem, duas notas seguidas em `browser_notes`. Essa conferência achou e corrigiu: a marca
+    data-cadex-pick ia no HTML entregue, e cada nota desligava o modo de escolher.
 - **E. Computer use.** Feature nova `computer-use` (apps/macos/features/computer-use/, a criar,
   só app macOS, com `CLAUDE.md`, testes e linha na tabela):
   - Ferramentas no mesmo MCP: `computer_list_apps`, `computer_get_state` (árvore de acessibilidade
@@ -167,7 +169,9 @@ docs/adr/0023-answer-agent-permissions.md (planos 18 e 19), `docs/adr/0002-zig-c
     alerta (o padrão é Não permitir), o Parar e o não. A conferência achou e corrigiu: as teclas iam
     para o app da frente (agora vão ao processo do app), o primeiro caractere sumia, o Parar não
     aceitava o primeiro clique, a faixa piscava, o painel Privacy_Accessibility não existe nos macOS
-    novos e um não esquecia de tirar o sim. A permissão sobreviveu ao rebuild (ADR 0016 vale).
+    novos e um não esquecia de tirar o sim. A permissão sobreviveu ao rebuild (ADR 0016 vale). O
+    campo de senha conferido num app de teste com um NSSecureTextField: sem valor na árvore, digitar
+    e definir recusados.
 - **F. Peso e fechamento.** Cenários no `tools/perf/run.py`: tudo desligado igual ao de hoje (nada
   ouvindo no socket além do plano 19, nenhum script na página); um agente falso fazendo 100
   snapshots e cliques numa página de teste, memória e CPU medidos. Os ids novos em `MAC_ONLY` de

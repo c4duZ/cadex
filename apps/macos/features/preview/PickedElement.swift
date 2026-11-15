@@ -92,12 +92,18 @@ public struct PickedElement: Equatable, Sendable {
         let head = lines.joined(separator: "\n")
         let tail = "</picked_element>"
         let room = Self.totalLimit - head.utf8.count - tail.utf8.count - 2
-        let markup = Self.fitting(Self.cut(Self.clean(html), Self.htmlLimit), bytes: room)
+        let markup = Self.fitting(Self.cut(Self.clean(Self.unmarked(html)), Self.htmlLimit), bytes: room)
         return head + "\n" + markup + "\n" + tail
     }
 
     /// Without control characters (an escape would end the bracketed paste
     /// or move the cursor) and without our own fence.
+    /// Without the picker's own marks, left on an element whose page
+    /// world never ran to take them off (a note, an inner element).
+    static func unmarked(_ html: String) -> String {
+        html.replacingOccurrences(of: #" data-cadex-pick="[^"]*""#, with: "", options: .regularExpression)
+    }
+
     static func clean(_ text: String) -> String {
         let kept = text.unicodeScalars.filter { s in
             switch s.value {

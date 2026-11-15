@@ -181,6 +181,9 @@ enum PickerScript {
             const frames = h.frames.map(selector);
             // Only the top document: the page's world looks it up there.
             const marked = !!mark && h.frames.length === 0 && h.el.getRootNode() === document;
+            // The markup before the mark: read after, it carried
+            // data-cadex-pick to the agent (2026-11-15).
+            const markup = html(h.el);
             if (marked) h.el.setAttribute('data-cadex-pick', mark);
             return {
               marked,
@@ -188,7 +191,7 @@ enum PickerScript {
               box: h.box,
               label: label(h),
               selector: frames.concat([selector(h.el)]).join(' >>> '),
-              html: html(h.el),
+              html: markup,
               text: (h.el.innerText || h.el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 400),
               viewport: { w: window.innerWidth, h: window.innerHeight },
               styles: styles(h.el),

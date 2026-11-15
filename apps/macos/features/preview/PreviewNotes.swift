@@ -21,6 +21,8 @@ final class PreviewNotes: NSObject, NSTextFieldDelegate {
     let field = NSTextField()
     private var editing: PickedElement?
     private var refreshing = false
+    /// The note was kept or given up; true when the keyboard went back to the page.
+    var onFinished: ((Bool) -> Void)?
     /// Held as long as the tab, as the picker's.
     private let world = PickerScript.world
 
@@ -62,10 +64,21 @@ final class PreviewNotes: NSObject, NSTextFieldDelegate {
         return false
     }
 
+    /// The owner clicked away from the field: the note is given up and
+    /// picking stops, since the page lost the keyboard.
+    func controlTextDidEndEditing(_ notification: Notification) {
+        guard editing != nil else { return }
+        editing = nil
+        field.isHidden = true
+        onFinished?(false)
+        refresh()
+    }
+
     private func finishEditing() {
         editing = nil
         field.isHidden = true
-        markers.window?.makeFirstResponder(web)
+        let back = markers.window?.makeFirstResponder(web) ?? false
+        onFinished?(back)
         refresh()
     }
 

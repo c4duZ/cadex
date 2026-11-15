@@ -55,7 +55,10 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         super.init()
         picker.onStateChange = { [weak self] in self?.showPicking() }
         picker.agentTerminal = { [weak self] in self?.agentController?.isAttached == true ? self?.agentTerminal : nil }
-        picker.onNote = { [weak self] element, box in self?.notes.edit(element, at: box) }
+        picker.onNote = { [weak self] element, box in
+            self?.picker.holdsWhileNoting = true
+            self?.notes.edit(element, at: box)
+        }
         web.navigationDelegate = self
         web.uiDelegate = self
         // "Inspecionar elemento" in the page's context menu (macOS 13.3+).
@@ -142,6 +145,12 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
             markers.topAnchor.constraint(equalTo: web.topAnchor), markers.bottomAnchor.constraint(equalTo: web.bottomAnchor),
             markers.leadingAnchor.constraint(equalTo: web.leadingAnchor), markers.trailingAnchor.constraint(equalTo: web.trailingAnchor),
         ])
+        // Kept or given up: picking goes on only if the keyboard is back on the page.
+        made.onFinished = { [weak self] backToPage in
+            guard let self else { return }
+            picker.holdsWhileNoting = false
+            if !backToPage { picker.stop() }
+        }
         return made
     }()
 

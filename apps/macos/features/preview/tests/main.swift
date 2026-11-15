@@ -116,6 +116,8 @@ let exitCode = await Checks.run([
         expect(!element.payload().contains("screenshot:"))
         element.screenshot = "/tmp/cadex-pick/pick-1.png"
         expect(element.payload().contains("(viewport 0×0)\nscreenshot: /tmp/cadex-pick/pick-1.png\nhtml:"))
+        let marked = PickedElement(page: "http://x", selector: "#hero", text: "", html: #"<div id="hero" data-cadex-pick="651A-AD4B">Hero</div>"#, box: .zero, viewport: .zero)
+        expect(marked.payload().contains(#"<div id="hero">Hero</div>"#), "the picker's mark never reaches the agent")
     }),
     ("source maps: VLQ numbers, and the original place of a served line and column", {
         expect(SourceMap.vlq("AAAA") == [0, 0, 0, 0])
