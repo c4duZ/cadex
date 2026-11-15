@@ -115,6 +115,14 @@ let package = Package(
             linkerSettings: [.linkedLibrary("sqlite3")]
         ),
         // The app's socket: where the sessions Cadex opened talk to it (docs/adr/0022-terminal-daemon.md).
+        // The agent operates other apps by accessibility (docs/adr/0026-computer-use.md).
+        .target(
+            name: "ComputerUse",
+            dependencies: ["CommandPalette", "Strings", "TempImages"],
+            path: "features/computer-use",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
         .target(
             name: "AgentTools",
             dependencies: ["SessionKit", "CommandPalette", "Strings"],
@@ -383,6 +391,12 @@ let package = Package(
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
+            name: "ComputerUseTests",
+            dependencies: ["ComputerUse", "Checks", "CommandPalette"],
+            path: "features/computer-use/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+        .executableTarget(
             name: "PowerTests",
             dependencies: ["Power", "Checks", "CommandPalette"],
             path: "features/power/tests",
@@ -448,7 +462,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "AgentTools", "SessionKit", "Worktrees", "SSH", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "AgentTools", "ComputerUse", "SessionKit", "Worktrees", "SSH", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

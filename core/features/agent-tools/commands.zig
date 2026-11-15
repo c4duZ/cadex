@@ -58,6 +58,8 @@ pub fn plan(gpa: std.mem.Allocator, sub: []const u8, words: []const []const u8) 
         try p.args.append(gpa, .{ .key = "text", .value = try std.mem.join(gpa, " ", words) });
     } else if (std.mem.eql(u8, sub, "browser")) {
         try planBrowser(gpa, &p, words);
+    } else if (std.mem.eql(u8, sub, "computer")) {
+        try planComputer(gpa, &p, words);
     } else if (std.mem.eql(u8, sub, "worktree")) {
         if (words.len < 2) return error.Usage;
         if (std.mem.eql(u8, words[0], "status")) {
@@ -101,6 +103,39 @@ fn planBrowser(gpa: std.mem.Allocator, p: *Planned, words: []const []const u8) !
     if (!(shape.len > 0 and shape[shape.len - 1].joined) and rest.len > shape.len) return error.Usage;
 }
 
+/// `cadex computer <action> …`: another app by accessibility
+/// (docs/spec/computer-use.md), one command `computer-use.agent`.
+fn planComputer(gpa: std.mem.Allocator, p: *Planned, words: []const []const u8) !void {
+    if (words.len == 0) return error.Usage;
+    const verb = words[0];
+    const rest = words[1..];
+    p.id = "computer-use.agent";
+    const action: []const u8 = if (std.mem.eql(u8, verb, "apps")) "list_apps"
+        else if (std.mem.eql(u8, verb, "state")) "get_state"
+        else if (std.mem.eql(u8, verb, "click")) "click"
+        else if (std.mem.eql(u8, verb, "type")) "type"
+        else if (std.mem.eql(u8, verb, "set")) "set_value"
+        else if (std.mem.eql(u8, verb, "scroll")) "scroll"
+        else if (std.mem.eql(u8, verb, "screenshot")) "screenshot"
+        else return error.Usage;
+    try p.args.append(gpa, .{ .key = "action", .value = action });
+    if (std.mem.eql(u8, action, "list_apps")) return if (rest.len == 0) {} else error.Usage;
+    if (rest.len == 0) return error.Usage;
+    try p.args.append(gpa, .{ .key = "app", .value = rest[0] });
+    if (std.mem.eql(u8, action, "get_state") or std.mem.eql(u8, action, "screenshot")) return if (rest.len == 1) {} else error.Usage;
+    if (rest.len < 2) return error.Usage;
+    try p.args.append(gpa, .{ .key = "index", .value = rest[1] });
+    if (std.mem.eql(u8, action, "click")) return if (rest.len == 2) {} else error.Usage;
+    if (std.mem.eql(u8, action, "scroll")) {
+        if (rest.len > 3) return error.Usage;
+        if (rest.len == 3) try p.args.append(gpa, .{ .key = "direction", .value = rest[2] });
+        return;
+    }
+    if (rest.len < 3) return error.Usage;
+    const key: []const u8 = if (std.mem.eql(u8, action, "type")) "text" else "value";
+    try p.args.append(gpa, .{ .key = key, .value = try std.mem.join(gpa, " ", rest[2..]) });
+}
+
 /// The values plan() joined (notify, comment, a fill's text) are the
 /// planner's to free.
 pub fn freeJoined(gpa: std.mem.Allocator, sub: []const u8, p: *Planned) void {
@@ -108,6 +143,10 @@ pub fn freeJoined(gpa: std.mem.Allocator, sub: []const u8, p: *Planned) void {
         else if (std.mem.eql(u8, sub, "worktree")) "comment"
         else if (std.mem.eql(u8, sub, "browser")) "text"
         else null;
+    if (std.mem.eql(u8, sub, "computer")) {
+        for (p.args.items) |a| if (std.mem.eql(u8, a.key, "text") or std.mem.eql(u8, a.key, "value")) gpa.free(a.value);
+        return;
+    }
     const key = joined_key orelse return;
     for (p.args.items) |a| if (std.mem.eql(u8, a.key, key)) gpa.free(a.value);
 }
@@ -120,6 +159,8 @@ pub const usage =
     \\       cadex worktree status <todo|doing|review|done> | comment <text>
     \\       cadex browser goto <url> | snapshot | click <ref> | fill <ref> <text> | press <key>
     \\                     | scroll [up|down|ref] | wait [selector] [seconds] | screenshot | console | notes
+    \\       cadex computer apps | state <app> | click <app> <n> | type <app> <n> <text>
+    \\                      | set <app> <n> <value> | scroll <app> <n> [up|down] | screenshot <app>
     \\       cadex commands | run <id> [key=value ...]   (add --json for the raw answer)
     \\       cadex skills list | get <topic>
     \\
@@ -165,6 +206,18 @@ test "the shortcuts become command ids with their arguments" {
     try testing.expectEqual(@as(usize, 1), snap.args.items.len);
     try testing.expectError(error.Usage, plan(gpa, "browser", &.{"click"}));
     try testing.expectError(error.Usage, plan(gpa, "browser", &.{ "snapshot", "extra" }));
+    var typed = try plan(gpa, "computer", &.{ "type", "TextEdit", "3", "hello", "there" });
+    defer {
+        freeJoined(gpa, "computer", &typed);
+        typed.deinit(gpa);
+    }
+    try testing.expectEqualStrings("computer-use.agent", typed.id.?);
+    try testing.expectEqualStrings("type", typed.args.items[0].value);
+    try testing.expectEqualStrings("hello there", typed.args.items[3].value);
+    var apps = try plan(gpa, "computer", &.{"apps"});
+    defer apps.deinit(gpa);
+    try testing.expectEqualStrings("list_apps", apps.args.items[0].value);
+    try testing.expectError(error.Usage, plan(gpa, "computer", &.{ "click", "TextEdit" }));
     var list = try plan(gpa, "commands", &.{});
     defer list.deinit(gpa);
     try testing.expect(list.id == null);

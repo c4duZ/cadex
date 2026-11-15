@@ -181,6 +181,14 @@ public struct Settings: Equatable, Sendable {
         public var browser = true
     }
 
+    /// The agent operates other apps (docs/adr/0026-computer-use.md): off
+    /// until the owner turns it on; the apps allowed and the extra blocked.
+    public struct ComputerUse: Equatable, Sendable {
+        public var enabled = false
+        public var allowedApps: [String] = []
+        public var blockedApps: [String] = []
+    }
+
     /// Tasks' worktrees (docs/spec/worktrees.md, plan 19 phase D).
     public struct Worktrees: Equatable, Sendable {
         /// Where tasks go: empty is beside each repository (`<repo>.worktrees`).
@@ -216,6 +224,7 @@ public struct Settings: Equatable, Sendable {
     public var ssh = SSH()
     public var worktrees = Worktrees()
     public var agentTools = AgentTools()
+    public var computerUse = ComputerUse()
     /// "cmd+shift+t" → command id, or nil to turn a default off.
     public var shortcuts: [String: String?] = [:]
 

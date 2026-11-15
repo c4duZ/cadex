@@ -44,6 +44,8 @@ public enum AgentCommandList {
         "agent-tools.open-file", "agent-tools.open-diff", "agent-tools.notify",
         "preview.open", "preview.reload", "preview.back", "preview.forward", "preview.agent",
         "worktrees.set-status", "worktrees.set-comment",
+        // Computer use (docs/adr/0026-computer-use.md): off by default, asked app by app.
+        "computer-use.agent",
     ]
 
     public static func allows(_ id: String) -> Bool { allowed.contains(id) }

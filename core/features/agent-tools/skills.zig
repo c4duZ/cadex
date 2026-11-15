@@ -10,6 +10,7 @@ pub const Topic = struct { name: []const u8, summary: []const u8, text: []const 
 pub const topics = [_]Topic{
     .{ .name = "cadex", .summary = "what the cadex command does and when to use it", .text = @embedFile("guides/cadex.md") },
     .{ .name = "tasks", .summary = "your task's status and comment, and asking for review", .text = @embedFile("guides/tasks.md") },
+    .{ .name = "computer", .summary = "operating other apps of the Mac, when the owner turns it on", .text = @embedFile("guides/computer.md") },
     .{ .name = "preview", .summary = "opening pages in Cadex's preview, and picked elements", .text = @embedFile("guides/preview.md") },
 };
 

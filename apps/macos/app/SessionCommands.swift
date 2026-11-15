@@ -1,4 +1,5 @@
 import AgentTools
+import ComputerUse
 import Agents
 import AppKit
 import Worktrees
@@ -145,6 +146,8 @@ extension WindowSession {
             command.id == "preview.open" ? command.accepting("url=<address>") { [weak self] in self?.agentOpenPreview($0) ?? .failed("the window is gone") } : command
         })
         commands.register(AgentToolsCommands.commands(agentToolsActions()))
+        commands.register(ComputerUseCommands.all(toggle: { [weak self] in self?.settings.store.update { $0.computerUse.enabled.toggle() } },
+                                                  openPermissions: { [weak self] in self?.app.openComputerUsePermissions() }))
         commands.register(PreviewAgentCommands.all(tab: { [weak self] in self?.agentPreview($0) },
                                                    open: { [weak self] in self?.openAgentPreview($0) },
                                                    enabled: { [weak self] in self?.settings.store.settings.agentTools.browser ?? false },

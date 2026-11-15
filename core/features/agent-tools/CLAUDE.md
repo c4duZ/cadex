@@ -35,6 +35,9 @@
 - Fase C e D: `cadex browser goto|snapshot|click|fill|press|scroll|wait|screenshot|console|notes` e as ferramentas
   `browser_*` do MCP viram o comando preview.agent com `action=`; o print volta ao agente como imagem
   (o PNG em base64) e o caminho.
+- Fase E: `cadex computer apps|state|click|type|set|scroll|screenshot` e as ferramentas `computer_*`
+  viram computer-use.agent com `action=` (`../../../docs/spec/computer-use.md`); o print da janela
+  também volta como imagem.
 - O build (`../../build.zig`, `addCli`) instala `zig-out/bin/cadex` só no Mac; o empacotamento o põe em
   Contents/Helpers.
 

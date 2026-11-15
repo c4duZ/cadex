@@ -12,6 +12,7 @@ tells the owner something, and marks your task's progress. Only sessions Cadex o
   you finish something long, need a decision, or are blocked. Keep it to one short sentence.
 - `cadex worktree status <todo|doing|review|done>`: your task's status (shown in Cadex's Tasks).
 - `cadex worktree comment "<text>"`: what you are doing now, in a few words.
+- `cadex computer …`: other apps of the Mac, if the owner turned it on (`cadex skills get computer`).
 - `cadex commands`: every command you may run, with its arguments.
 - `cadex run <id> [key=value ...]`: run one of those by id.
 Add `--json` for the app's raw answer. Exit code 0 means done; 1 means refused, with the reason.

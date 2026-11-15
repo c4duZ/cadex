@@ -18,7 +18,9 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
     elemento ou não (`preview.pickScreenshot`, ligado). Árvore de arquivos: seguir o terminal (`explorer.followTerminal`) e
     mostrar os ocultos (`explorer.showHidden`). Agentes: entre as opções da página Agents, hibernar os agentes parados
     (`agents.hibernateAfterMinutes`, 30 minutos; 0 desliga; ver `agents.md`). Os agentes podem usar o Cadex
-    (`agentTools.enabled`) e o preview (`agentTools.browser`), os dois ligados (ver `agent-tools.md`). Tarefas: a pasta das tarefas (`worktrees.root`, vazio é ao lado de cada repositório; ver
+    (`agentTools.enabled`) e o preview (`agentTools.browser`), os dois ligados (ver `agent-tools.md`), e outros apps do Mac
+    (`computerUse.enabled`, desligado; com `computerUse.allowedApps` e `computerUse.blockedApps`, ver
+    `computer-use.md`). Tarefas: a pasta das tarefas (`worktrees.root`, vazio é ao lado de cada repositório; ver
     `worktrees.md`). Manter acordado: como liga e desliga, o modo
     (`power.mode`), manter a tela acesa, ligar ao abrir (`power.onAtLaunch`) e a tampa fechada
     explicada à parte (ver `power.md`). Numa página própria ficou demais (o dono, 2026-10-20).

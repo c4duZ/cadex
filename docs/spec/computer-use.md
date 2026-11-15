@@ -51,7 +51,7 @@ mostra, clicar, digitar, rolar, conferir pelo print), com o dono sabendo e permi
 - O dono revoga a permissão nos Ajustes com o agente agindo -> a próxima ação recusa e a faixa some.
 
 ## Critérios de aceite
-- [ ] Desligado, nenhuma permissão do sistema é pedida e `computer_list_apps` recusa.
+- [x] Desligado, nenhuma permissão do sistema é pedida e `computer_list_apps` recusa (conferido com o `claude` real, 2026-11-15; ligado sem Acessibilidade, a resposta diz qual permissão falta).
 - [ ] Ligado, o agente lê a árvore do TextEdit, digita um texto num documento e confere pelo print.
 - [ ] O primeiro uso no TextEdit pergunta ao dono; negar recusa as ações seguintes.
 - [ ] Um campo de senha não mostra o valor e recusa digitação; Ajustes do Sistema é recusado sem

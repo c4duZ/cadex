@@ -86,6 +86,10 @@
   olhando), encerra com SIGTERM e marca a aba; o foco no terminal digita o `--resume` pelo kit; o fim
   de um agente que saiu sozinho mostra "Reiniciar"; agents.hibernate e agents.restart agem no
   terminal com foco. Só sessões abertas pelo Cadex (têm hooks).
+- `ComputerUseWiring.swift` (plano 20, fase E): liga a feature computer-use às configurações
+  (computerUse.enabled, allowedApps, blockedApps; o sim do dono é salvo), pergunta ao dono num alerta
+  "o agente quer usar <app>", explica ao ligar e abre os Ajustes da Acessibilidade e da Gravação de
+  Tela (computer-use.open-permissions); desligar para o que estiver agindo.
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.

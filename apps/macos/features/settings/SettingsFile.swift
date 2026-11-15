@@ -119,6 +119,11 @@ public enum SettingsFile {
                 else { reader.problems.append("agents.accountNames: esperava nomes por pasta") }
             }
         }
+        if let s = reader.section(root, "computerUse") {
+            settings.computerUse.enabled = reader.bool(s, "computerUse.enabled") ?? settings.computerUse.enabled
+            settings.computerUse.allowedApps = s["allowedApps"] as? [String] ?? settings.computerUse.allowedApps
+            settings.computerUse.blockedApps = s["blockedApps"] as? [String] ?? settings.computerUse.blockedApps
+        }
         if let s = reader.section(root, "agentTools") {
             settings.agentTools.enabled = reader.bool(s, "agentTools.enabled") ?? settings.agentTools.enabled
             settings.agentTools.browser = reader.bool(s, "agentTools.browser") ?? settings.agentTools.browser
@@ -178,6 +183,7 @@ public enum SettingsFile {
             "ssh": ["ping": s.ssh.ping],
             "worktrees": ["root": s.worktrees.root, "setupHooks": s.worktrees.setupHooks],
             "agentTools": ["enabled": s.agentTools.enabled, "browser": s.agentTools.browser],
+            "computerUse": ["enabled": s.computerUse.enabled, "allowedApps": s.computerUse.allowedApps, "blockedApps": s.computerUse.blockedApps],
             "agents": ["sessions": s.agents.sessions, "notifyPermission": s.agents.notifyPermission,
                        "notifyQuestion": s.agents.notifyQuestion, "notifyFinished": s.agents.notifyFinished,
                        "soundPermission": s.agents.soundPermission, "soundQuestion": s.agents.soundQuestion,
