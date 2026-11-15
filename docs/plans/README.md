@@ -39,7 +39,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 14 | `docs/plans/14-languages-and-settings.md` | inglês por padrão, português como opção, configurações refeitas | feito; falta rodar no Windows e conferir à mão |
 | 15 | `docs/plans/15-themes-and-personalization.md` | mais temas e personalização visual (claro/escuro, destaque, contraste, fonte, zoom, cores de space e aba) | fases A a D no código, Mac e Windows (2026-10-20); falta conferir à mão no Mac e no PC Windows |
 | 16 | `docs/plans/16-element-picker.md` | escolher elemento no preview e mandar para o agente no terminal (só Mac) | fase A feita e conferida pelo dono (2026-10-21; falta ⇧, ⌥ e Esc à mão); B a D no código, falta conferir em projetos reais |
-| 17 | `docs/plans/17-sidebar-agents-status.md` | barra lateral com ícones, página Agents (sessões e uso das contas), barra de status personalizável, SSH (só Mac) | feito (v2.2.0); falta o sinal do agente no título da aba |
+| 17 | `docs/plans/17-sidebar-agents-status.md` | barra lateral com ícones, página Agents (sessões e uso das contas), barra de status personalizável, SSH (só Mac) | feito (v2.2.0); o sinal do agente no título da aba veio no plano 19, fase B |
 
 - Depois do 17, o Cadex dono da sessão do agente: o comportamento do Orca, a memória do AI Memory e
   as máquinas pelo Tailscale (pedido do dono em 2026-11-14, depois do estudo

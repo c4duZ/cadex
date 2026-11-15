@@ -103,10 +103,9 @@ public final class AgentNotifier: NSObject {
     /// at once looked like a finished turn. Nothing if it works again.
     private func stopped(_ id: String) {
         guard let session = controller.sessions.first(where: { $0.id == id }), session.status != .working else { return }
-        // The agent's own report first; the log for sessions in other
-        // terminals, and for the finished turn's text the report lacks.
-        var stop = reportedStop?(session) ?? AgentStop.read(session)
-        if case .finished("") = stop, case .finished(let text) = AgentStop.read(session) { stop = .finished(text) }
+        // In a Cadex terminal the agent's own report says why, with no log
+        // read (plan 19); the end of the log only for sessions in other terminals.
+        let stop = reportedStop?(session) ?? AgentStop.read(session)
         if stop == .loginExpired { AgentUsageController.shared.loginFailed(session.account.dir) }
         guard wants(stop), !isLooking(session) else { return }
         didStop?(session, stop)

@@ -45,12 +45,25 @@ func eventually(_ body: () -> Bool) async -> Bool {
 }
 
 let exitCode = await Checks.run([
+    ("a tab whose agent waits for a permission shows ● and its conversation's name, and the tip says what", {
+        let tabs = makeTabs()
+        tabs.newTab()
+        guard let terminal = tabs.activeTerminal else { return expect(false, "no terminal") }
+        // As Claude Code does: it names the conversation (OSC 2) and reports blocked (OSC 7501), and keeps running.
+        terminal.session?.write("sh -c \"printf '\\\\033]2;Fix login\\\\007\\\\033]7501;state=blocked:app=claude-code:kind=permission:msg=YXBwcm92ZSBCYXNoOiBybSB4\\\\007'; sleep 20\"\n")
+        let shown = await eventually { tabs.bar.items.first?.title == "● Fix login" }
+        expect(shown, "\(tabs.bar.items.map(\.title))")
+        expect(tabs.bar.items.first?.tip?.hasPrefix("approve Bash: rm x") == true, "\(String(describing: tabs.bar.items.first?.tip))")
+        terminal.session?.write("\u{3}")
+        let back = await eventually { !(tabs.bar.items.first?.title.hasPrefix("●") ?? true) }
+        expect(back, "back at the shell, no agent sign: \(tabs.bar.items.map(\.title))")
+    }),
     ("a tab with an agent: the sign of its state, the conversation's name, what it does in the tip", {
         let working = TerminalAgentStatus(state: .working, kind: .none, app: "claude-code", message: "Creating empty file…")
         let waiting = TerminalAgentStatus(state: .blocked, kind: .permission, app: "claude-code", message: "approve Bash: touch x")
         let done = TerminalAgentStatus(state: .done, kind: .none, app: "claude-code", message: "")
         expect(TabAgentTitle.sign(working, finishedUnseen: false) == "◐ " && TabAgentTitle.sign(waiting, finishedUnseen: false) == "● ")
-        expect(TabAgentTitle.sign(done, finishedUnseen: true) == "✓ " && TabAgentTitle.sign(done, finishedUnseen: false) == "")
+        expect(TabAgentTitle.sign(done, finishedUnseen: true) == "✓• " && TabAgentTitle.sign(done, finishedUnseen: false) == "✓ ")
         expect(TabAgentTitle.sign(nil, finishedUnseen: true) == "", "no agent, no sign")
         expect(TabAgentTitle.name(programTitle: "✳ Fix login") == "Fix login" && TabAgentTitle.name(programTitle: "  ") == "")
         expect(TabAgentTitle.tip(waiting, folder: "~/code/app") == "approve Bash: touch x\n~/code/app")

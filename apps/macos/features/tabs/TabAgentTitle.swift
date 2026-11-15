@@ -4,13 +4,13 @@ import Terminal
 /// before the title and its conversation's name in place of the folder.
 /// The state comes from the agent's own OSC 7501 reports (Terminal).
 enum TabAgentTitle {
-    /// Working ◐, waiting for you ●, finished while you were away ✓,
-    /// failed ✕; nothing once a finished one was seen, or when idle.
+    /// Working ◐, waiting for you ●, finished ✓ (✓• while you have not
+    /// looked yet), failed ✕; nothing when idle (docs/spec/tabs.md).
     static func sign(_ status: TerminalAgentStatus?, finishedUnseen: Bool) -> String {
         switch status?.state {
         case .working: "◐ "
         case .blocked: "● "
-        case .done: finishedUnseen ? "✓ " : ""
+        case .done: finishedUnseen ? "✓• " : "✓ "
         case .failed: "✕ "
         default: ""
         }

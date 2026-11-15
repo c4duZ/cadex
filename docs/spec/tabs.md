@@ -14,8 +14,8 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   Muda quando a pasta muda.
 - Renomear (comando "Renomear aba", ou duplo clique no título) dá um nome que fica mesmo mudando de
   pasta. Renomear para vazio volta ao nome da pasta.
-- Aba com um agente do Claude Code (plano 19): o sinal de estado antes do título (trabalhando,
-  esperando você, terminou, terminou sem você ver), o nome da conversa no lugar da pasta e, ao
+- Aba com um agente do Claude Code (plano 19): o sinal de estado antes do título (◐ trabalhando,
+  ● esperando você, ✓ terminou, ✓• terminou sem você ver, até o terminal ganhar o foco; ✕ falhou), o nome da conversa no lugar da pasta e, ao
   passar o ponteiro, a frase do que ele faz agora. O nome dado à mão continua vencendo; o sinal
   aparece mesmo assim.
 - Com terminal.keepSessions ligado (plano 19), fechar a janela ou o app deixa os shells das abas

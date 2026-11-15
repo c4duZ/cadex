@@ -63,7 +63,10 @@
 - `AgentStop.swift`: por que uma sessão parou, do fim do log (64 KB, uma vez por parada):
   permissão (ferramenta pedida sem resposta), pergunta (AskUserQuestion, ExitPlanMode), terminou
   (fim de turno), parada por você (o Esc, que não avisa), login vencido (`"error":
-  "authentication_failed"`, que marca a conta com AgentUsageController.loginFailed). `AgentNotifier.swift`: a notificação do sistema quando uma sessão passa de
+  "authentication_failed"`, que marca a conta com AgentUsageController.loginFailed). Numa aba do
+  Cadex o motivo vem do próprio agente pelo OSC 7501 (plano 19): AgentStop.fromReport traduz o
+  relatório ("approve Bash: x", "answer: …", done) e o app o entrega por AgentNotifier.reportedStop,
+  sem ler log; o fim do log fica para sessões em outros terminais. `AgentNotifier.swift`: a notificação do sistema quando uma sessão passa de
   trabalhando para esperando, por tipo (agents.notifyPermission, -Question, -Finished), lido 1 s depois da
   parada, nunca enquanto você olha o terminal dele; só de dentro de um .app (fora dele a central do sistema para o
   processo). `AgentNotifyText.swift`: as palavras de cada notificação (tipo no
@@ -130,9 +133,12 @@
 - O app (`../../app/AgentsWiring.swift`) põe as páginas Agents (agents.show, ⇧⌘J) e Accounts
   (agents.show-accounts) no catálogo da barra lateral, o ponto no ícone enquanto o ícone está lá, o item Agents da barra de status, e acha o
   terminal de cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo).
+- O id de cada sessão pelos hooks (plano 19, fase B): AgentsController.noteHook guarda, por pid do
+  `claude`, o id que os hooks dizem (certo depois de /clear e --resume) e `withHookIDs` o põe no
+  lugar do id do registro; o socket é da feature agent-tools.
 - Status: fases C, C2 (notificações) e D (Accounts e uso) do plano 17 no código; plano 18 fase B
-  (uso sem token, kit da sessão) feita e conferida numa sessão real (bhband, 2026-11-14). Ainda não: o sinal no
-  título da aba do agente. Fase C do plano 18 (contas gerenciadas) no código; falta criar uma conta de
+  (uso sem token, kit da sessão) feita e conferida numa sessão real (bhband, 2026-11-14). O sinal no título da aba
+  do agente veio no plano 19 (feature tabs). Fase C do plano 18 (contas gerenciadas) no código; falta criar uma conta de
   verdade e fazer o /login nela.
 
 ## Como validar
