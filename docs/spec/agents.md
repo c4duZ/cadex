@@ -183,7 +183,8 @@ continua uma conversa em outra conta, sem nunca tocar em token
   (agents.mark-unread, ou o clique direito numa linha do feed) volta.
 - A página do sininho tem duas sub-abas: "Needs You" (o quadro) e "Feed" (agents.show-feed): a linha
   do tempo de terminou, pediu permissão, perguntou, falhou e tarefa criada, de todas as sessões, a
-  mais nova em cima, até 200; clicar leva ao terminal.
+  mais nova em cima, até 200, com filtro por tipo e por projeto; clicar leva ao terminal.
+- A página só acompanha as mudanças enquanto aparece.
 - Silenciar as notificações de uma máquina (agents.mutedMachines; este Mac agora, as remotas no
   plano 23). agents.attention desliga o sininho, o feed e o número.
 

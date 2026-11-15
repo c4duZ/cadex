@@ -18,6 +18,13 @@ public final class AgentAttentionView: NSView {
     public var onEnable: (() -> Void)?
 
     let attention = AgentAttention.shared
+    /// The feed's filter (docs/spec/agents.md, Atenção): a kind and a project.
+    let kindFilter = NSPopUpButton()
+    let projectFilter = NSPopUpButton()
+    static let kinds: [(AgentFeedEntry.Kind?, String)] = [
+        (nil, T("Everything", "Tudo")), (.finished, T("Finished", "Terminou")), (.permission, T("Permissions", "Permissões")),
+        (.question, T("Questions", "Perguntas")), (.failed, T("Failures", "Falhas")), (.taskCreated, T("Tasks", "Tarefas")),
+    ]
     private let stack = NSStackView()
     private let scroll = NSScrollView()
     private var token: UUID?
@@ -48,11 +55,32 @@ public final class AgentAttentionView: NSView {
 
     required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
 
+    /// Reads only while it shows: in a window and not hidden (the sidebar
+    /// keeps every page in the window and hides the others).
     public override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        if window != nil, token == nil { token = attention.watch { [weak self] in self?.render() } }
-        else if window == nil, let id = token { attention.stop(id); token = nil }
+        updateWatching()
     }
+
+    public override func viewDidHide() {
+        super.viewDidHide()
+        updateWatching()
+    }
+
+    public override func viewDidUnhide() {
+        super.viewDidUnhide()
+        updateWatching()
+    }
+
+    func updateWatching() {
+        let shows = window != nil && !isHiddenOrHasHiddenAncestor
+        if shows, token == nil { token = attention.watch { [weak self] in self?.render() } }
+        else if !shows, let id = token { attention.stop(id); token = nil }
+    }
+
+    var isWatching: Bool { token != nil }
+
+    @objc func filterChanged() { render() }
 
     func render() {
         for view in stack.arrangedSubviews { view.removeFromSuperview() }
@@ -103,7 +131,12 @@ public final class AgentAttentionView: NSView {
 
     private func renderFeed() {
         if attention.feed.isEmpty { return note(T("Nothing happened yet.", "Nada aconteceu ainda.")) }
-        for entry in attention.feed.prefix(100) {
+        add(filters())
+        let kind = Self.kinds[max(0, kindFilter.indexOfSelectedItem)].0
+        let project = projectFilter.indexOfSelectedItem > 0 ? projectFilter.titleOfSelectedItem : nil
+        let entries = attention.feed(kind: kind, project: project)
+        if entries.isEmpty { return note(T("Nothing of this kind.", "Nada desse tipo.")) }
+        for entry in entries.prefix(100) {
             let what: String
             switch entry.kind {
             case .finished: what = T("Finished", "Terminou")
@@ -130,6 +163,26 @@ public final class AgentAttentionView: NSView {
             }
             add(row)
         }
+    }
+
+    /// The kind and project pop-ups, keeping what was picked.
+    private func filters() -> NSView {
+        let kind = max(0, kindFilter.indexOfSelectedItem)
+        let project = projectFilter.titleOfSelectedItem
+        kindFilter.removeAllItems()
+        kindFilter.addItems(withTitles: Self.kinds.map(\.1))
+        kindFilter.selectItem(at: kind)
+        projectFilter.removeAllItems()
+        projectFilter.addItems(withTitles: [T("All Projects", "Todos os projetos")] + attention.feedProjects)
+        if let project, projectFilter.itemTitles.contains(project) { projectFilter.selectItem(withTitle: project) }
+        for popup in [kindFilter, projectFilter] {
+            popup.controlSize = .small
+            popup.target = self
+            popup.action = #selector(filterChanged)
+        }
+        let row = NSStackView(views: [kindFilter, projectFilter])
+        row.spacing = 6
+        return row
     }
 
     private func add(_ view: NSView) {

@@ -1,3 +1,4 @@
+import AppKit
 import Checks
 import Foundation
 @testable import Agents
@@ -63,5 +64,23 @@ let attentionChecks: [(name: String, body: Checks.Body)] = [
         expect(attention.feed.count == 200 && attention.feed.first?.text == "t249")
         attention.isEnabled = false
         expect(attention.unseen == 0 && attention.cards.isEmpty, "agents.attention off")
+    }),
+    ("the feed narrows to a kind and a project; the bell's page reads only while it shows", {
+        let attention = AgentAttention.shared
+        attention.update([report("f1", pid: 41, .working)])
+        attention.update([report("f1", pid: 41, .done)])
+        attention.note(.taskCreated, text: "new task", project: "other")
+        expect(attention.feed(kind: .finished, project: nil).allSatisfy { $0.kind == .finished } && !attention.feed(kind: .finished, project: nil).isEmpty)
+        expect(attention.feed(kind: nil, project: "other").map(\.text) == ["new task"])
+        expect(attention.feedProjects.contains("cadex") && attention.feedProjects.contains("other"))
+        let page = AgentAttentionView(frame: NSRect(x: 0, y: 0, width: 300, height: 400))
+        page.isHidden = true
+        let window = NSWindow(contentRect: page.frame, styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentView?.addSubview(page)
+        expect(!page.isWatching, "hidden: no watch")
+        page.isHidden = false
+        expect(page.isWatching, "shown: it watches")
+        page.removeFromSuperview()
+        expect(!page.isWatching)
     }),
 ]

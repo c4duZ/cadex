@@ -197,6 +197,16 @@ public final class AgentAttention {
 
     public func markUnread(_ key: String) { onMarkUnread?(key) }
 
+    /// The feed narrowed to a kind and a project; nil keeps all.
+    public func feed(kind: AgentFeedEntry.Kind?, project: String?) -> [AgentFeedEntry] {
+        feed.filter { entry in (kind == nil || entry.kind == kind) && (project == nil || entry.project == project) }
+    }
+
+    /// The projects the feed has lines of, for its filter, by name.
+    public var feedProjects: [String] {
+        Array(Set(feed.map(\.project).filter { !$0.isEmpty })).sorted()
+    }
+
     private func record(_ kind: AgentFeedEntry.Kind, key: String?, text: String, project: String, session: String, account: String) {
         feed.insert(AgentFeedEntry(at: Date(), kind: kind, key: key, text: text, project: project, session: session, account: account), at: 0)
         if feed.count > Self.feedLimit { feed.removeLast(feed.count - Self.feedLimit) }
