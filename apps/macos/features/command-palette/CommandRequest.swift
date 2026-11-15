@@ -40,4 +40,12 @@ extension Command {
         copy.withArguments = handler
         return copy
     }
+
+    /// The same, for a command that answers later (waits on a page).
+    public func acceptingLater(_ help: String, _ handler: @escaping @MainActor (CommandRequest, @escaping @MainActor (CommandReply) -> Void) -> Void) -> Command {
+        var copy = self
+        copy.argumentHelp = help
+        copy.withArgumentsLater = handler
+        return copy
+    }
 }

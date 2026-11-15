@@ -42,7 +42,7 @@ public enum AgentCommandAnswer: Sendable, Equatable {
 public enum AgentCommandList {
     public static let allowed: [String] = [
         "agent-tools.open-file", "agent-tools.open-diff", "agent-tools.notify",
-        "preview.open", "preview.reload", "preview.back", "preview.forward",
+        "preview.open", "preview.reload", "preview.back", "preview.forward", "preview.agent",
         "worktrees.set-status", "worktrees.set-comment",
     ]
 

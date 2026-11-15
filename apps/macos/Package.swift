@@ -384,7 +384,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "PowerTests",
-            dependencies: ["Power", "Checks"],
+            dependencies: ["Power", "Checks", "CommandPalette"],
             path: "features/power/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),

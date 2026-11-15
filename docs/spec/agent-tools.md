@@ -55,7 +55,7 @@ Cadex: `docs/adr/0024-agent-tools.md`).
   mesma versão do app; `cadex skills list` lista os temas. As skills do plugin do kit são curtas:
   dizem quando usar o Cadex e mandam rodar `cadex skills get`.
 - A lista do agente (só ela é aceita): os atalhos acima, preview.reload, preview.back,
-  preview.forward, as ferramentas do navegador e as do computer use. Nunca: fechar o app, janelas
+  preview.forward, preview.agent (as ferramentas do navegador) e as do computer use. Nunca: fechar o app, janelas
   ou abas, apagar, git que muda o repositório, conta, token, configuração ou permissão. Só uma ADR
   amplia a lista.
 - O que volta de uma página ou de outro app vem marcado como conteúdo, não instrução.

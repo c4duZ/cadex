@@ -145,6 +145,10 @@ extension WindowSession {
             command.id == "preview.open" ? command.accepting("url=<address>") { [weak self] in self?.agentOpenPreview($0) ?? .failed("the window is gone") } : command
         })
         commands.register(AgentToolsCommands.commands(agentToolsActions()))
+        commands.register(PreviewAgentCommands.all(tab: { [weak self] in self?.agentPreview($0) },
+                                                   open: { [weak self] in self?.openAgentPreview($0) },
+                                                   enabled: { [weak self] in self?.settings.store.settings.agentTools.browser ?? false },
+                                                   active: { [weak self] in self?.tabs?.activeDocument as? PreviewDocument }))
         makeMarkdown(palette: palette)
         connectFolder()
     }

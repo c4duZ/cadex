@@ -48,6 +48,15 @@ public final class CommandRegistry {
         return run(id) ? .ok("done") : .failed("\(id) did not run")
     }
 
+    /// The same, for every command: one that answers later replies when it
+    /// is done; the rest reply at once.
+    public func run(_ id: String, request: CommandRequest, reply: @escaping @MainActor (CommandReply) -> Void) {
+        if let command = command(id), command.unavailableReason() == nil, let later = command.withArgumentsLater {
+            return later(request, reply)
+        }
+        reply(run(id, request: request))
+    }
+
     /// Runs a command if it exists and is available. Returns whether it ran.
     @discardableResult
     public func run(_ id: String) -> Bool {

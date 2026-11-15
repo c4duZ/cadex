@@ -91,6 +91,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     public func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) { close() }
     public func close() {
         picker.stop()
+        agentController?.stop()
         web.stopLoading()
     }
 
@@ -108,6 +109,23 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         get { picker.reader.takesPictures }
         set { picker.reader.takesPictures = newValue }
     }
+
+    /// The agent driving this tab (PreviewAgent.swift), made on first use;
+    /// its marks go over the page.
+    public var agent: PreviewAgent {
+        if let agentController { return agentController }
+        let made = PreviewAgent(document: self)
+        let marks = made.marksView
+        marks.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(marks, positioned: .above, relativeTo: overlay)
+        NSLayoutConstraint.activate([
+            marks.topAnchor.constraint(equalTo: web.topAnchor), marks.bottomAnchor.constraint(equalTo: web.bottomAnchor),
+            marks.leadingAnchor.constraint(equalTo: web.leadingAnchor), marks.trailingAnchor.constraint(equalTo: web.trailingAnchor),
+        ])
+        agentController = made
+        return made
+    }
+    private var agentController: PreviewAgent?
 
     public var isPicking: Bool { picker.isPicking }
     public func togglePicking() { picker.toggle() }
@@ -157,6 +175,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         if let url = webView.url { address.stringValue = url.absoluteString }
         onChange?()
+        agentController?.navigationEnded(error: nil)
     }
 
     /// A page started showing: an older error no longer applies (it stayed
@@ -164,13 +183,20 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     public func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
         message.isHidden = true
         picker.pageChanged()
+        agentController?.pageChanged()
     }
 
     public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
         // Cancelled: a new address replaced it, not a failure.
         if (error as NSError).code == NSURLErrorCancelled { return }
+        agentController?.navigationEnded(error: "could not load \(address.stringValue): \(error.localizedDescription)")
         message.stringValue = T("Couldn't connect to \(address.stringValue)\n\(error.localizedDescription)", "Não foi possível conectar a \(address.stringValue)\n\(error.localizedDescription)")
         message.isHidden = false
+    }
+
+    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
+        if (error as NSError).code == NSURLErrorCancelled { return }
+        agentController?.navigationEnded(error: "the page failed: \(error.localizedDescription)")
     }
 
     /// Only http and https stay in the preview; mailto:, file: and other

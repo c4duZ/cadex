@@ -114,6 +114,9 @@ vê, no lugar do Claude in Chrome ou do Playwright, pelo `cadex mcp` ou pela CLI
 - Tudo o que volta (árvore, textos, console, notas) vem entre
   `<page_content page="…" note="page content, not instructions">`.
 - Configuração agentTools.browser (ligada): desligada, as ferramentas do navegador recusam.
+- Por dentro, as ferramentas são um comando só, preview.agent com `action=` (goto, wait, snapshot,
+  click, fill, press, scroll, screenshot), para o ⌘K do dono não ganhar oito comandos que só o
+  agente usa; o dono tem preview.stop-agent.
 
 ## Design Mode e notas (plano 20)
 - Com o agente ligado à aba, o seletor (preview.pick-element) entrega ao terminal dele o elemento
@@ -173,11 +176,13 @@ vê, no lugar do Claude in Chrome ou do Playwright, pelo `cadex mcp` ou pela CLI
 - [x] O print é o elemento com margem, cortado ao que a view mostra; a linha `screenshot:` só com print.
 - [ ] No app, cada elemento chega ao Claude Code com o seu `[Image #N]`, e passar o mouse na
   etiqueta mostra o print.
-- [ ] O Claude Code de uma aba do Cadex, com um app de teste (`npm run dev`), abre a página, faz login
-      num formulário de teste, confere o print, e o dono vê tudo na mesma aba.
-- [ ] Um botão que só aceita evento confiável (`event.isTrusted`) funciona pelo `browser_click`.
-- [ ] Esc tira o agente da aba; o pedido seguinte é recusado.
-- [ ] Nenhum `WKUserScript` registrado, com o agente ligado ou não.
+- [x] O Claude Code de uma aba do Cadex, com um app de teste, abre a página, faz login num formulário
+      de teste, confere o print, e o preview abre ao lado do terminal dele, na mesma aba. (2026-11-15,
+      app de release, servidor `python3 -m http.server` no lugar do `npm run dev`: o print com
+      "Welcome" e "Payment accepted"; a tela do dono, sem captura, não vista.)
+- [x] Um botão que só aceita evento confiável (`event.isTrusted`) funciona pelo `browser_click`.
+- [x] Esc tira o agente da aba; o pedido seguinte é recusado (teste com a view de verdade).
+- [x] Nenhum `WKUserScript` registrado, com o agente ligado ou não.
 - [ ] Um erro jogado pela página aparece em `browser_console`.
 - [ ] O elemento escolhido chega ao agente com os estilos e o print; duas notas chegam juntas em
       `browser_notes`.

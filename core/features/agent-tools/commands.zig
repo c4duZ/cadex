@@ -56,6 +56,8 @@ pub fn plan(gpa: std.mem.Allocator, sub: []const u8, words: []const []const u8) 
         if (words.len == 0) return error.Usage;
         p.id = "agent-tools.notify";
         try p.args.append(gpa, .{ .key = "text", .value = try std.mem.join(gpa, " ", words) });
+    } else if (std.mem.eql(u8, sub, "browser")) {
+        try planBrowser(gpa, &p, words);
     } else if (std.mem.eql(u8, sub, "worktree")) {
         if (words.len < 2) return error.Usage;
         if (std.mem.eql(u8, words[0], "status")) {
@@ -70,11 +72,43 @@ pub fn plan(gpa: std.mem.Allocator, sub: []const u8, words: []const []const u8) 
     return p;
 }
 
-/// The values plan() joined (notify, comment) are the planner's to free.
+/// `cadex browser <action> …`: the agent's browser in the preview
+/// (docs/spec/preview.md), one command `preview.agent` with `action=`.
+fn planBrowser(gpa: std.mem.Allocator, p: *Planned, words: []const []const u8) !void {
+    if (words.len == 0) return error.Usage;
+    const action = words[0];
+    const rest = words[1..];
+    p.id = "preview.agent";
+    try p.args.append(gpa, .{ .key = "action", .value = action });
+    const Want = struct { key: []const u8, joined: bool = false };
+    const shape: []const Want = if (std.mem.eql(u8, action, "goto")) &.{.{ .key = "url" }}
+        else if (std.mem.eql(u8, action, "click")) &.{.{ .key = "ref" }}
+        else if (std.mem.eql(u8, action, "fill")) &.{ .{ .key = "ref" }, .{ .key = "text", .joined = true } }
+        else if (std.mem.eql(u8, action, "press")) &.{.{ .key = "key" }}
+        else if (std.mem.eql(u8, action, "scroll")) &.{.{ .key = "target" }}
+        else if (std.mem.eql(u8, action, "wait")) &.{ .{ .key = "selector" }, .{ .key = "timeout" } }
+        else if (std.mem.eql(u8, action, "snapshot") or std.mem.eql(u8, action, "screenshot")) &.{}
+        else return error.Usage;
+    const optional = std.mem.eql(u8, action, "wait") or std.mem.eql(u8, action, "scroll");
+    if (!optional and rest.len < shape.len) return error.Usage;
+    for (shape, 0..) |want, i| {
+        if (i >= rest.len) break;
+        const value = if (want.joined) try std.mem.join(gpa, " ", rest[i..]) else rest[i];
+        try p.args.append(gpa, .{ .key = want.key, .value = value });
+        if (want.joined) break;
+    }
+    if (!(shape.len > 0 and shape[shape.len - 1].joined) and rest.len > shape.len) return error.Usage;
+}
+
+/// The values plan() joined (notify, comment, a fill's text) are the
+/// planner's to free.
 pub fn freeJoined(gpa: std.mem.Allocator, sub: []const u8, p: *Planned) void {
-    const joined = std.mem.eql(u8, sub, "notify") or (std.mem.eql(u8, sub, "worktree") and p.args.items.len > 0 and
-        std.mem.eql(u8, p.args.items[0].key, "comment"));
-    if (joined) for (p.args.items) |a| gpa.free(a.value);
+    const joined_key: ?[]const u8 = if (std.mem.eql(u8, sub, "notify")) "text"
+        else if (std.mem.eql(u8, sub, "worktree")) "comment"
+        else if (std.mem.eql(u8, sub, "browser")) "text"
+        else null;
+    const key = joined_key orelse return;
+    for (p.args.items) |a| if (std.mem.eql(u8, a.key, key)) gpa.free(a.value);
 }
 
 pub const usage =
@@ -83,6 +117,8 @@ pub const usage =
     \\       cadex preview <url>               (opens the page in Cadex's preview)
     \\       cadex notify <text>               (a notification to the owner)
     \\       cadex worktree status <todo|doing|review|done> | comment <text>
+    \\       cadex browser goto <url> | snapshot | click <ref> | fill <ref> <text> | press <key>
+    \\                     | scroll [up|down|ref] | wait [selector] [seconds] | screenshot
     \\       cadex commands | run <id> [key=value ...]   (add --json for the raw answer)
     \\       cadex skills list | get <topic>
     \\
@@ -115,6 +151,19 @@ test "the shortcuts become command ids with their arguments" {
     try testing.expectError(error.Usage, plan(gpa, "run", &.{ "x", "novalue" }));
     try testing.expectError(error.Usage, plan(gpa, "worktree", &.{ "status", "a", "b" }));
     try testing.expectError(error.Unknown, plan(gpa, "dance", &.{}));
+    var fill = try plan(gpa, "browser", &.{ "fill", "@e4", "ana", "maria" });
+    defer {
+        freeJoined(gpa, "browser", &fill);
+        fill.deinit(gpa);
+    }
+    try testing.expectEqualStrings("preview.agent", fill.id.?);
+    try testing.expectEqualStrings("@e4", fill.args.items[1].value);
+    try testing.expectEqualStrings("ana maria", fill.args.items[2].value);
+    var snap = try plan(gpa, "browser", &.{"snapshot"});
+    defer snap.deinit(gpa);
+    try testing.expectEqual(@as(usize, 1), snap.args.items.len);
+    try testing.expectError(error.Usage, plan(gpa, "browser", &.{"click"}));
+    try testing.expectError(error.Usage, plan(gpa, "browser", &.{ "snapshot", "extra" }));
     var list = try plan(gpa, "commands", &.{});
     defer list.deinit(gpa);
     try testing.expect(list.id == null);

@@ -1,5 +1,9 @@
 import AppKit
 import Checks
+// Declared, not just reached through Power: it copies Command values, and
+// without the import a change to Command's layout did not recompile this
+// file, which then crashed copying one (2026-11-15).
+import CommandPalette
 @testable import Power
 
 // Tests of the power feature. Run with `make macos-test` (see

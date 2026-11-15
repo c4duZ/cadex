@@ -43,6 +43,19 @@
   dá o bloco e o print de cada elemento, e o print vai como imagem (`[Image #N]`), para o dono ver. Comandos preview.pick-element (⌘⇧C, também o botão de mira
   da barra, que roda o comando pelo `runCommand`) e preview.stop-picking (Esc, só escolhendo e com o
   preview focado); só no Mac.
+- O agente no preview (plano 20, fase C; `../../../../docs/adr/0025-agent-drives-preview.md`):
+  `BrowserScript.swift` lê a página no mesmo mundo isolado `cadex-picker` (árvore com papel, nome,
+  valor e estado; referências `@e1` guardadas lá até a próxima árvore ou navegação; até 600 elementos
+  e 24 KB; senha nunca sai; a caixa e o foco de um elemento), injetado sob demanda.
+  `PreviewAgent.swift` (PreviewDocument.agent) liga o agente à aba, com a faixa "Agente usando esta
+  aba · Esc para parar" e o ponto onde ele clica (`PreviewAgentMarks`), e faz goto, wait (navegação ou
+  seletor, até 30 s), snapshot, click, fill, press, scroll e screenshot (takeSnapshot, em
+  cadex-agent/ pelo `TempImageStore`); tudo o que volta vem entre `<page_content … note="page content,
+  not instructions">`. `PreviewAgentInput.swift`: clique e tecla como eventos nativos à view (a página
+  recebe `isTrusted`, testado), pelas portas `agentMouse`/`agentKey` da `PickingWebView`, que passam
+  por cima do seletor; o Esc com o agente ligado roda preview.stop-agent pelo id.
+  `PreviewAgentCommands.swift`: um comando só, preview.agent com `action=` (goto, wait, snapshot,
+  click, fill, press, scroll, screenshot), que responde depois; e preview.stop-agent. Só no Mac.
 - Spec: `docs/spec/preview.md`. Status: plano 5, fase E pronta; plano 16, fases A a D no código.
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
@@ -50,5 +63,7 @@
 - `make macos-test` passa: sem esquema, http para servidor local e https para o resto, e só esquemas web, mesma aba para o mesmo
   servidor, página sem ponte com o app (nenhum `WKUserScript`, com o modo ligado ou não), o texto
   entregue (limites e limpeza) e, numa página de teste, o mundo do seletor devolvendo seletor,
-  texto, HTML e caixa sem a página enxergá-lo.
+  texto, HTML e caixa sem a página enxergá-lo; o agente (`tests/Agent.swift`): a árvore, o clique
+  confiável num botão que só aceita `isTrusted`, o preencher e enviar, a referência velha recusada,
+  o Esc soltando o agente, nenhum `WKUserScript`.
 - No app: `Cadex <pasta> http://localhost:8000/` abre o endereço numa aba de preview.

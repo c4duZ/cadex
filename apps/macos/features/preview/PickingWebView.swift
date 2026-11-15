@@ -104,6 +104,24 @@ final class PickingWebView: WKWebView {
     }
 
     override func mouseUp(with event: NSEvent) { if !isPicking { super.mouseUp(with: event) } }
+
+    // MARK: The agent (docs/adr/0025-agent-drives-preview.md)
+
+    /// Esc with the agent on the tab: true when it stopped the agent.
+    var onEscape: (() -> Bool)?
+
+    override func keyDown(with event: NSEvent) {
+        if event.keyCode == 53, onEscape?() == true { return }
+        super.keyDown(with: event)
+    }
+
+    /// The agent's native events reach WebKit as the system's would, past
+    /// the picker's swallowing and the owner's Esc.
+    func agentMouse(moved event: NSEvent) { super.mouseMoved(with: event) }
+    func agentMouse(down event: NSEvent) { super.mouseDown(with: event) }
+    func agentMouse(up event: NSEvent) { super.mouseUp(with: event) }
+    func agentKey(down event: NSEvent) { super.keyDown(with: event) }
+    func agentKey(up event: NSEvent) { super.keyUp(with: event) }
     override func mouseDragged(with event: NSEvent) { if !isPicking { super.mouseDragged(with: event) } }
     override func mouseEntered(with event: NSEvent) { if !isPicking { super.mouseEntered(with: event) } }
     override func rightMouseDown(with event: NSEvent) { if !isPicking { super.rightMouseDown(with: event) } }

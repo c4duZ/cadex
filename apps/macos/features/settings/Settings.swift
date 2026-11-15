@@ -177,6 +177,8 @@ public struct Settings: Equatable, Sendable {
         /// The sessions Cadex opens get `cadex` on their PATH, its MCP and
         /// skills, and the socket takes their command requests.
         public var enabled = true
+        /// The agent drives the preview (plan 20 phase C).
+        public var browser = true
     }
 
     /// Tasks' worktrees (docs/spec/worktrees.md, plan 19 phase D).

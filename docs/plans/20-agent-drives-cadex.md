@@ -127,6 +127,12 @@ docs/adr/0023-answer-agent-permissions.md (planos 18 e 19), `docs/adr/0002-zig-c
     da view e por um seletor aparecer, com tempo máximo.
   - Comandos novos: preview.stop-agent. Configuração agentTools.browser (ligada).
     Features: preview, agent-tools, worktrees.
+  - Feita em 2026-11-15. Diferenças: o modo árvore ficou num script próprio
+    (BrowserScript.swift) no mesmo mundo `cadex-picker`, ao lado do PickerScript.swift; as oito
+    ferramentas são um comando só, preview.agent com `action=`; o app de teste foi um
+    `python3 -m http.server`. Testado antes de escrever: clique, tecla e texto nativos chegam com
+    `isTrusted=true`. Conferido com o `claude` real no app de release (login, botão que só aceita
+    clique confiável, print de volta como imagem); `make perf` passou.
 - **D. Console, Design Mode e notas.**
   - `browser_console`: erros e mensagens desde a última leitura (ADR 0025), só com o agente ligado à
     aba.

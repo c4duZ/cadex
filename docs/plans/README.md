@@ -49,7 +49,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 |---|---|---|---|
 | 18 | `docs/plans/18-accounts-and-sessions.md` | contas em pastas do Cadex, configuração por link, uso sem token, histórico unificado e continuar em outra conta | feito (2026-11-14); falta o /login do dono numa conta nova (fase C) |
 | 19 | `docs/plans/19-agent-sessions-and-worktrees.md` | worktree por tarefa, estado por hooks, quadro "Precisa de você", daemon do terminal, hibernar | feito (fases A a G); falta o dono ver no app: o Dock com uma instância só, o New Task pelo clique, a tela religada com keepSessions e a aba hibernada voltando |
-| 20 | `docs/plans/20-agent-drives-cadex.md` | CLI `cadex` e skills, preview como navegador do agente, computer use | fases A e B feitas (ADRs 0024 a 0026; a CLI, os comandos pelo socket, as skills e o MCP) |
+| 20 | `docs/plans/20-agent-drives-cadex.md` | CLI `cadex` e skills, preview como navegador do agente, computer use | fases A, B e C feitas (a CLI e o MCP, o navegador do agente no preview) |
 | 21 | `docs/plans/21-review.md` | diff de revisão, comentar no diff e mandar em lote, autoria por linha | escrito |
 | 22 | `docs/plans/22-memory.md` | memória: ai-memory ao lado ou nativa, consolidação sem token, página Memory | escrito |
 | 23 | `docs/plans/23-machines.md` | máquinas da tailnet, "Rodar em", Docker pela tailnet, ambiente descartável por worktree | escrito |

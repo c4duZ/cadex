@@ -86,6 +86,7 @@ document.getElementById('vue').__vueParentComponent = { type: { __file: '/w/app/
 </body></html>
 """
 
+let agentExit = await Checks.run(agentChecks)
 let exitCode = await Checks.run([
     ("while picking, WebKit's mouse areas are put aside for ours, and come back after", {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 400, height: 300), styleMask: [.titled], backing: .buffered, defer: false)
@@ -300,4 +301,4 @@ let exitCode = await Checks.run([
         expect(away == nil, "another origin is never fetched")
     }),
 ])
-exit(exitCode)
+exit(agentExit != 0 ? agentExit : exitCode)

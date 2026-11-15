@@ -21,7 +21,8 @@
   terminal ou campo de texto) ou closure da feature dona. O atalho padrão mora no comando.
 - `CommandRequest.swift` (plano 20): um comando pode aceitar argumentos quando o agente o roda
   (`accepting`, `withArguments`, `argumentHelp`), com a pasta, o terminal e a conversa de quem pediu;
-  `CommandRegistry.run(_:request:)` o roda e devolve `CommandReply` (feito ou recusado com o motivo).
+  `CommandRegistry.run(_:request:)` o roda e devolve `CommandReply` (feito ou recusado com o motivo);
+  `acceptingLater` e `run(_:request:reply:)` para o que responde depois (uma página carregando).
 - `CommandRegistry.swift`: registro, execução por id, recentes. `StandardCommands.swift`: sair,
   ocultar, desfazer, copiar, colar. `CommandMenu.swift`: menu da aplicação gerado do registro, e
   `popup(_:)`, as linhas do menu do "+" com os pins (no menu do app de `apps/macos/shared/menus`).

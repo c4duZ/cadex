@@ -3,6 +3,7 @@ import Agents
 import AppKit
 import CommandPalette
 import Explorer
+import Preview
 import SourceControl
 import Strings
 import Terminal
@@ -17,18 +18,18 @@ extension AppDelegate {
     func startAgentTools() {
         AgentToolsServer.shared.onCommand = { [weak self] request, reply in
             guard let self else { return reply(.failed("Cadex is closing")) }
-            reply(self.answerAgent(request))
+            self.answerAgent(request, reply)
         }
     }
 
-    private func answerAgent(_ request: AgentCommandRequest) -> AgentCommandAnswer {
-        guard settings.store.settings.agentTools.enabled else { return .failed("Agent tools are off in Cadex") }
-        guard let found = agentTerminal(request) else { return .failed("this session's terminal is not open in Cadex") }
+    private func answerAgent(_ request: AgentCommandRequest, _ reply: @escaping @MainActor (AgentCommandAnswer) -> Void) {
+        guard settings.store.settings.agentTools.enabled else { return reply(.failed("Agent tools are off in Cadex")) }
+        guard let found = agentTerminal(request) else { return reply(.failed("this session's terminal is not open in Cadex")) }
         let session = Self.conversationName(found.terminal)
-        guard let id = request.id else { return .ok(commandList(found.window)) }
+        guard let id = request.id else { return reply(.ok(commandList(found.window))) }
         guard AgentCommandList.allows(id) else {
             AgentToolsActivity.shared.record(kitSession: request.kitSession, session: session, command: id, ok: false)
-            return .failed("\(id) is not allowed for agents")
+            return reply(.failed("\(id) is not allowed for agents"))
         }
         // The agent's folder, symlinks resolved (/tmp is /private/tmp, and git
         // answers the resolved one: found 2026-11-15), and authorized: the
@@ -37,14 +38,16 @@ extension AppDelegate {
         let folder = Self.resolved(found.terminal.currentDirectory ?? NSHomeDirectory())
         WorkspaceFolder.allow(folder)
         let asked = CommandRequest(arguments: request.arguments, folder: folder, terminal: Self.key(found.terminal), session: session)
-        let answer = found.window.commands.run(id, request: asked)
-        switch answer {
-        case .ok(let text):
-            AgentToolsActivity.shared.record(kitSession: request.kitSession, session: session, command: id, ok: true)
-            return .ok(text)
-        case .failed(let text):
-            AgentToolsActivity.shared.record(kitSession: request.kitSession, session: session, command: id, ok: false)
-            return .failed(text)
+        let shown = id == "preview.agent" ? "browser " + (request.arguments["action"] ?? "") : id
+        found.window.commands.run(id, request: asked) { answer in
+            switch answer {
+            case .ok(let text):
+                AgentToolsActivity.shared.record(kitSession: request.kitSession, session: session, command: shown, ok: true)
+                reply(.ok(text))
+            case .failed(let text):
+                AgentToolsActivity.shared.record(kitSession: request.kitSession, session: session, command: shown, ok: false)
+                reply(.failed(text))
+            }
         }
     }
 
@@ -136,6 +139,21 @@ extension WindowSession {
         return .ok("opened \(url) in the preview")
     }
 
+    /// The preview the asking agent drives (its first goto opened it).
+    func agentPreview(_ request: CommandRequest) -> PreviewDocument? {
+        AgentPreviewTabs.tabs[request.terminal]?.document
+    }
+
+    /// The agent's first goto: a blank preview beside its terminal, kept as
+    /// its tab (docs/spec/preview.md, Agente no preview).
+    func openAgentPreview(_ request: CommandRequest) -> PreviewDocument? {
+        besideAgent(request)
+        openPreview("", beside: true)
+        guard let doc = tabs?.activeDocument as? PreviewDocument else { return nil }
+        AgentPreviewTabs.tabs[request.terminal] = AgentPreviewTabs.Held(document: doc)
+        return doc
+    }
+
     /// What the agent opens goes beside its terminal (docs/spec/agent-tools.md):
     /// that terminal's space and tab come forward in this window, its pane
     /// takes the focus; the window does not jump in front of the owner's work.
@@ -158,4 +176,12 @@ extension WindowSession {
             self?.app.goToAgent(key: AppDelegate.key(found.terminal), pid: 0)
         }))
     }
+}
+
+/// Each agent terminal's preview tab, by the terminal's key; a closed tab
+/// lets go (weak).
+@MainActor
+enum AgentPreviewTabs {
+    struct Held { weak var document: PreviewDocument? }
+    static var tabs: [String: Held] = [:]
 }

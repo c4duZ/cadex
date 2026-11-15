@@ -47,6 +47,8 @@ public struct Command {
     /// What it does run with arguments (CommandRequest.swift); nil: it
     /// takes none, and the agent's run does the action as the owner's would.
     public var withArguments: (@MainActor (CommandRequest) -> CommandReply)?
+    /// The same, answering later (a page to load, a selector to show).
+    public var withArgumentsLater: (@MainActor (CommandRequest, @escaping @MainActor (CommandReply) -> Void) -> Void)?
     /// The arguments it takes, for `cadex commands`.
     public var argumentHelp = ""
 

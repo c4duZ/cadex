@@ -121,6 +121,7 @@ public enum SettingsFile {
         }
         if let s = reader.section(root, "agentTools") {
             settings.agentTools.enabled = reader.bool(s, "agentTools.enabled") ?? settings.agentTools.enabled
+            settings.agentTools.browser = reader.bool(s, "agentTools.browser") ?? settings.agentTools.browser
         }
         if let s = reader.section(root, "worktrees") {
             settings.worktrees.root = reader.string(s, "worktrees.root") ?? settings.worktrees.root
@@ -176,7 +177,7 @@ public enum SettingsFile {
             "statusBar": ["left": s.statusBar.left, "right": s.statusBar.right],
             "ssh": ["ping": s.ssh.ping],
             "worktrees": ["root": s.worktrees.root, "setupHooks": s.worktrees.setupHooks],
-            "agentTools": ["enabled": s.agentTools.enabled],
+            "agentTools": ["enabled": s.agentTools.enabled, "browser": s.agentTools.browser],
             "agents": ["sessions": s.agents.sessions, "notifyPermission": s.agents.notifyPermission,
                        "notifyQuestion": s.agents.notifyQuestion, "notifyFinished": s.agents.notifyFinished,
                        "soundPermission": s.agents.soundPermission, "soundQuestion": s.agents.soundQuestion,
