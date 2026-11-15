@@ -2,6 +2,7 @@ import AppKit
 import Preview
 import Strings
 import Tabs
+import Terminal
 
 /// Where an element picked in a preview goes (docs/spec/preview.md,
 /// "Escolher elemento"): pasted into the agent's terminal, without Enter,
@@ -9,12 +10,15 @@ import Tabs
 /// setting) or when no terminal runs an agent that takes a safe paste.
 @MainActor
 enum ElementPickDelivery {
-    static func deliver(_ delivery: PickDelivery, tabs: TabsController?, toClipboard: Bool) -> PickOutcome {
+    /// `driving`: the terminal of the agent that drives this preview (plan
+    /// 20, Design Mode): of the terminals, it gets the picks first. ⌥ and
+    /// the setting still copy: the owner asked for that.
+    static func deliver(_ delivery: PickDelivery, tabs: TabsController?, toClipboard: Bool, driving: TerminalView? = nil) -> PickOutcome {
         if delivery.toClipboard || toClipboard { return copy(delivery.text(), note: nil) }
         // The source path from the agent's folder, which it works in; each
         // element's picture after its block, as an image the terminal links
         // to its [Image #N] tag.
-        for terminal in tabs?.agentTerminals ?? [] {
+        for terminal in [driving].compactMap({ $0 }) + (tabs?.agentTerminals ?? []) {
             let pieces = delivery.pieces(relativeTo: terminal.currentDirectory)
             guard let first = pieces.first,
                   terminal.pasteFromApp(first.text, images: first.picture.map { [$0] } ?? []) else { continue }

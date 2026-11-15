@@ -18,7 +18,7 @@ public enum PreviewAgentCommands {
             Command(id: "preview.agent", title: T("Show the Agent's Preview", "Mostrar o preview do agente"),
                     keywords: ["agent", "browser", "preview", "agente", "navegador"], category: .view,
                     action: .run { active()?.focus() })
-                .acceptingLater("action=<goto|wait|snapshot|click|fill|press|scroll|screenshot> [url= selector= timeout= ref= text= key= target=]") { request, reply in
+                .acceptingLater("action=<goto|wait|snapshot|click|fill|press|scroll|screenshot|console|notes> [url= selector= timeout= ref= text= key= target=]") { request, reply in
                     guard enabled() else { return reply(.failed("the agent's browser is off in Cadex")) }
                     run(request, tab: tab, open: open, reply: reply)
                 },
@@ -50,7 +50,9 @@ public enum PreviewAgentCommands {
         case "press": request["key"].map { agent.press($0, reply: reply) } ?? reply(.failed("key= is needed"))
         case "scroll": agent.scroll(request["target"] ?? "down", reply: reply)
         case "screenshot": agent.screenshot(reply: reply)
-        default: reply(.failed("action is one of goto, wait, snapshot, click, fill, press, scroll, screenshot"))
+        case "console": agent.console(reply: reply)
+        case "notes": reply(.ok(doc.notesForAgent()))
+        default: reply(.failed("action is one of goto, wait, snapshot, click, fill, press, scroll, screenshot, console, notes"))
         }
     }
 }

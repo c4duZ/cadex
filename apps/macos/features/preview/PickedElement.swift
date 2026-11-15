@@ -21,10 +21,13 @@ public struct PickedElement: Equatable, Sendable {
     public var components: [String] = []
     /// A PNG of the element as shown (preview.pickScreenshot).
     public var screenshot: String?
+    /// Design Mode (plan 20): its computed styles, only with the agent on the tab.
+    public var styles: String?
 
     static let htmlLimit = 1500
     static let textLimit = 200
     static let selectorLimit = 300
+    static let stylesLimit = 600
     /// Bytes of the whole block; the HTML gives way first.
     static let totalLimit = 4096
 
@@ -45,6 +48,7 @@ public struct PickedElement: Equatable, Sendable {
                   html: object["html"] as? String ?? "", box: box,
                   viewport: CGSize(width: viewport?["w"] as? Double ?? 0, height: viewport?["h"] as? Double ?? 0))
         source = (object["attributeSource"] as? String).flatMap(Self.attributeLocation)
+        styles = (object["styles"] as? String).flatMap { $0.isEmpty ? nil : $0 }
     }
 
     /// Adds what the page's world read (PageSourceScript); a build
@@ -80,6 +84,7 @@ public struct PickedElement: Equatable, Sendable {
         let words = Self.cut(Self.clean(text).split(whereSeparator: \.isWhitespace).joined(separator: " "), Self.textLimit)
         if !words.isEmpty { lines.append("text: \"\(words)\"") }
         lines.append("box: \(Int(box.width))×\(Int(box.height)) at \(Int(box.minX)),\(Int(box.minY)) (viewport \(Int(viewport.width))×\(Int(viewport.height)))")
+        if let styles { lines.append("styles: " + Self.cut(Self.clean(styles), Self.stylesLimit)) }
         if let screenshot {
             lines.append("screenshot: " + (attached ? "the image pasted right after this block" : Self.clean(screenshot)))
         }
@@ -141,11 +146,30 @@ public struct PickDelivery: Sendable {
     public let elements: [PickedElement]
     /// ⌥ on a click: to the clipboard, whatever the setting says.
     public let toClipboard: Bool
+    /// The terminal of the agent driving this preview (plan 20): it gets
+    /// the picks first.
+    public var agentTerminal: String?
+    /// The owner's note for each element (preview.send-notes), said before
+    /// its block: the owner's words, not the page's.
+    public var notes: [String] = []
+
+    public init(elements: [PickedElement], toClipboard: Bool, agentTerminal: String? = nil, notes: [String] = []) {
+        self.elements = elements
+        self.toClipboard = toClipboard
+        self.agentTerminal = agentTerminal
+        self.notes = notes
+    }
+
+    /// "Note 2 from the owner: …" before an element's block, when it has one.
+    func noted(_ index: Int, _ block: String) -> String {
+        guard index < notes.count, !notes[index].isEmpty else { return block }
+        return "Note \(index + 1) from the owner: " + PickedElement.clean(notes[index]) + "\n" + block
+    }
 
     /// The text for the clipboard: one block per element, in the order
     /// clicked, each picture by its path.
     public func text(relativeTo folder: String? = nil) -> String {
-        elements.map { $0.payload(relativeTo: folder) }.joined(separator: "\n\n")
+        elements.enumerated().map { noted($0, $1.payload(relativeTo: folder)) }.joined(separator: "\n\n")
     }
 
     /// For a terminal: each element's block and its picture, to paste as an
@@ -153,7 +177,7 @@ public struct PickDelivery: Sendable {
     public func pieces(relativeTo folder: String? = nil) -> [(text: String, picture: URL?)] {
         elements.enumerated().map { index, element in
             let picture = element.screenshot.map { URL(fileURLWithPath: $0) }
-            let text = element.payload(relativeTo: folder, attached: picture != nil)
+            let text = noted(index, element.payload(relativeTo: folder, attached: picture != nil))
             return (index == 0 ? text : "\n\n" + text, picture)
         }
     }

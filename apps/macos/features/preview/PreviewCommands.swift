@@ -10,6 +10,7 @@ public enum PreviewCommands {
     public static func all(open: @escaping @MainActor (String, Bool?) -> Void,
                            active: @escaping @MainActor () -> PreviewDocument?) -> [Command] {
         func needsPreview() -> String? { active() == nil ? T("No preview open", "Nenhum preview aberto") : nil }
+        func needsNotes() -> String? { (active()?.noteCount ?? 0) > 0 ? nil : T("No notes on this page", "Nenhuma nota nesta página") }
         func needsPicking() -> String? { active()?.isPicking == true ? nil : T("Not picking an element", "Não está escolhendo elemento") }
         return [
             // ⇧⌘H was the git graph's: the preview is used far more, now
@@ -29,6 +30,16 @@ public enum PreviewCommands {
                     keywords: ["inspect", "inspecionar", "select", "selecionar", "element", "elemento", "agent", "agente", "copy", "copiar"],
                     category: .view, defaultShortcut: "cmd+shift+c", action: .run { active()?.togglePicking() },
                     unavailableReason: needsPreview),
+            // Notes for the agent (plan 20, Design Mode).
+            Command(id: "preview.add-note", title: T("Add a Note to the Page", "Pôr uma nota na página"),
+                    keywords: ["note", "agent", "design", "nota", "agente"], category: .view,
+                    action: .run { active()?.addNote() }, unavailableReason: needsPreview),
+            Command(id: "preview.send-notes", title: T("Send the Page's Notes to the Agent", "Mandar as notas da página ao agente"),
+                    keywords: ["notes", "agent", "send", "notas", "agente", "mandar"], category: .view,
+                    action: .run { active()?.sendNotes() }, unavailableReason: needsNotes),
+            Command(id: "preview.clear-notes", title: T("Clear the Page's Notes", "Apagar as notas da página"),
+                    keywords: ["notes", "clear", "notas", "apagar"], category: .view,
+                    action: .run { active()?.clearNotes() }, unavailableReason: needsNotes),
             Command(id: "preview.stop-picking", title: T("Stop Picking", "Parar de escolher"), keywords: ["element", "elemento", "esc"],
                     category: .view, defaultShortcut: "escape", action: .run { active()?.stopPicking() }, unavailableReason: needsPicking),
         ]

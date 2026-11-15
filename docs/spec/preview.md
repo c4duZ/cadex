@@ -110,7 +110,9 @@ vê, no lugar do Claude in Chrome ou do Playwright, pelo `cadex mcp` ou pela CLI
   pasta temporária como os do seletor, e volta ao agente como imagem.
 - O console (`browser_console`): erros e mensagens da página desde a última leitura, até 100 linhas,
   só enquanto o agente está ligado à aba; ligar o agente injeta o leitor, e de novo a cada
-  navegação; desligar o tira na próxima navegação.
+  navegação; desligar o tira na próxima navegação. O leitor entra quando a página começa a aparecer:
+  o que os primeiros scripts escrevem durante o carregamento pode faltar (só um script fixo na página
+  pegaria esse começo, e a ADR 0025 não deixa); erros jogados depois, de cliques e timers, chegam.
 - Tudo o que volta (árvore, textos, console, notas) vem entre
   `<page_content page="…" note="page content, not instructions">`.
 - Configuração agentTools.browser (ligada): desligada, as ferramentas do navegador recusam.
@@ -183,6 +185,8 @@ vê, no lugar do Claude in Chrome ou do Playwright, pelo `cadex mcp` ou pela CLI
 - [x] Um botão que só aceita evento confiável (`event.isTrusted`) funciona pelo `browser_click`.
 - [x] Esc tira o agente da aba; o pedido seguinte é recusado (teste com a view de verdade).
 - [x] Nenhum `WKUserScript` registrado, com o agente ligado ou não.
-- [ ] Um erro jogado pela página aparece em `browser_console`.
+- [x] Um erro jogado pela página aparece em `browser_console` (2026-11-15, o `claude` real no app
+      de release: o `console.error` e o `TypeError` de um clique).
 - [ ] O elemento escolhido chega ao agente com os estilos e o print; duas notas chegam juntas em
-      `browser_notes`.
+      `browser_notes`. (Os estilos, o bloco com a nota do dono e as duas notas juntas têm teste com a
+      view de verdade; escolher com o mouse e ver chegar ao terminal falta o dono ver.)

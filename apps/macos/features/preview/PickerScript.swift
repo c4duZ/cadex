@@ -147,6 +147,25 @@ enum PickerScript {
           return null;
         }
 
+        // Design Mode (plan 20): the computed styles that make the layout,
+        // for the agent to match; defaults and empty ones left out.
+        function styles(el) {
+          const s = getComputedStyle(el), out = [];
+          const add = (k, v) => { if (v && v !== 'none' && v !== 'normal' && v !== 'auto' && v !== '0px' && v !== 'rgba(0, 0, 0, 0)') out.push(k + ': ' + v); };
+          add('color', s.color);
+          add('background', s.backgroundColor);
+          add('font', s.fontWeight + ' ' + s.fontSize + '/' + s.lineHeight + ' ' + s.fontFamily.split(',')[0]);
+          add('padding', s.padding);
+          add('margin', s.margin);
+          if (s.borderStyle !== 'none' && s.borderWidth !== '0px') add('border', s.borderWidth + ' ' + s.borderStyle + ' ' + s.borderColor);
+          add('radius', s.borderRadius);
+          add('display', s.display);
+          if (s.display.includes('flex') || s.display.includes('grid')) { add('gap', s.gap); add('align', s.alignItems); add('justify', s.justifyContent); }
+          if (s.position !== 'static') add('position', s.position);
+          add('shadow', s.boxShadow);
+          return out.join('; ');
+        }
+
         function label(h) {
           return short(h.el) + '  ' + Math.round(h.box.w) + '×' + Math.round(h.box.h);
         }
@@ -172,6 +191,7 @@ enum PickerScript {
               html: html(h.el),
               text: (h.el.innerText || h.el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 400),
               viewport: { w: window.innerWidth, h: window.innerHeight },
+              styles: styles(h.el),
             };
           },
         };

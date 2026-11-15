@@ -109,6 +109,19 @@ final class PickingWebView: WKWebView {
 
     /// Esc with the agent on the tab: true when it stopped the agent.
     var onEscape: (() -> Bool)?
+    /// The page scrolled by the owner's wheel (the notes' markers follow).
+    var onScrolled: (() -> Void)?
+    private var scrollPending = false
+
+    override func scrollWheel(with event: NSEvent) {
+        super.scrollWheel(with: event)
+        guard onScrolled != nil, !scrollPending else { return }
+        scrollPending = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+            self?.scrollPending = false
+            self?.onScrolled?()
+        }
+    }
 
     override func keyDown(with event: NSEvent) {
         if event.keyCode == 53, onEscape?() == true { return }

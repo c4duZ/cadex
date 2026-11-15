@@ -114,7 +114,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
         opener.onEditorOpened = { [weak self] document in self?.markdown?.attach(document) }
         opener.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
         opener.onPickElement = { [weak self] delivery in
-            ElementPickDelivery.deliver(delivery, tabs: self?.tabs, toClipboard: self?.settings.picksToClipboard ?? false)
+            let driving = delivery.agentTerminal.flatMap { key in self?.app.locate { AppDelegate.key($0) == key }?.terminal }
+            return ElementPickDelivery.deliver(delivery, tabs: self?.tabs, toClipboard: self?.settings.picksToClipboard ?? false, driving: driving)
         }
         opener.picksScreenshot = { [weak self] in self?.settings.picksScreenshot ?? true }
         self.opener = opener

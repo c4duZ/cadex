@@ -17,6 +17,13 @@ final class PreviewPicker {
     var onDeliver: ((PickDelivery) -> PickOutcome)?
     /// Picking started or ended (the bar's button follows).
     var onStateChange: (() -> Void)?
+    /// The terminal of the agent driving this tab, nil without one (plan
+    /// 20): the picks go there first, with their computed styles.
+    var agentTerminal: (() -> String?)?
+    /// ⌘+click, or any click after preview.add-note: a note for this
+    /// element (PreviewNotes), with its box in the view.
+    var onNote: ((PickedElement, CGRect) -> Void)?
+    var takesNote = false
     private(set) var isPicking = false
     /// Marked with ⇧, in the order clicked.
     private(set) var selection: [PickedElement] = []
@@ -45,6 +52,13 @@ final class PreviewPicker {
 
     func toggle() { isPicking ? stop() : start() }
 
+    /// preview.add-note: picking, the next click pins a note.
+    func startNote() {
+        start()
+        takesNote = true
+        showSelection()
+    }
+
     func start() {
         guard !isPicking else { return }
         isPicking = true
@@ -64,6 +78,7 @@ final class PreviewPicker {
         reading = 0
         sendWhenRead = false
         copies = false
+        takesNote = false
         waiting = nil
         overlay.target = nil
         overlay.selected = []
@@ -115,6 +130,7 @@ final class PreviewPicker {
     // MARK: Selecting and sending
 
     private func click(_ point: CGPoint, _ flags: NSEvent.ModifierFlags) {
+        if flags.contains(.command) || takesNote { return note(at: point) }
         let adding = flags.contains(.shift)
         if flags.contains(.option) { copies = true }
         if !adding { sendWhenRead = true }
@@ -122,8 +138,21 @@ final class PreviewPicker {
         reader.read(at: point) { [weak self] element in
             guard let self, isPicking else { return }
             reading -= 1
-            if let element { select(element, toggling: adding) }
+            if var element {
+                // Design Mode: the styles go only to an agent driving this tab.
+                if agentTerminal?() == nil { element.styles = nil }
+                select(element, toggling: adding)
+            }
             if sendWhenRead, reading == 0 { send() }
+        }
+    }
+
+    /// The element under the click gets a note; picking ends, the field takes the keys.
+    private func note(at point: CGPoint) {
+        reader.read(at: point) { [weak self] element in
+            guard let self, isPicking else { return }
+            stop()
+            if let element { onNote?(element, reader.viewBox(element.box)) }
         }
     }
 
@@ -146,7 +175,7 @@ final class PreviewPicker {
     private func send() {
         let picked = selection
         guard !picked.isEmpty else { return stop() }
-        let delivery = PickDelivery(elements: picked, toClipboard: copies)
+        let delivery = PickDelivery(elements: picked, toClipboard: copies, agentTerminal: agentTerminal?())
         let outcome = onDeliver?(delivery) ?? Self.copy(delivery.text())
         stop()
         let marks = picked.enumerated().map { index, element in
@@ -160,9 +189,11 @@ final class PreviewPicker {
         overlay.selected = selection.enumerated().map { index, element in
             PickerOverlay.Mark(box: reader.viewBox(element.box), label: "\(index + 1)")
         }
-        overlay.banner = selection.isEmpty
-            ? T("Click an element · ⇧+click marks several · ⌥ copies · Esc stops",
-                "Clique num elemento · ⇧+clique marca vários · ⌥ copia · Esc sai")
+        overlay.banner = takesNote
+            ? T("Click an element to pin a note to it · Esc stops", "Clique num elemento para prender uma nota · Esc sai")
+            : selection.isEmpty
+            ? T("Click an element · ⇧+click marks several · ⌘+click adds a note · ⌥ copies · Esc stops",
+                "Clique num elemento · ⇧+clique marca vários · ⌘+clique põe uma nota · ⌥ copia · Esc sai")
             : T("\(selection.count) marked · let go of ⇧ to send · Esc cancels",
                 "\(selection.count) marcado(s) · solte o ⇧ para enviar · Esc cancela")
     }

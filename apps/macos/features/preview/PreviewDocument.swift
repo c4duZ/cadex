@@ -54,6 +54,8 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         pick = Self.button(.crosshair, T("Pick an element (⌘⇧C)", "Escolher elemento (⌘⇧C)"))
         super.init()
         picker.onStateChange = { [weak self] in self?.showPicking() }
+        picker.agentTerminal = { [weak self] in self?.agentController?.isAttached == true ? self?.agentTerminal : nil }
+        picker.onNote = { [weak self] element, box in self?.notes.edit(element, at: box) }
         web.navigationDelegate = self
         web.uiDelegate = self
         // "Inspecionar elemento" in the page's context menu (macOS 13.3+).
@@ -126,6 +128,36 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         return made
     }
     private var agentController: PreviewAgent?
+    /// The key of the terminal whose agent drives this tab (the app sets
+    /// it with the agent's first goto).
+    public var agentTerminal: String?
+
+    /// The owner's notes on this page (PreviewNotes.swift), over the page.
+    lazy var notes: PreviewNotes = {
+        let made = PreviewNotes(web: web)
+        let markers = made.view
+        markers.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(markers, positioned: .above, relativeTo: overlay)
+        NSLayoutConstraint.activate([
+            markers.topAnchor.constraint(equalTo: web.topAnchor), markers.bottomAnchor.constraint(equalTo: web.bottomAnchor),
+            markers.leadingAnchor.constraint(equalTo: web.leadingAnchor), markers.trailingAnchor.constraint(equalTo: web.trailingAnchor),
+        ])
+        return made
+    }()
+
+    public var noteCount: Int { notes.notes.count }
+    public func addNote() { picker.startNote() }
+    public func clearNotes() { notes.clear() }
+    /// preview.send-notes: all the notes, pasted to the agent as the picker does.
+    @discardableResult
+    public func sendNotes() -> PickOutcome? {
+        guard noteCount > 0 else { return nil }
+        let driving = agentController?.isAttached == true ? agentTerminal : nil
+        let delivery = notes.delivery(agentTerminal: driving)
+        return onPickElement?(delivery) ?? PreviewPicker.copy(delivery.text())
+    }
+    /// `browser_notes`: the notes as the agent reads them.
+    public func notesForAgent() -> String { notes.forAgent(relativeTo: nil) }
 
     public var isPicking: Bool { picker.isPicking }
     public func togglePicking() { picker.toggle() }
@@ -176,6 +208,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         if let url = webView.url { address.stringValue = url.absoluteString }
         onChange?()
         agentController?.navigationEnded(error: nil)
+        if noteCount > 0 { notes.refresh() }
     }
 
     /// A page started showing: an older error no longer applies (it stayed

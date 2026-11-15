@@ -87,7 +87,8 @@ fn planBrowser(gpa: std.mem.Allocator, p: *Planned, words: []const []const u8) !
         else if (std.mem.eql(u8, action, "press")) &.{.{ .key = "key" }}
         else if (std.mem.eql(u8, action, "scroll")) &.{.{ .key = "target" }}
         else if (std.mem.eql(u8, action, "wait")) &.{ .{ .key = "selector" }, .{ .key = "timeout" } }
-        else if (std.mem.eql(u8, action, "snapshot") or std.mem.eql(u8, action, "screenshot")) &.{}
+        else if (std.mem.eql(u8, action, "snapshot") or std.mem.eql(u8, action, "screenshot") or
+            std.mem.eql(u8, action, "console") or std.mem.eql(u8, action, "notes")) &.{}
         else return error.Usage;
     const optional = std.mem.eql(u8, action, "wait") or std.mem.eql(u8, action, "scroll");
     if (!optional and rest.len < shape.len) return error.Usage;
@@ -118,7 +119,7 @@ pub const usage =
     \\       cadex notify <text>               (a notification to the owner)
     \\       cadex worktree status <todo|doing|review|done> | comment <text>
     \\       cadex browser goto <url> | snapshot | click <ref> | fill <ref> <text> | press <key>
-    \\                     | scroll [up|down|ref] | wait [selector] [seconds] | screenshot
+    \\                     | scroll [up|down|ref] | wait [selector] [seconds] | screenshot | console | notes
     \\       cadex commands | run <id> [key=value ...]   (add --json for the raw answer)
     \\       cadex skills list | get <topic>
     \\

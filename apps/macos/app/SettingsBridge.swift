@@ -159,7 +159,7 @@ final class SettingsBridge {
         guard on, let tools = kit.toolsPath else { return kit.withdraw("agent-tools") }
         // Claude Code asks before every MCP tool; the ones that only read
         // the page go without asking (docs/adr/0024-agent-tools.md).
-        let reads = ["browser_snapshot", "browser_screenshot", "browser_wait"].map { "mcp__cadex__" + $0 }
+        let reads = ["browser_snapshot", "browser_screenshot", "browser_wait", "browser_console", "browser_notes"].map { "mcp__cadex__" + $0 }
         kit.contribute("agent-tools", SessionKitPart(settings: ["permissions": ["allow": reads]],
                                                      pluginDirs: AgentToolsPlugin.folder.map { [$0] } ?? [],
                                                      mcpServers: ["cadex": ["command": tools, "args": ["mcp"]]]))

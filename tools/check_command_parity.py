@@ -43,7 +43,7 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "agent-tools.open-file", "agent-tools.open-diff", "agent-tools.notify", "agent-tools.toggle",
             "agent-tools.show-sessions",
             # The agent's browser (ADR 0025): the WebView2 has no isolated world (ADR 0014).
-            "preview.agent", "preview.stop-agent",
+            "preview.agent", "preview.stop-agent", "preview.add-note", "preview.send-notes", "preview.clear-notes",
             # Tasks' worktrees (plan 19, phase D), until Windows gets the view.
             "worktrees.show", "worktrees.new-task", "worktrees.open", "worktrees.remove", "worktrees.set-status",
             "worktrees.set-comment", "worktrees.edit-setup-hooks"}

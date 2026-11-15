@@ -143,6 +143,11 @@ docs/adr/0023-answer-agent-permissions.md (planos 18 e 19), `docs/adr/0002-zig-c
     as notas ficam na aba enquanto ela está aberta; `browser_notes` e `cadex browser notes` as
     leem; o dono manda todas de uma vez (preview.send-notes). Comandos preview.add-note,
     preview.clear-notes, preview.send-notes. Features: preview, agent-tools.
+  - Feita em 2026-11-15: o console (com a limitação do carregamento, na spec), os estilos no
+    elemento escolhido com o agente ligado e a entrega ao terminal dele, as notas com marcadores e os
+    três comandos; `browser_console` e `browser_notes` no MCP e na CLI, liberados pelo kit por só
+    lerem. Conferido com o `claude` real: o erro da página em `browser_console`. Escolher e prender
+    notas com o mouse falta o dono ver.
 - **E. Computer use.** Feature nova `computer-use` (apps/macos/features/computer-use/, a criar,
   só app macOS, com `CLAUDE.md`, testes e linha na tabela):
   - Ferramentas no mesmo MCP: `computer_list_apps`, `computer_get_state` (árvore de acessibilidade

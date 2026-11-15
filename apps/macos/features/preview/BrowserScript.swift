@@ -192,7 +192,20 @@ enum BrowserScript {
 
         function scrollBy(dy) { window.scrollBy(0, dy * innerHeight); return { y: scrollY }; }
 
-        return { snapshot, box, prepareFill, exists, scrollBy };
+        // The notes' markers (PreviewNotes): where each selector's element is
+        // now, without scrolling; null when it is not on the page.
+        function boxes(selectors) {
+          return selectors.map(sel => {
+            try {
+              const el = document.querySelector(sel);
+              if (!el || !shown(el)) return null;
+              const r = el.getBoundingClientRect();
+              return { x: r.left, y: r.top, w: r.width, h: r.height };
+            } catch (e) { return null; }
+          });
+        }
+
+        return { snapshot, box, prepareFill, exists, scrollBy, boxes };
       })();
     }
     """#

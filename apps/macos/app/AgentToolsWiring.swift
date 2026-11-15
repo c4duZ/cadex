@@ -150,6 +150,7 @@ extension WindowSession {
         besideAgent(request)
         openPreview("", beside: true)
         guard let doc = tabs?.activeDocument as? PreviewDocument else { return nil }
+        doc.agentTerminal = request.terminal
         AgentPreviewTabs.tabs[request.terminal] = AgentPreviewTabs.Held(document: doc)
         return doc
     }

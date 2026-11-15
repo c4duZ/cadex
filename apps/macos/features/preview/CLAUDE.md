@@ -55,7 +55,16 @@
   recebe `isTrusted`, testado), pelas portas `agentMouse`/`agentKey` da `PickingWebView`, que passam
   por cima do seletor; o Esc com o agente ligado roda preview.stop-agent pelo id.
   `PreviewAgentCommands.swift`: um comando só, preview.agent com `action=` (goto, wait, snapshot,
-  click, fill, press, scroll, screenshot), que responde depois; e preview.stop-agent. Só no Mac.
+  click, fill, press, scroll, screenshot, console, notes), que responde depois; e preview.stop-agent.
+  Só no Mac.
+- Fase D do plano 20: `ConsoleScript.swift`, o leitor do console no mundo da página, injetado só com
+  o agente ligado (ao ligar e a cada navegação), lido e esvaziado a pedido. Design Mode: o
+  `PickerScript.swift` também lê os estilos calculados do layout; PickedElement.styles vai na linha
+  `styles:` só com o agente ligado à aba, e a entrega prefere o terminal dele
+  (PickDelivery.agentTerminal). `PreviewNotes.swift`: ⌘+clique escolhendo (ou preview.add-note)
+  prende uma nota a um elemento, com marcadores numerados que seguem a rolagem; preview.send-notes
+  cola todas no agente, cada nota do dono antes do bloco do elemento (PickDelivery.notes), e
+  preview.clear-notes apaga.
 - Spec: `docs/spec/preview.md`. Status: plano 5, fase E pronta; plano 16, fases A a D no código.
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 

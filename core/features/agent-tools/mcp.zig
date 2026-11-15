@@ -52,6 +52,10 @@ pub const tools = [_]Tool{
         .schema = "{\"type\":\"object\",\"properties\":{\"selector\":{\"type\":\"string\"},\"timeout\":{\"type\":\"integer\"}}}" },
     .{ .name = "browser_screenshot", .command = "preview.agent", .action = "screenshot", .description = "A picture of what the preview tab shows now." ++ browser_note,
         .schema = "{\"type\":\"object\",\"properties\":{}}" },
+    .{ .name = "browser_console", .command = "preview.agent", .action = "console", .description = "The page's console errors and messages since the last read (kept only while you drive the tab)." ++ browser_note,
+        .schema = "{\"type\":\"object\",\"properties\":{}}" },
+    .{ .name = "browser_notes", .command = "preview.agent", .action = "notes", .description = "The notes the owner pinned to elements of the page: each the owner's words, then the element (selector, source, styles, picture)." ++ browser_note,
+        .schema = "{\"type\":\"object\",\"properties\":{}}" },
 };
 
 const instructions = "Cadex holds this terminal. Use these tools to open files, diffs and pages beside it, to notify the owner and to mark the task's progress. More: run `cadex skills get cadex`.";

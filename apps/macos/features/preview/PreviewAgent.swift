@@ -36,8 +36,10 @@ public final class PreviewAgent {
     // MARK: Owner
 
     func attach() {
+        let was = isAttached
         isAttached = true
         stoppedByOwner = false
+        if !was { listenToConsole() }
         marks.show(T("Agent using this tab · Esc to stop", "Agente usando esta aba · Esc para parar"))
         // Esc runs preview.stop-agent by id, as a button does (ADR 0005).
         web?.onEscape = { [weak self] in
@@ -60,7 +62,31 @@ public final class PreviewAgent {
         return true
     }
 
-    func pageChanged() { injected = false }
+    func pageChanged() {
+        injected = false
+        if isAttached { listenToConsole() }
+    }
+
+    /// The console's buffer in the page's world (ConsoleScript), only while
+    /// the agent holds the tab.
+    private func listenToConsole() {
+        web?.evaluateJavaScript(ConsoleScript.install, in: nil, in: .page) { _ in }
+    }
+
+    /// browser_console: what the page wrote since the last read.
+    public func console(reply: @escaping (CommandReply) -> Void) {
+        if let reason = refusal() { return reply(.failed(reason)) }
+        web?.evaluateJavaScript(ConsoleScript.read(limit: 100), in: nil, in: .page) { result in
+            MainActor.assumeIsolated {
+                guard let json = (try? result.get()) as? String,
+                      let lines = try? JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String] else {
+                    return reply(.failed("the console could not be read"))
+                }
+                let page = self.web?.url?.absoluteString ?? ""
+                reply(.ok(Self.pageContent(page: page, lines.isEmpty ? "(nothing since the last read)" : lines.joined(separator: "\n"))))
+            }
+        }
+    }
 
     func navigationEnded(error: String?) {
         let waiters = navigationWaiters

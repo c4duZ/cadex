@@ -32,7 +32,7 @@
   embutidos no binário (`cadex skills list|get`); `mcp.zig` é o servidor MCP (JSON-RPC por linha:
   initialize, tools/list, tools/call, ping), cada ferramenta um pedido de comando. Saída 0 feito, 1
   recusado ou app fechado (o motivo no stderr), 2 uso.
-- Fase C: `cadex browser goto|snapshot|click|fill|press|scroll|wait|screenshot` e as ferramentas
+- Fase C e D: `cadex browser goto|snapshot|click|fill|press|scroll|wait|screenshot|console|notes` e as ferramentas
   `browser_*` do MCP viram o comando preview.agent com `action=`; o print volta ao agente como imagem
   (o PNG em base64) e o caminho.
 - O build (`../../build.zig`, `addCli`) instala `zig-out/bin/cadex` só no Mac; o empacotamento o põe em
