@@ -30,17 +30,24 @@ let hibernationChecks: [(name: String, body: Checks.Body)] = [
         // The first launch made a kit session with its token.
         _ = kit.claudeCommand(configDir: "/Users/me/.claude-work", defaultClaudeJSON: folder + "/none.json")
         let tokens = { (try? FileManager.default.contentsOfDirectory(atPath: folder + "/tokens")) ?? [] }
-        guard let file = tokens().first, tokens().count == 1 else { return expect(false, "\(tokens())") }
+        guard let file = tokens().first(where: { $0.hasSuffix(".token") }), tokens().filter({ $0.hasSuffix(".token") }).count == 1 else { return expect(false, "\(tokens())") }
         let session = String(file.dropLast(6))
         let token = try String(contentsOfFile: folder + "/tokens/" + file, encoding: .utf8)
         let command = AgentHibernation.resumeCommand(sessionID: "abc", folder: "/w/my app", configDir: "/Users/me/.claude-work",
                                                      kitSession: session, skipPermissions: false, kit: kit)
         expect(command == "cd '/w/my app' && CLAUDE_CONFIG_DIR=/Users/me/.claude-work claude --resume abc", command)
-        expect(tokens() == [file], "the same kit session: \(tokens())")
+        expect(tokens().filter { $0.hasSuffix(".token") } == [file], "the same kit session: \(tokens())")
         expect((try? String(contentsOfFile: folder + "/tokens/" + file, encoding: .utf8)) == token, "the token stays, so the app still knows the session")
+        // The command it was opened with comes back: its flags, not its old conversation.
+        let opened = kit.claudeCommand(configDir: nil, arguments: ["--model", "haiku", "--resume", "old", "--fork-session", "--dangerously-skip-permissions"],
+                                       defaultClaudeJSON: folder + "/none.json")
+        _ = opened
+        let newest = tokens().filter { $0.hasSuffix(".token") && $0 != file }.first.map { String($0.dropLast(6)) }
+        let same = AgentHibernation.resumeCommand(sessionID: "abc", folder: "/w", configDir: nil, kitSession: newest, skipPermissions: false, kit: kit)
+        expect(same == "cd /w && claude --resume abc --model haiku --dangerously-skip-permissions", same)
         // A kit session whose token is gone gets a new one.
         let fresh = AgentHibernation.resumeCommand(sessionID: "abc", folder: "/w", configDir: nil, kitSession: "gone", skipPermissions: true, kit: kit)
         expect(fresh == "cd /w && claude --resume abc --dangerously-skip-permissions", fresh)
-        expect(tokens().count == 2, "a new token for the gone one")
+        expect(tokens().filter { $0.hasSuffix(".token") }.count == 3, "a new token for the gone one")
     }),
 ]

@@ -199,7 +199,8 @@ docs/adr/0021-cadex-managed-accounts.md (do plano 18), `docs/adr/0019-agents-obs
   pasta, com o kit e o mesmo token. Agente que saiu mostra "Reiniciar" (agents.restart).
   agents.hibernate hiberna na hora. Features: agents, terminal, tabs, settings.
   Feita em 2026-11-15: encerrar é SIGTERM no `claude` (sai em menos de 1 s e grava a conversa,
-  testado); "parada" é o OSC 7501 em done ou idle; o relaunch reaproveita a sessão do kit e o token
+  testado); "parada" é o OSC 7501 em done ou idle; o relaunch reaproveita a sessão do kit, o token e
+  os argumentos com que ela abriu
   (o socket diz de qual sessão do kit veio cada hook); "Reiniciar" é um botão no canto do terminal;
   a aba mostra ☾. Conferido com o app de release: hibernou depois do tempo, o shell e o app
   ficaram, e o `--resume` lembrou a palavra-código. Falta ver o foco na aba relançando.

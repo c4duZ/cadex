@@ -104,6 +104,7 @@ public final class SessionKit {
         var args: [String] = []
         let session = reused ?? UUID().uuidString.lowercased()
         let token = reused.flatMap(existingToken) ?? writeToken(session: session)
+        writeArguments(arguments, session: session)
         if let settings = writeSettings(session: session, token: token, accountDir: accountDir) { args += ["--settings", settings] }
         for dir in parts.values.flatMap(\.pluginDirs).sorted() { args += ["--plugin-dir", dir] }
         if let mcp = writeMCP(key: key, isDefault: configDir == nil, defaultClaudeJSON: defaultClaudeJSON) { args += ["--mcp-config", mcp] }

@@ -51,6 +51,21 @@ extension SessionKit {
     /// A random token for the session, in its own file (0600): the app's
     /// socket takes the session's word only with it. nil when it cannot be
     /// kept (the session then works, without telling the app).
+    /// The arguments a session was opened with (`--model`, the permission
+    /// flag, …), beside its token for as long (30 days): a hibernated agent
+    /// comes back with the same command (plan 19 phase F).
+    func writeArguments(_ arguments: [String], session: String) {
+        guard let data = try? JSONSerialization.data(withJSONObject: arguments) else { return }
+        try? FileManager.default.createDirectory(atPath: tokens, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        FileManager.default.createFile(atPath: tokens + "/" + session + ".args.json", contents: data, attributes: [.posixPermissions: 0o600])
+    }
+
+    /// What `writeArguments` kept for `session`; nil when nothing was.
+    public func arguments(of session: String) -> [String]? {
+        guard let data = FileManager.default.contents(atPath: tokens + "/" + session + ".args.json") else { return nil }
+        return (try? JSONSerialization.jsonObject(with: data)) as? [String]
+    }
+
     /// The token a kit session already has, if its file is still there.
     func existingToken(session: String) -> String? {
         let token = (try? String(contentsOfFile: tokens + "/" + session + ".token", encoding: .utf8))?.trimmingCharacters(in: .whitespacesAndNewlines)

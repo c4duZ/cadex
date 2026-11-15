@@ -207,7 +207,9 @@ continua uma conversa em outra conta, sem nunca tocar em token
 - Agente que saiu mostra "Restart" (agents.restart), que relança igual.
 - Como (2026-11-15): só sessões abertas pelo Cadex, que têm os hooks; "terminou" é o OSC 7501 em
   done ou idle, e o tempo conta desde então (trabalhar zera). Encerrar é SIGTERM no `claude`: ele sai
-  em menos de 1 s, grava a conversa, e `--resume` a retoma (testado com a palavra-código). Não hiberna
+  em menos de 1 s, grava a conversa, e `--resume` a retoma (testado com a palavra-código). O comando
+  volta como foi aberto: o kit guarda os argumentos de cada sessão junto do token (`--model`, o modo
+  de permissões), sem o `--resume`/`--continue` de então. Não hiberna
   quem trabalha ou espera você (agents.hibernate recusa com um bip). "Restart" é um botão no canto do
   terminal quando o agente sai sozinho (fim da sessão sem processo depois); digitar o tira. Um texto
   digitado e não enviado no prompt do agente se perde ao hibernar.

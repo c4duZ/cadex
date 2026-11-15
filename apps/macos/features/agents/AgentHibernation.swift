@@ -33,13 +33,31 @@ public enum AgentHibernation {
 
     /// What is typed in the terminal to bring the conversation back: into
     /// its folder, then `claude --resume <id>` by the kit, in its account,
-    /// keeping the kit session (and so the token) when it is still there.
+    /// with the arguments the session was opened with, keeping the kit
+    /// session (and so the token) when it is still there. Without kept
+    /// arguments, the permission flag as agents.launchSkipPermissions says.
     @MainActor
     public static func resumeCommand(sessionID: String, folder: String, configDir: String?, kitSession: String?,
                                      skipPermissions: Bool, kit: SessionKit = .shared) -> String {
-        let flags = skipPermissions ? ["--dangerously-skip-permissions"] : []
+        let flags = kitSession.flatMap(kit.arguments(of:)).map(withoutConversation) ?? (skipPermissions ? ["--dangerously-skip-permissions"] : [])
         let claude = kit.claudeCommand(configDir: configDir, arguments: ["--resume", sessionID] + flags, session: kitSession)
         return "cd " + SessionKit.quote(folder) + " && " + claude
+    }
+
+    /// The arguments without what picked the conversation then (`--resume
+    /// <id>`, `--continue`, `--fork-session`): the resume picks it now.
+    static func withoutConversation(_ arguments: [String]) -> [String] {
+        var out: [String] = []
+        var skipNext = false
+        for argument in arguments {
+            if skipNext { skipNext = false; continue }
+            switch argument {
+            case "--resume", "-r": skipNext = true
+            case "--continue", "-c", "--fork-session": continue
+            default: out.append(argument)
+            }
+        }
+        return out
     }
 
     /// agents.hibernate (the focused terminal's agent, now) and
