@@ -84,6 +84,16 @@ let usageChecks: [(name: String, body: Checks.Body)] = [
         expect(AgentStop.fromReport(state: "done", kind: "none", message: "") == .finished(""))
         expect(AgentStop.fromReport(state: "working", kind: "none", message: "Creating…") == nil, "working is no stop")
     }),
+    ("a session's hooks give the id it runs under after /clear; SessionEnd lets it go", {
+        let controller = AgentsController.shared
+        let me = ProcessInfo.processInfo.processIdentifier
+        let account = AgentAccount(dir: "/h/.claude", name: "A", isDefault: true)
+        let registry = AgentSession(account: account, pid: me, id: "old", name: "x", cwd: "/w", status: .working, since: Date())
+        controller.noteHook(pid: me, event: "SessionStart", sessionID: "new")
+        expect(controller.withHookIDs([registry]).first?.id == "new", "the hook's id wins over the registry's")
+        controller.noteHook(pid: me, event: "SessionEnd", sessionID: "new")
+        expect(controller.withHookIDs([registry]).first?.id == "old")
+    }),
     ("a turn that failed to log in is a stop of its own", {
         let line = #"{"type":"assistant","error":"authentication_failed","isApiErrorMessage":true,"message":{"role":"assistant","content":[{"type":"text","text":"Login expired · Please run /login"}]}}"#
         expect(AgentStop.classify([line]) == .loginExpired)

@@ -1,3 +1,4 @@
+import AgentTools
 import AppKit
 import CommandPalette
 import Explorer
@@ -242,6 +243,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// The main window's spaces as they were at the end, for the next launch.
     func applicationWillTerminate(_ notification: Notification) {
+        AgentToolsServer.shared.stop()
         sessions.first { $0.isMain }?.spaces?.saveNow()
         if relaunching { openAgain() }
     }

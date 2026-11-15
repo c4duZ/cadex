@@ -114,6 +114,14 @@ let package = Package(
             exclude: ["CLAUDE.md", "tests"],
             linkerSettings: [.linkedLibrary("sqlite3")]
         ),
+        // The app's socket: where the sessions Cadex opened talk to it (docs/adr/0022-terminal-daemon.md).
+        .target(
+            name: "AgentTools",
+            dependencies: ["SessionKit"],
+            path: "features/agent-tools",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
         // The agents running on this Mac, read only (docs/adr/0019-agents-observe-only.md).
         .target(
             name: "Agents",
@@ -402,6 +410,11 @@ let package = Package(
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
+            name: "AgentToolsTests",
+            dependencies: ["AgentTools", "SessionKit", "Checks"],
+            path: "features/agent-tools/tests"
+        ),
+        .executableTarget(
             name: "TextIndexTests",
             dependencies: ["TextIndex", "Checks"],
             path: "shared/text-index/tests"
@@ -419,7 +432,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "SessionKit", "SSH", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "AgentTools", "SessionKit", "SSH", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

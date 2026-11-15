@@ -4,15 +4,33 @@
 
 const std = @import("std");
 const statusline = @import("statusline.zig");
+const hook = @import("hook.zig");
 
-const usage_text = "usage: cadex statusline   (Claude Code's status line, from a session Cadex opened)\n";
+const usage_text =
+    \\usage: cadex statusline       (Claude Code's status line, from a session Cadex opened)
+    \\       cadex hook <event>     (a Claude Code hook: tells the Cadex app, never waits)
+    \\
+;
 
 pub fn main(init: std.process.Init.Minimal) u8 {
     var args = init.args.iterate();
     _ = args.next();
     const sub = args.next() orelse return fail(usage_text);
     if (std.mem.eql(u8, sub, "statusline")) return runStatusline();
+    if (std.mem.eql(u8, sub, "hook")) return runHook(args.next() orelse return fail(usage_text));
     return fail(usage_text);
+}
+
+fn runHook(event: []const u8) u8 {
+    var gpa_state: std.heap.DebugAllocator(.{}) = .init;
+    defer _ = gpa_state.deinit();
+    const gpa = gpa_state.allocator();
+    const input = readStdin(gpa) catch return 0;
+    defer gpa.free(input);
+    const out = (hook.run(gpa, event, input) catch return 0) orelse return 0;
+    defer gpa.free(out);
+    writeAll(1, out);
+    return 0;
 }
 
 fn runStatusline() u8 {

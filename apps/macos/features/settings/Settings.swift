@@ -143,6 +143,9 @@ public struct Settings: Equatable, Sendable {
         /// (Claude Code's --dangerously-skip-permissions, Codex's
         /// --dangerously-bypass-approvals-and-sandbox). Off by default.
         public var launchSkipPermissions = false
+        /// The hooks that tell the app what a session Cadex opened does (plan
+        /// 19): its id after /clear and --resume. Off: none in the kit.
+        public var stateHooks = true
         /// Index every account's conversations for the History page (plan 18,
         /// phase D). Off: nothing indexed or watched.
         public var history = true

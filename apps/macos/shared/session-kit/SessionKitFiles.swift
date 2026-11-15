@@ -1,4 +1,5 @@
 import Foundation
+import Security
 
 /// The kit's files: one settings file per account (the owner's status
 /// line padding differs) and, for accounts other than the default, an MCP
@@ -14,16 +15,61 @@ extension SessionKit {
     /// (test 24, 2026-11-14) wait for the terminal to honor DEC 2026 and
     /// OSC 777 (plan 19, phase E); turning them on before would change
     /// nothing on screen.
-    func writeSettings(key: String, accountDir: String) -> String? {
+    func writeSettings(session: String, token: String?, accountDir: String) -> String? {
         var settings: [String: Any] = [:]
         if let tools = toolsPath {
             var line: [String: Any] = ["type": "command", "command": Self.quote(tools) + " statusline"]
             if let padding = Self.ownerPadding(accountDir) { line["padding"] = padding }
             settings["statusLine"] = line
+            if hooksEnabled { settings["hooks"] = Self.hooks(tools) }
         }
+        // The settings' env reaches the hooks (tested 2026-11-15): the token
+        // travels here, never typed in the terminal or kept in shell history.
+        if let token, toolsPath != nil { settings["env"] = ["CADEX_SESSION_TOKEN": token] }
         for id in parts.keys.sorted() { settings = Self.merge(settings, parts[id]!.settings) }
         guard !settings.isEmpty else { return nil }
-        return write(settings, name: "settings-\(key).json", mode: 0o644)
+        pruneSessions()
+        return write(settings, name: "session-\(session).json", mode: 0o600)
+    }
+
+    /// The events that tell the app what a session does (plan 19, phase B):
+    /// each runs `cadex hook <event>`, which never makes the session wait,
+    /// save PermissionRequest (docs/adr/0023-answer-agent-permissions.md).
+    static let hookEvents = ["SessionStart", "Stop", "Notification", "PermissionRequest", "SessionEnd", "CwdChanged"]
+
+    static func hooks(_ tools: String) -> [String: Any] {
+        Dictionary(uniqueKeysWithValues: hookEvents.map { event in
+            (event, [["hooks": [["type": "command", "command": quote(tools) + " hook " + event,
+                                 "timeout": event == "PermissionRequest" ? 600 : 5]]]])
+        })
+    }
+
+    /// A random token for the session, in its own file (0600): the app's
+    /// socket takes the session's word only with it. nil when it cannot be
+    /// kept (the session then works, without telling the app).
+    func writeToken(session: String) -> String? {
+        var bytes = [UInt8](repeating: 0, count: 32)
+        guard SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes) == errSecSuccess else { return nil }
+        let token = bytes.map { String(format: "%02x", $0) }.joined()
+        let fm = FileManager.default
+        try? fm.createDirectory(atPath: tokens, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        let path = tokens + "/" + session + ".token"
+        guard fm.createFile(atPath: path, contents: Data(token.utf8), attributes: [.posixPermissions: 0o600]) else { return nil }
+        return token
+    }
+
+    /// Old sessions' settings go after 2 days (a session reads them at
+    /// start), their tokens after 30 (a hibernated session comes back with
+    /// its token, plan 19 phase F).
+    func pruneSessions(now: Date = Date()) {
+        let fm = FileManager.default
+        for (dir, prefix, age) in [(folder, "session-", 2.0), (tokens, "", 30.0)] {
+            for name in (try? fm.contentsOfDirectory(atPath: dir)) ?? [] where name.hasPrefix(prefix) && (name.hasSuffix(".json") || name.hasSuffix(".token")) {
+                let path = dir + "/" + name
+                let date = (try? fm.attributesOfItem(atPath: path)[.modificationDate] as? Date) ?? now
+                if now.timeIntervalSince(date) > age * 86_400 { try? fm.removeItem(atPath: path) }
+            }
+        }
     }
 
     /// The default account's MCP servers (read only from its .claude.json;

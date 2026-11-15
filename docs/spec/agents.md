@@ -325,9 +325,11 @@ continua uma conversa em outra conta, sem nunca tocar em token
 - [ ] Numa aba aberta pelo Cadex, pedir um `rm` mostra "esperando permissão" em até 1 s e o título
       da aba muda; um `claude` digitado à mão mostra trabalhando, permissão e pergunta (com o texto)
       só pelo OSC 7501.
-- [ ] `/clear` e `--resume` mantêm o id certo; com o app fechado no meio, o próximo hook acha o app
-      reaberto e o token ainda vale; com o app fechado, o Claude não espera o hook.
-- [ ] Um processo sem token, ou de outro usuário, é recusado no socket do app.
+- [x] `/clear` e `--resume` mantêm o id certo; com o app fechado no meio, o próximo hook acha o app
+      reaberto e o token ainda vale; com o app fechado, o Claude não espera o hook (o `claude` real,
+      2026-11-15: SessionStart, /clear com o id novo, o socket fora e de volta, /exit).
+- [x] Um processo sem token, ou de outro usuário, é recusado no socket do app (teste com socket de
+      verdade; outro usuário pelo `getpeereid`, que o teste não tem como simular).
 - [ ] Permitir no quadro faz o comando rodar e fecha o diálogo da TUI; responder na TUI tira o
       cartão; nada é mandado ao agente sem clique.
 - [ ] O número do Dock some ao visitar o terminal; "Mark as Unread" o traz de volta.

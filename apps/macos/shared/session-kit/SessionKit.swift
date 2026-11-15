@@ -34,6 +34,21 @@ public final class SessionKit {
     public var toolsPath: String?
     /// The environment a new tab inherits: Cadex's own.
     public var environment: [String: String]
+    /// agents.stateHooks: the hooks that tell the app what a session does
+    /// (plan 19). Off, only the status line and the token.
+    public var hooksEnabled = true
+    /// Where each session's token is kept (0600), read by the app's socket.
+    public var tokens: String = SessionKit.tokensFolder
+
+    /// `~/Library/Application Support/Cadex/sockets` (docs/adr/0022-terminal-daemon.md).
+    public nonisolated static var socketsFolder: String {
+        FileManager.default.homeDirectoryForCurrentUser.path + "/Library/Application Support/Cadex/sockets"
+    }
+
+    /// `~/Library/Application Support/Cadex/sessions`: one token per session.
+    public nonisolated static var tokensFolder: String {
+        FileManager.default.homeDirectoryForCurrentUser.path + "/Library/Application Support/Cadex/sessions"
+    }
     private(set) var parts: [String: SessionKitPart] = [:]
 
     init(folder: String? = nil, toolsPath: String? = SessionKit.findTools(),
@@ -42,6 +57,8 @@ public final class SessionKit {
         self.folder = folder ?? home + "/Library/Application Support/Cadex/kit"
         self.toolsPath = toolsPath
         self.environment = environment
+        // A kit with a folder of its own (tests) keeps its tokens there too.
+        tokens = folder.map { $0 + "/tokens" } ?? SessionKit.tokensFolder
     }
 
     /// A kit that writes in `folder`, with no tools and an empty environment:
@@ -77,7 +94,9 @@ public final class SessionKit {
         let accountDir = configDir ?? FileManager.default.homeDirectoryForCurrentUser.path + "/.claude"
         let key = Self.accountKey(accountDir)
         var args: [String] = []
-        if let settings = writeSettings(key: key, accountDir: accountDir) { args += ["--settings", settings] }
+        let session = UUID().uuidString.lowercased()
+        let token = writeToken(session: session)
+        if let settings = writeSettings(session: session, token: token, accountDir: accountDir) { args += ["--settings", settings] }
         for dir in parts.values.flatMap(\.pluginDirs).sorted() { args += ["--plugin-dir", dir] }
         if let mcp = writeMCP(key: key, isDefault: configDir == nil, defaultClaudeJSON: defaultClaudeJSON) { args += ["--mcp-config", mcp] }
         return Self.compose(unset: unsetNames(isDefault: configDir == nil), configDir: configDir, arguments: args + arguments)

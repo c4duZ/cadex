@@ -13,6 +13,15 @@ func scratch() -> String {
     return dir
 }
 
+/// The --settings file a command names.
+func settingsPath(_ command: String) -> String {
+    let parts = command.components(separatedBy: " --settings ")
+    guard parts.count > 1 else { return "" }
+    var rest = parts[1]
+    if rest.hasPrefix("'") { rest.removeFirst(); return String(rest.prefix { $0 != "'" }) }
+    return String(rest.prefix { $0 != " " })
+}
+
 func json(_ path: String) -> [String: Any] {
     (fm.contents(atPath: path).flatMap { try? JSONSerialization.jsonObject(with: $0) } as? [String: Any]) ?? [:]
 }
@@ -31,11 +40,26 @@ let exitCode = await Checks.run([
         let kit = SessionKit(folder: dir + "/kit", toolsPath: "/App/Cadex.app/Contents/Helpers/cadex",
                              environment: ["CLAUDECODE": "1", "CLAUDE_CODE_CHILD_SESSION": "1", "PATH": "/bin"])
         let command = kit.claudeCommand(configDir: dir + "/acct", arguments: ["--resume", "abc"], defaultClaudeJSON: dir + "/none.json")
-        let settings = dir + "/kit/settings-" + SessionKit.accountKey(dir + "/acct") + ".json"
+        let settings = settingsPath(command)
         expect(command == "env -u CLAUDECODE -u CLAUDE_CODE_CHILD_SESSION CLAUDE_CONFIG_DIR=\(dir)/acct claude --settings \(settings) --resume abc", command)
-        let line = json(settings)["statusLine"] as? [String: Any]
+        expect(settings.hasPrefix(dir + "/kit/session-"), "one settings file per session")
+        let file = json(settings)
+        let line = file["statusLine"] as? [String: Any]
         expect(line?["command"] as? String == "/App/Cadex.app/Contents/Helpers/cadex statusline")
         expect(line?["padding"] as? Int == 2, "the owner's padding kept")
+        // The session's token in env, never in the command; its file 0600 in the kit's tokens.
+        let token = (file["env"] as? [String: String])?["CADEX_SESSION_TOKEN"] ?? ""
+        expect(token.count == 64 && !command.contains(token), "a 32-byte token, kept out of the typed command")
+        let tokenFiles = (try? fm.contentsOfDirectory(atPath: dir + "/kit/tokens")) ?? []
+        expect(tokenFiles.count == 1 && (try? String(contentsOfFile: dir + "/kit/tokens/" + tokenFiles[0], encoding: .utf8)) == token)
+        let mode = (try? fm.attributesOfItem(atPath: settings)[.posixPermissions] as? Int) ?? 0
+        expect(mode == 0o600, "the settings carry the token: 0600")
+        let hooks = file["hooks"] as? [String: Any]
+        expect(Set(hooks?.keys.map { $0 } ?? []) == ["SessionStart", "Stop", "Notification", "PermissionRequest", "SessionEnd", "CwdChanged"], "\(String(describing: hooks?.keys))")
+        let stop = ((hooks?["Stop"] as? [[String: Any]])?.first?["hooks"] as? [[String: Any]])?.first
+        expect(stop?["command"] as? String == "/App/Cadex.app/Contents/Helpers/cadex hook Stop")
+        kit.hooksEnabled = false
+        expect(json(settingsPath(kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json")))["hooks"] == nil, "agents.stateHooks off: no hooks")
     }),
     ("the default account: no folder, a stray CLAUDE_CONFIG_DIR dropped; no tools, no settings", {
         let dir = scratch()
@@ -69,7 +93,7 @@ let exitCode = await Checks.run([
         kit.contribute("b", SessionKitPart(settings: ["hooks": ["Stop": [["command": "b"]]]]))
         let command = kit.claudeCommand(configDir: nil, defaultClaudeJSON: dir + "/none.json")
         expect(command.contains("--plugin-dir /p/a"), command)
-        let settings = json(dir + "/kit/settings-" + SessionKit.accountKey(fm.homeDirectoryForCurrentUser.path + "/.claude") + ".json")
+        let settings = json(settingsPath(command))
         let stop = (settings["hooks"] as? [String: Any])?["Stop"] as? [Any]
         expect(stop?.count == 2, "\(settings)")
         kit.withdraw("a")

@@ -1,3 +1,4 @@
+import AgentTools
 import Agents
 import AppKit
 import Icons
@@ -231,6 +232,13 @@ extension AppDelegate {
                 s.agents.hiddenLogins[key] = nil
             }
         }
+        // The app's socket: the sessions Cadex opened tell it, through their
+        // hooks, the id they run under (docs/adr/0022-terminal-daemon.md).
+        AgentToolsServer.shared.onEvent = { event in
+            AgentsController.shared.noteHook(pid: event.pid, event: event.event, sessionID: event.sessionID)
+            return nil
+        }
+        do { try AgentToolsServer.shared.start() } catch { NSLog("Cadex: the app socket did not open: %@", "\(error)") }
         // In a Cadex terminal the agent says why it stopped (OSC 7501).
         notifier.reportedStop = { [weak self] session in
             guard let status = self?.sessions.lazy.compactMap({ $0.terminal(of: session)?.terminal.agentStatus }).first else { return nil }

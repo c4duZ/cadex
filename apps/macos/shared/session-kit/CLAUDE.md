@@ -21,8 +21,13 @@
   CLAUDE_CONFIG_DIR solto. `contribute`/`withdraw` com um `SessionKitPart`. `findTools` acha o `cadex`
   em Contents/Helpers ou, no `make run`, em `core/zig-out/bin`. `accountKey` é a regra do nome do
   arquivo de uso, igual à do `cadex statusline`.
-- `SessionKitFiles.swift`: em `~/Library/Application Support/Cadex/kit`, um `settings-<conta>.json`
-  com a status line do Cadex (com o `padding` da do dono) e o que as features contribuem (objetos se
+- `SessionKitFiles.swift`: em `~/Library/Application Support/Cadex/kit`, um `session-<chave>.json`
+  por sessão (0600, apagado depois de 2 dias) com a status line do Cadex (com o `padding` da do
+  dono), o token da sessão na `env` (que chega aos hooks, teste de 2026-11-15; nunca digitado no
+  terminal), os hooks do plano 19 (`cadex hook <evento>` em SessionStart, Stop, Notification,
+  PermissionRequest, SessionEnd e CwdChanged, com `hooksEnabled` = agents.stateHooks) e o que as
+  features contribuem; o token também num arquivo `…/Cadex/sessions/<chave>.token` (0600, 30 dias),
+  que o socket do app lê (objetos se
   juntam, listas se somam: hooks de duas features no mesmo evento rodam os dois); e, para contas que
   não são a padrão, `mcp-<conta>.json` (0600) com os `mcpServers` do .claude.json da conta padrão,
   lidos sem escrever.

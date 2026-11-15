@@ -20,6 +20,14 @@ Cadex).
 - Nunca lê token, login ou credencial, e não sai para a rede.
 - Sem subcomando, ou com um desconhecido, mostra o uso e sai com 2.
 
+### `cadex hook <evento>` (plano 19)
+- É o comando dos hooks que o kit da sessão põe nas sessões que o Cadex abre. Lê o JSON que o Claude
+  Code dá ao hook e manda ao socket do app (`…/Cadex/sockets/app.sock`) o token da sessão, o evento,
+  o pid do `claude` e o JSON.
+- Nunca faz a sessão esperar: 200 ms pela resposta; com o app fechado, sai na hora. A exceção é a
+  permissão (`docs/adr/0023-answer-agent-permissions.md`), que espera o clique do dono.
+- Imprime o que o app mandar imprimir (a decisão de uma permissão) e sai sempre com 0.
+
 ## Estados
 - **JSON sem `rate_limits`** (antes da primeira resposta da sessão): só o arquivo da sessão.
 - **Conta sem status line própria**: não imprime nada.

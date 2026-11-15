@@ -21,6 +21,30 @@ public final class AgentsController {
     public private(set) var subagents: [AgentSubagent] = []
     /// A continued session's origin subagents folders, by session id.
     private var originFolders: [String: [String]] = [:]
+    /// The session id each `claude` process has now, by pid, as its hooks
+    /// say (plan 19): right after /clear and --resume, which the registry
+    /// file in sessions/ did not follow (plan 19, test of 2026-11-14).
+    private var hookSessions: [Int32: String] = [:]
+
+    /// A hook event from a session Cadex opened (AgentTools' socket): its
+    /// SessionStart and the rest carry the id it runs under; SessionEnd ends it.
+    public func noteHook(pid: Int32, event: String, sessionID: String?) {
+        guard pid > 0 else { return }
+        if event == "SessionEnd" { hookSessions[pid] = nil } else if let id = sessionID, !id.isEmpty { hookSessions[pid] = id }
+        if !watchers.isEmpty { reload(accounts: false) }
+    }
+
+    /// The registry's sessions with the ids their hooks gave.
+    func withHookIDs(_ sessions: [AgentSession]) -> [AgentSession] {
+        sessions.map { session in
+            guard let id = hookSessions[session.pid], id != session.id else { return session }
+            var renamed = AgentSession(account: session.account, pid: session.pid, id: id, name: session.name,
+                                       cwd: session.cwd, status: session.status, since: session.since)
+            renamed.job = session.job
+            renamed.waitingFor = session.waitingFor
+            return renamed
+        }
+    }
     /// agents.accountNames (folder → name) and agents.hiddenAccounts.
     public var names: [String: String] = [:] { didSet { if names != oldValue { reload(accounts: true) } } }
     public var hidden: Set<String> = [] { didSet { if hidden != oldValue { publish() } } }
@@ -127,6 +151,10 @@ public final class AgentsController {
             bad += read.unreadable
         }
         // A background session that runs also has a registry: keep that one.
+        all = withHookIDs(all)
+        // A pid whose process is gone takes its hook id with it (one whose
+        // registry has not shown up yet stays).
+        hookSessions = hookSessions.filter { kill($0.key, 0) == 0 }
         sessions = all + background.filter { job in !all.contains { $0.id == job.id } }
         unreadable = bad
         if let open = openSession, let session = sessions.first(where: { $0.id == open }) {
