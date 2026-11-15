@@ -49,9 +49,13 @@ pub fn files(gpa: std.mem.Allocator, registry: *Registry, repo: []const u8, base
     defer gpa.free(names);
     const counts = try range(gpa, registry, repo, base, to, "--numstat");
     defer gpa.free(counts);
+    // Mid-merge, a diff against a commit calls a file in conflict M: the
+    // index's unmerged paths say U (seen in the app, 2026-11-15).
+    const unmerged = if (to == null) try unmergedPaths(gpa, registry, repo) else try gpa.alloc(u8, 0);
+    defer gpa.free(unmerged);
     var out: std.ArrayList(u8) = .empty;
     errdefer out.deinit(gpa);
-    try join(gpa, &out, names, counts);
+    try join(gpa, &out, names, counts, unmerged);
     if (to == null) try untracked(gpa, registry, repo, &out);
     return out.toOwnedSlice(gpa);
 }
@@ -75,7 +79,7 @@ fn range(gpa: std.mem.Allocator, registry: *Registry, repo: []const u8, base: []
 /// Pairs `--name-status -z` (status, then one path or, renamed, two) with
 /// `--numstat -z` (counts, then the path, or empty and the two paths), in
 /// the same order git gives both.
-fn join(gpa: std.mem.Allocator, out: *std.ArrayList(u8), names: []const u8, counts: []const u8) !void {
+fn join(gpa: std.mem.Allocator, out: *std.ArrayList(u8), names: []const u8, counts: []const u8, unmerged: []const u8) !void {
     var n = std.mem.splitScalar(u8, names, 0);
     var c = std.mem.splitScalar(u8, counts, 0);
     while (n.next()) |status| {
@@ -93,8 +97,26 @@ fn join(gpa: std.mem.Allocator, out: *std.ArrayList(u8), names: []const u8, coun
         const removed = fields.next() orelse "-";
         const path = if (renamed) second else first;
         const orig = if (renamed) first else "";
-        try out.print(gpa, "{c}\t{s}\t{s}\t{s}\t{s}\n", .{ status[0], added, removed, path, orig });
+        const letter: u8 = if (listed(unmerged, path)) 'U' else status[0];
+        try out.print(gpa, "{c}\t{s}\t{s}\t{s}\t{s}\n", .{ letter, added, removed, path, orig });
     }
+}
+
+/// The paths in conflict, NUL-separated (`git diff --name-only --diff-filter=U -z`).
+fn unmergedPaths(gpa: std.mem.Allocator, registry: *Registry, repo: []const u8) ![]u8 {
+    var r = try git.run(gpa, registry, repo, &.{ "diff", "--name-only", "--diff-filter=U", "-z" }, .{});
+    gpa.free(r.stderr);
+    if (!r.ok()) {
+        gpa.free(r.stdout);
+        return gpa.alloc(u8, 0);
+    }
+    return r.stdout;
+}
+
+fn listed(list: []const u8, path: []const u8) bool {
+    var it = std.mem.splitScalar(u8, list, 0);
+    while (it.next()) |item| if (std.mem.eql(u8, item, path)) return true;
+    return false;
 }
 
 /// The work tree's files git does not know (ignored ones left out), with

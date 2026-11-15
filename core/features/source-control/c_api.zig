@@ -243,3 +243,58 @@ pub export fn cadex_git_review_apply(repo: ?[*:0]const u8, patch: ?[*]const u8, 
     const chosen: []const usize = if (count == 0) &.{} else (lines orelse return status_code.invalid_argument)[0..count];
     return finish(sc.partial.apply(gpa, workspace.registry(), r, p[0..patch_len], chosen, unstage), message, message_len);
 }
+
+// ---- Image and conflict (plan 21 phase C) ----
+
+/// A version's bytes, whole: `rev` a commit, "" the index, ":1" ":2" ":3"
+/// a conflict's base, ours and theirs. Empty when it is not there.
+pub export fn cadex_git_show_blob(repo: ?[*:0]const u8, rev: ?[*:0]const u8, path: ?[*:0]const u8, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) Code {
+    c_buffer.clearOut(out, out_len);
+    const r = span(repo) orelse return status_code.invalid_argument;
+    const p = span(path) orelse return status_code.invalid_argument;
+    const bytes = sc.diff.blob(gpa, workspace.registry(), r, span(rev) orelse "", p) catch |err| return status_code.fromError(err);
+    defer gpa.free(bytes);
+    return c_buffer.handOut(bytes, out, out_len);
+}
+
+/// The conflict blocks of `text`, one line each: "start \t ours_start \t
+/// ours_end \t base_start \t base_end \t theirs_start \t theirs_end \t end"
+/// (0-based lines, ends exclusive; base -1 -1 without a base part).
+pub export fn cadex_git_conflict_blocks(text: ?[*]const u8, len: usize, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) Code {
+    c_buffer.clearOut(out, out_len);
+    const t: []const u8 = if (len == 0) "" else (text orelse return status_code.invalid_argument)[0..len];
+    const all = sc.conflict.blocks(gpa, t) catch |err| return status_code.fromError(err);
+    defer gpa.free(all);
+    var list: std.ArrayList(u8) = .empty;
+    defer list.deinit(gpa);
+    for (all) |b| {
+        const base: [2]i64 = if (b.base) |x| .{ @intCast(x[0]), @intCast(x[1]) } else .{ -1, -1 };
+        list.print(gpa, "{d}\t{d}\t{d}\t{d}\t{d}\t{d}\t{d}\t{d}\n", .{ b.start, b.ours[0], b.ours[1], base[0], base[1], b.theirs[0], b.theirs[1], b.end }) catch return status_code.out_of_memory;
+    }
+    return c_buffer.handOut(list.items, out, out_len);
+}
+
+/// `text` with block `which` replaced: choice 0 ours, 1 theirs, 2 both.
+pub export fn cadex_git_conflict_resolve(text: ?[*]const u8, len: usize, which: usize, choice: u8, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) Code {
+    c_buffer.clearOut(out, out_len);
+    const t: []const u8 = if (len == 0) "" else (text orelse return status_code.invalid_argument)[0..len];
+    if (choice > 2) return status_code.invalid_argument;
+    const resolved = sc.conflict.resolve(gpa, t, which, @enumFromInt(choice)) catch |err| return status_code.fromError(err);
+    defer gpa.free(resolved);
+    return c_buffer.handOut(resolved, out, out_len);
+}
+
+/// The first line (1-based) still holding a conflict marker; 0: none.
+pub export fn cadex_git_conflict_marker(text: ?[*]const u8, len: usize) callconv(.c) usize {
+    const t: []const u8 = if (len == 0) "" else (text orelse return 0)[0..len];
+    return sc.conflict.firstMarker(t) orelse 0;
+}
+
+/// Saves `text` over `path` (relative to `repo`) and stages it; refuses
+/// with CADEX_IO_FAILED and why while a marker is left.
+pub export fn cadex_git_mark_resolved(repo: ?[*:0]const u8, path: ?[*:0]const u8, text: ?[*]const u8, len: usize, message: ?*?[*]u8, message_len: ?*usize) callconv(.c) Code {
+    const r = span(repo) orelse return status_code.invalid_argument;
+    const p = span(path) orelse return status_code.invalid_argument;
+    const t: []const u8 = if (len == 0) "" else (text orelse return status_code.invalid_argument)[0..len];
+    return finish(sc.conflict.markResolved(gpa, workspace.registry(), r, p, t), message, message_len);
+}

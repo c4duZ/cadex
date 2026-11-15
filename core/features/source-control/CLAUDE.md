@@ -35,8 +35,15 @@
   patch; no stage, `+` não escolhida sai e `-` não escolhida vira contexto; no unstage, o
   contrário) e `apply` manda ao `git apply --cached --recount` (e `--reverse`); `patchOf` dá o patch
   de onde escolher, fazendo `add -N` no arquivo novo antes. Nunca toca o disco.
+- `conflict.zig` (plano 21, fase C): os blocos de conflito pelos marcadores que o git deixa
+  (`<<<<<<<`, `|||||||` do diff3 quando houver, `=======`, `>>>>>>>`; "=======" sozinho na linha,
+  os outros com rótulo opcional), resolver um bloco com a nossa, a deles ou as duas, a primeira linha
+  com marcador sobrando e `markResolved` (recusa com marcador; grava atômico, mantendo o modo, e faz
+  o `git add`). blob, no `diff.zig`: os bytes inteiros de uma versão (commit, índice, ou os estágios `:1`
+  `:2` `:3` de um conflito), até 21 MB, para a imagem e as três vias.
 - API C em `c_api.zig` (`cadex_git_*`, e `cadex_git_review_*` para o diff de revisão e o stage
-  parcial), listas em linhas com tab.
+  parcial, `cadex_git_show_blob` e `cadex_git_conflict_*`/`cadex_git_mark_resolved` para a fase C),
+  listas em linhas com tab.
 - Spec: `docs/spec/source-control.md`. Status: pronto (plano 6). A observação do
   repositório é a do explorer no app (as mudanças em .git chegam pelo mesmo watcher).
 
@@ -46,4 +53,5 @@
   renomeação com espaço no nome, pull recusado quando diverge, branches, fora do workspace recusado.
 - `review_test.zig`: a worktree de uma tarefa contra onde saiu do main (commit, rename staged,
   edição não staged, arquivo novo, main andando depois), duas pontas, uma linha entrando e saindo do
-  índice e uma linha de um arquivo novo.
+  índice e uma linha de um arquivo novo; um conflito de merge de verdade (os três estágios, o bloco,
+  recusado com marcador, resolvido e no stage).

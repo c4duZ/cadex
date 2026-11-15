@@ -82,6 +82,7 @@ final class FileOpener {
     /// `beside` overrides the setting ("Ver o diff ao lado", "em nova aba").
     func openDiff(_ request: SourceControlController.DiffRequest, from source: TabDocument? = nil, beside: Bool? = nil) {
         guard let tabs = currentTabs() else { return }
+        if request.conflict { return openConflict(repo: request.repo, path: request.path, beside: beside) }
         if let existing = tabs.document(identity: DiffDocument.identity(for: request)) as? DiffDocument {
             existing.load()
             return tabs.open(existing)
@@ -89,6 +90,17 @@ final class FileOpener {
         let diff = DiffDocument(request: request)
         diff.openFile = { [weak self, weak diff] path in self?.open(path, from: diff) }
         tabs.open(diff, beside: beside ?? opensBeside(), keeping: source)
+    }
+
+    /// A file in conflict, in three columns and the result (plan 21 phase C).
+    func openConflict(repo: String, path: String, beside: Bool? = nil) {
+        guard let tabs = currentTabs() else { return }
+        if let existing = tabs.document(identity: ConflictDocument.identity(repo: repo, path: path)) {
+            return tabs.open(existing)
+        }
+        let conflict = ConflictDocument(repo: repo, path: path)
+        conflict.runCommand = { [weak self] id in self?.runCommand?(id) ?? false }
+        tabs.open(conflict, beside: beside ?? opensBeside())
     }
 
     /// The repository's history in a tab; again, its tab, read again.

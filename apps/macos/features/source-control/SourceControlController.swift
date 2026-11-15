@@ -14,6 +14,8 @@ public final class SourceControlController {
         /// A file as this commit changed it (the history), instead of the
         /// working copy.
         public let commit: String?
+        /// The file is in conflict: it opens in three columns (plan 21 phase C).
+        public var conflict = false
 
         public init(repo: String, path: String, orig: String, staged: Bool, commit: String? = nil) {
             self.repo = repo
@@ -249,7 +251,9 @@ public final class SourceControlController {
 
     func openDiff(_ entry: GitRepository.Entry, staged: Bool, beside: Bool? = nil) {
         guard let repo else { return }
-        onOpenDiff?(DiffRequest(repo: repo.root, path: entry.path, orig: entry.orig, staged: staged), beside)
+        var request = DiffRequest(repo: repo.root, path: entry.path, orig: entry.orig, staged: staged)
+        request.conflict = entry.kind == .conflict
+        onOpenDiff?(request, beside)
     }
 
     func openFile(_ entry: GitRepository.Entry, beside: Bool? = nil) {

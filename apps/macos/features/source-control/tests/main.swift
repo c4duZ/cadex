@@ -76,4 +76,5 @@ let exitCode = await Checks.run([
     }),
 ])
 let reviewExit = await Checks.run(reviewChecks)
-exit(exitCode != 0 ? exitCode : reviewExit)
+let conflictExit = await Checks.run(conflictChecks)
+exit(exitCode != 0 ? exitCode : (reviewExit != 0 ? reviewExit : conflictExit))

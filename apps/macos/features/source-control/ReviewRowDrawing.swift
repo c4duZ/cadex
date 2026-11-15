@@ -26,6 +26,8 @@ extension ReviewTextView {
             label(T("⋯ Show \(count) more lines", "⋯ Mostrar mais \(count) linhas"), at: NSPoint(x: gutterWidth + 8, y: rect.minY + 2), color: look.lineNumber)
         case .note(_, let text):
             label(text, at: NSPoint(x: gutterWidth + 8, y: rect.minY + 2), color: look.lineNumber)
+        case .image:
+            break  // its ImageDiffView sits over the row
         }
         if cursor, window?.firstResponder === self {
             look.foreground.withAlphaComponent(0.35).setStroke()

@@ -21,6 +21,10 @@ extension WindowSession {
             canOpen: { [weak self] in self?.reviewFolder() == nil ? T("No git repository here", "Nenhum repositório git aqui") : nil },
             compare: { [weak self] repo, a, b in self?.openReview(ReviewDocument.Request(repo: repo, base: a, to: b)) },
             repo: { [weak self] in self?.reviewFolder() }))
+        commands.register(ConflictCommands.all(
+            conflict: { [weak self] in self?.tabs?.activeDocument as? ConflictDocument },
+            review: { [weak self] in self?.tabs?.activeDocument as? ReviewDocument },
+            diff: { [weak self] in self?.tabs?.activeDocument as? DiffDocument }))
     }
 
     /// The repository to review: the focused terminal's, else the workspace's.
@@ -45,6 +49,7 @@ extension WindowSession {
         let git = settings.store.settings.git
         let review = ReviewDocument(request: request, context: git.reviewContextLines, wrap: git.reviewWrap, whitespace: git.reviewShowWhitespace)
         review.openFile = { [weak self, weak review] path in self?.opener?.open(path, from: review) }
+        review.onOpenConflict = { [weak self] repo, path in self?.opener?.openConflict(repo: repo, path: path) }
         review.onSetting = { [weak self] context, wrap, whitespace in
             self?.settings.store.update {
                 $0.git.reviewContextLines = context

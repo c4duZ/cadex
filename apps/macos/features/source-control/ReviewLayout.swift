@@ -9,6 +9,15 @@ struct ReviewFileDiff: Sendable {
     let patch: String
     let binary: Bool
     let tooLarge: Bool
+    /// An image's two versions (plan 21 phase C); nil for the rest.
+    var beforeData: Data?
+    var afterData: Data?
+
+    /// An image both of whose sides are small enough to compare.
+    var showsImage: Bool {
+        (beforeData != nil || afterData != nil)
+            && (beforeData?.count ?? 0) <= ImageDiffView.maxBytes && (afterData?.count ?? 0) <= ImageDiffView.maxBytes
+    }
 
     init(file: GitRepository.ReviewFile, diff: GitRepository.Diff?) {
         self.file = file
@@ -41,6 +50,8 @@ struct ReviewLayout: Equatable {
         /// Unchanged lines hidden; `region` names it for "show more".
         case fold(file: Int, region: Int, count: Int)
         case note(file: Int, text: String)
+        /// A changed image, drawn by an ImageDiffView over the row.
+        case image(file: Int)
     }
 
     struct Options: Equatable {
@@ -60,6 +71,10 @@ struct ReviewLayout: Equatable {
         for (index, diff) in files.enumerated() {
             fileStarts.append(rows.count)
             rows.append(.header(file: index))
+            if diff.showsImage {
+                rows.append(.image(file: index))
+                continue
+            }
             if let note = notes(diff) {
                 rows.append(.note(file: index, text: note))
                 continue
@@ -155,7 +170,7 @@ struct ReviewLayout: Equatable {
     /// The file a row belongs to.
     static func file(of row: Row) -> Int {
         switch row {
-        case .header(let file), .line(let file, _, _, _, _), .fold(let file, _, _), .note(let file, _): file
+        case .header(let file), .line(let file, _, _, _, _), .fold(let file, _, _), .note(let file, _), .image(let file): file
         }
     }
 }

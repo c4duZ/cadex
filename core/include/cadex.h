@@ -821,6 +821,17 @@ cadex_status cadex_git_review_diff(const char *repo, const char *base, const cha
  * apply only the lines picked (indices into the patch split on '\n'). */
 cadex_status cadex_git_review_patch(const char *repo, const char *path, bool staged, uint8_t **out, size_t *out_len);
 cadex_status cadex_git_review_apply(const char *repo, const uint8_t *patch, size_t patch_len, const size_t *lines, size_t count, bool unstage, uint8_t **message, size_t *message_len);
+/* A version's bytes, whole (images, a conflict's stages): rev a commit, ""
+ * the index, ":1" ":2" ":3" a conflict's base, ours and theirs. */
+cadex_status cadex_git_show_blob(const char *repo, const char *rev, const char *path, uint8_t **out, size_t *out_len);
+/* Conflict blocks: "start \t ours_start \t ours_end \t base_start \t base_end \t
+ * theirs_start \t theirs_end \t end" per block (0-based, ends exclusive,
+ * base -1 -1 when absent); resolve one (choice 0 ours, 1 theirs, 2 both);
+ * the first marker line left (1-based, 0 none); save and stage. */
+cadex_status cadex_git_conflict_blocks(const uint8_t *text, size_t len, uint8_t **out, size_t *out_len);
+cadex_status cadex_git_conflict_resolve(const uint8_t *text, size_t len, size_t which, uint8_t choice, uint8_t **out, size_t *out_len);
+size_t cadex_git_conflict_marker(const uint8_t *text, size_t len);
+cadex_status cadex_git_mark_resolved(const char *repo, const char *path, const uint8_t *text, size_t len, uint8_t **message, size_t *message_len);
 
 /* ---- Git history (core/features/git-history) ------------------------- */
 

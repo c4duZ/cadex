@@ -105,6 +105,16 @@ docs/adr/0021-cadex-managed-accounts.md e docs/adr/0022-terminal-daemon.md (plan
     deles", "As duas" e editar à mão no resultado; "Marcar resolvido" grava e faz o stage. Comandos
     git.accept-ours, git.accept-theirs, git.accept-both, git.mark-resolved. Marcador de conflito que
     sobrou impede o "Marcar resolvido", com aviso.
+  - Feita em 2026-11-15: no núcleo, `core/features/source-control/conflict.zig` (blocos, resolver,
+    marcador, marcar resolvido) e a leitura de blob até 21 MB; no app, a imagem na aba de diff e na
+    revisão e a aba de conflito, com os cinco comandos. Os três modos da imagem desenham por cima
+    de NSImage (ImageIO); o "deslizar" anda com o arrasto. A nossa/a deles/as duas agem no bloco do
+    cursor, senão no primeiro. Testes com um conflito de verdade e com uma imagem mudada.
+    Conferido no app de release: a imagem nos três modos na revisão, o conflito aberto pelo painel e
+    pelo clique direito na revisão, "A deles" e "Marcar resolvido" (o painel passou o arquivo para
+    Staged). Achou e corrigiu: o resultado da aba de conflito sem altura (o split dava tudo às três
+    colunas; agora 38% para elas), o conflito chamado de M na revisão durante o merge (o núcleo agora
+    lê os caminhos não resolvidos) e o aviso comprido demais.
 - **D. Comentários e envio em lote.** Feature nova `review` (apps/macos/features/review/, a
   criar, só app): pasta com `CLAUDE.md`, testes e linha na tabela do `CLAUDE.md` da raiz. Ela não
   importa o source-control: o app liga a aba de revisão aos comentários pela porta de entrada de

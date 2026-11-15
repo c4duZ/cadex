@@ -21,6 +21,9 @@ public final class DiffDocument: TabDocument {
     private var scrollObservers: [NSObjectProtocol] = []
     /// "Abrir o arquivo" for files too big for the diff.
     public var openFile: ((String) -> Void)?
+    /// A changed image shows both versions (plan 21 phase C).
+    private(set) var imageView: ImageDiffView?
+    public var imageMode: ImageDiffMode = .sideBySide { didSet { imageView?.mode = imageMode } }
 
     public init(request: SourceControlController.DiffRequest) {
         self.request = request
@@ -56,6 +59,38 @@ public final class DiffDocument: TabDocument {
         }
     }
 
+    /// git.review-image-mode on this tab.
+    public func cycleImageMode() { imageMode = imageMode.next }
+    public var showsImage: Bool { imageView != nil }
+
+    /// The image's two versions: the commit's parent and the commit, HEAD
+    /// and the index (staged), or the index and the disk.
+    private func loadImages() {
+        let repo = GitRepository(root: request.repo)
+        let request = self.request
+        repo.queue.async { [weak self] in
+            let old = request.orig.isEmpty ? request.path : request.orig
+            let before = repo.blob(rev: request.commit.map { "\($0)^1" } ?? (request.staged ? "HEAD" : ""), path: old)
+            let after = request.commit.map { repo.blob(rev: $0, path: request.path) } ?? (request.staged
+                ? repo.blob(rev: "", path: request.path)
+                : FileManager.default.contents(atPath: request.repo + "/" + request.path))
+            DispatchQueue.main.async { MainActor.assumeIsolated { self?.showImages(before, after) } }
+        }
+    }
+
+    private func showImages(_ before: Data?, _ after: Data?) {
+        if (before?.count ?? 0) > ImageDiffView.maxBytes || (after?.count ?? 0) > ImageDiffView.maxBytes {
+            return place(message(T("Image too large to compare: ", "Imagem grande demais para comparar: ")
+                                 + [ImageDiffView.describe(T("before", "antes"), before, nil), ImageDiffView.describe(T("after", "depois"), after, nil)].joined(separator: ", "),
+                                 action: T("Open File", "Abrir o arquivo")))
+        }
+        let view = ImageDiffView(before: before, after: after)
+        view.mode = imageMode
+        imageView = view
+        place(view)
+        onChange?()
+    }
+
     /// diff.toggle-layout: side by side or the patch.
     public func toggleLayout() {
         sideBySide.toggle()
@@ -65,6 +100,7 @@ public final class DiffDocument: TabDocument {
     private func show(_ diff: GitRepository.Diff?) {
         self.diff = diff
         guard let diff else { return place(message(T("Couldn't read the diff", "Não foi possível ler o diff"))) }
+        if diff.binary, ImageDiffView.isImage(request.path) { return loadImages() }
         if diff.binary { return place(message(T("Binary file, no diff", "Arquivo binário, sem diff"))) }
         if diff.tooLarge { return place(message(T("File too large to diff", "Arquivo grande demais para o diff"), action: T("Open File", "Abrir o arquivo"))) }
         sideBySide ? showSides(diff) : showPatch(diff)
@@ -177,6 +213,7 @@ public final class DiffDocument: TabDocument {
     }
 
     private func place(_ content: NSView) {
+        if content !== imageView { imageView = nil }
         scrollObservers.forEach(NotificationCenter.default.removeObserver)
         scrollObservers = []
         view.subviews.forEach { $0.removeFromSuperview() }

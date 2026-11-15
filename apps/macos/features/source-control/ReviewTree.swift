@@ -15,6 +15,7 @@ final class ReviewTree: NSObject, NSTableViewDataSource, NSTableViewDelegate {
     private(set) var files: [GitRepository.ReviewFile] = []
     var onPick: ((Int) -> Void)?
     var onOpenFile: ((Int) -> Void)?
+    var onResolve: ((Int) -> Void)?
     private var following = false
 
     override init() {
@@ -33,7 +34,11 @@ final class ReviewTree: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         table.delegate = self
         table.contextEntries = { [weak self] row in
             guard let self, files.indices.contains(row) else { return [] }
-            return [MenuEntry(T("Open File", "Abrir o arquivo"), icon: .file) { [weak self] in self?.onOpenFile?(row) }]
+            var entries = [MenuEntry(T("Open File", "Abrir o arquivo"), icon: .file) { [weak self] in self?.onOpenFile?(row) }]
+            if files[row].status == "U" {
+                entries.insert(MenuEntry(T("Resolve Conflict", "Resolver o conflito"), icon: .gitDiff) { [weak self] in self?.onResolve?(row) }, at: 0)
+            }
+            return entries
         }
         scroll.documentView = table
         scroll.hasVerticalScroller = true

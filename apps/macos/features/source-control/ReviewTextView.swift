@@ -28,6 +28,9 @@ final class ReviewTextView: NSView {
     /// Each row's top; one more at the end for the total height.
     private(set) var tops: [CGFloat] = [0]
     var colored: [String: (NSAttributedString, [NSRange])] = [:]
+    /// The images' views, by file path, laid over their rows.
+    private var imageViews: [String: ImageDiffView] = [:]
+    var imageMode: ImageDiffMode = .sideBySide { didSet { imageViews.values.forEach { $0.mode = imageMode } } }
 
     override var isFlipped: Bool { true }
     override var acceptsFirstResponder: Bool { true }
@@ -36,7 +39,11 @@ final class ReviewTextView: NSView {
     /// line when it is still there.
     func show(_ layout: ReviewLayout, files: [ReviewFileDiff]) {
         let keep = layout.rows.isEmpty ? nil : rowKey(cursor)
-        if files.count != self.files.count || zip(files, self.files).contains(where: { $0.patch != $1.patch }) { colored = [:] }
+        if files.count != self.files.count || zip(files, self.files).contains(where: { $0.patch != $1.patch }) {
+            colored = [:]
+            imageViews.values.forEach { $0.removeFromSuperview() }
+            imageViews = [:]
+        }
         self.layout = layout
         self.files = files
         if let keep, let same = layout.rows.firstIndex(where: { rowKey(for: $0) == keep }) { cursor = same } else { cursor = min(cursor, max(layout.rows.count - 1, 0)) }
@@ -58,6 +65,7 @@ final class ReviewTextView: NSView {
     func height(of row: ReviewLayout.Row) -> CGFloat {
         switch row {
         case .header: return headerHeight
+        case .image: return 360
         case .line where wrap:
             let length = ReviewLayout.text(of: row, in: files).replacingOccurrences(of: "\t", with: "    ").count
             return lineHeight * CGFloat(max(1, (length + columns - 1) / columns))
@@ -75,7 +83,24 @@ final class ReviewTextView: NSView {
         }
         let height = max(y + 40, enclosingScrollView?.contentSize.height ?? 0)
         setFrameSize(NSSize(width: enclosingScrollView?.contentSize.width ?? bounds.width, height: height))
+        placeImages()
         needsDisplay = true
+    }
+
+    /// One ImageDiffView per image row, over it; the rest go.
+    private func placeImages() {
+        var kept: [String: ImageDiffView] = [:]
+        for (index, row) in layout.rows.enumerated() {
+            guard case .image(let file) = row, files.indices.contains(file) else { continue }
+            let diff = files[file]
+            let view = imageViews[diff.file.path] ?? ImageDiffView(before: diff.beforeData, after: diff.afterData)
+            view.mode = imageMode
+            if view.superview !== self { addSubview(view) }
+            view.frame = rect(of: index).insetBy(dx: 12, dy: 6)
+            kept[diff.file.path] = view
+        }
+        for (path, view) in imageViews where kept[path] == nil { view.removeFromSuperview() }
+        imageViews = kept
     }
 
     override func resize(withOldSuperviewSize oldSize: NSSize) {
@@ -159,6 +184,7 @@ final class ReviewTextView: NSView {
         case .line(let file, let kind, let old, let new, _): "l\(files.indices.contains(file) ? files[file].file.path : ""):\(kind):\(old ?? 0):\(new ?? 0)"
         case .fold(let file, let region, _): "f\(file):\(region)"
         case .note(let file, _): "n\(file)"
+        case .image(let file): "i\(file)"
         }
     }
 }

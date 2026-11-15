@@ -90,6 +90,25 @@ pub fn show(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const
     return r.stdout;
 }
 
+/// Images up to this go to the review's image diff (docs/spec/source-control.md, Imagem).
+pub const max_blob_bytes = 21 * 1024 * 1024;
+
+/// A version's bytes, whole (an image, a conflict's stage): `rev` a commit,
+/// "" the index, or ":1" ":2" ":3" a conflict's base, ours and theirs.
+/// Empty when it is not there. Caller frees.
+pub fn blob(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const u8, rev: []const u8, path: []const u8) ![]u8 {
+    if (rev.len > 0 and rev[0] == '-') return error.InvalidPattern;
+    const spec = try std.fmt.allocPrint(gpa, "{s}:{s}", .{ rev, path });
+    defer gpa.free(spec);
+    var r = try git.run(gpa, registry, repo, &.{ "show", spec }, .{ .max_output = max_blob_bytes });
+    defer gpa.free(r.stderr);
+    if (!r.ok()) {
+        gpa.free(r.stdout);
+        return gpa.alloc(u8, 0);
+    }
+    return r.stdout;
+}
+
 pub fn readDisk(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const u8, path: []const u8) ![]u8 {
     var buf: workspace.paths.Buffer = undefined;
     const full = try fs.join(&buf, repo, path);

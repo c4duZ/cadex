@@ -52,6 +52,8 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "git.review-unstage-hunk", "git.review-stage-lines", "git.review-unstage-lines", "git.review-next-file",
             "git.review-prev-file", "git.review-next-hunk", "git.review-prev-hunk", "git.review-toggle-collapse",
             "git.review-toggle-wrap", "git.review-toggle-whitespace",
+            # Image and conflict (plan 21 phase C): the core has them, the tabs are the Mac's for now.
+            "git.review-image-mode", "git.accept-ours", "git.accept-theirs", "git.accept-both", "git.mark-resolved",
             # Tasks' worktrees (plan 19, phase D), until Windows gets the view.
             "worktrees.show", "worktrees.new-task", "worktrees.open", "worktrees.remove", "worktrees.set-status",
             "worktrees.set-comment", "worktrees.edit-setup-hooks"}

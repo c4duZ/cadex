@@ -49,6 +49,17 @@
   git.review-toggle-wrap, git.review-toggle-whitespace. As teclas de uma letra são atalhos comuns
   de comandos que ficam indisponíveis fora da revisão em foco, e a tecla segue para quem tem o foco.
   A ligação com o app (a pasta, o branch de partida da tarefa, as configurações): `../../app/ReviewWiring.swift`.
+- Imagem e conflito (plano 21, fase C): `GitConflict.swift` chama `cadex_git_show_blob` e
+  `cadex_git_conflict_*`. `ImageDiffView.swift`: as duas versões de uma imagem (NSImage, pelo
+  ImageIO) lado a lado, deslizando uma barra ou sobrepostas com a opacidade num controle, e os
+  tamanhos embaixo; acima de 20 MB só os tamanhos. Aparece na aba de diff (`DiffDocument.swift`, no
+  lugar de "arquivo binário") e na revisão, como uma linha alta com a vista por cima
+  (`ReviewTextView.swift`). `ConflictDocument.swift`: o arquivo com U em três colunas (base, a nossa
+  e a deles, os estágios `:1` `:2` `:3`) e o resultado editável embaixo, os blocos pintados; a
+  nossa, a deles e as duas agem no bloco do cursor; marcar resolvido grava e faz o stage, recusado com
+  marcador sobrando (o cursor vai à linha). Abre pelo painel (DiffRequest.conflict) e pela revisão
+  (clique direito no arquivo U). `ConflictCommands.swift`: git.accept-ours, git.accept-theirs,
+  git.accept-both, git.mark-resolved e git.review-image-mode; os botões da barra só rodam os ids.
 - Spec de comportamento em `docs/spec/source-control.md`. Status: pronto (plano 6).
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
@@ -57,6 +68,8 @@
   num repositório temporário fazendo stage e commit; a revisão (`tests/Review.swift`): as linhas e
   as regiões recolhidas, arquivo novo e binário, as linhas marcadas virando linhas do patch, 50
   arquivos com 100 mudanças cada montados rápido, e uma tarefa de verdade contra o main com j/k e o
-  stage de uma mudança.
+  stage de uma mudança; a fase C (`tests/Conflict.swift`): um conflito de verdade resolvido pela aba
+  (recusado com marcador, a deles, resolvido e no stage) e uma imagem mudada na revisão e no diff,
+  com o modo trocando.
 - No app com CADEX_BACKGROUND=1: Visualizar > Mostrar o Git, um commit feito no terminal some da
   lista sozinho, e PATH sem git mostra a mensagem de instalar.

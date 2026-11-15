@@ -29,6 +29,8 @@ public final class ReviewDocument: TabDocument {
     public var onChange: (() -> Void)?
     public private(set) var request: Request
     public var openFile: ((String) -> Void)?
+    /// A file in conflict: the app opens it in three columns (repo, path).
+    public var onOpenConflict: ((String, String) -> Void)?
     /// A setting changed from the tab (context, wrap, whitespace): the app saves it.
     public var onSetting: ((Int, Bool, Bool) -> Void)?
     let text = ReviewTextView()
@@ -102,7 +104,9 @@ public final class ReviewDocument: TabDocument {
             let base = request.base ?? repo.reviewBase(start: request.start)
             let files = base.flatMap { repo.reviewFiles(base: $0, to: request.to) } ?? []
             let diffs = files.prefix(500).map { file in
-                ReviewFileDiff(file: file, diff: base.flatMap { repo.reviewDiff(base: $0, to: request.to, path: file.path, orig: file.orig) })
+                var diff = ReviewFileDiff(file: file, diff: base.flatMap { repo.reviewDiff(base: $0, to: request.to, path: file.path, orig: file.orig) })
+                if diff.binary, ImageDiffView.isImage(file.path), let base { Self.readImages(&diff, repo: repo, base: base, to: request.to) }
+                return diff
             }
             let exists = FileManager.default.fileExists(atPath: request.repo)
             DispatchQueue.main.async { MainActor.assumeIsolated { self?.loaded(base: base, files: diffs, exists: exists) } }
@@ -133,8 +137,23 @@ public final class ReviewDocument: TabDocument {
         if again { again = false; load() }
     }
 
+    /// An image's two versions: the base's, and the disk's (or the other tip's).
+    nonisolated static func readImages(_ diff: inout ReviewFileDiff, repo: GitRepository, base: String, to: String?) {
+        let file = diff.file
+        diff.beforeData = file.isNew ? nil : repo.blob(rev: base, path: file.orig.isEmpty ? file.path : file.orig)
+        diff.afterData = file.status == "D" ? nil : (to.map { repo.blob(rev: $0, path: file.path) }
+            ?? FileManager.default.contents(atPath: repo.root + "/" + file.path))
+    }
+
+    /// git.review-image-mode: every image of the tab, together.
+    public func cycleImageMode() { text.imageMode = text.imageMode.next }
+    public var hasImages: Bool { text.layout.rows.contains { if case .image = $0 { return true } else { return false } } }
+
     func relayout() {
         let layout = ReviewLayout(files: files, options: options) { diff in
+            // Short: the note is one line (the long one was cut, 2026-11-15).
+            if diff.file.status == "U" { return T("Merge conflict · right-click it on the left: Resolve Conflict",
+                                                    "Conflito de merge · clique direito nele à esquerda: Resolver o conflito") }
             if diff.binary { return T("Binary file", "Arquivo binário") }
             if diff.tooLarge { return T("File too large to diff", "Arquivo grande demais para o diff") }
             // No hunk: a rename or a mode change, with the same content.
@@ -205,6 +224,10 @@ public final class ReviewDocument: TabDocument {
         tree.onPick = { [weak self] file in
             guard let self, text.layout.fileStarts.indices.contains(file) else { return }
             text.go(to: text.layout.fileStarts[file])
+        }
+        tree.onResolve = { [weak self] file in
+            guard let self, files.indices.contains(file) else { return }
+            onOpenConflict?(request.repo, files[file].file.path)
         }
         tree.onOpenFile = { [weak self] file in
             guard let self, files.indices.contains(file) else { return }

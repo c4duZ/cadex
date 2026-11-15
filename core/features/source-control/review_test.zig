@@ -157,3 +157,55 @@ fn lineIndex(patch: []const u8, line: []const u8) ?usize {
     while (it.next()) |l| : (i += 1) if (std.mem.eql(u8, l, line)) return i;
     return null;
 }
+
+test "a real merge conflict: the three stages, one block per side, refused with a marker, then resolved and staged" {
+    const conflict = @import("conflict.zig");
+    const diff = @import("diff.zig");
+    var dir = try TestDir.init();
+    defer dir.deinit();
+    var registry = workspace.Registry.init(testing.allocator);
+    defer registry.deinit();
+    _ = try registry.authorize(dir.path());
+    var repo_buf: [1024]u8 = undefined;
+    const repo = try repo_test.newRepo(&dir, &registry, "repo", &repo_buf);
+    try dir.writeFile("repo/c.txt", "top\nmiddle\nend\n");
+    try sh(&registry, repo, &.{ "add", "." });
+    try sh(&registry, repo, &.{ "commit", "-q", "-m", "base" });
+    try sh(&registry, repo, &.{ "switch", "-q", "-c", "other" });
+    try dir.writeFile("repo/c.txt", "top\ntheirs\nend\n");
+    try sh(&registry, repo, &.{ "commit", "-q", "-am", "theirs" });
+    try sh(&registry, repo, &.{ "switch", "-q", "main" });
+    try dir.writeFile("repo/c.txt", "top\nours\nend\n");
+    try sh(&registry, repo, &.{ "commit", "-q", "-am", "ours" });
+    var merge = try git.run(testing.allocator, &registry, repo, &.{ "merge", "-q", "other" }, .{});
+    merge.deinit(testing.allocator);
+
+    // The review calls it U, not M.
+    const head = (try review.defaultBase(testing.allocator, &registry, repo, "main")).?;
+    defer testing.allocator.free(head);
+    const listing = try review.files(testing.allocator, &registry, repo, head, null);
+    defer testing.allocator.free(listing);
+    try expectHas(listing, "U\t");
+    const base = try diff.blob(testing.allocator, &registry, repo, ":1", "c.txt");
+    defer testing.allocator.free(base);
+    try testing.expectEqualStrings("top\nmiddle\nend\n", base);
+    const theirs = try diff.blob(testing.allocator, &registry, repo, ":3", "c.txt");
+    defer testing.allocator.free(theirs);
+    try testing.expectEqualStrings("top\ntheirs\nend\n", theirs);
+
+    const disk = try diff.readDisk(testing.allocator, &registry, repo, "c.txt");
+    defer testing.allocator.free(disk);
+    const all = try conflict.blocks(testing.allocator, disk);
+    defer testing.allocator.free(all);
+    try testing.expectEqual(@as(usize, 1), all.len);
+    const refused = (try conflict.markResolved(testing.allocator, &registry, repo, "c.txt", disk)).?;
+    defer testing.allocator.free(refused);
+    try expectHas(refused, "line 2");
+    const resolved = try conflict.resolve(testing.allocator, disk, 0, .both);
+    defer testing.allocator.free(resolved);
+    try testing.expectEqualStrings("top\nours\ntheirs\nend\n", resolved);
+    try repo_test.expectNoError(try conflict.markResolved(testing.allocator, &registry, repo, "c.txt", resolved));
+    const left = try out(&registry, repo, &.{ "diff", "--name-only", "--diff-filter=U" });
+    defer testing.allocator.free(left);
+    try testing.expectEqualStrings("", left);
+}
