@@ -43,6 +43,8 @@ let exitCode = await Checks.run([
         let settings = settingsPath(command)
         expect(command == "env -u CLAUDECODE -u CLAUDE_CODE_CHILD_SESSION CLAUDE_CONFIG_DIR=\(dir)/acct claude --settings \(settings) --resume abc", command)
         expect(settings.hasPrefix(dir + "/kit/session-"), "one settings file per session")
+        let session = String(settings.dropFirst((dir + "/kit/session-").count).dropLast(5))
+        expect(kit.arguments(of: session) == ["--resume", "abc"], "the session's arguments kept for a hibernated agent")
         let file = json(settings)
         let line = file["statusLine"] as? [String: Any]
         expect(line?["command"] as? String == "/App/Cadex.app/Contents/Helpers/cadex statusline")
@@ -51,7 +53,7 @@ let exitCode = await Checks.run([
         let token = (file["env"] as? [String: String])?["CADEX_SESSION_TOKEN"] ?? ""
         expect(token.count == 64 && !command.contains(token), "a 32-byte token, kept out of the typed command")
         expect((file["env"] as? [String: String])?["CLAUDE_CODE_FORCE_SYNC_OUTPUT"] == "1", "synchronized output on: the terminal honors DEC 2026")
-        let tokenFiles = (try? fm.contentsOfDirectory(atPath: dir + "/kit/tokens")) ?? []
+        let tokenFiles = ((try? fm.contentsOfDirectory(atPath: dir + "/kit/tokens")) ?? []).filter { $0.hasSuffix(".token") }
         expect(tokenFiles.count == 1 && (try? String(contentsOfFile: dir + "/kit/tokens/" + tokenFiles[0], encoding: .utf8)) == token)
         let mode = (try? fm.attributesOfItem(atPath: settings)[.posixPermissions] as? Int) ?? 0
         expect(mode == 0o600, "the settings carry the token: 0600")
