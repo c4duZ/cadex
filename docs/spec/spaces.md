@@ -19,8 +19,10 @@ que estavam, inclusive depois de fechar ou reabrir o app.
 - Os programas dos spaces escondidos continuam rodando; só não desenham.
 - Ao reabrir o app, cada space volta com as abas na mesma ordem, os nomes dados às abas, as
   divisões com as proporções, a pasta de cada painel, os arquivos e o histórico do git abertos (em
-  aba própria ou num painel ao lado de um terminal), o painel com foco, e o space e a aba que estavam ativos. O conteúdo antigo do terminal não volta:
-  cada painel começa um shell novo na pasta salva.
+  aba própria ou num painel ao lado de um terminal), o painel com foco, e o space e a aba que estavam ativos. Com terminal.keepSessions desligado (o
+  padrão), o conteúdo antigo do terminal não volta: cada painel começa um shell novo na pasta salva.
+  Ligado (plano 19), cada painel religa ao shell que o daemon do terminal manteve, com a tela e o
+  scrollback; depois de reiniciar o Mac, volta o scrollback salvo, num shell novo.
 - O estado é salvo sozinho, logo depois de cada mudança (abrir, fechar, dividir, mudar de pasta,
   trocar de space), num arquivo em Application Support/Cadex. Fechar o app de surpresa perde no
   máximo o último meio segundo.

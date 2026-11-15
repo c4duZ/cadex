@@ -164,6 +164,41 @@ continua uma conversa em outra conta, sem nunca tocar em token
   (ligada) desliga tudo: nada indexado nem vigiado. Linha que não lê (versão nova do Claude Code) é
   pulada e contada: "Some lines could not be read (N)" embaixo da busca.
 
+### Estado exato (plano 19)
+- Numa aba do Cadex, o estado de uma sessão vem do próprio Claude Code pelo OSC 7501 (`docs/adr/0022-terminal-daemon.md`):
+  trabalhando (com a frase do que faz, "Creating empty file…"), esperando permissão (com o pedido,
+  "approve Bash: touch x"), pergunta (com o texto e as opções), terminou, parado. Vale para um
+  `claude` digitado à mão. Chave ou estado desconhecido é ignorado; frase ausente não quebra.
+- Nas sessões que o Cadex abre, os hooks do kit (SessionStart, Stop, Notification,
+  PermissionRequest, SessionEnd, CwdChanged) dão o que o 7501 não traz: o id da sessão depois de
+  `/clear` e `--resume`, o arquivo da conversa e a pasta. Vão pelo `cadex hook` ao socket do app,
+  com o token da sessão; o hook nunca espera o app (200 ms), salvo a permissão (ADR 0023).
+- Sessão em outro terminal continua pelo registro dela e pelo fim do log numa parada.
+- agents.stateHooks (ligada) desliga os hooks do kit; o 7501 continua.
+
+### Atenção (plano 19)
+- Um sininho no topo da barra lateral conta os pedidos não vistos de todas as sessões (permissão,
+  pergunta, terminou sem você ver); o mesmo número no ícone do Dock (agents.dockBadge). Ir ao
+  terminal do agente marca como visto; "Mark as Unread" (agents.mark-unread) volta.
+- Feed (agents.show-feed): a linha do tempo de terminou, pediu permissão, perguntou e tarefa criada,
+  de todas as sessões, com filtro por tipo e projeto; página da barra lateral.
+- Silenciar as notificações de uma máquina (agents.mutedMachines; este Mac agora, as remotas no
+  plano 23). agents.attention desliga o sininho, o feed e o número.
+
+### Quadro "Precisa de você" (plano 19)
+- agents.show-attention mostra um cartão por pedido aberto. Permissão: a ferramenta e o comando ou o
+  arquivo, com Permitir e Negar (agents.approve, agents.deny), só por clique, com o diálogo da TUI
+  aberto: quem responder primeiro vence e o cartão some (`docs/adr/0023-answer-agent-permissions.md`).
+  Pergunta e plano: o texto e "Go to Terminal"; não são respondidos pelo Cadex.
+- Sessão aberta fora do Cadex mostra o cartão sem Permitir e Negar (não tem o hook do kit).
+
+### Hibernação (plano 19)
+- Sessão que terminou, sem foco e parada há agents.hibernateAfterMinutes (padrão 30; 0 desliga) é
+  encerrada; o Cadex guarda o id, a pasta, a conta, o comando e o token. A aba fica com "hibernating".
+- Abrir a aba ou a worktree relança na mesma pasta e conta `claude --resume <id>`, pelo kit e com o
+  mesmo token, sem prompt. agents.hibernate hiberna na hora.
+- Agente que saiu mostra "Restart" (agents.restart), que relança igual.
+
 ### Notificações
 - Quando uma sessão que trabalhava passa a esperar você, o Cadex manda uma notificação do sistema,
   escrita como as dos terminais e ferramentas de agente: o tipo no título, com o nome do agente
@@ -287,3 +322,14 @@ continua uma conversa em outra conta, sem nunca tocar em token
       que a conta original carregaria, 2026-11-14).
 - [x] Um transcript crescendo só tem o trecho novo lido; formato desconhecido é pulado sem travar
       (testes; nas contas do dono, nenhuma linha ilegível).
+- [ ] Numa aba aberta pelo Cadex, pedir um `rm` mostra "esperando permissão" em até 1 s e o título
+      da aba muda; um `claude` digitado à mão mostra trabalhando, permissão e pergunta (com o texto)
+      só pelo OSC 7501.
+- [ ] `/clear` e `--resume` mantêm o id certo; com o app fechado no meio, o próximo hook acha o app
+      reaberto e o token ainda vale; com o app fechado, o Claude não espera o hook.
+- [ ] Um processo sem token, ou de outro usuário, é recusado no socket do app.
+- [ ] Permitir no quadro faz o comando rodar e fecha o diálogo da TUI; responder na TUI tira o
+      cartão; nada é mandado ao agente sem clique.
+- [ ] O número do Dock some ao visitar o terminal; "Mark as Unread" o traz de volta.
+- [ ] Depois do tempo, a sessão hibernada some do `ps`; abrir a aba retoma a conversa (a
+      palavra-código lembrada).

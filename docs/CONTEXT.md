@@ -62,6 +62,19 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Comando** (`command`): uma ação do app, com id, título e a função que executa. Menus, botões e
   atalhos só disparam comandos.
 
+- **Tarefa** (`task`): um trabalho num repositório, com worktree, branch e agente próprios, começado
+  por New Task. **Worktree de tarefa** (`task worktree`): a worktree do git de uma tarefa, em
+  `<repo>.worktrees/`. **Hook de preparo** (`setup hook`): comando que roda numa worktree nova
+  (`pnpm install`). **Status da worktree** (`worktree status`): a fazer, em andamento, em revisão ou
+  pronto, com um comentário curto.
+- **Socket do app** (`app.sock`): por onde as sessões falam com o app (hooks, status line, depois a
+  CLI e o MCP). **Token da sessão** (`session token`): a senha de uma sessão aberta pelo Cadex, sem a
+  qual o socket recusa. **Daemon do terminal** (`terminal daemon`): o processo à parte que guarda
+  os shells quando terminal.keepSessions está ligado (`docs/adr/0022-terminal-daemon.md`).
+- **Hibernar** (`hibernate`): encerrar uma sessão parada e relançá-la com `--resume` quando voltam a
+  ela. **Quadro de atenção** (`attention board`): os pedidos abertos dos agentes num lugar só, com
+  Permitir e Negar (`docs/adr/0023-answer-agent-permissions.md`).
+
 ## Terminal
 - **Sessão** (`session`): um shell rodando num PTY, ligado a uma folha.
 - **PTY**: o pseudo-terminal do sistema por onde o shell lê e escreve.

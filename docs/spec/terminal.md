@@ -123,8 +123,21 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
 ### Fechar e restaurar
 - Fechar painel, aba ou janela com um processo rodando em primeiro plano (por exemplo, um agente ou
   um servidor) pede confirmação. A confirmação pode ser desligada nas configurações.
-- Ao reabrir o app, os spaces voltam com as abas, as divisões e a pasta de cada painel. O conteúdo
-  antigo da tela não volta: cada painel começa um shell novo.
+- Ao reabrir o app, os spaces voltam com as abas, as divisões e a pasta de cada painel. Com
+  terminal.keepSessions desligado (o padrão), o conteúdo antigo da tela não volta: cada painel
+  começa um shell novo.
+- Com terminal.keepSessions ligado (plano 19, `docs/adr/0022-terminal-daemon.md`), um processo à
+  parte, o daemon do terminal, é dono dos shells: fechar, travar ou atualizar o app não mata o que
+  roda; ao reabrir, cada painel religa ao seu shell e a tela e o scrollback voltam. Depois de
+  reiniciar o Mac, volta o scrollback salvo de cada painel, num shell novo (processo não volta). Sem
+  nenhum terminal aberto, o daemon sai sozinho. Desligado, nenhum daemon roda.
+
+### Agentes no terminal (plano 19)
+- O terminal responde à pergunta `ESC]7501;?` do Claude Code com `ESC]7501;?;1` e passa a receber o
+  estado da sessão (`state`, `kind`, `msg` em base64), que entrega ao app por terminal; chave
+  desconhecida é ignorada.
+- O desenho respeita a saída sincronizada (modo DEC 2026): desenha só no fim de cada bloco. Com
+  isso o kit da sessão liga `CLAUDE_CODE_FORCE_SYNC_OUTPUT=1`. `TERM_PROGRAM` continua `Cadex`.
 
 - Leitura (plano 15, fase C):
   - **Contraste mínimo** (terminal.minimumContrast, de 1 a 21; 1 desliga): texto que um programa

@@ -14,6 +14,10 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   Muda quando a pasta muda.
 - Renomear (comando "Renomear aba", ou duplo clique no título) dá um nome que fica mesmo mudando de
   pasta. Renomear para vazio volta ao nome da pasta.
+- Aba com um agente do Claude Code (plano 19): o sinal de estado antes do título (trabalhando,
+  esperando você, terminou, terminou sem você ver), o nome da conversa no lugar da pasta e, ao
+  passar o ponteiro, a frase do que ele faz agora. O nome dado à mão continua vencendo; o sinal
+  aparece mesmo assim.
 - ⌘1 a ⌘9 vão para a aba daquela posição. Ctrl+Tab e Ctrl+⇧+Tab alternam pela ordem de uso
   (Ctrl+Tab volta para a aba usada antes da atual).
 - Arrastar uma aba na barra muda a posição dela.
