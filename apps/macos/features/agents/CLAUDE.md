@@ -4,16 +4,23 @@
 - Ver os agentes de código rodando em todas as contas do Claude Code deste Mac: as sessões vivas por
   projeto, o estado (trabalhando, esperando você), os subagentes, e ir ao terminal de cada uma
   (plano 17, fase C; `../../../../docs/spec/agents.md`).
+- O uso de cada conta sem token, contas criadas e geridas pelo Cadex com a configuração do ~/.claude
+  por link, e o histórico de todas as conversas, com retomar e continuar em outra conta (plano 18,
+  `../../../../docs/adr/0021-cadex-managed-accounts.md`).
 
 ## O que eu não quero
 - Mandar prompt ou falar com agente, nem mexer nos arquivos do Claude Code: só ler
-  (`../../../../docs/adr/0019-agents-observe-only.md`). A exceção: abrir o agente de uma conta, que é
-  digitar o comando dele num terminal, com o kit da sessão
-  (`../../../../docs/adr/0021-cadex-managed-accounts.md`).
+  (`../../../../docs/adr/0019-agents-observe-only.md`). O que o Cadex inicia é digitar um comando
+  num terminal, sem prompt e com o kit da sessão (ADR 0021): abrir o agente de uma conta, retomar
+  uma conversa e continuá-la em outra conta. O que ele escreve fica nas pastas que ele cria (contas
+  gerenciadas, o kit, o uso, o índice); nas contas, só os links que o dono pede, e o que sai vai para
+  a lixeira, nunca apagado.
 - Ler, guardar ou repassar token, login ou credencial, ou chamar o serviço de uso: nunca (ADR 0021).
 - Ler ou vigiar alguma coisa com ninguém olhando, ou com agents.sessions desligado.
-- Ler os logs das conversas: só o registro de cada sessão, as descrições dos subagentes, a data
-  dos logs deles e, num clique num subagente, a conversa dele enquanto a aba está aberta.
+- Ler os logs das conversas além do necessário: o registro de cada sessão, as descrições dos
+  subagentes, o fim do log numa parada, a conversa de um subagente enquanto a aba dela está aberta e,
+  para o histórico, só o que cada conversa cresceu, com a página aberta, sem nunca guardar resultado
+  de ferramenta.
 - Travar ou mostrar erro porque uma versão nova do Claude Code mudou um arquivo: pula e conta.
 
 ## Como eu quero

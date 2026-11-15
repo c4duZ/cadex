@@ -207,6 +207,7 @@ abaixo. O pico de memória ao abrir foi 111 MB.
                     │  git-history · editor (tree-sitter)  │
                     │  markdown (índice de links)          │
                     │  workspace                           │
+                    │  agent-tools (o programa `cadex`)    │
                     └──────────────────▲───────────────────┘
                                        │ API C
                ┌───────────────────────┴───────────────────────┐
@@ -216,11 +217,14 @@ abaixo. O pico de memória ao abrir foi 111 MB.
   │   AppKit · Metal        │                    │   Win32 · Direct3D 11    │
   │   PDFKit · AVKit ·      │                    │   Direct2D · DirectWrite │
   │   ImageIO · Quick Look  │                    │   WIC · WebView2         │
+  │   SQLite (histórico)    │                    │                          │
   └─────────────────────────┘                    └──────────────────────────┘
 ```
 
 - **Núcleo:** toda a lógica que não depende de plataforma, escrita uma vez em Zig. O modelo do
-  terminal é a [libghostty-vt](https://github.com/ghostty-org/ghostty).
+  terminal é a [libghostty-vt](https://github.com/ghostty-org/ghostty). Ele também gera o `cadex`,
+  um programa sem interface que as sessões de agente abertas pelo Cadex rodam (hoje, a status line
+  que grava o uso de cada conta).
 - **App:** uma interface nativa e fina por sistema. Desenha, recebe entrada e chama o núcleo.
   Previews de mídia usam os frameworks do próprio sistema, sem peso extra.
 
