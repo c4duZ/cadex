@@ -88,7 +88,7 @@
   medir lentidão.
 
 - `TerminalAgent.swift` e `TerminalAgentStatus.swift` (plano 19): o que o agente disse ao terminal
-  pelo OSC 7501 (`TerminalSession.agentStatus`), só enquanto um programa roda em primeiro plano, e
+  pelo OSC 7501 (TerminalSession.agentStatus), só enquanto um programa roda em primeiro plano, e
   "terminou sem você ver" até o terminal ganhar o foco.
 
 ## Como validar
