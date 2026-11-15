@@ -37,9 +37,11 @@
   os 200 primeiros + "-" + hash em base 36), com busca pelo prefixo se o hash não bater. Uma regra
   só para subagentes, conversa do subagente e o fim do log (`AgentStop`); antes só "/" e "." viravam
   "-" e pastas com espaço, "_" ou acento perdiam subagentes e o motivo da parada (2026-11-14).
-- `AgentBackground.swift`: as sessões em segundo plano (agent view, `claude --bg`) abertas
+- `AgentBackground.swift`: as sessões em segundo plano (agent view, `claude --bg`) que rodam
   (trabalhando ou "blocked", que espera você), pelo `claude agents --json` da conta, a interface que
-  a doc do Claude Code suporta (a pasta jobs/ é interna). Custa 0,15 s de CPU por chamada: roda só
+  a doc do Claude Code suporta (a pasta jobs/ é interna), filtradas por `liveJobs` (o job entre os
+  `workers` do daemon/roster.json com processo vivo; os estacionados ficam fora, 2026-11-14) e uma
+  por job (`distinct`, a conta que tem a conversa). Custa 0,15 s de CPU por chamada: roda só
   quando a pasta jobs/ de uma conta muda, no máximo a cada 5 s, fora da linha principal; sem o
   binário `claude` (~/.local/bin, /opt/homebrew/bin, /usr/local/bin), nada. O ambiente perde
   CLAUDECODE e CLAUDE_CODE_*.

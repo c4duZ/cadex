@@ -158,7 +158,14 @@ public final class AgentsController {
         backgroundPending = true
         let accounts = self.accounts
         DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + max(0, wait)) {
-            let found = accounts.flatMap { AgentBackground.read($0, claude: claude) }
+            // Only jobs that run now: a parked one is no open session (the
+            // owner saw 110-day-old ones in folders long gone, 2026-11-14).
+            // An account with none is not even asked. One session per job.
+            let found = AgentBackground.distinct(accounts.flatMap { account -> [AgentSession] in
+                let live = AgentBackground.liveJobs(account)
+                guard !live.isEmpty else { return [] }
+                return AgentBackground.read(account, claude: claude).filter { live.contains($0.job ?? "") }
+            })
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
                     let controller = AgentsController.shared

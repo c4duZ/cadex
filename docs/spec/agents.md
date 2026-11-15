@@ -31,13 +31,16 @@ continua uma conversa em outra conta, sem nunca tocar em token
   ao terminal da sessão dele (o terminal certo é o que tem o processo da sessão na frente). Sessão de fora do
   Cadex (outro terminal) mostra "outside Cadex" e o duplo clique mostra a pasta dela na árvore do
   explorer, quando ela está no workspace.
-- Sessões em segundo plano (agent view, `claude --bg`) abertas também aparecem, no grupo do projeto
-  delas, com "in the background" na linha de baixo: trabalhando, ou esperando você quando o Claude
-  Code diz "blocked" (a dica mostra o que espera, como "permission prompt"). As terminadas não
-  aparecem. Duplo clique abre uma aba na pasta dela com `claude attach <job>` (com a conta), onde a
-  permissão ou a pergunta é respondida. Vêm do `claude agents --json`, lido só quando a pasta jobs/
-  da conta muda, no máximo a cada 5 s; sem o `claude` instalado, não aparecem (2026-11-14: havia
-  sessões esperando há dias que a página não mostrava).
+- Sessões em segundo plano (agent view, `claude --bg`) aparecem só enquanto rodam: o job tem um
+  processo vivo entre os `workers` do daemon da conta. No grupo do projeto delas, com "in the
+  background" na linha de baixo: trabalhando, ou esperando você quando o Claude Code diz "blocked"
+  (a dica mostra o que espera, como "permission prompt"). Duplo clique abre uma aba na pasta dela
+  com `claude attach <job>` (com a conta), onde a permissão ou a pergunta é respondida. As
+  terminadas e as estacionadas (sem processo; o `claude agents --json` lista algumas "blocked" há
+  meses, em pastas que nem existem mais, o dono em 2026-11-14) não aparecem. O mesmo job listado em
+  várias contas aparece uma vez, na conta que tem a conversa dele. O `claude agents --json` só roda
+  para a conta com algum job vivo, quando a pasta jobs/ muda, no máximo a cada 5 s; sem o `claude`
+  instalado, não aparecem.
 - As linhas acendem ao passar o ponteiro (0,12 s) e escurecem ao apertar: o clique responde antes
   de a ação acontecer. Antes o ponto ficava acima do nome e nada se mexia (o dono achou travado,
   2026-10-21); o clique indo ao terminal foi testado e desfeito no mesmo dia.

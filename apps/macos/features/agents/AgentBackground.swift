@@ -31,6 +31,41 @@ public enum AgentBackground {
         }
     }
 
+    /// The account's background jobs that run now: those its daemon's
+    /// roster (`daemon/roster.json`, Claude Code's own, read defensively)
+    /// lists among `workers` with a live process. `claude agents` also lists
+    /// parked jobs as "blocked", some for months, in folders long gone; they
+    /// have no worker, even with the daemon up (2026-11-14, Claude Code
+    /// 2.1.325: a fresh `claude --bg` was in workers, the parked ones not).
+    public static func liveJobs(_ account: AgentAccount, alive: (Int32) -> Bool = { kill($0, 0) == 0 }) -> Set<String> {
+        guard let roster = json(account.dir + "/daemon/roster.json"),
+              let workers = roster["workers"] as? [String: Any] else { return [] }
+        return Set(workers.compactMap { job, value in
+            guard let pid = ((value as? [String: Any])?["pid"] as? NSNumber)?.int32Value, pid > 0, alive(pid) else { return nil }
+            return job
+        })
+    }
+
+    /// One session per job: `claude agents` lists the same job under several
+    /// accounts (the owner's ~/.claude, ~/.claude-bhband and ~/.claude-diogo
+    /// all had "Subir docker"); the one whose folder holds its conversation
+    /// keeps it, else the first.
+    public static func distinct(_ sessions: [AgentSession]) -> [AgentSession] {
+        var out: [AgentSession] = []
+        for session in sessions {
+            if let index = out.firstIndex(where: { $0.job == session.job }) {
+                if !owns(out[index]), owns(session) { out[index] = session }
+            } else {
+                out.append(session)
+            }
+        }
+        return out
+    }
+
+    static func owns(_ session: AgentSession) -> Bool {
+        FileManager.default.fileExists(atPath: "\(AgentProjectFolder.path(for: session.cwd, in: session.account))/\(session.id).jsonl")
+    }
+
     /// The `claude` binary: the places its installers put it.
     public static func claudePath(home: String = NSHomeDirectory()) -> String? {
         [home + "/.local/bin/claude", "/opt/homebrew/bin/claude", "/usr/local/bin/claude"]

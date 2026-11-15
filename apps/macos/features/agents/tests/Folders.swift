@@ -7,6 +7,27 @@ import Foundation
 // to keep each file under 500 lines.
 
 let folderChecks: [(name: String, body: Checks.Body)] = [
+    ("a background session is open only while its job has a live worker; one session per job", {
+        let home = NSTemporaryDirectory() + "cadex-bg-\(UUID().uuidString)"
+        defer { try? fm.removeItem(atPath: home) }
+        let a = AgentAccount(dir: home + "/.claude-a", name: "A", isDefault: false)
+        // The roster as Claude Code 2.1.325 wrote it with one `claude --bg` running (2026-11-14).
+        write(a.dir + "/daemon/roster.json", #"{"proto":1,"supervisorPid":27628,"workers":{"2e7947f0":{"pid":27695,"sessionId":"s"},"dead0000":{"pid":4}}}"#)
+        expect(AgentBackground.liveJobs(a, alive: { $0 == 27695 }) == ["2e7947f0"], "a worker whose process is gone is not open")
+        write(a.dir + "/daemon/roster.json", #"{"proto":1,"supervisorPid":14899,"workers":{}}"#)
+        expect(AgentBackground.liveJobs(a, alive: { _ in true }).isEmpty, "no workers: every job is parked")
+        expect(AgentBackground.liveJobs(AgentAccount(dir: home + "/none", name: "N", isDefault: false)).isEmpty, "no roster: no daemon")
+        let b = AgentAccount(dir: home + "/.claude-b", name: "B", isDefault: false)
+        let cwd = home + "/w"
+        write(AgentProjectFolder.path(for: cwd, in: b) + "/s1.jsonl", "")
+        func job(_ account: AgentAccount) -> AgentSession {
+            var s = AgentSession(account: account, pid: 0, id: "s1", name: "x", cwd: cwd, status: .waiting, since: Date())
+            s.job = "j1"
+            return s
+        }
+        let one = AgentBackground.distinct([job(a), job(b)])
+        expect(one.count == 1 && one[0].account.dir == b.dir, "the account holding its conversation keeps it")
+    }),
     ("project folders: every non-alphanumeric is a dash; past 200, the prefix and a hash", {
         expect(AgentProjectFolder.name(for: "/x/a b_c.d-é") == "-x-a-b-c-d--", AgentProjectFolder.name(for: "/x/a b_c.d-é"))
         // The 282-character path of the test loop and the folder Claude Code made for it (2026-11-14).
