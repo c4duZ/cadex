@@ -1,5 +1,6 @@
 import AppKit
 import Editor
+import Strings
 
 /// The review's files stacked in one view (docs/spec/review.md): only the
 /// rows on screen are drawn, so 5 thousand lines in 50 files scroll like
@@ -135,6 +136,10 @@ final class ReviewTextView: NSView {
         super.updateTrackingAreas()
         trackingAreas.forEach(removeTrackingArea)
         addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect], owner: self))
+        // Who wrote a line, asked when the tip shows: a toolTip set on hover
+        // never showed with the pointer already inside (seen in the app, 2026-11-15).
+        removeAllToolTips()
+        addToolTip(bounds, owner: self, userData: nil)
     }
 
     override func mouseMoved(with event: NSEvent) {
@@ -143,12 +148,7 @@ final class ReviewTextView: NSView {
         guard index != hovered else { return }
         for old in [hovered, index].compactMap({ $0 }) { setNeedsDisplay(rect(of: old)) }
         hovered = index
-        // Who wrote it, on the pointer.
-        if let index, case .line(let file, let kind, _, let new?, _) = layout.rows[index], kind != .removed, let session = authorMarks[file]?[new] {
-            toolTip = "Written by the agent · session \(session.prefix(8))"
-        } else {
-            toolTip = nil
-        }
+
     }
 
     override func mouseExited(with event: NSEvent) {
@@ -246,6 +246,16 @@ final class ReviewTextView: NSView {
         case .note(let file, _): "n\(file)"
         case .image(let file): "i\(file)"
         case .annotation(_, let index): "a\(layout.annotations.indices.contains(index) ? layout.annotations[index].id : "")"
+        }
+    }
+}
+
+extension ReviewTextView: NSViewToolTipOwner {
+    nonisolated func view(_ view: NSView, stringForToolTip tag: NSView.ToolTipTag, point: NSPoint, userData data: UnsafeMutableRawPointer?) -> String {
+        MainActor.assumeIsolated {
+            guard let index = row(at: point.y), case .line(let file, let kind, _, let new?, _) = layout.rows[index], kind != .removed,
+                  let session = authorMarks[file]?[new] else { return "" }
+            return T("Written by the agent · session \(session.prefix(8))", "Escrita pelo agente · sessão \(session.prefix(8))")
         }
     }
 }

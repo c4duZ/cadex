@@ -77,6 +77,18 @@ let reviewChecks: [(name: String, body: Checks.Body)] = [
         expect(selection == ReviewLineSelection(path: "a.txt", old: false, start: 10, end: 10, lines: ["L10"], before: ["l7", "l8", "l9"], after: ["l11", "l12", "l13"]),
                "\(String(describing: selection))")
     }),
+    ("the agent's lines: the tip names the session on its lines, nothing on the owner's", {
+        let files = [reviewFile("a.txt", changes: [10], total: 20)]
+        let review = ReviewDocument(request: .init(repo: "/nonexistent", base: "HEAD"))
+        review.files = files
+        review.relayout()
+        review.lineMarks = ["a.txt": [10: "4a5adbc3-dbfb"]]
+        guard let agent = review.text.layout.rows.firstIndex(of: .line(file: 0, kind: .added, old: nil, new: 10, change: 0)),
+              let owner = review.text.layout.rows.firstIndex(of: .line(file: 0, kind: .context, old: 11, new: 11, change: nil)) else { return expect(false, "rows") }
+        let tip = { (row: Int) in review.text.view(review.text, stringForToolTip: 0, point: NSPoint(x: 50, y: review.text.rect(of: row).midY), userData: nil) }
+        expect(tip(agent).contains("4a5adbc3"), tip(agent))
+        expect(tip(owner).isEmpty, tip(owner))
+    }),
     ("a new file is all added lines; a binary says so", {
         let new = GitRepository.ReviewFile(status: "?", added: 2, removed: 0, path: "n.txt", orig: "")
         let diff = ReviewFileDiff(file: new, diff: GitRepository.Diff(before: "", after: "x\ny\n", patch: "@@ -0,0 +1,2 @@\n+x\n+y\n", binary: false, tooLarge: false))
