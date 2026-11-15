@@ -324,7 +324,9 @@ continua uma conversa em outra conta, sem nunca tocar em token
       (testes; nas contas do dono, nenhuma linha ilegível).
 - [ ] Numa aba aberta pelo Cadex, pedir um `rm` mostra "esperando permissão" em até 1 s e o título
       da aba muda; um `claude` digitado à mão mostra trabalhando, permissão e pergunta (com o texto)
-      só pelo OSC 7501.
+      só pelo OSC 7501. Conferido em 2026-11-15 pelo terminal do núcleo com o `claude` real:
+      idle, trabalhando com a frase e permissão com "approve Bash: …"; o título da aba por teste.
+      Falta ver na aba do app e o estado de pergunta.
 - [x] `/clear` e `--resume` mantêm o id certo; com o app fechado no meio, o próximo hook acha o app
       reaberto e o token ainda vale; com o app fechado, o Claude não espera o hook (o `claude` real,
       2026-11-15: SessionStart, /clear com o id novo, o socket fora e de volta, /exit).
