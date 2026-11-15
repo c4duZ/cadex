@@ -48,7 +48,9 @@ passa a receber `state=idle|working|blocked|done`, `kind=permission|question` e 
 - **Desligado por padrão** (terminal.keepSessions, o dono em 2026-11-14): desligado, nenhum daemon
   roda e o terminal é o de hoje. Liga só depois de passar no `make perf`.
 - **`TERM_PROGRAM` continua `Cadex`.** O renderizador passa a respeitar o modo DEC 2026 e só então
-  o kit liga `CLAUDE_CODE_FORCE_SYNC_OUTPUT=1`; a notificação vem por `preferredNotifChannel`
+  o kit liga `CLAUDE_CODE_FORCE_SYNC_OUTPUT=1`; a notificação vem por `preferredNotifChannel` (revisto pelo dono em 2026-11-15: o terminal mostra
+  as notificações OSC 777 e OSC 9 de qualquer programa, e o kit deixa o `preferredNotifChannel`
+  desligado, porque as paradas do agente já notificam pelos hooks e pelo 7501)
   (teste 24 de 2026-11-14). Kitty keyboard e OSC 9;4 só voltariam fingindo ser outro terminal:
   trocar o `TERM_PROGRAM` pede outra ADR, e a decisão é do dono.
 

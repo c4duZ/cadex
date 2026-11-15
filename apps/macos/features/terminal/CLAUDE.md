@@ -87,6 +87,9 @@
   Ctrl+C sob saída contínua em menos de 0,2 s; o redesenho por linha suja ficou para quando
   medir lentidão.
 
+- `TerminalNotify.swift`: a notificação que um programa pediu (OSC 777, OSC 9) sai como o aviso
+  TerminalView.programDidNotify; `isLookedAt` diz se você olha o terminal. O app posta
+  (`../../app/ProgramNotifications.swift`).
 - `TerminalAgent.swift` e `TerminalAgentStatus.swift` (plano 19): o que o agente disse ao terminal
   pelo OSC 7501 (TerminalSession.agentStatus), só enquanto um programa roda em primeiro plano, e
   "terminou sem você ver" até o terminal ganhar o foco.

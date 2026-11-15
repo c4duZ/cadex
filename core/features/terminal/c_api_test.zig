@@ -22,6 +22,7 @@ fn options() api.Options {
         .history_lines = 0,
         .on_local_url = null,
         .on_agent_status = null,
+        .on_notification = null,
     };
 }
 

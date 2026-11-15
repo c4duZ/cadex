@@ -80,6 +80,7 @@ public final class TerminalView: NSView {
             if let handler = self.onShellExit { handler() } else { self.window?.close() }
         }
         session?.onLocalURL = { [weak self] url in self?.offerPreview(url) }
+        session?.onNotification = { [weak self] title, body in self?.programNotified(title: title, body: body) }
         connectSignals()
         followAppearance()
         followPreferences()

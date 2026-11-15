@@ -32,6 +32,8 @@ public final class AgentNotifier: NSObject {
     public var isLooking: (AgentSession) -> Bool = { _ in false }
     /// A click on a notification: go to the session, by its id.
     public var onOpen: ((String) -> Void)?
+    /// A click on a program's notification (posted by the app): its terminal's key.
+    public var onOpenTerminal: ((String) -> Void)?
 
     /// Each stop that notifies, before it is posted (the tests' window in).
     var didStop: ((AgentSession, AgentStop) -> Void)?
@@ -51,7 +53,7 @@ public final class AgentNotifier: NSObject {
 
     /// Notifications only from an app bundle: outside one (`swift run`) the
     /// system's center has no app to post for and stops the process.
-    static var canPost: Bool { Bundle.main.bundleURL.pathExtension == "app" && Bundle.main.bundleIdentifier != nil }
+    public static var canPost: Bool { Bundle.main.bundleURL.pathExtension == "app" && Bundle.main.bundleIdentifier != nil }
 
     private func update() {
         if kinds.any, token == nil {
@@ -191,9 +193,14 @@ extension AgentNotifier: UNUserNotificationCenterDelegate {
 
     public nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
                                                    withCompletionHandler completionHandler: @escaping () -> Void) {
-        let id = response.notification.request.content.userInfo["session"] as? String
+        let info = response.notification.request.content.userInfo
+        let id = info["session"] as? String
+        let terminal = info["terminal"] as? String
         DispatchQueue.main.async {
-            MainActor.assumeIsolated { if let id { AgentNotifier.shared.onOpen?(id) } }
+            MainActor.assumeIsolated {
+                if let id { AgentNotifier.shared.onOpen?(id) }
+                if let terminal { AgentNotifier.shared.onOpenTerminal?(terminal) }
+            }
         }
         completionHandler()
     }

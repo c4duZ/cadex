@@ -75,7 +75,8 @@ settings, command-palette, tabs, terminal · Decisões: `docs/adr/0019-agents-ob
   - MCPs do usuário: o kit lê (só leitura) os `mcpServers` da conta padrão e os passa pelo
     `--mcp-config`; nada é escrito no .claude.json de conta nenhuma.
   - O kit também exporta `CLAUDE_CODE_FORCE_SYNC_OUTPUT=1` (só quando o terminal do Cadex respeitar
-    o modo DEC 2026, plano 19 E) e põe `preferredNotifChannel` no `--settings`: testado em
+    o modo DEC 2026, plano 19 E; ligado em 2026-11-15) e põe `preferredNotifChannel` no `--settings`
+    (este não: o dono, 2026-11-15, os avisos de agente já vêm pelos hooks): testado em
     2026-11-14 (2.1.325), com TERM_PROGRAM=Cadex isso devolve a saída sincronizada e a notificação
     OSC 777 sem fingir ser Ghostty. E traz permissions.allow para as ferramentas seguras do Cadex
     (`mcp__cadex__*` de leitura, plano 20); as que agem continuam perguntando.

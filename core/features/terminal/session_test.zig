@@ -164,3 +164,37 @@ test "a synchronized update (DEC 2026) holds the last frame until it ends, or fo
     clock.sleepMs(@import("session.zig").sync_hold_ms + 20);
     try testing.expect(try frameHas(session, "half-5"));
 }
+
+test "a program's desktop notification (OSC 777 and OSC 9) reaches the app" {
+    quietLogs();
+    const Got = struct {
+        var count: std.atomic.Value(u32) = .init(0);
+        var title: [64]u8 = undefined;
+        var body: [64]u8 = undefined;
+        fn on(_: ?*anyopaque, t: [*:0]const u8, b: [*:0]const u8) callconv(.c) void {
+            const ts = std.mem.span(t);
+            const bs = std.mem.span(b);
+            @memcpy(title[0..ts.len], ts);
+            title[ts.len] = 0;
+            @memcpy(body[0..bs.len], bs);
+            body[bs.len] = 0;
+            _ = count.fetchAdd(1, .acq_rel);
+        }
+    };
+    Got.count.store(0, .release);
+    const session = try Session.open(testing.allocator, .{
+        .size = .{ .cols = 80, .rows = 24 },
+        .shell = "/bin/sh",
+        .callbacks = .{ .on_notification = &Got.on },
+    });
+    defer session.close();
+    try session.write("printf '\\033]777;notify;Build;done in %ss\\007' $((40+2))\n");
+    var waited: u32 = 0;
+    while (Got.count.load(.acquire) == 0 and waited < 5000) : (waited += 20) clock.sleepMs(20);
+    try testing.expectEqualStrings("Build", std.mem.sliceTo(&Got.title, 0));
+    try testing.expectEqualStrings("done in 42s", std.mem.sliceTo(&Got.body, 0));
+    try session.write("printf '\\033]9;tests %s\\007' ok\n");
+    waited = 0;
+    while (Got.count.load(.acquire) < 2 and waited < 5000) : (waited += 20) clock.sleepMs(20);
+    try testing.expectEqualStrings("tests ok", std.mem.sliceTo(&Got.body, 0));
+}

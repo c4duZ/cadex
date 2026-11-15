@@ -23,6 +23,7 @@ pub const Options = extern struct {
     history_lines: u32,
     on_local_url: ?*const fn (?*anyopaque, [*:0]const u8) callconv(.c) void,
     on_agent_status: ?*const fn (?*anyopaque) callconv(.c) void,
+    on_notification: ?*const fn (?*anyopaque, [*:0]const u8, [*:0]const u8) callconv(.c) void,
 };
 
 pub export fn cadex_terminal_open(options: ?*const Options, out: ?*?*Session) callconv(.c) status.Code {
@@ -43,6 +44,7 @@ pub export fn cadex_terminal_open(options: ?*const Options, out: ?*?*Session) ca
             .on_bell = o.on_bell,
             .on_local_url = o.on_local_url,
             .on_agent_status = o.on_agent_status,
+            .on_notification = o.on_notification,
         },
     }) catch |err| return status.fromError(err);
     return status.ok;

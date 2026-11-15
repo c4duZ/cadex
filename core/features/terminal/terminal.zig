@@ -38,6 +38,7 @@ test {
     _ = @import("agent_status_test.zig");
     _ = @import("mouse.zig");
     _ = @import("local_url.zig");
+    _ = @import("program_notice.zig");
     // The daemon is the Mac's for now (docs/adr/0022-terminal-daemon.md).
     if (builtin.os.tag != .windows) {
         _ = @import("daemon_ring.zig");

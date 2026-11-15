@@ -77,6 +77,10 @@ typedef struct {
      * cadex_terminal_agent_status. NULL: no notice (the query is still
      * answered and the state kept). */
     void (*on_agent_status)(void *context);
+    /* Called on the reader thread when the program asks for a desktop
+     * notification (OSC 777 notify, OSC 9); title and body are UTF-8, cut
+     * to 256 and 1024 bytes, valid during the call. NULL: dropped. */
+    void (*on_notification)(void *context, const char *title, const char *body);
 } cadex_terminal_options;
 
 /* What an agent in the terminal last said it is doing (OSC 7501, the root

@@ -140,6 +140,14 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
   saída até o app religar. Enquanto nenhum app está ligado, as perguntas do programa ao terminal
   (cor de fundo, `ESC]7501;?`) ficam sem resposta.
 
+### Notificações dos programas
+- Um programa pode pedir uma notificação ao terminal (OSC 777 `notify;título;texto` ou OSC 9
+  `texto`): ela aparece como uma notificação do macOS, com o nome do terminal; o clique traz aquele
+  terminal para a frente. Não aparece enquanto você olha aquele terminal; uma nova do mesmo terminal
+  substitui a anterior. Desliga em terminal.programNotifications (Configurações › Terminal, ligada
+  por padrão). O kit da sessão não liga o `preferredNotifChannel` do Claude Code: as paradas do agente
+  já notificam pelos hooks e pelo OSC 7501 (o dono, 2026-11-15).
+
 ### Agentes no terminal (plano 19)
 - O terminal responde à pergunta `ESC]7501;?` do Claude Code com `ESC]7501;?;1` e passa a receber o
   estado da sessão (`state`, `kind`, `msg` em base64), que entrega ao app por terminal; chave
@@ -203,5 +211,7 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
 - [ ] Com terminal.keepSessions ligado, `top` rodando, fechar e reabrir o Cadex mostra o mesmo `top`
       com o scrollback; `kill -9` no app não derruba o terminal; atualizar o app mantém a sessão.
 - [ ] Com terminal.keepSessions desligado, nenhum daemon roda (`ps`).
+- [ ] `printf '\e]777;notify;Build;pronto\a'` numa aba em segundo plano mostra a notificação; o
+      clique leva à aba; com a aba à vista, nada aparece.
 - [ ] O Claude Code numa aba recebe a resposta ao `ESC]7501;?` e manda o estado; chaves desconhecidas
       não quebram (testes do núcleo com as sequências do teste de 2026-11-14).

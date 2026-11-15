@@ -30,6 +30,7 @@ public enum SettingsFile {
             }
             settings.terminal.optionAsMeta = reader.bool(t, "terminal.optionAsMeta") ?? settings.terminal.optionAsMeta
             settings.terminal.copyOnSelect = reader.bool(t, "terminal.copyOnSelect") ?? settings.terminal.copyOnSelect
+            settings.terminal.programNotifications = reader.bool(t, "terminal.programNotifications") ?? settings.terminal.programNotifications
             if let v = reader.number(t, "terminal.minimumContrast") { settings.terminal.minimumContrast = v.clamped(to: Settings.contrastRange) }
             if let v = reader.number(t, "terminal.lineHeight") { settings.terminal.lineHeight = v.clamped(to: Settings.lineHeights) }
             if let v = reader.number(t, "terminal.letterSpacing") { settings.terminal.letterSpacing = v.clamped(to: Settings.letterSpacings) }
@@ -150,6 +151,7 @@ public enum SettingsFile {
             "terminal": ["fontFamily": s.terminal.fontFamily, "fontSize": s.terminal.fontSize, "cursor": s.terminal.cursor,
                          "cursorBlink": s.terminal.cursorBlink, "historyLines": s.terminal.historyLines,
                          "optionAsMeta": s.terminal.optionAsMeta, "copyOnSelect": s.terminal.copyOnSelect,
+                         "programNotifications": s.terminal.programNotifications,
                          "minimumContrast": s.terminal.minimumContrast, "lineHeight": s.terminal.lineHeight,
                          "letterSpacing": s.terminal.letterSpacing, "fontFeatures": s.terminal.fontFeatures],
             "appearance": ["theme": s.appearance.theme, "lightTheme": s.appearance.lightTheme, "darkTheme": s.appearance.darkTheme,

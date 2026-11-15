@@ -21,6 +21,8 @@ pub const ReplyFn = *const fn (context: ?*anyopaque, bytes: []const u8) void;
 /// Called on the thread that feeds output.
 pub const Notice = enum { title, bell, agent };
 pub const NoticeFn = *const fn (context: ?*anyopaque, notice: Notice) void;
+/// A program's desktop notification (OSC 777, OSC 9), to the reply context.
+pub const ProgramNoticeFn = *const fn (context: ?*anyopaque, title: []const u8, body: []const u8) void;
 
 const agent_status = @import("agent_status.zig");
 pub const AgentState = agent_status.AgentState;
@@ -65,6 +67,7 @@ pub const Model = struct {
     reply: ?ReplyFn = null,
     reply_context: ?*anyopaque = null,
     notice: ?NoticeFn = null,
+    program_notice: ?ProgramNoticeFn = null,
     /// Last cell a mouse motion was reported for (mouse.zig drops repeats).
     last_mouse_cell: ?vt.Coordinate = null,
     selector: selection.Selector = .{},
@@ -110,6 +113,7 @@ pub const Model = struct {
         // Setting this also answers the program's `OSC 7501 ; ?` support
         // query, so Claude Code starts reporting (libghostty-vt).
         handler.effects.program_status = &programStatus;
+        handler.effects.desktop_notification = &desktopNotification;
         self.stream = .init(.{ .allocator = gpa, .handler = handler });
         return self;
     }
@@ -251,6 +255,11 @@ pub const Model = struct {
         next.msg_len = writer.buffered().len;
         self.agent = next;
         if (self.notice) |notify| notify(self.reply_context, .agent);
+    }
+
+    fn desktopNotification(handler: *Handler, n: vt.StreamAction.ShowDesktopNotification) void {
+        const self = fromHandler(handler);
+        if (self.program_notice) |notify| notify(self.reply_context, n.title, n.body);
     }
 
     fn bellRang(handler: *Handler) void {

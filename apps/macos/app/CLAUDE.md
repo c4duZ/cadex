@@ -75,6 +75,9 @@
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.
+- `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
+  vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
+  clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.
 - `PerfHooks.swift`: só para o `make perf` (`../../../tools/perf/run.py`): cada variável CADEX_PERF_
   faz a instância de teste agir sozinha em horas marcadas (abrir a conversa de um subagente, abrir
   abas); sem a variável, nada roda.

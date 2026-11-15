@@ -33,6 +33,8 @@ public struct Settings: Equatable, Sendable {
         public var letterSpacing: Double = 0
         /// OpenType features: "calt" and "liga" join ligatures, "-" turns one off.
         public var fontFeatures: [String] = []
+        /// A program's own notifications (OSC 777, OSC 9) as macOS ones.
+        public var programNotifications = true
     }
 
     public struct Appearance: Equatable, Sendable {

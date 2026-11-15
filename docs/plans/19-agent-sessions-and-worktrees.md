@@ -182,7 +182,9 @@ docs/adr/0021-cadex-managed-accounts.md (do plano 18), `docs/adr/0019-agents-obs
     progresso OSC 9;4 e notificação OSC 777 só para terminais que conhece pelo `TERM_PROGRAM`; o
     Cadex exporta `TERM_PROGRAM=Cadex` e não ganha nenhum. O renderizador passa a respeitar o modo
     DEC 2026 (desenhar só no fim do bloco) e só então o kit liga `CLAUDE_CODE_FORCE_SYNC_OUTPUT=1`
-    (plano 18); a notificação vem por `preferredNotifChannel`. Kitty keyboard e OSC 9;4 não voltam
+    (plano 18); a notificação vem por `preferredNotifChannel` (o dono, 2026-11-15: em vez disso o
+    terminal mostra as notificações OSC 777 e OSC 9 de qualquer programa, e o kit não liga o
+    `preferredNotifChannel`, para não duplicar os avisos de agente que já vêm pelos hooks). Kitty keyboard e OSC 9;4 não voltam
     sem fingir ser outro terminal: trocar o `TERM_PROGRAM` só com ADR. Feito em 2026-11-15: o
     quadro fica parado durante o bloco (no máximo 200 ms) e o kit liga a variável pelo `env` do
     `--settings`; com ela o `claude` real mandou 10 blocos nos primeiros segundos, sem ela nenhum.

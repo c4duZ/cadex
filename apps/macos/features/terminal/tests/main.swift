@@ -237,6 +237,17 @@ let exitCode = await Checks.run([
         expect(titled, "on_title never came")
         expect(session.title() == "titulo-cadex", session.title())
     }),
+    ("a program's notification (OSC 777) reaches the app with its title and text", {
+        let session = try TerminalSession(cols: 80, rows: 24, shell: "/bin/sh")
+        defer { session.close() }
+        var got: (String, String)?
+        session.onNotification = { got = ($0, $1) }
+        session.write("printf '\\033]777;notify;Build;pronto em %ss\\007' $((40+2))\n")
+        for _ in 0..<250 where got == nil {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        expect(got?.0 == "Build" && got?.1 == "pronto em 42s", "\(String(describing: got))")
+    }),
     ("arrow keys reach the shell through the core", {
         let session = try TerminalSession(cols: 80, rows: 24, shell: "/bin/sh")
         defer { session.close() }

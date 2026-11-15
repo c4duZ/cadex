@@ -20,6 +20,8 @@ public final class TerminalSession {
     public var onBell: (() -> Void)?
     /// A local server's address showed up in the output (once each).
     public var onLocalURL: ((String) -> Void)?
+    /// A program asked for a desktop notification: title and body.
+    public var onNotification: ((String, String) -> Void)?
     /// An agent in the terminal reported its state (OSC 7501); read it with agentStatus().
     public var onAgentStatus: (() -> Void)?
 
@@ -40,6 +42,14 @@ public final class TerminalSession {
         options.on_title = { context in CallbackRelay.from(context).onMain { $0.onTitle?() } }
         options.on_bell = { context in CallbackRelay.from(context).onMain { $0.onBell?() } }
         options.on_agent_status = { context in CallbackRelay.from(context).onMain { $0.onAgentStatus?() } }
+        // On the reader thread: no closure inside (one would take the main
+        // actor's isolation and trap here, found 2026-11-15).
+        options.on_notification = { context, title, body in
+            guard let title, let body else { return }
+            let heading = String(cString: title)
+            let text = String(cString: body)
+            CallbackRelay.from(context).onMain { $0.onNotification?(heading, text) }
+        }
         options.on_local_url = { context, url in
             guard let url else { return }
             let address = String(cString: url)

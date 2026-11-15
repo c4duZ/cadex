@@ -20,8 +20,9 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
     `worktrees.md`). Manter acordado: como liga e desliga, o modo
     (`power.mode`), manter a tela acesa, ligar ao abrir (`power.onAtLaunch`) e a tampa fechada
     explicada à parte (ver `power.md`). Numa página própria ficou demais (o dono, 2026-10-20).
-  - **Terminal:** Shell (o programa, vazio usa o do usuário; perguntar antes de fechar um programa
-    rodando; perguntar antes de colar várias linhas). Texto e cursor (fonte, tamanho, cursor,
+  - **Terminal:** Shell (o programa, vazio usa o do usuário; as notificações dos programas,
+    `terminal.programNotifications`; perguntar antes de fechar um programa rodando; perguntar antes
+    de colar várias linhas). Texto e cursor (fonte, tamanho, cursor,
     piscando). Histórico e teclado (linhas, Option esquerdo como Meta, copiar ao selecionar).
   - **Themes / Temas:** modo claro ou escuro, o tema, a vibrância e a imagem de fundo.
   - **Shortcuts / Atalhos:** a lista de comandos com o atalho de cada um, editável, com aviso de

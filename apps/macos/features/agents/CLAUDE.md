@@ -68,7 +68,8 @@
   "authentication_failed"`, que marca a conta com AgentUsageController.loginFailed). Numa aba do
   Cadex o motivo vem do próprio agente pelo OSC 7501 (plano 19): AgentStop.fromReport traduz o
   relatório ("approve Bash: x", "answer: …", done) e o app o entrega por AgentNotifier.reportedStop,
-  sem ler log; o fim do log fica para sessões em outros terminais. `AgentNotifier.swift`: a notificação do sistema quando uma sessão passa de
+  sem ler log; o fim do log fica para sessões em outros terminais. `AgentNotifier.swift` (é também o delegate do centro de notificações do app: o
+  clique numa notificação de programa vai a `onOpenTerminal`): a notificação do sistema quando uma sessão passa de
   trabalhando para esperando, por tipo (agents.notifyPermission, -Question, -Finished), lido 1 s depois da
   parada, nunca enquanto você olha o terminal dele; só de dentro de um .app (fora dele a central do sistema para o
   processo). `AgentNotifyText.swift`: as palavras de cada notificação (tipo no

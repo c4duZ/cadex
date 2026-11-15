@@ -33,7 +33,9 @@
   lidos sem escrever.
 - `CLAUDE_CODE_FORCE_SYNC_OUTPUT=1` na `env` do `--settings` (`synchronizedOutput`): o terminal respeita
   o modo DEC 2026 (plano 19, fase E) e, com ele, o Claude Code manda cada redesenho num bloco
-  (testado em 2026-11-15). Ainda não: `preferredNotifChannel` (OSC 777). O `cadex` no PATH da aba
+  (testado em 2026-11-15). Sem `preferredNotifChannel`: os avisos
+  de agente já vêm pelos hooks e pelo 7501, e o terminal mostra o OSC 777 de qualquer programa (o
+  dono, 2026-11-15). O `cadex` no PATH da aba
   entra com o primeiro subcomando que o agente usa (plano 20).
 
 ## Como validar

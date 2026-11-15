@@ -45,6 +45,9 @@
   continua até ele resetar) e linhas de histórico ao abrir (`model.zig:createWithHistory`, até 100 mil).
 - Cores do tema: `model.zig:setColors` troca o padrão de fundo, texto, cursor e das 16 ANSI; o que o
   programa trocou por OSC continua, e as consultas OSC 10/11/4 respondem com essas cores.
+- Notificação de programa (OSC 777, OSC 9): o efeito desktop_notification da libghostty, ligado no
+  `model.zig`, chega ao app pelo callback on_notification com título e texto já cortados e
+  terminados em NUL (`program_notice.zig`).
 - Título (OSC 0/2) e sino chegam ao app pelos callbacks on_title e on_bell (`model.zig:Notice`),
   na thread de leitura, como on_output.
 - O estado de um agente pelo OSC 7501 (plano 19, `../../../docs/adr/0022-terminal-daemon.md`): o

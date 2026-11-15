@@ -11,6 +11,7 @@ const input = @import("input.zig");
 const selection = @import("selection.zig");
 const paste_encoding = @import("paste.zig");
 const local_url = @import("local_url.zig");
+const program_notice = @import("program_notice.zig");
 
 pub const Size = pty.Size;
 pub const Frame = render.Frame;
@@ -34,6 +35,8 @@ pub const Callbacks = struct {
     on_local_url: ?*const fn (context: ?*anyopaque, url: [*:0]const u8) callconv(.c) void = null,
     /// An agent reported its state (OSC 7501): read it with agentStatus().
     on_agent_status: ?*const fn (context: ?*anyopaque) callconv(.c) void = null,
+    /// A program asked for a desktop notification (program_notice.zig).
+    on_notification: ?program_notice.Callback = null,
 };
 
 pub const Options = struct {
@@ -95,6 +98,7 @@ pub const Session = struct {
 
         model.setReply(&replyToShell, self);
         model.setNotice(&forwardNotice);
+        model.program_notice = &forwardProgramNotice;
         self.reader = try std.Thread.spawn(.{}, readLoop, .{self});
         return self;
     }
@@ -256,6 +260,11 @@ pub const Session = struct {
             .agent => self.callbacks.on_agent_status,
         };
         if (callback) |notify| notify(self.callbacks.context);
+    }
+
+    fn forwardProgramNotice(context: ?*anyopaque, heading: []const u8, body: []const u8) void {
+        const self: *Session = @ptrCast(@alignCast(context.?));
+        if (self.callbacks.on_notification) |notify| program_notice.forward(notify, self.callbacks.context, heading, body);
     }
 
     pub fn setCursorDefaults(self: *Session, shape: Model.CursorShape, blink: bool) void {

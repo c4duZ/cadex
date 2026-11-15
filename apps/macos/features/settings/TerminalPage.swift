@@ -24,6 +24,12 @@ enum TerminalPage {
                                  control: SettingsPage.text(g.shell, placeholder: "/bin/zsh") { value in
                                      store.update { $0.general.shell = value.trimmingCharacters(in: .whitespaces) }
                                  }),
+                SettingsPage.row(T("Notifications from programs", "Notificações dos programas"),
+                                 T("A program in a terminal can ask for a notification (OSC 777 or OSC 9: a long build saying it ended). It shows as one from macOS; a click goes to that terminal. Not while you look at it.",
+                                   "Um programa no terminal pode pedir uma notificação (OSC 777 ou OSC 9: um build longo avisando que acabou). Ela aparece como uma do macOS; o clique leva àquele terminal. Não enquanto você olha para ele."),
+                                 control: SettingsPage.toggle(store.settings.terminal.programNotifications) { on in
+                                     store.update { $0.terminal.programNotifications = on }
+                                 }),
                 SettingsPage.row(T("Ask before closing a running program", "Perguntar antes de fechar um programa rodando"),
                                  T("Closing a pane, tab or window where a program is running, such as a server or an agent, asks first.",
                                    "Fechar um painel, aba ou janela com um programa rodando, como um servidor ou um agente, pergunta antes."),
