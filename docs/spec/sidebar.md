@@ -10,7 +10,8 @@ em que ordem.
   arredondada foi testada e saiu, o dono, 2026-10-22), com personalizar no fim. Clicar num ícone mostra a
   página dele, o da página aberta também: o clique nunca recolhe a barra lateral (o dono, 2026-10-22;
   ⌘B recolhe). Os ícones e o de personalizar formam um bloco centrado, 2 pt entre eles.
-- Os ícones padrão, nesta ordem: Files (⇧⌘E, explorer.focus), Git (⇧⌘G, git.show), Agents (⇧⌘J,
+- Os ícones padrão, nesta ordem: Files (⇧⌘E, explorer.focus), Git (⇧⌘G, git.show), Tasks
+  (worktrees.show, as tarefas, plano 19), Agents (⇧⌘J,
   agents.show), History (agents.show-history, as conversas dos agentes, plano 18), Needs You
   (agents.show-attention, o sininho com o quadro e o feed, plano 19) e Accounts (⇧⌘U,
   agents.show-accounts, de uso); Agents e Accounts separados para cada um ter o próprio ícone e

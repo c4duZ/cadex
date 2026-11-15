@@ -41,10 +41,12 @@ extension AgentsView {
     }
 
     private func header(_ group: AgentsLayout.Group, caret: AgentCaret) -> NSView {
-        let line = NSStackView(views: [AgentText.icon(.folder, size: 13, color: colors.accent),
-                                       AgentText.label(group.project.name, size: 12, weight: .semibold, color: colors.text),
-                                       AgentText.label("\(group.sessions.count)", size: 11, color: colors.secondary),
-                                       NSView(), caret])
+        var views: [NSView] = [AgentText.icon(.folder, size: 13, color: colors.accent),
+                               AgentText.label(group.project.name, size: 12, weight: .semibold, color: colors.text),
+                               AgentText.label("\(group.sessions.count)", size: 11, color: colors.secondary)]
+        // A task's worktree says where it stands (docs/spec/worktrees.md).
+        if let note = projectNote?(group.project.root), !note.isEmpty { views.append(AgentText.label(note, size: 11, color: colors.secondary)) }
+        let line = NSStackView(views: views + [NSView(), caret])
         line.spacing = 7
         let row = AgentRow(line, inset: 6)
         row.toolTip = group.project.root

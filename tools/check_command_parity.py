@@ -16,7 +16,7 @@ PREFIXES = "tab|pane|explorer|workspace|search|editor|markdown|terminal|git|hist
 LITERAL = re.compile(r'"((?:%s)\.[a-z0-9-]+)"' % PREFIXES)
 # Names of views and keys in the Mac's code, not commands (2026-10-20).
 # power.mode, sidebar.items and statusBar.left/right are settings.json keys, read by name in SettingsFile.swift.
-NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode", "sidebar.items", "statusBar.left", "statusBar.right", "agents.sessions", "agents.accountNames", "agents.hiddenAccounts", "agents.accounts", "ssh.ping", "agents.hiddenLogins", "agents.launchSkipPermissions", "agents.activeAccount", "agents.projectAccounts", "agents.history", "agents.stateHooks", "agents.attention", "agents.dockBadge", "agents.mutedMachines", "history.jsonl"}
+NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode", "sidebar.items", "statusBar.left", "statusBar.right", "agents.sessions", "agents.accountNames", "agents.hiddenAccounts", "agents.accounts", "ssh.ping", "agents.hiddenLogins", "agents.launchSkipPermissions", "agents.activeAccount", "agents.projectAccounts", "agents.history", "agents.stateHooks", "agents.attention", "agents.dockBadge", "agents.mutedMachines", "worktrees.root", "worktrees.setupHooks", "history.jsonl"}
 # Mac-only for now: the in-app updater (docs/adr/0016-in-app-updates.md) comes
 # to Windows later. Windows-only ones (workspace.environment) need no entry.
 # The pasted-image tags (docs/spec/terminal.md, Ver a imagem colada) also
@@ -37,7 +37,10 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "agents.show-history", "agents.resume-session", "agents.continue-in-account", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).
-            "agents.show-attention", "agents.show-feed", "agents.approve", "agents.deny", "agents.mark-unread"}
+            "agents.show-attention", "agents.show-feed", "agents.approve", "agents.deny", "agents.mark-unread",
+            # Tasks' worktrees (plan 19, phase D), until Windows gets the view.
+            "worktrees.show", "worktrees.new-task", "worktrees.open", "worktrees.remove", "worktrees.set-status",
+            "worktrees.set-comment", "worktrees.edit-setup-hooks"}
 
 
 def literals(folder, suffix):

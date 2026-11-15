@@ -1,0 +1,93 @@
+import CCadex
+import Checks
+import Foundation
+@testable import Worktrees
+
+// Tests of the tasks' worktrees, on a real temporary repository. Run with
+// `make macos-test` (see shared/checks/Checks.swift for why this is an executable).
+
+nonisolated(unsafe) let fm = FileManager.default
+
+@discardableResult
+func git(_ dir: String, _ args: String...) -> Int32 {
+    let process = Process()
+    process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+    process.arguments = ["git", "-C", dir] + args
+    process.standardOutput = FileHandle.nullDevice
+    process.standardError = FileHandle.nullDevice
+    try? process.run()
+    process.waitUntilExit()
+    return process.terminationStatus
+}
+
+/// A repository with a commit, a .env git ignores and a .worktreeinclude naming it.
+func fakeRepo() -> (home: String, repo: String) {
+    let home = String(cString: realpath(NSTemporaryDirectory(), nil)) + "/cadex-wt-\(UUID().uuidString.prefix(8))"
+    let repo = home + "/app"
+    try? fm.createDirectory(atPath: repo, withIntermediateDirectories: true)
+    git(repo, "init", "--quiet", "--initial-branch=main")
+    git(repo, "config", "user.name", "Teste")
+    git(repo, "config", "user.email", "t@cadex")
+    fm.createFile(atPath: repo + "/a.txt", contents: Data("um\n".utf8))
+    fm.createFile(atPath: repo + "/.gitignore", contents: Data(".env\n".utf8))
+    fm.createFile(atPath: repo + "/.worktreeinclude", contents: Data(".env\n".utf8))
+    fm.createFile(atPath: repo + "/.env", contents: Data("TOKEN=x\n".utf8))
+    git(repo, "add", "a.txt", ".gitignore", ".worktreeinclude")
+    git(repo, "commit", "--quiet", "-m", "first")
+    // The repository is in the workspace; its tasks' folder is not, yet.
+    var out: UnsafeMutablePointer<UInt8>?
+    var len = 0
+    _ = cadex_workspace_authorize(repo, &out, &len)
+    cadex_free(out)
+    return (home, repo)
+}
+
+let exitCode = await Checks.run([
+    ("the plan: a branch from the name, the folder beside the repository, what needs a yes first", {
+        let (home, repo) = fakeRepo()
+        defer { try? fm.removeItem(atPath: home) }
+        let controller = WorktreesController()
+        controller.store = WorktreesStore(path: home + "/notes.json")
+        controller.setupHooks = [repo: ["pnpm install"]]
+        let plan = controller.plan(name: "Corrigir login!", repo: repo)
+        expect(plan.branch == "corrigir-login" && plan.base == "main", "\(plan)")
+        expect(plan.root == repo + ".worktrees" && plan.path == repo + ".worktrees/corrigir-login")
+        expect(plan.needsAuthorization && plan.hooksNeedConfirmation && plan.explainTrust)
+    }),
+    ("a task made: its worktree and branch, the .env copied, the note in progress; the second plan needs no yes", {
+        let (home, repo) = fakeRepo()
+        defer { try? fm.removeItem(atPath: home); try? fm.removeItem(atPath: repo + ".worktrees") }
+        let controller = WorktreesController()
+        controller.store = WorktreesStore(path: home + "/notes.json")
+        controller.setupHooks = [repo: ["pnpm install"]]
+        let plan = controller.plan(name: "Corrigir login", repo: repo)
+        guard case .success(let made) = controller.make(plan) else { return expect(false, "not made") }
+        expect(made.copied == 1 && made.unmatched.isEmpty && fm.fileExists(atPath: plan.path + "/.env"), "\(made)")
+        let tasks = controller.tasks(repo: repo)
+        expect(tasks.count == 1 && tasks[0].worktree.branch == "corrigir-login" && tasks[0].info?.status == .doing && tasks[0].info?.base == "main")
+        expect(controller.note(for: plan.path) == "In Progress")
+        controller.setComment("fixing the header", of: plan.path)
+        expect(controller.note(for: plan.path) == "In Progress · fixing the header")
+        let again = controller.plan(name: "Corrigir login", repo: repo)
+        expect(again.branch == "corrigir-login-2" && !again.needsAuthorization && !again.hooksNeedConfirmation && !again.explainTrust, "\(again)")
+        // The notes come back after a restart.
+        let reread = WorktreesStore(path: home + "/notes.json")
+        expect(reread.task(plan.path)?.comment == "fixing the header" && reread.repo(repo).trustExplained)
+    }),
+    ("taking a task away: refused with a change and says what; with nothing to lose it goes", {
+        let (home, repo) = fakeRepo()
+        defer { try? fm.removeItem(atPath: home); try? fm.removeItem(atPath: repo + ".worktrees") }
+        let controller = WorktreesController()
+        controller.store = WorktreesStore(path: home + "/notes.json")
+        let plan = controller.plan(name: "x", repo: repo)
+        guard case .success = controller.make(plan), let task = controller.tasks(repo: repo).first?.worktree else { return expect(false, "not made") }
+        fm.createFile(atPath: plan.path + "/a.txt", contents: Data("dois\n".utf8))
+        expect(controller.whatWouldBeLost(task) == ["a.txt"])
+        expect(controller.remove(task, repo: repo, deleteBranch: true) != nil && fm.fileExists(atPath: plan.path), "a change keeps it")
+        git(plan.path, "checkout", "--quiet", "a.txt")
+        expect(controller.whatWouldBeLost(task) == [])
+        expect(controller.remove(task, repo: repo, deleteBranch: true) == nil && !fm.fileExists(atPath: plan.path))
+        expect(controller.store.task(plan.path) == nil, "its note goes with it")
+    }),
+])
+exit(exitCode)

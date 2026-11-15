@@ -1,4 +1,5 @@
 import AppKit
+import Worktrees
 import Themes
 import Customize
 import Explorer
@@ -45,6 +46,11 @@ extension WindowSession {
             item("agents", .sparkle, T("Agents", "Agentes"), "agents.show", .page(makeAgentsPage("sessions"))),
             item("agent-history", .clipboardText, T("History", "Histórico"), "agents.show-history", .page(makeHistoryPage()), actions: [
                 SidebarAction("agents.resume-session", .terminalWindow, T("Resume a Conversation", "Retomar uma conversa")),
+            ]),
+            item("tasks", .stack, T("Tasks", "Tarefas"), "worktrees.show", .page(makeTasksPage()), actions: [
+                SidebarAction("worktrees.new-task", .plus, T("New Task", "Nova tarefa")),
+            ], more: [
+                SidebarAction("worktrees.edit-setup-hooks", .slidersHorizontal, T("Edit Setup Hooks", "Editar os hooks de preparo")),
             ]),
             item("attention", .bell, T("Needs You", "Precisa de você"), "agents.show-attention", .page(makeAttentionPage()),
                  subtabs: [SidebarItem.Subtab(id: "needs", title: T("Needs You", "Precisa de você")), SidebarItem.Subtab(id: "feed", title: "Feed")]),

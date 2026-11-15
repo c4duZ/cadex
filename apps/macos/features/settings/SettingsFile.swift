@@ -114,6 +114,13 @@ public enum SettingsFile {
                 else { reader.problems.append("agents.accountNames: esperava nomes por pasta") }
             }
         }
+        if let s = reader.section(root, "worktrees") {
+            settings.worktrees.root = reader.string(s, "worktrees.root") ?? settings.worktrees.root
+            if let hooks = s["setupHooks"] {
+                if let hooks = hooks as? [String: [String]] { settings.worktrees.setupHooks = hooks }
+                else { reader.problems.append("worktrees.setupHooks: esperava a lista de comandos por repositório") }
+            }
+        }
         if let s = reader.section(root, "ssh") {
             settings.ssh.ping = reader.bool(s, "ssh.ping") ?? settings.ssh.ping
         }
@@ -159,6 +166,7 @@ public enum SettingsFile {
             "sidebar": ["items": s.sidebar.items],
             "statusBar": ["left": s.statusBar.left, "right": s.statusBar.right],
             "ssh": ["ping": s.ssh.ping],
+            "worktrees": ["root": s.worktrees.root, "setupHooks": s.worktrees.setupHooks],
             "agents": ["sessions": s.agents.sessions, "notifyPermission": s.agents.notifyPermission,
                        "notifyQuestion": s.agents.notifyQuestion, "notifyFinished": s.agents.notifyFinished,
                        "soundPermission": s.agents.soundPermission, "soundQuestion": s.agents.soundQuestion,

@@ -1,5 +1,6 @@
 import Agents
 import AppKit
+import Worktrees
 import CommandPalette
 import Editor
 import Explorer
@@ -102,6 +103,11 @@ extension WindowSession {
             keywords: ["feed", "timeline", "agents", "linha do tempo", "agentes"], category: .view,
             action: .run { [weak self] in self?.showAttention("feed") }))
         commands.register(AgentAttentionCommands.commands(palette: palette))
+        commands.register(Command(
+            id: "worktrees.show", title: T("Show Tasks", "Mostrar as tarefas"),
+            keywords: ["tasks", "worktrees", "branches", "tarefas"], category: .view,
+            action: .run { [weak self] in self?.workspace?.showSidebar("tasks") }))
+        commands.register(WorktreesCommands.commands(palette: palette, actions: worktreesActions()))
         commands.register(Command(
             id: "agents.test-notifications", title: T("Send Test Notifications", "Mandar notificações de teste"),
             keywords: ["notifications", "agents", "test", "notificações", "teste", "avisos"], category: .view,

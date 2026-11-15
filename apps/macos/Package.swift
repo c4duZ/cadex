@@ -122,6 +122,15 @@ let package = Package(
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
+        // A task's worktree: made, opened and taken away (docs/spec/worktrees.md).
+        .target(
+            name: "Worktrees",
+            dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Strings", "UILooks"],
+            path: "features/worktrees",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
         // The agents running on this Mac, read only (docs/adr/0019-agents-observe-only.md).
         .target(
             name: "Agents",
@@ -410,6 +419,12 @@ let package = Package(
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
+            name: "WorktreesTests",
+            dependencies: ["Worktrees", "CCadex", "Checks"],
+            path: "features/worktrees/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+        .executableTarget(
             name: "AgentToolsTests",
             dependencies: ["AgentTools", "SessionKit", "Checks"],
             path: "features/agent-tools/tests"
@@ -432,7 +447,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "AgentTools", "SessionKit", "SSH", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "AgentTools", "SessionKit", "Worktrees", "SSH", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

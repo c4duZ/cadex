@@ -67,7 +67,10 @@
   workspace; a conta para continuar escolhida no ⌘K). `AgentsAttention.swift`: a atenção (plano 19,
   fase C): junta o que cada terminal de cada janela relatou (aviso TerminalView.agentDidChange), põe
   as permissões do socket no quadro, leva um cartão ao terminal dele, o número do sininho em cada
-  janela e o do Dock, e a página do sininho. O explorer é criado
+  janela e o do Dock, e a página do sininho. `WorktreesWiring.swift`: as tarefas (plano 19, fase D):
+  New Task pede o nome, mostra o que pede um sim (a pasta, os hooks), cria pelo núcleo e abre uma
+  aba com os hooks e o agente (kit, conta do projeto ou a ativa); a aba da confiança na primeira
+  tarefa; abrir, remover sem perder trabalho, comentar, os hooks de preparo. O explorer é criado
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.

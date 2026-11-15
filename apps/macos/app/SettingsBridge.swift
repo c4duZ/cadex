@@ -1,5 +1,6 @@
 import Agents
 import SessionKit
+import Worktrees
 import AppKit
 import Settings
 import SSH
@@ -80,6 +81,8 @@ final class SettingsBridge {
         AgentsController.shared.hidden = Set(settings.agents.hiddenAccounts.map(Self.expand))
         AgentHistoryController.shared.isEnabled = settings.agents.history
         SessionKit.shared.hooksEnabled = settings.agents.stateHooks
+        WorktreesController.shared.rootSetting = settings.worktrees.root
+        WorktreesController.shared.setupHooks = settings.worktrees.setupHooks.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }
         AgentUsageController.shared.activeAccount = settings.agents.activeAccount.isEmpty ? nil : Self.expand(settings.agents.activeAccount)
         AgentUsageController.shared.hiddenLogins = settings.agents.hiddenLogins.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }
         let agents = settings.agents

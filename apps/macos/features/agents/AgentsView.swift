@@ -16,6 +16,9 @@ public final class AgentsView: NSView {
     public var isInCadex: (AgentSession) -> Bool = { _ in false }
     /// A click: its terminal, or its folder when outside Cadex.
     public var onOpen: ((AgentSession) -> Void)?
+    /// A task's status and comment for a project's group ("In Progress ·
+    /// fixing the header"), by the group's folder; the app asks worktrees.
+    public var projectNote: ((String) -> String?)?
     /// A click on a subagent: its conversation in a tab (the app opens it).
     public var onOpenSubagent: ((AgentSession, AgentSubagent) -> Void)?
     /// "Turn On" when agents.sessions is off.

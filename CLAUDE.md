@@ -21,6 +21,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | search | sim | sim | busca de arquivo por nome (fuzzy) e de conteúdo, respeitando .gitignore |
 | source-control | sim | sim | status, diff, stage, commit, push e pull via o binário git |
 | git-history | sim | sim | log de commits e grafo |
+| worktrees | sim | sim | worktree por tarefa: New Task, status e comentário, hooks de preparo |
 | workspace | sim | não | diretórios autorizados, diretório de lançamento, ambiente (WSL no Windows) |
 | editor | sim | sim | ler código: números de linha, dobrar, destaque de sintaxe (tree-sitter), linha atual |
 | preview | não | sim | preview web de servidores locais e URLs; escolher elemento para o agente |

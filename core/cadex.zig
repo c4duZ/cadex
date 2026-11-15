@@ -11,6 +11,7 @@ pub const editor = @import("features/editor/editor.zig");
 pub const markdown = @import("features/markdown/markdown.zig");
 pub const source_control = @import("features/source-control/source_control.zig");
 pub const git_history = @import("features/git-history/history.zig");
+pub const worktrees = @import("features/worktrees/worktrees.zig");
 
 comptime {
     _ = @import("features/terminal/c_api.zig");
@@ -25,6 +26,7 @@ comptime {
     _ = @import("features/markdown/c_api.zig");
     _ = @import("features/source-control/c_api.zig");
     _ = @import("features/git-history/c_api.zig");
+    _ = @import("features/worktrees/c_api.zig");
     _ = @import("shared/language.zig");
 }
 
@@ -38,6 +40,7 @@ test {
     _ = markdown;
     _ = source_control;
     _ = git_history;
+    _ = worktrees;
     _ = @import("features/agent-tools/agent_tools.zig");
     _ = @import("features/terminal/c_api_test.zig");
     _ = @import("shared/c_buffer.zig");

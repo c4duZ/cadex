@@ -111,7 +111,7 @@ public struct Settings: Equatable, Sendable {
     public struct Sidebar: Equatable, Sendable {
         /// The icons on top of the sidebar, in order; a page left out is
         /// hidden (docs/spec/sidebar.md). The app drops unknown ids.
-        public var items = ["files", "git", "agents", "agent-history", "attention", "accounts"]
+        public var items = ["files", "git", "tasks", "agents", "agent-history", "attention", "accounts"]
     }
 
     public struct Agents: Equatable, Sendable {
@@ -164,6 +164,14 @@ public struct Settings: Equatable, Sendable {
         public var projectAccounts: [String: String] = [:]
     }
 
+    /// Tasks' worktrees (docs/spec/worktrees.md, plan 19 phase D).
+    public struct Worktrees: Equatable, Sendable {
+        /// Where tasks go: empty is beside each repository (`<repo>.worktrees`).
+        public var root = ""
+        /// Repository (with ~) → the setup hooks, in order.
+        public var setupHooks: [String: [String]] = [:]
+    }
+
     public struct SSH: Equatable, Sendable {
         /// Test each host of ~/.ssh/config with a TCP connection while the
         /// SSH item shows (docs/spec/ssh.md). Off: the list only.
@@ -189,6 +197,7 @@ public struct Settings: Equatable, Sendable {
     public var statusBar = StatusBar()
     public var agents = Agents()
     public var ssh = SSH()
+    public var worktrees = Worktrees()
     /// "cmd+shift+t" → command id, or nil to turn a default off.
     public var shortcuts: [String: String?] = [:]
 

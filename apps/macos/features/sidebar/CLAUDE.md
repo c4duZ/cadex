@@ -37,7 +37,8 @@
   sidebar.page-1 a -9 (⌃⌘1 a ⌃⌘9): o comando do ícone na posição (`press(position:)`), como o
   clique;
   ⇧⌘3 a ⇧⌘5 são as capturas de tela do sistema, por isso ⌃⌘ (o dono, 2026-10-21).
-- O catálogo do app está em `../../app/SidebarWiring.swift`: files, git, agents, agent-history (as
+- O catálogo do app está em `../../app/SidebarWiring.swift`: files, git, tasks (as tarefas, plano 19),
+  agents, agent-history (as
   conversas dos agentes, plano 18), attention (o sininho, com o número dos pedidos e as sub-abas
   Needs You e Feed, plano 19), accounts (padrão, em `SidebarLayout.swift`) e history (o do Git,
   escondido). Só entra o que mostra uma página na barra; preview e spaces saíram (o dono,

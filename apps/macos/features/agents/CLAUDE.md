@@ -50,6 +50,8 @@
   por arquivo as pastas sessions e jobs das contas e a de subagentes da sessão aberta; a cada 10 s
   confere quem ainda está vivo (um agente que caiu não avisa) e acha pasta sessions nova. As sessões
   em segundo plano entram na mesma lista (`job`, `waitingFor`). `isEnabled` é o agents.sessions.
+- O título do grupo de um projeto mostra o status e o comentário da tarefa dele (`projectNote`,
+  que o app pede à feature worktrees).
 - `AgentsLayout.swift`: grupos por projeto (o mais recente primeiro; esperando antes de
   trabalhando) e a linha de baixo ("main · conta", "esperando você · conta · fora do Cadex", "… ·
   em segundo plano").

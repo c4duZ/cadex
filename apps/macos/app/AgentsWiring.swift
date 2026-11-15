@@ -1,6 +1,7 @@
 import AgentTools
 import Agents
 import AppKit
+import Worktrees
 import Icons
 import Settings
 import Sidebar
@@ -27,6 +28,7 @@ extension WindowSession {
         page.onLaunch = { [weak self] account in self?.launchAgent(for: account) }
         page.onRename = { [weak self] account in self?.renameAccount(account) }
         page.onSetActive = { [weak self] account in self?.setActiveAccount(account) }
+        page.projectNote = { root in WorktreesController.shared.note(for: root) }
         ThemeStore.shared.observe { [weak page, weak self] _ in
             page?.colors = Self.agentColors()
             self?.usageStrip?.colors = Self.agentColors()

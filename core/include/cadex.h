@@ -806,4 +806,25 @@ cadex_status cadex_history_remote_url(const char *repo, const char *sha, uint8_t
 }
 #endif
 
+/* ---- worktrees: a task's worktree (docs/spec/worktrees.md) ---- */
+
+/* The branch a task's name becomes ("Corrigir login" -> "corrigir-login"). Free with cadex_free. */
+cadex_status cadex_worktrees_branch_name(const char *name, uint8_t **out, size_t *out_len);
+/* "path \t branch \t head" per worktree, the main one first. */
+cadex_status cadex_worktrees_list(const char *repo, uint8_t **out, size_t *out_len);
+/* A new branch from base in a new worktree at path, whose parent folder must
+ * be authorized. CADEX_IO_FAILED: git refused, its message in *message. */
+cadex_status cadex_worktrees_create(const char *repo, const char *path, const char *branch, const char *base,
+                                    uint8_t **message, size_t *message_len);
+/* Copies what .worktreeinclude names among the files git does not track;
+ * *copied counts them, *unmatched lists the lines that matched nothing. */
+cadex_status cadex_worktrees_copy_includes(const char *repo, const char *worktree, size_t *copied,
+                                           uint8_t **unmatched, size_t *unmatched_len);
+/* What taking the worktree away would lose, one per line: changed files, then
+ * "commit <oid> <subject>" for commits on no other branch. Empty: safe. */
+cadex_status cadex_worktrees_what_would_be_lost(const char *path, const char *branch, uint8_t **out, size_t *out_len);
+/* Takes the worktree away and, with branch not NULL, its branch when merged. */
+cadex_status cadex_worktrees_remove(const char *repo, const char *path, const char *branch,
+                                    uint8_t **message, size_t *message_len);
+
 #endif /* CADEX_H */

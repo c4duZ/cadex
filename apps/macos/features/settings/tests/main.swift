@@ -59,12 +59,12 @@ let exitCode = await Checks.run([
         expect(bad.agents.projectAccounts.isEmpty && problems.count == 1, "\(problems)")
     }),
     ("the sidebar's icons default to Files, Search and Git, and keep the saved order", {
-        expect(SettingsFile.read(Data("{}".utf8)).0.sidebar.items == ["files", "git", "agents", "agent-history", "attention", "accounts"])
+        expect(SettingsFile.read(Data("{}".utf8)).0.sidebar.items == ["files", "git", "tasks", "agents", "agent-history", "attention", "accounts"])
         var settings = Settings()
         settings.sidebar.items = ["git", "files"]
         expect(SettingsFile.read(SettingsFile.write(settings)).0.sidebar.items == ["git", "files"])
         let (read, problems) = SettingsFile.read(Data(#"{"sidebar": {"items": "git"}}"#.utf8))
-        expect(read.sidebar.items == ["files", "git", "agents", "agent-history", "attention", "accounts"] && problems.count == 1, "\(problems)")
+        expect(read.sidebar.items == ["files", "git", "tasks", "agents", "agent-history", "attention", "accounts"] && problems.count == 1, "\(problems)")
     }),
     ("the interface is in English unless the file says pt; anything else is a problem", {
         expect(SettingsFile.read(Data("{}".utf8)).0.general.language == "en")
