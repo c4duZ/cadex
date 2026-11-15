@@ -95,7 +95,7 @@ vê, no lugar do Claude in Chrome ou do Playwright, pelo `cadex mcp` ou pela CLI
   `browser_screenshot`, `browser_console` e `browser_notes`.
 - A aba do agente: a primeira ferramenta abre, ou reusa, a aba de preview ligada à tarefa (a pasta
   do terminal daquele agente), ao lado do terminal dele. Enquanto o agente está ligado, uma faixa no
-  topo diz "Agente usando esta aba · Esc para parar" e um ponteiro mostra onde ele clica. Esc com o
+  topo diz "Agente usando esta aba", com a tecla esc desenhada ao lado, e um ponteiro mostra onde ele clica. Esc com o
   preview focado, ou preview.stop-agent, desliga: o próximo pedido dele é recusado com "the owner
   stopped you on this tab" até ele chamar `browser_goto` de novo.
 - A árvore (`browser_snapshot`): os elementos visíveis, cada um com papel (button, link, textbox,
@@ -137,7 +137,7 @@ vê, no lugar do Claude in Chrome ou do Playwright, pelo `cadex mcp` ou pela CLI
 - **Erro:** servidor fora do ar: "Não foi possível conectar a <endereço>" com o motivo; recarregar tenta de novo.
 - **Pronto:** a página.
 - **Escolhendo:** cursor de cruz, faixa no topo, o botão de mira marcado.
-- **Agente usando a aba:** faixa "Agente usando esta aba · Esc para parar" e o ponteiro do agente.
+- **Agente usando a aba:** faixa "Agente usando esta aba" com a tecla esc e o ponteiro do agente.
 
 ## Casos de borda
 - Servidor reinicia (hot reload) -> a página do próprio servidor cuida; o Cadex não interfere.

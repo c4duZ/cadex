@@ -85,6 +85,16 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
 - **Escolher elemento para o agente** (Mac): no preview web, `⇧⌘C` e um clique mandam o elemento
   para o terminal do agente, com o arquivo e a linha onde ele foi escrito (React, Next, Vue, Svelte)
   e um print dele.
+- **O agente usa o Cadex** (Mac): nas sessões que o Cadex abre, o agente tem o comando `cadex` e um
+  servidor MCP para abrir arquivos e diffs ao lado do terminal dele, avisar você, marcar a tarefa e
+  rodar os comandos que a lista deixa ([ADR 0024](docs/adr/0024-agent-tools.md)).
+- **O preview como navegador do agente** (Mac): o agente abre a página do seu servidor no preview, ao
+  lado do terminal dele, lê a página como árvore, clica, preenche, tira print e lê o console, na mesma
+  aba que você olha, com uma faixa dizendo que ele está ali (`Esc` o tira). Você pode prender notas a
+  elementos da página e mandar todas para ele ([ADR 0025](docs/adr/0025-agent-drives-preview.md)).
+- **Outros apps do Mac** (opção desligada por padrão): o agente lê e opera outros apps pela
+  acessibilidade, com a sua permissão app por app, nunca em campos de senha nem nos Ajustes do
+  Sistema, com uma faixa e um botão Parar ([ADR 0026](docs/adr/0026-computer-use.md)).
 - **Temas:** centenas, com busca, importação e pasta própria; claro e escuro, cor de destaque, alto
   contraste, zoom da interface, cores de space e de aba, imagem de fundo e vibrância.
 - **Atualiza sozinho** (Mac): avisa quando sai versão nova e atualiza com um clique, conferindo a
@@ -187,6 +197,7 @@ máquinas: ⌘ vira Ctrl+Shift (como no Windows Terminal), e ⌘ com ⇧, ⌥ ou
 | Preview web | `⌘⇧H` | `Ctrl+Shift+Alt+H` |
 | Agents / Accounts / Git History / ícone 1…9 da barra lateral | `⌘⇧J` / `⌘⇧U` / `⌘⇧L` / `⌃⌘1…9` | só no Mac |
 | Escolher elemento no preview / parar | `⌘⇧C` / `Esc` | só no Mac |
+| Tirar o agente do preview | `Esc` (com o agente na aba) | só no Mac |
 | Histórico do git | pela paleta (sem atalho) | pela paleta (sem atalho) |
 | Trocar de space / novo space | `⌘⇧S` / `⌃⌘N` | `Ctrl+Shift+Alt+S` / `Ctrl+Shift+Alt+N` |
 | Próximo / anterior space | `⌃⌘→` / `⌃⌘←` | `Ctrl+Shift+Alt+PgDn` / `Ctrl+Shift+Alt+PgUp` |
@@ -242,7 +253,8 @@ abaixo. O pico de memória ao abrir foi 111 MB.
 - **Núcleo:** toda a lógica que não depende de plataforma, escrita uma vez em Zig. O modelo do
   terminal é a [libghostty-vt](https://github.com/ghostty-org/ghostty). Ele também gera o `cadex`,
   um programa sem interface que as sessões de agente abertas pelo Cadex rodam (a status line que
-  grava o uso de cada conta e os hooks que contam ao app o que cada sessão faz), e o
+  grava o uso de cada conta, os hooks que contam ao app o que cada sessão faz e os comandos, as skills
+  e o servidor MCP com que o agente usa o Cadex), e o
   `cadex-terminald`, o processo que guarda os terminais quando a opção de mantê-los está ligada.
 - **App:** uma interface nativa e fina por sistema. Desenha, recebe entrada e chama o núcleo.
   Previews de mídia usam os frameworks do próprio sistema, sem peso extra.

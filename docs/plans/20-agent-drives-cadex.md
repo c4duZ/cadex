@@ -173,6 +173,25 @@ docs/adr/0023-answer-agent-permissions.md (planos 18 e 19), `docs/adr/0002-zig-c
   snapshots e cliques numa página de teste, memória e CPU medidos. Os ids novos em `MAC_ONLY` de
   `tools/check_command_parity.py`. `CLAUDE.md` das features tocadas, README (o agente usando o
   preview) e notas da release em inglês.
+  - Feita em 2026-11-15: `tools/perf/plan20.py`, desligado (o pedido de comando recusado, a memória
+    do parado) e um agente falso no terminal do app de teste (`tools/perf/plan20_agent.py`) fazendo 100
+    snapshots e 100 cliques: 201 de 201 respondidos em 32 s, 26 MB a mais no app (a aba do preview que
+    o primeiro goto abre), 2,5 % de CPU durante e 0,6 % depois. Os ids novos já estavam em `MAC_ONLY`
+    desde as fases B a E. README e notas abaixo.
+
+## Notas da release (inglês)
+
+```markdown
+## Your agent uses Cadex (Mac)
+
+- **A `cadex` command for the agent.** In sessions Cadex opens, Claude Code gets a `cadex` command, skills and an MCP server: it opens files and diffs beside its terminal, notifies you, sets its task's status and comment, and runs the commands Cadex allows it. Only sessions Cadex opened can use it.
+- **The preview is the agent's browser.** The agent opens your dev server in the preview beside its terminal and drives it in the same tab you look at: it reads the page as a tree, clicks and types with real events, takes screenshots and reads the console. A band says when it is there; `Esc` takes it out. Everything the page says comes back marked as content, never as instructions.
+- **Design Mode and notes.** With the agent on the tab, a picked element carries its layout styles. ⌘-click elements while picking to pin numbered notes to them, and send them all to the agent at once.
+
+## Other apps of your Mac (opt-in)
+
+- **Computer use.** Turn on "Agents can use other apps" (Settings › General) and the agent can read another app's window and click, type and scroll in it through accessibility. It asks you app by app (the default answer is Don't Allow), never touches password fields, System Settings, Keychain Access or Terminal, and shows a band with Stop while it acts.
+```
 
 ## Como validar
 - `make check` a cada fase; `make perf` nas fases C a F: desligado, os números de hoje; ligado e

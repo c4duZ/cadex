@@ -1,3 +1,4 @@
+import AgentBand
 import AppKit
 import WebKit
 
@@ -84,28 +85,23 @@ enum PreviewAgentInput {
     }
 }
 
-/// The marks the owner sees while the agent drives the tab: a band on top,
-/// "Agent using this tab · Esc to stop", and a dot where it clicks.
+/// The marks the owner sees while the agent drives the tab: the band on
+/// top (`AgentBandView`, the same as computer use's, with an `esc` key cap)
+/// and a dot where it clicks.
 @MainActor
 final class PreviewAgentMarks: NSView {
-    private let label = NSTextField(labelWithString: "")
+    private let band = AgentBandView(trailing: .key("esc"), inWindow: true)
     private let dot = NSView()
 
     init() {
         super.init(frame: .zero)
         wantsLayer = true
-        label.font = .systemFont(ofSize: 11, weight: .medium)
-        label.textColor = .white
-        label.alignment = .center
-        label.wantsLayer = true
-        label.layer?.backgroundColor = NSColor.controlAccentColor.withAlphaComponent(0.9).cgColor
-        label.layer?.cornerRadius = 6
-        label.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(label)
+        band.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(band)
         NSLayoutConstraint.activate([
-            label.topAnchor.constraint(equalTo: topAnchor, constant: 6),
-            label.centerXAnchor.constraint(equalTo: centerXAnchor),
-            label.heightAnchor.constraint(equalToConstant: 22),
+            band.topAnchor.constraint(equalTo: topAnchor, constant: 10),
+            band.centerXAnchor.constraint(equalTo: centerXAnchor),
+            band.widthAnchor.constraint(lessThanOrEqualTo: widthAnchor, constant: -24),
         ])
         dot.wantsLayer = true
         dot.layer?.backgroundColor = NSColor.controlAccentColor.withAlphaComponent(0.55).cgColor
@@ -124,7 +120,7 @@ final class PreviewAgentMarks: NSView {
     override var isFlipped: Bool { true }
 
     func show(_ text: String) {
-        label.stringValue = "  " + text + "  "
+        band.text = text
         isHidden = false
     }
 

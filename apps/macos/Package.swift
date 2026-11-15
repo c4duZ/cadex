@@ -18,6 +18,11 @@ let package = Package(
 
         // Phosphor icons for every feature (docs/adr/0008-phosphor-icons.md).
         .target(
+            name: "AgentBand",
+            path: "shared/agent-band",
+            exclude: ["CLAUDE.md"]
+        ),
+        .target(
             name: "Icons",
             path: "shared/icons",
             exclude: ["CLAUDE.md", "Resources/LICENSE-Phosphor.txt", "Resources/LICENSE-MaterialIconTheme.txt", "tests"],
@@ -118,7 +123,7 @@ let package = Package(
         // The agent operates other apps by accessibility (docs/adr/0026-computer-use.md).
         .target(
             name: "ComputerUse",
-            dependencies: ["CommandPalette", "Strings", "TempImages"],
+            dependencies: ["AgentBand", "CommandPalette", "Strings", "TempImages"],
             path: "features/computer-use",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -235,7 +240,7 @@ let package = Package(
         ),
         .target(
             name: "Preview",
-            dependencies: ["CommandPalette", "Icons", "Menus", "Tabs", "Strings", "TempImages", "UILooks"],
+            dependencies: ["AgentBand", "CommandPalette", "Icons", "Menus", "Tabs", "Strings", "TempImages", "UILooks"],
             path: "features/preview",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]

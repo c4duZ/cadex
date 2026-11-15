@@ -22,6 +22,7 @@ import tempfile
 import time
 
 import plan19
+import plan20
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 HERE = pathlib.Path(__file__).resolve().parent
@@ -70,6 +71,14 @@ LIMITS = {
     "hooks_cpu": 3.0,             # 1.2 % with 5 sessions hooking every second (idle 0.3 %)
     "hooks_mb": 5,                # 0 MB grown over 20 s of hooks
     "hooks_refused": 0,           # every hook with a session's token is answered
+    # Plan 20 (tools/perf/plan20.py). Measured 2026-11-15 on this Mac.
+    "tools_off_accepted": 0,      # agentTools off: a command request with a token is refused
+    "tools_off_over_idle_mb": 5,  # off weighs what the idle app weighs (94 MB against 91-93 idle)
+    "browser_agent_mb": 40,       # 26 MB: the preview tab the first goto opens, then 100 snapshots and clicks
+                                  # (the app only; WebKit's page process is its own)
+    "browser_agent_cpu": 10.0,    # 2.5 %, 201 requests one after another in 32 s
+    "browser_agent_failed": 0,    # every goto, snapshot and click answered
+    "browser_agent_after_cpu": 1.0,  # 0.6 %: the agent stopped, nothing left running
 }
 # Themes the switch scenario goes through: official, tweakcn and base16.
 SWITCH_THEMES = ["caffeine", "catppuccin", "github-high-contrast", "gruvbox-soft", "tokyonight-storm", "0x96f", "nord"]
@@ -423,6 +432,8 @@ def main():
              ("plan 19: ten terminals kept by the daemon, with the window and with the app killed",
               lambda: plan19.kept_scenario(sys.modules[__name__])),
              ("plan 19: five sessions sending hooks every second", lambda: plan19.hooks_scenario(sys.modules[__name__])),
+             ("plan 20: the agent tools off", lambda: plan20.off_scenario(sys.modules[__name__])),
+             ("plan 20: a fake agent, 100 snapshots and 100 clicks in the preview", lambda: plan20.browser_scenario(sys.modules[__name__])),
              ("flooding with minimum contrast and ligatures", lambda: scenario(
                  "reading", "flood", ROOT, measure_reading_flood,
                  settings={"terminal": {"minimumContrast": 7, "fontFeatures": ["calt", "liga"]}}))]
@@ -443,6 +454,8 @@ def main():
     if "all_on_mb" in results and "idle_mb" in results:
         results["all_on_over_idle_pct"] = 100 * (results["all_on_mb"] - results["idle_mb"]) / results["idle_mb"]
     # Plan 18's rule: the History open or closed weighs at most 10% over idle.
+    if "tools_off_mb" in results and "idle_mb" in results:
+        results["tools_off_over_idle_mb"] = results["tools_off_mb"] - results["idle_mb"]
     for key in ["history_open", "history_closed"]:
         if f"{key}_mb" in results and "idle_mb" in results:
             results[f"{key}_over_idle_pct"] = 100 * (results[f"{key}_mb"] - results["idle_mb"]) / results["idle_mb"]

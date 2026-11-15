@@ -41,7 +41,7 @@
   contas (uma gerenciada, com links) e 200 conversas pelo CADEX_PERF_HOME, com a página History aberta e
   fechada, no máximo 10% acima do parado, e fechada nem o arquivo do índice nasce; no plano 19, em
   `perf/plan19.py`, dez terminais mantidos pelo daemon com a janela e com o app morto (os dez shells
-  continuam, e fechados os dez o daemon sai do `ps`) e cinco sessões mandando hooks a cada segundo, e com a opção desligada nenhum daemon;
+  continuam, e fechados os dez o daemon sai do `ps`) e cinco sessões mandando hooks a cada segundo, e com a opção desligada nenhum daemon; no plano 20, em `perf/plan20.py`, as ferramentas do agente desligadas (pedido recusado, memória do parado) e um agente falso (`perf/plan20_agent.py`, a carga `agent` do loadshell) que dirige o preview pelo socket do app, 100 snapshots e 100 cliques;
   cada instância de teste tem os próprios sockets e tokens, CADEX_SOCKETS_DIR, CADEX_SESSIONS_DIR e
   CADEX_TERMINAL_SOCKET, e nunca toca os do dono; os gatilhos ficam em `../apps/macos/app/PerfHooks.swift`), e mede memória (footprint) e CPU (tempo de CPU
   gasto na janela, não o %cpu do ps); os índices pela API C com `perf/index_probe.c`. Os limites

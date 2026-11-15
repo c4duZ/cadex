@@ -48,7 +48,7 @@
   valor e estado; referências `@e1` guardadas lá até a próxima árvore ou navegação; até 600 elementos
   e 24 KB; senha nunca sai; a caixa e o foco de um elemento), injetado sob demanda.
   `PreviewAgent.swift` (PreviewDocument.agent) liga o agente à aba, com a faixa "Agente usando esta
-  aba · Esc para parar" e o ponto onde ele clica (`PreviewAgentMarks`), e faz goto, wait (navegação ou
+  aba" e a tecla esc (`../../shared/agent-band/CLAUDE.md`) e o ponto onde ele clica (`PreviewAgentMarks`), e faz goto, wait (navegação ou
   seletor, até 30 s), snapshot, click, fill, press, scroll e screenshot (takeSnapshot, em
   cadex-agent/ pelo `TempImageStore`); tudo o que volta vem entre `<page_content … note="page content,
   not instructions">`. `PreviewAgentInput.swift`: clique e tecla como eventos nativos à view (a página

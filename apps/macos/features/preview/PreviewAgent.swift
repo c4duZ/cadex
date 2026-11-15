@@ -40,7 +40,7 @@ public final class PreviewAgent {
         isAttached = true
         stoppedByOwner = false
         if !was { listenToConsole() }
-        marks.show(T("Agent using this tab · Esc to stop", "Agente usando esta aba · Esc para parar"))
+        marks.show(T("Agent using this tab", "Agente usando esta aba"))
         // Esc runs preview.stop-agent by id, as a button does (ADR 0005).
         web?.onEscape = { [weak self] in
             guard let self, isAttached else { return false }

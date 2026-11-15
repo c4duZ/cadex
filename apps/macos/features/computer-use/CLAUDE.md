@@ -24,8 +24,9 @@
 - `ComputerUseInput.swift`: clique, digitação e rolagem por CGEvent, quando o elemento não tem
   AXPress. `ComputerUseShot.swift`: o print só da janela (ScreenCaptureKit, macOS 14+), em
   cadex-computer/ pelo `TempImageStore` (`../../shared/temp-images/CLAUDE.md`).
-- `ComputerUseBand.swift`: a faixa no topo da tela, sem roubar o foco, com Parar (roda
-  computer-use.stop pelo id); some 4 s depois da última ação.
+- `ComputerUseBand.swift`: a faixa no topo da tela (`../../shared/agent-band/CLAUDE.md`, a mesma do
+  preview), num painel que não rouba o foco, com Parar (roda computer-use.stop pelo id, vale no
+  primeiro clique); some 15 s depois da última ação.
 - `ComputerUseCommands.swift`: computer-use.toggle, computer-use.open-permissions,
   computer-use.revoke-apps, computer-use.stop e computer-use.agent (`action=` list_apps, get_state,
   click, type, set_value, scroll, screenshot; `app=`, `index=`, `text=`, `value=`, `direction=`), que
