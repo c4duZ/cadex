@@ -78,7 +78,7 @@ pub fn commitSides(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: 
 
 /// `git show <rev>:<path>` (rev "" is the index); empty when the path is
 /// not there (a new file).
-fn show(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const u8, rev: []const u8, path: []const u8) ![]u8 {
+pub fn show(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const u8, rev: []const u8, path: []const u8) ![]u8 {
     const spec = try std.fmt.allocPrint(gpa, "{s}:{s}", .{ rev, path });
     defer gpa.free(spec);
     var r = try git.run(gpa, registry, repo, &.{ "show", spec }, .{});
@@ -90,7 +90,7 @@ fn show(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const u8,
     return r.stdout;
 }
 
-fn readDisk(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const u8, path: []const u8) ![]u8 {
+pub fn readDisk(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const u8, path: []const u8) ![]u8 {
     var buf: workspace.paths.Buffer = undefined;
     const full = try fs.join(&buf, repo, path);
     var real_buf: workspace.paths.Buffer = undefined;
@@ -103,6 +103,6 @@ fn readDisk(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const
     return out.toOwnedSlice(gpa);
 }
 
-fn isBinary(bytes: []const u8) bool {
+pub fn isBinary(bytes: []const u8) bool {
     return std.mem.indexOfScalar(u8, bytes[0..@min(bytes.len, 8000)], 0) != null;
 }

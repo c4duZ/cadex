@@ -2,6 +2,8 @@
 
 ## O que eu quero
 - Status, diff, stage, unstage, descartar, commit, fetch, pull só fast-forward e push.
+- O diff de revisão (plano 21): uma worktree inteira contra uma base, ou duas pontas, e o stage e
+  unstage de algumas linhas.
 - Listar e trocar de branch, saber o upstream e quantos commits à frente e atrás.
 
 ## O que eu não quero
@@ -23,7 +25,18 @@
   locais e remotas sem par local, trocar de branch, init. Cada ação devolve a mensagem do git ou nada.
 - `diff.zig`: os dois lados (HEAD/índice ou índice/disco) e o patch, com aviso de binário e de lado
   acima de 2 MB; `commitSides`, um arquivo como um commit o mudou (para o histórico, da git-history).
-- API C em `c_api.zig` (`cadex_git_*`), listas em linhas com tab.
+- `review.zig` (plano 21): `defaultBase`, o merge-base de HEAD com o branch de partida da tarefa (o
+  New Task grava o nome, não o commit), senão com a branch padrão (origin/HEAD, main, master);
+  `files`, os arquivos mudados contra a base (commitados, staged, não staged e, com a árvore, os
+  novos que o git não conhece, com a contagem de linhas) ou entre duas pontas; `fileSides`, um
+  arquivo contra a base, com o patch de "tudo novo" para o arquivo que o git não conhece. Base e
+  ponta nunca começam com "-" (não viram opção do git).
+- `partial.zig` (plano 21): `filter` recorta o patch nas linhas escolhidas (pelo índice da linha no
+  patch; no stage, `+` não escolhida sai e `-` não escolhida vira contexto; no unstage, o
+  contrário) e `apply` manda ao `git apply --cached --recount` (e `--reverse`); `patchOf` dá o patch
+  de onde escolher, fazendo `add -N` no arquivo novo antes. Nunca toca o disco.
+- API C em `c_api.zig` (`cadex_git_*`, e `cadex_git_review_*` para o diff de revisão e o stage
+  parcial), listas em linhas com tab.
 - Spec: `docs/spec/source-control.md`. Status: pronto (plano 6). A observação do
   repositório é a do explorer no app (as mudanças em .git chegam pelo mesmo watcher).
 
@@ -31,3 +44,6 @@
 - `make core-test` (ou `zig build test` dentro de `core/`) passa, sem vazamento no alocador de teste.
 - `repo_test.zig` com repositórios temporários de verdade: status, stage, unstage, commit, diff,
   renomeação com espaço no nome, pull recusado quando diverge, branches, fora do workspace recusado.
+- `review_test.zig`: a worktree de uma tarefa contra onde saiu do main (commit, rename staged,
+  edição não staged, arquivo novo, main andando depois), duas pontas, uma linha entrando e saindo do
+  índice e uma linha de um arquivo novo.

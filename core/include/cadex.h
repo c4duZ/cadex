@@ -808,6 +808,20 @@ cadex_status cadex_git_diff(const char *repo, const char *path, const char *orig
 cadex_status cadex_git_diff_commit(const char *repo, const char *sha, const char *path, const char *orig, cadex_git_diff_sides *out);
 void cadex_git_diff_free(cadex_git_diff_sides *diff);
 
+/* The review (plan 21): a worktree against a base, or two tips. The base's
+ * sha: the merge-base of HEAD with start (the task's start branch, or
+ * NULL), else with the default branch; CADEX_NOT_FOUND when none. */
+cadex_status cadex_git_review_base(const char *repo, const char *start, uint8_t **out, size_t *out_len);
+/* "status \t added \t removed \t path \t orig" per file (A M D R T, ? new;
+ * counts "-" for a binary). to NULL: the work tree and its new files. */
+cadex_status cadex_git_review_files(const char *repo, const char *base, const char *to, uint8_t **out, size_t *out_len);
+/* One file against base (and to, or the disk). Free with cadex_git_diff_free. */
+cadex_status cadex_git_review_diff(const char *repo, const char *base, const char *to, const char *path, const char *orig, cadex_git_diff_sides *out);
+/* Partial staging: the patch to pick lines from (unstaged, or staged), then
+ * apply only the lines picked (indices into the patch split on '\n'). */
+cadex_status cadex_git_review_patch(const char *repo, const char *path, bool staged, uint8_t **out, size_t *out_len);
+cadex_status cadex_git_review_apply(const char *repo, const uint8_t *patch, size_t patch_len, const size_t *lines, size_t count, bool unstage, uint8_t **message, size_t *message_len);
+
 /* ---- Git history (core/features/git-history) ------------------------- */
 
 /* The log in pages, newest first, children before parents. Without a query,

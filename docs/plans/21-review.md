@@ -66,6 +66,11 @@ docs/adr/0021-cadex-managed-accounts.md e docs/adr/0022-terminal-daemon.md (plan
     autorizado e com o tempo limite de sempre. Arquivo novo: a primeira linha staged faz `add -N`.
   - API C nova em c_api.zig (`cadex_git_review_*`), listas em linhas com tab como as de hoje;
     testes em repo_test.zig.
+  - Feita em 2026-11-15: `core/features/source-control/review.zig` (base, arquivos, um arquivo, duas pontas) e `core/features/source-control/partial.zig`
+    (recorte do patch e o `git apply --cached --recount`), cinco funções `cadex_git_review_*`. As
+    linhas escolhidas são índices no texto do patch que o núcleo deu (`cadex_git_review_patch`):
+    a aba (B2) mapeia o que o dono marcou para elas. Testes em `core/features/source-control/review_test.zig`, ao lado do
+    repo_test.zig, com repositórios de verdade; `add -N` + recorte conferido com o git 2.50.
 - **B2. A aba de revisão no app** (`apps/macos/features/source-control/`), outra sessão:
   - ReviewDocument.swift (a criar), uma aba (TabDocument) com a árvore à esquerda (`MenuTableView`
     compartilhado) e os arquivos empilhados à direita numa vista de texto só, que desenha o que

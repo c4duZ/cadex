@@ -11,7 +11,7 @@ const diff = @import("diff.zig");
 const TestDir = @import("../../shared/test_dir.zig").TestDir;
 
 /// Runs git in `repo` and expects it to work.
-fn sh(registry: *workspace.Registry, repo: []const u8, args: []const []const u8) !void {
+pub fn sh(registry: *workspace.Registry, repo: []const u8, args: []const []const u8) !void {
     var r = try git.run(testing.allocator, registry, repo, args, .{});
     defer r.deinit(testing.allocator);
     if (!r.ok()) {
@@ -20,7 +20,7 @@ fn sh(registry: *workspace.Registry, repo: []const u8, args: []const []const u8)
     }
 }
 
-fn newRepo(dir: *TestDir, registry: *workspace.Registry, sub: []const u8, buf: []u8) ![]const u8 {
+pub fn newRepo(dir: *TestDir, registry: *workspace.Registry, sub: []const u8, buf: []u8) ![]const u8 {
     try dir.makeDir(sub);
     const repo = try dir.joinInto(buf, sub);
     try sh(registry, repo, &.{ "init", "--quiet", "--initial-branch=main" });
@@ -29,7 +29,7 @@ fn newRepo(dir: *TestDir, registry: *workspace.Registry, sub: []const u8, buf: [
     return repo;
 }
 
-fn expectNoError(err: ?[]u8) !void {
+pub fn expectNoError(err: ?[]u8) !void {
     if (err) |e| {
         defer testing.allocator.free(e);
         std.debug.print("unexpected: {s}\n", .{e});

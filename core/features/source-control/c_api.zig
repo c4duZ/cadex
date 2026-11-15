@@ -181,3 +181,65 @@ pub export fn cadex_git_diff_free(diff: ?*Diff) callconv(.c) void {
     std.c.free(d.patch);
     d.* = std.mem.zeroes(Diff);
 }
+
+// ---- The review (plan 21, docs/spec/source-control.md, Diff contra base) ----
+
+/// The base commit's sha: the merge-base of HEAD with `start` (the task's
+/// start branch, or NULL), else with the default branch. CADEX_NOT_FOUND:
+/// none (no commit, or a lone branch with no remote).
+pub export fn cadex_git_review_base(repo: ?[*:0]const u8, start: ?[*:0]const u8, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) Code {
+    c_buffer.clearOut(out, out_len);
+    const r = span(repo) orelse return status_code.invalid_argument;
+    const sha = (sc.review.defaultBase(gpa, workspace.registry(), r, span(start) orelse "") catch |err| return status_code.fromError(err)) orelse return status_code.not_found;
+    defer gpa.free(sha);
+    return c_buffer.handOut(sha, out, out_len);
+}
+
+/// Per changed file "status \t added \t removed \t path \t orig" (status
+/// A, M, D, R, T, or ? for a new file; counts "-" for a binary), against
+/// `base`; `to` NULL is the work tree with its new files, else a commit or
+/// branch (two worktrees' tips).
+pub export fn cadex_git_review_files(repo: ?[*:0]const u8, base: ?[*:0]const u8, to: ?[*:0]const u8, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) Code {
+    c_buffer.clearOut(out, out_len);
+    const r = span(repo) orelse return status_code.invalid_argument;
+    const b = span(base) orelse return status_code.invalid_argument;
+    const list = sc.review.files(gpa, workspace.registry(), r, b, span(to)) catch |err| return status_code.fromError(err);
+    defer gpa.free(list);
+    return c_buffer.handOut(list, out, out_len);
+}
+
+/// One file against `base` (and `to`, or the disk), in the diff struct;
+/// a new file's patch has every line added. Free with cadex_git_diff_free.
+pub export fn cadex_git_review_diff(repo: ?[*:0]const u8, base: ?[*:0]const u8, to: ?[*:0]const u8, path: ?[*:0]const u8, orig: ?[*:0]const u8, out: ?*Diff) callconv(.c) Code {
+    const d = out orelse return status_code.invalid_argument;
+    d.* = std.mem.zeroes(Diff);
+    const r = span(repo) orelse return status_code.invalid_argument;
+    const b = span(base) orelse return status_code.invalid_argument;
+    const p = span(path) orelse return status_code.invalid_argument;
+    var sides = sc.review.fileSides(gpa, workspace.registry(), r, b, span(to), p, span(orig) orelse "") catch |err| return status_code.fromError(err);
+    defer sides.deinit(gpa);
+    return fill(d, sides);
+}
+
+/// The patch to pick lines from for partial staging: the unstaged one
+/// (`staged` false; a file git does not know is made known with add -N)
+/// or the staged one.
+pub export fn cadex_git_review_patch(repo: ?[*:0]const u8, path: ?[*:0]const u8, staged: bool, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) Code {
+    c_buffer.clearOut(out, out_len);
+    const r = span(repo) orelse return status_code.invalid_argument;
+    const p = span(path) orelse return status_code.invalid_argument;
+    const patch = sc.partial.patchOf(gpa, workspace.registry(), r, p, staged) catch |err| return status_code.fromError(err);
+    defer gpa.free(patch);
+    return c_buffer.handOut(patch, out, out_len);
+}
+
+/// Stages (`unstage` false) or unstages the lines `lines` (indices into
+/// `patch` split on '\n', as cadex_git_review_patch gave it) and nothing
+/// else. CADEX_IO_FAILED with git's message when git refuses (the file
+/// changed meanwhile: ask for the patch again).
+pub export fn cadex_git_review_apply(repo: ?[*:0]const u8, patch: ?[*]const u8, patch_len: usize, lines: ?[*]const usize, count: usize, unstage: bool, message: ?*?[*]u8, message_len: ?*usize) callconv(.c) Code {
+    const r = span(repo) orelse return status_code.invalid_argument;
+    const p = patch orelse return status_code.invalid_argument;
+    const chosen: []const usize = if (count == 0) &.{} else (lines orelse return status_code.invalid_argument)[0..count];
+    return finish(sc.partial.apply(gpa, workspace.registry(), r, p[0..patch_len], chosen, unstage), message, message_len);
+}
