@@ -128,7 +128,9 @@ pub fn list(gpa: std.mem.Allocator, arena: std.mem.Allocator, connection: *Conne
 /// The daemon answering on `socket`, started from `helper` when none does:
 /// its own session (SETSID), no descriptor of the app's, its output to
 /// /dev/null; a thread of the app reaps it when it leaves, so no zombie
-/// stays while the app runs. Waits up to 2 s for the socket.
+/// stays while the app runs. Waits up to 5 s for the socket: once, right
+/// after a build, a kept terminal gave up at 2 s and fell back to a pty of
+/// its own (2026-11-15, not seen again in 10 runs).
 pub fn ensure(helper: [*:0]const u8, socket: [*:0]const u8, scrollback: ?[*:0]const u8) !void {
     const path = std.mem.span(socket);
     if (wire.connect(path)) |fd| {
@@ -150,7 +152,7 @@ pub fn ensure(helper: [*:0]const u8, socket: [*:0]const u8, scrollback: ?[*:0]co
     if (c.posix_spawn(&pid, helper, &actions, &attr, argv, c.environ) != 0) return error.SpawnFailed;
     if (std.Thread.spawn(.{}, reap, .{pid})) |t| t.detach() else |_| {}
     var waited: u32 = 0;
-    while (waited < 2000) : (waited += 20) {
+    while (waited < 5000) : (waited += 20) {
         if (wire.connect(path)) |fd| {
             _ = c.close(fd);
             return;

@@ -18,10 +18,17 @@ const clock = @import("../../shared/clock.zig");
 /// or broke the protocol.
 pub fn readClient(server: *Server, client: *Client) bool {
     const gpa = server.gpa;
+    var connected = true;
     while (true) {
         const room = client.inbox.room(gpa, wire.chunk) catch return false;
         const n = c.read(client.fd, room.ptr, room.len);
-        if (n == 0) return false;
+        // The end comes after what was sent before it: a close and then
+        // the end of the connection (a pane closing) must still close
+        // (found 2026-11-15: the session stayed alive and let go).
+        if (n == 0) {
+            connected = false;
+            break;
+        }
         if (n < 0) switch (c.errno(n)) {
             .INTR => continue,
             .AGAIN => break,
@@ -30,7 +37,7 @@ pub fn readClient(server: *Server, client: *Client) bool {
         client.inbox.filled(@intCast(n));
     }
     while (true) {
-        const f = (client.inbox.next() catch return false) orelse return true;
+        const f = (client.inbox.next() catch return false) orelse return connected;
         answer(server, client, f) catch return false;
     }
 }

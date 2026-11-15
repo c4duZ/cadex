@@ -266,3 +266,35 @@ test "the app's check of the socket, or a refused attach, does not make the daem
     try app.close(testing.allocator);
     try d.finish(false);
 }
+
+test "frames sent just before the end of the connection are still answered" {
+    var d: Running = .{ .server = undefined };
+    try d.start("end");
+    defer d.finish(false) catch {};
+    var pair: [2]c_int = undefined;
+    try testing.expect(socketpair(c.AF.UNIX, c.SOCK.STREAM, 0, &pair) == 0);
+    defer _ = c.close(pair[0]);
+    // Hello and a list, then the end, all waiting before the daemon reads:
+    // as a pane's close and its connection's end arrive.
+    var out: std.ArrayList(u8) = .empty;
+    defer out.deinit(testing.allocator);
+    try wire.frame(testing.allocator, &out, .hello, &.{ wire.version, 0 });
+    try wire.frame(testing.allocator, &out, .list, "");
+    try wire.writeAll(pair[0], out.items);
+    _ = c.shutdown(pair[0], 1);
+    const state = @import("daemon_state.zig");
+    var one: state.Client = .{ .fd = pair[1] };
+    defer {
+        one.inbox.deinit(testing.allocator);
+        one.outbox.deinit(testing.allocator);
+        _ = c.close(pair[1]);
+    }
+    wire.setNonblocking(pair[1]);
+    try testing.expect(!@import("daemon_handle.zig").readClient(&d.server, &one));
+    // Answered (hello_ok, sessions) although the connection had ended.
+    var inbox: wire.Inbox = .{ .bytes = one.outbox };
+    try testing.expectEqual(wire.Kind.hello_ok, (try inbox.next()).?.kind);
+    try testing.expectEqual(wire.Kind.sessions, (try inbox.next()).?.kind);
+}
+
+extern "c" fn socketpair(domain: c_uint, kind: c_uint, protocol: c_uint, fds: *[2]c_int) c_int;
