@@ -40,7 +40,8 @@ final class ReviewTextView: NSView {
     var headerHeight: CGFloat { lineHeight + 14 }
     /// Each row's top; one more at the end for the total height.
     private(set) var tops: [CGFloat] = [0]
-    var colored: [String: (NSAttributedString, [NSRange])] = [:]
+    /// Each file side's syntax tree and line ranges; lines are colored as drawn.
+    var colored: [String: (EditorLineColoring, [NSRange])] = [:]
     /// The images' views, by file path, laid over their rows.
     private var imageViews: [String: ImageDiffView] = [:]
     var imageMode: ImageDiffMode = .sideBySide { didSet { imageViews.values.forEach { $0.mode = imageMode } } }

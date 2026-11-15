@@ -92,6 +92,12 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   lado do terminal dele, lê a página como árvore, clica, preenche, tira print e lê o console, na mesma
   aba que você olha, com uma faixa dizendo que ele está ali (`Esc` o tira). Você pode prender notas a
   elementos da página e mandar todas para ele ([ADR 0025](docs/adr/0025-agent-drives-preview.md)).
+- **Revisar o que o agente fez** (Mac): uma aba por tarefa com todas as mudanças da worktree contra
+  onde ela começou, arquivos à esquerda e empilhados à direita, j/k e n/p, stage por trecho e por
+  linha, imagem lado a lado, deslizando ou sobreposta, e conflito de merge em três vias resolvido
+  por bloco. Comente em qualquer linha e mande todos os comentários ao agente da tarefa num texto só,
+  colado sem Enter; uma barra fina marca as linhas que o agente escreveu, guardadas só no Cadex
+  ([ADR 0027](docs/adr/0027-local-authorship.md)).
 - **Outros apps do Mac** (opção desligada por padrão): o agente lê e opera outros apps pela
   acessibilidade, com a sua permissão app por app, nunca em campos de senha nem nos Ajustes do
   Sistema, com uma faixa e um botão Parar ([ADR 0026](docs/adr/0026-computer-use.md)).
@@ -198,6 +204,7 @@ máquinas: ⌘ vira Ctrl+Shift (como no Windows Terminal), e ⌘ com ⇧, ⌥ ou
 | Agents / Accounts / Git History / ícone 1…9 da barra lateral | `⌘⇧J` / `⌘⇧U` / `⌘⇧L` / `⌃⌘1…9` | só no Mac |
 | Escolher elemento no preview / parar | `⌘⇧C` / `Esc` | só no Mac |
 | Tirar o agente do preview | `Esc` (com o agente na aba) | só no Mac |
+| Na revisão: próximo/anterior arquivo, mudança; comentar | `j` `k`, `n` `p`; `c` (com a revisão em foco) | só no Mac |
 | Histórico do git | pela paleta (sem atalho) | pela paleta (sem atalho) |
 | Trocar de space / novo space | `⌘⇧S` / `⌃⌘N` | `Ctrl+Shift+Alt+S` / `Ctrl+Shift+Alt+N` |
 | Próximo / anterior space | `⌃⌘→` / `⌃⌘←` | `Ctrl+Shift+Alt+PgDn` / `Ctrl+Shift+Alt+PgUp` |

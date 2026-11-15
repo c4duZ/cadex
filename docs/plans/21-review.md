@@ -180,6 +180,27 @@ docs/adr/0021-cadex-managed-accounts.md e docs/adr/0022-terminal-daemon.md (plan
   desligado igual ao de hoje. Todos os ids novos em `MAC_ONLY` de `tools/check_command_parity.py`:
   o Windows ganha o núcleo, mas nenhum comando, até o port trazer a aba. README com a revisão.
   Notas da release em inglês.
+  - Feita em 2026-11-15: `tools/perf/plan21.py` abre sozinho (CADEX_PERF_REVIEW) a revisão de uma
+    worktree falsa de 50 arquivos e 5 mil linhas, com 20 comentários, rola por 15 s pulando de
+    mudança em mudança e recebe 200 edições pelo socket: abre em 0,75 s, fica com 15 MB a mais
+    depois de assentar (pico de 82 MB rolando, memória liberada que o macOS recolhe), 18,5 % de CPU
+    rolando, 0 % depois, nenhuma edição recusada; com a autoria desligada, o peso do parado. A
+    medida achou o arquivo inteiro colorido guardado por arquivo: agora a revisão guarda a árvore e
+    colore só a linha que desenha (`EditorLineColoring`). O app chegou a 50,3 MB: o limite subiu
+    para 55 com o motivo ao lado (`tools/perf/limits.py`, que saiu do `tools/perf/run.py` para ele ficar
+    abaixo de 500 linhas). Ids novos em `MAC_ONLY` a cada fase; README e notas abaixo.
+
+## Notas da release (inglês)
+
+```markdown
+## Review what the agent did (Mac)
+
+- **One review per task.** Every change of a task's worktree since it left its branch, in one tab: the files listed on the left and stacked on the right, unchanged lines folded, j/k between files and n/p between changes. Change the base to any commit or branch, or compare two worktrees.
+- **Stage what you agree with.** Stage or unstage a change, or just the lines you mark, right from the review.
+- **Images and conflicts.** A changed image shows side by side, with a bar you slide between the two, or one over the other. A merge conflict opens in three columns with the result below; keep ours, theirs or both, block by block, and Mark Resolved saves and stages it.
+- **Comment, then send it all at once.** Press `+` in the margin or `c` to comment on a line or a range, in Markdown. Send to Agent pastes every comment into that task's agent in one message, with the file, the lines and the code quoted, without pressing Enter. Comments follow their lines when the agent edits again.
+- **Who wrote each line.** A thin bar marks the lines an agent opened by Cadex wrote; your own edits take the mark away. Only line ranges are kept, in Cadex, never in git (Settings › General).
+```
 
 ## Como validar
 - `make check` passa a cada fase, com os ids novos aceitos pelo `tools/check_command_parity.py`.

@@ -41,11 +41,11 @@
   contas (uma gerenciada, com links) e 200 conversas pelo CADEX_PERF_HOME, com a página History aberta e
   fechada, no máximo 10% acima do parado, e fechada nem o arquivo do índice nasce; no plano 19, em
   `perf/plan19.py`, dez terminais mantidos pelo daemon com a janela e com o app morto (os dez shells
-  continuam, e fechados os dez o daemon sai do `ps`) e cinco sessões mandando hooks a cada segundo, e com a opção desligada nenhum daemon; no plano 20, em `perf/plan20.py`, as ferramentas do agente desligadas (pedido recusado, memória do parado) e um agente falso (`perf/plan20_agent.py`, a carga `agent` do loadshell) que dirige o preview pelo socket do app, 100 snapshots e 100 cliques;
+  continuam, e fechados os dez o daemon sai do `ps`) e cinco sessões mandando hooks a cada segundo, e com a opção desligada nenhum daemon; no plano 20, em `perf/plan20.py`, as ferramentas do agente desligadas (pedido recusado, memória do parado) e um agente falso (`perf/plan20_agent.py`, a carga `agent` do loadshell) que dirige o preview pelo socket do app, 100 snapshots e 100 cliques; no plano 21, em `perf/plan21.py`, a revisão de uma worktree falsa de 50 arquivos aberta pelo CADEX_PERF_REVIEW e rolada, com 20 comentários e 200 edições pelo socket, e a autoria desligada;
   cada instância de teste tem os próprios sockets e tokens, CADEX_SOCKETS_DIR, CADEX_SESSIONS_DIR e
   CADEX_TERMINAL_SOCKET, e nunca toca os do dono; os gatilhos ficam em `../apps/macos/app/PerfHooks.swift`), e mede memória (footprint) e CPU (tempo de CPU
   gasto na janela, não o %cpu do ps); os índices pela API C com `perf/index_probe.c`. Os limites
-  ficam no topo do script, cada um com o que foi medido ao lado.
+  ficam em `perf/limits.py`, cada um com o que foi medido ao lado.
 - `webview2_sdk.py`: baixa o pacote Microsoft.Web.WebView2 (versão e sha256 fixados no script) e
   gera `../apps/windows/shared/webview/sdk/` (as declarações em C das interfaces que o app usa, os
   ids e o WebView2Loader.dll por arquitetura) (`../docs/adr/0014-webview2-on-windows.md`). Só roda

@@ -91,7 +91,7 @@ extension ReviewTextView {
         if colored[key] == nil {
             let diff = files[file]
             let lines = side == "before" ? diff.before : diff.after
-            let whole = EditorColoring.attributed(lines.joined(separator: "\n"), fileName: diff.file.path)
+            let whole = EditorLineColoring(lines.joined(separator: "\n"), fileName: diff.file.path)
             var ranges: [NSRange] = []
             var at = 0
             for line in lines {
@@ -101,10 +101,8 @@ extension ReviewTextView {
             }
             colored[key] = (whole, ranges)
         }
-        guard let (whole, ranges) = colored[key], ranges.indices.contains(number - 1), NSMaxRange(ranges[number - 1]) <= whole.length else {
-            return NSAttributedString()
-        }
-        let piece = NSMutableAttributedString(attributedString: whole.attributedSubstring(from: ranges[number - 1]))
+        guard let (whole, ranges) = colored[key], ranges.indices.contains(number - 1) else { return NSAttributedString() }
+        let piece = NSMutableAttributedString(attributedString: whole.attributed(ranges[number - 1]))
         piece.addAttribute(.font, value: look.font, range: NSRange(location: 0, length: piece.length))
         Self.marks(in: piece, show: showWhitespace, color: look.lineNumber)
         return piece

@@ -43,6 +43,9 @@ extension ReviewDocument {
         files.first { $0.file.path == path }.map { ($0.before, $0.after) }
     }
 
+    /// The cursor's row (make perf watches it move).
+    public var cursorRow: Int { text.cursor }
+
     /// The files in the review, in order.
     public var paths: [String] { files.map(\.file.path) }
 

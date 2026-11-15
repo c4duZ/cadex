@@ -36,6 +36,8 @@
   feature markdown, pela porta de entrada dela.
 - Spec: `docs/spec/editor.md`. Status: plano 5, fase B pronta (código). Markdown na fase C.
 - A faixa de aviso usa a fonte da interface (UILooks, `../../shared/looks/CLAUDE.md`); o código e os números de linha seguem a fonte do terminal, sem o zoom da interface.
+- `EditorColoring.swift`: o texto inteiro colorido (o diff) e EditorLineColoring, que guarda a árvore e
+  colore uma linha por vez, para a revisão desenhar só o que aparece sem guardar o texto colorido.
 
 ## Como validar
 - `make macos-test` passa: índice de linhas, indentação, abrir Zig com cores e dobras, salvar,

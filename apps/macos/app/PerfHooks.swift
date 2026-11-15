@@ -1,5 +1,6 @@
 import Agents
 import AppKit
+import SourceControl
 
 /// `make perf` only (tools/perf/run.py): what a scenario asks the test app
 /// to do on its own, at set times, so it is measured with no click. Each
@@ -10,6 +11,7 @@ extension WindowSession {
         if let path = environment["CADEX_PERF_SUBAGENT_LOG"] { openPerfTranscript(path) }
         if let count = environment["CADEX_PERF_TABS"].flatMap(Int.init) { openPerfTabs(count) }
         if let page = environment["CADEX_PERF_SIDEBAR"] { showPerfPage(page) }
+        if let out = environment["CADEX_PERF_REVIEW"] { openPerfReview(out) }
     }
 
     /// That sidebar page shown from the start: the sidebar opens on its
@@ -42,5 +44,42 @@ extension WindowSession {
             DispatchQueue.main.asyncAfter(deadline: .now() + 12 + Double(index)) { [weak self] in self?.tabs?.newTab() }
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 14 + Double(count)) { [weak self] in self?.tabs?.select(position: 1) }
+    }
+
+    /// Plan 21: the folder's review opened at 12 s; the seconds until it is
+    /// read and laid out go to `out` ("open 0.84"), then 15 s of moving
+    /// through the changes, back and forth, and "scrolled".
+    private func openPerfReview(_ out: String) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 12) { [weak self] in
+            guard let self else { return }
+            let start = Date()
+            openReview(repo: folder.root)
+            guard let review = tabs?.activeDocument as? ReviewDocument else { return }
+            let before = review.onLoaded
+            var first = true
+            review.onLoaded = { [weak review] in
+                before?()
+                guard first, let review else { return }
+                first = false
+                try? "open \(Date().timeIntervalSince(start))\n".write(toFile: out, atomically: true, encoding: .utf8)
+                // CADEX_PERF_REVIEW_STILL: opened, not scrolled (what opening alone weighs).
+                let still = ProcessInfo.processInfo.environment["CADEX_PERF_REVIEW_STILL"] != nil
+                Self.scroll(review, until: Date().addingTimeInterval(still ? 0 : 15), forward: true, out: out)
+            }
+        }
+    }
+
+    private static func scroll(_ review: ReviewDocument, until end: Date, forward: Bool, out: String) {
+        guard Date() < end else {
+            let opened = (try? String(contentsOfFile: out, encoding: .utf8)) ?? ""
+            try? (opened + "scrolled\n").write(toFile: out, atomically: true, encoding: .utf8)
+            return
+        }
+        let row = review.cursorRow
+        if forward { review.nextChange() } else { review.previousChange() }
+        let turn = review.cursorRow == row
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) { [weak review] in
+            if let review { scroll(review, until: end, forward: turn ? !forward : forward, out: out) }
+        }
     }
 }
