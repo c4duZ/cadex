@@ -66,6 +66,7 @@ LIMITS = {
     "daemon_alone_mb": 6,         # 1.4 MB with the app killed
     "daemon_alone_cpu": 1.0,      # ~0 %
     "daemon_lost_shells": 0,      # killing the app ends none of the ten shells
+    "daemon_stays_empty": 0,      # the ten closed, the daemon leaves the `ps` (ADR 0022)
     "hooks_cpu": 3.0,             # 1.2 % with 5 sessions hooking every second (idle 0.3 %)
     "hooks_mb": 5,                # 0 MB grown over 20 s of hooks
     "hooks_refused": 0,           # every hook with a session's token is answered

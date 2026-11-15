@@ -53,6 +53,59 @@ def daemon_sessions(socket_path):
     return alive, count
 
 
+def session_ids(socket_path):
+    """The names of the daemon's sessions."""
+    s = socket.socket(socket.AF_UNIX)
+    s.settimeout(3)
+    s.connect(socket_path)
+    s.sendall(struct.pack("<IBH", 3, 1, 1))
+    reader = FrameReader(s)
+    reader.next()
+    s.sendall(struct.pack("<IB", 1, 4))
+    _, p = reader.next()
+    s.close()
+    ids, i = [], 4
+    for _ in range(struct.unpack("<I", p[:4])[0]):
+        length = struct.unpack("<H", p[i:i + 2])[0]
+        ids.append(p[i + 2:i + 2 + length])
+        i += 2 + length + 10
+    return ids
+
+
+def close_sessions(socket_path):
+    """Each session taken and closed, as a pane closing does."""
+    for sid in session_ids(socket_path):
+        s = socket.socket(socket.AF_UNIX)
+        s.settimeout(3)
+        s.connect(socket_path)
+        reader = FrameReader(s)
+        s.sendall(struct.pack("<IBH", 3, 1, 1))
+        reader.next()
+        s.sendall(struct.pack("<IB", 3 + len(sid), 3) + struct.pack("<H", len(sid)) + sid)
+        reader.next()
+        s.sendall(struct.pack("<IB", 1, 5))
+        s.close()
+
+
+class FrameReader:
+    """The daemon's frames off a socket: [u32 length][u8 kind][payload]."""
+
+    def __init__(self, s):
+        self.s, self.buf = s, b""
+
+    def next(self):
+        while True:
+            if len(self.buf) >= 5:
+                n = struct.unpack("<I", self.buf[:4])[0]
+                if len(self.buf) >= 4 + n:
+                    kind, payload, self.buf = self.buf[4], self.buf[5:4 + n], self.buf[4 + n:]
+                    return kind, payload
+            data = self.s.recv(65536)
+            if not data:
+                raise OSError("the daemon closed the connection")
+            self.buf += data
+
+
 def cpu_percent(pid, seconds, cpu_seconds):
     start, used = time.time(), cpu_seconds(pid) or 0
     time.sleep(seconds)
@@ -78,9 +131,17 @@ def kept_scenario(perf):
         alive, total = daemon_sessions(sock)
         alone_mb = perf.footprint_mb(pid) or 0
         alone_cpu = cpu_percent(pid, 10, perf.cpu_seconds)
+        # The ten shells closed: a daemon with no session leaves the `ps`
+        # (docs/adr/0022-terminal-daemon.md), after its 3 s of grace.
+        close_sessions(sock)
+        deadline = time.time() + 10
+        while time.time() < deadline and daemon_pid(sock) is not None:
+            time.sleep(0.5)
+        stayed = 0 if daemon_pid(sock) is None else 1
         print(f"    {tab:.1f} MB a kept tab; daemon {window_mb:.1f} MB with the window, {alone_mb:.1f} alone, {alive} of 10 shells kept")
         return {"kept_tab_mb": tab, "daemon_window_mb": window_mb, "daemon_window_cpu": window_cpu,
-                "daemon_alone_mb": alone_mb, "daemon_alone_cpu": alone_cpu, "daemon_lost_shells": 10 - alive}
+                "daemon_alone_mb": alone_mb, "daemon_alone_cpu": alone_cpu, "daemon_lost_shells": 10 - alive,
+                "daemon_stays_empty": stayed}
     finally:
         pid = daemon_pid(sock)
         if pid:

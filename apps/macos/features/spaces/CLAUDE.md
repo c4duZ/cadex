@@ -14,7 +14,9 @@
   (`isShown` falso: não mudam o título nem pegam o teclado). Salva meio segundo depois de cada
   mudança (`onStateChange` das abas) e na hora ao sair; restaura em `start`. Sem `fileURL` (janela
   aberta pelo ⌘N, passageira) não lê nem grava nada: só a janela principal é salva. `closeAll()` ao
-  fechar a janela: salva uma última vez e encerra os shells de todos os spaces. A última aba de um
+  fechar a janela: salva uma última vez e encerra os shells de todos os spaces; os que o daemon do
+  terminal mantém (terminal.keepSessions, abas com `keepsSessions`, a janela principal) são soltos e
+  seguem rodando, com o nome salvo em cada painel para religar (plano 19, fase E2). A última aba de um
   space fecha o space; a do último space fecha a janela.
 - `SpacesFile.swift`: o JSON em Application Support/Cadex/spaces.json (gravação atômica), com os
   spaces, o ativo e a pasta do workspace. Arquivo ilegível vai para spaces.bad-<data>.json e o app

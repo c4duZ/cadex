@@ -251,7 +251,7 @@ docs/adr/0021-cadex-managed-accounts.md (do plano 18), `docs/adr/0019-agents-obs
     dono: sem `preferredNotifChannel`).
   - F: hibernado depois do tempo, o shell e o app ficando, e a conversa retomada com a palavra-código.
   - G: no `make perf`, dez terminais pelo daemon (1,6 MB com a janela, 1,4 MB com o app morto, 0% de
-    CPU, os dez shells vivos), cinco sessões mandando hooks a cada segundo (1,2% de CPU, nada de
+    CPU, os dez shells vivos; fechados os dez, o daemon sai do `ps`), cinco sessões mandando hooks a cada segundo (1,2% de CPU, nada de
     memória a mais, nenhum recusado) e, desligado, nenhum daemon. Cada instância de teste passou a ter
     os próprios sockets e tokens: até aqui todo `make perf` tomava o app.sock do Cadex do dono.
 - Falta o dono ver no app, sem permissão de clique e de captura de tela aqui: o número no Dock com

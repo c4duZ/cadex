@@ -15,7 +15,10 @@
   aponta para outro arquivo (os cenários do `make perf`).
 - A janela (⌘,, comando settings.open): `SettingsWindowController.swift`, com as seções em abas no
   topo, auxiliar de tela cheia (com o app em tela cheia, abre por cima dele, na mesma
-  mesa, e não numa mesa à parte); `GeneralPages.swift` (General e About), `TerminalPage.swift`, `KeepAwakeRows.swift` (as seções do manter acordado em General), `ThemesPage.swift` (modo, seus temas,
+  mesa, e não numa mesa à parte); `GeneralPages.swift` (General e About; em Agents também as linhas
+  do plano 19: o que precisa de você, o número no Dock, silenciar, hibernar depois de N minutos;
+  em Tarefas, a pasta das tarefas), `TerminalPage.swift` (com as notificações dos programas e manter
+  os terminais quando o Cadex fecha, plano 19), `KeepAwakeRows.swift` (as seções do manter acordado em General), `ThemesPage.swift` (modo, seus temas,
   busca e filtro claro/escuro, a grade e a moldura), `ThemeGrid.swift` (os cartões, só das linhas na
   tela, reaproveitados ao rolar), `ThemeActions.swift` (comandos theme.choose, -dark e -light com a lista no ⌘K,
   theme.import, theme.open-folder, theme.mode-system/-dark/-light, theme.accent, theme.accent-reset,
