@@ -40,8 +40,8 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Kit da sessão** (`session kit`): o que o Cadex passa a cada sessão que abre: `--settings`,
   `--plugin-dir`, `--mcp-config` e o ambiente da aba. A única porta pela qual o Cadex põe algo numa
   sessão do Claude Code (`docs/adr/0021-cadex-managed-accounts.md`). **Programa `cadex`**
-  (`agent-tools`): o executável sem interface que essas sessões rodam; hoje, a status line que grava
-  o uso da conta.
+  (`agent-tools`): o executável sem interface que essas sessões rodam: a status line que grava o uso
+  da conta, os hooks e, no plano 20, a CLI e o servidor MCP com que o agente usa o Cadex.
 - **Histórico de sessões** (`session history`): todas as conversas de todas as contas, indexadas
   para busca, na página History. **Retomar** (`resume`): abrir uma conversa antiga na conta dona.
   **Continuar em outra conta** (`continue in account`): abrir uma cópia da conversa em outra conta
@@ -71,6 +71,18 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   CLI e o MCP). **Token da sessão** (`session token`): a senha de uma sessão aberta pelo Cadex, sem a
   qual o socket recusa. **Daemon do terminal** (`terminal daemon`): o processo à parte que guarda
   os shells quando terminal.keepSessions está ligado (`docs/adr/0022-terminal-daemon.md`).
+- **Ferramentas do agente** (`agent tools`): o que o agente de uma sessão aberta pelo Cadex pode
+  pedir ao app, pela CLI `cadex` ou pelo `cadex mcp`, com o token da sessão; só uma lista fechada de
+  comandos (`docs/adr/0024-agent-tools.md`).
+- **Agente no preview** (`agent in preview`): o agente dirigindo a aba de preview que o dono vê
+  (ir, ler, clicar, preencher, print, console), com a faixa "Agente usando esta aba"
+  (`docs/adr/0025-agent-drives-preview.md`). **Árvore da página** (`page snapshot`): a página lida
+  como elementos com papel, nome, valor e estado. **Referência de elemento** (`element ref`): o
+  `@e1`, `@e2` que aponta um elemento da última árvore. **Design Mode**: o seletor entregando ao
+  agente o elemento com os estilos calculados. **Nota na página** (`page note`): um texto que o dono
+  prende a um elemento para o agente ler.
+- **Computer use**: o agente operando outros apps do Mac pela acessibilidade, com o print da janela,
+  desligado por padrão e com permissão por app (`docs/adr/0026-computer-use.md`).
 - **Hibernar** (`hibernate`): encerrar uma sessão parada e relançá-la com `--resume` quando voltam a
   ela. **Quadro de atenção** (`attention board`): os pedidos abertos dos agentes num lugar só, com
   Permitir e Negar (`docs/adr/0023-answer-agent-permissions.md`).

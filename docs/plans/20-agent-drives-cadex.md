@@ -58,7 +58,8 @@ docs/adr/0023-answer-agent-permissions.md (planos 18 e 19), `docs/adr/0002-zig-c
     e no `--mcp-config` do kit) e o `getpeereid`; só uma lista de comandos é permitida ao agente
     (abrir, avisar, status, preview; nunca fechar o app, apagar, mexer em conta ou configuração), e
     só uma ADR amplia essa lista (a 0033 do plano 24 acrescenta os de orquestração); o `cadex` vive
-    no bundle (`Cadex.app/Contents/MacOS/cadex`) e entra no `PATH` das abas pelo kit.
+    no bundle (`Cadex.app/Contents/Helpers/cadex`: em Contents/MacOS colidiria com "Cadex", plano 18)
+    e entra no `PATH` das abas pelo kit.
   - ADR 0025 (docs/adr/0025-agent-drives-preview.md, a criar): revê a ADR 0018 — o app passa a
     agir na página a pedido do agente (ler a árvore, clicar, digitar), continuando sem canal da
     página e sem script fixo. Decide: a leitura no mundo isolado `cadex-picker`; clique e tecla por
@@ -73,6 +74,10 @@ docs/adr/0023-answer-agent-permissions.md (planos 18 e 19), `docs/adr/0002-zig-c
     `docs/spec/README.md`); `docs/spec/preview.md` ganha "Agente no preview" e Design Mode. Termos no
     `docs/CONTEXT.md`: Ferramentas do agente, Token da sessão, Árvore da página, Referência de
     elemento, Agente no preview, Computer use.
+  - Feita em 2026-11-15: as três ADRs, `docs/spec/agent-tools.md` (o agente usa o Cadex),
+    `docs/spec/computer-use.md`, `docs/spec/preview.md` (Agente no preview, Design Mode e notas: a
+    nota é ⌘+clique, porque o ⌥ já copia) e os termos. Testado antes de escrever a 0024: o `env` do
+    `--settings` chega à ferramenta Bash e o `PATH` do comando digitado também.
 - **B. Comandos pelo socket, CLI e skills.** Na feature `agent-tools` (nascida no plano 18; o
   servidor do app.sock é do plano 19):
   - O servidor passa a aceitar pedidos de comando: confere token e lista de comandos e roda pelo

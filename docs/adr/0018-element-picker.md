@@ -1,6 +1,7 @@
 # 0018 — Seletor de elementos no preview: mundo isolado, sem ponte, colado sem Enter
 
-Data: 2026-10-20 · Status: aceita · Revê a regra "sem ponte com o Cadex" de `docs/spec/preview.md`
+Data: 2026-10-20 · Status: aceita, revista em parte por `docs/adr/0025-agent-drives-preview.md` (o app
+age na página a pedido do agente) · Revê a regra "sem ponte com o Cadex" de `docs/spec/preview.md`
 
 ## Contexto
 O dono quer clicar num elemento do preview web e mandar a descrição dele para o agente que roda
