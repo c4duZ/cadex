@@ -102,6 +102,9 @@ public enum SettingsFile {
             settings.agents.stateHooks = reader.bool(s, "agents.stateHooks") ?? settings.agents.stateHooks
             settings.agents.attention = reader.bool(s, "agents.attention") ?? settings.agents.attention
             settings.agents.dockBadge = reader.bool(s, "agents.dockBadge") ?? settings.agents.dockBadge
+            if let minutes = reader.number(s, "agents.hibernateAfterMinutes") {
+                settings.agents.hibernateAfterMinutes = min(max(Int(minutes), 0), 24 * 60)
+            }
             settings.agents.mutedMachines = reader.strings(s, "agents.mutedMachines") ?? settings.agents.mutedMachines
             if let projects = s["projectAccounts"] {
                 if let projects = projects as? [String: String] { settings.agents.projectAccounts = projects }
@@ -178,7 +181,8 @@ public enum SettingsFile {
                        "hiddenLogins": s.agents.hiddenLogins, "launchSkipPermissions": s.agents.launchSkipPermissions,
                        "activeAccount": s.agents.activeAccount, "projectAccounts": s.agents.projectAccounts,
                        "history": s.agents.history, "stateHooks": s.agents.stateHooks,
-                       "attention": s.agents.attention, "dockBadge": s.agents.dockBadge, "mutedMachines": s.agents.mutedMachines],
+                       "attention": s.agents.attention, "dockBadge": s.agents.dockBadge, "mutedMachines": s.agents.mutedMachines,
+                       "hibernateAfterMinutes": s.agents.hibernateAfterMinutes],
             "shortcuts": shortcuts,
         ]
         return (try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])) ?? Data()

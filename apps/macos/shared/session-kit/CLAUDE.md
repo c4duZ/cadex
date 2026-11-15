@@ -14,7 +14,8 @@
 - Feature importando outra para contribuir: cada uma chama `contribute` pelo app.
 
 ## Como eu quero
-- `SessionKit.swift`: SessionKit.shared; `claudeCommand` devolve o comando digitado no terminal
+- `SessionKit.swift`: SessionKit.shared; `claudeCommand` (com `session:`, retoma uma sessão do kit e
+  o token dela, para o agente hibernado voltar conhecido pelo app) devolve o comando digitado no terminal
   (`[env -u …] [CLAUDE_CONFIG_DIR=…] claude --settings … [--plugin-dir …] [--mcp-config …] args`),
   escrevendo antes os arquivos. O ambiente perde CLAUDECODE e CLAUDE_CODE_* herdados (um
   CLAUDE_CODE_CHILD_SESSION herdado desligou o transcript, 2026-11-14) e, na conta padrão, um

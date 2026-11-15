@@ -38,7 +38,7 @@
   testada). Passar o mouse mostra `PastedImageHover.swift`; clique sem modificador abre pelo
   `onOpenFile` de quem segura o terminal. Comandos terminal.open-pasted-image-beside e
   terminal.open-pasted-image-in-tab (só no Mac por enquanto; a última imagem colada na aba).
-- Preview: `TerminalPreviewOffer.swift` mostra "Abrir no preview" no canto de baixo por 10 s
+- Preview: `TerminalOffer.swift` mostra "Abrir no preview" no canto de baixo por 10 s
   quando o núcleo acha um servidor local na saída (onLocalURL da sessão); só aparece se quem
   segura o terminal pôs `onOpenPreview`.
 - Colar vindo de outra feature: `TerminalAppPaste.swift` (`pasteFromApp`, o elemento escolhido no
@@ -95,6 +95,10 @@
 - `TerminalNotify.swift`: a notificação que um programa pediu (OSC 777, OSC 9) sai como o aviso
   TerminalView.programDidNotify; `isLookedAt` diz se você olha o terminal. O app posta
   (`../../app/ProgramNotifications.swift`).
+- Hibernação (plano 19, fase F), em `TerminalAgent.swift`: `agentResume` (o que traz o agente de volta,
+  preenchido pelo app pelos hooks), `isHibernated`, `agentQuietSince` (desde quando está done ou
+  idle) e o aviso `didTakeFocus`; `TerminalOffer.swift` mostra "Reiniciar" (`offerRestart`, roda
+  `onRestartAgent`), que digitar tira.
 - `TerminalAgent.swift` e `TerminalAgentStatus.swift` (plano 19): o que o agente disse ao terminal
   pelo OSC 7501 (TerminalSession.agentStatus), só enquanto um programa roda em primeiro plano, e
   "terminou sem você ver" até o terminal ganhar o foco.

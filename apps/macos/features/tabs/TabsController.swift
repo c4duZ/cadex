@@ -257,7 +257,8 @@ public final class TabsController {
         guard let document = tab.focused.document else {
             let terminal = tab.focused.terminal
             return TabBarView.Item(id: tab.id, title: title, active: tab.id == list.active,
-                                   tip: TabAgentTitle.tip(terminal?.agentStatus, folder: terminal?.currentDirectory.map(shortPath)))
+                                   tip: TabAgentTitle.tip(terminal?.agentStatus, folder: terminal?.currentDirectory.map(shortPath),
+                                                         hibernated: terminal?.isHibernated ?? false))
         }
         let (icon, color) = Self.tabIcon(for: document.identity)
         return TabBarView.Item(id: tab.id, title: title, active: tab.id == list.active, icon: icon, iconColor: color,

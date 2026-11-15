@@ -38,6 +38,7 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).
             "agents.show-attention", "agents.show-feed", "agents.approve", "agents.deny", "agents.mark-unread",
+            "agents.hibernate", "agents.restart",
             # Tasks' worktrees (plan 19, phase D), until Windows gets the view.
             "worktrees.show", "worktrees.new-task", "worktrees.open", "worktrees.remove", "worktrees.set-status",
             "worktrees.set-comment", "worktrees.edit-setup-hooks"}

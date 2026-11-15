@@ -200,10 +200,17 @@ continua uma conversa em outra conta, sem nunca tocar em token
 
 ### Hibernação (plano 19)
 - Sessão que terminou, sem foco e parada há agents.hibernateAfterMinutes (padrão 30; 0 desliga) é
-  encerrada; o Cadex guarda o id, a pasta, a conta, o comando e o token. A aba fica com "hibernating".
+  encerrada; o Cadex guarda o id, a pasta, a conta, o comando e o token. A aba fica com ☾ e
+  "Hibernando" na dica.
 - Abrir a aba ou a worktree relança na mesma pasta e conta `claude --resume <id>`, pelo kit e com o
   mesmo token, sem prompt. agents.hibernate hiberna na hora.
 - Agente que saiu mostra "Restart" (agents.restart), que relança igual.
+- Como (2026-11-15): só sessões abertas pelo Cadex, que têm os hooks; "terminou" é o OSC 7501 em
+  done ou idle, e o tempo conta desde então (trabalhar zera). Encerrar é SIGTERM no `claude`: ele sai
+  em menos de 1 s, grava a conversa, e `--resume` a retoma (testado com a palavra-código). Não hiberna
+  quem trabalha ou espera você (agents.hibernate recusa com um bip). "Restart" é um botão no canto do
+  terminal quando o agente sai sozinho (fim da sessão sem processo depois); digitar o tira. Um texto
+  digitado e não enviado no prompt do agente se perde ao hibernar.
 
 ### Notificações
 - Quando uma sessão que trabalhava passa a esperar você, o Cadex manda uma notificação do sistema,
@@ -347,4 +354,7 @@ continua uma conversa em outra conta, sem nunca tocar em token
 - [ ] O número do Dock some ao visitar o terminal; "Mark as Unread" o traz de volta. A contagem e o
       "visto" têm teste; o ícone do Dock em si não foi fotografado.
 - [ ] Depois do tempo, a sessão hibernada some do `ps`; abrir a aba retoma a conversa (a
-      palavra-código lembrada).
+      palavra-código lembrada). (2026-11-15, app de release, agents.hibernateAfterMinutes = 1: o
+      `claude` saiu sozinho um minuto depois de responder, o shell e o app ficaram, e
+      `claude --resume <id>` da conversa respondeu a palavra-código; o foco na aba digitando o
+      `--resume` falta ver, sem permissão de clicar.)

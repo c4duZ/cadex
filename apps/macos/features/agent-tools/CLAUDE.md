@@ -22,7 +22,8 @@
 - `AgentSessionTokens.swift`: os tokens que o kit da sessão grava (`…/Cadex/sessions/<chave>.token`);
   um token desconhecido faz reler a pasta (sessão que acabou de abrir).
 - `AgentHookEvent.swift`: o evento, o pid do `claude` e o que o Claude Code deu ao hook
-  (session_id, transcript_path, cwd, source, notification_type, tool_name).
+  (session_id, transcript_path, cwd, source, notification_type, tool_name) e `kitSession`, a sessão
+  do kit dona do token (o nome do arquivo dele), que o agente hibernado reaproveita (plano 19, fase F).
 - O app (`../../app/AgentsWiring.swift`) liga o servidor ao abrir e manda cada evento à feature
   agents (`noteHook`: o id da sessão por pid, certo depois de /clear e --resume).
 

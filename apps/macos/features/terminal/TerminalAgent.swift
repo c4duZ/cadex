@@ -36,6 +36,10 @@ extension TerminalView {
     func agentReported() {
         let before = signals.agent?.state
         signals.agent = session?.agentStatus()
+        switch signals.agent?.state {
+        case .idle, .done: if signals.quietSince == nil || (before != .idle && before != .done) { signals.quietSince = Date() }
+        default: signals.quietSince = nil
+        }
         let looked = window?.isKeyWindow == true && window?.firstResponder === self
         if signals.agent?.state == .done, before != .done, !looked { signals.agentUnseen = true }
         if signals.agent?.state != .done { signals.agentUnseen = false }
@@ -49,4 +53,47 @@ extension TerminalView {
         signals.onAgent?()
         NotificationCenter.default.post(name: Self.agentDidChange, object: self)
     }
+}
+
+/// What brings a terminal's agent back after it quit or was hibernated
+/// (docs/spec/agents.md, Hibernação): the conversation, its folder, the
+/// account's folder (nil: the default one) and the session kit's name for
+/// it, whose token the relaunch keeps. The app fills it from the hooks.
+public struct TerminalAgentResume: Equatable, Sendable {
+    public let sessionID: String
+    public let folder: String
+    public let configDir: String?
+    public let kitSession: String?
+    public init(sessionID: String, folder: String, configDir: String?, kitSession: String?) {
+        self.sessionID = sessionID
+        self.folder = folder
+        self.configDir = configDir
+        self.kitSession = kitSession
+    }
+}
+
+/// Hibernation (plan 19 phase F): the state the app keeps on the terminal.
+extension TerminalView {
+    /// Posted when the terminal takes the keyboard focus (its tab opened,
+    /// a click): a hibernated agent comes back then.
+    public static let didTakeFocus = Notification.Name("CadexTerminalDidTakeFocus")
+
+    public var agentResume: TerminalAgentResume? {
+        get { signals.resume }
+        set { signals.resume = newValue }
+    }
+
+    /// The app ended this terminal's agent to save memory; it comes back
+    /// when the terminal is opened again.
+    public var isHibernated: Bool {
+        get { signals.hibernated }
+        set {
+            signals.hibernated = newValue
+            signals.onAgent?()
+            NotificationCenter.default.post(name: Self.agentDidChange, object: self)
+        }
+    }
+
+    /// Since when the agent has been done or idle (nil while it works or waits).
+    public var agentQuietSince: Date? { signals.quietSince }
 }

@@ -7,26 +7,33 @@ import SessionKit
 /// token not seen yet makes the folder be read again (a session just opened).
 final class AgentSessionTokens: @unchecked Sendable {
     let folder: String
-    private var known: Set<String> = []
+    /// Token → the kit session it was made for (the file's name).
+    private var known: [String: String] = [:]
     private let lock = NSLock()
 
     init(folder: String = SessionKit.tokensFolder) {
         self.folder = folder
     }
 
-    func isValid(_ token: String) -> Bool {
-        guard token.count >= 32 else { return false }
+    func isValid(_ token: String) -> Bool { kitSession(of: token) != nil }
+
+    /// The kit session `token` belongs to, nil when it is no session's.
+    func kitSession(of token: String) -> String? {
+        guard token.count >= 32 else { return nil }
         lock.lock()
         defer { lock.unlock() }
-        if known.contains(token) { return true }
+        if let session = known[token] { return session }
         known = Self.read(folder)
-        return known.contains(token)
+        return known[token]
     }
 
-    static func read(_ folder: String) -> Set<String> {
+    static func read(_ folder: String) -> [String: String] {
         let names = (try? FileManager.default.contentsOfDirectory(atPath: folder)) ?? []
-        return Set(names.filter { $0.hasSuffix(".token") }.compactMap { name in
-            (try? String(contentsOfFile: folder + "/" + name, encoding: .utf8))?.trimmingCharacters(in: .whitespacesAndNewlines)
-        })
+        var tokens: [String: String] = [:]
+        for name in names where name.hasSuffix(".token") {
+            guard let token = (try? String(contentsOfFile: folder + "/" + name, encoding: .utf8))?.trimmingCharacters(in: .whitespacesAndNewlines) else { continue }
+            tokens[token] = String(name.dropLast(6))
+        }
+        return tokens
     }
 }

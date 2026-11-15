@@ -100,7 +100,7 @@ final class Tab {
         let terminal = focused.terminal
         let agent = terminal?.agentStatus
         // The agent's sign shows even over a name given by hand (docs/spec/tabs.md).
-        let sign = TabAgentTitle.sign(agent, finishedUnseen: terminal?.agentFinishedUnseen ?? false)
+        let sign = TabAgentTitle.sign(agent, finishedUnseen: terminal?.agentFinishedUnseen ?? false, hibernated: terminal?.isHibernated ?? false)
         if let customTitle, !customTitle.isEmpty { return dot + sign + customTitle }
         if let document = focused.document { return dot + document.title }
         if agent != nil, let terminal {

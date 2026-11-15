@@ -16,7 +16,8 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
     (`markdown.openAs`), e para onde vai o elemento escolhido no preview, o terminal do agente
     (padrão) ou a área de transferência (`preview.pickTarget`, ver `preview.md`), com print do
     elemento ou não (`preview.pickScreenshot`, ligado). Árvore de arquivos: seguir o terminal (`explorer.followTerminal`) e
-    mostrar os ocultos (`explorer.showHidden`). Tarefas: a pasta das tarefas (`worktrees.root`, vazio é ao lado de cada repositório; ver
+    mostrar os ocultos (`explorer.showHidden`). Agentes: entre as opções da página Agents, hibernar os agentes parados
+    (`agents.hibernateAfterMinutes`, 30 minutos; 0 desliga; ver `agents.md`). Tarefas: a pasta das tarefas (`worktrees.root`, vazio é ao lado de cada repositório; ver
     `worktrees.md`). Manter acordado: como liga e desliga, o modo
     (`power.mode`), manter a tela acesa, ligar ao abrir (`power.onAtLaunch`) e a tampa fechada
     explicada à parte (ver `power.md`). Numa página própria ficou demais (o dono, 2026-10-20).

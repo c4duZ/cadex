@@ -198,6 +198,11 @@ docs/adr/0021-cadex-managed-accounts.md (do plano 18), `docs/adr/0019-agents-obs
   Abrir a worktree ou a aba relança com `CLAUDE_CONFIG_DIR=<conta> claude --resume <id>` na mesma
   pasta, com o kit e o mesmo token. Agente que saiu mostra "Reiniciar" (agents.restart).
   agents.hibernate hiberna na hora. Features: agents, terminal, tabs, settings.
+  Feita em 2026-11-15: encerrar é SIGTERM no `claude` (sai em menos de 1 s e grava a conversa,
+  testado); "parada" é o OSC 7501 em done ou idle; o relaunch reaproveita a sessão do kit e o token
+  (o socket diz de qual sessão do kit veio cada hook); "Reiniciar" é um botão no canto do terminal;
+  a aba mostra ☾. Conferido com o app de release: hibernou depois do tempo, o shell e o app
+  ficaram, e o `--resume` lembrou a palavra-código. Falta ver o foco na aba relançando.
 - **G. Peso e fechamento.** Cenários no `tools/perf/run.py`: 10 terminais pelo daemon, com e sem
   janela; 5 sessões falsas mandando hooks a cada segundo; tudo desligado igual ao de hoje. Todos
   os ids novos em `MAC_ONLY` de `tools/check_command_parity.py` (inclusive os de worktrees, até o

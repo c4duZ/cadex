@@ -103,6 +103,8 @@ extension WindowSession {
             keywords: ["feed", "timeline", "agents", "linha do tempo", "agentes"], category: .view,
             action: .run { [weak self] in self?.showAttention("feed") }))
         commands.register(AgentAttentionCommands.commands(palette: palette))
+        commands.register(AgentHibernation.commands(hibernate: { [weak self] in self?.hibernateFocusedAgent() },
+                                                    restart: { [weak self] in self?.restartFocusedAgent() }))
         commands.register(Command(
             id: "worktrees.show", title: T("Show Tasks", "Mostrar as tarefas"),
             keywords: ["tasks", "worktrees", "branches", "tarefas"], category: .view,

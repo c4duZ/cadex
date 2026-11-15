@@ -46,7 +46,9 @@ public final class TerminalView: NSView {
     /// "Abrir no preview" was clicked for a local server's address (the
     /// offer shows only when this is set).
     public var onOpenPreview: ((String) -> Void)?
-    var previewOffer: TerminalPreviewOffer?
+    var previewOffer: TerminalOffer?
+    /// "Restart" on an agent that quit runs this (the app's agents.restart).
+    public var onRestartAgent: (() -> Void)?
     /// Opens a file in the app (a pasted image's tag was clicked): the
     /// path, and beside (true), in a new tab (false) or as the setting says
     /// (nil). Without it the tags stay text.
@@ -257,6 +259,7 @@ public final class TerminalView: NSView {
     // MARK: Keyboard
 
     public override func keyDown(with event: NSEvent) {
+        if previewOffer?.isRestart == true { offerRestart(false) }
         restartBlink()
         hideImageHover()
         // A dead key is waiting (´ before e): the input system decides what

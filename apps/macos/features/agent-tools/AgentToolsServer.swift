@@ -75,8 +75,9 @@ public final class AgentToolsServer: @unchecked Sendable {
         setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
         guard let line = Self.readLine(client),
               let object = (try? JSONSerialization.jsonObject(with: line)) as? [String: Any],
-              let token = object["token"] as? String, tokens.isValid(token),
-              let event = AgentHookEvent.parse(object) else { close(client); return }
+              let token = object["token"] as? String, let kit = tokens.kitSession(of: token),
+              var event = AgentHookEvent.parse(object) else { close(client); return }
+        event.kitSession = kit
         if event.event == "PermissionRequest" { return waitForOwner(event, client) }
         DispatchQueue.main.async { [weak self] in
             let printed = MainActor.assumeIsolated { self?.onEvent?(event) ?? nil }

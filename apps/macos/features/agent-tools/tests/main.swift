@@ -60,7 +60,7 @@ let exitCode = await Checks.run([
         let answer = await sendAsync(server.path, line)
         expect(answer?.contains("\"ok\":true") == true, "\(String(describing: answer))")
         expect(events == [AgentHookEvent(event: "SessionStart", pid: 77, sessionID: "s-1", transcriptPath: "/t.jsonl", cwd: "/w", source: "clear",
-                                         notificationType: nil, toolName: nil, toolSubject: nil)], "\(events)")
+                                         notificationType: nil, toolName: nil, toolSubject: nil, kitSession: "s1")], "\(events)")
 
         let permission = await sendAsync(server.path, #"{"v":1,"token":"\#(token)","event":"PermissionRequest","pid":77,"payload":{"tool_name":"Bash","tool_input":{"command":"rm x","description":"d"}}}"#)
         expect(permission?.contains("decision") == true, "the hook gets the owner's answer: \(String(describing: permission))")

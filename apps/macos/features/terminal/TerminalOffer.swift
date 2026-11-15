@@ -2,20 +2,20 @@ import AppKit
 import Icons
 import Strings
 
-/// The offer to open a local server in the preview (docs/spec/preview.md):
-/// a small button in the bottom-right corner of the terminal, for a few
-/// seconds after the address shows up in the output.
-final class TerminalPreviewOffer: NSView {
+/// A small button in the bottom-right corner of the terminal: the offer to
+/// open a local server in the preview (docs/spec/preview.md), for a few
+/// seconds after the address shows up, and "Restart" when an agent quit
+/// (docs/spec/agents.md, Hibernação), until it is used or you type.
+final class TerminalOffer: NSView {
     private let button: NSButton
     private var hideTimer: Timer?
-    let url: String
-    private let open: (String) -> Void
+    private let act: () -> Void
+    /// The agent's "Restart", which typing takes away.
+    var isRestart = false
 
-    init(url: String, open: @escaping (String) -> Void) {
-        self.url = url
-        self.open = open
-        let shown = url.replacingOccurrences(of: "http://", with: "")
-        button = NSButton(title: T("Open in preview  \(shown)", "Abrir no preview  \(shown)"), target: nil, action: nil)
+    init(title: String, icon: Icon, act: @escaping () -> Void) {
+        self.act = act
+        button = NSButton(title: title, target: nil, action: nil)
         super.init(frame: .zero)
         wantsLayer = true
         layer?.cornerRadius = 8
@@ -23,7 +23,7 @@ final class TerminalPreviewOffer: NSView {
         layer?.borderWidth = 0.5
         layer?.borderColor = NSColor.separatorColor.cgColor
         button.isBordered = false
-        button.image = Icon.globe.image(size: 13)
+        button.image = icon.image(size: 13)
         button.imagePosition = .imageLeading
         button.contentTintColor = .controlAccentColor
         button.font = .systemFont(ofSize: 12, weight: .medium)
@@ -40,11 +40,11 @@ final class TerminalPreviewOffer: NSView {
     }
 
     @available(*, unavailable)
-    required init?(coder: NSCoder) { fatalError("TerminalPreviewOffer is created in code") }
+    required init?(coder: NSCoder) { fatalError("TerminalOffer is created in code") }
 
     @objc private func pressed() {
-        open(url)
         removeFromSuperview()
+        act()
     }
 
     /// Goes away by itself after a while.
@@ -60,15 +60,32 @@ extension TerminalView {
     /// Shows the offer for `url` (replacing an older one).
     func offerPreview(_ url: String) {
         guard let onOpenPreview else { return }
+        let shown = url.replacingOccurrences(of: "http://", with: "")
+        let offer = place(TerminalOffer(title: T("Open in preview  \(shown)", "Abrir no preview  \(shown)"), icon: .globe) { onOpenPreview(url) })
+        offer.hide(after: 10)
+    }
+
+    /// "Restart" for an agent that quit (not hibernated): it runs the
+    /// app's agents.restart through `onRestartAgent`. Stays until used,
+    /// until you type, or until another program runs. False hides it.
+    public func offerRestart(_ shown: Bool, agent: String = "Claude") {
+        guard shown, let onRestartAgent else {
+            if previewOffer?.isRestart == true { previewOffer?.removeFromSuperview() }
+            return
+        }
+        let offer = place(TerminalOffer(title: T("Restart \(agent)", "Reiniciar o \(agent)"), icon: .arrowClockwise) { onRestartAgent() })
+        offer.isRestart = true
+    }
+
+    private func place(_ offer: TerminalOffer) -> TerminalOffer {
         previewOffer?.removeFromSuperview()
-        let offer = TerminalPreviewOffer(url: url) { onOpenPreview($0) }
         offer.translatesAutoresizingMaskIntoConstraints = false
         addSubview(offer)
         NSLayoutConstraint.activate([
             offer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
             offer.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12),
         ])
-        offer.hide(after: 10)
         previewOffer = offer
+        return offer
     }
 }

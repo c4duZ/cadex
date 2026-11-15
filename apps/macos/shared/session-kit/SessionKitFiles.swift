@@ -51,6 +51,12 @@ extension SessionKit {
     /// A random token for the session, in its own file (0600): the app's
     /// socket takes the session's word only with it. nil when it cannot be
     /// kept (the session then works, without telling the app).
+    /// The token a kit session already has, if its file is still there.
+    func existingToken(session: String) -> String? {
+        let token = (try? String(contentsOfFile: tokens + "/" + session + ".token", encoding: .utf8))?.trimmingCharacters(in: .whitespacesAndNewlines)
+        return token?.count == 64 ? token : nil
+    }
+
     func writeToken(session: String) -> String? {
         var bytes = [UInt8](repeating: 0, count: 32)
         guard SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes) == errSecSuccess else { return nil }

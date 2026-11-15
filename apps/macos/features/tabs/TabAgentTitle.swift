@@ -1,3 +1,4 @@
+import Strings
 import Terminal
 
 /// A tab with an agent (docs/spec/tabs.md, plan 19): a sign for its state
@@ -6,8 +7,11 @@ import Terminal
 enum TabAgentTitle {
     /// Working ◐, waiting for you ●, finished ✓ (✓• while you have not
     /// looked yet), failed ✕; nothing when idle (docs/spec/tabs.md).
-    static func sign(_ status: TerminalAgentStatus?, finishedUnseen: Bool) -> String {
-        switch status?.state {
+    static func sign(_ status: TerminalAgentStatus?, finishedUnseen: Bool, hibernated: Bool = false) -> String {
+        // Hibernated ☾: the agent ended to save memory and comes back when
+        // the tab opens (plan 19 phase F).
+        if hibernated { return "☾ " }
+        return switch status?.state {
         case .working: "◐ "
         case .blocked: "● "
         case .done: finishedUnseen ? "✓• " : "✓ "
@@ -26,8 +30,9 @@ enum TabAgentTitle {
     }
 
     /// The tab's tip: what the agent does now, over the folder.
-    static func tip(_ status: TerminalAgentStatus?, folder: String?) -> String? {
-        let lines = [status?.message, folder].compactMap { $0 }.filter { !$0.isEmpty }
+    static func tip(_ status: TerminalAgentStatus?, folder: String?, hibernated: Bool = false) -> String? {
+        let state = hibernated ? T("Hibernating: comes back when you open this tab", "Hibernando: volta quando você abre esta aba") : status?.message
+        let lines = [state, folder].compactMap { $0 }.filter { !$0.isEmpty }
         return lines.isEmpty ? nil : lines.joined(separator: "\n")
     }
 }

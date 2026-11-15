@@ -95,13 +95,15 @@ public final class SessionKit {
     /// `arguments` (`--resume <id>`, the no-prompts flag). Writes the kit's
     /// files first. `defaultClaudeJSON` is the default account's
     /// .claude.json, whose MCP servers other accounts get (read only).
-    public func claudeCommand(configDir: String?, arguments: [String] = [],
+    /// `session`: a kit session to take again (a hibernated agent coming
+    /// back, plan 19 phase F): its token stays, so the app still knows it.
+    public func claudeCommand(configDir: String?, arguments: [String] = [], session reused: String? = nil,
                               defaultClaudeJSON: String = FileManager.default.homeDirectoryForCurrentUser.path + "/.claude.json") -> String {
         let accountDir = configDir ?? FileManager.default.homeDirectoryForCurrentUser.path + "/.claude"
         let key = Self.accountKey(accountDir)
         var args: [String] = []
-        let session = UUID().uuidString.lowercased()
-        let token = writeToken(session: session)
+        let session = reused ?? UUID().uuidString.lowercased()
+        let token = reused.flatMap(existingToken) ?? writeToken(session: session)
         if let settings = writeSettings(session: session, token: token, accountDir: accountDir) { args += ["--settings", settings] }
         for dir in parts.values.flatMap(\.pluginDirs).sorted() { args += ["--plugin-dir", dir] }
         if let mcp = writeMCP(key: key, isDefault: configDir == nil, defaultClaudeJSON: defaultClaudeJSON) { args += ["--mcp-config", mcp] }

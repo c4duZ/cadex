@@ -12,6 +12,11 @@ struct SignalState {
     var agent: TerminalAgentStatus?
     var agentUnseen = false
     var onAgent: (() -> Void)?
+    /// What brings the agent back (TerminalAgent.swift), whether the app
+    /// hibernated it, and since when it has been done or idle (plan 19 F).
+    var resume: TerminalAgentResume?
+    var hibernated = false
+    var quietSince: Date?
 }
 
 /// Signals between the view and the program: focus in and out (for
@@ -37,6 +42,7 @@ extension TerminalView {
             focusChanged()
             agentSeen()
             onFocus?()
+            NotificationCenter.default.post(name: Self.didTakeFocus, object: self)
         }
         return accepted
     }

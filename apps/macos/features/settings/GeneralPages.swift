@@ -90,6 +90,12 @@ enum GeneralPages {
                                          if on { s.agents.mutedMachines.append("local") }
                                      }
                                  }),
+                SettingsPage.row(T("Hibernate quiet agents after", "Hibernar agentes parados depois de"),
+                                 T("An agent opened by Cadex that finished, that you are not looking at, ends after this many minutes to free memory, and comes back with its conversation when you open its terminal again. 0 turns it off.",
+                                   "Um agente aberto pelo Cadex que terminou, e que você não está olhando, encerra depois desses minutos para liberar memória, e volta com a conversa quando você abre o terminal dele de novo. 0 desliga."),
+                                 control: SettingsPage.number(Double(store.settings.agents.hibernateAfterMinutes), range: 0...240, step: 5, format: "%.0f min") { value in
+                                     store.update { $0.agents.hibernateAfterMinutes = Int(value) }
+                                 }),
                 SettingsPage.row(T("Index conversation history", "Indexar o histórico de conversas"),
                                  T("Agents › History searches every conversation of every account. Cadex reads the conversation files only while the page shows, never a tool's result, and keeps the index on this Mac. Off, nothing is indexed or watched.",
                                    "Agents › Histórico busca todas as conversas de todas as contas. O Cadex lê os arquivos das conversas só com a página aberta, nunca o resultado de uma ferramenta, e guarda o índice neste Mac. Desligado, nada é indexado nem vigiado."),

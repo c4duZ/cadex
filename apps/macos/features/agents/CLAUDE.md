@@ -131,6 +131,11 @@
   sininho e do Dock; `update` recebe do app o que cada terminal relatou e fecha o hook quando o
   agente sai do "blocked"), `AgentAttentionView.swift` (a página do sininho: Needs You e Feed) e
   `AgentAttentionCommands.swift` (agents.approve, agents.deny e agents.mark-unread com a lista no ⌘K).
+- Hibernação (plano 19, fase F): `AgentHibernation.swift`, as regras puras (`isDue`/`dueAt`: parado há
+  agents.hibernateAfterMinutes e ninguém olhando; `configDir`: a conta pelo arquivo da conversa;
+  `resumeCommand`: `cd <pasta> && claude --resume <id>` pelo kit, mantendo a sessão do kit e o token)
+  e os comandos agents.hibernate e agents.restart; os terminais e o SIGTERM são do app
+  (`../../app/AgentsHibernate.swift`).
 - A conversa de um subagente numa aba (`AgentTranscriptDocument.swift`, um `TabDocument`): só pelo
   clique num subagente (`onOpenSubagent`). `AgentTranscript.swift` lê o log em pedaços, só o novo,
   e nunca guarda um resultado longo (prévia dos primeiros 4 KB, linhas contadas);

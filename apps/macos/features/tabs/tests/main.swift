@@ -70,6 +70,8 @@ let exitCode = await Checks.run([
         expect(TabAgentTitle.sign(working, finishedUnseen: false) == "◐ " && TabAgentTitle.sign(waiting, finishedUnseen: false) == "● ")
         expect(TabAgentTitle.sign(done, finishedUnseen: true) == "✓• " && TabAgentTitle.sign(done, finishedUnseen: false) == "✓ ")
         expect(TabAgentTitle.sign(nil, finishedUnseen: true) == "", "no agent, no sign")
+        expect(TabAgentTitle.sign(nil, finishedUnseen: false, hibernated: true) == "☾ ", "hibernated: the moon")
+        expect(TabAgentTitle.tip(nil, folder: "~/a", hibernated: true)?.hasSuffix("\n~/a") == true)
         expect(TabAgentTitle.name(programTitle: "✳ Fix login") == "Fix login" && TabAgentTitle.name(programTitle: "  ") == "")
         expect(TabAgentTitle.tip(waiting, folder: "~/code/app") == "approve Bash: touch x\n~/code/app")
         expect(TabAgentTitle.tip(nil, folder: "~/code/app") == "~/code/app")

@@ -75,7 +75,8 @@
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
 - `TabAgentTitle.swift` (plano 19): o sinal do estado do agente antes do título (◐ trabalhando,
-  ● esperando você, ✓ terminou, ✓• terminou sem você ver, ✕ falhou), o nome da conversa no lugar da pasta e a
+  ● esperando você, ✓ terminou, ✓• terminou sem você ver, ✕ falhou, ☾ hibernado, com "Hibernando" na
+  dica), o nome da conversa no lugar da pasta e a
   frase do que ele faz na dica; o nome dado à mão continua, com o sinal.
 
 ## Como validar

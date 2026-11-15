@@ -75,6 +75,11 @@
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.
+- `AgentsHibernate.swift` (plano 19, fase F): os hooks guardam no terminal o que traz o agente de
+  volta; um relógio só, armado para o primeiro agente parado (agents.hibernateAfterMinutes, ninguém
+  olhando), encerra com SIGTERM e marca a aba; o foco no terminal digita o `--resume` pelo kit; o fim
+  de um agente que saiu sozinho mostra "Reiniciar"; agents.hibernate e agents.restart agem no
+  terminal com foco. Só sessões abertas pelo Cadex (têm hooks).
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.

@@ -238,6 +238,7 @@ extension AppDelegate {
         // hooks, the id they run under (docs/adr/0022-terminal-daemon.md).
         AgentToolsServer.shared.onEvent = { event in
             AgentsController.shared.noteHook(pid: event.pid, event: event.event, sessionID: event.sessionID)
+            (NSApp.delegate as? AppDelegate)?.noteAgentEvent(event)
             return nil
         }
         do { try AgentToolsServer.shared.start() } catch { NSLog("Cadex: the app socket did not open: %@", "\(error)") }

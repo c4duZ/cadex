@@ -158,6 +158,9 @@ public struct Settings: Equatable, Sendable {
         /// Machines whose agents notify nothing: "local" is this Mac (plan 23
         /// adds remote ones).
         public var mutedMachines: [String] = []
+        /// A done or idle agent not looked at for this long ends and comes
+        /// back when its terminal is opened (plan 19 phase F); 0 is off.
+        public var hibernateAfterMinutes = 30
         /// Index every account's conversations for the History page (plan 18,
         /// phase D). Off: nothing indexed or watched.
         public var history = true

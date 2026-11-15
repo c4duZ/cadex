@@ -72,7 +72,7 @@ extension AppDelegate {
         locate { Self.key($0) == key }
     }
 
-    private func terminal(pid: Int32) -> (window: WindowSession, space: Int, terminal: TerminalView)? {
+    func terminal(pid: Int32) -> (window: WindowSession, space: Int, terminal: TerminalView)? {
         pid > 0 ? locate { $0.foregroundGroup == pid } : nil
     }
 

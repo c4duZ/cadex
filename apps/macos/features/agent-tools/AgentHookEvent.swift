@@ -17,6 +17,9 @@ public struct AgentHookEvent: Sendable, Equatable {
     public let toolName: String?
     /// What the tool would act on: the command, the file, the pattern or the address.
     public let toolSubject: String?
+    /// The session kit's name for the session (its token's file), set by
+    /// the socket: a hibernated agent comes back with the same token.
+    public internal(set) var kitSession: String?
 
     /// The line `cadex hook` sent, without its token; nil when it does not read.
     static func parse(_ object: [String: Any]) -> AgentHookEvent? {
@@ -26,7 +29,7 @@ public struct AgentHookEvent: Sendable, Equatable {
                               sessionID: payload["session_id"] as? String, transcriptPath: payload["transcript_path"] as? String,
                               cwd: payload["cwd"] as? String, source: payload["source"] as? String,
                               notificationType: payload["notification_type"] as? String, toolName: payload["tool_name"] as? String,
-                              toolSubject: subject(payload["tool_input"] as? [String: Any] ?? [:]))
+                              toolSubject: subject(payload["tool_input"] as? [String: Any] ?? [:]), kitSession: nil)
     }
 
     /// The part of a tool's input a person reads first, as the permission
