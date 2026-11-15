@@ -16,7 +16,8 @@
 - `ReviewCommentStore.swift`: por worktree em `~/Library/Application Support/Cadex/review/<repo>/<worktree>.json`
   (CADEX_REVIEW_DIR nas instâncias de teste), os pendentes e os enviados, gravado a cada mudança.
 - `ReviewComments.swift`: a lista de uma worktree (acrescentar, editar, apagar, recolocar, a
-  mensagem na ordem dos arquivos e das linhas, os enviados indo para o histórico) e
+  mensagem na ordem dos arquivos e das linhas, os enviados indo para o histórico, `move` de um
+  desatualizado para outras linhas com as mesmas palavras) e
   ReviewCommentText, o texto que o agente lê (o caminho, as linhas, o trecho citado e o comentário).
 - `ReviewCommentEditor.swift`: o campo num popover sob as linhas, ⌘↩ salva, esc desiste.
 - `ReviewCommentCommands.swift`: review.add-comment (c, só com a revisão em foco), review.edit-comment,

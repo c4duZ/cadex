@@ -55,6 +55,11 @@ let exitCode = await Checks.run([
         comments.place { path, _ in path == "a.swift" ? ["q", "y"] : nil }
         expect(comments.pending.first { $0.path == "b.swift" }?.stale == true)
         expect(comments.sorted(["a.swift", "b.swift"]).map(\.path) == ["a.swift", "b.swift"])
+        // Moved: the same words at the new lines, no longer stale.
+        let stale = comments.pending.first { $0.path == "b.swift" }!
+        comments.move(stale.id, to: comment(["q"], start: 1))
+        let moved = comments.comment(stale.id)!
+        expect(!moved.stale && moved.path == "a.swift" && moved.start == 1 && moved.body == stale.body && moved.lines == ["q"])
     }),
 ])
 exit(exitCode)

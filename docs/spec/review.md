@@ -30,14 +30,15 @@ do source-control (`source-control.md`); comentários e autoria são desta featu
 
 ### Comentários
 - Passar o mouse numa linha mostra "+" na margem; clicar abre o comentário daquela linha, arrastar
-  na margem abre de um intervalo (dentro do mesmo trecho), c abre na linha do cursor
-  (review.add-comment).
+  na margem abre de um intervalo (dentro do mesmo trecho: para numa região recolhida, num comentário
+  ou no fim do arquivo), c abre nas linhas marcadas ou na do cursor (review.add-comment).
 - O campo aceita Markdown; ⌘Enter salva, Esc cancela. O comentário salvo aparece sob as linhas, com
   editar (review.edit-comment) e apagar (review.delete-comment).
 - Cada comentário guarda o arquivo, o lado (antes ou depois), as linhas, o texto delas e 3 linhas de
   contexto. Quando o diff muda (o agente mexeu de novo), ele é reposicionado pelo texto e pelo
   contexto; sem achar, fica "desatualizado" no topo do arquivo, com o trecho antigo, até o dono
-  apagar ou mover.
+  apagar ou mover (no menu do clique nele, "Mover para as linhas marcadas": marcar as linhas novas e
+  apertar c).
 - Ficam guardados por worktree até enviar ou apagar, e sobrevivem a fechar o app.
 
 ### Enviar ao agente

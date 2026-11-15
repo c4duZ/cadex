@@ -17,6 +17,8 @@ import Worktrees
 enum ReviewCommentsHub {
     /// One list per worktree, shared by the windows.
     static var lists: [String: ReviewComments] = [:]
+    /// A stale comment waiting for its new lines (the next c), by worktree.
+    static var moving: [String: String] = [:]
 
     static func comments(for repo: String) -> ReviewComments {
         if let list = lists[repo] { return list }
@@ -36,11 +38,18 @@ extension WindowSession {
             for case let open as ReviewDocument in self?.tabs?.allDocuments ?? [] where open.request.repo == review.request.repo { self?.drawComments(on: open) }
         }
         review.onCommentRequest = { [weak self, weak review] selection in if let review { self?.writeComment(on: review, selection) } }
-        review.onAnnotation = { [weak self, weak review] _ in
+        review.onAnnotation = { [weak self, weak review] id in
             guard let self, let review, let anchor = review.anchor else { return }
-            PopupMenu.show([MenuEntry(T("Edit Comment", "Editar o comentário"), icon: .pencilSimple) { [weak self] in _ = self?.commands.run("review.edit-comment") },
-                            MenuEntry(T("Delete Comment", "Apagar o comentário"), icon: .trash) { [weak self] in _ = self?.commands.run("review.delete-comment") }],
-                           at: NSPoint(x: anchor.rect.midX, y: anchor.rect.maxY), in: anchor.view)
+            var entries = [MenuEntry(T("Edit Comment", "Editar o comentário"), icon: .pencilSimple) { [weak self] in _ = self?.commands.run("review.edit-comment") },
+                           MenuEntry(T("Delete Comment", "Apagar o comentário"), icon: .trash) { [weak self] in _ = self?.commands.run("review.delete-comment") }]
+            // A stale one waits to be moved: mark the new lines, then this.
+            if list.comment(id)?.stale == true {
+                entries.insert(MenuEntry(T("Move to Marked Lines", "Mover para as linhas marcadas"), icon: .arrowRight) { [weak review] in
+                    review?.announce(T("Mark the lines, then press c to move the comment there", "Marque as linhas e aperte c para mover o comentário para lá"))
+                    ReviewCommentsHub.moving[review?.request.repo ?? ""] = id
+                }, at: 0)
+            }
+            PopupMenu.show(entries, at: NSPoint(x: anchor.rect.midX, y: anchor.rect.maxY), in: anchor.view)
         }
         drawComments(on: review)
     }
@@ -75,6 +84,13 @@ extension WindowSession {
         commands.register(ReviewCommentCommands.all(.init(
             add: { [weak self] in
                 guard let review = review(), let selection = review.markedSelection() else { return }
+                let repo = review.request.repo
+                // Moving a stale comment: its words go to these lines.
+                if let id = ReviewCommentsHub.moving.removeValue(forKey: repo) {
+                    return ReviewCommentsHub.comments(for: repo).move(id, to: ReviewComment(
+                        path: selection.path, old: selection.old, start: selection.start, end: selection.end,
+                        lines: selection.lines, before: selection.before, after: selection.after, body: ""))
+                }
                 self?.writeComment(on: review, selection)
             },
             edit: { [weak self] in

@@ -42,6 +42,19 @@ public final class ReviewComments {
 
     public func comment(_ id: String) -> ReviewComment? { pending.first { $0.id == id } }
 
+    /// A comment to other lines (a stale one, whose lines are gone): the
+    /// same words, the new place and its context.
+    public func move(_ id: String, to place: ReviewComment) {
+        guard let at = pending.firstIndex(where: { $0.id == id }) else { return }
+        var moved = place
+        moved.id = id
+        moved.body = pending[at].body
+        moved.created = pending[at].created
+        moved.stale = false
+        pending[at] = moved
+        save()
+    }
+
     /// Each comment where its excerpt is now: `text(path, old)` gives the
     /// file's lines on that side, nil when the file left the review.
     public func place(_ text: (String, Bool) -> [String]?) {

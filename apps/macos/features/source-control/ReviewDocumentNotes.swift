@@ -11,7 +11,15 @@ extension ReviewDocument {
     /// One file and one side: the new side when any line has a new number
     /// (unchanged and added), else the old one (removed lines).
     func selection(of rows: [Int]) -> ReviewLineSelection? {
-        let lines = rows.compactMap { index -> (file: Int, kind: ReviewLayout.Kind, old: Int?, new: Int?)? in
+        // A run stays inside its stretch of code: it stops at the first row
+        // that is not a line (a fold, a note, the next file's header).
+        guard let low = rows.min() else { return nil }
+        var run: [Int] = []
+        for index in low...(rows.max() ?? low) {
+            guard text.layout.rows.indices.contains(index), case .line = text.layout.rows[index] else { break }
+            run.append(index)
+        }
+        let lines = run.compactMap { index -> (file: Int, kind: ReviewLayout.Kind, old: Int?, new: Int?)? in
             guard text.layout.rows.indices.contains(index), case .line(let file, let kind, let old, let new, _) = text.layout.rows[index] else { return nil }
             return (file, kind, old, new)
         }
