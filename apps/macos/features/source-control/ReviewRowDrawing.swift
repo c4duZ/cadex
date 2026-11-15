@@ -45,7 +45,8 @@ extension ReviewTextView {
         look.foreground.withAlphaComponent(0.07).setFill()
         NSRect(x: 0, y: rect.minY + 6, width: rect.width, height: rect.height - 6).fill()
         let name = f.orig.isEmpty ? f.path : "\(f.orig) → \(f.path)"
-        let counts = f.added.map { "+\($0) −\(f.removed ?? 0)" } ?? T("binary", "binário")
+        let stopped = authorStopped.contains(file) ? T("authorship stopped (over 2 MB) · ", "autoria parada (mais de 2 MB) · ") : ""
+        let counts = stopped + (f.added.map { "+\($0) −\(f.removed ?? 0)" } ?? T("binary", "binário"))
         let y = rect.minY + 6 + (rect.height - 6 - lineHeight) / 2 + 1
         label(String(f.status), at: NSPoint(x: 10, y: y), color: Self.statusColor(f.status), weight: .bold)
         label(name, at: NSPoint(x: 10 + charWidth * 2.5, y: y), color: look.foreground, weight: .semibold)
@@ -62,6 +63,11 @@ extension ReviewTextView {
         if marked {
             NSColor.controlAccentColor.withAlphaComponent(0.28).setFill()
             NSRect(x: 0, y: rect.minY, width: gutterWidth, height: rect.height).fill()
+        }
+        // The agent's line: a thin bar at the edge (review.toggle-authorship).
+        if kind != .removed, let new, authorMarks[file]?[new] != nil {
+            NSColor.systemPurple.withAlphaComponent(0.7).setFill()
+            NSRect(x: 0, y: rect.minY, width: 3, height: rect.height).fill()
         }
         if hovered.map({ rect.minY >= tops[$0] && rect.minY < tops[$0 + 1] }) == true {
             label("+", at: NSPoint(x: 3, y: rect.minY + 1), color: .controlAccentColor, weight: .bold)

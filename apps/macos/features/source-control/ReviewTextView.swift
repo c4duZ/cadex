@@ -28,6 +28,10 @@ final class ReviewTextView: NSView {
     private(set) var hovered: Int?
     private var commentFrom: Int?
     static let plusWidth: CGFloat = 16
+    /// The agent's lines by file index (new line → session), and the files
+    /// whose authorship stopped.
+    var authorMarks: [Int: [Int: String]] = [:]
+    var authorStopped: Set<Int> = []
 
     let look = EditorAppearance.current
     lazy var charWidth: CGFloat = ("M" as NSString).size(withAttributes: [.font: look.font]).width
@@ -139,6 +143,12 @@ final class ReviewTextView: NSView {
         guard index != hovered else { return }
         for old in [hovered, index].compactMap({ $0 }) { setNeedsDisplay(rect(of: old)) }
         hovered = index
+        // Who wrote it, on the pointer.
+        if let index, case .line(let file, let kind, _, let new?, _) = layout.rows[index], kind != .removed, let session = authorMarks[file]?[new] {
+            toolTip = "Written by the agent · session \(session.prefix(8))"
+        } else {
+            toolTip = nil
+        }
     }
 
     override func mouseExited(with event: NSEvent) {

@@ -85,6 +85,7 @@ final class SettingsBridge {
         AgentHistoryController.shared.isEnabled = settings.agents.history
         SessionKit.shared.hooksEnabled = settings.agents.stateHooks
         Self.applyAgentTools(settings.agentTools.enabled)
+        AuthorshipHub.apply(settings.review.authorship)
         onComputerUse?(settings.computerUse)
         WorktreesController.shared.rootSetting = settings.worktrees.root
         WorktreesController.shared.setupHooks = settings.worktrees.setupHooks.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }

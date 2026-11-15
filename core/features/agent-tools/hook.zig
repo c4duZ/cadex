@@ -9,6 +9,7 @@
 //! click (docs/adr/0023-answer-agent-permissions.md). Exit code 0 always.
 
 const std = @import("std");
+const edits = @import("edits.zig");
 extern "c" fn getppid() c_int;
 extern "c" fn time(t: ?*c_long) c_long;
 
@@ -24,6 +25,14 @@ pub fn message(gpa: std.mem.Allocator, token: []const u8, event: []const u8, pid
     var parsed = std.json.parseFromSlice(std.json.Value, gpa, payload, .{}) catch null;
     defer if (parsed) |*p| p.deinit();
     const value: std.json.Value = if (parsed) |p| p.value else .null;
+    // An edit's payload carries the whole file: only its ranges go (ADR 0027).
+    if (std.mem.eql(u8, event, "PostToolUse")) {
+        const cut = try edits.trimmed(gpa, value);
+        defer gpa.free(cut);
+        return std.fmt.allocPrint(gpa, "{{\"v\":1,\"token\":{f},\"event\":{f},\"pid\":{d},\"payload\":{s}}}\n", .{
+            std.json.fmt(token, .{}), std.json.fmt(event, .{}), pid, cut,
+        });
+    }
     return std.fmt.allocPrint(gpa, "{{\"v\":1,\"token\":{f},\"event\":{f},\"pid\":{d},\"payload\":{f}}}\n", .{
         std.json.fmt(token, .{}), std.json.fmt(event, .{}), pid, std.json.fmt(value, .{}),
     });
@@ -134,4 +143,12 @@ test "with no app on the socket the exchange gives up at once" {
     const got = try exchange(testing.allocator, "/nonexistent/cadex/app.sock", "x\n", 200);
     try testing.expect(got == null);
     try testing.expect(time(null) - start <= 1);
+}
+
+test "PostToolUse goes as ranges, never with the file" {
+    const line = try message(testing.allocator, "t", "PostToolUse", 7,
+        "{\"session_id\":\"s\",\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"/a\"},\"tool_response\":{\"originalFile\":\"WHOLE\",\"structuredPatch\":[{\"newStart\":3,\"lines\":[\"+x\"]}]}}");
+    defer testing.allocator.free(line);
+    try testing.expect(std.mem.indexOf(u8, line, "WHOLE") == null);
+    try testing.expect(std.mem.indexOf(u8, line, "\"lines\":[[3,3]]") != null);
 }

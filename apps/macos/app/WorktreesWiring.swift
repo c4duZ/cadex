@@ -153,6 +153,9 @@ extension WindowSession {
                 button: T("Remove", "Remover")) { [weak self] in
             if let message = WorktreesController.shared.remove(task, repo: repo, deleteBranch: true) {
                 self?.say(T("The task was not removed", "A tarefa não foi removida"), message)
+            } else {
+                // Its authorship and the versions kept for it go with it (ADR 0027).
+                AuthorshipHub.tracker(for: task.path).forget()
             }
         }
     }

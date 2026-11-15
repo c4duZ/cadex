@@ -100,6 +100,10 @@
   cada leitura; o "+" e o c abrem o editor; o clique num comentário oferece editar e apagar (pelos
   ids); enviar cola, sem Enter, no agente da worktree que aceita colagem segura, senão copia com aviso;
   os dois casos vão para o histórico.
+- `ReviewAuthorshipWiring.swift` (plano 21, fase E): com review.authorship o kit ganha o hook
+  PostToolUse (`cadex hook PostToolUse`); cada edição vai ao rastreador da worktree do arquivo (achada
+  fora da linha principal), as mudanças no disco e cada leitura da revisão comparam, e a aba ganha as
+  marcas (review.toggle-authorship, review.export-authorship); remover a tarefa esquece a autoria.
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.

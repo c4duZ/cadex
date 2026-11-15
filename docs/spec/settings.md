@@ -22,7 +22,8 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
     (`computerUse.enabled`, desligado; com `computerUse.allowedApps` e `computerUse.blockedApps`, ver
     `computer-use.md`). Revisão: as linhas de contexto em volta de cada mudança
     (`git.reviewContextLines`, 3), quebrar as linhas (`git.reviewWrap`) e mostrar os espaços
-    (`git.reviewShowWhitespace`), os dois desligados (ver `review.md`). Tarefas: a pasta das tarefas (`worktrees.root`, vazio é ao lado de cada repositório; ver
+    (`git.reviewShowWhitespace`), os dois desligados, e marcar as linhas que os agentes escrevem
+    (`review.authorship`, ligado; ver `review.md`). Tarefas: a pasta das tarefas (`worktrees.root`, vazio é ao lado de cada repositório; ver
     `worktrees.md`). Manter acordado: como liga e desliga, o modo
     (`power.mode`), manter a tela acesa, ligar ao abrir (`power.onAtLaunch`) e a tampa fechada
     explicada à parte (ver `power.md`). Numa página própria ficou demais (o dono, 2026-10-20).

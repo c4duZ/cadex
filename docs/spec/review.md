@@ -96,7 +96,9 @@ do source-control (`source-control.md`); comentários e autoria são desta featu
 - [x] Depois de o agente editar o arquivo, o comentário segue a linha certa; sem achar, fica
       "desatualizado" (testes da feature review e da aba).
 - [x] Comentários sobrevivem a fechar e abrir o app (teste: lidos de novo do arquivo da worktree).
-- [ ] Uma edição do agente marca as linhas dele; uma edição do dono no editor marca as do dono.
-- [ ] O que o `cadex hook` manda ao app no PostToolUse não tem o arquivo inteiro nem o texto da
-      conversa.
+- [x] Uma edição do agente marca as linhas dele; uma edição do dono no editor marca as do dono
+      (2026-11-15: o `claude` real editando numa worktree, o app de release gravando as linhas dele;
+      a edição do dono no disco tirou a marca da linha que tocou).
+- [x] O que o `cadex hook` manda ao app no PostToolUse não tem o arquivo inteiro nem o texto da
+      conversa (teste do núcleo: nem o `originalFile` nem o texto das linhas).
 - [ ] Com `review.authorship` desligada, o kit da sessão não tem o hook PostToolUse.

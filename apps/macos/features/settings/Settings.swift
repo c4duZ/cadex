@@ -211,6 +211,12 @@ public struct Settings: Equatable, Sendable {
         public var reviewShowWhitespace = false
     }
 
+    /// The review's line authorship (docs/adr/0027-local-authorship.md).
+    public struct Review: Equatable, Sendable {
+        /// Off: the session kit gets no PostToolUse hook and nothing is kept.
+        public var authorship = true
+    }
+
     public struct StatusBar: Equatable, Sendable {
         /// The items on each side, in order; an item in neither is hidden
         /// (docs/spec/status-bar.md). The app drops unknown ids.
@@ -231,6 +237,7 @@ public struct Settings: Equatable, Sendable {
     public var agents = Agents()
     public var ssh = SSH()
     public var git = Git()
+    public var review = Review()
     public var worktrees = Worktrees()
     public var agentTools = AgentTools()
     public var computerUse = ComputerUse()

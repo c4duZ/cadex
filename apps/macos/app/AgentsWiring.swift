@@ -240,6 +240,7 @@ extension AppDelegate {
         AgentToolsServer.shared.onEvent = { event in
             AgentsController.shared.noteHook(pid: event.pid, event: event.event, sessionID: event.sessionID)
             (NSApp.delegate as? AppDelegate)?.noteAgentEvent(event)
+            if event.edit != nil { AuthorshipHub.record(event) }
             return nil
         }
         do { try AgentToolsServer.shared.start() } catch { NSLog("Cadex: the app socket did not open: %@", "\(error)") }

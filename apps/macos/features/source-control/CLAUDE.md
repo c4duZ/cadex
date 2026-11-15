@@ -66,7 +66,9 @@
   texto e 3 linhas em volta) e `ReviewDocumentNotes.swift` (a seleção, os textos de cada arquivo, a
   nota do cursor, onde ancorar o popover, o botão da barra, `announce`). A aba desenha a nota numa
   caixa, mostra "+" na margem ao passar sobre uma linha (apertar e arrastar ali pede um comentário
-  das linhas) e avisa por onLoaded, onAnnotation e onCommentRequest.
+  das linhas) e avisa por onLoaded, onAnnotation e onCommentRequest. A autoria (fase E) também
+  chega de fora: `lineMarks` (arquivo → linha nova → sessão) vira uma barra fina na borda e a sessão
+  no tooltip; `marksStopped` põe "autoria parada" no cabeçalho do arquivo.
 - Spec de comportamento em `docs/spec/source-control.md`. Status: pronto (plano 6).
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 

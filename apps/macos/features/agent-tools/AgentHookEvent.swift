@@ -20,6 +20,9 @@ public struct AgentHookEvent: Sendable, Equatable {
     /// The session kit's name for the session (its token's file), set by
     /// the socket: a hibernated agent comes back with the same token.
     public internal(set) var kitSession: String?
+    /// PostToolUse (plan 21 phase E): the file an agent edited and the lines
+    /// it wrote, as `cadex hook` cut them (never the file's text).
+    public var edit: AgentEdit?
 
     /// The line `cadex hook` sent, without its token; nil when it does not read.
     static func parse(_ object: [String: Any]) -> AgentHookEvent? {
@@ -29,7 +32,8 @@ public struct AgentHookEvent: Sendable, Equatable {
                               sessionID: payload["session_id"] as? String, transcriptPath: payload["transcript_path"] as? String,
                               cwd: payload["cwd"] as? String, source: payload["source"] as? String,
                               notificationType: payload["notification_type"] as? String, toolName: payload["tool_name"] as? String,
-                              toolSubject: subject(payload["tool_input"] as? [String: Any] ?? [:]), kitSession: nil)
+                              toolSubject: subject(payload["tool_input"] as? [String: Any] ?? [:]), kitSession: nil,
+                              edit: event == "PostToolUse" ? AgentEdit(payload) : nil)
     }
 
     /// The part of a tool's input a person reads first, as the permission
@@ -39,5 +43,23 @@ public struct AgentHookEvent: Sendable, Equatable {
             if let value = input[key] as? String, !value.isEmpty { return value }
         }
         return input.values.compactMap { $0 as? String }.first
+    }
+}
+
+/// An agent's edit: the file, the lines it wrote ([start, end], 1-based),
+/// or the whole file (a Write that made it).
+public struct AgentEdit: Sendable, Equatable {
+    public let file: String
+    public let lines: [ClosedRange<Int>]
+    public let whole: Bool
+
+    init?(_ payload: [String: Any]) {
+        guard let file = payload["file"] as? String, !file.isEmpty else { return nil }
+        self.file = file
+        whole = payload["whole"] as? Bool ?? false
+        lines = (payload["lines"] as? [[Any]] ?? []).compactMap { pair in
+            guard pair.count == 2, let a = (pair[0] as? NSNumber)?.intValue, let b = (pair[1] as? NSNumber)?.intValue, a <= b else { return nil }
+            return a...b
+        }
     }
 }

@@ -62,4 +62,5 @@ let exitCode = await Checks.run([
         expect(!moved.stale && moved.path == "a.swift" && moved.start == 1 && moved.body == stale.body && moved.lines == ["q"])
     }),
 ])
-exit(exitCode)
+let authorshipExit = await Checks.run(authorshipChecks)
+exit(exitCode != 0 ? exitCode : authorshipExit)

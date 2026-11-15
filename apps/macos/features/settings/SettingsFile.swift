@@ -140,6 +140,9 @@ public enum SettingsFile {
             settings.git.reviewWrap = reader.bool(s, "git.reviewWrap") ?? settings.git.reviewWrap
             settings.git.reviewShowWhitespace = reader.bool(s, "git.reviewShowWhitespace") ?? settings.git.reviewShowWhitespace
         }
+        if let s = reader.section(root, "review") {
+            settings.review.authorship = reader.bool(s, "review.authorship") ?? settings.review.authorship
+        }
         if let s = reader.section(root, "ssh") {
             settings.ssh.ping = reader.bool(s, "ssh.ping") ?? settings.ssh.ping
         }
@@ -186,6 +189,7 @@ public enum SettingsFile {
             "sidebar": ["items": s.sidebar.items],
             "statusBar": ["left": s.statusBar.left, "right": s.statusBar.right],
             "ssh": ["ping": s.ssh.ping],
+            "review": ["authorship": s.review.authorship],
             "git": ["reviewContextLines": s.git.reviewContextLines, "reviewWrap": s.git.reviewWrap,
                     "reviewShowWhitespace": s.git.reviewShowWhitespace],
             "worktrees": ["root": s.worktrees.root, "setupHooks": s.worktrees.setupHooks],

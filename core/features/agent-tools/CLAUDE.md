@@ -38,6 +38,10 @@
 - Fase E: `cadex computer apps|state|click|type|set|scroll|screenshot` e as ferramentas `computer_*`
   viram computer-use.agent com `action=` (`../../../docs/spec/computer-use.md`); o print da janela
   também volta como imagem.
+- Plano 21, fase E (`../../../docs/adr/0027-local-authorship.md`): `edits.zig` corta o PostToolUse
+  antes do socket: a sessão, a pasta, a ferramenta, o arquivo e os intervalos de linhas escritas,
+  tirados do `structuredPatch` (o `newStart` e as linhas `+`); um Write que cria marca o arquivo
+  inteiro; nunca o arquivo (`originalFile`) nem o texto das linhas.
 - O build (`../../build.zig`, `addCli`) instala `zig-out/bin/cadex` só no Mac; o empacotamento o põe em
   Contents/Helpers.
 

@@ -66,6 +66,14 @@ extension ReviewDocument {
         say(bar.stringValue.components(separatedBy: " — ").last ?? "")
     }
 
+    func showMarks() {
+        text.authorMarks = Dictionary(uniqueKeysWithValues: files.enumerated().compactMap { index, diff in
+            lineMarks[diff.file.path].map { (index, $0) }
+        })
+        text.authorStopped = Set(files.enumerated().filter { marksStopped.contains($0.element.file.path) }.map(\.offset))
+        text.needsDisplay = true
+    }
+
     func showBarAction() {
         barButton.isHidden = barAction == nil
         barButton.title = barAction?.title ?? ""

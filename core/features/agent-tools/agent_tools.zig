@@ -11,6 +11,7 @@ pub const agent = @import("agent.zig");
 test {
     _ = statusline;
     _ = hook;
+    _ = @import("edits.zig");
     _ = cli;
     _ = agent;
 }

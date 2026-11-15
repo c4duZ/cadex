@@ -38,6 +38,10 @@ public final class ReviewDocument: TabDocument {
     public var onLoaded: (() -> Void)?
     public var onAnnotation: ((String) -> Void)?
     public var onCommentRequest: ((ReviewLineSelection) -> Void)?
+    /// Who wrote each line (plan 21 phase E): path → new line → a label
+    /// (the agent's session); paths whose authorship stopped (too big).
+    public var lineMarks: [String: [Int: String]] = [:] { didSet { showMarks() } }
+    public var marksStopped: Set<String> = [] { didSet { showMarks() } }
     /// A button on the bar ("Send to Agent (2)"), running what the app gives.
     public var barAction: (title: String, run: () -> Void)? { didSet { showBarAction() } }
     let barButton = CommandButton(title: "") {}
@@ -177,6 +181,7 @@ public final class ReviewDocument: TabDocument {
             return diff.patch.contains("\n@@") || diff.patch.hasPrefix("@@") ? nil : T("Only the name or the mode changed", "Só o nome ou o modo mudou")
         }
         text.show(layout, files: files)
+        showMarks()
     }
 
     func say(_ message: String) {

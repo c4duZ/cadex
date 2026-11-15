@@ -24,7 +24,8 @@
   um token desconhecido faz reler a pasta (sessão que acabou de abrir).
 - `AgentHookEvent.swift`: o evento, o pid do `claude` e o que o Claude Code deu ao hook
   (session_id, transcript_path, cwd, source, notification_type, tool_name) e `kitSession`, a sessão
-  do kit dona do token (o nome do arquivo dele), que o agente hibernado reaproveita (plano 19, fase F).
+  do kit dona do token (o nome do arquivo dele), que o agente hibernado reaproveita (plano 19, fase F),
+  e no PostToolUse o `edit` (AgentEdit: o arquivo e os intervalos de linhas, plano 21 fase E).
 - Pedidos de comando (plano 20, fase B): `AgentCommandRequest.swift` (o id ou a lista, os argumentos,
   os pids e a sessão do kit; a resposta `AgentCommandAnswer`; a lista fechada `AgentCommandList`, que
   só uma ADR amplia); o servidor os passa a `onCommand`, que responde uma vez (pode esperar uma página).

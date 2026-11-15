@@ -26,6 +26,7 @@ extension WindowSession {
             review: { [weak self] in self?.tabs?.activeDocument as? ReviewDocument },
             diff: { [weak self] in self?.tabs?.activeDocument as? DiffDocument }))
         registerReviewComments(palette: palette)
+        registerAuthorship()
     }
 
     /// The repository to review: the focused terminal's, else the workspace's.
@@ -59,6 +60,7 @@ extension WindowSession {
             }
         }
         attachComments(to: review)
+        attachAuthorship(to: review)
         tabs.open(review, beside: false)
     }
 
