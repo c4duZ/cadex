@@ -41,8 +41,9 @@ Testado em 2026-11-15 (Claude Code 2.1.325), sem tocar o `~/.claude`:
 - **Pelo kit da sessão, nunca pelo `~/.claude`.** O `cadex` mora no bundle, em
   `Cadex.app/Contents/Helpers/cadex` (em Contents/MacOS ele colidiria com "Cadex" num disco que não
   diferencia maiúsculas; plano 18). O comando que abre o agente põe essa pasta no `PATH`; o
-  `--mcp-config` do kit registra `cadex mcp`; o `--plugin-dir` traz as skills. O token já está no
-  `env` do `--settings`. Sessão aberta fora do Cadex não ganha nada disso.
+  `--mcp-config` do kit registra `cadex mcp`, com o token no `env` do servidor (é o Claude Code que o
+  inicia); o `--plugin-dir` traz as skills. Para a CLI, o token já está no `env` do `--settings`, que
+  chega à ferramenta Bash. Sessão aberta fora do Cadex não ganha nada disso.
 - **Skills curtas, guia no binário.** Cada SKILL.md diz quando usar o Cadex e manda rodar
   `cadex skills get <tema>`; o guia completo vem do binário da mesma versão do app, e nunca fica
   desatualizado.
