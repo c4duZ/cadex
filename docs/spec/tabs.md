@@ -18,6 +18,9 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   esperando você, terminou, terminou sem você ver), o nome da conversa no lugar da pasta e, ao
   passar o ponteiro, a frase do que ele faz agora. O nome dado à mão continua vencendo; o sinal
   aparece mesmo assim.
+- Com terminal.keepSessions ligado (plano 19), fechar a janela ou o app deixa os shells das abas
+  vivos no daemon do terminal, e reabrir religa cada aba ao seu; fechar uma aba ou um painel encerra
+  o shell dele, pedindo confirmação com programa rodando, como hoje.
 - ⌘1 a ⌘9 vão para a aba daquela posição. Ctrl+Tab e Ctrl+⇧+Tab alternam pela ordem de uso
   (Ctrl+Tab volta para a aba usada antes da atual).
 - Arrastar uma aba na barra muda a posição dela.
@@ -155,3 +158,5 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
 - [x] Clicar num documento dá o foco a ele; ⌘], ⌘[ e ⌘⌥ + seta passam por documentos.
 - [x] ⌘D num documento abre um terminal ao lado, na pasta do arquivo.
 - [x] Fechar painel, aba ou janela com documento não salvo pergunta antes.
+- [ ] Uma aba com o Claude Code mostra o sinal de estado e o nome da conversa; o nome dado à mão
+      continua; com keepSessions ligado, fechar e reabrir o app religa a aba ao mesmo shell.

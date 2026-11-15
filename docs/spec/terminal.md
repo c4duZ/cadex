@@ -192,3 +192,8 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
 - [x] Fechar uma aba com `sleep 100` rodando pede confirmação; com o shell parado, fecha direto.
 - [ ] Reabrir o app restaura abas, divisões e pastas.
 - [ ] `vim`, `htop` e `less` funcionam, inclusive com rolagem e redimensionamento.
+- [ ] Com terminal.keepSessions ligado, `top` rodando, fechar e reabrir o Cadex mostra o mesmo `top`
+      com o scrollback; `kill -9` no app não derruba o terminal; atualizar o app mantém a sessão.
+- [ ] Com terminal.keepSessions desligado, nenhum daemon roda (`ps`).
+- [ ] O Claude Code numa aba recebe a resposta ao `ESC]7501;?` e manda o estado; chaves desconhecidas
+      não quebram (testes do núcleo com as sequências do teste de 2026-11-14).
