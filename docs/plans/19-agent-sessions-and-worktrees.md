@@ -236,3 +236,47 @@ docs/adr/0021-cadex-managed-accounts.md (do plano 18), `docs/adr/0019-agents-obs
   (pedir a palavra-código, como no teste de 2026-11-14).
 - Conferência à mão pelo método do `docs/plans/README.md` (`CADEX_BACKGROUND=1`, menus,
   `screencapture -l`).
+
+## Fechamento (2026-11-15)
+- Fases A a G no código, com `make check` e `make perf` passando. Conferido com o `claude` real
+  (2.1.325, conta bhband) e com o app de release em instâncias de teste:
+  - B: o OSC 7501 e os hooks dando o estado e o id certos; o token recusando quem não é sessão.
+  - C: Permitir e Negar respondendo o hook no formato do Claude Code; o cartão saindo quando a TUI
+    responde.
+  - D: o comando "hooks de preparo && agente" com o `claude` real; a confiança da pasta é a do
+    repositório principal (corrigido do plano: aceitar em `<repo>.worktrees/` não cobria as tarefas).
+  - E: `top` vivo depois do `kill -9` no app e religado ao reabrir; o reinício simulado mostrando a
+    saída gravada; com a opção desligada, nenhum daemon. O modo DEC 2026 e o
+    `CLAUDE_CODE_FORCE_SYNC_OUTPUT`; as notificações OSC 777/9 de qualquer programa (escolha do
+    dono: sem `preferredNotifChannel`).
+  - F: hibernado depois do tempo, o shell e o app ficando, e a conversa retomada com a palavra-código.
+  - G: no `make perf`, dez terminais pelo daemon (1,6 MB com a janela, 1,4 MB com o app morto, 0% de
+    CPU, os dez shells vivos), cinco sessões mandando hooks a cada segundo (1,2% de CPU, nada de
+    memória a mais, nenhum recusado) e, desligado, nenhum daemon. Cada instância de teste passou a ter
+    os próprios sockets e tokens: até aqui todo `make perf` tomava o app.sock do Cadex do dono.
+- Falta o dono ver no app, sem permissão de clique e de captura de tela aqui: o número no Dock com
+  uma instância só; o New Task pelo clique; a tela religada com terminal.keepSessions; a aba
+  hibernada voltando ao abrir e o botão "Reiniciar".
+- Os ids novos estão em `MAC_ONLY` do `tools/check_command_parity.py`.
+- Diferenças do plano escrito: "mantido pelo launchd" sem LaunchAgent (ADR 0022, fase E2); só a janela
+  principal mantém terminais; a confiança das tarefas (fase D); as notificações (fase E).
+
+## Notas da release (inglês)
+
+```markdown
+## Agents you can trust to run on their own (Mac)
+
+- **Exact state in each tab.** A tab running Claude Code shows what it is doing — ◐ working, ● waiting for you, ✓ done — as Claude Code itself reports it, with the conversation's name.
+- **What needs you, in one place.** A bell in the sidebar (and a number on the Dock icon) counts open requests and agents that finished while you were away. Its page has the board, where you allow or deny a permission without going to the terminal — nothing reaches an agent without your click — and a feed of every agent's timeline.
+- **One task, one worktree.** New Task makes the branch and the worktree beside the repository, copies the files git ignores that `.worktreeinclude` names (`.env` and the like), runs your setup hooks and opens the agent there, in the project's account. Each task has a status and a comment; removing one is refused while work would be lost.
+- **Quiet agents hibernate.** An agent Cadex opened that finished and nobody looked at for 30 minutes ends to free memory, and comes back with its conversation when you open its tab (Settings › General › Agents).
+
+## Terminals that outlive the app (Mac, opt-in)
+
+- **Keep terminals when Cadex quits** (Settings › Terminal): the main window's shells and agents run in a small process of their own (about 1.5 MB). Quitting, a crash or an update leaves them running; reopening shows them again with their history. After the Mac restarts, the history comes back in new shells.
+
+## Smaller things (Mac)
+
+- Programs can post notifications from the terminal (OSC 777 or OSC 9), and Claude Code's redraws arrive as synchronized updates: no more half-drawn frames.
+- Test instances of Cadex no longer take over the running app's socket.
+```

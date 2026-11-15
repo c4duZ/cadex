@@ -16,7 +16,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 
 | feature | núcleo | app macOS | o que faz |
 |---|---|---|---|
-| terminal | sim | sim | sessões PTY, modelo libghostty-vt, render Metal, teclado, colagem, busca |
+| terminal | sim | sim | sessões PTY, modelo libghostty-vt, render Metal, teclado, colagem, busca, o daemon que mantém as sessões |
 | explorer | sim | sim | operações de arquivo, observação do disco, árvore e ícones |
 | search | sim | sim | busca de arquivo por nome (fuzzy) e de conteúdo, respeitando .gitignore |
 | source-control | sim | sim | status, diff, stage, commit, push e pull via o binário git |
@@ -29,7 +29,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | markdown | sim | sim | Markdown renderizado; ao editar: autocomplete de link, ⌘+clique, links quebrados, quem aponta pra cá |
 | tabs | não | sim | abas e divisões de painel |
 | sidebar | não | sim | ícones no topo que escolhem a página do painel lateral, personalizáveis |
-| agents | não | sim | as sessões de agente rodando nas contas do Claude Code, só lidas |
+| agents | não | sim | as sessões de agente nas contas do Claude Code: lidas, o quadro do que precisa de você, hibernar |
 | agent-tools | sim | sim | o programa `cadex` que as sessões abertas pelo Cadex rodam (status line, hooks) e o socket do app |
 | ssh | não | sim | os hosts do ~/.ssh/config, se respondem, e conectar numa aba |
 | spaces | não | sim | grupos de abas restaurados entre sessões |

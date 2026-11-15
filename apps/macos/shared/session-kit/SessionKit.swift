@@ -42,14 +42,19 @@ public final class SessionKit {
     /// Where each session's token is kept (0600), read by the app's socket.
     public var tokens: String = SessionKit.tokensFolder
 
-    /// `~/Library/Application Support/Cadex/sockets` (docs/adr/0022-terminal-daemon.md).
+    /// `~/Library/Application Support/Cadex/sockets` (docs/adr/0022-terminal-daemon.md);
+    /// CADEX_SOCKETS_DIR for a test instance, which must not take the
+    /// owner's app.sock (every `make perf` did until 2026-11-15).
     public nonisolated static var socketsFolder: String {
-        FileManager.default.homeDirectoryForCurrentUser.path + "/Library/Application Support/Cadex/sockets"
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SOCKETS_DIR"], !dir.isEmpty { return dir }
+        return FileManager.default.homeDirectoryForCurrentUser.path + "/Library/Application Support/Cadex/sockets"
     }
 
-    /// `~/Library/Application Support/Cadex/sessions`: one token per session.
+    /// `~/Library/Application Support/Cadex/sessions`: one token per
+    /// session; CADEX_SESSIONS_DIR for a test instance.
     public nonisolated static var tokensFolder: String {
-        FileManager.default.homeDirectoryForCurrentUser.path + "/Library/Application Support/Cadex/sessions"
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SESSIONS_DIR"], !dir.isEmpty { return dir }
+        return FileManager.default.homeDirectoryForCurrentUser.path + "/Library/Application Support/Cadex/sessions"
     }
     private(set) var parts: [String: SessionKitPart] = [:]
 

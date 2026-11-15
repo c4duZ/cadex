@@ -48,7 +48,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | # | plano | entrega | status |
 |---|---|---|---|
 | 18 | `docs/plans/18-accounts-and-sessions.md` | contas em pastas do Cadex, configuração por link, uso sem token, histórico unificado e continuar em outra conta | feito (2026-11-14); falta o /login do dono numa conta nova (fase C) |
-| 19 | `docs/plans/19-agent-sessions-and-worktrees.md` | worktree por tarefa, estado por hooks, quadro "Precisa de você", daemon do terminal, hibernar | fases A a D no código e conferidas com o `claude` real; E (o daemon, o app por ele, o modo DEC 2026) feita, com `make perf` limpo em 2026-11-15 (o app em 48,5 de 50 MB); F (hibernar e reiniciar) feita; falta o dono ver a tela religada e a aba hibernada voltando ao abrir; `make perf` limpo em 2026-11-15; falta o dono ver no app o New Task e o número no Dock com uma instância só |
+| 19 | `docs/plans/19-agent-sessions-and-worktrees.md` | worktree por tarefa, estado por hooks, quadro "Precisa de você", daemon do terminal, hibernar | feito (fases A a G); falta o dono ver no app: o Dock com uma instância só, o New Task pelo clique, a tela religada com keepSessions e a aba hibernada voltando |
 | 20 | `docs/plans/20-agent-drives-cadex.md` | CLI `cadex` e skills, preview como navegador do agente, computer use | escrito |
 | 21 | `docs/plans/21-review.md` | diff de revisão, comentar no diff e mandar em lote, autoria por linha | escrito |
 | 22 | `docs/plans/22-memory.md` | memória: ai-memory ao lado ou nativa, consolidação sem token, página Memory | escrito |

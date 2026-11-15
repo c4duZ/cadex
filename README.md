@@ -44,7 +44,18 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   contas deste Mac, por projeto, com o estado (trabalhando, esperando você) e os subagentes. Um clique
   num subagente abre a conversa dele numa aba, no jeito do Claude Code; um duplo clique na sessão
   vai ao terminal dela. Uma notificação avisa quando um agente pede permissão, pergunta ou termina.
-  O Cadex só lê: não manda prompt nem fala com modelo.
+  O título da aba mostra o estado exato do agente que roda nela (◐ trabalhando, ● esperando você, ✓
+  terminou), contado pelo próprio Claude Code. O Cadex não manda prompt nem fala com modelo.
+- **O que precisa de você** (Mac): um sininho na barra lateral conta os pedidos abertos dos agentes e
+  os que terminaram sem você ver, também no ícone do Dock. A página dele tem o quadro, onde se permite
+  ou nega um pedido de permissão sem ir até o terminal (nada vai ao agente sem o seu clique), e o feed
+  com a linha do tempo de todos os agentes.
+- **Uma tarefa, uma worktree** (Mac): "New Task" cria o branch e a worktree ao lado do repositório,
+  copia os arquivos fora do git que o `.worktreeinclude` pede (`.env` e afins), roda os hooks de
+  preparo e abre o agente nela, na conta do projeto. Cada tarefa tem status e um comentário; sair
+  dela é recusado enquanto houver trabalho que se perderia.
+- **Agentes parados hibernam** (Mac): um agente aberto pelo Cadex que terminou e que ninguém olha há
+  30 minutos encerra para liberar memória, e volta com a conversa quando você abre a aba dele.
 - **Uso dos planos** (Mac): a página Accounts mostra quanto cada conta do Claude Code e do Codex usou
   da sessão de 5 horas e da semana, e quando reinicia; um clique abre o agente daquela conta. O
   número do Claude Code vem do próprio Claude Code, pela status line das sessões que o Cadex abre: o
@@ -65,6 +76,12 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   arrastados para o lugar; o que fica desligado não pesa nada. Toda página da barra lateral tem o
   mesmo cabeçalho: o nome (a pasta, a branch) à esquerda e as ações dela à direita.
 - **Hosts SSH** (Mac): os do `~/.ssh/config`, se respondem, e um clique conecta numa aba.
+- **Terminais que sobrevivem ao app** (Mac, opção desligada por padrão): os shells e agentes da
+  janela principal rodam num processo à parte; fechar, travar ou atualizar o Cadex os deixa rodando,
+  e reabrir os mostra de novo com o histórico. Depois de reiniciar o Mac, o histórico volta em shells
+  novos ([ADR 0022](docs/adr/0022-terminal-daemon.md)).
+- **Notificações dos programas** (Mac): um programa no terminal que pede uma notificação (OSC 777 ou
+  OSC 9, como um build longo avisando que acabou) aparece como uma do macOS; o clique leva ao terminal.
 - **Escolher elemento para o agente** (Mac): no preview web, `⇧⌘C` e um clique mandam o elemento
   para o terminal do agente, com o arquivo e a linha onde ele foi escrito (React, Next, Vue, Svelte)
   e um print dele.
@@ -203,6 +220,7 @@ abaixo. O pico de memória ao abrir foi 111 MB.
                     │          Núcleo (Zig, API C)         │
                     │                                      │
                     │  terminal ── libghostty-vt           │
+                    │    (e o daemon `cadex-terminald`)    │
                     │  explorer · search · source-control  │
                     │  git-history · editor (tree-sitter)  │
                     │  markdown (índice de links)          │
@@ -223,8 +241,9 @@ abaixo. O pico de memória ao abrir foi 111 MB.
 
 - **Núcleo:** toda a lógica que não depende de plataforma, escrita uma vez em Zig. O modelo do
   terminal é a [libghostty-vt](https://github.com/ghostty-org/ghostty). Ele também gera o `cadex`,
-  um programa sem interface que as sessões de agente abertas pelo Cadex rodam (hoje, a status line
-  que grava o uso de cada conta).
+  um programa sem interface que as sessões de agente abertas pelo Cadex rodam (a status line que
+  grava o uso de cada conta e os hooks que contam ao app o que cada sessão faz), e o
+  `cadex-terminald`, o processo que guarda os terminais quando a opção de mantê-los está ligada.
 - **App:** uma interface nativa e fina por sistema. Desenha, recebe entrada e chama o núcleo.
   Previews de mídia usam os frameworks do próprio sistema, sem peso extra.
 

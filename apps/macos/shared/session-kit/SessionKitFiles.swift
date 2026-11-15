@@ -28,7 +28,12 @@ extension SessionKit {
         // travels here, never typed in the terminal or kept in shell history.
         var env: [String: String] = [:]
         if synchronizedOutput { env["CLAUDE_CODE_FORCE_SYNC_OUTPUT"] = "1" }
-        if let token, toolsPath != nil { env["CADEX_SESSION_TOKEN"] = token }
+        if let token, toolsPath != nil {
+            env["CADEX_SESSION_TOKEN"] = token
+            // A test instance's own socket (CADEX_SOCKETS_DIR): its sessions'
+            // hooks go there, not to the owner's app (hook.zig reads this).
+            if ProcessInfo.processInfo.environment["CADEX_SOCKETS_DIR"] != nil { env["CADEX_APP_SOCKET"] = SessionKit.socketsFolder + "/app.sock" }
+        }
         if !env.isEmpty { settings["env"] = env }
         for id in parts.keys.sorted() { settings = Self.merge(settings, parts[id]!.settings) }
         guard !settings.isEmpty else { return nil }

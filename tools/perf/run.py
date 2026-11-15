@@ -21,6 +21,8 @@ import sys
 import tempfile
 import time
 
+import plan19
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 HERE = pathlib.Path(__file__).resolve().parent
 APP = ROOT / "dist/Cadex.app"
@@ -56,6 +58,17 @@ LIMITS = {
     "history_closed_cpu": 2.0,
     "history_open_index_wrong": 0,      # open, the index file is made: the page did show
     "history_closed_index_wrong": 0,    # closed, the index file is not even made
+    # Plan 19 (tools/perf/plan19.py). Measured 2026-11-15 on this Mac, in swap.
+    "daemon_off_running": 0,      # terminal.keepSessions off: no daemon at all
+    "kept_tab_mb": 6,             # the same as terminal_tab_mb: a tab kept by the daemon weighs no more
+    "daemon_window_mb": 6,        # 1.6 MB with ten idle shells and the app attached
+    "daemon_window_cpu": 1.0,     # ~0 %: nothing moves, nothing wakes it
+    "daemon_alone_mb": 6,         # 1.4 MB with the app killed
+    "daemon_alone_cpu": 1.0,      # ~0 %
+    "daemon_lost_shells": 0,      # killing the app ends none of the ten shells
+    "hooks_cpu": 3.0,             # 1.2 % with 5 sessions hooking every second (idle 0.3 %)
+    "hooks_mb": 5,                # 0 MB grown over 20 s of hooks
+    "hooks_refused": 0,           # every hook with a session's token is answered
 }
 # Themes the switch scenario goes through: official, tweakcn and base16.
 SWITCH_THEMES = ["caffeine", "catppuccin", "github-high-contrast", "gruvbox-soft", "tokyonight-storm", "0x96f", "nord"]
@@ -89,11 +102,19 @@ class TestApp:
 
     def __init__(self, load, folder, seconds=20, settings=None, extra_env=None):
         self.dir = tempfile.mkdtemp(prefix="cadex-perf-")
+        # Its own sockets and tokens (plan 19): never the owner's app.sock
+        # nor terminal daemon, which every run took until 2026-11-15.
+        self.sockets = f"{self.dir}/s"
+        self.app_socket = f"{self.sockets}/app.sock"
+        self.terminal_socket = f"{self.sockets}/terminal-1.sock"
+        self.sessions_dir = f"{self.dir}/sessions"
         self.settings_file = pathlib.Path(self.dir) / "settings.json"
         self.settings_file.write_text(json.dumps(settings or {}))
         env = dict(os.environ, CADEX_BACKGROUND="1", CADEX_SPACES_FILE=f"{self.dir}/spaces.json",
                    CADEX_SETTINGS_FILE=str(self.settings_file), CADEX_THEMES_DIR=f"{self.dir}/themes",
                    SHELL=str(HERE / "loadshell.sh"), CADEX_LOAD=load, CADEX_LOAD_SECONDS=str(seconds),
+                   CADEX_SOCKETS_DIR=self.sockets, CADEX_SESSIONS_DIR=self.sessions_dir,
+                   CADEX_TERMINAL_SOCKET=self.terminal_socket,
                    **(extra_env or {}))
         args = [str(EXE)] + ([str(folder)] if folder else [])
         self.process = subprocess.Popen(args, env=env, cwd=str(folder or HOME),
@@ -138,7 +159,8 @@ def avg(values):
 def measure_idle(app):
     app.sample(16)  # the first read of the project and the shell settle
     tail = app.sample(10)
-    return {"idle_mb": max(m for m, _ in tail), "idle_cpu": avg([c for _, c in tail])}
+    return {"idle_mb": max(m for m, _ in tail), "idle_cpu": avg([c for _, c in tail]),
+            "daemon_off_running": 0 if plan19.daemon_pid(app.terminal_socket) is None else 1}
 
 
 def measure_flood(app):
@@ -233,21 +255,21 @@ def measure_subagent(app):
     return {"subagent_first_mb": first - base, "subagent_open_mb": second - closed, "subagent_closed_mb": after - closed}
 
 
-def measure_tabs(app):
-    """Five more terminal tabs opened by the app (CADEX_PERF_TABS) from
-    12 s, then back to the first: what each one adds, hidden."""
+def measure_tabs(app, count=5):
+    """`count` more terminal tabs opened by the app (CADEX_PERF_TABS) from
+    12 s, one a second, then back to the first: what each one adds, hidden."""
     start = time.time()
     curve = []
-    while time.time() - start < 30:
+    while time.time() - start < 25 + count:
         if app.process.poll() is not None:
             raise RuntimeError(f"the app quit (status {app.process.returncode})")
         curve.append((time.time() - start, footprint_mb(app.process.pid) or 0))
         time.sleep(0.5)
     values = lambda begin, end: sorted(m for t, m in curve if begin <= t <= end)
-    base, after = values(7, 11), values(24, 30)
+    base, after = values(7, 11), values(19 + count, 25 + count)
     base, after = base[len(base) // 2], after[len(after) // 2]
-    print(f"    base {base:.0f} MB, with five more tabs {after:.0f}")
-    return {"terminal_tab_mb": (after - base) / 5}
+    print(f"    base {base:.0f} MB, with {count} more tabs {after:.0f}")
+    return {"terminal_tab_mb": (after - base) / count}
 
 
 def write_agents_home(home, pid):
@@ -397,6 +419,9 @@ def main():
              ("plan 18: three accounts, 200 conversations, History open", lambda: history_scenario(True)),
              ("plan 18: the same with History closed", lambda: history_scenario(False)),
              ("five more terminal tabs", lambda: scenario("tabs", "idle", ROOT, measure_tabs, extra_env={"CADEX_PERF_TABS": "5"})),
+             ("plan 19: ten terminals kept by the daemon, with the window and with the app killed",
+              lambda: plan19.kept_scenario(sys.modules[__name__])),
+             ("plan 19: five sessions sending hooks every second", lambda: plan19.hooks_scenario(sys.modules[__name__])),
              ("flooding with minimum contrast and ligatures", lambda: scenario(
                  "reading", "flood", ROOT, measure_reading_flood,
                  settings={"terminal": {"minimumContrast": 7, "fontFeatures": ["calt", "liga"]}}))]
