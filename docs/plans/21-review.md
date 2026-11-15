@@ -91,7 +91,7 @@ docs/adr/0021-cadex-managed-accounts.md e docs/adr/0022-terminal-daemon.md (plan
     montam em menos de 1,5 s, testado), a lista à esquerda, os 14 comandos, as três configurações, e
     as entradas em Tasks, no grupo da tarefa em Agents e no cabeçalho do Git. j/k/n/p são atalhos
     comuns de comandos que ficam indisponíveis fora da revisão em foco, e a tecla segue adiante. O
-    stage casa as linhas da revisão com as do patch (`ReviewStaging.swift`). Conferido no app de
+    stage casa as linhas da revisão com as do patch (`apps/macos/features/source-control/ReviewStaging.swift`). Conferido no app de
     release com um repositório de teste: a aba, as regiões recolhidas, rename e apagado, n andando
     entre as mudanças com a lista acompanhando, e o stage de uma mudança só pelo ⌘K. Achou e
     corrigiu: o fundo cinza da lista e o rename sem conteúdo mostrando o arquivo. O app ficou em
