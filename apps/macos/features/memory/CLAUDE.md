@@ -36,9 +36,10 @@
   memory.shareAcrossAccounts desligada) e grava nela um project.json (`root`, `account`) com que o
   engine acha o projeto. Lê arquivos, sem chamar o git: roda a cada sessão aberta.
 - `MemoryWarmUp.swift`: `start` roda `cadex-memory --warm --data-dir <pasta>` em segundo plano
-  (QoS utility, saída em /dev/null) quando a versão do app difere da guardada em
-  memory.warmedVersion (UserDefaults); guarda a versão só se o engine sai 0 (falhou, tenta na
-  próxima abertura). No `make run` a versão é "0", aquecida uma vez também.
+  (QoS utility, saída em /dev/null) quando a versão do app difere da guardada no arquivo
+  `warmed-version` da própria pasta da memória (não em UserDefaults: uma instância de teste, com
+  outra pasta, dividia as preferências do app real e aquecia a pasta real; make perf,
+  2026-11-16); guarda a versão só se o engine sai 0 (falhou, tenta na próxima abertura). No `make run` a versão é "0", aquecida uma vez também.
 
 ## Como validar
 - `make macos-test` (MemoryTests): os 9 eventos e o comando de cada um, a `env` do pacote e a do

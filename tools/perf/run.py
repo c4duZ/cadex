@@ -77,6 +77,9 @@ class TestApp:
                    SHELL=str(HERE / "loadshell.sh"), CADEX_LOAD=load, CADEX_LOAD_SECONDS=str(seconds),
                    CADEX_SOCKETS_DIR=self.sockets, CADEX_SESSIONS_DIR=self.sessions_dir,
                    CADEX_TERMINAL_SOCKET=self.terminal_socket,
+                   # Its own memory folder: the warm-up and the engine wrote
+                   # the owner's real one until 2026-11-16 (plan 22).
+                   CADEX_MEMORY_DIR=f"{self.dir}/memory",
                    **(extra_env or {}))
         args = [str(EXE)] + ([str(folder)] if folder else [])
         self.process = subprocess.Popen(args, env=env, cwd=str(folder or HOME),

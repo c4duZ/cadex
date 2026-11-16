@@ -54,11 +54,10 @@ func repoWithWorktree(_ dir: String) -> (repo: String, tree: String) {
 
 /// The warm-up's result; nil when it did not start.
 @MainActor
-func warm(_ engine: String, _ folder: String, _ version: String, _ defaults: UserDefaults) async -> Bool? {
-    nonisolated(unsafe) let defaults = defaults
-    return await withCheckedContinuation { (resume: CheckedContinuation<Bool?, Never>) in
+func warm(_ engine: String, _ folder: String, _ version: String) async -> Bool? {
+    await withCheckedContinuation { (resume: CheckedContinuation<Bool?, Never>) in
         MainActor.assumeIsolated {
-            let started = MemoryWarmUp.start(engine: engine, folder: folder, version: version, defaults: defaults) { resume.resume(returning: $0) }
+            let started = MemoryWarmUp.start(engine: engine, folder: folder, version: version) { resume.resume(returning: $0) }
             if !started { resume.resume(returning: nil) }
         }
     }
@@ -165,21 +164,22 @@ let exitCode = await Checks.run([
         let ownInfo = fm.contents(atPath: memory + "/auto/" + account + "/" + key + "/project.json").flatMap { try? JSONSerialization.jsonObject(with: $0) } as? [String: Any]
         expect(ownInfo?["account"] as? String == account, "\(String(describing: ownInfo))")
     }),
-    ("the warm-up runs once per version and keeps it only when the engine exits 0", {
+    ("the warm-up runs once per version, kept in the memory folder only when the engine exits 0", {
         let dir = scratch()
         defer { try? fm.removeItem(atPath: dir) }
-        let suite = "cadex-memory-tests-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: suite)!
-        defer { defaults.removePersistentDomain(forName: suite) }
-        expect(MemoryWarmUp.isNeeded(version: "1.2", defaults: defaults))
-        expect(await warm(fakeEngine(dir, code: 1), dir + "/data", "1.2", defaults) == false, "a failing engine")
-        expect(defaults.string(forKey: MemoryWarmUp.versionKey) == nil, "a failure is tried again next launch")
-        expect(await warm(fakeEngine(dir, code: 0), dir + "/data", "1.2", defaults) == true)
+        let data = dir + "/data"
+        try? fm.createDirectory(atPath: data, withIntermediateDirectories: true)
+        let stamp = data + "/" + MemoryWarmUp.versionFile
+        expect(MemoryWarmUp.isNeeded(version: "1.2", folder: data))
+        expect(await warm(fakeEngine(dir, code: 1), data, "1.2") == false, "a failing engine")
+        expect(!fm.fileExists(atPath: stamp), "a failure is tried again next launch")
+        expect(await warm(fakeEngine(dir, code: 0), data, "1.2") == true)
         let args = (try? String(contentsOfFile: dir + "/args-0", encoding: .utf8)) ?? ""
-        expect(args == "--warm --data-dir \(dir)/data\n", args)
-        expect(defaults.string(forKey: MemoryWarmUp.versionKey) == "1.2" && !MemoryWarmUp.isNeeded(version: "1.2", defaults: defaults))
-        expect(await warm(fakeEngine(dir, code: 0), dir + "/data", "1.2", defaults) == nil, "the same version: not again")
-        expect(MemoryWarmUp.isNeeded(version: "1.3", defaults: defaults), "a new version warms again")
+        expect(args == "--warm --data-dir \(data)\n", args)
+        expect(!MemoryWarmUp.isNeeded(version: "1.2", folder: data), "stamped in the folder")
+        expect(await warm(fakeEngine(dir, code: 0), data, "1.2") == nil, "the same version: not again")
+        expect(MemoryWarmUp.isNeeded(version: "1.3", folder: data), "a new version warms again")
+        expect(MemoryWarmUp.isNeeded(version: "1.2", folder: dir + "/other"), "another folder (a test instance) has its own")
     }),
 ])
 exit(exitCode)
