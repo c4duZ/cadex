@@ -54,6 +54,23 @@ comando, e o Cadex mostra em que pé cada uma está (`docs/plans/19-agent-sessio
   worktrees.environment-destroy (este com confirmação).
 - A chave do Tailscale do sidecar vem do ambiente do dono na hora de subir; faltando, o Cadex diz
   qual variável falta e não sobe o sidecar.
+- Subir é digitado numa aba (a saída à vista, e a chave lida pelo shell do dono, nunca pelo Cadex).
+  O contêiner fica onde a worktree está: neste Mac, ou na máquina da tarefa remota pelo contexto do
+  Docker dela; numa remota, os hooks de preparo não rodam (o `setup` da receita faz esse papel).
+- O agente dentro do contêiner não tem os hooks do Cadex e não hiberna sozinho; o que suspende o
+  ambiente é hibernar um agente do Mac na pasta da tarefa, ou o comando.
+- A receita, com tudo que ela aceita:
+
+  ```toml
+  image = "ubuntu:24.04"      # ou dockerfile = "Dockerfile.dev" (só neste Mac)
+  machine = "pc"              # a escolha inicial do "Run on"
+  ports = [3000, 5173]
+  setup = "apt-get update && apt-get install -y nodejs"
+  workdir = "/work"
+  [tailscale]
+  name = "ubuntu-dev"
+  authkey_env = "TS_AUTHKEY"  # o nome da variável, nunca a chave
+  ```
 
 ### Status e comentário
 - Cada worktree tem um status (a fazer, em andamento, em revisão, pronto) e um comentário curto do que

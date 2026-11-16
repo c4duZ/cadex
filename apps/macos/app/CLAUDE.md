@@ -127,6 +127,11 @@
   (`attachMachines`, chamado pelo `SSHWiring.swift`), lido só com o cartão aberto, e o
   machines.connect: aba nova com `ssh '<usuário>@<máquina>'`, o usuário pedido uma vez por máquina
   (o deste Mac sugerido; ⌥↩ pergunta de novo) e guardado em machines.users.
+- `EnvironmentWiring.swift` (plano 23, fase E): New Task num repositório com receita sobe o ambiente
+  (os hooks de preparo antes, numa aba) em vez de abrir o agente no Mac; numa tarefa remota, pelo
+  contexto do Docker da máquina; a máquina da receita vem escolhida no "Run on"; os quatro comandos;
+  hibernar um agente cuja pasta é de uma tarefa com ambiente o suspende, relançar e abrir a tarefa
+  retomam; remover a tarefa pergunta se destrói o ambiente (marcado).
 - `DockerWiring.swift` (plano 23, fase D): machines.docker-context digita `export
   DOCKER_CONTEXT='<máquina>'` (ou `unset`) no shell da aba com foco, ou numa aba nova se um programa
   roda nela (o terminal não tem ambiente por aba); o item Docker da barra de status mostra o da aba

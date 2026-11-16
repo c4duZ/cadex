@@ -74,8 +74,12 @@ public enum Docker {
     /// The context for `machine` exists, made if it did not; nil, or the
     /// error docker gave.
     public static func ensureContext(_ machine: Machine, destination: String) async -> String? {
+        await ensureContext(name: contextName(machine), destination: destination)
+    }
+
+    /// The same for any ssh destination (a host of ~/.ssh/config too).
+    public static func ensureContext(name: String, destination: String) async -> String? {
         guard let docker = binary() else { return notInstalled }
-        let name = contextName(machine)
         let list = await run(docker, ["context", "ls", "--format", "{{json .}}"])
         if list.status == 0, contextNames(list.out).contains(name) { return nil }
         let made = await run(docker, createArguments(name: name, destination: destination))
@@ -95,7 +99,7 @@ public enum Docker {
         output.split(separator: "\n").compactMap { (try? JSONSerialization.jsonObject(with: Data($0.utf8))) as? [String: Any] }
     }
 
-    static func run(_ path: String, _ args: [String], timeout: TimeInterval = 10) async -> (status: Int32, out: String, err: String) {
+    public static func run(_ path: String, _ args: [String], timeout: TimeInterval = 10) async -> (status: Int32, out: String, err: String) {
         await Task.detached {
             let process = Process()
             process.executableURL = URL(fileURLWithPath: path)

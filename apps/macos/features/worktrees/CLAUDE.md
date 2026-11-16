@@ -39,10 +39,22 @@
   ganham `remote` e `remoteFolders`, lidas com `decodeIfPresent` (um arquivo de antes continua
   valendo inteiro). A página Tasks mostra a remota com o nome da máquina; worktrees.new-task-on e
   worktrees.open-remote-shell, e worktrees.remove lista as remotas também.
+- O ambiente descartável (plano 23, fase E; `../../../../docs/adr/0032-workspace-recipes.md`):
+  `EnvironmentRecipe.swift` (o .cadex/environment.toml, por um leitor de TOML só do que a receita
+  usa, sem dependência; erro com a linha, nunca meia receita; `authkey_env` é o nome da variável,
+  nunca a chave) e `TaskEnvironment.swift` (o ambiente nas notas: contêiner, sidecar, contexto,
+  estado; o script de subir, digitado numa aba: imagem ou build, o sidecar do Tailscale com a chave
+  do shell do dono pelo ambiente, o contêiner na rede dele com a worktree montada, o preparo e o
+  `claude` lá dentro; e os argumentos de suspender (`stop`), retomar e destruir).
+  worktrees.environment-up, -suspend, -resume e -destroy listam as tarefas, locais e remotas, que
+  aceitam a ação.
 
 ## Como validar
 - `make macos-test` (WorktreesTests): num repositório de verdade, o plano, a tarefa criada com o
   `.env`, as notas que voltam depois de reabrir, a segunda tarefa sem pedir nada, a remoção recusada
   com mudança e aceita sem ela; o "Rodar em" com um ssh falso que roda o comando aqui
   (`tests/Remote.swift`): a worktree feita "lá", o nome único, sem repositório (pergunta antes de
-  clonar), a remoção recusada com mudança, as falhas do ssh, a aba com os hooks e o claude.
+  clonar), a remoção recusada com mudança, as falhas do ssh, a aba com os hooks e o claude; o
+  ambiente com um docker falso que anota as chamadas (`tests/Environment.swift`): a receita, subir
+  com o sidecar sem a chave nos argumentos, sem a chave no shell nada sobe, Dockerfile, suspender,
+  retomar e destruir.

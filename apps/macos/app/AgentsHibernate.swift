@@ -93,6 +93,8 @@ extension AppDelegate {
         guard pid > 0, terminal.agentResume != nil else { return false }
         terminal.isHibernated = true
         kill(pid, SIGTERM)
+        // Its task's environment sleeps with it (plan 23, ADR 0032).
+        sessions.first?.followEnvironment(of: terminal.currentDirectory, to: .suspend)
         return true
     }
 
@@ -108,6 +110,7 @@ extension AppDelegate {
         guard let resume = terminal.agentResume, !terminal.hasForegroundProcess else { return false }
         terminal.offerRestart(false)
         terminal.isHibernated = false
+        sessions.first?.followEnvironment(of: terminal.currentDirectory, to: .resume)
         let command = AgentHibernation.resumeCommand(sessionID: resume.sessionID, folder: resume.folder, configDir: resume.configDir,
                                                      kitSession: resume.kitSession, skipPermissions: settings.store.settings.agents.launchSkipPermissions)
         terminal.session?.write(command + "\n")

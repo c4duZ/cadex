@@ -43,6 +43,7 @@ extension WindowSession {
         actions.newTaskOn = { [weak self] in self?.newTask(on: $0) }
         actions.openRemote = { [weak self] in self?.openRemoteTask($0) }
         actions.removeRemote = { [weak self] in self?.removeRemoteTask($0) }
+        actions.environment = { [weak self] action, key in self?.environmentAction(action, key: key) }
         return actions
     }
 
@@ -53,7 +54,7 @@ extension WindowSession {
             return say(T("New Task needs a git repository", "Nova tarefa precisa de um repositório git"),
                        T("Open a repository's folder first.", "Abra antes a pasta de um repositório."))
         }
-        askTaskName(preset: preset) { [weak self] name, target in
+        askTaskName(preset: preset ?? recipeTarget(repo)) { [weak self] name, target in
             guard let self, !name.isEmpty else { return }
             if let target { return self.newRemoteTask(name: name, repo: repo, target: target) }
             self.confirmTask(WorktreesController.shared.plan(name: name, repo: repo))
@@ -105,9 +106,14 @@ extension WindowSession {
             say(T("The task was not made", "A tarefa não foi criada"), message)
         case .success(let made):
             AgentAttention.shared.note(.taskCreated, text: plan.branch, project: (plan.repo as NSString).lastPathComponent)
-            let agent = agentCommand(cwd: made.path)
-            tabs?.newTab(cwd: made.path)
-            tabs?.activeTerminal?.session?.write((plan.hooks + [agent]).joined(separator: " && ") + "\n")
+            if let recipe = recipe(of: plan.repo) {
+                // With a recipe the agent runs inside the environment (ADR 0032).
+                startEnvironment(recipe, repo: plan.repo, branch: plan.branch, key: made.path, worktree: made.path, remote: nil, prefix: plan.hooks)
+            } else {
+                let agent = agentCommand(cwd: made.path)
+                tabs?.newTab(cwd: made.path)
+                tabs?.activeTerminal?.session?.write((plan.hooks + [agent]).joined(separator: " && ") + "\n")
+            }
             if plan.explainTrust { explainTrust(plan) }
             if !made.unmatched.isEmpty {
                 say(T("Some .worktreeinclude lines matched nothing", "Algumas linhas do .worktreeinclude não acharam nada"), made.unmatched.joined(separator: "\n"))
@@ -139,6 +145,7 @@ extension WindowSession {
 
     /// worktrees.open: the task becomes the window's workspace, with its terminal.
     func openTask(_ task: TaskWorktree) {
+        followEnvironment(of: task.path, to: .resume)
         folder.open(task.path)
         if let terminal = tabs?.allTerminals.first(where: { $0.currentDirectory == task.path }) { return tabs?.focus(terminal) ?? () }
         tabs?.newTab(cwd: task.path)
@@ -158,11 +165,15 @@ extension WindowSession {
         confirm(T("Remove the task \(task.branch)?", "Remover a tarefa \(task.branch)?"),
                 T("Its worktree goes, and its branch too (it is merged).", "A worktree sai, e o branch também (ele já foi juntado)."),
                 button: T("Remove", "Remover")) { [weak self] in
-            if let message = WorktreesController.shared.remove(task, repo: repo, deleteBranch: true) {
-                self?.say(T("The task was not removed", "A tarefa não foi removida"), message)
-            } else {
-                // Its authorship and the versions kept for it go with it (ADR 0027).
-                AuthorshipHub.tracker(for: task.path).forget()
+            self?.askDestroyWithTask(task.path) { destroy in
+                let env = WorktreesController.shared.store.environment(task.path)
+                if let message = WorktreesController.shared.remove(task, repo: repo, deleteBranch: true) {
+                    self?.say(T("The task was not removed", "A tarefa não foi removida"), message)
+                } else {
+                    // Its authorship and the versions kept for it go with it (ADR 0027).
+                    AuthorshipHub.tracker(for: task.path).forget()
+                    if destroy, let env { self?.runEnvironment(.destroy, env, key: task.path) }
+                }
             }
         }
     }

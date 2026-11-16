@@ -43,6 +43,8 @@ public final class WorktreesStore {
         /// and where each repository is on each machine (destination → folder).
         var remote: [String: [RemoteTask]] = [:]
         var remoteFolders: [String: [String: String]] = [:]
+        /// The tasks' throwaway environments, by the task's note key.
+        var environments: [String: TaskEnvironment] = [:]
 
         init() {}
 
@@ -54,6 +56,7 @@ public final class WorktreesStore {
             repos = try c.decodeIfPresent([String: RepoInfo].self, forKey: .repos) ?? [:]
             remote = (try? c.decodeIfPresent([String: [RemoteTask]].self, forKey: .remote)) ?? [:]
             remoteFolders = (try? c.decodeIfPresent([String: [String: String]].self, forKey: .remoteFolders)) ?? [:]
+            environments = (try? c.decodeIfPresent([String: TaskEnvironment].self, forKey: .environments)) ?? [:]
         }
     }
 
@@ -108,6 +111,19 @@ public final class WorktreesStore {
         var seen: [RunTarget] = []
         for task in file.remote.values.flatMap({ $0 }) where !seen.contains(task.target) { seen.append(task.target) }
         return seen
+    }
+
+    public func environment(_ key: String) -> TaskEnvironment? { file.environments[key] }
+
+    /// The local task whose worktree holds `folder`, when it has an
+    /// environment (a terminal's folder → its task's environment).
+    public func environmentKey(containing folder: String) -> String? {
+        file.environments.keys.filter { $0.hasPrefix("/") && (folder == $0 || folder.hasPrefix($0 + "/")) }.max { $0.count < $1.count }
+    }
+
+    public func setEnvironment(_ environment: TaskEnvironment?, for key: String) {
+        file.environments[key] = environment
+        save()
     }
 
     /// A task that left: its note goes too.

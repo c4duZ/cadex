@@ -82,6 +82,11 @@ extension WindowSession {
             switch result {
             case .made(let path, let branch):
                 AgentAttention.shared.note(.taskCreated, text: branch + " · " + target.label, project: (repo as NSString).lastPathComponent)
+                if let recipe = self.recipe(of: repo) {
+                    // The environment on that machine, through its Docker context (ADR 0032).
+                    let key = WorktreesController.shared.remoteTasks(repo: repo).first { $0.path == path && $0.target == target }?.noteKey ?? path
+                    return self.startEnvironment(recipe, repo: repo, branch: branch, key: key, worktree: path, remote: target, prefix: [])
+                }
                 let hooks = self.settings.store.settings.worktrees.setupHooks[SettingsBridge.tilde(repo)] ?? []
                 self.typeInNewTab(RemoteTaskScript.sshLine(target, RemoteTaskScript.agent(path: path, hooks: hooks)))
             case .noRepo:
@@ -117,15 +122,23 @@ extension WindowSession {
                 T("Its worktree goes from \(task.target.label); git refuses if it has changes. The branch stays there.",
                   "A worktree sai de \(task.target.label); o git recusa se ela tiver mudanças. O branch fica lá."),
                 button: T("Remove", "Remover")) { [weak self] in
-            Task { [weak self] in
-                guard let refused = await WorktreesController.shared.removeRemote(task, repo: repo) else { return }
-                let message: String
-                switch refused {
-                case .needsLogin(let text), .failed(let text): message = text
-                default: message = ""
-                }
-                self?.say(T("The task was not removed", "A tarefa não foi removida"), message)
+            self?.askDestroyWithTask(task.noteKey) { destroy in self?.finishRemoveRemote(task, repo: repo, destroy: destroy) }
+        }
+    }
+
+    private func finishRemoveRemote(_ task: RemoteTask, repo: String, destroy: Bool) {
+        let env = WorktreesController.shared.store.environment(task.noteKey)
+        // Both at once: a container with the folder mounted does not keep
+        // git from removing the worktree on Linux.
+        if destroy, let env { runEnvironment(.destroy, env, key: task.noteKey) }
+        Task { [weak self] in
+            guard let refused = await WorktreesController.shared.removeRemote(task, repo: repo) else { return }
+            let message: String
+            switch refused {
+            case .needsLogin(let text), .failed(let text): message = text
+            default: message = ""
             }
+            self?.say(T("The task was not removed", "A tarefa não foi removida"), message)
         }
     }
 

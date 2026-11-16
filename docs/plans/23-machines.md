@@ -160,6 +160,14 @@ docs/adr/0022-terminal-daemon.md (do plano 19), docs/adr/0024-agent-tools.md (do
   apagar a worktree destrói, com confirmação). Comandos worktrees.environment-up,
   worktrees.environment-suspend, worktrees.environment-resume, worktrees.environment-destroy. VM
   (Fly, Modal e outros) fica fora desta fase.
+  - No código em 2026-11-16: o leitor de TOML é do Cadex e só do que a receita usa (sem
+    dependência). Subir é digitado numa aba, então a chave do sidecar vem do shell do dono pelo
+    ambiente (`TS_AUTHKEY="$VAR" docker run -e TS_AUTHKEY`), nunca nos argumentos nem no Cadex. O
+    contêiner fica onde a worktree está; o sidecar leva as portas e o contêiner usa a rede dele. O
+    agente dentro do contêiner não tem hooks e não hiberna: hibernar um agente do Mac na pasta da
+    tarefa suspende, relançar ou abrir a tarefa retoma. Testado com um docker falso que anota as
+    chamadas (a chave não aparece em nenhum argumento; sem ela nada sobe). **Falta** o docker de
+    verdade: subir, suspender e retomar com os arquivos, destruir; o sidecar entrando na tailnet.
 - **F. Identidade e notificações por máquina.**
   - O app.sock (ADR 0022, estendido pela 0024) é Unix e só serve à própria máquina. Para outras máquinas
     nasce um listener TCP preso só ao IP 100.x da tailnet (nunca 0.0.0.0), aberto só com

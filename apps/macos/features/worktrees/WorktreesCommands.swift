@@ -18,6 +18,9 @@ public struct WorktreesActions {
     public var newTaskOn: @MainActor (RunTarget) -> Void = { _ in }
     public var openRemote: @MainActor (RemoteTask) -> Void = { _ in }
     public var removeRemote: @MainActor (RemoteTask) -> Void = { _ in }
+    /// The throwaway environment (plan 23 phase E), by the task's note key:
+    /// up (the repository has a recipe), suspend, resume, destroy.
+    public var environment: @MainActor (EnvironmentAction, String) -> Void = { _, _ in }
 
     public init(newTask: @escaping @MainActor () -> Void, open: @escaping @MainActor (TaskWorktree) -> Void,
                 remove: @escaping @MainActor (TaskWorktree) -> Void, comment: @escaping @MainActor (TaskWorktree) -> Void,
@@ -58,6 +61,10 @@ public enum WorktreesCommands {
                             actions.repository().map { controller.tasks(repo: $0).map(\.worktree) } ?? []
                         }, choose: actions.remove, remote: { actions.repository().map(controller.remoteTasks) ?? [] }, chooseRemote: actions.removeRemote))
                     }),
+            environmentCommand(.up, palette: palette, actions: actions),
+            environmentCommand(.suspend, palette: palette, actions: actions),
+            environmentCommand(.resume, palette: palette, actions: actions),
+            environmentCommand(.destroy, palette: palette, actions: actions),
             Command(id: "worktrees.new-task-on", title: T("New Task on Another Machine…", "Nova tarefa em outra máquina…"),
                     keywords: ["task", "remote", "run on", "ssh", "tailnet", "pc", "tarefa", "remota", "rodar em"], category: .terminal,
                     action: .run { palette.open(TargetSource(targets: actions.targets, choose: actions.newTaskOn)) }),
@@ -94,6 +101,50 @@ public enum WorktreesCommands {
                     keywords: ["setup", "hooks", "install", "worktree", "preparo", "hooks"], category: .terminal,
                     action: .run { actions.editSetupHooks() }),
         ]
+    }
+}
+
+public enum EnvironmentAction: String, CaseIterable, Sendable {
+    case up, suspend, resume, destroy
+}
+
+extension WorktreesCommands {
+    /// worktrees.environment-up and the others: the window's repository's
+    /// tasks that can take the action, local and remote, in ⌘K.
+    @MainActor
+    static func environmentCommand(_ action: EnvironmentAction, palette: CommandPaletteController, actions: WorktreesActions) -> Command {
+        let controller = WorktreesController.shared
+        // The ids written whole, so grep and the parity check find them.
+        let titles: [EnvironmentAction: (id: String, en: String, pt: String)] = [
+            .up: ("worktrees.environment-up", "Start a Task's Environment…", "Subir o ambiente de uma tarefa…"),
+            .suspend: ("worktrees.environment-suspend", "Suspend a Task's Environment…", "Suspender o ambiente de uma tarefa…"),
+            .resume: ("worktrees.environment-resume", "Resume a Task's Environment…", "Retomar o ambiente de uma tarefa…"),
+            .destroy: ("worktrees.environment-destroy", "Destroy a Task's Environment…", "Destruir o ambiente de uma tarefa…"),
+        ]
+        let fits: @MainActor (String) -> Bool = { key in
+            let env = controller.store.environment(key)
+            switch action {
+            case .up: return env == nil
+            case .suspend: return env?.state == .running
+            case .resume: return env?.state == .suspended
+            case .destroy: return env != nil
+            }
+        }
+        let title = titles[action]!
+        return Command(id: title.id, title: T(title.en, title.pt),
+                       keywords: ["environment", "container", "docker", "ambiente", "contêiner", action.rawValue], category: .terminal,
+                       action: .run {
+                           palette.open(TaskSource(placeholder: T(title.en, title.pt), tasks: {
+                               (actions.repository().map { controller.tasks(repo: $0).map(\.worktree) } ?? []).filter { fits($0.path) }
+                           }, choose: { actions.environment(action, $0.path) },
+                           remote: { (actions.repository().map(controller.remoteTasks) ?? []).filter { fits($0.noteKey) } },
+                           chooseRemote: { actions.environment(action, $0.noteKey) }))
+                       },
+                       unavailableReason: {
+                           guard action == .up else { return nil }
+                           guard let repo = actions.repository() else { return T("Open a repository first", "Abra um repositório antes") }
+                           return EnvironmentRecipe.load(repo: repo) == nil ? T("This repository has no .cadex/environment.toml", "Este repositório não tem .cadex/environment.toml") : nil
+                       })
     }
 }
 
