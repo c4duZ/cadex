@@ -38,7 +38,8 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   sozinhas, em segundo plano e sem IA: de todas as contas (ou só da conta, com o compartilhamento
   desligado), da raiz, das subpastas e das worktrees, até 200 sessões por agente e 50 mil eventos.
   Viram sessões e observações que a busca acha, não páginas. Acontece uma vez; nunca numa memória
-  que já tem conteúdo.
+  que já tem conteúdo. Ficam as mais novas, gravadas na ordem em que aconteceram, sem deixar
+  handoff. Se o processo sai no meio, a importação continua na próxima sessão do projeto.
 - "Organize History with AI" (memory.bootstrap), na página Memory, escreve as páginas de decisões,
   armadilhas e conceitos a partir do histórico importado, pelo agente de memória
   (`docs/adr/0029-memory-agent.md`). Mostra a estimativa de custo antes e só roda no clique.
@@ -63,8 +64,11 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
 
 ### Sessões de fora do Cadex
 - Uma sessão do projeto aberta em outro terminal ou no VS Code entra na memória na próxima vez que
-  o Cadex abre uma sessão de agente, antes do briefing, pelo mesmo caminho do histórico. Briefing ela
-  não recebe, e nada é escrito na configuração do dono.
+  o processo da memória sobe (a próxima sessão de agente do Cadex, quando nenhuma estava aberta),
+  em segundo plano e pelo mesmo caminho do histórico: o briefing dessa sessão não espera por ela, o
+  da seguinte já a tem. Briefing ela não recebe, e nada é escrito na configuração do dono.
+- Por subida, até 50 sessões, as mais novas primeiro; o resto entra na subida seguinte. Uma sessão
+  mexida nos últimos 2 minutos espera a próxima subida (pode estar aberta).
 
 ### O briefing
 - Ao começar uma sessão (nova, retomada, depois de `/clear`, depois de compactar), o agente recebe o
@@ -149,7 +153,10 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
 
 ## Limites conhecidos
 - `alias claude=` do dono desativa o `claude` do Cadex naquela aba.
-- Sessões de fora do Cadex não recebem briefing; só ensinam a memória depois.
+- Sessões de fora do Cadex não recebem briefing; só ensinam a memória depois, e só quando o
+  processo da memória sobe de novo (com sessões do Cadex abertas o tempo todo, esperam).
+- Sessão antiga cuja pasta foi apagada (uma worktree removida) não é importada.
+- Uma sessão que o Cadex já gravou e que depois continuou fora dele não é importada de novo.
 - O Codex foi testado sem login (2026-11-15): o caminho das ferramentas funciona; o dos hooks está
   pronto e só se confirma com uma conta.
 - O pedido de consolidar fica na conversa como mensagem do usuário.
@@ -167,7 +174,8 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
       atrasar a sessão; reabrir não importa de novo.
 - [ ] `claude` digitado numa aba do Cadex grava e recebe briefing; `claude -p`, `claude --version`,
       `claude mcp list` e `claude --model haiku mcp list` saem iguais aos de fora.
-- [ ] Uma sessão do projeto num terminal de fora entra na memória na próxima sessão do Cadex.
+- [ ] Uma sessão do projeto num terminal de fora entra na memória quando o processo sobe de novo,
+      sem atrasar o briefing; na sessão seguinte a busca a acha.
 - [ ] Com o processo morto, os eventos esperam e entram quando ele volta.
 - [ ] A compactação automática leva o ponto de controle ao resumo.
 - [ ] O modelo baixa (e retoma), carrega, sai depois de parado, e o processo volta ao peso de parado.

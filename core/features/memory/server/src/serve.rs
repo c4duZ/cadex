@@ -2,7 +2,8 @@
 //! 22 phase C): one engine per data folder (a lock), the socket 0600 and
 //! only for this user with a session token (auth.rs), the end of the
 //! process when the last `claude` ends (sessions.rs), the restart after the
-//! model unloads (restart.rs) and the replay of the hook queue (spool.rs).
+//! model unloads (restart.rs), the replay of the hook queue (spool.rs) and
+//! the import of past and outside sessions (import.rs).
 
 use std::fs::File;
 use std::future::IntoFuture;
@@ -23,7 +24,7 @@ use crate::args::Args;
 use crate::auth::{PeerListener, Tokens, require_session_token};
 use crate::restart::{InFlight, when_model_unloads};
 use crate::sessions::Sessions;
-use crate::{engine, restart, sessions, spool, sys};
+use crate::{engine, import, restart, sessions, spool, sys};
 
 /// How the engine ended.
 pub(crate) enum Exit {
@@ -125,9 +126,11 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
         sessions.register(*pid);
     }
     let in_flight = Arc::new(InFlight::default());
+    let (import_tx, import_rx) = import::channel();
     let inner = built
         .router
         .layer(from_fn_with_state(sessions.clone(), sessions::track))
+        .layer(from_fn_with_state(import_tx, import::watch))
         .layer(from_fn_with_state(in_flight.clone(), restart::count));
     let outer = inner.clone().layer(from_fn_with_state(
         Tokens::new(args.tokens_dir.clone()),
@@ -150,7 +153,19 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
     if let Some(model) = built.model.clone() {
         tokio::spawn(when_model_unloads(model, in_flight.clone(), restarting.clone(), cancel.clone()));
     }
-    tokio::spawn(spool::drain(inner, args.spool_dir.clone()));
+    tokio::spawn(spool::drain(inner.clone(), args.spool_dir.clone()));
+    let importer = import::Context {
+        router: inner,
+        reader: built.store.reader.clone(),
+        data_dir: args.data_dir.clone(),
+        home: std::env::var_os("HOME").map(Into::into).unwrap_or_default(),
+        claude_dirs: args.claude_dirs.clone(),
+        delay: args.import_delay,
+        in_flight: in_flight.clone(),
+        stop: cancel.clone(),
+    };
+    // The image a restart execs already did the start's import.
+    tokio::spawn(import::run(importer, import_rx, args.listen_fd.is_none()));
 
     let shutdown = cancel.clone();
     let listener = PeerListener::new(listener, sys::effective_uid());

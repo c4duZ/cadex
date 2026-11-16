@@ -28,6 +28,13 @@ pub(crate) struct Args {
     /// pays neither the migrations nor macOS's first-run check of the binary
     /// within its 1 s (plan 22, phase C).
     pub(crate) warm: bool,
+    /// `--claude-dirs a:b`: the Claude Code account folders whose transcripts
+    /// the import reads, in place of the app's (accounts.rs); tests, and the
+    /// app if it ever needs to say.
+    pub(crate) claude_dirs: Option<Vec<PathBuf>>,
+    /// How long an import waits after the engine is ready or after a
+    /// SessionStart, so the briefing goes first (import.rs).
+    pub(crate) import_delay: Duration,
     /// The `claude` pids still alive when the previous image restarted.
     pub(crate) sessions: Vec<i32>,
     /// The data folder's lock and the listening socket, kept open across a
@@ -63,6 +70,8 @@ pub(crate) fn parse(argv: &[String]) -> Result<Args> {
         embed_idle: Duration::from_secs(60),
         keep_alive: false,
         warm: false,
+        claude_dirs: None,
+        import_delay: Duration::from_millis(1500),
         sessions: Vec::new(),
         lock_fd: None,
         listen_fd: None,
@@ -80,6 +89,10 @@ pub(crate) fn parse(argv: &[String]) -> Result<Args> {
             "--warm" => args.warm = true,
             "--embed-idle-secs" => {
                 args.embed_idle = Duration::from_secs(value(&mut it, &arg)?.parse()?);
+            }
+            "--claude-dirs" => args.claude_dirs = Some(crate::accounts::parse_list(&value(&mut it, &arg)?)),
+            "--import-delay-ms" => {
+                args.import_delay = Duration::from_millis(value(&mut it, &arg)?.parse()?);
             }
             "--sessions" => {
                 let list = value(&mut it, &arg)?;
@@ -138,6 +151,10 @@ mod tests {
         assert!(args.tokens_dir.ends_with("Cadex/sessions"));
         assert!(!args.watcher && !args.keep_alive && args.embeddings);
         assert!(args.sessions.is_empty() && args.lock_fd.is_none());
+        assert!(args.claude_dirs.is_none() && args.import_delay == Duration::from_millis(1500));
+        let args = parse(&strings(&["--socket", "/s", "--data-dir", "/d", "--claude-dirs", "/a:/b", "--import-delay-ms", "0"])).unwrap();
+        assert_eq!(args.claude_dirs, Some(vec![PathBuf::from("/a"), PathBuf::from("/b")]));
+        assert_eq!(args.import_delay, Duration::ZERO);
     }
 
     #[test]

@@ -32,7 +32,7 @@ pub(crate) struct InFlight {
     zero: Notify,
 }
 
-struct InFlightGuard(Arc<InFlight>);
+pub(crate) struct InFlightGuard(Arc<InFlight>);
 
 impl Drop for InFlightGuard {
     fn drop(&mut self) {
@@ -43,6 +43,13 @@ impl Drop for InFlightGuard {
 }
 
 impl InFlight {
+    /// Count work that is not a request (an import, import.rs) as in flight
+    /// until the guard drops, so the restart waits for it.
+    pub(crate) fn hold(self: &Arc<Self>) -> InFlightGuard {
+        self.count.fetch_add(1, Ordering::SeqCst);
+        InFlightGuard(self.clone())
+    }
+
     async fn idle(&self) {
         loop {
             let zero = self.zero.notified();

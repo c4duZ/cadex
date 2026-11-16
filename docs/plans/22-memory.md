@@ -255,6 +255,11 @@ refaz o crate a partir dela.
     exato; o crate do Cadex percorre **todas as pastas de conta** (as do plano 18; só a da conta com
     memory.shareAcrossAccounts desligada), tira repetidas pelo id da sessão e casa **a raiz do
     repositório, as subpastas e as worktrees dele** (as do plano 19), não só o cwd exato.
+    Como ficou (2026-11-16): "memória vazia" é a regra do upstream (nenhuma sessão no projeto além
+    da que começa); escolhe as 200 mais novas e entra na ordem em que aconteceram (mais novas
+    primeiro deixavam a mais velha no topo do briefing); não deixa handoff (`auto_handoff=0`); uma
+    marca em `<memória>/imports/` faz ser uma vez só e retoma uma importação cortada pela saída do
+    processo; sessão cuja pasta já não existe fica de fora (o leitor do upstream confere a pasta).
   - **O `claude` digitado à mão** (o dono, 2026-11-15, opção "1 + 3"): prefixar o PATH das abas
     não funciona (o shell de login e o `.zshrc` reordenam). O Cadex abre o zsh das abas com uma
     pasta de inicialização dele (`ZDOTDIR`): ela devolve o `ZDOTDIR` do dono, carrega os arquivos
@@ -276,8 +281,14 @@ refaz o crate a partir dela.
   - **Sessões de fora do Cadex** (outro terminal, VS Code, bash e fish): nada percebe a hora em que
     terminam sem um vigia rodando o tempo todo. Toda vez que o `cadex-memory` sobe, ele importa,
     pelo mesmo caminho do backfill, as sessões dos projetos conhecidos que ainda não estão na
-    memória (pelo id da sessão). A memória aprende com elas na próxima sessão do Cadex, antes do
-    briefing; briefing elas não receberam.
+    memória (pelo id da sessão). Briefing elas não receberam.
+    Como ficou (2026-11-16): a importação roda em segundo plano depois que o socket está pronto,
+    para não atrasar o SessionStart que subiu o processo; esse briefing pode sair sem elas, e a
+    sessão seguinte já as tem. Não roda no reinício que devolve a memória (o processo não "subiu").
+    Por subida: até 50 sessões e 10 mil eventos, mais novas primeiro; transcript mexido nos
+    últimos 2 minutos espera (pode ser uma sessão aberta); um ponto de controle por conta faz a
+    subida seguinte ler só o que mudou depois, e só avança quando nada ficou para trás. Projeto
+    cuja importação do histórico ainda vai rodar fica com ela.
   - Configuração memory.enabled (**ligada**). Features: memory, agent-tools, agents, terminal,
     settings.
 - **D. Briefing, busca e ferramentas.**

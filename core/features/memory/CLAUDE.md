@@ -27,8 +27,10 @@
     `--no-embeddings`, `--watcher` (o vigia da wiki, desligado por padrão: nada por relógio),
     `--embed-idle-secs`, `--keep-alive` (não sai sem sessão: testes), `--warm` (abre o store e a
     wiki com as migrações e sai, sem socket nem `--socket`: o aquecimento que o app roda na primeira
-    abertura de cada versão; com outro engine na pasta, sai na hora) e os que o reinício passa
-    (`--sessions`, `--lock-fd`, `--listen-fd`).
+    abertura de cada versão; com outro engine na pasta, sai na hora), `--claude-dirs a:b` (as
+    pastas de conta da importação no lugar das do app: testes), `--import-delay-ms` (a espera da
+    importação depois de subir e de cada SessionStart, padrão 1500, para o briefing ir antes) e os
+    que o reinício passa (`--sessions`, `--lock-fd`, `--listen-fd`).
   - `server/src/engine.rs`: store, wiki, embedder, roteador de hooks e de workstream e o MCP
     (streamable HTTP, JSON, sem estado), montados como o serve.rs do cli do upstream os monta, sem
     TCP, web, autenticação multiusuário (o `require_bearer` dele roda sem token, como anônimo) nem
@@ -52,12 +54,35 @@
   - `server/src/lazy_embedder.rs`: o modelo de vetores carregado no primeiro uso e solto depois
     de `--embed-idle-secs` parado (o do upstream carrega ao subir e nunca solta); baixa o modelo
     em segundo plano se faltar, e até lá a busca é só por texto. Avisa carga e descarga ao reinício.
-  - `server/src/transcripts.rs`: `cadex-memory scan-transcripts`, as sessões de um projeto em
-    várias pastas de conta (base da importação do histórico, fase C).
+  - A importação das conversas pelos transcripts do Claude Code (fase C), em segundo plano, uma
+    tarefa só, que segura o reinício enquanto grava:
+    - `server/src/import.rs`: o middleware que entrega cada SessionStart aceito à tarefa, a fila
+      de trabalhos, os limites e `import_all` (escolhe as mais novas no limite, grava as escolhidas
+      da mais velha para a mais nova, pula a sessão que o store já tem).
+    - `server/src/import_jobs.rs`: o histórico do projeto na primeira sessão (memória sem outra
+      sessão, a regra do upstream; 200 sessões, 50 mil eventos; sem a sessão que começa) e, a cada
+      subida que não é reinício, as sessões de fora do Cadex dos projetos conhecidos (50 sessões e
+      10 mil eventos por subida, nada mexido nos últimos 2 min, ponto de controle por conta).
+    - `server/src/import_state.rs`: em `<data-dir>/imports/`, a marca de cada projeto
+      (`started`/`done`) e os pontos de controle por conta (outside.json).
+    - `server/src/accounts.rs`: as pastas de conta, pela regra do app (`~/.claude`, `~/.claude-*`
+      com .claude.json, as contas do Cadex em Application Support), e a chave da conta (a
+      workspace com memory.shareAcrossAccounts desligada lê só a sua conta).
+    - `server/src/project_paths.rs`: a raiz, as subpastas e as worktrees (`git worktree list`) de
+      um projeto; o repositório principal de uma worktree (`--git-common-dir`).
+    - `server/src/transcripts.rs`: os `projects/<pasta>/<id>.jsonl` de cada conta, com o cwd lido
+      do próprio transcript, repetidas tiradas pelo id; `cadex-memory scan-transcripts --cwd <dir>
+      [--claude-dirs a:b]` lista o que a importação leria (diagnóstico).
+    - `server/src/replay.rs` e `server/src/replay_capture.rs`: **código copiado do cli do
+      upstream** (v3.4.7, backfill.rs e transcript_capture.rs, origem no topo de cada um): o
+      transcript, lido pelo `export_transcript` do upstream, vira eventos de hook mandados ao
+      `/hook/batch` pela rota, em processo, com a raiz do projeto como cwd e `auto_handoff=0`.
   - `server/tests/smoke.rs`: o engine de ponta a ponta pelo socket (páginas pelo MCP, briefing
     pelo SessionStart, busca), sem modelo e sem vigia; `server/tests/lifecycle.rs`: token, fila,
-    saída quando o último `claude` termina, sessões passadas pelo reinício e o `--warm`; ajudas em
-    `server/tests/common/mod.rs`.
+    saída quando o último `claude` termina, sessões passadas pelo reinício e o `--warm`;
+    `server/tests/import.rs`: a importação com transcripts sintéticos em contas falsas (duas contas,
+    subpasta, worktree, workspace da conta, uma vez só, sessões de fora, ponto de controle); ajudas
+    em `server/tests/common/mod.rs`.
 - O cliente do socket, em Zig (o único código que fala com o memory.sock; o `cadex memory-hook`
   da feature agent-tools chama `memory.zig`):
   - `memory.zig`: a entrada da feature (`hook`).
@@ -88,14 +113,16 @@
   2. `make memory` e corrigir no crate do Cadex as mudanças de API (na prova de 2026-11-15, duas
      semanas de upstream deram 3 linhas);
   3. `make memory-upstream-test` no PC;
-  4. comparar, entre o commit velho e o novo, o serve.rs e o backfill.rs do cli do upstream e
-     trazer ao `server/src/engine.rs` os passos novos de inicialização (o compilador não pega um
-     passo que falta) e à importação do histórico as mudanças na conversão de conversas;
+  4. comparar, entre o commit velho e o novo, o serve.rs, o backfill.rs e o
+     transcript_capture.rs do cli do upstream e trazer ao `server/src/engine.rs` os passos novos de
+     inicialização (o compilador não pega um passo que falta) e ao código copiado (as funções que
+     o topo de `server/src/replay.rs` e de `server/src/replay_capture.rs` lista) as mudanças na
+     conversão de conversas e no que a captura guarda; anotar a versão nova no topo deles;
   5. `make check` e `make perf`; anotar o commit novo no topo do `server/Cargo.toml`.
 
 ## Como validar
-- `make memory-test`: os testes do crate, `server/tests/smoke.rs` e `server/tests/lifecycle.rs`
-  (parte do `make check`, em segundos).
+- `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs` e
+  `server/tests/import.rs` (parte do `make check`, em segundos).
 - `make core-test`: os testes do cliente (eventos, query com e sem workspace, fila, respostas HTTP,
   sem token).
 - Na mão, tudo em pastas temporárias: um `.token` em `CADEX_SESSIONS_DIR`, e

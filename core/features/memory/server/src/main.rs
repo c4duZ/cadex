@@ -7,16 +7,24 @@
 //! the consolidation and profile workers that need a model, and the
 //! clock-driven maintenance scheduler. What it adds: it leaves when the
 //! last agent session ends and restarts itself to give memory back after
-//! the embedding model unloads (plan 22, phase C).
+//! the embedding model unloads, and it learns the project's past sessions and
+//! the ones that ran outside Cadex from their transcripts (plan 22, phase C).
 
 use std::time::Instant;
 
 use anyhow::Result;
 
+mod accounts;
 mod args;
 mod auth;
 mod engine;
+mod import;
+mod import_jobs;
+mod import_state;
 mod lazy_embedder;
+mod project_paths;
+mod replay;
+mod replay_capture;
 mod restart;
 mod serve;
 mod sessions;
