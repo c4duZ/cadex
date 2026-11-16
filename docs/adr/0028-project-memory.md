@@ -1,8 +1,8 @@
 # 0028 — Memória do projeto: o engine do ai-memory, num processo próprio
 
 Data: 2026-11-15 · Status: aceita · Revê `docs/adr/0002-zig-core-with-c-api.md` e
-`docs/adr/0004-clean-rewrite.md` (só para a memória), `docs/adr/0021-cadex-managed-accounts.md`
-(hooks do kit), `docs/adr/0022-terminal-daemon.md` (um terceiro socket) e
+`docs/adr/0004-clean-rewrite.md` (só para a memória), `docs/adr/0022-terminal-daemon.md` (um
+terceiro socket) e
 `docs/adr/0023-answer-agent-permissions.md` (consolidação sem clique)
 
 ## Contexto
@@ -51,20 +51,30 @@ A auditoria e a prova de conceito do mesmo dia (ai-memory 3.4.7, Rust 1.95, núm
   dois. Quem desenvolve precisa do `rustup`; quem instala recebe o binário dentro do app (a ADR 0007
   continua valendo).
 - **O processo `cadex-memory`.** Executável universal em `Contents/Helpers/`, como o
-  `cadex-terminald`. Sobe pelo launchd com a primeira sessão de agente num projeto com a memória
-  ligada e sai sozinho com a última, sem timer parado. É o único que escreve na wiki e no banco. Não
+  `cadex-terminald`, e iniciado do mesmo jeito: quem precisa dele (o hook da memória no início de
+  uma sessão, ou o app) o sobe se ele não responde no socket, num processo à parte (`setsid`), sem
+  launchd (a ADR 0022 recusou o LaunchAgent). Sai sozinho quando a última sessão de agente fecha:
+  ele mesmo registra o processo `claude` de cada SessionStart e o sistema o avisa quando esse
+  processo termina (kqueue), sem timer parado. É o único que escreve na wiki e no banco. Não
   roda dentro do app (um erro nele fecharia a janela, e a RAM somaria no app) nem dentro do daemon
-  do terminal (um erro nele mataria todas as sessões). Caiu, o launchd o sobe de novo, e a fila do
-  `cadex hook` guarda os eventos do meio-tempo. Parado sem modelo, ele se reinicia sozinho depois de
+  do terminal (um erro nele mataria todas as sessões). Caiu, o próximo hook o sobe de novo, e a fila
+  local do hook guarda os eventos do meio-tempo. Parado sem modelo, ele se reinicia sozinho depois de
   descarregar o modelo de vetores, para devolver a memória.
 - **Um terceiro socket** (revê a ADR 0022): `memory.sock`, na mesma pasta de sockets, modo 0600, com
   o token da sessão e o `getpeereid` do `app.sock`. Só a feature `memory` do núcleo fala com ele; o
   `cadex hook`, o `cadex mcp` e o app passam por ela.
-- **Os hooks do kit vão por `--plugin-dir`** (revê a ADR 0021). Testado em 2026-11-15: dois
-  `--settings` não se somam, vale o último. Com os hooks do kit no `--settings`, o `--settings` do
-  dono apagaria os do kit, ou o contrário. Plugin não colide. O `--settings` do kit fica só com o
-  `statusLine`, que plugin não carrega; se o dono passa o seu, os dois viram um arquivo só, em que o
-  dele vale em tudo menos no `statusLine`.
+- **Os hooks da memória entram pelo kit** (ADR 0021), num comando próprio (`cadex memory-hook
+  <evento>`), separado do hook do app. Testado em 2026-11-15: dois `--settings` não se somam, vale
+  o último. Nas sessões que o Cadex abre isso não importa (só há o do kit); no `claude` digitado
+  numa aba, se o dono passa o seu `--settings`, os dois viram um arquivo só (o dele vale em tudo,
+  os hooks se somam, o `statusLine` é o do kit). Mover os hooks para o plugin foi considerado e
+  recusado na fase C: o plugin é uma pasta fixa e o `--settings` do kit leva também ambiente e
+  permissões.
+- **O `claude` digitado à mão, pelo zsh** (o dono, 2026-11-15): o Cadex abre o zsh das abas com
+  uma pasta de inicialização dele (`ZDOTDIR`, a técnica do Ghostty e do iTerm), que carrega os
+  arquivos do dono normalmente e define uma função `claude` que acrescenta o kit. Prefixar o PATH
+  não serve: o shell de login (`path_helper`) e o `.zshrc` do dono o reordenam. Bash, fish e
+  sessões de fora do Cadex entram na memória pela importação, sem briefing.
 - **Sem IA embutida.** O Cadex não roda modelo nem guarda chave, e nenhum provedor de LLM do fork é
   configurado ou chamado (o LTO já os tira do binário). Quando a memória precisa de IA, quem pensa é
   o Claude Code do usuário: na sessão aberta (consolidação, abaixo) ou numa sessão nova pelo CLI na
@@ -112,7 +122,7 @@ A auditoria e a prova de conceito do mesmo dia (ai-memory 3.4.7, Rust 1.95, núm
 - O build ganha o `cargo` (`make memory`); o app de release passa de 55 para 85 MB de limite, com o
   motivo no `tools/perf/limits.py`. O `make check` roda só os testes do crate do Cadex e uma prova
   rápida do engine; a suíte do upstream roda a cada merge.
-- O kit da sessão passa a levar os hooks pelo plugin; os planos 19 e 21 mudam junto (os hooks deles
-  vão para o mesmo plugin).
+- O kit da sessão ganha os hooks da memória (`cadex memory-hook`), ao lado dos dos planos 19 e 21;
+  as abas com zsh ganham a pasta de inicialização do Cadex (`ZDOTDIR`) com a função `claude`.
 - Propor editar os crates do upstream, rodar o engine no app ou no daemon do terminal, configurar um
   provedor de LLM do fork ou instalar hooks na configuração do dono é desfazer esta decisão.

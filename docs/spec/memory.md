@@ -44,8 +44,9 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   (`docs/adr/0029-memory-agent.md`). Mostra a estimativa de custo antes e só roda no clique.
 
 ### O `claude` digitado à mão
-- Nas abas do Cadex, o `claude` digitado recebe o mesmo kit das sessões que o Cadex abre: grava na
-  memória e recebe o briefing, na conta da aba.
+- Nas abas do Cadex com zsh (o shell padrão do Mac), o `claude` digitado recebe o mesmo kit das
+  sessões que o Cadex abre: grava na memória e recebe o briefing, na conta da aba. Com bash ou
+  fish, a sessão entra na memória pela importação, sem briefing.
 - Só sessões interativas. `claude -p`, `claude --version`, `claude --help` e todo subcomando
   (`mcp`, `plugin`, `update`, `doctor`, `auth`…, inclusive depois de opções, como
   `claude --model haiku mcp list`) saem exatamente iguais aos de fora do Cadex. `--bg` e
@@ -56,8 +57,9 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   memória.
 
 ### Sessões de fora do Cadex
-- Uma sessão do projeto aberta em outro terminal ou no VS Code entra na memória quando termina,
-  pelo mesmo caminho do histórico. Briefing ela não recebe, e nada é escrito na configuração do dono.
+- Uma sessão do projeto aberta em outro terminal ou no VS Code entra na memória na próxima vez que
+  o Cadex abre uma sessão de agente, antes do briefing, pelo mesmo caminho do histórico. Briefing ela
+  não recebe, e nada é escrito na configuração do dono.
 
 ### O briefing
 - Ao começar uma sessão (nova, retomada, depois de `/clear`, depois de compactar), o agente recebe o
@@ -160,7 +162,7 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
       atrasar a sessão; reabrir não importa de novo.
 - [ ] `claude` digitado numa aba do Cadex grava e recebe briefing; `claude -p`, `claude --version`,
       `claude mcp list` e `claude --model haiku mcp list` saem iguais aos de fora.
-- [ ] Uma sessão do projeto num terminal de fora entra na memória quando termina.
+- [ ] Uma sessão do projeto num terminal de fora entra na memória na próxima sessão do Cadex.
 - [ ] Com o processo morto, os eventos esperam e entram quando ele volta.
 - [ ] A compactação automática leva o ponto de controle ao resumo.
 - [ ] O modelo baixa (e retoma), carrega, sai depois de parado, e o processo volta ao peso de parado.

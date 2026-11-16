@@ -133,11 +133,12 @@ refaz o crate a partir dela.
   de várias contas, a reescrita do briefing, o handoff melhor, o provedor "Claude do usuário". O que
   for copiado do cli do upstream (a montagem do servidor, ~400 linhas da conversão de conversas do
   backfill) leva no topo a origem (arquivo e versão) e entra no checklist do merge.
-- **O processo `cadex-memory`:** executável Rust universal dentro do app. Sobe pelo launchd quando
-  a primeira sessão de agente abre num projeto com a memória ligada e sai sozinho quando a última
-  fecha, sem timer parado (como o daemon da ADR 0022). Escritor único da wiki e do banco. Um erro
-  nele só para a memória: o launchd o sobe de novo e a fila do `cadex hook` guarda o que chegou
-  nesse meio-tempo.
+- **O processo `cadex-memory`:** executável Rust universal dentro do app. Sobe como o daemon da
+  ADR 0022 (sem launchd: quem precisa dele o inicia com `setsid` se não responde no socket) quando a
+  primeira sessão de agente abre num projeto com a memória ligada, e sai sozinho quando a última
+  fecha: ele registra o `claude` de cada SessionStart e o kqueue o avisa quando esse processo
+  termina, sem timer parado. Escritor único da wiki e do banco. Um erro nele só para a memória: o
+  próximo hook o sobe de novo e a fila local do hook guarda o que chegou nesse meio-tempo.
 - **O terceiro socket:** memory.sock na pasta de sockets do Cadex (revê a ADR 0022), modo 0600,
   com o mesmo token por sessão e `getpeereid` do app.sock. O caminho cabe no limite de 104 bytes do
   macOS (a pasta de sockets já é curta pela ADR 0021). Só a feature `memory` do núcleo fala com ele;
@@ -153,8 +154,7 @@ refaz o crate a partir dela.
     núcleo só para a feature memory (revê a ADR 0002); o processo `cadex-memory` e o memory.sock
     (revê a 0022); o que fica fora do fork e por quê; o fork acompanha o upstream pelo procedimento
     da fase B. Revê também a ADR 0023: a consolidação na sessão (fase F) manda o agente consolidar
-    por um Stop com `block`, sem clique, nos marcos ligados em memory.consolidateInSession. Revê a
-    ADR 0021 num ponto: os hooks do kit passam a ir por `--plugin-dir` (fase C). Reescreve a linha
+    por um Stop com `block`, sem clique, nos marcos ligados em memory.consolidateInSession. Reescreve a linha
     "IA embutida no app" do `CLAUDE.md` da raiz para: "O Cadex não roda modelo nem guarda chave:
     quando a memória precisa de IA, quem pensa é o Claude Code do usuário, na sessão ou numa sessão
     nova pelo CLI na mesma conta".
@@ -213,19 +213,24 @@ refaz o crate a partir dela.
     que importa ou recurso que queremos, no máximo a cada mês.
   - O `docs/plans/README.md` passa a citar o Rust nas ferramentas da máquina. Features: memory.
 - **C. O processo, a captura e as pastas.**
-  - `cadex-memory` com o memory.sock, a vida pelo launchd e o escritor único; dados em
+  - `cadex-memory` com o memory.sock, iniciado sob demanda (`setsid`, como o daemon do terminal),
+    o fim pelo kqueue sobre os `claude` vivos e o escritor único; dados em
     `~/Library/Application Support/Cadex/memory/` (a criar), no layout do ai-memory (wiki/ em git,
     db/, raw/, models/).
   - **Aquecer depois de instalar ou atualizar:** na primeira abertura do app depois de uma versão
     nova, o app roda o `cadex-memory` uma vez em segundo plano (migrações do banco e a checagem do
     macOS do binário novo), para que o primeiro SessionStart não gaste o 1 s de espera nisso.
-  - **Os hooks do kit vão por `--plugin-dir`** (revê a ADR 0021): o plugin do kit leva os hooks da
-    memória e os dos planos 19 e 21; o `--settings` do kit fica só com o `statusLine` (que plugin
-    não carrega). Motivo: dois `--settings` não se somam, e o kit apagaria o do dono ou o dono o do
-    kit. Os hooks da memória: SessionStart, UserPromptSubmit, PostToolUse, PreCompact, PostCompact,
-    SubagentStart, SubagentStop, Stop, SessionEnd. Todos pelo `cadex hook`, que manda ao
-    memory.sock e, se o processo não responde, grava na fila local e sai; o `cadex-memory` esvazia a
-    fila ao subir. Nunca espera o engine fora do SessionStart.
+  - **Os hooks da memória entram pelo kit, no `--settings`** como os dos planos 19 e 21, num
+    comando próprio, `cadex memory-hook <evento>` (separado do `cadex hook` do app, que corta o
+    PostToolUse para a revisão; numa edição rodam os dois, ~4 ms a mais). Mover os hooks para o
+    `--plugin-dir` foi recusado (fase C, 2026-11-15): o plugin é uma pasta fixa, e o `--settings`
+    do kit leva também ambiente e permissões; a colisão com o `--settings` do dono só existe no
+    `claude` digitado, e o intermediário junta os dois. Os eventos: SessionStart,
+    UserPromptSubmit, PostToolUse, PreCompact, PostCompact, SubagentStart, SubagentStop, Stop,
+    SessionEnd. O comando fala HTTP/1.1 com o memory.sock (token da sessão no cabeçalho); se o
+    processo não responde, grava na fila local e sai; o `cadex-memory` esvazia a fila ao subir.
+    Nunca espera o engine fora do SessionStart. O kit passa no ambiente o caminho do
+    `cadex-memory` e a pasta da memória.
   - **Escopo:** o `cadex hook` manda sempre `project_strategy=repo-root` e `briefing=1`, desde a
     primeira sessão de cada projeto. Sem isso o engine faz de cada worktree um projeto à parte (pelo
     nome da pasta) e, uma vez registrada assim, ela não volta; e sem `briefing=1` as páginas não
@@ -250,9 +255,12 @@ refaz o crate a partir dela.
     exato; o crate do Cadex percorre **todas as pastas de conta** (as do plano 18; só a da conta com
     memory.shareAcrossAccounts desligada), tira repetidas pelo id da sessão e casa **a raiz do
     repositório, as subpastas e as worktrees dele** (as do plano 19), não só o cwd exato.
-  - **O `claude` digitado à mão** (o dono, 2026-11-15): as abas do Cadex têm na frente do PATH um
-    `claude` do Cadex que chama o de verdade com o kit, sem trocar a conta (o `CLAUDE_CONFIG_DIR` da
-    aba fica como está).
+  - **O `claude` digitado à mão** (o dono, 2026-11-15, opção "1 + 3"): prefixar o PATH das abas
+    não funciona (o shell de login e o `.zshrc` reordenam). O Cadex abre o zsh das abas com uma
+    pasta de inicialização dele (`ZDOTDIR`): ela devolve o `ZDOTDIR` do dono, carrega os arquivos
+    dele normalmente e define uma função `claude` que chama `cadex claude`, que pede o kit ao app e
+    executa o `claude` de verdade com ele, sem trocar a conta (o `CLAUDE_CONFIG_DIR` da aba fica
+    como está). Bash e fish ficam sem (entram pela importação).
     - Só para sessão interativa. Passam direto, sem nada: `-p`/`--print`, `-v`/`--version`,
       `-h`/`--help` e todo subcomando. O subcomando é a primeira palavra que não é opção, pulando o
       valor das opções que levam valor (`claude --model haiku mcp list` é `mcp`). A lista vem do
@@ -263,11 +271,13 @@ refaz o crate a partir dela.
     - `--bg` e `remote-control` passam direto, sem kit, até decisão própria.
     - Se o dono passa `--settings`, o intermediário junta o dele com o `statusLine` do kit num
       arquivo só (o do dono vale em tudo, menos o `statusLine`), porque dois `--settings` não se
-      somam; os hooks do kit vão pelo plugin e não colidem.
+      somam; os hooks dos dois se somam nesse arquivo.
     - Um `alias claude=` do dono passa por cima, e a spec diz isso.
-  - **Sessões de fora do Cadex** (outro terminal, VS Code): quando uma sessão do projeto termina sem
-    ter passado pelo kit, o engine a importa pelo mesmo caminho do backfill (só aquela sessão). A
-    memória aprende com ela; briefing ela não recebeu.
+  - **Sessões de fora do Cadex** (outro terminal, VS Code, bash e fish): nada percebe a hora em que
+    terminam sem um vigia rodando o tempo todo. Toda vez que o `cadex-memory` sobe, ele importa,
+    pelo mesmo caminho do backfill, as sessões dos projetos conhecidos que ainda não estão na
+    memória (pelo id da sessão). A memória aprende com elas na próxima sessão do Cadex, antes do
+    briefing; briefing elas não receberam.
   - Configuração memory.enabled (**ligada**). Features: memory, agent-tools, agents, terminal,
     settings.
 - **D. Briefing, busca e ferramentas.**
@@ -372,7 +382,7 @@ custo anotado.
 ## Como validar
 - `make check` a cada fase (com o crate do Cadex e a prova rápida do engine a partir da B);
   `make perf` nas fases B a I; `make memory-upstream-test` a cada merge do upstream.
-- Fase A: ADR 0028 cita o que revê (0002, 0004, 0021, 0022, 0023, a linha "IA embutida" da raiz),
+- Fase A: ADR 0028 cita o que revê (0002, 0004, 0022, 0023, a linha "IA embutida" da raiz),
   a regra de não editar o upstream e o que fica fora do fork; ADR 0029 cita a 0019, a linha
   "launcher de agentes" e a posição sobre os termos; spec com critérios e limites conhecidos;
   `make manifests`.
@@ -390,7 +400,7 @@ custo anotado.
   Cadex grava e recebe briefing, na conta da aba; com `--settings` do dono, os hooks dele e os do
   kit rodam juntos; `claude -p`, `claude mcp list`, `claude --model haiku mcp list` e
   `claude --version` saem iguais aos de fora do Cadex. Uma sessão do projeto num terminal de fora
-  entra na memória quando termina. O handoff de uma sessão com 10 edições lista as 10. O primeiro
+  entra na memória na próxima sessão do Cadex. O handoff de uma sessão com 10 edições lista as 10. O primeiro
   SessionStart depois de atualizar o app recebe briefing (o aquecimento funcionou).
 - Fase D: o hook de ferramenta no tempo de hoje; o briefing dentro do limite e sem frase
   imperativa; uma decisão salva numa sessão aparece no briefing da seguinte; a compactação
