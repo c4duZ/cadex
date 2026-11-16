@@ -35,6 +35,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | review | não | sim | comentários na revisão de uma tarefa, mandados ao agente dela num texto só |
 | computer-use | não | sim | o agente opera outros apps do Mac pela acessibilidade, com permissão do dono por app |
 | ssh | não | sim | os hosts do ~/.ssh/config, se respondem, e conectar numa aba |
+| machines | não | sim | as máquinas da tailnet pelo Tailscale do dono: online, caminho, latência, conectar; depois "Rodar em", Docker e compartilhar |
 | spaces | não | sim | grupos de abas restaurados entre sessões |
 | themes | não | sim | temas do app e do editor, imagem de fundo |
 | settings | não | sim | janela de configurações e preferências salvas |

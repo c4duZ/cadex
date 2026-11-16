@@ -4,6 +4,7 @@ import SessionKit
 import Worktrees
 import AppKit
 import Settings
+import Machines
 import SSH
 import Tabs
 import Terminal
@@ -80,6 +81,7 @@ final class SettingsBridge {
         AgentsController.shared.isEnabled = settings.agents.sessions
         AgentUsageController.shared.isEnabled = settings.agents.accounts
         SSHController.shared.pings = settings.ssh.ping
+        MachinesController.shared.isEnabled = settings.machines.tailscale
         AgentsController.shared.names = settings.agents.accountNames.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }
         AgentsController.shared.hidden = Set(settings.agents.hiddenAccounts.map(Self.expand))
         AgentHistoryController.shared.isEnabled = settings.agents.history

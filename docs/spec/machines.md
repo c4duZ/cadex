@@ -25,8 +25,9 @@ celular. A rede é o Tailscale que o dono já tem (`docs/adr/0030-installed-tail
   `~/.ssh/config`, o grupo "Tailnet" com as máquinas: a bolinha (verde online e direto, amarela
   online pelo relay, vermelha offline), o nome, o sistema e "direct 12 ms", "relay (sao) 80 ms" ou
   "offline, seen 3h ago".
-- A latência vem de um `tailscale ping` por máquina online, só ao abrir o cartão e no "Test Again";
-  nunca por relógio.
+- A latência vem do ping do Tailscale (pela API local, sem abrir processo; só com a CLI, um
+  `tailscale ping`), uma vez por máquina online, ao abrir o cartão e no "Test Again"; nunca por
+  relógio.
 - O número do item ("SSH 3/3") conta os hosts do `~/.ssh/config`; as máquinas da tailnet têm a
   contagem delas no título do grupo ("Tailnet 2/3").
 - Uma máquina que também é um host do `~/.ssh/config` (mesmo nome ou mesmo endereço) aparece nos

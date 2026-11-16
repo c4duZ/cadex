@@ -121,6 +121,10 @@ enum GeneralPages {
                                  T("While the SSH item shows in the status bar, each host of ~/.ssh/config gets a connection to its port, on open and every 10 minutes. No login, no command.",
                                    "Enquanto o item SSH aparece na barra de status, cada host do ~/.ssh/config recebe uma conexão na porta dele, ao abrir e a cada 10 minutos. Sem login, sem comando."),
                                  control: SettingsPage.toggle(store.settings.ssh.ping) { on in store.update { $0.ssh.ping = on } }),
+                SettingsPage.row(T("Tailnet machines", "Máquinas da tailnet"),
+                                 T("With Tailscale running, the SSH card lists your tailnet's machines under the hosts. Cadex reads the list from your Tailscale only while the card or ⌘K shows it, and never changes its settings. Off, Cadex does not touch Tailscale at all.",
+                                   "Com o Tailscale rodando, o cartão do SSH lista as máquinas da sua tailnet abaixo dos hosts. O Cadex lê a lista do seu Tailscale só enquanto o cartão ou o ⌘K a mostram, e nunca muda a configuração dele. Desligado, o Cadex não toca no Tailscale."),
+                                 control: SettingsPage.toggle(store.settings.machines.tailscale) { on in store.update { $0.machines.tailscale = on } }),
             ] + MemoryRows.make(store) + [
                 SettingsPage.section(T("Tasks", "Tarefas")),
                 SettingsPage.row(T("Folder of the tasks", "Pasta das tarefas"),

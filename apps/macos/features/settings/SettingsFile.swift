@@ -159,6 +159,13 @@ public enum SettingsFile {
         if let s = reader.section(root, "ssh") {
             settings.ssh.ping = reader.bool(s, "ssh.ping") ?? settings.ssh.ping
         }
+        if let s = reader.section(root, "machines") {
+            settings.machines.tailscale = reader.bool(s, "machines.tailscale") ?? settings.machines.tailscale
+            if let users = s["users"] {
+                if let users = users as? [String: String] { settings.machines.users = users }
+                else { reader.problems.append("machines.users: esperava um usuário por máquina") }
+            }
+        }
         if let s = reader.section(root, "statusBar") {
             settings.statusBar.left = reader.strings(s, "statusBar.left") ?? settings.statusBar.left
             settings.statusBar.right = reader.strings(s, "statusBar.right") ?? settings.statusBar.right
@@ -202,6 +209,7 @@ public enum SettingsFile {
             "sidebar": ["items": s.sidebar.items],
             "statusBar": ["left": s.statusBar.left, "right": s.statusBar.right],
             "ssh": ["ping": s.ssh.ping],
+            "machines": ["tailscale": s.machines.tailscale, "users": s.machines.users],
             "review": ["authorship": s.review.authorship],
             "memory": ["enabled": s.memory.enabled, "shareAcrossAccounts": s.memory.shareAcrossAccounts,
                        "consolidateInSession": s.memory.consolidateInSession, "consolidateAtContext": s.memory.consolidateAtContext,

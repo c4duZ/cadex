@@ -20,6 +20,14 @@ public final class SSHStrip: NSView {
 
     /// A host picked in the card: the app opens `ssh <alias>` in a tab.
     public var onConnect: ((String) -> Void)?
+    /// More of the card under the hosts, given by the app (the tailnet's
+    /// machines, docs/spec/machines.md): its width and the two text colors.
+    /// The ssh feature does not know what it is.
+    public var extraContent: ((CGFloat, NSColor, NSColor) -> NSView?)?
+    /// The card opened or closed: the app reads its extra only meanwhile.
+    public var onCardOpen: ((Bool) -> Void)? { didSet { card?.onOpenChange = onCardOpen } }
+    /// "Test Again" was clicked: the app tests its extra too.
+    public var onTestAgain: (() -> Void)?
     public var text: NSColor = .labelColor { didSet { render() } }
     public var secondary: NSColor = .secondaryLabelColor { didSet { render() } }
     private let dot = StatusDot()
@@ -81,6 +89,12 @@ public final class SSHStrip: NSView {
         }
     }
 
+    /// The card again, as it shows (its extra changed).
+    public func refreshCard() { card?.refresh() }
+
+    /// A row of the extra was picked: the card goes, as for a host.
+    public func closeCard() { card?.close() }
+
     public func render() {
         let ssh = SSHController.shared
         let reaches = ssh.hosts.compactMap { ssh.reach[$0.alias] }
@@ -137,18 +151,24 @@ public final class SSHStrip: NSView {
         again.textColor = text
         let button = HoverRow(again)
         button.setAccessibilityLabel(T("Test Again", "Testar de novo"))
-        button.onClick = { SSHController.shared.testNow() }
+        button.onClick = { [weak self] in
+            SSHController.shared.testNow()
+            self?.onTestAgain?()
+        }
         let note = small(T("Click a host to connect", "Clique num host para conectar"))
         note.toolTip = T("Tested on open and every 10 min", "Testado ao abrir e a cada 10 min")
         let footer = NSStackView(views: [note, NSView(), button])
         footer.alignment = .centerY
         footer.widthAnchor.constraint(equalToConstant: UILooks.pt(272)).isActive = true
         rows.append(footer)
+        let extra = extraContent?(UILooks.pt(272), text, secondary)
+        if let extra { rows.append(extra) }
         let stack = NSStackView(views: rows)
         stack.orientation = .vertical
         stack.alignment = .leading
         stack.spacing = 4
         stack.setCustomSpacing(8, after: title)
+        if extra != nil { stack.setCustomSpacing(14, after: footer) }
         return stack
     }
 

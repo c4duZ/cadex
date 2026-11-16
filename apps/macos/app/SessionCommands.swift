@@ -7,6 +7,7 @@ import CommandPalette
 import Editor
 import Explorer
 import GitHistory
+import Machines
 import Markdown
 import MediaPreview
 import Memory
@@ -55,6 +56,7 @@ extension WindowSession {
         commands.register(TabCommands.all { [weak self] in self?.tabs })
         commands.register(SidebarCommands.all({ [weak self] in self?.workspace?.sidebar }, palette: palette))
         commands.register(SSHCommands.all(palette: palette) { [weak self] alias in self?.connectSSH(alias) })
+        commands.register(MachinesCommands.all(palette: palette) { [weak self] machine, ask in self?.connectMachine(machine, askUser: ask) })
         commands.register(StatusBarCommands.all({ [weak self] in self?.workspace?.statusBar }, palette: palette,
                                                 customize: { [weak self] in self?.openCustomize("statusBar") }))
         makeSpaces(palette: palette)

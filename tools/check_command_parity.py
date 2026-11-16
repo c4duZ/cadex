@@ -12,11 +12,11 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-PREFIXES = "tab|pane|explorer|workspace|search|editor|markdown|terminal|git|history|diff|preview|media|space|edit|palette|settings|app|window|view|theme|power|sidebar|statusBar|agents|ssh|worktrees|agent-tools|computer-use|review|memory"
+PREFIXES = "tab|pane|explorer|workspace|search|editor|markdown|terminal|git|history|diff|preview|media|space|edit|palette|settings|app|window|view|theme|power|sidebar|statusBar|agents|ssh|worktrees|agent-tools|computer-use|review|memory|machines"
 LITERAL = re.compile(r'"((?:%s)\.[a-z0-9-]+)"' % PREFIXES)
 # Names of views and keys in the Mac's code, not commands (2026-10-20).
 # power.mode, sidebar.items and statusBar.left/right are settings.json keys, read by name in SettingsFile.swift.
-NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode", "sidebar.items", "statusBar.left", "statusBar.right", "agents.sessions", "agents.accountNames", "agents.hiddenAccounts", "agents.accounts", "ssh.ping", "agents.hiddenLogins", "agents.launchSkipPermissions", "agents.activeAccount", "agents.projectAccounts", "agents.history", "agents.stateHooks", "agents.attention", "agents.dockBadge", "agents.mutedMachines", "worktrees.root", "worktrees.setupHooks", "history.jsonl", "review.authorship", "memory.enabled", "memory.shareAcrossAccounts", "memory.consolidateInSession", "memory.consolidateAtContext", "memory.backgroundAgent", "memory.dailyBudgetUsd", "memory.requireApproval"}
+NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode", "sidebar.items", "statusBar.left", "statusBar.right", "agents.sessions", "agents.accountNames", "agents.hiddenAccounts", "agents.accounts", "ssh.ping", "agents.hiddenLogins", "agents.launchSkipPermissions", "agents.activeAccount", "agents.projectAccounts", "agents.history", "agents.stateHooks", "agents.attention", "agents.dockBadge", "agents.mutedMachines", "worktrees.root", "worktrees.setupHooks", "history.jsonl", "review.authorship", "memory.enabled", "memory.shareAcrossAccounts", "memory.consolidateInSession", "memory.consolidateAtContext", "memory.backgroundAgent", "memory.dailyBudgetUsd", "memory.requireApproval", "machines.tailscale", "machines.users"}
 # Mac-only for now: the in-app updater (docs/adr/0016-in-app-updates.md) comes
 # to Windows later. Windows-only ones (workspace.environment) need no entry.
 # The pasted-image tags (docs/spec/terminal.md, Ver a imagem colada) also
@@ -36,6 +36,8 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             # The unified history (plan 18, phase D).
             "agents.show-history", "agents.resume-session", "agents.continue-in-account", "agents.continue-in-agent", "memory.consolidate-now", "memory.run-dream", "memory.bootstrap", "memory.pause-agent",
             # The Memory page (plan 22, phase H), Mac only like the rest of the memory's app side.
+            # The tailnet's machines (plan 23, phase B): the Tailscale part waits for the Windows port.
+            "machines.connect", "machines.ping", "machines.refresh", "machines.copy-address",
             "memory.show", "memory.show-briefing", "memory.show-history", "memory.reindex", "memory.refresh", "memory.enable", "memory.approve", "memory.reject", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).

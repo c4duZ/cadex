@@ -97,6 +97,20 @@ docs/adr/0022-terminal-daemon.md (do plano 19), docs/adr/0024-agent-tools.md (do
     lembrado por máquina), machines.ping, machines.refresh, machines.copy-address.
   - Configuração machines.tailscale (ligada; sem daemon, nada aparece). Desligada: nenhum socket
     aberto, nenhum processo rodado.
+  - No código em 2026-11-16 (`apps/macos/features/machines/CLAUDE.md`): a feature lê o Tailscale só
+    com o cartão do ssh aberto (o `HoverCard` ganhou `onOpenChange`) ou com a paleta listando as
+    máquinas; a latência vem do ping da LocalAPI (sem processo; a CLI só sem LocalAPI). Achado ao
+    conferir a LocalAPI: o `watch-ipn-bus` sem bits manda os contadores do motor a cada 2 s, e o bit
+    do netmap inicial agora é recusado ("no longer supported"); por isso o fluxo só fica aberto com
+    o cartão aberto e só uma mudança que não é dos contadores (ou do número de pares vivos) relê o
+    status. Testado: 15 testes com respostas gravadas e uma LocalAPI falsa, e, com
+    `CADEX_MACHINES_REAL=1`, contra o Tailscale deste Mac (achou o Standalone, leu o status sem
+    leitura parcial, o ping respondeu, o fluxo mandou linhas e parou quando pedido); o grupo
+    desenhado num PNG (`CADEX_SNAPSHOT_DIR`). `make perf`: o app parado com 87 MB e 0,3 % de CPU,
+    igual ao de antes; quatro cenários antigos (temas, abas, subagente, preview do agente) passaram
+    do limite com a máquina em load 9–12 e passaram rodados de novo, isolados. **Falta** o que pede
+    o PC na tailnet: as máquinas no cartão iguais ao `tailscale status`, o PC desligado virando
+    offline, a aba do ssh conectando de verdade; e o cartão aberto no app clicado pelo dono.
 - **C. Rodar em (mínimo).** Na feature worktrees (plano 19): o "Nova tarefa" ganha "Rodar em"
   (este Mac, um host do `~/.ssh/config` ou uma máquina da tailnet). No remoto, uma aba ssh roda os
   passos da tarefa (clonar ou achar o repo, `git worktree add`, hooks de preparo) e abre `claude`

@@ -104,6 +104,9 @@ let package = Package(
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
+        // The tailnet's machines, by the owner's own Tailscale (docs/spec/machines.md, ADR 0030).
+        .target(name: "Machines", dependencies: ["CommandPalette", "Icons", "Menus", "Strings", "UILooks"], path: "features/machines",
+                exclude: ["CLAUDE.md", "tests"], swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]),
         // What a session opened by Cadex gets: --settings, --plugin-dir,
         // --mcp-config and the tab's environment (docs/adr/0021-cadex-managed-accounts.md).
         .target(
@@ -474,20 +477,14 @@ let package = Package(
         ),
         .executableTarget(name: "MemoryTests", dependencies: ["Memory", "SessionKit", "Checks"], path: "features/memory/tests",
                           linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
-        .executableTarget(
-            name: "SessionKitTests",
-            dependencies: ["SessionKit", "Checks"],
-            path: "shared/session-kit/tests"
-        ),
-        .executableTarget(
-            name: "TempImagesTests",
-            dependencies: ["TempImages", "Checks"],
-            path: "shared/temp-images/tests"
-        ),
+        .executableTarget(name: "MachinesTests", dependencies: ["Machines", "Checks"], path: "features/machines/tests",
+                          linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
+        .executableTarget(name: "SessionKitTests", dependencies: ["SessionKit", "Checks"], path: "shared/session-kit/tests"),
+        .executableTarget(name: "TempImagesTests", dependencies: ["TempImages", "Checks"], path: "shared/temp-images/tests"),
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "AgentTools", "ComputerUse", "Memory", "Review", "SessionKit", "Worktrees", "SSH", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "AgentTools", "ComputerUse", "Memory", "Review", "SessionKit", "Worktrees", "SSH", "Machines", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

@@ -81,6 +81,16 @@ let exitCode = await Checks.run([
         let (read, problems) = SettingsFile.read(Data(#"{"markdown": {"openAs": "slides"}}"#.utf8))
         expect(read.markdown.openAs == "source" && problems.count == 1, "\(problems)")
     }),
+    ("the tailnet's machines are read unless turned off; the users kept per machine", {
+        expect(SettingsFile.read(Data("{}".utf8)).0.machines == Settings.Machines())
+        var settings = Settings()
+        settings.machines.tailscale = false
+        settings.machines.users = ["pc.tail1234.ts.net": "dev"]
+        let (read, problems) = SettingsFile.read(SettingsFile.write(settings))
+        expect(problems.isEmpty && read.machines == settings.machines, "\(read.machines) \(problems)")
+        let (bad, wrong) = SettingsFile.read(Data(#"{"machines": {"tailscale": 1, "users": ["dev"]}}"#.utf8))
+        expect(bad.machines.tailscale && bad.machines.users.isEmpty && wrong.count == 2, "\(wrong)")
+    }),
     ("the memory is on and shared across accounts unless the file says otherwise", {
         let defaults = SettingsFile.read(Data("{}".utf8)).0.memory
         expect(defaults.enabled && defaults.shareAcrossAccounts && defaults.consolidateInSession && defaults.consolidateAtContext == 70)

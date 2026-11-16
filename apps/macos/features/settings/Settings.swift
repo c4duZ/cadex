@@ -203,6 +203,15 @@ public struct Settings: Equatable, Sendable {
         public var ping = true
     }
 
+    /// The tailnet's machines (docs/spec/machines.md, plan 23).
+    public struct Machines: Equatable, Sendable {
+        /// Read the owner's Tailscale. Off: no socket of it opened, no file
+        /// of it read, no process of it run.
+        public var tailscale = true
+        /// MagicDNS name → the user ssh logs in as, asked once per machine.
+        public var users: [String: String] = [:]
+    }
+
     /// The review tab (docs/spec/review.md, plan 21).
     public struct Git: Equatable, Sendable {
         /// Unchanged lines kept around each change; the rest folds.
@@ -254,6 +263,7 @@ public struct Settings: Equatable, Sendable {
     public var statusBar = StatusBar()
     public var agents = Agents()
     public var ssh = SSH()
+    public var machines = Machines()
     public var git = Git()
     public var review = Review()
     public var memory = Memory()

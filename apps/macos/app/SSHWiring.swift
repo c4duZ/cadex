@@ -19,6 +19,7 @@ extension WindowSession {
                                                                   "Hosts do ~/.ssh/config que respondem, testados ao abrir e a cada 10 min"),
                               icon: .hardDrives, side: .right, view: strip)
         strip.onConnect = { [weak self] alias in self?.connectSSH(alias) }
+        attachMachines(to: strip)
         ThemeStore.shared.observe { [weak strip] theme in
             strip?.text = theme.interface.text.nsColor
             strip?.secondary = theme.interface.secondaryText.nsColor

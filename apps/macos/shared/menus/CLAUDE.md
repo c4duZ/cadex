@@ -27,7 +27,7 @@
   em até 360 pt e cresce para baixo (os commits do histórico na barra lateral, 2026-10-21).
   `HoverTip.attach(_:to:)` troca o toolTip do sistema;
   o toolTip fica só para textos longos de linhas (caminhos, datas).
-- `HoverCard.swift`: o cartão sobre um item da barra de status (uso das contas, hosts SSH, portas),
+- `HoverCard.swift` (`onOpenChange` avisa quando abre e fecha, para quem só lê com o cartão aberto, as máquinas da tailnet): o cartão sobre um item da barra de status (uso das contas, hosts SSH, portas),
   como popover (seta embaixo apontando o meio do item, a ponta encostada nele). Entra suave 0,18 s
   depois de o ponteiro parar no item (sobe 4 pt aparecendo, 0,15 s), ou na hora no clique; fica
   enquanto o ponteiro está no item, no cartão ou na faixa entre eles, e sai no instante em que não

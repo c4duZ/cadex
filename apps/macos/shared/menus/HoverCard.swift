@@ -27,6 +27,9 @@ public final class HoverCard: NSObject {
     }
 
     var isOpen: Bool { watch != nil }
+    /// Told when the card opens (true) and closes (false): what it shows
+    /// may be read only while it is open (the tailnet's machines, plan 23).
+    public var onOpenChange: ((Bool) -> Void)?
 
     /// The card's content changed while it shows (a new reading): the new
     /// content in place, no animation, no new window.
@@ -43,9 +46,11 @@ public final class HoverCard: NSObject {
 
     public func close() {
         pending?.cancel()
+        let wasOpen = isOpen
         watch?.invalidate()
         watch = nil
         panel?.dismiss()
+        if wasOpen { onOpenChange?(false) }
     }
 
     // The tracking area calls its owner by the Objective-C names; Swift's
@@ -74,6 +79,7 @@ public final class HoverCard: NSObject {
         let timer = Timer(timeInterval: 1.0 / 30, repeats: true) { [weak self] _ in MainActor.assumeIsolated { self?.look() } }
         RunLoop.main.add(timer, forMode: .common)
         watch = timer
+        onOpenChange?(true)
     }
 
     /// The pointer on the item, the card or the strip between: stay.

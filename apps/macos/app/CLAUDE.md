@@ -123,6 +123,10 @@
   Memory na barra lateral, com as contas e o "Open the Session" pelo índice do History (vigiado só com
   a página na tela); abrir uma página autoriza a pasta da wiki antes; o ⌘S (editor.save) num .md de
   uma wiki roda o `reindex` do projeto, e a edição vira commit.
+- `MachinesWiring.swift` (plano 23, fase B): o grupo "Tailnet" da feature machines no cartão do ssh
+  (`attachMachines`, chamado pelo `SSHWiring.swift`), lido só com o cartão aberto, e o
+  machines.connect: aba nova com `ssh '<usuário>@<máquina>'`, o usuário pedido uma vez por máquina
+  (o deste Mac sugerido; ⌥↩ pergunta de novo) e guardado em machines.users.
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.
