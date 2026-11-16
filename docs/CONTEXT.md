@@ -91,6 +91,26 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   ela. **Quadro de atenção** (`attention board`): os pedidos abertos dos agentes num lugar só, com
   Permitir e Negar (`docs/adr/0023-answer-agent-permissions.md`).
 
+## Muitos agentes
+- **Corrida** (`race`): a mesma tarefa em N agentes, cada um na sua worktree do mesmo commit, para o
+  dono comparar e escolher o **vencedor** (`winner`); os outros são descartados para a Lixeira.
+  **Concorrente** (`contender`): um dos agentes de uma corrida, com conta, modelo e máquina.
+- **Execução** (`run`): um conjunto de tarefas com dependências, um coordenador (o dono ou um
+  agente) e uma caixa de entrada. **Tarefa de execução** (`run task`): uma tarefa dela, com
+  especificação, dependências e estado (pendente, pronta, despachada, concluída, falhou,
+  bloqueada); não confundir com a **tarefa** do New Task.
+- **Despacho** (`dispatch`): uma tentativa de uma tarefa de execução, numa worktree e aba, com a
+  especificação como prompt e o CADEX_DISPATCH_ID no ambiente. **Agente supervisionado**: o agente
+  de um despacho, que reporta ao Cadex pela CLI `cadex` (feito, sinal de vida, pergunta, recado,
+  sub-tarefa).
+- **Portão** (`gate`): uma tarefa que só fica pronta quando o dono aprova.
+- **Automação** (`automation`): um prompt que roda sozinho numa recorrência, com conta, modelo,
+  destino e teto; o app é acordado pelo launchd (`docs/adr/0034-scheduled-automations.md`).
+  **Execução perdida** (`missed run`): o horário que passou com o Mac dormindo ou desligado; roda
+  ao acordar ou é pulada, por automação.
+- **Teto** (`cap`): o limite de gasto, duração e agentes de uma corrida, execução ou automação;
+  passou dele, o agente é encerrado (`docs/adr/0033-cadex-launches-agents.md`).
+
 ## Memória
 - **Memória do projeto** (`memory`): o que o projeto lembra entre sessões, contas e agentes (o que
   cada sessão fez, decisões, armadilhas, conceitos), numa wiki em Markdown com git, por repositório

@@ -35,6 +35,11 @@ app à parte como o Amphetamine e sem o comando `caffeinate`. Pedido do dono em 
   sistema todo, contorna, e fica ligado se o app cair. Fica fora desta versão. No Windows, a tampa
   segue a opção "Ao fechar a tampa" do próprio sistema.
 
+- Outra feature pode pedir para o computador não dormir enquanto um trabalho dela roda, pela porta
+  de entrada da `power`, sem mudar o estado que o café mostra: uma automação agendada em execução
+  (`docs/spec/orchestration.md`, orchestration.keepAwakeDuringRuns). O pedido sai quando o trabalho
+  termina ou bate no teto.
+
 ## Estados
 - **Desligado:** ícone só com o contorno; o sistema decide.
 - **Sempre:** ícone cheio; o computador não dorme por inatividade.

@@ -255,6 +255,16 @@ continua uma conversa em outra conta, sem nunca tocar em token
   que parou (o dono, 2026-10-21).
 - Só no Mac por enquanto; no Windows chega com o port (lá dá para trocar o ícone da notificação).
 
+### Agentes abertos com prompt (plano 24)
+- Com a feature `orchestration` ligada, o Cadex abre agentes com prompt numa corrida, num despacho
+  ou numa automação (`docs/adr/0033-cadex-launches-agents.md`, `docs/spec/orchestration.md`). São
+  sessões do Cadex como as outras (kit, hooks, notificações, hibernação), e a linha delas em
+  Sessions diz de onde vieram: "race · <nome> 2/3", "run · <execução> · <tarefa>" ou
+  "automation · <nome>".
+- O quadro "Precisa de você" recebe também as perguntas que um agente supervisionado faz pelo
+  `cadex` (orchestration.ask), com "Open Run" em vez de Permitir e Negar.
+- Relançar depois de hibernar é `--resume`, como sempre: o prompt inicial não é mandado de novo.
+
 ### Configurações
 - Quatro chaves, cada uma desliga uma leitura por inteiro (nada vigiado nem lido):
   agents.sessions, agents.accounts, agents.history e, em ssh, ssh.ping. Ligadas por padrão, cada uma

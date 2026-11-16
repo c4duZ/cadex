@@ -72,6 +72,15 @@ comando, e o Cadex mostra em que pé cada uma está (`docs/plans/19-agent-sessio
   authkey_env = "TS_AUTHKEY"  # o nome da variável, nunca a chave
   ```
 
+### Corrida e despacho (plano 24, `docs/spec/orchestration.md`)
+- A feature `orchestration` cria worktrees pelo mesmo New Task, sem a folha: uma corrida cria N do
+  mesmo commit (`<tarefa>-1` … `<tarefa>-N`), e um despacho cria uma por tarefa. Os passos são os
+  mesmos (`.worktreeinclude`, hooks de preparo, confiança), e o agente abre **com prompt**
+  (`docs/adr/0033-cadex-launches-agents.md`) em vez de sem.
+- Essas worktrees aparecem na lista como as outras, com o nome da corrida ou da execução no
+  comentário. Descartar uma corrida manda as worktrees para a Lixeira pelo mesmo caminho do
+  worktrees.remove, com a branch mantida até o dono apagar.
+
 ### Status e comentário
 - Cada worktree tem um status (a fazer, em andamento, em revisão, pronto) e um comentário curto do que
   está fazendo agora, guardados pelo Cadex (nunca no git). Mudados por worktrees.set-status e

@@ -2,7 +2,8 @@
 
 Data: 2026-11-15 · Status: aceita · Estende `docs/adr/0022-terminal-daemon.md` (o `app.sock`) e revê
 `docs/adr/0019-agents-observe-only.md` (o Cadex só observa) neste ponto: o agente passa a pedir ações
-ao Cadex; o Cadex continua sem pedir nada ao agente
+ao Cadex; o Cadex continua sem pedir nada ao agente · A lista do agente ampliada por
+`docs/adr/0033-cadex-launches-agents.md` (os comandos de reporte da orquestração)
 
 ## Contexto
 O dono quer que o agente que roda numa aba do Cadex use o próprio Cadex: abrir o preview, mexer na

@@ -58,6 +58,13 @@ Cadex: `docs/adr/0024-agent-tools.md`).
   preview.forward, preview.agent (as ferramentas do navegador) e as do computer use. Nunca: fechar o app, janelas
   ou abas, apagar, git que muda o repositório, conta, token, configuração ou permissão. Só uma ADR
   amplia a lista.
+- Ampliada pela `docs/adr/0033-cadex-launches-agents.md` (plano 24) com os de reporte:
+  orchestration.report-done, orchestration.report-heartbeat, orchestration.ask,
+  orchestration.send-message, orchestration.inbox e orchestration.spawn, aceitos só de uma sessão
+  com CADEX_DISPATCH_ID e só sobre a execução dela; sem ela, "not part of a run", saída 1. Aprovar
+  portão, parar despacho e mexer em automação continuam fora.
+- `cadex claude --cadex-prompt-file <arquivo>` (plano 24): lê o prompt do arquivo que o Cadex
+  gravou, apaga o arquivo e o passa ao `claude` como um argumento do exec, sem shell no meio.
 - O que volta de uma página ou de outro app vem marcado como conteúdo, não instrução.
 - Configuração agentTools.enabled (ligada): desligada, o kit não põe `PATH`, MCP nem skills, e o
   socket recusa pedidos de comando (os hooks seguem). agent-tools.toggle liga e desliga;

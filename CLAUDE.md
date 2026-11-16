@@ -55,8 +55,9 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
   (`docs/adr/0028-project-memory.md`). Agentes de código rodam numa aba de terminal; o Cadex observa
   as sessões e o uso deles e, num clique numa conta, digita o comando que abre o agente dela
   (`docs/adr/0019-agents-observe-only.md`).
-- Modo em blocos, terminal privado e launcher de agentes: ficaram de fora do Cadex. Exceção: o agente
-  de memória, um `claude -p` desligado por padrão e com teto (`docs/adr/0029-memory-agent.md`).
+- Modo em blocos e terminal privado ficaram de fora. Agentes rodam em abas de terminal; o Cadex os
+  abre com prompt só quando o dono liga corrida, orquestração, automação ou o agente de memória,
+  sempre com teto (`docs/adr/0033-cadex-launches-agents.md`, `docs/adr/0029-memory-agent.md`).
 - Ação que não é um comando registrado (que só existe num botão, menu ou atalho).
 - Feature importando o miolo de outra feature.
 - Swift chamando detalhe interno do Zig, ou qualquer código falando com a libghostty fora da feature

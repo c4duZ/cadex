@@ -70,6 +70,25 @@ docs/adr/0031-run-on-remote.md (plano 23), `docs/adr/0004-clean-rewrite.md`,
   - Specs: docs/spec/orchestration.md (a criar, modelo do `docs/spec/README.md`);
     docs/spec/worktrees.md (plano 19) e `docs/spec/agents.md` atualizadas. Termos Corrida,
     Execução, Tarefa, Despacho, Portão, Automação no `docs/CONTEXT.md`.
+  - Escrita em 2026-11-16: `docs/adr/0033-cadex-launches-agents.md`,
+    `docs/adr/0034-scheduled-automations.md`, `docs/spec/orchestration.md`; worktrees, agents,
+    agent-tools e power nas specs; os termos no `docs/CONTEXT.md` (Corrida, Concorrente, Execução,
+    Despacho, Agente supervisionado, Portão, Automação, Execução perdida, Teto); a linha da raiz e
+    os cabeçalhos das ADRs 0019 e 0024. Decidido além do texto do plano:
+    - o prompt vai a um arquivo 0600 do Cadex e a aba roda `cadex claude --cadex-prompt-file`, que
+      o lê, apaga e passa como um elemento do argv; no remoto, um `ssh` à parte grava o texto num
+      `mktemp` de lá e a aba roda `claude "$(cat <caminho>)"` (o texto nunca entra no comando);
+    - a lista do agente ganha também orchestration.inbox (ler a própria caixa), sem a qual o `ask`
+      e o `send-message` não têm volta: seis comandos, não cinco;
+    - o LaunchAgent é um plist escrito pelo app com `StartCalendarInterval` (sem `KeepAlive` nem
+      `StartInterval`), carregado por `launchctl bootstrap`; o job roda `cadex automations due`,
+      que pede ao app pelo app.sock (pedido sem token, só `getpeereid`, que não diz o que rodar)
+      ou abre o app em segundo plano; o SMAppService ficou de fora porque o plist dele é fixo no
+      bundle;
+    - comandos que o plano não nomeava: orchestration.add-task, orchestration.show-run,
+      orchestration.stop-run, orchestration.toggle e orchestration.toggle-automations; e as
+      configurações orchestration.heartbeatMinutes (10), orchestration.keepAwakeDuringRuns
+      (ligada), orchestration.defaultBudgetUsd (5) e orchestration.defaultMaxMinutes (60).
 - **B. Feature `orchestration` e o estado.** Feature nova só no app macOS
   (apps/macos/features/orchestration/, a criar, com `CLAUDE.md` e linha na tabela da raiz),
   porque corrida, execuções e automações são um modelo próprio que usa worktrees, agents e
