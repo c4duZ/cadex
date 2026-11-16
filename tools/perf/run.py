@@ -25,6 +25,7 @@ import plan19
 import plan20
 import plan21
 import plan22
+import plan23
 from plan22_engine import engine_running
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
@@ -398,6 +399,8 @@ def main():
              ("plan 22: the memory engine idle, a session open", lambda: plan22.idle_scenario(sys.modules[__name__])),
              ("plan 22: the embedding model loaded, then given back", lambda: plan22.model_scenario(sys.modules[__name__])),
              ("plan 22: a wiki of 2 000 pages and a session of 500 events", lambda: plan22.wiki_scenario(sys.modules[__name__])),
+             ("plan 23: the tailnet's 20 machines, the SSH card's group open and closed", lambda: plan23.on_scenario(sys.modules[__name__])),
+             ("plan 23: machines.tailscale off", lambda: plan23.off_scenario(sys.modules[__name__])),
              ("flooding with minimum contrast and ligatures", lambda: scenario(
                  "reading", "flood", ROOT, measure_reading_flood,
                  settings={"terminal": {"minimumContrast": 7, "fontFeatures": ["calt", "liga"]}}))]

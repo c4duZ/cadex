@@ -205,6 +205,28 @@ docs/adr/0022-terminal-daemon.md (do plano 19), docs/adr/0024-agent-tools.md (do
   Cadex tocando no socket do Tailscale. Os ids novos em `MAC_ONLY` de
   `tools/check_command_parity.py`. README com a tailnet no ssh e o "Rodar em". Notas da release em
   inglês.
+  - Feita em 2026-11-16: `tools/perf/plan23.py` com um daemon falso (LocalAPI num socket Unix, 20
+    máquinas; o app de teste só chega nele pelo CADEX_PERF_TAILSCALE_SOCKET) e o grupo do cartão
+    aberto duas vezes pelo `apps/macos/app/PerfHooks.swift`: a primeira abertura custa +9 a +14 MB
+    uma vez (o sistema de texto e as camadas das bolinhas, que os hosts do próprio cartão do ssh
+    também pagam no primeiro hover; o app de teste nunca passa o ponteiro), com limite próprio e o
+    motivo ao lado; cada abertura depois fica em +0 a +1 % (o limite de 3 % do plano); CPU depois de
+    fechar 0,25 %; nenhum pedido ao daemon depois de fechar. Com machines.tailscale desligada, nenhum
+    pedido: contado pelo próprio daemon falso no lugar do `fs_usage`, que pede root. Os ids novos
+    em `MAC_ONLY`; README com a tailnet no ssh, o "Rodar em", o Docker e a receita; notas abaixo.
+
+## Notas da release (inglês)
+
+```markdown
+## Your other machines, through your Tailscale (Mac)
+
+- **Your tailnet in the SSH card.** With the Tailscale you already have, the SSH item's card lists your tailnet's machines under your ~/.ssh/config hosts: online or not, direct or through a relay, and the latency, read only while the card is open. A click opens `ssh` on one; Cadex asks the user once per machine. Without Tailscale, nothing changes and nothing asks you to install it (Settings › General › Tailnet machines).
+- **Run a task on another machine.** New Task now asks where it runs: this Mac, a host of ~/.ssh/config or a machine of your tailnet. There, Cadex makes the worktree over ssh and opens `claude` in it with that machine's own login; nothing of this Mac is copied over. The task shows with its machine's name, and Agents shows its sessions "on pc" while the page is open.
+- **Another machine's Docker in one tab.** "Use a Machine's Docker in This Tab" points that tab's `docker` at the machine, never the others (no `docker context use`), and the status bar says which. List a machine's containers in ⌘K, open a shell in one or its ports in the preview. A container with a Tailscale sidecar shows up as a machine of its own, and the preview offers its `http://name:3000`.
+- **A throwaway environment per task.** Put a .cadex/environment.toml file in a repository (an image or Dockerfile, ports, a setup command, an optional Tailscale sidecar) and New Task brings a container up with the worktree inside and the agent in it. It suspends, resumes and goes with the task. The sidecar's key is read from your shell, never kept by Cadex.
+- **Your preview on your phone.** One button shares the preview's local server on your tailnet (`tailscale serve`), and Stop Sharing undoes only what Cadex turned on. On the internet (Funnel) only after you confirm.
+- **Mute a machine.** Mute or Unmute a Machine's Agents silences one machine's notifications; the bell still counts.
+```
 
 ## Como validar
 - `make check` passa a cada fase; `make perf` nas fases B e H.

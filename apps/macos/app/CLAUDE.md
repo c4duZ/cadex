@@ -152,7 +152,7 @@
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.
 - `PerfHooks.swift`: só para o `make perf` (`../../../tools/perf/run.py`): cada variável CADEX_PERF_
   faz a instância de teste agir sozinha em horas marcadas (abrir a conversa de um subagente, abrir
-  abas, abrir e rolar a revisão da pasta com CADEX_PERF_REVIEW); sem a variável, nada roda.
+  abas, abrir e rolar a revisão da pasta com CADEX_PERF_REVIEW, abrir duas vezes o grupo das máquinas da tailnet com CADEX_PERF_MACHINES); sem a variável, nada roda.
 - Tela cheia: a barra de ferramentas (vazia, só dá a altura da barra de título) some ao entrar e
   volta ao sair, porque o macOS a punha numa faixa por cima da barra do app. Tamanho mínimo da
   janela 480×300.

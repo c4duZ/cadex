@@ -61,7 +61,9 @@
 - O app (`../../app/MachinesWiring.swift`) liga o grupo ao cartão do ssh, lê só com o cartão aberto
   (`onCardOpen`, pelo `onOpenChange` do `HoverCard`) e abre a aba com `ssh '<usuário>@<máquina>'`;
   o usuário é pedido uma vez por máquina e guardado em machines.users.
-- Status: fases B (cartão do ssh) e D (Docker, a oferta do preview) no código (2026-11-16).
+- TailscaleDaemon com CADEX_PERF_TAILSCALE_SOCKET (só o `make perf`, `../../../../tools/perf/plan23.py`): o
+  socket de um daemon falso e nenhuma outra forma de achar, para o app de teste nunca chegar ao do dono.
+- Status: fases B, D, F e G no código (2026-11-16); falta conferir com o PC na tailnet.
 
 ## Como validar
 - `make macos-test` (`tests/main.swift`, respostas gravadas em `tests/Fixtures.swift`, uma LocalAPI

@@ -73,4 +73,12 @@ LIMITS = {
     "memory_briefing_ms": 8.0,    # 2.5-3.7 ms with 2 000 pages; 1.3 ms with none (0.9 in the proof, 54 pages)
     "memory_whole_hook_ms": 10.0,  # 4.0-4.9 ms the whole `cadex memory-hook PostToolUse`, process start included
     "memory_whole_start_ms": 30.0, # 6-18 ms the whole SessionStart with its briefing
+    # Plan 23 (tools/perf/plan23.py): a fake daemon with 20 machines. Measured 2026-11-16.
+    "machines_first_open_mb": 15,        # +9-14 MB once: the first card content's text system and the dots'
+                                         # layers (the SSH card's hosts pay it on a first hover too; the test
+                                         # app never hovers); a second opening adds 0 (2026-11-16)
+    "machines_open_over_idle_pct": 3,    # the plan's limit, each opening after the first: 0 % measured
+    "machines_after_cpu": 1.0,           # the idle CPU once the group closes
+    "machines_requests_after_close": 0,  # closed: nothing read, the watch stream ended
+    "machines_off_requests": 0,          # machines.tailscale off: not one request to Tailscale
 }

@@ -76,6 +76,14 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   arrastados para o lugar; o que fica desligado não pesa nada. Toda página da barra lateral tem o
   mesmo cabeçalho: o nome (a pasta, a branch) à esquerda e as ações dela à direita.
 - **Hosts SSH** (Mac): os do `~/.ssh/config`, se respondem, e um clique conecta numa aba.
+- **Suas máquinas pelo Tailscale** (Mac, opcional): com o Tailscale que você já tem, o cartão do SSH
+  lista as máquinas da sua tailnet (no ar, caminho direto ou por relay, latência) e um clique abre o
+  ssh nelas. Uma tarefa pode **rodar em outra máquina** (a worktree e o agente lá, com o login do
+  Claude de lá), uma aba pode usar o **Docker de outra máquina**, e um repositório pode ter uma
+  **receita de ambiente** (`.cadex/environment.toml`) que sobe um contêiner por tarefa. Um servidor
+  deste Mac abre no seu celular pela tailnet com um clique. Sem o Tailscale, nada disso aparece
+  ([ADR 0030](docs/adr/0030-installed-tailscale.md), [ADR 0031](docs/adr/0031-run-on-remote.md),
+  [ADR 0032](docs/adr/0032-workspace-recipes.md)).
 - **Terminais que sobrevivem ao app** (Mac, opção desligada por padrão): os shells e agentes da
   janela principal rodam num processo à parte; fechar, travar ou atualizar o Cadex os deixa rodando,
   e reabrir os mostra de novo com o histórico. Depois de reiniciar o Mac, o histórico volta em shells

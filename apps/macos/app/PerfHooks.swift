@@ -1,4 +1,5 @@
 import Agents
+import Machines
 import AppKit
 import SourceControl
 
@@ -12,6 +13,7 @@ extension WindowSession {
         if let count = environment["CADEX_PERF_TABS"].flatMap(Int.init) { openPerfTabs(count) }
         if let page = environment["CADEX_PERF_SIDEBAR"] { showPerfPage(page) }
         if let out = environment["CADEX_PERF_REVIEW"] { openPerfReview(out) }
+        if let out = environment["CADEX_PERF_MACHINES"] { openPerfMachines(out) }
     }
 
     /// That sidebar page shown from the start: the sidebar opens on its
@@ -44,6 +46,26 @@ extension WindowSession {
             DispatchQueue.main.asyncAfter(deadline: .now() + 12 + Double(index)) { [weak self] in self?.tabs?.newTab() }
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 14 + Double(count)) { [weak self] in self?.tabs?.select(position: 1) }
+    }
+
+    /// Plan 23: the SSH card's Tailnet group "open" for 20 s (its reading,
+    /// pings and watch stream, and the group built at each change, as the
+    /// card does), then closed; `out` gets "closed <machines>" each time.
+    private func openPerfMachines(_ out: String) {
+        // Twice, at 12 s and 44 s: the first opening's one-time cost (the
+        // text system and the dots' layers) apart from each opening's.
+        for (start, last) in [(12.0, false), (44.0, true)] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + start) {
+                let token = MachinesController.shared.watch {
+                    _ = MachinesSection.make(width: 272, text: .white, secondary: .gray) { _ in }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 20) {
+                    MachinesController.shared.stop(token)
+                    let count = MachinesController.shared.status?.others.count ?? 0
+                    try? (last ? "closed \(count) twice" : "closed \(count)").write(toFile: out, atomically: true, encoding: .utf8)
+                }
+            }
+        }
     }
 
     /// Plan 21: the folder's review opened at 12 s; the seconds until it is

@@ -31,7 +31,17 @@ public struct TailscaleDaemon: Sendable {
     public var cliPaths = ["/usr/local/bin/tailscale", "/opt/homebrew/bin/tailscale"]
     public var appBinary = "/Applications/Tailscale.app/Contents/MacOS/Tailscale"
 
-    public init() {}
+    public init() {
+        // `make perf` only (tools/perf/plan23.py): a fake daemon's socket, and
+        // nothing else looked for, so a test app never reaches the owner's.
+        if let fake = ProcessInfo.processInfo.environment["CADEX_PERF_TAILSCALE_SOCKET"] {
+            socketPath = fake
+            standaloneDir = "/nonexistent"
+            groupContainers = "/nonexistent"
+            cliPaths = []
+            appBinary = "/nonexistent"
+        }
+    }
 
     public func find() -> TailscaleEndpoint? {
         let files = FileManager.default
