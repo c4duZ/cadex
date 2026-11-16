@@ -1,6 +1,7 @@
 # 0023 — Responder a um pedido de permissão do agente, só por clique
 
-Data: 2026-11-14 · Status: aceita · Revê "não manda prompt" de `docs/adr/0019-agents-observe-only.md`
+Data: 2026-11-14 · Status: aceita, revista em parte por `docs/adr/0028-project-memory.md` (o
+pedido de consolidar, sem clique, nos marcos ligados) · Revê "não manda prompt" de `docs/adr/0019-agents-observe-only.md`
 neste ponto só
 
 ## Contexto

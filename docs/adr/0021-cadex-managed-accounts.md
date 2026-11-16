@@ -1,6 +1,7 @@
 # 0021 — Contas gerenciadas pelo Cadex, uso sem token e abrir o agente sem prompt
 
-Data: 2026-11-14 · Status: aceita · Revê em parte `docs/adr/0019-agents-observe-only.md`
+Data: 2026-11-14 · Status: aceita, revista em parte por `docs/adr/0028-project-memory.md` (os
+hooks do kit vão por `--plugin-dir`) · Revê em parte `docs/adr/0019-agents-observe-only.md`
 
 ## Contexto
 Depois do estudo "Cadex × Claude Code" (2026-11-14), o dono decidiu que o Cadex passa a ser dono

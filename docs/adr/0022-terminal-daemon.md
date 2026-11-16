@@ -1,6 +1,7 @@
 # 0022 — Daemon do terminal e os dois sockets do Cadex
 
-Data: 2026-11-14 · Status: aceita · Revê "o conteúdo antigo da tela não volta" de
+Data: 2026-11-14 · Status: aceita, revista em parte por `docs/adr/0028-project-memory.md` (um
+terceiro socket, o da memória) · Revê "o conteúdo antigo da tela não volta" de
 `docs/spec/terminal.md` e `docs/spec/spaces.md` (com terminal.keepSessions ligado)
 
 ## Contexto

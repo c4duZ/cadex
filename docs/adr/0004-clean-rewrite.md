@@ -1,6 +1,7 @@
 # 0004 — Reescrita do zero, a partir do comportamento
 
-Data: 2026-10-19 · Status: aceita
+Data: 2026-10-19 · Status: aceita, com uma exceção em `docs/adr/0028-project-memory.md` (o fork do
+ai-memory como engine da memória)
 
 ## Contexto
 O Cadex é MIT, com código próprio. Código traduzido ou portado de outro app seria obra derivada e

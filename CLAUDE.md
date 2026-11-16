@@ -31,6 +31,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | sidebar | não | sim | ícones no topo que escolhem a página do painel lateral, personalizáveis |
 | agents | não | sim | as sessões de agente nas contas do Claude Code: lidas, o quadro do que precisa de você, hibernar |
 | agent-tools | sim | sim | o programa `cadex` que as sessões abertas pelo Cadex rodam (status line, hooks) e o socket do app |
+| memory | sim | sim | a memória do projeto entre sessões, contas e agentes: o engine do ai-memory no processo `cadex-memory`, briefing, busca, página Memory |
 | review | não | sim | comentários na revisão de uma tarefa, mandados ao agente dela num texto só |
 | computer-use | não | sim | o agente opera outros apps do Mac pela acessibilidade, com permissão do dono por app |
 | ssh | não | sim | os hosts do ~/.ssh/config, se respondem, e conectar numa aba |
@@ -45,12 +46,16 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 
 ## O que eu não quero
 - Código de outro app copiado, traduzido ou aberto como referência. A referência é o comportamento em
-  `docs/spec/`. Ver `docs/adr/0004-clean-rewrite.md`.
+  `docs/spec/`. Ver `docs/adr/0004-clean-rewrite.md`. Exceção única: o engine da memória é o fork do
+  ai-memory, sem edição nos crates dele (`docs/adr/0028-project-memory.md`).
 - WebView, Electron ou Tauri para a interface (`docs/adr/0001-macos-first-native-app.md`).
-- IA embutida no app. Agentes de código rodam numa aba de terminal; o Cadex só observa as sessões e
-  o uso deles e, num clique numa conta, digita o comando que abre o agente dela
+- IA embutida no app. O Cadex não roda modelo nem guarda chave: quando a memória precisa de IA, quem
+  pensa é o Claude Code do usuário, na sessão ou numa sessão nova pelo CLI na mesma conta
+  (`docs/adr/0028-project-memory.md`). Agentes de código rodam numa aba de terminal; o Cadex observa
+  as sessões e o uso deles e, num clique numa conta, digita o comando que abre o agente dela
   (`docs/adr/0019-agents-observe-only.md`).
-- Modo em blocos, terminal privado e launcher de agentes: ficaram de fora do Cadex.
+- Modo em blocos, terminal privado e launcher de agentes: ficaram de fora do Cadex. Exceção: o agente
+  de memória, um `claude -p` desligado por padrão e com teto (`docs/adr/0029-memory-agent.md`).
 - Ação que não é um comando registrado (que só existe num botão, menu ou atalho).
 - Feature importando o miolo de outra feature.
 - Swift chamando detalhe interno do Zig, ou qualquer código falando com a libghostty fora da feature
@@ -58,7 +63,8 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 - Dependência nova sem motivo, e arquivo acima de 500 linhas.
 
 ## Como eu quero
-- `core/`: núcleo em Zig, exposto por uma API C (`docs/adr/0002-zig-core-with-c-api.md`).
+- `core/`: núcleo em Zig, exposto por uma API C (`docs/adr/0002-zig-core-with-c-api.md`). O engine
+  da memória é Rust, num executável à parte (`docs/adr/0028-project-memory.md`).
   `apps/macos/`: Swift com AppKit e Metal. `apps/windows/`: Zig com Win32 e
   Direct3D 11, Windows 11 (`docs/adr/0012-windows-zig-win32-d3d11.md`).
 - Toda ação é um comando registrado na feature `command-palette`; menus, botões e atalhos só

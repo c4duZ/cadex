@@ -1,6 +1,7 @@
 # 0002 — Núcleo em Zig, exposto por uma API C
 
-Data: 2026-10-19 · Status: aceita
+Data: 2026-10-19 · Status: aceita, revista em parte por `docs/adr/0028-project-memory.md` (o engine
+da memória é Rust, num executável à parte)
 
 ## Contexto
 A lógica que não depende de plataforma (sessões de terminal, arquivos, busca, git, LSP, histórico)

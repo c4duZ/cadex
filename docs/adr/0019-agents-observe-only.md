@@ -1,8 +1,9 @@
 # 0019 — Agents: o Cadex observa os agentes, não roda nem fala com IA
 
 Data: 2026-10-21 · Status: aceita, revista em parte por `docs/adr/0021-cadex-managed-accounts.md` (login, uso e o que o Cadex inicia), por `docs/adr/0023-answer-agent-permissions.md` (responder a uma permissão, só por clique), por
-`docs/adr/0024-agent-tools.md` (o agente pede ações ao Cadex) e por `docs/adr/0026-computer-use.md`
-(o Cadex age em outros apps a pedido do agente) · Revê a linha "IA embutida no app" do `CLAUDE.md` da raiz
+`docs/adr/0024-agent-tools.md` (o agente pede ações ao Cadex) por `docs/adr/0026-computer-use.md`
+(o Cadex age em outros apps a pedido do agente) e por `docs/adr/0029-memory-agent.md` (o agente de
+memória) · Revê a linha "IA embutida no app" do `CLAUDE.md` da raiz
 
 ## Contexto
 O dono quer ver, no Cadex, as sessões de agente rodando em todas as contas do Claude Code da

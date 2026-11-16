@@ -87,6 +87,27 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   ela. **Quadro de atenção** (`attention board`): os pedidos abertos dos agentes num lugar só, com
   Permitir e Negar (`docs/adr/0023-answer-agent-permissions.md`).
 
+## Memória
+- **Memória do projeto** (`memory`): o que o projeto lembra entre sessões, contas e agentes (o que
+  cada sessão fez, decisões, armadilhas, conceitos), numa wiki em Markdown com git, por repositório
+  (`docs/adr/0028-project-memory.md`). **Engine da memória** (`cadex-memory`): o processo que guarda
+  e busca a memória, feito do fork do ai-memory; só existe com sessão de agente aberta.
+- **Briefing** (`briefing`): o texto de fatos que o agente recebe ao começar uma sessão: o handoff
+  aberto, as páginas fixadas, as regras, as decisões e armadilhas recentes.
+- **Handoff** (`handoff`): o recado de uma sessão que parou no meio para a próxima, que só uma
+  sessão pode aceitar.
+- **Workstream** (`workstream`): o fio de um trabalho através de sessões e agentes (qual sessão
+  continua qual), usado em "Continue in…". **Dossiê** (`dossier`): o Markdown, só de leitura, com o
+  que a sessão anterior fez, entregue ao outro agente numa troca Claude ↔ Codex.
+- **Importação do histórico** (`backfill`): as conversas antigas de um projeto entrando na memória
+  uma vez, sem IA, na primeira sessão com a memória vazia.
+- **Consolidação** (`consolidation`): transformar o que uma sessão fez em páginas de decisões,
+  armadilhas e conceitos. Feita pelo próprio agente, num marco, ou pelo agente de memória.
+- **Agente de memória** (`memory agent`): um `claude -p` na conta que faz as tarefas de memória sem
+  sessão aberta, desligado por padrão e com teto de gasto (`docs/adr/0029-memory-agent.md`).
+- **Busca por sentido** (`embeddings`): achar texto parecido, não só igual, com o modelo de vetores
+  local; carregado só enquanto é usado.
+
 ## Terminal
 - **Sessão** (`session`): um shell rodando num PTY, ligado a uma folha.
 - **PTY**: o pseudo-terminal do sistema por onde o shell lê e escreve.
