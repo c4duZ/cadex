@@ -45,6 +45,10 @@ dos planos 18 a 21.
   proíbe "route requests through consumer subscriptions".
 - Escrever no `~/.claude` (ou no `CODEX_HOME`) do dono: hooks, MCP, skills e `autoMemoryDirectory`
   chegam por `--settings`, `--mcp-config` e `--plugin-dir` das sessões que o Cadex abre (ADR 0021).
+  Nem hooks no settings.json da conta (o que o `install-hooks` do ai-memory faz), nem no
+  .claude/settings.local.json de cada repositório: o `claude` digitado à mão entra pelo
+  intermediário da fase C, e as sessões de fora do Cadex, pela importação depois (o dono,
+  2026-11-15).
 - Ordens no briefing: contexto injetado entra como lembrete do sistema; texto imperativo pode
   disparar a defesa contra injeção. Fatos, não ordens.
 - Editar transcript no lugar ou montar histórico à mão para o `--resume`. (O dossiê do `run` é
@@ -152,7 +156,22 @@ Auditoria autorizada pelo dono como exceção à ADR 0004 (registrada na ADR 002
     escrita à mão. Testado em 2026-11-14: 4 sessões simultâneas deixaram 1 entrada no MEMORY.md.
   - SessionEnd: página `sessions/<id>.md` e handoff por regras, sem modelo, e commit na wiki;
     sessão que morre sem SessionEnd vira o retrato de sessão interrompida do engine.
-  - Configuração memory.enabled (**ligada**). Features: memory, agent-tools, agents, settings.
+  - **O histórico que já existe** (o dono, 2026-11-15): na primeira sessão de um projeto com a
+    memória vazia, o backfill do engine importa sozinho, em segundo plano e sem IA, as conversas
+    antigas do projeto (até 200 sessões por agente e 50 mil eventos, os limites dele), pelo mesmo
+    caminho e a mesma limpeza da captura ao vivo. Viram sessões e observações na busca, não páginas.
+    Uma vez só; nunca numa memória que já tem conteúdo. Lê de todas as contas do projeto pelo
+    histórico do plano 18 (só as da conta, com memory.shareAcrossAccounts desligada).
+  - **O `claude` digitado à mão** (o dono, 2026-11-15): as abas do Cadex têm na frente do PATH um
+    `claude` do Cadex que chama o de verdade com as flags do kit (`--settings`, `--mcp-config`,
+    `--plugin-dir`), sem trocar a conta (o `CLAUDE_CONFIG_DIR` da aba fica como está). Só para
+    sessão interativa: `claude -p`, subcomandos (`mcp`, `update`, `doctor`…) e `--version` passam
+    direto, sem nada acrescentado. Um `alias claude=` do dono passa por cima, e a spec diz isso.
+  - **Sessões de fora do Cadex** (outro terminal, VS Code): quando uma sessão do projeto termina sem
+    ter passado pelo kit, o engine a importa pelo mesmo caminho do backfill (só aquela sessão). A
+    memória aprende com ela; briefing ela não recebeu.
+  - Configuração memory.enabled (**ligada**). Features: memory, agent-tools, agents, terminal,
+    settings.
 - **D. Briefing, busca e ferramentas.**
   - SessionStart (startup, resume, clear, compact, fork): o briefing do engine (handoff aberto,
     páginas fixadas, _rules/, decisões e armadilhas recentes), em frases de fato, no limite de
@@ -196,7 +215,11 @@ Auditoria autorizada pelo dono como exceção à ADR 0004 (registrada na ADR 002
   - O provedor "Claude do usuário" do fork chama esse `claude -p` para as tarefas do engine:
     consolidação (sessão parada ou depois da compactação), auto-improve (propostas vão para
     aprovação, memory.requireApproval ligada), experience, dream (computador parado; para quando o
-    dono volta), profile e bootstrap (manual).
+    dono volta) e profile.
+  - **Organizar o histórico com IA** (o bootstrap do engine, o dono, 2026-11-15): o `claude -p` lê
+    o que o backfill importou e escreve as páginas de decisões, armadilhas e conceitos. Só por
+    clique do dono (comando memory.bootstrap), depois de mostrar a estimativa de custo; por ser
+    disparado pelo dono, roda mesmo com memory.backgroundAgent desligada, com o mesmo teto.
   - Fila no `cadex-memory`, um trabalho por vez, teto por dia (memory.dailyBudgetUsd), tudo
     registrado com custo. Configuração memory.backgroundAgent (desligada). Comandos
     memory.run-dream, memory.bootstrap, memory.pause-agent.
@@ -205,6 +228,8 @@ Auditoria autorizada pelo dono como exceção à ADR 0004 (registrada na ADR 002
   - Cada página com a origem: sessão, conta e hora, com "Abrir a sessão" (plano 18).
   - "O que o agente vai ver": o briefing exato da próxima sessão neste projeto.
   - Estado do `cadex-memory` e do modelo de embeddings (baixando, pronto, carregado).
+  - O histórico importado (quantas sessões, de quais contas) e o botão "Organize History with AI"
+    (memory.bootstrap), com a estimativa de custo antes.
   - Fila do agente de fundo com custo; propostas para aprovar ou recusar.
   - Comandos memory.show, memory.show-briefing, memory.approve, memory.reject, memory.reindex.
     Features: memory, sidebar, markdown, git-history.
@@ -226,7 +251,11 @@ Auditoria autorizada pelo dono como exceção à ADR 0004 (registrada na ADR 002
 - Fase C: numa sessão do Cadex, prompts e edições chegam ao engine; com o `cadex-memory` morto, a
   fila guarda e esvazia quando ele volta; 4 sessões simultâneas salvando memória deixam o MEMORY.md
   com as 4 entradas; com shareAcrossAccounts desligada, duas contas não se veem; sem sessão de
-  agente, nenhum `cadex-memory` no `ps`; o `~/.claude` do dono não muda.
+  agente, nenhum `cadex-memory` no `ps`; o `~/.claude` do dono não muda. O primeiro projeto
+  aberto importa o histórico uma vez e não atrasa a sessão; reabrir não importa de novo. Um
+  `claude` digitado numa aba do Cadex grava e recebe briefing, na conta da aba; `claude -p`,
+  `claude mcp list` e `claude --version` saem iguais aos de fora do Cadex. Uma sessão do projeto
+  num terminal de fora entra na memória quando termina.
 - Fase D: o hook de ferramenta no tempo de hoje; o briefing dentro do limite e sem frase
   imperativa; uma decisão salva numa sessão aparece no briefing da seguinte; o teste das 30
   perguntas registrado; o modelo descarrega depois de parado.
@@ -235,7 +264,8 @@ Auditoria autorizada pelo dono como exceção à ADR 0004 (registrada na ADR 002
 - Fase F: marcar a worktree como pronta faz o Claude escrever as páginas uma vez, sem chave
   configurada em lugar nenhum.
 - Fase G: a prova registrada com custo e versão; desligado, nenhum `claude -p` roda (`ps`); ligado,
-  o dream para quando o dono mexe no teclado; o teto diário é respeitado.
+  o dream para quando o dono mexe no teclado; o teto diário é respeitado; "Organizar o histórico
+  com IA" mostra o custo antes, só roda no clique e escreve as páginas.
 - Fase H: editar uma página na Memory gera commit; "Abrir a sessão" leva à conversa certa; o
   briefing mostrado é igual ao que a sessão recebeu (conferido no transcript).
 - Conferência à mão pelo método do `docs/plans/README.md` (`CADEX_BACKGROUND=1`, menus,
