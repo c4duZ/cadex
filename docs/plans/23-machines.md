@@ -195,7 +195,9 @@ docs/adr/0022-terminal-daemon.md (do plano 19), docs/adr/0024-agent-tools.md (do
     443, 8443 e 10000 livre, nunca a do dono; o que ele ligou fica no shares.json dele, e parar roda
     `--https=<porta> off` só nessa (nunca `serve reset`). O Funnel só aparece com a permissão no Self
     do status (o `CapMap` deste Mac veio vazio: aqui ele fica indisponível) e pede confirmação. O
-    botão na barra do preview vem do app (`extraBarItems`) e roda o comando pelo id. Testado com um
+    botão na barra do preview vem do app (`extraBarItems`) e abre um menu com os três comandos, cada um
+    pelo id (até a conferência de 2026-11-16 só havia o de compartilhar na barra; os outros dois
+    estavam só no ⌘K). Testado com um
     CLI falso; o `serve` de verdade nunca rodou (mudaria o Tailscale do dono). **Falta**, com o dono:
     o link abrindo no celular, "Stop Sharing" deixando o `serve status` vazio, e o `--https=<porta>
     off` conferido na versão dele do CLI.

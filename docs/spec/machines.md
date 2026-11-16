@@ -86,8 +86,9 @@ celular. A rede é o Tailscale que o dono já tem (`docs/adr/0030-installed-tail
   fechados sem resposta. Desligada, nada escuta na rede.
 
 ### Compartilhar um servidor deste Mac
-- Na barra da aba de preview, com o Tailscale ligado no Cadex, o botão de compartilhar
-  (machines.share-port, também no ⌘K) roda `tailscale serve --bg --https=<porta> http://localhost:<porta do servidor>`
+- Na barra da aba de preview, com o Tailscale ligado no Cadex, o botão de compartilhar abre um menu
+  com "Share on Tailnet", "Share Publicly…" e "Stop Sharing…" (os mesmos comandos do ⌘K; o que não
+  pode rodar agora fica apagado). "Share on Tailnet" (machines.share-port) roda `tailscale serve --bg --https=<porta> http://localhost:<porta do servidor>`
   na primeira de 443, 8443 e 10000 que o dono ainda não serve, e mostra o endereço
   `https://<este-mac>.<tailnet>.ts.net[:porta]/`, com copiar e abrir: abre no celular do dono, na
   tailnet. Só servidor deste Mac (localhost, 127.0.0.1, [::1]); outra página, o comando diz que não.

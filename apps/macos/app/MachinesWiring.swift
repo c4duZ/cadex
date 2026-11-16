@@ -1,6 +1,7 @@
 import AppKit
 import AgentTools
 import Icons
+import Menus
 import Preview
 import Machines
 import SSH
@@ -109,15 +110,27 @@ extension WindowSession {
 }
 
 extension AppDelegate {
-    /// The preview bar's "Share on Tailnet", shown while machines.tailscale is on.
+    /// The preview bar's sharing button, while machines.tailscale is on: a
+    /// menu with the three commands (share on the tailnet, on the internet,
+    /// stop), each run by id; the ones that cannot run now are greyed.
     func startPreviewSharing() {
         PreviewDocument.extraBarItems = { document in
             guard MachinesController.shared.isEnabled else { return [] }
             let button = NSButton(image: Icon.globe.image(size: 14), target: nil, action: nil)
             button.isBordered = false
-            button.toolTip = T("Share on Tailnet", "Compartilhar na tailnet")
+            button.toolTip = T("Share on Tailnet…", "Compartilhar na tailnet…")
             button.widthAnchor.constraint(equalToConstant: 24).isActive = true
-            let target = ClosureTarget { [weak document] in _ = document?.runCommand?("machines.share-port") }
+            let target = ClosureTarget { [weak document, weak button] in
+                guard let document, let button else { return }
+                let run = { (id: String) in _ = document.runCommand?(id) }
+                let shares = !TailnetShares.shared.all.isEmpty
+                PopupMenu.show([
+                    MenuEntry(T("Share on Tailnet", "Compartilhar na tailnet"), icon: .globe) { run("machines.share-port") },
+                    MenuEntry(T("Share Publicly…", "Compartilhar em público…"), icon: .globe,
+                              isEnabled: MachinesController.shared.status?.funnelAllowed == true) { run("machines.share-public") },
+                    MenuEntry(T("Stop Sharing…", "Parar de compartilhar…"), icon: .x, isEnabled: shares) { run("machines.stop-sharing") },
+                ], below: button)
+            }
             button.target = target
             button.action = #selector(ClosureTarget.fire)
             objc_setAssociatedObject(button, &ClosureTarget.key, target, .OBJC_ASSOCIATION_RETAIN)
