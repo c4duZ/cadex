@@ -103,6 +103,10 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Workstream** (`workstream`): o fio de um trabalho através de sessões e agentes (qual sessão
   continua qual), usado em "Continue in…". **Dossiê** (`dossier`): o Markdown, só de leitura, com o
   que a sessão anterior fez, entregue ao outro agente numa troca Claude ↔ Codex.
+- **Memória automática do Claude** (`auto memory`): o que o próprio Claude Code salva como memória
+  (um arquivo de tópico por memória e o índice MEMORY.md), numa pasta por projeto dentro da memória
+  do Cadex; o Cadex refaz o índice e copia cada tópico para a wiki. **Chave do projeto**
+  (`project key`): o nome dessa pasta, tirado da raiz do repositório principal.
 - **Importação do histórico** (`backfill`): as conversas antigas de um projeto entrando na memória
   uma vez, sem IA, na primeira sessão com a memória vazia.
 - **Consolidação** (`consolidation`): transformar o que uma sessão fez em páginas de decisões,

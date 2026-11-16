@@ -3,7 +3,10 @@
 //! only for this user with a session token (auth.rs), the end of the
 //! process when the last `claude` ends (sessions.rs), the restart after the
 //! model unloads (restart.rs), the replay of the hook queue (spool.rs) and
-//! the import of past and outside sessions (import.rs).
+//! the import of past and outside sessions (import.rs), each live event's
+//! arrival time and the file a tool call named (hook_body.rs), Cadex's
+//! handoff (handoff.rs) and Claude's automatic memory folders
+//! (auto_watch.rs).
 
 use std::fs::File;
 use std::future::IntoFuture;
@@ -24,7 +27,7 @@ use crate::args::Args;
 use crate::auth::{PeerListener, Tokens, require_session_token};
 use crate::restart::{InFlight, when_model_unloads};
 use crate::sessions::Sessions;
-use crate::{engine, import, restart, sessions, spool, sys};
+use crate::{auto_watch, engine, handoff, hook_body, import, restart, sessions, spool, sys};
 
 /// How the engine ended.
 pub(crate) enum Exit {
@@ -127,8 +130,13 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
     }
     let in_flight = Arc::new(InFlight::default());
     let (import_tx, import_rx) = import::channel();
-    let inner = built
-        .router
+    let (ended_tx, ended_rx) = tokio::sync::mpsc::unbounded_channel();
+    let routes = built.router.clone();
+    #[cfg(debug_assertions)]
+    let routes = if crate::debug_panic::enabled() { crate::debug_panic::route(routes) } else { routes };
+    let inner = routes
+        .layer(axum::middleware::from_fn(hook_body::amend))
+        .layer(from_fn_with_state(ended_tx, handoff::watch))
         .layer(from_fn_with_state(sessions.clone(), sessions::track))
         .layer(from_fn_with_state(import_tx, import::watch))
         .layer(from_fn_with_state(in_flight.clone(), restart::count));
@@ -154,6 +162,19 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
         tokio::spawn(when_model_unloads(model, in_flight.clone(), restarting.clone(), cancel.clone()));
     }
     tokio::spawn(spool::drain(inner.clone(), args.spool_dir.clone()));
+    tokio::spawn(handoff::run(handoff::Context {
+        reader: built.store.reader.clone(),
+        writer: built.store.writer.clone(),
+        ended: built.session_ended.clone(),
+        in_flight: in_flight.clone(),
+        stop: cancel.clone(),
+    }, ended_rx));
+    tokio::spawn(auto_watch::run(auto_watch::Context {
+        router: inner.clone(),
+        data_dir: args.data_dir.clone(),
+        in_flight: in_flight.clone(),
+        stop: cancel.clone(),
+    }));
     let importer = import::Context {
         router: inner,
         reader: built.store.reader.clone(),

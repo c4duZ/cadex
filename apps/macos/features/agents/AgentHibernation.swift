@@ -40,7 +40,7 @@ public enum AgentHibernation {
     public static func resumeCommand(sessionID: String, folder: String, configDir: String?, kitSession: String?,
                                      skipPermissions: Bool, kit: SessionKit = .shared) -> String {
         let flags = kitSession.flatMap(kit.arguments(of:)).map(withoutConversation) ?? (skipPermissions ? ["--dangerously-skip-permissions"] : [])
-        let claude = kit.claudeCommand(configDir: configDir, arguments: ["--resume", sessionID] + flags, session: kitSession)
+        let claude = kit.claudeCommand(configDir: configDir, arguments: ["--resume", sessionID] + flags, session: kitSession, cwd: folder)
         return "cd " + SessionKit.quote(folder) + " && " + claude
     }
 

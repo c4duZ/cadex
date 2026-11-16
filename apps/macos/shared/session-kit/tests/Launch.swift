@@ -20,6 +20,19 @@ import Foundation
         let typed = kit.claudeCommand(configDir: dir + "/acct", arguments: ["-c"], session: pieces.session, defaultClaudeJSON: dir + "/none.json")
         expect(typed == composed, "\(typed)\n\(composed)")
     }),
+    ("per-session settings come with the session's folder, for Cadex's launches and the typed claude", {
+        let dir = scratch()
+        defer { try? fm.removeItem(atPath: dir) }
+        let kit = SessionKit(folder: dir + "/kit", toolsPath: "/H/cadex", environment: [:])
+        kit.contribute("p", SessionKitPart(perSession: { account, cwd in ["where": SessionKit.accountKey(account) + "@" + cwd] }))
+        let opened = json(settingsPath(kit.claudeCommand(configDir: dir + "/acct", cwd: "/w/app", defaultClaudeJSON: dir + "/none.json")))
+        expect(opened["where"] as? String == SessionKit.accountKey(dir + "/acct") + "@/w/app", "\(opened)")
+        expect(json(settingsPath(kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json")))["where"] == nil,
+               "no folder known: nothing")
+        guard case .success(let typed) = kit.typedLaunch(configDir: "", cwd: "/w/tab", ownerSettings: nil, arguments: [], defaultClaudeJSON: dir + "/none.json")
+        else { return expect(false, "refused") }
+        expect((json(typed.arguments[1])["where"] as? String)?.hasSuffix("@/w/tab") == true, "the tab's folder")
+    }),
     ("a typed claude: the tab's account, the owner's --settings merged in one file", {
         let dir = scratch()
         defer { try? fm.removeItem(atPath: dir) }

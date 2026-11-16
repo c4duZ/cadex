@@ -34,7 +34,10 @@
   - `server/src/engine.rs`: store, wiki, embedder, roteador de hooks e de workstream e o MCP
     (streamable HTTP, JSON, sem estado), montados como o serve.rs do cli do upstream os monta, sem
     TCP, web, autenticação multiusuário (o `require_bearer` dele roda sem token, como anônimo) nem
-    provedores.
+    provedores. Do `HookState`: `record_tool_names` e `index_file_paths` ligados (o nome de cada
+    ferramenta, nunca os argumentos, e o caminho relativo ao checkout do arquivo que ela nomeou,
+    para o handoff) e o `profile_notify` com o aviso de "um SessionEnd terminou" que o
+    `server/src/handoff.rs` espera (o worker de perfil, para quem ele existe, não roda aqui).
   - `server/src/serve.rs`: o memory.sock (modo 0600) servido pelo axum; uma trava em
     `<data-dir>/engine.lock` garante um engine só por pasta (dois SessionStart juntos não sobem
     dois escritores).
@@ -47,6 +50,43 @@
   - `server/src/restart.rs`: depois que o modelo descarrega, sem pedido em andamento, o engine se
     executa de novo (~35 ms em debug) com as sessões vivas, a trava e o socket abertos, e volta ao
     tamanho de parado (o alocador não devolvia os 68 MB). Sem sessão viva, sai em vez de reiniciar.
+  - O fim da sessão (fase C):
+    - `server/src/hook_body.rs`: middleware que lê uma vez o corpo de cada `/hook` ao vivo e põe
+      nele o `occurred_at` da chegada, sempre crescente (o roteador responde 202 e grava numa tarefa
+      à parte com a hora em que ela roda: eventos mandados em ordem saíam do store fora de ordem) e,
+      no PostToolUse, o arquivo do `server/src/file_claim.rs`. Evento vindo da fila leva a hora em
+      que foi reenviado, na ordem da fila.
+    - `server/src/file_claim.rs`: o campo `_ai_memory_file` que o cliente do upstream manda e o
+      `cadex memory-hook` não (o arquivo único que o `file_target` do upstream lê, relativo à pasta
+      com `.git` acima do cwd, comparado sem ir ao disco).
+    - `server/src/session_facts.rs`: os fatos de uma sessão no store (os prompts, as ferramentas
+      por nome, os arquivos que as de edição nomearam, sem repetir, a última mensagem do assistente
+      se foi capturada) e o texto do handoff: só fatos, com limites (12 prompts, 40 arquivos).
+    - `server/src/handoff.rs`: anota cada SessionEnd que passa e, quando o roteador avisa que um
+      terminou, troca o texto do handoff automático do upstream pelo dos fatos: cancela o dele
+      (só se ainda aberto) e insere um igual (automático, mesma sessão, pasta, agente e dono), que a
+      próxima sessão pega uma vez só. Sessão que o upstream deixa sem handoff fica sem.
+  - A memória automática do Claude (fase C), em `<data-dir>/auto/[<conta>/]<chave>/`:
+    - `server/src/project_key.rs`: a regra da chave do projeto (a raiz do repositório principal,
+      lida dos arquivos `.git`, e os 16 primeiros hex do SHA-256 do caminho), igual à do app
+      (`../../../apps/macos/features/memory/MemoryProject.swift`), com o mesmo valor fixado num
+      teste de cada lado.
+    - `server/src/auto_index.rs`: refaz o MEMORY.md pelos arquivos de tópico (frontmatter `name`,
+      `description`): mantém as linhas que existem, menos link para arquivo que sumiu; acrescenta
+      as que faltam (as novas por data); acima de 200 linhas ou 25.000 bytes saem as entradas dos
+      tópicos mais velhos, nunca linha escrita à mão; relê o arquivo logo antes de gravar e refaz
+      se o Claude o mudou no meio; grava com `.tmp` e rename.
+    - `server/src/auto_wiki.rs`: cada tópico vira a página `auto/<arquivo>` (kind `fact`, com a
+      sessão de origem) no escopo do projeto do project.json que o app grava, pelo
+      `memory_write_page` em processo (cada gravação é um commit da wiki); tópico apagado apaga a
+      página; só regrava o que mudou (hash por arquivo em `<data-dir>/auto-pages/`).
+    - `server/src/auto_watch.rs`: o vigia da pasta auto/ (FSEvents pelo crate `notify`, nada
+      por relógio), juntando mudanças por 500 ms; ao subir, acerta todas as pastas uma vez; a
+      mudança da própria gravação do MEMORY.md é reconhecida pelo texto e ignorada.
+  - `server/src/debug_panic.rs`: só em build de debug e com `CADEX_MEMORY_TEST_PANIC=1` no ambiente
+    do engine: a rota `POST /debug/panic` e um hook que aborta no pânico, como o `panic=abort` do
+    release (o tokio pegaria o pânico da tarefa e o processo seguiria). O release não tem nem a
+    rota nem a leitura da variável.
   - `server/src/spool.rs`: ao subir, reenvia pela rota, em ordem, a fila que o hook deixou
     (`{"v":1,"path":"/hook?…","body":"…"}` por arquivo, nome pela hora), sem passar pelo token;
     apaga o que entrou, separa como `.rejected` o que foi recusado (4xx) e guarda o resto num 5xx.
@@ -81,8 +121,12 @@
     pelo SessionStart, busca), sem modelo e sem vigia; `server/tests/lifecycle.rs`: token, fila,
     saída quando o último `claude` termina, sessões passadas pelo reinício e o `--warm`;
     `server/tests/import.rs`: a importação com transcripts sintéticos em contas falsas (duas contas,
-    subpasta, worktree, workspace da conta, uma vez só, sessões de fora, ponto de controle); ajudas
-    em `server/tests/common/mod.rs`.
+    subpasta, worktree, workspace da conta, uma vez só, sessões de fora, ponto de controle);
+    `server/tests/auto_memory.rs`: 4 tópicos gravados juntos dão 4 entradas no MEMORY.md e 4
+    páginas, edição e remoção chegam à wiki, o que mudou com o engine fora entra ao subir;
+    `server/tests/session_end.rs`: o handoff de uma sessão com 10 edições lista os 10 arquivos, e
+    um pânico forçado não perde evento (a fila espera e o engine seguinte a esvazia); ajudas em
+    `server/tests/common/mod.rs`.
 - O cliente do socket, em Zig (o único código que fala com o memory.sock; o `cadex memory-hook`
   da feature agent-tools chama `memory.zig`):
   - `memory.zig`: a entrada da feature (`hook`).
@@ -117,17 +161,25 @@
      transcript_capture.rs do cli do upstream e trazer ao `server/src/engine.rs` os passos novos de
      inicialização (o compilador não pega um passo que falta) e ao código copiado (as funções que
      o topo de `server/src/replay.rs` e de `server/src/replay_capture.rs` lista) as mudanças na
-     conversão de conversas e no que a captura guarda; anotar a versão nova no topo deles;
+     conversão de conversas e no que a captura guarda; anotar a versão nova no topo deles; ver
+     também o `file_path_field` do hook.rs do cli (que o `server/src/file_claim.rs` repete) e se o
+     `profile_notify` ainda toca a cada SessionEnd (o `server/src/handoff.rs` depende disso, e o
+     `server/tests/session_end.rs` falha se parar);
   5. `make check` e `make perf`; anotar o commit novo no topo do `server/Cargo.toml`.
 
 ## Como validar
-- `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs` e
-  `server/tests/import.rs` (parte do `make check`, em segundos).
+- `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs`,
+  `server/tests/import.rs`, `server/tests/auto_memory.rs` e `server/tests/session_end.rs` (parte do
+  `make check`, em segundos).
 - `make core-test`: os testes do cliente (eventos, query com e sem workspace, fila, respostas HTTP,
   sem token).
 - Na mão, tudo em pastas temporárias: um `.token` em `CADEX_SESSIONS_DIR`, e
   `echo '<json do SessionStart>' | CADEX_SESSION_TOKEN=… CADEX_MEMORY_BIN=… CADEX_MEMORY_DIR=…
   CADEX_MEMORY_SOCKET=… CADEX_SESSIONS_DIR=… core/zig-out/bin/cadex memory-hook SessionStart`.
+  Com o engine de debug e `CADEX_MEMORY_TEST_PANIC=1`, `POST /debug/panic` (com o token) o derruba.
+- Teste que falha: `CADEX_TEST_ENGINE_LOG=info` no `cargo test` põe o log do engine na saída do
+  teste (`server/tests/common/mod.rs`; padrão `warn`). Para pegar corrida, rodar os binários de
+  `server/target/debug/deps/` várias vezes em paralelo, sem compilar de novo.
 - `make memory-upstream-test` (`upstream_test.sh`): a suíte do upstream para os crates usados, no
   PC; a cada atualização do upstream.
 - `make package`: o binário universal assinado, cada fatia respondendo, sem provedor.

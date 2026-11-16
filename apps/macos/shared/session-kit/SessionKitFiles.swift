@@ -18,7 +18,7 @@ extension SessionKit {
     /// the frame until each ends (plan 19, phase E).
     /// `owner`: the owner's own `--settings` of a typed `claude`, merged in
     /// (SessionKitLaunch.swift), since two `--settings` do not add up.
-    func writeSettings(session: String, token: String?, accountDir: String, owner: [String: Any]? = nil) -> String? {
+    func writeSettings(session: String, token: String?, accountDir: String, cwd: String? = nil, owner: [String: Any]? = nil) -> String? {
         var settings: [String: Any] = [:]
         if let tools = toolsPath {
             var line: [String: Any] = ["type": "command", "command": Self.quote(tools) + " statusline"]
@@ -42,6 +42,7 @@ extension SessionKit {
         for id in parts.keys.sorted() {
             settings = Self.merge(settings, parts[id]!.settings)
             if let perAccount = parts[id]!.perAccount { settings = Self.merge(settings, perAccount(accountDir)) }
+            if let cwd, !cwd.isEmpty, let perSession = parts[id]!.perSession { settings = Self.merge(settings, perSession(accountDir, cwd)) }
         }
         if let owner { settings = Self.mergeOwner(kit: settings, owner: owner) }
         guard !settings.isEmpty || owner != nil else { return nil }

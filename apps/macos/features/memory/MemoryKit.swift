@@ -42,7 +42,10 @@ public enum MemoryKit {
     /// the `cadex` program. With `shareAcrossAccounts` off each account
     /// writes and reads its own workspace in the engine, named by the
     /// account's key (the rule of `cadex statusline`); on, all share
-    /// `default`.
+    /// `default`. A session whose folder is known saves Claude's automatic
+    /// memory in the project's folder under the memory (`autoMemoryDirectory`,
+    /// MemoryProject.swift), the account's own with sharing off; unknown,
+    /// Claude's default folder stays.
     public nonisolated static func part(tools: String, engine: String?, shareAcrossAccounts: Bool,
                                         environment: [String: String] = ProcessInfo.processInfo.environment) -> SessionKitPart {
         let command = SessionKit.quote(tools) + " memory-hook "
@@ -50,9 +53,15 @@ public enum MemoryKit {
         for event in hookEvents {
             hooks[event] = [["hooks": [["type": "command", "command": command + event, "timeout": 5]]]]
         }
+        let memory = folder(environment: environment)
         return SessionKitPart(settings: ["hooks": hooks, "env": env(engine: engine, environment: environment)],
                               perAccount: shareAcrossAccounts ? nil : { accountDir in
                                   ["env": ["CADEX_MEMORY_WORKSPACE": SessionKit.accountKey(accountDir)]]
+                              },
+                              perSession: { accountDir, cwd in
+                                  let account = shareAcrossAccounts ? nil : SessionKit.accountKey(accountDir)
+                                  guard let dir = MemoryProject.autoFolder(memory: memory, cwd: cwd, account: account) else { return [:] }
+                                  return ["autoMemoryDirectory": dir]
                               })
     }
 

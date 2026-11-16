@@ -26,8 +26,9 @@ extension SessionKit {
     /// The kit for a session in an account (`configDir` nil: the default
     /// one), writing its files first; `arguments` are kept beside the token
     /// (a hibernated agent comes back with them). `owner`: the owner's own
-    /// settings, merged into the kit's file.
-    public func launch(configDir: String?, arguments: [String] = [], session reused: String? = nil,
+    /// settings, merged into the kit's file. `cwd`: the session's folder,
+    /// when known (the parts' `perSession`).
+    public func launch(configDir: String?, arguments: [String] = [], session reused: String? = nil, cwd: String? = nil,
                        defaultClaudeJSON: String = FileManager.default.homeDirectoryForCurrentUser.path + "/.claude.json",
                        owner: [String: Any]? = nil) -> SessionKitLaunch {
         let accountDir = configDir ?? FileManager.default.homeDirectoryForCurrentUser.path + "/.claude"
@@ -35,7 +36,7 @@ extension SessionKit {
         let session = reused ?? UUID().uuidString.lowercased()
         let token = reused.flatMap(existingToken) ?? writeToken(session: session)
         writeArguments(arguments, session: session)
-        if let settings = writeSettings(session: session, token: token, accountDir: accountDir, owner: owner) { args += ["--settings", settings] }
+        if let settings = writeSettings(session: session, token: token, accountDir: accountDir, cwd: cwd, owner: owner) { args += ["--settings", settings] }
         for dir in parts.values.flatMap(\.pluginDirs).sorted() { args += ["--plugin-dir", dir] }
         if let mcp = writeMCP(key: Self.accountKey(accountDir), isDefault: configDir == nil, defaultClaudeJSON: defaultClaudeJSON) { args += ["--mcp-config", mcp] }
         return SessionKitLaunch(session: session, unset: unsetNames(isDefault: configDir == nil),
@@ -58,7 +59,7 @@ extension SessionKit {
             guard let read = Self.readOwnerSettings(value, cwd: cwd) else { return .failure(SessionKitRefusal(reason: "the --settings given do not read")) }
             owner = read
         }
-        return .success(launch(configDir: configDir.isEmpty ? nil : configDir, arguments: arguments,
+        return .success(launch(configDir: configDir.isEmpty ? nil : configDir, arguments: arguments, cwd: cwd,
                                defaultClaudeJSON: defaultClaudeJSON, owner: owner))
     }
 

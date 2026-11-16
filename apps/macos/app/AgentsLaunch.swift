@@ -34,14 +34,15 @@ extension WindowSession {
     func launchAgent(for account: AgentAccount) {
         if let session = lastUsedSession(of: account) { return openAgent(session) }
         guard let tabs else { return }
-        let command = AgentLaunch.command(for: account, skipPermissions: settings.store.settings.agents.launchSkipPermissions)
+        let skip = settings.store.settings.agents.launchSkipPermissions
+        let cwd = tabs.activeTerminal?.currentDirectory
         if let terminal = tabs.activeTerminal, !terminal.hasForegroundProcess {
-            terminal.session?.write(command + "\n")
+            terminal.session?.write(AgentLaunch.command(for: account, skipPermissions: skip, cwd: cwd) + "\n")
             tabs.focus(terminal)
             return
         }
-        tabs.newTab(cwd: tabs.activeTerminal?.currentDirectory)
-        tabs.activeTerminal?.session?.write(command + "\n")
+        tabs.newTab(cwd: cwd)
+        tabs.activeTerminal?.session?.write(AgentLaunch.command(for: account, skipPermissions: skip, cwd: cwd) + "\n")
     }
 
     /// The account's live session whose terminal was used last: this

@@ -80,6 +80,7 @@ fn hook_state(
     wiki: &Wiki,
     ids: (ai_memory_core::WorkspaceId, ai_memory_core::ProjectId),
     active_project: &ActiveProject,
+    session_ended: Arc<tokio::sync::Notify>,
 ) -> HookState {
     HookState {
         ingest_metrics: Arc::new(ai_memory_core::IngestMetrics::default()),
@@ -101,7 +102,9 @@ fn hook_state(
         cwd_probes: ai_memory_hooks::CwdProbes::default(),
         consolidate_on_session_end: false,
         session_consolidation_notify: None,
-        profile_notify: None,
+        // Rung after every SessionEnd; no profile worker runs here, and
+        // handoff.rs takes it as "a session end is done" (plan 22, phase C).
+        profile_notify: Some(session_ended),
         capture_assistant_enabled: false,
         claim_handoff_on_session_start: true,
         create_handoff_on_session_end: true,
@@ -117,8 +120,14 @@ fn hook_state(
         mid_session_routing: ai_memory_core::MidSessionRouting::default(),
         profile: ai_memory_core::profile::ProfileSettings::default(),
         ingest_drop_list: ai_memory_hooks::IngestDropList::default(),
-        record_tool_names: false,
-        index_file_paths: false,
+        // The handoff lists the tools by name and the files the edit tools
+        // named (session_facts.rs). Names only, never arguments; the path is
+        // relative to the checkout (file_claim.rs adds it), and a file
+        // outside it or one the sanitizer refuses (secrets) is not kept. A
+        // few bytes per call, in the local store only (plan 22, phase C,
+        // 2026-11-16).
+        record_tool_names: true,
+        index_file_paths: true,
         skip_wiki_checkpoints: false,
     }
 }
@@ -130,6 +139,8 @@ pub(crate) struct Engine {
     pub(crate) store: Store,
     pub(crate) router: axum::Router,
     pub(crate) model: Option<Arc<ModelEvents>>,
+    /// Rung by the hook router after each SessionEnd (handoff.rs).
+    pub(crate) session_ended: Arc<tokio::sync::Notify>,
     /// Lives as long as the engine; `None` unless `--watcher`.
     pub(crate) _watcher: Option<WatcherHandle>,
 }
@@ -174,7 +185,8 @@ pub(crate) async fn build(args: &Args, cancel: &CancellationToken) -> Result<Eng
             .with_legacy_session_mode(false)
             .with_json_response(true),
     );
-    let hooks = hook_router(hook_state(&store, &wiki, (ws, proj), &active_project));
+    let session_ended = Arc::new(tokio::sync::Notify::new());
+    let hooks = hook_router(hook_state(&store, &wiki, (ws, proj), &active_project, session_ended.clone()));
     let workstreams = workstream_router(WorkstreamState {
         writer: store.writer.clone(),
         reader: store.reader.clone(),
@@ -195,5 +207,5 @@ pub(crate) async fn build(args: &Args, cancel: &CancellationToken) -> Result<Eng
         .route("/healthz", axum::routing::get(|| async { "ok" }))
         .layer(DefaultBodyLimit::max(MAX_BODY_BYTES))
         .layer(axum::middleware::from_fn_with_state(auth, require_bearer));
-    Ok(Engine { store, router, model, _watcher: watcher })
+    Ok(Engine { store, router, model, session_ended, _watcher: watcher })
 }

@@ -29,6 +29,29 @@ func fakeEngine(_ dir: String, code: Int) -> String {
     return path
 }
 
+/// `git -C dir args…`; true when it worked.
+@discardableResult
+func git(_ dir: String, _ args: [String]) -> Bool {
+    let process = Process()
+    process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+    process.arguments = ["-C", dir, "-c", "user.name=t", "-c", "user.email=t@t"] + args
+    process.standardOutput = FileHandle.nullDevice
+    process.standardError = FileHandle.nullDevice
+    guard (try? process.run()) != nil else { return false }
+    process.waitUntilExit()
+    return process.terminationStatus == 0
+}
+
+/// A repository with a commit and a task's worktree beside it.
+func repoWithWorktree(_ dir: String) -> (repo: String, tree: String) {
+    let repo = dir + "/acme", tree = dir + "/acme-task"
+    try? fm.createDirectory(atPath: repo + "/src/deep", withIntermediateDirectories: true)
+    git(repo, ["init", "-q"])
+    git(repo, ["commit", "-q", "--allow-empty", "-m", "x"])
+    git(repo, ["worktree", "add", "-q", tree])
+    return (repo, tree)
+}
+
 /// The warm-up's result; nil when it did not start.
 @MainActor
 func warm(_ engine: String, _ folder: String, _ version: String, _ defaults: UserDefaults) async -> Bool? {
@@ -103,6 +126,44 @@ let exitCode = await Checks.run([
         kit.withdraw(MemoryKit.partID)
         let off = settings(of: kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json"))
         expect(off["hooks"] == nil && (off["env"] as? [String: String])?["CADEX_MEMORY_DIR"] == nil, "\(off)")
+    }),
+    ("the project key: pinned to the engine's, one per repository, worktrees and subfolders included", {
+        // The same value is pinned in core/features/memory/server/src/project_key.rs.
+        expect(MemoryProject.key(root: "/Users/example/acme") == "9db38d359c2297b1")
+        expect(MemoryProject.key(root: "/Users/example/acme/") == "9db38d359c2297b1")
+        let dir = scratch()
+        defer { try? fm.removeItem(atPath: dir) }
+        let (repo, tree) = repoWithWorktree(dir)
+        let root = MemoryProject.canonical(repo)
+        expect(root.hasPrefix("/private/"), "realpath, as the engine's canonicalize: \(root)")
+        expect(MemoryProject.mainRoot(cwd: repo) == root && MemoryProject.mainRoot(cwd: repo + "/src/deep") == root)
+        expect(MemoryProject.mainRoot(cwd: tree) == root, "a worktree is its main checkout's: \(MemoryProject.mainRoot(cwd: tree))")
+        try? fm.createDirectory(atPath: dir + "/loose", withIntermediateDirectories: true)
+        expect(MemoryProject.mainRoot(cwd: dir + "/loose") == MemoryProject.canonical(dir + "/loose"), "outside git: the folder itself")
+    }),
+    ("autoMemoryDirectory: the project's folder for a session in it or its worktree, the account's with sharing off, none without a folder", {
+        let dir = scratch()
+        defer { try? fm.removeItem(atPath: dir) }
+        let (repo, tree) = repoWithWorktree(dir)
+        let memory = dir + "/memory"
+        let kit = SessionKit(folder: dir + "/kit", toolsPath: "/bin/cadex", environment: [:])
+        kit.contribute(MemoryKit.partID, MemoryKit.part(tools: "/bin/cadex", engine: nil, shareAcrossAccounts: true, environment: ["CADEX_MEMORY_DIR": memory]))
+        let key = MemoryProject.key(root: MemoryProject.canonical(repo))
+        let inRepo = settings(of: kit.claudeCommand(configDir: dir + "/acct", cwd: repo + "/src", defaultClaudeJSON: dir + "/none.json"))
+        expect(inRepo["autoMemoryDirectory"] as? String == memory + "/auto/" + key, "\(inRepo)")
+        let inTree = settings(of: kit.claudeCommand(configDir: nil, cwd: tree, defaultClaudeJSON: dir + "/none.json"))
+        expect(inTree["autoMemoryDirectory"] as? String == memory + "/auto/" + key, "the worktree shares it: \(inTree)")
+        let info = fm.contents(atPath: memory + "/auto/" + key + "/project.json").flatMap { try? JSONSerialization.jsonObject(with: $0) } as? [String: Any]
+        expect(info?["root"] as? String == MemoryProject.canonical(repo) && info?["account"] is NSNull, "\(String(describing: info))")
+        expect(settings(of: kit.claudeCommand(configDir: nil, defaultClaudeJSON: dir + "/none.json"))["autoMemoryDirectory"] == nil,
+               "no folder known: Claude's own default")
+
+        kit.contribute(MemoryKit.partID, MemoryKit.part(tools: "/bin/cadex", engine: nil, shareAcrossAccounts: false, environment: ["CADEX_MEMORY_DIR": memory]))
+        let account = SessionKit.accountKey(dir + "/acct")
+        let own = settings(of: kit.claudeCommand(configDir: dir + "/acct", cwd: repo, defaultClaudeJSON: dir + "/none.json"))
+        expect(own["autoMemoryDirectory"] as? String == memory + "/auto/" + account + "/" + key, "\(own)")
+        let ownInfo = fm.contents(atPath: memory + "/auto/" + account + "/" + key + "/project.json").flatMap { try? JSONSerialization.jsonObject(with: $0) } as? [String: Any]
+        expect(ownInfo?["account"] as? String == account, "\(String(describing: ownInfo))")
     }),
     ("the warm-up runs once per version and keeps it only when the engine exits 0", {
         let dir = scratch()

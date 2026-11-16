@@ -41,6 +41,11 @@ impl Engine {
 
 /// Start the engine in `dir` with `extra` arguments; wait for /healthz.
 pub fn start(dir: &Path, extra: &[&str]) -> Engine {
+    start_with_env(dir, extra, &[])
+}
+
+/// `start`, with more variables in the engine's environment.
+pub fn start_with_env(dir: &Path, extra: &[&str], env: &[(&str, &str)]) -> Engine {
     let socket = dir.join("m.sock");
     let tokens = dir.join("sessions");
     std::fs::create_dir_all(&tokens).unwrap();
@@ -52,7 +57,10 @@ pub fn start(dir: &Path, extra: &[&str]) -> Engine {
         .arg("--no-embeddings")
         .args(extra)
         .env("HOME", dir)
-        .env("CADEX_MEMORY_LOG", "warn")
+        // CADEX_TEST_ENGINE_LOG=info (or a filter) to see what a failing
+        // run's engine did; its log goes to the test's output.
+        .env("CADEX_MEMORY_LOG", std::env::var("CADEX_TEST_ENGINE_LOG").unwrap_or_else(|_| "warn".into()))
+        .envs(env.iter().copied())
         .spawn()
         .expect("spawn cadex-memory");
     let engine = Engine { child, socket };

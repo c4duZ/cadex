@@ -17,16 +17,26 @@ use anyhow::Result;
 mod accounts;
 mod args;
 mod auth;
+mod auto_index;
+mod auto_watch;
+mod auto_wiki;
+#[cfg(debug_assertions)]
+mod debug_panic;
 mod engine;
+mod file_claim;
+mod handoff;
+mod hook_body;
 mod import;
 mod import_jobs;
 mod import_state;
 mod lazy_embedder;
+mod project_key;
 mod project_paths;
 mod replay;
 mod replay_capture;
 mod restart;
 mod serve;
+mod session_facts;
 mod sessions;
 mod spool;
 mod sys;
@@ -51,6 +61,10 @@ fn main() -> Result<()> {
         )
         .with_writer(std::io::stderr)
         .init();
+    #[cfg(debug_assertions)]
+    if debug_panic::enabled() {
+        debug_panic::abort_on_panic();
+    }
     // Few threads: the engine serves one person's sessions, and every idle
     // worker thread is RSS and wakeups for nothing.
     let runtime = tokio::runtime::Builder::new_multi_thread()

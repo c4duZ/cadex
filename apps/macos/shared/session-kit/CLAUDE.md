@@ -15,7 +15,8 @@
 - Feature importando outra para contribuir: cada uma chama `contribute` pelo app.
 
 ## Como eu quero
-- `SessionKit.swift`: SessionKit.shared; `claudeCommand` (com `session:`, retoma uma sessão do kit e
+- `SessionKit.swift`: SessionKit.shared; `claudeCommand` (com `cwd:`, a pasta da sessão quando quem
+  abre sabe; com `session:`, retoma uma sessão do kit e
   o token dela, para o agente hibernado voltar conhecido pelo app; os argumentos de cada sessão ficam
   ao lado do token, `arguments(of:)`, para ele voltar com o mesmo comando) devolve o comando digitado no terminal
   (`[env -u …] [CLAUDE_CONFIG_DIR=…] claude --settings … [--plugin-dir …] [--mcp-config …] args`),
@@ -42,7 +43,8 @@
   juntam, listas se somam: hooks de duas features no mesmo evento rodam os dois; os hooks
   contribuídos ficam com agents.stateHooks desligada, que só vale para os do kit; o `perAccount` de
   uma parte recebe a pasta da conta da sessão e junta o que devolve, como a workspace da memória por
-  conta); e, para contas que
+  conta; o `perSession` recebe a conta e a pasta da sessão, só quando ela é conhecida, como a pasta
+  da memória automática do Claude por projeto); e, para contas que
   não são a padrão, `mcp-<conta>.json` (0600) com os `mcpServers` do .claude.json da conta padrão,
   lidos sem escrever.
 - `CLAUDE_CODE_FORCE_SYNC_OUTPUT=1` na `env` do `--settings` (`synchronizedOutput`): o terminal respeita
@@ -57,4 +59,5 @@
 - `make macos-test` (SessionKitTests): comando por conta, ambiente limpo, status line com o padding
   do dono, MCP só para as outras contas e com 0600, contribuições somadas (com agents.stateHooks desligada
   também) e por conta, aspas só quando precisa; os pedaços iguais ao comando composto, o
-  `--settings` do dono juntado num arquivo só e as recusas.
+  `--settings` do dono juntado num arquivo só e as recusas; o `perSession` com a pasta da sessão
+  (aberta pelo Cadex ou o `claude` digitado) e sem nada quando ela não é conhecida.

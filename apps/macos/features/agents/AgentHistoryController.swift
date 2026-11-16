@@ -129,7 +129,7 @@ public enum AgentHistoryLaunch {
     /// "Resume": in the account that owns it, by its id.
     @MainActor
     public static func resume(_ entry: AgentHistoryEntry, kit: SessionKit = .shared) -> String {
-        kit.claudeCommand(configDir: configDir(entry.account), arguments: ["--resume", entry.id])
+        kit.claudeCommand(configDir: configDir(entry.account), arguments: ["--resume", entry.id], cwd: folder(entry))
     }
 
     /// "Continue in another account": by the file's path, with
@@ -138,7 +138,7 @@ public enum AgentHistoryLaunch {
     /// the other account answers "No conversation found").
     @MainActor
     public static func continueIn(_ entry: AgentHistoryEntry, account: AgentAccount, kit: SessionKit = .shared) -> String {
-        kit.claudeCommand(configDir: account.isDefault ? nil : account.dir, arguments: ["--resume", entry.path, "--fork-session"])
+        kit.claudeCommand(configDir: account.isDefault ? nil : account.dir, arguments: ["--resume", entry.path, "--fork-session"], cwd: folder(entry))
     }
 
     /// Where its tab opens: the folder it ran in, else the home folder.

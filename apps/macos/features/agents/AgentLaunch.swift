@@ -12,15 +12,16 @@ public enum AgentLaunch {
     /// `claude` in the account (CLAUDE_CONFIG_DIR, none for the default one)
     /// with the session kit (`--settings` with Cadex's status line, which
     /// tells the usage without a token; the environment cleaned), or `codex`
-    /// with CODEX_HOME; the no-prompts flag when asked for.
+    /// with CODEX_HOME; the no-prompts flag when asked for. `cwd`: the
+    /// folder it opens in, when known (the memory's folder per project).
     @MainActor
-    public static func command(for account: AgentAccount, skipPermissions: Bool, kit: SessionKit = .shared,
+    public static func command(for account: AgentAccount, skipPermissions: Bool, cwd: String? = nil, kit: SessionKit = .shared,
                                defaultClaudeJSON: String = FileManager.default.homeDirectoryForCurrentUser.path + "/.claude.json") -> String {
         let quoted = "'" + account.dir.replacingOccurrences(of: "'", with: "'\\''") + "'"
         switch account.provider {
         case .claude:
             return kit.claudeCommand(configDir: account.isDefault ? nil : account.dir,
-                                     arguments: skipPermissions ? ["--dangerously-skip-permissions"] : [],
+                                     arguments: skipPermissions ? ["--dangerously-skip-permissions"] : [], cwd: cwd,
                                      defaultClaudeJSON: defaultClaudeJSON)
         case .codex:
             let env = account.isDefault ? "" : "CODEX_HOME=\(quoted) "

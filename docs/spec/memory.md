@@ -26,12 +26,22 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   ferramentas que o agente usou e em quais arquivos, as compactações, os subagentes e o fim da
   sessão. A sessão nunca espera por isso; com o processo fora do ar, os eventos esperam numa fila e
   entram quando ele volta.
-- Ao fim de cada sessão: uma página da sessão (prompts, arquivos editados, último estado) e, se o
-  trabalho ficou no meio, um handoff para a próxima. Sessão que caiu sem fim (aba fechada, cota
+- Ao fim de cada sessão: uma página da sessão e, se o trabalho ficou no meio, um handoff para a
+  próxima. O handoff diz o que a sessão fez, só com o que foi capturado e só em frases de fato: os
+  prompts (a primeira linha de cada, até 12), os arquivos editados (cada um uma vez, até 40), as
+  ferramentas usadas com a contagem, o último prompt e, quando há, a última chamada que falhou.
+  Sessão sem nada que valha um handoff fica sem. Sessão que caiu sem fim (aba fechada, cota
   estourada) vira um retrato da sessão interrompida, com as últimas observações.
-- As memórias que o próprio Claude salva (a memória automática dele) caem na pasta da memória do
-  Cadex e entram no índice. O índice dessas memórias (o MEMORY.md) é refeito pelo Cadex a cada
-  gravação, para que sessões simultâneas não apaguem a entrada umas das outras.
+- As memórias que o próprio Claude salva (a memória automática dele), nas sessões que o Cadex abre
+  e no `claude` digitado numa aba, caem numa pasta por projeto dentro da memória do Cadex (por conta,
+  com o compartilhamento desligado): a raiz, as subpastas e as worktrees do repositório dividem a
+  pasta. O índice dessas memórias (o MEMORY.md) é refeito pelo Cadex a cada gravação, para que
+  sessões simultâneas não apaguem a entrada umas das outras: as linhas que existem ficam (menos o
+  link para memória apagada), cada memória sem linha ganha uma, e acima do que o Claude lê (200
+  linhas, 25 KB) saem as entradas das memórias mais velhas, nunca uma linha escrita à mão.
+- Cada uma dessas memórias vira também uma página da wiki do projeto (`auto/<arquivo>`), que a
+  busca acha e o git guarda, com a sessão que a salvou; apagar a memória apaga a página. O que
+  mudou com o processo da memória fora do ar entra quando ele sobe.
 
 ### O histórico que já existe
 - Na primeira sessão de um projeto com a memória vazia, as conversas antigas do projeto entram
@@ -143,7 +153,8 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
 - Quatro sessões do mesmo projeto salvando memória ao mesmo tempo -> as quatro entradas ficam no
   índice da memória automática do Claude.
 - Worktree nova do repositório -> cai na mesma memória desde a primeira sessão.
-- Sessão com 10 edições -> a página e o handoff listam as 10.
+- Sessão com 10 edições -> o handoff lista os 10 arquivos.
+- Sessão aberta sem pasta conhecida -> a memória automática dela fica na pasta padrão do Claude.
 - Processo da memória com erro grave -> volta sozinho, sem perder evento da fila; janela e terminais
   não sentem.
 - Briefing grande -> cortado no limite, nunca com ordens.
@@ -160,6 +171,14 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
 - O Codex foi testado sem login (2026-11-15): o caminho das ferramentas funciona; o dos hooks está
   pronto e só se confirma com uma conta.
 - O pedido de consolidar fica na conversa como mensagem do usuário.
+- A última resposta do assistente não entra no handoff: a captura dela está desligada.
+- A memória automática das sessões de fora do Cadex, e a salva antes desta versão, fica na pasta
+  padrão do Claude, fora do índice do Cadex e da wiki.
+- Na hora em que o Cadex troca o texto do handoff de uma sessão que acabou de terminar (milésimos),
+  uma sessão que começa não acha handoff; se ela já tinha pegado o do engine, fica com aquele.
+- Se o Claude grava o MEMORY.md no mesmo instante (microssegundos) em que o Cadex grava o índice
+  refeito, a gravação do Claude se perde; a entrada de cada memória volta na próxima reconstrução,
+  uma linha escrita à mão naquele instante não.
 - O código de senhas do engine e as bibliotecas de rede para baixar o modelo ficam no binário,
   sem uso por quem não pede.
 

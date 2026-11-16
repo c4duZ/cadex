@@ -81,11 +81,18 @@ fn wait_for_change(path: &Path, before: Option<&str>) -> String {
     }
 }
 
+/// The project's marker, `backfill-<workspace>-<project>`. Not its
+/// `.tmp`: the marker is written beside and renamed over (import_state.rs),
+/// and a test that picked the `.tmp` waited on a path gone for good (the
+/// "never changed" failures with the whole suite running, 2026-11-16; the
+/// import itself had ended in 3 s).
 fn backfill_marker(data: &Path) -> PathBuf {
     let deadline = Instant::now() + Duration::from_secs(20);
     loop {
         let found = std::fs::read_dir(data.join("imports")).ok().and_then(|d| {
-            d.flatten().map(|e| e.path()).find(|p| p.file_name().unwrap().to_str().unwrap().starts_with("backfill-"))
+            d.flatten().map(|e| e.path()).find(|p| {
+                p.extension().is_none() && p.file_name().unwrap().to_str().unwrap().starts_with("backfill-")
+            })
         });
         if let Some(path) = found {
             return path;

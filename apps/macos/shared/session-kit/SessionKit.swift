@@ -15,13 +15,19 @@ public struct SessionKitPart {
     /// memory's own workspace per account when sharing is off (plan 22,
     /// phase C).
     public var perAccount: ((_ accountDir: String) -> [String: Any])?
+    /// Settings that depend on the session's folder too, merged last, only
+    /// when the caller knows the folder: Claude's automatic memory folder
+    /// per project (plan 22, phase C).
+    public var perSession: ((_ accountDir: String, _ cwd: String) -> [String: Any])?
 
     public init(settings: [String: Any] = [:], pluginDirs: [String] = [], mcpServers: [String: Any] = [:],
-                perAccount: ((_ accountDir: String) -> [String: Any])? = nil) {
+                perAccount: ((_ accountDir: String) -> [String: Any])? = nil,
+                perSession: ((_ accountDir: String, _ cwd: String) -> [String: Any])? = nil) {
         self.settings = settings
         self.pluginDirs = pluginDirs
         self.mcpServers = mcpServers
         self.perAccount = perAccount
+        self.perSession = perSession
     }
 }
 
@@ -112,9 +118,11 @@ public final class SessionKit {
     /// .claude.json, whose MCP servers other accounts get (read only).
     /// `session`: a kit session to take again (a hibernated agent coming
     /// back, plan 19 phase F): its token stays, so the app still knows it.
-    public func claudeCommand(configDir: String?, arguments: [String] = [], session reused: String? = nil,
+    /// `cwd`: the folder the session runs in, when the caller knows it (the
+    /// parts' `perSession`).
+    public func claudeCommand(configDir: String?, arguments: [String] = [], session reused: String? = nil, cwd: String? = nil,
                               defaultClaudeJSON: String = FileManager.default.homeDirectoryForCurrentUser.path + "/.claude.json") -> String {
-        let kit = launch(configDir: configDir, arguments: arguments, session: reused, defaultClaudeJSON: defaultClaudeJSON)
+        let kit = launch(configDir: configDir, arguments: arguments, session: reused, cwd: cwd, defaultClaudeJSON: defaultClaudeJSON)
         return Self.compose(unset: kit.unset, configDir: configDir, arguments: kit.arguments + arguments, pathFirst: kit.pathFirst)
     }
 

@@ -240,12 +240,30 @@ refaz o crate a partir dela.
     pelo kit; o `cadex-memory` indexa e versiona e **reconstrói o MEMORY.md** a partir dos arquivos
     de tópico (frontmatter `name`/`description`), dentro de 200 linhas / 25 KB, sem apagar entrada
     escrita à mão. Testado em 2026-11-14: 4 sessões simultâneas deixaram 1 entrada no MEMORY.md.
+    Como ficou (2026-11-16), diferente do texto acima: o `autoMemoryDirectory` não é por conta, é
+    **por sessão**, na pasta do projeto (`auto/<chave do projeto>`, e `auto/<conta>/<chave>` com
+    memory.shareAcrossAccounts desligada), porque o MEMORY.md é de um projeto; a chave é a raiz do
+    repositório principal (worktrees e subpastas juntas), com a mesma regra no app e no engine,
+    fixada por um teste de cada lado. Só vai quando quem abre a sessão sabe a pasta dela (todas as
+    entradas do app sabem; sem ela fica a pasta padrão do Claude). Um project.json em cada pasta
+    leva o engine ao projeto. O vigia é por FSEvents só da pasta auto/ (o vigia da wiki continua
+    desligado), com 500 ms para juntar as gravações; ao subir, acerta tudo uma vez. Cada tópico vira
+    a página `auto/<arquivo>` (kind `fact`) pelo `memory_write_page`, que já faz o commit na wiki.
   - **Sem vigia por relógio:** o vigia da wiki do engine fica desligado. Edição pela página Memory
     vai pelo engine (`memory_write_page`/`memory_patch_page`); edição de fora (outro editor) entra
     pela reindexação ao subir o processo e pelo comando memory.reindex.
   - SessionEnd: página `sessions/<id>.md` e handoff, sem modelo, e commit na wiki. **O handoff do
     crate do Cadex:** o do engine é fraco (disse "sessão de um prompt" depois de 10 edições); o
     nosso lista os prompts, os arquivos editados e o último estado, só com o que foi capturado.
+    Como ficou (2026-11-16): o engine liga `record_tool_names` (o nome da ferramenta, nunca os
+    argumentos) e `index_file_paths` (o caminho relativo ao checkout do arquivo que ela nomeou; o
+    campo que o cliente do upstream manda é posto pelo engine, porque o `cadex memory-hook` passa o
+    payload como veio). O roteador do upstream responde antes de terminar a sessão, então o crate
+    espera o aviso que ele dá ao fim de cada SessionEnd (o `profile_notify`) e troca o texto: como o
+    store não tem atualização de handoff, cancela o automático (só se ainda aberto) e insere um
+    igual com o texto novo, pego uma vez só como o primeiro. A última resposta do assistente não
+    entra (a captura dela segue desligada). O texto é só de fatos: sem "Continue from" nem
+    "Next steps".
     Sessão que morre sem SessionEnd vira o retrato de sessão interrompida do engine.
   - **O histórico que já existe** (o dono, 2026-11-15): na primeira sessão de um projeto com a
     memória vazia, o backfill importa sozinho, em segundo plano e sem IA, as conversas antigas do
@@ -413,6 +431,16 @@ custo anotado.
   `claude --version` saem iguais aos de fora do Cadex. Uma sessão do projeto num terminal de fora
   entra na memória na próxima sessão do Cadex. O handoff de uma sessão com 10 edições lista as 10. O primeiro
   SessionStart depois de atualizar o app recebe briefing (o aquecimento funcionou).
+  Coberto por teste no `make check` (2026-11-16), sem Claude de verdade: a fila guarda e esvazia
+  com o processo morto e com um pânico forçado (`core/features/memory/server/tests/lifecycle.rs`,
+  `core/features/memory/server/tests/session_end.rs`); 4 tópicos gravados juntos deixam 4 entradas no MEMORY.md e 4
+  páginas (`core/features/memory/server/tests/auto_memory.rs`); o handoff de uma sessão com 10 edições lista as 10
+  (`core/features/memory/server/tests/session_end.rs`); a worktree cai na pasta e na memória do repositório (MemoryTests,
+  `core/features/memory/server/tests/import.rs`); a importação de contas, subpastas e worktrees uma vez
+  (`core/features/memory/server/tests/import.rs`); o `--settings` do dono junto com o do kit (SessionKitTests). Só com
+  uma sessão real do Claude Code: 4 sessões de verdade salvando ao mesmo tempo, o Claude lendo a
+  pasta do `autoMemoryDirectory` e o MEMORY.md refeito na sessão seguinte, o `claude` digitado e os
+  subcomandos, o `~/.claude` intacto, o `ps` sem engine, e o briefing depois de atualizar.
 - Fase D: o hook de ferramenta no tempo de hoje; o briefing dentro do limite e sem frase
   imperativa; uma decisão salva numa sessão aparece no briefing da seguinte; a compactação
   automática leva o checkpoint ao resumo; o teste das 30 perguntas registrado; o modelo baixa (e

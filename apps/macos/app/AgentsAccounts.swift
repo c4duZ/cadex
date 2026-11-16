@@ -61,7 +61,7 @@ extension WindowSession {
                 let dir = try AgentManagedAccounts.create(name: name, home: AgentsController.shared.homeFolder)
                 self.settings.store.update { $0.agents.accountNames[SettingsBridge.tilde(dir)] = name }
                 self.tabs?.newTab(cwd: self.folder.root)
-                self.tabs?.activeTerminal?.session?.write(SessionKit.shared.claudeCommand(configDir: dir) + "\n")
+                self.tabs?.activeTerminal?.session?.write(SessionKit.shared.claudeCommand(configDir: dir, cwd: self.folder.root) + "\n")
             } catch AgentManagedAccounts.Failure.taken(let dir) {
                 self.tell(T("An account with this name exists", "Já existe uma conta com esse nome"), dir)
             } catch AgentManagedAccounts.Failure.badName {

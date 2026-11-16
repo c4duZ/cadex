@@ -127,7 +127,7 @@ extension WindowSession {
         let account = AgentNewSession.account(cwd: cwd, accounts: AgentsController.shared.everyAccount(),
                                               active: agents.activeAccount.isEmpty ? nil : SettingsBridge.expand(agents.activeAccount), projects: projects)
         return SessionKit.shared.claudeCommand(configDir: account.flatMap { $0.isDefault ? nil : $0.dir },
-                                               arguments: agents.launchSkipPermissions ? ["--dangerously-skip-permissions"] : [])
+                                               arguments: agents.launchSkipPermissions ? ["--dangerously-skip-permissions"] : [], cwd: cwd)
     }
 
     /// worktrees.open: the task becomes the window's workspace, with its terminal.

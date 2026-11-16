@@ -4,7 +4,8 @@
 - O que o app põe na memória do projeto (`../../../../docs/spec/memory.md`,
   `../../../../docs/adr/0028-project-memory.md`, plano `../../../../docs/plans/22-memory.md` fase C):
   os hooks da memória e o ambiente deles em toda sessão que o Cadex abre, pelo kit
-  (`../../shared/session-kit/`), e o aquecimento do engine na primeira abertura de cada versão.
+  (`../../shared/session-kit/`), a pasta da memória automática do Claude por projeto, e o
+  aquecimento do engine na primeira abertura de cada versão.
 - Com memory.enabled desligada, nada disso: o app tira a parte do kit e não aquece.
 
 ## O que eu não quero
@@ -25,6 +26,15 @@
   ambiente do app), `CADEX_MEMORY_SOCKET` e `CADEX_SESSIONS_DIR`. Com
   memory.shareAcrossAccounts desligada, o `perAccount` da parte põe `CADEX_MEMORY_WORKSPACE` com a
   chave da conta da sessão (`accountKey` do kit): cada conta grava e lê a sua workspace no engine.
+  O `perSession` da parte, quando quem abre a sessão sabe a pasta dela, põe `autoMemoryDirectory`
+  na pasta do projeto (`MemoryProject.swift`); sem pasta conhecida, fica a padrão do Claude.
+- `MemoryProject.swift`: a regra da chave do projeto (a raiz do repositório principal lida dos
+  arquivos `.git`: a worktree e a subpasta dão a do checkout principal; fora do git, a própria
+  pasta; os 16 primeiros hex do SHA-256 do caminho), a mesma de
+  `../../../../core/features/memory/server/src/project_key.rs`, com o mesmo valor fixado num teste
+  de cada lado; `autoFolder` cria `<memória>/auto/[<conta>/]<chave>` (0700; a conta só com
+  memory.shareAcrossAccounts desligada) e grava nela um project.json (`root`, `account`) com que o
+  engine acha o projeto. Lê arquivos, sem chamar o git: roda a cada sessão aberta.
 - `MemoryWarmUp.swift`: `start` roda `cadex-memory --warm --data-dir <pasta>` em segundo plano
   (QoS utility, saída em /dev/null) quando a versão do app difere da guardada em
   memory.warmedVersion (UserDefaults); guarda a versão só se o engine sai 0 (falhou, tenta na
@@ -33,6 +43,9 @@
 ## Como validar
 - `make macos-test` (MemoryTests): os 9 eventos e o comando de cada um, a `env` do pacote e a do
   `make run`, a workspace só sem compartilhar, os hooks com agents.stateHooks desligada, a parte
-  retirada, o aquecimento uma vez por versão e só com saída 0 (um engine falso em script).
+  retirada, a chave do projeto (o valor fixado igual ao do engine, worktree e subpasta no
+  checkout principal, fora do git a pasta), o `autoMemoryDirectory` de uma sessão no repositório,
+  na worktree, sem compartilhar e sem pasta, e o aquecimento uma vez por versão e só com saída 0
+  (um engine falso em script).
 - No app, sem sessão real: o `--settings` de uma sessão do kit
   (Application Support/Cadex/kit) traz os 9 hooks e a `env` da memória.
