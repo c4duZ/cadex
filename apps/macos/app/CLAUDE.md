@@ -144,7 +144,9 @@
   página Agents na tela, o `claude agents --json` de cada máquina com tarefa, por ssh, a cada 30 s.
   agents.mute-machine (fase F) lista este Mac, os hosts e as máquinas e liga ou desliga cada uma em
   agents.mutedMachines. `MachinesWiring.swift` entrega a conexão aceita pelo listener da tailnet ao
-  servidor do app.sock (`serveRemote`).
+  servidor do app.sock (`serveRemote`). Fase G: `startPreviewSharing` põe na barra de todo preview o
+  botão que roda machines.share-port; `shareActions` dá a porta do preview com foco, confirma o
+  Funnel e mostra o endereço com Copiar e Abrir.
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.

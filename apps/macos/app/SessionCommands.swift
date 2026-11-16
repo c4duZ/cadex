@@ -59,6 +59,7 @@ extension WindowSession {
         commands.register(MachinesCommands.all(palette: palette) { [weak self] machine, ask in self?.connectMachine(machine, askUser: ask) })
         commands.register(DockerCommands.all(palette: palette, actions: dockerActions()))
         commands.register(muteMachineCommand(palette: palette))
+        commands.register(ShareCommands.all(palette: palette, actions: shareActions()))
         commands.register(StatusBarCommands.all({ [weak self] in self?.workspace?.statusBar }, palette: palette,
                                                 customize: { [weak self] in self?.openCustomize("statusBar") }))
         makeSpaces(palette: palette)

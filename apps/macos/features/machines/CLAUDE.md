@@ -51,6 +51,13 @@
   pelo controller quando a leitura dá o endereço e o dono deste Mac (`applyListener`); cada conexão
   passa pelo WhoIs da LocalAPI e só o aparelho do mesmo dono vai a `onAccepted` (o app entrega ao
   servidor do app.sock); o resto é fechado sem resposta.
+- Compartilhar um servidor deste Mac (fase G): `TailscaleServe.swift` (puro: as portas que o
+  `tailscale serve status --json` já usa, a primeira livre de 443, 8443 e 10000, os argumentos de
+  `serve`/`funnel --bg --yes --https=<porta>` e de `--https=<porta> off`, o endereço, a permissão do
+  Funnel no Self do status, a porta de uma página local; e `TailnetShares`, o que o Cadex ligou, no
+  shares.json dele), `MachinesShare.swift` (`share` e `stopSharing` pelo CLI do dono, nunca
+  `serve reset`, nunca a porta que o dono serve) e `ShareCommands.swift` (machines.share-port,
+  machines.share-public, que o app confirma, e machines.stop-sharing com a lista no ⌘K).
 - O app (`../../app/MachinesWiring.swift`) liga o grupo ao cartão do ssh, lê só com o cartão aberto
   (`onCardOpen`, pelo `onOpenChange` do `HoverCard`) e abre a aba com `ssh '<usuário>@<máquina>'`;
   o usuário é pedido uma vez por máquina e guardado em machines.users.
@@ -59,7 +66,8 @@
 ## Como validar
 - `make macos-test` (`tests/main.swift`, respostas gravadas em `tests/Fixtures.swift`, uma LocalAPI
   falsa em `tests/FakeDaemon.swift`): status completo, versão velha, JSON quebrado, sem login,
-  sozinho; pings; o fluxo de mudanças; o listener com WhoIs falso (`tests/ListenerTests.swift`); o Docker (`tests/DockerTests.swift`); um nome ser máquina; a ordem da detecção; a prova e o cabeçalho no pedido, 401;
+  sozinho; pings; o fluxo de mudanças; compartilhar com um CLI falso (`tests/ShareTests.swift`, nunca o
+  `serve` de verdade); o listener com WhoIs falso (`tests/ListenerTests.swift`); o Docker (`tests/DockerTests.swift`); um nome ser máquina; a ordem da detecção; a prova e o cabeçalho no pedido, 401;
   nada lido sem ninguém olhando, o fluxo parando ao fechar, os 30 s quando o fluxo falha, desligado.
 - Na mão, com o Tailscale do dono: o cartão do ssh mostra o grupo em até 2 s, igual ao
   `tailscale status`; com o PC na tailnet, desligá-lo o marca offline.

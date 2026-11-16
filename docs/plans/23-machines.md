@@ -191,6 +191,14 @@ docs/adr/0022-terminal-daemon.md (do plano 19), docs/adr/0024-agent-tools.md (do
   machines.stop-sharing desfaz só o que o Cadex ligou. machines.share-public (Funnel, beta, portas
   443/8443/10000) pede confirmação dizendo que a porta fica aberta para a internet, e só aparece se
   o daemon aceitar. Os botões aparecem na barra do preview.
+  - No código em 2026-11-16: o Cadex lê o `tailscale serve status --json` antes e usa a primeira de
+    443, 8443 e 10000 livre, nunca a do dono; o que ele ligou fica no shares.json dele, e parar roda
+    `--https=<porta> off` só nessa (nunca `serve reset`). O Funnel só aparece com a permissão no Self
+    do status (o `CapMap` deste Mac veio vazio: aqui ele fica indisponível) e pede confirmação. O
+    botão na barra do preview vem do app (`extraBarItems`) e roda o comando pelo id. Testado com um
+    CLI falso; o `serve` de verdade nunca rodou (mudaria o Tailscale do dono). **Falta**, com o dono:
+    o link abrindo no celular, "Stop Sharing" deixando o `serve status` vazio, e o `--https=<porta>
+    off` conferido na versão dele do CLI.
 - **H. Peso e fechamento.** Cenário no `tools/perf/run.py`: machines ligado com um daemon falso
   (respostas gravadas) e 20 máquinas, cartão aberto e fechado; limite de 3% acima do app parado e
   CPU parado sem mudança. Com machines.tailscale desligado, `fs_usage` e `nettop` não mostram o

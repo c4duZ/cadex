@@ -43,6 +43,8 @@ public struct TailnetStatus: Equatable, Sendable {
     /// Some field the Cadex reads was missing or of another type: a newer
     /// or older Tailscale (ADR 0030). What could be read is still there.
     public var partial: Bool
+    /// The tailnet lets this Mac use Funnel (its node's capability).
+    public var funnelAllowed = false
 
     public var isRunning: Bool { state == "Running" }
     public var others: [Machine] { machines.filter { !$0.isSelf } }
@@ -77,7 +79,7 @@ public enum Tailnet {
         } else if root["Peer"] != nil, !(root["Peer"] is NSNull) {
             partial = true
         }
-        return TailnetStatus(state: state, machines: machines, partial: partial)
+        return TailnetStatus(state: state, machines: machines, partial: partial, funnelAllowed: TailscaleServe.funnelAllowed(data))
     }
 
     static func machine(_ node: [String: Any], isSelf: Bool, users: [String: Any], partial: inout Bool) -> Machine {

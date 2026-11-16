@@ -67,6 +67,9 @@
   preview.clear-notes apaga.
 - Spec: `docs/spec/preview.md`. Status: plano 5, fase E pronta; plano 16, fases A a D no código.
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
+- PreviewDocument.extraBarItems: controles que o app põe no fim da barra (plano 23: compartilhar na
+  tailnet, que roda machines.share-port pelo id); o preview não sabe o que são. `currentURL` é a
+  página mostrada.
 
 ## Como validar
 - `make macos-test` passa: sem esquema, http para servidor local e https para o resto, e só esquemas web, mesma aba para o mesmo

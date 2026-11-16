@@ -40,6 +40,7 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "machines.connect", "machines.ping", "machines.refresh", "machines.copy-address",
             "worktrees.new-task-on", "worktrees.open-remote-shell", "machines.docker-context", "machines.docker-ps",
             "worktrees.environment-up", "worktrees.environment-suspend", "worktrees.environment-resume", "worktrees.environment-destroy", "agents.mute-machine",
+            "machines.share-port", "machines.stop-sharing", "machines.share-public",
             "memory.show", "memory.show-briefing", "memory.show-history", "memory.reindex", "memory.refresh", "memory.enable", "memory.approve", "memory.reject", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).

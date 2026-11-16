@@ -1,5 +1,7 @@
 import AppKit
 import AgentTools
+import Icons
+import Preview
 import Machines
 import SSH
 import Strings
@@ -71,4 +73,63 @@ extension AppDelegate {
         // the app socket's protocol (plan 23, phase F).
         TailnetListener.shared.onAccepted = { AgentToolsServer.shared.serveRemote($0) }
     }
+}
+
+/// Sharing the focused preview's local server (plan 23, phase G): the
+/// commands, the preview bar's button (it runs machines.share-port by id),
+/// the confirmation for the internet and the address shown with copy/open.
+extension WindowSession {
+    func shareActions() -> ShareActions {
+        ShareActions(focusedLocalPort: { [weak self] in
+            TailscaleServe.localPort(of: (self?.tabs?.activeDocument as? PreviewDocument)?.currentURL)
+        }, confirmPublic: { [weak self] port, then in
+            self?.confirm(T("Share localhost:\(port) on the internet?", "Compartilhar localhost:\(port) na internet?"),
+                          T("Anyone with the address can open it, not only your devices, until you stop it (Funnel, a Tailscale beta).",
+                            "Qualquer pessoa com o endereço abre, não só os seus aparelhos, até você parar (Funnel, um beta do Tailscale)."),
+                          button: T("Share Publicly", "Compartilhar em público"), then: then)
+        }, shared: { [weak self] url in
+            guard let self else { return }
+            let alert = NSAlert()
+            alert.messageText = T("Shared", "Compartilhado")
+            alert.informativeText = url + "\n\n" + T("\"Stop Sharing a Preview\" in ⌘K turns it off.", "\"Parar de compartilhar um preview\" no ⌘K desliga.")
+            alert.addButton(withTitle: T("Copy", "Copiar"))
+            alert.addButton(withTitle: T("Open", "Abrir"))
+            alert.addButton(withTitle: T("Done", "Pronto"))
+            alert.beginSheetModal(for: self.window) { response in
+                if response == .alertFirstButtonReturn {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(url, forType: .string)
+                }
+                if response == .alertSecondButtonReturn, let link = URL(string: url) { NSWorkspace.shared.open(link) }
+            }
+        }, failed: { [weak self] message in
+            self?.say(T("Not shared", "Não compartilhado"), message)
+        })
+    }
+}
+
+extension AppDelegate {
+    /// The preview bar's "Share on Tailnet", shown while machines.tailscale is on.
+    func startPreviewSharing() {
+        PreviewDocument.extraBarItems = { document in
+            guard MachinesController.shared.isEnabled else { return [] }
+            let button = NSButton(image: Icon.globe.image(size: 14), target: nil, action: nil)
+            button.isBordered = false
+            button.toolTip = T("Share on Tailnet", "Compartilhar na tailnet")
+            button.widthAnchor.constraint(equalToConstant: 24).isActive = true
+            let target = ClosureTarget { [weak document] in _ = document?.runCommand?("machines.share-port") }
+            button.target = target
+            button.action = #selector(ClosureTarget.fire)
+            objc_setAssociatedObject(button, &ClosureTarget.key, target, .OBJC_ASSOCIATION_RETAIN)
+            return [button]
+        }
+    }
+}
+
+/// A button's target that runs a closure (kept alive by the button).
+final class ClosureTarget: NSObject {
+    nonisolated(unsafe) static var key = 0
+    let block: () -> Void
+    init(_ block: @escaping () -> Void) { self.block = block }
+    @objc func fire() { block() }
 }

@@ -30,6 +30,9 @@ public final class MachinesController {
     }
     var listener: TailnetListener = .shared
     var listenPort = TailnetListener.port
+    /// The CLI calls of serve and funnel (tests: a fake), and Cadex's record of them.
+    var shareRunner: @Sendable ((path: String, beCLI: Bool), [String]) -> Data? = MachinesController.runCLI
+    var shares = TailnetShares.shared
 
     /// Where the daemon was looked for (tests point it at a folder).
     var daemon = TailscaleDaemon()

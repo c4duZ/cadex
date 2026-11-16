@@ -43,6 +43,13 @@ public struct TailscaleDaemon: Sendable {
         return nil
     }
 
+    /// The CLI, whatever answers the LocalAPI: `serve` and `funnel` go through
+    /// it (the documented way to change them, ADR 0030).
+    public func cli() -> (path: String, beCLI: Bool)? {
+        if let path = cliPaths.first(where: { FileManager.default.isExecutableFile(atPath: $0) }) { return (path, false) }
+        return FileManager.default.isExecutableFile(atPath: appBinary) ? (appBinary, true) : nil
+    }
+
     func standalone() -> TailscaleEndpoint? {
         guard let link = try? FileManager.default.destinationOfSymbolicLink(atPath: standaloneDir + "/ipnport"),
               let port = Int(link.trimmingCharacters(in: .whitespacesAndNewlines)), (1...65535).contains(port),

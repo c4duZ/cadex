@@ -22,6 +22,12 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     private lazy var picker = PreviewPicker(web: web, overlay: overlay)
     /// Runs a command by id: the bar's pick button fires preview.pick-element.
     public var runCommand: ((String) -> Bool)?
+    /// More controls at the end of the bar, given by the app (plan 23:
+    /// sharing the page on the tailnet); they run commands by id. The
+    /// preview does not know what they are.
+    @MainActor public static var extraBarItems: ((PreviewDocument) -> [NSView])?
+    /// The page shown now (nil before the first load).
+    public var currentURL: URL? { web.url }
     private let progress = NSProgressIndicator()
     private let back: NSButton
     private let forward: NSButton
@@ -302,7 +308,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         message.alignment = .center
         message.textColor = .secondaryLabelColor
         message.isHidden = true
-        let bar = NSStackView(views: [back, forward, reload, address, pick])
+        let bar = NSStackView(views: [back, forward, reload, address, pick] + (Self.extraBarItems?(self) ?? []))
         bar.spacing = 4
         bar.edgeInsets = NSEdgeInsets(top: 6, left: 8, bottom: 4, right: 8)
         for v in [bar, progress, web, overlay, message] as [NSView] {
