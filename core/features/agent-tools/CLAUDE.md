@@ -38,6 +38,10 @@
   embutidos no binário (`cadex skills list|get`); `mcp.zig` é o servidor MCP (JSON-RPC por linha:
   initialize, tools/list, tools/call, ping), cada ferramenta um pedido de comando. Saída 0 feito, 1
   recusado ou app fechado (o motivo no stderr), 2 uso.
+- Plano 22 fase D: com a memória ligada na sessão (CADEX_MEMORY_DIR no ambiente), o `mcp.zig` junta à
+  lista as ferramentas `memory_*` do engine e repassa as chamadas delas inteiras, pela entrada da
+  feature memory (`../memory/mcp_proxy.zig`), não pelo app; `agent.zig` ignora o SIGCHLD porque o
+  engine que o servidor sobe é filho dele.
 - Fase C e D: `cadex browser goto|snapshot|click|fill|press|scroll|wait|screenshot|console|notes` e as ferramentas
   `browser_*` do MCP viram o comando preview.agent com `action=`; o print volta ao agente como imagem
   (o PNG em base64) e o caminho.

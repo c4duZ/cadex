@@ -56,10 +56,22 @@ fn appendPair(gpa: std.mem.Allocator, out: *std.ArrayList(u8), key: []const u8, 
 pub const Payload = struct {
     session_id: ?[]const u8 = null,
     cwd: ?[]const u8 = null,
+    /// SessionStart's `startup`, `resume`, `clear` or `compact`.
+    source: ?[]const u8 = null,
+    /// Set when the hook fired inside a subagent (Claude Code 2.1.323+).
+    agent_id: ?[]const u8 = null,
+    /// UserPromptSubmit's text.
+    prompt: ?[]const u8 = null,
 
     pub fn of(value: std.json.Value) Payload {
         if (value != .object) return .{};
-        return .{ .session_id = string(value, "session_id"), .cwd = string(value, "cwd") };
+        return .{
+            .session_id = string(value, "session_id"),
+            .cwd = string(value, "cwd"),
+            .source = string(value, "source"),
+            .agent_id = string(value, "agent_id"),
+            .prompt = string(value, "prompt"),
+        };
     }
 
     fn string(value: std.json.Value, key: []const u8) ?[]const u8 {
@@ -114,7 +126,47 @@ pub fn handoffTarget(gpa: std.mem.Allocator, payload: Payload, workspace: ?[]con
     return out.toOwnedSlice(gpa);
 }
 
+/// `GET /recap` of the session: the window the last compaction dropped, or
+/// with `anchor` the short post-compaction anchor (upstream's `recap_url`
+/// and `anchor_url`).
+pub fn recapTarget(gpa: std.mem.Allocator, session_id: []const u8, anchor_budget: ?u32) ![]u8 {
+    var out: std.ArrayList(u8) = .empty;
+    errdefer out.deinit(gpa);
+    try out.appendSlice(gpa, "/recap?");
+    try appendPair(gpa, &out, "agent", "claude-code");
+    try appendPair(gpa, &out, "session_id", session_id);
+    if (anchor_budget) |budget| try out.print(gpa, "&budget={d}&mode=anchor", .{budget});
+    return out.toOwnedSlice(gpa);
+}
+
+/// `GET /brief` for a subagent: the project's brief, read-only (it never
+/// claims the parent's handoff). No `briefing=1`: the engine adds the
+/// repository's `inject_on_subagent_start` when there is one, and gives
+/// nothing otherwise, as upstream does.
+pub fn briefTarget(gpa: std.mem.Allocator, payload: Payload, workspace: ?[]const u8) ![]u8 {
+    var out: std.ArrayList(u8) = .empty;
+    errdefer out.deinit(gpa);
+    try out.appendSlice(gpa, "/brief?");
+    try appendPair(gpa, &out, "agent", "claude-code");
+    if (payload.cwd) |cwd| try appendPair(gpa, &out, "cwd", cwd);
+    if (workspace) |name| try appendPair(gpa, &out, "workspace", name);
+    try appendPair(gpa, &out, "project_strategy", "repo-root");
+    return out.toOwnedSlice(gpa);
+}
+
 const testing = std.testing;
+
+test "recap and brief queries" {
+    const recap = try recapTarget(testing.allocator, "s 1", null);
+    defer testing.allocator.free(recap);
+    try testing.expectEqualStrings("/recap?agent=claude-code&session_id=s%201", recap);
+    const anchor = try recapTarget(testing.allocator, "s", 2000);
+    defer testing.allocator.free(anchor);
+    try testing.expectEqualStrings("/recap?agent=claude-code&session_id=s&budget=2000&mode=anchor", anchor);
+    const brief = try briefTarget(testing.allocator, .{ .cwd = "/p", .session_id = "s" }, "w");
+    defer testing.allocator.free(brief);
+    try testing.expectEqualStrings("/brief?agent=claude-code&cwd=%2Fp&workspace=w&project_strategy=repo-root", brief);
+}
 
 test "Claude Code's events map to the engine's names" {
     try testing.expectEqualStrings("session-start", engineEvent("SessionStart").?);

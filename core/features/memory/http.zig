@@ -61,18 +61,32 @@ fn writeAll(fd: c.fd_t, data: []const u8, deadline_ms: i64) bool {
     return true;
 }
 
-/// The request's head. `body` goes after it as is.
-pub fn head(gpa: std.mem.Allocator, method: []const u8, target: []const u8, token: []const u8, body_len: usize) ![]u8 {
-    return std.fmt.allocPrint(gpa, "{s} {s} HTTP/1.1\r\nHost: localhost\r\nX-Cadex-Token: {s}\r\n" ++
-        "Content-Type: application/json\r\nAccept: application/json, text/plain\r\n" ++
-        "Content-Length: {d}\r\nConnection: close\r\n\r\n", .{ method, target, token, body_len });
+/// A header line more (`cadex mcp`'s session id, mcp_proxy.zig); the value
+/// must be header-safe already.
+pub const Header = struct { name: []const u8, value: []const u8 };
+
+/// The request's head. `body` goes after it as is. The engine's MCP route
+/// wants both JSON and event streams accepted (rmcp, plan 22 phase D).
+pub fn head(gpa: std.mem.Allocator, method: []const u8, target: []const u8, token: []const u8, extra: []const Header, body_len: usize) ![]u8 {
+    var out: std.ArrayList(u8) = .empty;
+    errdefer out.deinit(gpa);
+    try out.print(gpa, "{s} {s} HTTP/1.1\r\nHost: localhost\r\nX-Cadex-Token: {s}\r\n", .{ method, target, token });
+    for (extra) |h| try out.print(gpa, "{s}: {s}\r\n", .{ h.name, h.value });
+    try out.print(gpa, "Content-Type: application/json\r\nAccept: application/json, text/event-stream, text/plain\r\n" ++
+        "Content-Length: {d}\r\nConnection: close\r\n\r\n", .{body_len});
+    return out.toOwnedSlice(gpa);
 }
 
 /// One exchange; null when the engine is not there or the deadline passed.
 pub fn send(gpa: std.mem.Allocator, socket: []const u8, method: []const u8, target: []const u8, token: []const u8, body: []const u8, deadline_ms: i64) !?Response {
+    return sendWith(gpa, socket, method, target, token, &.{}, body, deadline_ms);
+}
+
+/// `send` with more header lines.
+pub fn sendWith(gpa: std.mem.Allocator, socket: []const u8, method: []const u8, target: []const u8, token: []const u8, extra: []const Header, body: []const u8, deadline_ms: i64) !?Response {
     const fd = connect(socket) orelse return null;
     defer _ = c.close(fd);
-    const h = try head(gpa, method, target, token, body.len);
+    const h = try head(gpa, method, target, token, extra, body.len);
     defer gpa.free(h);
     if (!writeAll(fd, h, deadline_ms) or !writeAll(fd, body, deadline_ms)) return null;
     var raw: std.ArrayList(u8) = .empty;
@@ -164,10 +178,10 @@ test "a cut or broken response is an error, not a body" {
 }
 
 test "the head carries the token and the length; nothing listening is null at once" {
-    const h = try head(testing.allocator, "POST", "/hook?event=stop", "tok", 12);
+    const h = try head(testing.allocator, "POST", "/hook?event=stop", "tok", &.{.{ .name = "X-A", .value = "b" }}, 12);
     defer testing.allocator.free(h);
     try testing.expect(std.mem.startsWith(u8, h, "POST /hook?event=stop HTTP/1.1\r\n"));
-    try testing.expect(std.mem.indexOf(u8, h, "X-Cadex-Token: tok\r\n") != null);
+    try testing.expect(std.mem.indexOf(u8, h, "X-Cadex-Token: tok\r\nX-A: b\r\n") != null);
     try testing.expect(std.mem.indexOf(u8, h, "Content-Length: 12\r\nConnection: close\r\n\r\n") != null);
     const start = clock.monotonicMs();
     try testing.expect(try send(testing.allocator, "/nonexistent/cadex/memory.sock", "GET", "/", "t", "", start + 200) == null);

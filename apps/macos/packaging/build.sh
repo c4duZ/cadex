@@ -110,6 +110,9 @@ cp -R "$MACOS/shared/icons/Resources/FileIcons" "$APP/Contents/Resources/"
 cp -R "$MACOS/shared/icons/Resources/ProviderLogos" "$APP/Contents/Resources/"
 # The skills plugin the session kit passes by --plugin-dir (plan 20, ADR 0024).
 cp -R "$MACOS/features/agent-tools/plugin" "$APP/Contents/Resources/agent-plugin"
+# ai-memory's own skills for the memory's tools (plan 22 phase D), from the
+# crate the engine was built with; MemoryKit.findPlugin finds them here.
+"$MEMORY/target/$(uname -m | sed 's/arm64/aarch64/')-apple-darwin/release/cadex-memory" export-plugin "$APP/Contents/Resources/memory-plugin"
 # The zsh integration (docs/spec/terminal.md): the tabs' zsh starts from this
 # ZDOTDIR; TerminalShellIntegration.swift finds it here.
 mkdir -p "$APP/Contents/Resources/shell-integration"

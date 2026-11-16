@@ -46,6 +46,9 @@
   CADEX_TERMINAL_SOCKET, e nunca toca os do dono; os gatilhos ficam em `../apps/macos/app/PerfHooks.swift`), e mede memória (footprint) e CPU (tempo de CPU
   gasto na janela, não o %cpu do ps); os índices pela API C com `perf/index_probe.c`. Os limites
   ficam em `perf/limits.py`, cada um com o que foi medido ao lado.
+- `memory_eval.py` (`make memory-eval MODELS=<pasta>`): a busca da memória medida, as ADRs e specs
+  como páginas e 30 perguntas, só por palavra contra a híbrida (plano 22 fase D; o resultado fica em
+  `../docs/spec/memory.md`).
 - `webview2_sdk.py`: baixa o pacote Microsoft.Web.WebView2 (versão e sha256 fixados no script) e
   gera `../apps/windows/shared/webview/sdk/` (as declarações em C das interfaces que o app usa, os
   ids e o WebView2Loader.dll por arquitetura) (`../docs/adr/0014-webview2-on-windows.md`). Só roda

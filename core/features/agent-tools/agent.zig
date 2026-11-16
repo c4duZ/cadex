@@ -8,6 +8,18 @@ const commands = @import("commands.zig");
 const request = @import("request.zig");
 const skills = @import("skills.zig");
 const mcp = @import("mcp.zig");
+const memory = @import("../memory/memory.zig");
+
+/// The memory's side of the MCP server, set up once in `serve`.
+var memory_proxy: memory.mcp.Proxy = undefined;
+
+fn memoryList(gpa: std.mem.Allocator) anyerror!?[]u8 {
+    return memory_proxy.listTools(gpa);
+}
+
+fn memoryCall(gpa: std.mem.Allocator, message: []const u8) anyerror!?[]u8 {
+    return memory_proxy.call(gpa, message);
+}
 
 pub fn main(sub: []const u8, all_words: []const []const u8, usage_text: []const u8) u8 {
     var gpa_state: std.heap.DebugAllocator(.{}) = .init;
@@ -62,6 +74,13 @@ fn runSkills(gpa: std.mem.Allocator, words: []const []const u8, usage_text: []co
 /// The MCP loop: a message per line in, its answer per line out, until
 /// stdin closes.
 fn serve(gpa: std.mem.Allocator) u8 {
+    // The engine this process may start is its child: children reap
+    // themselves, nothing here waits for one (plan 22 phase D).
+    const mem: ?mcp.Memory = if (memory_proxy.init()) blk: {
+        const ignore: std.c.Sigaction = .{ .handler = .{ .handler = std.c.SIG.IGN }, .mask = std.mem.zeroes(std.c.sigset_t), .flags = 0 };
+        _ = std.c.sigaction(std.c.SIG.CHLD, &ignore, null);
+        break :blk .{ .list = memoryList, .call = memoryCall };
+    } else null;
     var pending: std.ArrayList(u8) = .empty;
     defer pending.deinit(gpa);
     var buf: [64 * 1024]u8 = undefined;
@@ -73,7 +92,7 @@ fn serve(gpa: std.mem.Allocator) u8 {
         while (std.mem.indexOfScalar(u8, pending.items, '\n')) |end| {
             const message = std.mem.trim(u8, pending.items[0..end], " \r\t");
             if (message.len > 0) {
-                if (mcp.handle(gpa, message, request.sendCommand) catch null) |answer| {
+                if (mcp.handleWith(gpa, message, request.sendCommand, mem) catch null) |answer| {
                     defer gpa.free(answer);
                     writeAll(1, answer);
                 }

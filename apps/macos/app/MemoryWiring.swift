@@ -10,13 +10,15 @@ import Settings
 enum MemoryWiring {
     /// Looked up once: the bundle does not change while the app runs.
     static let engine = MemoryKit.findEngine()
+    static let plugin = MemoryKit.findPlugin()
 
     /// The settings: the part in the kit, or not. Without `cadex` there are
     /// no hooks to run (and no session token), so nothing goes in.
     static func apply(_ memory: Settings.Memory) {
         let kit = SessionKit.shared
         guard memory.enabled, let tools = kit.toolsPath else { return kit.withdraw(MemoryKit.partID) }
-        kit.contribute(MemoryKit.partID, MemoryKit.part(tools: tools, engine: engine, shareAcrossAccounts: memory.shareAcrossAccounts))
+        kit.contribute(MemoryKit.partID, MemoryKit.part(tools: tools, engine: engine, shareAcrossAccounts: memory.shareAcrossAccounts,
+                                                                 plugin: plugin))
     }
 }
 

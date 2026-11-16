@@ -26,6 +26,9 @@
   ambiente do app), `CADEX_MEMORY_SOCKET` e `CADEX_SESSIONS_DIR`. Com
   memory.shareAcrossAccounts desligada, o `perAccount` da parte põe `CADEX_MEMORY_WORKSPACE` com a
   chave da conta da sessão (`accountKey` do kit): cada conta grava e lê a sua workspace no engine.
+  Em `pluginDirs`, o plugin com as skills do próprio ai-memory (`findPlugin`: Resources/memory-plugin
+  no pacote, senão o que o `make app` escreve em `core/features/memory/server/target`, pelo
+  `cadex-memory export-plugin`; plano 22 fase D).
   O `perSession` da parte, quando quem abre a sessão sabe a pasta dela, põe `autoMemoryDirectory`
   na pasta do projeto (`MemoryProject.swift`); sem pasta conhecida, fica a padrão do Claude.
 - `MemoryProject.swift`: a regra da chave do projeto (a raiz do repositório principal lida dos

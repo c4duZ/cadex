@@ -491,6 +491,7 @@ dependencies = [
  "jiff",
  "libc",
  "notify",
+ "reqwest",
  "rmcp",
  "rusqlite",
  "serde",

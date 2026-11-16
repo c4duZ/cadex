@@ -6,10 +6,15 @@
 //! does not take it, the event goes to the queue (spool.zig) and the hook
 //! leaves. Nothing here makes the session fail: no token, no engine or any
 //! error means printing nothing.
+//!
+//! Besides the briefing, what upstream's own hook client hands back
+//! (context.zig): the anchor after a compaction, the recap on "reload
+//! context", and the brief a subagent starts with when the repository asks.
 
 const std = @import("std");
 const clock = @import("../../shared/clock.zig");
 const events = @import("events.zig");
+const context = @import("context.zig");
 const http = @import("http.zig");
 const launch = @import("launch.zig");
 const spool = @import("spool.zig");
@@ -20,6 +25,26 @@ extern "c" fn getppid() c_int;
 pub const start_budget_ms = 1000;
 /// Any other event's: past this the event waits in the queue.
 pub const event_budget_ms = 200;
+/// A hook that fetches something back for the session (the "reload context"
+/// recap, a subagent's brief): it waits like SessionStart, but never starts
+/// the engine (it is up: the session's SessionStart started it).
+pub const fetch_budget_ms = start_budget_ms;
+
+/// What the hook brings back after posting the event.
+const Reply = enum { none, briefing, anchor, recap, brief };
+
+fn replyFor(event: []const u8, payload: events.Payload) Reply {
+    if (std.mem.eql(u8, event, "session-start")) {
+        const compact = payload.source != null and std.mem.eql(u8, payload.source.?, "compact");
+        if (!compact) return .briefing;
+        return if (payload.agent_id == null and payload.session_id != null) .anchor else .none;
+    }
+    if (std.mem.eql(u8, event, "user-prompt-submit") and payload.session_id != null) {
+        if (payload.prompt) |prompt| if (context.isReloadRequest(prompt)) return .recap;
+    }
+    if (std.mem.eql(u8, event, "subagent-start")) return .brief;
+    return .none;
+}
 
 /// What the kit's environment says (SessionKit in the app).
 pub const Env = struct {
@@ -106,7 +131,9 @@ pub fn runWith(gpa: std.mem.Allocator, env: Env, claude_event: []const u8, input
     defer gpa.free(target);
 
     const is_start = std.mem.eql(u8, event, "session-start");
-    const deadline = started + @as(i64, if (is_start) start_budget_ms else event_budget_ms);
+    const reply = replyFor(event, payload);
+    const budget: i64 = if (is_start) start_budget_ms else if (reply != .none) fetch_budget_ms else event_budget_ms;
+    const deadline = started + budget;
     if (is_start) if (env.bin) |bin| {
         _ = launch.ensure(.{ .bin = bin, .socket = env.socket, .data_dir = env.data_dir, .tokens_dir = env.tokens_dir }, deadline);
     };
@@ -119,12 +146,17 @@ pub fn runWith(gpa: std.mem.Allocator, env: Env, claude_event: []const u8, input
         spool.write(gpa, env.data_dir, target, input) catch {};
         return null;
     }
-    if (!is_start) return null;
-    return fetchBriefing(gpa, env, payload, deadline);
+    return fetchReply(gpa, env, payload, reply, deadline);
 }
 
-fn fetchBriefing(gpa: std.mem.Allocator, env: Env, payload: events.Payload, deadline: i64) !?[]u8 {
-    const target = try events.handoffTarget(gpa, payload, env.workspace);
+fn fetchReply(gpa: std.mem.Allocator, env: Env, payload: events.Payload, reply: Reply, deadline: i64) !?[]u8 {
+    const target = switch (reply) {
+        .none => return null,
+        .briefing => try events.handoffTarget(gpa, payload, env.workspace),
+        .anchor => try events.recapTarget(gpa, payload.session_id.?, context.anchor_budget),
+        .recap => try events.recapTarget(gpa, payload.session_id.?, null),
+        .brief => try events.briefTarget(gpa, payload, env.workspace),
+    };
     defer gpa.free(target);
     const answer = (try http.send(gpa, env.socket, "GET", target, env.token, "", deadline)) orelse return null;
     defer answer.deinit(gpa);
@@ -132,7 +164,13 @@ fn fetchBriefing(gpa: std.mem.Allocator, env: Env, payload: events.Payload, dead
     const text = try briefingText(gpa, answer.body);
     defer gpa.free(text);
     if (text.len == 0) return null;
-    return try startOutput(gpa, text);
+    return switch (reply) {
+        .none => null,
+        .briefing => try startOutput(gpa, text),
+        .anchor => if (std.mem.startsWith(u8, text, context.anchor_header)) try startOutput(gpa, text) else null,
+        .recap => try context.envelope(gpa, "UserPromptSubmit", text),
+        .brief => try context.envelope(gpa, "SubagentStart", text),
+    };
 }
 
 const testing = std.testing;
@@ -180,6 +218,16 @@ test "an account's own memory is read from CADEX_MEMORY_WORKSPACE" {
     var socket_buf: [256]u8 = undefined;
     var dir_buf: [1024]u8 = undefined;
     try testing.expectEqualStrings("-Users-u--claude-x", Env.from(accountEnv, &socket_buf, &dir_buf).?.workspace.?);
+}
+
+test "what each event brings back" {
+    try testing.expectEqual(Reply.briefing, replyFor("session-start", .{ .source = "resume" }));
+    try testing.expectEqual(Reply.anchor, replyFor("session-start", .{ .source = "compact", .session_id = "s" }));
+    try testing.expectEqual(Reply.none, replyFor("session-start", .{ .source = "compact", .session_id = "s", .agent_id = "a" }));
+    try testing.expectEqual(Reply.recap, replyFor("user-prompt-submit", .{ .session_id = "s", .prompt = "Reload context, then go" }));
+    try testing.expectEqual(Reply.none, replyFor("user-prompt-submit", .{ .session_id = "s", .prompt = "fix it" }));
+    try testing.expectEqual(Reply.brief, replyFor("subagent-start", .{}));
+    try testing.expectEqual(Reply.none, replyFor("stop", .{}));
 }
 
 test "an event the memory does not take does nothing" {

@@ -88,6 +88,9 @@ let exitCode = await Checks.run([
             "CADEX_MEMORY_DIR": home + "/Library/Application Support/Cadex/memory",
         ], "\(String(describing: plain.settings["env"]))")
         expect(plain.perAccount == nil, "shared across accounts: no workspace")
+        expect(plain.pluginDirs.isEmpty, "no plugin found, none passed")
+        let skilled = MemoryKit.part(tools: "/c", engine: nil, shareAcrossAccounts: true, plugin: "/App/Cadex.app/Contents/Resources/memory-plugin", environment: [:])
+        expect(skilled.pluginDirs == ["/App/Cadex.app/Contents/Resources/memory-plugin"], "the skills plugin by --plugin-dir")
         let test = MemoryKit.part(tools: "/c", engine: nil, shareAcrossAccounts: true,
                                   environment: ["CADEX_SOCKETS_DIR": "/t/s", "CADEX_SESSIONS_DIR": "/t/k", "CADEX_MEMORY_DIR": "/t/m"])
         expect(test.settings["env"] as? [String: String] == [

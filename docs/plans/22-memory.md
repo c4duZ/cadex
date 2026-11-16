@@ -354,6 +354,36 @@ refaz o crate a partir dela.
   - Antes de fechar a fase, o teste das 30 perguntas: uma wiki com as nossas ADRs e specs, 30
     perguntas reais, acerto do FTS5 contra o híbrido, registrado na spec.
   - Features: memory, agent-tools.
+  - **Como ficou (2026-11-16), com o máximo de compatibilidade com o ai-memory (pedido do dono):**
+    - O briefing **não** é reescrito: o texto do upstream fica como é, com o aviso de segurança e as
+      notas ao agente sobre as ferramentas (tirar essas notas fazia o agente reler o handoff de uso
+      único). O handoff continua o nosso, de fatos.
+    - A compactação segue o cliente do upstream, não um ponto de controle no resumo (o PreCompact do
+      Claude Code não escreve no resumo): o SessionStart `compact` pega a âncora da sessão
+      (`/recap?mode=anchor`, os prompts do dono), nunca o handoff; nada num subagente (`agent_id`);
+      um prompt que começa com "reload context" pega o `/recap`; o SubagentStart pega o `/brief`,
+      que só vem com `inject_on_subagent_start` no .ai-memory.toml. No `cadex memory-hook`
+      (`core/features/memory/context.zig`), testado contra o engine.
+    - O `cadex mcp` lista as ferramentas pelo engine e repassa as chamadas
+      (`core/features/memory/mcp_proxy.zig`) com o `X-Memory-Actor-Session-Id` do
+      CLAUDE_CODE_SESSION_ID, como o mcp-bridge; antes do primeiro hook, o engine põe o projeto de
+      reserva pela pasta (mcp_scope.rs). 22 ferramentas; fora: consolidate, auto_improve,
+      forget_sweep, restore_page, install_self_routing. Sobe o engine se ele não está de pé.
+    - Em vez de uma skill nossa, as skills do próprio upstream (retrieval, durable-pages, handoff,
+      messaging), tiradas do crate pelo `cadex-memory export-plugin` no build: atualizar o upstream
+      atualiza as skills.
+    - O download do modelo é do crate do Cadex (model_fetch.rs), com os arquivos e os SHA-256 do
+      upstream: retoma por `Range` (testado com o modelo de verdade, cortado em 2 s), apaga o que não
+      confere, e sem rede espera 10 min para tentar de novo.
+    - As 30 perguntas (`make memory-eval`): no 1º lugar, 19 só por palavra e 21 com o modelo; entre
+      as 5 primeiras, 25 e 28. Registrado na spec.
+    - **Teste real** (conta bkdg, Haiku, US$ 0,037 em cinco chamadas): a sessão via as 22
+      ferramentas `memory_*` (carregadas sob demanda pelo ToolSearch do Claude Code) e as 4 skills
+      do plugin `cadex-memory`; gravou uma página sem dizer o projeto e ela caiu no da sessão; a
+      sessão seguinte a achou pelo `memory_query`, e o `memory_status` respondeu `resolved_by:
+      session`. Um `/compact` numa sessão retomada disparou o SessionStart `compact`, que entregou a
+      âncora; o "reload context" seguinte entregou o recap, e o Haiku citou os dois e o codinome
+      dito antes da compactação.
 - **E. Continuar em outro agente (o `run`).**
   - O workstream do engine (qual sessão continua qual, a trava contra dois agentes no mesmo
     workstream, o leitor das conversas de Claude e Codex) no `cadex-memory`, pelo roteador de

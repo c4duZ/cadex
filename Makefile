@@ -1,4 +1,4 @@
-.PHONY: check manifests core core-test memory memory-test memory-upstream-test macos-test app run relink package perf windows-core windows-core-test windows-app windows-run windows-app-test windows-package
+.PHONY: check manifests core core-test memory memory-test memory-upstream-test memory-eval macos-test app run relink package perf windows-core windows-core-test windows-app windows-run windows-app-test windows-package
 
 # Run before handing work over: manifests, core tests, the memory engine's
 # tests, app tests, and the Windows build (it cannot run here, but it must keep
@@ -39,6 +39,13 @@ memory-test:
 # of roda-no-pc, Linux x86_64), at the pinned commit; run at every upstream
 # update. The script goes by ssh with only the commit: no copy of this folder.
 MEMORY_REV = $(shell grep -m1 -o 'rev = "[0-9a-f]\{40\}"' $(MEMORY)/Cargo.toml | grep -o '[0-9a-f]\{40\}')
+# The search measured (plan 22 phase D): the ADRs and specs as pages, 30
+# questions, text only against hybrid; needs the release engine and the model
+# folder (MODELS=<dir with all-MiniLM-L6-v2/>). Not in check: it downloads nothing
+# but takes the 87 MB model from the caller.
+memory-eval:
+	@python3 tools/memory_eval.py $(MEMORY)/target/aarch64-apple-darwin/release/cadex-memory $(MODELS)
+
 memory-upstream-test:
 	@ssh $${RODA_NO_PC_HOST:-pc} 'bash -s' -- $(MEMORY_REV) < core/features/memory/upstream_test.sh
 
@@ -70,7 +77,7 @@ macos-test: core relink
 
 # Debug build of the app; `make run` opens it.
 app: core relink
-	@cd $(MEMORY) && $(CARGO) build --locked --quiet
+	@cd $(MEMORY) && $(CARGO) build --locked --quiet && target/debug/cadex-memory export-plugin target/memory-plugin
 	@cd apps/macos && swift build
 
 run: app

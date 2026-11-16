@@ -5,7 +5,10 @@
 //! (plan 22, phase D): the model is loaded only to index or search and is
 //! released after `idle` without use. While the model files are absent (first
 //! run) the embedder answers with an error, which the wiki and `memory_query`
-//! already treat as "FTS only", and fetches the files once in the background.
+//! already treat as "FTS only", and fetches the files once in the background
+//! (model_fetch.rs: a dropped download resumes; a failed one is tried again
+//! after `RETRY_AFTER`, not on every search, so an offline Mac does not
+//! knock on every query).
 //! Each load and unload is told to [`ModelEvents`]: after an unload the
 //! engine restarts itself to give the allocator's memory back (restart.rs).
 
@@ -17,7 +20,12 @@ use std::time::{Duration, Instant};
 use ai_memory_llm::{Embedder, LOCAL_DIM, LOCAL_MODEL, LlmError, LlmResult, LocalEmbedder};
 use tokio::sync::Mutex;
 
+use crate::model_fetch;
 use crate::restart::ModelEvents;
+
+/// After a failed fetch (offline, a cut connection), the next try waits this
+/// long; a new engine (the next session's) tries at once.
+const RETRY_AFTER: Duration = Duration::from_secs(600);
 
 /// Shared state between the embedder handle and its idle reaper task.
 struct Slot {
@@ -35,6 +43,8 @@ pub struct LazyLocalEmbedder {
     idle: Duration,
     slot: Arc<Slot>,
     fetching: Arc<AtomicBool>,
+    /// When the last fetch failed, if one did.
+    failed_at: Arc<std::sync::Mutex<Option<Instant>>>,
 }
 
 impl LazyLocalEmbedder {
@@ -51,6 +61,7 @@ impl LazyLocalEmbedder {
                 events,
             }),
             fetching: Arc::new(AtomicBool::new(false)),
+            failed_at: Arc::new(std::sync::Mutex::new(None)),
         }
     }
 
@@ -60,17 +71,23 @@ impl LazyLocalEmbedder {
     }
 
     fn start_fetch(&self) {
-        if self.fetching.swap(true, Ordering::SeqCst) {
+        let recent_failure = self.failed_at.lock().ok().and_then(|at| *at).is_some_and(|at| at.elapsed() < RETRY_AFTER);
+        if recent_failure || self.fetching.swap(true, Ordering::SeqCst) {
             return;
         }
-        let dir = self.models_dir.clone();
+        let dir = ai_memory_llm::local::model_dir(&self.models_dir);
         let fetching = self.fetching.clone();
+        let failed_at = self.failed_at.clone();
         tokio::spawn(async move {
             tracing::info!(dir = %dir.display(), "fetching the local embedding model (~87 MB, once)");
-            match ai_memory_llm::fetch_model(&dir).await {
+            let files = ai_memory_llm::local::MODEL_FILES;
+            match model_fetch::fetch(&dir, model_fetch::MODEL_BASE_URL, &files).await {
                 Ok(()) => tracing::info!("local embedding model fetched; hybrid search is on"),
                 Err(error) => {
-                    tracing::warn!(%error, "local embedding model fetch failed; FTS only");
+                    tracing::warn!(%error, "local embedding model fetch failed; FTS only, trying again later");
+                    if let Ok(mut at) = failed_at.lock() {
+                        *at = Some(Instant::now());
+                    }
                     fetching.store(false, Ordering::SeqCst);
                 }
             }

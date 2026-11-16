@@ -3,12 +3,22 @@
 //! the sessions Cadex opens; it inherits the session's environment, token
 //! included (tested 2026-11-15). Each tool is a command request to the app
 //! (request.zig); nothing of the app lives here. Plan 20 phase C adds the
-//! browser's tools, phase E the computer's.
+//! browser's tools, phase E the computer's. Plan 22 phase D adds the
+//! project memory's tools, which go to the memory engine and not to the app
+//! (the memory feature's `mcp`, mcp_proxy.zig).
 
 const std = @import("std");
 const request = @import("request.zig");
+const memory = @import("../memory/memory.zig");
 
 pub const Send = *const fn (gpa: std.mem.Allocator, id: []const u8, args: []const request.Arg) anyerror!request.Reply;
+
+/// The memory's tools: the list to add (JSON objects joined by commas) and
+/// a call forwarded whole. Null in a session with the memory off.
+pub const Memory = struct {
+    list: *const fn (gpa: std.mem.Allocator) anyerror!?[]u8,
+    call: *const fn (gpa: std.mem.Allocator, message: []const u8) anyerror!?[]u8,
+};
 
 const Tool = struct {
     name: []const u8,
@@ -78,6 +88,10 @@ const instructions = "Cadex holds this terminal. Use these tools to open files, 
 
 /// The answer to one message, or null when none is due (a notification).
 pub fn handle(gpa: std.mem.Allocator, message: []const u8, send: Send) !?[]u8 {
+    return handleWith(gpa, message, send, null);
+}
+
+pub fn handleWith(gpa: std.mem.Allocator, message: []const u8, send: Send, mem: ?Memory) !?[]u8 {
     var parsed = std.json.parseFromSlice(std.json.Value, gpa, message, .{}) catch
         return try std.fmt.allocPrint(gpa, "{{\"jsonrpc\":\"2.0\",\"id\":null,\"error\":{{\"code\":-32700,\"message\":\"parse error\"}}}}\n", .{});
     defer parsed.deinit();
@@ -101,8 +115,23 @@ pub fn handle(gpa: std.mem.Allocator, message: []const u8, send: Send) !?[]u8 {
             if (i > 0) try out.append(gpa, ',');
             try out.print(gpa, "{{\"name\":\"{s}\",\"description\":{f},\"inputSchema\":{s}}}", .{ t.name, std.json.fmt(t.description, .{}), t.schema });
         }
+        if (mem) |m| if (m.list(gpa) catch null) |more| {
+            defer gpa.free(more);
+            if (more.len > 0) {
+                try out.append(gpa, ',');
+                try out.appendSlice(gpa, more);
+            }
+        };
         try out.appendSlice(gpa, "]}}\n");
     } else if (std.mem.eql(u8, method, "tools/call")) {
+        if (mem) |m| if (memoryTool(object.get("params"))) {
+            if (m.call(gpa, message) catch null) |answer| {
+                out.deinit(gpa);
+                return answer;
+            }
+            try result(gpa, &out, false, "the project memory did not answer");
+            return try out.toOwnedSlice(gpa);
+        };
         try call(gpa, &out, object.get("params"), send);
     } else if (std.mem.eql(u8, method, "ping")) {
         try out.appendSlice(gpa, "\"result\":{}}\n");
@@ -110,6 +139,12 @@ pub fn handle(gpa: std.mem.Allocator, message: []const u8, send: Send) !?[]u8 {
         try out.print(gpa, "\"error\":{{\"code\":-32601,\"message\":{f}}}}}\n", .{std.json.fmt(method, .{})});
     }
     return try out.toOwnedSlice(gpa);
+}
+
+fn memoryTool(params: ?std.json.Value) bool {
+    const p = if (params) |v| (if (v == .object) v.object else return false) else return false;
+    const name = p.get("name") orelse return false;
+    return name == .string and memory.mcp.offers(name.string);
 }
 
 /// A tool's call: its arguments as strings, the app's answer as text.
@@ -181,6 +216,29 @@ fn result(gpa: std.mem.Allocator, out: *std.ArrayList(u8), ok: bool, text: []con
 }
 
 const testing = std.testing;
+
+fn fakeList(gpa: std.mem.Allocator) anyerror!?[]u8 {
+    return try gpa.dupe(u8, "{\"name\":\"memory_query\",\"inputSchema\":{}}");
+}
+
+fn fakeCall(gpa: std.mem.Allocator, message: []const u8) anyerror!?[]u8 {
+    return try std.fmt.allocPrint(gpa, "engine got {d} bytes\n", .{message.len});
+}
+
+test "the memory's tools join the list and their calls go to the memory" {
+    const gpa = testing.allocator;
+    const mem: Memory = .{ .list = fakeList, .call = fakeCall };
+    const list = (try handleWith(gpa, "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}", fakeSend, mem)).?;
+    defer gpa.free(list);
+    try testing.expect(std.mem.indexOf(u8, list, "\"cadex_open\"") != null and std.mem.endsWith(u8, list, ",{\"name\":\"memory_query\",\"inputSchema\":{}}]}}\n"));
+    const msg = "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"memory_query\",\"arguments\":{}}}";
+    const called = (try handleWith(gpa, msg, fakeSend, mem)).?;
+    defer gpa.free(called);
+    try testing.expect(std.mem.startsWith(u8, called, "engine got "));
+    const admin = (try handleWith(gpa, "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"memory_restore_page\"}}", fakeSend, mem)).?;
+    defer gpa.free(admin);
+    try testing.expect(std.mem.indexOf(u8, admin, "unknown tool") != null);
+}
 
 fn fakeSend(gpa: std.mem.Allocator, id: []const u8, args: []const request.Arg) anyerror!request.Reply {
     const text = try std.fmt.allocPrint(gpa, "{s} {s}={s}", .{ id, args[0].key, args[0].value });

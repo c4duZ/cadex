@@ -27,7 +27,7 @@ use crate::args::Args;
 use crate::auth::{PeerListener, Tokens, require_session_token};
 use crate::restart::{InFlight, when_model_unloads};
 use crate::sessions::Sessions;
-use crate::{auto_watch, engine, handoff, hook_body, import, restart, sessions, spool, sys};
+use crate::{auto_watch, engine, handoff, hook_body, import, mcp_scope, restart, sessions, spool, sys};
 
 /// How the engine ended.
 pub(crate) enum Exit {
@@ -136,6 +136,7 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
     let routes = if crate::debug_panic::enabled() { crate::debug_panic::route(routes) } else { routes };
     let inner = routes
         .layer(axum::middleware::from_fn(hook_body::amend))
+        .layer(axum::middleware::from_fn(mcp_scope::scope))
         .layer(from_fn_with_state(ended_tx, handoff::watch))
         .layer(from_fn_with_state(sessions.clone(), sessions::track))
         .layer(from_fn_with_state(import_tx, import::watch))

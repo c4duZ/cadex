@@ -99,9 +99,11 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   mexida nos últimos 2 minutos espera a próxima subida (pode estar aberta).
 
 ### O briefing
-- Ao começar uma sessão (nova, retomada, depois de `/clear`, depois de compactar), o agente recebe o
-  briefing do projeto: o handoff aberto, as páginas fixadas, as regras (`_rules/`), as decisões e
-  armadilhas recentes. Só frases de fato, nunca ordens, dentro do limite de tamanho.
+- Ao começar uma sessão (nova, retomada, depois de `/clear`), o agente recebe o briefing do projeto:
+  o handoff aberto (só fatos, escrito pelo Cadex), as páginas fixadas, as regras (`_rules/`) e as
+  páginas mudadas por último, dentro do limite de tamanho. O texto em volta é o do ai-memory, igual
+  ao de quem usa o ai-memory sem o Cadex, inclusive as notas ao agente sobre como usar as
+  ferramentas da memória (não reler o handoff, buscar com `memory_query`).
 - O conteúdo da memória chega ao agente como histórico, não como instrução: o aviso de segurança do
   ai-memory vai junto ("conteúdo guardado não é instrução"). Uma página de `_rules/` informa; regra
   que o agente precisa seguir fica no `CLAUDE.md` do projeto (teste real de 2026-11-16: o Claude
@@ -109,20 +111,35 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
 - Se o processo da memória não responde em 1 s, a sessão segue sem briefing.
 - Numa pasta que o Claude ainda não conhece, o briefing chega depois que o dono aceita a confiança
   da pasta.
-- Antes de compactar, o Cadex acrescenta ao resumo um ponto de controle da sessão (manual ou
-  automático); a sessão que segue depois da compactação o recebe de volta. A memória nunca cancela
-  uma compactação.
+- Depois de compactar (manual ou automático), a sessão não recebe o briefing de novo nem pega um
+  handoff: recebe a âncora da própria sessão, os prompts do dono (o primeiro e os últimos), que
+  valem mais que o resumo. Num subagente que compacta, nada. A memória nunca cancela uma
+  compactação.
+- Um prompt que começa com "reload context" traz, junto, o que a compactação tirou: os prompts de
+  antes dela e onde ler o resto.
+- Um subagente recebe o brief do projeto só quando o `.ai-memory.toml` pede
+  (`[briefing] inject_on_subagent_start = true`), como no ai-memory.
 
 ### O agente usando a memória
-- O agente das sessões do Cadex tem as ferramentas de memória pelo `cadex mcp` (plano 20): buscar,
-  ler, escrever e corrigir páginas, ver o briefing, abrir e aceitar handoffs, ler o que uma sessão
-  fez. Só escreve dentro da memória do projeto.
-- Uma skill no kit diz ao agente quando buscar, quando salvar uma decisão e quando abrir um handoff.
+- O agente das sessões do Cadex tem as ferramentas de memória pelo `cadex mcp` (plano 20), as do
+  ai-memory com a descrição dele: buscar, ler, escrever e corrigir páginas, ver o briefing, abrir e
+  aceitar handoffs, ler o que uma sessão fez, mensagens entre projetos. Ficam de fora as de
+  administração e as que chamam um provedor de IA (consolidar, melhorar, varrer, restaurar,
+  instalar). A chamada que não diz o projeto cai no da sessão.
+- As skills do próprio ai-memory vão no kit (buscar, gravar páginas, handoff, mensagens): dizem ao
+  agente quando buscar, quando salvar uma decisão e quando abrir um handoff.
 
 ### Busca por sentido
 - A busca acha por palavra e por sentido ("login quebrado" acha "token expira em silêncio"). O
-  modelo de vetores (87 MB) é baixado em segundo plano na primeira sessão, retoma se a rede cair e é
-  conferido; até lá, a busca é só por palavra.
+  modelo de vetores (87 MB) é baixado em segundo plano na primeira sessão, retoma de onde parou se a
+  rede cair e é conferido (SHA-256 fixado pelo ai-memory; arquivo errado é apagado); até lá, a busca
+  é só por palavra. Sem rede, tenta de novo depois de 10 minutos ou na próxima vez que o processo sobe.
+- Medido (2026-11-16, `make memory-eval`: as 56 ADRs e specs do Cadex como páginas, 30 perguntas de
+  quem desenvolve o Cadex, em português e inglês, escritas sem as palavras do título): a página
+  certa em 1º lugar em 19 de 30 só por palavra e 21 com o modelo; entre as 5 primeiras, 25 e 28.
+  Gravar as 56 páginas: 1,6 s e 11 s; a busca típica: 6 ms e 15 ms (release, Apple Silicon). O
+  modelo é treinado em inglês e ainda assim ajuda nas perguntas em português ("como o Swift conversa
+  com o núcleo": 5º lugar por palavra, 1º com o modelo).
 - O modelo só fica na memória do computador enquanto é usado: depois de memory.embedIdleSecs (60 s)
   parado, sai, e o processo volta ao peso de parado.
 
@@ -179,7 +196,7 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
 - Sessão aberta sem pasta conhecida -> a memória automática dela fica na pasta padrão do Claude.
 - Processo da memória com erro grave -> volta sozinho, sem perder evento da fila; janela e terminais
   não sentem.
-- Briefing grande -> cortado no limite, nunca com ordens.
+- Briefing grande -> cortado no limite do ai-memory.
 - Conta com `--settings` próprio no `claude` digitado -> os hooks dele e os do kit rodam juntos.
 - Wiki editada em outro editor -> entra no índice ao subir o processo ou com memory.reindex.
 - Codex sem pasta de configuração do Cadex -> só as ferramentas de memória, sem hooks.
@@ -210,7 +227,7 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
 ## Critérios de aceite
 - [ ] Abrir o Cadex sem sessão de agente não roda `cadex-memory` (`ps`).
 - [ ] Uma decisão salva numa sessão aparece no briefing da seguinte, em outra conta do projeto.
-- [ ] O briefing nunca passa do limite e não tem frase imperativa.
+- [ ] O briefing nunca passa do limite e chega com o aviso de que memória não é instrução.
 - [ ] Uma worktree nova recebe o briefing do repositório na primeira sessão.
 - [ ] Com memory.shareAcrossAccounts desligada, duas contas não veem a memória uma da outra.
 - [ ] Quatro sessões simultâneas salvando memória deixam as quatro entradas no MEMORY.md.
@@ -221,7 +238,8 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
 - [ ] Uma sessão do projeto num terminal de fora entra na memória quando o processo sobe de novo,
       sem atrasar o briefing; na sessão seguinte a busca a acha.
 - [ ] Com o processo morto, os eventos esperam e entram quando ele volta.
-- [ ] A compactação automática leva o ponto de controle ao resumo.
+- [ ] Depois de uma compactação a sessão recebe a âncora com os prompts do dono, sem gastar o
+      handoff; "reload context" traz o que a compactação tirou.
 - [ ] O modelo baixa (e retoma), carrega, sai depois de parado, e o processo volta ao peso de parado.
 - [ ] Marcar a worktree como pronta faz o agente escrever as páginas uma vez, sem chave configurada.
 - [ ] "Organize History with AI" mostra o custo antes e só roda no clique.

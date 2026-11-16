@@ -32,7 +32,10 @@ mod import_jobs;
 mod import_state;
 mod lazy_embedder;
 mod marker;
+mod model_fetch;
 mod marker_query;
+mod mcp_scope;
+mod plugin;
 mod project_key;
 mod project_paths;
 mod replay;
@@ -50,6 +53,7 @@ fn main() -> Result<()> {
     let argv: Vec<String> = std::env::args().skip(1).collect();
     match argv.first().map(String::as_str) {
         Some("scan-transcripts") => return transcripts::run(&argv[1..]),
+        Some("export-plugin") => return plugin::run(&argv[1..]),
         Some("--version") => {
             println!("cadex-memory {}", env!("CARGO_PKG_VERSION"));
             return Ok(());

@@ -38,6 +38,19 @@ public enum MemoryKit {
         return fm.isExecutableFile(atPath: built) ? built : nil
     }
 
+    /// The plugin with ai-memory's own skills (when to search, save, hand
+    /// off; `cadex-memory export-plugin`, plan 22 phase D): in the bundle's
+    /// Resources (packaging writes it), else where `make app` writes it.
+    public nonisolated static func findPlugin(bundle: String = Bundle.main.bundlePath, source: String = #filePath) -> String? {
+        let fm = FileManager.default
+        let bundled = bundle + "/Contents/Resources/memory-plugin"
+        if fm.fileExists(atPath: bundled + "/.claude-plugin/plugin.json") { return bundled }
+        var root = URL(fileURLWithPath: source)
+        for _ in 0..<5 { root.deleteLastPathComponent() }
+        let built = root.path + "/core/features/memory/server/target/memory-plugin"
+        return fm.fileExists(atPath: built + "/.claude-plugin/plugin.json") ? built : nil
+    }
+
     /// The part the kit merges into each session's `--settings`. `tools` is
     /// the `cadex` program. With `shareAcrossAccounts` off each account
     /// writes and reads its own workspace in the engine, named by the
@@ -46,7 +59,7 @@ public enum MemoryKit {
     /// memory in the project's folder under the memory (`autoMemoryDirectory`,
     /// MemoryProject.swift), the account's own with sharing off; unknown,
     /// Claude's default folder stays.
-    public nonisolated static func part(tools: String, engine: String?, shareAcrossAccounts: Bool,
+    public nonisolated static func part(tools: String, engine: String?, shareAcrossAccounts: Bool, plugin: String? = nil,
                                         environment: [String: String] = ProcessInfo.processInfo.environment) -> SessionKitPart {
         let command = SessionKit.quote(tools) + " memory-hook "
         var hooks: [String: Any] = [:]
@@ -55,6 +68,7 @@ public enum MemoryKit {
         }
         let memory = folder(environment: environment)
         return SessionKitPart(settings: ["hooks": hooks, "env": env(engine: engine, environment: environment)],
+                              pluginDirs: plugin.map { [$0] } ?? [],
                               perAccount: shareAcrossAccounts ? nil : { accountDir in
                                   ["env": ["CADEX_MEMORY_WORKSPACE": SessionKit.accountKey(accountDir)]]
                               },

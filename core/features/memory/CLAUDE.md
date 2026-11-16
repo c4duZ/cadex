@@ -100,7 +100,17 @@
   - `server/src/sys.rs`: as chamadas que pedem `unsafe` (kqueue, `geteuid`, `fcntl`), só ali.
   - `server/src/lazy_embedder.rs`: o modelo de vetores carregado no primeiro uso e solto depois
     de `--embed-idle-secs` parado (o do upstream carrega ao subir e nunca solta); baixa o modelo
-    em segundo plano se faltar, e até lá a busca é só por texto. Avisa carga e descarga ao reinício.
+    em segundo plano se faltar, e até lá a busca é só por texto; um download que falhou espera
+    10 min para tentar de novo. Avisa carga e descarga ao reinício.
+  - `server/src/model_fetch.rs`: o download do modelo com os arquivos e SHA-256 do upstream, mas
+    retomando por `Range` num `.part` (o do upstream lê o arquivo inteiro e recomeça); só renomeia o
+    que confere. O teste com o modelo de verdade é `cargo test -- --ignored real_model` (rede).
+  - `server/src/mcp_scope.rs`: numa chamada do `cadex mcp`, o projeto de reserva (os cabeçalhos
+    `x-memory-actor-fallback-*` do upstream) pela pasta que ele manda: o `project` do
+    .ai-memory.toml, senão o nome da raiz do repositório principal, como os hooks.
+  - `server/src/plugin.rs`: `cadex-memory export-plugin <pasta>`, o plugin do Claude Code com as
+    skills do próprio upstream (retrieval, durable-pages, handoff, messaging), tiradas do crate;
+    o `make app` e o empacotamento o escrevem.
   - A importação das conversas pelos transcripts do Claude Code (fase C), em segundo plano, uma
     tarefa só, que segura o reinício enquanto grava:
     - `server/src/import.rs`: o middleware que entrega cada SessionStart aceito à tarefa, a fila
@@ -138,7 +148,14 @@
     `server/tests/common/mod.rs`.
 - O cliente do socket, em Zig (o único código que fala com o memory.sock; o `cadex memory-hook`
   da feature agent-tools chama `memory.zig`):
-  - `memory.zig`: a entrada da feature (`hook`).
+  - `memory.zig`: a entrada da feature (`hook` e `mcp`).
+  - `context.zig`: o que o hook devolve além do briefing, como o cliente do upstream: no
+    SessionStart `compact` a âncora (`/recap?mode=anchor`, nunca o handoff; nada num subagente),
+    num prompt que começa com "reload context" o `/recap`, no SubagentStart o `/brief`.
+  - `mcp_proxy.zig`: as ferramentas `memory_*` do `cadex mcp`: a lista vem do engine (menos as de
+    administração e de provedor) e cada chamada vai inteira ao `/mcp` com o
+    `X-Memory-Actor-Session-Id` (CLAUDE_CODE_SESSION_ID), a pasta e a workspace da conta; sobe o
+    engine se ele não responde.
   - `hook_client.zig`: `cadex memory-hook <evento>`. Sem `CADEX_SESSION_TOKEN`, nada. Lê da env
     `CADEX_MEMORY_SOCKET` (padrão: sockets/memory.sock na pasta do Cadex), `CADEX_MEMORY_DIR`
     (padrão: memory/ na pasta do Cadex), `CADEX_MEMORY_BIN`, `CADEX_SESSIONS_DIR` e `CADEX_MEMORY_WORKSPACE` (a chave da conta, posta pelo
@@ -181,6 +198,7 @@
 - `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs`,
   `server/tests/import.rs`, `server/tests/auto_memory.rs`, `server/tests/marker.rs` e
   `server/tests/session_end.rs` (parte do `make check`, em segundos).
+- `make memory-eval MODELS=<pasta>`: as 30 perguntas, só texto contra híbrida (`../../../tools/memory_eval.py`).
 - `make core-test`: os testes do cliente (eventos, query com e sem workspace, fila, respostas HTTP,
   sem token).
 - Na mão, tudo em pastas temporárias: um `.token` em `CADEX_SESSIONS_DIR`, e
