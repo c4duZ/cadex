@@ -110,6 +110,23 @@ let exitCode = await Checks.run([
         kit.withdraw("a")
         expect(!kit.claudeCommand(configDir: nil, defaultClaudeJSON: dir + "/none.json").contains("--plugin-dir"))
     }),
+    ("contributed hooks stay with agents.stateHooks off; per-account settings follow the session's account", {
+        let dir = scratch()
+        defer { try? fm.removeItem(atPath: dir) }
+        let kit = SessionKit(folder: dir + "/kit", toolsPath: "/bin/cadex", environment: [:])
+        kit.hooksEnabled = false
+        kit.contribute("memory", SessionKitPart(settings: ["hooks": ["Stop": [["command": "m"]]]],
+                                                perAccount: { ["env": ["ACCOUNT": SessionKit.accountKey($0)]] }))
+        let other = json(settingsPath(kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json")))
+        let hooks = other["hooks"] as? [String: Any]
+        expect(hooks?.keys.sorted() == ["Stop"] && (hooks?["Stop"] as? [Any])?.count == 1, "only the contributed hook: \(other)")
+        let env = other["env"] as? [String: String]
+        expect(env?["ACCOUNT"] == SessionKit.accountKey(dir + "/acct") && env?["CADEX_SESSION_TOKEN"]?.count == 64,
+               "merged into the env, the token kept: \(other)")
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let main = json(settingsPath(kit.claudeCommand(configDir: nil, defaultClaudeJSON: dir + "/none.json")))
+        expect((main["env"] as? [String: String])?["ACCOUNT"] == SessionKit.accountKey(home + "/.claude"), "\(main)")
+    }),
     ("words are quoted only when the shell needs it", {
         expect(SessionKit.quote("/a/b-c.json") == "/a/b-c.json")
         expect(SessionKit.quote("/a/Application Support/x") == "'/a/Application Support/x'")

@@ -10,11 +10,18 @@ public struct SessionKitPart {
     public var settings: [String: Any]
     public var pluginDirs: [String]
     public var mcpServers: [String: Any]
+    /// Settings that depend on the session's account (its folder, ~/.claude
+    /// for the default one), merged after `settings` the same way: the
+    /// memory's own workspace per account when sharing is off (plan 22,
+    /// phase C).
+    public var perAccount: ((_ accountDir: String) -> [String: Any])?
 
-    public init(settings: [String: Any] = [:], pluginDirs: [String] = [], mcpServers: [String: Any] = [:]) {
+    public init(settings: [String: Any] = [:], pluginDirs: [String] = [], mcpServers: [String: Any] = [:],
+                perAccount: ((_ accountDir: String) -> [String: Any])? = nil) {
         self.settings = settings
         self.pluginDirs = pluginDirs
         self.mcpServers = mcpServers
+        self.perAccount = perAccount
     }
 }
 

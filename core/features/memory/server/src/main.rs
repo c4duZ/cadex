@@ -49,6 +49,11 @@ fn main() -> Result<()> {
         .worker_threads(2)
         .enable_all()
         .build()?;
+    if args.warm {
+        runtime.block_on(serve::warm(&args))?;
+        runtime.shutdown_timeout(std::time::Duration::from_millis(500));
+        return Ok(());
+    }
     let socket = args.socket.clone();
     let exit = runtime.block_on(serve::run(args, started))?;
     // Tasks still parked (the MCP sessions' timers, a model fetch) end here,

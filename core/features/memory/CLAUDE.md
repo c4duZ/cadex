@@ -25,8 +25,10 @@
   - `server/src/args.rs`: argumentos à mão (sem `clap` no binário): `--socket`, `--data-dir`,
     `--tokens-dir` (padrão: a pasta de tokens do app), `--spool-dir` (padrão: `<data-dir>/spool`),
     `--no-embeddings`, `--watcher` (o vigia da wiki, desligado por padrão: nada por relógio),
-    `--embed-idle-secs`, `--keep-alive` (não sai sem sessão: o aquecimento do app, testes) e os
-    que o reinício passa (`--sessions`, `--lock-fd`, `--listen-fd`).
+    `--embed-idle-secs`, `--keep-alive` (não sai sem sessão: testes), `--warm` (abre o store e a
+    wiki com as migrações e sai, sem socket nem `--socket`: o aquecimento que o app roda na primeira
+    abertura de cada versão; com outro engine na pasta, sai na hora) e os que o reinício passa
+    (`--sessions`, `--lock-fd`, `--listen-fd`).
   - `server/src/engine.rs`: store, wiki, embedder, roteador de hooks e de workstream e o MCP
     (streamable HTTP, JSON, sem estado), montados como o serve.rs do cli do upstream os monta, sem
     TCP, web, autenticação multiusuário (o `require_bearer` dele roda sem token, como anônimo) nem
@@ -54,18 +56,20 @@
     várias pastas de conta (base da importação do histórico, fase C).
   - `server/tests/smoke.rs`: o engine de ponta a ponta pelo socket (páginas pelo MCP, briefing
     pelo SessionStart, busca), sem modelo e sem vigia; `server/tests/lifecycle.rs`: token, fila,
-    saída quando o último `claude` termina e sessões passadas pelo reinício; ajudas em
+    saída quando o último `claude` termina, sessões passadas pelo reinício e o `--warm`; ajudas em
     `server/tests/common/mod.rs`.
 - O cliente do socket, em Zig (o único código que fala com o memory.sock; o `cadex memory-hook`
   da feature agent-tools chama `memory.zig`):
   - `memory.zig`: a entrada da feature (`hook`).
   - `hook_client.zig`: `cadex memory-hook <evento>`. Sem `CADEX_SESSION_TOKEN`, nada. Lê da env
     `CADEX_MEMORY_SOCKET` (padrão: sockets/memory.sock na pasta do Cadex), `CADEX_MEMORY_DIR`
-    (padrão: memory/ na pasta do Cadex), `CADEX_MEMORY_BIN` e `CADEX_SESSIONS_DIR`. SessionStart: sobe o engine se
+    (padrão: memory/ na pasta do Cadex), `CADEX_MEMORY_BIN`, `CADEX_SESSIONS_DIR` e `CADEX_MEMORY_WORKSPACE` (a chave da conta, posta pelo
+    kit com memory.shareAcrossAccounts desligada; vai como `workspace=` em todo `/hook` e `/handoff`,
+    e sem ela tudo cai na workspace `default`). SessionStart: sobe o engine se
     preciso, manda o evento e pede o briefing, tudo em 1 s, e imprime o `additionalContext`. Os
     outros eventos: 200 ms e, sem resposta (ou com 5xx), vão para a fila. Sempre sai 0.
   - `events.zig`: o nome do evento do Claude Code no do engine (o `HookEvent::parse` do upstream)
-    e a query (`event`, `agent=claude-code`, `cwd`, `session_id`, `project_strategy=repo-root`,
+    e a query (`event`, `agent=claude-code`, `cwd`, `workspace` quando há, `session_id`, `project_strategy=repo-root`,
     `ingest_key` aleatória; `pid` no SessionStart e no SessionEnd; `briefing=1` no `/handoff`).
   - `http.zig`: HTTP/1.1 mínimo no socket Unix (`Connection: close`, tamanho ou chunked), com
     prazo para a troca inteira.
@@ -92,7 +96,8 @@
 ## Como validar
 - `make memory-test`: os testes do crate, `server/tests/smoke.rs` e `server/tests/lifecycle.rs`
   (parte do `make check`, em segundos).
-- `make core-test`: os testes do cliente (eventos, query, fila, respostas HTTP, sem token).
+- `make core-test`: os testes do cliente (eventos, query com e sem workspace, fila, respostas HTTP,
+  sem token).
 - Na mão, tudo em pastas temporárias: um `.token` em `CADEX_SESSIONS_DIR`, e
   `echo '<json do SessionStart>' | CADEX_SESSION_TOKEN=… CADEX_MEMORY_BIN=… CADEX_MEMORY_DIR=…
   CADEX_MEMORY_SOCKET=… CADEX_SESSIONS_DIR=… core/zig-out/bin/cadex memory-hook SessionStart`.

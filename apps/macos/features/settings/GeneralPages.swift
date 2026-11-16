@@ -121,7 +121,7 @@ enum GeneralPages {
                                  T("While the SSH item shows in the status bar, each host of ~/.ssh/config gets a connection to its port, on open and every 10 minutes. No login, no command.",
                                    "Enquanto o item SSH aparece na barra de status, cada host do ~/.ssh/config recebe uma conexão na porta dele, ao abrir e a cada 10 minutos. Sem login, sem comando."),
                                  control: SettingsPage.toggle(store.settings.ssh.ping) { on in store.update { $0.ssh.ping = on } }),
-
+            ] + MemoryRows.make(store) + [
                 SettingsPage.section(T("Tasks", "Tarefas")),
                 SettingsPage.row(T("Folder of the tasks", "Pasta das tarefas"),
                                  T("Where New Task makes each repository's worktrees, in a folder with the repository's name. Empty: beside the repository, in <repo>.worktrees. The setup hooks are edited per repository on the Tasks page.",

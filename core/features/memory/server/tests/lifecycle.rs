@@ -5,6 +5,7 @@
 
 mod common;
 
+use std::os::unix::fs::FileTypeExt;
 use std::process::Command;
 use std::time::{Duration, Instant};
 
@@ -104,4 +105,34 @@ fn sessions_handed_over_by_a_restart_keep_the_engine_alive_until_they_end() {
     claude.wait().unwrap();
     // Without the handed-over session the startup grace (10 s) would apply.
     assert!(engine.exits_within(EXIT_LIMIT), "the handed-over session was not tracked");
+}
+
+#[test]
+fn a_warm_up_migrates_the_store_and_leaves_without_a_socket() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data = tmp.path().join("data");
+    let mut child = Command::new(env!("CARGO_BIN_EXE_cadex-memory"))
+        .args(["--warm", "--no-embeddings", "--data-dir", data.to_str().unwrap()])
+        .env("HOME", tmp.path())
+        .env("CADEX_MEMORY_LOG", "warn")
+        .spawn()
+        .expect("spawn cadex-memory --warm");
+    // Debug build on a loaded machine; the release one takes well under a second.
+    let deadline = Instant::now() + Duration::from_secs(20);
+    let status = loop {
+        if let Some(status) = child.try_wait().unwrap() {
+            break status;
+        }
+        if Instant::now() > deadline {
+            let _ = child.kill();
+            panic!("the warm-up did not leave");
+        }
+        std::thread::sleep(Duration::from_millis(50));
+    };
+    assert!(status.success(), "warm-up failed: {status}");
+    assert!(data.join("db/memory.sqlite").is_file(), "no store after the warm-up");
+    assert!(data.join("wiki").is_dir(), "no wiki after the warm-up");
+    let sockets: Vec<_> = std::fs::read_dir(&data).unwrap().flatten()
+        .filter(|e| e.file_type().is_ok_and(|t| t.is_socket())).collect();
+    assert!(sockets.is_empty(), "a warm-up bound a socket");
 }

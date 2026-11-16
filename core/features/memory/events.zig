@@ -78,16 +78,19 @@ pub fn ingestKey(out: *[32]u8) []const u8 {
     return out;
 }
 
-/// `/hook?event=…&agent=claude-code&cwd=…&session_id=…&project_strategy=repo-root&ingest_key=…[&pid=…]`.
+/// `/hook?event=…&agent=claude-code&cwd=…[&workspace=…]&session_id=…&project_strategy=repo-root&ingest_key=…[&pid=…]`.
 /// `repo-root` from the first session on, so a worktree joins its
 /// repository's memory instead of becoming a project of its own (plan 22).
-pub fn hookTarget(gpa: std.mem.Allocator, engine_event: []const u8, payload: Payload, ingest_key: []const u8, pid: ?c_int) ![]u8 {
+/// `workspace`: the account's own memory (CADEX_MEMORY_WORKSPACE, set by the
+/// kit when memory.shareAcrossAccounts is off); none is the engine's `default`.
+pub fn hookTarget(gpa: std.mem.Allocator, engine_event: []const u8, payload: Payload, workspace: ?[]const u8, ingest_key: []const u8, pid: ?c_int) ![]u8 {
     var out: std.ArrayList(u8) = .empty;
     errdefer out.deinit(gpa);
     try out.appendSlice(gpa, "/hook?");
     try appendPair(gpa, &out, "event", engine_event);
     try appendPair(gpa, &out, "agent", "claude-code");
     if (payload.cwd) |cwd| try appendPair(gpa, &out, "cwd", cwd);
+    if (workspace) |name| try appendPair(gpa, &out, "workspace", name);
     if (payload.session_id) |id| try appendPair(gpa, &out, "session_id", id);
     try appendPair(gpa, &out, "project_strategy", "repo-root");
     try appendPair(gpa, &out, "ingest_key", ingest_key);
@@ -96,13 +99,15 @@ pub fn hookTarget(gpa: std.mem.Allocator, engine_event: []const u8, payload: Pay
 }
 
 /// `GET /handoff` with `briefing=1`: without it the project's pages stay
-/// out of the briefing (plan 22).
-pub fn handoffTarget(gpa: std.mem.Allocator, payload: Payload) ![]u8 {
+/// out of the briefing (plan 22). The same `workspace` as the hook's, so the
+/// briefing comes from the memory the events went to.
+pub fn handoffTarget(gpa: std.mem.Allocator, payload: Payload, workspace: ?[]const u8) ![]u8 {
     var out: std.ArrayList(u8) = .empty;
     errdefer out.deinit(gpa);
     try out.appendSlice(gpa, "/handoff?");
     try appendPair(gpa, &out, "agent", "claude-code");
     if (payload.cwd) |cwd| try appendPair(gpa, &out, "cwd", cwd);
+    if (workspace) |name| try appendPair(gpa, &out, "workspace", name);
     try appendPair(gpa, &out, "project_strategy", "repo-root");
     try appendPair(gpa, &out, "briefing", "1");
     if (payload.session_id) |id| try appendPair(gpa, &out, "session_id", id);
@@ -124,17 +129,29 @@ test "Claude Code's events map to the engine's names" {
 
 test "the hook's query encodes the folder and carries the pid only when asked" {
     const payload: Payload = .{ .session_id = "s-1", .cwd = "/Users/a b/ação&x" };
-    const target = try hookTarget(testing.allocator, "session-start", payload, "k1", 42);
+    const target = try hookTarget(testing.allocator, "session-start", payload, null, "k1", 42);
     defer testing.allocator.free(target);
     try testing.expectEqualStrings("/hook?event=session-start&agent=claude-code&cwd=%2FUsers%2Fa%20b%2Fa%C3%A7%C3%A3o%26x" ++
         "&session_id=s-1&project_strategy=repo-root&ingest_key=k1&pid=42", target);
-    const bare = try hookTarget(testing.allocator, "stop", .{}, "k2", null);
+    const bare = try hookTarget(testing.allocator, "stop", .{}, null, "k2", null);
     defer testing.allocator.free(bare);
     try testing.expectEqualStrings("/hook?event=stop&agent=claude-code&project_strategy=repo-root&ingest_key=k2", bare);
-    const handoff = try handoffTarget(testing.allocator, payload);
+    const handoff = try handoffTarget(testing.allocator, payload, null);
     defer testing.allocator.free(handoff);
     try testing.expect(std.mem.startsWith(u8, handoff, "/handoff?agent=claude-code&cwd=%2FUsers"));
     try testing.expect(std.mem.endsWith(u8, handoff, "&project_strategy=repo-root&briefing=1&session_id=s-1"));
+}
+
+test "an account's own memory: the workspace goes on the hook and on the handoff" {
+    const payload: Payload = .{ .session_id = "s", .cwd = "/p" };
+    const target = try hookTarget(testing.allocator, "stop", payload, "-Users-a--claude-x", "k", null);
+    defer testing.allocator.free(target);
+    try testing.expectEqualStrings("/hook?event=stop&agent=claude-code&cwd=%2Fp&workspace=-Users-a--claude-x" ++
+        "&session_id=s&project_strategy=repo-root&ingest_key=k", target);
+    const handoff = try handoffTarget(testing.allocator, payload, "-Users-a--claude-x");
+    defer testing.allocator.free(handoff);
+    try testing.expectEqualStrings("/handoff?agent=claude-code&cwd=%2Fp&workspace=-Users-a--claude-x" ++
+        "&project_strategy=repo-root&briefing=1&session_id=s", handoff);
 }
 
 test "the payload's session and folder are read; ingest keys differ" {

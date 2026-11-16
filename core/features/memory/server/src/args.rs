@@ -21,8 +21,13 @@ pub(crate) struct Args {
     /// disk-driven work while parked; outside edits enter on the next start.
     pub(crate) watcher: bool,
     pub(crate) embed_idle: Duration,
-    /// Never exit for lack of sessions (the app's warm-up, tests).
+    /// Never exit for lack of sessions (tests).
     pub(crate) keep_alive: bool,
+    /// `--warm`: open the store and the wiki (migrations), then exit, with no
+    /// socket. The app runs it once per new version so the first SessionStart
+    /// pays neither the migrations nor macOS's first-run check of the binary
+    /// within its 1 s (plan 22, phase C).
+    pub(crate) warm: bool,
     /// The `claude` pids still alive when the previous image restarted.
     pub(crate) sessions: Vec<i32>,
     /// The data folder's lock and the listening socket, kept open across a
@@ -57,6 +62,7 @@ pub(crate) fn parse(argv: &[String]) -> Result<Args> {
         watcher: false,
         embed_idle: Duration::from_secs(60),
         keep_alive: false,
+        warm: false,
         sessions: Vec::new(),
         lock_fd: None,
         listen_fd: None,
@@ -71,6 +77,7 @@ pub(crate) fn parse(argv: &[String]) -> Result<Args> {
             "--no-embeddings" => args.embeddings = false,
             "--watcher" => args.watcher = true,
             "--keep-alive" => args.keep_alive = true,
+            "--warm" => args.warm = true,
             "--embed-idle-secs" => {
                 args.embed_idle = Duration::from_secs(value(&mut it, &arg)?.parse()?);
             }
@@ -83,7 +90,12 @@ pub(crate) fn parse(argv: &[String]) -> Result<Args> {
             other => bail!("unknown argument {other}"),
         }
     }
-    args.socket = socket.context("--socket <path> is required")?;
+    // A warm-up binds nothing, so it needs no socket.
+    args.socket = match socket {
+        Some(path) => path,
+        None if args.warm => PathBuf::new(),
+        None => bail!("--socket <path> is required"),
+    };
     args.data_dir = data_dir.context("--data-dir <path> is required")?;
     args.tokens_dir = tokens_dir.unwrap_or_else(default_tokens_dir);
     args.spool_dir = spool_dir.unwrap_or_else(|| args.data_dir.join("spool"));
@@ -140,6 +152,14 @@ mod tests {
         assert!(args.keep_alive && args.watcher);
         assert!(parse(&strings(&["--socket", "/s"])).is_err());
         assert!(parse(&strings(&["--socket", "/s", "--data-dir", "/d", "--bogus"])).is_err());
+    }
+
+    #[test]
+    fn a_warm_up_needs_the_data_folder_but_no_socket() {
+        let args = parse(&strings(&["--warm", "--data-dir", "/d"])).unwrap();
+        assert!(args.warm && args.socket.as_os_str().is_empty());
+        assert!(parse(&strings(&["--warm"])).is_err());
+        assert!(!parse(&strings(&["--socket", "/s", "--data-dir", "/d"])).unwrap().warm);
     }
 
     #[test]

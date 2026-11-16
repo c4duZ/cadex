@@ -35,7 +35,12 @@ extension SessionKit {
             if ProcessInfo.processInfo.environment["CADEX_SOCKETS_DIR"] != nil { env["CADEX_APP_SOCKET"] = SessionKit.socketsFolder + "/app.sock" }
         }
         if !env.isEmpty { settings["env"] = env }
-        for id in parts.keys.sorted() { settings = Self.merge(settings, parts[id]!.settings) }
+        // Contributed hooks stay with agents.stateHooks off: that setting is
+        // about the kit's own hooks only (the memory's run regardless).
+        for id in parts.keys.sorted() {
+            settings = Self.merge(settings, parts[id]!.settings)
+            if let perAccount = parts[id]!.perAccount { settings = Self.merge(settings, perAccount(accountDir)) }
+        }
         guard !settings.isEmpty else { return nil }
         pruneSessions()
         return write(settings, name: "session-\(session).json", mode: 0o600)

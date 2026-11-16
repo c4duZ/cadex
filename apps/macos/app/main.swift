@@ -63,6 +63,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         startPower()
         startUpdates()
+        startMemory()
         startAgentNotifications()
         startAttention()
         startProgramNotifications()

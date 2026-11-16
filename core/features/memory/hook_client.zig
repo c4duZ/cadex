@@ -29,6 +29,9 @@ pub const Env = struct {
     /// The `cadex-memory` binary; without it the engine cannot be started.
     bin: ?[:0]const u8 = null,
     tokens_dir: ?[:0]const u8 = null,
+    /// The account's own memory when memory.shareAcrossAccounts is off
+    /// (CADEX_MEMORY_WORKSPACE, the account's key); null shares `default`.
+    workspace: ?[:0]const u8 = null,
 
     pub const Lookup = *const fn ([*:0]const u8) ?[:0]const u8;
 
@@ -46,6 +49,7 @@ pub const Env = struct {
                 (std.fmt.bufPrintZ(dir_buf, "{s}/{s}/memory", .{ home, support }) catch return null),
             .bin = getenv("CADEX_MEMORY_BIN"),
             .tokens_dir = getenv("CADEX_SESSIONS_DIR"),
+            .workspace = getenv("CADEX_MEMORY_WORKSPACE"),
         };
     }
 
@@ -98,7 +102,7 @@ pub fn runWith(gpa: std.mem.Allocator, env: Env, claude_event: []const u8, input
     const payload = events.Payload.of(if (parsed) |p| p.value else .null);
     var key_buf: [32]u8 = undefined;
     const pid: ?c_int = if (events.sendsPid(event)) claude_pid else null;
-    const target = try events.hookTarget(gpa, event, payload, events.ingestKey(&key_buf), pid);
+    const target = try events.hookTarget(gpa, event, payload, env.workspace, events.ingestKey(&key_buf), pid);
     defer gpa.free(target);
 
     const is_start = std.mem.eql(u8, event, "session-start");
@@ -120,7 +124,7 @@ pub fn runWith(gpa: std.mem.Allocator, env: Env, claude_event: []const u8, input
 }
 
 fn fetchBriefing(gpa: std.mem.Allocator, env: Env, payload: events.Payload, deadline: i64) !?[]u8 {
-    const target = try events.handoffTarget(gpa, payload);
+    const target = try events.handoffTarget(gpa, payload, env.workspace);
     defer gpa.free(target);
     const answer = (try http.send(gpa, env.socket, "GET", target, env.token, "", deadline)) orelse return null;
     defer answer.deinit(gpa);
@@ -164,7 +168,18 @@ test "no session token, nothing to do; otherwise Cadex's folders by default" {
     try testing.expectEqualStrings("tok", env.token);
     try testing.expectEqualStrings("/Users/u/Library/Application Support/Cadex/sockets/memory.sock", env.socket);
     try testing.expectEqualStrings("/Users/u/Library/Application Support/Cadex/memory", env.data_dir);
-    try testing.expect(env.bin == null and env.tokens_dir == null);
+    try testing.expect(env.bin == null and env.tokens_dir == null and env.workspace == null);
+}
+
+fn accountEnv(name: [*:0]const u8) ?[:0]const u8 {
+    if (std.mem.eql(u8, std.mem.span(name), "CADEX_MEMORY_WORKSPACE")) return "-Users-u--claude-x";
+    return testEnv(name);
+}
+
+test "an account's own memory is read from CADEX_MEMORY_WORKSPACE" {
+    var socket_buf: [256]u8 = undefined;
+    var dir_buf: [1024]u8 = undefined;
+    try testing.expectEqualStrings("-Users-u--claude-x", Env.from(accountEnv, &socket_buf, &dir_buf).?.workspace.?);
 }
 
 test "an event the memory does not take does nothing" {

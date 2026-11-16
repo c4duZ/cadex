@@ -217,6 +217,14 @@ public struct Settings: Equatable, Sendable {
         public var authorship = true
     }
 
+    /// The project memory (docs/spec/memory.md, plan 22).
+    public struct Memory: Equatable, Sendable {
+        /// Off: sessions get no memory hooks and the engine is not warmed.
+        public var enabled = true
+        /// Off: each account has its own memory (clients' accounts apart).
+        public var shareAcrossAccounts = true
+    }
+
     public struct StatusBar: Equatable, Sendable {
         /// The items on each side, in order; an item in neither is hidden
         /// (docs/spec/status-bar.md). The app drops unknown ids.
@@ -238,6 +246,7 @@ public struct Settings: Equatable, Sendable {
     public var ssh = SSH()
     public var git = Git()
     public var review = Review()
+    public var memory = Memory()
     public var worktrees = Worktrees()
     public var agentTools = AgentTools()
     public var computerUse = ComputerUse()

@@ -96,6 +96,21 @@ fn remove_socket(path: &Path) {
     let _ = std::fs::remove_file(path);
 }
 
+/// `--warm`: what a start costs before the socket (the store's and the
+/// wiki's migrations), paid now, then leave. An engine already serving the
+/// folder has paid it: nothing to do.
+pub(crate) async fn warm(args: &Args) -> Result<()> {
+    std::fs::create_dir_all(&args.data_dir)?;
+    let Some(_lock) = lock_data_dir(args).await? else {
+        info!("another cadex-memory serves this data folder; already warm");
+        return Ok(());
+    };
+    let store = engine::open_for_warm_up(args).await?;
+    let _ = tokio::time::timeout(Duration::from_secs(5), store.close()).await;
+    info!(data_dir = %args.data_dir.display(), "cadex-memory warmed up");
+    Ok(())
+}
+
 /// Run the engine until a signal, the last session's end or a restart.
 pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
     std::fs::create_dir_all(&args.data_dir)?;

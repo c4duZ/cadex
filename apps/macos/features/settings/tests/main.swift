@@ -81,6 +81,17 @@ let exitCode = await Checks.run([
         let (read, problems) = SettingsFile.read(Data(#"{"markdown": {"openAs": "slides"}}"#.utf8))
         expect(read.markdown.openAs == "source" && problems.count == 1, "\(problems)")
     }),
+    ("the memory is on and shared across accounts unless the file says otherwise", {
+        let defaults = SettingsFile.read(Data("{}".utf8)).0.memory
+        expect(defaults.enabled && defaults.shareAcrossAccounts)
+        var settings = Settings()
+        settings.memory.enabled = false
+        settings.memory.shareAcrossAccounts = false
+        let (read, problems) = SettingsFile.read(SettingsFile.write(settings))
+        expect(problems.isEmpty && read.memory == settings.memory, "\(read.memory) \(problems)")
+        let (bad, wrong) = SettingsFile.read(Data(#"{"memory": {"enabled": "no", "shareAcrossAccounts": false}}"#.utf8))
+        expect(bad.memory.enabled && !bad.memory.shareAcrossAccounts && wrong.count == 1, "\(wrong)")
+    }),
     ("files open beside unless the file says tab; anything else is a problem", {
         expect(SettingsFile.read(Data("{}".utf8)).0.general.openFiles == "beside")
         let (read, problems) = SettingsFile.read(Data(#"{"general": {"openFiles": "janela"}}"#.utf8))

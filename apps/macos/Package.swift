@@ -142,6 +142,9 @@ let package = Package(
             exclude: ["CLAUDE.md", "tests", "plugin"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
+        // The project memory's part in the sessions and the engine's warm-up (docs/adr/0028-project-memory.md).
+        .target(name: "Memory", dependencies: ["SessionKit"], path: "features/memory", exclude: ["CLAUDE.md", "tests"],
+                swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]),
         // A task's worktree: made, opened and taken away (docs/spec/worktrees.md).
         .target(
             name: "Worktrees",
@@ -467,6 +470,7 @@ let package = Package(
             dependencies: ["TextIndex", "Checks"],
             path: "shared/text-index/tests"
         ),
+        .executableTarget(name: "MemoryTests", dependencies: ["Memory", "SessionKit", "Checks"], path: "features/memory/tests"),
         .executableTarget(
             name: "SessionKitTests",
             dependencies: ["SessionKit", "Checks"],
@@ -480,7 +484,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "AgentTools", "ComputerUse", "Review", "SessionKit", "Worktrees", "SSH", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "AgentTools", "ComputerUse", "Memory", "Review", "SessionKit", "Worktrees", "SSH", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

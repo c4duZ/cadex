@@ -143,6 +143,10 @@ public enum SettingsFile {
         if let s = reader.section(root, "review") {
             settings.review.authorship = reader.bool(s, "review.authorship") ?? settings.review.authorship
         }
+        if let s = reader.section(root, "memory") {
+            settings.memory.enabled = reader.bool(s, "memory.enabled") ?? settings.memory.enabled
+            settings.memory.shareAcrossAccounts = reader.bool(s, "memory.shareAcrossAccounts") ?? settings.memory.shareAcrossAccounts
+        }
         if let s = reader.section(root, "ssh") {
             settings.ssh.ping = reader.bool(s, "ssh.ping") ?? settings.ssh.ping
         }
@@ -190,6 +194,7 @@ public enum SettingsFile {
             "statusBar": ["left": s.statusBar.left, "right": s.statusBar.right],
             "ssh": ["ping": s.ssh.ping],
             "review": ["authorship": s.review.authorship],
+            "memory": ["enabled": s.memory.enabled, "shareAcrossAccounts": s.memory.shareAcrossAccounts],
             "git": ["reviewContextLines": s.git.reviewContextLines, "reviewWrap": s.git.reviewWrap,
                     "reviewShowWhitespace": s.git.reviewShowWhitespace],
             "worktrees": ["root": s.worktrees.root, "setupHooks": s.worktrees.setupHooks],

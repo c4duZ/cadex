@@ -68,6 +68,13 @@ async fn open_wiki(args: &Args, embedder: Option<Arc<dyn Embedder>>) -> Result<(
     Ok((store, wiki))
 }
 
+/// The store and the wiki opened and migrated, as `build` opens them, with
+/// no embedder (the model is not loaded by a warm-up); the wiki is dropped.
+pub(crate) async fn open_for_warm_up(args: &Args) -> Result<Store> {
+    let (store, _wiki) = open_wiki(args, None).await?;
+    Ok(store)
+}
+
 fn hook_state(
     store: &Store,
     wiki: &Wiki,
