@@ -6,7 +6,8 @@
 //! the import of past and outside sessions (import.rs), each live event's
 //! arrival time and the file a tool call named (hook_body.rs), Cadex's
 //! handoff (handoff.rs) and Claude's automatic memory folders
-//! (auto_watch.rs), and the memory agent (agent/, plan 22 phase G).
+//! (auto_watch.rs), the memory agent (agent/, plan 22 phase G) and the
+//! Memory page's routes with projects.json (page/, projects_file.rs, phase H).
 
 use std::fs::File;
 use std::future::IntoFuture;
@@ -143,18 +144,30 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
         in_flight.clone(),
         cancel.clone(),
     ));
-    let routes = built.router.clone().merge(crate::agent::routes::router(agent.clone()));
+    // Plan 22 phase H: the Memory page's routes (page/) and projects.json.
+    let page = Arc::new(crate::page::Ctx::new(
+        (built.store.reader.clone(), built.store.writer.clone(), built.wiki.clone()),
+        args.data_dir.clone(),
+        built.model.clone(),
+    ));
+    let routes = built
+        .router
+        .clone()
+        .merge(crate::agent::routes::router(agent.clone()))
+        .merge(crate::page::router(page.clone()));
     #[cfg(debug_assertions)]
     let routes = if crate::debug_panic::enabled() { crate::debug_panic::route(routes) } else { routes };
     let inner = routes
         .layer(axum::middleware::from_fn(hook_body::amend))
         .layer(axum::middleware::from_fn(mcp_scope::scope))
+        .layer(from_fn_with_state(page.clone(), crate::projects_file::watch))
         .layer(from_fn_with_state(ended_tx, handoff::watch))
         .layer(from_fn_with_state(maint_tx, maintenance::watch))
         .layer(from_fn_with_state(agent, crate::agent::routes::watch))
         .layer(from_fn_with_state(sessions.clone(), sessions::track))
         .layer(from_fn_with_state(import_tx, import::watch))
         .layer(from_fn_with_state(in_flight.clone(), restart::count));
+    page.set_inner(inner.clone());
     let outer = inner.clone().layer(from_fn_with_state(
         Tokens::new(args.tokens_dir.clone()),
         require_session_token,

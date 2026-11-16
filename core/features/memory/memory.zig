@@ -6,7 +6,8 @@
 
 pub const hook = @import("hook_client.zig");
 pub const mcp = @import("mcp_proxy.zig");
-/// `cadex memory-agent`, the app's way to the memory agent (phase G).
+/// `cadex memory-agent`, the app's way to the memory agent (phase G) and
+/// to the Memory page's engine routes (phase H).
 pub const agent = @import("agent_client.zig");
 
 test {

@@ -47,6 +47,22 @@ extension MemoryWiring {
         }
         MemoryAgent.run(tools: tools, words: words, environment: MemoryAgent.environment(engine: engine, token: token), done: done)
     }
+
+    /// The same for a plain-text answer (`briefing`).
+    static func runAgentText(_ words: [String], done: @escaping @MainActor @Sendable (Int32, String) -> Void) {
+        guard let tools = SessionKit.shared.toolsPath, let token = MemoryAgent.appToken(tokens: SessionKit.tokensFolder) else {
+            return done(1, "cadex is missing")
+        }
+        MemoryAgent.runText(tools: tools, words: words, environment: MemoryAgent.environment(engine: engine, token: token), done: done)
+    }
+
+    /// The same with `input` on stdin (`write-page`'s body).
+    static func runAgent(_ words: [String], input: String, done: @escaping @MainActor @Sendable (Int32, [String: Any]) -> Void) {
+        guard let tools = SessionKit.shared.toolsPath, let token = MemoryAgent.appToken(tokens: SessionKit.tokensFolder) else {
+            return done(1, ["error": "cadex is missing"])
+        }
+        MemoryAgent.run(tools: tools, words: words, input: input, environment: MemoryAgent.environment(engine: engine, token: token), done: done)
+    }
 }
 
 extension AppDelegate {

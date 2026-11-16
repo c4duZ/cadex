@@ -119,7 +119,10 @@
   agente com foco; fase G: o agent.json do agente de memória a cada mudança das configurações
   (memory.backgroundAgent só vale com a memória ligada; as contas pelas de Agents) e
   memory.bootstrap (a estimativa num alerta antes, só roda no sim), memory.run-dream e
-  memory.pause-agent, todos pelo `cadex memory-agent`.
+  memory.pause-agent, todos pelo `cadex memory-agent`. `MemoryPageWiring.swift` (fase H): a página
+  Memory na barra lateral, com as contas e o "Open the Session" pelo índice do History (vigiado só com
+  a página na tela); abrir uma página autoriza a pasta da wiki antes; o ⌘S (editor.save) num .md de
+  uma wiki roda o `reindex` do projeto, e a edição vira commit.
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.

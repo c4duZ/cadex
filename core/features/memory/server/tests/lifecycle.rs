@@ -69,9 +69,18 @@ fn queued_hook_events_are_replayed_at_start() {
     assert_eq!(left(), 0, "the queue was not drained");
     assert!(spool.join("0000000000003-c.rejected").exists(), "a bad entry is set aside, not lost");
 
-    let recent = tool(&engine.socket, "memory_read_session_observations", serde_json::json!({
+    // The route answers 202 and stores in a task of its own: the spool file
+    // goes at the answer, the rows a moment later. Reading at once lost that
+    // race under `make check`'s load ("project 'spooled' not found",
+    // 2026-11-16), so wait for the rows as the other tests do.
+    let read = || tool(&engine.socket, "memory_read_session_observations", serde_json::json!({
         "session_id": session, "workspace": "default", "project": "spooled",
     }));
+    let mut recent = read();
+    while !recent.contains("albatross") && Instant::now() < deadline + Duration::from_secs(10) {
+        std::thread::sleep(Duration::from_millis(100));
+        recent = read();
+    }
     assert!(recent.contains("albatross"), "the queued prompt did not land: {recent}");
 }
 

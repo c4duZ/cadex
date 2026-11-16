@@ -16,7 +16,7 @@ const usage_text =
     \\usage: cadex statusline       (Claude Code's status line, from a session Cadex opened)
     \\       cadex hook <event>     (a Claude Code hook: tells the Cadex app, never waits)
     \\       cadex memory-hook <event> (a Claude Code hook: feeds the project memory)
-    \\       cadex memory-agent <status|pause|resume|dream|bootstrap> [--cwd DIR] [--dry-run] (the app's memory agent)
+    \\       cadex memory-agent <action> [--cwd DIR] … (the app's way to the memory: agent, page, briefing)
     \\       cadex mcp              (the MCP server of the sessions Cadex opens)
     \\       cadex claude [args…]   (the `claude` typed in a Cadex zsh tab: the session kit)
     \\       cadex continue [options] [agent] [args…] (ai-memory run: the agent in the project's workstream, with the kit)

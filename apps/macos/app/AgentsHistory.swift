@@ -63,7 +63,7 @@ extension WindowSession {
     }
 
     /// A new tab in `cwd` with `command` typed and run.
-    private func typeInNewTab(_ command: String, cwd: String) {
+    func typeInNewTab(_ command: String, cwd: String) {
         guard let tabs else { return }
         tabs.newTab(cwd: cwd)
         tabs.activeTerminal?.session?.write(command + "\n")

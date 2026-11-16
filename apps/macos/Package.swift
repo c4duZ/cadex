@@ -143,8 +143,10 @@ let package = Package(
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
         // The project memory's part in the sessions and the engine's warm-up (docs/adr/0028-project-memory.md).
-        .target(name: "Memory", dependencies: ["SessionKit"], path: "features/memory", exclude: ["CLAUDE.md", "tests"],
-                swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]),
+        .target(name: "Memory", dependencies: ["SessionKit", "CommandPalette", "Icons", "Menus", "Strings", "Tabs", "UILooks"],
+                path: "features/memory", exclude: ["CLAUDE.md", "tests"],
+                swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
+                linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
         // A task's worktree: made, opened and taken away (docs/spec/worktrees.md).
         .target(
             name: "Worktrees",
@@ -470,7 +472,8 @@ let package = Package(
             dependencies: ["TextIndex", "Checks"],
             path: "shared/text-index/tests"
         ),
-        .executableTarget(name: "MemoryTests", dependencies: ["Memory", "SessionKit", "Checks"], path: "features/memory/tests"),
+        .executableTarget(name: "MemoryTests", dependencies: ["Memory", "SessionKit", "Checks"], path: "features/memory/tests",
+                          linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
         .executableTarget(
             name: "SessionKitTests",
             dependencies: ["SessionKit", "Checks"],

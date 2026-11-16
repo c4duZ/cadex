@@ -153,6 +153,21 @@
       `server/src/agent/routes.rs` (`GET /cadex/agent/status`, `POST /cadex/agent/pause`,
       `/cadex/agent/run-dream`, `/cadex/agent/bootstrap[?dry_run=1]`; o bootstrap roda mesmo com o
       agente desligado, com o mesmo teto) e `server/src/agent/mod.rs`.
+  - A página Memory (fase H), em `server/src/page/`, rotas `/cadex/memory/*`: `server/src/page/overview.rs`
+    (projeto, pasta da wiki, modelo, contagens e o histórico importado por conta, contado de agora em
+    diante em `<data-dir>/imports/counts.json`, já que o store não guarda a conta de uma sessão),
+    `server/src/page/briefing.rs` e `server/src/page/handoff_text.rs` (o que a próxima sessão recebe,
+    sem pegar o handoff: o `/handoff` com `claim=0` pela própria rota, o aviso de handoff trocado pelo
+    texto dele com o renderizador do upstream **copiado**, e o corte de 9.800 caracteres como o
+    upstream; igual byte a byte ao SessionStart seguinte, no teste), `server/src/page/pages.rs`
+    (gravar e apagar como as ferramentas, com commit; sem frontmatter, a página guarda o que tinha),
+    `server/src/page/reindex.rs` (o arquivo editado no disco entra pelo `Wiki::reindex_page`, com a
+    varredura **copiada** do vigia do upstream, e um commit; arquivo apagado no disco não apaga a
+    página, como no upstream) e `server/src/page/proposals.rs` (as propostas pendentes, até 200, e
+    aprovar ou recusar pelo caminho do "pending-writes" do admin do upstream, com commit na aprovação).
+    `server/src/projects_file.rs`: o `<data-dir>/projects.json` (workspace, projeto, raiz, pasta da
+    wiki), atualizado no SessionStart, na gravação de página e no overview, para a página mostrar a
+    árvore com o engine parado.
   - `server/src/plugin.rs`: `cadex-memory export-plugin <pasta>`, o plugin do Claude Code com as
     skills do próprio upstream (retrieval, durable-pages, handoff, messaging), tiradas do crate;
     o `make app` e o empacotamento o escrevem.
@@ -254,6 +269,9 @@
     o SessionEnd consolida pelo falso, com a linha de comando e o ambiente exatos da prova; pausa e
     teto; a estimativa sem chamar e o bootstrap com o agente desligado; propostas pendentes com
     aprovação; o dream depois de um SessionEnd só com o Mac parado;
+    `server/tests/memory_page.rs`: overview com o engine de pé e parado, o briefing igual ao do
+    SessionStart seguinte e sem pegar o handoff, gravar e apagar página com commit, o reindex de um
+    arquivo editado no disco, propostas aprovadas e recusadas, o projects.json;
     `server/tests/session_end.rs`: o handoff de uma sessão com 10 edições lista os 10 arquivos, e
     um pânico forçado não perde evento (a fila espera e o engine seguinte a esvazia); ajudas em
     `server/tests/common/mod.rs`.
@@ -267,10 +285,13 @@
     `stop_hook_active`, o hook responde `decision: "block"` com o texto do `/cadex/consolidate`. Um
     prompt que começa com "Consolidate this session into the project memory" (o que o
     memory.consolidate-now cola) recebe o mesmo texto ao lado. Sem a variável, nada.
-  - `agent_client.zig` (fase G): `cadex memory-agent <status|pause|resume|dream|bootstrap> [--cwd]
-    [--dry-run]`, o caminho do app até o agente de memória (o app roda o comando e lê o JSON; não fala
-    com o socket): o token é o CADEX_SESSION_TOKEN que o app dá, do arquivo dele na pasta de tokens;
-    `status` nunca sobe o engine (fora: `{"running":false}`), os outros sobem.
+  - `agent_client.zig` (fases G e H): `cadex memory-agent <ação> [--cwd D] [--workspace W]`, o
+    caminho do app até a memória (o app roda o comando e lê uma linha JSON; não fala com o socket):
+    o token é o CADEX_SESSION_TOKEN que o app dá, do arquivo dele na pasta de tokens. Ações: do
+    agente, `status`, `pause`, `resume`, `dream`, `bootstrap [--dry-run]`; da página Memory,
+    `overview`, `briefing` (texto puro), `write-page --path P` (corpo no stdin), `delete-page --path
+    P`, `reindex`, `proposals`, `approve --id`, `reject --id`. `status` e `overview` nunca sobem o
+    engine (fora: `{"running":false}`); os outros sobem. Erro: saída 1 e `{"error":…}`; uso: 2.
   - `context.zig`: o que o hook devolve além do briefing, como o cliente do upstream: no
     SessionStart `compact` a âncora (`/recap?mode=anchor`, nunca o handoff; nada num subagente),
     num prompt que começa com "reload context" o `/recap`, no SubagentStart o `/brief`.
@@ -322,7 +343,7 @@
 ## Como validar
 - `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs`,
   `server/tests/import.rs`, `server/tests/auto_memory.rs`, `server/tests/marker.rs`,
-  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs`, `server/tests/agent.rs` e `server/tests/session_end.rs` (parte do `make check`, em segundos).
+  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs`, `server/tests/agent.rs`, `server/tests/memory_page.rs` e `server/tests/session_end.rs` (parte do `make check`, em segundos).
 - `make memory-eval MODELS=<pasta>`: as 30 perguntas, só texto contra híbrida (`../../../tools/memory_eval.py`).
 - `make core-test`: os testes do cliente (eventos, query com e sem workspace, fila, respostas HTTP,
   sem token).

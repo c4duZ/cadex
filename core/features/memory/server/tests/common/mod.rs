@@ -6,6 +6,7 @@
 
 pub mod agent;
 pub mod bench;
+pub mod session;
 
 use std::io::{Read, Write};
 use std::os::unix::net::UnixStream;

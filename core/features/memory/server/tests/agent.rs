@@ -222,8 +222,12 @@ fn bootstrap_estimates_without_calling_and_runs_with_the_agent_off() {
     let qs = query(&[("cwd", cwd)]);
     let queued = request(s, "POST", &format!("/cadex/agent/bootstrap?{qs}"), None, Some(common::TOKEN)).unwrap();
     assert_eq!(queued.0, 202, "{}", queued.1);
-    wait_for("the bootstrap pages", Duration::from_secs(20), || page(&data.join("wiki"), "0001-use-sqlite.md").is_some());
-    assert!(page(&data.join("wiki"), "bootstrap.md").is_some());
+    // Upstream's bootstrap writes the pages and then its bootstrap.md
+    // manifest: waiting for the first page only and reading the manifest at
+    // once failed under `make check`'s load (2026-11-16). Wait for both.
+    wait_for("the bootstrap pages and manifest", Duration::from_secs(20), || {
+        page(&data.join("wiki"), "0001-use-sqlite.md").is_some() && page(&data.join("wiki"), "bootstrap.md").is_some()
+    });
     let call = fake.calls_for("BootstrapBatch").pop().expect("the bootstrap call");
     assert!(call.stdin.contains("fix the WAL lock in the cache") && call.stdin.contains(S1));
     assert!(!call.env.contains_key("CLAUDE_CONFIG_DIR"), "the default account sets no CLAUDE_CONFIG_DIR");

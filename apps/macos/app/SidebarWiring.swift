@@ -4,6 +4,7 @@ import Themes
 import Customize
 import Explorer
 import GitHistory
+import Memory
 import Icons
 import Settings
 import Shortcuts
@@ -55,6 +56,15 @@ extension WindowSession {
             ]),
             item("attention", .bell, T("Needs You", "Precisa de você"), "agents.show-attention", .page(makeAttentionPage()),
                  subtabs: [SidebarItem.Subtab(id: "needs", title: T("Needs You", "Precisa de você")), SidebarItem.Subtab(id: "feed", title: "Feed")]),
+            item("memory", .memory, T("Memory", "Memória"), "memory.show", .page(makeMemoryPage()), actions: [
+                SidebarAction("memory.bootstrap", .sparkle, T("Organize History with AI", "Organizar o histórico com IA")),
+                SidebarAction("memory.reindex", .arrowsClockwise, T("Reindex", "Reindexar")),
+                SidebarAction("memory.show-briefing", .eye, T("What the Agent Will See", "O que o agente vai ver")),
+            ], more: [
+                SidebarAction("memory.show-history", .clockCounterClockwise, T("Show Memory History", "Mostrar o histórico da memória")),
+                SidebarAction("memory.pause-agent", .slidersHorizontal, T("Pause or Resume the Memory Agent", "Pausar ou retomar o agente de memória")),
+                SidebarAction("memory.refresh", .arrowClockwise, T("Refresh", "Atualizar")),
+            ]),
             item("accounts", .gauge, T("Accounts", "Contas"), "agents.show-accounts", .page(makeAgentsPage("accounts")), actions: [
                 SidebarAction("agents.refresh-usage", .arrowsClockwise, T("Refresh Usage", "Atualizar o uso")),
                 SidebarAction("agents.customize-accounts", .slidersHorizontal, T("Customize Accounts", "Personalizar as contas")),

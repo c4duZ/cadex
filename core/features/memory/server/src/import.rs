@@ -199,6 +199,9 @@ pub(crate) async fn import_all(ctx: &Context, sessions: &[Planned<'_>], budget: 
             Ok(events) => {
                 report.imported += 1;
                 report.events += events;
+                let target = sessions[i].target;
+                let workspace = target.workspace.as_deref().unwrap_or(ai_memory_core::DEFAULT_WORKSPACE_NAME);
+                crate::import_state::count_imported(&ctx.data_dir, workspace, &target.cwd, &sessions[i].transcript.account);
             }
             Err(error) => failed(report, sessions[i].transcript, &error),
         }

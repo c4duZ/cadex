@@ -9,6 +9,7 @@ import Explorer
 import GitHistory
 import Markdown
 import MediaPreview
+import Memory
 import Power
 import Preview
 import Search
@@ -90,6 +91,7 @@ extension WindowSession {
             keywords: ["usage", "plan", "limit", "refresh", "uso", "plano", "limite", "atualizar"], category: .view,
             action: .run { AgentUsageController.shared.refreshNow() }))
         commands.register(memoryCommands())
+        commands.register(MemoryPageCommands.commands(palette: palette, actions: memoryPageActions()))
         commands.register(AgentLaunch.commands(palette: palette, launch: { [weak self] account in self?.launchAgent(for: account) },
                                                continueIn: { [weak self] account in self?.continueInAgent(account) },
                                                customize: { [weak self] in self?.openCustomize("accounts") }))
@@ -141,7 +143,7 @@ extension WindowSession {
             // The sidebar's history when the tab in front is not one: its
             // right-click menu runs these too.
             active: { [weak self] in self?.tabs?.activeDocument as? HistoryDocument ?? self?.sidebarHistory }))
-        commands.register(EditorCommands.all { [weak self] in self?.tabs?.activeDocument as? EditorDocument })
+        commands.register(withMemoryReindex(EditorCommands.all { [weak self] in self?.tabs?.activeDocument as? EditorDocument }))
         commands.register(MediaCommands.all { [weak self] in self?.tabs?.activeDocument as? MediaDocument })
         // preview.open also takes url= from the agent (docs/adr/0024-agent-tools.md).
         commands.register(PreviewCommands.all(open: { [weak self] url, beside in self?.openPreview(url, beside: beside) },

@@ -494,6 +494,19 @@ refaz o crate a partir dela.
   - Fila do agente de fundo com custo; propostas para aprovar ou recusar.
   - Comandos memory.show, memory.show-briefing, memory.approve, memory.reject, memory.reindex.
     Features: memory, sidebar, markdown, git-history.
+  - **Como ficou (2026-11-16):** o engine ganhou as rotas `/cadex/memory/*` (overview, briefing sem
+    pegar o handoff, gravar e apagar página, reindex com commit, propostas com aprovar e recusar pelo
+    "pending-writes" do upstream, já que ele não tem ferramenta MCP para isso) e o projects.json; o
+    `cadex memory-agent` ganhou as ações; o app, a página (na lista padrão da barra lateral), os
+    comandos memory.show, memory.show-briefing, memory.reindex, memory.refresh, memory.enable,
+    memory.approve e memory.reject, e o ⌘S num .md da wiki rodando o reindex. Cada ação foi rodada
+    de verdade contra um engine: o briefing duas vezes igual e o handoff intacto; a edição no disco
+    virou o commit "cadex reindex"; aprovar um id que não existe recusa com mensagem. A página foi
+    desenhada num PNG fora da tela (`CADEX_SNAPSHOT_DIR`, memory-page.png): o desenho mostrou custos
+    de fração de centavo como US$ 0,00, e eles agora saem com quatro casas. O histórico importado por
+    conta é contado a partir desta versão (o store não guarda a conta da sessão).
+    Na conferência antes do commit faltava o "histórico pelo git-history": entrou memory.show-history,
+    os commits da wiki (repositório próprio na pasta da memória) na aba do Git History.
 - **I. Peso e fechamento.** Cenários no `tools/perf/run.py`, com limites no `tools/perf/limits.py`
   e o motivo ao lado, partindo da prova:
   - app parado igual ao de hoje (o engine fora do app); `cadex-memory` ausente sem sessão de agente;

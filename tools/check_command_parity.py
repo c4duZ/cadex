@@ -34,7 +34,9 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "agents.add-account", "agents.set-active-account", "agents.set-project-account", "agents.sync-account-config", "agents.share-account-config",
             "agents.use-own-copy", "agents.follow-default-config", "agents.remove-account",
             # The unified history (plan 18, phase D).
-            "agents.show-history", "agents.resume-session", "agents.continue-in-account", "agents.continue-in-agent", "memory.consolidate-now", "memory.run-dream", "memory.bootstrap", "memory.pause-agent", "agents.copy-resume-command",
+            "agents.show-history", "agents.resume-session", "agents.continue-in-account", "agents.continue-in-agent", "memory.consolidate-now", "memory.run-dream", "memory.bootstrap", "memory.pause-agent",
+            # The Memory page (plan 22, phase H), Mac only like the rest of the memory's app side.
+            "memory.show", "memory.show-briefing", "memory.show-history", "memory.reindex", "memory.refresh", "memory.enable", "memory.approve", "memory.reject", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).
             "agents.show-attention", "agents.show-feed", "agents.approve", "agents.deny", "agents.mark-unread",

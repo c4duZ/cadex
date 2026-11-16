@@ -23,6 +23,9 @@ use tokio_util::sync::CancellationToken;
 pub(crate) struct ModelEvents {
     pub(crate) loaded: AtomicBool,
     pub(crate) unloaded: Notify,
+    /// A download of the model is running: the Memory page's "downloading"
+    /// (plan 22 phase H, page/overview.rs).
+    pub(crate) fetching: AtomicBool,
 }
 
 /// Requests being served right now, on the inner router (spool replays count).

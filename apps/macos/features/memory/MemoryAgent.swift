@@ -90,6 +90,32 @@ public enum MemoryAgent {
     /// the exit code and the JSON it printed, on the main thread.
     public nonisolated static func run(tools: String, words: [String], environment: [String: String],
                                        done: @escaping @MainActor @Sendable (Int32, [String: Any]) -> Void) {
+        runRaw(tools: tools, words: words, environment: environment, input: nil) { code, data in
+            done(code, (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:])
+        }
+    }
+
+    /// The same for a plain-text answer (`briefing`): the text as printed.
+    public nonisolated static func runText(tools: String, words: [String], environment: [String: String],
+                                           done: @escaping @MainActor @Sendable (Int32, String) -> Void) {
+        runRaw(tools: tools, words: words, environment: environment, input: nil) { code, data in
+            done(code, String(decoding: data, as: UTF8.self))
+        }
+    }
+
+    /// The same with `input` on stdin (`write-page`'s body), JSON back.
+    public nonisolated static func run(tools: String, words: [String], input: String, environment: [String: String],
+                                       done: @escaping @MainActor @Sendable (Int32, [String: Any]) -> Void) {
+        runRaw(tools: tools, words: words, environment: environment, input: Data(input.utf8)) { code, data in
+            done(code, (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:])
+        }
+    }
+
+    /// The process itself: stdout read whole, the code and the bytes on the
+    /// main thread. stderr apart, so a warning never breaks the JSON or the
+    /// briefing; it stands in only for an empty stdout (an error said there).
+    nonisolated static func runRaw(tools: String, words: [String], environment: [String: String], input: Data?,
+                                   done: @escaping @MainActor @Sendable (Int32, Data) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async {
             let process = Process()
             process.executableURL = URL(fileURLWithPath: tools)
@@ -97,17 +123,38 @@ public enum MemoryAgent {
             process.environment = environment
             let out = Pipe()
             process.standardOutput = out
-            process.standardError = out
+            let err = Pipe()
+            process.standardError = err
+            let stdin = Pipe()
+            process.standardInput = input == nil ? FileHandle.nullDevice : stdin
             var code: Int32 = 1
-            var answer: [String: Any] = [:]
+            var data = Data()
             if (try? process.run()) != nil {
-                let data = out.fileHandleForReading.readDataToEndOfFile()
+                if let input {
+                    // Written from another queue: a body bigger than the pipe's
+                    // buffer would block while we wait on stdout.
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        stdin.fileHandleForWriting.write(input)
+                        try? stdin.fileHandleForWriting.close()
+                    }
+                }
+                // Both pipes drained at once: a full stderr would block the child.
+                let errors = ErrorBox()
+                let group = DispatchGroup()
+                DispatchQueue.global(qos: .userInitiated).async(group: group) { errors.data = err.fileHandleForReading.readDataToEndOfFile() }
+                data = out.fileHandleForReading.readDataToEndOfFile()
+                group.wait()
                 process.waitUntilExit()
                 code = process.terminationStatus
-                answer = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
+                if data.isEmpty { data = errors.data }
             }
-            let result = answer
+            let result = data
             DispatchQueue.main.async { MainActor.assumeIsolated { done(code, result) } }
         }
     }
+}
+
+/// stderr's bytes, handed from the reading queue (read after group.wait()).
+private final class ErrorBox: @unchecked Sendable {
+    var data = Data()
 }

@@ -63,7 +63,7 @@ func warm(_ engine: String, _ folder: String, _ version: String) async -> Bool? 
     }
 }
 
-let exitCode = await Checks.run([
+let featureTests: [(name: String, body: Checks.Body)] = [
     ("nine events, each `cadex memory-hook <Event>` with no matcher and 5 s", {
         let part = MemoryKit.part(tools: "/App/Cadex.app/Contents/Helpers/cadex", engine: nil, shareAcrossAccounts: true, environment: [:])
         let hooks = part.settings["hooks"] as? [String: Any] ?? [:]
@@ -214,5 +214,6 @@ let exitCode = await Checks.run([
         expect(MemoryWarmUp.isNeeded(version: "1.3", folder: data), "a new version warms again")
         expect(MemoryWarmUp.isNeeded(version: "1.2", folder: dir + "/other"), "another folder (a test instance) has its own")
     }),
-])
+]
+let exitCode = await Checks.run(featureTests + pageTests())
 exit(exitCode)

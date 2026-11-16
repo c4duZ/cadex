@@ -203,15 +203,19 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   Cadex nunca guarda nem lê a chave.
 
 ### Página Memory
-- Página da barra lateral (ícone Phosphor), memory.show. A wiki em árvore, aberta e editada como
-  Markdown; cada edição é um commit, com o histórico pelo Git History.
+- Página da barra lateral (ícone Phosphor), memory.show, na lista padrão. A wiki em árvore (pastas,
+  páginas mais novas primeiro), aberta e editada como Markdown; salvar com ⌘S faz da edição um
+  commit (o reindex do projeto). Edição fora do Cadex entra com memory.reindex. Apagar uma página
+  pede confirmação. "Show Memory History" (memory.show-history) abre os commits da wiki (cada
+  gravação, reindexação e aprovação é um) na aba do Git History.
 - Cada página mostra de onde veio: sessão, conta e hora, com "Abrir a sessão".
 - "What the Agent Will See" (memory.show-briefing): o briefing exato da próxima sessão neste
   projeto.
 - O estado do processo e do modelo de vetores (baixando, pronto, carregado); o histórico importado
-  (quantas sessões, de quais contas); a fila do agente de fundo, com custo; as propostas, com
-  memory.approve e memory.reject; memory.reindex para refazer o índice depois de editar a wiki fora
-  do Cadex.
+  (quantas sessões, de quais contas, contado a partir desta versão); o agente de fundo (ligado,
+  pausado, o gasto do dia contra o teto, a fila e os últimos trabalhos com custo); as propostas, com
+  memory.approve e memory.reject (no ⌘K, a lista das pendentes).
+- Com o processo parado, a página mostra a árvore e não o sobe; só "What the Agent Will See" sobe.
 
 ## Estados
 - **Desligada:** nenhum hook a mais nas sessões, nenhum processo, a página Memory explica e oferece

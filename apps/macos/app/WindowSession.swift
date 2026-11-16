@@ -7,6 +7,7 @@ import CommandPalette
 import Editor
 import Explorer
 import Markdown
+import Memory
 import Preview
 import Search
 import Settings
@@ -62,6 +63,10 @@ final class WindowSession: NSObject, NSWindowDelegate {
     weak var portsLabel: StatusLabel?
     var ports: [UInt16] = []
     var portsCard: HoverCard?
+    /// The Memory page (MemoryPageWiring.swift) and its History watch,
+    /// held only while the page shows.
+    weak var memoryPage: MemoryView?
+    var memoryHistoryWatch: UUID?
 
     var settings: SettingsBridge { app.settings }
 

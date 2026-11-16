@@ -39,7 +39,17 @@
   aprovação, a conta padrão e as de cada projeto, o `claude`) e `write`, o `<memória>/agent.json`
   (0600) que o engine lê a cada trabalho; `appToken`, o token do próprio app na pasta de tokens
   (memory-agent.token, feito uma vez); `environment` e `run`, o `cadex memory-agent` fora da linha
-  principal, com o JSON de volta.
+  principal, com o JSON de volta; também o texto puro (o briefing) e o stdin (write-page).
+- A página Memory (fase H): `MemoryView.swift` (a página: desligada com "Turn On", o estado, até 3
+  propostas com Approve/Reject e a árvore; só pede dados quando aparece), `MemoryWikiOutline.swift`
+  (a árvore: o clique abre a página no Markdown; o menu tem Open the Session, Reveal in Finder e
+  Delete Page; `MemoryColors`), `MemoryWiki.swift` (a árvore lida da pasta da wiki: só .md, sem
+  .git nem arquivos ocultos, pastas primeiro, páginas mais novas primeiro; o frontmatter e a origem:
+  sessão, agente, hora), `MemoryData.swift` (o JSON do `overview`, do `status`, das `proposals` e o
+  projects.json), `MemoryPageState.swift` (o que a página mostra e os textos do estado; os custos com
+  as casas que importam) e `MemoryCommands.swift` (memory.show, memory.show-briefing numa aba só de
+  leitura, memory.reindex, memory.refresh, memory.enable, memory.approve e memory.reject com a lista
+  das propostas no ⌘K; memory.show-history, os commits da wiki na aba do Git History).
 - `MemoryProject.swift`: a regra da chave do projeto (a raiz do repositório principal lida dos
   arquivos `.git`: a worktree e a subpasta dão a do checkout principal; fora do git, a própria
   pasta; os 16 primeiros hex do SHA-256 do caminho), a mesma de

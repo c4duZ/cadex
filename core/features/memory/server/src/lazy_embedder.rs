@@ -78,6 +78,8 @@ impl LazyLocalEmbedder {
         let dir = ai_memory_llm::local::model_dir(&self.models_dir);
         let fetching = self.fetching.clone();
         let failed_at = self.failed_at.clone();
+        let events = self.slot.events.clone();
+        events.fetching.store(true, Ordering::SeqCst);
         tokio::spawn(async move {
             tracing::info!(dir = %dir.display(), "fetching the local embedding model (~87 MB, once)");
             let files = ai_memory_llm::local::MODEL_FILES;
@@ -91,6 +93,7 @@ impl LazyLocalEmbedder {
                     fetching.store(false, Ordering::SeqCst);
                 }
             }
+            events.fetching.store(false, Ordering::SeqCst);
         });
     }
 

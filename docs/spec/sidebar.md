@@ -13,9 +13,9 @@ em que ordem.
 - Os ícones padrão, nesta ordem: Files (⇧⌘E, explorer.focus), Git (⇧⌘G, git.show), Tasks
   (worktrees.show, as tarefas, plano 19), Agents (⇧⌘J,
   agents.show), History (agents.show-history, as conversas dos agentes, plano 18), Needs You
-  (agents.show-attention, o sininho com o quadro e o feed, plano 19) e Accounts (⇧⌘U,
-  agents.show-accounts, de uso); Agents e Accounts separados para cada um ter o próprio ícone e
-  atalho (o dono, 2026-10-21). Quem já salvou a lista de ícones liga History em Personalizar. Git History (⇧⌘L, git.show-history, de log)
+  (agents.show-attention, o sininho com o quadro e o feed, plano 19), Accounts (⇧⌘U,
+  agents.show-accounts, de uso) e Memory (memory.show, a memória do projeto, plano 22); Agents e Accounts separados para cada um ter o próprio ícone e
+  atalho (o dono, 2026-10-21). Quem já salvou a lista de ícones liga History e Memory em Personalizar. Git History (⇧⌘L, git.show-history, de log)
   existe escondido e pode ser ligado. Atalhos de ⇧⌘ com a inicial, para lembrar (2026-10-22).
 - ⌃⌘1 a ⌃⌘9 (sidebar.page-1 a -9) mostram a página do ícone daquela posição, na ordem que
   aparece, sem recolher a barra lateral, como ⌘1 a ⌘9 nas abas; ⇧⌘ não, porque ⇧⌘3 a ⇧⌘5 são as capturas de tela do macOS.

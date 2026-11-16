@@ -5,6 +5,11 @@
 //!   checkout for the same reason (backfill.rs, `sentinel_path`).
 //! - `outside.json`: per account folder, the newest transcript time every
 //!   earlier start has handled, so a start only reads what changed since.
+//! - `counts.json`: how many sessions each account gave each project's
+//!   import (by workspace name and the folder the events went to), for the
+//!   Memory page's "imported history" (plan 22 phase H, 2026-11-16). The store
+//!   does not know which account a session came from. Imports made before
+//!   this file existed are not in it.
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -89,6 +94,35 @@ impl Checkpoints {
     }
 }
 
+/// The sessions imported per account, by project.
+type Counts = BTreeMap<String, BTreeMap<String, u64>>;
+
+fn counts_key(workspace: &str, root: &str) -> String {
+    format!("{workspace}\t{root}")
+}
+
+fn load_counts(data_dir: &Path) -> Counts {
+    let text = std::fs::read_to_string(folder(data_dir).join("counts.json")).unwrap_or_default();
+    serde_json::from_str(&text).unwrap_or_default()
+}
+
+/// One more session imported from `account` into the project of
+/// `workspace` whose events went to `root`. The import is one task, so the
+/// read and the write do not race.
+pub(crate) fn count_imported(data_dir: &Path, workspace: &str, root: &str, account: &Path) {
+    let mut counts = load_counts(data_dir);
+    let by_account = counts.entry(counts_key(workspace, root)).or_default();
+    *by_account.entry(account.to_string_lossy().into_owned()).or_default() += 1;
+    if let Ok(text) = serde_json::to_string_pretty(&counts) {
+        write_atomic(&folder(data_dir).join("counts.json"), &text);
+    }
+}
+
+/// The sessions imported into a project, per account folder.
+pub(crate) fn imported(data_dir: &Path, workspace: &str, root: &str) -> BTreeMap<String, u64> {
+    load_counts(data_dir).remove(&counts_key(workspace, root)).unwrap_or_default()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -109,5 +143,19 @@ mod tests {
         points.set(Path::new("/a"), at);
         points.save();
         assert_eq!(Checkpoints::load(tmp.path()).get(Path::new("/a")), Some(at));
+    }
+
+    #[test]
+    fn imported_sessions_are_counted_per_project_and_account() {
+        let tmp = tempfile::tempdir().unwrap();
+        count_imported(tmp.path(), "default", "/r", Path::new("/h/.claude"));
+        count_imported(tmp.path(), "default", "/r", Path::new("/h/.claude"));
+        count_imported(tmp.path(), "default", "/r", Path::new("/h/.claude-work"));
+        count_imported(tmp.path(), "acct", "/r", Path::new("/h/.claude"));
+        let counts = imported(tmp.path(), "default", "/r");
+        assert_eq!(counts.get("/h/.claude"), Some(&2));
+        assert_eq!(counts.get("/h/.claude-work"), Some(&1));
+        assert_eq!(imported(tmp.path(), "acct", "/r").len(), 1);
+        assert!(imported(tmp.path(), "default", "/other").is_empty());
     }
 }
