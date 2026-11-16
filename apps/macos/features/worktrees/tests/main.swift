@@ -82,6 +82,26 @@ let localTests: [(name: String, body: Checks.Body)] = [
         let reread = WorktreesStore(path: home + "/notes.json")
         expect(reread.task(plan.path)?.comment == "fixing the header" && reread.repo(repo).trustExplained)
     }),
+    ("a race's discard: tasks from one base, one to the Trash with its commit, git forgets it, the branch stays until deleted", {
+        let (home, repo) = fakeRepo()
+        defer { try? fm.removeItem(atPath: home); try? fm.removeItem(atPath: repo + ".worktrees") }
+        let controller = WorktreesController()
+        controller.store = WorktreesStore(path: home + "/notes.json")
+        controller.moveToTrash = { try fm.moveItem(atPath: $0, toPath: home + "/trash-" + ($0 as NSString).lastPathComponent) }
+        let one = controller.plan(name: "fix-1", repo: repo, base: "main")
+        guard case .success = controller.make(one) else { return expect(false, "not made") }
+        let two = controller.plan(name: "fix-2", repo: repo, base: "main")
+        guard case .success = controller.make(two) else { return expect(false, "not made") }
+        expect(one.base == "main" && two.branch == "fix-2")
+        fm.createFile(atPath: two.path + "/a.txt", contents: Data("try 2\n".utf8))
+        git(two.path, "commit", "--quiet", "-am", "try 2")
+        expect(controller.trash(two.path, repo: repo) == nil)
+        expect(!fm.fileExists(atPath: two.path) && fm.fileExists(atPath: home + "/trash-fix-2/a.txt"), "in the Trash, with its work")
+        expect(controller.tasks(repo: repo).map(\.worktree.branch) == ["fix-1"] && controller.store.task(two.path) == nil)
+        expect(git(repo, "rev-parse", "--verify", "--quiet", "fix-2") == 0, "the branch stays")
+        expect(controller.deleteBranch("fix-2", repo: repo) == nil && git(repo, "rev-parse", "--verify", "--quiet", "fix-2") != 0)
+        expect(controller.deleteBranch("fix-1", repo: repo) != nil, "git refuses a branch checked out in a worktree")
+    }),
     ("taking a task away: refused with a change and says what; with nothing to lose it goes", {
         let (home, repo) = fakeRepo()
         defer { try? fm.removeItem(atPath: home); try? fm.removeItem(atPath: repo + ".worktrees") }

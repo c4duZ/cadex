@@ -76,8 +76,9 @@ public final class WorktreesController {
     }
 
     /// The plan for `name` in `repo`: a branch no worktree uses and a folder
-    /// not taken ("-2", "-3"…), from the branch checked out now.
-    public func plan(name: String, repo: String) -> TaskPlan {
+    /// not taken ("-2", "-3"…), from the branch checked out now, or from
+    /// `base` (a race's starting point, plan 24).
+    public func plan(name: String, repo: String, base given: String? = nil) -> TaskPlan {
         let base = WorktreesCore.branchName(name)
         let used = Set(WorktreesCore.list(repo: repo).map(\.branch))
         let root = tasksRoot(of: repo)
@@ -89,7 +90,7 @@ public final class WorktreesController {
         }
         let hooks = setupHooks[repo] ?? []
         let info = store.repo(repo)
-        return TaskPlan(repo: repo, name: name, branch: branch, base: WorktreesCore.currentBranch(repo), root: root,
+        return TaskPlan(repo: repo, name: name, branch: branch, base: given ?? WorktreesCore.currentBranch(repo), root: root,
                         path: root + "/" + branch, needsAuthorization: !WorktreesCore.isAuthorized(root),
                         hooks: hooks, hooksNeedConfirmation: !hooks.isEmpty && info.confirmedHooks != hooks,
                         explainTrust: !info.trustExplained)
@@ -127,6 +128,30 @@ public final class WorktreesController {
         if refused == nil || !FileManager.default.fileExists(atPath: task.path) { store.forget(task.path) }
         publish()
         return refused
+    }
+
+    /// A race's discarded worktree (plan 24): the folder goes to the Trash
+    /// (what was in it can come back from there), git forgets it, and the
+    /// branch stays. Nil when done; else why not.
+    public func trash(_ path: String, repo: String) -> String? {
+        do {
+            try moveToTrash(path)
+        } catch {
+            return error.localizedDescription
+        }
+        store.forget(path)
+        publish()
+        return WorktreesCore.prune(repo: repo)
+    }
+
+    /// The Finder's Trash; a test moves the folder aside instead.
+    public var moveToTrash: (String) throws -> Void = { path in
+        try FileManager.default.trashItem(at: URL(fileURLWithPath: path), resultingItemURL: nil)
+    }
+
+    /// orchestration.delete-race-branches: `git branch -D`, after the app asked.
+    public func deleteBranch(_ branch: String, repo: String) -> String? {
+        WorktreesCore.deleteBranch(repo: repo, branch: branch)
     }
 
     /// Told every status set, by whoever set it (the owner, the agent's

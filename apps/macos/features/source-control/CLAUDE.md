@@ -30,7 +30,8 @@
   marcadas, as duas colunas rolando juntas, ou o patch numa coluna. Com `commit` no DiffRequest, o
   arquivo como aquele commit o mudou (o histórico pede pelo app).
 - Revisão (plano 21, fase B2; `docs/spec/review.md`): `GitReview.swift` chama `cadex_git_review_*`
-  (base, arquivos, um arquivo, o patch de stage e aplicar linhas). `ReviewLayout.swift`, puro: as
+  (base, arquivos, um arquivo, o patch de stage e aplicar linhas); ReviewTally (público, plano 24)
+  conta arquivos e linhas de uma worktree contra o ponto de partida, para o quadro da corrida. `ReviewLayout.swift`, puro: as
   linhas empilhadas (cabeçalho por arquivo, os números dos dois lados, regiões sem mudança recolhidas
   além das linhas de contexto, abertas uma a uma ou todas) e onde começa cada arquivo e cada mudança.
   `ReviewTextView.swift` desenha só as linhas na tela (`ReviewRowDrawing.swift`: cores do editor,

@@ -40,6 +40,20 @@
   abre no primeiro uso com a feature ligada e fecha quando as duas desligam;
   `sessionEnvironment(dispatch:)` é o CADEX_DISPATCH_ID que o kit põe na sessão de um despacho
   (`SessionKit.claudeCommand(sessionEnvironment:)`).
+- A corrida (fase C): `PromptFiles.swift` (o prompt num arquivo 0600 numa pasta 0700, até 100 KB,
+  sem NUL; CADEX_PROMPTS_DIR numa instância de teste; o que ninguém pegou sai depois de um dia),
+  `ClaudeTrust.swift` (a confiança do Claude Code lida sem escrever: `projects[<pasta>]
+  .hasTrustDialogAccepted` do .claude.json da conta, a pasta, uma pasta mãe confiada ou o
+  repositório principal), `RaceLaunch.swift` (as recusas antes de criar qualquer coisa: desligada,
+  menos de 2 ou mais de orchestration.maxAgents, prompt vazio ou grande, conta local sem confiança;
+  e o comando do concorrente, `cadex claude --cadex-prompt-file` pelo kit), `RaceColumns.swift`
+  (as colunas do quadro, puras, e `SessionCost`, o `cost.total_cost_usd` que o `cadex statusline`
+  grava por sessão), `NewRaceForm.swift` (o formulário), `RaceBoardView.swift` e
+  `RaceBoardDocument.swift` (o quadro numa aba), `RaceCommands.swift` (orchestration.toggle,
+  -new-race, -show-race, -pick-winner, -discard-race e -delete-race-branches, com as listas no ⌘K).
+  O que junta worktrees, agents, tabs e source-control é do app (`../../app/RaceWiring.swift`,
+  `../../app/RaceBoardWiring.swift`). CADEX_ORCHESTRATION_DIR troca a pasta do estado numa
+  instância de teste.
 - Configurações (`../settings/OrchestrationSettings.swift`, `../settings/OrchestrationRows.swift`):
   orchestration.enabled, orchestration.automations, orchestration.maxAgents (6),
   orchestration.maxDepth (2), orchestration.heartbeatMinutes (10),
@@ -52,4 +66,5 @@
   profundidade máxima, parar o pai para os filhos, despacho órfão, relatório repetido, sinal de
   vida e "stalled?", teto de agentes e execução parada, caixa de entrada, o arquivo 0600 que
   persiste, linha ilegível pulada, lote desfeito, corrida, automações, e o controlador desligado
-  sem arquivo nenhum.
+  sem arquivo nenhum; da corrida: o arquivo do prompt, a confiança, as recusas, o comando sem o
+  texto, as colunas e o custo.

@@ -93,6 +93,45 @@ test "a task: its worktree and branch, the .env copied, listed, what would be lo
     try testing.expect(!fs.exists(path));
 }
 
+test "a race's discard: the folder gone (the Trash), prune forgets it, the branch stays until deleted" {
+    var dir = try TestDir.init();
+    defer dir.deinit();
+    var registry = workspace.Registry.init(testing.allocator);
+    defer registry.deinit();
+    _ = try registry.authorize(dir.path());
+    try dir.makeDir("repo");
+    var repo_buf: [1024]u8 = undefined;
+    const repo = try dir.joinInto(&repo_buf, "repo");
+    try sh(&registry, repo, &.{ "init", "--quiet", "--initial-branch=main" });
+    try sh(&registry, repo, &.{ "config", "user.name", "Teste" });
+    try sh(&registry, repo, &.{ "config", "user.email", "teste@cadex" });
+    try dir.writeFile("repo/app.txt", "um\n");
+    try sh(&registry, repo, &.{ "add", "app.txt" });
+    try sh(&registry, repo, &.{ "commit", "--quiet", "-m", "first" });
+    try dir.makeDir("repo.worktrees");
+    var path_buf: [1024]u8 = undefined;
+    const path = try dir.joinInto(&path_buf, "repo.worktrees/fix-2");
+    try testing.expect((try tasks.create(testing.allocator, &registry, repo, path, "fix-2", "main")) == null);
+    try dir.writeFile("repo.worktrees/fix-2/app.txt", "dois\n");
+    try sh(&registry, path, &.{ "commit", "--quiet", "-am", "try 2" });
+
+    // The app moves the folder to the Trash; here, out of the way.
+    var gone_buf: [1024]u8 = undefined;
+    try fs.rename(path, try dir.joinInto(&gone_buf, "trashed"), true);
+    try testing.expect((try tasks.prune(testing.allocator, &registry, repo)) == null);
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+    try testing.expectEqual(@as(usize, 1), (try tasks.list(arena.allocator(), &registry, repo)).len);
+    try sh(&registry, repo, &.{ "rev-parse", "--verify", "--quiet", "fix-2" });
+
+    const odd = (try tasks.deleteBranch(testing.allocator, &registry, repo, "-x")).?;
+    defer testing.allocator.free(odd);
+    try testing.expect((try tasks.deleteBranch(testing.allocator, &registry, repo, "fix-2")) == null);
+    var gone = try sc.git.run(testing.allocator, &registry, repo, &.{ "rev-parse", "--verify", "--quiet", "fix-2" }, .{});
+    defer gone.deinit(testing.allocator);
+    try testing.expect(!gone.ok());
+}
+
 test "a worktree outside the authorized folders is refused" {
     var dir = try TestDir.init();
     defer dir.deinit();

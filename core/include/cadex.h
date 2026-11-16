@@ -885,5 +885,10 @@ cadex_status cadex_worktrees_what_would_be_lost(const char *path, const char *br
 /* Takes the worktree away and, with branch not NULL, its branch when merged. */
 cadex_status cadex_worktrees_remove(const char *repo, const char *path, const char *branch,
                                     uint8_t **message, size_t *message_len);
+/* git worktree prune: forgets the worktrees whose folder is gone (a race's
+ * discarded ones, sent to the Trash; plan 24). */
+cadex_status cadex_worktrees_prune(const char *repo, uint8_t **message, size_t *message_len);
+/* git branch -D: a branch, merged or not; the app asks first. */
+cadex_status cadex_worktrees_delete_branch(const char *repo, const char *branch, uint8_t **message, size_t *message_len);
 
 #endif /* CADEX_H */

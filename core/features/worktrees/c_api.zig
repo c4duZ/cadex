@@ -83,6 +83,19 @@ pub export fn cadex_worktrees_remove(repo: ?[*:0]const u8, path: ?[*:0]const u8,
     return finish(wt.tasks.remove(gpa, workspace.registry(), r, p, span(branch)), message, message_len);
 }
 
+/// `git worktree prune`: forgets the worktrees whose folder is gone.
+pub export fn cadex_worktrees_prune(repo: ?[*:0]const u8, message: ?*?[*]u8, message_len: ?*usize) callconv(.c) Code {
+    const r = span(repo) orelse return status_code.invalid_argument;
+    return finish(wt.tasks.prune(gpa, workspace.registry(), r), message, message_len);
+}
+
+/// `git branch -D <branch>`, merged or not.
+pub export fn cadex_worktrees_delete_branch(repo: ?[*:0]const u8, branch: ?[*:0]const u8, message: ?*?[*]u8, message_len: ?*usize) callconv(.c) Code {
+    const r = span(repo) orelse return status_code.invalid_argument;
+    const b = span(branch) orelse return status_code.invalid_argument;
+    return finish(wt.tasks.deleteBranch(gpa, workspace.registry(), r, b), message, message_len);
+}
+
 fn finish(result: anyerror!?[]u8, message: ?*?[*]u8, message_len: ?*usize) Code {
     c_buffer.clearOut(message, message_len);
     const err_text = result catch |err| return status_code.fromError(err);

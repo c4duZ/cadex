@@ -46,6 +46,19 @@ import Foundation
         let other = json(settingsPath(kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json")))["env"] as? [String: String] ?? [:]
         expect(other["CADEX_DISPATCH_ID"] == nil, "another session does not get it")
     }),
+    ("with a prompt: run by cadex claude with the file, never the text; the relaunch arguments without it; nil without cadex", {
+        let dir = scratch()
+        defer { try? fm.removeItem(atPath: dir) }
+        let kit = SessionKit(folder: dir + "/kit", toolsPath: "/H/My Tools/cadex", environment: [:])
+        guard let opened = kit.claudeCommand(configDir: dir + "/acct", arguments: ["--model", "haiku"], cwd: "/w",
+                                             promptFile: "/p/prompts/d1.md", defaultClaudeJSON: dir + "/none.json")
+        else { return expect(false, "no command") }
+        expect(opened.command.contains("'/H/My Tools/cadex' claude --settings "), opened.command)
+        expect(opened.command.hasSuffix("--model haiku --cadex-prompt-file /p/prompts/d1.md"), opened.command)
+        expect(kit.arguments(of: opened.session) == ["--model", "haiku"], "\(String(describing: kit.arguments(of: opened.session)))")
+        let none = SessionKit(folder: dir + "/kit2", toolsPath: nil, environment: [:])
+        expect(none.claudeCommand(configDir: nil, cwd: "/w", promptFile: "/p/x.md", defaultClaudeJSON: dir + "/none.json") == nil)
+    }),
     ("a typed claude: the tab's account, the owner's --settings merged in one file", {
         let dir = scratch()
         defer { try? fm.removeItem(atPath: dir) }

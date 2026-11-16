@@ -15,7 +15,8 @@
 ## Como eu quero
 - `WorktreesCore.swift`: a camada fina sobre `cadex_worktrees_*` (e a raiz do repositório, o branch
   atual e a autorização da pasta).
-- `WorktreesStore.swift`: as notas em `…/Cadex/worktrees.json`: por tarefa o status (a fazer, em
+- `WorktreesStore.swift`: as notas em `…/Cadex/worktrees.json` (CADEX_WORKTREES_FILE numa instância
+  de teste, plano 24): por tarefa o status (a fazer, em
   andamento, em revisão, pronto), o comentário, o ponto de partida e a data; por repositório os hooks
   já vistos e se o aviso da confiança já foi mostrado.
 - `WorktreesController.swift`: WorktreesController.shared. `plan` (branch único, pasta
@@ -39,6 +40,13 @@
   ganham `remote` e `remoteFolders`, lidas com `decodeIfPresent` (um arquivo de antes continua
   valendo inteiro). A página Tasks mostra a remota com o nome da máquina; worktrees.new-task-on e
   worktrees.open-remote-shell, e worktrees.remove lista as remotas também.
+- A corrida (plano 24, fase C): `plan(name:repo:base:)` aceita o ponto de partida escolhido;
+  `trash` manda a pasta de uma worktree descartada para a Lixeira (`moveToTrash`, trocado nos
+  testes), esquece a nota e roda `git worktree prune` (a branch fica); `deleteBranch` é o `git
+  branch -D` depois da confirmação do app. No remoto, RemoteTaskRunner.uploadPrompt manda o
+  prompt pela entrada do ssh para um arquivo do `mktemp` lá, e `RemoteTaskScript.agent(path:hooks:
+  promptFile:model:)` roda `claude "$(cat <arquivo>)"` (o texto nunca no comando; caminho e modelo
+  conferidos).
 - O ambiente descartável (plano 23, fase E; `../../../../docs/adr/0032-workspace-recipes.md`):
   `EnvironmentRecipe.swift` (o .cadex/environment.toml, por um leitor de TOML só do que a receita
   usa, sem dependência; erro com a linha, nunca meia receita; `authkey_env` é o nome da variável,
@@ -57,4 +65,5 @@
   clonar), a remoção recusada com mudança, as falhas do ssh, a aba com os hooks e o claude; o
   ambiente com um docker falso que anota as chamadas (`tests/Environment.swift`): a receita, subir
   com o sidecar sem a chave nos argumentos, sem a chave no shell nada sobe, Dockerfile, suspender,
-  retomar e destruir.
+  retomar e destruir; a corrida: duas tarefas do mesmo ponto, uma para a "Lixeira" com o commit,
+  o git esquecendo, a branch ficando até apagar; o prompt remoto chegando inteiro e nada rodando.

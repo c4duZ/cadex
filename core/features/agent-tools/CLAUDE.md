@@ -66,6 +66,13 @@
   `args` do kit antes das palavras do dono. CADEX_CLAUDE_WRAP (o pid) pega um `claude` que chama
   `cadex claude` de novo. `claude_args_check.py` (no `make manifests`) avisa, sem falhar, quando o
   `claude` instalado tem subcomando ou opção com valor que a lista não conhece.
+- Plano 24, fase C (`../../../docs/adr/0033-cadex-launches-agents.md`): `prompt_file.zig` tira
+  `--cadex-prompt-file <arquivo>` das palavras antes de tudo (as palavras guardadas para relançar
+  não levam o prompt), lê o arquivo só se estiver na pasta dos prompts (CADEX_PROMPTS_DIR, senão
+  `…/Cadex/orchestration/prompts`), for um arquivo comum deste usuário (aberto com O_NOFOLLOW e
+  conferido pelo `fstat`), até 100 KB e sem NUL, apaga e o passa ao `claude` como a última palavra
+  do exec (um prompt que começa com "-" ganha um espaço antes). Arquivo que não serve: `cadex
+  claude` diz e sai com 127, sem abrir o `claude` sem o prompt.
 - Plano 22, fase E: `cadex continue [opções] [agente] [args…]` (`continue_wrap.zig`) é o que o
   "Continue in…" (agents.continue-in-agent) digita numa aba: pede o kit como o `cadex claude`
   (o `kitFor` do `claude_wrap.zig`), lê do arquivo do `--settings` do kit o ambiente da memória (o
@@ -83,6 +90,8 @@
 - `make core-test`: arquivos, nome da conta, status line do dono, JSON quebrado e a chamada de dentro;
   a linha do pedido e a resposta, os atalhos virando ids, os guias e o servidor MCP com um app falso;
   as decisões do `cadex claude` (`--model haiku mcp list`, `-p`, `--version`, `claude`, um prompt,
-  `--resume abc`, `--settings x.json`), o pedido do kit, a resposta e o app ausente.
+  `--resume abc`, `--settings x.json`), o pedido do kit, a resposta e o app ausente; o
+  `--cadex-prompt-file` saindo das palavras nas duas grafias, o prompt inteiro e o arquivo apagado,
+  e fora da pasta, link ou nome com ponto recusados e mantidos.
 - Na mão, sem o app: `CADEX_APP_SOCKET=/nada PATH=<pasta com um claude falso>:$PATH core/zig-out/bin/cadex claude --model haiku mcp list`.
 - Na mão: `echo '<json>' | CLAUDE_CONFIG_DIR=<pasta> CADEX_USAGE_DIR=<pasta> core/zig-out/bin/cadex statusline`.

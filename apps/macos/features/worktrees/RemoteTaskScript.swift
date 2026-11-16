@@ -79,6 +79,27 @@ public enum RemoteTaskScript {
         return login(steps.joined(separator: " && ") + "; exec \"$SHELL\" -l")
     }
 
+    /// The same with a prompt already on the machine (`uploadPrompt`, plan
+    /// 24, docs/adr/0033-cadex-launches-agents.md): the text is only the
+    /// output of a substitution in double quotes, which the shell does not
+    /// expand again, and the file goes as `claude` starts. `model` empty:
+    /// the account's. Nil for a path that is not one `mktemp` gives.
+    public static func agent(path: String, hooks: [String], promptFile: String, model: String = "") -> String? {
+        guard isPromptPath(promptFile), model.allSatisfy({ $0.isLetter || $0.isNumber || "-._[]".contains($0) }) else { return nil }
+        let flags = model.isEmpty ? "" : " --model \(quote(model))"
+        let claude = "p=\"$(cat \(promptFile))\"; rm -f \(promptFile); claude\(flags) \"$p\""
+        let steps = ["cd \(quote(path))"] + hooks + ["{ \(claude); }"]
+        return login(steps.joined(separator: " && ") + "; exec \"$SHELL\" -l")
+    }
+
+    /// Writes stdin to a new file of `mktemp` there and prints its path.
+    public static let uploadPrompt = "f=$(mktemp \"${TMPDIR:-/tmp}/cadex-prompt.XXXXXX\") && cat > \"$f\" && echo \"CADEX_PROMPT=$f\""
+
+    /// A path `mktemp` printed: only letters, digits, "/", ".", "_" and "-".
+    public static func isPromptPath(_ path: String) -> Bool {
+        path.hasPrefix("/") && !path.contains("..") && path.allSatisfy { $0.isASCII && ($0.isLetter || $0.isNumber || "/._-".contains($0)) }
+    }
+
     /// worktrees.open-remote-shell: a login shell in the worktree.
     public static func shell(path: String) -> String {
         login("cd \(quote(path)) && exec \"$SHELL\" -l")

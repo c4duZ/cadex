@@ -63,7 +63,14 @@ public final class WorktreesStore {
     let path: String
     private(set) var file = File()
 
-    public init(path: String = FileManager.default.homeDirectoryForCurrentUser.path + "/Library/Application Support/Cadex/worktrees.json") {
+    /// CADEX_WORKTREES_FILE: a test instance's own notes, never the owner's
+    /// (plan 24 phase C: a race tested in the app wrote them until then).
+    public static var defaultPath: String {
+        if let file = ProcessInfo.processInfo.environment["CADEX_WORKTREES_FILE"], !file.isEmpty { return file }
+        return FileManager.default.homeDirectoryForCurrentUser.path + "/Library/Application Support/Cadex/worktrees.json"
+    }
+
+    public init(path: String = WorktreesStore.defaultPath) {
         self.path = path
         if let data = FileManager.default.contents(atPath: path), let read = try? JSONDecoder().decode(File.self, from: data) { file = read }
     }

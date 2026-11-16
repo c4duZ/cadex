@@ -35,7 +35,8 @@
   `statusLine`; `hooks` somados por evento, os do kit primeiro; no `env`, os `CADEX_*` do kit
   ficam); recusa o arquivo do próprio kit (o comando que o Cadex digita passa pela mesma função) e
   o que não lê.
-- `SessionKitFiles.swift`: em `~/Library/Application Support/Cadex/kit`, um `session-<chave>.json`
+- `SessionKitFiles.swift`: em `~/Library/Application Support/Cadex/kit` (CADEX_KIT_DIR numa
+  instância de teste, plano 24), um `session-<chave>.json`
   por sessão (0600, apagado depois de 2 dias) com a status line do Cadex (com o `padding` da do
   dono), o token da sessão na `env` (que chega aos hooks, teste de 2026-11-15; nunca digitado no
   terminal), os hooks do plano 19 (`cadex hook <evento>` em SessionStart, Stop, Notification,

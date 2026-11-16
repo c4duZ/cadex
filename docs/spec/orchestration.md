@@ -171,6 +171,10 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
   running").
 - Mac desligado no horário: na próxima abertura do app, a regra da execução perdida vale.
 - Prompt enorme (mais de 100 KB): recusado antes de abrir, pelo limite de argumento do sistema.
+- Concorrente numa máquina remota cuja pasta do repositório o Cadex ainda não conhece (nenhuma
+  tarefa feita lá pelo "Run on"): a coluna fica "Failed to start", dizendo para criar uma tarefa lá
+  antes; os outros seguem.
+- O arquivo do prompt que nenhuma aba pegou (o app fechou antes) sai depois de um dia.
 
 ## Critérios de aceite
 - [ ] Com orchestration.enabled desligada, nenhum agente é aberto com prompt, nenhum banco aberto,
@@ -178,14 +182,20 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
 - [x] Testes do modelo com banco temporário: dependências tornando tarefas prontas, ciclo recusado,
       profundidade máxima, despacho órfão (o agente saiu sem reportar). (OrchestrationTests,
       2026-11-16, com portões, parar em cadeia, teto de agentes e a caixa de entrada.)
-- [ ] Uma corrida de 3 num repositório de teste cria 3 worktrees do mesmo commit, 3 abas com o
-      prompt e o quadro com os três estados e custos; "Compare" mostra o diff entre duas; escolher o
-      vencedor manda as outras worktrees para a Lixeira e deixa as branches.
+- [x] Uma corrida de 3 num repositório de teste cria 3 worktrees do mesmo commit, 3 abas com o
+      prompt e o quadro com os três estados e custos; escolher o vencedor manda as outras worktrees
+      para a Lixeira e deixa as branches. (2026-11-16, instância de teste com o `claude` real; a
+      corrida começou pelo gancho de teste, sem o formulário.)
+- [x] "Compare" mostra o diff entre duas (pelo menu, kite-1 contra kite-2, 2026-11-16).
+- [x] "New Race" pela folha de verdade começa a corrida; cancelar a confirmação não deixa corrida
+      gravada (2026-11-16).
 - [ ] Uma execução de 3 tarefas encadeadas, com agentes reais, vai de pendente a concluída sozinha;
       um portão segura a terceira até a aprovação; parar o pai encerra os filhos; um agente sem
       sinal de vida aparece como "stalled?".
-- [ ] Um prompt com aspas, `$()`, crase e quebra de linha chega intacto ao agente e nada é executado
-      pelo shell (no Mac e no remoto).
+- [x] Um prompt com aspas, `$()`, crase e quebra de linha chega intacto ao agente e nada é executado
+      pelo shell (no Mac, com o `claude` real; no remoto, com um ssh falso e um `claude` falso).
+- [x] Passou do teto de uma corrida, o agente local é encerrado e a coluna diz "hit the cap" (teto de
+      1 min, encerrado aos ~61 s, 2026-11-16).
 - [ ] Os comandos de reporte só são aceitos de uma sessão com CADEX_DISPATCH_ID e só sobre a
       execução dela; approve-gate pela CLI é recusado.
 - [ ] Uma automação a cada 2 minutos roda com o Cadex fechado (o LaunchAgent abre o app em segundo

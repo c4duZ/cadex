@@ -30,8 +30,10 @@ public final class OrchestrationController {
     }
     public var limits = Limits()
 
-    /// Where state.sqlite lives; a test's own folder.
-    public var folder = FileManager.default.homeDirectoryForCurrentUser.path + "/Library/Application Support/Cadex/orchestration"
+    /// Where state.sqlite lives: CADEX_ORCHESTRATION_DIR for a test
+    /// instance, never the owner's; a test's own folder.
+    public var folder = ProcessInfo.processInfo.environment["CADEX_ORCHESTRATION_DIR"].flatMap { $0.isEmpty ? nil : $0 }
+        ?? FileManager.default.homeDirectoryForCurrentUser.path + "/Library/Application Support/Cadex/orchestration"
     public var statePath: String { folder + "/state.sqlite" }
 
     private var store: OrchestrationStore?

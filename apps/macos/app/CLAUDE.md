@@ -148,12 +148,32 @@
   botão de compartilhar, um menu com machines.share-port, machines.share-public (apagado sem a
   permissão do Funnel) e machines.stop-sharing (apagado sem nada compartilhado), cada um pelo id; `shareActions` dá a porta do preview com foco, confirma o
   Funnel e mostra o endereço com Copiar e Abrir.
+- `RaceWiring.swift` (plano 24, fase C): registra os comandos da corrida; orchestration.toggle
+  mostra antes o que muda ao ligar; orchestration.new-race abre o formulário (contas com a do
+  projeto primeiro, as máquinas do "Rodar em"), confere antes de criar (RaceLaunch.check, a
+  confiança pela conta de cada concorrente local), pede uma vez o que o New Task pediria (a pasta,
+  hooks novos) e cria por concorrente a worktree pelo `plan`/`make` da worktrees e uma aba com os
+  hooks e o `cadex claude --cadex-prompt-file` do kit; numa máquina remota, a worktree pelo
+  `makeRemote` (a pasta do repositório lá já lembrada), o prompt pelo `uploadPrompt` e a aba `ssh
+  -t`. `RaceBoardWiring.swift`: o quadro numa aba (`RaceWatch`: os quadros abertos, o diff de cada
+  concorrente contado fora da linha principal pelo `ReviewTally`, um relógio de 15 s só com quadro
+  aberto ou agente local de corrida trabalhando, e o aviso TerminalView.agentDidChange); o estado
+  de cada concorrente pelo terminal achado pela sessão do kit (agentResume.kitSession), o custo
+  pelo `SessionCost`, o remoto pelo `claude agents --json` da Agents; passou do teto da corrida
+  (gasto ou minutos), SIGTERM como na hibernação; escolher o vencedor oferece descartar os outros;
+  descartar para os agentes, manda as pastas para a Lixeira pela worktrees e deixa as branches;
+  apagar as branches lista cada uma antes.
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.
 - `PerfHooks.swift`: só para o `make perf` (`../../../tools/perf/run.py`): cada variável CADEX_PERF_
   faz a instância de teste agir sozinha em horas marcadas (abrir a conversa de um subagente, abrir
   abas, abrir e rolar a revisão da pasta com CADEX_PERF_REVIEW, abrir duas vezes o grupo das máquinas da tailnet com CADEX_PERF_MACHINES); sem a variável, nada roda.
+  `RacePerfHooks.swift` (plano 24): CADEX_PERF_RACE, um JSON com uma corrida que começa sozinha sem
+  folha (e, com `pickAfter`, o #1 vence e os outros são descartados), anotada em `out`; CADEX_PERF_RACE_FORM
+  preenche a folha "New Race" quando ela abre (a acessibilidade não alcança a folha); usado no
+  teste da corrida no app e no `make perf` da fase F. Uma instância assim usa as pastas próprias
+  CADEX_ORCHESTRATION_DIR, CADEX_PROMPTS_DIR, CADEX_KIT_DIR, CADEX_WORKTREES_FILE e CADEX_USAGE_DIR.
 - Tela cheia: a barra de ferramentas (vazia, só dá a altura da barra de título) some ao entrar e
   volta ao sair, porque o macOS a punha numa faixa por cima da barra do app. Tamanho mínimo da
   janela 480×300.

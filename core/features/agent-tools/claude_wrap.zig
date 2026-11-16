@@ -13,6 +13,7 @@
 const std = @import("std");
 const claude_args = @import("claude_args.zig");
 const hook = @import("hook.zig");
+const prompt_file = @import("prompt_file.zig");
 const request = @import("request.zig");
 
 extern "c" fn setenv(name: [*:0]const u8, value: [*:0]const u8, overwrite: c_int) c_int;
@@ -85,14 +86,29 @@ pub fn run(words: []const [:0]const u8) u8 {
     var real_buf: [path_max]u8 = undefined;
     const real = findReal(arena, &real_buf) orelse return say("cadex claude: claude is not on PATH\n");
     markLoop();
-    const plain = toSlices(arena, words) catch return execAs(arena, real, &.{}, words);
-    const p = claude_args.plan(arena, plain) catch return execAs(arena, real, &.{}, words);
-    if (p == .pass_through) return execAs(arena, real, &.{}, words);
-    const kit = kitFor(arena, p.kit.user_settings, p.kit.words) orelse return execAs(arena, real, &.{}, words);
+    // A prompt Cadex wrote to a file (plan 24): out of the words before
+    // anything reads them (the kit keeps the words for a hibernated agent's
+    // relaunch, which must not get the prompt again), back as the last word.
+    const taken = prompt_file.take(arena, words) catch return execAs(arena, real, &.{}, words, null);
+    const prompt = promptOf(arena, taken.path) catch return say("cadex claude: the prompt file is not one Cadex wrote\n");
+    const owner = taken.words;
+    const plain = toSlices(arena, owner) catch return execAs(arena, real, &.{}, owner, prompt);
+    const p = claude_args.plan(arena, plain) catch return execAs(arena, real, &.{}, owner, prompt);
+    if (p == .pass_through) return execAs(arena, real, &.{}, owner, prompt);
+    const kit = kitFor(arena, p.kit.user_settings, p.kit.words) orelse return execAs(arena, real, &.{}, owner, prompt);
     for (kit.unset) |name| _ = unsetenv((arena.dupeZ(u8, name) catch continue).ptr);
     if (kit.path_first) |dir| prependPath(arena, dir);
-    const rest = toSentinels(arena, p.kit.words) catch return execAs(arena, real, &.{}, words);
-    return execAs(arena, real, kit.args, rest);
+    const rest = toSentinels(arena, p.kit.words) catch return execAs(arena, real, &.{}, owner, prompt);
+    return execAs(arena, real, kit.args, rest, prompt);
+}
+
+/// The prompt behind `--cadex-prompt-file`; an error when the option was
+/// given and the file is not one the app wrote: `claude` does not start
+/// without the prompt it was opened for.
+fn promptOf(arena: std.mem.Allocator, path: ?[:0]const u8) !?[:0]const u8 {
+    const given = path orelse return null;
+    const dir = prompt_file.folder(arena) orelse return error.NoPrompt;
+    return prompt_file.read(arena, dir, given) orelse error.NoPrompt;
 }
 
 /// The kit for this tab (also `cadex continue`, continue_wrap.zig).
@@ -107,12 +123,13 @@ pub fn kitFor(arena: std.mem.Allocator, user_settings: ?[]const u8, words: []con
     return askKit(arena, socket, msg);
 }
 
-/// argv: "claude", the kit's words, then the owner's.
-fn execAs(arena: std.mem.Allocator, real: [:0]const u8, kit_args: []const []const u8, words: []const [:0]const u8) u8 {
+/// argv: "claude", the kit's words, the owner's, then the prompt (one word).
+fn execAs(arena: std.mem.Allocator, real: [:0]const u8, kit_args: []const []const u8, words: []const [:0]const u8, prompt: ?[:0]const u8) u8 {
     var argv: std.ArrayList(?[*:0]const u8) = .empty;
     argv.append(arena, "claude") catch return 127;
     for (kit_args) |arg| argv.append(arena, (arena.dupeZ(u8, arg) catch return 127).ptr) catch return 127;
     for (words) |word| argv.append(arena, word.ptr) catch return 127;
+    if (prompt) |text| argv.append(arena, text.ptr) catch return 127;
     const list = argv.toOwnedSliceSentinel(arena, null) catch return 127;
     _ = execve(real.ptr, list.ptr, @ptrCast(environ));
     return say("cadex claude: claude did not start\n");

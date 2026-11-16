@@ -77,7 +77,9 @@ public final class SessionKit {
     init(folder: String? = nil, toolsPath: String? = SessionKit.findTools(),
          environment: [String: String] = ProcessInfo.processInfo.environment) {
         let home = FileManager.default.homeDirectoryForCurrentUser.path
-        self.folder = folder ?? home + "/Library/Application Support/Cadex/kit"
+        // CADEX_KIT_DIR: a test instance's own kit files (plan 24 phase C).
+        let testFolder = environment["CADEX_KIT_DIR"].flatMap { $0.isEmpty ? nil : $0 }
+        self.folder = folder ?? testFolder ?? home + "/Library/Application Support/Cadex/kit"
         self.toolsPath = toolsPath
         self.environment = environment
         // A kit with a folder of its own (tests) keeps its tokens there too.
@@ -131,6 +133,24 @@ public final class SessionKit {
         return Self.compose(unset: kit.unset, configDir: configDir, arguments: kit.arguments + arguments, pathFirst: kit.pathFirst)
     }
 
+    /// A session opened with a prompt (plan 24, docs/adr/0033-cadex-launches-agents.md):
+    /// the same command, run by `cadex claude` with `--cadex-prompt-file
+    /// <file>`, which reads the file, removes it and hands the prompt to
+    /// `claude` as one word of the exec: the prompt's text is never typed.
+    /// The arguments kept for a relaunch after hibernating do not have the
+    /// file. Nil without the `cadex` program (no way to keep the text out
+    /// of the shell). Also the session's key, for the caller's records.
+    public func claudeCommand(configDir: String?, arguments: [String] = [], cwd: String?, promptFile: String,
+                              sessionEnvironment: [String: String] = [:],
+                              defaultClaudeJSON: String = FileManager.default.homeDirectoryForCurrentUser.path + "/.claude.json") -> (command: String, session: String)? {
+        guard let tools = toolsPath else { return nil }
+        let kit = launch(configDir: configDir, arguments: arguments, cwd: cwd, defaultClaudeJSON: defaultClaudeJSON,
+                         sessionEnvironment: sessionEnvironment)
+        let command = Self.compose(unset: kit.unset, configDir: configDir, arguments: kit.arguments + arguments + ["--cadex-prompt-file", promptFile],
+                                   pathFirst: kit.pathFirst, program: [tools, "claude"])
+        return (command, kit.session)
+    }
+
     /// What the tab must not inherit: CLAUDECODE and CLAUDE_CODE_* (a
     /// session that inherited CLAUDE_CODE_CHILD_SESSION kept no transcript,
     /// 2026-11-14), and a stray CLAUDE_CONFIG_DIR for the default account.
@@ -142,14 +162,14 @@ public final class SessionKit {
 
     /// `[env -u X] [CLAUDE_CONFIG_DIR=dir] claude args…`, each word quoted
     /// only when the shell needs it.
-    static func compose(unset: [String], configDir: String?, arguments: [String], pathFirst: String? = nil) -> String {
+    static func compose(unset: [String], configDir: String?, arguments: [String], pathFirst: String? = nil, program: [String] = ["claude"]) -> String {
         var words: [String] = []
         if !unset.isEmpty { words += ["env"] + unset.flatMap { ["-u", $0] } }
         // The shell expands "$PATH" before claude (or env) runs: the agent's
         // Bash tool finds `cadex` first (tested 2026-11-15).
         if let pathFirst { words.append("PATH=" + quote(pathFirst) + ":\"$PATH\"") }
         if let configDir { words.append("CLAUDE_CONFIG_DIR=" + quote(configDir)) }
-        words.append("claude")
+        words += program.map(quote)
         words += arguments.map(quote)
         return words.joined(separator: " ")
     }

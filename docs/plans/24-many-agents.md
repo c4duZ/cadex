@@ -125,6 +125,49 @@ docs/adr/0031-run-on-remote.md (plano 23), `docs/adr/0004-clean-rewrite.md`,
     orchestration.discard-race manda as outras worktrees para a lixeira e mantém as branches até
     orchestration.delete-race-branches, com confirmação.
   - Features: orchestration, worktrees, agents, source-control, tabs.
+  - No código em 2026-11-16 (`apps/macos/features/orchestration/CLAUDE.md`,
+    `apps/macos/app/RaceWiring.swift`, `apps/macos/app/RaceBoardWiring.swift`): o prompt vai a um
+    arquivo 0600 e a aba roda `cadex claude --cadex-prompt-file` (núcleo:
+    `core/features/agent-tools/prompt_file.zig`; só a pasta dos prompts, arquivo comum do usuário,
+    sem link, apagado ao ler); no remoto, o texto vai pela entrada de um ssh à parte para um
+    `mktemp` lá e a aba roda `claude "$(cat <arquivo>)"`. Antes de criar qualquer coisa, a corrida
+    confere a confiança do Claude Code na conta de cada concorrente local
+    (`projects[<pasta>].hasTrustDialogAccepted`, lido sem escrever). Descartar manda a pasta para a
+    Lixeira e roda `git worktree prune` (núcleo novo: `cadex_worktrees_prune` e
+    `cadex_worktrees_delete_branch`); a branch fica até orchestration.delete-race-branches. O teto
+    da corrida (gasto ou minutos) encerra o agente local com SIGTERM; o remoto não é do Cadex
+    parar. O concorrente remoto exige que a pasta do repositório lá já seja conhecida (uma tarefa
+    feita antes pelo "Run on"); sem ela, falha dizendo isso. Testado: no núcleo, o
+    `--cadex-prompt-file` (o prompt com aspas, `$()`, crase, `;`, `&&` e quebra de linha chegou
+    inteiro como um argumento a um `claude` falso, nada rodou, o arquivo sumiu, `/etc/hosts`
+    recusado) e o prune e o `branch -D` num repositório de verdade; no app, 21 testes da
+    orchestration (o arquivo do prompt, a confiança, as recusas, o comando sem o texto, as colunas,
+    o custo), o kit com o prompt, e na worktrees duas tarefas do mesmo ponto com uma descartada e o
+    prompt remoto por um ssh falso. Na instância de teste (2026-11-16, pastas próprias: as notas
+    das worktrees e o kit ganharam CADEX_WORKTREES_FILE e CADEX_KIT_DIR para isso; a corrida
+    começada pelo CADEX_PERF_RACE, sem a folha), com o `claude` real na conta bkdg e haiku, num
+    repositório em que a conta já confiava: 3 worktrees do mesmo commit, 3 abas, os 3 `claude` com o
+    prompt (aspas, `$()`, crase, `;`, `&&`, `|` e a quebra de linha) como último argumento, a
+    resposta devolvendo o `$(echo NAO_RODOU)` literal; o quadro com os três "Finished", o custo
+    (US$ 0,0048 cada, que o quadro arredondava para 0,00: passou a mostrar 4 casas abaixo de 0,10) e
+    o diff depois de mudar dois arquivos; o #1 vencedor e os outros dois descartados (agentes
+    encerrados, pastas fora do disco, `git worktree list` sem elas, branches mantidas); numa
+    segunda corrida com teto de 1 min, os dois agentes encerrados aos ~61 s, "hit the cap" (o
+    quadro mostrava "Starting" no mesmo instante: o motivo gravado passou a valer). Achado e
+    mudado: o teto vale só até haver vencedor. O `--max-budget-usd` do Claude Code só vale com
+    `--print`, então o teto de gasto é o do Cadex. Limpeza: as pastas de conversa e o
+    session-env do teste foram para a Lixeira; o history.jsonl e o .claude.json da conta
+    ficaram (são do Claude Code). Com o dono olhando (2026-11-16), a folha de verdade: "New Race"
+    aberto pelo menu View, preenchido pelo gancho CADEX_PERF_RACE_FORM (a acessibilidade do macOS
+    não alcança a folha), enviado com Return e confirmado o "Start the race?" (a pasta das
+    worktrees): 2 worktrees, 2 `claude` com o prompt, o quadro com custo de 4 casas; e o
+    "Compare…" pelo menu, kite-1 contra kite-2, mostrou o arquivo que só o kite-1 tinha. Achados e
+    corrigidos nesse teste: uma conta sem nome deixava o menu da conta em branco e títulos
+    repetidos desalinhavam as linhas (o menu do macOS junta títulos iguais; agora um item por conta,
+    o nome da pasta quando falta nome, e a mesma pasta uma vez só); e a corrida era gravada antes da
+    confirmação, então cancelar deixava uma corrida-fantasma (agora só ao começar). **Falta**: a
+    Lixeira não pôde ser listada (o macOS nega a pasta a este processo), só a saída das pastas do
+    disco; o concorrente remoto com o PC na tailnet.
 - **D. Orquestração: execuções, tarefas e despachos.** Em duas partes, cada uma numa sessão:
   **D1** o modelo e o despacho (execução, tarefas, dependências, despacho, parar), com o dono como
   coordenador e a página da execução; **D2** os agentes supervisionados (os comandos de reporte

@@ -81,3 +81,21 @@ extension GitRepository {
         return String(decoding: UnsafeBufferPointer(start: out, count: len), as: UTF8.self)
     }
 }
+
+/// A worktree's changes against where it started, counted (plan 24: a
+/// race's board shows one per contender). Blocks on `git`: call it off the
+/// main thread.
+public struct ReviewTally: Equatable, Sendable {
+    public let files: Int
+    public let added: Int
+    public let removed: Int
+
+    /// `start`: the branch the task started from (the review's base is the
+    /// merge-base with it). Nil when git cannot say.
+    public static func of(worktree: String, start: String?) -> ReviewTally? {
+        let repo = GitRepository(root: worktree)
+        guard let base = repo.reviewBase(start: start), let files = repo.reviewFiles(base: base, to: nil) else { return nil }
+        return ReviewTally(files: files.count, added: files.reduce(0) { $0 + ($1.added ?? 0) },
+                           removed: files.reduce(0) { $0 + ($1.removed ?? 0) })
+    }
+}

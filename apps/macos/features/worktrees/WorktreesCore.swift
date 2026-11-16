@@ -50,6 +50,12 @@ public enum WorktreesCore {
     }
 
     /// The repository holding `folder`, or nil.
+    /// `git worktree prune`; git's message when it refused.
+    static func prune(repo: String) -> String? { action { cadex_worktrees_prune(repo, &$0, &$1) } }
+
+    /// `git branch -D`; git's message when it refused.
+    static func deleteBranch(repo: String, branch: String) -> String? { action { cadex_worktrees_delete_branch(repo, branch, &$0, &$1) } }
+
     public static func repository(of folder: String) -> String? {
         text { cadex_git_root(folder, &$0, &$1) }
     }

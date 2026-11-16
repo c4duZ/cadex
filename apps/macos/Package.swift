@@ -108,7 +108,7 @@ let package = Package(
         .target(name: "Machines", dependencies: ["CommandPalette", "Icons", "Menus", "Strings", "UILooks"], path: "features/machines",
                 exclude: ["CLAUDE.md", "tests"], swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]),
         // Races, runs and automations: many agents at once (docs/spec/orchestration.md, ADR 0033).
-        .target(name: "Orchestration", path: "features/orchestration", exclude: ["CLAUDE.md", "tests"],
+        .target(name: "Orchestration", dependencies: ["CommandPalette", "Icons", "SessionKit", "Strings", "Tabs"], path: "features/orchestration", exclude: ["CLAUDE.md", "tests"],
                 linkerSettings: [.linkedLibrary("sqlite3")]),
         // What a session opened by Cadex gets: --settings, --plugin-dir,
         // --mcp-config and the tab's environment (docs/adr/0021-cadex-managed-accounts.md).
@@ -470,7 +470,8 @@ let package = Package(
                           linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
         .executableTarget(name: "MachinesTests", dependencies: ["Machines", "Checks"], path: "features/machines/tests",
                           linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
-        .executableTarget(name: "OrchestrationTests", dependencies: ["Orchestration", "Checks"], path: "features/orchestration/tests"),
+        .executableTarget(name: "OrchestrationTests", dependencies: ["Orchestration", "SessionKit", "Checks"], path: "features/orchestration/tests",
+                          linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
         .executableTarget(name: "SessionKitTests", dependencies: ["SessionKit", "Checks"], path: "shared/session-kit/tests"),
         .executableTarget(name: "TempImagesTests", dependencies: ["TempImages", "Checks"], path: "shared/temp-images/tests"),
 

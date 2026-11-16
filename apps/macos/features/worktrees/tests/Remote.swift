@@ -42,6 +42,27 @@ func remoteController(_ home: String) -> WorktreesController {
 let pc = RunTarget(label: "pc", destination: "dev@pc.tail1234.ts.net")
 
 let remoteTests: [(name: String, body: Checks.Body)] = [
+    ("a race's prompt there: by ssh's stdin to a mktemp file, then claude gets it as one word and the file goes", {
+        let home = NSTemporaryDirectory() + "cx-rp-\(UUID().uuidString.prefix(8))"
+        try? fm.createDirectory(atPath: home + "/bin", withIntermediateDirectories: true)
+        defer { try? fm.removeItem(atPath: home) }
+        var runner = RemoteTaskRunner()
+        runner.ssh = fakeSSH(home)
+        let text = "diga \"oi\" $(touch \(home)/PWNED) `id`; a && b | c\nlinha 2 $HOME"
+        guard case .success(let file) = await runner.uploadPrompt(pc, text) else { return expect(false, "no upload") }
+        expect(RemoteTaskScript.isPromptPath(file) && fm.contents(atPath: file) == Data(text.utf8), file)
+        fm.createFile(atPath: home + "/bin/claude", contents: Data("#!/bin/sh\nfor a; do printf '[%s]' \"$a\"; done\n".utf8),
+                      attributes: [.posixPermissions: 0o755])
+        guard let script = RemoteTaskScript.agent(path: home, hooks: [], promptFile: file, model: "haiku") else { return expect(false, "no script") }
+        // The tab's login shell, minus the shell kept open after.
+        let inner = script.replacingOccurrences(of: "; exec \"$SHELL\" -l", with: "")
+        let printed = sh(inner, env: ["SHELL": "/bin/sh", "PATH": home + "/bin:/usr/bin:/bin"])
+        expect(printed == "[--model][haiku][" + text + "]", printed)
+        expect(!fm.fileExists(atPath: file) && !fm.fileExists(atPath: home + "/PWNED"), "file gone, nothing run")
+        expect(RemoteTaskScript.agent(path: home, hooks: [], promptFile: "/tmp/x; rm -rf ~") == nil)
+        expect(RemoteTaskScript.agent(path: home, hooks: [], promptFile: "/tmp/x", model: "a b") == nil)
+        expect(!RemoteTaskScript.isPromptPath("/tmp/../etc/passwd") && !RemoteTaskScript.isPromptPath("tmp/x"))
+    }),
     ("quoting survives quotes, spaces and $: what sh gets is the text", {
         for text in ["it's", "a b", "$HOME", "\"x\"", "back\\slash", ""] {
             expect(sh("printf %s " + RemoteTaskScript.quote(text)) == text, text)

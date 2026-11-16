@@ -41,18 +41,27 @@ public struct RemoteTaskRunner: Sendable {
         ["-o", "BatchMode=yes", "-o", "ConnectTimeout=10", "--", target.destination, "sh -c " + RemoteTaskScript.quote(script)]
     }
 
-    public func run(_ target: RunTarget, _ script: String) async -> (status: Int32, out: String, err: String) {
+    public func run(_ target: RunTarget, _ script: String, input: Data? = nil) async -> (status: Int32, out: String, err: String) {
         let arguments = arguments(target, script)
         let ssh = self.ssh, timeout = self.timeout
         return await Task.detached {
             let process = Process()
             process.executableURL = URL(fileURLWithPath: ssh)
             process.arguments = arguments
-            process.standardInput = FileHandle.nullDevice
+            let stdin = Pipe()
+            process.standardInput = input == nil ? FileHandle.nullDevice : stdin
             let out = Pipe(), err = Pipe()
             process.standardOutput = out
             process.standardError = err
             guard (try? process.run()) != nil else { return (-1, "", "ssh could not start") }
+            if let input {
+                // Written from another thread: a prompt bigger than the pipe
+                // would block here while ssh waits for us to read its output.
+                Thread {
+                    stdin.fileHandleForWriting.write(input)
+                    try? stdin.fileHandleForWriting.close()
+                }.start()
+            }
             DispatchQueue.global().asyncAfter(deadline: .now() + timeout) { if process.isRunning { process.terminate() } }
             // Both pipes read at once: a full stderr pipe would block ssh.
             let errData = Box()
@@ -72,6 +81,15 @@ public struct RemoteTaskRunner: Sendable {
         return Self.failure(result.status, result.err)
     }
 
+    /// A prompt sent to the machine by ssh's stdin (never in a command):
+    /// the path of the file there, or the failure.
+    public func uploadPrompt(_ target: RunTarget, _ text: String) async -> Result<String, RemotePromptError> {
+        let result = await run(target, RemoteTaskScript.uploadPrompt, input: Data(text.utf8))
+        let line = result.out.split(separator: "\n").first { $0.hasPrefix("CADEX_PROMPT=") }.map { String($0.dropFirst(13)) }
+        guard result.status == 0, let path = line else { return .failure(RemotePromptError(message: result.err.isEmpty ? "exit \(result.status)" : result.err)) }
+        return RemoteTaskScript.isPromptPath(path) ? .success(path) : .failure(RemotePromptError(message: "unexpected path " + path))
+    }
+
     /// nil when removed; else the message (git's refusal, or ssh's).
     public func remove(_ task: RemoteTask) async -> RemotePrepared? {
         let result = await run(task.target, RemoteTaskScript.remove(folder: task.folder, path: task.path))
@@ -86,6 +104,10 @@ public struct RemoteTaskRunner: Sendable {
         let login = ["Permission denied", "Host key verification failed", "password", "passphrase"].contains { message.contains($0) }
         return login ? .needsLogin(message) : .failed(message.isEmpty ? T("The machine did not answer.", "A máquina não respondeu.") : message)
     }
+}
+
+public struct RemotePromptError: Error, Equatable, Sendable {
+    public let message: String
 }
 
 /// A buffer one thread fills and another reads after it finished.

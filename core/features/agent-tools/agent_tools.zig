@@ -16,5 +16,6 @@ test {
     _ = agent;
     _ = @import("claude_args.zig");
     _ = @import("claude_wrap.zig");
+    _ = @import("prompt_file.zig");
     _ = @import("continue_wrap.zig");
 }

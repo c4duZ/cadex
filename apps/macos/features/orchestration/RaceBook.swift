@@ -31,9 +31,10 @@ public final class RaceBook {
 
     /// A contender's state from its hooks (or `claude agents --json`), its
     /// session once known, and why it failed.
-    public func update(_ id: String, state: ContenderState, session: SessionLink? = nil, reason: String? = nil) throws {
+    public func update(_ id: String, state: ContenderState, session: SessionLink? = nil, reason: String? = nil, worktree: String? = nil) throws {
         guard var contender: Contender = try store.get(.contenders, id: id) else { throw RunError.unknown(id) }
         contender.state = state
+        contender.worktree = worktree ?? contender.worktree
         contender.session = session ?? contender.session
         contender.reason = reason ?? contender.reason
         try store.put(.contenders, id: id, parent: contender.race, contender)
