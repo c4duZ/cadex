@@ -26,6 +26,7 @@ func json(_ path: String) -> [String: Any] {
     (fm.contents(atPath: path).flatMap { try? JSONSerialization.jsonObject(with: $0) } as? [String: Any]) ?? [:]
 }
 
+let launchExit = await Checks.run(launchChecks)
 let exitCode = await Checks.run([
     ("the account key is the same rule as cadex statusline", {
         expect(SessionKit.accountKey("/Users/a/.claude-x") == "-Users-a--claude-x")
@@ -142,4 +143,4 @@ let exitCode = await Checks.run([
         expect(SessionKit.findTools(bundle: dir + "/none.app", source: "/nowhere/a/b/c/d/e/f.swift") == nil)
     }),
 ])
-exit(exitCode)
+exit(launchExit != 0 ? launchExit : exitCode)

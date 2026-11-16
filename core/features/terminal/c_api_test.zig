@@ -61,6 +61,7 @@ test "rejects invalid arguments instead of crashing" {
     try testing.expectEqual(status.invalid_argument, api.cadex_terminal_resize(null, 80, 24, 0, 0));
     try testing.expect(!api.cadex_terminal_has_foreground_process(null));
     try testing.expectEqual(@as(i32, 0), api.cadex_terminal_foreground_group(null));
+    try testing.expectEqual(@as(i32, 0), api.cadex_terminal_shell_pid(null));
     api.cadex_terminal_close(null);
 }
 

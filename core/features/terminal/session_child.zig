@@ -81,6 +81,16 @@ pub const Child = union(enum) {
         };
     }
 
+    /// The shell's pid (0 on Windows): the app knows a `cadex claude`
+    /// typed in one of its tabs by this pid among its ancestors (plan 22,
+    /// phase C). The daemon's shells are real processes too, its children.
+    pub fn shellPid(self: *Child) i32 {
+        return switch (self.*) {
+            .local => |l| if (has_daemon) @intCast(l.pid) else 0,
+            .remote => |*r| if (has_daemon) @intCast(r.pty.pid) else unreachable,
+        };
+    }
+
     pub fn currentDirectory(self: *Child, buf: *pty.DirectoryBuffer) ?[]const u8 {
         return switch (self.*) {
             .local => |l| l.currentDirectory(buf),

@@ -110,6 +110,10 @@ cp -R "$MACOS/shared/icons/Resources/FileIcons" "$APP/Contents/Resources/"
 cp -R "$MACOS/shared/icons/Resources/ProviderLogos" "$APP/Contents/Resources/"
 # The skills plugin the session kit passes by --plugin-dir (plan 20, ADR 0024).
 cp -R "$MACOS/features/agent-tools/plugin" "$APP/Contents/Resources/agent-plugin"
+# The zsh integration (docs/spec/terminal.md): the tabs' zsh starts from this
+# ZDOTDIR; TerminalShellIntegration.swift finds it here.
+mkdir -p "$APP/Contents/Resources/shell-integration"
+cp -R "$MACOS/features/terminal/shell-integration/zsh" "$APP/Contents/Resources/shell-integration/zsh"
 cp "$ROOT/LICENSE" "$ROOT/NOTICE" "$APP/Contents/Resources/"
 # The licenses of the memory engine's Rust crates, from its Cargo.lock (NOTICE
 # points here); a crate outside about.toml's accepted licenses fails the package.

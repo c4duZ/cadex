@@ -190,6 +190,13 @@ public final class TerminalSession {
         return cadex_terminal_foreground_group(handle)
     }
 
+    /// The shell's pid, 0 once it ended: a `cadex claude` typed in this
+    /// terminal has it among its ancestors (plan 22, phase C).
+    public var shellPid: Int32 {
+        guard let handle else { return 0 }
+        return cadex_terminal_shell_pid(handle)
+    }
+
     /// The screen to draw. Valid until the next call; main thread only.
     func currentFrame() -> UnsafePointer<cadex_terminal_frame>? {
         guard let handle else { return nil }

@@ -57,7 +57,7 @@ pub const Child = struct {
         const shell = try a.dupeZ(u8, shell_env.resolveShell(options.shell, env_shell));
         const cwd = if (options.cwd) |dir| (try a.dupeZ(u8, dir)).ptr else null;
         const argv = try shell_env.loginArgv(a, shell);
-        const envp = try shell_env.sessionEnv(a, try parentEnv(a));
+        const envp = try shell_env.sessionEnv(a, try parentEnv(a), shell);
         return spawn(shell.ptr, argv, envp, cwd, options.size);
     }
 

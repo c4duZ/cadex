@@ -81,6 +81,11 @@
   da tarefa), avisar (notificação e feed), preview.open com url=, a lista de sessões no ⌘K; o
   navegador do agente (fase C): o primeiro goto abre um preview ao lado do terminal dele, que fica
   sendo a aba daquele terminal (`AgentPreviewTabs`), e os pedidos respondem quando a página responde.
+- `TypedClaudeWiring.swift` (plano 22, fase C): o kit do `claude` digitado numa aba zsh; só para
+  quem tem o shell de um terminal do app acima (`shellPid` de todos os terminais, de todas as janelas
+  e spaces), pelo SessionKit.typedLaunch. O `main.swift` põe as variáveis da integração do zsh no
+  ambiente antes de abrir qualquer terminal (`exportTypedClaudeEnvironment`; numa instância de teste,
+  também o CADEX_APP_SOCKET dela, para as abas não pedirem ao app do dono).
 - `AgentsHibernate.swift` (plano 19, fase F): os hooks guardam no terminal o que traz o agente de
   volta; um relógio só, armado para o primeiro agente parado (agents.hibernateAfterMinutes, ninguém
   olhando), encerra com SIGTERM e marca a aba; o foco no terminal digita o `--resume` pelo kit; o fim

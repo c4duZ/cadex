@@ -92,6 +92,14 @@
   Ctrl+C sob saída contínua em menos de 0,2 s; o redesenho por linha suja ficou para quando
   medir lentidão.
 
+- Integração do zsh (plano 22, fase C; `../../../../docs/spec/terminal.md`):
+  `shell-integration/zsh/.zshenv` é a pasta `ZDOTDIR` que o núcleo põe no zsh das abas: devolve o
+  `ZDOTDIR` do dono, define a função `claude` (roda `$CADEX_TOOLS claude`, senão o `claude` de
+  verdade) e lê o `.zshenv` do dono. `TerminalShellIntegration.swift` acha a pasta (Resources do
+  pacote, onde o `../../packaging/build.sh` a copia, ou ao lado da fonte) e o app põe
+  CADEX_ZSH_INTEGRATION e CADEX_TOOLS no próprio ambiente antes de qualquer terminal e do daemon
+  (`../../app/main.swift`). TerminalSession.shellPid (e o do `TerminalView`) é o pid do shell, com que
+  o app reconhece um `cadex claude` vindo de uma aba dele (`../../app/TypedClaudeWiring.swift`).
 - `TerminalNotify.swift`: a notificação que um programa pediu (OSC 777, OSC 9) sai como o aviso
   TerminalView.programDidNotify; `isLookedAt` diz se você olha o terminal. O app posta
   (`../../app/ProgramNotifications.swift`).
@@ -104,4 +112,5 @@
   "terminou sem você ver" até o terminal ganhar o foco.
 
 ## Como validar
-- `make macos-test` passa.
+- `make macos-test` passa. TerminalTests roda um zsh de verdade com a pasta da integração: os
+  arquivos do dono (no `$HOME` e num `ZDOTDIR` próprio) e o `claude` chegando ao `cadex`.

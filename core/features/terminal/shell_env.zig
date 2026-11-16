@@ -39,18 +39,53 @@ pub fn loginArgv(arena: std.mem.Allocator, shell_path: []const u8) !Argv {
 }
 
 /// The parent's environment minus the variables the terminal owns, plus
-/// the terminal's own.
-pub fn sessionEnv(arena: std.mem.Allocator, parent: []const [*:0]const u8) !Envp {
+/// the terminal's own, plus the zsh integration when the shell is zsh.
+pub fn sessionEnv(arena: std.mem.Allocator, parent: []const [*:0]const u8, shell_path: []const u8) !Envp {
+    const zsh_dir = zshIntegration(parent, shell_path);
     var list: std.ArrayList(?[*:0]const u8) = .empty;
+    var user_zdotdir: ?[]const u8 = null;
     for (parent) |entry| {
-        if (isOwned(std.mem.span(entry))) continue;
+        const text = std.mem.span(entry);
+        if (isOwned(text)) continue;
+        if (valueOf(text, "CADEX_USER_ZDOTDIR") != null) continue;
+        const own_zdotdir = valueOf(text, "ZDOTDIR");
+        if (zsh_dir != null and own_zdotdir != null) {
+            user_zdotdir = own_zdotdir;
+            continue;
+        }
         try list.append(arena, entry);
     }
     for (added_vars) |entry| {
         try list.append(arena, (try arena.dupeZ(u8, entry)).ptr);
     }
+    if (zsh_dir) |dir| {
+        try list.append(arena, (try std.fmt.allocPrintSentinel(arena, "ZDOTDIR={s}", .{dir}, 0)).ptr);
+        if (user_zdotdir) |own| try list.append(arena, (try std.fmt.allocPrintSentinel(arena, "CADEX_USER_ZDOTDIR={s}", .{own}, 0)).ptr);
+    }
     const envp = try list.toOwnedSliceSentinel(arena, null);
     return envp.ptr;
+}
+
+/// The folder of Cadex's zsh startup files (CADEX_ZSH_INTEGRATION, which
+/// the app puts in its own environment at launch), when the shell is zsh.
+/// A tab's PATH cannot carry Cadex's `claude`: the login shell's
+/// path_helper and the owner's .zshrc reorder it, so zsh starts from a
+/// ZDOTDIR of Cadex's that gives the owner's back and defines a `claude`
+/// function (the owner, 2026-11-15; the technique Ghostty and iTerm use).
+/// bash and fish are left as they are.
+pub fn zshIntegration(parent: []const [*:0]const u8, shell_path: []const u8) ?[]const u8 {
+    if (!std.mem.eql(u8, std.fs.path.basename(shell_path), "zsh")) return null;
+    for (parent) |entry| {
+        const dir = valueOf(std.mem.span(entry), "CADEX_ZSH_INTEGRATION") orelse continue;
+        return if (dir.len > 0) dir else null;
+    }
+    return null;
+}
+
+/// The value of `name` when `entry` is `name=value`.
+fn valueOf(entry: []const u8, name: []const u8) ?[]const u8 {
+    if (entry.len <= name.len or entry[name.len] != '=' or !std.mem.startsWith(u8, entry, name)) return null;
+    return entry[name.len + 1 ..];
 }
 
 pub fn isOwned(entry: []const u8) bool {
@@ -82,7 +117,7 @@ test "environment replaces the terminal variables and keeps the rest" {
     var arena: std.heap.ArenaAllocator = .init(testing.allocator);
     defer arena.deinit();
     const parent = [_][*:0]const u8{ "HOME=/Users/cadu", "TERM=xterm-ghostty", "TERM_PROGRAM=iTerm.app", "PATH=/usr/bin" };
-    const envp = try sessionEnv(arena.allocator(), &parent);
+    const envp = try sessionEnv(arena.allocator(), &parent, "/bin/bash");
 
     var got: std.ArrayList([]const u8) = .empty;
     var i: usize = 0;
@@ -94,4 +129,53 @@ test "environment replaces the terminal variables and keeps the rest" {
     };
     try testing.expectEqual(expected.len, got.items.len);
     for (expected, got.items) |want, have| try testing.expectEqualStrings(want, have);
+}
+
+fn envList(arena: std.mem.Allocator, envp: Envp) ![]const []const u8 {
+    var got: std.ArrayList([]const u8) = .empty;
+    var i: usize = 0;
+    while (envp[i]) |entry| : (i += 1) try got.append(arena, std.mem.span(entry));
+    return got.items;
+}
+
+fn has(list: []const []const u8, want: []const u8) bool {
+    for (list) |entry| if (std.mem.eql(u8, entry, want)) return true;
+    return false;
+}
+
+fn hasName(list: []const []const u8, name: []const u8) bool {
+    for (list) |entry| if (valueOf(entry, name) != null) return true;
+    return false;
+}
+
+test "zsh starts from Cadex's ZDOTDIR and keeps the owner's to give back" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const parent = [_][*:0]const u8{ "HOME=/Users/c", "CADEX_ZSH_INTEGRATION=/App/zsh", "ZDOTDIR=/Users/c/.config/zsh", "CADEX_USER_ZDOTDIR=/stale" };
+    const got = try envList(a, try sessionEnv(a, &parent, "/bin/zsh"));
+    try testing.expect(has(got, "ZDOTDIR=/App/zsh"));
+    try testing.expect(has(got, "CADEX_USER_ZDOTDIR=/Users/c/.config/zsh"));
+    try testing.expect(!has(got, "ZDOTDIR=/Users/c/.config/zsh") and !has(got, "CADEX_USER_ZDOTDIR=/stale"));
+    try testing.expect(has(got, "CADEX_ZSH_INTEGRATION=/App/zsh") and has(got, "HOME=/Users/c"));
+
+    // No ZDOTDIR of the owner's: none to give back, zsh then uses $HOME.
+    const plain = [_][*:0]const u8{ "HOME=/Users/c", "CADEX_ZSH_INTEGRATION=/App/zsh" };
+    const zsh = try envList(a, try sessionEnv(a, &plain, "/opt/homebrew/bin/zsh"));
+    try testing.expect(has(zsh, "ZDOTDIR=/App/zsh") and !hasName(zsh, "CADEX_USER_ZDOTDIR"));
+}
+
+test "bash, fish and a zsh without the integration folder are left as they are" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const parent = [_][*:0]const u8{ "CADEX_ZSH_INTEGRATION=/App/zsh", "ZDOTDIR=/own" };
+    for ([_][]const u8{ "/bin/bash", "/opt/homebrew/bin/fish" }) |shell| {
+        const got = try envList(a, try sessionEnv(a, &parent, shell));
+        try testing.expect(has(got, "ZDOTDIR=/own") and !hasName(got, "CADEX_USER_ZDOTDIR"));
+    }
+    const without = [_][*:0]const u8{ "ZDOTDIR=/own", "CADEX_ZSH_INTEGRATION=" };
+    const zsh = try envList(a, try sessionEnv(a, &without, "/bin/zsh"));
+    try testing.expect(has(zsh, "ZDOTDIR=/own") and !hasName(zsh, "CADEX_USER_ZDOTDIR"));
+    try testing.expect(zshIntegration(&parent, "/bin/zshx") == null);
 }

@@ -14,4 +14,6 @@ test {
     _ = @import("edits.zig");
     _ = cli;
     _ = agent;
+    _ = @import("claude_args.zig");
+    _ = @import("claude_wrap.zig");
 }

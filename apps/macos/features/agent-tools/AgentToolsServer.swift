@@ -6,8 +6,8 @@ import SessionKit
 /// Cadex opened talk to the app, through `cadex hook` now and the CLI and MCP
 /// of plan 20 later. `~/Library/Application Support/Cadex/sockets/app.sock`,
 /// the folder 0700. A connection counts only from a process of this user
-/// (getpeereid) carrying a session's token; anything else is closed with no
-/// answer. One line in, one line out: `{"ok":true}` and, for a hook that
+/// (getpeereid) carrying a session's token, or asking for the kit from
+/// under one of Cadex's terminals; anything else is closed with no answer. One line in, one line out: `{"ok":true}` and, for a hook that
 /// should print something, its "stdout".
 public final class AgentToolsServer: @unchecked Sendable {
     public static let shared = AgentToolsServer()
@@ -24,6 +24,10 @@ public final class AgentToolsServer: @unchecked Sendable {
     /// checks its list and runs it, answering once through `reply` (a
     /// command may wait on a page). Without it, every request is refused.
     public var onCommand: (@MainActor (AgentCommandRequest, _ reply: @escaping @MainActor (AgentCommandAnswer) -> Void) -> Void)?
+    /// The kit for a `claude` typed in a Cadex terminal (AgentKitRequest.swift,
+    /// plan 22 phase C): the app checks the asking process is under one of
+    /// its terminals' shells and builds the kit. Without it, refused.
+    public var onKit: (@MainActor (AgentKitRequest) -> AgentKitAnswer)?
     public let path: String
     let tokens: AgentSessionTokens
     private let queue = DispatchQueue(label: "cadex.agent-tools.server", qos: .utility)
@@ -78,8 +82,10 @@ public final class AgentToolsServer: @unchecked Sendable {
         var timeout = timeval(tv_sec: 1, tv_usec: 0)
         setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
         guard let line = Self.readLine(client),
-              let object = (try? JSONSerialization.jsonObject(with: line)) as? [String: Any],
-              let token = object["token"] as? String, let kit = tokens.kitSession(of: token) else { close(client); return }
+              let object = (try? JSONSerialization.jsonObject(with: line)) as? [String: Any] else { close(client); return }
+        // No token in a tab: a typed `claude` is checked by its ancestry.
+        if object["kit"] as? Bool == true { return answerKit(object, client) }
+        guard let token = object["token"] as? String, let kit = tokens.kitSession(of: token) else { close(client); return }
         if let request = AgentCommandRequest.parse(object, kitSession: kit) { return answerCommand(request, client) }
         guard var event = AgentHookEvent.parse(object) else { close(client); return }
         event.kitSession = kit

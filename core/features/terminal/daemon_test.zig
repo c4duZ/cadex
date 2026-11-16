@@ -202,6 +202,8 @@ test "an app session through the daemon: detached, taken back with its screen, t
         try s.write("echo first-$((3+4))\n");
         try waitText(s, "first-7");
         try testing.expect(s.foregroundGroup() == 0);
+        // The daemon's shell is a real process: the app checks a typed `cadex claude` against it.
+        try testing.expect(s.child.shellPid() > 0 and std.c.kill(s.child.shellPid(), @enumFromInt(0)) == 0);
         // The app quits: the shell goes on in the daemon.
         s.detach();
     }

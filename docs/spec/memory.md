@@ -49,10 +49,15 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   fish, a sessão entra na memória pela importação, sem briefing.
 - Só sessões interativas. `claude -p`, `claude --version`, `claude --help` e todo subcomando
   (`mcp`, `plugin`, `update`, `doctor`, `auth`…, inclusive depois de opções, como
-  `claude --model haiku mcp list`) saem exatamente iguais aos de fora do Cadex. `--bg` e
-  `remote-control` também passam sem o kit.
-- Se o dono passa o próprio `--settings`, ele continua valendo inteiro, e os hooks do kit rodam
-  junto.
+  `claude --model haiku mcp list`) saem exatamente iguais aos de fora do Cadex. `--bg`,
+  `--remote-control`/`remote-control`, `--cloud` e `--desktop` também passam sem o kit.
+- Se o dono passa o próprio `--settings` (arquivo ou JSON), o Cadex junta o dele e o do kit num
+  arquivo só, porque dois `--settings` não se somam: vale o do dono em tudo, menos a status line
+  (a do Cadex, que chama a da conta); os hooks dos dois rodam (os do kit primeiro); no `env`, os
+  `CADEX_*` do kit ficam. Um `--settings` que não lê, ou o Cadex fechado, deixa o comando como foi
+  digitado, sem kit.
+- Só um processo dentro de um terminal do Cadex recebe o kit: o app confere, pelo sistema, que o
+  shell de um terminal dele está acima de quem pede.
 - Um `alias claude=` no shell do dono passa por cima do `claude` do Cadex: essa sessão fica sem
   memória.
 

@@ -178,6 +178,10 @@ bool cadex_terminal_has_foreground_process(cadex_terminal *terminal);
  * (or on Windows). The app matches an agent's pid to its terminal with it. */
 int32_t cadex_terminal_foreground_group(cadex_terminal *terminal);
 
+/* The shell's pid, 0 once it ended (or on Windows). The app knows a
+ * `cadex claude` typed in one of its terminals by it (plan 22, phase C). */
+int32_t cadex_terminal_shell_pid(cadex_terminal *terminal);
+
 /* The title the program set (OSC 0/2), not NUL-terminated. Free with
  * cadex_free. No title: *out is NULL and *out_len is 0. */
 cadex_status cadex_terminal_copy_title(cadex_terminal *terminal, uint8_t **out, size_t *out_len);

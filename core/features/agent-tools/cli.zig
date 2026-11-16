@@ -6,6 +6,7 @@ const std = @import("std");
 const statusline = @import("statusline.zig");
 const hook = @import("hook.zig");
 const agent = @import("agent.zig");
+const claude_wrap = @import("claude_wrap.zig");
 // The memory's hook (plan 22): the memory feature's entry, the only code
 // that talks to the engine's socket.
 const memory = @import("../memory/memory.zig");
@@ -15,6 +16,7 @@ const usage_text =
     \\       cadex hook <event>     (a Claude Code hook: tells the Cadex app, never waits)
     \\       cadex memory-hook <event> (a Claude Code hook: feeds the project memory)
     \\       cadex mcp              (the MCP server of the sessions Cadex opens)
+    \\       cadex claude [args…]   (the `claude` typed in a Cadex zsh tab: the session kit)
     \\
 ++ @import("commands.zig").usage;
 
@@ -25,6 +27,7 @@ pub fn main(init: std.process.Init.Minimal) u8 {
     if (std.mem.eql(u8, sub, "statusline")) return runStatusline();
     if (std.mem.eql(u8, sub, "hook")) return runHook(args.next() orelse return fail(usage_text), hook.run);
     if (std.mem.eql(u8, sub, "memory-hook")) return runHook(args.next() orelse return fail(usage_text), memory.hook.run);
+    if (std.mem.eql(u8, sub, "claude")) return runClaude(&args);
     // The agent's subcommands (plan 20): every word after the subcommand.
     var words_buf: [64][]const u8 = undefined;
     var n: usize = 0;
@@ -33,6 +36,14 @@ pub fn main(init: std.process.Init.Minimal) u8 {
         words_buf[n] = word;
     }
     return agent.main(sub, words_buf[0..n], usage_text);
+}
+
+/// Every word after `claude`, however many (a prompt may be long): the
+/// process becomes `claude`, so nothing here is freed.
+fn runClaude(args: anytype) u8 {
+    var words: std.ArrayList([:0]const u8) = .empty;
+    while (args.next()) |word| words.append(std.heap.page_allocator, word) catch return claude_wrap.run(&.{});
+    return claude_wrap.run(words.items);
 }
 
 const HookRun = *const fn (std.mem.Allocator, []const u8, []const u8) anyerror!?[]u8;

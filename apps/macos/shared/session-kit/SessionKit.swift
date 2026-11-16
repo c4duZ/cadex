@@ -114,17 +114,8 @@ public final class SessionKit {
     /// back, plan 19 phase F): its token stays, so the app still knows it.
     public func claudeCommand(configDir: String?, arguments: [String] = [], session reused: String? = nil,
                               defaultClaudeJSON: String = FileManager.default.homeDirectoryForCurrentUser.path + "/.claude.json") -> String {
-        let accountDir = configDir ?? FileManager.default.homeDirectoryForCurrentUser.path + "/.claude"
-        let key = Self.accountKey(accountDir)
-        var args: [String] = []
-        let session = reused ?? UUID().uuidString.lowercased()
-        let token = reused.flatMap(existingToken) ?? writeToken(session: session)
-        writeArguments(arguments, session: session)
-        if let settings = writeSettings(session: session, token: token, accountDir: accountDir) { args += ["--settings", settings] }
-        for dir in parts.values.flatMap(\.pluginDirs).sorted() { args += ["--plugin-dir", dir] }
-        if let mcp = writeMCP(key: key, isDefault: configDir == nil, defaultClaudeJSON: defaultClaudeJSON) { args += ["--mcp-config", mcp] }
-        return Self.compose(unset: unsetNames(isDefault: configDir == nil), configDir: configDir, arguments: args + arguments,
-                            pathFirst: agentToolsOnPath ? toolsPath.map { ($0 as NSString).deletingLastPathComponent } : nil)
+        let kit = launch(configDir: configDir, arguments: arguments, session: reused, defaultClaudeJSON: defaultClaudeJSON)
+        return Self.compose(unset: kit.unset, configDir: configDir, arguments: kit.arguments + arguments, pathFirst: kit.pathFirst)
     }
 
     /// What the tab must not inherit: CLAUDECODE and CLAUDE_CODE_* (a

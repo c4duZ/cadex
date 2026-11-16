@@ -16,7 +16,9 @@ extension SessionKit {
     /// it, 10 updates in a session's first seconds instead of 0 (tested
     /// 2026-11-15, 2.1.325, also through this env), and the terminal holds
     /// the frame until each ends (plan 19, phase E).
-    func writeSettings(session: String, token: String?, accountDir: String) -> String? {
+    /// `owner`: the owner's own `--settings` of a typed `claude`, merged in
+    /// (SessionKitLaunch.swift), since two `--settings` do not add up.
+    func writeSettings(session: String, token: String?, accountDir: String, owner: [String: Any]? = nil) -> String? {
         var settings: [String: Any] = [:]
         if let tools = toolsPath {
             var line: [String: Any] = ["type": "command", "command": Self.quote(tools) + " statusline"]
@@ -41,7 +43,8 @@ extension SessionKit {
             settings = Self.merge(settings, parts[id]!.settings)
             if let perAccount = parts[id]!.perAccount { settings = Self.merge(settings, perAccount(accountDir)) }
         }
-        guard !settings.isEmpty else { return nil }
+        if let owner { settings = Self.mergeOwner(kit: settings, owner: owner) }
+        guard !settings.isEmpty || owner != nil else { return nil }
         pruneSessions()
         return write(settings, name: "session-\(session).json", mode: 0o600)
     }

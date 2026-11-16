@@ -128,6 +128,12 @@ pub export fn cadex_terminal_foreground_group(session: ?*Session) callconv(.c) i
     return s.foregroundGroup();
 }
 
+/// The shell's pid, 0 once it ended (or on Windows).
+pub export fn cadex_terminal_shell_pid(session: ?*Session) callconv(.c) i32 {
+    const s = session orelse return 0;
+    return if (s.reaped) 0 else s.child.shellPid();
+}
+
 /// Visible text, one line per row, not NUL-terminated. Free with cadex_free.
 pub export fn cadex_terminal_copy_text(session: ?*Session, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) status.Code {
     const s = session orelse return status.invalid_argument;

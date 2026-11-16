@@ -7,8 +7,9 @@
   `../../../../docs/adr/0024-agent-tools.md`).
 
 ## O que eu não quero
-- Ouvir qualquer processo: só os deste usuário (`getpeereid`) com o token de uma sessão do Cadex;
-  o resto é fechado sem resposta.
+- Ouvir qualquer processo: só os deste usuário (`getpeereid`) com o token de uma sessão do Cadex,
+  ou, no pedido do kit sem token, de dentro de um terminal do Cadex (a ancestralidade lida do sistema,
+  nunca a lista de pids do pedido); o resto é fechado sem resposta ou recusado.
 - Fazer a sessão esperar: a resposta sai na hora (a permissão, plano 19 fase C, é a exceção da ADR
   0023).
 - Token, login ou credencial do Claude Code: o token aqui é do Cadex, um por sessão.
@@ -34,12 +35,18 @@
   `AgentToolsActivity.swift`: quem usou o Cadex e o último pedido, só em memória;
   `AgentToolsPlugin.swift` e `plugin/`: o plugin de skills curtas que o kit passa por `--plugin-dir`
   (no pacote, em Resources/agent-plugin). O app acha o terminal e roda (`../../app/AgentToolsWiring.swift`).
+- O kit do `claude` digitado (plano 22, fase C): `AgentKitRequest.swift` lê o pedido do
+  `cadex claude` (`"kit":true`, sem token), a ancestralidade de quem conectou (LOCAL_PEERPID e o
+  pai de cada um pelo sysctl) e `comesFrom(shells:)`; o servidor o passa a `onKit`, que responde na
+  hora com `AgentKitAnswer` (`args`, `unset`, `path_first`, ou a recusa). O app confere os shells dos
+  terminais e monta o kit (`../../app/TypedClaudeWiring.swift`).
 - O app (`../../app/AgentsWiring.swift`) liga o servidor ao abrir e manda cada evento à feature
   agents (`noteHook`: o id da sessão por pid, certo depois de /clear e --resume).
 
 ## Como validar
 - `make macos-test` (AgentToolsTests): socket de verdade numa pasta temporária, token certo, errado
   e ausente, token de sessão aberta depois, e o `stdout` de volta ao hook; o pedido de comando com a
-  sessão do kit e os pids, a resposta, a recusa sem token; a lista do agente; o plugin.
+  sessão do kit e os pids, a resposta, a recusa sem token; a lista do agente; o plugin; o pedido do
+  kit aceito e recusado pela ancestralidade, sem handler recusado.
 - Conferido em 2026-11-15 com o `claude` real: SessionStart, /clear (SessionEnd e o id novo), o
   servidor desligado no meio (o Claude não esperou) e de volta com o mesmo token, SessionEnd no /exit.

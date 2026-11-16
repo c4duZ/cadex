@@ -69,6 +69,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         startProgramNotifications()
         startHibernation()
         startAgentTools()
+        startTypedClaude()
         startComputerUse()
         let main = WindowSession(app: self, folder: WorkspaceFolder(), isMain: true)
         sessions.append(main)
@@ -291,6 +292,8 @@ if Bundle.main.bundleIdentifier == nil {
     let repo = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../../..")
     app.applicationIconImage = NSImage(contentsOf: repo.appendingPathComponent("docs/cadex-icon.png").standardized)
 }
+// Before any terminal or the terminal daemon starts (plan 22, phase C).
+AppDelegate.exportTypedClaudeEnvironment()
 let delegate = AppDelegate()
 app.delegate = delegate
 app.run()

@@ -7,6 +7,7 @@ import Checks
 // shared/checks/Checks.swift for why this is an executable).
 
 let keepExit = await Checks.run(keepChecks)
+let shellExit = await Checks.run(shellIntegrationChecks)
 let exitCode = await Checks.run([
     ("special keys go to the core's encoder", {
         expect(KeyEncoding.route(keyCode: 36, modifiers: [], optionAsMeta: false) == .core(key: UInt16(CADEX_KEY_ENTER), mods: 0))
@@ -311,4 +312,4 @@ let exitCode = await Checks.run([
         expect(tags.first?.number == 5, "\(tags)")
     }),
 ])
-exit(keepExit != 0 ? keepExit : exitCode)
+exit(keepExit != 0 ? keepExit : shellExit != 0 ? shellExit : exitCode)

@@ -24,6 +24,14 @@
   CLAUDE_CONFIG_DIR solto. `contribute`/`withdraw` com um `SessionKitPart`. `findTools` acha o `cadex`
   em Contents/Helpers ou, no `make run`, em `core/zig-out/bin`. `accountKey` é a regra do nome do
   arquivo de uso, igual à do `cadex statusline`.
+- `SessionKitLaunch.swift` (plano 22, fase C): `launch` devolve o kit em pedaços (`SessionKitLaunch`:
+  a sessão, os nomes a tirar do ambiente, a pasta primeira no PATH e `--settings`/`--plugin-dir`/
+  `--mcp-config`); `claudeCommand` é esses pedaços compostos. `typedLaunch` é o kit do `claude`
+  digitado numa aba (`cadex claude`), na conta da aba: o `--settings` do dono (arquivo, relativo à
+  pasta da aba, ou JSON) entra no arquivo do kit por `mergeOwner` (vale o do dono, menos a
+  `statusLine`; `hooks` somados por evento, os do kit primeiro; no `env`, os `CADEX_*` do kit
+  ficam); recusa o arquivo do próprio kit (o comando que o Cadex digita passa pela mesma função) e
+  o que não lê.
 - `SessionKitFiles.swift`: em `~/Library/Application Support/Cadex/kit`, um `session-<chave>.json`
   por sessão (0600, apagado depois de 2 dias) com a status line do Cadex (com o `padding` da do
   dono), o token da sessão na `env` (que chega aos hooks, teste de 2026-11-15; nunca digitado no
@@ -48,4 +56,5 @@
 ## Como validar
 - `make macos-test` (SessionKitTests): comando por conta, ambiente limpo, status line com o padding
   do dono, MCP só para as outras contas e com 0600, contribuições somadas (com agents.stateHooks desligada
-  também) e por conta, aspas só quando precisa.
+  também) e por conta, aspas só quando precisa; os pedaços iguais ao comando composto, o
+  `--settings` do dono juntado num arquivo só e as recusas.

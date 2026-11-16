@@ -42,6 +42,10 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   sessão do Claude Code (`docs/adr/0021-cadex-managed-accounts.md`). **Programa `cadex`**
   (`agent-tools`): o executável sem interface que essas sessões rodam: a status line que grava o uso
   da conta, os hooks e, no plano 20, a CLI e o servidor MCP com que o agente usa o Cadex.
+- **Integração do zsh** (`zsh integration`): a pasta de inicialização (`ZDOTDIR`) com que o Cadex
+  abre o zsh das abas; devolve a do dono e define a função `claude`, que roda `cadex claude`. O
+  **`claude` digitado** (`typed claude`) é a sessão aberta assim, à mão numa aba, que recebe o kit da
+  sessão na conta da aba (plano 22, fase C).
 - **Histórico de sessões** (`session history`): todas as conversas de todas as contas, indexadas
   para busca, na página History. **Retomar** (`resume`): abrir uma conversa antiga na conta dona.
   **Continuar em outra conta** (`continue in account`): abrir uma cópia da conversa em outra conta

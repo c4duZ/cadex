@@ -19,6 +19,19 @@ do dia a dia, mais simples por dentro e com o texto nítido.
   de prompt (oh-my-posh, Starship) continuam iguais, porque o aviso só é acrescentado ao prompt. O
   cmd fica sem integração, e a pasta da aba é a de abertura.
 - No Windows, a pasta avisada (file:///C:/Users/x) vira `C:\Users\x`, com barras invertidas.
+- **Integração do zsh** (plano 22, fase C): no Mac, o zsh das abas abre com uma pasta de
+  inicialização do Cadex (`ZDOTDIR`), a técnica do Ghostty e do iTerm, porque prefixar o `PATH` não
+  funciona (o shell de login, com o path_helper, e o `.zshrc` do dono o reordenam). Essa pasta
+  devolve o `ZDOTDIR` do dono (ou nenhum, e o zsh lê o `$HOME`), lê o `.zshenv` dele e define uma
+  função `claude`; daí o zsh lê o `.zprofile`, o `.zshrc` e o `.zlogin` do dono como sempre. Não
+  escreve nada na tela, não falha a abertura, vale também para `zsh -c`, e um zsh aberto dentro da
+  aba já é o do dono, sem a função.
+  - A função roda `cadex claude`, que dá o kit da sessão ao `claude` interativo digitado na aba
+    (`docs/spec/memory.md`, "O `claude` digitado à mão"); sem o `cadex`, roda o `claude` de verdade.
+  - Um `alias claude=` ou uma função `claude` do dono passa por cima da do Cadex: aquela aba fica
+    sem o kit. Bash e fish não recebem nada.
+  - Funciona nos terminais mantidos (terminal.keepSessions): o daemon herda do app o ambiente que
+    liga a integração. Um daemon que já rodava antes de um app sem ela só a passa depois de sair.
 - Quando o shell termina (`exit`, Ctrl+D), o painel fecha. Se era o último painel da aba, a aba fecha.
 
 ### Abas
@@ -184,6 +197,8 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
   esconder o motivo.
 
 ## Casos de borda
+- `ZDOTDIR` próprio do dono: a aba o devolve antes de ler os arquivos dele; o `zsh` aninhado vê só
+  o do dono.
 - Área de transferência vazia: ⌘V não envia nada.
 - Vários arquivos copiados: todos os caminhos, na ordem copiada.
 - Imagem e texto juntos na área de transferência (comum ao copiar do navegador): vale a imagem.
@@ -199,6 +214,8 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
   tmux e terminal suspenso por atalho global. Podem entrar depois, cada um com a própria decisão.
 
 ## Critérios de aceite
+- [ ] Numa aba com zsh, `type claude` diz que é uma função; `echo $ZDOTDIR` mostra o do dono (ou
+      nada); o `.zshrc` do dono rodou; com `alias claude=` no `.zshrc`, vale o alias.
 - [ ] Com contraste mínimo 7, texto azul-escuro sobre fundo preto fica legível; com 1, fica como veio.
 - [ ] A altura de linha e as ligaduras mudam o terminal na hora (com Fira Code, `->` vira uma seta).
 - [x] Copiar um arquivo com espaço no nome no Finder e colar resulta num caminho que o shell aceita.

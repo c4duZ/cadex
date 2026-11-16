@@ -8,6 +8,8 @@ extension TerminalView {
     public var hasForegroundProcess: Bool { session?.hasForegroundProcess == true }
     /// The foreground program's process group, 0 for none (TerminalSession).
     public var foregroundGroup: Int32 { session?.foregroundGroup ?? 0 }
+    /// The shell's pid, 0 for none (TerminalSession).
+    public var shellPid: Int32 { session?.shellPid ?? 0 }
 
     /// The current directory of the session (OSC 7 or the foreground
     /// program's); new tabs and panes open there.

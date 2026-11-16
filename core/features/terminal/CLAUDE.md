@@ -6,7 +6,8 @@
 - Integração de shell (OSC 7) para saber o diretório atual de cada sessão.
 - Saber se uma sessão tem um processo rodando em primeiro plano (para avisar antes de fechar) e o
   grupo de processos dele (`cadex_terminal_foreground_group`: o app liga a sessão de um agente ao
-  terminal onde ela roda; 0 no Windows por enquanto).
+  terminal onde ela roda; 0 no Windows por enquanto) e o pid do shell (`cadex_terminal_shell_pid`:
+  o app reconhece um `cadex claude` digitado num terminal dele, plano 22 fase C).
 
 ## O que eu não quero
 - Qualquer outra feature, do núcleo ou do app, falando direto com a libghostty: só `model.zig`,
@@ -70,7 +71,11 @@
   seguras); espera, desliga (SIGHUP) e mata o filho. `pty_windows.zig`: ConPTY, shell (pwsh, senão
   Windows PowerShell) num Job Object; uma thread espera o processo e fecha o console, porque o
   ConPTY não fecha a saída sozinho quando o shell sai.
-- `shell_env.zig`: shell, argv de login e ambiente (TERM=xterm-256color, TERM_PROGRAM=Cadex).
+- `shell_env.zig`: shell, argv de login e ambiente (TERM=xterm-256color, TERM_PROGRAM=Cadex). A
+  integração do zsh (plano 22, fase C; `../../../docs/spec/terminal.md`): com o shell `zsh` e
+  CADEX_ZSH_INTEGRATION=<pasta> no ambiente (o app o põe no dele ao abrir), `ZDOTDIR=<pasta>` e o
+  `ZDOTDIR` que havia vai em CADEX_USER_ZDOTDIR (`zshIntegration`); bash e fish ficam como estão. Vale
+  para o PTY próprio e para o daemon, que abre os shells com o mesmo `pty_posix.zig`.
 - `shell_windows.zig`: a linha de comando do shell no Windows. PowerShell aberto sem argumentos
   ganha a integração de shell (-NoExit -EncodedCommand, depois do $PROFILE do usuário): avisa a
   pasta por OSC 7 pelo LocationChangedAction do PowerShell 7, sem mexer no prompt; no Windows
@@ -100,6 +105,8 @@
   linhas, caminho relativo, OSC 8).
 - `input.zig` testa setas em modo de aplicação, F-keys, modificadores, Ctrl/Meta e kitty.
 - `render_test.zig` cobre cores, estilos, inversão, largura dupla, emoji e cursor.
+- `shell_env.zig` testa a integração do zsh: zsh com e sem `ZDOTDIR` do dono, bash, fish e a pasta
+  vazia.
 - `daemon_test.zig`: o daemon numa thread com shells de verdade: a sessão sobrevive ao app, religa
   com o replay, termina sem app e guarda o código, close mata o shell, o segundo daemon e a versão
   errada são recusados, e o daemon sai sozinho sem sessão nem app.

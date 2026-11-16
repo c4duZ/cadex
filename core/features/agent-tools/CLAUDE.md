@@ -3,13 +3,15 @@
 ## O que eu quero
 - O programa `cadex` que as sessões de agente abertas pelo Cadex rodam (`../../../docs/spec/agent-tools.md`,
   `../../../docs/adr/0021-cadex-managed-accounts.md`, `../../../docs/adr/0022-terminal-daemon.md`):
-  `cadex statusline`, `cadex hook <evento>` e `cadex memory-hook <evento>` (plano 22); no plano 20 (`../../../docs/adr/0024-agent-tools.md`), os
+  `cadex statusline`, `cadex hook <evento>`, `cadex memory-hook <evento>` e `cadex claude` (plano 22); no plano 20 (`../../../docs/adr/0024-agent-tools.md`), os
   comandos com que o agente usa o Cadex, as skills e o servidor MCP.
 
 ## O que eu não quero
 - Ler, guardar ou repassar token, login ou credencial do Claude Code; falar com a rede. (O token
   da sessão é do Cadex: vem na env que o kit põe e só vai ao socket do app.)
 - Atrapalhar a sessão: erro é engolido, a status line do dono roda mesmo sem o uso gravado.
+- Quebrar o `claude` digitado: `cadex claude` sem app, recusado ou com qualquer erro roda o `claude`
+  de verdade exatamente como foi digitado, e nunca troca a conta (o CLAUDE_CONFIG_DIR da aba).
 - Depender da libghostty ou do resto do núcleo: só libc, `../../shared/fs.zig`, `../../shared/process.zig`
   e a entrada da feature memory (`../memory/memory.zig`), para o `cadex memory-hook`.
 
@@ -47,10 +49,26 @@
   tirados do `structuredPatch` (o `newStart` e as linhas `+`); um Write sem patch (o que cria)
   marca o arquivo inteiro, o que reescreve traz patch; nunca o arquivo (`originalFile`) nem o texto
   das linhas.
+- Plano 22, fase C: `cadex claude <args…>` é o que a função `claude` da integração do zsh roda
+  (`../../../apps/macos/features/terminal/shell-integration/zsh/.zshenv`). `claude_args.zig` decide:
+  passam direto `-p`/`--print`, `-v`/`--version`, `-h`/`--help`, `--bg`, `--remote-control`,
+  `--cloud`, `--desktop` e todo subcomando (`subcommands`: o `claude --help` do Claude Code 2.1.325
+  mais os escondidos achados na prova), achado como a primeira palavra que não é opção, pulando o
+  valor das opções que levam valor (`--x=v`, `-abc` e opções variádicas também); o resto é sessão
+  interativa, e o último `--settings` do dono sai das palavras. `claude_wrap.zig` pede o kit ao
+  socket do app (`{"v":1,"kit":true,"pids","config_dir","cwd","user_settings","args"}`, sem token: o
+  app confere a ancestralidade), espera até 3 s, tira do ambiente o que a resposta manda (`unset`),
+  põe `path_first` no PATH e executa o primeiro `claude` do PATH que não é o próprio `cadex` com
+  `args` do kit antes das palavras do dono. CADEX_CLAUDE_WRAP (o pid) pega um `claude` que chama
+  `cadex claude` de novo. `claude_args_check.py` (no `make manifests`) avisa, sem falhar, quando o
+  `claude` instalado tem subcomando ou opção com valor que a lista não conhece.
 - O build (`../../build.zig`, `addCli`) instala `zig-out/bin/cadex` só no Mac; o empacotamento o põe em
   Contents/Helpers.
 
 ## Como validar
 - `make core-test`: arquivos, nome da conta, status line do dono, JSON quebrado e a chamada de dentro;
-  a linha do pedido e a resposta, os atalhos virando ids, os guias e o servidor MCP com um app falso.
+  a linha do pedido e a resposta, os atalhos virando ids, os guias e o servidor MCP com um app falso;
+  as decisões do `cadex claude` (`--model haiku mcp list`, `-p`, `--version`, `claude`, um prompt,
+  `--resume abc`, `--settings x.json`), o pedido do kit, a resposta e o app ausente.
+- Na mão, sem o app: `CADEX_APP_SOCKET=/nada PATH=<pasta com um claude falso>:$PATH core/zig-out/bin/cadex claude --model haiku mcp list`.
 - Na mão: `echo '<json>' | CLAUDE_CONFIG_DIR=<pasta> CADEX_USAGE_DIR=<pasta> core/zig-out/bin/cadex statusline`.

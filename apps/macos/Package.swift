@@ -195,7 +195,7 @@ let package = Package(
             name: "Terminal",
             dependencies: ["CCadex", "CommandPalette", "Icons", "Menus", "Strings", "TempImages"],
             path: "features/terminal",
-            exclude: ["CLAUDE.md", "tests"],
+            exclude: ["CLAUDE.md", "tests", "shell-integration"],
             // @testable access for the feature's test executable.
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
