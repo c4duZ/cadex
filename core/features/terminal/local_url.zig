@@ -2,6 +2,10 @@
 //! (docs/spec/preview.md): `http://localhost:5173`, `127.0.0.1:8000`,
 //! `0.0.0.0:3000`, `[::1]:8080`, with or without `http://`. Each address is
 //! reported once per session; the app offers to open it in the preview.
+//! Also, with `http://` written, a name that may be a machine of the
+//! owner's tailnet (plan 23): one label (`ubuntu-dev`), a MagicDNS name
+//! (`*.ts.net`) or a 100.64/10 address. The core cannot know the tailnet,
+//! so the app offers only the names of machines it knows.
 
 const std = @import("std");
 
@@ -46,6 +50,7 @@ pub const Detector = struct {
     /// The carried part is scanned again; `seen` drops the repeats. An
     /// address touching the end of the text may go on in the next read.
     fn scanText(self: *Detector, text: []const u8, context: anytype, comptime report: fn (@TypeOf(context), []const u8) void) void {
+        self.scanTailnet(text, context, report);
         for (hosts) |host| {
             var from: usize = 0;
             while (std.mem.indexOfPos(u8, text, from, host)) |start| {
@@ -54,17 +59,62 @@ pub const Detector = struct {
                 if (parsed.end == text.len) continue;
                 var buf: [max_url + 32]u8 = undefined;
                 const url = normalized(&buf, host, parsed) orelse continue;
-                if (self.seen.contains(url)) continue;
-                const copy = self.gpa.dupe(u8, url) catch return;
-                self.seen.put(self.gpa, copy, {}) catch {
-                    self.gpa.free(copy);
-                    return;
-                };
+                if (!self.once(url)) continue;
                 report(context, url);
             }
         }
     }
+
+    /// `http://<name>:<port>[/path]` whose name may be a tailnet machine.
+    fn scanTailnet(self: *Detector, text: []const u8, context: anytype, comptime report: fn (@TypeOf(context), []const u8) void) void {
+        const scheme = "http://";
+        var from: usize = 0;
+        while (std.mem.indexOfPos(u8, text, from, scheme)) |start| {
+            from = start + scheme.len;
+            var i = from;
+            while (i < text.len and i - from < 253 and (std.ascii.isAlphanumeric(text[i]) or text[i] == '-' or text[i] == '.')) i += 1;
+            if (i >= text.len or text[i] != ':') continue;
+            const name = text[from..i];
+            if (!mayBeTailnet(name)) continue;
+            var host_buf: [260]u8 = undefined;
+            const host = std.fmt.bufPrint(&host_buf, "{s}:", .{name}) catch continue;
+            const parsed = parse(text, from, host) orelse continue;
+            if (parsed.end == text.len) continue;
+            var buf: [max_url + 280]u8 = undefined;
+            const url = normalized(&buf, host, parsed) orelse continue;
+            if (!self.once(url)) continue;
+            report(context, url);
+        }
+    }
+
+    /// True the first time `url` is seen in this session.
+    fn once(self: *Detector, url: []const u8) bool {
+        if (self.seen.contains(url)) return false;
+        const copy = self.gpa.dupe(u8, url) catch return false;
+        self.seen.put(self.gpa, copy, {}) catch {
+            self.gpa.free(copy);
+            return false;
+        };
+        return true;
+    }
 };
+
+/// One label (no dot), a `*.ts.net` name or a 100.64/10 address; never
+/// the local names, which the main pass reports.
+fn mayBeTailnet(name: []const u8) bool {
+    if (name.len == 0 or name[0] == '-' or name[0] == '.' or name[name.len - 1] == '.') return false;
+    if (std.mem.eql(u8, name, "localhost")) return false;
+    if (std.mem.indexOfScalar(u8, name, '.') == null) return !std.ascii.isDigit(name[0]);
+    if (std.ascii.endsWithIgnoreCase(name, ".ts.net")) return true;
+    var parts = std.mem.splitScalar(u8, name, '.');
+    var octets: [4]u8 = undefined;
+    var n: usize = 0;
+    while (parts.next()) |part| : (n += 1) {
+        if (n == 4) return false;
+        octets[n] = std.fmt.parseInt(u8, part, 10) catch return false;
+    }
+    return n == 4 and octets[0] == 100 and octets[1] >= 64 and octets[1] <= 127;
+}
 
 /// Copies `raw` into `out` without ESC sequences (CSI, OSC, two-byte).
 /// Returns the length written.
@@ -162,4 +212,17 @@ test "an address split between two reads is found" {
     d.scan("host:4321/docs\n", &found, Found.add);
     try testing.expectEqual(@as(usize, 1), found.list.items.len);
     try testing.expectEqualStrings("http://localhost:4321/docs", found.list.items[0]);
+}
+
+test "with http://, names that may be tailnet machines; never a bare name, a public host or a local one twice" {
+    var d: Detector = .{ .gpa = testing.allocator };
+    defer d.deinit();
+    var found: Found = .{};
+    defer found.deinit();
+    d.scan("open http://ubuntu-dev:3000/ and http://pc.tail1234.ts.net:8080/app now\n", &found, Found.add);
+    d.scan("http://100.64.0.7:5173 and http://100.128.0.1:80 and http://10.0.0.1:80 and http://example.com:443\n", &found, Found.add);
+    d.scan("ubuntu-dev:3000 bare, http://localhost:4000 and http://1abc:9 and http://ubuntu-dev:3000/\n", &found, Found.add);
+    const want = [_][]const u8{ "http://ubuntu-dev:3000/", "http://pc.tail1234.ts.net:8080/app", "http://100.64.0.7:5173/", "http://localhost:4000/" };
+    try testing.expectEqual(want.len, found.list.items.len);
+    for (want, found.list.items) |w, got| try testing.expectEqualStrings(w, got);
 }

@@ -60,7 +60,9 @@
 - `local_url.zig`: endereços de servidor local na saída (localhost, 127.0.0.1, 0.0.0.0, [::1], com ou
   sem http://), sem sequências de escape (o Vite pinta a porta no meio do endereço), achados mesmo
   partidos entre duas leituras, uma vez por sessão; chegam ao app pelo callback on_local_url
-  (docs/spec/preview.md).
+  (docs/spec/preview.md). Com `http://` escrito, também um nome que pode ser de uma máquina da
+  tailnet (plano 23): uma parte só (`ubuntu-dev`), `*.ts.net` ou 100.64/10; o app só oferece os
+  nomes de máquinas que ele conhece.
 - `session_view.zig` e `c_api_view.zig`: rolagem, seleção, busca e links da sessão, separados para
   `session.zig` e `c_api.zig` ficarem abaixo de 300 linhas.
 - Rolagem e histórico no `model.zig`: pelo menos 10 mil linhas (limite em linhas com folga de uma

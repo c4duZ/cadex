@@ -127,6 +127,11 @@
   (`attachMachines`, chamado pelo `SSHWiring.swift`), lido só com o cartão aberto, e o
   machines.connect: aba nova com `ssh '<usuário>@<máquina>'`, o usuário pedido uma vez por máquina
   (o deste Mac sugerido; ⌥↩ pergunta de novo) e guardado em machines.users.
+- `DockerWiring.swift` (plano 23, fase D): machines.docker-context digita `export
+  DOCKER_CONTEXT='<máquina>'` (ou `unset`) no shell da aba com foco, ou numa aba nova se um programa
+  roda nela (o terminal não tem ambiente por aba); o item Docker da barra de status mostra o da aba
+  com foco; o shell de um contêiner numa aba e a porta no preview. `MachinesWiring.swift` também
+  liga TerminalView.isOwnHost ao `isMachine` (a oferta do preview para `http://ubuntu-dev:3000`).
 - `RunOnWiring.swift` (plano 23, fase C): o "Rodar em" no New Task (o nome e a máquina num alerta;
   as máquinas são os hosts do ~/.ssh/config e as da tailnet online), a pasta do repositório lá
   perguntada uma vez, clonar só com sim, a aba `ssh -t` com os hooks e o `claude`, abrir e remover a

@@ -38,15 +38,23 @@
   sistema, endereço e a resposta; estados sem login, sozinho na tailnet e leitura parcial.
 - `MachinesCommands.swift`: machines.connect (⌥↩ pergunta o usuário de novo), machines.ping (a
   paleta reabre com a resposta), machines.refresh, machines.copy-address (⌥↩ copia o IP).
+- Docker pela tailnet (fase D, `../../../../docs/adr/0032-workspace-recipes.md`): `Docker.swift` (o
+  `docker` do dono, nunca um cliente próprio: o contexto `<máquina>` com `host=ssh://`, criado se
+  faltar; nunca `docker context use`; a leitura do `docker context ls` e do `docker ps --all` em
+  JSON, as portas publicadas na máquina; a linha do `export DOCKER_CONTEXT` e do `docker exec`) e
+  `DockerCommands.swift` (machines.docker-context, com "Este Mac" primeiro, e machines.docker-ps:
+  as máquinas e depois os contêineres no ⌘K, um shell por contêiner e as portas dos que rodam).
+  `isMachine`: se um nome (curto, MagicDNS ou 100.x) é de uma máquina da tailnet, para a oferta do
+  preview; lê uma vez se ninguém leu, e quem pergunta junto espera a mesma leitura.
 - O app (`../../app/MachinesWiring.swift`) liga o grupo ao cartão do ssh, lê só com o cartão aberto
   (`onCardOpen`, pelo `onOpenChange` do `HoverCard`) e abre a aba com `ssh '<usuário>@<máquina>'`;
   o usuário é pedido uma vez por máquina e guardado em machines.users.
-- Status: fase B no código (2026-11-16).
+- Status: fases B (cartão do ssh) e D (Docker, a oferta do preview) no código (2026-11-16).
 
 ## Como validar
 - `make macos-test` (`tests/main.swift`, respostas gravadas em `tests/Fixtures.swift`, uma LocalAPI
   falsa em `tests/FakeDaemon.swift`): status completo, versão velha, JSON quebrado, sem login,
-  sozinho; pings; o fluxo de mudanças; a ordem da detecção; a prova e o cabeçalho no pedido, 401;
+  sozinho; pings; o fluxo de mudanças; o Docker (`tests/DockerTests.swift`); um nome ser máquina; a ordem da detecção; a prova e o cabeçalho no pedido, 401;
   nada lido sem ninguém olhando, o fluxo parando ao fechar, os 30 s quando o fluxo falha, desligado.
 - Na mão, com o Tailscale do dono: o cartão do ssh mostra o grupo em até 2 s, igual ao
   `tailscale status`; com o PC na tailnet, desligá-lo o marca offline.

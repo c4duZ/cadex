@@ -66,6 +66,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         startMemory()
         startAgentNotifications()
         startRemoteAgents()
+        startMachines()
         startAttention()
         startProgramNotifications()
         startHibernation()

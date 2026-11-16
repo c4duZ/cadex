@@ -62,6 +62,11 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// The Ports item's label and what it last read (SSHWiring.swift).
     weak var portsLabel: StatusLabel?
     var ports: [UInt16] = []
+    /// The Docker context each terminal was told to use (plan 23,
+    /// machines.docker-context), by terminal; the status bar shows the focused one's.
+    var dockerContexts: [ObjectIdentifier: String] = [:]
+    weak var dockerLabel: StatusLabel?
+    weak var dockerItem: StatusItem?
     var portsCard: HoverCard?
     /// The Memory page (MemoryPageWiring.swift) and its History watch,
     /// held only while the page shows.

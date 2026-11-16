@@ -32,6 +32,7 @@ public final class MachinesController {
 
     private var watchers: [UUID: () -> Void] = [:]
     private var observers: [UUID: () -> Void] = [:]
+    private var waiting: [() -> Void] = []
     private var handle: WatchHandle?
     private var timer: Timer?
     private var generation = 0
@@ -87,6 +88,26 @@ public final class MachinesController {
             guard self.generation == generation else { return }
             self.pings[machine.id] = .some(result ?? MachinePing(ms: nil, path: .idle, error: "no answer"))
             self.publish()
+        }
+    }
+
+    /// Whether `host` (a short name, a MagicDNS name or a 100.x address) is
+    /// a machine of the tailnet: the preview's offer for `http://ubuntu-dev:3000`
+    /// (plan 23). Reads the daemon once if nothing did yet; off, never.
+    public func isMachine(_ host: String, then: @escaping (Bool) -> Void) {
+        let check = { [weak self] in
+            let name = host.lowercased()
+            then(self?.status?.others.contains { $0.name.lowercased() == name || $0.dnsName.lowercased() == name || $0.ip == name } ?? false)
+        }
+        guard isEnabled else { return then(false) }
+        guard status == nil else { return check() }
+        // Several hosts asked before the first reading lands share it.
+        waiting.append(check)
+        guard waiting.count == 1 else { return }
+        refresh { [weak self] in
+            let checks = self?.waiting ?? []
+            self?.waiting = []
+            for check in checks { check() }
         }
     }
 

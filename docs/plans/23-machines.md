@@ -143,6 +143,17 @@ docs/adr/0022-terminal-daemon.md (do plano 19), docs/adr/0024-agent-tools.md (do
   - Contêiner com sidecar do Tailscale: aparece como máquina própria (o nome dado na receita), e o
     preview abre `http://<nome>:<porta>` direto. A oferta "Abrir no preview" do terminal (spec do
     preview) passa a reconhecer nomes MagicDNS além do localhost.
+  - No código em 2026-11-16: o terminal não tem ambiente por aba (cada shell herda o do app), então
+    machines.docker-context digita `export DOCKER_CONTEXT='<máquina>'` no shell da aba com foco
+    quando ele está no prompt, ou numa aba nova; o item Docker da barra de status segue a aba com
+    foco. machines.docker-ps ficou no ⌘K (máquina, depois contêineres: o shell e as portas no
+    preview), porque não existe um "cartão da máquina". O núcleo reporta também `http://<nome>:<porta>`
+    de um nome que pode ser da tailnet (uma parte só, `*.ts.net`, 100.64/10, só com `http://`), e o
+    app só oferece o de uma máquina que conhece (`isMachine`, uma leitura se preciso). O passo a passo
+    do WSL está na spec, **não testado**. Testado: o detector no núcleo, a leitura do `docker context
+    ls` (chaves lidas neste Mac) e do `docker ps`, as portas, a lista no ⌘K, o `export` passando pelo
+    sh. **Falta**, com o PC: o contexto de verdade pelo ssh, `docker ps` de lá, um contêiner com
+    sidecar virando máquina, e a oferta do preview com o nome dele.
 - **E. Ambiente descartável por worktree.** Pela ADR 0032: "Nova tarefa" com receita cria o
   contêiner na máquina escolhida, roda o preparo e abre o agente dentro dele; suspender
   (`docker pause`/`stop`), retomar e destruir seguem a worktree (hibernar do plano 19 suspende;

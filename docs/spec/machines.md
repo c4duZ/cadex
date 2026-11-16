@@ -52,13 +52,28 @@ celular. A rede é o Tailscale que o dono já tem (`docs/adr/0030-installed-tail
   ganha `DOCKER_CONTEXT=<máquina>` e o `docker` dela fala com o daemon de lá. Os outros terminais
   continuam no contexto de antes; o Cadex nunca roda `docker context use`.
 - A barra de status mostra o contexto da aba com foco ("docker: pc"), quando há um.
-- machines.docker-ps mostra no cartão da máquina os contêineres dela (nome, imagem, portas,
-  estado), com "Open Shell" (`docker exec -it <contêiner> bash` numa aba, `sh` se não houver bash)
-  e "Open in Preview" para cada porta publicada.
+- A aba ganha o contexto pelo shell dela: o Cadex digita `export DOCKER_CONTEXT='pc'` quando o
+  shell está no prompt; com um programa rodando, abre uma aba nova para isso. "This Mac" digita
+  `unset DOCKER_CONTEXT`. Um `unset` digitado à mão não é visto pelo Cadex: o item da barra de status
+  continua mostrando o último que ele pôs.
+- machines.docker-ps lista no ⌘K as máquinas e, escolhida uma, os contêineres dela (nome, imagem,
+  estado): escolher um abre o shell dele numa aba (`docker exec -it <contêiner> bash`, `sh` se não
+  houver bash), e cada porta publicada de um que roda tem a linha que a abre no preview
+  (`http://<máquina>:<porta>`). (No ⌘K e não no cartão: o cartão do ssh é para conectar; o plano
+  pedia o cartão da máquina, que não existe.)
 - Um contêiner com o sidecar do Tailscale (`docs/adr/0032-workspace-recipes.md`) entra na tailnet
   com nome próprio e aparece como mais uma máquina, em até 30 s depois de subir.
-- O passo a passo para o PC Windows do dono (o Tailscale **dentro** do Ubuntu do WSL, o `sshd` no
-  Ubuntu, o usuário no grupo `docker`) entra aqui quando for testado nele (plano 23, fase D).
+- O PC Windows do dono, pelo Ubuntu do WSL (o Windows não entra; **ainda não testado no PC**):
+  1. no Ubuntu, `curl -fsSL https://tailscale.com/install.sh | sh` e `sudo tailscale up` (entra com a
+     conta do dono; o Ubuntu vira uma máquina própria da tailnet);
+  2. `sudo apt install -y openssh-server` e `sudo service ssh start`; a chave do Mac em
+     `~/.ssh/authorized_keys` do Ubuntu, para o ssh não pedir senha (o Cadex nunca pergunta senha);
+  3. Docker: o Docker Desktop do Windows com a integração WSL ligada para esse Ubuntu, ou o
+     `docker.io` do Ubuntu; `sudo usermod -aG docker $USER` e entrar de novo;
+  4. com o systemd ligado no WSL (`/etc/wsl.conf`: `[boot]` e `systemd=true`, depois `wsl
+     --shutdown`), o `tailscaled` e o `sshd` sobem sozinhos quando o WSL volta;
+  5. conferir do Mac: `tailscale status` mostra o Ubuntu; `ssh <usuário>@<nome>.<tailnet>.ts.net`
+     entra sem senha; `docker --context <nome> ps` lista.
 
 ### Ambiente descartável
 - Ver "Ambiente descartável" em `docs/spec/worktrees.md`: a receita `.cadex/environment.toml` do

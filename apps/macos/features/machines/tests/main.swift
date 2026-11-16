@@ -52,7 +52,7 @@ final class Fake {
     }
 }
 
-let exitCode = await Checks.run([
+let machineTests: [(name: String, body: Checks.Body)] = [
     ("status: this Mac first, the others by name, with path, owner and last seen", {
         let status = Tailnet.status(data(statusRunning))!
         expect(status.isRunning && !status.partial, "\(status.state) \(status.partial)")
@@ -207,6 +207,19 @@ let exitCode = await Checks.run([
         controller.stop(id)
         expect(MachinesSection.make(width: 272, text: .white, secondary: .gray) { _ in } == nil, "nothing read: no group")
     }),
+    ("a host is a machine by its short name, MagicDNS name or 100.x address; read once if needed; never when off", {
+        let fake = Fake(statusRunning)
+        defer { try? fm.removeItem(atPath: fake.dir) }
+        var answers: [Bool] = []
+        for host in ["ubuntu-dev", "PC", "box.tail1234.ts.net", "100.64.0.4", "my-mac"] { fake.controller.isMachine(host) { answers.append($0) } }
+        expect(await eventually { answers.count == 5 })
+        expect(answers == [false, true, true, true, false], "\(answers): this Mac is not offered as another machine")
+        expect(fake.reads == 1, "read once for all of them")
+        fake.controller.isEnabled = false
+        var off: Bool?
+        fake.controller.isMachine("pc") { off = $0 }
+        expect(off == false && fake.reads == 1)
+    }),
     ("the answers in the card: direct, relay, offline seen hours ago", {
         let status = Tailnet.status(data(statusRunning))!
         let pc = status.others.first { $0.name == "pc" }!, box = status.others.first { $0.name == "box" }!, old = status.others.first { $0.name == "old-laptop" }!
@@ -267,7 +280,8 @@ let exitCode = await Checks.run([
         print("    watch stream: \(lines) line(s) in 3 s")
         expect(lines > 0)
     }),
-])
+]
+let exitCode = await Checks.run(machineTests + dockerTests)
 
 @MainActor func eventually(_ condition: () async -> Bool) async -> Bool {
     for _ in 0..<60 {

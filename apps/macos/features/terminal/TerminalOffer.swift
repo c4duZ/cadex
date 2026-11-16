@@ -58,7 +58,29 @@ final class TerminalOffer: NSView {
 
 extension TerminalView {
     /// Shows the offer for `url` (replacing an older one).
+    /// Whether a host that is not this Mac's is a machine the owner has
+    /// (plan 23: the core also reports `http://ubuntu-dev:3000`, which may be
+    /// a tailnet machine or anything else). The app answers, maybe after
+    /// reading the tailnet once; none set, only local addresses are offered.
+    public static var isOwnHost: (@MainActor (String, @escaping @MainActor (Bool) -> Void) -> Void)?
+
+    static func isLocal(_ host: String) -> Bool {
+        ["localhost", "127.0.0.1", "[::1]"].contains(host)
+    }
+
+    static func host(of url: String) -> String {
+        let rest = url.replacingOccurrences(of: "http://", with: "")
+        if rest.hasPrefix("[") { return String(rest.prefix { $0 != "]" }) + "]" }
+        return String(rest.prefix { $0 != ":" && $0 != "/" })
+    }
+
     func offerPreview(_ url: String) {
+        let host = Self.host(of: url)
+        guard !Self.isLocal(host) else { return showPreviewOffer(url) }
+        Self.isOwnHost?(host) { [weak self] own in if own { self?.showPreviewOffer(url) } }
+    }
+
+    private func showPreviewOffer(_ url: String) {
         guard let onOpenPreview else { return }
         let shown = url.replacingOccurrences(of: "http://", with: "")
         let offer = place(TerminalOffer(title: T("Open in preview  \(shown)", "Abrir no preview  \(shown)"), icon: .globe) { onOpenPreview(url) })

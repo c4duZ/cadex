@@ -57,6 +57,7 @@ extension WindowSession {
         commands.register(SidebarCommands.all({ [weak self] in self?.workspace?.sidebar }, palette: palette))
         commands.register(SSHCommands.all(palette: palette) { [weak self] alias in self?.connectSSH(alias) })
         commands.register(MachinesCommands.all(palette: palette) { [weak self] machine, ask in self?.connectMachine(machine, askUser: ask) })
+        commands.register(DockerCommands.all(palette: palette, actions: dockerActions()))
         commands.register(StatusBarCommands.all({ [weak self] in self?.workspace?.statusBar }, palette: palette,
                                                 customize: { [weak self] in self?.openCustomize("statusBar") }))
         makeSpaces(palette: palette)
@@ -234,6 +235,7 @@ extension WindowSession {
             self?.countTerminals()
             self?.showFocusedAccount()
             self?.forgetFocusedAgentNotification()
+            self?.showDockerContext()
             // Ports are read again on a tab or pane switch, only while the item shows.
             if let self, let label = self.portsLabel, label.window != nil { self.readPorts(into: label) }
         }

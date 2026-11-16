@@ -2,6 +2,7 @@ import AppKit
 import Machines
 import SSH
 import Strings
+import Terminal
 
 /// The tailnet's machines in this window (docs/spec/machines.md, plan 23):
 /// the "Tailnet" group under the hosts of the SSH card, read only while
@@ -57,5 +58,13 @@ extension WindowSession {
         let target = user + "@" + machine.address
         let quoted = "'" + target.replacingOccurrences(of: "'", with: "'\\''") + "'"
         tabs.activeTerminal?.session?.write("ssh \(quoted)\n")
+    }
+}
+
+/// For the whole app: a terminal's `http://ubuntu-dev:3000` is offered in
+/// the preview only when it names a machine of the tailnet (plan 23).
+extension AppDelegate {
+    func startMachines() {
+        TerminalView.isOwnHost = { host, answer in MachinesController.shared.isMachine(host, then: answer) }
     }
 }

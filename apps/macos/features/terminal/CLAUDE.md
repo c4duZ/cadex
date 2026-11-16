@@ -40,7 +40,9 @@
   terminal.open-pasted-image-in-tab (só no Mac por enquanto; a última imagem colada na aba).
 - Preview: `TerminalOffer.swift` mostra "Abrir no preview" no canto de baixo por 10 s
   quando o núcleo acha um servidor local na saída (onLocalURL da sessão); só aparece se quem
-  segura o terminal pôs `onOpenPreview`.
+  segura o terminal pôs `onOpenPreview`. Endereço que não é deste Mac (o núcleo reporta também
+  `http://<nome>:<porta>` de um nome que pode ser da tailnet, plano 23) só com o sim do app
+  (TerminalView.isOwnHost).
 - Colar vindo de outra feature: `TerminalAppPaste.swift` (`pasteFromApp`, o elemento escolhido no
   preview), bracketed e sem Enter, sem perguntar; recusa (false) quando a colagem não é segura e
   quem chamou copia. Imagens vão depois do texto, cada caminho numa colagem própria e ligadas à
