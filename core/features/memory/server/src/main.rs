@@ -20,6 +20,7 @@ mod auth;
 mod auto_index;
 mod auto_watch;
 mod auto_wiki;
+mod capture;
 #[cfg(debug_assertions)]
 mod debug_panic;
 mod engine;
@@ -30,6 +31,8 @@ mod import;
 mod import_jobs;
 mod import_state;
 mod lazy_embedder;
+mod marker;
+mod marker_query;
 mod project_key;
 mod project_paths;
 mod replay;

@@ -500,6 +500,7 @@ dependencies = [
  "tempfile",
  "tokio",
  "tokio-util",
+ "toml",
  "tower",
  "tracing",
  "tracing-subscriber",

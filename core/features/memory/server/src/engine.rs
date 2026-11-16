@@ -125,7 +125,9 @@ fn hook_state(
         // relative to the checkout (file_claim.rs adds it), and a file
         // outside it or one the sanitizer refuses (secrets) is not kept. A
         // few bytes per call, in the local store only (plan 22, phase C,
-        // 2026-11-16).
+        // 2026-11-16). The observation body still keeps upstream's excerpt of
+        // the tool's response (2,000 bytes; a Claude Write's response holds the
+        // file written): kept by the owner's choice after the real test.
         record_tool_names: true,
         index_file_paths: true,
         skip_wiki_checkpoints: false,

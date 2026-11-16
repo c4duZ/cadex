@@ -10,6 +10,11 @@
 //!   the order upstream's handoff and session_facts.rs read (`created_at`,
 //!   then rowid). Upstream bounds the value (no more than 5 min ahead).
 //! - on a PostToolUse, the file the call named (file_claim.rs).
+//! - on a tool event, the repository's `[capture] ignore_paths`
+//!   (capture.rs): dropped (202, nothing stored), metadata only, or kept.
+//!
+//! Before that, on `/hook`, `/handoff` and `/brief`, the query gets the
+//! pairs of the repository's `.ai-memory.toml` (marker_query.rs).
 //!
 //! An event replayed from the queue gets the time of its replay: still in
 //! the order it was queued, since the queue is replayed one at a time.
@@ -23,7 +28,8 @@ use axum::http::{StatusCode, header};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
 
-use crate::file_claim;
+use crate::capture::{self, Capture};
+use crate::{file_claim, marker_query};
 
 /// Same cap as engine.rs's body limit.
 const MAX_BODY: usize = 10 * 1024 * 1024;
@@ -41,13 +47,43 @@ fn arrival() -> Option<String> {
     jiff::Timestamp::from_microsecond(now.max(previous + 1)).ok().map(|t| t.to_string())
 }
 
-/// The body amended; `None` to send it unchanged.
+/// What the body became.
+enum Amended {
+    Unchanged,
+    Changed(Vec<u8>),
+    Dropped,
+}
+
+/// The body amended; `None` to send it unchanged (tests).
+#[cfg(test)]
 fn amend_body(body: &[u8], query: &HashMap<String, String>) -> Option<Vec<u8>> {
-    let mut payload: serde_json::Value = serde_json::from_slice(body).ok()?;
-    let object = payload.as_object_mut()?;
-    if !object.contains_key(OCCURRED_AT) {
-        object.insert(OCCURRED_AT.into(), arrival()?.into());
+    match amend_event(body, query) {
+        Amended::Changed(bytes) => Some(bytes),
+        _ => None,
     }
+}
+
+fn amend_event(body: &[u8], query: &HashMap<String, String>) -> Amended {
+    let Ok(mut payload) = serde_json::from_slice::<serde_json::Value>(body) else { return Amended::Unchanged };
+    let Some(object) = payload.as_object_mut() else { return Amended::Unchanged };
+    if !object.contains_key(OCCURRED_AT)
+        && let Some(at) = arrival()
+    {
+        object.insert(OCCURRED_AT.into(), at.into());
+    }
+    let event = query.get("event").map_or("", String::as_str);
+    let agent = query.get("agent").map_or("claude-code", String::as_str);
+    let cwd = query.get("cwd").map(String::as_str);
+    if capture::apply(&mut payload, event, agent, cwd) == Capture::Drop {
+        return Amended::Dropped;
+    }
+    match amend_claims(payload, query) {
+        Some(bytes) => Amended::Changed(bytes),
+        None => Amended::Unchanged,
+    }
+}
+
+fn amend_claims(mut payload: serde_json::Value, query: &HashMap<String, String>) -> Option<Vec<u8>> {
     if matches!(query.get("event").map(String::as_str), Some("post-tool-use" | "post_tool_use")) {
         file_claim::insert(&mut payload, query.get("cwd").map(String::as_str));
     }
@@ -55,7 +91,10 @@ fn amend_body(body: &[u8], query: &HashMap<String, String>) -> Option<Vec<u8>> {
 }
 
 /// Middleware on the inner router.
-pub(crate) async fn amend(req: Request, next: Next) -> Response {
+pub(crate) async fn amend(mut req: Request, next: Next) -> Response {
+    if let Some(uri) = marker_uri(req.uri()) {
+        *req.uri_mut() = uri;
+    }
     let query = (req.uri().path() == "/hook")
         .then(|| Query::<HashMap<String, String>>::try_from_uri(req.uri()).ok())
         .flatten();
@@ -64,14 +103,21 @@ pub(crate) async fn amend(req: Request, next: Next) -> Response {
     let Ok(bytes) = axum::body::to_bytes(body, MAX_BODY).await else {
         return StatusCode::PAYLOAD_TOO_LARGE.into_response();
     };
-    let bytes = match amend_body(&bytes, &query) {
-        Some(changed) => {
+    let bytes = match amend_event(&bytes, &query) {
+        Amended::Changed(changed) => {
             parts.headers.remove(header::CONTENT_LENGTH);
             Bytes::from(changed)
         }
-        None => bytes,
+        Amended::Unchanged => bytes,
+        Amended::Dropped => return (StatusCode::ACCEPTED, "dropped by capture.ignore_paths").into_response(),
     };
     next.run(Request::from_parts(parts, Body::from(bytes))).await
+}
+
+/// The URI with the marker's query pairs, when it has any.
+fn marker_uri(uri: &axum::http::Uri) -> Option<axum::http::Uri> {
+    let query = marker_query::amend(uri.path(), uri.query()?)?;
+    format!("{}?{query}", uri.path()).parse().ok()
 }
 
 #[cfg(test)]

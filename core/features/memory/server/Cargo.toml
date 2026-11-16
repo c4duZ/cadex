@@ -41,6 +41,9 @@ serde_json = "1"
 serde_urlencoded = "0.7"
 sha2 = "0.10"
 rmcp = { version = "3.9", features = ["server", "macros", "transport-io", "transport-streamable-http-server", "schemars"] }
+# Already in upstream's tree (its lock pins 1.2.1): reads a marker's
+# `[capture]` table, where upstream's cli uses `toml_edit` (plan 22, 2026-11-16).
+toml = "1"
 tokio = { version = "1", features = ["full"] }
 tokio-util = { version = "0.7", features = ["rt", "io"] }
 tower = { version = "0.5", features = ["util"] }

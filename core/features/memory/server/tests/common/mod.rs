@@ -76,9 +76,15 @@ pub fn start_with_env(dir: &Path, extra: &[&str], env: &[(&str, &str)]) -> Engin
 
 /// One HTTP/1.1 request over the Unix socket: (status, body).
 pub fn request(socket: &Path, method: &str, path: &str, body: Option<&str>, token: Option<&str>) -> Option<(u16, String)> {
+    let token: Vec<(&str, &str)> = token.map(|t| ("X-Cadex-Token", t)).into_iter().collect();
+    request_with(socket, method, path, body, &token)
+}
+
+/// `request` with any headers.
+pub fn request_with(socket: &Path, method: &str, path: &str, body: Option<&str>, headers: &[(&str, &str)]) -> Option<(u16, String)> {
     let mut stream = UnixStream::connect(socket).ok()?;
     let body = body.unwrap_or("");
-    let token = token.map(|t| format!("X-Cadex-Token: {t}\r\n")).unwrap_or_default();
+    let token: String = headers.iter().map(|(k, v)| format!("{k}: {v}\r\n")).collect();
     let head = format!(
         "{method} {path} HTTP/1.1\r\nHost: localhost\r\n{token}Content-Type: application/json\r\n\
          Accept: application/json, text/event-stream\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
@@ -121,6 +127,20 @@ pub fn tool(socket: &Path, name: &str, arguments: serde_json::Value) -> String {
         "params": {"name": name, "arguments": arguments},
     });
     ok(socket, "POST", "/mcp", Some(&call.to_string())).unwrap_or_else(|| panic!("{name} failed"))
+}
+
+/// `tool`, as the MCP call of hook session `session` (upstream's bridge
+/// header, which routes an unscoped call to the session's project).
+pub fn tool_in_session(socket: &Path, session: &str, name: &str, arguments: serde_json::Value) -> String {
+    let call = serde_json::json!({
+        "jsonrpc": "2.0", "id": 1, "method": "tools/call",
+        "params": {"name": name, "arguments": arguments},
+    });
+    let headers = [("X-Cadex-Token", TOKEN), ("X-Memory-Actor-Session-Id", session)];
+    request_with(socket, "POST", "/mcp", Some(&call.to_string()), &headers)
+        .filter(|(s, _)| *s == 200)
+        .map(|(_, b)| b)
+        .unwrap_or_else(|| panic!("{name} failed"))
 }
 
 pub fn query(pairs: &[(&str, &str)]) -> String {

@@ -35,8 +35,8 @@
     (streamable HTTP, JSON, sem estado), montados como o serve.rs do cli do upstream os monta, sem
     TCP, web, autenticação multiusuário (o `require_bearer` dele roda sem token, como anônimo) nem
     provedores. Do `HookState`: `record_tool_names` e `index_file_paths` ligados (o nome de cada
-    ferramenta, nunca os argumentos, e o caminho relativo ao checkout do arquivo que ela nomeou,
-    para o handoff) e o `profile_notify` com o aviso de "um SessionEnd terminou" que o
+    ferramenta, nunca os argumentos; o corpo guarda até 2.000 bytes do que ela devolveu, o padrão
+    do upstream, que numa gravação do Claude traz o conteúdo do arquivo; e o caminho relativo ao checkout do arquivo que ela nomeou, para o handoff) e o `profile_notify` com o aviso de "um SessionEnd terminou" que o
     `server/src/handoff.rs` espera (o worker de perfil, para quem ele existe, não roda aqui).
   - `server/src/serve.rs`: o memory.sock (modo 0600) servido pelo axum; uma trava em
     `<data-dir>/engine.lock` garante um engine só por pasta (dois SessionStart juntos não sobem
@@ -55,7 +55,14 @@
       nele o `occurred_at` da chegada, sempre crescente (o roteador responde 202 e grava numa tarefa
       à parte com a hora em que ela roda: eventos mandados em ordem saíam do store fora de ordem) e,
       no PostToolUse, o arquivo do `server/src/file_claim.rs`. Evento vindo da fila leva a hora em
-      que foi reenviado, na ordem da fila.
+      que foi reenviado, na ordem da fila. Antes disso, em `/hook`, `/handoff` e `/brief`, põe na
+      query os pares do .ai-memory.toml; e num evento de ferramenta aplica o `[capture]`.
+    - O .ai-memory.toml do repositório, lido pelo engine porque o `cadex memory-hook` não o lê
+      (o cliente do upstream lê): `server/src/marker.rs` (achar e ler: **cópia** do marker.rs do
+      cli do upstream, origem no topo, sem rotas da pasta pessoal nem perfis de servidor),
+      `server/src/marker_query.rs` (os pares que o `build_marker_query_suffix` do upstream manda;
+      o briefing do Cadex nasce ligado e o `workspace` da conta vale mais que o do arquivo) e
+      `server/src/capture.rs` (o `CapturePolicy` do upstream: some, só metadados ou fica).
     - `server/src/file_claim.rs`: o campo `_ai_memory_file` que o cliente do upstream manda e o
       `cadex memory-hook` não (o arquivo único que o `file_target` do upstream lê, relativo à pasta
       com `.git` acima do cwd, comparado sem ir ao disco).
@@ -124,6 +131,8 @@
     subpasta, worktree, workspace da conta, uma vez só, sessões de fora, ponto de controle);
     `server/tests/auto_memory.rs`: 4 tópicos gravados juntos dão 4 entradas no MEMORY.md e 4
     páginas, edição e remoção chegam à wiki, o que mudou com o engine fora entra ao subir;
+    `server/tests/marker.rs`: o .ai-memory.toml nomeia o projeto, desliga o briefing e tira um
+    arquivo da captura, e a chamada MCP com o `X-Memory-Actor-Session-Id` cai no projeto da sessão;
     `server/tests/session_end.rs`: o handoff de uma sessão com 10 edições lista os 10 arquivos, e
     um pânico forçado não perde evento (a fila espera e o engine seguinte a esvazia); ajudas em
     `server/tests/common/mod.rs`.
@@ -158,8 +167,9 @@
      semanas de upstream deram 3 linhas);
   3. `make memory-upstream-test` no PC;
   4. comparar, entre o commit velho e o novo, o serve.rs, o backfill.rs e o
-     transcript_capture.rs do cli do upstream e trazer ao `server/src/engine.rs` os passos novos de
-     inicialização (o compilador não pega um passo que falta) e ao código copiado (as funções que
+     transcript_capture.rs do cli do upstream, e o marker.rs e o `build_marker_query_suffix` do
+     hook_capture.rs (o que `server/src/marker.rs` e `server/src/marker_query.rs` repetem), e
+     trazer ao `server/src/engine.rs` os passos novos de inicialização (o compilador não pega um passo que falta) e ao código copiado (as funções que
      o topo de `server/src/replay.rs` e de `server/src/replay_capture.rs` lista) as mudanças na
      conversão de conversas e no que a captura guarda; anotar a versão nova no topo deles; ver
      também o `file_path_field` do hook.rs do cli (que o `server/src/file_claim.rs` repete) e se o
@@ -169,8 +179,8 @@
 
 ## Como validar
 - `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs`,
-  `server/tests/import.rs`, `server/tests/auto_memory.rs` e `server/tests/session_end.rs` (parte do
-  `make check`, em segundos).
+  `server/tests/import.rs`, `server/tests/auto_memory.rs`, `server/tests/marker.rs` e
+  `server/tests/session_end.rs` (parte do `make check`, em segundos).
 - `make core-test`: os testes do cliente (eventos, query com e sem workspace, fila, respostas HTTP,
   sem token).
 - Na mão, tudo em pastas temporárias: um `.token` em `CADEX_SESSIONS_DIR`, e

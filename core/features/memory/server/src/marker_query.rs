@@ -1,0 +1,156 @@
+//! The query pairs upstream's hook client adds from a repository's
+//! `.ai-memory.toml` (`build_marker_query_suffix` in the cli's
+//! hook_capture.rs at fa0ec25), added here to `/hook`, `/handoff` and
+//! `/brief` before upstream's routes read them, since `cadex memory-hook`
+//! does not read the marker (plan 22, 2026-11-16).
+//!
+//! The same keys and values, with Cadex's choices on top:
+//! - `briefing=1` by default (Cadex turns the brief on; upstream leaves it
+//!   off): `[briefing] inject_on_session_start` (or `inject_on_subagent_start`
+//!   on `/brief`) replaces it when the marker has it.
+//! - a `workspace` the client sent (the account's, with
+//!   memory.shareAcrossAccounts off) outranks the marker's: that setting is the
+//!   owner's privacy choice, and a committed file must not undo it.
+//! - not sent: the repository identity and `aliases` (Cadex names a project
+//!   by its main repository root, server-side), home routes and server
+//!   profiles.
+
+#[cfg(test)]
+use std::path::Path;
+
+use crate::marker;
+
+/// The query with the marker's pairs; `None` when nothing changes.
+pub(crate) fn amend(path: &str, query: &str) -> Option<String> {
+    if !matches!(path, "/hook" | "/handoff" | "/brief") {
+        return None;
+    }
+    let mut pairs: Vec<(String, String)> = serde_urlencoded::from_str(query).ok()?;
+    let cwd = pairs.iter().find(|(k, _)| k == "cwd").map(|(_, v)| v.clone())?;
+    let home = marker::home_dir();
+    let found = marker::find_settings_marker(&cwd, home.as_deref())?;
+    let text = std::fs::read_to_string(&found).ok()?;
+    apply(&mut pairs, path, &text);
+    serde_urlencoded::to_string(&pairs).ok()
+}
+
+fn set(pairs: &mut Vec<(String, String)>, key: &str, value: String) {
+    pairs.retain(|(k, _)| k != key);
+    pairs.push((key.to_string(), value));
+}
+
+fn has(pairs: &[(String, String)], key: &str) -> bool {
+    pairs.iter().any(|(k, v)| k == key && !v.is_empty())
+}
+
+/// A `[profile]` flag as upstream forwards it: `0` when falsy, else `1`.
+fn profile_flag(text: &str, key: &str) -> String {
+    let off = marker::parse_flag_in(text, key).is_some_and(|v| marker::is_falsy(&v));
+    if off { "0" } else { "1" }.to_string()
+}
+
+pub(crate) fn apply(pairs: &mut Vec<(String, String)>, path: &str, text: &str) {
+    if let Some(workspace) = marker::parse_key_in(text, "workspace")
+        && !has(pairs, "workspace")
+    {
+        set(pairs, "workspace", workspace);
+    }
+    if let Some(strategy) = marker::parse_key_in(text, "project_strategy") {
+        set(pairs, "project_strategy", strategy);
+    }
+    if let Some(project) = marker::parse_key_in(text, "project") {
+        set(pairs, "project", project);
+        set(pairs, "project_src", "marker".into());
+    }
+    if let Some(drop) = marker::parse_key_in(text, "drop_subagent_captures").filter(|v| !v.is_empty()) {
+        set(pairs, "drop_subagent", drop);
+    }
+    if let Some(global) = marker::parse_flag_in(text, "default_global") {
+        set(pairs, "default_global", global);
+    }
+    let brief_key = if path == "/brief" { "inject_on_subagent_start" } else { "inject_on_session_start" };
+    if let Some(briefing) = marker::parse_flag_in(text, brief_key) {
+        set(pairs, "briefing", briefing);
+    }
+    if let Some(budget) = marker::parse_flag_in(text, "max_chars") {
+        set(pairs, "briefing_budget", budget);
+    }
+    set(pairs, "profile_contribute", profile_flag(text, "contribute"));
+    set(pairs, "profile_consume", profile_flag(text, "consume"));
+    let off = |v: Option<String>| v.is_some_and(|v| marker::is_falsy(&v));
+    if off(marker::parse_scoped_flag_in(text, "recovery", "deliver_on_session_start", true)) {
+        set(pairs, "handoff", "0".into());
+    }
+    if off(marker::parse_scoped_flag_in(text, "recovery", "deliver_on_session_start", false)) {
+        set(pairs, "recovery", "0".into());
+    }
+}
+
+/// Whether `dir` has a marker of its own (tests).
+#[cfg(test)]
+fn marker_in(dir: &Path) -> bool {
+    dir.join(marker::MARKER_FILENAME).is_file()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn pairs(query: &str) -> Vec<(String, String)> {
+        serde_urlencoded::from_str(query).unwrap()
+    }
+
+    fn get<'a>(pairs: &'a [(String, String)], key: &str) -> Option<&'a str> {
+        pairs.iter().find(|(k, _)| k == key).map(|(_, v)| v.as_str())
+    }
+
+    #[test]
+    fn the_marker_names_the_project_and_turns_the_brief_off() {
+        let mut p = pairs("event=session-start&cwd=%2Fr&project_strategy=repo-root&briefing=1");
+        let text = "workspace = \"team\"\nproject = \"app\"\n[briefing]\ninject_on_session_start = false # off\nmax_chars = 4000\n";
+        apply(&mut p, "/handoff", text);
+        assert_eq!(get(&p, "workspace"), Some("team"));
+        assert_eq!(get(&p, "project"), Some("app"));
+        assert_eq!(get(&p, "project_src"), Some("marker"));
+        assert_eq!(get(&p, "briefing"), Some("false"));
+        assert_eq!(get(&p, "briefing_budget"), Some("4000"));
+        assert_eq!(get(&p, "profile_contribute"), Some("1"));
+        assert_eq!(get(&p, "handoff"), None);
+    }
+
+    #[test]
+    fn the_account_workspace_wins_and_delivery_opt_outs_are_separate() {
+        let mut p = pairs("cwd=%2Fr&workspace=acct-1&briefing=1");
+        let text = "workspace = \"team\"\n[handoff]\ndeliver_on_session_start = false\n[profile]\nconsume = no\n";
+        apply(&mut p, "/handoff", text);
+        assert_eq!(get(&p, "workspace"), Some("acct-1"));
+        assert_eq!(get(&p, "briefing"), Some("1"), "no briefing key keeps Cadex's default");
+        assert_eq!(get(&p, "handoff"), Some("0"));
+        assert_eq!(get(&p, "recovery"), None);
+        assert_eq!(get(&p, "profile_consume"), Some("0"));
+        let mut r = pairs("cwd=%2Fr");
+        apply(&mut r, "/brief", "[recovery]\ndeliver_on_session_start = 0\n[briefing]\ninject_on_subagent_start = true\n");
+        assert_eq!((get(&r, "recovery"), get(&r, "handoff"), get(&r, "briefing")), (Some("0"), None, Some("true")));
+    }
+
+    #[test]
+    fn a_capture_only_marker_is_transparent_and_home_bounds_the_walk() {
+        let home = tempfile::tempdir().unwrap();
+        let repo = home.path().join("repo");
+        let sub = repo.join("pkg");
+        std::fs::create_dir_all(&sub).unwrap();
+        std::fs::write(repo.join(".ai-memory.toml"), "project = \"outer\"\n").unwrap();
+        std::fs::write(sub.join(".ai-memory.toml"), "[capture]\nignore_paths = [\"*.env\"]\n").unwrap();
+        assert!(marker_in(&sub));
+        let found = marker::find_settings_marker(sub.to_str().unwrap(), Some(home.path())).unwrap();
+        assert_eq!(found, repo.join(".ai-memory.toml"));
+        let nearest = marker::find_marker(sub.to_str().unwrap(), Some(home.path())).unwrap();
+        assert_eq!(nearest, sub.join(".ai-memory.toml"));
+        let config = marker::read_capture_config(&nearest).unwrap();
+        assert_eq!(config.ignore_paths, vec!["*.env".to_string()]);
+        std::fs::write(sub.join(".ai-memory.toml"), "[capture]\nother = 1\n").unwrap();
+        assert!(marker::read_capture_config(&nearest).is_err(), "unknown key fails closed");
+        let elsewhere = tempfile::tempdir().unwrap();
+        assert!(marker::find_settings_marker(elsewhere.path().to_str().unwrap(), Some(home.path())).is_none());
+    }
+}
