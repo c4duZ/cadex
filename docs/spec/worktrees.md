@@ -27,6 +27,34 @@ comando, e o Cadex mostra em que pé cada uma está (`docs/plans/19-agent-sessio
 - A conversa não é copiada entre worktrees: de dentro de uma worktree, `claude --resume <id>` acha a
   conversa do repositório, e a memória automática é uma só (teste de 2026-11-14).
 
+### Rodar em outra máquina (plano 23, `docs/adr/0031-run-on-remote.md`)
+- O "New Task" ganha "Run on": este Mac (o padrão), um host do `~/.ssh/config` ou uma máquina da
+  tailnet (`docs/spec/machines.md`). worktrees.new-task-on abre o "New Task" já nessa escolha.
+- Numa máquina remota, uma aba de terminal abre `ssh` nela e roda lá os mesmos passos: acha o
+  repositório (pelo remoto `origin` do repositório daqui, na pasta que o dono informou na primeira
+  vez, lembrada por máquina; sem ele, oferece clonar), `git worktree add`, os hooks de preparo do
+  repositório e, por fim, `claude` na pasta da worktree, com o login do Claude do remoto. Nada é
+  copiado daqui (nem `.worktreeinclude`, nem conta, nem chave): o que o remoto precisa, ele tem.
+- A worktree remota aparece na lista com o nome da máquina ("corrigir-login · pc"), com status e
+  comentário como as outras. A sessão aparece em Agents como "em pc"
+  (`docs/spec/agents.md`).
+- worktrees.open-remote-shell abre outra aba ssh na pasta da worktree remota.
+- Fechar a aba não apaga a worktree remota; worktrees.remove numa remota roda o `git worktree
+  remove` lá, com a mesma confirmação.
+- Fica para depois (o `cadexd`): diff, editor e revisão do que está no remoto, e o estado da sessão
+  por hooks.
+
+### Ambiente descartável (plano 23, `docs/adr/0032-workspace-recipes.md`)
+- Num repositório com `.cadex/environment.toml`, o "New Task" mostra a receita (imagem, máquina,
+  portas) e cria, junto com a worktree, um contêiner na máquina da receita (ou na escolhida no
+  "Run on"); roda o comando de preparo dentro dele e abre o agente lá dentro.
+- O ambiente segue a tarefa: hibernar a tarefa (plano 19) suspende o contêiner; abrir de novo o
+  retoma; worktrees.remove pergunta também se destrói o contêiner (o padrão é sim). Comandos
+  worktrees.environment-up, worktrees.environment-suspend, worktrees.environment-resume e
+  worktrees.environment-destroy (este com confirmação).
+- A chave do Tailscale do sidecar vem do ambiente do dono na hora de subir; faltando, o Cadex diz
+  qual variável falta e não sobe o sidecar.
+
 ### Status e comentário
 - Cada worktree tem um status (a fazer, em andamento, em revisão, pronto) e um comentário curto do que
   está fazendo agora, guardados pelo Cadex (nunca no git). Mudados por worktrees.set-status e
@@ -56,6 +84,10 @@ comando, e o Cadex mostra em que pé cada uma está (`docs/plans/19-agent-sessio
 - Worktree apagada por fora (`git worktree remove`, pasta apagada): sai da lista, sem erro.
 - Repositório com worktrees criadas fora do Cadex: aparecem na lista, sem status até alguém dar um.
 - Hook de preparo que espera entrada: o terminal da tarefa recebe as teclas, como qualquer terminal.
+- Máquina remota offline ou ssh recusado: a aba mostra o erro do `ssh`, e a tarefa não aparece
+  na lista até a worktree existir lá.
+- Receita com erro (TOML inválido, imagem que não baixa): a worktree é criada, o ambiente não, e
+  o terminal da tarefa mostra o erro com "Try Again".
 
 ## Critérios de aceite
 - [ ] New Task num repositório com `.worktreeinclude` e um hook de preparo cria a worktree e o
@@ -67,3 +99,7 @@ comando, e o Cadex mostra em que pé cada uma está (`docs/plans/19-agent-sessio
 - [x] Remover com mudanças não salvas é recusado e diz quais arquivos.
 - [x] Status e comentário voltam iguais depois de reabrir o app.
 - [x] Testes do núcleo com um repositório falso, sem vazamento (`make core-test`).
+- [ ] "New Task" em "Run on: pc" cria a worktree no PC e abre `claude` lá numa aba; a sessão
+      aparece em Agents como "em pc"; fechar a aba não apaga a worktree remota.
+- [ ] Uma receita de teste sobe o contêiner, o agente roda dentro dele, suspender e retomar
+      preservam os arquivos, destruir remove o contêiner e pede confirmação.

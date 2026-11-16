@@ -1,6 +1,7 @@
 # 0001 — macOS primeiro, app nativo por plataforma
 
-Data: 2026-10-19 · Status: aceita
+Data: 2026-10-19 · Status: aceita; o "Linux fora do escopo" revisto em parte por
+`docs/adr/0031-run-on-remote.md` (um núcleo sem janela no Linux, só como servidor, depois)
 
 ## Contexto
 Apps desse tipo costumam ser feitos com Tauri ou Electron: rodam em macOS, Linux e Windows, mas

@@ -16,7 +16,11 @@ Ver no Cadex a página do servidor que um agente subiu no terminal (`npm run dev
   `http://127.0.0.1:8000`, `http://0.0.0.0:3000`, `http://[::1]:8080`), aparece no canto do terminal
   a oferta "Abrir no preview" com o endereço, por alguns segundos. Clicar abre a aba (ou recarrega a
   aba de preview que já mostra esse endereço). A oferta não se repete para o mesmo endereço na mesma
-  sessão.
+  sessão. Com o Tailscale rodando (plano 23), também conta como local o nome de uma máquina da
+  tailnet (`http://ubuntu-dev:3000`, `http://pc.<tailnet>.ts.net:8080`) e o IP 100.x dela; a lista de
+  nomes vem do app, e o preview não lê o Tailscale.
+- Na barra de uma aba de servidor local, com o Tailscale rodando, o app põe "Share on Tailnet" e,
+  com o Tailscale permitindo, "Share Publicly…" (`docs/spec/machines.md`).
 - Link da página que abre janela nova abre no navegador do sistema.
 - A página não tem acesso ao app nem a arquivos locais: nenhum objeto do app nem canal de mensagens
   na página, sem `file://`, cookies e dados guardados só enquanto o app está aberto. O seletor de

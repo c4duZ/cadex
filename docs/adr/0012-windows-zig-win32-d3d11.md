@@ -1,6 +1,7 @@
 # 0012 — App Windows: Zig com Win32 e Direct3D 11
 
-Data: 2026-10-19 · Status: aceita (revista em 2026-10-20: as declarações do app vêm dos headers)
+Data: 2026-10-19 · Status: aceita (revista em 2026-10-20: as declarações do app vêm dos headers; o
+escopo de plataformas revisto em parte por `docs/adr/0031-run-on-remote.md`, o núcleo sem janela no Linux)
 
 ## Contexto
 O macOS chegou à v1.0.0 (planos 1 a 8). O dono pediu para começar o Windows mantendo todas as

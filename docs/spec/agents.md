@@ -185,8 +185,14 @@ continua uma conversa em outra conta, sem nunca tocar em token
   do tempo de terminou, pediu permissão, perguntou, falhou e tarefa criada, de todas as sessões, a
   mais nova em cima, até 200, com filtro por tipo e por projeto; clicar leva ao terminal.
 - A página só acompanha as mudanças enquanto aparece.
-- Silenciar as notificações de uma máquina (agents.mutedMachines; este Mac agora, as remotas no
-  plano 23). agents.attention desliga o sininho, o feed e o número.
+- Silenciar as notificações de uma máquina (agents.mutedMachines): este Mac, cada host do
+  `~/.ssh/config` e cada máquina da tailnet (plano 23).
+- Sessões remotas (plano 23, `docs/adr/0031-run-on-remote.md`): com a página Agents aberta, o Cadex
+  roda `claude agents --json` por ssh em cada máquina onde uma tarefa do "Run on" está, e lista as
+  sessões de lá no projeto, com "em <máquina>". Sem kit nem hooks lá, o estado é o que esse comando
+  diz, e a notificação de "terminou" ou "esperando você" de uma sessão remota só vem enquanto a página
+  está aberta (nada de quadro "Precisa de você" para elas); um duplo clique leva à aba ssh da tarefa.
+  Página fechada, nenhum ssh roda. agents.attention desliga o sininho, o feed e o número.
 
 ### Quadro "Precisa de você" (plano 19)
 - agents.show-attention mostra um cartão por pedido aberto. Permissão: a ferramenta e o comando ou o

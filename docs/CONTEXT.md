@@ -119,6 +119,27 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Busca por sentido** (`embeddings`): achar texto parecido, não só igual, com o modelo de vetores
   local; carregado só enquanto é usado.
 
+## Máquinas
+- **Tailnet**: a rede do Tailscale do dono, as máquinas dele ligadas entre si com nome e IP 100.x,
+  cifradas; o Cadex usa o Tailscale que o dono instalou (`docs/adr/0030-installed-tailscale.md`).
+- **Máquina** (`machine`): um aparelho da tailnet (o PC, um Ubuntu do WSL, um contêiner com
+  sidecar), com nome MagicDNS (`pc.<tailnet>.ts.net`), sistema, online e caminho (direto ou relay).
+  **Este Mac** é a máquina onde o Cadex roda.
+- **LocalAPI**: a API local do daemon do Tailscale, de onde vêm a lista de máquinas, o WhoIs e o
+  fluxo de mudanças. **WhoIs**: a pergunta "de quem é este IP da tailnet"; o Cadex só aceita
+  aparelho do mesmo usuário.
+- **Rodar em** (`run on`): a escolha da máquina onde uma tarefa roda; no remoto ficam o git, a
+  worktree e o agente, aqui a janela (`docs/adr/0031-run-on-remote.md`). **`cadexd`**: o núcleo sem
+  janela num Linux, o "Rodar em" completo, que vem depois do mínimo por ssh.
+- **Contexto Docker** (`docker context`): o apontamento do `docker` para o daemon de uma máquina
+  (`ssh://<usuário>@<máquina>`); no Cadex, escolhido por aba, nunca global.
+- **Sidecar do Tailscale**: um contêiner do Tailscale ao lado do serviço, que põe o contêiner na
+  tailnet como máquina própria, alcançável pelo nome.
+- **Receita de ambiente** (`environment recipe`): o `.cadex/environment.toml` de um repositório, que
+  diz imagem, máquina, portas, preparo e sidecar (`docs/adr/0032-workspace-recipes.md`).
+  **Ambiente descartável**: o contêiner de uma tarefa, criado pela receita, que suspende, retoma e é
+  destruído com ela.
+
 ## Terminal
 - **Sessão** (`session`): um shell rodando num PTY, ligado a uma folha.
 - **PTY**: o pseudo-terminal do sistema por onde o shell lê e escreve.

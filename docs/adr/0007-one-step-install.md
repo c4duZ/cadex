@@ -1,6 +1,7 @@
 # 0007 — Instalação em um passo
 
-Data: 2026-10-19 · Status: aceita (revista no mesmo dia: sem conta Apple Developer por enquanto)
+Data: 2026-10-19 · Status: aceita (revista no mesmo dia: sem conta Apple Developer por enquanto; revista em
+parte por `docs/adr/0030-installed-tailscale.md`: uma feature opcional usa o Tailscale do dono)
 
 ## Contexto
 O Cadex é para desenvolvedores que trabalham com agentes de IA, mas instalar tem que ser muito

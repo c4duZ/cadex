@@ -18,6 +18,9 @@ num deles com um clique.
   fecha quando o ponteiro sai dos dois. Clicar num host abre uma aba com `ssh <host>` (ssh.connect,
   também no ⌘K); "Test Again" testa na hora.
 - Mudar o `~/.ssh/config` atualiza a lista sem reabrir o app.
+- Com o Tailscale do dono rodando, o cartão ganha, abaixo dos hosts, o grupo "Tailnet" com as
+  máquinas da tailnet (`docs/spec/machines.md`, plano 23). Quem põe o grupo no cartão é o app: o
+  ssh não lê o Tailscale. O número do item continua contando só os hosts do `~/.ssh/config`.
 
 ## Estados
 - **Sem `~/.ssh/config` ou sem hosts**: o item mostra "SSH" apagado; o cartão diz "No hosts in
@@ -36,3 +39,5 @@ num deles com um clique.
 - [ ] Desligar a rede faz o item ficar âmbar no próximo teste; "Test Again" volta para verde.
 - [ ] Escolher um host abre uma aba nova rodando `ssh <host>`.
 - [ ] Com ssh.ping desligado, nenhuma conexão sai do Cadex (conferido com `nettop`).
+- [ ] Com o Tailscale rodando, o grupo "Tailnet" aparece abaixo dos hosts; sem ele, o cartão fica
+      como antes.

@@ -2,7 +2,8 @@
 
 Depende de: planos 19 e 20 (worktree por tarefa, daemon, socket e CLI `cadex`) · Features: machines
 (nova, app macOS), ssh, worktrees, preview, agents, status-bar, settings, command-palette ·
-Decisões: ADR 0030, ADR 0031 e ADR 0032 (a escrever na fase A), `docs/adr/0004-clean-rewrite.md`,
+Decisões: `docs/adr/0030-installed-tailscale.md`, `docs/adr/0031-run-on-remote.md`,
+`docs/adr/0032-workspace-recipes.md` (escritas na fase A), `docs/adr/0004-clean-rewrite.md`,
 `docs/adr/0005-every-action-is-a-command.md`, `docs/adr/0007-one-step-install.md`,
 `docs/adr/0001-macos-first-native-app.md`, `docs/adr/0012-windows-zig-win32-d3d11.md`,
 docs/adr/0022-terminal-daemon.md (do plano 19), docs/adr/0024-agent-tools.md (do plano 20).
@@ -49,7 +50,7 @@ docs/adr/0022-terminal-daemon.md (do plano 19), docs/adr/0024-agent-tools.md (do
 ## Como eu quero
 **Fases:**
 - **A. ADRs, spec e termos.**
-  - ADR 0030 (docs/adr/0030-installed-tailscale.md, a criar): o Cadex usa o Tailscale instalado.
+  - ADR 0030 (`docs/adr/0030-installed-tailscale.md`): o Cadex usa o Tailscale instalado.
     Acha o daemon nesta ordem: socket do `tailscaled` aberto (/var/run/tailscaled.socket), app
     Standalone (porta e token em arquivos sob /Library/Tailscale/), app da App Store (arquivo no
     Group Container, que faz o macOS pedir permissão uma vez) e, sem nenhum, a CLI
@@ -57,7 +58,7 @@ docs/adr/0022-terminal-daemon.md (do plano 19), docs/adr/0024-agent-tools.md (do
     não promete estabilidade: campo que falta é pulado, nada trava, a página diz o que não leu.
     Identidade entre máquinas por WhoIs (só aparelhos do mesmo usuário). libtailscale recusada,
     com os números.
-  - ADR 0031 (docs/adr/0031-run-on-remote.md, a criar): "Rodar em" uma máquina remota. Mínimo:
+  - ADR 0031 (`docs/adr/0031-run-on-remote.md`): "Rodar em" uma máquina remota. Mínimo:
     aba ssh que cria a worktree e abre `claude` na pasta remota (o login do Claude fica no remoto).
     Completo: `cadexd`, o núcleo Zig sem janela num Linux, com o daemon do plano 19 (ADR 0022)
     servindo as sessões de lá e o Cadex do Mac como cliente pela tailnet, aceito só por WhoIs. O
@@ -65,14 +66,24 @@ docs/adr/0022-terminal-daemon.md (do plano 19), docs/adr/0024-agent-tools.md (do
     escopo de plataformas das ADRs 0001 e 0012 (macOS e Windows), e entra só depois do mínimo em
     uso. Sessão remota no mínimo não tem kit, hooks nem `cadex`: só o estado lido por
     `claude agents --json` via ssh.
-  - ADR 0032 (docs/adr/0032-workspace-recipes.md, a criar): receita de ambiente por repositório
+  - ADR 0032 (`docs/adr/0032-workspace-recipes.md`): receita de ambiente por repositório
     (.cadex/environment.toml, a criar em cada repo que usar): imagem ou Dockerfile, máquina onde
     roda, portas, comando de preparo, sidecar do Tailscale (nome, `TS_AUTHKEY` lido do ambiente do
     dono). O Cadex roda `docker` (local ou por contexto remoto); não fala com nuvem nenhuma nesta
     fase. Comportamento das receitas do Orca (orca.yaml), sem código dele (ADR 0004).
-  - docs/spec/machines.md (a criar); `docs/spec/ssh.md`, docs/spec/worktrees.md (do plano 19),
+  - `docs/spec/machines.md`; `docs/spec/ssh.md`, `docs/spec/worktrees.md` (do plano 19),
     `docs/spec/preview.md` e `docs/spec/agents.md` atualizadas; termos Tailnet, Máquina, Rodar em,
     Contexto Docker, Receita de ambiente e Ambiente descartável no `docs/CONTEXT.md`.
+  - Feita em 2026-11-16: `docs/adr/0030-installed-tailscale.md`, `docs/adr/0031-run-on-remote.md`,
+    `docs/adr/0032-workspace-recipes.md` e `docs/spec/machines.md`; `docs/spec/ssh.md`,
+    `docs/spec/worktrees.md`, `docs/spec/preview.md` e `docs/spec/agents.md` atualizadas; os termos
+    numa seção "Máquinas" do `docs/CONTEXT.md`; as ADRs 0001, 0007, 0012 e 0022 dizem no cabeçalho o
+    que foi revisto. A detecção da ADR 0030 conferida neste Mac (Tailscale 1.104.7, Standalone): sem
+    /var/run/tailscaled.socket; a porta no link /Library/Tailscale/ipnport, o token em
+    sameuserproof-<porta> (0640, root:admin); status, whois e watch-ipn-bus respondem com o token
+    e dão 401 sem ele; o grupo compartilhado do app fechado sem permissão; /usr/local/bin/tailscale
+    é um script que chama o binário do app. A tailnet do dono tinha só este Mac: as fases B a D
+    precisam do PC (o Ubuntu do WSL com o Tailscale dentro) na tailnet.
 - **B. Máquinas na barra lateral e no ssh.** Feature nova `machines` (só app macOS,
   apps/macos/features/machines/, a criar, com `CLAUDE.md`, testes e linha na tabela da raiz):
   - `TailscaleLocal`: acha o daemon (ADR 0030), lê o status (pares, nome MagicDNS, IP 100.x,
