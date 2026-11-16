@@ -1,4 +1,5 @@
 import AppKit
+import AgentTools
 import Machines
 import SSH
 import Strings
@@ -66,5 +67,8 @@ extension WindowSession {
 extension AppDelegate {
     func startMachines() {
         TerminalView.isOwnHost = { host, answer in MachinesController.shared.isMachine(host, then: answer) }
+        // A device of the owner reaching this Mac through the tailnet speaks
+        // the app socket's protocol (plan 23, phase F).
+        TailnetListener.shared.onAccepted = { AgentToolsServer.shared.serveRemote($0) }
     }
 }

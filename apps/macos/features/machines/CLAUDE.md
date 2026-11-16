@@ -46,6 +46,11 @@
   as máquinas e depois os contêineres no ⌘K, um shell por contêiner e as portas dos que rodam).
   `isMachine`: se um nome (curto, MagicDNS ou 100.x) é de uma máquina da tailnet, para a oferta do
   preview; lê uma vez se ninguém leu, e quem pergunta junto espera a mesma leitura.
+- Aceitar outras máquinas (fase F): `TailnetListener.swift`, TCP na porta 47100 preso ao IP 100.x
+  deste Mac (nunca a todas as interfaces, só IPv4), ligado por machines.acceptRemote (desligada) e
+  pelo controller quando a leitura dá o endereço e o dono deste Mac (`applyListener`); cada conexão
+  passa pelo WhoIs da LocalAPI e só o aparelho do mesmo dono vai a `onAccepted` (o app entrega ao
+  servidor do app.sock); o resto é fechado sem resposta.
 - O app (`../../app/MachinesWiring.swift`) liga o grupo ao cartão do ssh, lê só com o cartão aberto
   (`onCardOpen`, pelo `onOpenChange` do `HoverCard`) e abre a aba com `ssh '<usuário>@<máquina>'`;
   o usuário é pedido uma vez por máquina e guardado em machines.users.
@@ -54,7 +59,7 @@
 ## Como validar
 - `make macos-test` (`tests/main.swift`, respostas gravadas em `tests/Fixtures.swift`, uma LocalAPI
   falsa em `tests/FakeDaemon.swift`): status completo, versão velha, JSON quebrado, sem login,
-  sozinho; pings; o fluxo de mudanças; o Docker (`tests/DockerTests.swift`); um nome ser máquina; a ordem da detecção; a prova e o cabeçalho no pedido, 401;
+  sozinho; pings; o fluxo de mudanças; o listener com WhoIs falso (`tests/ListenerTests.swift`); o Docker (`tests/DockerTests.swift`); um nome ser máquina; a ordem da detecção; a prova e o cabeçalho no pedido, 401;
   nada lido sem ninguém olhando, o fluxo parando ao fechar, os 30 s quando o fluxo falha, desligado.
 - Na mão, com o Tailscale do dono: o cartão do ssh mostra o grupo em até 2 s, igual ao
   `tailscale status`; com o PC na tailnet, desligá-lo o marca offline.

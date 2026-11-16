@@ -56,7 +56,10 @@
   agents --json` de lá (interativas e em segundo plano; o formato das interativas não foi visto numa
   sessão real ainda), AgentSession.machine e a linha "· em pc"; o controller recebe a lista em
   `remote`, e `pageShown`/`onWatching` dizem ao app quando uma página Agents está na tela (o notifier
-  vigia o controller sempre, então vigiado não é olhado).
+  vigia o controller sempre, então vigiado não é olhado). O silêncio por máquina
+  (agents.mutedMachines: "local" e o nome de cada máquina) é conferido por sessão no
+  `AgentNotifier.swift` (`mutedMachines`): a sessão de uma máquina silenciada para sem notificação,
+  e o sininho e o feed continuam.
 - `AgentsLayout.swift`: grupos por projeto (o mais recente primeiro; esperando antes de
   trabalhando) e a linha de baixo ("main · conta", "esperando você · conta · fora do Cadex", "… ·
   em segundo plano").

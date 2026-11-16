@@ -142,6 +142,9 @@
   perguntada uma vez, clonar só com sim, a aba `ssh -t` com os hooks e o `claude`, abrir e remover a
   tarefa remota, a sessão remota em Agents abrindo o shell da tarefa; e `startRemoteAgents`: com uma
   página Agents na tela, o `claude agents --json` de cada máquina com tarefa, por ssh, a cada 30 s.
+  agents.mute-machine (fase F) lista este Mac, os hosts e as máquinas e liga ou desliga cada uma em
+  agents.mutedMachines. `MachinesWiring.swift` entrega a conexão aceita pelo listener da tailnet ao
+  servidor do app.sock (`serveRemote`).
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.

@@ -40,6 +40,9 @@
   pai de cada um pelo sysctl) e `comesFrom(shells:)`; o servidor o passa a `onKit`, que responde na
   hora com `AgentKitAnswer` (`args`, `unset`, `path_first`, ou a recusa). O app confere os shells dos
   terminais e monta o kit (`../../app/TypedClaudeWiring.swift`).
+- `serveRemote` (plano 23, fase F): a conexão de outra máquina da tailnet que o listener da feature
+  machines já conferiu pelo WhoIs; o mesmo protocolo, só com o token de uma sessão; o pedido do kit
+  é fechado (ele confia na ancestralidade de um processo deste Mac).
 - O app (`../../app/AgentsWiring.swift`) liga o servidor ao abrir e manda cada evento à feature
   agents (`noteHook`: o id da sessão por pid, certo depois de /clear e --resume).
 
@@ -47,6 +50,7 @@
 - `make macos-test` (AgentToolsTests): socket de verdade numa pasta temporária, token certo, errado
   e ausente, token de sessão aberta depois, e o `stdout` de volta ao hook; o pedido de comando com a
   sessão do kit e os pids, a resposta, a recusa sem token; a lista do agente; o plugin; o pedido do
-  kit aceito e recusado pela ancestralidade, sem handler recusado.
+  kit aceito e recusado pela ancestralidade, sem handler recusado; de outra máquina
+  (`tests/Remote.swift`), o token atendido e o kit e a falta de token fechados.
 - Conferido em 2026-11-15 com o `claude` real: SessionStart, /clear (SessionEnd e o id novo), o
   servidor desligado no meio (o Claude não esperou) e de volta com o mesmo token, SessionEnd no /exit.

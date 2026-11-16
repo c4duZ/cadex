@@ -1,5 +1,6 @@
 import Agents
 import AppKit
+import CommandPalette
 import Machines
 import SSH
 import Strings
@@ -149,6 +150,29 @@ extension WindowSession {
         let tasks = repository.map(WorktreesController.shared.remoteTasks) ?? []
         if let task = tasks.first(where: { $0.target.destination == destination && session.cwd.hasPrefix($0.path) }) { return openRemoteTask(task) }
         typeInNewTab(RemoteTaskScript.sshLine(RunTarget(label: session.machine ?? destination, destination: destination), RemoteTaskScript.shell(path: session.cwd)))
+    }
+
+    /// agents.mute-machine: this Mac, each ssh host and each tailnet
+    /// machine, muted or not; choosing one switches it (agents.mutedMachines).
+    func muteMachineCommand(palette: CommandPaletteController) -> Command {
+        Command(id: "agents.mute-machine", title: T("Mute or Unmute a Machine's Agents…", "Silenciar ou não os agentes de uma máquina…"),
+                keywords: ["mute", "silence", "notifications", "machine", "silenciar", "notificações", "máquina"], category: .terminal,
+                action: .run { [weak self] in
+                    palette.open(AgentChoiceSource(placeholder: T("The machine to mute or unmute", "A máquina a silenciar ou não"), empty: "", items: {
+                        guard let self else { return [] }
+                        let muted = Set(self.settings.store.settings.agents.mutedMachines)
+                        let names = ["local"] + self.runTargets().map(\.label)
+                        return names.map { name in
+                            PaletteItem(id: name, title: name == "local" ? T("This Mac", "Este Mac") : name,
+                                        detail: muted.contains(name) ? T("muted: choose to unmute", "silenciado: escolha para voltar") : T("notifies", "notifica"),
+                                        icon: .bell)
+                        }
+                    }, choose: { [weak self] name in
+                        self?.settings.store.update { s in
+                            if s.agents.mutedMachines.contains(name) { s.agents.mutedMachines.removeAll { $0 == name } } else { s.agents.mutedMachines.append(name) }
+                        }
+                    }))
+                })
     }
 
     private func typeInNewTab(_ line: String) {

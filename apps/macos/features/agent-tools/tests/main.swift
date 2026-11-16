@@ -32,6 +32,7 @@ func sendAsync(_ path: String, _ line: String) async -> String? {
 
 let commandExit = await Checks.run(commandChecks)
 let kitExit = await Checks.run(kitChecks)
+let remoteExit = await Checks.run(remoteChecks)
 let exitCode = await Checks.run([
     ("a session's token gets its event to the app and the hook's stdout back; no token, no answer", {
         // A short folder: a Unix socket's path has a 104-byte limit.
@@ -112,4 +113,4 @@ let exitCode = await Checks.run([
         answer?("{}")
     }),
 ])
-exit(commandExit != 0 ? commandExit : kitExit != 0 ? kitExit : exitCode)
+exit(commandExit != 0 ? commandExit : kitExit != 0 ? kitExit : remoteExit != 0 ? remoteExit : exitCode)

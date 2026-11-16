@@ -79,12 +79,32 @@ public final class AgentToolsServer: @unchecked Sendable {
         // Only this user's processes: another user is closed unheard.
         var uid: uid_t = 0, gid: gid_t = 0
         guard getpeereid(client, &uid, &gid) == 0, uid == getuid() else { close(client); return }
+        serve(client, local: true)
+    }
+
+    /// A connection from another machine of the owner's tailnet, already
+    /// checked by WhoIs (plan 23, TailnetListener): the same protocol, with a
+    /// session's token; never the kit request, which trusts the asking
+    /// process's ancestry on this Mac.
+    public func serveRemote(_ client: Int32) {
+        queue.async { [weak self] in
+            guard let self else { close(client); return }
+            var on: Int32 = 1
+            setsockopt(client, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size))
+            self.serve(client, local: false)
+        }
+    }
+
+    private func serve(_ client: Int32, local: Bool) {
         var timeout = timeval(tv_sec: 1, tv_usec: 0)
         setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
         guard let line = Self.readLine(client),
               let object = (try? JSONSerialization.jsonObject(with: line)) as? [String: Any] else { close(client); return }
         // No token in a tab: a typed `claude` is checked by its ancestry.
-        if object["kit"] as? Bool == true { return answerKit(object, client) }
+        if object["kit"] as? Bool == true {
+            guard local else { close(client); return }
+            return answerKit(object, client)
+        }
         guard let token = object["token"] as? String, let kit = tokens.kitSession(of: token) else { close(client); return }
         if let request = AgentCommandRequest.parse(object, kitSession: kit) { return answerCommand(request, client) }
         guard var event = AgentHookEvent.parse(object) else { close(client); return }

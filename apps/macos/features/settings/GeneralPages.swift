@@ -125,6 +125,10 @@ enum GeneralPages {
                                  T("With Tailscale running, the SSH card lists your tailnet's machines under the hosts. Cadex reads the list from your Tailscale only while the card or ⌘K shows it, and never changes its settings. Off, Cadex does not touch Tailscale at all.",
                                    "Com o Tailscale rodando, o cartão do SSH lista as máquinas da sua tailnet abaixo dos hosts. O Cadex lê a lista do seu Tailscale só enquanto o cartão ou o ⌘K a mostram, e nunca muda a configuração dele. Desligado, o Cadex não toca no Tailscale."),
                                  control: SettingsPage.toggle(store.settings.machines.tailscale) { on in store.update { $0.machines.tailscale = on } }),
+                SettingsPage.row(T("Accept your other devices", "Aceitar seus outros aparelhos"),
+                                 T("Cadex listens on this Mac's tailnet address only (never on the local network) for your own devices, checked by Tailscale; anyone else's is closed. For the remote Cadex and the phone that come later. Off, nothing listens.",
+                                   "O Cadex ouve só no endereço deste Mac na tailnet (nunca na rede local), para os seus próprios aparelhos, conferidos pelo Tailscale; o de outra pessoa é fechado. Para o Cadex remoto e o celular, que vêm depois. Desligado, nada ouve."),
+                                 control: SettingsPage.toggle(store.settings.machines.acceptRemote) { on in store.update { $0.machines.acceptRemote = on } }),
             ] + MemoryRows.make(store) + [
                 SettingsPage.section(T("Tasks", "Tarefas")),
                 SettingsPage.row(T("Folder of the tasks", "Pasta das tarefas"),

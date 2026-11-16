@@ -20,6 +20,16 @@ public final class MachinesController {
     public private(set) var pings: [String: MachinePing?] = [:]
     /// machines.tailscale. Off: everything stops and is forgotten.
     public var isEnabled = true { didSet { if isEnabled != oldValue { enabledChanged() } } }
+    /// machines.acceptRemote (off): the listener on this Mac's 100.x address.
+    /// Turned on, the daemon is read once for that address.
+    public var acceptRemote = false {
+        didSet {
+            guard acceptRemote != oldValue else { return }
+            if acceptRemote, isEnabled, status == nil { refresh() } else { applyListener() }
+        }
+    }
+    var listener: TailnetListener = .shared
+    var listenPort = TailnetListener.port
 
     /// Where the daemon was looked for (tests point it at a folder).
     var daemon = TailscaleDaemon()
@@ -70,6 +80,7 @@ public final class MachinesController {
             guard self.generation == generation else { return }
             self.reading = false
             self.status = result
+            self.applyListener()
             self.publish()
             done?()
         }
@@ -159,11 +170,23 @@ public final class MachinesController {
         reading = false
     }
 
+    /// Listening only with both settings on and this Mac's address known;
+    /// a new address (another tailnet) moves it.
+    func applyListener() {
+        guard isEnabled, acceptRemote, let me = status?.machines.first(where: \.isSelf), status?.isRunning == true else {
+            return listener.stop()
+        }
+        listener.start(ip: me.ip, owner: me.ownerID, port: listenPort)
+    }
+
     private func enabledChanged() {
         halt()
         status = nil
         pings = [:]
-        if isEnabled, !watchers.isEmpty { start() } else { publish() }
+        applyListener()
+        if isEnabled, !watchers.isEmpty { start() }
+        else if isEnabled, acceptRemote { refresh() }
+        else { publish() }
     }
 
     private func publish() {

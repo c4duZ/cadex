@@ -23,6 +23,8 @@ public struct Machine: Equatable, Sendable {
     public var os: String
     /// The owner's login, when the daemon says.
     public var owner: String
+    /// The owner's id on the tailnet ("" unknown): WhoIs compares it.
+    public var ownerID: String = ""
     public var online: Bool
     public var lastSeen: Date?
     public var path: MachinePath
@@ -105,6 +107,7 @@ public enum Tailnet {
                        ip: ips.first { !$0.contains(":") } ?? ips.first ?? "",
                        os: text("OS") ?? "",
                        owner: owner,
+                       ownerID: node["UserID"].map { String(describing: $0) } ?? "",
                        online: isSelf || online,
                        lastSeen: date(node["LastSeen"] as? String),
                        path: path,
@@ -117,6 +120,13 @@ public enum Tailnet {
         let precise = ISO8601DateFormatter()
         precise.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return precise.date(from: text) ?? ISO8601DateFormatter().date(from: text)
+    }
+
+    /// The owner's id in a LocalAPI `whois` answer (`UserProfile.ID`).
+    public static func whoisOwner(_ data: Data) -> String? {
+        guard let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              let profile = root["UserProfile"] as? [String: Any], let id = profile["ID"] else { return nil }
+        return String(describing: id)
     }
 
     /// The LocalAPI's `POST /localapi/v0/ping` answer (tested 2026-11-16,

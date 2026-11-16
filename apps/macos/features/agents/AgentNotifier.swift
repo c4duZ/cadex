@@ -30,6 +30,9 @@ public final class AgentNotifier: NSObject {
     /// Whether you are looking at that agent now (its terminal in front in
     /// the key window): then nothing is posted.
     public var isLooking: (AgentSession) -> Bool = { _ in false }
+    /// agents.mutedMachines: "local" (this Mac) or a machine's name; a
+    /// session of a muted machine stops without a notification.
+    public var mutedMachines: Set<String> = []
     /// A click on a notification: go to the session, by its id.
     public var onOpen: ((String) -> Void)?
     /// A click on a program's notification (posted by the app): its terminal's key.
@@ -111,6 +114,7 @@ public final class AgentNotifier: NSObject {
         if stop == .loginExpired { AgentUsageController.shared.loginFailed(session.account.dir) }
         guard wants(stop), !isLooking(session) else { return }
         didStop?(session, stop)
+        guard !mutedMachines.contains(session.machine ?? "local") else { return }
         post(session, stop)
     }
 

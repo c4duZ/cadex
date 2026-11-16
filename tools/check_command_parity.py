@@ -16,7 +16,7 @@ PREFIXES = "tab|pane|explorer|workspace|search|editor|markdown|terminal|git|hist
 LITERAL = re.compile(r'"((?:%s)\.[a-z0-9-]+)"' % PREFIXES)
 # Names of views and keys in the Mac's code, not commands (2026-10-20).
 # power.mode, sidebar.items and statusBar.left/right are settings.json keys, read by name in SettingsFile.swift.
-NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode", "sidebar.items", "statusBar.left", "statusBar.right", "agents.sessions", "agents.accountNames", "agents.hiddenAccounts", "agents.accounts", "ssh.ping", "agents.hiddenLogins", "agents.launchSkipPermissions", "agents.activeAccount", "agents.projectAccounts", "agents.history", "agents.stateHooks", "agents.attention", "agents.dockBadge", "agents.mutedMachines", "worktrees.root", "worktrees.setupHooks", "history.jsonl", "review.authorship", "memory.enabled", "memory.shareAcrossAccounts", "memory.consolidateInSession", "memory.consolidateAtContext", "memory.backgroundAgent", "memory.dailyBudgetUsd", "memory.requireApproval", "machines.tailscale", "machines.users"}
+NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode", "sidebar.items", "statusBar.left", "statusBar.right", "agents.sessions", "agents.accountNames", "agents.hiddenAccounts", "agents.accounts", "ssh.ping", "agents.hiddenLogins", "agents.launchSkipPermissions", "agents.activeAccount", "agents.projectAccounts", "agents.history", "agents.stateHooks", "agents.attention", "agents.dockBadge", "agents.mutedMachines", "worktrees.root", "worktrees.setupHooks", "history.jsonl", "review.authorship", "memory.enabled", "memory.shareAcrossAccounts", "memory.consolidateInSession", "memory.consolidateAtContext", "memory.backgroundAgent", "memory.dailyBudgetUsd", "memory.requireApproval", "machines.tailscale", "machines.users", "machines.acceptRemote"}
 # Mac-only for now: the in-app updater (docs/adr/0016-in-app-updates.md) comes
 # to Windows later. Windows-only ones (workspace.environment) need no entry.
 # The pasted-image tags (docs/spec/terminal.md, Ver a imagem colada) also
@@ -39,7 +39,7 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             # The tailnet's machines (plan 23, phase B): the Tailscale part waits for the Windows port.
             "machines.connect", "machines.ping", "machines.refresh", "machines.copy-address",
             "worktrees.new-task-on", "worktrees.open-remote-shell", "machines.docker-context", "machines.docker-ps",
-            "worktrees.environment-up", "worktrees.environment-suspend", "worktrees.environment-resume", "worktrees.environment-destroy",
+            "worktrees.environment-up", "worktrees.environment-suspend", "worktrees.environment-resume", "worktrees.environment-destroy", "agents.mute-machine",
             "memory.show", "memory.show-briefing", "memory.show-history", "memory.reindex", "memory.refresh", "memory.enable", "memory.approve", "memory.reject", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).

@@ -80,7 +80,7 @@ celular. A rede é o Tailscale que o dono já tem (`docs/adr/0030-installed-tail
   repositório sobe um contêiner por tarefa, que suspende, retoma e é destruído com ela.
 
 ### Aceitar outras máquinas
-- machines.acceptRemote (desligada): ligada, o Cadex escuta numa porta **só no IP 100.x** deste Mac
+- machines.acceptRemote (desligada): ligada, o Cadex escuta na porta 47100 **só no IP 100.x** deste Mac
   (nunca em todas as interfaces), para o `cadexd` e o celular que vêm depois. Cada conexão é
   conferida pelo Tailscale (WhoIs): só aparelhos do mesmo usuário da tailnet; os outros são
   fechados sem resposta. Desligada, nada escuta na rede.
@@ -95,9 +95,14 @@ celular. A rede é o Tailscale que o dono já tem (`docs/adr/0030-installed-tail
   deixar e a porta for 443, 8443 ou 10000; pede confirmação dizendo que a porta fica aberta para a
   internet. Parar desfaz.
 
+  A conexão aceita fala o mesmo protocolo do socket do app, com o token de uma sessão; o pedido do
+  kit (que confia num processo deste Mac) nunca é aceito de fora.
+
 ### Notificações por máquina
 - agents.mutedMachines lista este Mac, cada host do `~/.ssh/config` e cada máquina da tailnet;
-  as notificações de uma máquina silenciada não aparecem (`docs/spec/agents.md`).
+  as notificações de uma máquina silenciada não aparecem; o sininho e o feed continuam
+  (`docs/spec/agents.md`). agents.mute-machine liga e desliga cada uma no ⌘K; "Silenciar os agentes
+  deste Mac" nas configurações é o mesmo para este Mac.
 
 ### Configurações
 - machines.tailscale (ligada): desligada, nenhum socket do Tailscale aberto, nenhum arquivo dele

@@ -176,6 +176,15 @@ docs/adr/0022-terminal-daemon.md (do plano 19), docs/adr/0024-agent-tools.md (do
     que vêm depois.
   - Silenciar por máquina: agents.mutedMachines (plano 19) passa a listar cada host ssh e cada
     máquina da tailnet, além deste Mac.
+  - No código em 2026-11-16: a porta é 47100, só IPv4 no 100.x deste Mac; o listener só existe com
+    machines.acceptRemote e machines.tailscale ligadas e o endereço lido (ligar o aceite lê o
+    Tailscale uma vez). O WhoIs compara o UserProfile.ID com o dono deste Mac. A conexão aceita vai
+    ao servidor do app.sock (`serveRemote`): token de sessão sim, pedido do kit nunca. O silêncio
+    passou a ser conferido por sessão (antes "local" desligava todos os tipos de notificação), com
+    agents.mute-machine no ⌘K. Testado: o listener em 127.0.0.1 com WhoIs falso (o mesmo dono passa,
+    o outro é fechado, parado nada ouve), o controller ligando e desligando, o servidor de longe.
+    **Falta**, com o PC: uma conexão de verdade de lá, outro usuário recusado, e o `lsof -i` mostrando
+    só o 100.x.
 - **G. Compartilhar o preview.** Na feature machines (o Tailscale é dela), ligada ao preview pelo
   app (o preview não importa machines): machines.share-port roda `tailscale serve --bg <porta>`
   para a porta da aba de preview e mostra o `https://<host>.<tailnet>.ts.net` (copiar, abrir);

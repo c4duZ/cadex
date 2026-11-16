@@ -85,6 +85,7 @@ let exitCode = await Checks.run([
         expect(SettingsFile.read(Data("{}".utf8)).0.machines == Settings.Machines())
         var settings = Settings()
         settings.machines.tailscale = false
+        settings.machines.acceptRemote = true
         settings.machines.users = ["pc.tail1234.ts.net": "dev"]
         let (read, problems) = SettingsFile.read(SettingsFile.write(settings))
         expect(problems.isEmpty && read.machines == settings.machines, "\(read.machines) \(problems)")

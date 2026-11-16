@@ -208,6 +208,9 @@ public struct Settings: Equatable, Sendable {
         /// Read the owner's Tailscale. Off: no socket of it opened, no file
         /// of it read, no process of it run.
         public var tailscale = true
+        /// Listen on this Mac's tailnet address for the owner's other devices
+        /// (WhoIs, same user only). Off: nothing listens on the network.
+        public var acceptRemote = false
         /// MagicDNS name → the user ssh logs in as, asked once per machine.
         public var users: [String: String] = [:]
     }

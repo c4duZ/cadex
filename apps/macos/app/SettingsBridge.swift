@@ -82,6 +82,7 @@ final class SettingsBridge {
         AgentUsageController.shared.isEnabled = settings.agents.accounts
         SSHController.shared.pings = settings.ssh.ping
         MachinesController.shared.isEnabled = settings.machines.tailscale
+        MachinesController.shared.acceptRemote = settings.machines.acceptRemote
         AgentsController.shared.names = settings.agents.accountNames.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }
         AgentsController.shared.hidden = Set(settings.agents.hiddenAccounts.map(Self.expand))
         AgentHistoryController.shared.isEnabled = settings.agents.history
@@ -96,8 +97,10 @@ final class SettingsBridge {
         AgentUsageController.shared.activeAccount = settings.agents.activeAccount.isEmpty ? nil : Self.expand(settings.agents.activeAccount)
         AgentUsageController.shared.hiddenLogins = settings.agents.hiddenLogins.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }
         let agents = settings.agents
-        // This Mac muted (agents.mutedMachines): no agent notifies (plan 19).
-        let speaks = agents.sessions && !agents.mutedMachines.contains("local")
+        // agents.mutedMachines: "local" is this Mac, the others a machine's
+        // name (plan 23); checked per session by the notifier, the bell still counts.
+        let speaks = agents.sessions
+        AgentNotifier.shared.mutedMachines = Set(agents.mutedMachines)
         AgentNotifier.shared.kinds = .init(permission: speaks && agents.notifyPermission,
                                            question: speaks && agents.notifyQuestion,
                                            finished: speaks && agents.notifyFinished)
