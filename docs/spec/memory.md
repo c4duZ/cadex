@@ -162,7 +162,11 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   "Consolidate Memory Now", memory.consolidate-now), o agente recebe, ao terminar a resposta, o
   pedido de consolidar a sessão, e escreve ele mesmo as páginas pelas ferramentas da memória: a da
   sessão e as de decisões, armadilhas, regras e conceitos que a sessão deixou. Uma vez por marco;
-  nunca dois pedidos seguidos. O pedido aparece na conversa como uma mensagem do usuário.
+  nunca dois pedidos seguidos. O pedido aparece na conversa como uma mensagem do usuário ("Stop hook
+  feedback"), e a tela do Claude Code mostra "Stop hook error occurred": é o nome que ele dá a um
+  bloqueio no fim da resposta, não uma falha.
+- O contexto que conta é o que o Claude Code mostrou na última atualização da linha de status, que
+  vem depois do fim da resposta: o pedido chega no fim da resposta seguinte à que passou do limite.
 - As regras do pedido são as do ai-memory (as que o consolidador dele dá ao modelo: só o que a
   sessão mostrou, nada inventado, o estado final vale, preferências do projeto em
   `_prompts/consolidation.md`), e as páginas saem nos caminhos e tipos dele. Sem chave e sem outro

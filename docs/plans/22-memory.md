@@ -446,7 +446,11 @@ refaz o crate a partir dela.
     do escopo): com o pedido de "tarefa pronta" deixado antes, o Stop bloqueou, o Haiku buscou na
     memória, leu as observações da sessão e gravou num lote decisions/heron-3-cache-sqlite-wal.md
     e a página da sessão; a busca seguinte acha as duas. O marco do contexto testado com o hook e o
-    engine de verdade (40% nada, 75% bloqueia uma vez, nunca com `stop_hook_active`).
+    engine de verdade (40% nada, 75% bloqueia uma vez, nunca com `stop_hook_active`) e depois numa
+    sessão **interativa** de verdade (pseudo-terminal, status line do Cadex, limite em 1%): o status
+    line grava o contexto depois do Stop, então o marco veio no fim do segundo turno; o Haiku gravou
+    concepts/kite-7-uploader.md e a página da sessão. A tela mostra o bloqueio como "Stop hook error
+    occurred" (o transcript registra `hook_blocking_error`; o agente recebe "Stop hook feedback").
 - **G. Agente de memória de fundo (ADR 0029).**
   - Primeiro, a prova num script fora do app: `CLAUDE_CONFIG_DIR=<conta> claude -p` com o login da
     conta, `--model` barato, `--max-budget-usd`, `--no-session-persistence`, `--mcp-config` só com
