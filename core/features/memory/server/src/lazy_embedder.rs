@@ -6,6 +6,8 @@
 //! released after `idle` without use. While the model files are absent (first
 //! run) the embedder answers with an error, which the wiki and `memory_query`
 //! already treat as "FTS only", and fetches the files once in the background.
+//! Each load and unload is told to [`ModelEvents`]: after an unload the
+//! engine restarts itself to give the allocator's memory back (restart.rs).
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -15,6 +17,8 @@ use std::time::{Duration, Instant};
 use ai_memory_llm::{Embedder, LOCAL_DIM, LOCAL_MODEL, LlmError, LlmResult, LocalEmbedder};
 use tokio::sync::Mutex;
 
+use crate::restart::ModelEvents;
+
 /// Shared state between the embedder handle and its idle reaper task.
 struct Slot {
     model: Mutex<Option<Arc<LocalEmbedder>>>,
@@ -22,6 +26,7 @@ struct Slot {
     last_use_ms: AtomicU64,
     epoch: Instant,
     reaper_running: AtomicBool,
+    events: Arc<ModelEvents>,
 }
 
 /// An [`Embedder`] over the local all-MiniLM model with lazy load and idle unload.
@@ -34,7 +39,7 @@ pub struct LazyLocalEmbedder {
 
 impl LazyLocalEmbedder {
     /// A handle that loads from `<models_dir>/all-MiniLM-L6-v2/` on demand.
-    pub fn new(models_dir: PathBuf, idle: Duration) -> Self {
+    pub fn new(models_dir: PathBuf, idle: Duration, events: Arc<ModelEvents>) -> Self {
         Self {
             models_dir,
             idle,
@@ -43,6 +48,7 @@ impl LazyLocalEmbedder {
                 last_use_ms: AtomicU64::new(0),
                 epoch: Instant::now(),
                 reaper_running: AtomicBool::new(false),
+                events,
             }),
             fetching: Arc::new(AtomicBool::new(false)),
         }
@@ -90,6 +96,7 @@ impl LazyLocalEmbedder {
         tracing::info!(ms = started.elapsed().as_millis() as u64, "local embedding model loaded");
         let model = Arc::new(model);
         *guard = Some(model.clone());
+        self.slot.events.loaded.store(true, Ordering::SeqCst);
         self.spawn_reaper();
         Ok(model)
     }
@@ -115,6 +122,8 @@ impl LazyLocalEmbedder {
                     if now.saturating_sub(slot.last_use_ms.load(Ordering::Relaxed)) >= idle_ms {
                         *guard = None;
                         slot.reaper_running.store(false, Ordering::SeqCst);
+                        slot.events.loaded.store(false, Ordering::SeqCst);
+                        slot.events.unloaded.notify_one();
                         tracing::info!("local embedding model unloaded after idling");
                         return;
                     }

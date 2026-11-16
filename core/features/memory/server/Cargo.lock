@@ -488,11 +488,13 @@ dependencies = [
  "anyhow",
  "async-trait",
  "axum",
+ "libc",
  "rmcp",
  "serde_json",
  "tempfile",
  "tokio",
  "tokio-util",
+ "tower",
  "tracing",
  "tracing-subscriber",
 ]

@@ -6,10 +6,14 @@ const std = @import("std");
 const statusline = @import("statusline.zig");
 const hook = @import("hook.zig");
 const agent = @import("agent.zig");
+// The memory's hook (plan 22): the memory feature's entry, the only code
+// that talks to the engine's socket.
+const memory = @import("../memory/memory.zig");
 
 const usage_text =
     \\usage: cadex statusline       (Claude Code's status line, from a session Cadex opened)
     \\       cadex hook <event>     (a Claude Code hook: tells the Cadex app, never waits)
+    \\       cadex memory-hook <event> (a Claude Code hook: feeds the project memory)
     \\       cadex mcp              (the MCP server of the sessions Cadex opens)
     \\
 ++ @import("commands.zig").usage;
@@ -19,7 +23,8 @@ pub fn main(init: std.process.Init.Minimal) u8 {
     _ = args.next();
     const sub = args.next() orelse return fail(usage_text);
     if (std.mem.eql(u8, sub, "statusline")) return runStatusline();
-    if (std.mem.eql(u8, sub, "hook")) return runHook(args.next() orelse return fail(usage_text));
+    if (std.mem.eql(u8, sub, "hook")) return runHook(args.next() orelse return fail(usage_text), hook.run);
+    if (std.mem.eql(u8, sub, "memory-hook")) return runHook(args.next() orelse return fail(usage_text), memory.hook.run);
     // The agent's subcommands (plan 20): every word after the subcommand.
     var words_buf: [64][]const u8 = undefined;
     var n: usize = 0;
@@ -30,13 +35,16 @@ pub fn main(init: std.process.Init.Minimal) u8 {
     return agent.main(sub, words_buf[0..n], usage_text);
 }
 
-fn runHook(event: []const u8) u8 {
+const HookRun = *const fn (std.mem.Allocator, []const u8, []const u8) anyerror!?[]u8;
+
+/// Both hooks: stdin in, what they print out, exit 0 whatever happens.
+fn runHook(event: []const u8, run: HookRun) u8 {
     var gpa_state: std.heap.DebugAllocator(.{}) = .init;
     defer _ = gpa_state.deinit();
     const gpa = gpa_state.allocator();
     const input = readStdin(gpa) catch return 0;
     defer gpa.free(input);
-    const out = (hook.run(gpa, event, input) catch return 0) orelse return 0;
+    const out = (run(gpa, event, input) catch return 0) orelse return 0;
     defer gpa.free(out);
     writeAll(1, out);
     return 0;

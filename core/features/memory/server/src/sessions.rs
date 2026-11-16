@@ -1,0 +1,196 @@
+//! The `claude` processes the engine serves, and the engine's exit when the
+//! last one ends (plan 22, phase C): each SessionStart names its `claude` pid
+//! (`pid=` in the query or `X-Cadex-Pid`), a kqueue says when that process
+//! exits, and with no live session left the engine lingers 3 s and leaves.
+//! If no session registers within 10 s of the start, it leaves too. Same
+//! numbers as the terminal daemon (core/features/terminal/daemon.zig, idle()).
+//! No timer runs while sessions are alive.
+
+use std::collections::HashSet;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
+
+use axum::extract::{Request, State};
+use axum::middleware::Next;
+use axum::response::Response;
+use tokio::sync::Notify;
+use tokio_util::sync::CancellationToken;
+
+use crate::sys::ProcWatch;
+
+/// After the last session ends: a `/clear` ends a session and starts the
+/// next one in the same `claude`, and a new tab may be a moment away.
+pub(crate) const LINGER: Duration = Duration::from_secs(3);
+/// Started by a hook whose session never registered (it failed, or it was
+/// the app's warm-up run).
+pub(crate) const STARTUP_GRACE: Duration = Duration::from_secs(10);
+
+pub(crate) struct Sessions {
+    live: Mutex<HashSet<i32>>,
+    ever: AtomicBool,
+    changed: Notify,
+    watch: Option<ProcWatch>,
+}
+
+impl Sessions {
+    /// The registry, with a thread blocked on the kqueue for exits.
+    pub(crate) fn start() -> Arc<Self> {
+        let watch = ProcWatch::new()
+            .map_err(|error| tracing::warn!(%error, "no kqueue: sessions are not tracked"))
+            .ok();
+        let sessions = Arc::new(Self {
+            live: Mutex::new(HashSet::new()),
+            ever: AtomicBool::new(false),
+            changed: Notify::new(),
+            watch,
+        });
+        if sessions.watch.is_some() {
+            let waiter = sessions.clone();
+            std::thread::Builder::new()
+                .name("cadex-memory-sessions".into())
+                .spawn(move || {
+                    let Some(watch) = waiter.watch.as_ref() else { return };
+                    while let Ok(pid) = watch.wait() {
+                        waiter.ended(pid);
+                    }
+                })
+                .expect("sessions thread");
+        }
+        sessions
+    }
+
+    fn live(&self) -> std::sync::MutexGuard<'_, HashSet<i32>> {
+        self.live.lock().unwrap_or_else(|e| e.into_inner())
+    }
+
+    /// A session's `claude` is `pid`. A pid already gone counts as a session
+    /// that ended (it starts the linger). Pid 1 is launchd: the hook's parent
+    /// died and the hook was adopted.
+    pub(crate) fn register(&self, pid: i32) {
+        if pid <= 1 {
+            return;
+        }
+        self.ever.store(true, Ordering::SeqCst);
+        let alive = match &self.watch {
+            Some(watch) => watch.watch(pid).unwrap_or(false),
+            None => false,
+        };
+        if alive {
+            self.live().insert(pid);
+        }
+        self.changed.notify_one();
+    }
+
+    /// `pid` exited, or its session sent SessionEnd.
+    pub(crate) fn ended(&self, pid: i32) {
+        self.live().remove(&pid);
+        self.changed.notify_one();
+    }
+
+    /// The pids still alive, for a restart.
+    pub(crate) fn pids(&self) -> Vec<i32> {
+        let mut pids: Vec<i32> = self.live().iter().copied().collect();
+        pids.sort_unstable();
+        pids
+    }
+
+    fn is_empty(&self) -> bool {
+        self.live().is_empty()
+    }
+
+    /// Cancel `stop` once no session is left (see the module comment).
+    pub(crate) async fn exit_when_idle(self: Arc<Self>, started: Instant, stop: CancellationToken) {
+        loop {
+            if !self.is_empty() {
+                tokio::select! {
+                    () = self.changed.notified() => continue,
+                    () = stop.cancelled() => return,
+                }
+            }
+            let wait = if self.ever.load(Ordering::SeqCst) {
+                LINGER
+            } else {
+                STARTUP_GRACE.saturating_sub(started.elapsed())
+            };
+            tokio::select! {
+                () = tokio::time::sleep(wait) => {
+                    if self.is_empty() {
+                        tracing::info!("no agent session left; cadex-memory exits");
+                        stop.cancel();
+                        return;
+                    }
+                }
+                () = self.changed.notified() => {}
+                () = stop.cancelled() => return,
+            }
+        }
+    }
+}
+
+/// What a `/hook` request says about sessions: (event, pid).
+fn hook_session(query: &str, header_pid: Option<i32>) -> Option<(&str, i32)> {
+    let mut event = None;
+    let mut pid = header_pid;
+    for pair in query.split('&') {
+        match pair.split_once('=') {
+            Some(("event", value)) => event = Some(value),
+            Some(("pid", value)) => pid = value.parse().ok().or(pid),
+            _ => {}
+        }
+    }
+    Some((event?, pid?))
+}
+
+/// Middleware: SessionStart registers its `claude`, SessionEnd removes it.
+/// On the inner router, so a SessionStart replayed from the spool counts too.
+pub(crate) async fn track(State(sessions): State<Arc<Sessions>>, req: Request, next: Next) -> Response {
+    if req.uri().path() == "/hook" {
+        let header_pid = req
+            .headers()
+            .get("x-cadex-pid")
+            .and_then(|v| v.to_str().ok())
+            .and_then(|v| v.trim().parse().ok());
+        if let Some((event, pid)) = hook_session(req.uri().query().unwrap_or(""), header_pid) {
+            match event {
+                "session-start" | "session_start" | "SessionStart" => sessions.register(pid),
+                "session-end" | "session_end" | "SessionEnd" => sessions.ended(pid),
+                _ => {}
+            }
+        }
+    }
+    next.run(req).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_query_or_the_header_names_the_pid() {
+        assert_eq!(hook_session("event=session-start&agent=claude-code&pid=42", None), Some(("session-start", 42)));
+        assert_eq!(hook_session("event=session-end", Some(7)), Some(("session-end", 7)));
+        assert_eq!(hook_session("event=stop&pid=x", None), None);
+        assert_eq!(hook_session("pid=3", None), None);
+    }
+
+    #[tokio::test]
+    async fn the_last_session_ending_stops_the_engine_after_the_linger() {
+        let sessions = Sessions::start();
+        let mut child = std::process::Command::new("/bin/sleep").arg("30").spawn().unwrap();
+        sessions.register(child.id() as i32);
+        sessions.register(1);
+        assert_eq!(sessions.pids(), vec![child.id() as i32]);
+        let stop = CancellationToken::new();
+        let started = Instant::now();
+        let watcher = tokio::spawn(sessions.clone().exit_when_idle(started, stop.clone()));
+        tokio::time::sleep(Duration::from_millis(200)).await;
+        assert!(!stop.is_cancelled());
+        let killed = Instant::now();
+        child.kill().unwrap();
+        child.wait().unwrap();
+        tokio::time::timeout(LINGER + Duration::from_secs(2), watcher).await.unwrap().unwrap();
+        assert!(stop.is_cancelled() && killed.elapsed() >= LINGER - Duration::from_millis(100));
+        assert!(sessions.pids().is_empty());
+    }
+}

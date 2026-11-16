@@ -13,24 +13,65 @@
   fork, com ADR.
 - Configurar ou chamar um provedor de LLM do fork, servidor TCP, interface web ou multiusuário
   (ADR 0028). O empacotamento falha se o binário tiver o endereço de um provedor.
-- Outra feature falando com o `cadex-memory` sem passar por esta (fase C: o cliente do socket em
-  Zig).
+- Outra feature falando com o `cadex-memory` sem passar por esta: o `cadex memory-hook` (e, depois,
+  o `cadex mcp` e o app) usam o cliente desta pasta.
+- Hook que faz a sessão esperar: fora do SessionStart, nunca espera o engine.
 
 ## Como eu quero
 - `server/`: o crate `cadex-memory`, workspace própria (perfis e o `[patch]` do zip do upstream
   só valem na raiz). Versão do Rust no `server/rust-toolchain.toml` (a do upstream).
-  - `server/src/main.rs`: argumentos à mão (sem `clap` no binário), log em `CADEX_MEMORY_LOG`,
-    runtime tokio com 2 threads.
+  - `server/src/main.rs`: escolhe o subcomando, liga o log (`CADEX_MEMORY_LOG`), roda o engine
+    num runtime tokio de 2 threads e, se ele pediu, se executa de novo (`server/src/restart.rs`).
+  - `server/src/args.rs`: argumentos à mão (sem `clap` no binário): `--socket`, `--data-dir`,
+    `--tokens-dir` (padrão: a pasta de tokens do app), `--spool-dir` (padrão: `<data-dir>/spool`),
+    `--no-embeddings`, `--watcher` (o vigia da wiki, desligado por padrão: nada por relógio),
+    `--embed-idle-secs`, `--keep-alive` (não sai sem sessão: o aquecimento do app, testes) e os
+    que o reinício passa (`--sessions`, `--lock-fd`, `--listen-fd`).
   - `server/src/engine.rs`: store, wiki, embedder, roteador de hooks e de workstream e o MCP
     (streamable HTTP, JSON, sem estado), montados como o serve.rs do cli do upstream os monta, sem
-    TCP, web, autenticação nem provedores; servidos pelo axum num socket Unix modo 0600.
+    TCP, web, autenticação multiusuário (o `require_bearer` dele roda sem token, como anônimo) nem
+    provedores.
+  - `server/src/serve.rs`: o memory.sock (modo 0600) servido pelo axum; uma trava em
+    `<data-dir>/engine.lock` garante um engine só por pasta (dois SessionStart juntos não sobem
+    dois escritores).
+  - `server/src/auth.rs`: conexão de outro uid é fechada (credenciais do socket); todo pedido,
+    menos `/healthz`, leva o token da sessão em `X-Cadex-Token`, válido se algum
+    `<tokens-dir>/<kitSession>.token` o contém (pasta relida quando chega token novo); sem ele, 401.
+  - `server/src/sessions.rs`: o SessionStart traz o pid do `claude` (`pid=`), o kqueue avisa quando
+    ele termina e o SessionEnd o tira; sem sessão viva, espera 3 s e sai (fecha o store, apaga o
+    socket); sem nenhuma sessão em 10 s depois de subir, sai também. Nenhum timer com sessão viva.
+  - `server/src/restart.rs`: depois que o modelo descarrega, sem pedido em andamento, o engine se
+    executa de novo (~35 ms em debug) com as sessões vivas, a trava e o socket abertos, e volta ao
+    tamanho de parado (o alocador não devolvia os 68 MB). Sem sessão viva, sai em vez de reiniciar.
+  - `server/src/spool.rs`: ao subir, reenvia pela rota, em ordem, a fila que o hook deixou
+    (`{"v":1,"path":"/hook?…","body":"…"}` por arquivo, nome pela hora), sem passar pelo token;
+    apaga o que entrou, separa como `.rejected` o que foi recusado (4xx) e guarda o resto num 5xx.
+  - `server/src/sys.rs`: as chamadas que pedem `unsafe` (kqueue, `geteuid`, `fcntl`), só ali.
   - `server/src/lazy_embedder.rs`: o modelo de vetores carregado no primeiro uso e solto depois
     de `--embed-idle-secs` parado (o do upstream carrega ao subir e nunca solta); baixa o modelo
-    em segundo plano se faltar, e até lá a busca é só por texto.
+    em segundo plano se faltar, e até lá a busca é só por texto. Avisa carga e descarga ao reinício.
   - `server/src/transcripts.rs`: `cadex-memory scan-transcripts`, as sessões de um projeto em
     várias pastas de conta (base da importação do histórico, fase C).
   - `server/tests/smoke.rs`: o engine de ponta a ponta pelo socket (páginas pelo MCP, briefing
-    pelo SessionStart, busca), sem modelo e sem vigia.
+    pelo SessionStart, busca), sem modelo e sem vigia; `server/tests/lifecycle.rs`: token, fila,
+    saída quando o último `claude` termina e sessões passadas pelo reinício; ajudas em
+    `server/tests/common/mod.rs`.
+- O cliente do socket, em Zig (o único código que fala com o memory.sock; o `cadex memory-hook`
+  da feature agent-tools chama `memory.zig`):
+  - `memory.zig`: a entrada da feature (`hook`).
+  - `hook_client.zig`: `cadex memory-hook <evento>`. Sem `CADEX_SESSION_TOKEN`, nada. Lê da env
+    `CADEX_MEMORY_SOCKET` (padrão: sockets/memory.sock na pasta do Cadex), `CADEX_MEMORY_DIR`
+    (padrão: memory/ na pasta do Cadex), `CADEX_MEMORY_BIN` e `CADEX_SESSIONS_DIR`. SessionStart: sobe o engine se
+    preciso, manda o evento e pede o briefing, tudo em 1 s, e imprime o `additionalContext`. Os
+    outros eventos: 200 ms e, sem resposta (ou com 5xx), vão para a fila. Sempre sai 0.
+  - `events.zig`: o nome do evento do Claude Code no do engine (o `HookEvent::parse` do upstream)
+    e a query (`event`, `agent=claude-code`, `cwd`, `session_id`, `project_strategy=repo-root`,
+    `ingest_key` aleatória; `pid` no SessionStart e no SessionEnd; `briefing=1` no `/handoff`).
+  - `http.zig`: HTTP/1.1 mínimo no socket Unix (`Connection: close`, tamanho ou chunked), com
+    prazo para a troca inteira.
+  - `launch.zig`: sobe o `cadex-memory` como o `ensure` do daemon do terminal (SETSID, stdio em
+    /dev/null, socket a cada 20 ms), dentro do prazo do SessionStart.
+  - `spool.zig`: a fila em `<memory>/spool/` (pasta 0700, arquivo 0600, `.tmp` e rename).
 - Perfil de release para tamanho: `opt-level="z"`, LTO completo, `panic="abort"`, sem símbolos;
   candle e gemm em `opt-level=3` (no "z", gravar página com vetor fica 30% mais lento).
 - Build: `make memory` (release das duas arquiteturas), `make app` (debug da máquina),
@@ -49,7 +90,12 @@
   5. `make check` e `make perf`; anotar o commit novo no topo do `server/Cargo.toml`.
 
 ## Como validar
-- `make memory-test`: os testes do crate e o `server/tests/smoke.rs` (parte do `make check`).
+- `make memory-test`: os testes do crate, `server/tests/smoke.rs` e `server/tests/lifecycle.rs`
+  (parte do `make check`, em segundos).
+- `make core-test`: os testes do cliente (eventos, query, fila, respostas HTTP, sem token).
+- Na mão, tudo em pastas temporárias: um `.token` em `CADEX_SESSIONS_DIR`, e
+  `echo '<json do SessionStart>' | CADEX_SESSION_TOKEN=… CADEX_MEMORY_BIN=… CADEX_MEMORY_DIR=…
+  CADEX_MEMORY_SOCKET=… CADEX_SESSIONS_DIR=… core/zig-out/bin/cadex memory-hook SessionStart`.
 - `make memory-upstream-test` (`upstream_test.sh`): a suíte do upstream para os crates usados, no
   PC; a cada atualização do upstream.
 - `make package`: o binário universal assinado, cada fatia respondendo, sem provedor.

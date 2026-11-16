@@ -91,7 +91,7 @@ fi
 for slice in arm64 x86_64; do
     if ! arch -"$slice" /usr/bin/true 2>/dev/null; then echo "skip: no $slice runtime (Rosetta) to test cadex-memory"; continue; fi
     arch -"$slice" "$APP/Contents/Helpers/cadex-memory" --socket "$SMOKE/m-$slice.sock" \
-        --data-dir "$SMOKE/memory-$slice" --no-embeddings --no-watcher 2>/dev/null & engine=$!
+        --data-dir "$SMOKE/memory-$slice" --no-embeddings 2>/dev/null & engine=$!
     ok=""
     for _ in $(seq 1 50); do
         [ "$(curl -s --unix-socket "$SMOKE/m-$slice.sock" http://localhost/healthz 2>/dev/null)" = ok ] && { ok=1; break; }
