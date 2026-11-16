@@ -30,25 +30,32 @@ extension WindowSession {
         page.onNewTask = actions.newTask
         page.onComment = actions.comment
         page.onRemove = actions.remove
+        page.onOpenRemote = actions.openRemote
+        page.onRemoveRemote = actions.removeRemote
         return page
     }
 
     func worktreesActions() -> WorktreesActions {
-        WorktreesActions(newTask: { [weak self] in self?.newTask() }, open: { [weak self] in self?.openTask($0) },
-                         remove: { [weak self] in self?.removeTask($0) }, comment: { [weak self] in self?.commentTask($0) },
-                         editSetupHooks: { [weak self] in self?.editSetupHooks() }, repository: { [weak self] in self?.repository })
+        var actions = WorktreesActions(newTask: { [weak self] in self?.newTask() }, open: { [weak self] in self?.openTask($0) },
+                                       remove: { [weak self] in self?.removeTask($0) }, comment: { [weak self] in self?.commentTask($0) },
+                                       editSetupHooks: { [weak self] in self?.editSetupHooks() }, repository: { [weak self] in self?.repository })
+        actions.targets = { [weak self] in self?.runTargets() ?? [] }
+        actions.newTaskOn = { [weak self] in self?.newTask(on: $0) }
+        actions.openRemote = { [weak self] in self?.openRemoteTask($0) }
+        actions.removeRemote = { [weak self] in self?.removeRemoteTask($0) }
+        return actions
     }
 
-    /// worktrees.new-task.
-    func newTask() {
+    /// worktrees.new-task, and worktrees.new-task-on with `on` already
+    /// chosen: the name, and where it runs ("Run on", plan 23).
+    func newTask(on preset: RunTarget? = nil) {
         guard let repo = repository else {
             return say(T("New Task needs a git repository", "Nova tarefa precisa de um repositório git"),
                        T("Open a repository's folder first.", "Abra antes a pasta de um repositório."))
         }
-        ask(T("New task", "Nova tarefa"), T("Its name becomes a branch and a worktree beside the repository; the agent opens in it.",
-                                            "O nome vira um branch e uma worktree ao lado do repositório; o agente abre nela."),
-            placeholder: T("Fix the login", "Corrigir o login")) { [weak self] name in
+        askTaskName(preset: preset) { [weak self] name, target in
             guard let self, !name.isEmpty else { return }
+            if let target { return self.newRemoteTask(name: name, repo: repo, target: target) }
             self.confirmTask(WorktreesController.shared.plan(name: name, repo: repo))
         }
     }
@@ -192,7 +199,7 @@ extension WindowSession {
 
     // MARK: Sheets
 
-    private func ask(_ title: String, _ text: String, placeholder: String, then: @escaping (String) -> Void) {
+    func ask(_ title: String, _ text: String, placeholder: String, then: @escaping (String) -> Void) {
         let alert = NSAlert()
         alert.messageText = title
         alert.informativeText = text
@@ -208,7 +215,7 @@ extension WindowSession {
         }
     }
 
-    private func confirm(_ title: String, _ text: String, button: String, then: @escaping () -> Void) {
+    func confirm(_ title: String, _ text: String, button: String, then: @escaping () -> Void) {
         let alert = NSAlert()
         alert.messageText = title
         alert.informativeText = text
@@ -217,7 +224,7 @@ extension WindowSession {
         alert.beginSheetModal(for: window) { response in if response == .alertFirstButtonReturn { then() } }
     }
 
-    private func say(_ title: String, _ text: String) {
+    func say(_ title: String, _ text: String) {
         let alert = NSAlert()
         alert.messageText = title
         alert.informativeText = text

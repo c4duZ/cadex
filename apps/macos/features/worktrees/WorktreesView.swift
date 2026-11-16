@@ -20,6 +20,9 @@ public final class WorktreesView: NSView {
     public var onNewTask: (() -> Void)?
     public var onComment: ((TaskWorktree) -> Void)?
     public var onRemove: ((TaskWorktree) -> Void)?
+    /// A task on another machine (plan 23): its shell, and taking it away.
+    public var onOpenRemote: ((RemoteTask) -> Void)?
+    public var onRemoveRemote: ((RemoteTask) -> Void)?
 
     let controller = WorktreesController.shared
     private let stack = NSStackView()
@@ -57,13 +60,41 @@ public final class WorktreesView: NSView {
             return add(label(T("Open a git repository to make tasks.", "Abra um repositório git para criar tarefas."), size: 12, color: secondary))
         }
         let tasks = controller.tasks(repo: repo)
-        if tasks.isEmpty {
+        let remote = controller.remoteTasks(repo: repo)
+        if tasks.isEmpty, remote.isEmpty {
             add(label(T("No tasks yet.", "Nenhuma tarefa ainda."), size: 12, color: secondary))
             let button = NSButton(title: T("New Task", "Nova tarefa"), target: self, action: #selector(newTask))
             button.bezelStyle = .rounded
             return add(button)
         }
         for (task, info) in tasks { add(row(task, info)) }
+        for task in remote { add(remoteRow(task)) }
+    }
+
+    /// "fix-login · pc": the machine's name, never a local folder (ADR 0031).
+    private func remoteRow(_ task: RemoteTask) -> NSView {
+        let info = controller.store.task(task.noteKey)
+        let title = label(task.branch + " · " + task.target.label, size: 12, weight: .semibold, color: text)
+        let detail = [info?.status.title, info?.comment].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+        let box = NSStackView(views: [title, label(detail.isEmpty ? task.path : detail, size: 11, color: secondary)])
+        box.orientation = .vertical
+        box.alignment = .leading
+        box.spacing = 1
+        let row = TaskRow(box)
+        row.toolTip = task.target.destination + ":" + task.path
+        row.onClick = { [weak self] in self?.onOpenRemote?(task) }
+        row.onRightClick = { [weak self, weak row] in
+            guard let self, let row else { return }
+            var entries = [MenuEntry(T("Open Shell There", "Abrir um shell lá"), icon: .terminalWindow) { [weak self] in self?.onOpenRemote?(task) }, .separator]
+            for status in TaskStatus.allCases {
+                entries.append(MenuEntry(status.title, icon: info?.status == status ? .check : nil) { [weak self] in
+                    self?.controller.setStatus(status, of: task.noteKey)
+                })
+            }
+            entries += [.separator, MenuEntry(T("Remove Task…", "Remover tarefa…"), icon: .trash) { [weak self] in self?.onRemoveRemote?(task) }]
+            PopupMenu.show(entries, below: row)
+        }
+        return row
     }
 
     private func row(_ task: TaskWorktree, _ info: TaskInfo?) -> NSView {

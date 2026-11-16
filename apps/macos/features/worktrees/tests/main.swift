@@ -42,7 +42,7 @@ func fakeRepo() -> (home: String, repo: String) {
     return (home, repo)
 }
 
-let exitCode = await Checks.run([
+let localTests: [(name: String, body: Checks.Body)] = [
     ("the plan: a branch from the name, the folder beside the repository, what needs a yes first", {
         let (home, repo) = fakeRepo()
         defer { try? fm.removeItem(atPath: home) }
@@ -97,5 +97,6 @@ let exitCode = await Checks.run([
         expect(controller.remove(task, repo: repo, deleteBranch: true) == nil && !fm.fileExists(atPath: plan.path))
         expect(controller.store.task(plan.path) == nil, "its note goes with it")
     }),
-])
+]
+let exitCode = await Checks.run(localTests + remoteTests)
 exit(exitCode)

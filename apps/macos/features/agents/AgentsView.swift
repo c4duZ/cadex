@@ -108,6 +108,7 @@ public final class AgentsView: NSView {
         let shows = window != nil && !isHiddenOrHasHiddenAncestor
         if shows, token == nil {
             token = controller.watch { [weak self] in self?.render() }
+            controller.pageShown(true)
             // The "3m" ages move on while the page shows.
             let timer = Timer(timeInterval: 30, repeats: true) { [weak self] _ in MainActor.assumeIsolated { self?.render() } }
             timer.tolerance = 5
@@ -115,6 +116,7 @@ public final class AgentsView: NSView {
             clock = timer
         } else if !shows, let token {
             controller.stop(token)
+            controller.pageShown(false)
             self.token = nil
             clock?.invalidate()
             clock = nil

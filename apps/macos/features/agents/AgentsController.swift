@@ -87,6 +87,22 @@ public final class AgentsController {
     private var backgroundPending = false
     lazy var claude: String? = AgentBackground.claudePath(home: home)
 
+    /// Sessions on other machines (plan 23): the app reads them over ssh
+    /// only while this page is watched (`onWatching`) and sets them here.
+    public var remote: [AgentSession] = [] { didSet { if remote != oldValue { reload(accounts: false) } } }
+    /// Told when the Agents page starts (true) and stops (false) showing:
+    /// the notifier also watches this controller all the time, so being
+    /// watched is not the page being looked at.
+    public var onWatching: ((Bool) -> Void)?
+    private var pagesShown = 0
+
+    /// An Agents page came on or left the screen (each window has one).
+    public func pageShown(_ shown: Bool) {
+        pagesShown = max(0, pagesShown + (shown ? 1 : -1))
+        if shown, pagesShown == 1 { onWatching?(true) }
+        if !shown, pagesShown == 0 { onWatching?(false) }
+    }
+
     /// Whether anything is read now: false means no stream and no timer.
     var isRunning: Bool { stream != nil || liveness != nil }
 
@@ -155,7 +171,7 @@ public final class AgentsController {
         // A pid whose process is gone takes its hook id with it (one whose
         // registry has not shown up yet stays).
         hookSessions = hookSessions.filter { kill($0.key, 0) == 0 }
-        sessions = all + background.filter { job in !all.contains { $0.id == job.id } }
+        sessions = all + background.filter { job in !all.contains { $0.id == job.id } } + remote
         unreadable = bad
         if let open = openSession, let session = sessions.first(where: { $0.id == open }) {
             // Where a continued session came from never changes: read once per session.

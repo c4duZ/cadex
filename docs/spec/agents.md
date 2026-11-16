@@ -188,7 +188,7 @@ continua uma conversa em outra conta, sem nunca tocar em token
 - Silenciar as notificações de uma máquina (agents.mutedMachines): este Mac, cada host do
   `~/.ssh/config` e cada máquina da tailnet (plano 23).
 - Sessões remotas (plano 23, `docs/adr/0031-run-on-remote.md`): com a página Agents aberta, o Cadex
-  roda `claude agents --json` por ssh em cada máquina onde uma tarefa do "Run on" está, e lista as
+  roda `claude agents --json` por ssh (sem perguntar nada: uma máquina que pede senha fica de fora) em cada máquina onde uma tarefa do "Run on" está, ao abrir e a cada 30 s, e lista as
   sessões de lá no projeto, com "em <máquina>". Sem kit nem hooks lá, o estado é o que esse comando
   diz, e a notificação de "terminou" ou "esperando você" de uma sessão remota só vem enquanto a página
   está aberta (nada de quadro "Precisa de você" para elas); um duplo clique leva à aba ssh da tarefa.

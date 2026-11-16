@@ -192,6 +192,7 @@ extension WindowSession {
     /// front, on that space and tab (the owner, 2026-10-21: two windows,
     /// a click in one goes to the other).
     func openAgent(_ session: AgentSession) {
+        if session.machine != nil { return openRemoteAgent(session) }
         for window in app.sessions {
             guard let found = window.terminal(of: session), let spaces = window.spaces else { continue }
             NSApp.activate(ignoringOtherApps: true)

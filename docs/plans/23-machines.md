@@ -118,6 +118,17 @@ docs/adr/0022-terminal-daemon.md (do plano 19), docs/adr/0024-agent-tools.md (do
   em Agents como "em <máquina>" (lida pelo `claude agents --json` via ssh, só com Agents aberto).
   Diff e editor remotos ficam para o completo. Comandos worktrees.new-task-on e
   worktrees.open-remote-shell.
+  - No código em 2026-11-16: o script do remoto (`apps/macos/features/worktrees/RemoteTaskScript.swift`)
+    roda por `ssh -o BatchMode=yes` em segundo plano e devolve a pasta e o branch finais, então a
+    tarefa só entra na lista quando a worktree existe lá; o ssh que pede senha ou confiança vira
+    "conecte uma vez numa aba". A pasta do repositório em cada máquina é perguntada uma vez; sem
+    repositório, clonar do origin só com sim. A aba roda os hooks e o `claude` por um shell de login
+    (o PATH de lá). Em Agents, a leitura remota liga só com a página na tela (o notifier vigia o
+    controller sempre: vigiado não é olhado). Testado com um ssh falso que roda o comando nesta
+    máquina, em repositórios de verdade (worktree feita, nome único, clone, remoção recusada com
+    mudança, a aba com hooks e claude) e o parse das sessões remotas. **Falta**, com o PC: o ssh de
+    verdade, o `claude agents --json` de uma sessão interativa de lá (o formato das interativas foi
+    lido com tolerância, nunca visto), e as notificações por máquina (fase F).
 - **D. Docker pela tailnet.**
   - machines.docker-context: cria um contexto (`docker context create <máquina> --docker
     "host=ssh://<user>@<máquina>"`) e o escolhe **por aba**, com `DOCKER_CONTEXT` no ambiente dela

@@ -40,6 +40,8 @@ public final class WorktreesController {
     public var rootSetting = ""
     /// worktrees.setupHooks: repository → the commands, in order.
     public var setupHooks: [String: [String]] = [:]
+    /// Runs "Run on"'s scripts on other machines (tests: a fake ssh).
+    public var remoteRunner = RemoteTaskRunner()
     private var watchers: [UUID: () -> Void] = [:]
 
     init() {}

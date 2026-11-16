@@ -6,7 +6,9 @@
   cada tarefa tem status e comentário; sair só sem perder trabalho.
 
 ## O que eu não quero
-- Reimplementar o git: tudo pelo núcleo (`../../../../core/features/worktrees/CLAUDE.md`).
+- Reimplementar o git: tudo pelo núcleo (`../../../../core/features/worktrees/CLAUDE.md`). A
+  exceção é o "Rodar em" (plano 23): o git de outra máquina, que o núcleo daqui não alcança, roda lá
+  pelo ssh do dono.
 - Guardar status ou comentário no git: é nota do Cadex.
 - Escrever no .claude.json: a confiança da pasta é o próprio Claude Code que pergunta.
 
@@ -26,8 +28,21 @@
 - `WorktreesView.swift`: a página Tasks (lê só enquanto aparece). `WorktreesCommands.swift`:
   worktrees.new-task, -open, -remove, -set-status, -set-comment e -edit-setup-hooks, com as listas
   no ⌘K; o que pergunta e abre abas é do app (`../../app/WorktreesWiring.swift`).
+- "Rodar em" outra máquina (plano 23, fase C; `../../../../docs/adr/0031-run-on-remote.md`, o
+  mínimo): `RemoteTaskScript.swift` (puro: o script que acha ou clona o repositório lá, busca o
+  origin e faz `git worktree add` a partir do `base` do origin, branch único como aqui, e imprime
+  `CADEX_TASK_PATH`/`CADEX_TASK_BRANCH`; o de remover; a aba com os hooks e `claude` por um shell de
+  login; tudo entre aspas simples), `RemoteTasks.swift` (`RemoteTask`, `RunTarget` e o
+  `RemoteTaskRunner`: `ssh -o BatchMode=yes`, nunca pergunta; o 255 do ssh vira "conecte numa aba"
+  ou "não respondeu") e `WorktreesRemote.swift` (`makeRemote` e `removeRemote`: a tarefa só entra na
+  lista quando a worktree existe lá; a pasta do repositório por máquina fica lembrada). As notas
+  ganham `remote` e `remoteFolders`, lidas com `decodeIfPresent` (um arquivo de antes continua
+  valendo inteiro). A página Tasks mostra a remota com o nome da máquina; worktrees.new-task-on e
+  worktrees.open-remote-shell, e worktrees.remove lista as remotas também.
 
 ## Como validar
 - `make macos-test` (WorktreesTests): num repositório de verdade, o plano, a tarefa criada com o
   `.env`, as notas que voltam depois de reabrir, a segunda tarefa sem pedir nada, a remoção recusada
-  com mudança e aceita sem ela.
+  com mudança e aceita sem ela; o "Rodar em" com um ssh falso que roda o comando aqui
+  (`tests/Remote.swift`): a worktree feita "lá", o nome único, sem repositório (pergunta antes de
+  clonar), a remoção recusada com mudança, as falhas do ssh, a aba com os hooks e o claude.

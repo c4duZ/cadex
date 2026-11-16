@@ -52,6 +52,11 @@
   em segundo plano entram na mesma lista (`job`, `waitingFor`). `isEnabled` é o agents.sessions.
 - O título do grupo de um projeto mostra o status e o comentário da tarefa dele (`projectNote`,
   que o app pede à feature worktrees).
+- Sessões em outra máquina (plano 23, "Rodar em"): AgentBackground.parseRemote lê o `claude
+  agents --json` de lá (interativas e em segundo plano; o formato das interativas não foi visto numa
+  sessão real ainda), AgentSession.machine e a linha "· em pc"; o controller recebe a lista em
+  `remote`, e `pageShown`/`onWatching` dizem ao app quando uma página Agents está na tela (o notifier
+  vigia o controller sempre, então vigiado não é olhado).
 - `AgentsLayout.swift`: grupos por projeto (o mais recente primeiro; esperando antes de
   trabalhando) e a linha de baixo ("main · conta", "esperando você · conta · fora do Cadex", "… ·
   em segundo plano").

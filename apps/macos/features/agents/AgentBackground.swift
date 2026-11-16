@@ -31,6 +31,35 @@ public enum AgentBackground {
         }
     }
 
+    /// The open sessions of another machine, from its `claude agents
+    /// --json` read over ssh (plan 23, "Run on"; ADR 0031): interactive and
+    /// background, as there is no sessions/ folder to read there. Each
+    /// carries the machine; its account is a stand-in named after it.
+    /// Ended ones are left out. The interactive entries' shape was not seen
+    /// on a real session yet (only `[]`, 2026-11-16): read defensively.
+    public static func parseRemote(_ data: Data, machine: String, destination: String) -> [AgentSession] {
+        guard let list = (try? JSONSerialization.jsonObject(with: data)) as? [[String: Any]] else { return [] }
+        let account = AgentAccount(dir: "ssh://" + destination, name: machine, isDefault: false)
+        return list.compactMap { entry in
+            guard let id = entry["sessionId"] as? String ?? entry["id"] as? String, let cwd = entry["cwd"] as? String else { return nil }
+            let state = (entry["state"] as? String ?? entry["status"] as? String ?? "").lowercased()
+            let status: AgentSession.Status
+            switch state {
+            case "working", "busy", "running": status = .working
+            case "blocked", "waiting", "idle": status = .waiting
+            case "done", "completed", "failed", "stopped", "ended": return nil
+            default: status = .other(state)
+            }
+            let millis = (entry["startedAt"] as? NSNumber)?.doubleValue ?? 0
+            var session = AgentSession(account: account, pid: 0, id: id, name: entry["name"] as? String ?? (cwd as NSString).lastPathComponent,
+                                       cwd: cwd, status: status, since: Date(timeIntervalSince1970: millis / 1000))
+            session.machine = machine
+            session.job = entry["kind"] as? String == "background" ? entry["id"] as? String : nil
+            session.waitingFor = entry["waitingFor"] as? String
+            return session
+        }
+    }
+
     /// The account's background jobs that run now: those its daemon's
     /// roster (`daemon/roster.json`, Claude Code's own, read defensively)
     /// lists among `workers` with a live process. `claude agents` also lists

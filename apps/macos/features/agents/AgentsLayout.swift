@@ -45,6 +45,10 @@ public enum AgentsLayout {
         case .other(let status) where !status.isEmpty: parts.append(status)
         default: if let branch = project.branch { parts.append(branch) }
         }
+        if let machine = session.machine {
+            parts.append(T("on ", "em ") + machine)
+            return parts.joined(separator: " · ")
+        }
         parts.append(session.account.name)
         if session.job != nil {
             parts.append(T("in the background", "em segundo plano"))

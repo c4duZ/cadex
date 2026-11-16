@@ -39,6 +39,22 @@ public final class WorktreesStore {
     struct File: Codable {
         var tasks: [String: TaskInfo] = [:]
         var repos: [String: RepoInfo] = [:]
+        /// Plan 23: the tasks on other machines, by this Mac's repository,
+        /// and where each repository is on each machine (destination → folder).
+        var remote: [String: [RemoteTask]] = [:]
+        var remoteFolders: [String: [String: String]] = [:]
+
+        init() {}
+
+        // Every field may be missing: a file from before a field existed
+        // must still read whole (a strict decode would drop every note).
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            tasks = try c.decodeIfPresent([String: TaskInfo].self, forKey: .tasks) ?? [:]
+            repos = try c.decodeIfPresent([String: RepoInfo].self, forKey: .repos) ?? [:]
+            remote = (try? c.decodeIfPresent([String: [RemoteTask]].self, forKey: .remote)) ?? [:]
+            remoteFolders = (try? c.decodeIfPresent([String: [String: String]].self, forKey: .remoteFolders)) ?? [:]
+        }
     }
 
     let path: String
@@ -64,6 +80,34 @@ public final class WorktreesStore {
         change(&info)
         file.repos[path] = info
         save()
+    }
+
+    public func remoteTasks(_ repo: String) -> [RemoteTask] { file.remote[repo] ?? [] }
+
+    public func addRemote(_ task: RemoteTask, repo: String) {
+        file.remote[repo, default: []].append(task)
+        save()
+    }
+
+    public func forgetRemote(_ task: RemoteTask, repo: String) {
+        file.remote[repo]?.removeAll { $0.path == task.path && $0.target == task.target }
+        file.tasks[task.noteKey] = nil
+        save()
+    }
+
+    /// Where `repo` is on the machine `destination`, once the owner said.
+    public func remoteFolder(_ repo: String, on destination: String) -> String? { file.remoteFolders[repo]?[destination] }
+
+    public func setRemoteFolder(_ folder: String, repo: String, on destination: String) {
+        file.remoteFolders[repo, default: [:]][destination] = folder
+        save()
+    }
+
+    /// Every machine some task of any repository runs on: Agents asks them.
+    public var remoteTargets: [RunTarget] {
+        var seen: [RunTarget] = []
+        for task in file.remote.values.flatMap({ $0 }) where !seen.contains(task.target) { seen.append(task.target) }
+        return seen
     }
 
     /// A task that left: its note goes too.

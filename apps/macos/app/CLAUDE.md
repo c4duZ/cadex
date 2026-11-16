@@ -127,6 +127,11 @@
   (`attachMachines`, chamado pelo `SSHWiring.swift`), lido só com o cartão aberto, e o
   machines.connect: aba nova com `ssh '<usuário>@<máquina>'`, o usuário pedido uma vez por máquina
   (o deste Mac sugerido; ⌥↩ pergunta de novo) e guardado em machines.users.
+- `RunOnWiring.swift` (plano 23, fase C): o "Rodar em" no New Task (o nome e a máquina num alerta;
+  as máquinas são os hosts do ~/.ssh/config e as da tailnet online), a pasta do repositório lá
+  perguntada uma vez, clonar só com sim, a aba `ssh -t` com os hooks e o `claude`, abrir e remover a
+  tarefa remota, a sessão remota em Agents abrindo o shell da tarefa; e `startRemoteAgents`: com uma
+  página Agents na tela, o `claude agents --json` de cada máquina com tarefa, por ssh, a cada 30 s.
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.

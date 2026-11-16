@@ -12,6 +12,12 @@ public struct WorktreesActions {
     public var editSetupHooks: @MainActor () -> Void
     /// The window's repository, or nil.
     public var repository: @MainActor () -> String?
+    /// "Run on" (plan 23): the machines a task can go to, New Task already
+    /// on one, a remote task's shell and its removal. Set after init.
+    public var targets: @MainActor () -> [RunTarget] = { [] }
+    public var newTaskOn: @MainActor (RunTarget) -> Void = { _ in }
+    public var openRemote: @MainActor (RemoteTask) -> Void = { _ in }
+    public var removeRemote: @MainActor (RemoteTask) -> Void = { _ in }
 
     public init(newTask: @escaping @MainActor () -> Void, open: @escaping @MainActor (TaskWorktree) -> Void,
                 remove: @escaping @MainActor (TaskWorktree) -> Void, comment: @escaping @MainActor (TaskWorktree) -> Void,
@@ -47,7 +53,23 @@ public enum WorktreesCommands {
                     action: pick(T("The task to open", "A tarefa a abrir"), actions.open)),
             Command(id: "worktrees.remove", title: T("Remove Task…", "Remover tarefa…"),
                     keywords: ["task", "worktree", "remove", "delete", "tarefa", "remover"], category: .terminal,
-                    action: pick(T("The task to remove", "A tarefa a remover"), actions.remove)),
+                    action: .run {
+                        palette.open(TaskSource(placeholder: T("The task to remove", "A tarefa a remover"), tasks: {
+                            actions.repository().map { controller.tasks(repo: $0).map(\.worktree) } ?? []
+                        }, choose: actions.remove, remote: { actions.repository().map(controller.remoteTasks) ?? [] }, chooseRemote: actions.removeRemote))
+                    }),
+            Command(id: "worktrees.new-task-on", title: T("New Task on Another Machine…", "Nova tarefa em outra máquina…"),
+                    keywords: ["task", "remote", "run on", "ssh", "tailnet", "pc", "tarefa", "remota", "rodar em"], category: .terminal,
+                    action: .run { palette.open(TargetSource(targets: actions.targets, choose: actions.newTaskOn)) }),
+            Command(id: "worktrees.open-remote-shell", title: T("Open a Remote Task's Shell…", "Abrir o shell de uma tarefa remota…"),
+                    keywords: ["task", "remote", "ssh", "shell", "tarefa", "remota"], category: .terminal,
+                    action: .run {
+                        palette.open(TaskSource(placeholder: T("The remote task", "A tarefa remota"), tasks: { [] }, choose: { _ in },
+                                                remote: { actions.repository().map(controller.remoteTasks) ?? [] }, chooseRemote: actions.openRemote))
+                    },
+                    unavailableReason: {
+                        (actions.repository().map(controller.remoteTasks) ?? []).isEmpty ? T("No task of this repository runs on another machine", "Nenhuma tarefa deste repositório roda em outra máquina") : nil
+                    }),
             Command(id: "worktrees.set-status", title: T("Set Task Status…", "Mudar o status da tarefa…"),
                     keywords: ["task", "status", "review", "done", "tarefa", "status", "pronto"], category: .terminal,
                     action: pick(T("The task", "A tarefa")) { task in
@@ -92,23 +114,34 @@ final class TaskSource: PaletteSource {
     var icon: Icon { .gitBranch }
     private let tasks: () -> [TaskWorktree]
     private let pick: (TaskWorktree) -> Void
+    /// The tasks on other machines, listed after these with the machine's name.
+    private let remote: () -> [RemoteTask]
+    private let pickRemote: (RemoteTask) -> Void
 
-    init(placeholder: String, tasks: @escaping () -> [TaskWorktree], choose: @escaping (TaskWorktree) -> Void) {
+    init(placeholder: String, tasks: @escaping () -> [TaskWorktree], choose: @escaping (TaskWorktree) -> Void,
+         remote: @escaping () -> [RemoteTask] = { [] }, chooseRemote: @escaping (RemoteTask) -> Void = { _ in }) {
         self.placeholder = placeholder
         self.tasks = tasks
         self.pick = choose
+        self.remote = remote
+        self.pickRemote = chooseRemote
     }
 
     func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
         let store = WorktreesController.shared.store
-        show(tasks().filter { query.isEmpty || $0.branch.localizedCaseInsensitiveContains(query) }.map { task in
+        let here = tasks().filter { query.isEmpty || $0.branch.localizedCaseInsensitiveContains(query) }.map { task in
             PaletteItem(id: task.path, title: task.branch.isEmpty ? (task.path as NSString).lastPathComponent : task.branch,
                         detail: store.task(task.path)?.status.title, icon: .gitBranch)
-        }, nil)
+        }
+        let there = remote().filter { query.isEmpty || $0.branch.localizedCaseInsensitiveContains(query) || $0.target.label.localizedCaseInsensitiveContains(query) }.map { task in
+            PaletteItem(id: task.noteKey, title: task.branch + " · " + task.target.label, detail: store.task(task.noteKey)?.status.title, icon: .globe)
+        }
+        show(here + there, nil)
     }
 
     func choose(_ item: PaletteItem) {
-        if let task = tasks().first(where: { $0.path == item.id }) { pick(task) }
+        if let task = tasks().first(where: { $0.path == item.id }) { return pick(task) }
+        if let task = remote().first(where: { $0.noteKey == item.id }) { pickRemote(task) }
     }
 
     func stop() {}
@@ -130,6 +163,34 @@ final class StatusSource: PaletteSource {
 
     func choose(_ item: PaletteItem) {
         if let status = TaskStatus(rawValue: item.id) { WorktreesController.shared.setStatus(status, of: task.path) }
+    }
+
+    func stop() {}
+}
+
+/// ⌘K's list of machines a task can run on (worktrees.new-task-on).
+@MainActor
+final class TargetSource: PaletteSource {
+    private let targets: () -> [RunTarget]
+    private let pick: (RunTarget) -> Void
+
+    init(targets: @escaping () -> [RunTarget], choose: @escaping (RunTarget) -> Void) {
+        self.targets = targets
+        self.pick = choose
+    }
+
+    var placeholder: String { T("Run the new task on", "Rodar a nova tarefa em") }
+    var emptyText: String { T("No other machine: hosts of ~/.ssh/config and tailnet machines show here", "Nenhuma outra máquina: os hosts do ~/.ssh/config e as máquinas da tailnet aparecem aqui") }
+    var icon: Icon { .globe }
+
+    func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
+        show(targets().filter { query.isEmpty || $0.label.localizedCaseInsensitiveContains(query) }.map {
+            PaletteItem(id: $0.destination, title: $0.label, detail: $0.destination == $0.label ? nil : $0.destination, icon: .globe)
+        }, nil)
+    }
+
+    func choose(_ item: PaletteItem) {
+        if let target = targets().first(where: { $0.destination == item.id }) { pick(target) }
     }
 
     func stop() {}

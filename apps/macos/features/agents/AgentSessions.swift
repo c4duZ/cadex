@@ -80,6 +80,9 @@ public struct AgentSession: Equatable, Sendable {
     public var job: String? = nil
     /// What a background session waits for ("permission prompt").
     public var waitingFor: String? = nil
+    /// A session on another machine (plan 23, "Run on"): the machine's name;
+    /// nil for one on this Mac.
+    public var machine: String? = nil
 
     /// The sessions of `account` whose process is alive. A file that does
     /// not read (another Claude Code version) is skipped, never fatal; the
