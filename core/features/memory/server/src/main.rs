@@ -9,6 +9,8 @@
 //! last agent session ends and restarts itself to give memory back after
 //! the embedding model unloads, and it learns the project's past sessions and
 //! the ones that ran outside Cadex from their transcripts (plan 22, phase C).
+//! `cadex-memory run` is upstream's managed launcher for Claude Code and
+//! Codex against this engine (run/mod.rs, plan 22 phase E).
 
 use std::time::Instant;
 
@@ -41,6 +43,7 @@ mod project_paths;
 mod replay;
 mod replay_capture;
 mod restart;
+mod run;
 mod serve;
 mod session_facts;
 mod sessions;
@@ -50,6 +53,12 @@ mod transcripts;
 
 fn main() -> Result<()> {
     let started = Instant::now();
+    // `run` passes the agent's arguments through untouched, so it reads them
+    // as OS strings (std::env::args panics on one that is not UTF-8).
+    let raw: Vec<std::ffi::OsString> = std::env::args_os().skip(1).collect();
+    if raw.first().is_some_and(|a| a == "run") {
+        std::process::exit(run::main(&raw[1..]));
+    }
     let argv: Vec<String> = std::env::args().skip(1).collect();
     match argv.first().map(String::as_str) {
         Some("scan-transcripts") => return transcripts::run(&argv[1..]),

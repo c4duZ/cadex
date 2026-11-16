@@ -95,7 +95,8 @@ pub fn run(words: []const [:0]const u8) u8 {
     return execAs(arena, real, kit.args, rest);
 }
 
-fn kitFor(arena: std.mem.Allocator, user_settings: ?[]const u8, words: []const []const u8) ?Kit {
+/// The kit for this tab (also `cadex continue`, continue_wrap.zig).
+pub fn kitFor(arena: std.mem.Allocator, user_settings: ?[]const u8, words: []const []const u8) ?Kit {
     var path_buf: [256]u8 = undefined;
     const socket = hook.socketPath(&path_buf) orelse return null;
     var pids_buf: [12]c_int = undefined;

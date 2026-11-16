@@ -398,6 +398,26 @@ refaz o crate a partir dela.
     dono. Sem conta do Codex hoje (o dono, 2026-11-15): a parte do Codex fica pronta para testar e
     só fecha com uma conta; o que não puder ser conferido vai marcado na spec.
   - Features: memory, agents, command-palette.
+  - **Como ficou (2026-11-16), com o máximo de compatibilidade (decisão do dono: caminho A):**
+    o miolo do `ai-memory run` portado para `cadex-memory run` (core/features/memory/server/src/run/,
+    só Claude e Codex, a lógica dos agentes no crate de workstream, as mesmas rotas e o mesmo dossiê);
+    `cadex continue <claude|codex>` (Zig) pede o kit ao app pela ancestralidade, como o `cadex
+    claude`, tira do settings do kit o token e o ambiente da memória e chama o launcher com o kit;
+    o `cadex memory-hook` manda `managed_run` como o hook do upstream (o pacote do workstream chega
+    no briefing); agents.continue-in-agent ("Continue in…") digita o `cadex continue` numa aba. O
+    engine fica de pé até o launcher fechar a execução (o pid dele entra no `POST /workstream/runs`).
+    O nome é `continue` porque `cadex run` já roda um comando do app. Depois (pedido do dono,
+    2026-11-16) entrou o resto do `run`: todas as opções e agentes do upstream, escolha automática,
+    menu de sessão, `claude attach`, `--yolo`, ai-jail, perfis, modo sem engine com diário recuperado
+    no próximo `run`, menu de saída; o ⌘K ganhou "o último agente que trabalhou aqui". Fora, de
+    propósito: a instalação automática de hooks (grava na configuração dos agentes do dono) e o
+    reparo de projeto dividido (só num servidor compartilhado). Os hooks do Codex (CODEX_HOME do
+    Cadex com a confiança) ficam para quando houver conta: o Codex 0.149.1 aceita `-c` em `codex
+    resume [OPTIONS] [SESSION_ID]` (conferido), o resto pede login.
+  - **Teste real** (conta bkdg, Haiku, US$ 0,0125): duas execuções `claude -p` pelo launcher; a
+    segunda retomou a mesma sessão nativa e respondeu o que a primeira ouviu ("FALCON-5"); 3 e 4
+    eventos salvos no workstream; sem o aviso de contexto não entregue; o engine saiu depois. O Codex
+    só com o falso dos testes (sem conta).
 - **F. Consolidação na sessão, sem token.**
   - Hook Stop com `decision: "block"` só em marcos: worktree marcada como pronta (plano 19),
     contexto acima de memory.consolidateAtContext (70%, do `context_window` que o

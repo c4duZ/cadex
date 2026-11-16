@@ -90,6 +90,7 @@ extension WindowSession {
             keywords: ["usage", "plan", "limit", "refresh", "uso", "plano", "limite", "atualizar"], category: .view,
             action: .run { AgentUsageController.shared.refreshNow() }))
         commands.register(AgentLaunch.commands(palette: palette, launch: { [weak self] account in self?.launchAgent(for: account) },
+                                               continueIn: { [weak self] account in self?.continueInAgent(account) },
                                                customize: { [weak self] in self?.openCustomize("accounts") }))
         commands.register(AgentAccountCommands.commands(palette: palette, actions: accountActions()))
         commands.register(Command(

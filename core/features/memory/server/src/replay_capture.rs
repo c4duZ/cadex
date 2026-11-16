@@ -97,20 +97,20 @@ fn decide_call(policy: &CapturePolicy, event: &NewWorkstreamEvent) -> EventCaptu
 
 /// Claude Code records a `!` command's output as a user message opening with
 /// one of these blocks; live capture never receives it.
-fn shell_mode_output(event: &NewWorkstreamEvent) -> bool {
+pub(crate) fn shell_mode_output(event: &NewWorkstreamEvent) -> bool {
     const TAGS: [&str; 4] = ["<bash-stdout>", "<bash-stderr>", "<local-command-stdout>", "<local-command-stderr>"];
     event.agent == ai_memory_core::AgentKind::ClaudeCode
         && TAGS.iter().any(|tag| event.content.trim_start().starts_with(tag))
 }
 
 /// The exporter's marker for a record it skipped as oversized.
-fn skipped_record(event: &NewWorkstreamEvent) -> bool {
+pub(crate) fn skipped_record(event: &NewWorkstreamEvent) -> bool {
     event.kind == WorkstreamEventKind::Annotation
         && event.metadata.get(SKIPPED_RECORD_KEY).and_then(Value::as_bool) == Some(true)
 }
 
 /// The native id linking a call and its result.
-fn call_id(event: &NewWorkstreamEvent) -> Option<&str> {
+pub(crate) fn call_id(event: &NewWorkstreamEvent) -> Option<&str> {
     ["tool_use_id", "tool_call_id"]
         .iter()
         .find_map(|key| event.metadata.get(*key).and_then(Value::as_str))
@@ -119,7 +119,7 @@ fn call_id(event: &NewWorkstreamEvent) -> Option<&str> {
 
 /// A recorded call's tool name and arguments (`{name}: {json}`); `None`
 /// arguments when they cannot be recovered.
-fn recorded_call(event: &NewWorkstreamEvent) -> (&str, Option<Value>) {
+pub(crate) fn recorded_call(event: &NewWorkstreamEvent) -> (&str, Option<Value>) {
     let name = event
         .metadata
         .get("tool")

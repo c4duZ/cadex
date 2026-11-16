@@ -44,8 +44,9 @@
   - `server/src/auth.rs`: conexão de outro uid é fechada (credenciais do socket); todo pedido,
     menos `/healthz`, leva o token da sessão em `X-Cadex-Token`, válido se algum
     `<tokens-dir>/<kitSession>.token` o contém (pasta relida quando chega token novo); sem ele, 401.
-  - `server/src/sessions.rs`: o SessionStart traz o pid do `claude` (`pid=`), o kqueue avisa quando
-    ele termina e o SessionEnd o tira; sem sessão viva, espera 3 s e sai (fecha o store, apaga o
+  - `server/src/sessions.rs`: o SessionStart traz o pid do `claude` (`pid=`), e o `POST
+    /workstream/runs?pid=` traz o do `cadex-memory run` (o engine fica de pé até o launcher importar
+    e fechar a execução, depois do fim do agente); o kqueue avisa quando ele termina e o SessionEnd o tira; sem sessão viva, espera 3 s e sai (fecha o store, apaga o
     socket); sem nenhuma sessão em 10 s depois de subir, sai também. Nenhum timer com sessão viva.
   - `server/src/restart.rs`: depois que o modelo descarrega, sem pedido em andamento, o engine se
     executa de novo (~35 ms em debug) com as sessões vivas, a trava e o socket abertos, e volta ao
@@ -134,6 +135,56 @@
       upstream** (v3.4.7, backfill.rs e transcript_capture.rs, origem no topo de cada um): o
       transcript, lido pelo `export_transcript` do upstream, vira eventos de hook mandados ao
       `/hook/batch` pela rota, em processo, com a raiz do projeto como cwd e `auto_handoff=0`.
+  - Continuar em outro agente (fase E), `cadex-memory run`, em `server/src/run/`: **cópia do
+    `ai-memory run`** do cli do upstream (run.rs, jail_folders.rs e transcript_capture.rs; as
+    funções copiadas listadas no topo de cada arquivo), com as mesmas opções (`--workspace`,
+    `--project`/`--project-id`, `--workstream`/`--new`, `--executable`, `--yolo`, `--jail[=…]`,
+    `--no-jail`, `--jail-map`, `--jail-rw-map`, `--fresh`, `--force-unlock`, `--no-exit-prompt`,
+    `--require-server`, `--profile`, `--env`, `--env-file`), os mesmos agentes e nomes (Claude,
+    `claude-*`, Codex, OpenCode, Pi, Crush, OMP, Kimi, Command Code, Kiro, Grok, Antigravity, Copilot)
+    e a lógica deles no crate de workstream. Do Cadex: `--socket`, `--data-dir` e as palavras do kit
+    por agente (`--claude-kit-arg`, `--codex-kit-arg`, postas depois do plano montado, só as do agente
+    que roda). Lê o token e o socket como o hook (CADEX_SESSION_TOKEN, CADEX_MEMORY_SOCKET,
+    CADEX_MEMORY_DIR, CADEX_SESSIONS_DIR, CADEX_MEMORY_WORKSPACE, CADEX_MEMORY_BIN para subir o
+    engine); quem o chama é o `cadex continue` da feature agent-tools.
+    - A linha de comando: `server/src/run/args.rs`, `server/src/run/choice.rs` (nomes dos agentes),
+      `server/src/run/wrapper.rs` (opções digitadas depois do agente), `server/src/run/profiles.rs` (o
+      `[run]` do config.toml do próprio ai-memory, **só lido**) e `server/src/run/child_env.rs` (perfil,
+      `--env-file`, `--env`, achar o executável).
+    - Antes do engine: `server/src/run/local.rs`, `server/src/run/auto.rs` (sem agente: a sessão mais
+      nova do checkout) e `server/src/run/opencode.rs` (o dialeto do OpenCode; o motor do Kiro).
+    - Uma execução: `server/src/run/flow.rs`, `server/src/run/launch.rs`, `server/src/run/adopt.rs`
+      e `server/src/run/picker.rs` (adotar uma sessão nativa, com menu num terminal),
+      `server/src/run/attach.rs` (`claude attach` de uma sessão que roda em segundo plano),
+      `server/src/run/harness_ctx.rs` (o pacote do workstream do Crush e do Grok),
+      `server/src/run/store_record.rs`, `server/src/run/plan.rs`, `server/src/run/history.rs` (o
+      dossiê do agente anterior, 0600, apagado no fim), `server/src/run/server.rs` e
+      `server/src/run/uds_http.rs` (preparar com a espera da trava, batimento de 30 s, cancelar,
+      fechar, pelo memory.sock).
+    - Depois do agente: `server/src/run/after.rs`, `server/src/run/import.rs`,
+      `server/src/run/ledger_capture.rs` (o `[capture]` aplicado à conversa) e
+      `server/src/run/hookless.rs` (fim de sessão de quem não tem SessionEnd; sem a rota
+      `/admin/open-sessions` do upstream, manda o fim direto ao `/hook/batch`).
+    - Sem o engine: `server/src/run/offline.rs` (o agente roda mesmo assim, com aviso; com
+      `--require-server`, não), `server/src/run/journal.rs` e `server/src/run/recover.rs` (o diário em
+      `<data-dir>/run/`, refeito no próximo `run` que acha o engine; o upstream pede `ai-memory recover`
+      à mão).
+    - `--yolo` e o ai-jail: `server/src/run/yolo.rs`, `server/src/run/jail.rs`,
+      `server/src/run/jail_checklist.rs`, `server/src/run/jail_choices.rs`, `server/src/run/jail_exec.rs`
+      e `server/src/run/jail_folders.rs`. Dentro da jaula o launcher chega ao engine pelo arquivo do
+      memory.sock mapeado (`--rw-map`) e pelas variáveis passadas por `--env` (o ai-jail limpa o
+      ambiente); só a pasta `<data-dir>/run` vai junto, nunca a pasta de sockets (a do daemon do
+      terminal ficaria exposta).
+    - `server/src/run/exit_prompt.rs`: o menu depois de uma sessão (outro agente, de novo, sair).
+    - Tudo o que o launcher guarda (diário, registros de sessão, respostas da jaula) fica em
+      `<data-dir>/run/`, nunca nas pastas do ai-memory.
+    - Fora, de propósito: a instalação automática de hooks e MCP do upstream (`--no-autowire` é
+      aceita e não faz nada): ela grava na configuração dos agentes do dono, que o Cadex nunca toca; o
+      kit faz isso para o Claude (e o MCP do Codex). Também fora o reparo de projeto dividido e o
+      registro de projetos (só acontecem num servidor compartilhado que roteia pelo remote do git), a
+      escolha entre projetos de mesmo nome (multiusuário) e o seletor de pastas em tela da jaula
+      (crossterm não está no lock: `f` manda usar `--jail-map`). AI_MEMORY_HOOK_URL nunca vai ao
+      agente (não há TCP).
   - `server/tests/smoke.rs`: o engine de ponta a ponta pelo socket (páginas pelo MCP, briefing
     pelo SessionStart, busca), sem modelo e sem vigia; `server/tests/lifecycle.rs`: token, fila,
     saída quando o último `claude` termina, sessões passadas pelo reinício e o `--warm`;
@@ -143,6 +194,15 @@
     páginas, edição e remoção chegam à wiki, o que mudou com o engine fora entra ao subir;
     `server/tests/marker.rs`: o .ai-memory.toml nomeia o projeto, desliga o briefing e tira um
     arquivo da captura, e a chamada MCP com o `X-Memory-Actor-Session-Id` cai no projeto da sessão;
+    `server/tests/run.rs`, `server/tests/run_agents.rs` e `server/tests/run_launch.rs` (agentes
+    falsos e um ai-jail falso em `server/tests/common/bench.rs`): Claude, depois Codex no mesmo workstream com o dossiê do Claude (0600,
+    apagado depois), depois Claude de novo retomando a sessão dele com o dossiê do Codex; um segundo
+    launcher no workstream ocupado é recusado depois da espera curta; o engine fica de pé do fim do
+    agente até o `/finish`; sem agente, a sessão mais nova continua; `--yolo` sem terminal põe a
+    flag sem perguntar; sessão do Claude em segundo plano vira `claude attach`; o Grok recebe o pacote
+    como `--rules`; o dialeto do OpenCode pela versão; perfil, `--env-file` e `--env` na ordem certa;
+    sem engine o agente roda e o próximo `run` recupera; `--jail` roda de novo dentro do ai-jail e
+    alcança o engine;
     `server/tests/session_end.rs`: o handoff de uma sessão com 10 edições lista os 10 arquivos, e
     um pânico forçado não perde evento (a fila espera e o engine seguinte a esvazia); ajudas em
     `server/tests/common/mod.rs`.
@@ -165,7 +225,9 @@
     outros eventos: 200 ms e, sem resposta (ou com 5xx), vão para a fila. Sempre sai 0.
   - `events.zig`: o nome do evento do Claude Code no do engine (o `HookEvent::parse` do upstream)
     e a query (`event`, `agent=claude-code`, `cwd`, `workspace` quando há, `session_id`, `project_strategy=repo-root`,
-    `ingest_key` aleatória; `pid` no SessionStart e no SessionEnd; `briefing=1` no `/handoff`).
+    `ingest_key` aleatória; `pid` no SessionStart e no SessionEnd; `briefing=1` no `/handoff`) e,
+    numa execução gerenciada (fase E), `managed_run` (o AI_MEMORY_RUN_ID) no `/hook` e no `/handoff`
+    e `auto_handoff=0` (AI_MEMORY_AUTO_HANDOFF falso) no `/hook`, como o cliente do upstream.
   - `http.zig`: HTTP/1.1 mínimo no socket Unix (`Connection: close`, tamanho ou chunked), com
     prazo para a troca inteira.
   - `launch.zig`: sobe o `cadex-memory` como o `ensure` do daemon do terminal (SETSID, stdio em
@@ -184,7 +246,8 @@
      semanas de upstream deram 3 linhas);
   3. `make memory-upstream-test` no PC;
   4. comparar, entre o commit velho e o novo, o serve.rs, o backfill.rs e o
-     transcript_capture.rs do cli do upstream, e o marker.rs e o `build_marker_query_suffix` do
+     transcript_capture.rs do cli do upstream, o run.rs (as funções que o topo de cada arquivo de
+     `server/src/run/` lista), e o marker.rs e o `build_marker_query_suffix` do
      hook_capture.rs (o que `server/src/marker.rs` e `server/src/marker_query.rs` repetem), e
      trazer ao `server/src/engine.rs` os passos novos de inicialização (o compilador não pega um passo que falta) e ao código copiado (as funções que
      o topo de `server/src/replay.rs` e de `server/src/replay_capture.rs` lista) as mudanças na
@@ -196,8 +259,8 @@
 
 ## Como validar
 - `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs`,
-  `server/tests/import.rs`, `server/tests/auto_memory.rs`, `server/tests/marker.rs` e
-  `server/tests/session_end.rs` (parte do `make check`, em segundos).
+  `server/tests/import.rs`, `server/tests/auto_memory.rs`, `server/tests/marker.rs`,
+  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs` e `server/tests/session_end.rs` (parte do `make check`, em segundos).
 - `make memory-eval MODELS=<pasta>`: as 30 perguntas, só texto contra híbrida (`../../../tools/memory_eval.py`).
 - `make core-test`: os testes do cliente (eventos, query com e sem workspace, fila, respostas HTTP,
   sem token).

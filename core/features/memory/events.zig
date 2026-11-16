@@ -154,7 +154,47 @@ pub fn briefTarget(gpa: std.mem.Allocator, payload: Payload, workspace: ?[]const
     return out.toOwnedSlice(gpa);
 }
 
+/// Whether `value` is a UUID in its text form (8-4-4-4-12 hex), the shape of
+/// upstream's `ManagedRunId`.
+pub fn isUuid(value: []const u8) bool {
+    if (value.len != 36) return false;
+    for (value, 0..) |c, i| {
+        const dash = i == 8 or i == 13 or i == 18 or i == 23;
+        if (dash != (c == '-')) return false;
+        if (!dash and !std.ascii.isHex(c)) return false;
+    }
+    return true;
+}
+
+/// What a managed run (`cadex-memory run`, plan 22 phase E) adds to the
+/// hook's and the handoff's query, as upstream's hook client does from the
+/// same variables (`managed_run_query_suffix` and `auto_handoff_query_suffix`
+/// in its hook.rs at fa0ec25): `&managed_run=<AI_MEMORY_RUN_ID>` when that is
+/// a run id, so the startup packet is the workstream's; `&auto_handoff=0`
+/// (hook only) when AI_MEMORY_AUTO_HANDOFF is falsy.
+pub fn appendManaged(gpa: std.mem.Allocator, target: *std.ArrayList(u8), run_id: ?[]const u8, auto_handoff: ?[]const u8, on_hook: bool) !void {
+    if (run_id) |id| if (isUuid(id)) try target.print(gpa, "&managed_run={s}", .{id});
+    if (!on_hook) return;
+    const off = auto_handoff orelse return;
+    const v = std.mem.trim(u8, off, " \t");
+    for ([_][]const u8{ "0", "false", "no", "off" }) |f| {
+        if (std.ascii.eqlIgnoreCase(v, f)) return target.appendSlice(gpa, "&auto_handoff=0");
+    }
+}
+
 const testing = std.testing;
+
+test "a managed run's id and the handoff switch go on the query" {
+    var out: std.ArrayList(u8) = .empty;
+    defer out.deinit(testing.allocator);
+    try appendManaged(testing.allocator, &out, "0198c3a0-1b2c-7d3e-8f40-123456789abc", "False", true);
+    try testing.expectEqualStrings("&managed_run=0198c3a0-1b2c-7d3e-8f40-123456789abc&auto_handoff=0", out.items);
+    out.clearRetainingCapacity();
+    try appendManaged(testing.allocator, &out, "not-a-run", "1", true);
+    try testing.expectEqualStrings("", out.items);
+    try appendManaged(testing.allocator, &out, "0198c3a0-1b2c-7d3e-8f40-123456789abc", "off", false);
+    try testing.expectEqualStrings("&managed_run=0198c3a0-1b2c-7d3e-8f40-123456789abc", out.items);
+}
 
 test "recap and brief queries" {
     const recap = try recapTarget(testing.allocator, "s 1", null);

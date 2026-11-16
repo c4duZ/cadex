@@ -57,6 +57,10 @@ pub const Env = struct {
     /// The account's own memory when memory.shareAcrossAccounts is off
     /// (CADEX_MEMORY_WORKSPACE, the account's key); null shares `default`.
     workspace: ?[:0]const u8 = null,
+    /// A managed run's id and handoff switch (`cadex-memory run` sets them,
+    /// as upstream's `ai-memory run` does; events.appendManaged).
+    run_id: ?[:0]const u8 = null,
+    auto_handoff: ?[:0]const u8 = null,
 
     pub const Lookup = *const fn ([*:0]const u8) ?[:0]const u8;
 
@@ -75,6 +79,8 @@ pub const Env = struct {
             .bin = getenv("CADEX_MEMORY_BIN"),
             .tokens_dir = getenv("CADEX_SESSIONS_DIR"),
             .workspace = getenv("CADEX_MEMORY_WORKSPACE"),
+            .run_id = getenv("AI_MEMORY_RUN_ID"),
+            .auto_handoff = getenv("AI_MEMORY_AUTO_HANDOFF"),
         };
     }
 
@@ -127,8 +133,11 @@ pub fn runWith(gpa: std.mem.Allocator, env: Env, claude_event: []const u8, input
     const payload = events.Payload.of(if (parsed) |p| p.value else .null);
     var key_buf: [32]u8 = undefined;
     const pid: ?c_int = if (events.sendsPid(event)) claude_pid else null;
-    const target = try events.hookTarget(gpa, event, payload, env.workspace, events.ingestKey(&key_buf), pid);
-    defer gpa.free(target);
+    const base = try events.hookTarget(gpa, event, payload, env.workspace, events.ingestKey(&key_buf), pid);
+    var query: std.ArrayList(u8) = .fromOwnedSlice(base);
+    defer query.deinit(gpa);
+    try events.appendManaged(gpa, &query, env.run_id, env.auto_handoff, true);
+    const target = query.items;
 
     const is_start = std.mem.eql(u8, event, "session-start");
     const reply = replyFor(event, payload);
@@ -152,7 +161,12 @@ pub fn runWith(gpa: std.mem.Allocator, env: Env, claude_event: []const u8, input
 fn fetchReply(gpa: std.mem.Allocator, env: Env, payload: events.Payload, reply: Reply, deadline: i64) !?[]u8 {
     const target = switch (reply) {
         .none => return null,
-        .briefing => try events.handoffTarget(gpa, payload, env.workspace),
+        .briefing => blk: {
+            var handoff: std.ArrayList(u8) = .fromOwnedSlice(try events.handoffTarget(gpa, payload, env.workspace));
+            errdefer handoff.deinit(gpa);
+            try events.appendManaged(gpa, &handoff, env.run_id, null, false);
+            break :blk try handoff.toOwnedSlice(gpa);
+        },
         .anchor => try events.recapTarget(gpa, payload.session_id.?, context.anchor_budget),
         .recap => try events.recapTarget(gpa, payload.session_id.?, null),
         .brief => try events.briefTarget(gpa, payload, env.workspace),

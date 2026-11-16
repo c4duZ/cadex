@@ -113,6 +113,12 @@ let usageChecks: [(name: String, body: Checks.Body)] = [
         expect(AgentLaunch.command(for: codex, skipPermissions: true, kit: kit) == "CODEX_HOME='/Users/me/.codex-2' codex --dangerously-bypass-approvals-and-sandbox")
         let odd = AgentAccount(dir: "/tmp/it's", name: "x", isDefault: false)
         expect(AgentLaunch.command(for: odd, skipPermissions: false, kit: kit, defaultClaudeJSON: none) == "CLAUDE_CONFIG_DIR='/tmp/it'\\''s' claude")
+        // "Continue in…" (plan 22 phase E): `cadex continue`, the account by its variable.
+        expect(AgentLaunch.continueCommand(for: work, tools: "/A/cadex") == "CLAUDE_CONFIG_DIR='/Users/me/.claude-work' '/A/cadex' continue claude")
+        expect(AgentLaunch.continueCommand(for: codex, tools: "/A/cadex") == "CODEX_HOME='/Users/me/.codex-2' '/A/cadex' continue codex")
+        expect(AgentLaunch.continueCommand(for: AgentAccount(dir: "/Users/me/.claude", name: "D", isDefault: true), tools: "/A/cadex")
+               == "'/A/cadex' continue claude")
+        expect(AgentLaunch.continueCommand(for: nil, tools: "/A/cadex") == "'/A/cadex' continue")
     }),
     ("an account with no login, or out for over a day, is left out; a short pause is not", {
         let usage = AgentUsageController.shared

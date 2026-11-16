@@ -54,6 +54,14 @@ extension WindowSession {
         }
     }
 
+    /// "Continue in…" (plan 22 phase E): a new tab in the window's project
+    /// with `cadex continue <agent>` in the chosen account. Needs `cadex`
+    /// and the memory on (the launcher is the memory's).
+    func continueInAgent(_ account: AgentAccount?) {
+        guard settings.store.settings.memory.enabled, let tools = SessionKit.shared.toolsPath else { return NSSound.beep() }
+        typeInNewTab(AgentLaunch.continueCommand(for: account, tools: tools), cwd: projectRoot ?? NSHomeDirectory())
+    }
+
     /// A new tab in `cwd` with `command` typed and run.
     private func typeInNewTab(_ command: String, cwd: String) {
         guard let tabs else { return }

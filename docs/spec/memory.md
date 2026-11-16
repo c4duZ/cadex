@@ -144,12 +144,18 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   parado, sai, e o processo volta ao peso de parado.
 
 ### Continuar em outro agente
-- "Continue in…" (agents.continue-in-agent) leva o trabalho de uma sessão para outro agente ou
-  conta. Claude → Claude é o "Continue in Another Account" (a conversa inteira, numa cópia). Claude ↔
-  Codex abre o outro agente com o workstream e um dossiê do que a sessão anterior fez, só de
-  leitura, apagado quando a sessão fecha. Dois agentes nunca pegam o mesmo workstream ao mesmo tempo.
-- O Codex recebe as ferramentas de memória por argumento; os hooks dele só rodam com a pasta de
-  configuração do Codex que o Cadex gerencia, nunca na `~/.codex` do dono.
+- "Continue in…" (agents.continue-in-agent) escolhe agente e conta no ⌘K (ou "o último agente que trabalhou aqui") e abre uma aba na pasta do
+  projeto com `cadex continue claude` ou `cadex continue codex` (que o dono também pode digitar numa
+  aba do Cadex). É o `ai-memory run` do ai-memory, com o mesmo registro: o trabalho do projeto é um
+  workstream; o agente que já rodou nele volta à própria sessão (`--resume`), e o outro agente começa
+  uma sessão nova com o pacote do workstream no briefing e um dossiê da conversa anterior, só de
+  leitura, apagado quando ele fecha. Dois agentes nunca pegam o mesmo workstream ao mesmo tempo: o
+  segundo espera um pouco e é recusado. Ao fim, a conversa entra na memória (também a do Codex,
+  que não tem hooks).
+- Claude numa outra conta não acha a sessão da primeira: começa uma nova no mesmo workstream, com o
+  pacote. Para levar a conversa inteira, "Continue in Another Account" no histórico (uma cópia).
+- O Codex recebe as ferramentas de memória por argumento (`-c mcp_servers…`); os hooks dele só
+  rodariam com uma pasta de configuração do Codex que o Cadex gerenciasse, nunca na `~/.codex` do dono.
 
 ### Consolidação na sessão
 - Em marcos (worktree marcada como pronta, contexto acima de memory.consolidateAtContext, 70%, ou
@@ -218,6 +224,14 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
 - Se o Claude grava o MEMORY.md no mesmo instante (microssegundos) em que o Cadex grava o índice
   refeito, a gravação do Claude se perde; a entrada de cada memória volta na próxima reconstrução,
   uma linha escrita à mão naquele instante não.
+- O Codex não foi testado de verdade (sem conta): o "Continue in…" para ele está pronto e testado com
+  um Codex falso; os hooks dele não rodam (só a importação no fim).
+- O `cadex continue` tem as opções e os agentes do `ai-memory run` (`--yolo`, `--jail`, perfis,
+  `--env`, OpenCode, Kimi, Grok…), menos a instalação automática de hooks: o Cadex não grava na
+  configuração dos agentes; fora do Claude e do Codex, a conversa entra na memória só pela
+  importação no fim. Sem o processo da memória o agente roda mesmo assim e o próximo `cadex
+  continue` recupera a conversa. Com o ai-jail, o acesso ao socket da memória de dentro da jaula não
+  foi conferido com o ai-jail de verdade (só com um falso).
 - Do `.ai-memory.toml`, o Cadex não lê `identity`, `aliases`, `server` nem as rotas do arquivo da
   pasta pessoal; e não confere o `ignore_paths` de outro repositório numa chamada daqui
   (`cat ../outro/segredo.env` entra).

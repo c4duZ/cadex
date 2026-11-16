@@ -7,6 +7,7 @@ const statusline = @import("statusline.zig");
 const hook = @import("hook.zig");
 const agent = @import("agent.zig");
 const claude_wrap = @import("claude_wrap.zig");
+const continue_wrap = @import("continue_wrap.zig");
 // The memory's hook (plan 22): the memory feature's entry, the only code
 // that talks to the engine's socket.
 const memory = @import("../memory/memory.zig");
@@ -17,6 +18,7 @@ const usage_text =
     \\       cadex memory-hook <event> (a Claude Code hook: feeds the project memory)
     \\       cadex mcp              (the MCP server of the sessions Cadex opens)
     \\       cadex claude [args…]   (the `claude` typed in a Cadex zsh tab: the session kit)
+    \\       cadex continue [options] [agent] [args…] (ai-memory run: the agent in the project's workstream, with the kit)
     \\
 ++ @import("commands.zig").usage;
 
@@ -28,6 +30,7 @@ pub fn main(init: std.process.Init.Minimal) u8 {
     if (std.mem.eql(u8, sub, "hook")) return runHook(args.next() orelse return fail(usage_text), hook.run);
     if (std.mem.eql(u8, sub, "memory-hook")) return runHook(args.next() orelse return fail(usage_text), memory.hook.run);
     if (std.mem.eql(u8, sub, "claude")) return runClaude(&args);
+    if (std.mem.eql(u8, sub, "continue")) return runContinue(&args);
     // The agent's subcommands (plan 20): every word after the subcommand.
     var words_buf: [64][]const u8 = undefined;
     var n: usize = 0;
@@ -44,6 +47,13 @@ fn runClaude(args: anytype) u8 {
     var words: std.ArrayList([:0]const u8) = .empty;
     while (args.next()) |word| words.append(std.heap.page_allocator, word) catch return claude_wrap.run(&.{});
     return claude_wrap.run(words.items);
+}
+
+/// Every word after `continue`; the process becomes `cadex-memory run`.
+fn runContinue(args: anytype) u8 {
+    var words: std.ArrayList([:0]const u8) = .empty;
+    while (args.next()) |word| words.append(std.heap.page_allocator, word) catch return continue_wrap.run(&.{});
+    return continue_wrap.run(words.items);
 }
 
 const HookRun = *const fn (std.mem.Allocator, []const u8, []const u8) anyerror!?[]u8;

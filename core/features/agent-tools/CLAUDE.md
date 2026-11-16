@@ -66,6 +66,15 @@
   `args` do kit antes das palavras do dono. CADEX_CLAUDE_WRAP (o pid) pega um `claude` que chama
   `cadex claude` de novo. `claude_args_check.py` (no `make manifests`) avisa, sem falhar, quando o
   `claude` instalado tem subcomando ou opção com valor que a lista não conhece.
+- Plano 22, fase E: `cadex continue [opções] [agente] [args…]` (`continue_wrap.zig`) é o que o
+  "Continue in…" (agents.continue-in-agent) digita numa aba: pede o kit como o `cadex claude`
+  (o `kitFor` do `claude_wrap.zig`), lê do arquivo do `--settings` do kit o ambiente da memória (o
+  token e os CADEX_MEMORY_*), põe no próprio ambiente e vira o `cadex-memory run` (o `ai-memory run`
+  do upstream, `../memory/CLAUDE.md`) com as palavras do dono intactas: o launcher entende as opções
+  e escolhe o agente (nenhum: a sessão mais nova). Vão dois conjuntos do kit: `--claude-kit-arg` (as
+  palavras do kit) e `--codex-kit-arg` (o servidor MCP da memória por `-c mcp_servers.cadex…`, com o
+  token no env dele); o launcher usa só o do agente que roda. Memória desligada (sem
+  CADEX_MEMORY_BIN no kit): diz e sai.
 - O build (`../../build.zig`, `addCli`) instala `zig-out/bin/cadex` só no Mac; o empacotamento o põe em
   Contents/Helpers.
 

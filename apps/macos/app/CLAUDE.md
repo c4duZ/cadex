@@ -64,7 +64,8 @@
   conta ativa no settings.json, sincronizar, compartilhar numa conta antiga mostrando antes o que
   muda, cópia própria, voltar a seguir e remover (só as do Cadex, para a lixeira). `AgentsHistory.swift`:
   a página History e o que cada ação faz (aba com o comando, área de transferência, Finder,
-  workspace; a conta para continuar escolhida no ⌘K). `AgentsAttention.swift`: a atenção (plano 19,
+  workspace; a conta para continuar escolhida no ⌘K) e `continueInAgent` (o "Continue in…" do plano 22
+  fase E: com memory.enabled, uma aba na pasta do projeto com o `cadex continue` da conta). `AgentsAttention.swift`: a atenção (plano 19,
   fase C): junta o que cada terminal de cada janela relatou (aviso TerminalView.agentDidChange), põe
   as permissões do socket no quadro, leva um cartão ao terminal dele, o número do sininho em cada
   janela e o do Dock, e a página do sininho. `WorktreesWiring.swift`: as tarefas (plano 19, fase D):

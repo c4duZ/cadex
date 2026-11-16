@@ -5,6 +5,11 @@
 //! If no session registers within 10 s of the start, it leaves too. Same
 //! numbers as the terminal daemon (core/features/terminal/daemon.zig, idle()).
 //! No timer runs while sessions are alive.
+//!
+//! A `cadex-memory run` launcher counts as a session too: its prepare
+//! (`POST /workstream/runs?pid=<launcher pid>`) registers the launcher, so
+//! the engine outlives the agent it started until the transcript import and
+//! the finish are done (plan 22 phase E, 2026-11-16).
 
 use std::collections::HashSet;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -142,10 +147,24 @@ fn hook_session(query: &str, header_pid: Option<i32>) -> Option<(&str, i32)> {
     Some((event?, pid?))
 }
 
-/// Middleware: SessionStart registers its `claude`, SessionEnd removes it.
-/// On the inner router, so a SessionStart replayed from the spool counts too.
+/// The `pid=` of a query, if any.
+fn query_pid(query: &str) -> Option<i32> {
+    query.split('&').find_map(|pair| match pair.split_once('=') {
+        Some(("pid", value)) => value.parse().ok(),
+        _ => None,
+    })
+}
+
+/// Middleware: SessionStart registers its `claude`, SessionEnd removes it,
+/// and a managed run's prepare registers its launcher (the kqueue removes it
+/// when the launcher exits). On the inner router, so a SessionStart replayed
+/// from the spool counts too.
 pub(crate) async fn track(State(sessions): State<Arc<Sessions>>, req: Request, next: Next) -> Response {
-    if req.uri().path() == "/hook" {
+    if req.uri().path() == "/workstream/runs" && req.method() == axum::http::Method::POST {
+        if let Some(pid) = query_pid(req.uri().query().unwrap_or("")) {
+            sessions.register(pid);
+        }
+    } else if req.uri().path() == "/hook" {
         let header_pid = req
             .headers()
             .get("x-cadex-pid")
@@ -172,6 +191,8 @@ mod tests {
         assert_eq!(hook_session("event=session-end", Some(7)), Some(("session-end", 7)));
         assert_eq!(hook_session("event=stop&pid=x", None), None);
         assert_eq!(hook_session("pid=3", None), None);
+        assert_eq!(query_pid("pid=31"), Some(31));
+        assert_eq!(query_pid("x=1&pid=y"), None);
     }
 
     #[tokio::test]

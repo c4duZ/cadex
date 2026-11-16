@@ -38,14 +38,37 @@ public enum AgentLaunch {
         return (account.isDefault ? "" : "CLAUDE_CONFIG_DIR=\(quoted) ") + "claude attach " + safeJob
     }
 
-    /// agents.open-account (the accounts in ⌘K) and agents.customize-accounts.
+    /// "Continue in…" (plan 22 phase E): `cadex continue <agent>` in the
+    /// account, the agent in the project's memory workstream (ai-memory's
+    /// `run`): the same native session when the agent ran it last, else a
+    /// new one with the other agent's conversation as a read-only dossier.
+    /// The tab's zsh runs it; `cadex` asks the app for the kit.
+    /// With no account, `cadex continue` alone: the launcher continues the
+    /// newest session of the project, in whichever agent ran it.
+    public static func continueCommand(for account: AgentAccount?, tools: String) -> String {
+        let cadex = "'" + tools.replacingOccurrences(of: "'", with: "'\\''") + "'"
+        guard let account else { return cadex + " continue" }
+        let quoted = "'" + account.dir.replacingOccurrences(of: "'", with: "'\\''") + "'"
+        switch account.provider {
+        case .claude: return (account.isDefault ? "" : "CLAUDE_CONFIG_DIR=\(quoted) ") + cadex + " continue claude"
+        case .codex: return (account.isDefault ? "" : "CODEX_HOME=\(quoted) ") + cadex + " continue codex"
+        }
+    }
+
+    /// agents.open-account (the accounts in ⌘K), agents.continue-in-agent and
+    /// agents.customize-accounts.
     @MainActor
     public static func commands(palette: CommandPaletteController, launch: @escaping @MainActor (AgentAccount) -> Void,
+                                continueIn: @escaping @MainActor (AgentAccount?) -> Void,
                                 customize: @escaping @MainActor () -> Void) -> [Command] {
         [
             Command(id: "agents.open-account", title: T("Open an Account's Agent", "Abrir o agente de uma conta"),
                     keywords: ["claude", "codex", "agent", "account", "agente", "conta", "abrir"], category: .terminal,
                     action: .run { palette.open(AccountSource(launch: launch)) }),
+            Command(id: "agents.continue-in-agent", title: T("Continue in…", "Continuar em…"),
+                    keywords: ["continue", "workstream", "handoff", "claude", "codex", "memory", "continuar", "memória"], category: .terminal,
+                    action: .run { palette.open(AccountSource(launch: { continueIn($0) }, automatic: { continueIn(nil) }, placeholder: T("The agent and account that continue this project's work",
+                                                                                                  "O agente e a conta que continuam o trabalho deste projeto"))) }),
             Command(id: "agents.customize-accounts", title: T("Customize Accounts", "Personalizar as contas"),
                     keywords: ["accounts", "hide", "show", "contas", "esconder", "mostrar"], category: .view,
                     action: .run { customize() }),
@@ -57,22 +80,36 @@ public enum AgentLaunch {
 @MainActor
 final class AccountSource: PaletteSource {
     private let launch: (AgentAccount) -> Void
+    /// "Continue in…" only: a first item for the agent that worked last.
+    private let automatic: (() -> Void)?
+    let placeholder: String
+    private static let automaticID = "\u{0}automatic"
 
-    init(launch: @escaping (AgentAccount) -> Void) { self.launch = launch }
+    init(launch: @escaping (AgentAccount) -> Void, automatic: (() -> Void)? = nil,
+         placeholder: String = T("Open the agent of an account", "Abrir o agente de uma conta")) {
+        self.launch = launch
+        self.automatic = automatic
+        self.placeholder = placeholder
+    }
 
-    var placeholder: String { T("Open the agent of an account", "Abrir o agente de uma conta") }
     var emptyText: String { T("No such account", "Nenhuma conta assim") }
     var icon: Icon { .sparkle }
 
     func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
         let accounts = AgentUsageController.shared.visibleAccounts()
-        let items = accounts.filter { query.isEmpty || $0.name.localizedCaseInsensitiveContains(query) }.map { account in
+        var items = accounts.filter { query.isEmpty || $0.name.localizedCaseInsensitiveContains(query) }.map { account in
             PaletteItem(id: account.dir, title: account.name, detail: account.provider == .codex ? "codex" : "claude", icon: .terminalWindow)
+        }
+        let lastTitle = T("The agent that worked here last", "O último agente que trabalhou aqui")
+        if automatic != nil, query.isEmpty || lastTitle.localizedCaseInsensitiveContains(query) {
+            items.insert(PaletteItem(id: Self.automaticID, title: lastTitle, detail: T("its newest session", "a sessão mais nova dele"),
+                                     icon: .clockCounterClockwise), at: 0)
         }
         show(items, nil)
     }
 
     func choose(_ item: PaletteItem) {
+        if item.id == Self.automaticID { automatic?(); return }
         guard let account = AgentUsageController.shared.visibleAccounts().first(where: { $0.dir == item.id }) else { return }
         launch(account)
     }

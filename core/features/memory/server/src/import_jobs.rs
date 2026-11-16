@@ -106,7 +106,7 @@ pub(crate) async fn backfill(ctx: &Context, job: &SessionStarted) {
     found.retain(|t| t.id != job.session_id);
     found.truncate(BACKFILL_SESSIONS);
     let cwd = row.repo_path.clone().unwrap_or_else(|| root.to_string_lossy().into_owned());
-    let target = Target { cwd, workspace: workspace_of(&row) };
+    let target = Target { cwd, workspace: workspace_of(&row), agent: "claude-code" };
     let planned: Vec<Planned<'_>> = found.iter().map(|transcript| Planned { transcript, target: &target }).collect();
     let mut budget = Budget { sessions: BACKFILL_SESSIONS, events: BACKFILL_EVENTS };
     let mut report = Report::default();
@@ -176,7 +176,7 @@ pub(crate) async fn outside(ctx: &Context) {
     let known = if found.is_empty() { Vec::new() } else { known_projects(ctx, &scopes).await };
     let targets: Vec<Option<Target>> = found.iter().map(|t| {
         let project = owner(&known, &accounts::key(&t.account), &t.cwd)?;
-        Some(Target { cwd: project.row.repo_path.clone()?, workspace: workspace_of(&project.row) })
+        Some(Target { cwd: project.row.repo_path.clone()?, workspace: workspace_of(&project.row), agent: "claude-code" })
     }).collect();
     let planned: Vec<Planned<'_>> = found.iter().zip(&targets)
         .filter_map(|(transcript, target)| Some(Planned { transcript, target: target.as_ref()? }))

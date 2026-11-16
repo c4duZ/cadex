@@ -30,6 +30,17 @@ ai-memory-workstream = { git = "https://github.com/akitaonrails/ai-memory", rev 
 anyhow = "1"
 async-trait = "0.1"
 axum = "0.8"
+# Upstream's tree has it (5.0.1, through its cli's config): the path of
+# upstream's own config.toml that `cadex-memory run --profile` reads
+# (`default_data_dir`, run/profiles.rs, 2026-11-16).
+dirs = "5"
+# The `run` launcher's client for memory.sock (src/run/uds_http.rs): hyper's
+# HTTP/1 client connection over a Unix stream. All three are in the tree
+# already (axum and reqwest), at the lock's versions, and reqwest already
+# turns on these features: no new crate (plan 22 phase E, 2026-11-16).
+http-body-util = "0.1"
+hyper = { version = "1", features = ["client", "http1"] }
+hyper-util = { version = "0.1", features = ["tokio"] }
 jiff = "0.2"
 libc = "0.2"
 # Both already in upstream's tree (its store and its wiki watcher), at the
@@ -43,6 +54,9 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde_urlencoded = "0.7"
 sha2 = "0.10"
+# Was a dev-dependency only: the `run` launcher keeps the previous session's
+# dossier in a private temporary folder, as upstream's run does (2026-11-16).
+tempfile = "3"
 rmcp = { version = "3.9", features = ["server", "macros", "transport-io", "transport-streamable-http-server", "schemars"] }
 # Already in upstream's tree (its lock pins 1.2.1): reads a marker's
 # `[capture]` table, where upstream's cli uses `toml_edit` (plan 22, 2026-11-16).
@@ -52,9 +66,9 @@ tokio-util = { version = "0.7", features = ["rt", "io"] }
 tower = { version = "0.5", features = ["util"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
-
-[dev-dependencies]
-tempfile = "3"
+# In upstream's tree with these features (its workspace Cargo.toml): the
+# recovery journal's entry ids (run/journal.rs, 2026-11-16).
+uuid = { version = "1", features = ["v4"] }
 
 # Upstream's own patch (its Cargo.toml, 2026-11-15): candle needs zip 8.x and
 # 8.6.0 has GHSA-m665-v7pm-7grj; patches only apply from the root workspace.

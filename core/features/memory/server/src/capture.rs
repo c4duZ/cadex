@@ -32,7 +32,7 @@ fn is_tool_event(event: &str) -> bool {
 
 /// The policy of the nearest marker above `cwd` (a `[capture]`-only marker
 /// counts here, unlike for the query pairs).
-fn policy(cwd: &str) -> CapturePolicy {
+pub(crate) fn policy(cwd: &str) -> CapturePolicy {
     let home = marker::home_dir();
     let home = home.as_deref().and_then(Path::to_str);
     let Some(found) = marker::find_marker(cwd, home.map(Path::new)) else {

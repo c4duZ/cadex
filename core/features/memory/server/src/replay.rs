@@ -37,6 +37,9 @@ const HOOK_BATCH_BYTES: usize = 8 * 1024 * 1024;
 pub(crate) struct Target {
     pub(crate) cwd: String,
     pub(crate) workspace: Option<String>,
+    /// The hook `agent` (`claude-code` for imports; the harness's for a
+    /// recovered `cadex-memory run`, run/recover.rs).
+    pub(crate) agent: &'static str,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -159,7 +162,7 @@ fn replay_ingest_key(sid: &str, kind: &str, event_id: &str) -> String {
 }
 
 fn hook_item(target: &Target, event: &str, sid: &str, ingest_key: &str, source_event: Option<&str>, body: serde_json::Value) -> HookItem {
-    let mut pairs: Vec<(&str, &str)> = vec![("event", event), ("agent", "claude-code"), ("cwd", &target.cwd)];
+    let mut pairs: Vec<(&str, &str)> = vec![("event", event), ("agent", target.agent), ("cwd", &target.cwd)];
     if let Some(ws) = &target.workspace {
         pairs.push(("workspace", ws));
     }
@@ -171,7 +174,7 @@ fn hook_item(target: &Target, event: &str, sid: &str, ingest_key: &str, source_e
     HookItem { url: format!("http://localhost/hook?{query}"), body }
 }
 
-fn hook_batch_end(items: &[HookItem], offset: usize) -> Result<usize> {
+pub(crate) fn hook_batch_end(items: &[HookItem], offset: usize) -> Result<usize> {
     let (mut end, mut bytes) = (offset, 2_usize);
     while end < items.len() && end - offset < HOOK_BATCH_ITEMS {
         let item_bytes = serde_json::to_vec(&items[end])?.len().saturating_add(1);
@@ -188,7 +191,7 @@ fn hook_batch_end(items: &[HookItem], offset: usize) -> Result<usize> {
 }
 
 #[derive(Debug, Deserialize)]
-struct HookBatchAck {
+pub(crate) struct HookBatchAck {
     accepted: usize,
     results: Vec<HookBatchResult>,
     #[serde(default)]
@@ -204,7 +207,7 @@ struct HookBatchResult {
 }
 
 /// The items the server durably took; an error for any other outcome.
-fn acknowledged(ack: &HookBatchAck, items: &[HookItem]) -> Result<Vec<usize>> {
+pub(crate) fn acknowledged(ack: &HookBatchAck, items: &[HookItem]) -> Result<Vec<usize>> {
     let indices = ack.accepted_indices.clone().unwrap_or_else(|| (0..ack.accepted).collect());
     if ack.accepted > items.len()
         || indices.iter().any(|i| *i >= items.len())
@@ -297,7 +300,7 @@ mod tests {
 
     #[test]
     fn an_item_names_the_project_root_and_never_leaves_a_baton() {
-        let target = Target { cwd: "/r/a b".into(), workspace: Some("-Users-a--claude".into()) };
+        let target = Target { cwd: "/r/a b".into(), workspace: Some("-Users-a--claude".into()), agent: "claude-code" };
         let item = hook_item(&target, "user-prompt", "s1", "k", None, serde_json::json!({}));
         assert_eq!(item.url, "http://localhost/hook?event=user-prompt&agent=claude-code&cwd=%2Fr%2Fa+b\
             &workspace=-Users-a--claude&project_strategy=repo-root&session_id=s1&ingest_key=k&auto_handoff=0");

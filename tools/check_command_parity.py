@@ -34,7 +34,7 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "agents.add-account", "agents.set-active-account", "agents.set-project-account", "agents.sync-account-config", "agents.share-account-config",
             "agents.use-own-copy", "agents.follow-default-config", "agents.remove-account",
             # The unified history (plan 18, phase D).
-            "agents.show-history", "agents.resume-session", "agents.continue-in-account", "agents.copy-resume-command",
+            "agents.show-history", "agents.resume-session", "agents.continue-in-account", "agents.continue-in-agent", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).
             "agents.show-attention", "agents.show-feed", "agents.approve", "agents.deny", "agents.mark-unread",

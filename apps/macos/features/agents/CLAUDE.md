@@ -96,7 +96,9 @@
   sem login ou vencida há mais de um dia ficam fora), com mais espaço entre elas que o cartão e sem linha; clique leva ao agente já aberto ou abre um, clique direito renomeia e
   esconde. `AgentLaunch.swift`: o comando que abre o agente de uma conta (o Claude pelo
   SessionKit.claudeCommand, com a status line do Cadex; o Codex com `CODEX_HOME`; a flag sem
-  permissões), agents.open-account e agents.customize-accounts (ADR 0019 e 0021). Conta escondida
+  permissões), agents.open-account e agents.customize-accounts (ADR 0019 e 0021); agents.continue-in-agent
+  ("Continue in…", plano 22 fase E), a conta escolhida no ⌘K e `continueCommand`: `cadex continue
+  claude|codex` com CLAUDE_CONFIG_DIR ou CODEX_HOME da conta, numa aba na pasta do projeto. Conta escondida
   volta quando o `oauthAccount` muda (`fingerprint`, `onLoginChanged`).
 - `AgentAccounts.swift` (plano 18, fase C): `AgentConfigShare`, a configuração compartilhada por
   link a partir do ~/.claude, lista negra do estado da conta (`isAccountState`; .credentials.json

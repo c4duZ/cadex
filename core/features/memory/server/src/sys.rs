@@ -6,7 +6,11 @@
 //!   parent of those processes, so `waitpid` cannot tell it);
 //! - the effective uid, to refuse connections from another user;
 //! - clearing close-on-exec on the two descriptors a restart hands to the
-//!   next image, and taking them back on the other side.
+//!   next image, and taking them back on the other side;
+//! - for `cadex-memory run` (plan 22 phase E, 2026-11-16): the host name of
+//!   the lease owner label (upstream asks `sysinfo`, not in this crate), and
+//!   `setsid` in the engine the launcher starts, so it leaves the terminal's
+//!   session as launch.zig's `POSIX_SPAWN_SETSID` does.
 
 use std::io;
 use std::os::fd::{AsRawFd, FromRawFd, OwnedFd, RawFd};
@@ -39,6 +43,28 @@ pub(crate) fn adopt(fd: RawFd) -> io::Result<OwnedFd> {
     // SAFETY: as in inherit_on_exec, on a descriptor we now own.
     unsafe { libc::fcntl(owned.as_raw_fd(), libc::F_SETFD, libc::FD_CLOEXEC) };
     Ok(owned)
+}
+
+/// This machine's host name, `None` if it cannot be read.
+pub(crate) fn host_name() -> Option<String> {
+    let mut buf = [0u8; 256];
+    // SAFETY: gethostname writes at most `buf.len()` bytes into a buffer we own.
+    if unsafe { libc::gethostname(buf.as_mut_ptr().cast(), buf.len()) } != 0 {
+        return None;
+    }
+    let len = buf.iter().position(|&b| b == 0).unwrap_or(buf.len());
+    String::from_utf8(buf[..len].to_vec()).ok().filter(|name| !name.trim().is_empty())
+}
+
+/// Make `command`'s child the leader of a new session (no controlling
+/// terminal: a Ctrl-C or a closed tab of the launcher never reaches it).
+pub(crate) fn new_session_on_spawn(command: &mut std::process::Command) {
+    use std::os::unix::process::CommandExt;
+    // SAFETY: setsid is async-signal-safe, the only kind of call allowed
+    // between fork and exec, and touches no memory of the parent.
+    unsafe {
+        command.pre_exec(|| if libc::setsid() < 0 { Err(io::Error::last_os_error()) } else { Ok(()) });
+    }
 }
 
 /// A kqueue that reports the exit of the processes it watches.
