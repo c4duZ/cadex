@@ -4,8 +4,10 @@ was measured beside it. A limit only goes up with the reason written.
 
 LIMITS = {
     # 43 MB universal (2026-10-20); 50.3 MB after plan 21 (the review tab, image diffs, conflicts,
-    # comments, line authorship: 2026-11-15), raised from 50 then, room for plans 22 to 24.
-    "app_mb": 55,
+    # comments, line authorship: 2026-11-15), raised from 50 then. 85 since plan 22 (the owner,
+    # 2026-11-15): the memory engine cadex-memory, Rust, ~24 MB universal (10.4 arm64 + 13.2 x86_64,
+    # docs/adr/0028-project-memory.md); room for plans 23 and 24.
+    "app_mb": 85,
     "idle_mb": 100,               # ~78 MB with one terminal in a project
     "idle_cpu": 2.0,              # ~0 %
     "flood_peak_mb": 200,         # ~147 MB while `yes` floods

@@ -512,3 +512,44 @@ Simple Icons — https://github.com/simple-icons/simple-icons
 The Gemini logo in apps/macos/shared/icons/Resources/ProviderLogos, from
 simple-icons 16.35.0. CC0 1.0 Universal (public domain dedication). The logo
 is a trademark of its owner, shown only to name the provider.
+
+ai-memory (Fabio Akita)
+https://github.com/akitaonrails/ai-memory
+The memory engine: its crates (core, store, wiki, consolidate, hooks, mcp, llm,
+workstream) are compiled, unmodified and pinned by commit, into the
+cadex-memory helper (core/features/memory, docs/adr/0028-project-memory.md).
+
+    MIT License
+
+    Copyright (c) 2026 Fabio Akita
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+Rust crates of the memory engine
+The ~400 crates compiled into cadex-memory with ai-memory (tokio, axum, rmcp,
+rusqlite with SQLite, libgit2, candle, tokenizers and their dependencies) are
+listed, with each license text, in THIRD-PARTY-RUST.txt inside the app
+(Contents/Resources), generated from core/features/memory/server/Cargo.lock by
+cargo-about when the app is packaged. Licenses: MIT, Apache-2.0, BSD, ISC,
+Unicode-3.0, Zlib, MPL-2.0, CC0-1.0, CDLA-Permissive-2.0.
+
+all-MiniLM-L6-v2 (sentence-transformers)
+https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+The embedding model of the memory's search by meaning. Not shipped in the app:
+cadex-memory downloads it on first use. Apache License 2.0.

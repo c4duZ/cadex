@@ -1,0 +1,101 @@
+# cadex-memory: the memory engine process (docs/adr/0028-project-memory.md).
+#
+# ai-memory's crates come from upstream pinned by commit, never edited, like
+# libghostty in core/build.zig.zon. Updating upstream means changing AI_MEMORY_REV
+# below (all eight lines) and following the procedure in ../CLAUDE.md.
+# v3.4.7 = fa0ec25dbe987b7574a7487ecf92f0873040c2f2 (2026-11-15).
+
+[package]
+name = "cadex-memory"
+description = "Cadex's memory engine process: ai-memory's hook ingest and MCP tools over a Unix socket."
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+license = "MIT"
+publish = false
+
+[[bin]]
+name = "cadex-memory"
+path = "src/main.rs"
+
+[dependencies]
+ai-memory-core = { git = "https://github.com/akitaonrails/ai-memory", rev = "fa0ec25dbe987b7574a7487ecf92f0873040c2f2" }
+ai-memory-store = { git = "https://github.com/akitaonrails/ai-memory", rev = "fa0ec25dbe987b7574a7487ecf92f0873040c2f2" }
+ai-memory-wiki = { git = "https://github.com/akitaonrails/ai-memory", rev = "fa0ec25dbe987b7574a7487ecf92f0873040c2f2" }
+ai-memory-consolidate = { git = "https://github.com/akitaonrails/ai-memory", rev = "fa0ec25dbe987b7574a7487ecf92f0873040c2f2" }
+ai-memory-hooks = { git = "https://github.com/akitaonrails/ai-memory", rev = "fa0ec25dbe987b7574a7487ecf92f0873040c2f2" }
+ai-memory-mcp = { git = "https://github.com/akitaonrails/ai-memory", rev = "fa0ec25dbe987b7574a7487ecf92f0873040c2f2" }
+ai-memory-llm = { git = "https://github.com/akitaonrails/ai-memory", rev = "fa0ec25dbe987b7574a7487ecf92f0873040c2f2" }
+ai-memory-workstream = { git = "https://github.com/akitaonrails/ai-memory", rev = "fa0ec25dbe987b7574a7487ecf92f0873040c2f2" }
+anyhow = "1"
+async-trait = "0.1"
+axum = "0.8"
+rmcp = { version = "3.9", features = ["server", "macros", "transport-io", "transport-streamable-http-server", "schemars"] }
+tokio = { version = "1", features = ["full"] }
+tokio-util = { version = "0.7", features = ["rt", "io"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
+
+[dev-dependencies]
+serde_json = "1"
+tempfile = "3"
+
+# Upstream's own patch (its Cargo.toml, 2026-11-15): candle needs zip 8.x and
+# 8.6.0 has GHSA-m665-v7pm-7grj; patches only apply from the root workspace.
+[patch.crates-io]
+zip = { git = "https://github.com/zip-rs/zip2", rev = "507c5c76ddd4cde767e64832fc6f848c51a99e44" }
+
+[workspace]
+
+# Shipped inside the app, so built for size; the inference crates keep
+# opt-level 3: at "z" writing a page with its embedding was 30% slower
+# (237 vs 182 ms) for 0.3 MB saved (proof of concept, 2026-11-15).
+# panic = "abort": unwind cost 2.3 MB per architecture (12.28 vs 9.98 MB, 2026-11-15),
+# and upstream never catches a panic. A panic ends the process; launchd starts
+# it again (~150 ms), SQLite (WAL) and the wiki's atomic writes survive it, and
+# the `cadex hook` queue keeps the events of that gap (plan 22, phase C test).
+[profile.release]
+opt-level = "z"
+lto = "fat"
+panic = "abort"
+codegen-units = 1
+strip = true
+
+[profile.release.package.candle-core]
+opt-level = 3
+
+[profile.release.package.candle-nn]
+opt-level = 3
+
+[profile.release.package.candle-transformers]
+opt-level = 3
+
+[profile.release.package.gemm]
+opt-level = 3
+
+[profile.release.package.gemm-common]
+opt-level = 3
+
+[profile.release.package.gemm-f16]
+opt-level = 3
+
+[profile.release.package.gemm-f32]
+opt-level = 3
+
+[profile.release.package.gemm-f64]
+opt-level = 3
+
+[profile.release.package.gemm-c32]
+opt-level = 3
+
+[profile.release.package.gemm-c64]
+opt-level = 3
+
+# Upstream's dev profile: full debuginfo made each test binary ~190 MB.
+[profile.dev]
+opt-level = 0
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+opt-level = 1

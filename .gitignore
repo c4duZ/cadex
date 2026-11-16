@@ -20,3 +20,6 @@ dist/
 
 # Local secrets: the update signing key (apps/macos/packaging/CLAUDE.md)
 .env
+
+# Rust (core/features/memory/server; Cargo.lock pins the upstream crates)
+target/

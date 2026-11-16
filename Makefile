@@ -1,8 +1,9 @@
-.PHONY: check manifests core core-test macos-test app run relink package perf windows-core windows-core-test windows-app windows-run windows-app-test windows-package
+.PHONY: check manifests core core-test memory memory-test memory-upstream-test macos-test app run relink package perf windows-core windows-core-test windows-app windows-run windows-app-test windows-package
 
-# Run before handing work over: manifests, core tests, app tests, and the
-# Windows build (it cannot run here, but it must keep compiling).
-check: manifests core-test macos-test windows-app
+# Run before handing work over: manifests, core tests, the memory engine's
+# tests, app tests, and the Windows build (it cannot run here, but it must keep
+# compiling).
+check: manifests core-test memory-test macos-test windows-app
 
 manifests:
 	@python3 tools/check_manifests.py
@@ -16,6 +17,28 @@ core:
 
 core-test:
 	@cd core && zig build test
+
+# The memory engine, cadex-memory (core/features/memory, docs/adr/0028-project-memory.md):
+# Rust, upstream crates pinned by commit in its Cargo.toml and Cargo.lock.
+CARGO ?= $(HOME)/.cargo/bin/cargo
+MEMORY = core/features/memory/server
+
+# Release, both architectures (the package joins them with lipo).
+memory:
+	@cd $(MEMORY) && $(CARGO) build --release --locked --target aarch64-apple-darwin \
+		&& $(CARGO) build --release --locked --target x86_64-apple-darwin
+
+# Cadex's own crate and the end-to-end check of the engine, in seconds. The
+# upstream crates' suite (16 min on 12 cores) is memory-upstream-test.
+memory-test:
+	@cd $(MEMORY) && $(CARGO) test --locked --quiet
+
+# Upstream's tests for the crates the engine uses, on the PC (the `pc` ssh host
+# of roda-no-pc, Linux x86_64), at the pinned commit; run at every upstream
+# update. The script goes by ssh with only the commit: no copy of this folder.
+MEMORY_REV = $(shell grep -m1 -o 'rev = "[0-9a-f]\{40\}"' $(MEMORY)/Cargo.toml | grep -o '[0-9a-f]\{40\}')
+memory-upstream-test:
+	@ssh $${RODA_NO_PC_HOST:-pc} 'bash -s' -- $(MEMORY_REV) < core/features/memory/upstream_test.sh
 
 # swift build does not notice a new libcadex.a: drop the linked binaries so
 # they link again (tests ran against an old core, 2026-10-19).
@@ -45,6 +68,7 @@ macos-test: core relink
 
 # Debug build of the app; `make run` opens it.
 app: core relink
+	@cd $(MEMORY) && $(CARGO) build --locked --quiet
 	@cd apps/macos && swift build
 
 run: app

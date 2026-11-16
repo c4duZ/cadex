@@ -51,7 +51,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 19 | `docs/plans/19-agent-sessions-and-worktrees.md` | worktree por tarefa, estado por hooks, quadro "Precisa de você", daemon do terminal, hibernar | feito (fases A a G); falta o dono ver no app: o Dock com uma instância só, o New Task pelo clique, a tela religada com keepSessions e a aba hibernada voltando |
 | 20 | `docs/plans/20-agent-drives-cadex.md` | CLI `cadex` e skills, preview como navegador do agente, computer use | feito (2026-11-15): a CLI e o MCP, o navegador do agente, console, Design Mode e notas, computer use |
 | 21 | `docs/plans/21-review.md` | diff de revisão, comentar no diff e mandar em lote, autoria por linha | feito (2026-11-15): o diff de revisão e o stage parcial, a aba de revisão, imagem e conflito, comentários mandados ao agente, autoria por linha |
-| 22 | `docs/plans/22-memory.md` | memória: o engine do ai-memory (fork em Rust) no processo `cadex-memory`, nascendo ligada com embeddings, continuar em outro agente, consolidação sem token, página Memory | fase A feita (2026-11-15): ADRs 0028 e 0029, spec `docs/spec/memory.md`; próxima: fase B |
+| 22 | `docs/plans/22-memory.md` | memória: o engine do ai-memory (fork em Rust) no processo `cadex-memory`, nascendo ligada com embeddings, continuar em outro agente, consolidação sem token, página Memory | fases A e B feitas (2026-11-15): ADRs 0028 e 0029, a spec, o `cadex-memory` compilado, empacotado e testado; próxima: fase C |
 | 23 | `docs/plans/23-machines.md` | máquinas da tailnet, "Rodar em", Docker pela tailnet, ambiente descartável por worktree | escrito |
 | 24 | `docs/plans/24-many-agents.md` | mesma tarefa em N agentes, orquestração, automações agendadas | escrito |
 
@@ -67,7 +67,8 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 Começando uma sessão do zero:
 1. Ler `CLAUDE.md` (raiz), este índice e o plano da vez. Os planos citam os arquivos que importam.
 2. Ferramentas da máquina: Zig 0.16 em `~/.local/bin/zig` (a libghostty exige 0.16; não usar o do
-   Homebrew), Swift 6 das Command Line Tools (sem Xcode), Rust não é usado no Cadex.
+   Homebrew), Swift 6 das Command Line Tools (sem Xcode) e, para o engine da memória, Rust pelo `rustup` em
+   `~/.cargo/bin` (a versão vem do rust-toolchain.toml do crate; `docs/adr/0028-project-memory.md`).
 3. Comandos: `make check` (manifestos + testes do núcleo + testes do app), `make run` (abre o app),
    `make core` (só a biblioteca).
 4. Ver o app de verdade: com o app aberto, o id da janela sai de um programinha Swift que lista

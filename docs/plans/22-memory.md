@@ -114,12 +114,20 @@ refaz o crate a partir dela.
   PostCompact, SubagentStart, SubagentStop, Stop, SessionEnd. Sem login não deu para ver a saída do
   hook chegando ao modelo.
 - **Disco:** 54 páginas (as nossas ADRs e specs) = wiki 1,8 MB + banco 5,3 MB.
+- **Fase B, o build de verdade (2026-11-15):** `cadex-memory` com 9,98 MB (Apple Silicon) e
+  12,57 MB (Intel), 22,6 MB universal; **app de release com 73,2 MB**; parado, 11 MB de footprint
+  e CPU zero; sobe em ~120–150 ms (670 ms na primeira vez); nenhum endereço de provedor no binário.
+  `panic="unwind"` custaria +2,3 MB por arquitetura (12,28 MB): fica `abort`. Release do zero:
+  2 min 21 s (Apple Silicon) e 4 min 22 s (Intel); `make package` ~4 min do zero, 30 s com cache.
+  O Cargo.lock do crate tem as mesmas 408 versões do upstream. 383 crates na lista de licenças,
+  todas aceitas (um MPL-2.0, `option-ext`, sem modificação).
 
 ## Como eu quero
 **Arquitetura:**
-- **O fork:** o ai-memory vendorizado em core/features/memory/engine/ (a criar), **sem edição nos
-  crates dele**, com a versão e o commit de origem anotados. Código de terceiro, como a libghostty:
-  fora da regra das 500 linhas, no `NOTICE` com as licenças das dependências.
+- **O fork:** os crates do ai-memory **sem edição**, baixados pelo Cargo fixados por commit (no
+  Cargo.toml e no Cargo.lock do crate do Cadex), como a libghostty no `core/build.zig.zon`; nada do
+  código dele copiado para o repositório (seriam 25 MB num repositório de 37 MB; decidido na fase
+  B, 2026-11-15). No `NOTICE`, com as licenças das dependências.
 - **O crate do Cadex** (core/features/memory/server/, a criar): monta o `cadex-memory` com os crates
   usados e tudo o que é nosso: o servidor no socket, o embedder preguiçoso, a leitura de conversas
   de várias contas, a reescrita do briefing, o handoff melhor, o provedor "Claude do usuário". O que
@@ -162,7 +170,7 @@ refaz o crate a partir dela.
     até ter `CODEX_HOME` do Cadex). Termos "Memória do projeto", "Briefing", "Handoff",
     "Workstream", "Consolidação" e "Agente de memória" no `docs/CONTEXT.md`.
 - **B. O fork, o crate e o build.**
-  - Vendorizar o ai-memory na versão do dia e refazer o crate do Cadex a partir da prova:
+  - Fixar o ai-memory por commit (v3.4.7) e refazer o crate do Cadex a partir da prova:
     servidor axum no UnixListener com o roteador de hooks, o do workstream e o MCP (streamable
     HTTP, sem estado); o middleware de autenticação dele roda sem token, como usuário único.
   - Perfil de release `cadex`: `opt-level="z"`, LTO completo, `codegen-units=1`, sem símbolos, com
@@ -179,8 +187,10 @@ refaz o crate a partir dela.
     - `make check`: os testes do crate do Cadex e uma prova rápida (o engine sobe numa pasta
       temporária, recebe um SessionStart com página no escopo e devolve o briefing; grava e acha uma
       página), em segundos. A suíte dos crates do upstream (16 min no PC) **não** entra.
-    - `make memory-upstream-test` (novo): a suíte dos crates usados, no PC pelo `roda-no-pc`; roda
-      em todo merge do upstream.
+    - `make memory-upstream-test` (novo): a suíte dos crates usados, no PC (o host `pc` do
+      `roda-no-pc`), mandada por `ssh` só com o commit fixado; roda em toda atualização do
+      upstream. Não pelo `roda-no-pc`: ele espelha a pasta inteira, com os builds (4,8 GB), e
+      encheu o disco do PC em 2026-11-15; a pasta de build dos testes é apagada ao fim.
     - `make package` (`apps/macos/packaging/build.sh`): como o `cadex-terminald`: `lipo` das duas
       fatias em `Contents/Helpers/cadex-memory`, `strip`, `codesign`, e cada fatia sobe numa pasta
       temporária e responde no socket (a Intel pelo Rosetta, quando houver). Confere também que o
@@ -194,7 +204,8 @@ refaz o crate a partir dela.
     medido nesta fase.
   - O limite `app_mb` do `tools/perf/limits.py` sobe para 85, com o motivo ao lado. No Windows, o
     engine entra quando a memória for portada; até lá o build Windows segue sem ela.
-  - **Procedimento de merge do upstream** no `CLAUDE.md` da feature: (1) merge da tag nova; (2)
+  - **Procedimento de atualização do upstream** no `CLAUDE.md` da feature: (1) trocar o commit
+    fixado; (2)
     `make memory` e corrigir as mudanças de API no crate do Cadex; (3) `make memory-upstream-test`
     no PC; (4) comparar o serve.rs e a conversão de conversas do cli do upstream entre as duas
     versões e trazer ao crate do Cadex os passos novos (o compilador não pega passo de

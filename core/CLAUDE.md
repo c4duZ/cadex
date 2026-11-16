@@ -18,6 +18,9 @@
   Usa só libc e `shared/`, sem a libghostty, e reserva folga no cabeçalho para a assinatura.
 - No Mac, também o programa `cadex-terminald`, o daemon do terminal (`features/terminal/CLAUDE.md`,
   raiz em `cadex_terminal_daemon.zig`): o PTY e `shared/`, sem a libghostty, com a mesma folga.
+- O engine da memória, `cadex-memory`, é Rust e não sai do `zig build`: crate em
+  `features/memory/server/`, com os crates do ai-memory fixados por commit
+  (`features/memory/CLAUDE.md`, `../docs/adr/0028-project-memory.md`); `make memory` o compila.
 - Memória: quem aloca libera; a API C deixa claro de quem é cada buffer.
 - Funções da API C com prefixo cadex_ e o nome da feature (ex.: cadex_terminal_open).
 

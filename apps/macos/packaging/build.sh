@@ -1,7 +1,9 @@
 #!/bin/bash
 # Builds dist/Cadex.app at the repository root: universal (Apple Silicon and
 # Intel), macOS 13+, signed ad hoc with the identity pinned to the bundle id.
-# Needs only the Command Line Tools and Zig 0.16 (docs/adr/0007-one-step-install.md).
+# Needs the Command Line Tools, Zig 0.16 and, for the memory engine, Rust by
+# rustup (docs/adr/0028-project-memory.md); whoever installs gets binaries only
+# (docs/adr/0007-one-step-install.md).
 #
 #   apps/macos/packaging/build.sh
 set -euo pipefail
@@ -70,6 +72,34 @@ for slice in arm64 x86_64; do
         || { kill $daemon 2>/dev/null; echo "cadex-terminald ($slice) failed in the bundle"; exit 1; }
     kill $daemon; wait $daemon 2>/dev/null || true
 done
+# The memory engine (core/features/memory, docs/adr/0028-project-memory.md):
+# Rust, built for size per architecture, joined like the others. Each slice
+# must answer on its socket, and no LLM provider may be compiled in: Cadex
+# runs no model of its own (the fat LTO drops them; 2026-11-15).
+CARGO="${CARGO:-$HOME/.cargo/bin/cargo}"
+MEMORY="$ROOT/core/features/memory/server"
+for target in aarch64-apple-darwin x86_64-apple-darwin; do
+    (cd "$MEMORY" && "$CARGO" build --release --locked --target "$target")
+done
+lipo -create "$MEMORY/target/aarch64-apple-darwin/release/cadex-memory" \
+    "$MEMORY/target/x86_64-apple-darwin/release/cadex-memory" -output "$APP/Contents/Helpers/cadex-memory"
+codesign --force --sign - -i "$BUNDLE_ID.memory" "$APP/Contents/Helpers/cadex-memory"
+if strings "$APP/Contents/Helpers/cadex-memory" | grep -E -q \
+    'api\.anthropic\.com|api\.openai\.com|generativelanguage\.googleapis\.com|api\.voyageai\.com|api\.githubcopilot\.com'; then
+    echo "cadex-memory carries an LLM provider endpoint"; exit 1
+fi
+for slice in arm64 x86_64; do
+    if ! arch -"$slice" /usr/bin/true 2>/dev/null; then echo "skip: no $slice runtime (Rosetta) to test cadex-memory"; continue; fi
+    arch -"$slice" "$APP/Contents/Helpers/cadex-memory" --socket "$SMOKE/m-$slice.sock" \
+        --data-dir "$SMOKE/memory-$slice" --no-embeddings --no-watcher 2>/dev/null & engine=$!
+    ok=""
+    for _ in $(seq 1 50); do
+        [ "$(curl -s --unix-socket "$SMOKE/m-$slice.sock" http://localhost/healthz 2>/dev/null)" = ok ] && { ok=1; break; }
+        sleep 0.2
+    done
+    kill $engine 2>/dev/null; wait $engine 2>/dev/null || true
+    [ -n "$ok" ] || { echo "cadex-memory ($slice) failed in the bundle"; exit 1; }
+done
 rm -rf "$SMOKE"
 # Resources the code finds in the main bundle (Icon.swift, ThemeCatalog.swift):
 # SwiftPM's own resource bundles would have to sit in the app's root folder.
@@ -81,6 +111,11 @@ cp -R "$MACOS/shared/icons/Resources/ProviderLogos" "$APP/Contents/Resources/"
 # The skills plugin the session kit passes by --plugin-dir (plan 20, ADR 0024).
 cp -R "$MACOS/features/agent-tools/plugin" "$APP/Contents/Resources/agent-plugin"
 cp "$ROOT/LICENSE" "$ROOT/NOTICE" "$APP/Contents/Resources/"
+# The licenses of the memory engine's Rust crates, from its Cargo.lock (NOTICE
+# points here); a crate outside about.toml's accepted licenses fails the package.
+CARGO_ABOUT="${CARGO_ABOUT:-$HOME/.cargo/bin/cargo-about}"
+[ -x "$CARGO_ABOUT" ] || { echo "cargo-about is missing: cargo install --locked cargo-about --features cli"; exit 1; }
+(cd "$MEMORY" && PATH="$(dirname "$CARGO"):$PATH" "$CARGO_ABOUT" generate --fail -c about.toml about.hbs) > "$APP/Contents/Resources/THIRD-PARTY-RUST.txt"
 
 # The icon in every size macOS asks for, from the large PNG.
 ICONSET="$(mktemp -d)/AppIcon.iconset"

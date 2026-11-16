@@ -33,14 +33,17 @@ A auditoria e a prova de conceito do mesmo dia (ai-memory 3.4.7, Rust 1.95, núm
 - **O engine da memória é o fork do ai-memory.** Exceção à ADR 0004 só para esse código: ele pode
   ser lido, usado e adaptado. É MIT, como o Cadex, e entra no `NOTICE` com as licenças das
   dependências. Todo outro código de terceiro continua sob a ADR 0004.
-- **Sem edição dentro dos crates dele.** O fork fica vendorizado na feature `memory` do núcleo,
-  intacto, com a versão e o commit de origem. Tudo o que é do Cadex vive num crate nosso por cima:
+- **Sem edição dentro dos crates dele.** Os crates dele não são copiados para o repositório: o
+  Cargo os baixa do GitHub fixados por commit (no Cargo.toml e no Cargo.lock do crate do Cadex),
+  como o `build.zig.zon` faz com a libghostty. Copiar somaria 25 MB de código de terceiro a um
+  repositório de 37 MB (2026-11-15). Se um dia for preciso mudar o upstream, é um `[patch]`
+  apontando para um fork, com ADR. Tudo o que é do Cadex vive num crate nosso por cima:
   o servidor no socket, o carregamento preguiçoso do modelo, a leitura das conversas de todas as
   contas, a reescrita do briefing, o handoff, o provedor de IA. O que for copiado do crate de linha
   de comando dele (montagem do servidor, conversão de conversas) leva a origem no topo e entra no
-  procedimento de merge.
-- **O fork acompanha o upstream**, sem calendário fixo e no máximo a cada mês: merge da versão
-  nova, ajuste das mudanças de API no crate nosso, a suíte dos crates usados (no PC), revisão à mão
+  procedimento de atualização.
+- **O fork acompanha o upstream**, sem calendário fixo e no máximo a cada mês: trocar o commit
+  fixado, ajuste das mudanças de API no crate nosso, a suíte dos crates usados (no PC), revisão à mão
   dos passos de inicialização e da conversão de conversas que copiamos, `make check` e `make perf`.
   O procedimento fica no `CLAUDE.md` da feature.
 - **Rust no núcleo, só para a feature `memory`** (revê a ADR 0002). O núcleo continua em Zig com a
