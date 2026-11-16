@@ -357,3 +357,8 @@
 - `make memory-upstream-test` (`upstream_test.sh`): a suíte do upstream para os crates usados, no
   PC; a cada atualização do upstream.
 - `make package`: o binário universal assinado, cada fatia respondendo, sem provedor.
+- `make perf` (`../../../tools/perf/plan22.py`): o engine do pacote parado com sessão (até 25 MB, CPU
+  zero), com o modelo (pico até 400 MB) e de volta ao parado depois do reinício sozinho, e uma wiki
+  de 2 mil páginas com 500 eventos (hook, briefing e o `cadex memory-hook` inteiro no tempo medido);
+  o app parado sem nenhum `cadex-memory` no `ps`. O modelo vem de `CADEX_PERF_MODELS` (a pasta com
+  all-MiniLM-L6-v2/) ou o engine o baixa numa pasta temporária.

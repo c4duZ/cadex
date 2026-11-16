@@ -24,6 +24,8 @@ import time
 import plan19
 import plan20
 import plan21
+import plan22
+from plan22_engine import engine_running
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 HERE = pathlib.Path(__file__).resolve().parent
@@ -125,7 +127,9 @@ def measure_idle(app):
     app.sample(16)  # the first read of the project and the shell settle
     tail = app.sample(10)
     return {"idle_mb": max(m for m, _ in tail), "idle_cpu": avg([c for _, c in tail]),
-            "daemon_off_running": 0 if plan19.daemon_pid(app.terminal_socket) is None else 1}
+            "daemon_off_running": 0 if plan19.daemon_pid(app.terminal_socket) is None else 1,
+            # Plan 22: no agent session, no memory engine (the warm-up's ran and left).
+            "memory_engine_running": 1 if engine_running(f"{app.dir}/memory") else 0}
 
 
 def measure_flood(app):
@@ -391,6 +395,9 @@ def main():
              ("plan 20: a fake agent, 100 snapshots and 100 clicks in the preview", lambda: plan20.browser_scenario(sys.modules[__name__])),
              ("plan 21: a review of 50 files, scrolled, with comments and 200 edits", lambda: plan21.review_scenario(sys.modules[__name__])),
              ("plan 21: authorship off", lambda: plan21.off_scenario(sys.modules[__name__])),
+             ("plan 22: the memory engine idle, a session open", lambda: plan22.idle_scenario(sys.modules[__name__])),
+             ("plan 22: the embedding model loaded, then given back", lambda: plan22.model_scenario(sys.modules[__name__])),
+             ("plan 22: a wiki of 2 000 pages and a session of 500 events", lambda: plan22.wiki_scenario(sys.modules[__name__])),
              ("flooding with minimum contrast and ligatures", lambda: scenario(
                  "reading", "flood", ROOT, measure_reading_flood,
                  settings={"terminal": {"minimumContrast": 7, "fontFeatures": ["calt", "liga"]}}))]

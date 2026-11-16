@@ -140,8 +140,8 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   Gravar as 56 páginas: 1,6 s e 11 s; a busca típica: 6 ms e 15 ms (release, Apple Silicon). O
   modelo é treinado em inglês e ainda assim ajuda nas perguntas em português ("como o Swift conversa
   com o núcleo": 5º lugar por palavra, 1º com o modelo).
-- O modelo só fica na memória do computador enquanto é usado: depois de memory.embedIdleSecs (60 s)
-  parado, sai, e o processo volta ao peso de parado.
+- O modelo só fica na memória do computador enquanto é usado: depois de 60 s parado
+  (fixo, sem opção nas configurações), sai, e o processo volta ao peso de parado.
 
 ### Continuar em outro agente
 - "Continue in…" (agents.continue-in-agent) escolhe agente e conta no ⌘K (ou "o último agente que trabalhou aqui") e abre uma aba na pasta do

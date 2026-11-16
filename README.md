@@ -98,6 +98,13 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   por bloco. Comente em qualquer linha e mande todos os comentários ao agente da tarefa num texto só,
   colado sem Enter; uma barra fina marca as linhas que o agente escreveu, guardadas só no Cadex
   ([ADR 0027](docs/adr/0027-local-authorship.md)).
+- **O projeto lembra** (Mac): o que cada sessão de agente fez, as decisões e as armadilhas passam
+  para a próxima sessão, de uma conta para outra e do Claude para o Codex, sem você repetir nada. O
+  engine é o do [ai-memory](https://github.com/akitaonrails/ai-memory), num processo à parte que só
+  existe enquanto há sessão de agente; a busca por sentido roda um modelo local pequeno, e quem
+  escreve as páginas é o Claude da própria sessão, sem chave nem custo extra. A página Memory mostra
+  e edita a wiki (Markdown em git) e o que o agente recebe ao começar
+  ([ADR 0028](docs/adr/0028-project-memory.md)).
 - **Outros apps do Mac** (opção desligada por padrão): o agente lê e opera outros apps pela
   acessibilidade, com a sua permissão app por app, nunca em campos de senha nem nos Ajustes do
   Sistema, com uma faixa e um botão Parar ([ADR 0026](docs/adr/0026-computer-use.md)).
@@ -226,7 +233,10 @@ Tamanhos da versão 2.2.1 (2026-10-22); memória medida na 0.1.0 (2026-10-19), n
 | memória com um terminal aberto (footprint) | 66 MB |
 | cada aba de terminal a mais, escondida (2.2.0) | 1 MB |
 | tudo da barra lateral e da barra de status ligado (2.2.0) | +7% |
+| o processo da memória, com sessão de agente e sem o modelo (plano 22) | 13 MB |
+| o mesmo com o modelo de busca carregado (pico; sai depois de 60 s parado) | 300–380 MB |
 
+Os números da memória são do `make perf` em 2026-11-16; sem sessão de agente, o processo nem existe.
 O app instalado leva as duas arquiteturas e as 18 gramáticas do
 tree-sitter compiladas dentro (as tabelas delas são 15 MB de cada fatia); o download comprimido fica
 abaixo. O pico de memória ao abrir foi 111 MB.
@@ -244,6 +254,8 @@ abaixo. O pico de memória ao abrir foi 111 MB.
                     │  markdown (índice de links)          │
                     │  workspace                           │
                     │  agent-tools (o programa `cadex`)    │
+                    │  memory ── `cadex-memory` (Rust,     │
+                    │    o engine do ai-memory)            │
                     └──────────────────▲───────────────────┘
                                        │ API C
                ┌───────────────────────┴───────────────────────┐
@@ -263,6 +275,8 @@ abaixo. O pico de memória ao abrir foi 111 MB.
   grava o uso de cada conta, os hooks que contam ao app o que cada sessão faz e os comandos, as skills
   e o servidor MCP com que o agente usa o Cadex), e o
   `cadex-terminald`, o processo que guarda os terminais quando a opção de mantê-los está ligada.
+  A memória do projeto é a exceção ao Zig: o engine do ai-memory, em Rust, num executável à parte, o
+  `cadex-memory`, que sobe com a primeira sessão de agente e sai com a última.
 - **App:** uma interface nativa e fina por sistema. Desenha, recebe entrada e chama o núcleo.
   Previews de mídia usam os frameworks do próprio sistema, sem peso extra.
 
@@ -295,7 +309,9 @@ feature, manifestos curtos por pasta e verificação executável.
 
 ## Desenvolvimento
 
-Requisitos: macOS 13+, as Command Line Tools (Swift 6; o Xcode completo não é preciso) e Zig 0.16.
+Requisitos: macOS 13+, as Command Line Tools (Swift 6; o Xcode completo não é preciso) e Zig 0.16;
+para o engine da memória, o Rust do [rustup](https://rustup.rs) (a versão fica no
+`core/features/memory/server/rust-toolchain.toml`).
 
 ```bash
 make check     # manifestos + testes do núcleo + testes do app

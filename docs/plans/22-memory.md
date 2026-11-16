@@ -345,8 +345,8 @@ refaz o crate a partir dela.
   - **Embeddings ligados, pelo embedder preguiçoso do crate do Cadex:** o do engine carrega o
     modelo ao subir e nunca solta. O nosso: o modelo (87 MB) baixado em segundo plano na primeira
     sessão de agente, com retomada se cair e conferência do arquivo (até lá, só FTS5); carregado na
-    primeira busca ou gravação que precisa (~400 ms); descarregado depois de memory.embedIdleSecs
-    (60 s) parado. **Como o alocador não devolve a memória** (68 MB depois de descarregar), o
+    primeira busca ou gravação que precisa (~400 ms); descarregado depois de 60 s
+    parado (fixo: o `--embed-idle-secs` do engine, que o app não muda; o ai-memory nunca descarrega). **Como o alocador não devolve a memória** (68 MB depois de descarregar), o
     `cadex-memory` se reinicia sozinho quando está parado, sem modelo e sem pedido em andamento
     (~70 ms), e volta aos ~12 MB.
   - O download do modelo é testado de verdade nesta fase (a prova copiou o arquivo): rede caindo no
@@ -511,19 +511,48 @@ refaz o crate a partir dela.
   e o motivo ao lado, partindo da prova:
   - app parado igual ao de hoje (o engine fora do app); `cadex-memory` ausente sem sessão de agente;
   - `cadex-memory` parado sem modelo: footprint até 25 MB (12 MB na prova), CPU zero;
-  - com o modelo carregado: pico até 400 MB (366 na prova); depois de memory.embedIdleSecs e do
-    reinício sozinho, de volta ao limite parado;
+  - com o modelo carregado: pico até 400 MB (366 na prova); depois dos 60 s parado
+    (`--embed-idle-secs`; 5 s no teste) e do reinício sozinho, de volta ao limite parado;
   - uma wiki de 2 mil páginas e uma sessão falsa mandando 500 eventos: hook de ferramenta e
     briefing no tempo da prova (a ordem de 1 ms pelo socket, o `cadex hook` inteiro no tempo de
     hoje);
   - app de release até 85 MB.
   Os ids novos em `MAC_ONLY` de `tools/check_command_parity.py`. `CLAUDE.md` das features tocadas,
   README e notas da release em inglês.
+  - Feita em 2026-11-16: `tools/perf/plan22.py` (com `tools/perf/plan22_engine.py`) roda o
+    `cadex-memory` do pacote numa pasta e numa HOME temporárias, com uma sessão falsa (o pid do
+    próprio teste). Medido no `make perf` inteiro: o app parado com 89 MB, como antes, e nenhum
+    `cadex-memory` no `ps` sem sessão (o aquecimento roda e sai); o engine parado com 13 MB e CPU
+    zero; com o modelo, 500 páginas gravadas e 10 buscas, pico de 304–378 MB, e 13 MB depois de
+    descarregar e se reiniciar sozinho (mesmo pid); com 2 mil páginas (gravadas em 30 s, lotes de
+    100) e 500 eventos, pelo socket o hook de ferramenta em 0,7–0,8 ms e o briefing em 2,5–3,7 ms
+    (1,3 ms com a wiki vazia; o cliente Python custa ~0,1 ms), e o `cadex memory-hook` inteiro em
+    4–5 ms (PostToolUse) e 6–18 ms (SessionStart com briefing). O hook ficou acima dos 0,15 ms da
+    prova pelo que a fase C pôs no caminho (hora de chegada, arquivo, .ai-memory.toml); o briefing
+    cresce com a wiki, ainda na casa de poucos ms. Com as 2 mil páginas o engine parado fica em
+    24–26 MB (sem limite próprio; o de 25 MB é o do engine sem wiki grande). App de release com
+    77,1 MB. O modelo vem de CADEX_PERF_MODELS ou o próprio engine o baixa (o caminho real, ~1 min).
+    Três cenários antigos (hooks do plano 19, revisão do plano 21, CPU depois do agente do plano 20)
+    passaram do limite com a máquina carregada e passaram rodados de novo, isolados.
 
 **Testes que chamam o Claude de verdade** (lição da prova, que gastou US$ 1,73 em vez de US$ 0,08):
 em bash com listas (nunca o `$args` do zsh, que não separa as palavras), `--model haiku` fixo,
 `--max-budget-usd` e `--no-session-persistence` em todo `-p`, numa conta escolhida pelo dono, com o
 custo anotado.
+
+## Notas da release (inglês)
+
+```markdown
+## Your project remembers (Mac)
+
+- **Memory between sessions, accounts and agents.** What each agent session did, the decisions and the pitfalls carry over to the next session, to your other Claude Code accounts and to Codex, without you repeating anything. Every folder and worktree of a repository shares one memory. Turn sharing between accounts off for client work (Settings › General › Memory).
+- **Built on ai-memory.** The engine is [ai-memory](https://github.com/akitaonrails/ai-memory) by Fábio Akita, unchanged, in its own process (`cadex-memory`) that only runs while an agent session is open and leaves when the last one closes. Your history already on disk is imported once, the first time a project opens.
+- **Search by meaning, on your Mac.** A small local model (~87 MB, downloaded on first use) finds "where we touched the login" by what the code means, and leaves memory after a minute idle. No API key, nothing sent anywhere.
+- **The session writes its own memory.** At milestones, or when you run "Consolidate Memory Now", the agent you are already talking to writes the pages, with ai-memory's own rules. No extra model, no extra cost. An optional background agent (off by default, with a daily budget) can do it with your account's `claude -p`.
+- **Continue in another agent.** "Continue in…" opens Claude Code or Codex in the same folder with a dossier of where the work stopped.
+- **The Memory page.** Browse and edit the wiki (Markdown in git, every save a commit), see exactly what the next session will receive, open the session a page came from, and approve or reject proposed changes.
+- **Light.** 13 MB while a session is open; the search model peaks under 400 MB and is let go after a minute idle. Hooks answer in under a millisecond, and no hook ever makes the session wait.
+```
 
 ## Como validar
 - `make check` a cada fase (com o crate do Cadex e a prova rápida do engine a partir da B);

@@ -63,4 +63,14 @@ LIMITS = {
     "review_after_cpu": 1.0,      # 0.0 % once it stops
     "review_edits_refused": 0,    # every one of the 200 edits answered
     "review_off_over_idle_mb": 5,  # authorship off: the idle app's weight
+    # Plan 22 (tools/perf/plan22.py): cadex-memory from the release bundle. Measured 2026-11-16 on this Mac.
+    "memory_engine_running": 0,   # the idle app with no agent session: no cadex-memory in the `ps`
+    "memory_idle_mb": 25,         # 13 MB with a session open and no model (12 in the proof)
+    "memory_idle_cpu": 1.0,       # 0.00 %: nothing by the clock while a session is open
+    "memory_model_peak_mb": 400,  # 304-378 MB writing 500 pages and searching (366 in the proof)
+    "memory_model_after_mb": 25,  # 13 MB: unloaded after --embed-idle-secs and re-executed (68 without it)
+    "memory_tool_hook_ms": 2.0,   # 0.66-0.81 ms a PostToolUse over the socket, with 2 000 pages (0.15 in the proof's leaner router)
+    "memory_briefing_ms": 8.0,    # 2.5-3.7 ms with 2 000 pages; 1.3 ms with none (0.9 in the proof, 54 pages)
+    "memory_whole_hook_ms": 10.0,  # 4.0-4.9 ms the whole `cadex memory-hook PostToolUse`, process start included
+    "memory_whole_start_ms": 30.0, # 6-18 ms the whole SessionStart with its briefing
 }
