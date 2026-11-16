@@ -130,23 +130,20 @@ public final class WorktreesController {
         return refused
     }
 
-    /// A race's discarded worktree (plan 24): the folder goes to the Trash
-    /// (what was in it can come back from there), git forgets it, and the
-    /// branch stays. Nil when done; else why not.
-    public func trash(_ path: String, repo: String) -> String? {
+    /// A race's discarded worktree (plan 24): the folder is deleted, not sent
+    /// to the Trash (the owner, 2026-11-16: the Trash only leaves him one more
+    /// thing to empty), git forgets it, and the branch stays with its commits
+    /// until orchestration.delete-race-branches. What was never committed in
+    /// it goes. Nil when done; else why not.
+    public func discard(_ path: String, repo: String) -> String? {
         do {
-            try moveToTrash(path)
+            try FileManager.default.removeItem(atPath: path)
         } catch {
             return error.localizedDescription
         }
         store.forget(path)
         publish()
         return WorktreesCore.prune(repo: repo)
-    }
-
-    /// The Finder's Trash; a test moves the folder aside instead.
-    public var moveToTrash: (String) throws -> Void = { path in
-        try FileManager.default.trashItem(at: URL(fileURLWithPath: path), resultingItemURL: nil)
     }
 
     /// orchestration.delete-race-branches: `git branch -D`, after the app asked.

@@ -57,6 +57,14 @@ let storeTests: [(name: String, body: Checks.Body)] = [
         expect(after[0].state == .finished && after[0].session?.transcript == "/t.jsonl")
         expect(after[1].state == .discarded && after[2].state == .discarded)
         expect(try races.races().first?.winner == contenders[0].id)
+        // #3 runs on another machine: its branch is there, not this Mac's to delete.
+        expect(try races.branchesLeft(race: race.id).map(\.index) == [2])
+        try races.markBranchDeleted(contenders[1].id)
+        expect(try races.branchesLeft(race: race.id).isEmpty, "a deleted branch is not listed again")
+        // A row written before branchDeleted existed still reads, as not deleted.
+        struct Old: Encodable { let id, race: String; let index: Int; let agent: AgentChoice; let worktree: String; let state: ContenderState }
+        try races.store.put(.contenders, id: "old", parent: race.id, Old(id: "old", race: race.id, index: 9, agent: AgentChoice(), worktree: "/w", state: .discarded))
+        expect(try races.branchesLeft(race: race.id).map(\.index) == [9])
     }),
     ("automations: born off, toggled, history newest first, a running one known", {
         let book = AutomationBook(store: try OrchestrationStore(path: ":memory:"))

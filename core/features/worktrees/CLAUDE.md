@@ -15,7 +15,7 @@
   (`git worktree add -b`, só com a pasta-mãe autorizada), `whatWouldBeLost` (o `status` e os
   commits só desse branch) e `remove` (`git worktree remove` e, se pedido, `git branch -d`, que
   recusa branch não juntado); `prune` (`git worktree prune`, depois de a pasta de uma worktree
-  descartada ir para a Lixeira, plano 24) e `deleteBranch` (`git branch -D`, com a confirmação no
+  descartada ser apagada pelo app, plano 24) e `deleteBranch` (`git branch -D`, com a confirmação no
   app; nome começando com "-" recusado).
 - `include.zig`: o `.worktreeinclude` no formato do `.gitignore` (âncora, pasta, "!", a última linha
   vence) aplicado ao que o git não rastreia (`git ls-files --others --directory`); copia com

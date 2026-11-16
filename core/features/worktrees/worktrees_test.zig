@@ -93,7 +93,7 @@ test "a task: its worktree and branch, the .env copied, listed, what would be lo
     try testing.expect(!fs.exists(path));
 }
 
-test "a race's discard: the folder gone (the Trash), prune forgets it, the branch stays until deleted" {
+test "a race's discard: the folder gone, prune forgets it, the branch stays until deleted" {
     var dir = try TestDir.init();
     defer dir.deinit();
     var registry = workspace.Registry.init(testing.allocator);
@@ -115,7 +115,7 @@ test "a race's discard: the folder gone (the Trash), prune forgets it, the branc
     try dir.writeFile("repo.worktrees/fix-2/app.txt", "dois\n");
     try sh(&registry, path, &.{ "commit", "--quiet", "-am", "try 2" });
 
-    // The app moves the folder to the Trash; here, out of the way.
+    // The app deletes the folder; here it is moved out of the way.
     var gone_buf: [1024]u8 = undefined;
     try fs.rename(path, try dir.joinInto(&gone_buf, "trashed"), true);
     try testing.expect((try tasks.prune(testing.allocator, &registry, repo)) == null);

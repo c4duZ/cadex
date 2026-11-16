@@ -175,15 +175,15 @@ extension WindowSession {
     }
 
     /// orchestration.pick-winner: the winner stays a plain task; the others
-    /// can go to the Trash at once, or later by orchestration.discard-race.
+    /// can be deleted at once, or later by orchestration.discard-race.
     func pickWinner(_ race: Race, _ contender: Contender) {
         guard let book = OrchestrationController.shared.races(), let others = try? book.pickWinner(race: race.id, contender: contender.id) else { return }
         refreshRaceBoards()
         let names = others.filter { $0.state != .discarded }.map { ($0.worktree as NSString).lastPathComponent }
         guard !names.isEmpty, let updated: Race = try? book.store.get(.races, id: race.id) else { return }
         confirm(T("#\(contender.index) won \(race.name)", "#\(contender.index) venceu \(race.name)"),
-                T("Send the other worktrees to the Trash now? Their agents stop; their branches stay until you delete them.\n\n",
-                  "Mandar as outras worktrees para a Lixeira agora? Os agentes delas param; as branches ficam até você apagar.\n\n") + names.joined(separator: "\n"),
+                T("Delete the other worktrees now? Their agents stop and what was never committed in them is lost; their branches and commits stay until you delete them.\n\n",
+                  "Apagar as outras worktrees agora? Os agentes delas param e o que nunca teve commit nelas se perde; as branches e os commits ficam até você apagar.\n\n") + names.joined(separator: "\n"),
                 button: T("Discard the Others", "Descartar os outros")) { [weak self] in self?.discardNow(updated) }
     }
 
@@ -192,7 +192,8 @@ extension WindowSession {
         guard let book = OrchestrationController.shared.races() else { return }
         let losers = ((try? book.contenders(of: race.id)) ?? []).filter { $0.id != race.winner && $0.state != .discarded }
         confirm(T("Discard \(race.name)'s other worktrees?", "Descartar as outras worktrees de \(race.name)?"),
-                T("They go to the Trash and their agents stop; the branches stay.\n\n", "Elas vão para a Lixeira e os agentes param; as branches ficam.\n\n")
+                T("They are deleted and their agents stop; what was never committed is lost, the branches and commits stay.\n\n",
+                  "Elas são apagadas e os agentes param; o que nunca teve commit se perde, as branches e os commits ficam.\n\n")
                 + losers.map { ($0.worktree as NSString).lastPathComponent }.joined(separator: "\n"),
                 button: T("Discard", "Descartar")) { [weak self] in self?.discardNow(race) }
     }
@@ -203,7 +204,7 @@ extension WindowSession {
         for contender in ((try? book.contenders(of: race.id)) ?? []) where contender.id != race.winner && contender.state != .discarded {
             if let found = contenderTerminal(contender), found.terminal.foregroundGroup > 0 { kill(found.terminal.foregroundGroup, SIGTERM) }
             if contender.agent.machine.isEmpty, FileManager.default.fileExists(atPath: contender.worktree),
-               let refused = WorktreesController.shared.trash(contender.worktree, repo: race.repository) {
+               let refused = WorktreesController.shared.discard(contender.worktree, repo: race.repository) {
                 problems.append((contender.worktree as NSString).lastPathComponent + ": " + refused)
             }
         }
@@ -212,16 +213,25 @@ extension WindowSession {
         if !problems.isEmpty { say(T("Some worktrees did not go", "Algumas worktrees não foram"), problems.joined(separator: "\n")) }
     }
 
-    /// orchestration.delete-race-branches: each branch listed, then `git branch -D`.
+    /// orchestration.delete-race-branches: each branch still there listed,
+    /// then `git branch -D`; a deleted one is remembered and not listed again.
     func deleteRaceBranches(_ race: Race) {
         guard let book = OrchestrationController.shared.races() else { return }
-        let branches = ((try? book.contenders(of: race.id)) ?? []).filter { $0.state == .discarded && $0.agent.machine.isEmpty }
-            .map { ($0.worktree as NSString).lastPathComponent }
+        let left = (try? book.branchesLeft(race: race.id)) ?? []
+        let branches = left.map { ($0.worktree as NSString).lastPathComponent }
         guard !branches.isEmpty else { return say(T("No branch to delete", "Nenhuma branch para apagar"), race.name) }
-        confirm(T("Delete \(branches.count) branches of \(race.name)?", "Apagar \(branches.count) branches de \(race.name)?"),
-                T("Their commits are lost unless another branch has them:\n\n", "Os commits delas se perdem, a não ser que outra branch os tenha:\n\n") + branches.joined(separator: "\n"),
-                button: T("Delete Branches", "Apagar as branches")) { [weak self] in
-            let refused = branches.compactMap { branch in WorktreesController.shared.deleteBranch(branch, repo: race.repository).map { branch + ": " + $0 } }
+        let title = branches.count == 1 ? T("Delete 1 branch of \(race.name)?", "Apagar 1 branch de \(race.name)?")
+                                        : T("Delete \(branches.count) branches of \(race.name)?", "Apagar \(branches.count) branches de \(race.name)?")
+        confirm(title, T("Their commits are lost unless another branch has them:\n\n", "Os commits delas se perdem, a não ser que outra branch os tenha:\n\n") + branches.joined(separator: "\n"),
+                button: branches.count == 1 ? T("Delete Branch", "Apagar a branch") : T("Delete Branches", "Apagar as branches")) { [weak self] in
+            var refused: [String] = []
+            for (contender, branch) in zip(left, branches) {
+                if let message = WorktreesController.shared.deleteBranch(branch, repo: race.repository) {
+                    refused.append(branch + ": " + message)
+                } else {
+                    try? book.markBranchDeleted(contender.id)
+                }
+            }
             if !refused.isEmpty { self?.say(T("Some branches stayed", "Algumas branches ficaram"), refused.joined(separator: "\n")) }
         }
     }

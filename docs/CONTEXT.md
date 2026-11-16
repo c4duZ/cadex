@@ -93,7 +93,7 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 
 ## Muitos agentes
 - **Corrida** (`race`): a mesma tarefa em N agentes, cada um na sua worktree do mesmo commit, para o
-  dono comparar e escolher o **vencedor** (`winner`); os outros são descartados para a Lixeira.
+  dono comparar e escolher o **vencedor** (`winner`); os outros são descartados: a pasta é apagada, a branch fica.
   **Concorrente** (`contender`): um dos agentes de uma corrida, com conta, modelo e máquina.
 - **Execução** (`run`): um conjunto de tarefas com dependências, um coordenador (o dono ou um
   agente) e uma caixa de entrada. **Tarefa de execução** (`run task`): uma tarefa dela, com

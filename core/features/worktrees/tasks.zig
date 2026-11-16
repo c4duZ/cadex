@@ -139,8 +139,8 @@ pub fn remove(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []con
     return null;
 }
 
-/// A race's discarded worktrees go to the Trash as folders (plan 24): git
-/// then forgets the ones whose folder is gone (`git worktree prune`), and
+/// A race's discarded worktrees are deleted as folders by the app (plan 24):
+/// git then forgets the ones whose folder is gone (`git worktree prune`), and
 /// their branches stay. Returns git's message when it refused.
 pub fn prune(gpa: std.mem.Allocator, registry: *workspace.Registry, repo: []const u8) !?[]u8 {
     var r = try git.run(gpa, registry, repo, &.{ "worktree", "prune" }, .{});

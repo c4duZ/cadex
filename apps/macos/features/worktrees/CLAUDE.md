@@ -41,8 +41,8 @@
   valendo inteiro). A página Tasks mostra a remota com o nome da máquina; worktrees.new-task-on e
   worktrees.open-remote-shell, e worktrees.remove lista as remotas também.
 - A corrida (plano 24, fase C): `plan(name:repo:base:)` aceita o ponto de partida escolhido;
-  `trash` manda a pasta de uma worktree descartada para a Lixeira (`moveToTrash`, trocado nos
-  testes), esquece a nota e roda `git worktree prune` (a branch fica); `deleteBranch` é o `git
+  `discard` apaga a pasta de uma worktree descartada (direto, sem a Lixeira: o dono, 2026-11-16),
+  esquece a nota e roda `git worktree prune` (a branch fica); `deleteBranch` é o `git
   branch -D` depois da confirmação do app. No remoto, RemoteTaskRunner.uploadPrompt manda o
   prompt pela entrada do ssh para um arquivo do `mktemp` lá, e `RemoteTaskScript.agent(path:hooks:
   promptFile:model:)` roda `claude "$(cat <arquivo>)"` (o texto nunca no comando; caminho e modelo
@@ -65,5 +65,5 @@
   clonar), a remoção recusada com mudança, as falhas do ssh, a aba com os hooks e o claude; o
   ambiente com um docker falso que anota as chamadas (`tests/Environment.swift`): a receita, subir
   com o sidecar sem a chave nos argumentos, sem a chave no shell nada sobe, Dockerfile, suspender,
-  retomar e destruir; a corrida: duas tarefas do mesmo ponto, uma para a "Lixeira" com o commit,
-  o git esquecendo, a branch ficando até apagar; o prompt remoto chegando inteiro e nada rodando.
+  retomar e destruir; a corrida: duas tarefas do mesmo ponto, uma apagada (com um arquivo sem
+  commit), o git esquecendo, a branch ficando com o commit até apagar; o prompt remoto chegando inteiro e nada rodando.

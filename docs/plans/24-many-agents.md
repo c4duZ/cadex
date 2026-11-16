@@ -37,7 +37,9 @@ docs/adr/0031-run-on-remote.md (plano 23), `docs/adr/0004-clean-rewrite.md`,
   lido pelo `claude`, nunca concatenado num comando digitado; vale para o `spawn` de um agente.
 - Despachar sem o dono ver: toda Execução e toda automação mostram antes o que vão rodar, onde, em
   qual conta e com que teto; o portão de decisão nunca é pulado.
-- Apagar trabalho: worktree descartada vai para a lixeira, a branch fica até o dono confirmar.
+- Apagar trabalho: a branch de uma worktree descartada fica, com os commits, até o dono confirmar.
+  A pasta descartada é apagada direto, sem passar pela Lixeira (o dono, 2026-11-16: "não quero que
+  mande isso pro lixo"); só o que nunca teve commit nela se perde.
 - Agente que gera agente sem fim: profundidade máxima de sub-agentes (padrão 2); parar um agente
   para os filhos dele.
 - Código do Orca como referência (ADR 0004): só o comportamento descrito na documentação dele.
@@ -122,7 +124,8 @@ docs/adr/0031-run-on-remote.md (plano 23), `docs/adr/0004-clean-rewrite.md`,
     `cadex statusline` grava, plano 18) e o resumo do diff; "Comparar" abre o diff entre duas
     worktrees da revisão do plano 21 (git.review-compare-worktrees).
   - "Escolher vencedor" (orchestration.pick-winner): o vencedor segue como worktree normal;
-    orchestration.discard-race manda as outras worktrees para a lixeira e mantém as branches até
+    orchestration.discard-race apaga as outras worktrees (antes iam para a lixeira; trocado pelo dono
+    em 2026-11-16) e mantém as branches até
     orchestration.delete-race-branches, com confirmação.
   - Features: orchestration, worktrees, agents, source-control, tabs.
   - No código em 2026-11-16 (`apps/macos/features/orchestration/CLAUDE.md`,
@@ -133,7 +136,7 @@ docs/adr/0031-run-on-remote.md (plano 23), `docs/adr/0004-clean-rewrite.md`,
     `mktemp` lá e a aba roda `claude "$(cat <arquivo>)"`. Antes de criar qualquer coisa, a corrida
     confere a confiança do Claude Code na conta de cada concorrente local
     (`projects[<pasta>].hasTrustDialogAccepted`, lido sem escrever). Descartar manda a pasta para a
-    Lixeira e roda `git worktree prune` (núcleo novo: `cadex_worktrees_prune` e
+    Lixeira (desde 2026-11-16, apaga a pasta direto, pedido do dono) e roda `git worktree prune` (núcleo novo: `cadex_worktrees_prune` e
     `cadex_worktrees_delete_branch`); a branch fica até orchestration.delete-race-branches. O teto
     da corrida (gasto ou minutos) encerra o agente local com SIGTERM; o remoto não é do Cadex
     parar. O concorrente remoto exige que a pasta do repositório lá já seja conhecida (uma tarefa
@@ -165,9 +168,13 @@ docs/adr/0031-run-on-remote.md (plano 23), `docs/adr/0004-clean-rewrite.md`,
     corrigidos nesse teste: uma conta sem nome deixava o menu da conta em branco e títulos
     repetidos desalinhavam as linhas (o menu do macOS junta títulos iguais; agora um item por conta,
     o nome da pasta quando falta nome, e a mesma pasta uma vez só); e a corrida era gravada antes da
-    confirmação, então cancelar deixava uma corrida-fantasma (agora só ao começar). **Falta**: a
-    Lixeira não pôde ser listada (o macOS nega a pasta a este processo), só a saída das pastas do
-    disco; o concorrente remoto com o PC na tailnet.
+    confirmação, então cancelar deixava uma corrida-fantasma (agora só ao começar). Depois, o
+    "Delete Branches" pelo menu, numa corrida de 2 com o #2 descartado: a confirmação listou só a
+    `kite-2`, ela saiu e a `kite-1` do vencedor ficou; achados: o plural ("1 branches") e a corrida
+    que continuava na lista com a branch já apagada (agora a apagada fica marcada e não volta). E o
+    dono trocou o descarte: a pasta é apagada direto, sem a Lixeira (as branches e os commits
+    ficam; o que nunca teve commit se perde, e a confirmação diz). **Falta**: o concorrente remoto
+    com o PC na tailnet.
 - **D. Orquestração: execuções, tarefas e despachos.** Em duas partes, cada uma numa sessão:
   **D1** o modelo e o despacho (execução, tarefas, dependências, despacho, parar), com o dono como
   coordenador e a página da execução; **D2** os agentes supervisionados (os comandos de reporte
@@ -233,7 +240,7 @@ docs/adr/0031-run-on-remote.md (plano 23), `docs/adr/0004-clean-rewrite.md`,
   profundidade máxima, despacho órfão) com banco temporário.
 - Fase C: uma corrida de 3 num repositório de teste cria 3 worktrees do mesmo ponto, 3 abas com o
   prompt e o quadro com os três estados e custos; "Comparar" mostra o diff entre duas; escolher o
-  vencedor manda as outras worktrees para a lixeira e deixa as branches.
+  vencedor apaga as outras worktrees e deixa as branches.
 - Fase D: uma execução de 3 tarefas encadeadas, com agentes reais, vai de pendente a concluída
   sozinha; um portão segura a terceira até a aprovação; parar o pai encerra os filhos; um agente
   sem sinal de vida aparece como "parado?"; um prompt com aspas, `$()` e quebra de linha chega

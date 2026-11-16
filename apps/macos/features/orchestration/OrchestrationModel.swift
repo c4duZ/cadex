@@ -61,6 +61,9 @@ public struct Contender: Codable, Equatable, Sendable {
     public var state: ContenderState
     public var session: SessionLink?
     public var reason: String?
+    /// Its branch was deleted (orchestration.delete-race-branches). Optional,
+    /// so a row from before this field still reads.
+    public var branchDeleted: Bool?
 }
 
 /// The Claude session behind a contender, a dispatch or an automation's run:

@@ -40,7 +40,7 @@ public enum RaceCommands {
             list(.show, "orchestration.show-race", T("Show a Race", "Mostrar uma corrida"), ["board", "quadro", "show", "mostrar"]),
             list(.pickWinner, "orchestration.pick-winner", T("Pick a Race's Winner", "Escolher o vencedor de uma corrida"), ["winner", "vencedor", "pick"]),
             list(.discard, "orchestration.discard-race", T("Discard a Race's Other Worktrees", "Descartar as outras worktrees de uma corrida"),
-                 ["discard", "descartar", "trash", "lixeira"]),
+                 ["discard", "descartar", "delete", "apagar"]),
             list(.deleteBranches, "orchestration.delete-race-branches", T("Delete a Race's Discarded Branches", "Apagar as branches descartadas de uma corrida"),
                  ["delete", "apagar", "branches"]),
         ]
@@ -65,7 +65,7 @@ final class RaceSource: PaletteSource {
         switch kind {
         case .show: T("Show a race", "Mostrar uma corrida")
         case .pickWinner: T("The race to pick a winner in", "A corrida em que escolher o vencedor")
-        case .discard: T("The race whose other worktrees go to the Trash", "A corrida cujas outras worktrees vão para a Lixeira")
+        case .discard: T("The race whose other worktrees to delete", "A corrida cujas outras worktrees apagar")
         case .deleteBranches: T("The race whose discarded branches to delete", "A corrida cujas branches descartadas apagar")
         case .contenders(let race): T("The winner of \(race.name)", "O vencedor de \(race.name)")
         }
@@ -80,7 +80,9 @@ final class RaceSource: PaletteSource {
         case .show, .contenders: return all
         case .pickWinner: return all.filter { $0.winner == nil }
         case .discard: return all.filter { $0.winner != nil && !$0.discarded }
-        case .deleteBranches: return all.filter(\.discarded)
+        case .deleteBranches:
+            let book = OrchestrationController.shared.races()
+            return all.filter { $0.discarded && !((try? book?.branchesLeft(race: $0.id)) ?? []).isEmpty }
         }
     }
 

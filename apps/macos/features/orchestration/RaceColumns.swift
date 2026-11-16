@@ -61,7 +61,7 @@ public enum RaceColumns {
                 state: discarded ? T("Discarded", "Descartado") : stateLabel(info, stored: contender),
                 elapsed: info?.since.map { duration(now.timeIntervalSince($0)) } ?? "",
                 cost: costLabel(info?.costUsd, remote: !contender.agent.machine.isEmpty),
-                diff: discarded ? T("in the Trash", "na Lixeira") : info?.worktreeGone == true ? T("worktree gone", "worktree sumiu") : diffLabel(info?.diff),
+                diff: discarded ? T("deleted", "apagada") : info?.worktreeGone == true ? T("worktree gone", "worktree sumiu") : diffLabel(info?.diff),
                 isWinner: race.winner == contender.id,
                 isDiscarded: discarded,
                 canCompare: !discarded && info?.worktreeGone != true && contender.agent.machine.isEmpty)

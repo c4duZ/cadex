@@ -82,12 +82,11 @@ let localTests: [(name: String, body: Checks.Body)] = [
         let reread = WorktreesStore(path: home + "/notes.json")
         expect(reread.task(plan.path)?.comment == "fixing the header" && reread.repo(repo).trustExplained)
     }),
-    ("a race's discard: tasks from one base, one to the Trash with its commit, git forgets it, the branch stays until deleted", {
+    ("a race's discard: tasks from one base, one deleted, git forgets it, its branch keeps the commit until deleted", {
         let (home, repo) = fakeRepo()
         defer { try? fm.removeItem(atPath: home); try? fm.removeItem(atPath: repo + ".worktrees") }
         let controller = WorktreesController()
         controller.store = WorktreesStore(path: home + "/notes.json")
-        controller.moveToTrash = { try fm.moveItem(atPath: $0, toPath: home + "/trash-" + ($0 as NSString).lastPathComponent) }
         let one = controller.plan(name: "fix-1", repo: repo, base: "main")
         guard case .success = controller.make(one) else { return expect(false, "not made") }
         let two = controller.plan(name: "fix-2", repo: repo, base: "main")
@@ -95,8 +94,10 @@ let localTests: [(name: String, body: Checks.Body)] = [
         expect(one.base == "main" && two.branch == "fix-2")
         fm.createFile(atPath: two.path + "/a.txt", contents: Data("try 2\n".utf8))
         git(two.path, "commit", "--quiet", "-am", "try 2")
-        expect(controller.trash(two.path, repo: repo) == nil)
-        expect(!fm.fileExists(atPath: two.path) && fm.fileExists(atPath: home + "/trash-fix-2/a.txt"), "in the Trash, with its work")
+        fm.createFile(atPath: two.path + "/scratch.txt", contents: Data("never committed\n".utf8))
+        expect(controller.discard(two.path, repo: repo) == nil)
+        expect(!fm.fileExists(atPath: two.path), "deleted, with what was never committed")
+        expect(sh("git -C '\(repo)' log -1 --format=%s fix-2") == "try 2\n", "the commit stays on the branch")
         expect(controller.tasks(repo: repo).map(\.worktree.branch) == ["fix-1"] && controller.store.task(two.path) == nil)
         expect(git(repo, "rev-parse", "--verify", "--quiet", "fix-2") == 0, "the branch stays")
         expect(controller.deleteBranch("fix-2", repo: repo) == nil && git(repo, "rev-parse", "--verify", "--quiet", "fix-2") != 0)

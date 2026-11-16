@@ -41,7 +41,7 @@ public final class RaceBook {
     }
 
     /// `orchestration.pick-winner`; returns the others, the ones that
-    /// `discard` sends to the Trash.
+    /// `discard` deletes.
     public func pickWinner(race id: String, contender winner: String) throws -> [Contender] {
         guard var race: Race = try store.get(.races, id: id) else { throw RunError.unknown(id) }
         let all = try contenders(of: id)
@@ -51,8 +51,20 @@ public final class RaceBook {
         return all.filter { $0.id != winner }
     }
 
+    /// The discarded contenders whose branch is still there, for
+    /// orchestration.delete-race-branches.
+    public func branchesLeft(race id: String) throws -> [Contender] {
+        try contenders(of: id).filter { $0.state == .discarded && $0.branchDeleted != true && $0.agent.machine.isEmpty }
+    }
+
+    public func markBranchDeleted(_ id: String) throws {
+        guard var contender: Contender = try store.get(.contenders, id: id) else { throw RunError.unknown(id) }
+        contender.branchDeleted = true
+        try store.put(.contenders, id: id, parent: contender.race, contender)
+    }
+
     /// `orchestration.discard-race`: every contender but the winner is
-    /// marked discarded (their worktrees went to the Trash; the branches stay
+    /// marked discarded (their worktrees were deleted; the branches stay
     /// until orchestration.delete-race-branches).
     public func discard(race id: String) throws -> [Contender] {
         guard var race: Race = try store.get(.races, id: id) else { throw RunError.unknown(id) }

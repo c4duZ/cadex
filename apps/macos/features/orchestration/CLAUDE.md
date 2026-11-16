@@ -34,7 +34,8 @@
   `stopRun`, `reapOrphans` ("exited without reporting"); `spawn`, `ask` (ao dono ou ao
   coordenador), `send` (só na mesma execução), `answer` e `inbox`.
 - `RaceBook.swift`: a corrida (2 a orchestration.maxAgents concorrentes numerados de 1), o vencedor
-  e o descarte; `AutomationBook`: automações (nascem desligadas) e o histórico.
+  e o descarte; `branchesLeft` e `markBranchDeleted`: as branches dos descartados que ainda
+  existem, para o orchestration.delete-race-branches não listar de novo a apagada; `AutomationBook`: automações (nascem desligadas) e o histórico.
 - `OrchestrationController.swift`: a porta de entrada (`shared`): `isEnabled`,
   `automationsEnabled` e `limits` vindos das configurações (`../../app/SettingsBridge.swift`); o banco só
   abre no primeiro uso com a feature ligada e fecha quando as duas desligam;

@@ -44,8 +44,9 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
 - "Compare" escolhe duas colunas e abre o diff entre as duas worktrees
   (git.review-compare-worktrees).
 - "Pick Winner" (orchestration.pick-winner): o vencedor segue como uma tarefa normal da worktrees.
-  Em seguida, "Discard the Others" (orchestration.discard-race) manda as outras worktrees para a
-  Lixeira, depois de encerrar os agentes delas, e mantém as branches;
+  Em seguida, "Discard the Others" (orchestration.discard-race) apaga as outras worktrees, direto,
+  sem a Lixeira (o dono, 2026-11-16), depois de encerrar os agentes delas, e mantém as branches com
+  os commits; o que nunca teve commit nelas se perde, e a confirmação diz isso;
   orchestration.delete-race-branches apaga as branches das descartadas, com confirmação que lista
   cada uma.
 - No remoto, descartar roda o `git worktree remove` lá, com a mesma confirmação, e a branch fica.
@@ -184,9 +185,11 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
       2026-11-16, com portões, parar em cadeia, teto de agentes e a caixa de entrada.)
 - [x] Uma corrida de 3 num repositório de teste cria 3 worktrees do mesmo commit, 3 abas com o
       prompt e o quadro com os três estados e custos; escolher o vencedor manda as outras worktrees
-      para a Lixeira e deixa as branches. (2026-11-16, instância de teste com o `claude` real; a
+      e deixa as branches. (2026-11-16, instância de teste com o `claude` real; a
       corrida começou pelo gancho de teste, sem o formulário.)
 - [x] "Compare" mostra o diff entre duas (pelo menu, kite-1 contra kite-2, 2026-11-16).
+- [x] "Delete Branches" lista só as branches que restam (uma), apaga e não lista de novo
+      (2026-11-16, pelo menu, na instância de teste; o "não lista de novo" com teste).
 - [x] "New Race" pela folha de verdade começa a corrida; cancelar a confirmação não deixa corrida
       gravada (2026-11-16).
 - [ ] Uma execução de 3 tarefas encadeadas, com agentes reais, vai de pendente a concluída sozinha;

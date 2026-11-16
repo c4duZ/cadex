@@ -161,8 +161,9 @@
   de cada concorrente pelo terminal achado pela sessão do kit (agentResume.kitSession), o custo
   pelo `SessionCost`, o remoto pelo `claude agents --json` da Agents; passou do teto da corrida
   (gasto ou minutos), SIGTERM como na hibernação; escolher o vencedor oferece descartar os outros;
-  descartar para os agentes, manda as pastas para a Lixeira pela worktrees e deixa as branches;
-  apagar as branches lista cada uma antes.
+  descartar para os agentes, apaga as pastas direto pela worktrees (sem Lixeira, o dono em
+  2026-11-16) e deixa as branches; apagar as branches lista só as que restam, e a apagada não volta
+  à lista.
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.

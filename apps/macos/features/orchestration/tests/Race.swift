@@ -89,7 +89,7 @@ let raceTests: [(name: String, body: Checks.Body)] = [
         expect(columns[1].cost == "—" && columns[1].subtitle == "haiku · ~/.claude · pc" && !columns[1].canCompare, "\(columns[1])")
         let capped = Contender(id: "c4", race: "r", index: 4, agent: AgentChoice(), worktree: "/w", state: .exited, reason: "hit the cap")
         expect(RaceColumns.make(race: race, contenders: [capped], live: live, now: t0)[0].state == "Stopped: hit the cap")
-        expect(columns[2].isDiscarded && !columns[2].canCompare && columns[2].diff == "in the Trash", "\(columns[2])")
+        expect(columns[2].isDiscarded && !columns[2].canCompare && columns[2].diff == "deleted", "\(columns[2])")
         expect(RaceColumns.costLabel(0.0048, remote: false) == "US$ 0.0048" && RaceColumns.diffLabel(DiffCount(files: 1, added: 3, removed: 0)) == "1 file +3 −0")
     }),
     ("the form: rows follow the count, accounts take turns, the model and machine chosen per row, the prompt kept", {
