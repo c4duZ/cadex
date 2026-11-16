@@ -19,7 +19,8 @@
 - `WorktreesController.swift`: WorktreesController.shared. `plan` (branch único, pasta
   `<repo>.worktrees/<branch>` ou worktrees.root, ponto de partida, o que pede um sim: autorizar a
   pasta, hooks novos, a confiança), `make`, `tasks`, `note` (para o grupo em Agents),
-  `whatWouldBeLost`, `remove`, `setStatus`, `setComment`.
+  `whatWouldBeLost`, `remove`, `setStatus` (avisa `onStatusChange`: o app passa "review" à memória
+  como marco de consolidação, plano 22 fase F), `setComment`.
 - worktrees.set-status e -set-comment também aceitam `status=` e `comment=` do agente (plano 20): da
   tarefa do terminal dele (`taskOf`, só uma worktree de tarefa, nunca o repositório), sem lista.
 - `WorktreesView.swift`: a página Tasks (lê só enquanto aparece). `WorktreesCommands.swift`:

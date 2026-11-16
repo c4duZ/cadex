@@ -83,14 +83,18 @@ let exitCode = await Checks.run([
     }),
     ("the memory is on and shared across accounts unless the file says otherwise", {
         let defaults = SettingsFile.read(Data("{}".utf8)).0.memory
-        expect(defaults.enabled && defaults.shareAcrossAccounts)
+        expect(defaults.enabled && defaults.shareAcrossAccounts && defaults.consolidateInSession && defaults.consolidateAtContext == 70)
         var settings = Settings()
         settings.memory.enabled = false
         settings.memory.shareAcrossAccounts = false
+        settings.memory.consolidateInSession = false
+        settings.memory.consolidateAtContext = 85
         let (read, problems) = SettingsFile.read(SettingsFile.write(settings))
         expect(problems.isEmpty && read.memory == settings.memory, "\(read.memory) \(problems)")
         let (bad, wrong) = SettingsFile.read(Data(#"{"memory": {"enabled": "no", "shareAcrossAccounts": false}}"#.utf8))
         expect(bad.memory.enabled && !bad.memory.shareAcrossAccounts && wrong.count == 1, "\(wrong)")
+        let clamped = SettingsFile.read(Data(#"{"memory": {"consolidateAtContext": 300}}"#.utf8)).0.memory
+        expect(clamped.consolidateAtContext == 95, "the milestone percent stays in 10…95")
     }),
     ("files open beside unless the file says tab; anything else is a problem", {
         expect(SettingsFile.read(Data("{}".utf8)).0.general.openFiles == "beside")

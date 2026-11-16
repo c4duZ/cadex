@@ -60,6 +60,7 @@ public enum MemoryKit {
     /// MemoryProject.swift), the account's own with sharing off; unknown,
     /// Claude's default folder stays.
     public nonisolated static func part(tools: String, engine: String?, shareAcrossAccounts: Bool, plugin: String? = nil,
+                                        consolidateAt: Int? = nil,
                                         environment: [String: String] = ProcessInfo.processInfo.environment) -> SessionKitPart {
         let command = SessionKit.quote(tools) + " memory-hook "
         var hooks: [String: Any] = [:]
@@ -67,7 +68,11 @@ public enum MemoryKit {
             hooks[event] = [["hooks": [["type": "command", "command": command + event, "timeout": 5]]]]
         }
         let memory = folder(environment: environment)
-        return SessionKitPart(settings: ["hooks": hooks, "env": env(engine: engine, environment: environment)],
+        var env = env(engine: engine, environment: environment)
+        // Consolidation in the session (plan 22 phase F): the hook's
+        // milestone percent; absent, the hook never asks.
+        if let consolidateAt { env["CADEX_MEMORY_CONSOLIDATE_AT"] = String(consolidateAt) }
+        return SessionKitPart(settings: ["hooks": hooks, "env": env],
                               pluginDirs: plugin.map { [$0] } ?? [],
                               perAccount: shareAcrossAccounts ? nil : { accountDir in
                                   ["env": ["CADEX_MEMORY_WORKSPACE": SessionKit.accountKey(accountDir)]]
@@ -78,6 +83,23 @@ public enum MemoryKit {
                                   return ["autoMemoryDirectory": dir]
                               })
     }
+
+    /// "The task is ready" for a session (plan 22 phase F): the file
+    /// `cadex memory-hook` looks for at the session's next Stop
+    /// (core/features/memory/consolidate.zig). False for a session id that
+    /// is not a plain id.
+    @discardableResult
+    public nonisolated static func requestConsolidation(sessionID: String,
+                                                       environment: [String: String] = ProcessInfo.processInfo.environment) -> Bool {
+        guard !sessionID.isEmpty, sessionID.allSatisfy({ $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "-" || $0 == "_") }) else { return false }
+        let dir = folder(environment: environment) + "/consolidate/requests"
+        try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        return FileManager.default.createFile(atPath: dir + "/" + sessionID + ".ready", contents: Data(), attributes: [.posixPermissions: 0o600])
+    }
+
+    /// What "Consolidate Memory Now" pastes (no Enter); the hook knows it
+    /// (`asked_prefix` in consolidate.zig) and adds the request next to it.
+    public static let consolidateNowText = "Consolidate this session into the project memory."
 
     /// What `cadex memory-hook` reads (hook_client.zig): the engine, the
     /// data folder and, for a test instance only (CADEX_SOCKETS_DIR,

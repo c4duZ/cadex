@@ -14,6 +14,7 @@
 const std = @import("std");
 const clock = @import("../../shared/clock.zig");
 const events = @import("events.zig");
+const consolidate = @import("consolidate.zig");
 const context = @import("context.zig");
 const http = @import("http.zig");
 const launch = @import("launch.zig");
@@ -31,7 +32,7 @@ pub const event_budget_ms = 200;
 pub const fetch_budget_ms = start_budget_ms;
 
 /// What the hook brings back after posting the event.
-const Reply = enum { none, briefing, anchor, recap, brief };
+const Reply = enum { none, briefing, anchor, recap, brief, consolidate_stop, consolidate_asked };
 
 fn replyFor(event: []const u8, payload: events.Payload) Reply {
     if (std.mem.eql(u8, event, "session-start")) {
@@ -61,6 +62,13 @@ pub const Env = struct {
     /// as upstream's `ai-memory run` does; events.appendManaged).
     run_id: ?[:0]const u8 = null,
     auto_handoff: ?[:0]const u8 = null,
+    /// Consolidation in the session (plan 22 phase F): the context percent
+    /// that is a milestone (CADEX_MEMORY_CONSOLIDATE_AT, put by the kit with
+    /// memory.consolidateInSession on; none: off) and where `cadex
+    /// statusline` writes each session's context (CADEX_USAGE_DIR).
+    consolidate_at: ?[:0]const u8 = null,
+    usage_dir: ?[:0]const u8 = null,
+    home: [:0]const u8 = "",
 
     pub const Lookup = *const fn ([*:0]const u8) ?[:0]const u8;
 
@@ -81,6 +89,9 @@ pub const Env = struct {
             .workspace = getenv("CADEX_MEMORY_WORKSPACE"),
             .run_id = getenv("AI_MEMORY_RUN_ID"),
             .auto_handoff = getenv("AI_MEMORY_AUTO_HANDOFF"),
+            .consolidate_at = getenv("CADEX_MEMORY_CONSOLIDATE_AT"),
+            .usage_dir = getenv("CADEX_USAGE_DIR"),
+            .home = getenv("HOME") orelse "",
         };
     }
 
@@ -140,7 +151,20 @@ pub fn runWith(gpa: std.mem.Allocator, env: Env, claude_event: []const u8, input
     const target = query.items;
 
     const is_start = std.mem.eql(u8, event, "session-start");
-    const reply = replyFor(event, payload);
+    var reply = replyFor(event, payload);
+    var milestone: consolidate.Reason = .asked;
+    if (reply == .none) if (consolidationAt(env)) |threshold| {
+        if (std.mem.eql(u8, event, "stop")) {
+            if (stopMilestone(gpa, env, payload, threshold)) |reason| {
+                milestone = reason;
+                reply = .consolidate_stop;
+            }
+        } else if (std.mem.eql(u8, event, "user-prompt-submit") and payload.session_id != null) {
+            if (payload.prompt) |prompt| if (consolidate.isAsked(prompt)) {
+                reply = .consolidate_asked;
+            };
+        }
+    };
     const budget: i64 = if (is_start) start_budget_ms else if (reply != .none) fetch_budget_ms else event_budget_ms;
     const deadline = started + budget;
     if (is_start) if (env.bin) |bin| {
@@ -155,10 +179,26 @@ pub fn runWith(gpa: std.mem.Allocator, env: Env, claude_event: []const u8, input
         spool.write(gpa, env.data_dir, target, input) catch {};
         return null;
     }
-    return fetchReply(gpa, env, payload, reply, deadline);
+    return fetchReply(gpa, env, payload, reply, milestone, deadline);
 }
 
-fn fetchReply(gpa: std.mem.Allocator, env: Env, payload: events.Payload, reply: Reply, deadline: i64) !?[]u8 {
+/// The milestone percent, when consolidation in the session is on.
+fn consolidationAt(env: Env) ?f64 {
+    const raw = env.consolidate_at orelse return null;
+    const value = std.fmt.parseFloat(f64, raw) catch return null;
+    return if (value > 0 and value <= 100) value else null;
+}
+
+fn stopMilestone(gpa: std.mem.Allocator, env: Env, payload: events.Payload, threshold: f64) ?consolidate.Reason {
+    const session = payload.session_id orelse return null;
+    var usage_buf: [1024]u8 = undefined;
+    const usage = if (env.usage_dir) |u| u[0..] else std.fmt.bufPrint(&usage_buf, "{s}/Library/Application Support/Cadex/usage", .{env.home}) catch return null;
+    var paths: consolidate.Paths = .{};
+    if (!paths.init(env.data_dir, usage, session)) return null;
+    return consolidate.atStop(gpa, &paths, threshold, payload.stop_hook_active);
+}
+
+fn fetchReply(gpa: std.mem.Allocator, env: Env, payload: events.Payload, reply: Reply, milestone: consolidate.Reason, deadline: i64) !?[]u8 {
     const target = switch (reply) {
         .none => return null,
         .briefing => blk: {
@@ -170,6 +210,7 @@ fn fetchReply(gpa: std.mem.Allocator, env: Env, payload: events.Payload, reply: 
         .anchor => try events.recapTarget(gpa, payload.session_id.?, context.anchor_budget),
         .recap => try events.recapTarget(gpa, payload.session_id.?, null),
         .brief => try events.briefTarget(gpa, payload, env.workspace),
+        .consolidate_stop, .consolidate_asked => try consolidateTarget(gpa, payload, env.workspace, milestone),
     };
     defer gpa.free(target);
     const answer = (try http.send(gpa, env.socket, "GET", target, env.token, "", deadline)) orelse return null;
@@ -184,7 +225,28 @@ fn fetchReply(gpa: std.mem.Allocator, env: Env, payload: events.Payload, reply: 
         .anchor => if (std.mem.startsWith(u8, text, context.anchor_header)) try startOutput(gpa, text) else null,
         .recap => try context.envelope(gpa, "UserPromptSubmit", text),
         .brief => try context.envelope(gpa, "SubagentStart", text),
+        .consolidate_stop => try consolidate.blockOutput(gpa, text),
+        .consolidate_asked => try context.envelope(gpa, "UserPromptSubmit", text),
     };
+}
+
+/// The request's query: the session, the milestone, and the folder and
+/// workspace the engine names the project by (the hooks' own scope).
+fn consolidateTarget(gpa: std.mem.Allocator, payload: events.Payload, workspace: ?[]const u8, reason: consolidate.Reason) ![]u8 {
+    var out: std.ArrayList(u8) = .empty;
+    errdefer out.deinit(gpa);
+    try out.appendSlice(gpa, "/cadex/consolidate?session_id=");
+    try events.appendEncoded(gpa, &out, payload.session_id.?);
+    try out.print(gpa, "&reason={s}", .{consolidate.name(reason)});
+    if (payload.cwd) |cwd| {
+        try out.appendSlice(gpa, "&cwd=");
+        try events.appendEncoded(gpa, &out, cwd);
+    }
+    if (workspace) |w| {
+        try out.appendSlice(gpa, "&workspace=");
+        try events.appendEncoded(gpa, &out, w);
+    }
+    return out.toOwnedSlice(gpa);
 }
 
 const testing = std.testing;

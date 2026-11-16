@@ -143,6 +143,9 @@ pub(crate) struct Engine {
     pub(crate) model: Option<Arc<ModelEvents>>,
     /// Rung by the hook router after each SessionEnd (handoff.rs).
     pub(crate) session_ended: Arc<tokio::sync::Notify>,
+    /// For the maintenance jobs (maintenance.rs, plan 22 phase F).
+    pub(crate) wiki: Wiki,
+    pub(crate) embedder: Option<Arc<dyn Embedder>>,
     /// Lives as long as the engine; `None` unless `--watcher`.
     pub(crate) _watcher: Option<WatcherHandle>,
 }
@@ -174,7 +177,7 @@ pub(crate) async fn build(args: &Args, cancel: &CancellationToken) -> Result<Eng
         .with_wiki(wiki.clone())
         .with_active_project(active_project.clone())
         .with_sanitizer(Sanitizer::builtin());
-    if let Some(e) = embedder {
+    if let Some(e) = embedder.clone() {
         server = server.with_embedder(e);
     }
 
@@ -207,7 +210,9 @@ pub(crate) async fn build(args: &Args, cancel: &CancellationToken) -> Result<Eng
         .merge(hooks)
         .merge(workstreams)
         .route("/healthz", axum::routing::get(|| async { "ok" }))
+        // Plan 22 phase F: the consolidation request for the session's own Claude.
+        .route("/cadex/consolidate", axum::routing::get(crate::consolidate_prompt::handle))
         .layer(DefaultBodyLimit::max(MAX_BODY_BYTES))
         .layer(axum::middleware::from_fn_with_state(auth, require_bearer));
-    Ok(Engine { store, router, model, session_ended, _watcher: watcher })
+    Ok(Engine { store, router, model, session_ended, wiki: wiki.clone(), embedder, _watcher: watcher })
 }

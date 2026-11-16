@@ -27,7 +27,7 @@ use crate::args::Args;
 use crate::auth::{PeerListener, Tokens, require_session_token};
 use crate::restart::{InFlight, when_model_unloads};
 use crate::sessions::Sessions;
-use crate::{auto_watch, engine, handoff, hook_body, import, mcp_scope, restart, sessions, spool, sys};
+use crate::{auto_watch, engine, handoff, hook_body, import, maintenance, mcp_scope, restart, sessions, spool, sys};
 
 /// How the engine ended.
 pub(crate) enum Exit {
@@ -131,6 +131,8 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
     let in_flight = Arc::new(InFlight::default());
     let (import_tx, import_rx) = import::channel();
     let (ended_tx, ended_rx) = tokio::sync::mpsc::unbounded_channel();
+    let (maint_tx, maint_rx) = maintenance::channel();
+    let lane = maintenance::lane();
     let routes = built.router.clone();
     #[cfg(debug_assertions)]
     let routes = if crate::debug_panic::enabled() { crate::debug_panic::route(routes) } else { routes };
@@ -138,6 +140,7 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
         .layer(axum::middleware::from_fn(hook_body::amend))
         .layer(axum::middleware::from_fn(mcp_scope::scope))
         .layer(from_fn_with_state(ended_tx, handoff::watch))
+        .layer(from_fn_with_state(maint_tx, maintenance::watch))
         .layer(from_fn_with_state(sessions.clone(), sessions::track))
         .layer(from_fn_with_state(import_tx, import::watch))
         .layer(from_fn_with_state(in_flight.clone(), restart::count));
@@ -184,10 +187,25 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
         claude_dirs: args.claude_dirs.clone(),
         delay: args.import_delay,
         in_flight: in_flight.clone(),
+        lane: lane.clone(),
         stop: cancel.clone(),
     };
     // The image a restart execs already did the start's import.
     tokio::spawn(import::run(importer, import_rx, args.listen_fd.is_none()));
+    // Plan 22 phase F: maintenance on the start and each SessionEnd, never by a clock.
+    tokio::spawn(maintenance::run(maintenance::Context {
+        stores: crate::maintenance_jobs::Stores {
+            reader: built.store.reader.clone(),
+            writer: built.store.writer.clone(),
+            wiki: built.wiki.clone(),
+            embedder: built.embedder.clone(),
+        },
+        data_dir: args.data_dir.clone(),
+        delay: args.import_delay,
+        lane,
+        in_flight: in_flight.clone(),
+        stop: cancel.clone(),
+    }, maint_rx, args.listen_fd.is_none()));
 
     let shutdown = cancel.clone();
     let listener = PeerListener::new(listener, sys::effective_uid());

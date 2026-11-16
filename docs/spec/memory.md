@@ -158,11 +158,25 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   rodariam com uma pasta de configuração do Codex que o Cadex gerenciasse, nunca na `~/.codex` do dono.
 
 ### Consolidação na sessão
-- Em marcos (worktree marcada como pronta, contexto acima de memory.consolidateAtContext, 70%, ou
+- Em marcos (a tarefa marcada como pronta, o contexto acima de memory.consolidateAtContext, 70%, ou
   "Consolidate Memory Now", memory.consolidate-now), o agente recebe, ao terminar a resposta, o
-  pedido de consolidar a sessão, e escreve ele mesmo as páginas. Uma vez por marco; nunca dois
-  pedidos seguidos. O pedido aparece na conversa como uma mensagem do usuário.
+  pedido de consolidar a sessão, e escreve ele mesmo as páginas pelas ferramentas da memória: a da
+  sessão e as de decisões, armadilhas, regras e conceitos que a sessão deixou. Uma vez por marco;
+  nunca dois pedidos seguidos. O pedido aparece na conversa como uma mensagem do usuário.
+- As regras do pedido são as do ai-memory (as que o consolidador dele dá ao modelo: só o que a
+  sessão mostrou, nada inventado, o estado final vale, preferências do projeto em
+  `_prompts/consolidation.md`), e as páginas saem nos caminhos e tipos dele. Sem chave e sem outro
+  modelo: quem escreve é o Claude da sessão.
+- "Consolidate Memory Now" cola o pedido curto no agente com foco, sem Enter; ao ser enviado, o
+  pedido completo vai junto.
 - memory.consolidateInSession (ligada) liga e desliga isso.
+
+### Manutenção
+- Ao subir o processo da memória e a cada fim de sessão, nunca por relógio, rodam no máximo uma vez
+  por dia as limpezas do ai-memory, com os padrões dele: apaga páginas com validade vencida, tira
+  da wiki as páginas de sessão e outras episódicas sem leitura há uns 80 dias (ficam marcadas no
+  banco e somem de vez depois de 180 dias), apaga projetos vazios e fecha sessões paradas há 48 h;
+  o lint por regras escreve `_lint/report.md` em cada projeto. Ao subir, gera os vetores que faltam.
 
 ### Agente de memória de fundo
 - Desligado por padrão (memory.backgroundAgent). Ligado, faz o que não cabe na sessão aberta
@@ -256,6 +270,8 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
       handoff; "reload context" traz o que a compactação tirou.
 - [ ] O modelo baixa (e retoma), carrega, sai depois de parado, e o processo volta ao peso de parado.
 - [ ] Marcar a worktree como pronta faz o agente escrever as páginas uma vez, sem chave configurada.
+- [ ] O contexto passando de memory.consolidateAtContext pede a consolidação uma vez; com
+      `stop_hook_active` nunca pede.
 - [ ] "Organize History with AI" mostra o custo antes e só roda no clique.
 - [ ] Com memory.backgroundAgent desligada, nenhum `claude -p` roda.
 - [ ] Editar uma página na Memory gera commit; "Abrir a sessão" leva à conversa certa.

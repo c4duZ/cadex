@@ -109,6 +109,24 @@
   - `server/src/mcp_scope.rs`: numa chamada do `cadex mcp`, o projeto de reserva (os cabeçalhos
     `x-memory-actor-fallback-*` do upstream) pela pasta que ele manda: o `project` do
     .ai-memory.toml, senão o nome da raiz do repositório principal, como os hooks.
+  - Consolidação na sessão (fase F): `server/src/consolidate_prompt.rs`, a rota
+    `GET /cadex/consolidate?session_id&reason&cwd&workspace`: o pedido que faz o Claude da sessão
+    consolidar, com as regras do próprio upstream (`BATCH_SYSTEM_PROMPT` do crate de consolidação,
+    até o contrato de saída JSON; as convenções de caminho, `tier` e `kind` copiadas do
+    `batch_request_plan`), a workspace e o projeto da pasta (o `memory_write_pages_batch` não tem
+    escopo padrão) e as ferramentas no lugar do JSON. O consolidador do upstream pede um provedor de
+    IA, que o Cadex não tem.
+  - A manutenção (fase F), por evento e nunca por relógio: `server/src/maintenance.rs` (ao subir e
+    a cada SessionEnd ao vivo, depois de `--import-delay-ms`, na mesma fila da importação e segurando
+    o reinício), `server/src/maintenance_jobs.rs` (**cópia** dos passos do agendador do serve.rs do
+    upstream, origem no topo: a varredura de esquecimento, a de projetos vazios e o lint por regras,
+    no máximo uma vez por dia cada; a geração de vetores que faltam, ao subir e no máximo de hora em
+    hora) e `server/src/maintenance_state.rs` (a hora da última rodada de cada um em
+    `<data-dir>/maintenance/`; rodada que falha não conta). Os padrões do upstream valem, inclusive o
+    que apaga: página com `expires_at` vencido, página episódica fria (~80 dias sem leitura, as
+    sessions/ incluídas, arquivo removido e linha marcada), marca de remoção com mais de 180 dias,
+    projeto vazio com mais de 7 dias; sessão parada 48 h é fechada. Fora (pedem IA): o auto-improve,
+    o dream, o worker de consolidação e o de perfil.
   - `server/src/plugin.rs`: `cadex-memory export-plugin <pasta>`, o plugin do Claude Code com as
     skills do próprio upstream (retrieval, durable-pages, handoff, messaging), tiradas do crate;
     o `make app` e o empacotamento o escrevem.
@@ -203,12 +221,22 @@
     como `--rules`; o dialeto do OpenCode pela versão; perfil, `--env-file` e `--env` na ordem certa;
     sem engine o agente roda e o próximo `run` recupera; `--jail` roda de novo dentro do ai-jail e
     alcança o engine;
+    `server/tests/maintenance.rs`: um SessionEnd varre o vencido e o frio e um segundo no mesmo dia
+    não; a subida varre o que venceu; sem evento, nada; o SessionStart responde rápido durante a
+    varredura;
     `server/tests/session_end.rs`: o handoff de uma sessão com 10 edições lista os 10 arquivos, e
     um pânico forçado não perde evento (a fila espera e o engine seguinte a esvazia); ajudas em
     `server/tests/common/mod.rs`.
 - O cliente do socket, em Zig (o único código que fala com o memory.sock; o `cadex memory-hook`
   da feature agent-tools chama `memory.zig`):
   - `memory.zig`: a entrada da feature (`hook` e `mcp`).
+  - `consolidate.zig` (fase F): os marcos da consolidação na sessão, cada um uma vez por sessão
+    (marca em `<memory>/consolidate/<sessão>`): o contexto passou de CADEX_MEMORY_CONSOLIDATE_AT (do
+    arquivo da sessão que o `cadex statusline` grava em `<usage>/sessions/`) ou a tarefa ficou
+    pronta (o pedido que o app deixa em `<memory>/consolidate/requests/`); no Stop, sem
+    `stop_hook_active`, o hook responde `decision: "block"` com o texto do `/cadex/consolidate`. Um
+    prompt que começa com "Consolidate this session into the project memory" (o que o
+    memory.consolidate-now cola) recebe o mesmo texto ao lado. Sem a variável, nada.
   - `context.zig`: o que o hook devolve além do briefing, como o cliente do upstream: no
     SessionStart `compact` a âncora (`/recap?mode=anchor`, nunca o handoff; nada num subagente),
     num prompt que começa com "reload context" o `/recap`, no SubagentStart o `/brief`.
@@ -260,7 +288,7 @@
 ## Como validar
 - `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs`,
   `server/tests/import.rs`, `server/tests/auto_memory.rs`, `server/tests/marker.rs`,
-  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs` e `server/tests/session_end.rs` (parte do `make check`, em segundos).
+  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs` e `server/tests/session_end.rs` (parte do `make check`, em segundos).
 - `make memory-eval MODELS=<pasta>`: as 30 perguntas, só texto contra híbrida (`../../../tools/memory_eval.py`).
 - `make core-test`: os testes do cliente (eventos, query com e sem workspace, fila, respostas HTTP,
   sem token).

@@ -29,6 +29,10 @@
   Em `pluginDirs`, o plugin com as skills do próprio ai-memory (`findPlugin`: Resources/memory-plugin
   no pacote, senão o que o `make app` escreve em `core/features/memory/server/target`, pelo
   `cadex-memory export-plugin`; plano 22 fase D).
+  Com memory.consolidateInSession (fase F), a `env` leva `CADEX_MEMORY_CONSOLIDATE_AT` (o
+  memory.consolidateAtContext). `requestConsolidation` deixa o pedido de "tarefa pronta" de uma
+  sessão (`<memória>/consolidate/requests/<sessão>.ready`, 0600, só id simples), que o hook lê no
+  Stop seguinte; `consolidateNowText` é o que o memory.consolidate-now cola.
   O `perSession` da parte, quando quem abre a sessão sabe a pasta dela, põe `autoMemoryDirectory`
   na pasta do projeto (`MemoryProject.swift`); sem pasta conhecida, fica a padrão do Claude.
 - `MemoryProject.swift`: a regra da chave do projeto (a raiz do repositório principal lida dos

@@ -113,7 +113,10 @@
 - `MemoryWiring.swift` (plano 22, fase C): com memory.enabled o kit ganha a parte da feature memory
   (os hooks `cadex memory-hook` e a env do engine; com memory.shareAcrossAccounts desligada, a
   workspace por conta), aplicada pelo `SettingsBridge.swift`; e `startMemory`, ao abrir, aquece o
-  engine uma vez por versão (`../features/memory/MemoryWarmUp.swift`).
+  engine uma vez por versão (`../features/memory/MemoryWarmUp.swift`); fase F: a tarefa que vira
+  "review" (WorktreesController.onStatusChange) deixa o pedido de consolidação para as sessões cujo
+  terminal está na pasta dela (`agentResume`), e memory.consolidate-now cola o pedido, sem Enter, no
+  agente com foco.
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.

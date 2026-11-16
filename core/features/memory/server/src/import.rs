@@ -79,6 +79,8 @@ pub(crate) struct Context {
     pub(crate) claude_dirs: Option<Vec<PathBuf>>,
     pub(crate) delay: Duration,
     pub(crate) in_flight: Arc<InFlight>,
+    /// Shared with maintenance.rs: one background writer at a time.
+    pub(crate) lane: crate::maintenance::Lane,
     pub(crate) stop: CancellationToken,
 }
 
@@ -123,6 +125,9 @@ impl Report {
 /// this image is a restart), then each SessionStart as it comes.
 pub(crate) async fn run(ctx: Context, mut rx: Receiver, outside_at_start: bool) {
     if outside_at_start {
+        // Taken before the wait, so the start's maintenance, which takes it
+        // after the same wait, runs after this import (maintenance.rs).
+        let _lane = ctx.lane.lock().await;
         tokio::select! {
             () = tokio::time::sleep(ctx.delay) => {}
             () = ctx.stop.cancelled() => return,
@@ -140,6 +145,7 @@ pub(crate) async fn run(ctx: Context, mut rx: Receiver, outside_at_start: bool) 
             () = tokio::time::sleep(wait) => {}
             () = ctx.stop.cancelled() => return,
         }
+        let _lane = ctx.lane.lock().await;
         let _hold = ctx.in_flight.hold();
         import_jobs::backfill(&ctx, &job).await;
     }

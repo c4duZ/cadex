@@ -23,6 +23,7 @@ mod auto_index;
 mod auto_watch;
 mod auto_wiki;
 mod capture;
+mod consolidate_prompt;
 #[cfg(debug_assertions)]
 mod debug_panic;
 mod engine;
@@ -33,6 +34,9 @@ mod import;
 mod import_jobs;
 mod import_state;
 mod lazy_embedder;
+mod maintenance;
+mod maintenance_jobs;
+mod maintenance_state;
 mod marker;
 mod model_fetch;
 mod marker_query;

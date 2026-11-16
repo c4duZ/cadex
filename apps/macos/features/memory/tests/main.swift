@@ -97,6 +97,18 @@ let exitCode = await Checks.run([
             "CADEX_MEMORY_DIR": "/t/m", "CADEX_MEMORY_SOCKET": "/t/s/memory.sock", "CADEX_SESSIONS_DIR": "/t/k",
         ], "\(String(describing: test.settings["env"]))")
     }),
+    ("consolidation in the session: the milestone percent in the env, and a task-ready request file per session", {
+        let on = MemoryKit.part(tools: "/c", engine: nil, shareAcrossAccounts: true, consolidateAt: 70, environment: ["CADEX_MEMORY_DIR": "/t/m"])
+        expect((on.settings["env"] as? [String: String])?["CADEX_MEMORY_CONSOLIDATE_AT"] == "70")
+        let off = MemoryKit.part(tools: "/c", engine: nil, shareAcrossAccounts: true, environment: ["CADEX_MEMORY_DIR": "/t/m"])
+        expect((off.settings["env"] as? [String: String])?["CADEX_MEMORY_CONSOLIDATE_AT"] == nil, "off: the hook never asks")
+        let dir = scratch()
+        defer { try? fm.removeItem(atPath: dir) }
+        expect(MemoryKit.requestConsolidation(sessionID: "abc-1", environment: ["CADEX_MEMORY_DIR": dir]))
+        expect(fm.fileExists(atPath: dir + "/consolidate/requests/abc-1.ready"))
+        expect(!MemoryKit.requestConsolidation(sessionID: "../x", environment: ["CADEX_MEMORY_DIR": dir]), "no path tricks")
+        expect(MemoryKit.consolidateNowText.hasPrefix("Consolidate this session into the project memory"), "the hook's asked_prefix")
+    }),
     ("the engine is found in the bundle, else in the debug build of make app", {
         let dir = scratch()
         defer { try? fm.removeItem(atPath: dir) }

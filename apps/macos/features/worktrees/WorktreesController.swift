@@ -127,9 +127,15 @@ public final class WorktreesController {
         return refused
     }
 
+    /// Told every status set, by whoever set it (the owner, the agent's
+    /// cadex_worktree_status): the app's memory takes "review" as the
+    /// task-ready milestone (plan 22 phase F).
+    public var onStatusChange: (@MainActor (TaskStatus, String) -> Void)?
+
     public func setStatus(_ status: TaskStatus, of path: String) {
         store.setTask(path) { $0.status = status }
         publish()
+        onStatusChange?(status, path)
     }
 
     public func setComment(_ comment: String, of path: String) {

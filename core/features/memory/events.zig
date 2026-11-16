@@ -62,6 +62,8 @@ pub const Payload = struct {
     agent_id: ?[]const u8 = null,
     /// UserPromptSubmit's text.
     prompt: ?[]const u8 = null,
+    /// Stop's flag: the session already goes on because of a Stop hook.
+    stop_hook_active: bool = false,
 
     pub fn of(value: std.json.Value) Payload {
         if (value != .object) return .{};
@@ -71,6 +73,7 @@ pub const Payload = struct {
             .source = string(value, "source"),
             .agent_id = string(value, "agent_id"),
             .prompt = string(value, "prompt"),
+            .stop_hook_active = if (value.object.get("stop_hook_active")) |v| v == .bool and v.bool else false,
         };
     }
 

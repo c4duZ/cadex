@@ -10,6 +10,7 @@ pub const mcp = @import("mcp_proxy.zig");
 test {
     _ = @import("events.zig");
     _ = @import("context.zig");
+    _ = @import("consolidate.zig");
     _ = @import("http.zig");
     _ = @import("spool.zig");
     _ = @import("launch.zig");

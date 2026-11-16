@@ -430,6 +430,23 @@ refaz o crate a partir dela.
   - Ligar ao crate do Cadex o que a prova deixou de fora e esta fase precisa: o consolidador do
     engine e a manutenção (forget sweep, lint de regras, decaimento), disparados por evento (fim de
     sessão, subida do processo), nunca por relógio.
+  - **Como ficou (2026-11-16), com o máximo de compatibilidade:** o upstream consolida com um
+    provedor de IA (que o Cadex não tem); aqui o Claude da sessão recebe as regras do próprio
+    upstream (o `BATCH_SYSTEM_PROMPT` do crate, até o contrato JSON, e as convenções de caminho,
+    `tier` e `kind`) e grava pelas ferramentas `memory_*`, com a workspace e o projeto da pasta no
+    pedido (o `memory_write_pages_batch` não tem escopo padrão: no primeiro teste real o Haiku parou
+    por falta deles). Os marcos ficam no `cadex memory-hook` (`core/features/memory/consolidate.zig`);
+    o texto, no engine (`/cadex/consolidate`); o "Consolidate Memory Now" cola o pedido curto e o
+    hook do UserPromptSubmit põe o completo ao lado. A manutenção sem IA do agendador do upstream
+    (varredura de esquecimento, projetos vazios, lint por regras, vetores que faltam) roda ao subir e
+    a cada SessionEnd, no máximo uma vez por dia, com os padrões do upstream, inclusive o que apaga
+    (anotado na spec). O dono decidiu manter esses padrões, inclusive o fim das páginas de sessão
+    sem leitura há ~80 dias (2026-11-16).
+  - **Teste real** (conta bkdg, Haiku, US$ 0,010 no segundo; o primeiro, US$ 0,013, mostrou a falta
+    do escopo): com o pedido de "tarefa pronta" deixado antes, o Stop bloqueou, o Haiku buscou na
+    memória, leu as observações da sessão e gravou num lote decisions/heron-3-cache-sqlite-wal.md
+    e a página da sessão; a busca seguinte acha as duas. O marco do contexto testado com o hook e o
+    engine de verdade (40% nada, 75% bloqueia uma vez, nunca com `stop_hook_active`).
 - **G. Agente de memória de fundo (ADR 0029).**
   - Primeiro, a prova num script fora do app: `CLAUDE_CONFIG_DIR=<conta> claude -p` com o login da
     conta, `--model` barato, `--max-budget-usd`, `--no-session-persistence`, `--mcp-config` só com

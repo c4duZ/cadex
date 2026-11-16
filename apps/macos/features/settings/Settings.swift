@@ -223,6 +223,11 @@ public struct Settings: Equatable, Sendable {
         public var enabled = true
         /// Off: each account has its own memory (clients' accounts apart).
         public var shareAcrossAccounts = true
+        /// At a milestone the session's own Claude consolidates the session
+        /// into the memory (plan 22 phase F; docs/spec/memory.md).
+        public var consolidateInSession = true
+        /// The context percent that is a milestone.
+        public var consolidateAtContext = 70
     }
 
     public struct StatusBar: Equatable, Sendable {
