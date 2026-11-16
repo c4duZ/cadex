@@ -93,6 +93,12 @@ let exitCode = await Checks.run([
         expect(problems.isEmpty && read.memory == settings.memory, "\(read.memory) \(problems)")
         let (bad, wrong) = SettingsFile.read(Data(#"{"memory": {"enabled": "no", "shareAcrossAccounts": false}}"#.utf8))
         expect(bad.memory.enabled && !bad.memory.shareAcrossAccounts && wrong.count == 1, "\(wrong)")
+        expect(!defaults.backgroundAgent && defaults.dailyBudgetUsd == 1.0 && defaults.requireApproval, "the memory agent starts off (ADR 0029)")
+        var agent = Settings()
+        agent.memory.backgroundAgent = true
+        agent.memory.dailyBudgetUsd = 2.5
+        agent.memory.requireApproval = false
+        expect(SettingsFile.read(SettingsFile.write(agent)).0.memory == agent.memory)
         let clamped = SettingsFile.read(Data(#"{"memory": {"consolidateAtContext": 300}}"#.utf8)).0.memory
         expect(clamped.consolidateAtContext == 95, "the milestone percent stays in 10…95")
     }),

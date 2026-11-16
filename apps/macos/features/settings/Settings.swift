@@ -228,6 +228,11 @@ public struct Settings: Equatable, Sendable {
         public var consolidateInSession = true
         /// The context percent that is a milestone.
         public var consolidateAtContext = 70
+        /// The memory agent, a `claude -p` on the account (ADR 0029): off by
+        /// default; its daily cap and whether its proposals wait for the owner.
+        public var backgroundAgent = false
+        public var dailyBudgetUsd = 1.0
+        public var requireApproval = true
     }
 
     public struct StatusBar: Equatable, Sendable {

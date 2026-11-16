@@ -116,7 +116,10 @@
   engine uma vez por versão (`../features/memory/MemoryWarmUp.swift`); fase F: a tarefa que vira
   "review" (WorktreesController.onStatusChange) deixa o pedido de consolidação para as sessões cujo
   terminal está na pasta dela (`agentResume`), e memory.consolidate-now cola o pedido, sem Enter, no
-  agente com foco.
+  agente com foco; fase G: o agent.json do agente de memória a cada mudança das configurações
+  (memory.backgroundAgent só vale com a memória ligada; as contas pelas de Agents) e
+  memory.bootstrap (a estimativa num alerta antes, só roda no sim), memory.run-dream e
+  memory.pause-agent, todos pelo `cadex memory-agent`.
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.

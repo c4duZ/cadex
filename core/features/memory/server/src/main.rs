@@ -17,6 +17,7 @@ use std::time::Instant;
 use anyhow::Result;
 
 mod accounts;
+mod agent;
 mod args;
 mod auth;
 mod auto_index;

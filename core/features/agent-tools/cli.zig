@@ -16,6 +16,7 @@ const usage_text =
     \\usage: cadex statusline       (Claude Code's status line, from a session Cadex opened)
     \\       cadex hook <event>     (a Claude Code hook: tells the Cadex app, never waits)
     \\       cadex memory-hook <event> (a Claude Code hook: feeds the project memory)
+    \\       cadex memory-agent <status|pause|resume|dream|bootstrap> [--cwd DIR] [--dry-run] (the app's memory agent)
     \\       cadex mcp              (the MCP server of the sessions Cadex opens)
     \\       cadex claude [args…]   (the `claude` typed in a Cadex zsh tab: the session kit)
     \\       cadex continue [options] [agent] [args…] (ai-memory run: the agent in the project's workstream, with the kit)
@@ -31,6 +32,7 @@ pub fn main(init: std.process.Init.Minimal) u8 {
     if (std.mem.eql(u8, sub, "memory-hook")) return runHook(args.next() orelse return fail(usage_text), memory.hook.run);
     if (std.mem.eql(u8, sub, "claude")) return runClaude(&args);
     if (std.mem.eql(u8, sub, "continue")) return runContinue(&args);
+    if (std.mem.eql(u8, sub, "memory-agent")) return runMemoryAgent(&args);
     // The agent's subcommands (plan 20): every word after the subcommand.
     var words_buf: [64][]const u8 = undefined;
     var n: usize = 0;
@@ -54,6 +56,21 @@ fn runContinue(args: anytype) u8 {
     var words: std.ArrayList([:0]const u8) = .empty;
     while (args.next()) |word| words.append(std.heap.page_allocator, word) catch return continue_wrap.run(&.{});
     return continue_wrap.run(words.items);
+}
+
+/// The memory agent's command (plan 22 phase G): JSON out, the code of the
+/// answer (0 done, 1 refused or no engine, 2 usage).
+fn runMemoryAgent(args: anytype) u8 {
+    var gpa_state: std.heap.DebugAllocator(.{}) = .init;
+    defer _ = gpa_state.deinit();
+    const gpa = gpa_state.allocator();
+    var words: std.ArrayList([]const u8) = .empty;
+    defer words.deinit(gpa);
+    while (args.next()) |word| words.append(gpa, word) catch return 1;
+    const result = memory.agent.run(gpa, words.items) catch return 1;
+    defer gpa.free(result.out);
+    writeAll(if (result.code == 2) 2 else 1, result.out);
+    return result.code;
 }
 
 const HookRun = *const fn (std.mem.Allocator, []const u8, []const u8) anyerror!?[]u8;

@@ -27,6 +27,20 @@ enum MemoryRows {
                              control: SettingsPage.number(Double(m.consolidateAtContext), range: 10...95, step: 5, format: "%.0f%%") { value in
                                  store.update { $0.memory.consolidateAtContext = Int(value) }
                              }),
+            SettingsPage.row(T("Background memory agent", "Agente de memória de fundo"),
+                             T("Off by default. On, Cadex runs `claude -p` on your account, with no tools and a cap per call and per day, to consolidate sessions that ended without a milestone and to propose rules and lessons. Anthropic's Consumer Terms (§3.7) restrict automated use of a subscription: an API key set in the account's Claude Code (apiKeyHelper) is the alternative; Cadex never stores or reads it. Organize History with AI runs only when you click, even with this off.",
+                               "Desligado por padrão. Ligado, o Cadex roda `claude -p` na sua conta, sem ferramentas e com teto por chamada e por dia, para consolidar sessões que terminaram sem marco e propor regras e lições. Os Termos de Consumidor da Anthropic (§3.7) restringem o uso automatizado de uma assinatura: uma chave de API configurada no Claude Code da conta (apiKeyHelper) é a alternativa; o Cadex nunca guarda nem lê a chave. Organizar o histórico com IA só roda no seu clique, mesmo com isto desligado."),
+                             control: SettingsPage.toggle(m.backgroundAgent) { on in store.update { $0.memory.backgroundAgent = on } }),
+            SettingsPage.row(T("Daily cap", "Teto por dia"),
+                             T("The most the memory agent may spend in a day, in US dollars of the account's usage.",
+                               "O máximo que o agente de memória pode gastar num dia, em dólares do uso da conta."),
+                             control: SettingsPage.number(m.dailyBudgetUsd, range: 0...20, step: 0.5, format: "US$ %.2f") { value in
+                                 store.update { $0.memory.dailyBudgetUsd = value }
+                             }),
+            SettingsPage.row(T("Proposals wait for approval", "Propostas esperam aprovação"),
+                             T("Rules and lessons the agent proposes wait on the Memory page until you approve them.",
+                               "As regras e lições que o agente propõe esperam na página Memory até você aprovar."),
+                             control: SettingsPage.toggle(m.requireApproval) { on in store.update { $0.memory.requireApproval = on } }),
         ]
     }
 }

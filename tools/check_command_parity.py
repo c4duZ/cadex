@@ -16,7 +16,7 @@ PREFIXES = "tab|pane|explorer|workspace|search|editor|markdown|terminal|git|hist
 LITERAL = re.compile(r'"((?:%s)\.[a-z0-9-]+)"' % PREFIXES)
 # Names of views and keys in the Mac's code, not commands (2026-10-20).
 # power.mode, sidebar.items and statusBar.left/right are settings.json keys, read by name in SettingsFile.swift.
-NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode", "sidebar.items", "statusBar.left", "statusBar.right", "agents.sessions", "agents.accountNames", "agents.hiddenAccounts", "agents.accounts", "ssh.ping", "agents.hiddenLogins", "agents.launchSkipPermissions", "agents.activeAccount", "agents.projectAccounts", "agents.history", "agents.stateHooks", "agents.attention", "agents.dockBadge", "agents.mutedMachines", "worktrees.root", "worktrees.setupHooks", "history.jsonl", "review.authorship", "memory.enabled", "memory.shareAcrossAccounts", "memory.consolidateInSession", "memory.consolidateAtContext"}
+NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode", "sidebar.items", "statusBar.left", "statusBar.right", "agents.sessions", "agents.accountNames", "agents.hiddenAccounts", "agents.accounts", "ssh.ping", "agents.hiddenLogins", "agents.launchSkipPermissions", "agents.activeAccount", "agents.projectAccounts", "agents.history", "agents.stateHooks", "agents.attention", "agents.dockBadge", "agents.mutedMachines", "worktrees.root", "worktrees.setupHooks", "history.jsonl", "review.authorship", "memory.enabled", "memory.shareAcrossAccounts", "memory.consolidateInSession", "memory.consolidateAtContext", "memory.backgroundAgent", "memory.dailyBudgetUsd", "memory.requireApproval"}
 # Mac-only for now: the in-app updater (docs/adr/0016-in-app-updates.md) comes
 # to Windows later. Windows-only ones (workspace.environment) need no entry.
 # The pasted-image tags (docs/spec/terminal.md, Ver a imagem colada) also
@@ -34,7 +34,7 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "agents.add-account", "agents.set-active-account", "agents.set-project-account", "agents.sync-account-config", "agents.share-account-config",
             "agents.use-own-copy", "agents.follow-default-config", "agents.remove-account",
             # The unified history (plan 18, phase D).
-            "agents.show-history", "agents.resume-session", "agents.continue-in-account", "agents.continue-in-agent", "memory.consolidate-now", "agents.copy-resume-command",
+            "agents.show-history", "agents.resume-session", "agents.continue-in-account", "agents.continue-in-agent", "memory.consolidate-now", "memory.run-dream", "memory.bootstrap", "memory.pause-agent", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).
             "agents.show-attention", "agents.show-feed", "agents.approve", "agents.deny", "agents.mark-unread",

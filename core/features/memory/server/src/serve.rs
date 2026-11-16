@@ -6,7 +6,7 @@
 //! the import of past and outside sessions (import.rs), each live event's
 //! arrival time and the file a tool call named (hook_body.rs), Cadex's
 //! handoff (handoff.rs) and Claude's automatic memory folders
-//! (auto_watch.rs).
+//! (auto_watch.rs), and the memory agent (agent/, plan 22 phase G).
 
 use std::fs::File;
 use std::future::IntoFuture;
@@ -133,7 +133,17 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
     let (ended_tx, ended_rx) = tokio::sync::mpsc::unbounded_channel();
     let (maint_tx, maint_rx) = maintenance::channel();
     let lane = maintenance::lane();
-    let routes = built.router.clone();
+    // Plan 22 phase G: the memory agent, its routes and its event middleware.
+    let agent = crate::agent::start(crate::agent::Ctx::new(
+        (built.store.reader.clone(), built.store.writer.clone(), built.wiki.clone(), built.embedder.clone()),
+        built.default_scope,
+        args.data_dir.clone(),
+        args.import_delay,
+        sessions.clone(),
+        in_flight.clone(),
+        cancel.clone(),
+    ));
+    let routes = built.router.clone().merge(crate::agent::routes::router(agent.clone()));
     #[cfg(debug_assertions)]
     let routes = if crate::debug_panic::enabled() { crate::debug_panic::route(routes) } else { routes };
     let inner = routes
@@ -141,6 +151,7 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
         .layer(axum::middleware::from_fn(mcp_scope::scope))
         .layer(from_fn_with_state(ended_tx, handoff::watch))
         .layer(from_fn_with_state(maint_tx, maintenance::watch))
+        .layer(from_fn_with_state(agent, crate::agent::routes::watch))
         .layer(from_fn_with_state(sessions.clone(), sessions::track))
         .layer(from_fn_with_state(import_tx, import::watch))
         .layer(from_fn_with_state(in_flight.clone(), restart::count));

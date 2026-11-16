@@ -26,7 +26,10 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
     (`review.authorship`, ligado; ver `review.md`). Memória: a memória do projeto (`memory.enabled`,
     ligada) e compartilhá-la entre as contas (`memory.shareAcrossAccounts`, ligada; desligada, cada
     conta tem a sua; ver `memory.md`), a consolidação na sessão (`memory.consolidateInSession`,
-    ligada) e o marco do contexto (`memory.consolidateAtContext`, 70%, de 10 a 95). Tarefas: a pasta das tarefas (`worktrees.root`, vazio é ao lado de cada repositório; ver
+    ligada) e o marco do contexto (`memory.consolidateAtContext`, 70%, de 10 a 95); o agente de
+    memória de fundo (`memory.backgroundAgent`, desligado), o teto dele por dia
+    (`memory.dailyBudgetUsd`, US$ 1,00, de 0 a 20) e se as propostas esperam aprovação
+    (`memory.requireApproval`, ligada). Tarefas: a pasta das tarefas (`worktrees.root`, vazio é ao lado de cada repositório; ver
     `worktrees.md`). Manter acordado: como liga e desliga, o modo
     (`power.mode`), manter a tela acesa, ligar ao abrir (`power.onAtLaunch`) e a tampa fechada
     explicada à parte (ver `power.md`). Numa página própria ficou demais (o dono, 2026-10-20).

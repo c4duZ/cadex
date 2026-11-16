@@ -10,9 +10,13 @@
 //! (`POST /workstream/runs?pid=<launcher pid>`) registers the launcher, so
 //! the engine outlives the agent it started until the transcript import and
 //! the finish are done (plan 22 phase E, 2026-11-16).
+//!
+//! A memory agent job (agent/queue.rs) has no process of its own to watch,
+//! so it holds the engine with a counted guard instead (`hold`): queued or
+//! running, it counts as a live session (plan 22 phase G, 2026-11-16).
 
 use std::collections::HashSet;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
@@ -33,6 +37,8 @@ pub(crate) const STARTUP_GRACE: Duration = Duration::from_secs(10);
 
 pub(crate) struct Sessions {
     live: Mutex<HashSet<i32>>,
+    /// Agent jobs holding the engine (`hold`).
+    holds: AtomicUsize,
     ever: AtomicBool,
     changed: Notify,
     watch: Option<ProcWatch>,
@@ -46,6 +52,7 @@ impl Sessions {
             .ok();
         let sessions = Arc::new(Self {
             live: Mutex::new(HashSet::new()),
+            holds: AtomicUsize::new(0),
             ever: AtomicBool::new(false),
             changed: Notify::new(),
             watch,
@@ -101,7 +108,15 @@ impl Sessions {
     }
 
     fn is_empty(&self) -> bool {
-        self.live().is_empty()
+        self.live().is_empty() && self.holds.load(Ordering::SeqCst) == 0
+    }
+
+    /// Keep the engine up until the guard drops, as a live session would.
+    pub(crate) fn hold(self: &Arc<Self>) -> SessionsHold {
+        self.ever.store(true, Ordering::SeqCst);
+        self.holds.fetch_add(1, Ordering::SeqCst);
+        self.changed.notify_one();
+        SessionsHold(self.clone())
     }
 
     /// Cancel `stop` once no session is left (see the module comment).
@@ -130,6 +145,16 @@ impl Sessions {
                 () = stop.cancelled() => return,
             }
         }
+    }
+}
+
+/// See `Sessions::hold`.
+pub(crate) struct SessionsHold(Arc<Sessions>);
+
+impl Drop for SessionsHold {
+    fn drop(&mut self) {
+        self.0.holds.fetch_sub(1, Ordering::SeqCst);
+        self.0.changed.notify_one();
     }
 }
 

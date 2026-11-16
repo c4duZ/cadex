@@ -146,6 +146,9 @@ pub(crate) struct Engine {
     /// For the maintenance jobs (maintenance.rs, plan 22 phase F).
     pub(crate) wiki: Wiki,
     pub(crate) embedder: Option<Arc<dyn Embedder>>,
+    /// The default workspace and project, for the memory agent's consolidator
+    /// (agent/jobs.rs), as upstream serve builds its `Consolidator`.
+    pub(crate) default_scope: (ai_memory_core::WorkspaceId, ai_memory_core::ProjectId),
     /// Lives as long as the engine; `None` unless `--watcher`.
     pub(crate) _watcher: Option<WatcherHandle>,
 }
@@ -214,5 +217,5 @@ pub(crate) async fn build(args: &Args, cancel: &CancellationToken) -> Result<Eng
         .route("/cadex/consolidate", axum::routing::get(crate::consolidate_prompt::handle))
         .layer(DefaultBodyLimit::max(MAX_BODY_BYTES))
         .layer(axum::middleware::from_fn_with_state(auth, require_bearer));
-    Ok(Engine { store, router, model, session_ended, wiki: wiki.clone(), embedder, _watcher: watcher })
+    Ok(Engine { store, router, model, session_ended, wiki: wiki.clone(), embedder, default_scope: (ws, proj), _watcher: watcher })
 }

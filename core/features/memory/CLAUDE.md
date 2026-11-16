@@ -37,7 +37,8 @@
     provedores. Do `HookState`: `record_tool_names` e `index_file_paths` ligados (o nome de cada
     ferramenta, nunca os argumentos; o corpo guarda até 2.000 bytes do que ela devolveu, o padrão
     do upstream, que numa gravação do Claude traz o conteúdo do arquivo; e o caminho relativo ao checkout do arquivo que ela nomeou, para o handoff) e o `profile_notify` com o aviso de "um SessionEnd terminou" que o
-    `server/src/handoff.rs` espera (o worker de perfil, para quem ele existe, não roda aqui).
+    `server/src/handoff.rs` espera (o passo de perfil do agente de memória roda depois do SessionEnd,
+    pelo `server/src/agent/`, só com o agente ligado).
   - `server/src/serve.rs`: o memory.sock (modo 0600) servido pelo axum; uma trava em
     `<data-dir>/engine.lock` garante um engine só por pasta (dois SessionStart juntos não sobem
     dois escritores).
@@ -127,6 +128,31 @@
     sessions/ incluídas, arquivo removido e linha marcada), marca de remoção com mais de 180 dias,
     projeto vazio com mais de 7 dias; sessão parada 48 h é fechada. Fora (pedem IA): o auto-improve,
     o dream, o worker de consolidação e o de perfil.
+  - O agente de memória (fase G, ADR 0029), em `server/src/agent/`: o provedor de IA do upstream
+    (`LlmProvider`) feito com o `claude -p` da conta, para o consolidador, o perfil, o experience, o
+    auto-improve, o dream e o bootstrap do próprio upstream rodarem sem mudança.
+    - `server/src/agent/claude_cli.rs`: a chamada provada em 2026-11-16 (`claude -p --model haiku
+      --max-budget-usd <por chamada> --no-session-persistence --tools "" --strict-mcp-config
+      --mcp-config <vazio> --settings <disableAllHooks> --system-prompt … --output-format json`, o
+      pedido no stdin, numa pasta vazia, sem CLAUDECODE/CLAUDE_CODE_*, com o CLAUDE_CONFIG_DIR da
+      conta do projeto; nunca `--bare`, que pula o keychain do login); sem endereço de provedor.
+    - `server/src/agent/provider.rs` (o `LlmProvider`, que confere o teto antes de cada chamada e
+      registra depois), `server/src/agent/config.rs` (o agent.json que o app grava, lido a cada
+      trabalho; sem arquivo, desligado), `server/src/agent/ledger.rs` (`<data-dir>/agent/ledger.jsonl`,
+      0600: tipo, projeto, custo, versão do Claude Code, modelo; o gasto do dia local),
+      `server/src/agent/queue.rs` (um trabalho por vez, sem repetir, pausa; segura o engine e o
+      reinício enquanto há trabalho), `server/src/agent/jobs.rs` (no SessionEnd ao vivo: consolidar
+      pelo caminho do worker do upstream, que pula a página que o Claude da sessão já consolidou
+      (`consolidated_by: agent`), o perfil, o experience a cada 5 sessões, o auto-improve no máximo
+      de hora em hora por projeto, com propostas pendentes quando memory.requireApproval; no
+      PostCompact, consolidar o que houve; e um dream se não há sessão viva e o Mac está parado há
+      10 min), `server/src/agent/improve.rs` (**cópia** do agendador do auto-improve do upstream,
+      por projeto), `server/src/agent/dream.rs` (o dream e o tempo parado do Mac pelo `ioreg`; o
+      automático para quando o dono volta), `server/src/agent/bootstrap.rs` (a estimativa sem
+      chamar o Claude e o bootstrap do upstream sobre as sessões do projeto) e
+      `server/src/agent/routes.rs` (`GET /cadex/agent/status`, `POST /cadex/agent/pause`,
+      `/cadex/agent/run-dream`, `/cadex/agent/bootstrap[?dry_run=1]`; o bootstrap roda mesmo com o
+      agente desligado, com o mesmo teto) e `server/src/agent/mod.rs`.
   - `server/src/plugin.rs`: `cadex-memory export-plugin <pasta>`, o plugin do Claude Code com as
     skills do próprio upstream (retrieval, durable-pages, handoff, messaging), tiradas do crate;
     o `make app` e o empacotamento o escrevem.
@@ -224,6 +250,10 @@
     `server/tests/maintenance.rs`: um SessionEnd varre o vencido e o frio e um segundo no mesmo dia
     não; a subida varre o que venceu; sem evento, nada; o SessionStart responde rápido durante a
     varredura;
+    `server/tests/agent.rs` (um `claude` falso em `server/tests/common/agent.rs`): desligado, nada; ligado,
+    o SessionEnd consolida pelo falso, com a linha de comando e o ambiente exatos da prova; pausa e
+    teto; a estimativa sem chamar e o bootstrap com o agente desligado; propostas pendentes com
+    aprovação; o dream depois de um SessionEnd só com o Mac parado;
     `server/tests/session_end.rs`: o handoff de uma sessão com 10 edições lista os 10 arquivos, e
     um pânico forçado não perde evento (a fila espera e o engine seguinte a esvazia); ajudas em
     `server/tests/common/mod.rs`.
@@ -237,6 +267,10 @@
     `stop_hook_active`, o hook responde `decision: "block"` com o texto do `/cadex/consolidate`. Um
     prompt que começa com "Consolidate this session into the project memory" (o que o
     memory.consolidate-now cola) recebe o mesmo texto ao lado. Sem a variável, nada.
+  - `agent_client.zig` (fase G): `cadex memory-agent <status|pause|resume|dream|bootstrap> [--cwd]
+    [--dry-run]`, o caminho do app até o agente de memória (o app roda o comando e lê o JSON; não fala
+    com o socket): o token é o CADEX_SESSION_TOKEN que o app dá, do arquivo dele na pasta de tokens;
+    `status` nunca sobe o engine (fora: `{"running":false}`), os outros sobem.
   - `context.zig`: o que o hook devolve além do briefing, como o cliente do upstream: no
     SessionStart `compact` a âncora (`/recap?mode=anchor`, nunca o handoff; nada num subagente),
     num prompt que começa com "reload context" o `/recap`, no SubagentStart o `/brief`.
@@ -288,7 +322,7 @@
 ## Como validar
 - `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs`,
   `server/tests/import.rs`, `server/tests/auto_memory.rs`, `server/tests/marker.rs`,
-  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs` e `server/tests/session_end.rs` (parte do `make check`, em segundos).
+  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs`, `server/tests/agent.rs` e `server/tests/session_end.rs` (parte do `make check`, em segundos).
 - `make memory-eval MODELS=<pasta>`: as 30 perguntas, só texto contra híbrida (`../../../tools/memory_eval.py`).
 - `make core-test`: os testes do cliente (eventos, query com e sem workspace, fila, respostas HTTP,
   sem token).

@@ -150,6 +150,11 @@ public enum SettingsFile {
             if let percent = reader.number(s, "memory.consolidateAtContext") {
                 settings.memory.consolidateAtContext = min(max(Int(percent), 10), 95)
             }
+            settings.memory.backgroundAgent = reader.bool(s, "memory.backgroundAgent") ?? settings.memory.backgroundAgent
+            if let budget = reader.number(s, "memory.dailyBudgetUsd") {
+                settings.memory.dailyBudgetUsd = min(max(budget, 0), 50)
+            }
+            settings.memory.requireApproval = reader.bool(s, "memory.requireApproval") ?? settings.memory.requireApproval
         }
         if let s = reader.section(root, "ssh") {
             settings.ssh.ping = reader.bool(s, "ssh.ping") ?? settings.ssh.ping
@@ -199,7 +204,9 @@ public enum SettingsFile {
             "ssh": ["ping": s.ssh.ping],
             "review": ["authorship": s.review.authorship],
             "memory": ["enabled": s.memory.enabled, "shareAcrossAccounts": s.memory.shareAcrossAccounts,
-                       "consolidateInSession": s.memory.consolidateInSession, "consolidateAtContext": s.memory.consolidateAtContext],
+                       "consolidateInSession": s.memory.consolidateInSession, "consolidateAtContext": s.memory.consolidateAtContext,
+                       "backgroundAgent": s.memory.backgroundAgent, "dailyBudgetUsd": s.memory.dailyBudgetUsd,
+                       "requireApproval": s.memory.requireApproval],
             "git": ["reviewContextLines": s.git.reviewContextLines, "reviewWrap": s.git.reviewWrap,
                     "reviewShowWhitespace": s.git.reviewShowWhitespace],
             "worktrees": ["root": s.worktrees.root, "setupHooks": s.worktrees.setupHooks],

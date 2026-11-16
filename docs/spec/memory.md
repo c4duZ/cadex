@@ -183,10 +183,24 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   o lint por regras escreve `_lint/report.md` em cada projeto. Ao subir, gera os vetores que faltam.
 
 ### Agente de memória de fundo
-- Desligado por padrão (memory.backgroundAgent). Ligado, faz o que não cabe na sessão aberta
-  (consolidar sessão parada, propor regras, reorganizar a wiki com o computador parado) com o
-  `claude -p` da conta, com teto por dia (memory.dailyBudgetUsd). Propostas esperam aprovação
-  (memory.requireApproval). Ver `docs/adr/0029-memory-agent.md`.
+- Desligado por padrão (memory.backgroundAgent). Ligado, faz o que não cabe na sessão aberta com o
+  `claude -p` da conta do projeto (Haiku, sem ferramentas, sem hooks, sem guardar sessão na conta,
+  com teto por chamada), sempre por evento: quando uma sessão termina, consolida a página dela (a
+  não ser que o próprio Claude da sessão já tenha consolidado), atualiza o perfil de trabalho e, no
+  ritmo do ai-memory, propõe regras e lições (auto-improve, experience); depois de compactar,
+  consolida o que houve; com o Mac parado há 10 minutos e nenhuma sessão aberta, reorganiza a wiki
+  (dream), e para quando o dono volta. São os passos do próprio ai-memory, com o Claude da conta no
+  lugar de um provedor com chave. Ver `docs/adr/0029-memory-agent.md`.
+- Teto por dia (memory.dailyBudgetUsd, US$ 1,00): passou, nada mais roda no dia; cada trabalho fica
+  registrado com custo e versão do Claude Code. Propostas esperam aprovação na página Memory
+  (memory.requireApproval, ligada). "Pause or Resume the Memory Agent" (memory.pause-agent) segura a
+  fila; "Reorganize Memory Now" (memory.run-dream) pede um dream.
+- "Organize History with AI…" (memory.bootstrap) mostra antes a estimativa de custo (folgada) e só
+  roda no sim, mesmo com o agente desligado, com o mesmo teto: o Claude da conta lê as sessões
+  importadas e escreve as decisões, armadilhas e conceitos (o bootstrap do ai-memory).
+- A tela de configurações avisa que os Termos de Consumidor da Anthropic (§3.7) restringem o uso
+  automatizado da assinatura e sugere uma chave de API no Claude Code da conta (apiKeyHelper); o
+  Cadex nunca guarda nem lê a chave.
 
 ### Página Memory
 - Página da barra lateral (ícone Phosphor), memory.show. A wiki em árvore, aberta e editada como

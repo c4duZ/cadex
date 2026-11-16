@@ -468,6 +468,21 @@ refaz o crate a partir dela.
   - Fila no `cadex-memory`, um trabalho por vez, teto por dia (memory.dailyBudgetUsd), tudo
     registrado com custo. Configuração memory.backgroundAgent (desligada). Comandos
     memory.run-dream, memory.bootstrap, memory.pause-agent.
+  - **Como ficou (2026-11-16), com o máximo de compatibilidade:** a prova (script fora do app, conta
+    bkdg) passou: `claude -p` com o prompt de consolidação do upstream devolveu o JSON exato que o
+    consolidador espera, por US$ 0,00075 em 3 s, sem sessão guardada na conta (`--bare` não serve: pula
+    o keychain do login). Daí o provedor de IA do upstream feito com esse `claude -p`
+    (`core/features/memory/server/src/agent/`), para os passos do upstream rodarem sem mudança:
+    consolidação (o caminho do worker, que pula página já consolidada na sessão), perfil,
+    experience, auto-improve (propostas pendentes com aprovação), dream (só com o Mac parado e sem
+    sessão; o automático para quando o dono volta) e bootstrap; fila de um por vez, teto por dia e
+    por chamada, registro com custo. O app grava o agent.json (apps/macos/features/memory/MemoryAgent.swift) e fala com o
+    engine pelo `cadex memory-agent` (`core/features/memory/agent_client.zig`), com um token próprio.
+  - **Teste real** (conta bkdg, Haiku, US$ 0,0043 no total): uma sessão simulada terminou e o engine
+    consolidou a página dela (US$ 0,0011, fiel, sem inventar) e passou o perfil (US$ 0,0005); o
+    bootstrap estimou US$ 0,09 (folgado, de propósito) e custou US$ 0,0017, escrevendo uma decisão,
+    uma armadilha e um conceito no formato do upstream; o status mostrou gasto, teto e a versão do
+    Claude Code; nenhuma sessão ficou na conta. Achado e corrigido: o gasto zerado aparecia como -0.0.
 - **H. Página Memory.** Página da barra lateral (ícone Phosphor):
   - A wiki em árvore, aberta e editada como Markdown (gravando pelo engine); histórico pelo
     `git-history`.

@@ -87,6 +87,7 @@ final class SettingsBridge {
         Self.applyAgentTools(settings.agentTools.enabled)
         AuthorshipHub.apply(settings.review.authorship)
         MemoryWiring.apply(settings.memory)
+        MemoryWiring.writeAgentConfig(settings.memory, agents: settings.agents)
         onComputerUse?(settings.computerUse)
         WorktreesController.shared.rootSetting = settings.worktrees.root
         WorktreesController.shared.setupHooks = settings.worktrees.setupHooks.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }

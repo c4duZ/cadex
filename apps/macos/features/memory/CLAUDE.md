@@ -35,6 +35,11 @@
   Stop seguinte; `consolidateNowText` é o que o memory.consolidate-now cola.
   O `perSession` da parte, quando quem abre a sessão sabe a pasta dela, põe `autoMemoryDirectory`
   na pasta do projeto (`MemoryProject.swift`); sem pasta conhecida, fica a padrão do Claude.
+- `MemoryAgent.swift` (fase G, ADR 0029): `Config` (o que o dono escolheu: ligado, teto por dia,
+  aprovação, a conta padrão e as de cada projeto, o `claude`) e `write`, o `<memória>/agent.json`
+  (0600) que o engine lê a cada trabalho; `appToken`, o token do próprio app na pasta de tokens
+  (memory-agent.token, feito uma vez); `environment` e `run`, o `cadex memory-agent` fora da linha
+  principal, com o JSON de volta.
 - `MemoryProject.swift`: a regra da chave do projeto (a raiz do repositório principal lida dos
   arquivos `.git`: a worktree e a subpasta dão a do checkout principal; fora do git, a própria
   pasta; os 16 primeiros hex do SHA-256 do caminho), a mesma de

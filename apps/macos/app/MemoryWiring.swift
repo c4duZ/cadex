@@ -28,6 +28,27 @@ enum MemoryWiring {
     }
 }
 
+extension MemoryWiring {
+    /// What the memory agent reads at each job (ADR 0029): on only with the
+    /// memory and the agent on; the accounts as Agents sets them.
+    static func writeAgentConfig(_ memory: Settings.Memory, agents: Settings.Agents) {
+        let config = MemoryAgent.Config(enabled: memory.enabled && memory.backgroundAgent, dailyBudgetUsd: memory.dailyBudgetUsd,
+                                        requireApproval: memory.requireApproval,
+                                        configDir: MemoryAgent.accountFolder(agents.activeAccount),
+                                        projectAccounts: agents.projectAccounts.compactMapValues { MemoryAgent.accountFolder($0) },
+                                        claude: MemoryAgent.findClaude())
+        MemoryAgent.write(config, folder: MemoryKit.folder())
+    }
+
+    /// `cadex memory-agent <words>` with the app's token; nil without `cadex`.
+    static func runAgent(_ words: [String], done: @escaping @MainActor @Sendable (Int32, [String: Any]) -> Void) {
+        guard let tools = SessionKit.shared.toolsPath, let token = MemoryAgent.appToken(tokens: SessionKit.tokensFolder) else {
+            return done(1, ["error": "cadex is missing"])
+        }
+        MemoryAgent.run(tools: tools, words: words, environment: MemoryAgent.environment(engine: engine, token: token), done: done)
+    }
+}
+
 extension AppDelegate {
     /// Once per version, with memory on: the migrations and macOS's check
     /// of the new binary happen now, not in the first SessionStart's 1 s.
@@ -54,7 +75,59 @@ extension WindowSession {
     func memoryCommands() -> [Command] {
         [Command(id: "memory.consolidate-now", title: T("Consolidate Memory Now", "Consolidar a memória agora"),
                  keywords: ["memory", "consolidate", "save", "lessons", "memória", "consolidar", "salvar"], category: .terminal,
-                 action: .run { [weak self] in self?.consolidateNow() })]
+                 action: .run { [weak self] in self?.consolidateNow() }),
+         // The memory agent (ADR 0029): each asks the engine through `cadex memory-agent`.
+         Command(id: "memory.bootstrap", title: T("Organize History with AI…", "Organizar o histórico com IA…"),
+                 keywords: ["memory", "history", "bootstrap", "organize", "memória", "histórico", "organizar"], category: .terminal,
+                 action: .run { [weak self] in self?.organizeHistory() }),
+         Command(id: "memory.run-dream", title: T("Reorganize Memory Now (Dream)", "Reorganizar a memória agora (dream)"),
+                 keywords: ["memory", "dream", "reorganize", "memória", "reorganizar"], category: .terminal,
+                 action: .run { [weak self] in self?.memoryAgentAct(["dream", "--cwd", self?.projectRoot ?? NSHomeDirectory()]) }),
+         Command(id: "memory.pause-agent", title: T("Pause or Resume the Memory Agent", "Pausar ou retomar o agente de memória"),
+                 keywords: ["memory", "agent", "pause", "resume", "memória", "agente", "pausar", "retomar"], category: .terminal,
+                 action: .run { [weak self] in self?.togglePauseAgent() })]
+    }
+
+    /// Bootstrap: the estimate first, then only on the owner's yes (ADR 0029).
+    private func organizeHistory() {
+        guard settings.store.settings.memory.enabled else { return NSSound.beep() }
+        let cwd = projectRoot ?? NSHomeDirectory()
+        MemoryWiring.runAgent(["bootstrap", "--cwd", cwd, "--dry-run"]) { [weak self] code, answer in
+            guard let self, code == 0 else { return self?.agentAlert(T("The memory agent did not answer", "O agente de memória não respondeu"), answer) ?? () }
+            let usd = (answer["estimate_usd"] as? NSNumber)?.doubleValue ?? 0
+            let sessions = (answer["sessions"] as? NSNumber)?.intValue ?? 0
+            let alert = NSAlert()
+            alert.messageText = T("Organize this project's history with AI?", "Organizar o histórico deste projeto com IA?")
+            alert.informativeText = T("Your account's Claude reads the \(sessions) imported sessions and writes the decisions, gotchas and concepts it finds. Estimate: up to US$ \(String(format: "%.2f", usd)), within the daily cap.",
+                                      "O Claude da sua conta lê as \(sessions) sessões importadas e escreve as decisões, armadilhas e conceitos que achar. Estimativa: até US$ \(String(format: "%.2f", usd)), dentro do teto do dia.")
+            alert.addButton(withTitle: T("Organize", "Organizar"))
+            alert.addButton(withTitle: T("Cancel", "Cancelar"))
+            alert.beginSheetModal(for: self.window) { response in
+                guard response == .alertFirstButtonReturn else { return }
+                self.memoryAgentAct(["bootstrap", "--cwd", cwd])
+            }
+        }
+    }
+
+    private func togglePauseAgent() {
+        MemoryWiring.runAgent(["status"]) { [weak self] _, status in
+            let paused = status["paused"] as? Bool ?? false
+            self?.memoryAgentAct([paused ? "resume" : "pause"])
+        }
+    }
+
+    private func memoryAgentAct(_ words: [String]) {
+        guard settings.store.settings.memory.enabled else { return NSSound.beep() }
+        MemoryWiring.runAgent(words) { [weak self] code, answer in
+            if code != 0 { self?.agentAlert(T("The memory agent refused", "O agente de memória recusou"), answer) }
+        }
+    }
+
+    private func agentAlert(_ title: String, _ answer: [String: Any]) {
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = answer["error"] as? String ?? ""
+        alert.beginSheetModal(for: window)
     }
 
     private func consolidateNow() {

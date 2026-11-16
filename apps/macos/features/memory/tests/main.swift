@@ -109,6 +109,24 @@ let exitCode = await Checks.run([
         expect(!MemoryKit.requestConsolidation(sessionID: "../x", environment: ["CADEX_MEMORY_DIR": dir]), "no path tricks")
         expect(MemoryKit.consolidateNowText.hasPrefix("Consolidate this session into the project memory"), "the hook's asked_prefix")
     }),
+    ("the memory agent: the config the engine reads, the accounts as folders, the app's own token", {
+        expect(MemoryAgent.accountFolder("", home: "/U") == nil && MemoryAgent.accountFolder("~/.claude", home: "/U") == nil)
+        expect(MemoryAgent.accountFolder("~/.claude-work", home: "/U") == "/U/.claude-work")
+        expect(MemoryAgent.accountFolder("/Abs/acct", home: "/U") == "/Abs/acct")
+        let dir = scratch()
+        defer { try? fm.removeItem(atPath: dir) }
+        let config = MemoryAgent.Config(enabled: false, dailyBudgetUsd: 1, requireApproval: true, configDir: nil,
+                                        projectAccounts: ["/r": "/U/.claude-work"], claude: "/b/claude")
+        expect(MemoryAgent.write(config, folder: dir))
+        let read = (try? JSONSerialization.jsonObject(with: Data(contentsOf: URL(fileURLWithPath: dir + "/agent.json")))) as? [String: Any] ?? [:]
+        expect(read["enabled"] as? Bool == false && read["config_dir"] is NSNull && read["claude"] as? String == "/b/claude", "\(read)")
+        expect((read["project_accounts"] as? [String: String])?["/r"] == "/U/.claude-work")
+        expect(((try? fm.attributesOfItem(atPath: dir + "/agent.json"))?[.posixPermissions] as? Int) == 0o600)
+        let token = MemoryAgent.appToken(tokens: dir + "/tokens")
+        expect(token?.count == 64 && MemoryAgent.appToken(tokens: dir + "/tokens") == token, "made once, then reused")
+        let env = MemoryAgent.environment(engine: "/e", token: "t", base: ["CADEX_MEMORY_DIR": "/m", "CLAUDECODE": "1", "PATH": "/bin"])
+        expect(env["CADEX_SESSION_TOKEN"] == "t" && env["CADEX_MEMORY_BIN"] == "/e" && env["CLAUDECODE"] == nil && env["PATH"] == "/bin")
+    }),
     ("the engine is found in the bundle, else in the debug build of make app", {
         let dir = scratch()
         defer { try? fm.removeItem(atPath: dir) }

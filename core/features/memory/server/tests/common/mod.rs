@@ -4,6 +4,7 @@
 
 #![allow(dead_code)]
 
+pub mod agent;
 pub mod bench;
 
 use std::io::{Read, Write};

@@ -75,6 +75,7 @@
   palavras do kit) e `--codex-kit-arg` (o servidor MCP da memória por `-c mcp_servers.cadex…`, com o
   token no env dele); o launcher usa só o do agente que roda. Memória desligada (sem
   CADEX_MEMORY_BIN no kit): diz e sai.
+- Plano 22, fase G: `cadex memory-agent …` só despacha para a feature memory (`../memory/agent_client.zig`).
 - O build (`../../build.zig`, `addCli`) instala `zig-out/bin/cadex` só no Mac; o empacotamento o põe em
   Contents/Helpers.
 
