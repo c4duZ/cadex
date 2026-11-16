@@ -79,8 +79,9 @@ Claude Code sugerida. A página de legal and compliance do Claude Code (lida em 
   sabe do agente pelos hooks, pelo OSC 7501 e pelo que o agente reporta (abaixo). O motor
   stream-json fica para outra ADR. Nada de proxy, token ou login tocado (ADR 0021).
 - **Aba ou `--bg`:** a aba é o padrão (o dono vê e responde ali); rodar com `claude --bg` e
-  acompanhar pelo `claude agents --json` é uma opção por execução, decidida na fase B do plano 24
-  com o mesmo prompt por argv e o mesmo kit.
+  acompanhar pelo `claude agents --json` foi pesado na fase B do plano 24 (2026-11-16) e ficou de
+  fora por ora: sempre aba, até um teste mostrar que os hooks e a status line do kit chegam a uma
+  sessão em segundo plano (o registro guarda o modo, para entrar sem mudar o banco).
 
 ### A lista de comandos do agente, ampliada (ADR 0024)
 Entram seis comandos, só aceitos de uma sessão que tem `CADEX_DISPATCH_ID` (um despacho de uma

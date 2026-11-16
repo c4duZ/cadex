@@ -100,6 +100,18 @@ docs/adr/0031-run-on-remote.md (plano 23), `docs/adr/0004-clean-rewrite.md`,
   Windows precisar, o modelo desce para o núcleo. Configurações orchestration.enabled (desligada),
   orchestration.automations (desligada), orchestration.maxAgents (padrão 6),
   orchestration.maxDepth (padrão 2).
+  - No código em 2026-11-16 (`apps/macos/features/orchestration/CLAUDE.md`): os registros
+    (corrida e concorrentes, execução, tarefa, despacho, mensagem, automação e histórico, com
+    `SessionLink`: a sessão do kit, o id do Claude e o transcript), as regras puras em `RunGraph`,
+    o banco (uma tabela por tipo, o JSON do registro com o pai indexado, 0600 em pasta 0700), a vida
+    da execução (`RunBook`, `RunInbox`), `RaceBook` e `AutomationBook`, e o controlador, que só abre o
+    banco no primeiro uso com a feature ligada. O kit ganhou `sessionEnvironment` (variáveis só de
+    uma sessão, na `env` do `--settings`, sem vencer o token do kit) para o CADEX_DISPATCH_ID. As
+    configurações, com as quatro do plano e as quatro da fase A, na seção "Many Agents" de General.
+    Decidido aqui: aba sempre; `claude --bg` fica de fora até um teste mostrar que os hooks e a
+    status line do kit chegam a uma sessão em segundo plano. Testado: 15 testes do modelo (banco em
+    memória e em arquivo temporário), o das configurações e o do kit; o app compila. **Falta**: nada
+    abre agente ainda (fases C a E) e o app não foi aberto para ver a seção nas Configurações.
 - **C. Corrida: a mesma tarefa em N agentes.**
   - "Nova corrida" (orchestration.new-race): prompt, ponto de partida, N concorrentes Claude
     (conta, modelo, e máquina pelo mínimo do "Rodar em" do plano 23). Cria N worktrees pelo

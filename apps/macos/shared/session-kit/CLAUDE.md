@@ -24,7 +24,9 @@
   CLAUDE_CODE_CHILD_SESSION herdado desligou o transcript, 2026-11-14) e, na conta padrão, um
   CLAUDE_CONFIG_DIR solto. `contribute`/`withdraw` com um `SessionKitPart`. `findTools` acha o `cadex`
   em Contents/Helpers ou, no `make run`, em `core/zig-out/bin`. `accountKey` é a regra do nome do
-  arquivo de uso, igual à do `cadex statusline`.
+  arquivo de uso, igual à do `cadex statusline`. `sessionEnvironment` (plano 24, fase B): variáveis
+  só daquela sessão, na `env` do `--settings` (o CADEX_DISPATCH_ID de um despacho da
+  orchestration), nunca digitadas; os nomes do kit vencem as delas.
 - `SessionKitLaunch.swift` (plano 22, fase C): `launch` devolve o kit em pedaços (`SessionKitLaunch`:
   a sessão, os nomes a tirar do ambiente, a pasta primeira no PATH e `--settings`/`--plugin-dir`/
   `--mcp-config`); `claudeCommand` é esses pedaços compostos. `typedLaunch` é o kit do `claude`
@@ -60,4 +62,5 @@
   do dono, MCP só para as outras contas e com 0600, contribuições somadas (com agents.stateHooks desligada
   também) e por conta, aspas só quando precisa; os pedaços iguais ao comando composto, o
   `--settings` do dono juntado num arquivo só e as recusas; o `perSession` com a pasta da sessão
-  (aberta pelo Cadex ou o `claude` digitado) e sem nada quando ela não é conhecida.
+  (aberta pelo Cadex ou o `claude` digitado) e sem nada quando ela não é conhecida; a variável de
+  uma sessão só nela, fora do comando, e sem trocar o token do kit.

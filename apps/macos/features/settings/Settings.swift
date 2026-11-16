@@ -270,6 +270,7 @@ public struct Settings: Equatable, Sendable {
     public var git = Git()
     public var review = Review()
     public var memory = Memory()
+    public var orchestration = Orchestration()
     public var worktrees = Worktrees()
     public var agentTools = AgentTools()
     public var computerUse = ComputerUse()

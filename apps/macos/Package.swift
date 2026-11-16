@@ -107,6 +107,9 @@ let package = Package(
         // The tailnet's machines, by the owner's own Tailscale (docs/spec/machines.md, ADR 0030).
         .target(name: "Machines", dependencies: ["CommandPalette", "Icons", "Menus", "Strings", "UILooks"], path: "features/machines",
                 exclude: ["CLAUDE.md", "tests"], swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]),
+        // Races, runs and automations: many agents at once (docs/spec/orchestration.md, ADR 0033).
+        .target(name: "Orchestration", path: "features/orchestration", exclude: ["CLAUDE.md", "tests"],
+                linkerSettings: [.linkedLibrary("sqlite3")]),
         // What a session opened by Cadex gets: --settings, --plugin-dir,
         // --mcp-config and the tab's environment (docs/adr/0021-cadex-managed-accounts.md).
         .target(
@@ -440,24 +443,12 @@ let package = Package(
             path: "shared/strings/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
-        .executableTarget(
-            name: "MenusTests",
-            dependencies: ["Menus", "Checks"],
-            path: "shared/menus/tests",
-            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
-        ),
-        .executableTarget(
-            name: "UILooksTests",
-            dependencies: ["UILooks", "Checks"],
-            path: "shared/looks/tests",
-            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
-        ),
-        .executableTarget(
-            name: "IconsTests",
-            dependencies: ["Icons", "Checks"],
-            path: "shared/icons/tests",
-            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
-        ),
+        .executableTarget(name: "MenusTests", dependencies: ["Menus", "Checks"], path: "shared/menus/tests",
+                          linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
+        .executableTarget(name: "UILooksTests", dependencies: ["UILooks", "Checks"], path: "shared/looks/tests",
+                          linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
+        .executableTarget(name: "IconsTests", dependencies: ["Icons", "Checks"], path: "shared/icons/tests",
+                          linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
         .executableTarget(
             name: "WorktreesTests",
             dependencies: ["Worktrees", "CCadex", "Checks"],
@@ -479,12 +470,13 @@ let package = Package(
                           linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
         .executableTarget(name: "MachinesTests", dependencies: ["Machines", "Checks"], path: "features/machines/tests",
                           linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
+        .executableTarget(name: "OrchestrationTests", dependencies: ["Orchestration", "Checks"], path: "features/orchestration/tests"),
         .executableTarget(name: "SessionKitTests", dependencies: ["SessionKit", "Checks"], path: "shared/session-kit/tests"),
         .executableTarget(name: "TempImagesTests", dependencies: ["TempImages", "Checks"], path: "shared/temp-images/tests"),
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "AgentTools", "ComputerUse", "Memory", "Review", "SessionKit", "Worktrees", "SSH", "Machines", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "AgentTools", "ComputerUse", "Memory", "Review", "SessionKit", "Worktrees", "SSH", "Machines", "Orchestration", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

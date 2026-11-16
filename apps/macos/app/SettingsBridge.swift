@@ -5,6 +5,7 @@ import Worktrees
 import AppKit
 import Settings
 import Machines
+import Orchestration
 import SSH
 import Tabs
 import Terminal
@@ -83,6 +84,7 @@ final class SettingsBridge {
         SSHController.shared.pings = settings.ssh.ping
         MachinesController.shared.isEnabled = settings.machines.tailscale
         MachinesController.shared.acceptRemote = settings.machines.acceptRemote
+        Self.applyOrchestration(settings.orchestration)
         AgentsController.shared.names = settings.agents.accountNames.reduce(into: [:]) { $0[Self.expand($1.key)] = $1.value }
         AgentsController.shared.hidden = Set(settings.agents.hiddenAccounts.map(Self.expand))
         AgentHistoryController.shared.isEnabled = settings.agents.history
@@ -174,5 +176,21 @@ final class SettingsBridge {
         kit.contribute("agent-tools", SessionKitPart(settings: ["permissions": ["allow": reads]],
                                                      pluginDirs: AgentToolsPlugin.folder.map { [$0] } ?? [],
                                                      mcpServers: ["cadex": ["command": tools, "args": ["mcp"]]]))
+    }
+
+    /// orchestration.* (plan 24 phase B): the switches and caps. Off, the
+    /// state stays closed (OrchestrationController).
+    static func applyOrchestration(_ o: Settings.Orchestration) {
+        let controller = OrchestrationController.shared
+        var limits = OrchestrationController.Limits()
+        limits.maxAgents = o.maxAgents
+        limits.maxDepth = o.maxDepth
+        limits.heartbeatMinutes = o.heartbeatMinutes
+        limits.keepAwakeDuringRuns = o.keepAwakeDuringRuns
+        limits.defaultBudgetUsd = o.defaultBudgetUsd
+        limits.defaultMaxMinutes = o.defaultMaxMinutes
+        controller.limits = limits
+        controller.isEnabled = o.enabled
+        controller.automationsEnabled = o.automations
     }
 }

@@ -143,6 +143,8 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
 - Corridas, execuções, tarefas, despachos, mensagens, automações e o histórico ficam num SQLite do
   sistema em `~/Library/Application Support/Cadex/orchestration/state.sqlite`, com o id da sessão
   e o caminho do transcript de cada despacho. Aberto só com a feature ligada.
+- Todo agente da feature roda numa aba; `claude --bg` fica de fora até um teste mostrar que os
+  hooks e a status line do kit chegam a uma sessão em segundo plano (fase B, 2026-11-16).
 
 ## Estados
 - **Desligada**: o ⌘K mostra só "Turn On Agent Orchestration"; a página explica e oferece ligar.
@@ -173,8 +175,9 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
 ## Critérios de aceite
 - [ ] Com orchestration.enabled desligada, nenhum agente é aberto com prompt, nenhum banco aberto,
       nenhum timer e nenhum LaunchAgent (`ps`, `lsof`, `launchctl print`).
-- [ ] Testes do modelo com banco temporário: dependências tornando tarefas prontas, ciclo recusado,
-      profundidade máxima, despacho órfão (o agente saiu sem reportar).
+- [x] Testes do modelo com banco temporário: dependências tornando tarefas prontas, ciclo recusado,
+      profundidade máxima, despacho órfão (o agente saiu sem reportar). (OrchestrationTests,
+      2026-11-16, com portões, parar em cadeia, teto de agentes e a caixa de entrada.)
 - [ ] Uma corrida de 3 num repositório de teste cria 3 worktrees do mesmo commit, 3 abas com o
       prompt e o quadro com os três estados e custos; "Compare" mostra o diff entre duas; escolher o
       vencedor manda as outras worktrees para a Lixeira e deixa as branches.

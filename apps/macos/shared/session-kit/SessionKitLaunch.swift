@@ -30,13 +30,14 @@ extension SessionKit {
     /// when known (the parts' `perSession`).
     public func launch(configDir: String?, arguments: [String] = [], session reused: String? = nil, cwd: String? = nil,
                        defaultClaudeJSON: String = FileManager.default.homeDirectoryForCurrentUser.path + "/.claude.json",
-                       owner: [String: Any]? = nil) -> SessionKitLaunch {
+                       owner: [String: Any]? = nil, sessionEnvironment: [String: String] = [:]) -> SessionKitLaunch {
         let accountDir = configDir ?? FileManager.default.homeDirectoryForCurrentUser.path + "/.claude"
         var args: [String] = []
         let session = reused ?? UUID().uuidString.lowercased()
         let token = reused.flatMap(existingToken) ?? writeToken(session: session)
         writeArguments(arguments, session: session)
-        if let settings = writeSettings(session: session, token: token, accountDir: accountDir, cwd: cwd, owner: owner) { args += ["--settings", settings] }
+        if let settings = writeSettings(session: session, token: token, accountDir: accountDir, cwd: cwd, owner: owner,
+                                       sessionEnvironment: sessionEnvironment) { args += ["--settings", settings] }
         for dir in parts.values.flatMap(\.pluginDirs).sorted() { args += ["--plugin-dir", dir] }
         if let mcp = writeMCP(key: Self.accountKey(accountDir), isDefault: configDir == nil, defaultClaudeJSON: defaultClaudeJSON) { args += ["--mcp-config", mcp] }
         return SessionKitLaunch(session: session, unset: unsetNames(isDefault: configDir == nil),

@@ -92,6 +92,19 @@ let exitCode = await Checks.run([
         let (bad, wrong) = SettingsFile.read(Data(#"{"machines": {"tailscale": 1, "users": ["dev"]}}"#.utf8))
         expect(bad.machines.tailscale && bad.machines.users.isEmpty && wrong.count == 2, "\(wrong)")
     }),
+    ("orchestration: off by default, kept across a write, numbers bounded", {
+        let defaults = SettingsFile.read(Data("{}".utf8)).0.orchestration
+        expect(!defaults.enabled && !defaults.automations && defaults.maxAgents == 6 && defaults.maxDepth == 2)
+        expect(defaults.heartbeatMinutes == 10 && defaults.keepAwakeDuringRuns && defaults.defaultBudgetUsd == 5 && defaults.defaultMaxMinutes == 60)
+        var settings = Settings()
+        settings.orchestration.enabled = true
+        settings.orchestration.maxAgents = 3
+        settings.orchestration.defaultBudgetUsd = 2.5
+        let (read, problems) = SettingsFile.read(SettingsFile.write(settings))
+        expect(problems.isEmpty && read.orchestration == settings.orchestration, "\(read.orchestration) \(problems)")
+        let (wild, _) = SettingsFile.read(Data(#"{"orchestration": {"maxAgents": 500, "maxDepth": -3, "defaultBudgetUsd": 0}}"#.utf8))
+        expect(wild.orchestration.maxAgents == 20 && wild.orchestration.maxDepth == 0 && wild.orchestration.defaultBudgetUsd == 0.1)
+    }),
     ("the memory is on and shared across accounts unless the file says otherwise", {
         let defaults = SettingsFile.read(Data("{}".utf8)).0.memory
         expect(defaults.enabled && defaults.shareAcrossAccounts && defaults.consolidateInSession && defaults.consolidateAtContext == 70)

@@ -120,9 +120,14 @@ public final class SessionKit {
     /// back, plan 19 phase F): its token stays, so the app still knows it.
     /// `cwd`: the folder the session runs in, when the caller knows it (the
     /// parts' `perSession`).
+    /// `sessionEnvironment`: variables for this session only, in the
+    /// `--settings` env (a dispatch's CADEX_DISPATCH_ID, plan 24); the kit's
+    /// own names win over them.
     public func claudeCommand(configDir: String?, arguments: [String] = [], session reused: String? = nil, cwd: String? = nil,
-                              defaultClaudeJSON: String = FileManager.default.homeDirectoryForCurrentUser.path + "/.claude.json") -> String {
-        let kit = launch(configDir: configDir, arguments: arguments, session: reused, cwd: cwd, defaultClaudeJSON: defaultClaudeJSON)
+                              defaultClaudeJSON: String = FileManager.default.homeDirectoryForCurrentUser.path + "/.claude.json",
+                              sessionEnvironment: [String: String] = [:]) -> String {
+        let kit = launch(configDir: configDir, arguments: arguments, session: reused, cwd: cwd, defaultClaudeJSON: defaultClaudeJSON,
+                         sessionEnvironment: sessionEnvironment)
         return Self.compose(unset: kit.unset, configDir: configDir, arguments: kit.arguments + arguments, pathFirst: kit.pathFirst)
     }
 

@@ -159,6 +159,19 @@ public enum SettingsFile {
         if let s = reader.section(root, "ssh") {
             settings.ssh.ping = reader.bool(s, "ssh.ping") ?? settings.ssh.ping
         }
+        if let s = reader.section(root, "orchestration") {
+            var o = settings.orchestration
+            o.enabled = reader.bool(s, "orchestration.enabled") ?? o.enabled
+            o.automations = reader.bool(s, "orchestration.automations") ?? o.automations
+            o.keepAwakeDuringRuns = reader.bool(s, "orchestration.keepAwakeDuringRuns") ?? o.keepAwakeDuringRuns
+            // Bounds: at least 1 agent and 1 level, and a cap that is a cap.
+            if let n = reader.number(s, "orchestration.maxAgents") { o.maxAgents = min(max(Int(n), 1), 20) }
+            if let n = reader.number(s, "orchestration.maxDepth") { o.maxDepth = min(max(Int(n), 0), 5) }
+            if let n = reader.number(s, "orchestration.heartbeatMinutes") { o.heartbeatMinutes = min(max(Int(n), 1), 120) }
+            if let n = reader.number(s, "orchestration.defaultBudgetUsd") { o.defaultBudgetUsd = min(max(n, 0.1), 100) }
+            if let n = reader.number(s, "orchestration.defaultMaxMinutes") { o.defaultMaxMinutes = min(max(Int(n), 1), 24 * 60) }
+            settings.orchestration = o
+        }
         if let s = reader.section(root, "machines") {
             settings.machines.tailscale = reader.bool(s, "machines.tailscale") ?? settings.machines.tailscale
             settings.machines.acceptRemote = reader.bool(s, "machines.acceptRemote") ?? settings.machines.acceptRemote
@@ -212,6 +225,10 @@ public enum SettingsFile {
             "ssh": ["ping": s.ssh.ping],
             "machines": ["tailscale": s.machines.tailscale, "acceptRemote": s.machines.acceptRemote, "users": s.machines.users],
             "review": ["authorship": s.review.authorship],
+            "orchestration": ["enabled": s.orchestration.enabled, "automations": s.orchestration.automations,
+                              "maxAgents": s.orchestration.maxAgents, "maxDepth": s.orchestration.maxDepth,
+                              "heartbeatMinutes": s.orchestration.heartbeatMinutes, "keepAwakeDuringRuns": s.orchestration.keepAwakeDuringRuns,
+                              "defaultBudgetUsd": s.orchestration.defaultBudgetUsd, "defaultMaxMinutes": s.orchestration.defaultMaxMinutes],
             "memory": ["enabled": s.memory.enabled, "shareAcrossAccounts": s.memory.shareAcrossAccounts,
                        "consolidateInSession": s.memory.consolidateInSession, "consolidateAtContext": s.memory.consolidateAtContext,
                        "backgroundAgent": s.memory.backgroundAgent, "dailyBudgetUsd": s.memory.dailyBudgetUsd,

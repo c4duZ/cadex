@@ -33,6 +33,19 @@ import Foundation
         else { return expect(false, "refused") }
         expect((json(typed.arguments[1])["where"] as? String)?.hasSuffix("@/w/tab") == true, "the tab's folder")
     }),
+    ("a launch's own variables (a dispatch's CADEX_DISPATCH_ID) reach only that session, under the kit's names", {
+        let dir = scratch()
+        defer { try? fm.removeItem(atPath: dir) }
+        let kit = SessionKit(folder: dir + "/kit", toolsPath: "/H/cadex", environment: [:])
+        let command = kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json",
+                                        sessionEnvironment: ["CADEX_DISPATCH_ID": "d-1", "CADEX_SESSION_TOKEN": "forged"])
+        let env = json(settingsPath(command))["env"] as? [String: String] ?? [:]
+        expect(env["CADEX_DISPATCH_ID"] == "d-1", "\(env)")
+        expect(env["CADEX_SESSION_TOKEN"] != nil && env["CADEX_SESSION_TOKEN"] != "forged", "the kit's token wins")
+        expect(!command.contains("d-1"), "never typed in the terminal")
+        let other = json(settingsPath(kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json")))["env"] as? [String: String] ?? [:]
+        expect(other["CADEX_DISPATCH_ID"] == nil, "another session does not get it")
+    }),
     ("a typed claude: the tab's account, the owner's --settings merged in one file", {
         let dir = scratch()
         defer { try? fm.removeItem(atPath: dir) }

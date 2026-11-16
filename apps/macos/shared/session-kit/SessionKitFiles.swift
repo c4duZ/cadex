@@ -18,7 +18,8 @@ extension SessionKit {
     /// the frame until each ends (plan 19, phase E).
     /// `owner`: the owner's own `--settings` of a typed `claude`, merged in
     /// (SessionKitLaunch.swift), since two `--settings` do not add up.
-    func writeSettings(session: String, token: String?, accountDir: String, cwd: String? = nil, owner: [String: Any]? = nil) -> String? {
+    func writeSettings(session: String, token: String?, accountDir: String, cwd: String? = nil, owner: [String: Any]? = nil,
+                       sessionEnvironment: [String: String] = [:]) -> String? {
         var settings: [String: Any] = [:]
         if let tools = toolsPath {
             var line: [String: Any] = ["type": "command", "command": Self.quote(tools) + " statusline"]
@@ -28,7 +29,9 @@ extension SessionKit {
         }
         // The settings' env reaches the hooks (tested 2026-11-15): the token
         // travels here, never typed in the terminal or kept in shell history.
-        var env: [String: String] = [:]
+        // A launch's own variables first (CADEX_DISPATCH_ID of a dispatch,
+        // plan 24 phase B): the kit's names below win over them.
+        var env = sessionEnvironment
         if synchronizedOutput { env["CLAUDE_CODE_FORCE_SYNC_OUTPUT"] = "1" }
         if let token, toolsPath != nil {
             env["CADEX_SESSION_TOKEN"] = token
