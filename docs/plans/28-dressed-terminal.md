@@ -26,7 +26,10 @@ painéis" e os apelidos do 27.
 - **A. Medir o Claude.** Feita (2026-11-17): no tema padrão o Claude manda RGB fixo; no "dark-ansi" (por `--settings`), só ANSI; o kit pedirá o "-ansi" do modo do tema (`docs/spec/terminal.md`, As cores do Claude Code). Plano original: Numa instância de teste, com a conta de teste: quais cores o Claude Code
   manda (ANSI do tema ou cor fixa) no diff, na mensagem e nas ferramentas, em cada tema dele; qual
   tema o kit da sessão deve pedir para o nosso ANSI valer. Resultado escrito na spec do terminal.
-- **B. O painel.** PaneHeaderView.swift na cara nova e sempre visível: `StateGlyph`, nome, tarefa,
+- **B. O painel.** Feita (2026-11-17): caixas, vão, anel do foco, sem foco a 92%, respiro, o
+  cabeçalho sempre e o que o app sabe do agente (`../../apps/macos/app/PaneHeaderWiring.swift`; o modelo vem do arquivo
+  da sessão que a status line do kit grava); tabs.paneHeaders e tabs.unfocusedDim saíram já aqui.
+  Plano original: PaneHeaderView.swift na cara nova e sempre visível: `StateGlyph`, nome, tarefa,
   modelo, conta, custo e tempo (do que os hooks e o uso já sabem); o painel com foco com contorno e
   halo, os outros apagados; vão de 8 pt; respiro dentro do terminal. tabs.paneHeaders migrada uma
   vez (sai no 29).

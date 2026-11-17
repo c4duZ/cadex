@@ -1,13 +1,40 @@
 import AppKit
 import Icons
 import Menus
+import StateGlyph
 import Strings
+import Terminal
 
 /// The pane headers of every tab (PaneHeaderView.swift): what each one
 /// says, and its buttons, which focus their pane and run a command by id
 /// (ADR 0005): pane.close, pane.zoom; the "+" menu is the app's (paneMenu). Apart from
 /// TabsController.swift, at its size limit.
+/// What the app knows of the agent in a terminal, for its pane's header (plan 28 phase B): the
+/// app works it out when an agent changes and keeps it; the header only reads it.
+public struct PaneDetail: Equatable, Sendable {
+    /// "Claude".
+    public var title: String
+    /// "orchestration-e · Opus · bkdg".
+    public var detail: String
+    /// "US$ 0.31 · 4 min".
+    public var trailing: String
+
+    public init(title: String, detail: String, trailing: String) {
+        self.title = title
+        self.detail = detail
+        self.trailing = trailing
+    }
+}
+
 extension TabsController {
+    /// The detail of an agent's terminal, from the app (every window's); nil: a plain terminal.
+    @MainActor public static var paneDetail: (TerminalView) -> PaneDetail? = { _ in nil }
+
+    /// Every pane header of these tabs says again what it shows (an agent's detail changed).
+    public func refreshPaneHeaders() {
+        for tab in tabs.values { tab.layout.refreshHeaders() }
+    }
+
     func wireHeaders(_ tab: Tab) {
         tab.layout.headerStyle = bar.style
         tab.layout.describe = { [weak self, weak tab] id in
@@ -35,7 +62,17 @@ extension TabsController {
         switch pane {
         case .terminal(let terminal):
             let program = terminal.programTitle
-            return .init(title: program.isEmpty ? folderTitle(terminal.currentDirectory, home: home) : program, icon: .terminalWindow)
+            var info = PaneHeaderView.Info(title: program.isEmpty ? folderTitle(terminal.currentDirectory, home: home) : program,
+                                           icon: .terminalWindow, padded: true)
+            info.state = TabAgentTitle.state(terminal.agentStatus, hibernated: terminal.isHibernated)
+            if let agent = Self.paneDetail(terminal) {
+                // An agent waiting at its prompt has no state to report: the idle ring, as the tree.
+                info.state = info.state ?? .idle
+                info.title = agent.title
+                info.detail = agent.detail
+                info.trailing = agent.trailing
+            }
+            return info
         case .document(let document):
             let (icon, color) = Self.tabIcon(for: document.identity)
             return .init(title: document.title, icon: icon, iconColor: color, image: Self.tabImage(for: document.identity),

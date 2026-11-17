@@ -31,6 +31,11 @@ let exitCode = await Checks.run([
         second.text = "bhband"
         stack.addArrangedSubview(first)
         stack.addArrangedSubview(second)
+        // The room left goes to a spacer, as on the bar: without it the stack sometimes stretched
+        // the first label to the whole width and the second never moved (flaky, 2026-11-17).
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.init(1), for: .horizontal)
+        stack.addArrangedSubview(spacer)
         stack.layoutSubtreeIfNeeded()
         let before = second.frame.minX
         first.text = "feature/a-very-long-branch-name"

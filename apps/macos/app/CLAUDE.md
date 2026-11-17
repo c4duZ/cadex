@@ -229,8 +229,13 @@
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.
+- `PaneHeaderWiring.swift` (plano 28 fase B): o que o cabeçalho de cada painel diz de um agente
+  ("Claude", a tarefa, o modelo, a conta; o custo e o tempo), calculado quando um agente desta janela
+  muda e uma vez por minuto, e guardado em `PaneDetails` (o cabeçalho só lê; o modelo e o custo do
+  arquivo da sessão que a status line do kit grava; o tempo pelo início do processo).
 - `PerfHooks.swift`: só para o `make perf` (`../../../tools/perf/run.py`): cada variável CADEX_PERF_
-  faz a instância de teste agir sozinha em horas marcadas (abrir a conversa de um subagente, abrir
+  faz a instância de teste agir sozinha em horas marcadas (CADEX_PERF_TYPE digita um comando no terminal com foco,
+  CADEX_PERF_SPLIT divide o painel, CADEX_PERF_SNAPSHOT_AT atrasa a captura; abrir a conversa de um subagente, abrir
   abas, abrir e rolar a revisão da pasta com CADEX_PERF_REVIEW, abrir duas vezes o grupo das máquinas da tailnet com CADEX_PERF_MACHINES); sem a variável, nada roda.
   `RacePerfHooks.swift` (plano 24): CADEX_PERF_RACE, um JSON com uma corrida que começa sozinha sem
   folha (e, com `pickAfter`, o #1 vence e os outros são descartados), anotada em `out`; CADEX_PERF_RACE_FORM

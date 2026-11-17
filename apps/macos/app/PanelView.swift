@@ -1,16 +1,12 @@
 import AppKit
 
-/// A rounded panel inside the window frame: the sidebar and
-/// the terminal area. Clips what it holds to its corners.
+/// The center between the tree and the right panel: the window's ground, where the panes' boxes
+/// sit (plan 28 phase B); it clips what it holds and carries the background image.
 final class PanelView: NSView {
-    static let cornerRadius: CGFloat = 8
-
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
-        layer?.cornerRadius = Self.cornerRadius
         layer?.masksToBounds = true
-        layer?.borderWidth = 1
     }
 
     @available(*, unavailable)

@@ -53,20 +53,6 @@ enum ThemeLooksRows {
                              T("All text at 7:1, stronger borders and focus, no transparency. Also turns on with Increase contrast in the system's Accessibility settings.",
                                "Todo texto a 7:1, bordas e foco mais fortes, sem transparência. Liga também com Aumentar contraste nos ajustes de Acessibilidade do sistema."),
                              control: SettingsPage.toggle(a.highContrast) { on in store.update { $0.appearance.highContrast = on } }),
-            SettingsPage.row(T("Panes without focus", "Painéis sem foco"),
-                             T("How much darker the other panes of a tab are, so the one you type in stands out. 0 turns it off.",
-                               "O quanto os outros painéis de uma aba ficam mais escuros, para destacar aquele em que você digita. 0 desliga."),
-                             control: SettingsPage.slider(store.settings.tabs.unfocusedDim, range: Settings.dimRange, format: "%.0f%%", shown: { $0 * 100 }) { value in
-                                 store.update { $0.tabs.unfocusedDim = value }
-                             }),
-            SettingsPage.row(T("Pane headers", "Cabeçalho dos painéis"),
-                             T("A slim line on top of each pane with its name, maximize and close.",
-                               "Uma linha fina em cima de cada painel com o nome, maximizar e fechar."),
-                             control: SettingsPage.popup([(T("When Split", "Com divisões"), "split"), (T("Always", "Sempre"), "always"),
-                                                          (T("Never", "Nunca"), "never")],
-                                                         selected: store.settings.tabs.paneHeaders) { value in
-                                 store.update { $0.tabs.paneHeaders = value }
-                             }),
         ]
     }
 }

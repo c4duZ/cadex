@@ -76,15 +76,9 @@ public struct Settings: Equatable, Sendable {
     }
 
     public struct Tabs: Equatable, Sendable {
-        /// The shade over the panes without focus, 0 to 0.6 (0.26 measured
-        /// against dark themes on 2026-10-19).
-        public var unfocusedDim: Double = 0.26
         /// Where a file opened beside goes, with half the tab: "right" or
         /// "left" (issue #5).
         public var documentSide = "right"
-        /// A slim header on each pane with its name and a close button:
-        /// "split" (when a tab has 2+ panes), "always" or "never" (issue #1).
-        public var paneHeaders = "split"
     }
 
     public struct Explorer: Equatable, Sendable {
@@ -295,7 +289,6 @@ public struct Settings: Equatable, Sendable {
     static let markdownOpenings = ["source", "rendered"]
     static let pickTargets = ["terminal", "clipboard"]
     static let documentSides = ["right", "left"]
-    static let paneHeaderModes = ["split", "always", "never"]
     static let fileOpenings = ["beside", "tab"]
     static let languages = ["en", "pt"]
     static let inspectorTabs = ["changes", "files", "history", "memory"]
@@ -305,7 +298,6 @@ public struct Settings: Equatable, Sendable {
     static let contrastRange = 1.0...21.0
     static let lineHeights = 0.8...2.0
     static let letterSpacings = -1.0...4.0
-    static let dimRange = 0.0...0.6
     static let zoomRange = 0.8...1.5
     static let densities = ["normal", "compact"]
     static let uiFontSizes = 9.0...24.0

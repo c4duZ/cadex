@@ -337,37 +337,42 @@ let exitCode = await Checks.run([
         expect(tabs.count == 2 && tabs.activeDocument === b && tabs.activePaneCount == 2)
         tabs.closeAll()
     }),
-    ("pane headers: only with 2+ panes; ✕ closes that pane alone; maximize; never", {
+    ("pane headers on every pane (plan 28); ✕ closes that pane alone; maximize", {
         let tabs = makeTabs()
         tabs.newTab(cwd: "/")
         tabs.view.layoutSubtreeIfNeeded()
         guard let layout = tabs.activeTab?.layout else { return expect(false) }
         layout.layoutSubtreeIfNeeded()
-        expect(layout.headerViews.isEmpty, "one pane, no header")
+        expect(layout.headerViews.count == 1, "one pane has its header too (the Pane mockup)")
         let doc = FakeDocument("/r/CLAUDE.md")
         tabs.open(doc, beside: true)
         layout.layoutSubtreeIfNeeded()
         expect(layout.headerViews.count == 2, "\(layout.headerViews.count)")
-        // The divider's grab band sits on top, along all of it, wider than the line.
+        // The gap's grab band sits on top, along all of it, wider than the gap.
         let handles = layout.subviews.compactMap { $0 as? DividerHandle }
-        expect(handles.count == 1 && handles[0].frame.height == layout.bounds.height + 16 && handles[0].frame.width == 17,
+        expect(handles.count == 1 && handles[0].frame.height == layout.paneArea.height + 16 && handles[0].frame.width == PaneLayoutView.gap + 16,
                "\(handles.map(\.frame))")
-        for y in stride(from: CGFloat(5), to: layout.bounds.height, by: 120) {
+        for y in stride(from: layout.paneArea.minY + 5, to: layout.paneArea.maxY, by: 120) {
             let hit = layout.hitTest(layout.convert(CGPoint(x: handles[0].frame.midX + 6, y: y), to: layout.superview))
             expect(hit is DividerHandle, "the handle at y \(y), not \(String(describing: hit))")
         }
         let docPane = tabs.activeTab!.tree.leaves.last!
         expect(layout.headerViews[docPane]?.info.title == doc.title && layout.headerViews[docPane]?.focused == true)
-        expect(layout.panes[docPane]!.frame.minY == PaneHeaderView.height, "the pane starts under its header")
+        // Under the center's padding, the box's line and its header (a document: no body padding).
+        let top = layout.paneArea.minY + DesignTokens.Stroke.hairline + PaneHeaderView.height
+        expect(layout.panes[docPane]!.frame.minY == top, "the pane starts under its header: \(layout.panes[docPane]!.frame.minY)")
         // Issue #1: the file's ✕ closes the file only, never the tab or the window.
         layout.onHeaderAction?(docPane, .close)
         layout.layoutSubtreeIfNeeded()
-        expect(doc.closed && tabs.count == 1 && tabs.activePaneCount == 1 && layout.headerViews.isEmpty)
+        expect(doc.closed && tabs.count == 1 && tabs.activePaneCount == 1 && layout.headerViews.count == 1)
         tabs.open(FakeDocument("/r/b.md"), beside: true)
         let terminalPane = tabs.activeTab!.tree.leaves.first!
         layout.onHeaderAction?(terminalPane, .zoom)
         layout.layoutSubtreeIfNeeded()
-        expect(layout.zoomed == terminalPane && layout.panes[terminalPane]!.frame.height == layout.bounds.height - PaneHeaderView.height)
+        // Maximized: the whole area, less its line, header and the terminal's padding.
+        let pad = DesignTokens.Pane.bodyPadding
+        let tall = layout.paneArea.height - 2 * DesignTokens.Stroke.hairline - PaneHeaderView.height - UILooks.pt(pad.top + pad.bottom)
+        expect(layout.zoomed == terminalPane && layout.panes[terminalPane]!.frame.height == tall, "\(layout.panes[terminalPane]!.frame.height) \(tall)")
         expect(layout.panes[tabs.activeTab!.tree.leaves.last!]!.superview == nil, "the other pane is out of view")
         tabs.toggleZoom()
         layout.layoutSubtreeIfNeeded()
@@ -397,10 +402,6 @@ let exitCode = await Checks.run([
                 try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/pane-headers.png"))
             }
         }
-        PaneLooks.paneHeaders = "never"
-        layout.layoutSubtreeIfNeeded()
-        expect(layout.headerViews.isEmpty)
-        PaneLooks.paneHeaders = "split"
         tabs.closeAll()
     }),
     ("dragging a pane: zones by the diagonals, center and header swap, measured on the start", {

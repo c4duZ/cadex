@@ -102,10 +102,9 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
   à esquerda a peça de estado, o nome (o arquivo, com ● se não salvo; o programa do terminal; o
   agente) e, mais apagado, de onde é (a tarefa, o modelo, a conta); à direita o que interessa ao
   painel (o custo e o tempo de um agente; "running 38 s" de um comando; a etiqueta azul "Open :5173
-  in preview" de um servidor). Ao passar o ponteiro e no painel com foco, aparecem também + (terminal
-  ao lado, terminal abaixo, preview web ao lado, maximizar, fechar o painel, cada um com ícone e
-  atalho), maximizar e ✕, guardando o lugar quando somem, para o cabeçalho não mexer (o maximizar
-  aparecendo sozinho mexia, 2026-10-22). O botão do meio do mouse fecha o painel, como fecha uma aba.
+  in preview" de um servidor). Ao passar o ponteiro aparecem também + (terminal ao lado, terminal
+  abaixo, preview web ao lado, maximizar, fechar o painel, cada um com ícone e atalho), maximizar e
+  ✕; parados não aparecem, como no mockup, e o custo fica na borda direita. O botão do meio do mouse fecha o painel, como fecha uma aba.
   O cabeçalho só se redesenha quando o que ele mostra muda (custo e tempo no máximo uma vez por
   segundo), nunca a cada tecla.
 - Arrastar o cabeçalho move o painel (a ideia do dono, 2026-10-22): a aba vira um quadro em que cada
@@ -123,8 +122,12 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
   (pane.close, pane.zoom, pane.split-right, pane.split-down).
 - Maximizar (pane.zoom, ⇧⌘↩): o painel ocupa a aba toda, os outros saem de vista e voltam ao
   restaurar; dar o foco a outro painel também restaura.
-- tabs.paneHeaders sai: o cabeçalho é sempre (o mockup mostra um painel só com cabeçalho); quem tinha
-  "never" é migrado uma vez, e a chave sai no plano 29 (`../design/work-frame/inventory.md`).
+- tabs.paneHeaders saiu no plano 28: o cabeçalho é sempre (o mockup mostra um painel só com
+  cabeçalho); um arquivo antigo com a chave abre sem aviso.
+- Cada painel é uma caixa (components.pane): cantos de 10 pt, 8 pt em volta e entre as caixas, sem
+  linha divisória (arrastar o vão redimensiona; sob o ponteiro, uma barra curta no meio dele); a com
+  foco no fundo da moldura com a linha de foco e um anel de 3 pt; as outras num fundo um tom mais
+  escuro e a 92% (components.pane.idle). O terminal tem 14 × 16 pt de respiro dentro da caixa.
 
 ### Fechar
 - ⌘W fecha o painel com foco. O espaço dele vai para o vizinho. Se era o único da aba, fecha a aba.
@@ -138,8 +141,8 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 ### Desempenho
 - Abas que não estão visíveis não desenham; continuam lendo a saída do shell.
 
-- O apagado dos painéis sem foco é ajustável (tabs.unfocusedDim, de 0 a 0,6; 0,08 por padrão,
-  que é a opacidade de 92% do mockup; 0 desliga).
+- Os painéis sem foco ficam a 92% (components.pane.idle.opacity); tabs.unfocusedDim, a sombra
+  ajustável de antes, saiu no plano 28.
 - Clique direito numa aba: renomear, cor da aba e fechar painel, pelos comandos (plano 15, fase D).
 
 ## Estados

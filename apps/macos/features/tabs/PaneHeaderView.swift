@@ -1,20 +1,18 @@
 import AppKit
 import Icons
+import StateGlyph
 import Strings
 import UILooks
 
-/// The slim line on top of a pane when its tab has more than one
-/// (docs/spec/tabs.md, "Cabeçalho dos painéis"): what the pane shows on the
-/// left, and on the right "+" (what opens beside, maximize, close),
-/// maximize and close. It fixes issue #1: a
-/// file opened beside the terminal had no visible way to close only it.
-/// Lighter than the tab strip above it (no fill, a hairline below), so the
-/// window does not read as two rows of tabs; the close button always shows
-/// on the focused pane, the rest on hover (as iTerm2's per-pane title bar,
-/// Zed and VS Code do, research of 2026-10-22).
+/// The header of every pane (plan 28 phase B; the Terminals and Pane mockups,
+/// components.pane.header): 34 pt, the state's glyph, the name in semibold, what it is
+/// ("orchestration-e · Opus · bkdg") dimmer, and on the right the cost and the time; the line of
+/// the pane under it. The "+" (what opens beside), maximize and close show under the pointer
+/// only, as the mockups draw none; they keep issue #1's way to close one pane.
 @MainActor
 final class PaneHeaderView: NSView {
-    static var height: CGFloat { UILooks.pt(24) }
+    typealias H = DesignTokens.Pane.Header
+    static var height: CGFloat { UILooks.rowHeight(H.height) }
 
     struct Info: Equatable {
         var title: String
@@ -22,6 +20,14 @@ final class PaneHeaderView: NSView {
         var iconColor: NSColor?
         var image: NSImage?
         var dirty = false
+        /// What runs in the pane (an agent's state): the glyph before the name.
+        var state: GlyphState?
+        /// "orchestration-e · Opus · bkdg": where and who, after the name.
+        var detail = ""
+        /// "US$ 0.31 · 4 min": on the right.
+        var trailing = ""
+        /// A terminal: its text gets the mockup's room inside the box (components.pane.bodyPadding).
+        var padded = false
     }
 
     enum DragPhase { case began, moved, ended }
@@ -34,34 +40,43 @@ final class PaneHeaderView: NSView {
                                  text: .labelColor, secondaryText: .secondaryLabelColor) { didSet { refresh() } }
     var onAction: ((Action) -> Void)?
 
-    private let iconView = NSImageView()
+    private let glyph = StateGlyphView(size: H.glyph)
     private let label = NSTextField(labelWithString: "")
+    private let detail = NSTextField(labelWithString: "")
+    private let trailing = NSTextField(labelWithString: "")
     private let menuButton = PaneHeaderButton(icon: .plus)
     private let zoomButton = PaneHeaderButton(icon: .cornersOut)
     private let closeButton = PaneHeaderButton(icon: .x)
+    private let buttons: NSStackView
     private var hovering = false { didSet { if hovering != oldValue { refresh() } } }
 
     override init(frame: NSRect) {
+        buttons = NSStackView(views: [menuButton, zoomButton, closeButton])
         super.init(frame: frame)
-        label.font = UILooks.font(11.5)
-        label.lineBreakMode = .byTruncatingMiddle
-        label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        iconView.imageScaling = .scaleProportionallyUpOrDown
+        label.font = UILooks.font(H.fontSize, weight: H.name)
+        for field in [label, detail, trailing] {
+            field.lineBreakMode = .byTruncatingTail
+            field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        }
+        detail.font = UILooks.font(H.fontSize)
+        trailing.font = UILooks.font(H.fontSize)
+        trailing.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+        glyph.widthAnchor.constraint(equalToConstant: UILooks.pt(H.glyph)).isActive = true
+        glyph.heightAnchor.constraint(equalToConstant: UILooks.pt(H.glyph)).isActive = true
         menuButton.onPress = { [weak self] in self.map { $0.onAction?(.menu($0.menuButton)) } }
         zoomButton.onPress = { [weak self] in self?.onAction?(.zoom) }
         closeButton.onPress = { [weak self] in self?.onAction?(.close) }
         menuButton.toolTip = T("Open Beside, Split, Maximize, Close", "Abrir ao lado, dividir, maximizar, fechar")
-        let buttons = NSStackView(views: [menuButton, zoomButton, closeButton])
-        buttons.spacing = 2
-        let row = NSStackView(views: [iconView, label, NSView(), buttons])
-        row.spacing = 6
+        buttons.spacing = UILooks.pt(DesignTokens.Stroke.glyph)
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.init(1), for: .horizontal)
+        let row = NSStackView(views: [glyph, label, detail, spacer, trailing, buttons])
+        row.spacing = UILooks.pt(H.gap)
         row.translatesAutoresizingMaskIntoConstraints = false
         addSubview(row)
         NSLayoutConstraint.activate([
-            iconView.widthAnchor.constraint(equalToConstant: UILooks.pt(13)),
-            iconView.heightAnchor.constraint(equalToConstant: UILooks.pt(13)),
-            row.leadingAnchor.constraint(equalTo: leadingAnchor, constant: UILooks.pt(10)),
-            row.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -UILooks.pt(4)),
+            row.leadingAnchor.constraint(equalTo: leadingAnchor, constant: UILooks.pt(H.padding.left)),
+            row.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -UILooks.pt(H.padding.right)),
             row.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
         refresh()
@@ -116,33 +131,29 @@ final class PaneHeaderView: NSView {
 
     private func refresh() {
         label.stringValue = (info.dirty ? "● " : "") + info.title
-        label.textColor = focused ? style.text : style.secondaryText
-        if let image = info.image {
-            iconView.image = image
-            iconView.contentTintColor = nil
-        } else {
-            iconView.image = info.icon.image(size: UILooks.pt(13))
-            iconView.contentTintColor = info.iconColor ?? (focused ? style.text : style.secondaryText)
-        }
-        iconView.alphaValue = focused ? 1 : 0.7
-        for button in [menuButton, zoomButton, closeButton] { button.color = focused ? style.text : style.secondaryText }
+        label.textColor = DesignTokens.Color.textPrimary
+        detail.stringValue = info.detail
+        detail.textColor = H.meta
+        detail.isHidden = info.detail.isEmpty
+        trailing.stringValue = info.trailing
+        trailing.textColor = H.meta
+        trailing.isHidden = info.trailing.isEmpty
+        glyph.state = info.state
+        glyph.isHidden = info.state == nil
+        for button in [menuButton, zoomButton, closeButton] { button.color = H.meta }
         zoomButton.icon = zoomed ? .cornersIn : .cornersOut
         zoomButton.toolTip = zoomed ? T("Restore Pane (⇧⌘↩)", "Restaurar painel (⇧⌘↩)") : T("Maximize Pane (⇧⌘↩)", "Maximizar painel (⇧⌘↩)")
         closeButton.toolTip = T("Close Pane (⌘W)", "Fechar painel (⌘W)")
-        // The three show together, on the focused pane and under the
-        // pointer, and keep their room when they fade: maximize showing
-        // apart from the others moved the header (the owner, 2026-10-22).
-        let shown = hovering || focused || zoomed
-        for button in [menuButton, zoomButton, closeButton] { button.alphaValue = shown ? 1 : 0 }
+        // Under the pointer only: the mockups' header has none. They take no room at rest, so the
+        // cost sits at the right edge as drawn.
+        buttons.isHidden = !hovering
         needsDisplay = true
     }
 
-    /// A hairline below. No accent line: the focus shows by the other
-    /// panes' dimming and this title's stronger text, as in terminals (the
-    /// owner found the colored line and the outline crude, 2026-10-22).
+    /// The pane's line under the header (components.pane.header.borderBottom).
     override func draw(_ dirtyRect: NSRect) {
-        NSColor.separatorColor.setFill()
-        NSRect(x: 0, y: bounds.height - 1, width: bounds.width, height: 1).fill()
+        H.borderBottom.setFill()
+        NSRect(x: 0, y: bounds.height - DesignTokens.Stroke.hairline, width: bounds.width, height: DesignTokens.Stroke.hairline).fill()
     }
 }
 

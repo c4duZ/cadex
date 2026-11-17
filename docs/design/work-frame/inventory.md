@@ -91,9 +91,11 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 ### Terminal e painéis (plano 28)
 | tipo | peça | estado | destino | plano |
 |---|---|---|---|---|
-| arquivo | `apps/macos/features/tabs/PaneHeaderView.swift` | muda | o cabeçalho com estado, conta, custo, tempo | 28 |
-| chave | `tabs.paneHeaders` | sai | cabeçalho sempre (o mockup mostra com um painel só); migrada no 28, sai no 29 | 29 |
-| arquivo | `apps/macos/features/tabs/PaneLayoutView.swift` | muda | contorno de foco, vão de 8 pt | 28 |
+| arquivo | `apps/macos/features/tabs/PaneHeaderView.swift` | muda | o cabeçalho com estado, conta, custo, tempo, feito na fase B (`apps/macos/app/PaneHeaderWiring.swift`) | 28 |
+| chave | `tabs.paneHeaders` | saiu | cabeçalho sempre (o mockup mostra com um painel só); saiu na fase B, um arquivo antigo abre sem aviso | 28 |
+| chave | `tabs.unfocusedDim` | saiu | os painéis sem foco a 92% do mockup (components.pane.idle); saiu na fase B, com a linha das configurações | 28 |
+| trecho | "FocusOutlineView" em `apps/macos/features/tabs/PaneLayoutView.swift` | saiu | a sombra de antes sobre os painéis sem foco; a caixa de cada painel em `apps/macos/features/tabs/PaneChrome.swift` (fase B) | 28 |
+| arquivo | `apps/macos/features/tabs/PaneLayoutView.swift` | muda | contorno de foco, vão de 8 pt, feito na fase B | 28 |
 | arquivo | `apps/macos/features/terminal/TerminalAppearance.swift` | muda | respiro e cores afinadas | 28 |
 
 ### Entradas (plano 29)

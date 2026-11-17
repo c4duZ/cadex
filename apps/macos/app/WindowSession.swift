@@ -82,6 +82,9 @@ final class WindowSession: NSObject, NSWindowDelegate {
     var treeTallyTimer: Timer?
     /// The rows' age moves on by itself: a redraw a minute.
     var treeClock: Timer?
+    /// The pane headers' agent details (PaneHeaderWiring.swift): the agent notice and the minute clock.
+    var paneHeaderObserver: NSObjectProtocol?
+    var paneHeaderClock: Timer?
     /// The Agents page, for its sub-tabs (AgentsWiring.swift).
     /// The status bar's Agent usage item, for the theme's colors.
     weak var usageStrip: AgentUsageStrip?
@@ -121,6 +124,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         applyLooks(looks.backgroundImage.map { .init(path: $0, opacity: looks.backgroundOpacity, blur: looks.backgroundBlur) },
                    vibrancy: looks.vibrancy)
         startProjects()
+        startPaneHeaders()
     }
 
     /// The title area is the app's (fullSizeContentView, transparent title
@@ -274,6 +278,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
         if let treeWatch { WorktreesController.shared.stop(treeWatch) }
         if let treeObserver { NotificationCenter.default.removeObserver(treeObserver) }
         treeClock?.invalidate()
+        if let paneHeaderObserver { NotificationCenter.default.removeObserver(paneHeaderObserver) }
+        paneHeaderClock?.invalidate()
         treeTallyTimer?.invalidate()
         workspace?.statusBar.stopReading()
         bellPanel.close()

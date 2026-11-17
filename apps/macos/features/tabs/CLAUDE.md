@@ -23,13 +23,15 @@
   pediu, que não é trocado. Encostado (issue #5): Tab.dockedPane é um documento num lado da
   divisão de fora; `PaneTree.balanced(keeping:)` reequilibra só o outro lado; o lado vem de
   documentsOnLeft (tabs.documentSide, que o app define).
-  `PaneHeaderView.swift`: o cabeçalho de cada painel com 2+ painéis (nome, ⋯, maximizar, ✕; issue
-  #1), posto pelo `PaneLayoutView.swift`, que também mostra só o painel maximizado (`zoomed`);
+  `PaneHeaderView.swift`: o cabeçalho de todo painel (plano 28 fase B, components.pane.header: o
+  estado, o nome, de onde é e, à direita, o custo e o tempo; +, maximizar e ✕ só ao passar o
+  ponteiro; issue #1); o que um agente acrescenta vem do app por TabsController.paneDetail
+  (`PaneDetail`, guardado pelo app e só lido aqui); posto pelo `PaneLayoutView.swift`, que também mostra só o painel maximizado (`zoomed`);
   `TabsPaneHeaders.swift` diz o que cada um mostra e liga os botões aos comandos pelo `runCommand`
   (pane.close, pane.zoom; o menu do + vem do app em `paneMenu`). Arrastar o cabeçalho move o
   painel: `PaneDragBoard.swift` mostra cada painel como janela cinza que desliza ao vivo, a etiqueta
   de `PaneDragChip.swift` segue o ponteiro e `PaneDrop.swift` decide onde cai, no layout do começo
-  (diagonais, centro e cabeçalho trocam); os painéis de verdade só mudam ao soltar. tabs.paneHeaders vem do app em PaneLooks.paneHeaders.
+  (diagonais, centro e cabeçalho trocam); os painéis de verdade só mudam ao soltar.
   `PanePressRecognizer.swift`: o clique num documento dá o foco ao painel sem tomar o clique. Título
   e ícone da aba vêm do painel com foco; "●" se qualquer painel tem mudança não salva. A oferta de preview de cada terminal sai por
   `onOpenPreview`. `TabList.swift`: as regras puras (ordem, ativa, recentes, mover), testadas.
@@ -45,9 +47,10 @@
   (a propriedade bar do controlador). `TabsView.swift`: só a aba ativa. `Tab.swift`: uma aba.
 - Divisões: `PaneTree.swift` é a árvore pura (dividir, remover dando o espaço ao irmão, retângulos,
   ordem de leitura, vizinho por direção, proporção por caminho), testada. `PaneLayoutView.swift`
-  posiciona os painéis pela árvore, divisor de 1 pt que pega o mouse a 8 pt numa `DividerHandle` por cima de tudo (o cursor de
-  redimensionar não briga com o do terminal) e engrossa sob o
-  ponteiro (tamanho mínimo de painel), e escurece os painéis sem foco (PaneLooks.unfocusedDim, tabs.unfocusedDim, que o app define). `balanced()` na árvore deixa
+  posiciona os painéis pela árvore, cada um na caixa de `PaneChrome.swift` (cantos, linha, o anel do
+  foco, os sem foco a 92%), com 8 pt em volta e entre as caixas; o vão pega o mouse numa
+  `DividerHandle` por cima de tudo (o cursor de redimensionar não briga com o do terminal) e mostra
+  uma barra curta sob o ponteiro (tamanho mínimo de painel); o terminal com o respiro do mockup. `balanced()` na árvore deixa
   do mesmo tamanho os painéis numa direção, a cada divisão e fechamento. `Tab.swift` guarda árvore, painéis e foco.
 - `TabsSnapshot.swift` e `TabsRestore.swift`: o estado das abas para salvar (ordem, árvore de cada
   aba com a pasta de cada terminal ou a identidade de cada documento e as proporções, nome dado,

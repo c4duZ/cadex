@@ -19,6 +19,15 @@ extension WindowSession {
         if let tab = environment["CADEX_PERF_PANEL"] { showPerfPage(tab) }
         // Files shown down to these paths (comma-separated), the last one chosen: the tree as a
         // mockup draws it, to compare them (2026-11-17).
+        // A command typed in the focused terminal once its shell is ready: a real `claude` in the
+        // pane, to compare its header with the Pane mockup (plan 28 phase B).
+        if let command = environment["CADEX_PERF_TYPE"] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in self?.tabs?.activeTerminal?.typeWhenReady(command + "\n") }
+        }
+        // The focused pane split to the right, to compare two panes with the Terminals mockup.
+        if environment["CADEX_PERF_SPLIT"] != nil {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in _ = self?.commands.run("pane.split-right") }
+        }
         if environment["CADEX_PERF_HISTORY_OPEN"] != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in self?.panelHistory?.openFirstCommit() }
         }
@@ -37,7 +46,9 @@ extension WindowSession {
     /// The window drawn into a PNG at 4 s, then at `out`: a test window often opens on another
     /// Space, where screencapture fails (2026-11-17, the right panel's fidelity check).
     private func savePerfSnapshot(_ out: String) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
+        // CADEX_PERF_SNAPSHOT_AT: later, when what is shown takes longer (a `claude` starting).
+        let at = ProcessInfo.processInfo.environment["CADEX_PERF_SNAPSHOT_AT"].flatMap(Double.init) ?? 4
+        DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in
             guard let view = self?.window.contentView?.superview ?? self?.window.contentView,
                   let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
             view.cacheDisplay(in: view.bounds, to: bitmap)

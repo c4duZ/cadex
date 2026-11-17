@@ -1,16 +1,18 @@
 import AppKit
+import UILooks
 
-/// Lays a tab's panes out by its PaneTree, draws the 1-point dividers and
-/// lets them be dragged, and dims the panes without focus when there are
-/// several (docs/spec/tabs.md, "Divisões").
-///
-/// The owner found the blue focus outline beside the divider crude and the
-/// divider hard to grab (2026-10-19): the outline gave way to dimming, as
-/// in iTerm2, and the divider grabs 6 pt each side and thickens under the
-/// pointer.
+/// Lays a tab's panes out by its PaneTree, each in its box with its header (plan 28 phase B; the
+/// Terminals and Pane mockups, components.pane): 8 pt around and between the boxes, the focused
+/// one lit with its halo, the others a shade dimmer; the gap between two boxes is where a drag
+/// resizes them (docs/spec/tabs.md, "Divisões").
 final class PaneLayoutView: NSView {
-    /// Space between panes, where the divider line is drawn and grabbed.
-    static let gap: CGFloat = 1
+    /// Space between panes, where a drag resizes them.
+    static var gap: CGFloat { UILooks.pt(DesignTokens.Pane.gap) }
+    /// The panes' area: the center less its padding.
+    var paneArea: CGRect {
+        let pad = UILooks.pt(DesignTokens.Pane.outerPadding)
+        return bounds.insetBy(dx: pad, dy: pad)
+    }
     /// No pane gets smaller than this by dragging or splitting.
     static let minPaneSize = CGSize(width: 120, height: 60)
     /// How far from the line a drag still grabs the divider.
@@ -18,7 +20,7 @@ final class PaneLayoutView: NSView {
 
     var tree: PaneTree = .leaf(0) { didSet { needsLayout = true } }
     var panes: [Int: NSView] = [:]
-    var focused: Int? { didSet { outline.needsDisplay = true; needsLayout = true } }
+    var focused: Int? { didSet { needsLayout = true } }
     /// The tree after a divider drag.
     var onTreeChange: ((PaneTree) -> Void)?
     /// The one pane taking the whole tab (pane.zoom), the others out of view.
@@ -34,7 +36,7 @@ final class PaneLayoutView: NSView {
     private var paneDrag: PaneDragState?
     var headerViews: [Int: PaneHeaderView] { headers }
 
-    private let outline = FocusOutlineView()
+    private lazy var chrome = PaneChrome(host: layer)
     private var dragging: (path: [Bool], axis: PaneTree.Axis, area: CGRect)?
     /// The divider under the pointer (or being dragged), drawn thicker.
     private var hovered: [Bool]? { didSet { if hovered != oldValue { needsDisplay = true } } }
@@ -43,55 +45,54 @@ final class PaneLayoutView: NSView {
 
     override init(frame: NSRect) {
         super.init(frame: frame)
-        outline.autoresizingMask = [.width, .height]
-        addSubview(outline)
-        NotificationCenter.default.addObserver(forName: PaneLooks.didChange, object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.needsLayout = true }
-        }
+        wantsLayer = true
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("PaneLayoutView is created in code") }
 
-    /// Puts exactly the tree's panes in the view, outline on top.
+    /// Puts exactly the tree's panes in the view, under the divider handles.
     func syncSubviews() {
         if let zoomed, !tree.leaves.contains(zoomed) { self.zoomed = nil }
         let shown = zoomed.map { [$0] } ?? tree.leaves
         let wanted = Set(shown.compactMap { panes[$0] }.map(ObjectIdentifier.init))
-        for view in subviews where view !== outline && !(view is PaneHeaderView) && !wanted.contains(ObjectIdentifier(view)) {
+        for view in subviews where !(view is DividerHandle) && !(view is PaneHeaderView) && !wanted.contains(ObjectIdentifier(view)) {
             view.removeFromSuperview()
         }
         for id in shown {
             guard let view = panes[id], view.superview !== self else { continue }
-            addSubview(view, positioned: .below, relativeTo: outline)
+            addSubview(view, positioned: .below, relativeTo: handles.first)
         }
         needsLayout = true
     }
 
     override func layout() {
         super.layout()
-        let frames = zoomed.map { [$0: bounds] } ?? tree.frames(in: bounds, gap: Self.gap)
+        let frames = zoomed.map { [$0: paneArea] } ?? tree.frames(in: paneArea, gap: Self.gap)
         needsDisplay = true
-        let withHeaders = showsHeaders
-        placeHeaders(withHeaders ? Array(frames.keys) : [])
+        chrome.place(frames, focused: focused)
+        placeHeaders(Array(frames.keys))
+        typealias P = DesignTokens.Pane
         for (id, frame) in frames {
-            guard withHeaders, let header = headers[id] else { panes[id]?.frame = frame; continue }
-            let height = min(PaneHeaderView.height, frame.height)
-            header.frame = CGRect(x: frame.minX, y: frame.minY, width: frame.width, height: height)
-            panes[id]?.frame = CGRect(x: frame.minX, y: frame.minY + height, width: frame.width, height: frame.height - height)
+            // Inside the box's line: the header on top, the pane under it; a terminal with the
+            // mockup's room around its text (bodyPadding).
+            let inner = frame.insetBy(dx: DesignTokens.Stroke.hairline, dy: DesignTokens.Stroke.hairline)
+            let height = min(PaneHeaderView.height, inner.height)
+            headers[id]?.frame = CGRect(x: inner.minX, y: inner.minY, width: inner.width, height: height)
+            var body = CGRect(x: inner.minX, y: inner.minY + height, width: inner.width, height: inner.height - height)
+            if headers[id]?.info.padded == true {
+                let pad = P.bodyPadding
+                body = CGRect(x: body.minX + UILooks.pt(pad.left), y: body.minY + UILooks.pt(pad.top),
+                              width: max(body.width - UILooks.pt(pad.left + pad.right), 0),
+                              height: max(body.height - UILooks.pt(pad.top + pad.bottom), 0))
+            }
+            panes[id]?.frame = body
+            // The panes without focus a shade dimmer (components.pane.idle.opacity).
+            let alpha = frames.count > 1 && id != focused ? P.Idle.opacity : 1
+            headers[id]?.alphaValue = alpha
+            panes[id]?.alphaValue = alpha
         }
-        outline.frame = bounds
-        outline.dimmed = zoomed == nil && tree.leaves.count > 1 ? frames.filter { $0.key != focused }.map(\.value) : []
         placeHandles()
-    }
-
-    /// tabs.paneHeaders: "split" (with 2+ panes, or one maximized), "always", "never".
-    var showsHeaders: Bool {
-        switch PaneLooks.paneHeaders {
-        case "always": true
-        case "never": false
-        default: tree.leaves.count > 1 || zoomed != nil
-        }
     }
 
     /// One header per shown pane, under the dimming like its pane.
@@ -103,7 +104,7 @@ final class PaneLayoutView: NSView {
         for id in ids where headers[id] == nil {
             let header = PaneHeaderView(frame: .zero)
             header.onAction = { [weak self] action in self?.onHeaderAction?(id, action) }
-            addSubview(header, positioned: .below, relativeTo: outline)
+            addSubview(header, positioned: .below, relativeTo: handles.first)
             headers[id] = header
         }
         refreshHeaders()
@@ -119,27 +120,25 @@ final class PaneLayoutView: NSView {
         }
     }
 
-    /// Only the divider lines: filling the whole view would hide a
-    /// background image behind the terminals.
+    /// The gap between boxes shows nothing at rest (the mockups); under the pointer or in a drag,
+    /// a short bar in its middle says it resizes.
     override func draw(_ dirtyRect: NSRect) {
-        for divider in dividers(of: tree, in: bounds, path: []) {
-            if divider.path == hovered || divider.path == dragging?.path {
-                NSColor.labelColor.withAlphaComponent(0.35).setFill()
-                let thick = divider.axis == .horizontal ? divider.line.insetBy(dx: -1.5, dy: 0) : divider.line.insetBy(dx: 0, dy: -1.5)
-                NSBezierPath(roundedRect: thick, xRadius: 2, yRadius: 2).fill()
-            } else {
-                NSColor.separatorColor.setFill()
-                divider.line.fill()
-            }
+        for divider in dividers(of: tree, in: paneArea, path: []) where divider.path == hovered || divider.path == dragging?.path {
+            DesignTokens.Color.lineFocus.setFill()
+            let bar = DesignTokens.Stroke.glyph
+            let line = divider.axis == .horizontal
+                ? CGRect(x: divider.line.midX - bar / 2, y: divider.line.minY, width: bar, height: divider.line.height)
+                : CGRect(x: divider.line.minX, y: divider.line.midY - bar / 2, width: divider.line.width, height: bar)
+            NSBezierPath(roundedRect: line, xRadius: bar / 2, yRadius: bar / 2).fill()
         }
     }
 
     /// Whether pane `id` has room to be split along `axis`.
     /// Half the tab is wide enough for a pane.
-    var canDock: Bool { (bounds.width - Self.gap) / 2 >= Self.minPaneSize.width }
+    var canDock: Bool { (paneArea.width - Self.gap) / 2 >= Self.minPaneSize.width }
 
     func canSplit(_ id: Int, axis: PaneTree.Axis) -> Bool {
-        guard let frame = tree.frames(in: bounds, gap: Self.gap)[id] else { return false }
+        guard let frame = tree.frames(in: paneArea, gap: Self.gap)[id] else { return false }
         switch axis {
         case .horizontal: return (frame.width - Self.gap) / 2 >= Self.minPaneSize.width
         case .vertical: return (frame.height - Self.gap) / 2 >= Self.minPaneSize.height
@@ -178,7 +177,7 @@ final class PaneLayoutView: NSView {
     private func beginPaneDrag(_ id: Int, at point: CGPoint) {
         guard tree.leaves.count > 1, zoomed == nil, paneDrag == nil else { return }
         let style = headerStyle ?? TabBarView().style
-        let frames = tree.frames(in: bounds, gap: Self.gap)
+        let frames = tree.frames(in: paneArea, gap: Self.gap)
         var infos: [Int: PaneHeaderView.Info] = [:]
         for leaf in tree.leaves { infos[leaf] = describe?(leaf) }
         let board = PaneDragBoard(frame: bounds, frames: frames, infos: infos, dragged: id, style: style)
@@ -231,7 +230,7 @@ final class PaneLayoutView: NSView {
     /// this view, the terminal and the headers under the band set their
     /// own cursor and the resize one came and went (the owner, 2026-10-22).
     private func placeHandles() {
-        let all = zoomed == nil ? dividers(of: tree, in: bounds, path: []) : []
+        let all = zoomed == nil ? dividers(of: tree, in: paneArea, path: []) : []
         while handles.count > all.count { handles.removeLast().removeFromSuperview() }
         while handles.count < all.count {
             let handle = DividerHandle()
@@ -291,7 +290,7 @@ final class PaneLayoutView: NSView {
     }
 
     private func divider(at point: CGPoint) -> Divider? {
-        dividers(of: tree, in: bounds, path: []).first { grabArea($0).contains(point) }
+        dividers(of: tree, in: paneArea, path: []).first { grabArea($0).contains(point) }
     }
 
     private func dividers(of node: PaneTree, in rect: CGRect, path: [Bool]) -> [Divider] {
@@ -303,46 +302,6 @@ final class PaneLayoutView: NSView {
         return [Divider(path: path, axis: axis, area: rect, line: line)]
             + dividers(of: a, in: first, path: path + [false])
             + dividers(of: b, in: second, path: path + [true])
-    }
-}
-
-/// How dark the panes without focus are (tabs.unfocusedDim, plan 15): the
-/// app sets it from the settings, and every window redraws.
-@MainActor
-public enum PaneLooks {
-    public static let didChange = Notification.Name("PaneLooks.didChange")
-    /// 0.16 barely showed over dark themes (2026-10-19); 0.26 is the default.
-    public static var unfocusedDim: CGFloat = 0.26 {
-        didSet { if unfocusedDim != oldValue { NotificationCenter.default.post(name: didChange, object: nil) } }
-    }
-    /// tabs.paneHeaders: "split" (default), "always" or "never".
-    public static var paneHeaders = "split" {
-        didSet { if paneHeaders != oldValue { NotificationCenter.default.post(name: didChange, object: nil) } }
-    }
-}
-
-/// A light shade over the panes without focus, so the focused one stands
-/// out without a line. Draws over the panes and lets every click through.
-private final class FocusOutlineView: NSView {
-    var dimmed: [CGRect] = [] { didSet { if dimmed != oldValue { needsDisplay = true } } }
-
-    override init(frame: NSRect) {
-        super.init(frame: frame)
-        NotificationCenter.default.addObserver(forName: PaneLooks.didChange, object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.needsDisplay = true }
-        }
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) { fatalError("FocusOutlineView is created in code") }
-
-    override var isFlipped: Bool { true }
-
-    override func hitTest(_ point: NSPoint) -> NSView? { nil }
-
-    override func draw(_ dirtyRect: NSRect) {
-        NSColor.black.withAlphaComponent(PaneLooks.unfocusedDim).setFill()
-        dimmed.forEach { $0.fill() }
     }
 }
 

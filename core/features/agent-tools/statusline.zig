@@ -108,11 +108,13 @@ pub fn files(gpa: std.mem.Allocator, parsed: std.json.Value, config_dir: []const
     const id = if (root.get("session_id")) |v| (if (v == .string) safeId(v.string) else null) else null;
     if (id) |sid| {
         const null_value: std.json.Value = .null;
-        out.session = try std.fmt.allocPrint(gpa, "{{\"at\":{d},\"config_dir\":{f},\"context_window\":{f},\"cost\":{f}}}\n", .{
+        // The model too: the pane's header says it ("Opus", plan 28 phase B).
+        out.session = try std.fmt.allocPrint(gpa, "{{\"at\":{d},\"config_dir\":{f},\"context_window\":{f},\"cost\":{f},\"model\":{f}}}\n", .{
             now,
             std.json.fmt(config_dir, .{}),
             std.json.fmt(root.get("context_window") orelse null_value, .{}),
             std.json.fmt(root.get("cost") orelse null_value, .{}),
+            std.json.fmt(root.get("model") orelse null_value, .{}),
         });
         out.session_id = sid;
     }
@@ -221,7 +223,8 @@ const sample =
     \\{"session_id":"abc-123","transcript_path":"/x.jsonl",
     \\ "rate_limits":{"five_hour":{"used_percentage":42.5,"resets_at":1763100000},
     \\                "seven_day":{"used_percentage":10,"resets_at":1763500000}},
-    \\ "context_window":{"total_input_tokens":1200},"cost":{"total_cost_usd":0.25}}
+    \\ "context_window":{"total_input_tokens":1200},"cost":{"total_cost_usd":0.25},
+    \\ "model":{"id":"claude-opus-5-5","display_name":"Opus"}}
 ;
 
 test "account key replaces every non-alphanumeric byte" {
@@ -242,6 +245,7 @@ test "files keep rate_limits per account and context and cost per session" {
     );
     try testing.expectEqualStrings("abc-123", out.session_id.?);
     try testing.expect(std.mem.indexOf(u8, out.session.?, "\"total_cost_usd\":0.25") != null);
+    try testing.expect(std.mem.indexOf(u8, out.session.?, "\"display_name\":\"Opus\"") != null);
 }
 
 test "a JSON without rate_limits or with a strange id writes nothing for them" {

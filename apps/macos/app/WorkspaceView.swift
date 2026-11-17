@@ -14,8 +14,9 @@ import UILooks
 final class WorkspaceView: NSView {
     /// The tree's width (components.sidebar.width).
     static var sidebarWidth: CGFloat { UILooks.pt(DesignTokens.Sidebar.width) }
-    /// Space around and between the panels.
-    static let gap: CGFloat = 6
+    /// Between the columns and the center: none. The center runs from the tree's line to the
+    /// panel's, and its 8 pt around the panes are the pane layout's (components.pane.outerPadding).
+    static let gap: CGFloat = 0
 
     let titleBar: TitleBarView
     let statusBar = StatusBarView()
@@ -232,7 +233,8 @@ final class WorkspaceView: NSView {
         window?.backgroundColor = vibrancy ? ui.chrome.color(alpha: 0.55) : ui.chrome.nsColor
         raiseWindowButtons()
         window?.appearance = NSAppearance(named: theme.dark ? .darkAqua : .aqua)
-        contentPanel.setColors(fill: theme.terminal.background.nsColor, border: ui.panelBorder.nsColor)
+        // The center's ground is the window's (the Main mockup): the panes are the boxes on it.
+        contentPanel.setColors(fill: DesignTokens.Color.bgWindow, border: .clear)
         explorer.style = .init(text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor, accent: ui.accent.nsColor)
         let style = TabBarView.Style(
             activeFill: ui.tabActive.nsColor, hoverFill: ui.tabActive.color(alpha: 0.5),
