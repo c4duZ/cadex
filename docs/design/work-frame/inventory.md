@@ -124,8 +124,8 @@ do Windows. Cada comando que sai do Mac sai também do `MAC_ONLY` de
 `tools/check_command_parity.py` no mesmo plano.
 
 ### Cópias velhas
-`.claude/worktrees/plan-8/` guarda cópias antigas da casca (TitleBarView, PanelView, WorkspaceView,
-um `SidebarView.swift` do app). Ver com o dono e apagar no plano 25.
+A worktree do plano 8 (`.claude/worktrees/`), com cópias antigas da casca, foi apagada com a branch
+dela no plano 25 (o dono, 2026-11-17).
 
 ## Como validar
 - `make manifests` roda `tools/check_leftovers.py`; toda linha `saiu` passa.

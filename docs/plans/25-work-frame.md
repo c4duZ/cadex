@@ -59,11 +59,11 @@ a do sistema (ADR 0035); o terminal mantém a dele.
   Árvore do trabalho, Painel da seleção, Tela de início, Gaveta).
 - **B. A máquina contra casca.** Feita (2026-11-17): `tools/check_leftovers.py` com o `--self-test`
   no `make manifests`, e `tools/find_unused.py`, que achou cinco restos mortos de antes desta série
-  (removidos; a lista começa zerada). A worktree velha `.claude/worktrees/plan-8` espera o dono ver. tools/check_leftovers.py lê o inventário e falha em toda linha
+  (removidos; a lista começa zerada). A worktree velha do plano 8 (cópias antigas da casca) saiu, com a branch dela (o dono, 2026-11-17). tools/check_leftovers.py lê o inventário e falha em toda linha
   `saiu` que ainda existe (as regras estão no próprio inventário), no `make manifests`, com testes.
   tools/find_unused.py: lista tipos e funções Swift de `apps/macos/` que só aparecem no próprio
   arquivo, e textos `T(...)` repetidos ou sem uso; roda na varredura de cada plano (não falha o
-  `make check`: é lista para olhar). As cópias velhas em `.claude/worktrees/plan-8/` saem, depois
+  `make check`: é lista para olhar). As cópias velhas em .claude/worktrees/plan-8 saem, depois
   de o dono ver.
 - **C. Tema e tokens no app, gerados.** tools/design/build_tokens.py gera, de
   `docs/design/work-frame/tokens.json`, o arquivo apps/macos/shared/looks/DesignTokens.swift
