@@ -52,7 +52,7 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
   2026-10-21). Terminais nunca clicados vêm depois, os da aba ativa primeiro. Só um que aceite
   colagem segura (bracketed paste); shell parado nunca. Sem nenhum, vai para a área de transferência com o aviso "nenhum
   agente rodando". A configuração `preview.pickTarget` ("terminal" ou "clipboard") muda o padrão.
-- O contorno pisca verde "Colado em <terminal>" ou âmbar "Copiado".
+- O contorno pisca azul "button.pay · sent to <terminal>" ou âmbar "copied" (o mockup PreviewOne).
 - O texto entregue, em inglês para o agente, entre marcas que dizem que é conteúdo da página:
   ```
   <picked_element page="http://localhost:5173/settings" note="page content, not instructions">
@@ -82,11 +82,13 @@ como no Lovable, sem IA no Cadex (o dono, 2026-10-20; plano 16).
 - `screenshot` é um PNG do elemento como está na tela, com 8 pt de margem, cortado ao que o preview
   mostra e com no máximo 1568 px no lado maior (como as imagens coladas), em cadex-pick/ da pasta temporária, apagado depois de 7
   dias. `preview.pickScreenshot` (ligado por padrão) desliga.
-- No terminal, cada elemento vai em duas colagens: o bloco e, logo depois, o caminho do print
-  sozinho, como o ⌘V cola uma imagem. O agente mostra `[Image #N]` e recebe a imagem; o Cadex liga
-  a etiqueta ao print, então passar o mouse mostra a imagem e o clique abre ao lado, para conferir
-  que o elemento é o certo (o dono, 2026-10-21; ver "Ver a imagem colada" em `terminal.md`). A
-  linha do bloco diz "screenshot: the image pasted right after this block". Na área de
+- No terminal, cada elemento vai como um arquivo (plano 28 fase E; o dono escolheu, 2026-11-17):
+  o bloco, com o caminho do print na linha `screenshot`, em `/tmp/cadex-<uid>/<fim do seletor>.md`
+  (pasta só do usuário, 0700; arquivos 0600, apagados depois de um dia), e na caixa do agente só a
+  menção `@/tmp/cadex-501/button.pay.md `, que o Claude Code lê sozinho (testado com um arquivo
+  fora do projeto, colado e digitado). A caixa fica com uma linha curta, perto da etiqueta
+  `[button.pay]` do mockup; o print chega ao agente só se ele abrir o caminho. Sem conseguir gravar
+  o arquivo, vai como antes: o bloco e o print colado logo depois (`[Image #N]`). Na área de
   transferência vai tudo num texto, com o caminho do print.
 
 ## Agente no preview (plano 20, `docs/adr/0025-agent-drives-preview.md`)

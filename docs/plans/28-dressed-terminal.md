@@ -45,9 +45,8 @@ painéis" e os apelidos do 27.
   Permitir e Negar, o mesmo que o sino responde (responder num fecha o outro).
 - **E. Preview ao lado.** Feita (2026-11-17): a oferta do terminal abre o preview ao lado dele; a
   barra nova é o cabeçalho do painel (endereço com o ponto, Pick element, tamanhos); o contorno e a
-  etiqueta do elemento no desenho do mockup. O elemento continua chegando ao agente como o bloco
-  `<picked_element>` de antes (o Claude o mostra como texto colado), não como a etiqueta curta
-  "[button.pay]" do mockup: trocar perderia o que o agente precisa saber. Plano original: Abre como painel ao lado do terminal que mostrou o endereço (a oferta de
+  etiqueta do elemento no desenho do mockup. O elemento chega ao agente como um arquivo citado
+  com `@` (a opção C2 do dono): uma linha curta na caixa, o bloco e o caminho do print no arquivo. Plano original: Abre como painel ao lado do terminal que mostrou o endereço (a oferta de
   hoje, `onOpenPreview`), com a barra nova (endereço, Escolher elemento, tamanhos); o elemento
   escolhido entra na linha do agente como etiqueta. Um terminal só: terminal e preview lado a lado.
 - **F. Remoção.** Saem os apelidos do 27 (`project.*` fica, `space.*`, worktrees.show e

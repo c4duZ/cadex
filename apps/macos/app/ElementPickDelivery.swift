@@ -15,10 +15,17 @@ enum ElementPickDelivery {
     /// the setting still copy: the owner asked for that.
     static func deliver(_ delivery: PickDelivery, tabs: TabsController?, toClipboard: Bool, driving: TerminalView? = nil) -> PickOutcome {
         if delivery.toClipboard || toClipboard { return copy(delivery.text(), note: nil) }
-        // The source path from the agent's folder, which it works in; each
-        // element's picture after its block, as an image the terminal links
-        // to its [Image #N] tag.
+        // The source path from the agent's folder, which it works in. Each element goes as a file
+        // the agent reads by its `@` mention (PickFiles, the owner's choice of 2026-11-17: one
+        // short line in the box, the picture's path inside); if the file cannot be written, the
+        // block and its picture are pasted as before.
         for terminal in [driving].compactMap({ $0 }) + (tabs?.agentTerminals ?? []) {
+            if let mention = PickFiles.mention(delivery, relativeTo: terminal.currentDirectory) {
+                guard terminal.pasteFromApp(mention, images: []) else { continue }
+                tabs?.focus(terminal)
+                let title = terminal.programTitle
+                return .pasted(into: title.isEmpty ? T("the terminal", "o terminal") : title)
+            }
             let pieces = delivery.pieces(relativeTo: terminal.currentDirectory)
             guard let first = pieces.first,
                   terminal.pasteFromApp(first.text, images: first.picture.map { [$0] } ?? []) else { continue }

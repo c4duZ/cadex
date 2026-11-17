@@ -88,6 +88,23 @@ document.getElementById('vue').__vueParentComponent = { type: { __file: '/w/app/
 
 let agentExit = await Checks.run(agentChecks)
 let exitCode = await Checks.run([
+    ("a pick as a file the agent reads: its @ mention, named by the selector's end, the user's alone", {
+        let element = PickedElement(page: "http://x", selector: "main > div.cart button.pay", text: "Pay", html: "<button>", box: .zero, viewport: .zero)
+        expect(PickFiles.name(of: element) == "button.pay")
+        var bad = element
+        bad.selector = "a[href='../x'] > ../.."
+        expect(!PickFiles.name(of: bad).contains("/"), "\(PickFiles.name(of: bad))")
+        let delivery = PickDelivery(elements: [element, element], toClipboard: false, agentTerminal: nil)
+        guard let mention = PickFiles.mention(delivery) else { return expect(false, "no mention") }
+        let paths = mention.split(separator: " ").map { String($0.dropFirst()) }
+        expect(mention.hasPrefix("@" + PickFiles.folder + "/button.pay") && paths.count == 2 && paths[0] != paths[1], mention)
+        let text = (try? String(contentsOfFile: paths[0], encoding: .utf8)) ?? ""
+        expect(text.contains("selector: main > div.cart button.pay") && text.contains("<picked_element"), text)
+        let mode = (try? FileManager.default.attributesOfItem(atPath: paths[0])[.posixPermissions] as? Int) ?? 0
+        let folderMode = (try? FileManager.default.attributesOfItem(atPath: PickFiles.folder)[.posixPermissions] as? Int) ?? 0
+        expect(mode == 0o600 && folderMode == 0o700, "\(String(mode, radix: 8)) \(String(folderMode, radix: 8))")
+        for path in paths { try? FileManager.default.removeItem(atPath: path) }
+    }),
     ("after sending, the element's label says what it was and where it went (the PreviewOne mockup)", {
         let element = PickedElement(page: "http://x", selector: "main > div.cart button.pay", text: "", html: "", box: .zero, viewport: .zero)
         expect(PreviewPicker.flashText(.pasted(into: "Claude"), element: element, count: 1) == "button.pay · sent to Claude")

@@ -33,6 +33,9 @@
   cada navegação, sem `WKUserScript`; o fundo da página não é elemento), a origem e o print. `PickingWebView.swift` engole movimento, clique e arrasto com o modo ligado (a página não
   recebe hover nem clique; a rolagem passa): as áreas de rastreamento do WebKit, de um objeto
   dele e não da view, saem durante a seleção e uma nossa fica no lugar e o modo acaba quando a web view perde o foco.
+  `PickFiles.swift` (plano 28 fase E): cada elemento vira um arquivo em `/tmp/cadex-<uid>/` e o
+  terminal recebe só `@<caminho>` (o Claude Code lê o arquivo; testado), com o print pelo caminho
+  dentro; o app usa (`../../app/ElementPickDelivery.swift`) e, sem conseguir gravar, cola o bloco.
   `PickerOverlay.swift` desenha contorno, etiqueta, faixa e o aviso por cima, fora do DOM, no
   desenho do mockup (components.preview.picked: contorno azul de 2 pt a 3 pt do elemento, a
   etiqueta azul em cima, "button.pay · sent to Claude" depois de enviar; âmbar quando só copiou). `PickedElement.swift` é o texto entregue (limites, sem caracteres de controle, entre
