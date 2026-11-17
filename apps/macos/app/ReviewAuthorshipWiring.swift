@@ -7,9 +7,10 @@ import Strings
 import Worktrees
 
 /// Line authorship in the app (docs/adr/0027-local-authorship.md, plan 21
-/// phase E): with review.authorship on, the session kit gets a PostToolUse
-/// hook (`cadex hook PostToolUse`, which sends ranges only); each edit goes
-/// to its worktree's tracker; disk changes and each read of a review are
+/// phase E): the session kit always has a PostToolUse hook (`cadex hook
+/// PostToolUse`, which sends ranges only; Changes' "Last turn" reads it too,
+/// plan 26 C2); with review.authorship on, each edit goes to its worktree's
+/// tracker; disk changes and each read of a review are
 /// compared; the review tab draws the agent's lines.
 @MainActor
 enum AuthorshipHub {
@@ -28,7 +29,8 @@ enum AuthorshipHub {
 
     private static var swept = false
 
-    /// The setting: the hook in the kit, or not (then nothing is kept either).
+    /// The setting: authorship kept or not. The edits' hook is in the kit either way: Changes'
+    /// "Last turn" reads the same edits (plan 26 phase C2, AgentTurns).
     static func apply(_ enabled: Bool) {
         on = enabled
         if !swept {
@@ -36,7 +38,7 @@ enum AuthorshipHub {
             ReviewAuthorshipTracker.sweep()
         }
         let kit = SessionKit.shared
-        guard enabled, let tools = kit.toolsPath else { return kit.withdraw("review") }
+        guard let tools = kit.toolsPath else { return kit.withdraw("review") }
         let command = "'" + tools.replacingOccurrences(of: "'", with: "'\\''") + "' hook PostToolUse"
         kit.contribute("review", SessionKitPart(settings: ["hooks": ["PostToolUse": [
             ["matcher": "Edit|Write|MultiEdit|NotebookEdit", "hooks": [["type": "command", "command": command, "timeout": 5]]],

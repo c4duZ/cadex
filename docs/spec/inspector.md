@@ -32,9 +32,11 @@ novo.
     de memória e atualizar.
 - **Changes** (o painel de `source-control.md`): o seletor "Last turn / Task / Uncommitted" (o que
   o agente mudou na última rodada, tudo da tarefa contra o ponto de partida, ou o que não tem
-  commit); um arquivo por linha com M (âmbar) ou A (verde), o nome, a pasta e +/−; no pé, o último
-  resultado da checagem do projeto ("make check passed · 2 min ago") e os botões "Commit…" e "Open
-  PR". Clicar num arquivo abre o diff no centro. As ações de hoje (stage, unstage, descartar, abrir
+  commit; a rodada são os arquivos que as edições do agente tocaram desde a última parada dele,
+  pelos hooks, guardada só enquanto o app está aberto); um arquivo por linha com M (âmbar) ou A (verde), o nome, a pasta e +/−; no pé, o último
+  resultado da checagem do projeto ("make check passed · 2 min ago"; essa linha espera uma fonte, plano 26) e os botões "Commit…" (a
+  mensagem numa folha) e "Open PR" (uma aba com `gh pr create --web`, ou como instalar o GitHub
+  CLI). Clicar num arquivo abre o diff no centro. As ações de hoje (stage, unstage, descartar, abrir
   diff ao lado ou em aba) continuam, no clique direito e no ⌘K.
 - **Files** (o explorer de `explorer.md`): a árvore de arquivos da pasta da seleção, com as mesmas
   ações de hoje.

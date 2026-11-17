@@ -1,7 +1,9 @@
 # source-control (app macOS)
 
 ## O que eu quero
-- Painel com mudanças, stage por arquivo, commit (Cmd+Enter), push e pull, troca de branch.
+- A aba Changes do painel da direita (plano 26 fase C2; `../../../../docs/spec/inspector.md`): Last
+  turn, Task e Uncommitted, um arquivo por linha com a letra, a pasta e +/−, Commit… e Open PR; stage
+  por arquivo no clique direito, push e pull, troca de branch.
 - Diff lado a lado ou unificado.
 - A aba de revisão (plano 21): todas as mudanças de uma worktree contra a base, num lugar só, com
   stage por trecho e por linha.
@@ -18,13 +20,20 @@
   (`diskChanged`, as mudanças do watcher do explorer, inclusive em .git) e faz as ações; confirma
   descartar (arquivo novo vai para a Lixeira), commit sem nada staged e publicar a branch. Avisa o
   app por closures: `onMarks` (marcas do explorer), `onOpenDiff`, `onOpenFile`.
-- `SourceControlView.swift` (listas, mensagem, estados; a branch e os botões ficam no cabeçalho da
-  barra lateral, que o app enche por `onBranch` e `onBusy`) e
-  `SourceControlRow.swift` (linhas, cores das letras, até 1000 por lista, menu de contexto no `MenuTableView` compartilhado).
-- Comandos em `SourceControlCommands.swift`: git.commit, git.stage-all, git.unstage-all, git.stage,
+- `SourceControlView.swift`: a aba, na cara da peça Inspector (o seletor, a lista, o pé com Commit…
+  e Open PR, os estados; a branch e os botões ficam na linha de contexto do painel, que o app enche
+  por `onBranch` e `onBusy`). `ChangesScope.swift`: as três listas e `ChangesRow` (até 500, com a
+  entrada do status pelo caminho, para stage, descartar e o diff). `SourceControlChanges.swift`: a
+  leitura da lista na fila do repositório depois de cada status (contra HEAD; contra a base da
+  tarefa, `taskStart`; a última rodada filtra pelos arquivos que o app diz, `lastTurnFiles`; sem HEAD
+  ainda, os arquivos do status sem números), o clique (o diff sem commit, ou a revisão), o Commit…
+  (a mensagem numa folha; nada no stage, tudo entra) e o Open PR (`onOpenPullRequest`).
+  `ChangesRowView.swift`: a linha, o seletor e o menu de contexto no `MenuTableView` compartilhado.
+- Comandos em `SourceControlCommands.swift`: git.commit, git.open-pr, git.changes-last-turn,
+  git.changes-task, git.changes-uncommitted (os três do seletor), git.stage-all, git.unstage-all, git.stage,
   git.unstage, git.discard, git.open-diff e git.open-file (com -beside e -in-tab: ao lado, em nova aba; o menu mostra só o que vale
-  para a linha, em `SourceControlRow.swift`), git.reveal, git.fetch, git.pull, git.push,
-  git.refresh, git.switch-branch (branches na paleta) e diff.toggle-layout. Botões, menu e ⌘Enter
+  para a linha, em `ChangesRowView.swift`), git.reveal, git.fetch, git.pull, git.push,
+  git.refresh, git.switch-branch (branches na paleta) e diff.toggle-layout. Botões, seletor e menu
   só disparam esses ids. O git.show (⇧⌘G, mostrar o painel) é registrado em `apps/macos/app/main.swift`.
 - `DiffDocument.swift`: aba de diff (TabDocument) com as cores do editor, linhas de `DiffLines.swift`
   marcadas, as duas colunas rolando juntas, ou o patch numa coluna. Com `commit` no DiffRequest, o

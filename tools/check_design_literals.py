@@ -35,6 +35,9 @@ FRAME_FILES = [
     "apps/macos/features/inspector/InspectorView.swift",  # plano 26
     "apps/macos/features/inspector/InspectorParts.swift",  # plano 26
     "apps/macos/features/inspector/InspectorTab.swift",  # plano 26
+    "apps/macos/shared/looks/DesignButton.swift",  # plano 26
+    "apps/macos/features/source-control/SourceControlView.swift",  # plano 26
+    "apps/macos/features/source-control/ChangesRowView.swift",  # plano 26
     "apps/macos/shared/menus/AnchoredPanel.swift",  # plano 26
 ]
 # A design value: any number but a bare 0 or 1 (those are counts, identities and the hairline

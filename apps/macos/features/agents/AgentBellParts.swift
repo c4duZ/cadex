@@ -11,39 +11,27 @@ enum AgentBellParts {
 
     /// Allow (primary), Deny (secondary), Go to tab (quiet), as the mockup draws them.
     static func button(_ title: String, _ style: Style, _ action: @escaping @MainActor () -> Void) -> NSButton {
-        typealias B = DesignTokens.Button
+        switch style {
+        case .primary: return DesignButton.make(title, .primary, action: action)
+        case .secondary: return DesignButton.make(title, .secondary, action: action)
+        case .quiet: return quiet(title, action)
+        }
+    }
+
+    /// "Go to tab": text only, in the bell's link color.
+    private static func quiet(_ title: String, _ action: @escaping @MainActor () -> Void) -> NSButton {
         let button = BellButton(title: title, target: nil, action: nil)
         button.handler = action
         button.target = button
         button.action = #selector(BellButton.clicked)
         button.isBordered = false
-        button.wantsLayer = true
-        button.layer?.cornerRadius = UILooks.pt(B.radius)
-        let color: NSColor
-        let weight: NSFont.Weight
-        switch style {
-        case .primary:
-            button.layer?.backgroundColor = B.Primary.bg.cgColor
-            color = B.Primary.color
-            weight = B.Primary.weight
-        case .secondary:
-            button.layer?.backgroundColor = B.Secondary.bg.cgColor
-            button.layer?.borderColor = B.Secondary.border.cgColor
-            button.layer?.borderWidth = DesignTokens.Stroke.hairline
-            color = B.Secondary.color
-            weight = B.Secondary.weight
-        case .quiet:
-            color = DesignTokens.Bell.GoTo.color
-            weight = .regular
-        }
         button.attributedTitle = NSAttributedString(string: title, attributes: [
-            .font: UILooks.font(DesignTokens.FontSize.body, weight: weight), .foregroundColor: color,
+            .font: UILooks.font(DesignTokens.FontSize.body), .foregroundColor: DesignTokens.Bell.GoTo.color,
         ])
-        let padding = style == .quiet ? DesignTokens.Bell.GoTo.padding.left : B.paddingX[1]
         button.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            button.heightAnchor.constraint(equalToConstant: UILooks.pt(B.Heights.medium)),
-            button.widthAnchor.constraint(equalToConstant: ceil(button.attributedTitle.size().width) + UILooks.pt(padding) * 2),
+            button.heightAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Button.Heights.medium)),
+            button.widthAnchor.constraint(equalToConstant: ceil(button.attributedTitle.size().width) + UILooks.pt(DesignTokens.Bell.GoTo.padding.left) * 2),
         ])
         return button
     }

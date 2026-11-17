@@ -50,9 +50,11 @@ power, updates · Decisões: `docs/adr/0035-work-frame.md` · Mockups: 1 (o mapa
   contexto com os botões da aba (até 3 e o "⋯", desenhados no mockup Inspector), as páginas de
   antes dentro (saíram da barra lateral), inspector.toggle (⌥⌘I) e o botão da barra de título,
   inspector.visible e inspector.tab salvos, e os ganchos de teste CADEX_PERF_PANEL e
-  CADEX_PERF_SNAPSHOT (a janela de teste abre noutra mesa, onde o screencapture falha). Falta a
-  C2: Changes com o seletor e o pé (Commit…, Open PR), as linhas de Files, History e Memory no
-  desenho, a borda arrastável e a janela estreita. Plano original: Feature nova `inspector` (spec do plano 25): coluna de 320 pt,
+  CADEX_PERF_SNAPSHOT (a janela de teste abre noutra mesa, onde o screencapture falha). C2a feita
+  (2026-11-17): Changes no desenho (o seletor Last turn / Task / Uncommitted, as linhas com letra,
+  pasta e +/−, Commit… e Open PR; a última rodada pelos hooks de edição e de parada, agora sempre no
+  kit; a linha "make check passed" espera uma fonte). Falta a C2b: as linhas de Files, History e
+  Memory no desenho, a borda arrastável e a janela estreita. Plano original: Feature nova `inspector` (spec do plano 25): coluna de 320 pt,
   recolhível (⌥⌘I, inspector.toggle), com as abas Mudanças, Arquivos, Histórico e Memória; cada
   aba é a página de hoje (source-control, explorer, git-history, memory) com o cabeçalho de
   `SidebarHeader`, pelo catálogo que `SidebarWiring` já monta. git.show, `git.show-history`,

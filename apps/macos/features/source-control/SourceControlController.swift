@@ -69,6 +69,27 @@ public final class SourceControlController {
     /// Runs a command by id (buttons and keys go through the registry).
     let run: (String) -> Bool
 
+    /// Changes' scope (plan 26 phase C2): what the list shows; changing it reads again.
+    public var scope: ChangesScope = .uncommitted {
+        didSet { if scope != oldValue { loadChanges() } }
+    }
+    /// Where the task of a repository started (the branch New Task kept), from the app.
+    public var taskStart: (@MainActor (String) -> String?)?
+    /// The files the agent edited in its last turn in a repository (absolute paths), from the app;
+    /// nil: no turn seen there.
+    public var lastTurnFiles: (@MainActor (String) -> Set<String>?)?
+    /// git.open-pr: the app opens a tab in the repository with the GitHub CLI.
+    public var onOpenPullRequest: ((String) -> Void)?
+    /// The list as the scope shows it, read after each status.
+    var changeRows: [ChangesRow] = []
+    /// How many files the scope has, past the rows' cap too ("N more").
+    var changeTotal = 0
+    /// The list was not read while the tab was hidden: it reads when it shows.
+    var changesStale = false
+    var changesRunning = false
+    /// Asked again while a read ran (a scope switch, a new status): it reads once more after.
+    var changesPending = false
+
     /// The last branch seen in each repository, shown while its status is read.
     private var knownBranches: [String: Branch] = [:]
 
@@ -99,6 +120,10 @@ public final class SourceControlController {
                     self.repo = found
                     self.state = !available ? .gitMissing : (found == nil ? .noRepository : .loading)
                     self.status = GitRepository.Status()
+                    // The last repository's files go at once, not when the new list is read.
+                    self.changeRows = []
+                    self.changeTotal = 0
+                    self.panel.renderChanges(turnSeen: true, problem: nil)
                     self.panel.render()
                     // A repository's last branch shows at once, and nothing is
                     // said before its status comes: an empty status hid the
@@ -142,6 +167,7 @@ public final class SourceControlController {
                     self.state = .ready
                     self.panel.render()
                     self.publishMarks()
+                    self.loadChanges()
                 }
             }
         }
@@ -203,23 +229,6 @@ public final class SourceControlController {
                            action: T("Publish", "Publicar")) { [weak self] in self?.perform { $0.push(publish: branch) } }
         }
         perform { $0.push(publish: nil) }
-    }
-
-    /// git.commit (⌘Enter in the message). Nothing staged: asks to take every change.
-    public func commit() {
-        let message = panel.message
-        guard !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return panel.show(error: T("Write a commit message", "Escreva uma mensagem para o commit"))
-        }
-        let commitAll: @MainActor (Bool) -> Void = { [weak self] all in
-            self?.panel.clearMessage()
-            self?.perform { $0.commit(message, all: all) }
-        }
-        guard status.entries.contains(where: \.isStaged) else {
-            guard !status.entries.isEmpty else { return panel.show(error: T("No changes to commit", "Nenhuma mudança para o commit")) }
-            return confirm(T("Nothing is staged. Commit all changes?", "Nada está staged. Fazer o commit de todas as mudanças?"), detail: "", action: T("Commit All", "Commit de tudo")) { commitAll(true) }
-        }
-        commitAll(false)
     }
 
     /// Discards with confirmation; new files go to the Trash.

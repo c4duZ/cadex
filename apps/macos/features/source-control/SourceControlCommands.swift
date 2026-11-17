@@ -10,10 +10,25 @@ public enum SourceControlCommands {
                            activeDiff: @escaping @MainActor () -> DiffDocument? = { nil }) -> [Command] {
         func needsRepo() -> String? { git.repo == nil ? T("No git repository open", "Nenhum repositório git aberto") : nil }
         func needsSelection() -> String? { git.panel.selectedEntries().isEmpty ? T("No file selected", "Nenhum arquivo selecionado") : nil }
-        func selected() -> [GitRepository.Entry] { git.panel.selectedEntries().map(\.0) }
+        // One entry per file: a file staged and changed again comes in twice (both sides), and
+        // Discard counted it as two (review of 2026-11-17).
+        func selected() -> [GitRepository.Entry] {
+            var seen: Set<String> = []
+            return git.panel.selectedEntries().map(\.0).filter { seen.insert($0.path).inserted }
+        }
         return [
-            Command(id: "git.commit", title: T("Commit", "Fazer o commit"), keywords: ["commit", "git"], category: .file,
+            Command(id: "git.commit", title: T("Commit…", "Fazer o commit…"), keywords: ["commit", "git"], category: .file,
                     action: .run { git.commit() }, unavailableReason: needsRepo),
+            // Opens a tab with the GitHub CLI's `gh pr create --web` in the repository (plan 26 C2).
+            Command(id: "git.open-pr", title: T("Open Pull Request", "Abrir pull request"), keywords: ["pr", "pull request", "github", "gh"],
+                    category: .file, action: .run { git.openPullRequest() }, unavailableReason: needsRepo),
+            // Changes' three lists (docs/spec/inspector.md); the segments run these.
+            Command(id: "git.changes-last-turn", title: T("Changes: Last Turn", "Mudanças: última rodada"), keywords: ["changes", "turn", "agent", "mudanças"],
+                    category: .view, action: .run { git.scope = .lastTurn }, unavailableReason: needsRepo),
+            Command(id: "git.changes-task", title: T("Changes: Task", "Mudanças: tarefa"), keywords: ["changes", "task", "mudanças", "tarefa"],
+                    category: .view, action: .run { git.scope = .task }, unavailableReason: needsRepo),
+            Command(id: "git.changes-uncommitted", title: T("Changes: Uncommitted", "Mudanças: sem commit"), keywords: ["changes", "uncommitted", "mudanças"],
+                    category: .view, action: .run { git.scope = .uncommitted }, unavailableReason: needsRepo),
             Command(id: "git.stage-all", title: T("Stage All Changes", "Stage de todas as mudanças"), keywords: ["git add", "stage"], category: .file,
                     action: .run { git.stageAll() }, unavailableReason: needsRepo),
             Command(id: "git.unstage-all", title: T("Unstage All", "Unstage de tudo"), keywords: ["git reset", "unstage"], category: .file,

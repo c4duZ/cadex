@@ -220,7 +220,11 @@ extension AppDelegate {
             AgentsController.shared.noteHook(pid: event.pid, event: event.event, sessionID: event.sessionID)
             (NSApp.delegate as? AppDelegate)?.noteAgentEvent(event)
             (NSApp.delegate as? AppDelegate)?.noteRunHook(event)
-            if event.edit != nil { AuthorshipHub.record(event) }
+            if event.edit != nil {
+                AuthorshipHub.record(event)
+                AgentTurns.record(event)
+            }
+            if event.event == "Stop" { AgentTurns.stop(event) }
             if let questions = event.questions {
                 AgentAttention.shared.noteAsked(pid: event.pid, questions.map {
                     AgentAnswer.Asked(question: $0.question, options: $0.options, multiSelect: $0.multiSelect)

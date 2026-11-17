@@ -163,6 +163,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         showUpdate()
         explorer.revealSidebar = { [weak workspace] in workspace?.showInspector("files") }
         git.onOpenFile = { [weak opener] path, beside in opener?.open(path, beside: beside) }
+        wireChanges(git)
         git.onOpenDiff = { [weak opener] request, beside in opener?.openDiff(request, beside: beside) }
         git.onMarks = { [weak explorer] marks in explorer?.gitMarks = marks }
         startPerfHooks()

@@ -33,17 +33,16 @@ let exitCode = await Checks.run([
         expect(s.entries.count == 4)
         expect(s.entries[0].isStaged && !s.entries[0].isUnstaged)
         expect(s.entries[3].isUnstaged && s.entries[3].letter(staged: false) == "?")
-        let rows = SourceControlRow.rows(for: s)
-        expect(rows.first == .header(title: "Staged", staged: true, count: 2), "\(rows)")
-        expect(rows.count == 6, "\(rows.count)")
+        // Changes' rows (plan 26 C2): the counts' files with the status entry of each, by path.
+        let files = GitRepository.parseReviewFiles("M\t3\t1\tcore/a.zig\t\n?\t-\t-\tnovo.md\t\nM\t2\t0\tdocs/c.md\t\n")
+        let rows = ChangesRow.rows(files, entries: s.entries, keep: nil)
+        expect(rows.map(\.name) == ["a.zig", "novo.md", "c.md"] && rows[0].folder == "core" && rows[1].letter == "A", "\(rows)")
+        expect(rows[1].entry?.path == "novo.md" && rows[2].entry == nil, "a file changed only in commits has no entry")
+        expect(ChangesRow.rows(files, entries: s.entries, keep: ["docs/c.md"]).map(\.name) == ["c.md"], "the last turn keeps its files")
     }),
-    ("a list shows at most 1000 files and says how many there are", {
-        var s = GitRepository.Status()
-        s.entries = (0..<1500).map { GitRepository.Entry(kind: .untracked, index: "?", worktree: "?", path: "f\($0)", orig: "") }
-        let rows = SourceControlRow.rows(for: s)
-        expect(rows.count == 1 + SourceControlRow.limit + 1, "\(rows.count)")
-        guard case let .header(title, _, _) = rows.last else { return expect(false, "no note") }
-        expect(title.contains("1500"), title)
+    ("a list shows at most 500 files (docs/spec/inspector.md)", {
+        let files = (0..<800).map { GitRepository.ReviewFile(status: "?", added: nil, removed: nil, path: "f\($0)", orig: "") }
+        expect(ChangesRow.rows(files, entries: [], keep: nil).count == ChangesRow.limit)
     }),
     ("removed and added lines from a patch", {
         let patch = "diff --git a/x b/x\n--- a/x\n+++ b/x\n@@ -1,3 +1,3 @@\n um\n-dois\n+DOIS\n três\n@@ -10,2 +10,3 @@\n dez\n+onze\n doze\n"
@@ -63,15 +62,39 @@ let exitCode = await Checks.run([
         var marks: [String: Character] = [:]
         let controller = SourceControlController(folder: folder.root) { _ in true }
         controller.onMarks = { marks = $0 }
+        // The list reads only while the tab shows (plan 26 C2): on screen, in a window.
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 320, height: 600), styleMask: [.titled], backing: .buffered, defer: true)
+        window.contentView = controller.view
         let ready = await eventually { controller.state == .ready && controller.status.entries.count == 1 }
         expect(ready, "\(controller.state) \(controller.status)")
         expect(marks[folder.root + "/a.txt"] == "?", "\(marks)")
         controller.stageAll()
         _ = await eventually { controller.status.entries.first?.isStaged == true }
-        controller.panel.messageForTests("primeiro commit")
-        controller.commit()
+        let listed = await eventually { controller.changeRows.map(\.name) == ["a.txt"] }
+        expect(listed, "uncommitted lists the new file: \(controller.changeRows)")
+        controller.scope = .lastTurn
+        let noTurn = await eventually { controller.changeRows.isEmpty }
+        expect(noTurn, "no turn seen: nothing")
+        controller.lastTurnFiles = { _ in [controller.repositoryRoot! + "/a.txt"] }
+        controller.scope = .uncommitted
+        controller.scope = .lastTurn
+        let turn = await eventually { controller.changeRows.map(\.name) == ["a.txt"] }
+        expect(turn, "the turn's file: \(controller.changeRows)")
+        controller.scope = .uncommitted
+        controller.commit(message: "primeiro commit", all: false)
         let committed = await eventually { controller.status.entries.isEmpty && controller.status.oid != "(initial)" }
         expect(committed, "\(controller.status)")
+        // Settled first: a read started before hiding may still run and see the new file.
+        _ = await eventually { controller.changeRows.isEmpty && !controller.changesRunning }
+        controller.view.isHidden = true
+        FileManager.default.createFile(atPath: dir + "/b.txt", contents: Data("b\n".utf8))
+        controller.refresh()
+        _ = await eventually { controller.status.entries.count == 1 }
+        expect(controller.changeRows.isEmpty && controller.changesStale, "hidden: nothing read \(controller.changeRows.map(\.name)) \(controller.changesStale)")
+        controller.view.isHidden = false
+        let shown = await eventually { controller.changeRows.map(\.name) == ["b.txt"] }
+        expect(shown, "shown again, it reads: \(controller.changeRows)")
+        window.contentView = nil
         try? FileManager.default.removeItem(atPath: dir)
     }),
 ])
