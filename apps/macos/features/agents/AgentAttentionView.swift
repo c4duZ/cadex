@@ -121,7 +121,7 @@ public final class AgentAttentionView: NSView {
         spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
         views.append(spacer)
         let other = subtab == "feed" ? T("Needs you", "Precisa de você") : T("Activity", "Atividade")
-        views.append(AgentBellParts.button(other, .quiet) { [weak self] in
+        views.append(AgentBellParts.link(other) { [weak self] in
             guard let self else { return }
             self.subtab = self.subtab == "feed" ? "needs" : "feed"
         })
@@ -144,11 +144,21 @@ public final class AgentAttentionView: NSView {
                                                    AgentBellParts.label(heading, size: C.Title.fontSize, weight: C.Title.weight, color: DesignTokens.Color.textPrimary),
                                                    time: AgentTime.short(since: request.at))]
         if request.kind == .question, !title.isEmpty {
-            views.append(AgentBellParts.label(title, size: Look.Question.fontSize, color: Look.Question.color, wraps: true))
+            // The drawing's line height (1.5 × the size), as a fixed line.
+            let question = AgentBellParts.label(title, size: Look.Question.fontSize, color: Look.Question.color, wraps: true)
+            let style = NSMutableParagraphStyle()
+            style.minimumLineHeight = UILooks.pt(Look.Question.fontSize * Look.Question.lineHeight)
+            style.maximumLineHeight = style.minimumLineHeight
+            question.attributedStringValue = NSAttributedString(string: title, attributes: [
+                .font: UILooks.font(Look.Question.fontSize), .foregroundColor: Look.Question.color, .paragraphStyle: style,
+            ])
+            views.append(question)
         } else if !request.detail.isEmpty {
             views.append(command(request.detail))
         }
-        views.append(AgentBellParts.label([request.project, request.session, request.account].filter { !$0.isEmpty }.joined(separator: " · "),
+        // "cadex · perf-subagent-window · Claude · bhband" (the drawing): the cards come from the
+        // kit's hooks, which only Claude Code sessions run.
+        views.append(AgentBellParts.label([request.project, request.session, "Claude", request.account].filter { !$0.isEmpty }.joined(separator: " · "),
                                           size: Look.Meta.fontSize, color: Look.Meta.color))
         if request.kind == .question, !request.options.isEmpty {
             // Each option as a button, and words of one's own in the field (ADR 0036): typed in
@@ -195,7 +205,8 @@ public final class AgentAttentionView: NSView {
         box.orientation = .vertical
         box.alignment = .leading
         box.spacing = UILooks.pt(C.gap)
-        for view in [row] { view.widthAnchor.constraint(equalTo: box.widthAnchor).isActive = true }
+        // The command's box across the card, as the drawing's block.
+        for view in views where view === row || view is CommandBox { view.widthAnchor.constraint(equalTo: box.widthAnchor).isActive = true }
         return box
     }
 
@@ -206,7 +217,7 @@ public final class AgentAttentionView: NSView {
         label.font = UILooks.monospaced(K.fontSize)
         label.textColor = K.color
         label.maximumNumberOfLines = 4
-        let box = NSStackView(views: [label])
+        let box = CommandBox(views: [label])
         box.edgeInsets = NSEdgeInsets(top: UILooks.pt(K.padding.top), left: UILooks.pt(K.padding.left),
                                       bottom: UILooks.pt(K.padding.bottom), right: UILooks.pt(K.padding.right))
         box.wantsLayer = true
@@ -224,7 +235,7 @@ public final class AgentAttentionView: NSView {
         typealias E = Look.Earlier
         let label = AgentBellParts.label(T("EARLIER", "ANTES"), size: E.Label.fontSize, weight: E.Label.weight, color: E.Label.color)
         add(label, padding: E.Label.padding, line: false)
-        for entry in done { add(feedRow(entry), padding: Self.listed(E.Row.padding), line: false) }
+        for (index, entry) in done.enumerated() { add(feedRow(entry), padding: Self.listed(last: index == done.count - 1), line: false) }
     }
 
     private func renderFeed() {
@@ -234,16 +245,17 @@ public final class AgentAttentionView: NSView {
         let project = projectFilter.indexOfSelectedItem > 0 ? projectFilter.titleOfSelectedItem : nil
         let entries = attention.feed(kind: kind, project: project)
         if entries.isEmpty { return note(T("Nothing of this kind.", "Nada desse tipo.")) }
-        for entry in entries.prefix(Self.maxFeed) { add(feedRow(entry), padding: Self.listed(Look.Earlier.Row.padding), line: false) }
+        let shown = entries.prefix(Self.maxFeed)
+        for (index, entry) in shown.enumerated() { add(feedRow(entry), padding: Self.listed(last: index == shown.count - 1), line: false) }
     }
 
     @objc func filterChanged() { render() }
 
-    /// A line of the list: its own padding inside the list's (components.bell.earlier), so its
-    /// glyph lines up with the cards'.
-    static func listed(_ row: NSEdgeInsets) -> NSEdgeInsets {
+    /// A line of the list in the list's side padding (components.bell.earlier.listPadding); the
+    /// row's own padding is inside its fill (feedRow), so the glyph lines up with the cards'.
+    static func listed(last: Bool) -> NSEdgeInsets {
         let list = Look.Earlier.listPadding
-        return NSEdgeInsets(top: row.top, left: row.left + list.left, bottom: row.bottom, right: row.right + list.right)
+        return NSEdgeInsets(top: 0, left: list.left, bottom: last ? list.bottom : 0, right: list.right)
     }
 
     /// The kind and project pop-ups, keeping what was picked.
@@ -298,7 +310,9 @@ public final class AgentAttentionView: NSView {
         let line = AgentBellParts.line(state, glyph: Look.Earlier.Row.glyph, label, time: AgentTime.short(since: entry.at))
         line.spacing = UILooks.pt(Look.Earlier.Row.gap)
         line.heightAnchor.constraint(equalToConstant: UILooks.pt(Look.Earlier.Row.height)).isActive = true
-        let row = AgentRow(line, inset: 0)
+        // The row's own padding inside its fill (components.bell.earlier.row), nothing above or below.
+        let padding = Look.Earlier.Row.padding
+        let row = AgentRow(line, inset: UILooks.pt(padding.left), trailing: UILooks.pt(padding.right), vertical: 0)
         row.hoverFill = DesignTokens.Color.bgButton
         row.onClick = { [weak self] in self?.onGoTo?(entry.key, 0) }
         if let key = entry.key {
@@ -337,3 +351,6 @@ public final class AgentAttentionView: NSView {
         add(box, padding: Look.Card.padding, line: false)
     }
 }
+
+/// A permission's command in its box (the card stretches it across).
+final class CommandBox: NSStackView {}

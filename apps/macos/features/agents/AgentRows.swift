@@ -137,17 +137,19 @@ final class AgentRow: NSView {
     }
     private var checkedPointer = false
 
-    init(_ content: NSView, inset: CGFloat = 6) {
+    /// `inset` and `trailing` keep the content off the sides, `vertical` off the top and bottom
+    /// (the bell's lines give their own: its rows are 34 pt with nothing around, Bell mockup).
+    init(_ content: NSView, inset: CGFloat = 6, trailing: CGFloat = 6, vertical: CGFloat = 5) {
         super.init(frame: .zero)
         wantsLayer = true
         layer?.cornerRadius = 7
         content.translatesAutoresizingMaskIntoConstraints = false
         addSubview(content)
         NSLayoutConstraint.activate([
-            content.topAnchor.constraint(equalTo: topAnchor, constant: 5),
-            content.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -5),
+            content.topAnchor.constraint(equalTo: topAnchor, constant: vertical),
+            content.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -vertical),
             content.leadingAnchor.constraint(equalTo: leadingAnchor, constant: inset),
-            content.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
+            content.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -trailing),
         ])
     }
 

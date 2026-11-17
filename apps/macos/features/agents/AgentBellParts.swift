@@ -36,6 +36,19 @@ enum AgentBellParts {
         return button
     }
 
+    /// "Activity" in the header: the drawing's 12 pt muted text, as tall as its words.
+    static func link(_ title: String, _ action: @escaping @MainActor () -> Void) -> NSButton {
+        let button = BellButton(title: title, target: nil, action: nil)
+        button.handler = action
+        button.target = button
+        button.action = #selector(BellButton.clicked)
+        button.isBordered = false
+        button.attributedTitle = NSAttributedString(string: title, attributes: [
+            .font: UILooks.font(DesignTokens.Bell.Activity.fontSize), .foregroundColor: DesignTokens.Bell.Activity.color,
+        ])
+        return button
+    }
+
     /// "Answer…": the owner's own words for a question, sent with Return (components.bell.answer).
     static func answerField(draft: String, focused: Bool, edit: @escaping @MainActor (String) -> Void,
                             send: @escaping @MainActor (String) -> Void) -> NSView {
@@ -79,6 +92,10 @@ enum AgentBellParts {
     /// A glyph, the text and the time, as a card's heading and an earlier line are.
     static func line(_ state: GlyphState, glyph size: CGFloat, _ text: NSView, time: String) -> NSStackView {
         let glyph = StateGlyphView(size: size, state: state)
+        // Only its design size in the row: the halo draws past it, as the drawing's box-shadow
+        // (the text sat 7 pt right, measured 2026-11-17).
+        glyph.widthAnchor.constraint(equalToConstant: UILooks.pt(size)).isActive = true
+        glyph.heightAnchor.constraint(equalToConstant: UILooks.pt(size)).isActive = true
         let spacer = NSView()
         spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
         let when = label(time, size: DesignTokens.Bell.Card.Time.fontSize, color: DesignTokens.Bell.Card.Time.color)

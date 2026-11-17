@@ -142,6 +142,35 @@ let attentionChecks: [(name: String, body: Checks.Body)] = [
         attention.resolve(id)
         attention.update([])
     }),
+    ("the bell with the Bell mockup's own data (CADEX_SNAPSHOT_DIR: bell-mockup.png), to lay over it", {
+        let attention = AgentAttention.shared
+        attention.isEnabled = true
+        attention.update([report("p1", pid: 71, .working), report("q1", pid: 72, .working)])
+        attention.update([report("p1", pid: 71, .blocked, .permission, "approve Bash: make perf"),
+                          report("q1", pid: 72, .blocked, .question,
+                                 "answer: Keep the old checkout copy for returning customers, or use the new text for everyone?")])
+        let id = attention.addPermission(pid: 71, tool: "Bash", subject: "make perf", project: "cadex", session: "perf-subagent-window",
+                                         account: "bhband", key: "p1") { _ in }
+        let page = AgentAttentionView(frame: .zero)
+        let width = DesignTokens.Popover.bellWidth
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: width, height: 500), styleMask: [.borderless], backing: .buffered, defer: false)
+        let root = NSView(frame: window.contentLayoutRect)
+        root.wantsLayer = true
+        root.layer?.backgroundColor = DesignTokens.Popover.bg.cgColor
+        window.contentView = root
+        page.translatesAutoresizingMaskIntoConstraints = false
+        root.addSubview(page)
+        NSLayoutConstraint.activate([page.topAnchor.constraint(equalTo: root.topAnchor), page.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+                                     page.widthAnchor.constraint(equalToConstant: width)])
+        page.render()
+        root.layoutSubtreeIfNeeded()
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"], let bitmap = root.bitmapImageRepForCachingDisplay(in: root.bounds) {
+            root.cacheDisplay(in: root.bounds, to: bitmap)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/bell-mockup.png"))
+        }
+        attention.resolve(id)
+        attention.update([])
+    }),
     ("an answer's keys: an option's number at once; the words after the type-something number and Return (tested 2026-11-17)", {
         let parsed = AgentAnswer.parse("Which color? (Red · Blue)")
         expect(parsed.question == "Which color?" && parsed.options == ["Red", "Blue"], "\(parsed)")
