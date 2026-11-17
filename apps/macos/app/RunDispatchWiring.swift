@@ -139,7 +139,7 @@ extension WindowSession {
     /// or one of its tasks: where the owner may reuse one.
     func idleTerminals(repo: String) -> [DispatchForm.Idle] {
         let root = WorktreesController.shared.tasksRoot(of: repo)
-        return (spaces?.spaces ?? []).flatMap { $0.tabs.allTerminals }.compactMap { terminal in
+        return (projects?.projects ?? []).flatMap { $0.tabs.allTerminals }.compactMap { terminal in
             guard !terminal.hasForegroundProcess, terminal.shellPid > 0, let cwd = terminal.currentDirectory,
                   cwd == repo || cwd.hasPrefix(repo + "/") || cwd.hasPrefix(root + "/") else { return nil }
             return DispatchForm.Idle(title: T("Terminal in ", "Terminal em ") + (cwd as NSString).abbreviatingWithTildeInPath, shell: terminal.shellPid)
@@ -177,7 +177,7 @@ extension WindowSession {
         }
         guard let command = command(for: dispatch, task: task, cwd: cwd, book: book) else { return }
         found.terminal.session?.write(command + "\n")
-        found.window.spaces?.select(found.space)
+        found.window.projects?.select(found.space)
         found.window.tabs?.focus(found.terminal)
     }
 

@@ -111,7 +111,7 @@ extension WindowSession {
     /// Only terminals running a program are asked: a shell at its prompt
     /// listens on nothing, and with none running nothing is read.
     func readPorts(into label: StatusLabel) {
-        let groups = (spaces?.spaces ?? []).flatMap { $0.tabs.allTerminals }.map(\.foregroundGroup).filter { $0 > 0 }
+        let groups = (projects?.projects ?? []).flatMap { $0.tabs.allTerminals }.map(\.foregroundGroup).filter { $0 > 0 }
         ports = groups.isEmpty ? [] : ListeningPorts.ports(inGroups: groups)
         label.text = "\(ports.count)"
         portsCard?.refresh()

@@ -108,7 +108,7 @@ extension WindowSession {
         guard let run = (try? OrchestrationController.shared.automations()?.history(of: automation))??.first(where: { $0.id == id }),
               let session = run.session else { return }
         if let found = app.locate({ $0.agentResume?.kitSession == session.kit }) {
-            found.window.spaces?.select(found.space)
+            found.window.projects?.select(found.space)
             return found.window.tabs?.focus(found.terminal) ?? ()
         }
         guard let claude = session.claude, let automation = try? OrchestrationController.shared.automations()?.automation(automation) else { return NSSound.beep() }

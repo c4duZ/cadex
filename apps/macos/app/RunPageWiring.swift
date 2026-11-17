@@ -160,7 +160,7 @@ extension WindowSession {
               let found = dispatchTerminal(dispatch) else { return NSSound.beep() }
         NSApp.activate(ignoringOtherApps: true)
         found.window.window.makeKeyAndOrderFront(nil)
-        found.window.spaces?.select(found.space)
+        found.window.projects?.select(found.space)
         found.window.tabs?.focus(found.terminal)
     }
 

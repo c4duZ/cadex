@@ -38,15 +38,17 @@ enum WorkColor: String, CaseIterable {
 }
 
 extension WindowSession {
-    /// space.set-color and tab.set-color.
+    /// project.set-color (space.set-color, its old id until plan 28) and tab.set-color.
     func registerWorkColors(palette: CommandPaletteController) {
+        let projectColor: @MainActor () -> Void = { [weak self] in
+            guard let projects = self?.projects else { return }
+            palette.open(WorkColorSource(current: projects.activeColor) { projects.setActiveColor($0) })
+        }
         commands.register([
-            Command(id: "space.set-color", title: T("Set Space Color", "Escolher a cor do space"),
-                    keywords: ["space", "color", "cor", "paint", "pintar"], category: .tabs,
-                    action: .run { [weak self] in
-                        guard let spaces = self?.spaces else { return }
-                        palette.open(WorkColorSource(current: spaces.activeColor) { spaces.setActiveColor($0) })
-                    }),
+            Command(id: "project.set-color", title: T("Set Project Color", "Escolher a cor do projeto"),
+                    keywords: ["project", "color", "cor", "paint", "pintar", "projeto"], category: .tabs, action: .run(projectColor)),
+            Command(id: "space.set-color", title: T("Set Project Color (old name)", "Escolher a cor do projeto (nome antigo)"),
+                    keywords: ["space"], category: .tabs, action: .run(projectColor)),
             Command(id: "tab.set-color", title: T("Set Tab Color", "Escolher a cor da aba"),
                     keywords: ["tab", "aba", "color", "cor", "paint", "pintar"], category: .tabs,
                     action: .run { [weak self] in
@@ -58,7 +60,7 @@ extension WindowSession {
 
     /// The window's accent from the active tab's color or the space's.
     func refreshWorkColor() {
-        let name = tabs?.activeColor ?? spaces?.activeColor
+        let name = tabs?.activeColor ?? projects?.activeColor
         workspace?.workColor = name.flatMap(WorkColor.init(rawValue:))
     }
 }

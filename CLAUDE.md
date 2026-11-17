@@ -39,7 +39,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | computer-use | não | sim | o agente opera outros apps do Mac pela acessibilidade, com permissão do dono por app |
 | ssh | não | sim | os hosts do ~/.ssh/config, se respondem, e conectar numa aba |
 | machines | não | sim | as máquinas da tailnet pelo Tailscale do dono: online, caminho, latência, conectar; depois "Rodar em", Docker e compartilhar |
-| spaces | não | sim | grupos de abas restaurados entre sessões (vira `projects`, o projeto com pasta, no plano 27) |
+| projects | não | sim | o projeto: a pasta de um repositório com as abas abertas nela, restaurado entre sessões (o que eram os spaces, plano 27) |
 | themes | não | sim | temas do app e do editor, imagem de fundo |
 | settings | não | sim | janela de configurações e preferências salvas |
 | command-palette | não | sim | ⌘K: registro de todos os comandos e a paleta que executa qualquer um |

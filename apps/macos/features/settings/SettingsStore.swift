@@ -15,7 +15,7 @@ public final class SettingsStore {
 
     /// CADEX_SETTINGS_FILE points to another file: the perf scenarios try
     /// themes and effects without touching the owner's settings (as
-    /// CADEX_SPACES_FILE does for the spaces).
+    /// CADEX_PROJECTS_FILE does for the projects).
     public static var defaultFile: URL {
         if let path = ProcessInfo.processInfo.environment["CADEX_SETTINGS_FILE"], !path.isEmpty {
             return URL(fileURLWithPath: path)

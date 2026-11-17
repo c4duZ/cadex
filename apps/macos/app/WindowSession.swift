@@ -13,7 +13,7 @@ import Search
 import Settings
 import Shortcuts
 import SourceControl
-import Spaces
+import Projects
 import Tabs
 
 /// One window (docs/spec/workspace.md): its workspace folder, spaces and
@@ -28,9 +28,9 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// The app menu for this window's commands, set when it is key.
     private(set) var mainMenu: NSMenu?
     var palette: CommandPaletteController?
-    var spaces: SpacesController?
+    var projects: ProjectsController?
     /// The shown space's tabs: every command acts on these.
-    var tabs: TabsController? { spaces?.active }
+    var tabs: TabsController? { projects?.active }
     var workspace: WorkspaceView?
     let folder: WorkspaceFolder
     /// The window the app opened with: its spaces are saved and restored.
@@ -97,7 +97,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         let looks = current.appearance
         applyLooks(looks.backgroundImage.map { .init(path: $0, opacity: looks.backgroundOpacity, blur: looks.backgroundBlur) },
                    vibrancy: looks.vibrancy)
-        startSpaces()
+        startProjects()
     }
 
     /// The title area is the app's (fullSizeContentView, transparent title
@@ -126,7 +126,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// The opener, the shell view and the links between the features.
     private func connectWindow() {
         let opener = FileOpener(tabs: { [weak self] in self?.tabs },
-                                every: { [weak self] in self?.spaces?.spaces.map(\.tabs) ?? [] },
+                                every: { [weak self] in self?.projects?.projects.map(\.tabs) ?? [] },
                                 opensBeside: { [weak self] in self?.settings.opensBeside ?? true })
         opener.onEditorOpened = { [weak self] document in self?.markdown?.attach(document) }
         opener.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
@@ -170,7 +170,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
     }
 
     /// Whether a terminal in any space of this window runs a program.
-    var hasRunningProgram: Bool { spaces?.spaces.contains { $0.tabs.hasRunningProgram } ?? false }
+    var hasRunningProgram: Bool { projects?.projects.contains { $0.tabs.hasRunningProgram } ?? false }
 
     /// The menu and the shortcut labels from the keymap in effect.
     func applyKeymap(_ keymap: Keymap) {
@@ -240,9 +240,9 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// The tabs ask before closing over a running program; close() after
     /// the confirmation does not come back here.
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        guard let spaces else { return true }
-        spaces.saveNow()
-        return spaces.shouldCloseAll(then: { sender.close() })
+        guard let projects else { return true }
+        projects.saveNow()
+        return projects.shouldCloseAll(then: { sender.close() })
     }
 
     /// Its shells end with it: with another window open the app goes on.
@@ -251,7 +251,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         if let workspace { updateAgentsDot(shown: false, on: workspace.sidebar) }
         workspace?.statusBar.stopReading()
         bellPanel.close()
-        spaces?.closeAll()
+        projects?.closeAll()
         app.sessionClosed(self)
     }
 }

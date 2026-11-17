@@ -82,10 +82,10 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 ### Projetos (os spaces) (plano 27)
 | tipo | peça | estado | destino | plano |
 |---|---|---|---|---|
-| arquivo | `apps/macos/features/spaces/` | muda | a feature `projects`: o space com pasta, na árvore | 27 |
+| arquivo | `apps/macos/features/spaces/` | saiu | a feature `projects` (`apps/macos/features/projects/`): o space com pasta; projects.json, migrado uma vez do spaces.json (fase A); a árvore na fase B | 27 |
 | comando | `space.switch`, `space.new`, `space.rename`, `space.close`, `space.next`, `space.previous`, `space.set-color` | sai | `project.*`; apelidos no 27, saem no 28 | 28 |
-| spec | `docs/spec/spaces.md` | sai | `docs/spec/projects.md` | 27 |
-| arquivo | `apps/macos/app/SpacesWiring.swift` | muda | `ProjectsWiring.swift` | 27 |
+| spec | `docs/spec/spaces.md` | muda | o Mac segue `docs/spec/projects.md` desde o plano 27; ela fica para o app do Windows, que ainda tem spaces (`docs/adr/0035-work-frame.md`: o Windows vem depois) | port |
+| arquivo | `apps/macos/app/SpacesWiring.swift` | saiu | `apps/macos/app/ProjectsWiring.swift` | 27 |
 
 ### Terminal e painéis (plano 28)
 | tipo | peça | estado | destino | plano |

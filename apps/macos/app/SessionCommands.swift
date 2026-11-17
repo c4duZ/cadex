@@ -70,7 +70,7 @@ extension WindowSession {
         commands.register(ShareCommands.all(palette: palette, actions: shareActions()))
         commands.register(StatusBarCommands.all({ [weak self] in self?.workspace?.statusBar }, palette: palette,
                                                 customize: { [weak self] in self?.openCustomize("statusBar") }))
-        makeSpaces(palette: palette)
+        makeProjects(palette: palette)
         registerWorkColors(palette: palette)
         makeExplorer()
         makeSearch(palette: palette)
@@ -237,7 +237,7 @@ extension WindowSession {
             self.markdown?.setRoot(root)
             self.git?.setFolder(root)
             self.panelFolderChanged()
-            self.spaces?.scheduleSave()
+            self.projects?.scheduleSave()
             self.showLocation(root)
         }
     }

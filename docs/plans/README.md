@@ -63,7 +63,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 |---|---|---|---|
 | 25 | `docs/plans/25-work-frame.md` | fundações: specs, tema Cadex Night, medidas, a peça de estado, o inventário e a máquina contra casca velha | feito (2026-11-17): fases A a E; galeria de fidelidade em https://claude.ai/artifact/FpF42fpf4XMZoP4rZSmy37 |
 | 26 | `docs/plans/26-frame.md` | barra de título, barra de status, painel da direita, o sino em popover | feito (2026-11-17): fases A a F; `make perf` passou com o painel aberto |
-| 27 | `docs/plans/27-projects-tree.md` | projetos (os spaces) e a árvore do trabalho; sai a fileira de ícones | escrito |
+| 27 | `docs/plans/27-projects-tree.md` | projetos (os spaces) e a árvore do trabalho; sai a fileira de ícones | fase A no código (2026-11-17); falta B (a árvore), C, D e E |
 | 28 | `docs/plans/28-dressed-terminal.md` | o terminal vestido e o preview ao lado | escrito |
 | 29 | `docs/plans/29-entrances.md` | tela de início, a folha única do ⌘N (tarefa e corrida), ⌘J | escrito |
 | 30 | `docs/plans/30-overview.md` | página do projeto, quadro, corrida, gaveta e a auditoria final | escrito |

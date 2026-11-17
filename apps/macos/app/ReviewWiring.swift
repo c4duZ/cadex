@@ -73,6 +73,6 @@ extension WindowSession {
     }
 
     private func spacesTabs() -> [TabsController] {
-        spaces?.spaces.map(\.tabs) ?? []
+        projects?.projects.map(\.tabs) ?? []
     }
 }

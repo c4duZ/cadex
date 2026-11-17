@@ -161,7 +161,7 @@ extension WindowSession {
     /// takes the focus; the window does not jump in front of the owner's work.
     private func besideAgent(_ request: CommandRequest) {
         guard let found = app.locate({ AppDelegate.key($0) == request.terminal }), found.window === self else { return }
-        spaces?.select(found.space)
+        projects?.select(found.space)
         tabs?.focus(found.terminal)
     }
 

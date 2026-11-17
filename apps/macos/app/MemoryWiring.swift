@@ -75,7 +75,7 @@ extension AppDelegate {
             guard status == .review, let self else { return }
             let memory = self.settings.store.settings.memory
             guard memory.enabled, memory.consolidateInSession else { return }
-            for terminal in self.sessions.flatMap({ window in (window.spaces?.spaces ?? []).flatMap { $0.tabs.allTerminals } }) {
+            for terminal in self.sessions.flatMap({ window in (window.projects?.projects ?? []).flatMap { $0.tabs.allTerminals } }) {
                 guard let resume = terminal.agentResume, resume.folder == path || resume.folder.hasPrefix(path + "/") else { continue }
                 MemoryKit.requestConsolidation(sessionID: resume.sessionID)
             }

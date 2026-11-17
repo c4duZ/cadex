@@ -55,7 +55,7 @@ extension AppDelegate {
     private var hibernateMinutes: Int { settings.store.settings.agents.hibernateAfterMinutes }
 
     private var everyTerminal: [TerminalView] {
-        sessions.flatMap { window in (window.spaces?.spaces ?? []).flatMap { $0.tabs.allTerminals } }
+        sessions.flatMap { window in (window.projects?.projects ?? []).flatMap { $0.tabs.allTerminals } }
     }
 
     /// An agent Cadex opened, running, not hibernated.

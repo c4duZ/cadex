@@ -10,7 +10,7 @@ import MediaPreview
 import Preview
 import SourceControl
 import GitHistory
-import Spaces
+import Projects
 import Tabs
 import Terminal
 
@@ -33,7 +33,7 @@ func appRegistry() -> CommandRegistry {
     registry.register(SourceControlCommands.all(SourceControlController(folder: NSTemporaryDirectory()) { _ in false },
                                                 palette: palette))
     registry.register(HistoryCommands.all(open: { _ in }, repository: { nil }, active: { nil }))
-    registry.register(SpacesCommands.all(SpacesController { fatalError("not called") }, palette: palette) { "/" })
+    registry.register(ProjectsCommands.all(ProjectsController { fatalError("not called") }, palette: palette) { "/" })
     registry.register(MarkdownCommands.all(MarkdownController(root: NSTemporaryDirectory(), findFiles: { _ in [] }, open: { _, _ in }),
                                            palette: palette) { nil })
     registry.register(SearchCommands.all(SearchController(root: NSTemporaryDirectory(), showHidden: false) { _, _, _ in },

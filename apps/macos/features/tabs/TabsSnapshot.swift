@@ -2,7 +2,7 @@ import CoreGraphics
 import Foundation
 
 /// What a window's tabs are, in a form that can be saved and rebuilt
-/// (docs/spec/spaces.md): the order, each tab's panes (a terminal by its
+/// (docs/spec/projects.md): the order, each tab's panes (a terminal by its
 /// folder, a document by its identity) with their proportions, and the
 /// active tab. Not the terminals' content: each pane starts a new shell.
 public struct TabsSnapshot: Codable, Equatable, Sendable {

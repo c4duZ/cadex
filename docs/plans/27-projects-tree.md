@@ -21,7 +21,12 @@ agents, tabs, command-palette · Decisões: `docs/adr/0035-work-frame.md` · Moc
 - Tokens: components.sidebar (valores exatos em `docs/design/work-frame/tokens.json`).
 - Cada arquivo reescrito entra na lista de tools/check_design_literals.py: só valores de
   `DesignTokens`, nada digitado.
-- **A. Projetos.** A feature `spaces` vira `projects` (pasta, spec docs/spec/projects.md, linha
+- **A. Projetos.** Feita (2026-11-17): `apps/macos/features/projects/` (pasta por projeto, a raiz do
+  repositório; a worktree de uma tarefa é do repositório principal), projects.json com a migração
+  única do spaces.json (que fica ao lado como spaces.migrated.json), project.* com os space.* como
+  apelidos, ProjectsWiring.swift; abrir com uma pasta faz o projeto dela; o daemon do terminal mantém
+  o nome de antes (as sessões guardadas religam). A spec spaces.md fica para o app do Windows. Plano
+  original: A feature `spaces` vira `projects` (pasta, spec docs/spec/projects.md, linha
   da tabela da raiz, `CLAUDE.md`): cada projeto tem a pasta do repositório, as abas, a cor e a
   ordem; o arquivo spaces.json é migrado uma vez para projects.json (um space sem pasta vira
   projeto da pasta do workspace dele). Comandos project.switch, project.new (abrir pasta),

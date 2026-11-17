@@ -104,7 +104,7 @@ final class WorkspaceView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("WorkspaceView is created in code") }
 
-    /// A space's tabs come into the window (docs/spec/spaces.md).
+    /// A space's tabs come into the window (docs/spec/projects.md).
     func show(_ tabs: TabsController) {
         guard tabs.view !== tabsView else { return }
         tabsView?.removeFromSuperview()

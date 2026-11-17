@@ -2,7 +2,7 @@ import AppKit
 import CommandPalette
 import Menus
 import Search
-import Spaces
+import Projects
 import Strings
 import Tabs
 import Themes
@@ -63,9 +63,9 @@ extension WindowSession {
             palette.addPrefix("#", label: T("text", "texto"), source: search.content)
         }
         var places: [(String, PaletteSource)] = [(T("Tabs", "Abas"), TabCommands.source { [weak self] in self?.tabs })]
-        if let spaces { places.append(("Spaces", SpacesCommands.source(spaces))) }
+        if let projects { places.append((T("Projects", "Projetos"), ProjectsCommands.source(projects))) }
         palette.addPrefix("@", label: T("tabs and spaces", "abas e spaces"), source: MergedSource(
             placeholder: T("Go to a tab or space", "Ir para a aba ou o space"),
-            emptyText: T("No tabs or spaces", "Nenhuma aba ou space"), icon: .stack, parts: places))
+            emptyText: T("No tabs or projects", "Nenhuma aba ou space"), icon: .stack, parts: places))
     }
 }

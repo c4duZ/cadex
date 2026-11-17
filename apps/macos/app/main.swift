@@ -241,7 +241,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         let open = sessions.filter { $0.window.isVisible }
         guard !open.isEmpty else { return .terminateNow }
-        let tabs = open.flatMap { $0.spaces?.spaces.map(\.tabs) ?? [] }
+        let tabs = open.flatMap { $0.projects?.projects.map(\.tabs) ?? [] }
         let now = TabsController.shouldClose(
             tabs, in: (current ?? open[0]).window,
             then: { NSApp.reply(toApplicationShouldTerminate: true) },
@@ -255,7 +255,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// The main window's spaces as they were at the end, for the next launch.
     func applicationWillTerminate(_ notification: Notification) {
         AgentToolsServer.shared.stop()
-        sessions.first { $0.isMain }?.spaces?.saveNow()
+        sessions.first { $0.isMain }?.projects?.saveNow()
         if relaunching { openAgain() }
     }
 

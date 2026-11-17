@@ -1,7 +1,7 @@
 import AppKit
 import Terminal
 
-/// Saving and rebuilding a window's tabs (docs/spec/spaces.md), and the
+/// Saving and rebuilding a window's tabs (docs/spec/projects.md), and the
 /// switches a space needs: shown or hidden, closed all at once.
 extension TabsController {
     /// The tabs as they are now, in order, with the active one.
@@ -20,7 +20,7 @@ extension TabsController {
     /// shells in the saved folders; documents made by `makeDocument` from
     /// their identity (nil when the file is gone). A lone document that is
     /// gone drops its tab; one beside others becomes a terminal in its
-    /// folder, so the layout stays (docs/spec/spaces.md).
+    /// folder, so the layout stays (docs/spec/projects.md).
     public func restore(_ snapshot: TabsSnapshot, makeDocument: (String) -> TabDocument?) {
         var ids: [Int?] = []
         for item in snapshot.items {

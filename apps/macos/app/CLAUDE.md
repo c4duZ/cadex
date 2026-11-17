@@ -2,8 +2,8 @@
 
 ## O que eu quero
 - Só o ponto de entrada: criar o NSApplication, as janelas e ligar as features.
-- Várias janelas (⌘N, window.new): cada uma com workspace, spaces, explorer, busca, git e comandos
-  próprios; só a principal (a que abriu com o app) salva os spaces (docs/spec/workspace.md).
+- Várias janelas (⌘N, window.new): cada uma com workspace, projetos, explorer, busca, git e comandos
+  próprios; só a principal (a que abriu com o app) salva os projetos (docs/spec/workspace.md).
 
 ## O que eu não quero
 - Lógica de feature aqui. Cada coisa que a janela mostra vem de uma feature, pela porta de
@@ -11,26 +11,26 @@
 
 ## Como eu quero
 - `PaletteWiring.swift`: a paleta nas cores do tema, os prefixos do ⌘K (`/` arquivos, `#` texto,
-  `@` abas e spaces) e as aberturas (`openers`), primeiro no ⌘K; o "+" das abas mostra as que saem
+  `@` abas e projetos) e as aberturas (`openers`), primeiro no ⌘K; o "+" das abas mostra as que saem
   da aba (`newOpeners`) e o "+" do cabeçalho de cada painel as que abrem ao lado (`besideOpeners`),
   com maximizar e fechar (`paneMenu`).
   Comando novo que abre algo (terminal, arquivo, web, janela) entra nos `openers` daqui e nos de
   `../../windows/app/app_commands.zig`, e na lista "Abrir" de `../../../docs/spec/command-palette.md`.
-- `SpacesWiring.swift`: os spaces na janela (abas de cada space ligadas à barra de status e ao
+- `ProjectsWiring.swift`: os projetos na janela (plano 27; abas de cada projeto ligadas à barra de status e ao
   preview, documentos reabertos, pasta do workspace devolvida); `tabs` da `WindowSession` é sempre a
-  do space que aparece, então os comandos agem nela. Janela aberta pelo ⌘N tem spaces sem arquivo.
+  do projeto que aparece, então os comandos agem nela. Janela aberta pelo ⌘N tem projetos sem arquivo. project.new (`chooseProjectFolder`) pede a pasta, abre-a no workspace e mostra o projeto dela; aberto com uma pasta na linha de comando, os projetos voltam e a pasta vira o projeto dela (`startProjects`).
 - `FolderFollow.swift`: o workspace segue o terminal com foco; a cada `cd` vai para a raiz do
   repositório git da pasta (ou a própria pasta), a menos que explorer.followTerminal desligue.
 - Antes de montar qualquer tela, `main.swift` define Strings.language pelo general.language (ADR
   0015); "Reabrir agora" nas configurações e a atualização (`startUpdates`) saem como de costume e um
   shell abre o Cadex de novo (`openAgain`), levando as variáveis CADEX_ (uma instância de teste
-  reabre em segundo plano, com o arquivo de spaces dela).
+  reabre em segundo plano, com o arquivo de projetos dela).
 - `main.swift` (AppDelegate) guarda o que as janelas dividem: configurações, a janela de
   configurações, o keymap e o despachante de atalhos, que trocam para os comandos da janela com
   foco (`sessionBecameKey`). Abre a janela principal e as do ⌘N (`newWindow`, na pasta da janela de
   onde veio, deslocada um passo). Sair pergunta uma vez pelos programas e arquivos de todas as
   janelas.
-- `WindowSession.swift`: uma janela. Cria o `WorkspaceFolder`, o explorer, a busca, o git e os spaces
+- `WindowSession.swift`: uma janela. Cria o `WorkspaceFolder`, o explorer, a busca, o git e os projetos
   dela; como delegate da janela pergunta às abas antes de fechar (shouldCloseAll) e, fechada,
   encerra os shells dela (`closeAll`). `SessionCommands.swift` registra os comandos de cada feature
   no registro da janela (e window.new, view.toggle-sidebar e git.show da casca) e liga a barra de
@@ -41,7 +41,7 @@
   as mudanças em .git, páginas web num PreviewDocument) e onde: ao lado do painel com foco ou em
   nova aba, por general.openFiles (opensBeside em `SettingsBridge.swift`), ou pela escolha do explorer; quem
   pede (o histórico abrindo um diff) fica no painel dele. `makeDocument(identity:)` refaz os
-  documentos salvos nos spaces. O elemento escolhido num preview vai por `ElementPickDelivery.swift`:
+  documentos salvos nos projetos. O elemento escolhido num preview vai por `ElementPickDelivery.swift`:
   colado sem Enter no terminal do agente, que ganha o foco, ou copiado (⌥, preview.pickTarget em
   `SettingsBridge.swift`, ou nenhum agente). Passa as mudanças do disco aos documentos abertos e monta a aparência do editor (`EditorLooks`).
 - A casca da janela: título transparente com barra de ferramentas compacta (ela posiciona os
@@ -98,7 +98,7 @@
   sendo a aba daquele terminal (`AgentPreviewTabs`), e os pedidos respondem quando a página responde.
 - `TypedClaudeWiring.swift` (plano 22, fase C): o kit do `claude` digitado numa aba zsh; só para
   quem tem o shell de um terminal do app acima (`shellPid` de todos os terminais, de todas as janelas
-  e spaces), pelo SessionKit.typedLaunch. O `main.swift` põe as variáveis da integração do zsh no
+  e projetos), pelo SessionKit.typedLaunch. O `main.swift` põe as variáveis da integração do zsh no
   ambiente antes de abrir qualquer terminal (`exportTypedClaudeEnvironment`; numa instância de teste,
   também o CADEX_APP_SOCKET dela, para as abas não pedirem ao app do dono).
 - `AgentsHibernate.swift` (plano 19, fase F): os hooks guardam no terminal o que traz o agente de
@@ -236,9 +236,9 @@
 - Tela cheia: a barra de ferramentas (vazia, só dá a altura da barra de título) some ao entrar e
   volta ao sair, porque o macOS a punha numa faixa por cima da barra do app. Tamanho mínimo da
   janela 480×300.
-- `WorkColors.swift` (plano 15, fase D): as cores de space e de aba pelo nome, desenhadas com o ANSI
-  do tema; registra space.set-color e tab.set-color (lista no ⌘K) e põe a cor da aba ativa, ou a do
-  space, no lugar do destaque da janela (workColor do WorkspaceView). O clique direito numa aba mostra
+- `WorkColors.swift` (plano 15, fase D): as cores de projeto e de aba pelo nome, desenhadas com o ANSI
+  do tema; registra project.set-color (space.set-color, o id antigo, até o plano 28) e tab.set-color
+  (lista no ⌘K) e põe a cor da aba ativa, ou a do projeto, no lugar do destaque da janela (workColor do WorkspaceView). O clique direito numa aba mostra
   `tabActions` (`PaletteWiring.swift`). `main.swift` chama
   UILooks.configure com o zoom, a densidade e a fonte da interface antes de qualquer tela.
 - `MenuBarItem.swift`: o símbolo do Cadex na barra de menus do macOS (NSStatusItem), desenhado por
@@ -248,7 +248,7 @@
   com vibrância, a moldura fosca; depois de ligar, os botões da janela voltam para cima da camada.
 - Sem pacote .app (make run), `main.swift` põe o ícone de `docs/cadex-icon.png` no Dock; no .app ele
   vem do AppIcon.icns.
-- Abrir para teste com CADEX_BACKGROUND=1: a janela aparece sem tomar o foco do teclado. Abas, spaces e a paleta
+- Abrir para teste com CADEX_BACKGROUND=1: a janela aparece sem tomar o foco do teclado. Abas, projetos e a paleta
   entram aqui conforme as features existirem.
 - Barra de título, botões dela, painel lateral e as abas dele medem por UILooks (`../shared/looks/CLAUDE.md`); a barra de título leva o zoom e não a densidade, porque o macOS põe os botões da janela.
 

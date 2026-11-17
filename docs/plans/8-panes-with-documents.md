@@ -34,7 +34,7 @@ documento (`open(_:)`, `activeDocument`, `document(identity:)`, `allDocuments`).
   Layout .pane(folder:) e .split), `apps/macos/features/tabs/PaneTree.swift` (`balanced()`), `apps/macos/features/tabs/PaneLayoutView.swift` (já
   aceita qualquer NSView como painel; escurece os sem foco), `apps/macos/features/tabs/TabBarView.swift`, `apps/macos/features/tabs/TabDocument.swift`.
 - App: `apps/macos/app/FileOpener.swift` (open, openDiff, openHistory, foldersChanged),
-  `apps/macos/app/SpacesWiring.swift` (makeTabs, startSpaces, reopen), `apps/macos/app/main.swift`
+  apps/macos/app/SpacesWiring.swift (hoje ProjectsWiring.swift) (makeTabs, startSpaces, reopen), `apps/macos/app/main.swift`
   (openPreview, registro de comandos, onEditorOpened → markdown.attach), `apps/macos/app/FolderFollow.swift`.
 - Explorer: ExplorerController.openFile (closure `(String) -> Void`), `apps/macos/features/explorer/ExplorerCommands.swift`
   (tabela e menu de contexto), `apps/macos/features/explorer/ExplorerActions.swift` (openSelection).

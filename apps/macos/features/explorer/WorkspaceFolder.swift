@@ -54,7 +54,7 @@ public final class WorkspaceFolder {
     }
 
     /// Authorizes a folder without making it the root: a restored document
-    /// was opened in a folder the user chose then (docs/spec/spaces.md).
+    /// was opened in a folder the user chose then (docs/spec/projects.md).
     /// The canonical path, or nil when it is gone.
     @discardableResult
     public static func allow(_ path: String) -> String? {

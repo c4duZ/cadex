@@ -74,7 +74,7 @@ extension AppDelegate {
     func gatherAgentReports() {
         var reports: [AgentReport] = []
         for window in sessions {
-            for space in window.spaces?.spaces ?? [] {
+            for space in window.projects?.projects ?? [] {
                 for terminal in space.tabs.allTerminals {
                     guard let status = terminal.agentStatus else { continue }
                     let pid = terminal.foregroundGroup
@@ -107,7 +107,7 @@ extension AppDelegate {
         guard let found = key.flatMap({ terminal(key: $0) }) ?? (pid > 0 ? terminal(pid: pid) : nil) else { return NSSound.beep() }
         NSApp.activate(ignoringOtherApps: true)
         found.window.window.makeKeyAndOrderFront(nil)
-        found.window.spaces?.select(found.space)
+        found.window.projects?.select(found.space)
         found.window.tabs?.focus(found.terminal)
     }
 
@@ -121,7 +121,7 @@ extension AppDelegate {
 
     func locate(_ match: (TerminalView) -> Bool) -> (window: WindowSession, space: Int, terminal: TerminalView)? {
         for window in sessions {
-            for (index, space) in (window.spaces?.spaces ?? []).enumerated() {
+            for (index, space) in (window.projects?.projects ?? []).enumerated() {
                 if let terminal = space.tabs.allTerminals.first(where: match) { return (window, index, terminal) }
             }
         }

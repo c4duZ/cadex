@@ -99,8 +99,8 @@ extension WindowSession {
         // getpgid(0) is Cadex's own group.
         guard session.pid > 0 else { return nil }
         let group = getpgid(session.pid)
-        guard group > 0, let spaces else { return nil }
-        for (index, space) in spaces.spaces.enumerated() {
+        guard group > 0, let projects else { return nil }
+        for (index, space) in projects.projects.enumerated() {
             if let terminal = space.tabs.allTerminals.first(where: { $0.foregroundGroup == group }) { return (index, terminal) }
         }
         return nil
@@ -168,10 +168,10 @@ extension WindowSession {
     func openAgent(_ session: AgentSession) {
         if session.machine != nil { return openRemoteAgent(session) }
         for window in app.sessions {
-            guard let found = window.terminal(of: session), let spaces = window.spaces else { continue }
+            guard let found = window.terminal(of: session), let projects = window.projects else { continue }
             NSApp.activate(ignoringOtherApps: true)
             window.window.makeKeyAndOrderFront(nil)
-            spaces.select(found.space)
+            projects.select(found.space)
             window.tabs?.focus(found.terminal)
             return
         }

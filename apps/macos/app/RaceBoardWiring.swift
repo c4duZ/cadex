@@ -134,7 +134,7 @@ extension WindowSession {
         if let found = contenderTerminal(contender) {
             NSApp.activate(ignoringOtherApps: true)
             found.window.window.makeKeyAndOrderFront(nil)
-            found.window.spaces?.select(found.space)
+            found.window.projects?.select(found.space)
             return found.window.tabs?.focus(found.terminal) ?? ()
         }
         NSSound.beep()

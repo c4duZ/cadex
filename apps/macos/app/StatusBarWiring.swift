@@ -57,7 +57,7 @@ extension WindowSession {
     /// The Terminals item, when it shows: every terminal of every space.
     func countTerminals() {
         guard terminalsItem?.isVisible == true else { return }
-        let count = spaces?.spaces.reduce(0) { $0 + $1.tabs.terminalCount } ?? 0
+        let count = projects?.projects.reduce(0) { $0 + $1.tabs.terminalCount } ?? 0
         terminalsLabel?.text = "\(count)"
     }
 

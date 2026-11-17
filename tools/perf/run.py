@@ -76,7 +76,7 @@ class TestApp:
         self.sessions_dir = f"{self.dir}/sessions"
         self.settings_file = pathlib.Path(self.dir) / "settings.json"
         self.settings_file.write_text(json.dumps(settings or {}))
-        env = dict(os.environ, CADEX_BACKGROUND="1", CADEX_SPACES_FILE=f"{self.dir}/spaces.json",
+        env = dict(os.environ, CADEX_BACKGROUND="1", CADEX_PROJECTS_FILE=f"{self.dir}/projects.json",
                    CADEX_SETTINGS_FILE=str(self.settings_file), CADEX_THEMES_DIR=f"{self.dir}/themes",
                    SHELL=str(HERE / "loadshell.sh"), CADEX_LOAD=load, CADEX_LOAD_SECONDS=str(seconds),
                    CADEX_SOCKETS_DIR=self.sockets, CADEX_SESSIONS_DIR=self.sessions_dir,

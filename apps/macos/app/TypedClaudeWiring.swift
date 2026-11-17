@@ -33,6 +33,6 @@ extension AppDelegate {
     /// The shells of every terminal in every window and space, the kept
     /// ones (in the terminal daemon) included.
     private func terminalShells() -> [Int32] {
-        sessions.flatMap { $0.spaces?.spaces ?? [] }.flatMap(\.tabs.allTerminals).map(\.shellPid).filter { $0 > 0 }
+        sessions.flatMap { $0.projects?.projects ?? [] }.flatMap(\.tabs.allTerminals).map(\.shellPid).filter { $0 > 0 }
     }
 }
