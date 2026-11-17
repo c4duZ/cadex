@@ -143,7 +143,9 @@ final class WindowSession: NSObject, NSWindowDelegate {
         window.contentView = workspace
         self.workspace = workspace
         workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.newOpeners) ?? [] }
-        workspace.titleBar.spaceMenu = { [weak self] in self?.menu?.popup(Self.spaceActions) ?? [] }
+        showLocation(folder.root)
+        // A window opened later shows what already needs you, not only the next change.
+        workspace.titleBar.setBell(count: AgentAttention.shared.unseen)
         showPower()
         showUpdate()
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }

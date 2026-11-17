@@ -20,6 +20,11 @@ FRAME_FILES = [
     "apps/macos/shared/state-glyph/StateGlyph.swift",  # plano 25
     "apps/macos/shared/state-glyph/StateGlyphView.swift",  # plano 25
     "apps/macos/features/tabs/TabAgentTitle.swift",  # plano 25
+    "apps/macos/app/TitleBarView.swift",  # plano 26
+    "apps/macos/app/TitleBarButton.swift",  # plano 26
+    "apps/macos/app/TitleBarSearch.swift",  # plano 26
+    "apps/macos/features/tabs/TabBarView.swift",  # plano 26
+    "apps/macos/features/tabs/TabBarDrag.swift",  # plano 26
 ]
 # A design value: any number but a bare 0 or 1 (those are counts, identities and the hairline
 # of an edge, not mockup values; review of 2026-11-17).

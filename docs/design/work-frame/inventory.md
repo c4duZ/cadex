@@ -29,14 +29,16 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | tipo | peça | estado | destino | plano |
 |---|---|---|---|---|
 | arquivo | `apps/macos/app/TitleBarView.swift` | muda | a barra nova: busca, projeto › tarefa, abas, quadro, sino, painel da direita | 26 |
-| arquivo | `apps/macos/app/TitleBarButton.swift` | muda | o botão da barra nova | 26 |
+| arquivo | `apps/macos/app/TitleBarButton.swift` | muda | o botão de ícone da barra nova (components.titleIconButton), feito | 26 |
 | arquivo | `apps/macos/app/WorkspaceView.swift` | muda | as quatro regiões | 26 |
 | arquivo | `apps/macos/app/PanelView.swift` | muda | o painel arredondado das fundações | 26 |
-| comando | `space.switch` no botão da barra | sai | o botão de space sai; trocar de projeto pela árvore e ⌘J (plano 27/29) | 26 |
+| trecho | "spaceButton" em `apps/macos/app/TitleBarView.swift` | saiu | o botão de space saiu da barra; space.switch no ⌘K até virar project.switch (plano 27) | 26 |
+| trecho | "spaceActions" em `apps/macos/app/PaletteWiring.swift` | saiu | o menu do clique direito no botão de space | 26 |
+| trecho | "sidebarButton" em `apps/macos/app/TitleBarView.swift` | saiu | ⌘B e view.toggle-sidebar no ⌘K | 26 |
 | comando | `power.toggle` no café da barra | muda | item da barra de status | 26 |
 | comando | `app.check-for-updates` no botão da barra | muda | etiqueta na barra de status, só com versão nova | 26 |
-| comando | `settings.open` no botão da barra | muda | só ⌘, e o menu | 26 |
-| arquivo | `apps/macos/features/tabs/TabBarView.swift` | muda | as abas com estado na barra nova | 26 |
+| trecho | "settingsButton" em `apps/macos/app/TitleBarView.swift` | saiu | só ⌘, e o menu | 26 |
+| arquivo | `apps/macos/features/tabs/TabBarView.swift` | muda | as abas com estado e a largura do título (components.tab), feito | 26 |
 | arquivo | `apps/macos/features/tabs/TabAgentTitle.swift` | muda | vira a peça de estado das fundações | 25 |
 
 ### Barra lateral de ícones (planos 26 e 27)

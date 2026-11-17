@@ -26,7 +26,11 @@ power, updates · Decisões: `docs/adr/0035-work-frame.md` · Mockups: 1 (o mapa
   components.popover (valores exatos em `docs/design/work-frame/tokens.json`).
 - Cada arquivo reescrito entra na lista de tools/check_design_literals.py: só valores de
   `DesignTokens`, nada digitado.
-- **A. Barra de título.** `apps/macos/app/TitleBarView.swift` reescrita como a peça TitleBar: busca
+- **A. Barra de título.** Feita (2026-11-17), revisada e conferida na galeria: 44 pt com os botões da
+  janela descidos para o meio (seguindo a moldura deles), a busca, o lugar, as abas na largura do
+  título (× só sob o ponteiro, como no mockup), o "+" de 28 e o sino com o número (também na
+  janela aberta depois). O botão do painel da direita entra com a fase C e o do quadro com o plano
+  30. Plano original: `apps/macos/app/TitleBarView.swift` reescrita como a peça TitleBar: busca
   ⌘K, "projeto › tarefa", as abas (com o `StateGlyph` do que roda, a ativa com fundo), "+", e à
   direita quadro, sino (com o número) e painel da direita. Saem dela: o botão de space (o comando
   fica no ⌘K até o plano 27), o café, a atualização e as configurações. TabBarView.swift na cara

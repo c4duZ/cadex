@@ -5,16 +5,16 @@ import Menus
 import StateGlyph
 import Strings
 
-/// The tab strip in the title bar, the bar's main element: tabs of equal
-/// width side by side, as macOS's own tabs (Safari, Ghostty), each with its
-/// own light fill so it reads as a tab, the active one stronger and marked
-/// with a line in the theme's accent; × on the active tab and under the
-/// pointer. The owner chose this over quiet pills, which gave the
-/// space and the tabs the same weight (2026-10-19). Click selects,
-/// double-click renames, dragging reorders, the middle button closes.
-/// Drawn by hand so dragging is simple; colors come from the theme.
+/// The tab strip in the title bar (components.tab of the new frame's tokens; screens.md,
+/// TitleBar): each tab as wide as its title, the active one on the chip's fill in the primary
+/// text, the others bare in the secondary text, with no line under them; the state glyph of
+/// what runs in it, or its icon; × under the pointer. This replaces the
+/// equal-width native-looking tabs the owner chose on 2026-10-19, by the mockups approved on
+/// 2026-11-17 (docs/adr/0035-work-frame.md). Click selects, double-click renames, dragging
+/// reorders, the middle button closes. Drawn by hand so dragging is simple.
 public final class TabBarView: NSView {
-    /// The colors of the strip, set by whoever applies the theme.
+    /// The theme's colors, set by whoever applies it: the pane headers take them
+    /// (onStyleChange); the strip itself draws in the new frame's tokens.
     public struct Style {
         public var activeFill: NSColor
         public var hoverFill: NSColor
@@ -54,16 +54,18 @@ public final class TabBarView: NSView {
         var unseen = false
     }
 
-    static var height: CGFloat { UILooks.pt(30) }
-    /// Tabs shrink to this when many are open, then the strip clips.
-    private static var minWidth: CGFloat { UILooks.pt(96) }
-    private static var maxWidth: CGFloat { UILooks.pt(220) }
-    private static var closeSize: CGFloat { UILooks.pt(14) }
-    private static var iconSize: CGFloat { UILooks.pt(13) }
-    private static var padding: CGFloat { UILooks.pt(10) }
-    private static var pillHeight: CGFloat { UILooks.pt(28) }
-    private static var pillRadius: CGFloat { UILooks.pt(7) }
-    private static var gap: CGFloat { UILooks.pt(4) }
+    typealias Look = DesignTokens.Tab
+    static var height: CGFloat { UILooks.pt(Look.height) }
+    /// The longest a title goes before it is cut, and the narrowest a tab shrinks to when many
+    /// are open (then the strip clips): the strip's own limits, not in the mockups.
+    private static var maxTitle: CGFloat { UILooks.pt(Look.maxTitle) }
+    private static var minWidth: CGFloat { UILooks.pt(Look.minWidth) }
+    private static var closeSize: CGFloat { UILooks.pt(Look.close) }
+    private static var iconSize: CGFloat { UILooks.pt(Look.icon) }
+    private static var padding: CGFloat { UILooks.pt(Look.paddingX) }
+    private static var inner: CGFloat { UILooks.pt(Look.gap) }
+    private static var pillRadius: CGFloat { UILooks.pt(Look.radius) }
+    private static var gap: CGFloat { UILooks.pt(Look.groupGap) }
 
     public var style = Style(activeFill: .controlBackgroundColor, hoverFill: .quaternaryLabelColor,
                              text: .labelColor, secondaryText: .secondaryLabelColor) {
@@ -119,22 +121,46 @@ public final class TabBarView: NSView {
     // MARK: Layout
 
     private func font(_ item: Item) -> NSFont {
-        UILooks.font(12, weight: item.unseen ? .semibold : item.active ? .medium : .regular)
+        UILooks.font(DesignTokens.FontSize.body, weight: item.unseen ? DesignTokens.FontWeight.semibold
+                     : item.active ? Look.Active.weight : .regular)
     }
 
-    /// Every tab at full width: the strip asks for this much.
-    private var naturalWidths: [CGFloat] {
-        items.map { _ in Self.maxWidth }
+    /// A tab as wide as its title with the icon and the paddings, as the mockup draws it. Measured
+    /// in the widest weight, so selecting a tab or an agent finishing does not move the others
+    /// (review of 2026-11-17); × shows over the title's end, on its own fill, with no room kept.
+    func naturalWidth(_ item: Item) -> CGFloat {
+        let widest = UILooks.font(DesignTokens.FontSize.body, weight: DesignTokens.FontWeight.semibold)
+        let title = min((item.title as NSString).size(withAttributes: [.font: widest]).width, Self.maxTitle)
+        return (Self.padding * 2 + Self.iconSize + Self.inner + title).rounded(.up)
     }
 
-    /// Equal widths, the most that fits, never under `minWidth`.
-    var frames: [NSRect] {
+    private var naturalWidths: [CGFloat] { items.map(naturalWidth) }
+
+    /// Each tab its natural width; when they do not fit, all shrink by the same share, never
+    /// under `minWidth`.
+    var widths: [Int: CGFloat] {
+        let natural = naturalWidths
         let gaps = Self.gap * CGFloat(max(items.count - 1, 0))
-        let fit = items.isEmpty ? Self.maxWidth : (bounds.width - gaps) / CGFloat(items.count)
-        let width = min(max(fit, Self.minWidth), Self.maxWidth).rounded(.down)
-        return items.indices.map { i in
-            NSRect(x: CGFloat(i) * (width + Self.gap), y: 0, width: width, height: bounds.height)
+        let total = natural.reduce(0, +)
+        let share = total + gaps > bounds.width && total > 0 ? max(bounds.width - gaps, 0) / total : 1
+        return Dictionary(uniqueKeysWithValues: zip(items.map(\.id), natural.map { max(($0 * share).rounded(.down), min($0, Self.minWidth)) }))
+    }
+
+    /// Where each tab of an order starts.
+    func positions(_ order: [Int]) -> [Int: CGFloat] {
+        let widths = widths
+        var x: CGFloat = 0
+        var out: [Int: CGFloat] = [:]
+        for id in order {
+            out[id] = x
+            x += (widths[id] ?? 0) + Self.gap
         }
+        return out
+    }
+
+    var frames: [NSRect] {
+        let widths = widths, starts = positions(items.map(\.id))
+        return items.map { NSRect(x: starts[$0.id] ?? 0, y: 0, width: widths[$0.id] ?? 0, height: bounds.height) }
     }
 
     func frame(at index: Int) -> NSRect {
@@ -143,7 +169,13 @@ public final class TabBarView: NSView {
     }
 
     private func closeFrame(in tab: NSRect) -> NSRect {
-        NSRect(x: tab.maxX - Self.closeSize - Self.padding + 2, y: tab.midY - Self.closeSize / 2, width: Self.closeSize, height: Self.closeSize)
+        NSRect(x: tab.maxX - Self.closeSize - Self.inner, y: tab.midY - Self.closeSize / 2, width: Self.closeSize, height: Self.closeSize)
+    }
+
+    /// Behind ×, the tab's own fill, so the title's end does not show through it.
+    private func closeBackdrop(in tab: NSRect) -> NSRect {
+        let close = closeFrame(in: tab)
+        return NSRect(x: close.minX - Self.inner, y: close.minY, width: tab.maxX - close.minX + Self.inner, height: close.height)
     }
 
     private func index(at point: NSPoint) -> Int? {
@@ -185,7 +217,7 @@ public final class TabBarView: NSView {
                 glyphs[item.id] = view
             }
             view?.state = state
-            let iconRect = NSRect(x: rect.minX + Self.padding, y: rect.midY - Self.iconSize / 2, width: Self.iconSize, height: Self.iconSize)
+            let iconRect = Self.iconRect(in: rect)
             let margin = UILooks.pt(StateGlyphLook.margin(size: size))
             view?.frame = Self.glyphRect(item, in: iconRect).insetBy(dx: -margin, dy: -margin)
             view?.isHidden = dragging != nil
@@ -207,41 +239,44 @@ public final class TabBarView: NSView {
         drawWhileDragging()
     }
 
-    func drawTab(_ item: Item, in rect: NSRect, hovered: Bool) {
-        let pill = NSRect(x: rect.minX, y: rect.midY - Self.pillHeight / 2, width: rect.width, height: Self.pillHeight)
-        let fill = item.active ? style.activeFill : hovered ? style.hoverFill : style.text.withAlphaComponent(0.05)
-        fill.setFill()
-        NSBezierPath(roundedRect: pill, xRadius: Self.pillRadius, yRadius: Self.pillRadius).fill()
-        if item.active {
-            style.accent.setFill()
-            NSBezierPath(roundedRect: NSRect(x: pill.minX + 10, y: pill.maxY - 2.5, width: pill.width - 20, height: 2),
-                         xRadius: 1, yRadius: 1).fill()
-        }
-        let color = item.active ? style.text : style.secondaryText
+    static func iconRect(in rect: NSRect) -> NSRect {
+        NSRect(x: rect.minX + padding, y: rect.midY - iconSize / 2, width: iconSize, height: iconSize)
+    }
 
-        let iconRect = NSRect(x: rect.minX + Self.padding, y: rect.midY - Self.iconSize / 2, width: Self.iconSize, height: Self.iconSize)
+    func drawTab(_ item: Item, in rect: NSRect, hovered: Bool) {
+        let pill = NSRect(x: rect.minX, y: rect.midY - Self.height / 2, width: rect.width, height: Self.height)
+        if item.active || hovered {
+            (item.active ? Look.Active.bg : DesignTokens.Color.bgButton).setFill()
+            NSBezierPath(roundedRect: pill, xRadius: Self.pillRadius, yRadius: Self.pillRadius).fill()
+        }
+        let color = item.active ? Look.Active.color : Look.Inactive.color
+
+        let iconRect = Self.iconRect(in: rect)
         if let state = item.state {
             // At rest the glyph is a view laid over this spot (it spins); while a tab is dragged
             // the strip draws a still one where the tab is now.
             if dragging != nil { StateGlyphLook.draw(state, in: Self.glyphRect(item, in: iconRect)) }
         } else if let image = item.image {
-            image.draw(in: iconRect, from: .zero, operation: .sourceOver, fraction: item.active ? 1 : 0.8)
+            image.draw(in: iconRect, from: .zero, operation: .sourceOver, fraction: 1)
         } else {
-            let iconColor = item.iconColor.map { item.active ? $0 : $0.withAlphaComponent(0.75) } ?? (item.active ? style.accent : color)
-            tinted(item.icon, size: Self.iconSize, color: iconColor).draw(in: iconRect)
+            tinted(item.icon, size: Self.iconSize, color: item.iconColor ?? color).draw(in: iconRect)
         }
 
         let paragraph = NSMutableParagraphStyle()
         paragraph.lineBreakMode = .byTruncatingTail
         let attributes: [NSAttributedString.Key: Any] = [.font: font(item), .foregroundColor: color, .paragraphStyle: paragraph]
-        let textX = iconRect.maxX + 6
-        let textWidth = max(closeFrame(in: rect).minX - 4 - textX, 0)
+        let textX = iconRect.maxX + Self.inner
+        let textWidth = max(rect.maxX - Self.padding - textX, 0)
         let lineHeight = ceil(font(item).ascender - font(item).descender)
         (item.title as NSString).draw(in: NSRect(x: textX, y: rect.midY - lineHeight / 2, width: textWidth, height: lineHeight),
                                       withAttributes: attributes)
 
-        guard hovered || item.active else { return }
-        tinted(.x, size: 11, color: style.secondaryText).draw(in: closeFrame(in: rect).insetBy(dx: 1.5, dy: 1.5))
+        // Only under the pointer: the mockups show no × on the active tab, and it would cover
+        // the end of a title the tab is sized to (2026-11-17).
+        guard hovered else { return }
+        (item.active ? Look.Active.bg : DesignTokens.Color.bgButton).setFill()
+        closeBackdrop(in: rect).fill()
+        tinted(.x, size: Self.closeSize, color: Look.Inactive.color).draw(in: closeFrame(in: rect))
     }
 
     /// A template icon in a color: drawn on a copy, filled over with sourceAtop.

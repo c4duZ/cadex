@@ -41,10 +41,14 @@ extension TabBarView {
     /// The order if the dragged tab were dropped now: at the slot its middle is over.
     func dropOrder() -> [Int] {
         guard let drag = dragging, let from = items.firstIndex(where: { $0.id == drag.id }) else { return items.map(\.id) }
-        let center = frame(at: from).midX + drag.offset
-        let to = frames.lastIndex { $0.minX <= center } ?? 0
+        // Tabs are as wide as their titles: the dragged one goes past each other tab whose middle
+        // its own middle has crossed (counting by left edges dropped a wide tab a slot early).
+        let all = frames
+        let center = all[from].midX + drag.offset
         var order = items.map(\.id)
         order.remove(at: from)
+        let others = items.indices.filter { $0 != from }
+        let to = others.filter { all[$0].midX < center }.count
         order.insert(drag.id, at: min(max(to, 0), order.count))
         return order
     }
@@ -72,9 +76,7 @@ extension TabBarView {
 
     /// Where tab `id` shows now: on its way from where it was to its slot.
     private func shownX(_ id: Int) -> CGFloat {
-        let all = frames
-        guard let slot = dragOrder.firstIndex(of: id), slot < all.count else { return 0 }
-        let target = all[slot].minX
+        guard let target = positions(dragOrder)[id] else { return 0 }
         guard let start = slideFrom[id] else { return target }
         let t = min(max((CACurrentMediaTime() - slideStart) / Self.slideDuration, 0), 1)
         let eased = 1 - pow(1 - t, 3)
@@ -85,11 +87,10 @@ extension TabBarView {
     /// under the pointer, kept inside the strip.
     func drawWhileDragging() {
         guard let drag = dragging, let from = items.firstIndex(where: { $0.id == drag.id }) else { return }
-        let all = frames
+        // Tabs are as wide as their titles: each keeps its own width at its sliding place.
+        let widths = widths
         for item in items where item.id != drag.id {
-            guard let slot = dragOrder.firstIndex(of: item.id), slot < all.count else { continue }
-            var rect = all[slot]
-            rect.origin.x = shownX(item.id)
+            let rect = NSRect(x: shownX(item.id), y: 0, width: widths[item.id] ?? 0, height: bounds.height)
             drawTab(item, in: rect, hovered: false)
         }
         var rect = frame(at: from)

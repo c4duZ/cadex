@@ -54,7 +54,10 @@ extension AppDelegate {
     /// The bell's number in each window and the Dock's (agents.dockBadge).
     func showAttentionCount() {
         let count = AgentAttention.shared.unseen
-        for window in sessions { window.workspace?.sidebar.setBadge(count > 0 ? "\(count)" : nil, for: "attention") }
+        for window in sessions {
+            window.workspace?.sidebar.setBadge(count > 0 ? "\(count)" : nil, for: "attention")
+            window.workspace?.titleBar.setBell(count: count)
+        }
         NSApp.dockTile.badgeLabel = settings.store.settings.agents.dockBadge && count > 0 ? "\(count)" : nil
     }
 

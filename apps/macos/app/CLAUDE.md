@@ -44,15 +44,18 @@
   documentos salvos nos spaces. O elemento escolhido num preview vai por `ElementPickDelivery.swift`:
   colado sem Enter no terminal do agente, que ganha o foco, ou copiado (⌥, preview.pickTarget em
   `SettingsBridge.swift`, ou nenhum agente). Passa as mudanças do disco aos documentos abertos e monta a aparência do editor (`EditorLooks`).
-- A casca da janela: título transparente com barra de ferramentas compacta
-  (38 pt, botões da janela centrados); `TitleBarView.swift` (um grupo à esquerda com painel
-  lateral, busca/paleta "⌘K" e spaces, o space só o ícone de pilha com um space e o nome com mais;
-  o café do manter acordado antes do space (cheio ligado, contorno desligado; o clique roda
-  power.toggle, o ⇧⌘A); depois as abas, "+" e, à direita, o botão de atualização (na cor de
-  destaque do tema, só com versão nova para instalar; roda app.check-for-updates) e as
-  configurações; cada controle um `TitleBarButton.swift` de
-  26 pt com fundo ao passar e ao clicar,
-  busca, todos por comando), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
+- A casca da janela: título transparente com barra de ferramentas compacta (ela posiciona os
+  botões da janela); `TitleBarView.swift`, a barra de título da moldura nova (plano 26, fase A;
+  `../../../docs/design/work-frame/screens.md`, TitleBar; components.titleBar): 44 pt, com os
+  botões da janela descidos para o meio dela a cada mudança de tamanho e de foco (a barra compacta
+  os centra em 38), a busca `TitleBarSearch.swift` ("Search ⌘K", abre a paleta), "projeto ›
+  tarefa" (`location(of:)`: `<repo>.worktrees/<tarefa>` é o projeto e a tarefa), as abas e "+",
+  e à direita o sino com o número (`setBell`, de `AgentsAttention.swift`); o café e a
+  atualização ficam nela até a fase B levá-los à barra de status; o botão da barra lateral, o de
+  space e o das configurações saíram (⌘B, ⇧⌘S e ⌘, no ⌘K, nos atalhos e no menu). Cada botão é
+  um `TitleBarButton.swift` (components.titleIconButton: 30 pt, aceso quando o que abre está
+  aberto, com o número do sino), todos por comando; nada de valor digitado
+  (`../../../tools/check_design_literals.py`), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
   painel lateral recolhível, barra de status) e `SidebarWiring.swift` (o catálogo da feature `sidebar`: a árvore do explorer, o painel do git e o histórico compacto como páginas, a busca como ação; salva sidebar.items e põe a contagem de mudanças no ícone do Git; `openCustomize` abre a janela
   Customize única na aba pedida, com as abas da barra lateral e da barra de status desta janela, nas
   cores do tema como as configurações e não nas da janela, e a repinta quando o tema muda) e
@@ -224,8 +227,8 @@
   janela 480×300.
 - `WorkColors.swift` (plano 15, fase D): as cores de space e de aba pelo nome, desenhadas com o ANSI
   do tema; registra space.set-color e tab.set-color (lista no ⌘K) e põe a cor da aba ativa, ou a do
-  space, no lugar do destaque da janela (workColor do WorkspaceView). O clique direito numa aba e no
-  botão do space mostra `tabActions`/`spaceActions` (`PaletteWiring.swift`). `main.swift` chama
+  space, no lugar do destaque da janela (workColor do WorkspaceView). O clique direito numa aba mostra
+  `tabActions` (`PaletteWiring.swift`). `main.swift` chama
   UILooks.configure com o zoom, a densidade e a fonte da interface antes de qualquer tela.
 - `MenuBarItem.swift`: o símbolo do Cadex na barra de menus do macOS (NSStatusItem), desenhado por
   `CadexMark.swift` com os caminhos do `docs/cadex-icon.svg`, branco com o manter acordado

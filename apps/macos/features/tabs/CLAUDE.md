@@ -34,9 +34,11 @@
   e ícone da aba vêm do painel com foco; "●" se qualquer painel tem mudança não salva. A oferta de preview de cada terminal sai por
   `onOpenPreview`. `TabList.swift`: as regras puras (ordem, ativa, recentes, mover), testadas.
 - `TabBarView.swift`: a barra de abas desenhada à mão (dica de cada aba e do × por HoverTip.hover,
-  do menus compartilhado), cada aba da largura do título (72 a 200 pt),
-  com o ícone do que mostra (terminal; arquivo pelo tipo e cor do `FileIcons`, como na árvore;
-  histórico; página web), a ativa com fundo neutro e × ao passar o mouse
+  do menus compartilhado), na cara da moldura nova (plano 26, fase A; components.tab): cada aba da
+  largura do título (até maxTitle; todas encolhem juntas até minWidth quando não cabem), 30 pt,
+  raio 7, com o ícone do que mostra (terminal; arquivo pelo tipo e cor do `FileIcons`, como na árvore;
+  histórico; página web) ou a peça de estado, a ativa no fundo de etiqueta e as outras sem fundo,
+  sem linha embaixo, × só ao passar o mouse
   (clique, duplo clique renomeia, clique do meio fecha, arrastar reordena ao vivo em
   `TabBarDrag.swift`, com a janela travada enquanto isso), com cores de fora (`style`); fica na barra de título da janela
   (a propriedade bar do controlador). `TabsView.swift`: só a aba ativa. `Tab.swift`: uma aba.

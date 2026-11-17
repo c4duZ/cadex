@@ -32,6 +32,8 @@ public extension DesignTokens {
             public static let fontSize: CGFloat = DesignTokens.FontSize.caption
             public static var color: NSColor { DesignTokens.Color.textTertiary }
         }
+        public static let padding = NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        public static let gap: CGFloat = 8
     }
     enum Breadcrumb {
         public static let fontSize: CGFloat = DesignTokens.FontSize.meta
@@ -58,6 +60,10 @@ public extension DesignTokens {
             public static var color: NSColor { DesignTokens.Color.textTertiary }
             public static let glyph: CGFloat = DesignTokens.FontSize.glyph
         }
+        public static let close: CGFloat = 14
+        public static let maxTitle: CGFloat = 160
+        public static let minWidth: CGFloat = 96
+        public static let icon: CGFloat = 12
     }
     enum TitleIconButton {
         public static let size: CGFloat = 30

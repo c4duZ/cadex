@@ -223,7 +223,15 @@ extension WindowSession {
             self.git?.setFolder(root)
             self.sidebarFolderChanged()
             self.spaces?.scheduleSave()
+            self.showLocation(root)
         }
+    }
+
+    /// "project › task" in the title bar: a task's worktree (`<repo>.worktrees/<branch>`, plan 19)
+    /// names its repository and the task; any other folder is the project alone.
+    func showLocation(_ root: String) {
+        let (project, task) = TitleBarView.location(of: root)
+        workspace?.titleBar.setLocation(project: project, task: task)
     }
 
     /// The status bar follows the focused terminal's folder, and its folder

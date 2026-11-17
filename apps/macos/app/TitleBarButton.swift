@@ -3,95 +3,104 @@ import UILooks
 import Icons
 import Menus
 
-/// A control of the title bar: an icon, words, or both, in a 26 pt rounded
-/// area that lights up under the pointer and when pressed, like the tabs
-/// next to it. The bare icon buttons gave no feedback and could only be hit
-/// on their 16 pt glyph (UI review, 2026-10-19).
+/// An icon button of the title bar (components.titleIconButton of the new frame's tokens,
+/// docs/adr/0035-work-frame.md): 30 pt, rounded, the icon in the secondary text and lit with the
+/// chip's fill while what it opens is open (the right panel, the bell's popover), or under the
+/// pointer and when pressed. A badge in the needs-you amber carries a count (the bell).
 final class TitleBarButton: NSView {
-    static var height: CGFloat { UILooks.pt(26) }
-    static var iconSize: CGFloat { UILooks.pt(15) }
-    /// The same margin on both sides of every button, with words or not, so
-    /// icons side by side sit at equal distances: an icon alone is 28 pt.
-    /// Mixed margins (8 and 9 pt next to a 28 pt icon button) left the
-    /// group's gaps uneven (owner, 2026-10-19).
-    static var margin: CGFloat { UILooks.pt(6.5) }
-    static var iconOnlyWidth: CGFloat { iconSize + margin * 2 }
+    typealias Look = DesignTokens.TitleIconButton
+
+    /// The bar's buttons, and the smaller "+" after the tabs (components.tab.add).
+    @MainActor enum Kind {
+        case standard, add
+        var size: CGFloat { UILooks.pt(self == .add ? DesignTokens.Tab.Add.size : Look.size) }
+        var icon: CGFloat { UILooks.pt(self == .add ? DesignTokens.Tab.Add.glyph : Look.icon) }
+        var rest: NSColor { self == .add ? DesignTokens.Tab.Add.color : Look.Inactive.color }
+    }
 
     var onPress: (() -> Void)?
     /// A right click; nil leaves it to the window.
     var onRightPress: (() -> Void)?
-    var colors: (text: NSColor, secondary: NSColor) = (.labelColor, .secondaryLabelColor) { didSet { restyle() } }
-    private let icon: NSImageView?
-    private let label = NSTextField(labelWithString: "")
+    /// What the button opens is open: the chip's fill and the primary text.
+    var isOn = false { didSet { restyle() } }
+    /// Another color than the secondary text at rest: the update is news, in the accent.
+    var tint: NSColor? { didSet { restyle() } }
+    private let kind: Kind
+    private let icon: NSImageView
+    private let iconKind: Icon
+    /// The badge: a round box with the count centered in it (a label alone sits high).
+    private let badge = NSView()
+    private let badgeLabel = NSTextField(labelWithString: "")
     private var hovered = false { didSet { restyle() } }
     private var pressed = false { didSet { restyle() } }
-    /// Words in their own colors (the space's breadcrumb), instead of `title`.
-    var attributedTitle: NSAttributedString? { didSet { restyle() } }
 
-    init(icon: Icon?, title: String? = nil, tip: String) {
-        self.icon = icon.map { NSImageView(image: $0.image(size: Self.iconSize)) }
+    init(icon: Icon, tip: String, kind: Kind = .standard) {
+        self.kind = kind
+        iconKind = icon
+        self.icon = NSImageView(image: icon.image(size: kind.icon))
         super.init(frame: .zero)
         wantsLayer = true
-        layer?.cornerRadius = 6
+        layer?.cornerRadius = UILooks.pt(Look.radius)
         HoverTip.attach(tip, to: self)
         setAccessibilityElement(true)
         setAccessibilityRole(.button)
-        setAccessibilityLabel(title ?? tip)
-        label.stringValue = title ?? ""
-        label.font = UILooks.font(12)
-        let views: [NSView] = (self.icon.map { [$0] } ?? []) + (title == nil ? [] : [label])
-        let content = NSStackView(views: views)
-        content.spacing = 4
-        content.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(content)
-        var constraints = [
-            heightAnchor.constraint(equalToConstant: Self.height),
-            content.centerYAnchor.constraint(equalTo: centerYAnchor),
-        ]
-        if title == nil {
-            constraints += [widthAnchor.constraint(equalToConstant: Self.iconOnlyWidth),
-                            content.centerXAnchor.constraint(equalTo: centerXAnchor)]
-        } else {
-            constraints += [content.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Self.margin),
-                            content.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Self.margin)]
+        setAccessibilityLabel(tip)
+        for view in [self.icon, badge] as [NSView] {
+            view.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(view)
         }
-        NSLayoutConstraint.activate(constraints)
+        badgeLabel.font = UILooks.font(DesignTokens.Badge.fontSize, weight: DesignTokens.Badge.weight)
+        badgeLabel.alignment = .center
+        badgeLabel.textColor = DesignTokens.Badge.color
+        badgeLabel.translatesAutoresizingMaskIntoConstraints = false
+        badge.addSubview(badgeLabel)
+        badge.wantsLayer = true
+        badge.layer?.backgroundColor = DesignTokens.Badge.bg.cgColor
+        badge.layer?.cornerRadius = UILooks.pt(DesignTokens.Badge.radius)
+        badge.isHidden = true
+        let side = kind.size
+        NSLayoutConstraint.activate([
+            widthAnchor.constraint(equalToConstant: side),
+            heightAnchor.constraint(equalToConstant: side),
+            self.icon.centerXAnchor.constraint(equalTo: centerXAnchor),
+            self.icon.centerYAnchor.constraint(equalTo: centerYAnchor),
+            badge.topAnchor.constraint(equalTo: topAnchor, constant: UILooks.pt(DesignTokens.Badge.top)),
+            badge.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -UILooks.pt(DesignTokens.Badge.right)),
+            badge.heightAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Badge.height)),
+            badge.widthAnchor.constraint(greaterThanOrEqualToConstant: UILooks.pt(DesignTokens.Badge.minWidth)),
+            badge.widthAnchor.constraint(greaterThanOrEqualTo: badgeLabel.widthAnchor),
+            badgeLabel.centerXAnchor.constraint(equalTo: badge.centerXAnchor),
+            badgeLabel.centerYAnchor.constraint(equalTo: badge.centerYAnchor),
+        ])
         restyle()
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("TitleBarButton is created in code") }
 
-    /// The words; empty leaves the icon alone.
-    func setTitle(_ attributed: NSAttributedString) {
-        attributedTitle = attributed
-        label.isHidden = attributed.length == 0
-        if attributed.length > 0 { setAccessibilityLabel(attributed.string) }
+    /// The count on the badge; nil or zero hides it.
+    func setBadge(_ count: Int?) {
+        let shown = (count ?? 0) > 0
+        badge.isHidden = !shown
+        badgeLabel.stringValue = shown ? "\(count!)" : ""
     }
 
-    /// Another icon, the fill weight when `filled` (keep-awake on).
-    func setIcon(_ icon: Icon, filled: Bool) {
-        self.icon?.image = icon.image(size: Self.iconSize, filled: filled)
+    /// The icon again in its fill weight (keep-awake on).
+    func setFilled(_ filled: Bool) {
+        icon.image = iconKind.image(size: kind.icon, filled: filled)
     }
 
     private func restyle() {
-        let fill: CGFloat = pressed ? 0.16 : hovered ? 0.09 : 0
-        layer?.backgroundColor = fill > 0 ? colors.text.withAlphaComponent(fill).cgColor : nil
-        let tint = hovered || pressed ? colors.text : colors.secondary
-        icon?.contentTintColor = tint
-        if let attributedTitle {
-            label.attributedStringValue = attributedTitle
-        } else {
-            label.textColor = tint
-        }
+        let lit = isOn || hovered || pressed
+        layer?.backgroundColor = lit ? Look.Active.bg.cgColor : nil
+        icon.contentTintColor = tint ?? (lit ? Look.Active.color : kind.rest)
     }
 
     // MARK: Pointer
 
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
-        // Only its own: removing them all took the hover tip's away (the
-        // title bar showed no names, owner, 2026-10-20).
+        // Only its own: removing them all took the hover tip's away (owner, 2026-10-20).
         trackingAreas.filter { $0.owner === self }.forEach(removeTrackingArea)
         addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect], owner: self))
     }

@@ -41,7 +41,8 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 - Cara das abas (components.tab): 30 pt de altura, raio 7, 12 pt de lado, largura do título; a
   ativa com o fundo de etiqueta e o texto forte, as outras sem fundo e com o texto secundário; sem
   linha embaixo. Ícone do que mostram (a peça de estado no que roda algo; arquivo pelo tipo,
-  histórico, página web). O × aparece na ativa e na que está sob o ponteiro. Revê o estilo de abas
+  histórico, página web). O × aparece na aba sob o ponteiro, por cima do fim do título (o mockup não mostra × na
+  ativa). Revê o estilo de abas
   nativas com fundo e linha na cor do tema (o dono, 2026-10-19), pelo mockup aprovado em 2026-11-17.
 - A barra de abas aparece mesmo com uma aba só.
 

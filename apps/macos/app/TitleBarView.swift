@@ -5,142 +5,119 @@ import Menus
 import Strings
 import Tabs
 
-/// The title bar: the window buttons, one group on the left with the
-/// sidebar, the search (the palette, ⌘K) and the spaces, then the tabs,
-/// "+", and the settings on the right. Every button runs a command by id
-/// (ADR 0005).
-///
-/// The owner asked for the left icons together and for the tabs to lead
-/// (2026-10-19): the palette button and the wide search field opened the
-/// same palette, so they became one button that says ⌘K, and the tabs take
-/// the room the field used. One height (26 pt) for every control, one icon
-/// size per role, gaps on a 4/8/12 pt scale.
+/// The title bar of the new frame (docs/adr/0035-work-frame.md; screens.md, TitleBar;
+/// components.titleBar): the window buttons, the search (the palette, ⌘K), where you are
+/// ("project › task"), the tabs of what is open and "+", and on the right the bell. Every
+/// control runs a command by id (ADR 0005); the sidebar, the space and the settings left the bar
+/// (⌘B, ⇧⌘S and ⌘, in the palette, the shortcuts and the menu).
 final class TitleBarView: NSView {
-    /// Matches the title area of a window with a unified compact toolbar,
-    /// where macOS centers the window buttons.
-    /// Zoomed but never compact: macOS places the window buttons itself,
-    /// and a shorter bar would leave them off center (plan 15, phase D).
-    static var height: CGFloat { UILooks.pt(38) }
-    /// Where the close, minimize and zoom buttons end, and the one gap used
-    /// before and after the group: 6 and 12 pt there read as crooked.
-    // Measured in a capture: the zoom button ends at 72 pt (2026-10-19).
-    private static let windowButtonsEnd: CGFloat = 72
-    private static let groupGap: CGFloat = 10
-    /// The group's leading edge: after the window buttons, or at the edge in
-    /// full screen, where macOS hides them (owner, 2026-10-19).
-    private var groupLeading: NSLayoutConstraint!
+    typealias Look = DesignTokens.TitleBar
+    /// Zoomed but never compact: macOS places the window buttons itself (plan 15, phase D).
+    static var height: CGFloat { UILooks.pt(Look.height) }
+    /// Where the close, minimize and zoom buttons end, measured in a capture (2026-10-19).
+    private static let windowButtonsEnd: CGFloat = 72 // token-exempt: where macOS draws its own buttons
+    private var searchLeading: NSLayoutConstraint!
 
     private let run: (String) -> Void
-    private let sidebarButton = TitleBarButton(icon: .sidebar, tip: T("Sidebar (⌘B)", "Painel lateral (⌘B)"))
-    /// The palette is the search for everything (files, commands, ⌘K).
-    private let searchButton = TitleBarButton(icon: .magnifyingGlass, title: "⌘K", tip: T("Search files and commands (⌘K)", "Buscar arquivos e comandos (⌘K)"))
-    /// The space's name; clicking it switches spaces (docs/spec/spaces.md).
-    private let spaceButton = TitleBarButton(icon: .stack, title: "", tip: T("Switch space (⇧⌘S)", "Trocar de space (⇧⌘S)"))
-    /// The four as one group on a light fill.
-    private let group = NSView()
+    private let search = TitleBarSearch()
+    /// "cadex › orchestration-e": the project, then the task when one is selected.
+    private let location = NSTextField(labelWithString: "")
     private let newTabButton = TitleBarButton(
-        icon: .plus, tip: T("Open a terminal, file, preview or git graph", "Abrir terminal, arquivo, preview ou grafo do git"))
-    private let settingsButton = TitleBarButton(icon: .gearSix, tip: T("Settings (⌘,)", "Configurações (⌘,)"))
-    /// A newer Cadex: shown only while there is one, left of the settings;
-    /// a click opens the update panel (docs/spec/updates.md).
-    private let updateButton = TitleBarButton(icon: .arrowCircleUp, tip: "")
-    /// The update button and the settings: a stack, so the hidden button
-    /// takes no room.
-    private let trailing = NSStackView()
-    /// Keep-awake, in the group: filled while on, the outline while off; a
-    /// click runs power.toggle, as ⇧⌘A (docs/spec/power.md).
+        icon: .plus, tip: T("Open a terminal, file, preview or git graph", "Abrir terminal, arquivo, preview ou grafo do git"), kind: .add)
+    /// The bell: the requests waiting for you, its count on the badge (docs/spec/agents.md).
+    private let bellButton = TitleBarButton(icon: .bell, tip: T("Needs you", "Precisa de você"))
+    /// Keep-awake and the update stay here until plan 26 phase B moves them to the status bar.
     private let powerButton = TitleBarButton(icon: .coffee, tip: T("Keep awake", "Manter acordado"))
-    /// The shown space's tabs; swapped when the space changes.
+    private let updateButton = TitleBarButton(icon: .arrowCircleUp, tip: "")
+    private let trailing = NSStackView()
+    /// The line under the bar.
+    private let hairline = NSView()
+    /// The shown project's tabs; swapped when the project changes.
     private(set) var tabBar: TabBarView?
     private var tabBarConstraints: [NSLayoutConstraint] = []
-    private var textColor = NSColor.labelColor
-    private var secondaryColor = NSColor.secondaryLabelColor
-
-    /// The space button's right click menu (rename, color, close), from commands.
-    var spaceMenu: (() -> [MenuEntry])?
 
     /// The "+" menu (the openers, built by the app); without it, "+" is a new tab.
     var newMenu: (() -> [MenuEntry])?
+
+    init(run: @escaping (String) -> Void) {
+        self.run = run
+        super.init(frame: .zero)
+        search.onPress = { [weak self] in self?.run("palette.open") }
+        newTabButton.onPress = { [weak self] in self?.showNewMenu() }
+        bellButton.onPress = { [weak self] in self?.run("agents.show-attention") }
+        powerButton.onPress = { [weak self] in self?.run("power.toggle") }
+        updateButton.onPress = { [weak self] in self?.run("app.check-for-updates") }
+        updateButton.setFilled(true)
+        // The update is news, not a tool: in the accent (docs/spec/updates.md).
+        updateButton.tint = DesignTokens.Color.stateWorking
+        updateButton.isHidden = true
+        trailing.setViews([updateButton, powerButton, bellButton], in: .leading)
+        trailing.spacing = UILooks.pt(Look.gap)
+
+        location.font = UILooks.font(DesignTokens.Breadcrumb.fontSize)
+        location.textColor = DesignTokens.Breadcrumb.color
+        location.lineBreakMode = .byTruncatingMiddle
+        location.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        wantsLayer = true
+        hairline.wantsLayer = true
+        for view in [search, location, newTabButton, trailing, hairline] as [NSView] {
+            view.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(view)
+        }
+        searchLeading = search.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Self.searchStart(fullScreen: false))
+        NSLayoutConstraint.activate([
+            searchLeading,
+            // The bar's gap and the tabs group's margin, as the mockup lays them out.
+            location.leadingAnchor.constraint(equalTo: search.trailingAnchor,
+                                              constant: UILooks.pt(Look.gap + DesignTokens.Tab.groupMarginLeft)),
+            trailing.leadingAnchor.constraint(greaterThanOrEqualTo: newTabButton.trailingAnchor, constant: UILooks.pt(Look.gap)),
+            trailing.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -UILooks.pt(Look.padding.right)),
+            hairline.leadingAnchor.constraint(equalTo: leadingAnchor),
+            hairline.trailingAnchor.constraint(equalTo: trailingAnchor),
+            hairline.bottomAnchor.constraint(equalTo: bottomAnchor),
+            hairline.heightAnchor.constraint(equalToConstant: DesignTokens.Stroke.hairline),
+        ] + [search, location, newTabButton, trailing].map { $0.centerYAnchor.constraint(equalTo: centerYAnchor) })
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("TitleBarView is created in code") }
+
+    /// After the window buttons and the mockup's gap; at the bar's own padding in full screen,
+    /// where macOS hides the buttons (owner, 2026-10-19).
+    private static func searchStart(fullScreen: Bool) -> CGFloat {
+        fullScreen ? UILooks.pt(Look.padding.left) : windowButtonsEnd + UILooks.pt(Look.gap + Look.afterTrafficLights)
+    }
 
     private func showNewMenu() {
         guard let entries = newMenu?(), !entries.isEmpty else { return run("tab.new") }
         PopupMenu.show(entries, below: newTabButton)
     }
 
-    init(run: @escaping (String) -> Void) {
-        self.run = run
-        super.init(frame: .zero)
-        sidebarButton.onPress = { [weak self] in self?.run("view.toggle-sidebar") }
-        searchButton.onPress = { [weak self] in self?.run("palette.open") }
-        spaceButton.onPress = { [weak self] in self?.run("space.switch") }
-        spaceButton.onRightPress = { [weak self] in
-            guard let self, let entries = self.spaceMenu?(), !entries.isEmpty else { return }
-            PopupMenu.show(entries, below: self.spaceButton)
+    /// The project and the task a folder stands for: `<repo>.worktrees/<branch>` (where New Task
+    /// puts a task, plan 19) is the repository's project and that task; anything else, its name.
+    static func location(of root: String) -> (project: String, task: String?) {
+        let url = URL(fileURLWithPath: root)
+        let parent = url.deletingLastPathComponent().lastPathComponent
+        if parent.hasSuffix(".worktrees") {
+            return (String(parent.dropLast(".worktrees".count)), url.lastPathComponent)
         }
-        newTabButton.onPress = { [weak self] in self?.showNewMenu() }
-        settingsButton.onPress = { [weak self] in self?.run("settings.open") }
-        powerButton.onPress = { [weak self] in self?.run("power.toggle") }
-        updateButton.onPress = { [weak self] in self?.run("app.check-for-updates") }
-        updateButton.setIcon(.arrowCircleUp, filled: true)
-        updateButton.isHidden = true
-        trailing.setViews([updateButton, settingsButton], in: .leading)
-        trailing.spacing = 4
-
-        group.wantsLayer = true
-        group.layer?.cornerRadius = 8
-        // The coffee before the spaces (owner, 2026-10-20).
-        let inside = NSStackView(views: [sidebarButton, searchButton, powerButton, spaceButton])
-        inside.spacing = 0
-        // 1 pt around 26 pt buttons: the group is 28 pt tall, as the tabs.
-        inside.edgeInsets = NSEdgeInsets(top: 1, left: 1, bottom: 1, right: 1)
-        inside.translatesAutoresizingMaskIntoConstraints = false
-        group.addSubview(inside)
-        NSLayoutConstraint.activate([
-            inside.leadingAnchor.constraint(equalTo: group.leadingAnchor),
-            inside.trailingAnchor.constraint(equalTo: group.trailingAnchor),
-            inside.topAnchor.constraint(equalTo: group.topAnchor),
-            inside.bottomAnchor.constraint(equalTo: group.bottomAnchor),
-        ])
-        spaceButton.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
-
-        let views: [NSView] = [group, newTabButton, trailing]
-        views.forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
-            addSubview($0)
-        }
-        groupLeading = group.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Self.windowButtonsEnd + Self.groupGap)
-        NSLayoutConstraint.activate([
-            groupLeading,
-            spaceButton.widthAnchor.constraint(lessThanOrEqualToConstant: 160),
-            trailing.leadingAnchor.constraint(greaterThanOrEqualTo: newTabButton.trailingAnchor, constant: 12),
-            trailing.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
-        ] + views.map { $0.centerYAnchor.constraint(equalTo: centerYAnchor) })
+        return (url.lastPathComponent, nil)
     }
 
-    @available(*, unavailable)
-    required init?(coder: NSCoder) { fatalError("TitleBarView is created in code") }
+    /// Where you are: the project, and the task when one is selected.
+    func setLocation(project: String, task: String?) {
+        location.stringValue = [project, task].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " › ")
+    }
 
-    /// The space, quiet: the stack icon alone with one space, its name and
-    /// a caret with more. The name before the tabs weighed as much as them
-    /// (owner, 2026-10-19).
-    private var spaceTitle = ""
-    private var spaceCount = 1
-    func setSpace(name: String, count: Int) {
-        spaceTitle = name
-        spaceCount = count
-        guard count > 1 else { return spaceButton.setTitle(NSAttributedString()) }
-        let title = NSMutableAttributedString(string: name, attributes: [
-            .font: UILooks.font(12), .foregroundColor: secondaryColor,
-        ])
-        title.append(NSAttributedString(string: " ▾", attributes: [
-            .font: UILooks.font(9), .foregroundColor: secondaryColor.withAlphaComponent(0.7),
-        ]))
-        spaceButton.setTitle(title)
+    /// The bell's count: what needs you, and finished agents you have not seen.
+    func setBell(count: Int) {
+        bellButton.setBadge(count)
     }
 
     /// Keep-awake's icon: filled while on; the tip says the state.
     func setPower(on: Bool, tip: String) {
-        powerButton.setIcon(.coffee, filled: on)
+        powerButton.setFilled(on)
         HoverTip.attach(tip, to: powerButton)
     }
 
@@ -150,7 +127,7 @@ final class TitleBarView: NSView {
         HoverTip.attach(tip, to: updateButton)
     }
 
-    /// Puts a space's tab bar between the group and "+".
+    /// Puts a project's tab bar after where you are, "+" right after its tabs.
     func setTabBar(_ bar: TabBarView) {
         guard bar !== tabBar else { return }
         tabBar?.removeFromSuperview()
@@ -158,47 +135,78 @@ final class TitleBarView: NSView {
         bar.translatesAutoresizingMaskIntoConstraints = false
         addSubview(bar)
         tabBarConstraints = [
-            bar.leadingAnchor.constraint(equalTo: group.trailingAnchor, constant: Self.groupGap),
-            bar.heightAnchor.constraint(equalToConstant: 30),
+            bar.leadingAnchor.constraint(equalTo: location.trailingAnchor,
+                                         constant: UILooks.pt(DesignTokens.Breadcrumb.marginRight + DesignTokens.Tab.groupGap)),
+            bar.heightAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Tab.height)),
             bar.centerYAnchor.constraint(equalTo: centerYAnchor),
-            newTabButton.leadingAnchor.constraint(equalTo: bar.trailingAnchor, constant: 4),
+            newTabButton.leadingAnchor.constraint(equalTo: bar.trailingAnchor, constant: UILooks.pt(DesignTokens.Tab.groupGap)),
         ]
         NSLayoutConstraint.activate(tabBarConstraints)
-        // The tab bar is as wide as its tabs and gives way first when the
-        // window is narrow.
+        // The strip is as wide as its tabs and gives way first when the window is narrow.
         bar.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         bar.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         tabBar = bar
     }
+
+    // MARK: The window
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         let center = NotificationCenter.default
         center.removeObserver(self)
         guard let window else { return }
-        center.addObserver(self, selector: #selector(fullScreenChanged), name: NSWindow.didEnterFullScreenNotification, object: window)
-        center.addObserver(self, selector: #selector(fullScreenChanged), name: NSWindow.didExitFullScreenNotification, object: window)
-        fullScreenChanged()
+        for name in [NSWindow.didEnterFullScreenNotification, NSWindow.didExitFullScreenNotification] {
+            center.addObserver(self, selector: #selector(windowChanged), name: name, object: window)
+        }
+        // AppKit tiles the window buttons again on many events (resize, focus, a screen or scale
+        // change, un-minimizing, an appearance change): following their own frame catches every
+        // one (review of 2026-11-17). Moving them posts again, but the second time they are
+        // already in place and nothing moves.
+        for kind in [NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton] {
+            guard let button = window.standardWindowButton(kind) else { continue }
+            button.postsFrameChangedNotifications = true
+            center.addObserver(self, selector: #selector(buttonMoved), name: NSView.frameDidChangeNotification, object: button)
+        }
+        windowChanged()
     }
 
-    @objc private func fullScreenChanged() {
+    @objc private func windowChanged() {
         let full = window?.styleMask.contains(.fullScreen) == true
-        groupLeading.constant = full ? 8 : Self.windowButtonsEnd + Self.groupGap
+        searchLeading.constant = Self.searchStart(fullScreen: full)
+        centerWindowButtons()
+    }
+
+    @objc private func buttonMoved() { centerWindowButtons() }
+
+    override func layout() {
+        super.layout()
+        centerWindowButtons()
+    }
+
+    /// The compact toolbar centers the window buttons in 38 pt; the new frame's bar is 44, so
+    /// they move down to its middle, or they sit 3 pt above every other control (2026-11-17).
+    /// macOS lays them out again on many events: this runs after each move of theirs.
+    private func centerWindowButtons() {
+        guard let window, !window.styleMask.contains(.fullScreen) else { return }
+        for kind in [NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton] {
+            guard let button = window.standardWindowButton(kind), let container = button.superview else { continue }
+            let middle = Self.height / 2
+            let fromTop = container.isFlipped ? button.frame.midY : container.bounds.height - button.frame.midY
+            let delta = middle - fromTop
+            guard abs(delta) > 0.5 else { continue }
+            var origin = button.frame.origin
+            origin.y += container.isFlipped ? delta : -delta
+            button.setFrameOrigin(origin)
+        }
     }
 
     /// Empty parts of the bar drag the window, like a normal title bar.
     override var mouseDownCanMoveWindow: Bool { true }
 
-    func setColors(text: NSColor, secondary: NSColor, field: NSColor, accent: NSColor) {
-        textColor = text
-        secondaryColor = secondary
-        // The bar's own controls in near-full contrast: in the quiet gray
-        // they disappeared next to the tabs (owner, 2026-10-19).
-        let strong = text.withAlphaComponent(0.78)
-        for button in [sidebarButton, searchButton, spaceButton, newTabButton, powerButton, settingsButton] { button.colors = (text, strong) }
-        // The update in the theme's accent: it is news, not a tool.
-        updateButton.colors = (accent, accent)
-        group.layer?.backgroundColor = text.withAlphaComponent(0.06).cgColor
-        setSpace(name: spaceTitle, count: spaceCount)
+    override var wantsUpdateLayer: Bool { true }
+
+    override func updateLayer() {
+        layer?.backgroundColor = Look.bg.cgColor
+        hairline.layer?.backgroundColor = Look.borderBottom.cgColor
     }
 }

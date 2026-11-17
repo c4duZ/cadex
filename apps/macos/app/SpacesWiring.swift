@@ -19,8 +19,7 @@ extension WindowSession {
             self?.workspace?.show(tabs)
             self?.refreshWorkColor()
         }
-        spaces.onChange = { [weak self, weak spaces] in
-            self?.workspace?.titleBar.setSpace(name: spaces?.activeName ?? "", count: spaces?.spaces.count ?? 1)
+        spaces.onChange = { [weak self] in
             self?.refreshWorkColor()
         }
         commands.register(SpacesCommands.all(spaces, palette: palette) { [weak self] in
