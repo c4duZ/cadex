@@ -92,8 +92,10 @@ extension WindowSession {
                 self?.git?.refresh()
             }))
         commands.register(Command(
-            id: "agents.show", title: T("Show Agents", "Mostrar os agentes"),
-            keywords: ["agents", "claude", "sessions", "agentes", "sessões", "subagents"], category: .view,
+            // The work's tree, where the agents and the tasks are (plan 28: agents.show and
+            // worktrees.show, which showed the old pages, left; ⇧⌘J stays).
+            id: "sidebar.show", title: T("Show the Work Tree", "Mostrar a árvore do trabalho"),
+            keywords: ["tree", "agents", "tasks", "claude", "sessions", "árvore", "agentes", "tarefas", "sessões"], category: .view,
             defaultShortcut: "cmd+shift+j",
             action: .run { [weak self] in self?.workspace?.showTree() }))
         commands.register(Command(
@@ -140,10 +142,6 @@ extension WindowSession {
         commands.register(AgentAttentionCommands.commands(palette: palette))
         commands.register(AgentHibernation.commands(hibernate: { [weak self] in self?.hibernateFocusedAgent() },
                                                     restart: { [weak self] in self?.restartFocusedAgent() }))
-        commands.register(Command(
-            id: "worktrees.show", title: T("Show Tasks", "Mostrar as tarefas"),
-            keywords: ["tasks", "worktrees", "branches", "tarefas"], category: .view,
-            action: .run { [weak self] in self?.workspace?.showTree() }))
         commands.register(WorktreesCommands.commands(palette: palette, actions: worktreesActions()))
         commands.register(Command(
             id: "agents.test-notifications", title: T("Send Test Notifications", "Mandar notificações de teste"),

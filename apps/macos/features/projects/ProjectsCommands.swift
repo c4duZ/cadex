@@ -4,35 +4,31 @@ import CommandPalette
 import Icons
 
 /// The projects' commands (ADR 0005; docs/spec/projects.md): project.switch, .new, .rename, .close,
-/// .next and .previous. The old space.* ids run the same until plan 28 (aliases, no shortcut of
-/// their own: a keymap that saved them keeps working). `folder` asks for the folder of a new
-/// project (Open Folder).
+/// .next and .previous (the old space.* ids left in plan 28). `chooseFolder` asks for the folder
+/// of a new project (Open Folder).
 public enum ProjectsCommands {
     @MainActor
     public static func all(_ projects: ProjectsController, palette: CommandPaletteController,
                            chooseFolder: @escaping @MainActor () -> Void) -> [Command] {
         func needsTwo() -> String? { projects.projects.count > 1 ? nil : T("Only one project open", "Só um projeto aberto") }
-        let commands: [(id: String, old: String, title: String, keywords: [String], shortcut: String?, run: @MainActor () -> Void,
+        let commands: [(id: String, title: String, keywords: [String], shortcut: String?, run: @MainActor () -> Void,
                         unavailable: @MainActor () -> String?)] = [
-            ("project.switch", "space.switch", T("Switch Project", "Trocar de projeto"), ["project", "switch", "projeto", "trocar"], "cmd+shift+s",
+            ("project.switch", T("Switch Project", "Trocar de projeto"), ["project", "switch", "projeto", "trocar"], "cmd+shift+s",
              { palette.open(ProjectSource(projects: projects)) }, { nil }),
-            ("project.new", "space.new", T("Open Project…", "Abrir projeto…"), ["project", "open", "folder", "new", "projeto", "abrir", "pasta"], "ctrl+cmd+n",
+            ("project.new", T("Open Project…", "Abrir projeto…"), ["project", "open", "folder", "new", "projeto", "abrir", "pasta"], "ctrl+cmd+n",
              chooseFolder, { nil }),
-            ("project.rename", "space.rename", T("Rename Project", "Renomear o projeto"), ["project", "rename", "name", "projeto", "renomear"], nil,
+            ("project.rename", T("Rename Project", "Renomear o projeto"), ["project", "rename", "name", "projeto", "renomear"], nil,
              { askName(projects) }, { nil }),
-            ("project.close", "space.close", T("Close Project", "Fechar o projeto"), ["project", "close", "projeto", "fechar"], nil,
+            ("project.close", T("Close Project", "Fechar o projeto"), ["project", "close", "projeto", "fechar"], nil,
              { projects.closeActive() }, needsTwo),
-            ("project.next", "space.next", T("Next Project", "Próximo projeto"), ["project", "next", "projeto", "próximo"], "ctrl+cmd+right",
+            ("project.next", T("Next Project", "Próximo projeto"), ["project", "next", "projeto", "próximo"], "ctrl+cmd+right",
              { projects.selectNext(step: 1) }, needsTwo),
-            ("project.previous", "space.previous", T("Previous Project", "Projeto anterior"), ["project", "previous", "projeto", "anterior"], "ctrl+cmd+left",
+            ("project.previous", T("Previous Project", "Projeto anterior"), ["project", "previous", "projeto", "anterior"], "ctrl+cmd+left",
              { projects.selectNext(step: -1) }, needsTwo),
         ]
-        return commands.flatMap { c in
-            [Command(id: c.id, title: c.title, keywords: c.keywords, category: .tabs, defaultShortcut: c.shortcut,
-                     action: .run(c.run), unavailableReason: c.unavailable),
-             // The plan-7 id, until plan 28 (docs/design/work-frame/inventory.md).
-             Command(id: c.old, title: c.title + T(" (old name)", " (nome antigo)"), keywords: ["space"], category: .tabs,
-                     action: .run(c.run), unavailableReason: c.unavailable)]
+        return commands.map { c in
+            Command(id: c.id, title: c.title, keywords: c.keywords, category: .tabs, defaultShortcut: c.shortcut,
+                    action: .run(c.run), unavailableReason: c.unavailable)
         }
     }
 

@@ -287,7 +287,7 @@ let exitCode = await Checks.run([
         tabs.closeAll()
         expect(b.closed)
     }),
-    ("a plan 7 spaces.json comes back the same: a document tab is a tab of one pane", {
+    ("an old snapshot's document item comes back the same: a document tab is a tab of one pane", {
         let json = """
         {"items":[{"terminal":{"layout":{"pane":{"folder":"/"}},"focus":0}},{"document":{"identity":"/x.md"}}],"active":1}
         """

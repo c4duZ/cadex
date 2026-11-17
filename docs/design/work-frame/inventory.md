@@ -69,10 +69,10 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | arquivo | página memory (`apps/macos/features/memory/MemoryView.swift`) | muda | aba Memória do painel da direita | 26 |
 | comando | `git.show`, `git.show-history`, `memory.show`, `explorer.focus` | muda | abrem a aba do painel da direita | 26 |
 | arquivo | página tasks (`apps/macos/features/worktrees/WorktreesView.swift`) | saiu | as tarefas na árvore (fase D) | 27 |
-| comando | `worktrees.show` | sai | apelido de mostrar a árvore no 27, sai no 28 | 28 |
+| comando | `worktrees.show` | saiu | sidebar.show mostra a árvore (plano 28 fase F) | 28 |
 | arquivo | página agents: `apps/macos/features/agents/AgentsView.swift`, `apps/macos/features/agents/AgentSessionList.swift`, `apps/macos/features/agents/AgentsLayout.swift` | saiu | os agentes nos terminais da árvore; as sessões de fora do Cadex na página do projeto (plano 30); fase D | 27 |
 | trecho | `pageShown` / `onWatching` em `apps/macos/features/agents/AgentsController.swift` e a leitura das máquinas em `apps/macos/app/RunOnWiring.swift` | muda | sem a página Agents ninguém os chama: a página do projeto mostra as sessões das outras máquinas e volta a chamá-los | 30 |
-| comando | `agents.show` | sai | apelido no 27, sai no 28 | 28 |
+| comando | `agents.show` | saiu | sidebar.show (⇧⌘J) mostra a árvore, onde estão os agentes (plano 28 fase F) | 28 |
 | arquivo | página agent-history (`apps/macos/features/agents/AgentHistoryView.swift`, `AgentHistoryList.swift`) | muda | Arquivo e histórico, no centro: uma aba (`AgentHistoryDocument.swift`), feito na fase C | 27 |
 | arquivo | página attention (`apps/macos/features/agents/AgentAttentionView.swift`) | muda | o conteúdo do popover do sino, feito | 26 |
 | trecho | ".page(makeAttentionPage())" em `apps/macos/app/SidebarWiring.swift` | saiu | a página do sininho saiu da barra lateral; o id é aposentado em SidebarLayout.retired | 26 |
@@ -84,7 +84,8 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | tipo | peça | estado | destino | plano |
 |---|---|---|---|---|
 | arquivo | `apps/macos/features/spaces/` | saiu | a feature `projects` (`apps/macos/features/projects/`): o space com pasta; projects.json, migrado uma vez do spaces.json (fase A); a árvore na fase B | 27 |
-| comando | `space.switch`, `space.new`, `space.rename`, `space.close`, `space.next`, `space.previous`, `space.set-color` | sai | `project.*`; apelidos no 27, saem no 28 | 28 |
+| comando | `space.switch`, `space.new`, `space.rename`, `space.close`, `space.next`, `space.previous`, `space.set-color` | saiu | `project.*`; os apelidos saíram na fase F do 28 | 28 |
+| trecho | "LegacySpaces" em `apps/macos/features/projects/ProjectsFile.swift` | saiu | a leitura do spaces.json, que virou projects.json uma vez no 27 (fase F do 28) | 28 |
 | spec | `docs/spec/spaces.md` | muda | o Mac segue `docs/spec/projects.md` desde o plano 27; ela fica para o app do Windows, que ainda tem spaces (`docs/adr/0035-work-frame.md`: o Windows vem depois) | port |
 | arquivo | `apps/macos/app/SpacesWiring.swift` | saiu | `apps/macos/app/ProjectsWiring.swift` | 27 |
 

@@ -28,7 +28,7 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "terminal.open-pasted-image-beside", "terminal.open-pasted-image-in-tab",
             "preview.pick-element", "preview.stop-picking",
             "git.show-history", "inspector.tab-1", "inspector.tab-2", "inspector.tab-3", "inspector.tab-4", "history.show-in-tab",
-            "statusBar.customize", "statusBar.toggle-item", "statusBar.activity-monitor", "agents.show", "agents.test-notifications", "agents.show-accounts", "agents.refresh-usage", "ssh.connect", "ssh.test-again", "agents.open-account", "agents.customize-accounts",
+            "statusBar.customize", "statusBar.toggle-item", "statusBar.activity-monitor", "sidebar.show", "agents.test-notifications", "agents.show-accounts", "agents.refresh-usage", "ssh.connect", "ssh.test-again", "agents.open-account", "agents.customize-accounts",
             "pane.zoom",
             # Managed accounts (plan 18, phase C), Mac only like the rest of agents.
             "agents.add-account", "agents.set-active-account", "agents.set-project-account", "agents.sync-account-config", "agents.share-account-config",
@@ -78,7 +78,7 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "review.clear-comments", "review.show-sent", "review.toggle-authorship", "review.export-authorship",
             "git.review-image-mode", "git.accept-ours", "git.accept-theirs", "git.accept-both", "git.mark-resolved",
             # Tasks' worktrees (plan 19, phase D), until Windows gets the view.
-            "worktrees.show", "worktrees.new-task", "worktrees.open", "worktrees.remove", "worktrees.set-status",
+            "worktrees.new-task", "worktrees.open", "worktrees.remove", "worktrees.set-status",
             "worktrees.set-comment", "worktrees.edit-setup-hooks"}
 
 

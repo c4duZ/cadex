@@ -25,15 +25,13 @@
 - `ProjectsFile.swift`: o JSON em Application Support/Cadex/projects.json (gravação atômica), com os
   projetos (nome, pasta, abas, cor), o ativo e a pasta do workspace. Arquivo ilegível vai para
   projects.bad-<data>.json e o app começa do zero. CADEX_PROJECTS_FILE aponta para outro arquivo:
-  conferir o app em teste não pode apagar os projetos do dono. Sem projects.json, o spaces.json ao
-  lado vira projetos uma vez (`migrate`: cada space, o projeto da pasta do primeiro terminal, subindo
-  até o repositório, ou a pasta do workspace; dois da mesma pasta, um projeto com as abas dos dois) e
-  fica ao lado como spaces.migrated.json. `repositoryRoot`: o repositório de uma pasta pelos arquivos
+  conferir o app em teste não pode apagar os projetos do dono. O spaces.json de antes do plano 27
+  virou projetos uma vez; essa leitura saiu no plano 28. `repositoryRoot`: o repositório de uma pasta pelos arquivos
   (`.git`; a worktree de uma tarefa pertence ao repositório principal), sem rodar o git.
 - Comandos em `ProjectsCommands.swift`: project.switch (⇧⌘S, a lista na paleta com a pasta de cada
   um), project.new (⌃⌘N, Abrir projeto: a pasta pelo seletor do sistema), project.rename,
-  project.close, project.next (⌃⌘→) e project.previous (⌃⌘←); os space.* de antes rodam o mesmo, sem
-  atalho, até o plano 28. project.set-color (e space.set-color) fica no app
+  project.close, project.next (⌃⌘→) e project.previous (⌃⌘←); os space.* de antes saíram no plano 28.
+  project.set-color fica no app
   (`../../app/WorkColors.swift`).
 - O app (`../../app/ProjectsWiring.swift`) cria as abas de cada projeto, reabre os documentos
   salvos e devolve a pasta do workspace quando o app abre sem pasta; o daemon do terminal mantém o

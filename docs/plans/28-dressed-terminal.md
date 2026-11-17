@@ -49,7 +49,9 @@ painéis" e os apelidos do 27.
   com `@` (a opção C2 do dono): uma linha curta na caixa, o bloco e o caminho do print no arquivo. Plano original: Abre como painel ao lado do terminal que mostrou o endereço (a oferta de
   hoje, `onOpenPreview`), com a barra nova (endereço, Escolher elemento, tamanhos); o elemento
   escolhido entra na linha do agente como etiqueta. Um terminal só: terminal e preview lado a lado.
-- **F. Remoção.** Saem os apelidos do 27 (`project.*` fica, `space.*`, worktrees.show e
+- **F. Remoção.** Feita (2026-11-17): saíram os space.*, worktrees.show e agents.show (sidebar.show,
+  ⇧⌘J, mostra a árvore e o "working" da barra o roda) e a leitura do spaces.json; o cabeçalho e o
+  escurecer velhos já tinham saído na fase B. Plano original: Saem os apelidos do 27 (`project.*` fica, `space.*`, worktrees.show e
   agents.show saem), a leitura de spaces.json, o cabeçalho velho e o escurecer velho que o novo
   substitui. Specs e `CLAUDE.md` de tabs, terminal, preview e agent-tools.
 - **G. Varredura e fechamento.** Linhas do 28 em `saiu`; tools/find_unused.py; `make check`; `make

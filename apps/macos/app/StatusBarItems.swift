@@ -43,7 +43,7 @@ extension WindowSession {
         working.isHidden = true
         needs.isHidden = true
         needs.onClick = { [weak self] in _ = self?.commands.run("agents.show-attention") }
-        working.onClick = { [weak self] in _ = self?.commands.run("agents.show") }
+        working.onClick = { [weak self] in _ = self?.commands.run("sidebar.show") }
         let row = NSStackView(views: [working, needs])
         row.isHidden = true
         row.spacing = UILooks.pt(DesignTokens.StatusBar.gap) - 2 * StatusBarView.itemInset

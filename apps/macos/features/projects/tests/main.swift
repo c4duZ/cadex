@@ -121,24 +121,6 @@ let exitCode = await Checks.run([
         expect(projects.projects.count == 1)
         projects.projects.forEach { $0.tabs.closeAll() }
     }),
-    ("the spaces of before become projects once: by their folder, two of one folder as one, the old file kept beside", {
-        let (a, b) = folders()
-        let dir = tempDir()
-        let legacy = """
-        {"version": 1, "active": 2, "folder": "\(a)", "spaces": [
-          {"name": "api", "color": "blue", "tabs": {"items": [{"terminal": {"layout": {"pane": {"folder": "\(a)/src"}}, "focus": 0}}], "active": 0}},
-          {"name": "site", "tabs": {"items": [{"terminal": {"layout": {"pane": {"folder": "\(b)"}}, "focus": 0}}], "active": 0}},
-          {"name": "api 2", "tabs": {"items": [{"terminal": {"layout": {"pane": {"folder": "\(a)"}}, "focus": 0}}], "active": 0}}
-        ]}
-        """
-        try? Data(legacy.utf8).write(to: dir.appendingPathComponent("spaces.json"))
-        let saved = ProjectsFile.load(from: dir.appendingPathComponent("projects.json"))
-        expect(saved?.projects.map(\.folder) == [a, b], "\(String(describing: saved?.projects.map(\.folder)))")
-        expect(saved?.projects.first?.tabs.items.count == 2 && saved?.projects.first?.color == "blue", "the two spaces of one folder, together")
-        expect(saved?.active == 0, "the active space's project is the active one")
-        let files = (try? FileManager.default.contentsOfDirectory(atPath: dir.path)) ?? []
-        expect(files.contains("projects.json") && files.contains("spaces.migrated.json") && !files.contains("spaces.json"), "\(files)")
-    }),
     ("a worktree's folder belongs to its main repository", {
         let (a, _) = folders()
         let worktree = tempDir()

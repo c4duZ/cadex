@@ -67,5 +67,5 @@ agora sempre com a pasta (`../adr/0035-work-frame.md`).
 - [x] Um terminal e um documento lado a lado voltam lado a lado.
 - [ ] Com terminal.keepSessions ligado, reabrir o app traz a tela e o scrollback de cada painel;
       depois de reiniciar o Mac, o scrollback salvo volta num shell novo.
-- [ ] Os spaces de uma instalação de antes voltam como projetos, com as abas, depois da migração.
-- [ ] Nenhum comando space.* existe depois do plano 28 (`../design/work-frame/inventory.md`).
+- [x] Os spaces de uma instalação de antes voltam como projetos, com as abas, depois da migração (plano 27; a leitura do spaces.json saiu no 28, depois de migrar).
+- [x] Nenhum comando space.* existe depois do plano 28 (`../design/work-frame/inventory.md`).

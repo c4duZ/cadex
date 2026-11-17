@@ -38,7 +38,7 @@ enum WorkColor: String, CaseIterable {
 }
 
 extension WindowSession {
-    /// project.set-color (space.set-color, its old id until plan 28) and tab.set-color.
+    /// project.set-color and tab.set-color.
     func registerWorkColors(palette: CommandPaletteController) {
         let projectColor: @MainActor () -> Void = { [weak self] in
             guard let projects = self?.projects else { return }
@@ -47,8 +47,6 @@ extension WindowSession {
         commands.register([
             Command(id: "project.set-color", title: T("Set Project Color", "Escolher a cor do projeto"),
                     keywords: ["project", "color", "cor", "paint", "pintar", "projeto"], category: .tabs, action: .run(projectColor)),
-            Command(id: "space.set-color", title: T("Set Project Color (old name)", "Escolher a cor do projeto (nome antigo)"),
-                    keywords: ["space"], category: .tabs, action: .run(projectColor)),
             Command(id: "tab.set-color", title: T("Set Tab Color", "Escolher a cor da aba"),
                     keywords: ["tab", "aba", "color", "cor", "paint", "pintar"], category: .tabs,
                     action: .run { [weak self] in

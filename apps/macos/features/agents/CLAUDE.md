@@ -157,7 +157,7 @@
   sistema enquanto aberta; fechada, solta tudo.
 - O app (`../../app/AgentsWiring.swift`) liga o item Agents da barra de status e acha o terminal de
   cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo). A página Agents
-  saiu da janela com a barra de ícones (plano 27 fase B: agents.show, ⇧⌘J, mostra a árvore, onde as
+  saiu da janela com a barra de ícones (plano 27 fase B: sidebar.show, ⇧⌘J, mostra a árvore, onde as
   tarefas e os terminais têm o estado de cada agente); as sessões abertas fora do Cadex vão para a
   página do projeto no plano 30.
 - O id de cada sessão pelos hooks (plano 19, fase B): AgentsController.noteHook guarda, por pid do

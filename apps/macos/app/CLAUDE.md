@@ -250,7 +250,7 @@
   volta ao sair, porque o macOS a punha numa faixa por cima da barra do app. Tamanho mínimo da
   janela 480×300.
 - `WorkColors.swift` (plano 15, fase D): as cores de projeto e de aba pelo nome, desenhadas com o ANSI
-  do tema; registra project.set-color (space.set-color, o id antigo, até o plano 28) e tab.set-color
+  do tema; registra project.set-color e tab.set-color
   (lista no ⌘K) e põe a cor da aba ativa, ou a do projeto, no lugar do destaque da janela (workColor do WorkspaceView). O clique direito numa aba mostra
   `tabActions` (`PaletteWiring.swift`). `main.swift` chama
   UILooks.configure com o zoom, a densidade e a fonte da interface antes de qualquer tela.

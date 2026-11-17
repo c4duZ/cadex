@@ -35,18 +35,6 @@ public struct SavedProjects: Codable, Equatable, Sendable {
     }
 }
 
-/// spaces.json as plan 7 wrote it, read once to become projects.json (migration 0035).
-struct LegacySpaces: Codable {
-    struct Space: Codable {
-        var name: String
-        var tabs: TabsSnapshot
-        var color: String?
-    }
-    var spaces: [Space]
-    var active: Int
-    var folder: String?
-}
-
 public enum ProjectsFile {
     /// CADEX_PROJECTS_FILE points somewhere else: checking the app must not overwrite the owner's
     /// projects.
@@ -59,11 +47,10 @@ public enum ProjectsFile {
     }
 
     /// The saved projects; nil without a file. A file that does not read is moved aside
-    /// (projects.bad-<date>.json) and the app starts fresh. Without projects.json, the spaces.json
-    /// beside it becomes projects once and stays beside as spaces.migrated.json (the spec: the old
-    /// file stays until the next plan).
+    /// (projects.bad-<date>.json) and the app starts fresh. (The spaces.json of before plan 27
+    /// was read once to become this file; that reading left in plan 28.)
     public static func load(from url: URL) -> SavedProjects? {
-        guard let data = try? Data(contentsOf: url) else { return migrateLegacy(beside: url) }
+        guard let data = try? Data(contentsOf: url) else { return nil }
         if let saved = try? JSONDecoder().decode(SavedProjects.self, from: data), !saved.projects.isEmpty {
             return saved
         }
@@ -76,43 +63,6 @@ public enum ProjectsFile {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         try encoder.encode(projects).write(to: url, options: .atomic)
-    }
-
-    static func migrateLegacy(beside url: URL) -> SavedProjects? {
-        let old = url.deletingLastPathComponent().appendingPathComponent("spaces.json")
-        guard let data = try? Data(contentsOf: old), let legacy = try? JSONDecoder().decode(LegacySpaces.self, from: data),
-              !legacy.spaces.isEmpty else { return nil }
-        let projects = migrate(legacy, root: repositoryRoot) { snapshot in
-            snapshot.items.lazy.compactMap { item -> String? in
-                if case .terminal(_, let layout, _, _) = item { return layout.folders.first }
-                return nil
-            }.first.map(repositoryRoot)
-        }
-        guard (try? save(projects, to: url)) != nil else { return projects }
-        try? FileManager.default.moveItem(at: old, to: old.deletingLastPathComponent().appendingPathComponent("spaces.migrated.json"))
-        return projects
-    }
-
-    /// Each space becomes the project of its folder (its first terminal's repository, else the
-    /// workspace's); spaces of the same folder become one project with the tabs of all, in order.
-    /// Pure: the folder of a snapshot comes from `folderOf`.
-    /// `root` takes the workspace's folder to its repository too (a workspace in a repository's
-    /// subfolder and a space in its root are one project: review of 2026-11-17).
-    static func migrate(_ legacy: LegacySpaces, root: (String) -> String = { $0 }, folderOf: (TabsSnapshot) -> String?) -> SavedProjects {
-        var projects: [SavedProjects.Project] = []
-        var activeFolder: String?
-        let workspace = legacy.folder.map(root) ?? NSHomeDirectory()
-        for (index, space) in legacy.spaces.enumerated() {
-            let folder = folderOf(space.tabs) ?? workspace
-            if index == legacy.active { activeFolder = folder }
-            if let at = projects.firstIndex(where: { $0.folder == folder }) {
-                projects[at].tabs.items += space.tabs.items
-                continue
-            }
-            projects.append(.init(name: space.name, folder: folder, tabs: space.tabs, color: space.color))
-        }
-        let active = projects.firstIndex { $0.folder == activeFolder } ?? 0
-        return SavedProjects(projects: projects, active: active, folder: legacy.folder)
     }
 
     /// The repository holding `path`: the folder with `.git` above it; a worktree's (`.git` is a
