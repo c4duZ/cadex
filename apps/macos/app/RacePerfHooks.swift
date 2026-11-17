@@ -61,7 +61,7 @@ extension WindowSession {
     /// `account` and `model`, `start`) that fills the New Task sheet when it opens and, with
     /// `start`, presses Start: the sheet, its lines and the launch stay the real ones.
     func fillPerfNewTask(_ sheet: NewTaskSheet) {
-        struct Agent: Decodable { var account: String?; var model: String? }
+        struct Agent: Decodable { var account: String?; var model: String?; var codex: Bool? }
         struct Fill: Decodable {
             var prompt: String
             var branch: String?
@@ -80,7 +80,7 @@ extension WindowSession {
             let choices = sheet.choices
             request.agents = agents.map { wanted in
                 let dir = wanted.account.map(SettingsBridge.expand)
-                var agent = choices.first { $0.account == dir && $0.machine.isEmpty }
+                var agent = choices.first { $0.account == dir && $0.machine.isEmpty && $0.isCodex == (wanted.codex ?? false) }
                     ?? NewTaskAgent(name: ((dir ?? "default") as NSString).lastPathComponent, account: dir)
                 agent.model = wanted.model ?? ""
                 return agent

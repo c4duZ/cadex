@@ -58,6 +58,9 @@
   dono, 2026-11-15). O `cadex` no PATH da aba
   entra com o primeiro subcomando que o agente usa (plano 20).
 
+- `codexCommand` (plano 29): `[CODEX_HOME=…] codex …`, e com o pedido `cadex codex …
+  --cadex-prompt-file <arquivo>`; sem kit (o Codex não tem hooks nem status line que o Cadex leia).
+
 ## Como validar
 - `make macos-test` (SessionKitTests): comando por conta, ambiente limpo, status line do Cadex, o
   tema pedido, MCP só para as outras contas e com 0600, contribuições somadas (com agents.stateHooks desligada

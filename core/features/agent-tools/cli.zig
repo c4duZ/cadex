@@ -7,6 +7,7 @@ const statusline = @import("statusline.zig");
 const hook = @import("hook.zig");
 const agent = @import("agent.zig");
 const claude_wrap = @import("claude_wrap.zig");
+const codex_wrap = @import("codex_wrap.zig");
 const continue_wrap = @import("continue_wrap.zig");
 const automations = @import("automations.zig");
 // The memory's hook (plan 22): the memory feature's entry, the only code
@@ -33,6 +34,7 @@ pub fn main(init: std.process.Init.Minimal) u8 {
     if (std.mem.eql(u8, sub, "hook")) return runHook(args.next() orelse return fail(usage_text), hook.run);
     if (std.mem.eql(u8, sub, "memory-hook")) return runHook(args.next() orelse return fail(usage_text), memory.hook.run);
     if (std.mem.eql(u8, sub, "claude")) return runClaude(&args);
+    if (std.mem.eql(u8, sub, "codex")) return runCodex(&args);
     if (std.mem.eql(u8, sub, "continue")) return runContinue(&args);
     if (std.mem.eql(u8, sub, "memory-agent")) return runMemoryAgent(&args);
     if (std.mem.eql(u8, sub, "automations")) {
@@ -56,6 +58,13 @@ fn runClaude(args: anytype) u8 {
     var words: std.ArrayList([:0]const u8) = .empty;
     while (args.next()) |word| words.append(std.heap.page_allocator, word) catch return claude_wrap.run(&.{});
     return claude_wrap.run(words.items);
+}
+
+/// Every word after `codex`; the process becomes `codex` (codex_wrap.zig).
+fn runCodex(args: anytype) u8 {
+    var words: std.ArrayList([:0]const u8) = .empty;
+    while (args.next()) |word| words.append(std.heap.page_allocator, word) catch return codex_wrap.run(&.{});
+    return codex_wrap.run(words.items);
 }
 
 /// Every word after `continue`; the process becomes `cadex-memory run`.

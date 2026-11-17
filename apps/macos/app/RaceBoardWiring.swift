@@ -126,6 +126,8 @@ extension WindowSession {
     }
 
     func contenderTerminal(_ contender: Contender) -> (window: WindowSession, space: Int, terminal: TerminalView)? {
+        // Codex has no kit session: its terminal is the one in its worktree.
+        if contender.agent.isCodex { return app.locate { $0.currentDirectory == contender.worktree } }
         guard let kit = contender.session?.kit else { return nil }
         return app.locate { $0.agentResume?.kitSession == kit }
     }
@@ -161,6 +163,10 @@ extension WindowSession {
         let terminal = found.terminal
         let cost = terminal.agentResume.flatMap { SessionCost.read(session: $0.sessionID) }
         let state: ContenderLive.State
+        // Codex reports nothing to the terminal: working while it runs, exited after.
+        if contender.agent.isCodex {
+            return ContenderLive(state: terminal.hasForegroundProcess ? .working : .exited, since: nil, costUsd: nil, diff: diff, worktreeGone: gone)
+        }
         switch terminal.agentStatus?.state {
         case .working?: state = .working
         case .blocked?: state = .waiting

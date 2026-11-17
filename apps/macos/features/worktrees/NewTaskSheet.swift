@@ -313,15 +313,16 @@ public final class NewTaskSheet: NSView, NSTextViewDelegate, NSTextFieldDelegate
     private func pickAgent(at index: Int?, below anchor: NSView) {
         let current = index.map { request.agents[$0] }
         var entries = actions.choices().map { choice in
-            MenuEntry(choice.title, icon: current.map { $0.account == choice.account && $0.machine == choice.machine } == true ? .check : nil) { [weak self] in
+            MenuEntry(choice.title, icon: current.map { $0.account == choice.account && $0.machine == choice.machine && $0.isCodex == choice.isCodex } == true ? .check : nil) { [weak self] in
                 guard let self else { return }
                 var picked = choice
-                picked.model = current?.model ?? ""
+                // The model goes with the agent's kind: Claude's names mean nothing to Codex.
+                picked.model = current?.isCodex == choice.isCodex ? current?.model ?? "" : ""
                 if let index { self.request.agents[index] = picked } else { self.request.agents.append(picked) }
                 self.refresh()
             }
         }
-        if let index, let current {
+        if let index, let current, !current.isCodex {
             entries.append(.separator)
             for model in NewTaskAgent.models {
                 entries.append(MenuEntry(model.isEmpty ? T("Account's default model", "Modelo padrão da conta") : model.prefix(1).uppercased() + model.dropFirst(),

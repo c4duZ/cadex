@@ -89,7 +89,8 @@
   (a pasta das cópias, os hooks novos, a confiança; numa corrida, a conta que ainda não confia trava
   o Começar e abre o Claude lá, e as corridas desligadas são ligadas pelo Começar); começar: na
   pasta, um terminal com o agente e o pedido (`openAgent`); numa cópia, `makeTask`; noutra máquina,
-  a tarefa remota (sem o pedido ainda); dois ou mais, `startRace` sem perguntar de novo. O explorer é criado
+  a tarefa remota com o pedido por arquivo lá (`newRemoteTask(…prompt:model:)`, o mesmo caminho do
+  concorrente remoto); o Codex de uma conta como agente, pelo `cadex codex`; dois ou mais, `startRace` sem perguntar de novo. O explorer é criado
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.
@@ -180,7 +181,8 @@
   pediria (a pasta, hooks novos), e cria por concorrente a worktree pelo `plan`/`make` da worktrees e uma aba com os
   hooks e o `cadex claude --cadex-prompt-file` do kit; numa máquina remota, a worktree pelo
   `makeRemote` (a pasta do repositório lá já lembrada), o prompt pelo `uploadPrompt` e a aba `ssh
-  -t`. `RaceBoardWiring.swift`: o quadro numa aba (`RaceWatch`: os quadros abertos, o diff de cada
+  -t`. `RaceBoardWiring.swift`: o quadro numa aba (o concorrente do Codex achado pelo terminal na
+  worktree dele, trabalhando enquanto o programa roda, o teto só de tempo) (`RaceWatch`: os quadros abertos, o diff de cada
   concorrente contado fora da linha principal pelo `ReviewTally`, um relógio de 15 s só com quadro
   aberto ou agente local de corrida trabalhando, e o aviso TerminalView.agentDidChange); o estado
   de cada concorrente pelo terminal achado pela sessão do kit (agentResume.kitSession), o custo

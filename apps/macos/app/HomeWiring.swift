@@ -88,15 +88,16 @@ extension WindowSession {
         let project = homeChoice.project.map { folder in
             projects.projects.first { $0.folder == folder }?.name ?? projects.recent.first { $0.folder == folder }?.name ?? (folder as NSString).lastPathComponent
         }
-        home.show(HomeState(project: project, agent: account.map { "Claude · " + $0.name }, separateCopy: homeChoice.separateCopy, recents: recents))
+        home.show(HomeState(project: project, agent: account.map { ($0.provider == .codex ? "Codex · " : "Claude · ") + $0.name }, separateCopy: homeChoice.separateCopy, recents: recents))
     }
 
     // MARK: The prompt
 
     /// The account the prompt opens: the one picked, else the project's or the active one.
     private func homeAccount() -> AgentAccount? {
+        // The one picked, Claude Code's or Codex's.
+        if let dir = homeChoice.account, let found = AgentsController.shared.everyAccount().first(where: { $0.dir == dir }) { return found }
         let accounts = AgentsController.shared.everyAccount().filter { $0.provider == .claude }
-        if let dir = homeChoice.account, let found = accounts.first(where: { $0.dir == dir }) { return found }
         let agents = settings.store.settings.agents
         let projects = agents.projectAccounts.reduce(into: [String: String]()) { $0[SettingsBridge.expand($1.key)] = SettingsBridge.expand($1.value) }
         return AgentNewSession.account(cwd: homeChoice.project ?? NSHomeDirectory(), accounts: accounts,
@@ -117,7 +118,7 @@ extension WindowSession {
         let folder = opened.folder
         // A project the screen just opened came with a terminal: the agent goes there.
         let terminal: () -> Void = { [weak self] in if !opened.fresh { self?.tabs?.newTab(cwd: folder) } }
-        let agent = AgentChoice(account: account.isDefault ? nil : account.dir)
+        let agent = AgentChoice(account: account.isDefault ? nil : account.dir, provider: account.provider == .codex ? "codex" : nil)
         switch RaceLaunch.localCommand(kit: SessionKit.shared, agent: agent, cwd: folder, prompt: text,
                                        skipPermissions: settings.store.settings.agents.launchSkipPermissions) {
         case .success(let launch):
@@ -173,8 +174,8 @@ extension WindowSession {
 
     private func homePickAgent(below anchor: NSView) {
         let current = homeAccount()?.dir
-        var entries = AgentsController.shared.everyAccount().filter { $0.provider == .claude }.map { account in
-            MenuEntry("Claude · " + account.name, icon: account.dir == current ? .check : nil) { [weak self] in
+        var entries = AgentsController.shared.everyAccount().sorted { ($0.provider == .claude ? 0 : 1) < ($1.provider == .claude ? 0 : 1) }.map { account in
+            MenuEntry((account.provider == .codex ? "Codex · " : "Claude · ") + account.name, icon: account.dir == current ? .check : nil) { [weak self] in
                 self?.homeChoice.account = account.dir
                 self?.refreshHome()
             }

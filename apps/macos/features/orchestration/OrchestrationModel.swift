@@ -27,11 +27,17 @@ public struct AgentChoice: Codable, Equatable, Sendable {
     public var account: String?
     public var model: String
     public var machine: String
-    public init(account: String? = nil, model: String = "", machine: String = "") {
+    /// "codex" for Codex (its CODEX_HOME in `account`); nil is Claude Code. Optional so a race
+    /// saved before plan 29 still reads.
+    public var provider: String?
+    public init(account: String? = nil, model: String = "", machine: String = "", provider: String? = nil) {
         self.account = account
         self.model = model
         self.machine = machine
+        self.provider = provider
     }
+
+    public var isCodex: Bool { provider == "codex" }
 }
 
 // MARK: Races

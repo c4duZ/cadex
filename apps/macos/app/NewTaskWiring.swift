@@ -85,7 +85,16 @@ extension WindowSession {
             }
             return NewTaskAgent(name: account.title, account: account.dir, usage: usage)
         }
-        return accounts + runTargets().map { NewTaskAgent(name: $0.label, account: nil, machine: $0.label) }
+        // Codex accounts (~/.codex, ~/.codex-*), with their usage when the usage watch has it.
+        let codex = every.filter { $0.provider == .codex }.map { account -> NewTaskAgent in
+            var usage = ""
+            if case .ready(let numbers, _) = AgentUsageController.shared.states[account.dir] ?? .loading,
+               let percent = numbers.week?.percent ?? numbers.session?.percent {
+                usage = T("\(Int(percent.rounded()))% used", "\(Int(percent.rounded()))% usado")
+            }
+            return NewTaskAgent(name: account.name, account: account.isDefault ? nil : account.dir, usage: usage, isCodex: true)
+        }
+        return accounts + codex + runTargets().map { NewTaskAgent(name: $0.label, account: nil, machine: $0.label) }
     }
 
     /// The old questions as lines: where the copies go (with another folder to choose), the setup
@@ -100,7 +109,7 @@ extension WindowSession {
         // dialog in N tabs at once): the line stops Start and opens Claude there to accept it.
         if request.isRace {
             var seen = Set<String>()
-            for agent in request.agents where agent.machine.isEmpty && seen.insert(agent.account ?? "").inserted
+            for agent in request.agents where agent.machine.isEmpty && !agent.isCodex && seen.insert(agent.account ?? "").inserted
                 && !ClaudeTrust.isTrusted(repo, repository: nil, configDir: agent.account) {
                 let project = (repo as NSString).lastPathComponent
                 notes.append(NewTaskNote(T("Claude Code in \(agent.name) does not trust \(project) yet: accept it once, then start the race.",
@@ -111,6 +120,10 @@ extension WindowSession {
                     self?.tabs?.activeTerminal?.typeWhenReady(SessionKit.shared.claudeCommand(configDir: agent.account, cwd: repo) + "\n")
                 })
             }
+        }
+        if request.isRace, request.agents.contains(where: { $0.isCodex }) {
+            notes.append(NewTaskNote(T("Codex keeps no cost Cadex can read: its cap is the time only.",
+                                       "O Codex não guarda um custo que o Cadex leia: o teto dele é só o tempo.")))
         }
         guard request.runsInCopy, request.agents.contains(where: { $0.machine.isEmpty }) else { return notes }
         let plan = WorktreesController.shared.plan(name: request.branchName.isEmpty ? "task" : request.branchName, repo: repo)
@@ -130,7 +143,9 @@ extension WindowSession {
     }
 
     private func startNewTask(_ request: NewTaskRequest, repo: String) {
-        let choice = { (agent: NewTaskAgent) in AgentChoice(account: agent.account, model: agent.model, machine: agent.machine) }
+        let choice = { (agent: NewTaskAgent) in
+            AgentChoice(account: agent.account, model: agent.model, machine: agent.machine, provider: agent.isCodex ? "codex" : nil)
+        }
         if request.isRace {
             if !OrchestrationController.shared.isEnabled { settings.store.update { $0.orchestration.enabled = true } }
             let caps = OrchestrationController.shared.defaultCaps
@@ -139,9 +154,9 @@ extension WindowSession {
         }
         guard let agent = request.agents.first else { return }
         if !agent.machine.isEmpty, let target = runTargets().first(where: { $0.label == agent.machine }) {
-            // On another machine the task's tab runs Claude there, with its own login; the words
-            // go into that agent as the race's do (RemoteTaskScript.agent), not yet for a task.
-            return newRemoteTask(name: request.branchName, repo: repo, target: target)
+            // On another machine the task's tab runs Claude there, with its own login and the words
+            // by file, as a race's contender (RemoteTaskScript.agent).
+            return newRemoteTask(name: request.branchName, repo: repo, target: target, prompt: request.prompt, model: agent.model)
         }
         if request.runsInCopy {
             return makeTask(WorktreesController.shared.plan(name: request.branchName, repo: repo), prompt: request.prompt, agent: choice(agent))
@@ -169,7 +184,11 @@ extension WindowSession {
 
     /// The agent with no prompt (empty words, the spec): `claude` with the kit, its model.
     func plainAgentCommand(_ agent: AgentChoice, cwd: String) -> String {
-        SessionKit.shared.claudeCommand(configDir: agent.account,
+        if agent.isCodex {
+            return SessionKit.shared.codexCommand(home: agent.account,
+                                                  arguments: RaceLaunch.arguments(agent, skipPermissions: settings.store.settings.agents.launchSkipPermissions)) ?? "codex"
+        }
+        return SessionKit.shared.claudeCommand(configDir: agent.account,
                                         arguments: RaceLaunch.arguments(agent, skipPermissions: settings.store.settings.agents.launchSkipPermissions), cwd: cwd)
     }
 }

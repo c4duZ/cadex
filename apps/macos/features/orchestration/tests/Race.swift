@@ -7,6 +7,28 @@ import Foundation
 // the board's columns, the session's cost, the refusals and the command.
 
 let raceTests: [(name: String, body: Checks.Body)] = [
+    ("a Codex contender: its words by file through cadex codex, its own flags, no Claude trust asked", {
+        let dir = NSTemporaryDirectory() + "cadex-codex-\(UUID().uuidString)"
+        defer { try? FileManager.default.removeItem(atPath: dir) }
+        let kit = SessionKit.forTests(folder: dir + "/kit")
+        kit.toolsPath = "/H/cadex"
+        let codex = AgentChoice(account: "/U/.codex-pro", model: "gpt-5", provider: "codex")
+        expect(RaceLaunch.arguments(codex, skipPermissions: true) == ["-m", "gpt-5", "--dangerously-bypass-approvals-and-sandbox"])
+        guard case .success(let opened) = RaceLaunch.localCommand(kit: kit, agent: codex, cwd: "/w", prompt: "fix $(id)", skipPermissions: false,
+                                                                   promptFolder: dir + "/prompts")
+        else { return expect(false, "refused") }
+        expect(opened.command.hasPrefix("CODEX_HOME=/U/.codex-pro /H/cadex codex -m gpt-5 --cadex-prompt-file ") && !opened.command.contains("$(id)"),
+               opened.command)
+        expect(opened.session.isEmpty, "no kit session for Codex")
+        let request = RaceRequest(name: "r", prompt: "x", repository: "/r", base: "main", agents: [codex, AgentChoice(account: "/c")],
+                                  caps: Caps(budgetUsd: 1, maxMinutes: 20))
+        var asked: [String?] = []
+        _ = RaceLaunch.check(request, enabled: true, maxAgents: 6) { asked.append($0); return true }
+        expect(asked == ["/c"], "only Claude's account is asked about trust: \(asked)")
+        // A race saved before plan 29 (no provider) still reads.
+        let old = try? JSONDecoder().decode(AgentChoice.self, from: Data(#"{"account":"/c","model":"","machine":""}"#.utf8))
+        expect(old?.provider == nil && old?.isCodex == false)
+    }),
     ("the prompt file: 0600 in a 0700 folder, the text intact; empty, too big or with a NUL refused", {
         let dir = tempDir()
         defer { try? fm.removeItem(atPath: dir) }

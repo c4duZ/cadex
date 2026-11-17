@@ -23,6 +23,13 @@ Cadex: `docs/adr/0024-agent-tools.md`).
 - Nunca lê token, login ou credencial, e não sai para a rede.
 - Sem subcomando, ou com um desconhecido, mostra o uso e sai com 2.
 
+### `cadex codex` (plano 29)
+- `cadex codex [palavras…] --cadex-prompt-file <arquivo>`: o Codex com o pedido do dono, lido do
+  arquivo que o Cadex escreveu (as mesmas regras do `cadex claude`: só da pasta dos prompts, só deste
+  usuário, apagado depois de lido) e passado ao `codex` depois de "--", como uma palavra do exec,
+  nunca num comando de shell. Sem kit: o Codex não tem hooks nem status line que o Cadex leia.
+  CADEX_CODEX_BIN aponta um `codex` falso numa instância de teste.
+
 ### `cadex hook <evento>` (plano 19)
 - É o comando dos hooks que o kit da sessão põe nas sessões que o Cadex abre. Lê o JSON que o Claude
   Code dá ao hook e manda ao socket do app (`…/Cadex/sockets/app.sock`) o token da sessão, o evento,

@@ -28,19 +28,21 @@ extension WindowSession {
 
     /// Where the repository is on that machine (asked once, remembered),
     /// then the worktree made there; a missing repository offers a clone.
-    func newRemoteTask(name: String, repo: String, target: RunTarget) {
+    /// `prompt` and `model`: the owner's words and the model from the New Task sheet; the words go
+    /// by ssh's stdin into a file there, never into the command (as a race's do).
+    func newRemoteTask(name: String, repo: String, target: RunTarget, prompt: String = "", model: String = "") {
         let store = WorktreesController.shared.store
-        if let folder = store.remoteFolder(repo, on: target.destination) { return makeRemoteTask(name: name, repo: repo, target: target, folder: folder, clone: false) }
+        if let folder = store.remoteFolder(repo, on: target.destination) { return makeRemoteTask(name: name, repo: repo, target: target, folder: folder, clone: false, prompt: prompt, model: model) }
         let guess = "~/" + (repo as NSString).lastPathComponent
         ask(T("Where is \((repo as NSString).lastPathComponent) on \(target.label)?", "Onde fica \((repo as NSString).lastPathComponent) em \(target.label)?"),
             T("Its folder there; Cadex remembers it for this machine. If there is no repository, Cadex offers to clone it.",
               "A pasta dele lá; o Cadex lembra para esta máquina. Se não houver repositório, o Cadex oferece clonar."),
             placeholder: guess) { [weak self] typed in
-            self?.makeRemoteTask(name: name, repo: repo, target: target, folder: typed.isEmpty ? guess : typed, clone: false)
+            self?.makeRemoteTask(name: name, repo: repo, target: target, folder: typed.isEmpty ? guess : typed, clone: false, prompt: prompt, model: model)
         }
     }
 
-    private func makeRemoteTask(name: String, repo: String, target: RunTarget, folder: String, clone: Bool) {
+    private func makeRemoteTask(name: String, repo: String, target: RunTarget, folder: String, clone: Bool, prompt: String = "", model: String = "") {
         Task { [weak self] in
             let result = await WorktreesController.shared.makeRemote(name: name, repo: repo, target: target, folder: folder, clone: clone)
             guard let self else { return }
@@ -53,7 +55,19 @@ extension WindowSession {
                     return self.startEnvironment(recipe, repo: repo, branch: branch, key: key, worktree: path, remote: target, prefix: [])
                 }
                 let hooks = self.settings.store.settings.worktrees.setupHooks[SettingsBridge.tilde(repo)] ?? []
-                self.typeInNewTab(RemoteTaskScript.sshLine(target, RemoteTaskScript.agent(path: path, hooks: hooks)))
+                guard !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                    return self.typeInNewTab(RemoteTaskScript.sshLine(target, RemoteTaskScript.agent(path: path, hooks: hooks)))
+                }
+                switch await WorktreesController.shared.remoteRunner.uploadPrompt(target, prompt) {
+                case .failure(let error):
+                    self.say(T("The words did not reach \(target.label)", "O pedido não chegou a \(target.label)"), error.message)
+                case .success(let file):
+                    guard let script = RemoteTaskScript.agent(path: path, hooks: hooks, promptFile: file, model: model) else {
+                        return self.say(T("The agent did not start", "O agente não começou"),
+                                        T("The model's name is not one Cadex can pass.", "O nome do modelo não é um que o Cadex consiga passar."))
+                    }
+                    self.typeInNewTab(RemoteTaskScript.sshLine(target, script))
+                }
             case .noRepo:
                 guard let origin = WorktreesController.origin(of: repo) else {
                     return self.say(T("No repository at \(folder) on \(target.label)", "Nenhum repositório em \(folder) em \(target.label)"),
@@ -64,7 +78,7 @@ extension WindowSession {
                              T("There is no repository there. Cadex will run git clone \(origin) on \(target.label), with its own access to it.",
                                "Não há repositório lá. O Cadex vai rodar git clone \(origin) em \(target.label), com o acesso de lá."),
                              button: T("Clone", "Clonar")) { [weak self] in
-                    self?.makeRemoteTask(name: name, repo: repo, target: target, folder: folder, clone: true)
+                    self?.makeRemoteTask(name: name, repo: repo, target: target, folder: folder, clone: true, prompt: prompt, model: model)
                 }
             case .needsLogin(let message):
                 self.say(T("ssh needs you on \(target.label)", "O ssh precisa de você em \(target.label)"),

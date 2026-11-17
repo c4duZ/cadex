@@ -17,7 +17,8 @@ tokens components.home).
      were, or start something."
   2. **A caixa do pedido:** "What do you want to do in <projeto>?". O projeto é o da última vez (o
      ativo, ou o primeiro dos recentes) e o nome dele é um menu: os projetos abertos e os recentes,
-     com busca, e Open folder… no fim. Escrever "@" na caixa abre o mesmo menu. Embaixo, o agente e a conta ("◆ Claude · bkdg ▾")
+     com busca, e Open folder… no fim. Escrever "@" na caixa abre o mesmo menu. Embaixo, o agente e a conta ("◆ Claude · bkdg ▾"; o menu lista as contas do Claude Code e as do
+     Codex)
      e onde roda ("In this folder ▾", ou uma cópia separada, que vira tarefa); à direita, o que o
      Enter faz ("↩ opens a terminal with Claude"). Enter abre um terminal no projeto com o agente e
      a conta escolhidos, já com o pedido como prompt (`../adr/0036-owner-words-reach-the-agent.md`). Com "cópia separada", Enter abre a folha Nova tarefa já com o

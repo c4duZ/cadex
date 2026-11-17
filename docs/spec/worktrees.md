@@ -14,13 +14,16 @@ comando, e o Cadex mostra em que pé cada uma está (`docs/plans/19-agent-sessio
     cada vez) ou "Separate copy" (a worktree, rodando em paralelo), com o nome do branch tirado do
     pedido ("Corrigir login" → `corrigir-login`) e editável, e o ponto de partida (o branch atual,
     que fica gravado para a revisão do plano 21);
-  - **quem faz:** uma linha por agente (conta e quanto do limite já usou) e "+ Add another agent";
+  - **quem faz:** uma linha por agente (o Claude Code ou o Codex de uma conta, ou o Claude de uma
+    máquina do "Run on"; o modelo no menu da linha, para o Claude; quanto do limite já usou) e "+ Add
+    another agent";
     com dois ou mais vira corrida (`orchestration.md`) e a folha mostra o aviso com o teto;
   - as perguntas de antes (autorizar a pasta das worktrees, hooks de preparo novos, a explicação da
     confiança do Claude Code) viram linhas da própria folha, cada uma com a escolha dela;
   - o botão principal, "Start task ⌘↩", ou "Start race ⌘↩" com dois ou mais agentes.
   - O agente abre já com o pedido escrito como prompt (`../adr/0036-owner-words-reach-the-agent.md`);
-    pedido vazio abre o agente sem prompt.
+    pedido vazio abre o agente sem prompt. Numa máquina remota, o pedido vai pela entrada do ssh para
+    um arquivo lá, como o de um concorrente remoto de corrida, e o `claude` de lá o lê.
   - **De qual projeto:** "in <projeto> ▾" no título da folha, o selecionado na árvore; o menu troca
     para outro projeto aberto ou um recente, ou Open folder…
 - Confirmado, para uma cópia separada:

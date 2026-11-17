@@ -36,7 +36,11 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
   agente; "+ Add another agent" com a feature desligada mostra antes a folha de ligar. O que a
   folha pede para a corrida: o prompt, o ponto de partida (o branch atual, ou outro), e
   de 2 a orchestration.maxAgents concorrentes, cada um com conta, modelo e máquina (este Mac, ou uma
-  remota pelo "Run on" mínimo, `docs/spec/worktrees.md`). Cria uma worktree por concorrente pelo
+  remota pelo "Run on" mínimo, `docs/spec/worktrees.md`). Um concorrente pode ser o Codex de uma
+  conta (~/.codex ou ~/.codex-*): o pedido vai pelo `cadex codex` (o mesmo arquivo e as mesmas
+  regras do `cadex claude`), sem pedir confiança ao Claude Code; como o Codex não relata estado nem
+  custo ao Cadex, o quadro o mostra trabalhando enquanto o programa roda e o teto dele é só o tempo
+  (a folha avisa). Cria uma worktree por concorrente pelo
   New Task da feature worktrees, todas do mesmo commit, com os nomes `<tarefa>-1` … `<tarefa>-N`,
   e abre uma aba por concorrente com o prompt.
 - A corrida abre no centro (orchestration.show-race; `../design/work-frame/screens.md`, seção

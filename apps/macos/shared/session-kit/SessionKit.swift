@@ -156,6 +156,21 @@ public final class SessionKit {
         return (command, kit.session)
     }
 
+    /// Codex in an account (plan 29: the New Task sheet, races, the home screen): `[CODEX_HOME=dir]
+    /// codex args…`; with the owner's words, `cadex codex … --cadex-prompt-file <file>`, which hands
+    /// them to `codex` as one word of the exec (never typed). Codex has no kit (no hooks, no status
+    /// line). Nil only with a prompt file and no `cadex`.
+    public func codexCommand(home: String?, arguments: [String] = [], promptFile: String? = nil) -> String? {
+        var words = home.map { ["CODEX_HOME=" + Self.quote($0)] } ?? []
+        if let promptFile {
+            guard let tools = toolsPath else { return nil }
+            words += [Self.quote(tools), "codex"] + (arguments + ["--cadex-prompt-file", promptFile]).map(Self.quote)
+        } else {
+            words += ["codex"] + arguments.map(Self.quote)
+        }
+        return words.joined(separator: " ")
+    }
+
     /// What the tab must not inherit: CLAUDECODE and CLAUDE_CODE_* (a
     /// session that inherited CLAUDE_CODE_CHILD_SESSION kept no transcript,
     /// 2026-11-14), and a stray CLAUDE_CONFIG_DIR for the default account.

@@ -52,22 +52,25 @@ public struct NewTaskAgent: Equatable, Sendable {
     public var usage: String
     /// "opus", "haiku"; empty for the account's own default.
     public var model: String
+    /// Codex instead of Claude Code (its CODEX_HOME in `account`).
+    public var isCodex: Bool
 
-    public init(name: String, account: String?, machine: String = "", usage: String = "", model: String = "") {
+    public init(name: String, account: String?, machine: String = "", usage: String = "", model: String = "", isCodex: Bool = false) {
         self.name = name
         self.account = account
         self.machine = machine
         self.usage = usage
         self.model = model
+        self.isCodex = isCodex
     }
 
-    /// "Claude Opus · bkdg", "Claude · ubuntu-dev" (the mockup's rows).
+    /// "Claude Opus · bkdg", "Codex · pro", "Claude · ubuntu-dev" (the mockup's rows).
     public var title: String {
-        "Claude" + (model.isEmpty ? "" : " " + model.prefix(1).uppercased() + model.dropFirst()) + " · " + name
+        (isCodex ? "Codex" : "Claude") + (model.isEmpty ? "" : " " + model.prefix(1).uppercased() + model.dropFirst()) + " · " + name
             + (machine.isEmpty ? "" : T(" on \(machine)", " em \(machine)"))
     }
 
-    /// The models the row's menu offers.
+    /// The models the row's menu offers (Claude's; Codex keeps its own default).
     public static let models = ["", "opus", "sonnet", "haiku"]
 }
 

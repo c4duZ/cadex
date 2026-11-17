@@ -62,7 +62,8 @@ public enum RaceLaunch {
         let bytes = Data(request.prompt.utf8).count
         guard bytes <= PromptFiles.maxBytes else { return .promptTooBig(bytes) }
         var seen: Set<String> = []
-        let untrusted = request.agents.filter { $0.machine.isEmpty }.compactMap { agent -> String? in
+        // Claude Code's trust; Codex asks nothing of the kind.
+        let untrusted = request.agents.filter { $0.machine.isEmpty && !$0.isCodex }.compactMap { agent -> String? in
             let key = agent.account ?? ""
             guard seen.insert(key).inserted, !trusts(agent.account) else { return nil }
             return agent.account.map { ($0 as NSString).lastPathComponent } ?? "~/.claude"
@@ -73,7 +74,10 @@ public enum RaceLaunch {
     /// The words after `claude` for an agent: its model, and the account's
     /// choice of no permission prompts.
     public static func arguments(_ agent: AgentChoice, skipPermissions: Bool) -> [String] {
-        (agent.model.isEmpty ? [] : ["--model", agent.model]) + (skipPermissions ? ["--dangerously-skip-permissions"] : [])
+        if agent.isCodex {
+            return (agent.model.isEmpty ? [] : ["-m", agent.model]) + (skipPermissions ? ["--dangerously-bypass-approvals-and-sandbox"] : [])
+        }
+        return (agent.model.isEmpty ? [] : ["--model", agent.model]) + (skipPermissions ? ["--dangerously-skip-permissions"] : [])
     }
 
     /// The tab's command for a local contender: the prompt written to its
@@ -88,6 +92,13 @@ public enum RaceLaunch {
         switch PromptFiles.write(prompt, in: promptFolder) {
         case .failure(.tooBig(let bytes)): return .failure(.promptTooBig(bytes))
         case .failure: return .failure(.emptyPrompt)
+        case .success(let file) where agent.isCodex:
+            // Codex: no kit session; the race finds its terminal by the worktree (RaceBoardWiring).
+            guard let command = kit.codexCommand(home: agent.account, arguments: arguments(agent, skipPermissions: skipPermissions), promptFile: file) else {
+                try? FileManager.default.removeItem(atPath: file)
+                return .failure(.noCadex)
+            }
+            return .success((command, ""))
         case .success(let file):
             guard let opened = kit.claudeCommand(configDir: agent.account, arguments: arguments(agent, skipPermissions: skipPermissions),
                                                  cwd: cwd, promptFile: file, sessionEnvironment: sessionEnvironment) else {

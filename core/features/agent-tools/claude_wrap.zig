@@ -31,7 +31,7 @@ extern "c" var environ: [*:null]?[*:0]u8;
 /// hold the owner's `claude` for long.
 pub const wait_ms: u32 = 3_000;
 const X_OK: c_int = 1;
-const path_max = 1024;
+pub const path_max = 1024;
 
 /// Marks the `claude` this process became (exec keeps the pid): if that
 /// `claude` is a script that runs `cadex claude` again, the second one
@@ -84,7 +84,7 @@ pub fn run(words: []const [:0]const u8) u8 {
     const arena = arena_state.allocator();
     if (looping()) return say("cadex claude: the claude on PATH runs `cadex claude` again\n");
     var real_buf: [path_max]u8 = undefined;
-    const real = findReal(arena, &real_buf) orelse return say("cadex claude: claude is not on PATH\n");
+    const real = findReal(arena, &real_buf, "claude", "CADEX_CLAUDE_BIN") orelse return say("cadex claude: claude is not on PATH\n");
     markLoop();
     // A prompt Cadex wrote to a file (plan 24): out of the words before
     // anything reads them (the kit keeps the words for a hibernated agent's
@@ -151,10 +151,11 @@ fn argvFor(arena: std.mem.Allocator, kit_args: []const []const u8, words: []cons
 
 /// The first `claude` on PATH that is not this program (a `claude` linked
 /// to `cadex` would run `cadex` again).
-fn findReal(arena: std.mem.Allocator, out: *[path_max]u8) ?[:0]const u8 {
-    // CADEX_CLAUDE_BIN: a test instance's fake `claude` (tools/perf/fake_claude.py,
+/// `name`: "claude", or "codex" for `cadex codex` (codex_wrap.zig).
+pub fn findReal(arena: std.mem.Allocator, out: *[path_max]u8, name: []const u8, override: [*:0]const u8) ?[:0]const u8 {
+    // CADEX_CLAUDE_BIN (CADEX_CODEX_BIN): a test instance's fake `claude` (tools/perf/fake_claude.py,
     // plan 24 F), so the tab's shell PATH can never put the real one first.
-    if (std.c.getenv("CADEX_CLAUDE_BIN")) |v| {
+    if (std.c.getenv(override)) |v| {
         const given = std.mem.span(v);
         if (given.len > 0) return arena.dupeZ(u8, given) catch null;
     }
@@ -169,7 +170,7 @@ fn findReal(arena: std.mem.Allocator, out: *[path_max]u8) ?[:0]const u8 {
     var dirs = std.mem.splitScalar(u8, path, ':');
     while (dirs.next()) |dir| {
         if (dir.len == 0) continue;
-        const candidate = std.fmt.allocPrintSentinel(arena, "{s}/claude", .{dir}, 0) catch return null;
+        const candidate = std.fmt.allocPrintSentinel(arena, "{s}/{s}", .{ dir, name }, 0) catch return null;
         if (access(candidate.ptr, X_OK) != 0) continue;
         const resolved = realpath(candidate.ptr, out) orelse continue;
         if (self.len > 0 and std.mem.eql(u8, std.mem.span(resolved), self)) continue;

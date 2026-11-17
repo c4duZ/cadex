@@ -22,6 +22,9 @@
   termina com `--mcp-config <arquivo>`, que aceita vários valores, e o Claude Code lia o pedido como
   um segundo arquivo de MCP e saía (achado pela tela de início, 2026-11-17); sem "--" a mais quando
   o dono já tem um.
+- `codex_wrap.zig` (plano 29): `cadex codex`, o Codex com o pedido de um arquivo de prompt pelas
+  regras do `prompt_file.zig`, depois de "--"; o `codex` de verdade pelo `findReal` do
+  `claude_wrap.zig` (genérico pelo nome; CADEX_CODEX_BIN numa instância de teste). Sem kit.
 - `statusline.zig`: `files` monta o arquivo da conta (`rate_limits`) e o da sessão (`context_window`,
   `cost`, `model`); `accountKey` dá o nome do arquivo da conta (todo byte que não é letra ou dígito
   ASCII vira "-", a mesma regra do SessionKit.accountKey no app); `run` grava primeiro e depois

@@ -32,7 +32,8 @@ Inventário: seção "Entradas" e os apelidos do 28.
 - **B. Nova tarefa (⌘N).** Feita (2026-11-17): a folha na feature worktrees, ligada pelo
   `../../apps/macos/app/NewTaskWiring.swift`; tarefa na pasta, numa cópia e corrida conferidas no
   app com o `claude` falso (a corrida numa pasta que a conta de teste já confia); a conta que não
-  confia trava a corrida com "Open Claude to Trust". Plano original: Uma folha só: o pedido, onde (pasta do projeto ou cópia separada com o
+  confia trava a corrida com "Open Claude to Trust"; o Codex de uma conta como agente (`cadex
+  codex`, uma corrida Claude + Codex conferida com os falsos) e o pedido na tarefa remota. Plano original: Uma folha só: o pedido, onde (pasta do projeto ou cópia separada com o
   nome do branch), quem faz (lista de agentes com conta e uso; "+ Adicionar outro agente"); com 2+
   aparece o aviso de corrida com o teto e o botão vira Iniciar corrida. Usa o que
   WorktreesController.plan e a corrida já fazem; os "sim" que hoje são alertas (autorizar pasta,
