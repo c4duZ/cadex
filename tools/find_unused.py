@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+"""A list to look at, not a check (plan 25, docs/adr/0035-work-frame.md): the
+Swift of apps/macos that nobody else calls, run in each plan's sweep so the
+old shell does not linger as dead code.
+
+- types (class, struct, enum, protocol) declared and named nowhere, not even in their file;
+- functions and properties declared once and named nowhere else, not even in
+  their own file (overrides, @objc, protocol requirements and AppKit
+  callbacks are left out, and so are tests);
+- with --texts, interface texts `T("en", "pt")` written the same in more than one place.
+
+It never fails: names reached by reflection, selectors or string ids can show
+up here and still be in use. Read the list; delete what is really dead.
+Usage: tools/find_unused.py [--texts] [folder under apps/macos …]
+"""
+import collections
+import pathlib
+import re
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+APP = ROOT / "apps/macos"
+SKIP = {".build", "Resources"}
+TESTS = "tests"
+TYPE = re.compile(r"^\s*(?:public |internal |private |fileprivate |final |open |@MainActor )*"
+                  r"(?:class|struct|enum|protocol|actor)\s+([A-Z][A-Za-z0-9_]*)", re.M)
+MEMBER = re.compile(r"^\s*((?:@\w+(?:\([^)]*\))?\s+)*)((?:public |internal |private |fileprivate |static |final |"
+                    r"open |nonisolated |override |mutating |class )*)(func|var|let)\s+([a-z_][A-Za-z0-9_]*)", re.M)
+TEXT = re.compile(r'\bT\("((?:[^"\\]|\\.)*)",\s*"((?:[^"\\]|\\.)*)"\)')
+CALLBACK = re.compile(r"^(init|deinit|body|description|hash|encode|draw|layout|update|viewDid|viewWill|"
+                      r"mouse|key|scroll|accepts|becomeFirst|resignFirst|application|window|table|outline|"
+                      r"number|control|menu|validate|perform|awake|hitTest|intrinsic|is[A-Z]|wants|prepare|"
+                      r"observeValue|userContentController|webView|collection|text|cursor|reset|cancel|setMarkedText|"
+                      r"unmarkText|markedRange|selectedRange|insertText|firstRect|characterIndex|attributed|"
+                      r"validAttributes|popover|draggingSession|concludeDrag|numberOf|sidebar|split)")
+
+
+def swift_files(folders, with_tests=False):
+    for folder in folders:
+        for p in sorted(folder.rglob("*.swift")):
+            parts = set(p.relative_to(APP).parts)
+            if not (parts & SKIP) and (with_tests or TESTS not in parts):
+                yield p
+
+
+def report(folders):
+    everything = {p: p.read_text() for p in swift_files([APP], with_tests=True)}
+    words = collections.Counter()
+    for p, text in everything.items():
+        found = collections.Counter(re.findall(r"\b[A-Za-z_][A-Za-z0-9_]*\b", text))
+
+        words.update(found)
+    lines = []
+    for p in swift_files(folders):
+        text = everything[p]
+        rel = p.relative_to(ROOT)
+        for name in TYPE.findall(text):
+            if words[name] == 1:
+                lines.append(f"{rel}: tipo {name} declarado e nunca usado")
+        for attrs, mods, _, name in MEMBER.findall(text):
+            if "override" in mods or "@objc" in attrs or "@IBAction" in attrs or CALLBACK.match(name):
+                continue
+            if words[name] == 1:
+                lines.append(f"{rel}: {name} declarado e nunca usado")
+    if "--texts" not in sys.argv:
+        return lines
+    texts = collections.defaultdict(list)
+    for p in swift_files(folders):
+        for en, pt in TEXT.findall(everything[p]):
+            texts[(en, pt)].append(str(p.relative_to(ROOT)))
+    for (en, _), where in sorted(texts.items()):
+        if len(where) > 1:
+            lines.append(f"texto repetido em {len(where)} lugares: \"{en}\" ({', '.join(sorted(set(where)))})")
+    return lines
+
+
+def main():
+    folders = [APP / a for a in sys.argv[1:] if not a.startswith("--")] or [APP]
+    lines = report(folders)
+    for line in lines:
+        print(line)
+    print(f"{len(lines)} item(ns) para olhar (não falha: confira antes de apagar)")
+
+
+if __name__ == "__main__":
+    main()

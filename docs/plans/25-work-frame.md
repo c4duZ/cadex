@@ -57,7 +57,9 @@ a do sistema (ADR 0035); o terminal mantém a dele.
   direita), docs/spec/home.md (a tela de início). Linhas na tabela da raiz para as features
   novas (inspector, home; projects no lugar de spaces) e termos no `docs/CONTEXT.md` (Projeto,
   Árvore do trabalho, Painel da seleção, Tela de início, Gaveta).
-- **B. A máquina contra casca.** tools/check_leftovers.py lê o inventário e falha em toda linha
+- **B. A máquina contra casca.** Feita (2026-11-17): `tools/check_leftovers.py` com o `--self-test`
+  no `make manifests`, e `tools/find_unused.py`, que achou cinco restos mortos de antes desta série
+  (removidos; a lista começa zerada). A worktree velha `.claude/worktrees/plan-8` espera o dono ver. tools/check_leftovers.py lê o inventário e falha em toda linha
   `saiu` que ainda existe (as regras estão no próprio inventário), no `make manifests`, com testes.
   tools/find_unused.py: lista tipos e funções Swift de `apps/macos/` que só aparecem no próprio
   arquivo, e textos `T(...)` repetidos ou sem uso; roda na varredura de cada plano (não falha o

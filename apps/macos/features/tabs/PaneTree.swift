@@ -174,15 +174,6 @@ indirect enum PaneTree: Equatable {
         }
     }
 
-    /// The side of `frame` nearest to `point`, by its share of the width
-    /// or height: where a pane dropped there goes.
-    static func dropEdge(at point: CGPoint, in frame: CGRect) -> Direction {
-        let x = (point.x - frame.minX) / max(frame.width, 1)
-        let y = (point.y - frame.minY) / max(frame.height, 1)
-        let sides: [(Direction, CGFloat)] = [(.left, x), (.right, 1 - x), (.up, y), (.down, 1 - y)]
-        return sides.min { $0.1 < $1.1 }!.0
-    }
-
     func settingRatio(_ ratio: CGFloat, at path: [Bool]) -> PaneTree {
         guard case .split(let ax, let a, let b, let r) = self else { return self }
         guard let step = path.first else { return .split(ax, a, b, ratio: ratio) }

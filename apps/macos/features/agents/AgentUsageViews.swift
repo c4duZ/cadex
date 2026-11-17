@@ -2,43 +2,6 @@ import AppKit
 import Strings
 import UILooks
 
-/// The usage part of an account's card: the plan, a bar for the 5 hour
-/// session and one for the week, each with its share and when it resets;
-/// the bar warns from 70% and alarms from 90% (docs/spec/agents.md).
-extension AgentsView {
-    func usageLines(_ account: AgentAccount) -> [NSView] {
-        let plan = usage.plans[account.dir].map { $0.capitalized }
-        var lines: [NSView] = []
-        switch usage.states[account.dir] ?? .loading {
-        case .loading:
-            lines.append(line(T("Reading…", "Lendo…")))
-        case .expired:
-            lines.append(line(T("Login expired. Run claude with this account to renew it.", "Login vencido. Rode o claude com esta conta para renovar.")))
-        case .noLogin:
-            lines.append(line(T("No login found for this account.", "Nenhum login encontrado para esta conta.")))
-        case .ready(let numbers, let at):
-            // Claude's numbers are those of the last session Cadex opened:
-            // old ones are dimmed, with their age; Codex's, of its last use.
-            let old = account.provider == .claude && Date().timeIntervalSince(at) > agentUsageOld
-            lines += AgentUsageRows.bars(numbers, colors: colors, dim: old)
-            if account.provider == .codex { lines.append(line(T("as of ", "em ") + AgentResetTime.text(at))) }
-            else if old { lines.append(line(T("updated ", "atualizado há ") + AgentTime.short(since: at))) }
-        case .noUsage:
-            lines.append(line(T("Open the agent from Cadex to see usage.", "Abra o agente pelo Cadex para ver o uso.")))
-        }
-        if let plan { lines.insert(line(plan), at: 0) }
-        return lines
-    }
-
-    private func line(_ text: String) -> NSView {
-        let label = NSTextField(wrappingLabelWithString: text)
-        label.font = UILooks.font(11)
-        label.textColor = colors.secondary
-        return label
-    }
-
-}
-
 /// The bars of an account's usage, the same in its card and in the popover.
 @MainActor
 enum AgentUsageRows {

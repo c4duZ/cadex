@@ -33,6 +33,12 @@
   mockups é token, todo token aparece num mockup), toda peça citada existe e toda peça está num dos
   planos 25 a 30 (`../docs/adr/0035-work-frame.md`). O que é exemplo fica entre
   `<!-- tokens:off: motivo -->` e `<!-- tokens:on -->`.
+- `check_leftovers.py` (no `make manifests`, com `--self-test` antes): toda peça da casca velha
+  marcada `saiu` no inventário (`../docs/design/work-frame/inventory.md`) sumiu de verdade: arquivo,
+  comando, chave (menos na linha marcada `// migração 0035`), gancho do `make perf` e trecho de spec.
+- `find_unused.py`: a lista (que nunca falha) do Swift do app que ninguém usa: tipos e membros
+  declarados e nunca citados, e, com `--texts`, textos `T(…)` repetidos; roda na varredura de cada
+  plano da moldura nova (planos 25 a 30), para casca velha não ficar como código morto.
 - `check_command_parity.py` (no `make manifests`), com os prefixos das features (worktrees,
   agent-tools e computer-use entraram em 2026-11-15; antes não eram conferidos): todo id de comando do Mac existe no app Windows
   (ADR 0005, os mesmos ids nos dois). Nome de interface que não é comando vai em NOT_COMMANDS.

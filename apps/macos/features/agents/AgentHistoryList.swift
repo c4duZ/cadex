@@ -128,8 +128,6 @@ final class AgentHistoryTable: NSTableView, NSTableViewDataSource, NSTableViewDe
         return entry
     }
 
-    var selectedEntry: AgentHistoryEntry? { entry(at: selectedRow) }
-
     @objc private func resumeClicked() {
         if let entry = entry(at: clickedRow) { onResume?(entry) }
     }

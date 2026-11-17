@@ -95,8 +95,8 @@
   pasta de uso (um descritor, o rename de cada arquivo avisa), relê a cada 60 s e lê os logins e os
   logs do Codex a cada 5 min fora da linha principal; uma falha de login vale até uma sessão
   posterior gravar uso. `AgentUsageViews.swift`:
-  as barras do cartão (destaque, laranja a partir de 70%, vermelho a partir de 90%) e
-  `AgentUsageRows`, as barras que o cartão e o popover dividem. `AgentUsageStrip.swift`: o item
+  `AgentUsageRows`, as barras que o cartão e o popover dividem (destaque, laranja a partir de 70%,
+  vermelho a partir de 90%). `AgentUsageStrip.swift`: o item
   Agent usage, com a conta do terminal com foco (`focused`, que o app diz) ou a última, e o popover
   ao passar o ponteiro (`AgentUsageCard.swift` no `HoverCard` compartilhado, todas as contas; subir para dentro dele o mantém aberto). `CodexUsage.swift`: as contas
   do Codex e o uso tirado dos logs dele (os limites de cada uso), sem rede. `AgentAccountsView.swift`: a página

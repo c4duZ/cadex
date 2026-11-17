@@ -14,9 +14,6 @@ public enum ThemeFile {
         public var description: String { "\(field): \(message)" }
     }
 
-    static let interfaceFields = ["chrome", "panel", "panelBorder", "tabActive", "field", "text", "secondaryText", "accent"]
-    static let terminalFields = ["background", "foreground", "cursor", "selection"]
-
     public static func read(_ data: Data) throws -> Theme {
         guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw Problem(field: "(arquivo)", message: "não é um objeto JSON")
