@@ -9,14 +9,28 @@ continua uma conversa em outra conta, sem nunca tocar em token
 (`docs/adr/0021-cadex-managed-accounts.md`).
 
 ## Comportamento
+### Onde cada coisa fica (moldura nova, `../adr/0035-work-frame.md`)
+As páginas Agents, Accounts, History e o sininho da barra lateral de ícones saem
+(`../design/work-frame/inventory.md`); o que elas mostravam continua, nestes lugares:
+- **As sessões:** as que rodam num terminal do Cadex aparecem na árvore (`sidebar.md`), no terminal e
+  na tarefa delas, com o estado e os subagentes dobrados sob a linha; todas, inclusive as abertas
+  fora do Cadex, aparecem na página do projeto (Recent conversations, plano 30) e no ⌘J. Até o plano
+  30, as de fora do Cadex ficam no Arquivo e histórico (plano 27).
+- **O uso das contas:** a etiqueta Agent usage da barra de status e o popover dela (`status-bar.md`),
+  e "Accounts used here" na página do projeto.
+- **O histórico das conversas:** "Archive & history" (⌘⇧H), no pé da árvore, abre no centro.
+- **O sininho:** o sino da barra de título, com o número, abre um popover (seção Atenção).
+Onde o texto abaixo diz "a lista de sessões", "o uso" ou "o histórico", vale o lugar novo; as regras
+de leitura (só enquanto aparece) passam a valer para o lugar novo.
+
 ### Sessions
-- A página Agents (as sessões) lista as sessões vivas do Claude Code de todas as contas da máquina,
+- A lista de sessões mostra as sessões vivas do Claude Code de todas as contas da máquina,
   agrupadas por projeto (a raiz do repositório git da pasta da sessão, ou a própria pasta). O grupo
   mostra o nome da pasta e quantas sessões tem; clicar no título recolhe ou abre o grupo.
 - Cada sessão: um sinal de estado no meio da linha do nome, o nome, há quanto tempo está naquele
   estado, uma seta e, embaixo, o logo do provedor da conta, o branch e a conta ("main · Liderhub").
-  - **Trabalhando**: anel girando na cor de destaque.
-  - **Esperando você**: ponto azul. O ícone Agents da barra lateral ganha o ponto também.
+  - **Trabalhando**: o anel azul girando da peça de estado (components.stateGlyph).
+  - **Esperando você**: o âmbar com halo da peça de estado; o sino conta.
   - Estado desconhecido: ponto cinza, com o nome do estado na dica.
 - A lista acompanha na hora: sessão nova aparece, sessão encerrada some, estado muda, sem botão de
   atualizar.
@@ -62,7 +76,7 @@ continua uma conversa em outra conta, sem nunca tocar em token
 - Depois: a aba de terminal com um agente mostra o mesmo sinal de estado no título.
 
 ### Accounts
-- A página Accounts, com ícone próprio na barra lateral (o medidor), mostra um cartão por conta: o nome (a organização da conta; renomeável), o
+- O popover do uso (a etiqueta Agent usage da barra de status) mostra um bloco por conta: o nome (a organização da conta; renomeável), o
   plano, e duas barras: a sessão de 5 horas e a semana, com a porcentagem e quando reinicia.
 - A barra fica na cor de alerta a partir de 70% e na de perigo a partir de 90%.
 - Conta é cada pasta de configuração do Claude Code na pasta pessoal (`~/.claude` e as
@@ -80,7 +94,7 @@ continua uma conversa em outra conta, sem nunca tocar em token
   sessão grava o último valor da conta; o cartão mostra esse valor e, sem sessão aberta pelo Cadex
   agora, "em <hora>". Janela que já reiniciou desde então mostra 0%. Conta usada só fora do Cadex
   não tem número: o cartão diz "Open the agent from Cadex to see usage".
-- O arquivo de uso é vigiado só enquanto alguém mostra o uso (a página Accounts ou o item da barra
+- O arquivo de uso é vigiado só enquanto alguém mostra o uso (o popover do uso ou o item da barra
   de status). "Refresh" no menu do cartão e no ⌘K ("Agents: Refresh Usage") relê o arquivo.
 - O Cadex nunca lê, guarda, renova ou repassa login ou token, nem chama o serviço de uso. "Conta com
   login" é a que tem `oauthAccount` no `.claude.json` (lido, nunca escrito).
@@ -132,7 +146,7 @@ continua uma conversa em outra conta, sem nunca tocar em token
   projeto que apontavam para ela. As contas de antes não são removidas: elas se escondem.
 
 ### Histórico
-- A página History (agents.show-history), ao lado de Sessions, lista todas as conversas de todas as
+- Archive & history (agents.show-history, ⌘⇧H), no centro, lista todas as conversas de todas as
   contas: título (o que você deu com /rename, senão o que o Claude deu, senão o primeiro pedido),
   e embaixo pasta · branch · conta · há quanto tempo. A pasta é a de onde a conversa rodou (uma
   conversa do repositório retomada numa worktree aparece na worktree). Conversa sem mensagem
@@ -150,7 +164,7 @@ continua uma conversa em outra conta, sem nunca tocar em token
   confia, o próprio Claude Code pergunta antes. A cópia mostra a mesma conversa e o índice guarda de
   onde ela veio: as linhas copiadas levam o id da origem (em `sessionId` nas versões antigas, em
   `session_id` na primeira mensagem no 2.1.325); a conversa de um subagente dela é procurada também
-  na conta de origem, onde ficou: a lista de subagentes de uma sessão continuada (página Agents)
+  na conta de origem, onde ficou: a lista de subagentes de uma sessão continuada (na árvore)
   mostra os dela e os da origem, e a conversa de cada um abre do arquivo dele.
 - Também no clique direito e no ⌘K: "Copy Resume Command" (agents.copy-resume-command, com o `cd`
   para a pasta), "Reveal Session Log" (agents.reveal-session-log, no Finder) e abrir a pasta da
@@ -177,28 +191,36 @@ continua uma conversa em outra conta, sem nunca tocar em token
 - agents.stateHooks (ligada) desliga os hooks do kit; o 7501 continua.
 
 ### Atenção (plano 19)
-- O sininho ("Needs You", um ícone da barra lateral, padrão) conta os pedidos abertos de todas as
+- O sino (na barra de título, sempre à vista) conta os pedidos abertos de todas as
   sessões (permissão, pergunta) e os agentes que terminaram sem você ver; o mesmo número no ícone do
   Dock (agents.dockBadge). Ir ao terminal do agente marca como visto; "Mark as Unread"
   (agents.mark-unread, ou o clique direito numa linha do feed) volta.
-- A página do sininho tem duas sub-abas: "Needs You" (o quadro) e "Feed" (agents.show-feed): a linha
+- O popover do sino (400 pt; `../design/work-frame/screens.md`, seção Bell) tem duas vistas, "Needs
+  you" (os cartões) e "Activity" (agents.show-feed): a linha
   do tempo de terminou, pediu permissão, perguntou, falhou e tarefa criada, de todas as sessões, a
   mais nova em cima, até 200, com filtro por tipo e por projeto; clicar leva ao terminal.
-- A página só acompanha as mudanças enquanto aparece.
+- O popover só acompanha as mudanças enquanto aparece; o número do sino é o mesmo do Dock e não lê
+  nada a mais.
 - Silenciar as notificações de uma máquina (agents.mutedMachines): este Mac, cada host do
   `~/.ssh/config` e cada máquina da tailnet (plano 23).
-- Sessões remotas (plano 23, `docs/adr/0031-run-on-remote.md`): com a página Agents aberta, o Cadex
+- Sessões remotas (plano 23, `docs/adr/0031-run-on-remote.md`): com uma tarefa remota à vista na
+  árvore ou a página do projeto dela aberta, o Cadex
   roda `claude agents --json` por ssh (sem perguntar nada: uma máquina que pede senha fica de fora) em cada máquina onde uma tarefa do "Run on" está, ao abrir e a cada 30 s, e lista as
   sessões de lá no projeto, com "em <máquina>". Sem kit nem hooks lá, o estado é o que esse comando
   diz, e a notificação de "terminou" ou "esperando você" de uma sessão remota só vem enquanto a página
-  está aberta (nada de quadro "Precisa de você" para elas); um duplo clique leva à aba ssh da tarefa.
-  Página fechada, nenhum ssh roda. agents.attention desliga o sininho, o feed e o número.
+  está à vista (nada de cartão "Precisa de você" para elas); um duplo clique leva à aba ssh da tarefa.
+  Nada à vista, nenhum ssh roda. agents.attention desliga o sininho, o feed e o número.
 
 ### Quadro "Precisa de você" (plano 19)
 - agents.show-attention mostra um cartão por pedido aberto. Permissão: a ferramenta e o comando ou o
   arquivo, com Permitir e Negar (agents.approve, agents.deny), só por clique, com o diálogo da TUI
   aberto: quem responder primeiro vence (`docs/adr/0023-answer-agent-permissions.md`). Pergunta e
-  plano: o texto; não são respondidos pelo Cadex. Todo cartão tem "Go to Terminal".
+  plano: o texto e, numa sessão aberta pelo Cadex, a resposta ali mesmo
+  (`../adr/0036-owner-words-reach-the-agent.md`): um campo "Answer…" para texto livre, ou um botão
+  por opção quando a pergunta tem opções; o Cadex digita a resposta no terminal do agente só se ele
+  ainda está naquela pergunta, e senão o cartão diz "The agent moved on". Todo cartão tem "Go to
+  tab"; sessão aberta fora do Cadex tem só ele. O mesmo pedido de permissão aparece como cartão no pé do painel do agente
+  (`tabs.md`, plano 28): responder num fecha o outro.
 - O cartão some quando o pedido se resolve: pelo clique aqui, ou quando o agente deixa de estar
   "blocked" no OSC 7501 (respondido na TUI). O Claude Code não fecha o hook quando a TUI responde
   (teste de 2026-11-15), então é a saída do "blocked" que tira o cartão e fecha o hook que esperava.
@@ -269,8 +291,9 @@ continua uma conversa em outra conta, sem nunca tocar em token
 - Quatro chaves, cada uma desliga uma leitura por inteiro (nada vigiado nem lido):
   agents.sessions, agents.accounts, agents.history e, em ssh, ssh.ping. Ligadas por padrão, cada uma
   com a sua linha em Configurações › General ("Index conversation history" é a do histórico).
-- Accounts tem a cara do cartão do item de uso: um bloco por conta (logo, nome, "· plano", as
-  barras), com espaço largo entre eles e sem linha nem caixa; a pasta fica na dica.
+- O popover do uso: um bloco por conta (logo, nome, "· plano", quando zera, a barra e "84% of the
+  5-hour window · 61% of the week"), e no pé "Open an agent on… · Add account · Accounts settings";
+  a pasta fica na dica (`../design/work-frame/screens.md`, seção Anatomy).
 - Conta sem `oauthAccount` não aparece em Accounts, no item de uso nem no cartão. "Login vencido"
   aparece quando uma sessão daquela conta falha com erro de autenticação ("Failed to
   authenticate…"), ou pelo `credential_expires_at` de um `claude -p` que o Cadex já rode por outro
@@ -299,7 +322,7 @@ continua uma conversa em outra conta, sem nunca tocar em token
   "updated 3 h ago".
 - **Sem uso nenhum**: conta que nunca teve sessão aberta pelo Cadex mostra "Open the agent from
   Cadex to see usage", sem barras.
-- **Histórico indexando**: a página History mostra o que já leu e uma linha "Indexing 120 of 800";
+- **Histórico indexando**: Archive & history mostra o que já leu e uma linha "Indexing 120 of 800";
   a lista cresce sem pular.
 - **Leitura desligada**: a página explica qual chave está desligada, com o botão para ligar.
 

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Needs you popover</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 900px; font-family: Inter, system-ui, sans-serif; font-size: 13px; color: #E7E8EA">
+  <dc-import name="Main" hint-size="1440px,900px"></dc-import>
+  <div style="position: absolute; top: 46px; right: 52px; width: 400px; border-radius: 12px; background: #17191C; border: 1px solid #2C3036; box-shadow: 0 18px 48px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4); overflow: hidden">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid #24272C">
+      <span style="font-weight: 600; font-size: 13px">Needs you</span>
+      <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 8px; background: #F2A93B; color: #1A1206">2</span>
+      <span style="flex: 1"></span>
+      <span style="font-size: 12px; color: #8A9099">Activity</span>
+    </div>
+
+    <div style="padding: 12px 14px; border-bottom: 1px solid #24272C; display: flex; flex-direction: column; gap: 8px">
+      <div style="display: flex; align-items: center; gap: 8px">
+        <span style="width: 10px; height: 10px; border-radius: 50%; background: #F2A93B; box-shadow: 0 0 0 3px rgba(242,169,59,0.18)"></span>
+        <span style="font-weight: 600">Wants to run Bash</span>
+        <span style="flex: 1"></span>
+        <span style="font-size: 11px; color: #7C828B">1 min</span>
+      </div>
+      <div style="padding: 8px 10px; border-radius: 7px; background: #0F1012; border: 1px solid #23262B; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #D5D7DB">make perf</div>
+      <div style="font-size: 11.5px; color: #8A9099">cadex · perf-subagent-window · Claude · bhband</div>
+      <div style="display: flex; gap: 8px">
+        <button style="height: 30px; padding: 0 14px; border-radius: 7px; border: 0; background: #E7E8EA; color: #111214; font: inherit; font-weight: 600">Allow</button>
+        <button style="height: 30px; padding: 0 14px; border-radius: 7px; border: 1px solid #2A2D33; background: #1A1C20; color: #E7E8EA; font: inherit; font-weight: 500">Deny</button>
+        <span style="flex: 1"></span>
+        <button style="height: 30px; padding: 0 10px; border-radius: 7px; border: 0; background: transparent; color: #9BA0A8; font: inherit">Go to tab</button>
+      </div>
+    </div>
+
+    <div style="padding: 12px 14px; border-bottom: 1px solid #24272C; display: flex; flex-direction: column; gap: 8px">
+      <div style="display: flex; align-items: center; gap: 8px">
+        <span style="width: 10px; height: 10px; border-radius: 50%; background: #F2A93B; box-shadow: 0 0 0 3px rgba(242,169,59,0.18)"></span>
+        <span style="font-weight: 600">Asks a question</span>
+        <span style="flex: 1"></span>
+        <span style="font-size: 11px; color: #7C828B">now</span>
+      </div>
+      <div style="font-size: 12.5px; color: #D5D7DB; line-height: 1.5">Keep the old checkout copy for returning customers, or use the new text for everyone?</div>
+      <div style="font-size: 11.5px; color: #8A9099">bhband-site · checkout-copy · Claude · bhband</div>
+      <div style="display: flex; gap: 8px">
+        <label style="flex: 1; display: flex">
+          <span style="position: absolute; width: 1px; height: 1px; overflow: hidden">Answer</span>
+          <input placeholder="Answer…" style="flex: 1; height: 30px; border-radius: 7px; border: 1px solid #2A2D33; background: #0F1012; color: #E7E8EA; padding: 0 10px; font: inherit">
+        </label>
+        <button style="height: 30px; padding: 0 12px; border-radius: 7px; border: 0; background: transparent; color: #9BA0A8; font: inherit">Go to tab</button>
+      </div>
+    </div>
+
+    <div style="padding: 10px 14px 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: #7C828B">EARLIER</div>
+    <div style="padding: 0 6px 8px">
+      <div style="height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 8px">
+        <span style="width: 9px; height: 9px; border-radius: 50%; background: #3FB97A"></span>
+        <span style="flex: 1">bell-cards finished · <span style="color: #8A9099">PR #41 ready</span></span>
+        <span style="font-size: 11px; color: #7C828B">22m</span>
+      </div>
+      <div style="height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 8px">
+        <span style="width: 9px; height: 9px; border-radius: 50%; background: #EF5B5B"></span>
+        <span style="flex: 1">hero-images failed · <span style="color: #8A9099">exited</span></span>
+        <span style="font-size: 11px; color: #7C828B">1h</span>
+      </div>
+      <div style="height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 8px">
+        <span style="width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid #6B7079; box-sizing: border-box"></span>
+        <span style="flex: 1">Memory learned 3 pages · <span style="color: #8A9099">cadex</span></span>
+        <span style="font-size: 11px; color: #7C828B">2h</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

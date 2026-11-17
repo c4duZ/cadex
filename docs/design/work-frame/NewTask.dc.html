@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>New task sheet</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 900px; font-family: Inter, system-ui, sans-serif; font-size: 13px; color: #E7E8EA">
+  <dc-import name="Main" hint-size="1440px,900px"></dc-import>
+  <div style="position: absolute; inset: 0; border-radius: 12px; background: rgba(5,6,7,0.6)"></div>
+  <div style="position: absolute; top: 110px; left: 400px; width: 640px; border-radius: 14px; background: #17191C; border: 1px solid #2C3036; box-shadow: 0 24px 64px rgba(0,0,0,0.6); overflow: hidden">
+    <div style="padding: 16px 18px 8px; display: flex; align-items: center; gap: 8px">
+      <span style="font-weight: 650; font-size: 15px">New task</span><span style="color: #8A9099">in cadex</span>
+    </div>
+    <div style="margin: 0 18px; padding: 12px 14px; min-height: 76px; border-radius: 10px; background: #0F1012; border: 1px solid #2A2D33; line-height: 1.5">Make the cache evict entries by age, keep the public API the same.</div>
+
+    <div style="padding: 16px 18px 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: #7C828B">WHERE</div>
+    <div style="margin: 0 18px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+      <div style="padding: 10px 12px; border-radius: 10px; border: 1px solid #2A2D33; display: flex; flex-direction: column; gap: 3px">
+        <span style="font-weight: 600">○ In the project’s folder</span><span style="font-size: 12px; color: #8A9099">Works on your files, on main. One at a time.</span>
+      </div>
+      <div style="padding: 10px 12px; border-radius: 10px; border: 1px solid #5B9CF5; background: #141B26; display: flex; flex-direction: column; gap: 3px">
+        <span style="font-weight: 600">● Separate copy · branch cache-evict</span><span style="font-size: 12px; color: #8A9099">Runs in parallel; you review and merge after.</span>
+      </div>
+    </div>
+
+    <div style="padding: 16px 18px 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: #7C828B">WHO DOES IT</div>
+    <div style="margin: 0 18px; display: flex; flex-direction: column; gap: 6px">
+      <sc-for list="{{agents}}" as="a" hint-placeholder-count="3">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 9px; background: #1D1F23">
+          <span style="font-weight: 600">{{a.n}}</span><span style="flex: 1">{{a.agent}}</span><span style="color: #8A9099; font-size: 12px">{{a.usage}}</span><span style="color: #7C828B">✕</span>
+        </div>
+      </sc-for>
+      <div style="padding: 6px 12px; color: #9BA0A8">+ Add another agent</div>
+      <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 9px; background: #1C1812; border: 1px solid #4A3A1C; color: #F2D29B; font-size: 12.5px">⚑ With 3 agents this is a race: each gets its own copy, you compare and keep one. Cap US$ 1.00 · 20 min each.</div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 8px; padding: 16px 18px; margin-top: 12px; border-top: 1px solid #24272C">
+      <span style="font-size: 12px; color: #7C828B">Opens as terminals in the sidebar under cadex</span>
+      <span style="flex: 1"></span>
+      <button style="height: 32px; padding: 0 14px; border-radius: 7px; border: 1px solid #2A2D33; background: transparent; color: #E7E8EA; font: inherit">Cancel</button>
+      <button style="height: 32px; padding: 0 16px; border-radius: 7px; border: 0; background: #E7E8EA; color: #111214; font: inherit; font-weight: 600">Start race  ⌘↩</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { agents: [
+      { n: '1', agent: 'Claude Opus · bkdg', usage: '84% used' },
+      { n: '2', agent: 'Codex · pro', usage: '12% used' },
+      { n: '3', agent: 'Claude Haiku · bhband', usage: '31% used' },
+    ] };
+  }
+}
+</script>
+</body>
+</html>

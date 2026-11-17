@@ -1,5 +1,8 @@
 # 0029 — Agente de memória: um `claude -p` na conta, desligado por padrão
 
+> Padrão revisto pela `docs/adr/0037-memory-agent-on-by-default.md` (2026-11-17): o agente nasce
+> ligado. O resto desta decisão vale.
+
 Data: 2026-11-15 · Status: aceita · Revê `docs/adr/0019-agents-observe-only.md` e a linha
 "launcher de agentes" do `CLAUDE.md` da raiz, **só para o agente de memória**. Apoia-se em
 `docs/adr/0028-project-memory.md`

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Right panel</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 320px; height: 826px; box-sizing: border-box; display: flex; flex-direction: column; background: #131417; border-left: 1px solid #1F2125; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px">
+  <div style="display: flex; align-items: center; gap: 2px; padding: 10px 8px 0; border-bottom: 1px solid #1F2125">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+      <span style="{{t.style}}">{{t.label}}</span>
+    </sc-for>
+    <span style="flex: 1"></span>
+    <span style="font-size: 11px; color: #7C828B; padding-bottom: 6px">⌥⌘I</span>
+  </div>
+  <div style="padding: 10px 14px 4px; font-size: 11.5px; color: #8A9099">{{scope}}</div>
+
+  <sc-if value="{{isChanges}}" hint-placeholder-val="{{ true }}">
+    <div style="margin: 6px 10px 8px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 3px; border-radius: 7px; background: #0F1012; border: 1px solid #1F2125">
+      <span style="text-align: center; padding: 4px 0; border-radius: 5px; background: #22252A; font-size: 11.5px; font-weight: 600">Last turn</span>
+      <span style="text-align: center; padding: 4px 0; font-size: 11.5px; color: #8A9099">Task</span>
+      <span style="text-align: center; padding: 4px 0; font-size: 11.5px; color: #8A9099">Uncommitted</span>
+    </div>
+    <div style="flex: 1; padding: 0 6px">
+      <sc-for list="{{files}}" as="file" hint-placeholder-count="5">
+        <div style="height: 30px; display: flex; align-items: center; gap: 8px; padding: 0 8px">
+          <span style="width: 14px; font-size: 10.5px; font-weight: 700; color: {{file.kindColor}}">{{file.kind}}</span>
+          <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{file.name}}<span style="color: #7C828B">  {{file.dir}}</span></span>
+          <span style="font-size: 11px; color: #6FCF97">+{{file.added}}</span>
+          <span style="font-size: 11px; color: #F08A8A">−{{file.removed}}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="padding: 12px; border-top: 1px solid #1F2125; display: flex; flex-direction: column; gap: 8px">
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #9BA0A8"><span style="width: 8px; height: 8px; border-radius: 50%; background: #3FB97A"></span>make check passed · 2 min ago</div>
+      <div style="display: flex; gap: 8px">
+        <button style="flex: 1; height: 32px; border-radius: 7px; border: 1px solid #2A2D33; background: #1A1C20; color: #E7E8EA; font: inherit; font-weight: 500">Commit…</button>
+        <button style="flex: 1; height: 32px; border-radius: 7px; border: 0; background: #E7E8EA; color: #111214; font: inherit; font-weight: 600">Open PR</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isMemory}}" hint-placeholder-val="{{ false }}">
+    <div style="flex: 1; display: flex; flex-direction: column; gap: 14px; padding: 6px 14px; overflow: hidden">
+      <div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: #0F1012; border: 1px solid #1F2125; color: #8A9099">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="M10.5 10.5 14 14"></path></svg>
+        Search what this project knows
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: #7C828B">LEARNED TODAY</div>
+        <sc-for list="{{learned}}" as="l" hint-placeholder-count="3">
+          <div style="display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 8px; background: #17191C">
+            <span style="font-weight: 600">{{l.title}}</span>
+            <span style="font-size: 11.5px; color: #8A9099">{{l.from}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: #7C828B">WIKI</div>
+        <sc-for list="{{wiki}}" as="w" hint-placeholder-count="5">
+          <div style="height: 28px; display: flex; align-items: center; gap: 8px; color: #C9CCD1">
+            <span style="color: #7C828B">{{w.kind}}</span><span style="flex: 1">{{w.title}}</span><span style="font-size: 11px; color: #7C828B">{{w.count}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="flex: 1"></div>
+      <div style="padding: 10px; border-radius: 8px; border: 1px solid #1F2125; font-size: 12px; color: #9BA0A8; line-height: 1.5">Each new agent here starts with a 2 KB briefing of this. <span style="color: #E7E8EA">See the briefing</span></div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tab":{"editor":"enum","options":["changes","files","history","memory"],"default":"changes"},"$preview":{"width":320,"height":826}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const tab = this.props.tab ?? 'changes';
+    const labels = [['changes', 'Changes'], ['files', 'Files'], ['history', 'History'], ['memory', 'Memory']];
+    return {
+      isChanges: tab === 'changes',
+      isMemory: tab === 'memory',
+      scope: tab === 'memory' ? 'cadex · the project’s memory, shared by every task and account' : 'orchestration-e · against main',
+      tabs: labels.map(([id, label]) => ({ label, style: 'padding: 7px 9px; font-size: 12.5px; ' + (id === tab ? 'font-weight: 600; color: #E7E8EA; border-bottom: 2px solid #E7E8EA' : 'color: #8A9099; border-bottom: 2px solid transparent') })),
+      files: [
+        { kind: 'M', kindColor: '#F2B65E', name: 'AutomationRunWiring.swift', dir: 'app', added: 36, removed: 4 },
+        { kind: 'A', kindColor: '#6FCF97', name: 'AutomationSchedule.swift', dir: 'orchestration', added: 128, removed: 0 },
+        { kind: 'A', kindColor: '#6FCF97', name: 'AutomationAgent.swift', dir: 'orchestration', added: 96, removed: 0 },
+        { kind: 'M', kindColor: '#F2B65E', name: 'PowerController.swift', dir: 'power', added: 21, removed: 0 },
+        { kind: 'M', kindColor: '#F2B65E', name: 'AgentToolsServer.swift', dir: 'agent-tools', added: 12, removed: 1 },
+        { kind: 'M', kindColor: '#F2B65E', name: 'orchestration.md', dir: 'docs/spec', added: 18, removed: 6 },
+      ],
+      learned: [
+        { title: 'zsh drops input typed before its prompt', from: 'gotcha · from perf-subagent-window · Claude' },
+        { title: 'Footprint peaks when a canvas is made', from: 'decision · from orchestration-e · Claude' },
+        { title: 'The bell’s cards were squeezed to 0 pt', from: 'gotcha · from bell-cards · Codex' },
+      ],
+      wiki: [
+        { kind: '◆', title: 'Decisions', count: '48' },
+        { kind: '!', title: 'Gotchas', count: '31' },
+        { kind: '◇', title: 'Concepts', count: '22' },
+        { kind: '·', title: 'Sessions', count: '113' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -9,6 +9,7 @@ manifests:
 	@python3 tools/check_manifests.py
 	@python3 -I tools/icons/windows_icons.py --check
 	@python3 -I tools/check_command_parity.py
+	@python3 -I tools/check_design_tokens.py
 	@python3 -I tools/icons/windows_file_icons.py --check
 	@# Warns (never fails) when the installed claude has words cadex claude does not know.
 	@python3 -I core/features/agent-tools/claude_args_check.py

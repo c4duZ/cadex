@@ -28,6 +28,11 @@
   tabela bate com o map.json. Rodar de novo depois do build_file_icons.py.
 - `icons/build_provider_logos.py`: os logos dos provedores de IA (Lobe Icons e Simple Icons, versões
   fixadas) em PDF para o app (`../docs/adr/0020-provider-logos.md`).
+- `check_design_tokens.py` (no `make manifests`): os mockups da moldura nova
+  (`../docs/design/work-frame/`) e o `../docs/design/work-frame/tokens.json` dela concordam nos dois sentidos (todo valor dos
+  mockups é token, todo token aparece num mockup), toda peça citada existe e toda peça está num dos
+  planos 25 a 30 (`../docs/adr/0035-work-frame.md`). O que é exemplo fica entre
+  `<!-- tokens:off: motivo -->` e `<!-- tokens:on -->`.
 - `check_command_parity.py` (no `make manifests`), com os prefixos das features (worktrees,
   agent-tools e computer-use entraram em 2026-11-15; antes não eram conferidos): todo id de comando do Mac existe no app Windows
   (ADR 0005, os mesmos ids nos dois). Nome de interface que não é comando vai em NOT_COMMANDS.

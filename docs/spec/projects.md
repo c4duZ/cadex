@@ -1,0 +1,71 @@
+# projects
+
+## Para que serve
+Separar o trabalho por projeto (uma pasta de código, de preferência um repositório) e voltar a cada
+um do jeito que estava, inclusive depois de fechar ou reabrir o app. É o que antes se chamava space,
+agora sempre com a pasta (`../adr/0035-work-frame.md`).
+
+## Comportamento
+- Um projeto é uma pasta mais os terminais e documentos abertos nela, as tarefas dela (worktrees,
+  `worktrees.md`), um nome (o da pasta, renomeável) e uma cor opcional.
+- Os projetos aparecem na árvore da esquerda (`sidebar.md`), cada um com os terminais e as tarefas.
+  O centro mostra o que está aberto do projeto selecionado; a barra de título mostra "projeto ›
+  tarefa" e as abas.
+- **Abrir um projeto:** "+ Add project" na árvore, Open folder (⌘O) e os recentes da tela de início
+  (`home.md`), `cadex .` num terminal, ou soltar a pasta no ícone do Dock (project.new). Abrir a
+  pasta de um projeto que já existe vai para ele.
+- **Trocar de projeto:** clicar nele na árvore, project.switch (⇧⌘S, a lista na paleta com busca, o
+  atual marcado), project.next (⌃⌘→) e project.previous (⌃⌘←), pela ordem da árvore, dando a volta;
+  e o ⌘J, por atenção. O foco volta para onde estava no projeto.
+- project.rename pede o nome; vazio volta ao nome da pasta. project.set-color (ou o clique direito
+  no cabeçalho do projeto) escolhe a cor, que pinta o cabeçalho na árvore e a barra de abas enquanto
+  o projeto aparece (`themes.md`, cores de trabalho).
+- project.close encerra os terminais e documentos do projeto (pergunta antes se algum roda um
+  programa ou se há arquivo não salvo) e tira o projeto da árvore; as tarefas e as worktrees ficam
+  no disco e voltam se a pasta for aberta de novo. Fechar o último projeto mostra a tela de início.
+- Os programas dos projetos que não aparecem continuam rodando; só não desenham.
+- **Ao reabrir o app**, cada projeto volta com as abas na mesma ordem, os nomes dados às abas, as
+  divisões com as proporções, a pasta de cada painel, os arquivos e o histórico do git abertos (em
+  aba própria ou num painel ao lado de um terminal), o painel com foco, e o projeto e a aba que
+  estavam ativos. Com terminal.keepSessions desligado (o padrão), o conteúdo antigo do terminal não
+  volta: cada painel começa um shell novo na pasta salva. Ligado (plano 19), cada painel religa ao
+  shell que o daemon do terminal manteve, com a tela e o scrollback; depois de reiniciar o Mac,
+  volta o scrollback salvo, num shell novo.
+- O estado é salvo sozinho, logo depois de cada mudança (abrir, fechar, dividir, mudar de pasta,
+  trocar de projeto), num arquivo em Application Support/Cadex. Fechar o app de surpresa perde no
+  máximo o último meio segundo.
+- Abrir o app com uma pasta ou arquivos na linha de comando restaura os projetos e abre o que foi
+  pedido (a pasta vira o projeto dela, com uma aba de terminal; arquivos abrem no projeto ativo).
+  Abrir sem nada (pelo Dock) volta ao projeto ativo da última vez.
+- **Os spaces de antes viram projetos uma vez**, na primeira abertura com a moldura nova: cada space
+  vira o projeto da pasta do workspace dele, com as abas, o nome e a cor; dois spaces da mesma pasta
+  viram um projeto com as abas dos dois, na ordem. O arquivo velho fica ao lado, com outro nome, até
+  o plano seguinte.
+
+## Estados
+- **Primeira abertura (sem arquivo):** nenhum projeto; a tela de início.
+- **Arquivo ilegível:** como a primeira abertura; o arquivo ruim fica ao lado, com outro nome, para
+  não se perder.
+
+## Casos de borda
+- Pasta de um painel apagada entre as sessões -> o shell abre na pasta do projeto, ou na pessoal se
+  ela também sumiu.
+- Pasta do projeto apagada -> o projeto aparece na árvore em cinza com Locate… e Remove.
+- Arquivo aberto que sumiu -> a aba dele não volta; num painel dividido, o painel vira um terminal
+  na pasta do arquivo, para o layout não mudar. O resto volta.
+- Diff, preview web e janelas de mensagem não são restaurados (são passageiros).
+- Projeto salvo sem nenhuma aba -> volta com um terminal na pasta dele.
+- Dois projetos com o mesmo nome (pastas diferentes) -> permitido; a árvore e a paleta mostram o
+  caminho.
+
+## Critérios de aceite
+- [x] Um projeto salvo e restaurado volta igual: abas, nomes, divisões com proporções, pastas, foco.
+  (Valia para os spaces; conferir de novo com os projetos.)
+- [x] Arquivo de estado corrompido não impede o app de abrir: volta ao padrão e guarda o ruim ao lado.
+- [ ] Trocar de projeto pela árvore, pela paleta e pelos atalhos mostra as abas daquele projeto.
+- [x] Fechar o app pelo menu e reabrir traz os mesmos projetos e o mesmo projeto ativo.
+- [x] Um terminal e um documento lado a lado voltam lado a lado.
+- [ ] Com terminal.keepSessions ligado, reabrir o app traz a tela e o scrollback de cada painel;
+      depois de reiniciar o Mac, o scrollback salvo volta num shell novo.
+- [ ] Os spaces de uma instalação de antes voltam como projetos, com as abas, depois da migração.
+- [ ] Nenhum comando space.* existe depois do plano 28 (`../design/work-frame/inventory.md`).

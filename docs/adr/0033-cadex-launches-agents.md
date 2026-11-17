@@ -6,6 +6,9 @@ inicia agente") e a linha "launcher de agentes" do `CLAUDE.md` da raiz · Genera
 agente de memória) · Amplia a lista de comandos do agente de `docs/adr/0024-agent-tools.md` · Plano
 `docs/plans/24-many-agents.md`
 
+> Ampliada pela `docs/adr/0036-owner-words-reach-the-agent.md` (2026-11-17): o pedido que o próprio
+> dono escreve (tela de início, Nova tarefa) também abre o agente com prompt.
+
 ## Contexto
 O dono quer vários agentes trabalhando de uma vez, sem sair do Cadex (2026-11-14, sobre o Orca:
 "automações, orquestração, mesma tarefa em três agentes… muito bons"): a mesma tarefa em N agentes

@@ -31,12 +31,17 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
   Aspas, `$()`, crases, `;` e quebras de linha chegam intactos e nada é executado.
 
 ### Corrida
-- "New Race" (orchestration.new-race): o prompt, o ponto de partida (o branch atual, ou outro), e
+- A corrida nasce na folha "New task" (`worktrees.md`) com dois agentes ou mais: não há folha
+  própria (`../adr/0035-work-frame.md`). orchestration.new-race abre a folha já com duas linhas de
+  agente; "+ Add another agent" com a feature desligada mostra antes a folha de ligar. O que a
+  folha pede para a corrida: o prompt, o ponto de partida (o branch atual, ou outro), e
   de 2 a orchestration.maxAgents concorrentes, cada um com conta, modelo e máquina (este Mac, ou uma
   remota pelo "Run on" mínimo, `docs/spec/worktrees.md`). Cria uma worktree por concorrente pelo
   New Task da feature worktrees, todas do mesmo commit, com os nomes `<tarefa>-1` … `<tarefa>-N`,
   e abre uma aba por concorrente com o prompt.
-- O quadro da corrida (orchestration.show-race): uma coluna por concorrente com o estado
+- A corrida abre no centro (orchestration.show-race; `../design/work-frame/screens.md`, seção
+  Race; tokens components.race), com as abas "Contenders" e "Compare" na barra de título e, acima
+  das colunas, o pedido, o ponto de partida e o teto. Uma coluna por concorrente com o estado
   (trabalhando, esperando você, terminou, saiu; no remoto, o do `claude agents --json`), o tempo, o
   custo (o `cost` da sessão gravado pelo `cadex statusline`), e o resumo do diff contra o ponto de
   partida (arquivos, +/−). Clicar numa coluna vai ao terminal dela; "Review" abre a revisão daquela
@@ -130,7 +135,8 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
   bloqueada). Nenhum agente aprova portão: o comando não está na lista do agente.
 
 ### A página da execução
-- orchestration.show-run abre a página: o grafo das tarefas (cada uma com estado e o despacho
+- orchestration.show-run abre a página no centro (também pelo filtro "Run" do quadro, na cara da
+  moldura nova, plano 30): o grafo das tarefas (cada uma com estado e o despacho
   atual), a caixa de entrada, os portões abertos, o gasto e o tempo contra o teto. Cada despacho
   leva à aba dele. A página só lê o banco enquanto está aberta, e as mudanças chegam pelos hooks e
   pelos reportes, sem timer.
@@ -189,7 +195,9 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
 
 ## Estados
 - **Desligada**: o ⌘K mostra só "Turn On Agent Orchestration"; a página explica e oferece ligar.
-- **Nenhuma corrida, execução ou automação**: "No races or runs yet" com "New Race" e "New Run".
+- **Nenhuma corrida, execução ou automação**: o quadro (`../design/work-frame/screens.md`, seção
+  Board) mostra "No races or runs yet" com "New race" (a folha New task com dois agentes) e "New run".
+  As corridas e as execuções são filtros do quadro, que mostra todas as tarefas por estado.
 - **Esperando a confiança**: a execução não começou; a linha diz por quê e tem "Open Claude to
   Trust".
 - **No teto de agentes**: um despacho a mais espera na fila, "waiting for a free slot (6 of 6)".

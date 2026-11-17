@@ -1,8 +1,11 @@
 # status-bar
 
 ## Para que serve
-Mostrar, embaixo da janela, o que quem usa quer ter sempre à vista: onde o terminal com foco está,
-o ambiente e, se quiser, uso das contas, RAM, CPU, SSH e outros. Cada pessoa monta a própria barra.
+Mostrar, embaixo da janela, o que quem usa quer ter sempre à vista: o projeto e o branch, quantos
+agentes trabalham e quantos precisam de você, a conta mais perto do limite, onde roda e, se quiser,
+RAM, CPU, SSH e outros. Cada pessoa monta a própria barra. Cara e medidas da moldura nova
+(`../adr/0035-work-frame.md`; `../design/work-frame/screens.md`, seção StatusBar; tokens em
+`../design/work-frame/tokens.json`, components.statusBar).
 
 ## Comportamento
 ### Os itens
@@ -10,11 +13,15 @@ A barra tem dois lados, esquerda e direita, e cada lado é uma lista de itens em
 
 | item | mostra | padrão |
 |---|---|---|
-| Folder | a trilha "Home › Cadu › Trabalho › cadex" do terminal com foco | ligado, esquerda |
-| Environment | "Local" no macOS (no Windows, a distro WSL) | ligado, direita |
-| Git branch | o branch do workspace, com ↑↓ de commits a enviar/receber | desligado |
-| Agent usage | por conta: barra da sessão de 5 h (cresce com o espaço livre, de 40 a 88 pt), "58% 5h · 41% wk" (`agents.md`) | desligado |
-| Agents | "◐ 1 · ● 2": trabalhando e esperando você | desligado |
+| Project | "cadex · main ↑3": o projeto e o branch, com ↑↓ de commits a enviar/receber | ligado, esquerda |
+| Agents | "● 3 working" (azul) e "● 2 need you" (âmbar); some o que for zero | ligado, esquerda |
+| Folder | a trilha "Home › Cadu › Trabalho › cadex" do terminal com foco | desligado |
+| Terminal | "Terminal ⌃`": mostra ou esconde a gaveta de terminais | ligado, direita |
+| Memory | "Memory · 214 pages": abre a aba Memory do painel da direita | ligado, direita |
+| Agent usage | a conta mais perto do limite: "Claude bkdg 84% · resets 3h", em etiqueta âmbar acima de 80% e texto comum abaixo (`agents.md`) | ligado, direita |
+| Environment | "Local" no macOS (no Windows, a distro WSL), ou a máquina onde roda | ligado, direita |
+| Keep awake | o café, sempre à vista como era na barra de título: cheio ligado, contorno desligado; o clique roda power.toggle (`power.md`) | ligado, direita |
+| Update | "Update to 2.6": só com versão nova para instalar; o clique roda app.check-for-updates (`updates.md`) | ligado, direita, só com versão nova |
 | RAM | memória do sistema em uso: "12.4 / 16 GB" | desligado |
 | CPU | uso do processador do sistema: "CPU 18%" | desligado |
 | Cadex memory | a memória do próprio Cadex: "61 MB" | desligado |
@@ -22,10 +29,15 @@ A barra tem dois lados, esquerda e direita, e cada lado é uma lista de itens em
 | Ports | portas ouvindo nos processos dos terminais do Cadex: "⌁ 2 (:3000, :5173)" | desligado |
 | SSH | hosts no ar: "SSH 3/3 ●" (`ssh.md`) | desligado |
 
-Sem mexer em nada, a barra é a de sempre: trilha à esquerda e ambiente à direita.
+Sem mexer em nada, a barra é a do mockup: projeto e agentes à esquerda; Terminal, Memory, a
+conta, o café, o ambiente (e a atualização quando há versão nova) à direita. O mockup não desenha
+o café: ele entra na barra de status para continuar sempre à vista, como o dono pediu na barra de
+título (`power.md`). Quem tinha a barra
+personalizada antes mantém a dele, com Folder e Git branch virando Project quando os dois estavam
+ligados.
 
 ### Mudanças sem pulo
-- Os itens clicáveis (branch, terminais, agentes, uso, portas, SSH, RAM, CPU, memória do Cadex)
+- Os itens clicáveis (projeto, terminais, agentes, uso, memória, café, atualização, portas, SSH, RAM, CPU, memória do Cadex)
   acendem com um fundo arredondado ao passar o ponteiro, como os botões da barra de cima; cada item
   guarda 6 pt em volta para o fundo, sem mudar o espaço entre os textos (o dono, 2026-10-22).
 - Quando um item muda de largura (a pasta, o branch, a conta, ao trocar de aba ou de conta), os que
@@ -40,7 +52,7 @@ Sem mexer em nada, a barra é a de sempre: trilha à esquerda e ambiente à dire
 
 ### Personalizar
 - Botão direito na barra: menu com cada item (marcado se aparece) e "Customize Status Bar…".
-- "Customize Status Bar…" abre a janela Customize, a mesma da barra lateral, na aba Status Bar: as seções Left e
+- "Customize Status Bar…" abre a janela Customize na aba Status Bar: as seções Left e
   Right com todos os itens, cada um com chave; arrastar uma linha reordena, e passando para a outra
   seção ela muda de lado. Os escondidos ficam embaixo do lado de costume deles.
 - No ⌘K: "Customize Status Bar" e "Show or Hide a Status Bar Item" (a lista dos itens, cada um
@@ -60,8 +72,10 @@ Sem mexer em nada, a barra é a de sempre: trilha à esquerda e ambiente à dire
 - Ports é lido quando um terminal abre, fecha ou um programa termina, e a cada 10 s enquanto um
   programa roda num terminal.
 - Clicar em RAM, CPU ou Cadex memory abre o Monitor de Atividade; em Ports, o cartão com cada porta
-  (passar o ponteiro também abre; "localhost:3000" abre no preview); em Agent usage ou Agents, a página Agents; em Git branch,
-  a página Git.
+  (passar o ponteiro também abre; "localhost:3000" abre no preview); em Agent usage, o popover das
+  contas (cada conta com plano, quando zera, a barra e "84% of the 5-hour window · 61% of the
+  week", e "Open an agent on… · Add account · Accounts settings"; é o que era a página Accounts);
+  em Agents, o sino; em Project, a aba Changes do painel da direita.
 
 ## Estados
 - **Pasta desconhecida** (sessão ainda abrindo): Folder fica vazio, o resto aparece.
@@ -75,7 +89,8 @@ Sem mexer em nada, a barra é a de sempre: trilha à esquerda e ambiente à dire
 - settings.json com item desconhecido ou repetido: ignorado, vira aviso; o resto vale.
 
 ## Critérios de aceite
-- [ ] Sem configuração, a barra é igual à de antes: trilha e ambiente.
+- [ ] Sem configuração, a barra é a do mockup (StatusBar em `../design/work-frame/screens.md`).
+- [ ] Uma barra personalizada antes da moldura nova continua a mesma depois.
 - [ ] A trilha mostra a pasta do terminal com foco e muda ao trocar de aba e depois de um `cd`.
 - [ ] Escolher uma subpasta no menu da trilha faz o terminal com foco ir até ela.
 - [ ] Ligar RAM e CPU pelo botão direito mostra os dois na hora, em todas as janelas.

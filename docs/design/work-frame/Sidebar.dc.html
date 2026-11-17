@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Work tree</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 292px; height: 826px; box-sizing: border-box; display: flex; flex-direction: column; background: #131417; border-right: 1px solid #1F2125; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px">
+  <div style="display: flex; gap: 6px; padding: 10px 10px 8px">
+    <button style="flex: 1; height: 34px; border-radius: 8px; border: 1px solid #2A2D33; background: #1A1C20; color: #E7E8EA; font: inherit; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 0 12px">
+      <span style="font-size: 16px; line-height: 1; color: #9BA0A8">+</span><span style="flex: 1; text-align: left">New task</span><span style="font-size: 11px; color: #7C828B">⌘N</span>
+    </button>
+    <button aria-label="Filter and group" style="width: 34px; height: 34px; border: 0; border-radius: 8px; background: transparent; color: #8A9099; display: flex; align-items: center; justify-content: center">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 3.5h12M4.5 8h7M7 12.5h2"></path></svg>
+    </button>
+  </div>
+
+  <div style="flex: 1; overflow: hidden; padding: 0 6px">
+    <sc-for list="{{projects}}" as="project" hint-placeholder-count="2">
+      <div style="margin-bottom: 10px">
+        <div style="{{project.headStyle}}">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 6l4 4 4-4"></path></svg>
+          <span style="color: #D5D7DB; font-weight: 600">{{project.name}}</span>
+          <span style="color: #7C828B">{{project.branch}}</span>
+          <span style="flex: 1"></span>
+          <span style="color: #7C828B">{{project.count}}</span>
+        </div>
+        <sc-for list="{{project.tasks}}" as="task" hint-placeholder-count="3">
+          <div style="{{task.rowStyle}}">
+            <div style="display: flex; align-items: center; gap: 9px">
+              <span style="{{task.glyph}}"></span>
+              <span style="{{task.nameStyle}}">{{task.name}}</span>
+              <span style="flex: 1"></span>
+              <sc-if value="{{task.pr}}" hint-placeholder-val="{{ false }}">
+                <span style="font-size: 10.5px; font-weight: 600; padding: 1px 6px; border-radius: 5px; background: #1E2A20; color: #7FD3A2">{{task.pr}}</span>
+              </sc-if>
+              <span style="font-size: 11px; color: #7C828B">{{task.age}}</span>
+            </div>
+            <div style="display: flex; gap: 6px; padding-left: 19px; margin-top: 3px; font-size: 11.5px; color: #8A9099">
+              <span>{{task.agent}}</span>
+              <span style="color: #4A4F57">·</span>
+              <span style="color: #6FCF97">+{{task.added}}</span>
+              <span style="color: #F08A8A">−{{task.removed}}</span>
+              <sc-if value="{{task.waiting}}" hint-placeholder-val="{{ false }}">
+                <span style="color: #4A4F57">·</span><span style="color: #F2B65E">{{task.waiting}}</span>
+              </sc-if>
+            </div>
+            <sc-if value="{{task.terminals}}" hint-placeholder-val="{{ false }}">
+              <div style="padding-left: 19px; margin-top: 7px; display: flex; flex-direction: column; gap: 3px">
+                <sc-for list="{{task.terminals}}" as="term" hint-placeholder-count="3">
+                  <div style="height: 24px; display: flex; align-items: center; gap: 8px; padding: 0 6px; border-radius: 6px; font-size: 12px; color: #B5B9C0">
+                    <span style="{{term.dot}}"></span>
+                    <span>{{term.name}}</span>
+                    <span style="flex: 1"></span>
+                    <span style="color: #7C828B; font-size: 11px">{{term.note}}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+    <div style="height: 30px; display: flex; align-items: center; gap: 8px; padding: 0 8px; color: #8A9099; font-size: 12px">
+      <span style="font-size: 16px; line-height: 1">+</span> Add project
+    </div>
+  </div>
+
+  <div style="border-top: 1px solid #1F2125; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px">
+    <div style="height: 28px; display: flex; align-items: center; gap: 10px; padding: 0 6px; color: #9BA0A8">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6"></circle><path d="M8 4.5V8l2.5 1.5"></path></svg>
+      <span style="flex: 1">Automations</span><span style="font-size: 11.5px; color: #7C828B">2 on · next 09:00</span>
+    </div>
+    <div style="height: 28px; display: flex; align-items: center; gap: 10px; padding: 0 6px; color: #9BA0A8">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2" y="3" width="12" height="3" rx="1"></rect><path d="M3 6v6.5h10V6M6.5 9h3"></path></svg>
+      <span style="flex: 1">Archive &amp; history</span><span style="font-size: 11.5px; color: #7C828B">⌘⇧H</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"selected":{"editor":"text","default":"orchestration-e"},"project":{"editor":"text","default":""},"terms":{"editor":"text","default":"0,1,2"},"$preview":{"width":292,"height":826}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const selected = this.props.selected ?? 'orchestration-e';
+    const project = this.props.project ?? '';
+    const terms = String(this.props.terms ?? '0,1,2').split(',').map(Number);
+    const glyph = (state) => {
+      const base = 'width: 10px; height: 10px; border-radius: 50%; box-sizing: border-box; flex: none; ';
+      if (state === 'working') return base + 'border: 2px solid #5B9CF5; border-top-color: transparent';
+      if (state === 'needs') return base + 'background: #F2A93B; box-shadow: 0 0 0 3px rgba(242,169,59,0.18)';
+      if (state === 'done') return base + 'background: #3FB97A';
+      if (state === 'failed') return base + 'background: #EF5B5B';
+      return base + 'border: 1.5px solid #6B7079';
+    };
+    const dot = (state) => 'width: 7px; height: 7px; border-radius: 50%; box-sizing: border-box; flex: none; ' + (state === 'working' ? 'border: 1.5px solid #5B9CF5; border-top-color: transparent' : state === 'done' ? 'background: #3FB97A' : 'border: 1.5px solid #6B7079');
+    const task = (t) => {
+      const on = t.name === selected;
+      return { ...t,
+        glyph: glyph(t.state),
+        terminals: on ? [
+          { name: 'Claude', note: 'Opus', dot: dot('working') },
+          { name: 'npm run dev', note: ':5173', dot: dot('done') },
+          { name: 'make macos-test', note: '38s', dot: dot('working') },
+          { name: 'Preview', note: ':5173', dot: dot('idle') },
+        ].filter((_, i) => terms.includes(i)) : null,
+        nameStyle: 'font-weight: ' + (t.unread ? 650 : 500) + '; color: ' + (t.unread ? '#F4F5F6' : '#D5D7DB') + '; white-space: nowrap; overflow: hidden; text-overflow: ellipsis',
+        rowStyle: 'padding: 7px 8px 7px 10px; border-radius: 8px; margin-bottom: 2px; ' + (on ? 'background: #1F2226; box-shadow: inset 0 0 0 1px #2C3036' : ''),
+      };
+    };
+    const head = (name) => 'height: 30px; display: flex; align-items: center; gap: 8px; padding: 0 8px; border-radius: 7px; font-size: 12px; color: #9BA0A8; ' + (name === project ? 'background: #1F2226; box-shadow: inset 0 0 0 1px #2C3036' : '');
+    return {
+      projects: [
+        { name: 'cadex', branch: 'main', count: '4', tasks: [
+          { name: 'orchestration-e', state: 'working', agent: 'Claude · bkdg', added: 214, removed: 38, age: '4m' },
+          { name: 'perf-subagent-window', state: 'needs', agent: 'Claude · bhband', added: 12, removed: 6, age: '1m', unread: true, waiting: 'approve Bash' },
+          { name: 'bell-cards', state: 'done', agent: 'Codex', added: 40, removed: 9, age: '22m', unread: true, pr: 'PR #41' },
+          { name: 'windows-port-tabs', state: 'idle', agent: 'Claude · bkdg', added: 0, removed: 0, age: '2d' },
+        ]},
+        { name: 'bhband-site', branch: 'main', count: '2', tasks: [
+          { name: 'checkout-copy', state: 'needs', agent: 'Claude · bhband', added: 31, removed: 2, age: 'now', unread: true, waiting: 'question' },
+          { name: 'hero-images', state: 'failed', agent: 'Claude · bhband', added: 3, removed: 0, age: '1h' },
+        ]},
+      ].map((p) => ({ ...p, headStyle: head(p.name), tasks: p.tasks.map(task) })),
+    };
+  }
+}
+</script>
+</body>
+</html>

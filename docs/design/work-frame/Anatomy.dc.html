@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Row anatomy, states, usage</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<div style="width: 900px; height: 1920px; box-sizing: border-box; padding: 48px; display: flex; flex-direction: column; gap: 40px; background: #0F1012; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px; border-radius: 12px; border: 1px solid #25282D">
+
+  <div style="display: flex; flex-direction: column; gap: 16px">
+    <h2 style="margin: 0; font-size: 20px; font-weight: 650">A task row</h2>
+    <div style="width: 420px; padding: 12px 14px; border-radius: 10px; background: #1F2226; box-shadow: inset 0 0 0 1px #2C3036; font-size: 15px">
+      <div style="display: flex; align-items: center; gap: 10px">
+        <span style="width: 12px; height: 12px; border-radius: 50%; background: #F2A93B; box-shadow: 0 0 0 4px rgba(242,169,59,0.18)"></span>
+        <span style="font-weight: 650; color: #F4F5F6">perf-subagent-window</span>
+        <span style="flex: 1"></span>
+        <span style="font-size: 12px; font-weight: 600; padding: 1px 7px; border-radius: 5px; background: #1E2A20; color: #7FD3A2">PR #42</span>
+        <span style="font-size: 12.5px; color: #7C828B">1m</span>
+      </div>
+      <div style="display: flex; gap: 7px; padding-left: 22px; margin-top: 4px; font-size: 13px; color: #8A9099">
+        <span>Claude · bhband</span><span style="color: #4A4F57">·</span><span style="color: #6FCF97">+12</span><span style="color: #F08A8A">−6</span><span style="color: #4A4F57">·</span><span style="color: #F2B65E">approve Bash</span>
+      </div>
+    </div>
+    <ol style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: #C3C6CB; line-height: 1.5">
+      <li><b style="color: #E7E8EA">State glyph</b>: one of the six below, the same in the row, the tab, ⌘J, the board, the bell and the Dock.</li>
+      <li><b style="color: #E7E8EA">Task name</b> (or the PR title once there is one). <b style="color: #E7E8EA">Bold</b> means something new you have not seen; no badge.</li>
+      <li><b style="color: #E7E8EA">PR / CI chip</b>, only when there is one: green open, amber checks failing, purple merged.</li>
+      <li><b style="color: #E7E8EA">Age</b>: since the last change of state.</li>
+      <li><b style="color: #E7E8EA">Agent · account</b>, then the task's diff, then what it waits for in amber.</li>
+      <li>Hover: the task's comment and Go to Tab / Review / Hibernate. Subagents fold under the row.</li>
+    </ol>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 14px">
+    <h2 style="margin: 0; font-size: 20px; font-weight: 650">Six states, and nothing else in color</h2>
+    <sc-for list="{{states}}" as="s" hint-placeholder-count="6">
+      <div style="display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 10px; background: #15171A; border: 1px solid #23262B">
+        <span style="{{s.glyph}}"></span>
+        <span style="width: 110px; font-weight: 600">{{s.name}}</span>
+        <span style="width: 70px; font-size: 12px; color: #8A9099">{{s.hex}}</span>
+        <span style="flex: 1; color: #C3C6CB">{{s.meaning}}</span>
+      </div>
+    </sc-for>
+    <div style="color: #8A9099; line-height: 1.5">Surfaces are neutral grays (#0F1012 → #1F2226), text in three steps (#E7E8EA, #9BA0A8, #7C828B). The theme's accent only marks focus and the selected row; color means state.</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 14px">
+    <h2 style="margin: 0; font-size: 20px; font-weight: 650">Usage: a chip, not a page</h2>
+    <div style="display: flex; align-items: flex-start; gap: 24px">
+      <span style="display: flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 6px; background: #2A2113; color: #F2B65E; font-weight: 600; font-size: 12px">Claude bkdg 84% · resets 3h</span>
+      <div style="width: 360px; padding: 14px; border-radius: 12px; background: #17191C; border: 1px solid #2C3036; box-shadow: 0 18px 48px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 14px">
+        <sc-for list="{{accounts}}" as="a" hint-placeholder-count="3">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="display: flex; gap: 8px"><span style="font-weight: 600">{{a.name}}</span><span style="color: #7C828B">{{a.plan}}</span><span style="flex: 1"></span><span style="font-size: 12px; color: #8A9099">{{a.reset}}</span></div>
+            <div style="height: 6px; border-radius: 3px; background: #24272C; overflow: hidden"><div style="{{a.bar}}"></div></div>
+            <div style="font-size: 11.5px; color: #8A9099">{{a.line}}</div>
+          </div>
+        </sc-for>
+        <div style="border-top: 1px solid #24272C; padding-top: 10px; font-size: 12px; color: #9BA0A8">Open an agent on… · Add account · Accounts settings</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px">
+    <h2 style="margin: 0; font-size: 20px; font-weight: 650">Where today's nine sidebar pages go</h2>
+    <sc-for list="{{moves}}" as="m" hint-placeholder-count="8">
+      <div style="display: flex; gap: 16px; padding: 9px 0; border-bottom: 1px solid #1F2125">
+        <span style="width: 190px; color: #9BA0A8">{{m.from}}</span>
+        <span style="flex: 1; color: #E7E8EA">{{m.to}}</span>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":900,"height":1920}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const base = 'width: 14px; height: 14px; border-radius: 50%; box-sizing: border-box; flex: none; ';
+    const bar = (pct, color) => 'height: 6px; width: ' + pct + '%; background: ' + color;
+    return {
+      states: [
+        { name: 'Working', hex: '#5B9CF5', glyph: base + 'border: 2.5px solid #5B9CF5; border-top-color: transparent', meaning: 'The agent is in a turn. The only thing that moves (it spins).' },
+        { name: 'Needs you', hex: '#F2A93B', glyph: base + 'background: #F2A93B; box-shadow: 0 0 0 4px rgba(242,169,59,0.18)', meaning: 'A permission or a question. Counted on the bell and the Dock.' },
+        { name: 'Done', hex: '#3FB97A', glyph: base + 'background: #3FB97A', meaning: 'The turn ended or the task reported done; ready to review.' },
+        { name: 'Failed', hex: '#EF5B5B', glyph: base + 'background: #EF5B5B', meaning: 'The agent exited, hit a cap or failed to start.' },
+        { name: 'Idle', hex: '#6B7079', glyph: base + 'border: 2px solid #6B7079', meaning: 'Nothing running: hibernated, or a task with no agent.' },
+        { name: 'In review', hex: '#A98BF0', glyph: base + 'background: #A98BF0', meaning: 'Done and waiting for your review, or comments to send.' },
+      ],
+      accounts: [
+        { name: 'bkdg', plan: 'Max', reset: 'resets in 3h', bar: bar(84, '#F2A93B'), line: '84% of the 5-hour window · 61% of the week' },
+        { name: 'bhband', plan: 'Team', reset: 'resets in 1h', bar: bar(41, '#9BA0A8'), line: '41% of the 5-hour window · 22% of the week' },
+        { name: 'Codex', plan: 'Plus', reset: 'resets Thu', bar: bar(12, '#9BA0A8'), line: '12% of the week' },
+      ],
+      moves: [
+        { from: 'Tasks + Agents', to: 'One Work tree on the left: project → task → its terminals' },
+        { from: 'Needs You', to: 'The bell in the title bar (count, Allow/Deny, answer inline)' },
+        { from: 'Files', to: 'The right panel’s Files tab, for the selected task or project' },
+        { from: 'Git', to: 'The right panel’s Changes tab, with Commit and Open PR' },
+        { from: 'Git History', to: 'The right panel’s History tab' },
+        { from: 'History', to: 'Archive & history (⌘⇧H) at the sidebar’s foot, and ⌘K search' },
+        { from: 'Accounts', to: 'The usage chip and its popover in the status bar' },
+        { from: 'Memory', to: 'The right panel’s Memory tab, and the project’s page' },
+        { from: 'Race board, run page', to: 'Open in the center; also filters of the Board' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

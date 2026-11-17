@@ -183,7 +183,8 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   o lint por regras escreve `_lint/report.md` em cada projeto. Ao subir, gera os vetores que faltam.
 
 ### Agente de memória de fundo
-- Desligado por padrão (memory.backgroundAgent). Ligado, faz o que não cabe na sessão aberta com o
+- Ligado por padrão (memory.backgroundAgent; `../adr/0037-memory-agent-on-by-default.md`, o dono,
+  2026-11-17: "sempre tem que nascer ligado"); quem desligou à mão continua desligado. Ligado, faz o que não cabe na sessão aberta com o
   `claude -p` da conta do projeto (Haiku, sem ferramentas, sem hooks, sem guardar sessão na conta,
   com teto por chamada), sempre por evento: quando uma sessão termina, consolida a página dela (a
   não ser que o próprio Claude da sessão já tenha consolidado), atualiza o perfil de trabalho e, no
@@ -193,7 +194,8 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   lugar de um provedor com chave. Ver `docs/adr/0029-memory-agent.md`.
 - Teto por dia (memory.dailyBudgetUsd, US$ 1,00): passou, nada mais roda no dia; cada trabalho fica
   registrado com custo e versão do Claude Code. Propostas esperam aprovação na página Memory
-  (memory.requireApproval, ligada). "Pause or Resume the Memory Agent" (memory.pause-agent) segura a
+  (memory.requireApproval: desligada por padrão pela ADR 0037, como no ai-memory, e as propostas
+  entram registradas, com desfazer; ligada, esperam aprovação). "Pause or Resume the Memory Agent" (memory.pause-agent) segura a
   fila; "Reorganize Memory Now" (memory.run-dream) pede um dream.
 - "Organize History with AI…" (memory.bootstrap) mostra antes a estimativa de custo (folgada) e só
   roda no sim, mesmo com o agente desligado, com o mesmo teto: o Claude da conta lê as sessões
@@ -295,7 +297,7 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
 - [ ] O contexto passando de memory.consolidateAtContext pede a consolidação uma vez; com
       `stop_hook_active` nunca pede.
 - [ ] "Organize History with AI" mostra o custo antes e só roda no clique.
-- [ ] Com memory.backgroundAgent desligada, nenhum `claude -p` roda.
+- [ ] Numa instalação nova, memory.backgroundAgent vem ligada; desligada, nenhum `claude -p` roda.
 - [ ] Editar uma página na Memory gera commit; "Abrir a sessão" leva à conversa certa.
 - [ ] O briefing mostrado na Memory é igual ao que a sessão recebeu (conferido no transcript).
 - [ ] O `~/.claude` e a `~/.codex` do dono não mudam.

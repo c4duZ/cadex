@@ -1,0 +1,178 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-17T03:40:00Z"
+  },
+  "title": "Cadex redesign",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Map.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "1 · The frame: the same four regions on every screen"
+    },
+    "Main.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "2 · A task: its terminals in the center, its changes on the right"
+    },
+    "Terminals.dc.html": {
+      "x": 3040,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "3 · The same task, split in three terminals, right panel closed"
+    },
+    "Project.dc.html": {
+      "x": 0,
+      "y": 1020,
+      "w": 1440,
+      "h": 900,
+      "title": "4 · A project's page, with its memory on the right"
+    },
+    "Bell.dc.html": {
+      "x": 1520,
+      "y": 1020,
+      "w": 1440,
+      "h": 900,
+      "title": "5 · Needs you: the bell"
+    },
+    "Switcher.dc.html": {
+      "x": 3040,
+      "y": 1020,
+      "w": 1440,
+      "h": 900,
+      "title": "6 · ⌘J: jump by attention, or start a task"
+    },
+    "Board.dc.html": {
+      "x": 0,
+      "y": 2040,
+      "w": 1440,
+      "h": 900,
+      "title": "7 · The board, in the center (races and runs are filters)"
+    },
+    "Race.dc.html": {
+      "x": 1520,
+      "y": 2040,
+      "w": 1440,
+      "h": 900,
+      "title": "8 · A race: three agents side by side, in the center"
+    },
+    "Drawer.dc.html": {
+      "x": 3040,
+      "y": 2040,
+      "w": 1440,
+      "h": 900,
+      "title": "9 · The terminal drawer: quick shells outside any task"
+    },
+    "Pane.dc.html": {
+      "x": 0,
+      "y": 3060,
+      "w": 1440,
+      "h": 900,
+      "title": "10 · A Claude Code pane: today vs. dressed by Cadex"
+    },
+    "Anatomy.dc.html": {
+      "x": 1520,
+      "y": 3060,
+      "w": 900,
+      "h": 1920,
+      "title": "11 · A task row, the five states, usage, where each page went"
+    },
+    "Sidebar.dc.html": {
+      "x": 2500,
+      "y": 3060,
+      "w": 292,
+      "h": 826,
+      "title": "Part · Left: the Work tree"
+    },
+    "Inspector.dc.html": {
+      "x": 2872,
+      "y": 3060,
+      "w": 320,
+      "h": 826,
+      "title": "Part · Right panel"
+    },
+    "StatusBar.dc.html": {
+      "x": 2500,
+      "y": 4006,
+      "w": 1440,
+      "h": 30,
+      "title": "Part · Status bar"
+    },
+    "TitleBar.dc.html": {
+      "x": 2500,
+      "y": 4116,
+      "w": 1440,
+      "h": 44,
+      "title": "Part · Title bar"
+    },
+    "PreviewOne.dc.html": {
+      "x": 0,
+      "y": 4080,
+      "w": 1440,
+      "h": 900,
+      "title": "3b · One terminal + the web preview (agent ran the dev server itself)"
+    },
+    "PreviewMany.dc.html": {
+      "x": 0,
+      "y": 5100,
+      "w": 1440,
+      "h": 900,
+      "title": "3c · Agent, dev server and tests + the web preview"
+    },
+    "Home.dc.html": {
+      "x": -1520,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "0 · Start: open a project, a terminal, an agent, a task or a race"
+    },
+    "NewTask.dc.html": {
+      "x": -1520,
+      "y": 1020,
+      "w": 1440,
+      "h": 900,
+      "title": "0b · ⌘N New task: where it runs, who does it (2+ agents = race)"
+    }
+  },
+  "order": [
+    "Home.dc.html",
+    "NewTask.dc.html",
+    "Map.dc.html",
+    "Main.dc.html",
+    "Terminals.dc.html",
+    "PreviewOne.dc.html",
+    "PreviewMany.dc.html",
+    "Project.dc.html",
+    "Bell.dc.html",
+    "Switcher.dc.html",
+    "Board.dc.html",
+    "Race.dc.html",
+    "Drawer.dc.html",
+    "Pane.dc.html",
+    "Anatomy.dc.html",
+    "Sidebar.dc.html",
+    "Inspector.dc.html",
+    "StatusBar.dc.html",
+    "TitleBar.dc.html"
+  ],
+  "notes": {
+    "t1": {
+      "x": 0,
+      "y": -300,
+      "text": "Cadex: one frame — Work tree · what you opened · the selection's panel",
+      "kind": "title1",
+      "maxW": 4480
+    }
+  },
+  "designSystems": []
+}

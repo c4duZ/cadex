@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A task in three terminals</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #0C0D0F; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px; border-radius: 12px; overflow: hidden; border: 1px solid #25282D">
+  <dc-import name="TitleBar" view="split" panel="{{ false }}" hint-size="1440px,44px"></dc-import>
+
+  <div style="flex: 1; display: flex; min-height: 0">
+    <dc-import name="Sidebar" selected="orchestration-e" hint-size="292px,826px"></dc-import>
+
+    <div style="flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 8px; padding: 8px">
+      <div style="border-radius: 10px; background: #121316; border: 1px solid #2E3238; box-shadow: 0 0 0 3px rgba(91,156,245,0.10); display: flex; flex-direction: column; overflow: hidden">
+        <div style="height: 34px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-bottom: 1px solid #22252A; font-size: 12px">
+          <span style="width: 9px; height: 9px; border-radius: 50%; border: 2px solid #5B9CF5; border-top-color: transparent; box-sizing: border-box"></span>
+          <span style="font-weight: 600">Claude</span><span style="color: #8A9099">Opus · bkdg</span><span style="flex: 1"></span><span style="color: #8A9099">US$ 0.31 · 4 min</span>
+        </div>
+        <div style="flex: 1; padding: 14px 16px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; line-height: 1.6; color: #C9CCD1; display: flex; flex-direction: column; overflow: hidden">
+          <div style="padding: 6px 10px; border-radius: 6px; background: #1C1F24; color: #EDEEF0">&gt; The preview should reload after each save</div>
+          <div style="margin-top: 10px"><span style="color: #6FCF97">⏺</span> <span style="color: #EDEEF0; font-weight: 600">Read</span>(vite.config.ts)</div>
+          <div style="color: #7C828B">  ⎿  Read 42 lines</div>
+          <div style="margin-top: 8px"><span style="color: #6FCF97">⏺</span> <span style="color: #EDEEF0; font-weight: 600">Update</span>(vite.config.ts)</div>
+          <div style="padding: 0 6px; border-radius: 3px; background: #15261C; color: #B9E5C8">   18 +   server: { hmr: { overlay: false } },</div>
+          <div style="margin-top: 8px"><span style="color: #EDEEF0">⏺</span> Saved. The dev server on the right picks it up;</div>
+          <div>  the tests below still pass.</div>
+          <div style="flex: 1"></div>
+          <div style="padding: 9px 12px; border-radius: 8px; border: 1px solid #2E3238; background: #17191C; color: #8A9099">&gt;</div>
+          <div style="margin-top: 7px; display: flex; gap: 14px; font-family: Inter, system-ui, sans-serif; font-size: 11px; color: #8A9099"><span>Opus</span><span>context 6%</span><span>US$ 0.31</span><span style="flex: 1"></span><span>default</span></div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; min-height: 0">
+        <div style="border-radius: 10px; background: #111214; border: 1px solid #23262B; display: flex; flex-direction: column; overflow: hidden; opacity: 0.92">
+          <div style="height: 34px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-bottom: 1px solid #22252A; font-size: 12px">
+            <span style="width: 9px; height: 9px; border-radius: 50%; background: #3FB97A"></span>
+            <span style="font-weight: 600">npm run dev</span><span style="flex: 1"></span>
+            <span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: #1A2333; color: #9BC1FF">Open :5173 in preview</span>
+          </div>
+          <div style="flex: 1; padding: 14px 16px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; line-height: 1.6; color: #B5B9C0">
+            <div><span style="color: #6FCF97; font-weight: 600">VITE v6.2</span>  ready in 312 ms</div>
+            <div style="margin-top: 6px">  ➜  Local:   <span style="color: #9BC1FF; text-decoration: underline">http://localhost:5173/</span></div>
+            <div style="color: #7C828B">  ➜  press h + enter to show help</div>
+            <div style="margin-top: 6px; color: #7C828B">22:41:07 [vite] hmr update /src/App.tsx</div>
+            <div style="color: #7C828B">22:41:19 [vite] config changed, restarting</div>
+          </div>
+        </div>
+        <div style="border-radius: 10px; background: #111214; border: 1px solid #23262B; display: flex; flex-direction: column; overflow: hidden; opacity: 0.92">
+          <div style="height: 34px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-bottom: 1px solid #22252A; font-size: 12px">
+            <span style="width: 9px; height: 9px; border-radius: 50%; border: 2px solid #5B9CF5; border-top-color: transparent; box-sizing: border-box"></span>
+            <span style="font-weight: 600">make macos-test</span><span style="color: #8A9099">running 38 s</span>
+          </div>
+          <div style="flex: 1; padding: 14px 16px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; line-height: 1.6; color: #B5B9C0">
+            <div><span style="color: #6FCF97">ok</span>   the schedule: next, due, missed</div>
+            <div><span style="color: #6FCF97">ok</span>   the LaunchAgent: dates, plist, sync</div>
+            <div><span style="color: #6FCF97">ok</span>   before a run: off, prompt, folder, trust</div>
+            <div><span style="color: #6FCF97">ok</span>   its history: turned on, run, skip</div>
+            <div style="color: #8FB8F7">…    TerminalTests</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <dc-import name="StatusBar" hint-size="1440px,30px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

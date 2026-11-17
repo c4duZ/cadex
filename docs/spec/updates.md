@@ -13,11 +13,11 @@ em 2026-10-20. Decisão em
   notas e três botões: **Instalar e reabrir**, **Depois** e **Não lembrar de novo** (o dono,
   2026-10-20).
   - **Depois** fecha a janela; ela volta na próxima vez que o Cadex abrir.
-  - **Não lembrar de novo**: a janela não abre mais sozinha para essa versão, mas o botão da barra
-    fica (o dono, 2026-10-20). Uma versão mais nova volta a abrir a janela.
-- Com versão nova, pulada ou não, aparece também um botão na barra de título, à esquerda das
-  configurações: uma seta para cima num círculo, na cor de destaque. Passar o ponteiro diz
-  "Atualizar para 1.3.0". Sem versão nova, o botão não existe.
+  - **Não lembrar de novo**: a janela não abre mais sozinha para essa versão, mas o item da barra
+    de status fica (o dono, 2026-10-20). Uma versão mais nova volta a abrir a janela.
+- Com versão nova, pulada ou não, aparece também o item Update na barra de status, à direita
+  (`status-bar.md`; antes era um botão na barra de título, `../adr/0035-work-frame.md`): uma seta
+  para cima num círculo e "Update to 1.3.0", na cor de destaque. Sem versão nova, o item não existe.
 - Clicar no botão, ou rodar "Procurar atualizações" no ⌘K (também no menu Cadex), abre uma janela
   pequena que procura na hora e mostra:
   - procurando: "Procurando atualizações…";
@@ -33,8 +33,8 @@ em 2026-10-20. Decisão em
 - A versão nova abre sem o aviso "Abrir mesmo assim" e mantém as permissões já dadas ao Cadex.
 
 ## Estados
-- **Em dia:** nada na barra de título.
-- **Disponível:** botão na barra; a janela mostra as notas e "Instalar e reabrir".
+- **Em dia:** nada na barra de status.
+- **Disponível:** o item na barra de status; a janela mostra as notas e "Instalar e reabrir".
 - **Baixando:** a janela mostra o progresso; o botão da barra diz a porcentagem.
 - **Instalada, falta reabrir:** o botão da barra reabre.
 - **Falha:** a janela diz o motivo; nada no app instalado mudou.

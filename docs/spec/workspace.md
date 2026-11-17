@@ -1,11 +1,29 @@
 # workspace
 
 ## Para que serve
-Dizer em qual pasta o usuário está trabalhando (a raiz do explorer e da busca) e garantir que o app
-só mexe em arquivos dentro das pastas que o usuário abriu.
+Montar a janela (as regiões da moldura), dizer em qual pasta o usuário está trabalhando (a raiz do
+explorer e da busca) e garantir que o app só mexe em arquivos dentro das pastas que o usuário abriu.
 
 ## Comportamento
-- **Workspace** é a pasta raiz aberta na janela. O explorer mostra a árvore dela e a busca procura
+### A janela
+- Toda tela tem a mesma moldura, em quatro regiões (`../adr/0035-work-frame.md`; o mapa em
+  `../design/work-frame/screens.md`, seção Map; tokens components.window, components.titleBar e
+  components.statusBar):
+  - **barra de título** (44 pt): os botões da janela, a busca ⌘K, "projeto › tarefa", as abas
+    (`tabs.md`), e à direita o quadro, o sino e o botão do painel da direita. O café, a atualização
+    e as configurações não ficam nela: o café e a atualização vão para a barra de status
+    (`status-bar.md`), as configurações ficam no ⌘, e no menu;
+  - **esquerda:** a árvore do trabalho (`sidebar.md`), recolhível (⌘B);
+  - **centro:** o que se abriu: os terminais e documentos da seleção, a página do projeto, o quadro,
+    a corrida, a tela de início (`home.md`); a gaveta de terminais sobe por cima dele (⌃`);
+  - **direita:** o painel da seleção (`inspector.md`), opcional (⌥⌘I);
+  - **barra de status** embaixo (30 pt).
+- A janela tem cantos de 12 e o fundo da moldura nova; a imagem de fundo e a vibrância, quando
+  ligadas, continuam como antes (`themes.md`).
+
+### A pasta
+- **Workspace** é a pasta da seleção: a do projeto, ou a da tarefa (a worktree) quando uma tarefa
+  está selecionada (`projects.md`). O explorer mostra a árvore dela e a busca procura
   dentro dela.
 - O workspace é definido:
   - ao abrir o app com uma pasta: pela linha de comando (`Cadex /caminho`) ou arrastando a pasta no
@@ -35,11 +53,11 @@ só mexe em arquivos dentro das pastas que o usuário abriu.
   está dentro de um diretório autorizado.
 - A lista de autorizados dura enquanto o app está aberto. Trocar de workspace não tira a pasta
   anterior da lista nessa sessão.
-- **Várias janelas.** "Nova janela" (⌘N) abre outra janela com um terminal na pasta do workspace
-  da janela com foco. Cada janela tem o próprio workspace, os próprios spaces e abas, e o seu
+- **Várias janelas.** "Nova janela" (⇧⌘N; o ⌘N é Nova tarefa, plano 29) abre outra janela com um terminal na pasta do workspace
+  da janela com foco. Cada janela tem o próprio workspace, os próprios projetos e abas, e o seu
   explorer, busca e git: trocar a pasta numa não mexe na outra. Menus, atalhos e a paleta agem na
   janela com foco. Pedido do dono em 2026-10-20.
-- Só a **janela principal** (a que abriu com o app) é salva e restaurada pelos spaces. As outras
+- Só a **janela principal** (a que abriu com o app) é salva e restaurada pelos projetos. As outras
   são passageiras: fechar o app ou a janela não guarda nada delas. Fechada a principal, nenhuma
   outra toma o lugar dela; o arquivo fica com o que ela tinha ao fechar.
 - Fechar uma janela pergunta só pelos programas e arquivos dela. Sair do app pergunta uma vez por
@@ -69,6 +87,8 @@ só mexe em arquivos dentro das pastas que o usuário abriu.
 - [ ] "Abrir pasta…" pela paleta troca o workspace e o explorer (falta conferir à mão: abre o seletor do sistema).
 - [x] "Usar a pasta do terminal" troca o workspace para a pasta do painel com foco.
 - [x] Um terminal dentro de um repositório leva a árvore para a raiz do repositório.
-- [ ] ⌘N abre outra janela na pasta do workspace da janela com foco (macOS; no Windows o comando abre outro processo, sem atalho).
-- [ ] Trocar a pasta, o space ou a aba numa janela não muda a outra.
+- [ ] Toda tela tem as mesmas quatro regiões, com as medidas dos tokens (conferido lado a lado com
+  os mockups).
+- [ ] ⇧⌘N abre outra janela na pasta do workspace da janela com foco (macOS; no Windows o comando abre outro processo, sem atalho).
+- [ ] Trocar a pasta, o projeto ou a aba numa janela não muda a outra.
 - [ ] Sair e abrir de novo traz só a janela principal.

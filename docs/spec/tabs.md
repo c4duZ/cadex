@@ -1,23 +1,32 @@
 # tabs
 
 ## Para que serve
-Ter vários terminais e arquivos abertos na mesma janela: abas lado a lado na barra, cada aba
-dividida em painéis. Um painel mostra um terminal ou um documento (código, Markdown, mídia, preview
-web, diff, histórico do git), e um documento tem um ponto no título quando há mudança não salva.
+Ter vários terminais e arquivos abertos na mesma janela: abas lado a lado na barra de título, cada
+aba dividida em painéis. Um painel mostra um terminal ou um documento (código, Markdown, mídia,
+preview web, diff, histórico do git), e um documento tem um ponto no título quando há mudança não
+salva. Cara e medidas da moldura nova (`../adr/0035-work-frame.md`; `../design/work-frame/screens.md`,
+seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
+`../design/work-frame/tokens.json`).
 
 ## Comportamento
 
 ### Abas
-- ⌘T abre uma aba de terminal na pasta da sessão ativa; sem sessão ativa, na pasta pessoal. A aba
-  nova entra à direita da atual e ganha o foco.
+- As abas são da seleção da árvore (`sidebar.md`): as da tarefa selecionada, ou as do projeto (os
+  terminais e documentos fora de tarefa). Trocar de tarefa ou de projeto troca as abas da barra.
+  Antes delas, na barra de título, "projeto › tarefa" (só o projeto fora de tarefa).
+- ⌘T abre uma aba de terminal na pasta da seleção (a da tarefa, ou a do projeto); sem projeto, na
+  pasta pessoal. A aba nova entra à direita da atual e ganha o foco. O "+" depois das abas faz o
+  mesmo, com o menu do que mais abrir.
 - O título da aba é o nome da pasta atual da sessão com foco (a pasta pessoal aparece como `~`).
   Muda quando a pasta muda.
 - Renomear (comando "Renomear aba", ou duplo clique no título) dá um nome que fica mesmo mudando de
   pasta. Renomear para vazio volta ao nome da pasta.
-- Aba com um agente do Claude Code (plano 19): o sinal de estado antes do título (◐ trabalhando,
-  ● esperando você, ✓ terminou, ✓• terminou sem você ver, até o terminal ganhar o foco; ✕ falhou), o nome da conversa no lugar da pasta e, ao
-  passar o ponteiro, a frase do que ele faz agora. O nome dado à mão continua vencendo; o sinal
-  aparece mesmo assim.
+- Toda aba que roda algo mostra antes do título a peça de estado do app (components.stateGlyph):
+  um agente do Claude Code (plano 19) com os estados dele (trabalhando, precisa de você, pronto,
+  falhou, parado), um programa qualquer com o anel enquanto roda e o ponto verde quando serve algo
+  (uma porta aberta). Aba de agente: o nome da conversa no lugar da pasta e, ao passar o ponteiro,
+  a frase do que ele faz agora; "pronto sem você ver" deixa o título em negrito até o terminal
+  ganhar o foco. O nome dado à mão continua vencendo; o estado aparece mesmo assim.
 - Com terminal.keepSessions ligado (plano 19), fechar a janela principal ou o app deixa os shells das
   abas vivos no daemon do terminal, sem perguntar por programa rodando (ele segue rodando), e reabrir
   religa cada aba ao seu; fechar uma aba ou um painel encerra o shell dele, pedindo confirmação com
@@ -29,12 +38,12 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
 - Clicar numa aba vai para ela; o × da aba ou o clique do meio (botão 3 do mouse) fecha a aba.
 - Com o ponteiro sobre uma aba, em 0,2 s aparece a pasta do terminal (~ no lugar da pasta pessoal)
   ou o caminho do arquivo; sobre o ×, "Fechar aba" (o dono, 2026-10-20).
-- As abas são o elemento principal da barra de cima: largura igual (até 220 pt, encolhendo quando
-  não cabem), cada uma com fundo próprio, a ativa com fundo mais forte e uma linha na cor do tema
-  embaixo; ícone do que mostram (terminal, arquivo pelo tipo, histórico, página web). O × aparece
-  na ativa e na que está sob o ponteiro. O dono escolheu esse estilo, o das abas nativas do macOS,
-  no lugar de pílulas discretas (2026-10-19).
-- A barra de abas aparece mesmo com uma aba só (o visual final vem com a feature themes).
+- Cara das abas (components.tab): 30 pt de altura, raio 7, 12 pt de lado, largura do título; a
+  ativa com o fundo de etiqueta e o texto forte, as outras sem fundo e com o texto secundário; sem
+  linha embaixo. Ícone do que mostram (a peça de estado no que roda algo; arquivo pelo tipo,
+  histórico, página web). O × aparece na ativa e na que está sob o ponteiro. Revê o estilo de abas
+  nativas com fundo e linha na cor do tema (o dono, 2026-10-19), pelo mockup aprovado em 2026-11-17.
+- A barra de abas aparece mesmo com uma aba só.
 
 - Arrastar uma aba pela barra muda a ordem: ela vai por cima seguindo o ponteiro e as outras deslizam
   para a vaga nova enquanto ela passa (0,15 s), como os ícones da barra lateral; cai onde o meio dela
@@ -54,8 +63,12 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   ponteiro e enquanto arrasta.
 - ⌘] e ⌘[ passam o foco para o próximo e o anterior painel da aba, em volta. ⌘⌥ + seta passa para
   o painel vizinho naquela direção.
-- Clicar num painel dá o foco a ele. Os painéis sem foco ficam levemente escurecidos (sem contorno
-  azul, que o dono achou tosco); eles continuam recebendo saída e atualizando.
+- Clicar num painel dá o foco a ele. Os painéis são arredondados (raio 10), com 8 pt entre eles e
+  em volta. O com foco tem o contorno discreto e um halo azul a 10% (components.pane.focused); os
+  sem foco, o fundo e o contorno mais apagados e 92% de opacidade (components.pane.idle), e
+  continuam recebendo saída e atualizando. Revê "sem contorno azul, que o dono achou tosco" e "os
+  painéis continuam colados" (2026-10-22), pelo mockup aprovado em 2026-11-17: o contorno agora é
+  da cor das linhas, não azul, e só o halo é azulado.
 
 ### Documentos em painéis
 - Todo painel guarda um terminal ou um documento e funciona igual nos dois casos: dividir (⌘D,
@@ -84,16 +97,16 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   ícone do tipo). "●" no título quando qualquer painel da aba tem mudança não salva.
 
 ### Cabeçalho dos painéis
-- Com 2 ou mais painéis numa aba, cada um ganha em cima uma linha fina (24 pt, sem fundo, um fio
-  embaixo): à esquerda o ícone e o nome (o arquivo, com ● se não salvo; o programa do terminal, ou a
-  pasta); à direita + (terminal ao lado, terminal abaixo, preview web ao lado, maximizar, fechar o
-  painel, cada um com ícone e atalho), maximizar e ✕. Os três aparecem juntos, sempre no painel com
-  foco e ao passar o ponteiro nos outros, e guardam o lugar quando somem, para o cabeçalho não mexer
-  (o maximizar aparecendo sozinho mexia, 2026-10-22). O botão do meio do mouse fecha o painel, como
-  fecha uma aba; o painel com foco tem
-  o nome mais forte e os outros escurecem, como nos terminais, sem faixa nem contorno de cor; os
-  painéis continuam colados, com a linha fina de sempre entre eles (o dono, 2026-10-22). Mais leve que as abas da janela, para não
-  parecer uma segunda fileira de abas. Resolve o issue #1: o arquivo aberto ao lado tinha só o ⌘W.
+- Todo painel tem cabeçalho, com um ou com vários (components.pane.header: 34 pt, um fio embaixo):
+  à esquerda a peça de estado, o nome (o arquivo, com ● se não salvo; o programa do terminal; o
+  agente) e, mais apagado, de onde é (a tarefa, o modelo, a conta); à direita o que interessa ao
+  painel (o custo e o tempo de um agente; "running 38 s" de um comando; a etiqueta azul "Open :5173
+  in preview" de um servidor). Ao passar o ponteiro e no painel com foco, aparecem também + (terminal
+  ao lado, terminal abaixo, preview web ao lado, maximizar, fechar o painel, cada um com ícone e
+  atalho), maximizar e ✕, guardando o lugar quando somem, para o cabeçalho não mexer (o maximizar
+  aparecendo sozinho mexia, 2026-10-22). O botão do meio do mouse fecha o painel, como fecha uma aba.
+  O cabeçalho só se redesenha quando o que ele mostra muda (custo e tempo no máximo uma vez por
+  segundo), nunca a cada tecla.
 - Arrastar o cabeçalho move o painel (a ideia do dono, 2026-10-22): a aba vira um quadro em que cada
   painel é uma janela cinza só com o cabeçalho (ícone e nome), e as janelas se reorganizam ao vivo,
   com uma animação de 0,3 s que passa um pouco do ponto, mostrando como vai ficar; a do painel
@@ -109,11 +122,8 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
   (pane.close, pane.zoom, pane.split-right, pane.split-down).
 - Maximizar (pane.zoom, ⇧⌘↩): o painel ocupa a aba toda, os outros saem de vista e voltam ao
   restaurar; dar o foco a outro painel também restaura.
-- Com um painel só, nada muda: sem cabeçalho. tabs.paneHeaders: "split" (padrão), "always" ou
-  "never" (Configurações › Temas, ao lado de "Painéis sem foco"), como a opção do iTerm2.
-- Escolhido depois de pesquisa (2026-10-22): editores dão abas a cada painel (VS Code, Zed); os
-  terminais, nenhum cabeçalho ou um só com divisões (iTerm2). Abas por painel trariam um segundo
-  nível de aba atual e o caso do grupo vazio; o cabeçalho fino basta para fechar o certo.
+- tabs.paneHeaders sai: o cabeçalho é sempre (o mockup mostra um painel só com cabeçalho); quem tinha
+  "never" é migrado uma vez, e a chave sai no plano 29 (`../design/work-frame/inventory.md`).
 
 ### Fechar
 - ⌘W fecha o painel com foco. O espaço dele vai para o vizinho. Se era o único da aba, fecha a aba.
@@ -127,12 +137,12 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
 ### Desempenho
 - Abas que não estão visíveis não desenham; continuam lendo a saída do shell.
 
-- O escurecimento dos painéis sem foco é ajustável (tabs.unfocusedDim, de 0 a 0,6; 0,26 por
-  padrão; 0 desliga).
+- O apagado dos painéis sem foco é ajustável (tabs.unfocusedDim, de 0 a 0,6; 0,08 por padrão,
+  que é a opacidade de 92% do mockup; 0 desliga).
 - Clique direito numa aba: renomear, cor da aba e fechar painel, pelos comandos (plano 15, fase D).
 
 ## Estados
-- **Uma aba, um painel:** como o terminal sozinho, com a barra de abas em cima.
+- **Uma aba, um painel:** o painel com o cabeçalho dele, a barra de abas em cima.
 - **Shell não abre** (shell configurado não existe): a aba abre mostrando o erro (spec do terminal).
 
 ## Casos de borda
@@ -160,5 +170,7 @@ web, diff, histórico do git), e um documento tem um ponto no título quando há
 - [x] Clicar num documento dá o foco a ele; ⌘], ⌘[ e ⌘⌥ + seta passam por documentos.
 - [x] ⌘D num documento abre um terminal ao lado, na pasta do arquivo.
 - [x] Fechar painel, aba ou janela com documento não salvo pergunta antes.
-- [ ] Uma aba com o Claude Code mostra o sinal de estado e o nome da conversa; o nome dado à mão
+- [ ] Cada aba e cada cabeçalho de painel com algo rodando mostra a peça de estado certa.
+- [ ] Trocar de tarefa na árvore troca as abas da barra de título.
+- [ ] Uma aba com o Claude Code mostra o estado e o nome da conversa; o nome dado à mão
       continua; com keepSessions ligado, fechar e reabrir o app religa a aba ao mesmo shell.

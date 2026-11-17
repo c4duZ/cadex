@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cadex board</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #0C0D0F; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px; border-radius: 12px; overflow: hidden; border: 1px solid #25282D">
+  <dc-import name="TitleBar" view="board" panel="{{ false }}" hint-size="1440px,44px"></dc-import>
+  <div style="flex: 1; display: flex; min-height: 0">
+    <dc-import name="Sidebar" selected="" hint-size="292px,826px"></dc-import>
+    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0">
+  <div style="display: flex; align-items: center; gap: 8px; padding: 14px 16px">
+    <button style="height: 28px; padding: 0 12px; border-radius: 14px; border: 0; background: #E7E8EA; color: #111214; font: inherit; font-weight: 600; font-size: 12px">All</button>
+    <button style="height: 28px; padding: 0 12px; border-radius: 14px; border: 1px solid #2A2D33; background: transparent; color: #C9CCD1; font: inherit; font-size: 12px">Race: kite (3)</button>
+    <button style="height: 28px; padding: 0 12px; border-radius: 14px; border: 1px solid #2A2D33; background: transparent; color: #C9CCD1; font: inherit; font-size: 12px">Run: release-2.4 (5)</button>
+    <button style="height: 28px; padding: 0 12px; border-radius: 14px; border: 1px solid #2A2D33; background: transparent; color: #C9CCD1; font: inherit; font-size: 12px">Automations</button>
+    <span style="flex: 1"></span>
+    <button style="height: 30px; padding: 0 12px; border-radius: 7px; border: 1px solid #2A2D33; background: #1A1C20; color: #E7E8EA; font: inherit; font-weight: 500">New race</button>
+    <button style="height: 30px; padding: 0 12px; border-radius: 7px; border: 0; background: #E7E8EA; color: #111214; font: inherit; font-weight: 600">New task</button>
+  </div>
+
+  <div style="flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 0 16px 16px; min-height: 0">
+    <sc-for list="{{columns}}" as="col" hint-placeholder-count="4">
+      <div style="display: flex; flex-direction: column; gap: 10px; min-height: 0">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 4px 2px">
+          <span style="{{col.glyph}}"></span>
+          <span style="font-weight: 600">{{col.title}}</span>
+          <span style="color: #7C828B">{{col.count}}</span>
+        </div>
+        <sc-for list="{{col.cards}}" as="card" hint-placeholder-count="2">
+          <div style="{{card.box}}">
+            <div style="display: flex; align-items: center; gap: 8px">
+              <span style="{{col.glyph}}"></span>
+              <span style="font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{card.name}}</span>
+              <span style="font-size: 11px; color: #7C828B">{{card.age}}</span>
+            </div>
+            <div style="font-size: 12px; line-height: 1.5; color: #C3C6CB">{{card.text}}</div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #8A9099">
+              <span>{{card.project}}</span><span style="color: #4A4F57">·</span><span>{{card.agent}}</span>
+              <span style="flex: 1"></span>
+              <span style="color: #6FCF97">+{{card.added}}</span><span style="color: #F08A8A">−{{card.removed}}</span>
+            </div>
+            <sc-if value="{{card.group}}" hint-placeholder-val="{{ false }}">
+              <span style="align-self: flex-start; font-size: 10.5px; font-weight: 600; padding: 2px 7px; border-radius: 5px; background: #1D2230; color: #9BB8F0">{{card.group}}</span>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+    </div>
+  </div>
+  <dc-import name="StatusBar" hint-size="1440px,30px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const base = 'width: 10px; height: 10px; border-radius: 50%; box-sizing: border-box; flex: none; ';
+    const box = (tint) => 'display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 10px; background: ' + (tint || '#15171A') + '; border: 1px solid #25282D';
+    const col = (title, glyph, tint, cards) => ({ title, glyph: base + glyph, count: String(cards.length), cards: cards.map((c) => ({ ...c, box: box(tint) })) });
+    return {
+      columns: [
+        col('Needs you', 'background: #F2A93B; box-shadow: 0 0 0 3px rgba(242,169,59,0.18)', '#1C1812', [
+          { name: 'perf-subagent-window', text: 'Wants to run Bash: make perf', project: 'cadex', agent: 'Claude', added: 12, removed: 6, age: '1m' },
+          { name: 'checkout-copy', text: 'Keep the old copy for returning customers, or use the new text for everyone?', project: 'bhband-site', agent: 'Claude', added: 31, removed: 2, age: 'now' },
+        ]),
+        col('Working', 'border: 2px solid #5B9CF5; border-top-color: transparent', '', [
+          { name: 'orchestration-e', text: 'Wiring the wake check…', project: 'cadex', agent: 'Claude', added: 214, removed: 38, age: '4m' },
+          { name: 'kite-1', text: 'Rewriting the cache layer with a single map…', project: 'cadex', agent: 'Claude Opus', added: 88, removed: 41, age: '6m', group: 'Race: kite #1' },
+          { name: 'kite-2', text: 'Adding a test for the eviction order…', project: 'cadex', agent: 'Codex', added: 52, removed: 12, age: '6m', group: 'Race: kite #2' },
+        ]),
+        col('In review', 'background: #A98BF0', '', [
+          { name: 'release-notes', text: 'Done: notes for 2.4 in English, links checked. 2 comments from you to send.', project: 'cadex', agent: 'Claude', added: 64, removed: 3, age: '15m', group: 'Run: release-2.4' },
+        ]),
+        col('Done', 'background: #3FB97A', '#121A15', [
+          { name: 'bell-cards', text: 'PR #41 opened: the cards show their heading.', project: 'cadex', agent: 'Codex', added: 40, removed: 9, age: '22m' },
+          { name: 'nightly-check', text: 'Automation: tests passed, nothing to report.', project: 'cadex', agent: 'Claude', added: 0, removed: 0, age: '09:00' },
+        ]),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

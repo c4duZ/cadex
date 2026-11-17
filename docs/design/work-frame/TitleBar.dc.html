@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Title bar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1440px; height: 44px; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 0 12px 0 16px; border-bottom: 1px solid #1F2125; background: #121316; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px">
+  <!-- tokens:off: os botões da janela são do macOS -->
+<div style="display: flex; gap: 8px" aria-hidden="true">
+    <span style="width: 12px; height: 12px; border-radius: 50%; background: #FF5F57"></span>
+    <span style="width: 12px; height: 12px; border-radius: 50%; background: #FEBC2E"></span>
+    <span style="width: 12px; height: 12px; border-radius: 50%; background: #28C840"></span>
+  </div>
+  <!-- tokens:on -->
+<button style="margin-left: 70px; height: 28px; width: 150px; border-radius: 7px; border: 1px solid #25282D; background: #17191C; color: #8A9099; display: flex; align-items: center; gap: 8px; padding: 0 10px; font: inherit; font-size: 12px">
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="M10.5 10.5 14 14"></path></svg>
+    <span style="flex: 1; text-align: left">Search</span><span style="font-size: 11px; color: #7C828B">⌘K</span>
+  </button>
+  <div style="display: flex; align-items: center; gap: 2px; margin-left: 36px; flex: 1; min-width: 0">
+    <span style="font-size: 12px; color: #7C828B; margin-right: 8px; white-space: nowrap">{{where}}</span>
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+      <div style="{{t.style}}"><span style="{{t.dot}}"></span>{{t.label}}</div>
+    </sc-for>
+    <sc-if value="{{canAdd}}" hint-placeholder-val="{{ true }}">
+      <button aria-label="New terminal" style="width: 28px; height: 28px; border: 0; background: transparent; color: #7C828B; font-size: 16px; line-height: 1">+</button>
+    </sc-if>
+  </div>
+  <button aria-label="Board" style="{{boardStyle}}"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="1.5" y="2.5" width="3.5" height="11" rx="1"></rect><rect x="6.25" y="2.5" width="3.5" height="7" rx="1"></rect><rect x="11" y="2.5" width="3.5" height="9" rx="1"></rect></svg></button>
+  <button aria-label="Needs you, 2" style="{{bellStyle}}"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 11V7a4 4 0 0 1 8 0v4l1 1.5H3z"></path><path d="M6.5 14h3"></path></svg><span style="position: absolute; top: 2px; right: 1px; min-width: 15px; height: 15px; border-radius: 8px; background: #F2A93B; color: #1A1206; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center">2</span></button>
+  <button aria-label="Right panel" style="{{panelStyle}}"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2"></rect><path d="M10 2.5v11"></path></svg></button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["task","split","project","board","race"],"default":"task"},"panel":{"editor":"boolean","default":true},"bell":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":44}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const view = this.props.view ?? 'task';
+    const panel = this.props.panel ?? true;
+    const bell = this.props.bell ?? false;
+    const ring = (size) => `width: ${size}px; height: ${size}px; border-radius: 50%; box-sizing: border-box; flex: none; border: ${size > 8 ? 2 : 1.5}px solid #5B9CF5; border-top-color: transparent`;
+    const green = 'width: 7px; height: 7px; border-radius: 50%; flex: none; background: #3FB97A';
+    const none = 'display: none';
+    const tab = (label, dot, on) => ({ label, dot, style: 'height: 30px; display: flex; align-items: center; gap: 8px; padding: 0 12px; border-radius: 7px; white-space: nowrap; ' + (on ? 'background: #1D1F23; font-weight: 500' : 'color: #9BA0A8') });
+    const views = {
+      task: { where: 'cadex › orchestration-e', add: true, tabs: [tab('Claude', ring(9), true), tab('npm run dev', green), tab('make macos-test', ring(7)), tab('Review', none)] },
+      split: { where: 'cadex › orchestration-e', add: true, tabs: [tab('Terminals · 3', ring(9), true), tab('Review', none)] },
+      project: { where: 'cadex', add: false, tabs: [tab('Overview', none, true), tab('Automations', none), tab('Conversations', none)] },
+      board: { where: 'All projects', add: false, tabs: [tab('Board', none, true)] },
+      race: { where: 'cadex › race kite', add: false, tabs: [tab('Contenders · 3', ring(9), true), tab('Compare', none)] },
+    };
+    const v = views[view] ?? views.task;
+    const icon = (on) => 'position: relative; width: 30px; height: 30px; border: 0; border-radius: 7px; display: flex; align-items: center; justify-content: center; ' + (on ? 'background: #1D1F23; color: #E7E8EA' : 'background: transparent; color: #9BA0A8');
+    return { where: v.where, tabs: v.tabs, canAdd: v.add, boardStyle: icon(view === 'board'), bellStyle: icon(bell), panelStyle: icon(panel) };
+  }
+}
+</script>
+</body>
+</html>

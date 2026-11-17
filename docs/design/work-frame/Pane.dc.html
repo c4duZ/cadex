@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Claude Code pane, before and after</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; padding: 32px; background: #0C0D0F; font-family: Inter, system-ui, sans-serif; color: #E7E8EA">
+
+  <!-- tokens:off: o lado "hoje" é o Claude Code sem o Cadex -->
+<!-- Today -->
+  <div style="display: flex; flex-direction: column; gap: 12px; min-width: 0">
+    <div style="font-size: 13px; font-weight: 600; color: #9BA0A8; letter-spacing: 0.04em">TODAY</div>
+    <div style="flex: 1; background: #141414; border: 1px solid #2A2A2A; padding: 10px 12px; font-family: Menlo, ui-monospace, monospace; font-size: 12.5px; line-height: 1.3; color: #D4D4D4; overflow: hidden; display: flex; flex-direction: column">
+      <div style="color: #D97757">╭─────────────────────────────────────────────╮</div>
+      <div style="color: #D97757">│ <span style="color: #FFFFFF; font-weight: 700">✻ Welcome to Claude Code!</span>                   │</div>
+      <div style="color: #D97757">│   /help for help, /status for your setup    │</div>
+      <div style="color: #D97757">╰─────────────────────────────────────────────╯</div>
+      <div style="margin-top: 10px; background: #2A2A2A; color: #FFFFFF">&gt; Add the wake check to the agenda</div>
+      <div style="margin-top: 8px"><span style="color: #FFFFFF">⏺</span> I'll look at how the app starts first.</div>
+      <div style="margin-top: 6px"><span style="color: #4EBA65">⏺</span> <span style="font-weight: 700">Read</span>(app/AutomationRunWiring.swift)</div>
+      <div style="color: #8A8A8A">  ⎿  Read 196 lines (ctrl+r to expand)</div>
+      <div style="margin-top: 6px"><span style="color: #4EBA65">⏺</span> <span style="font-weight: 700">Update</span>(app/AutomationRunWiring.swift)</div>
+      <div style="color: #8A8A8A">  ⎿  Updated with 4 additions and 1 removal</div>
+      <div style="background: #022800; color: #E6E6E6">       47 +        NSWorkspace.shared.notificationCenter.addObs…</div>
+      <div style="background: #3D0000; color: #E6E6E6">       48 -        // TODO: wake</div>
+      <div style="margin-top: 6px"><span style="color: #E5C07B">⏺</span> <span style="font-weight: 700">Bash</span>(make macos-test)</div>
+      <div style="margin-top: 6px; color: #D97757">✻ Wiring the wake check… (12s · ↑ 2.1k tokens · esc to interrupt)</div>
+      <div style="flex: 1"></div>
+      <div style="border: 1px solid #555; padding: 4px 8px; color: #D4D4D4">&gt; </div>
+      <div style="margin-top: 4px; color: #8A8A8A">  [brain] Opus 4.7 | [target] default</div>
+      <div style="color: #8A8A8A">  ──────────────────────────────────────────</div>
+      <div style="color: #7EC07E">  [chart] context: 49K/1M ███░░░░░░░░░░░░░░ 5%</div>
+      <div style="color: #8A8A8A">  ──────────────────────────────────────────</div>
+      <div style="color: #D8B66B">  [clock] session usage: 7% █░░░░ resets at 22:40 | weekly 87% ████</div>
+      <div style="color: #8A8A8A">  [folder] orchestration-e | [leaf] orchestration-e</div>
+      <div style="color: #E5C07B">  ▶▶ auto mode on (shift+tab to cycle)</div>
+    </div>
+  </div>
+
+  <!-- tokens:on -->
+<!-- With Cadex -->
+  <div style="display: flex; flex-direction: column; gap: 12px; min-width: 0">
+    <div style="font-size: 13px; font-weight: 600; color: #9BA0A8; letter-spacing: 0.04em">DRESSED BY CADEX</div>
+    <div style="position: relative; flex: 1; border-radius: 12px; background: #121316; border: 1px solid #2E3238; box-shadow: 0 0 0 3px rgba(91,156,245,0.10); display: flex; flex-direction: column; overflow: hidden">
+      <div style="height: 34px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-bottom: 1px solid #22252A; font-size: 12.5px">
+        <span style="width: 10px; height: 10px; border-radius: 50%; border: 2px solid #5B9CF5; border-top-color: transparent; box-sizing: border-box"></span>
+        <span style="font-weight: 600">Claude</span>
+        <span style="color: #8A9099">orchestration-e · Opus · bkdg</span>
+        <span style="flex: 1"></span>
+        <span style="color: #8A9099">US$ 0.31</span>
+        <span style="color: #8A9099">4 min</span>
+      </div>
+      <div style="flex: 1; display: flex; min-height: 0">
+        <div style="flex: 1; padding: 14px 16px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; line-height: 1.6; color: #C9CCD1; overflow: hidden; display: flex; flex-direction: column">
+          <div style="color: #8A9099">✻ Claude Code · /help · /status</div>
+          <div style="margin-top: 12px; padding: 6px 10px; border-radius: 6px; background: #1C1F24; color: #EDEEF0">&gt; Add the wake check to the agenda</div>
+          <div style="margin-top: 10px"><span style="color: #EDEEF0">⏺</span> I'll look at how the app starts first.</div>
+          <div style="margin-top: 8px"><span style="color: #6FCF97">⏺</span> <span style="color: #EDEEF0; font-weight: 600">Read</span>(app/AutomationRunWiring.swift)</div>
+          <div style="color: #7C828B">  ⎿  Read 196 lines</div>
+          <div style="margin-top: 8px"><span style="color: #6FCF97">⏺</span> <span style="color: #EDEEF0; font-weight: 600">Update</span>(app/AutomationRunWiring.swift)</div>
+          <div style="color: #7C828B">  ⎿  4 additions and 1 removal</div>
+          <div style="margin-top: 2px; padding: 0 6px; border-radius: 3px; background: #15261C; color: #B9E5C8">   47 +   NSWorkspace.shared.notificationCenter.addObs…</div>
+          <div style="padding: 0 6px; border-radius: 3px; background: #2A1719; color: #F0B9B9">   48 -   // TODO: wake</div>
+          <div style="margin-top: 8px"><span style="color: #F2B65E">⏺</span> <span style="color: #EDEEF0; font-weight: 600">Bash</span>(make macos-test)</div>
+          <div style="margin-top: 10px; color: #8FB8F7">✻ Wiring the wake check… <span style="color: #7C828B">12s · esc to interrupt</span></div>
+          <div style="flex: 1"></div>
+          <div style="padding: 9px 12px; border-radius: 8px; border: 1px solid #2E3238; background: #17191C; color: #8A9099">&gt; <span style="display: inline-block; width: 7px; height: 14px; background: #C9CCD1; vertical-align: middle"></span></div>
+          <div style="margin-top: 8px; display: flex; gap: 14px; font-family: Inter, system-ui, sans-serif; font-size: 11.5px; color: #8A9099">
+            <span>Opus</span>
+            <span style="display: flex; align-items: center; gap: 6px">context <span style="width: 60px; height: 4px; border-radius: 2px; background: #2A2D33; display: inline-block"><span style="display: block; width: 5%; height: 4px; border-radius: 2px; background: #9BA0A8"></span></span> 5%</span>
+            <span>US$ 0.31</span>
+            <span>orchestration-e</span>
+            <span style="flex: 1"></span>
+            <span style="color: #F2B65E">auto</span>
+          </div>
+        </div>
+        <div style="width: 8px; flex: none; position: relative; background: #15171A; border-left: 1px solid #1F2125" aria-hidden="true">
+          <span style="position: absolute; top: 60px; left: 1px; width: 6px; height: 3px; border-radius: 2px; background: #9BA0A8"></span>
+          <span style="position: absolute; top: 210px; left: 1px; width: 6px; height: 3px; border-radius: 2px; background: #9BA0A8"></span>
+          <span style="position: absolute; top: 360px; left: 1px; width: 6px; height: 3px; border-radius: 2px; background: #F2A93B"></span>
+          <span style="position: absolute; bottom: 20px; left: 1px; width: 6px; height: 90px; border-radius: 3px; background: #3A3E45"></span>
+        </div>
+      </div>
+      <div style="position: absolute; left: 16px; right: 24px; bottom: 92px; padding: 12px 14px; border-radius: 10px; background: #1E1A12; border: 1px solid #4A3A1C; box-shadow: 0 12px 32px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 12px">
+        <span style="width: 10px; height: 10px; border-radius: 50%; background: #F2A93B; box-shadow: 0 0 0 3px rgba(242,169,59,0.18)"></span>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-weight: 600; font-size: 13px">Wants to run Bash</span>
+          <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #D5D7DB">make macos-test</span>
+        </div>
+        <button style="height: 30px; padding: 0 14px; border-radius: 7px; border: 0; background: #E7E8EA; color: #111214; font: inherit; font-weight: 600">Allow</button>
+        <button style="height: 30px; padding: 0 12px; border-radius: 7px; border: 1px solid #4A3A1C; background: transparent; color: #E7E8EA; font: inherit">Deny</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cadex: a task</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #0C0D0F; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px; border-radius: 12px; overflow: hidden; border: 1px solid #25282D">
+
+  <dc-import name="TitleBar" view="task" panel="{{ true }}" hint-size="1440px,44px"></dc-import>
+
+  <div style="flex: 1; display: flex; min-height: 0">
+    <dc-import name="Sidebar" selected="orchestration-e" hint-size="292px,826px"></dc-import>
+
+    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 8px; gap: 8px">
+      <div style="flex: 1; border-radius: 10px; background: #121316; border: 1px solid #2E3238; box-shadow: 0 0 0 3px rgba(91,156,245,0.10); display: flex; flex-direction: column; overflow: hidden">
+        <div style="height: 34px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-bottom: 1px solid #22252A; font-size: 12px">
+          <span style="width: 9px; height: 9px; border-radius: 50%; border: 2px solid #5B9CF5; border-top-color: transparent; box-sizing: border-box"></span>
+          <span style="font-weight: 600">Claude</span><span style="color: #8A9099">orchestration-e · Opus · bkdg</span><span style="flex: 1"></span><span style="color: #8A9099">US$ 0.31 · 4 min</span>
+        </div>
+        <div style="flex: 1; padding: 14px 16px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; line-height: 1.6; color: #C9CCD1; display: flex; flex-direction: column; overflow: hidden">
+          <div style="padding: 6px 10px; border-radius: 6px; background: #1C1F24; color: #EDEEF0">&gt; Add the wake check to the agenda</div>
+          <div style="margin-top: 10px"><span style="color: #EDEEF0">⏺</span> I'll look at how the app starts first.</div>
+          <div style="margin-top: 8px"><span style="color: #6FCF97">⏺</span> <span style="color: #EDEEF0; font-weight: 600">Read</span>(app/AutomationRunWiring.swift)</div>
+          <div style="color: #7C828B">  ⎿  Read 196 lines</div>
+          <div style="margin-top: 8px"><span style="color: #6FCF97">⏺</span> <span style="color: #EDEEF0; font-weight: 600">Update</span>(app/AutomationRunWiring.swift)</div>
+          <div style="color: #7C828B">  ⎿  4 additions and 1 removal</div>
+          <div style="margin-top: 2px; padding: 0 6px; border-radius: 3px; background: #15261C; color: #B9E5C8">   47 +   NSWorkspace.shared.notificationCenter.addObserver(…</div>
+          <div style="padding: 0 6px; border-radius: 3px; background: #2A1719; color: #F0B9B9">   48 -   // TODO: wake</div>
+          <div style="margin-top: 8px"><span style="color: #F2B65E">⏺</span> <span style="color: #EDEEF0; font-weight: 600">Bash</span>(make macos-test)</div>
+          <div style="margin-top: 10px; color: #8FB8F7">✻ Wiring the wake check… <span style="color: #7C828B">12s · esc to interrupt</span></div>
+          <div style="flex: 1"></div>
+          <div style="padding: 9px 12px; border-radius: 8px; border: 1px solid #2E3238; background: #17191C; color: #8A9099">&gt; <span style="display: inline-block; width: 7px; height: 14px; background: #C9CCD1; vertical-align: middle"></span></div>
+          <div style="margin-top: 8px; display: flex; gap: 14px; font-family: Inter, system-ui, sans-serif; font-size: 11.5px; color: #8A9099"><span>Opus</span><span>context 5%</span><span>US$ 0.31</span><span style="flex: 1"></span><span>default</span></div>
+        </div>
+      </div>
+    </div>
+
+    <dc-import name="Inspector" tab="changes" hint-size="320px,826px"></dc-import>
+  </div>
+
+  <dc-import name="StatusBar" hint-size="1440px,30px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

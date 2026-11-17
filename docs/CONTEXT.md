@@ -14,17 +14,30 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Spec**: a descrição do comportamento de uma feature em `docs/spec/`. É a referência da reescrita.
 
 ## Janela e layout
-- **Janela** (`window`): uma janela do app, com workspace, spaces, explorer, busca e git próprios.
-  ⌘N abre outra. A **janela principal** é a que abriu com o app: só ela é salva e restaurada.
-- **Space** (`space`): um grupo de abas com nome, que o usuário alterna. Restaurado entre sessões.
+- **Janela** (`window`): uma janela do app, com workspace, projetos, explorer, busca e git próprios.
+  ⇧⌘N abre outra (o ⌘N é Nova tarefa). A **janela principal** é a que abriu com o app: só ela é
+  salva e restaurada.
+- **Moldura** (`work frame`): as quatro regiões iguais em toda tela, barra de título, árvore do
+  trabalho, centro e painel da seleção, mais a barra de status (`docs/adr/0035-work-frame.md`).
+- **Projeto** (`project`): uma pasta de código com os terminais, documentos e tarefas abertos nela,
+  restaurado entre sessões. É o que antes se chamava **space** (`space`), agora sempre com pasta.
+- **Tela de início** (`home`): o centro quando nenhum projeto está aberto: a caixa do pedido, os
+  cartões Terminal, Agent, Task e Race e os projetos recentes.
+- **Gaveta de terminais** (`terminal drawer`): os terminais rápidos fora de qualquer projeto, que
+  sobem de baixo por cima do centro (⌃`).
+- **Peça de estado** (`state glyph`): o sinal único de estado do app (trabalhando, precisa de você,
+  pronto, falhou, parado, em revisão), igual na árvore, nas abas, no sino, no ⌘J, no quadro e no Dock.
+- **Token de design** (`design token`): um valor nomeado dos mockups da moldura (cor, fonte, raio,
+  espaço, medida de peça), em `docs/design/work-frame/tokens.json`, de onde o app gera os dele.
 - **Aba** (`tab`): um item da barra de abas. Pode ser terminal, editor, preview, markdown, mídia,
   diff ou histórico do git.
 - **Painel** (`pane`): uma divisão dentro de uma aba de terminal. Uma aba pode ter vários painéis.
 - **Folha** (`leaf`): um painel final da árvore de divisões, que contém uma sessão de terminal.
-- **Barra lateral** (`sidebar`): a coluna à esquerda; a fileira de ícones no topo escolhe a página
-  (arquivos, busca, git, agentes) e quem usa escolhe quais ícones aparecem.
-- **Página da barra lateral** (`sidebar page`): o que um ícone da fileira mostra. **Sub-aba**
-  (`subtab`): uma vista dentro da página, no controle logo abaixo dos ícones (Changes e History no Git).
+- **Árvore do trabalho** (`sidebar`): a coluna à esquerda, com os projetos, os terminais de cada um
+  e as tarefas quando existem. Antes era a barra lateral de ícones, com uma página por ícone; a
+  fileira e as páginas saem pela moldura nova.
+- **Painel da seleção** (`inspector`): a coluna opcional à direita, com Changes, Files, History e
+  Memory do projeto ou da tarefa selecionada.
 - **Barra de status** (`status-bar`): a faixa inferior, montada com itens que quem usa escolhe e
   arrasta. **Item da barra de status** (`status item`): uma peça dela (pasta, ambiente, RAM, CPU, SSH...).
 - **Conta** (`agent account`): uma pasta de configuração do Claude Code (`~/.claude`, `~/.claude-*`), com
@@ -67,7 +80,8 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   atalhos só disparam comandos.
 
 - **Tarefa** (`task`): um trabalho num repositório, com worktree, branch e agente próprios, começado
-  por New Task. **Worktree de tarefa** (`task worktree`): a worktree do git de uma tarefa, em
+  pela folha New task (⌘N). Opcional: o uso normal (um terminal com o agente na pasta do projeto)
+  não precisa de tarefa. **Worktree de tarefa** (`task worktree`): a worktree do git de uma tarefa, em
   `<repo>.worktrees/`. **Hook de preparo** (`setup hook`): comando que roda numa worktree nova
   (`pnpm install`). **Status da worktree** (`worktree status`): a fazer, em andamento, em revisão ou
   pronto, com um comentário curto.

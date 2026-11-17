@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The frame</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: grid; grid-template-rows: 64px minmax(0, 1fr) 40px; grid-template-columns: 292px minmax(0, 1fr) 320px; gap: 10px; padding: 24px; background: #0A0B0C; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px">
+  <sc-for list="{{regions}}" as="r" hint-placeholder-count="5">
+    <div style="{{r.box}}">
+      <div style="display: flex; align-items: baseline; gap: 10px">
+        <span style="font-size: 15px; font-weight: 700">{{r.name}}</span>
+        <span style="font-size: 12px; color: #8A9099">{{r.hint}}</span>
+      </div>
+      <sc-for list="{{r.items}}" as="i" hint-placeholder-count="3">
+        <div style="font-size: 12.5px; line-height: 1.5; color: #C3C6CB">{{i}}</div>
+      </sc-for>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const box = (area, tint, row) => `grid-area: ${area}; display: flex; flex-direction: ${row ? 'row; align-items: center; flex-wrap: wrap; column-gap: 28px' : 'column'}; gap: 10px; padding: 16px 18px; border-radius: 12px; background: ${tint}; border: 1px solid #25282D; overflow: hidden`;
+    return {
+      regions: [
+        { name: 'Title bar', hint: 'always the same', box: box('1 / 1 / 2 / 4', '#121316', true), items: [
+          'Search ⌘K (every action is a command)',
+          'Where you are: project › task',
+          'The tabs of what is open: terminals of the task, Review',
+          'Board · the bell (needs you) · open or close the right panel',
+        ]},
+        { name: 'Left: Work', hint: 'the only sidebar, never changes', box: box('2 / 1 / 3 / 2', '#131417'), items: [
+          'Projects, each one folding open',
+          'Inside: its tasks, with state, agent, diff, what it waits for',
+          'Inside the selected task: its terminals (Claude, dev server, tests)',
+          'Click a project name → the project’s page',
+          'At the bottom: Automations, Archive & history',
+          'No Files or Git tab here any more: they live on the right',
+        ]},
+        { name: 'Center: what you opened', hint: 'terminals first', box: box('2 / 2 / 3 / 3', '#0F1114'), items: [
+          'A task: its terminals, one big or split (⌘D right, ⇧⌘D down), panes you drag',
+          'Claude Code runs as itself, in a terminal, dressed by Cadex (screen 10)',
+          'The task’s Review, the project’s page, the board, a race: all open here',
+          'The drawer (⌃`) slides up from the bottom for quick shells outside any task',
+        ]},
+        { name: 'Right: the selection', hint: 'optional, ⌥⌘I', box: box('2 / 3 / 3 / 4', '#131417'), items: [
+          'Tabs: Changes · Files · History · Memory',
+          'For a task: its diff, files, commits, and Commit / Open PR',
+          'For a project: its memory (what agents learned, the wiki, the briefing)',
+          'Closed, the center gets the space',
+        ]},
+        { name: 'Status bar', hint: 'always the same', box: box('3 / 1 / 4 / 4', '#121316', true), items: [
+          'project · branch', 'working / need you', 'Terminal ⌃`', 'Memory', 'the account nearest its limit', 'Local or the machine it runs on',
+        ]},
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

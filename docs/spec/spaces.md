@@ -1,5 +1,9 @@
 # spaces
 
+> Substituída por `projects.md` (`../adr/0035-work-frame.md`): o space vira o projeto, sempre com
+> pasta. Esta página sai no plano 27, quando a feature vira `projects`
+> (`../design/work-frame/inventory.md`); até lá descreve o que o código ainda faz.
+
 ## Para que serve
 Separar o trabalho em grupos de abas com nome (um por projeto ou tarefa) e voltar a eles do jeito
 que estavam, inclusive depois de fechar ou reabrir o app.

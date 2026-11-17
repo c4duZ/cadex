@@ -55,6 +55,19 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 23 | `docs/plans/23-machines.md` | máquinas da tailnet, "Rodar em", Docker pela tailnet, ambiente descartável por worktree | fases A a H no código (2026-11-16): ADRs 0030 a 0032, as máquinas da tailnet no cartão do ssh (testado contra o Tailscale deste Mac), "Rodar em" por ssh, Docker por aba, a receita de ambiente, aceitar outras máquinas por WhoIs, compartilhar o preview, o peso no `make perf`; C a G testadas com ssh, docker, CLI e respostas falsas; falta conferir B a G com o PC na tailnet (e o `serve` com o dono) |
 | 24 | `docs/plans/24-many-agents.md` | mesma tarefa em N agentes, orquestração, automações agendadas | fases A e B feitas (2026-11-16: ADRs 0033 e 0034, spec, a feature orchestration com o estado em SQLite); C feita (a corrida testada no app com o claude real, pela folha e pelo gancho de teste; falta o concorrente remoto com o PC); feito (2026-11-16): corrida, execuções com agentes que reportam pela CLI e portões, automações pelo launchd, o peso no `make perf`; testado no app com o claude real e agentes falsos; falta o concorrente remoto com o PC na tailnet, um sono de verdade do Mac e as folhas vistas a olho com o dono |
 
+- Depois do 24, a moldura nova em seis planos, cada um tirando o que substitui (o dono, 2026-11-17: "muda tudo. Vamos tentar
+  fazer isso… cuidado para não deixar cascas do que é hoje para trás"); o mapa da casca velha é
+  `docs/design/work-frame/inventory.md`:
+
+| # | plano | entrega | status |
+|---|---|---|---|
+| 25 | `docs/plans/25-work-frame.md` | fundações: specs, tema Cadex Night, medidas, a peça de estado, o inventário e a máquina contra casca velha | em andamento (2026-11-17): ADR 0035 aceita; fase A |
+| 26 | `docs/plans/26-frame.md` | barra de título, barra de status, painel da direita, o sino em popover | escrito |
+| 27 | `docs/plans/27-projects-tree.md` | projetos (os spaces) e a árvore do trabalho; sai a fileira de ícones | escrito |
+| 28 | `docs/plans/28-dressed-terminal.md` | o terminal vestido e o preview ao lado | escrito |
+| 29 | `docs/plans/29-entrances.md` | tela de início, a folha única do ⌘N (tarefa e corrida), ⌘J | escrito |
+| 30 | `docs/plans/30-overview.md` | página do projeto, quadro, corrida, gaveta e a auditoria final | escrito |
+
 ## O que eu não quero
 - Executar plano sem ler antes o `CLAUDE.md` da raiz e o da feature que vai mexer.
 - Código de outro app como referência (ADR 0004): a fonte é a spec em `docs/spec/` e o que o dono

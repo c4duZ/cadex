@@ -28,7 +28,9 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | media-preview | não | sim | imagem, vídeo, áudio e PDF com os frameworks do sistema |
 | markdown | sim | sim | Markdown renderizado; ao editar: autocomplete de link, ⌘+clique, links quebrados, quem aponta pra cá |
 | tabs | não | sim | abas e divisões de painel |
-| sidebar | não | sim | ícones no topo que escolhem a página do painel lateral, personalizáveis |
+| sidebar | não | sim | a árvore do trabalho à esquerda: projetos, terminais e tarefas (a fileira de ícones sai no plano 27) |
+| inspector | não | sim | o painel da seleção à direita: Changes, Files, History e Memory (plano 26) |
+| home | não | sim | a tela de início: o pedido, os cartões Terminal, Agent, Task e Race, os projetos recentes (plano 29) |
 | agents | não | sim | as sessões de agente nas contas do Claude Code: lidas, o quadro do que precisa de você, hibernar |
 | agent-tools | sim | sim | o programa `cadex` que as sessões abertas pelo Cadex rodam (status line, hooks) e o socket do app |
 | memory | sim | sim | a memória do projeto entre sessões, contas e agentes: o engine do ai-memory no processo `cadex-memory`, briefing, busca, página Memory |
@@ -37,7 +39,7 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
 | computer-use | não | sim | o agente opera outros apps do Mac pela acessibilidade, com permissão do dono por app |
 | ssh | não | sim | os hosts do ~/.ssh/config, se respondem, e conectar numa aba |
 | machines | não | sim | as máquinas da tailnet pelo Tailscale do dono: online, caminho, latência, conectar; depois "Rodar em", Docker e compartilhar |
-| spaces | não | sim | grupos de abas restaurados entre sessões |
+| spaces | não | sim | grupos de abas restaurados entre sessões (vira `projects`, o projeto com pasta, no plano 27) |
 | themes | não | sim | temas do app e do editor, imagem de fundo |
 | settings | não | sim | janela de configurações e preferências salvas |
 | command-palette | não | sim | ⌘K: registro de todos os comandos e a paleta que executa qualquer um |
@@ -57,8 +59,10 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
   as sessões e o uso deles e, num clique numa conta, digita o comando que abre o agente dela
   (`docs/adr/0019-agents-observe-only.md`).
 - Modo em blocos e terminal privado ficaram de fora. Agentes rodam em abas de terminal; o Cadex os
-  abre com prompt só quando o dono liga corrida, orquestração, automação ou o agente de memória,
-  sempre com teto (`docs/adr/0033-cadex-launches-agents.md`, `docs/adr/0029-memory-agent.md`).
+  abre com prompt quando o dono escreve o pedido (tela de início, Nova tarefa) ou liga corrida,
+  orquestração, automação ou o agente de memória (ligado por padrão), sempre com teto no que roda
+  sem ele (`docs/adr/0033-cadex-launches-agents.md`, `docs/adr/0036-owner-words-reach-the-agent.md`,
+  `docs/adr/0029-memory-agent.md`, `docs/adr/0037-memory-agent-on-by-default.md`).
 - Ação que não é um comando registrado (que só existe num botão, menu ou atalho).
 - Feature importando o miolo de outra feature.
 - Swift chamando detalhe interno do Zig, ou qualquer código falando com a libghostty fora da feature

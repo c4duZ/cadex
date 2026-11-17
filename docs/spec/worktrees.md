@@ -6,16 +6,33 @@ comando, e o Cadex mostra em que pé cada uma está (`docs/plans/19-agent-sessio
 
 ## Comportamento
 ### Nova tarefa
-- "New Task" (worktrees.new-task, no ⌘K) pede o nome da tarefa e mostra o branch que ele vira
-  ("Corrigir login" → `corrigir-login`) e o ponto de partida (o branch atual, que fica gravado para
-  a revisão do plano 21). Confirmado:
+- "New task" (worktrees.new-task, ⌘N, o botão do topo da árvore e o cartão Task da tela de início)
+  abre uma folha só, a mesma da corrida (`../design/work-frame/screens.md`, seção NewTask; tokens
+  components.newTask e components.sheet), no lugar das perguntas em sequência de antes:
+  - o pedido, em várias linhas;
+  - **onde:** "In the project's folder" (trabalha nos arquivos do projeto, no branch atual; uma de
+    cada vez) ou "Separate copy" (a worktree, rodando em paralelo), com o nome do branch tirado do
+    pedido ("Corrigir login" → `corrigir-login`) e editável, e o ponto de partida (o branch atual,
+    que fica gravado para a revisão do plano 21);
+  - **quem faz:** uma linha por agente (conta e quanto do limite já usou) e "+ Add another agent";
+    com dois ou mais vira corrida (`orchestration.md`) e a folha mostra o aviso com o teto;
+  - as perguntas de antes (autorizar a pasta das worktrees, hooks de preparo novos, a explicação da
+    confiança do Claude Code) viram linhas da própria folha, cada uma com a escolha dela;
+  - o botão principal, "Start task ⌘↩", ou "Start race ⌘↩" com dois ou mais agentes.
+  - O agente abre já com o pedido escrito como prompt (`../adr/0036-owner-words-reach-the-agent.md`);
+    pedido vazio abre o agente sem prompt.
+  - **De qual projeto:** "in <projeto> ▾" no título da folha, o selecionado na árvore; o menu troca
+    para outro projeto aberto ou um recente, ou Open folder…
+- Confirmado, para uma cópia separada:
   1. cria a worktree e o branch pelo `git` do dono, em worktrees.root (padrão: ao lado do
      repositório, em `<repo>.worktrees/<branch>`);
   2. copia para lá os arquivos fora do git que o `.worktreeinclude` do repositório lista (`.env` e
      afins; mesmo formato do `.gitignore`);
   3. roda os hooks de preparo do repositório (`pnpm install`, `direnv allow`…) num terminal da
      tarefa, com a saída à vista;
-  4. abre o agente sem prompt, na conta do projeto ou na ativa (`docs/adr/0021-cadex-managed-accounts.md`).
+  4. abre o agente na conta escolhida (a do projeto, ou a ativa; `docs/adr/0021-cadex-managed-accounts.md`),
+     com o pedido como prompt.
+- Na pasta do projeto: só o passo 4, num terminal novo do projeto.
 - A pasta das worktrees pode cair fora dos diretórios autorizados (feature `workspace`): na primeira
   tarefa de um repositório, o Cadex pede para autorizá-la, uma vez; recusar deixa escolher outra raiz.
 - Confiança do Claude Code: numa pasta nunca aberta, o diálogo "trust this folder" segura o agente.
@@ -28,8 +45,9 @@ comando, e o Cadex mostra em que pé cada uma está (`docs/plans/19-agent-sessio
   conversa do repositório, e a memória automática é uma só (teste de 2026-11-14).
 
 ### Rodar em outra máquina (plano 23, `docs/adr/0031-run-on-remote.md`)
-- O "New Task" ganha "Run on": este Mac (o padrão), um host do `~/.ssh/config` ou uma máquina da
-  tailnet (`docs/spec/machines.md`). worktrees.new-task-on abre o "New Task" já nessa escolha.
+- A folha "New task" tem "Run on": este Mac (o padrão), um host do `~/.ssh/config` ou uma máquina da
+  tailnet (`docs/spec/machines.md`), na linha de cada agente. worktrees.new-task-on abre a folha já
+  nessa escolha.
 - Numa máquina remota, uma aba de terminal abre `ssh` nela e roda lá os mesmos passos: acha o
   repositório (pelo remoto `origin` do repositório daqui, na pasta que o dono informou na primeira
   vez, lembrada por máquina; sem ele, oferece clonar), `git worktree add`, os hooks de preparo do

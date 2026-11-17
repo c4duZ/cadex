@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A race in three terminals</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #0C0D0F; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px; border-radius: 12px; overflow: hidden; border: 1px solid #25282D">
+  <dc-import name="TitleBar" view="race" panel="{{ false }}" hint-size="1440px,44px"></dc-import>
+  <div style="flex: 1; display: flex; min-height: 0">
+  <dc-import name="Sidebar" selected="" hint-size="292px,826px"></dc-import>
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0">
+  <div style="flex: none; display: flex; align-items: center; gap: 12px; padding: 12px 14px 4px">
+    <span style="font-weight: 600">“Make the cache evict by age, keep the API”</span>
+    <span style="color: #8A9099">from main · cap US$ 1.00, 20 min each</span>
+    <span style="flex: 1"></span>
+    <button style="height: 30px; padding: 0 12px; border-radius: 7px; border: 1px solid #2A2D33; background: #1A1C20; color: #E7E8EA; font: inherit; font-weight: 500">Compare…</button>
+  </div>
+
+  <div style="flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 8px; min-height: 0">
+    <sc-for list="{{lanes}}" as="lane" hint-placeholder-count="3">
+      <div style="{{lane.box}}">
+        <div style="flex: none; padding: 10px 12px; border-bottom: 1px solid #22252A; display: flex; flex-direction: column; gap: 6px">
+          <div style="display: flex; align-items: center; gap: 10px">
+            <span style="{{lane.glyph}}"></span>
+            <span style="font-weight: 650">#{{lane.n}} {{lane.agent}}</span>
+            <span style="color: #8A9099">{{lane.account}}</span>
+            <span style="flex: 1"></span>
+            <span style="font-size: 12px; color: #8A9099">{{lane.time}}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; font-size: 12px; color: #9BA0A8">
+            <span>{{lane.state}}</span>
+            <span style="color: #4A4F57">·</span>
+            <span>{{lane.cost}}</span>
+            <span style="color: #4A4F57">·</span>
+            <span><span style="color: #6FCF97">+{{lane.added}}</span> <span style="color: #F08A8A">−{{lane.removed}}</span> in {{lane.files}} files</span>
+          </div>
+          <div style="height: 4px; border-radius: 2px; background: #22252A; overflow: hidden"><div style="{{lane.bar}}"></div></div>
+        </div>
+        <div style="flex: 1; padding: 12px 14px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; line-height: 1.6; color: #B5B9C0; overflow: hidden">
+          <sc-for list="{{lane.lines}}" as="line" hint-placeholder-count="6">
+            <div style="{{line.style}}">{{line.text}}</div>
+          </sc-for>
+        </div>
+        <div style="flex: none; display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid #22252A">
+          <button style="height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid #2A2D33; background: #1A1C20; color: #E7E8EA; font: inherit; font-size: 12px">Review</button>
+          <button style="height: 28px; padding: 0 12px; border-radius: 7px; border: 0; background: #E7E8EA; color: #111214; font: inherit; font-size: 12px; font-weight: 600">Pick winner</button>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  </div>
+  </div>
+  <dc-import name="StatusBar" hint-size="1440px,30px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const base = 'width: 10px; height: 10px; border-radius: 50%; box-sizing: border-box; flex: none; ';
+    const L = (text, kind) => ({ text, style: kind === 'tool' ? 'color: #EDEEF0' : kind === 'add' ? 'padding: 0 4px; border-radius: 3px; background: #15261C; color: #B9E5C8' : kind === 'dim' ? 'color: #7C828B' : kind === 'live' ? 'color: #8FB8F7' : kind === 'ok' ? 'color: #6FCF97' : '' });
+    const lane = (o) => ({ ...o,
+      box: 'display: flex; flex-direction: column; border-radius: 10px; overflow: hidden; background: #121316; border: 1px solid ' + (o.focus ? '#2E3238; box-shadow: 0 0 0 3px rgba(91,156,245,0.10)' : '#23262B'),
+      bar: 'height: 4px; width: ' + o.pct + '%; background: ' + (o.pct > 80 ? '#F2A93B' : '#6B7079') });
+    return {
+      lanes: [
+        lane({ n: 1, agent: 'Claude Opus', account: 'bkdg', time: '6m 12s', state: 'Working', glyph: base + 'border: 2px solid #5B9CF5; border-top-color: transparent', cost: 'US$ 0.42', added: 88, removed: 41, files: 4, pct: 42, focus: true,
+          lines: [L('⏺ Read(cache/Store.swift)', 'tool'), L('  ⎿  Read 210 lines', 'dim'), L('⏺ Update(cache/Store.swift)', 'tool'), L('   +  var order: [Key: Date] = [:]', 'add'), L('   +  func evictOlderThan(_ age: TimeInterval)', 'add'), L('⏺ Bash(swift test)', 'tool'), L('✻ Running the tests… 18s', 'live')] }),
+        lane({ n: 2, agent: 'Codex', account: 'pro', time: '6m 12s', state: 'Finished', glyph: base + 'background: #3FB97A', cost: '—', added: 52, removed: 12, files: 3, pct: 0,
+          lines: [L('• Edited cache/Store.swift (+40 -12)', 'tool'), L('• Added tests/EvictionTests.swift (+12)', 'tool'), L('• Ran swift test', 'tool'), L('  14 passed', 'ok'), L('Done. Eviction runs on insert and every', ''), L('minute; the public API is unchanged.', '')] }),
+        lane({ n: 3, agent: 'Claude Haiku', account: 'bkdg', time: '6m 12s', state: 'Waiting for you', glyph: base + 'background: #F2A93B; box-shadow: 0 0 0 3px rgba(242,169,59,0.18)', cost: 'US$ 0.86', added: 120, removed: 70, files: 6, pct: 86,
+          lines: [L('⏺ Update(cache/Store.swift)', 'tool'), L('⏺ Update(cache/Index.swift)', 'tool'), L('⏺ Bash(rm -rf .build && swift test)', 'tool'), L('  Do you want to run this command?', 'live'), L('  ❯ 1. Yes', ''), L('    2. No, and tell Claude what to do', 'dim')] }),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
