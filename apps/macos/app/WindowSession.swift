@@ -5,6 +5,7 @@ import Worktrees
 import Menus
 import StatusBar
 import GitHistory
+import Home
 import CommandPalette
 import Editor
 import Explorer
@@ -85,6 +86,9 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// The pane headers' agent details (PaneHeaderWiring.swift): the agent notice and the minute clock.
     var paneHeaderObserver: NSObjectProtocol?
     var paneHeaderClock: Timer?
+    /// The home screen while shown, and its choices (HomeWiring.swift).
+    var home: HomeView?
+    var homeChoice = HomeChoice()
     /// The agents' permissions at the foot of their panes (PanePermissionWiring.swift).
     var panePermissionWatch: UUID?
     /// The Agents page, for its sub-tabs (AgentsWiring.swift).

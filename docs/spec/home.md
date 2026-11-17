@@ -45,8 +45,12 @@ tokens components.home).
 - Recente cuja pasta sumiu: a linha em cinza com "Folder not found" e Remove.
 - Janela estreita: os cartões passam para duas colunas, depois uma.
 
+- O Enter da caixa, conferido com um `claude` real (conta de teste, 2026-11-17): o projeto abre, o
+  agente roda no terminal que veio com ele e responde ao pedido.
+
 ## Critérios de aceite
-- [ ] Sem projeto aberto, a tela de início aparece; com um projeto da última vez, o Cadex abre nele.
+- [x] Sem projeto aberto, a tela de início aparece; com um projeto da última vez, o Cadex abre nele
+      (2026-11-17, instância de teste aberta sem pasta).
 - [ ] Cada cartão roda o comando dele (terminal, agente, folha Nova tarefa, folha com dois agentes).
 - [ ] Clicar num recente abre o projeto com as abas dele.
 - [ ] Tudo da tela está no ⌘K (home.show e os comandos dos cartões).

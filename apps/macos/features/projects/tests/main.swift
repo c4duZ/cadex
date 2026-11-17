@@ -81,13 +81,15 @@ let exitCode = await Checks.run([
         expect(projects.projects[0].tabs.isShown == false && projects.projects[1].tabs.isShown)
         var expected = saved
         expected.projects[1].tabs.items.removeLast()
-        let same = await eventually { projects.saved == expected }
+        // Without the recent ones, which carry the time of now.
+        func withoutRecent(_ saved: SavedProjects) -> SavedProjects { var copy = saved; copy.recent = nil; return copy }
+        let same = await eventually { withoutRecent(projects.saved) == expected }
         expect(same, "\(projects.saved)")
 
         projects.saveNow()
         let again = controller(url, window: window())
         again.start(folder: "/") { _ in nil }
-        let restored = await eventually { again.saved == expected }
+        let restored = await eventually { withoutRecent(again.saved) == expected }
         expect(restored, "\(again.saved)")
         (projects.projects + again.projects).forEach { $0.tabs.closeAll() }
     }),
@@ -101,7 +103,7 @@ let exitCode = await Checks.run([
         expect(files.contains { $0.hasPrefix("projects.bad-") } && !files.contains("projects.json"), "\(files)")
         projects.projects.forEach { $0.tabs.closeAll() }
     }),
-    ("open a folder: its project, or the one already open; next, rename (empty: the folder's name), close; the last stays", {
+    ("open a folder: its project, or the one already open; next, rename (empty: the folder's name), close; the last leaves none", {
         let (a, b) = folders()
         let projects = controller(tempFile(), window: window())
         projects.start(folder: a) { _ in nil }
@@ -117,9 +119,27 @@ let exitCode = await Checks.run([
         expect(projects.activeIndex == 1 && projects.projects[1].tabs.isShown && !projects.projects[0].tabs.isShown)
         projects.closeActive()
         expect(projects.projects.count == 1 && projects.activeFolder == a && projects.active?.isShown == true)
+        var none = 0
+        projects.onNone = { none += 1 }
         projects.closeActive()
-        expect(projects.projects.count == 1)
-        projects.projects.forEach { $0.tabs.closeAll() }
+        expect(projects.projects.isEmpty && projects.active == nil && none == 1, "the last one closed: the home screen (plan 29)")
+        expect(projects.recent.map(\.folder) == [a, b], "the recent ones, the latest first: \(projects.recent.map(\.folder))")
+    }),
+    ("from the Dock with nothing saved: no project; the recent ones and an empty list come back from the file", {
+        let (a, _) = folders()
+        let file = tempFile()
+        var none = 0
+        let first = controller(file, window: window())
+        first.onNone = { none += 1 }
+        first.start(folder: a, openFolder: false) { _ in nil }
+        expect(first.projects.isEmpty && none == 1)
+        first.open(folder: a)
+        first.closeActive()
+        first.saveNow()
+        let again = controller(file, window: window())
+        again.start(folder: a, openFolder: false) { _ in nil }
+        expect(again.projects.isEmpty && again.recent.map(\.folder) == [a], "\(again.recent)")
+        expect(FileManager.default.fileExists(atPath: file.path), "an empty list is a good file, not moved aside")
     }),
     ("a worktree's folder belongs to its main repository", {
         let (a, _) = folders()

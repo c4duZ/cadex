@@ -116,3 +116,18 @@ extension TerminalSession {
         return tags
     }
 }
+
+extension TerminalView {
+    /// The text on screen, one string per row, from the frame the drawing uses: for the tests and
+    /// the test instance's CADEX_PERF_DUMP_SCREEN (a window capture does not get the Metal layer).
+    public func screenLines() -> [String] {
+        guard let frame = session?.currentFrame()?.pointee, let cells = frame.cells, let text = frame.text, frame.rows > 0 else { return [] }
+        let cols = Int(frame.cols)
+        return (0..<Int(frame.rows)).map { row in
+            (0..<cols).map { col -> String in
+                let cell = cells[row * cols + col]
+                return String(decoding: UnsafeBufferPointer(start: text + Int(cell.text_offset), count: Int(cell.text_len)), as: UTF8.self)
+            }.joined().replacingOccurrences(of: "\0", with: "")
+        }
+    }
+}

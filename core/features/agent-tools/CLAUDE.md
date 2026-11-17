@@ -18,6 +18,10 @@
 ## Como eu quero
 - `cli.zig`: o `main` (raiz em `../../cadex_cli.zig`, fora da pasta para poder usar shared/),
   lê a entrada com libc e escolhe o subcomando.
+- `claude_wrap.zig`: o pedido de um arquivo de prompt vai depois de "--" (`argvFor`): o kit
+  termina com `--mcp-config <arquivo>`, que aceita vários valores, e o Claude Code lia o pedido como
+  um segundo arquivo de MCP e saía (achado pela tela de início, 2026-11-17); sem "--" a mais quando
+  o dono já tem um.
 - `statusline.zig`: `files` monta o arquivo da conta (`rate_limits`) e o da sessão (`context_window`,
   `cost`, `model`); `accountKey` dá o nome do arquivo da conta (todo byte que não é letra ou dígito
   ASCII vira "-", a mesma regra do SessionKit.accountKey no app); `run` grava primeiro e depois

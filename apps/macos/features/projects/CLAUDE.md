@@ -17,13 +17,17 @@
   abas), os outros seguem rodando escondidos (`isShown` falso). `open(folder:)` abre o projeto da
   pasta (o do repositório dela) ou mostra o que já existe; `rename` vazio volta ao nome da pasta.
   Salva meio segundo depois de cada mudança (`onStateChange` das abas) e na hora ao sair; restaura em
-  `start` (sem nada salvo, o projeto da pasta de abertura). Sem `fileURL` (janela do ⌘N, passageira)
+  `start` (sem nada salvo, o projeto da pasta de abertura; aberto pelo Dock, `openFolder` falso,
+  nenhum projeto e `onNone`, a tela de início). Sem `fileURL` (janela do ⌘N, passageira)
   não lê nem grava nada. `closeAll()` ao fechar a janela: salva uma última vez e encerra os shells;
   os que o daemon do terminal mantém (terminal.keepSessions) são soltos e seguem rodando (plano 19,
-  fase E2). A última aba de um projeto fecha o projeto; a do último fecha a janela (a tela de início
-  entra no plano 29).
+  fase E2). A última aba de um projeto fecha o projeto; fechar o último (project.close ou a última aba) deixa
+  a janela sem projeto e chama `onNone`, que mostra a tela de início (plano 29); a janela do ⌘N
+  fecha. `recent`: os projetos usados por último, abertos ou fechados, até 8, salvos no arquivo
+  (SavedProjects.Recent, a lista RECENT PROJECTS); `forgetRecent` tira um.
 - `ProjectsFile.swift`: o JSON em Application Support/Cadex/projects.json (gravação atômica), com os
-  projetos (nome, pasta, abas, cor), o ativo e a pasta do workspace. Arquivo ilegível vai para
+  projetos (nome, pasta, abas, cor), o ativo, a pasta do workspace e os recentes; uma lista vazia
+  (a tela de início) é um arquivo bom. Arquivo ilegível vai para
   projects.bad-<data>.json e o app começa do zero. CADEX_PROJECTS_FILE aponta para outro arquivo:
   conferir o app em teste não pode apagar os projetos do dono. O spaces.json de antes do plano 27
   virou projetos uma vez; essa leitura saiu no plano 28. `repositoryRoot`: o repositório de uma pasta pelos arquivos

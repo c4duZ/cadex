@@ -43,6 +43,21 @@ extension WindowSession {
         if let url = environment["CADEX_PERF_PREVIEW"] {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in self?.openPreview(url, beside: true) }
         }
+        // The home screen's prompt sent as the owner's Enter (plan 29 phase A).
+        if let prompt = environment["CADEX_PERF_HOME_PROMPT"] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in self?.home?.actions.submit(prompt) }
+        }
+        // Every terminal's screen as text, at CADEX_PERF_DUMP_SCREEN_AT seconds, into the file named.
+        if let out = environment["CADEX_PERF_DUMP_SCREEN"] {
+            let at = environment["CADEX_PERF_DUMP_SCREEN_AT"].flatMap(Double.init) ?? 10
+            DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in
+                let screens = (self?.projects?.projects ?? []).flatMap { $0.tabs.allTerminals }.enumerated().map { index, terminal in
+                    "== terminal \(index + 1)\n" + terminal.screenLines().map { $0.replacingOccurrences(of: " +$", with: "", options: .regularExpression) }
+                        .filter { !$0.isEmpty }.joined(separator: "\n")
+                }
+                try? screens.joined(separator: "\n").write(toFile: out, atomically: true, encoding: .utf8)
+            }
+        }
         // The focused pane split to the right, to compare two panes with the Terminals mockup.
         if environment["CADEX_PERF_SPLIT"] != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in _ = self?.commands.run("pane.split-right") }

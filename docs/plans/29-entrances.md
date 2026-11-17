@@ -20,7 +20,11 @@ Inventário: seção "Entradas" e os apelidos do 28.
   `docs/design/work-frame/tokens.json`).
 - Cada arquivo reescrito entra na lista de tools/check_design_literals.py: só valores de
   `DesignTokens`, nada digitado.
-- **A. Tela de início.** Feature `home`: aparece sem projeto aberto e por home.show; a caixa "o que
+- **A. Tela de início.** Feita (2026-11-17): feature `home` (a tela comparada com o mockup no app),
+  os recentes no projects.json, fechar o último projeto mostra a tela, aberto pelo Dock sem nada
+  salvo também; o Enter abre o agente com o pedido (conferido com um `claude` real; achou e
+  consertou o "--" que faltava antes do pedido no `cadex claude`); ⇧⌘A passou do power.toggle ao
+  agents.open-account. Plano original: Feature `home`: aparece sem projeto aberto e por home.show; a caixa "o que
   você quer fazer em <projeto>" (Enter abre um terminal com o agente e o pedido, pela ADR 0036;
   o projeto pelo menu do nome ou "@"), a
   conta e o lugar abaixo dela; os quatro cartões (Terminal ⌘T, Agente ⌘⇧A, Tarefa ⌘N, Corrida);

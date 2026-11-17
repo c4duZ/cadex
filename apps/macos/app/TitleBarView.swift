@@ -117,6 +117,12 @@ final class TitleBarView: NSView {
         bellButton.setBadge(count)
     }
 
+    /// The home screen shows no terminal tabs and no "+" (the Home mockup).
+    func setTabsHidden(_ hidden: Bool) {
+        tabBar?.isHidden = hidden
+        newTabButton.isHidden = hidden
+    }
+
     /// Puts a project's tab bar after where you are, "+" right after its tabs.
     func setTabBar(_ bar: TabBarView) {
         guard bar !== tabBar else { return }

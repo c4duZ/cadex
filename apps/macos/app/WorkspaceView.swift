@@ -112,6 +112,7 @@ final class WorkspaceView: NSView {
 
     /// A space's tabs come into the window (docs/spec/projects.md).
     func show(_ tabs: TabsController) {
+        hideHome()
         guard tabs.view !== tabsView else { return }
         tabsView?.removeFromSuperview()
         fill(contentPanel, with: tabs.view)
@@ -120,7 +121,36 @@ final class WorkspaceView: NSView {
         if let tabBarStyle { tabs.bar.style = tabBarStyle }
     }
 
-    /// Shows the tree (agents.show and worktrees.show, which showed their pages, until plan 28).
+    /// The home screen in the center (plan 29; the Home mockup): over the tabs, the title bar
+    /// without them, the right panel closed (it comes back with the tabs).
+    private(set) weak var home: NSView?
+    private var inspectorBeforeHome = false
+
+    func showHome(_ view: NSView) {
+        home?.removeFromSuperview()
+        tabsView?.isHidden = true
+        fill(contentPanel, with: view)
+        home = view
+        titleBar.setTabsHidden(true)
+        if inspectorVisible {
+            inspectorBeforeHome = true
+            setInspector(visible: false)
+        }
+    }
+
+    func hideHome() {
+        guard let home else { return }
+        home.removeFromSuperview()
+        self.home = nil
+        tabsView?.isHidden = false
+        titleBar.setTabsHidden(false)
+        if inspectorBeforeHome {
+            inspectorBeforeHome = false
+            setInspector(visible: true)
+        }
+    }
+
+    /// Shows the work's tree (sidebar.show).
     func showTree() {
         if !sidebarVisible { toggleSidebar() }
     }

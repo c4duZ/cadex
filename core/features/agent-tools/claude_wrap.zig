@@ -123,16 +123,30 @@ pub fn kitFor(arena: std.mem.Allocator, user_settings: ?[]const u8, words: []con
     return askKit(arena, socket, msg);
 }
 
-/// argv: "claude", the kit's words, the owner's, then the prompt (one word).
 fn execAs(arena: std.mem.Allocator, real: [:0]const u8, kit_args: []const []const u8, words: []const [:0]const u8, prompt: ?[:0]const u8) u8 {
-    var argv: std.ArrayList(?[*:0]const u8) = .empty;
-    argv.append(arena, "claude") catch return 127;
-    for (kit_args) |arg| argv.append(arena, (arena.dupeZ(u8, arg) catch return 127).ptr) catch return 127;
-    for (words) |word| argv.append(arena, word.ptr) catch return 127;
-    if (prompt) |text| argv.append(arena, text.ptr) catch return 127;
-    const list = argv.toOwnedSliceSentinel(arena, null) catch return 127;
+    const list = argvFor(arena, kit_args, words, prompt) catch return 127;
     _ = execve(real.ptr, list.ptr, @ptrCast(environ));
     return say("cadex claude: claude did not start\n");
+}
+
+/// argv: "claude", the kit's words, the owner's, then "--" and the prompt (one word). The "--":
+/// the kit's last words are often `--mcp-config <file>`, which takes several values, and Claude
+/// Code read the prompt as a second MCP file and quit ("Invalid MCP configuration", the home
+/// screen's prompt, 2026-11-17). Not twice: after the owner's own "--", everything is words.
+fn argvFor(arena: std.mem.Allocator, kit_args: []const []const u8, words: []const [:0]const u8, prompt: ?[:0]const u8) ![:null]?[*:0]const u8 {
+    var argv: std.ArrayList(?[*:0]const u8) = .empty;
+    try argv.append(arena, "claude");
+    for (kit_args) |arg| try argv.append(arena, (try arena.dupeZ(u8, arg)).ptr);
+    var ended = false;
+    for (words) |word| {
+        if (std.mem.eql(u8, word, "--")) ended = true;
+        try argv.append(arena, word.ptr);
+    }
+    if (prompt) |text| {
+        if (!ended) try argv.append(arena, "--");
+        try argv.append(arena, text.ptr);
+    }
+    return argv.toOwnedSliceSentinel(arena, null);
 }
 
 /// The first `claude` on PATH that is not this program (a `claude` linked
@@ -229,4 +243,25 @@ test "no app on the socket: no kit, so claude runs as typed" {
     var arena_state: std.heap.ArenaAllocator = .init(testing.allocator);
     defer arena_state.deinit();
     try testing.expect(askKit(arena_state.allocator(), "/nonexistent/cadex-test/app.sock", "{}\n") == null);
+}
+
+test "the prompt goes after \"--\": the kit's --mcp-config cannot take it as a file" {
+    var arena_state = std.heap.ArenaAllocator.init(testing.allocator);
+    defer arena_state.deinit();
+    const arena = arena_state.allocator();
+    const kit = [_][]const u8{ "--settings", "/k/s.json", "--mcp-config", "/k/m.json" };
+    const words = [_][:0]const u8{ "--model", "haiku" };
+    const argv = try argvFor(arena, &kit, &words, "fix the pay button");
+    var seen: std.ArrayList([]const u8) = .empty;
+    for (argv) |word| try seen.append(arena, std.mem.span(word.?));
+    const want = [_][]const u8{ "claude", "--settings", "/k/s.json", "--mcp-config", "/k/m.json", "--model", "haiku", "--", "fix the pay button" };
+    try testing.expectEqual(want.len, seen.items.len);
+    for (want, seen.items) |a, b| try testing.expectEqualStrings(a, b);
+    // The owner's own "--" already ends the options: no second one.
+    const owner = [_][:0]const u8{ "--", "hello" };
+    const again = try argvFor(arena, &.{}, &owner, "more");
+    try testing.expectEqual(@as(usize, 4), again.len);
+    // No prompt: no "--".
+    const plain = try argvFor(arena, &kit, &words, null);
+    try testing.expectEqual(@as(usize, 7), plain.len);
 }

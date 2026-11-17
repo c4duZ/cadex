@@ -108,6 +108,8 @@
   clique e arrasto levam a vista até lá. A barrinha Metal de antes, que só aparecia rolando, saiu do
   `QuadBuilder.swift`. `footCard`: um cartão que o app põe no pé do painel (a permissão do agente).
   `innerPadding`: o respiro que o terminal guarda em volta do texto, que a caixa desconta.
+- `screenLines()` (em `TerminalPastedImages.swift`): o texto da tela, linha a linha, do mesmo quadro
+  do desenho; para os testes e o CADEX_PERF_DUMP_SCREEN (a captura da janela não pega o Metal).
 - `TerminalTypeAhead.swift` (plano 24, fase F): `typeWhenReady`, o texto que o app digita numa aba
   (o agente do New Task, um despacho, uma automação, o ssh) espera a primeira saída do shell e
   300 ms de silêncio, no máximo 5 s desde a abertura: o zsh descarta a entrada pendente ao montar a

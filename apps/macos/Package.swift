@@ -178,6 +178,14 @@ let package = Package(
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
+        // The home screen: the prompt, the four cards, the recent projects (docs/spec/home.md).
+        .target(
+            name: "Home",
+            dependencies: ["Icons", "Strings", "UILooks"],
+            path: "features/home",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
         // The column on the right: Changes, Files, History and Memory (docs/spec/inspector.md).
         .target(
             name: "Inspector",
@@ -314,7 +322,7 @@ let package = Package(
 
         .executableTarget(
             name: "CommandPaletteTests",
-            dependencies: ["CommandPalette", "Checks"],
+            dependencies: ["CommandPalette", "Checks", "Icons"],
             path: "features/command-palette/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
@@ -349,6 +357,12 @@ let package = Package(
             name: "CustomizeTests",
             dependencies: ["Customize", "Checks"],
             path: "shared/customize/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+        .executableTarget(
+            name: "HomeTests",
+            dependencies: ["Home", "Checks"],
+            path: "features/home/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
@@ -501,7 +515,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Inspector", "Customize", "Agents", "AgentTools", "ComputerUse", "Memory", "Review", "SessionKit", "Worktrees", "SSH", "Machines", "Orchestration", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Projects", "Menus", "Power", "Strings", "Updates", "UILooks"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Inspector", "Home", "Customize", "Agents", "AgentTools", "ComputerUse", "Memory", "Review", "SessionKit", "Worktrees", "SSH", "Machines", "Orchestration", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Projects", "Menus", "Power", "Strings", "Updates", "UILooks"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

@@ -20,6 +20,19 @@ public struct SavedProjects: Codable, Equatable, Sendable {
         }
     }
 
+    /// A project used lately, open or closed (the home screen's RECENT PROJECTS, plan 29).
+    public struct Recent: Codable, Equatable, Sendable {
+        public var name: String
+        public var folder: String
+        public var usedAt: Date
+
+        public init(name: String, folder: String, usedAt: Date) {
+            self.name = name
+            self.folder = folder
+            self.usedAt = usedAt
+        }
+    }
+
     /// Bumped when the format changes in a way old files cannot be read.
     public var version = 1
     public var projects: [Project]
@@ -27,11 +40,14 @@ public struct SavedProjects: Codable, Equatable, Sendable {
     /// The workspace folder (the explorer's root), for a launch without one: from the Dock there
     /// is never a folder argument.
     public var folder: String?
+    /// The latest first, at most `ProjectsController.recentLimit`; nil in a file of before plan 29.
+    public var recent: [Recent]?
 
-    public init(projects: [Project], active: Int, folder: String? = nil) {
+    public init(projects: [Project], active: Int, folder: String? = nil, recent: [Recent]? = nil) {
         self.projects = projects
         self.active = active
         self.folder = folder
+        self.recent = recent
     }
 }
 
@@ -47,11 +63,12 @@ public enum ProjectsFile {
     }
 
     /// The saved projects; nil without a file. A file that does not read is moved aside
-    /// (projects.bad-<date>.json) and the app starts fresh. (The spaces.json of before plan 27
-    /// was read once to become this file; that reading left in plan 28.)
+    /// (projects.bad-<date>.json) and the app starts fresh. With no project open (the home screen,
+    /// plan 29) the file has none and is still good. (The spaces.json of before plan 27 was read
+    /// once to become this file; that reading left in plan 28.)
     public static func load(from url: URL) -> SavedProjects? {
         guard let data = try? Data(contentsOf: url) else { return nil }
-        if let saved = try? JSONDecoder().decode(SavedProjects.self, from: data), !saved.projects.isEmpty {
+        if let saved = try? JSONDecoder().decode(SavedProjects.self, from: data) {
             return saved
         }
         moveAside(url)

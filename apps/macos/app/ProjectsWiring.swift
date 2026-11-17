@@ -23,6 +23,7 @@ extension WindowSession {
         }
         let projects = ProjectsController(fileURL: isMain ? ProjectsFile.defaultURL : nil) { [unowned self] in self.makeTabs() }
         projects.onSwitch = { [weak self] tabs in
+            self?.hideHome()
             self?.workspace?.show(tabs)
             self?.refreshWorkColor()
         }
@@ -33,6 +34,12 @@ extension WindowSession {
             self?.loadTreeTasks(onlyIfProjectsChanged: true)
         }
         projects.onTabsChange = { [weak self] in self?.refreshTree() }
+        // No project open (plan 29): the home screen in the center.
+        projects.onNone = { [weak self] in
+            self?.showHome()
+            self?.refreshTree()
+        }
+        commands.register(homeCommands())
         commands.register(ProjectsCommands.all(projects, palette: palette) { [weak self] in self?.chooseProjectFolder() })
         self.projects = projects
     }
@@ -80,7 +87,8 @@ extension WindowSession {
             folder.open(path)
         }
         projects.workspaceFolder = { [weak self] in self?.folder.root }
-        projects.start(folder: folder.root) { [weak self] identity in
+        // From the Dock with nothing saved open: the home screen; with a folder, its project.
+        projects.start(folder: folder.root, openFolder: folder.launchedWithFolder || !isMain) { [weak self] identity in
             // Archive & History comes back too (plan 27 C): a tab, not a file.
             if identity == AgentHistoryDocument.identity, let self { return AgentHistoryDocument(page: self.makeHistoryPage()) }
             return self?.opener?.makeDocument(identity: identity)

@@ -30,6 +30,12 @@ public final class ProjectsController {
     public var activeFolder: String? { projects.indices.contains(activeIndex) ? projects[activeIndex].folder : nil }
     /// The window shows these tabs now: the app swaps the view and the bar.
     public var onSwitch: ((TabsController) -> Void)?
+    /// No project is open any more (the last one closed, or none at launch): the app shows the
+    /// home screen (plan 29).
+    public var onNone: (() -> Void)?
+    /// The projects used lately, open or closed, the latest first (the home screen's list).
+    public private(set) var recent: [SavedProjects.Recent] = []
+    static let recentLimit = 8
     /// A name or the active project changed (the title bar's label).
     public var onChange: (() -> Void)?
     /// Any project's tabs changed (opened, closed, moved, a folder): the work's tree redraws.
@@ -57,11 +63,13 @@ public final class ProjectsController {
     }
 
     /// The saved projects, or the project of `folder` with a terminal in it. `makeDocument` makes a
-    /// saved document from its identity (nil when it is gone).
-    public func start(folder: String, makeDocument: (String) -> TabDocument?) {
+    /// saved document from its identity (nil when it is gone). `openFolder` false (a launch from
+    /// the Dock, plan 29): with nothing saved open, no project, and the app shows the home screen.
+    public func start(folder: String, openFolder: Bool = true, makeDocument: (String) -> TabDocument?) {
         restoring = true
         defer { restoring = false }
         let saved = fileURL.flatMap(ProjectsFile.load(from:))
+        recent = saved?.recent ?? []
         for project in saved?.projects ?? [] {
             let tabs = add(name: project.name, folder: project.folder)
             projects[projects.count - 1].color = project.color
@@ -71,6 +79,11 @@ public final class ProjectsController {
             if tabs.count == 0 { tabs.newTab(cwd: FileManager.default.fileExists(atPath: project.folder) ? project.folder : folder) }
         }
         if projects.isEmpty {
+            guard openFolder else {
+                activeIndex = -1
+                onNone?()
+                return
+            }
             let root = ProjectsFile.repositoryRoot(folder)
             add(name: Self.name(of: root), folder: root).newTab(cwd: folder)
         }
@@ -103,10 +116,10 @@ public final class ProjectsController {
         return name.isEmpty ? folder : name
     }
 
-    /// The last tab of a project closed: the project goes, or the window when it was the only one
-    /// (the home screen takes this over in plan 29).
+    /// The last tab of a project closed: the project goes; the only one leaves the home screen
+    /// (plan 29), or closes a passing window.
     private func emptied(_ project: Project) {
-        guard projects.count > 1, let index = projects.firstIndex(where: { $0 === project }) else {
+        guard projects.count > 1 || fileURL != nil, let index = projects.firstIndex(where: { $0 === project }) else {
             saveNow()
             project.tabs.hostWindow?.close()
             return
@@ -120,6 +133,7 @@ public final class ProjectsController {
         guard projects.indices.contains(index), index != activeIndex else { return }
         if projects.indices.contains(activeIndex) { projects[activeIndex].tabs.setShown(false) }
         activeIndex = index
+        noteUsed(projects[index])
         let tabs = projects[index].tabs
         onSwitch?(tabs)
         tabs.setShown(true)
@@ -162,9 +176,9 @@ public final class ProjectsController {
     }
 
     /// project.close: asks over running programs and unsaved files, then shows the project before
-    /// it. The last project does not close until the home screen exists (plan 29).
+    /// it; the last one leaves the home screen (plan 29), save in a passing window, which keeps it.
     public func closeActive() {
-        guard projects.count > 1, let tabs = active else { return }
+        guard projects.count > 1 || fileURL != nil, let tabs = active else { return }
         let index = activeIndex
         let close: @MainActor () -> Void = { [weak self] in
             tabs.closeAll()
@@ -174,11 +188,15 @@ public final class ProjectsController {
     }
 
     private func remove(at index: Int) {
-        guard projects.count > 1, projects.indices.contains(index) else { return }
+        guard projects.indices.contains(index) else { return }
         let wasActive = index == activeIndex
+        noteUsed(projects[index])
         projects[index].tabs.setShown(false)
         projects.remove(at: index)
-        if wasActive {
+        if projects.isEmpty {
+            activeIndex = -1
+            onNone?()
+        } else if wasActive {
             activeIndex = -1
             select(max(index - 1, 0))
         } else if index < activeIndex {
@@ -207,7 +225,20 @@ public final class ProjectsController {
 
     public var saved: SavedProjects {
         SavedProjects(projects: projects.map { .init(name: $0.name, folder: $0.folder, tabs: $0.tabs.snapshot(), color: $0.color) },
-                      active: max(activeIndex, 0), folder: workspaceFolder?())
+                      active: max(activeIndex, 0), folder: workspaceFolder?(), recent: recent)
+    }
+
+    /// The project goes to the top of the recent ones.
+    private func noteUsed(_ project: Project, at date: Date = Date()) {
+        recent.removeAll { $0.folder == project.folder }
+        recent.insert(.init(name: project.name, folder: project.folder, usedAt: date), at: 0)
+        if recent.count > Self.recentLimit { recent.removeLast(recent.count - Self.recentLimit) }
+    }
+
+    /// A recent project that is gone (Remove on its row).
+    public func forgetRecent(folder: String) {
+        recent.removeAll { $0.folder == folder }
+        scheduleSave()
     }
 
     /// What was saved last time, read before start() (the workspace folder).
@@ -228,7 +259,7 @@ public final class ProjectsController {
     /// Writes now (quitting, closing the window).
     public func saveNow() {
         savePending = false
-        guard !restoring, !closed, !projects.isEmpty, let fileURL else { return }
+        guard !restoring, !closed, let fileURL else { return }
         try? ProjectsFile.save(saved, to: fileURL)
     }
 }

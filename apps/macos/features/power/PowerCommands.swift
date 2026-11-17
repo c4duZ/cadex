@@ -12,7 +12,8 @@ public enum PowerCommands {
         return [
             Command(id: "power.toggle", title: T("Toggle Keep Awake", "Ligar ou desligar o manter acordado"),
                     keywords: ["caffeinate", "amphetamine", "acordado", "awake", "dormir", "sleep", "toggle"], category: .app,
-                    defaultShortcut: "cmd+shift+a", action: .run { [weak power] in power?.toggle() }),
+                    // ⇧⌘A went to the Agent card of the home screen (plan 29; the Home mockup).
+                    action: .run { [weak power] in power?.toggle() }),
             Command(id: "power.keep-awake", title: T("Keep the Computer Awake", "Manter o computador acordado"),
                     keywords: ["caffeinate", "amphetamine", "dormir", "sleep", "energia", "awake", "power"], category: .app,
                     action: .run { [weak power] in power?.set(.always) }, unavailableReason: unless(.always, T("Already awake", "Já está acordado"))),

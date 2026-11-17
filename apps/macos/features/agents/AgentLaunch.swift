@@ -64,6 +64,8 @@ public enum AgentLaunch {
         [
             Command(id: "agents.open-account", title: T("Open an Account's Agent", "Abrir o agente de uma conta"),
                     keywords: ["claude", "codex", "agent", "account", "agente", "conta", "abrir"], category: .terminal,
+                    // The Agent card of the home screen (plan 29; the Home mockup).
+                    defaultShortcut: "cmd+shift+a",
                     action: .run { palette.open(AccountSource(launch: launch)) }),
             Command(id: "agents.continue-in-agent", title: T("Continue in…", "Continuar em…"),
                     keywords: ["continue", "workstream", "handoff", "claude", "codex", "memory", "continuar", "memória"], category: .terminal,

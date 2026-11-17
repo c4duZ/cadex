@@ -1,6 +1,9 @@
 import AppKit
 import Checks
 @testable import CommandPalette
+// Icons by name: without it `.files` in a comparison was found some other way and the check
+// failed on equal icons, now and then (2026-11-17).
+import Icons
 
 // Tests of the command-palette feature. Run with `make macos-test` (see
 // shared/checks/Checks.swift for why this is an executable).

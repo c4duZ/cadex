@@ -229,6 +229,14 @@
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.
+- `HomeWiring.swift` (plano 29 fase A): a tela de início da feature `home` no centro
+  (WorkspaceView.showHome: sem as abas e o "+", o painel da direita fechado e devolvido depois),
+  quando os projetos acabam (`onNone`) e pelo home.show; some quando um projeto aparece. O Enter
+  abre o projeto escolhido e o agente da conta escolhida com o pedido por arquivo
+  (RaceLaunch.localCommand, ADR 0036), no terminal que o projeto recém-aberto trouxe; numa cópia
+  separada, worktrees.new-task; os cartões rodam tab.new, agents.open-account (⇧⌘A),
+  worktrees.new-task e orchestration.new-race; os recentes com o estado dos terminais; Clone… pede o
+  endereço e a pasta e digita o `git clone` numa aba lá.
 - `PaneHeaderWiring.swift` (plano 28 fase B): o que o cabeçalho de cada painel diz de um agente
   ("Claude", a tarefa, o modelo, a conta; o custo e o tempo), calculado quando um agente desta janela
   muda e uma vez por minuto, e guardado em `PaneDetails` (o cabeçalho só lê; o modelo e o custo do
@@ -237,7 +245,8 @@
   cartão `AgentPermissionCard` no pé do painel dele (TerminalView.footCard), com Permitir e Negar
   pela mesma AgentAttention do sino: responder num fecha o outro.
 - `PerfHooks.swift`: só para o `make perf` (`../../../tools/perf/run.py`): cada variável CADEX_PERF_
-  faz a instância de teste agir sozinha em horas marcadas (CADEX_PERF_TYPE digita um comando no terminal com foco, CADEX_PERF_SEND manda uma mensagem ao agente
+  faz a instância de teste agir sozinha em horas marcadas (CADEX_PERF_TYPE digita um comando no terminal com foco, CADEX_PERF_HOME_PROMPT manda o pedido da
+  tela de início, CADEX_PERF_DUMP_SCREEN grava a tela de cada terminal num arquivo, CADEX_PERF_SEND manda uma mensagem ao agente
   com o Return como tecla (a marca da barra),
   CADEX_PERF_SPLIT divide o painel, CADEX_PERF_SNAPSHOT_AT atrasa a captura; abrir a conversa de um subagente, abrir
   abas, abrir e rolar a revisão da pasta com CADEX_PERF_REVIEW, abrir duas vezes o grupo das máquinas da tailnet com CADEX_PERF_MACHINES); sem a variável, nada roda.
