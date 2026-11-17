@@ -15,6 +15,8 @@ extension WindowSession {
         if let out = environment["CADEX_PERF_REVIEW"] { openPerfReview(out) }
         if let out = environment["CADEX_PERF_MACHINES"] { openPerfMachines(out) }
         if let file = environment["CADEX_PERF_RACE"] { startPerfRace(file) }
+        if let file = environment["CADEX_PERF_RUN"] { startPerfRun(file) }
+        if environment["CADEX_PERF_PRESS"] != nil { startPerfPresses() }
     }
 
     /// That sidebar page shown from the start: the sidebar opens on its

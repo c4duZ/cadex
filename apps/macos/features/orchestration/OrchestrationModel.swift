@@ -90,6 +90,9 @@ public struct Run: Codable, Equatable, Sendable {
     public var caps: Caps
     public var createdAt: Date
     public var stopped = false
+    /// Why it stopped: "stopped" (the owner) or "hit the cap". Optional, so
+    /// a row from before this field still reads.
+    public var reason: String?
 }
 
 public enum TaskState: String, Codable, Sendable { case pending, ready, dispatched, done, failed, blocked }
@@ -111,6 +114,26 @@ public struct RunTask: Codable, Equatable, Sendable {
     /// 0 for a task the owner added; a spawned one is its parent's plus 1.
     public var depth: Int
     public var reason: String?
+    /// The owner's dispatch waiting for a free slot (orchestration.maxAgents
+    /// reached, plan 24 D1): launched as soon as one frees. Optional, so a
+    /// row from before it still reads.
+    public var queued: QueuedDispatch?
+}
+
+/// A dispatch the owner asked for while every slot was taken: who runs it,
+/// where it starts, and (optionally) the idle terminal to reuse, by its
+/// shell's pid.
+public struct QueuedDispatch: Codable, Equatable, Sendable {
+    public var agent: AgentChoice
+    public var base: String
+    public var reuseShell: Int32?
+    public var at: Date
+    public init(agent: AgentChoice, base: String, reuseShell: Int32? = nil, at: Date) {
+        self.agent = agent
+        self.base = base
+        self.reuseShell = reuseShell
+        self.at = at
+    }
 }
 
 public enum DispatchState: String, Codable, Sendable { case starting, working, done, failed, stopped }
@@ -132,6 +155,10 @@ public struct Dispatch: Codable, Equatable, Sendable {
     public var lastSign: Date
     public var summary: String?
     public var reason: String?
+    /// The session's cost as its status line last wrote it (plan 24 D1):
+    /// kept here because the run's cap sums every dispatch, also those whose
+    /// tab is gone. Optional, so a row from before it still reads.
+    public var costUsd: Double?
 }
 
 public enum MessageKind: String, Codable, Sendable { case question, answer, message }

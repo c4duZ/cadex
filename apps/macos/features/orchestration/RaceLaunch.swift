@@ -80,7 +80,9 @@ public enum RaceLaunch {
     /// file, then `cadex claude` with the kit; the session's key. Nil, with
     /// the reason, when the prompt cannot be written or there is no `cadex`.
     @MainActor
+    /// `sessionEnvironment`: a dispatch's CADEX_DISPATCH_ID (plan 24 D1).
     public static func localCommand(kit: SessionKit, agent: AgentChoice, cwd: String, prompt: String, skipPermissions: Bool,
+                                    sessionEnvironment: [String: String] = [:],
                                     promptFolder: String = PromptFiles.folder) -> Result<(command: String, session: String), RaceRefusal> {
         guard kit.toolsPath != nil else { return .failure(.noCadex) }
         switch PromptFiles.write(prompt, in: promptFolder) {
@@ -88,7 +90,7 @@ public enum RaceLaunch {
         case .failure: return .failure(.emptyPrompt)
         case .success(let file):
             guard let opened = kit.claudeCommand(configDir: agent.account, arguments: arguments(agent, skipPermissions: skipPermissions),
-                                                 cwd: cwd, promptFile: file) else {
+                                                 cwd: cwd, promptFile: file, sessionEnvironment: sessionEnvironment) else {
                 try? FileManager.default.removeItem(atPath: file)
                 return .failure(.noCadex)
             }

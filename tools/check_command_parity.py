@@ -44,6 +44,10 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             # Races (plan 24, phase C): the orchestration feature is Mac only for now.
             "orchestration.toggle", "orchestration.new-race", "orchestration.show-race", "orchestration.pick-winner",
             "orchestration.discard-race", "orchestration.delete-race-branches",
+            # Runs with the owner coordinating (plan 24, phase D1).
+            "orchestration.new-run", "orchestration.show-run", "orchestration.add-task", "orchestration.dispatch",
+            "orchestration.retry", "orchestration.mark-done", "orchestration.stop-dispatch", "orchestration.stop-run",
+            "orchestration.set-dependencies",
             "memory.show", "memory.show-briefing", "memory.show-history", "memory.reindex", "memory.refresh", "memory.enable", "memory.approve", "memory.reject", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).

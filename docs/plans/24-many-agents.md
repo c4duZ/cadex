@@ -199,6 +199,43 @@ docs/adr/0031-run-on-remote.md (plano 23), `docs/adr/0004-clean-rewrite.md`,
     binário (`cadex skills get orchestration`).
   - A página da execução: grafo das tarefas, caixa de entrada, portões; cada despacho leva à aba.
   - Features: orchestration, agent-tools, worktrees, agents, tabs.
+  - D1 feita em 2026-11-16 (`apps/macos/features/orchestration/CLAUDE.md`,
+    `apps/macos/app/RunWiring.swift`, `apps/macos/app/RunDispatchWiring.swift`,
+    `apps/macos/app/RunPageWiring.swift`): New Run (nome e teto, o dono coordenando), Add Task
+    (título, especificação, dependências), as dependências mudadas depois (o ciclo recusado pelos
+    títulos), o despacho (a folha com o prompt inteiro, a conta, o modelo, o modo de permissão, a
+    branch de partida ou um terminal parado reaproveitado, e o teto; confere desligada, parada, não
+    pronta, vazia, grande e a confiança, com "Open Claude to Trust"; grava o despacho, cria a
+    worktree pelo New Task e abre a aba com `cadex claude --cadex-prompt-file` e o
+    CADEX_DISPATCH_ID na sessão pelo kit), a fila no teto de agentes (corridas e execuções juntas,
+    "waiting for a free slot", começa sozinha quando um agente termina), tentar de novo, parar o
+    despacho (e os de baixo) e a execução, a página (o grafo pelo nível de cada tarefa, o estado,
+    "after:", a última tentativa e as anteriores com o motivo, o gasto e o tempo contra o teto, cada
+    despacho levando à aba dele, sem relógio próprio) e um relógio só com despacho vivo, que grava o
+    custo, falha o despacho cujo agente saiu e para a execução no teto. Decidido além do texto:
+    orchestration.mark-done ("Mark Done", a palavra do dono enquanto nenhum agente reporta, também
+    sobre a última tentativa que falhou) e orchestration.set-dependencies; o despacho parte da
+    branch da dependência concluída mais recente; o tempo do teto é o tempo com agentes trabalhando
+    (união), não desde a criação. Testado: 12 testes novos na OrchestrationTests (34 no todo); na
+    instância de teste com o `claude` real (bkdg, haiku): pelo gancho CADEX_PERF_RUN, 3 tarefas
+    encadeadas de pendente a concluída, `chain-b` partindo de `chain-a` e `chain-c` de `chain-b`, o
+    prompt (aspas, `$()`, crase, `;`, `&&`, `|`, quebra de linha) chegando inteiro e respondido,
+    parar, o agente encerrado por fora ("exited without reporting") e o teto de US$ 0,001 parando a
+    execução; e pelas folhas e botões de verdade (comandos pelo menu View, botões da página
+    apertados por `performClick` e folhas respondidas pelo gancho CADEX_PERF_SHEETS, porque a tela
+    estava bloqueada e a acessibilidade não via a janela): New Run, Add Task duas vezes, as
+    dependências com o ciclo "p → q → p" recusado, despachar (com a pasta das worktrees pedida),
+    o app fechado com o agente trabalhando e reaberto (o despacho "exited without reporting", a
+    dependente bloqueada), Mark Done destravando, despachar no terminal parado do repositório (o
+    `claude` nessa pasta, sem worktree), com teto de 1 agente a terceira tarefa na fila, parar a
+    segunda despachando a da fila sozinha, o agente encerrado por fora e "Retry…" abrindo a
+    tentativa 2 numa worktree nova, "Stop Run…" encerrando o vivo, "Go to Terminal" levando o foco
+    à aba do agente, e num repositório em que a conta não confiava a recusa antes de criar
+    qualquer coisa e "Open Claude to Trust" abrindo o `claude` da conta lá (encerrado sem aceitar).
+    Achados e corrigidos: o custo de uma tentativa marcada logo ao terminar ficava 0 (a status line
+    grava depois), a tarefa despachada de novo ficava com o motivo "stopped", o teto pequeno
+    aparecia "of 0.00" e a recusa por confiança falava em "corrida". Não visto a olho: as folhas
+    desenhadas (a tela estava bloqueada; o texto de cada uma está no log do teste).
 - **E. Automações agendadas.**
   - Automação (orchestration.new-automation): nome, prompt, recorrência (dias úteis 09:00, a cada
     N horas, uma vez), destino (worktree nova a cada execução ou uma fixa), conta, modelo, modo de

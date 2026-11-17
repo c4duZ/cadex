@@ -55,6 +55,24 @@
   O que junta worktrees, agents, tabs e source-control é do app (`../../app/RaceWiring.swift`,
   `../../app/RaceBoardWiring.swift`). CADEX_ORCHESTRATION_DIR troca a pasta do estado numa
   instância de teste.
+- A execução com o dono coordenando (fase D1): `RunOwner.swift` (`attach`, a sessão da aba depois
+  de gravar o despacho, porque o id dele vai no CADEX_DISPATCH_ID; `record`, o custo e o id do
+  Claude, só escrito quando muda; `markDone`, o "Mark Done" do dono, também sobre a última
+  tentativa que falhou; `enforceCap`; e em `RunGraph` `spent`, `busySeconds`, a união dos
+  intervalos com agente trabalhando, não o tempo desde a criação, e `overCap`), `RunLaunch.swift`
+  (as recusas antes de criar: desligada, execução parada, tarefa não pronta, especificação vazia ou
+  grande, sem vaga, conta sem confiança; o prompt é a especificação, ou o título; `bases`: a
+  branch da dependência concluída mais recente primeiro, depois a do repositório), `RunRows.swift`
+  (as linhas da página, puras: o nível no grafo, a última tentativa e as anteriores com o motivo, a
+  linha "waiting for a free slot (N of M)" e as ações que cabem), `RunQueue.swift` (a fila no teto de
+  agentes, guardada na tarefa, a mais antiga primeiro; e RunError.message, o erro pelos títulos,
+  o ciclo como "a → c → b → a"), `RunForms.swift` (as folhas New Run, Add Task, a do despacho, com
+  o prompt inteiro, o modo de permissão e um terminal parado para reaproveitar, e a das
+  dependências), `RunPageView.swift` (a página e o `RunPageDocument`, sem relógio próprio) e
+  `RunCommands.swift` (orchestration.new-run, -show-run, -add-task, -dispatch, -retry, -mark-done,
+  -stop-dispatch, que também tira da fila, -stop-run e -set-dependencies, com as listas no ⌘K). O
+  teto de agentes vale para corridas e execuções juntas (`othersLive`). O despacho usa o RaceLaunch.localCommand com
+  `sessionEnvironment`. O app liga (`../../app/RunWiring.swift`, `../../app/RunPageWiring.swift`).
 - Configurações (`../settings/OrchestrationSettings.swift`, `../settings/OrchestrationRows.swift`):
   orchestration.enabled, orchestration.automations, orchestration.maxAgents (6),
   orchestration.maxDepth (2), orchestration.heartbeatMinutes (10),
@@ -68,4 +86,9 @@
   vida e "stalled?", teto de agentes e execução parada, caixa de entrada, o arquivo 0600 que
   persiste, linha ilegível pulada, lote desfeito, corrida, automações, e o controlador desligado
   sem arquivo nenhum; da corrida: o arquivo do prompt, a confiança, as recusas, o comando sem o
-  texto, as colunas e o custo.
+  texto, as colunas e o custo; da execução (D1): marcar concluída (a última tentativa, também a que
+  falhou), o custo gravado, o tempo com agentes como união, o teto parando tudo, as recusas do
+  despacho em ordem, de onde ele parte, as linhas da página e o CADEX_DISPATCH_ID só nas
+  configurações da sessão; a fila (ordem, só prontas, sai ao despachar e com a execução parada), a
+  vaga dividida com a corrida, as dependências mudadas depois (ciclo pelos títulos, não numa
+  despachada), o grafo, o histórico e a linha da fila na página.

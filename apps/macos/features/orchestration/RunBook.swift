@@ -40,8 +40,11 @@ public final class RunBook {
         return try store.get(.tasks, id: id) ?? task
     }
 
+    /// orchestration.set-dependencies: only for a task not yet dispatched or
+    /// done (a dispatched one already started from what it had).
     public func setDependencies(task id: String, _ deps: [String]) throws {
         guard var task: RunTask = try store.get(.tasks, id: id) else { throw RunError.unknown(id) }
+        guard [.pending, .ready, .blocked].contains(task.state) else { throw RunError.notReady(id, task.state) }
         try check(deps, for: id, in: try tasks(of: task.run))
         task.dependsOn = deps
         try store.put(.tasks, id: id, parent: task.run, task)
@@ -88,16 +91,21 @@ public final class RunBook {
     /// A try of a ready task, recorded before the agent opens. Refused when
     /// the task is not ready, the run was stopped, or orchestration.maxAgents
     /// agents are already live (the caller queues it).
-    public func dispatch(task id: String, agent: AgentChoice, worktree: String, session: SessionLink?, maxAgents: Int) throws -> Dispatch {
+    /// `othersLive`: agents of races alive now; the cap is for all of them.
+    public func dispatch(task id: String, agent: AgentChoice, worktree: String, session: SessionLink?, maxAgents: Int,
+                         othersLive: Int = 0) throws -> Dispatch {
         guard var task: RunTask = try store.get(.tasks, id: id) else { throw RunError.unknown(id) }
         guard task.state == .ready else { throw RunError.notReady(id, task.state) }
         guard let run = try run(task.run), !run.stopped else { throw RunError.stopped(task.run) }
         let all: [Dispatch] = try store.all(.dispatches)
-        guard RunGraph.hasSlot(all, maxAgents: maxAgents) else { throw RunError.noSlot(maxAgents) }
+        guard RunGraph.hasSlot(all, maxAgents: maxAgents - othersLive) else { throw RunError.noSlot(maxAgents) }
         let attempt = all.filter { $0.task == id }.count + 1
         let dispatch = Dispatch(id: newId(), run: task.run, task: id, attempt: attempt, agent: agent, worktree: worktree,
                                 launch: .tab, state: .starting, session: session, startedAt: now(), lastSign: now())
         task.state = .dispatched
+        // A retry's task said "stopped" or why it failed while dispatched again.
+        task.reason = nil
+        task.queued = nil
         try store.batch {
             try store.put(.dispatches, id: dispatch.id, parent: task.run, dispatch)
             try store.put(.tasks, id: id, parent: task.run, task)
@@ -162,16 +170,16 @@ public final class RunBook {
     /// stop; their tasks go back to ready, marked "stopped". Returns the
     /// stopped ids, for the caller to end their agents.
     @discardableResult
-    public func stop(_ id: String) throws -> [Dispatch] {
+    public func stop(_ id: String, reason: String = "stopped") throws -> [Dispatch] {
         guard let root: Dispatch = try store.get(.dispatches, id: id) else { throw RunError.unknown(id) }
         let all = try dispatches(of: root.run)
         let ids = Set(RunGraph.descendants(of: id, dispatches: all, tasks: try tasks(of: root.run)))
         var stopped: [Dispatch] = []
         for var dispatch in RunGraph.live(all) where ids.contains(dispatch.id) {
             dispatch.state = .stopped
-            dispatch.reason = "stopped"
+            dispatch.reason = reason
             dispatch.endedAt = now()
-            try end(dispatch, task: .pending, reason: "stopped")
+            try end(dispatch, task: .pending, reason: reason)
             stopped.append(dispatch)
         }
         try settle(run: root.run)
@@ -180,11 +188,16 @@ public final class RunBook {
 
     /// Every live dispatch of a run stops, and the run takes no new ones.
     @discardableResult
-    public func stopRun(_ id: String) throws -> [Dispatch] {
+    public func stopRun(_ id: String, reason: String = "stopped") throws -> [Dispatch] {
         guard var run = try run(id) else { throw RunError.unknown(id) }
         run.stopped = true
+        run.reason = reason
         try store.put(.runs, id: id, run)
-        return try RunGraph.live(dispatches(of: id)).flatMap { try stop($0.id) }
+        for var task in try tasks(of: id) where task.queued != nil {
+            task.queued = nil
+            try store.put(.tasks, id: task.id, parent: id, task)
+        }
+        return try RunGraph.live(dispatches(of: id)).flatMap { try stop($0.id, reason: reason) }
     }
 
     /// The live dispatches whose agent is gone without a report fail,

@@ -164,6 +164,29 @@
   descartar para os agentes, apaga as pastas direto pela worktrees (sem Lixeira, o dono em
   2026-11-16) e deixa as branches; apagar as branches lista só as que restam, e a apagada não volta
   à lista.
+- `RunWiring.swift` (plano 24, fase D1): registra os comandos da execução; New Run (nome e teto,
+  no repositório da janela, o dono coordenando) abre a página; Add Task; as dependências mudadas
+  (o ciclo recusado pelos títulos); tentar de novo passa pela folha do despacho; marcar concluída;
+  parar (despacho, com confirmação; um que espera vaga só sai da fila) e a execução manda SIGTERM
+  ao agente achado pela sessão do kit e passa as vagas à fila. `RunDispatchWiring.swift`: a folha
+  do despacho (o prompt inteiro, a conta, o modelo, o modo de permissão, a branch de partida ou um
+  terminal parado do repositório, o teto), as conferências (RunLaunch.check; sem confiança, "Open
+  Claude to Trust" abre uma aba com o `claude` da conta no repositório), o que o New Task pediria,
+  a fila quando os agentes vivos (corridas e execuções) chegam a orchestration.maxAgents, e o
+  lançamento: o despacho gravado, a worktree pelo `plan`/`make` e a aba com o `cadex claude
+  --cadex-prompt-file` e o CADEX_DISPATCH_ID na sessão, ou o comando no terminal reaproveitado.
+  `RunPageWiring.swift`: a página numa aba (sem relógio próprio) e o `RunWatch` (um relógio de 15 s
+  só com despacho vivo, esperando vaga ou terminado há menos de 2 min, e o aviso
+  TerminalView.agentDidChange, que redesenha as páginas): grava o custo, sinal de vida pelo hook,
+  falha o despacho cujo agente saiu ("exited without reporting", com 20 s de folga para o shell
+  começar; o app reaberto faz o mesmo com os que ficaram), para a execução no teto e esvazia a fila.
+  A corrida também conta os agentes das execuções no teto. `RunPerfHooks.swift`: CADEX_PERF_RUN
+  (uma execução com tarefas que se despacham sozinhas, com `markDoneWhenFinished`,
+  `markDoneWhenFailed` e `stopFirstAfter`, anotada em `out`), CADEX_PERF_RUN_FORM (preenche as
+  folhas), CADEX_PERF_SHEETS (anota cada folha no log e a responde como o clique no primeiro botão;
+  "Open Claude to Trust" só numa conta do Cadex) e CADEX_PERF_PRESS (aperta pelo título um botão da
+  janela, por `performClick`; `page` traz a página da execução): a tela bloqueada não deixa a
+  acessibilidade ver a janela (2026-11-16).
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.

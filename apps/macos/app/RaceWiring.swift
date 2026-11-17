@@ -36,7 +36,7 @@ extension WindowSession {
     }
 
     /// The accounts to offer: the project's (or the active one) first.
-    private func raceAccounts(repo: String) -> [NewRaceForm.Account] {
+    func raceAccounts(repo: String) -> [NewRaceForm.Account] {
         let agents = settings.store.settings.agents
         let projects = agents.projectAccounts.reduce(into: [String: String]()) { $0[SettingsBridge.expand($1.key)] = SettingsBridge.expand($1.value) }
         let first = AgentNewSession.account(cwd: repo, accounts: AgentsController.shared.everyAccount(),
@@ -76,7 +76,9 @@ extension WindowSession {
     /// `askFirst` false: a test instance's own race (`RacePerfHooks.swift`), no sheet.
     func startRace(_ request: RaceRequest, askFirst: Bool = true) {
         let controller = OrchestrationController.shared
-        let refusal = RaceLaunch.check(request, enabled: controller.isEnabled, maxAgents: controller.limits.maxAgents) { account in
+        // orchestration.maxAgents is for every agent alive: the runs' and other races' take slots too (plan 24 D1).
+        let free = controller.limits.maxAgents - liveRunAgents() - liveRaceAgents()
+        let refusal = RaceLaunch.check(request, enabled: controller.isEnabled, maxAgents: free) { account in
             ClaudeTrust.isTrusted(request.repository, repository: nil, configDir: account)
         }
         if let refusal { return say(T("The race did not start", "A corrida não começou"), refusal.message) }

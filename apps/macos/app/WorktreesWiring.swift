@@ -232,6 +232,7 @@ extension WindowSession {
         alert.informativeText = text
         alert.addButton(withTitle: button)
         alert.addButton(withTitle: T("Cancel", "Cancelar"))
+        perfAnswer(alert)
         alert.beginSheetModal(for: window) { response in if response == .alertFirstButtonReturn { then() } }
     }
 
@@ -239,6 +240,7 @@ extension WindowSession {
         let alert = NSAlert()
         alert.messageText = title
         alert.informativeText = text
+        perfAnswer(alert)
         alert.beginSheetModal(for: window)
     }
 }

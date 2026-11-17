@@ -65,6 +65,26 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
   como prompt e CADEX_DISPATCH_ID no ambiente da aba (pelo kit da sessão). Com o dono coordenando,
   despachar é dele; com um agente coordenando, o agente despacha pelo `spawn` e cada tarefa nova
   aparece no quadro.
+- De onde parte (2026-11-16, fase D1): a folha do despacho oferece a branch da dependência
+  concluída mais recente (o trabalho dela está lá), as outras dependências concluídas e a branch do
+  repositório; a worktree se chama `<execução>-<tarefa>`.
+- No teto de agentes (orchestration.maxAgents, corridas e execuções juntas), o despacho pedido
+  espera na fila da tarefa, "waiting for a free slot (6 of 6)", e começa sozinho quando um agente
+  termina, o mais antigo primeiro; "Stop Waiting" (ou orchestration.stop-dispatch) o tira da fila.
+- Dependências mudadas depois (orchestration.set-dependencies), só numa tarefa pendente, pronta ou
+  bloqueada: a que fecharia um ciclo é recusada dizendo o ciclo pelos títulos ("a → c → b → a").
+- A folha do despacho mostra o prompt inteiro (rolável), a conta, o modelo, o modo de permissão, a
+  branch de partida ou o terminal parado escolhido, e o teto da execução. Sem confiança na conta,
+  "Open Claude to Trust" abre uma aba com o `claude` dela no repositório.
+- Com o dono coordenando, "Mark Done" (orchestration.mark-done) é a palavra dele de que o trabalho
+  ficou pronto: a tarefa fica concluída e as que dependiam dela podem ficar prontas. Vale também
+  sobre a última tentativa que falhou ("exited without reporting": o agente saiu antes do clique).
+  O `report-done` do próprio agente vem com os agentes supervisionados (fase D2).
+- Teto da execução: o gasto é a soma do custo de cada despacho (o último que a status line gravou),
+  e o tempo é o tempo com pelo menos um agente trabalhando (a união dos intervalos), não o tempo
+  desde a criação: uma execução preenchida ao longo do dia bateria no teto antes de qualquer agente
+  (decidido em 2026-11-16). Passou de um dos dois, todos os despachos vivos param e a execução fica
+  "hit the cap", sem aceitar despachos novos.
 - Nova tentativa (orchestration.retry), só pelo dono ou pelo coordenador: um despacho novo da mesma
   tarefa; o anterior fica no histórico da tarefa, com o motivo.
 - Parar (orchestration.stop-dispatch): encerra o agente do despacho (SIGTERM no `claude`) e os
@@ -194,7 +214,14 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
       gravada (2026-11-16).
 - [ ] Uma execução de 3 tarefas encadeadas, com agentes reais, vai de pendente a concluída sozinha;
       um portão segura a terceira até a aprovação; parar o pai encerra os filhos; um agente sem
-      sinal de vida aparece como "stalled?".
+      sinal de vida aparece como "stalled?". (D1, 2026-11-16, na instância de teste com o `claude`
+      real: 3 tarefas encadeadas de pendente a concluída, cada uma da branch da anterior, despachadas
+      e marcadas pelo gancho de teste como o dono faria; parar, o agente que sai sem reportar e o
+      teto da execução; e pelas folhas e botões de verdade, respondidos por gancho com a tela
+      bloqueada: New Run, Add Task, as dependências com o ciclo recusado, despachar, a confiança,
+      o terminal reaproveitado, a fila, parar, tentar de novo, Mark Done, Go to Terminal, Stop Run
+      e o app reaberto no meio. Falta o reporte pelo agente, os portões, os filhos e o
+      "stalled?": D2.)
 - [x] Um prompt com aspas, `$()`, crase e quebra de linha chega intacto ao agente e nada é executado
       pelo shell (no Mac, com o `claude` real; no remoto, com um ssh falso e um `claude` falso).
 - [x] Passou do teto de uma corrida, o agente local é encerrado e a coluna diz "hit the cap" (teto de
