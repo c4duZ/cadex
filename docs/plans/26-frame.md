@@ -85,7 +85,7 @@ power, updates · Decisões: `docs/adr/0035-work-frame.md` · Mockups: 1 (o mapa
   do agente só se ele ainda está na pergunta, senão "The agent moved on"), testada com o fake agent
   e com o Claude real na conta de teste. `agents.show-attention` e `agents.show-feed` abrem o
   popover.
-- **E. Remoção.** Feita (2026-11-17): a página Accounts e `AgentAccountsView.swift` saíram (as
+- **E. Remoção.** Feita (2026-11-17): a página Accounts e AgentAccountsView.swift saíram (as
   contas no cartão do item de uso, clicáveis; agents.show-accounts o abre fixo; renomear virou
   agents.rename-account); a versão 4 das configurações tira do sidebar.items, uma vez, as páginas que
   saíram; ⌃⌘1 a ⌃⌘4 (sidebar.page-N) abrem as abas do painel; o CADEX_PERF_SIDEBAR fica até o 27,
@@ -96,7 +96,11 @@ power, updates · Decisões: `docs/adr/0035-work-frame.md` · Mockups: 1 (o mapa
   `apps/macos/app/PerfHooks.swift` e `tools/perf/run.py`. Specs e `CLAUDE.md` de app, sidebar,
   tabs, status-bar, power, updates, agents e das quatro páginas atualizados. Comandos que saem
   também saem do `MAC_ONLY`.
-- **F. Varredura e fechamento.** Linhas do 26 no inventário em `saiu`; tools/find_unused.py;
+- **F. Varredura e fechamento.** Feita (2026-11-17): o tools/find_unused.py achou um resto (o
+  preenchimento do botão do café, que saiu da barra de título) e ele saiu; o inventário sem peça do 26
+  sobrando (check_leftovers); `make check` e `make perf` passaram, o painel da direita aberto; os
+  prints na galeria (a janela ao lado do mockup 2; o sino, mockup 5, nas fases D1 e D2). Plano 26
+  feito. Plano original: Linhas do 26 no inventário em `saiu`; tools/find_unused.py;
   `make check`; `make perf` (a barra nova e o painel da direita aberto); prints ao lado dos mockups
   1, 2 e 5, e o dono vê.
 

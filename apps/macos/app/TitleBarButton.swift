@@ -27,7 +27,6 @@ final class TitleBarButton: NSView {
     var tint: NSColor? { didSet { restyle() } }
     private let kind: Kind
     private let icon: NSImageView
-    private let iconKind: Icon
     /// The badge: a round box with the count centered in it (a label alone sits high).
     private let badge = NSView()
     private let badgeLabel = NSTextField(labelWithString: "")
@@ -36,7 +35,6 @@ final class TitleBarButton: NSView {
 
     init(icon: Icon, tip: String, kind: Kind = .standard) {
         self.kind = kind
-        iconKind = icon
         self.icon = NSImageView(image: icon.image(size: kind.icon))
         super.init(frame: .zero)
         wantsLayer = true
@@ -83,11 +81,6 @@ final class TitleBarButton: NSView {
         let shown = (count ?? 0) > 0
         badge.isHidden = !shown
         badgeLabel.stringValue = shown ? "\(count!)" : ""
-    }
-
-    /// The icon again in its fill weight (keep-awake on).
-    func setFilled(_ filled: Bool) {
-        icon.image = iconKind.image(size: kind.icon, filled: filled)
     }
 
     private func restyle() {
