@@ -60,7 +60,8 @@
   painel lateral recolhível, barra de status) e `TreeWiring.swift` (plano 27 fase B: a árvore da feature `sidebar`, colada à esquerda: o modelo
   juntado dos projetos, das worktrees de cada um, listadas fora da linha principal, do estado do
   agente de cada terminal e da conta do agente na pasta da tarefa; a escolha leva à aba, à tarefa ou
-  ao projeto; sidebar.find) e `CustomizeWiring.swift` (`openCustomize` abre a janela Customize única
+  ao projeto; sidebar.find; na fase B2, o +/− de cada tarefa pelo ReviewTally, a idade e a novidade
+  de cada estado, o que espera e o menu da tarefa pelos comandos dela, `treeMenu`) e `CustomizeWiring.swift` (`openCustomize` abre a janela Customize única
   na aba pedida, com a da barra de status e a das contas desta janela, nas cores do tema como as
   configurações e não nas da janela, e a repinta quando o tema muda) e
   `StatusBarWiring.swift` (os itens Git branch e Terminals, e os lados salvos) e `StatusBarItems.swift`

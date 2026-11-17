@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Menus
 import Strings
 import UILooks
 
@@ -12,6 +13,8 @@ import UILooks
 public final class WorkTreeView: NSView {
     typealias S = DesignTokens.Sidebar
     public var onPick: ((WorkTreePick) -> Void)?
+    /// A task's right click: the app's menu for it (each entry runs a command), shown at the row.
+    public var menuFor: ((String) -> [MenuEntry])?
     /// The foot's Automations line ("2 on · next 09:00"), from the app.
     public var automationsDetail = "" { didSet { if automationsDetail != oldValue { render() } } }
     private let run: (String) -> Void
@@ -133,6 +136,10 @@ public final class WorkTreeView: NSView {
             let isChosen = chosen == .task(task.id) || task.terminals.contains { chosen == .terminal($0.id) }
             row.isChosen = chosen == .task(task.id)
             row.onPress = { [weak self] in self?.onPick?(.task(task.id)) }
+            row.onMenu = { [weak self, weak row] point in
+                guard let self, let row, let entries = self.menuFor?(task.id), !entries.isEmpty else { return }
+                PopupMenu.show(entries, at: point, in: row)
+            }
             place(row)
             spacing(S.TaskRow.marginBottom)
             // The chosen task's terminals under it (the mockup).

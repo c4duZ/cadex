@@ -32,6 +32,15 @@ public struct WorkTreeTask: Equatable, Sendable {
     /// "Claude · bkdg": who works on it.
     public var agent: String
     public var terminals: [WorkTreeTerminal]
+    /// Lines added and removed against where the task started; nil until counted.
+    public var added: Int?
+    public var removed: Int?
+    /// What it waits for, in amber ("waits for a permission").
+    public var waiting: String = ""
+    /// Since its state last changed ("4m").
+    public var age: String = ""
+    /// The task's comment, shown under the pointer.
+    public var comment: String = ""
 
     public init(id: String, name: String, state: GlyphState, unread: Bool = false, agent: String = "", terminals: [WorkTreeTerminal] = []) {
         self.id = id

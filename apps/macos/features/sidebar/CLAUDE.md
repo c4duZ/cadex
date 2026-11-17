@@ -31,9 +31,11 @@
 - Ainda no código até a fase D: a fileira de ícones e as páginas de antes (`SidebarView.swift`,
   `SidebarItem.swift`, `SidebarLayout.swift`, `SidebarHeader.swift`, `SidebarIconRow.swift`,
   `SidebarIconButton.swift`, `SidebarCommands.swift`), que a janela já não mostra.
-- Status: plano 27 fase B1 no código (a estrutura). Falta a B2: o diff, o PR, a idade, o negrito da
-  novidade, o que espera em âmbar e as ações ao passar o ponteiro.
+- A linha de tarefa inteira (fase B2): a idade à direita do nome, embaixo o agente, o +/− e o que
+  espera em âmbar; o comentário sob o ponteiro; o clique direito pede ao app o menu (`menuFor`).
+- Status: plano 27 fase B no código. A etiqueta de PR do mockup fica de fora: o app não tem de onde
+  saber de um PR.
 
 ## Como validar
 - `make macos-test` passa: a árvore com os projetos, as tarefas e os terminais, os terminais só sob a
-  tarefa escolhida, "Add project" no fim; e os testes da fileira de antes até a fase D.
+  tarefa escolhida, "Add project" no fim; com CADEX_SNAPSHOT_DIR, tree.png com uma tarefa inteira; e os testes da fileira de antes até a fase D.

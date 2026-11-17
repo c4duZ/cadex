@@ -9,6 +9,8 @@ import UILooks
 @MainActor
 final class WorkTreeRow: NSStackView {
     var onPress: (() -> Void)?
+    /// The right click, at the point in the row (a task's menu).
+    var onMenu: ((NSPoint) -> Void)?
     var radius: CGFloat = 0
     var isChosen = false { didSet { needsDisplay = true; restyle() } }
     private var hovering = false { didSet { restyle() } }
@@ -28,6 +30,11 @@ final class WorkTreeRow: NSStackView {
     override func mouseUp(with event: NSEvent) {
         guard bounds.contains(convert(event.locationInWindow, from: nil)) else { return }
         onPress?()
+    }
+
+    override func rightMouseDown(with event: NSEvent) {
+        guard let onMenu else { return super.rightMouseDown(with: event) }
+        onMenu(convert(event.locationInWindow, from: nil))
     }
 
     override func accessibilityPerformPress() -> Bool {
@@ -104,14 +111,29 @@ enum WorkTreeRows {
         glyph.setContentHuggingPriority(.required, for: .horizontal)
         let name = label(task.name, size: R.Name.fontSize, weight: task.unread ? R.NameUnread.weight : R.Name.weight,
                          color: task.unread ? R.NameUnread.color : R.Name.color)
-        let top = NSStackView(views: [glyph, name])
+        var head: [NSView] = [glyph, name, spacer()]
+        if !task.age.isEmpty { head.append(label(task.age, size: R.Age.fontSize, color: R.Age.color)) }
+        let top = NSStackView(views: head)
         top.spacing = UILooks.pt(R.gap)
         var lines: [NSView] = [top]
-        if !task.agent.isEmpty {
-            let meta = label(task.agent, size: R.Meta.fontSize, color: R.Meta.color)
-            let indented = NSStackView(views: [meta])
-            indented.edgeInsets = NSEdgeInsets(top: 0, left: UILooks.pt(R.Meta.indent), bottom: 0, right: 0)
-            lines.append(indented)
+        // Under the name: the agent · +added −removed · what it waits for (the anatomy).
+        var meta: [NSView] = []
+        func dot() { if !meta.isEmpty { meta.append(label("·", size: R.Meta.fontSize, color: R.separator)) } }
+        if !task.agent.isEmpty { meta.append(label(task.agent, size: R.Meta.fontSize, color: R.Meta.color)) }
+        if let added = task.added, let removed = task.removed, added + removed > 0 {
+            dot()
+            meta.append(label("+\(added)", size: R.Meta.fontSize, color: R.added))
+            meta.append(label("−\(removed)", size: R.Meta.fontSize, color: R.removed))
+        }
+        if !task.waiting.isEmpty {
+            dot()
+            meta.append(label(task.waiting, size: R.Meta.fontSize, color: R.waiting))
+        }
+        if !meta.isEmpty {
+            let line = NSStackView(views: meta)
+            line.spacing = UILooks.pt(R.Meta.gap)
+            line.edgeInsets = NSEdgeInsets(top: 0, left: UILooks.pt(R.Meta.indent), bottom: 0, right: 0)
+            lines.append(line)
         }
         let row = WorkTreeRow(views: lines)
         row.orientation = .vertical
@@ -122,6 +144,8 @@ enum WorkTreeRows {
         row.radius = R.radius
         row.setAccessibilityRole(.button)
         row.setAccessibilityLabel(task.name)
+        row.toolTip = task.comment.isEmpty ? nil : task.comment
+        top.widthAnchor.constraint(equalTo: row.widthAnchor, constant: -UILooks.pt(R.padding.left + R.padding.right)).isActive = true
         return row
     }
 

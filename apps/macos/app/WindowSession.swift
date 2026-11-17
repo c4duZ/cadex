@@ -1,5 +1,6 @@
 import Agents
 import AppKit
+import StateGlyph
 import Worktrees
 import Menus
 import StatusBar
@@ -71,6 +72,16 @@ final class WindowSession: NSObject, NSWindowDelegate {
     var treeFolders: [String] = []
     /// A redraw is on its way: changes in a burst (a title, a status) make one.
     var treeRefreshPending = false
+    /// Each task's lines added and removed against its start, counted off the main thread.
+    var treeTallies: [String: (added: Int, removed: Int)] = [:]
+    /// Each task's state and since when (the row's age), and the tasks changed while not looked at
+    /// (the name in bold).
+    var treeStates: [String: (state: GlyphState, since: Date)] = [:]
+    var treeUnread: Set<String> = []
+    /// A count of the diffs is on its way: an agent's statuses in a burst make one.
+    var treeTallyTimer: Timer?
+    /// The rows' age moves on by itself: a redraw a minute.
+    var treeClock: Timer?
     /// The Agents page, for its sub-tabs (AgentsWiring.swift).
     /// The status bar's Agent usage item, for the theme's colors.
     weak var usageStrip: AgentUsageStrip?
@@ -262,6 +273,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
         // What this window watched lets go: the tree's tasks, the bar's items.
         if let treeWatch { WorktreesController.shared.stop(treeWatch) }
         if let treeObserver { NotificationCenter.default.removeObserver(treeObserver) }
+        treeClock?.invalidate()
+        treeTallyTimer?.invalidate()
         workspace?.statusBar.stopReading()
         bellPanel.close()
         projects?.closeAll()

@@ -37,8 +37,11 @@ agents, tabs, command-palette · Decisões: `docs/adr/0035-work-frame.md` · Moc
   `apps/macos/app/TreeWiring.swift`): "New task" e o filtro (sidebar.find), os projetos com a seta que
   dobra e o nome que abre, as tarefas com o estado e o agente, os terminais (os da tarefa sob ela
   quando escolhida), "+ Add project" e o pé; os redesenhos juntados, o git só quando os projetos
-  mudam. Falta a B2: o diff, o PR, a idade, o negrito da novidade, o que espera e as ações ao passar
-  o ponteiro (status, comentário, remover, hibernar). Plano original: SidebarView.swift vira a árvore da peça Sidebar: "Nova tarefa ⌘N" e o filtro no
+  mudam. B2 feita (2026-11-17): a idade, o negrito da novidade (o estado
+  mudou sem ninguém olhar), o agente, o +/− contra o começo da tarefa (contado fora da linha
+  principal, de novo uns segundos depois de um agente mudar), o que espera em âmbar, o comentário
+  sob o ponteiro e o clique direito (ir à aba, revisar, hibernar, os quatro status, comentar,
+  remover). A etiqueta de PR fica de fora: o app não sabe de PR. Plano original: SidebarView.swift vira a árvore da peça Sidebar: "Nova tarefa ⌘N" e o filtro no
   topo; cada projeto dobrável (nome, branch, quantas tarefas); dentro, os terminais da pasta do
   projeto e as tarefas (worktrees) como grupos com a linha do mockup (`StateGlyph`, nome em negrito
   quando não lido, agente e conta, +/−, o que espera em âmbar, PR, idade); dentro do selecionado,
