@@ -86,7 +86,9 @@
   direita entre as barras: Changes (o painel do git), Files (a árvore do explorer), History (o
   histórico compacto, feito na primeira vez que a aba aparece) e Memory, cada aba com os botões de
   antes; a linha de contexto com a pasta, o branch (o clique troca) e a memória do projeto;
-  inspector.toggle (⌥⌘I) e inspector.visible e inspector.tab salvos; git.show, explorer.focus,
+  inspector.toggle (⌥⌘I) e inspector.visible, inspector.tab e inspector.width (a borda) salvos; numa
+  janela abaixo de 1000 pt, abrir o painel recolhe a barra lateral e fechá-lo a devolve
+  (`WorkspaceView.swift`); git.show, explorer.focus,
   git.show-history e memory.show abrem a aba deles (WorkspaceView.showInspector).
 - `AgentToolsWiring.swift` (plano 20, fase B): o pedido de comando do agente acha o terminal dele
   (pela sessão do kit, senão pelos pids acima do `cadex`), confere agentTools.enabled e a lista do

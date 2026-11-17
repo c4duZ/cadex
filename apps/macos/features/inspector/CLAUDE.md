@@ -20,11 +20,14 @@
   troca as palavras da linha de contexto de uma aba (a pasta, o branch, a memória do projeto);
   `setBusy` gira o indicador; até 3 botões, o resto no "⋯" (PopupMenu de `../../shared/menus`).
   As palavras ocupam o que sobra e os botões ficam à direita.
+- `InspectorEdge.swift`: a borda esquerda, uma faixa de 5 pt com o cursor de redimensionar; arrastar
+  pede a largura (`onResize`), e o app a limita (Settings.inspectorWidths) e salva ao soltar
+  (inspector.width).
 - `InspectorParts.swift`: o nome da aba (sublinhada a aberta) e o botão de ícone de 24 pt, aceso
   sob o ponteiro como os da barra de título.
 - Status: fase C1 no código (o painel, as abas com as páginas de antes, ⌥⌘I, o botão da barra de
-  título, inspector.visible e inspector.tab salvos). Falta a C2: as linhas no desenho das abas
-  (Changes com o seletor e o pé, Files, History e Memory), a borda arrastável e a janela estreita.
+  título, inspector.visible e inspector.tab salvos). C2a a C2d feitas: as abas no desenho, a borda arrastável e
+  a janela estreita (abaixo de 1000 pt, abrir o painel recolhe a barra lateral, e fechá-lo a devolve).
 
 ## Como validar
 - `make macos-test` passa: as abas na ordem, uma página à vista e as outras escondidas, a linha de

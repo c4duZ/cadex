@@ -87,6 +87,9 @@ let exitCode = await Checks.run([
         expect(SettingsFile.read(SettingsFile.write(settings)).0.inspector == settings.inspector)
         let (read, problems) = SettingsFile.read(Data(#"{"inspector": {"tab": "accounts"}}"#.utf8))
         expect(read.inspector.tab == "changes" && problems.count == 1, "\(problems)")
+        settings.inspector.width = 410
+        expect(SettingsFile.read(SettingsFile.write(settings)).0.inspector.width == 410, "the dragged width comes back")
+        expect(SettingsFile.read(Data(#"{"inspector": {"width": 5000}}"#.utf8)).0.inspector.width == Settings.inspectorWidths.upperBound, "kept in range")
     }),
     ("the interface is in English unless the file says pt; anything else is a problem", {
         expect(SettingsFile.read(Data("{}".utf8)).0.general.language == "en")

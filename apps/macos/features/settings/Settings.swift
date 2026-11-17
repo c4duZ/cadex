@@ -130,6 +130,8 @@ public struct Settings: Equatable, Sendable {
     public struct Inspector: Equatable, Sendable {
         public var visible = true
         public var tab = "changes"
+        /// Its width, dragged by the edge; 320 is components.inspector.width.
+        public var width = 320.0
     }
 
     public struct Agents: Equatable, Sendable {
@@ -305,6 +307,8 @@ public struct Settings: Equatable, Sendable {
     static let fileOpenings = ["beside", "tab"]
     static let languages = ["en", "pt"]
     static let inspectorTabs = ["changes", "files", "history", "memory"]
+    /// The right panel's width: narrower hides its rows' text, wider eats the terminals.
+    public static let inspectorWidths = 240.0...640.0
     static let keepAwakeModes = ["always", "running"]
     static let contrastRange = 1.0...21.0
     static let lineHeights = 0.8...2.0

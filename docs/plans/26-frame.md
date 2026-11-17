@@ -58,7 +58,9 @@ power, updates · Decisões: `docs/adr/0035-work-frame.md` · Mockups: 1 (o mapa
   grafo de uma cor e o ponto azul no HEAD, os arquivos do commit aberto com +/−). C2c feita
   (2026-11-17): Memory no desenho (a busca, memory.search; LEARNED TODAY com as páginas de hoje; a
   WIKI com as marcas e as contagens; o estado numa linha; a nota do briefing; as propostas ficam,
-  em cartões). Falta a C2d: a borda arrastável e a janela estreita. Plano original: Feature nova `inspector` (spec do plano 25): coluna de 320 pt,
+  em cartões). C2d feita (2026-11-17):
+  a borda arrastável (inspector.width, de 240 a 640, salva ao soltar) e a janela estreita (abaixo de
+  1000 pt, abrir o painel recolhe a barra lateral, e fechá-lo a devolve). Fase C inteira feita. Plano original: Feature nova `inspector` (spec do plano 25): coluna de 320 pt,
   recolhível (⌥⌘I, inspector.toggle), com as abas Mudanças, Arquivos, Histórico e Memória; cada
   aba é a página de hoje (source-control, explorer, git-history, memory) com o cabeçalho de
   `SidebarHeader`, pelo catálogo que `SidebarWiring` já monta. git.show, `git.show-history`,

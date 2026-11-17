@@ -7,6 +7,7 @@ import Settings
 import Memory
 import SourceControl
 import Strings
+import UILooks
 
 /// The right panel's tabs in this window (docs/spec/inspector.md; plan 26 phase C): Changes, Files,
 /// History and Memory, the pages the sidebar had, each from its feature; a tab's click runs its
@@ -53,6 +54,14 @@ extension WindowSession {
             self?.settings.store.update { $0.inspector.tab = id }
         }
         git.onBusy = { [weak inspector] busy in inspector?.setBusy(busy, for: "changes") }
+        // The edge: the width follows the pointer within the settings' range, and is saved when let go.
+        inspector.onResize = { [weak self] asked, ended in
+            guard let self, let workspace = self.workspace else { return }
+            let range = Settings.inspectorWidths
+            let width = min(max(asked, UILooks.pt(range.lowerBound)), UILooks.pt(range.upperBound))
+            workspace.setInspector(width: width)
+            if ended { self.settings.store.update { $0.inspector.width = Double(width / UILooks.pt(1)) } }
+        }
         return inspector
     }
 
@@ -60,7 +69,8 @@ extension WindowSession {
     func applyInspector(_ prefs: Settings.Inspector) {
         guard let workspace else { return }
         // Always: the title bar's button lights with the panel open from the start too.
-        workspace.setInspector(visible: prefs.visible)
+        workspace.setInspector(width: UILooks.pt(prefs.width))
+        workspace.setInspector(visible: prefs.visible, launching: true)
         // Closed: the tab is only picked, so nothing reads behind a hidden panel.
         if workspace.inspector.tab != prefs.tab { workspace.inspector.show(prefs.tab, announce: prefs.visible) }
     }

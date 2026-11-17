@@ -29,6 +29,13 @@ final class WorkspaceView: NSView {
     private var contentToInspector: NSLayoutConstraint!
     private var contentToEdge: NSLayoutConstraint!
     private(set) var inspectorVisible = true
+    /// The panel's width (inspector.width), dragged by its edge.
+    private(set) var inspectorPoints = UILooks.pt(DesignTokens.Inspector.width)
+    /// The sidebar was folded to make room for the panel in a narrow window: it comes back when
+    /// the panel closes (docs/spec/inspector.md, "Janela estreita").
+    private var sidebarFoldedForInspector = false
+    /// Below this the center is too narrow for the sidebar and the panel side by side (the spec).
+    static let narrowWindow: CGFloat = 1000
     private let explorer: ExplorerController
     private let contentPanel = PanelView()
     private var sidebarWidth: NSLayoutConstraint!
@@ -62,7 +69,7 @@ final class WorkspaceView: NSView {
         let gap = Self.gap
         sidebarWidth = sidebarPanel.widthAnchor.constraint(equalToConstant: Self.sidebarWidth)
         contentLeading = contentPanel.leadingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: gap)
-        inspectorWidth = inspector.widthAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Inspector.width))
+        inspectorWidth = inspector.widthAnchor.constraint(equalToConstant: inspectorPoints)
         contentToInspector = contentPanel.trailingAnchor.constraint(equalTo: inspector.leadingAnchor, constant: -gap)
         contentToEdge = contentPanel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -gap)
         NSLayoutConstraint.activate([
@@ -121,9 +128,19 @@ final class WorkspaceView: NSView {
 
     /// inspector.toggle and the saved inspector.visible. Closed, the panel is hidden, so no tab of
     /// it reads (docs/spec/inspector.md).
-    func setInspector(visible: Bool) {
-        let opening = visible && !inspectorVisible
+    /// `launching`: the saved state applied when the window opens, which folds the sidebar the
+    /// same way in a narrow window (review of 2026-11-17: only a later open did).
+    func setInspector(visible: Bool, launching: Bool = false) {
+        let opening = visible && (!inspectorVisible || launching)
+        let closing = !visible && inspectorVisible
         inspectorVisible = visible
+        if opening, sidebarVisible, (window?.frame.width ?? .infinity) < Self.narrowWindow {
+            setSidebar(visible: false)
+            sidebarFoldedForInspector = true
+        } else if closing, sidebarFoldedForInspector {
+            setSidebar(visible: true)
+            sidebarFoldedForInspector = false
+        }
         inspector.isHidden = !visible
         contentToInspector.isActive = visible
         contentToEdge.isActive = !visible
@@ -133,9 +150,30 @@ final class WorkspaceView: NSView {
         if opening, let tab = inspector.tab { inspector.show(tab) }
     }
 
+    /// The panel's width, within the settings' range and what the window leaves after the sidebar
+    /// and a center of `minCenter` (a 640 pt panel in a 700 pt window squeezed the terminals to
+    /// nothing: review of 2026-11-17).
+    func setInspector(width: CGFloat) {
+        var room = CGFloat.infinity
+        if let window {
+            room = window.frame.width - (sidebarVisible ? Self.sidebarWidth + Self.gap : 0) - Self.minCenter - Self.gap * 2
+        }
+        inspectorPoints = max(min(width, room), UILooks.pt(DesignTokens.Inspector.width) / 2)
+        inspectorWidth.constant = inspectorPoints
+    }
+
+    /// The least the terminals keep beside the panel.
+    static let minCenter: CGFloat = 320
+
     /// The view.toggle-sidebar command.
     func toggleSidebar() {
-        sidebarVisible.toggle()
+        // The owner chose: the panel no longer brings the sidebar back when it closes.
+        sidebarFoldedForInspector = false
+        setSidebar(visible: !sidebarVisible)
+    }
+
+    private func setSidebar(visible: Bool) {
+        sidebarVisible = visible
         sidebarPanel.isHidden = !sidebarVisible
         sidebarWidth.constant = sidebarVisible ? Self.sidebarWidth : 0
         contentLeading.constant = sidebarVisible ? Self.gap : 0

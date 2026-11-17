@@ -16,6 +16,12 @@ public final class InspectorView: NSView {
 
     /// A tab came into view: the app makes or refreshes its content only then.
     public var onShow: ((String) -> Void)?
+    /// The left edge dragged: the width asked, and whether the drag ended (the app saves it).
+    public var onResize: ((CGFloat, Bool) -> Void)? {
+        get { edge.onDrag }
+        set { edge.onDrag = newValue }
+    }
+    private let edge = InspectorEdge()
     public private(set) var tab: String?
     private let tabs: [InspectorTab]
     private let run: (String) -> Void
@@ -41,7 +47,8 @@ public final class InspectorView: NSView {
         buildScopeRow()
         let border = line(I.borderLeft)
         let underTabs = line(I.Tabs.borderBottom)
-        for view in [tabRow, underTabs, scopeRow, content, border] as [NSView] {
+        edge.currentWidth = { [weak self] in self?.bounds.width ?? 0 }
+        for view in [tabRow, underTabs, scopeRow, content, border, edge] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
@@ -52,6 +59,11 @@ public final class InspectorView: NSView {
             border.bottomAnchor.constraint(equalTo: bottomAnchor),
             border.leadingAnchor.constraint(equalTo: leadingAnchor),
             border.widthAnchor.constraint(equalToConstant: hairline),
+            // Under the tab row: the strip must not catch a click meant for the first tab.
+            edge.topAnchor.constraint(equalTo: underTabs.bottomAnchor),
+            edge.bottomAnchor.constraint(equalTo: bottomAnchor),
+            edge.leadingAnchor.constraint(equalTo: leadingAnchor),
+            edge.widthAnchor.constraint(equalToConstant: InspectorEdge.grab),
             tabRow.topAnchor.constraint(equalTo: topAnchor),
             tabRow.leadingAnchor.constraint(equalTo: leadingAnchor),
             tabRow.trailingAnchor.constraint(equalTo: trailingAnchor),
