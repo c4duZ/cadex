@@ -204,6 +204,22 @@ de tokens.
 - **Files e History não foram desenhadas:** são a árvore de arquivos e o histórico do git de hoje,
   com as linhas e os tokens das abas acima (plano 26 desenha as duas antes de implementar).
 
+### InspectorFiles.dc.html — peça · O painel da direita, aba Files (a aprovar)
+- A árvore de arquivos da seleção (a pasta da tarefa ou do projeto), uma linha de 28 por item:
+  ▸/▾ nas pastas, o ícone do tipo (o Material do app, no lugar dos blocos coloridos do desenho),
+  o nome em 13, e à direita a letra do git (M âmbar, A verde); arquivo mudado tem o nome em âmbar.
+  Cada nível recua 16. O arquivo aberto no centro fica com o fundo e o contorno da linha escolhida.
+- As ações de hoje continuam no cabeçalho da aba e no clique direito (novo arquivo, nova pasta,
+  recolher, renomear, revelar…).
+
+### InspectorHistory.dc.html — peça · O painel da direita, aba History (a aprovar)
+- Os commits da seleção, do mais novo para baixo, cada um em duas linhas: à esquerda a faixa do
+  grafo (linha de 2 e um ponto de 10: azul cheio no commit de onde se está, contorno nos outros);
+  a mensagem em 13 (seminegrito no atual) com as etiquetas de branch e tag; embaixo "autor · há
+  quanto · hash curto".
+- Clicar num commit abre os arquivos dele logo abaixo (letra, caminho, +/−) e marca a linha;
+  clicar num arquivo abre o diff no centro. O resto como hoje (`docs/spec/inspector.md`).
+
 ### StatusBar.dc.html — peça · A barra de status
 - Esquerda: "cadex · main ↑3", "● 3 working" (azul), "● 2 need you" (âmbar).
 - Direita: "Terminal ⌃`", "Memory · 214 pages", a etiqueta âmbar "Claude bkdg 84% · resets 3h" (só

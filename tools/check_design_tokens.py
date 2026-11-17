@@ -159,9 +159,9 @@ def check_screens(plans_dir):
     listed = set()
     for name in PLANS:
         path = plans_dir / name
-        for line in (path.read_text() if path.exists() else "").splitlines():
-            if line.lstrip("- ").startswith("Telas:"):
-                listed |= set(re.findall(r"[A-Za-z]+\.dc\.html", line))
+        # The "Telas:" item, with the lines that continue it (indented, not a new item).
+        for item in re.findall(r"^- Telas:.*(?:\n  .*)*", path.read_text() if path.exists() else "", re.M):
+            listed |= set(re.findall(r"[A-Za-z]+\.dc\.html", item))
     problems = [f"screens.md: {m} sem descrição" for m in sorted(mockups - described)]
     problems += [f"screens.md: descreve {m}, que não existe" for m in sorted(described - mockups)]
     problems += [f"{m} não está na linha Telas: de nenhum plano da moldura" for m in sorted(mockups - listed)]

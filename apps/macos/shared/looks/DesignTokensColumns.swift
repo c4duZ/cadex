@@ -254,5 +254,69 @@ public extension DesignTokens {
                 public static let lineHeight: CGFloat = DesignTokens.LineHeight.relaxed
             }
         }
+        public enum Tree {
+            public static let rowHeight: CGFloat = 28
+            public static let indent: CGFloat = 16
+            public static let padding = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
+            public static let gap: CGFloat = 6
+            public static let radius: CGFloat = DesignTokens.Radius.control
+            public static let chevron: CGFloat = 12
+            public static var chevronColor: NSColor { DesignTokens.Color.textTertiary }
+            public enum Name {
+                public static let fontSize: CGFloat = DesignTokens.FontSize.body
+                public static var color: NSColor { DesignTokens.Color.textRow }
+                public static var changed: NSColor { DesignTokens.Color.accentAmberText }
+            }
+            public enum Mark {
+                public static let fontSize: CGFloat = DesignTokens.FontSize.chip
+                public static var weight: NSFont.Weight { DesignTokens.FontWeight.bold }
+                public static var modified: NSColor { DesignTokens.Color.accentAmberText }
+                public static var added: NSColor { DesignTokens.Color.accentGreenText }
+            }
+            public enum Selected {
+                public static var bg: NSColor { DesignTokens.Color.bgSelected }
+                public static var shadow: [DesignTokens.ShadowLayer] { DesignTokens.Shadow.selectedRow }
+            }
+        }
+        public enum Commit {
+            public static let padding = NSEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
+            public static let gap: CGFloat = 8
+            public static let radius: CGFloat = DesignTokens.Radius.control
+            public enum Lane {
+                public static let width: CGFloat = 14
+                public static var line: NSColor { DesignTokens.Color.lineControl }
+                public static let stroke: CGFloat = DesignTokens.Stroke.glyph
+            }
+            public enum Dot {
+                public static let size: CGFloat = 10
+                public static var ring: NSColor { DesignTokens.Color.textSecondary }
+                public static var head: NSColor { DesignTokens.Color.stateWorking }
+            }
+            public enum Title {
+                public static let fontSize: CGFloat = DesignTokens.FontSize.body
+                public static var weight: NSFont.Weight { DesignTokens.FontWeight.medium }
+                public static var headWeight: NSFont.Weight { DesignTokens.FontWeight.semibold }
+                public static var color: NSColor { DesignTokens.Color.textRow }
+            }
+            public enum Meta {
+                public static let fontSize: CGFloat = DesignTokens.FontSize.small
+                public static var color: NSColor { DesignTokens.Color.textMuted }
+            }
+            public enum Ref {
+                public static let fontSize: CGFloat = DesignTokens.FontSize.chip
+                public static var weight: NSFont.Weight { DesignTokens.FontWeight.semibold }
+                public static let padding = NSEdgeInsets(top: 1, left: 6, bottom: 1, right: 6)
+                public static let radius: CGFloat = DesignTokens.Radius.chip
+                public static var bg: NSColor { DesignTokens.Color.chipGroupBg }
+                public static var color: NSColor { DesignTokens.Color.chipGroupText }
+            }
+            public enum File {
+                public static let height: CGFloat = 24
+                public static let padding = NSEdgeInsets(top: 0, left: 6, bottom: 0, right: 6)
+                public static let radius: CGFloat = DesignTokens.Radius.tag
+                public static let fontSize: CGFloat = DesignTokens.FontSize.meta
+                public static var color: NSColor { DesignTokens.Color.textTerminalDim }
+            }
+        }
     }
 }

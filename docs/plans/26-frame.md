@@ -18,7 +18,8 @@ power, updates · Decisões: `docs/adr/0035-work-frame.md` · Mockups: 1 (o mapa
 - Painel da direita lendo com ele fechado: cada aba lê só enquanto aparece, como as páginas de hoje.
 
 ## Como eu quero
-- Telas: TitleBar.dc.html, StatusBar.dc.html, Inspector.dc.html, Main.dc.html, Bell.dc.html (descritas em `docs/design/work-frame/screens.md`; cada uma implementada como a
+- Telas: TitleBar.dc.html, StatusBar.dc.html, Inspector.dc.html, InspectorFiles.dc.html,
+  InspectorHistory.dc.html, Main.dc.html, Bell.dc.html (descritas em `docs/design/work-frame/screens.md`; cada uma implementada como a
   seção dela diz, e conferida lado a lado com o mockup).
 - Tokens: components.titleBar, components.search, components.breadcrumb, components.tab,
   components.titleIconButton, components.badge, components.statusBar, components.inspector,

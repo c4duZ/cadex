@@ -49,6 +49,54 @@ body{margin:0}
     </div>
   </sc-if>
 
+
+  <sc-if value="{{isFiles}}" hint-placeholder-val="{{ false }}">
+    <div style="flex: 1; padding: 4px 6px; overflow: hidden">
+      <sc-for list="{{tree}}" as="n" hint-placeholder-count="10">
+        <div style="{{n.row}}">
+          <span style="{{n.chevron}}"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="{{n.chevronPath}}"></path></svg></span>
+          <span style="{{n.icon}}"></span>
+          <span style="{{n.name}}">{{n.label}}</span>
+          <span style="{{n.markStyle}}">{{n.mark}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isHistory}}" hint-placeholder-val="{{ false }}">
+    <div style="flex: 1; padding: 4px 6px; overflow: hidden">
+      <sc-for list="{{commits}}" as="c" hint-placeholder-count="8">
+        <div style="{{c.row}}">
+          <div style="position: relative; width: 14px; flex: none; align-self: stretch">
+            <span style="position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: #2A2D33"></span>
+            <span style="{{c.dot}}"></span>
+          </div>
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+            <div style="display: flex; align-items: center; gap: 6px; min-width: 0">
+              <span style="{{c.titleStyle}}">{{c.title}}</span>
+              <sc-for list="{{c.refs}}" as="r" hint-placeholder-count="1">
+                <span style="font-size: 10.5px; font-weight: 600; padding: 1px 6px; border-radius: 5px; background: #1D2230; color: #9BB8F0; flex: none">{{r}}</span>
+              </sc-for>
+            </div>
+            <span style="font-size: 11.5px; color: #8A9099">{{c.meta}}</span>
+            <sc-if value="{{c.files}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 2px; margin-top: 6px">
+                <sc-for list="{{c.files}}" as="f" hint-placeholder-count="2">
+                  <div style="height: 24px; display: flex; align-items: center; gap: 8px; padding: 0 6px; border-radius: 6px; font-size: 12px; color: #B5B9C0">
+                    <span style="width: 14px; font-size: 10.5px; font-weight: 700; color: {{f.color}}">{{f.kind}}</span>
+                    <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{f.name}}</span>
+                    <span style="font-size: 11px; color: #6FCF97">+{{f.added}}</span>
+                    <span style="font-size: 11px; color: #F08A8A">−{{f.removed}}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
   <sc-if value="{{isMemory}}" hint-placeholder-val="{{ false }}">
     <div style="flex: 1; display: flex; flex-direction: column; gap: 14px; padding: 6px 14px; overflow: hidden">
       <div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: #0F1012; border: 1px solid #1F2125; color: #8A9099">
@@ -80,13 +128,58 @@ body{margin:0}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"tab":{"editor":"enum","options":["changes","files","history","memory"],"default":"changes"},"$preview":{"width":320,"height":826}}'>
 class Component extends DCLogic {
+  tree() {
+    const rows = [
+      [0, 'dir', 'apps', true, ''], [1, 'dir', 'macos', true, ''], [2, 'dir', 'app', true, ''],
+      [3, 'swift', 'AutomationRunWiring.swift', false, 'M', true], [3, 'swift', 'WorkspaceView.swift', false, ''],
+      [2, 'dir', 'features', false, ''], [1, 'dir', 'windows', false, ''], [0, 'dir', 'core', false, ''],
+      [0, 'dir', 'docs', true, ''], [1, 'md', 'orchestration.md', false, 'M'], [1, 'md', 'CONTEXT.md', false, ''],
+      [0, 'md', 'README.md', false, ''], [0, 'make', 'Makefile', false, ''],
+    ];
+    const iconColor = { dir: '#9BC1FF', swift: '#F2B65E', md: '#9BB8F0', make: '#9BA0A8' };
+    return rows.map(([depth, kind, label, open, mark, selected]) => ({
+      label, mark,
+      row: 'height: 28px; display: flex; align-items: center; gap: 6px; padding: 0 8px 0 ' + (8 + depth * 16) + 'px; border-radius: 7px; ' + (selected ? 'background: #1F2226; box-shadow: inset 0 0 0 1px #2C3036' : ''),
+      chevron: 'width: 12px; height: 12px; flex: none; color: #7C828B; display: flex; ' + (kind === 'dir' ? '' : 'visibility: hidden'),
+      chevronPath: open ? 'M4 6l4 4 4-4' : 'M6 4l4 4-4 4',
+      icon: 'width: 14px; height: 12px; flex: none; border-radius: ' + (kind === 'dir' ? '3px' : '2px') + '; background: ' + iconColor[kind],
+      name: 'flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; color: ' + (mark ? '#F2B65E' : '#D5D7DB'),
+      markStyle: 'font-size: 10.5px; font-weight: 700; color: ' + (mark === 'A' ? '#6FCF97' : '#F2B65E'),
+    }));
+  }
+  commits() {
+    const dot = (head) => 'position: absolute; left: 2px; top: 5px; width: 10px; height: 10px; border-radius: 50%; box-sizing: border-box; ' + (head ? 'background: #5B9CF5' : 'background: #131417; border: 2px solid #9BA0A8');
+    const list = [
+      { title: 'Wake check for the agenda', meta: 'Claude · 4m · a41c9e2', refs: ['orchestration-e'], head: true, open: true },
+      { title: 'Automations: the LaunchAgent and its dates', meta: 'Claude · 1h · 7d03b11', refs: [] },
+      { title: 'The schedule: next, due, missed', meta: 'Claude · 2h · 19be4f0', refs: [] },
+      { title: 'fix: the bell’s cards show their heading', meta: 'Codex · 3h · 01b3c82', refs: ['main'] },
+      { title: 'make perf: the subagent’s closed weight', meta: 'Claude · 5h · a6fdddb', refs: [] },
+      { title: 'plan 24 phase F: many agents in make perf', meta: 'Claude · yesterday · 9684c1d', refs: ['v2.6.0'] },
+    ];
+    return list.map((c) => ({ ...c,
+      dot: dot(c.head),
+      row: 'display: flex; gap: 8px; padding: 6px 8px; border-radius: 7px; ' + (c.open ? 'background: #1F2226; box-shadow: inset 0 0 0 1px #2C3036' : ''),
+      titleStyle: 'min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; font-weight: ' + (c.head ? 600 : 500) + '; color: #D5D7DB',
+      files: c.open ? [
+        { kind: 'M', color: '#F2B65E', name: 'app/AutomationRunWiring.swift', added: 36, removed: 4 },
+        { kind: 'A', color: '#6FCF97', name: 'orchestration/AutomationSchedule.swift', added: 128, removed: 0 },
+      ] : null,
+    }));
+  }
   renderVals() {
     const tab = this.props.tab ?? 'changes';
     const labels = [['changes', 'Changes'], ['files', 'Files'], ['history', 'History'], ['memory', 'Memory']];
     return {
       isChanges: tab === 'changes',
       isMemory: tab === 'memory',
-      scope: tab === 'memory' ? 'cadex · the project’s memory, shared by every task and account' : 'orchestration-e · against main',
+      isFiles: tab === 'files',
+      isHistory: tab === 'history',
+      scope: tab === 'memory' ? 'cadex · the project’s memory, shared by every task and account'
+        : tab === 'files' ? 'orchestration-e · cadex.worktrees/orchestration-e'
+        : tab === 'history' ? 'orchestration-e · 3 commits ahead of main' : 'orchestration-e · against main',
+      tree: this.tree(),
+      commits: this.commits(),
       tabs: labels.map(([id, label]) => ({ label, style: 'padding: 7px 9px; font-size: 12.5px; ' + (id === tab ? 'font-weight: 600; color: #E7E8EA; border-bottom: 2px solid #E7E8EA' : 'color: #8A9099; border-bottom: 2px solid transparent') })),
       files: [
         { kind: 'M', kindColor: '#F2B65E', name: 'AutomationRunWiring.swift', dir: 'app', added: 36, removed: 4 },
