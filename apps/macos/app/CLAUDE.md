@@ -2,7 +2,7 @@
 
 ## O que eu quero
 - Só o ponto de entrada: criar o NSApplication, as janelas e ligar as features.
-- Várias janelas (⌘N, window.new): cada uma com workspace, projetos, explorer, busca, git e comandos
+- Várias janelas (⇧⌘N, window.new; o ⌘N é Nova tarefa desde o plano 29): cada uma com workspace, projetos, explorer, busca, git e comandos
   próprios; só a principal (a que abriu com o app) salva os projetos (docs/spec/workspace.md).
 
 ## O que eu não quero
@@ -18,7 +18,7 @@
   `../../windows/app/app_commands.zig`, e na lista "Abrir" de `../../../docs/spec/command-palette.md`.
 - `ProjectsWiring.swift`: os projetos na janela (plano 27; abas de cada projeto ligadas à barra de status e ao
   preview, documentos reabertos, pasta do workspace devolvida); `tabs` da `WindowSession` é sempre a
-  do projeto que aparece, então os comandos agem nela. Janela aberta pelo ⌘N tem projetos sem arquivo. project.new (`chooseProjectFolder`) pede a pasta, abre-a no workspace e mostra o projeto dela; aberto com uma pasta na linha de comando, os projetos voltam e a pasta vira o projeto dela (`startProjects`).
+  do projeto que aparece, então os comandos agem nela. Janela aberta pelo ⇧⌘N tem projetos sem arquivo. project.new (`chooseProjectFolder`) pede a pasta, abre-a no workspace e mostra o projeto dela; aberto com uma pasta na linha de comando, os projetos voltam e a pasta vira o projeto dela (`startProjects`).
 - `FolderFollow.swift`: o workspace segue o terminal com foco; a cada `cd` vai para a raiz do
   repositório git da pasta (ou a própria pasta), a menos que explorer.followTerminal desligue.
 - Antes de montar qualquer tela, `main.swift` define Strings.language pelo general.language (ADR
@@ -27,7 +27,7 @@
   reabre em segundo plano, com o arquivo de projetos dela).
 - `main.swift` (AppDelegate) guarda o que as janelas dividem: configurações, a janela de
   configurações, o keymap e o despachante de atalhos, que trocam para os comandos da janela com
-  foco (`sessionBecameKey`). Abre a janela principal e as do ⌘N (`newWindow`, na pasta da janela de
+  foco (`sessionBecameKey`). Abre a janela principal e as do ⇧⌘N (`newWindow`, na pasta da janela de
   onde veio, deslocada um passo). Sair pergunta uma vez pelos programas e arquivos de todas as
   janelas.
 - `WindowSession.swift`: uma janela. Cria o `WorkspaceFolder`, o explorer, a busca, o git e os projetos
@@ -235,8 +235,11 @@
   abre o projeto escolhido e o agente da conta escolhida com o pedido por arquivo
   (RaceLaunch.localCommand, ADR 0036), no terminal que o projeto recém-aberto trouxe; numa cópia
   separada, worktrees.new-task; os cartões rodam tab.new, agents.open-account (⇧⌘A),
-  worktrees.new-task e orchestration.new-race; os recentes com o estado dos terminais; Clone… pede o
-  endereço e a pasta e digita o `git clone` numa aba lá.
+  worktrees.new-task e orchestration.new-race; os recentes com o estado dos terminais; sem projeto
+  nenhum, Tarefa e Corrida pedem a pasta antes. Clone… pede o endereço e a pasta, digita o `git
+  clone` numa aba lá e, terminado com o repositório na pasta (`CloneWatch`, uma olhada por
+  segundo), abre o projeto dele e fecha o da pasta-mãe aberto só para isso; CADEX_PERF_HOME_CLONE o
+  roda sem as perguntas.
 - `PaneHeaderWiring.swift` (plano 28 fase B): o que o cabeçalho de cada painel diz de um agente
   ("Claude", a tarefa, o modelo, a conta; o custo e o tempo), calculado quando um agente desta janela
   muda e uma vez por minuto, e guardado em `PaneDetails` (o cabeçalho só lê; o modelo e o custo do

@@ -187,6 +187,19 @@ public final class ProjectsController {
         if TabsController.shouldClose([tabs], in: tabs.hostWindow, what: T("the project", "o projeto"), then: close) { close() }
     }
 
+    /// The project of `folder` closed, asking as project.close does (the home screen's Clone…
+    /// closes the parent folder's project it opened only to clone).
+    public func close(folder: String) {
+        guard let index = projects.firstIndex(where: { $0.folder == folder }) else { return }
+        let tabs = projects[index].tabs
+        let close: @MainActor () -> Void = { [weak self, weak tabs] in
+            tabs?.closeAll()
+            guard let self, let at = self.projects.firstIndex(where: { $0.folder == folder }) else { return }
+            self.remove(at: at)
+        }
+        if TabsController.shouldClose([tabs], in: tabs.hostWindow, what: T("the project", "o projeto"), then: close) { close() }
+    }
+
     private func remove(at index: Int) {
         guard projects.indices.contains(index) else { return }
         let wasActive = index == activeIndex

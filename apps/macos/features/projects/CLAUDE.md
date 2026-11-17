@@ -18,13 +18,13 @@
   pasta (o do repositório dela) ou mostra o que já existe; `rename` vazio volta ao nome da pasta.
   Salva meio segundo depois de cada mudança (`onStateChange` das abas) e na hora ao sair; restaura em
   `start` (sem nada salvo, o projeto da pasta de abertura; aberto pelo Dock, `openFolder` falso,
-  nenhum projeto e `onNone`, a tela de início). Sem `fileURL` (janela do ⌘N, passageira)
+  nenhum projeto e `onNone`, a tela de início). Sem `fileURL` (janela do ⇧⌘N, passageira)
   não lê nem grava nada. `closeAll()` ao fechar a janela: salva uma última vez e encerra os shells;
   os que o daemon do terminal mantém (terminal.keepSessions) são soltos e seguem rodando (plano 19,
   fase E2). A última aba de um projeto fecha o projeto; fechar o último (project.close ou a última aba) deixa
   a janela sem projeto e chama `onNone`, que mostra a tela de início (plano 29); a janela do ⌘N
   fecha. `recent`: os projetos usados por último, abertos ou fechados, até 8, salvos no arquivo
-  (SavedProjects.Recent, a lista RECENT PROJECTS); `forgetRecent` tira um.
+  (SavedProjects.Recent, a lista RECENT PROJECTS); `forgetRecent` tira um; `close(folder:)` fecha um projeto pela pasta (o Clone… da tela de início).
 - `ProjectsFile.swift`: o JSON em Application Support/Cadex/projects.json (gravação atômica), com os
   projetos (nome, pasta, abas, cor), o ativo, a pasta do workspace e os recentes; uma lista vazia
   (a tela de início) é um arquivo bom. Arquivo ilegível vai para

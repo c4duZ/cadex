@@ -84,6 +84,15 @@ public enum HomeWords {
         return terminals > 0 ? .open(open) : .closed
     }
 
+    /// The folder `git clone` makes from an address: its last part without ".git"
+    /// ("https://github.com/o/repo.git" and "git@host:o/repo" are "repo").
+    public static func cloneFolder(_ address: String) -> String {
+        var last = address.trimmingCharacters(in: CharacterSet(charactersIn: "/ ")).split(whereSeparator: { $0 == "/" || $0 == ":" }).last.map(String.init) ?? ""
+        if last.hasSuffix(".git") { last.removeLast(4) }
+        let safe = last.filter { $0.isLetter || $0.isNumber || "._-".contains($0) }
+        return safe.isEmpty || safe.hasPrefix(".") ? "repository" : safe
+    }
+
     /// "~/Cadu/Trabalho/cadex": the home folder as ~.
     public static func shortPath(_ path: String, home: String = NSHomeDirectory()) -> String {
         path == home ? "~" : path.hasPrefix(home + "/") ? "~" + path.dropFirst(home.count) : path

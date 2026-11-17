@@ -51,6 +51,7 @@ tokens components.home).
 ## Critérios de aceite
 - [x] Sem projeto aberto, a tela de início aparece; com um projeto da última vez, o Cadex abre nele
       (2026-11-17, instância de teste aberta sem pasta).
+- [x] Clone… clona num terminal e abre o projeto clonado (2026-11-17, um repositório local, no app).
 - [ ] Cada cartão roda o comando dele (terminal, agente, folha Nova tarefa, folha com dois agentes).
 - [ ] Clicar num recente abre o projeto com as abas dele.
 - [ ] Tudo da tela está no ⌘K (home.show e os comandos dos cartões).

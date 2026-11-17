@@ -17,6 +17,12 @@ let exitCode = await Checks.run([
         expect(HomeWords.state(terminals: 3, needYou: 0, finished: nil) == .open("3 terminals open"))
         expect(HomeWords.state(terminals: 0, needYou: 0, finished: nil) == .closed)
     }),
+    ("Clone's folder: the address's last part without .git, never a path", {
+        expect(HomeWords.cloneFolder("https://github.com/o/repo.git") == "repo")
+        expect(HomeWords.cloneFolder("git@github.com:o/site") == "site")
+        expect(HomeWords.cloneFolder("https://x.org/a/b/") == "b")
+        expect(HomeWords.cloneFolder("..") == "repository" && HomeWords.cloneFolder("") == "repository")
+    }),
     ("when, and the home folder as ~", {
         let now = Date()
         expect(HomeWords.when(now, now: now) == "now" && HomeWords.when(now - 240, now: now) == "4m")

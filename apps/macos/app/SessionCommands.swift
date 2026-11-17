@@ -39,7 +39,8 @@ extension WindowSession {
         commands.register(app.settingsPageCommands)
         commands.register(Command(
             id: "window.new", title: T("New Window", "Nova janela"), keywords: ["new window", "janela"], category: .file,
-            defaultShortcut: "cmd+n", action: .run { [weak self] in
+            // ⇧⌘N: ⌘N is New Task (plan 29; the mockups).
+            defaultShortcut: "cmd+shift+n", action: .run { [weak self] in
                 guard let self else { return }
                 self.app.newWindow(from: self)
             }))

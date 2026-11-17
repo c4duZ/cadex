@@ -50,6 +50,8 @@ public enum WorktreesCommands {
         return [
             Command(id: "worktrees.new-task", title: T("New Task", "Nova tarefa"),
                     keywords: ["task", "worktree", "branch", "agent", "tarefa", "nova"], category: .terminal,
+                    // ⌘N: the way in for a task, and with a second agent a race (plan 29; the mockups).
+                    defaultShortcut: "cmd+n",
                     action: .run { actions.newTask() }),
             Command(id: "worktrees.open", title: T("Open Task…", "Abrir tarefa…"),
                     keywords: ["task", "worktree", "open", "tarefa", "abrir"], category: .terminal,

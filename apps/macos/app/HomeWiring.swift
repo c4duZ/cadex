@@ -107,6 +107,7 @@ extension WindowSession {
     /// (ADR 0036: the owner asked, so no orchestration switch); in a separate copy, New Task.
     private func homeSubmit(_ text: String) {
         if homeChoice.separateCopy {
+            guard homeChoice.project != nil else { return chooseProjectFolder() }
             homeOpenProject()
             _ = commands.run("worktrees.new-task")
             return
@@ -206,10 +207,32 @@ extension WindowSession {
 
     /// Each card runs its command in the chosen project (the home folder without one).
     private func homeCard(_ card: HomeCard) {
+        // A task needs a repository: with no project at all, Open Folder first (the spec).
+        if card == .task || card == .race, homeChoice.project == nil { return chooseProjectFolder() }
         let opened = homeOpenProject()
         // Terminal on a project just opened: the terminal it came with is the one.
         if card == .terminal, opened.fresh { return }
         _ = commands.run(Self.homeCommand(card))
+    }
+
+    /// `git clone` in a terminal of the parent folder, in sight; when it ends with the repository
+    /// there, its project opens, and the parent's project goes if it was opened only for this.
+    func homeCloneRun(_ address: String, into parent: String) {
+        let name = HomeWords.cloneFolder(address)
+        let target = (parent as NSString).appendingPathComponent(name)
+        let before = projects?.projects.count ?? 0
+        homeOpen(parent)
+        let fresh = (projects?.projects.count ?? 0) > before
+        if !fresh { tabs?.newTab(cwd: parent) }
+        guard let terminal = tabs?.activeTerminal else { return }
+        func quoted(_ text: String) -> String { "'" + text.replacingOccurrences(of: "'", with: "'\\''") + "'" }
+        terminal.typeWhenReady("git clone " + quoted(address) + " " + quoted(name) + "\n")
+        CloneWatch(terminal: terminal, target: target) { [weak self] in
+            self?.homeOpen(target)
+            if fresh, let parentProject = self?.projects?.projects.first(where: { target.hasPrefix($0.folder + "/") })?.folder {
+                self?.projects?.close(folder: parentProject)
+            }
+        }.start()
     }
 
     /// Clone…: the address, then where; `git clone` runs in a terminal there, in sight.
@@ -234,13 +257,52 @@ extension WindowSession {
                 panel.beginSheetModal(for: self.window) { picked in
                     MainActor.assumeIsolated {
                         guard picked == .OK, let parent = panel.url?.path else { return }
-                        self.homeOpen(parent)
-                        let quoted = "'" + address.replacingOccurrences(of: "'", with: "'\\''") + "'"
-                        self.tabs?.newTab(cwd: parent)
-                        self.tabs?.activeTerminal?.typeWhenReady("git clone " + quoted + "\n")
+                        self.homeCloneRun(address, into: parent)
                     }
                 }
             }
         }
+    }
+}
+
+/// Watches a Clone… terminal: git runs, then the shell is back at its prompt (looked at once a
+/// second, for at most an hour); with the repository there, `done`.
+@MainActor
+final class CloneWatch {
+    private weak var terminal: TerminalView?
+    private let target: String
+    private let done: () -> Void
+    private var started = false
+    private var ticks = 0
+    private var clock: Timer?
+
+    init(terminal: TerminalView, target: String, done: @escaping () -> Void) {
+        self.terminal = terminal
+        self.target = target
+        self.done = done
+    }
+
+    func start() {
+        let clock = Timer(timeInterval: 1, repeats: true) { [self] _ in MainActor.assumeIsolated { self.tick() } }
+        RunLoop.main.add(clock, forMode: .common)
+        self.clock = clock
+    }
+
+    private func tick() {
+        ticks += 1
+        guard let terminal, ticks < 3600 else { return stop() }
+        if terminal.hasForegroundProcess { started = true; return }
+        // Back at the prompt with the repository there: done, even when git was too quick to be
+        // seen running (a local clone, under a second). Not seen running after 30 s: it failed at
+        // once, or was never typed; stop looking.
+        let cloned = FileManager.default.fileExists(atPath: target + "/.git")
+        guard cloned || started || ticks > 30 else { return }
+        stop()
+        if cloned { done() }
+    }
+
+    private func stop() {
+        clock?.invalidate()
+        clock = nil
     }
 }

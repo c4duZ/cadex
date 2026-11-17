@@ -20,7 +20,7 @@ ação do app (ADR 0005). Quando existirem, acha também abas, spaces e arquivos
   embaixo. Abre na hora, sem animação perceptível.
 - Com o campo vazio, lista em seções com título. Primeiro "Abrir", as formas de abrir coisas ao
   lado do terminal, com nome próprio: Terminal em nova aba (⌘T), Terminal ao lado (⌘D), Terminal abaixo (⇧⌘D),
-  Arquivo… (⌘P), Preview web, Preview web em nova aba, Nova janela (⌘N). O grafo do git saiu daqui e
+  Arquivo… (⌘P), Preview web, Preview web em nova aba, Nova janela (⇧⌘N). O grafo do git saiu daqui e
   dos menus "+" (o dono, 2026-10-22); continua no ⌘K pelo nome. Depois "Recentes" e uma seção por área (Abas, Painéis, Arquivos,
   Busca, Editor, Terminal, Git, Web e mídia, Spaces, Editar, Cadex), cada uma em ordem alfabética.
   O dono sentiu falta das seções e de ter as aberturas primeiro (2026-10-19).

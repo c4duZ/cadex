@@ -14,7 +14,8 @@
 ## Como eu quero
 - `HomeModel.swift`: o que a tela mostra, puro e testado: `HomeState` (o projeto, o agente, o lugar,
   os recentes), `HomeRecent` (o estado em cor: precisa de você, terminou, aberto, fechado, pasta
-  sumida) e `HomeWords` (a saudação pela hora, o "quando", o estado de um projeto aberto, o ~).
+  sumida) e `HomeWords` (a saudação pela hora, o "quando", o estado de um projeto aberto, o ~, a pasta que o
+  `git clone` cria).
 - `HomeView.swift`: a coluna de 760 pt (a saudação, a caixa do pedido com o nome do projeto como
   botão, "@" abrindo o mesmo menu e o Enter mandando o pedido; os chips do agente e do lugar; o que
   o Enter faz), `HomeCard` (os quatro cartões e os comandos que o app liga) e `HomeCardGrid` (4, 2 ou

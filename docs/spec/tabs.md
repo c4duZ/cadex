@@ -30,7 +30,7 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 - Com terminal.keepSessions ligado (plano 19), fechar a janela principal ou o app deixa os shells das
   abas vivos no daemon do terminal, sem perguntar por programa rodando (ele segue rodando), e reabrir
   religa cada aba ao seu; fechar uma aba ou um painel encerra o shell dele, pedindo confirmação com
-  programa rodando, como hoje. As janelas do ⌘N não salvam spaces: os terminais delas são do app,
+  programa rodando, como hoje. As janelas do ⇧⌘N (window.new) não salvam spaces: os terminais delas são do app,
   como com a opção desligada.
 - ⌘1 a ⌘9 vão para a aba daquela posição. Ctrl+Tab e Ctrl+⇧+Tab alternam pela ordem de uso
   (Ctrl+Tab volta para a aba usada antes da atual).

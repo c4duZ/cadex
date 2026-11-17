@@ -121,6 +121,8 @@ final class TitleBarView: NSView {
     func setTabsHidden(_ hidden: Bool) {
         tabBar?.isHidden = hidden
         newTabButton.isHidden = hidden
+        // No project, no "project › task" (the mockup's "All projects · Board" is plan 30's).
+        location.isHidden = hidden
     }
 
     /// Puts a project's tab bar after where you are, "+" right after its tabs.

@@ -58,6 +58,12 @@ extension WindowSession {
                 try? screens.joined(separator: "\n").write(toFile: out, atomically: true, encoding: .utf8)
             }
         }
+        // Clone… without its two questions: "<address>|<parent folder>" (plan 29 phase A).
+        if let clone = environment["CADEX_PERF_HOME_CLONE"], let bar = clone.firstIndex(of: "|") {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                self?.homeCloneRun(String(clone[..<bar]), into: String(clone[clone.index(after: bar)...]))
+            }
+        }
         // The focused pane split to the right, to compare two panes with the Terminals mockup.
         if environment["CADEX_PERF_SPLIT"] != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in _ = self?.commands.run("pane.split-right") }
