@@ -26,9 +26,6 @@ final class TitleBarView: NSView {
         icon: .plus, tip: T("Open a terminal, file, preview or git graph", "Abrir terminal, arquivo, preview ou grafo do git"), kind: .add)
     /// The bell: the requests waiting for you, its count on the badge (docs/spec/agents.md).
     private let bellButton = TitleBarButton(icon: .bell, tip: T("Needs you", "Precisa de você"))
-    /// Keep-awake and the update stay here until plan 26 phase B moves them to the status bar.
-    private let powerButton = TitleBarButton(icon: .coffee, tip: T("Keep awake", "Manter acordado"))
-    private let updateButton = TitleBarButton(icon: .arrowCircleUp, tip: "")
     private let trailing = NSStackView()
     /// The line under the bar.
     private let hairline = NSView()
@@ -45,13 +42,7 @@ final class TitleBarView: NSView {
         search.onPress = { [weak self] in self?.run("palette.open") }
         newTabButton.onPress = { [weak self] in self?.showNewMenu() }
         bellButton.onPress = { [weak self] in self?.run("agents.show-attention") }
-        powerButton.onPress = { [weak self] in self?.run("power.toggle") }
-        updateButton.onPress = { [weak self] in self?.run("app.check-for-updates") }
-        updateButton.setFilled(true)
-        // The update is news, not a tool: in the accent (docs/spec/updates.md).
-        updateButton.tint = DesignTokens.Color.stateWorking
-        updateButton.isHidden = true
-        trailing.setViews([updateButton, powerButton, bellButton], in: .leading)
+        trailing.setViews([bellButton], in: .leading)
         trailing.spacing = UILooks.pt(Look.gap)
 
         location.font = UILooks.font(DesignTokens.Breadcrumb.fontSize)
@@ -113,18 +104,6 @@ final class TitleBarView: NSView {
     /// The bell's count: what needs you, and finished agents you have not seen.
     func setBell(count: Int) {
         bellButton.setBadge(count)
-    }
-
-    /// Keep-awake's icon: filled while on; the tip says the state.
-    func setPower(on: Bool, tip: String) {
-        powerButton.setFilled(on)
-        HoverTip.attach(tip, to: powerButton)
-    }
-
-    /// The update button: hidden with nothing to install, its tip the state.
-    func setUpdate(visible: Bool, tip: String) {
-        updateButton.isHidden = !visible
-        HoverTip.attach(tip, to: updateButton)
     }
 
     /// Puts a project's tab bar after where you are, "+" right after its tabs.

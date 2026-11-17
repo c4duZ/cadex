@@ -4,9 +4,10 @@ import Strings
 import Menus
 import UILooks
 
-/// The status bar's Agent usage item (docs/spec/agents.md, Accounts): the
-/// account of the agent in the focused terminal, or the last one shown,
-/// with its logo, name, a bar of the 5 hour session that takes the free room and "5h · wk".
+/// The status bar's Agent usage item (docs/spec/agents.md; the new frame's StatusBar): the
+/// account of the agent in the focused terminal, or the last one shown, as "Claude bkdg 84% ·
+/// resets 3h", the amber chip from 80% (plan 26 phase B; the logo and the session's bar of
+/// before left with the new frame's mockup).
 /// The pointer over it opens a popover with every account of every
 /// provider (the owner, 2026-10-21). The app watches the usage while the
 /// item shows and says which account the terminal's agent uses.
@@ -29,19 +30,30 @@ public final class AgentUsageStrip: NSView {
     }
     private(set) var last: String?
     private let stack = NSStackView()
+    private let chip = NSView()
     private var card: HoverCard?
 
     public init() {
         super.init(frame: .zero)
         HoverHighlight.attach(self)
-        stack.spacing = 5
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(stack)
+        // The amber fill on its own view: the hover highlight paints and clears this view's layer,
+        // which took the chip's fill away after a hover (review of 2026-11-17).
+        chip.wantsLayer = true
+        chip.layer?.cornerRadius = UILooks.pt(DesignTokens.StatusBar.UsageChip.radius)
+        stack.spacing = UILooks.pt(DesignTokens.StatusBar.iconGap)
+        for view in [chip, stack] {
+            view.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(view)
+        }
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 6),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
+            chip.leadingAnchor.constraint(equalTo: leadingAnchor),
+            chip.trailingAnchor.constraint(equalTo: trailingAnchor),
+            chip.topAnchor.constraint(equalTo: topAnchor),
+            chip.bottomAnchor.constraint(equalTo: bottomAnchor),
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: UILooks.pt(DesignTokens.StatusBar.UsageChip.padding.left)),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -UILooks.pt(DesignTokens.StatusBar.UsageChip.padding.right)),
             stack.centerYAnchor.constraint(equalTo: centerYAnchor),
-            heightAnchor.constraint(equalToConstant: UILooks.pt(20)),
+            heightAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.StatusBar.itemHeight)),
         ])
         render()
         card = HoverCard(over: self) { [weak self] in AgentUsageCard.make(colors: self?.colors ?? AgentColors()) }
@@ -62,46 +74,32 @@ public final class AgentUsageStrip: NSView {
     public func render() {
         if !stack.arrangedSubviews.isEmpty, window != nil { fade() }
         stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        let usage = AgentUsageController.shared
-        guard let account = shown() else {
-            stack.addArrangedSubview(AgentText.label(T("Usage", "Uso"), size: 11, color: colors.secondary))
-            return
-        }
-        let logo = NSImageView(image: account.logo.image(size: UILooks.pt(12)))
-        logo.contentTintColor = colors.secondary
-        stack.addArrangedSubview(logo)
-        let name = AgentText.label(account.name, size: 11, color: colors.text)
+        let line = Self.line(for: shown())
+        let text = AgentText.label(line.text, size: DesignTokens.StatusBar.fontSize, color: DesignTokens.StatusBar.color)
+        text.font = UILooks.monospacedDigits(DesignTokens.StatusBar.fontSize, weight: line.warn ? Chip.weight : .regular)
+        text.textColor = line.warn ? Chip.color : DesignTokens.StatusBar.color
         // A long account name is cut, not pushing the bar (the owner, 2026-10-22).
-        name.widthAnchor.constraint(lessThanOrEqualToConstant: UILooks.pt(150)).isActive = true
-        stack.addArrangedSubview(name)
-        guard let numbers = usage.states[account.dir]?.usage else {
-            stack.addArrangedSubview(AgentText.label("–", size: 11, color: colors.secondary))
-            return
-        }
-        if let session = numbers.session {
-            let meter = AgentMeter(share: session.percent / 100, color: AgentMeter.color(session.percent, accent: colors.accent), track: colors.secondary)
-            fit(meter)
-            stack.addArrangedSubview(meter)
-        }
-        let text = AgentText.label(Self.short(numbers), size: 11, color: colors.secondary)
-        text.font = UILooks.monospacedDigits(11)
+        text.lineBreakMode = .byTruncatingMiddle
+        text.widthAnchor.constraint(lessThanOrEqualToConstant: UILooks.pt(DesignTokens.Tab.maxTitle) * 2).isActive = true
         stack.addArrangedSubview(text)
+        chip.layer?.backgroundColor = line.warn ? Chip.bg.cgColor : nil
         card?.refresh()
     }
 
-    /// The bar takes the status bar's free room, from 40 pt up to 88 pt: at
-    /// 30 pt it was too small to read, at 136 (half the popover's bars) too
-    /// long (the owner, 2026-10-21). Below the other items' resistance, so it gives
-    /// way first when the window narrows.
-    private func fit(_ meter: NSView) {
-        let wide = meter.widthAnchor.constraint(equalToConstant: UILooks.pt(88))
-        wide.priority = NSLayoutConstraint.Priority(240)
-        NSLayoutConstraint.activate([
-            wide,
-            meter.widthAnchor.constraint(greaterThanOrEqualToConstant: UILooks.pt(40)),
-            meter.widthAnchor.constraint(lessThanOrEqualToConstant: UILooks.pt(88)),
-        ])
-        meter.setContentCompressionResistancePriority(NSLayoutConstraint.Priority(240), for: .horizontal)
+    typealias Chip = DesignTokens.StatusBar.UsageChip
+
+    /// "Claude bkdg 84% · resets 3h": the account and its 5 hour session, as the mockup writes
+    /// it; `warn` from the chip's threshold (80%), when the item becomes the amber chip
+    /// (docs/spec/status-bar.md).
+    static func line(for account: AgentAccount?, usage: AgentUsageController = .shared) -> (text: String, warn: Bool) {
+        guard let account else { return (T("Usage", "Uso"), false) }
+        let who = (account.provider == .codex ? "Codex " : "Claude ") + account.name
+        guard let numbers = usage.states[account.dir]?.usage, let window = numbers.session ?? numbers.week else {
+            return (who + " –", false)
+        }
+        let percent = Int(window.percent.rounded())
+        let resets = window.resets.map { T(" · resets ", " · reinicia ") + AgentResetTime.text($0) } ?? ""
+        return ("\(who) \(percent)%\(resets)", window.percent > Chip.showAbovePercent)
     }
 
     /// The account's switch fades in, as the bar's other texts do.
@@ -111,12 +109,6 @@ public final class AgentUsageStrip: NSView {
         fade.type = .fade
         fade.duration = 0.18
         stack.layer?.add(fade, forKey: "fade")
-    }
-
-    /// "19% 5h · 97% wk"
-    static func short(_ numbers: AgentUsage) -> String {
-        [numbers.session.map { "\(Int($0.percent.rounded()))% 5h" }, numbers.week.map { "\(Int($0.percent.rounded()))% wk" }]
-            .compactMap { $0 }.joined(separator: " · ")
     }
 
     /// "New sessions use": the Claude accounts in use, the active one checked.

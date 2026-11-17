@@ -18,7 +18,7 @@ A barra tem dois lados, esquerda e direita, e cada lado é uma lista de itens em
 | Folder | a trilha "Home › Cadu › Trabalho › cadex" do terminal com foco | desligado |
 | Terminal | "Terminal ⌃`": mostra ou esconde a gaveta de terminais | ligado, direita |
 | Memory | "Memory · 214 pages": abre a aba Memory do painel da direita | ligado, direita |
-| Agent usage | a conta mais perto do limite: "Claude bkdg 84% · resets 3h", em etiqueta âmbar acima de 80% e texto comum abaixo (`agents.md`) | ligado, direita |
+| Agent usage | a conta do agente do terminal com foco, ou a última (a escolha do dono, 2026-10-21): "Claude bkdg 84% · resets 3h", em etiqueta âmbar acima de 80% e texto comum abaixo; passar o ponteiro abre todas as contas (`agents.md`) | ligado, direita |
 | Environment | "Local" no macOS (no Windows, a distro WSL), ou a máquina onde roda | ligado, direita |
 | Keep awake | o café, sempre à vista como era na barra de título: cheio ligado, contorno desligado; o clique roda power.toggle (`power.md`) | ligado, direita |
 | Update | "Update to 2.6": só com versão nova para instalar; o clique roda app.check-for-updates (`updates.md`) | ligado, direita, só com versão nova |

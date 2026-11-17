@@ -67,25 +67,34 @@ public final class StatusLabel: NSView {
     private var textCap: NSLayoutConstraint?
     /// The text in the accent or a warning color; nil for the quiet one.
     public var tint: NSColor? { didSet { restyle() } }
-    var color: NSColor = .secondaryLabelColor { didSet { restyle() } }
+    var color: NSColor = DesignTokens.StatusBar.color { didSet { restyle() } }
+    /// A state's dot before the text ("● 3 working", the mockup's StatusBar); nil hides it.
+    public var dot: NSColor? { didSet { restyle() } }
     private let icon: NSImageView?
+    private let dotView = NSView()
     private let label = NSTextField(labelWithString: "")
 
     public init(icon: Icon?, tip: String? = nil) {
-        self.icon = icon.map { NSImageView(image: $0.image(size: UILooks.pt(12))) }
+        typealias Look = DesignTokens.StatusBar
+        self.icon = icon.map { NSImageView(image: $0.image(size: UILooks.pt(Look.icon))) }
         super.init(frame: .zero)
-        label.font = UILooks.monospacedDigits(11)
+        label.font = UILooks.monospacedDigits(Look.fontSize)
         label.lineBreakMode = .byTruncatingTail
-        let views = [self.icon, label].compactMap { $0 }
+        dotView.wantsLayer = true
+        dotView.layer?.cornerRadius = UILooks.pt(Look.dot) / 2
+        dotView.isHidden = true
+        let views = [self.icon, dotView, label].compactMap { $0 }
         let stack = NSStackView(views: views)
-        stack.spacing = 4
+        stack.spacing = UILooks.pt(Look.iconGap)
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: StatusBarView.itemInset),
             stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -StatusBarView.itemInset),
             stack.centerYAnchor.constraint(equalTo: centerYAnchor),
-            heightAnchor.constraint(equalToConstant: UILooks.pt(20)),
+            heightAnchor.constraint(equalToConstant: UILooks.pt(Look.itemHeight)),
+            dotView.widthAnchor.constraint(equalToConstant: UILooks.pt(Look.dot)),
+            dotView.heightAnchor.constraint(equalToConstant: UILooks.pt(Look.dot)),
         ])
         HoverTip.attach(tip, to: self)
         setAccessibilityElement(true)
@@ -95,6 +104,11 @@ public final class StatusLabel: NSView {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("StatusLabel is created in code") }
+
+    /// Another icon, in its fill weight when `filled` (the coffee while keeping awake).
+    public func setIcon(_ kind: Icon, filled: Bool) {
+        icon?.image = kind.image(size: UILooks.pt(DesignTokens.StatusBar.icon), filled: filled)
+    }
 
     /// The words read on hover (RAM's free part, each SSH host).
     public func setTip(_ tip: String?) {
@@ -114,5 +128,7 @@ public final class StatusLabel: NSView {
     private func restyle() {
         label.textColor = tint ?? color
         icon?.contentTintColor = tint ?? color
+        dotView.isHidden = dot == nil
+        dotView.layer?.backgroundColor = dot?.cgColor
     }
 }

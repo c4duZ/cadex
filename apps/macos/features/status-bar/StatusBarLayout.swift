@@ -8,8 +8,11 @@ import Strings
 /// tested without a window.
 public enum StatusBarLayout {
     /// The bar from before it had items: the folder and the environment.
-    public static let defaultLeft = ["folder"]
-    public static let defaultRight = ["environment"]
+    /// The new frame's bar (docs/design/work-frame/screens.md, StatusBar): the project and the
+    /// agents on the left; the memory, the usage, keep-awake, the update and where it runs on the
+    /// right (the drawer's Terminal item joins in plan 30).
+    public static let defaultLeft = ["project", "agents"]
+    public static let defaultRight = ["memory", "usage", "keepAwake", "update", "environment"]
 
     /// The saved sides against the ids the app knows: unknown ids, and an
     /// id listed again (on the same side or the other), are dropped and noted.

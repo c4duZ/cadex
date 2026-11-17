@@ -51,15 +51,17 @@
   os centra em 38), a busca `TitleBarSearch.swift` ("Search ⌘K", abre a paleta), "projeto ›
   tarefa" (`location(of:)`: `<repo>.worktrees/<tarefa>` é o projeto e a tarefa), as abas e "+",
   e à direita o sino com o número (`setBell`, de `AgentsAttention.swift`); o café e a
-  atualização ficam nela até a fase B levá-los à barra de status; o botão da barra lateral, o de
-  space e o das configurações saíram (⌘B, ⇧⌘S e ⌘, no ⌘K, nos atalhos e no menu). Cada botão é
+  atualização foram para a barra de status (fase B, `StatusBarItems.swift`); o botão da barra
+  lateral, o de space e o das configurações saíram (⌘B, ⇧⌘S e ⌘, no ⌘K, nos atalhos e no menu). Cada botão é
   um `TitleBarButton.swift` (components.titleIconButton: 30 pt, aceso quando o que abre está
   aberto, com o número do sino), todos por comando; nada de valor digitado
   (`../../../tools/check_design_literals.py`), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
   painel lateral recolhível, barra de status) e `SidebarWiring.swift` (o catálogo da feature `sidebar`: a árvore do explorer, o painel do git e o histórico compacto como páginas, a busca como ação; salva sidebar.items e põe a contagem de mudanças no ícone do Git; `openCustomize` abre a janela
   Customize única na aba pedida, com as abas da barra lateral e da barra de status desta janela, nas
   cores do tema como as configurações e não nas da janela, e a repinta quando o tema muda) e
-  `StatusBarWiring.swift` (os itens Git branch e Terminals, e os lados salvos). `AgentsLaunch.swift`:
+  `StatusBarWiring.swift` (os itens Git branch e Terminals, e os lados salvos) e `StatusBarItems.swift`
+  (plano 26, fase B: Project com o branch, Agents em duas contagens com o ponto de estado, Memory,
+  o café e a atualização, que saíram da barra de título; `showPower`/`showUpdate` os atualizam). `AgentsLaunch.swift`:
   esconder contas guardando quem está logado (os ids do oauthAccount, nunca o login), a aba Accounts do Customize e o clique numa conta: o agente dela
   já rodando num terminal do Cadex vem para a frente (o usado por último, em qualquer janela); sem
   nenhum, abre no terminal com foco (no prompt) ou numa aba nova. `AgentsAccounts.swift`: as contas

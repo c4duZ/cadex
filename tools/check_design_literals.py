@@ -25,6 +25,10 @@ FRAME_FILES = [
     "apps/macos/app/TitleBarSearch.swift",  # plano 26
     "apps/macos/features/tabs/TabBarView.swift",  # plano 26
     "apps/macos/features/tabs/TabBarDrag.swift",  # plano 26
+    "apps/macos/app/StatusBarItems.swift",  # plano 26
+    "apps/macos/features/status-bar/StatusBarView.swift",  # plano 26
+    "apps/macos/features/status-bar/StatusItem.swift",  # plano 26
+    "apps/macos/features/agents/AgentUsageStrip.swift",  # plano 26
 ]
 # A design value: any number but a bare 0 or 1 (those are counts, identities and the hairline
 # of an edge, not mockup values; review of 2026-11-17).

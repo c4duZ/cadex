@@ -185,7 +185,7 @@ public final class UpdateController {
         }
     }
 
-    /// Whether the title bar shows its button.
+    /// Whether the status bar shows the update item (plan 26 phase B; the title bar before).
     public var showsButton: Bool {
         switch state {
         case .available, .downloading, .installed: true
@@ -193,7 +193,7 @@ public final class UpdateController {
         }
     }
 
-    /// What the title bar's button says on hover.
+    /// What the status bar's update item says, and on hover.
     public var buttonTip: String {
         switch state {
         case .downloading(let done, let total):

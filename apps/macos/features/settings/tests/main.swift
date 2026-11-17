@@ -12,7 +12,7 @@ let exitCode = await Checks.run([
         let old = read(#"{"appearance": {"theme": "caffeine", "darkTheme": "caffeine"}}"#)
         expect(old.appearance.theme == "cadex-night", old.appearance.theme)
         expect(old.appearance.darkTheme == "caffeine", "a dark theme was a choice: it stays")
-        expect(read(#"{"version": 3}"#).version == 3, "a newer file keeps its version")
+        expect(read(#"{"version": 4}"#).version == 4, "a newer file keeps its version")
         expect(read(#"{"appearance": {"theme": "dracula"}}"#).appearance.theme == "dracula")
         expect(read(#"{"version": 2, "appearance": {"theme": "caffeine"}}"#).appearance.theme == "caffeine")
         expect(Settings().appearance.theme == "cadex-night")
@@ -186,6 +186,18 @@ let exitCode = await Checks.run([
         store.load()
         expect(store.settings.terminal.fontSize == 18)
         expect(seen == [13, 16, 18], "\(seen)")
+    }),
+    ("the status bar of before moves to the new frame's; an arranged one keeps its items (plan 26 B)", {
+        func read(_ json: String) -> Settings.StatusBar { SettingsFile.read(Data(json.utf8)).0.statusBar }
+        let old = read(#"{"version": 2, "statusBar": {"left": ["folder"], "right": ["environment"]}}"#)
+        expect(old == Settings.StatusBar(), "\(old)")
+        let mine = read(#"{"version": 2, "statusBar": {"left": ["folder", "ram"], "right": ["branch", "environment"]}}"#)
+        expect(mine.left == ["project", "ram"] && mine.right == ["environment", "keepAwake", "update"], "\(mine)")
+        let oneSide = read(#"{"version": 2, "statusBar": {"left": ["folder", "ram"]}}"#)
+        expect(oneSide.left == ["project", "ram"] || oneSide.left == ["folder", "ram"], "\(oneSide)")
+        expect(oneSide.right == ["environment", "keepAwake", "update"], "the side not written was the old default: \(oneSide)")
+        let now = read(#"{"version": 3, "statusBar": {"left": ["folder"], "right": []}}"#)
+        expect(now.left == ["folder"] && now.right.isEmpty, "a version 3 file is left alone")
     }),
     ("an old file is moved once and written back, so a later hand edit to Caffeine stays", {
         let file = FileManager.default.temporaryDirectory.appendingPathComponent("cadex-settings-\(UUID())/settings.json")

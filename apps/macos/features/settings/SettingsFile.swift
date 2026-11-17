@@ -192,7 +192,7 @@ public enum SettingsFile {
             }
         }
         problems = reader.problems
-        migrate(&settings, from: root["version"] as? Int ?? 1)
+        migrate(&settings, from: root["version"] as? Int ?? 1, root: root)
         return (settings, problems)
     }
 
@@ -202,9 +202,35 @@ public enum SettingsFile {
     /// light themes were empty by default, so Caffeine there was a choice and
     /// stays (review of 2026-11-17). A file of a newer app keeps its version.
     /// SettingsStore saves right after, so it happens once.
-    static func migrate(_ settings: inout Settings, from version: Int) {
+    static func migrate(_ settings: inout Settings, from version: Int, root: [String: Any] = [:]) {
         if version < 2, settings.appearance.theme == "caffeine" { settings.appearance.theme = "cadex-night" }
+        if version < 3 {
+            // A side the old file did not write had the old default, not the new one (review of
+            // 2026-11-17: a file with only `left` got the new frame's whole right side).
+            let bar = root["statusBar"] as? [String: Any]
+            if bar?["left"] == nil { settings.statusBar.left = ["folder"] }
+            if bar?["right"] == nil { settings.statusBar.right = ["environment"] }
+            migrateStatusBar(&settings.statusBar)
+        }
         settings.version = max(version, Settings.currentVersion)
+    }
+
+    /// The new frame's status bar (plan 26 phase B): the old default becomes the new one; a bar
+    /// someone arranged stays theirs, with Folder and Git branch shown together becoming Project,
+    /// and keep-awake and the update joining on the right, since they leave the title bar where
+    /// they were always in sight (docs/spec/status-bar.md).
+    static func migrateStatusBar(_ bar: inout Settings.StatusBar) {
+        let defaults = Settings.StatusBar()
+        if bar.left == ["folder"] && bar.right == ["environment"] {
+            bar = defaults
+            return
+        }
+        let shown = bar.left + bar.right
+        if shown.contains("folder") && shown.contains("branch") {
+            bar.left = bar.left.map { $0 == "folder" ? "project" : $0 }.filter { $0 != "branch" }
+            bar.right = bar.right.map { $0 == "folder" ? "project" : $0 }.filter { $0 != "branch" }
+        }
+        for id in ["keepAwake", "update"] where !(bar.left + bar.right).contains(id) { bar.right.append(id) }
     }
 
     /// The version a file says it has: 1 for a file from before versions.

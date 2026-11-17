@@ -35,8 +35,8 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | trecho | "spaceButton" em `apps/macos/app/TitleBarView.swift` | saiu | o botão de space saiu da barra; space.switch no ⌘K até virar project.switch (plano 27) | 26 |
 | trecho | "spaceActions" em `apps/macos/app/PaletteWiring.swift` | saiu | o menu do clique direito no botão de space | 26 |
 | trecho | "sidebarButton" em `apps/macos/app/TitleBarView.swift` | saiu | ⌘B e view.toggle-sidebar no ⌘K | 26 |
-| comando | `power.toggle` no café da barra | muda | item da barra de status | 26 |
-| comando | `app.check-for-updates` no botão da barra | muda | etiqueta na barra de status, só com versão nova | 26 |
+| trecho | "powerButton" em `apps/macos/app/TitleBarView.swift` | saiu | o café é o item keepAwake da barra de status (power.toggle) | 26 |
+| trecho | "updateButton" em `apps/macos/app/TitleBarView.swift` | saiu | o item update da barra de status, só com versão nova (app.check-for-updates) | 26 |
 | trecho | "settingsButton" em `apps/macos/app/TitleBarView.swift` | saiu | só ⌘, e o menu | 26 |
 | arquivo | `apps/macos/features/tabs/TabBarView.swift` | muda | as abas com estado e a largura do título (components.tab), feito | 26 |
 | arquivo | `apps/macos/features/tabs/TabAgentTitle.swift` | muda | vira a peça de estado das fundações | 25 |

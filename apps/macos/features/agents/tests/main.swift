@@ -259,27 +259,13 @@ let exitCode = await Checks.run([
         expect(strip.shown()?.dir == "/a")
         strip.focused = nil
         expect(strip.shown()?.dir == "/a", "no agent in the terminal: the last one")
-        // The bar takes the free room, between 40 and 88 pt, and gives
-        // way first when a long left side pushes on it.
-        strip.focused = "/b"
-        func meterWidth(_ width: CGFloat, left: String) -> CGFloat {
-            let bar = NSView(frame: NSRect(x: 0, y: 0, width: width, height: 24))
-            let label = NSTextField(labelWithString: left)
-            label.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
-            for view in [label, strip] as [NSView] { view.translatesAutoresizingMaskIntoConstraints = false; bar.addSubview(view) }
-            NSLayoutConstraint.activate([label.leadingAnchor.constraint(equalTo: bar.leadingAnchor), label.trailingAnchor.constraint(lessThanOrEqualTo: strip.leadingAnchor),
-                                         strip.trailingAnchor.constraint(equalTo: bar.trailingAnchor), label.centerYAnchor.constraint(equalTo: bar.centerYAnchor),
-                                         strip.centerYAnchor.constraint(equalTo: bar.centerYAnchor)])
-            bar.layoutSubtreeIfNeeded()
-            let found = strip.subviews.first?.subviews.first { $0 is AgentMeter }?.frame.width ?? -1
-            strip.removeFromSuperview()
-            return found
-        }
-        let roomy = meterWidth(900, left: "folder")
-        let tight = meterWidth(320, left: String(repeating: "long folder name ", count: 8))
-        expect(roomy == 88, "roomy: \(roomy)")
-        expect(tight >= 40 && tight < 88, "tight: \(tight)")
-        expect(AgentUsageStrip.short(AgentUsage(session: .init(percent: 19.4, resets: nil), week: .init(percent: 97, resets: nil), sonnetWeek: nil)) == "19% 5h · 97% wk")
+        // The new frame's line: who and the 5 hour session; the amber chip only above 80%.
+        expect(AgentUsageStrip.line(for: b).text == "Codex B 10%" && !AgentUsageStrip.line(for: b).warn)
+        usage.states["/b"] = .ready(AgentUsage(session: .init(percent: 80, resets: nil), week: nil, sonnetWeek: nil), Date())
+        expect(!AgentUsageStrip.line(for: b).warn, "80% is not above 80%")
+        usage.states["/b"] = .ready(AgentUsage(session: .init(percent: 84, resets: nil), week: nil, sonnetWeek: nil), Date())
+        expect(AgentUsageStrip.line(for: b).warn && AgentUsageStrip.line(for: b).text == "Codex B 84%")
+        expect(AgentUsageStrip.line(for: nil).text == "Usage")
         if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
             usage.plans["/a"] = "team"
             usage.states["/a"] = .ready(AgentUsage(session: .init(percent: 19, resets: Date().addingTimeInterval(4000)),

@@ -2,8 +2,10 @@
 
 ## O que eu quero
 - A barra embaixo da janela montada por quem usa: itens à esquerda e à direita, em ordem, escondidos
-  ou não, arrastados entre os lados (plano 17, fase B). Sem configuração, a de sempre: a trilha da
-  pasta e o ambiente.
+  ou não, arrastados entre os lados (plano 17, fase B), na cara da moldura nova (plano 26, fase B;
+  components.statusBar). Sem configuração, a do mockup: Project e Agents à esquerda; Memory, o uso,
+  o café, a atualização e o ambiente à direita (StatusBarLayout.defaultLeft e defaultRight; a
+  barra padrão de antes passa para essa uma vez, pelo SettingsFile.migrate da feature settings).
 
 ## O que eu não quero
 - Item escondido, ou janela fora da tela, pesando: sem timer, sem leitura, sem requisição (regra do
@@ -13,8 +15,8 @@
 
 ## Como eu quero
 - `StatusItem.swift`: o item (id, título, linha do Customize, ícone, lado de costume, view) e
-  `onVisible`, que liga e desliga a leitura dele; `StatusLabel`, a cara da maioria (ícone, texto,
-  cor de alerta, dica, clique que roda um comando).
+  `onVisible`, que liga e desliga a leitura dele; `StatusLabel`, a cara da maioria (ícone, ponto de
+  estado, texto, cor de alerta, dica, clique que roda um comando), nos tokens da barra.
 - `SlidingStack.swift`: cada lado da barra; os itens que mudam de lugar deslizam do lugar antigo
   (transform, sem mexer no layout) e os textos que mudam esmaecem. StatusLabel.maxTextWidth corta
   um texto longo (o branch).

@@ -35,7 +35,12 @@ power, updates · Decisões: `docs/adr/0035-work-frame.md` · Mockups: 1 (o mapa
   direita quadro, sino (com o número) e painel da direita. Saem dela: o botão de space (o comando
   fica no ⌘K até o plano 27), o café, a atualização e as configurações. TabBarView.swift na cara
   nova. Arrastar, renomear e o menu das abas continuam.
-- **B. Barra de status.** Na cara da peça StatusBar: projeto e branch, quantos trabalham e quantos
+- **B. Barra de status.** Feita (2026-11-17), revisada e conferida na galeria: a cara dos tokens, os
+  itens Project, Agents (duas contagens com o ponto de estado), Memory (sem a contagem de páginas:
+  nada lê a wiki só para o item), o café e a atualização (saíram da barra de título), a etiqueta
+  de uso no formato do mockup e âmbar acima de 80% (ainda a conta do terminal com foco, a escolha
+  do dono de 2026-10-21; o popover com todas as contas fica), o padrão novo e a migração única
+  (versão 3). Plano original: Na cara da peça StatusBar: projeto e branch, quantos trabalham e quantos
   precisam de você, Memória, a conta mais perto do limite (etiqueta âmbar acima de 80%), Local ou a
   máquina. Novos itens: o café (power.toggle) e a atualização (só com versão nova). A etiqueta de
   uso abre um popover com as contas (o conteúdo da página Accounts: uso, recarregar, abrir conta,

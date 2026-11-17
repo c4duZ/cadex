@@ -2,9 +2,10 @@
 
 ## O que eu quero
 - Atualizar o Cadex com um clique: procura versão nova em segundo plano depois de abrir e a cada 6
-  horas; achando, mostra um botão na barra de título e abre a janela sozinha (uma vez por abertura)
+  horas; achando, mostra o item Update na barra de status (plano 26 fase B; antes um botão
+  na barra de título) e abre a janela sozinha (uma vez por abertura)
   com Instalar e reabrir, Depois e Não lembrar de novo, que só deixa de abrir a janela para aquela
-  versão (o botão fica).
+  versão (o item fica).
   Spec: `../../../../docs/spec/updates.md`; decisão: `../../../../docs/adr/0016-in-app-updates.md`.
 
 ## O que eu não quero
@@ -14,7 +15,7 @@
 
 ## Como eu quero
 - `UpdateController.swift`: a porta de entrada, uma para o app inteiro. Estados idle, checking,
-  upToDate, available, downloading, installed e failed; `onChange` avisa a barra de título. A versão
+  upToDate, available, downloading, installed e failed; `onChange` avisa o item da barra de status. A versão
   pulada fica no UserDefaults (updates.skippedVersion): é estado, não preferência do settings.json.
   `CADEX_UPDATE_FEED` troca o latest.json (URL ou caminho) para testar uma release antes de
   publicar. Fora do pacote .app (`make run`) não procura e os comandos ficam indisponíveis.

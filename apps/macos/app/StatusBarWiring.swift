@@ -21,6 +21,7 @@ extension WindowSession {
         // The panel reads the status anyway; the item only shows it.
         git.onBranch = { [weak self, weak branch, weak branchItem] info in
             self?.showSidebarBranch(info)
+            self?.showProject(branch: info)
             guard let branch, branchItem?.isVisible == true else { return }
             branch.text = info.map { Self.branchText($0) } ?? ""
             branch.toolTip = info.map { Self.branchText($0) }
@@ -34,7 +35,8 @@ extension WindowSession {
         terminalsItem.onVisible = { [weak self] visible in if visible { self?.countTerminals() } }
         self.terminalsLabel = terminals
         self.terminalsItem = terminalsItem
-        bar.add([branchItem, terminalsItem, makeAgentsItem(), makeUsageItem(), makePortsItem(), makeSSHItem(), makeDockerItem()] + SystemItems.all { [weak self] in _ = self?.commands.run("statusBar.activity-monitor") })
+        bar.add([makeProjectItem(), branchItem, terminalsItem, makeAgentsItem(), makeMemoryItem(), makeUsageItem(),
+                 makeKeepAwakeItem(), makeUpdateItem(), makePortsItem(), makeSSHItem(), makeDockerItem()] + SystemItems.all { [weak self] in _ = self?.commands.run("statusBar.activity-monitor") })
         bar.run = { [weak self] id in _ = self?.commands.run(id) }
         bar.onLayoutChange = { [weak self] left, right in
             self?.settings.store.update {

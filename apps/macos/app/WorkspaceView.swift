@@ -158,7 +158,6 @@ final class WorkspaceView: NSView {
         // close to the text (plan 15, phase B).
         sidebar.setColors(.init(text: ui.textOnTabActive.nsColor, secondary: ui.secondaryText.nsColor, fill: ui.tabActive.nsColor,
                                 accent: ui.accent.nsColor))
-        statusBar.style = .init(text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor)
         let style = TabBarView.Style(
             activeFill: ui.tabActive.nsColor, hoverFill: ui.tabActive.color(alpha: 0.5),
             text: ui.textOnTabActive.nsColor, secondaryText: ui.secondaryText.nsColor, accent: ui.accent.nsColor)

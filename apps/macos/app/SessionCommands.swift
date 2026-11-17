@@ -232,6 +232,7 @@ extension WindowSession {
     func showLocation(_ root: String) {
         let (project, task) = TitleBarView.location(of: root)
         workspace?.titleBar.setLocation(project: project, task: task)
+        showProject(branch: lastBranch)
     }
 
     /// The status bar follows the focused terminal's folder, and its folder

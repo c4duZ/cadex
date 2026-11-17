@@ -11,19 +11,9 @@ import UILooks
 /// window on screen), so a hidden one costs nothing.
 @MainActor
 public final class StatusBarView: NSView {
-    public static var height: CGFloat { UILooks.rowHeight(26) }
+    typealias Look = DesignTokens.StatusBar
+    public static var height: CGFloat { UILooks.rowHeight(Look.height) }
 
-    public struct Style {
-        public var text: NSColor
-        public var secondaryText: NSColor
-
-        public init(text: NSColor, secondaryText: NSColor) {
-            self.text = text
-            self.secondaryText = secondaryText
-        }
-    }
-
-    public var style = Style(text: .labelColor, secondaryText: .secondaryLabelColor) { didSet { restyle() } }
     /// The folder shown; nil while unknown.
     public var path: String? {
         get { folder.path }
@@ -49,7 +39,9 @@ public final class StatusBarView: NSView {
     private let folder = FolderTrail()
     private let environment = StatusLabel(icon: nil)
     /// The space each item keeps around its content, where its hover fill shows.
-    public static let itemInset: CGFloat = 6
+    public static var itemInset: CGFloat { UILooks.pt(Look.itemInset) }
+    /// The line over the bar.
+    private let hairline = NSView()
     private let leftStack = SlidingStack()
     private let rightStack = SlidingStack()
 
@@ -64,20 +56,28 @@ public final class StatusBarView: NSView {
         ]
         for stack in [leftStack, rightStack] {
             stack.orientation = .horizontal
-            // 16 pt between texts, as before: each item pads its own 6 pt so
-            // its hover fill surrounds it.
-            stack.spacing = UILooks.pt(16) - 2 * Self.itemInset
+            // The mockup's gap between texts: each item pads its own inset so its hover fill
+            // surrounds it.
+            stack.spacing = UILooks.pt(Look.gap) - 2 * Self.itemInset
             stack.translatesAutoresizingMaskIntoConstraints = false
             addSubview(stack)
         }
         leftStack.setClippingResistancePriority(.defaultLow, for: .horizontal)
         rightStack.setContentCompressionResistancePriority(.required, for: .horizontal)
+        wantsLayer = true
+        hairline.wantsLayer = true
+        hairline.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(hairline)
         NSLayoutConstraint.activate([
-            leftStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12 - Self.itemInset),
+            leftStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: UILooks.pt(Look.padding.left) - Self.itemInset),
             leftStack.centerYAnchor.constraint(equalTo: centerYAnchor),
-            leftStack.trailingAnchor.constraint(lessThanOrEqualTo: rightStack.leadingAnchor, constant: -16),
-            rightStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12 + Self.itemInset),
+            leftStack.trailingAnchor.constraint(lessThanOrEqualTo: rightStack.leadingAnchor, constant: -UILooks.pt(Look.gap)),
+            rightStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -UILooks.pt(Look.padding.right) + Self.itemInset),
             rightStack.centerYAnchor.constraint(equalTo: centerYAnchor),
+            hairline.topAnchor.constraint(equalTo: topAnchor),
+            hairline.leadingAnchor.constraint(equalTo: leadingAnchor),
+            hairline.trailingAnchor.constraint(equalTo: trailingAnchor),
+            hairline.heightAnchor.constraint(equalToConstant: DesignTokens.Stroke.hairline),
         ])
         setLayout(left: StatusBarLayout.defaultLeft, right: StatusBarLayout.defaultRight)
         restyle()
@@ -140,9 +140,13 @@ public final class StatusBarView: NSView {
         views.forEach(stack.addArrangedSubview)
     }
 
+    /// The new frame's bar (components.statusBar): its fill, the line over it and the quiet text,
+    /// the folder's last piece in the primary text.
     private func restyle() {
-        folder.colors = (style.text, style.secondaryText)
-        for item in catalog { (item.view as? StatusLabel)?.color = style.secondaryText }
+        layer?.backgroundColor = Look.bg.cgColor
+        hairline.layer?.backgroundColor = Look.borderTop.cgColor
+        folder.colors = (DesignTokens.Color.textPrimary, Look.color)
+        for item in catalog { (item.view as? StatusLabel)?.color = Look.color }
     }
 
     // MARK: Seen or not

@@ -106,6 +106,10 @@ public extension DesignTokens {
             public static var weight: NSFont.Weight { DesignTokens.FontWeight.semibold }
             public static let showAbovePercent: CGFloat = 80
         }
+        public static let icon: CGFloat = 12
+        public static let itemHeight: CGFloat = 20
+        public static let itemInset: CGFloat = 6
+        public static let iconGap: CGFloat = 4
     }
     enum StateGlyph {
         public static let sizes: [CGFloat] = [7, 9, 10, 14]

@@ -78,9 +78,12 @@ let exitCode = await Checks.run([
         let hidden = StatusBarLayout.toggled(left: ["folder", "ram"], right: [], "ram", side: .right)
         expect(hidden.left == ["folder"] && hidden.right.isEmpty)
     }),
-    ("with nothing set the bar is the one from before: folder left, environment right", {
+    ("with nothing set the bar is the new frame's: project and agents left; memory, usage, keep-awake, update and environment right", {
+        expect(StatusBarLayout.defaultLeft == ["project", "agents"])
+        expect(StatusBarLayout.defaultRight == ["memory", "usage", "keepAwake", "update", "environment"])
+        // The bar alone knows only its own items: the app adds the rest and lays it out again.
         let bar = StatusBarView()
-        expect(bar.left == ["folder"] && bar.right == ["environment"], "\(bar.left) \(bar.right)")
+        expect(bar.left.isEmpty && bar.right == ["environment"], "\(bar.left) \(bar.right)")
     }),
     ("Customize lists Left and Right with the hidden ones under their side, and gives the sides back", {
         let bar = StatusBarView()
@@ -152,7 +155,6 @@ let exitCode = await Checks.run([
         }
         bar.add([label("branch", .gitBranch, "main ↑2"), label("terminals", .terminalWindow, "4"),
                  label("ram", .memory, "12.4 / 16 GB"), label("cpu", .cpu, "18%"), label("cadexMemory", .appWindow, "61 MB", tint: nil)])
-        bar.style = .init(text: .white, secondaryText: NSColor(white: 0.62, alpha: 1))
         bar.path = NSHomeDirectory() + "/Cadu/Trabalho/cadu/cadex"
         bar.setLayout(left: ["folder", "branch"], right: ["terminals", "ram", "cpu", "cadexMemory", "environment"])
         let window = NSWindow(contentRect: bar.frame, styleMask: [.borderless], backing: .buffered, defer: false)

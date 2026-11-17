@@ -5,8 +5,8 @@ import Foundation
 public struct Settings: Equatable, Sendable {
     /// The file's version: what an old file (without it) gets moved to once,
     /// when the defaults change (SettingsFile.migrate). 2: the new frame's
-    /// theme (docs/adr/0035-work-frame.md, 2026-11-17).
-    public static let currentVersion = 2
+    /// theme; 3: the new frame's status bar (docs/adr/0035-work-frame.md, 2026-11-17).
+    public static let currentVersion = 3
     public var version = Settings.currentVersion
 
     public struct General: Equatable, Sendable {
@@ -256,8 +256,8 @@ public struct Settings: Equatable, Sendable {
     public struct StatusBar: Equatable, Sendable {
         /// The items on each side, in order; an item in neither is hidden
         /// (docs/spec/status-bar.md). The app drops unknown ids.
-        public var left = ["folder"]
-        public var right = ["environment"]
+        public var left = ["project", "agents"]
+        public var right = ["memory", "usage", "keepAwake", "update", "environment"]
     }
 
     public var general = General()

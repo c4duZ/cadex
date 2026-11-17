@@ -37,37 +37,15 @@ extension WindowSession {
         return page
     }
 
-    func makeAgentsItem() -> StatusItem {
-        let label = StatusLabel(icon: .sparkle, tip: T("Agents working and waiting for you", "Agentes trabalhando e esperando você"))
-        label.onClick = { [weak self] in _ = self?.commands.run("agents.show") }
-        let item = StatusItem(id: "agents", title: T("Agents", "Agentes"),
-                              subtitle: T("Working ◐ and waiting for you ●", "Trabalhando ◐ e esperando você ●"),
-                              icon: .sparkle, side: .right, view: label)
-        var token: UUID?
-        item.onVisible = { [weak label] visible in
-            if visible {
-                token = AgentsController.shared.watch {
-                    let counts = AgentsController.shared.counts
-                    label?.text = "◐ \(counts.working)  ● \(counts.waiting)"
-                    label?.tint = counts.waiting > 0 ? NSColor.systemBlue : nil
-                }
-            } else if let id = token {
-                AgentsController.shared.stop(id)
-                token = nil
-            }
-        }
-        return item
-    }
-
-    /// Agent usage in the status bar: per account, the session's bar and
-    /// "5h · wk"; reads only while the item shows.
+    /// Agent usage in the status bar: "Claude bkdg 84% · resets 3h" for the focused terminal's
+    /// account, the amber chip above 80%; reads only while the item shows.
     func makeUsageItem() -> StatusItem {
         let strip = AgentUsageStrip()
         strip.onClick = { [weak self] in _ = self?.commands.run("agents.show-accounts") }
         strip.onSetActive = { [weak self] account in self?.setActiveAccount(account) }
         let item = StatusItem(id: "usage", title: T("Agent usage", "Uso dos agentes"),
                               subtitle: T("Each account's 5 h session and week", "A sessão de 5 h e a semana de cada conta"),
-                              icon: .sparkle, side: .left, view: strip)
+                              icon: .sparkle, side: .right, view: strip)
         var token: UUID?
         var sessions: UUID?
         item.onVisible = { [weak strip, weak self] visible in

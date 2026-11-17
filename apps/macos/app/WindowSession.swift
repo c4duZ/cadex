@@ -51,6 +51,11 @@ final class WindowSession: NSObject, NSWindowDelegate {
     let sidebarHistoryHost = NSView()
     /// The status bar's Terminals item (StatusBarWiring.swift).
     var terminalsLabel: StatusLabel?
+    /// The status bar's Project, keep-awake and update items (StatusBarItems.swift).
+    var projectLabel: StatusLabel?
+    var lastBranch: SourceControlController.Branch?
+    var keepAwakeLabel: StatusLabel?
+    var updateLabel: StatusLabel?
     var terminalsItem: StatusItem?
     /// The Agents icon's dot, watched while the icon is in the sidebar (AgentsWiring.swift).
     var agentsDotToken: UUID?
@@ -146,10 +151,12 @@ final class WindowSession: NSObject, NSWindowDelegate {
         showLocation(folder.root)
         // A window opened later shows what already needs you, not only the next change.
         workspace.titleBar.setBell(count: AgentAttention.shared.unseen)
-        showPower()
-        showUpdate()
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
         setUpStatusBar(workspace.statusBar, git: git)
+        // After the status bar's items exist: they show keep-awake and the update (review of
+        // 2026-11-17: before, a new window drew them in the wrong state).
+        showPower()
+        showUpdate()
         explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar("files") }
         git.onOpenFile = { [weak opener] path, beside in opener?.open(path, beside: beside) }
         git.onOpenDiff = { [weak opener] request, beside in opener?.openDiff(request, beside: beside) }
@@ -162,16 +169,6 @@ final class WindowSession: NSObject, NSWindowDelegate {
 
     /// Whether a terminal in any space of this window runs a program.
     var hasRunningProgram: Bool { spaces?.spaces.contains { $0.tabs.hasRunningProgram } ?? false }
-
-    /// Keep-awake's icon in the title bar: filled while on, its tip the state.
-    func showPower() {
-        workspace?.titleBar.setPower(on: app.power.mode != .off, tip: app.powerTip)
-    }
-
-    /// The update button, only while there is one to install or finish.
-    func showUpdate() {
-        workspace?.titleBar.setUpdate(visible: app.updates.showsButton, tip: app.updates.buttonTip)
-    }
 
     /// The menu and the shortcut labels from the keymap in effect.
     func applyKeymap(_ keymap: Keymap) {

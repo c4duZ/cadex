@@ -34,7 +34,7 @@ final class FolderTrail: NSView {
             // (with "less or equal" the trail stretched and pushed it away).
             trail.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -StatusBarView.itemInset),
             trail.centerYAnchor.constraint(equalTo: centerYAnchor),
-            heightAnchor.constraint(equalToConstant: UILooks.pt(20)),
+            heightAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.StatusBar.itemHeight)),
         ])
     }
 
@@ -68,14 +68,14 @@ final class FolderTrail: NSView {
 
     private func title(_ text: String, last: Bool) -> NSAttributedString {
         NSAttributedString(string: text, attributes: [
-            .font: UILooks.font(11, weight: last ? .semibold : .regular),
+            .font: UILooks.font(DesignTokens.StatusBar.fontSize, weight: last ? DesignTokens.FontWeight.semibold : .regular),
             .foregroundColor: last ? colors.text : colors.secondary,
         ])
     }
 
     private func label(_ text: String) -> NSTextField {
         let label = NSTextField(labelWithString: text)
-        label.font = UILooks.font(11)
+        label.font = UILooks.font(DesignTokens.StatusBar.fontSize)
         label.textColor = colors.secondary
         return label
     }
