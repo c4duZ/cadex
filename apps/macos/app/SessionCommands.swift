@@ -120,9 +120,14 @@ extension WindowSession {
                                                customize: { [weak self] in self?.openCustomize("accounts") }))
         commands.register(AgentAccountCommands.commands(palette: palette, actions: accountActions()))
         commands.register(Command(
-            id: "agents.show-history", title: T("Show Agent History", "Mostrar o histórico dos agentes"),
-            keywords: ["history", "conversations", "resume", "claude", "histórico", "conversas", "retomar"], category: .view,
-            action: .run { [weak self] in self?.workspace?.showSidebar("agent-history") }))
+            id: "agents.show-history", title: T("Show Archive & History", "Mostrar o arquivo e histórico"),
+            keywords: ["history", "archive", "conversations", "resume", "claude", "histórico", "arquivo", "conversas", "retomar"], category: .view,
+            // In the center, as a tab (plan 27 phase C): the sidebar becomes the work's tree.
+            action: .run { [weak self] in
+                guard let self, let tabs = self.tabs else { return }
+                // The tab there already: just shown, no page made for nothing (each one observes the theme).
+                tabs.open(tabs.document(identity: AgentHistoryDocument.identity) ?? AgentHistoryDocument(page: self.makeHistoryPage()))
+            }))
         commands.register(AgentHistoryCommands.commands(palette: palette, actions: historyActions(), accountName: Self.accountName))
         commands.register(Command(
             id: "agents.show-attention", title: T("Show What Needs You", "Mostrar o que precisa de você"),

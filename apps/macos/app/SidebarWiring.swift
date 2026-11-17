@@ -24,9 +24,6 @@ extension WindowSession {
         // (docs/spec/sidebar.md, "Cabeçalho da página").
         let catalog = [
             item("agents", .sparkle, T("Agents", "Agentes"), "agents.show", .page(makeAgentsPage())),
-            item("agent-history", .clipboardText, T("History", "Histórico"), "agents.show-history", .page(makeHistoryPage()), actions: [
-                SidebarAction("agents.resume-session", .terminalWindow, T("Resume a Conversation", "Retomar uma conversa")),
-            ]),
             item("tasks", .stack, T("Tasks", "Tarefas"), "worktrees.show", .page(makeTasksPage()), actions: [
                 SidebarAction("worktrees.new-task", .plus, T("New Task", "Nova tarefa")),
             ], more: [

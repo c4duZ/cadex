@@ -39,7 +39,11 @@ agents, tabs, command-palette · Decisões: `docs/adr/0035-work-frame.md` · Moc
   os terminais dele. Clicar num terminal mostra a aba dele; no nome do projeto, a página do projeto
   (plano 30; até lá, os terminais dele). No pé: Automações e Arquivo e histórico. ⌘B recolhe.
   Adicionar projeto.
-- **C. Arquivo e histórico.** A página agent-history passa a abrir no centro, como documento, por
+- **C. Arquivo e histórico.** Feita (2026-11-17, antes da B, para o histórico ter lugar quando a
+  árvore tomar a coluna): agents.show-history abre "Archive & History" numa aba do centro
+  (`apps/macos/features/agents/AgentHistoryDocument.swift`, a mesma página e as mesmas ações); a
+  página saiu da barra lateral (o id em SidebarLayout.retired). Sem atalho: o ⌘⇧H do mockup é do
+  preview web hoje, e o dono decide. Plano original: A página agent-history passa a abrir no centro, como documento, por
   Arquivo e histórico (⌘⇧H), com as mesmas ações (continuar, copiar o comando, revelar).
 - **D. Remoção.** Saem: SidebarIconRow.swift, SidebarIconButton.swift, SidebarLayout.swift, a
   aba Sidebar do Customize, sidebar.customize, `sidebar.toggle-page`, os apelidos

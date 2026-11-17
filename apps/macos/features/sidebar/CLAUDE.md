@@ -36,8 +36,9 @@
 - `SidebarCommands.swift`: sidebar.customize e sidebar.toggle-page (a lista de páginas no ⌘K).
   sidebar.page-1 a -9 (⌃⌘1 a ⌃⌘9) passaram a abrir as abas do painel da direita (plano 26 fase E,
   registrados pelo app em `../../app/InspectorWiring.swift`) e saem no plano 27.
-- O catálogo do app está em `../../app/SidebarWiring.swift`: tasks (as tarefas, plano 19), agents,
-  agent-history (as conversas dos agentes, plano 18), o padrão em `SidebarLayout.swift`. Files, Git,
+- O catálogo do app está em `../../app/SidebarWiring.swift`: tasks (as tarefas, plano 19) e agents, o
+  padrão em `SidebarLayout.swift`; as conversas dos agentes (agent-history) viraram uma aba no centro
+  (plano 27 fase C, o id em SidebarLayout.retired). Files, Git,
   Git History e Memory foram para o painel da direita (plano 26 fase C, `../inspector/`) e Accounts
   para o cartão do item de uso (fase E); a versão 4 das configurações tirou os ids delas do
   sidebar.items uma vez. O sininho saiu para o popover da

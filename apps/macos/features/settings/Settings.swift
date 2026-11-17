@@ -123,7 +123,7 @@ public struct Settings: Equatable, Sendable {
         /// The icons on top of the sidebar, in order; a page left out is
         /// hidden (docs/spec/sidebar.md). The app drops unknown ids.
         /// Files, Git, Git History and Memory went to the right panel (plan 26 phase C).
-        public var items = ["tasks", "agents", "agent-history"]
+        public var items = ["tasks", "agents"]
     }
 
     /// The right panel (docs/spec/inspector.md): open or closed, and its tab, come back on reopen.

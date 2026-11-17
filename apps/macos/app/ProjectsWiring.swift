@@ -1,4 +1,5 @@
 import AppKit
+import Agents
 import CommandPalette
 import Explorer
 import GitHistory
@@ -74,7 +75,11 @@ extension WindowSession {
             folder.open(path)
         }
         projects.workspaceFolder = { [weak self] in self?.folder.root }
-        projects.start(folder: folder.root) { [weak self] identity in self?.opener?.makeDocument(identity: identity) }
+        projects.start(folder: folder.root) { [weak self] identity in
+            // Archive & History comes back too (plan 27 C): a tab, not a file.
+            if identity == AgentHistoryDocument.identity, let self { return AgentHistoryDocument(page: self.makeHistoryPage()) }
+            return self?.opener?.makeDocument(identity: identity)
+        }
         // Opened on a folder: the old projects come back and the folder becomes its own project
         // (docs/spec/projects.md), shown; a project it already had gets a terminal there unless one
         // is (opening the same folder again stacked tabs). It went into whichever project was

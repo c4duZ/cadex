@@ -72,7 +72,7 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | comando | `worktrees.show` | sai | apelido de mostrar a árvore no 27, sai no 28 | 28 |
 | arquivo | página agents: `apps/macos/features/agents/AgentsView.swift`, `apps/macos/features/agents/AgentSessionList.swift`, `apps/macos/features/agents/AgentsLayout.swift` | sai | os agentes nos terminais da árvore; as sessões de fora do Cadex na página do projeto | 27 |
 | comando | `agents.show` | sai | apelido no 27, sai no 28 | 28 |
-| arquivo | página agent-history (`apps/macos/features/agents/AgentHistoryView.swift`, `AgentHistoryList.swift`) | muda | Arquivo e histórico, no centro | 27 |
+| arquivo | página agent-history (`apps/macos/features/agents/AgentHistoryView.swift`, `AgentHistoryList.swift`) | muda | Arquivo e histórico, no centro: uma aba (`AgentHistoryDocument.swift`), feito na fase C | 27 |
 | arquivo | página attention (`apps/macos/features/agents/AgentAttentionView.swift`) | muda | o conteúdo do popover do sino, feito | 26 |
 | trecho | ".page(makeAttentionPage())" em `apps/macos/app/SidebarWiring.swift` | saiu | a página do sininho saiu da barra lateral; o id é aposentado em SidebarLayout.retired | 26 |
 | comando | `agents.show-attention`, `agents.show-feed` | muda | abrem o sino | 26 |

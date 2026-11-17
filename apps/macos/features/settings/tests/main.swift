@@ -70,13 +70,13 @@ let exitCode = await Checks.run([
         let (bad, problems) = SettingsFile.read(Data(#"{"agents": {"projectAccounts": ["x"]}}"#.utf8))
         expect(bad.agents.projectAccounts.isEmpty && problems.count == 1, "\(problems)")
     }),
-    ("the sidebar's icons default to Tasks, Agents and History, and keep the saved order", {
-        expect(SettingsFile.read(Data("{}".utf8)).0.sidebar.items == ["tasks", "agents", "agent-history"])
+    ("the sidebar's icons default to Tasks and Agents, and keep the saved order", {
+        expect(SettingsFile.read(Data("{}".utf8)).0.sidebar.items == ["tasks", "agents"])
         var settings = Settings()
         settings.sidebar.items = ["git", "files"]
         expect(SettingsFile.read(SettingsFile.write(settings)).0.sidebar.items == ["git", "files"])
         let (read, problems) = SettingsFile.read(Data(#"{"sidebar": {"items": "git"}}"#.utf8))
-        expect(read.sidebar.items == ["tasks", "agents", "agent-history"] && problems.count == 1, "\(problems)")
+        expect(read.sidebar.items == ["tasks", "agents"] && problems.count == 1, "\(problems)")
     }),
     ("version 4: the pages that left the sidebar in plan 26 leave its saved list once", {
         let old = SettingsFile.read(Data(#"{"version": 3, "sidebar": {"items": ["files", "agents", "git", "accounts", "tasks", "memory", "history"]}}"#.utf8)).0
