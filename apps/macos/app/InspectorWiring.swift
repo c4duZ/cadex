@@ -101,21 +101,26 @@ extension WindowSession {
         settings.store.update { $0.inspector.visible = visible }
     }
 
-    /// The scope row of Files and Memory and History: the folder's name, the whole path in the tip.
+    /// The scope row of Files and Memory and History, as the Inspector drawing has it: Files and
+    /// History "orchestration-e · cadex.worktrees/orchestration-e" (the folder, then where it
+    /// sits), Memory the project's name; the whole path in the tip.
     func showPanelFolder(_ root: String) {
         guard let inspector = workspace?.inspector else { return }
         let name = Self.folderName(root)
-        inspector.setScope(InspectorScope(name, tip: root), for: "files")
-        inspector.setScope(InspectorScope(name, tip: root), for: "history")
-        inspector.setScope(InspectorScope(name + T(" · the project’s memory, shared by every task and account",
+        let place = ((root as NSString).deletingLastPathComponent as NSString).lastPathComponent + "/" + name
+        inspector.setScope(InspectorScope(name + " · " + place, tip: root), for: "files")
+        inspector.setScope(InspectorScope(name + " · " + place, tip: root), for: "history")
+        let project = TitleBarView.location(of: root).project
+        inspector.setScope(InspectorScope(project + T(" · the project’s memory, shared by every task and account",
                                                    " · a memória do projeto, de todas as tarefas e contas"), tip: root), for: "memory")
     }
 
     /// Changes' scope: the branch with ↑ and ↓, the click switches branch; "Git" outside a
     /// repository. From the status the panel reads anyway.
     func showPanelBranch(_ branch: SourceControlController.Branch?) {
+        let name = Self.folderName(folder.root)
         workspace?.inspector.setScope(branch.map {
-            InspectorScope(Self.branchText($0), command: "git.switch-branch", tip: T("Switch branch", "Trocar de branch"))
+            InspectorScope(name + " · " + Self.branchText($0), command: "git.switch-branch", tip: T("Switch branch", "Trocar de branch"))
         } ?? InspectorScope("Git"), for: "changes")
     }
 

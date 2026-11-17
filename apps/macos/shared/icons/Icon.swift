@@ -17,6 +17,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case arrowsInLineVertical = 0xE532
     case arrowSquareOut = 0xE5DE
     case arrowUp = 0xE08E
+    case archive = 0xE00C
     case arrowUUpLeft = 0xE08A
     case bell = 0xE0CE
     case bracketsCurly = 0xE860
@@ -26,6 +27,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case check = 0xE182
     case checkCircle = 0xE184
     case clipboardText = 0xE198
+    case clock = 0xE19A
     case clockCounterClockwise = 0xE1A0
     case code = 0xE1BC
     case coffee = 0xE1C2
@@ -40,6 +42,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case eye = 0xE220
     case file = 0xE230
     case fileArchive = 0xEB2A
+    case funnelSimple = 0xE268
     case fileAudio = 0xEA20
     case fileCode = 0xE914
     case fileImage = 0xEA24

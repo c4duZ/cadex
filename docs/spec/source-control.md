@@ -84,8 +84,8 @@ e pull. Os agentes mexem no código pelo terminal; aqui se confere e se faz o co
 - "Ver o diff" e "Abrir o arquivo" seguem a configuração "Abrir arquivos"; as outras escolhem na hora.
 
 ### Explorer
-- Arquivos alterados aparecem no explorer com a cor do tipo de mudança, e pastas que contêm
-  alterados com um ponto.
+- Arquivos alterados aparecem no explorer com a cor do tipo de mudança e a letra; as pastas ficam
+  sem marca, como no desenho da aba Files.
 
 ### O git
 - Tudo passa pelo binário `git` do usuário, com tempo limite (30 s; fetch, pull e push, 2 min) e

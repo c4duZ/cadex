@@ -28,3 +28,7 @@ nome. O pacote mais usado do VS Code para isso é o Material Icon Theme (licenç
   pelo Direct2D (`tools/icons/windows_file_icons.py`, cerca de 360 KB no exe): o SVG do Direct2D
   (ID2D1DeviceContext5) só tem declaração em C++ nos headers do mingw, e a tabela dele à mão seria
   longa demais para acertar sem rodar. Explorer, abas e as buscas de arquivo usam os desenhos.
+- Na árvore da aba Files do painel da direita (2026-11-17), o Material saiu: cada ícone nas cores
+  dele fazia a árvore parecer uma colcha ao lado do desenho aprovado (o dono, comparando os dois).
+  Lá vão os glifos Phosphor numa cor calma por espécie (components.inspector.tree.iconColor). As
+  abas e as buscas de arquivo seguem com o Material.

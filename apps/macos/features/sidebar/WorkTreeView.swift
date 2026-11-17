@@ -26,10 +26,12 @@ public final class WorkTreeView: NSView {
     private(set) var chosen: WorkTreePick?
     private var folded: Set<String> = []
     private let newTaskShortcut: String?
+    private let archiveShortcut: String?
 
-    public init(newTaskShortcut: String?, run: @escaping (String) -> Void) {
+    public init(newTaskShortcut: String?, archiveShortcut: String? = nil, run: @escaping (String) -> Void) {
         self.run = run
         self.newTaskShortcut = newTaskShortcut
+        self.archiveShortcut = archiveShortcut
         super.init(frame: .zero)
         wantsLayer = true
         layer?.backgroundColor = S.bg.cgColor
@@ -114,9 +116,9 @@ public final class WorkTreeView: NSView {
         add.onPress = { [weak self] in self?.run("project.new") }
         place(add)
         foot.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        let automations = WorkTreeRows.foot(.clockCounterClockwise, T("Automations", "Automações"), detail: automationsDetail)
+        let automations = WorkTreeRows.foot(.clock, T("Automations", "Automações"), detail: automationsDetail)
         automations.onPress = { [weak self] in self?.run("orchestration.show-automation-history") }
-        let archive = WorkTreeRows.foot(.fileArchive, T("Archive & history", "Arquivo e histórico"), detail: "")
+        let archive = WorkTreeRows.foot(.archive, T("Archive & history", "Arquivo e histórico"), detail: archiveShortcut ?? "")
         archive.onPress = { [weak self] in self?.run("agents.show-history") }
         for row in [automations, archive] {
             foot.addArrangedSubview(row)
@@ -132,9 +134,10 @@ public final class WorkTreeView: NSView {
         place(header)
         guard !isFolded else { return spacing(S.Project.marginBottom) }
         for task in project.tasks {
-            let row = WorkTreeRows.task(task)
             let isChosen = chosen == .task(task.id) || task.terminals.contains { chosen == .terminal($0.id) }
-            row.isChosen = chosen == .task(task.id)
+            // The chosen task's terminals sit inside its box, under the meta line (the mockup).
+            let row = WorkTreeRows.task(task, terminals: isChosen ? task.terminals.map(terminalRow) : [])
+            row.isChosen = isChosen
             row.onPress = { [weak self] in self?.onPick?(.task(task.id)) }
             row.onMenu = { [weak self, weak row] point in
                 guard let self, let row, let entries = self.menuFor?(task.id), !entries.isEmpty else { return }
@@ -142,21 +145,25 @@ public final class WorkTreeView: NSView {
             }
             place(row)
             spacing(S.TaskRow.marginBottom)
-            // The chosen task's terminals under it (the mockup).
-            if isChosen { addTerminals(task.terminals, indent: S.TerminalRow.Block.indent) }
         }
-        addTerminals(project.terminals, indent: 0)
+        // The project's own terminals with their dot in the tasks' glyph column, so they read as
+        // the project's rows (the drawing has none; 2026-11-17).
+        addTerminals(project.terminals, indent: S.TaskRow.padding.left + (S.TaskRow.glyph - S.TerminalRow.dot) / 2 - S.TerminalRow.padding.left)
         spacing(S.Project.marginBottom)
     }
 
     private func addTerminals(_ terminals: [WorkTreeTerminal], indent: CGFloat) {
         for terminal in terminals {
-            let row = WorkTreeRows.terminal(terminal)
-            row.isChosen = chosen == .terminal(terminal.id)
-            row.onPress = { [weak self] in self?.onPick?(.terminal(terminal.id)) }
-            place(row, indent: indent)
+            place(terminalRow(terminal), indent: indent)
             spacing(S.TerminalRow.Block.gap)
         }
+    }
+
+    private func terminalRow(_ terminal: WorkTreeTerminal) -> WorkTreeRow {
+        let row = WorkTreeRows.terminal(terminal)
+        row.isChosen = chosen == .terminal(terminal.id)
+        row.onPress = { [weak self] in self?.onPick?(.terminal(terminal.id)) }
+        return row
     }
 
     /// A project's header folds it; its terminals and tasks stay as they were.
@@ -187,7 +194,7 @@ public final class WorkTreeView: NSView {
     private func buildTop() -> NSView {
         typealias N = S.NewTask
         let title = WorkTreeRows.label(T("New task", "Nova tarefa"), size: DesignTokens.FontSize.body, weight: N.weight, color: DesignTokens.Color.textPrimary)
-        var views: [NSView] = [WorkTreeRows.icon(.plus, size: S.Filter.icon, color: DesignTokens.Color.textPrimary), title]
+        var views: [NSView] = [WorkTreeRows.icon(.plus, size: N.Plus.size, color: N.Plus.color), title]
         let spacer = NSView()
         spacer.setContentHuggingPriority(.init(1), for: .horizontal)
         views.append(spacer)
@@ -204,7 +211,7 @@ public final class WorkTreeView: NSView {
         newTask.onPress = { [weak self] in self?.run("worktrees.new-task") }
         newTask.setAccessibilityRole(.button)
         newTask.setAccessibilityLabel(T("New task", "Nova tarefa"))
-        let filter = WorkTreeRow(views: [WorkTreeRows.icon(.slidersHorizontal, size: S.Filter.icon, color: S.Filter.color)])
+        let filter = WorkTreeRow(views: [WorkTreeRows.icon(.funnelSimple, size: S.Filter.icon, color: S.Filter.color)])
         filter.alignment = .centerY
         filter.distribution = .gravityAreas
         filter.radius = S.Filter.radius
@@ -216,6 +223,8 @@ public final class WorkTreeView: NSView {
         filter.setAccessibilityRole(.button)
         filter.setAccessibilityLabel(filter.toolTip)
         let top = NSStackView(views: [newTask, filter])
+        // Top-aligned so the insets hold: centred, the button sat 2 pt high (measured 2026-11-17).
+        top.alignment = .top
         top.spacing = UILooks.pt(S.Top.gap)
         top.edgeInsets = NSEdgeInsets(top: UILooks.pt(S.Top.padding.top), left: UILooks.pt(S.Top.padding.left),
                                       bottom: UILooks.pt(S.Top.padding.bottom), right: UILooks.pt(S.Top.padding.right))
@@ -224,11 +233,16 @@ public final class WorkTreeView: NSView {
 
     /// What the tree shows, for tests.
     var rowTitles: [String] {
-        list.arrangedSubviews.compactMap { item in
-            // An indented row sits in a box of its own.
-            let row = item as? WorkTreeRow ?? (item as? NSStackView)?.arrangedSubviews.first
-            return row?.accessibilityLabel()
+        list.arrangedSubviews.flatMap { item -> [String] in
+            // An indented row sits in a box of its own; a chosen task holds its terminals' rows.
+            guard let row = item as? WorkTreeRow ?? (item as? NSStackView)?.arrangedSubviews.first as? WorkTreeRow else { return [] }
+            let inner = Self.rows(in: row).filter { $0.accessibilityRole() != .disclosureTriangle }
+            return [row.accessibilityLabel() ?? ""] + inner.compactMap { $0.accessibilityLabel() }
         }
+    }
+
+    private static func rows(in view: NSView) -> [WorkTreeRow] {
+        view.subviews.flatMap { sub in (sub as? WorkTreeRow).map { [$0] } ?? rows(in: sub) }
     }
 }
 

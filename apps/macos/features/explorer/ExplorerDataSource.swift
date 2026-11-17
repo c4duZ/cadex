@@ -142,10 +142,14 @@ final class ExplorerCell: NSTableCellView {
         imageView?.frame = NSRect(x: 2, y: mid - icon / 2, width: icon, height: icon)
         let height = textField?.intrinsicContentSize.height ?? 17
         let markWidth: CGFloat = mark.stringValue.isEmpty ? 0 : UILooks.pt(Tree.indent)
-        let x = 2 + icon + UILooks.pt(Tree.gap)
-        let right = UILooks.pt(Tree.padding.right)
+        // The text field draws its text 2 pt in: start it 2 pt early so the name sits where the
+        // drawing has it (measured 2026-11-17).
+        let x = icon + UILooks.pt(Tree.gap)
+        let right = UILooks.pt(Tree.listPadding.right + Tree.padding.right)
         textField?.frame = NSRect(x: x, y: mid - height / 2, width: max(bounds.width - x - right - markWidth, 0), height: height)
-        mark.frame = NSRect(x: bounds.width - markWidth - right, y: mid - height / 2, width: markWidth, height: height)
+        // Centered on its own height: on the name's, the smaller letter sat 1.5 pt high.
+        let markHeight = mark.intrinsicContentSize.height
+        mark.frame = NSRect(x: bounds.width - markWidth - right, y: mid - markHeight / 2, width: markWidth, height: markHeight)
     }
 
     /// The git change of a file (its letter) or a dot on a folder holding
@@ -163,7 +167,7 @@ final class ExplorerCell: NSTableCellView {
 
     @MainActor
     func show(_ node: FileNode, title: String? = nil, expanded: Bool, style: ExplorerStyle, git: Character? = nil) {
-        mark.stringValue = git.map { node.isFolder ? "•" : String($0) } ?? ""
+        mark.stringValue = node.isFolder ? "" : git.map(String.init) ?? ""
         if let git { mark.textColor = Self.gitColor(git) }
         textField?.stringValue = title ?? node.name
         textField?.isEditable = false
@@ -174,20 +178,13 @@ final class ExplorerCell: NSTableCellView {
             return
         }
         textField?.font = UILooks.font(Tree.Name.fontSize)
-        // The Material Icon Theme's drawing when it knows the name (Docker,
-        // Python, src, tests...; docs/adr/0011), in its own colors; else the
-        // Phosphor glyph, folders in the theme's accent (with them gray, a
-        // theme changed only the background, owner, 2026-10-19).
-        let link = node.entry?.kind == .symlink
-        if !link, let material = node.isFolder ? FileIcons.folderImage(named: node.name) : FileIcons.image(forFileNamed: node.name) {
-            imageView?.image = material
-            imageView?.contentTintColor = nil
-        } else {
-            imageView?.image = FileTypeIcon.icon(name: node.name, entry: node.entry, expanded: expanded).image(size: 14)
-            imageView?.contentTintColor = node.isFolder ? style.accent : FileIcons.color(forFileNamed: node.name) ?? style.secondaryText
-        }
+        // The Files drawing (plan 26 C2b, redone 2026-11-17): one calm color per kind, folders
+        // blue, sources amber, docs pale blue, the rest gray; the Material icons each in their own
+        // colors made the tree look like a patchwork next to the drawing (owner, 2026-11-17).
+        imageView?.image = FileTypeIcon.icon(name: node.name, entry: node.entry, expanded: expanded).image(size: UILooks.pt(Tree.icon))
+        imageView?.contentTintColor = FileTypeIcon.color(name: node.name, entry: node.entry)
         // A changed file's name in amber (the drawing), a new one green; folders keep the row's.
-        textField?.textColor = git.map { node.isFolder ? Tree.Name.color : $0 == "M" ? Tree.Name.changed : Self.gitColor($0) } ?? Tree.Name.color
+        textField?.textColor = node.isFolder ? Tree.Name.color : git.map { $0 == "M" ? Tree.Name.changed : Self.gitColor($0) } ?? Tree.Name.color
         alphaValue = node.isHidden || node.entry?.ignored == true ? 0.55 : 1
         toolTip = node.entry?.kind == .symlink && !cadex_workspace_is_authorized(node.path) ? T("Points outside the open folder", "Aponta para fora da pasta aberta") : nil
     }
@@ -230,7 +227,7 @@ final class ExplorerRowView: NSTableRowView {
     override func drawSelection(in dirtyRect: NSRect) {
         typealias Tree = DesignTokens.Inspector.Tree
         let radius = UILooks.pt(Tree.radius)
-        let box = bounds.insetBy(dx: UILooks.pt(Tree.padding.left) / 2, dy: 0)
+        let box = bounds.insetBy(dx: UILooks.pt(Tree.listPadding.left), dy: 0)
         Tree.Selected.bg.setFill()
         NSBezierPath(roundedRect: box, xRadius: radius, yRadius: radius).fill()
         guard let line = Tree.Selected.shadow.first else { return }

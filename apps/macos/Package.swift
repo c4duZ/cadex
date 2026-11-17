@@ -359,7 +359,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "SidebarTests",
-            dependencies: ["Sidebar", "Checks"],
+            dependencies: ["Sidebar", "StateGlyph", "Checks"],
             path: "features/sidebar/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),

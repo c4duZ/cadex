@@ -54,6 +54,34 @@ final class ExplorerOutline: NSOutlineView {
         return view
     }
 
+    // MARK: Where the arrow and the row sit (the Files drawing)
+
+    typealias Tree = DesignTokens.Inspector.Tree
+
+    /// The left edge of a level's arrow: the list's and the row's padding, then 16 pt per level.
+    /// The system's place put it 11 pt left of the drawing's (measured 2026-11-17).
+    private func arrowX(level: Int) -> CGFloat {
+        UILooks.pt(Tree.listPadding.left + Tree.padding.left) + CGFloat(level) * indentationPerLevel
+    }
+
+    override func frameOfOutlineCell(atRow row: Int) -> NSRect {
+        var frame = super.frameOfOutlineCell(atRow: row)
+        guard !frame.isEmpty else { return frame }
+        frame.origin.x = arrowX(level: level(forRow: row))
+        frame.size.width = UILooks.pt(Tree.chevron)
+        return frame
+    }
+
+    /// The cell starts after the arrow and the gap; its icon sits 2 pt in (ExplorerCell.layout).
+    override func frameOfCell(atColumn column: Int, row: Int) -> NSRect {
+        var frame = super.frameOfCell(atColumn: column, row: row)
+        let x = arrowX(level: level(forRow: row)) + UILooks.pt(Tree.chevron + Tree.gap) - 2
+        // To the tree's edge: the cell measures the row's right padding from there.
+        frame.size.width = max(bounds.width - x, 0)
+        frame.origin.x = x
+        return frame
+    }
+
     private func run(_ id: String) {
         _ = controller?.run(id)
     }

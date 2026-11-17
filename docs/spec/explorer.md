@@ -35,12 +35,12 @@ segue a documentação pública do VS Code; o código de cores por tipo vem do C
 - Pastas compactas: uma pasta que só tem outra pasta dentro aparece numa linha só, "src/main/java",
   até a primeira pasta com mais de um item ou com arquivo. Abrir a linha abre a última pasta da
   cadeia; as ações (novo arquivo, renomear, apagar) valem para ela.
-- Ícones pelo tipo, os do Material Icon Theme do VS Code quando ele conhece o nome (Docker, Git,
-  Python, Rust, Makefile, licença, `.env`; pastas `src`, `tests`, `docs`, `.github`,
-  `node_modules`...), nas cores dele; o resto em Phosphor: pastas na cor do tema, arquivos na cor
-  do tipo ou cinza (ADR 0011). As abas usam os mesmos ícones.
+- Ícones Phosphor pelo tipo, numa cor calma por espécie, como o desenho da aba Files
+  (components.inspector.tree.iconColor): pastas azuis, código âmbar, documentos azul-claro, o resto
+  cinza. Os do Material, cada um nas cores dele, deixavam a árvore uma colcha ao lado do desenho
+  (dono, 2026-11-17); a busca e as abas ainda os usam (ADR 0011).
 - Git: o nome do arquivo alterado fica na cor da mudança, com a letra (M, A, U, D) alinhada à
-  direita; a pasta que contém alterados ganha o nome levemente colorido e um ponto.
+  direita; as pastas ficam sem marca, como no desenho (2026-11-17).
 - Cabeçalho: o da barra lateral (`sidebar.md`, "Cabeçalho da página"): o nome da pasta raiz como
   escrito; à direita, novo arquivo, nova pasta e recolher tudo; no "⋯", buscar arquivo e recarregar.
 - As pastas abertas são lembradas por raiz: reabrir o app ou voltar àquela pasta abre as mesmas.

@@ -31,6 +31,8 @@
 - Ainda no código até a fase D: a fileira de ícones e as páginas de antes (`SidebarView.swift`,
   `SidebarItem.swift`, `SidebarLayout.swift`, `SidebarHeader.swift`, `SidebarIconRow.swift`,
   `SidebarIconButton.swift`, `SidebarCommands.swift`), que a janela já não mostra.
+- A tarefa escolhida leva os terminais dela dentro da caixa, sob a linha do agente (o mockup); os
+  terminais da pasta do projeto ficam com o ponto na coluna dos glifos das tarefas.
 - A linha de tarefa inteira (fase B2): a idade à direita do nome, embaixo o agente, o +/− e o que
   espera em âmbar; o comentário sob o ponteiro; o clique direito pede ao app o menu (`menuFor`).
 - Status: plano 27 fase B no código. A etiqueta de PR do mockup fica de fora: o app não tem de onde
@@ -38,4 +40,4 @@
 
 ## Como validar
 - `make macos-test` passa: a árvore com os projetos, as tarefas e os terminais, os terminais só sob a
-  tarefa escolhida, "Add project" no fim; com CADEX_SNAPSHOT_DIR, tree.png com uma tarefa inteira; e os testes da fileira de antes até a fase D.
+  tarefa escolhida, "Add project" no fim; com CADEX_SNAPSHOT_DIR, tree.png com os dados do Sidebar.dc.html no tamanho dele (292×826), para pôr sobre o mockup; e os testes da fileira de antes até a fase D.

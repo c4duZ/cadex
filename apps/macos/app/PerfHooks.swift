@@ -18,6 +18,17 @@ extension WindowSession {
         if let file = environment["CADEX_PERF_RUN"] { startPerfRun(file) }
         if environment["CADEX_PERF_PRESS"] != nil { startPerfPresses() }
         if let tab = environment["CADEX_PERF_PANEL"] { showPerfPage(tab) }
+        // Files shown down to these paths (comma-separated), the last one chosen: the tree as a
+        // mockup draws it, to compare them (2026-11-17).
+        if let paths = environment["CADEX_PERF_REVEAL"]?.split(separator: ",").map(String.init) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                for path in paths { self?.explorer?.reveal(path) }
+            }
+        }
+        // The window at a mockup's size ("1440x900"), to compare them pixel for pixel.
+        if let size = environment["CADEX_PERF_WINDOW"]?.split(separator: "x").compactMap({ Double($0) }), size.count == 2 {
+            window.setContentSize(NSSize(width: size[0], height: size[1]))
+        }
         if let out = environment["CADEX_PERF_SNAPSHOT"] { savePerfSnapshot(out) }
     }
 

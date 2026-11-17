@@ -73,6 +73,14 @@ enum WorkTreeRows {
         return view
     }
 
+    /// A state glyph that takes only its design size in the row; the halo draws past it, as the
+    /// mockup's box-shadow takes no room (the name sat 6 pt off, measured 2026-11-17).
+    private static func designSized(_ glyph: StateGlyphView, _ side: CGFloat) -> StateGlyphView {
+        glyph.widthAnchor.constraint(equalToConstant: UILooks.pt(side)).isActive = true
+        glyph.heightAnchor.constraint(equalToConstant: UILooks.pt(side)).isActive = true
+        return glyph
+    }
+
     private static func spacer() -> NSView {
         let view = NSView()
         view.setContentHuggingPriority(.init(1), for: .horizontal)
@@ -105,10 +113,10 @@ enum WorkTreeRows {
 
     /// The task's line (the anatomy): its state, its name (bold when there is news), and under it
     /// who works on it.
-    static func task(_ task: WorkTreeTask) -> WorkTreeRow {
+    static func task(_ task: WorkTreeTask, terminals: [WorkTreeRow] = []) -> WorkTreeRow {
         typealias R = S.TaskRow
-        let glyph = StateGlyphView(size: UILooks.pt(R.glyph), state: task.state)
-        glyph.setContentHuggingPriority(.required, for: .horizontal)
+        typealias T = S.TerminalRow
+        let glyph = designSized(StateGlyphView(size: R.glyph, state: task.state), R.glyph)
         let name = label(task.name, size: R.Name.fontSize, weight: task.unread ? R.NameUnread.weight : R.Name.weight,
                          color: task.unread ? R.NameUnread.color : R.Name.color)
         var head: [NSView] = [glyph, name, spacer()]
@@ -120,7 +128,7 @@ enum WorkTreeRows {
         var meta: [NSView] = []
         func dot() { if !meta.isEmpty { meta.append(label("·", size: R.Meta.fontSize, color: R.separator)) } }
         if !task.agent.isEmpty { meta.append(label(task.agent, size: R.Meta.fontSize, color: R.Meta.color)) }
-        if let added = task.added, let removed = task.removed, added + removed > 0 {
+        if let added = task.added, let removed = task.removed {
             dot()
             meta.append(label("+\(added)", size: R.Meta.fontSize, color: R.added))
             meta.append(label("−\(removed)", size: R.Meta.fontSize, color: R.removed))
@@ -135,7 +143,15 @@ enum WorkTreeRows {
             line.edgeInsets = NSEdgeInsets(top: 0, left: UILooks.pt(R.Meta.indent), bottom: 0, right: 0)
             lines.append(line)
         }
+        let block = NSStackView(views: terminals)
+        if !terminals.isEmpty {
+            block.orientation = .vertical
+            block.alignment = .leading
+            block.spacing = UILooks.pt(T.Block.gap)
+            lines.append(block)
+        }
         let row = WorkTreeRow(views: lines)
+        if !terminals.isEmpty { row.setCustomSpacing(UILooks.pt(T.Block.marginTop), after: lines[lines.count - 2]) }
         row.orientation = .vertical
         row.alignment = .leading
         row.spacing = UILooks.pt(R.Meta.marginTop)
@@ -146,14 +162,19 @@ enum WorkTreeRows {
         row.setAccessibilityLabel(task.name)
         row.toolTip = task.comment.isEmpty ? nil : task.comment
         top.widthAnchor.constraint(equalTo: row.widthAnchor, constant: -UILooks.pt(R.padding.left + R.padding.right)).isActive = true
+        for terminal in terminals {
+            terminal.widthAnchor.constraint(equalTo: row.widthAnchor, constant: -UILooks.pt(R.padding.left + R.padding.right + T.Block.indent)).isActive = true
+        }
+        if !terminals.isEmpty {
+            block.edgeInsets = NSEdgeInsets(top: 0, left: UILooks.pt(T.Block.indent), bottom: 0, right: 0)
+        }
         return row
     }
 
     /// A terminal: its state's dot (or a quiet one), the name, the note on the right.
     static func terminal(_ terminal: WorkTreeTerminal) -> WorkTreeRow {
         typealias T = S.TerminalRow
-        let dot = StateGlyphView(size: UILooks.pt(T.dot), state: terminal.state ?? .idle)
-        dot.setContentHuggingPriority(.required, for: .horizontal)
+        let dot = designSized(StateGlyphView(size: T.dot, state: terminal.state ?? .idle), T.dot)
         var views: [NSView] = [dot, label(terminal.title, size: T.fontSize, color: T.color), spacer()]
         if !terminal.note.isEmpty { views.append(label(terminal.note, size: T.Note.fontSize, color: T.Note.color)) }
         let row = WorkTreeRow(views: views)
@@ -182,7 +203,9 @@ enum WorkTreeRows {
     /// A row of the foot: "Automations · 2 on", "Archive & history".
     static func foot(_ icon: Icon, _ title: String, detail: String) -> WorkTreeRow {
         typealias F = S.Foot.Row
-        var views: [NSView] = [Self.icon(icon, size: F.icon, color: F.color), label(title, size: S.Project.fontSize, color: F.color)]
+        let name = label(title, size: S.Project.fontSize, color: F.color)
+        name.setContentHuggingPriority(.init(1), for: .horizontal)
+        var views: [NSView] = [Self.icon(icon, size: F.icon, color: F.color), name]
         if !detail.isEmpty { views.append(label(detail, size: F.Detail.fontSize, color: F.Detail.color)) }
         let row = WorkTreeRow(views: views)
         row.spacing = UILooks.pt(F.gap)

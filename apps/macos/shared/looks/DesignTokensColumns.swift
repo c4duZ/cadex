@@ -27,6 +27,10 @@ public extension DesignTokens {
                 public static let fontSize: CGFloat = DesignTokens.FontSize.caption
                 public static var color: NSColor { DesignTokens.Color.textTertiary }
             }
+            public enum Plus {
+                public static let size: CGFloat = 12
+                public static var color: NSColor { DesignTokens.Color.textSecondary }
+            }
         }
         public enum Filter {
             public static let size: CGFloat = 34
@@ -286,6 +290,13 @@ public extension DesignTokens {
                 public static var bg: NSColor { DesignTokens.Color.bgSelected }
                 public static var shadow: [DesignTokens.ShadowLayer] { DesignTokens.Shadow.selectedRow }
             }
+            public enum IconColor {
+                public static var folder: NSColor { DesignTokens.Color.accentLink }
+                public static var code: NSColor { DesignTokens.Color.accentAmberText }
+                public static var doc: NSColor { DesignTokens.Color.chipGroupText }
+                public static var other: NSColor { DesignTokens.Color.textSecondary }
+            }
+            public static let listPadding = NSEdgeInsets(top: 4, left: 6, bottom: 4, right: 6)
         }
         public enum Commit {
             public static let padding = NSEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
