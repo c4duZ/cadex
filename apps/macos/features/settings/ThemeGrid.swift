@@ -87,7 +87,7 @@ final class ThemeGrid: NSView {
 /// One theme in the grid: three color bars on the theme's background, the
 /// name and the description; outlined when it is the one in use.
 final class ThemeCard: NSView {
-    private(set) var family: ThemeFamily = .cadex
+    private(set) var family: ThemeFamily = .cadexNight
     var selected = false { didSet { updateBorder() } }
     private let onPick: (ThemeFamily) -> Void
     private let swatch = Swatch()

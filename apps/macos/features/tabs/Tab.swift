@@ -99,15 +99,14 @@ final class Tab {
         let dot = documents.contains { $0.hasUnsavedChanges } ? "● " : ""
         let terminal = focused.terminal
         let agent = terminal?.agentStatus
-        // The agent's sign shows even over a name given by hand (docs/spec/tabs.md).
-        let sign = TabAgentTitle.sign(agent, finishedUnseen: terminal?.agentFinishedUnseen ?? false, hibernated: terminal?.isHibernated ?? false)
-        if let customTitle, !customTitle.isEmpty { return dot + sign + customTitle }
+        // The agent's state is the glyph of the tab (TabBarView.Item.state), not text.
+        if let customTitle, !customTitle.isEmpty { return dot + customTitle }
         if let document = focused.document { return dot + document.title }
         if agent != nil, let terminal {
             let name = TabAgentTitle.name(programTitle: terminal.programTitle)
-            if !name.isEmpty { return dot + sign + name }
+            if !name.isEmpty { return dot + name }
         }
-        return dot + sign + folderTitle(terminal?.currentDirectory, home: home)
+        return dot + folderTitle(terminal?.currentDirectory, home: home)
     }
 
     var hasForegroundProcess: Bool { terminals.contains { $0.hasForegroundProcess } }

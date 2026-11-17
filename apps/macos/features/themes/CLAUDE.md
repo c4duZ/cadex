@@ -20,9 +20,12 @@
   com 22% da cor principal do tema: o "accent" do tweakcn sólido pintava de âmbar ou verde, e cinza
   neutro deixava todos os temas iguais. A cor principal aparece também nas pastas, na seleção da
   árvore e no ícone da aba ativa. `ThemeFamily.swift`: um tema com
-  versão escura e/ou clara, e o modo (sistema, escuro, claro). Padrão: Caffeine.
-- `Theme.swift`: o tema (cores da interface e do terminal, 16 ANSI). `BuiltInThemes.swift`: Cadex
-  Escuro (cores da interface medidas num print, 2026-10-19) e Cadex Claro. `ThemeStore.swift`: o tema
+  versão escura e/ou clara, e o modo (sistema, escuro, claro). Padrão: Cadex Night
+  (ThemeFamily.cadexNight, primeira família de `ThemeCatalog.all()`, só escura;
+  `../../../../docs/adr/0035-work-frame.md`).
+- `Theme.swift`: o tema (cores da interface e do terminal, 16 ANSI). `CadexNight.swift`: o tema da
+  moldura nova, gerado por `../../../../tools/design/build_tokens.py` dos tokens dos mockups (não
+  editar à mão; os Cadex Escuro e Claro de antes saíram no plano 25). `ThemeStore.swift`: o tema
   em uso (só as famílias do escuro e do claro ficam na memória), pela escolha das configurações
   (`Choice`: tema do escuro e do claro, modo, destaque, alto contraste), seguindo o modo do sistema e o
   "Aumentar contraste", e quem observa a troca. `HighContrast.swift`: o alto contraste (texto a 7:1,
@@ -37,5 +40,5 @@
 
 ## Como validar
 - `make macos-test` passa.
-- Teste: o catálogo tem mais de 300 temas, o Caffeine primeiro, todos com texto legível; os do
+- Teste: o catálogo tem mais de 300 temas, o Cadex Night primeiro e padrão (o Caffeine continua), todos com texto legível; os do
   tweakcn com ANSI próprio; importar Ghostty, iTerm2 e base16; a pasta do usuário.

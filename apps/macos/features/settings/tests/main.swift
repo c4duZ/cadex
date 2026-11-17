@@ -7,6 +7,18 @@ import Themes
 // shared/checks/Checks.swift for why this is an executable).
 
 let exitCode = await Checks.run([
+    ("an old file on Caffeine moves to Cadex Night once; a theme picked since stays (ADR 0035)", {
+        func read(_ json: String) -> Settings { SettingsFile.read(Data(json.utf8)).0 }
+        let old = read(#"{"appearance": {"theme": "caffeine", "darkTheme": "caffeine"}}"#)
+        expect(old.appearance.theme == "cadex-night", old.appearance.theme)
+        expect(old.appearance.darkTheme == "caffeine", "a dark theme was a choice: it stays")
+        expect(read(#"{"version": 3}"#).version == 3, "a newer file keeps its version")
+        expect(read(#"{"appearance": {"theme": "dracula"}}"#).appearance.theme == "dracula")
+        expect(read(#"{"version": 2, "appearance": {"theme": "caffeine"}}"#).appearance.theme == "caffeine")
+        expect(Settings().appearance.theme == "cadex-night")
+        let written = try JSONSerialization.jsonObject(with: SettingsFile.write(old)) as! [String: Any]
+        expect(written["version"] as? Int == Settings.currentVersion)
+    }),
     ("settings saved and read back are the same", {
         var settings = Settings()
         settings.terminal.fontSize = 15
@@ -174,6 +186,21 @@ let exitCode = await Checks.run([
         store.load()
         expect(store.settings.terminal.fontSize == 18)
         expect(seen == [13, 16, 18], "\(seen)")
+    }),
+    ("an old file is moved once and written back, so a later hand edit to Caffeine stays", {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("cadex-settings-\(UUID())/settings.json")
+        defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
+        try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data(#"{"appearance": {"theme": "caffeine"}}"#.utf8).write(to: file)
+        let store = SettingsStore(file: file)
+        store.load()
+        let saved = try Data(contentsOf: file)
+        expect(SettingsFile.version(of: saved) == Settings.currentVersion && store.settings.appearance.theme == "cadex-night")
+        var back = store.settings
+        back.appearance.theme = "caffeine"
+        try SettingsFile.write(back).write(to: file)
+        store.load()
+        expect(store.settings.appearance.theme == "caffeine", "chosen after the move: stays")
     }),
     ("the themes page builds cards only for the rows on screen", {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent("cadex-themes-page-\(UUID().uuidString)")

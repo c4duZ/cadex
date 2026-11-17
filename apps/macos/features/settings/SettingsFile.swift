@@ -192,7 +192,24 @@ public enum SettingsFile {
             }
         }
         problems = reader.problems
+        migrate(&settings, from: root["version"] as? Int ?? 1)
         return (settings, problems)
+    }
+
+    /// Moves an older file to the current defaults, once: a file of version 1
+    /// still on the old default theme (Caffeine) goes to Cadex Night, the
+    /// new frame's (docs/adr/0035-work-frame.md). Only `theme`: the dark and
+    /// light themes were empty by default, so Caffeine there was a choice and
+    /// stays (review of 2026-11-17). A file of a newer app keeps its version.
+    /// SettingsStore saves right after, so it happens once.
+    static func migrate(_ settings: inout Settings, from version: Int) {
+        if version < 2, settings.appearance.theme == "caffeine" { settings.appearance.theme = "cadex-night" }
+        settings.version = max(version, Settings.currentVersion)
+    }
+
+    /// The version a file says it has: 1 for a file from before versions.
+    public static func version(of data: Data) -> Int {
+        (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["version"] as? Int ?? 1
     }
 
     public static func write(_ settings: Settings) -> Data {
@@ -200,6 +217,7 @@ public enum SettingsFile {
         var shortcuts: [String: Any] = [:]
         for (combo, id) in s.shortcuts { shortcuts[combo] = id ?? NSNull() }
         let object: [String: Any] = [
+            "version": s.version,
             "general": ["shell": s.general.shell, "confirmClose": s.general.confirmClose,
                         "confirmMultilinePaste": s.general.confirmMultilinePaste, "openFiles": s.general.openFiles,
                         "language": s.general.language],

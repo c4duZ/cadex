@@ -5,19 +5,21 @@ import Foundation
 // Tests of the themes feature. Run with `make macos-test` (see
 // shared/checks/Checks.swift for why this is an executable).
 
+/// A light theme from the catalog, for the checks that need one.
+let lightTheme = ThemeCatalog.family(id: "gruvbox")!.light!
+
 let exitCode = await Checks.run([
-    ("the built-in themes have the 16 ANSI colors", {
-        for theme in [Theme.cadexDark, Theme.cadexLight] {
-            expect(theme.terminal.ansi.count == 16, theme.name)
-        }
-        expect(Theme.cadexDark.dark && !Theme.cadexLight.dark)
+    ("Cadex Night, generated from the mockups' tokens, has the 16 ANSI colors and only a dark version", {
+        expect(Theme.cadexNight.terminal.ansi.count == 16)
+        expect(Theme.cadexNight.dark && ThemeFamily.cadexNight.light == nil)
+        expect(Theme.cadexNight.interface.chrome == RGB(0x121316), "bg.chrome of tokens.json")
     }),
     ("a theme file reads back what was written", {
-        let data = ThemeFile.write(.cadexDark)
-        expect(try ThemeFile.read(data) == .cadexDark)
+        let data = ThemeFile.write(.cadexNight)
+        expect(try ThemeFile.read(data) == .cadexNight)
     }),
     ("an invalid color is refused with the field in the message", {
-        var object = try JSONSerialization.jsonObject(with: ThemeFile.write(.cadexLight)) as! [String: Any]
+        var object = try JSONSerialization.jsonObject(with: ThemeFile.write(.cadexNight)) as! [String: Any]
         var terminal = object["terminal"] as! [String: Any]
         terminal["cursor"] = "vermelho"
         object["terminal"] = terminal
@@ -32,16 +34,17 @@ let exitCode = await Checks.run([
         expect(try ThemeFile.parse("#fff", field: "x") == RGB(0xFFFFFF))
         expect(try ThemeFile.parse("#12345678", field: "x") == RGB(0x123456))
         expect((try? ThemeFile.parse("123456", field: "x")) == nil)
-        var object = try JSONSerialization.jsonObject(with: ThemeFile.write(.cadexLight)) as! [String: Any]
+        var object = try JSONSerialization.jsonObject(with: ThemeFile.write(.cadexNight)) as! [String: Any]
         var terminal = object["terminal"] as! [String: Any]
         terminal["ansi"] = ["#000000"]
         object["terminal"] = terminal
         expect((try? ThemeFile.read(try JSONSerialization.data(withJSONObject: object))) == nil)
     }),
-    ("the built-in catalog has hundreds of themes, Caffeine first", {
+    ("the built-in catalog has hundreds of themes, Cadex Night first and the default", {
         let families = ThemeCatalog.all()
         expect(families.count > 300, "\(families.count)")
-        expect(families.first?.id == "caffeine")
+        expect(families.first?.id == "cadex-night" && ThemeCatalog.defaultId == "cadex-night")
+        expect(ThemeCatalog.family(id: "caffeine") != nil, "Caffeine stays to pick")
         expect(Set(families.map(\.id)).count == families.count, "repeated ids")
         for family in families {
             expect(family.dark != nil || family.light != nil, family.id)
@@ -87,7 +90,7 @@ let exitCode = await Checks.run([
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent("cadex-themes-\(UUID().uuidString)")
         setenv("CADEX_THEMES_DIR", folder.path, 1)
         defer { try? FileManager.default.removeItem(at: folder); unsetenv("CADEX_THEMES_DIR") }
-        var theme = Theme.cadexLight
+        var theme = lightTheme
         theme.name = "Meu Tema!"
         let id = try ThemeLibrary.save(theme)
         expect(id == "user:meu-tema", id)
@@ -110,13 +113,13 @@ let exitCode = await Checks.run([
         }
     }),
     ("text over a light accent turns dark, over a dark one light", {
-        var light = Theme.cadexDark.interface
+        var light = Theme.cadexNight.interface
         light.tabActive = RGB(0xF5E663)
         expect(light.textOnTabActive == RGB(0x000000))
-        var dark = Theme.cadexLight.interface
+        var dark = lightTheme.interface
         dark.tabActive = RGB(0x1A237E)
         expect(dark.textOnTabActive == RGB(0xFFFFFF))
-        expect(Theme.cadexDark.interface.textOnTabActive == Theme.cadexDark.interface.text)
+        expect(Theme.cadexNight.interface.textOnTabActive == Theme.cadexNight.interface.text)
     }),
     ("colors print as #RRGGBB", {
         expect(RGB(0x252525).hex == "#252525")

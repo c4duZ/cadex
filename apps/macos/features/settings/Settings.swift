@@ -3,6 +3,12 @@ import Foundation
 /// Every user preference, as saved in settings.json (docs/spec/settings.md).
 /// One file, one place: terminal, appearance and shortcuts all live here.
 public struct Settings: Equatable, Sendable {
+    /// The file's version: what an old file (without it) gets moved to once,
+    /// when the defaults change (SettingsFile.migrate). 2: the new frame's
+    /// theme (docs/adr/0035-work-frame.md, 2026-11-17).
+    public static let currentVersion = 2
+    public var version = Settings.currentVersion
+
     public struct General: Equatable, Sendable {
         /// Empty: the system's shell.
         public var shell = ""
@@ -41,8 +47,8 @@ public struct Settings: Equatable, Sendable {
     }
 
     public struct Appearance: Equatable, Sendable {
-        /// The theme family id ("caffeine").
-        public var theme = "caffeine"
+        /// The theme family id: Cadex Night, the new frame's (docs/adr/0035-work-frame.md).
+        public var theme = "cadex-night"
         /// With the mode following the system, another theme for its light
         /// or dark mode; empty uses `theme` (plan 15, phase B).
         public var lightTheme = ""

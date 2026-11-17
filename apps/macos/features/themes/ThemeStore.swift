@@ -27,10 +27,10 @@ public final class ThemeStore {
         }
     }
 
-    public private(set) var choice = Choice(dark: ThemeFamily.cadex.id, light: ThemeFamily.cadex.id, mode: .system)
-    public private(set) var darkFamily: ThemeFamily = .cadex
-    public private(set) var lightFamily: ThemeFamily = .cadex
-    public private(set) var current: Theme = .cadexDark
+    public private(set) var choice = Choice(dark: ThemeFamily.cadexNight.id, light: ThemeFamily.cadexNight.id, mode: .system)
+    public private(set) var darkFamily: ThemeFamily = .cadexNight
+    public private(set) var lightFamily: ThemeFamily = .cadexNight
+    public private(set) var current: Theme = .cadexNight
     private var observers: [(Theme) -> Void] = []
     private var appearanceObservation: NSKeyValueObservation?
 
@@ -77,7 +77,7 @@ public final class ThemeStore {
     }
 
     private static func family(_ id: String) -> ThemeFamily {
-        ThemeLibrary.family(id: id) ?? ThemeCatalog.family(id: ThemeCatalog.defaultId) ?? .cadex
+        ThemeLibrary.family(id: id) ?? ThemeCatalog.family(id: ThemeCatalog.defaultId) ?? .cadexNight
     }
 
     func refresh() {

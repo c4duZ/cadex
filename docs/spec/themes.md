@@ -16,10 +16,12 @@ temas que ele já usava em outros apps.
   - os temas do tweakcn, sem os quase iguais, com cores de terminal tiradas das cores de cada um;
   - os esquemas base16 e base24 do tinted-theming.
 
-  O padrão é o Cadex Night (e o claro par dele), o tema da moldura nova, com as cores de
+  O padrão é o Cadex Night, o tema da moldura nova, só escuro por enquanto (o par claro vem com um
+  mockup claro), com as cores de
   `../design/work-frame/tokens.json` geradas para o app (`../adr/0035-work-frame.md`; antes era o
-  Caffeine). Quem escolheu outro tema fica com o dele; quem estava nos Cadex Escuro ou Claro de antes
-  passa para o Cadex Night uma vez. As cores de estado (trabalhando, precisa de você, pronto, falhou,
+  Caffeine). Quem escolheu outro tema fica com o dele; um settings.json de antes (sem versão) ainda no
+  Caffeine, o padrão antigo, passa para o Cadex Night uma vez, e o arquivo é regravado com a versão
+  nova (um Caffeine escolhido depois fica). As cores de estado (trabalhando, precisa de você, pronto, falhou,
   parado, em revisão) são as mesmas em todo tema: cor no app quer dizer estado. Todo tema tem o texto legível: o contraste é conferido ao gerar o
   catálogo. Créditos e licenças estão no `NOTICE`.
 - A página de temas acha um tema pela busca (nome ou descrição) e filtra os que têm versão escura

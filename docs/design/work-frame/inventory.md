@@ -110,8 +110,8 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 ### Tema (plano 25)
 | tipo | peça | estado | destino | plano |
 |---|---|---|---|---|
-| chave | `appearance.theme` padrão `caffeine` | muda | padrão `cadex-night` | 25 |
-| arquivo | `apps/macos/features/themes/BuiltInThemes.swift` (Cadex Escuro e Claro) | muda | Cadex Night e o claro par dele; quem usava os velhos é migrado | 25 |
+| chave | `appearance.theme` padrão `caffeine` | muda | padrão `cadex-night`; arquivo sem versão no Caffeine passa uma vez (Settings.version 2) | 25 |
+| arquivo | `apps/macos/features/themes/BuiltInThemes.swift` (Cadex Escuro e Claro, só os testes os usavam) | saiu | o Cadex Night gerado dos tokens (`apps/macos/features/themes/CadexNight.swift`), família própria no catálogo | 25 |
 
 ### Fica como está
 `apps/macos/app/WindowBackdrop.swift` (imagem de fundo), `apps/macos/app/MenuBarItem.swift`, a

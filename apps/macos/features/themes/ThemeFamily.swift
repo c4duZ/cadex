@@ -34,8 +34,10 @@ public enum ThemeMode: String, Sendable, CaseIterable {
 }
 
 public extension ThemeFamily {
-    /// The Cadex's own pair, until the catalog of plan 3, fase D.
-    static let cadex = ThemeFamily(
-        id: "cadex", name: "Cadex", description: T("Graphite gray around near-black panels.", "Cinza-grafite em volta de painéis quase pretos."),
-        dark: .cadexDark, light: .cadexLight)
+    /// The new frame's theme (docs/adr/0035-work-frame.md): only dark, as the
+    /// mockups are; a light pair comes with a light mockup.
+    static let cadexNight = ThemeFamily(
+        id: "cadex-night", name: "Cadex Night",
+        description: T("Neutral grays; color only for state. The new frame's own.", "Cinzas neutros; cor só para estado. O da moldura nova."),
+        source: "cadex", dark: Theme.cadexNight, light: nil)
 }

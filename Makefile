@@ -10,6 +10,9 @@ manifests:
 	@python3 -I tools/icons/windows_icons.py --check
 	@python3 -I tools/check_command_parity.py
 	@python3 -I tools/check_design_tokens.py
+	@python3 -I tools/design/build_tokens.py --check
+	@python3 -I tools/check_design_literals.py --self-test
+	@python3 -I tools/check_design_literals.py
 	@python3 -I tools/check_leftovers.py --self-test
 	@python3 -I tools/check_leftovers.py
 	@python3 -I tools/icons/windows_file_icons.py --check
@@ -68,14 +71,14 @@ macos-test: core relink
 		&& swift build --product SourceControlTests \
 		&& swift build --product GitHistoryTests && swift build --product SpacesTests \
 		&& swift build --product MenusTests && swift build --product PowerTests && swift build --product StringsTests \
-		&& swift build --product UpdatesTests && swift build --product UILooksTests \
+		&& swift build --product UpdatesTests && swift build --product UILooksTests && swift build --product StateGlyphTests \
 		&& swift build --product TempImagesTests && swift build --product SessionKitTests && swift build --product TextIndexTests && swift build --product AgentToolsTests && swift build --product WorktreesTests \
 		&& swift build --product ComputerUseTests && swift build --product ReviewTests && swift build --product MemoryTests
 	@cd apps/macos && .build/debug/TerminalTests && .build/debug/CommandPaletteTests && .build/debug/ShortcutsTests \
 		&& .build/debug/TabsTests && .build/debug/StatusBarTests && .build/debug/SidebarTests && .build/debug/CustomizeTests && .build/debug/AgentsTests && .build/debug/SSHTests && .build/debug/MachinesTests && .build/debug/OrchestrationTests && .build/debug/IconsTests \
 		&& .build/debug/ThemesTests && .build/debug/SettingsTests \
 		&& .build/debug/ExplorerTests && .build/debug/SearchTests && .build/debug/EditorTests && .build/debug/MarkdownTests && .build/debug/MediaPreviewTests && .build/debug/PreviewTests && .build/debug/SourceControlTests && .build/debug/GitHistoryTests \
-		&& .build/debug/SpacesTests && .build/debug/MenusTests && .build/debug/PowerTests && .build/debug/StringsTests && .build/debug/UpdatesTests && .build/debug/UILooksTests && .build/debug/TempImagesTests && .build/debug/SessionKitTests && .build/debug/TextIndexTests && .build/debug/AgentToolsTests && .build/debug/WorktreesTests \
+		&& .build/debug/SpacesTests && .build/debug/MenusTests && .build/debug/PowerTests && .build/debug/StringsTests && .build/debug/UpdatesTests && .build/debug/UILooksTests && .build/debug/StateGlyphTests && .build/debug/TempImagesTests && .build/debug/SessionKitTests && .build/debug/TextIndexTests && .build/debug/AgentToolsTests && .build/debug/WorktreesTests \
 		&& .build/debug/ComputerUseTests && .build/debug/ReviewTests && .build/debug/MemoryTests
 
 # Debug build of the app; `make run` opens it.

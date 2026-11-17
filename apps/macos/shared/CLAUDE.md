@@ -8,7 +8,9 @@
 
 ## Como eu quero
 - Antes de mover algo para cá, as duas features que usam têm que existir. Exceção decidida no
-  plano 18: `session-kit/`, a porta que os planos 19 a 24 vão usar (o `CLAUDE.md` dela explica).
+  plano 18: `session-kit/`, a porta que os planos 19 a 24 vão usar (o `CLAUDE.md` dela explica);
+  plano 25: `state-glyph/`, o sinal de estado que as abas usam já e a árvore, o sino, o ⌘J e o
+  quadro usam nos planos 26 a 30.
 
 ## Como validar
 - `make macos-test` passa.

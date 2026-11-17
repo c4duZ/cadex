@@ -50,6 +50,14 @@ let package = Package(
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
+        // The app's one sign of state (docs/adr/0035-work-frame.md, plan 25 phase D).
+        .target(
+            name: "StateGlyph",
+            dependencies: ["UILooks"],
+            path: "shared/state-glyph",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
         // The popup menus in the look of ⌘K (right click, "+", status bar).
         .target(
             name: "Menus",
@@ -210,7 +218,7 @@ let package = Package(
         ),
         .target(
             name: "Tabs",
-            dependencies: ["Terminal", "CommandPalette", "Icons", "Menus", "Strings", "UILooks"],
+            dependencies: ["Terminal", "CommandPalette", "Icons", "Menus", "StateGlyph", "Strings", "UILooks"],
             path: "features/tabs",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
@@ -312,7 +320,7 @@ let package = Package(
 
         .executableTarget(
             name: "TabsTests",
-            dependencies: ["Tabs", "Terminal", "Icons", "Checks"],
+            dependencies: ["Tabs", "Terminal", "Icons", "StateGlyph", "UILooks", "Checks"],
             path: "features/tabs/tests",
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
@@ -446,6 +454,8 @@ let package = Package(
         .executableTarget(name: "MenusTests", dependencies: ["Menus", "Checks"], path: "shared/menus/tests",
                           linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
         .executableTarget(name: "UILooksTests", dependencies: ["UILooks", "Checks"], path: "shared/looks/tests",
+                          linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
+        .executableTarget(name: "StateGlyphTests", dependencies: ["StateGlyph", "UILooks", "Checks"], path: "shared/state-glyph/tests",
                           linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
         .executableTarget(name: "IconsTests", dependencies: ["Icons", "Checks"], path: "shared/icons/tests",
                           linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),

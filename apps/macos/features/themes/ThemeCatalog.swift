@@ -8,18 +8,20 @@ import Strings
 /// holds only the themes in use (plan 15: hundreds of themes must not
 /// weigh on the app).
 public enum ThemeCatalog {
-    /// The family the app starts with: the one the owner uses.
-    public static let defaultId = "caffeine"
+    /// The family the app starts with: Cadex Night, the new frame's
+    /// (docs/adr/0035-work-frame.md), generated from the mockups' tokens.
+    public static let defaultId = ThemeFamily.cadexNight.id
 
-    /// Every built-in family, the default first. Empty only if the bundled
-    /// file is missing or broken, which the tests catch.
+    /// Every built-in family, Cadex Night (the default) first. Only Cadex Night
+    /// if the bundled file is missing or broken, which the tests catch.
     public static func all() -> [ThemeFamily] {
-        guard let entries = entries() else { return [] }
-        return entries.compactMap { try? family($0) }
+        guard let entries = entries() else { return [ThemeFamily.cadexNight] }
+        return [ThemeFamily.cadexNight] + entries.compactMap { try? family($0) }
     }
 
     /// One built-in family, reading only its entry.
     public static func family(id: String) -> ThemeFamily? {
+        if id == ThemeFamily.cadexNight.id { return ThemeFamily.cadexNight }
         guard let entry = entries()?.first(where: { $0["id"] as? String == id }) else { return nil }
         return try? family(entry)
     }

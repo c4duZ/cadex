@@ -32,7 +32,7 @@ COLOR = re.compile(r"#[0-9A-Fa-f]{6}\b|#[0-9A-Fa-f]{3}\b|rgba\([^)]*\)")
 SPACING = {"gap", "padding", "margin", "margin-top", "margin-bottom", "margin-left",
            "margin-right", "padding-top", "padding-left", "padding-right", "padding-bottom",
            "row-gap", "column-gap"}
-SKIP_KEYS = {"about", "inset", "opening", "outline", "regions", "files", "mono"}
+SKIP_KEYS = {"about", "opening", "regions", "files", "mono"}
 
 
 def norm_color(c):

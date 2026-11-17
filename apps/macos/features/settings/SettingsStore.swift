@@ -51,8 +51,12 @@ public final class SettingsStore {
         guard let data = try? Data(contentsOf: file) else { return }
         let (read, problems) = SettingsFile.read(data)
         problems.forEach { NSLog("settings.json: %@", $0) }
-        guard read != settings else { return }
+        // An older file was moved to the current defaults: written back now, so
+        // the move happens once and a later hand edit is not moved again.
+        let migrated = SettingsFile.version(of: data) < Settings.currentVersion
+        guard read != settings || migrated else { return }
         settings = read
+        if migrated { save() }
         observers.forEach { $0(read) }
     }
 

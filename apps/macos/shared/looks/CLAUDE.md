@@ -16,6 +16,10 @@
 ## Como eu quero
 - `TitleBarHold.swift`: nada clicável da barra de título move a janela; abas e botões da barra a
   travam enquanto o ponteiro está neles (o macOS decide mover a janela antes de o app ver o clique).
+- `DesignTokens.swift` e os arquivos de peças `DesignTokensChrome.swift`, `DesignTokensColumns.swift`,
+  `DesignTokensCenter.swift` e `DesignTokensPages.swift`: os tokens dos mockups da moldura nova, gerados
+  por `../../../../tools/design/build_tokens.py` de `../../../../docs/design/work-frame/tokens.json`
+  (não editar à mão). Valores em pontos de desenho: quem usa passa por `pt`, `rowHeight` e `font`.
 - `UILooks.swift`: o app chama UILooks.configure uma vez, antes de montar qualquer tela. As telas
   pedem `font(_:weight:)` (tamanho do desenho × zoom × fontSize/13, na família escolhida com o
   mesmo peso), `monospaced`/`monospacedDigits` (código curto e números), `pt` (larguras, margens,

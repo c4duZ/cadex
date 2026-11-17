@@ -1,22 +1,23 @@
+import StateGlyph
 import Strings
 import Terminal
 
-/// A tab with an agent (docs/spec/tabs.md, plan 19): a sign for its state
-/// before the title and its conversation's name in place of the folder.
-/// The state comes from the agent's own OSC 7501 reports (Terminal).
+/// A tab with an agent (docs/spec/tabs.md, plan 19): the app's state glyph before the title
+/// (shared/state-glyph, plan 25; the ◐ ● ✓ ✕ ☾ of the title went with it) and its
+/// conversation's name in place of the folder. The state comes from the agent's own OSC 7501
+/// reports (Terminal).
 enum TabAgentTitle {
-    /// Working ◐, waiting for you ●, finished ✓ (✓• while you have not
-    /// looked yet), failed ✕; nothing when idle (docs/spec/tabs.md).
-    static func sign(_ status: TerminalAgentStatus?, finishedUnseen: Bool, hibernated: Bool = false) -> String {
-        // Hibernated ☾: the agent ended to save memory and comes back when
-        // the tab opens (plan 19 phase F).
-        if hibernated { return "☾ " }
+    /// Working, needs you (waiting for a permission or an answer), done, failed; a hibernated
+    /// agent (plan 19 phase F: ended to save memory, back when the tab opens) is idle; nothing
+    /// when there is no agent.
+    static func state(_ status: TerminalAgentStatus?, hibernated: Bool = false) -> GlyphState? {
+        if hibernated { return .idle }
         return switch status?.state {
-        case .working: "◐ "
-        case .blocked: "● "
-        case .done: finishedUnseen ? "✓• " : "✓ "
-        case .failed: "✕ "
-        default: ""
+        case .working: .working
+        case .blocked: .needs
+        case .done: .done
+        case .failed: .failed
+        default: nil
         }
     }
 

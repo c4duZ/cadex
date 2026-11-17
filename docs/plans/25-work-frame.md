@@ -44,7 +44,8 @@ a do sistema (ADR 0035); o terminal mantém a dele.
   lista da anatomia 20 → 18.
 - Telas: Map.dc.html, Anatomy.dc.html (descritas em `docs/design/work-frame/screens.md`; cada uma implementada como a
   seção dela diz, e conferida lado a lado com o mockup).
-- Tokens: components.window, components.stateGlyph, components.button (e todas as primitivas).
+- Tokens: components.window, components.stateGlyph, components.button, components.theme (e todas as
+  primitivas).
 
 **Fases:**
 - **A. Specs.** O dono aceita a ADR 0035. Reescritas antes do código, cada uma dizendo o que some:
@@ -65,23 +66,39 @@ a do sistema (ADR 0035); o terminal mantém a dele.
   arquivo, e textos `T(...)` repetidos ou sem uso; roda na varredura de cada plano (não falha o
   `make check`: é lista para olhar). As cópias velhas em .claude/worktrees/plan-8 saem, depois
   de o dono ver.
-- **C. Tema e tokens no app, gerados.** tools/design/build_tokens.py gera, de
-  `docs/design/work-frame/tokens.json`, o arquivo apps/macos/shared/looks/DesignTokens.swift
-  (cores, fontes, raios, espaços, sombras e as medidas de cada peça, com o nome do token) e o tema
-  "Cadex Night" de `apps/macos/features/themes/BuiltInThemes.swift` (com o claro par dele e o ANSI
-  afinado ao components.terminalTheme); `--check` no `make manifests` falha se o gerado não
-  bater com o tokens.json. Nada desses valores é digitado à mão no Swift. O tema vira padrão em
-  appearance.theme; quem usava "Cadex Escuro" ou "Cadex Claro" é migrado uma vez. Medidas passam
-  pelo zoom e pela densidade de `apps/macos/shared/looks/UILooks.swift`.
-  tools/check_design_literals.py (no `make manifests`): nos arquivos da moldura nova (a lista
-  cresce a cada plano, conforme cada arquivo é reescrito; ao fim do 30 cobre toda a casca), nenhuma
-  cor em hex, `NSColor(red:…)`, raio, espaço ou tamanho de fonte digitado: só `DesignTokens`.
-- **D. A peça de estado.** `StateGlyph` em `apps/macos/shared/` (components.stateGlyph: os seis
-  estados, com "em revisão", nos tamanhos 7, 9, 10 e 14, o anel girando só enquanto aparece e parado com "Reduzir movimento"), no lugar do glifo de
-  `apps/macos/features/tabs/TabAgentTitle.swift`. Testes e snapshot dos cinco.
-- **E. Varredura e fechamento.** Linhas do inventário deste plano em `saiu`; tools/find_unused.py
-  limpo do que este plano trocou; `make check`; snapshots das fundações ao lado do mockup Anatomy
-  (11).
+- **C. Tema e tokens no app, gerados.** Feita (2026-11-17). `tools/design/build_tokens.py` gera, de
+  `docs/design/work-frame/tokens.json`, `apps/macos/shared/looks/DesignTokens.swift` (cores, fontes,
+  pesos, entrelinhas, espaçamento de letra, raios, espessuras, opacidade, sombras em camadas e a
+  escala de espaços, com o nome do token), um arquivo de peças por região da moldura
+  (`apps/macos/shared/looks/DesignTokensChrome.swift`, DesignTokensColumns.swift,
+  DesignTokensCenter.swift, DesignTokensPages.swift, cada um abaixo de 300 linhas) e o tema
+  `apps/macos/features/themes/CadexNight.swift` (components.theme e components.terminalTheme, o
+  ANSI só com cores dos tokens); `--check` no `make manifests` falha se o gerado não bater com o
+  tokens.json. O Cadex Night é família própria no catálogo, a primeira e o padrão, só escura (os
+  mockups não têm versão clara: o par claro vem com um mockup claro). Os "Cadex Escuro/Claro" de
+  BuiltInThemes.swift saíram: nenhum tema escolhível os usava, só os testes. Como o settings.json
+  grava também os padrões, o arquivo ganhou versão (Settings.version, 2): arquivo sem versão no
+  Caffeine (o padrão antigo) passa uma vez para o Cadex Night; um tema escolhido fica. As medidas
+  passam pelo zoom e pela densidade de `apps/macos/shared/looks/UILooks.swift` em quem as usa.
+  `tools/check_design_literals.py` (no `make manifests`, com `--self-test`): nos arquivos da lista
+  FRAME_FILES (cresce a cada plano, conforme cada arquivo é escrito ou reescrito para a moldura; ao
+  fim do 30 cobre toda a casca), nenhuma cor em hex ou por componentes, raio, espaço, altura ou
+  tamanho de fonte digitado: só `DesignTokens`.
+- **D. A peça de estado.** Feita (2026-11-17). `apps/macos/shared/state-glyph/` (components.stateGlyph):
+  `GlyphState` com os seis estados (com "em revisão", que só o quadro usava e a anatomia passou a
+  mostrar), `StateGlyphLook` (cor, espessura por tamanho, halo, o anel aberto em cima e um quadro
+  parado para quem desenha à mão) e `StateGlyphView` (camadas; o anel gira no servidor de desenho só
+  enquanto pode ser visto e nunca com "Reduzir movimento"), nos tamanhos 7, 9, 10 e 14. Exceção à
+  regra de `apps/macos/shared/CLAUDE.md` registrada lá. Nas abas, o sinal no lugar do ícone e o
+  título em negrito quando terminou sem ser visto; os sinais de texto ◐ ● ✓ ✕ ☾ saíram de
+  `apps/macos/features/tabs/TabAgentTitle.swift`. Snapshots: state-glyphs.png e tab-states.png.
+- **E. Varredura e fechamento.** Feita (2026-11-17). Inventário: BuiltInThemes.swift saiu, o tema e
+  a aba mudaram como dito; `tools/find_unused.py` zerado (os tokens gerados ficam fora da lista,
+  porque os próximos planos é que os usam); `make check`. Fidelidade, numa galeria para o dono
+  (https://claude.ai/artifact/FpF42fpf4XMZoP4rZSmy37): o app de teste abrindo no Cadex Night, os
+  seis estados nos quatro tamanhos ao lado da Anatomy, e a barra de abas com os sinais. Diferença
+  registrada: o contorno do parado no tamanho 14 tem 1,5 pt nos tokens e 2 pt no desenho da
+  Anatomy; vale o token (os outros parados do mockup têm 1,5).
 
 ## Como validar
 - `make check` passa, com tools/check_leftovers.py no `make manifests`.

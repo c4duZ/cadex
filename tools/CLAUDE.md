@@ -33,6 +33,13 @@
   mockups é token, todo token aparece num mockup), toda peça citada existe e toda peça está num dos
   planos 25 a 30 (`../docs/adr/0035-work-frame.md`). O que é exemplo fica entre
   `<!-- tokens:off: motivo -->` e `<!-- tokens:on -->`.
+- `design/build_tokens.py`: gera, de `../docs/design/work-frame/tokens.json`, os tokens do app
+  (`../apps/macos/shared/looks/DesignTokens.swift` e um arquivo de peças por região da moldura) e o
+  tema Cadex Night (`../apps/macos/features/themes/CadexNight.swift`); `--check` no `make manifests`
+  falha se o gerado não bate. Nada desses valores é digitado no Swift (ADR 0035).
+- `check_design_literals.py` (no `make manifests`, com `--self-test`): nos arquivos da moldura nova
+  (a lista FRAME_FILES, que cada plano de 25 a 30 aumenta), nenhuma cor, raio, fonte, espaço ou
+  altura digitados: só `DesignTokens`.
 - `check_leftovers.py` (no `make manifests`, com `--self-test` antes): toda peça da casca velha
   marcada `saiu` no inventário (`../docs/design/work-frame/inventory.md`) sumiu de verdade: arquivo,
   comando, chave (menos na linha marcada `// migração 0035`), gancho do `make perf` e trecho de spec.

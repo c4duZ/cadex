@@ -61,7 +61,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 
 | # | plano | entrega | status |
 |---|---|---|---|
-| 25 | `docs/plans/25-work-frame.md` | fundações: specs, tema Cadex Night, medidas, a peça de estado, o inventário e a máquina contra casca velha | em andamento (2026-11-17): ADR 0035 aceita; fase A |
+| 25 | `docs/plans/25-work-frame.md` | fundações: specs, tema Cadex Night, medidas, a peça de estado, o inventário e a máquina contra casca velha | feito (2026-11-17): fases A a E; galeria de fidelidade em https://claude.ai/artifact/FpF42fpf4XMZoP4rZSmy37 |
 | 26 | `docs/plans/26-frame.md` | barra de título, barra de status, painel da direita, o sino em popover | escrito |
 | 27 | `docs/plans/27-projects-tree.md` | projetos (os spaces) e a árvore do trabalho; sai a fileira de ícones | escrito |
 | 28 | `docs/plans/28-dressed-terminal.md` | o terminal vestido e o preview ao lado | escrito |

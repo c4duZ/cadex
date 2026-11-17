@@ -2,6 +2,8 @@ import AppKit
 import CoreGraphics
 import Checks
 @testable import Tabs
+import StateGlyph
+import UILooks
 import Icons
 import Terminal
 
@@ -45,7 +47,7 @@ func eventually(_ body: () -> Bool) async -> Bool {
 }
 
 let exitCode = await Checks.run([
-    ("a tab whose agent waits for a permission shows ● and its conversation's name, and the tip says what", {
+    ("a tab whose agent waits for a permission shows the needs-you glyph and its conversation's name, and the tip says what", {
         let tabs = makeTabs()
         tabs.newTab()
         guard let terminal = tabs.activeTerminal else { return expect(false, "no terminal") }
@@ -55,22 +57,22 @@ let exitCode = await Checks.run([
         defer { NotificationCenter.default.removeObserver(observer) }
         // As Claude Code does: it names the conversation (OSC 2) and reports blocked (OSC 7501), and keeps running.
         terminal.session?.write("sh -c \"printf '\\\\033]2;Fix login\\\\007\\\\033]7501;state=blocked:app=claude-code:kind=permission:msg=YXBwcm92ZSBCYXNoOiBybSB4\\\\007'; sleep 20\"\n")
-        let shown = await eventually { tabs.bar.items.first?.title == "● Fix login" }
+        let shown = await eventually { tabs.bar.items.first?.title == "Fix login" && tabs.bar.items.first?.state == .needs }
         expect(shown, "\(tabs.bar.items.map(\.title))")
         expect(notices >= 1, "the terminal tells the app its agent changed")
         expect(tabs.bar.items.first?.tip?.hasPrefix("approve Bash: rm x") == true, "\(String(describing: tabs.bar.items.first?.tip))")
         terminal.session?.write("\u{3}")
-        let back = await eventually { !(tabs.bar.items.first?.title.hasPrefix("●") ?? true) }
+        let back = await eventually { tabs.bar.items.first?.state == nil }
         expect(back, "back at the shell, no agent sign: \(tabs.bar.items.map(\.title))")
     }),
-    ("a tab with an agent: the sign of its state, the conversation's name, what it does in the tip", {
+    ("a tab with an agent: the glyph of its state, the conversation's name, what it does in the tip", {
         let working = TerminalAgentStatus(state: .working, kind: .none, app: "claude-code", message: "Creating empty file…")
         let waiting = TerminalAgentStatus(state: .blocked, kind: .permission, app: "claude-code", message: "approve Bash: touch x")
         let done = TerminalAgentStatus(state: .done, kind: .none, app: "claude-code", message: "")
-        expect(TabAgentTitle.sign(working, finishedUnseen: false) == "◐ " && TabAgentTitle.sign(waiting, finishedUnseen: false) == "● ")
-        expect(TabAgentTitle.sign(done, finishedUnseen: true) == "✓• " && TabAgentTitle.sign(done, finishedUnseen: false) == "✓ ")
-        expect(TabAgentTitle.sign(nil, finishedUnseen: true) == "", "no agent, no sign")
-        expect(TabAgentTitle.sign(nil, finishedUnseen: false, hibernated: true) == "☾ ", "hibernated: the moon")
+        expect(TabAgentTitle.state(working) == .working && TabAgentTitle.state(waiting) == .needs)
+        expect(TabAgentTitle.state(done) == .done)
+        expect(TabAgentTitle.state(nil) == nil, "no agent, no glyph")
+        expect(TabAgentTitle.state(nil, hibernated: true) == .idle, "hibernated: idle")
         expect(TabAgentTitle.tip(nil, folder: "~/a", hibernated: true)?.hasSuffix("\n~/a") == true)
         expect(TabAgentTitle.name(programTitle: "✳ Fix login") == "Fix login" && TabAgentTitle.name(programTitle: "  ") == "")
         expect(TabAgentTitle.tip(waiting, folder: "~/code/app") == "approve Bash: touch x\n~/code/app")
@@ -589,5 +591,42 @@ let exitCode = await Checks.run([
         a.hasUnsavedChanges = false
         tabs.closeAll()
     }),
+    ("the strip shows each tab's state glyph in place of its icon; unseen is bold (CADEX_SNAPSHOT_DIR: tab-states.png)", {
+        let bar = TabBarView(frame: NSRect(x: 0, y: 0, width: 920, height: 40))
+        bar.style = .init(activeFill: DesignTokens.Color.bgChip, hoverFill: DesignTokens.Color.bgSelected,
+                          text: DesignTokens.Color.textPrimary, secondaryText: DesignTokens.Color.textSecondary,
+                          accent: DesignTokens.Color.stateWorking)
+        bar.items = [
+            .init(id: 1, title: "Claude", active: true, state: .working),
+            .init(id: 2, title: "Fix login", active: false, state: .needs),
+            .init(id: 3, title: "bell-cards", active: false, state: .done, unseen: true),
+            .init(id: 4, title: "hero-images", active: false, state: .failed),
+            .init(id: 5, title: "~", active: false),
+        ]
+        bar.layoutSubtreeIfNeeded()
+        let glyphs = bar.subviews.compactMap { $0 as? StateGlyphView }
+        expect(glyphs.count == 4, "\(glyphs.count) glyphs")
+        expect(glyphs.contains { $0.state == .working && $0.size == DesignTokens.StateGlyph.sizes[1] }, "active: the larger glyph")
+        bar.items.removeLast(2)
+        expect(bar.subviews.compactMap { $0 as? StateGlyphView }.count == 3, "a tab gone takes its glyph")
+        bar.items += [.init(id: 4, title: "hero-images", active: false, state: .failed), .init(id: 5, title: "~", active: false)]
+        snapshot(bar, "tab-states")
+    }),
 ])
+
+/// With CADEX_SNAPSHOT_DIR set, saves a picture of `view` there, to put the strip beside the mockup.
+@MainActor func snapshot(_ view: NSView, _ name: String) {
+    guard let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }
+    let window = NSWindow(contentRect: view.bounds, styleMask: [.borderless], backing: .buffered, defer: false)
+    window.appearance = NSAppearance(named: .darkAqua)
+    let root = NSView(frame: view.bounds)
+    root.wantsLayer = true
+    root.layer?.backgroundColor = DesignTokens.Color.bgChrome.cgColor
+    root.addSubview(view)
+    window.contentView = root
+    root.layoutSubtreeIfNeeded()
+    guard let bitmap = root.bitmapImageRepForCachingDisplay(in: root.bounds) else { return }
+    root.cacheDisplay(in: root.bounds, to: bitmap)
+    try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir).appendingPathComponent(name + ".png"))
+}
 exit(exitCode)

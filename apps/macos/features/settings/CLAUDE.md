@@ -10,7 +10,8 @@
 ## Como eu quero
 - `Settings.swift`: o modelo (geral com general.openFiles, terminal, aparência, explorer, markdown, power, atalhos) e os limites da spec.
   `SettingsFile.swift`: lê o JSON campo a campo (campo errado volta ao padrão e vira aviso, o resto
-  vale) e escreve. `SettingsStore.swift`: memória e disco (Application Support/Cadex), salva a cada
+  vale) e escreve, com a versão do arquivo (Settings.version); `migrate` leva um arquivo antigo aos
+  padrões novos uma vez (versão 2: do Caffeine ao Cadex Night, ADR 0035). `SettingsStore.swift`: memória e disco (Application Support/Cadex), salva a cada
   mudança e relê edição à mão observando a pasta (salvar atômico) e o arquivo (edição no lugar). CADEX_SETTINGS_FILE
   aponta para outro arquivo (os cenários do `make perf`).
 - A janela (⌘,, comando settings.open): `SettingsWindowController.swift`, com as seções em abas no

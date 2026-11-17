@@ -74,10 +74,13 @@
   (plano 8).
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
-- `TabAgentTitle.swift` (plano 19): o sinal do estado do agente antes do título (◐ trabalhando,
-  ● esperando você, ✓ terminou, ✓• terminou sem você ver, ✕ falhou, ☾ hibernado, com "Hibernando" na
-  dica), o nome da conversa no lugar da pasta e a
-  frase do que ele faz na dica; o nome dado à mão continua, com o sinal.
+- `TabAgentTitle.swift` (plano 19; plano 25 fase D): o estado do agente como `GlyphState` da peça
+  única de estado (`../../shared/state-glyph/`): trabalhando, precisa de você, pronto, falhou, e
+  hibernado como parado ("Hibernando" na dica); o `TabBarView` põe o sinal no lugar do ícone da aba
+  (uma `StateGlyphView` por aba com estado, 9 na ativa e 7 nas outras, parada e desenhada enquanto
+  uma aba é arrastada) e o título em negrito quando o agente terminou sem você ver; os sinais de
+  texto de antes (◐ ● ✓ ✕ ☾) saíram do título. O nome da conversa no lugar da pasta e a frase do
+  que ele faz na dica; o nome dado à mão continua.
 
 ## Como validar
 - `make macos-test` passa: `TabList` e `PaneTree` têm os testes das regras; o snapshot ida e volta
