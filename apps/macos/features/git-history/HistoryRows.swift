@@ -73,6 +73,8 @@ final class HistoryRows: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         if id == "graph" {
             let view = tableView.makeView(withIdentifier: .init("graph"), owner: nil) as? HistoryGraphView ?? HistoryGraphView()
             view.identifier = .init("graph")
+            // The compact rows share this reuse queue: their look must not stay here.
+            view.compact = false
             view.graph = showsGraph ? commit.graph : nil
             view.isMerge = commit.parents.count > 1
             view.isHead = commit.refs.contains { $0 == "HEAD" || $0.hasPrefix("HEAD -> ") }

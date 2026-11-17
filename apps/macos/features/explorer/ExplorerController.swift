@@ -239,7 +239,6 @@ public final class ExplorerController: NSObject {
     func refreshVisibleRows() {
         outline.enumerateAvailableRowViews { rowView, row in
             if let rowView = rowView as? ExplorerRowView {
-                rowView.accent = style.accent
                 rowView.guide = style.secondaryText.withAlphaComponent(0.25)
                 rowView.needsDisplay = true
             }

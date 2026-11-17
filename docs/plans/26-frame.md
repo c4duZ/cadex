@@ -53,7 +53,9 @@ power, updates · Decisões: `docs/adr/0035-work-frame.md` · Mockups: 1 (o mapa
   CADEX_PERF_SNAPSHOT (a janela de teste abre noutra mesa, onde o screencapture falha). C2a feita
   (2026-11-17): Changes no desenho (o seletor Last turn / Task / Uncommitted, as linhas com letra,
   pasta e +/−, Commit… e Open PR; a última rodada pelos hooks de edição e de parada, agora sempre no
-  kit; a linha "make check passed" espera uma fonte). Falta a C2b: as linhas de Files, History e
+  kit; a linha "make check passed" espera uma fonte). C2b feita (2026-11-17): Files e History nos desenhos
+  aprovados (a árvore de 28 com recuo de 16 e a linha escolhida; os commits em duas linhas com o
+  grafo de uma cor e o ponto azul no HEAD, os arquivos do commit aberto com +/−). Falta a C2c:
   Memory no desenho, a borda arrastável e a janela estreita. Plano original: Feature nova `inspector` (spec do plano 25): coluna de 320 pt,
   recolhível (⌥⌘I, inspector.toggle), com as abas Mudanças, Arquivos, Histórico e Memória; cada
   aba é a página de hoje (source-control, explorer, git-history, memory) com o cabeçalho de

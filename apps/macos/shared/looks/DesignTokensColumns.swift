@@ -266,6 +266,7 @@ public extension DesignTokens {
             public static let indent: CGFloat = 16
             public static let padding = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
             public static let gap: CGFloat = 6
+            public static let icon: CGFloat = 14
             public static let radius: CGFloat = DesignTokens.Radius.control
             public static let chevron: CGFloat = 12
             public static var chevronColor: NSColor { DesignTokens.Color.textTertiary }

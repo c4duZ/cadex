@@ -30,8 +30,10 @@
   quando está indisponível), `FileTypeIcon.swift` (pasta, link, e os arquivos pelo `FileIcons` compartilhado).
 - Um clique abre (arquivo na aba, pasta abre ou fecha); ⌘ e ⇧ só selecionam; a seta não abre duas
   vezes. Dois cliques numa pasta rodam explorer.open-in-terminal (o app faz `cd` ou, com programa
-  rodando, abre aba nova na pasta). Aparência do VS Code (spec, "Aparência"): linhas de 22 pt, recuo de 8 pt, guias de recuo com o
-  ponteiro sobre a árvore e fundo leve na linha sob ele (`ExplorerOutline.swift` e
+  rodando, abre aba nova na pasta). Aparência da aba Files do painel da direita (plano 26 fase C2b, components.inspector.tree, o
+  desenho que o dono aprovou): linhas de 28 pt, recuo de 16 pt, a seta apagada, o nome em 13 (o
+  mudado em âmbar, o novo em verde), a letra do git à direita e a linha escolhida com o fundo e o
+  contorno arredondados; guias de recuo com o ponteiro sobre a árvore e fundo leve na linha sob ele (`ExplorerOutline.swift` e
   `ExplorerRowView`), cores por tipo em `apps/macos/shared/icons/FileIcons.swift` (da tabela do CodeEdit,
   MIT, no NOTICE). `ExplorerCompact.swift`: pastas compactas; a linha é a primeira pasta da cadeia,
   mostra os filhos da última e as ações valem para a última (`tail`, `item(of:)`, `row(of:)`,

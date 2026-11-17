@@ -1,6 +1,7 @@
 import AppKit
 import UILooks
 import Menus
+import Icons
 
 /// The tree's NSOutlineView. Keys that only make sense in the tree (Enter
 /// opens, F2 renames, ⌘⌫ trashes, ⌘C and ⌘V copy files) are handled here,
@@ -19,9 +20,10 @@ final class ExplorerOutline: NSOutlineView {
         columnAutoresizingStyle = .firstColumnOnlyAutoresizingStyle
         outlineTableColumn = column
         headerView = nil
-        // VS Code's tree: 22 pt rows, 8 pt per level (docs/spec/explorer.md).
-        rowHeight = UILooks.rowHeight(22)
-        indentationPerLevel = 8
+        // The right panel's Files tab (plan 26 C2b; components.inspector.tree): 28 pt rows,
+        // 16 pt per level, as the drawing the owner approved.
+        rowHeight = UILooks.rowHeight(DesignTokens.Inspector.Tree.rowHeight)
+        indentationPerLevel = UILooks.pt(DesignTokens.Inspector.Tree.indent)
         backgroundColor = .clear
         style = .plain
         allowsMultipleSelection = true
@@ -35,6 +37,21 @@ final class ExplorerOutline: NSOutlineView {
         registerForDraggedTypes([.fileURL])
         setDraggingSourceOperationMask([.move], forLocal: true)
         setDraggingSourceOperationMask([.copy], forLocal: false)
+    }
+
+    /// Drawn once: makeView runs for every row that scrolls in (review of 2026-11-17).
+    private static let carets = (closed: Icon.caretRight.image(size: UILooks.pt(DesignTokens.Inspector.Tree.chevron)),
+                                 open: Icon.caretDown.image(size: UILooks.pt(DesignTokens.Inspector.Tree.chevron)))
+
+    /// The folders' arrow as the drawing has it: a caret, dimmer than the names.
+    override func makeView(withIdentifier identifier: NSUserInterfaceItemIdentifier, owner: Any?) -> NSView? {
+        let view = super.makeView(withIdentifier: identifier, owner: owner)
+        if identifier == NSOutlineView.disclosureButtonIdentifier, let button = view as? NSButton {
+            button.image = Self.carets.closed
+            button.alternateImage = Self.carets.open
+            button.contentTintColor = DesignTokens.Inspector.Tree.chevronColor
+        }
+        return view
     }
 
     private func run(_ id: String) {

@@ -59,7 +59,6 @@ extension ExplorerController: NSOutlineViewDataSource, NSOutlineViewDelegate {
 
     public func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
         let row = (outlineView.makeView(withIdentifier: ExplorerRowView.identifier, owner: nil) as? ExplorerRowView) ?? ExplorerRowView()
-        row.accent = style.accent
         row.guide = style.secondaryText.withAlphaComponent(0.25)
         return row
     }
@@ -101,14 +100,16 @@ extension ExplorerController: NSOutlineViewDataSource, NSOutlineViewDelegate {
 
 /// A row: icon and name; hidden files dimmed, notes in italics.
 final class ExplorerCell: NSTableCellView {
-    /// Same colors as the Git lists: green new, red deleted or in conflict,
-    /// blue renamed, orange changed.
+    typealias Tree = DesignTokens.Inspector.Tree
+
+    /// The drawing's colors (components.inspector.tree.mark), as Changes: green new, red deleted
+    /// or in conflict, dim renamed, amber changed.
     static func gitColor(_ letter: Character) -> NSColor {
         switch letter {
-        case "A", "?": .systemGreen
-        case "D", "U": .systemRed
-        case "R", "C": .systemBlue
-        default: .systemOrange
+        case "A", "?": Tree.Mark.added
+        case "D", "U": DesignTokens.Color.accentRedText
+        case "R", "C": DesignTokens.Color.textTertiary
+        default: Tree.Mark.modified
         }
     }
 
@@ -120,7 +121,7 @@ final class ExplorerCell: NSTableCellView {
         let icon = NSImageView()
         let label = NSTextField(labelWithString: "")
         label.lineBreakMode = .byTruncatingMiddle
-        label.font = UILooks.font(12)
+        label.font = UILooks.font(Tree.Name.fontSize)
         label.cell?.isScrollable = true
         addSubview(icon)
         addSubview(label)
@@ -137,11 +138,14 @@ final class ExplorerCell: NSTableCellView {
     override func layout() {
         super.layout()
         let mid = bounds.midY
-        imageView?.frame = NSRect(x: 2, y: mid - 7, width: 14, height: 14)
+        let icon = UILooks.pt(Tree.icon)
+        imageView?.frame = NSRect(x: 2, y: mid - icon / 2, width: icon, height: icon)
         let height = textField?.intrinsicContentSize.height ?? 17
-        let markWidth: CGFloat = mark.stringValue.isEmpty ? 0 : 16
-        textField?.frame = NSRect(x: 22, y: mid - height / 2, width: max(bounds.width - 26 - markWidth, 0), height: height)
-        mark.frame = NSRect(x: bounds.width - markWidth - 4, y: mid - height / 2, width: markWidth, height: height)
+        let markWidth: CGFloat = mark.stringValue.isEmpty ? 0 : UILooks.pt(Tree.indent)
+        let x = 2 + icon + UILooks.pt(Tree.gap)
+        let right = UILooks.pt(Tree.padding.right)
+        textField?.frame = NSRect(x: x, y: mid - height / 2, width: max(bounds.width - x - right - markWidth, 0), height: height)
+        mark.frame = NSRect(x: bounds.width - markWidth - right, y: mid - height / 2, width: markWidth, height: height)
     }
 
     /// The git change of a file (its letter) or a dot on a folder holding
@@ -150,7 +154,7 @@ final class ExplorerCell: NSTableCellView {
         if let existing = subviews.first(where: { $0.identifier == Self.markIdentifier }) as? NSTextField { return existing }
         let field = NSTextField(labelWithString: "")
         field.identifier = Self.markIdentifier
-        field.font = UILooks.monospaced(10, weight: .bold)
+        field.font = UILooks.font(Tree.Mark.fontSize, weight: Tree.Mark.weight)
         field.alignment = .right
         addSubview(field)
         return field
@@ -169,7 +173,7 @@ final class ExplorerCell: NSTableCellView {
             textField?.textColor = style.secondaryText
             return
         }
-        textField?.font = UILooks.font(12)
+        textField?.font = UILooks.font(Tree.Name.fontSize)
         // The Material Icon Theme's drawing when it knows the name (Docker,
         // Python, src, tests...; docs/adr/0011), in its own colors; else the
         // Phosphor glyph, folders in the theme's accent (with them gray, a
@@ -182,20 +186,18 @@ final class ExplorerCell: NSTableCellView {
             imageView?.image = FileTypeIcon.icon(name: node.name, entry: node.entry, expanded: expanded).image(size: 14)
             imageView?.contentTintColor = node.isFolder ? style.accent : FileIcons.color(forFileNamed: node.name) ?? style.secondaryText
         }
-        textField?.textColor = git.map { node.isFolder ? style.text : Self.gitColor($0) } ?? style.text
+        // A changed file's name in amber (the drawing), a new one green; folders keep the row's.
+        textField?.textColor = git.map { node.isFolder ? Tree.Name.color : $0 == "M" ? Tree.Name.changed : Self.gitColor($0) } ?? Tree.Name.color
         alphaValue = node.isHidden || node.entry?.ignored == true ? 0.55 : 1
         toolTip = node.entry?.kind == .symlink && !cadex_workspace_is_authorized(node.path) ? T("Points outside the open folder", "Aponta para fora da pasta aberta") : nil
     }
 }
 
-/// A row of the tree, drawn as in VS Code: a light fill under the pointer,
-/// thin indent guides while the pointer is over the tree, and the selection
-/// in the theme's accent, with a 1 pt border when the tree has the keyboard.
-/// The system's gray selection barely showed without focus, and its blue
-/// ignored the theme (owner, 2026-10-19).
+/// A row of the tree: a light fill under the pointer, thin indent guides while the pointer is over
+/// the tree, and the selection as the Files drawing has it (plan 26 C2b), the same with or without
+/// the keyboard. The system's gray selection barely showed without focus (owner, 2026-10-19).
 final class ExplorerRowView: NSTableRowView {
     static let identifier = NSUserInterfaceItemIdentifier("explorer.row")
-    var accent: NSColor = .controlAccentColor { didSet { needsDisplay = true } }
     var guide: NSColor = .separatorColor
 
     init() {
@@ -223,13 +225,18 @@ final class ExplorerRowView: NSTableRowView {
         }
     }
 
+    /// The chosen row as the drawing has it (components.inspector.tree.selected): the raised fill,
+    /// rounded, with its 1 pt line inside; the same with or without the keyboard.
     override func drawSelection(in dirtyRect: NSRect) {
-        accent.withAlphaComponent(isEmphasized ? 0.28 : 0.16).setFill()
-        bounds.fill()
-        guard isEmphasized else { return }
-        accent.withAlphaComponent(0.8).setStroke()
-        let border = NSBezierPath(rect: bounds.insetBy(dx: 0.5, dy: 0.5))
-        border.lineWidth = 1
+        typealias Tree = DesignTokens.Inspector.Tree
+        let radius = UILooks.pt(Tree.radius)
+        let box = bounds.insetBy(dx: UILooks.pt(Tree.padding.left) / 2, dy: 0)
+        Tree.Selected.bg.setFill()
+        NSBezierPath(roundedRect: box, xRadius: radius, yRadius: radius).fill()
+        guard let line = Tree.Selected.shadow.first else { return }
+        line.color.setStroke()
+        let border = NSBezierPath(roundedRect: box.insetBy(dx: line.spread / 2, dy: line.spread / 2), xRadius: radius, yRadius: radius)
+        border.lineWidth = line.spread
         border.stroke()
     }
 

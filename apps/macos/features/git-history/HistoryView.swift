@@ -50,8 +50,13 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         let lanes = rows.showsGraph ? rows.commits.lazy.compactMap(\.graph?.width).max() ?? 1 : 0
         let graphColumn = table.tableColumns[0]
         graphColumn.isHidden = !rows.showsGraph
-        graphColumn.width = HistoryGraphView.width(lanes: lanes)
-        if isCompact { compactRows.reload() } else { table.reloadData() }
+        graphColumn.width = HistoryGraphView.width(lanes: lanes, compact: isCompact)
+        if isCompact {
+            // The description fits what is left of the panel's width: it is cut with "…", never past
+            // the edge.
+            table.sizeToFit()
+            compactRows.reload()
+        } else { table.reloadData() }
         if !isCompact, let sha = document.selected?.sha, let row = rows.commits.firstIndex(where: { $0.sha == sha }) {
             rows.selecting = true
             table.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
@@ -82,6 +87,13 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         }
         currentOnly.isHidden = compact
         count.isHidden = compact
+        // Compact (the right panel's History): the description takes the width, not the graph,
+        // which is the first column and so was the one stretched (a wide gap after the dots, the
+        // subjects cut past the edge: seen 2026-11-17); the panel's own ground shows through.
+        let graph = table.tableColumns.first { $0.identifier.rawValue == "graph" }
+        graph?.resizingMask = compact ? [] : .userResizingMask
+        table.columnAutoresizingStyle = compact ? .uniformColumnAutoresizingStyle : .firstColumnOnlyAutoresizingStyle
+        table.backgroundColor = compact ? .clear : NSColor.controlBackgroundColor
         searchField.placeholderString = compact
             ? T("Filter commits", "Filtrar commits")
             : T("Filter by subject, author or SHA (Enter searches the repository)", "Filtrar por assunto, autor ou sha (Enter busca no repositório)")

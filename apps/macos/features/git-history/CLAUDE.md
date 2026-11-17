@@ -14,7 +14,11 @@
   pedidas conforme a lista rola, filtro no que já veio, Enter busca no repositório, só a branch
   atual, detalhes e URL do remoto do commit selecionado, recarga quando algo muda em .git
   (`diskChanged`, vindo do watcher do explorer pelo app).
-- `compact` (a página Git History da barra lateral): só o grafo e a descrição, sem títulos de
+- `compact` (a aba History do painel da direita; plano 26 fase C2b, components.inspector.commit: o
+  título em 13, seminegrito no commit atual, com as etiquetas de branch e tag, "autor · tempo · sha"
+  em 11,5, o grafo com uma cor só, linha de 2 e ponto de 10, azul cheio no HEAD e contorno nos
+  outros, o commit aberto com o fundo e o contorno, os arquivos em 24 com +/−, a descrição na
+  largura que sobra): só o grafo e a descrição, sem títulos de
   coluna, autor, data, sha, caixa de seleção, contagem nem painel de detalhes. As linhas são de
   `HistoryCompactRows.swift`: cada commit em duas linhas (descrição; autor · tempo · sha), clicar
   abre os arquivos dele embaixo com o grafo passando por trás; parar o mouse num commit mostra a
