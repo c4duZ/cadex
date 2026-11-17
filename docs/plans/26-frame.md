@@ -62,7 +62,9 @@ power, updates · Decisões: `docs/adr/0035-work-frame.md` · Mockups: 1 (o mapa
   seguinte às opções, o texto e Enter mandam palavras próprias, com 0,3 s entre as teclas.
   `apps/macos/features/agents/AgentAnswer.swift`, os botões das opções e o campo no cartão, o
   comando agents.answer, e o app digita só se o agente ainda pergunta aquilo (senão "The agent
-  moved on" no feed). Plano original: O botão da barra abre um popover com o conteúdo de `AgentAttentionView` (Precisa de
+  moved on" no feed). As opções vêm do hook PreToolUse do AskUserQuestion, não do aviso: um
+  rótulo com " · " se partia no aviso, e formulário e múltipla escolha ficam para a aba (o dono
+  pediu, 2026-11-17; conferido com o Claude real). Plano original: O botão da barra abre um popover com o conteúdo de `AgentAttentionView` (Precisa de
   você e Atividade), Permitir/Negar, e a resposta das perguntas ali mesmo pela
   docs/adr/0036-owner-words-reach-the-agent.md (o campo, ou um botão por opção; digitado no terminal
   do agente só se ele ainda está na pergunta, senão "The agent moved on"), testada com o fake agent

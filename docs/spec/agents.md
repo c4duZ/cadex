@@ -216,10 +216,14 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
   arquivo, com Permitir e Negar (agents.approve, agents.deny), só por clique, com o diálogo da TUI
   aberto: quem responder primeiro vence (`docs/adr/0023-answer-agent-permissions.md`). Pergunta e
   plano: o texto e a resposta ali mesmo (`../adr/0036-owner-words-reach-the-agent.md`): um botão
-  por opção (as que o aviso do Claude traz, "Which color? (Red · Blue)"; o número da opção escolhe
-  no menu dele) e um campo "Answer…" para palavras próprias (o número seguinte às opções, o texto
+  por opção (as do hook PreToolUse do AskUserQuestion, que o kit manda ao app: o aviso do terminal
+  junta os rótulos com " · " sem escapar, e "Red · dark" e "Blue" chegam como "(Red · dark ·
+  Blue)", e num formulário mostra só a primeira pergunta; o número da opção escolhe no menu dele) e
+  um campo "Answer…" para palavras próprias (o número seguinte às opções, o texto
   e Enter; testado com o Claude Code 2.1.326 em 2026-11-17), também pelo ⌘K (agents.answer); o Cadex digita a resposta no terminal do agente só se ele
-  ainda está naquela pergunta, e senão o cartão diz "The agent moved on". Todo cartão tem "Go to
+  ainda está naquela pergunta, e senão o cartão diz "The agent moved on". Formulário (várias
+  perguntas), múltipla escolha (o número marca uma caixa) e sessão sem o hook não têm resposta no
+  sino: o texto e "Go to tab". Todo cartão tem "Go to
   tab"; sessão aberta fora do Cadex tem só ele. O mesmo pedido de permissão aparece como cartão no pé do painel do agente
   (`tabs.md`, plano 28): responder num fecha o outro.
 - O cartão some quando o pedido se resolve: pelo clique aqui, ou quando o agente deixa de estar

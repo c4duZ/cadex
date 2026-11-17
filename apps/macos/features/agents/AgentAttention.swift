@@ -109,11 +109,15 @@ public final class AgentAttention {
         let reported = reports.filter { report in
             report.state == .blocked && !hooked.contains { $0.pid == report.pid } && answered[report.key] != report.message
         }.map { report in
-            let asked = report.kind == .permission ? (Self.tool(report.message), [String]()) : AgentAnswer.parse(Self.question(report.message))
+            let text = Self.question(report.message)
+            let options = report.kind == .permission ? [] : AgentAnswer.options(reported: text, asked: asked[report.pid])
+            // The hook's question when it matched: a label with " (" would cut the report's.
+            let title = report.kind == .permission ? Self.tool(report.message)
+                : options.isEmpty ? AgentAnswer.parse(text).question : asked[report.pid]?.first?.question ?? text
             return AgentRequest(id: "report:" + report.key, kind: report.kind == .permission ? .permission : .question, key: report.key, pid: report.pid,
-                                title: asked.0, detail: report.kind == .permission ? Self.subject(report.message) : "",
+                                title: title, detail: report.kind == .permission ? Self.subject(report.message) : "",
                                 project: report.project, session: report.session, account: report.account, at: Date(), canAnswer: false,
-                                options: asked.1, message: report.message)
+                                options: options, message: report.message)
         }
         return hooked + reported
     }
@@ -173,6 +177,15 @@ public final class AgentAttention {
         publish()
     }
 
+    /// What each agent (by its `claude` pid) last asked through AskUserQuestion, from the hook the
+    /// app passes on (AgentAnswer.options). The hook comes before the report.
+    private var asked: [Int32: [AgentAnswer.Asked]] = [:]
+
+    public func noteAsked(pid: Int32, _ questions: [AgentAnswer.Asked]) {
+        asked[pid] = questions
+        publish()
+    }
+
     /// The questions answered from here, by terminal: their cards stay away until the agent
     /// reports something else.
     private var answered: [String: String] = [:]
@@ -205,6 +218,7 @@ public final class AgentAttention {
     public func update(_ next: [AgentReport]) {
         // An answered question whose agent now says something else is done with.
         answered = answered.filter { key, message in next.contains { $0.key == key && $0.message == message } }
+        asked = asked.filter { pid, _ in next.contains { $0.pid == pid } }
         for report in next {
             let before = reports.first { $0.key == report.key }
             guard before?.state != report.state || before?.message != report.message else { continue }

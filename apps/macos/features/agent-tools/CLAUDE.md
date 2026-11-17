@@ -26,7 +26,9 @@
 - `AgentHookEvent.swift`: o evento, o pid do `claude` e o que o Claude Code deu ao hook
   (session_id, transcript_path, cwd, source, notification_type, tool_name) e `kitSession`, a sessão
   do kit dona do token (o nome do arquivo dele), que o agente hibernado reaproveita (plano 19, fase F),
-  e no PostToolUse o `edit` (AgentEdit: o arquivo e os intervalos de linhas, plano 21 fase E).
+  e no PostToolUse o `edit` (AgentEdit: o arquivo e os intervalos de linhas, plano 21 fase E); no
+  PreToolUse do AskUserQuestion, `questions` (AgentAskedQuestion: a pergunta, os rótulos das opções
+  e o multiSelect; plano 26 D2, o hook que `../../app/AgentsAttention.swift` põe no kit).
 - Pedidos de comando (plano 20, fase B): `AgentCommandRequest.swift` (o id ou a lista, os argumentos,
   os pids, a sessão do kit e o CADEX_DISPATCH_ID que o `cadex` mandou; a resposta
   `AgentCommandAnswer`; a lista fechada `AgentCommandList`, que só uma ADR amplia, com os sete da

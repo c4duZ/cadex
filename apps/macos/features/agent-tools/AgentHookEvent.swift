@@ -23,6 +23,10 @@ public struct AgentHookEvent: Sendable, Equatable {
     /// PostToolUse (plan 21 phase E): the file an agent edited and the lines
     /// it wrote, as `cadex hook` cut them (never the file's text).
     public var edit: AgentEdit?
+    /// PreToolUse of AskUserQuestion (plan 26 D2): the questions as the agent wrote them, each
+    /// option apart. The report in the terminal joins the labels with " · " and shows only the
+    /// first question of a form (Claude Code 2.1.326, 2026-11-17): only this is exact.
+    public var questions: [AgentAskedQuestion]?
 
     /// The line `cadex hook` sent, without its token; nil when it does not read.
     static func parse(_ object: [String: Any]) -> AgentHookEvent? {
@@ -33,7 +37,9 @@ public struct AgentHookEvent: Sendable, Equatable {
                               cwd: payload["cwd"] as? String, source: payload["source"] as? String,
                               notificationType: payload["notification_type"] as? String, toolName: payload["tool_name"] as? String,
                               toolSubject: subject(payload["tool_input"] as? [String: Any] ?? [:]), kitSession: nil,
-                              edit: event == "PostToolUse" ? AgentEdit(payload) : nil)
+                              edit: event == "PostToolUse" ? AgentEdit(payload) : nil,
+                              questions: event == "PreToolUse" && payload["tool_name"] as? String == "AskUserQuestion"
+                                  ? AgentAskedQuestion.list(payload["tool_input"] as? [String: Any] ?? [:]) : nil)
     }
 
     /// The part of a tool's input a person reads first, as the permission
@@ -60,6 +66,22 @@ public struct AgentEdit: Sendable, Equatable {
         lines = (payload["lines"] as? [[Any]] ?? []).compactMap { pair in
             guard pair.count == 2, let a = (pair[0] as? NSNumber)?.intValue, let b = (pair[1] as? NSNumber)?.intValue, a <= b else { return nil }
             return a...b
+        }
+    }
+}
+
+/// One question of an AskUserQuestion: its text, its options' labels, and whether several may be
+/// picked.
+public struct AgentAskedQuestion: Sendable, Equatable {
+    public let question: String
+    public let options: [String]
+    public let multiSelect: Bool
+
+    static func list(_ input: [String: Any]) -> [AgentAskedQuestion] {
+        (input["questions"] as? [[String: Any]] ?? []).compactMap { item in
+            guard let question = item["question"] as? String else { return nil }
+            let options = (item["options"] as? [[String: Any]] ?? []).compactMap { $0["label"] as? String }
+            return AgentAskedQuestion(question: question, options: options, multiSelect: item["multiSelect"] as? Bool ?? false)
         }
     }
 }

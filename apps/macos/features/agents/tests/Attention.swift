@@ -32,6 +32,7 @@ let attentionChecks: [(name: String, body: Checks.Body)] = [
     }),
     ("an agent blocked without a waiting hook is a card to go to; with one, a single card", {
         let attention = AgentAttention()
+        attention.noteAsked(pid: 7, [AgentAnswer.Asked(question: "Azul ou verde?", options: ["Azul", "Verde"], multiSelect: false)])
         attention.update([report("t1", pid: 7, .blocked, .question, "answer: Azul ou verde? (Azul · Verde)"),
                           report("t2", pid: 9, .blocked, .permission, "approve Bash: ls")])
         let cards = attention.cards
@@ -109,6 +110,7 @@ let attentionChecks: [(name: String, body: Checks.Body)] = [
         let attention = AgentAttention.shared
         attention.isEnabled = true
         attention.update([report("p1", pid: 71, .working), report("q1", pid: 72, .working), report("d1", pid: 73, .working)])
+        attention.noteAsked(pid: 72, [AgentAnswer.Asked(question: "Which checkout copy?", options: ["Keep the old", "Use the new"], multiSelect: false)])
         attention.update([report("p1", pid: 71, .blocked, .permission, "approve Bash: make perf"),
                           report("q1", pid: 72, .blocked, .question, "answer: Which checkout copy? (Keep the old · Use the new)"),
                           report("d1", pid: 73, .done)])
@@ -148,6 +150,24 @@ let attentionChecks: [(name: String, body: Checks.Body)] = [
         expect(AgentAnswer.keys(.text("Green\nnow"), options: 2) == ["3", "Green now", "\r"], "one line")
         expect(AgentAnswer.keys(.option(2), options: 2) == nil && AgentAnswer.keys(.text("  "), options: 2) == nil)
         expect(AgentAnswer.keys(.option(0), options: 0) == nil, "no options known: nothing to type")
+    }),
+    ("the options come only from the hook: a label with \" · \", a form, a multiple choice, no hook (2026-11-17)", {
+        let one = [AgentAnswer.Asked(question: "Which shade?", options: ["Red · dark", "Blue"], multiSelect: false)]
+        expect(AgentAnswer.options(reported: "Which shade? (Red · dark · Blue)", asked: one) == ["Red · dark", "Blue"], "the hook's labels, not the report's split")
+        expect(AgentAnswer.parse("Which shade? (Red · dark · Blue)").question == "Which shade?")
+        let form = one + [AgentAnswer.Asked(question: "Which sizes?", options: ["S", "M"], multiSelect: true)]
+        expect(AgentAnswer.options(reported: "Which shade? (Red · dark · Blue)", asked: form).isEmpty, "a form is answered in its tab")
+        let multi = [AgentAnswer.Asked(question: "Which sizes?", options: ["S", "M"], multiSelect: true)]
+        expect(AgentAnswer.options(reported: "Which sizes? (S · M)", asked: multi).isEmpty, "a digit ticks a box there")
+        expect(AgentAnswer.options(reported: "Which shade? (Red · Blue)", asked: nil).isEmpty, "no hook, no answer")
+        expect(AgentAnswer.options(reported: "Other? (A · B)", asked: one).isEmpty, "another question than the hook's")
+        expect(AgentAnswer.options(reported: "Which shade? (Red · dark · Blue · Green)", asked: one).isEmpty, "same text, other options: an old hook")
+        let attention = AgentAttention()
+        attention.update([report("s1", pid: 5, .working)])
+        attention.update([report("s1", pid: 5, .blocked, .question, "answer: Which shade? (Red · dark · Blue)")])
+        expect(attention.cards.first?.options == [], "the report alone offers nothing")
+        attention.noteAsked(pid: 5, one)
+        expect(attention.cards.first?.options == ["Red · dark", "Blue"], "\(attention.cards)")
     }),
     ("an answer to a question the agent left types nothing and the feed says so", {
         let attention = AgentAttention.shared

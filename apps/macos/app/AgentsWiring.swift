@@ -221,6 +221,11 @@ extension AppDelegate {
             (NSApp.delegate as? AppDelegate)?.noteAgentEvent(event)
             (NSApp.delegate as? AppDelegate)?.noteRunHook(event)
             if event.edit != nil { AuthorshipHub.record(event) }
+            if let questions = event.questions {
+                AgentAttention.shared.noteAsked(pid: event.pid, questions.map {
+                    AgentAnswer.Asked(question: $0.question, options: $0.options, multiSelect: $0.multiSelect)
+                })
+            }
             return nil
         }
         do { try AgentToolsServer.shared.start() } catch { NSLog("Cadex: the app socket did not open: %@", "\(error)") }

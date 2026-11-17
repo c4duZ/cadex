@@ -1,6 +1,7 @@
 import AgentTools
 import Agents
 import AppKit
+import SessionKit
 import Sidebar
 import Terminal
 import Themes
@@ -29,6 +30,14 @@ extension AppDelegate {
             if cancel.isCancelled { attention.resolve(id) }
         }
         attention.onAnswer = { [weak self] request, reply in self?.answer(request, reply) ?? false }
+        // The questions' exact options (plan 26 D2): AskUserQuestion's PreToolUse goes to the app,
+        // only that tool, never waiting (`cadex hook` gives the app 200 ms and answers nothing).
+        if let tools = SessionKit.shared.toolsPath {
+            let command = "'" + tools.replacingOccurrences(of: "'", with: "'\\''") + "' hook PreToolUse"
+            SessionKit.shared.contribute("questions", SessionKitPart(settings: ["hooks": ["PreToolUse": [
+                ["matcher": "AskUserQuestion", "hooks": [["type": "command", "command": command, "timeout": 5]]],
+            ]]]))
+        }
         _ = attention.watch { [weak self] in self?.showAttentionCount() }
     }
 

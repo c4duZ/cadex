@@ -34,6 +34,17 @@ let commandExit = await Checks.run(commandChecks)
 let kitExit = await Checks.run(kitChecks)
 let remoteExit = await Checks.run(remoteChecks)
 let exitCode = await Checks.run([
+    ("AskUserQuestion's PreToolUse carries each question and option apart (Claude Code 2.1.326, 2026-11-17)", {
+        // The payload as the real hook got it: a label with " · " in it stays one label.
+        let event = AgentHookEvent.parse(["event": "PreToolUse", "pid": 9, "payload": ["tool_name": "AskUserQuestion", "tool_input": ["questions": [
+            ["question": "Which shade?", "header": "Shade", "options": [["label": "Red · dark", "description": "d"], ["label": "Blue", "description": "b"]], "multiSelect": false],
+            ["question": "Which sizes?", "header": "Sizes", "options": [["label": "S"], ["label": "M"]], "multiSelect": true],
+        ]]]])
+        expect(event?.questions == [AgentAskedQuestion(question: "Which shade?", options: ["Red · dark", "Blue"], multiSelect: false),
+                                    AgentAskedQuestion(question: "Which sizes?", options: ["S", "M"], multiSelect: true)], "\(String(describing: event?.questions))")
+        let other = AgentHookEvent.parse(["event": "PreToolUse", "pid": 9, "payload": ["tool_name": "Bash", "tool_input": ["command": "ls"]]])
+        expect(other?.questions == nil, "only AskUserQuestion")
+    }),
     ("a session's token gets its event to the app and the hook's stdout back; no token, no answer", {
         // A short folder: a Unix socket's path has a 104-byte limit.
         let dir = "/tmp/cx-\(UUID().uuidString.prefix(8))"
