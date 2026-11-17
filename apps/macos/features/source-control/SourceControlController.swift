@@ -35,6 +35,9 @@ public final class SourceControlController {
 
     let panel = SourceControlView()
     public var view: NSView { panel }
+
+    /// Changes' footer line: "make check passed · 2 min ago"; nil hides it.
+    public func showCheck(_ text: String?, passed: Bool) { panel.showCheck(text, passed: passed) }
     private(set) var repo: GitRepository?
     /// The repository's top folder, for the history (git-history).
     public var repositoryRoot: String? { repo?.root }

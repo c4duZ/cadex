@@ -110,6 +110,11 @@
   `innerPadding`: o respiro que o terminal guarda em volta do texto, que a caixa desconta.
 - `screenLines()` (em `TerminalPastedImages.swift`): o texto da tela, linha a linha, do mesmo quadro
   do desenho; para os testes e o CADEX_PERF_DUMP_SCREEN (a captura da janela não pega o Metal).
+- `TerminalCommand.swift` (plano 29): o comando que roda e o último (TerminalView.command), lido do
+  núcleo a cada mudança de título e carimbado com a hora, o endereço local que ele mostrou
+  (`served`) e `openServed`; `shortName` ("npm run dev" de `PATH=… /usr/bin/npm run dev`), a
+  duração e a porta. A integração do zsh manda as marcas OSC 133 por add-zsh-hook. A captura de
+  teste desenha o terminal por `snapshotImage` (TerminalRenderer.image, fora da tela).
 - `TerminalTypeAhead.swift` (plano 24, fase F): `typeWhenReady`, o texto que o app digita numa aba
   (o agente do New Task, um despacho, uma automação, o ssh) espera a primeira saída do shell e
   300 ms de silêncio, no máximo 5 s desde a abertura: o zsh descarta a entrada pendente ao montar a

@@ -255,6 +255,10 @@
   linhas da feature sidebar (`JumpRow`) tiradas do `treeModel()` da árvore (`TreeWiring.swift`),
   mais as sessões de fora do Cadex (lidas enquanto o ⌘J está aberto); escolher leva à tarefa, ao
   terminal ou à sessão (`openAgent`); o texto que não acha nada vira o pedido da folha Nova tarefa.
+- `CheckLineWiring.swift` (plano 29, revisão): a linha "make check passed · 2 min ago" do pé de
+  Changes, o último comando de checagem (CheckLine, da source-control) que terminou num terminal da
+  pasta, a cada redesenho da árvore. `ProjectsWiring.swift` dá às abas o grupo de cada pasta
+  (`taskFolder(containing:)`, pelas worktrees que a árvore listou).
 - `PaneHeaderWiring.swift` (plano 28 fase B): o que o cabeçalho de cada painel diz de um agente
   ("Claude", a tarefa, o modelo, a conta; o custo e o tempo), calculado quando um agente desta janela
   muda e uma vez por minuto, e guardado em `PaneDetails` (o cabeçalho só lê; o modelo e o custo do

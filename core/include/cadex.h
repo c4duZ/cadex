@@ -120,6 +120,22 @@ typedef struct {
 
 cadex_status cadex_terminal_agent_status(cadex_terminal *session, cadex_agent_status *out);
 
+/* The command the shell runs or ran last, from its OSC 133 marks (Cadex's zsh integration):
+ * running, the text (UTF-8, not NUL-terminated), and the last one's text and exit code. seq
+ * changes at each start and end. Its changes come through on_title. */
+typedef struct {
+    uint8_t running;
+    uint8_t has_exit;
+    int32_t exit_code;
+    uint32_t seq;
+    uint16_t text_len;
+    uint8_t text[512];
+    uint16_t last_len;
+    uint8_t last[512];
+} cadex_shell_command;
+
+cadex_status cadex_terminal_shell_command(cadex_terminal *session, cadex_shell_command *out);
+
 /* Starts a login shell on a new pty. */
 cadex_status cadex_terminal_open(const cadex_terminal_options *options, cadex_terminal **out);
 

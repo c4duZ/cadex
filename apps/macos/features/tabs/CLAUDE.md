@@ -82,6 +82,12 @@
   (plano 8).
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
+- Plano 29, revisão contra os mockups: `TabCommandLooks.swift` (o nome do comando na aba e no
+  cabeçalho, o estado de um comando, "Terminals · N", "running 38 s" e a etiqueta "Open :5173 in
+  preview", `PaneHeaderOffer` no `PaneHeaderView.swift`), `TabsCommandClock.swift` (um relógio de
+  1 s só enquanto um painel mostra "running", que também move a árvore por onCommandTick) e
+  `TabsGroups.swift` (a barra só com as abas do grupo da aba ativa, pelo `groupOf` do app, e
+  "Review" no fim de uma tarefa; ⌘1…⌘9 e arrastar pela ordem mostrada).
 - `TabAgentTitle.swift` (plano 19; plano 25 fase D): o estado do agente como `GlyphState` da peça
   única de estado (`../../shared/state-glyph/`): trabalhando, precisa de você, pronto, falhou, e
   hibernado como parado ("Hibernando" na dica); o `TabBarView` põe o sinal antes do nome da aba

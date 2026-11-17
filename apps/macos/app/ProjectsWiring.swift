@@ -66,6 +66,11 @@ extension WindowSession {
         tabs.contextMenu = { [weak self] in self?.menu?.popup(Self.tabActions) ?? [] }
         tabs.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
         tabs.paneMenu = { [weak self] in self?.paneMenu() ?? [] }
+        // The bar shows the tabs of where you are: a task's (its worktree, as the tree lists them),
+        // else the project's own (the Main mockup).
+        tabs.groupOf = { [weak self] folder in self?.taskFolder(containing: folder) ?? "" }
+        tabs.isTask = { !$0.isEmpty }
+        tabs.onCommandTick = { [weak self] in self?.refreshTree() }
         // Beside the terminal that showed the address (plan 28 phase E; the PreviewOne mockup).
         tabs.onOpenPreview = { [weak self] url in self?.openPreview(url, beside: true) }
         tabs.onOpenFile = { [weak self] path, beside in
@@ -130,5 +135,11 @@ extension WindowSession {
             if case let .terminal(_, layout, _, _) = item { return layout.folders.contains(folder) }
             return false
         }
+    }
+
+    /// The task worktree a folder is in (the tree's lists), nil for the project's own.
+    func taskFolder(containing folder: String?) -> String? {
+        guard let folder, !folder.isEmpty else { return nil }
+        return treeTasks.values.joined().map(\.path).filter { folder == $0 || folder.hasPrefix($0 + "/") }.max { $0.count < $1.count }
     }
 }

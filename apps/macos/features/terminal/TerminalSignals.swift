@@ -82,6 +82,8 @@ extension TerminalView {
     // MARK: Title and bell
 
     private func titleChanged() {
+        // A command's start or end comes as a title change too (the core's OSC 133).
+        readCommand()
         let title = session?.title() ?? ""
         if let handler = onProgramTitle {
             handler(title)

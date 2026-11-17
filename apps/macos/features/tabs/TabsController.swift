@@ -27,6 +27,13 @@ public final class TabsController {
     public var contextMenu: (() -> [MenuEntry])?
     /// Runs a command by id: the pane headers' buttons (ADR 0005).
     public var runCommand: ((String) -> Bool)?
+    /// The group of a folder (a task's worktree, else the project): the bar shows the active
+    /// tab's group only (TabsGroups.swift); nil shows every tab.
+    public var groupOf: ((String?) -> String)?
+    /// Whether a group is a task's (the bar then ends with "Review").
+    public var isTask: ((String) -> Bool)?
+    /// Each second while a command shows "running N s": the tree's note moves too.
+    public var onCommandTick: (() -> Void)?
     /// The pane header's "+" menu, built by the app from commands.
     public var paneMenu: (() -> [MenuEntry])?
     /// The last tab closed. Without it, the window closes (one space).
@@ -52,8 +59,12 @@ public final class TabsController {
     public init(window: NSWindow) {
         self.window = window
         view = TabsView(frame: window.contentView?.bounds ?? .zero)
-        bar.onSelect = { [weak self] in self?.select($0) }
-        bar.onClose = { [weak self] in self?.closeTab($0) }
+        bar.onSelect = { [weak self] id in
+            guard let self else { return }
+            if id == reviewItemID { _ = self.runCommand?("git.review-open"); return }
+            self.select(id)
+        }
+        bar.onClose = { [weak self] id in if id != reviewItemID { self?.closeTab(id) } }
         bar.onRename = { [weak self] in self?.rename($0) }
         bar.onContextMenu = { [weak self] _, point in
             guard let self, let entries = self.contextMenu?(), !entries.isEmpty else { return }
@@ -61,7 +72,8 @@ public final class TabsController {
         }
         bar.onStyleChange = { [weak self] in self?.refreshHeaders() }
         bar.onMove = { [weak self] id, index in
-            self?.list.move(id, to: index)
+            guard id != reviewItemID else { return }
+            self?.moveShown(id, to: index)
             self?.refreshBar()
         }
     }
@@ -164,7 +176,9 @@ public final class TabsController {
 
     /// ⌘1 to ⌘9.
     public func select(position: Int) {
-        guard let id = list.id(atPosition: position) else { return }
+        let shown = shownIDs
+        guard position >= 1, position <= shown.count else { return }
+        let id = shown[position - 1]
         select(id)
     }
 
@@ -237,7 +251,9 @@ public final class TabsController {
     }
 
     func refreshBar() {
-        bar.items = list.order.compactMap { id in tabs[id].map(barItem) }
+        bar.items = shownIDs.compactMap { id in tabs[id].map(barItem) }
+            + (reviewOffered ? [TabBarView.Item(id: reviewItemID, title: T("Review", "Revisão"), active: false)] : [])
+        armCommandClock()
         activeTab?.layout.refreshHeaders()
         onStateChange?()
         guard isShown else { return }
@@ -259,7 +275,7 @@ public final class TabsController {
             return TabBarView.Item(id: tab.id, title: title, active: tab.id == list.active,
                                    tip: TabAgentTitle.tip(terminal?.agentStatus, folder: terminal?.currentDirectory.map(shortPath),
                                                          hibernated: terminal?.isHibernated ?? false),
-                                   state: TabAgentTitle.state(terminal?.agentStatus, hibernated: terminal?.isHibernated ?? false),
+                                   state: TabCommandLooks.state(of: tab),
                                    unseen: terminal?.agentFinishedUnseen ?? false)
         }
         return TabBarView.Item(id: tab.id, title: title, active: tab.id == list.active,

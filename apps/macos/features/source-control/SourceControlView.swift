@@ -26,6 +26,10 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
     private let none = NSTextField(wrappingLabelWithString: "")
     /// "N more" past the 500 rows (docs/spec/inspector.md).
     private let more = NSTextField(labelWithString: "")
+    /// "● make check passed · 2 min ago" (components.inspector.footer.check).
+    private let check = NSTextField(labelWithString: "")
+    private let checkDot = NSView()
+    private lazy var checkRow = NSStackView(views: [checkDot, check])
 
     /// On screen: the list reads only then (SourceControlChanges.loadChanges).
     var shows: Bool { window != nil && !isHiddenOrHasHiddenAncestor }
@@ -144,7 +148,17 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
         more.font = UILooks.font(DesignTokens.FontSize.meta)
         more.textColor = DesignTokens.Color.textMuted
         more.isHidden = true
-        footer.setViews([more, error, buttons], in: .top)
+        typealias Check = I.Footer.Check
+        check.font = UILooks.font(Check.fontSize)
+        check.textColor = Check.color
+        check.lineBreakMode = .byTruncatingTail
+        checkDot.wantsLayer = true
+        checkDot.layer?.cornerRadius = UILooks.pt(Check.dot) / 2
+        checkDot.widthAnchor.constraint(equalToConstant: UILooks.pt(Check.dot)).isActive = true
+        checkDot.heightAnchor.constraint(equalToConstant: UILooks.pt(Check.dot)).isActive = true
+        checkRow.spacing = UILooks.pt(I.Footer.gap)
+        checkRow.isHidden = true
+        footer.setViews([checkRow, more, error, buttons], in: .top)
         footer.orientation = .vertical
         footer.alignment = .leading
         footer.detachesHiddenViews = true
@@ -198,6 +212,14 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
             none.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -UILooks.pt(I.Footer.padding)),
         ])
     }
+    /// The project's last check, from the commands its terminals ran (the app finds it): its
+    /// words and whether it passed; nil hides the line.
+    func showCheck(_ text: String?, passed: Bool) {
+        checkRow.isHidden = text == nil
+        check.stringValue = text ?? ""
+        checkDot.layer?.backgroundColor = (passed ? DesignTokens.Color.stateDone : DesignTokens.Color.stateFailed).cgColor
+    }
+
 }
 
 extension ChangesScope {
@@ -209,4 +231,5 @@ extension ChangesScope {
         case .uncommitted: "git.changes-uncommitted"
         }
     }
+
 }

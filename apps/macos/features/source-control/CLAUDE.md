@@ -82,6 +82,9 @@
 - Spec de comportamento em `docs/spec/source-control.md`. Status: pronto (plano 6).
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
+- `CheckLine.swift` (plano 29): que comando é uma checagem e as palavras da linha do pé de Changes;
+  SourceControlController.showCheck a mostra.
+
 ## Como validar
 - `make macos-test` passa: status vindo do núcleo, limite de 1000 linhas, linhas do patch, painel
   num repositório temporário fazendo stage e commit; a revisão (`tests/Review.swift`): as linhas e

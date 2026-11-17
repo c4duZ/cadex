@@ -171,6 +171,34 @@ pub export fn cadex_terminal_agent_status(session: ?*Session, out: ?*AgentStatus
     return status.ok;
 }
 
+/// The command the shell runs or ran last (OSC 133 from Cadex's zsh integration). Mirrors
+/// cadex_shell_command in include/cadex.h.
+pub const ShellCommandC = extern struct {
+    running: u8,
+    has_exit: u8,
+    exit_code: i32,
+    seq: u32,
+    text_len: u16,
+    text: [512]u8,
+    last_len: u16,
+    last: [512]u8,
+};
+
+pub export fn cadex_terminal_shell_command(session: ?*Session, out: ?*ShellCommandC) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const o = out orelse return status.invalid_argument;
+    const c = s.shellCommand();
+    o.running = @intFromBool(c.running);
+    o.has_exit = @intFromBool(c.last_exit != null);
+    o.exit_code = c.last_exit orelse 0;
+    o.seq = c.seq;
+    o.text_len = @intCast(c.text_len);
+    @memcpy(o.text[0..c.text_len], c.current());
+    o.last_len = @intCast(c.last_len);
+    @memcpy(o.last[0..c.last_len], c.previous());
+    return status.ok;
+}
+
 /// The title the program set (OSC 0/2), not NUL-terminated. Free with
 /// cadex_free. No title: *out is NULL and *out_len is 0.
 pub export fn cadex_terminal_copy_title(session: ?*Session, out: ?*?[*]u8, out_len: ?*usize) callconv(.c) status.Code {

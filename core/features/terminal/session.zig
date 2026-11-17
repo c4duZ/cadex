@@ -304,6 +304,13 @@ pub const Session = struct {
         return self.model.agent;
     }
 
+    /// The command the shell runs or ran last (OSC 133), copied.
+    pub fn shellCommand(self: *Session) @import("model.zig").ShellCommand {
+        self.lock();
+        defer self.unlock();
+        return self.model.command;
+    }
+
     /// The title the program set (OSC 0/2), empty if none. Caller frees.
     pub fn title(self: *Session, gpa: std.mem.Allocator) ![]u8 {
         self.lock();

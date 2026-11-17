@@ -102,6 +102,9 @@ final class Tab {
         // The agent's state is the glyph of the tab (TabBarView.Item.state), not text.
         if let customTitle, !customTitle.isEmpty { return dot + customTitle }
         if let document = focused.document { return dot + document.title }
+        // Several terminals: the mockup's "Terminals · 3".
+        if let group = TabCommandLooks.groupTitle(self) { return dot + group }
+        if let command = TabCommandLooks.commandTitle(terminal) { return dot + command }
         if agent != nil, let terminal {
             let name = TabAgentTitle.name(programTitle: terminal.programTitle)
             if !name.isEmpty { return dot + name }

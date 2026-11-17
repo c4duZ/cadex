@@ -30,10 +30,12 @@ final class PaneHeaderView: NSView {
         var padded = false
         /// The pane's own bar is its header (a preview): this one is not shown.
         var hidden = false
+        /// "Open :5173 in preview": the blue chip on the right (a command serving an address).
+        var offer = ""
     }
 
     enum DragPhase { case began, moved, ended }
-    enum Action { case focus, close, zoom, menu(NSView), drag(DragPhase, NSPoint) }
+    enum Action { case focus, close, zoom, menu(NSView), drag(DragPhase, NSPoint), offer }
 
     var info = Info(title: "", icon: .terminalWindow) { didSet { if info != oldValue { refresh() } } }
     var focused = false { didSet { if focused != oldValue { refresh() } } }
@@ -46,6 +48,7 @@ final class PaneHeaderView: NSView {
     private let label = NSTextField(labelWithString: "")
     private let detail = NSTextField(labelWithString: "")
     private let trailing = NSTextField(labelWithString: "")
+    private let offer = PaneHeaderOffer()
     private let menuButton = PaneHeaderButton(icon: .plus)
     private let zoomButton = PaneHeaderButton(icon: .cornersOut)
     private let closeButton = PaneHeaderButton(icon: .x)
@@ -72,7 +75,8 @@ final class PaneHeaderView: NSView {
         buttons.spacing = UILooks.pt(DesignTokens.Stroke.glyph)
         let spacer = NSView()
         spacer.setContentHuggingPriority(.init(1), for: .horizontal)
-        let row = NSStackView(views: [glyph, label, detail, spacer, trailing, buttons])
+        offer.onPress = { [weak self] in self?.onAction?(.offer) }
+        let row = NSStackView(views: [glyph, label, detail, spacer, offer, trailing, buttons])
         row.spacing = UILooks.pt(H.gap)
         row.translatesAutoresizingMaskIntoConstraints = false
         addSubview(row)
@@ -140,6 +144,8 @@ final class PaneHeaderView: NSView {
         trailing.stringValue = info.trailing
         trailing.textColor = H.meta
         trailing.isHidden = info.trailing.isEmpty
+        offer.text = info.offer
+        offer.isHidden = info.offer.isEmpty
         glyph.state = info.state
         glyph.isHidden = info.state == nil
         for button in [menuButton, zoomButton, closeButton] { button.color = H.meta }
@@ -202,5 +208,51 @@ final class PaneHeaderButton: NSView {
     override func mouseDown(with event: NSEvent) {}
     override func mouseUp(with event: NSEvent) {
         if alphaValue > 0, bounds.contains(convert(event.locationInWindow, from: nil)) { onPress?() }
+    }
+}
+
+/// "Open :5173 in preview" (components.pane.header.offer): a blue chip that runs `onPress`.
+@MainActor
+final class PaneHeaderOffer: NSView {
+    typealias O = DesignTokens.Pane.Header.Offer
+    var onPress: (() -> Void)?
+    private let label = NSTextField(labelWithString: "")
+
+    init() {
+        super.init(frame: .zero)
+        wantsLayer = true
+        layer?.backgroundColor = O.bg.cgColor
+        layer?.cornerRadius = UILooks.pt(O.radius)
+        label.font = UILooks.font(O.fontSize, weight: O.weight)
+        label.textColor = O.color
+        label.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(label)
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: UILooks.pt(O.padding.left)),
+            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -UILooks.pt(O.padding.right)),
+            label.topAnchor.constraint(equalTo: topAnchor, constant: UILooks.pt(O.padding.top)),
+            label.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -UILooks.pt(O.padding.bottom)),
+        ])
+        setAccessibilityElement(true)
+        setAccessibilityRole(.button)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("PaneHeaderOffer is created in code") }
+
+    var text: String {
+        get { label.stringValue }
+        set {
+            label.textColor = O.color
+            label.stringValue = newValue
+            setAccessibilityLabel(newValue)
+        }
+    }
+
+    override var mouseDownCanMoveWindow: Bool { false }
+    override func resetCursorRects() { addCursorRect(bounds, cursor: .pointingHand) }
+    override func mouseDown(with event: NSEvent) {}
+    override func mouseUp(with event: NSEvent) {
+        if bounds.contains(convert(event.locationInWindow, from: nil)) { onPress?() }
     }
 }

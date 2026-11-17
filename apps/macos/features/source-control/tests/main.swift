@@ -27,6 +27,15 @@ func git(_ args: [String], in dir: String) {
 }
 
 let exitCode = await Checks.run([
+    ("the check line: which commands are a check, and its words", {
+        for line in ["make check", "npm test", "swift build -c release", "pytest -q", "cargo clippy --tests", "make macos-test"] {
+            expect(CheckLine.isCheck(line), line)
+        }
+        for line in ["ls", "git status", "make", "npm install", "python3 -m http.server 5173"] { expect(!CheckLine.isCheck(line), line) }
+        let now = Date()
+        expect(CheckLine.text("make check", passed: true, endedAt: now - 130, now: now) == "make check passed · 2 min ago")
+        expect(CheckLine.text("npm test", passed: false, endedAt: now, now: now) == "npm test failed · now")
+    }),
     ("status lines from the core become entries and rows", {
         let s = GitRepository.parseStatus("main\tabc\torigin/main\t1\t2\n0\tM\t.\ta.zig\t\n0\t.\tM\tb.zig\t\n1\tR\t.\tnovo.txt\tvelho.txt\n3\t?\t?\tnovo.md\t\n")
         expect(s.branch == "main" && s.ahead == 1 && s.behind == 2)

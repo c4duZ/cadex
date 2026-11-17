@@ -62,6 +62,9 @@ public final class TerminalView: NSView {
     /// "Abrir no preview" was clicked for a local server's address (the
     /// offer shows only when this is set).
     public var onOpenPreview: ((String) -> Void)?
+    /// The command the shell runs and the last one (TerminalCommand.swift).
+    public internal(set) var command = TerminalCommand()
+    var commandSeq: UInt32 = 0
     var previewOffer: TerminalOffer?
     /// "Restart" on an agent that quit runs this (the app's agents.restart).
     public var onRestartAgent: (() -> Void)?
@@ -109,7 +112,10 @@ public final class TerminalView: NSView {
             guard let self else { return }
             if let handler = self.onShellExit { handler() } else { self.window?.close() }
         }
-        session?.onLocalURL = { [weak self] url in self?.offerPreview(url) }
+        session?.onLocalURL = { [weak self] url in
+            self?.offerPreview(url)
+            self?.noteServed(url)
+        }
         session?.onNotification = { [weak self] title, body in self?.programNotified(title: title, body: body) }
         connectSignals()
         followAppearance()

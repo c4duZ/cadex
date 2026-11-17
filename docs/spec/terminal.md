@@ -208,6 +208,16 @@ permissão.
 - O que o Claude desenha continua dele: a caixa da mensagem, as ferramentas e o diff só mudam de
   cor, nunca de forma.
 
+### O comando de cada terminal (plano 29, revisão contra os mockups)
+- A integração do zsh manda as marcas de comando do padrão OSC 133 (C com o comando, codificado
+  em URL, ao começar; D com o código de saída ao voltar o prompt), só em shell interativo, por
+  add-zsh-hook (os ganchos do dono continuam). O núcleo as lê pela libghostty e guarda o comando
+  que roda e o último que terminou, com o código; o app carimba a hora.
+- Com isso: a aba e o cabeçalho do painel com o nome do comando ("npm run dev"), "running 38 s",
+  o ponto verde e "Open :5173 in preview" no cabeçalho quando o comando mostra um endereço local
+  (o clique abre o preview ao lado), a árvore com a porta ou o tempo, e a linha "make check passed
+  · 2 min ago" no pé de Changes (`inspector.md`).
+
 ## Estados
 - **Abrindo:** o painel aparece na hora; o prompt surge assim que o shell responde.
 - **Erro ao abrir o shell** (shell configurado não existe, pasta sem permissão): o painel mostra a

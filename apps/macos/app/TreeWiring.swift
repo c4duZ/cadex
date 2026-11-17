@@ -80,6 +80,8 @@ extension WindowSession {
                 MainActor.assumeIsolated {
                     guard let self, load == self.treeLoad else { return }
                     self.treeTasks = found
+                    // The tab bar groups by these tasks: shown again with them.
+                    self.projects?.projects.forEach { $0.tabs.refreshTabBar() }
                     self.treeBranches = branches
                     self.treeTallies = tallies
                     // What is gone is forgotten: a task made again at the same path starts fresh.
@@ -122,6 +124,7 @@ extension WindowSession {
     private func drawTree() {
         guard let tree = workspace?.tree else { return }
         tree.show(treeModel(), chosen: tabs?.activeTerminal.map { .terminal(AppDelegate.key($0)) })
+        showCheckLine()
     }
 
     /// The projects with their tasks and terminals and the state of each, from what is open now:
@@ -290,6 +293,14 @@ extension WindowSession {
         // A program's title without the spinner in front (Claude Code outside the launcher animates
         // it, and the row changed every 0.3 s).
         let program = String(terminal.programTitle.drop { !$0.isLetter && !$0.isNumber }).trimmingCharacters(in: .whitespaces)
+        // A command the shell runs (OSC 133): its name, and on the right the port it serves or how
+        // long it has run (the Main mockup's ":5173", "38s").
+        if agent.isEmpty, let running = terminal.command.running {
+            let note = terminal.command.served.map(TerminalCommand.port)
+                ?? terminal.command.startedAt.map { TerminalCommand.duration(since: $0).replacingOccurrences(of: " ", with: "") } ?? ""
+            return WorkTreeTerminal(id: AppDelegate.key(terminal), title: TerminalCommand.shortName(running),
+                                    state: terminal.command.served != nil ? .done : .working, note: note)
+        }
         let title = !agent.isEmpty ? agent : !program.isEmpty ? program
             : ((terminal.currentDirectory ?? "") as NSString).lastPathComponent
         return WorkTreeTerminal(id: AppDelegate.key(terminal), title: title, state: state)

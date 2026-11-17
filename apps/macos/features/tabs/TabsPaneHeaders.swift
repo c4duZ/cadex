@@ -51,6 +51,7 @@ extension TabsController {
             case .close: self.run("pane.close") { self.closeFocusedPane() }
             case .zoom: self.run("pane.zoom") { self.toggleZoom() }
             case .menu(let anchor): PopupMenu.show(self.paneMenu?() ?? [], below: anchor)
+            case .offer: tab.panes[id]?.terminal?.openServed()
             case .drag: break
             }
         }
@@ -65,6 +66,7 @@ extension TabsController {
             var info = PaneHeaderView.Info(title: program.isEmpty ? folderTitle(terminal.currentDirectory, home: home) : program,
                                            icon: .terminalWindow, padded: true)
             info.state = TabAgentTitle.state(terminal.agentStatus, hibernated: terminal.isHibernated)
+            TabCommandLooks.header(&info, terminal: terminal)
             if let agent = Self.paneDetail(terminal) {
                 // An agent waiting at its prompt has no state to report: the idle ring, as the tree.
                 info.state = info.state ?? .idle

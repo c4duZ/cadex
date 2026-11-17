@@ -57,6 +57,10 @@
   Chega ao app pelo callback on_agent_status e por `cadex_terminal_agent_status` (estado, tipo e o
   texto já decodificado). Testado com o Claude Code de verdade em 2026-11-15: idle, working com a
   frase, blocked com "approve Bash: …".
+- `shell_command.zig` (plano 29): o comando que o shell roda e o último que terminou, com o código,
+  pelas marcas OSC 133 (C com cmdline_url, D com o código) que a libghostty lê e o `model.zig` liga
+  ao efeito semantic_prompt; chega ao app como mudança de título e por `cadex_terminal_shell_command`
+  (sem hora: o app carimba).
 - `local_url.zig`: endereços de servidor local na saída (localhost, 127.0.0.1, 0.0.0.0, [::1], com ou
   sem http://), sem sequências de escape (o Vite pinta a porta no meio do endereço), achados mesmo
   partidos entre duas leituras, uma vez por sessão; chegam ao app pelo callback on_local_url

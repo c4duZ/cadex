@@ -30,6 +30,14 @@ public extension DesignTokens {
             public static let glyph: CGFloat = 9
             public static var name: NSFont.Weight { DesignTokens.FontWeight.semibold }
             public static var meta: NSColor { DesignTokens.Color.textMuted }
+            public enum Offer {
+                public static let padding = NSEdgeInsets(top: 2, left: 8, bottom: 2, right: 8)
+                public static let radius: CGFloat = DesignTokens.Radius.tag
+                public static var bg: NSColor { DesignTokens.Color.accentLinkBg }
+                public static var color: NSColor { DesignTokens.Color.accentLink }
+                public static let fontSize: CGFloat = DesignTokens.FontSize.caption
+                public static var weight: NSFont.Weight { DesignTokens.FontWeight.semibold }
+            }
         }
         public enum Chip {
             public static let fontSize: CGFloat = DesignTokens.FontSize.caption

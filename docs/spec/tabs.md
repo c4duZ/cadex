@@ -157,6 +157,13 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 - Abrir ao lado com o painel de documento da aba não salvo: divide em vez de trocar (nada se perde).
 - Abrir ao lado num painel pequeno demais para dividir: abre em nova aba.
 
+### Abas da tarefa (plano 29, revisão contra os mockups)
+- A barra de título mostra as abas de onde você está: com uma aba de tarefa ativa, as abas da
+  tarefa (os terminais e documentos na worktree dela) e, no fim, "Review" (abre a revisão, até a
+  aba de revisão existir); com uma do projeto, as dele. ⌘1…⌘9 e arrastar contam as mostradas.
+- Uma aba com vários terminais se chama "Terminals · N", com o estado mais importante deles; um
+  terminal rodando um comando leva o nome do comando (`terminal.md`).
+
 ## Critérios de aceite
 - [x] ⌘T abre na pasta atual depois de um `cd` na aba ativa.
 - [x] Renomear mantém o nome depois de um `cd`; renomear para vazio volta ao nome da pasta.

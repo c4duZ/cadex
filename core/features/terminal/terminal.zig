@@ -36,6 +36,8 @@ test {
     _ = @import("search_test.zig");
     _ = @import("links_test.zig");
     _ = @import("agent_status_test.zig");
+    _ = @import("shell_command.zig");
+    _ = @import("shell_command_test.zig");
     _ = @import("mouse.zig");
     _ = @import("local_url.zig");
     _ = @import("program_notice.zig");

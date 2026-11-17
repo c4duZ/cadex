@@ -31,3 +31,26 @@ claude() {
 if [[ -r "${ZDOTDIR:-$HOME}/.zshenv" ]]; then
   builtin source "${ZDOTDIR:-$HOME}/.zshenv"
 fi
+
+# The command each prompt runs, for the tab's name and the pane's header (plan 29's review
+# against the mockups): OSC 133 C with the line URL-encoded byte by byte when it starts, and D
+# with the exit code when the prompt comes back. Only in an interactive shell; registered with
+# add-zsh-hook, so the owner's own hooks run as before.
+if [[ -o interactive ]]; then
+  _cadex_command_start() {
+    builtin emulate -L zsh -o extended_glob -o no_multibyte
+    local line=$1 encoded=""
+    encoded=${line//(#m)[^A-Za-z0-9._~\/-]/%${(l:2::0:)$(( [##16] #MATCH ))}}
+    builtin print -rn -- $'\e]133;C;cmdline_url='"$encoded"$'\a'
+    _cadex_command_running=1
+  }
+  _cadex_command_end() {
+    local code=$?
+    [[ -n $_cadex_command_running ]] || return 0
+    builtin print -rn -- $'\e]133;D;'"$code"$'\a'
+    _cadex_command_running=
+  }
+  builtin autoload -Uz add-zsh-hook
+  add-zsh-hook preexec _cadex_command_start
+  add-zsh-hook precmd _cadex_command_end
+fi

@@ -25,6 +25,8 @@ pub const NoticeFn = *const fn (context: ?*anyopaque, notice: Notice) void;
 pub const ProgramNoticeFn = *const fn (context: ?*anyopaque, title: []const u8, body: []const u8) void;
 
 const agent_status = @import("agent_status.zig");
+const shell_command = @import("shell_command.zig");
+pub const ShellCommand = shell_command.ShellCommand;
 pub const AgentState = agent_status.AgentState;
 pub const AgentKind = agent_status.AgentKind;
 pub const AgentStatus = agent_status.AgentStatus;
@@ -73,6 +75,8 @@ pub const Model = struct {
     selector: selection.Selector = .{},
     search: search.Search = .{},
     agent: AgentStatus = .{},
+    /// The command the shell runs, from its OSC 133 marks (shell_command.zig).
+    command: ShellCommand = .{},
 
     /// Heap-allocated because the stream's handler keeps a pointer to the
     /// terminal; the model must not move after init.
@@ -114,6 +118,7 @@ pub const Model = struct {
         // query, so Claude Code starts reporting (libghostty-vt).
         handler.effects.program_status = &programStatus;
         handler.effects.desktop_notification = &desktopNotification;
+        handler.effects.semantic_prompt = &semanticPrompt;
         self.stream = .init(.{ .allocator = gpa, .handler = handler });
         return self;
     }
@@ -255,6 +260,18 @@ pub const Model = struct {
         next.msg_len = writer.buffered().len;
         self.agent = next;
         if (self.notice) |notify| notify(self.reply_context, .agent);
+    }
+
+    /// A command starts or ends (OSC 133 C and D): kept, and the app told as for a title, since
+    /// the tab's name follows the command (no new callback in the C options for it).
+    fn semanticPrompt(handler: *Handler, event: Handler.SemanticPrompt) void {
+        const self = fromHandler(handler);
+        switch (event.kind) {
+            .output_start => self.command.start(event.command),
+            .command_end => self.command.end(event.exit_code),
+            else => return,
+        }
+        if (self.notice) |notify| notify(self.reply_context, .title);
     }
 
     fn desktopNotification(handler: *Handler, n: vt.StreamAction.ShowDesktopNotification) void {
