@@ -35,7 +35,7 @@ extension WindowSession {
                 button: T("Turn On", "Ligar")) { [weak self] in self?.settings.store.update { $0.orchestration.enabled = true } }
     }
 
-    /// The accounts to offer: the project's (or the active one) first.
+    /// The accounts to offer: the project's (or the active one) first; nil is the default one's.
     func raceAccounts(repo: String) -> [NewRaceForm.Account] {
         let agents = settings.store.settings.agents
         let projects = agents.projectAccounts.reduce(into: [String: String]()) { $0[SettingsBridge.expand($1.key)] = SettingsBridge.expand($1.value) }
@@ -48,30 +48,9 @@ extension WindowSession {
         return ordered.map { NewRaceForm.Account(title: $0.name, dir: $0.isDefault ? nil : $0.dir) }
     }
 
-    /// orchestration.new-race: the form, what it will run shown in it, then
-    /// the checks before anything is made.
-    func newRace() {
-        let controller = OrchestrationController.shared
-        guard let repo = mainRepository else {
-            return say(T("A race needs a git repository", "Uma corrida precisa de um repositório git"), T("Open a repository's folder first.", "Abra antes a pasta de um repositório."))
-        }
-        let form = NewRaceForm(accounts: raceAccounts(repo: repo), machines: runTargets().map(\.label),
-                               base: WorktreesController.shared.plan(name: "x", repo: repo).base, maxAgents: controller.limits.maxAgents)
-        let caps = controller.defaultCaps
-        let alert = NSAlert()
-        alert.messageText = T("New Race", "Nova corrida")
-        alert.informativeText = T("Each agent gets its own worktree from the same branch and a tab with the prompt. Cap per agent: US$ \(String(format: "%.2f", caps.budgetUsd)) and \(caps.maxMinutes) min.",
-                                  "Cada agente ganha uma worktree própria da mesma branch e uma aba com o prompt. Teto por agente: US$ \(String(format: "%.2f", caps.budgetUsd)) e \(caps.maxMinutes) min.")
-        alert.accessoryView = form
-        alert.addButton(withTitle: T("Start Race", "Começar a corrida"))
-        alert.addButton(withTitle: T("Cancel", "Cancelar"))
-        alert.window.initialFirstResponder = form.firstField
-        fillPerfRaceForm(form)
-        alert.beginSheetModal(for: window) { [weak self] response in
-            guard response == .alertFirstButtonReturn, let self else { return }
-            self.startRace(form.request(repository: repo, caps: caps))
-        }
-    }
+    /// orchestration.new-race: the New Task sheet with two agents (plan 29: one sheet for a task
+    /// and a race; the old form left).
+    func newRace() { showNewTask(agents: 2) }
 
     /// `askFirst` false: a test instance's own race (`RacePerfHooks.swift`), no sheet.
     func startRace(_ request: RaceRequest, askFirst: Bool = true) {

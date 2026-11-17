@@ -194,12 +194,24 @@ public extension DesignTokens {
                 public static var border: NSColor { DesignTokens.Color.stateWorking }
                 public static var bg: NSColor { DesignTokens.Color.tintOptionSelected }
             }
+            public static let gap: CGFloat = 8
+            public static let textGap: CGFloat = 3
+            public enum Note {
+                public static let fontSize: CGFloat = DesignTokens.FontSize.meta
+                public static var color: NSColor { DesignTokens.Color.textMuted }
+            }
         }
         public enum AgentRow {
             public static let padding = NSEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
             public static let radius: CGFloat = DesignTokens.Radius.item
             public static var bg: NSColor { DesignTokens.Color.bgChip }
             public static let gap: CGFloat = 10
+            public static let listGap: CGFloat = 6
+            public enum Usage {
+                public static let fontSize: CGFloat = DesignTokens.FontSize.meta
+                public static var color: NSColor { DesignTokens.Color.textMuted }
+            }
+            public static var remove: NSColor { DesignTokens.Color.textTertiary }
         }
         public enum RaceNote {
             public static let padding = NSEdgeInsets(top: 10, left: 12, bottom: 10, right: 12)
@@ -208,6 +220,31 @@ public extension DesignTokens {
             public static var border: NSColor { DesignTokens.Color.lineAmber }
             public static var color: NSColor { DesignTokens.Color.textAmberNote }
             public static let fontSize: CGFloat = DesignTokens.FontSize.panel
+        }
+        public enum Frame {
+            public static let top: CGFloat = 110
+            public static let inset: CGFloat = 18
+            public static let headerTop: CGFloat = 16
+            public static let headerBottom: CGFloat = 8
+            public static let headerGap: CGFloat = 8
+            public static let labelTop: CGFloat = 16
+            public static let labelBottom: CGFloat = 6
+        }
+        public enum AddAgent {
+            public static let padding = NSEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
+            public static var color: NSColor { DesignTokens.Color.textSecondary }
+        }
+        public enum Footer {
+            public static let padding = NSEdgeInsets(top: 16, left: 18, bottom: 16, right: 18)
+            public static let marginTop: CGFloat = 12
+            public static var borderTop: NSColor { DesignTokens.Color.linePopover }
+            public static let fontSize: CGFloat = DesignTokens.FontSize.meta
+            public static var color: NSColor { DesignTokens.Color.textTertiary }
+            public static let gap: CGFloat = 8
+            public static let buttonHeight: CGFloat = 32
+        }
+        public enum Subtitle {
+            public static var color: NSColor { DesignTokens.Color.textMuted }
         }
     }
 }

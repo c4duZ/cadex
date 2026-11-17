@@ -1,4 +1,5 @@
 import Agents
+import Orchestration
 import AppKit
 import SessionKit
 import Settings
@@ -27,51 +28,19 @@ extension WindowSession {
                                        remove: { [weak self] in self?.removeTask($0) }, comment: { [weak self] in self?.commentTask($0) },
                                        editSetupHooks: { [weak self] in self?.editSetupHooks() }, repository: { [weak self] in self?.repository })
         actions.targets = { [weak self] in self?.runTargets() ?? [] }
-        actions.newTaskOn = { [weak self] in self?.newTask(on: $0) }
+        actions.newTaskOn = { [weak self] in self?.showNewTask(machine: $0) }
         actions.openRemote = { [weak self] in self?.openRemoteTask($0) }
         actions.removeRemote = { [weak self] in self?.removeRemoteTask($0) }
         actions.environment = { [weak self] action, key in self?.environmentAction(action, key: key) }
         return actions
     }
 
-    /// worktrees.new-task, and worktrees.new-task-on with `on` already
-    /// chosen: the name, and where it runs ("Run on", plan 23).
-    func newTask(on preset: RunTarget? = nil) {
-        guard let repo = repository else {
-            return say(T("New Task needs a git repository", "Nova tarefa precisa de um repositório git"),
-                       T("Open a repository's folder first.", "Abra antes a pasta de um repositório."))
-        }
-        askTaskName(preset: preset ?? recipeTarget(repo)) { [weak self] name, target in
-            guard let self, !name.isEmpty else { return }
-            if let target { return self.newRemoteTask(name: name, repo: repo, target: target) }
-            self.confirmTask(WorktreesController.shared.plan(name: name, repo: repo))
-        }
-    }
+    /// worktrees.new-task (⌘N): the New Task sheet (NewTaskWiring.swift).
+    func newTask() { showNewTask() }
 
-    /// Shows what needs a yes (the folder, new setup hooks) before making the
-    /// task. Saying no to the folder lets the owner choose another root.
-    private func confirmTask(_ plan: TaskPlan) {
-        var asks: [String] = []
-        if plan.needsAuthorization { asks.append(T("Cadex will make tasks in \(plan.root).", "O Cadex vai criar tarefas em \(plan.root).")) }
-        if plan.hooksNeedConfirmation { asks.append(T("Setup hooks that will run: ", "Hooks de preparo que vão rodar: ") + plan.hooks.joined(separator: " && ")) }
-        guard !asks.isEmpty else { return makeTask(plan) }
-        let alert = NSAlert()
-        alert.messageText = T("Make the task \(plan.branch)?", "Criar a tarefa \(plan.branch)?")
-        alert.informativeText = asks.joined(separator: "\n\n")
-        alert.addButton(withTitle: T("Make Task", "Criar tarefa"))
-        alert.addButton(withTitle: T("Cancel", "Cancelar"))
-        if plan.needsAuthorization { alert.addButton(withTitle: T("Choose Another Folder…", "Escolher outra pasta…")) }
-        alert.beginSheetModal(for: window) { [weak self] response in
-            switch response {
-            case .alertFirstButtonReturn: self?.makeTask(plan)
-            case .alertThirdButtonReturn: self?.chooseTasksRoot(then: plan)
-            default: break
-            }
-        }
-    }
-
-    /// worktrees.root from a folder panel; the plan is made again under it.
-    private func chooseTasksRoot(then plan: TaskPlan) {
+    /// worktrees.root from a folder panel (the sheet's "Choose Another Folder…"); the sheet's
+    /// lines are made again under it.
+    func chooseTasksRoot() {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
@@ -83,11 +52,13 @@ extension WindowSession {
             guard let self, response == .OK, let url = panel.url else { return }
             self.settings.store.update { $0.worktrees.root = SettingsBridge.tilde(url.path) }
             WorktreesController.shared.rootSetting = url.path
-            DispatchQueue.main.async { self.confirmTask(WorktreesController.shared.plan(name: plan.name, repo: plan.repo)) }
+            self.newTaskSheet?.refreshNotes()
         }
     }
 
-    private func makeTask(_ plan: TaskPlan) {
+    /// The task's worktree, then a tab with its setup hooks and the agent with the owner's words
+    /// (the sheet's Start: the sheet showed what needs a yes).
+    func makeTask(_ plan: TaskPlan, prompt: String, agent: AgentChoice) {
         switch WorktreesController.shared.make(plan) {
         case .failure(.git(let message)):
             say(T("The task was not made", "A tarefa não foi criada"), message)
@@ -97,37 +68,23 @@ extension WindowSession {
                 // With a recipe the agent runs inside the environment (ADR 0032).
                 startEnvironment(recipe, repo: plan.repo, branch: plan.branch, key: made.path, worktree: made.path, remote: nil, prefix: plan.hooks)
             } else {
-                let agent = agentCommand(cwd: made.path)
-                tabs?.newTab(cwd: made.path)
-                tabs?.activeTerminal?.typeWhenReady((plan.hooks + [agent]).joined(separator: " && ") + "\n")
+                // Empty words: the agent with no prompt (the spec).
+                let launch: Result<String, RaceRefusal> = prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    ? .success(plainAgentCommand(agent, cwd: made.path))
+                    : RaceLaunch.localCommand(kit: SessionKit.shared, agent: agent, cwd: made.path, prompt: prompt,
+                                              skipPermissions: settings.store.settings.agents.launchSkipPermissions).map(\.command)
+                switch launch {
+                case .success(let command):
+                    tabs?.newTab(cwd: made.path)
+                    tabs?.activeTerminal?.typeWhenReady((plan.hooks + [command]).joined(separator: " && ") + "\n")
+                case .failure(let refusal):
+                    say(T("The agent did not start", "O agente não começou"), refusal.message)
+                }
             }
-            if plan.explainTrust { explainTrust(plan) }
             if !made.unmatched.isEmpty {
                 say(T("Some .worktreeinclude lines matched nothing", "Algumas linhas do .worktreeinclude não acharam nada"), made.unmatched.joined(separator: "\n"))
             }
         }
-    }
-
-    /// The first task of a repository: Claude Code asks to trust a folder it
-    /// never saw, and for a worktree the trust is the main repository's:
-    /// accepting in the task's tab covers the repository and every task, made
-    /// before or after (tested 2026-11-15; the tasks' folder alone did not).
-    /// No extra tab: a repository already trusted asks nothing.
-    private func explainTrust(_ plan: TaskPlan) {
-        let name = (plan.repo as NSString).lastPathComponent
-        say(T("If Claude Code asks to trust the folder", "Se o Claude Code perguntar se confia na pasta"),
-            T("Accept it in the task's tab: it counts for \(name) and every task of it, so it asks only once.",
-              "Aceite na aba da tarefa: vale para \(name) e todas as tarefas dele, então só pergunta uma vez."))
-    }
-
-    /// `claude` with the kit, in the project's account or the active one.
-    private func agentCommand(cwd: String) -> String {
-        let agents = settings.store.settings.agents
-        let projects = agents.projectAccounts.reduce(into: [String: String]()) { $0[SettingsBridge.expand($1.key)] = SettingsBridge.expand($1.value) }
-        let account = AgentNewSession.account(cwd: cwd, accounts: AgentsController.shared.everyAccount(),
-                                              active: agents.activeAccount.isEmpty ? nil : SettingsBridge.expand(agents.activeAccount), projects: projects)
-        return SessionKit.shared.claudeCommand(configDir: account.flatMap { $0.isDefault ? nil : $0.dir },
-                                               arguments: agents.launchSkipPermissions ? ["--dangerously-skip-permissions"] : [], cwd: cwd)
     }
 
     /// worktrees.open: the task becomes the window's workspace, with its terminal.

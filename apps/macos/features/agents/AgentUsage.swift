@@ -52,6 +52,16 @@ enum AgentUsageFile {
     }
 }
 
+public extension AgentUsage {
+    /// The account's usage as its last session's status line wrote it, read now (one small
+    /// file): the New Task sheet's "84% used" without the usage watch running. Nil when no session
+    /// of it wrote any.
+    static func current(of account: AgentAccount) -> AgentUsage? {
+        guard let data = FileManager.default.contents(atPath: AgentUsageFile.path(of: account, in: AgentUsageFile.folder())) else { return nil }
+        return parseFile(data)?.0
+    }
+}
+
 /// How much of the plan an account used: the 5 hour session and the week
 /// (and the week's Sonnet share when the plan has one), each with when it
 /// resets (docs/spec/agents.md, Accounts).

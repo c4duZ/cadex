@@ -1,3 +1,4 @@
+import Worktrees
 import AppKit
 import Orchestration
 
@@ -56,19 +57,36 @@ extension WindowSession {
         try? (before + String(decoding: json, as: UTF8.self) + "\n").write(toFile: out, atomically: true, encoding: .utf8)
     }
 
-    /// CADEX_PERF_RACE_FORM: a JSON (`name`, `prompt`, `count`, `accounts`,
-    /// `model`) that fills "New Race"'s sheet when it opens; the sheet, its
-    /// button and the launch stay the real ones.
-    func fillPerfRaceForm(_ form: NewRaceForm) {
+    /// CADEX_PERF_NEW_TASK, a JSON file (`prompt`, `branch`, `separateCopy`, `agents` with
+    /// `account` and `model`, `start`) that fills the New Task sheet when it opens and, with
+    /// `start`, presses Start: the sheet, its lines and the launch stay the real ones.
+    func fillPerfNewTask(_ sheet: NewTaskSheet) {
+        struct Agent: Decodable { var account: String?; var model: String? }
         struct Fill: Decodable {
-            var name: String
             var prompt: String
-            var count: Int
-            var accounts: [String?]
-            var model: String
+            var branch: String?
+            var separateCopy: Bool?
+            var agents: [Agent]?
+            var start: Bool?
         }
-        guard let file = ProcessInfo.processInfo.environment["CADEX_PERF_RACE_FORM"], let data = FileManager.default.contents(atPath: file),
+        guard let file = ProcessInfo.processInfo.environment["CADEX_PERF_NEW_TASK"], let data = FileManager.default.contents(atPath: file),
               let fill = try? JSONDecoder().decode(Fill.self, from: data) else { return }
-        form.fill(name: fill.name, prompt: fill.prompt, count: fill.count, accounts: fill.accounts, model: fill.model)
+        var request = sheet.request
+        request.prompt = fill.prompt
+        request.branch = fill.branch ?? ""
+        request.separateCopy = fill.separateCopy ?? true
+        if let agents = fill.agents {
+            // The sheet's own choice for each account (with its usage), the model from the file.
+            let choices = sheet.choices
+            request.agents = agents.map { wanted in
+                let dir = wanted.account.map(SettingsBridge.expand)
+                var agent = choices.first { $0.account == dir && $0.machine.isEmpty }
+                    ?? NewTaskAgent(name: ((dir ?? "default") as NSString).lastPathComponent, account: dir)
+                agent.model = wanted.model ?? ""
+                return agent
+            }
+        }
+        sheet.fill(request)
+        if fill.start == true { DispatchQueue.main.asyncAfter(deadline: .now() + 1) { sheet.pressStart() } }
     }
 }

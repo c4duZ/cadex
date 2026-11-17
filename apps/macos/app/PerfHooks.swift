@@ -64,6 +64,10 @@ extension WindowSession {
                 self?.homeCloneRun(String(clone[..<bar]), into: String(clone[clone.index(after: bar)...]))
             }
         }
+        // A command by its id, as the palette runs it (the New Task sheet, plan 29 phase B).
+        if let id = environment["CADEX_PERF_COMMAND"] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in _ = self?.commands.run(id) }
+        }
         // The focused pane split to the right, to compare two panes with the Terminals mockup.
         if environment["CADEX_PERF_SPLIT"] != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in _ = self?.commands.run("pane.split-right") }

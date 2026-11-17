@@ -119,5 +119,5 @@ let localTests: [(name: String, body: Checks.Body)] = [
         expect(controller.store.task(plan.path) == nil, "its note goes with it")
     }),
 ]
-let exitCode = await Checks.run(localTests + remoteTests + environmentTests)
+let exitCode = await Checks.run(localTests + remoteTests + environmentTests + newTaskTests)
 exit(exitCode)

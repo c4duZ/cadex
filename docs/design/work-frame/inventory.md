@@ -102,10 +102,11 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 ### Entradas (plano 29)
 | tipo | peça | estado | destino | plano |
 |---|---|---|---|---|
-| trecho | o fluxo de alertas do New Task em `apps/macos/app/WorktreesWiring.swift` | sai | a folha única do ⌘N | 29 |
+| trecho | "confirmTask" em `apps/macos/app/WorktreesWiring.swift` | saiu | o fluxo de alertas do New Task: a folha única do ⌘N (`apps/macos/features/worktrees/NewTaskSheet.swift`), fase B | 29 |
+| trecho | "askTaskName" em `apps/macos/app/RunOnWiring.swift` | saiu | o nome e o "Rodar em" num alerta: a máquina é uma linha de agente da folha, fase B | 29 |
 | arquivo | `apps/macos/features/orchestration/NewRaceForm.swift` | sai | a folha única do ⌘N (2+ agentes) | 29 |
 | comando | `orchestration.new-race` | sai | apelido do ⌘N com 2 agentes no 29, sai no 30 | 30 |
-| comando | `window.new` no ⌘N | muda | ⇧⌘N; o ⌘N é Nova tarefa | 29 |
+| comando | `window.new` no ⌘N | muda | ⇧⌘N; o ⌘N é Nova tarefa, feito na fase A | 29 |
 
 ### Visão geral (plano 30)
 | tipo | peça | estado | destino | plano |

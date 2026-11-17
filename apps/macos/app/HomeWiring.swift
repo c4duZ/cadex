@@ -109,8 +109,8 @@ extension WindowSession {
         if homeChoice.separateCopy {
             guard homeChoice.project != nil else { return chooseProjectFolder() }
             homeOpenProject()
-            _ = commands.run("worktrees.new-task")
-            return
+            // The New Task sheet with the words already in it (the spec).
+            return showNewTask(prompt: text)
         }
         guard let account = homeAccount() else { return homeNoAccount() }
         let opened = homeOpenProject()

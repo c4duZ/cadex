@@ -82,6 +82,7 @@
   da conta, só lido (tem login, o plano pelo `organizationType`, e os ids que trazem de volta uma
   conta escondida). `AgentUsageFile`: onde o `cadex statusline` grava o `rate_limits` de cada conta
   (`CADEX_USAGE_DIR` ou Application Support/Cadex/usage, nome por SessionKit.accountKey).
+  AgentUsage.current lê na hora o arquivo de uma conta (o "% used" da folha Nova tarefa);
   AgentUsage.parseFile: as porcentagens e os reinícios (segundos ou ISO; janela que já reiniciou é
   0%). `AgentUsageState`: lendo, pronto (com a hora do arquivo; mais de 10 min fica apagado com a
   idade), login vencido, sem login, sem uso ("Abra o agente pelo Cadex").

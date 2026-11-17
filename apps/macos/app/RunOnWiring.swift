@@ -26,42 +26,6 @@ extension WindowSession {
         return targets
     }
 
-    /// The name, and "Run on" with this Mac first. The tailnet's list is
-    /// read once when the dialog opens, if nothing read it yet.
-    func askTaskName(preset: RunTarget?, then: @escaping (String, RunTarget?) -> Void) {
-        let show = { [weak self] in
-            guard let self else { return }
-            let targets = self.runTargets()
-            let alert = NSAlert()
-            alert.messageText = T("New task", "Nova tarefa")
-            alert.informativeText = T("Its name becomes a branch and a worktree; the agent opens in it. On another machine, the worktree and the agent are there, with its own Claude login.",
-                                      "O nome vira um branch e uma worktree; o agente abre nela. Em outra máquina, a worktree e o agente ficam lá, com o login do Claude de lá.")
-            let field = NSTextField(string: "")
-            field.placeholderString = T("Fix the login", "Corrigir o login")
-            let where_ = NSPopUpButton(frame: .zero, pullsDown: false)
-            where_.addItem(withTitle: T("This Mac", "Este Mac"))
-            for target in targets { where_.addItem(withTitle: target.label) }
-            if let preset, let index = targets.firstIndex(of: preset) { where_.selectItem(at: index + 1) }
-            let label = NSTextField(labelWithString: T("Run on", "Rodar em"))
-            let row = NSStackView(views: [label, where_])
-            let box = NSStackView(views: [field, row])
-            box.orientation = .vertical
-            box.alignment = .leading
-            box.frame = NSRect(x: 0, y: 0, width: 300, height: 58)
-            field.widthAnchor.constraint(equalToConstant: 300).isActive = true
-            alert.accessoryView = box
-            alert.addButton(withTitle: T("OK", "OK"))
-            alert.addButton(withTitle: T("Cancel", "Cancelar"))
-            alert.window.initialFirstResponder = field
-            alert.beginSheetModal(for: self.window) { response in
-                guard response == .alertFirstButtonReturn else { return }
-                let index = where_.indexOfSelectedItem
-                then(field.stringValue.trimmingCharacters(in: .whitespaces), index > 0 ? targets[index - 1] : nil)
-            }
-        }
-        if MachinesController.shared.isEnabled, MachinesController.shared.status == nil { MachinesController.shared.refresh(show) } else { show() }
-    }
-
     /// Where the repository is on that machine (asked once, remembered),
     /// then the worktree made there; a missing repository offers a clone.
     func newRemoteTask(name: String, repo: String, target: RunTarget) {

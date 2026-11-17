@@ -29,7 +29,10 @@ Inventário: seção "Entradas" e os apelidos do 28.
   o projeto pelo menu do nome ou "@"), a
   conta e o lugar abaixo dela; os quatro cartões (Terminal ⌘T, Agente ⌘⇧A, Tarefa ⌘N, Corrida);
   projetos recentes com o estado; Abrir pasta ⌘O e Clonar.
-- **B. Nova tarefa (⌘N).** Uma folha só: o pedido, onde (pasta do projeto ou cópia separada com o
+- **B. Nova tarefa (⌘N).** Feita (2026-11-17): a folha na feature worktrees, ligada pelo
+  `../../apps/macos/app/NewTaskWiring.swift`; tarefa na pasta, numa cópia e corrida conferidas no
+  app com o `claude` falso (a corrida numa pasta que a conta de teste já confia); a conta que não
+  confia trava a corrida com "Open Claude to Trust". Plano original: Uma folha só: o pedido, onde (pasta do projeto ou cópia separada com o
   nome do branch), quem faz (lista de agentes com conta e uso; "+ Adicionar outro agente"); com 2+
   aparece o aviso de corrida com o teto e o botão vira Iniciar corrida. Usa o que
   WorktreesController.plan e a corrida já fazem; os "sim" que hoje são alertas (autorizar pasta,

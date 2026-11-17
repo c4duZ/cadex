@@ -24,6 +24,15 @@
   pasta, hooks novos, a confiança), `make`, `tasks`, `note` (para o grupo em Agents),
   `whatWouldBeLost`, `remove`, `setStatus` (avisa `onStatusChange`: o app passa "review" à memória
   como marco de consolidação, plano 22 fase F), `setComment`.
+- A folha Nova tarefa (plano 29 fase B; mockup NewTask, components.newTask e components.sheet), a
+  porta única da tarefa e da corrida: `NewTaskModel.swift` (puro: `NewTaskRequest` com o pedido,
+  onde, o branch tirado do pedido e os agentes; dois ou mais é corrida, sempre em cópias; o que
+  falta para começar; `NewTaskAgent` com conta, máquina, modelo e uso), `NewTaskSheet.swift` (o
+  fundo escurecido e o painel de 640 pt: o pedido, ONDE, QUEM FAZ com o menu de cada agente e o "+",
+  o aviso da corrida, as linhas que o app manda, `NewTaskNote`, no lugar das perguntas de antes, uma
+  delas podendo travar o Começar; "in <projeto> ▾" troca de projeto; ⌘↩ e Esc) e
+  `NewTaskParts.swift` (a opção, a linha do agente, a nota). O que cria é do app
+  (`../../app/NewTaskWiring.swift`).
 - worktrees.set-status e -set-comment também aceitam `status=` e `comment=` do agente (plano 20): da
   tarefa do terminal dele (`taskOf`, só uma worktree de tarefa, nunca o repositório), sem lista.
 - As tarefas aparecem na árvore da esquerda (feature sidebar; a página Tasks saiu no plano 27 fase D).

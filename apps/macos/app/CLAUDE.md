@@ -79,10 +79,17 @@
   fase C): junta o que cada terminal de cada janela relatou (aviso TerminalView.agentDidChange), põe
   as permissões do socket no quadro, leva um cartão ao terminal dele, o número do sininho em cada
   janela e o do Dock, e a página do sininho. `WorktreesWiring.swift`: as tarefas (plano 19, fase D):
-  New Task pede o nome, mostra o que pede um sim (a pasta, os hooks; recusar a pasta deixa
-  escolher outra raiz, que vira worktrees.root), cria pelo núcleo e abre uma
-  aba com os hooks e o agente (kit, conta do projeto ou a ativa); o aviso da confiança na primeira
-  tarefa (a do repositório, aceita uma vez na aba da tarefa); abrir, remover sem perder trabalho, comentar, os hooks de preparo. O explorer é criado
+  o worktrees.new-task (⌘N) abre a folha Nova tarefa; `makeTask` cria pelo núcleo e abre uma aba
+  com os hooks e o agente com o pedido (sem pedido, o agente sem prompt); `chooseTasksRoot` (o
+  "Escolher outra pasta…" da folha, que vira worktrees.root); abrir, remover sem perder trabalho,
+  comentar, os hooks de preparo. `NewTaskWiring.swift` (plano 29 fase B): a folha da feature
+  worktrees sobre a janela, aberta pelo ⌘N, pelo worktrees.new-task-on (a máquina na primeira linha),
+  pelo orchestration.new-race (duas linhas) e pela tela de início (com o pedido); as escolhas (as
+  contas daqui com o uso lido na hora, as máquinas do "Rodar em"), as linhas no lugar das perguntas
+  (a pasta das cópias, os hooks novos, a confiança; numa corrida, a conta que ainda não confia trava
+  o Começar e abre o Claude lá, e as corridas desligadas são ligadas pelo Começar); começar: na
+  pasta, um terminal com o agente e o pedido (`openAgent`); numa cópia, `makeTask`; noutra máquina,
+  a tarefa remota (sem o pedido ainda); dois ou mais, `startRace` sem perguntar de novo. O explorer é criado
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.
@@ -167,10 +174,10 @@
   permissão do Funnel) e machines.stop-sharing (apagado sem nada compartilhado), cada um pelo id; `shareActions` dá a porta do preview com foco, confirma o
   Funnel e mostra o endereço com Copiar e Abrir.
 - `RaceWiring.swift` (plano 24, fase C): registra os comandos da corrida; orchestration.toggle
-  mostra antes o que muda ao ligar; orchestration.new-race abre o formulário (contas com a do
-  projeto primeiro, as máquinas do "Rodar em"), confere antes de criar (RaceLaunch.check, a
-  confiança pela conta de cada concorrente local), pede uma vez o que o New Task pediria (a pasta,
-  hooks novos) e cria por concorrente a worktree pelo `plan`/`make` da worktrees e uma aba com os
+  mostra antes o que muda ao ligar; orchestration.new-race abre a folha Nova tarefa com dois agentes (plano 29; o formulário
+  New Race saiu do caminho), `startRace` confere antes de criar (RaceLaunch.check, a
+  confiança pela conta de cada concorrente local), e sem a folha pede uma vez o que o New Task
+  pediria (a pasta, hooks novos), e cria por concorrente a worktree pelo `plan`/`make` da worktrees e uma aba com os
   hooks e o `cadex claude --cadex-prompt-file` do kit; numa máquina remota, a worktree pelo
   `makeRemote` (a pasta do repositório lá já lembrada), o prompt pelo `uploadPrompt` e a aba `ssh
   -t`. `RaceBoardWiring.swift`: o quadro numa aba (`RaceWatch`: os quadros abertos, o diff de cada
@@ -248,14 +255,14 @@
   cartão `AgentPermissionCard` no pé do painel dele (TerminalView.footCard), com Permitir e Negar
   pela mesma AgentAttention do sino: responder num fecha o outro.
 - `PerfHooks.swift`: só para o `make perf` (`../../../tools/perf/run.py`): cada variável CADEX_PERF_
-  faz a instância de teste agir sozinha em horas marcadas (CADEX_PERF_TYPE digita um comando no terminal com foco, CADEX_PERF_HOME_PROMPT manda o pedido da
+  faz a instância de teste agir sozinha em horas marcadas (CADEX_PERF_COMMAND roda um comando pelo id, CADEX_PERF_TYPE digita um comando no terminal com foco, CADEX_PERF_HOME_PROMPT manda o pedido da
   tela de início, CADEX_PERF_DUMP_SCREEN grava a tela de cada terminal num arquivo, CADEX_PERF_SEND manda uma mensagem ao agente
   com o Return como tecla (a marca da barra),
   CADEX_PERF_SPLIT divide o painel, CADEX_PERF_SNAPSHOT_AT atrasa a captura; abrir a conversa de um subagente, abrir
   abas, abrir e rolar a revisão da pasta com CADEX_PERF_REVIEW, abrir duas vezes o grupo das máquinas da tailnet com CADEX_PERF_MACHINES); sem a variável, nada roda.
   `RacePerfHooks.swift` (plano 24): CADEX_PERF_RACE, um JSON com uma corrida que começa sozinha sem
-  folha (e, com `pickAfter`, o #1 vence e os outros são descartados), anotada em `out`; CADEX_PERF_RACE_FORM
-  preenche a folha "New Race" quando ela abre (a acessibilidade não alcança a folha); usado no
+  folha (e, com `pickAfter`, o #1 vence e os outros são descartados), anotada em `out`; CADEX_PERF_NEW_TASK
+  preenche a folha Nova tarefa quando ela abre e, com `start`, aperta Começar (plano 29); usado no
   teste da corrida no app e no `make perf` da fase F. Uma instância assim usa as pastas próprias
   CADEX_ORCHESTRATION_DIR, CADEX_PROMPTS_DIR, CADEX_KIT_DIR, CADEX_WORKTREES_FILE e CADEX_USAGE_DIR.
 - Tela cheia: a barra de ferramentas (vazia, só dá a altura da barra de título) some ao entrar e
