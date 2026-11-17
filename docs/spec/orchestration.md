@@ -33,7 +33,8 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
 ### Corrida
 - A corrida nasce na folha "New task" (`worktrees.md`) com dois agentes ou mais: não há folha
   própria (`../adr/0035-work-frame.md`). orchestration.new-race abre a folha já com duas linhas de
-  agente; "+ Add another agent" com a feature desligada mostra antes a folha de ligar. O que a
+  agente; com a feature desligada, a folha diz numa linha que o Começar a liga (o
+  comando não fica indisponível). O que a
   folha pede para a corrida: o prompt, o ponto de partida (o branch atual, ou outro), e
   de 2 a orchestration.maxAgents concorrentes, cada um com conta, modelo e máquina (este Mac, ou uma
   remota pelo "Run on" mínimo, `docs/spec/worktrees.md`). Um concorrente pode ser o Codex de uma

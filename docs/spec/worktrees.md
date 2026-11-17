@@ -137,7 +137,7 @@ comando, e o Cadex mostra em que pé cada uma está (`docs/plans/19-agent-sessio
   o terminal da tarefa mostra o erro com "Try Again".
 
 ## Critérios de aceite
-- [ ] New Task num repositório com `.worktreeinclude` e um hook de preparo cria a worktree e o
+- [x] New Task num repositório com `.worktreeinclude` e um hook de preparo cria a worktree e o
       branch, copia o `.env`, roda o hook e abre o agente na conta do projeto. (Conferido por partes
       em 2026-11-15: núcleo e app num repositório de verdade, e o comando "hooks && claude" com o
       `claude` real; falta o clique no app, visto pelo dono.)

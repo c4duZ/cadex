@@ -25,11 +25,16 @@ public struct SavedProjects: Codable, Equatable, Sendable {
         public var name: String
         public var folder: String
         public var usedAt: Date
+        /// The tabs it had when it closed: opening it again from the home screen brings them back.
+        public var tabs: TabsSnapshot?
+        public var color: String?
 
-        public init(name: String, folder: String, usedAt: Date) {
+        public init(name: String, folder: String, usedAt: Date, tabs: TabsSnapshot? = nil, color: String? = nil) {
             self.name = name
             self.folder = folder
             self.usedAt = usedAt
+            self.tabs = tabs
+            self.color = color
         }
     }
 

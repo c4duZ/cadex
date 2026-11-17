@@ -36,6 +36,8 @@ public final class ProjectsController {
     /// The projects used lately, open or closed, the latest first (the home screen's list).
     public private(set) var recent: [SavedProjects.Recent] = []
     static let recentLimit = 8
+    /// Makes a saved document again (start's), for a recent project's tabs.
+    private var makeDocument: (String) -> TabDocument? = { _ in nil }
     /// A name or the active project changed (the title bar's label).
     public var onChange: (() -> Void)?
     /// Any project's tabs changed (opened, closed, moved, a folder): the work's tree redraws.
@@ -65,7 +67,8 @@ public final class ProjectsController {
     /// The saved projects, or the project of `folder` with a terminal in it. `makeDocument` makes a
     /// saved document from its identity (nil when it is gone). `openFolder` false (a launch from
     /// the Dock, plan 29): with nothing saved open, no project, and the app shows the home screen.
-    public func start(folder: String, openFolder: Bool = true, makeDocument: (String) -> TabDocument?) {
+    public func start(folder: String, openFolder: Bool = true, makeDocument: @escaping (String) -> TabDocument?) {
+        self.makeDocument = makeDocument
         restoring = true
         defer { restoring = false }
         let saved = fileURL.flatMap(ProjectsFile.load(from:))
@@ -152,7 +155,16 @@ public final class ProjectsController {
     public func open(folder: String) {
         let root = ProjectsFile.repositoryRoot(folder)
         if let index = projects.firstIndex(where: { $0.folder == root }) { return select(index) }
-        add(name: Self.name(of: root), folder: root).newTab(cwd: folder)
+        // A recent one comes back with the tabs it had when it closed (the home screen's list).
+        let recent = self.recent.first { $0.folder == root }
+        let tabs = add(name: recent?.name ?? Self.name(of: root), folder: root)
+        if let saved = recent?.tabs, root == folder {
+            restoring = true
+            tabs.restore(saved, makeDocument: makeDocument)
+            restoring = false
+            projects[projects.count - 1].color = recent?.color
+        }
+        if tabs.count == 0 { tabs.newTab(cwd: folder) }
         select(projects.count - 1)
     }
 
@@ -181,8 +193,10 @@ public final class ProjectsController {
         guard projects.count > 1 || fileURL != nil, let tabs = active else { return }
         let index = activeIndex
         let close: @MainActor () -> Void = { [weak self] in
+            // What it had, taken before the shells end (the recent list keeps it).
+            let kept = tabs.snapshot()
             tabs.closeAll()
-            self?.remove(at: index)
+            self?.remove(at: index, tabs: kept)
         }
         if TabsController.shouldClose([tabs], in: tabs.hostWindow, what: T("the project", "o projeto"), then: close) { close() }
     }
@@ -193,17 +207,18 @@ public final class ProjectsController {
         guard let index = projects.firstIndex(where: { $0.folder == folder }) else { return }
         let tabs = projects[index].tabs
         let close: @MainActor () -> Void = { [weak self, weak tabs] in
+            let kept = tabs?.snapshot()
             tabs?.closeAll()
             guard let self, let at = self.projects.firstIndex(where: { $0.folder == folder }) else { return }
-            self.remove(at: at)
+            self.remove(at: at, tabs: kept)
         }
         if TabsController.shouldClose([tabs], in: tabs.hostWindow, what: T("the project", "o projeto"), then: close) { close() }
     }
 
-    private func remove(at index: Int) {
+    private func remove(at index: Int, tabs kept: TabsSnapshot? = nil) {
         guard projects.indices.contains(index) else { return }
         let wasActive = index == activeIndex
-        noteUsed(projects[index])
+        noteUsed(projects[index], tabs: kept)
         projects[index].tabs.setShown(false)
         projects.remove(at: index)
         if projects.isEmpty {
@@ -242,9 +257,10 @@ public final class ProjectsController {
     }
 
     /// The project goes to the top of the recent ones.
-    private func noteUsed(_ project: Project, at date: Date = Date()) {
+    /// `tabs`: what it had, when it closes (kept for opening it again).
+    private func noteUsed(_ project: Project, tabs: TabsSnapshot? = nil, at date: Date = Date()) {
         recent.removeAll { $0.folder == project.folder }
-        recent.insert(.init(name: project.name, folder: project.folder, usedAt: date), at: 0)
+        recent.insert(.init(name: project.name, folder: project.folder, usedAt: date, tabs: tabs, color: project.color), at: 0)
         if recent.count > Self.recentLimit { recent.removeLast(recent.count - Self.recentLimit) }
     }
 

@@ -1,6 +1,7 @@
 import Agents
 import Machines
 import AppKit
+import Home
 import SourceControl
 
 /// `make perf` only (tools/perf/run.py): what a scenario asks the test app
@@ -72,6 +73,52 @@ extension WindowSession {
         if let id = environment["CADEX_PERF_COMMAND2"] {
             let at = environment["CADEX_PERF_COMMAND2_AT"].flatMap(Double.init) ?? 10
             DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in _ = self?.commands.run(id) }
+        }
+        // The home screen clicked as the owner would: "card:task", "recent:<folder>" (plan 29).
+        if let action = environment["CADEX_PERF_HOME_ACTION"], let colon = action.firstIndex(of: ":") {
+            let kind = String(action[..<colon]), value = String(action[action.index(after: colon)...])
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                guard let home = self?.home else { return }
+                if kind == "recent" { return home.actions.openRecent(value) }
+                if let card = HomeCard.allCases.first(where: { "\($0)" == value }) { home.actions.card(card) }
+            }
+        }
+        // ⌘J's list searched with this text and its last item chosen, as the palette does (the text
+        // that finds nothing becomes New Task's request); "first:" chooses the first item instead.
+        if let query = environment["CADEX_PERF_JUMP"] {
+            let at = environment["CADEX_PERF_JUMP_AT"].flatMap(Double.init) ?? 6
+            DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in
+                guard let self else { return }
+                let source = JumpSource(window: self)
+                let first = query.hasPrefix("first:")
+                source.search(first ? String(query.dropFirst(6)) : query) { items, _ in
+                    guard let item = first ? items.first : items.last else { return }
+                    source.choose(item)
+                    source.stop()
+                }
+            }
+        }
+        // What the window shows, as JSON, at CADEX_PERF_REPORT_AT seconds (the checks of plan 29).
+        if let out = environment["CADEX_PERF_REPORT"] {
+            let at = environment["CADEX_PERF_REPORT_AT"].flatMap(Double.init) ?? 8
+            DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in
+                guard let self else { return }
+                let projects = (self.projects?.projects ?? []).map { project -> [String: Any] in
+                    ["name": project.name, "tabs": project.tabs.count,
+                     "terminals": project.tabs.allTerminals.map { $0.currentDirectory ?? "" },
+                     "focused": project.tabs.activeTerminal?.currentDirectory ?? ""]
+                }
+                var report: [String: Any] = ["projects": projects, "active": self.projects?.activeName ?? "", "home": self.home != nil,
+                                             "palette": self.palette?.currentSource?.placeholder ?? ""]
+                if let sheet = self.newTaskSheet {
+                    report["sheet"] = ["agents": sheet.request.agents.map(\.title), "prompt": sheet.request.prompt, "race": sheet.request.isRace]
+                }
+                report["commands"] = ["home.show", "tab.new", "agents.open-account", "worktrees.new-task", "orchestration.new-race", "view.jump"]
+                    .filter { self.commands.command($0) != nil }
+                if let data = try? JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]) {
+                    try? data.write(to: URL(fileURLWithPath: out))
+                }
+            }
         }
         // The focused pane split to the right, to compare two panes with the Terminals mockup.
         if environment["CADEX_PERF_SPLIT"] != nil {

@@ -134,7 +134,8 @@ extension WindowSession {
         if plan.hooksNeedConfirmation {
             notes.append(NewTaskNote(T("Setup hooks that will run in the copy: ", "Hooks de preparo que vão rodar na cópia: ") + plan.hooks.joined(separator: " && ")))
         }
-        if plan.explainTrust {
+        // A race asks the trust before it starts (the line above): this one is for a single task.
+        if plan.explainTrust, !request.isRace {
             let name = (repo as NSString).lastPathComponent
             notes.append(NewTaskNote(T("If Claude Code asks to trust the folder, accept it in the task's tab: it counts for \(name) and every task of it.",
                                        "Se o Claude Code perguntar se confia na pasta, aceite na aba da tarefa: vale para \(name) e todas as tarefas dele.")))

@@ -23,6 +23,8 @@ agora sempre com a pasta (`../adr/0035-work-frame.md`).
 - project.close encerra os terminais e documentos do projeto (pergunta antes se algum roda um
   programa ou se há arquivo não salvo) e tira o projeto da árvore; as tarefas e as worktrees ficam
   no disco e voltam se a pasta for aberta de novo. Fechar o último projeto mostra a tela de início.
+  Um projeto fechado fica nos recentes com as abas que tinha, e reabri-lo (pela tela de início ou
+  pela pasta) as devolve.
 - Os programas dos projetos que não aparecem continuam rodando; só não desenham.
 - **Ao reabrir o app**, cada projeto volta com as abas na mesma ordem, os nomes dados às abas, as
   divisões com as proporções, a pasta de cada painel, os arquivos e o histórico do git abertos (em

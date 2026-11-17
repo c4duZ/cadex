@@ -36,7 +36,8 @@ public enum RaceCommands {
                     action: .run { actions.toggle() }),
             Command(id: "orchestration.new-race", title: T("New Race: the Same Task in Several Agents", "Nova corrida: a mesma tarefa em vários agentes"),
                     keywords: keywords + ["new", "nova", "worktree", "task", "tarefa"], category: .view,
-                    action: .run { actions.newRace() }, unavailableReason: off),
+                    // Off is said by the New Task sheet, whose Start turns races on (plan 29).
+                    action: .run { actions.newRace() }),
             list(.show, "orchestration.show-race", T("Show a Race", "Mostrar uma corrida"), ["board", "quadro", "show", "mostrar"]),
             list(.pickWinner, "orchestration.pick-winner", T("Pick a Race's Winner", "Escolher o vencedor de uma corrida"), ["winner", "vencedor", "pick"]),
             list(.discard, "orchestration.discard-race", T("Discard a Race's Other Worktrees", "Descartar as outras worktrees de uma corrida"),

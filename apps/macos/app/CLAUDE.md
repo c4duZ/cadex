@@ -261,7 +261,8 @@
   cartão `AgentPermissionCard` no pé do painel dele (TerminalView.footCard), com Permitir e Negar
   pela mesma AgentAttention do sino: responder num fecha o outro.
 - `PerfHooks.swift`: só para o `make perf` (`../../../tools/perf/run.py`): cada variável CADEX_PERF_
-  faz a instância de teste agir sozinha em horas marcadas (CADEX_PERF_COMMAND roda um comando pelo id, e CADEX_PERF_COMMAND2 um segundo mais tarde; a
+  faz a instância de teste agir sozinha em horas marcadas (CADEX_PERF_HOME_ACTION clica num cartão ou num recente da tela de início, CADEX_PERF_JUMP
+  busca e escolhe no ⌘J, CADEX_PERF_REPORT grava em JSON o que a janela mostra; CADEX_PERF_COMMAND roda um comando pelo id, e CADEX_PERF_COMMAND2 um segundo mais tarde; a
   captura salva também um painel visível, como o da paleta, num arquivo terminado em -panel.png, CADEX_PERF_TYPE digita um comando no terminal com foco, CADEX_PERF_HOME_PROMPT manda o pedido da
   tela de início, CADEX_PERF_DUMP_SCREEN grava a tela de cada terminal num arquivo, CADEX_PERF_SEND manda uma mensagem ao agente
   com o Return como tecla (a marca da barra),

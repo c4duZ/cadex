@@ -140,8 +140,10 @@ extension WindowSession {
     private func homeOpenProject() -> (folder: String, fresh: Bool) {
         let folder = homeChoice.project ?? NSHomeDirectory()
         let before = projects?.projects.count ?? 0
+        // A recent one comes back with its old tabs: then it has no fresh terminal to use.
+        let restores = projects?.recent.first { $0.folder == ProjectsFile.repositoryRoot(folder) }?.tabs?.items.isEmpty == false
         homeOpen(folder)
-        return (folder, (projects?.projects.count ?? 0) > before)
+        return (folder, (projects?.projects.count ?? 0) > before && !restores)
     }
 
     private func homeOpen(_ folder: String) {

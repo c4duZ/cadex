@@ -141,6 +141,22 @@ let exitCode = await Checks.run([
         expect(again.projects.isEmpty && again.recent.map(\.folder) == [a], "\(again.recent)")
         expect(FileManager.default.fileExists(atPath: file.path), "an empty list is a good file, not moved aside")
     }),
+    ("a project closed comes back from the recent ones with the tabs it had", {
+        let (a, b) = folders()
+        let projects = controller(tempFile(), window: window())
+        projects.start(folder: a) { _ in nil }
+        projects.active?.newTab(cwd: a)
+        expect(projects.active?.count == 2)
+        projects.open(folder: b)
+        projects.select(0)
+        projects.closeActive()
+        // b shows now and goes first; a stays in the list with its two tabs.
+        let kept = projects.recent.first { $0.folder == a }
+        expect(projects.projects.count == 1 && kept?.tabs?.items.count == 2, "\(String(describing: kept?.tabs?.items.count))")
+        projects.open(folder: a)
+        expect(projects.activeFolder == a && projects.active?.count == 2, "\(String(describing: projects.active?.count))")
+        projects.projects.forEach { $0.tabs.closeAll() }
+    }),
     ("a worktree's folder belongs to its main repository", {
         let (a, _) = folders()
         let worktree = tempDir()
