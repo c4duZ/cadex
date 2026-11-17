@@ -101,6 +101,10 @@ final class TitleBarView: NSView {
         location.stringValue = [project, task].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " › ")
     }
 
+    /// The bell, where its popover opens; lit while it is open.
+    var bellAnchor: NSView { bellButton }
+    func setBellOpen(_ open: Bool) { bellButton.isOn = open }
+
     /// The bell's count: what needs you, and finished agents you have not seen.
     func setBell(count: Int) {
         bellButton.setBadge(count)

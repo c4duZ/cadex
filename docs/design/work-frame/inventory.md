@@ -46,7 +46,7 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 |---|---|---|---|---|
 | arquivo | `apps/macos/features/sidebar/SidebarIconRow.swift` | sai | a árvore do trabalho | 27 |
 | arquivo | `apps/macos/features/sidebar/SidebarIconButton.swift` | sai | a árvore do trabalho | 27 |
-| arquivo | `apps/macos/features/sidebar/SidebarSubtabs.swift` | sai | as sub-abas eram do sino (vira popover) | 26 |
+| arquivo | `apps/macos/features/sidebar/SidebarSubtabs.swift` | saiu | as sub-abas eram do sino (virou popover), com SidebarItem.subtabs e select(subtab:of:) | 26 |
 | arquivo | `apps/macos/features/sidebar/SidebarLayout.swift` | sai | a árvore não tem ordem de ícones | 27 |
 | arquivo | `apps/macos/features/sidebar/SidebarItem.swift` | muda | aba do painel da direita | 26 |
 | arquivo | `apps/macos/features/sidebar/SidebarHeader.swift` | muda | cabeçalho das abas do painel da direita | 26 |
@@ -73,7 +73,8 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | arquivo | página agents: `apps/macos/features/agents/AgentsView.swift`, `apps/macos/features/agents/AgentSessionList.swift`, `apps/macos/features/agents/AgentsLayout.swift` | sai | os agentes nos terminais da árvore; as sessões de fora do Cadex na página do projeto | 27 |
 | comando | `agents.show` | sai | apelido no 27, sai no 28 | 28 |
 | arquivo | página agent-history (`apps/macos/features/agents/AgentHistoryView.swift`, `AgentHistoryList.swift`) | muda | Arquivo e histórico, no centro | 27 |
-| arquivo | página attention (`apps/macos/features/agents/AgentAttentionView.swift`) | muda | o sino em popover | 26 |
+| arquivo | página attention (`apps/macos/features/agents/AgentAttentionView.swift`) | muda | o conteúdo do popover do sino, feito | 26 |
+| trecho | ".page(makeAttentionPage())" em `apps/macos/app/SidebarWiring.swift` | saiu | a página do sininho saiu da barra lateral; o id é aposentado em SidebarLayout.retired | 26 |
 | comando | `agents.show-attention`, `agents.show-feed` | muda | abrem o sino | 26 |
 | arquivo | página accounts (`apps/macos/features/agents/AgentAccountsView.swift`) | sai | o popover da etiqueta de uso na barra de status e a página do projeto | 26 |
 | comando | `agents.show-accounts` | muda | abre o popover de uso | 26 |

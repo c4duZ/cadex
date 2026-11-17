@@ -1,6 +1,7 @@
 import AppKit
 import Checks
 import Foundation
+import UILooks
 @testable import Agents
 
 // Attention in one place (plan 19 phase C; docs/spec/agents.md, Atenção and
@@ -102,6 +103,40 @@ let attentionChecks: [(name: String, body: Checks.Body)] = [
             try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/attention-card.png"))
         }
         page.removeFromSuperview()
+        attention.update([])
+    }),
+    ("the bell's popover: a permission with Allow and Deny, a question, what finished (CADEX_SNAPSHOT_DIR: bell-popover.png)", {
+        let attention = AgentAttention.shared
+        attention.isEnabled = true
+        attention.update([report("p1", pid: 71, .working), report("q1", pid: 72, .working), report("d1", pid: 73, .working)])
+        attention.update([report("p1", pid: 71, .blocked, .permission, "approve Bash: make perf"),
+                          report("q1", pid: 72, .blocked, .question, "Keep the old checkout copy, or use the new text for everyone?"),
+                          report("d1", pid: 73, .done)])
+        let id = attention.addPermission(pid: 71, tool: "Bash", subject: "make perf", project: "cadex", session: "perf-subagent-window",
+                                         account: "bhband", key: "p1") { _ in }
+        let page = AgentAttentionView(frame: .zero)
+        let width = DesignTokens.Popover.bellWidth
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: width, height: 600), styleMask: [.borderless], backing: .buffered, defer: false)
+        let root = NSView(frame: window.contentLayoutRect)
+        root.wantsLayer = true
+        root.layer?.backgroundColor = DesignTokens.Popover.bg.cgColor
+        window.contentView = root
+        page.translatesAutoresizingMaskIntoConstraints = false
+        root.addSubview(page)
+        NSLayoutConstraint.activate([page.topAnchor.constraint(equalTo: root.topAnchor), page.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+                                     page.widthAnchor.constraint(equalToConstant: width)])
+        page.render()
+        root.layoutSubtreeIfNeeded()
+        func texts(_ view: NSView) -> [String] { ((view as? NSTextField).map { [$0.stringValue] } ?? []) + view.subviews.flatMap(texts) }
+        func buttons(_ view: NSView) -> [String] { ((view as? NSButton).map { [$0.attributedTitle.string] } ?? []) + view.subviews.flatMap(buttons) }
+        expect(texts(page).contains("Wants to run Bash") && texts(page).contains("Asks a question"), "\(texts(page))")
+        expect(buttons(page).contains("Allow") && buttons(page).contains("Deny") && buttons(page).contains("Go to tab"), "\(buttons(page))")
+        expect(texts(page).contains("EARLIER"), "what finished, under EARLIER")
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"], let bitmap = root.bitmapImageRepForCachingDisplay(in: root.bounds) {
+            root.cacheDisplay(in: root.bounds, to: bitmap)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/bell-popover.png"))
+        }
+        attention.resolve(id)
         attention.update([])
     }),
     ("a permission reported by the agent and then by its hook is one line in the feed", {

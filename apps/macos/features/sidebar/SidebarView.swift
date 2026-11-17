@@ -15,13 +15,7 @@ public final class SidebarView: NSView {
     /// The shown ids changed here (switch, drag); the app saves them.
     public var onItemsChange: (([String]) -> Void)?
     public private(set) var page: String?
-    /// A page's sub-tab was picked (or the page came with one): the app
-    /// switches the page's view.
-    public var onSubtab: ((String, String) -> Void)?
-    /// The sub-tab each page shows, the first until one is picked.
-    public private(set) var subtab: [String: String] = [:]
     let header = SidebarHeader()
-    private var subtabs: SidebarSubtabs { header.subtabs }
     public private(set) var items: [String] = []
     private let catalog: [SidebarItem]
     private let run: (String) -> Void
@@ -48,8 +42,6 @@ public final class SidebarView: NSView {
         row.onReorder = { [weak self] ids in self?.change(ids) }
         row.onCustomize = { [weak self] _ in self?.customize() }
         row.onOverflow = { [weak self] ids, anchor in self?.overflow(ids, below: anchor) }
-        subtabs.onPick = { [weak self] index in self?.subtabPicked(index) }
-        subtabs.isHidden = true
         for view in [row, header, content, empty] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
@@ -105,7 +97,6 @@ public final class SidebarView: NSView {
         empty.isHidden = !none
         content.isHidden = none
         header.isHidden = none
-        if none { subtabs.isHidden = true }
         if page == nil, let first = ids.first(where: { id in catalog.first { $0.id == id }?.view != nil }) { show(first) }
         return problems
     }
@@ -117,37 +108,12 @@ public final class SidebarView: NSView {
         for other in catalog { other.view?.isHidden = other.id != id }
         row.select(id)
         showHeader(of: item)
-        showSubtabs(of: item)
         onShow?(id)
-    }
-
-    /// Picks a page's sub-tab from code (a command, a click elsewhere).
-    public func select(subtab sub: String, of id: String) {
-        guard let item = catalog.first(where: { $0.id == id }), item.subtabs.contains(where: { $0.id == sub }) else { return }
-        subtab[id] = sub
-        if page == id { showSubtabs(of: item) } else { onSubtab?(id, sub) }
     }
 
     private func showHeader(of item: SidebarItem) {
         header.set(titles[item.id] ?? SidebarTitle(item.title), actions: item.actions, extra: item.more)
         header.busy = busyPages.contains(item.id)
-    }
-
-    private func showSubtabs(of item: SidebarItem) {
-        subtabs.isHidden = item.subtabs.isEmpty
-        header.needsLayout = true
-        guard !item.subtabs.isEmpty else { return }
-        let current = subtab[item.id] ?? item.subtabs[0].id
-        subtab[item.id] = current
-        subtabs.set(item.subtabs.map(\.title), selected: item.subtabs.firstIndex { $0.id == current } ?? 0)
-        onSubtab?(item.id, current)
-    }
-
-    private func subtabPicked(_ index: Int) {
-        guard let page, let item = catalog.first(where: { $0.id == page }), item.subtabs.indices.contains(index) else { return }
-        let sub = item.subtabs[index].id
-        subtab[page] = sub
-        onSubtab?(page, sub)
     }
 
     /// The header's name for a page: the folder's name for Files, the

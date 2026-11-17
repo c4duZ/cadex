@@ -1,24 +1,28 @@
 import AppKit
 import Icons
 import Menus
+import StateGlyph
 import Strings
 import UILooks
 
-/// The bell's page (docs/spec/agents.md, Atenção and Quadro): "Needs You",
-/// a card per open request, with Allow and Deny when its hook waits and
-/// "Go to Terminal" otherwise; and "Feed", the timeline. Reads only while it
-/// shows. Nothing is answered without a click on a card.
+/// The bell's popover (docs/spec/agents.md, Atenção and Quadro; docs/design/work-frame/screens.md,
+/// Bell; components.popover and components.bell): "Needs you" with a card per open request, Allow
+/// and Deny when its hook waits, "Go to tab" always, and the latest that finished or failed under
+/// "EARLIER"; "Activity", the timeline. It grows with what it holds (no scroll): a few cards, then
+/// "N more". Reads only while it shows. Nothing is answered without a click on a card.
 @MainActor
 public final class AgentAttentionView: NSView {
-    public var colors = AgentColors() { didSet { render() } }
-    /// "needs" or "feed", the sidebar's sub-tab.
+    typealias Look = DesignTokens.Bell
+    /// "needs" or "feed": what the popover shows (Activity is the feed).
     public var subtab = "needs" { didSet { if subtab != oldValue { render() } } }
     /// The terminal a card or a feed line belongs to; nil key: none known.
     public var onGoTo: ((String?, Int32) -> Void)?
     public var onEnable: (() -> Void)?
+    /// Drawn again (a request came or went, Activity switched): the popover sizes itself again.
+    public var onRender: (() -> Void)?
 
     let attention = AgentAttention.shared
-    /// The feed's filter (docs/spec/agents.md, Atenção): a kind and a project.
+    /// The timeline's filter (docs/spec/agents.md, Atenção): a kind and a project.
     let kindFilter = NSPopUpButton()
     let projectFilter = NSPopUpButton()
     static let kinds: [(AgentFeedEntry.Kind?, String)] = [
@@ -26,44 +30,29 @@ public final class AgentAttentionView: NSView {
         (.question, T("Questions", "Perguntas")), (.failed, T("Failures", "Falhas")), (.taskCreated, T("Tasks", "Tarefas")),
         (.note, T("Notes", "Avisos")),
     ]
+    /// The most cards and lines it shows: past them, "N more" (the popover has no scroll).
+    static let maxCards = 4
+    static let maxEarlier = 3
+    static let maxFeed = 12
     private let stack = NSStackView()
-    private let scroll = NSScrollView()
     private var token: UUID?
 
     public override init(frame: NSRect) {
         super.init(frame: frame)
         stack.orientation = .vertical
         stack.alignment = .leading
-        stack.spacing = 6
-        stack.edgeInsets = NSEdgeInsets(top: 6, left: 6, bottom: 6, right: 6)
-        let document = TopLeft()
-        // Held by constraints, not by its first frame (zero): with the frame
-        // the cards were squeezed to their buttons, headings 0 pt high
-        // (found 2026-11-16, plan 24 F).
-        document.translatesAutoresizingMaskIntoConstraints = false
-        document.addSubview(stack)
+        stack.spacing = 0
         stack.translatesAutoresizingMaskIntoConstraints = false
-        scroll.documentView = document
-        scroll.hasVerticalScroller = true
-        scroll.drawsBackground = false
-        scroll.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(scroll)
+        addSubview(stack)
         NSLayoutConstraint.activate([
-            scroll.leadingAnchor.constraint(equalTo: leadingAnchor), scroll.trailingAnchor.constraint(equalTo: trailingAnchor),
-            scroll.topAnchor.constraint(equalTo: topAnchor), scroll.bottomAnchor.constraint(equalTo: bottomAnchor),
-            stack.leadingAnchor.constraint(equalTo: document.leadingAnchor), stack.topAnchor.constraint(equalTo: document.topAnchor),
-            stack.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor),
-            document.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor),
-            document.topAnchor.constraint(equalTo: scroll.contentView.topAnchor),
-            document.leadingAnchor.constraint(equalTo: scroll.contentView.leadingAnchor),
-            document.bottomAnchor.constraint(equalTo: stack.bottomAnchor),
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor), stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stack.topAnchor.constraint(equalTo: topAnchor), stack.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
 
-    /// Reads only while it shows: in a window and not hidden (the sidebar
-    /// keeps every page in the window and hides the others).
+    /// Reads only while it shows: in a window and not hidden.
     public override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         updateWatching()
@@ -87,93 +76,137 @@ public final class AgentAttentionView: NSView {
 
     var isWatching: Bool { token != nil }
 
-    @objc func filterChanged() { render() }
-
-    func render() {
+    public func render() {
+        defer { onRender?() }
         for view in stack.arrangedSubviews { view.removeFromSuperview() }
+        add(header(), padding: DesignTokens.Popover.Header.padding, line: true)
         guard attention.isEnabled else {
             return note(T("Attention is off (agents.attention).", "A atenção está desligada (agents.attention)."), button: T("Turn On", "Ligar"))
         }
         if subtab == "feed" { return renderFeed() }
         let cards = attention.cards
-        if cards.isEmpty { return note(T("No agent needs you now.", "Nenhum agente precisa de você agora.")) }
-        for card in cards { add(self.card(card)) }
+        if cards.isEmpty { note(T("No agent needs you now.", "Nenhum agente precisa de você agora.")) }
+        for request in cards.prefix(Self.maxCards) { add(card(request), padding: Look.Card.padding, line: true) }
+        if cards.count > Self.maxCards {
+            note(T("\(cards.count - Self.maxCards) more on the board", "Mais \(cards.count - Self.maxCards) no quadro"))
+        }
+        renderEarlier()
+    }
+
+    /// "Needs you" and its count; "Activity" switches to the timeline and back.
+    private func header() -> NSView {
+        typealias H = DesignTokens.Popover.Header
+        let title = AgentBellParts.label(subtab == "feed" ? T("Activity", "Atividade") : T("Needs you", "Precisa de você"),
+                                         size: H.Title.fontSize, weight: H.Title.weight, color: DesignTokens.Color.textPrimary)
+        var views: [NSView] = [title]
+        let count = attention.cards.count
+        if subtab != "feed", count > 0 {
+            let chip = AgentBellParts.label("\(count)", size: H.Count.fontSize, weight: H.Count.weight, color: H.Count.color)
+            chip.wantsLayer = true
+            chip.layer?.backgroundColor = H.Count.bg.cgColor
+            chip.layer?.cornerRadius = UILooks.pt(H.Count.radius)
+            chip.alignment = .center
+            chip.widthAnchor.constraint(greaterThanOrEqualToConstant: UILooks.pt(DesignTokens.Badge.minWidth + H.Count.padding.left * 2)).isActive = true
+            views.append(chip)
+        }
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        views.append(spacer)
+        let other = subtab == "feed" ? T("Needs you", "Precisa de você") : T("Activity", "Atividade")
+        views.append(AgentBellParts.button(other, .quiet) { [weak self] in
+            guard let self else { return }
+            self.subtab = self.subtab == "feed" ? "needs" : "feed"
+        })
+        let row = NSStackView(views: views)
+        row.spacing = UILooks.pt(DesignTokens.Tab.gap)
+        return row
     }
 
     private func card(_ request: AgentRequest) -> NSView {
-        let heading: String
-        // An agent that said nothing more than "blocked" (a report with no
-        // text) left a card with only its button (2026-11-16, plan 24 F).
+        typealias C = Look.Card
+        // An agent that said nothing more than "blocked" (a report with no text) left a card
+        // with only its button (2026-11-16, plan 24 F).
         let title = request.title.trimmingCharacters(in: .whitespaces)
+        let heading: String
         switch request.kind {
-        case .permission: heading = title.isEmpty ? T("Waiting for a permission", "Esperando uma permissão") : T("Wants to use \(title)", "Quer usar \(title)")
-        case .question: heading = title.isEmpty ? T("Has a question", "Tem uma pergunta") : title
+        case .permission: heading = title.isEmpty ? T("Waiting for a permission", "Esperando uma permissão") : T("Wants to run \(title)", "Quer rodar \(title)")
+        case .question: heading = T("Asks a question", "Faz uma pergunta")
         }
-        var views: [NSView] = [AgentText.label(heading, size: 12, weight: .semibold, color: colors.text)]
-        if !request.detail.isEmpty {
-            let detail = NSTextField(wrappingLabelWithString: request.detail)
-            detail.font = .monospacedSystemFont(ofSize: UILooks.pt(11), weight: .regular)
-            detail.textColor = colors.text
-            detail.maximumNumberOfLines = 4
-            views.append(detail)
+        var views: [NSView] = [AgentBellParts.line(.needs, glyph: C.glyph,
+                                                   AgentBellParts.label(heading, size: C.Title.fontSize, weight: C.Title.weight, color: DesignTokens.Color.textPrimary),
+                                                   time: AgentTime.short(since: request.at))]
+        if request.kind == .question, !title.isEmpty {
+            views.append(AgentBellParts.label(title, size: Look.Question.fontSize, color: Look.Question.color, wraps: true))
+        } else if !request.detail.isEmpty {
+            views.append(command(request.detail))
         }
-        views.append(AgentText.label([request.project, request.session, request.account].filter { !$0.isEmpty }.joined(separator: " · "),
-                                     size: 11, color: colors.secondary))
+        views.append(AgentBellParts.label([request.project, request.session, request.account].filter { !$0.isEmpty }.joined(separator: " · "),
+                                          size: Look.Meta.fontSize, color: Look.Meta.color))
         var buttons: [NSView] = []
         if request.canAnswer {
-            buttons.append(button(T("Allow", "Permitir")) { [weak self] in self?.attention.approve(request.id) })
-            buttons.append(button(T("Deny", "Negar")) { [weak self] in self?.attention.deny(request.id) })
+            buttons.append(AgentBellParts.button(T("Allow", "Permitir"), .primary) { [weak self] in self?.attention.approve(request.id) })
+            buttons.append(AgentBellParts.button(T("Deny", "Negar"), .secondary) { [weak self] in self?.attention.deny(request.id) })
         }
-        buttons.append(button(T("Go to Terminal", "Ir ao terminal")) { [weak self] in self?.onGoTo?(request.key, request.pid) })
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        buttons.append(spacer)
+        buttons.append(AgentBellParts.button(T("Go to tab", "Ir à aba"), .quiet) { [weak self] in self?.onGoTo?(request.key, request.pid) })
         let row = NSStackView(views: buttons)
-        row.spacing = 6
+        row.spacing = UILooks.pt(Look.buttonGap)
         views.append(row)
         let box = NSStackView(views: views)
         box.orientation = .vertical
         box.alignment = .leading
-        box.spacing = 4
-        box.edgeInsets = NSEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
-        box.wantsLayer = true
-        box.layer?.cornerRadius = 8
-        box.layer?.backgroundColor = colors.fill.withAlphaComponent(0.4).cgColor
+        box.spacing = UILooks.pt(C.gap)
+        for view in [row] { view.widthAnchor.constraint(equalTo: box.widthAnchor).isActive = true }
         return box
+    }
+
+    /// The command or file of a permission, in its box.
+    private func command(_ text: String) -> NSView {
+        typealias K = Look.Command
+        let label = NSTextField(wrappingLabelWithString: text)
+        label.font = UILooks.monospaced(K.fontSize)
+        label.textColor = K.color
+        label.maximumNumberOfLines = 4
+        let box = NSStackView(views: [label])
+        box.edgeInsets = NSEdgeInsets(top: UILooks.pt(K.padding.top), left: UILooks.pt(K.padding.left),
+                                      bottom: UILooks.pt(K.padding.bottom), right: UILooks.pt(K.padding.right))
+        box.wantsLayer = true
+        box.layer?.backgroundColor = K.bg.cgColor
+        box.layer?.borderColor = K.border.cgColor
+        box.layer?.borderWidth = DesignTokens.Stroke.hairline
+        box.layer?.cornerRadius = UILooks.pt(K.radius)
+        return box
+    }
+
+    /// The latest that finished or failed, a line each.
+    private func renderEarlier() {
+        let done = attention.feed.filter { $0.kind == .finished || $0.kind == .failed }.prefix(Self.maxEarlier)
+        guard !done.isEmpty else { return }
+        typealias E = Look.Earlier
+        let label = AgentBellParts.label(T("EARLIER", "ANTES"), size: E.Label.fontSize, weight: E.Label.weight, color: E.Label.color)
+        add(label, padding: E.Label.padding, line: false)
+        for entry in done { add(feedRow(entry), padding: Self.listed(E.Row.padding), line: false) }
     }
 
     private func renderFeed() {
         if attention.feed.isEmpty { return note(T("Nothing happened yet.", "Nada aconteceu ainda.")) }
-        add(filters())
+        add(filters(), padding: Look.Earlier.Label.padding, line: false)
         let kind = Self.kinds[max(0, kindFilter.indexOfSelectedItem)].0
         let project = projectFilter.indexOfSelectedItem > 0 ? projectFilter.titleOfSelectedItem : nil
         let entries = attention.feed(kind: kind, project: project)
         if entries.isEmpty { return note(T("Nothing of this kind.", "Nada desse tipo.")) }
-        for entry in entries.prefix(100) {
-            let what: String
-            switch entry.kind {
-            case .finished: what = T("Finished", "Terminou")
-            case .permission: what = T("Asked permission", "Pediu permissão")
-            case .question: what = T("Asked a question", "Fez uma pergunta")
-            case .failed: what = T("Failed", "Falhou")
-            case .taskCreated: what = T("Task created", "Tarefa criada")
-            case .note: what = T("Said", "Avisou")
-            }
-            let top = AgentText.label(what + (entry.text.isEmpty ? "" : ": " + entry.text), size: 12, color: colors.text)
-            let bottom = AgentText.label(([entry.project, entry.session, entry.account].filter { !$0.isEmpty } + [AgentTime.short(since: entry.at)])
-                .joined(separator: " · "), size: 11, color: colors.secondary)
-            let content = NSStackView(views: [top, bottom])
-            content.orientation = .vertical
-            content.alignment = .leading
-            content.spacing = 1
-            let row = AgentRow(content, inset: 6)
-            row.hoverFill = colors.fill.withAlphaComponent(0.5)
-            row.onClick = { [weak self] in self?.onGoTo?(entry.key, 0) }
-            if let key = entry.key {
-                row.onRightClick = { [weak self, weak row] in
-                    guard let self, let row else { return }
-                    PopupMenu.show([MenuEntry(T("Mark as Unread", "Marcar como não lido"), icon: .eye) { [weak self] in self?.attention.markUnread(key) }], below: row)
-                }
-            }
-            add(row)
-        }
+        for entry in entries.prefix(Self.maxFeed) { add(feedRow(entry), padding: Self.listed(Look.Earlier.Row.padding), line: false) }
+    }
+
+    @objc func filterChanged() { render() }
+
+    /// A line of the list: its own padding inside the list's (components.bell.earlier), so its
+    /// glyph lines up with the cards'.
+    static func listed(_ row: NSEdgeInsets) -> NSEdgeInsets {
+        let list = Look.Earlier.listPadding
+        return NSEdgeInsets(top: row.top, left: row.left + list.left, bottom: row.bottom, right: row.right + list.right)
     }
 
     /// The kind and project pop-ups, keeping what was picked.
@@ -192,46 +225,78 @@ public final class AgentAttentionView: NSView {
             popup.action = #selector(filterChanged)
         }
         let row = NSStackView(views: [kindFilter, projectFilter])
-        row.spacing = 6
+        row.spacing = UILooks.pt(Look.buttonGap)
         return row
     }
 
-    private func add(_ view: NSView) {
-        stack.addArrangedSubview(view)
-        view.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -12).isActive = true
+    /// "bell-cards finished · PR #41 ready" with its glyph and when; a click goes to its tab, the
+    /// right click marks it unread.
+    private func feedRow(_ entry: AgentFeedEntry) -> NSView {
+        let state: GlyphState = switch entry.kind {
+        case .finished: .done
+        case .failed: .failed
+        case .permission, .question: .needs
+        case .taskCreated, .note: .idle
+        }
+        let what: String = switch entry.kind {
+        case .finished: T("finished", "terminou")
+        case .permission: T("asked permission", "pediu permissão")
+        case .question: T("asked a question", "fez uma pergunta")
+        case .failed: T("failed", "falhou")
+        case .taskCreated: T("task created", "tarefa criada")
+        case .note: T("said", "avisou")
+        }
+        let who = entry.session.isEmpty ? entry.project : entry.session
+        let text = NSMutableAttributedString(string: "\(who) \(what)", attributes: [
+            .font: UILooks.font(DesignTokens.FontSize.body), .foregroundColor: DesignTokens.Color.textPrimary,
+        ])
+        if !entry.text.isEmpty {
+            text.append(NSAttributedString(string: " · " + entry.text, attributes: [
+                .font: UILooks.font(DesignTokens.FontSize.body), .foregroundColor: Look.Earlier.Row.detail,
+            ]))
+        }
+        let label = NSTextField(labelWithAttributedString: text)
+        label.lineBreakMode = .byTruncatingTail
+        label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        let line = AgentBellParts.line(state, glyph: Look.Earlier.Row.glyph, label, time: AgentTime.short(since: entry.at))
+        line.spacing = UILooks.pt(Look.Earlier.Row.gap)
+        line.heightAnchor.constraint(equalToConstant: UILooks.pt(Look.Earlier.Row.height)).isActive = true
+        let row = AgentRow(line, inset: 0)
+        row.hoverFill = DesignTokens.Color.bgButton
+        row.onClick = { [weak self] in self?.onGoTo?(entry.key, 0) }
+        if let key = entry.key {
+            row.onRightClick = { [weak self, weak row] in
+                guard let self, let row else { return }
+                PopupMenu.show([MenuEntry(T("Mark as Unread", "Marcar como não lido"), icon: .eye) { [weak self] in self?.attention.markUnread(key) }], below: row)
+            }
+        }
+        return row
+    }
+
+    /// One block of the popover with its padding, the line under it when `line`.
+    private func add(_ view: NSView, padding: NSEdgeInsets, line: Bool) {
+        let box = NSStackView(views: [view])
+        box.edgeInsets = NSEdgeInsets(top: UILooks.pt(padding.top), left: UILooks.pt(padding.left),
+                                      bottom: UILooks.pt(padding.bottom), right: UILooks.pt(padding.right))
+        view.widthAnchor.constraint(equalTo: box.widthAnchor, constant: -UILooks.pt(padding.left + padding.right)).isActive = true
+        stack.addArrangedSubview(box)
+        box.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+        guard line else { return }
+        let rule = NSView()
+        rule.wantsLayer = true
+        rule.layer?.backgroundColor = Look.Card.borderBottom.cgColor
+        rule.heightAnchor.constraint(equalToConstant: DesignTokens.Stroke.hairline).isActive = true
+        stack.addArrangedSubview(rule)
+        rule.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
     }
 
     private func note(_ text: String, button title: String? = nil) {
-        let label = NSTextField(wrappingLabelWithString: text)
-        label.font = UILooks.font(12)
-        label.textColor = colors.secondary
-        var views: [NSView] = [label]
-        if let title { views.append(button(title) { [weak self] in self?.onEnable?() }) }
+        var views: [NSView] = [AgentBellParts.label(text, size: DesignTokens.FontSize.meta, color: DesignTokens.Color.textSecondary, wraps: true)]
+        if let title { views.append(AgentBellParts.button(title, .secondary) { [weak self] in self?.onEnable?() }) }
         let box = NSStackView(views: views)
         box.orientation = .vertical
         box.alignment = .leading
-        box.edgeInsets = NSEdgeInsets(top: 12, left: 6, bottom: 4, right: 6)
-        add(box)
+        box.spacing = UILooks.pt(Look.Card.gap)
+        add(box, padding: Look.Card.padding, line: false)
     }
-
-    private func button(_ title: String, _ action: @escaping @MainActor () -> Void) -> NSButton {
-        let button = AttentionButton(title: title, target: nil, action: nil)
-        button.handler = action
-        button.target = button
-        button.action = #selector(AttentionButton.clicked)
-        button.bezelStyle = .rounded
-        button.controlSize = .small
-        return button
-    }
-}
-
-/// A button that runs a closure.
-private final class AttentionButton: NSButton {
-    var handler: (@MainActor () -> Void)?
-    @objc func clicked() { handler?() }
-}
-
-/// A view whose origin is the top left, so the list starts at the top.
-private final class TopLeft: NSView {
-    override var isFlipped: Bool { true }
 }

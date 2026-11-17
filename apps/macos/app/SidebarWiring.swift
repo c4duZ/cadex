@@ -54,8 +54,6 @@ extension WindowSession {
             ], more: [
                 SidebarAction("worktrees.edit-setup-hooks", .slidersHorizontal, T("Edit Setup Hooks", "Editar os hooks de preparo")),
             ]),
-            item("attention", .bell, T("Needs You", "Precisa de você"), "agents.show-attention", .page(makeAttentionPage()),
-                 subtabs: [SidebarItem.Subtab(id: "needs", title: T("Needs You", "Precisa de você")), SidebarItem.Subtab(id: "feed", title: "Feed")]),
             item("memory", .memory, T("Memory", "Memória"), "memory.show", .page(makeMemoryPage()), actions: [
                 SidebarAction("memory.bootstrap", .sparkle, T("Organize History with AI", "Organizar o histórico com IA")),
                 SidebarAction("memory.reindex", .arrowsClockwise, T("Reindex", "Reindexar")),
@@ -74,7 +72,6 @@ extension WindowSession {
         sidebar.onItemsChange = { [weak self] ids in self?.settings.store.update { $0.sidebar.items = ids } }
         sidebar.onShow = { [weak self] id in if id == "history" { self?.showSidebarHistory() } }
         sidebar.onCustomize = { [weak self] in self?.openCustomize("sidebar") }
-        sidebar.onSubtab = { [weak self] page, sub in if page == "attention" { self?.attentionPage?.subtab = sub } }
         sidebar.setTitle(Self.folderTitle(folder.root), for: "files")
         git.onBusy = { [weak sidebar] busy in sidebar?.setBusy(busy, for: "git") }
         applySidebar(settings.store.settings.sidebar, to: sidebar)
@@ -209,10 +206,10 @@ extension WindowSession {
     }
 
     private func item(_ id: String, _ icon: Icon, _ title: String, _ command: String, _ kind: SidebarItem.Kind,
-                      subtabs: [SidebarItem.Subtab] = [], actions: [SidebarAction] = [], more: [SidebarAction] = []) -> SidebarItem {
+                      actions: [SidebarAction] = [], more: [SidebarAction] = []) -> SidebarItem {
         let shortcut = app.keymapLabel(command)
             ?? commands.command(command)?.defaultShortcut.flatMap { KeyCombo($0)?.label }
-        return SidebarItem(id: id, icon: icon, title: title, command: command, shortcut: shortcut, kind: kind, subtabs: subtabs,
+        return SidebarItem(id: id, icon: icon, title: title, command: command, shortcut: shortcut, kind: kind,
                            actions: actions, more: more)
     }
 }

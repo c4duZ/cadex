@@ -46,7 +46,6 @@ final class SidebarHeader: NSView {
 
     var run: ((String) -> Void)?
     var colors = SidebarColors() { didSet { restyle() } }
-    let subtabs = SidebarSubtabs()
     let titleView = SidebarHeaderTitle()
     private(set) var buttons: [SidebarIconButton] = []
     private let more = SidebarIconButton(id: "…", icon: .dotsThree, tip: T("More actions", "Mais ações"), iconSide: 14)
@@ -60,7 +59,7 @@ final class SidebarHeader: NSView {
         progress.style = .spinning
         progress.controlSize = .small
         progress.isDisplayedWhenStopped = false
-        for view in [titleView, subtabs, progress, more] as [NSView] { addSubview(view) }
+        for view in [titleView, progress, more] as [NSView] { addSubview(view) }
         titleView.onPress = { [weak self] command in self?.run?(command) }
         more.onPress = { [weak self] in self?.showMore() }
     }
@@ -111,11 +110,6 @@ final class SidebarHeader: NSView {
             x -= side + UILooks.pt(4)
             progress.frame = NSRect(x: x, y: (bounds.height - side) / 2, width: side, height: side)
         }
-        if !subtabs.isHidden {
-            let fit = subtabs.fittingSize
-            x -= fit.width + UILooks.pt(4)
-            subtabs.frame = NSRect(x: x, y: (bounds.height - fit.height) / 2, width: fit.width, height: fit.height)
-        }
         let height = UILooks.pt(22)
         let width = min(titleView.preferredWidth, max(x - UILooks.pt(6), 0))
         titleView.frame = NSRect(x: 0, y: (bounds.height - height) / 2, width: width, height: height)
@@ -123,7 +117,6 @@ final class SidebarHeader: NSView {
 
     private func restyle() {
         for button in buttons + [more] { button.colors = colors }
-        subtabs.colors = colors
         titleView.colors = colors
     }
 

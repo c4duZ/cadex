@@ -23,7 +23,7 @@ power, updates · Decisões: `docs/adr/0035-work-frame.md` · Mockups: 1 (o mapa
   seção dela diz, e conferida lado a lado com o mockup).
 - Tokens: components.titleBar, components.search, components.breadcrumb, components.tab,
   components.titleIconButton, components.badge, components.statusBar, components.inspector,
-  components.popover (valores exatos em `docs/design/work-frame/tokens.json`).
+  components.popover, components.bell (valores exatos em `docs/design/work-frame/tokens.json`).
 - Cada arquivo reescrito entra na lista de tools/check_design_literals.py: só valores de
   `DesignTokens`, nada digitado.
 - **A. Barra de título.** Feita (2026-11-17), revisada e conferida na galeria: 44 pt com os botões da
@@ -53,7 +53,12 @@ power, updates · Decisões: `docs/adr/0035-work-frame.md` · Mockups: 1 (o mapa
   Tarefa / Sem commit e os botões Commit e Abrir PR. As abas Files e History não estão desenhadas
   nos mockups: antes de implementar, desenhá-las no canvas com os tokens das abas, o dono ver, e
   então entram em screens.md e no tokens.json.
-- **D. O sino.** O botão da barra abre um popover com o conteúdo de `AgentAttentionView` (Precisa de
+- **D. O sino.** D1 feita (2026-11-17): o popover do sino no desenho do mockup (`AnchoredPanel` em
+  `apps/macos/shared/menus/AnchoredPanel.swift`, abre no clique, fecha fora e no Esc; o conteúdo
+  em `apps/macos/features/agents/AgentAttentionView.swift`), Allow/Deny/Go to tab, "EARLIER", a
+  Atividade com os filtros, e a página do sininho saiu da barra lateral. D2 falta: responder a
+  pergunta pelo sino precisa antes de um teste com o Claude real (as perguntas chegam só com o
+  texto, sem as opções do menu dele). Plano original: O botão da barra abre um popover com o conteúdo de `AgentAttentionView` (Precisa de
   você e Atividade), Permitir/Negar, e a resposta das perguntas ali mesmo pela
   docs/adr/0036-owner-words-reach-the-agent.md (o campo, ou um botão por opção; digitado no terminal
   do agente só se ele ainda está na pergunta, senão "The agent moved on"), testada com o fake agent

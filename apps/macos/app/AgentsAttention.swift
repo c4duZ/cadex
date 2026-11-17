@@ -4,6 +4,7 @@ import AppKit
 import Sidebar
 import Terminal
 import Themes
+import UILooks
 
 /// Attention for the whole app (docs/spec/agents.md, Atenção and Quadro;
 /// plan 19 phase C): every terminal's agent state gathered across windows,
@@ -102,18 +103,24 @@ extension AppDelegate {
 extension WindowSession {
     func makeAttentionPage() -> AgentAttentionView {
         let page = AgentAttentionView()
-        page.colors = Self.agentColors()
         page.onGoTo = { [weak self] key, pid in self?.app.goToAgent(key: key, pid: pid) }
         page.onEnable = { [weak self] in self?.settings.store.update { $0.agents.attention = true } }
-        ThemeStore.shared.observe { [weak page] _ in page?.colors = Self.agentColors() }
         attentionPage = page
         return page
     }
 
-    /// agents.show-attention and agents.show-feed: the bell's page, on that sub-tab.
+    /// agents.show-attention and agents.show-feed: the bell's popover under the title bar's bell
+    /// (plan 26 phase D; the sidebar page before), on Needs you or Activity; the same command
+    /// again on what shows closes it, as a second click on the bell.
     func showAttention(_ subtab: String) {
-        workspace?.showSidebar("attention")
-        workspace?.sidebar.select(subtab: subtab, of: "attention")
-        attentionPage?.subtab = subtab
+        guard let workspace else { return }
+        if bellPanel.isOpen, attentionPage?.subtab == subtab { return bellPanel.close() }
+        let page = attentionPage ?? makeAttentionPage()
+        page.subtab = subtab
+        page.onRender = { [weak self] in self?.bellPanel.refit() }
+        page.render()
+        bellPanel.onClose = { [weak workspace] in workspace?.titleBar.setBellOpen(false) }
+        bellPanel.show(page, below: workspace.titleBar.bellAnchor, width: UILooks.pt(DesignTokens.Popover.bellWidth))
+        workspace.titleBar.setBellOpen(true)
     }
 }

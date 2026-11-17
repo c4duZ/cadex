@@ -28,7 +28,7 @@ LOOKS = ROOT / "apps/macos/shared/looks"
 # Which file each piece goes in; every component of tokens.json must be in one.
 PARTS = {
     "Chrome": ["window", "titleBar", "search", "breadcrumb", "tab", "titleIconButton", "badge", "statusBar",
-               "stateGlyph", "button"],
+               "stateGlyph", "button", "bell"],
     "Columns": ["sidebar", "inspector"],
     "Center": ["pane", "preview", "popover", "sheet", "newTask"],
     "Pages": ["board", "race", "project", "home", "drawer"],

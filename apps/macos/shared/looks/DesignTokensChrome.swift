@@ -158,4 +158,70 @@ public extension DesignTokens {
             public static var weight: NSFont.Weight { DesignTokens.FontWeight.medium }
         }
     }
+    enum Bell {
+        public enum Activity {
+            public static let fontSize: CGFloat = DesignTokens.FontSize.meta
+            public static var color: NSColor { DesignTokens.Color.textMuted }
+        }
+        public enum Card {
+            public static let padding = NSEdgeInsets(top: 12, left: 14, bottom: 12, right: 14)
+            public static let gap: CGFloat = 8
+            public static var borderBottom: NSColor { DesignTokens.Color.linePopover }
+            public static let glyph: CGFloat = 10
+            public enum Title {
+                public static let fontSize: CGFloat = DesignTokens.FontSize.body
+                public static var weight: NSFont.Weight { DesignTokens.FontWeight.semibold }
+            }
+            public enum Time {
+                public static let fontSize: CGFloat = DesignTokens.FontSize.caption
+                public static var color: NSColor { DesignTokens.Color.textTertiary }
+            }
+        }
+        public enum Command {
+            public static let padding = NSEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
+            public static let radius: CGFloat = DesignTokens.Radius.control
+            public static var bg: NSColor { DesignTokens.Color.bgInset }
+            public static var border: NSColor { DesignTokens.Color.linePaneIdle }
+            public static let fontSize: CGFloat = DesignTokens.FontSize.meta
+            public static var color: NSColor { DesignTokens.Color.textRow }
+        }
+        public enum Question {
+            public static let fontSize: CGFloat = DesignTokens.FontSize.panel
+            public static let lineHeight: CGFloat = DesignTokens.LineHeight.relaxed
+            public static var color: NSColor { DesignTokens.Color.textRow }
+        }
+        public enum Meta {
+            public static let fontSize: CGFloat = DesignTokens.FontSize.small
+            public static var color: NSColor { DesignTokens.Color.textMuted }
+        }
+        public static let buttonGap: CGFloat = 8
+        public enum GoTo {
+            public static let padding = NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+            public static var color: NSColor { DesignTokens.Color.textSecondary }
+        }
+        public enum Answer {
+            public static let height: CGFloat = 30
+            public static let radius: CGFloat = DesignTokens.Radius.control
+            public static var border: NSColor { DesignTokens.Color.lineControl }
+            public static var bg: NSColor { DesignTokens.Color.bgInset }
+            public static let padding = NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        }
+        public enum Earlier {
+            public enum Label {
+                public static let padding = NSEdgeInsets(top: 10, left: 14, bottom: 4, right: 14)
+                public static let fontSize: CGFloat = DesignTokens.FontSize.caption
+                public static var weight: NSFont.Weight { DesignTokens.FontWeight.semibold }
+                public static let tracking: CGFloat = DesignTokens.Tracking.label
+                public static var color: NSColor { DesignTokens.Color.textTertiary }
+            }
+            public static let listPadding = NSEdgeInsets(top: 0, left: 6, bottom: 8, right: 6)
+            public enum Row {
+                public static let height: CGFloat = 34
+                public static let gap: CGFloat = 10
+                public static let padding = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
+                public static let glyph: CGFloat = 9
+                public static var detail: NSColor { DesignTokens.Color.textMuted }
+            }
+        }
+    }
 }

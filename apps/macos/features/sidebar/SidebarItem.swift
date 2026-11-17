@@ -22,25 +22,12 @@ public struct SidebarItem {
     /// The shortcut as the menus show it ("⇧⌘E"), for the tip.
     public let shortcut: String?
     public let kind: Kind
-    /// The page's views, picked under the icons (Agents: Sessions,
-    /// Accounts); the page shows the one the app is told.
-    public let subtabs: [Subtab]
-
-    public struct Subtab: Equatable, Sendable {
-        public let id: String
-        public let title: String
-        public init(id: String, title: String) {
-            self.id = id
-            self.title = title
-        }
-    }
-
     /// The page's buttons in the header row, in order; past
     /// SidebarHeader.maxShown they go under "⋯", after them `more`.
     public let actions: [SidebarAction]
     public let more: [SidebarAction]
 
-    public init(id: String, icon: Icon, title: String, command: String, shortcut: String? = nil, kind: Kind, subtabs: [Subtab] = [],
+    public init(id: String, icon: Icon, title: String, command: String, shortcut: String? = nil, kind: Kind,
                 actions: [SidebarAction] = [], more: [SidebarAction] = []) {
         self.actions = actions
         self.more = more
@@ -50,7 +37,6 @@ public struct SidebarItem {
         self.command = command
         self.shortcut = shortcut
         self.kind = kind
-        self.subtabs = subtabs
     }
 
     var view: NSView? {

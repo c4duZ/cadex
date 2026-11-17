@@ -5,11 +5,11 @@ import Foundation
 /// hidden. Pure, so the rules are tested without a window.
 public enum SidebarLayout {
     /// Files, Git, Agents, the agents' History and Accounts (plans 17 and 18).
-    public static let defaultItems = ["files", "git", "tasks", "agents", "agent-history", "attention", "accounts", "memory"]
+    public static let defaultItems = ["files", "git", "tasks", "agents", "agent-history", "accounts", "memory"]
     /// Ids that were icons once and left the bar: dropped from a saved list
     /// without a warning. Search runs ⌘P and ⇧⌘F, not a page (the owner,
     /// 2026-10-22); Web Preview and Spaces opened things elsewhere (2026-10-21).
-    public static let retired: Set<String> = ["search", "preview", "spaces"]
+    public static let retired: Set<String> = ["search", "preview", "spaces", "attention"]
 
     /// The saved list against the ids the app knows: unknown and repeated
     /// ids are dropped, each one noted.

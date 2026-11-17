@@ -62,6 +62,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// The Agents page, for its sub-tabs (AgentsWiring.swift).
     /// The status bar's Agent usage item, for the theme's colors.
     weak var usageStrip: AgentUsageStrip?
+    /// The bell's popover (AgentsAttention.swift).
+    let bellPanel = AnchoredPanel()
     /// The bell's page (AgentsAttention.swift), for its sub-tab.
     weak var attentionPage: AgentAttentionView?
     /// The Ports item's label and what it last read (SSHWiring.swift).
@@ -247,6 +249,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         // What this window watched lets go: the agents' dot, the bar's items.
         if let workspace { updateAgentsDot(shown: false, on: workspace.sidebar) }
         workspace?.statusBar.stopReading()
+        bellPanel.close()
         spaces?.closeAll()
         app.sessionClosed(self)
     }
