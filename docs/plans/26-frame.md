@@ -85,7 +85,11 @@ power, updates · Decisões: `docs/adr/0035-work-frame.md` · Mockups: 1 (o mapa
   do agente só se ele ainda está na pergunta, senão "The agent moved on"), testada com o fake agent
   e com o Claude real na conta de teste. `agents.show-attention` e `agents.show-feed` abrem o
   popover.
-- **E. Remoção.** Saem da barra lateral as páginas files, git, history, memory, attention e accounts
+- **E. Remoção.** Feita (2026-11-17): a página Accounts e `AgentAccountsView.swift` saíram (as
+  contas no cartão do item de uso, clicáveis; agents.show-accounts o abre fixo; renomear virou
+  agents.rename-account); a versão 4 das configurações tira do sidebar.items, uma vez, as páginas que
+  saíram; ⌃⌘1 a ⌃⌘4 (sidebar.page-N) abrem as abas do painel; o CADEX_PERF_SIDEBAR fica até o 27,
+  porque Agents e History seguem na barra (o inventário diz). Plano original: Saem da barra lateral as páginas files, git, history, memory, attention e accounts
   (e a página AgentAccountsView.swift); SidebarSubtabs.swift sai; sidebar.items é migrado uma
   vez (o que estava aberto vira a aba aberta do painel da direita); `sidebar.page-1…9` viram
   apelidos das abas do painel (saem no 27); `CADEX_PERF_SIDEBAR` dá lugar a `CADEX_PERF_PANEL` em

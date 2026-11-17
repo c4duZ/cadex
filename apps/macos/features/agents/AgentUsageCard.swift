@@ -1,4 +1,5 @@
 import AppKit
+import Menus
 import Strings
 import UILooks
 
@@ -8,8 +9,9 @@ import UILooks
 /// owner liked the card's look and asked the same for the tab (2026-10-21).
 @MainActor
 enum AgentUsageCard {
-    /// Every account worth showing, one block each, in the card over the usage item.
-    static func make(colors: AgentColors) -> NSView {
+    /// Every account worth showing, one block each, in the card over the usage item; a click on one
+    /// opens its agent (`launch`).
+    static func make(colors: AgentColors, launch: (@MainActor (AgentAccount) -> Void)? = nil) -> NSView {
         let stack = NSStackView()
         stack.orientation = .vertical
         stack.alignment = .leading
@@ -18,7 +20,14 @@ enum AgentUsageCard {
         if accounts.isEmpty {
             stack.addArrangedSubview(AgentText.label(T("No account in use on this Mac.", "Nenhuma conta em uso neste Mac."), size: 12, color: colors.secondary))
         }
-        for account in accounts { stack.addArrangedSubview(block(account, colors: colors, width: UILooks.pt(272))) }
+        for account in accounts {
+            let block = block(account, colors: colors, width: UILooks.pt(272))
+            guard let launch else { stack.addArrangedSubview(block); continue }
+            let row = HoverRow(block, inset: 0)
+            row.toolTip = T("Click: open its agent in the terminal", "Clique: abrir o agente dela no terminal")
+            row.onClick = { launch(account) }
+            stack.addArrangedSubview(row)
+        }
         stack.widthAnchor.constraint(equalToConstant: UILooks.pt(272)).isActive = true
         return stack
     }

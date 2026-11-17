@@ -2,7 +2,7 @@ import AppKit
 import Foundation
 
 /// Every account's plan usage, for the whole app, read only while something
-/// shows it (Accounts, the usage item) (docs/spec/agents.md, Accounts).
+/// shows it (the usage item and its card) (docs/spec/agents.md, Accounts).
 /// The numbers come from the files `cadex statusline` writes in the
 /// sessions Cadex opens (docs/adr/0021-cadex-managed-accounts.md): no
 /// token, no Keychain, no request. The usage folder is watched while
@@ -40,7 +40,7 @@ public final class AgentUsageController {
         }
     }
 
-    /// The accounts the card, the item and Accounts list: shown and in use.
+    /// The accounts the card and the item list: shown and in use.
     public func visibleAccounts() -> [AgentAccount] { accounts().filter { !isStale($0.dir) } }
 
     /// The hidden accounts' login when they were hidden (agents.hiddenLogins).

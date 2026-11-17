@@ -219,8 +219,16 @@ public enum SettingsFile {
             if bar?["right"] == nil { settings.statusBar.right = ["environment"] }
             migrateStatusBar(&settings.statusBar)
         }
+        if version < 4 {
+            // Files, Git, Git History and Memory went to the right panel and Accounts to the usage
+            // item's card (plan 26 phases C and E): their ids leave the sidebar's list once.
+            settings.sidebar.items.removeAll { movedOutOfSidebar.contains($0) }
+        }
         settings.version = max(version, Settings.currentVersion)
     }
+
+    /// The sidebar's pages that left it in plan 26 (migration 0035).
+    static let movedOutOfSidebar: Set<String> = ["files", "git", "history", "memory", "accounts"]
 
     /// The new frame's status bar (plan 26 phase B): the old default becomes the new one; a bar
     /// someone arranged stays theirs, with Folder and Git branch shown together becoming Project,

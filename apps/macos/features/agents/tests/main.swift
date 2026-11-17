@@ -456,11 +456,12 @@ let exitCode = await Checks.run([
         usage.plans[home + "/.claude-work"] = "team"
         usage.states[home + "/.claude-work"] = .ready(AgentUsage(session: .init(percent: 19, resets: Date().addingTimeInterval(5400)),
                                                                    week: .init(percent: 97, resets: Date().addingTimeInterval(86400 * 3)), sonnetWeek: nil), Date())
-        page.subtab = "accounts"
-        root.layoutSubtreeIfNeeded()
-        if let bitmap = root.bitmapImageRepForCachingDisplay(in: root.bounds) {
-            root.cacheDisplay(in: root.bounds, to: bitmap)
-            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/agents-accounts.png"))
+        // The accounts now live in the usage item's card (plan 26 phase E): its picture.
+        let card = AgentUsageCard.make(colors: AgentColors()) { _ in }
+        card.frame = NSRect(origin: .zero, size: card.fittingSize)
+        if let bitmap = card.bitmapImageRepForCachingDisplay(in: card.bounds) {
+            card.cacheDisplay(in: card.bounds, to: bitmap)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/usage-card.png"))
         }
         AgentsController.shared.hidden = []
         page.removeFromSuperview()

@@ -44,7 +44,29 @@ public final class HoverCard: NSObject {
         open()
     }
 
+    /// From the keyboard or ⌘K (agents.show-accounts): the pointer is elsewhere, so the card
+    /// stays until the pointer comes into it (then the usual rule), a click elsewhere or Esc. Opened
+    /// as a hover card it closed in 33 ms (review of 2026-11-17).
+    public func openPinned() {
+        pending?.cancel()
+        open()
+        guard isOpen else { return }
+        pinned = true
+        pinMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .keyDown]) { [weak self] event in
+            guard let self else { return event }
+            if event.type == .keyDown, event.keyCode != 53 { return event }
+            if event.type != .keyDown, event.window === self.panel { return event }
+            self.close()
+            return event.type == .keyDown ? nil : event
+        }
+    }
+    private var pinned = false
+    private var pinMonitor: Any?
+
     public func close() {
+        pinned = false
+        if let pinMonitor { NSEvent.removeMonitor(pinMonitor) }
+        pinMonitor = nil
         pending?.cancel()
         let wasOpen = isOpen
         watch?.invalidate()
@@ -90,7 +112,13 @@ public final class HoverCard: NSObject {
         let card = panel.frame.insetBy(dx: -2, dy: -2)
         let bridge = NSRect(x: min(item.minX, card.minX), y: item.maxY - 2, width: max(item.maxX, card.maxX) - min(item.minX, card.minX),
                             height: max(card.minY - item.maxY, 0) + 4)
-        if !(item.contains(pointer) || card.contains(pointer) || bridge.contains(pointer)) { close() }
+        let inside = item.contains(pointer) || card.contains(pointer) || bridge.contains(pointer)
+        // Pinned: the pointer has not come yet; once it does, the hover rule takes over.
+        if pinned {
+            if inside { pinned = false }
+            return
+        }
+        if !inside { close() }
     }
 }
 

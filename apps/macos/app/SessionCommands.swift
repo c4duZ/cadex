@@ -62,6 +62,7 @@ extension WindowSession {
                                                 terminalFolder: { [weak self] in self?.tabs?.activeTerminal?.currentDirectory }))
         commands.register(TabCommands.all { [weak self] in self?.tabs })
         commands.register(SidebarCommands.all({ [weak self] in self?.workspace?.sidebar }, palette: palette))
+        commands.register(inspectorTabCommands())
         commands.register(SSHCommands.all(palette: palette) { [weak self] alias in self?.connectSSH(alias) })
         commands.register(MachinesCommands.all(palette: palette) { [weak self] machine, ask in self?.connectMachine(machine, askUser: ask) })
         commands.register(DockerCommands.all(palette: palette, actions: dockerActions()))
@@ -100,7 +101,14 @@ extension WindowSession {
             keywords: ["accounts", "usage", "plan", "limit", "contas", "uso", "plano", "limite", "claude"], category: .view,
             // U for usage (the owner asked shortcuts as memorable as ⇧⌘E and ⇧⌘G, 2026-10-22).
             defaultShortcut: "cmd+shift+u",
-            action: .run { [weak self] in self?.workspace?.showSidebar("accounts") }))
+            // The usage item's card (plan 26 phase E); with the item hidden, the accounts in ⌘K.
+            action: .run { [weak self] in
+                guard let strip = self?.usageStrip, strip.window != nil, !strip.isHiddenOrHasHiddenAncestor else {
+                    _ = self?.commands.run("agents.open-account")
+                    return
+                }
+                strip.openCard()
+            }))
         commands.register(Command(
             id: "agents.refresh-usage", title: T("Refresh Agent Usage", "Atualizar o uso dos agentes"),
             keywords: ["usage", "plan", "limit", "refresh", "uso", "plano", "limite", "atualizar"], category: .view,

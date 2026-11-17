@@ -113,11 +113,15 @@ let accountChecks: [(name: String, body: Checks.Body)] = [
         expect(texts(AgentUsageCard.block(account, colors: AgentColors(), width: 200)).contains("· Max · active"))
         usage.activeAccount = nil
         expect(texts(AgentUsageCard.block(account, colors: AgentColors(), width: 200)).contains("· Max"))
-        var chosen: String?
-        let page = AgentsView()
-        page.onSetActive = { chosen = $0.dir }
-        page.accountMenu(account).first { $0.title == "Use for New Sessions" }?.action()
-        expect(chosen == account.dir, "the menu entry runs onSetActive")
+        // The card's account is a row: its click opens that account's agent (the Accounts page's
+        // click, plan 26 phase E).
+        var launched: String?
+        usage.accounts = { [account] }
+        usage.states[account.dir] = .noUsage
+        let card = AgentUsageCard.make(colors: AgentColors()) { launched = $0.dir }
+        func rows(_ view: NSView) -> [HoverRow] { ((view as? HoverRow).map { [$0] } ?? []) + view.subviews.flatMap(rows) }
+        rows(card).first?.onClick?()
+        expect(launched == account.dir, "the card's row opens the account's agent")
     }),
     ("the usage item's right click: New Sessions Use, the active account checked, a choice sets it", {
         let usage = AgentUsageController.shared

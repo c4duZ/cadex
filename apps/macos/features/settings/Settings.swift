@@ -6,7 +6,7 @@ public struct Settings: Equatable, Sendable {
     /// The file's version: what an old file (without it) gets moved to once,
     /// when the defaults change (SettingsFile.migrate). 2: the new frame's
     /// theme; 3: the new frame's status bar (docs/adr/0035-work-frame.md, 2026-11-17).
-    public static let currentVersion = 3
+    public static let currentVersion = 4
     public var version = Settings.currentVersion
 
     public struct General: Equatable, Sendable {
@@ -123,7 +123,7 @@ public struct Settings: Equatable, Sendable {
         /// The icons on top of the sidebar, in order; a page left out is
         /// hidden (docs/spec/sidebar.md). The app drops unknown ids.
         /// Files, Git, Git History and Memory went to the right panel (plan 26 phase C).
-        public var items = ["tasks", "agents", "agent-history", "accounts"]
+        public var items = ["tasks", "agents", "agent-history"]
     }
 
     /// The right panel (docs/spec/inspector.md): open or closed, and its tab, come back on reopen.

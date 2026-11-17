@@ -129,8 +129,9 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
   - Uma conta segue a fonte quando foi criada pelo Cadex ou tem algum link para ela.
 - **Conta ativa:** a das sessões novas abertas pelo Cadex (agents.activeAccount; vazia é a conta
   padrão). Escolhida no item Agent usage (clique direito: "New Sessions Use", com a marca na ativa),
-  no ⌘K ("Set Active Agent Account", agents.set-active-account) e no clique direito do cartão em
-  Accounts ("Use for New Sessions"). O cartão dela diz "· active".
+  e no ⌘K ("Set Active Agent Account", agents.set-active-account). O cartão dela diz "· active"
+  (a página Accounts saiu da barra lateral no plano 26: o cartão do item de uso tem as contas, e o
+  clique numa abre o agente dela).
 - **Conta do projeto:** "Set This Project's Agent Account" (agents.set-project-account) dá ao
   projeto da janela (a raiz git do workspace) uma conta própria, que vence a ativa naquele projeto;
   "Use the Active Account" na mesma lista desfaz. Guardada em agents.projectAccounts; conta que não

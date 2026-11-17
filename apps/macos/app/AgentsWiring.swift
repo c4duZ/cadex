@@ -16,18 +16,13 @@ import Themes
 /// screen, the dot while the icon is in the sidebar, the item while it is
 /// in the bar.
 extension WindowSession {
-    /// Sessions or Accounts: the same view on either list.
-    func makeAgentsPage(_ list: String) -> AgentsView {
+    /// The Agents page (the sessions); Accounts became the usage item's card (plan 26 phase E).
+    func makeAgentsPage() -> AgentsView {
         let page = AgentsView()
-        page.subtab = list
         page.isInCadex = { [weak self] session in self?.terminal(of: session) != nil }
         page.onOpen = { [weak self] session in self?.openAgent(session) }
         page.onOpenSubagent = { [weak self] session, agent in self?.openSubagent(agent, of: session) }
         page.onEnable = { [weak self] in self?.settings.store.update { $0.agents.sessions = true } }
-        page.onHide = { [weak self] account, hide in self?.hideAccount(account, hide) }
-        page.onLaunch = { [weak self] account in self?.launchAgent(for: account) }
-        page.onRename = { [weak self] account in self?.renameAccount(account) }
-        page.onSetActive = { [weak self] account in self?.setActiveAccount(account) }
         page.projectNote = { root in WorktreesController.shared.note(for: root) }
         page.onReview = { [weak self] root in self?.openReview(repo: root) }
         ThemeStore.shared.observe { [weak page, weak self] _ in
@@ -43,6 +38,7 @@ extension WindowSession {
         let strip = AgentUsageStrip()
         strip.onClick = { [weak self] in _ = self?.commands.run("agents.show-accounts") }
         strip.onSetActive = { [weak self] account in self?.setActiveAccount(account) }
+        strip.onLaunch = { [weak self] account in self?.launchAgent(for: account) }
         let item = StatusItem(id: "usage", title: T("Agent usage", "Uso dos agentes"),
                               subtitle: T("Each account's 5 h session and week", "A sessão de 5 h e a semana de cada conta"),
                               icon: .sparkle, side: .right, view: strip)

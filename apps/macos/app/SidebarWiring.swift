@@ -23,7 +23,7 @@ extension WindowSession {
         // Each page's header: up to three buttons, the rest under "⋯"
         // (docs/spec/sidebar.md, "Cabeçalho da página").
         let catalog = [
-            item("agents", .sparkle, T("Agents", "Agentes"), "agents.show", .page(makeAgentsPage("sessions"))),
+            item("agents", .sparkle, T("Agents", "Agentes"), "agents.show", .page(makeAgentsPage())),
             item("agent-history", .clipboardText, T("History", "Histórico"), "agents.show-history", .page(makeHistoryPage()), actions: [
                 SidebarAction("agents.resume-session", .terminalWindow, T("Resume a Conversation", "Retomar uma conversa")),
             ]),
@@ -31,10 +31,6 @@ extension WindowSession {
                 SidebarAction("worktrees.new-task", .plus, T("New Task", "Nova tarefa")),
             ], more: [
                 SidebarAction("worktrees.edit-setup-hooks", .slidersHorizontal, T("Edit Setup Hooks", "Editar os hooks de preparo")),
-            ]),
-            item("accounts", .gauge, T("Accounts", "Contas"), "agents.show-accounts", .page(makeAgentsPage("accounts")), actions: [
-                SidebarAction("agents.refresh-usage", .arrowsClockwise, T("Refresh Usage", "Atualizar o uso")),
-                SidebarAction("agents.customize-accounts", .slidersHorizontal, T("Customize Accounts", "Personalizar as contas")),
             ]),
         ]
         let sidebar = SidebarView(catalog: catalog) { [weak self] id in _ = self?.commands.run(id) }
@@ -44,8 +40,6 @@ extension WindowSession {
         return sidebar
     }
 
-    static let movedToInspector: Set<String> = ["files", "git", "history", "memory"]
-
     /// sidebar.items from settings, in this window.
     func applySidebar(_ prefs: Settings.Sidebar) {
         guard let sidebar = workspace?.sidebar else { return }
@@ -53,10 +47,8 @@ extension WindowSession {
     }
 
     private func applySidebar(_ prefs: Settings.Sidebar, to sidebar: SidebarView) {
-        // Ids of pages that moved to the right panel, saved before plan 26: dropped without a
-        // warning (the panel has them). Here and not in SidebarLayout.retired: the sidebar's own
-        // tests still use these ids as plain pages, and the bar itself goes in plan 27.
-        let items = prefs.items.filter { !Self.movedToInspector.contains($0) }
+        // The ids that left in plan 26 were taken out of settings.json once (version 4).
+        let items = prefs.items
         if items != sidebar.items {
             for problem in sidebar.setItems(items) { NSLog("Cadex settings: %@", problem) }
             refreshCustomize()

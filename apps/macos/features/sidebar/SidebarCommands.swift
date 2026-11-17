@@ -2,19 +2,13 @@ import CommandPalette
 import Icons
 import Strings
 
-/// The sidebar's commands (ADR 0005): the customize panel, showing or
-/// hiding any page from ⌘K, with the list of pages marked shown or hidden,
-/// and the icons by position (⌃⌘1 to ⌃⌘9).
+/// The sidebar's commands (ADR 0005): the customize panel and showing or hiding any page from ⌘K,
+/// with the list of pages marked shown or hidden. ⌃⌘1 to ⌃⌘9 (sidebar.page-N) went to the right
+/// panel's tabs (plan 26 phase E; `../../app/InspectorWiring.swift`).
 @MainActor
 public enum SidebarCommands {
     public static func all(_ sidebar: @escaping @MainActor () -> SidebarView?, palette: CommandPaletteController) -> [Command] {
-        let positions = (1...9).map { n in
-            Command(id: "sidebar.page-\(n)", title: T("Go to Sidebar Icon \(n)", "Ir para o ícone \(n) do painel lateral"),
-                    keywords: ["sidebar \(n)", "page \(n)", "página \(n)", "painel"], category: .view,
-                    defaultShortcut: "ctrl+cmd+\(n)", action: .run { sidebar()?.press(position: n) },
-                    unavailableReason: { (sidebar()?.items.count ?? 0) >= n ? nil : T("There is no icon \(n)", "Não há ícone \(n)") })
-        }
-        return positions + [
+        [
             Command(id: "sidebar.customize", title: T("Customize Sidebar", "Personalizar o painel lateral"),
                     keywords: ["sidebar", "icons", "pages", "ícones", "páginas", "painel"], category: .view,
                     action: .run { sidebar()?.customize() }),

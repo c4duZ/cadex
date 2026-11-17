@@ -99,10 +99,11 @@
   vermelho a partir de 90%). `AgentUsageStrip.swift`: o item
   Agent usage, com a conta do terminal com foco (`focused`, que o app diz) ou a última, e o popover
   ao passar o ponteiro (`AgentUsageCard.swift` no `HoverCard` compartilhado, todas as contas; subir para dentro dele o mantém aberto). `CodexUsage.swift`: as contas
-  do Codex e o uso tirado dos logs dele (os limites de cada uso), sem rede. `AgentAccountsView.swift`: a página
-  Accounts (outra página da barra lateral, com o mesmo `AgentsView`) nos blocos do cartão (`AgentUsageCard.swift:block`), só as contas em uso (`visibleAccounts`:
-  sem login ou vencida há mais de um dia ficam fora), com mais espaço entre elas que o cartão e sem linha; clique leva ao agente já aberto ou abre um, clique direito renomeia e
-  esconde. `AgentLaunch.swift`: o comando que abre o agente de uma conta (o Claude pelo
+  do Codex e o uso tirado dos logs dele (os limites de cada uso), sem rede. A página Accounts saiu da barra lateral (plano 26 fase E): as
+  contas em uso (`visibleAccounts`: sem login ou vencida há mais de um dia ficam fora) estão no cartão
+  do item de uso, cada uma clicável (abre o agente dela, `onLaunch`), e agents.show-accounts (⇧⌘U)
+  abre esse cartão fixo até o ponteiro entrar nele, um clique fora ou o Esc (`openCard`); usar nas sessões novas fica no clique direito do item; esconder
+  esconder no Customize › Accounts, renomear no ⌘K (agents.rename-account). `AgentLaunch.swift`: o comando que abre o agente de uma conta (o Claude pelo
   SessionKit.claudeCommand, com a status line do Cadex; o Codex com `CODEX_HOME`; a flag sem
   permissões), agents.open-account e agents.customize-accounts (ADR 0019 e 0021); agents.continue-in-agent
   ("Continue in…", plano 22 fase E), a conta escolhida no ⌘K e `continueCommand`: `cadex continue
@@ -157,8 +158,8 @@
   escrevem no jeito do Claude Code ("● Bash(…)", "⎿", Markdown) e `AgentTranscriptView.swift` mostra
   tudo numa vista de texto só (uma view por entrada custava 25 MB). Vigia o arquivo por um evento do
   sistema enquanto aberta; fechada, solta tudo.
-- O app (`../../app/AgentsWiring.swift`) põe as páginas Agents (agents.show, ⇧⌘J) e Accounts
-  (agents.show-accounts) no catálogo da barra lateral, o ponto no ícone enquanto o ícone está lá, o item Agents da barra de status, e acha o
+- O app (`../../app/AgentsWiring.swift`) põe a página Agents (agents.show, ⇧⌘J) no catálogo da barra
+  lateral, o ponto no ícone enquanto o ícone está lá, o item Agents da barra de status, e acha o
   terminal de cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo).
 - O id de cada sessão pelos hooks (plano 19, fase B): AgentsController.noteHook guarda, por pid do
   `claude`, o id que os hooks dizem (certo depois de /clear e --resume) e `withHookIDs` o põe no

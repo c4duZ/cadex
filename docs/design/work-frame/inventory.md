@@ -48,15 +48,15 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | arquivo | `apps/macos/features/sidebar/SidebarIconButton.swift` | sai | a árvore do trabalho | 27 |
 | arquivo | `apps/macos/features/sidebar/SidebarSubtabs.swift` | saiu | as sub-abas eram do sino (virou popover), com SidebarItem.subtabs e select(subtab:of:) | 26 |
 | arquivo | `apps/macos/features/sidebar/SidebarLayout.swift` | sai | a árvore não tem ordem de ícones | 27 |
-| arquivo | `apps/macos/features/sidebar/SidebarItem.swift` | muda | aba do painel da direita | 26 |
-| arquivo | `apps/macos/features/sidebar/SidebarHeader.swift` | muda | cabeçalho das abas do painel da direita | 26 |
+| arquivo | `apps/macos/features/sidebar/SidebarItem.swift` | muda | o painel da direita tem a peça própria (`InspectorTab`, feature inspector, plano 26); este fica com as páginas que restam na barra até a árvore | 27 |
+| arquivo | `apps/macos/features/sidebar/SidebarHeader.swift` | muda | o painel da direita tem a linha de contexto própria (plano 26); este fica com as páginas que restam na barra até a árvore | 27 |
 | arquivo | `apps/macos/features/sidebar/SidebarView.swift` | muda | a árvore do trabalho | 27 |
-| arquivo | `apps/macos/app/SidebarWiring.swift` | muda | o catálogo do painel da direita e a árvore | 26 |
-| comando | `sidebar.page-1` … `sidebar.page-9` | sai | apelidos das abas do painel no 26, saem no 27 | 27 |
+| arquivo | `apps/macos/app/SidebarWiring.swift` | muda | o catálogo do painel da direita foi para `InspectorWiring.swift` (plano 26); este vira a árvore | 27 |
+| comando | `sidebar.page-1` … `sidebar.page-9` | sai | no 26 abrem as abas do painel (⌃⌘1 a ⌃⌘4, `InspectorWiring.swift`); saem no 27 | 27 |
 | comando | `sidebar.customize` | sai | a árvore não se personaliza por ícones | 27 |
 | comando | `sidebar.toggle-page` | sai | as abas do painel da direita no ⌘K | 27 |
-| chave | `sidebar.items` | sai | migrada no 26 para a aba aberta do painel; leitura sai no 27 | 27 |
-| gancho | `CADEX_PERF_SIDEBAR` | sai | `CADEX_PERF_PANEL` (aba do painel) e a árvore | 26 |
+| chave | `sidebar.items` | sai | no 26, a versão 4 das configurações tira dela, uma vez, as páginas que saíram (a página aberta não era salva, então não há aba para levar); a leitura sai no 27 | 27 |
+| gancho | `CADEX_PERF_SIDEBAR` | sai | `CADEX_PERF_PANEL` abre a aba do painel desde o 26; este ainda abre Agents e History, que ficam na barra até a árvore (o `make perf` mede as duas) | 27 |
 | trecho | `sidebarPage` / aba "Sidebar" em `apps/macos/shared/customize/CustomizeWindow.swift` | sai | sem personalizar ícones | 27 |
 | spec | `docs/spec/sidebar.md`: "fileira de ícones" | sai | a spec da árvore | 27 |
 
@@ -76,8 +76,8 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | arquivo | página attention (`apps/macos/features/agents/AgentAttentionView.swift`) | muda | o conteúdo do popover do sino, feito | 26 |
 | trecho | ".page(makeAttentionPage())" em `apps/macos/app/SidebarWiring.swift` | saiu | a página do sininho saiu da barra lateral; o id é aposentado em SidebarLayout.retired | 26 |
 | comando | `agents.show-attention`, `agents.show-feed` | muda | abrem o sino | 26 |
-| arquivo | página accounts (`apps/macos/features/agents/AgentAccountsView.swift`) | sai | o popover da etiqueta de uso na barra de status e a página do projeto | 26 |
-| comando | `agents.show-accounts` | muda | abre o popover de uso | 26 |
+| arquivo | página accounts (`apps/macos/features/agents/AgentAccountsView.swift`) | saiu | o popover da etiqueta de uso na barra de status (o clique numa conta abre o agente dela) e a página do projeto | 26 |
+| comando | `agents.show-accounts` | muda | abre o popover de uso (sem o item na barra, a lista das contas no ⌘K), feito | 26 |
 
 ### Projetos (os spaces) (plano 27)
 | tipo | peça | estado | destino | plano |

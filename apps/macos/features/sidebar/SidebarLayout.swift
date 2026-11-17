@@ -4,9 +4,9 @@ import Foundation
 /// sidebar.items in settings.json is the list, in order; an id left out is
 /// hidden. Pure, so the rules are tested without a window.
 public enum SidebarLayout {
-    /// Tasks, Agents, the agents' History and Accounts (plans 17 to 19); Files, Git and Memory
-    /// went to the right panel (plan 26 phase C).
-    public static let defaultItems = ["tasks", "agents", "agent-history", "accounts"]
+    /// Tasks, Agents and the agents' History (plans 17 to 19); Files, Git and Memory went to the
+    /// right panel and Accounts to the usage item's card (plan 26 phases C and E).
+    public static let defaultItems = ["tasks", "agents", "agent-history"]
     /// Ids that were icons once and left the bar: dropped from a saved list
     /// without a warning. Search runs ⌘P and ⇧⌘F, not a page (the owner,
     /// 2026-10-22); Web Preview and Spaces opened things elsewhere (2026-10-21).

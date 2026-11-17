@@ -29,6 +29,9 @@ public struct AgentAccountActions {
     public var remove: @MainActor (_ account: String) -> Void
     /// This window's project gets its own account; nil goes back to the active one.
     public var setProject: @MainActor (AgentAccount?) -> Void = { _ in }
+    /// Rename an account (the app asks the name): it was the Accounts page's right click until
+    /// the page left the sidebar (plan 26 phase E).
+    public var rename: @MainActor (AgentAccount) -> Void = { _ in }
     /// The account this window's project has now, by folder.
     public var projectAccount: @MainActor () -> String? = { nil }
 
@@ -74,6 +77,13 @@ public enum AgentAccountCommands {
                         }
                     }) { dir in
                         if let account = agents.everyAccount().first(where: { $0.dir == dir }) { actions.setActive(account) }
+                    }),
+            Command(id: "agents.rename-account", title: T("Rename an Agent Account…", "Renomear uma conta de agente…"),
+                    keywords: ["account", "rename", "name", "conta", "renomear", "nome"], category: .terminal,
+                    action: list(T("The account to rename", "A conta a renomear"), T("No account in use", "Nenhuma conta em uso"), {
+                        AgentUsageController.shared.visibleAccounts().map { PaletteItem(id: $0.dir, title: $0.name, detail: nil, icon: .gauge) }
+                    }) { dir in
+                        if let account = agents.everyAccount().first(where: { $0.dir == dir }) { actions.rename(account) }
                     }),
             Command(id: "agents.set-project-account", title: T("Set This Project's Agent Account", "Escolher a conta de agente deste projeto"),
                     keywords: ["account", "project", "repository", "conta", "projeto", "repositório", "claude"], category: .terminal,

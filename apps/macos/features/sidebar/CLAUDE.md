@@ -33,14 +33,14 @@
 - A fileira fica sob a barra de título transparente: nenhuma view dela move a janela
   (mouseDownCanMoveWindow). O que se arrasta vai para cima dos vizinhos e anda a partir de onde
   estava no começo; a vaga é a que está sob o meio dele (CustomizeLayout.dropIndex).
-- `SidebarCommands.swift`: sidebar.customize, sidebar.toggle-page (a lista de páginas no ⌘K) e
-  sidebar.page-1 a -9 (⌃⌘1 a ⌃⌘9): o comando do ícone na posição (`press(position:)`), como o
-  clique;
-  ⇧⌘3 a ⇧⌘5 são as capturas de tela do sistema, por isso ⌃⌘ (o dono, 2026-10-21).
+- `SidebarCommands.swift`: sidebar.customize e sidebar.toggle-page (a lista de páginas no ⌘K).
+  sidebar.page-1 a -9 (⌃⌘1 a ⌃⌘9) passaram a abrir as abas do painel da direita (plano 26 fase E,
+  registrados pelo app em `../../app/InspectorWiring.swift`) e saem no plano 27.
 - O catálogo do app está em `../../app/SidebarWiring.swift`: tasks (as tarefas, plano 19), agents,
-  agent-history (as conversas dos agentes, plano 18) e accounts (padrão, em `SidebarLayout.swift`).
-  Files, Git, Git History e Memory foram para o painel da direita (plano 26 fase C,
-  `../inspector/`); os ids delas salvos num sidebar.items antigo o app tira sem aviso. O sininho saiu para o popover da
+  agent-history (as conversas dos agentes, plano 18), o padrão em `SidebarLayout.swift`. Files, Git,
+  Git History e Memory foram para o painel da direita (plano 26 fase C, `../inspector/`) e Accounts
+  para o cartão do item de uso (fase E); a versão 4 das configurações tirou os ids delas do
+  sidebar.items uma vez. O sininho saiu para o popover da
   barra de título (plano 26, fase D) e as sub-abas, que só ele usava, saíram junto; o id
   "attention" está em SidebarLayout.retired. `onShow` avisa quando uma página aparece, para o app só
   criar o conteúdo então.

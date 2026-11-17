@@ -1,4 +1,5 @@
 import AppKit
+import CommandPalette
 import Explorer
 import GitHistory
 import Icons
@@ -63,6 +64,23 @@ extension WindowSession {
             if ended { self.settings.store.update { $0.inspector.width = Double(width / UILooks.pt(1)) } }
         }
         return inspector
+    }
+
+    /// ⌃⌘1 to ⌃⌘4: the panel's tabs in order (plan 26 phase E). The ids stay sidebar.page-N, the
+    /// ones keymaps saved, until the sidebar becomes the tree in plan 27; 5 to 9 have no tab.
+    func inspectorTabCommands() -> [Command] {
+        (1...9).map { n in
+            Command(id: "sidebar.page-\(n)", title: T("Go to Right Panel Tab \(n)", "Ir para a aba \(n) do painel da direita"),
+                    keywords: ["panel \(n)", "tab \(n)", "inspector", "painel \(n)", "aba \(n)"], category: .view,
+                    defaultShortcut: "ctrl+cmd+\(n)",
+                    action: .run { [weak self] in
+                        guard let workspace = self?.workspace, workspace.inspector.known.indices.contains(n - 1) else { return }
+                        workspace.showInspector(workspace.inspector.known[n - 1])
+                    },
+                    unavailableReason: { [weak self] in
+                        (self?.workspace?.inspector.known.count ?? 0) >= n ? nil : T("The panel has no tab \(n)", "O painel não tem a aba \(n)")
+                    })
+        }
     }
 
     /// inspector.visible and inspector.tab from settings, in this window.

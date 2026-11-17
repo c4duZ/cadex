@@ -26,21 +26,8 @@ public final class AgentsView: NSView {
     /// "Turn On" when agents.sessions is off.
     public var onEnable: (() -> Void)?
     public var colors = AgentColors() { didSet { render() } }
-    /// The list shown: "sessions" or "accounts" (AgentAccountsView.swift);
-    /// each is its own sidebar page, so each has its own icon and shortcut.
-    public var subtab = "sessions" { didSet { if subtab != oldValue { updateWatching(); render() } } }
-    /// Rename an account (nil: back to its own name) or hide and show it;
-    /// the app saves agents.accountNames and agents.hiddenAccounts.
-    public var onRename: ((AgentAccount) -> Void)?
-    /// "Use for New Sessions": the account becomes the active one.
-    public var onSetActive: ((AgentAccount) -> Void)?
-    public var onHide: ((AgentAccount, Bool) -> Void)?
-    /// A click on an account: open its agent in the focused terminal (the app's).
-    public var onLaunch: ((AgentAccount) -> Void)?
 
     let controller: AgentsController
-    /// Usage is read while Accounts shows (AgentUsageController).
-    var usage: AgentUsageController { .shared }
     private let stack = NSStackView()
     /// Projects folded by a click on their title, by root, while the app runs.
     var folded: Set<String> = []
@@ -51,7 +38,6 @@ public final class AgentsView: NSView {
     var reveals: [String: AgentReveal] = [:]
     private let scroll = NSScrollView()
     private var token: UUID?
-    private var usageToken: UUID?
     private var clock: Timer?
 
     public init(controller: AgentsController = .shared) {
@@ -121,14 +107,6 @@ public final class AgentsView: NSView {
             clock?.invalidate()
             clock = nil
         }
-        // The plans' usage only while Accounts is the tab on screen.
-        let accounts = shows && subtab == "accounts"
-        if accounts, usageToken == nil {
-            usageToken = usage.watch { [weak self] in if self?.subtab == "accounts" { self?.render() } }
-        } else if !accounts, let usageToken {
-            usage.stop(usageToken)
-            self.usageToken = nil
-        }
     }
 
     // MARK: Drawing the list
@@ -139,7 +117,6 @@ public final class AgentsView: NSView {
         guard controller.isEnabled else {
             return note(T("Agent sessions are off.", "As sessões de agentes estão desligadas."), button: T("Turn On", "Ligar"))
         }
-        if subtab == "accounts" { return renderAccounts() }
         let groups = AgentsLayout.groups(controller.sessions)
         if groups.isEmpty {
             note(T("No agents running. Start one in a terminal: claude", "Nenhum agente rodando. Abra um num terminal: claude"))

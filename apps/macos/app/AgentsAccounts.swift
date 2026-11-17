@@ -11,7 +11,7 @@ import Strings
 /// Code's own /login, in a tab (docs/adr/0021-cadex-managed-accounts.md).
 extension WindowSession {
     func accountActions() -> AgentAccountActions {
-        AgentAccountActions(
+        var actions = AgentAccountActions(
             add: { [weak self] in self?.addAccount() },
             setActive: { [weak self] account in self?.setActiveAccount(account) },
             sync: { [weak self] in self?.syncAccountConfig() },
@@ -26,6 +26,8 @@ extension WindowSession {
                 guard let self else { return nil }
                 return self.settings.store.settings.agents.projectAccounts[SettingsBridge.tilde(self.projectRoot)].map(SettingsBridge.expand)
             })
+        actions.rename = { [weak self] account in self?.renameAccount(account) }
+        return actions
     }
 
     /// This window's project: the git root of its workspace folder.

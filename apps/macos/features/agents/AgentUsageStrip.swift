@@ -14,6 +14,12 @@ import UILooks
 @MainActor
 public final class AgentUsageStrip: NSView {
     public var onClick: (() -> Void)?
+    /// A click on an account in the card: open its agent (the app's), as the Accounts page did
+    /// before it left the sidebar (plan 26 phase E).
+    public var onLaunch: ((AgentAccount) -> Void)?
+
+    /// agents.show-accounts: the card at once, without the pointer over the item.
+    public func openCard() { card?.openPinned() }
     /// The right click's choice of the active account (docs/spec/agents.md,
     /// Contas gerenciadas: chosen in this item and in ⌘K, plan 18).
     public var onSetActive: ((AgentAccount) -> Void)?
@@ -56,7 +62,9 @@ public final class AgentUsageStrip: NSView {
             heightAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.StatusBar.itemHeight)),
         ])
         render()
-        card = HoverCard(over: self) { [weak self] in AgentUsageCard.make(colors: self?.colors ?? AgentColors()) }
+        card = HoverCard(over: self) { [weak self] in
+            AgentUsageCard.make(colors: self?.colors ?? AgentColors()) { account in self?.card?.close(); self?.onLaunch?(account) }
+        }
     }
 
     @available(*, unavailable)

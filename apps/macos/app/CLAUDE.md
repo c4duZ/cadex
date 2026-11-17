@@ -57,7 +57,7 @@
   um `TitleBarButton.swift` (components.titleIconButton: 30 pt, aceso quando o que abre está
   aberto, com o número do sino), todos por comando; nada de valor digitado
   (`../../../tools/check_design_literals.py`), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
-  painel lateral recolhível, barra de status) e `SidebarWiring.swift` (o catálogo da feature `sidebar`: Tasks, Agents, History e Accounts; salva sidebar.items, sem os ids que foram para a direita; `openCustomize` abre a janela
+  painel lateral recolhível, barra de status) e `SidebarWiring.swift` (o catálogo da feature `sidebar`: Tasks, Agents e History; salva sidebar.items, que a versão 4 das configurações limpou das páginas que saíram; `openCustomize` abre a janela
   Customize única na aba pedida, com as abas da barra lateral e da barra de status desta janela, nas
   cores do tema como as configurações e não nas da janela, e a repinta quando o tema muda) e
   `StatusBarWiring.swift` (os itens Git branch e Terminals, e os lados salvos) e `StatusBarItems.swift`
