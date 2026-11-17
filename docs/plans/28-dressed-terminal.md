@@ -38,7 +38,9 @@ painéis" e os apelidos do 27.
   linha adicionada, 93 o trabalhando, 94 os destaques, 37 as bordas); a status line do kit é a
   linha do painel e a da conta não roda mais. Plano original: O ANSI do Cadex Night afinado pelo que a fase A achou; a status line do
   kit (`core/features/agent-tools/statusline.zig`) em uma linha (modelo, contexto, custo, modo).
-- **D. Marcas e permissão.** Marcas na barra de rolagem em cada mensagem do dono (âmbar onde o
+- **D. Marcas e permissão.** Feita (2026-11-17): `TerminalScrollbar` com as marcas (Enter com agente;
+  âmbar quando ele passa a esperar) e o polegar; o cartão de permissão no pé do painel pelo
+  `footCard` do terminal, ligado à mesma atenção do sino. Plano original: Marcas na barra de rolagem em cada mensagem do dono (âmbar onde o
   agente pediu algo); o pedido de permissão que chega pelo hook vira cartão no pé do painel com
   Permitir e Negar, o mesmo que o sino responde (responder num fecha o outro).
 - **E. Preview ao lado.** Abre como painel ao lado do terminal que mostrou o endereço (a oferta de

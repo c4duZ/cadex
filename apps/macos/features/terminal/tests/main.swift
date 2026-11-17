@@ -9,6 +9,17 @@ import Checks
 let keepExit = await Checks.run(keepChecks)
 let shellExit = await Checks.run(shellIntegrationChecks)
 let exitCode = await Checks.run([
+    ("the scrollbar's marks: at the cursor's row of the whole history, amber wins, gone with a clear", {
+        let bar = TerminalScrollbar(frame: NSRect(x: 0, y: 0, width: 8, height: 400))
+        bar.update(total: 100, offset: 60, rows: 40)
+        bar.mark(cursorRow: 5, needs: false)
+        expect(bar.marks == [TerminalScrollbar.Mark(row: 65, needs: false)], "\(bar.marks)")
+        bar.mark(cursorRow: 5, needs: true)
+        expect(bar.marks.count == 1 && bar.marks[0].needs, "one mark per row, the amber kept")
+        expect(bar.thumbRect().map { $0.maxY.rounded() } == 400, "at the bottom of the history, the thumb is at the bottom")
+        bar.update(total: 40, offset: 0, rows: 40)
+        expect(bar.marks.isEmpty && bar.thumbRect() == nil, "cleared: no marks, nothing to scroll")
+    }),
     ("special keys go to the core's encoder", {
         expect(KeyEncoding.route(keyCode: 36, modifiers: [], optionAsMeta: false) == .core(key: UInt16(CADEX_KEY_ENTER), mods: 0))
         expect(KeyEncoding.route(keyCode: 126, modifiers: [], optionAsMeta: false) == .core(key: UInt16(CADEX_KEY_UP), mods: 0))

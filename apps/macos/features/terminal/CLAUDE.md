@@ -87,7 +87,7 @@
   (`fontKey`).
 - Status: janela com um shell, desenho em Metal (SF Mono, nítido), teclado básico e colagem de
   texto, teclas pelo núcleo (modo de aplicação, F-keys, modificadores, kitty, Option como Meta).
-  Rolagem com barra discreta, seleção (arrastar, duplo e triplo clique, Shift+clique, ⌘A) e ⌘C.
+  Rolagem com a barra do mockup (marcas e polegar), seleção (arrastar, duplo e triplo clique, Shift+clique, ⌘A) e ⌘C.
   Colagem de texto (bracketed paste), arquivos e imagem, e arrastar arquivos.
   Links com ⌘ e busca (⌘F) no histórico. Mouse para programas, foco, título, sino e cursor
   piscando. Desempenho medido em 2026-10-19: `cat` de 100 MB em 0,95 s,
@@ -102,6 +102,12 @@
   CADEX_ZSH_INTEGRATION e CADEX_TOOLS no próprio ambiente antes de qualquer terminal e do daemon
   (`../../app/main.swift`). TerminalSession.shellPid (e o do `TerminalView`) é o pid do shell, com que
   o app reconhece um `cadex claude` vindo de uma aba dele (`../../app/TypedClaudeWiring.swift`).
+- `TerminalScrollbar.swift` (plano 28 fase D): a barra de rolagem do mockup Pane, uma coluna de 8 pt
+  que o painel põe na borda da caixa (`scrollbar`), com o polegar e as marcas: cinza onde o dono
+  mandou uma mensagem ao agente (Enter com agente rodando), âmbar onde o agente passou a esperar;
+  clique e arrasto levam a vista até lá. A barrinha Metal de antes, que só aparecia rolando, saiu do
+  `QuadBuilder.swift`. `footCard`: um cartão que o app põe no pé do painel (a permissão do agente).
+  `innerPadding`: o respiro que o terminal guarda em volta do texto, que a caixa desconta.
 - `TerminalTypeAhead.swift` (plano 24, fase F): `typeWhenReady`, o texto que o app digita numa aba
   (o agente do New Task, um despacho, uma automação, o ssh) espera a primeira saída do shell e
   300 ms de silêncio, no máximo 5 s desde a abertura: o zsh descarta a entrada pendente ao montar a

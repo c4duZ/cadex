@@ -43,6 +43,8 @@ extension TerminalView {
         let looked = window?.isKeyWindow == true && window?.firstResponder === self
         if signals.agent?.state == .done, before != .done, !looked { signals.agentUnseen = true }
         if signals.agent?.state != .done { signals.agentUnseen = false }
+        // The agent waits for the owner: an amber mark where it asked (the Pane mockup).
+        if signals.agent?.state == .blocked, before != .blocked { scrollbar.mark(cursorRow: lastCursorRow, needs: true) }
         signals.onAgent?()
         NotificationCenter.default.post(name: Self.agentDidChange, object: self)
     }

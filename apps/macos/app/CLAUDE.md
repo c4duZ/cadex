@@ -233,6 +233,9 @@
   ("Claude", a tarefa, o modelo, a conta; o custo e o tempo), calculado quando um agente desta janela
   muda e uma vez por minuto, e guardado em `PaneDetails` (o cabeçalho só lê; o modelo e o custo do
   arquivo da sessão que a status line do kit grava; o tempo pelo início do processo).
+- `PanePermissionWiring.swift` (plano 28 fase D): a permissão que o hook de um agente espera vira o
+  cartão `AgentPermissionCard` no pé do painel dele (TerminalView.footCard), com Permitir e Negar
+  pela mesma AgentAttention do sino: responder num fecha o outro.
 - `PerfHooks.swift`: só para o `make perf` (`../../../tools/perf/run.py`): cada variável CADEX_PERF_
   faz a instância de teste agir sozinha em horas marcadas (CADEX_PERF_TYPE digita um comando no terminal com foco,
   CADEX_PERF_SPLIT divide o painel, CADEX_PERF_SNAPSHOT_AT atrasa a captura; abrir a conversa de um subagente, abrir

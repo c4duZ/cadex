@@ -13,8 +13,8 @@ struct DrawOverlay {
 }
 
 /// Turns a frame into quads, in painting order: cell backgrounds, selection,
-/// block cursor, glyphs, underline and strikethrough, thin cursors and the
-/// scrollbar on top.
+/// block cursor, glyphs, underline and strikethrough and thin cursors (the
+/// scrollbar is an AppKit view beside, TerminalScrollbar.swift).
 /// Pure apart from the atlas lookups, so the layout rules are testable.
 struct QuadBuilder {
     var quads: [QuadInstance] = []
@@ -22,10 +22,6 @@ struct QuadBuilder {
     /// Selection tint over the cells: the text color at low opacity, so it
     /// reads on any theme. Picked by eye against the default dark theme.
     static let selectionAlpha: Float = 0.3
-    /// Scrollbar: thin, inside the right padding, shown only while the view
-    /// is not at the bottom of the history.
-    static let scrollbarWidthPoints: Float = 3
-    static let scrollbarAlpha: Float = 0.35
     /// Find (⌘F) highlights: amber for every match, a stronger orange for
     /// the current one, like Safari's find. Translucent so the text shows.
     static let matchColor = rgba(0xE5B341, alpha: 0.35)
@@ -108,7 +104,6 @@ struct QuadBuilder {
         if cursorAt >= 0, !blockCursor {
             cursor(style: frame.cursor_style, at: origin(cursorAt), color: cursorColor, metrics: m)
         }
-        scrollbar(frame, metrics: m, padding: padding, viewSize: viewSize)
         if overlay.flash {
             solid(.zero, viewSize, rgba(frame.foreground, alpha: Self.flashAlpha))
         }
@@ -168,21 +163,6 @@ struct QuadBuilder {
             solid(origin, SIMD2(line, h), color)
             solid(SIMD2(origin.x + w - line, origin.y), SIMD2(line, h), color)
         }
-    }
-
-    private mutating func scrollbar(_ frame: cadex_terminal_frame, metrics m: CellMetrics,
-                                    padding: SIMD2<Float>, viewSize: SIMD2<Float>) {
-        let total = Float(frame.scroll_total)
-        let shown = Float(frame.rows)
-        let offset = Float(frame.scroll_offset)
-        guard total > shown, offset + shown < total else { return }
-        let width = Self.scrollbarWidthPoints * Float(m.scale)
-        let trackTop = padding.y
-        let trackHeight = viewSize.y - padding.y * 2
-        let height = max(width * 2, trackHeight * shown / total)
-        let y = trackTop + (trackHeight - height) * offset / max(total - shown, 1)
-        let x = viewSize.x - (padding.x + width) / 2
-        solid(SIMD2(x, y), SIMD2(width, height), rgba(frame.foreground, alpha: Self.scrollbarAlpha))
     }
 
     private mutating func solid(_ origin: SIMD2<Float>, _ size: SIMD2<Float>, _ color: SIMD4<Float>) {

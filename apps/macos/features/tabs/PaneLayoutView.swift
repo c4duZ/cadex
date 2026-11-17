@@ -1,4 +1,5 @@
 import AppKit
+import Terminal
 import UILooks
 
 /// Lays a tab's panes out by its PaneTree, each in its box with its header (plan 28 phase B; the
@@ -56,7 +57,9 @@ final class PaneLayoutView: NSView {
         if let zoomed, !tree.leaves.contains(zoomed) { self.zoomed = nil }
         let shown = zoomed.map { [$0] } ?? tree.leaves
         let wanted = Set(shown.compactMap { panes[$0] }.map(ObjectIdentifier.init))
-        for view in subviews where !(view is DividerHandle) && !(view is PaneHeaderView) && !wanted.contains(ObjectIdentifier(view)) {
+        for view in subviews where !(view is DividerHandle) && !(view is PaneHeaderView) && !wanted.contains(ObjectIdentifier(view))
+            && !((view as? TerminalScrollbar).map { bar in shown.contains { (panes[$0] as? TerminalView)?.scrollbar === bar } } ?? false)
+            && !shown.contains(where: { (panes[$0] as? TerminalView)?.footCard === view }) {
             view.removeFromSuperview()
         }
         for id in shown {
@@ -80,11 +83,22 @@ final class PaneLayoutView: NSView {
             let height = min(PaneHeaderView.height, inner.height)
             headers[id]?.frame = CGRect(x: inner.minX, y: inner.minY, width: inner.width, height: height)
             var body = CGRect(x: inner.minX, y: inner.minY + height, width: inner.width, height: inner.height - height)
+            if let terminal = panes[id] as? TerminalView {
+                // The mockup's scrollbar along the box's right edge, under the header.
+                let bar = UILooks.pt(P.Scrollbar.width)
+                // It stops where the box's corner rounds, as drawn.
+                terminal.scrollbar.frame = CGRect(x: body.maxX - bar, y: body.minY, width: bar, height: max(body.height - UILooks.pt(P.radius), 0))
+                if terminal.scrollbar.superview !== self { addSubview(terminal.scrollbar, positioned: .below, relativeTo: handles.first) }
+                terminal.scrollbar.alphaValue = frames.count > 1 && id != focused ? P.Idle.opacity : 1
+                placeFootCard(terminal, box: frame)
+            }
             if headers[id]?.info.padded == true {
-                let pad = P.bodyPadding
-                body = CGRect(x: body.minX + UILooks.pt(pad.left), y: body.minY + UILooks.pt(pad.top),
-                              width: max(body.width - UILooks.pt(pad.left + pad.right), 0),
-                              height: max(body.height - UILooks.pt(pad.top + pad.bottom), 0))
+                // The mockup's room around the text, less what the terminal keeps itself.
+                let pad = P.bodyPadding, own = TerminalView.innerPadding
+                let left = max(UILooks.pt(pad.left) - own, 0), right = max(UILooks.pt(pad.right) - own, 0)
+                let top = max(UILooks.pt(pad.top) - own, 0), bottom = max(UILooks.pt(pad.bottom) - own, 0)
+                body = CGRect(x: body.minX + left, y: body.minY + top,
+                              width: max(body.width - left - right, 0), height: max(body.height - top - bottom, 0))
             }
             panes[id]?.frame = body
             // The panes without focus a shade dimmer (components.pane.idle.opacity).
@@ -93,6 +107,17 @@ final class PaneLayoutView: NSView {
             panes[id]?.alphaValue = alpha
         }
         placeHandles()
+    }
+
+    /// The terminal's foot card (an agent's permission) where the Pane mockup puts it: 16 pt from
+    /// the box's left, 24 from its right, its bottom 92 above the box's (over the agent's prompt).
+    private func placeFootCard(_ terminal: TerminalView, box: CGRect) {
+        guard let card = terminal.footCard else { return }
+        typealias I = DesignTokens.Pane.Permission.Inset
+        if card.superview !== self { addSubview(card, positioned: .below, relativeTo: handles.first) }
+        let height = card.fittingSize.height
+        let left = box.minX + UILooks.pt(I.left), right = box.maxX - UILooks.pt(I.right)
+        card.frame = CGRect(x: left, y: box.maxY - UILooks.pt(I.bottom) - height, width: max(right - left, 0), height: height)
     }
 
     /// One header per shown pane, under the dimming like its pane.

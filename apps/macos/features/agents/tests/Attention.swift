@@ -171,6 +171,34 @@ let attentionChecks: [(name: String, body: Checks.Body)] = [
         attention.resolve(id)
         attention.update([])
     }),
+    ("the permission at the pane's foot: the Pane mockup's card (CADEX_SNAPSHOT_DIR: permission-card.png)", {
+        let attention = AgentAttention.shared
+        attention.isEnabled = true
+        var allowed = 0, denied = 0
+        let id = attention.addPermission(pid: 81, tool: "Bash", subject: "make macos-test", project: "cadex", session: "orchestration-e",
+                                         account: "bkdg", key: "p81") { _ in }
+        guard let request = attention.cards.first(where: { $0.id == id }) else { return expect(false, "no card") }
+        let card = AgentPermissionCard(request, allow: { allowed += 1 }, deny: { denied += 1 })
+        let width: CGFloat = 629
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: width + 40, height: 120), styleMask: [.borderless], backing: .buffered, defer: false)
+        let root = NSView(frame: window.contentLayoutRect)
+        root.wantsLayer = true
+        root.layer?.backgroundColor = DesignTokens.Pane.Focused.bg.cgColor
+        window.contentView = root
+        card.frame = NSRect(x: 20, y: 20, width: width, height: card.fittingSize.height)
+        root.addSubview(card)
+        root.layoutSubtreeIfNeeded()
+        func buttons(_ view: NSView) -> [NSButton] { ((view as? NSButton).map { [$0] } ?? []) + view.subviews.flatMap(buttons) }
+        let all = buttons(card)
+        expect(all.map(\.attributedTitle.string) == ["Allow", "Deny"], "\(all.map(\.attributedTitle.string))")
+        all[0].performClick(nil)
+        expect(allowed == 1 && denied == 0, "Allow runs its action")
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"], let bitmap = root.bitmapImageRepForCachingDisplay(in: root.bounds) {
+            root.cacheDisplay(in: root.bounds, to: bitmap)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/permission-card.png"))
+        }
+        attention.resolve(id)
+    }),
     ("an answer's keys: an option's number at once; the words after the type-something number and Return (tested 2026-11-17)", {
         let parsed = AgentAnswer.parse("Which color? (Red · Blue)")
         expect(parsed.question == "Which color?" && parsed.options == ["Red", "Blue"], "\(parsed)")

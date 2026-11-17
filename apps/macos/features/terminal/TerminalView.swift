@@ -10,6 +10,22 @@ import TempImages
 public final class TerminalView: NSView {
     /// Space between the window edge and the text, in points.
     private static let paddingPoints: CGFloat = 8
+    /// The room the terminal keeps around its text itself: the pane's box takes it off its own
+    /// padding so the text sits where the mockup has it (plan 28 phase B).
+    public static var innerPadding: CGFloat { paddingPoints }
+    /// The scrollbar of the Pane mockup, with the marks (TerminalScrollbar.swift); the pane places it.
+    public let scrollbar = TerminalScrollbar()
+    /// The cursor's row on the screen at the last frame: where a mark goes.
+    var lastCursorRow = 0
+    /// A card at the pane's foot (the agent's permission, plan 28 phase D), from the app; the pane
+    /// layout places it. Setting it asks the layout again.
+    public var footCard: NSView? {
+        didSet {
+            guard footCard !== oldValue else { return }
+            oldValue?.removeFromSuperview()
+            superview?.needsLayout = true
+        }
+    }
 
     public private(set) var session: TerminalSession?
     private var renderer: TerminalRenderer?
@@ -71,6 +87,7 @@ public final class TerminalView: NSView {
     /// `keptID`: the name to take back.
     public init(frame: CGRect, cwd: String? = nil, keep: Bool = false, keptID: String? = nil) {
         super.init(frame: frame)
+        scrollbar.terminal = self
         let scale = window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
         if let device {
             if let atlas = Self.preferredAtlas(device: device, scale: scale) {
@@ -194,6 +211,9 @@ public final class TerminalView: NSView {
         let overlay = DrawOverlay(linkCells: hoveredLinkCells, hideCursor: !signals.cursorShown, flash: isFlashing)
         renderer.draw(frame.pointee, padding: SIMD2(padding, padding), in: drawable, size: canvas.drawableSize,
                       overlay: overlay, synchronously: synchronously)
+        let shown = frame.pointee
+        lastCursorRow = Int(shown.cursor_y)
+        scrollbar.update(total: Int(shown.scroll_total), offset: Int(shown.scroll_offset), rows: Int(shown.rows))
         // A synchronized update (DEC 2026) held the last frame: look again
         // when the hold runs out, in case the program never ends it.
         let held = session.holdRemainingMs
@@ -273,6 +293,10 @@ public final class TerminalView: NSView {
         if hasMarkedText() {
             interpretKeyEvents([event])
             return
+        }
+        // Return to an agent: a message sent, a mark on the scrollbar (the Pane mockup).
+        if event.keyCode == 36 || event.keyCode == 76, !event.modifierFlags.contains(.shift), agentStatus != nil {
+            scrollbar.mark(cursorRow: lastCursorRow, needs: false)
         }
         switch KeyEncoding.route(keyCode: event.keyCode, modifiers: event.modifierFlags, optionAsMeta: optionAsMeta) {
         case .macEditing(let bytes):

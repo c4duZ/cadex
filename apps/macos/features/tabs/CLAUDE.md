@@ -50,7 +50,8 @@
   posiciona os painéis pela árvore, cada um na caixa de `PaneChrome.swift` (cantos, linha, o anel do
   foco, os sem foco a 92%), com 8 pt em volta e entre as caixas; o vão pega o mouse numa
   `DividerHandle` por cima de tudo (o cursor de redimensionar não briga com o do terminal) e mostra
-  uma barra curta sob o ponteiro (tamanho mínimo de painel); o terminal com o respiro do mockup. `balanced()` na árvore deixa
+  uma barra curta sob o ponteiro (tamanho mínimo de painel); o terminal com o respiro do mockup, a
+  barra de rolagem dele na borda da caixa e o cartão do pé (`footCard`) onde o mockup Pane o põe. `balanced()` na árvore deixa
   do mesmo tamanho os painéis numa direção, a cada divisão e fechamento. `Tab.swift` guarda árvore, painéis e foco.
 - `TabsSnapshot.swift` e `TabsRestore.swift`: o estado das abas para salvar (ordem, árvore de cada
   aba com a pasta de cada terminal ou a identidade de cada documento e as proporções, nome dado,

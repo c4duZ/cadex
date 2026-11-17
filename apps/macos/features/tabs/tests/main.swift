@@ -371,7 +371,8 @@ let exitCode = await Checks.run([
         layout.layoutSubtreeIfNeeded()
         // Maximized: the whole area, less its line, header and the terminal's padding.
         let pad = DesignTokens.Pane.bodyPadding
-        let tall = layout.paneArea.height - 2 * DesignTokens.Stroke.hairline - PaneHeaderView.height - UILooks.pt(pad.top + pad.bottom)
+        let own = TerminalView.innerPadding
+        let tall = layout.paneArea.height - 2 * DesignTokens.Stroke.hairline - PaneHeaderView.height - (UILooks.pt(pad.top) - own) - (UILooks.pt(pad.bottom) - own)
         expect(layout.zoomed == terminalPane && layout.panes[terminalPane]!.frame.height == tall, "\(layout.panes[terminalPane]!.frame.height) \(tall)")
         expect(layout.panes[tabs.activeTab!.tree.leaves.last!]!.superview == nil, "the other pane is out of view")
         tabs.toggleZoom()
