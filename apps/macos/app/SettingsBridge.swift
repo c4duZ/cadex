@@ -49,7 +49,9 @@ final class SettingsBridge {
         store.observe { [weak self] settings in self?.apply(settings) }
         // "Increase contrast" in the system changes the theme, not the settings.
         var wasHighContrast = ThemeStore.shared.isHighContrast
-        ThemeStore.shared.observe { [weak self] _ in
+        ThemeStore.shared.observe { [weak self] theme in
+            // The sessions the app opens draw in the theme's ANSI colors, light or dark as it is.
+            SessionKit.shared.claudeTheme = theme.dark ? "dark-ansi" : "light-ansi"
             guard ThemeStore.shared.isHighContrast != wasHighContrast else { return }
             wasHighContrast = ThemeStore.shared.isHighContrast
             self?.applyLooks()

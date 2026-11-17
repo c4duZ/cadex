@@ -6,8 +6,9 @@ import Security
 /// file. Written atomically before each launch.
 extension SessionKit {
     /// The kit's `--settings`: the status line through `cadex statusline`
-    /// (it keeps the usage and calls the owner's own, which `--settings`
-    /// replaces, tested 2026-11-14) and what the features contribute. Hooks
+    /// (it keeps the usage and prints the pane's one line, plan 28 phase C;
+    /// the account's own status line is replaced in the session) and what the
+    /// features contribute. Hooks
     /// passed this way add to the account's and the project's (tested), so
     /// the owner's keep running.
     ///
@@ -22,9 +23,7 @@ extension SessionKit {
                        sessionEnvironment: [String: String] = [:]) -> String? {
         var settings: [String: Any] = [:]
         if let tools = toolsPath {
-            var line: [String: Any] = ["type": "command", "command": Self.quote(tools) + " statusline"]
-            if let padding = Self.ownerPadding(accountDir) { line["padding"] = padding }
-            settings["statusLine"] = line
+            settings["statusLine"] = ["type": "command", "command": Self.quote(tools) + " statusline"]
             if hooksEnabled { settings["hooks"] = Self.hooks(tools) }
         }
         // The settings' env reaches the hooks (tested 2026-11-15): the token
@@ -40,6 +39,7 @@ extension SessionKit {
             if ProcessInfo.processInfo.environment["CADEX_SOCKETS_DIR"] != nil { env["CADEX_APP_SOCKET"] = SessionKit.socketsFolder + "/app.sock" }
         }
         if !env.isEmpty { settings["env"] = env }
+        if let claudeTheme { settings["theme"] = claudeTheme }
         // Contributed hooks stay with agents.stateHooks off: that setting is
         // about the kit's own hooks only (the memory's run regardless).
         for id in parts.keys.sorted() {
@@ -127,14 +127,6 @@ extension SessionKit {
         for id in parts.keys.sorted() { servers.merge(parts[id]!.mcpServers) { _, new in new } }
         guard !servers.isEmpty else { return nil }
         return write(["mcpServers": servers], name: "mcp-\(key).json", mode: 0o600)
-    }
-
-    /// The `padding` of the owner's status line, so the line sits where it did.
-    static func ownerPadding(_ accountDir: String) -> Any? {
-        guard let data = FileManager.default.contents(atPath: accountDir + "/settings.json"),
-              let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
-              let line = object["statusLine"] as? [String: Any] else { return nil }
-        return line["padding"]
     }
 
     /// Objects merge key by key, arrays add up, anything else: the later wins.

@@ -3,23 +3,22 @@
 //! with `rate_limits` (the account's 5 h and week windows, the numbers of
 //! `/usage`), `context_window`, `cost` and `session_id` (tested with
 //! 2.1.325, 2026-11-14). It keeps the account's `rate_limits` and the
-//! session's context and cost in small files the app reads, then runs the
-//! status line the owner already had in that account and prints its output.
-//! No token is read anywhere: the usage comes from Claude Code itself.
+//! session's context, cost and model in small files the app reads, then
+//! prints the pane's one line of the Pane mockup (plan 28 phase C): the model,
+//! the context with its bar, the cost and the folder. The account's own status
+//! line (the multi-line one the mockup's "today" shows) is no longer called in
+//! the sessions Cadex opens. No token is read anywhere: the usage comes from
+//! Claude Code itself.
 
 const std = @import("std");
 const fs = @import("../../shared/fs.zig");
-const process = @import("../../shared/process.zig");
 
-/// Where a call runs: the account's folder, where the usage files go, and
-/// whether this call came from the owner's own command (then it does
-/// nothing, so a status line that calls `cadex statusline` cannot loop).
+/// Where a call runs: the account's folder and where the usage files go.
 pub const Env = struct {
     config_buf: fs.Buffer = undefined,
     config_len: usize = 0,
     usage_buf: fs.Buffer = undefined,
     usage_len: usize = 0,
-    nested: bool = false,
 
     pub fn configDir(self: *const Env) []const u8 {
         return self.config_buf[0..self.config_len];
@@ -40,11 +39,11 @@ pub const Env = struct {
             (std.fmt.bufPrint(&config_tmp, "{s}/.claude", .{home}) catch "");
         const usage = getenv("CADEX_USAGE_DIR") orelse
             (std.fmt.bufPrint(&usage_tmp, "{s}/Library/Application Support/Cadex/usage", .{home}) catch "");
-        return make(config, usage, getenv("CADEX_STATUSLINE") != null);
+        return make(config, usage);
     }
 
-    pub fn make(config: []const u8, usage: []const u8, nested: bool) Env {
-        var env: Env = .{ .nested = nested };
+    pub fn make(config: []const u8, usage: []const u8) Env {
+        var env: Env = .{};
         const c = std.mem.trimEnd(u8, config, "/");
         const u = std.mem.trimEnd(u8, usage, "/");
         if (c.len <= env.config_buf.len) {
@@ -121,34 +120,83 @@ pub fn files(gpa: std.mem.Allocator, parsed: std.json.Value, config_dir: []const
     return out;
 }
 
-/// The owner's status line command in the account's settings.json
-/// (`statusLine.command`), or null. The kit's `--settings` replaces it in
-/// the session (tested 2026-11-14), so this program calls it.
-pub fn ownerCommand(gpa: std.mem.Allocator, settings: []const u8) !?[]u8 {
-    var parsed = std.json.parseFromSlice(std.json.Value, gpa, settings, .{}) catch return null;
+/// One call: write the usage, then the line. Errors are swallowed: a status
+/// line must never disturb the session.
+pub fn run(gpa: std.mem.Allocator, input: []const u8, env: Env) ![]u8 {
+    const parsed = std.json.parseFromSlice(std.json.Value, gpa, input, .{}) catch return gpa.alloc(u8, 0);
     defer parsed.deinit();
-    if (parsed.value != .object) return null;
-    const line = parsed.value.object.get("statusLine") orelse return null;
-    if (line != .object) return null;
-    const command = line.object.get("command") orelse return null;
-    if (command != .string or command.string.len == 0) return null;
-    return try gpa.dupe(u8, command.string);
+    if (files(gpa, parsed.value, env.configDir(), unixSeconds())) |out| {
+        defer out.deinit(gpa);
+        save(env, out);
+    } else |_| {}
+    return line(gpa, parsed.value);
 }
 
-/// One call: write the usage first (so a broken or slow owner command
-/// cannot lose it), then print what the owner's command prints. Errors are
-/// swallowed: a status line must never disturb the session.
-pub fn run(gpa: std.mem.Allocator, input: []const u8, env: Env) ![]u8 {
-    if (env.nested) return gpa.alloc(u8, 0);
-    if (std.json.parseFromSlice(std.json.Value, gpa, input, .{})) |parsed| {
-        defer parsed.deinit();
-        const now = unixSeconds();
-        if (files(gpa, parsed.value, env.configDir(), now)) |out| {
-            defer out.deinit(gpa);
-            save(env, out);
-        } else |_| {}
-    } else |_| {}
-    return owner(gpa, input, env);
+/// "Opus  context ━━━──────── 5%  US$ 0.31  orchestration-e": the Pane
+/// mockup's line, in the ANSI colors the Cadex theme gives (37 the words, 97
+/// the bar's part used, 90 the rest), two spaces apart. What Claude Code
+/// leaves out is left out.
+pub fn line(gpa: std.mem.Allocator, root: std.json.Value) ![]u8 {
+    if (root != .object) return gpa.alloc(u8, 0);
+    const o = root.object;
+    var out: std.ArrayList(u8) = .empty;
+    errdefer out.deinit(gpa);
+    if (field(o, "model", "display_name")) |model| if (model == .string) try part(gpa, &out, model.string);
+    if (contextPercent(o)) |pct| {
+        const clamped = @min(@max(pct, 0), 100);
+        const used: usize = @intFromFloat(clamped / 100 * bar_cells + 0.5);
+        var cells: [bar_cells * 3]u8 = undefined;
+        var n: usize = 0;
+        for (0..bar_cells) |i| {
+            const glyph = if (i < used) used_cell else free_cell;
+            @memcpy(cells[n .. n + glyph.len], glyph);
+            n += glyph.len;
+        }
+        const split = used * used_cell.len;
+        var text: [160]u8 = undefined;
+        try part(gpa, &out, std.fmt.bufPrint(&text, "context \x1b[97m{s}\x1b[90m{s}\x1b[37m {d:.0}%", .{ cells[0..split], cells[split..n], clamped }) catch "");
+    }
+    if (field(o, "cost", "total_cost_usd")) |cost| if (number(cost)) |usd| {
+        var text: [32]u8 = undefined;
+        try part(gpa, &out, std.fmt.bufPrint(&text, "US$ {d:.2}", .{usd}) catch "");
+    };
+    const dir = field(o, "workspace", "current_dir") orelse o.get("cwd");
+    if (dir) |d| if (d == .string and d.string.len > 0) try part(gpa, &out, std.fs.path.basename(d.string));
+    if (out.items.len > 0) try out.appendSlice(gpa, "\x1b[0m");
+    return out.toOwnedSlice(gpa);
+}
+
+const bar_cells = 10;
+const used_cell = "\u{2501}";
+const free_cell = "\u{2500}";
+
+/// One word or group of the line, two spaces after the one before, in 37.
+fn part(gpa: std.mem.Allocator, out: *std.ArrayList(u8), text: []const u8) !void {
+    if (text.len == 0) return;
+    try out.appendSlice(gpa, if (out.items.len == 0) "\x1b[37m" else "  ");
+    try out.appendSlice(gpa, text);
+}
+
+fn field(o: std.json.ObjectMap, object: []const u8, key: []const u8) ?std.json.Value {
+    const inner = o.get(object) orelse return null;
+    if (inner != .object) return null;
+    return inner.object.get(key);
+}
+
+fn number(v: std.json.Value) ?f64 {
+    return switch (v) {
+        .integer => |i| @floatFromInt(i),
+        .float => |f| f,
+        else => null,
+    };
+}
+
+/// The context used: Claude Code's percentage, else its tokens over the window's size.
+fn contextPercent(o: std.json.ObjectMap) ?f64 {
+    if (field(o, "context_window", "used_percentage")) |v| if (number(v)) |pct| return pct;
+    const tokens = number(field(o, "context_window", "total_input_tokens") orelse return null) orelse return null;
+    const size = number(field(o, "context_window", "context_window_size") orelse return null) orelse return null;
+    return if (size > 0) tokens / size * 100 else null;
 }
 
 extern "c" fn time(t: ?*c_long) c_long;
@@ -187,35 +235,14 @@ fn makeDirs(path: []const u8) void {
     var i: usize = 1;
     while (i <= path.len) : (i += 1) {
         if (i == path.len or path[i] == '/') {
-            const part = path[0..i];
-            if (!fs.isDirectory(part)) fs.makeDirectory(part) catch {};
+            const prefix = path[0..i];
+            if (!fs.isDirectory(prefix)) fs.makeDirectory(prefix) catch {};
         }
     }
 }
 
 /// The owner's command through /bin/sh, with the same JSON on stdin and
 /// CADEX_STATUSLINE set; 10 s at most, 64 KB of output kept.
-fn owner(gpa: std.mem.Allocator, input: []const u8, env: Env) ![]u8 {
-    var path: fs.Buffer = undefined;
-    const settings_path = std.fmt.bufPrint(&path, "{s}/settings.json", .{env.configDir()}) catch return gpa.alloc(u8, 0);
-    const file = fs.File.openRead(settings_path, .{}) catch return gpa.alloc(u8, 0);
-    defer file.close();
-    var settings: std.ArrayList(u8) = .empty;
-    defer settings.deinit(gpa);
-    try fs.appendUpTo(gpa, file, &settings, 1024 * 1024);
-    const command = (try ownerCommand(gpa, settings.items)) orelse return gpa.alloc(u8, 0);
-    defer gpa.free(command);
-    var result = try process.run(gpa, &.{ "/bin/sh", "-c", command }, .{
-        .stdin = input,
-        .env = &.{"CADEX_STATUSLINE=1"},
-        .timeout_ms = 10_000,
-        .max_output = 64 * 1024,
-    });
-    gpa.free(result.stderr);
-    result.stderr = &.{};
-    return result.stdout;
-}
-
 const testing = std.testing;
 const TestDir = @import("../../shared/test_dir.zig").TestDir;
 
@@ -256,28 +283,17 @@ test "a JSON without rate_limits or with a strange id writes nothing for them" {
     try testing.expect(out.account == null and out.session == null);
 }
 
-test "owner command comes from statusLine.command" {
-    const cmd = (try ownerCommand(testing.allocator, "{\"statusLine\":{\"type\":\"command\",\"command\":\"echo hi\"}}")).?;
-    defer testing.allocator.free(cmd);
-    try testing.expectEqualStrings("echo hi", cmd);
-    try testing.expect((try ownerCommand(testing.allocator, "{\"statusLine\":3}")) == null);
-    try testing.expect((try ownerCommand(testing.allocator, "not json")) == null);
-}
-
-test "run writes the usage files and prints the owner's status line" {
+test "run writes the usage files and prints the pane's line" {
     var dir = try TestDir.init();
     defer dir.deinit();
     try dir.makeDir("account");
-    var settings_path: fs.Buffer = undefined;
-    const sp = try dir.joinInto(&settings_path, "account/settings.json");
-    try fs.writeThenRename(try dir.join("s.tmp"), sp, "{\"statusLine\":{\"type\":\"command\",\"command\":\"head -c 14\"}}", 0o644);
-
     var config: fs.Buffer = undefined;
     var usage: fs.Buffer = undefined;
-    const env = Env.make(try dir.joinInto(&config, "account"), try dir.joinInto(&usage, "usage/deep"), false);
+    const env = Env.make(try dir.joinInto(&config, "account"), try dir.joinInto(&usage, "usage/deep"));
     const printed = try run(testing.allocator, sample, env);
     defer testing.allocator.free(printed);
-    try testing.expectEqualStrings("{\"session_id\":", printed);
+    try testing.expect(std.mem.startsWith(u8, printed, "\x1b[37mOpus  "));
+    try testing.expect(std.mem.indexOf(u8, printed, "US$ 0.25") != null);
 
     var key: fs.Buffer = undefined;
     var name: fs.Buffer = undefined;
@@ -286,9 +302,20 @@ test "run writes the usage files and prints the owner's status line" {
     try testing.expect(fs.exists(try dir.join("usage/deep/sessions/abc-123.json")));
 }
 
-test "a nested call does nothing" {
-    const env = Env.make("/nowhere", "/nowhere/usage", true);
-    const printed = try run(testing.allocator, sample, env);
-    defer testing.allocator.free(printed);
-    try testing.expectEqual(@as(usize, 0), printed.len);
+test "the line: model, context bar, cost and folder; what is missing is left out" {
+    const json =
+        \\{"model":{"display_name":"Opus"},"context_window":{"used_percentage":50},
+        \\ "cost":{"total_cost_usd":0.312},"workspace":{"current_dir":"/r/cadex.worktrees/orchestration-e"}}
+    ;
+    var parsed = try std.json.parseFromSlice(std.json.Value, testing.allocator, json, .{});
+    defer parsed.deinit();
+    const text = try line(testing.allocator, parsed.value);
+    defer testing.allocator.free(text);
+    try testing.expectEqualStrings("\x1b[37mOpus  context \x1b[97m" ++ used_cell ** 5 ++ "\x1b[90m" ++ free_cell ** 5 ++
+        "\x1b[37m 50%  US$ 0.31  orchestration-e\x1b[0m", text);
+    var empty = try std.json.parseFromSlice(std.json.Value, testing.allocator, "{}", .{});
+    defer empty.deinit();
+    const none = try line(testing.allocator, empty.value);
+    defer testing.allocator.free(none);
+    try testing.expectEqual(@as(usize, 0), none.len);
 }

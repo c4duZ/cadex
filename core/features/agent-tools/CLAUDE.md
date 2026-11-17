@@ -9,7 +9,7 @@
 ## O que eu não quero
 - Ler, guardar ou repassar token, login ou credencial do Claude Code; falar com a rede. (O token
   da sessão é do Cadex: vem na env que o kit põe e só vai ao socket do app.)
-- Atrapalhar a sessão: erro é engolido, a status line do dono roda mesmo sem o uso gravado.
+- Atrapalhar a sessão: erro é engolido; sem o uso gravado, a linha sai do mesmo jeito.
 - Quebrar o `claude` digitado: `cadex claude` sem app, recusado ou com qualquer erro roda o `claude`
   de verdade exatamente como foi digitado, e nunca troca a conta (o CLAUDE_CONFIG_DIR da aba).
 - Depender da libghostty ou do resto do núcleo: só libc, `../../shared/fs.zig`, `../../shared/process.zig`
@@ -19,10 +19,10 @@
 - `cli.zig`: o `main` (raiz em `../../cadex_cli.zig`, fora da pasta para poder usar shared/),
   lê a entrada com libc e escolhe o subcomando.
 - `statusline.zig`: `files` monta o arquivo da conta (`rate_limits`) e o da sessão (`context_window`,
-  `cost`); `accountKey` dá o nome do arquivo da conta (todo byte que não é letra ou dígito ASCII
-  vira "-", a mesma regra do SessionKit.accountKey no app); `run` grava primeiro e depois roda a
-  status line do dono (`ownerCommand`, do settings.json da conta) pelo `/bin/sh`, com 10 s e 64 KB.
-  `CADEX_STATUSLINE` marca a chamada de dentro, que não faz nada.
+  `cost`, `model`); `accountKey` dá o nome do arquivo da conta (todo byte que não é letra ou dígito
+  ASCII vira "-", a mesma regra do SessionKit.accountKey no app); `run` grava primeiro e depois
+  imprime `line`, a linha do painel do mockup (plano 28 fase C: modelo, contexto com barra, custo,
+  pasta, em ANSI); a status line da conta não roda mais nas sessões do Cadex.
 - `hook.zig`: `cadex hook <evento>` manda ao socket do app uma linha com o token
   (CADEX_SESSION_TOKEN), o evento, o pid do `claude` (o pai do hook) e o JSON reescrito numa linha;
   espera 200 ms (a permissão, 10 min: ADR 0023) e imprime o `stdout` da resposta. App fechado: sai
@@ -97,7 +97,7 @@
   Contents/Helpers.
 
 ## Como validar
-- `make core-test`: arquivos, nome da conta, status line do dono, JSON quebrado e a chamada de dentro;
+- `make core-test`: arquivos, nome da conta, a linha do painel (com e sem as partes), JSON quebrado;
   a linha do pedido (com o despacho) e a resposta, os atalhos virando ids, o `spec-file=` lido
   (pasta e arquivo que falta recusados), os guias e o servidor MCP com um app falso;
   as decisões do `cadex claude` (`--model haiku mcp list`, `-p`, `--version`, `claude`, um prompt,

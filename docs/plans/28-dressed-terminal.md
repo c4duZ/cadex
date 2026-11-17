@@ -33,7 +33,10 @@ painéis" e os apelidos do 27.
   modelo, conta, custo e tempo (do que os hooks e o uso já sabem); o painel com foco com contorno e
   halo, os outros apagados; vão de 8 pt; respiro dentro do terminal. tabs.paneHeaders migrada uma
   vez (sai no 29).
-- **C. Cores e status line.** O ANSI do Cadex Night afinado pelo que a fase A achou; a status line do
+- **C. Cores e status line.** Feita (2026-11-17): o kit pede "dark-ansi" ou "light-ansi" pelo tema;
+  o ANSI do Cadex Night afinado pelo que o Claude pinta no -ansi (91 a linha removida, 92 o ponto e a
+  linha adicionada, 93 o trabalhando, 94 os destaques, 37 as bordas); a status line do kit é a
+  linha do painel e a da conta não roda mais. Plano original: O ANSI do Cadex Night afinado pelo que a fase A achou; a status line do
   kit (`core/features/agent-tools/statusline.zig`) em uma linha (modelo, contexto, custo, modo).
 - **D. Marcas e permissão.** Marcas na barra de rolagem em cada mensagem do dono (âmbar onde o
   agente pediu algo); o pedido de permissão que chega pelo hook vira cartão no pé do painel com

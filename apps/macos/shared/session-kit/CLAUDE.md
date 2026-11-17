@@ -37,8 +37,8 @@
   o que não lê.
 - `SessionKitFiles.swift`: em `~/Library/Application Support/Cadex/kit` (CADEX_KIT_DIR numa
   instância de teste, plano 24), um `session-<chave>.json`
-  por sessão (0600, apagado depois de 2 dias) com a status line do Cadex (com o `padding` da do
-  dono), o token da sessão na `env` (que chega aos hooks, teste de 2026-11-15; nunca digitado no
+  por sessão (0600, apagado depois de 2 dias) com a status line do Cadex (a linha do painel, plano 28 fase C)
+  e o tema "-ansi" do Claude quando o app o pede (`claudeTheme`, escuro ou claro pelo tema do Cadex), o token da sessão na `env` (que chega aos hooks, teste de 2026-11-15; nunca digitado no
   terminal), os hooks do plano 19 (`cadex hook <evento>` em SessionStart, Stop, Notification,
   PermissionRequest, SessionEnd e CwdChanged, com `hooksEnabled` = agents.stateHooks) e o que as
   features contribuem; o token também num arquivo `…/Cadex/sessions/<chave>.token` (0600, 30 dias),
@@ -59,8 +59,8 @@
   entra com o primeiro subcomando que o agente usa (plano 20).
 
 ## Como validar
-- `make macos-test` (SessionKitTests): comando por conta, ambiente limpo, status line com o padding
-  do dono, MCP só para as outras contas e com 0600, contribuições somadas (com agents.stateHooks desligada
+- `make macos-test` (SessionKitTests): comando por conta, ambiente limpo, status line do Cadex, o
+  tema pedido, MCP só para as outras contas e com 0600, contribuições somadas (com agents.stateHooks desligada
   também) e por conta, aspas só quando precisa; os pedaços iguais ao comando composto, o
   `--settings` do dono juntado num arquivo só e as recusas; o `perSession` com a pasta da sessão
   (aberta pelo Cadex ou o `claude` digitado) e sem nada quando ela não é conhecida; a variável de

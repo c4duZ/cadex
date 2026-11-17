@@ -11,12 +11,15 @@ Cadex: `docs/adr/0024-agent-tools.md`).
 - É o comando da status line que o kit da sessão põe no `--settings` das sessões que o Cadex abre.
   O Claude Code o chama a cada mensagem, com um JSON na entrada.
 - Do JSON, guarda o `rate_limits` da conta (a sessão de 5 h e a semana, com a porcentagem e quando
-  reinicia) num arquivo por conta, e o `context_window` e o `cost` da sessão num arquivo por sessão,
+  reinicia) num arquivo por conta, e o `context_window`, o `cost` e o `model` da sessão num arquivo
+  por sessão,
   em `~/Library/Application Support/Cadex/usage` (ou `CADEX_USAGE_DIR`). A conta é a pasta em
   `CLAUDE_CONFIG_DIR`, ou `~/.claude` sem ela. Cada arquivo é escrito inteiro e trocado de uma vez.
-- Depois roda a status line que o dono já tinha na conta (`statusLine.command` do `settings.json`
-  dela), pelo `/bin/sh`, com o mesmo JSON, e imprime o que ela imprimir. O `--settings` do kit
-  substitui a status line da conta na sessão; é assim que ela continua aparecendo igual.
+- Depois imprime a linha do painel do mockup (plano 28 fase C), uma só: o modelo, o contexto com a
+  barra, o custo e a pasta ("Opus  context ━━──────── 5%  US$ 0.31  orchestration-e"), nas cores
+  ANSI que o tema do Cadex dá. A status line que a conta tinha (`statusLine.command`) não roda nas
+  sessões que o Cadex abre: o `--settings` do kit a substitui. Num `claude` aberto fora do Cadex, a
+  da conta continua.
 - Nunca lê token, login ou credencial, e não sai para a rede.
 - Sem subcomando, ou com um desconhecido, mostra o uso e sai com 2.
 
@@ -80,7 +83,7 @@ Cadex: `docs/adr/0024-agent-tools.md`).
 
 ## Estados
 - **JSON sem `rate_limits`** (antes da primeira resposta da sessão): só o arquivo da sessão.
-- **Conta sem status line própria**: não imprime nada.
+- **JSON sem modelo, contexto ou custo**: a linha fica sem a parte que falta; sem nenhuma, vazia.
 - **Pasta de uso que não existe**: é criada.
 
 - **App fechado:** `cadex run` e os atalhos dizem "Cadex is not running" e saem com 1; o MCP responde
@@ -92,20 +95,16 @@ Cadex: `docs/adr/0024-agent-tools.md`).
   resposta (o `cadex` diz "not a session opened by Cadex", saída 1).
 - Comando fora da lista (fechar o app, apagar): "not allowed for agents", saída 1; nada roda.
 - Argumento demais ou faltando: o erro diz o que o comando espera.
-- JSON quebrado: nada é gravado; a status line do dono roda do mesmo jeito.
-- Status line do dono quebrada, lenta ou muda: o uso já foi gravado antes; ela tem 10 s e 64 KB de
-  saída; falhando, a linha fica vazia e a sessão não sente.
-- A status line do dono chama o próprio `cadex statusline`: a chamada de dentro não faz nada
-  (`CADEX_STATUSLINE`), sem laço.
+- JSON quebrado: nada é gravado e a linha fica vazia; a sessão não sente.
 - `session_id` com caractere estranho (barra, ponto): o arquivo da sessão não é gravado.
 
 ## Critérios de aceite
 - [x] Com o JSON de uma sessão, grava o arquivo da conta com o `rate_limits` e o da sessão com
-      contexto e custo, e imprime a saída da status line do dono (teste do núcleo e na mão,
-      2026-11-14).
+      contexto, custo e modelo, e imprime a linha do painel (teste do núcleo; a linha, plano 28
+      fase C, 2026-11-17).
 - [x] Numa sessão real aberta com o comando do kit, o cartão da conta mostra os mesmos números do
       `/usage` (bhband, Claude Code 2.1.325, 2026-11-14: 3% e 56%, reinícios iguais).
-- [x] A status line do dono aparece igual numa sessão aberta pelo Cadex (mesma sessão).
+- [ ] Numa sessão aberta pelo Cadex, a status line é a linha do painel, em uma linha (plano 28 fase C).
 - [x] Numa aba aberta pelo Cadex, `cadex notify "oi"` avisa o dono e `cadex worktree status review`
       muda o status da tarefa; num terminal de fora (sem o token), `cadex` é recusado. (2026-11-15, o
       `claude` real numa instância de teste do app de release: "the task is review", "the owner was

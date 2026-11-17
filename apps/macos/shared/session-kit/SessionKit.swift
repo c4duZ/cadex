@@ -52,6 +52,11 @@ public final class SessionKit {
     public var hooksEnabled = true
     /// CLAUDE_CODE_FORCE_SYNC_OUTPUT=1 in the settings' env (SessionKitFiles).
     public var synchronizedOutput = true
+    /// Claude Code's theme for the session ("dark-ansi" or "light-ansi", plan 28 phase C): in its
+    /// -ansi themes it draws only the 16 ANSI colors, which the Cadex theme gives; in its others,
+    /// fixed 24-bit colors no Cadex theme reaches (measured 2026-11-17, docs/spec/terminal.md).
+    /// nil: the account's own.
+    public var claudeTheme: String?
     /// agentTools.enabled (plan 20): the folder of `cadex` goes first on the
     /// session's PATH, so the agent runs it (docs/adr/0024-agent-tools.md).
     public var agentToolsOnPath = false

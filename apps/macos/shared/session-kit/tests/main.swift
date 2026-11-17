@@ -49,7 +49,7 @@ let exitCode = await Checks.run([
         let file = json(settings)
         let line = file["statusLine"] as? [String: Any]
         expect(line?["command"] as? String == "/App/Cadex.app/Contents/Helpers/cadex statusline")
-        expect(line?["padding"] as? Int == 2, "the owner's padding kept")
+        expect(line?["padding"] == nil, "the pane's own line: the account's padding is not carried over")
         // The session's token in env, never in the command; its file 0600 in the kit's tokens.
         let token = (file["env"] as? [String: String])?["CADEX_SESSION_TOKEN"] ?? ""
         expect(token.count == 64 && !command.contains(token), "a 32-byte token, kept out of the typed command")
@@ -69,6 +69,10 @@ let exitCode = await Checks.run([
         kit.agentToolsOnPath = false
         kit.hooksEnabled = false
         expect(json(settingsPath(kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json")))["hooks"] == nil, "agents.stateHooks off: no hooks")
+        // Claude Code's -ansi theme, so the Cadex theme's ANSI colors are its colors (plan 28 phase C).
+        expect(file["theme"] == nil, "no theme asked: the account's own")
+        kit.claudeTheme = "dark-ansi"
+        expect(json(settingsPath(kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json")))["theme"] as? String == "dark-ansi")
     }),
     ("the default account: no folder, a stray CLAUDE_CONFIG_DIR dropped; no tools, only the synchronized output", {
         let dir = scratch()
