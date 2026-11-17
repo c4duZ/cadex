@@ -199,6 +199,9 @@ public enum Recurrence: Codable, Equatable, Sendable {
     case weekdays(hour: Int, minute: Int)
     case daily(hour: Int, minute: Int)
     case everyHours(Int)
+    /// Every N minutes from the hour (the plan's check runs one every 2
+    /// minutes, plan 24 E). A row from before it still reads.
+    case everyMinutes(Int)
     case once(Date)
 }
 
@@ -226,6 +229,9 @@ public struct Automation: Codable, Equatable, Sendable {
     public var useSubscription = false
     public var missed: MissedRun = .runOnWake
     public var enabled = false
+    /// When it was last turned on: a time it was off is not "missed".
+    /// Optional, so a row from before it still reads.
+    public var enabledAt: Date?
 }
 
 public enum AutomationResult: String, Codable, Sendable { case running, done, failed, hitTheCap, stoppedWaiting, skipped }
@@ -240,4 +246,6 @@ public struct AutomationRun: Codable, Equatable, Sendable {
     public var result: AutomationResult
     public var session: SessionLink?
     public var reason: String?
+    /// Where it ran (the new worktree or the fixed folder), for its history.
+    public var folder: String?
 }

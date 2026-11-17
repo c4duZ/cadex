@@ -8,6 +8,7 @@ const hook = @import("hook.zig");
 const agent = @import("agent.zig");
 const claude_wrap = @import("claude_wrap.zig");
 const continue_wrap = @import("continue_wrap.zig");
+const automations = @import("automations.zig");
 // The memory's hook (plan 22): the memory feature's entry, the only code
 // that talks to the engine's socket.
 const memory = @import("../memory/memory.zig");
@@ -17,6 +18,7 @@ const usage_text =
     \\       cadex hook <event>     (a Claude Code hook: tells the Cadex app, never waits)
     \\       cadex memory-hook <event> (a Claude Code hook: feeds the project memory)
     \\       cadex memory-agent <action> [--cwd DIR] … (the app's way to the memory: agent, page, briefing)
+    \\       cadex automations due   (the automations' LaunchAgent: the app checks its agenda, or opens)
     \\       cadex mcp              (the MCP server of the sessions Cadex opens)
     \\       cadex claude [args…]   (the `claude` typed in a Cadex zsh tab: the session kit)
     \\       cadex continue [options] [agent] [args…] (ai-memory run: the agent in the project's workstream, with the kit)
@@ -33,6 +35,11 @@ pub fn main(init: std.process.Init.Minimal) u8 {
     if (std.mem.eql(u8, sub, "claude")) return runClaude(&args);
     if (std.mem.eql(u8, sub, "continue")) return runContinue(&args);
     if (std.mem.eql(u8, sub, "memory-agent")) return runMemoryAgent(&args);
+    if (std.mem.eql(u8, sub, "automations")) {
+        const what = args.next() orelse return fail(usage_text);
+        if (!std.mem.eql(u8, what, "due")) return fail(usage_text);
+        return automations.due();
+    }
     // The agent's subcommands (plan 20): every word after the subcommand.
     var words_buf: [64][]const u8 = undefined;
     var n: usize = 0;

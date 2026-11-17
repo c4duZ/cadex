@@ -28,6 +28,10 @@ public final class AgentToolsServer: @unchecked Sendable {
     /// plan 22 phase C): the app checks the asking process is under one of
     /// its terminals' shells and builds the kit. Without it, refused.
     public var onKit: (@MainActor (AgentKitRequest) -> AgentKitAnswer)?
+    /// `cadex automations due` (docs/adr/0034-scheduled-automations.md): "check
+    /// your agenda". No token: it says nothing of what to run, so any process
+    /// of this user (getpeereid) may at most bring a check forward.
+    public var onDue: (@MainActor () -> Void)?
     public let path: String
     let tokens: AgentSessionTokens
     private let queue = DispatchQueue(label: "cadex.agent-tools.server", qos: .utility)
@@ -100,6 +104,14 @@ public final class AgentToolsServer: @unchecked Sendable {
         setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
         guard let line = Self.readLine(client),
               let object = (try? JSONSerialization.jsonObject(with: line)) as? [String: Any] else { close(client); return }
+        if object["due"] as? Bool == true {
+            guard local else { close(client); return }
+            DispatchQueue.main.async { [weak self] in
+                MainActor.assumeIsolated { self?.onDue?() }
+                Self.answer(client, nil)
+            }
+            return
+        }
         // No token in a tab: a typed `claude` is checked by its ancestry.
         if object["kit"] as? Bool == true {
             guard local else { close(client); return }

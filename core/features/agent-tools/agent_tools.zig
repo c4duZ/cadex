@@ -18,4 +18,5 @@ test {
     _ = @import("claude_wrap.zig");
     _ = @import("prompt_file.zig");
     _ = @import("continue_wrap.zig");
+    _ = @import("automations.zig");
 }

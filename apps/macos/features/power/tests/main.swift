@@ -65,6 +65,18 @@ let exitCode = await Checks.run([
         power.set(.always)
         expect(power.mode == .off && !power.isHolding && changes == 1)
     }),
+    ("another feature's job holds apart from the mode: the last one to end lets go, the coffee stays off", {
+        let job = FakeHold()
+        let power = PowerController(anyRunning: { false }, holder: FakeHold())
+        power.makeJobHolder = { job }
+        expect(power.hold(job: "a") && job.held && power.mode == .off && !power.isHolding)
+        power.hold(job: "b")
+        power.release(job: "a")
+        expect(job.held, "b still runs")
+        power.release(job: "b")
+        expect(!job.held && power.jobs.isEmpty)
+        power.release(job: "b")
+    }),
     ("each command shows only when it changes something", {
         let power = PowerController(anyRunning: { false }, holder: FakeHold())
         let commands = Dictionary(uniqueKeysWithValues: PowerCommands.all(power).map { ($0.id, $0) })

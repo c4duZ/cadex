@@ -200,6 +200,14 @@ extension WindowSession {
                 let parts = line.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "|").map(String.init)
                 let wanted = parts.first ?? ""
                 let index = parts.count > 1 ? (Int(parts[1]) ?? 1) : 1
+                // "automation:<name>": that automation's history in front.
+                if wanted.hasPrefix("automation:") {
+                    let name = String(wanted.dropFirst("automation:".count))
+                    if let found = ((try? OrchestrationController.shared.automations()?.automations()) ?? []).first(where: { $0.name == name }) {
+                        self.showAutomationHistory(found.id)
+                    }
+                    return NSLog("Cadex pressed: %@", wanted)
+                }
                 // "page": the newest run's page in front, as orchestration.show-run does.
                 if wanted == "page" {
                     let runs = ((try? OrchestrationController.shared.runs()?.store.all(.runs)) as [Run]??) ?? nil
@@ -218,5 +226,32 @@ extension WindowSession {
             }
         }
         RunLoop.main.add(timer, forMode: .common)
+    }
+
+    /// CADEX_PERF_AUTOMATION_FORM: a JSON with the "New Automation" sheet's
+    /// fields (`name`, `prompt`, `kind` 0 weekdays…3 every N minutes, `time`,
+    /// `newWorktree`, `account`, `model`, `permission`, `tools`, `budgetUsd`,
+    /// `maxMinutes`, `subscription`, `skipMissed`), filled when it opens.
+    func fillPerfAutomationForm(_ form: NewAutomationForm) {
+        struct Fill: Decodable {
+            var name: String
+            var prompt: String
+            var kind: Int
+            var time: String
+            var newWorktree: Bool?
+            var account: String?
+            var model: String?
+            var permission: String?
+            var tools: String?
+            var budgetUsd: Double?
+            var maxMinutes: Int?
+            var subscription: Bool?
+            var skipMissed: Bool?
+        }
+        guard let file = ProcessInfo.processInfo.environment["CADEX_PERF_AUTOMATION_FORM"], let data = FileManager.default.contents(atPath: file),
+              let fill = try? JSONDecoder().decode(Fill.self, from: data) else { return }
+        form.fill(name: fill.name, prompt: fill.prompt, kind: fill.kind, time: fill.time, newWorktree: fill.newWorktree ?? true, account: fill.account,
+                  model: fill.model ?? "", permission: fill.permission ?? "default", tools: fill.tools ?? "", budgetUsd: fill.budgetUsd ?? 0.05,
+                  maxMinutes: fill.maxMinutes ?? 3, subscription: fill.subscription ?? false, skipMissed: fill.skipMissed ?? false)
     }
 }

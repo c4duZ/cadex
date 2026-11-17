@@ -26,8 +26,14 @@ public final class OrchestrationController {
     }
     /// orchestration.automations. Off closes the state when races and runs are off too.
     public var automationsEnabled = false {
-        didSet { if !isEnabled && !automationsEnabled { close() } }
+        didSet {
+            if !isEnabled && !automationsEnabled { close() }
+            if automationsEnabled != oldValue { onAutomationsSwitch?(automationsEnabled) }
+        }
     }
+    /// orchestration.automations changed (Settings, or the command): the app
+    /// installs or removes the LaunchAgent (docs/adr/0034-scheduled-automations.md).
+    public var onAutomationsSwitch: ((Bool) -> Void)?
     public var limits = Limits()
 
     /// Where state.sqlite lives: CADEX_ORCHESTRATION_DIR for a test

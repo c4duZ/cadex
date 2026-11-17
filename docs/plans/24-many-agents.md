@@ -295,6 +295,32 @@ docs/adr/0031-run-on-remote.md (plano 23), `docs/adr/0004-clean-rewrite.md`,
       `apps/macos/features/agents/AgentBackground.swift`). A escolha entre aba e `--bg` por
       execução fica para a fase B.
   - Features: orchestration, worktrees, power, agents, settings.
+  - E feita em 2026-11-16 (`apps/macos/features/orchestration/CLAUDE.md`,
+    `apps/macos/app/AutomationWiring.swift`, `apps/macos/app/AutomationRunWiring.swift`,
+    `core/features/agent-tools/automations.zig`): New Automation (nome, prompt, recorrência, destino,
+    conta, modelo, modo de permissão, ferramentas, tetos, assinatura ou a chave de API da conta, o
+    que fazer com a perdida), nascendo desligada; ligar as automações e cada uma mostrando antes o
+    que muda; o LaunchAgent instalado com a primeira ligada, reescrito a cada mudança e removido com a
+    última ou com orchestration.automations; `cadex automations due` pedindo ao app pelo socket ou
+    abrindo o Cadex em segundo plano; a agenda conferida ao abrir, ao acordar e no pedido; a execução
+    perdida (rodar uma vez ou pular) e "still running"; a aba na janela principal sem trazê-la para a
+    frente; o computador acordado durante a execução pela power (`hold(job:)`, porta nova); o teto
+    ("hit the cap", "stopped waiting"); "Run Now"; o histórico com início, fim, custo, resultado e os
+    links da sessão e do transcript; o aviso ao terminar ou falhar. Decidido além do texto: a
+    recorrência "a cada N minutos" (a validação pede uma a cada 2 minutos); o modo de permissão
+    sempre explícito; as ferramentas numa palavra só; uma execução recusada vira "failed" no
+    histórico. Testado: 5 testes novos na OrchestrationTests (47), 1 na power, o núcleo; numa
+    instância de teste com um LaunchAgent de rótulo e pasta próprios: sem automação ligada nenhum
+    plist nem job; ligar instalou e carregou; com o Cadex fechado, o launchd abriu o app às 22:00:07
+    e a automação rodou numa worktree nova; com o app aberto, o horário seguinte pelo socket; com
+    agentes falsos, "hit the cap" e "stopped waiting" em 1 min, os agentes encerrados, o pedido de
+    energia no `pmset` durante a execução; a perdida com o app fechado e o job descarregado
+    ("rodar ao acordar" rodou uma vez, "pular" ficou "skipped: missed"); desligar a última e desligar
+    orchestration.automations removeram o plist e o job; com o `claude` real, "Run Now" com a sessão,
+    o transcript e o custo certos, a recusa sem apiKeyHelper, e o pedido de permissão parando em
+    "stopped waiting". Achados e corrigidos: sem o modo explícito o "auto mode" da conta aprovou um
+    `touch` sozinho; o custo final ficava 0. **Falta**: um sono de verdade do Mac no horário (a
+    perdida foi simulada com o app fechado), e o quadro "Precisa de você" visto a olho durante a espera.
 - **F. Peso e fechamento.** Cenário novo no `tools/perf/run.py`: 6 agentes falsos em paralelo
   (programas que imitam os hooks do plano 19 e reportam pela CLI), uma corrida de 3 e uma execução
   com 5 tarefas; limite de memória e CPU do Cadex com o quadro aberto, e com orchestration.enabled

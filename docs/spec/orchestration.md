@@ -138,7 +138,7 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
 
 ### Automações
 - "New Automation" (orchestration.new-automation): nome, prompt, recorrência (dias úteis a uma hora,
-  todo dia a uma hora, a cada N horas, uma vez numa data), destino (uma worktree nova a cada
+  todo dia a uma hora, a cada N horas, a cada N minutos, uma vez numa data), destino (uma worktree nova a cada
   execução, ou uma pasta fixa), conta, modelo, modo de permissão e ferramentas permitidas, teto de
   gasto e de duração, assinatura ou chave de API (a chave é do `apiKeyHelper` da conta; o Cadex só
   diz se a conta tem um), e o que fazer com uma execução perdida (rodar ao acordar, o padrão, ou
@@ -153,6 +153,14 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
   espera até o dono responder ou até o teto de duração, marcada "stopped waiting".
 - Passou do teto de gasto ou de duração: o agente é encerrado e a execução fica "hit the cap".
 - "Run Now" (orchestration.run-automation-now) roda fora do horário, com o mesmo teto.
+- O modo de permissão escolhido vai sempre ao `claude` (`--permission-mode=default` também): sem
+  ele valia o modo da conta, e o "auto mode" do Claude Code aprovou sozinho um comando que ninguém
+  viu (2026-11-16). As ferramentas permitidas vão numa palavra só (`--allowedTools=a,b`), porque a
+  opção aceita vários valores e engoliria o prompt.
+- O app confere a agenda ao abrir, ao acordar o Mac e quando o job pede (`cadex automations due`,
+  o pedido sem token no `app.sock`); com o app fechado, o job abre o Cadex em segundo plano
+  (`open -g` no app empacotado; numa instância de teste, o executável com CADEX_BACKGROUND=1 e as
+  pastas dela, passadas pelo plist). Um horário atrasado mais de 2 minutos é uma execução perdida.
 - O histórico (orchestration.show-automation-history): uma linha por execução com início, fim,
   custo, resultado (done, failed, hit the cap, stopped waiting, skipped) e o link para a sessão (vai
   à aba, ou retoma pelo History) e para o transcript.
@@ -244,11 +252,20 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
       execução dela; approve-gate pela CLI é recusado. (2026-11-16, pela CLI de verdade com o token
       de uma sessão de despacho: outro CADEX_DISPATCH_ID recusado, approve-gate "not allowed for
       agents", retry de um agente de tarefa recusado, report-done repetido "already done".)
-- [ ] Uma automação a cada 2 minutos roda com o Cadex fechado (o LaunchAgent abre o app em segundo
-      plano), para no teto e aparece no histórico com o link certo.
-- [ ] Um pedido de permissão sem ninguém vai ao quadro e a execução para no teto de duração.
-- [ ] Com o Mac dormindo no horário, a automação roda ao acordar (ou é pulada, se assim marcada).
-- [ ] Desligar a última automação remove o LaunchAgent.
+- [x] Uma automação a cada 2 minutos roda com o Cadex fechado (o LaunchAgent abre o app em segundo
+      plano), para no teto e aparece no histórico com o link certo. (2026-11-16, instância de teste
+      com um LaunchAgent de rótulo próprio: o launchd abriu o app às 22:00:07 e a automação rodou
+      numa worktree nova; com agentes falsos, "hit the cap" e "stopped waiting" em 1 min; com o
+      `claude` real, a sessão e o transcript certos no histórico.)
+- [x] Um pedido de permissão sem ninguém vai ao quadro e a execução para no teto de duração.
+      (2026-11-16, com o `claude` real e o modo "default": o `touch` esperou a permissão e a
+      execução parou em 1 min, "stopped waiting", sem o arquivo; o quadro é o do plano 19, pelo hook.)
+- [x] Com o Mac dormindo no horário, a automação roda ao acordar (ou é pulada, se assim marcada).
+      (2026-11-16, simulado com o app fechado e o job descarregado no horário, o mesmo caminho do
+      acordar: "rodar ao acordar" rodou uma vez ao abrir, "pular" ficou "skipped: missed". Um sono de
+      verdade do Mac falta conferir com o dono.)
+- [x] Desligar a última automação remove o LaunchAgent. (2026-11-16: o plist some e o `launchctl
+      print` não acha o job; desligar orchestration.automations faz o mesmo, e religar o devolve.)
 - [ ] `fs_usage` e `nettop` não mostram o Cadex lendo o Keychain nem falando com a Anthropic.
 - [ ] `make perf`: com tudo desligado, os números de antes; 6 agentes falsos, uma corrida de 3 e uma
       execução de 5 tarefas dentro do limite.

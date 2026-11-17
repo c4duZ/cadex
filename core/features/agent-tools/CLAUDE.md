@@ -48,6 +48,10 @@
   `cadex skills get orchestration`. `cadex claude` executa o CADEX_CLAUDE_BIN quando ele existe: o
   `claude` falso de uma instância de teste (`../../../tools/perf/fake_claude.py`), que o PATH do
   shell da aba nunca troca pelo de verdade.
+- Plano 24, fase E (`../../../docs/adr/0034-scheduled-automations.md`): `automations.zig`, `cadex
+  automations due`, o programa do LaunchAgent das automações: pede ao app pelo socket que confira a
+  agenda (`{"v":1,"due":true}`, sem token); com o app fechado, abre o Cadex em segundo plano
+  (CADEX_APP_BUNDLE com `open -g`, ou CADEX_APP_BIN com CADEX_BACKGROUND=1, numa sessão própria) e sai.
 - Fase C e D: `cadex browser goto|snapshot|click|fill|press|scroll|wait|screenshot|console|notes` e as ferramentas
   `browser_*` do MCP viram o comando preview.agent com `action=`; o print volta ao agente como imagem
   (o PNG em base64) e o caminho.

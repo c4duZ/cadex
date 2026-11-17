@@ -52,6 +52,9 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "orchestration.add-gate", "orchestration.approve-gate", "orchestration.reject-gate",
             "orchestration.answer-question", "orchestration.report-done", "orchestration.report-heartbeat",
             "orchestration.ask", "orchestration.send-message", "orchestration.inbox", "orchestration.spawn",
+            # Scheduled automations (plan 24, phase E).
+            "orchestration.toggle-automations", "orchestration.new-automation", "orchestration.toggle-automation",
+            "orchestration.run-automation-now", "orchestration.show-automation-history",
             "memory.show", "memory.show-briefing", "memory.show-history", "memory.reindex", "memory.refresh", "memory.enable", "memory.approve", "memory.reject", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).

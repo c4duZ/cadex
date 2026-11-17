@@ -58,6 +58,27 @@ public final class PowerController {
         set(mode == .off ? defaultMode : .off)
     }
 
+    /// The jobs of other features holding the computer awake now (an
+    /// automation running, docs/spec/power.md): their own power request,
+    /// apart from the mode, so the coffee does not change.
+    public private(set) var jobs: Set<String> = []
+    private lazy var jobHolder: PowerHold = makeJobHolder()
+    var makeJobHolder: () -> PowerHold = { SystemPowerHold() }
+
+    /// Keeps the computer awake while the job runs; false when the system refused.
+    @discardableResult
+    public func hold(job: String) -> Bool {
+        let first = jobs.isEmpty
+        jobs.insert(job)
+        return first ? jobHolder.hold(display: false) : true
+    }
+
+    /// The job ended: the request goes with the last one.
+    public func release(job: String) {
+        guard jobs.remove(job) != nil, jobs.isEmpty else { return }
+        jobHolder.release()
+    }
+
     /// Holds or releases as the mode and the terminals say now.
     func check(force: Bool = false) {
         let should = mode == .always || (mode == .running && anyRunning())

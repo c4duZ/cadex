@@ -14,6 +14,9 @@
 ## Como eu quero
 - `PowerController.swift`: a porta de entrada. Modos off, always e running; em running confere os
   terminais a cada 5 s. `keepDisplayOn` vale na hora. `onChange` avisa o ícone.
+- `hold(job:)` e `release(job:)` (plano 24, fase E): outra feature segura o computador enquanto um
+  trabalho dela roda (uma automação, orchestration.keepAwakeDuringRuns), com um pedido próprio,
+  sem mudar o modo nem o café; sai com o último trabalho.
 - `PowerHold.swift`: os pedidos do IOKit (PreventSystemSleep, que vale com a tampa fechada na
   tomada; PreventUserIdleSystemSleep; e o da tela, se pedido). Pedido recusado volta a off.
 - `PowerCommands.swift`: power.toggle (⇧⌘A: o modo padrão, `defaultMode`, ou desligar), power.keep-awake, power.keep-awake-while-running e power.allow-sleep; cada
@@ -21,5 +24,6 @@
 - Spec: `docs/spec/power.md`.
 
 ## Como validar
-- `make macos-test` passa: sempre, com programa, pedido recusado, comandos que somem.
+- `make macos-test` passa: sempre, com programa, pedido recusado, comandos que somem, o trabalho
+  de outra feature segurando à parte.
 - No app: ligar e conferir `pmset -g assertions` (o pedido "Cadex: manter o computador acordado").

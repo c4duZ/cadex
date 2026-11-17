@@ -10,6 +10,10 @@ acts on words in its prompt (the last argument), reporting by `cadex run`:
   FAKE-HEARTBEAT   a heartbeat every 20 s
   FAKE-SLEEP       work for FAKE_SLEEP seconds (default 300), then idle
   FAKE-SILENT      nothing at all (it stalls)
+  FAKE-BLOCKED     says it waits for a permission (OSC 7501 blocked), then waits
+
+It tells the terminal its state by OSC 7501 like Claude Code (working when
+it starts, idle when it stops).
 
 It never talks to the network. Idle means: wait until killed."""
 import json, os, signal, subprocess, sys, time, uuid
@@ -40,7 +44,14 @@ def run(*words):
     log(f"{words[0]} -> {done.returncode} {done.stdout.strip()} {done.stderr.strip()}")
 
 
+def status(state, kind=""):
+    extra = f":kind={kind}" if kind else ""
+    sys.stdout.write(f"\x1b]7501;state={state}:app=claude-code{extra}\x07")
+    sys.stdout.flush()
+
+
 def idle():
+    status("idle")
     hook("Stop")
     while True:
         time.sleep(3600)
@@ -50,6 +61,11 @@ signal.signal(signal.SIGTERM, lambda *_: (hook("SessionEnd"), sys.exit(0)))
 log("started: " + prompt[:40])
 hook("SessionStart")
 hook("UserPromptSubmit")
+status("working")
+if "FAKE-BLOCKED" in prompt:
+    status("blocked", "permission")
+    while True:
+        time.sleep(3600)
 if "FAKE-SPAWN" in prompt:
     path = os.path.join(os.getcwd(), "child-spec.md")
     open(path, "w").write("FAKE-SLEEP child")

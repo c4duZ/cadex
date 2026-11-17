@@ -72,6 +72,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         startProgramNotifications()
         startHibernation()
         startAgentTools()
+        startAutomations()
         startTypedClaude()
         startComputerUse()
         let main = WindowSession(app: self, folder: WorkspaceFolder(), isMain: true)

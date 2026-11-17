@@ -86,6 +86,20 @@
   entregaram, "stalled?" em amarelo, "waiting for an answer", a nota do sinal de vida e a caixa de
   entrada com "Answer…"; o ⌘K, orchestration.add-gate, -approve-gate, -reject-gate,
   -answer-question e os seis comandos do agente (com argumentos, pelo `cadex run`).
+- As automações (fase E): `AutomationSchedule.swift` (puro: o próximo horário de cada recorrência,
+  dias úteis, todo dia, a cada N horas desde a meia-noite, a cada N minutos desde a hora e uma vez;
+  o que vence agora, várias perdidas viram uma, atrasada mais de 2 min é perdida e roda ou é pulada
+  pela regra dela, "still running" com a anterior rodando; as datas do launchd), `AutomationAgent.swift`
+  (o plist do LaunchAgent com StartCalendarInterval, sem KeepAlive, RunAtLoad nem StartInterval, o
+  programa `cadex automations due`, escrito e carregado com `launchctl bootstrap`, removido sem
+  data; CADEX_LAUNCH_AGENTS_DIR e CADEX_LAUNCH_LABEL numa instância de teste),
+  `AutomationLaunch.swift` (as recusas antes de rodar, com a chave de API pelo apiKeyHelper da conta
+  lido sem escrever, a menos que a automação use a assinatura; as palavras do `claude`, o modo de
+  permissão sempre; e a vida da execução no `AutomationBook`: ligar a partir de agora, começar,
+  pular, terminar), `NewAutomationForm.swift`, `AutomationHistory.swift` (as linhas e a página do
+  histórico) e `AutomationCommands.swift` (orchestration.toggle-automations, -new-automation,
+  -toggle-automation, -run-automation-now e -show-automation-history). O controlador avisa quando
+  orchestration.automations muda (`onAutomationsSwitch`).
 - Configurações (`../settings/OrchestrationSettings.swift`, `../settings/OrchestrationRows.swift`):
   orchestration.enabled, orchestration.automations, orchestration.maxAgents (6),
   orchestration.maxDepth (2), orchestration.heartbeatMinutes (10),
@@ -108,4 +122,6 @@
   pedinte pela sessão e as recusas, report-done e o repetido, sinal de vida e "stalled?", pergunta
   ao dono e a resposta, recado só na mesma execução, o coordenador respondendo e sabendo como as
   tarefas terminaram, spawn (profundidade, after, gate, a vaga, parar o pai), o coordenador criando
-  no topo, portões, a tarefa que não começa sozinha e o prompt do coordenador.
+  no topo, portões, a tarefa que não começa sozinha e o prompt do coordenador; da E
+  (`tests/Automations.swift`): o próximo horário de cada recorrência, o que vence e a perdida, o
+  plist e a instalação com um launchctl falso, as recusas e as palavras, o histórico.

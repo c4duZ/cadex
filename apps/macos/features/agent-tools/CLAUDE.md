@@ -42,6 +42,9 @@
   pai de cada um pelo sysctl) e `comesFrom(shells:)`; o servidor o passa a `onKit`, que responde na
   hora com `AgentKitAnswer` (`args`, `unset`, `path_first`, ou a recusa). O app confere os shells dos
   terminais e monta o kit (`../../app/TypedClaudeWiring.swift`).
+- `onDue` (plano 24, fase E, `../../../../docs/adr/0034-scheduled-automations.md`): o pedido
+  `{"v":1,"due":true}` do `cadex automations due`, sem token e só local (getpeereid): "confira a
+  agenda"; não diz o que rodar.
 - `serveRemote` (plano 23, fase F): a conexão de outra máquina da tailnet que o listener da feature
   machines já conferiu pelo WhoIs; o mesmo protocolo, só com o token de uma sessão; o pedido do kit
   é fechado (ele confia na ancestralidade de um processo deste Mac).

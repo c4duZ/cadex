@@ -196,6 +196,18 @@
   "Open Claude to Trust" só numa conta do Cadex) e CADEX_PERF_PRESS (aperta pelo título um botão da
   janela, por `performClick`; `page` traz a página da execução): a tela bloqueada não deixa a
   acessibilidade ver a janela (2026-11-16).
+- `AutomationWiring.swift` (plano 24, fase E): os comandos das automações; ligar mostra antes a
+  posição dos termos e o aviso do item em segundo plano; New Automation (nasce desligada, abre o
+  histórico); ligar uma mostra o que roda, onde, em qual conta, como é pago e o teto; o LaunchAgent
+  segue as ligadas (`syncAutomationAgent`: numa instância de teste, as pastas CADEX_ dela, o
+  executável e o socket dela no plist). `AutomationRunWiring.swift`: a agenda conferida ao abrir,
+  ao acordar o Mac (NSWorkspace.didWakeNotification) e no pedido do job (`onDue` do servidor); a
+  execução (as recusas viram "failed" no histórico; a worktree nova pelo `plan`/`make` ou a pasta
+  fixa; o prompt por arquivo; a aba na janela principal sem trazê-la para a frente; o computador
+  acordado pela power, `hold(job:)`); o `AutomationWatch`, um relógio de 10 s só com execução
+  rodando ou terminada há menos de 2 min (o custo final): concluída quando o agente para depois de
+  trabalhar, falhou quando sai, no teto o agente é encerrado ("hit the cap", ou "stopped waiting"
+  esperando permissão); o id do Claude e o caminho do transcript; o aviso no feed e na notificação.
 - `ProgramNotifications.swift`: a notificação pedida por um programa num terminal (OSC 777, OSC 9)
   vira uma do macOS (terminal.programNotifications), uma por terminal, não enquanto você o olha; o
   clique vem pelo AgentNotifier.onOpenTerminal (o único delegate do centro) e leva ao terminal.
