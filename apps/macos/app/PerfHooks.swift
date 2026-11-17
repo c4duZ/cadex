@@ -98,6 +98,18 @@ extension WindowSession {
                 }
             }
         }
+        // A key pressed as the keyboard sends it, to the key window (⌘1 with ⌘J open), at
+        // CADEX_PERF_KEY_AT seconds: "1" is ⌘1; it goes through the shortcuts' monitor as a real one.
+        if let digit = environment["CADEX_PERF_KEY"], let code = ["1": 18, "2": 19, "3": 20][digit] {
+            let at = environment["CADEX_PERF_KEY_AT"].flatMap(Double.init) ?? 10
+            DispatchQueue.main.asyncAfter(deadline: .now() + at) {
+                guard let target = NSApp.keyWindow ?? NSApp.windows.first(where: { $0 is NSPanel && $0.isVisible }),
+                      let press = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: .command, timestamp: ProcessInfo.processInfo.systemUptime,
+                                                   windowNumber: target.windowNumber, context: nil, characters: digit,
+                                                   charactersIgnoringModifiers: digit, isARepeat: false, keyCode: UInt16(code)) else { return }
+                NSApp.sendEvent(press)
+            }
+        }
         // What the window shows, as JSON, at CADEX_PERF_REPORT_AT seconds (the checks of plan 29).
         if let out = environment["CADEX_PERF_REPORT"] {
             let at = environment["CADEX_PERF_REPORT_AT"].flatMap(Double.init) ?? 8

@@ -42,7 +42,11 @@ Inventário: seção "Entradas" e os apelidos do 28.
   comparado com o mockup no app (uma corrida de verdade com o `claude` falso). O ⇧⌘N da janela nova e o ⌘N da Nova tarefa entraram já na fase A (os cartões da tela
   de início mostram o atalho). Plano original: Pular por atenção (precisa de você, trabalhando, pronto) ou começar tarefa, como no
   mockup 6. window.new vai para ⇧⌘N.
-- **D. Remoção.** Saem: NewRaceForm.swift, o fluxo de alertas do New Task em
+- **D. Remoção.** Feita (2026-11-17): saiu o NewRaceForm.swift (as contas das outras folhas em
+  AccountChoice.swift); o fluxo de alertas, a leitura de tabs.paneHeaders e os apelidos do 28 já
+  tinham saído (fases A–B e plano 28); orchestration.new-race abre a folha com dois agentes e fica
+  para o plano 30; CADEX_PERF_RACE_FORM virou CADEX_PERF_NEW_TASK. O ⌘1…⌘9 do ⌘J passa na frente do
+  ir-para-a-aba (`takenFirst`), conferido no app com a tecla. Plano original: Saem: NewRaceForm.swift, o fluxo de alertas do New Task em
   WorktreesWiring.swift, a leitura de tabs.paneHeaders, os apelidos do 28;
   `orchestration.new-race` vira apelido do ⌘N com dois agentes (sai no 30). `CADEX_PERF_RACE_FORM` passa a abrir a folha nova. Specs e `CLAUDE.md` de
   worktrees, orchestration, home, shortcuts.

@@ -114,29 +114,9 @@ let raceTests: [(name: String, body: Checks.Body)] = [
         expect(columns[2].isDiscarded && !columns[2].canCompare && columns[2].diff == "deleted", "\(columns[2])")
         expect(RaceColumns.costLabel(0.0048, remote: false) == "US$ 0.0048" && RaceColumns.diffLabel(DiffCount(files: 1, added: 3, removed: 0)) == "1 file +3 −0")
     }),
-    ("the form: rows follow the count, accounts take turns, the model and machine chosen per row, the prompt kept", {
-        let accounts = [NewRaceForm.Account(title: "bkdg", dir: "/a/bkdg"), NewRaceForm.Account(title: "default", dir: nil)]
-        let form = NewRaceForm(accounts: accounts, machines: ["pc", "nas"], base: "main", maxAgents: 6)
-        expect(form.contenderRows.count == 3, "three by default")
-        form.choose(count: 4)
-        expect(form.contenderRows.count == 4)
-        form.choose(count: 2)
-        expect(form.contenderRows.count == 2)
-        form.nameField.stringValue = "fix-login"
-        form.promptView.string = "diga \"oi\"\n$(x)"
-        form.contenderRows[1].model.stringValue = "haiku"
-        form.contenderRows[1].machine.selectItem(at: 2)
-        let request = form.request(repository: "/r", caps: Caps(budgetUsd: 1, maxMinutes: 5))
-        expect(request.name == "fix-login" && request.base == "main" && request.prompt == "diga \"oi\"\n$(x)", "\(request)")
-        expect(request.agents == [AgentChoice(account: "/a/bkdg"), AgentChoice(account: nil, model: "haiku", machine: "nas")], "\(request.agents)")
-        let same = [NewRaceForm.Account(title: "Org", dir: "/a/x"), NewRaceForm.Account(title: "Org", dir: "/a/y"), NewRaceForm.Account(title: "", dir: "/a/bkdg")]
-        expect(NewRaceForm.titles(same) == ["Org · x", "Org · y", "bkdg"], "\(NewRaceForm.titles(same))")
-        let twins = NewRaceForm(accounts: same, machines: [], base: "main", maxAgents: 6)
-        expect(twins.contenderRows[0].account.numberOfItems == 3 && twins.contenderRows[0].account.titleOfSelectedItem == "Org · x")
-        twins.fill(name: "n", prompt: "p", count: 2, accounts: ["/a/bkdg", "/a/y"], model: "haiku")
-        expect(twins.request(repository: "/r", caps: Caps(budgetUsd: 1, maxMinutes: 1)).agents.map(\.account) == ["/a/bkdg", "/a/y"])
-        let capped = NewRaceForm(accounts: [], machines: [], base: "", maxAgents: 2)
-        expect(capped.contenderRows.count == 2 && capped.request(repository: "/r", caps: Caps(budgetUsd: 1, maxMinutes: 1)).agents.allSatisfy { $0.account == nil })
+    ("the accounts' names: two of the same name get their folder after it", {
+        let same = [AccountChoice(title: "Org", dir: "/a/x"), AccountChoice(title: "Org", dir: "/a/y"), AccountChoice(title: "", dir: "/a/bkdg")]
+        expect(AccountChoice.titles(same) == ["Org · x", "Org · y", "bkdg"], "\(AccountChoice.titles(same))")
     }),
     ("the session's cost: cost.total_cost_usd of the status line's file; none, or a path, is nil", {
         let dir = tempDir()

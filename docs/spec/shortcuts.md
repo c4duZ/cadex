@@ -7,7 +7,9 @@ comando; o usuário pode mudar qualquer um.
 ## Comportamento
 - Os atalhos padrão vêm com o app. Os do terminal e das abas:
   - ⌘K paleta · ⌘L limpar · ⌘C copiar · ⌘V colar · ⌘A selecionar tudo · ⌘F buscar
-  - ⌘T nova aba · ⌘W fechar painel · ⌘1 a ⌘9 ir para a aba
+  - ⌘T nova aba · ⌘W fechar painel · ⌘1 a ⌘9 ir para a aba (com o ⌘J aberto, ⌘1 a ⌘9 escolhem a
+    linha dele: a paleta pega a tecla antes do atalho e do menu)
+  - ⌘N nova tarefa · ⇧⌘N nova janela · ⌘J ir para uma tarefa · ⇧⌘A o agente de uma conta
   - Ctrl+Tab e Ctrl+⇧+Tab alternar abas pela ordem de uso
   - ⌘D dividir à direita · ⌘⇧D dividir para baixo · ⌘] e ⌘[ próximo e anterior painel
   - ⌘⌥ + setas mudar o foco para o painel naquela direção

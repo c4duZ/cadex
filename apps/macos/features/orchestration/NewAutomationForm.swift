@@ -22,15 +22,15 @@ public final class NewAutomationForm: NSView {
     let subscription = NSButton(checkboxWithTitle: T("Use the subscription (not the account's API key)", "Usar a assinatura (não a chave de API da conta)"),
                                 target: nil, action: nil)
     let missed = NSPopUpButton()
-    private let accounts: [NewRaceForm.Account]
+    private let accounts: [AccountChoice]
     private let repository: String?
     private let folder: String
     static let modes = ["default", "acceptEdits", "plan", "bypassPermissions"]
 
     /// `repository`: a git repository (a new worktree each run is offered);
     /// `folder`: the fixed folder offered (the window's).
-    public init(accounts: [NewRaceForm.Account], repository: String?, folder: String, caps: Caps) {
-        self.accounts = accounts.isEmpty ? [NewRaceForm.Account(title: "~/.claude", dir: nil)] : accounts
+    public init(accounts: [AccountChoice], repository: String?, folder: String, caps: Caps) {
+        self.accounts = accounts.isEmpty ? [AccountChoice(title: "~/.claude", dir: nil)] : accounts
         self.repository = repository
         self.folder = folder
         super.init(frame: NSRect(x: 0, y: 0, width: 540, height: 470))
@@ -43,8 +43,8 @@ public final class NewAutomationForm: NSView {
         timeField.stringValue = "09:00"
         if let repository { target.menu?.addItem(NSMenuItem(title: T("A new worktree of ", "Uma worktree nova de ") + (repository as NSString).lastPathComponent, action: nil, keyEquivalent: "")) }
         target.menu?.addItem(NSMenuItem(title: T("This folder: ", "Esta pasta: ") + (folder as NSString).abbreviatingWithTildeInPath, action: nil, keyEquivalent: ""))
-        for title in NewRaceForm.titles(self.accounts) { account.menu?.addItem(NSMenuItem(title: title, action: nil, keyEquivalent: "")) }
-        model.addItems(withObjectValues: NewRaceForm.models.map { $0.isEmpty ? T("default", "padrão") : $0 })
+        for title in AccountChoice.titles(self.accounts) { account.menu?.addItem(NSMenuItem(title: title, action: nil, keyEquivalent: "")) }
+        model.addItems(withObjectValues: AccountChoice.models.map { $0.isEmpty ? T("default", "padrão") : $0 })
         model.selectItem(at: 0)
         Self.modes.forEach { permission.menu?.addItem(NSMenuItem(title: $0, action: nil, keyEquivalent: "")) }
         toolsField.placeholderString = T("Allowed tools, comma-separated (Read,Edit,Bash(git:*))", "Ferramentas permitidas, separadas por vírgula (Read,Edit,Bash(git:*))")

@@ -85,6 +85,14 @@ public final class CommandPaletteController {
         panel.prepare(placeholder: newSource.placeholder, emptyText: newSource.emptyText, icon: newSource.icon)
     }
 
+    /// ⌘1…⌘9 while the list shows that shortcut (⌘J): the row is chosen here and the press ends,
+    /// so the app's shortcut for it (tab.select-N) and the menu never get it. True when taken.
+    public func takePress(_ event: NSEvent) -> Bool {
+        // The press goes to the panel (its window, or the key one while it is open).
+        guard panel.isVisible, event.window === panel || panel.isKeyWindow else { return false }
+        return panel.chooseByShortcut(event)
+    }
+
     /// Runs the current text again (an option of the source changed).
     public func refresh() {
         guard panel.isVisible else { return }

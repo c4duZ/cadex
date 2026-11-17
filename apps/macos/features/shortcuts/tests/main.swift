@@ -42,6 +42,19 @@ func appRegistry() -> CommandRegistry {
 }
 
 let exitCode = await Checks.run([
+    ("a press another part takes first ends there: ⌘1 in ⌘J's list is not tab.select-1", { @MainActor in
+        let registry = CommandRegistry()
+        var ran = 0
+        registry.register(Command(id: "tab.select-1", title: "Tab 1", category: .tabs, defaultShortcut: "cmd+1", action: .run { ran += 1 }))
+        let dispatcher = ShortcutDispatcher(registry: registry, keymap: Keymap(registry: registry))
+        guard let press = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: .command, timestamp: 0, windowNumber: 0, context: nil,
+                                           characters: "1", charactersIgnoringModifiers: "1", isARepeat: false, keyCode: 18) else { return expect(false) }
+        var wanted = true
+        dispatcher.takenFirst = { _ in wanted }
+        expect(dispatcher.handle(press) && ran == 0, "the palette took it: handled, the command not run")
+        wanted = false
+        expect(dispatcher.handle(press) && ran == 1, "otherwise the shortcut runs")
+    }),
     ("key combinations parse, print and label", {
         let combo = KeyCombo("cmd+shift+d")
         expect(combo == KeyCombo(key: "d", command: true, shift: true))

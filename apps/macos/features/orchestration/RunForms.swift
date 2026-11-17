@@ -107,7 +107,7 @@ public final class DispatchForm: NSView {
         }
     }
 
-    private let accounts: [NewRaceForm.Account]
+    private let accounts: [AccountChoice]
     private let bases: [String]
     private let idle: [Idle]
     let account = NSPopUpButton()
@@ -116,13 +116,13 @@ public final class DispatchForm: NSView {
     let base = NSPopUpButton()
     let promptView = NSTextView()
 
-    public init(accounts: [NewRaceForm.Account], bases: [String], idle: [Idle], prompt: String, permissions: String) {
-        self.accounts = accounts.isEmpty ? [NewRaceForm.Account(title: "~/.claude", dir: nil)] : accounts
+    public init(accounts: [AccountChoice], bases: [String], idle: [Idle], prompt: String, permissions: String) {
+        self.accounts = accounts.isEmpty ? [AccountChoice(title: "~/.claude", dir: nil)] : accounts
         self.bases = bases
         self.idle = idle
         super.init(frame: NSRect(x: 0, y: 0, width: 520, height: 300))
-        for title in NewRaceForm.titles(self.accounts) { account.menu?.addItem(NSMenuItem(title: title, action: nil, keyEquivalent: "")) }
-        model.addItems(withObjectValues: NewRaceForm.models.map { $0.isEmpty ? T("default", "padrão") : $0 })
+        for title in AccountChoice.titles(self.accounts) { account.menu?.addItem(NSMenuItem(title: title, action: nil, keyEquivalent: "")) }
+        model.addItems(withObjectValues: AccountChoice.models.map { $0.isEmpty ? T("default", "padrão") : $0 })
         model.selectItem(at: 0)
         place.menu?.addItem(NSMenuItem(title: T("A new worktree and tab", "Uma worktree e aba novas"), action: nil, keyEquivalent: ""))
         for terminal in idle { place.menu?.addItem(NSMenuItem(title: terminal.title, action: nil, keyEquivalent: "")) }

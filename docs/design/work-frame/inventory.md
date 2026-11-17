@@ -104,7 +104,7 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 |---|---|---|---|---|
 | trecho | "confirmTask" em `apps/macos/app/WorktreesWiring.swift` | saiu | o fluxo de alertas do New Task: a folha única do ⌘N (`apps/macos/features/worktrees/NewTaskSheet.swift`), fase B | 29 |
 | trecho | "askTaskName" em `apps/macos/app/RunOnWiring.swift` | saiu | o nome e o "Rodar em" num alerta: a máquina é uma linha de agente da folha, fase B | 29 |
-| arquivo | `apps/macos/features/orchestration/NewRaceForm.swift` | sai | a folha única do ⌘N (2+ agentes) | 29 |
+| arquivo | `apps/macos/features/orchestration/NewRaceForm.swift` | saiu | a folha única do ⌘N (2+ agentes); as contas das folhas de execução e automação em `apps/macos/features/orchestration/AccountChoice.swift`, fase D | 29 |
 | comando | `orchestration.new-race` | sai | apelido do ⌘N com 2 agentes no 29, sai no 30 | 30 |
 | comando | `window.new` no ⌘N | muda | ⇧⌘N; o ⌘N é Nova tarefa, feito na fase A | 29 |
 

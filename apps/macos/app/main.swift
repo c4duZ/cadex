@@ -206,6 +206,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             dispatcher.update(keymap: keymap)
         } else {
             let dispatcher = ShortcutDispatcher(registry: main.commands, keymap: keymap)
+            // ⌘1…⌘9 in ⌘J's list are its own, not tab.select-N (plan 29).
+            dispatcher.takenFirst = { [weak self] event in self?.sessions.contains { $0.palette?.takePress(event) == true } ?? false }
             dispatcher.start()
             self.dispatcher = dispatcher
         }

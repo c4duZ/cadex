@@ -235,12 +235,25 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
             return true
         }
         // ⌘1…⌘9: the row that shows that shortcut (⌘J's rows, the mockup).
-        if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command, let digit = event.charactersIgnoringModifiers,
-           "123456789".contains(digit), let index = items.firstIndex(where: { $0.shortcut == "⌘" + digit && $0.unavailableReason == nil }) {
+        if let index = shortcutRow(event) {
             onChoose?(index, .primary)
             return true
         }
         return super.performKeyEquivalent(with: event)
+    }
+
+    /// The row a ⌘1…⌘9 press picks, when the list shows that shortcut.
+    private func shortcutRow(_ event: NSEvent) -> Int? {
+        guard event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command, let digit = event.charactersIgnoringModifiers,
+              digit.count == 1, "123456789".contains(digit) else { return nil }
+        return items.firstIndex { $0.shortcut == "⌘" + digit && $0.unavailableReason == nil }
+    }
+
+    /// Chooses the row a ⌘1…⌘9 press names; false when none shows it.
+    func chooseByShortcut(_ event: NSEvent) -> Bool {
+        guard let index = shortcutRow(event) else { return false }
+        onChoose?(index, .primary)
+        return true
     }
 
     private static func choice(_ flags: NSEvent.ModifierFlags) -> PaletteChoice {

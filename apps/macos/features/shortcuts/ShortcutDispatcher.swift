@@ -14,6 +14,10 @@ public final class ShortcutDispatcher {
     /// While true, presses go to the views untouched (the settings window
     /// recording a new shortcut).
     public var isSuspended = false
+    /// A press another part takes first (⌘1…⌘9 in ⌘J's list, which are tab.select-1…9 elsewhere):
+    /// true when it took it, and then nothing else does, not the command and not the menu (with
+    /// no key window the menu came first and switched the tab, 2026-11-17).
+    public var takenFirst: ((NSEvent) -> Bool)?
 
     public init(registry: CommandRegistry, keymap: Keymap) {
         self.registry = registry
@@ -43,6 +47,7 @@ public final class ShortcutDispatcher {
 
     /// True when the press ran a command and must not reach the view.
     public func handle(_ event: NSEvent) -> Bool {
+        if takenFirst?(event) == true { return true }
         guard !isSuspended, let combo = KeyCombo(event: event), let id = keymap.command(for: combo) else { return false }
         return registry.run(id)
     }

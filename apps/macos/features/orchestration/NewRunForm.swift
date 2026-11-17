@@ -33,10 +33,10 @@ public final class NewRunForm: NSView {
     let account = NSPopUpButton()
     let model = NSComboBox()
     let goalView = NSTextView()
-    private let accounts: [NewRaceForm.Account]
+    private let accounts: [AccountChoice]
 
-    public init(caps: Caps, accounts: [NewRaceForm.Account] = []) {
-        self.accounts = accounts.isEmpty ? [NewRaceForm.Account(title: "~/.claude", dir: nil)] : accounts
+    public init(caps: Caps, accounts: [AccountChoice] = []) {
+        self.accounts = accounts.isEmpty ? [AccountChoice(title: "~/.claude", dir: nil)] : accounts
         super.init(frame: NSRect(x: 0, y: 0, width: 520, height: 330))
         nameField.placeholderString = T("Run name", "Nome da execução")
         budgetField.stringValue = String(format: "%.2f", caps.budgetUsd)
@@ -48,8 +48,8 @@ public final class NewRunForm: NSView {
         }
         mode.target = self
         mode.action = #selector(modeChanged)
-        for title in NewRaceForm.titles(self.accounts) { account.menu?.addItem(NSMenuItem(title: title, action: nil, keyEquivalent: "")) }
-        model.addItems(withObjectValues: NewRaceForm.models.map { $0.isEmpty ? T("default", "padrão") : $0 })
+        for title in AccountChoice.titles(self.accounts) { account.menu?.addItem(NSMenuItem(title: title, action: nil, keyEquivalent: "")) }
+        model.addItems(withObjectValues: AccountChoice.models.map { $0.isEmpty ? T("default", "padrão") : $0 })
         model.selectItem(at: 0)
         let goal = FormKit.textArea(goalView, height: 90)
         FormKit.stack([FormKit.labeled(T("Name", "Nome"), nameField), FormKit.labeled(T("Cap (US$)", "Teto (US$)"), budgetField, width: 80),

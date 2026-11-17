@@ -36,7 +36,7 @@ extension WindowSession {
     }
 
     /// The accounts to offer: the project's (or the active one) first; nil is the default one's.
-    func raceAccounts(repo: String) -> [NewRaceForm.Account] {
+    func raceAccounts(repo: String) -> [AccountChoice] {
         let agents = settings.store.settings.agents
         let projects = agents.projectAccounts.reduce(into: [String: String]()) { $0[SettingsBridge.expand($1.key)] = SettingsBridge.expand($1.value) }
         let first = AgentNewSession.account(cwd: repo, accounts: AgentsController.shared.everyAccount(),
@@ -45,7 +45,7 @@ extension WindowSession {
         // One per folder: the same account listed twice came out twice in the form (2026-11-16).
         var seen: Set<String> = []
         let ordered = ((first.map { [$0] } ?? []) + all).filter { seen.insert($0.dir).inserted }
-        return ordered.map { NewRaceForm.Account(title: $0.name, dir: $0.isDefault ? nil : $0.dir) }
+        return ordered.map { AccountChoice(title: $0.name, dir: $0.isDefault ? nil : $0.dir) }
     }
 
     /// orchestration.new-race: the New Task sheet with two agents (plan 29: one sheet for a task

@@ -22,6 +22,9 @@
 - Spec em `../../../../docs/spec/shortcuts.md`. Status: modelo, preferências e despacho prontos;
   tela de configuração no plano 3.
 
+- `takenFirst` (plano 29): uma tecla que outra parte pega antes (o ⌘1…⌘9 da lista do ⌘J, que o app
+  liga à paleta): pega, ela termina ali, sem o comando e sem o menu.
+
 ## Como validar
 - `make macos-test` passa.
 - Teste: todo atalho padrão aponta para um comando registrado e não há dois atalhos padrão iguais.
