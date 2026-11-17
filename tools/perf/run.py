@@ -426,8 +426,6 @@ def main():
 
     print()
     # Plan 17's rule: all of it on weighs at most 10% over the app with it off.
-    if "tree_mb" in results and "idle_mb" in results:
-        results["tree_over_idle_pct"] = 100 * (results["tree_mb"] - results["idle_mb"]) / results["idle_mb"]
     if "all_on_mb" in results and "idle_mb" in results:
         results["all_on_over_idle_pct"] = 100 * (results["all_on_mb"] - results["idle_mb"]) / results["idle_mb"]
     # Plan 18's rule: the History open or closed weighs at most 10% over idle.

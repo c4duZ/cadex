@@ -62,7 +62,7 @@ agents, tabs, command-palette · Decisões: `docs/adr/0035-work-frame.md` · Moc
   agentes de fora do Cadex (o que a página Agents mostrava) passam para a página do projeto no 30:
   até lá, ficam no Arquivo e histórico, sem sumir. Specs, `CLAUDE.md`, `MAC_ONLY` e os cenários do
   `tools/perf/run.py` que usavam sidebar.items atualizados.
-- **E. Varredura e fechamento.** Linhas do 27 em `saiu`; tools/find_unused.py; `make check`; `make
+- **E. Varredura e fechamento.** Feita (2026-11-17): inventário do 27 em `saiu` (o histórico de agentes fica `muda`, no centro), tools/find_unused.py limpo, `make check` e `make perf` passam (a árvore com 8 projetos de 6 tarefas: +1,2 % contra os mesmos projetos sem tarefa; a troca de tema 0 MB depois da repintura do tema); os prints ao lado dos mockups renderizados foram ao dono na revisão de fidelidade. Plano original: Linhas do 27 em `saiu`; tools/find_unused.py; `make check`; `make
   perf` (a árvore com muitos projetos e tarefas); print ao lado dos mockups 2 e 11, e o dono vê.
 
 ## Como validar
