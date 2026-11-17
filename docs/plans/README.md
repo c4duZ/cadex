@@ -65,7 +65,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 26 | `docs/plans/26-frame.md` | barra de título, barra de status, painel da direita, o sino em popover | feito (2026-11-17): fases A a F; `make perf` passou com o painel aberto |
 | 27 | `docs/plans/27-projects-tree.md` | projetos (os spaces) e a árvore do trabalho; sai a fileira de ícones | fechado (2026-11-17): fases A a E; a revisão de fidelidade contra os mockups renderizados e a moldura de novo no tema entraram junto |
 | 28 | `docs/plans/28-dressed-terminal.md` | o terminal vestido e o preview ao lado | fechado (2026-11-17): fases A a G; o elemento escolhido chega ao agente como arquivo citado com @ (escolha do dono) |
-| 29 | `docs/plans/29-entrances.md` | tela de início, a folha única do ⌘N (tarefa e corrida), ⌘J | escrito |
+| 29 | `docs/plans/29-entrances.md` | tela de início, a folha única do ⌘N (tarefa e corrida), ⌘J | fechado (2026-11-17): fases A a E; a tela de início, a folha Nova tarefa (tarefa e corrida, Claude e Codex) e o ⌘J |
 | 30 | `docs/plans/30-overview.md` | página do projeto, quadro, corrida, gaveta e a auditoria final | escrito |
 
 ## O que eu não quero

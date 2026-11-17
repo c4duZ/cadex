@@ -386,7 +386,9 @@ def main():
     steps = [("one terminal, idle, in a project", lambda: scenario("idle", "idle", ROOT, measure_idle)),
              ("a program flooding the terminal", lambda: scenario("flood", "flood", ROOT, measure_flood)),
              ("a TUI redrawing the screen", lambda: scenario("tui", "tui", ROOT, measure_tui)),
-             ("the home folder as the workspace", lambda: scenario("home", "idle", None, measure_home)),
+             # The home folder given: with no folder and nothing saved the app shows the home screen
+             # (plan 29), a lighter window, and the measure was no longer the home folder's (37 MB).
+             ("the home folder as the workspace", lambda: scenario("home", "idle", HOME, measure_home)),
              ("an agent saving files", lambda: scenario("agent", "idle", ROOT, measure_agent)),
              ("switching themes 300 times", lambda: scenario("themes", "idle", ROOT, measure_theme_switch)),
              ("everything of plan 17 on: every status bar item, Agents open, accounts, hosts", all_on_scenario),

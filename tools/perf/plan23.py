@@ -127,7 +127,11 @@ def on_scenario(perf):
           f"({out.strip()}); {after_cpu:.2f} % CPU after; {len(requests)} requests, {len(late)} after closing")
     if "closed 20 twice" not in out:
         raise RuntimeError(f"the group did not read the 20 machines twice: {out!r}")
-    return {"machines_first_open_mb": top["first"] - idle, "machines_open_over_idle_pct": 100 * (top["second"] - before) / before,
+    # The second opening against the first: an opening that leaves something behind grows each
+    # time. Against the memory just before it, the measure rewarded keeping the card cached after
+    # closing; once closing gave it back (73 MB again), the second opening costs what the first
+    # did and read 12 % with nothing growing (82 then 83 MB, 2026-11-17).
+    return {"machines_first_open_mb": top["first"] - idle, "machines_open_over_idle_pct": 100 * max(top["second"] - top["first"], 0) / idle,
             "machines_after_cpu": after_cpu, "machines_requests_after_close": len(late)}
 
 

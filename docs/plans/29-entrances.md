@@ -50,7 +50,7 @@ Inventário: seção "Entradas" e os apelidos do 28.
   WorktreesWiring.swift, a leitura de tabs.paneHeaders, os apelidos do 28;
   `orchestration.new-race` vira apelido do ⌘N com dois agentes (sai no 30). `CADEX_PERF_RACE_FORM` passa a abrir a folha nova. Specs e `CLAUDE.md` de
   worktrees, orchestration, home, shortcuts.
-- **E. Varredura e fechamento.** Linhas do 29 em `saiu`; tools/find_unused.py; `make check`; `make
+- **E. Varredura e fechamento.** Feita (2026-11-17): inventário do 29 em `saiu` ou feito, tools/find_unused.py limpo, `make check` e `make perf` passam (o cenário da pasta pessoal passa a pasta, que sem ela abria a tela de início; o das máquinas compara a segunda abertura com a primeira); os prints ao lado dos mockups 0, 0b e 6 foram ao dono. Plano original: Linhas do 29 em `saiu`; tools/find_unused.py; `make check`; `make
   perf`; prints ao lado dos mockups 0, 0b e 6, e o dono vê.
 
 ## Como validar
