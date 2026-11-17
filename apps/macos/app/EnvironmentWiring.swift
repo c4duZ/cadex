@@ -64,7 +64,7 @@ extension WindowSession {
             WorktreesController.shared.publish()
             self.tabs?.newTab(cwd: remote == nil ? worktree : nil)
             let line = EnvironmentScript.upLine(recipe, env, worktree: worktree)
-            self.tabs?.activeTerminal?.session?.write((prefix + [line]).joined(separator: " && ") + "\n")
+            self.tabs?.activeTerminal?.typeWhenReady((prefix + [line]).joined(separator: " && ") + "\n")
         }
     }
 

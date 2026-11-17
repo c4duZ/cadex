@@ -61,6 +61,11 @@ public final class TerminalView: NSView {
     /// The terminal daemon's name for this shell (TerminalKeep.swift); nil
     /// on a pty of its own. Saved with the spaces to take it back.
     public private(set) var keptID: String?
+    /// What waits to be typed until the shell is ready (TerminalTypeAhead.swift).
+    var pendingTyping: [String] = []
+    var lastOutputAt: Date?
+    var typingCheck: Timer?
+    let openedAt = Date()
 
     /// `keep`: the daemon may keep it (the main window's terminals);
     /// `keptID`: the name to take back.
@@ -77,6 +82,7 @@ public final class TerminalView: NSView {
         session = opened.session
         self.keptID = opened.keptID
         session?.onOutput = { [weak self] in
+            self?.noteOutputForTyping()
             self?.needsDisplay = true
             self?.refreshFindCounts()
             self?.matchPastedImagesSoon()

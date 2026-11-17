@@ -120,7 +120,7 @@ extension WindowSession {
             } else {
                 let agent = agentCommand(cwd: made.path)
                 tabs?.newTab(cwd: made.path)
-                tabs?.activeTerminal?.session?.write((plan.hooks + [agent]).joined(separator: " && ") + "\n")
+                tabs?.activeTerminal?.typeWhenReady((plan.hooks + [agent]).joined(separator: " && ") + "\n")
             }
             if plan.explainTrust { explainTrust(plan) }
             if !made.unmatched.isEmpty {

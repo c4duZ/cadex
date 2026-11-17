@@ -131,7 +131,7 @@ extension WindowSession {
         alert.beginSheetModal(for: window) { [weak self] response in
             guard response == .alertFirstButtonReturn, let self else { return }
             self.tabs?.newTab(cwd: repo)
-            self.tabs?.activeTerminal?.session?.write(SessionKit.shared.claudeCommand(configDir: account, cwd: repo) + "\n")
+            self.tabs?.activeTerminal?.typeWhenReady(SessionKit.shared.claudeCommand(configDir: account, cwd: repo) + "\n")
         }
     }
 
@@ -161,7 +161,7 @@ extension WindowSession {
         WorktreesController.shared.setComment(T("run \(run.name) · \(task.title)", "execução \(run.name) · \(task.title)"), of: plan.path)
         guard let command = command(for: dispatch, task: task, cwd: plan.path, book: book) else { return }
         tabs?.newTab(cwd: plan.path)
-        tabs?.activeTerminal?.session?.write((plan.hooks + [command]).joined(separator: " && ") + "\n")
+        tabs?.activeTerminal?.typeWhenReady((plan.hooks + [command]).joined(separator: " && ") + "\n")
     }
 
     /// In the idle terminal the owner picked: its folder is the dispatch's.

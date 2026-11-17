@@ -61,7 +61,7 @@ extension WindowSession {
         tabs.newTab()
         let target = user + "@" + machine.address
         let quoted = "'" + target.replacingOccurrences(of: "'", with: "'\\''") + "'"
-        tabs.activeTerminal?.session?.write("ssh \(quoted)\n")
+        tabs.activeTerminal?.typeWhenReady("ssh \(quoted)\n")
     }
 }
 

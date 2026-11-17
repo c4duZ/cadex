@@ -218,8 +218,9 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
 - O arquivo do prompt que nenhuma aba pegou (o app fechou antes) sai depois de um dia.
 
 ## Critérios de aceite
-- [ ] Com orchestration.enabled desligada, nenhum agente é aberto com prompt, nenhum banco aberto,
-      nenhum timer e nenhum LaunchAgent (`ps`, `lsof`, `launchctl print`).
+- [x] Com orchestration.enabled desligada, nenhum agente é aberto com prompt, nenhum banco aberto,
+      nenhum timer e nenhum LaunchAgent (`ps`, `lsof`, `launchctl print`). (`make perf`, 2026-11-16:
+      nenhum arquivo na pasta do estado nem na dos LaunchAgents, nenhum job, o peso e a CPU do parado.)
 - [x] Testes do modelo com banco temporário: dependências tornando tarefas prontas, ciclo recusado,
       profundidade máxima, despacho órfão (o agente saiu sem reportar). (OrchestrationTests,
       2026-11-16, com portões, parar em cadeia, teto de agentes e a caixa de entrada.)
@@ -266,6 +267,10 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
       verdade do Mac falta conferir com o dono.)
 - [x] Desligar a última automação remove o LaunchAgent. (2026-11-16: o plist some e o `launchctl
       print` não acha o job; desligar orchestration.automations faz o mesmo, e religar o devolve.)
-- [ ] `fs_usage` e `nettop` não mostram o Cadex lendo o Keychain nem falando com a Anthropic.
-- [ ] `make perf`: com tudo desligado, os números de antes; 6 agentes falsos, uma corrida de 3 e uma
-      execução de 5 tarefas dentro do limite.
+- [x] `fs_usage` e `nettop` não mostram o Cadex lendo o Keychain nem falando com a Anthropic.
+      (`make perf`, 2026-11-16, com o `lsof`, porque o `fs_usage` pede root: com uma corrida de 3 e uma
+      execução de 5 agentes, nenhuma conexão de rede do app e nenhum arquivo do Keychain aberto.)
+- [x] `make perf`: com tudo desligado, os números de antes; 6 agentes falsos, uma corrida de 3 e uma
+      execução de 5 tarefas dentro do limite. (2026-11-16, duas rodadas inteiras: desligado −2 a −3 MB
+      do parado, nenhum arquivo nem job; ligado 158 a 161 MB e 1,4 a 1,5% de CPU, todos os agentes de
+      pé, nenhuma rede nem Keychain.)

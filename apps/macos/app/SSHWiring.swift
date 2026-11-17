@@ -42,7 +42,7 @@ extension WindowSession {
         guard let tabs else { return }
         tabs.newTab()
         let quoted = "'" + alias.replacingOccurrences(of: "'", with: "'\\''") + "'"
-        tabs.activeTerminal?.session?.write("ssh \(quoted)\n")
+        tabs.activeTerminal?.typeWhenReady("ssh \(quoted)\n")
     }
 
     func makePortsItem() -> StatusItem {

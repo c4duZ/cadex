@@ -49,7 +49,7 @@ extension WindowSession {
         case .success(let opened):
             try? book.setCoordinator(run: run.id, kit: opened.session)
             tabs?.newTab(cwd: run.repository)
-            tabs?.activeTerminal?.session?.write(opened.command + "\n")
+            tabs?.activeTerminal?.typeWhenReady(opened.command + "\n")
             armRunWatch()
         }
         refreshRunPages()

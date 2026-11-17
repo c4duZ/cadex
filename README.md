@@ -113,6 +113,15 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   escreve as páginas é o Claude da própria sessão, sem chave nem custo extra. A página Memory mostra
   e edita a wiki (Markdown em git) e o que o agente recebe ao começar
   ([ADR 0028](docs/adr/0028-project-memory.md)).
+- **Vários agentes de uma vez** (Mac, desligado por padrão): uma **corrida** dá a mesma tarefa a 2 a 6
+  agentes, cada um na sua worktree, com o quadro lado a lado (estado, tempo, custo, diff), comparar
+  dois e escolher o vencedor; uma **execução** encadeia tarefas com dependências e portões, cada uma
+  despachada a um agente numa worktree e aba novas, que reporta pelo `cadex` (concluído, sinal de
+  vida, perguntas, recados, sub-tarefas), coordenada por você ou por um agente; uma **automação**
+  roda um prompt num horário, mesmo com o Cadex fechado (o launchd o acorda), com histórico. O
+  prompt nunca passa pelo shell, o Cadex mostra antes o que vai rodar, onde e em qual conta, e tudo
+  tem teto de gasto, de duração e de agentes ([ADR 0033](docs/adr/0033-cadex-launches-agents.md),
+  [ADR 0034](docs/adr/0034-scheduled-automations.md)).
 - **Outros apps do Mac** (opção desligada por padrão): o agente lê e opera outros apps pela
   acessibilidade, com a sua permissão app por app, nunca em campos de senha nem nos Ajustes do
   Sistema, com uma faixa e um botão Parar ([ADR 0026](docs/adr/0026-computer-use.md)).
@@ -243,6 +252,8 @@ Tamanhos da versão 2.2.1 (2026-10-22); memória medida na 0.1.0 (2026-10-19), n
 | tudo da barra lateral e da barra de status ligado (2.2.0) | +7% |
 | o processo da memória, com sessão de agente e sem o modelo (plano 22) | 13 MB |
 | o mesmo com o modelo de busca carregado (pico; sai depois de 60 s parado) | 300–380 MB |
+| uma corrida de 3 e uma execução de 5 tarefas, 9 abas, o quadro e a página abertos (plano 24) | 141–160 MB, 1,5–2,9% de CPU |
+| corridas, execuções e automações desligadas (plano 24) | o mesmo que sem elas |
 
 Os números da memória são do `make perf` em 2026-11-16; sem sessão de agente, o processo nem existe.
 O app instalado leva as duas arquiteturas e as 18 gramáticas do

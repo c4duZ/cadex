@@ -42,7 +42,7 @@ extension WindowSession {
             return
         }
         tabs.newTab(cwd: cwd)
-        tabs.activeTerminal?.session?.write(AgentLaunch.command(for: account, skipPermissions: skip, cwd: cwd) + "\n")
+        tabs.activeTerminal?.typeWhenReady(AgentLaunch.command(for: account, skipPermissions: skip, cwd: cwd) + "\n")
     }
 
     /// The account's live session whose terminal was used last: this

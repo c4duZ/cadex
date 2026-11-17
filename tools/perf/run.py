@@ -26,6 +26,7 @@ import plan20
 import plan21
 import plan22
 import plan23
+import plan24
 from plan22_engine import engine_running
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
@@ -401,6 +402,8 @@ def main():
              ("plan 22: a wiki of 2 000 pages and a session of 500 events", lambda: plan22.wiki_scenario(sys.modules[__name__])),
              ("plan 23: the tailnet's 20 machines, the SSH card's group open and closed", lambda: plan23.on_scenario(sys.modules[__name__])),
              ("plan 23: machines.tailscale off", lambda: plan23.off_scenario(sys.modules[__name__])),
+             ("plan 24: races and runs off", lambda: plan24.off_scenario(sys.modules[__name__])),
+             ("plan 24: a race of 3 and a run of 5 with fake agents, 6 working at once", lambda: plan24.on_scenario(sys.modules[__name__])),
              ("flooding with minimum contrast and ligatures", lambda: scenario(
                  "reading", "flood", ROOT, measure_reading_flood,
                  settings={"terminal": {"minimumContrast": 7, "fontFeatures": ["calt", "liga"]}}))]
@@ -423,6 +426,8 @@ def main():
     # Plan 18's rule: the History open or closed weighs at most 10% over idle.
     if "review_off_mb" in results and "idle_mb" in results:
         results["review_off_over_idle_mb"] = results["review_off_mb"] - results["idle_mb"]
+    if "orch_off_mb" in results and "idle_mb" in results:
+        results["orch_off_over_idle_mb"] = results["orch_off_mb"] - results["idle_mb"]
     if "tools_off_mb" in results and "idle_mb" in results:
         results["tools_off_over_idle_mb"] = results["tools_off_mb"] - results["idle_mb"]
     for key in ["history_open", "history_closed"]:

@@ -81,4 +81,14 @@ LIMITS = {
     "machines_after_cpu": 1.0,           # the idle CPU once the group closes
     "machines_requests_after_close": 0,  # closed: nothing read, the watch stream ended
     "machines_off_requests": 0,          # machines.tailscale off: not one request to Tailscale
+    # Plan 24 (tools/perf/plan24.py): races, runs and automations. Measured 2026-11-16 on this Mac.
+    "orch_off_over_idle_mb": 5,   # off: -1 MB (88 against 89), the app as it was
+    "orch_off_files": 0,          # off: no state.sqlite and no LaunchAgent written
+    "orch_off_launchd_jobs": 0,   # off: no job of Cadex in launchd
+    "orch_on_mb": 220,            # 141-160 MB: a race of 3 and a run of 5, 9 terminal tabs, the board and the page open
+    "orch_on_cpu": 5.0,           # 1.45-2.86 %: 6 fake agents sending a heartbeat every 20 s, hooks, the watch's 15 s
+    "orch_agents_missing": 0,     # every fake agent started (the 3 contenders and the 5 dispatches)
+    "orch_run_missing": 0,        # the chain of 2 done, the 3 long ones dispatched
+    "orch_network": 0,            # not one network connection of the app (lsof -i)
+    "orch_keychain": 0,           # no Keychain file open (fs_usage needs root; lsof)
 }

@@ -118,7 +118,7 @@ extension WindowSession {
         case .success(let opened):
             try? book.update(contender.id, state: .working, session: SessionLink(kit: opened.session))
             tabs?.newTab(cwd: plan.path)
-            tabs?.activeTerminal?.session?.write((plan.hooks + [opened.command]).joined(separator: " && ") + "\n")
+            tabs?.activeTerminal?.typeWhenReady((plan.hooks + [opened.command]).joined(separator: " && ") + "\n")
         }
     }
 
@@ -155,7 +155,7 @@ extension WindowSession {
                 }
                 try? book.update(contender.id, state: .working)
                 self.tabs?.newTab()
-                self.tabs?.activeTerminal?.session?.write(RemoteTaskScript.sshLine(target, script) + "\n")
+                self.tabs?.activeTerminal?.typeWhenReady(RemoteTaskScript.sshLine(target, script) + "\n")
             }
             self.refreshRaceBoards()
         }

@@ -204,7 +204,7 @@ extension WindowSession {
         // A background session: its screen in a new tab, in its folder.
         if let job = session.job, let tabs {
             tabs.newTab(cwd: session.cwd)
-            tabs.activeTerminal?.session?.write(AgentLaunch.attachCommand(job: job, account: session.account) + "\n")
+            tabs.activeTerminal?.typeWhenReady(AgentLaunch.attachCommand(job: job, account: session.account) + "\n")
             return
         }
         if explorer?.reveal(session.cwd) == true { workspace?.showSidebar("files") } else { NSSound.beep() }

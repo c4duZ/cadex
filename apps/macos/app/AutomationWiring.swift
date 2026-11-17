@@ -114,7 +114,7 @@ extension WindowSession {
         guard let claude = session.claude, let automation = try? OrchestrationController.shared.automations()?.automation(automation) else { return NSSound.beep() }
         let cwd = run.folder ?? AutomationLaunch.place(automation)
         tabs?.newTab(cwd: cwd)
-        tabs?.activeTerminal?.session?.write(SessionKit.shared.claudeCommand(configDir: automation.agent.account, arguments: ["--resume", claude], cwd: cwd) + "\n")
+        tabs?.activeTerminal?.typeWhenReady(SessionKit.shared.claudeCommand(configDir: automation.agent.account, arguments: ["--resume", claude], cwd: cwd) + "\n")
     }
 
     private func openAutomationTranscript(run id: String, automation: String) {

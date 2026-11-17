@@ -326,6 +326,38 @@ docs/adr/0031-run-on-remote.md (plano 23), `docs/adr/0004-clean-rewrite.md`,
   com 5 tarefas; limite de memória e CPU do Cadex com o quadro aberto, e com orchestration.enabled
   desligado os números de antes (nenhum banco aberto, nenhum timer, nenhum LaunchAgent). Os ids
   novos em `MAC_ONLY` de `tools/check_command_parity.py`. README e notas da release em inglês.
+  - F feita em 2026-11-16 (`tools/perf/plan24.py`, `tools/perf/fake_claude.py`): desligado, o app
+    pesa o que pesava (88 MB contra 89 do parado), nenhum arquivo de estado nem LaunchAgent, nenhum
+    job no launchd; ligado, uma corrida de 3 e uma execução de 5 tarefas com agentes falsos (6
+    trabalhando ao mesmo tempo, mandando sinal de vida a cada 20 s, e uma cadeia de 2 que reporta
+    concluída), o quadro e a página abertos: 141 a 160 MB e 1,5 a 2,9% de CPU com 9 abas de terminal,
+    os 8 agentes de pé, nenhuma conexão de rede do app e nenhum arquivo do Keychain aberto (`lsof`;
+    o `fs_usage` pede root). Os limites em `tools/perf/limits.py`, com o medido ao lado; os ids das
+    fases C a E em `MAC_ONLY`; README (vários agentes de uma vez, os números) e as notas abaixo.
+    Achado pelo cenário e corrigido: o texto que o app digita numa aba recém-aberta se perdia às
+    vezes, porque o zsh descarta a entrada pendente ao montar a linha de edição (três de três agentes
+    perdidos com um shell rápido; o New Task, o "Rodar em" e o ssh digitam do mesmo jeito):
+    TerminalView.typeWhenReady espera o prompt (`apps/macos/features/terminal/TerminalTypeAhead.swift`).
+    Na primeira rodada inteira do `make perf`, três números de planos anteriores passaram do limite
+    (o subagente fechado, a revisão sem autoria e o grupo das máquinas) com a máquina sob pressão
+    (o disco tinha chegado a 293 MB livres); rodados de novo, os três ficaram dentro. Na segunda
+    rodada inteira, todos os números do plano 24 de novo dentro (161 MB, 1,4% de CPU) e só o
+    `subagent_closed_mb` (plano 17) fora, 44 MB contra o limite de 5: isolado, ou logo depois do
+    cenário que vem antes dele, deu 2, 0, −21, 3 e 1 MB em cinco rodadas, e o cenário não passa por
+    nada do plano 24 (a orquestração desligada). O limite não subiu: fica para o dono decidir se é
+    medição sob carga ou algo a investigar no plano 17.
+
+## Notas da release (inglês)
+
+```markdown
+## Many agents at once (Mac, off until you turn it on)
+
+- **The same task in several agents.** New Race gives one prompt to 2 to 6 Claude agents, each in its own worktree from the same commit, with the account, model and machine you pick. The race's board shows each one's state, time, cost and diff side by side; Compare opens the diff between two, Pick Winner keeps one as a normal task and Discard the Others deletes the rest (their branches stay until you delete them).
+- **Runs: tasks that wait for each other.** A run holds tasks with dependencies, each dispatched to an agent in a new worktree and tab (or an idle terminal you pick). You coordinate it, let ready tasks start on their own, or give the goal to an agent that plans the tasks. Agents report through `cadex run orchestration.…`: done, signs of life, questions (answered from the run's page), notes to each other and sub-tasks, up to a depth limit. A gate holds a task until you approve it. Stop a dispatch and the ones it spawned stop too; an agent that goes quiet shows "stalled?" and tells you.
+- **Automations.** A prompt that runs on a schedule (weekdays at 09:00, every 4 hours, once), in a new worktree or a fixed folder, with its account, model, permission mode and allowed tools, even with Cadex closed: a LaunchAgent, installed only while an automation is on, wakes the app at those times. A run missed while the Mac slept runs once on waking, or is skipped. Each run has a cap and a history with its session and transcript.
+- **Always shown first, always capped.** Before anything runs, Cadex shows the prompt, the folder, the account, the model and the cap; nothing starts without Claude Code trusting the repository. The prompt never goes through a shell. Every race, run and automation has a spending, time and agent cap, and off it costs nothing: no state file, no timer, no LaunchAgent.
+- **Typing into a new tab.** A command Cadex types into a tab it just opened (New Task's agent, Run on, ssh) now waits for the shell's prompt: a fast shell could drop it.
+```
 
 ## Como validar
 - `make check` passa a cada fase, com os ids novos aceitos pelo `tools/check_command_parity.py`.

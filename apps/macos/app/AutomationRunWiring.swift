@@ -187,7 +187,7 @@ extension WindowSession {
         try? book.record(run)
         if controller.limits.keepAwakeDuringRuns { app.power.hold(job: run.id) }
         tabs?.newTab(cwd: cwd)
-        tabs?.activeTerminal?.session?.write((hooks + [opened.command]).joined(separator: " && ") + "\n")
+        tabs?.activeTerminal?.typeWhenReady((hooks + [opened.command]).joined(separator: " && ") + "\n")
         app.armAutomationWatch()
         refreshAutomationPages()
     }

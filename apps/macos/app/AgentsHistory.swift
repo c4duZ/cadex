@@ -66,7 +66,7 @@ extension WindowSession {
     func typeInNewTab(_ command: String, cwd: String) {
         guard let tabs else { return }
         tabs.newTab(cwd: cwd)
-        tabs.activeTerminal?.session?.write(command + "\n")
+        tabs.activeTerminal?.typeWhenReady(command + "\n")
     }
 
     /// The conversation's folder becomes this window's workspace.

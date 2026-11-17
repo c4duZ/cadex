@@ -178,7 +178,7 @@ extension WindowSession {
     private func typeInNewTab(_ line: String) {
         guard let tabs else { return }
         tabs.newTab()
-        tabs.activeTerminal?.session?.write(line + "\n")
+        tabs.activeTerminal?.typeWhenReady(line + "\n")
     }
 }
 

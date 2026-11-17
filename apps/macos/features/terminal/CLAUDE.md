@@ -102,6 +102,10 @@
   CADEX_ZSH_INTEGRATION e CADEX_TOOLS no próprio ambiente antes de qualquer terminal e do daemon
   (`../../app/main.swift`). TerminalSession.shellPid (e o do `TerminalView`) é o pid do shell, com que
   o app reconhece um `cadex claude` vindo de uma aba dele (`../../app/TypedClaudeWiring.swift`).
+- `TerminalTypeAhead.swift` (plano 24, fase F): `typeWhenReady`, o texto que o app digita numa aba
+  (o agente do New Task, um despacho, uma automação, o ssh) espera a primeira saída do shell e
+  300 ms de silêncio, no máximo 5 s desde a abertura: o zsh descarta a entrada pendente ao montar a
+  linha de edição, e um shell rápido perdia o comando (achado pelo `make perf`, 2026-11-16).
 - `TerminalNotify.swift`: a notificação que um programa pediu (OSC 777, OSC 9) sai como o aviso
   TerminalView.programDidNotify; `isLookedAt` diz se você olha o terminal. O app posta
   (`../../app/ProgramNotifications.swift`).
@@ -115,4 +119,5 @@
 
 ## Como validar
 - `make macos-test` passa. TerminalTests roda um zsh de verdade com a pasta da integração: os
-  arquivos do dono (no `$HOME` e num `ZDOTDIR` próprio) e o `claude` chegando ao `cadex`.
+  arquivos do dono (no `$HOME` e num `ZDOTDIR` próprio) e o `claude` chegando ao `cadex`; e o texto
+  digitado num zsh recém-aberto esperando o prompt e rodando.
