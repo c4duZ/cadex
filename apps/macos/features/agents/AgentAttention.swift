@@ -52,6 +52,10 @@ public struct AgentRequest: Equatable, Sendable {
     public let at: Date
     /// Answered by Allow and Deny: its hook waits (docs/adr/0023-answer-agent-permissions.md).
     public let canAnswer: Bool
+    /// A question's options, as the agent reported them; empty: none known (AgentAnswer.parse).
+    public var options: [String] = []
+    /// The agent's report as it came, to check it still asks the same right before answering.
+    public var message: String = ""
 }
 
 /// One line of the feed: what happened, where and when.
@@ -102,11 +106,14 @@ public final class AgentAttention {
     public var cards: [AgentRequest] {
         guard isEnabled else { return [] }
         let hooked = pending.values.map(\.request).sorted { $0.at < $1.at }
-        let reported = reports.filter { report in report.state == .blocked && !hooked.contains { $0.pid == report.pid } }.map { report in
-            AgentRequest(id: "report:" + report.key, kind: report.kind == .permission ? .permission : .question, key: report.key, pid: report.pid,
-                         title: report.kind == .permission ? Self.tool(report.message) : Self.question(report.message),
-                         detail: report.kind == .permission ? Self.subject(report.message) : "",
-                         project: report.project, session: report.session, account: report.account, at: Date(), canAnswer: false)
+        let reported = reports.filter { report in
+            report.state == .blocked && !hooked.contains { $0.pid == report.pid } && answered[report.key] != report.message
+        }.map { report in
+            let asked = report.kind == .permission ? (Self.tool(report.message), [String]()) : AgentAnswer.parse(Self.question(report.message))
+            return AgentRequest(id: "report:" + report.key, kind: report.kind == .permission ? .permission : .question, key: report.key, pid: report.pid,
+                                title: asked.0, detail: report.kind == .permission ? Self.subject(report.message) : "",
+                                project: report.project, session: report.session, account: report.account, at: Date(), canAnswer: false,
+                                options: asked.1, message: report.message)
         }
         return hooked + reported
     }
@@ -142,6 +149,34 @@ public final class AgentAttention {
     /// Deny, on the owner's click: the agent is told the owner said no.
     public func deny(_ id: String) { answer(id, Self.decision(allow: false)) }
 
+    /// The app answers a question in the agent's terminal (it has the terminals; this feature reads
+    /// none): true when it sent the keys, false when the agent no longer asks it.
+    public var onAnswer: ((AgentRequest, AgentAnswer.Reply) -> Bool)?
+
+    /// An option or words of the owner's for an open question, from its card or ⌘K
+    /// (docs/adr/0036-owner-words-reach-the-agent.md). The agent moved on: nothing is typed, and
+    /// the feed says so.
+    ///
+    /// `asked` is the question as the owner saw it: a card keeps its id while its agent asks the
+    /// next question, so a reply to the old one must not pass for the new one (review of
+    /// 2026-11-17). Once answered, the card goes until the agent reports something else, so a
+    /// second click sends nothing.
+    public func answerQuestion(_ id: String, asked: String, _ reply: AgentAnswer.Reply) {
+        guard let request = cards.first(where: { $0.id == id && $0.message == asked }), request.kind == .question,
+              let key = request.key, onAnswer?(request, reply) == true else {
+            let gone = cards.first { $0.id == id }
+            note(.note, text: T("The agent moved on: nothing was typed", "O agente seguiu: nada foi digitado"),
+                 project: gone?.project ?? "", session: gone?.session ?? "", key: gone?.key)
+            return
+        }
+        answered[key] = asked
+        publish()
+    }
+
+    /// The questions answered from here, by terminal: their cards stay away until the agent
+    /// reports something else.
+    private var answered: [String: String] = [:]
+
     /// The request went away without a click here (answered in the TUI, or
     /// the hook left): its card goes and its hook gets no answer.
     public func resolve(_ id: String) {
@@ -168,6 +203,8 @@ public final class AgentAttention {
     /// The agents' reports now: what changed goes to the feed, and a hooked
     /// permission whose agent left "blocked" was answered in the TUI.
     public func update(_ next: [AgentReport]) {
+        // An answered question whose agent now says something else is done with.
+        answered = answered.filter { key, message in next.contains { $0.key == key && $0.message == message } }
         for report in next {
             let before = reports.first { $0.key == report.key }
             guard before?.state != report.state || before?.message != report.message else { continue }

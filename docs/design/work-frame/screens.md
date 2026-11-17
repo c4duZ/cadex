@@ -114,7 +114,7 @@ de tokens.
     tarefa · agente · conta", e Allow, Deny e, à direita, "Go to tab";
   - pergunta: "Asks a question", "now", a pergunta, a origem, um campo "Answer…" e "Go to tab".
     Enviar a resposta digita no terminal do agente (`docs/adr/0036-owner-words-reach-the-agent.md`);
-    pergunta com opções mostra um botão por opção no lugar do campo.
+    pergunta com opções mostra também um botão por opção, acima do campo.
 - **"EARLIER":** linhas curtas com estado, o que houve e quando ("bell-cards finished · PR #41
   ready", "hero-images failed · exited", "Memory learned 3 pages · cadex").
 - Responder aqui responde no terminal; o cartão de permissão no pé do painel (tela 10) é o mesmo

@@ -31,6 +31,7 @@ FRAME_FILES = [
     "apps/macos/features/agents/AgentUsageStrip.swift",  # plano 26
     "apps/macos/features/agents/AgentAttentionView.swift",  # plano 26
     "apps/macos/features/agents/AgentBellParts.swift",  # plano 26
+    "apps/macos/features/agents/AgentAnswer.swift",  # plano 26
     "apps/macos/shared/menus/AnchoredPanel.swift",  # plano 26
 ]
 # A design value: any number but a bare 0 or 1 (those are counts, identities and the hairline

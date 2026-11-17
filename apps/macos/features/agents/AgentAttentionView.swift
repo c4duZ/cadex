@@ -76,8 +76,16 @@ public final class AgentAttentionView: NSView {
 
     var isWatching: Bool { token != nil }
 
+    /// What the owner typed in each question's field, by card and question, kept across renders.
+    private var drafts: [String: String] = [:]
+    /// The field the owner was typing in, to give it the keyboard back after a render.
+    private var typing: String?
+
     public func render() {
         defer { onRender?() }
+        let live = Set(attention.cards.map { $0.id + "\u{1}" + $0.message })
+        drafts = drafts.filter { live.contains($0.key) }
+        if let field = window?.firstResponder as? NSTextView, field.isFieldEditor, field.delegate is AnswerField {} else { typing = nil }
         for view in stack.arrangedSubviews { view.removeFromSuperview() }
         add(header(), padding: DesignTokens.Popover.Header.padding, line: true)
         guard attention.isEnabled else {
@@ -142,6 +150,35 @@ public final class AgentAttentionView: NSView {
         }
         views.append(AgentBellParts.label([request.project, request.session, request.account].filter { !$0.isEmpty }.joined(separator: " · "),
                                           size: Look.Meta.fontSize, color: Look.Meta.color))
+        if request.kind == .question, !request.options.isEmpty {
+            // Each option as a button, and words of one's own in the field (ADR 0036): typed in
+            // the agent's terminal only if it still asks this.
+            let asked = request.message
+            let options = request.options.prefix(AgentAnswer.maxOptions - 1).enumerated().map { index, option in
+                AgentBellParts.button(option, .secondary) { [weak self] in self?.attention.answerQuestion(request.id, asked: asked, .option(index)) }
+            }
+            let choices = NSStackView(views: Array(options))
+            choices.spacing = UILooks.pt(Look.buttonGap)
+            views.append(choices)
+            // Every report re-renders the cards: what the owner is typing comes back, focus too.
+            let draftKey = request.id + "\u{1}" + asked
+            let field = AgentBellParts.answerField(draft: drafts[draftKey] ?? "", focused: typing == draftKey,
+                                                   edit: { [weak self] words in self?.drafts[draftKey] = words; self?.typing = draftKey },
+                                                   send: { [weak self] words in
+                self?.drafts[draftKey] = nil
+                self?.attention.answerQuestion(request.id, asked: asked, .text(words))
+            })
+            let go = AgentBellParts.button(T("Go to tab", "Ir à aba"), .quiet) { [weak self] in self?.onGoTo?(request.key, request.pid) }
+            let row = NSStackView(views: [field, go])
+            row.spacing = UILooks.pt(Look.buttonGap)
+            views.append(row)
+            let box = NSStackView(views: views)
+            box.orientation = .vertical
+            box.alignment = .leading
+            box.spacing = UILooks.pt(C.gap)
+            row.widthAnchor.constraint(equalTo: box.widthAnchor).isActive = true
+            return box
+        }
         var buttons: [NSView] = []
         if request.canAnswer {
             buttons.append(AgentBellParts.button(T("Allow", "Permitir"), .primary) { [weak self] in self?.attention.approve(request.id) })

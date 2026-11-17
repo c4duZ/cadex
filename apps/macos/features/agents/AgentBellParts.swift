@@ -48,6 +48,37 @@ enum AgentBellParts {
         return button
     }
 
+    /// "Answer…": the owner's own words for a question, sent with Return (components.bell.answer).
+    static func answerField(draft: String, focused: Bool, edit: @escaping @MainActor (String) -> Void,
+                            send: @escaping @MainActor (String) -> Void) -> NSView {
+        typealias A = DesignTokens.Bell.Answer
+        let field = AnswerField(string: draft)
+        // Only Return sends: leaving the field (a click outside, Tab, the popover closing) must
+        // not type half an answer in the agent (review of 2026-11-17).
+        field.cell?.sendsActionOnEndEditing = false
+        field.edit = edit
+        if focused { DispatchQueue.main.async { [weak field] in field?.window?.makeFirstResponder(field) } }
+        field.placeholderString = T("Answer…", "Responder…")
+        field.isBordered = false
+        field.drawsBackground = false
+        field.focusRingType = .none
+        field.font = UILooks.font(DesignTokens.FontSize.body)
+        field.textColor = DesignTokens.Color.textPrimary
+        field.send = send
+        field.target = field
+        field.action = #selector(AnswerField.sent)
+        let box = NSStackView(views: [field])
+        box.edgeInsets = NSEdgeInsets(top: 0, left: UILooks.pt(A.padding.left), bottom: 0, right: UILooks.pt(A.padding.right))
+        box.wantsLayer = true
+        box.layer?.backgroundColor = A.bg.cgColor
+        box.layer?.borderColor = A.border.cgColor
+        box.layer?.borderWidth = DesignTokens.Stroke.hairline
+        box.layer?.cornerRadius = UILooks.pt(A.radius)
+        box.heightAnchor.constraint(equalToConstant: UILooks.pt(A.height)).isActive = true
+        box.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        return box
+    }
+
     /// A label in the popover's type: a size, a weight and a color of the tokens.
     static func label(_ text: String, size: CGFloat, weight: NSFont.Weight = .regular, color: NSColor, wraps: Bool = false) -> NSTextField {
         let label = wraps ? NSTextField(wrappingLabelWithString: text) : NSTextField(labelWithString: text)
@@ -73,4 +104,20 @@ enum AgentBellParts {
 final class BellButton: NSButton {
     var handler: (@MainActor () -> Void)?
     @objc func clicked() { handler?() }
+}
+
+/// The answer's field: Return sends its words once, then it empties.
+final class AnswerField: NSTextField {
+    var send: (@MainActor (String) -> Void)?
+    var edit: (@MainActor (String) -> Void)?
+    override func textDidChange(_ notification: Notification) {
+        super.textDidChange(notification)
+        edit?(stringValue)
+    }
+    @objc func sent() {
+        let words = stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !words.isEmpty else { return }
+        stringValue = ""
+        send?(words)
+    }
 }

@@ -4,8 +4,8 @@ import Icons
 import Strings
 
 /// The attention's commands (ADR 0005; docs/spec/agents.md, Quadro): Allow
-/// and Deny list the requests whose hook waits, Mark as Unread lists the
-/// feed's lines. Each acts only on the one the owner picks.
+/// and Deny list the requests whose hook waits, Answer lists the options of the open questions,
+/// Mark as Unread lists the feed's lines. Each acts only on the one the owner picks.
 public enum AgentAttentionCommands {
     @MainActor
     public static func commands(palette: CommandPaletteController) -> [Command] {
@@ -27,6 +27,26 @@ public enum AgentAttentionCommands {
             Command(id: "agents.deny", title: T("Deny an Agent's Request…", "Negar o pedido de um agente…"),
                     keywords: ["deny", "refuse", "permission", "negar", "recusar", "permissão"], category: .terminal,
                     action: requests(T("The request to deny", "O pedido a negar")) { attention.deny($0) }),
+            // An option of an open question, typed in its agent's terminal (ADR 0036); the
+            // words of one's own go from the bell's field.
+            Command(id: "agents.answer", title: T("Answer an Agent's Question…", "Responder a pergunta de um agente…"),
+                    keywords: ["answer", "question", "option", "responder", "pergunta", "opção"], category: .terminal,
+                    action: .run {
+                        palette.open(AgentChoiceSource(placeholder: T("The answer", "A resposta"), empty: T("No question with options waits", "Nenhuma pergunta com opções espera"), items: {
+                            attention.cards.filter { $0.kind == .question }.flatMap { card in
+                                card.options.enumerated().map { index, option in
+                                    PaletteItem(id: card.id + "\u{1}" + String(index) + "\u{1}" + card.message, title: card.title + " → " + option,
+                                                detail: [card.project, card.session].filter { !$0.isEmpty }.joined(separator: " · "), icon: .question)
+                                }
+                            }
+                        }, choose: { picked in
+                            // The question as listed travels with the pick: a newer one in the same
+                            // tab must not take this answer.
+                            let parts = picked.components(separatedBy: "\u{1}")
+                            guard parts.count >= 3, let index = Int(parts[1]) else { return }
+                            attention.answerQuestion(parts[0], asked: parts[2...].joined(separator: "\u{1}"), .option(index))
+                        }))
+                    }),
             Command(id: "agents.mark-unread", title: T("Mark an Agent as Unread…", "Marcar um agente como não lido…"),
                     keywords: ["unread", "attention", "feed", "não lido", "atenção"], category: .terminal,
                     action: .run {

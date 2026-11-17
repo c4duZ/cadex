@@ -36,7 +36,7 @@ let attentionChecks: [(name: String, body: Checks.Body)] = [
                           report("t2", pid: 9, .blocked, .permission, "approve Bash: ls")])
         let cards = attention.cards
         expect(cards.count == 2 && cards.allSatisfy { !$0.canAnswer }, "\(cards)")
-        expect(cards.contains { $0.kind == .question && $0.title == "Azul ou verde? (Azul · Verde)" })
+        expect(cards.contains { $0.kind == .question && $0.title == "Azul ou verde?" && $0.options == ["Azul", "Verde"] }, "the options apart (plan 26 D2)")
         expect(cards.contains { $0.kind == .permission && $0.title == "Bash" && $0.detail == "ls" })
         _ = attention.addPermission(pid: 9, tool: "Bash", subject: "ls", project: "p", session: "s", account: "a", key: "t2") { _ in }
         expect(attention.cards.count == 2 && attention.cards.contains { $0.pid == 9 && $0.canAnswer }, "the hook's card stands for both")
@@ -110,7 +110,7 @@ let attentionChecks: [(name: String, body: Checks.Body)] = [
         attention.isEnabled = true
         attention.update([report("p1", pid: 71, .working), report("q1", pid: 72, .working), report("d1", pid: 73, .working)])
         attention.update([report("p1", pid: 71, .blocked, .permission, "approve Bash: make perf"),
-                          report("q1", pid: 72, .blocked, .question, "Keep the old checkout copy, or use the new text for everyone?"),
+                          report("q1", pid: 72, .blocked, .question, "answer: Which checkout copy? (Keep the old · Use the new)"),
                           report("d1", pid: 73, .done)])
         let id = attention.addPermission(pid: 71, tool: "Bash", subject: "make perf", project: "cadex", session: "perf-subagent-window",
                                          account: "bhband", key: "p1") { _ in }
@@ -130,6 +130,7 @@ let attentionChecks: [(name: String, body: Checks.Body)] = [
         func texts(_ view: NSView) -> [String] { ((view as? NSTextField).map { [$0.stringValue] } ?? []) + view.subviews.flatMap(texts) }
         func buttons(_ view: NSView) -> [String] { ((view as? NSButton).map { [$0.attributedTitle.string] } ?? []) + view.subviews.flatMap(buttons) }
         expect(texts(page).contains("Wants to run Bash") && texts(page).contains("Asks a question"), "\(texts(page))")
+        expect(texts(page).contains("Which checkout copy?") && buttons(page).contains("Use the new"), "the question's options as buttons: \(buttons(page))")
         expect(buttons(page).contains("Allow") && buttons(page).contains("Deny") && buttons(page).contains("Go to tab"), "\(buttons(page))")
         expect(texts(page).contains("EARLIER"), "what finished, under EARLIER")
         if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"], let bitmap = root.bitmapImageRepForCachingDisplay(in: root.bounds) {
@@ -137,6 +138,43 @@ let attentionChecks: [(name: String, body: Checks.Body)] = [
             try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/bell-popover.png"))
         }
         attention.resolve(id)
+        attention.update([])
+    }),
+    ("an answer's keys: an option's number at once; the words after the type-something number and Return (tested 2026-11-17)", {
+        let parsed = AgentAnswer.parse("Which color? (Red · Blue)")
+        expect(parsed.question == "Which color?" && parsed.options == ["Red", "Blue"], "\(parsed)")
+        expect(AgentAnswer.parse("Done? Yes").options.isEmpty && AgentAnswer.parse("(only one)").options.isEmpty)
+        expect(AgentAnswer.keys(.option(1), options: 2) == ["2"])
+        expect(AgentAnswer.keys(.text("Green\nnow"), options: 2) == ["3", "Green now", "\r"], "one line")
+        expect(AgentAnswer.keys(.option(2), options: 2) == nil && AgentAnswer.keys(.text("  "), options: 2) == nil)
+        expect(AgentAnswer.keys(.option(0), options: 0) == nil, "no options known: nothing to type")
+    }),
+    ("an answer to a question the agent left types nothing and the feed says so", {
+        let attention = AgentAttention.shared
+        attention.isEnabled = true
+        attention.update([report("q9", pid: 79, .working)])
+        attention.update([report("q9", pid: 79, .blocked, .question, "answer: Which? (A · B)")])
+        var sent: [AgentAnswer.Reply] = []
+        attention.onAnswer = { _, reply in sent.append(reply); return false }
+        let card = attention.cards.first { $0.kind == .question }
+        let id = card?.id ?? "", asked = card?.message ?? ""
+        attention.answerQuestion(id, asked: asked, .option(1))
+        expect(sent == [.option(1)], "\(sent)")
+        expect(attention.feed.first?.kind == .note && attention.feed.first?.text.hasPrefix("The agent moved on") == true, "\(attention.feed.first.map(\.text) ?? "")")
+        // A newer question in the same tab keeps the card's id: the old answer must not reach it.
+        attention.update([report("q9", pid: 79, .blocked, .question, "answer: Other? (C · D)")])
+        attention.onAnswer = { _, reply in sent.append(reply); return true }
+        attention.answerQuestion(id, asked: asked, .option(0))
+        expect(sent.count == 1, "an answer to the old question reached the new one")
+        // Answered: the card goes, a second click sends nothing; a new report brings it back.
+        let next = attention.cards.first { $0.kind == .question }?.message ?? ""
+        attention.answerQuestion(id, asked: next, .option(0))
+        expect(sent.count == 2 && !attention.cards.contains { $0.id == id }, "answered card stays")
+        attention.answerQuestion(id, asked: next, .option(0))
+        expect(sent.count == 2, "a second click typed again")
+        attention.update([report("q9", pid: 79, .blocked, .question, "answer: Third? (E · F)")])
+        expect(attention.cards.contains { $0.id == id }, "the next question shows")
+        attention.onAnswer = nil
         attention.update([])
     }),
     ("a permission reported by the agent and then by its hook is one line in the feed", {

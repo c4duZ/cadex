@@ -56,9 +56,13 @@ power, updates · Decisões: `docs/adr/0035-work-frame.md` · Mockups: 1 (o mapa
 - **D. O sino.** D1 feita (2026-11-17): o popover do sino no desenho do mockup (`AnchoredPanel` em
   `apps/macos/shared/menus/AnchoredPanel.swift`, abre no clique, fecha fora e no Esc; o conteúdo
   em `apps/macos/features/agents/AgentAttentionView.swift`), Allow/Deny/Go to tab, "EARLIER", a
-  Atividade com os filtros, e a página do sininho saiu da barra lateral. D2 falta: responder a
-  pergunta pelo sino precisa antes de um teste com o Claude real (as perguntas chegam só com o
-  texto, sem as opções do menu dele). Plano original: O botão da barra abre um popover com o conteúdo de `AgentAttentionView` (Precisa de
+  Atividade com os filtros, e a página do sininho saiu da barra lateral. D2 feita (2026-11-17): responder a pergunta pelo
+  sino. Testado antes com o Claude real (conta bkdg, haiku, Claude Code 2.1.326): o aviso dele já
+  traz as opções ("Which color? (Red · Blue)"), o número da opção escolhe na hora, e o número
+  seguinte às opções, o texto e Enter mandam palavras próprias, com 0,3 s entre as teclas.
+  `apps/macos/features/agents/AgentAnswer.swift`, os botões das opções e o campo no cartão, o
+  comando agents.answer, e o app digita só se o agente ainda pergunta aquilo (senão "The agent
+  moved on" no feed). Plano original: O botão da barra abre um popover com o conteúdo de `AgentAttentionView` (Precisa de
   você e Atividade), Permitir/Negar, e a resposta das perguntas ali mesmo pela
   docs/adr/0036-owner-words-reach-the-agent.md (o campo, ou um botão por opção; digitado no terminal
   do agente só se ele ainda está na pergunta, senão "The agent moved on"), testada com o fake agent

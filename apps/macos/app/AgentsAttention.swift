@@ -28,8 +28,38 @@ extension AppDelegate {
             cancel.onCancel = { attention.resolve(id) }
             if cancel.isCancelled { attention.resolve(id) }
         }
+        attention.onAnswer = { [weak self] request, reply in self?.answer(request, reply) ?? false }
         _ = attention.watch { [weak self] in self?.showAttentionCount() }
     }
+
+    /// Types the owner's answer in the agent's terminal (docs/adr/0036-owner-words-reach-the-agent.md):
+    /// only if, right now, that terminal's agent still asks the same question; each key a moment
+    /// after the one before, as the menu takes them (AgentAnswer). False: nothing was typed.
+    func answer(_ request: AgentRequest, _ reply: AgentAnswer.Reply) -> Bool {
+        guard let key = request.key, let terminal = terminal(key: key)?.terminal, Self.stillAsks(terminal, request.message),
+              let keys = AgentAnswer.keys(reply, options: request.options.count) else { return false }
+        for (step, text) in keys.enumerated() {
+            // Checked again before every key: the agent may move on, or the owner type in the
+            // tab, between two of them (review of 2026-11-17); then the rest is not sent.
+            DispatchQueue.main.asyncAfter(deadline: .now() + Self.keyPause * Double(step)) { [weak terminal] in
+                MainActor.assumeIsolated {
+                    guard let terminal, Self.stillAsks(terminal, request.message) else { return }
+                    terminal.session?.write(text)
+                }
+            }
+        }
+        return true
+    }
+
+    /// The terminal's agent is blocked on this very question (same report, word for word).
+    static func stillAsks(_ terminal: TerminalView, _ message: String) -> Bool {
+        guard let status = terminal.agentStatus else { return false }
+        return status.state == .blocked && status.kind == .question && status.message == message
+    }
+
+    /// Between two keys of an answer: the menu opens its text field before the words arrive (the
+    /// test of 2026-11-17 sent them seconds apart; a third of a second is ample for the TUI).
+    static let keyPause: TimeInterval = 0.3
 
     /// Every terminal running an agent that reported, in every window.
     func gatherAgentReports() {

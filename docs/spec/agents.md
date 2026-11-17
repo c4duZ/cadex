@@ -215,9 +215,10 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
 - agents.show-attention mostra um cartão por pedido aberto. Permissão: a ferramenta e o comando ou o
   arquivo, com Permitir e Negar (agents.approve, agents.deny), só por clique, com o diálogo da TUI
   aberto: quem responder primeiro vence (`docs/adr/0023-answer-agent-permissions.md`). Pergunta e
-  plano: o texto e, numa sessão aberta pelo Cadex, a resposta ali mesmo
-  (`../adr/0036-owner-words-reach-the-agent.md`): um campo "Answer…" para texto livre, ou um botão
-  por opção quando a pergunta tem opções; o Cadex digita a resposta no terminal do agente só se ele
+  plano: o texto e a resposta ali mesmo (`../adr/0036-owner-words-reach-the-agent.md`): um botão
+  por opção (as que o aviso do Claude traz, "Which color? (Red · Blue)"; o número da opção escolhe
+  no menu dele) e um campo "Answer…" para palavras próprias (o número seguinte às opções, o texto
+  e Enter; testado com o Claude Code 2.1.326 em 2026-11-17), também pelo ⌘K (agents.answer); o Cadex digita a resposta no terminal do agente só se ele
   ainda está naquela pergunta, e senão o cartão diz "The agent moved on". Todo cartão tem "Go to
   tab"; sessão aberta fora do Cadex tem só ele. O mesmo pedido de permissão aparece como cartão no pé do painel do agente
   (`tabs.md`, plano 28): responder num fecha o outro.
