@@ -23,7 +23,7 @@ painéis" e os apelidos do 27.
   `docs/design/work-frame/tokens.json`).
 - Cada arquivo reescrito entra na lista de tools/check_design_literals.py: só valores de
   `DesignTokens`, nada digitado.
-- **A. Medir o Claude.** Numa instância de teste, com a conta de teste: quais cores o Claude Code
+- **A. Medir o Claude.** Feita (2026-11-17): no tema padrão o Claude manda RGB fixo; no "dark-ansi" (por `--settings`), só ANSI; o kit pedirá o "-ansi" do modo do tema (`docs/spec/terminal.md`, As cores do Claude Code). Plano original: Numa instância de teste, com a conta de teste: quais cores o Claude Code
   manda (ANSI do tema ou cor fixa) no diff, na mensagem e nas ferramentas, em cada tema dele; qual
   tema o kit da sessão deve pedir para o nosso ANSI valer. Resultado escrito na spec do terminal.
 - **B. O painel.** PaneHeaderView.swift na cara nova e sempre visível: `StateGlyph`, nome, tarefa,

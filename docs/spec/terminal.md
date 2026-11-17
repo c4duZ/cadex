@@ -189,6 +189,25 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
     desenhada como um sinal só sobre as células dela, quando a fonte junta essas letras (Fira Code,
     JetBrains Mono). O SF Mono não tem ligaduras. terminal.toggle-ligatures liga e desliga.
 
+### As cores do Claude Code (plano 28, fase A)
+Medido em 2026-11-17 com um `claude` de verdade (conta de teste, haiku) num terminal falso que
+guardou cada byte desenhado: a abertura, o pedido, as ferramentas, o diff e a pergunta de
+permissão.
+- No tema padrão do Claude ("dark"), quase tudo vem em cor fixa (RGB de 24 bits, `38;2;…` e
+  `48;2;…`): o fundo do diff (`61,1,0` e `2,40,0`), o texto do diff (`248,248,242`), o "Perusing…"
+  laranja animado cor a cor, o texto do dono (branco), os destaques (`177,185,249`), o modo
+  (`175,135,255`). O tema do Cadex não alcança nada disso: é o Claude com as cores dele.
+- No tema "dark-ansi" do Claude, pedido por `--settings '{"theme":"dark-ansi"}'` (vale na sessão,
+  sem mexer na configuração da conta), tudo vem nas 16 cores ANSI: o texto do dono em 97, o
+  "trabalhando" em 93, os destaques e o ❯ em 94, as bordas em 37, o logo em 91 e 40, o modo em 95.
+  Aí o ANSI do tema do Cadex manda nas cores do Claude.
+- A status line do kit já usa ANSI (36, 32, 33, 35).
+- Decisão: o kit das sessões abertas pelo Cadex pede o tema "dark-ansi" num tema escuro do Cadex e
+  "light-ansi" num claro (fase C); o ANSI do Cadex Night é afinado para que o Claude, assim, fique
+  com a cara do mockup 10. Quem digita `claude` numa aba sem o kit continua com o tema da conta.
+- O que o Claude desenha continua dele: a caixa da mensagem, as ferramentas e o diff só mudam de
+  cor, nunca de forma.
+
 ## Estados
 - **Abrindo:** o painel aparece na hora; o prompt surge assim que o shell responde.
 - **Erro ao abrir o shell** (shell configurado não existe, pasta sem permissão): o painel mostra a
