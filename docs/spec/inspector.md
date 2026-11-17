@@ -19,7 +19,8 @@ novo.
   task and account").
 - **O que a coluna mostra** segue a seleção: a tarefa da aba com foco, ou o projeto quando o foco
   está num terminal fora de tarefa ou na página do projeto.
-- **Cabeçalho de cada aba:** uma linha só, igual em todas, com o nome à esquerda (a pasta em Files,
+- **Cabeçalho de cada aba:** é a própria linha de contexto (o mockup Inspector, com os botões
+  desenhados no plano 26 fase C), igual em todas, com as palavras à esquerda (a pasta em Files,
   com o caminho na dica; a branch em Changes, com o ícone de branch e ↑ ↓, e o clique troca de
   branch, git.switch-branch, ou "Git" fora de um repositório) e até 3 botões à direita (o resto no
   "⋯"), sempre à vista, discretos, acesos sob o ponteiro, cada um rodando um comando:

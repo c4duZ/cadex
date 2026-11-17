@@ -22,7 +22,12 @@ body{margin:0}
     <span style="flex: 1"></span>
     <span style="font-size: 11px; color: #7C828B; padding-bottom: 6px">⌥⌘I</span>
   </div>
-  <div style="padding: 10px 14px 4px; font-size: 11.5px; color: #8A9099">{{scope}}</div>
+  <div style="display: flex; align-items: center; gap: 2px; padding: 10px 8px 4px 14px; font-size: 11.5px; color: #8A9099">
+    <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{scope}}</span>
+    <sc-for list="{{actions}}" as="a" hint-placeholder-count="3">
+      <button aria-label="{{a.label}}" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 5px; background: transparent; color: #7C828B"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="{{a.path}}"></path></svg></button>
+    </sc-for>
+  </div>
 
   <sc-if value="{{isChanges}}" hint-placeholder-val="{{ true }}">
     <div style="margin: 6px 10px 8px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 3px; border-radius: 7px; background: #0F1012; border: 1px solid #1F2125">
@@ -178,6 +183,13 @@ class Component extends DCLogic {
       scope: tab === 'memory' ? 'cadex · the project’s memory, shared by every task and account'
         : tab === 'files' ? 'orchestration-e · cadex.worktrees/orchestration-e'
         : tab === 'history' ? 'orchestration-e · 3 commits ahead of main' : 'orchestration-e · against main',
+      // The tab's header buttons (plan 26 C): up to three, the rest under "⋯" (docs/spec/inspector.md).
+      actions: ({
+        changes: [['Fetch', 'M8 3v7M5 7l3 3 3-3M3 13h10'], ['Pull', 'M8 2v10M4 8l4 4 4-4'], ['Push', 'M8 14V4M4 8l4-4 4 4'], ['More', 'M3 8h.5M8 8h.5M13 8h.5']],
+        files: [['New File', 'M4 2h5l3 3v9H4zM8 7v5M5.5 9.5h5'], ['New Folder', 'M2 4h4l1 1.5h7V13H2zM8 7.5v4M6 9.5h4'], ['Collapse All', 'M4 6l4 3 4-3M4 10l4 3 4-3'], ['More', 'M3 8h.5M8 8h.5M13 8h.5']],
+        history: [['Open in a Tab', 'M9 3h4v4M13 3L7 9M11 9v4H3V5h4']],
+        memory: [['Organize with AI', 'M8 2l1.5 4.5L14 8l-4.5 1.5L8 14l-1.5-4.5L2 8l4.5-1.5z'], ['Reindex', 'M13 8a5 5 0 1 1-1.5-3.5M13 2v3h-3'], ['What the Agent Will See', 'M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8zM8 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3'], ['More', 'M3 8h.5M8 8h.5M13 8h.5']],
+      })[tab].map(([label, path]) => ({ label, path })),
       tree: this.tree(),
       commits: this.commits(),
       tabs: labels.map(([id, label]) => ({ label, style: 'padding: 7px 9px; font-size: 12.5px; ' + (id === tab ? 'font-weight: 600; color: #E7E8EA; border-bottom: 2px solid #E7E8EA' : 'color: #8A9099; border-bottom: 2px solid transparent') })),

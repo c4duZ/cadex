@@ -63,7 +63,7 @@ relink:
 macos-test: core relink
 	@cd apps/macos && swift build --product TerminalTests && swift build --product CommandPaletteTests \
 		&& swift build --product ShortcutsTests && swift build --product TabsTests \
-		&& swift build --product StatusBarTests && swift build --product SidebarTests && swift build --product CustomizeTests && swift build --product AgentsTests && swift build --product SSHTests && swift build --product MachinesTests && swift build --product OrchestrationTests && swift build --product IconsTests \
+		&& swift build --product StatusBarTests && swift build --product SidebarTests && swift build --product InspectorTests && swift build --product CustomizeTests && swift build --product AgentsTests && swift build --product SSHTests && swift build --product MachinesTests && swift build --product OrchestrationTests && swift build --product IconsTests \
 		&& swift build --product ThemesTests && swift build --product SettingsTests \
 		&& swift build --product ExplorerTests && swift build --product SearchTests \
 		&& swift build --product EditorTests && swift build --product MarkdownTests \
@@ -75,7 +75,7 @@ macos-test: core relink
 		&& swift build --product TempImagesTests && swift build --product SessionKitTests && swift build --product TextIndexTests && swift build --product AgentToolsTests && swift build --product WorktreesTests \
 		&& swift build --product ComputerUseTests && swift build --product ReviewTests && swift build --product MemoryTests
 	@cd apps/macos && .build/debug/TerminalTests && .build/debug/CommandPaletteTests && .build/debug/ShortcutsTests \
-		&& .build/debug/TabsTests && .build/debug/StatusBarTests && .build/debug/SidebarTests && .build/debug/CustomizeTests && .build/debug/AgentsTests && .build/debug/SSHTests && .build/debug/MachinesTests && .build/debug/OrchestrationTests && .build/debug/IconsTests \
+		&& .build/debug/TabsTests && .build/debug/StatusBarTests && .build/debug/SidebarTests && .build/debug/InspectorTests && .build/debug/CustomizeTests && .build/debug/AgentsTests && .build/debug/SSHTests && .build/debug/MachinesTests && .build/debug/OrchestrationTests && .build/debug/IconsTests \
 		&& .build/debug/ThemesTests && .build/debug/SettingsTests \
 		&& .build/debug/ExplorerTests && .build/debug/SearchTests && .build/debug/EditorTests && .build/debug/MarkdownTests && .build/debug/MediaPreviewTests && .build/debug/PreviewTests && .build/debug/SourceControlTests && .build/debug/GitHistoryTests \
 		&& .build/debug/SpacesTests && .build/debug/MenusTests && .build/debug/PowerTests && .build/debug/StringsTests && .build/debug/UpdatesTests && .build/debug/UILooksTests && .build/debug/StateGlyphTests && .build/debug/TempImagesTests && .build/debug/SessionKitTests && .build/debug/TextIndexTests && .build/debug/AgentToolsTests && .build/debug/WorktreesTests \

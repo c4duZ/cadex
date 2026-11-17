@@ -107,7 +107,7 @@ extension WindowSession {
         guard let root = WorktreesCore.repository(of: request.folder).map(AppDelegate.resolved) else { return .failed("this terminal is not in a git repository") }
         guard request["path"] != nil else {
             folder.open(root)
-            workspace?.showSidebar("git")
+            workspace?.showInspector("changes")
             return .ok("the task's changes are in Cadex's Git page")
         }
         guard let found = agentPath(request["path"], request) else { return .failed("the file must be inside this task") }

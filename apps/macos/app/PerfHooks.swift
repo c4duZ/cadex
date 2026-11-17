@@ -17,6 +17,19 @@ extension WindowSession {
         if let file = environment["CADEX_PERF_RACE"] { startPerfRace(file) }
         if let file = environment["CADEX_PERF_RUN"] { startPerfRun(file) }
         if environment["CADEX_PERF_PRESS"] != nil { startPerfPresses() }
+        if let tab = environment["CADEX_PERF_PANEL"] { showPerfPage(tab) }
+        if let out = environment["CADEX_PERF_SNAPSHOT"] { savePerfSnapshot(out) }
+    }
+
+    /// The window drawn into a PNG at 4 s, then at `out`: a test window often opens on another
+    /// Space, where screencapture fails (2026-11-17, the right panel's fidelity check).
+    private func savePerfSnapshot(_ out: String) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
+            guard let view = self?.window.contentView?.superview ?? self?.window.contentView,
+                  let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
+            view.cacheDisplay(in: view.bounds, to: bitmap)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: out))
+        }
     }
 
     /// That sidebar page shown from the start: the sidebar opens on its
@@ -24,7 +37,10 @@ extension WindowSession {
     /// wants Agents or History open asks for it (found 2026-11-14: the
     /// History "open" scenario had never shown the page).
     private func showPerfPage(_ page: String) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in self?.workspace?.showSidebar(page) }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            guard let workspace = self?.workspace else { return }
+            if workspace.inspector.known.contains(page) { workspace.showInspector(page) } else { workspace.showSidebar(page) }
+        }
     }
 
     /// That log's conversation opened at 12 s and 48 s and closed 12 s

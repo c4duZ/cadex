@@ -58,7 +58,7 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "memory.show", "memory.show-briefing", "memory.show-history", "memory.reindex", "memory.refresh", "memory.enable", "memory.approve", "memory.reject", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).
-            "agents.show-attention", "agents.show-feed", "agents.approve", "agents.deny", "agents.answer", "agents.mark-unread",
+            "agents.show-attention", "agents.show-feed", "agents.approve", "agents.deny", "agents.answer", "inspector.toggle", "agents.mark-unread",
             "agents.hibernate", "agents.restart",
             # Plan 20: the agent uses the Cadex (ADR 0024), Mac only for now.
             "agent-tools.open-file", "agent-tools.open-diff", "agent-tools.notify", "agent-tools.toggle",

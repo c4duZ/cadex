@@ -164,9 +164,16 @@ public extension DesignTokens {
             }
         }
         public enum Scope {
-            public static let padding = NSEdgeInsets(top: 10, left: 14, bottom: 4, right: 14)
+            public static let padding = NSEdgeInsets(top: 10, left: 14, bottom: 4, right: 8)
             public static let fontSize: CGFloat = DesignTokens.FontSize.small
             public static var color: NSColor { DesignTokens.Color.textMuted }
+            public static let gap: CGFloat = 2
+            public enum Button {
+                public static let size: CGFloat = 24
+                public static let icon: CGFloat = 14
+                public static let radius: CGFloat = DesignTokens.Radius.chip
+                public static var color: NSColor { DesignTokens.Color.textTertiary }
+            }
         }
         public enum Segmented {
             public static let margin = NSEdgeInsets(top: 6, left: 10, bottom: 8, right: 10)

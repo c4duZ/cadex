@@ -45,7 +45,14 @@ power, updates · Decisões: `docs/adr/0035-work-frame.md` · Mockups: 1 (o mapa
   máquina. Novos itens: o café (power.toggle) e a atualização (só com versão nova). A etiqueta de
   uso abre um popover com as contas (o conteúdo da página Accounts: uso, recarregar, abrir conta,
   personalizar). Os itens de hoje continuam personalizáveis.
-- **C. O painel da direita.** Feature nova `inspector` (spec do plano 25): coluna de 320 pt,
+- **C. O painel da direita.** C1 feita (2026-11-17, o dono aprovou os desenhos de Files e History):
+  a feature `apps/macos/features/inspector/`, a coluna de 320 com as abas e "⌥⌘I", a linha de
+  contexto com os botões da aba (até 3 e o "⋯", desenhados no mockup Inspector), as páginas de
+  antes dentro (saíram da barra lateral), inspector.toggle (⌥⌘I) e o botão da barra de título,
+  inspector.visible e inspector.tab salvos, e os ganchos de teste CADEX_PERF_PANEL e
+  CADEX_PERF_SNAPSHOT (a janela de teste abre noutra mesa, onde o screencapture falha). Falta a
+  C2: Changes com o seletor e o pé (Commit…, Open PR), as linhas de Files, History e Memory no
+  desenho, a borda arrastável e a janela estreita. Plano original: Feature nova `inspector` (spec do plano 25): coluna de 320 pt,
   recolhível (⌥⌘I, inspector.toggle), com as abas Mudanças, Arquivos, Histórico e Memória; cada
   aba é a página de hoje (source-control, explorer, git-history, memory) com o cabeçalho de
   `SidebarHeader`, pelo catálogo que `SidebarWiring` já monta. git.show, `git.show-history`,

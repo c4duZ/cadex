@@ -194,7 +194,9 @@ de tokens.
 ### Inspector.dc.html — peça · O painel da direita
 - **Abas:** Changes, Files, History, Memory e "⌥⌘I"; a ativa sublinhada.
 - **Linha de contexto:** "orchestration-e · against main" (ou, em Memory, "cadex · the project's
-  memory, shared by every task and account").
+  memory, shared by every task and account"), e à direita os botões da aba, ícones de 14 em caixas
+  de 24, até três e o "⋯" (Changes: fetch, pull, push; Files: novo arquivo, nova pasta, recolher;
+  History: abrir numa aba; Memory: organizar, reindexar, o briefing).
 - **Changes:** seletor "Last turn / Task / Uncommitted"; um arquivo por linha (M âmbar ou A verde,
   nome, pasta, +/−); no pé, "make check passed · 2 min ago" com ponto verde e os botões "Commit…" e
   "Open PR".

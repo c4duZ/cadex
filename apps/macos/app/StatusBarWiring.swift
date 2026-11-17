@@ -20,7 +20,7 @@ extension WindowSession {
                                     icon: .gitBranch, side: .right, view: branch)
         // The panel reads the status anyway; the item only shows it.
         git.onBranch = { [weak self, weak branch, weak branchItem] info in
-            self?.showSidebarBranch(info)
+            self?.showPanelBranch(info)
             self?.showProject(branch: info)
             guard let branch, branchItem?.isVisible == true else { return }
             branch.text = info.map { Self.branchText($0) } ?? ""

@@ -122,7 +122,14 @@ public struct Settings: Equatable, Sendable {
     public struct Sidebar: Equatable, Sendable {
         /// The icons on top of the sidebar, in order; a page left out is
         /// hidden (docs/spec/sidebar.md). The app drops unknown ids.
-        public var items = ["files", "git", "tasks", "agents", "agent-history", "accounts", "memory"]
+        /// Files, Git, Git History and Memory went to the right panel (plan 26 phase C).
+        public var items = ["tasks", "agents", "agent-history", "accounts"]
+    }
+
+    /// The right panel (docs/spec/inspector.md): open or closed, and its tab, come back on reopen.
+    public struct Inspector: Equatable, Sendable {
+        public var visible = true
+        public var tab = "changes"
     }
 
     public struct Agents: Equatable, Sendable {
@@ -269,6 +276,7 @@ public struct Settings: Equatable, Sendable {
     public var preview = Preview()
     public var power = Power()
     public var sidebar = Sidebar()
+    public var inspector = Inspector()
     public var statusBar = StatusBar()
     public var agents = Agents()
     public var ssh = SSH()
@@ -296,6 +304,7 @@ public struct Settings: Equatable, Sendable {
     static let paneHeaderModes = ["split", "always", "never"]
     static let fileOpenings = ["beside", "tab"]
     static let languages = ["en", "pt"]
+    static let inspectorTabs = ["changes", "files", "history", "memory"]
     static let keepAwakeModes = ["always", "running"]
     static let contrastRange = 1.0...21.0
     static let lineHeights = 0.8...2.0

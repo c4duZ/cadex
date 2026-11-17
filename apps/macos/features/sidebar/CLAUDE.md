@@ -37,9 +37,10 @@
   sidebar.page-1 a -9 (⌃⌘1 a ⌃⌘9): o comando do ícone na posição (`press(position:)`), como o
   clique;
   ⇧⌘3 a ⇧⌘5 são as capturas de tela do sistema, por isso ⌃⌘ (o dono, 2026-10-21).
-- O catálogo do app está em `../../app/SidebarWiring.swift`: files, git, tasks (as tarefas, plano 19),
-  agents, agent-history (as conversas dos agentes, plano 18), accounts (padrão, em
-  `SidebarLayout.swift`), memory e history (o do Git, escondido). O sininho saiu para o popover da
+- O catálogo do app está em `../../app/SidebarWiring.swift`: tasks (as tarefas, plano 19), agents,
+  agent-history (as conversas dos agentes, plano 18) e accounts (padrão, em `SidebarLayout.swift`).
+  Files, Git, Git History e Memory foram para o painel da direita (plano 26 fase C,
+  `../inspector/`); os ids delas salvos num sidebar.items antigo o app tira sem aviso. O sininho saiu para o popover da
   barra de título (plano 26, fase D) e as sub-abas, que só ele usava, saíram junto; o id
   "attention" está em SidebarLayout.retired. `onShow` avisa quando uma página aparece, para o app só
   criar o conteúdo então.

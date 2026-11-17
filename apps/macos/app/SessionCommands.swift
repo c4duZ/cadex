@@ -47,6 +47,13 @@ extension WindowSession {
             id: "view.toggle-sidebar", title: T("Show or Hide Sidebar", "Mostrar ou esconder o painel lateral"),
             keywords: ["sidebar", "explorer", "painel"], category: .view, defaultShortcut: "cmd+b",
             action: .run { [weak self] in self?.workspace?.toggleSidebar() }))
+        // The right panel (plan 26 phase C, docs/spec/inspector.md); its tabs open by git.show,
+        // explorer.focus, git.show-history and memory.show.
+        commands.register(Command(
+            id: "inspector.toggle", title: T("Show or Hide the Right Panel", "Mostrar ou esconder o painel da direita"),
+            keywords: ["inspector", "panel", "right", "changes", "files", "painel", "direita"], category: .view,
+            defaultShortcut: "cmd+opt+i",
+            action: .run { [weak self] in self?.toggleInspector() }))
         commands.register(PowerCommands.all(app.power))
         commands.register(ThemeCommands.all(store: app.settings.store, palette: palette))
         commands.register(UpdateCommands.all(app.updates))
@@ -80,7 +87,7 @@ extension WindowSession {
             id: "git.show", title: T("Show Git", "Mostrar o Git"), keywords: ["source control", "git", "mudanças", "changes", "commit"],
             category: .view, defaultShortcut: "cmd+shift+g",
             action: .run { [weak self] in
-                self?.workspace?.showSidebar("git")
+                self?.workspace?.showInspector("changes")
                 self?.git?.refresh()
             }))
         commands.register(Command(
@@ -134,23 +141,23 @@ extension WindowSession {
             keywords: ["history", "log", "commits", "histórico", "sidebar", "painel"], category: .view,
             // L for log, as in git log.
             defaultShortcut: "cmd+shift+l",
-            action: .run { [weak self] in self?.workspace?.showSidebar("history") }))
+            action: .run { [weak self] in self?.workspace?.showInspector("history") }))
         commands.register(Command(
             id: "history.show-in-tab", title: T("Show Commit Details in a Tab", "Mostrar o commit numa aba"),
             keywords: ["commit", "details", "message", "detalhes", "mensagem", "history", "histórico"], category: .view,
             action: .run { [weak self] in
-                guard let history = self?.sidebarHistory, let sha = history.selectedSha else { return }
+                guard let history = self?.panelHistory, let sha = history.selectedSha else { return }
                 self?.opener?.openHistory(history.root, beside: false, selecting: sha)
             },
             unavailableReason: { [weak self] in
-                self?.sidebarHistory?.selectedSha == nil ? T("Pick a commit in the sidebar's Git History", "Escolha um commit no histórico do painel lateral") : nil
+                self?.panelHistory?.selectedSha == nil ? T("Pick a commit in the History tab", "Escolha um commit na aba History") : nil
             }))
         commands.register(HistoryCommands.all(
             open: { [weak self] beside in if let root = self?.git?.repositoryRoot { self?.opener?.openHistory(root, beside: beside) } },
             repository: { [weak self] in self?.git?.repositoryRoot },
             // The sidebar's history when the tab in front is not one: its
             // right-click menu runs these too.
-            active: { [weak self] in self?.tabs?.activeDocument as? HistoryDocument ?? self?.sidebarHistory }))
+            active: { [weak self] in self?.tabs?.activeDocument as? HistoryDocument ?? self?.panelHistory }))
         commands.register(withMemoryReindex(EditorCommands.all { [weak self] in self?.tabs?.activeDocument as? EditorDocument }))
         commands.register(MediaCommands.all { [weak self] in self?.tabs?.activeDocument as? MediaDocument })
         // preview.open also takes url= from the agent (docs/adr/0024-agent-tools.md).
@@ -217,11 +224,11 @@ extension WindowSession {
         folder.onChange = { [weak self] root in
             guard let self else { return }
             self.explorer?.setRoot(root)
-            self.workspace?.sidebar.setTitle(Self.folderTitle(root), for: "files")
+            self.showPanelFolder(root)
             self.search?.setRoot(root, showHidden: self.explorer?.showHidden ?? true)
             self.markdown?.setRoot(root)
             self.git?.setFolder(root)
-            self.sidebarFolderChanged()
+            self.panelFolderChanged()
             self.spaces?.scheduleSave()
             self.showLocation(root)
         }

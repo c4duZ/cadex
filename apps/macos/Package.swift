@@ -178,6 +178,14 @@ let package = Package(
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
+        // The column on the right: Changes, Files, History and Memory (docs/spec/inspector.md).
+        .target(
+            name: "Inspector",
+            dependencies: ["Icons", "Menus", "Strings", "UILooks"],
+            path: "features/inspector",
+            exclude: ["CLAUDE.md", "tests"],
+            swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
+        ),
         // The column on the left: icons on top, the chosen page below (docs/spec/sidebar.md).
         .target(
             name: "Sidebar",
@@ -344,6 +352,12 @@ let package = Package(
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
         ),
         .executableTarget(
+            name: "InspectorTests",
+            dependencies: ["Inspector", "Checks"],
+            path: "features/inspector/tests",
+            linkerSettings: [.unsafeFlags(["-L", coreLibDir])]
+        ),
+        .executableTarget(
             name: "SidebarTests",
             dependencies: ["Sidebar", "Checks"],
             path: "features/sidebar/tests",
@@ -487,7 +501,7 @@ let package = Package(
 
         .executableTarget(
             name: "Cadex",
-            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Customize", "Agents", "AgentTools", "ComputerUse", "Memory", "Review", "SessionKit", "Worktrees", "SSH", "Machines", "Orchestration", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
+            dependencies: ["Terminal", "CommandPalette", "Shortcuts", "Tabs", "Themes", "StatusBar", "Sidebar", "Inspector", "Customize", "Agents", "AgentTools", "ComputerUse", "Memory", "Review", "SessionKit", "Worktrees", "SSH", "Machines", "Orchestration", "Icons", "Settings", "Explorer", "Search", "Editor", "Markdown", "MediaPreview", "Preview", "SourceControl", "GitHistory", "Spaces", "Menus", "Power", "Strings", "Updates", "UILooks"],
             path: "app",
             exclude: ["CLAUDE.md"],
             linkerSettings: [.unsafeFlags(["-L", coreLibDir])]

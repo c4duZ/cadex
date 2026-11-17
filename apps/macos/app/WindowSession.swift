@@ -47,8 +47,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
     var followTerminal = true
     /// The sidebar's Git History page, made the first time it shows
     /// (SidebarWiring.swift); nil while nobody opened it, so it costs nothing.
-    var sidebarHistory: HistoryDocument?
-    let sidebarHistoryHost = NSView()
+    var panelHistory: HistoryDocument?
+    let panelHistoryHost = NSView()
     /// The status bar's Terminals item (StatusBarWiring.swift).
     var terminalsLabel: StatusLabel?
     /// The status bar's Project, keep-awake and update items (StatusBarItems.swift).
@@ -142,15 +142,17 @@ final class WindowSession: NSObject, NSWindowDelegate {
         explorer.onFolderChange = { [weak self, weak opener] folders in
             opener?.foldersChanged(folders)
             self?.git?.diskChanged(folders)
-            self?.sidebarHistory?.diskChanged(folders)
+            self?.panelHistory?.diskChanged(folders)
             self?.reviewsDiskChanged(folders)
             AuthorshipHub.diskChanged(folders)
         }
-        let workspace = WorkspaceView(explorer: explorer, sidebar: makeSidebar(explorer: explorer, git: git)) { [weak self] id in self?.commands.run(id) }
+        let workspace = WorkspaceView(explorer: explorer, sidebar: makeSidebar(), inspector: makeInspector(explorer: explorer, git: git)) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace
         self.workspace = workspace
         workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.newOpeners) ?? [] }
         showLocation(folder.root)
+        showPanelFolder(folder.root)
+        applyInspector(settings.store.settings.inspector)
         // A window opened later shows what already needs you, not only the next change.
         workspace.titleBar.setBell(count: AgentAttention.shared.unseen)
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
@@ -159,13 +161,10 @@ final class WindowSession: NSObject, NSWindowDelegate {
         // 2026-11-17: before, a new window drew them in the wrong state).
         showPower()
         showUpdate()
-        explorer.revealSidebar = { [weak workspace] in workspace?.showSidebar("files") }
+        explorer.revealSidebar = { [weak workspace] in workspace?.showInspector("files") }
         git.onOpenFile = { [weak opener] path, beside in opener?.open(path, beside: beside) }
         git.onOpenDiff = { [weak opener] request, beside in opener?.openDiff(request, beside: beside) }
-        git.onMarks = { [weak self, weak explorer] marks in
-            explorer?.gitMarks = marks
-            self?.showGitBadge(marks)
-        }
+        git.onMarks = { [weak explorer] marks in explorer?.gitMarks = marks }
         startPerfHooks()
     }
 
@@ -177,6 +176,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         let menu = CommandMenu(registry: commands) { keymap.combo(for: $0)?.menuKeyEquivalent }
         mainMenu = menu.build()
         self.menu = menu
+        workspace?.inspector.setShortcut(app.keymapLabel("inspector.toggle"))
     }
 
     // MARK: Settings, from SettingsBridge through the app

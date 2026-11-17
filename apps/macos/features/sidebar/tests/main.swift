@@ -66,6 +66,7 @@ let exitCode = await Checks.run([
     }),
     ("the view shows the first page and reports unknown ids", {
         let view = SidebarView(catalog: catalog()) { _ in }
+        view.setItems(["files", "git"])
         expect(view.page == "files")
         let problems = view.setItems(["git", "agents"])
         expect(view.items == ["git"] && problems.count == 1, "\(view.items) \(problems)")
@@ -93,6 +94,7 @@ let exitCode = await Checks.run([
     ("toggling a page saves the new list", {
         var saved: [[String]] = []
         let view = SidebarView(catalog: catalog()) { _ in }
+        view.setItems(["files", "git"])
         view.onItemsChange = { saved.append($0) }
         view.toggle("find")
         view.toggle("nope")

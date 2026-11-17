@@ -37,7 +37,7 @@ extension WindowSession {
 
     func memoryPageActions() -> MemoryPageActions {
         var actions = MemoryPageActions(
-            show: { [weak self] in self?.workspace?.showSidebar("memory") },
+            show: { [weak self] in self?.workspace?.showInspector("memory") },
             showBriefing: { [weak self] in self?.showMemoryBriefing() },
             reindex: { [weak self] in if let self { self.reindexMemory(root: self.projectRoot) } },
             refresh: { [weak self] in self?.refreshMemoryPage() },

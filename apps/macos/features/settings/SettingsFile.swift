@@ -86,6 +86,10 @@ public enum SettingsFile {
         if let s = reader.section(root, "sidebar") {
             settings.sidebar.items = reader.strings(s, "sidebar.items") ?? settings.sidebar.items
         }
+        if let s = reader.section(root, "inspector") {
+            settings.inspector.visible = reader.bool(s, "inspector.visible") ?? settings.inspector.visible
+            settings.inspector.tab = reader.choice(s, "inspector.tab", Settings.inspectorTabs) ?? settings.inspector.tab
+        }
         if let s = reader.section(root, "agents") {
             settings.agents.sessions = reader.bool(s, "agents.sessions") ?? settings.agents.sessions
             settings.agents.notifyPermission = reader.bool(s, "agents.notifyPermission") ?? settings.agents.notifyPermission
@@ -265,6 +269,7 @@ public enum SettingsFile {
             "preview": ["pickTarget": s.preview.pickTarget, "pickScreenshot": s.preview.pickScreenshot],
             "power": ["mode": s.power.mode, "onAtLaunch": s.power.onAtLaunch, "keepDisplayOn": s.power.keepDisplayOn],
             "sidebar": ["items": s.sidebar.items],
+            "inspector": ["visible": s.inspector.visible, "tab": s.inspector.tab],
             "statusBar": ["left": s.statusBar.left, "right": s.statusBar.right],
             "ssh": ["ping": s.ssh.ping],
             "machines": ["tailscale": s.machines.tailscale, "acceptRemote": s.machines.acceptRemote, "users": s.machines.users],

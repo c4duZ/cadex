@@ -50,13 +50,14 @@
   botões da janela descidos para o meio dela a cada mudança de tamanho e de foco (a barra compacta
   os centra em 38), a busca `TitleBarSearch.swift` ("Search ⌘K", abre a paleta), "projeto ›
   tarefa" (`location(of:)`: `<repo>.worktrees/<tarefa>` é o projeto e a tarefa), as abas e "+",
-  e à direita o sino com o número (`setBell`, de `AgentsAttention.swift`); o café e a
+  e à direita o sino com o número (`setBell`, de `AgentsAttention.swift`) e o botão do painel da
+  direita (inspector.toggle, aceso com ele aberto; `setInspectorOpen`); o café e a
   atualização foram para a barra de status (fase B, `StatusBarItems.swift`); o botão da barra
   lateral, o de space e o das configurações saíram (⌘B, ⇧⌘S e ⌘, no ⌘K, nos atalhos e no menu). Cada botão é
   um `TitleBarButton.swift` (components.titleIconButton: 30 pt, aceso quando o que abre está
   aberto, com o número do sino), todos por comando; nada de valor digitado
   (`../../../tools/check_design_literals.py`), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
-  painel lateral recolhível, barra de status) e `SidebarWiring.swift` (o catálogo da feature `sidebar`: a árvore do explorer, o painel do git e o histórico compacto como páginas, a busca como ação; salva sidebar.items e põe a contagem de mudanças no ícone do Git; `openCustomize` abre a janela
+  painel lateral recolhível, barra de status) e `SidebarWiring.swift` (o catálogo da feature `sidebar`: Tasks, Agents, History e Accounts; salva sidebar.items, sem os ids que foram para a direita; `openCustomize` abre a janela
   Customize única na aba pedida, com as abas da barra lateral e da barra de status desta janela, nas
   cores do tema como as configurações e não nas da janela, e a repinta quando o tema muda) e
   `StatusBarWiring.swift` (os itens Git branch e Terminals, e os lados salvos) e `StatusBarItems.swift`
@@ -81,6 +82,12 @@
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.
+- `InspectorWiring.swift` (plano 26, fase C): o painel da direita da feature `inspector`, colado à
+  direita entre as barras: Changes (o painel do git), Files (a árvore do explorer), History (o
+  histórico compacto, feito na primeira vez que a aba aparece) e Memory, cada aba com os botões de
+  antes; a linha de contexto com a pasta, o branch (o clique troca) e a memória do projeto;
+  inspector.toggle (⌥⌘I) e inspector.visible e inspector.tab salvos; git.show, explorer.focus,
+  git.show-history e memory.show abrem a aba deles (WorkspaceView.showInspector).
 - `AgentToolsWiring.swift` (plano 20, fase B): o pedido de comando do agente acha o terminal dele
   (pela sessão do kit, senão pelos pids acima do `cadex`), confere agentTools.enabled e a lista do
   agente e roda na janela daquele terminal, com a pasta e a conversa; abrir arquivo e diff (só dentro

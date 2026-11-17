@@ -1,5 +1,6 @@
 import AppKit
 import Explorer
+import Inspector
 import Sidebar
 import StatusBar
 import Tabs
@@ -19,6 +20,15 @@ final class WorkspaceView: NSView {
     let statusBar = StatusBarView()
     private let sidebarPanel = PanelView()
     let sidebar: SidebarView
+    /// The right panel (plan 26 phase C): a column flush with the window's right edge, its own
+    /// line on the left (components.inspector), not a rounded panel.
+    let inspector: InspectorView
+    private var inspectorWidth: NSLayoutConstraint!
+    /// The center ends at the panel, or at the window's edge with it closed: the panel keeps its
+    /// width hidden, since 0 pt could not hold its rows (review of 2026-11-17).
+    private var contentToInspector: NSLayoutConstraint!
+    private var contentToEdge: NSLayoutConstraint!
+    private(set) var inspectorVisible = true
     private let explorer: ExplorerController
     private let contentPanel = PanelView()
     private var sidebarWidth: NSLayoutConstraint!
@@ -33,16 +43,17 @@ final class WorkspaceView: NSView {
     /// The shown space's tabs in the content panel.
     private weak var tabsView: NSView?
 
-    init(explorer: ExplorerController, sidebar: SidebarView, run: @escaping (String) -> Void) {
+    init(explorer: ExplorerController, sidebar: SidebarView, inspector: InspectorView, run: @escaping (String) -> Void) {
         titleBar = TitleBarView(run: run)
         self.explorer = explorer
         self.sidebar = sidebar
+        self.inspector = inspector
         super.init(frame: .zero)
         frost.blendingMode = .behindWindow
         frost.material = .underWindowBackground
         frost.state = .active
         frost.isHidden = true
-        for view in [frost, titleBar, statusBar, sidebarPanel, contentPanel] as [NSView] {
+        for view in [frost, titleBar, statusBar, sidebarPanel, contentPanel, inspector] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
@@ -51,6 +62,9 @@ final class WorkspaceView: NSView {
         let gap = Self.gap
         sidebarWidth = sidebarPanel.widthAnchor.constraint(equalToConstant: Self.sidebarWidth)
         contentLeading = contentPanel.leadingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: gap)
+        inspectorWidth = inspector.widthAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Inspector.width))
+        contentToInspector = contentPanel.trailingAnchor.constraint(equalTo: inspector.leadingAnchor, constant: -gap)
+        contentToEdge = contentPanel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -gap)
         NSLayoutConstraint.activate([
             frost.topAnchor.constraint(equalTo: topAnchor),
             frost.bottomAnchor.constraint(equalTo: bottomAnchor),
@@ -70,8 +84,12 @@ final class WorkspaceView: NSView {
             sidebarWidth,
             contentPanel.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
             contentLeading,
-            contentPanel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -gap),
+            contentToInspector,
             contentPanel.bottomAnchor.constraint(equalTo: statusBar.topAnchor),
+            inspector.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
+            inspector.trailingAnchor.constraint(equalTo: trailingAnchor),
+            inspector.bottomAnchor.constraint(equalTo: statusBar.topAnchor),
+            inspectorWidth,
         ])
         ThemeStore.shared.observe { [weak self] theme in self?.apply(theme) }
     }
@@ -89,10 +107,30 @@ final class WorkspaceView: NSView {
         if let tabBarStyle { tabs.bar.style = tabBarStyle }
     }
 
-    /// Shows the sidebar on a page (explorer.focus, git.show).
-    func showSidebar(_ page: String = "files") {
+    /// Shows the sidebar on a page (agents.show, worktrees.show).
+    func showSidebar(_ page: String) {
         if !sidebarVisible { toggleSidebar() }
         sidebar.show(page)
+    }
+
+    /// Opens the right panel on a tab (git.show, explorer.focus, git.show-history, memory.show).
+    func showInspector(_ tab: String) {
+        if !inspectorVisible { setInspector(visible: true) }
+        inspector.show(tab)
+    }
+
+    /// inspector.toggle and the saved inspector.visible. Closed, the panel is hidden, so no tab of
+    /// it reads (docs/spec/inspector.md).
+    func setInspector(visible: Bool) {
+        let opening = visible && !inspectorVisible
+        inspectorVisible = visible
+        inspector.isHidden = !visible
+        contentToInspector.isActive = visible
+        contentToEdge.isActive = !visible
+        titleBar.setInspectorOpen(visible)
+        // Opened again: its tab is announced, so a page that went while closed (History after a
+        // folder change) comes back (review of 2026-11-17).
+        if opening, let tab = inspector.tab { inspector.show(tab) }
     }
 
     /// The view.toggle-sidebar command.
