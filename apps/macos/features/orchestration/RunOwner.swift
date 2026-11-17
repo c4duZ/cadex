@@ -49,7 +49,7 @@ extension RunBook {
     /// caller to end their agents (empty when under the cap).
     public func enforceCap(run id: String) throws -> [Dispatch] {
         guard let run = try run(id), !run.stopped else { return [] }
-        guard RunGraph.overCap(run.caps, dispatches: try dispatches(of: id), now: now()) else { return [] }
+        guard RunGraph.overCap(run.caps, dispatches: try dispatches(of: id), now: now(), extra: run.coordinatorCostUsd ?? 0) else { return [] }
         return try stopRun(id, reason: "hit the cap")
     }
 }
@@ -82,7 +82,8 @@ extension RunGraph {
     }
 
     /// Past the run's cap, in money or in time with agents working.
-    public static func overCap(_ caps: Caps, dispatches: [Dispatch], now: Date) -> Bool {
-        spent(dispatches) > caps.budgetUsd || busySeconds(dispatches, now: now) > TimeInterval(caps.maxMinutes * 60)
+    /// `extra`: the coordinating agent's cost, which counts too.
+    public static func overCap(_ caps: Caps, dispatches: [Dispatch], now: Date, extra: Double = 0) -> Bool {
+        spent(dispatches) + extra > caps.budgetUsd || busySeconds(dispatches, now: now) > TimeInterval(caps.maxMinutes * 60)
     }
 }

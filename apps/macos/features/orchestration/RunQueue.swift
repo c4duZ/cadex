@@ -55,6 +55,9 @@ extension RunError {
         case .noGate(let id): return T("\(name(id)) has no gate waiting.", "\(name(id)) não tem portão esperando.")
         case .tooDeep(let max): return T("Sub-tasks go at most \(max) deep (Settings › Many Agents).", "Sub-tarefas vão no máximo \(max) níveis (Configurações › Muitos agentes).")
         case .wrongRun(_): return T("That dispatch is of another run.", "Esse despacho é de outra execução.")
+        case .notSupervised: return "this session is not a task of a Cadex run (no dispatch for its token)"
+        case .notYours(let what): return what
+        case .missing(let key): return "\(key)= is needed"
         }
     }
 }

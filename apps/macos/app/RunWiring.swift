@@ -25,6 +25,11 @@ extension WindowSession {
         actions.stopRun = { [weak self] in self?.stopRun($0.id) }
         actions.setDependencies = { [weak self] in self?.setTaskDependencies($0.id) }
         actions.stopWaiting = { [weak self] in self?.stopTask($0.id) }
+        actions.addGate = { [weak self] in self?.addTaskGate($0.id) }
+        actions.approveGate = { [weak self] in self?.approveTaskGate($0.id) }
+        actions.rejectGate = { [weak self] in self?.rejectTaskGate($0.id) }
+        actions.answer = { [weak self] in self?.answerQuestion($0) }
+        actions.agent = { [weak self] id, request in self?.answerRunAgent(id, request) ?? .failed("the window is gone") }
         commands.register(RunCommands.all(palette: palette, actions: actions))
         // Dispatches left working by the last launch: the watch reaps the
         // ones whose agent is gone. Nothing with the feature off.
@@ -35,17 +40,18 @@ extension WindowSession {
         }
     }
 
-    /// orchestration.new-run: the name and the cap, in this repository; then its page.
+    /// orchestration.new-run: the name, the cap and who coordinates, in this
+    /// repository; then its page (and, with an agent coordinating, its tab).
     func newRun() {
         let controller = OrchestrationController.shared
-        guard let repo = repository else {
+        guard let repo = mainRepository else {
             return say(T("A run needs a git repository", "Uma execução precisa de um repositório git"), T("Open a repository's folder first.", "Abra antes a pasta de um repositório."))
         }
-        let form = NewRunForm(caps: controller.defaultCaps)
+        let form = NewRunForm(caps: controller.defaultCaps, accounts: raceAccounts(repo: repo))
         let alert = NSAlert()
         alert.messageText = T("New Run", "Nova execução")
-        alert.informativeText = T("Tasks in \((repo as NSString).abbreviatingWithTildeInPath), coordinated by you: you add them, dispatch each one when it is ready and mark it done. The cap is for the whole run.",
-                                  "Tarefas em \((repo as NSString).abbreviatingWithTildeInPath), coordenadas por você: você as adiciona, despacha cada uma quando fica pronta e marca como concluída. O teto vale para a execução inteira.")
+        alert.informativeText = T("Tasks in \((repo as NSString).abbreviatingWithTildeInPath), each in its own worktree and agent. You coordinate (each dispatch yours, or ready tasks starting on their own as the account below), or an agent does: Claude opens in a tab here with your goal and spawns the tasks. The cap is for the whole run.",
+                                  "Tarefas em \((repo as NSString).abbreviatingWithTildeInPath), cada uma na sua worktree e agente. Você coordena (cada despacho seu, ou as prontas começando sozinhas na conta abaixo), ou um agente coordena: o Claude abre numa aba aqui com o seu objetivo e cria as tarefas. O teto vale para a execução inteira.")
         alert.accessoryView = form
         alert.addButton(withTitle: T("Create Run", "Criar a execução"))
         alert.addButton(withTitle: T("Cancel", "Cancelar"))
@@ -53,11 +59,26 @@ extension WindowSession {
         fillPerfRunForm(form)
         perfAnswer(alert)
         alert.beginSheetModal(for: window) { [weak self] response in
-            guard response == .alertFirstButtonReturn, let self, let book = controller.runs() else { return }
-            let values = form.values(fallback: controller.defaultCaps)
-            guard let run = try? book.newRun(name: values.name, repository: repo, caps: values.caps) else { return }
-            self.showRun(run.id)
+            guard response == .alertFirstButtonReturn, let self else { return }
+            self.createRun(form.values(fallback: controller.defaultCaps), repo: repo)
         }
+    }
+
+    func createRun(_ values: NewRunValues, repo: String) {
+        guard let book = OrchestrationController.shared.runs() else { return }
+        if values.mode == .agent {
+            guard !values.goal.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                return say(T("The run was not created", "A execução não foi criada"), T("An agent coordinating needs a goal.", "Um agente coordenando precisa de um objetivo."))
+            }
+            guard ClaudeTrust.isTrusted(repo, repository: nil, configDir: values.agent.account) else {
+                return say(T("The run was not created", "A execução não foi criada"),
+                           DispatchRefusal.notTrusted(values.agent.account.map { ($0 as NSString).lastPathComponent } ?? "~/.claude", dir: values.agent.account).message)
+            }
+        }
+        guard let run = try? book.newRun(name: values.name, repository: repo, caps: values.caps) else { return }
+        if values.mode != .owner { try? book.configure(run: run.id, autoAgent: values.agent, goal: values.mode == .agent ? values.goal : nil) }
+        showRun(run.id)
+        if values.mode == .agent, let made = try? book.run(run.id) { launchCoordinator(made, book: book) }
     }
 
     /// orchestration.add-task: title, spec and what it waits for.
@@ -78,11 +99,12 @@ extension WindowSession {
             let values = form.values()
             guard !values.title.isEmpty else { return self.say(T("The task did not go in", "A tarefa não entrou"), T("It needs a title.", "Ela precisa de um título.")) }
             do {
-                try book.addTask(run: runID, title: values.title, spec: values.spec, dependsOn: values.dependsOn)
+                try book.addTask(run: runID, title: values.title, spec: values.spec, dependsOn: values.dependsOn, gate: values.gate)
             } catch {
                 self.say(T("The task did not go in", "A tarefa não entrou"), Self.runMessage(error, run: runID))
             }
             self.refreshRunPages()
+            self.dispatchOnTheirOwn()
         }
     }
 
@@ -105,6 +127,7 @@ extension WindowSession {
         }
         refreshRunPages()
         drainRunQueue()
+        dispatchOnTheirOwn()
     }
 
     /// orchestration.stop-dispatch: it and the dispatches below it stop, their agents ended.
@@ -124,11 +147,14 @@ extension WindowSession {
     func stopRun(_ id: String) {
         guard let book = OrchestrationController.shared.runs(), let run = try? book.run(id) else { return }
         let live = RunGraph.live((try? book.dispatches(of: id)) ?? []).count
+        let coordinator = run.coordinator == nil ? "" : T(" and the coordinating agent", " e o agente coordenador")
+        let more = run.coordinator == nil ? "" : T(" (and the coordinator)", " (e o coordenador)")
         confirm(T("Stop the run \(run.name)?", "Parar a execução \(run.name)?"),
-                T("\(live) agent(s) working are ended, and the run takes no new dispatches. Worktrees and branches stay.",
-                  "\(live) agente(s) trabalhando são encerrados, e a execução não aceita novos despachos. Worktrees e branches ficam."),
+                T("\(live) agent(s) working\(coordinator) are ended, and the run takes no new dispatches. The agents of done tasks stay open. Worktrees and branches stay.",
+                  "\(live) agente(s) trabalhando\(more) são encerrados, e a execução não aceita novos despachos. Os agentes das tarefas concluídas ficam abertos. Worktrees e branches ficam."),
                 button: T("Stop Run", "Parar a execução")) { [weak self] in
             self?.endAgents((try? book.stopRun(id)) ?? [])
+            self?.endCoordinator(of: id)
         }
     }
 
@@ -140,6 +166,13 @@ extension WindowSession {
         }
         refreshRunPages()
         if !stopped.isEmpty { drainRunQueue() }
+    }
+
+    /// A stopped run's coordinating agent ends too (SIGTERM, as a hibernation).
+    func endCoordinator(of runID: String) {
+        guard let kit = (try? OrchestrationController.shared.runs()?.run(runID))??.coordinator,
+              let found = app.locate({ $0.agentResume?.kitSession == kit }), found.terminal.foregroundGroup > 0 else { return }
+        kill(found.terminal.foregroundGroup, SIGTERM)
     }
 
     /// The page's "Stop" on a task: out of the queue when it waits for a

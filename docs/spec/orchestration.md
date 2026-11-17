@@ -85,6 +85,12 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
   desde a criação: uma execução preenchida ao longo do dia bateria no teto antes de qualquer agente
   (decidido em 2026-11-16). Passou de um dos dois, todos os despachos vivos param e a execução fica
   "hit the cap", sem aceitar despachos novos.
+- New Run escolhe quem coordena: o dono despachando cada tarefa, o dono com as tarefas prontas
+  começando sozinhas (na conta e modelo escolhidos na folha), ou um agente: o Claude abre numa aba
+  no repositório com o objetivo do dono como prompt (por arquivo, nunca pelo shell) e cria as
+  tarefas pelo `spawn`; as dele começam sozinhas como a conta escolhida. Uma tarefa parada pelo
+  dono não começa sozinha de novo: o dono a despacha (2026-11-16, D2). Uma que não consegue
+  começar sozinha (sem confiança, especificação grande…) fica "falhou" com o motivo.
 - Nova tentativa (orchestration.retry), só pelo dono ou pelo coordenador: um despacho novo da mesma
   tarefa; o anterior fica no histórico da tarefa, com o motivo.
 - Parar (orchestration.stop-dispatch): encerra o agente do despacho (SIGTERM no `claude`) e os
@@ -103,6 +109,12 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
     execução, lido por ele na caixa dele;
   - `cadex run orchestration.spawn title=… spec-file=<arquivo>`: uma sub-tarefa, até
     orchestration.maxDepth; a especificação vai em arquivo, e o Cadex a lê, nunca a executa.
+- `spawn` aceita também `after=<ids ou títulos>` (espera por elas) e `gate=yes` (o dono aprova antes);
+  a sub-tarefa roda como o agente que a pediu, ou como a conta da execução quando é o coordenador.
+- O coordenador agente lê a caixa dele (as perguntas dos agentes e como cada tarefa terminou),
+  responde com `send-message to=<despacho> answers=<pergunta> text=…` e tenta de novo uma tarefa
+  que falhou com `cadex run orchestration.retry task=<id>`. Parar a execução encerra também ele.
+- Cada hook da sessão de um despacho é sinal de vida, como os reportes.
 - Sem sinal de vida nem hook por orchestration.heartbeatMinutes (padrão 10), o despacho fica
   "stalled?" no quadro e o Cadex avisa (a notificação do plano 19, tipo pergunta). Voltar a reportar
   tira a marca.
@@ -212,22 +224,26 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
       (2026-11-16, pelo menu, na instância de teste; o "não lista de novo" com teste).
 - [x] "New Race" pela folha de verdade começa a corrida; cancelar a confirmação não deixa corrida
       gravada (2026-11-16).
-- [ ] Uma execução de 3 tarefas encadeadas, com agentes reais, vai de pendente a concluída sozinha;
+- [x] Uma execução de 3 tarefas encadeadas, com agentes reais, vai de pendente a concluída sozinha;
       um portão segura a terceira até a aprovação; parar o pai encerra os filhos; um agente sem
-      sinal de vida aparece como "stalled?". (D1, 2026-11-16, na instância de teste com o `claude`
+      sinal de vida aparece como "stalled?". (D2, 2026-11-16: com o `claude` real na conta bkdg,
+      cada agente reportando por `cadex run orchestration.report-done`, a terceira esperando o
+      "Approve"; o pai com um filho criado pelo `spawn`, os dois encerrados; o "stalled?" com um
+      agente falso calado e o aviso.) (D1, 2026-11-16, na instância de teste com o `claude`
       real: 3 tarefas encadeadas de pendente a concluída, cada uma da branch da anterior, despachadas
       e marcadas pelo gancho de teste como o dono faria; parar, o agente que sai sem reportar e o
       teto da execução; e pelas folhas e botões de verdade, respondidos por gancho com a tela
       bloqueada: New Run, Add Task, as dependências com o ciclo recusado, despachar, a confiança,
       o terminal reaproveitado, a fila, parar, tentar de novo, Mark Done, Go to Terminal, Stop Run
-      e o app reaberto no meio. Falta o reporte pelo agente, os portões, os filhos e o
-      "stalled?": D2.)
+      e o app reaberto no meio.)
 - [x] Um prompt com aspas, `$()`, crase e quebra de linha chega intacto ao agente e nada é executado
       pelo shell (no Mac, com o `claude` real; no remoto, com um ssh falso e um `claude` falso).
 - [x] Passou do teto de uma corrida, o agente local é encerrado e a coluna diz "hit the cap" (teto de
       1 min, encerrado aos ~61 s, 2026-11-16).
-- [ ] Os comandos de reporte só são aceitos de uma sessão com CADEX_DISPATCH_ID e só sobre a
-      execução dela; approve-gate pela CLI é recusado.
+- [x] Os comandos de reporte só são aceitos de uma sessão com CADEX_DISPATCH_ID e só sobre a
+      execução dela; approve-gate pela CLI é recusado. (2026-11-16, pela CLI de verdade com o token
+      de uma sessão de despacho: outro CADEX_DISPATCH_ID recusado, approve-gate "not allowed for
+      agents", retry de um agente de tarefa recusado, report-done repetido "already done".)
 - [ ] Uma automação a cada 2 minutos roda com o Cadex fechado (o LaunchAgent abre o app em segundo
       plano), para no teto e aparece no histórico com o link certo.
 - [ ] Um pedido de permissão sem ninguém vai ao quadro e a execução para no teto de duração.

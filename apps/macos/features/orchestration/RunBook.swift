@@ -221,4 +221,10 @@ public enum RunError: Error, Equatable {
     case noGate(String)
     case tooDeep(Int)
     case wrongRun(String)
+    /// The asking session is no dispatch nor coordinator of a run.
+    case notSupervised
+    /// A coordinator's command asked by a task's agent (or the other way round).
+    case notYours(String)
+    /// An argument the command needs.
+    case missing(String)
 }

@@ -52,7 +52,7 @@ extension WindowSession {
     /// the checks before anything is made.
     func newRace() {
         let controller = OrchestrationController.shared
-        guard let repo = repository else {
+        guard let repo = mainRepository else {
             return say(T("A race needs a git repository", "Uma corrida precisa de um repositório git"), T("Open a repository's folder first.", "Abra antes a pasta de um repositório."))
         }
         let form = NewRaceForm(accounts: raceAccounts(repo: repo), machines: runTargets().map(\.label),

@@ -12,12 +12,20 @@ public struct CommandRequest: Sendable, Equatable {
     public let terminal: String
     /// The conversation's name, for what the owner sees.
     public let session: String
+    /// The asking session's kit key, from its token (plan 24 D2: a run's
+    /// commands find the dispatch by it, never by what the agent says).
+    public var kitSession = ""
+    /// The CADEX_DISPATCH_ID the agent's `cadex` sent, if any.
+    public var dispatch: String?
 
-    public init(arguments: [String: String], folder: String, terminal: String = "", session: String = "") {
+    public init(arguments: [String: String], folder: String, terminal: String = "", session: String = "",
+                kitSession: String = "", dispatch: String? = nil) {
         self.arguments = arguments
         self.folder = folder
         self.terminal = terminal
         self.session = session
+        self.kitSession = kitSession
+        self.dispatch = dispatch
     }
 
     public subscript(_ key: String) -> String? { arguments[key] }

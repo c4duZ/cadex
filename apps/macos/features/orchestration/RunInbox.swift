@@ -24,9 +24,14 @@ extension RunBook {
     /// coordinating, else to the owner.
     @discardableResult
     public func ask(from id: String, question: String) throws -> RunMessage {
-        let dispatch = try live(id)
+        var dispatch = try live(id)
         let to = try run(dispatch.run)?.coordinator == nil ? "owner" : "coordinator"
-        return try post(run: dispatch.run, kind: .question, from: id, to: to, text: question)
+        let line = try post(run: dispatch.run, kind: .question, from: id, to: to, text: question)
+        // "waiting for an answer" until one comes (docs/spec/orchestration.md).
+        dispatch = try store.get(.dispatches, id: id) ?? dispatch
+        dispatch.waitingFor = line.id
+        try store.put(.dispatches, id: id, parent: dispatch.run, dispatch)
+        return line
     }
 
     /// `orchestration.send-message`: only to a dispatch of the same run.
@@ -46,6 +51,10 @@ extension RunBook {
         var reply = try post(run: asked.run, kind: .answer, from: from, to: asked.from, text: text)
         reply.answers = question
         try store.put(.messages, id: reply.id, parent: reply.run, reply)
+        if var asker: Dispatch = try store.get(.dispatches, id: asked.from), asker.waitingFor == question {
+            asker.waitingFor = nil
+            try store.put(.dispatches, id: asker.id, parent: asker.run, asker)
+        }
         return reply
     }
 

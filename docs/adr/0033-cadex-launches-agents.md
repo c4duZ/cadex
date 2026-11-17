@@ -100,6 +100,13 @@ execução, posto pelo kit) e só sobre a execução desse despacho:
 Fora da lista continuam: aprovar ou recusar portão, parar despacho, ligar automação, escolher
 vencedor de corrida e tudo que a ADR 0024 já recusava. Portão é do dono, sempre.
 
+Acrescentado na fase D2 (2026-11-16), com a spec que já dizia "nova tentativa só pelo dono ou pelo
+coordenador": orchestration.retry, aceito só da sessão do coordenador de uma execução (um agente
+coordenador tenta de novo a tarefa que falhou, sem esperar o dono). E o kit libera os sete
+comandos e o `cadex skills get` no `permissions.allow` do Claude Code: perguntados a cada vez, uma
+execução de vários agentes pararia no dono a cada reporte; eles só mexem no estado do Cadex, e o
+app os recusa de qualquer sessão que não seja de um despacho ou coordenador.
+
 ### O que muda na ADR 0019 e na raiz
 - "O Cadex não inicia agente" passa a: o Cadex abre agentes sem prompt nos casos da ADR 0021, e com
   prompt só nos quatro casos acima, sempre ligados pelo dono e com teto.

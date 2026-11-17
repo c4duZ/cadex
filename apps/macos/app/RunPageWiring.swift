@@ -14,6 +14,8 @@ import Terminal
 final class RunWatch {
     static let shared = RunWatch()
     var pages: [RunPageDocument] = []
+    /// The dispatches the owner was told are "stalled?" (once each).
+    var toldStalled: Set<String> = []
     private var timer: Timer?
     private var observer: NSObjectProtocol?
 
@@ -54,9 +56,14 @@ extension WindowSession {
         actions.goToTerminal = { [weak self] in self?.goToDispatch($0) }
         actions.stop = { [weak self] in self?.stopTask($0) }
         actions.editDependencies = { [weak self] in self?.setTaskDependencies($0) }
+        actions.addGate = { [weak self] in self?.addTaskGate($0) }
+        actions.approveGate = { [weak self] in self?.approveTaskGate($0) }
+        actions.rejectGate = { [weak self] in self?.rejectTaskGate($0) }
+        actions.answer = { [weak self] in self?.answerQuestion($0) }
         actions.markDone = { [weak self] in self?.markDispatchDone($0) }
         actions.retry = { [weak self] in self?.retryTask($0) }
         let page = RunPageDocument(runID: id, book: book, colors: Self.raceColors(), actions: actions) { [weak self] in self?.live($0) }
+        page.heartbeatMinutes = { OrchestrationController.shared.limits.heartbeatMinutes }
         page.slots = { [weak self] in ((self?.liveRunAgents() ?? 0) + (self?.liveRaceAgents() ?? 0), OrchestrationController.shared.limits.maxAgents) }
         page.refresh()
         page.onClose = { [weak page] in RunWatch.shared.pages.removeAll { $0 === page } }
@@ -110,15 +117,35 @@ extension WindowSession {
                 changed = true
             }
         }
+        // The coordinating agents' cost counts in their run's spend.
+        for run in ((try? book.store.all(.runs) as [Run]) ?? []) where !run.stopped && run.coordinator != nil {
+            guard let claude = app.locate({ $0.agentResume?.kitSession == run.coordinator })?.terminal.agentResume?.sessionID,
+                  let cost = SessionCost.read(session: claude), cost != run.coordinatorCostUsd else { continue }
+            try? book.setCoordinator(run: run.id, kit: nil, cost: cost)
+            changed = true
+        }
         let gone = (try? book.reapOrphans { alive.contains($0) }) ?? []
+        for id in gone {
+            if let dispatch = all.first(where: { $0.id == id }) {
+                try? book.tellCoordinator(run: dispatch.run, from: id, text: "task \(dispatch.task) failed: exited without reporting")
+            }
+        }
+        tellStalled(RunGraph.live((try? book.store.all(.dispatches)) ?? []), book: book)
         var capped: [Dispatch] = []
-        for run in Set(live.map(\.run)) { capped += (try? book.enforceCap(run: run)) ?? [] }
+        let watched = Set(live.map(\.run)).union(((try? book.store.all(.runs) as [Run]) ?? []).filter { !$0.stopped && $0.coordinator != nil }.map(\.id))
+        for run in watched {
+            let stopped = (try? book.enforceCap(run: run)) ?? []
+            capped += stopped
+            if (try? book.run(run))??.stopped == true { endCoordinator(of: run) }
+        }
         endAgents(capped)
         if !gone.isEmpty { drainRunQueue() }
+        dispatchOnTheirOwn()
         if changed || !gone.isEmpty || !capped.isEmpty { refreshRunPages() }
         let after: [Dispatch] = (try? book.store.all(.dispatches)) ?? []
         let waiting = ((try? book.waiting()) ?? []).isEmpty == false
-        if !waiting && RunGraph.live(after).isEmpty && !after.contains(where: { $0.state == .done && now.timeIntervalSince($0.endedAt ?? .distantPast) < 120 }) {
+        let coordinating = ((try? book.store.all(.runs) as [Run]) ?? []).contains { !$0.stopped && $0.coordinator != nil }
+        if !waiting && !coordinating && RunGraph.live(after).isEmpty && !after.contains(where: { $0.state == .done && now.timeIntervalSince($0.endedAt ?? .distantPast) < 120 }) {
             RunWatch.shared.disarm()
         }
     }

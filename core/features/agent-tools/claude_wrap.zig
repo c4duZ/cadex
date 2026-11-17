@@ -138,6 +138,12 @@ fn execAs(arena: std.mem.Allocator, real: [:0]const u8, kit_args: []const []cons
 /// The first `claude` on PATH that is not this program (a `claude` linked
 /// to `cadex` would run `cadex` again).
 fn findReal(arena: std.mem.Allocator, out: *[path_max]u8) ?[:0]const u8 {
+    // CADEX_CLAUDE_BIN: a test instance's fake `claude` (tools/perf/fake_claude.py,
+    // plan 24 F), so the tab's shell PATH can never put the real one first.
+    if (std.c.getenv("CADEX_CLAUDE_BIN")) |v| {
+        const given = std.mem.span(v);
+        if (given.len > 0) return arena.dupeZ(u8, given) catch null;
+    }
     var self_buf: [path_max]u8 = undefined;
     var self_raw: [path_max]u8 = undefined;
     var size: u32 = self_raw.len;

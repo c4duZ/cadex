@@ -71,6 +71,21 @@ public enum RunLaunch {
         return nil
     }
 
+    /// The coordinating agent's prompt: what it is for, how to plan with
+    /// `cadex`, then the owner's goal as typed (plan 24 D2).
+    public static func coordinatorPrompt(run: Run, goal: String) -> String {
+        """
+        You coordinate the Cadex run "\(run.name)" in this repository. Do not do the work yourself: \
+        split the goal below into tasks with `cadex run orchestration.spawn` (read `cadex skills get orchestration` first). \
+        Each task runs in its own worktree and agent when what it waits for is done. \
+        Follow them with `cadex run orchestration.inbox`, answer their questions, and when every task is done, \
+        say so in one short message here and stop.
+
+        Goal:
+        \(goal)
+        """
+    }
+
     /// The agent's prompt: the task's specification (the title when it has none).
     public static func prompt(_ task: RunTask) -> String {
         task.spec.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? task.title : task.spec

@@ -39,7 +39,10 @@ pub fn main(sub: []const u8, all_words: []const []const u8, usage_text: []const 
             n += 1;
         }
     }
-    var p = commands.plan(gpa, sub, words_buf[0..n]) catch return say(2, usage_text);
+    var p = commands.plan(gpa, sub, words_buf[0..n]) catch |err| return switch (err) {
+        error.SpecFile => say(1, "cadex: spec-file= must be a readable file of at most 100 KB, without NUL\n"),
+        else => say(2, usage_text),
+    };
     defer {
         commands.freeJoined(gpa, sub, &p);
         p.deinit(gpa);

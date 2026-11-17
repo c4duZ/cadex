@@ -12,6 +12,11 @@ public struct RunPageActions {
     /// A task's live try stopped, or its waiting dispatch taken out of the queue.
     public var stop: (String) -> Void = { _ in }
     public var editDependencies: (String) -> Void = { _ in }
+    public var addGate: (String) -> Void = { _ in }
+    public var approveGate: (String) -> Void = { _ in }
+    public var rejectGate: (String) -> Void = { _ in }
+    /// A question to the owner, by its id.
+    public var answer: (String) -> Void = { _ in }
     public var markDone: (String) -> Void = { _ in }
     public var retry: (String) -> Void = { _ in }
     public init() {}
@@ -58,7 +63,7 @@ final class RunPageView: NSView {
 
     required init?(coder: NSCoder) { nil }
 
-    func show(run: Run, summary: String, rows: [RunRow]) {
+    func show(run: Run, summary: String, rows: [RunRow], inbox: [InboxLine] = []) {
         content.arrangedSubviews.forEach { $0.removeFromSuperview() }
         content.addArrangedSubview(label(run.name, size: 18, weight: .semibold, color: colors.text))
         let coordinator = run.coordinator == nil ? T("coordinated by you", "coordenada por você") : T("coordinated by an agent", "coordenada por um agente")
@@ -75,6 +80,13 @@ final class RunPageView: NSView {
                                                "Nenhuma tarefa ainda: adicione uma e despache quando estiver pronta."), size: 12, color: colors.secondary))
         }
         rows.forEach { content.addArrangedSubview(rowView($0)) }
+        guard !inbox.isEmpty else { return }
+        content.addArrangedSubview(label(T("Inbox", "Caixa de entrada"), size: 14, weight: .semibold, color: colors.text))
+        for line in inbox.prefix(30) {
+            let text = label(line.text, size: 12, color: line.canAnswer ? colors.accent : colors.secondary, lines: 3)
+            guard line.canAnswer else { content.addArrangedSubview(text); continue }
+            content.addArrangedSubview(NSStackView(views: [text, button(T("Answer…", "Responder…")) { [weak self] in self?.actions.answer(line.id) }]))
+        }
     }
 
     private func rowView(_ row: RunRow) -> NSView {
@@ -87,7 +99,13 @@ final class RunPageView: NSView {
         let prefix = row.level > 0 ? "↳ " : ""
         stack.addArrangedSubview(label(prefix + row.title + "  ·  " + row.state, size: 13, weight: .semibold, color: colors.text))
         if !row.after.isEmpty { stack.addArrangedSubview(label(row.after, size: 11, color: colors.secondary)) }
-        if !row.dispatch.isEmpty { stack.addArrangedSubview(label(row.dispatch, size: 12, color: row.isQueued ? colors.accent : colors.text)) }
+        if !row.dispatch.isEmpty {
+            // "stalled?" in yellow (docs/spec/orchestration.md "Estados").
+            let color = row.isStalled ? NSColor.systemYellow : row.isQueued ? colors.accent : colors.text
+            stack.addArrangedSubview(label(row.dispatch, size: 12, color: color))
+        }
+        if !row.gate.isEmpty { stack.addArrangedSubview(label(row.gate, size: 12, color: row.canDecideGate ? colors.accent : colors.secondary)) }
+        row.delivered.forEach { stack.addArrangedSubview(label("· " + $0, size: 11, color: colors.secondary, lines: 3)) }
         if !row.reason.isEmpty { stack.addArrangedSubview(label(row.reason, size: 11, color: colors.secondary, lines: 2)) }
         row.history.forEach { stack.addArrangedSubview(label($0, size: 11, color: colors.secondary)) }
         var buttons: [NSView] = []
@@ -102,6 +120,11 @@ final class RunPageView: NSView {
             buttons.append(button(T("Mark Done", "Marcar concluída")) { [weak self] in self?.actions.markDone(id) })
         }
         if row.canRetry { buttons.append(button(T("Retry…", "Tentar de novo…")) { [weak self] in self?.actions.retry(row.task) }) }
+        if row.canDecideGate {
+            buttons.append(button(T("Approve", "Aprovar")) { [weak self] in self?.actions.approveGate(row.task) })
+            buttons.append(button(T("Reject…", "Recusar…")) { [weak self] in self?.actions.rejectGate(row.task) })
+        }
+        if row.canAddGate { buttons.append(button(T("Add Gate", "Pôr portão")) { [weak self] in self?.actions.addGate(row.task) }) }
         if row.canEditDependencies {
             buttons.append(button(T("Dependencies…", "Dependências…")) { [weak self] in self?.actions.editDependencies(row.task) })
         }
@@ -141,6 +164,8 @@ public final class RunPageDocument: TabDocument {
     private let live: (Dispatch) -> ContenderLive?
     /// The agents alive now in races and runs, and orchestration.maxAgents: the queue's line.
     public var slots: () -> (live: Int, max: Int) = { (0, 6) }
+    /// orchestration.heartbeatMinutes: "stalled?" after that long without a sign of life.
+    public var heartbeatMinutes: () -> Int = { 10 }
 
     public init(runID: String, book: RunBook, colors: RaceBoardColors, actions: RunPageActions, live: @escaping (Dispatch) -> ContenderLive?) {
         self.runID = runID
@@ -165,9 +190,11 @@ public final class RunPageDocument: TabDocument {
         let tasks = (try? book.tasks(of: runID)) ?? []
         let dispatches = (try? book.dispatches(of: runID)) ?? []
         let now = Date()
+        let messages: [RunMessage] = (try? book.store.all(.messages, parent: runID)) ?? []
         page.show(run: run, summary: RunRows.summary(run: run, dispatches: dispatches, now: now),
                   rows: RunRows.make(run: run, tasks: tasks, dispatches: dispatches, live: live, now: now,
-                                     maxAgents: slots().max, liveAgents: slots().live))
+                                     maxAgents: slots().max, liveAgents: slots().live, heartbeatMinutes: heartbeatMinutes()),
+                  inbox: RunRows.inbox(messages, tasks: tasks, dispatches: dispatches))
         if title != run.name {
             title = run.name
             onChange?()

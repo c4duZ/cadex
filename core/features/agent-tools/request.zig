@@ -30,10 +30,14 @@ pub const Reply = struct {
 pub const Failure = error{ NoToken, NotRunning };
 
 /// The line for running `id` with `args`, or for the list (`id` null).
-pub fn line(gpa: std.mem.Allocator, token: []const u8, id: ?[]const u8, args: []const Arg, pids: []const c_int) ![]u8 {
+/// `dispatch`: the session's CADEX_DISPATCH_ID (plan 24 D2), which the app
+/// checks against the dispatch it matched to the token: a report never
+/// lands in another run.
+pub fn line(gpa: std.mem.Allocator, token: []const u8, id: ?[]const u8, args: []const Arg, pids: []const c_int, dispatch: ?[]const u8) ![]u8 {
     var out: std.ArrayList(u8) = .empty;
     errdefer out.deinit(gpa);
     try out.print(gpa, "{{\"v\":1,\"token\":{f}", .{std.json.fmt(token, .{})});
+    if (dispatch) |d| if (d.len > 0) try out.print(gpa, ",\"dispatch\":{f}", .{std.json.fmt(d, .{})});
     if (id) |name| {
         try out.print(gpa, ",\"run\":{f},\"args\":{{", .{std.json.fmt(name, .{})});
         for (args, 0..) |arg, i| {
@@ -79,7 +83,8 @@ pub fn send(gpa: std.mem.Allocator, id: ?[]const u8, args: []const Arg) !Reply {
     var path_buf: [256]u8 = undefined;
     const path = hook.socketPath(&path_buf) orelse return error.NotRunning;
     var pids_buf: [12]c_int = undefined;
-    const msg = try line(gpa, token, id, args, ancestors(&pids_buf));
+    const dispatch: ?[]const u8 = if (std.c.getenv("CADEX_DISPATCH_ID")) |d| std.mem.span(d) else null;
+    const msg = try line(gpa, token, id, args, ancestors(&pids_buf), dispatch);
     defer gpa.free(msg);
     const answer = (try hook.exchange(gpa, path, msg, wait_ms)) orelse return error.NotRunning;
     defer gpa.free(answer);
@@ -115,12 +120,15 @@ pub fn ancestors(out: []c_int) []const c_int {
 const testing = std.testing;
 
 test "the request line names the command, its arguments and the pids above" {
-    const msg = try line(testing.allocator, "tok", "agent-tools.notify", &.{.{ .key = "text", .value = "oi \"x\"" }}, &.{ 7, 3 });
+    const msg = try line(testing.allocator, "tok", "agent-tools.notify", &.{.{ .key = "text", .value = "oi \"x\"" }}, &.{ 7, 3 }, null);
     defer testing.allocator.free(msg);
     try testing.expectEqualStrings("{\"v\":1,\"token\":\"tok\",\"run\":\"agent-tools.notify\",\"args\":{\"text\":\"oi \\\"x\\\"\"},\"pids\":[7,3]}\n", msg);
-    const list = try line(testing.allocator, "tok", null, &.{}, &.{});
+    const list = try line(testing.allocator, "tok", null, &.{}, &.{}, "");
     defer testing.allocator.free(list);
     try testing.expectEqualStrings("{\"v\":1,\"token\":\"tok\",\"list\":true,\"pids\":[]}\n", list);
+    const report = try line(testing.allocator, "tok", "orchestration.report-done", &.{.{ .key = "summary", .value = "ok" }}, &.{}, "d-1");
+    defer testing.allocator.free(report);
+    try testing.expectEqualStrings("{\"v\":1,\"token\":\"tok\",\"dispatch\":\"d-1\",\"run\":\"orchestration.report-done\",\"args\":{\"summary\":\"ok\"},\"pids\":[]}\n", report);
 }
 
 test "the app's answer: the result, the error, or a line that is not JSON" {

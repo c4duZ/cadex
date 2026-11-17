@@ -42,6 +42,12 @@
   lista as ferramentas `memory_*` do engine e repassa as chamadas delas inteiras, pela entrada da
   feature memory (`../memory/mcp_proxy.zig`), não pelo app; `agent.zig` ignora o SIGCHLD porque o
   engine que o servidor sobe é filho dele.
+- Plano 24, fase D2: o pedido leva o CADEX_DISPATCH_ID da sessão (`"dispatch"`), que o app confere
+  contra o despacho do token; `run … spec-file=<arquivo>` lê o arquivo (comum, até 100 KB, sem
+  NUL) e manda o texto como `spec=` (orchestration.spawn); o guia `guides/orchestration.md` sai por
+  `cadex skills get orchestration`. `cadex claude` executa o CADEX_CLAUDE_BIN quando ele existe: o
+  `claude` falso de uma instância de teste (`../../../tools/perf/fake_claude.py`), que o PATH do
+  shell da aba nunca troca pelo de verdade.
 - Fase C e D: `cadex browser goto|snapshot|click|fill|press|scroll|wait|screenshot|console|notes` e as ferramentas
   `browser_*` do MCP viram o comando preview.agent com `action=`; o print volta ao agente como imagem
   (o PNG em base64) e o caminho.
@@ -88,7 +94,8 @@
 
 ## Como validar
 - `make core-test`: arquivos, nome da conta, status line do dono, JSON quebrado e a chamada de dentro;
-  a linha do pedido e a resposta, os atalhos virando ids, os guias e o servidor MCP com um app falso;
+  a linha do pedido (com o despacho) e a resposta, os atalhos virando ids, o `spec-file=` lido
+  (pasta e arquivo que falta recusados), os guias e o servidor MCP com um app falso;
   as decisões do `cadex claude` (`--model haiku mcp list`, `-p`, `--version`, `claude`, um prompt,
   `--resume abc`, `--settings x.json`), o pedido do kit, a resposta e o app ausente; o
   `--cadex-prompt-file` saindo das palavras nas duas grafias, o prompt inteiro e o arquivo apagado,

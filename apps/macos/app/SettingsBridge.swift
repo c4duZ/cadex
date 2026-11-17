@@ -173,7 +173,13 @@ final class SettingsBridge {
         // Claude Code asks before every MCP tool; the ones that only read
         // the page go without asking (docs/adr/0024-agent-tools.md).
         let reads = ["browser_snapshot", "browser_screenshot", "browser_wait", "browser_console", "browser_notes"].map { "mcp__cadex__" + $0 }
-        kit.contribute("agent-tools", SessionKitPart(settings: ["permissions": ["allow": reads]],
+        // A run's agent reports by `cadex run orchestration.…` (plan 24 D2):
+        // asked every time, a run of several agents would wait on the owner
+        // at each report. They only touch Cadex's state, and the app refuses
+        // them from a session that is no dispatch or coordinator (ADR 0033).
+        let reports = ["report-done", "report-heartbeat", "ask", "send-message", "inbox", "spawn", "retry"]
+            .map { "Bash(cadex run orchestration.\($0):*)" } + ["Bash(cadex skills get:*)"]
+        kit.contribute("agent-tools", SessionKitPart(settings: ["permissions": ["allow": reads + reports]],
                                                      pluginDirs: AgentToolsPlugin.folder.map { [$0] } ?? [],
                                                      mcpServers: ["cadex": ["command": tools, "args": ["mcp"]]]))
     }

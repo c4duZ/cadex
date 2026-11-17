@@ -61,8 +61,14 @@ Cadex: `docs/adr/0024-agent-tools.md`).
 - Ampliada pela `docs/adr/0033-cadex-launches-agents.md` (plano 24) com os de reporte:
   orchestration.report-done, orchestration.report-heartbeat, orchestration.ask,
   orchestration.send-message, orchestration.inbox e orchestration.spawn, aceitos só de uma sessão
-  com CADEX_DISPATCH_ID e só sobre a execução dela; sem ela, "not part of a run", saída 1. Aprovar
-  portão, parar despacho e mexer em automação continuam fora.
+  de despacho (o app acha o despacho pela sessão do token; o CADEX_DISPATCH_ID que o `cadex` manda
+  só é conferido contra ele, e outro é recusado) ou do coordenador da execução, e só sobre a
+  execução dela; sem ela, "this session is not a task of a Cadex run", saída 1. orchestration.retry
+  só do coordenador. Aprovar portão, parar despacho e mexer em automação continuam fora. O kit
+  libera esses comandos (`Bash(cadex run orchestration.<id>:*)`) e `cadex skills get` sem o Claude
+  Code perguntar ao dono a cada um (plano 24 D2). `spec-file=<arquivo>` manda o texto do arquivo
+  como `spec=`, lido pelo `cadex` (até 100 KB, sem NUL); o guia é `cadex skills get orchestration`
+  e a skill curta `cadex-orchestration` vai no plugin do kit.
 - `cadex claude --cadex-prompt-file <arquivo>` (plano 24): lê o prompt do arquivo que o Cadex
   gravou, apaga o arquivo e o passa ao `claude` como um argumento do exec, sem shell no meio.
 - O que volta de uma página ou de outro app vem marcado como conteúdo, não instrução.

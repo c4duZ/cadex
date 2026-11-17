@@ -180,7 +180,16 @@
   TerminalView.agentDidChange, que redesenha as páginas): grava o custo, sinal de vida pelo hook,
   falha o despacho cujo agente saiu ("exited without reporting", com 20 s de folga para o shell
   começar; o app reaberto faz o mesmo com os que ficaram), para a execução no teto e esvazia a fila.
-  A corrida também conta os agentes das execuções no teto. `RunPerfHooks.swift`: CADEX_PERF_RUN
+  A corrida também conta os agentes das execuções no teto. `RunAgentWiring.swift` (fase D2): os
+  comandos do agente pelo `cadex run` (o pedinte achado pela sessão do token, `RunAgentAPI`), a
+  pergunta ao dono no feed de atenção e na notificação, as tarefas que começam sozinhas
+  (`dispatchOnTheirOwn`, depois de cada mudança e a cada volta do relógio; a que não começa fica
+  "falhou"), os portões e a resposta do dono, o "stalled?" avisado uma vez por despacho, o agente
+  coordenador numa aba no repositório (`launchCoordinator`, o objetivo por arquivo) e, no
+  AppDelegate, cada hook de uma sessão de despacho como sinal de vida (`noteRunHook`). Parar a
+  execução, pelo dono ou pelo teto, encerra também o coordenador; o custo dele conta no teto. New
+  Run e New Race partem do repositório principal (`mainRepository`) mesmo com o foco numa worktree
+  de tarefa. O kit libera os comandos de reporte no Claude Code (`../app/SettingsBridge.swift`). `RunPerfHooks.swift`: CADEX_PERF_RUN
   (uma execução com tarefas que se despacham sozinhas, com `markDoneWhenFinished`,
   `markDoneWhenFailed` e `stopFirstAfter`, anotada em `out`), CADEX_PERF_RUN_FORM (preenche as
   folhas), CADEX_PERF_SHEETS (anota cada folha no log e a responde como o clique no primeiro botão;

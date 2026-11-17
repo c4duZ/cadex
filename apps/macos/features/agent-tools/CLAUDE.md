@@ -28,12 +28,14 @@
   do kit dona do token (o nome do arquivo dele), que o agente hibernado reaproveita (plano 19, fase F),
   e no PostToolUse o `edit` (AgentEdit: o arquivo e os intervalos de linhas, plano 21 fase E).
 - Pedidos de comando (plano 20, fase B): `AgentCommandRequest.swift` (o id ou a lista, os argumentos,
-  os pids e a sessão do kit; a resposta `AgentCommandAnswer`; a lista fechada `AgentCommandList`, que
-  só uma ADR amplia); o servidor os passa a `onCommand`, que responde uma vez (pode esperar uma página).
+  os pids, a sessão do kit e o CADEX_DISPATCH_ID que o `cadex` mandou; a resposta
+  `AgentCommandAnswer`; a lista fechada `AgentCommandList`, que só uma ADR amplia, com os sete da
+  orquestração da ADR 0033); a sessão e o despacho seguem no CommandRequest até o comando; o servidor os passa a `onCommand`, que responde uma vez (pode esperar uma página).
   `AgentToolsCommands.swift`: agent-tools.open-file, -open-diff e -notify (com argumentos; pelo dono,
   o comando mais próximo dele), agent-tools.toggle e agent-tools.show-sessions;
   `AgentToolsActivity.swift`: quem usou o Cadex e o último pedido, só em memória;
-  `AgentToolsPlugin.swift` e `plugin/`: o plugin de skills curtas que o kit passa por `--plugin-dir`
+  `AgentToolsPlugin.swift` e `plugin/`: o plugin de skills curtas (`cadex`, `cadex-task` e
+  `cadex-orchestration`) que o kit passa por `--plugin-dir`
   (no pacote, em Resources/agent-plugin). O app acha o terminal e roda (`../../app/AgentToolsWiring.swift`).
 - O kit do `claude` digitado (plano 22, fase C): `AgentKitRequest.swift` lê o pedido do
   `cadex claude` (`"kit":true`, sem token), a ancestralidade de quem conectou (LOCAL_PEERPID e o

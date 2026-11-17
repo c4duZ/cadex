@@ -104,6 +104,9 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   de um despacho, que reporta ao Cadex pela CLI `cadex` (feito, sinal de vida, pergunta, recado,
   sub-tarefa).
 - **Portão** (`gate`): uma tarefa que só fica pronta quando o dono aprova.
+- **Coordenador** (`coordinator`): quem decide os despachos de uma execução: o dono, ou um agente
+  que recebe o objetivo e cria as tarefas pelo `spawn`. **Despachar sozinha** (`autoAgent`): a
+  tarefa que fica pronta começa sem clique, na conta e modelo escolhidos ao criar a execução.
 - **Automação** (`automation`): um prompt que roda sozinho numa recorrência, com conta, modelo,
   destino e teto; o app é acordado pelo launchd (`docs/adr/0034-scheduled-automations.md`).
   **Execução perdida** (`missed run`): o horário que passou com o Mac dormindo ou desligado; roda

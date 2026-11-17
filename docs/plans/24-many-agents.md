@@ -236,6 +236,38 @@ docs/adr/0031-run-on-remote.md (plano 23), `docs/adr/0004-clean-rewrite.md`,
     grava depois), a tarefa despachada de novo ficava com o motivo "stopped", o teto pequeno
     aparecia "of 0.00" e a recusa por confiança falava em "corrida". Não visto a olho: as folhas
     desenhadas (a tela estava bloqueada; o texto de cada uma está no log do teste).
+  - D2 feita em 2026-11-16 (`apps/macos/features/orchestration/CLAUDE.md`,
+    `apps/macos/app/RunAgentWiring.swift`, `core/features/agent-tools/CLAUDE.md`): os seis comandos
+    do agente pela CLI `cadex` (report-done, report-heartbeat, ask, send-message, inbox e spawn, este
+    com `spec-file=` lido pelo `cadex`, `after=` e `gate=`), e o retry do coordenador, o pedinte achado
+    pela sessão do token (o CADEX_DISPATCH_ID só conferido contra ele); o sinal de vida (cada hook e
+    cada reporte), o "stalled?" em amarelo e avisado uma vez; a pergunta ao dono no feed e na
+    notificação, "Answer…" na caixa de entrada da página; sub-tarefas até orchestration.maxDepth,
+    despachadas sozinhas, paradas com o pai; portões (add, approve e reject só pelo dono, com o que
+    as dependências entregaram); o coordenador sendo um agente (New Run com o objetivo: uma aba no
+    repositório com o prompt por arquivo, que cria as tarefas pelo spawn e ouve como cada uma
+    terminou); a skill curta `cadex-orchestration` no plugin do kit e o guia `cadex skills get
+    orchestration`. Decidido além do texto: New Run com "as prontas começam sozinhas" (a conta e o
+    modelo na folha), sem o qual "vai de pendente a concluída sozinha" exigiria um coordenador
+    agente; o retry do coordenador e os comandos de reporte liberados no Claude Code pelo kit
+    (emenda na ADR 0033); a tarefa parada pelo dono não começa sozinha de novo; New Run e New Race
+    partem do repositório principal mesmo com o foco numa worktree de tarefa; CADEX_CLAUDE_BIN e o
+    `claude` falso (`tools/perf/fake_claude.py`, que imita os hooks e reporta pela CLI) para testes
+    sem gastar conta. Testado: 9 testes novos na OrchestrationTests (42), o núcleo (a linha com o
+    despacho, o spec-file); na instância de teste com o `claude` real (bkdg, haiku): a cadeia de 3 de
+    pendente a concluída sozinha com cada agente reportando pela CLI, o portão segurando a terceira
+    até o "Approve", a pergunta ao dono respondida pelo "Answer…" (a espera limpa), o `spawn` de um
+    filho e parar o pai encerrando os dois, e um coordenador agente criando duas tarefas encadeadas,
+    as duas reportando e ele ouvindo cada fim, "Stop Run…" o encerrando; com agentes falsos, o
+    "stalled?" em 1 min e o aviso, o sinal de volta tirando a marca, o recado entre dois despachos,
+    "Add Gate" e "Reject…" pela página; pela CLI com o token de uma sessão de despacho, report-done
+    repetido "already done", outro CADEX_DISPATCH_ID recusado, approve-gate "not allowed for agents"
+    e o retry de um agente de tarefa recusado. Achados e corrigidos: a tarefa parada voltava sozinha
+    numa execução que despacha sozinha, a execução criada de dentro de uma worktree a tomava como
+    repositório, um despacho que nunca falou não ficava "stalled?" e o texto de parar a execução não
+    citava o coordenador. Numa rodada real (o pai e o filho parados com o re-despacho de antes da
+    correção) o app de teste saiu sem relatório de crash; não se repetiu depois da correção, com o
+    `claude` real nem com os falsos, e a causa não foi confirmada.
 - **E. Automações agendadas.**
   - Automação (orchestration.new-automation): nome, prompt, recorrência (dias úteis 09:00, a cada
     N horas, uma vez), destino (worktree nova a cada execução ou uma fixa), conta, modelo, modo de

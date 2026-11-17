@@ -91,10 +91,11 @@ public enum RunGraph {
         live(dispatches).count < maxAgents
     }
 
-    /// Working dispatches with no sign of life for `minutes` before `now`.
+    /// Live dispatches (starting or working) with no sign of life for `minutes` before `now`.
     public static func stalled(_ dispatches: [Dispatch], minutes: Int, now: Date) -> [String] {
+        // Starting counts too: a dispatch that never sent a hook or a report is as quiet (2026-11-16, plan 24 D2).
         let limit = TimeInterval(minutes * 60)
-        return dispatches.filter { $0.state == .working && now.timeIntervalSince($0.lastSign) >= limit }.map(\.id)
+        return live(dispatches).filter { now.timeIntervalSince($0.lastSign) >= limit }.map(\.id)
     }
 
     /// Live dispatches whose session is gone without a report: the agent

@@ -73,6 +73,19 @@
   -stop-dispatch, que também tira da fila, -stop-run e -set-dependencies, com as listas no ⌘K). O
   teto de agentes vale para corridas e execuções juntas (`othersLive`). O despacho usa o RaceLaunch.localCommand com
   `sessionEnvironment`. O app liga (`../../app/RunWiring.swift`, `../../app/RunPageWiring.swift`).
+- Os agentes supervisionados (fase D2): `RunAgents.swift` (`caller`: o despacho da sessão do token,
+  também um já encerrado, para o segundo report-done ouvir "already done", senão a execução que ela
+  coordena; um CADEX_DISPATCH_ID que não é ele é recusado; `heartbeat`, `addGate`, `spawnTask`, um
+  nível abaixo do pedinte e recusado em orchestration.maxDepth, com `after=` e `gate=`, despachada
+  sozinha como o agente que pediu; `tellCoordinator`, `configure` e `setCoordinator`;
+  `readyOnTheirOwn`, as prontas que começam sozinhas, menos a que o dono parou; `failTask`, a que não
+  conseguiu começar sozinha) e `RunAgentAPI.swift` (a resposta de cada comando do agente:
+  report-done, report-heartbeat, ask, send-message, inbox, spawn e o retry do coordenador, com o que
+  o app faz depois). `NewRunForm.swift`: quem coordena (o dono, o dono com as prontas sozinhas, um
+  agente com o objetivo), a conta e o modelo. A página ganhou o portão com o que as dependências
+  entregaram, "stalled?" em amarelo, "waiting for an answer", a nota do sinal de vida e a caixa de
+  entrada com "Answer…"; o ⌘K, orchestration.add-gate, -approve-gate, -reject-gate,
+  -answer-question e os seis comandos do agente (com argumentos, pelo `cadex run`).
 - Configurações (`../settings/OrchestrationSettings.swift`, `../settings/OrchestrationRows.swift`):
   orchestration.enabled, orchestration.automations, orchestration.maxAgents (6),
   orchestration.maxDepth (2), orchestration.heartbeatMinutes (10),
@@ -91,4 +104,8 @@
   despacho em ordem, de onde ele parte, as linhas da página e o CADEX_DISPATCH_ID só nas
   configurações da sessão; a fila (ordem, só prontas, sai ao despachar e com a execução parada), a
   vaga dividida com a corrida, as dependências mudadas depois (ciclo pelos títulos, não numa
-  despachada), o grafo, o histórico e a linha da fila na página.
+  despachada), o grafo, o histórico e a linha da fila na página; da D2 (`tests/Agents.swift`): o
+  pedinte pela sessão e as recusas, report-done e o repetido, sinal de vida e "stalled?", pergunta
+  ao dono e a resposta, recado só na mesma execução, o coordenador respondendo e sabendo como as
+  tarefas terminaram, spawn (profundidade, after, gate, a vaga, parar o pai), o coordenador criando
+  no topo, portões, a tarefa que não começa sozinha e o prompt do coordenador.

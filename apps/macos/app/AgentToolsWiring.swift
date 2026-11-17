@@ -37,7 +37,8 @@ extension AppDelegate {
         // there already.
         let folder = Self.resolved(found.terminal.currentDirectory ?? NSHomeDirectory())
         WorkspaceFolder.allow(folder)
-        let asked = CommandRequest(arguments: request.arguments, folder: folder, terminal: Self.key(found.terminal), session: session)
+        let asked = CommandRequest(arguments: request.arguments, folder: folder, terminal: Self.key(found.terminal), session: session,
+                                   kitSession: request.kitSession, dispatch: request.dispatch)
         let shown = id == "preview.agent" ? "browser " + (request.arguments["action"] ?? "") : id
         found.window.commands.run(id, request: asked) { answer in
             switch answer {

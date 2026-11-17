@@ -93,6 +93,14 @@ public struct Run: Codable, Equatable, Sendable {
     /// Why it stopped: "stopped" (the owner) or "hit the cap". Optional, so
     /// a row from before this field still reads.
     public var reason: String?
+    /// Who runs a task that becomes ready, with no click (plan 24 D2): set
+    /// when the owner chose "dispatch ready tasks on their own" or an agent
+    /// coordinates (its spawned tasks run as this). Nil: the owner dispatches.
+    public var autoAgent: AgentChoice?
+    /// The coordinating agent's goal (its first prompt) and its session's
+    /// last known cost, counted in the run's spend.
+    public var goal: String?
+    public var coordinatorCostUsd: Double?
 }
 
 public enum TaskState: String, Codable, Sendable { case pending, ready, dispatched, done, failed, blocked }
@@ -118,6 +126,8 @@ public struct RunTask: Codable, Equatable, Sendable {
     /// reached, plan 24 D1): launched as soon as one frees. Optional, so a
     /// row from before it still reads.
     public var queued: QueuedDispatch?
+    /// Dispatched on its own when ready, as this (a spawned task, plan 24 D2).
+    public var auto: AgentChoice?
 }
 
 /// A dispatch the owner asked for while every slot was taken: who runs it,
@@ -159,6 +169,10 @@ public struct Dispatch: Codable, Equatable, Sendable {
     /// kept here because the run's cap sums every dispatch, also those whose
     /// tab is gone. Optional, so a row from before it still reads.
     public var costUsd: Double?
+    /// The agent's last heartbeat note (plan 24 D2).
+    public var note: String?
+    /// The question it asked and waits on ("waiting for an answer").
+    public var waitingFor: String?
 }
 
 public enum MessageKind: String, Codable, Sendable { case question, answer, message }

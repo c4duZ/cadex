@@ -114,11 +114,21 @@ extension WindowSession {
     /// (`after`); each fills its sheet when
     /// it opens; the sheets, their buttons and the launch stay the real ones.
     private struct RunFormFill: Decodable {
-        struct RunFill: Decodable { var name: String }
+        struct RunFill: Decodable {
+            var name: String
+            /// 0 you dispatch, 1 ready tasks on their own, 2 an agent coordinates.
+            var mode: Int?
+            var account: String?
+            var model: String?
+            var goal: String?
+            var budgetUsd: Double?
+            var maxMinutes: Int?
+        }
         struct TaskFill: Decodable {
             var title: String
             var spec: String
             var after: [String]?
+            var gate: Bool?
         }
         struct DispatchFill: Decodable {
             var account: String?
@@ -130,6 +140,8 @@ extension WindowSession {
         var task: TaskFill?
         var dispatch: DispatchFill?
         var dependencies: DependenciesFill?
+        /// What the owner types in a one-line sheet (an answer, a reason).
+        var text: String?
     }
 
     private func runFormFill() -> RunFormFill? {
@@ -138,16 +150,21 @@ extension WindowSession {
     }
 
     func fillPerfRunForm(_ form: NewRunForm) {
-        if let fill = runFormFill()?.run { form.fill(name: fill.name) }
+        if let fill = runFormFill()?.run {
+            form.fill(name: fill.name, mode: RunMode(rawValue: fill.mode ?? 0) ?? .owner, account: fill.account, model: fill.model ?? "",
+                      goal: fill.goal ?? "", budgetUsd: fill.budgetUsd, maxMinutes: fill.maxMinutes)
+        }
     }
 
     func fillPerfTaskForm(_ form: AddTaskForm) {
-        if let fill = runFormFill()?.task { form.fill(title: fill.title, spec: fill.spec, after: fill.after ?? []) }
+        if let fill = runFormFill()?.task { form.fill(title: fill.title, spec: fill.spec, after: fill.after ?? [], gate: fill.gate ?? false) }
     }
 
     func fillPerfDispatchForm(_ form: DispatchForm) {
         if let fill = runFormFill()?.dispatch { form.fill(account: fill.account, model: fill.model, reuse: fill.reuse ?? false) }
     }
+
+    func perfTypedText() -> String? { runFormFill()?.text }
 
     func fillPerfDependenciesForm(_ form: DependenciesForm) {
         if let fill = runFormFill()?.dependencies { form.fill(after: fill.after) }

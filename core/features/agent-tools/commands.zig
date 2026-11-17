@@ -12,11 +12,42 @@ pub const Planned = struct {
     /// Null for the list of commands.
     id: ?[]const u8,
     args: std.ArrayList(request.Arg) = .empty,
+    /// A `spec-file=` read into `spec=` (orchestration.spawn), owned here.
+    owned: ?[]u8 = null,
 
     pub fn deinit(self: *Planned, gpa: std.mem.Allocator) void {
+        if (self.owned) |text| gpa.free(text);
         self.args.deinit(gpa);
     }
 };
+
+/// The biggest spec a `spec-file=` may hold: the same as a prompt
+/// (docs/spec/orchestration.md, "Prompt enorme").
+pub const max_spec_bytes = 100 * 1024;
+
+/// `spec-file=<path>` (orchestration.spawn, plan 24 D2): the text goes to the
+/// app as the value of `spec=`, read here, so the sub-task's prompt is a
+/// file's text and never a command (docs/adr/0033-cadex-launches-agents.md).
+/// A regular file, at most `max_spec_bytes`, no NUL.
+pub fn readSpec(gpa: std.mem.Allocator, path: []const u8) ![]u8 {
+    const z = try gpa.dupeZ(u8, path);
+    defer gpa.free(z);
+    const fd = std.c.open(z.ptr, .{ .ACCMODE = .RDONLY });
+    if (fd < 0) return error.SpecFile;
+    defer _ = std.c.close(fd);
+    var st: std.c.Stat = undefined;
+    if (std.c.fstat(fd, &st) != 0 or !std.c.S.ISREG(st.mode) or st.size > max_spec_bytes) return error.SpecFile;
+    const text = try gpa.alloc(u8, @intCast(st.size));
+    errdefer gpa.free(text);
+    var got: usize = 0;
+    while (got < text.len) {
+        const n = std.c.read(fd, text[got..].ptr, text.len - got);
+        if (n <= 0) break;
+        got += @intCast(n);
+    }
+    if (got != text.len or std.mem.indexOfScalar(u8, text, 0) != null) return error.SpecFile;
+    return text;
+}
 
 /// What a subcommand asks the app, from its words (after the subcommand);
 /// error.Usage when they do not fit.
@@ -29,6 +60,12 @@ pub fn plan(gpa: std.mem.Allocator, sub: []const u8, words: []const []const u8) 
         p.id = words[0];
         for (words[1..]) |word| {
             const eq = std.mem.indexOfScalar(u8, word, '=') orelse return error.Usage;
+            if (std.mem.eql(u8, word[0..eq], "spec-file")) {
+                if (p.owned != null) return error.Usage;
+                p.owned = try readSpec(gpa, word[eq + 1 ..]);
+                try p.args.append(gpa, .{ .key = "spec", .value = p.owned.? });
+                continue;
+            }
             try p.args.append(gpa, .{ .key = word[0..eq], .value = word[eq + 1 ..] });
         }
     } else if (std.mem.eql(u8, sub, "open")) {
@@ -161,7 +198,8 @@ pub const usage =
     \\                     | scroll [up|down|ref] | wait [selector] [seconds] | screenshot | console | notes
     \\       cadex computer apps | state <app> | click <app> <n> | type <app> <n> <text>
     \\                      | set <app> <n> <value> | scroll <app> <n> [up|down] | screenshot <app>
-    \\       cadex commands | run <id> [key=value ...]   (add --json for the raw answer)
+    \\       cadex commands | run <id> [key=value ...]   (add --json for the raw answer;
+    \\                      spec-file=<file> sends the file's text as spec=)
     \\       cadex skills list | get <topic>
     \\
 ;
@@ -221,6 +259,24 @@ test "the shortcuts become command ids with their arguments" {
     var list = try plan(gpa, "commands", &.{});
     defer list.deinit(gpa);
     try testing.expect(list.id == null);
+}
+
+test "spec-file= sends the file's text as spec=, read here; a folder or a missing file is refused" {
+    const gpa = testing.allocator;
+    var dir = try @import("../../shared/test_dir.zig").TestDir.init();
+    defer dir.deinit();
+    try dir.writeFile("spec.md", "fix it \"now\" $(rm -rf x)\nline 2");
+    const path = try dir.join("spec.md");
+    const arg = try std.fmt.allocPrint(gpa, "spec-file={s}", .{path});
+    defer gpa.free(arg);
+    var spawn = try plan(gpa, "run", &.{ "orchestration.spawn", "title=t", arg });
+    defer spawn.deinit(gpa);
+    try testing.expectEqualStrings("spec", spawn.args.items[1].key);
+    try testing.expectEqualStrings("fix it \"now\" $(rm -rf x)\nline 2", spawn.args.items[1].value);
+    const folder_arg = try std.fmt.allocPrint(gpa, "spec-file={s}", .{dir.path()});
+    defer gpa.free(folder_arg);
+    try testing.expectError(error.SpecFile, plan(gpa, "run", &.{ "orchestration.spawn", folder_arg }));
+    try testing.expectError(error.SpecFile, plan(gpa, "run", &.{ "orchestration.spawn", "spec-file=/nope/none.md" }));
 }
 
 test "skills come from the binary" {

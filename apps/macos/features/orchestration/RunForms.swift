@@ -45,43 +45,15 @@ enum FormKit {
     }
 }
 
-/// "New Run": the name and the run's cap; the repository and the
-/// coordinator (the owner, in D1) are the app's.
-@MainActor
-public final class NewRunForm: NSView {
-    let nameField = NSTextField()
-    let budgetField = NSTextField()
-    let minutesField = NSTextField()
-
-    public init(caps: Caps) {
-        super.init(frame: NSRect(x: 0, y: 0, width: 420, height: 100))
-        nameField.placeholderString = T("Run name", "Nome da execução")
-        budgetField.stringValue = String(format: "%.2f", caps.budgetUsd)
-        minutesField.stringValue = "\(caps.maxMinutes)"
-        FormKit.stack([FormKit.labeled(T("Name", "Nome"), nameField), FormKit.labeled(T("Cap (US$)", "Teto (US$)"), budgetField, width: 80),
-                       FormKit.labeled(T("Cap (min)", "Teto (min)"), minutesField, width: 80)], in: self)
-    }
-
-    required init?(coder: NSCoder) { nil }
-    public var firstField: NSView { nameField }
-
-    /// The name (empty: "run") and the caps (a field that does not read keeps `fallback`'s).
-    public func values(fallback: Caps) -> (name: String, caps: Caps) {
-        let name = nameField.stringValue.trimmingCharacters(in: .whitespaces)
-        let budget = Double(budgetField.stringValue.replacingOccurrences(of: ",", with: ".")).flatMap { $0 > 0 ? $0 : nil } ?? fallback.budgetUsd
-        let minutes = Int(minutesField.stringValue).flatMap { $0 > 0 ? $0 : nil } ?? fallback.maxMinutes
-        return (name.isEmpty ? "run" : name, Caps(budgetUsd: budget, maxMinutes: minutes))
-    }
-
-    public func fill(name: String) { nameField.stringValue = name }
-}
-
 /// "Add Task": the title, the specification (the agent's prompt) and one
 /// checkbox per task of the run it may wait for.
 @MainActor
 public final class AddTaskForm: NSView {
     let titleField = NSTextField()
     let specView = NSTextView()
+    /// docs/spec/orchestration.md: "e, se o dono quiser, um portão".
+    let gateBox = NSButton(checkboxWithTitle: T("Gate: wait for my approval before it starts", "Portão: esperar minha aprovação antes de começar"),
+                           target: nil, action: nil)
     private let others: [RunTask]
     private var boxes: [NSButton] = []
 
@@ -98,6 +70,7 @@ public final class AddTaskForm: NSView {
             boxes.append(box)
             views.append(box)
         }
+        views.append(gateBox)
         FormKit.stack(views, in: self)
         if let scroll = specView.enclosingScrollView { scroll.widthAnchor.constraint(equalTo: widthAnchor).isActive = true }
     }
@@ -105,15 +78,16 @@ public final class AddTaskForm: NSView {
     required init?(coder: NSCoder) { nil }
     public var firstField: NSView { titleField }
 
-    public func values() -> (title: String, spec: String, dependsOn: [String]) {
+    public func values() -> (title: String, spec: String, dependsOn: [String], gate: Bool) {
         let deps = zip(others, boxes).filter { $0.1.state == .on }.map(\.0.id)
-        return (titleField.stringValue.trimmingCharacters(in: .whitespaces), specView.string, deps)
+        return (titleField.stringValue.trimmingCharacters(in: .whitespaces), specView.string, deps, gateBox.state == .on)
     }
 
     /// As the owner would type it (the run's test in the app, `../../app/RunPerfHooks.swift`).
-    public func fill(title: String, spec: String, after: [String]) {
+    public func fill(title: String, spec: String, after: [String], gate: Bool = false) {
         titleField.stringValue = title
         specView.string = spec
+        gateBox.state = gate ? .on : .off
         for (task, box) in zip(others, boxes) { box.state = after.contains(task.title) ? .on : .off }
     }
 }

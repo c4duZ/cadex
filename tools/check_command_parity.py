@@ -48,6 +48,10 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "orchestration.new-run", "orchestration.show-run", "orchestration.add-task", "orchestration.dispatch",
             "orchestration.retry", "orchestration.mark-done", "orchestration.stop-dispatch", "orchestration.stop-run",
             "orchestration.set-dependencies",
+            # Supervised agents and gates (plan 24, phase D2).
+            "orchestration.add-gate", "orchestration.approve-gate", "orchestration.reject-gate",
+            "orchestration.answer-question", "orchestration.report-done", "orchestration.report-heartbeat",
+            "orchestration.ask", "orchestration.send-message", "orchestration.inbox", "orchestration.spawn",
             "memory.show", "memory.show-briefing", "memory.show-history", "memory.reindex", "memory.refresh", "memory.enable", "memory.approve", "memory.reject", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).

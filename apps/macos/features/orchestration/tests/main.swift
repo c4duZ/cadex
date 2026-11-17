@@ -33,5 +33,5 @@ final class Fixture {
     }
 }
 
-let exitCode = await Checks.run(runTests + storeTests + raceTests + dispatchTests + queueTests)
+let exitCode = await Checks.run(runTests + storeTests + raceTests + dispatchTests + queueTests + agentTests)
 exit(exitCode)

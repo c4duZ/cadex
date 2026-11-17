@@ -12,6 +12,7 @@ pub const topics = [_]Topic{
     .{ .name = "tasks", .summary = "your task's status and comment, and asking for review", .text = @embedFile("guides/tasks.md") },
     .{ .name = "computer", .summary = "operating other apps of the Mac, when the owner turns it on", .text = @embedFile("guides/computer.md") },
     .{ .name = "preview", .summary = "opening pages in Cadex's preview, and picked elements", .text = @embedFile("guides/preview.md") },
+    .{ .name = "orchestration", .summary = "a task of a run: reporting done, signs of life, questions, messages, sub-tasks", .text = @embedFile("guides/orchestration.md") },
 };
 
 pub fn find(name: []const u8) ?Topic {

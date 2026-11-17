@@ -14,6 +14,14 @@ import Worktrees
 extension WindowSession {
     var repository: String? { WorktreesCore.repository(of: folder.root) }
 
+    /// The main checkout of this folder's repository, also when the folder
+    /// is one of its tasks: a race or a run made from inside a task's
+    /// worktree took that worktree as the repository (found 2026-11-16, plan 24 D2).
+    var mainRepository: String? {
+        guard let root = repository else { return nil }
+        return WorktreesCore.list(repo: root).first?.path ?? root
+    }
+
     func makeTasksPage() -> WorktreesView {
         let page = WorktreesView()
         let paint = { [weak page] in
@@ -221,6 +229,8 @@ extension WindowSession {
         alert.addButton(withTitle: T("OK", "OK"))
         alert.addButton(withTitle: T("Cancel", "Cancelar"))
         alert.window.initialFirstResponder = field
+        if let typed = perfTypedText() { field.stringValue = typed }
+        perfAnswer(alert)
         alert.beginSheetModal(for: window) { response in
             if response == .alertFirstButtonReturn { then(field.stringValue.trimmingCharacters(in: .whitespaces)) }
         }

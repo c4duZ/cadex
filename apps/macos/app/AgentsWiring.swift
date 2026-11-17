@@ -241,6 +241,7 @@ extension AppDelegate {
         AgentToolsServer.shared.onEvent = { event in
             AgentsController.shared.noteHook(pid: event.pid, event: event.event, sessionID: event.sessionID)
             (NSApp.delegate as? AppDelegate)?.noteAgentEvent(event)
+            (NSApp.delegate as? AppDelegate)?.noteRunHook(event)
             if event.edit != nil { AuthorshipHub.record(event) }
             return nil
         }

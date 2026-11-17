@@ -49,18 +49,30 @@ extension WindowSession {
             .filter { contenderTerminal($0)?.terminal.hasForegroundProcess == true }.count
     }
 
+    /// The runs' live dispatches and their coordinating agents still running.
     func liveRunAgents() -> Int {
-        RunGraph.live((try? OrchestrationController.shared.runs()?.store.all(.dispatches)) ?? []).count
+        guard let book = OrchestrationController.shared.runs() else { return 0 }
+        let coordinators = ((try? book.store.all(.runs) as [Run]) ?? []).filter { run in
+            guard !run.stopped, let kit = run.coordinator else { return false }
+            return app.locate { $0.agentResume?.kitSession == kit }?.terminal.hasForegroundProcess == true
+        }.count
+        return RunGraph.live((try? book.store.all(.dispatches)) ?? []).count + coordinators
     }
 
     /// `askFirst` false: from the queue or a test instance, no confirmation.
-    func startDispatch(_ request: DispatchRequest, askFirst: Bool = true) {
+    /// `auto`: a task dispatched on its own (plan 24 D2): a refusal fails the
+    /// task with the reason instead of a sheet, so it is not tried at every turn.
+    func startDispatch(_ request: DispatchRequest, askFirst: Bool = true, auto: Bool = false) {
         let controller = OrchestrationController.shared
         guard let book = controller.runs(), let task: RunTask = try? book.store.get(.tasks, id: request.task),
               let run = try? book.run(task.run) else { return }
         let all: [Dispatch] = (try? book.store.all(.dispatches)) ?? []
         let refusal = RunLaunch.check(request, run: run, task: task, all: all, othersLive: liveRaceAgents(), enabled: controller.isEnabled,
                                       maxAgents: controller.limits.maxAgents) { ClaudeTrust.isTrusted(run.repository, repository: nil, configDir: $0) }
+        if auto, let refusal, refusal != .noSlot(controller.limits.maxAgents) {
+            try? book.failTask(task.id, reason: T("failed to start: ", "não começou: ") + refusal.message)
+            return refreshRunPages()
+        }
         if case .notTrusted(_, let dir)? = refusal { return askToTrust(run.repository, account: dir, message: refusal?.message ?? "") }
         if let refusal, refusal != .noSlot(controller.limits.maxAgents) {
             try? book.unqueue(task: task.id)
