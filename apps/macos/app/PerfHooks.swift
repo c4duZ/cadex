@@ -27,11 +27,13 @@ extension WindowSession {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in self?.workspace?.showSidebar(page) }
     }
 
-    /// That log's conversation opened at 12 s and 36 s and closed 12 s
+    /// That log's conversation opened at 12 s and 48 s and closed 12 s
     /// after each: the first opening's one-time cost apart from each
-    /// opening's, and what stays once closed.
+    /// opening's, and what stays once closed. 24 s between a close and the
+    /// next opening: closing peaks for 1-2 s and settles about 12 s later
+    /// (curve of 2026-11-16), and the measure waits for that.
     private func openPerfTranscript(_ path: String) {
-        for start in [12.0, 36.0] {
+        for start in [12.0, 48.0] {
             DispatchQueue.main.asyncAfter(deadline: .now() + start) { [weak self] in
                 self?.tabs?.open(AgentTranscriptDocument(path: path, title: "perf", detail: "", colors: Self.agentColors()), beside: false)
             }

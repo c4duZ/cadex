@@ -344,8 +344,21 @@ docs/adr/0031-run-on-remote.md (plano 23), `docs/adr/0004-clean-rewrite.md`,
     rodada inteira, todos os números do plano 24 de novo dentro (161 MB, 1,4% de CPU) e só o
     `subagent_closed_mb` (plano 17) fora, 44 MB contra o limite de 5: isolado, ou logo depois do
     cenário que vem antes dele, deu 2, 0, −21, 3 e 1 MB em cinco rodadas, e o cenário não passa por
-    nada do plano 24 (a orquestração desligada). O limite não subiu: fica para o dono decidir se é
-    medição sob carga ou algo a investigar no plano 17.
+    nada do plano 24 (a orquestração desligada). Investigado depois, com a curva da memória segundo a
+    segundo: cada fechamento da conversa tem um pico de 130 a 140 MB por 1 a 2 s (o terminal volta à
+    tela e refaz a área de desenho), fica uns 9 MB acima por cerca de 12 s e volta ao parado, ou
+    abaixo; o teste lia 4 a 7 s depois do fechamento, e com a máquina carregada o fechamento atrasava
+    e a leitura pegava o pico. A leitura passou a 16 a 22 s depois (`tools/perf/run.py`,
+    `apps/macos/app/PerfHooks.swift`), o limite ficou o mesmo: 4, −7 e −1 MB, a última com quatro
+    `yes` ocupando a CPU. Numa terceira rodada inteira, com o subagente dentro (0,0), outros quatro
+    números antigos passaram (a History aberta, o agente no preview, o grupo das máquinas e o parado
+    com a orquestração desligada). Medido depois: toda vez que a área de desenho do terminal nasce ou
+    muda de tamanho (abrir, fechar uma aba e voltar, abrir a History, o preview ao lado), a memória
+    salta para 125 a 136 MB e volta em 1 a 2 s, ou em uns 10 s com a CPU ocupada; o teste que lê
+    nessa hora falha, por isso falha um diferente a cada rodada inteira, e cada um isolado passa (o
+    parado, o redimensionar com e sem carga, as máquinas e o desligado logo depois de um `make
+    package`). Não é vazamento nem do plano 24. Fica para o dono: medir a mediana depois de assentar
+    em todos os cenários, ou o terminal pedir 2 quadros em vez de 3 (o pico em uns 25 MB).
 
 ## Notas da release (inglês)
 

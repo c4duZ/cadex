@@ -28,7 +28,8 @@ LIMITS = {
     "all_on_cpu": 2.0,            # the same as idle_cpu
     "subagent_first_mb": 20,      # +6 to +9 MB: a 34 MB log's first opening, the text system included (2026-10-21)
     "subagent_open_mb": 8,        # 0 to +2 MB each opening after (TextKit 1 had kept +20 and jumped 70)
-    "subagent_closed_mb": 5,      # +1 to +3 MB once its tab is closed again
+    "subagent_closed_mb": 5,      # +1 to +3 MB once its tab is closed again, read 16-22 s after the close
+                                  # (read 4-7 s after, a loaded Mac caught the close's 1-2 s peak: +44, 2026-11-16)
     "history_open_over_idle_pct": 10,   # plan 18: 3 accounts (one managed), 200 transcripts, History open
     "history_open_cpu": 2.0,            # the same as idle_cpu once the first reading is done
     "history_closed_over_idle_pct": 10, # History closed: nothing indexed or watched

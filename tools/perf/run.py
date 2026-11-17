@@ -203,8 +203,12 @@ def write_subagent_log(path):
 
 
 def measure_subagent(app):
-    """A subagent's conversation opened at 12 s and 36 s and closed 12 s
-    after each by the app (CADEX_PERF_SUBAGENT_LOG). Memory every 0.5 s,
+    """A subagent's conversation opened at 12 s and 48 s and closed 12 s
+    after each by the app (CADEX_PERF_SUBAGENT_LOG). What stays is read 16
+    to 22 s after each close: closing peaks at 130-140 MB for 1-2 s (the
+    terminal shown again makes its canvas) and settles about 12 s later;
+    read 4 to 7 s after, a close delayed by a loaded Mac put the peak in
+    the window, +13 and +44 MB in the full run of 2026-11-16, +0 to +3 alone. Memory every 0.5 s,
     the median of each stretch so the 1 s jumps of switching tabs do not
     count. The first opening also loads the text system once; the second
     is what each one adds; after it closes nothing must stay. Since the
@@ -212,7 +216,7 @@ def measure_subagent(app):
     be below zero: the tab costs less than the terminal it hides."""
     start = time.time()
     curve = []
-    while time.time() - start < 55:
+    while time.time() - start < 83:
         if app.process.poll() is not None:
             raise RuntimeError(f"the app quit (status {app.process.returncode})")
         curve.append((time.time() - start, footprint_mb(app.process.pid) or 0))
@@ -221,7 +225,7 @@ def measure_subagent(app):
     def median(begin, end):
         values = sorted(m for t, m in curve if begin <= t <= end)
         return values[len(values) // 2] if values else 0
-    base, first, closed, second, after = median(7, 11), median(17, 23), median(30, 35), median(42, 47), median(52, 55)
+    base, first, closed, second, after = median(7, 11), median(17, 23), median(40, 46), median(53, 59), median(76, 82)
     print(f"    base {base:.0f} MB, first open {first:.0f}, closed {closed:.0f}, second open {second:.0f}, closed {after:.0f}")
     return {"subagent_first_mb": first - base, "subagent_open_mb": second - closed, "subagent_closed_mb": after - closed}
 
@@ -340,7 +344,7 @@ def subagent_scenario():
     log = os.path.join(folder, "agent-perf.jsonl")
     try:
         write_subagent_log(log)
-        return scenario("subagent", "idle", ROOT, measure_subagent, seconds=70, extra_env={"CADEX_PERF_SUBAGENT_LOG": log})
+        return scenario("subagent", "idle", ROOT, measure_subagent, seconds=90, extra_env={"CADEX_PERF_SUBAGENT_LOG": log})
     finally:
         shutil.rmtree(folder, ignore_errors=True)
 

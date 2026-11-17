@@ -179,7 +179,9 @@ extension WindowSession {
     func perfAnswer(_ alert: NSAlert, accept: Bool = true) {
         guard ProcessInfo.processInfo.environment["CADEX_PERF_SHEETS"] == "1" else { return }
         NSLog("Cadex sheet: %@ | %@", alert.messageText, alert.informativeText)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+        // CADEX_PERF_SHEETS_WAIT: seconds before answering, for a print of the sheet.
+        let wait = ProcessInfo.processInfo.environment["CADEX_PERF_SHEETS_WAIT"].flatMap(Double.init) ?? 1.5
+        DispatchQueue.main.asyncAfter(deadline: .now() + wait) { [weak self] in
             guard let self, alert.window.isVisible else { return }
             self.window.endSheet(alert.window, returnCode: accept || alert.buttons.count < 2 ? .alertFirstButtonReturn : .alertSecondButtonReturn)
         }
