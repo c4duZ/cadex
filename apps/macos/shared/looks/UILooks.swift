@@ -62,6 +62,10 @@ public enum UILooks {
     /// A width, padding or icon size, scaled by the zoom.
     public static func pt(_ value: CGFloat) -> CGFloat { value * zoom }
 
+    /// How far in an NSTextField label draws its text, on each side. A label placed at a
+    /// mockup's text position sat this much right of it (measured 2026-11-17).
+    public static let labelInset: CGFloat = 2
+
     /// A height (a row, a bar): scaled by the zoom and tightened when
     /// compact. Whole points, so lines between rows stay crisp; the design
     /// heights are whole, so zoom 1 gives them back unchanged.

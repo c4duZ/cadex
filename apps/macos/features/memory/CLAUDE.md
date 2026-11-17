@@ -43,7 +43,8 @@
 - A aba Memory do painel da direita (fase H; plano 26 fase C2c, na cara do mockup Inspector,
   components.inspector.memory): `MemoryView.swift` (desligada, o texto e "Turn On"; ligada, "Search
   what this project knows" (memory.search), até 3 propostas com Approve/Reject, "LEARNED TODAY" com
-  as páginas de hoje em cartões, "WIKI" com a árvore, o estado do engine e do agente numa linha e a
+  as páginas de hoje em cartões, "WIKI" com a árvore (os tipos na ordem do mockup, sem seta; o estado do engine e do agente na dica
+  do rótulo) e a
   nota do briefing com "See the briefing"; só pede dados quando aparece; cada botão roda um comando
   pelo `run`), `MemoryParts.swift` (as peças: a busca, os rótulos, os cartões, a nota),
   `MemorySearch.swift` (a busca no ⌘K pelas páginas: título, tipo, caminho e resumo),

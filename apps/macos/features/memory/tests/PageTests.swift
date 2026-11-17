@@ -165,6 +165,40 @@ func pageTests() -> [(name: String, body: Checks.Body)] { [
     ("costs keep the digits that matter", {
         expect(MemoryStatusText.usd(0) == "0.00" && MemoryStatusText.usd(0.42) == "0.42" && MemoryStatusText.usd(0.0043) == "0.0043")
     }),
+    ("the tab with the Inspector mockup's own data (CADEX_SNAPSHOT_DIR: memory-mockup.png), to lay over it", {
+        guard let out = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }
+        let dir = scratch()
+        defer { try? fm.removeItem(atPath: dir) }
+        let today = ISO8601DateFormatter().string(from: Date())
+        // Newest first, as the cards list them: the mockup's order.
+        let now = Date()
+        let learned = [("gotchas/zsh", "zsh drops input typed before its prompt", "gotcha", "perf-subagent-window", "claude-code"),
+                       ("decisions/footprint", "Footprint peaks when a canvas is made", "decision", "orchestration-e", "claude-code"),
+                       ("gotchas/bell", "The bell’s cards were squeezed to 0 pt", "gotcha", "bell-cards", "codex")]
+        for (index, (path, title, kind, task, agent)) in learned.enumerated() {
+            let at = ISO8601DateFormatter().string(from: now.addingTimeInterval(-Double(index) * 60))
+            write(dir + "/\(path).md", "---\ntitle: \(title)\nkind: \(kind)\nsession_id: \(task)\nagent: \(agent)\nupdated_at: \(at)\n---\n")
+        }
+        _ = today
+        for (folder, count) in [("decisions", 47), ("gotchas", 29), ("concepts", 22), ("sessions", 113)] {
+            for index in 0..<count {
+                write(dir + "/\(folder)/old-\(index).md", "---\ntitle: Page \(index)\nupdated_at: 2026-10-01T10:00:00Z\n---\n")
+            }
+        }
+        let overview = MemoryOverview.parse(["running": true, "workspace": "default", "project": "cadex", "wiki_dir": dir, "model": "loaded",
+                                             "pages": 214, "sessions": 113])
+        let view = MemoryView(frame: NSRect(x: 0, y: 0, width: 320, height: 760))
+        view.placeOf = { $0 }
+        view.show(MemoryPageState(enabled: true, overview: overview, agent: nil, proposals: [], wikiDir: dir, tree: MemoryWiki.tree(dir)))
+        let host = NSView(frame: view.frame)
+        host.wantsLayer = true
+        host.layer?.backgroundColor = DesignTokens.Inspector.bg.cgColor
+        host.addSubview(view)
+        host.layoutSubtreeIfNeeded()
+        guard let bitmap = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { return }
+        host.cacheDisplay(in: host.bounds, to: bitmap)
+        try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: out + "/memory-mockup.png"))
+    }),
     ("the page drawn (CADEX_SNAPSHOT_DIR: memory-page.png), with a wiki, the agent and a proposal", {
         guard let out = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }
         let dir = scratch()

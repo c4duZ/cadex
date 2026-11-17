@@ -51,6 +51,10 @@ public final class HistoryDocument: TabDocument {
     public var identity: String { Self.identity(for: root) }
     public var title: String { T("History: ", "Histórico: ") + (root as NSString).lastPathComponent }
     public var hasUnsavedChanges: Bool { false }
+    /// Opens the first commit's files, as the History drawing shows it (make perf and the
+    /// fidelity check, CADEX_PERF_HISTORY_OPEN).
+    public func openFirstCommit() { historyView.openFirstCompactCommit() }
+
     public func focus() { view.window?.makeFirstResponder(historyView.table) }
     public func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) { close() }
     public func close() {}

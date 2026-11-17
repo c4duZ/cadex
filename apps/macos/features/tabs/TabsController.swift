@@ -262,9 +262,7 @@ public final class TabsController {
                                    state: TabAgentTitle.state(terminal?.agentStatus, hibernated: terminal?.isHibernated ?? false),
                                    unseen: terminal?.agentFinishedUnseen ?? false)
         }
-        let (icon, color) = Self.tabIcon(for: document.identity)
-        return TabBarView.Item(id: tab.id, title: title, active: tab.id == list.active, icon: icon, iconColor: color,
-                               image: Self.tabImage(for: document.identity),
+        return TabBarView.Item(id: tab.id, title: title, active: tab.id == list.active,
                                tip: document.identity.hasPrefix("/") ? shortPath(document.identity) : nil)
     }
 

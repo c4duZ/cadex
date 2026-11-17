@@ -8,7 +8,7 @@ import Strings
 /// The tab strip in the title bar (components.tab of the new frame's tokens; screens.md,
 /// TitleBar): each tab as wide as its title, the active one on the chip's fill in the primary
 /// text, the others bare in the secondary text, with no line under them; the state glyph of
-/// what runs in it, or its icon; × under the pointer. This replaces the
+/// what runs in it (no icon otherwise); × under the pointer. This replaces the
 /// equal-width native-looking tabs the owner chose on 2026-10-19, by the mockups approved on
 /// 2026-11-17 (docs/adr/0035-work-frame.md). Click selects, double-click renames, dragging
 /// reorders, the middle button closes. Drawn by hand so dragging is simple.
@@ -36,18 +36,10 @@ public final class TabBarView: NSView {
         let id: Int
         let title: String
         let active: Bool
-        /// The tab's kind: a terminal, or the document's (file by type,
-        /// history, web page).
-        var icon: Icon = .terminalWindow
-        /// The file type's color (Swift orange, Markdown blue...), or nil:
-        /// the accent when active, gray otherwise.
-        var iconColor: NSColor?
-        /// The Material drawing of the file, drawn as it is (over `icon`).
-        var image: NSImage?
         /// Shown on hover: the terminal's folder or the file's path, which
         /// the title shortens.
         var tip: String?
-        /// What runs in it (an agent's state): the state glyph in place of the icon.
+        /// What runs in it (an agent's state): the state glyph before the title.
         var state: GlyphState?
         /// Something finished that the owner has not seen: the title in bold, no badge
         /// (docs/spec/tabs.md).
@@ -61,7 +53,6 @@ public final class TabBarView: NSView {
     private static var maxTitle: CGFloat { UILooks.pt(Look.maxTitle) }
     private static var minWidth: CGFloat { UILooks.pt(Look.minWidth) }
     private static var closeSize: CGFloat { UILooks.pt(Look.close) }
-    private static var iconSize: CGFloat { UILooks.pt(Look.icon) }
     private static var padding: CGFloat { UILooks.pt(Look.paddingX) }
     private static var inner: CGFloat { UILooks.pt(Look.gap) }
     private static var pillRadius: CGFloat { UILooks.pt(Look.radius) }
@@ -125,13 +116,13 @@ public final class TabBarView: NSView {
                      : item.active ? Look.Active.weight : .regular)
     }
 
-    /// A tab as wide as its title with the icon and the paddings, as the mockup draws it. Measured
+    /// A tab as wide as its title with the glyph and the paddings, as the mockup draws it. Measured
     /// in the widest weight, so selecting a tab or an agent finishing does not move the others
     /// (review of 2026-11-17); × shows over the title's end, on its own fill, with no room kept.
     func naturalWidth(_ item: Item) -> CGFloat {
         let widest = UILooks.font(DesignTokens.FontSize.body, weight: DesignTokens.FontWeight.semibold)
         let title = min((item.title as NSString).size(withAttributes: [.font: widest]).width, Self.maxTitle)
-        return (Self.padding * 2 + Self.iconSize + Self.inner + title).rounded(.up)
+        return (Self.padding * 2 + Self.lead(item) + title).rounded(.up)
     }
 
     private var naturalWidths: [CGFloat] { items.map(naturalWidth) }
@@ -196,13 +187,7 @@ public final class TabBarView: NSView {
         return item.active ? sizes[1] : sizes[0]
     }
 
-    /// The glyph's own square, centered on the icon's spot.
-    static func glyphRect(_ item: Item, in iconRect: NSRect) -> NSRect {
-        let side = UILooks.pt(glyphSize(item))
-        return NSRect(x: iconRect.midX - side / 2, y: iconRect.midY - side / 2, width: side, height: side)
-    }
-
-    /// One view per tab with a state, over its icon's spot; hidden while a tab is dragged
+    /// One view per tab with a state, on its glyph spot; hidden while a tab is dragged
     /// (drawTab draws still ones then), gone with the state or the tab.
     private func syncGlyphs() {
         var kept: Set<Int> = []
@@ -217,9 +202,8 @@ public final class TabBarView: NSView {
                 glyphs[item.id] = view
             }
             view?.state = state
-            let iconRect = Self.iconRect(in: rect)
             let margin = UILooks.pt(StateGlyphLook.margin(size: size))
-            view?.frame = Self.glyphRect(item, in: iconRect).insetBy(dx: -margin, dy: -margin)
+            view?.frame = Self.glyphSpot(item, in: rect).insetBy(dx: -margin, dy: -margin)
             view?.isHidden = dragging != nil
             kept.insert(item.id)
         }
@@ -239,8 +223,17 @@ public final class TabBarView: NSView {
         drawWhileDragging()
     }
 
-    static func iconRect(in rect: NSRect) -> NSRect {
-        NSRect(x: rect.minX + padding, y: rect.midY - iconSize / 2, width: iconSize, height: iconSize)
+    /// Room before the title: the state glyph and the gap when something runs, nothing else. The
+    /// TitleBar mockup draws a tab as its dot (or no dot) and its name; the terminal and file
+    /// icons made the strip busier than the drawing (owner, 2026-11-17).
+    static func lead(_ item: Item) -> CGFloat {
+        item.state == nil ? 0 : UILooks.pt(glyphSize(item)) + inner
+    }
+
+    /// The glyph's spot: right after the padding, as wide as the glyph.
+    static func glyphSpot(_ item: Item, in rect: NSRect) -> NSRect {
+        let side = UILooks.pt(glyphSize(item))
+        return NSRect(x: rect.minX + padding, y: rect.midY - side / 2, width: side, height: side)
     }
 
     func drawTab(_ item: Item, in rect: NSRect, hovered: Bool) {
@@ -251,21 +244,14 @@ public final class TabBarView: NSView {
         }
         let color = item.active ? Look.Active.color : Look.Inactive.color
 
-        let iconRect = Self.iconRect(in: rect)
-        if let state = item.state {
-            // At rest the glyph is a view laid over this spot (it spins); while a tab is dragged
-            // the strip draws a still one where the tab is now.
-            if dragging != nil { StateGlyphLook.draw(state, in: Self.glyphRect(item, in: iconRect)) }
-        } else if let image = item.image {
-            image.draw(in: iconRect, from: .zero, operation: .sourceOver, fraction: 1)
-        } else {
-            tinted(item.icon, size: Self.iconSize, color: item.iconColor ?? color).draw(in: iconRect)
-        }
+        // At rest the glyph is a view laid over its spot (it spins); while a tab is dragged the
+        // strip draws a still one where the tab is now.
+        if let state = item.state, dragging != nil { StateGlyphLook.draw(state, in: Self.glyphSpot(item, in: rect)) }
 
         let paragraph = NSMutableParagraphStyle()
         paragraph.lineBreakMode = .byTruncatingTail
         let attributes: [NSAttributedString.Key: Any] = [.font: font(item), .foregroundColor: color, .paragraphStyle: paragraph]
-        let textX = iconRect.maxX + Self.inner
+        let textX = rect.minX + Self.padding + Self.lead(item)
         let textWidth = max(rect.maxX - Self.padding - textX, 0)
         let lineHeight = ceil(font(item).ascender - font(item).descender)
         (item.title as NSString).draw(in: NSRect(x: textX, y: rect.midY - lineHeight / 2, width: textWidth, height: lineHeight),

@@ -584,14 +584,14 @@ let exitCode = await Checks.run([
         tabs.view.layoutSubtreeIfNeeded()
         let a = FakeDocument("/r/a.md")
         tabs.open(a, beside: true)
-        expect(tabs.bar.items.first?.title == "a.md" && tabs.bar.items.first?.icon == .fileMd)
+        expect(tabs.bar.items.first?.title == "a.md")
         a.hasUnsavedChanges = true
         tabs.focusPane(step: 1)
         expect(tabs.bar.items.first?.title.hasPrefix("● ") == true, "\(tabs.bar.items)")
         a.hasUnsavedChanges = false
         tabs.closeAll()
     }),
-    ("the strip shows each tab's state glyph in place of its icon; unseen is bold (CADEX_SNAPSHOT_DIR: tab-states.png)", {
+    ("the strip shows each tab's state glyph before its name; unseen is bold (CADEX_SNAPSHOT_DIR: tab-states.png)", {
         let bar = TabBarView(frame: NSRect(x: 0, y: 0, width: 920, height: 40))
         bar.style = .init(activeFill: DesignTokens.Color.bgChip, hoverFill: DesignTokens.Color.bgSelected,
                           text: DesignTokens.Color.textPrimary, secondaryText: DesignTokens.Color.textSecondary,

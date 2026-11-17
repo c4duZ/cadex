@@ -15,6 +15,8 @@ public final class MemoryView: NSView {
     public var accountName: (String) -> String = { ($0 as NSString).lastPathComponent }
     /// The account of a session by id, when the History knows it.
     public var accountOf: (String) -> String? = { _ in nil } { didSet { outline.accountOf = accountOf } }
+    /// Where a session ran (its folder's name: the task), when the History knows it.
+    public var placeOf: (String) -> String? = { _ in nil }
     /// Whether "Open the Session" can resume it (the History has it).
     public var canResume: (String) -> Bool = { _ in false }
     /// The page came on screen (true) or left it (false): the app refreshes.
@@ -110,20 +112,20 @@ public final class MemoryView: NSView {
         if let problem = state.problem { add(MemoryParts.paragraph(problem), to: top) }
         renderProposals(state.proposals)
         renderLearned(state.tree?.allPages ?? [])
-        add(MemoryParts.label("WIKI"), to: top)
+        // The engine's state is not in the drawing: it stays under the pointer on WIKI.
+        var status = [MemoryStatusText.engine(state.overview) + " · " + MemoryStatusText.agent(state.agent)]
+        status += [MemoryStatusText.counts(state.overview), MemoryStatusText.imported(state.overview, accountName: accountName)].compactMap { $0 }
+        status += MemoryStatusText.queue(state.agent).map { T("queued: ", "na fila: ") + $0 }
+        status += MemoryStatusText.recent(state.agent)
+        let wiki = MemoryParts.label("WIKI")
+        wiki.toolTip = status.joined(separator: "\n")
+        add(wiki, to: top)
         if state.tree == nil || state.tree?.count == 0 {
             add(MemoryParts.line(state.wikiDir == nil ? T("No wiki yet: it starts with this project's first agent session.",
                                                           "Nenhuma wiki ainda: começa com a primeira sessão de agente deste projeto.")
                                                       : T("The wiki is empty.", "A wiki está vazia.")), to: top)
         }
         outline.show(state.tree)
-        // The state as before the redesign, in small lines: the counts, the import, the queue and
-        // the recent runs (a failed run says why there; review of 2026-11-17).
-        var status = [MemoryStatusText.engine(state.overview) + " · " + MemoryStatusText.agent(state.agent)]
-        status += [MemoryStatusText.counts(state.overview), MemoryStatusText.imported(state.overview, accountName: accountName)].compactMap { $0 }
-        status += MemoryStatusText.queue(state.agent).map { T("queued: ", "na fila: ") + $0 }
-        status += MemoryStatusText.recent(state.agent)
-        add(MemoryParts.line(status.joined(separator: "\n")), to: bottom)
         add(MemoryParts.briefing { [weak self] in self?.run?("memory.show-briefing") }, to: bottom)
     }
 
@@ -134,8 +136,9 @@ public final class MemoryView: NSView {
             .sorted { ($0.learnedAt ?? .distantPast) > ($1.learnedAt ?? .distantPast) }
         guard !today.isEmpty else { return }
         var cards: [NSView] = today.prefix(Self.shownLearned).map { page in
-            MemoryParts.card(page.title, meta: [page.kind, MemoryStatusText.origin(page, account: page.sessionID.flatMap(accountOf))]
-                .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")) { [weak self] in self?.onOpenPage?(page) }
+            MemoryParts.card(page.title, meta: MemoryStatusText.learned(page, place: page.sessionID.flatMap(placeOf))) { [weak self] in
+                self?.onOpenPage?(page)
+            }
         }
         if today.count > Self.shownLearned {
             cards.append(MemoryParts.line(T("\(today.count - Self.shownLearned) more in Search", "Mais \(today.count - Self.shownLearned) na busca")))

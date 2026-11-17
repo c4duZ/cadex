@@ -13,7 +13,8 @@ final class ChangesRowView: NSView {
     init(_ row: ChangesRow) {
         super.init(frame: .zero)
         let kind = label(String(row.letter), size: F.Kind.fontSize, weight: F.Kind.weight, color: Self.color(of: row.letter))
-        kind.alignment = .center
+        // Left in its 14 pt, as the mockup's span; centered it sat 4 pt right (measured 2026-11-17).
+        kind.alignment = .left
         let name = NSTextField(labelWithString: "")
         // One line, cut at the end: a long folder wrapped onto the next row (seen 2026-11-17).
         name.usesSingleLineMode = true
@@ -32,7 +33,10 @@ final class ChangesRowView: NSView {
         let stack = NSStackView(views: views)
         stack.spacing = UILooks.pt(F.gap)
         stack.distribution = .fill
-        stack.edgeInsets = NSEdgeInsets(top: 0, left: UILooks.pt(F.padding.left), bottom: 0, right: UILooks.pt(F.padding.right))
+        // Less the 2 pt a label draws its text in, at both ends: the letter, the name and the counts
+        // land where the mockup has them (measured 2026-11-17).
+        let inset = UILooks.labelInset
+        stack.edgeInsets = NSEdgeInsets(top: 0, left: UILooks.pt(F.padding.left) - inset, bottom: 0, right: UILooks.pt(F.padding.right) - inset)
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
         NSLayoutConstraint.activate([

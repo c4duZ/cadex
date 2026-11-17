@@ -108,6 +108,22 @@ public enum MemoryStatusText {
     }
 
     /// A page's second line: "session a1b2c3d4 · Work · 3h".
+    /// A page learned today as the Inspector mockup says it: "gotcha · from perf-subagent-window ·
+    /// Claude", the kind, the task its session ran in, who wrote it.
+    public static func learned(_ page: MemoryPage, place: String?) -> String {
+        [page.kind, place.map { T("from ", "de ") + $0 }, page.agent.map(agentName)]
+            .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+    }
+
+    /// The agent as people say it: "claude-code" is Claude, "codex" Codex.
+    static func agentName(_ agent: String) -> String {
+        switch agent.lowercased() {
+        case "claude-code", "claude": "Claude"
+        case "codex": "Codex"
+        default: agent
+        }
+    }
+
     public static func origin(_ page: MemoryPage, account: String?, now: Date = Date()) -> String {
         [page.sessionID.map { T("session ", "sessão ") + MemoryWiki.shortID($0) }, account ?? page.agent,
          page.time.map { MemoryJSON.ago($0, now: now) }]

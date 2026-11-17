@@ -36,8 +36,9 @@
 - `TabBarView.swift`: a barra de abas desenhada à mão (dica de cada aba e do × por HoverTip.hover,
   do menus compartilhado), na cara da moldura nova (plano 26, fase A; components.tab): cada aba da
   largura do título (até maxTitle; todas encolhem juntas até minWidth quando não cabem), 30 pt,
-  raio 7, com o ícone do que mostra (terminal; arquivo pelo tipo e cor do `FileIcons`, como na árvore;
-  histórico; página web) ou a peça de estado, a ativa no fundo de etiqueta e as outras sem fundo,
+  raio 7, com a peça de estado antes do nome quando algo roda e sem ícone nenhum fora disso, como o
+  mockup TitleBar (os ícones de terminal e de arquivo deixavam a fileira mais cheia que o desenho,
+  2026-11-17), a ativa no fundo de etiqueta e as outras sem fundo,
   sem linha embaixo, × só ao passar o mouse
   (clique, duplo clique renomeia, clique do meio fecha, arrastar reordena ao vivo em
   `TabBarDrag.swift`, com a janela travada enquanto isso), com cores de fora (`style`); fica na barra de título da janela
@@ -78,7 +79,7 @@
 
 - `TabAgentTitle.swift` (plano 19; plano 25 fase D): o estado do agente como `GlyphState` da peça
   única de estado (`../../shared/state-glyph/`): trabalhando, precisa de você, pronto, falhou, e
-  hibernado como parado ("Hibernando" na dica); o `TabBarView` põe o sinal no lugar do ícone da aba
+  hibernado como parado ("Hibernando" na dica); o `TabBarView` põe o sinal antes do nome da aba
   (uma `StateGlyphView` por aba com estado, 9 na ativa e 7 nas outras, parada e desenhada enquanto
   uma aba é arrastada) e o título em negrito quando o agente terminou sem você ver; os sinais de
   texto de antes (◐ ● ✓ ✕ ☾) saíram do título. O nome da conversa no lugar da pasta e a frase do

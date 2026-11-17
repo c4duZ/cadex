@@ -47,6 +47,8 @@ final class MemoryWikiOutline: NSOutlineView, NSOutlineViewDataSource, NSOutline
         backgroundColor = .clear
         style = .plain
         indentationPerLevel = UILooks.pt(DesignTokens.Inspector.Tree.indent)
+        // The drawing's 4 pt between the kinds' rows.
+        intercellSpacing = NSSize(width: 0, height: UILooks.pt(M.wikiGap))
         dataSource = self
         delegate = self
         target = self
@@ -69,9 +71,10 @@ final class MemoryWikiOutline: NSOutlineView, NSOutlineViewDataSource, NSOutline
     private static let carets = (closed: Icon.caretRight.image(size: UILooks.pt(DesignTokens.Inspector.Tree.chevron)),
                                  open: Icon.caretDown.image(size: UILooks.pt(DesignTokens.Inspector.Tree.chevron)))
 
-    /// The wiki again, keeping open what was open.
+    /// The wiki again, keeping open what was open; the kinds in the drawing's order.
     func show(_ tree: MemoryFolder?) {
-        roots = tree.map { MemoryNode(folder: $0).children } ?? []
+        roots = (tree.map { MemoryNode(folder: $0).children } ?? []).enumerated()
+            .sorted { (Self.rank($0.element), $0.offset) < (Self.rank($1.element), $1.offset) }.map(\.element)
         reloadData()
         for node in roots { restore(node) }
     }
@@ -155,13 +158,32 @@ final class MemoryWikiOutline: NSOutlineView, NSOutlineViewDataSource, NSOutline
         return cell
     }
 
+    /// Decisions, Gotchas, Concepts, Sessions as the mockup lists them; the rest after, as found.
+    private static func rank(_ node: MemoryNode) -> Int {
+        ["decisions", "gotchas", "concepts", "sessions"].firstIndex(of: node.folder?.name.lowercased() ?? "") ?? 4
+    }
+
+    /// The kinds' rows sit flush, with no caret: the drawing has a plain list (a click still opens
+    /// a kind's pages under it, indented).
+    override func frameOfOutlineCell(atRow row: Int) -> NSRect {
+        level(forRow: row) == 0 ? .zero : super.frameOfOutlineCell(atRow: row)
+    }
+
+    override func frameOfCell(atColumn column: Int, row: Int) -> NSRect {
+        var frame = super.frameOfCell(atColumn: column, row: row)
+        let level = CGFloat(self.level(forRow: row))
+        frame.size.width = bounds.width - level * indentationPerLevel
+        frame.origin.x = level * indentationPerLevel
+        return frame
+    }
+
     /// The marks the mockup gives the wiki's kinds; another folder gets the plain one.
     static func mark(of folder: String) -> String {
         switch folder.lowercased() {
         case "decisions": "◆"
         case "gotchas": "!"
         case "concepts": "◇"
-        case "sessions": "≡"
+        case "sessions": "·"
         default: "▸"
         }
     }

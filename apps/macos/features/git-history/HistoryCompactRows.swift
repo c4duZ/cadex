@@ -33,9 +33,13 @@ final class HistoryCompactRows: NSObject, NSTableViewDataSource, NSTableViewDele
     static let commitHeight: CGFloat = {
         let lines = NSLayoutManager().defaultLineHeight(for: UILooks.font(C.Title.fontSize))
             + NSLayoutManager().defaultLineHeight(for: UILooks.font(C.Meta.fontSize))
-        return UILooks.rowHeight(C.padding.top + C.padding.bottom) + ceil(lines)
+        return UILooks.rowHeight(C.padding.top + C.lineGap + C.padding.bottom) + ceil(lines)
     }()
-    static var fileHeight: CGFloat { UILooks.rowHeight(C.File.height) }
+    /// A file's 24 pt and the 2 pt to the next; the last one the commit's bottom padding instead,
+    /// so the box closes under it as the drawing's (2026-11-17).
+    static func fileHeight(last: Bool) -> CGFloat {
+        UILooks.rowHeight(C.File.height + (last ? C.padding.bottom : C.File.gap))
+    }
 
     /// The rows: every commit, and the open one's files right after it.
     static func items(commits: Int, expandedAt: Int?, files: Int) -> [Item] {
@@ -91,7 +95,7 @@ final class HistoryCompactRows: NSObject, NSTableViewDataSource, NSTableViewDele
     func numberOfRows(in tableView: NSTableView) -> Int { items.count }
 
     func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
-        if case .file = items[row] { return Self.fileHeight }
+        if case .file(_, let file) = items[row] { return Self.fileHeight(last: file == files.count - 1) }
         return Self.commitHeight
     }
 
@@ -130,35 +134,30 @@ final class HistoryCompactRows: NSObject, NSTableViewDataSource, NSTableViewDele
         let cell = table.makeView(withIdentifier: .init("compactCommit"), owner: nil) as? HistoryCompactCell
             ?? HistoryCompactCell(identifier: "compactCommit")
         cell.top.attributedStringValue = Self.subject(commit)
-        let when = HistoryRows.relative(commit.date)
+        let when = Self.shortAge(commit.date)
         cell.bottom.stringValue = "\(commit.author) · \(when) · \(commit.shortSha)"
         HoverTip.attach(Self.tip(commit), to: cell)
         return cell
     }
 
+    /// A file of the open commit as the drawing has it: the letter, the path, the counts on the right.
     private func fileCell(_ file: CommitDetails.File, in table: NSTableView) -> NSView {
-        let cell = table.makeView(withIdentifier: .init("compactFile"), owner: nil) as? HistoryCompactCell
-            ?? HistoryCompactCell(identifier: "compactFile")
-        let name = (file.path as NSString).lastPathComponent
-        let folder = (file.path as NSString).deletingLastPathComponent
-        let font = UILooks.font(C.File.fontSize)
-        let line = NSMutableAttributedString(string: "\(file.letter)  ", attributes: [
-            .font: UILooks.font(C.File.fontSize, weight: DesignTokens.FontWeight.bold), .foregroundColor: Self.color(of: file.letter),
-        ])
-        line.append(NSAttributedString(string: name, attributes: [.font: font, .foregroundColor: C.File.color]))
-        if !folder.isEmpty {
-            line.append(NSAttributedString(string: "  " + folder, attributes: [.font: font, .foregroundColor: DesignTokens.Color.textTertiary]))
-        }
-        if let added = file.added, let removed = file.removed {
-            line.append(NSAttributedString(string: "  +\(added)", attributes: [.font: font, .foregroundColor: DesignTokens.Color.accentGreenText]))
-            line.append(NSAttributedString(string: " −\(removed)", attributes: [.font: font, .foregroundColor: DesignTokens.Color.accentRedText]))
-        }
-        let style = NSMutableParagraphStyle()
-        style.lineBreakMode = .byTruncatingMiddle
-        line.addAttribute(.paragraphStyle, value: style, range: NSRange(location: 0, length: line.length))
-        cell.top.attributedStringValue = line
+        let cell = table.makeView(withIdentifier: .init("compactFile"), owner: nil) as? HistoryCompactFileCell
+            ?? HistoryCompactFileCell()
+        cell.show(file, color: Self.color(of: file.letter))
         HoverTip.attach(file.path, to: cell)
         return cell
+    }
+
+    /// "now", "4m", "1h", "yesterday", "3d": the History drawing's short ages ("17 minutes ago"
+    /// took the meta line's room, 2026-11-17).
+    static func shortAge(_ date: Date, now: Date = Date()) -> String {
+        let seconds = max(0, Int(now.timeIntervalSince(date)))
+        if seconds < 60 { return T("now", "agora") }
+        if seconds < 3600 { return "\(seconds / 60)m" }
+        if seconds < 86400 { return "\(seconds / 3600)h" }
+        if seconds < 2 * 86400 { return T("yesterday", "ontem") }
+        return "\(seconds / 86400)d"
     }
 
     /// The hover tip of a commit: the whole subject, its branches and tags,
@@ -182,21 +181,18 @@ final class HistoryCompactRows: NSObject, NSTableViewDataSource, NSTableViewDele
         }
     }
 
-    /// The subject as the drawing has it: the branch and tag chips, then the subject in 13, medium,
-    /// semibold on the commit you are on; one line, cut at the end.
+    /// The subject as the drawing has it: the subject in 13, medium, semibold on the commit you
+    /// are on, then the branch and tag chips; one line, cut at the end.
     static func subject(_ commit: HistoryCommit) -> NSAttributedString {
         let head = commit.refs.contains { $0 == "HEAD" || $0.hasPrefix("HEAD -> ") }
-        let text = NSMutableAttributedString()
+        let font = UILooks.font(C.Title.fontSize, weight: head ? C.Title.headWeight : C.Title.weight)
+        let text = NSMutableAttributedString(string: commit.subject, attributes: [.font: font, .foregroundColor: C.Title.color])
         for ref in commit.refs where ref != "HEAD" {
             let name = ref.hasPrefix("HEAD -> ") ? String(ref.dropFirst(8)) : ref.hasPrefix("tag: ") ? String(ref.dropFirst(5)) : ref
-            text.append(NSAttributedString(string: " \(name) ", attributes: [
-                .font: UILooks.font(C.Ref.fontSize, weight: C.Ref.weight), .foregroundColor: C.Ref.color, .backgroundColor: C.Ref.bg,
-            ]))
-            text.append(NSAttributedString(string: " "))
+            // The drawing's 6 pt gap before each chip: a space of that width.
+            text.append(NSAttributedString(string: " ", attributes: [.font: font, .kern: UILooks.pt(C.Ref.padding.left) - (" " as NSString).size(withAttributes: [.font: font]).width]))
+            text.append(HistoryRefChip.make(name, besides: font))
         }
-        text.append(NSAttributedString(string: commit.subject, attributes: [
-            .font: UILooks.font(C.Title.fontSize, weight: head ? C.Title.headWeight : C.Title.weight), .foregroundColor: C.Title.color,
-        ]))
         let line = NSMutableParagraphStyle()
         line.lineBreakMode = .byTruncatingTail
         text.addAttribute(.paragraphStyle, value: line, range: NSRange(location: 0, length: text.length))
@@ -206,7 +202,13 @@ final class HistoryCompactRows: NSObject, NSTableViewDataSource, NSTableViewDele
     /// The open commit's row: the raised fill and its line (components.inspector.tree.selected).
     func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
         let view = HistoryCompactRowView()
-        if row < items.count, case .commit(let index) = items[row] { view.open = commits[index].sha == expanded }
+        guard row < items.count else { return view }
+        switch items[row] {
+        case .commit(let index):
+            if commits[index].sha == expanded { view.part = files.isEmpty ? .whole : .top }
+        case .file(_, let file):
+            view.part = file == files.count - 1 ? .bottom : .middle
+        }
         return view
     }
 
@@ -227,65 +229,3 @@ final class HistoryCompactRows: NSObject, NSTableViewDataSource, NSTableViewDele
     }
 }
 
-/// A row's text: one line (a file) or two (a commit's subject over its
-/// author, time and SHA).
-@MainActor
-final class HistoryCompactCell: NSTableCellView {
-    let top = NSTextField(labelWithString: "")
-    let bottom = NSTextField(labelWithString: "")
-
-    init(identifier: String) {
-        super.init(frame: .zero)
-        self.identifier = .init(identifier)
-        let twoLines = identifier == "compactCommit"
-        bottom.font = UILooks.font(DesignTokens.Inspector.Commit.Meta.fontSize)
-        bottom.textColor = DesignTokens.Inspector.Commit.Meta.color
-        for label in [top, bottom] {
-            label.lineBreakMode = .byTruncatingTail
-            label.maximumNumberOfLines = 1
-            label.translatesAutoresizingMaskIntoConstraints = false
-            label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        }
-        addSubview(top)
-        NSLayoutConstraint.activate([
-            // A file sits in from its commit, so it reads as one of its files.
-            top.leadingAnchor.constraint(equalTo: leadingAnchor, constant: twoLines ? 2 : 14),
-            top.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
-        ])
-        if twoLines {
-            addSubview(bottom)
-            NSLayoutConstraint.activate([
-                top.bottomAnchor.constraint(equalTo: centerYAnchor, constant: 1),
-                bottom.topAnchor.constraint(equalTo: centerYAnchor, constant: 2),
-                bottom.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
-                bottom.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
-            ])
-        } else {
-            top.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-        }
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) { fatalError("HistoryCompactCell is created in code") }
-}
-
-/// A row of the compact history: the open commit drawn as the drawing's chosen row; the table's
-/// own selection is not drawn (a click opens, it does not select).
-final class HistoryCompactRowView: NSTableRowView {
-    var open = false { didSet { needsDisplay = true } }
-
-    override func drawBackground(in dirtyRect: NSRect) {
-        guard open else { return }
-        typealias Tree = DesignTokens.Inspector.Tree
-        let radius = UILooks.pt(DesignTokens.Inspector.Commit.radius)
-        Tree.Selected.bg.setFill()
-        NSBezierPath(roundedRect: bounds, xRadius: radius, yRadius: radius).fill()
-        guard let line = Tree.Selected.shadow.first else { return }
-        line.color.setStroke()
-        let border = NSBezierPath(roundedRect: bounds.insetBy(dx: line.spread / 2, dy: line.spread / 2), xRadius: radius, yRadius: radius)
-        border.lineWidth = line.spread
-        border.stroke()
-    }
-
-    override func drawSelection(in dirtyRect: NSRect) {}
-}

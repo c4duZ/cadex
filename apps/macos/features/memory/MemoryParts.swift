@@ -33,7 +33,7 @@ enum MemoryParts {
         let stack = NSStackView(views: [label(title)] + cards)
         stack.orientation = .vertical
         stack.alignment = .leading
-        stack.spacing = UILooks.pt(M.WikiRow.gap)
+        stack.spacing = UILooks.pt(M.learnedGap)
         for card in cards { card.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true }
         return stack
     }
@@ -88,8 +88,11 @@ enum MemoryParts {
 
     /// "Each new agent here starts with a briefing of this. See the briefing": the note at the foot.
     static func briefing(_ see: @escaping @MainActor () -> Void) -> NSView {
+        // The mockup's line-height (1.5 × the size), as a fixed line: a multiple of the font's own
+        // line made it taller than the drawing (measured 2026-11-17).
         let style = NSMutableParagraphStyle()
-        style.lineHeightMultiple = M.Briefing.lineHeight
+        style.minimumLineHeight = UILooks.pt(M.Briefing.fontSize * M.Briefing.lineHeight)
+        style.maximumLineHeight = style.minimumLineHeight
         let font = UILooks.font(M.Briefing.fontSize)
         let text = NSMutableAttributedString(string: T("Each new agent here starts with a briefing of this. ", "Cada agente novo aqui começa com um briefing disto. "),
                                              attributes: [.font: font, .foregroundColor: M.Briefing.color, .paragraphStyle: style])

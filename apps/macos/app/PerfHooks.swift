@@ -20,6 +20,9 @@ extension WindowSession {
         if let tab = environment["CADEX_PERF_PANEL"] { showPerfPage(tab) }
         // Files shown down to these paths (comma-separated), the last one chosen: the tree as a
         // mockup draws it, to compare them (2026-11-17).
+        if environment["CADEX_PERF_HISTORY_OPEN"] != nil {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in self?.panelHistory?.openFirstCommit() }
+        }
         if let paths = environment["CADEX_PERF_REVEAL"]?.split(separator: ",").map(String.init) {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
                 for path in paths { self?.explorer?.reveal(path) }

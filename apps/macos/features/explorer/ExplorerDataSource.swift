@@ -139,7 +139,7 @@ final class ExplorerCell: NSTableCellView {
         super.layout()
         let mid = bounds.midY
         let icon = UILooks.pt(Tree.icon)
-        imageView?.frame = NSRect(x: 2, y: mid - icon / 2, width: icon, height: icon)
+        imageView?.frame = NSRect(x: UILooks.labelInset, y: mid - icon / 2, width: icon, height: icon)
         let height = textField?.intrinsicContentSize.height ?? 17
         let markWidth: CGFloat = mark.stringValue.isEmpty ? 0 : UILooks.pt(Tree.indent)
         // The text field draws its text 2 pt in: start it 2 pt early so the name sits where the

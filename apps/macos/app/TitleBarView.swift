@@ -15,7 +15,10 @@ final class TitleBarView: NSView {
     /// Zoomed but never compact: macOS places the window buttons itself (plan 15, phase D).
     static var height: CGFloat { UILooks.pt(Look.height) }
     /// Where the close, minimize and zoom buttons end, measured in a capture (2026-10-19).
-    private static let windowButtonsEnd: CGFloat = 72 // token-exempt: where macOS draws its own buttons
+    private static let windowButtonsEnd: CGFloat = 68 // token-exempt: where the mockup's window buttons end
+    /// The window buttons' centers in the TitleBar mockup: 12 pt circles, 8 apart, 16 in. Where
+    /// macOS put them they sat 2.5 pt right, and the search with them (measured 2026-11-17).
+    private static let windowButtonMids: [CGFloat] = [22, 42, 62] // token-exempt: macOS's own buttons
     private var searchLeading: NSLayoutConstraint!
 
     private let run: (String) -> Void
@@ -27,7 +30,7 @@ final class TitleBarView: NSView {
     /// The bell: the requests waiting for you, its count on the badge (docs/spec/agents.md).
     private let bellButton = TitleBarButton(icon: .bell, tip: T("Needs you", "Precisa de você"))
     /// The right panel's button (inspector.toggle), lit while the panel is open.
-    private let panelButton = TitleBarButton(icon: .sidebar, tip: T("Right panel", "Painel da direita"))
+    private let panelButton = TitleBarButton(icon: .sidebarSimple, tip: T("Right panel", "Painel da direita"), mirrored: true)
     private let trailing = NSStackView()
     /// The line under the bar.
     private let hairline = NSView()
@@ -175,14 +178,16 @@ final class TitleBarView: NSView {
     /// macOS lays them out again on many events: this runs after each move of theirs.
     private func centerWindowButtons() {
         guard let window, !window.styleMask.contains(.fullScreen) else { return }
-        for kind in [NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton] {
+        for (kind, mid) in zip([NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton], Self.windowButtonMids) {
             guard let button = window.standardWindowButton(kind), let container = button.superview else { continue }
             let middle = Self.height / 2
             let fromTop = container.isFlipped ? button.frame.midY : container.bounds.height - button.frame.midY
             let delta = middle - fromTop
-            guard abs(delta) > 0.5 else { continue }
+            let across = UILooks.pt(mid) - button.frame.midX
+            guard abs(delta) > 0.5 || abs(across) > 0.5 else { continue }
             var origin = button.frame.origin
             origin.y += container.isFlipped ? delta : -delta
+            origin.x += across
             button.setFrameOrigin(origin)
         }
     }

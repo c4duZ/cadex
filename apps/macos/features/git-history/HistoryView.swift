@@ -75,6 +75,13 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
     }
 
     private var header: NSTableHeaderView?
+    /// The search bar, and the list under it or (compact) at the top: the History drawing of the
+    /// right panel has no filter, the commits start right under the scope row (2026-11-17).
+    private var bar: NSView?
+    private var listBelowBar: NSLayoutConstraint?
+    private var listAtTop: NSLayoutConstraint?
+    private var listLeading: NSLayoutConstraint?
+    private var listTrailing: NSLayoutConstraint?
 
     /// The sidebar's narrow look: the columns a pane of 240 points cannot
     /// show go, and so do the column titles, the checkbox and the count
@@ -87,6 +94,15 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         }
         currentOnly.isHidden = compact
         count.isHidden = compact
+        bar?.isHidden = compact
+        // The drawing's list: 6 pt in on each side, no space between the cells or the rows (the
+        // open commit's box runs over its files).
+        let side = DesignTokens.Inspector.Tree.listPadding
+        listLeading?.constant = compact ? UILooks.pt(side.left) : 0
+        listTrailing?.constant = compact ? -UILooks.pt(side.right) : 0
+        table.intercellSpacing = compact ? .zero : NSSize(width: 3, height: 2)
+        listBelowBar?.isActive = !compact
+        listAtTop?.isActive = compact
         // Compact (the right panel's History): the description takes the width, not the graph,
         // which is the first column and so was the one stretched (a wide gap after the dots, the
         // subjects cut past the edge: seen 2026-11-17); the panel's own ground shows through.
@@ -94,9 +110,6 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         graph?.resizingMask = compact ? [] : .userResizingMask
         table.columnAutoresizingStyle = compact ? .uniformColumnAutoresizingStyle : .firstColumnOnlyAutoresizingStyle
         table.backgroundColor = compact ? .clear : NSColor.controlBackgroundColor
-        searchField.placeholderString = compact
-            ? T("Filter commits", "Filtrar commits")
-            : T("Filter by subject, author or SHA (Enter searches the repository)", "Filtrar por assunto, autor ou sha (Enter busca no repositório)")
         table.sizeLastColumnToFit()
         detailsView.setCompact(compact)
         // The sidebar's rows: two lines per commit, files opening under it,
@@ -115,6 +128,10 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         detailsShare.isActive = !compact
         detailsNone.isActive = compact
         render()
+    }
+
+    func openFirstCompactCommit() {
+        if isCompact { compactRows.press(0) }
     }
 
     func showDetails() {
@@ -153,6 +170,7 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         count.font = UILooks.font(11)
         count.textColor = .secondaryLabelColor
         let top = NSStackView(views: [searchField, currentOnly, progress, count])
+        bar = top
         top.spacing = 10
         top.edgeInsets = NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
         searchField.setContentHuggingPriority(.defaultLow, for: .horizontal)
@@ -174,6 +192,13 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         }
         detailsShare = detailsView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 0.34)
         detailsNone = detailsView.heightAnchor.constraint(equalToConstant: 0)
+        listBelowBar = scroll.topAnchor.constraint(equalTo: top.bottomAnchor, constant: 8)
+        listBelowBar?.isActive = true
+        listAtTop = scroll.topAnchor.constraint(equalTo: topAnchor)
+        listLeading = scroll.leadingAnchor.constraint(equalTo: leadingAnchor)
+        listTrailing = scroll.trailingAnchor.constraint(equalTo: trailingAnchor)
+        listLeading?.isActive = true
+        listTrailing?.isActive = true
         NSLayoutConstraint.activate([
             top.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             top.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -181,9 +206,6 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
             // Without a height the bar took the free space and the list
             // none (2026-10-19).
             top.heightAnchor.constraint(equalToConstant: 28),
-            scroll.topAnchor.constraint(equalTo: top.bottomAnchor, constant: 8),
-            scroll.leadingAnchor.constraint(equalTo: leadingAnchor),
-            scroll.trailingAnchor.constraint(equalTo: trailingAnchor),
             separator.topAnchor.constraint(equalTo: scroll.bottomAnchor),
             separator.leadingAnchor.constraint(equalTo: leadingAnchor),
             separator.trailingAnchor.constraint(equalTo: trailingAnchor),

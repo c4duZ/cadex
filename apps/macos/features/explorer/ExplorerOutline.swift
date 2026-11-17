@@ -72,10 +72,10 @@ final class ExplorerOutline: NSOutlineView {
         return frame
     }
 
-    /// The cell starts after the arrow and the gap; its icon sits 2 pt in (ExplorerCell.layout).
+    /// The cell starts after the arrow and the gap; its icon sits a label's inset in (ExplorerCell.layout).
     override func frameOfCell(atColumn column: Int, row: Int) -> NSRect {
         var frame = super.frameOfCell(atColumn: column, row: row)
-        let x = arrowX(level: level(forRow: row)) + UILooks.pt(Tree.chevron + Tree.gap) - 2
+        let x = arrowX(level: level(forRow: row)) + UILooks.pt(Tree.chevron + Tree.gap) - UILooks.labelInset
         // To the tree's edge: the cell measures the row's right padding from there.
         frame.size.width = max(bounds.width - x, 0)
         frame.origin.x = x

@@ -265,6 +265,8 @@ public extension DesignTokens {
                 public static var color: NSColor { DesignTokens.Color.textSecondary }
                 public static let lineHeight: CGFloat = DesignTokens.LineHeight.relaxed
             }
+            public static let learnedGap: CGFloat = 6
+            public static let wikiGap: CGFloat = 4
         }
         public enum Tree {
             public static let rowHeight: CGFloat = 28
@@ -336,7 +338,9 @@ public extension DesignTokens {
                 public static let radius: CGFloat = DesignTokens.Radius.tag
                 public static let fontSize: CGFloat = DesignTokens.FontSize.meta
                 public static var color: NSColor { DesignTokens.Color.textTerminalDim }
+                public static let gap: CGFloat = 2
             }
+            public static let lineGap: CGFloat = 2
         }
     }
 }

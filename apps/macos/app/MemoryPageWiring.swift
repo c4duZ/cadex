@@ -17,6 +17,7 @@ extension WindowSession {
         page.run = { [weak self] id in _ = self?.commands.run(id) }
         page.accountName = Self.accountName
         page.accountOf = { id in Self.historyEntry(session: id).map { Self.accountName($0.account) } }
+        page.placeOf = { id in Self.historyEntry(session: id).map { ($0.cwd as NSString).lastPathComponent }.flatMap { $0.isEmpty ? nil : $0 } }
         page.canResume = { id in Self.historyEntry(session: id) != nil }
         page.onShowing = { [weak self] shows in self?.memoryPageShowing(shows) }
         page.onOpenPage = { [weak self] memoryPage in self?.openMemoryPage(memoryPage) }

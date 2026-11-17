@@ -31,11 +31,27 @@ final class TitleBarButton: NSView {
     private let badge = NSView()
     private let badgeLabel = NSTextField(labelWithString: "")
     private var hovered = false { didSet { restyle() } }
+
+    private static func mirror(_ image: NSImage) -> NSImage {
+        let flipped = NSImage(size: image.size, flipped: false) { rect in
+            let turn = NSAffineTransform()
+            turn.translateX(by: rect.width, yBy: 0)
+            turn.scaleX(by: -1, yBy: 1)
+            turn.concat()
+            image.draw(in: rect)
+            return true
+        }
+        flipped.isTemplate = true
+        return flipped
+    }
     private var pressed = false { didSet { restyle() } }
 
-    init(icon: Icon, tip: String, kind: Kind = .standard) {
+    /// `mirrored`: the glyph flipped left to right (the right panel's button: Phosphor draws the
+    /// sidebar on the left, the mockup's line is on the right, where the panel opens).
+    init(icon: Icon, tip: String, kind: Kind = .standard, mirrored: Bool = false) {
         self.kind = kind
-        self.icon = NSImageView(image: icon.image(size: kind.icon))
+        let image = icon.image(size: kind.icon)
+        self.icon = NSImageView(image: mirrored ? Self.mirror(image) : image)
         super.init(frame: .zero)
         wantsLayer = true
         layer?.cornerRadius = UILooks.pt(Look.radius)
