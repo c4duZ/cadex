@@ -38,7 +38,8 @@ Inventário: seção "Entradas" e os apelidos do 28.
   aparece o aviso de corrida com o teto e o botão vira Iniciar corrida. Usa o que
   WorktreesController.plan e a corrida já fazem; os "sim" que hoje são alertas (autorizar pasta,
   hooks novos, confiança) viram linhas da própria folha.
-- **C. ⌘J.** O ⇧⌘N da janela nova e o ⌘N da Nova tarefa entraram já na fase A (os cartões da tela
+- **C. ⌘J.** Feita (2026-11-17): view.jump na paleta, com as linhas da árvore e as sessões de fora,
+  comparado com o mockup no app (uma corrida de verdade com o `claude` falso). O ⇧⌘N da janela nova e o ⌘N da Nova tarefa entraram já na fase A (os cartões da tela
   de início mostram o atalho). Plano original: Pular por atenção (precisa de você, trabalhando, pronto) ou começar tarefa, como no
   mockup 6. window.new vai para ⇧⌘N.
 - **D. Remoção.** Saem: NewRaceForm.swift, o fluxo de alertas do New Task em

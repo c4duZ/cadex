@@ -37,6 +37,12 @@
 - Status: plano 27 fases B e D no código. A etiqueta de PR do mockup fica de fora: o app não tem de onde
   saber de um PR.
 
+- `WorkTreeJump.swift` (plano 29 fase C): as linhas do ⌘J tiradas do modelo da árvore (`JumpRow`:
+  PRECISA DE VOCÊ, com o que pede ou falhou; TERMINOU, com o terminado e o em revisão; TRABALHANDO;
+  o parado fica de fora), na ordem da árvore dentro de cada grupo, e o filtro por palavras; as
+  sessões de fora do Cadex entram pelo `init(session:)`. O app faz delas a lista da paleta
+  (`../../app/JumpWiring.swift`).
+
 ## Como validar
 - `make macos-test` passa: a árvore com os projetos, as tarefas e os terminais, os terminais só sob a
   tarefa escolhida, "Add project" no fim; com CADEX_SNAPSHOT_DIR, tree.png com os dados do Sidebar.dc.html no tamanho dele (292×826), para pôr sobre o mockup.

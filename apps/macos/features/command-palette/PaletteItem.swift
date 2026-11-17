@@ -19,6 +19,11 @@ public struct PaletteItem: Equatable {
     public let icon: Icon?
     /// A picture on the left instead (a file type's Material icon).
     public let image: NSImage?
+    /// How the row is drawn: the palette's own, or ⌘J's (the Switcher mockup: the name in
+    /// semibold, the detail right after it, the shortcut as one key).
+    /// `jumpAction`: ⌘J's last row ("+ New task in **cadex**… ⌘N"): the bold part white, one key.
+    public enum Look: Sendable { case standard, jump, jumpAction }
+    public var look: Look = .standard
 
     public init(id: String, title: String, bold: [Range<String.Index>] = [], detail: String? = nil,
                 shortcut: String? = nil, unavailableReason: String? = nil, section: String? = nil,

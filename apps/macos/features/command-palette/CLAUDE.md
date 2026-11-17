@@ -42,6 +42,12 @@
 - Spec em `../../../../docs/spec/command-palette.md`. Status: registro, menu e paleta prontos.
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 
+- Para o ⌘J (plano 29 fase C): uma fonte pode ter largura própria (`width`, 600 pt) e ficar sem o
+  rodapé das teclas (`showsFooter`); um item pode ter o jeito do ⌘J (PaletteItem.look: o nome em
+  semibold, o detalhe logo depois, o atalho numa tecla só; `.jumpAction` para o "+ New task"); uma
+  seção sem título vira uma linha; ⌘1…⌘9 escolhem o item que mostra aquele atalho; `home` é a
+  janela da paleta quando nenhuma tem o foco (uma instância de teste em segundo plano).
+
 ## Como validar
 - `make macos-test` passa.
 - Teste: todo id usado por menu, botão ou atalho existe no registro.

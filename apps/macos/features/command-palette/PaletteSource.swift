@@ -24,12 +24,18 @@ public protocol PaletteSource: AnyObject {
     var icon: Icon { get }
     /// The palette closed or switched source: stop work in progress.
     func stop()
+    var width: CGFloat? { get }
+    var showsFooter: Bool { get }
 }
 
 extension PaletteSource {
     public func choose(_ item: PaletteItem, as choice: PaletteChoice) { choose(item) }
     public var hints: [PaletteHint] { [PaletteHint("↩", T("choose", "escolher"))] }
     public var icon: Icon { .magnifyingGlass }
+    /// Its own width (⌘J's 600 pt, components.sheet.switcherWidth); nil: the palette's.
+    public var width: CGFloat? { nil }
+    /// The keys' footer under the list; ⌘J has none (the mockup).
+    public var showsFooter: Bool { true }
 }
 
 /// ⌘K: the registered commands (PaletteModel), run by id.

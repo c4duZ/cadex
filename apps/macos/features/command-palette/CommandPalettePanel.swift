@@ -13,6 +13,15 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
     static var listMaxHeight: CGFloat { UILooks.pt(400) }
     private static var fieldHeight: CGFloat { UILooks.rowHeight(54) }
     private static var footerHeight: CGFloat { UILooks.rowHeight(36) }
+    /// The footer for the list shown (a source can go without, ⌘J).
+    var footerShown = true {
+        didSet {
+            footer.isHidden = !footerShown
+            bottomLine.isHidden = !footerShown
+            footerSpace?.constant = footerShown ? -Self.footerHeight : 0
+        }
+    }
+    private var footerSpace: NSLayoutConstraint?
 
     var onQuery: ((String) -> Void)?
     var onChoose: ((Int, PaletteChoice) -> Void)?
@@ -54,9 +63,15 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         if isVisible { onDismiss?() }
     }
 
+    /// The list's width: the palette's, or the source's own (⌘J).
+    var listWidth: CGFloat = CommandPalettePanel.width
+
     func show(over parent: NSWindow) {
         let frame = parent.frame
-        setFrameTopLeftPoint(NSPoint(x: frame.midX - Self.width / 2, y: frame.maxY - 56))
+        var own = self.frame
+        own.size.width = listWidth
+        setFrame(own, display: false)
+        setFrameTopLeftPoint(NSPoint(x: frame.midX - listWidth / 2, y: frame.maxY - 56))
         makeKeyAndOrderFront(nil)
         makeFirstResponder(field)
     }
@@ -133,6 +148,8 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         statusLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
         for line in [topLine, bottomLine] { line.wantsLayer = true }
 
+        let bottomLineToBottom = bottomLine.bottomAnchor.constraint(equalTo: background.bottomAnchor, constant: -Self.footerHeight)
+        footerSpace = bottomLineToBottom
         for view in [fieldIcon, field, statusLabel, topLine, scroll, emptyLabel, bottomLine, footer] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             background.addSubview(view)
@@ -160,7 +177,7 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
             bottomLine.leadingAnchor.constraint(equalTo: background.leadingAnchor),
             bottomLine.trailingAnchor.constraint(equalTo: background.trailingAnchor),
             bottomLine.heightAnchor.constraint(equalToConstant: 1),
-            bottomLine.bottomAnchor.constraint(equalTo: background.bottomAnchor, constant: -Self.footerHeight),
+            bottomLineToBottom,
             footer.leadingAnchor.constraint(equalTo: background.leadingAnchor, constant: 20),
             footer.centerYAnchor.constraint(equalTo: background.bottomAnchor, constant: -Self.footerHeight / 2),
         ])
@@ -180,7 +197,7 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
 
     private func resizeToFit() {
         let list = rows.isEmpty ? Self.rowHeight : min(rows.reduce(0) { $0 + height(of: $1) }, Self.listMaxHeight)
-        let total = Self.fieldHeight + 1 + 6 + list + 6 + 1 + Self.footerHeight
+        let total = Self.fieldHeight + 1 + 6 + list + 6 + (footerShown ? 1 + Self.footerHeight : 0)
         var frame = self.frame
         frame.origin.y += frame.height - total
         frame.size.height = total
@@ -215,6 +232,12 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         if [36, 76].contains(event.keyCode), event.modifierFlags.contains(.command) {
             chooseSelected(.command)
+            return true
+        }
+        // ⌘1…⌘9: the row that shows that shortcut (⌘J's rows, the mockup).
+        if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command, let digit = event.charactersIgnoringModifiers,
+           "123456789".contains(digit), let index = items.firstIndex(where: { $0.shortcut == "⌘" + digit && $0.unavailableReason == nil }) {
+            onChoose?(index, .primary)
             return true
         }
         return super.performKeyEquivalent(with: event)

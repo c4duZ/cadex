@@ -249,6 +249,10 @@
   clone` numa aba lá e, terminado com o repositório na pasta (`CloneWatch`, uma olhada por
   segundo), abre o projeto dele e fecha o da pasta-mãe aberto só para isso; CADEX_PERF_HOME_CLONE o
   roda sem as perguntas.
+- `JumpWiring.swift` (plano 29 fase C): view.jump (⌘J) abre a paleta com a fonte `JumpSource`: as
+  linhas da feature sidebar (`JumpRow`) tiradas do `treeModel()` da árvore (`TreeWiring.swift`),
+  mais as sessões de fora do Cadex (lidas enquanto o ⌘J está aberto); escolher leva à tarefa, ao
+  terminal ou à sessão (`openAgent`); o texto que não acha nada vira o pedido da folha Nova tarefa.
 - `PaneHeaderWiring.swift` (plano 28 fase B): o que o cabeçalho de cada painel diz de um agente
   ("Claude", a tarefa, o modelo, a conta; o custo e o tempo), calculado quando um agente desta janela
   muda e uma vez por minuto, e guardado em `PaneDetails` (o cabeçalho só lê; o modelo e o custo do
@@ -257,7 +261,8 @@
   cartão `AgentPermissionCard` no pé do painel dele (TerminalView.footCard), com Permitir e Negar
   pela mesma AgentAttention do sino: responder num fecha o outro.
 - `PerfHooks.swift`: só para o `make perf` (`../../../tools/perf/run.py`): cada variável CADEX_PERF_
-  faz a instância de teste agir sozinha em horas marcadas (CADEX_PERF_COMMAND roda um comando pelo id, CADEX_PERF_TYPE digita um comando no terminal com foco, CADEX_PERF_HOME_PROMPT manda o pedido da
+  faz a instância de teste agir sozinha em horas marcadas (CADEX_PERF_COMMAND roda um comando pelo id, e CADEX_PERF_COMMAND2 um segundo mais tarde; a
+  captura salva também um painel visível, como o da paleta, num arquivo terminado em -panel.png, CADEX_PERF_TYPE digita um comando no terminal com foco, CADEX_PERF_HOME_PROMPT manda o pedido da
   tela de início, CADEX_PERF_DUMP_SCREEN grava a tela de cada terminal num arquivo, CADEX_PERF_SEND manda uma mensagem ao agente
   com o Return como tecla (a marca da barra),
   CADEX_PERF_SPLIT divide o painel, CADEX_PERF_SNAPSHOT_AT atrasa a captura; abrir a conversa de um subagente, abrir

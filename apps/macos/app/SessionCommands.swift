@@ -32,6 +32,7 @@ extension WindowSession {
         // The palette shows each command's shortcut, which settings can
         // change; it reads the current one from the app.
         let palette = CommandPaletteController(registry: commands) { [unowned app] in app.keymapLabel($0) }
+        palette.home = window
         self.palette = palette
         commands.register(palette.openCommand)
         commands.register(StandardCommands.all)
@@ -64,6 +65,7 @@ extension WindowSession {
         commands.register(TabCommands.all { [weak self] in self?.tabs })
         commands.register(inspectorTabCommands())
         commands.register(treeCommands(palette: palette))
+        commands.register(jumpCommands(palette: palette))
         commands.register(SSHCommands.all(palette: palette) { [weak self] alias in self?.connectSSH(alias) })
         commands.register(MachinesCommands.all(palette: palette) { [weak self] machine, ask in self?.connectMachine(machine, askUser: ask) })
         commands.register(DockerCommands.all(palette: palette, actions: dockerActions()))

@@ -72,10 +72,11 @@ final class KeycapsView: NSStackView {
         return modifiers.map(String.init) + (rest.isEmpty ? [] : [String(rest)])
     }
 
-    func show(_ label: String?, style: PaletteStyle) {
+    /// `joined`: the whole shortcut in one key (⌘J's "⌘1", the mockup).
+    func show(_ label: String?, style: PaletteStyle, joined: Bool = false) {
         arrangedSubviews.forEach { $0.removeFromSuperview() }
         spacing = 3
-        for key in Self.keys(of: label ?? "") {
+        for key in joined ? [label].compactMap({ $0 }).filter { !$0.isEmpty } : Self.keys(of: label ?? "") {
             let text = NSTextField(labelWithString: key)
             text.font = UILooks.font(11, weight: .medium)
             text.textColor = style.secondaryText
@@ -130,10 +131,25 @@ final class PaletteHeaderView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("PaletteHeaderView is created in code") }
 
+    private let line = NSView()
+
     func show(_ text: String, style: PaletteStyle) {
         title.attributedStringValue = NSAttributedString(string: text.uppercased(), attributes: [
             .font: UILooks.font(11, weight: .semibold), .foregroundColor: style.secondaryText, .kern: 0.6,
         ])
+        // A section with a blank title is a line (⌘J's, above "+ New task", the mockup).
+        let blank = text.trimmingCharacters(in: .whitespaces).isEmpty
+        if blank, line.superview == nil {
+            line.wantsLayer = true
+            line.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(line)
+            NSLayoutConstraint.activate([
+                line.leadingAnchor.constraint(equalTo: leadingAnchor), line.trailingAnchor.constraint(equalTo: trailingAnchor),
+                line.centerYAnchor.constraint(equalTo: centerYAnchor), line.heightAnchor.constraint(equalToConstant: 1),
+            ])
+        }
+        line.layer?.backgroundColor = style.secondaryText.withAlphaComponent(0.18).cgColor
+        line.isHidden = !blank
     }
 }
 
@@ -148,6 +164,9 @@ final class PaletteRowView: NSTableCellView {
     private let keys = KeycapsView()
     private var style = PaletteStyle.system
     private var available = true
+    /// The detail on the right (the palette) or right after the title (⌘J).
+    private var detailRight: [NSLayoutConstraint] = []
+    private var detailInline: [NSLayoutConstraint] = []
 
     init() {
         super.init(frame: .zero)
@@ -168,12 +187,15 @@ final class PaletteRowView: NSTableCellView {
             icon.heightAnchor.constraint(equalToConstant: 16),
             title.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 10),
             title.centerYAnchor.constraint(equalTo: centerYAnchor),
-            detail.leadingAnchor.constraint(greaterThanOrEqualTo: title.trailingAnchor, constant: 12),
-            detail.trailingAnchor.constraint(equalTo: keys.leadingAnchor, constant: -8),
             detail.centerYAnchor.constraint(equalTo: centerYAnchor),
             keys.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
             keys.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
+        detailRight = [detail.leadingAnchor.constraint(greaterThanOrEqualTo: title.trailingAnchor, constant: 12),
+                       detail.trailingAnchor.constraint(equalTo: keys.leadingAnchor, constant: -8)]
+        detailInline = [detail.leadingAnchor.constraint(equalTo: title.trailingAnchor, constant: 10),
+                        detail.trailingAnchor.constraint(lessThanOrEqualTo: keys.leadingAnchor, constant: -8)]
+        NSLayoutConstraint.activate(detailRight)
     }
 
     @available(*, unavailable)
@@ -183,17 +205,24 @@ final class PaletteRowView: NSTableCellView {
         self.style = style
         available = item.unavailableReason == nil
         let color = available ? style.text : style.secondaryText.withAlphaComponent(0.6)
+        let jump = item.look == .jump
         let text = NSMutableAttributedString(string: item.title, attributes: [
-            .font: UILooks.font(14), .foregroundColor: color,
+            .font: UILooks.font(14, weight: jump ? .semibold : .regular), .foregroundColor: color,
         ])
+        NSLayoutConstraint.deactivate(jump ? detailRight : detailInline)
+        NSLayoutConstraint.activate(jump ? detailInline : detailRight)
+        detail.alignment = jump ? .left : .right
+        detail.font = UILooks.font(jump ? 13 : 12)
+        title.setContentHuggingPriority(jump ? .required : .defaultLow, for: .horizontal)
         for range in item.bold {
-            text.addAttributes([.font: UILooks.font(14, weight: .semibold), .foregroundColor: available ? style.accent : color],
+            // The search's matched letters take the accent; ⌘J's action keeps the text's color.
+            text.addAttributes([.font: UILooks.font(14, weight: .semibold), .foregroundColor: available && item.look == .standard ? style.accent : color],
                                range: NSRange(range, in: item.title))
         }
         title.attributedStringValue = text
         detail.stringValue = item.unavailableReason ?? item.detail ?? ""
         detail.textColor = style.secondaryText.withAlphaComponent(available ? 1 : 0.7)
-        keys.show(available ? item.shortcut : nil, style: style)
+        keys.show(available ? item.shortcut : nil, style: style, joined: item.look != .standard)
         icon.image = item.image ?? item.icon?.image(size: 16)
         setSelected(selected)
     }

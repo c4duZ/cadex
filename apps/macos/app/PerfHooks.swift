@@ -68,6 +68,11 @@ extension WindowSession {
         if let id = environment["CADEX_PERF_COMMAND"] {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in _ = self?.commands.run(id) }
         }
+        // A second command later (⌘J over what the first one started).
+        if let id = environment["CADEX_PERF_COMMAND2"] {
+            let at = environment["CADEX_PERF_COMMAND2_AT"].flatMap(Double.init) ?? 10
+            DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in _ = self?.commands.run(id) }
+        }
         // The focused pane split to the right, to compare two panes with the Terminals mockup.
         if environment["CADEX_PERF_SPLIT"] != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in _ = self?.commands.run("pane.split-right") }
@@ -97,6 +102,13 @@ extension WindowSession {
                   let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
             view.cacheDisplay(in: view.bounds, to: bitmap)
             try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: out))
+            // A panel over it (the palette, ⌘J) is a window of its own: next to it, -panel.png.
+            for panel in NSApp.windows where panel is NSPanel && panel.isVisible {
+                guard let content = panel.contentView?.superview ?? panel.contentView,
+                      let shot = content.bitmapImageRepForCachingDisplay(in: content.bounds) else { continue }
+                content.cacheDisplay(in: content.bounds, to: shot)
+                try? shot.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: (out as NSString).deletingPathExtension + "-panel.png"))
+            }
         }
     }
 

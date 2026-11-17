@@ -73,3 +73,12 @@ ação do app (ADR 0005). Quando existirem, acha também abas, spaces e arquivos
 - [x] Campo vazio: "Abrir" primeiro, depois recentes e as seções na ordem da spec.
 - [ ] `/` acha arquivos, `#` texto, `@` abas e spaces, `>` volta aos comandos.
 - [ ] ⌥↩ num arquivo abre ao lado; ⌘↩, em nova aba.
+
+## ⌘J (plano 29)
+- view.jump (⌘J) abre a mesma paleta, com 600 pt e sem o rodapé, para ir ao trabalho pelo que ele
+  pede (mockup Switcher): "Jump to a task, or type to start one" e "⌘J" à direita; os grupos
+  NEEDS YOU (pede permissão ou resposta, ou falhou), FINISHED (terminou, ou está em revisão) e
+  WORKING, cada linha com o estado, o nome em negrito, "projeto · o que espera ou faz" e ⌘1…⌘9;
+  as tarefas e os terminais com agente de todos os projetos da janela, e as sessões abertas fora do
+  Cadex ("fora do Cadex"). Digitar filtra; o último item, depois de uma linha, é "+ New task in
+  <projeto>… ⌘N", que com um texto que não achou nada abre a folha Nova tarefa com ele.

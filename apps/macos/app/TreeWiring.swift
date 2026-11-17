@@ -120,9 +120,15 @@ extension WindowSession {
 
     /// The tree from what is open now (no git, no disk).
     private func drawTree() {
-        guard let tree = workspace?.tree, let projects else { return }
-        let active = tabs?.activeTerminal
-        let model = projects.projects.map { project -> WorkTreeProject in
+        guard let tree = workspace?.tree else { return }
+        tree.show(treeModel(), chosen: tabs?.activeTerminal.map { .terminal(AppDelegate.key($0)) })
+    }
+
+    /// The projects with their tasks and terminals and the state of each, from what is open now:
+    /// the tree draws it and ⌘J lists it (JumpWiring.swift).
+    func treeModel() -> [WorkTreeProject] {
+        guard let projects else { return [] }
+        return projects.projects.map { project -> WorkTreeProject in
             let worktrees = treeTasks[project.folder] ?? []
             var tasks = worktrees.map { worktree in
                 WorkTreeTask(id: worktree.path, name: (worktree.path as NSString).lastPathComponent, state: .idle)
@@ -141,7 +147,6 @@ extension WindowSession {
             return WorkTreeProject(id: project.folder, name: project.name, branch: treeBranches[project.folder] ?? "",
                                    tasks: tasks, terminals: own)
         }
-        tree.show(model, chosen: active.map { .terminal(AppDelegate.key($0)) })
     }
 
     /// A project's own terminal in full (the mockup's two lines): its name, under it who runs in

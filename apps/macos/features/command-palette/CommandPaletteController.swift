@@ -17,6 +17,9 @@ public final class CommandPaletteController {
     private var generation = 0
     /// The window the palette opened over; it gets the focus back.
     private weak var parent: NSWindow?
+    /// The window this palette belongs to, for when no window is key (a test instance in the
+    /// background opening ⌘J by its hook).
+    public weak var home: NSWindow?
     /// Lists reached from ⌘K by the first character: "/" files, "#" text,
     /// "@" tabs and spaces (docs/spec/command-palette.md). ">" is commands.
     private var prefixes: [(prefix: Character, label: String, source: PaletteSource)] = []
@@ -72,8 +75,10 @@ public final class CommandPaletteController {
         answering?.stop()
         answering = nil
         source = newSource
+        panel.listWidth = newSource.width ?? CommandPalettePanel.width
+        panel.footerShown = newSource.showsFooter
         if !panel.isVisible {
-            guard let window = NSApp.keyWindow ?? NSApp.mainWindow else { return }
+            guard let window = NSApp.keyWindow ?? NSApp.mainWindow ?? home else { return }
             parent = window
             panel.show(over: window)
         }
