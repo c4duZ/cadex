@@ -24,6 +24,21 @@ extension WindowSession {
         if let command = environment["CADEX_PERF_TYPE"] {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in self?.tabs?.activeTerminal?.typeWhenReady(command + "\n") }
         }
+        // A message sent to the agent as the owner does: the text, then Return as a key event (it
+        // marks the scrollbar), at CADEX_PERF_SEND_AT seconds (plan 28 phase D, seen in the app).
+        if let message = environment["CADEX_PERF_SEND"] {
+            let at = environment["CADEX_PERF_SEND_AT"].flatMap(Double.init) ?? 15
+            DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in
+                guard let terminal = self?.tabs?.activeTerminal else { return }
+                terminal.insertText(message, replacementRange: NSRange(location: NSNotFound, length: 0))
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    if let key = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: 0,
+                                                   context: nil, characters: "\r", charactersIgnoringModifiers: "\r", isARepeat: false, keyCode: 36) {
+                        terminal.keyDown(with: key)
+                    }
+                }
+            }
+        }
         // The focused pane split to the right, to compare two panes with the Terminals mockup.
         if environment["CADEX_PERF_SPLIT"] != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in _ = self?.commands.run("pane.split-right") }
