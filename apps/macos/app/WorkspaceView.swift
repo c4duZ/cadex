@@ -12,14 +12,16 @@ import UILooks
 /// a collapsible sidebar and the terminal area as rounded panels, and the
 /// status bar at the bottom (docs/plans/3-window-and-theme.md, fase A).
 final class WorkspaceView: NSView {
-    static var sidebarWidth: CGFloat { UILooks.pt(240) }
+    /// The tree's width (components.sidebar.width).
+    static var sidebarWidth: CGFloat { UILooks.pt(DesignTokens.Sidebar.width) }
     /// Space around and between the panels.
     static let gap: CGFloat = 6
 
     let titleBar: TitleBarView
     let statusBar = StatusBarView()
-    private let sidebarPanel = PanelView()
-    let sidebar: SidebarView
+    /// The work's tree (plan 27 phase B): a column flush with the window's left edge, its own line
+    /// on the right (components.sidebar), as the right panel is on the other side.
+    let tree: WorkTreeView
     /// The right panel (plan 26 phase C): a column flush with the window's right edge, its own
     /// line on the left (components.inspector), not a rounded panel.
     let inspector: InspectorView
@@ -50,25 +52,24 @@ final class WorkspaceView: NSView {
     /// The shown space's tabs in the content panel.
     private weak var tabsView: NSView?
 
-    init(explorer: ExplorerController, sidebar: SidebarView, inspector: InspectorView, run: @escaping (String) -> Void) {
+    init(explorer: ExplorerController, tree: WorkTreeView, inspector: InspectorView, run: @escaping (String) -> Void) {
         titleBar = TitleBarView(run: run)
         self.explorer = explorer
-        self.sidebar = sidebar
+        self.tree = tree
         self.inspector = inspector
         super.init(frame: .zero)
         frost.blendingMode = .behindWindow
         frost.material = .underWindowBackground
         frost.state = .active
         frost.isHidden = true
-        for view in [frost, titleBar, statusBar, sidebarPanel, contentPanel, inspector] as [NSView] {
+        for view in [frost, titleBar, statusBar, tree, contentPanel, inspector] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
-        fill(sidebarPanel, with: sidebar)
 
         let gap = Self.gap
-        sidebarWidth = sidebarPanel.widthAnchor.constraint(equalToConstant: Self.sidebarWidth)
-        contentLeading = contentPanel.leadingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: gap)
+        sidebarWidth = tree.widthAnchor.constraint(equalToConstant: Self.sidebarWidth)
+        contentLeading = contentPanel.leadingAnchor.constraint(equalTo: tree.trailingAnchor, constant: gap)
         inspectorWidth = inspector.widthAnchor.constraint(equalToConstant: inspectorPoints)
         contentToInspector = contentPanel.trailingAnchor.constraint(equalTo: inspector.leadingAnchor, constant: -gap)
         contentToEdge = contentPanel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -gap)
@@ -85,9 +86,9 @@ final class WorkspaceView: NSView {
             statusBar.trailingAnchor.constraint(equalTo: trailingAnchor),
             statusBar.bottomAnchor.constraint(equalTo: bottomAnchor),
             statusBar.heightAnchor.constraint(equalToConstant: StatusBarView.height),
-            sidebarPanel.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
-            sidebarPanel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: gap),
-            sidebarPanel.bottomAnchor.constraint(equalTo: statusBar.topAnchor),
+            tree.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
+            tree.leadingAnchor.constraint(equalTo: leadingAnchor),
+            tree.bottomAnchor.constraint(equalTo: statusBar.topAnchor),
             sidebarWidth,
             contentPanel.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
             contentLeading,
@@ -114,10 +115,9 @@ final class WorkspaceView: NSView {
         if let tabBarStyle { tabs.bar.style = tabBarStyle }
     }
 
-    /// Shows the sidebar on a page (agents.show, worktrees.show).
-    func showSidebar(_ page: String) {
+    /// Shows the tree (agents.show and worktrees.show, which showed their pages, until plan 28).
+    func showTree() {
         if !sidebarVisible { toggleSidebar() }
-        sidebar.show(page)
     }
 
     /// Opens the right panel on a tab (git.show, explorer.focus, git.show-history, memory.show).
@@ -174,9 +174,10 @@ final class WorkspaceView: NSView {
 
     private func setSidebar(visible: Bool) {
         sidebarVisible = visible
-        sidebarPanel.isHidden = !sidebarVisible
+        tree.isHidden = !sidebarVisible
         sidebarWidth.constant = sidebarVisible ? Self.sidebarWidth : 0
-        contentLeading.constant = sidebarVisible ? Self.gap : 0
+        // The center keeps its margin with the tree folded (it sat flush against the edge).
+        contentLeading.constant = Self.gap
     }
 
     private func fill(_ panel: NSView, with view: NSView) {
@@ -227,13 +228,8 @@ final class WorkspaceView: NSView {
         window?.backgroundColor = vibrancy ? ui.chrome.color(alpha: 0.55) : ui.chrome.nsColor
         raiseWindowButtons()
         window?.appearance = NSAppearance(named: theme.dark ? .darkAqua : .aqua)
-        sidebarPanel.setColors(fill: ui.panel.nsColor, border: ui.panelBorder.nsColor)
         contentPanel.setColors(fill: theme.terminal.background.nsColor, border: ui.panelBorder.nsColor)
         explorer.style = .init(text: ui.text.nsColor, secondaryText: ui.secondaryText.nsColor, accent: ui.accent.nsColor)
-        // Over the active fill: black or white if a user's accent made it too
-        // close to the text (plan 15, phase B).
-        sidebar.setColors(.init(text: ui.textOnTabActive.nsColor, secondary: ui.secondaryText.nsColor, fill: ui.tabActive.nsColor,
-                                accent: ui.accent.nsColor))
         let style = TabBarView.Style(
             activeFill: ui.tabActive.nsColor, hoverFill: ui.tabActive.color(alpha: 0.5),
             text: ui.textOnTabActive.nsColor, secondaryText: ui.secondaryText.nsColor, accent: ui.accent.nsColor)

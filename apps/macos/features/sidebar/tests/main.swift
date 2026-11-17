@@ -185,4 +185,6 @@ let exitCode = await Checks.run([
     root.cacheDisplay(in: root.bounds, to: bitmap)
     try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir).appendingPathComponent(name + ".png"))
 }
-exit(exitCode)
+let treeExit = await Checks.run(treeChecks)
+exit(exitCode != 0 ? exitCode : treeExit)
+

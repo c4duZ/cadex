@@ -57,9 +57,12 @@
   um `TitleBarButton.swift` (components.titleIconButton: 30 pt, aceso quando o que abre está
   aberto, com o número do sino), todos por comando; nada de valor digitado
   (`../../../tools/check_design_literals.py`), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
-  painel lateral recolhível, barra de status) e `SidebarWiring.swift` (o catálogo da feature `sidebar`: Tasks, Agents e History; salva sidebar.items, que a versão 4 das configurações limpou das páginas que saíram; `openCustomize` abre a janela
-  Customize única na aba pedida, com as abas da barra lateral e da barra de status desta janela, nas
-  cores do tema como as configurações e não nas da janela, e a repinta quando o tema muda) e
+  painel lateral recolhível, barra de status) e `TreeWiring.swift` (plano 27 fase B: a árvore da feature `sidebar`, colada à esquerda: o modelo
+  juntado dos projetos, das worktrees de cada um, listadas fora da linha principal, do estado do
+  agente de cada terminal e da conta do agente na pasta da tarefa; a escolha leva à aba, à tarefa ou
+  ao projeto; sidebar.find) e `CustomizeWiring.swift` (`openCustomize` abre a janela Customize única
+  na aba pedida, com a da barra de status e a das contas desta janela, nas cores do tema como as
+  configurações e não nas da janela, e a repinta quando o tema muda) e
   `StatusBarWiring.swift` (os itens Git branch e Terminals, e os lados salvos) e `StatusBarItems.swift`
   (plano 26, fase B: Project com o branch, Agents em duas contagens com o ponto de estado, Memory,
   o café e a atualização, que saíram da barra de título; `showPower`/`showUpdate` os atualizam). `AgentsLaunch.swift`:

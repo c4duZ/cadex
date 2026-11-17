@@ -1,54 +1,39 @@
 # sidebar (app macOS)
 
 ## O que eu quero
-- A coluna à esquerda com uma fileira de ícones no topo, que escolhe a página, e quem usa decidindo
-  quais ícones aparecem e em que ordem (`../../../../docs/spec/sidebar.md`, plano 17 fase A).
+- A árvore do trabalho, a coluna da esquerda (`../../../../docs/spec/sidebar.md`; a peça Sidebar do
+  mockup, plano 27 fase B): "New task" e o filtro no topo; cada projeto dobrável com as tarefas
+  (as worktrees) e os terminais da pasta dele; sob a tarefa escolhida, os terminais dela; "+ Add
+  project"; no pé, Automations e Archive & history.
 
 ## O que eu não quero
-- Esta feature conhecendo o explorer, o git ou qualquer outra: o app monta o catálogo com a view de
-  cada uma, pela porta de entrada dela.
-- Clique que faz a ação por conta própria: todo ícone roda um comando pelo id (ADR 0005).
-- A ordem guardada em outro lugar que não o sidebar.items do settings.json.
+- Esta feature conhecendo terminais, worktrees, projetos ou agentes: o app monta o modelo
+  (`WorkTree.swift`) e a árvore só desenha e diz o que foi escolhido.
+- Clique que faz a ação por conta própria: cada botão roda um comando pelo id (ADR 0005); a linha
+  escolhida volta ao app por `onPick`.
+- Valor digitado: só `DesignTokens` (components.sidebar; `../../../../tools/check_design_literals.py`).
 
 ## Como eu quero
-- `SidebarItem.swift`: um item do catálogo (id, ícone Phosphor, título, comando, atalho para a dica,
-  botões do cabeçalho em `actions` e `more`); página (com view) ou ação (só roda o comando).
-- `SidebarLayout.swift`: as regras puras e testadas: a lista salva contra os ids conhecidos (id
-  desconhecido ou repetido sai e vira aviso), mostrar/esconder, mover, a ordem do painel, onde cai
-  o ícone arrastado e quantos cabem antes do "…".
-- `SidebarView.swift`: a porta de entrada. A fileira, o cabeçalho da página e as páginas; `setTitle`
-  troca o nome do cabeçalho (a pasta em Files, a branch em Git) e `setBusy` gira o indicador; `setItems` recebe o sidebar.items, `onItemsChange` devolve o que mudou
-  para o app salvar, `setBadge` põe a contagem ou o ponto num ícone. Clicar num ícone mostra a página
-  dele, o da aberta também: nunca recolhe a barra (o dono, 2026-10-22; ⌘B recolhe).
-- `SidebarHeader.swift`: o cabeçalho único de toda página, logo abaixo dos ícones: o nome à esquerda
-  (`SidebarTitle`, com ícone e comando opcionais) e até 3 botões (`SidebarAction`) à direita, o resto
-  no "⋯"; nenhuma página tem cabeçalho próprio (o dono, 2026-10-22).
-- `SidebarIconRow.swift` e `SidebarIconButton.swift`: os ícones, sem moldura, num bloco centrado com
-  2 pt entre eles, personalizar no fim; arrastar para o lado reordena
-  (depois de 4 pt), o que não cabe vai para o "…" (menu de `../../shared/menus`), o botão de
-  personalizar fica à direita.
-- Personalizar: a aba Sidebar (`customizePage`) da janela única de `../../shared/customize/`, que o
-  app abre (`onCustomize`, sidebar.customize): o título "Sidebar icons" e todas as páginas, as que
-  aparecem primeiro; o que volta dela vira sidebar.items.
-- A fileira fica sob a barra de título transparente: nenhuma view dela move a janela
-  (mouseDownCanMoveWindow). O que se arrasta vai para cima dos vizinhos e anda a partir de onde
-  estava no começo; a vaga é a que está sob o meio dele (CustomizeLayout.dropIndex).
-- `SidebarCommands.swift`: sidebar.customize e sidebar.toggle-page (a lista de páginas no ⌘K).
-  sidebar.page-1 a -9 (⌃⌘1 a ⌃⌘9) passaram a abrir as abas do painel da direita (plano 26 fase E,
-  registrados pelo app em `../../app/InspectorWiring.swift`) e saem no plano 27.
-- O catálogo do app está em `../../app/SidebarWiring.swift`: tasks (as tarefas, plano 19) e agents, o
-  padrão em `SidebarLayout.swift`; as conversas dos agentes (agent-history) viraram uma aba no centro
-  (plano 27 fase C, o id em SidebarLayout.retired). Files, Git,
-  Git History e Memory foram para o painel da direita (plano 26 fase C, `../inspector/`) e Accounts
-  para o cartão do item de uso (fase E); a versão 4 das configurações tirou os ids delas do
-  sidebar.items uma vez. O sininho saiu para o popover da
-  barra de título (plano 26, fase D) e as sub-abas, que só ele usava, saíram junto; o id
-  "attention" está em SidebarLayout.retired. `onShow` avisa quando uma página aparece, para o app só
-  criar o conteúdo então.
-- Status: fase A no código. Ainda não: a página aberta voltando com os spaces.
+- `WorkTree.swift`: o modelo puro (`WorkTreeProject`, `WorkTreeTask`, `WorkTreeTerminal`) e
+  `WorkTreePick` (projeto, tarefa ou terminal).
+- `WorkTreeView.swift`: a porta de entrada. `show` recebe os projetos e o escolhido e redesenha só
+  quando mudam; o cabeçalho do projeto dobra e desdobra; o topo roda worktrees.new-task e
+  sidebar.find, "+ Add project" roda project.new, o pé roda orchestration.show-automation-history e
+  agents.show-history; `automationsDetail` é a linha das automações.
+- `WorkTreeRows.swift`: as linhas (o cabeçalho do projeto, a linha de tarefa com o `StateGlyph`, o
+  nome em negrito quando há novidade e o agente embaixo, a linha de terminal com o ponto e a nota,
+  "+ Add project" e as do pé) e `WorkTreeRow`, a linha que se aperta, escolhida com o fundo e a
+  linha de dentro.
+- `WorkTreeFind.swift`: sidebar.find, os projetos, as tarefas e os terminais da árvore no ⌘K.
+- O app (`../../app/TreeWiring.swift`) junta o modelo: os projetos e as abas deles, as worktrees de
+  cada projeto (o git fora da linha principal), o estado do agente de cada terminal, a conta do
+  agente na pasta da tarefa; redesenha quando uma aba, um projeto, uma tarefa ou um agente muda.
+- Ainda no código até a fase D: a fileira de ícones e as páginas de antes (`SidebarView.swift`,
+  `SidebarItem.swift`, `SidebarLayout.swift`, `SidebarHeader.swift`, `SidebarIconRow.swift`,
+  `SidebarIconButton.swift`, `SidebarCommands.swift`), que a janela já não mostra.
+- Status: plano 27 fase B1 no código (a estrutura). Falta a B2: o diff, o PR, a idade, o negrito da
+  novidade, o que espera em âmbar e as ações ao passar o ponteiro.
 
 ## Como validar
-- `make macos-test` passa: o cabeçalho (nome, botões, volta ao nome da página), o arrastar dos ícones com eventos de mouse (uma vaga, duas, o arrastado por
-  cima), a lista que vai para o Customize, as regras do layout, a view mostrando a primeira página, o clique que
-  roda o comando (sem recolher), mostrar/esconder salvando. Com CADEX_SNAPSHOT_DIR, o teste salva
-  sidebar.png e sidebar-narrow.png para ver sem captura de tela.
+- `make macos-test` passa: a árvore com os projetos, as tarefas e os terminais, os terminais só sob a
+  tarefa escolhida, "Add project" no fim; e os testes da fileira de antes até a fase D.

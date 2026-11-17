@@ -41,7 +41,7 @@ extension WindowSession {
             guard let self, let workspace = self.workspace else { return }
             // The history became a tab in the center (plan 27 phase C): its command opens it.
             if page == "agent-history" { _ = self.commands.run("agents.show-history"); return }
-            if workspace.inspector.known.contains(page) { workspace.showInspector(page) } else { workspace.showSidebar(page) }
+            if workspace.inspector.known.contains(page) { workspace.showInspector(page) } else { workspace.showTree() }
         }
     }
 

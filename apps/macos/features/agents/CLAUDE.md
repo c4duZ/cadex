@@ -159,9 +159,11 @@
   escrevem no jeito do Claude Code ("● Bash(…)", "⎿", Markdown) e `AgentTranscriptView.swift` mostra
   tudo numa vista de texto só (uma view por entrada custava 25 MB). Vigia o arquivo por um evento do
   sistema enquanto aberta; fechada, solta tudo.
-- O app (`../../app/AgentsWiring.swift`) põe a página Agents (agents.show, ⇧⌘J) no catálogo da barra
-  lateral, o ponto no ícone enquanto o ícone está lá, o item Agents da barra de status, e acha o
-  terminal de cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo).
+- O app (`../../app/AgentsWiring.swift`) liga o item Agents da barra de status e acha o terminal de
+  cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo). A página Agents
+  saiu da janela com a barra de ícones (plano 27 fase B: agents.show, ⇧⌘J, mostra a árvore, onde as
+  tarefas e os terminais têm o estado de cada agente); `AgentsView.swift` e as linhas dela saem na
+  fase D, e as sessões abertas fora do Cadex vão para a página do projeto no plano 30.
 - O id de cada sessão pelos hooks (plano 19, fase B): AgentsController.noteHook guarda, por pid do
   `claude`, o id que os hooks dizem (certo depois de /clear e --resume) e `withHookIDs` o põe no
   lugar do id do registro; o socket é da feature agent-tools.

@@ -61,8 +61,8 @@ extension WindowSession {
         commands.register(WorkspaceCommands.all(folder, window: { [weak self] in self?.window },
                                                 terminalFolder: { [weak self] in self?.tabs?.activeTerminal?.currentDirectory }))
         commands.register(TabCommands.all { [weak self] in self?.tabs })
-        commands.register(SidebarCommands.all({ [weak self] in self?.workspace?.sidebar }, palette: palette))
         commands.register(inspectorTabCommands())
+        commands.register(treeCommands(palette: palette))
         commands.register(SSHCommands.all(palette: palette) { [weak self] alias in self?.connectSSH(alias) })
         commands.register(MachinesCommands.all(palette: palette) { [weak self] machine, ask in self?.connectMachine(machine, askUser: ask) })
         commands.register(DockerCommands.all(palette: palette, actions: dockerActions()))
@@ -95,7 +95,7 @@ extension WindowSession {
             id: "agents.show", title: T("Show Agents", "Mostrar os agentes"),
             keywords: ["agents", "claude", "sessions", "agentes", "sessões", "subagents"], category: .view,
             defaultShortcut: "cmd+shift+j",
-            action: .run { [weak self] in self?.workspace?.showSidebar("agents") }))
+            action: .run { [weak self] in self?.workspace?.showTree() }))
         commands.register(Command(
             id: "agents.show-accounts", title: T("Show Agent Accounts", "Mostrar as contas dos agentes"),
             keywords: ["accounts", "usage", "plan", "limit", "contas", "uso", "plano", "limite", "claude"], category: .view,
@@ -143,7 +143,7 @@ extension WindowSession {
         commands.register(Command(
             id: "worktrees.show", title: T("Show Tasks", "Mostrar as tarefas"),
             keywords: ["tasks", "worktrees", "branches", "tarefas"], category: .view,
-            action: .run { [weak self] in self?.workspace?.showSidebar("tasks") }))
+            action: .run { [weak self] in self?.workspace?.showTree() }))
         commands.register(WorktreesCommands.commands(palette: palette, actions: worktreesActions()))
         commands.register(Command(
             id: "agents.test-notifications", title: T("Send Test Notifications", "Mandar notificações de teste"),

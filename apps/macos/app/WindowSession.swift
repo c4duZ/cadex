@@ -1,5 +1,6 @@
 import Agents
 import AppKit
+import Worktrees
 import Menus
 import StatusBar
 import GitHistory
@@ -57,8 +58,19 @@ final class WindowSession: NSObject, NSWindowDelegate {
     var keepAwakeLabel: StatusLabel?
     var updateLabel: StatusLabel?
     var terminalsItem: StatusItem?
-    /// The Agents icon's dot, watched while the icon is in the sidebar (AgentsWiring.swift).
-    var agentsDotToken: UUID?
+    /// The work's tree: the tasks of each project, listed by git off the main thread, and the
+    /// worktrees' watch (TreeWiring.swift).
+    var treeTasks: [String: [TaskWorktree]] = [:]
+    /// Each project's branch, read with its tasks (not on every redraw: review of 2026-11-17).
+    var treeBranches: [String: String] = [:]
+    var treeWatch: UUID?
+    var treeObserver: NSObjectProtocol?
+    /// The newest list asked: an older one that comes back later is dropped.
+    var treeLoad = 0
+    /// The project folders the tasks were last listed for: a switch alone lists nothing.
+    var treeFolders: [String] = []
+    /// A redraw is on its way: changes in a burst (a title, a status) make one.
+    var treeRefreshPending = false
     /// The Agents page, for its sub-tabs (AgentsWiring.swift).
     /// The status bar's Agent usage item, for the theme's colors.
     weak var usageStrip: AgentUsageStrip?
@@ -146,7 +158,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
             self?.reviewsDiskChanged(folders)
             AuthorshipHub.diskChanged(folders)
         }
-        let workspace = WorkspaceView(explorer: explorer, sidebar: makeSidebar(), inspector: makeInspector(explorer: explorer, git: git)) { [weak self] id in self?.commands.run(id) }
+        let workspace = WorkspaceView(explorer: explorer, tree: makeTree(), inspector: makeInspector(explorer: explorer, git: git)) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace
         self.workspace = workspace
         workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.newOpeners) ?? [] }
@@ -247,8 +259,9 @@ final class WindowSession: NSObject, NSWindowDelegate {
 
     /// Its shells end with it: with another window open the app goes on.
     func windowWillClose(_ notification: Notification) {
-        // What this window watched lets go: the agents' dot, the bar's items.
-        if let workspace { updateAgentsDot(shown: false, on: workspace.sidebar) }
+        // What this window watched lets go: the tree's tasks, the bar's items.
+        if let treeWatch { WorktreesController.shared.stop(treeWatch) }
+        if let treeObserver { NotificationCenter.default.removeObserver(treeObserver) }
         workspace?.statusBar.stopReading()
         bellPanel.close()
         projects?.closeAll()

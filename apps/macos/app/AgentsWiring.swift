@@ -77,20 +77,6 @@ extension WindowSession {
         strip.focused = nil
     }
 
-    /// The dot on the Agents icon while some agent waits for an answer;
-    /// watched only while the icon is in the sidebar.
-    func updateAgentsDot(shown: Bool, on sidebar: SidebarView) {
-        if shown, agentsDotToken == nil {
-            agentsDotToken = AgentsController.shared.watch { [weak sidebar] in
-                sidebar?.setBadge(AgentsController.shared.counts.waiting > 0 ? "" : nil, for: "agents")
-            }
-        } else if !shown, let token = agentsDotToken {
-            AgentsController.shared.stop(token)
-            agentsDotToken = nil
-            sidebar.setBadge(nil, for: "agents")
-        }
-    }
-
     /// The terminal an agent runs in: the one whose foreground process
     /// group is the agent's (the core's cadex_terminal_foreground_group),
     /// with the index of its space.

@@ -39,6 +39,8 @@ FRAME_FILES = [
     "apps/macos/features/source-control/SourceControlView.swift",  # plano 26
     "apps/macos/features/source-control/ChangesRowView.swift",  # plano 26
     "apps/macos/shared/menus/AnchoredPanel.swift",  # plano 26
+    "apps/macos/features/sidebar/WorkTreeView.swift",  # plano 27
+    "apps/macos/features/sidebar/WorkTreeRows.swift",  # plano 27
 ]
 # A design value: any number but a bare 0 or 1 (those are counts, identities and the hairline
 # of an edge, not mockup values; review of 2026-11-17).

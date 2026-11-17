@@ -28,7 +28,11 @@ extension WindowSession {
         }
         projects.onChange = { [weak self] in
             self?.refreshWorkColor()
+            // A project opened or closed: the tasks are listed again (git, off the main thread);
+            // a switch only redraws.
+            self?.loadTreeTasks(onlyIfProjectsChanged: true)
         }
+        projects.onTabsChange = { [weak self] in self?.refreshTree() }
         commands.register(ProjectsCommands.all(projects, palette: palette) { [weak self] in self?.chooseProjectFolder() })
         self.projects = projects
     }
@@ -90,6 +94,7 @@ extension WindowSession {
             if projects.projects.count == before, let tabs, !hasTerminal(in: folder.root, tabs) { tabs.newTab(cwd: folder.root) }
         }
         if isMain { closeUnclaimedTerminals(projects) }
+        loadTreeTasks()
     }
 
     /// The main window came back (plan 19 E2): the daemon's sessions of this

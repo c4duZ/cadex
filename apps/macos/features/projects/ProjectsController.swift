@@ -32,6 +32,8 @@ public final class ProjectsController {
     public var onSwitch: ((TabsController) -> Void)?
     /// A name or the active project changed (the title bar's label).
     public var onChange: (() -> Void)?
+    /// Any project's tabs changed (opened, closed, moved, a folder): the work's tree redraws.
+    public var onTabsChange: (() -> Void)?
     /// The workspace folder to save with the projects.
     public var workspaceFolder: (() -> String?)?
     private let makeTabs: () -> TabsController
@@ -83,7 +85,10 @@ public final class ProjectsController {
         let tabs = makeTabs()
         let project = Project(name: name, folder: folder, tabs: tabs)
         tabs.isShown = false
-        tabs.onStateChange = { [weak self] in self?.scheduleSave() }
+        tabs.onStateChange = { [weak self] in
+            self?.scheduleSave()
+            self?.onTabsChange?()
+        }
         tabs.onEmpty = { [weak self, weak project] in
             guard let self, let project else { return }
             self.emptied(project)

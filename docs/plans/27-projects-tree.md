@@ -32,7 +32,13 @@ agents, tabs, command-palette · Decisões: `docs/adr/0035-work-frame.md` · Moc
   projeto da pasta do workspace dele). Comandos project.switch, project.new (abrir pasta),
   project.close, project.rename, project.next, project.previous, `project.set-color`; os
   `space.*` viram apelidos (saem no 28). SpacesWiring.swift vira ProjectsWiring.swift.
-- **B. A árvore.** SidebarView.swift vira a árvore da peça Sidebar: "Nova tarefa ⌘N" e o filtro no
+- **B. A árvore.** B1 feita (2026-11-17): a árvore na coluna da esquerda
+  (`apps/macos/features/sidebar/WorkTreeView.swift`, o modelo juntado em
+  `apps/macos/app/TreeWiring.swift`): "New task" e o filtro (sidebar.find), os projetos com a seta que
+  dobra e o nome que abre, as tarefas com o estado e o agente, os terminais (os da tarefa sob ela
+  quando escolhida), "+ Add project" e o pé; os redesenhos juntados, o git só quando os projetos
+  mudam. Falta a B2: o diff, o PR, a idade, o negrito da novidade, o que espera e as ações ao passar
+  o ponteiro (status, comentário, remover, hibernar). Plano original: SidebarView.swift vira a árvore da peça Sidebar: "Nova tarefa ⌘N" e o filtro no
   topo; cada projeto dobrável (nome, branch, quantas tarefas); dentro, os terminais da pasta do
   projeto e as tarefas (worktrees) como grupos com a linha do mockup (`StateGlyph`, nome em negrito
   quando não lido, agente e conta, +/−, o que espera em âmbar, PR, idade); dentro do selecionado,

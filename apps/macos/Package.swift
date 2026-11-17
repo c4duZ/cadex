@@ -189,7 +189,7 @@ let package = Package(
         // The column on the left: icons on top, the chosen page below (docs/spec/sidebar.md).
         .target(
             name: "Sidebar",
-            dependencies: ["CommandPalette", "Customize", "Icons", "Menus", "Strings", "UILooks"],
+            dependencies: ["CommandPalette", "Customize", "Icons", "Menus", "StateGlyph", "Strings", "UILooks"],
             path: "features/sidebar",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
