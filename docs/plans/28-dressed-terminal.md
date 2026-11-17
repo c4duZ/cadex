@@ -54,7 +54,7 @@ painéis" e os apelidos do 27.
   escurecer velhos já tinham saído na fase B. Plano original: Saem os apelidos do 27 (`project.*` fica, `space.*`, worktrees.show e
   agents.show saem), a leitura de spaces.json, o cabeçalho velho e o escurecer velho que o novo
   substitui. Specs e `CLAUDE.md` de tabs, terminal, preview e agent-tools.
-- **G. Varredura e fechamento.** Linhas do 28 em `saiu`; tools/find_unused.py; `make check`; `make
+- **G. Varredura e fechamento.** Feita (2026-11-17): inventário do 28 em `saiu` ou feito, tools/find_unused.py limpo, `make check` e `make perf` passam (terminal jorrando 131 MB, TUI 126, troca de tema 3, árvore +1,2 %); o painel do Claude, o cartão de permissão e a marca vistos no app com um `claude` real; o preview ao lado comparado com o mockup. Plano original: Linhas do 28 em `saiu`; tools/find_unused.py; `make check`; `make
   perf` (terminal jorrando e TUI com o cabeçalho); prints ao lado dos mockups 3, 3b, 3c e 10, e o
   dono vê.
 

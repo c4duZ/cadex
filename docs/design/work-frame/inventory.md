@@ -97,7 +97,7 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | chave | `tabs.unfocusedDim` | saiu | os painéis sem foco a 92% do mockup (components.pane.idle); saiu na fase B, com a linha das configurações | 28 |
 | trecho | "FocusOutlineView" em `apps/macos/features/tabs/PaneLayoutView.swift` | saiu | a sombra de antes sobre os painéis sem foco; a caixa de cada painel em `apps/macos/features/tabs/PaneChrome.swift` (fase B) | 28 |
 | arquivo | `apps/macos/features/tabs/PaneLayoutView.swift` | muda | contorno de foco, vão de 8 pt, feito na fase B | 28 |
-| arquivo | `apps/macos/features/terminal/TerminalAppearance.swift` | muda | respiro e cores afinadas | 28 |
+| arquivo | `apps/macos/features/terminal/TerminalAppearance.swift` | muda | respiro e cores afinadas: o respiro pela caixa do painel (fase B) e o ANSI do Cadex Night pelo que o Claude pinta no -ansi (fase C) | 28 |
 
 ### Entradas (plano 29)
 | tipo | peça | estado | destino | plano |
