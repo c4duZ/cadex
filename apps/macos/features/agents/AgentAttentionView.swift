@@ -37,6 +37,10 @@ public final class AgentAttentionView: NSView {
         stack.spacing = 6
         stack.edgeInsets = NSEdgeInsets(top: 6, left: 6, bottom: 6, right: 6)
         let document = TopLeft()
+        // Held by constraints, not by its first frame (zero): with the frame
+        // the cards were squeezed to their buttons, headings 0 pt high
+        // (found 2026-11-16, plan 24 F).
+        document.translatesAutoresizingMaskIntoConstraints = false
         document.addSubview(stack)
         stack.translatesAutoresizingMaskIntoConstraints = false
         scroll.documentView = document
@@ -50,6 +54,8 @@ public final class AgentAttentionView: NSView {
             stack.leadingAnchor.constraint(equalTo: document.leadingAnchor), stack.topAnchor.constraint(equalTo: document.topAnchor),
             stack.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor),
             document.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor),
+            document.topAnchor.constraint(equalTo: scroll.contentView.topAnchor),
+            document.leadingAnchor.constraint(equalTo: scroll.contentView.leadingAnchor),
             document.bottomAnchor.constraint(equalTo: stack.bottomAnchor),
         ])
     }
@@ -96,9 +102,12 @@ public final class AgentAttentionView: NSView {
 
     private func card(_ request: AgentRequest) -> NSView {
         let heading: String
+        // An agent that said nothing more than "blocked" (a report with no
+        // text) left a card with only its button (2026-11-16, plan 24 F).
+        let title = request.title.trimmingCharacters(in: .whitespaces)
         switch request.kind {
-        case .permission: heading = T("Wants to use \(request.title)", "Quer usar \(request.title)")
-        case .question: heading = request.title
+        case .permission: heading = title.isEmpty ? T("Waiting for a permission", "Esperando uma permissão") : T("Wants to use \(title)", "Quer usar \(title)")
+        case .question: heading = title.isEmpty ? T("Has a question", "Tem uma pergunta") : title
         }
         var views: [NSView] = [AgentText.label(heading, size: 12, weight: .semibold, color: colors.text)]
         if !request.detail.isEmpty {

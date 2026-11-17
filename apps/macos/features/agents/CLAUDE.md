@@ -139,7 +139,7 @@
   com as permissões cujo hook espera, que só Permitir e Negar respondem, no formato do Claude Code
   testado em 2026-11-15, e os pedidos vistos pelo OSC 7501; o feed, até 200; `unseen`, o número do
   sininho e do Dock; `update` recebe do app o que cada terminal relatou e fecha o hook quando o
-  agente sai do "blocked"), `AgentAttentionView.swift` (a página do sininho: Needs You e Feed) e
+  agente sai do "blocked"), `AgentAttentionView.swift` (a página do sininho: Needs You e Feed; o cartão sem frase do agente diz "Waiting for a permission" ou "Has a question", e a vista da rolagem é presa por constraints: pelo primeiro quadro, zero, os cartões ficavam só com o botão, achado em 2026-11-16) e
   `AgentAttentionCommands.swift` (agents.approve, agents.deny e agents.mark-unread com a lista no ⌘K).
 - Hibernação (plano 19, fase F): `AgentHibernation.swift`, as regras puras (`isDue`/`dueAt`: parado há
   agents.hibernateAfterMinutes e ninguém olhando; `configDir`: a conta pelo arquivo da conversa;

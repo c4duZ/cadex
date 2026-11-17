@@ -83,6 +83,27 @@ let attentionChecks: [(name: String, body: Checks.Body)] = [
         page.removeFromSuperview()
         expect(!page.isWatching)
     }),
+    ("a card says what the agent waits for, with a heading, even when the agent sent no text (plan 24 F)", {
+        let attention = AgentAttention.shared
+        attention.isEnabled = true
+        attention.update([report("c1", pid: 61, .working)])
+        attention.update([report("c1", pid: 61, .blocked, .permission, "")])
+        let page = AgentAttentionView(frame: NSRect(x: 0, y: 0, width: 300, height: 400))
+        let window = NSWindow(contentRect: page.frame, styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentView?.addSubview(page)
+        page.render()
+        page.layoutSubtreeIfNeeded()
+        func texts(_ view: NSView) -> [NSTextField] { (view as? NSTextField).map { [$0] } ?? [] + view.subviews.flatMap(texts) }
+        let heading = texts(page).first { $0.stringValue == "Waiting for a permission" }
+        expect(heading != nil, "\(texts(page).map(\.stringValue))")
+        expect((heading?.frame.height ?? 0) > 0, "the heading has a height: \(heading?.frame ?? .zero)")
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"], let bitmap = page.bitmapImageRepForCachingDisplay(in: page.bounds) {
+            page.cacheDisplay(in: page.bounds, to: bitmap)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/attention-card.png"))
+        }
+        page.removeFromSuperview()
+        attention.update([])
+    }),
     ("a permission reported by the agent and then by its hook is one line in the feed", {
         let attention = AgentAttention()
         attention.update([report("t9", pid: 90, .working)])
