@@ -13,6 +13,9 @@ public struct MemoryPage: Equatable, Sendable {
     public var agent: String?
     public var time: Date?
     public var summary: String?
+    /// When an agent wrote it, as the frontmatter says; nil when only the file's date is known
+    /// (a clone or a pull makes every file new: "LEARNED TODAY" must not count those).
+    public var learnedAt: Date? = nil
 }
 
 /// A folder of the wiki with its pages and folders, or the wiki itself.
@@ -61,12 +64,12 @@ public enum MemoryWiki {
         let name = ((relative as NSString).lastPathComponent as NSString).deletingPathExtension
         let modified = (try? FileManager.default.attributesOfItem(atPath: path))?[.modificationDate] as? Date
         let generated = front.map("generated")
-        let time = MemoryJSON.date(front.scalar("updated_at")) ?? MemoryJSON.date(generated["at"]) ?? modified
+        let written = MemoryJSON.date(front.scalar("updated_at")) ?? MemoryJSON.date(generated["at"])
         let sources = front.list("sources")
         return MemoryPage(path: path, relative: relative, title: front.scalar("title") ?? name,
                           kind: front.scalar("kind") ?? front.scalar("type"), sessionID: sessionID(front, relative: relative),
                           agent: front.scalar("agent") ?? sources.first?["author"] ?? generated["by"],
-                          time: time, summary: front.scalar("summary"))
+                          time: written ?? modified, summary: front.scalar("summary"), learnedAt: written)
     }
 
     /// The session a page came from: `session_id`, else the name of a

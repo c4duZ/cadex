@@ -14,17 +14,11 @@ import Themes
 extension WindowSession {
     func makeMemoryPage() -> MemoryView {
         let page = MemoryView()
-        let paint = { [weak page] in
-            let ui = ThemeStore.shared.current.interface
-            page?.colors = MemoryColors(text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, accent: ui.accent.nsColor)
-        }
-        paint()
-        ThemeStore.shared.observe { _ in paint() }
+        page.run = { [weak self] id in _ = self?.commands.run(id) }
         page.accountName = Self.accountName
         page.accountOf = { id in Self.historyEntry(session: id).map { Self.accountName($0.account) } }
         page.canResume = { id in Self.historyEntry(session: id) != nil }
         page.onShowing = { [weak self] shows in self?.memoryPageShowing(shows) }
-        page.onTurnOn = { [weak self] in _ = self?.commands.run("memory.enable") }
         page.onOpenPage = { [weak self] memoryPage in self?.openMemoryPage(memoryPage) }
         page.onOpenSession = { [weak self] id in self?.openMemorySession(id) }
         page.onReveal = { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: $0.path)]) }
@@ -52,6 +46,16 @@ extension WindowSession {
             approve: { [weak self] proposal in self?.decideProposal(proposal, approve: true) },
             reject: { [weak self] proposal in self?.decideProposal(proposal, approve: false) })
         actions.showHistory = { [weak self] in self?.showMemoryHistory() }
+        // The tab's tree when it was read; otherwise the wiki read now, from projects.json: ⌘K may
+        // come before the tab was ever opened (review of 2026-11-17).
+        actions.pages = { [weak self] in
+            guard let self else { return [] }
+            if let tree = self.memoryPage?.state?.tree { return tree.allPages }
+            guard let wiki = MemoryPageState.wikiDir(overview: nil, root: self.projectRoot, folder: MemoryKit.folder()),
+                  FileManager.default.fileExists(atPath: wiki) else { return [] }
+            return MemoryWiki.tree(wiki).allPages
+        }
+        actions.openPage = { [weak self] page in self?.openMemoryPage(page) }
         return actions
     }
 

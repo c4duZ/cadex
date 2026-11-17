@@ -229,6 +229,7 @@ public extension DesignTokens {
                 public static var bg: NSColor { DesignTokens.Color.bgInset }
                 public static var border: NSColor { DesignTokens.Color.lineSubtle }
                 public static var color: NSColor { DesignTokens.Color.textMuted }
+                public static let icon: CGFloat = 13
             }
             public enum Label {
                 public static let fontSize: CGFloat = DesignTokens.FontSize.caption

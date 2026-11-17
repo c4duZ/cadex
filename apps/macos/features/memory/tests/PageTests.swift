@@ -1,6 +1,7 @@
 import AppKit
 import Checks
 import Foundation
+import UILooks
 @testable import Memory
 
 // The Memory page (plan 22 phase H): the CLI's JSON read as the contract
@@ -169,7 +170,9 @@ func pageTests() -> [(name: String, body: Checks.Body)] { [
         let dir = scratch()
         defer { try? fm.removeItem(atPath: dir) }
         write(dir + "/decisions/tenant-files.md", "---\ntitle: One SQLite file per tenant\nkind: decision\nsession_id: 77777777-7777-4777-8777-777777777777\nagent: claude-code\nupdated_at: 2026-11-16T15:10:00Z\n---\nbody")
-        write(dir + "/gotchas/batch-timeout.md", "---\ntitle: Batches above 1000 rows hit the API timeout\nkind: gotcha\nupdated_at: 2026-11-15T10:00:00Z\n---\n")
+        // Written today: it is what "LEARNED TODAY" shows (plan 26 C2c).
+        let today = ISO8601DateFormatter().string(from: Date())
+        write(dir + "/gotchas/batch-timeout.md", "---\ntitle: Batches above 1000 rows hit the API timeout\nkind: gotcha\nupdated_at: \(today)\n---\n")
         write(dir + "/sessions/77777777-7777-4777-8777-777777777777.md", "---\ntitle: LARK-1 tenant storage\nsession_id: 77777777-7777-4777-8777-777777777777\nagent: claude-code\n---\n")
         write(dir + "/_rules/style.md", "---\ntitle: Identifiers in English\nkind: rule\n---\n")
         let overview = MemoryOverview.parse(["running": true, "workspace": "default", "project": "lark", "wiki_dir": dir, "model": "loaded",
@@ -183,12 +186,11 @@ func pageTests() -> [(name: String, body: Checks.Body)] { [
                                                                  "kind": "rule", "summary": "Seen in 3 sessions", "created_at": "2026-11-16T14:00:00Z",
                                                                  "body": "Run every migration inside a transaction."]]])
         let view = MemoryView(frame: NSRect(x: 0, y: 0, width: 320, height: 760))
-        view.colors = MemoryColors(text: .white, secondary: NSColor(white: 0.62, alpha: 1), accent: NSColor(red: 0.88, green: 0.64, blue: 0.35, alpha: 1))
         view.accountName = { $0.hasSuffix("work") ? "Work" : "Personal" }
         view.show(MemoryPageState(enabled: true, overview: overview, agent: agent, proposals: proposals, wikiDir: dir, tree: MemoryWiki.tree(dir)))
         let host = NSView(frame: view.frame)
         host.wantsLayer = true
-        host.layer?.backgroundColor = NSColor(white: 0.12, alpha: 1).cgColor
+        host.layer?.backgroundColor = DesignTokens.Inspector.bg.cgColor
         host.addSubview(view)
         host.layoutSubtreeIfNeeded()
         guard let bitmap = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { return }

@@ -19,6 +19,9 @@ public struct MemoryPageActions {
     public var proposals: @MainActor (@escaping @MainActor ([MemoryProposal]) -> Void) -> Void
     public var approve: @MainActor (MemoryProposal) -> Void
     public var reject: @MainActor (MemoryProposal) -> Void
+    /// The wiki's pages as the Memory tab last read them, and opening one (memory.search).
+    public var pages: @MainActor () -> [MemoryPage] = { [] }
+    public var openPage: @MainActor (MemoryPage) -> Void = { _ in }
 
     public init(show: @escaping @MainActor () -> Void, showBriefing: @escaping @MainActor () -> Void, reindex: @escaping @MainActor () -> Void,
                 refresh: @escaping @MainActor () -> Void, turnOn: @escaping @MainActor () -> Void,
@@ -58,6 +61,9 @@ public enum MemoryPageCommands {
                     keywords: ["memory", "refresh", "reload", "memória", "atualizar"], category: .view, action: .run(actions.refresh)),
             Command(id: "memory.enable", title: T("Turn On Project Memory", "Ligar a memória do projeto"),
                     keywords: ["memory", "enable", "turn on", "memória", "ligar"], category: .view, action: .run(actions.turnOn)),
+            Command(id: "memory.search", title: T("Search Project Memory…", "Buscar na memória do projeto…"),
+                    keywords: ["memory", "search", "wiki", "find", "memória", "buscar"], category: .view,
+                    action: .run { palette.open(MemoryPageSource(pages: actions.pages(), open: actions.openPage)) }),
             Command(id: "memory.approve", title: T("Approve Memory Proposal…", "Aprovar proposta da memória…"),
                     keywords: ["memory", "proposal", "approve", "agent", "memória", "proposta", "aprovar"], category: .view,
                     action: pick(T("The proposal to approve", "A proposta a aprovar"), actions.approve)),

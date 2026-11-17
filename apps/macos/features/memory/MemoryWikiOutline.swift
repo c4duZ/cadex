@@ -1,4 +1,5 @@
 import AppKit
+import Icons
 import Menus
 import UILooks
 
@@ -30,7 +31,6 @@ final class MemoryNode: NSObject {
 /// A click on a page opens it; the right click lists what to do with it.
 @MainActor
 final class MemoryWikiOutline: NSOutlineView, NSOutlineViewDataSource, NSOutlineViewDelegate {
-    var colors = MemoryColors() { didSet { reloadData() } }
     /// The account of a session, by id, when the History knows it.
     var accountOf: (String) -> String? = { _ in nil }
     var onOpen: ((MemoryPage) -> Void)?
@@ -46,7 +46,7 @@ final class MemoryWikiOutline: NSOutlineView, NSOutlineViewDataSource, NSOutline
         headerView = nil
         backgroundColor = .clear
         style = .plain
-        indentationPerLevel = 12
+        indentationPerLevel = UILooks.pt(DesignTokens.Inspector.Tree.indent)
         dataSource = self
         delegate = self
         target = self
@@ -54,6 +54,20 @@ final class MemoryWikiOutline: NSOutlineView, NSOutlineViewDataSource, NSOutline
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
+
+    /// The folders' caret dim, as in Files (components.inspector.tree.chevron).
+    override func makeView(withIdentifier identifier: NSUserInterfaceItemIdentifier, owner: Any?) -> NSView? {
+        let view = super.makeView(withIdentifier: identifier, owner: owner)
+        if identifier == NSOutlineView.disclosureButtonIdentifier, let button = view as? NSButton {
+            button.image = Self.carets.closed
+            button.alternateImage = Self.carets.open
+            button.contentTintColor = DesignTokens.Inspector.Tree.chevronColor
+        }
+        return view
+    }
+
+    private static let carets = (closed: Icon.caretRight.image(size: UILooks.pt(DesignTokens.Inspector.Tree.chevron)),
+                                 open: Icon.caretDown.image(size: UILooks.pt(DesignTokens.Inspector.Tree.chevron)))
 
     /// The wiki again, keeping open what was open.
     func show(_ tree: MemoryFolder?) {
@@ -86,19 +100,27 @@ final class MemoryWikiOutline: NSOutlineView, NSOutlineViewDataSource, NSOutline
         if let node = notification.userInfo?["NSObject"] as? MemoryNode { expanded.remove(node.key) }
     }
 
+    typealias M = DesignTokens.Inspector.Memory
+
+    /// A folder is a wiki row (components.inspector.memory.wikiRow); a page, a title over its origin.
     func outlineView(_ outlineView: NSOutlineView, heightOfRowByItem item: Any) -> CGFloat {
-        (item as? MemoryNode)?.page == nil ? UILooks.pt(22) : UILooks.pt(36)
+        (item as? MemoryNode)?.page == nil ? UILooks.rowHeight(M.WikiRow.height) : Self.pageHeight
     }
+
+    /// Worked out once: the title and the origin lines, as the cards (the zoom is set at launch).
+    static let pageHeight: CGFloat = {
+        let lines = NSLayoutManager().defaultLineHeight(for: UILooks.font(DesignTokens.FontSize.body))
+            + NSLayoutManager().defaultLineHeight(for: UILooks.font(M.Card.Meta.fontSize))
+        return ceil(lines) + UILooks.pt(M.Card.padding.top)
+    }()
 
     func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
         guard let node = item as? MemoryNode else { return nil }
-        if let folder = node.folder {
-            return cell(MemoryText.label("\(folder.name)  \(folder.count)", size: 12, weight: .semibold, color: colors.text), top: 3)
-        }
+        if let folder = node.folder { return folderRow(folder) }
         guard let page = node.page else { return nil }
         let account = page.sessionID.flatMap(accountOf)
-        let title = MemoryText.label(page.title, size: 12, color: colors.text)
-        let detail = MemoryText.label(MemoryStatusText.origin(page, account: account), size: 11, color: colors.secondary)
+        let title = MemoryText.label(page.title, size: DesignTokens.FontSize.body, color: M.WikiRow.color)
+        let detail = MemoryText.label(MemoryStatusText.origin(page, account: account), size: M.Card.Meta.fontSize, color: M.Card.Meta.color)
         let stack = NSStackView(views: [title, detail])
         stack.orientation = .vertical
         stack.alignment = .leading
@@ -106,6 +128,42 @@ final class MemoryWikiOutline: NSOutlineView, NSOutlineViewDataSource, NSOutline
         let view = cell(stack, top: 2)
         view.toolTip = [page.relative, page.summary].compactMap { $0 }.joined(separator: "\n")
         return view
+    }
+
+    /// "◆ Decisions  48": the kind's mark, the name, the count on the right (the mockup's WIKI).
+    private func folderRow(_ folder: MemoryFolder) -> NSView {
+        let mark = MemoryText.label(Self.mark(of: folder.name), size: DesignTokens.FontSize.body, color: M.Label.color)
+        mark.alignment = .center
+        // One width for every mark: ◆ and ! are not as wide, and the names went out of line.
+        mark.widthAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Inspector.Tree.icon)).isActive = true
+        let shown = folder.name.hasPrefix("_") ? String(folder.name.dropFirst()) : folder.name
+        let name = MemoryText.label(shown.capitalized, size: DesignTokens.FontSize.body, color: M.WikiRow.color)
+        name.setContentHuggingPriority(.init(1), for: .horizontal)
+        let count = MemoryText.label("\(folder.count)", size: M.Label.fontSize, color: M.Label.color)
+        count.setContentCompressionResistancePriority(.required, for: .horizontal)
+        let row = NSStackView(views: [mark, name, count])
+        row.spacing = UILooks.pt(M.WikiRow.gap)
+        row.distribution = .fill
+        let cell = NSView()
+        row.translatesAutoresizingMaskIntoConstraints = false
+        cell.addSubview(row)
+        NSLayoutConstraint.activate([
+            row.leadingAnchor.constraint(equalTo: cell.leadingAnchor),
+            row.trailingAnchor.constraint(equalTo: cell.trailingAnchor),
+            row.centerYAnchor.constraint(equalTo: cell.centerYAnchor),
+        ])
+        return cell
+    }
+
+    /// The marks the mockup gives the wiki's kinds; another folder gets the plain one.
+    static func mark(of folder: String) -> String {
+        switch folder.lowercased() {
+        case "decisions": "◆"
+        case "gotchas": "!"
+        case "concepts": "◇"
+        case "sessions": "≡"
+        default: "▸"
+        }
     }
 
     private func cell(_ content: NSView, top: CGFloat) -> NSView {
@@ -138,19 +196,6 @@ final class MemoryWikiOutline: NSOutlineView, NSOutlineViewDataSource, NSOutline
         guard let page = page(at: row), let entries = menuFor?(page) else { return }
         selectRowIndexes([row], byExtendingSelection: false)
         PopupMenu.show(entries, at: point, in: self)
-    }
-}
-
-/// The page's colors, from the theme (the app sets them).
-public struct MemoryColors {
-    public var text: NSColor
-    public var secondary: NSColor
-    public var accent: NSColor
-
-    public init(text: NSColor = .labelColor, secondary: NSColor = .secondaryLabelColor, accent: NSColor = .controlAccentColor) {
-        self.text = text
-        self.secondary = secondary
-        self.accent = accent
     }
 }
 
