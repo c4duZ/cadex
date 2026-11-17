@@ -40,11 +40,11 @@ let exitCode = await Checks.run([
         object["terminal"] = terminal
         expect((try? ThemeFile.read(try JSONSerialization.data(withJSONObject: object))) == nil)
     }),
-    ("the built-in catalog has hundreds of themes, Cadex Night first and the default", {
+    ("the built-in catalog: the official themes, Cadex Night first and the default", {
         let families = ThemeCatalog.all()
-        expect(families.count > 300, "\(families.count)")
+        expect(families.count > 30 && families.allSatisfy { $0.source == "official" || $0.id == "cadex-night" }, "\(families.count)")
         expect(families.first?.id == "cadex-night" && ThemeCatalog.defaultId == "cadex-night")
-        expect(ThemeCatalog.family(id: "caffeine") != nil, "Caffeine stays to pick")
+        expect(ThemeCatalog.family(id: "caffeine") == nil, "the tweakcn presets left on 2026-11-17")
         expect(Set(families.map(\.id)).count == families.count, "repeated ids")
         for family in families {
             expect(family.dark != nil || family.light != nil, family.id)
@@ -63,11 +63,6 @@ let exitCode = await Checks.run([
                 expect(ui.secondaryText.contrast(with: ui.panel) >= 3.0, "\(family.id) secondary text")
             }
         }
-    }),
-    ("the tweakcn themes have their own terminal colors", {
-        let families = ThemeCatalog.all().filter { $0.source == "tweakcn" }
-        let greens = Set(families.compactMap { $0.dark?.terminal.ansi[2] })
-        expect(greens.count > families.count / 2, "\(greens.count) greens for \(families.count) themes")
     }),
     ("a Ghostty, an iTerm2 and a base16 theme are imported", {
         let ghostty = (["background = 1d1f21", "foreground = #c5c8c6", "cursor-color = #c5c8c6"]

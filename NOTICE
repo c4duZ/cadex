@@ -203,18 +203,8 @@ Icon fonts (regular and fill weights) of @phosphor-icons/web 2.1.2, in apps/maco
 Theme colors
 ------------
 The built-in themes (apps/macos/features/themes/Resources/catalog.json) are converted
-by tools/themes/build_catalog.py from the sources below. Apache-2.0 text:
+by tools/themes/build_catalog.py from each project's own files, below. Apache-2.0 text:
 tools/themes/licenses/Apache-2.0.txt.
-
-tweakcn theme presets
-https://github.com/jnsahaj/tweakcn (utils/theme-presets.ts, commit a3b47b3)
-Licensed under the Apache License, Version 2.0.
-
-tinted-theming base16 and base24 schemes
-https://github.com/tinted-theming/schemes (base16/ and base24/, commit 3ac9113)
-MIT. Copyright (c) 2022 Tinted Theming (https://github.com/tinted-theming)
-Each scheme names its author in its file; the catalog keeps the author in the
-theme's description (docs/adr/0017-base16-themes.md).
 
 Kanagawa
 https://raw.githubusercontent.com/rebelot/kanagawa.nvim/bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3/extras/kitty/kanagawa.conf

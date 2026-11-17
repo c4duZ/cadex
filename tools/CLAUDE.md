@@ -12,11 +12,9 @@
 - `check_manifests.py`: as quatro seções, os caminhos citados e um `CLAUDE.md` em toda pasta de
   feature do núcleo e dos apps.
 - `themes/build_catalog.py`: gera o catálogo de temas do app a partir de
-  `themes/official-palettes.json` (paletas oficiais, cada cor com a fonte), dos temas do tweakcn
-  (`themes/tweakcn.py`, ANSI tirado das cores de cada um) e dos esquemas base16/base24 do
-  tinted-theming (`themes/tinted.py`); os commits ficam fixados no script e os dois checkouts são
-  passados na linha de comando (`../docs/adr/0017-base16-themes.md`). Contraste conferido e ajustado
-  em OKLCH por `themes/colors.py`; quase iguais e recusados saem na saída. Descrições em par
+  `themes/official-palettes.json` (paletas oficiais, cada cor com a fonte); o tweakcn e o
+  base16/base24 saíram em 2026-11-17 (`../docs/adr/0017-base16-themes.md`). Contraste conferido e
+  ajustado em OKLCH por `themes/colors.py`; os recusados saem na saída. Descrições em par
   inglês/português em `themes/descriptions.json`; licenças em `themes/licenses/` e no `NOTICE`.
 - `icons/build_file_icons.py`: gera os ícones de arquivo e pasta do app a partir do Material Icon
   Theme (commit fixado no script; o checkout é passado na linha de comando), com
@@ -36,7 +34,9 @@
 - `design/build_tokens.py`: gera, de `../docs/design/work-frame/tokens.json`, os tokens do app
   (`../apps/macos/shared/looks/DesignTokens.swift` e um arquivo de peças por região da moldura) e o
   tema Cadex Night (`../apps/macos/features/themes/CadexNight.swift`); `--check` no `make manifests`
-  falha se o gerado não bate. Nada desses valores é digitado no Swift (ADR 0035).
+  falha se o gerado não bate. `design/theme_recipes.py`: como cada cor segue o tema (do fundo e do
+  texto dele, ou puxada para uma cor de estado), as receitas que o gerador escreve para
+  `../apps/macos/shared/looks/DesignTokensTheme.swift`. Nada desses valores é digitado no Swift (ADR 0035).
 - `check_design_literals.py` (no `make manifests`, com `--self-test`): nos arquivos da moldura nova
   (a lista FRAME_FILES, que cada plano de 25 a 30 aumenta), nenhuma cor, raio, fonte, espaço ou
   altura digitados: só `DesignTokens`.

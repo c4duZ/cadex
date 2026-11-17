@@ -9,12 +9,11 @@ temas que ele já usava em outros apps.
   e as do terminal (fundo, texto, cursor, seleção e as 16 cores ANSI).
 - Cada tema tem versão escura e/ou clara. O usuário escolhe o tema e o modo: seguir o sistema
   (padrão), sempre escuro ou sempre claro. Tema sem a versão pedida mostra a que tem.
-- Vêm centenas de temas embutidos (plano 15, `docs/adr/0017-base16-themes.md`):
-  - as paletas oficiais de temas abertos, com as variantes (Catppuccin, Rosé Pine, Tokyo Night,
-    Kanagawa, Gruvbox, Everforest, GitHub, Ayu, One, Nightfox, Night Owl, Nord, Dracula,
-    Solarized), com as cores de terminal dos próprios projetos;
-  - os temas do tweakcn, sem os quase iguais, com cores de terminal tiradas das cores de cada um;
-  - os esquemas base16 e base24 do tinted-theming.
+- Vêm os temas embutidos das paletas oficiais de temas abertos, com as variantes (Catppuccin, Rosé
+  Pine, Tokyo Night, Kanagawa, Gruvbox, Everforest, GitHub, Ayu, One, Nightfox, Night Owl, Nord,
+  Dracula, Solarized), com as cores de terminal dos próprios projetos. Os presets do tweakcn e os
+  esquemas base16/base24 saíram em 2026-11-17: centenas de temas parecidos que o dono não usava
+  (`docs/adr/0017-base16-themes.md`). Quem estava num deles volta ao Cadex Night.
 
   O padrão é o Cadex Night, o tema da moldura nova, só escuro por enquanto (o par claro vem com um
   mockup claro), com as cores de
@@ -80,7 +79,6 @@ temas que ele já usava em outros apps.
 - [ ] O terminal usa o fundo, o texto e as 16 cores do tema (`ls --color` e `vim` mostram as cores).
 - [ ] Com "seguir o sistema", trocar o modo do macOS troca o tema na hora.
 - [x] Todo tema embutido tem texto do terminal com contraste de 4:1 ou mais, e o da interface com 4,5:1.
-- [x] Os temas do tweakcn têm cores de terminal próprias, diferentes entre si.
 - [x] Um tema do Ghostty, do iTerm2 e base16 é importado; um arquivo quebrado na pasta aparece com o motivo.
 - [x] A página de temas acha um tema pela busca e filtra claro/escuro, sem criar um cartão por tema.
 - [ ] Trocar o modo do macOS troca entre os dois temas escolhidos.

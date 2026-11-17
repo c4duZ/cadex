@@ -32,6 +32,28 @@ let exitCode = await Checks.run([
         UILooks.configure(zoom: 1, compact: false, fontFamily: "No Such Font", fontSize: 13)
         expect(UILooks.font(13) == NSFont.systemFont(ofSize: 13))
     }),
+    ("the frame follows a theme: Cadex Night keeps the mockups' colors; another theme's repaints a built view", {
+        let night = DesignTokens.Color.bgSidebar
+        expect(ColorKey(night) == ColorKey(DesignTokens.rgb(0x131417)), "Cadex Night: the mockup's value")
+        let view = NSView(frame: NSRect(x: 0, y: 0, width: 10, height: 10))
+        view.wantsLayer = true
+        view.layer?.backgroundColor = DesignTokens.Color.bgSidebar.cgColor
+        let label = NSTextField(labelWithString: "x")
+        label.textColor = DesignTokens.Color.textMuted
+        view.addSubview(label)
+        let before = DesignTokens.themedColors()
+        // A light theme: white frame, near-black text.
+        expect(DesignTokens.applyTheme(chrome: DesignTokens.rgb(0xFFFFFF), text: DesignTokens.rgb(0x1F2328)))
+        DesignTokens.repaint(view, from: before)
+        let sidebar = DesignTokens.Color.bgSidebar
+        expect(ColorKey(sidebar) != ColorKey(night) && sidebar.usingColorSpace(.sRGB)!.redComponent > 0.9, "a light sidebar: \(sidebar)")
+        expect(view.layer?.backgroundColor.map { ColorKey($0) } == ColorKey(sidebar.cgColor), "the built layer repainted")
+        expect(ColorKey(label.textColor!) == ColorKey(DesignTokens.Color.textMuted), "the built label repainted")
+        expect(ColorKey(DesignTokens.Color.stateNeeds) == ColorKey(DesignTokens.rgb(0xF2A93B)), "a state keeps its color in every theme")
+        expect(!DesignTokens.applyTheme(chrome: DesignTokens.rgb(0xFFFFFF), text: DesignTokens.rgb(0x1F2328)), "the same theme changes nothing")
+        DesignTokens.applyTheme(chrome: nil, text: nil)
+        expect(ColorKey(DesignTokens.Color.bgSidebar) == ColorKey(night), "back to Cadex Night")
+    }),
     ("out-of-range values are clamped", {
         UILooks.configure(zoom: 9, compact: false, fontFamily: "", fontSize: 1)
         expect(UILooks.zoom == 1.5 && UILooks.fontSize == 9)

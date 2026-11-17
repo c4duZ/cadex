@@ -7,8 +7,8 @@ public struct ThemeFamily: Equatable, Sendable, Identifiable {
     public let name: String
     /// One line for the theme card, in the interface's language.
     public let description: String
-    /// Where the colors come from: "official", "tweakcn", "base16",
-    /// "base24" or "user" (a file in the user's themes folder).
+    /// Where the colors come from: "official" (the catalog), "cadex" or "user" (a file in the
+    /// user's themes folder).
     public let source: String
     public let dark: Theme?
     public let light: Theme?

@@ -49,3 +49,9 @@ uma fonte grande, de licença clara, num formato que diga o papel de cada cor, e
   de entrar estranho.
 - Atualizar os esquemas é trocar o commit no script e rodar de novo. Os recusados aparecem na
   saída do build.
+
+## Revisto em 2026-11-17
+- Os presets do tweakcn e os esquemas base16/base24 saíram do catálogo: centenas de temas
+  parecidos entre si que o dono não usava, e duas fontes a menos no `NOTICE`. Ficam as paletas
+  oficiais (35 temas), com o contraste conferido como antes. Importar um .yaml base16/base24
+  continua (`ThemeImport`), para quem tem o seu.

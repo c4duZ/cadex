@@ -27,6 +27,7 @@ import plan21
 import plan22
 import plan23
 import plan24
+import plan27
 from plan22_engine import engine_running
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
@@ -83,8 +84,9 @@ class TestApp:
                    CADEX_TERMINAL_SOCKET=self.terminal_socket,
                    # Its own memory folder: the warm-up and the engine wrote
                    # the owner's real one until 2026-11-16 (plan 22).
-                   CADEX_MEMORY_DIR=f"{self.dir}/memory",
-                   **(extra_env or {}))
+                   CADEX_MEMORY_DIR=f"{self.dir}/memory")
+        # After the instance's own: a scenario may give its own projects file (plan 27).
+        env.update(extra_env or {})
         args = [str(EXE)] + ([str(folder)] if folder else [])
         self.process = subprocess.Popen(args, env=env, cwd=str(folder or HOME),
                                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -406,6 +408,7 @@ def main():
              ("plan 23: machines.tailscale off", lambda: plan23.off_scenario(sys.modules[__name__])),
              ("plan 24: races and runs off", lambda: plan24.off_scenario(sys.modules[__name__])),
              ("plan 24: a race of 3 and a run of 5 with fake agents, 6 working at once", lambda: plan24.on_scenario(sys.modules[__name__])),
+             ("plan 27: the work's tree, 8 projects with 6 tasks each", lambda: plan27.tree_scenario(sys.modules[__name__])),
              ("flooding with minimum contrast and ligatures", lambda: scenario(
                  "reading", "flood", ROOT, measure_reading_flood,
                  settings={"terminal": {"minimumContrast": 7, "fontFeatures": ["calt", "liga"]}}))]
@@ -423,6 +426,8 @@ def main():
 
     print()
     # Plan 17's rule: all of it on weighs at most 10% over the app with it off.
+    if "tree_mb" in results and "idle_mb" in results:
+        results["tree_over_idle_pct"] = 100 * (results["tree_mb"] - results["idle_mb"]) / results["idle_mb"]
     if "all_on_mb" in results and "idle_mb" in results:
         results["all_on_over_idle_pct"] = 100 * (results["all_on_mb"] - results["idle_mb"]) / results["idle_mb"]
     # Plan 18's rule: the History open or closed weighs at most 10% over idle.

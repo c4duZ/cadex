@@ -3,10 +3,9 @@ import Strings
 
 /// The themes that ship with the app: Resources/catalog.json, built by
 /// tools/themes/build_catalog.py from the official palettes of open-source
-/// themes, the tweakcn presets and the base16/base24 schemes
-/// (docs/spec/themes.md, NOTICE). Read when asked and not kept: the app
-/// holds only the themes in use (plan 15: hundreds of themes must not
-/// weigh on the app).
+/// themes (docs/spec/themes.md, NOTICE; the tweakcn presets and the
+/// base16/base24 schemes left on 2026-11-17). Read when asked and not kept:
+/// the app holds only the themes in use.
 public enum ThemeCatalog {
     /// The family the app starts with: Cadex Night, the new frame's
     /// (docs/adr/0035-work-frame.md), generated from the mockups' tokens.

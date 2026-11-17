@@ -28,75 +28,77 @@ public enum DesignTokens {
         }
     }
 
+    /// Each color as Cadex Night has it; a theme's palette (DesignTokensTheme.swift) takes over
+    /// the ones with a recipe.
     public enum Color {
         /// bg.window: #0C0D0F
-        public static var bgWindow: NSColor { DesignTokens.rgb(0x0C0D0F) }
+        public static var bgWindow: NSColor { DesignTokens.themed("bg.window", DesignTokens.rgb(0x0C0D0F)) }
         /// bg.inset: #0F1012
-        public static var bgInset: NSColor { DesignTokens.rgb(0x0F1012) }
+        public static var bgInset: NSColor { DesignTokens.themed("bg.inset", DesignTokens.rgb(0x0F1012)) }
         /// bg.drawer: #101113
-        public static var bgDrawer: NSColor { DesignTokens.rgb(0x101113) }
+        public static var bgDrawer: NSColor { DesignTokens.themed("bg.drawer", DesignTokens.rgb(0x101113)) }
         /// bg.paneIdle: #111214
-        public static var bgPaneIdle: NSColor { DesignTokens.rgb(0x111214) }
+        public static var bgPaneIdle: NSColor { DesignTokens.themed("bg.paneIdle", DesignTokens.rgb(0x111214)) }
         /// bg.chrome: #121316
-        public static var bgChrome: NSColor { DesignTokens.rgb(0x121316) }
+        public static var bgChrome: NSColor { DesignTokens.themed("bg.chrome", DesignTokens.rgb(0x121316)) }
         /// bg.sidebar: #131417
-        public static var bgSidebar: NSColor { DesignTokens.rgb(0x131417) }
+        public static var bgSidebar: NSColor { DesignTokens.themed("bg.sidebar", DesignTokens.rgb(0x131417)) }
         /// bg.card: #15171A
-        public static var bgCard: NSColor { DesignTokens.rgb(0x15171A) }
+        public static var bgCard: NSColor { DesignTokens.themed("bg.card", DesignTokens.rgb(0x15171A)) }
         /// bg.raised: #17191C
-        public static var bgRaised: NSColor { DesignTokens.rgb(0x17191C) }
+        public static var bgRaised: NSColor { DesignTokens.themed("bg.raised", DesignTokens.rgb(0x17191C)) }
         /// bg.button: #1A1C20
-        public static var bgButton: NSColor { DesignTokens.rgb(0x1A1C20) }
+        public static var bgButton: NSColor { DesignTokens.themed("bg.button", DesignTokens.rgb(0x1A1C20)) }
         /// bg.userMessage: #1C1F24
-        public static var bgUserMessage: NSColor { DesignTokens.rgb(0x1C1F24) }
+        public static var bgUserMessage: NSColor { DesignTokens.themed("bg.userMessage", DesignTokens.rgb(0x1C1F24)) }
         /// bg.chip: #1D1F23
-        public static var bgChip: NSColor { DesignTokens.rgb(0x1D1F23) }
+        public static var bgChip: NSColor { DesignTokens.themed("bg.chip", DesignTokens.rgb(0x1D1F23)) }
         /// bg.selected: #1F2226
-        public static var bgSelected: NSColor { DesignTokens.rgb(0x1F2226) }
+        public static var bgSelected: NSColor { DesignTokens.themed("bg.selected", DesignTokens.rgb(0x1F2226)) }
         /// bg.segment: #22252A
-        public static var bgSegment: NSColor { DesignTokens.rgb(0x22252A) }
+        public static var bgSegment: NSColor { DesignTokens.themed("bg.segment", DesignTokens.rgb(0x22252A)) }
         /// line.subtle: #1F2125
-        public static var lineSubtle: NSColor { DesignTokens.rgb(0x1F2125) }
+        public static var lineSubtle: NSColor { DesignTokens.themed("line.subtle", DesignTokens.rgb(0x1F2125)) }
         /// line.pane: #22252A
-        public static var linePane: NSColor { DesignTokens.rgb(0x22252A) }
+        public static var linePane: NSColor { DesignTokens.themed("line.pane", DesignTokens.rgb(0x22252A)) }
         /// line.paneIdle: #23262B
-        public static var linePaneIdle: NSColor { DesignTokens.rgb(0x23262B) }
+        public static var linePaneIdle: NSColor { DesignTokens.themed("line.paneIdle", DesignTokens.rgb(0x23262B)) }
         /// line.popover: #24272C
-        public static var linePopover: NSColor { DesignTokens.rgb(0x24272C) }
+        public static var linePopover: NSColor { DesignTokens.themed("line.popover", DesignTokens.rgb(0x24272C)) }
         /// line.default: #25282D
-        public static var lineDefault: NSColor { DesignTokens.rgb(0x25282D) }
+        public static var lineDefault: NSColor { DesignTokens.themed("line.default", DesignTokens.rgb(0x25282D)) }
         /// line.control: #2A2D33
-        public static var lineControl: NSColor { DesignTokens.rgb(0x2A2D33) }
+        public static var lineControl: NSColor { DesignTokens.themed("line.control", DesignTokens.rgb(0x2A2D33)) }
         /// line.selected: #2C3036
-        public static var lineSelected: NSColor { DesignTokens.rgb(0x2C3036) }
+        public static var lineSelected: NSColor { DesignTokens.themed("line.selected", DesignTokens.rgb(0x2C3036)) }
         /// line.focus: #2E3238
-        public static var lineFocus: NSColor { DesignTokens.rgb(0x2E3238) }
+        public static var lineFocus: NSColor { DesignTokens.themed("line.focus", DesignTokens.rgb(0x2E3238)) }
         /// line.amber: #4A3A1C
-        public static var lineAmber: NSColor { DesignTokens.rgb(0x4A3A1C) }
+        public static var lineAmber: NSColor { DesignTokens.themed("line.amber", DesignTokens.rgb(0x4A3A1C)) }
         /// scroll.thumb: #3A3E45
-        public static var scrollThumb: NSColor { DesignTokens.rgb(0x3A3E45) }
+        public static var scrollThumb: NSColor { DesignTokens.themed("scroll.thumb", DesignTokens.rgb(0x3A3E45)) }
         /// text.separator: #4A4F57
-        public static var textSeparator: NSColor { DesignTokens.rgb(0x4A4F57) }
+        public static var textSeparator: NSColor { DesignTokens.themed("text.separator", DesignTokens.rgb(0x4A4F57)) }
         /// text.strong: #F4F5F6
-        public static var textStrong: NSColor { DesignTokens.rgb(0xF4F5F6) }
+        public static var textStrong: NSColor { DesignTokens.themed("text.strong", DesignTokens.rgb(0xF4F5F6)) }
         /// text.terminalStrong: #EDEEF0
-        public static var textTerminalStrong: NSColor { DesignTokens.rgb(0xEDEEF0) }
+        public static var textTerminalStrong: NSColor { DesignTokens.themed("text.terminalStrong", DesignTokens.rgb(0xEDEEF0)) }
         /// text.primary: #E7E8EA
-        public static var textPrimary: NSColor { DesignTokens.rgb(0xE7E8EA) }
+        public static var textPrimary: NSColor { DesignTokens.themed("text.primary", DesignTokens.rgb(0xE7E8EA)) }
         /// text.row: #D5D7DB
-        public static var textRow: NSColor { DesignTokens.rgb(0xD5D7DB) }
+        public static var textRow: NSColor { DesignTokens.themed("text.row", DesignTokens.rgb(0xD5D7DB)) }
         /// text.terminal: #C9CCD1
-        public static var textTerminal: NSColor { DesignTokens.rgb(0xC9CCD1) }
+        public static var textTerminal: NSColor { DesignTokens.themed("text.terminal", DesignTokens.rgb(0xC9CCD1)) }
         /// text.body: #C3C6CB
-        public static var textBody: NSColor { DesignTokens.rgb(0xC3C6CB) }
+        public static var textBody: NSColor { DesignTokens.themed("text.body", DesignTokens.rgb(0xC3C6CB)) }
         /// text.terminalDim: #B5B9C0
-        public static var textTerminalDim: NSColor { DesignTokens.rgb(0xB5B9C0) }
+        public static var textTerminalDim: NSColor { DesignTokens.themed("text.terminalDim", DesignTokens.rgb(0xB5B9C0)) }
         /// text.secondary: #9BA0A8
-        public static var textSecondary: NSColor { DesignTokens.rgb(0x9BA0A8) }
+        public static var textSecondary: NSColor { DesignTokens.themed("text.secondary", DesignTokens.rgb(0x9BA0A8)) }
         /// text.muted: #8A9099
-        public static var textMuted: NSColor { DesignTokens.rgb(0x8A9099) }
+        public static var textMuted: NSColor { DesignTokens.themed("text.muted", DesignTokens.rgb(0x8A9099)) }
         /// text.tertiary: #7C828B
-        public static var textTertiary: NSColor { DesignTokens.rgb(0x7C828B) }
+        public static var textTertiary: NSColor { DesignTokens.themed("text.tertiary", DesignTokens.rgb(0x7C828B)) }
         /// text.onLight: #111214
         public static var textOnLight: NSColor { DesignTokens.rgb(0x111214) }
         /// text.onAmber: #1A1206
@@ -104,7 +106,7 @@ public enum DesignTokens {
         /// text.onAccent: #FFFFFF
         public static var textOnAccent: NSColor { DesignTokens.rgb(0xFFFFFF) }
         /// text.amberNote: #F2D29B
-        public static var textAmberNote: NSColor { DesignTokens.rgb(0xF2D29B) }
+        public static var textAmberNote: NSColor { DesignTokens.themed("text.amberNote", DesignTokens.rgb(0xF2D29B)) }
         /// state.working: #5B9CF5
         public static var stateWorking: NSColor { DesignTokens.rgb(0x5B9CF5) }
         /// state.needs: #F2A93B
@@ -124,43 +126,43 @@ public enum DesignTokens {
         /// halo.input: rgba(91,156,245,0.08)
         public static var haloInput: NSColor { DesignTokens.rgb(0x5B9CF5, alpha: 0.08) }
         /// accent.amberText: #F2B65E
-        public static var accentAmberText: NSColor { DesignTokens.rgb(0xF2B65E) }
+        public static var accentAmberText: NSColor { DesignTokens.themed("accent.amberText", DesignTokens.rgb(0xF2B65E)) }
         /// accent.greenText: #6FCF97
-        public static var accentGreenText: NSColor { DesignTokens.rgb(0x6FCF97) }
+        public static var accentGreenText: NSColor { DesignTokens.themed("accent.greenText", DesignTokens.rgb(0x6FCF97)) }
         /// accent.redText: #F08A8A
-        public static var accentRedText: NSColor { DesignTokens.rgb(0xF08A8A) }
+        public static var accentRedText: NSColor { DesignTokens.themed("accent.redText", DesignTokens.rgb(0xF08A8A)) }
         /// accent.liveText: #8FB8F7
-        public static var accentLiveText: NSColor { DesignTokens.rgb(0x8FB8F7) }
+        public static var accentLiveText: NSColor { DesignTokens.themed("accent.liveText", DesignTokens.rgb(0x8FB8F7)) }
         /// accent.link: #9BC1FF
-        public static var accentLink: NSColor { DesignTokens.rgb(0x9BC1FF) }
+        public static var accentLink: NSColor { DesignTokens.themed("accent.link", DesignTokens.rgb(0x9BC1FF)) }
         /// accent.linkBg: #1A2333
-        public static var accentLinkBg: NSColor { DesignTokens.rgb(0x1A2333) }
+        public static var accentLinkBg: NSColor { DesignTokens.themed("accent.linkBg", DesignTokens.rgb(0x1A2333)) }
         /// diff.addText: #B9E5C8
-        public static var diffAddText: NSColor { DesignTokens.rgb(0xB9E5C8) }
+        public static var diffAddText: NSColor { DesignTokens.themed("diff.addText", DesignTokens.rgb(0xB9E5C8)) }
         /// diff.addBg: #15261C
-        public static var diffAddBg: NSColor { DesignTokens.rgb(0x15261C) }
+        public static var diffAddBg: NSColor { DesignTokens.themed("diff.addBg", DesignTokens.rgb(0x15261C)) }
         /// diff.delText: #F0B9B9
-        public static var diffDelText: NSColor { DesignTokens.rgb(0xF0B9B9) }
+        public static var diffDelText: NSColor { DesignTokens.themed("diff.delText", DesignTokens.rgb(0xF0B9B9)) }
         /// diff.delBg: #2A1719
-        public static var diffDelBg: NSColor { DesignTokens.rgb(0x2A1719) }
+        public static var diffDelBg: NSColor { DesignTokens.themed("diff.delBg", DesignTokens.rgb(0x2A1719)) }
         /// chip.prBg: #1E2A20
-        public static var chipPrBg: NSColor { DesignTokens.rgb(0x1E2A20) }
+        public static var chipPrBg: NSColor { DesignTokens.themed("chip.prBg", DesignTokens.rgb(0x1E2A20)) }
         /// chip.prText: #7FD3A2
-        public static var chipPrText: NSColor { DesignTokens.rgb(0x7FD3A2) }
+        public static var chipPrText: NSColor { DesignTokens.themed("chip.prText", DesignTokens.rgb(0x7FD3A2)) }
         /// chip.usageBg: #2A2113
-        public static var chipUsageBg: NSColor { DesignTokens.rgb(0x2A2113) }
+        public static var chipUsageBg: NSColor { DesignTokens.themed("chip.usageBg", DesignTokens.rgb(0x2A2113)) }
         /// chip.groupBg: #1D2230
-        public static var chipGroupBg: NSColor { DesignTokens.rgb(0x1D2230) }
+        public static var chipGroupBg: NSColor { DesignTokens.themed("chip.groupBg", DesignTokens.rgb(0x1D2230)) }
         /// chip.groupText: #9BB8F0
-        public static var chipGroupText: NSColor { DesignTokens.rgb(0x9BB8F0) }
+        public static var chipGroupText: NSColor { DesignTokens.themed("chip.groupText", DesignTokens.rgb(0x9BB8F0)) }
         /// tint.needs: #1C1812
-        public static var tintNeeds: NSColor { DesignTokens.rgb(0x1C1812) }
+        public static var tintNeeds: NSColor { DesignTokens.themed("tint.needs", DesignTokens.rgb(0x1C1812)) }
         /// tint.done: #121A15
-        public static var tintDone: NSColor { DesignTokens.rgb(0x121A15) }
+        public static var tintDone: NSColor { DesignTokens.themed("tint.done", DesignTokens.rgb(0x121A15)) }
         /// tint.permission: #1E1A12
-        public static var tintPermission: NSColor { DesignTokens.rgb(0x1E1A12) }
+        public static var tintPermission: NSColor { DesignTokens.themed("tint.permission", DesignTokens.rgb(0x1E1A12)) }
         /// tint.optionSelected: #141B26
-        public static var tintOptionSelected: NSColor { DesignTokens.rgb(0x141B26) }
+        public static var tintOptionSelected: NSColor { DesignTokens.themed("tint.optionSelected", DesignTokens.rgb(0x141B26)) }
         /// scrim: rgba(5,6,7,0.6)
         public static var scrim: NSColor { DesignTokens.rgb(0x050607, alpha: 0.6) }
         /// shadow.40: rgba(0,0,0,0.4)
@@ -174,6 +176,123 @@ public enum DesignTokens {
         /// shadow.60: rgba(0,0,0,0.6)
         public static var shadow60: NSColor { DesignTokens.rgb(0x000000, alpha: 0.6) }
     }
+
+    /// How each themed color follows a theme (tools/design/theme_recipes.py): from the theme's
+    /// frame color and text, or toward a state color.
+    static let recipes: [String: ThemeRecipe] = [
+        "bg.window": .neutral(-0.0298),
+        "bg.inset": .neutral(-0.0157),
+        "bg.drawer": .neutral(-0.0110),
+        "bg.paneIdle": .neutral(-0.0063),
+        "bg.chrome": .neutral(0.0000),
+        "bg.sidebar": .neutral(0.0047),
+        "bg.card": .neutral(0.0172),
+        "bg.raised": .neutral(0.0266),
+        "bg.button": .neutral(0.0423),
+        "bg.userMessage": .neutral(0.0564),
+        "bg.chip": .neutral(0.0564),
+        "bg.selected": .neutral(0.0690),
+        "bg.segment": .neutral(0.0846),
+        "line.subtle": .neutral(0.0658),
+        "line.pane": .neutral(0.0846),
+        "line.paneIdle": .neutral(0.0893),
+        "line.popover": .neutral(0.0940),
+        "line.default": .neutral(0.0987),
+        "line.control": .neutral(0.1238),
+        "line.selected": .neutral(0.1363),
+        "line.focus": .neutral(0.1457),
+        "line.amber": .tint(0xF2A93B, 0.2514),
+        "scroll.thumb": .neutral(0.2037),
+        "text.separator": .neutral(0.2837),
+        "text.strong": .neutral(1.0596),
+        "text.terminalStrong": .neutral(1.0282),
+        "text.primary": .neutral(1.0000),
+        "text.row": .neutral(0.9216),
+        "text.terminal": .neutral(0.8699),
+        "text.body": .neutral(0.8417),
+        "text.terminalDim": .neutral(0.7821),
+        "text.secondary": .neutral(0.6645),
+        "text.muted": .neutral(0.5893),
+        "text.tertiary": .neutral(0.5235),
+        "text.amberNote": .ink(0xF2A93B, 0.5583),
+        "accent.amberText": .ink(0xF2A93B, 0.2000),
+        "accent.greenText": .ink(0x3FB97A, 0.2873),
+        "accent.redText": .ink(0xEF5B5B, 0.3302),
+        "accent.liveText": .ink(0x5B9CF5, 0.3681),
+        "accent.link": .ink(0x5B9CF5, 0.4574),
+        "accent.linkBg": .tint(0x5B9CF5, 0.1252),
+        "diff.addText": .ink(0x3FB97A, 0.7283),
+        "diff.addBg": .tint(0x3FB97A, 0.0983),
+        "diff.delText": .ink(0xEF5B5B, 0.6607),
+        "diff.delBg": .tint(0xEF5B5B, 0.0986),
+        "chip.prBg": .tint(0x3FB97A, 0.1354),
+        "chip.prText": .ink(0x3FB97A, 0.3829),
+        "chip.usageBg": .tint(0xF2A93B, 0.0995),
+        "chip.groupBg": .tint(0x5B9CF5, 0.1172),
+        "chip.groupText": .ink(0x5B9CF5, 0.4370),
+        "tint.needs": .tint(0xF2A93B, 0.0384),
+        "tint.done": .tint(0x3FB97A, 0.0268),
+        "tint.permission": .tint(0xF2A93B, 0.0485),
+        "tint.optionSelected": .tint(0x5B9CF5, 0.0652),
+    ]
+
+    /// The themed colors as Cadex Night has them: what a repaint maps from on the way back.
+    static let cadexNight: [String: UInt32] = [
+        "bg.window": 0x0C0D0F,
+        "bg.inset": 0x0F1012,
+        "bg.drawer": 0x101113,
+        "bg.paneIdle": 0x111214,
+        "bg.chrome": 0x121316,
+        "bg.sidebar": 0x131417,
+        "bg.card": 0x15171A,
+        "bg.raised": 0x17191C,
+        "bg.button": 0x1A1C20,
+        "bg.userMessage": 0x1C1F24,
+        "bg.chip": 0x1D1F23,
+        "bg.selected": 0x1F2226,
+        "bg.segment": 0x22252A,
+        "line.subtle": 0x1F2125,
+        "line.pane": 0x22252A,
+        "line.paneIdle": 0x23262B,
+        "line.popover": 0x24272C,
+        "line.default": 0x25282D,
+        "line.control": 0x2A2D33,
+        "line.selected": 0x2C3036,
+        "line.focus": 0x2E3238,
+        "line.amber": 0x4A3A1C,
+        "scroll.thumb": 0x3A3E45,
+        "text.separator": 0x4A4F57,
+        "text.strong": 0xF4F5F6,
+        "text.terminalStrong": 0xEDEEF0,
+        "text.primary": 0xE7E8EA,
+        "text.row": 0xD5D7DB,
+        "text.terminal": 0xC9CCD1,
+        "text.body": 0xC3C6CB,
+        "text.terminalDim": 0xB5B9C0,
+        "text.secondary": 0x9BA0A8,
+        "text.muted": 0x8A9099,
+        "text.tertiary": 0x7C828B,
+        "text.amberNote": 0xF2D29B,
+        "accent.amberText": 0xF2B65E,
+        "accent.greenText": 0x6FCF97,
+        "accent.redText": 0xF08A8A,
+        "accent.liveText": 0x8FB8F7,
+        "accent.link": 0x9BC1FF,
+        "accent.linkBg": 0x1A2333,
+        "diff.addText": 0xB9E5C8,
+        "diff.addBg": 0x15261C,
+        "diff.delText": 0xF0B9B9,
+        "diff.delBg": 0x2A1719,
+        "chip.prBg": 0x1E2A20,
+        "chip.prText": 0x7FD3A2,
+        "chip.usageBg": 0x2A2113,
+        "chip.groupBg": 0x1D2230,
+        "chip.groupText": 0x9BB8F0,
+        "tint.needs": 0x1C1812,
+        "tint.done": 0x121A15,
+        "tint.permission": 0x1E1A12,
+        "tint.optionSelected": 0x141B26,
+    ]
 
     public enum FontSize {
         public static let badge: CGFloat = 10

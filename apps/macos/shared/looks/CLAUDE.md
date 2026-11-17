@@ -20,6 +20,10 @@
   `DesignTokensCenter.swift` e `DesignTokensPages.swift`: os tokens dos mockups da moldura nova, gerados
   por `../../../../tools/design/build_tokens.py` de `../../../../docs/design/work-frame/tokens.json`
   (não editar à mão). Valores em pontos de desenho: quem usa passa por `pt`, `rowHeight` e `font`.
+- `DesignTokensTheme.swift`: a moldura no tema (2026-11-17): cada cor com receita segue o fundo e o
+  texto do tema ativo (`applyTheme`; no Cadex Night, os valores dos mockups); as cores de estado
+  ficam iguais em todo tema. `repaint` troca, numa janela já montada, cada cor de token pela nova
+  (camadas, textos, ícones, botões) e redesenha tudo, sem refazer as views.
 - `UILooks.swift`: o app chama UILooks.configure uma vez, antes de montar qualquer tela. As telas
   pedem `font(_:weight:)` (tamanho do desenho × zoom × fontSize/13, na família escolhida com o
   mesmo peso), `monospaced`/`monospacedDigits` (código curto e números), `pt` (larguras, margens,

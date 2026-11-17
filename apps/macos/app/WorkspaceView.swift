@@ -105,6 +105,10 @@ final class WorkspaceView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("WorkspaceView is created in code") }
 
+    /// The frame's colors as this window last painted them: the palette is the app's, and each
+    /// window repaints from its own, so a second window changes too.
+    private var paintedWith = DesignTokens.themedColors()
+
     /// A space's tabs come into the window (docs/spec/projects.md).
     func show(_ tabs: TabsController) {
         guard tabs.view !== tabsView else { return }
@@ -235,6 +239,12 @@ final class WorkspaceView: NSView {
             text: ui.textOnTabActive.nsColor, secondaryText: ui.secondaryText.nsColor, accent: ui.accent.nsColor)
         tabBarStyle = style
         titleBar.tabBar?.style = style
+        // The new frame in the theme's colors (owner, 2026-11-17: every theme looked like Cadex
+        // Night): the tokens follow its frame color and text; Cadex Night keeps the mockups'.
+        let mockups = theme.interface == Theme.cadexNight.interface
+        DesignTokens.applyTheme(chrome: mockups ? nil : theme.interface.chrome.nsColor, text: mockups ? nil : theme.interface.text.nsColor)
+        DesignTokens.repaint(self, from: paintedWith)
+        paintedWith = DesignTokens.themedColors()
     }
 
     /// The frost is a layer over the title area and hid the close, minimize

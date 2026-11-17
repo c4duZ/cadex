@@ -21,6 +21,10 @@ import pathlib
 import re
 import sys
 
+# Run with -I by make: the script's own folder is not on the path.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import theme_recipes  # noqa: E402
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 TOKENS = ROOT / "docs/design/work-frame/tokens.json"
 OUT_PRIMITIVES = ROOT / "apps/macos/shared/looks/DesignTokens.swift"
@@ -105,11 +109,35 @@ def primitives(t):
            "            self.x = x; self.y = y; self.blur = blur; self.spread = spread; self.colorValue = color; self.inset = inset",
            "        }",
            "    }\n"]
+    recipe = theme_recipes.recipes(t["color"])
+    out.append("    /// Each color as Cadex Night has it; a theme's palette (DesignTokensTheme.swift) takes over")
+    out.append("    /// the ones with a recipe.")
     out.append("    public enum Color {")
     for k, v in t["color"].items():
         out.append(f"        /// {k}: {v}")
-        out.append(f"        public static var {ident(k)}: NSColor {{ {color_expr(v)} }}")
+        if k in recipe:
+            out.append(f"        public static var {ident(k)}: NSColor {{ DesignTokens.themed(\"{k}\", {color_expr(v)}) }}")
+        else:
+            out.append(f"        public static var {ident(k)}: NSColor {{ {color_expr(v)} }}")
     out.append("    }\n")
+    out.append("    /// How each themed color follows a theme (tools/design/theme_recipes.py): from the theme's")
+    out.append("    /// frame color and text, or toward a state color.")
+    out.append("    static let recipes: [String: ThemeRecipe] = [")
+    for k, r in recipe.items():
+        if k.endswith("#error"):
+            continue
+        if r[0] == "neutral":
+            out.append(f"        \"{k}\": .neutral({r[1]:.4f}),")
+        else:
+            hue = t["color"][r[1]][1:].upper()
+            out.append(f"        \"{k}\": .{r[0]}(0x{hue}, {r[2]:.4f}),")
+    out.append("    ]\n")
+    out.append("    /// The themed colors as Cadex Night has them: what a repaint maps from on the way back.")
+    out.append("    static let cadexNight: [String: UInt32] = [")
+    for k in recipe:
+        if not k.endswith("#error"):
+            out.append(f"        \"{k}\": 0x{t['color'][k][1:].upper()},")
+    out.append("    ]\n")
     for group, typ in (("fontSize", "CGFloat"), ("lineHeight", "CGFloat"), ("stroke", "CGFloat"), ("opacity", "CGFloat")):
         out.append(f"    public enum {SWIFT_GROUP[group]} {{")
         for k, v in t[group].items():

@@ -92,4 +92,6 @@ LIMITS = {
     "orch_run_missing": 0,        # the chain of 2 done, the 3 long ones dispatched
     "orch_network": 0,            # not one network connection of the app (lsof -i)
     "orch_keychain": 0,           # no Keychain file open (fs_usage needs root; lsof)
+    # Plan 27 (tools/perf/plan27.py): the work's tree with 8 projects of 6 tasks each.
+    "tree_over_idle_pct": 10,     # the plan's limit before the first measure
 }
