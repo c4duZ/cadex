@@ -54,7 +54,7 @@ agents, tabs, command-palette · Decisões: `docs/adr/0035-work-frame.md` · Moc
   página saiu da barra lateral (o id em SidebarLayout.retired). Sem atalho: o ⌘⇧H do mockup é do
   preview web hoje, e o dono decide. Plano original: A página agent-history passa a abrir no centro, como documento, por
   Arquivo e histórico (⌘⇧H), com as mesmas ações (continuar, copiar o comando, revelar).
-- **D. Remoção.** Saem: SidebarIconRow.swift, SidebarIconButton.swift, SidebarLayout.swift, a
+- **D. Remoção.** Feita (2026-11-17): saíram a fileira de ícones e o SidebarView com os comandos dela, a configuração sidebar.items (um arquivo antigo abre sem aviso), CADEX_PERF_SIDEBAR (o `make perf` abre o histórico pelo CADEX_PERF_PANEL), os sidebar.page-N (viraram inspector.tab-1…4), a página Tasks e a página Agents; worktrees.show e agents.show mostram a árvore até o 28; a leitura das sessões nas outras máquinas fica sem quem a chame até a página do projeto (30). Plano original: Saem: SidebarIconRow.swift, SidebarIconButton.swift, SidebarLayout.swift, a
   aba Sidebar do Customize, sidebar.customize, `sidebar.toggle-page`, os apelidos
   `sidebar.page-1…9`, a leitura de sidebar.items, a página Tasks (WorktreesView.swift) e a
   página Agents (AgentsView.swift, AgentSessionList.swift, AgentsLayout.swift), com

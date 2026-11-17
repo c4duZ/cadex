@@ -26,7 +26,8 @@
   como marco de consolidação, plano 22 fase F), `setComment`.
 - worktrees.set-status e -set-comment também aceitam `status=` e `comment=` do agente (plano 20): da
   tarefa do terminal dele (`taskOf`, só uma worktree de tarefa, nunca o repositório), sem lista.
-- `WorktreesView.swift`: a página Tasks (lê só enquanto aparece). `WorktreesCommands.swift`:
+- As tarefas aparecem na árvore da esquerda (feature sidebar; a página Tasks saiu no plano 27 fase D).
+  `WorktreesCommands.swift`:
   worktrees.new-task, -open, -remove, -set-status, -set-comment e -edit-setup-hooks, com as listas
   no ⌘K; o que pergunta e abre abas é do app (`../../app/WorktreesWiring.swift`).
 - "Rodar em" outra máquina (plano 23, fase C; `../../../../docs/adr/0031-run-on-remote.md`, o
@@ -38,7 +39,7 @@
   ou "não respondeu") e `WorktreesRemote.swift` (`makeRemote` e `removeRemote`: a tarefa só entra na
   lista quando a worktree existe lá; a pasta do repositório por máquina fica lembrada). As notas
   ganham `remote` e `remoteFolders`, lidas com `decodeIfPresent` (um arquivo de antes continua
-  valendo inteiro). A página Tasks mostra a remota com o nome da máquina; worktrees.new-task-on e
+  valendo inteiro). worktrees.new-task-on e
   worktrees.open-remote-shell, e worktrees.remove lista as remotas também.
 - A corrida (plano 24, fase C): `plan(name:repo:base:)` aceita o ponto de partida escolhido;
   `discard` apaga a pasta de uma worktree descartada (direto, sem a Lixeira: o dono, 2026-11-16),

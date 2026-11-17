@@ -11,7 +11,6 @@ extension WindowSession {
         let environment = ProcessInfo.processInfo.environment
         if let path = environment["CADEX_PERF_SUBAGENT_LOG"] { openPerfTranscript(path) }
         if let count = environment["CADEX_PERF_TABS"].flatMap(Int.init) { openPerfTabs(count) }
-        if let page = environment["CADEX_PERF_SIDEBAR"] { showPerfPage(page) }
         if let out = environment["CADEX_PERF_REVIEW"] { openPerfReview(out) }
         if let out = environment["CADEX_PERF_MACHINES"] { openPerfMachines(out) }
         if let file = environment["CADEX_PERF_RACE"] { startPerfRace(file) }
@@ -46,10 +45,9 @@ extension WindowSession {
         }
     }
 
-    /// That sidebar page shown from the start: the sidebar opens on its
-    /// default page, not on the first of sidebar.items, so a scenario that
-    /// wants Agents or History open asks for it (found 2026-11-14: the
-    /// History "open" scenario had never shown the page).
+    /// A right panel's tab, or Archive & history ("agent-history"), shown from the start: a
+    /// scenario that wants one open asks for it (found 2026-11-14: the History "open" scenario
+    /// had never shown the page).
     private func showPerfPage(_ page: String) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
             guard let self, let workspace = self.workspace else { return }

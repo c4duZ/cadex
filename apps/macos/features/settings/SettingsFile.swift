@@ -83,9 +83,6 @@ public enum SettingsFile {
             settings.power.onAtLaunch = reader.bool(p, "power.onAtLaunch") ?? settings.power.onAtLaunch
             settings.power.keepDisplayOn = reader.bool(p, "power.keepDisplayOn") ?? settings.power.keepDisplayOn
         }
-        if let s = reader.section(root, "sidebar") {
-            settings.sidebar.items = reader.strings(s, "sidebar.items") ?? settings.sidebar.items
-        }
         if let s = reader.section(root, "inspector") {
             settings.inspector.visible = reader.bool(s, "inspector.visible") ?? settings.inspector.visible
             settings.inspector.tab = reader.choice(s, "inspector.tab", Settings.inspectorTabs) ?? settings.inspector.tab
@@ -219,16 +216,8 @@ public enum SettingsFile {
             if bar?["right"] == nil { settings.statusBar.right = ["environment"] }
             migrateStatusBar(&settings.statusBar)
         }
-        if version < 4 {
-            // Files, Git, Git History and Memory went to the right panel and Accounts to the usage
-            // item's card (plan 26 phases C and E): their ids leave the sidebar's list once.
-            settings.sidebar.items.removeAll { movedOutOfSidebar.contains($0) }
-        }
         settings.version = max(version, Settings.currentVersion)
     }
-
-    /// The sidebar's pages that left it in plan 26 (migration 0035).
-    static let movedOutOfSidebar: Set<String> = ["files", "git", "history", "memory", "accounts"]
 
     /// The new frame's status bar (plan 26 phase B): the old default becomes the new one; a bar
     /// someone arranged stays theirs, with Folder and Git branch shown together becoming Project,
@@ -279,7 +268,6 @@ public enum SettingsFile {
             "markdown": ["openAs": s.markdown.openAs],
             "preview": ["pickTarget": s.preview.pickTarget, "pickScreenshot": s.preview.pickScreenshot],
             "power": ["mode": s.power.mode, "onAtLaunch": s.power.onAtLaunch, "keepDisplayOn": s.power.keepDisplayOn],
-            "sidebar": ["items": s.sidebar.items],
             "inspector": ["visible": s.inspector.visible, "tab": s.inspector.tab, "width": s.inspector.width],
             "statusBar": ["left": s.statusBar.left, "right": s.statusBar.right],
             "ssh": ["ping": s.ssh.ping],

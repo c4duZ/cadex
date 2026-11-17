@@ -24,8 +24,6 @@ final class SettingsBridge {
     var onExplorer: ((Settings.Explorer) -> Void)?
     /// The markdown section changed (how notes open).
     var onMarkdown: ((Settings.Markdown) -> Void)?
-    /// The sidebar section changed (which icons, in what order).
-    var onSidebar: ((Settings.Sidebar) -> Void)?
     /// computerUse changed (ComputerUseWiring.swift).
     var onComputerUse: ((Settings.ComputerUse) -> Void)?
     /// The status bar section changed (which items, on which side).
@@ -77,7 +75,6 @@ final class SettingsBridge {
         onExplorer?(settings.explorer)
         onMarkdown?(settings.markdown)
         onPower?(settings.power)
-        onSidebar?(settings.sidebar)
         onStatusBar?(settings.statusBar)
         AgentsController.shared.isEnabled = settings.agents.sessions
         AgentUsageController.shared.isEnabled = settings.agents.accounts

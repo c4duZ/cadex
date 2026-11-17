@@ -16,22 +16,6 @@ import Themes
 /// screen, the dot while the icon is in the sidebar, the item while it is
 /// in the bar.
 extension WindowSession {
-    /// The Agents page (the sessions); Accounts became the usage item's card (plan 26 phase E).
-    func makeAgentsPage() -> AgentsView {
-        let page = AgentsView()
-        page.isInCadex = { [weak self] session in self?.terminal(of: session) != nil }
-        page.onOpen = { [weak self] session in self?.openAgent(session) }
-        page.onOpenSubagent = { [weak self] session, agent in self?.openSubagent(agent, of: session) }
-        page.onEnable = { [weak self] in self?.settings.store.update { $0.agents.sessions = true } }
-        page.projectNote = { root in WorktreesController.shared.note(for: root) }
-        page.onReview = { [weak self] root in self?.openReview(repo: root) }
-        ThemeStore.shared.observe { [weak page, weak self] _ in
-            page?.colors = Self.agentColors()
-            self?.usageStrip?.colors = Self.agentColors()
-        }
-        return page
-    }
-
     /// Agent usage in the status bar: "Claude bkdg 84% · resets 3h" for the focused terminal's
     /// account, the amber chip above 80%; reads only while the item shows.
     func makeUsageItem() -> StatusItem {
@@ -90,17 +74,6 @@ extension WindowSession {
             if let terminal = space.tabs.allTerminals.first(where: { $0.foregroundGroup == group }) { return (index, terminal) }
         }
         return nil
-    }
-
-    /// A subagent's conversation in a tab, beside or new as files open; the
-    /// same subagent again selects its tab (docs/spec/agents.md).
-    func openSubagent(_ agent: AgentSubagent, of session: AgentSession) {
-        guard let tabs else { return }
-        let identity = AgentTranscriptDocument.identity(for: AgentTranscriptDocument.path(of: agent, in: session))
-        if let existing = tabs.document(identity: identity) { return tabs.open(existing) }
-        let document = AgentTranscriptDocument(session: session, agent: agent, colors: Self.agentColors())
-        ThemeStore.shared.observe { [weak document] _ in document?.colors = Self.agentColors() }
-        tabs.open(document, beside: settings.opensBeside)
     }
 
     /// The terminal with the focus runs an agent: its notification is read

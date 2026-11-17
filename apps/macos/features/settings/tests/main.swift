@@ -70,20 +70,9 @@ let exitCode = await Checks.run([
         let (bad, problems) = SettingsFile.read(Data(#"{"agents": {"projectAccounts": ["x"]}}"#.utf8))
         expect(bad.agents.projectAccounts.isEmpty && problems.count == 1, "\(problems)")
     }),
-    ("the sidebar's icons default to Tasks and Agents, and keep the saved order", {
-        expect(SettingsFile.read(Data("{}".utf8)).0.sidebar.items == ["tasks", "agents"])
-        var settings = Settings()
-        settings.sidebar.items = ["git", "files"]
-        expect(SettingsFile.read(SettingsFile.write(settings)).0.sidebar.items == ["git", "files"])
-        let (read, problems) = SettingsFile.read(Data(#"{"sidebar": {"items": "git"}}"#.utf8))
-        expect(read.sidebar.items == ["tasks", "agents"] && problems.count == 1, "\(problems)")
-    }),
-    ("version 4: the pages that left the sidebar in plan 26 leave its saved list once", {
-        let old = SettingsFile.read(Data(#"{"version": 3, "sidebar": {"items": ["files", "agents", "git", "accounts", "tasks", "memory", "history"]}}"#.utf8)).0
-        expect(old.sidebar.items == ["agents", "tasks"] && old.version == 4, "\(old.sidebar.items)")
-        // A file already at 4 is not touched again (an id with the same name a later plan adds stays).
-        let new = SettingsFile.read(Data(#"{"version": 4, "sidebar": {"items": ["files", "agents"]}}"#.utf8)).0
-        expect(new.sidebar.items == ["files", "agents"], "\(new.sidebar.items)")
+    ("a file of the old sidebar (its icon list, gone in plan 27) reads with no problem", {
+        let (read, problems) = SettingsFile.read(Data(#"{"version": 4, "sidebar": {"items": ["files", "agents"]}}"#.utf8))
+        expect(problems.isEmpty && read.version == Settings.currentVersion, "\(problems)")
     }),
     ("the right panel opens on Changes; open or closed and its tab come back; a tab it lacks is a problem", {
         let fresh = SettingsFile.read(Data("{}".utf8)).0.inspector

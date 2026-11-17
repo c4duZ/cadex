@@ -55,19 +55,13 @@
 - Sessões em outra máquina (plano 23, "Rodar em"): AgentBackground.parseRemote lê o `claude
   agents --json` de lá (interativas e em segundo plano; o formato das interativas não foi visto numa
   sessão real ainda), AgentSession.machine e a linha "· em pc"; o controller recebe a lista em
-  `remote`, e `pageShown`/`onWatching` dizem ao app quando uma página Agents está na tela (o notifier
-  vigia o controller sempre, então vigiado não é olhado). O silêncio por máquina
+  `remote`, e `pageShown`/`onWatching` diziam ao app quando a página Agents estava na tela: sem ela
+  (plano 27 fase D) ninguém os chama até a página do projeto, no plano 30, mostrar essas sessões. O silêncio por máquina
   (agents.mutedMachines: "local" e o nome de cada máquina) é conferido por sessão no
   `AgentNotifier.swift` (`mutedMachines`): a sessão de uma máquina silenciada para sem notificação,
   e o sininho e o feed continuam.
-- `AgentsLayout.swift`: grupos por projeto (o mais recente primeiro; esperando antes de
-  trabalhando) e a linha de baixo ("main · conta", "esperando você · conta · fora do Cadex", "… ·
-  em segundo plano").
-- `AgentsView.swift`: a página da barra lateral; lê só enquanto aparece. `AgentSessionList.swift`:
-  as sessões, com o logo da conta; clique (ou a seta) abre os subagentes, duplo clique chama
-  `onOpen` (o terminal; numa sessão em segundo plano, uma aba nova com `claude attach <job>`, de
-  `AgentLaunch.swift:attachCommand`),
-  o título do projeto recolhe o grupo. `AgentMotion.swift`: a seta que gira e o `AgentReveal`, que
+- A página Agents (AgentsView, AgentSessionList, AgentsLayout) saiu no plano 27
+  fase D: os agentes estão nos terminais da árvore. `AgentMotion.swift`: a seta que gira e o `AgentReveal`, que
   desdobra e dobra (altura e opacidade, 0,2 s). `AgentRows.swift`: o sinal (anel girando, ponto
   azul, ✓), a linha clicável que acende ao passar e escurece ao apertar, e os rótulos.
 - `AgentStop.swift`: por que uma sessão parou, do fim do log (64 KB, uma vez por parada):
@@ -162,8 +156,8 @@
 - O app (`../../app/AgentsWiring.swift`) liga o item Agents da barra de status e acha o terminal de
   cada sessão pelo grupo de processos (`cadex_terminal_foreground_group` do núcleo). A página Agents
   saiu da janela com a barra de ícones (plano 27 fase B: agents.show, ⇧⌘J, mostra a árvore, onde as
-  tarefas e os terminais têm o estado de cada agente); `AgentsView.swift` e as linhas dela saem na
-  fase D, e as sessões abertas fora do Cadex vão para a página do projeto no plano 30.
+  tarefas e os terminais têm o estado de cada agente); as sessões abertas fora do Cadex vão para a
+  página do projeto no plano 30.
 - O id de cada sessão pelos hooks (plano 19, fase B): AgentsController.noteHook guarda, por pid do
   `claude`, o id que os hooks dizem (certo depois de /clear e --resume) e `withHookIDs` o põe no
   lugar do id do registro; o socket é da feature agent-tools.

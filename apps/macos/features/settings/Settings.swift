@@ -119,13 +119,6 @@ public struct Settings: Equatable, Sendable {
         public var keepDisplayOn = false
     }
 
-    public struct Sidebar: Equatable, Sendable {
-        /// The icons on top of the sidebar, in order; a page left out is
-        /// hidden (docs/spec/sidebar.md). The app drops unknown ids.
-        /// Files, Git, Git History and Memory went to the right panel (plan 26 phase C).
-        public var items = ["tasks", "agents"]
-    }
-
     /// The right panel (docs/spec/inspector.md): open or closed, and its tab, come back on reopen.
     public struct Inspector: Equatable, Sendable {
         public var visible = true
@@ -277,7 +270,6 @@ public struct Settings: Equatable, Sendable {
     public var markdown = Markdown()
     public var preview = Preview()
     public var power = Power()
-    public var sidebar = Sidebar()
     public var inspector = Inspector()
     public var statusBar = StatusBar()
     public var agents = Agents()

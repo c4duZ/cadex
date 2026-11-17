@@ -303,10 +303,9 @@ def history_scenario(open_page):
     home = tempfile.mkdtemp(prefix="cadex-perf-history-")
     try:
         write_history_home(home)
-        first = ["agent-history", "files"] if open_page else ["files", "agent-history"]
-        settings = {"sidebar": {"items": first + ["git", "agents", "accounts"]}}
-        env = {"CADEX_PERF_HOME": home} | ({"CADEX_PERF_SIDEBAR": "agent-history"} if open_page else {})
-        found = scenario("history", "idle", ROOT, measure_idle, settings=settings, extra_env=env)
+        # Archive & history opens in the center since plan 27 (agents.show-history).
+        env = {"CADEX_PERF_HOME": home} | ({"CADEX_PERF_PANEL": "agent-history"} if open_page else {})
+        found = scenario("history", "idle", ROOT, measure_idle, extra_env=env)
         key = "history_open" if open_page else "history_closed"
         index = os.path.exists(f"{home}/Library/Application Support/Cadex/history.sqlite")
         print(f"    {found['idle_mb']:.0f} MB, index file {'made' if index else 'not made'}")
@@ -318,13 +317,12 @@ def history_scenario(open_page):
         shutil.rmtree(home, ignore_errors=True)
 
 
-ALL_ON = {"sidebar": {"items": ["agents", "files", "git", "accounts"]},
-          "statusBar": {"left": ["folder", "branch", "terminals", "agents", "usage"],
+ALL_ON = {"statusBar": {"left": ["folder", "branch", "terminals", "agents", "usage"],
                         "right": ["ports", "ssh", "ram", "cpu", "cadexMemory", "environment"]}}
 
 
 def all_on_scenario():
-    """Every status bar item, the Agents page open, three accounts and
+    """Every status bar item, the work's tree with the agents, three accounts and
     sessions and three SSH hosts: at most 10% over the idle scenario and
     the same CPU (plan 17, phase F)."""
     home = tempfile.mkdtemp(prefix="cadex-perf-home-")
@@ -332,7 +330,7 @@ def all_on_scenario():
     try:
         write_agents_home(home, waiter.pid)
         found = scenario("all-on", "idle", ROOT, measure_idle, settings=ALL_ON,
-                         extra_env={"CADEX_PERF_HOME": home, "CADEX_PERF_SIDEBAR": "agents"})
+                         extra_env={"CADEX_PERF_HOME": home})
         return {"all_on_mb": found["idle_mb"], "all_on_cpu": found["idle_cpu"]}
     finally:
         waiter.kill()

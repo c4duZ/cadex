@@ -66,5 +66,5 @@ de você sem abrir página nenhuma (`../adr/0035-work-frame.md`; mockup e texto 
 - [ ] Projeto sem tarefa nunca mostra nada de tarefa.
 - [ ] ⌘B recolhe e mostra; a largura volta ao reabrir.
 - [ ] Cada ação da árvore está no ⌘K.
-- [ ] Nada da fileira de ícones de antes existe: sem ícones de página, sem Customize Sidebar,
-  sem sidebar.items (`../design/work-frame/inventory.md`).
+- [ ] Nada da barra de antes existe: sem ícones de página, sem Customize Sidebar, sem a lista de
+  ícones nas configurações (`../design/work-frame/inventory.md`).

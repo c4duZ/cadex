@@ -75,8 +75,6 @@ let folderChecks: [(name: String, body: Checks.Body)] = [
         expect(found[0].status == .waiting && found[0].job == "2e0affcb" && found[0].waitingFor == "permission prompt" && found[0].pid == 0)
         expect(found[1].status == .working)
         expect(AgentBackground.parse(Data("not json".utf8), account: account).isEmpty)
-        expect(AgentsLayout.detail(found[0], project: AgentProject(root: "/r", name: "r", branch: "main"), inCadex: false)
-               == "waiting for you · X · in the background")
         expect(AgentLaunch.attachCommand(job: "2e0affcb", account: account) == "CLAUDE_CONFIG_DIR='/h/.claude-x' claude attach 2e0affcb")
         expect(AgentLaunch.attachCommand(job: "ab; rm -rf ~", account: AgentAccount(dir: "/h/.claude", name: "d", isDefault: true))
                == "claude attach abrm-rf", "only letters, digits and dashes reach the shell")

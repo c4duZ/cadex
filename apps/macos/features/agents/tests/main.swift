@@ -90,19 +90,6 @@ let exitCode = await Checks.run([
         expect(subagents.map(\.description) == ["Mover Kakashi", "Achar o bug"], "\(subagents)")
         expect(subagents.map(\.isRunning) == [true, false])
     }),
-    ("the page groups by project, waiting first, and says where each one is", {
-        let account = AgentAccount(dir: "/a", name: "BKDG", isDefault: false)
-        func session(_ id: String, _ cwd: String, _ status: AgentSession.Status, _ at: Double) -> AgentSession {
-            AgentSession(account: account, pid: 1, id: id, name: id, cwd: cwd, status: status, since: Date(timeIntervalSince1970: at))
-        }
-        let project = { (cwd: String) in AgentProject(root: cwd.hasPrefix("/x") ? "/x" : cwd, name: cwd.hasPrefix("/x") ? "x" : "y", branch: "main") }
-        let groups = AgentsLayout.groups([session("a", "/x/1", .working, 30), session("b", "/x/2", .waiting, 10), session("c", "/y", .working, 20)], project: project)
-        expect(groups.map(\.project.name) == ["x", "y"] && groups[0].sessions.map(\.id) == ["b", "a"], "\(groups.map { $0.sessions.map(\.id) })")
-        let p = AgentProject(root: "/x", name: "x", branch: "main")
-        expect(AgentsLayout.detail(session("a", "/x", .working, 0), project: p, inCadex: true) == "main · BKDG")
-        expect(AgentsLayout.detail(session("b", "/x", .waiting, 0), project: p, inCadex: false) == "waiting for you · BKDG · outside Cadex")
-        expect(AgentTime.short(since: Date(timeIntervalSinceNow: -200)) == "3m" && AgentTime.short(since: Date()) == "now")
-    }),
     ("nothing off or unwatched reads: no stream, no timer", {
         let home = fakeHome()
         defer { try? fm.removeItem(atPath: home) }
@@ -288,36 +275,6 @@ let exitCode = await Checks.run([
             }
         }
     }),
-    ("a click on a session unfolds its subagents, a double click goes to it; a project's title folds it", {
-        let home = fakeHome()
-        defer { try? fm.removeItem(atPath: home) }
-        AgentsController.shared.home = home
-        if AgentsController.shared.openSession != nil { AgentsController.shared.toggle(AgentsController.shared.openSession!) }
-        let page = AgentsView()
-        var opened: [String] = []
-        page.onOpen = { opened.append($0.id) }
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 260, height: 320), styleMask: [.borderless], backing: .buffered, defer: false)
-        page.frame = NSRect(x: 0, y: 0, width: 260, height: 320)
-        window.contentView = page
-        page.layoutSubtreeIfNeeded()
-        func all<T: NSView>(_ type: T.Type, in view: NSView = page) -> [T] {
-            view.subviews.flatMap { ($0 as? T).map { [$0] } ?? [] } + view.subviews.flatMap { all(type, in: $0) }
-        }
-        guard let row = all(AgentRow.self).first(where: { $0.toolTip?.contains("pid") == true }),
-              let caret = all(AgentCaret.self, in: row).first else { return expect(false, "no session row") }
-        row.onDoubleClick?()
-        expect(opened.count == 1 && AgentsController.shared.openSession == nil, "a double click goes, nothing unfolds")
-        row.onClick?()
-        expect(AgentsController.shared.openSession == opened.first, "a click unfolds its subagents")
-        caret.onClick?()
-        try? await Task.sleep(nanoseconds: 400_000_000)
-        expect(AgentsController.shared.openSession == nil, "its arrow folds them again")
-        let header = all(AgentRow.self).first { $0.toolTip == AgentsController.shared.sessions.first { $0.id == opened[0] }.map { AgentProject.of($0.cwd).root } }
-        header?.onClick?()
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        expect(page.folded.count == 1, "folded: \(page.folded)")
-        window.contentView = nil
-    }),
     ("a subagent's log reads as task, replies and tools; results, thinking and Esc marks stay out", {
         func line(_ object: [String: Any]) -> String { String(decoding: try! JSONSerialization.data(withJSONObject: object), as: UTF8.self) }
         let lines = [
@@ -423,48 +380,6 @@ let exitCode = await Checks.run([
         document = nil
         try? await Task.sleep(nanoseconds: 300_000_000)
         print(String(format: "transcript: before %.1f MB, open %.1f MB (+%.1f), closed %.1f MB, %.0f ms", before, open, open - before, footprint(), took * 1000))
-    }),
-    ("a picture of the page, with CADEX_SNAPSHOT_DIR", {
-        guard let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }
-        let home = fakeHome()
-        defer { try? fm.removeItem(atPath: home) }
-        AgentsController.shared.home = home
-        let page = AgentsView()
-        page.colors = AgentColors(text: .white, secondary: NSColor(white: 0.62, alpha: 1), accent: NSColor(red: 0.88, green: 0.64, blue: 0.35, alpha: 1),
-                                  waiting: NSColor(red: 0.42, green: 0.66, blue: 1, alpha: 1), fill: NSColor(white: 0.17, alpha: 1))
-        page.isInCadex = { $0.id == "s1" }
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 260, height: 320), styleMask: [.borderless], backing: .buffered, defer: false)
-        window.appearance = NSAppearance(named: .darkAqua)
-        let root = NSView(frame: window.contentLayoutRect)
-        root.wantsLayer = true
-        root.layer?.backgroundColor = NSColor(white: 0.08, alpha: 1).cgColor
-        page.frame = root.bounds
-        page.autoresizingMask = [.width, .height]
-        root.addSubview(page)
-        window.contentView = root
-        if AgentsController.shared.openSession != "s1" { AgentsController.shared.toggle("s1") }
-        root.layoutSubtreeIfNeeded()
-        if let bitmap = root.bitmapImageRepForCachingDisplay(in: root.bounds) {
-            root.cacheDisplay(in: root.bounds, to: bitmap)
-            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/agents-page.png"))
-        }
-        AgentsController.shared.hidden = [home + "/.claude-band"]
-        let usage = AgentUsageController.shared
-        usage.accounts = { AgentsController.shared.everyAccount().filter { !AgentsController.shared.hidden.contains($0.dir) } }
-        usage.states[home + "/.claude"] = .expired
-        usage.expiredSince[home + "/.claude"] = Date().addingTimeInterval(-600)
-        usage.plans[home + "/.claude-work"] = "team"
-        usage.states[home + "/.claude-work"] = .ready(AgentUsage(session: .init(percent: 19, resets: Date().addingTimeInterval(5400)),
-                                                                   week: .init(percent: 97, resets: Date().addingTimeInterval(86400 * 3)), sonnetWeek: nil), Date())
-        // The accounts now live in the usage item's card (plan 26 phase E): its picture.
-        let card = AgentUsageCard.make(colors: AgentColors()) { _ in }
-        card.frame = NSRect(origin: .zero, size: card.fittingSize)
-        if let bitmap = card.bitmapImageRepForCachingDisplay(in: card.bounds) {
-            card.cacheDisplay(in: card.bounds, to: bitmap)
-            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/usage-card.png"))
-        }
-        AgentsController.shared.hidden = []
-        page.removeFromSuperview()
     }),
 ])
 

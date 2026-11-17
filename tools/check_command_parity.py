@@ -15,8 +15,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 PREFIXES = "tab|pane|explorer|workspace|search|editor|markdown|terminal|git|history|diff|preview|media|space|edit|palette|settings|app|window|view|theme|power|sidebar|statusBar|agents|ssh|worktrees|agent-tools|computer-use|review|memory|machines|orchestration"
 LITERAL = re.compile(r'"((?:%s)\.[a-z0-9-]+)"' % PREFIXES)
 # Names of views and keys in the Mac's code, not commands (2026-10-20).
-# power.mode, sidebar.items and statusBar.left/right are settings.json keys, read by name in SettingsFile.swift.
-NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode", "sidebar.items", "statusBar.left", "statusBar.right", "agents.sessions", "agents.accountNames", "agents.hiddenAccounts", "agents.accounts", "ssh.ping", "agents.hiddenLogins", "agents.launchSkipPermissions", "agents.activeAccount", "agents.projectAccounts", "agents.history", "agents.stateHooks", "agents.attention", "agents.dockBadge", "agents.mutedMachines", "worktrees.root", "worktrees.setupHooks", "history.jsonl", "review.authorship", "memory.enabled", "memory.shareAcrossAccounts", "memory.consolidateInSession", "memory.consolidateAtContext", "memory.backgroundAgent", "memory.dailyBudgetUsd", "memory.requireApproval", "machines.tailscale", "machines.users", "machines.acceptRemote", "orchestration.enabled", "orchestration.automations", "orchestration.maxAgents", "orchestration.maxDepth", "orchestration.heartbeatMinutes", "orchestration.keepAwakeDuringRuns", "orchestration.defaultBudgetUsd", "orchestration.defaultMaxMinutes"}
+# power.mode and statusBar.left/right are settings.json keys, read by name in SettingsFile.swift.
+NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "terminal.ansi", "terminal.cursor", "power.mode", "statusBar.left", "statusBar.right", "agents.sessions", "agents.accountNames", "agents.hiddenAccounts", "agents.accounts", "ssh.ping", "agents.hiddenLogins", "agents.launchSkipPermissions", "agents.activeAccount", "agents.projectAccounts", "agents.history", "agents.stateHooks", "agents.attention", "agents.dockBadge", "agents.mutedMachines", "worktrees.root", "worktrees.setupHooks", "history.jsonl", "review.authorship", "memory.enabled", "memory.shareAcrossAccounts", "memory.consolidateInSession", "memory.consolidateAtContext", "memory.backgroundAgent", "memory.dailyBudgetUsd", "memory.requireApproval", "machines.tailscale", "machines.users", "machines.acceptRemote", "orchestration.enabled", "orchestration.automations", "orchestration.maxAgents", "orchestration.maxDepth", "orchestration.heartbeatMinutes", "orchestration.keepAwakeDuringRuns", "orchestration.defaultBudgetUsd", "orchestration.defaultMaxMinutes"}
 # Mac-only for now: the in-app updater (docs/adr/0016-in-app-updates.md) comes
 # to Windows later. Windows-only ones (workspace.environment) need no entry.
 # The pasted-image tags (docs/spec/terminal.md, Ver a imagem colada) also
@@ -27,7 +27,7 @@ NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "termi
 MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "terminal.open-pasted-image-beside", "terminal.open-pasted-image-in-tab",
             "preview.pick-element", "preview.stop-picking",
-            "sidebar.customize", "sidebar.toggle-page", "git.show-history", "history.show-in-tab",
+            "git.show-history", "inspector.tab-1", "inspector.tab-2", "inspector.tab-3", "inspector.tab-4", "history.show-in-tab",
             "statusBar.customize", "statusBar.toggle-item", "statusBar.activity-monitor", "agents.show", "agents.test-notifications", "agents.show-accounts", "agents.refresh-usage", "ssh.connect", "ssh.test-again", "agents.open-account", "agents.customize-accounts",
             "pane.zoom",
             # Managed accounts (plan 18, phase C), Mac only like the rest of agents.

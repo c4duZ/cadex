@@ -44,21 +44,21 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 ### Barra lateral de ícones (planos 26 e 27)
 | tipo | peça | estado | destino | plano |
 |---|---|---|---|---|
-| arquivo | `apps/macos/features/sidebar/SidebarIconRow.swift` | sai | a árvore do trabalho | 27 |
-| arquivo | `apps/macos/features/sidebar/SidebarIconButton.swift` | sai | a árvore do trabalho | 27 |
+| arquivo | `apps/macos/features/sidebar/SidebarIconRow.swift` | saiu | a árvore do trabalho (fase D) | 27 |
+| arquivo | `apps/macos/features/sidebar/SidebarIconButton.swift` | saiu | a árvore do trabalho (fase D) | 27 |
 | arquivo | `apps/macos/features/sidebar/SidebarSubtabs.swift` | saiu | as sub-abas eram do sino (virou popover), com SidebarItem.subtabs e select(subtab:of:) | 26 |
-| arquivo | `apps/macos/features/sidebar/SidebarLayout.swift` | sai | a árvore não tem ordem de ícones | 27 |
-| arquivo | `apps/macos/features/sidebar/SidebarItem.swift` | muda | o painel da direita tem a peça própria (`InspectorTab`, feature inspector, plano 26); este fica com as páginas que restam na barra até a árvore | 27 |
-| arquivo | `apps/macos/features/sidebar/SidebarHeader.swift` | muda | o painel da direita tem a linha de contexto própria (plano 26); este fica com as páginas que restam na barra até a árvore | 27 |
-| arquivo | `apps/macos/features/sidebar/SidebarView.swift` | muda | a árvore do trabalho | 27 |
-| arquivo | `apps/macos/app/SidebarWiring.swift` | muda | o catálogo do painel da direita foi para `InspectorWiring.swift` (plano 26); este vira a árvore | 27 |
-| comando | `sidebar.page-1` … `sidebar.page-9` | sai | no 26 abrem as abas do painel (⌃⌘1 a ⌃⌘4, `InspectorWiring.swift`); saem no 27 | 27 |
-| comando | `sidebar.customize` | sai | a árvore não se personaliza por ícones | 27 |
-| comando | `sidebar.toggle-page` | sai | as abas do painel da direita no ⌘K | 27 |
-| chave | `sidebar.items` | sai | no 26, a versão 4 das configurações tira dela, uma vez, as páginas que saíram (a página aberta não era salva, então não há aba para levar); a leitura sai no 27 | 27 |
-| gancho | `CADEX_PERF_SIDEBAR` | sai | `CADEX_PERF_PANEL` abre a aba do painel desde o 26; este ainda abre Agents e History, que ficam na barra até a árvore (o `make perf` mede as duas) | 27 |
-| trecho | `sidebarPage` / aba "Sidebar" em `apps/macos/shared/customize/CustomizeWindow.swift` | sai | sem personalizar ícones | 27 |
-| spec | `docs/spec/sidebar.md`: "fileira de ícones" | sai | a spec da árvore | 27 |
+| arquivo | `apps/macos/features/sidebar/SidebarLayout.swift` | saiu | a árvore não tem ordem de ícones (fase D) | 27 |
+| arquivo | `apps/macos/features/sidebar/SidebarItem.swift` | saiu | o painel da direita tem a peça própria (`InspectorTab`, feature inspector, plano 26); a barra virou a árvore (fase D) | 27 |
+| arquivo | `apps/macos/features/sidebar/SidebarHeader.swift` | saiu | o painel da direita tem a linha de contexto própria (plano 26; fase D) | 27 |
+| arquivo | `apps/macos/features/sidebar/SidebarView.swift` | saiu | a árvore do trabalho (`apps/macos/features/sidebar/WorkTreeView.swift`), com `SidebarCommands.swift` (fase D) | 27 |
+| arquivo | `apps/macos/app/SidebarWiring.swift` | saiu | o catálogo do painel foi para `apps/macos/app/InspectorWiring.swift` (plano 26), a árvore para `apps/macos/app/TreeWiring.swift` e o Customize para `apps/macos/app/CustomizeWiring.swift` (fase B1) | 27 |
+| comando | `sidebar.page-1` … `sidebar.page-9` | saiu | `inspector.tab-1` … `inspector.tab-4` (⌃⌘1 a ⌃⌘4, `apps/macos/app/InspectorWiring.swift`), fase D | 27 |
+| comando | `sidebar.customize` | saiu | a árvore não se personaliza por ícones | 27 |
+| comando | `sidebar.toggle-page` | saiu | as abas do painel da direita no ⌘K | 27 |
+| chave | `sidebar.items` | saiu | a leitura, a escrita e a migração 4 saíram na fase D; um arquivo antigo com a chave abre sem aviso | 27 |
+| gancho | `CADEX_PERF_SIDEBAR` | saiu | `CADEX_PERF_PANEL` abre a aba do painel e, com "agent-history", o Arquivo e histórico (fase D) | 27 |
+| trecho | `sidebarPage` / aba "Sidebar" em `apps/macos/shared/customize/CustomizeWindow.swift` | saiu | sem personalizar ícones | 27 |
+| spec | `docs/spec/sidebar.md`: "fileira de ícones" | saiu | a spec é a da árvore desde a fase B | 27 |
 
 ### Páginas da barra lateral
 | tipo | peça | estado | destino | plano |
@@ -68,9 +68,10 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | arquivo | página history (`apps/macos/features/git-history/HistoryCompactRows.swift`) | muda | aba Histórico do painel da direita | 26 |
 | arquivo | página memory (`apps/macos/features/memory/MemoryView.swift`) | muda | aba Memória do painel da direita | 26 |
 | comando | `git.show`, `git.show-history`, `memory.show`, `explorer.focus` | muda | abrem a aba do painel da direita | 26 |
-| arquivo | página tasks (`apps/macos/features/worktrees/WorktreesView.swift`) | sai | as tarefas na árvore | 27 |
+| arquivo | página tasks (`apps/macos/features/worktrees/WorktreesView.swift`) | saiu | as tarefas na árvore (fase D) | 27 |
 | comando | `worktrees.show` | sai | apelido de mostrar a árvore no 27, sai no 28 | 28 |
-| arquivo | página agents: `apps/macos/features/agents/AgentsView.swift`, `apps/macos/features/agents/AgentSessionList.swift`, `apps/macos/features/agents/AgentsLayout.swift` | sai | os agentes nos terminais da árvore; as sessões de fora do Cadex na página do projeto | 27 |
+| arquivo | página agents: `apps/macos/features/agents/AgentsView.swift`, `apps/macos/features/agents/AgentSessionList.swift`, `apps/macos/features/agents/AgentsLayout.swift` | saiu | os agentes nos terminais da árvore; as sessões de fora do Cadex na página do projeto (plano 30); fase D | 27 |
+| trecho | `pageShown` / `onWatching` em `apps/macos/features/agents/AgentsController.swift` e a leitura das máquinas em `apps/macos/app/RunOnWiring.swift` | muda | sem a página Agents ninguém os chama: a página do projeto mostra as sessões das outras máquinas e volta a chamá-los | 30 |
 | comando | `agents.show` | sai | apelido no 27, sai no 28 | 28 |
 | arquivo | página agent-history (`apps/macos/features/agents/AgentHistoryView.swift`, `AgentHistoryList.swift`) | muda | Arquivo e histórico, no centro: uma aba (`AgentHistoryDocument.swift`), feito na fase C | 27 |
 | arquivo | página attention (`apps/macos/features/agents/AgentAttentionView.swift`) | muda | o conteúdo do popover do sino, feito | 26 |

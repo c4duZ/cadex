@@ -66,11 +66,11 @@ extension WindowSession {
         return inspector
     }
 
-    /// ⌃⌘1 to ⌃⌘4: the panel's tabs in order (plan 26 phase E). The ids stay sidebar.page-N, the
-    /// ones keymaps saved, until the sidebar becomes the tree in plan 27; 5 to 9 have no tab.
+    /// ⌃⌘1 to ⌃⌘4: the panel's tabs in order (plan 26 phase E; the sidebar.page-N ids of the old
+    /// sidebar left in plan 27 phase D).
     func inspectorTabCommands() -> [Command] {
-        (1...9).map { n in
-            Command(id: "sidebar.page-\(n)", title: T("Go to Right Panel Tab \(n)", "Ir para a aba \(n) do painel da direita"),
+        (1...4).map { n in
+            Command(id: "inspector.tab-\(n)", title: T("Go to Right Panel Tab \(n)", "Ir para a aba \(n) do painel da direita"),
                     keywords: ["panel \(n)", "tab \(n)", "inspector", "painel \(n)", "aba \(n)"], category: .view,
                     defaultShortcut: "ctrl+cmd+\(n)",
                     action: .run { [weak self] in

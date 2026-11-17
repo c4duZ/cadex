@@ -22,27 +22,6 @@ extension WindowSession {
         return WorktreesCore.list(repo: root).first?.path ?? root
     }
 
-    func makeTasksPage() -> WorktreesView {
-        let page = WorktreesView()
-        let paint = { [weak page] in
-            let ui = ThemeStore.shared.current.interface
-            page?.text = ui.text.nsColor
-            page?.secondary = ui.secondaryText.nsColor
-        }
-        paint()
-        ThemeStore.shared.observe { _ in paint() }
-        page.repository = { [weak self] in self?.repository }
-        let actions = worktreesActions()
-        page.onOpen = actions.open
-        page.onReview = { [weak self] task in self?.openReview(repo: task.path) }
-        page.onNewTask = actions.newTask
-        page.onComment = actions.comment
-        page.onRemove = actions.remove
-        page.onOpenRemote = actions.openRemote
-        page.onRemoveRemote = actions.removeRemote
-        return page
-    }
-
     func worktreesActions() -> WorktreesActions {
         var actions = WorktreesActions(newTask: { [weak self] in self?.newTask() }, open: { [weak self] in self?.openTask($0) },
                                        remove: { [weak self] in self?.removeTask($0) }, comment: { [weak self] in self?.commentTask($0) },

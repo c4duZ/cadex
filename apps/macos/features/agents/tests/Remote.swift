@@ -20,9 +20,6 @@ let remoteChecks: [(name: String, body: Checks.Body)] = [
         expect(sessions[0].status == .waiting && sessions[0].job == "bg12" && sessions[0].waitingFor == "permission prompt")
         expect(sessions[1].status == .working && sessions[1].job == nil && sessions[1].name == "fix")
         expect(AgentBackground.parseRemote(Data("not json".utf8), machine: "pc", destination: "pc").isEmpty)
-        let project = AgentProject(root: "/home/dev/app", name: "app", branch: "fix")
-        expect(AgentsLayout.detail(sessions[0], project: project, inCadex: false) == "waiting for you · on pc", "never 'outside Cadex'")
-        expect(AgentsLayout.detail(sessions[1], project: project, inCadex: false) == "fix · on pc")
     }),
     ("the page shown tells the app, which reads the machines only meanwhile; their sessions join the list", {
         let controller = AgentsController.shared
