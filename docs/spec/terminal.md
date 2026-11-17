@@ -182,7 +182,7 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
   - **Contraste mínimo** (terminal.minimumContrast, de 1 a 21; 1 desliga): texto que um programa
     pinta perto demais do fundo da célula vai para o branco ou o preto até a razão WCAG pedida.
     A conta é feita no shader, uma vez por letra.
-  - **Altura de linha** (terminal.lineHeight, 0,8 a 2 vezes a da fonte) e **espaçamento entre
+  - **Altura de linha** (terminal.lineHeight, 0,8 a 2 vezes a da fonte; padrão 1,6, a da moldura nova, e um arquivo antigo no 1 passa a 1,6 uma vez) e **espaçamento entre
     letras** (terminal.letterSpacing, -1 a 4 pt, com a letra centrada na célula).
   - **Recursos OpenType** (terminal.fontFeatures: "ss01", "zero", "-liga"…). Com "calt" ou "liga"
     ligados, uma sequência de 2 a 8 símbolos na mesma linha e na mesma cor (`->`, `!=`, `===`) é

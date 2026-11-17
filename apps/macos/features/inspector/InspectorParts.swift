@@ -9,7 +9,7 @@ final class InspectorTabButton: NSView {
     typealias T = DesignTokens.Inspector.Tabs.Tab
     let id: String
     var onPress: (() -> Void)?
-    private let label = NSTextField(labelWithString: "")
+    let label = NSTextField(labelWithString: "")
     private let underline = NSView()
 
     init(id: String, title: String) {

@@ -1,6 +1,7 @@
 import Agents
 import Machines
 import AppKit
+import Terminal
 import Home
 import SourceControl
 
@@ -118,17 +119,58 @@ extension WindowSession {
                 let projects = (self.projects?.projects ?? []).map { project -> [String: Any] in
                     ["name": project.name, "tabs": project.tabs.count,
                      "terminals": project.tabs.allTerminals.map { $0.currentDirectory ?? "" },
-                     "focused": project.tabs.activeTerminal?.currentDirectory ?? ""]
+                     "focused": project.tabs.activeTerminal?.currentDirectory ?? "",
+                     "programs": project.tabs.allTerminals.map { $0.programTitle }]
                 }
                 var report: [String: Any] = ["projects": projects, "active": self.projects?.activeName ?? "", "home": self.home != nil,
                                              "palette": self.palette?.currentSource?.placeholder ?? ""]
                 if let sheet = self.newTaskSheet {
                     report["sheet"] = ["agents": sheet.request.agents.map(\.title), "prompt": sheet.request.prompt, "race": sheet.request.isRace]
                 }
+                // Every inspector tab button on screen, with its label's look (a stale bold, 2026-11-17).
+                func buttons(_ v: NSView) -> [NSView] { (String(describing: type(of: v)).contains("InspectorTabButton") ? [v] : []) + v.subviews.flatMap(buttons) }
+                report["inspectorTabs"] = buttons(self.window.contentView?.superview ?? NSView()).map { button -> String in
+                    let label = button.subviews.compactMap { $0 as? NSTextField }.first
+                    let frame = button.convert(button.bounds, to: nil)
+                    return "\(label?.stringValue ?? "?") x=\(Int(frame.minX)) y=\(Int(frame.minY)) bold=\(label?.font?.fontDescriptor.symbolicTraits.contains(.bold) ?? false) hidden=\(button.isHiddenOrHasHiddenAncestor)"
+                }
+                // The tab strip's titles as drawn (TabBarView's tab views' labels).
+                func labels(_ v: NSView) -> [String] { ((v as? NSTextField).map { [$0.stringValue] } ?? []) + v.subviews.flatMap(labels) }
+                report["tabStrip"] = self.tabs.map { labels($0.bar) } ?? []
+                // The right panel's words (its scope row comes first), and the bell's cards' words.
+                func texts(_ v: NSView) -> [String] {
+                    guard !v.isHidden else { return [] }
+                    return ((v as? NSTextField).map { [$0.stringValue] } ?? []) + v.subviews.flatMap(texts)
+                }
+                report["inspectorTexts"] = self.workspace.map { [$0.inspector.tab] + Array(texts($0.inspector).filter { !$0.isEmpty }.prefix(8)) } ?? []
+                report["panels"] = NSApp.windows.filter { $0 is NSPanel && $0.isVisible }.map { panel in texts(panel.contentView ?? NSView()).filter { !$0.isEmpty } }
                 report["commands"] = ["home.show", "tab.new", "agents.open-account", "worktrees.new-task", "orchestration.new-race", "view.jump"]
                     .filter { self.commands.command($0) != nil }
                 if let data = try? JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]) {
                     try? data.write(to: URL(fileURLWithPath: out))
+                }
+            }
+        }
+        // A scene in steps, for the comparisons with the mockups: a JSON list of {"at": seconds, and
+        // one of "command": id, "type": text in the focused terminal, "tab": text in a new tab of
+        // its folder, "split": text in a pane split to the right ("split-down": below)}.
+        if let file = environment["CADEX_PERF_SCRIPT"], let data = FileManager.default.contents(atPath: file),
+           let steps = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
+            for step in steps {
+                let at = (step["at"] as? NSNumber)?.doubleValue ?? 3
+                DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in
+                    guard let self else { return }
+                    if let id = step["command"] as? String { _ = self.commands.run(id) }
+                    if let text = step["type"] as? String { self.tabs?.activeTerminal?.typeWhenReady(text + "\n") }
+                    if let text = step["tab"] as? String {
+                        self.tabs?.newTab(cwd: self.tabs?.activeTerminal?.currentDirectory)
+                        self.tabs?.activeTerminal?.typeWhenReady(text + "\n")
+                    }
+                    for (key, command) in [("split", "pane.split-right"), ("split-down", "pane.split-down")] {
+                        guard let text = step[key] as? String else { continue }
+                        _ = self.commands.run(command)
+                        self.tabs?.activeTerminal?.typeWhenReady(text + "\n")
+                    }
                 }
             }
         }
@@ -159,7 +201,26 @@ extension WindowSession {
         DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in
             guard let view = self?.window.contentView?.superview ?? self?.window.contentView,
                   let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
+            // Drawn now: a window off screen (another Space) skips the display cycle, and a text
+            // changed since kept its old picture in the capture (the inspector's tab, 2026-11-17).
+            func redraw(_ v: NSView) { v.needsDisplay = true; v.subviews.forEach(redraw) }
+            redraw(view)
+            view.layoutSubtreeIfNeeded()
+            view.displayIfNeeded()
             view.cacheDisplay(in: view.bounds, to: bitmap)
+            // The terminals are Metal layers the capture leaves blank: each drawn over its place.
+            if let context = NSGraphicsContext(bitmapImageRep: bitmap) {
+                NSGraphicsContext.saveGraphicsState()
+                NSGraphicsContext.current = context
+                func terminals(_ v: NSView) -> [TerminalView] { ((v as? TerminalView).map { [$0] } ?? []) + v.subviews.flatMap(terminals) }
+                for terminal in terminals(view) where terminal.window != nil && !terminal.isHiddenOrHasHiddenAncestor {
+                    guard let picture = terminal.snapshotImage() else { continue }
+                    let rect = terminal.convert(terminal.bounds, to: view)
+                    let flipped = view.isFlipped ? rect : NSRect(x: rect.minX, y: rect.minY, width: rect.width, height: rect.height)
+                    NSImage(cgImage: picture, size: rect.size).draw(in: flipped)
+                }
+                NSGraphicsContext.restoreGraphicsState()
+            }
             try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: out))
             // A panel over it (the palette, ⌘J) is a window of its own: next to it, -panel.png.
             for panel in NSApp.windows where panel is NSPanel && panel.isVisible {

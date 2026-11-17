@@ -28,7 +28,7 @@ public final class TerminalView: NSView {
     }
 
     public private(set) var session: TerminalSession?
-    private var renderer: TerminalRenderer?
+    var renderer: TerminalRenderer?
     let device = MTLCreateSystemDefaultDevice()
     /// The Metal surface, only while in a window (TerminalCanvas.swift).
     var canvas: TerminalCanvas?

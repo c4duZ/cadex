@@ -26,7 +26,7 @@ public final class InspectorView: NSView {
     private let tabs: [InspectorTab]
     private let run: (String) -> Void
     private let tabRow = NSStackView()
-    private var tabButtons: [InspectorTabButton] = []
+    private(set) var tabButtons: [InspectorTabButton] = []
     private let scopeRow = NSStackView()
     private let scopeLabel = NSTextField(labelWithString: "")
     private var scopeButtons: [InspectorIconButton] = []

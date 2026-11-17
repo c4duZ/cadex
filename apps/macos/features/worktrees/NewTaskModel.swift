@@ -25,7 +25,8 @@ public struct NewTaskRequest: Equatable, Sendable {
 
     /// The branch typed, else the one the words suggest.
     public var branchName: String {
-        let typed = NewTaskWords.branch(from: branch)
+        // What the owner typed is kept, every word ("orchestration-e" lost its "e", 2026-11-17).
+        let typed = NewTaskWords.slug(branch)
         return typed.isEmpty ? NewTaskWords.branch(from: prompt) : typed
     }
 
@@ -84,6 +85,12 @@ public enum NewTaskWords {
         let words = folded.split { !($0.isLetter || $0.isNumber) }.map(String.init)
         let kept = words.filter { !small.contains($0) && $0.allSatisfy { $0.isASCII } }
         return kept.prefix(limit).joined(separator: "-")
+    }
+
+    /// A typed branch made safe: lowercase, letters and digits joined by "-", nothing dropped.
+    public static func slug(_ text: String) -> String {
+        let folded = text.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: nil).lowercased()
+        return folded.split { !($0.isLetter || $0.isNumber || $0 == "." || $0 == "_") || !$0.isASCII }.joined(separator: "-")
     }
 
     /// The race's note: "With 3 agents this is a race: …".

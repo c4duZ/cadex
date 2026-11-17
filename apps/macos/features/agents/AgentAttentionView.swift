@@ -189,6 +189,23 @@ public final class AgentAttentionView: NSView {
             row.widthAnchor.constraint(equalTo: box.widthAnchor).isActive = true
             return box
         }
+        // Nothing to answer here (a request the agent reported, no hook): "Go to tab" on the origin's
+        // line, not alone on a row of its own under a gap (seen in the app, 2026-11-17).
+        if !request.canAnswer, let origin = views.last {
+            views.removeLast()
+            let spacer = NSView()
+            spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+            let go = AgentBellParts.button(T("Go to tab", "Ir à aba"), .quiet) { [weak self] in self?.onGoTo?(request.key, request.pid) }
+            let line = NSStackView(views: [origin, spacer, go])
+            line.spacing = UILooks.pt(Look.buttonGap)
+            views.append(line)
+            let box = NSStackView(views: views)
+            box.orientation = .vertical
+            box.alignment = .leading
+            box.spacing = UILooks.pt(C.gap)
+            for view in views where view === line || view is CommandBox { view.widthAnchor.constraint(equalTo: box.widthAnchor).isActive = true }
+            return box
+        }
         var buttons: [NSView] = []
         if request.canAnswer {
             buttons.append(AgentBellParts.button(T("Allow", "Permitir"), .primary) { [weak self] in self?.attention.approve(request.id) })

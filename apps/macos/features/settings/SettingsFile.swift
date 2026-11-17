@@ -214,6 +214,9 @@ public enum SettingsFile {
             if bar?["right"] == nil { settings.statusBar.right = ["environment"] }
             migrateStatusBar(&settings.statusBar)
         }
+        // The terminal's line height of the work frame's mockups (1.6), for a file still on the old
+        // default (1): one chosen by the owner stays (plan 29's review against the mockups).
+        if version < 5, settings.terminal.lineHeight == 1 { settings.terminal.lineHeight = 1.6 }
         settings.version = max(version, Settings.currentVersion)
     }
 

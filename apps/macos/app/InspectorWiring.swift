@@ -1,4 +1,5 @@
 import AppKit
+import Worktrees
 import CommandPalette
 import Explorer
 import GitHistory
@@ -110,6 +111,21 @@ extension WindowSession {
         let place = ((root as NSString).deletingLastPathComponent as NSString).lastPathComponent + "/" + name
         inspector.setScope(InspectorScope(name + " · " + place, tip: root), for: "files")
         inspector.setScope(InspectorScope(name + " · " + place, tip: root), for: "history")
+        // A task's history: how far it went from where it started (the Inspector drawing,
+        // "orchestration-e · 3 commits ahead of main"), counted by git off the main thread.
+        if let base = WorktreesController.shared.store.task(root)?.base, !base.isEmpty {
+            DispatchQueue.global(qos: .utility).async { [weak self] in
+                let ahead = Self.commitsAhead(of: base, in: root)
+                DispatchQueue.main.async {
+                    MainActor.assumeIsolated {
+                        guard let self, let ahead, self.folder.root == root else { return }
+                        let words = ahead == 1 ? T("1 commit ahead of \(base)", "1 commit à frente de \(base)")
+                            : T("\(ahead) commits ahead of \(base)", "\(ahead) commits à frente de \(base)")
+                        self.workspace?.inspector.setScope(InspectorScope(name + " · " + words, tip: root), for: "history")
+                    }
+                }
+            }
+        }
         let project = TitleBarView.location(of: root).project
         inspector.setScope(InspectorScope(project + T(" · the project’s memory, shared by every task and account",
                                                    " · a memória do projeto, de todas as tarefas e contas"), tip: root), for: "memory")
@@ -119,12 +135,32 @@ extension WindowSession {
     /// repository. From the status the panel reads anyway.
     func showPanelBranch(_ branch: SourceControlController.Branch?) {
         let name = Self.folderName(folder.root)
+        // A task: what it is measured against (the Inspector drawing, "orchestration-e · against main").
+        if let base = WorktreesController.shared.store.task(folder.root)?.base, !base.isEmpty {
+            return workspace?.inspector.setScope(InspectorScope(name + T(" · against ", " · contra ") + base, command: "git.switch-branch",
+                                                               tip: T("Switch branch", "Trocar de branch")), for: "changes") ?? ()
+        }
         workspace?.inspector.setScope(branch.map {
             InspectorScope(name + " · " + Self.branchText($0), command: "git.switch-branch", tip: T("Switch branch", "Trocar de branch"))
         } ?? InspectorScope("Git"), for: "changes")
     }
 
     static func folderName(_ path: String) -> String { (path as NSString).lastPathComponent }
+
+    /// `git rev-list --count <base>..HEAD` in `folder`; nil when git says no.
+    nonisolated static func commitsAhead(of base: String, in folder: String) -> Int? {
+        let git = Process()
+        git.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+        git.arguments = ["-C", folder, "rev-list", "--count", base + "..HEAD"]
+        let out = Pipe()
+        git.standardOutput = out
+        git.standardError = FileHandle.nullDevice
+        guard (try? git.run()) != nil else { return nil }
+        let data = out.fileHandleForReading.readDataToEndOfFile()
+        git.waitUntilExit()
+        guard git.terminationStatus == 0 else { return nil }
+        return Int(String(decoding: data, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines))
+    }
 
     /// The History tab: the repository's history, compact, made the
     /// first time the tab shows and again when the repository changes.

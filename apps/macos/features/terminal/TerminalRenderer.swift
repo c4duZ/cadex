@@ -85,23 +85,7 @@ final class TerminalRenderer {
         let semaphore = inFlight
         commands.addCompletedHandler { _ in semaphore.signal() }
 
-        let pass = MTLRenderPassDescriptor()
-        pass.colorAttachments[0].texture = drawable.texture
-        pass.colorAttachments[0].loadAction = .clear
-        pass.colorAttachments[0].storeAction = .store
-        pass.colorAttachments[0].clearColor = Self.clearColor(frame.background, alpha: backgroundAlpha)
-
-        if let encoder = commands.makeRenderCommandEncoder(descriptor: pass) {
-            var uniforms = SIMD4<Float>(Float(size.width), Float(size.height), minimumContrast, 0)
-            encoder.setRenderPipelineState(pipeline)
-            encoder.setVertexBuffer(buffer, offset: 0, index: 0)
-            encoder.setVertexBytes(&uniforms, length: MemoryLayout<SIMD4<Float>>.size, index: 1)
-            encoder.setFragmentTexture(atlas.texture, index: 0)
-            if !quads.isEmpty {
-                encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4, instanceCount: quads.count)
-            }
-            encoder.endEncoding()
-        }
+        encode(quads.count, buffer: buffer, background: frame.background, into: drawable.texture, size: size, commands: commands)
         // With the layer's transaction (a new surface's first frame), the
         // drawable is shown once the work is scheduled, with the frame.
         if synchronously {
@@ -112,6 +96,49 @@ final class TerminalRenderer {
             commands.present(drawable)
             commands.commit()
         }
+    }
+
+    /// The pass that draws `count` quads of `buffer` over the background, into `texture`.
+    private func encode(_ count: Int, buffer: MTLBuffer, background: UInt32, into texture: MTLTexture, size: CGSize, commands: MTLCommandBuffer) {
+        let pass = MTLRenderPassDescriptor()
+        pass.colorAttachments[0].texture = texture
+        pass.colorAttachments[0].loadAction = .clear
+        pass.colorAttachments[0].storeAction = .store
+        pass.colorAttachments[0].clearColor = Self.clearColor(background, alpha: backgroundAlpha)
+        guard let encoder = commands.makeRenderCommandEncoder(descriptor: pass) else { return }
+        var uniforms = SIMD4<Float>(Float(size.width), Float(size.height), minimumContrast, 0)
+        encoder.setRenderPipelineState(pipeline)
+        encoder.setVertexBuffer(buffer, offset: 0, index: 0)
+        encoder.setVertexBytes(&uniforms, length: MemoryLayout<SIMD4<Float>>.size, index: 1)
+        encoder.setFragmentTexture(atlas.texture, index: 0)
+        if count > 0 { encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4, instanceCount: count) }
+        encoder.endEncoding()
+    }
+
+    /// The frame as a picture, drawn the same way into a texture off screen (a window capture does
+    /// not get the Metal layer: the test instance's snapshots and the comparisons with the mockups).
+    func image(_ frame: cadex_terminal_frame, padding: SIMD2<Float>, size: CGSize) -> CGImage? {
+        let width = Int(size.width), height = Int(size.height)
+        guard width > 0, height > 0 else { return nil }
+        let quads = builder.build(frame: frame, atlas: atlas, metrics: font.metrics, padding: padding,
+                                  viewSize: SIMD2(Float(size.width), Float(size.height)), overlay: DrawOverlay(), selection: selectionColor)
+        let described = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: width, height: height, mipmapped: false)
+        described.usage = [.renderTarget]
+        described.storageMode = .shared
+        let length = max(1, quads.count) * MemoryLayout<QuadInstance>.stride
+        guard let texture = device.makeTexture(descriptor: described), let commands = queue.makeCommandBuffer(),
+              let buffer = device.makeBuffer(length: length, options: .storageModeShared) else { return nil }
+        quads.withUnsafeBytes { bytes in if let base = bytes.baseAddress { buffer.contents().copyMemory(from: base, byteCount: bytes.count) } }
+        encode(quads.count, buffer: buffer, background: frame.background, into: texture, size: size, commands: commands)
+        commands.commit()
+        commands.waitUntilCompleted()
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        texture.getBytes(&pixels, bytesPerRow: width * 4, from: MTLRegionMake2D(0, 0, width, height), mipmapLevel: 0)
+        let info = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue)
+        guard let provider = CGDataProvider(data: Data(pixels) as CFData) else { return nil }
+        return CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: width * 4,
+                       space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: info, provider: provider, decode: nil, shouldInterpolate: false,
+                       intent: .defaultIntent)
     }
 
     private func buffer(for quads: [QuadInstance]) -> MTLBuffer? {

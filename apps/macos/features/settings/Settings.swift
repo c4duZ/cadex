@@ -6,7 +6,7 @@ public struct Settings: Equatable, Sendable {
     /// The file's version: what an old file (without it) gets moved to once,
     /// when the defaults change (SettingsFile.migrate). 2: the new frame's
     /// theme; 3: the new frame's status bar (docs/adr/0035-work-frame.md, 2026-11-17).
-    public static let currentVersion = 4
+    public static let currentVersion = 5
     public var version = Settings.currentVersion
 
     public struct General: Equatable, Sendable {
@@ -34,7 +34,8 @@ public struct Settings: Equatable, Sendable {
         /// The WCAG ratio text keeps against its background; 1 is off (plan 15).
         public var minimumContrast: Double = 1
         /// Line height as a multiple of the font's.
-        public var lineHeight: Double = 1
+        /// 1.6: the new frame's terminal (tokens.json, components.terminalTheme.lineHeight).
+        public var lineHeight: Double = 1.6
         /// Extra space between letters, in points.
         public var letterSpacing: Double = 0
         /// OpenType features: "calt" and "liga" join ligatures, "-" turns one off.

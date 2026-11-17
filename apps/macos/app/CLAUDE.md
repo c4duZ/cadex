@@ -97,7 +97,9 @@
 - `InspectorWiring.swift` (plano 26, fase C): o painel da direita da feature `inspector`, colado à
   direita entre as barras: Changes (o painel do git), Files (a árvore do explorer), History (o
   histórico compacto, feito na primeira vez que a aba aparece) e Memory, cada aba com os botões de
-  antes; a linha de contexto com a pasta, o branch (o clique troca) e a memória do projeto;
+  antes; a linha de contexto com a pasta, o branch (o clique troca) e a memória do projeto; numa tarefa,
+  Changes diz "<tarefa> · against <ponto de partida>" e History "<tarefa> · N commits ahead of
+  <ponto de partida>" (contado pelo git fora da linha principal), como no mockup Inspector;
   inspector.toggle (⌥⌘I) e inspector.visible, inspector.tab e inspector.width (a borda) salvos; numa
   janela abaixo de 1000 pt, abrir o painel recolhe a barra lateral e fechá-lo a devolve
   (`WorkspaceView.swift`); git.show, explorer.focus,

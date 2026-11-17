@@ -20,6 +20,8 @@ let newTaskTests: [(name: String, body: Checks.Body)] = [
         expect(request.missing == nil && request.branchName == "fix-login")
         request.branch = "Login Fix!"
         expect(request.branchName == "login-fix", request.branchName)
+        request.branch = "orchestration-e"
+        expect(request.branchName == "orchestration-e", "a typed branch keeps every word: \(request.branchName)")
         request.agents = []
         expect(request.missing != nil, "no agent")
     }),

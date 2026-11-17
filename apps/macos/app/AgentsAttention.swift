@@ -1,6 +1,7 @@
 import AgentTools
 import Agents
 import AppKit
+import Projects
 import SessionKit
 import Sidebar
 import Terminal
@@ -23,7 +24,7 @@ extension AppDelegate {
             let found = self.terminal(pid: event.pid)
             let session = AgentsController.shared.sessions.first { $0.pid == event.pid }
             let id = attention.addPermission(pid: event.pid, tool: event.toolName ?? "?", subject: event.toolSubject ?? "",
-                                             project: AgentProject.of(event.cwd ?? session?.cwd ?? "").name,
+                                             project: Self.projectName(event.cwd ?? session?.cwd ?? ""),
                                              session: found.map { Self.conversationName($0.terminal) } ?? session?.name ?? "",
                                              account: session?.account.name ?? "", key: found.map { Self.key($0.terminal) }, reply: reply)
             cancel.onCancel = { attention.resolve(id) }
@@ -83,7 +84,7 @@ extension AppDelegate {
                                                state: AgentReport.State(rawValue: "\(status.state)") ?? .idle,
                                                kind: AgentReport.Kind(rawValue: "\(status.kind)") ?? .none,
                                                message: status.message, finishedUnseen: terminal.agentFinishedUnseen,
-                                               project: AgentProject.of(terminal.currentDirectory ?? "").name,
+                                               project: Self.projectName(terminal.currentDirectory ?? ""),
                                                session: Self.conversationName(terminal), account: session?.account.name ?? ""))
                 }
             }
@@ -125,6 +126,13 @@ extension AppDelegate {
             }
         }
         return nil
+    }
+
+    /// The project of a folder for the bell's cards: its main repository's name, also for a
+    /// task's worktree (the worktree's own name read as the project, "cache-evict-3 · cache-evict-3").
+    static func projectName(_ folder: String) -> String {
+        guard !folder.isEmpty else { return "" }
+        return (ProjectsFile.repositoryRoot(folder) as NSString).lastPathComponent
     }
 
     static func key(_ terminal: TerminalView) -> String { "\(ObjectIdentifier(terminal).hashValue)" }
