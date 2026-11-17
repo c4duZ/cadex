@@ -22,4 +22,10 @@ public protocol TabDocument: AnyObject {
     func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void)
     /// The tab is gone: stop watching, free resources.
     func close()
+    /// Its own bar is its pane's header (the preview, plan 28 phase E): the pane draws none.
+    var barIsHeader: Bool { get }
+}
+
+public extension TabDocument {
+    var barIsHeader: Bool { false }
 }

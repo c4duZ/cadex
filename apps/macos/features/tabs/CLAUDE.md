@@ -27,7 +27,8 @@
   estado, o nome, de onde é e, à direita, o custo e o tempo; +, maximizar e ✕ só ao passar o
   ponteiro; issue #1); o que um agente acrescenta vem do app por TabsController.paneDetail
   (`PaneDetail`, guardado pelo app e só lido aqui); posto pelo `PaneLayoutView.swift`, que também mostra só o painel maximizado (`zoomed`);
-  `TabsPaneHeaders.swift` diz o que cada um mostra e liga os botões aos comandos pelo `runCommand`
+  Um documento cuja barra é o cabeçalho (`barIsHeader`, o preview) fica sem o cabeçalho do painel e
+  com os cantos da caixa. `TabsPaneHeaders.swift` diz o que cada um mostra e liga os botões aos comandos pelo `runCommand`
   (pane.close, pane.zoom; o menu do + vem do app em `paneMenu`). Arrastar o cabeçalho move o
   painel: `PaneDragBoard.swift` mostra cada painel como janela cinza que desliza ao vivo, a etiqueta
   de `PaneDragChip.swift` segue o ponteiro e `PaneDrop.swift` decide onde cai, no layout do começo

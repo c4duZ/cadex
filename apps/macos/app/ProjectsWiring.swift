@@ -59,7 +59,8 @@ extension WindowSession {
         tabs.contextMenu = { [weak self] in self?.menu?.popup(Self.tabActions) ?? [] }
         tabs.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
         tabs.paneMenu = { [weak self] in self?.paneMenu() ?? [] }
-        tabs.onOpenPreview = { [weak self] url in self?.openPreview(url) }
+        // Beside the terminal that showed the address (plan 28 phase E; the PreviewOne mockup).
+        tabs.onOpenPreview = { [weak self] url in self?.openPreview(url, beside: true) }
         tabs.onOpenFile = { [weak self] path, beside in
             // A pasted image lives in the temporary folder, outside the
             // workspace: the media viewer reads only authorized folders.

@@ -80,7 +80,9 @@ final class PaneLayoutView: NSView {
             // Inside the box's line: the header on top, the pane under it; a terminal with the
             // mockup's room around its text (bodyPadding).
             let inner = frame.insetBy(dx: DesignTokens.Stroke.hairline, dy: DesignTokens.Stroke.hairline)
-            let height = min(PaneHeaderView.height, inner.height)
+            let hidden = headers[id]?.info.hidden == true
+            headers[id]?.isHidden = hidden
+            let height = hidden ? 0 : min(PaneHeaderView.height, inner.height)
             headers[id]?.frame = CGRect(x: inner.minX, y: inner.minY, width: inner.width, height: height)
             var body = CGRect(x: inner.minX, y: inner.minY + height, width: inner.width, height: inner.height - height)
             if let terminal = panes[id] as? TerminalView {
@@ -101,6 +103,15 @@ final class PaneLayoutView: NSView {
                               width: max(body.width - left - right, 0), height: max(body.height - top - bottom, 0))
             }
             panes[id]?.frame = body
+            // A document with no padding (a page, an image) takes the box's rounded corners: its
+            // square ones showed past the curve. The top ones too when it has no header.
+            if headers[id]?.info.padded != true, let view = panes[id] {
+                view.wantsLayer = true
+                view.layer?.cornerRadius = max(UILooks.pt(P.radius) - DesignTokens.Stroke.hairline, 0)
+                view.layer?.maskedCorners = hidden ? [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+                    : [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+                view.layer?.masksToBounds = true
+            }
             // The panes without focus a shade dimmer (components.pane.idle.opacity).
             let alpha = frames.count > 1 && id != focused ? P.Idle.opacity : 1
             headers[id]?.alphaValue = alpha

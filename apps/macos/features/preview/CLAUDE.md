@@ -12,11 +12,16 @@
 - WKWebView isolada do resto do app: `PreviewDocument.swift` é a aba (implementa o `TabDocument`),
   com dados do site só enquanto o app está aberto, nenhum script do app na página, file: e esquemas
   estranhos recusados (mailto: e afins vão para o sistema), janela nova vai para o navegador,
-  "Inspecionar elemento" no menu da página. Barra com voltar, avançar, recarregar e endereço; título
-  da página na aba; progresso fino; erro de conexão com o motivo. A página carrega quando a aba
+  "Inspecionar elemento" no menu da página. A barra (`PreviewBar.swift`, plano 28 fase E; os mockups
+  PreviewOne e PreviewMany, components.preview) é o cabeçalho do painel (`barIsHeader`: o painel
+  não põe outro): voltar, avançar, recarregar pequenos, o endereço na caixa com o ponto da página
+  (verde carregada, cinza carregando, vermelho com falha), "Pick element" em azul, os tamanhos
+  (desktop e celular, 390 pt centrado) e o que o app acrescenta; título da página na aba; progresso
+  fino; erro de conexão com o motivo. A página carrega quando a aba
   aparece pela primeira vez (carregada antes de estar numa janela, não desenhava).
 - Identidade da aba pelo endereço: a oferta do terminal para um endereço já aberto recarrega aquela
   aba; preview em branco é sempre aba nova.
+- A oferta do terminal abre o preview ao lado dele (plano 28 fase E, `../../app/ProjectsWiring.swift`).
 - Comandos em `PreviewCommands.swift`: preview.open (⇧⌘H, onde a configuração diz), preview.open-in-tab, preview.reload (⌘R), preview.back,
   preview.forward. A oferta "Abrir no preview" é da feature terminal (`../terminal/TerminalOffer.swift`)
   e chega aqui pelo app (`onOpenPreview` das abas).
@@ -28,8 +33,9 @@
   cada navegação, sem `WKUserScript`; o fundo da página não é elemento), a origem e o print. `PickingWebView.swift` engole movimento, clique e arrasto com o modo ligado (a página não
   recebe hover nem clique; a rolagem passa): as áreas de rastreamento do WebKit, de um objeto
   dele e não da view, saem durante a seleção e uma nossa fica no lugar e o modo acaba quando a web view perde o foco.
-  `PickerOverlay.swift` desenha contorno, etiqueta, faixa e o aviso verde/âmbar por cima, fora do
-  DOM. `PickedElement.swift` é o texto entregue (limites, sem caracteres de controle, entre
+  `PickerOverlay.swift` desenha contorno, etiqueta, faixa e o aviso por cima, fora do DOM, no
+  desenho do mockup (components.preview.picked: contorno azul de 2 pt a 3 pt do elemento, a
+  etiqueta azul em cima, "button.pay · sent to Claude" depois de enviar; âmbar quando só copiou). `PickedElement.swift` é o texto entregue (limites, sem caracteres de controle, entre
   `<picked_element>`), puro e testado. Fase B: no clique, o mundo do seletor marca o elemento com
   data-cadex-pick e lê os atributos de build; `PageSourceScript.swift` roda uma vez no mundo da
   página (callAsyncJavaScript), lê lovable-tagger, Svelte, React até o 18 e Vue, e tira a marca.

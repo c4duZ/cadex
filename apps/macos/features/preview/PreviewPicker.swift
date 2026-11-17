@@ -191,7 +191,7 @@ final class PreviewPicker {
         stop()
         let marks = picked.enumerated().map { index, element in
             PickerOverlay.Mark(box: reader.viewBox(element.box),
-                               label: index == 0 ? Self.flashText(outcome, count: picked.count) : "\(index + 1)")
+                               label: index == 0 ? Self.flashText(outcome, element: element, count: picked.count) : "\(index + 1)")
         }
         overlay.flash(marks, color: Self.flashColor(outcome))
     }
@@ -215,11 +215,14 @@ final class PreviewPicker {
         return .copied(note: nil)
     }
 
-    static func flashText(_ outcome: PickOutcome, count: Int) -> String {
-        let what = count > 1 ? T("\(count) elements · ", "\(count) elementos · ") : ""
+    /// "button.pay · sent to Claude" (the PreviewOne mockup): the element by the end of its
+    /// selector, then where it went.
+    static func flashText(_ outcome: PickOutcome, element: PickedElement, count: Int) -> String {
+        let name = element.selector.split(separator: " ").last.map(String.init) ?? element.selector
+        let what = (count > 1 ? T("\(count) elements", "\(count) elementos") : name) + " · "
         switch outcome {
-        case .pasted(let name): return what + T("Pasted into \(name)", "Colado em \(name)")
-        case .copied(let note): return what + (note ?? T("Copied", "Copiado"))
+        case .pasted(let agent): return what + T("sent to \(agent)", "enviado a \(agent)")
+        case .copied(let note): return what + (note ?? T("copied", "copiado"))
         }
     }
 

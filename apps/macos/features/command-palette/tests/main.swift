@@ -43,7 +43,7 @@ let exitCode = await Checks.run([
         let items = PaletteModel.items(for: "", registry: registry) { _ in nil }
         expect(items.map(\.id) == ["terminal.clear", "tab.new", "window.new"], "\(items.map(\.id))")
         expect(items.map(\.section) == ["Recent", "Tabs", "Cadex"], "\(items.map(\.section))")
-        expect(items[1].icon == .files && items[2].icon == .gearSix)
+        expect(items[1].icon == .files && items[2].icon == .gearSix, "\(items.map(\.id)) \(items.map { String(describing: $0.icon) })")
     }),
     ("titles go where the section changes; arrows skip them", {
         let items = [PaletteItem(id: "a", title: "a", section: "X"), PaletteItem(id: "b", title: "b", section: "X"),

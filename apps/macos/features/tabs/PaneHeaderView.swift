@@ -28,6 +28,8 @@ final class PaneHeaderView: NSView {
         var trailing = ""
         /// A terminal: its text gets the mockup's room inside the box (components.pane.bodyPadding).
         var padded = false
+        /// The pane's own bar is its header (a preview): this one is not shown.
+        var hidden = false
     }
 
     enum DragPhase { case began, moved, ended }

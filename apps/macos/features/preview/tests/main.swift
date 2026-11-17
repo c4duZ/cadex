@@ -88,6 +88,11 @@ document.getElementById('vue').__vueParentComponent = { type: { __file: '/w/app/
 
 let agentExit = await Checks.run(agentChecks)
 let exitCode = await Checks.run([
+    ("after sending, the element's label says what it was and where it went (the PreviewOne mockup)", {
+        let element = PickedElement(page: "http://x", selector: "main > div.cart button.pay", text: "", html: "", box: .zero, viewport: .zero)
+        expect(PreviewPicker.flashText(.pasted(into: "Claude"), element: element, count: 1) == "button.pay · sent to Claude")
+        expect(PreviewPicker.flashText(.copied(note: nil), element: element, count: 2) == "2 elements · copied")
+    }),
     ("while picking, WebKit's mouse areas are put aside for ours, and come back after", {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 400, height: 300), styleMask: [.titled], backing: .buffered, defer: false)
         let doc = PreviewDocument(url: "")

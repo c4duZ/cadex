@@ -17,8 +17,15 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     public var onChange: (() -> Void)?
     let web: PickingWebView
     let address = NSTextField()
-    private let overlay = PickerOverlay()
-    private let pick: NSButton
+    let overlay = PickerOverlay()
+    let pick = NSButton(title: "", target: nil, action: nil)
+    /// The page's dot in the address box (PreviewBar.swift).
+    let dot = NSView()
+    /// The page's sizes (the mockup's desktop and phone), and which one shows.
+    let desktop = PreviewBar.icon(.monitor, T("Desktop width", "Largura de desktop"))
+    let phone = PreviewBar.icon(.deviceMobile, T("Phone width", "Largura de celular"))
+    var phoneSized = false
+    var sizes: (full: [NSLayoutConstraint], phone: [NSLayoutConstraint]) = ([], [])
     private lazy var picker = PreviewPicker(web: web, overlay: overlay)
     /// Runs a command by id: the bar's pick button fires preview.pick-element.
     public var runCommand: ((String) -> Bool)?
@@ -26,12 +33,14 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     /// sharing the page on the tailnet); they run commands by id. The
     /// preview does not know what they are.
     @MainActor public static var extraBarItems: ((PreviewDocument) -> [NSView])?
+    /// The bar is the pane's header (the PreviewOne mockup).
+    public var barIsHeader: Bool { true }
     /// The page shown now (nil before the first load).
     public var currentURL: URL? { web.url }
-    private let progress = NSProgressIndicator()
-    private let back: NSButton
-    private let forward: NSButton
-    private let message = NSTextField(labelWithString: "")
+    let progress = NSProgressIndicator()
+    let back = PreviewBar.icon(.caretLeft, T("Back", "Voltar"))
+    let forward = PreviewBar.icon(.caretRight, T("Forward", "Avançar"))
+    let message = NSTextField(labelWithString: "")
     private var observations: [NSKeyValueObservation] = []
     /// Loaded when the tab first shows: a page loaded before its view was
     /// in a window was never drawn (2026-10-19).
@@ -55,10 +64,8 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         configuration.websiteDataStore = .nonPersistent()
         configuration.applicationNameForUserAgent = Self.safariUserAgent
         web = PickingWebView(frame: .zero, configuration: configuration)
-        back = Self.button(.arrowLeft, T("Back", "Voltar"))
-        forward = Self.button(.arrowRight, T("Forward", "Avançar"))
-        pick = Self.button(.crosshair, T("Pick an element (⌘⇧C)", "Escolher elemento (⌘⇧C)"))
         super.init()
+        HoverTip.attach(T("Pick an element (⌘⇧C)", "Escolher elemento (⌘⇧C)"), to: pick)
         picker.onStateChange = { [weak self] in self?.showPicking() }
         picker.agentTerminal = { [weak self] in self?.agentController?.isAttached == true ? self?.agentTerminal : nil }
         picker.onNote = { [weak self] element, box in
@@ -69,7 +76,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         web.uiDelegate = self
         // "Inspecionar elemento" in the page's context menu (macOS 13.3+).
         if #available(macOS 13.3, *) { web.isInspectable = true }
-        layout()
+        layoutBar()
         observations = [
             web.observe(\.title) { [weak self] _, _ in MainActor.assumeIsolated { self?.onChange?() } },
             web.observe(\.estimatedProgress) { [weak self] web, _ in
@@ -179,7 +186,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     public func stopPicking() { picker.stop() }
 
     private func showPicking() {
-        pick.contentTintColor = picker.isPicking ? .controlAccentColor : nil
+        PreviewBar.pickChip(pick, picking: picker.isPicking)
     }
 
     /// Loads an address; without a scheme, http:// for local servers and
@@ -221,6 +228,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
 
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         if let url = webView.url { address.stringValue = url.absoluteString }
+        showDot(loading: false, failed: false)
         onChange?()
         agentController?.navigationEnded(error: nil)
         if noteCount > 0 { notes.refresh() }
@@ -238,6 +246,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         // Cancelled: a new address replaced it, not a failure.
         if (error as NSError).code == NSURLErrorCancelled { return }
         agentController?.navigationEnded(error: "could not load \(address.stringValue): \(error.localizedDescription)")
+        showDot(loading: false, failed: true)
         message.stringValue = T("Couldn't connect to \(address.stringValue)\n\(error.localizedDescription)", "Não foi possível conectar a \(address.stringValue)\n\(error.localizedDescription)")
         message.isHidden = false
     }
@@ -275,72 +284,6 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     private func showProgress(_ value: Double, loading: Bool) {
         progress.doubleValue = value * 100
         progress.isHidden = !loading
-    }
-
-    private static func button(_ icon: Icon, _ tip: String) -> NSButton {
-        let b = NSButton(image: icon.image(size: 14), target: nil, action: nil)
-        b.isBordered = false
-        HoverTip.attach(tip, to: b)
-        b.widthAnchor.constraint(equalToConstant: 24).isActive = true
-        return b
-    }
-
-    private func layout() {
-        let reload = Self.button(.arrowClockwise, T("Reload", "Recarregar"))
-        back.target = self
-        back.action = #selector(backPressed)
-        forward.target = self
-        forward.action = #selector(forwardPressed)
-        reload.target = self
-        reload.action = #selector(reloadPressed)
-        pick.target = self
-        pick.action = #selector(pickPressed)
-        back.isEnabled = false
-        forward.isEnabled = false
-        address.delegate = self
-        address.placeholderString = "http://localhost:3000"
-        address.font = UILooks.font(12)
-        address.bezelStyle = .roundedBezel
-        progress.style = .bar
-        progress.isIndeterminate = false
-        progress.controlSize = .small
-        progress.isHidden = true
-        message.alignment = .center
-        message.textColor = .secondaryLabelColor
-        message.isHidden = true
-        let bar = NSStackView(views: [back, forward, reload, address, pick] + (Self.extraBarItems?(self) ?? []))
-        bar.spacing = 4
-        bar.edgeInsets = NSEdgeInsets(top: 6, left: 8, bottom: 4, right: 8)
-        for v in [bar, progress, web, overlay, message] as [NSView] {
-            v.translatesAutoresizingMaskIntoConstraints = false
-            view.addSubview(v)
-        }
-        NSLayoutConstraint.activate([
-            bar.topAnchor.constraint(equalTo: view.topAnchor),
-            bar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            progress.topAnchor.constraint(equalTo: bar.bottomAnchor),
-            progress.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            progress.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            progress.heightAnchor.constraint(equalToConstant: 2),
-            web.topAnchor.constraint(equalTo: progress.bottomAnchor),
-            web.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            web.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            web.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            overlay.topAnchor.constraint(equalTo: web.topAnchor),
-            overlay.leadingAnchor.constraint(equalTo: web.leadingAnchor),
-            overlay.trailingAnchor.constraint(equalTo: web.trailingAnchor),
-            overlay.bottomAnchor.constraint(equalTo: web.bottomAnchor),
-            message.centerXAnchor.constraint(equalTo: web.centerXAnchor),
-            message.centerYAnchor.constraint(equalTo: web.centerYAnchor),
-            message.widthAnchor.constraint(lessThanOrEqualTo: web.widthAnchor, constant: -40),
-        ])
-    }
-
-    @objc private func backPressed() { goBack() }
-    @objc private func forwardPressed() { goForward() }
-    @objc private func reloadPressed() { reload() }
-    @objc private func pickPressed() {
-        if runCommand?("preview.pick-element") != true { togglePicking() }
+        if loading { showDot(loading: true, failed: false) }
     }
 }

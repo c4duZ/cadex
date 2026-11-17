@@ -21,9 +21,11 @@ final class PickerOverlay: NSView {
     private var flash: (marks: [Mark], color: NSColor)?
     private var flashTimer: Timer?
 
-    static let pastedColor = NSColor.systemGreen
-    static let selectedColor = NSColor.systemGreen
-    static let copiedColor = NSColor.systemOrange
+    /// The PreviewOne mockup's picked element (components.preview.picked): the working blue
+    /// outline and label; amber when it was only copied.
+    static var pastedColor: NSColor { DesignTokens.Preview.Picked.Outline.color }
+    static var selectedColor: NSColor { DesignTokens.Preview.Picked.Outline.color }
+    static var copiedColor: NSColor { DesignTokens.Color.stateNeeds }
 
     override var isFlipped: Bool { true }
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
@@ -45,29 +47,35 @@ final class PickerOverlay: NSView {
         if let flash { flash.marks.forEach { draw($0, color: flash.color) } }
         selected.forEach { draw($0, color: Self.selectedColor) }
         // Over a marked one, its green stays and the outline adds nothing.
-        if let target, flash == nil, !selected.contains(where: { $0.box == target.box }) { draw(target, color: .controlAccentColor) }
+        if let target, flash == nil, !selected.contains(where: { $0.box == target.box }) { draw(target, color: Self.selectedColor) }
         if let banner { drawBanner(banner) }
     }
 
+    /// The mockup's mark: a 2 pt outline 3 pt out from the element, no fill, and the label chip
+    /// sitting on the outline's top edge.
     private func draw(_ mark: Mark, color: NSColor) {
-        let box = mark.box.insetBy(dx: -1, dy: -1)
-        color.withAlphaComponent(0.12).setFill()
-        NSBezierPath(rect: box).fill()
+        typealias P = DesignTokens.Preview.Picked
+        let offset = UILooks.pt(P.outlineOffset), width = UILooks.pt(P.Outline.width)
+        let box = mark.box.insetBy(dx: -offset, dy: -offset)
         color.setStroke()
-        let outline = NSBezierPath(rect: box.insetBy(dx: 1, dy: 1))
-        outline.lineWidth = 2
+        let corner = UILooks.pt(DesignTokens.Radius.control)
+        let outline = NSBezierPath(roundedRect: box, xRadius: corner, yRadius: corner)
+        outline.lineWidth = width
         outline.stroke()
         let text = NSAttributedString(string: mark.label, attributes: [
-            .font: UILooks.monospaced(11, weight: .medium), .foregroundColor: NSColor.white,
+            .font: UILooks.font(P.Label.fontSize, weight: P.Label.weight), .foregroundColor: P.Label.color,
         ])
         let size = text.size()
-        var chip = CGRect(x: box.minX, y: box.minY - size.height - 8, width: size.width + 10, height: size.height + 4)
+        let pad = P.Label.padding
+        var chip = CGRect(x: box.minX, y: box.minY - size.height - UILooks.pt(pad.top + pad.bottom),
+                          width: size.width + UILooks.pt(pad.left + pad.right), height: size.height + UILooks.pt(pad.top + pad.bottom))
         // No room above: under the box, or inside it at the top.
         if chip.minY < 2 { chip.origin.y = box.maxY + 4 <= bounds.maxY - chip.height ? box.maxY + 4 : box.minY + 2 }
         chip.origin.x = max(2, min(chip.minX, bounds.maxX - chip.width - 2))
         color.setFill()
-        NSBezierPath(roundedRect: chip, xRadius: 4, yRadius: 4).fill()
-        text.draw(at: CGPoint(x: chip.minX + 5, y: chip.minY + 2))
+        let radius = UILooks.pt(P.Label.radius)
+        NSBezierPath(roundedRect: chip, xRadius: radius, yRadius: radius).fill()
+        text.draw(at: CGPoint(x: chip.minX + UILooks.pt(pad.left), y: chip.minY + UILooks.pt(pad.top)))
     }
 
     private func drawBanner(_ banner: String) {

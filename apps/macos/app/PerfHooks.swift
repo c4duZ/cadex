@@ -39,6 +39,10 @@ extension WindowSession {
                 }
             }
         }
+        // A page opened beside the focused terminal, to compare with the PreviewOne mockup.
+        if let url = environment["CADEX_PERF_PREVIEW"] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in self?.openPreview(url, beside: true) }
+        }
         // The focused pane split to the right, to compare two panes with the Terminals mockup.
         if environment["CADEX_PERF_SPLIT"] != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in _ = self?.commands.run("pane.split-right") }
