@@ -134,7 +134,7 @@ extension WindowSession {
                 if let index = tasks.firstIndex(where: { folder == $0.id || folder.hasPrefix($0.id + "/") }) {
                     tasks[index].terminals.append(row)
                 } else {
-                    own.append(row)
+                    own.append(projectRow(row, terminal: terminal, folder: folder, project: project.folder))
                 }
             }
             for index in tasks.indices { fillTask(&tasks[index]) }
@@ -142,6 +142,27 @@ extension WindowSession {
                                    tasks: tasks, terminals: own)
         }
         tree.show(model, chosen: active.map { .terminal(AppDelegate.key($0)) })
+    }
+
+    /// A project's own terminal in full (the mockup's two lines): its name, under it who runs in
+    /// it or where it is, what it waits for, and since when its state changed.
+    private func projectRow(_ row: WorkTreeTerminal, terminal: TerminalView, folder: String, project: String) -> WorkTreeTerminal {
+        var row = row
+        let state = row.state ?? .idle
+        if treeStates[row.id]?.state != state { treeStates[row.id] = (state, Date()) }
+        if terminal.agentStatus != nil {
+            row.detail = Self.agent(in: folder)
+        } else {
+            // A shell: "Terminal", and under it the folder it is in, from the project's.
+            row.title = row.title == (folder as NSString).lastPathComponent ? T("Terminal", "Terminal") : row.title
+            let name = (project as NSString).lastPathComponent
+            row.detail = folder == project ? name
+                : folder.hasPrefix(project + "/") ? name + "/" + String(folder.dropFirst(project.count + 1))
+                : (folder as NSString).abbreviatingWithTildeInPath
+        }
+        row.waiting = Self.waiting(terminal.agentStatus) ?? ""
+        row.age = treeStates[row.id].map { Self.age(since: $0.since) } ?? ""
+        return row
     }
 
     /// A task's line beyond its name: its state (and since when), what news it has, who works on

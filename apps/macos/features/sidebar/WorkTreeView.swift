@@ -146,17 +146,19 @@ public final class WorkTreeView: NSView {
             place(row)
             spacing(S.TaskRow.marginBottom)
         }
-        // The project's own terminals with their dot in the tasks' glyph column, so they read as
-        // the project's rows (the drawing has none; 2026-11-17).
-        addTerminals(project.terminals, indent: S.TaskRow.padding.left + (S.TaskRow.glyph - S.TerminalRow.dot) / 2 - S.TerminalRow.padding.left)
-        spacing(S.Project.marginBottom)
-    }
-
-    private func addTerminals(_ terminals: [WorkTreeTerminal], indent: CGFloat) {
-        for terminal in terminals {
-            place(terminalRow(terminal), indent: indent)
-            spacing(S.TerminalRow.Block.gap)
+        // The project's own terminals as the mockup's rows: a one-line chip under the project read
+        // as a stray tag next to the drawing (owner, 2026-11-17).
+        for terminal in project.terminals {
+            var line = WorkTreeTask(id: terminal.id, name: terminal.title, state: terminal.state ?? .idle, agent: terminal.detail)
+            line.waiting = terminal.waiting
+            line.age = terminal.age
+            let row = WorkTreeRows.task(line)
+            row.isChosen = chosen == .terminal(terminal.id)
+            row.onPress = { [weak self] in self?.onPick?(.terminal(terminal.id)) }
+            place(row)
+            spacing(S.TaskRow.marginBottom)
         }
+        spacing(S.Project.marginBottom)
     }
 
     private func terminalRow(_ terminal: WorkTreeTerminal) -> WorkTreeRow {

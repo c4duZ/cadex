@@ -13,6 +13,11 @@ public struct WorkTreeTerminal: Equatable, Sendable {
     public var state: GlyphState?
     /// A short note on the right ("Opus", ":5173", "38s").
     public var note: String
+    /// A project's own terminal is drawn as the mockup's two-line row: under its name, who runs
+    /// in it ("Claude · bkdg") or its folder, what it waits for, and its age on the right.
+    public var detail: String = ""
+    public var waiting: String = ""
+    public var age: String = ""
 
     public init(id: String, title: String, state: GlyphState? = nil, note: String = "") {
         self.id = id
