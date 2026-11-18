@@ -32,7 +32,11 @@
   `pageLit` acende o da página aberta; o clique roda o comando da página, e no aceso o
   `toggleCommand` (view.toggle-sidebar), como a barra de atividades do VS Code (ADR 0038 revista). `RailParts.swift`: `RailTile` (o
   quadrado, o halo, a peça de estado, o ponto) e `RailButton` (o "+" e os do pé). Tokens:
-  components.rail.
+  components.rail. `RailDrag.swift` (plano 36 E): arrastar um quadrado ou um ícone de página passa
+  dos 4 pt e vira arrasto (`RailPress`; sem laço de eventos próprio, os cliques de teste mandam o
+  soltar logo depois); os outros abrem caminho ao vivo; ao soltar, `onMove` (a pasta, a ordem e se
+  ficou acima da linha, fixado) ou `onMovePages` (os ids). Um projeto sem terminal não passa da linha
+  para baixo.
 - `WorkTree.swift`: o modelo puro (`WorkTreeProject`, `WorkTreeTask`, `WorkTreeTerminal`) e
   `WorkTreePick` (projeto, tarefa ou terminal).
 - `WorkTreeView.swift`: a porta de entrada. `show` recebe os projetos e o escolhido e redesenha só

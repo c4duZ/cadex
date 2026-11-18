@@ -120,6 +120,8 @@ public struct Settings: Equatable, Sendable {
         public var tab = "changes"
         /// Its width, dragged by the edge; 260 is components.inspector.width (the side column, ADR 0038).
         public var width = 260.0
+        /// The pages' order, dragged in the rail (plan 36 phase E); empty: the app's own.
+        public var order: [String] = []
     }
 
     public struct Agents: Equatable, Sendable {
@@ -293,7 +295,7 @@ public struct Settings: Equatable, Sendable {
     static let documentSides = ["right", "left"]
     static let fileOpenings = ["beside", "tab"]
     static let languages = ["en", "pt"]
-    static let inspectorTabs = ["changes", "files", "history", "memory"]
+    static let inspectorTabs = ["changes", "files", "history", "memory", "sessions"]
     /// The right panel's width: narrower hides its rows' text, wider eats the terminals.
     public static let inspectorWidths = 240.0...640.0
     static let keepAwakeModes = ["always", "running"]

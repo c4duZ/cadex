@@ -7,10 +7,11 @@ import StateGlyph
 import Strings
 import Worktrees
 
-/// The Projects page (plan 34 B): project.show-all, from the sidebar's foot and ⌘K; a card per
+/// The Projects page (plan 34 B): project.show-all, from the rail's foot and ⌘K; a card per
 /// project with its tasks (the tree's), sessions (the history's, read while a page shows) and
 /// memories (its wiki, counted off the main thread), and what goes on (a live agent working or
-/// waiting, else the last session). A click opens the project's page; Add project is project.new.
+/// waiting, else the last session). A click opens the project's page; it edits nothing (ADR 0038):
+/// Add project is the rail's "+" (project.create).
 extension WindowSession {
     func projectsPageCommands() -> [Command] {
         [Command(id: "project.show-all", title: T("Show Projects", "Mostrar os projetos"),
@@ -27,7 +28,7 @@ extension WindowSession {
     func makeProjectsPage() -> ProjectsListDocument {
         var actions = ProjectsListActions()
         actions.open = { [weak self] folder in self?.openProjectPage(folder) }
-        actions.add = { [weak self] in _ = self?.commands.run("project.new") }
+        actions.add = { [weak self] in _ = self?.commands.run("project.create") }
         actions.load = { [weak self] show in self?.loadProjectCards(show) }
         return ProjectsListDocument(actions: actions)
     }

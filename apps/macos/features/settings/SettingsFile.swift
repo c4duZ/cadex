@@ -84,6 +84,7 @@ public enum SettingsFile {
         if let s = reader.section(root, "inspector") {
             settings.inspector.visible = reader.bool(s, "inspector.visible") ?? settings.inspector.visible
             settings.inspector.tab = reader.choice(s, "inspector.tab", Settings.inspectorTabs) ?? settings.inspector.tab
+            settings.inspector.order = reader.strings(s, "inspector.order") ?? settings.inspector.order
             if let width = reader.number(s, "inspector.width") {
                 settings.inspector.width = min(max(width, Settings.inspectorWidths.lowerBound), Settings.inspectorWidths.upperBound)
             }
@@ -281,7 +282,7 @@ public enum SettingsFile {
             "markdown": ["openAs": s.markdown.openAs],
             "preview": ["pickTarget": s.preview.pickTarget, "pickScreenshot": s.preview.pickScreenshot],
             "power": ["mode": s.power.mode, "onAtLaunch": s.power.onAtLaunch, "keepDisplayOn": s.power.keepDisplayOn],
-            "inspector": ["visible": s.inspector.visible, "tab": s.inspector.tab, "width": s.inspector.width],
+            "inspector": ["visible": s.inspector.visible, "tab": s.inspector.tab, "width": s.inspector.width, "order": s.inspector.order],
             "statusBar": ["left": s.statusBar.left, "right": s.statusBar.right],
             "ssh": ["ping": s.ssh.ping],
             "machines": ["tailscale": s.machines.tailscale, "acceptRemote": s.machines.acceptRemote, "users": s.machines.users],

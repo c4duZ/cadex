@@ -25,7 +25,7 @@ public final class InspectorView: NSView {
     }
     private let edge = InspectorEdge()
     public private(set) var tab: String?
-    private let tabs: [InspectorTab]
+    private var tabs: [InspectorTab]
     private let run: (String) -> Void
     private let tabRow = NSStackView()
     private(set) var tabButtons: [InspectorTabButton] = []
@@ -106,6 +106,20 @@ public final class InspectorView: NSView {
     public var known: [String] { tabs.map(\.id) }
     /// The tabs, for the rail that shows their icons (ADR 0038, revised).
     public var pages: [InspectorTab] { tabs }
+
+    /// The pages in the order dragged in the rail (plan 36 phase E): `ids` first, in that order, the
+    /// ones it does not name after them as they were (a page added later still shows). The
+    /// inspector.tab-N commands follow it.
+    public func reorder(_ ids: [String]) {
+        let named = ids.compactMap { id in tabs.first { $0.id == id } }
+        tabs = named + tabs.filter { !ids.contains($0.id) }
+        tabButtons.sort { a, b in known.firstIndex(of: a.id) ?? 0 < known.firstIndex(of: b.id) ?? 0 }
+        guard !tabRow.isHidden else { return }
+        for (index, button) in tabButtons.enumerated() {
+            tabRow.removeArrangedSubview(button)
+            tabRow.insertArrangedSubview(button, at: index)
+        }
+    }
 
     /// Shows a tab (its command, a click, the saved inspector.tab); an unknown id shows nothing new.
     /// `announce` false only picks it (the panel closed at launch): no page is made or read.

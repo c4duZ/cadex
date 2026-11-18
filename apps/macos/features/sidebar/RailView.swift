@@ -20,13 +20,20 @@ public final class RailView: NSView {
     /// The foot's page that shows (lit), or nil.
     public var footLit: RailFoot? { didSet { if footLit != oldValue { lightFoot() } } }
     private let run: (String) -> Void
-    private let top = NSStackView()
+    let top = NSStackView()
     private let foot = NSStackView()
     private var shown: (projects: [RailProject], chosen: String?)?
-    private(set) var tiles: [RailTile] = []
+    var tiles: [RailTile] = []
     private let add: RailButton
     private let pagesLine = NSView()
-    private var pageButtons: [(RailPage, RailButton)] = []
+    var pageButtons: [(RailPage, RailButton)] = []
+    /// A tile dragged to a new place (plan 36 phase E): its folder, the tiles' folders in the new
+    /// order, and whether it is now pinned (above the line).
+    public var onMove: ((String, [String], Bool) -> Void)?
+    /// The page icons dragged into a new order: their ids.
+    public var onMovePages: (([String]) -> Void)?
+    /// The tile or icon being dragged now.
+    var dragged: NSView?
     /// The command that folds the column: the lit page's click runs it (as VS Code's activity bar).
     public var toggleCommand = "view.toggle-sidebar"
     /// The page the column shows (nil: closed): its icon lit.
@@ -108,6 +115,10 @@ public final class RailView: NSView {
                 PopupMenu.show(entries, at: tile.convert(event.locationInWindow, from: nil), in: tile)
             }
             tile.onDropImage = { [weak self] url in self?.onDropImage?(project.id, url) }
+            tile.onDrag = { [weak self, weak tile] event, ended in
+                guard let self, let tile else { return }
+                ended ? self.dragEnded(tile, .project) : self.dragMoved(tile, .project, event)
+            }
             return tile
         }
         for (index, tile) in tiles.enumerated() { top.insertArrangedSubview(tile, at: index) }
@@ -118,7 +129,7 @@ public final class RailView: NSView {
     }
 
     /// Between the pinned projects and the others.
-    private lazy var groupLine: NSView = {
+    lazy var groupLine: NSView = {
         let line = NSView()
         line.wantsLayer = true
         line.layer?.backgroundColor = R.Separator.color.cgColor
@@ -139,6 +150,10 @@ public final class RailView: NSView {
             button.onPress = { [weak self] in
                 guard let self else { return }
                 self.run(self.pageLit == page.id ? self.toggleCommand : page.command)
+            }
+            button.onDrag = { [weak self, weak button] event, ended in
+                guard let self, let button else { return }
+                ended ? self.dragEnded(button, .page) : self.dragMoved(button, .page, event)
             }
             return (page, button)
         }

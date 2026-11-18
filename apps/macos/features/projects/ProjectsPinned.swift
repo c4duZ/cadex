@@ -52,3 +52,23 @@ extension ProjectsController {
         close(folder: folder)
     }
 }
+
+// MARK: Order (plan 36 phase E)
+
+extension ProjectsController {
+    /// The order dragged in the rail: `folders` first, in that order; the projects it does not name
+    /// (the home folder's, never in the rail) keep their places after them. The shown project
+    /// stays the shown one. `pinned`: what the dragged one became (above the line or below).
+    public func arrange(_ folders: [String], moved folder: String, pinned: Bool) {
+        let shown = projects.indices.contains(activeIndex) ? projects[activeIndex] : nil
+        let named = folders.compactMap { folder in projects.first { $0.folder == folder } }
+        projects = named + projects.filter { !folders.contains($0.folder) }
+        if let shown, let index = projects.firstIndex(where: { $0 === shown }) { activeIndex = index }
+        if let project = projects.first(where: { $0.folder == folder }), project.pinned != pinned {
+            // Unpinning one with no terminal would drop it from the rail: the rail never offers it.
+            if pinned || project.tabs.count > 0 { project.pinned = pinned }
+        }
+        onChange?()
+        scheduleSave()
+    }
+}

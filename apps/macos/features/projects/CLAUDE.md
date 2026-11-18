@@ -63,7 +63,12 @@
   fechando não o tira: `keepEmpty`, e se era o mostrado, aparece outro com terminais ou a tela de
   início); `setPinned` (solto e sem terminal, sai), `closeTerminals(folder:)` (fixado fica),
   `removeFromRail(folder:)`. Aberto pelo ⌘O não nasce fixado; criado pela folha, sim; o arquivo de
-  antes (sem "pinned") volta tudo fixado. O seletor ⇧⌘S mostra a imagem e o emoji.
+  antes (sem "pinned") volta tudo fixado. O seletor ⇧⌘S mostra a imagem e o emoji. `arrange`
+  (plano 36 E): a ordem arrastada no trilho, o mostrado continua o mostrado, acima da linha fixa
+  (um vazio nunca se solta por arrasto).
+- `ProjectSettingsLook.swift` (plano 36 E): o topo das Settings do projeto, como ele aparece no
+  trilho (a prévia, o nome, Edit Name and Image… e a caixa de fixado). A página Projects não edita
+  nada (ADR 0038); a página do projeto tem Open terminal (ProjectPageActions.openTerminal).
 - `ProjectsFile.swift`: o JSON em Application Support/Cadex/projects.json (gravação atômica), com os
   projetos (nome, pasta, abas, cor, imagem, emoji, fixado), o ativo, a pasta do workspace e os recentes; uma lista vazia
   (a tela de início) é um arquivo bom. Arquivo ilegível vai para

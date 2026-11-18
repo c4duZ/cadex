@@ -24,7 +24,8 @@
   As palavras ocupam o que sobra e os botões ficam à direita.
 - `InspectorEdge.swift`: a borda direita (a coluna fica à esquerda do centro), uma faixa de 5 pt com o cursor de redimensionar; arrastar
   pede a largura (`onResize`), e o app a limita (Settings.inspectorWidths) e salva ao soltar
-  (inspector.width).
+  (inspector.width). `reorder` põe as páginas na ordem arrastada no trilho (plano 36 E;
+  inspector.order), que os inspector.tab-N seguem.
 - `InspectorParts.swift`: a aba como ícone num quadro de 40×30, acesa com o fundo escolhido
   (components.inspector.iconTabs), e o botão de ícone de 24 pt do pé, aceso sob o ponteiro como os
   da barra de título.

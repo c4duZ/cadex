@@ -6,6 +6,7 @@ import Orchestration
 import Projects
 import StateGlyph
 import Strings
+import UILooks
 import Worktrees
 
 /// A project's page in this window (plan 30 A, done with plan 29's review; docs/spec/projects.md):
@@ -51,7 +52,7 @@ extension WindowSession {
 
     /// The page's sections: the project's memory (its .ai-memory.toml) for now.
     func makeProjectSettings(_ folder: String) -> ProjectSettingsDocument {
-        ProjectSettingsDocument(folder: folder) { [MemoryProjectForm(folder: folder)] }
+        ProjectSettingsDocument(folder: folder) { [weak self] in [self?.projectLook(folder), MemoryProjectForm(folder: folder)].compactMap { $0 } }
     }
 
     /// The project's page, on a section and a line when given (plan 34 G).
@@ -81,12 +82,35 @@ extension WindowSession {
         actions.showAll = { [weak self] in self?.openProjectsPage() }
         actions.items = { [weak self] section, query in self?.projectItems(folder, section, query: query) ?? [] }
         actions.detail = { [weak self] section, id in self?.projectDetail(folder, section, id) }
-        actions.sectionView = { section in section == .settings ? MemoryProjectForm(folder: folder) : nil }
+        actions.sectionView = { [weak self] section in section == .settings ? self?.projectSettingsView(folder) : nil }
+        actions.openTerminal = { [weak self] in self?.pickProject(folder) }
         actions.createAutomation = { [weak self] in _ = self?.commands.run("orchestration.new-automation") }
         actions.openAutomations = { [weak self] in self?.openAutomationsPage() }
         // The tasks' sessions on other machines (plan 23), read over ssh only while a page shows.
         actions.shown = { shown in AgentsController.shared.pageShown(shown) }
         return ProjectPageDocument(folder: folder, actions: actions)
+    }
+
+    /// The project's Settings: how it shows in the rail (name, picture, pinned; plan 36 E), then
+    /// its memory's file.
+    private func projectSettingsView(_ folder: String) -> NSView {
+        let column = NSStackView(views: [projectLook(folder), MemoryProjectForm(folder: folder)])
+        column.orientation = .vertical
+        column.alignment = .leading
+        column.spacing = UILooks.pt(DesignTokens.Project.Columns.gap)
+        return column
+    }
+
+    /// How the project shows in the rail, on top of its Settings: Edit Name and Image… and pinned.
+    func projectLook(_ folder: String) -> NSView {
+        let name = projects?.projects.first { $0.folder == folder }?.name ?? (folder as NSString).lastPathComponent
+        return ProjectSettingsLook(picture: projectPicture(folder), name: name, pinned: projects?.isPinned(folder) ?? false,
+                                   edit: { [weak self] in self?.projectTarget = folder; _ = self?.commands.run("project.edit") },
+                                   pinned: { [weak self] on in
+                                       guard let self, let projects = self.projects, projects.isPinned(folder) != on else { return }
+                                       self.projectTarget = folder
+                                       _ = self.commands.run("project.pin")
+                                   })
     }
 
     /// A live session comes to the front; an ended one goes on in a tab of its folder.

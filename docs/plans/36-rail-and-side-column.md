@@ -84,9 +84,17 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
   app: a barra do projeto com a tarefa, a barra da tarefa com "‹ repo" e Review, a coluna na
   tarefa. Não conferido: o clique na barra de título (o clique de teste não chega lá; o teste de
   unidade cobre a tarefa e o "‹"), o "» N" na janela, as abas sem projeto.
-- [ ] E. Ordenar: a ordem arrastada (projetos e ícones da coluna; arrastar um aberto para cima da
+- [x] E. Ordenar: a ordem arrastada (projetos e ícones da coluna; arrastar um aberto para cima da
   linha o fixa). A página Projects só
   pelo pé do trilho, sem editar nada, e o cartão abrindo a página do projeto (com Open terminal).
+  Feito: arrastar no trilho reordena ao vivo (`apps/macos/features/sidebar/RailDrag.swift`); a ordem dos projetos vai ao
+  projects.json, a das páginas a inspector.order (e os ⌃⌘1…5 a seguem); um sem terminal não desce
+  da linha. A página do projeto ganhou Open terminal; as Settings do projeto, no topo, "In the
+  sidebar" (a prévia, Edit Name and Image… e fixado); Add project da página Projects é o mesmo "+"
+  do trilho (project.create); inspector.tab aceita "sessions" (antes voltava a Changes). Conferido
+  no app: arrastar gamma para cima de alpha (fixado, primeiro, salvo e de volta ao reabrir), o Git
+  graph para cima de Files (salvo e de volta), as Settings e o Open terminal. Não conferido: o
+  arrasto com o mouse de verdade (só o de teste) e a animação de deslizar.
 - [ ] F. Quando a coluna fecha e o pé: o quadro fecha a coluna e o segundo clique no ícone dele a
   devolve (conferir o bug que o dono viu); a janela estreita; Remote no pé (os hosts do ssh e as
   máquinas da tailnet, Connect); o item Memory da barra de status abrindo a página Memory da coluna.

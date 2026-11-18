@@ -28,7 +28,7 @@ public final class ProjectsController {
         }
     }
 
-    public private(set) var projects: [Project] = []
+    public internal(set) var projects: [Project] = []
     public internal(set) var activeIndex = 0
     public var active: TabsController? { projects.indices.contains(activeIndex) ? projects[activeIndex].tabs : nil }
     public var activeName: String { projects.indices.contains(activeIndex) ? projects[activeIndex].name : "" }

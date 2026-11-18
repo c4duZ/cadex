@@ -7,6 +7,8 @@ import UILooks
 @MainActor
 public struct ProjectPageActions {
     public var race: () -> Void = {}
+    /// Open terminal (plan 36 E): the project's terminals, one opened if it has none.
+    public var openTerminal: () -> Void = {}
     public var newTask: () -> Void = {}
     public var openConversation: (String) -> Void = { _ in }
     public var toggleAutomation: (String) -> Void = { _ in }
@@ -175,7 +177,8 @@ public final class ProjectPageDocument: TabDocument {
         let race = DesignButton.make(T("Race…", "Corrida…"), .secondary) { [weak self] in self?.actions.race() }
         let shortcut = actions.newTaskShortcut().map { "  " + $0 } ?? ""
         let task = DesignButton.make(T("New task", "Nova tarefa") + shortcut, .primary) { [weak self] in self?.actions.newTask() }
-        let buttons = NSStackView(views: [race, task])
+        let terminal = DesignButton.make(T("Open terminal", "Abrir terminal"), .secondary) { [weak self] in self?.actions.openTerminal() }
+        let buttons = NSStackView(views: [terminal, race, task])
         buttons.spacing = UILooks.pt(H.gap)
         titled.setContentHuggingPriority(.init(1), for: .horizontal)
         (titled as? NSStackView)?.setHuggingPriority(.init(1), for: .horizontal)

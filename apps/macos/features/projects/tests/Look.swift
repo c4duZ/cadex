@@ -71,6 +71,31 @@ let lookTests: [(name: String, body: Checks.Body)] = [
         expect(before.isPinned(a))
         before.projects.forEach { $0.tabs.closeAll() }
     }),
+    ("the rail's order (plan 36 E): dragged, kept; the shown one stays; above the line pins, an empty one never unpins", {
+        let (a, b) = folders()
+        let projects = controller(tempFile(), window: window())
+        projects.start(folder: a) { _ in nil }
+        projects.open(folder: b)
+        expect(projects.activeFolder == b)
+        projects.arrange([b, a], moved: b, pinned: true)
+        expect(projects.projects.map(\.folder) == [b, a] && projects.activeFolder == b, "\(projects.projects.map(\.folder))")
+        expect(projects.isPinned(b) && !projects.isPinned(a), "dragged above the line: pinned")
+        projects.arrange([a, b], moved: a, pinned: true)
+        projects.arrange([b, a], moved: a, pinned: false)
+        expect(!projects.isPinned(a), "below the line with terminals: not pinned")
+        projects.closeTerminals(folder: b)
+        projects.arrange([a, b], moved: b, pinned: false)
+        expect(projects.isPinned(b) && projects.projects.count == 2, "pinned and empty stays pinned")
+        projects.projects.forEach { $0.tabs.closeAll() }
+    }),
+    ("the project's Settings: Edit Name and Image… and the pinned box (plan 36 E)", {
+        var edits = 0
+        var pins: [Bool] = []
+        let look = ProjectSettingsLook(picture: nil, name: "cadex", pinned: true, edit: { edits += 1 }, pinned: { pins.append($0) })
+        expect(look.pinShown)
+        look.clickPin()
+        expect(pins == [false] && !look.pinShown, "\(pins)")
+    }),
     ("the column's Sessions: the groups with their lines, the search filters, the click picks", {
         let view = SessionsColumnView()
         var picked: [String] = []

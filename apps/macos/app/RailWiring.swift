@@ -14,6 +14,16 @@ extension WindowSession {
         rail.onPick = { [weak self] folder in self?.pickProject(folder) }
         rail.menuFor = { [weak self] folder in self?.railMenu(folder) ?? [] }
         rail.onDropImage = { [weak self] folder, url in self?.dropProjectImage(folder, url) }
+        // Dragged (plan 36 phase E): the projects' order and pinned kept in projects.json, the pages'
+        // in the settings (inspector.order), which the inspector.tab-N commands follow too.
+        rail.onMove = { [weak self] folder, order, pinned in
+            self?.projects?.arrange(order, moved: folder, pinned: pinned)
+            self?.drawRail()
+        }
+        rail.onMovePages = { [weak self] ids in
+            self?.workspace?.inspector.reorder(ids)
+            self?.settings.store.update { $0.inspector.order = ids }
+        }
         return rail
     }
 

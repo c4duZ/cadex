@@ -134,8 +134,15 @@ final class RailTile: NSView {
     override var mouseDownCanMoveWindow: Bool { false }
     // The first click of an inactive window counts (the owner's clicks were eaten, plan 34).
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
-    override func mouseDown(with event: NSEvent) {}
+    // Past a few points the press is a drag that reorders (plan 36 phase E); the rail moves it.
+    var onDrag: ((NSEvent, Bool) -> Void)?
+    private let press = RailPress()
+    override func mouseDown(with event: NSEvent) { press.down(event) }
+    override func mouseDragged(with event: NSEvent) {
+        if onDrag != nil, press.moved(event) { onDrag?(event, false) }
+    }
     override func mouseUp(with event: NSEvent) {
+        if press.up() { onDrag?(event, true); return }
         guard bounds.contains(convert(event.locationInWindow, from: nil)) else { return }
         onPress?()
     }
@@ -192,8 +199,15 @@ final class RailButton: NSView {
 
     override func mouseEntered(with event: NSEvent) { hovering = true }
     override func mouseExited(with event: NSEvent) { hovering = false }
-    override func mouseDown(with event: NSEvent) {}
+    // Past a few points the press is a drag that reorders (plan 36 phase E); the rail moves it.
+    var onDrag: ((NSEvent, Bool) -> Void)?
+    private let press = RailPress()
+    override func mouseDown(with event: NSEvent) { press.down(event) }
+    override func mouseDragged(with event: NSEvent) {
+        if onDrag != nil, press.moved(event) { onDrag?(event, false) }
+    }
     override func mouseUp(with event: NSEvent) {
+        if press.up() { onDrag?(event, true); return }
         guard bounds.contains(convert(event.locationInWindow, from: nil)) else { return }
         onPress?()
     }
