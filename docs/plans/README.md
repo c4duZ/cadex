@@ -72,6 +72,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 
 | 32 | `docs/plans/32-settings-and-memory.md` | as configurações numa janela com lista e busca (a barra de status e as contas dentro), a memória por projeto numa tela | fechado (2026-11-18): fases A a E; o `make perf` passa menos o browser_agent_after_cpu (1,1 e 1,4 % na rodada completa, 0,2 a 0,4 sozinho), aceito pelo dono como ruído desta máquina |
 | 33 | `docs/plans/33-claude-pane-and-accounts.md` | o painel do Claude vestido de verdade (cores, sem o mascote, a caixa, o modo na status line) e a troca de conta num clique pela memória; o `claude` digitado na conta certa e com as permissões da opção | em andamento |
+| 34 | `docs/plans/34-projects-and-pages.md` | as páginas fora da barra de cima; Projetos e Automações no pé da barra lateral; a página do projeto com Sessões e Memória, o clique mostrando o resumo; Automações com tabela ou vazia com Criar automação (`docs/design/projects/proposta.html`) | em andamento |
 
 - Depois: a moldura nova no app do Windows (plano 34, a escrever), sobre o port dos planos 9 a 13;
   até lá o Windows segue com spaces e os comandos novos ficam no `MAC_ONLY` da paridade.

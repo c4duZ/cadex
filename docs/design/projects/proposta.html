@@ -1,0 +1,189 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Projetos e páginas</title><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css"><link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css"><style>
+  :root { --page:#0A0B0C; --chrome:#121316; --side:#131417; --card:#15171A; --raised:#17191C; --btn:#1A1C20; --sel:#1F2226; --seg:#22252A;
+    --line:#22252A; --line2:#2A2D33; --text:#E7E8EA; --row:#D5D7DB; --dim:#9BA0A8; --muted:#8A9099; --ter:#7C828B; --sep:#4A4F57;
+    --blue:#5B9CF5; --amber:#F2A93B; --green:#3FB97A; --red:#EF5B5B; --purple:#A98BF0; --link:#9BC1FF; --linkbg:#1A2333; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--page); color:var(--text); font:13px/1.45 -apple-system, "SF Pro Text", Inter, system-ui, sans-serif; }
+  main { max-width:1280px; margin:0 auto; padding:32px 24px 90px; }
+  h1 { font-size:24px; margin:0 0 6px; } .sub { color:var(--dim); font-size:14px; max-width:1000px; margin:0; }
+  section { margin-top:56px; } h2 { font-size:19px; margin:0 0 4px; } h2 small { color:var(--dim); font-weight:500; font-size:13px; margin-left:8px; }
+  .grid { display:grid; grid-template-columns: 1fr 1fr; gap:18px; align-items:start; margin-top:12px; }
+  .col h3 { font-size:12px; letter-spacing:.06em; color:var(--dim); margin:0 0 8px; text-transform:uppercase; }
+  .shot { background:#0E0F11; border:1px solid var(--line); border-radius:12px; padding:14px; display:grid; place-items:center; }
+  .shot img { max-width:100%; max-height:620px; border-radius:8px; }
+  .issues { margin:12px 0 0; padding-left:18px; color:var(--row); font-size:13.5px; } .issues li { margin:4px 0; }
+  .issues b { color:var(--text); }
+  .row { display:flex; align-items:center; gap:8px; } .grow { flex:1; min-width:0; }
+  .muted { color:var(--muted); } .ter { color:var(--ter); } .amb { color:var(--amber); } .grn { color:#6FCF97; } .lnk { color:var(--link); }
+  kbd { font:11px -apple-system; color:var(--ter); border:1px solid var(--line2); border-radius:5px; padding:1px 5px; }
+  /* palette-like */
+  .pal { width:100%; max-width:600px; background:#16181B; border:1px solid #2A2D33; border-radius:14px; box-shadow:0 24px 60px rgba(0,0,0,.55); overflow:hidden; }
+  .pal .in { height:52px; padding:0 16px; border-bottom:1px solid var(--line); font-size:16px; color:var(--muted); gap:10px; }
+  .pal .hint { padding:8px 16px 4px; color:var(--ter); font-size:12px; }
+  .pal .it { margin:2px 8px; padding:9px 10px; border-radius:9px; gap:12px; }
+  .pal .it.on { background:#202833; } .pal .ft { border-top:1px solid var(--line); padding:9px 16px; gap:14px; color:var(--ter); font-size:12px; }
+  .pal .sec { padding:10px 18px 4px; color:var(--ter); font-size:11px; font-weight:700; letter-spacing:.06em; }
+  .logo { width:22px; height:22px; border-radius:6px; display:grid; place-items:center; background:#2A1E1A; color:#D97757; font-size:13px; flex:none; }
+  .two { display:flex; flex-direction:column; line-height:1.25; } .two small { color:var(--ter); font-size:11.5px; }
+  .meter { width:64px; height:5px; border-radius:3px; background:var(--seg); position:relative; overflow:hidden; flex:none; }
+  .meter i { position:absolute; inset:0 auto 0 0; width:var(--w); background:var(--c, var(--green)); border-radius:3px; }
+  .pct { width:84px; text-align:right; font-variant-numeric:tabular-nums; font-size:12px; color:var(--dim); }
+  .chip { font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:6px; background:var(--seg); color:var(--dim); }
+  /* side panel */
+  .panel { width:330px; background:var(--side); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .ptabs { height:40px; padding:0 12px; gap:16px; border-bottom:1px solid var(--line); color:var(--dim); font-size:12.5px; }
+  .ptabs .on { color:var(--text); font-weight:600; box-shadow: inset 0 -2px 0 var(--text); padding:11px 0; }
+  .phead { padding:10px 12px 6px; gap:8px; }
+  .phead .t { font-weight:650; font-size:13.5px; } .phead .s { color:var(--ter); font-size:12px; }
+  .ib { width:26px; height:26px; border-radius:7px; display:grid; place-items:center; color:var(--dim); font-size:15px; flex:none; }
+  .search { margin:4px 12px 8px; height:30px; border:1px solid var(--line2); border-radius:8px; background:var(--card); padding:0 10px; gap:8px; color:var(--ter); }
+  .lbl { padding:10px 14px 4px; color:var(--ter); font-size:11px; font-weight:700; letter-spacing:.06em; display:flex; align-items:center; gap:6px; }
+  .lbl .n { color:var(--sep); font-weight:600; }
+  .mi { margin:1px 6px; padding:6px 8px; border-radius:8px; gap:9px; }
+  .mi:hover { background:var(--btn); }
+  .kind { width:20px; height:20px; border-radius:6px; display:grid; place-items:center; font-size:12px; flex:none; }
+  .k-dec { background:#16233A; color:var(--link); } .k-got { background:#2A2214; color:var(--amber); } .k-rule { background:#221B33; color:var(--purple); }
+  .mi .ttl { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--row); }
+  .mi .when { color:var(--ter); font-size:11.5px; flex:none; }
+  .more { margin:2px 14px 6px; color:var(--link); font-size:12px; }
+  .sess { margin:1px 6px; padding:7px 8px; border-radius:8px; }
+  .sess .a { gap:8px; } .sess .ttl { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--row); }
+  .sess .b { gap:6px; color:var(--ter); font-size:11.5px; margin:2px 0 0 0; }
+  .acct { display:inline-flex; align-items:center; gap:4px; } .acct i { color:#D97757; font-size:10px; }
+  .foot { margin:10px 12px 12px; padding:10px 12px; border:1px solid var(--line2); border-radius:10px; background:var(--card); font-size:12px; color:var(--dim); }
+  .foot a { color:var(--link); text-decoration:none; }
+  /* files */
+  .fr { height:26px; padding:0 10px 0 calc(10px + var(--d,0) * 14px); gap:7px; color:var(--row); font-size:12.5px; }
+  .fr.dim { color:var(--sep); } .fr .st { margin-left:auto; font-size:11px; font-weight:700; }
+  .fr i.ph { color:var(--ter); font-size:14px; } .fr .car { width:10px; color:var(--ter); font-size:10px; }
+  /* menu */
+  .menu { width:300px; background:#16181B; border:1px solid #2A2D33; border-radius:12px; padding:6px; box-shadow:0 18px 48px rgba(0,0,0,.55); }
+  .menu .it { padding:7px 9px; border-radius:8px; gap:10px; color:var(--row); } .menu .it.on { background:#202833; }
+  .menu .it i.ph { font-size:16px; color:var(--dim); width:18px; } .menu .sep { height:1px; background:var(--line); margin:5px 6px; }
+  .menu .cap { padding:6px 9px 2px; color:var(--ter); font-size:11px; font-weight:700; letter-spacing:.05em; }
+  .why { background:#111214; border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin-top:14px; font-size:13.5px; color:var(--row); }
+  .why h4 { margin:0 0 6px; font-size:12px; letter-spacing:.06em; color:var(--dim); text-transform:uppercase; }
+  .why ul { margin:0; padding-left:18px; } .why li { margin:3px 0; }
+  @media (max-width:980px) { .grid { grid-template-columns:1fr; } }
+
+.win{width:100%;max-width:1240px;background:var(--page);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.top{height:44px;background:var(--chrome);border-bottom:1px solid var(--line);padding:0 12px;gap:10px}
+.dots{gap:7px}.dots i{width:12px;height:12px;border-radius:50%;background:#3a3d42;display:block}
+.tsearch{width:170px;height:28px;border:1px solid var(--line2);border-radius:8px;padding:0 9px;gap:7px;color:var(--ter);font-size:12.5px}
+.ttab{height:28px;padding:0 12px;border-radius:8px;gap:7px;color:var(--dim);font-size:12.5px}.ttab.on{background:var(--sel);color:var(--text);font-weight:600}
+.tright{gap:14px;color:var(--dim);font-size:12.5px}
+.body{display:grid;grid-template-columns:230px 1fr;min-height:620px}
+.side{background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:10px 8px}
+.newt{height:32px;border:1px solid var(--line2);border-radius:8px;padding:0 10px;gap:8px;font-size:13px;margin-bottom:12px}
+.sp{padding:4px 8px;font-weight:650;font-size:13px;gap:6px}.sp small{color:var(--ter);font-weight:500}
+.st{padding:5px 8px 5px 22px;font-size:12.5px;color:var(--row);gap:8px}.st small{color:var(--ter)}
+.foot2{margin-top:auto;border-top:1px solid var(--line);padding-top:8px}
+.fi{padding:7px 8px;border-radius:8px;gap:9px;color:var(--row);font-size:13px}.fi.on{background:var(--sel);color:var(--text);font-weight:600}.fi i{color:var(--dim);font-size:15px}.fi .d{margin-left:auto;color:var(--ter);font-size:11.5px}
+.main{padding:22px 28px;overflow:hidden}
+.crumb{color:var(--ter);font-size:12px;gap:6px;margin-bottom:6px}.crumb a{color:var(--link);text-decoration:none}
+.h1{font-size:22px;font-weight:700}.meta{color:var(--dim);font-size:12.5px;margin-top:2px}
+.btn{height:30px;padding:0 12px;border-radius:8px;border:1px solid var(--line2);font-size:12.5px;font-weight:600;gap:6px}.btn.pri{background:var(--text);color:#111;border-color:var(--text)}
+.seg{display:inline-flex;gap:2px;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:3px;margin:16px 0 14px}
+.seg span{padding:5px 12px;border-radius:7px;font-size:12.5px;color:var(--dim)}.seg span.on{background:var(--sel);color:var(--text);font-weight:600}
+.split{display:grid;grid-template-columns:1fr 1.05fr;gap:16px;align-items:start}
+.list{border:1px solid var(--line);border-radius:10px;background:var(--side);overflow:hidden}
+.li{padding:10px 12px;border-bottom:1px solid var(--line);gap:10px}.li:last-child{border-bottom:0}.li.on{background:#1b2230;box-shadow:inset 2px 0 0 var(--blue)}
+.li .t{font-size:13px;color:var(--text);font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.li .s{font-size:11.5px;color:var(--ter);margin-top:2px;gap:6px}
+.det{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:16px 18px}
+.det h3{margin:0;font-size:16px}.det .m{color:var(--ter);font-size:12px;margin:4px 0 12px;gap:8px}
+.det p{color:var(--row);font-size:13px;margin:0 0 10px}.det h4{font-size:11px;letter-spacing:.06em;color:var(--ter);margin:14px 0 6px}
+.det ul{margin:0;padding-left:18px;color:var(--row);font-size:13px}.det li{margin:3px 0}
+.tags{gap:6px;flex-wrap:wrap}.tag{font-size:11px;padding:2px 8px;border-radius:6px;background:var(--seg);color:var(--dim)}
+.kc{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:6px}
+.grp{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ter);padding:10px 12px 4px;background:var(--side)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.pc{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:14px}.pc .n{font-weight:700;font-size:14px}.pc .p{color:var(--ter);font-size:11.5px;margin:2px 0 10px}
+.stats{gap:14px;font-size:12px;color:var(--dim)}.stats b{color:var(--text);font-weight:650}
+table{width:100%;border-collapse:collapse;font-size:12.5px}th{text-align:left;color:var(--ter);font-size:11px;letter-spacing:.05em;font-weight:700;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:10px;border-bottom:1px solid var(--line);color:var(--row)}tr:hover td{background:var(--btn)}
+.sw{width:28px;height:16px;border-radius:8px;background:var(--green);position:relative;display:inline-block}.sw::after{content:"";position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff}.sw.off{background:var(--seg)}.sw.off::after{left:2px;right:auto}
+.empty{border:1px dashed var(--line2);border-radius:14px;min-height:470px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;margin-top:18px;padding:40px 24px}.empty .ic{width:64px;height:64px;border-radius:16px;background:var(--btn);display:grid;place-items:center;font-size:32px;color:var(--dim)}.empty h3{margin:18px 0 6px;font-size:20px}.empty p{color:var(--dim);margin:0 auto 22px;max-width:460px;font-size:14px}.empty .btn{height:38px;padding:0 18px;font-size:14px}
+.note{background:#1E1A12;border:1px solid #4A3A1C;color:#F2D29B;border-radius:9px;padding:9px 12px;font-size:12.5px;margin-top:14px;gap:8px}
+</style><main><h1>Projetos, sessões, memória e automações</h1><p class="sub">Proposta para aprovar antes do código. As abas da barra de cima continuam sendo só os terminais e nunca mudam quando você abre uma página. As páginas abrem no centro, abaixo da barra, e o Esc ou o clique numa aba de terminal volta para ela.</p><section><h2>1. Página do projeto · Sessões</h2><p class="sub" style="margin-bottom:12px">Clique numa sessão: o resumo abre ao lado, com o que foi feito e o que a memória guardou.</p><div class="win"><div class="top row"><span class="dots row"><i></i><i></i><i></i></span><span class="tsearch row"><i class="ph ph-magnifying-glass"></i>Buscar<span class="grow"></span>⌘K</span><span class="ttab on row"><i class="ph ph-terminal-window"></i>bkdg-center</span><span class="ttab row"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>space</span><span class="ttab row">cadex</span><span class="ttab" style="padding:0 6px">+</span><span class="grow"></span><span class="tright row"><span class="row" style="gap:6px"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>bhband 36%</span><i class="ph ph-kanban"></i><i class="ph ph-bell"></i><i class="ph ph-gear"></i><i class="ph ph-sidebar-simple"></i></span></div>
+<div class="body"><div class="side"><div class="newt row"><i class="ph ph-plus"></i>Nova tarefa</div>
+<div class="sp row"><i class="ph ph-caret-down" style="font-size:10px;color:var(--ter)"></i>bkdg-center <small>dev/center</small></div>
+<div class="st row"><i class="ph ph-circle" style="font-size:9px;color:var(--ter)"></i>Terminal<span class="grow"></span><small>agora</small></div>
+<div class="st row"><i class="ph-fill ph-circle" style="font-size:9px;color:var(--green)"></i>Estado da memória…<span class="grow"></span><small>8 min</small></div>
+<div class="sp row" style="margin-top:6px"><i class="ph ph-caret-right" style="font-size:10px;color:var(--ter)"></i>cadex <small>main</small></div>
+<div class="foot2"><div class="fi row on"><i class="ph ph-folders"></i>Projetos<span class="d">3</span></div><div class="fi row"><i class="ph ph-clock"></i>Automações<span class="d">1 ligada</span></div></div></div>
+<div class="main"><div class="crumb row"><a href="#">Projetos</a>›<span>bkdg-center</span></div>
+<div class="row"><div class="grow"><div class="h1">bkdg-center</div><div class="meta">~/Cadu/Trabalho/bkdg/bkdg-center · dev/center · 34 páginas de memória · 29 sessões</div></div><span class="btn row">Corrida…</span><span class="btn pri row" style="margin-left:8px">Nova tarefa ⌘N</span></div>
+<div class="seg"><span>Visão geral</span><span class="on">Sessões</span><span>Memória</span><span>Automações</span><span>Configurações</span></div>
+<div class="split"><div class="list">
+<div class="li on"><div class="grow" style="min-width:0"><div class="t">Estado da memória do AI Memory</div><div class="s row"><span class="acct"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>fba. + BKDG</span>· dev/center · 8 min</div></div></div>
+<div class="li"><div class="grow"><div class="t">Upwork portfolio project entry template</div><div class="s row"><span class="acct"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>fba. + BKDG</span>· center · 2 h</div></div></div>
+<div class="li"><div class="grow"><div class="t">Avaliação de arquitetura do Space</div><div class="s row"><span class="acct"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>bhband</span>· backend · 6 d</div></div></div>
+<div class="li"><div class="grow"><div class="t">Descrições do mockup do Center</div><div class="s row"><span class="acct"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>fba. + BKDG</span>· HEAD · 7 d</div></div></div>
+<div class="li"><div class="grow"><div class="t">Remoção de documentação desatualizada</div><div class="s row"><span class="acct"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>fba. + BKDG</span>· dev/center · 8 d</div></div></div>
+<div class="li"><div class="grow"><div class="t">Handoff space 2026-11-06</div><div class="s row"><span class="acct"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>fba. + BKDG</span>· dev/center · 9 d</div></div></div>
+</div>
+<div class="det"><h3>Estado da memória do AI Memory</h3><div class="m row"><span class="acct"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>fba. + BKDG</span>· dev/center · hoje 14:34 · 12 arquivos</div>
+<p>Auditoria da memória ai-memory do bkdg-center, limpeza de páginas de outro sistema e sessões vazias, e achados sobre o painel do Cadex.</p>
+<div class="tags row"><span class="tag">ai-memory</span><span class="tag">cadex</span><span class="tag">limpeza-de-memoria</span></div>
+<h4>O QUE FOI FEITO</h4><ul><li>Apagadas 6 páginas de outro projeto e 2 sessões vazias (de 33 para 27).</li><li>Handoff escrito para a seção do KDX.</li></ul>
+<h4>O QUE A MEMÓRIA GUARDOU</h4><div class="row" style="gap:8px;margin-bottom:6px"><span class="kind k-got"><i class="ph ph-warning"></i></span><span style="font-size:13px">Páginas de sessão misturam projetos</span></div><div class="row" style="gap:8px"><span class="kind k-dec"><i class="ph ph-check-circle"></i></span><span style="font-size:13px">O título da sessão vem do primeiro prompt</span></div>
+<div class="row" style="gap:8px;margin-top:16px"><span class="btn pri row"><i class="ph ph-play"></i>Retomar</span><span class="btn row">Continuar em outra conta…</span><span class="btn row">Ver a página</span></div></div></div></div></div></div><div class="why"><h4>O que muda</h4><ul><li><b>A barra de cima não muda</b>: as abas continuam sendo os terminais. As seções do projeto (Visão geral, Sessões, Memória, Automações, Configurações) ficam dentro da página.</li><li><b>O Archive & history vira a aba Sessões</b> de cada projeto, e o clique mostra o resumo em vez de nada.</li><li>Retomar, Continuar em outra conta e Ver a página em botões no resumo.</li></ul></div></section><section><h2>2. Página do projeto · Memória</h2><p class="sub" style="margin-bottom:12px">A memória inteira, agrupada pelo tipo. O clique mostra a página renderizada, sem frontmatter.</p><div class="win"><div class="top row"><span class="dots row"><i></i><i></i><i></i></span><span class="tsearch row"><i class="ph ph-magnifying-glass"></i>Buscar<span class="grow"></span>⌘K</span><span class="ttab on row"><i class="ph ph-terminal-window"></i>bkdg-center</span><span class="ttab row"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>space</span><span class="ttab row">cadex</span><span class="ttab" style="padding:0 6px">+</span><span class="grow"></span><span class="tright row"><span class="row" style="gap:6px"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>bhband 36%</span><i class="ph ph-kanban"></i><i class="ph ph-bell"></i><i class="ph ph-gear"></i><i class="ph ph-sidebar-simple"></i></span></div>
+<div class="body"><div class="side"><div class="newt row"><i class="ph ph-plus"></i>Nova tarefa</div>
+<div class="sp row"><i class="ph ph-caret-down" style="font-size:10px;color:var(--ter)"></i>bkdg-center <small>dev/center</small></div>
+<div class="st row"><i class="ph ph-circle" style="font-size:9px;color:var(--ter)"></i>Terminal<span class="grow"></span><small>agora</small></div>
+<div class="st row"><i class="ph-fill ph-circle" style="font-size:9px;color:var(--green)"></i>Estado da memória…<span class="grow"></span><small>8 min</small></div>
+<div class="sp row" style="margin-top:6px"><i class="ph ph-caret-right" style="font-size:10px;color:var(--ter)"></i>cadex <small>main</small></div>
+<div class="foot2"><div class="fi row on"><i class="ph ph-folders"></i>Projetos<span class="d">3</span></div><div class="fi row"><i class="ph ph-clock"></i>Automações<span class="d">1 ligada</span></div></div></div>
+<div class="main"><div class="crumb row"><a href="#">Projetos</a>›<span>bkdg-center</span></div>
+<div class="row"><div class="grow"><div class="h1">bkdg-center</div><div class="meta">~/Cadu/Trabalho/bkdg/bkdg-center · dev/center · 34 páginas de memória · 29 sessões</div></div><span class="btn row">Corrida…</span><span class="btn pri row" style="margin-left:8px">Nova tarefa ⌘N</span></div>
+<div class="seg"><span>Visão geral</span><span>Sessões</span><span class="on">Memória</span><span>Automações</span><span>Configurações</span></div>
+<div class="split"><div class="list">
+<div class="search row" style="margin:10px"><i class="ph ph-magnifying-glass"></i>Buscar na memória</div>
+<div class="grp">REGRAS · O QUE TODO AGENTE RECEBE</div>
+<div class="li"><span class="kind k-rule"><i class="ph ph-push-pin"></i></span><div class="grow"><div class="t">Nunca rodar migração sem backup do banco</div></div></div>
+<div class="grp">DECISÕES</div>
+<div class="li on"><span class="kind k-dec"><i class="ph ph-check-circle"></i></span><div class="grow"><div class="t">Descrição de competência usa texto único com rótulos</div><div class="s row">de "Corrigir a descrição…" · 2 h</div></div></div>
+<div class="grp">CUIDADOS</div>
+<div class="li"><span class="kind k-got"><i class="ph ph-warning"></i></span><div class="grow"><div class="t">Ciclo guarda cópia das competências</div><div class="s row">3 h</div></div></div>
+<div class="li"><span class="kind k-got"><i class="ph ph-warning"></i></span><div class="grow"><div class="t">Quebra de linha da descrição some na tela</div><div class="s row">3 h</div></div></div>
+</div>
+<div class="det"><div class="row" style="gap:8px"><span class="kc" style="background:#16233A;color:var(--link)">DECISÃO</span><span class="ter" style="font-size:12px">aprendida há 2 h</span></div>
+<h3 style="margin-top:8px">Descrição de competência usa texto único com rótulos</h3>
+<div class="m row">de <a class="lnk" href="#" style="text-decoration:none">Corrigir a descrição das competências</a> · <span class="acct"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>bhband</span></div>
+<p>A descrição de cada competência fica num campo de texto só, com rótulos ("Nível 1:", "Nível 2:") em vez de um campo por nível.</p>
+<h4>POR QUÊ</h4><p>Os níveis variam de 3 a 5 por competência e o formulário quebrava ao trocar a quantidade.</p>
+<h4>ONDE</h4><ul><li><code>src/competencias/Descricao.tsx</code></li><li><code>api/competencias/schema.ts</code></li></ul>
+<div class="row" style="gap:8px;margin-top:16px"><span class="btn row"><i class="ph ph-pencil-simple"></i>Editar</span><span class="btn row">Abrir a sessão</span><span class="btn row" style="color:var(--red)">Apagar…</span></div></div></div></div></div></div><div class="why"><h4>O que muda</h4><ul><li>As regras primeiro: são o que todo agente recebe.</li><li>Cada página mostra de qual sessão veio, o porquê e onde no código, renderizada. O .md cru só abre pelo Editar.</li><li>O painel Memory da direita continua como o resumo rápido, e o clique nele abre esta tela.</li></ul></div></section><section><h2>3. Projetos</h2><p class="sub" style="margin-bottom:12px">No pé da barra lateral, no lugar do Archive & history.</p><div class="win"><div class="top row"><span class="dots row"><i></i><i></i><i></i></span><span class="tsearch row"><i class="ph ph-magnifying-glass"></i>Buscar<span class="grow"></span>⌘K</span><span class="ttab on row"><i class="ph ph-terminal-window"></i>bkdg-center</span><span class="ttab row"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>space</span><span class="ttab row">cadex</span><span class="ttab" style="padding:0 6px">+</span><span class="grow"></span><span class="tright row"><span class="row" style="gap:6px"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>bhband 36%</span><i class="ph ph-kanban"></i><i class="ph ph-bell"></i><i class="ph ph-gear"></i><i class="ph ph-sidebar-simple"></i></span></div>
+<div class="body"><div class="side"><div class="newt row"><i class="ph ph-plus"></i>Nova tarefa</div>
+<div class="sp row"><i class="ph ph-caret-down" style="font-size:10px;color:var(--ter)"></i>bkdg-center <small>dev/center</small></div>
+<div class="st row"><i class="ph ph-circle" style="font-size:9px;color:var(--ter)"></i>Terminal<span class="grow"></span><small>agora</small></div>
+<div class="st row"><i class="ph-fill ph-circle" style="font-size:9px;color:var(--green)"></i>Estado da memória…<span class="grow"></span><small>8 min</small></div>
+<div class="sp row" style="margin-top:6px"><i class="ph ph-caret-right" style="font-size:10px;color:var(--ter)"></i>cadex <small>main</small></div>
+<div class="foot2"><div class="fi row on"><i class="ph ph-folders"></i>Projetos<span class="d">3</span></div><div class="fi row"><i class="ph ph-clock"></i>Automações<span class="d">1 ligada</span></div></div></div>
+<div class="main"><div class="row"><div class="grow"><div class="h1">Projetos</div><div class="meta">3 projetos · a memória de cada um é dividida por todas as contas</div></div><span class="btn pri row"><i class="ph ph-plus"></i>Adicionar projeto</span></div>
+<div class="cards">
+<div class="pc"><div class="n">bkdg-center</div><div class="p">~/Cadu/Trabalho/bkdg/bkdg-center · dev/center</div><div class="stats row"><span><b>2</b> tarefas</span><span><b>29</b> sessões</span><span><b>34</b> memórias</span></div><div class="row" style="gap:6px;margin-top:10px;color:var(--ter);font-size:11.5px"><i class="ph-fill ph-circle" style="color:var(--green);font-size:8px"></i>agente trabalhando · 8 min</div></div>
+<div class="pc"><div class="n">cadex</div><div class="p">~/Cadu/Trabalho/cadu/cadex · main</div><div class="stats row"><span><b>0</b> tarefas</span><span><b>30</b> sessões</span><span><b>0</b> memórias</span></div><div class="row" style="gap:6px;margin-top:10px;color:var(--ter);font-size:11.5px">última sessão ontem</div></div>
+<div class="pc"><div class="n">space</div><div class="p">~/Cadu/Trabalho/bkdg/space · main</div><div class="stats row"><span><b>1</b> tarefa</span><span><b>12</b> sessões</span><span><b>9</b> memórias</span></div><div class="row" style="gap:6px;margin-top:10px;color:var(--amber);font-size:11.5px"><i class="ph-fill ph-circle" style="font-size:8px"></i>1 esperando você</div></div>
+</div>
+<div class="row" style="margin-top:22px;gap:8px;color:var(--ter);font-size:12px"><i class="ph ph-archive"></i>Todas as conversas de todos os projetos: na aba Sessões de cada um, ou "Todas as sessões" no ⌘K.</div></div></div></div><div class="why"><h4>O que muda</h4><ul><li>Um cartão por projeto: tarefas, sessões, memórias e o que está acontecendo agora.</li><li>O clique abre a página do projeto (1 e 2). As Configurações de cada projeto ficam lá dentro, sem o projeto "cadu" aparecendo do nada.</li></ul></div></section><section><h2>4. Automações, vazia</h2><p class="sub" style="margin-bottom:12px">Hoje o clique não abre nada. Vazia, a página ocupa a área, diz o que é e põe o Criar automação no meio (ajuste do dono, 2026-11-18).</p><div class="win"><div class="top row"><span class="dots row"><i></i><i></i><i></i></span><span class="tsearch row"><i class="ph ph-magnifying-glass"></i>Buscar<span class="grow"></span>⌘K</span><span class="ttab on row"><i class="ph ph-terminal-window"></i>bkdg-center</span><span class="ttab row"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>space</span><span class="ttab row">cadex</span><span class="ttab" style="padding:0 6px">+</span><span class="grow"></span><span class="tright row"><span class="row" style="gap:6px"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>bhband 36%</span><i class="ph ph-kanban"></i><i class="ph ph-bell"></i><i class="ph ph-gear"></i><i class="ph ph-sidebar-simple"></i></span></div>
+<div class="body"><div class="side"><div class="newt row"><i class="ph ph-plus"></i>Nova tarefa</div>
+<div class="sp row"><i class="ph ph-caret-down" style="font-size:10px;color:var(--ter)"></i>bkdg-center <small>dev/center</small></div>
+<div class="st row"><i class="ph ph-circle" style="font-size:9px;color:var(--ter)"></i>Terminal<span class="grow"></span><small>agora</small></div>
+<div class="st row"><i class="ph-fill ph-circle" style="font-size:9px;color:var(--green)"></i>Estado da memória…<span class="grow"></span><small>8 min</small></div>
+<div class="sp row" style="margin-top:6px"><i class="ph ph-caret-right" style="font-size:10px;color:var(--ter)"></i>cadex <small>main</small></div>
+<div class="foot2"><div class="fi row"><i class="ph ph-folders"></i>Projetos<span class="d">3</span></div><div class="fi row on"><i class="ph ph-clock"></i>Automações<span class="d">1 ligada</span></div></div></div>
+<div class="main"><div class="row"><div class="grow"><div class="h1">Automações</div><div class="meta">Um prompt que roda sozinho num horário, numa conta e num projeto</div></div></div>
+<div class="empty"><div class="ic"><i class="ph ph-clock"></i></div><h3>Nenhuma automação ainda</h3><p>Por exemplo: toda manhã às 9h, revisar os PRs abertos do bkdg-center e deixar um resumo.</p><span class="btn pri row" style="display:inline-flex"><i class="ph ph-plus"></i>Criar automação</span></div>
+<div class="note row"><i class="ph ph-info"></i>As automações estão desligadas. Criar a primeira as liga.</div></div></div></div><div class="why"><h4>O que muda</h4><ul><li>Sempre abre, ligadas ou não; desligadas, avisa e criar a primeira as liga.</li></ul></div></section><section><h2>5. Automações, com itens</h2><p class="sub" style="margin-bottom:12px">Uma tabela: ligar e desligar na linha, a última e a próxima rodada.</p><div class="win"><div class="top row"><span class="dots row"><i></i><i></i><i></i></span><span class="tsearch row"><i class="ph ph-magnifying-glass"></i>Buscar<span class="grow"></span>⌘K</span><span class="ttab on row"><i class="ph ph-terminal-window"></i>bkdg-center</span><span class="ttab row"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>space</span><span class="ttab row">cadex</span><span class="ttab" style="padding:0 6px">+</span><span class="grow"></span><span class="tright row"><span class="row" style="gap:6px"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>bhband 36%</span><i class="ph ph-kanban"></i><i class="ph ph-bell"></i><i class="ph ph-gear"></i><i class="ph ph-sidebar-simple"></i></span></div>
+<div class="body"><div class="side"><div class="newt row"><i class="ph ph-plus"></i>Nova tarefa</div>
+<div class="sp row"><i class="ph ph-caret-down" style="font-size:10px;color:var(--ter)"></i>bkdg-center <small>dev/center</small></div>
+<div class="st row"><i class="ph ph-circle" style="font-size:9px;color:var(--ter)"></i>Terminal<span class="grow"></span><small>agora</small></div>
+<div class="st row"><i class="ph-fill ph-circle" style="font-size:9px;color:var(--green)"></i>Estado da memória…<span class="grow"></span><small>8 min</small></div>
+<div class="sp row" style="margin-top:6px"><i class="ph ph-caret-right" style="font-size:10px;color:var(--ter)"></i>cadex <small>main</small></div>
+<div class="foot2"><div class="fi row"><i class="ph ph-folders"></i>Projetos<span class="d">3</span></div><div class="fi row on"><i class="ph ph-clock"></i>Automações<span class="d">1 ligada</span></div></div></div>
+<div class="main"><div class="row"><div class="grow"><div class="h1">Automações</div><div class="meta">2 automações · 1 ligada · a próxima roda amanhã às 09:00</div></div><span class="btn pri row"><i class="ph ph-plus"></i>Criar automação</span></div>
+<div class="list" style="margin-top:16px"><table><tr><th></th><th>NOME</th><th>QUANDO</th><th>PROJETO</th><th>CONTA</th><th>ÚLTIMA</th><th>PRÓXIMA</th></tr>
+<tr><td><span class="sw"></span></td><td style="color:var(--text);font-weight:600">Revisar PRs abertos</td><td>Dias úteis 09:00</td><td>bkdg-center</td><td><span class="acct"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>bhband</span></td><td><span class="grn">● concluída</span> hoje</td><td>amanhã 09:00</td></tr>
+<tr><td><span class="sw off"></span></td><td style="color:var(--text);font-weight:600">Atualizar dependências</td><td>Toda segunda 08:00</td><td>cadex</td><td><span class="acct"><i class="ph-fill ph-sparkle" style="color:#D97757"></i>fba. + BKDG</span></td><td class="ter">nunca</td><td class="ter">—</td></tr></table></div>
+<div class="row" style="margin-top:10px;gap:8px;color:var(--ter);font-size:12px">Clique numa linha para ver as rodadas e editar; o botão direito tem Executar agora, Ligar ou desligar e Apagar.</div></div></div></div><div class="why"><h4>O que muda</h4><ul><li>O clique na linha abre as rodadas e a edição; o botão direito tem Executar agora, Ligar/desligar e Apagar (todos comandos do ⌘K).</li></ul></div></section><section><h2>Sobre o projeto "Cadu" em Configurações</h2><p class="sub">A janela tinha como projeto a sua pasta pessoal (~), que se chama "cadu", porque o workspace abriu nela. Os terminais de bkdg-center ficaram dentro desse projeto. Com a página Projetos, as Configurações passam a ser sempre de um projeto que você escolheu, e a pasta pessoal não vira projeto sozinha.</p></section></main></html>
