@@ -10,6 +10,16 @@ public struct MenuEntry {
     public let shortcut: String?
     public let isEnabled: Bool
     public let isSeparator: Bool
+    /// A group's title ("NEW", "OPEN"): small spaced capitals, not chosen.
+    public let isCaption: Bool
+    /// A picture on the left instead of the glyph (the provider's logo), in its own colors.
+    public var image: NSImage?
+    /// The color a one-color `image` (a template) is drawn in; nil, the row's.
+    public var imageTint: NSColor?
+    /// Small and dim on the right, before the keys (an account's usage, "22%").
+    public var detail: String?
+    /// A caret on the right: choosing it opens a list (the accounts).
+    public var opensList = false
     let action: @MainActor () -> Void
 
     public init(_ title: String, icon: Icon? = nil, shortcut: String? = nil, isEnabled: Bool = true,
@@ -19,19 +29,23 @@ public struct MenuEntry {
         self.shortcut = shortcut
         self.isEnabled = isEnabled
         isSeparator = false
+        isCaption = false
         self.action = action
     }
 
-    private init() {
-        title = ""
+    private init(caption: String?) {
+        title = caption ?? ""
         icon = nil
         shortcut = nil
         isEnabled = false
-        isSeparator = true
+        isSeparator = caption == nil
+        isCaption = caption != nil
         action = {}
     }
 
-    public static var separator: MenuEntry { MenuEntry() }
+    public static var separator: MenuEntry { MenuEntry(caption: nil) }
+    /// A group's title over its rows.
+    public static func caption(_ title: String) -> MenuEntry { MenuEntry(caption: title) }
 
     /// No separator first, last or twice in a row: lists built by leaving
     /// out what cannot run would otherwise show empty groups.
@@ -41,7 +55,7 @@ public struct MenuEntry {
             if entry.isSeparator, out.last?.isSeparator ?? true { continue }
             out.append(entry)
         }
-        if out.last?.isSeparator == true { out.removeLast() }
+        while out.last?.isSeparator == true || out.last?.isCaption == true { out.removeLast() }
         return out
     }
 

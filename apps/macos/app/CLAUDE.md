@@ -12,8 +12,8 @@
 ## Como eu quero
 - `PaletteWiring.swift`: a paleta nas cores do tema, os prefixos do ⌘K (`/` arquivos, `#` texto,
   `@` abas e projetos) e as aberturas (`openers`: Terminal, Agente, Nova tarefa, Arquivo, Preview),
-  primeiro no ⌘K; o "+" das abas (`newTabMenu`: Terminal, Agente, Tarefa, Corrida, uma linha,
-  Arquivo e Preview em nova aba) e o "+" do cabeçalho de cada painel, só o que abre ao lado
+  primeiro no ⌘K; o "+" das abas (`newTabMenu`: NOVO com Terminal, "Claude em <conta>" com o logo, o uso e a
+  lista das contas, Tarefa e Corrida; ABRIR com Arquivo e Preview em nova aba) e o "+" do cabeçalho de cada painel, só o que abre ao lado
   (`besideOpeners`, `paneMenu`; maximizar e fechar são botões do cabeçalho; o dono, 2026-11-18).
   Comando novo que abre algo (terminal, arquivo, web, janela) entra nos `openers` daqui e nos de
   `../../windows/app/app_commands.zig`, e na lista "Abrir" de `../../../docs/spec/command-palette.md`.

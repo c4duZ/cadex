@@ -27,8 +27,9 @@ let exitCode = await Checks.run([
     ("rows stack under the padding; the menu fits its widest line", {
         let entries = [item("Abrir"), .separator, item("Um título bem mais comprido que o mínimo do menu", shortcut: "⇧⌘D")]
         let frames = MenuLayout.frames(entries, width: 300)
-        expect(frames.map(\.minY) == [5, 33, 42] && frames[2].height == 28, "\(frames)")
-        expect(MenuLayout.totalHeight(entries) == 75)
+        // The proposal's measures (2026-11-18): 6 pt around, rows of 32, the separator 11.
+        expect(frames.map(\.minY) == [6, 38, 49] && frames[2].height == 32, "\(frames)")
+        expect(MenuLayout.totalHeight(entries) == 87)
         expect(MenuLayout.width([item("a")]) == MenuLayout.minWidth)
         expect(MenuLayout.width(entries) > MenuLayout.minWidth)
     }),

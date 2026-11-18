@@ -1,4 +1,6 @@
+import Agents
 import AppKit
+import Icons
 import CommandPalette
 import Menus
 import Search
@@ -47,12 +49,31 @@ extension WindowSession {
         PalettePin(id: "preview.open", title: T("Web Preview on the Right", "Preview web ao lado"), icon: .globe),
     ]
 
-    /// The tabs' "+": what starts something (a terminal, an agent, a task, a race), a line, then what
-    /// opens one (a file, a preview).
+    /// The tabs' "+", as the approved proposal draws it: NEW (a terminal, Claude in the account in
+    /// use with its logo and usage, opening the accounts' list; a task, a race), then OPEN (a file,
+    /// a preview).
     func newTabMenu() -> [MenuEntry] {
         guard let menu else { return [] }
-        let starts = Array(Self.newOpeners.prefix(4)), opens = Array(Self.newOpeners.dropFirst(4))
-        return MenuEntry.tidy(menu.popup(starts) + [.separator] + menu.popup(opens))
+        let pins = Self.newOpeners
+        var new = menu.popup(pins.filter { $0.id == "tab.new" })
+        if let agent = claudeMenuEntry() { new.append(agent) }
+        new += menu.popup(pins.filter { ["worktrees.new-task", "worktrees.new-race"].contains($0.id) })
+        let open = menu.popup(pins.filter { ["search.files", "preview.open-in-tab"].contains($0.id) })
+        return MenuEntry.tidy([.caption(T("New", "Novo"))] + new + [.separator, .caption(T("Open", "Abrir"))] + open)
+    }
+
+    /// "Claude in bhband  22% ›": the account new sessions use, its usage; the caret's list is
+    /// agents.open-account (every account).
+    private func claudeMenuEntry() -> MenuEntry? {
+        guard let dir = shownAccountDir(), let account = AgentsController.shared.everyAccount().first(where: { $0.dir == dir }) else { return nil }
+        var entry = MenuEntry(T("Claude in \(account.name)", "Claude em \(account.name)")) { [weak self] in
+            _ = self?.commands.run("agents.open-account")
+        }
+        entry.image = ProviderLogo.claude.image(size: 16)
+        entry.imageTint = ProviderLogo.claude.brandColor
+        entry.detail = AgentSwitch.used(AgentUsage.current(of: account)).map { "\($0)%" }
+        entry.opensList = true
+        return entry
     }
 
     /// The pane header's menu: what opens beside it.

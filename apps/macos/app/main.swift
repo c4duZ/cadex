@@ -74,7 +74,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let ui = theme.interface
             MenuStyle.current = MenuStyle(
                 background: ui.panel.nsColor, border: ui.panelBorder.nsColor, text: ui.text.nsColor,
-                secondaryText: ui.secondaryText.nsColor, selection: ui.tabActive.nsColor, accent: ui.accent.nsColor,
+                secondaryText: ui.secondaryText.nsColor,
+                // The proposal's blue-gray row (#202833 on the dark theme): the accent over the panel.
+                selection: ui.panel.nsColor.blended(withFraction: 0.14, of: ui.accent.nsColor) ?? ui.tabActive.nsColor, accent: ui.accent.nsColor,
                 keycap: ui.field.nsColor)
         }
         startPower()

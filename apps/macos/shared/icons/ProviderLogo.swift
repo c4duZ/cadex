@@ -12,6 +12,15 @@ public enum ProviderLogo: String, CaseIterable, Sendable {
     case cursor
     case gemini
 
+    /// The provider's own color, where a list shows the logo as the provider's sign (the approved
+    /// proposal's menus and account list, 2026-11-18: Claude's orange); nil keeps the theme's.
+    public var brandColor: NSColor? {
+        switch self {
+        case .claude: NSColor(srgbRed: 0xD9 / 255, green: 0x77 / 255, blue: 0x57 / 255, alpha: 1)
+        default: nil
+        }
+    }
+
     /// A template image: the view tints it.
     @MainActor
     public func image(size: CGFloat) -> NSImage {

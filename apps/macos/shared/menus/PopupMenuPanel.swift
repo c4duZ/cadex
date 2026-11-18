@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import UILooks
 
 /// The window of one open menu. It takes the keyboard (arrows, Return,
 /// Esc) and closes when it loses it, as a click outside does.
@@ -94,7 +95,7 @@ final class PopupMenuList: NSView {
         self.style = style
         super.init(frame: .zero)
         wantsLayer = true
-        layer?.cornerRadius = 10
+        layer?.cornerRadius = MenuLayout.radius
         layer?.cornerCurve = .continuous
         layer?.masksToBounds = true
         layer?.borderWidth = 1
@@ -143,7 +144,7 @@ final class PopupMenuList: NSView {
         let point = convert(event.locationInWindow, from: nil)
         let frames = MenuLayout.frames(entries, width: bounds.width)
         let index = frames.firstIndex { $0.contains(point) }
-        setSelected(index.flatMap { entries[$0].isSeparator || !entries[$0].isEnabled ? nil : $0 })
+        setSelected(index.flatMap { entries[$0].isSeparator || entries[$0].isCaption || !entries[$0].isEnabled ? nil : $0 })
     }
 
     private func setSelected(_ index: Int?) {
@@ -157,12 +158,19 @@ final class PopupMenuList: NSView {
             let entry = entries[i]
             if entry.isSeparator {
                 style.border.setFill()
-                NSRect(x: frame.minX + 6, y: frame.midY, width: frame.width - 12, height: 1).fill()
+                NSRect(x: frame.minX + MenuLayout.padding, y: frame.midY, width: frame.width - 2 * MenuLayout.padding, height: 1).fill()
+                continue
+            }
+            if entry.isCaption {
+                let caption = NSAttributedString(string: entry.title.uppercased(), attributes: [
+                    .font: MenuLayout.captionFont, .foregroundColor: style.secondaryText.withAlphaComponent(0.8), .kern: 0.6,
+                ])
+                caption.draw(at: NSPoint(x: frame.minX + MenuLayout.inset, y: frame.maxY - caption.size().height - UILooks.pt(2)))
                 continue
             }
             if i == selected {
                 style.selection.setFill()
-                NSBezierPath(roundedRect: frame, xRadius: 6, yRadius: 6).fill()
+                NSBezierPath(roundedRect: frame, xRadius: MenuLayout.rowRadius, yRadius: MenuLayout.rowRadius).fill()
             }
             drawItem(entry, in: frame, selected: i == selected)
         }
@@ -170,32 +178,46 @@ final class PopupMenuList: NSView {
 
     private func drawItem(_ entry: MenuEntry, in frame: NSRect, selected: Bool) {
         let color = entry.isEnabled ? style.text : style.secondaryText.withAlphaComponent(0.5)
-        var x = frame.minX + 10
-        if let icon = entry.icon {
-            let tint = !entry.isEnabled ? color : selected ? style.accent : style.secondaryText
-            icon.image(size: 16).menuTinted(tint).draw(in: NSRect(x: x, y: frame.midY - 8, width: 16, height: 16))
-            x += 24
+        var x = frame.minX + MenuLayout.inset
+        let side = UILooks.pt(16)
+        let glyph = NSRect(x: x, y: frame.midY - side / 2, width: side, height: side)
+        if let image = entry.image {
+            (image.isTemplate ? image.menuTinted(entry.imageTint ?? style.secondaryText) : image).draw(in: glyph)
+            x += UILooks.pt(28)
+        } else if let icon = entry.icon {
+            let tint = !entry.isEnabled ? color : selected ? style.text : style.secondaryText
+            icon.image(size: side).menuTinted(tint).draw(in: glyph)
+            x += UILooks.pt(28)
         }
         let title = NSAttributedString(string: entry.title, attributes: [.font: MenuLayout.font, .foregroundColor: color])
         title.draw(at: NSPoint(x: x, y: frame.midY - title.size().height / 2))
-        if let shortcut = entry.shortcut, entry.isEnabled { drawKeys(shortcut, right: frame.maxX - 6, midY: frame.midY) }
+        var right = frame.maxX - MenuLayout.inset
+        if entry.opensList {
+            let caret = Icon.caretRight.image(size: UILooks.pt(12)).menuTinted(style.secondaryText)
+            caret.draw(in: NSRect(x: right - UILooks.pt(12), y: frame.midY - UILooks.pt(6), width: UILooks.pt(12), height: UILooks.pt(12)))
+            right -= UILooks.pt(20)
+        }
+        if let shortcut = entry.shortcut, entry.isEnabled {
+            right = drawKey(shortcut, right: right, midY: frame.midY) - UILooks.pt(8)
+        }
+        if let detail = entry.detail {
+            let text = NSAttributedString(string: detail, attributes: [.font: MenuLayout.detailFont, .foregroundColor: style.secondaryText])
+            text.draw(at: NSPoint(x: right - text.size().width, y: frame.midY - text.size().height / 2))
+        }
     }
 
-    private func drawKeys(_ label: String, right: CGFloat, midY: CGFloat) {
-        var x = right - MenuLayout.keycapsWidth(label)
-        for key in MenuLayout.keys(of: label) {
-            let width = MenuLayout.keycapWidth(key)
-            let cap = NSRect(x: x, y: midY - 9, width: width, height: 18)
-            let path = NSBezierPath(roundedRect: cap.insetBy(dx: 0.5, dy: 0.5), xRadius: 5, yRadius: 5)
-            style.keycap.setFill()
-            path.fill()
-            style.border.setStroke()
-            path.stroke()
-            let text = NSAttributedString(string: key, attributes: [.font: MenuLayout.keyFont, .foregroundColor: style.secondaryText])
-            let size = text.size()
-            text.draw(at: NSPoint(x: cap.midX - size.width / 2, y: cap.midY - size.height / 2))
-            x += width + 3
-        }
+    /// The shortcut in one thin key, as the proposal's `kbd`: a line, no fill, dim letters.
+    private func drawKey(_ label: String, right: CGFloat, midY: CGFloat) -> CGFloat {
+        let width = MenuLayout.keycapsWidth(label)
+        let height = UILooks.pt(18)
+        let cap = NSRect(x: right - width, y: midY - height / 2, width: width, height: height)
+        let path = NSBezierPath(roundedRect: cap.insetBy(dx: 0.5, dy: 0.5), xRadius: UILooks.pt(5), yRadius: UILooks.pt(5))
+        style.border.setStroke()
+        path.stroke()
+        let text = NSAttributedString(string: label, attributes: [.font: MenuLayout.keyFont, .foregroundColor: style.secondaryText])
+        let size = text.size()
+        text.draw(at: NSPoint(x: cap.midX - size.width / 2, y: cap.midY - size.height / 2))
+        return cap.minX
     }
 }
 

@@ -12,7 +12,10 @@
 ## Como eu quero
 - `HoverHighlight.swift`: o fundo arredondado sob o ponteiro dos itens clicáveis da barra de status
   (status-bar, agents, ssh).
-- `MenuEntry.swift`: uma linha (título, ícone, atalho, ativa ou não, a ação) ou separador;
+- `MenuEntry.swift`: uma linha (título, ícone ou imagem com a cor dela, o detalhe à direita, a seta
+  de lista, atalho, ativa ou não, a ação), o título de um grupo (`caption`) ou separador; o desenho é o
+  `.menu` da proposta aprovada em 2026-11-18 (300 pt, cantos de 12, linhas de 32, a escolhida azulada,
+  o atalho numa tecla fina);
   `tidy` tira separadores sobrando; MenuStyle.current são as cores, que o app troca junto com o
   tema.
 - `PopupMenu.swift`: `PopupMenu.show(_:at:in:)`, `show(_:below:)` (menu de botão) e `show(_:above:)`

@@ -46,16 +46,25 @@ public enum PopupMenu {
 
 /// Sizes and keyboard moves, apart from drawing so the tests can check them.
 @MainActor
+/// The measures of the approved proposal's menu (scratchpad ux2/index.html, `.menu`, 2026-11-18):
+/// 6 pt around, rows of 7 pt over and under a 13 pt line, 9 pt in, captions in 11 pt bold spaced
+/// capitals, the separator 5 pt from each side, corners of 12 and of 8 on the rows.
 enum MenuLayout {
-    static var padding: CGFloat { UILooks.pt(5) }
-    static var itemHeight: CGFloat { UILooks.rowHeight(28) }
-    static var separatorHeight: CGFloat { UILooks.rowHeight(9) }
-    static var minWidth: CGFloat { UILooks.pt(200) }
+    static var padding: CGFloat { UILooks.pt(6) }
+    static var itemHeight: CGFloat { UILooks.rowHeight(32) }
+    static var captionHeight: CGFloat { UILooks.rowHeight(24) }
+    static var separatorHeight: CGFloat { UILooks.rowHeight(11) }
+    static var minWidth: CGFloat { UILooks.pt(300) }
+    static var inset: CGFloat { UILooks.pt(9) }
+    static var radius: CGFloat { UILooks.pt(12) }
+    static var rowRadius: CGFloat { UILooks.pt(8) }
     static var font: NSFont { UILooks.font(13) }
-    static var keyFont: NSFont { UILooks.font(11, weight: .medium) }
+    static var keyFont: NSFont { UILooks.font(11) }
+    static var captionFont: NSFont { UILooks.font(11, weight: .bold) }
+    static var detailFont: NSFont { UILooks.font(11.5) }
 
     static func height(of entry: MenuEntry) -> CGFloat {
-        entry.isSeparator ? separatorHeight : itemHeight
+        entry.isSeparator ? separatorHeight : entry.isCaption ? captionHeight : itemHeight
     }
 
     /// Each entry's frame, top to bottom, in a flipped view `width` wide.
@@ -76,13 +85,16 @@ enum MenuLayout {
         let widest = entries.map { entry -> CGFloat in
             let title = (entry.title as NSString).size(withAttributes: [.font: font]).width
             let keys = entry.shortcut.map { keycapsWidth($0) + 24 } ?? 0
-            return 2 * padding + 10 + (entry.icon == nil ? 0 : 24) + title + keys + 14
+            let detail = entry.detail.map { ($0 as NSString).size(withAttributes: [.font: detailFont]).width + 12 } ?? 0
+            let leading = entry.icon == nil && entry.image == nil ? 0 : UILooks.pt(28)
+            return 2 * padding + 2 * inset + leading + title + keys + detail + (entry.opensList ? 20 : 0)
         }.max() ?? 0
         return max(minWidth, ceil(widest))
     }
 
+    /// The shortcut in one key ("⌘T"), as the proposal draws it.
     static func keycapsWidth(_ label: String) -> CGFloat {
-        keys(of: label).reduce(0) { $0 + keycapWidth($1) + 3 } - 3
+        ceil((label as NSString).size(withAttributes: [.font: keyFont]).width) + UILooks.pt(10)
     }
 
     static func keycapWidth(_ key: String) -> CGFloat {
@@ -99,11 +111,11 @@ enum MenuLayout {
     /// The next enabled entry from `index` by `step`, wrapping; nil when
     /// none is enabled.
     static func next(from index: Int?, by step: Int, in entries: [MenuEntry]) -> Int? {
-        guard entries.contains(where: { !$0.isSeparator && $0.isEnabled }) else { return nil }
+        guard entries.contains(where: { !$0.isSeparator && !$0.isCaption && $0.isEnabled }) else { return nil }
         var candidate = index ?? (step > 0 ? -1 : entries.count)
         repeat {
             candidate = (candidate + step + entries.count) % entries.count
-        } while entries[candidate].isSeparator || !entries[candidate].isEnabled
+        } while entries[candidate].isSeparator || entries[candidate].isCaption || !entries[candidate].isEnabled
         return candidate
     }
 }
