@@ -25,6 +25,7 @@ NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "termi
 # (plan 17) start on the Mac, 2026-10-21; so do the pane headers and
 # pane.zoom (issue #1, 2026-10-22).
 MAC_ONLY = {"project.edit", "project.create", "project.new-terminal", "project.reveal", "project.copy-path",  # plano 36 B
+            "project.pin", "project.close-terminals", "project.remove",
             "agents.switch-account", "memory.configure-project", "project.show-settings", "app.check-for-updates", "app.install-update", "app.skip-update",
             "terminal.open-pasted-image-beside", "terminal.open-pasted-image-in-tab",
             "preview.pick-element", "preview.stop-picking",

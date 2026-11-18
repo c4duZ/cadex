@@ -110,10 +110,12 @@
 - `ProjectEditWiring.swift` (plano 36 fase B): a folha "Edit project" (project.edit, também pelo
   clique direito no trilho; nome, imagem ou emoji, cor) e a mesma folha criando pelo "+" do trilho
   (project.create: a pasta, o nome, a imagem); a imagem solta num quadrado do trilho vira a do
-  projeto; o clique direito (`railMenu`: New Terminal, New Task…, Edit Name and Image…, Project
-  Settings…, Show in Finder, Copy Path, Close Project), cada linha um comando: `projectTarget` diz
+  projeto; o clique direito (`railMenu`: New Terminal, New Task…, Edit Name and Image…, Pin ou
+  Unpin, Project Settings…, Show in Finder, Copy Path, Close Terminals, Remove from the Sidebar),
+  cada linha um comando (project.pin, project.close-terminals, project.remove e os de baixo): `projectTarget` diz
   a qual projeto o próximo comando se refere (project.new-terminal, project.reveal,
-  project.copy-path, project.edit), e New Task, Settings e Close mostram o projeto antes;
+  project.copy-path, project.edit), e New Task e Settings mostram o projeto antes; criar pela folha
+  fixa o projeto; o trilho põe os fixados primeiro (`RailWiring.swift`);
   `projectPicture`, o quadrado dos cartões da página Projetos e do cabeçalho da página do projeto.
 - `InspectorWiring.swift` (plano 26, fase C; desde o plano 36 a coluna lateral, à esquerda, ao lado
   do trilho): Files (a árvore do explorer), Changes (o painel do git), Memory e Git graph (o

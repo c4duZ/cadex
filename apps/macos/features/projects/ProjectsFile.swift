@@ -16,14 +16,19 @@ public struct SavedProjects: Codable, Equatable, Sendable {
         public var image: String?
         /// An emoji in place of the letter, when there is no picture.
         public var emoji: String?
+        /// Kept in the rail with no terminal open (plan 36); nil in a file of before: pinned, so a
+        /// project the owner had does not leave the rail when its last terminal closes.
+        public var pinned: Bool?
 
-        public init(name: String, folder: String, tabs: TabsSnapshot, color: String? = nil, image: String? = nil, emoji: String? = nil) {
+        public init(name: String, folder: String, tabs: TabsSnapshot, color: String? = nil, image: String? = nil, emoji: String? = nil,
+                    pinned: Bool? = nil) {
             self.name = name
             self.folder = folder
             self.tabs = tabs
             self.color = color
             self.image = image
             self.emoji = emoji
+            self.pinned = pinned
         }
     }
 

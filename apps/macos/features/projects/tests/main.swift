@@ -96,6 +96,8 @@ let mainTests: [(name: String, body: Checks.Body)] = [
         expect(projects.projects[0].tabs.isShown == false && projects.projects[1].tabs.isShown)
         var expected = saved
         expected.projects[1].tabs.items.removeLast()
+        // A file of before plan 36 has no "pinned": its projects come back pinned.
+        for index in expected.projects.indices { expected.projects[index].pinned = true }
         // Without the recent ones, which carry the time of now.
         func withoutRecent(_ saved: SavedProjects) -> SavedProjects { var copy = saved; copy.recent = nil; return copy }
         let same = await eventually { withoutRecent(projects.saved) == expected }

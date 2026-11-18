@@ -26,7 +26,8 @@
   `RailView.swift`: a porta de entrada; `show` recebe os projetos e o escolhido e redesenha só quando
   mudam; `onPick` diz a pasta clicada; `footLit` acende o pé; `menuFor`, o clique direito (as linhas
   vêm do app, cada uma um comando); `onDropImage`, uma imagem solta num quadrado (plano 36 B). O
-  quadrado mostra a imagem do projeto, senão o emoji, senão a letra; o "+" roda project.create. `RailParts.swift`: `RailTile` (o
+  quadrado mostra a imagem do projeto, senão o emoji, senão a letra; o "+" roda project.create; os
+  fixados primeiro e, depois de uma linha, os abertos não fixados (o pinned de RailProject). `RailParts.swift`: `RailTile` (o
   quadrado, o halo, a peça de estado, o ponto) e `RailButton` (o "+" e os do pé). Tokens:
   components.rail.
 - `WorkTree.swift`: o modelo puro (`WorkTreeProject`, `WorkTreeTask`, `WorkTreeTerminal`) e

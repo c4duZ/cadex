@@ -33,6 +33,27 @@ extension WindowSession {
                         self.pickProject(folder)
                         self.projects?.active?.newTab(cwd: folder)
                     }),
+            Command(id: "project.pin", title: T("Pin or Unpin the Project", "Fixar ou soltar o projeto"),
+                    keywords: ["project", "pin", "unpin", "keep", "rail", "projeto", "fixar", "soltar", "trilho"], category: .tabs,
+                    action: .run { [weak self] in
+                        guard let self, let projects = self.projects, let folder = self.takeProjectTarget() else { return }
+                        projects.setPinned(!projects.isPinned(folder), for: folder)
+                        self.refreshTree()
+                    }),
+            Command(id: "project.close-terminals", title: T("Close the Project's Terminals", "Fechar os terminais do projeto"),
+                    keywords: ["project", "close", "terminals", "projeto", "fechar", "terminais"], category: .tabs,
+                    action: .run { [weak self] in
+                        guard let self, let folder = self.takeProjectTarget() else { return }
+                        self.projects?.closeTerminals(folder: folder)
+                        self.refreshTree()
+                    }),
+            Command(id: "project.remove", title: T("Remove the Project from the Sidebar", "Tirar o projeto da barra lateral"),
+                    keywords: ["project", "remove", "rail", "sidebar", "projeto", "tirar", "remover", "trilho"], category: .tabs,
+                    action: .run { [weak self] in
+                        guard let self, let folder = self.takeProjectTarget() else { return }
+                        self.projects?.removeFromRail(folder: folder)
+                        self.refreshTree()
+                    }),
             Command(id: "project.reveal", title: T("Show the Project in Finder", "Mostrar o projeto no Finder"),
                     keywords: ["project", "finder", "reveal", "folder", "projeto", "pasta"], category: .tabs,
                     action: .run { [weak self] in
@@ -58,17 +79,20 @@ extension WindowSession {
         func shown(_ id: String) -> @MainActor () -> Void {
             { [weak self] in self?.pickProject(folder); _ = self?.commands.run(id) }
         }
+        let pinned = projects?.isPinned(folder) ?? false
         return [
             MenuEntry(T("New Terminal", "Novo terminal"), icon: .terminalWindow, action: on("project.new-terminal")),
             MenuEntry(T("New Task…", "Nova tarefa…"), icon: .plus, action: shown("worktrees.new-task")),
             .separator,
             MenuEntry(T("Edit Name and Image…", "Editar nome e imagem…"), icon: .pencilSimple, action: on("project.edit")),
+            MenuEntry(pinned ? T("Unpin", "Soltar") : T("Pin", "Fixar"), icon: .pushPin, action: on("project.pin")),
             MenuEntry(T("Project Settings…", "Configurações do projeto…"), icon: .gearSix, action: shown("project.show-settings")),
             .separator,
             MenuEntry(T("Show in Finder", "Mostrar no Finder"), icon: .folderOpen, action: on("project.reveal")),
             MenuEntry(T("Copy Path", "Copiar o caminho"), icon: .copy, action: on("project.copy-path")),
             .separator,
-            MenuEntry(T("Close Project", "Fechar o projeto"), icon: .x, action: shown("project.close")),
+            MenuEntry(T("Close Terminals", "Fechar os terminais"), icon: .x, action: on("project.close-terminals")),
+            MenuEntry(T("Remove from the Sidebar", "Tirar da barra lateral"), icon: .trash, action: on("project.remove")),
         ]
     }
 
@@ -106,6 +130,8 @@ extension WindowSession {
             self.folder.open(folder)
             projects.open(folder: folder)
             guard let root = projects.activeFolder else { return }
+            // Made here: pinned (an opened folder, ⌘O, is not; ADR 0038).
+            projects.setPinned(true, for: root)
             self.apply(form, to: root, keeping: nil)
         }
     }

@@ -37,6 +37,15 @@ let railChecks: [(name: String, body: Checks.Body)] = [
                    RailProject(id: "/c", name: "fba")], chosen: nil)
         expect(rail.tiles.map(\.pictureShown) == [true, false, false])
         expect(rail.tiles.map(\.markText) == ["C", "🦊", "F"], "\(rail.tiles.map(\.markText))")
+        rail.show([RailProject(id: "/a", name: "a"), RailProject(id: "/b", name: "b", pinned: false)], chosen: nil)
+        expect(rail.groupLineShown, "a line between the pinned and the others")
+        rail.show([RailProject(id: "/a", name: "a"), RailProject(id: "/b", name: "b")], chosen: nil)
+        expect(!rail.groupLineShown)
+        // The chosen one ringed after a pick, with the line before an unpinned one (seen in the app:
+        // the ring went to the unpinned tile).
+        rail.show([RailProject(id: "/a", name: "a"), RailProject(id: "/b", name: "b"), RailProject(id: "/c", name: "c", pinned: false)], chosen: "/a")
+        rail.show([RailProject(id: "/a", name: "a"), RailProject(id: "/b", name: "b", open: true), RailProject(id: "/c", name: "c", pinned: false)], chosen: "/b")
+        expect(rail.tiles.map(\.chosen) == [false, true, false], "\(rail.tiles.map(\.chosen))")
         var menus: [String] = []
         rail.menuFor = { menus.append($0); return [] }
         expect(rail.menuFor?("/b").isEmpty == true && menus == ["/b"])

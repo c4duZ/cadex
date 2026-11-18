@@ -19,7 +19,9 @@ extension WindowSession {
     /// The projects as the rail draws them.
     func railModel() -> [RailProject] {
         let theme = ThemeStore.shared.current
-        return (projects?.projects ?? []).map { project in
+        // The pinned first, in their order; then the open ones that are not pinned.
+        let ordered = (projects?.projects ?? []).filter(\.pinned) + (projects?.projects ?? []).filter { !$0.pinned }
+        return ordered.map { project in
             let terminals = project.tabs.allTerminals
             let states = terminals.compactMap { Self.treeRow($0).state }
             let tint = project.color.flatMap(WorkColor.init(rawValue:)).map { color -> [Double] in
@@ -27,7 +29,7 @@ extension WindowSession {
                 return [Double((value >> 16) & 0xFF) / 255, Double((value >> 8) & 0xFF) / 255, Double(value & 0xFF) / 255]
             }
             return RailProject(id: project.folder, name: project.name, tint: tint, state: Self.summary(states), open: !terminals.isEmpty,
-                               image: projects?.imageURL(project.image)?.path, emoji: project.emoji)
+                               image: projects?.imageURL(project.image)?.path, emoji: project.emoji, pinned: project.pinned)
         }
     }
 

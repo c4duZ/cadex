@@ -38,4 +38,37 @@ let lookTests: [(name: String, body: Checks.Body)] = [
         expect(projects.storeImage(from: tempDir().appendingPathComponent("nope.png")) == nil, "a file that is no image: nothing")
         again.projects.forEach { $0.tabs.closeAll() }
     }),
+    ("pinned: the last terminal closing leaves it in the list without tabs; unpinned it goes; a file of before is pinned", {
+        let (a, b) = folders()
+        let file = tempFile()
+        let projects = controller(file, window: window())
+        projects.start(folder: a) { _ in nil }
+        projects.open(folder: b)
+        expect(!projects.isPinned(a) && !projects.isPinned(b), "opened folders are not pinned")
+        projects.setPinned(true, for: b)
+        projects.closeTerminals(folder: b)
+        expect(projects.projects.map(\.folder) == [a, b] && projects.projects[1].tabs.count == 0, "pinned stays, with no tab")
+        expect(projects.activeFolder == a, "the one with terminals shows")
+        projects.setPinned(false, for: b)
+        expect(projects.projects.map(\.folder) == [a], "unpinned with no terminal: gone")
+        projects.open(folder: b)
+        projects.setPinned(true, for: b)
+        projects.closeTerminals(folder: b)
+        projects.saveNow()
+        projects.projects.forEach { $0.tabs.closeAll() }
+        let again = controller(file, window: window())
+        again.start(folder: a) { _ in nil }
+        expect(again.projects.count == 2 && again.isPinned(b) && again.projects[1].tabs.count == 0, "back pinned and empty")
+        again.removeFromRail(folder: b)
+        expect(again.projects.map(\.folder) == [a], "Remove from the Sidebar")
+        again.projects.forEach { $0.tabs.closeAll() }
+        // A file saved before plan 36 has no "pinned": its projects stay.
+        let old = SavedProjects(projects: [.init(name: "a", folder: a, tabs: TabsSnapshot(items: [], active: 0))], active: 0)
+        let oldFile = tempFile()
+        try? ProjectsFile.save(old, to: oldFile)
+        let before = controller(oldFile, window: window())
+        before.start(folder: a) { _ in nil }
+        expect(before.isPinned(a))
+        before.projects.forEach { $0.tabs.closeAll() }
+    }),
 ]

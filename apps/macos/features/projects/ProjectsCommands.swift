@@ -82,9 +82,12 @@ final class ProjectSource: PaletteSource {
             .map { index, project in
                 let tabs = project.tabs.count == 1 ? T("1 tab", "1 aba") : T("\(project.tabs.count) tabs", "\(project.tabs.count) abas")
                 let place = project.folder.hasPrefix(home) ? "~" + project.folder.dropFirst(home.count) : project.folder
-                return PaletteItem(id: String(index), title: project.name,
-                                   detail: (index == projects.activeIndex ? T("current · ", "atual · ") : "") + "\(place) · \(tabs)",
-                                   icon: .stack)
+                // The project's picture on the left, as the rail shows it (plan 36 B); the glyph without one.
+                let picture = projects.imageURL(project.image).flatMap { NSImage(contentsOf: $0) }
+                let item = PaletteItem(id: String(index), title: (project.emoji.map { $0 + "  " } ?? "") + project.name,
+                                       detail: (index == projects.activeIndex ? T("current · ", "atual · ") : "") + "\(place) · \(tabs)",
+                                       icon: picture == nil ? .stack : nil, image: picture)
+                return item
             }
         show(items, nil)
     }

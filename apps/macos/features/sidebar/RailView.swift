@@ -86,6 +86,7 @@ public final class RailView: NSView {
         if let shown, shown.projects == projects, shown.chosen == chosen { return }
         shown = (projects, chosen)
         tiles.forEach { $0.removeFromSuperview() }
+        groupLine.removeFromSuperview()
         tiles = projects.map { project in
             let tile = RailTile(project: project, chosen: project.id == chosen)
             tile.onPress = { [weak self] in self?.onPick?(project.id) }
@@ -97,7 +98,24 @@ public final class RailView: NSView {
             return tile
         }
         for (index, tile) in tiles.enumerated() { top.insertArrangedSubview(tile, at: index) }
+        // The pinned ones first, then a line, then the open ones not pinned (the Dock's two parts).
+        if let first = tiles.firstIndex(where: { !$0.project.pinned }), first > 0 {
+            top.insertArrangedSubview(groupLine, at: first)
+        }
     }
+
+    /// Between the pinned projects and the others.
+    private lazy var groupLine: NSView = {
+        let line = NSView()
+        line.wantsLayer = true
+        line.layer?.backgroundColor = R.Separator.color.cgColor
+        line.translatesAutoresizingMaskIntoConstraints = false
+        line.widthAnchor.constraint(equalToConstant: UILooks.pt(R.Separator.width)).isActive = true
+        line.heightAnchor.constraint(equalToConstant: DesignTokens.Stroke.hairline).isActive = true
+        return line
+    }()
+
+    var groupLineShown: Bool { groupLine.superview != nil }
 
     private func lightFoot() {
         for (page, button) in footButtons { button.lit = page == footLit }

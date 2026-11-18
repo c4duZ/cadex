@@ -19,9 +19,12 @@ public struct RailProject: Equatable, Sendable {
     public var image: String?
     /// An emoji in place of the letter (plan 36 phase B).
     public var emoji: String?
+    /// Kept in the rail with no terminal; the open ones that are not come after a line, as the Dock's.
+    public var pinned: Bool
 
     public init(id: String, name: String, tint: [Double]? = nil, state: GlyphState? = nil, open: Bool = false,
-                image: String? = nil, emoji: String? = nil) {
+                image: String? = nil, emoji: String? = nil, pinned: Bool = true) {
+        self.pinned = pinned
         self.id = id
         self.name = name
         self.tint = tint

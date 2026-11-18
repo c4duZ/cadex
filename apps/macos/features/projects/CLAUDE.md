@@ -55,8 +55,13 @@
   `ProjectEditParts.swift`: a prévia (`ProjectPreview`, também nos cartões da página Projetos e no
   cabeçalho da página do projeto) e a bolinha de cor. O app mostra a folha e aplica
   (`../../app/ProjectEditWiring.swift`).
+- `ProjectsPinned.swift` (plano 36): o projeto fixado fica no trilho sem terminal (a última aba
+  fechando não o tira: `keepEmpty`, e se era o mostrado, aparece outro com terminais ou a tela de
+  início); `setPinned` (solto e sem terminal, sai), `closeTerminals(folder:)` (fixado fica),
+  `removeFromRail(folder:)`. Aberto pelo ⌘O não nasce fixado; criado pela folha, sim; o arquivo de
+  antes (sem "pinned") volta tudo fixado. O seletor ⇧⌘S mostra a imagem e o emoji.
 - `ProjectsFile.swift`: o JSON em Application Support/Cadex/projects.json (gravação atômica), com os
-  projetos (nome, pasta, abas, cor, imagem, emoji), o ativo, a pasta do workspace e os recentes; uma lista vazia
+  projetos (nome, pasta, abas, cor, imagem, emoji, fixado), o ativo, a pasta do workspace e os recentes; uma lista vazia
   (a tela de início) é um arquivo bom. Arquivo ilegível vai para
   projects.bad-<data>.json e o app começa do zero. CADEX_PROJECTS_FILE aponta para outro arquivo:
   conferir o app em teste não pode apagar os projetos do dono. O spaces.json de antes do plano 27

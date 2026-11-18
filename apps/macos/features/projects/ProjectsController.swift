@@ -18,6 +18,8 @@ public final class ProjectsController {
         /// The picture's file in `imagesFolder`, and an emoji for when there is none (plan 36 B).
         public var image: String?
         public var emoji: String?
+        /// Kept in the rail with no terminal open (plan 36): its last tab closing leaves it there.
+        public var pinned = false
 
         init(name: String, folder: String, tabs: TabsController) {
             self.name = name
@@ -27,7 +29,7 @@ public final class ProjectsController {
     }
 
     public private(set) var projects: [Project] = []
-    public private(set) var activeIndex = 0
+    public internal(set) var activeIndex = 0
     public var active: TabsController? { projects.indices.contains(activeIndex) ? projects[activeIndex].tabs : nil }
     public var activeName: String { projects.indices.contains(activeIndex) ? projects[activeIndex].name : "" }
     public var activeFolder: String? { projects.indices.contains(activeIndex) ? projects[activeIndex].folder : nil }
@@ -81,10 +83,14 @@ public final class ProjectsController {
             projects[projects.count - 1].color = project.color
             projects[projects.count - 1].image = project.image
             projects[projects.count - 1].emoji = project.emoji
+            projects[projects.count - 1].pinned = project.pinned ?? true
             activeIndex = projects.count - 1
             tabs.restore(project.tabs, makeDocument: makeDocument)
-            // Saved with no tab: a terminal in its folder (the spec), or the launch folder when gone.
-            if tabs.count == 0 { tabs.newTab(cwd: FileManager.default.fileExists(atPath: project.folder) ? project.folder : folder) }
+            // Saved with no tab: a terminal in its folder (the spec), or the launch folder when gone;
+            // a pinned one stays without (plan 36: in the rail, its click opens one).
+            if tabs.count == 0, project.pinned != true {
+                tabs.newTab(cwd: FileManager.default.fileExists(atPath: project.folder) ? project.folder : folder)
+            }
         }
         if projects.isEmpty {
             guard openFolder else {
@@ -95,9 +101,15 @@ public final class ProjectsController {
             let root = ProjectsFile.repositoryRoot(folder)
             add(name: Self.name(of: root), folder: root).newTab(cwd: folder)
         }
-        let index = min(max(saved?.active ?? 0, 0), projects.count - 1)
+        var index = min(max(saved?.active ?? 0, 0), projects.count - 1)
         projects.forEach { $0.tabs.isShown = false }
         activeIndex = -1
+        // A pinned project without terminals is not shown at start: one with terminals, else the
+        // home screen with the rail (plan 36).
+        if projects[index].tabs.count == 0 {
+            guard let open = projects.firstIndex(where: { $0.tabs.count > 0 }) else { return onNone?() ?? () }
+            index = open
+        }
         select(index)
     }
 
@@ -125,8 +137,9 @@ public final class ProjectsController {
     }
 
     /// The last tab of a project closed: the project goes; the only one leaves the home screen
-    /// (plan 29), or closes a passing window.
+    /// (plan 29), or closes a passing window. A pinned one stays in the rail (plan 36).
     private func emptied(_ project: Project) {
+        if project.pinned, fileURL != nil { return keepEmpty(project) }
         guard projects.count > 1 || fileURL != nil, let index = projects.firstIndex(where: { $0 === project }) else {
             saveNow()
             project.tabs.hostWindow?.close()
@@ -222,7 +235,7 @@ public final class ProjectsController {
         if TabsController.shouldClose([tabs], in: tabs.hostWindow, what: T("the project", "o projeto"), then: close) { close() }
     }
 
-    private func remove(at index: Int, tabs kept: TabsSnapshot? = nil) {
+    func remove(at index: Int, tabs kept: TabsSnapshot? = nil) {
         guard projects.indices.contains(index) else { return }
         let wasActive = index == activeIndex
         noteUsed(projects[index], tabs: kept)
@@ -260,7 +273,7 @@ public final class ProjectsController {
 
     public var saved: SavedProjects {
         SavedProjects(projects: projects.map { .init(name: $0.name, folder: $0.folder, tabs: $0.tabs.snapshot(), color: $0.color,
-                                                     image: $0.image, emoji: $0.emoji) },
+                                                     image: $0.image, emoji: $0.emoji, pinned: $0.pinned) },
                       active: max(activeIndex, 0), folder: workspaceFolder?(), recent: recent)
     }
 
@@ -301,3 +314,4 @@ public final class ProjectsController {
         try? ProjectsFile.save(saved, to: fileURL)
     }
 }
+

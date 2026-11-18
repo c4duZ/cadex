@@ -53,11 +53,14 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
   Close terminals e Remove from the sidebar, cada um um comando.
   Feita em 2026-11-18: a folha (nome, imagem com Choose Image… e Remove, emoji, cor) pelo clique
   direito e pelo ⌘K (project.edit), criando pelo "+" (project.create), a imagem solta no quadrado,
-  o clique direito inteiro menos Pin/Unpin e Remove from the sidebar (vêm com fixar, na fase E; por
-  ora Close Project), a imagem no trilho, nos cartões da página Projects e no cabeçalho da página
-  do projeto. Conferido no app: o trilho com imagem e emoji, o menu do clique direito, a folha, as
-  duas páginas. Não conferido: escolher e salvar uma imagem pelo seletor com o mouse, soltar uma
-  imagem no trilho, criar um projeto pela folha; o seletor ⇧⌘S ainda sem a imagem.
+  o clique direito inteiro (com Pin/Unpin, Close Terminals e Remove from the Sidebar: o fixar veio
+  para cá da fase E), a imagem no trilho, nos cartões da página Projects, no cabeçalho da página do
+  projeto e no ⇧⌘S; o projeto fixado sem terminal fica no trilho e o clique abre um; os abertos não
+  fixados depois de uma linha. Conferido no app: o trilho com imagem, emoji, fixado sem terminal e a
+  linha; o menu; a folha; as duas páginas; o ⇧⌘S; o clique no fixado abrindo o terminal. Visto uma
+  vez e não reproduzido em mais duas: o halo no projeto errado depois desse clique (a janela de
+  teste estava em foco). Não conferido com o mouse: o seletor de imagem, soltar uma imagem, criar
+  pela folha.
 - [ ] C. As páginas da coluna: os pés (Files: a pasta, criar e buscar; Changes: a checagem, Commit,
   Open PR e a branch com ↑↓; Memory: o briefing; Git graph: a branch e abrir numa aba); Changes com
   o escopo num menu pequeno, o total e o +/− de cada arquivo; a página nova Sessions (agora, hoje,
@@ -66,8 +69,8 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
 - [ ] D. As abas: a tarefa como aba (ícone de branch, estado, seta) que troca a barra para os
   terminais dela; "‹ projeto" volta; "» N" com a lista de todos quando não cabem; ⌘1 a ⌘9 pela
   ordem mostrada; as abas sem projeto quando nenhum projeto está aceso.
-- [ ] E. Fixar e ordenar: fixar e desafixar, a ordem arrastada (projetos e ícones da coluna), os
-  abertos não fixados depois de uma linha, o fixado sem terminal abrindo um. A página Projects só
+- [ ] E. Ordenar: a ordem arrastada (projetos e ícones da coluna; arrastar um aberto para cima da
+  linha o fixa). A página Projects só
   pelo pé do trilho, sem editar nada, e o cartão abrindo a página do projeto (com Open terminal).
 - [ ] F. Quando a coluna fecha e o pé: o quadro fecha a coluna e o segundo clique no ícone dele a
   devolve (conferir o bug que o dono viu); a janela estreita; Remote no pé (os hosts do ssh e as
