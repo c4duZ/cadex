@@ -61,14 +61,15 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
   vez e não reproduzido em mais duas: o halo no projeto errado depois desse clique (a janela de
   teste estava em foco). Não conferido com o mouse: o seletor de imagem, soltar uma imagem, criar
   pela folha.
-- [ ] C. As páginas da coluna: os ícones das páginas saem do topo da coluna e vão para o trilho,
+- [x] C. As páginas da coluna: os ícones das páginas saem do topo da coluna e vão para o trilho,
   abaixo dos projetos e do "+", depois de uma linha (o dono, 2026-11-18): o clique abre a coluna na
   página, mesmo fechada, e o clique no aceso a fecha; a coluna sem fileira no topo (feito em
   2026-11-18 e conferido no app: com a coluna fechada pelo ⌘B, o clique em Files a abre em Files,
   aceso). A página Sessions (feita em 2026-11-18): as conversas do projeto por quando, a busca, o
   histórico lido só enquanto ela aparece e "Reading the history…" antes da primeira leitura; o
   clique abre a página do projeto em Sessions com o resumo e o Resume; conferida no app. O Changes
-  com o escopo num menu pequeno e o total ao lado (feito e conferido no app, 2026-11-18). Os pés (Files: a pasta, criar e buscar; Changes: a checagem, Commit,
+  com o escopo num menu pequeno e o total ao lado (feito e conferido no app, 2026-11-18). Os pés já
+  vinham da fase A (a linha de contexto no pé de cada página, com os botões dela). Os pés (Files: a pasta, criar e buscar; Changes: a checagem, Commit,
   Open PR e a branch com ↑↓; Memory: o briefing; Git graph: a branch e abrir numa aba); Changes com
   o escopo num menu pequeno, o total e o +/− de cada arquivo; a página nova Sessions (agora, hoje,
   antes; o clique mostra o resumo no centro, como na página do projeto); a ordem Files, Changes,
