@@ -100,6 +100,10 @@
   histórico) e `AutomationCommands.swift` (orchestration.toggle-automations, -new-automation,
   -toggle-automation, -run-automation-now e -show-automation-history). O controlador avisa quando
   orchestration.automations muda (`onAutomationsSwitch`).
+- O quadro (plano 30 B): `BoardModel.swift` (cartões, colunas pelo estado e filtros, puros),
+  `BoardView.swift` (`BoardDocument`, a página "cadex:board") e `BoardParts.swift` (a página com a
+  rolagem, as colunas em 4, 2 ou 1 e a fileira de filtros que quebra). A corrida no centro:
+  `RaceLaneViews.swift` (a faixa do pedido com Compare… e o pé de cada concorrente).
 - Configurações (`../settings/OrchestrationSettings.swift`, `../settings/OrchestrationRows.swift`):
   orchestration.enabled, orchestration.automations, orchestration.maxAgents (6),
   orchestration.maxDepth (2), orchestration.heartbeatMinutes (10),

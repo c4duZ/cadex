@@ -1,4 +1,5 @@
 import AppKit
+import Orchestration
 import SourceControl
 import Menus
 import CommandPalette
@@ -125,6 +126,10 @@ extension WindowSession {
         guard let tree = workspace?.tree else { return }
         tree.show(treeModel(), chosen: tabs?.activeTerminal.map { .terminal(AppDelegate.key($0)) })
         showCheckLine()
+        // The board moves its cards with the tree (a state changed, a task came or went).
+        for project in projects?.projects ?? [] {
+            (project.tabs.document(identity: BoardDocument.identity) as? BoardDocument)?.reload()
+        }
     }
 
     /// The projects with their tasks and terminals and the state of each, from what is open now:

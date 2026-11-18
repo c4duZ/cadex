@@ -7,6 +7,19 @@ import Foundation
 // the board's columns, the session's cost, the refusals and the command.
 
 let raceTests: [(name: String, body: Checks.Body)] = [
+    ("the board: each state in its column, idle left out, the filters with their counts and Automations last", {
+        let cards = [BoardCard(id: "a", state: .needs, name: "a", project: "p", filter: "Race: kite"),
+                     BoardCard(id: "b", state: .working, name: "b", project: "p", filter: "Race: kite"),
+                     BoardCard(id: "c", state: .review, name: "c", project: "p"),
+                     BoardCard(id: "d", state: .done, name: "d", project: "p", filter: "Automations"),
+                     BoardCard(id: "e", state: .idle, name: "e", project: "p"),
+                     BoardCard(id: "f", state: .failed, name: "f", project: "p", filter: "Run: release")]
+        let all = BoardColumns.sort(cards, filter: nil)
+        expect(all.map { $0.1.map(\.id) } == [["a", "f"], ["b"], ["c"], ["d"]], "\(all.map { $0.1.map(\.id) })")
+        expect(BoardColumns.sort(cards, filter: "Race: kite").map { $0.1.map(\.id) } == [["a"], ["b"], [], []])
+        let filters = BoardColumns.filters(cards)
+        expect(filters.map(\.name) == ["Race: kite", "Run: release", "Automations"] && filters[0].count == 2, "\(filters)")
+    }),
     ("a Codex contender: its words by file through cadex codex, its own flags, no Claude trust asked", {
         let dir = NSTemporaryDirectory() + "cadex-codex-\(UUID().uuidString)"
         defer { try? FileManager.default.removeItem(atPath: dir) }

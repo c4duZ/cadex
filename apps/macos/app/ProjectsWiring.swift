@@ -3,6 +3,7 @@ import Agents
 import CommandPalette
 import Explorer
 import GitHistory
+import Orchestration
 import Projects
 import Strings
 import Tabs
@@ -70,15 +71,20 @@ extension WindowSession {
         // else the project's own (the Main mockup).
         tabs.groupOf = { [weak self] folder in
             // The project's page and the app's pages: one group of their own.
+            if folder == BoardDocument.identity { return "board" }
             if let folder, ["project:", "cadex:", "automation:"].contains(where: folder.hasPrefix) { return "pages" }
             return self?.taskFolder(containing: folder) ?? ""
         }
-        tabs.extrasOf = { group in
+        tabs.extrasOf = { [weak self] group in
             switch group {
-            case "": []
+            case "", "board": []
             case "pages": [TabsExtra(title: T("Automations", "Automações"), command: "orchestration.show-automation-history", identity: "automation:"),
                            TabsExtra(title: T("Conversations", "Conversas"), command: "agents.show-history", identity: "cadex:agent-history")]
-            default: [TabsExtra(title: T("Review", "Revisão"), command: "git.review-open", identity: "review:")]
+            default:
+                // A race's lanes compare their worktrees; a task reviews its own (the mockups).
+                self?.raceName(of: group) != nil
+                    ? [TabsExtra(title: T("Compare", "Comparar"), command: "git.review-compare-worktrees", identity: "review:")]
+                    : [TabsExtra(title: T("Review", "Revisão"), command: "git.review-open", identity: "review:")]
             }
         }
         tabs.onCommandTick = { [weak self] in self?.refreshTree() }
@@ -108,6 +114,7 @@ extension WindowSession {
             // Archive & History comes back too (plan 27 C): a tab, not a file.
             if identity == AgentHistoryDocument.identity, let self { return AgentHistoryDocument(page: self.makeHistoryPage()) }
             if identity.hasPrefix("project:"), let self { return self.makeProjectPage(String(identity.dropFirst("project:".count))) }
+            if identity == BoardDocument.identity, let self { return self.makeBoard() }
             return self?.opener?.makeDocument(identity: identity)
         }
         // Opened on a folder: the old projects come back and the folder becomes its own project

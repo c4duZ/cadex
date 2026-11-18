@@ -41,6 +41,18 @@ public extension DesignTokens {
             }
             public static var tintNeeds: NSColor { DesignTokens.Color.tintNeeds }
             public static var tintDone: NSColor { DesignTokens.Color.tintDone }
+            public enum Head {
+                public static let gap: CGFloat = 8
+                public enum Age {
+                    public static let fontSize: CGFloat = DesignTokens.FontSize.caption
+                    public static var color: NSColor { DesignTokens.Color.textTertiary }
+                }
+            }
+            public enum Meta {
+                public static let fontSize: CGFloat = DesignTokens.FontSize.small
+                public static var color: NSColor { DesignTokens.Color.textMuted }
+                public static let gap: CGFloat = 6
+            }
         }
         public enum GroupChip {
             public static let fontSize: CGFloat = DesignTokens.FontSize.chip
@@ -50,6 +62,18 @@ public extension DesignTokens {
             public static var bg: NSColor { DesignTokens.Color.chipGroupBg }
             public static var color: NSColor { DesignTokens.Color.chipGroupText }
         }
+        public enum Column {
+            public static let gap: CGFloat = 10
+            public enum Header {
+                public static let padding = NSEdgeInsets(top: 4, left: 2, bottom: 4, right: 2)
+                public static let gap: CGFloat = 8
+                public static var count: NSColor { DesignTokens.Color.textTertiary }
+            }
+        }
+        public enum Actions {
+            public static let height: CGFloat = 30
+        }
+        public static let minColumn: CGFloat = 220
     }
     enum Race {
         public enum Lane {
@@ -69,7 +93,15 @@ public extension DesignTokens {
             public enum Footer {
                 public static let padding = NSEdgeInsets(top: 10, left: 12, bottom: 10, right: 12)
                 public static let gap: CGFloat = 8
+                public static var borderTop: NSColor { DesignTokens.Color.lineSubtle }
+                public static var bg: NSColor { DesignTokens.Color.bgChrome }
             }
+        }
+        public enum Banner {
+            public static let padding = NSEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)
+            public static let gap: CGFloat = 12
+            public static var meta: NSColor { DesignTokens.Color.textMuted }
+            public static var bg: NSColor { DesignTokens.Color.bgWindow }
         }
     }
     enum Project {

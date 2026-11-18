@@ -49,6 +49,8 @@ final class Tab {
     /// Set by "Renomear aba"; stays when the folder changes. Nil shows the
     /// focused pane's folder or document (docs/spec/tabs.md).
     var customTitle: String?
+    /// A strip over the panes (a race's prompt and cap, the Race mockup); nil: none.
+    var banner: NSView?
     /// A work color's name ("red"): tab.set-color, plan 15, phase D.
     var color: String?
     private(set) var panes: [Int: Pane] = [:]

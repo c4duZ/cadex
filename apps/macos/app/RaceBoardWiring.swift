@@ -63,6 +63,10 @@ extension WindowSession {
     /// orchestration.show-race: the board in a tab (the one it has, if open).
     func showRace(_ id: String) {
         guard let book = OrchestrationController.shared.races() else { return }
+        // The lanes when the race has them (the Race mockup); the board for one with none here.
+        if let lane = ((try? book.contenders(of: id)) ?? []).sorted(by: { $0.index < $1.index }).first(where: { contenderTerminal($0) != nil }) {
+            return goToContender(lane)
+        }
         if let open = RaceWatch.shared.boards.first(where: { $0.raceID == id }), tabs?.open(open) != nil { return }
         var actions = RaceBoardActions()
         actions.goToTerminal = { [weak self] contender in self?.goToContender(contender) }
@@ -96,6 +100,8 @@ extension WindowSession {
     }
 
     private func raceTick() {
+        // The lanes' headers move with the race (state, cost, diff, the cap's bar).
+        refreshPaneDetails()
         let book = OrchestrationController.shared.races()
         let races = (try? book?.races()) ?? []
         var working = false

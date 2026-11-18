@@ -40,6 +40,8 @@ extension WindowSession {
     }
 
     private func paneDetail(of terminal: TerminalView, project: String) -> PaneDetail? {
+        // A race's lane says the race's numbers (RaceLanesWiring.swift).
+        if let lane = laneDetail(terminal) { return lane }
         guard terminal.agentStatus != nil,
               let session = AgentsController.shared.sessions.first(where: { self.terminal(of: $0)?.terminal === terminal }) else { return nil }
         let place = TitleBarView.location(of: terminal.currentDirectory ?? "")

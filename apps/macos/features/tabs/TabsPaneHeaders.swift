@@ -11,6 +11,18 @@ import Terminal
 /// TabsController.swift, at its size limit.
 /// What the app knows of the agent in a terminal, for its pane's header (plan 28 phase B): the
 /// app works it out when an agent changes and keeps it; the header only reads it.
+/// A race contender's second line and its cap (the Race mockup's lanes).
+public struct PaneLane: Equatable, Sendable {
+    /// "Working · US$ 0.42 · +88 −41 in 4 files".
+    public var status: String
+    /// 0…1 of the cap spent (money or minutes, whichever is further).
+    public var cap: Double
+    public init(status: String, cap: Double) {
+        self.status = status
+        self.cap = cap
+    }
+}
+
 public struct PaneDetail: Equatable, Sendable {
     /// "Claude".
     public var title: String
@@ -18,11 +30,14 @@ public struct PaneDetail: Equatable, Sendable {
     public var detail: String
     /// "US$ 0.31 · 4 min".
     public var trailing: String
+    /// A race's contender: the lane's second line and cap bar.
+    public var lane: PaneLane?
 
-    public init(title: String, detail: String, trailing: String) {
+    public init(title: String, detail: String, trailing: String, lane: PaneLane? = nil) {
         self.title = title
         self.detail = detail
         self.trailing = trailing
+        self.lane = lane
     }
 }
 
@@ -73,6 +88,7 @@ extension TabsController {
                 info.title = agent.title
                 info.detail = agent.detail
                 info.trailing = agent.trailing
+                info.lane = agent.lane
             }
             return info
         case .document(let document):

@@ -19,6 +19,15 @@ public final class TerminalView: NSView {
     var lastCursorRow = 0
     /// A card at the pane's foot (the agent's permission, plan 28 phase D), from the app; the pane
     /// layout places it. Setting it asks the layout again.
+    /// A bar across the pane's foot, the terminal above it (a race's lane: Review, Pick winner).
+    public var footBar: NSView? {
+        didSet {
+            guard footBar !== oldValue else { return }
+            oldValue?.removeFromSuperview()
+            superview?.needsLayout = true
+        }
+    }
+
     public var footCard: NSView? {
         didSet {
             guard footCard !== oldValue else { return }

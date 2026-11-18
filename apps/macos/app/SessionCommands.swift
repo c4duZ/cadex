@@ -2,6 +2,7 @@ import AgentTools
 import ComputerUse
 import Agents
 import AppKit
+import Orchestration
 import Worktrees
 import CommandPalette
 import Editor
@@ -67,6 +68,7 @@ extension WindowSession {
         commands.register(treeCommands(palette: palette))
         commands.register(jumpCommands(palette: palette))
         commands.register(projectPageCommands())
+        commands.register(boardCommands())
         commands.register(SSHCommands.all(palette: palette) { [weak self] alias in self?.connectSSH(alias) })
         commands.register(MachinesCommands.all(palette: palette) { [weak self] machine, ask in self?.connectMachine(machine, askUser: ask) })
         commands.register(DockerCommands.all(palette: palette, actions: dockerActions()))
@@ -252,8 +254,15 @@ extension WindowSession {
     /// "project › task" in the title bar: a task's worktree (`<repo>.worktrees/<branch>`, plan 19)
     /// names its repository and the task; any other folder is the project alone.
     func showLocation(_ root: String) {
+        // The board is of every project: "All projects" (the Board mockup).
+        if tabs?.activeDocument?.identity == BoardDocument.identity {
+            workspace?.titleBar.setLocation(project: T("All projects", "Todos os projetos"), task: nil)
+            return showProject(branch: lastBranch)
+        }
         let (project, task) = TitleBarView.location(of: root)
-        workspace?.titleBar.setLocation(project: project, task: task)
+        // A race's lane: "cadex › race kite" (the Race mockup).
+        let race = raceName(of: root).map { T("race ", "corrida ") + $0 }
+        workspace?.titleBar.setLocation(project: project, task: race ?? task)
         showProject(branch: lastBranch)
     }
 
@@ -267,6 +276,7 @@ extension WindowSession {
             if let folder = terminal?.currentDirectory { bar?.path = folder }
             bar?.canNavigate = terminal?.hasForegroundProcess == false
             self?.terminalFolderMoved(terminal?.currentDirectory)
+            self?.showBoardChrome()
             self?.refreshWorkColor()
             self?.countTerminals()
             self?.showFocusedAccount()

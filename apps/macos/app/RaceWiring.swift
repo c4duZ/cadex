@@ -5,6 +5,7 @@ import Orchestration
 import SessionKit
 import Settings
 import Strings
+import Terminal
 import Themes
 import Worktrees
 
@@ -75,29 +76,38 @@ extension WindowSession {
             guard let self, let (race, contenders) = try? book.newRace(name: request.name, prompt: request.prompt, repository: request.repository,
                                                                        base: plans[0].base, caps: request.caps, agents: request.agents,
                                                                        worktree: { plans[$0 - 1].path }, maxAgents: controller.limits.maxAgents) else { return }
-            for (contender, plan) in zip(contenders, plans) { self.launch(contender, plan: plan, race: race, book: book) }
-            self.showRace(race.id)
+            var lanes: [TerminalView] = []
+            for (contender, plan) in zip(contenders, plans) {
+                if let lane = self.launch(contender, plan: plan, race: race, book: book, beside: lanes.last) { lanes.append(lane) }
+            }
+            // The local contenders side by side in one tab (the Race mockup); none: the board.
+            if lanes.isEmpty { self.showRace(race.id) } else { self.dressLanes(race, lanes) }
         }
         if asks.isEmpty || !askFirst { return go() }
         confirm(T("Start the race \(request.name)?", "Começar a corrida \(request.name)?"), asks.joined(separator: "\n\n"), button: T("Start", "Começar"), then: go)
     }
 
-    /// One contender: its worktree, then a tab with the setup hooks and the agent.
-    private func launch(_ contender: Contender, plan: TaskPlan, race: Race, book: RaceBook) {
-        if !contender.agent.machine.isEmpty { return launchRemote(contender, race: race, book: book) }
+    /// One contender: its worktree, then a terminal with the setup hooks and the agent, in a new
+    /// tab or split to the right of `beside` (the race's lanes); the local one's terminal.
+    private func launch(_ contender: Contender, plan: TaskPlan, race: Race, book: RaceBook, beside: TerminalView?) -> TerminalView? {
+        if !contender.agent.machine.isEmpty { launchRemote(contender, race: race, book: book); return nil }
         if case .failure(.git(let message)) = WorktreesController.shared.make(plan) {
             try? book.update(contender.id, state: .failed, reason: message)
-            return
+            return nil
         }
         WorktreesController.shared.setComment(T("race \(race.name) #\(contender.index)", "corrida \(race.name) #\(contender.index)"), of: plan.path)
         switch RaceLaunch.localCommand(kit: SessionKit.shared, agent: contender.agent, cwd: plan.path, prompt: race.prompt,
                                        skipPermissions: settings.store.settings.agents.launchSkipPermissions) {
         case .failure(let refusal):
             try? book.update(contender.id, state: .failed, reason: refusal.message)
+            return nil
         case .success(let opened):
             try? book.update(contender.id, state: .working, session: SessionLink(kit: opened.session))
-            tabs?.newTab(cwd: plan.path)
+            // Beside the last lane when it is still in front; else a tab of its own.
+            let split = beside.flatMap { lane in tabs?.activeTerminal === lane ? tabs?.splitRight(cwd: plan.path) : nil }
+            if split == nil { tabs?.newTab(cwd: plan.path) }
             tabs?.activeTerminal?.typeWhenReady((plan.hooks + [opened.command]).joined(separator: " && ") + "\n")
+            return tabs?.activeTerminal
         }
     }
 

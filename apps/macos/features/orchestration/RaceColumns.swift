@@ -76,6 +76,9 @@ public enum RaceColumns {
         return parts.joined(separator: " · ")
     }
 
+    /// The state's words for a lane's header.
+    public static func stateText(_ info: ContenderLive?, stored: Contender) -> String { stateLabel(info, stored: stored) }
+
     static func stateLabel(_ info: ContenderLive?, stored: Contender) -> String {
         if stored.state == .failed { return T("Failed to start", "Não começou") + (stored.reason.map { ": " + $0 } ?? "") }
         // Stopped by Cadex (the cap): says so even before the process is gone.

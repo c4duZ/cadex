@@ -138,6 +138,19 @@ final class WorkspaceView: NSView {
         }
     }
 
+    private var inspectorBeforeBoard: Bool?
+
+    /// The board shows: the right panel closes, and comes back as it was when the board goes.
+    func setBoardShown(_ shown: Bool) {
+        if shown, inspectorBeforeBoard == nil {
+            inspectorBeforeBoard = inspectorVisible
+            if inspectorVisible { setInspector(visible: false) }
+        } else if !shown, let before = inspectorBeforeBoard {
+            inspectorBeforeBoard = nil
+            if before, !inspectorVisible { setInspector(visible: true) }
+        }
+    }
+
     func hideHome() {
         guard let home else { return }
         home.removeFromSuperview()

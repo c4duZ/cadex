@@ -90,3 +90,4 @@ pub const diamond: u21 = 0xE1EC;
 pub const flag: u21 = 0xE244;
 pub const git_fork: u21 = 0xE27E;
 pub const terminal: u21 = 0xE47E;
+pub const kanban: u21 = 0xEB54;

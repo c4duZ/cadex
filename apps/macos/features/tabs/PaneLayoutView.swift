@@ -59,7 +59,8 @@ final class PaneLayoutView: NSView {
         let wanted = Set(shown.compactMap { panes[$0] }.map(ObjectIdentifier.init))
         for view in subviews where !(view is DividerHandle) && !(view is PaneHeaderView) && !wanted.contains(ObjectIdentifier(view))
             && !((view as? TerminalScrollbar).map { bar in shown.contains { (panes[$0] as? TerminalView)?.scrollbar === bar } } ?? false)
-            && !shown.contains(where: { (panes[$0] as? TerminalView)?.footCard === view }) {
+            && !shown.contains(where: { (panes[$0] as? TerminalView)?.footCard === view })
+            && !shown.contains(where: { (panes[$0] as? TerminalView)?.footBar === view }) {
             view.removeFromSuperview()
         }
         for id in shown {
@@ -73,7 +74,9 @@ final class PaneLayoutView: NSView {
         super.layout()
         let frames = zoomed.map { [$0: paneArea] } ?? tree.frames(in: paneArea, gap: Self.gap)
         needsDisplay = true
-        // A page alone in its tab: the whole center, flat (the Project mockup), no box drawn.
+        // A page alone in its tab: the whole center, flat (the Project mockup), no box drawn. The
+        // headers say first what each pane is (the first layout had none yet and drew the box).
+        placeHeaders(Array(frames.keys))
         if frames.count == 1, let only = frames.keys.first, headers[only]?.info.page == true, let view = panes[only] {
             chrome.place([:], focused: nil)
             headers[only]?.isHidden = true
@@ -92,7 +95,7 @@ final class PaneLayoutView: NSView {
             let inner = frame.insetBy(dx: DesignTokens.Stroke.hairline, dy: DesignTokens.Stroke.hairline)
             let hidden = headers[id]?.info.hidden == true
             headers[id]?.isHidden = hidden
-            let height = hidden ? 0 : min(PaneHeaderView.height, inner.height)
+            let height = hidden ? 0 : min(headers[id]?.preferredHeight ?? PaneHeaderView.height, inner.height)
             headers[id]?.frame = CGRect(x: inner.minX, y: inner.minY, width: inner.width, height: height)
             var body = CGRect(x: inner.minX, y: inner.minY + height, width: inner.width, height: inner.height - height)
             if let terminal = panes[id] as? TerminalView {
@@ -103,6 +106,14 @@ final class PaneLayoutView: NSView {
                 if terminal.scrollbar.superview !== self { addSubview(terminal.scrollbar, positioned: .below, relativeTo: handles.first) }
                 terminal.scrollbar.alphaValue = frames.count > 1 && id != focused ? P.Idle.opacity : 1
                 placeFootCard(terminal, box: frame)
+                // A lane's foot bar across the box's bottom; the terminal ends above it.
+                if let bar = terminal.footBar {
+                    if bar.superview !== self { addSubview(bar, positioned: .below, relativeTo: handles.first) }
+                    let barHeight = bar.fittingSize.height
+                    bar.frame = CGRect(x: inner.minX, y: inner.maxY - barHeight, width: inner.width, height: barHeight)
+                    body.size.height = max(body.height - barHeight, 0)
+                    bar.alphaValue = frames.count > 1 && id != focused ? P.Idle.opacity : 1
+                }
             }
             if headers[id]?.info.padded == true {
                 // The mockup's room around the text, less what the terminal keeps itself.

@@ -106,7 +106,7 @@
   que o painel põe na borda da caixa (`scrollbar`), com o polegar e as marcas: cinza onde o dono
   mandou uma mensagem ao agente (Enter com agente rodando), âmbar onde o agente passou a esperar;
   clique e arrasto levam a vista até lá. A barrinha Metal de antes, que só aparecia rolando, saiu do
-  `QuadBuilder.swift`. `footCard`: um cartão que o app põe no pé do painel (a permissão do agente).
+  `QuadBuilder.swift`. `footBar`: uma barra no pé do painel (o Review e Pick winner de um concorrente). `footCard`: um cartão que o app põe no pé do painel (a permissão do agente).
   `innerPadding`: o respiro que o terminal guarda em volta do texto, que a caixa desconta.
 - `screenLines()` (em `TerminalPastedImages.swift`): o texto da tela, linha a linha, do mesmo quadro
   do desenho; para os testes e o CADEX_PERF_DUMP_SCREEN (a captura da janela não pega o Metal).

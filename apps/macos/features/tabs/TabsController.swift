@@ -198,7 +198,7 @@ public final class TabsController {
 
     func showActive() {
         guard let tab = activeTab else { return }
-        view.show(tab.view)
+        view.show(tab.view, banner: tab.banner)
         if isShown { tab.focusContent() }
         refreshBar()
     }

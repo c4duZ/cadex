@@ -30,7 +30,23 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
 - O prompt chega ao `claude` como argumento do exec, nunca dentro de um comando de shell (ADR 0033).
   Aspas, `$()`, crases, `;` e quebras de linha chegam intactos e nada é executado.
 
+### O quadro (mockup Board; plano 30 B, feito junto da revisão do plano 29)
+- view.board e o botão do quadro na barra de título (aceso com ele aberto) abrem a página "Board",
+  com "All projects" no lugar do projeto e o painel da direita fechado (volta como estava).
+- As tarefas de todos os projetos da janela em quatro colunas: Needs you (pede permissão ou
+  resposta, ou falhou), Working, In review (a tarefa em revisão) e Done; a parada fica de fora.
+  Cada cartão: o estado, o nome, a idade, o que faz ou espera ("Wants to run Bash: make perf"),
+  "projeto · agente", o +/− e a etiqueta da corrida, execução ou automação a que pertence.
+- Pílulas de filtro: All, cada corrida e execução com a contagem, Automations; New race e New task.
+- Responsivo: 4 colunas, 2 ou 1 pela largura; as pílulas quebram a linha e os botões sobem.
+
 ### Corrida
+- A corrida no centro (mockup Race): os concorrentes locais lado a lado numa aba "Contenders · N",
+  com a faixa do pedido, de onde partiu e o teto, e "Compare…"; cada um com o cabeçalho "#1 Claude
+  Opus · conta · tempo", a linha do estado, custo e diff e a barra do teto (âmbar acima de 80%), e o
+  pé com Review e Pick winner. A barra de título diz "projeto › race <nome>" e termina em
+  "Compare". orchestration.show-race leva aos concorrentes; o quadro de colunas antigo fica só para
+  a corrida sem nenhum concorrente local.
 - A corrida nasce na folha "New task" (`worktrees.md`) com dois agentes ou mais: não há folha
   própria (`../adr/0035-work-frame.md`). orchestration.new-race abre a folha já com duas linhas de
   agente; com a feature desligada, a folha diz numa linha que o Começar a liga (o

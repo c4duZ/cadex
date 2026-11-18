@@ -13,6 +13,13 @@ import UILooks
 final class PaneHeaderView: NSView {
     typealias H = DesignTokens.Pane.Header
     static var height: CGFloat { UILooks.rowHeight(H.height) }
+    typealias Lane = DesignTokens.Race.Lane
+
+    /// Its height: one line, or a lane's three (the line, its status and the cap bar).
+    var preferredHeight: CGFloat {
+        guard info.lane != nil else { return Self.height }
+        return Self.height + UILooks.pt(DesignTokens.FontSize.meta) * 1.5 + UILooks.pt(Lane.Header.gap) * 2 + UILooks.pt(Lane.Cap.height)
+    }
 
     struct Info: Equatable {
         var title: String
@@ -32,6 +39,8 @@ final class PaneHeaderView: NSView {
         var hidden = false
         /// A page: alone in its tab, it fills the center with no box (TabDocument.isPage).
         var page = false
+        /// A race contender's lane: a second line and the cap's bar under the first.
+        var lane: PaneLane?
         /// "Open :5173 in preview": the blue chip on the right (a command serving an address).
         var offer = ""
     }
@@ -51,6 +60,9 @@ final class PaneHeaderView: NSView {
     private let detail = NSTextField(labelWithString: "")
     private let trailing = NSTextField(labelWithString: "")
     private let offer = PaneHeaderOffer()
+    private let laneLine = NSTextField(labelWithString: "")
+    private let capTrack = NSView()
+    private let capFill = NSView()
     private let menuButton = PaneHeaderButton(icon: .plus)
     private let zoomButton = PaneHeaderButton(icon: .cornersOut)
     private let closeButton = PaneHeaderButton(icon: .x)
@@ -85,13 +97,29 @@ final class PaneHeaderView: NSView {
         NSLayoutConstraint.activate([
             row.leadingAnchor.constraint(equalTo: leadingAnchor, constant: UILooks.pt(H.padding.left)),
             row.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -UILooks.pt(H.padding.right)),
-            row.centerYAnchor.constraint(equalTo: centerYAnchor),
+            row.centerYAnchor.constraint(equalTo: topAnchor, constant: Self.height / 2),
         ])
+        laneLine.font = UILooks.font(H.fontSize)
+        laneLine.lineBreakMode = .byTruncatingTail
+        for view in [laneLine, capTrack, capFill] { addSubview(view) }
+        capTrack.wantsLayer = true
+        capFill.wantsLayer = true
         refresh()
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("PaneHeaderView is created in code") }
+
+    /// The lane's line and bar under the first line, across the header.
+    override func layout() {
+        super.layout()
+        let left = UILooks.pt(H.padding.left), width = bounds.width - left - UILooks.pt(H.padding.right)
+        let lineHeight = UILooks.pt(DesignTokens.FontSize.meta) * 1.5
+        laneLine.frame = CGRect(x: left, y: Self.height - UILooks.pt(Lane.Header.gap), width: max(width, 0), height: lineHeight)
+        let barY = laneLine.frame.maxY + UILooks.pt(Lane.Header.gap)
+        capTrack.frame = CGRect(x: left, y: barY, width: max(width, 0), height: UILooks.pt(Lane.Cap.height))
+        capFill.frame = CGRect(x: left, y: barY, width: max(width, 0) * CGFloat(min(max(info.lane?.cap ?? 0, 0), 1)), height: UILooks.pt(Lane.Cap.height))
+    }
 
     override var isFlipped: Bool { true }
     override var mouseDownCanMoveWindow: Bool { false }
@@ -146,6 +174,18 @@ final class PaneHeaderView: NSView {
         trailing.stringValue = info.trailing
         trailing.textColor = H.meta
         trailing.isHidden = info.trailing.isEmpty
+        let lane = info.lane
+        laneLine.isHidden = lane == nil
+        capTrack.isHidden = lane == nil
+        capFill.isHidden = lane == nil
+        if let lane {
+            laneLine.attributedStringValue = PaneHeaderView.laneText(lane.status)
+            capTrack.layer?.backgroundColor = Lane.Cap.track.cgColor
+            capTrack.layer?.cornerRadius = UILooks.pt(Lane.Cap.radius)
+            capFill.layer?.cornerRadius = UILooks.pt(Lane.Cap.radius)
+            capFill.layer?.backgroundColor = (lane.cap * 100 > Lane.Cap.warnAbovePercent ? Lane.Cap.warn : Lane.Cap.fill).cgColor
+            needsLayout = true
+        }
         offer.text = info.offer
         offer.isHidden = info.offer.isEmpty
         glyph.state = info.state
@@ -158,6 +198,18 @@ final class PaneHeaderView: NSView {
         // cost sits at the right edge as drawn.
         buttons.isHidden = !hovering
         needsDisplay = true
+    }
+
+    /// "Working · US$ 0.42 · +88 −41 in 4 files": the diff's numbers in their colors.
+    static func laneText(_ status: String) -> NSAttributedString {
+        let text = NSMutableAttributedString(string: status, attributes: [.font: UILooks.font(H.fontSize), .foregroundColor: H.meta])
+        let words = status as NSString
+        for (pattern, color) in [("\\+[0-9]+", DesignTokens.Color.accentGreenText), ("−[0-9]+", DesignTokens.Color.accentRedText)] {
+            for match in (try? NSRegularExpression(pattern: pattern))?.matches(in: status, range: NSRange(location: 0, length: words.length)) ?? [] {
+                text.addAttribute(.foregroundColor, value: color, range: match.range)
+            }
+        }
+        return text
     }
 
     /// The pane's line under the header (components.pane.header.borderBottom).

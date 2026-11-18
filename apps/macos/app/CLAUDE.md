@@ -261,6 +261,13 @@
   do histórico (lido enquanto a página existe), o custo de cada uma, os merges e o remoto pelo git,
   as automações e as páginas da memória. A barra de título agrupa as páginas ("pages": Overview, e
   Automations e Conversations como itens extras, `extrasOf`).
+- `BoardWiring.swift` (plano 30 B): view.board e o botão da barra de título abrem o quadro; os
+  cartões vêm do `treeModel()` com o que o agente faz e o grupo (corrida, execução, automação) pelas
+  worktrees dos registros; "All projects", o botão aceso e o painel da direita fechado enquanto ele
+  aparece (WorkspaceView.setBoardShown); a árvore o refaz a cada redesenho.
+  `RaceLanesWiring.swift`: os concorrentes locais lado a lado numa aba (`dressLanes`: o nome, a
+  faixa e o pé de cada um), o cabeçalho de cada um pelo `laneDetail` (refeito pelo relógio da
+  corrida) e `raceName(of:)` para "projeto › race <nome>" e o "Compare" da barra.
 - `CheckLineWiring.swift` (plano 29, revisão): a linha "make check passed · 2 min ago" do pé de
   Changes, o último comando de checagem (CheckLine, da source-control) que terminou num terminal da
   pasta, a cada redesenho da árvore. `ProjectsWiring.swift` dá às abas o grupo de cada pasta

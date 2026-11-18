@@ -29,6 +29,7 @@ final class TitleBarView: NSView {
         icon: .plus, tip: T("Open a terminal, file, preview or git graph", "Abrir terminal, arquivo, preview ou grafo do git"), kind: .add)
     /// The bell: the requests waiting for you, its count on the badge (docs/spec/agents.md).
     private let bellButton = TitleBarButton(icon: .bell, tip: T("Needs you", "Precisa de você"))
+    private let boardButton = TitleBarButton(icon: .kanban, tip: T("Board", "Quadro"))
     /// The right panel's button (inspector.toggle), lit while the panel is open.
     private let panelButton = TitleBarButton(icon: .sidebarSimple, tip: T("Right panel", "Painel da direita"), mirrored: true)
     private let trailing = NSStackView()
@@ -47,8 +48,9 @@ final class TitleBarView: NSView {
         search.onPress = { [weak self] in self?.run("palette.open") }
         newTabButton.onPress = { [weak self] in self?.showNewMenu() }
         bellButton.onPress = { [weak self] in self?.run("agents.show-attention") }
+        boardButton.onPress = { [weak self] in self?.run("view.board") }
         panelButton.onPress = { [weak self] in self?.run("inspector.toggle") }
-        trailing.setViews([bellButton, panelButton], in: .leading)
+        trailing.setViews([boardButton, bellButton, panelButton], in: .leading)
         trailing.spacing = UILooks.pt(Look.gap)
 
         location.font = UILooks.font(DesignTokens.Breadcrumb.fontSize)
@@ -110,6 +112,8 @@ final class TitleBarView: NSView {
     /// The bell, where its popover opens; lit while it is open.
     var bellAnchor: NSView { bellButton }
     func setBellOpen(_ open: Bool) { bellButton.isOn = open }
+    /// Lit while the board shows.
+    func setBoardOpen(_ open: Bool) { boardButton.isOn = open }
     func setInspectorOpen(_ open: Bool) { panelButton.isOn = open }
 
     /// The bell's count: what needs you, and finished agents you have not seen.

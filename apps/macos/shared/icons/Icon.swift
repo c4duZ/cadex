@@ -95,6 +95,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case flag = 0xE244
     case gitFork = 0xE27E
     case terminal = 0xE47E
+    case kanban = 0xEB54
 
     /// The fonts' family names inside the TTFs.
     static let fontName = "Phosphor"
