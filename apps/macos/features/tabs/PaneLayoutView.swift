@@ -157,9 +157,10 @@ final class PaneLayoutView: NSView {
         if card.superview !== self { addSubview(card, positioned: .above, relativeTo: terminal) }
         let height = card.fittingSize.height
         let left = box.minX + UILooks.pt(I.left), right = box.maxX - UILooks.pt(I.right)
-        // Over the agent's input box, whose top rule is the row above the cursor (Claude's, plan 33);
-        // never lower than the mockup's place.
-        let input = terminal.frame.minY + terminal.rowTop(terminal.cursorRow - 1) - UILooks.pt(DesignTokens.Pane.Permission.gap)
+        // Over the agent's input box: Claude writes its top rule on the row above the cursor and the
+        // terminal draws it one row lower, in the mode line's room (ClaudeDress, plan 33), so it starts
+        // at the cursor's row; never lower than the mockup's place.
+        let input = terminal.frame.minY + terminal.rowTop(terminal.cursorRow) - UILooks.pt(DesignTokens.Pane.Permission.gap)
         let bottom = min(box.maxY - UILooks.pt(I.bottom), terminal.cursorRow > 1 ? input : .infinity)
         card.frame = CGRect(x: left, y: bottom - height, width: max(right - left, 0), height: height)
     }

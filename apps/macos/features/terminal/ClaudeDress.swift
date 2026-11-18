@@ -11,7 +11,7 @@ struct ClaudeDress {
     struct Palette: Equatable {
         var userBackground, strong, dim, separator: UInt32
         var addBackground, addText, addSign, deleteBackground, deleteText, deleteSign: UInt32
-        var toolDone, toolRunning, live, accent, modeEdits, modePlan, boxLine: UInt32
+        var toolDone, toolRunning, live, accent, modeEdits, modePlan, boxLine, boxFill: UInt32
 
         init(_ a: TerminalAppearance) {
             let bg = a.background, fg = a.foreground
@@ -35,6 +35,8 @@ struct ClaudeDress {
             modeEdits = ansi(13)
             modePlan = ansi(6)
             boxLine = mix(bg, fg, 0.13)
+            // The mockup's input: a shade over the terminal (bg.card on Cadex Night).
+            boxFill = mix(bg, fg, 0.03)
         }
     }
 
@@ -54,6 +56,9 @@ struct ClaudeDress {
         var hidden: [Bool]
         var shapes: [Shape] = []
         var label: (text: String, row: Int, color: UInt32)?
+        /// Where each row is drawn, in cells from where Claude wrote it: the banner moved left into
+        /// the mascot's room, the input and the status line moved down into the mode line's.
+        var shift: [(dx: Int, dy: Int)]
     }
 
     /// `atBottom`: the view shows the screen, not the history above it (the mode line is the
@@ -61,7 +66,8 @@ struct ClaudeDress {
     static func plan(cells source: UnsafePointer<cadex_terminal_cell>, text: UnsafePointer<UInt8>,
                      cols: Int, rows: Int, palette p: Palette, atBottom: Bool = true) -> Plan {
         let count = cols * rows
-        var plan = Plan(cells: Array(UnsafeBufferPointer(start: source, count: count)), hidden: Array(repeating: false, count: count))
+        var plan = Plan(cells: Array(UnsafeBufferPointer(start: source, count: count)), hidden: Array(repeating: false, count: count),
+                        shift: Array(repeating: (0, 0), count: rows))
         // The text from the frame's own cells: the plan's change while they are read.
         func string(_ i: Int) -> String {
             let c = source[i]
@@ -81,13 +87,21 @@ struct ClaudeDress {
 extension ClaudeDress {
     /// The mascot: block elements in Claude's orange at the start of a banner row ("▐▛███▜▌").
     static func hideMascot(_ plan: inout Plan, lines: [String], cols: Int) {
+        var banner: [Int] = []
         for (r, line) in lines.enumerated() {
             let head = Array(line.prefix(10))
             guard head.filter(isBlock).count >= 2, head.allSatisfy({ $0 == " " || isBlock($0) }) else { continue }
             for c in 0..<min(10, cols) where plan.cells[r * cols + c].fg == Mascot.color || head[c] == " " {
                 plan.hidden[r * cols + c] = true
             }
+            banner.append(r)
         }
+        // The banner's words to where the conversation starts: the column of the first one ("Claude
+        // Code"), for every banner row, so the three stay aligned.
+        guard let first = banner.first else { return }
+        let chars = Array(lines[first])
+        guard let start = chars.indices.first(where: { $0 >= 10 && chars[$0] != " " }) else { return }
+        for r in banner { plan.shift[r].dx = -start }
     }
 
     /// A character of the Unicode block "Block Elements" (U+2580 to U+259F), the mascot's.
@@ -105,6 +119,7 @@ extension ClaudeDress {
             guard isRule(r), let end = (r + 2..<min(lines.count, r + 12)).first(where: isRule),
                   lines[r + 1].hasPrefix("❯") else { r += 1; continue }
             for row in [r, end] { for c in 0..<cols { plan.hidden[row * cols + c] = true } }
+            plan.shapes.append(Shape(top: r, bottom: end, left: 0, right: cols - 1, color: p.boxFill, outline: false, midRows: true))
             plan.shapes.append(Shape(top: r, bottom: end, left: 0, right: cols - 1, color: p.boxLine, outline: true, midRows: true))
             r = end + 1
         }
@@ -136,9 +151,24 @@ extension ClaudeDress {
         let first = Array(lines[r]).firstIndex(where: { $0 != " " }) ?? 0
         let color = plan.cells[r * cols + min(first, cols - 1)].fg
         for c in 0..<cols { plan.hidden[r * cols + c] = true }
+        // The status line, and the input box right above it, down into the mode line's row: they sit
+        // at the pane's foot, as in the mockup, with no empty row under them.
+        var top = r - 1
+        if let i = plan.shapes.lastIndex(where: { $0.outline && $0.bottom == r - 2 }) {
+            top = plan.shapes[i].top
+            // The box's fill and outline go down together.
+            for j in plan.shapes.indices where plan.shapes[j].midRows && plan.shapes[j].top == top {
+                plan.shapes[j].top += 1
+                plan.shapes[j].bottom += 1
+            }
+        }
+        // Claude's effort hint ("◐ medium · /effort") sits on the row right above the box: it goes
+        // down with it, or it floated a row away (the owner, 2026-11-18).
+        if top > 0, lines[top - 1].contains("/effort") { top -= 1 }
+        for row in top..<r { plan.shift[row].dy = 1 }
         let above = Array(lines[r - 1])
         guard above.suffix(words.count + 2).allSatisfy({ $0 == " " }) else { return }
-        plan.label = (words, r - 1, Fixed.mode[color].map { $0 == .plan ? p.modePlan : p.modeEdits } ?? p.modeEdits)
+        plan.label = (words, r, Fixed.mode[color].map { $0 == .plan ? p.modePlan : p.modeEdits } ?? p.modeEdits)
     }
 
     /// Claude's fixed colors to the theme's (the table in the spec), the text color by its background.

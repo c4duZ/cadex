@@ -63,8 +63,10 @@ struct QuadBuilder {
         let cursorColor = rgba(frame.has_cursor_color ? frame.cursor_color : frame.foreground)
         let blockCursor = frame.cursor_style == UInt8(CADEX_CURSOR_BLOCK)
 
+        let shift = dress?.shift
         func origin(_ index: Int) -> SIMD2<Float> {
-            SIMD2(padding.x + Float(index % cols) * cellW, padding.y + Float(index / cols) * cellH)
+            let moved = shift.map { $0[index / cols] } ?? (dx: 0, dy: 0)
+            return SIMD2(padding.x + Float(index % cols + moved.dx) * cellW, padding.y + Float(index / cols + moved.dy) * cellH)
         }
 
         for shape in dress?.shapes ?? [] {
@@ -197,11 +199,13 @@ struct QuadBuilder {
     }
 
     /// A ClaudeDress shape in pixels: the owner's message a half cell wider than its rows, the input
-    /// box from the middle of its first rule to the middle of the last.
+    /// box tight around its text, inside its two rules' rows.
     private mutating func rounded(_ shape: ClaudeDress.Shape, cols: Int, cell: SIMD2<Float>, padding: SIMD2<Float>, scale: Float) {
-        let half = cell.y * 0.5
-        let top = padding.y + Float(shape.top) * cell.y + (shape.midRows ? half : 0)
-        let bottom = padding.y + Float(shape.bottom + 1) * cell.y - (shape.midRows ? half : 0)
+        // The input box with room around its line: two thirds into each rule's row, about 1.65 rows
+        // tall for one line (the owner, 2026-11-18: from the rules' middles, 2 rows, and at 55 %,
+        // 1.9, looked huge; at 80 %, 1.4, too short).
+        let top = padding.y + Float(shape.top) * cell.y + (shape.midRows ? cell.y * 0.67 : 0)
+        let bottom = padding.y + Float(shape.bottom + 1) * cell.y - (shape.midRows ? cell.y * 0.67 : 0)
         let left = padding.x + Float(shape.left) * cell.x - cell.x * 0.5
         let right = padding.x + Float(shape.right + 1) * cell.x + cell.x * 0.5
         let size = SIMD2(right - left, bottom - top)

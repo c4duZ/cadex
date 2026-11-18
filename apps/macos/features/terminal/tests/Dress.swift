@@ -78,6 +78,7 @@ enum Claude {
         expect((0..<3).allSatisfy { r in (0..<9).allSatisfy { plan.hidden[r * 40 + $0] } }, "mascot cells hidden")
         expect(!plan.hidden[12] && !plan.hidden[40 + 11], "the words stay")
         expect(!plan.hidden.suffix(40).contains(true), "a block inside text is not the mascot")
+        expect((0..<3).allSatisfy { plan.shift[$0].dx == -11 } && plan.shift[3].dx == 0, "the banner's words to the start: \(plan.shift)")
     }),
     ("the input's two rules become one rounded box; one rule alone stays", {
         var s = FakeScreen(cols: 12)
@@ -87,7 +88,8 @@ enum Claude {
         s.row((String(repeating: "─", count: 12), 0xB1B9F9, nil))
         s.row((" Bash command", 0xB1B9F9, nil))
         let plan = s.plan()
-        expect(plan.shapes == [ClaudeDress.Shape(top: 0, bottom: 2, left: 0, right: 11, color: Claude.palette.boxLine, outline: true, midRows: true)],
+        expect(plan.shapes == [ClaudeDress.Shape(top: 0, bottom: 2, left: 0, right: 11, color: Claude.palette.boxFill, outline: false, midRows: true),
+                               ClaudeDress.Shape(top: 0, bottom: 2, left: 0, right: 11, color: Claude.palette.boxLine, outline: true, midRows: true)],
                "\(plan.shapes)")
         expect((0..<12).allSatisfy { plan.hidden[$0] && plan.hidden[24 + $0] } && !plan.hidden[12], "rules hidden, input shown")
         expect(!plan.hidden[36], "the permission dialog's rule stays")
@@ -107,9 +109,21 @@ enum Claude {
         s.row(("  Haiku 5.5  context 6%", 0x999999, nil))
         s.row(("  ⏵⏵ accept edits on", 0xAF87FF, nil), (" (shift+tab to cycle)", 0x999999, nil))
         let plan = s.plan()
-        expect(plan.label?.text == "accept edits" && plan.label?.row == 0 && plan.label?.color == Claude.palette.modeEdits, "\(String(describing: plan.label))")
+        expect(plan.label?.text == "accept edits" && plan.label?.row == 1 && plan.label?.color == Claude.palette.modeEdits, "\(String(describing: plan.label))")
+        expect(plan.shift[0].dy == 1 && plan.shift[1].dy == 0, "the status line down into the mode line's row")
         expect(plan.hidden[50...].allSatisfy { $0 }, "the mode line not drawn")
         expect(s.plan(atBottom: false).label == nil && !s.plan(atBottom: false).hidden.contains(true), "scrolled up: as Claude drew")
+        var boxed = FakeScreen(cols: 50)
+        boxed.row(("", Claude.text, nil))
+        boxed.row(("                                ◐ medium · /effort", 0x999999, nil))
+        boxed.row((String(repeating: "─", count: 50), 0x888888, nil))
+        boxed.row(("❯\u{00A0}hi", Claude.text, nil))
+        boxed.row((String(repeating: "─", count: 50), 0x888888, nil))
+        boxed.row(("  Haiku 5.5", 0x999999, nil))
+        boxed.row(("  ⏵⏵ auto mode on", 0xAF87FF, nil), (" (shift+tab to cycle)", 0x999999, nil))
+        let moved = boxed.plan()
+        expect((1...5).allSatisfy { moved.shift[$0].dy == 1 } && moved.shift[0].dy == 0, "the box and the effort hint go down with it: \(moved.shift)")
+        expect(moved.shapes.count == 2 && moved.shapes.allSatisfy { $0.top == 3 && $0.bottom == 5 }, "\(moved.shapes)")
         var other = FakeScreen(cols: 50)
         other.row(("  status", 0x999999, nil))
         other.row(("  ⏵⏵ accept edits enabled", 0xAF87FF, nil))
