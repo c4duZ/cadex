@@ -4,8 +4,10 @@ import Menus
 import Strings
 import UILooks
 
-/// The right panel (docs/spec/inspector.md; docs/design/work-frame/screens.md, Inspector): the
-/// tabs on top with "⌥⌘I", the scope row under them with the tab's buttons, and the tab's page.
+/// The side column (docs/adr/0038-rail-and-side-column.md; docs/design/work-frame/screens.md, Rail):
+/// left of the center, next to the rail. The pages' icons on top, the page, and at the foot the
+/// scope row with the page's buttons (the right panel of docs/spec/inspector.md had the tabs' names
+/// and the scope row on top).
 /// The pages are features' views the app passes in; only the one showing is unhidden, so a page
 /// that reads only while it shows (window and not hidden) reads only here and only then.
 @MainActor
@@ -16,7 +18,7 @@ public final class InspectorView: NSView {
 
     /// A tab came into view: the app makes or refreshes its content only then.
     public var onShow: ((String) -> Void)?
-    /// The left edge dragged: the width asked, and whether the drag ended (the app saves it).
+    /// The right edge dragged: the width asked, and whether the drag ended (the app saves it).
     public var onResize: ((CGFloat, Bool) -> Void)? {
         get { edge.onDrag }
         set { edge.onDrag = newValue }
@@ -45,10 +47,11 @@ public final class InspectorView: NSView {
         layer?.backgroundColor = I.bg.cgColor
         buildTabRow(shortcut: shortcut)
         buildScopeRow()
-        let border = line(I.borderLeft)
-        let underTabs = line(I.Tabs.borderBottom)
+        let border = line(I.borderRight)
+        let underTabs = line(I.IconTabs.borderBottom)
+        let overFoot = line(I.Footer.borderTop)
         edge.currentWidth = { [weak self] in self?.bounds.width ?? 0 }
-        for view in [tabRow, underTabs, scopeRow, content, border, edge] as [NSView] {
+        for view in [tabRow, underTabs, content, overFoot, scopeRow, border, edge] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
@@ -57,27 +60,31 @@ public final class InspectorView: NSView {
         NSLayoutConstraint.activate([
             border.topAnchor.constraint(equalTo: topAnchor),
             border.bottomAnchor.constraint(equalTo: bottomAnchor),
-            border.leadingAnchor.constraint(equalTo: leadingAnchor),
+            border.trailingAnchor.constraint(equalTo: trailingAnchor),
             border.widthAnchor.constraint(equalToConstant: hairline),
-            // Under the tab row: the strip must not catch a click meant for the first tab.
+            // Under the tab row: the strip must not catch a click meant for a tab.
             edge.topAnchor.constraint(equalTo: underTabs.bottomAnchor),
             edge.bottomAnchor.constraint(equalTo: bottomAnchor),
-            edge.leadingAnchor.constraint(equalTo: leadingAnchor),
+            edge.trailingAnchor.constraint(equalTo: trailingAnchor),
             edge.widthAnchor.constraint(equalToConstant: InspectorEdge.grab),
             tabRow.topAnchor.constraint(equalTo: topAnchor),
             tabRow.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tabRow.trailingAnchor.constraint(equalTo: trailingAnchor),
+            tabRow.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -hairline),
             underTabs.topAnchor.constraint(equalTo: tabRow.bottomAnchor),
             underTabs.leadingAnchor.constraint(equalTo: leadingAnchor),
-            underTabs.trailingAnchor.constraint(equalTo: trailingAnchor),
+            underTabs.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -hairline),
             underTabs.heightAnchor.constraint(equalToConstant: hairline),
-            scopeRow.topAnchor.constraint(equalTo: underTabs.bottomAnchor),
+            content.topAnchor.constraint(equalTo: underTabs.bottomAnchor),
+            content.leadingAnchor.constraint(equalTo: leadingAnchor),
+            content.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -hairline),
+            content.bottomAnchor.constraint(equalTo: overFoot.topAnchor),
+            overFoot.leadingAnchor.constraint(equalTo: leadingAnchor),
+            overFoot.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -hairline),
+            overFoot.heightAnchor.constraint(equalToConstant: hairline),
+            overFoot.bottomAnchor.constraint(equalTo: scopeRow.topAnchor),
             scopeRow.leadingAnchor.constraint(equalTo: leadingAnchor),
-            scopeRow.trailingAnchor.constraint(equalTo: trailingAnchor),
-            content.topAnchor.constraint(equalTo: scopeRow.bottomAnchor),
-            content.leadingAnchor.constraint(equalTo: leadingAnchor, constant: hairline),
-            content.trailingAnchor.constraint(equalTo: trailingAnchor),
-            content.bottomAnchor.constraint(equalTo: bottomAnchor),
+            scopeRow.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -hairline),
+            scopeRow.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
 
@@ -103,7 +110,6 @@ public final class InspectorView: NSView {
     /// The tab row's shortcut, as the keymap says it now.
     public func setShortcut(_ label: String?) {
         kbd.stringValue = label ?? ""
-        kbd.isHidden = label == nil
     }
 
     /// The scope row's words for a tab; nil goes back to the tab's name.
@@ -118,28 +124,26 @@ public final class InspectorView: NSView {
         updateBusy()
     }
 
+    /// The pages' icons (components.inspector.iconTabs). The shortcut is no longer shown in the row:
+    /// the column has no "⌥⌘I" label since it moved left (ADR 0038); setShortcut keeps the label for
+    /// whoever asks.
     private func buildTabRow(shortcut: String?) {
-        typealias Tabs = I.Tabs
+        typealias Tabs = I.IconTabs
         tabRow.orientation = .horizontal
-        tabRow.alignment = .bottom
+        tabRow.alignment = .centerY
         tabRow.spacing = UILooks.pt(Tabs.gap)
         tabRow.edgeInsets = NSEdgeInsets(top: UILooks.pt(Tabs.padding.top), left: UILooks.pt(Tabs.padding.left),
                                          bottom: UILooks.pt(Tabs.padding.bottom), right: UILooks.pt(Tabs.padding.right))
         tabButtons = tabs.map { tab in
-            let button = InspectorTabButton(id: tab.id, title: tab.title)
+            let button = InspectorTabButton(id: tab.id, title: tab.title, icon: tab.icon)
             button.onPress = { [weak self] in self?.run(tab.command) }
             return button
         }
         let spacer = NSView()
         spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
         kbd.stringValue = shortcut ?? ""
-        kbd.font = UILooks.font(Tabs.Kbd.fontSize)
-        kbd.textColor = Tabs.Kbd.color
-        kbd.isHidden = shortcut == nil
-        // On the tabs' text line, not on the underline.
-        let kbdBox = NSStackView(views: [kbd])
-        kbdBox.edgeInsets = NSEdgeInsets(top: 0, left: 0, bottom: UILooks.pt(Tabs.Tab.padding.bottom), right: 0)
-        for view in tabButtons + [spacer, kbdBox] as [NSView] { tabRow.addArrangedSubview(view) }
+        kbd.isHidden = true
+        for view in tabButtons + [spacer] as [NSView] { tabRow.addArrangedSubview(view) }
     }
 
     private func buildScopeRow() {

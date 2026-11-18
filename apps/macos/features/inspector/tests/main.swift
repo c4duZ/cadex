@@ -20,14 +20,13 @@ func tabs(_ views: [NSView]) -> [InspectorTab] {
 }
 
 let exitCode = await Checks.run([
-    ("the tab shown by its command is the bold and white one, the others not (Files opened by explorer.focus)", { @MainActor in
+    ("the page shown by its command is the lit icon, the others not (Files opened by explorer.focus)", { @MainActor in
         let views = (0..<4).map { _ in NSView() }
         let inspector = InspectorView(tabs: tabs(views), shortcut: nil) { _ in true }
         inspector.show("changes")
         inspector.show("files")
-        let weights = inspector.tabButtons.map { ($0.id, $0.isOn, $0.label.font?.fontDescriptor.symbolicTraits.contains(.bold) ?? false) }
-        print("TABS", weights, inspector.tabButtons.map { $0.label.textColor?.description ?? "" })
         expect(inspector.tabButtons.filter(\.isOn).map(\.id) == ["files"])
+        expect(inspector.tabButtons.map(\.toolTip) == ["Changes", "Files", "History", "Memory"], "the name under the pointer")
     }),
     ("the tabs in order with ⌥⌘I; one page shows, the others are hidden (they read only while shown)", {
         let views = (0..<4).map { _ in NSView() }

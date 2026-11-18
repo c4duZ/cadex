@@ -31,7 +31,7 @@ public struct InspectorScope: Equatable {
     }
 }
 
-/// One tab of the right panel: a feature's page that the app passes in (this feature knows none
+/// One tab of the side column (the right panel until ADR 0038): a feature's page that the app passes in (this feature knows none
 /// of them), the command its tab runs (ADR 0005: the click opens the panel on it by that command,
 /// as ⌘K does), and its header's buttons.
 @MainActor
@@ -39,6 +39,8 @@ public struct InspectorTab {
     /// Stable, in English: "changes", "files", "history", "memory". Saved in inspector.tab.
     public let id: String
     public let title: String
+    /// The tab's icon in the column's top row; the title shows under the pointer (ADR 0038).
+    public let icon: Icon
     /// git.show, explorer.focus, git.show-history, memory.show.
     public let command: String
     public let view: NSView
@@ -46,10 +48,11 @@ public struct InspectorTab {
     public let actions: [InspectorAction]
     public let more: [InspectorAction]
 
-    public init(id: String, title: String, command: String, view: NSView,
+    public init(id: String, title: String, icon: Icon = .file, command: String, view: NSView,
                 actions: [InspectorAction] = [], more: [InspectorAction] = []) {
         self.id = id
         self.title = title
+        self.icon = icon
         self.command = command
         self.view = view
         self.actions = actions

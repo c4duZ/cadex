@@ -127,6 +127,7 @@ extension WindowSession {
         guard let tree = workspace?.tree else { return }
         tree.show(treeModel(), chosen: tabs?.activeTerminal.map { .terminal(AppDelegate.key($0)) })
         showFootLines(tree)
+        drawRail()
         showCheckLine()
         // The board moves its cards with the tree (a state changed, a task came or went).
         for project in projects?.projects ?? [] {

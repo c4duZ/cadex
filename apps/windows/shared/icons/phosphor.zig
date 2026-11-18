@@ -99,3 +99,5 @@ pub const hand: u21 = 0xE298;
 pub const folders: u21 = 0xE260;
 pub const play: u21 = 0xE3D0;
 pub const arrows_left_right: u21 = 0xE0A0;
+pub const brain: u21 = 0xE74E;
+pub const squares_four: u21 = 0xE464;

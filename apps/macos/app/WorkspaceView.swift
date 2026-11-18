@@ -12,38 +12,32 @@ import UILooks
 /// a collapsible sidebar and the terminal area as rounded panels, and the
 /// status bar at the bottom (docs/plans/3-window-and-theme.md, fase A).
 final class WorkspaceView: NSView {
-    /// The tree's width (components.sidebar.width).
-    static var sidebarWidth: CGFloat { UILooks.pt(DesignTokens.Sidebar.width) }
+    /// The rail's width (components.rail.width; docs/adr/0038-rail-and-side-column.md).
+    static var railWidth: CGFloat { UILooks.pt(DesignTokens.Rail.width) }
     /// Between the columns and the center: none. The center runs from the tree's line to the
     /// panel's, and its 8 pt around the panes are the pane layout's (components.pane.outerPadding).
     static let gap: CGFloat = 0
 
     let titleBar: TitleBarView
     let statusBar = StatusBarView()
-    /// The work's tree (plan 27 phase B): a column flush with the window's left edge, its own line
-    /// on the right (components.sidebar), as the right panel is on the other side.
+    /// The work's tree of plan 27: off screen since ADR 0038 (the rail took its place); it still
+    /// gathers what sidebar.find lists, until plan 36 phase F takes it out.
     let tree: WorkTreeView
-    /// The right panel (plan 26 phase C): a column flush with the window's right edge, its own
-    /// line on the left (components.inspector), not a rounded panel.
+    /// The rail (ADR 0038): flush with the window's left edge, the projects and the foot.
+    let rail: RailView
+    /// The side column (the right panel until ADR 0038): right of the rail, its own line on the
+    /// right (components.inspector), with the pages' icons on top.
     let inspector: InspectorView
     private var inspectorWidth: NSLayoutConstraint!
-    /// The center ends at the panel, or at the window's edge with it closed: the panel keeps its
-    /// width hidden, since 0 pt could not hold its rows (review of 2026-11-17).
+    /// The center starts at the column, or at the rail with it closed: the column keeps its width
+    /// hidden, since 0 pt could not hold its rows (review of 2026-11-17).
     private var contentToInspector: NSLayoutConstraint!
-    private var contentToEdge: NSLayoutConstraint!
+    private var contentToRail: NSLayoutConstraint!
     private(set) var inspectorVisible = true
-    /// The panel's width (inspector.width), dragged by its edge.
+    /// The column's width (inspector.width), dragged by its edge.
     private(set) var inspectorPoints = UILooks.pt(DesignTokens.Inspector.width)
-    /// The sidebar was folded to make room for the panel in a narrow window: it comes back when
-    /// the panel closes (docs/spec/inspector.md, "Janela estreita").
-    private var sidebarFoldedForInspector = false
-    /// Below this the center is too narrow for the sidebar and the panel side by side (the spec).
-    static let narrowWindow: CGFloat = 1000
     private let explorer: ExplorerController
     private let contentPanel = PanelView()
-    private var sidebarWidth: NSLayoutConstraint!
-    private var contentLeading: NSLayoutConstraint!
-    private(set) var sidebarVisible = true
     private let backdrop = WindowBackdrop()
     /// The frosted frame, shown only with vibrancy on.
     private let frost = NSVisualEffectView()
@@ -53,27 +47,26 @@ final class WorkspaceView: NSView {
     /// The shown project's tabs in the content panel.
     private weak var tabsView: NSView?
 
-    init(explorer: ExplorerController, tree: WorkTreeView, inspector: InspectorView, run: @escaping (String) -> Void) {
+    init(explorer: ExplorerController, tree: WorkTreeView, rail: RailView, inspector: InspectorView, run: @escaping (String) -> Void) {
         titleBar = TitleBarView(run: run)
         self.explorer = explorer
         self.tree = tree
+        self.rail = rail
         self.inspector = inspector
         super.init(frame: .zero)
         frost.blendingMode = .behindWindow
         frost.material = .underWindowBackground
         frost.state = .active
         frost.isHidden = true
-        for view in [frost, titleBar, statusBar, tree, contentPanel, inspector] as [NSView] {
+        for view in [frost, titleBar, statusBar, rail, inspector, contentPanel] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
 
         let gap = Self.gap
-        sidebarWidth = tree.widthAnchor.constraint(equalToConstant: Self.sidebarWidth)
-        contentLeading = contentPanel.leadingAnchor.constraint(equalTo: tree.trailingAnchor, constant: gap)
         inspectorWidth = inspector.widthAnchor.constraint(equalToConstant: inspectorPoints)
-        contentToInspector = contentPanel.trailingAnchor.constraint(equalTo: inspector.leadingAnchor, constant: -gap)
-        contentToEdge = contentPanel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -gap)
+        contentToInspector = contentPanel.leadingAnchor.constraint(equalTo: inspector.trailingAnchor, constant: gap)
+        contentToRail = contentPanel.leadingAnchor.constraint(equalTo: rail.trailingAnchor, constant: gap)
         NSLayoutConstraint.activate([
             frost.topAnchor.constraint(equalTo: topAnchor),
             frost.bottomAnchor.constraint(equalTo: bottomAnchor),
@@ -87,18 +80,18 @@ final class WorkspaceView: NSView {
             statusBar.trailingAnchor.constraint(equalTo: trailingAnchor),
             statusBar.bottomAnchor.constraint(equalTo: bottomAnchor),
             statusBar.heightAnchor.constraint(equalToConstant: StatusBarView.height),
-            tree.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
-            tree.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tree.bottomAnchor.constraint(equalTo: statusBar.topAnchor),
-            sidebarWidth,
-            contentPanel.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
-            contentLeading,
-            contentToInspector,
-            contentPanel.bottomAnchor.constraint(equalTo: statusBar.topAnchor),
+            rail.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
+            rail.leadingAnchor.constraint(equalTo: leadingAnchor),
+            rail.bottomAnchor.constraint(equalTo: statusBar.topAnchor),
+            rail.widthAnchor.constraint(equalToConstant: Self.railWidth),
             inspector.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
-            inspector.trailingAnchor.constraint(equalTo: trailingAnchor),
+            inspector.leadingAnchor.constraint(equalTo: rail.trailingAnchor),
             inspector.bottomAnchor.constraint(equalTo: statusBar.topAnchor),
             inspectorWidth,
+            contentPanel.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
+            contentToInspector,
+            contentPanel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -gap),
+            contentPanel.bottomAnchor.constraint(equalTo: statusBar.topAnchor),
         ])
         ThemeStore.shared.observe { [weak self] theme in self?.apply(theme) }
     }
@@ -187,70 +180,46 @@ final class WorkspaceView: NSView {
         }
     }
 
-    /// Shows the work's tree (sidebar.show).
+    /// sidebar.show (⇧⌘J): the side column comes up (the tree it showed left with ADR 0038).
     func showTree() {
-        if !sidebarVisible { toggleSidebar() }
+        if !inspectorVisible { setInspector(visible: true) }
     }
 
-    /// Opens the right panel on a tab (git.show, explorer.focus, git.show-history, memory.show).
+    /// Opens the side column on a page (git.show, explorer.focus, git.show-history, memory.show).
     func showInspector(_ tab: String) {
         if !inspectorVisible { setInspector(visible: true) }
         inspector.show(tab)
     }
 
-    /// inspector.toggle and the saved inspector.visible. Closed, the panel is hidden, so no tab of
-    /// it reads (docs/spec/inspector.md).
-    /// `launching`: the saved state applied when the window opens, which folds the sidebar the
-    /// same way in a narrow window (review of 2026-11-17: only a later open did).
+    /// ⌘B, inspector.toggle and the saved inspector.visible. Closed, the column is hidden, so no
+    /// page of it reads (docs/spec/inspector.md); the rail stays (ADR 0038).
+    /// `launching`: the saved state applied when the window opens.
     func setInspector(visible: Bool, launching: Bool = false) {
         let opening = visible && (!inspectorVisible || launching)
-        let closing = !visible && inspectorVisible
         inspectorVisible = visible
-        if opening, sidebarVisible, (window?.frame.width ?? .infinity) < Self.narrowWindow {
-            setSidebar(visible: false)
-            sidebarFoldedForInspector = true
-        } else if closing, sidebarFoldedForInspector {
-            setSidebar(visible: true)
-            sidebarFoldedForInspector = false
-        }
         inspector.isHidden = !visible
         contentToInspector.isActive = visible
-        contentToEdge.isActive = !visible
+        contentToRail.isActive = !visible
         titleBar.setInspectorOpen(visible)
-        // Opened again: its tab is announced, so a page that went while closed (History after a
+        // Opened again: its page is announced, so a page that went while closed (History after a
         // folder change) comes back (review of 2026-11-17).
         if opening, let tab = inspector.tab { inspector.show(tab) }
     }
 
-    /// The panel's width, within the settings' range and what the window leaves after the sidebar
+    /// The column's width, within the settings' range and what the window leaves after the rail
     /// and a center of `minCenter` (a 640 pt panel in a 700 pt window squeezed the terminals to
     /// nothing: review of 2026-11-17).
     func setInspector(width: CGFloat) {
         var room = CGFloat.infinity
         if let window {
-            room = window.frame.width - (sidebarVisible ? Self.sidebarWidth + Self.gap : 0) - Self.minCenter - Self.gap * 2
+            room = window.frame.width - Self.railWidth - Self.minCenter - Self.gap * 2
         }
         inspectorPoints = max(min(width, room), UILooks.pt(DesignTokens.Inspector.width) / 2)
         inspectorWidth.constant = inspectorPoints
     }
 
-    /// The least the terminals keep beside the panel.
+    /// The least the terminals keep beside the column.
     static let minCenter: CGFloat = 320
-
-    /// The view.toggle-sidebar command.
-    func toggleSidebar() {
-        // The owner chose: the panel no longer brings the sidebar back when it closes.
-        sidebarFoldedForInspector = false
-        setSidebar(visible: !sidebarVisible)
-    }
-
-    private func setSidebar(visible: Bool) {
-        sidebarVisible = visible
-        tree.isHidden = !sidebarVisible
-        sidebarWidth.constant = sidebarVisible ? Self.sidebarWidth : 0
-        // The center keeps its margin with the tree folded (it sat flush against the edge).
-        contentLeading.constant = Self.gap
-    }
 
     private func fill(_ panel: NSView, with view: NSView) {
         view.translatesAutoresizingMaskIntoConstraints = false

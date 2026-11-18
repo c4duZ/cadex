@@ -19,6 +19,13 @@ extension WindowSession {
         // big to index whole (docs/spec/search.md).
         search?.setFocus(folder)
         guard followTerminal else { return }
+        // Since ADR 0038 Files and Changes show the chosen project (or the task the terminal is
+        // in), not wherever `cd` went: the column and the tabs speak of the same place.
+        if let anchor = projectAnchor(for: folder) {
+            if anchor != self.folder.root, WorkspaceFolder.allow(anchor) != nil { self.folder.open(anchor) }
+            return
+        }
+        // No project (a terminal of no project): the old rule, the folder's repository.
         // git runs only inside authorized folders; the user went there.
         guard WorkspaceFolder.allow(folder) != nil else { return }
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
@@ -31,5 +38,18 @@ extension WindowSession {
                 }
             }
         }
+    }
+
+    /// The folder Files and Changes show for a terminal in `folder`: its task's worktree, else the
+    /// chosen project's folder; nil without a project.
+    func projectAnchor(for folder: String?) -> String? {
+        if let task = taskFolder(containing: folder) { return task }
+        return projects?.activeFolder
+    }
+
+    /// A project came into the window: the column shows it (the focused terminal's task, if any).
+    func followProject() {
+        guard followTerminal, let anchor = projectAnchor(for: tabs?.activeTerminal?.currentDirectory) else { return }
+        if anchor != folder.root, WorkspaceFolder.allow(anchor) != nil { folder.open(anchor) }
     }
 }

@@ -192,6 +192,15 @@ de tokens.
 - **Pé:** "Automations · 2 on · next 09:00" e "Archive & history ⌘⇧H".
 - Projeto sem tarefa mostra só os terminais da pasta dele (plano 27).
 
+### Rail.dc.html — peça · O trilho e a coluna lateral (ADR 0038, plano 36)
+- **Trilho (56 pt):** os projetos em quadrados de 38 pt com a marca (a imagem do projeto, depois a
+  letra), o escolhido num anel; a peça de estado no canto (só o que se deve ver) e o ponto de
+  terminal aberto embaixo; o "+"; no pé, depois de uma linha, Projects e Automations, aceso o da
+  página aberta.
+- **Coluna lateral (260 pt):** no topo, só os ícones das páginas (Files, Changes, Memory, Git
+  graph), o aceso com o fundo escolhido; a página; no pé, a linha de contexto com os botões da
+  página.
+
 ### Inspector.dc.html — peça · O painel da direita
 - **Abas:** Changes, Files, History, Memory e "⌥⌘I"; a ativa sublinhada.
 - **Linha de contexto:** "orchestration-e · against main" (ou, em Memory, "cadex · the project's

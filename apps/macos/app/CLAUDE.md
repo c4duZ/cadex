@@ -20,8 +20,9 @@
 - `ProjectsWiring.swift`: os projetos na janela (plano 27; abas de cada projeto ligadas à barra de status e ao
   preview, documentos reabertos, pasta do workspace devolvida); `tabs` da `WindowSession` é sempre a
   do projeto que aparece, então os comandos agem nela. Janela aberta pelo ⇧⌘N tem projetos sem arquivo. project.new (`chooseProjectFolder`) pede a pasta, abre-a no workspace e mostra o projeto dela; aberto com uma pasta na linha de comando, os projetos voltam e a pasta vira o projeto dela (`startProjects`).
-- `FolderFollow.swift`: o workspace segue o terminal com foco; a cada `cd` vai para a raiz do
-  repositório git da pasta (ou a própria pasta), a menos que explorer.followTerminal desligue.
+- `FolderFollow.swift`: o workspace segue o projeto escolhido no trilho, ou a tarefa em que está o
+  terminal com foco (plano 36 fase A, ADR 0038); só um terminal sem projeto o leva, a cada `cd`, à
+  raiz do repositório git da pasta (ou à própria pasta); explorer.followTerminal desligado não segue nada.
 - Antes de montar qualquer tela, `main.swift` define Strings.language pelo general.language (ADR
   0015); "Reabrir agora" nas configurações e a atualização (`startUpdates`) saem como de costume e um
   shell abre o Cadex de novo (`openAgain`), levando as variáveis CADEX_ (uma instância de teste
@@ -99,15 +100,21 @@
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.
-- `InspectorWiring.swift` (plano 26, fase C): o painel da direita da feature `inspector`, colado à
-  direita entre as barras: Changes (o painel do git), Files (a árvore do explorer), History (o
-  histórico compacto, feito na primeira vez que a aba aparece) e Memory, cada aba com os botões de
-  antes; a linha de contexto com a pasta, o branch (o clique troca) e a memória do projeto; numa tarefa,
+- `RailWiring.swift` (plano 36 fase A, ADR 0038): o trilho da feature `sidebar` na borda esquerda
+  (`WorkspaceView.swift`): os projetos com a cor, o estado mais urgente dos terminais e o ponto de
+  terminal aberto, redesenhados com a árvore (drawTree, em `TreeWiring.swift`); o clique escolhe o projeto (as
+  abas e a coluna), abre um terminal se ele não tem, e sai de uma página aberta no centro. O ⌘B
+  (view.toggle-sidebar) e o inspector.toggle fecham e abrem a coluna; o trilho fica. Files e Changes
+  seguem o projeto escolhido, ou a tarefa do terminal com foco, não o `cd` (`FolderFollow.swift`,
+  `projectAnchor`, `followProject` na troca de projeto).
+- `InspectorWiring.swift` (plano 26, fase C; desde o plano 36 a coluna lateral, à esquerda, ao lado
+  do trilho): Files (a árvore do explorer), Changes (o painel do git), Memory e Git graph (o
+  histórico compacto, feito na primeira vez que a página aparece), nessa ordem, cada uma com o ícone
+  e os botões de antes; a linha de contexto com a pasta, o branch (o clique troca) e a memória do projeto; numa tarefa,
   Changes diz "<tarefa> · against <ponto de partida>" e History "<tarefa> · N commits ahead of
   <ponto de partida>" (contado pelo git fora da linha principal), como no mockup Inspector;
-  inspector.toggle (⌥⌘I) e inspector.visible, inspector.tab e inspector.width (a borda) salvos; numa
-  janela abaixo de 1000 pt, abrir o painel recolhe a barra lateral e fechá-lo a devolve
-  (`WorkspaceView.swift`); git.show, explorer.focus,
+  inspector.toggle (⌥⌘I) e inspector.visible, inspector.tab e inspector.width (a borda) salvos (a
+  regra da janela estreita saiu com a árvore; a nova vem na fase E do plano 36); git.show, explorer.focus,
   git.show-history e memory.show abrem a aba deles (WorkspaceView.showInspector).
 - `AgentToolsWiring.swift` (plano 20, fase B): o pedido de comando do agente acha o terminal dele
   (pela sessão do kit, senão pelos pids acima do `cadex`), confere agentTools.enabled e a lista do

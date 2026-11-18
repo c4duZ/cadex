@@ -118,8 +118,8 @@ public struct Settings: Equatable, Sendable {
     public struct Inspector: Equatable, Sendable {
         public var visible = true
         public var tab = "changes"
-        /// Its width, dragged by the edge; 320 is components.inspector.width.
-        public var width = 320.0
+        /// Its width, dragged by the edge; 260 is components.inspector.width (the side column, ADR 0038).
+        public var width = 260.0
     }
 
     public struct Agents: Equatable, Sendable {

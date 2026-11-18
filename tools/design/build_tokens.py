@@ -33,7 +33,7 @@ LOOKS = ROOT / "apps/macos/shared/looks"
 PARTS = {
     "Chrome": ["window", "titleBar", "search", "breadcrumb", "tab", "titleIconButton", "badge", "statusBar",
                "stateGlyph", "button", "bell"],
-    "Columns": ["sidebar", "inspector"],
+    "Columns": ["sidebar", "inspector", "rail"],
     "Center": ["pane", "preview", "popover", "sheet", "newTask"],
     "Pages": ["board", "race", "project", "home", "drawer"],
 }

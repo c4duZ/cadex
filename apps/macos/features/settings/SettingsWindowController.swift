@@ -105,7 +105,7 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         }
         let line = NSView()
         line.wantsLayer = true
-        line.layer?.backgroundColor = DesignTokens.Inspector.borderLeft.cgColor
+        line.layer?.backgroundColor = DesignTokens.Inspector.borderRight.cgColor
         let root = NSView()
         for view in [navigation, line, content] {
             view.translatesAutoresizingMaskIntoConstraints = false

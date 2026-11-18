@@ -47,14 +47,16 @@ extension WindowSession {
                 self.app.newWindow(from: self)
             }))
         commands.register(Command(
-            id: "view.toggle-sidebar", title: T("Show or Hide Sidebar", "Mostrar ou esconder o painel lateral"),
-            keywords: ["sidebar", "explorer", "painel"], category: .view, defaultShortcut: "cmd+b",
-            action: .run { [weak self] in self?.workspace?.toggleSidebar() }))
-        // The right panel (plan 26 phase C, docs/spec/inspector.md); its tabs open by git.show,
-        // explorer.focus, git.show-history and memory.show.
+            // The side column next to the rail (ADR 0038): the tree that ⌘B folded left; ⌘B folds
+            // the column now, the rail stays.
+            id: "view.toggle-sidebar", title: T("Show or Hide the Side Column", "Mostrar ou esconder a coluna lateral"),
+            keywords: ["sidebar", "explorer", "column", "painel", "coluna"], category: .view, defaultShortcut: "cmd+b",
+            action: .run { [weak self] in self?.toggleInspector() }))
+        // The same column by its old name and shortcut (it was the right panel, plan 26 phase C);
+        // its pages open by git.show, explorer.focus, git.show-history and memory.show.
         commands.register(Command(
-            id: "inspector.toggle", title: T("Show or Hide the Right Panel", "Mostrar ou esconder o painel da direita"),
-            keywords: ["inspector", "panel", "right", "changes", "files", "painel", "direita"], category: .view,
+            id: "inspector.toggle", title: T("Show or Hide the Side Column (Files, Changes, Memory)", "Mostrar ou esconder a coluna lateral (Arquivos, Mudanças, Memória)"),
+            keywords: ["inspector", "panel", "changes", "files", "painel", "lateral"], category: .view,
             defaultShortcut: "cmd+opt+i",
             action: .run { [weak self] in self?.toggleInspector() }))
         commands.register(PowerCommands.all(app.power))

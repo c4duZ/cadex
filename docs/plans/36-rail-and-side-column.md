@@ -1,0 +1,77 @@
+# Plano 36 — O trilho e a coluna lateral
+
+O dono, 2026-11-18: não gosta da coluna da direita e quer a barra lateral só à esquerda, com os
+terminais ocupando o resto. O estudo e as rodadas de mockup terminaram na
+`docs/adr/0038-rail-and-side-column.md`, com os mockups em `docs/design/sidebar/` (1 a 3). Ele
+escolheu ainda: com tudo fechado fica a tela de início de hoje (a página Projects só abre pelo
+botão no pé do trilho); o terminal aberto sem projeto fica em abas sem projeto, que aparecem quando
+nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a barra mostra; e a ordem
+é este plano agora, a fase H do 34 depois.
+
+## O que eu quero
+- À esquerda, o trilho (56 pt) e a coluna lateral (260 pt, arrastável). A coluna da direita sai.
+- O trilho com os projetos (a imagem e o nome dados pelo dono, a peça de estado, o ponto de
+  terminal aberto), o "+" e, no pé, Projects, Automations e Remote (este só havendo host).
+- A coluna lateral com as páginas do projeto escolhido, trocadas por ícones no topo: Files,
+  Changes, Sessions, Memory e Git graph; cada página com o pé dela; nada de título, projeto, branch
+  ou caminho no topo.
+- Os terminais só nas abas de cima; a tarefa como uma aba que entra e "‹ projeto" que sai; "» N"
+  quando não cabe.
+- Cada tela igual aos mockups.
+
+## O que eu não quero
+- A lista de terminais na coluna lateral, ou ícone das páginas no trilho.
+- Página que pula: abrir Projects ou a página de um projeto não fecha a coluna.
+- Feature importando o miolo de outra: o trilho só desenha o que o app monta (como a árvore hoje),
+  e as páginas da coluna chegam do app pelas portas de entrada das features.
+- Valor digitado na moldura: tokens novos em `docs/design/work-frame/tokens.json` (components.rail e
+  o iconTabs de components.inspector, a coluna lateral), gerados como os de hoje.
+
+## Como eu quero
+- [x] A. O trilho e a coluna no lugar: a `sidebar` ganha o trilho (os projetos com a imagem, a peça
+  de estado e o ponto de terminal aberto; o "+"; o pé com Projects e Automations) no lugar da
+  árvore; a coluna da `inspector` muda para a esquerda, ao lado do trilho, com os ícones no topo
+  (Files, Changes, History com o nome Git graph, Memory) e sem a linha de contexto. Clicar num
+  projeto troca as abas e a coluna; Files e Changes seguem o projeto escolhido, não o `cd`. ⌘B fecha
+  e abre a coluna; ⌥⌘I deixa de existir (o comando vira o mesmo do ⌘B). Os tokens novos.
+  Feita em 2026-11-18: o trilho (`RailView`) e a coluna à esquerda com os ícones e a linha de
+  contexto no pé; conferida com cliques de verdade numa instância de teste (o projeto B troca as
+  abas e a coluna; o ícone Files troca a página; o ⌘B fecha a coluna e o trilho fica). Não
+  conferido: arrastar a borda da coluna e o tema claro. A árvore fica fora da tela, ainda montada
+  para o sidebar.find, até a fase F; o botão da coluna na barra de título continua (abre e fecha a
+  coluna).
+- [ ] B. As páginas da coluna: os pés (Files: a pasta, criar e buscar; Changes: a checagem, Commit,
+  Open PR e a branch com ↑↓; Memory: o briefing; Git graph: a branch e abrir numa aba); Changes com
+  o escopo num menu pequeno, o total e o +/− de cada arquivo; a página nova Sessions (agora, hoje,
+  antes; o clique mostra o resumo no centro, como na página do projeto); a ordem Files, Changes,
+  Sessions, Memory, Git graph.
+- [ ] C. As abas: a tarefa como aba (ícone de branch, estado, seta) que troca a barra para os
+  terminais dela; "‹ projeto" volta; "» N" com a lista de todos quando não cabem; ⌘1 a ⌘9 pela
+  ordem mostrada; as abas sem projeto quando nenhum projeto está aceso.
+- [ ] D. Os projetos: nome e imagem próprios (a folha de editar, também a de criar pelo "+"),
+  fixar, a ordem arrastada (projetos e ícones da coluna), os abertos não fixados depois de uma
+  linha, o fixado sem terminal abrindo um; o clique direito (New terminal, New task, Edit name and
+  image, Pin/Unpin, Project settings, Show in Finder, Copy path, Close terminals, Remove from the
+  sidebar). A página Projects só pelo pé do trilho, sem editar nada, e o cartão abrindo a página do
+  projeto (com Open terminal).
+- [ ] E. Quando a coluna fecha e o pé: o quadro fecha a coluna e o segundo clique no ícone dele a
+  devolve (conferir o bug que o dono viu); a janela estreita; Remote no pé (os hosts do ssh e as
+  máquinas da tailnet, Connect); o item Memory da barra de status abrindo a página Memory da coluna.
+- [ ] F. Fechar: as specs (sidebar, inspector, tabs, projects, home, status-bar, ssh), os CLAUDE.md,
+  o inventário da moldura (`docs/design/work-frame/inventory.md`) com a árvore e a coluna da
+  direita em `sai`, a paridade (`MAC_ONLY`), `make check`, `make perf` e a dist.
+
+Fora deste plano, anotados na ADR 0038 ("Levantado junto"): o celular controlando a sessão, as
+contas na barra de cima, o item Ports sozinho, o aviso do computer-use e "All sessions" na página
+Projects. Cada um vira plano próprio.
+
+- Telas: Rail.dc.html (descrita em `docs/design/work-frame/screens.md`; os estudos aprovados em
+  `docs/design/sidebar/`).
+- Tokens: components.rail, components.inspector (iconTabs e a largura de 260; valores exatos em
+  `docs/design/work-frame/tokens.json`).
+
+## Como validar
+- Cada fase: os testes da feature, o print da instância de teste ao lado do mockup, e os cliques de
+  verdade (`CADEX_PERF_CLICK`, `CADEX_PERF_HOVER`) no que a fase mexe, dizendo o que não foi
+  conferido.
+- No fim, `make check` e `make perf` (a coluna fechada não lê nada).

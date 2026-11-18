@@ -27,6 +27,7 @@ extension WindowSession {
             self?.hideHome()
             self?.workspace?.show(tabs)
             self?.refreshWorkColor()
+            self?.followProject()
         }
         projects.onChange = { [weak self] in
             self?.refreshWorkColor()

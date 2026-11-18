@@ -1,7 +1,12 @@
 # sidebar (app macOS)
 
 ## O que eu quero
-- A árvore do trabalho, a coluna da esquerda (`../../../../docs/spec/sidebar.md`; a peça Sidebar do
+- O trilho (plano 36 fase A; `../../../../docs/adr/0038-rail-and-side-column.md`; a peça Rail de
+  `../../../../docs/design/work-frame/screens.md`): na borda esquerda, os projetos com a marca, o
+  anel do escolhido, a peça de estado e o ponto de terminal aberto; o "+" (project.new); no pé,
+  Projects (project.show-all) e Automations (orchestration.show-automations), aceso o da página aberta.
+- A árvore do trabalho (fora da tela desde a ADR 0038; ainda junta o que o sidebar.find lista, até a
+  fase F do plano 36), a coluna da esquerda (`../../../../docs/spec/sidebar.md`; a peça Sidebar do
   mockup, plano 27 fase B): "New task" e o filtro no topo; cada projeto dobrável com as tarefas
   (as worktrees) e os terminais da pasta dele; sob a tarefa escolhida, os terminais dela; "+ Add
   project"; no pé, Projects (project.show-all, com o número) e Automations
@@ -16,6 +21,12 @@
 - Valor digitado: só `DesignTokens` (components.sidebar; `../../../../tools/check_design_literals.py`).
 
 ## Como eu quero
+- `Rail.swift`: o modelo puro do trilho (`RailProject`: a pasta, o nome, a cor, o estado e se tem
+  terminal aberto; `mark`, a letra até haver imagem; `badge`, o estado que se mostra) e `RailFoot`.
+  `RailView.swift`: a porta de entrada; `show` recebe os projetos e o escolhido e redesenha só quando
+  mudam; `onPick` diz a pasta clicada; `footLit` acende o pé. `RailParts.swift`: `RailTile` (o
+  quadrado, o anel, a peça de estado, o ponto) e `RailButton` (o "+" e os do pé). Tokens:
+  components.rail.
 - `WorkTree.swift`: o modelo puro (`WorkTreeProject`, `WorkTreeTask`, `WorkTreeTerminal`) e
   `WorkTreePick` (projeto, tarefa ou terminal).
 - `WorkTreeView.swift`: a porta de entrada. `show` recebe os projetos e o escolhido e redesenha só
@@ -46,5 +57,6 @@
   (`../../app/JumpWiring.swift`).
 
 ## Como validar
-- `make macos-test` passa: a árvore com os projetos, as tarefas e os terminais, os terminais só sob a
+- `make macos-test` passa: o trilho (um quadrado por projeto, o escolhido no anel, a peça de estado
+  só fora de parado, o ponto, o clique, o pé com os comandos e aceso); a árvore com os projetos, as tarefas e os terminais, os terminais só sob a
   tarefa escolhida, "Add project" no fim; com CADEX_SNAPSHOT_DIR, tree.png com os dados do Sidebar.dc.html no tamanho dele (292×826), para pôr sobre o mockup.

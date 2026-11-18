@@ -29,7 +29,7 @@
 - `check_design_tokens.py` (no `make manifests`): os mockups da moldura nova
   (`../docs/design/work-frame/`) e o `../docs/design/work-frame/tokens.json` dela concordam nos dois sentidos (todo valor dos
   mockups é token, todo token aparece num mockup), toda peça citada existe e toda peça está num dos
-  planos 25 a 30 (`../docs/adr/0035-work-frame.md`). O que é exemplo fica entre
+  planos 25 a 30 ou no 36 (`../docs/adr/0035-work-frame.md`, `../docs/adr/0038-rail-and-side-column.md`). O que é exemplo fica entre
   `<!-- tokens:off: motivo -->` e `<!-- tokens:on -->`.
 - `design/build_tokens.py`: gera, de `../docs/design/work-frame/tokens.json`, os tokens do app
   (`../apps/macos/shared/looks/DesignTokens.swift` e um arquivo de peças por região da moldura) e o

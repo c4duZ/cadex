@@ -143,9 +143,9 @@ public extension DesignTokens {
         }
     }
     enum Inspector {
-        public static let width: CGFloat = 320
+        public static let width: CGFloat = 260
         public static var bg: NSColor { DesignTokens.Color.bgSidebar }
-        public static var borderLeft: NSColor { DesignTokens.Color.lineSubtle }
+        public static var borderRight: NSColor { DesignTokens.Color.lineSubtle }
         public enum Tabs {
             public static let padding = NSEdgeInsets(top: 10, left: 8, bottom: 0, right: 8)
             public static let gap: CGFloat = 2
@@ -165,6 +165,24 @@ public extension DesignTokens {
             public enum Kbd {
                 public static let fontSize: CGFloat = DesignTokens.FontSize.caption
                 public static var color: NSColor { DesignTokens.Color.textTertiary }
+            }
+        }
+        public enum IconTabs {
+            public static let padding = NSEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
+            public static let gap: CGFloat = 2
+            public static var borderBottom: NSColor { DesignTokens.Color.lineSubtle }
+            public enum Tab {
+                public static let width: CGFloat = 40
+                public static let height: CGFloat = 30
+                public static let radius: CGFloat = DesignTokens.Radius.row
+                public static let icon: CGFloat = 16
+                public enum Active {
+                    public static var bg: NSColor { DesignTokens.Color.bgSelected }
+                    public static var color: NSColor { DesignTokens.Color.textPrimary }
+                }
+                public enum Inactive {
+                    public static var color: NSColor { DesignTokens.Color.textMuted }
+                }
             }
         }
         public enum Scope {
@@ -341,6 +359,52 @@ public extension DesignTokens {
                 public static let gap: CGFloat = 2
             }
             public static let lineGap: CGFloat = 2
+        }
+    }
+    enum Rail {
+        public static let width: CGFloat = 56
+        public static var bg: NSColor { DesignTokens.Color.bgChrome }
+        public static var borderRight: NSColor { DesignTokens.Color.lineSubtle }
+        public static let padding = NSEdgeInsets(top: 10, left: 0, bottom: 8, right: 0)
+        public static let gap: CGFloat = 7
+        public enum Tile {
+            public static let size: CGFloat = 38
+            public static let radius: CGFloat = DesignTokens.Radius.pane
+            public static let fontSize: CGFloat = DesignTokens.FontSize.body
+            public static var weight: NSFont.Weight { DesignTokens.FontWeight.bold }
+            public static var bg: NSColor { DesignTokens.Color.bgButton }
+            public static var color: NSColor { DesignTokens.Color.textPrimary }
+            public enum Ring {
+                public static let width: CGFloat = 2
+                public static let gap: CGFloat = 2
+                public static var color: NSColor { DesignTokens.Color.textPrimary }
+            }
+            public enum Badge {
+                public static let size: CGFloat = 12
+                public static let border: CGFloat = 2
+                public static var borderColor: NSColor { DesignTokens.Color.bgChrome }
+            }
+            public enum Open {
+                public static let size: CGFloat = 4
+                public static let offset: CGFloat = 6
+                public static var color: NSColor { DesignTokens.Color.textSecondary }
+            }
+        }
+        public enum Button {
+            public static let width: CGFloat = 38
+            public static let height: CGFloat = 30
+            public static let radius: CGFloat = DesignTokens.Radius.item
+            public static let icon: CGFloat = 16
+            public static var color: NSColor { DesignTokens.Color.textMuted }
+            public enum Lit {
+                public static var bg: NSColor { DesignTokens.Color.bgSelected }
+                public static var color: NSColor { DesignTokens.Color.textPrimary }
+            }
+        }
+        public enum Separator {
+            public static let width: CGFloat = 28
+            public static var color: NSColor { DesignTokens.Color.lineControl }
+            public static let margin: CGFloat = 3
         }
     }
 }

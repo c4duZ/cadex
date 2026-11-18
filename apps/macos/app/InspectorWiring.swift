@@ -11,13 +11,23 @@ import SourceControl
 import Strings
 import UILooks
 
-/// The right panel's tabs in this window (docs/spec/inspector.md; plan 26 phase C): Changes, Files,
+/// The side column's pages in this window (the right panel's tabs until ADR 0038) (docs/spec/inspector.md; plan 26 phase C): Changes, Files,
 /// History and Memory, the pages the sidebar had, each from its feature; a tab's click runs its
 /// command (ADR 0005) and the commands open the panel on it.
 extension WindowSession {
     func makeInspector(explorer: ExplorerController, git: SourceControlController) -> InspectorView {
+        // The order of use (ADR 0038): Files, Changes, Memory, then the graph, the least used
+        // (Sessions joins in plan 36 phase B).
         let tabs = [
-            InspectorTab(id: "changes", title: T("Changes", "Mudanças"), command: "git.show", view: git.view, actions: [
+            InspectorTab(id: "files", title: T("Files", "Arquivos"), icon: .folder, command: "explorer.focus", view: explorer.view, actions: [
+                InspectorAction("explorer.new-file", .filePlus, T("New File", "Novo arquivo")),
+                InspectorAction("explorer.new-folder", .folderPlus, T("New Folder", "Nova pasta")),
+                InspectorAction("explorer.collapse-all", .arrowsInLineVertical, T("Collapse All Folders", "Recolher todas as pastas")),
+            ], more: [
+                InspectorAction("search.files", .magnifyingGlass, T("Find File", "Buscar arquivo")),
+                InspectorAction("explorer.refresh", .arrowsClockwise, T("Reload", "Recarregar")),
+            ]),
+            InspectorTab(id: "changes", title: T("Changes", "Mudanças"), icon: .gitDiff, command: "git.show", view: git.view, actions: [
                 InspectorAction("git.fetch", .arrowsClockwise, "Fetch"),
                 InspectorAction("git.pull", .arrowDown, "Pull"),
                 InspectorAction("git.push", .arrowUp, "Push"),
@@ -28,26 +38,18 @@ extension WindowSession {
                 InspectorAction("git.unstage-all", .minus, T("Unstage All", "Tirar tudo do stage")),
                 InspectorAction("git.refresh", .arrowClockwise, T("Refresh", "Atualizar")),
             ]),
-            InspectorTab(id: "files", title: T("Files", "Arquivos"), command: "explorer.focus", view: explorer.view, actions: [
-                InspectorAction("explorer.new-file", .filePlus, T("New File", "Novo arquivo")),
-                InspectorAction("explorer.new-folder", .folderPlus, T("New Folder", "Nova pasta")),
-                InspectorAction("explorer.collapse-all", .arrowsInLineVertical, T("Collapse All Folders", "Recolher todas as pastas")),
-            ], more: [
-                InspectorAction("search.files", .magnifyingGlass, T("Find File", "Buscar arquivo")),
-                InspectorAction("explorer.refresh", .arrowsClockwise, T("Reload", "Recarregar")),
-            ]),
-            InspectorTab(id: "history", title: T("History", "Histórico"), command: "git.show-history", view: panelHistoryHost, actions: [
-                InspectorAction("git.history-in-tab", .arrowSquareOut, T("Open Git History in New Tab", "Abrir o histórico do git em nova aba")),
-            ]),
             // Every action by its name in the "…" menu: three bare icons (sparkle, reload, eye) said
             // nothing (the owner, 2026-11-18).
-            InspectorTab(id: "memory", title: T("Memory", "Memória"), command: "memory.show", view: makeMemoryPage(), actions: [], more: [
+            InspectorTab(id: "memory", title: T("Memory", "Memória"), icon: .brain, command: "memory.show", view: makeMemoryPage(), actions: [], more: [
                 InspectorAction("memory.show-briefing", .eye, T("What the Agent Will See", "O que o agente vai ver")),
                 InspectorAction("memory.bootstrap", .sparkle, T("Organize History with AI", "Organizar o histórico com IA")),
                 InspectorAction("memory.reindex", .arrowsClockwise, T("Reindex", "Reindexar")),
                 InspectorAction("memory.show-history", .clockCounterClockwise, T("Show Memory History", "Mostrar o histórico da memória")),
                 InspectorAction("memory.pause-agent", .slidersHorizontal, T("Pause or Resume the Memory Agent", "Pausar ou retomar o agente de memória")),
                 InspectorAction("memory.refresh", .arrowClockwise, T("Refresh", "Atualizar")),
+            ]),
+            InspectorTab(id: "history", title: T("Git Graph", "Grafo do git"), icon: .gitBranch, command: "git.show-history", view: panelHistoryHost, actions: [
+                InspectorAction("git.history-in-tab", .arrowSquareOut, T("Open Git History in New Tab", "Abrir o histórico do git em nova aba")),
             ]),
         ]
         let shortcut = app.keymapLabel("inspector.toggle") ?? "⌥⌘I"
@@ -68,11 +70,11 @@ extension WindowSession {
         return inspector
     }
 
-    /// ⌃⌘1 to ⌃⌘4: the panel's tabs in order (plan 26 phase E; the sidebar.page-N ids of the old
+    /// ⌃⌘1 to ⌃⌘4: the column's pages in order (plan 26 phase E; the sidebar.page-N ids of the old
     /// sidebar left in plan 27 phase D).
     func inspectorTabCommands() -> [Command] {
         (1...4).map { n in
-            Command(id: "inspector.tab-\(n)", title: T("Go to Right Panel Tab \(n)", "Ir para a aba \(n) do painel da direita"),
+            Command(id: "inspector.tab-\(n)", title: T("Go to Side Column Page \(n)", "Ir para a página \(n) da coluna lateral"),
                     keywords: ["panel \(n)", "tab \(n)", "inspector", "painel \(n)", "aba \(n)"], category: .view,
                     defaultShortcut: "ctrl+cmd+\(n)",
                     action: .run { [weak self] in
