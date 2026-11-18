@@ -39,7 +39,8 @@ public final class InspectorView: NSView {
     private var overflow: [InspectorAction] = []
     private let kbd = NSTextField(labelWithString: "")
 
-    public init(tabs: [InspectorTab], shortcut: String?, run: @escaping (String) -> Void) {
+    /// `tabsOnTop` false: no row of icons on top; the rail shows the pages (ADR 0038, revised).
+    public init(tabs: [InspectorTab], shortcut: String?, tabsOnTop: Bool = true, run: @escaping (String) -> Void) {
         self.tabs = tabs
         self.run = run
         super.init(frame: .zero)
@@ -56,6 +57,14 @@ public final class InspectorView: NSView {
             addSubview(view)
         }
         for tab in tabs { place(tab.view) }
+        if !tabsOnTop {
+            // The row keeps its buttons' state (the tests read it) but not the buttons themselves.
+            tabRow.arrangedSubviews.forEach { $0.removeFromSuperview() }
+            tabRow.edgeInsets = NSEdgeInsets()
+            tabRow.isHidden = true
+            underTabs.isHidden = true
+            tabRow.heightAnchor.constraint(equalToConstant: 0).isActive = true
+        }
         let hairline = DesignTokens.Stroke.hairline
         NSLayoutConstraint.activate([
             border.topAnchor.constraint(equalTo: topAnchor),
@@ -95,6 +104,8 @@ public final class InspectorView: NSView {
 
     /// The ids of the tabs, in order.
     public var known: [String] { tabs.map(\.id) }
+    /// The tabs, for the rail that shows their icons (ADR 0038, revised).
+    public var pages: [InspectorTab] { tabs }
 
     /// Shows a tab (its command, a click, the saved inspector.tab); an unknown id shows nothing new.
     /// `announce` false only picks it (the panel closed at launch): no page is made or read.

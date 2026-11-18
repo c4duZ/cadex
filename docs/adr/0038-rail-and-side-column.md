@@ -26,12 +26,15 @@ sem nome de onde ele não tem apoio.
   quando: **Projects**, **Automations** e, só havendo algum host, **Remote** (ver abaixo).
 - **Clicar num projeto do trilho** põe os terminais dele nas abas de cima e a coluna lateral nele.
   Um projeto fixado sem terminal abre um terminal novo na pasta dele.
-- **A coluna lateral é do projeto escolhido** e mostra uma página por vez. No topo, só os ícones
-  das páginas, nesta ordem: **Files, Changes, Sessions, Memory e Git graph** (o nome sob o ponteiro;
-  o número de arquivos no Changes e um ponto no Memory quando aprendeu algo). Nada de título,
-  projeto, branch ou caminho no topo: o projeto está aceso no trilho e a branch, na barra de status.
-  O que cada página precisa de ação desce para um pé (como o briefing do Memory): a checagem, Commit,
-  Open PR e a branch com ↑↓ no Changes; a pasta e criar e buscar no Files.
+- **A coluna lateral é do projeto escolhido** e mostra uma página por vez: Files, Changes,
+  Sessions, Memory e Git graph, nesta ordem. **Os ícones das páginas ficam no trilho**, logo abaixo
+  dos projetos e do "+", depois de uma linha (o dono, 2026-11-18, revendo a versão com os ícones no
+  topo da coluna): clicar num ícone abre a coluna já naquela página, mesmo fechada; clicar no ícone
+  aceso fecha a coluna, como a barra de atividades do VS Code. O nome sob o ponteiro, o número de
+  arquivos no Changes e um ponto no Memory quando aprendeu algo. A coluna não tem fileira no topo:
+  nada de título, projeto, branch ou caminho; o projeto está aceso no trilho e a branch, na barra
+  de status. O que cada página precisa de ação desce para um pé (como o briefing do Memory): a
+  checagem, Commit, Open PR e a branch com ↑↓ no Changes; a pasta e criar e buscar no Files.
 - **Os terminais ficam só nas abas de cima**, sem lista na coluna lateral. Uma tarefa (worktree) é
   uma aba com o ícone de branch e a seta: clicar troca a barra para os terminais dela, e "‹ projeto"
   volta. Quando as abas não cabem, "» N" no fim abre a lista de todos; o ⌘J acha qualquer terminal.
@@ -59,8 +62,9 @@ sem nome de onde ele não tem apoio.
 - **A lista de terminais na coluna lateral:** repete as abas de cima e gasta altura; o que ela tinha
   de único (o pedido de outro projeto) já está na peça de estado do trilho.
 - **Os ícones das páginas no pé do trilho:** ficam longe da coluna que trocam.
-- **Abas escritas no topo da coluna:** cinco nomes não cabem em 260 pt; os ícones com o nome sob o
-  ponteiro e o pé de cada página bastam.
+- **Abas escritas no topo da coluna:** cinco nomes não cabem em 260 pt.
+- **Os ícones no topo da coluna** (a fase A fez assim): com a coluna fechada não havia como abrir
+  uma página num clique; no trilho, ficam sempre à mão.
 - **Um quadrado "~" para os terminais sem projeto e a página Projects para editar projetos:** o
   dono não reconheceu o primeiro e não quer o segundo.
 

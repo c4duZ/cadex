@@ -1,4 +1,5 @@
 import AppKit
+import Inspector
 import Projects
 import Sidebar
 import StateGlyph
@@ -14,6 +15,11 @@ extension WindowSession {
         rail.menuFor = { [weak self] folder in self?.railMenu(folder) ?? [] }
         rail.onDropImage = { [weak self] folder, url in self?.dropProjectImage(folder, url) }
         return rail
+    }
+
+    /// The side column's pages as the rail shows them: their icons, under the projects.
+    func railPages(_ inspector: InspectorView) -> [RailPage] {
+        inspector.pages.map { RailPage(id: $0.id, title: $0.title, icon: $0.icon, command: $0.command) }
     }
 
     /// The projects as the rail draws them.

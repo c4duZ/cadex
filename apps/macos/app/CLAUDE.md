@@ -117,6 +117,9 @@
   project.copy-path, project.edit), e New Task e Settings mostram o projeto antes; criar pela folha
   fixa o projeto; o trilho põe os fixados primeiro (`RailWiring.swift`);
   `projectPicture`, o quadrado dos cartões da página Projetos e do cabeçalho da página do projeto.
+- O trilho mostra os ícones das páginas da coluna (plano 36 fase C, ADR 0038 revista): `railPages`
+  em `RailWiring.swift`, postos pelo `WindowSession.swift`; `WorkspaceView.syncRailPages` acende o
+  da página aberta quando a coluna abre, fecha ou troca de página; a coluna sem a fileira de cima.
 - `InspectorWiring.swift` (plano 26, fase C; desde o plano 36 a coluna lateral, à esquerda, ao lado
   do trilho): Files (a árvore do explorer), Changes (o painel do git), Memory e Git graph (o
   histórico compacto, feito na primeira vez que a página aparece), nessa ordem, cada uma com o ícone

@@ -193,6 +193,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         let workspace = WorkspaceView(explorer: explorer, tree: makeTree(), rail: makeRail(), inspector: makeInspector(explorer: explorer, git: git)) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace
         self.workspace = workspace
+        workspace.rail.setPages(railPages(workspace.inspector))
         workspace.titleBar.newMenu = { [weak self] in self?.newTabMenu() ?? [] }
         showLocation(folder.root)
         showPanelFolder(folder.root)

@@ -53,9 +53,11 @@ extension WindowSession {
             ]),
         ]
         let shortcut = app.keymapLabel("inspector.toggle") ?? "⌥⌘I"
-        let inspector = InspectorView(tabs: tabs, shortcut: shortcut) { [weak self] id in _ = self?.commands.run(id) }
+        // The pages' icons are the rail's (ADR 0038, revised 2026-11-18): none on top of the column.
+        let inspector = InspectorView(tabs: tabs, shortcut: shortcut, tabsOnTop: false) { [weak self] id in _ = self?.commands.run(id) }
         inspector.onShow = { [weak self] id in
             if id == "history" { self?.showHistoryTab() }
+            self?.workspace?.syncRailPages()
             self?.settings.store.update { $0.inspector.tab = id }
         }
         git.onBusy = { [weak inspector] busy in inspector?.setBusy(busy, for: "changes") }

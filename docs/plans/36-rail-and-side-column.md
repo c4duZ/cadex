@@ -11,16 +11,16 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
 ## O que eu quero
 - À esquerda, o trilho (56 pt) e a coluna lateral (260 pt, arrastável). A coluna da direita sai.
 - O trilho com os projetos (a imagem e o nome dados pelo dono, a peça de estado, o ponto de
-  terminal aberto), o "+" e, no pé, Projects, Automations e Remote (este só havendo host).
-- A coluna lateral com as páginas do projeto escolhido, trocadas por ícones no topo: Files,
-  Changes, Sessions, Memory e Git graph; cada página com o pé dela; nada de título, projeto, branch
-  ou caminho no topo.
+  terminal aberto), o "+", os ícones das páginas e, no pé, Projects, Automations e Remote (este só
+  havendo host).
+- A coluna lateral com as páginas do projeto escolhido, trocadas pelos ícones do trilho: Files,
+  Changes, Sessions, Memory e Git graph; cada página com o pé dela; nada no topo.
 - Os terminais só nas abas de cima; a tarefa como uma aba que entra e "‹ projeto" que sai; "» N"
   quando não cabe.
 - Cada tela igual aos mockups.
 
 ## O que eu não quero
-- A lista de terminais na coluna lateral, ou ícone das páginas no trilho.
+- A lista de terminais na coluna lateral.
 - Página que pula: abrir Projects ou a página de um projeto não fecha a coluna.
 - Feature importando o miolo de outra: o trilho só desenha o que o app monta (como a árvore hoje),
   e as páginas da coluna chegam do app pelas portas de entrada das features.
@@ -61,7 +61,11 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
   vez e não reproduzido em mais duas: o halo no projeto errado depois desse clique (a janela de
   teste estava em foco). Não conferido com o mouse: o seletor de imagem, soltar uma imagem, criar
   pela folha.
-- [ ] C. As páginas da coluna: os pés (Files: a pasta, criar e buscar; Changes: a checagem, Commit,
+- [ ] C. As páginas da coluna: os ícones das páginas saem do topo da coluna e vão para o trilho,
+  abaixo dos projetos e do "+", depois de uma linha (o dono, 2026-11-18): o clique abre a coluna na
+  página, mesmo fechada, e o clique no aceso a fecha; a coluna sem fileira no topo (feito em
+  2026-11-18 e conferido no app: com a coluna fechada pelo ⌘B, o clique em Files a abre em Files,
+  aceso). Os pés (Files: a pasta, criar e buscar; Changes: a checagem, Commit,
   Open PR e a branch com ↑↓; Memory: o briefing; Git graph: a branch e abrir numa aba); Changes com
   o escopo num menu pequeno, o total e o +/− de cada arquivo; a página nova Sessions (agora, hoje,
   antes; o clique mostra o resumo no centro, como na página do projeto); a ordem Files, Changes,

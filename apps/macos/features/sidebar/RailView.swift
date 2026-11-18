@@ -25,6 +25,12 @@ public final class RailView: NSView {
     private var shown: (projects: [RailProject], chosen: String?)?
     private(set) var tiles: [RailTile] = []
     private let add: RailButton
+    private let pagesLine = NSView()
+    private var pageButtons: [(RailPage, RailButton)] = []
+    /// The command that folds the column: the lit page's click runs it (as VS Code's activity bar).
+    public var toggleCommand = "view.toggle-sidebar"
+    /// The page the column shows (nil: closed): its icon lit.
+    public var pageLit: String? { didSet { if pageLit != oldValue { lightPages() } } }
     private let footButtons: [(RailFoot, RailButton)]
 
     public init(run: @escaping (String) -> Void) {
@@ -57,6 +63,11 @@ public final class RailView: NSView {
         foot.setCustomSpacing(UILooks.pt(R.Separator.margin) + UILooks.pt(R.gap), after: separator)
         for (_, button) in footButtons { foot.addArrangedSubview(button) }
         top.addArrangedSubview(add)
+        pagesLine.wantsLayer = true
+        pagesLine.layer?.backgroundColor = R.Separator.color.cgColor
+        pagesLine.translatesAutoresizingMaskIntoConstraints = false
+        pagesLine.isHidden = true
+        top.addArrangedSubview(pagesLine)
         for view in [top, foot, border] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
@@ -68,6 +79,8 @@ public final class RailView: NSView {
             foot.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -UILooks.pt(R.padding.bottom)),
             foot.centerXAnchor.constraint(equalTo: centerXAnchor),
             separator.widthAnchor.constraint(equalToConstant: UILooks.pt(R.Separator.width)),
+            pagesLine.widthAnchor.constraint(equalToConstant: UILooks.pt(R.Separator.width)),
+            pagesLine.heightAnchor.constraint(equalToConstant: hairline),
             separator.heightAnchor.constraint(equalToConstant: hairline),
             border.topAnchor.constraint(equalTo: topAnchor),
             border.bottomAnchor.constraint(equalTo: bottomAnchor),
@@ -116,6 +129,32 @@ public final class RailView: NSView {
     }()
 
     var groupLineShown: Bool { groupLine.superview != nil }
+
+    /// The side column's pages, under the projects and the "+", after a line. A click opens the
+    /// column on the page; on the lit one, folds it.
+    public func setPages(_ pages: [RailPage]) {
+        pageButtons.forEach { $0.1.removeFromSuperview() }
+        pageButtons = pages.map { page in
+            let button = RailButton(command: page.command, icon: page.icon, tip: page.title)
+            button.onPress = { [weak self] in
+                guard let self else { return }
+                self.run(self.pageLit == page.id ? self.toggleCommand : page.command)
+            }
+            return (page, button)
+        }
+        for (_, button) in pageButtons { top.addArrangedSubview(button) }
+        pagesLine.isHidden = pages.isEmpty
+        top.setCustomSpacing(UILooks.pt(R.Separator.margin) + UILooks.pt(R.gap), after: pagesLine)
+        lightPages()
+    }
+
+    private func lightPages() {
+        for (page, button) in pageButtons { button.lit = page.id == pageLit }
+    }
+
+    var pageCommands: [String] { pageButtons.map(\.1.command) }
+    var litPage: String? { pageButtons.first(where: \.1.lit)?.0.id }
+    func pressPage(_ index: Int) { pageButtons[index].1.onPress?() }
 
     private func lightFoot() {
         for (page, button) in footButtons { button.lit = page == footLit }

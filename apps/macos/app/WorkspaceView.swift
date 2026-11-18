@@ -201,9 +201,15 @@ final class WorkspaceView: NSView {
         contentToInspector.isActive = visible
         contentToRail.isActive = !visible
         titleBar.setInspectorOpen(visible)
+        syncRailPages()
         // Opened again: its page is announced, so a page that went while closed (History after a
         // folder change) comes back (review of 2026-11-17).
         if opening, let tab = inspector.tab { inspector.show(tab) }
+    }
+
+    /// The rail lights the page the column shows; none with the column closed.
+    func syncRailPages() {
+        rail.pageLit = inspectorVisible ? inspector.tab : nil
     }
 
     /// The column's width, within the settings' range and what the window leaves after the rail

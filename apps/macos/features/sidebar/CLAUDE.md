@@ -27,7 +27,10 @@
   mudam; `onPick` diz a pasta clicada; `footLit` acende o pé; `menuFor`, o clique direito (as linhas
   vêm do app, cada uma um comando); `onDropImage`, uma imagem solta num quadrado (plano 36 B). O
   quadrado mostra a imagem do projeto, senão o emoji, senão a letra; o "+" roda project.create; os
-  fixados primeiro e, depois de uma linha, os abertos não fixados (o pinned de RailProject). `RailParts.swift`: `RailTile` (o
+  fixados primeiro e, depois de uma linha, os abertos não fixados (o pinned de RailProject).
+  `setPages` põe os ícones das páginas da coluna (`RailPage`) abaixo do "+", depois de uma linha;
+  `pageLit` acende o da página aberta; o clique roda o comando da página, e no aceso o
+  `toggleCommand` (view.toggle-sidebar), como a barra de atividades do VS Code (ADR 0038 revista). `RailParts.swift`: `RailTile` (o
   quadrado, o halo, a peça de estado, o ponto) e `RailButton` (o "+" e os do pé). Tokens:
   components.rail.
 - `WorkTree.swift`: o modelo puro (`WorkTreeProject`, `WorkTreeTask`, `WorkTreeTerminal`) e

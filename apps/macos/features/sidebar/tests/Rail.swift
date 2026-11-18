@@ -58,4 +58,19 @@ let railChecks: [(name: String, body: Checks.Body)] = [
         rail.footLit = nil
         expect(rail.litCommands.isEmpty)
     }),
+    ("the pages' icons in the rail: a click opens the column on the page; on the lit one, folds it", {
+        var ran: [String] = []
+        let rail = RailView { ran.append($0) }
+        rail.setPages([RailPage(id: "files", title: "Files", icon: .folder, command: "explorer.focus"),
+                       RailPage(id: "changes", title: "Changes", icon: .gitDiff, command: "git.show")])
+        expect(rail.pageCommands == ["explorer.focus", "git.show"])
+        rail.pressPage(1)
+        expect(ran == ["git.show"], "closed: opens on the page")
+        rail.pageLit = "changes"
+        expect(rail.litPage == "changes")
+        rail.pressPage(1)
+        expect(ran == ["git.show", "view.toggle-sidebar"], "lit: folds the column")
+        rail.pressPage(0)
+        expect(ran.last == "explorer.focus", "another page: goes to it")
+    }),
 ]

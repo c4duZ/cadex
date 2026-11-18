@@ -197,9 +197,11 @@ de tokens.
   letra), o escolhido com um halo suave, do mesmo tamanho dos outros; a peça de estado no canto (só o que se deve ver) e o ponto de
   terminal aberto embaixo; o "+"; no pé, depois de uma linha, Projects e Automations, aceso o da
   página aberta.
-- **Coluna lateral (260 pt):** no topo, só os ícones das páginas (Files, Changes, Memory, Git
-  graph), o aceso com o fundo escolhido; a página; no pé, a linha de contexto com os botões da
-  página.
+- **Ícones das páginas no trilho**, abaixo dos projetos e do "+", depois de uma linha: Files,
+  Changes, Memory, Git graph; o da página aberta aceso; o clique abre a coluna na página, e no
+  aceso a fecha (o dono, 2026-11-18).
+- **Coluna lateral (260 pt):** sem fileira no topo; a página; no pé, a linha de contexto com os
+  botões da página.
 
 ### Inspector.dc.html — peça · O painel da direita
 - **Abas:** Changes, Files, History, Memory e "⌥⌘I"; a ativa sublinhada.

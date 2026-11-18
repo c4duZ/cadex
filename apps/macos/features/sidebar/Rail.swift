@@ -1,4 +1,5 @@
 import Foundation
+import Icons
 import StateGlyph
 
 /// One project in the rail (docs/adr/0038-rail-and-side-column.md; the Rail mockup): the app
@@ -52,4 +53,20 @@ public struct RailProject: Equatable, Sendable {
 public enum RailFoot: String, Sendable {
     case projects
     case automations
+}
+
+/// A page of the side column, as the rail shows it (docs/adr/0038-rail-and-side-column.md, revised
+/// 2026-11-18): its icon, its name under the pointer, the command that opens the column on it.
+public struct RailPage: Equatable, Sendable {
+    public var id: String
+    public var title: String
+    public var icon: Icon
+    public var command: String
+
+    public init(id: String, title: String, icon: Icon, command: String) {
+        self.id = id
+        self.title = title
+        self.icon = icon
+        self.command = command
+    }
 }
