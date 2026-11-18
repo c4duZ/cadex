@@ -11,7 +11,12 @@ final class RailTile: NSView {
     typealias T = DesignTokens.Rail.Tile
     let project: RailProject
     var onPress: (() -> Void)?
+    /// A right click: the app's menu for this project, shown at the pointer.
+    var onMenu: ((NSEvent) -> Void)?
+    /// An image file dropped on the tile (it becomes the project's picture).
+    var onDropImage: ((URL) -> Void)?
     private let face = NSView()
+    private let picture = NSImageView()
     private let mark = NSTextField(labelWithString: "")
     private let ring = NSView()
     private let badge = NSView()
@@ -28,7 +33,13 @@ final class RailTile: NSView {
         face.layer?.cornerRadius = UILooks.pt(T.radius)
         face.layer?.backgroundColor = (project.tint.map { NSColor(srgbRed: $0[0], green: $0[1], blue: $0[2], alpha: 1) } ?? T.bg).cgColor // token-exempt: the project's own color, from the app
         mark.stringValue = project.mark
-        mark.font = UILooks.font(T.fontSize, weight: T.weight)
+        mark.font = project.emoji?.isEmpty == false ? UILooks.font(T.emojiSize) : UILooks.font(T.fontSize, weight: T.weight)
+        // The picture fills the face, cut by its corners.
+        face.layer?.masksToBounds = true
+        picture.imageScaling = .scaleProportionallyUpOrDown
+        picture.image = project.image.flatMap { NSImage(contentsOfFile: $0) }
+        picture.isHidden = picture.image == nil
+        mark.isHidden = !picture.isHidden
         mark.textColor = T.color
         mark.alignment = .center
         ring.wantsLayer = true
@@ -50,6 +61,8 @@ final class RailTile: NSView {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
+        picture.translatesAutoresizingMaskIntoConstraints = false
+        face.addSubview(picture)
         let badgeSize = UILooks.pt(T.Badge.size)
         NSLayoutConstraint.activate([
             widthAnchor.constraint(equalToConstant: Self.outer),
@@ -62,6 +75,10 @@ final class RailTile: NSView {
             face.centerYAnchor.constraint(equalTo: centerYAnchor),
             face.widthAnchor.constraint(equalToConstant: size),
             face.heightAnchor.constraint(equalToConstant: size),
+            picture.topAnchor.constraint(equalTo: face.topAnchor),
+            picture.bottomAnchor.constraint(equalTo: face.bottomAnchor),
+            picture.leadingAnchor.constraint(equalTo: face.leadingAnchor),
+            picture.trailingAnchor.constraint(equalTo: face.trailingAnchor),
             mark.centerXAnchor.constraint(equalTo: face.centerXAnchor),
             mark.centerYAnchor.constraint(equalTo: face.centerYAnchor),
             badge.widthAnchor.constraint(equalToConstant: badgeSize),
@@ -77,10 +94,32 @@ final class RailTile: NSView {
         toolTip = project.name
         setAccessibilityRole(.button)
         setAccessibilityLabel(project.name)
+        registerForDraggedTypes([.fileURL])
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("RailTile is created in code") }
+
+    var pictureShown: Bool { !picture.isHidden }
+    var markText: String { mark.stringValue }
+
+    override func rightMouseDown(with event: NSEvent) { onMenu?(event) }
+
+    // An image file dragged onto the tile: copy, to become the project's picture.
+    private func droppedImage(_ sender: NSDraggingInfo) -> URL? {
+        let options: [NSPasteboard.ReadingOptionKey: Any] = [.urlReadingFileURLsOnly: true, .urlReadingContentsConformToTypes: ["public.image"]]
+        return (sender.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: options) as? [URL])?.first
+    }
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        droppedImage(sender) == nil ? [] : .copy
+    }
+
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let url = droppedImage(sender) else { return false }
+        onDropImage?(url)
+        return true
+    }
 
     var chosen: Bool { !ring.isHidden }
 

@@ -24,7 +24,8 @@ NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "termi
 # world WebView2 lacks (docs/adr/0018-element-picker.md). The sidebar's icons
 # (plan 17) start on the Mac, 2026-10-21; so do the pane headers and
 # pane.zoom (issue #1, 2026-10-22).
-MAC_ONLY = {"agents.switch-account", "memory.configure-project", "project.show-settings", "app.check-for-updates", "app.install-update", "app.skip-update",
+MAC_ONLY = {"project.edit", "project.create", "project.new-terminal", "project.reveal", "project.copy-path",  # plano 36 B
+            "agents.switch-account", "memory.configure-project", "project.show-settings", "app.check-for-updates", "app.install-update", "app.skip-update",
             "terminal.open-pasted-image-beside", "terminal.open-pasted-image-in-tab",
             "preview.pick-element", "preview.stop-picking",
             "git.show-history", "inspector.tab-1", "inspector.tab-2", "inspector.tab-3", "inspector.tab-4", "history.show-in-tab",

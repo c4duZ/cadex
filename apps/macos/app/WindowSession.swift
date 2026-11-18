@@ -28,6 +28,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
     let window: NSWindow
     let commands = CommandRegistry()
     var menu: CommandMenu?
+    /// The project a right click in the rail chose, for the command its menu runs next (plan 36 B).
+    var projectTarget: String?
     /// The app menu for this window's commands, set when it is key.
     private(set) var mainMenu: NSMenu?
     var palette: CommandPaletteController?

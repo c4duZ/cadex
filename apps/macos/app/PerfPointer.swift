@@ -25,11 +25,13 @@ extension WindowSession {
     /// the top), one every CADEX_PERF_CLICK_GAP s (1.5) from CADEX_PERF_CLICK_AT s: the real path of
     /// a click (the window's hit test, the view's mouseUp), without the owner's mouse.
     func startPerfClicks(_ spec: String, at: Double, gap: Double) {
-        let points = spec.split(separator: ";").compactMap { pair -> CGPoint? in
-            let xy = pair.split(separator: ",").compactMap { Double($0) }
-            return xy.count == 2 ? CGPoint(x: xy[0], y: xy[1]) : nil
+        // "r" before a point: a right click (the rail's menu, plan 36 B).
+        let points = spec.split(separator: ";").compactMap { pair -> (CGPoint, Bool)? in
+            let right = pair.hasPrefix("r")
+            let xy = pair.drop { $0 == "r" }.split(separator: ",").compactMap { Double($0) }
+            return xy.count == 2 ? (CGPoint(x: xy[0], y: xy[1]), right) : nil
         }
-        for (index, fraction) in points.enumerated() {
+        for (index, (fraction, right)) in points.enumerated() {
             DispatchQueue.main.asyncAfter(deadline: .now() + at + Double(index) * gap) { [weak self] in
                 guard let self else { return }
                 let frame = self.window.frame
@@ -38,7 +40,7 @@ extension WindowSession {
                 // window (logged 2026-11-18, windowNumber 0) and reached no view. From sendEvent on it is
                 // a click's own path: the hit test, mouseDown, mouseUp.
                 let local = self.window.convertPoint(fromScreen: point)
-                for type in [NSEvent.EventType.leftMouseDown, .leftMouseUp] {
+                for type in right ? [NSEvent.EventType.rightMouseDown, .rightMouseUp] : [.leftMouseDown, .leftMouseUp] {
                     if let event = NSEvent.mouseEvent(with: type, location: local, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
                                                       windowNumber: self.window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1) {
                         self.window.sendEvent(event)

@@ -11,12 +11,19 @@ public struct SavedProjects: Codable, Equatable, Sendable {
         public var tabs: TabsSnapshot
         /// A work color's name ("blue"), plan 15, phase D.
         public var color: String?
+        /// The project's picture: a file in the project-images folder next to this file (plan 36
+        /// phase B); nil: the emoji or the letter.
+        public var image: String?
+        /// An emoji in place of the letter, when there is no picture.
+        public var emoji: String?
 
-        public init(name: String, folder: String, tabs: TabsSnapshot, color: String? = nil) {
+        public init(name: String, folder: String, tabs: TabsSnapshot, color: String? = nil, image: String? = nil, emoji: String? = nil) {
             self.name = name
             self.folder = folder
             self.tabs = tabs
             self.color = color
+            self.image = image
+            self.emoji = emoji
         }
     }
 
@@ -28,13 +35,18 @@ public struct SavedProjects: Codable, Equatable, Sendable {
         /// The tabs it had when it closed: opening it again from the home screen brings them back.
         public var tabs: TabsSnapshot?
         public var color: String?
+        public var image: String?
+        public var emoji: String?
 
-        public init(name: String, folder: String, usedAt: Date, tabs: TabsSnapshot? = nil, color: String? = nil) {
+        public init(name: String, folder: String, usedAt: Date, tabs: TabsSnapshot? = nil, color: String? = nil,
+                    image: String? = nil, emoji: String? = nil) {
             self.name = name
             self.folder = folder
             self.usedAt = usedAt
             self.tabs = tabs
             self.color = color
+            self.image = image
+            self.emoji = emoji
         }
     }
 

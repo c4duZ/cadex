@@ -64,6 +64,8 @@ public struct ProjectPageState: Equatable {
     public var conversations: [Conversation]
     public var automations: [Automation]
     public var accounts: [Account]
+    /// The project's tile beside the name (plan 36 B).
+    public var picture: ProjectPicture?
 
     public init(name: String, place: String, stats: [Stat] = [], conversations: [Conversation] = [], automations: [Automation] = [],
                 accounts: [Account] = []) {

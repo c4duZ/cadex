@@ -24,7 +24,9 @@
 - `Rail.swift`: o modelo puro do trilho (`RailProject`: a pasta, o nome, a cor, o estado e se tem
   terminal aberto; `mark`, a letra até haver imagem; `badge`, o estado que se mostra) e `RailFoot`.
   `RailView.swift`: a porta de entrada; `show` recebe os projetos e o escolhido e redesenha só quando
-  mudam; `onPick` diz a pasta clicada; `footLit` acende o pé. `RailParts.swift`: `RailTile` (o
+  mudam; `onPick` diz a pasta clicada; `footLit` acende o pé; `menuFor`, o clique direito (as linhas
+  vêm do app, cada uma um comando); `onDropImage`, uma imagem solta num quadrado (plano 36 B). O
+  quadrado mostra a imagem do projeto, senão o emoji, senão a letra; o "+" roda project.create. `RailParts.swift`: `RailTile` (o
   quadrado, o halo, a peça de estado, o ponto) e `RailButton` (o "+" e os do pé). Tokens:
   components.rail.
 - `WorkTree.swift`: o modelo puro (`WorkTreeProject`, `WorkTreeTask`, `WorkTreeTerminal`) e

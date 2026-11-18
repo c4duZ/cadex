@@ -177,7 +177,10 @@ extension WindowSession {
                     // The proposal's line: where, the branch, the remote, then the memory's pages and the sessions.
                     let counts = [pages.map { T("\($0.filter { !$0.relative.hasPrefix("sessions/") }.count) memory pages", "\($0.filter { !$0.relative.hasPrefix("sessions/") }.count) páginas de memória") },
                                   T("\(mine.count) sessions", "\(mine.count) sessões")].compactMap { $0 }
-                    show(ProjectPageState(name: name, place: ([place] + counts).joined(separator: " · "), stats: stats, conversations: Array((away + talks).prefix(6)), automations: jobs, accounts: chips))
+                    var state = ProjectPageState(name: name, place: ([place] + counts).joined(separator: " · "), stats: stats,
+                                                 conversations: Array((away + talks).prefix(6)), automations: jobs, accounts: chips)
+                    state.picture = self.projectPicture(folder)
+                    show(state)
                 }
             }
         }

@@ -43,6 +43,7 @@ extension WindowSession {
         }
         commands.register(homeCommands())
         commands.register(ProjectsCommands.all(projects, palette: palette) { [weak self] in self?.chooseProjectFolder() })
+        commands.register(projectEditCommands())
         self.projects = projects
     }
 

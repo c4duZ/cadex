@@ -372,6 +372,7 @@ public extension DesignTokens {
             public static let radius: CGFloat = DesignTokens.Radius.pane
             public static let fontSize: CGFloat = DesignTokens.FontSize.body
             public static var weight: NSFont.Weight { DesignTokens.FontWeight.bold }
+            public static let emojiSize: CGFloat = DesignTokens.FontSize.glyph
             public static var bg: NSColor { DesignTokens.Color.bgButton }
             public static var color: NSColor { DesignTokens.Color.textPrimary }
             public enum Chosen {

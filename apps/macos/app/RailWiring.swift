@@ -11,6 +11,8 @@ extension WindowSession {
     func makeRail() -> RailView {
         let rail = RailView { [weak self] id in _ = self?.commands.run(id) }
         rail.onPick = { [weak self] folder in self?.pickProject(folder) }
+        rail.menuFor = { [weak self] folder in self?.railMenu(folder) ?? [] }
+        rail.onDropImage = { [weak self] folder, url in self?.dropProjectImage(folder, url) }
         return rail
     }
 
@@ -24,8 +26,8 @@ extension WindowSession {
                 let value = color.rgb(in: theme).value
                 return [Double((value >> 16) & 0xFF) / 255, Double((value >> 8) & 0xFF) / 255, Double(value & 0xFF) / 255]
             }
-            return RailProject(id: project.folder, name: project.name, tint: tint,
-                               state: Self.summary(states), open: !terminals.isEmpty)
+            return RailProject(id: project.folder, name: project.name, tint: tint, state: Self.summary(states), open: !terminals.isEmpty,
+                               image: projects?.imageURL(project.image)?.path, emoji: project.emoji)
         }
     }
 

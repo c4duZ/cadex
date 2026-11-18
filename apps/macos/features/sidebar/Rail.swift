@@ -15,19 +15,27 @@ public struct RailProject: Equatable, Sendable {
     public var state: GlyphState?
     /// It has a terminal open: the dot under the tile, as the Dock's.
     public var open: Bool
+    /// The project's picture (a file), shown over the whole tile; nil: the emoji or the letter.
+    public var image: String?
+    /// An emoji in place of the letter (plan 36 phase B).
+    public var emoji: String?
 
-    public init(id: String, name: String, tint: [Double]? = nil, state: GlyphState? = nil, open: Bool = false) {
+    public init(id: String, name: String, tint: [Double]? = nil, state: GlyphState? = nil, open: Bool = false,
+                image: String? = nil, emoji: String? = nil) {
         self.id = id
         self.name = name
         self.tint = tint
         self.state = state
         self.open = open
+        self.image = image
+        self.emoji = emoji
     }
 
-    /// What the tile shows until the project has an image (plan 36 phase D): the name's first
-    /// letter or digit, upper case.
+    /// What the tile shows without a picture: the emoji, else the name's first letter or digit,
+    /// upper case (plan 36 phase B).
     public var mark: String {
-        name.first { $0.isLetter || $0.isNumber }.map { String($0).uppercased() } ?? "•"
+        if let emoji, !emoji.isEmpty { return emoji }
+        return name.first { $0.isLetter || $0.isNumber }.map { String($0).uppercased() } ?? "•"
     }
 
     /// The badge's state: only what someone should see (idle has none).

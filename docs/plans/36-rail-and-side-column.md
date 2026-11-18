@@ -42,7 +42,7 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
   antes da fase A: é o arraste sintético numa janela sem foco, não conferido com o mouse de verdade. A árvore fica fora da tela, ainda montada
   para o sidebar.find, até a fase G; o botão da coluna na barra de título continua (abre e fecha a
   coluna).
-- [ ] B. Editar o projeto (o dono pediu desde o começo; vem antes de tudo o mais, 2026-11-18): o
+- [x] B. Editar o projeto (o dono pediu desde o começo; vem antes de tudo o mais, 2026-11-18): o
   nome que ele quiser, não o da pasta; a imagem (uma foto ou imagem do Mac, também arrastada para o
   quadrado do trilho, um emoji, ou a letra numa cor); a cor do projeto; tudo numa folha "Edit
   project", aberta pelo clique direito no quadrado do trilho ("Edit name and image…") e pelo ⌘K, e a
@@ -51,6 +51,13 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
   Projects, na página do projeto e no seletor ⇧⌘S. O clique direito no quadrado, inteiro: New
   terminal, New task, Edit name and image…, Pin/Unpin, Project settings…, Show in Finder, Copy path,
   Close terminals e Remove from the sidebar, cada um um comando.
+  Feita em 2026-11-18: a folha (nome, imagem com Choose Image… e Remove, emoji, cor) pelo clique
+  direito e pelo ⌘K (project.edit), criando pelo "+" (project.create), a imagem solta no quadrado,
+  o clique direito inteiro menos Pin/Unpin e Remove from the sidebar (vêm com fixar, na fase E; por
+  ora Close Project), a imagem no trilho, nos cartões da página Projects e no cabeçalho da página
+  do projeto. Conferido no app: o trilho com imagem e emoji, o menu do clique direito, a folha, as
+  duas páginas. Não conferido: escolher e salvar uma imagem pelo seletor com o mouse, soltar uma
+  imagem no trilho, criar um projeto pela folha; o seletor ⇧⌘S ainda sem a imagem.
 - [ ] C. As páginas da coluna: os pés (Files: a pasta, criar e buscar; Changes: a checagem, Commit,
   Open PR e a branch com ↑↓; Memory: o briefing; Git graph: a branch e abrir numa aba); Changes com
   o escopo num menu pequeno, o total e o +/− de cada arquivo; a página nova Sessions (agora, hoje,

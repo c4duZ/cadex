@@ -107,6 +107,14 @@
   (view.toggle-sidebar) e o inspector.toggle fecham e abrem a coluna; o trilho fica. Files e Changes
   seguem o projeto escolhido, ou a tarefa do terminal com foco, não o `cd` (`FolderFollow.swift`,
   `projectAnchor`, `followProject` na troca de projeto).
+- `ProjectEditWiring.swift` (plano 36 fase B): a folha "Edit project" (project.edit, também pelo
+  clique direito no trilho; nome, imagem ou emoji, cor) e a mesma folha criando pelo "+" do trilho
+  (project.create: a pasta, o nome, a imagem); a imagem solta num quadrado do trilho vira a do
+  projeto; o clique direito (`railMenu`: New Terminal, New Task…, Edit Name and Image…, Project
+  Settings…, Show in Finder, Copy Path, Close Project), cada linha um comando: `projectTarget` diz
+  a qual projeto o próximo comando se refere (project.new-terminal, project.reveal,
+  project.copy-path, project.edit), e New Task, Settings e Close mostram o projeto antes;
+  `projectPicture`, o quadrado dos cartões da página Projetos e do cabeçalho da página do projeto.
 - `InspectorWiring.swift` (plano 26, fase C; desde o plano 36 a coluna lateral, à esquerda, ao lado
   do trilho): Files (a árvore do explorer), Changes (o painel do git), Memory e Git graph (o
   histórico compacto, feito na primeira vez que a página aparece), nessa ordem, cada uma com o ícone
@@ -317,7 +325,7 @@
   captura salva também um painel visível, como o da paleta, num arquivo terminado em -panel.png, CADEX_PERF_TYPE digita um comando no terminal com foco, CADEX_PERF_HOME_PROMPT manda o pedido da
   tela de início, CADEX_PERF_DUMP_SCREEN grava a tela de cada terminal num arquivo, CADEX_PERF_SEND manda uma mensagem ao agente
   com o Return como tecla (a marca da barra),
-  CADEX_PERF_SPLIT divide o painel, CADEX_PERF_SWITCH troca a conta do Claude em foco e CADEX_PERF_LIMIT_AT olha os avisos de limite (plano 33), CADEX_PERF_DRAG arrasta (pressiona, move em dez passos, solta) e anota a ordem das abas, CADEX_PERF_CLICK dá cliques à janela de teste (montados com a janela e entregues pelo sendEvent dela: postado no processo, o clique chegava sem janela), CADEX_PERF_HOVER move o ponteiro só dentro do app (`PerfPointer.swift`: o movimento postado no processo e entregue às views que rastreiam, sem mexer no mouse do dono), CADEX_PERF_MENU abre o menu "new" (o "+" das abas) ou "pane" (o "+" de um painel) para a captura, CADEX_PERF_SNAPSHOT_AT atrasa a captura; abrir a conversa de um subagente, abrir
+  CADEX_PERF_SPLIT divide o painel, CADEX_PERF_SWITCH troca a conta do Claude em foco e CADEX_PERF_LIMIT_AT olha os avisos de limite (plano 33), CADEX_PERF_DRAG arrasta (pressiona, move em dez passos, solta) e anota a ordem das abas, CADEX_PERF_CLICK dá cliques à janela de teste ("r" antes do ponto: o clique direito, plano 36 B) (montados com a janela e entregues pelo sendEvent dela: postado no processo, o clique chegava sem janela), CADEX_PERF_HOVER move o ponteiro só dentro do app (`PerfPointer.swift`: o movimento postado no processo e entregue às views que rastreiam, sem mexer no mouse do dono), CADEX_PERF_MENU abre o menu "new" (o "+" das abas) ou "pane" (o "+" de um painel) para a captura, CADEX_PERF_SNAPSHOT_AT atrasa a captura; abrir a conversa de um subagente, abrir
   abas, abrir e rolar a revisão da pasta com CADEX_PERF_REVIEW, abrir duas vezes o grupo das máquinas da tailnet com CADEX_PERF_MACHINES); sem a variável, nada roda.
   `RacePerfHooks.swift` (plano 24): CADEX_PERF_RACE, um JSON com uma corrida que começa sozinha sem
   folha (e, com `pickAfter`, o #1 vence e os outros são descartados), anotada em `out`; CADEX_PERF_NEW_TASK

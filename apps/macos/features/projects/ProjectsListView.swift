@@ -18,6 +18,8 @@ public struct ProjectCard: Equatable {
     public var status: String
     /// The status's dot: working (green in the proposal), needs (amber), or none.
     public var state: GlyphState?
+    /// The project's tile beside the name (plan 36 B); nil: the name alone.
+    public var picture: ProjectPicture?
 
     public init(folder: String, name: String, place: String, tasks: Int, sessions: Int, memories: Int, status: String, state: GlyphState?) {
         self.folder = folder
@@ -105,6 +107,17 @@ public final class ProjectsListDocument: TabDocument {
         let stats = NSTextField(labelWithString: "")
         stats.attributedStringValue = Self.stats(project)
         var lines: [NSView] = [name, place, stats]
+        // The line the stats come after: the place, or the head that holds it beside the tile.
+        var abovePlace: NSView = place
+        if let picture = project.picture {
+            // The tile beside the name and the place, as the rail shows the project.
+            let words = vertical([name, place], gap: PP.Head.titleGap)
+            let head = NSStackView(views: [ProjectPreview.of(picture, name: project.name), words])
+            head.alignment = .centerY
+            head.spacing = UILooks.pt(PP.Head.gap)
+            lines = [head, stats]
+            abovePlace = head
+        }
         let status = pageLabel(project.status, size: DesignTokens.FontSize.small,
                                color: project.state == .needs ? DesignTokens.Color.stateNeeds : DesignTokens.Color.textTertiary)
         if let state = project.state {
@@ -118,7 +131,7 @@ public final class ProjectsListDocument: TabDocument {
             lines.append(status)
         }
         let column = vertical(lines, gap: PP.Row.textGap)
-        column.setCustomSpacing(UILooks.pt(PP.Stat.gap * 3), after: place)
+        column.setCustomSpacing(UILooks.pt(PP.Stat.gap * 3), after: abovePlace)
         column.setCustomSpacing(UILooks.pt(PP.Stat.gap * 3), after: stats)
         box.hold(column, padding: S.padding)
         box.setAccessibilityElement(true)

@@ -166,12 +166,20 @@ public final class ProjectPageDocument: TabDocument {
         // text's width and the buttons sat beside the path (2026-11-17).
         words.setHuggingPriority(.init(1), for: .horizontal)
         words.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        let titled: NSView = state.picture.map { picture in
+            let row = NSStackView(views: [ProjectPreview.of(picture, name: state.name), words])
+            row.alignment = .centerY
+            row.spacing = UILooks.pt(H.gap)
+            return row
+        } ?? words
         let race = DesignButton.make(T("Race…", "Corrida…"), .secondary) { [weak self] in self?.actions.race() }
         let shortcut = actions.newTaskShortcut().map { "  " + $0 } ?? ""
         let task = DesignButton.make(T("New task", "Nova tarefa") + shortcut, .primary) { [weak self] in self?.actions.newTask() }
         let buttons = NSStackView(views: [race, task])
         buttons.spacing = UILooks.pt(H.gap)
-        let row = NSStackView(views: [words, buttons])
+        titled.setContentHuggingPriority(.init(1), for: .horizontal)
+        (titled as? NSStackView)?.setHuggingPriority(.init(1), for: .horizontal)
+        let row = NSStackView(views: [titled, buttons])
         // The words take the rest of the row, the buttons go right (they sat beside the path with
         // the right panel open, 2026-11-17).
         row.distribution = .fill

@@ -15,6 +15,9 @@ public final class ProjectsController {
         public let tabs: TabsController
         /// A work color's name (project.set-color, plan 15, phase D).
         public var color: String?
+        /// The picture's file in `imagesFolder`, and an emoji for when there is none (plan 36 B).
+        public var image: String?
+        public var emoji: String?
 
         init(name: String, folder: String, tabs: TabsController) {
             self.name = name
@@ -46,7 +49,7 @@ public final class ProjectsController {
     public var workspaceFolder: (() -> String?)?
     private let makeTabs: () -> TabsController
     /// Nil for a passing window (⌘N): only the main window is saved (docs/spec/workspace.md).
-    private let fileURL: URL?
+    let fileURL: URL?
     private var savePending = false
     /// While restoring, the half-built state must not overwrite the file.
     private var restoring = false
@@ -76,6 +79,8 @@ public final class ProjectsController {
         for project in saved?.projects ?? [] {
             let tabs = add(name: project.name, folder: project.folder)
             projects[projects.count - 1].color = project.color
+            projects[projects.count - 1].image = project.image
+            projects[projects.count - 1].emoji = project.emoji
             activeIndex = projects.count - 1
             tabs.restore(project.tabs, makeDocument: makeDocument)
             // Saved with no tab: a terminal in its folder (the spec), or the launch folder when gone.
@@ -163,6 +168,8 @@ public final class ProjectsController {
             tabs.restore(saved, makeDocument: makeDocument)
             restoring = false
             projects[projects.count - 1].color = recent?.color
+            projects[projects.count - 1].image = recent?.image
+            projects[projects.count - 1].emoji = recent?.emoji
         }
         if tabs.count == 0 { tabs.newTab(cwd: folder) }
         select(projects.count - 1)
@@ -252,7 +259,8 @@ public final class ProjectsController {
     // MARK: Saving
 
     public var saved: SavedProjects {
-        SavedProjects(projects: projects.map { .init(name: $0.name, folder: $0.folder, tabs: $0.tabs.snapshot(), color: $0.color) },
+        SavedProjects(projects: projects.map { .init(name: $0.name, folder: $0.folder, tabs: $0.tabs.snapshot(), color: $0.color,
+                                                     image: $0.image, emoji: $0.emoji) },
                       active: max(activeIndex, 0), folder: workspaceFolder?(), recent: recent)
     }
 
@@ -260,7 +268,8 @@ public final class ProjectsController {
     /// `tabs`: what it had, when it closes (kept for opening it again).
     private func noteUsed(_ project: Project, tabs: TabsSnapshot? = nil, at date: Date = Date()) {
         recent.removeAll { $0.folder == project.folder }
-        recent.insert(.init(name: project.name, folder: project.folder, usedAt: date, tabs: tabs, color: project.color), at: 0)
+        recent.insert(.init(name: project.name, folder: project.folder, usedAt: date, tabs: tabs, color: project.color,
+                            image: project.image, emoji: project.emoji), at: 0)
         if recent.count > Self.recentLimit { recent.removeLast(recent.count - Self.recentLimit) }
     }
 

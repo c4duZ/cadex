@@ -60,9 +60,11 @@ extension WindowSession {
                         let branch = tree.first { $0.id == folder }?.branch ?? ""
                         let path = folder.hasPrefix(home) ? "~" + folder.dropFirst(home.count) : folder
                         let (status, state) = Self.projectStatus(live: here, last: mine.compactMap(\.updated).max(), now: now)
-                        return ProjectCard(folder: folder, name: name, place: [String(path), branch].filter { !$0.isEmpty }.joined(separator: " · "),
-                                           tasks: tree.first { $0.id == folder }?.tasks.count ?? 0, sessions: mine.count,
-                                           memories: memories[index], status: status, state: state)
+                        var card = ProjectCard(folder: folder, name: name, place: [String(path), branch].filter { !$0.isEmpty }.joined(separator: " · "),
+                                               tasks: tree.first { $0.id == folder }?.tasks.count ?? 0, sessions: mine.count,
+                                               memories: memories[index], status: status, state: state)
+                        card.picture = self.projectPicture(folder)
+                        return card
                     })
                 }
             }

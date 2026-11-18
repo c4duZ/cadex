@@ -1,5 +1,6 @@
 import AppKit
 import Icons
+import Menus
 import Strings
 import UILooks
 
@@ -12,6 +13,10 @@ public final class RailView: NSView {
     typealias R = DesignTokens.Rail
     /// A project's tile was clicked: its folder.
     public var onPick: ((String) -> Void)?
+    /// A right click on a tile: the menu's entries for that project (each runs a command).
+    public var menuFor: ((String) -> [MenuEntry])?
+    /// An image file dropped on a tile: the project's folder and the file.
+    public var onDropImage: ((String, URL) -> Void)?
     /// The foot's page that shows (lit), or nil.
     public var footLit: RailFoot? { didSet { if footLit != oldValue { lightFoot() } } }
     private let run: (String) -> Void
@@ -24,7 +29,7 @@ public final class RailView: NSView {
 
     public init(run: @escaping (String) -> Void) {
         self.run = run
-        add = RailButton(command: "project.new", icon: .plus, tip: T("Add Project", "Adicionar projeto"))
+        add = RailButton(command: "project.create", icon: .plus, tip: T("New Project…", "Novo projeto…"))
         footButtons = [
             (.projects, RailButton(command: "project.show-all", icon: .squaresFour, tip: T("Projects", "Projetos"))),
             (.automations, RailButton(command: "orchestration.show-automations", icon: .clock, tip: T("Automations", "Automações"))),
@@ -32,7 +37,7 @@ public final class RailView: NSView {
         super.init(frame: .zero)
         wantsLayer = true
         layer?.backgroundColor = R.bg.cgColor
-        add.onPress = { [weak self] in self?.run("project.new") }
+        add.onPress = { [weak self] in self?.run("project.create") }
         for (_, button) in footButtons {
             let command = button.command
             button.onPress = { [weak self] in self?.run(command) }
@@ -84,6 +89,11 @@ public final class RailView: NSView {
         tiles = projects.map { project in
             let tile = RailTile(project: project, chosen: project.id == chosen)
             tile.onPress = { [weak self] in self?.onPick?(project.id) }
+            tile.onMenu = { [weak self, weak tile] event in
+                guard let self, let tile, let entries = self.menuFor?(project.id), !entries.isEmpty else { return }
+                PopupMenu.show(entries, at: tile.convert(event.locationInWindow, from: nil), in: tile)
+            }
+            tile.onDropImage = { [weak self] url in self?.onDropImage?(project.id, url) }
             return tile
         }
         for (index, tile) in tiles.enumerated() { top.insertArrangedSubview(tile, at: index) }

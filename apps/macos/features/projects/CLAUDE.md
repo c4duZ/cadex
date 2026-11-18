@@ -2,8 +2,9 @@
 
 ## O que eu quero
 - Os projetos (`../../../../docs/spec/projects.md`; o que eram os spaces, plano 27): cada um é a
-  pasta de um repositório com as abas abertas nela, um nome (o da pasta, renomeável) e uma cor,
-  alternáveis e restaurados com pastas e layouts ao reabrir.
+  pasta de um repositório com as abas abertas nela, um nome (o que o dono der; senão o da pasta),
+  uma cor e uma imagem ou um emoji (plano 36 fase B), alternáveis e restaurados com pastas e
+  layouts ao reabrir.
 
 ## O que eu não quero
 - Perder o layout se o app fechar inesperadamente.
@@ -45,8 +46,17 @@
 - `ProjectSettingsDocument.swift` (plano 32 D): a página Settings do projeto, ao lado do Overview
   (identidade `project:settings:<pasta>`, no grupo das páginas), com as seções que o app dá (a
   memória do projeto, o .ai-memory.toml); os padrões de todos ficam na janela de configurações.
+- `ProjectLook.swift` (plano 36 fase B): `ProjectLook` (nome, cor, imagem, emoji), `look(of:)` e
+  `setLook(_:for:)` (nome vazio volta ao da pasta; a imagem trocada sai da pasta), `storeImage(from:)`
+  (a imagem copiada para `imagesFolder`, project-images ao lado do projects.json, cortada quadrada
+  no meio e pequena, em PNG; a origem pode sumir) e `ProjectPicture`, o quadrado que as páginas
+  desenham. `ProjectEditForm.swift`: o formulário da folha "Edit project" (nome; imagem com Choose
+  Image…, Remove e o emoji; a cor; ao criar, a pasta), com a prévia como o trilho mostra;
+  `ProjectEditParts.swift`: a prévia (`ProjectPreview`, também nos cartões da página Projetos e no
+  cabeçalho da página do projeto) e a bolinha de cor. O app mostra a folha e aplica
+  (`../../app/ProjectEditWiring.swift`).
 - `ProjectsFile.swift`: o JSON em Application Support/Cadex/projects.json (gravação atômica), com os
-  projetos (nome, pasta, abas, cor), o ativo, a pasta do workspace e os recentes; uma lista vazia
+  projetos (nome, pasta, abas, cor, imagem, emoji), o ativo, a pasta do workspace e os recentes; uma lista vazia
   (a tela de início) é um arquivo bom. Arquivo ilegível vai para
   projects.bad-<data>.json e o app começa do zero. CADEX_PROJECTS_FILE aponta para outro arquivo:
   conferir o app em teste não pode apagar os projetos do dono. O spaces.json de antes do plano 27
@@ -64,7 +74,8 @@
   esquerda vem na fase B.
 
 ## Como validar
-- `make macos-test` passa: primeira abertura, salvar e restaurar igual, arquivo corrompido, abrir
+- `make macos-test` passa: o visual do projeto (nome, cor, imagem quadrada e pequena, emoji; salvo e
+  de volta; a imagem trocada sai), primeira abertura, salvar e restaurar igual, arquivo corrompido, abrir
   pasta (nova e de um projeto que existe), próximo, renomear, fechar, a migração do spaces.json e o
   repositório de uma worktree.
 - No app: `CADEX_PROJECTS_FILE=<arquivo de teste> CADEX_BACKGROUND=1`, abrir um projeto, dividir,
