@@ -166,6 +166,10 @@ extension WindowSession {
                     if let id = step["command"] as? String, !self.commands.run(id) {
                         NSLog("Cadex script: %@ did not run: %@", id, self.commands.command(id)?.unavailableReason() ?? "unknown")
                     }
+                    // The terminal's find bar, as ⌘F opens it with the terminal focused.
+                    if step["find"] as? Bool == true { self.tabs?.activeTerminal?.showFind(nil) }
+                    // The repository's history in a tab, as the History tab opens it.
+                    if step["history"] as? Bool == true, let repo = self.mainRepository { self.opener?.openHistory(repo) }
                     // A file's diff, as a click on it in Changes opens it.
                     if let path = step["diff"] as? String, let repo = self.mainRepository {
                         self.opener?.openDiff(.init(repo: repo, path: path, orig: path, staged: false), beside: nil)

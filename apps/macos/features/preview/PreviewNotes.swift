@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Strings
 import WebKit
 
@@ -30,7 +31,7 @@ final class PreviewNotes: NSObject, NSTextFieldDelegate {
         self.web = web
         super.init()
         field.placeholderString = T("A note for the agent · Enter keeps · Esc gives up", "Uma nota para o agente · Enter guarda · Esc desiste")
-        field.font = .systemFont(ofSize: 12)
+        field.font = UILooks.font(DesignTokens.FontSize.meta)
         field.delegate = self
         field.isHidden = true
         markers.addSubview(field)
@@ -135,9 +136,9 @@ final class PreviewNoteMarkers: NSView {
     override func draw(_ dirtyRect: NSRect) {
         for (number, corner) in places {
             let circle = NSRect(x: corner.x - 9, y: corner.y - 9, width: 18, height: 18)
-            NSColor.systemOrange.setFill()
+            DesignTokens.Color.stateNeeds.setFill()
             NSBezierPath(ovalIn: circle).fill()
-            let text = NSAttributedString(string: "\(number)", attributes: [.font: NSFont.boldSystemFont(ofSize: 10), .foregroundColor: NSColor.white])
+            let text = NSAttributedString(string: "\(number)", attributes: [.font: UILooks.font(DesignTokens.FontSize.badge, weight: DesignTokens.FontWeight.bold), .foregroundColor: DesignTokens.Color.textOnAmber])
             let size = text.size()
             text.draw(at: NSPoint(x: circle.midX - size.width / 2, y: circle.midY - size.height / 2))
         }

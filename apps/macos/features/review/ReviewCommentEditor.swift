@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Strings
 
 /// The field where a comment is written (docs/spec/review.md): a popover
@@ -20,17 +21,26 @@ public final class ReviewCommentEditor: NSObject, NSPopoverDelegate {
 
     private func open(at rect: NSRect, of view: NSView, title: String, text: String) {
         let label = NSTextField(labelWithString: title)
-        label.font = .systemFont(ofSize: 11, weight: .semibold)
-        label.textColor = .secondaryLabelColor
+        label.font = UILooks.font(DesignTokens.FontSize.caption, weight: DesignTokens.FontWeight.semibold)
+        label.textColor = DesignTokens.Color.textSecondary
         let hint = NSTextField(labelWithString: T("Markdown · ⌘↩ saves · esc gives up", "Markdown · ⌘↩ salva · esc desiste"))
-        hint.font = .systemFont(ofSize: 10.5)
-        hint.textColor = .tertiaryLabelColor
+        hint.font = UILooks.font(DesignTokens.FontSize.chip)
+        hint.textColor = DesignTokens.Color.textTertiary
         let scroll = NSScrollView()
         scroll.documentView = field
         scroll.hasVerticalScroller = true
-        scroll.borderType = .bezelBorder
+        scroll.borderType = .noBorder
+        scroll.drawsBackground = false
+        scroll.wantsLayer = true
+        scroll.layer?.backgroundColor = DesignTokens.NewTask.Field.bg.cgColor
+        scroll.layer?.borderColor = DesignTokens.NewTask.Field.border.cgColor
+        scroll.layer?.borderWidth = DesignTokens.Stroke.hairline
+        scroll.layer?.cornerRadius = UILooks.pt(DesignTokens.NewTask.Field.radius)
         field.isRichText = false
-        field.font = .systemFont(ofSize: 13)
+        field.font = UILooks.font(DesignTokens.FontSize.body)
+        field.textColor = DesignTokens.Color.textPrimary
+        field.insertionPointColor = DesignTokens.Color.textPrimary
+        field.drawsBackground = false
         field.string = text
         field.minSize = NSSize(width: 0, height: 90)
         field.maxSize = NSSize(width: 10_000, height: 10_000)

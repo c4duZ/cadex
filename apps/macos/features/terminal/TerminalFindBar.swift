@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Icons
 import Menus
 import Strings
@@ -6,7 +7,8 @@ import Strings
 /// The find bar (⌘F) over the top-right corner of the terminal: the text to
 /// find, "3 de 12", previous and next, close. Enter goes to the next (older)
 /// match, Shift+Enter to the previous one, Esc closes (docs/spec/terminal.md).
-final class TerminalFindBar: NSVisualEffectView, NSSearchFieldDelegate {
+/// The frame's popover (components.popover; plan 31 E): raised, its line and corner.
+final class TerminalFindBar: NSView, NSSearchFieldDelegate {
     var onChange: ((String) -> Void)?
     var onNext: (() -> Void)?
     var onPrevious: (() -> Void)?
@@ -17,19 +19,26 @@ final class TerminalFindBar: NSVisualEffectView, NSSearchFieldDelegate {
 
     init() {
         super.init(frame: .zero)
-        material = .popover
-        blendingMode = .withinWindow
-        state = .active
+        typealias P = DesignTokens.Popover
         wantsLayer = true
-        layer?.cornerRadius = 8
+        layer?.cornerRadius = UILooks.pt(P.radius)
+        layer?.backgroundColor = P.bg.cgColor
+        layer?.borderColor = P.border.cgColor
+        layer?.borderWidth = DesignTokens.Stroke.hairline
 
         field.placeholderString = T("Find", "Buscar")
         field.delegate = self
         field.sendsSearchStringImmediately = true
         field.target = self
         field.action = #selector(fieldChanged)
-        countLabel.textColor = .secondaryLabelColor
-        countLabel.font = .monospacedDigitSystemFont(ofSize: NSFont.smallSystemFontSize, weight: .regular)
+        field.isBezeled = false
+        field.drawsBackground = false
+        field.focusRingType = .none
+        (field.cell as? NSSearchFieldCell)?.searchButtonCell = nil
+        field.font = UILooks.font(DesignTokens.FontSize.body)
+        field.textColor = DesignTokens.Color.textPrimary
+        countLabel.textColor = DesignTokens.Color.textMuted
+        countLabel.font = UILooks.monospacedDigits(DesignTokens.FontSize.meta)
 
         let stack = NSStackView(views: [
             field, countLabel,
@@ -37,8 +46,9 @@ final class TerminalFindBar: NSVisualEffectView, NSSearchFieldDelegate {
             button(.caretDown, T("Next (↩)", "Próxima (↩)"), #selector(nextClicked)),
             button(.x, T("Close (Esc)", "Fechar (Esc)"), #selector(closeClicked)),
         ])
-        stack.spacing = 6
-        stack.edgeInsets = NSEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
+        let pad = DesignTokens.NewTask.AgentRow.padding
+        stack.spacing = UILooks.pt(DesignTokens.NewTask.Option.gap)
+        stack.edgeInsets = NSEdgeInsets(top: UILooks.pt(pad.top), left: UILooks.pt(pad.left), bottom: UILooks.pt(pad.bottom), right: UILooks.pt(pad.right))
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
         NSLayoutConstraint.activate([
@@ -46,7 +56,7 @@ final class TerminalFindBar: NSVisualEffectView, NSSearchFieldDelegate {
             stack.trailingAnchor.constraint(equalTo: trailingAnchor),
             stack.topAnchor.constraint(equalTo: topAnchor),
             stack.bottomAnchor.constraint(equalTo: bottomAnchor),
-            field.widthAnchor.constraint(equalToConstant: 200),
+            field.widthAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Inspector.width) * 2 / 3),
         ])
     }
 
@@ -94,7 +104,8 @@ final class TerminalFindBar: NSVisualEffectView, NSSearchFieldDelegate {
     // MARK: Buttons
 
     private func button(_ icon: Icon, _ tip: String, _ action: Selector) -> NSButton {
-        let button = NSButton(image: icon.image(size: 14), target: self, action: action)
+        let button = NSButton(image: icon.image(size: UILooks.pt(DesignTokens.FontSize.prompt)), target: self, action: action)
+        button.contentTintColor = DesignTokens.Color.textSecondary
         button.setAccessibilityLabel(tip)
         button.isBordered = false
         HoverTip.attach(tip, to: button)

@@ -109,7 +109,10 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         let graph = table.tableColumns.first { $0.identifier.rawValue == "graph" }
         graph?.resizingMask = compact ? [] : .userResizingMask
         table.columnAutoresizingStyle = compact ? .uniformColumnAutoresizingStyle : .firstColumnOnlyAutoresizingStyle
-        table.backgroundColor = compact ? .clear : NSColor.controlBackgroundColor
+        // As a page, the page's background (plan 31 E; it was the system's grey).
+        table.backgroundColor = .clear
+        wantsLayer = true
+        layer?.backgroundColor = compact ? nil : DesignTokens.Color.bgWindow.cgColor
         table.sizeLastColumnToFit()
         detailsView.setCompact(compact)
         // The sidebar's rows: two lines per commit, files opening under it,
@@ -163,13 +166,16 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         searchField.sendsWholeSearchString = false
         currentOnly.target = self
         currentOnly.action = #selector(toggleCurrentOnly(_:))
-        currentOnly.font = UILooks.font(12)
         progress.style = .spinning
         progress.controlSize = .small
         progress.isDisplayedWhenStopped = false
         count.font = UILooks.font(11)
-        count.textColor = .secondaryLabelColor
-        let top = NSStackView(views: [searchField, currentOnly, progress, count])
+        count.textColor = DesignTokens.Color.textMuted
+        // The frame's field and the checkbox's words in the frame's colors (plan 31 E).
+        let searchBox = FrameField.field(searchField)
+        searchBox.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        _ = FrameField.check(currentOnly)
+        let top = NSStackView(views: [searchBox, currentOnly, progress, count])
         bar = top
         top.spacing = 10
         top.edgeInsets = NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
@@ -177,6 +183,10 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
 
         rows.table = table
         rows.build()
+        // The page's background until setCompact says otherwise (the right panel's list).
+        table.backgroundColor = .clear
+        wantsLayer = true
+        layer?.backgroundColor = DesignTokens.Color.bgWindow.cgColor
         scroll.documentView = table
         scroll.hasVerticalScroller = true
         scroll.autohidesScrollers = true
@@ -184,7 +194,7 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         detailsView.onOpenFile = { [weak self] file in self?.document?.openDiff(file) }
         separator.boxType = .separator
 
-        empty.textColor = .secondaryLabelColor
+        empty.textColor = DesignTokens.Color.textMuted
         empty.alignment = .center
         for v in [top, scroll, separator, detailsView, empty] as [NSView] {
             v.translatesAutoresizingMaskIntoConstraints = false

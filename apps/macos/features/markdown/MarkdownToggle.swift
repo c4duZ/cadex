@@ -18,13 +18,14 @@ final class MarkdownToggle: NSView {
     init() {
         super.init(frame: .zero)
         wantsLayer = true
-        layer?.cornerRadius = 6
-        layer?.borderWidth = 1
+        layer?.cornerRadius = UILooks.pt(DesignTokens.Button.radius)
+        layer?.borderWidth = DesignTokens.Stroke.hairline
         setAccessibilityRole(.button)
-        label.font = UILooks.font(11, weight: .medium)
+        label.font = UILooks.font(DesignTokens.FontSize.caption, weight: DesignTokens.Button.Secondary.weight)
         let content = NSStackView(views: [icon, label])
-        content.spacing = 4
-        content.edgeInsets = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 9)
+        content.spacing = UILooks.pt(DesignTokens.Pane.Header.gap)
+        content.edgeInsets = NSEdgeInsets(top: 0, left: UILooks.pt(DesignTokens.Button.paddingX[0]) * 2 / 3, bottom: 0,
+                                          right: UILooks.pt(DesignTokens.Button.paddingX[0]) * 2 / 3)
         content.translatesAutoresizingMaskIntoConstraints = false
         addSubview(content)
         NSLayoutConstraint.activate([
@@ -32,7 +33,7 @@ final class MarkdownToggle: NSView {
             content.trailingAnchor.constraint(equalTo: trailingAnchor),
             content.topAnchor.constraint(equalTo: topAnchor),
             content.bottomAnchor.constraint(equalTo: bottomAnchor),
-            heightAnchor.constraint(equalToConstant: 24),
+            heightAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Button.Heights.small) * 6 / 7),
         ])
         show(rendered: false)
         // A selector observer: removed by itself when the button goes.
@@ -58,13 +59,13 @@ final class MarkdownToggle: NSView {
         restyle()
     }
 
-    /// The editor's own colors, so the button reads on any theme.
+    /// The app's secondary button (components.button; plan 31 E): the frame's tokens follow the theme.
     private func restyle() {
-        let look = EditorAppearance.current
-        layer?.backgroundColor = look.background.blended(withFraction: 0.12, of: look.foreground)?.cgColor
-        layer?.borderColor = look.foreground.withAlphaComponent(0.15).cgColor
-        label.textColor = look.foreground
-        icon.contentTintColor = look.foreground.withAlphaComponent(0.8)
+        typealias B = DesignTokens.Button.Secondary
+        layer?.backgroundColor = B.bg.cgColor
+        layer?.borderColor = B.border.cgColor
+        label.textColor = B.color
+        icon.contentTintColor = DesignTokens.Color.textSecondary
     }
 
     override func mouseDown(with event: NSEvent) { onPress?() }

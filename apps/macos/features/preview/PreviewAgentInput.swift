@@ -1,5 +1,6 @@
 import AgentBand
 import AppKit
+import UILooks
 import WebKit
 
 /// The agent's mouse and keyboard on the page (docs/adr/0025-agent-drives-preview.md):
@@ -104,7 +105,7 @@ final class PreviewAgentMarks: NSView {
             band.widthAnchor.constraint(lessThanOrEqualTo: widthAnchor, constant: -24),
         ])
         dot.wantsLayer = true
-        dot.layer?.backgroundColor = NSColor.controlAccentColor.withAlphaComponent(0.55).cgColor
+        dot.layer?.backgroundColor = DesignTokens.Color.stateWorking.withAlphaComponent(0.55).cgColor
         dot.layer?.borderColor = NSColor.white.cgColor
         dot.layer?.borderWidth = 2
         dot.layer?.cornerRadius = 9

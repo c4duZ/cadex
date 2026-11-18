@@ -34,7 +34,9 @@ extension TabsController {
     /// asked (the history opening a diff), never replaced by what it opens.
     public func open(_ document: TabDocument, beside: Bool, keeping: TabDocument? = nil) {
         if reveal(identity: document.identity) { return }
-        guard beside, let tab = activeTab else { return addTab(.document(document)) }
+        // A page (the review, the history, a project's page) is the center whole: never beside a
+        // terminal, whatever the setting says (plan 31 E; the history opened as a narrow split).
+        guard beside, !document.isPage, let tab = activeTab else { return addTab(.document(document)) }
         if let pane = reusablePane(in: tab, keeping: keeping) {
             replace(pane, in: tab, with: document)
         } else if tab.dockedPane == nil, tab.canDock {

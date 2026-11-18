@@ -45,6 +45,8 @@ public final class AgentTranscriptDocument: TabDocument {
     public var view: NSView { transcript }
     var drawnText: String { transcript.textView.string }
     public var hasUnsavedChanges: Bool { false }
+    /// The center whole (plan 31 E): something to read, not a pane beside a terminal.
+    public var isPage: Bool { true }
     public func focus() { transcript.window?.makeFirstResponder(transcript.textView) }
     public func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) { close() }
 

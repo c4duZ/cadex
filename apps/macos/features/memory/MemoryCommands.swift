@@ -141,6 +141,8 @@ public final class MemoryBriefingDocument: TabDocument {
     public let identity: String
     public var title: String { T("Memory Briefing", "Briefing da memória") }
     public var hasUnsavedChanges: Bool { false }
+    /// The center whole (plan 31 E): something to read, not a pane beside a terminal.
+    public var isPage: Bool { true }
     public var onChange: (() -> Void)?
     private let text: NSTextView
 

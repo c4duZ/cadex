@@ -167,7 +167,7 @@ public final class ConflictDocument: NSObject, TabDocument, NSTextViewDelegate {
 
     private func build() {
         status.font = UILooks.font(11.5)
-        status.textColor = .secondaryLabelColor
+        status.textColor = DesignTokens.Color.textMuted
         let buttons = [("git.accept-ours", T("Ours", "A nossa")), ("git.accept-theirs", T("Theirs", "A deles")),
                        ("git.accept-both", T("Both", "As duas")), ("git.mark-resolved", T("Mark Resolved", "Marcar resolvido"))]
             .map { id, title in CommandButton(title: title) { [weak self] in _ = self?.runCommand?(id) } }
@@ -209,7 +209,7 @@ public final class ConflictDocument: NSObject, TabDocument, NSTextViewDelegate {
         scroll.backgroundColor = look.background
         let label = NSTextField(labelWithString: title)
         label.font = UILooks.font(11, weight: .semibold)
-        label.textColor = .secondaryLabelColor
+        label.textColor = DesignTokens.Color.textMuted
         // A plain box with the text pinned to its edges: inside a stack in
         // the split, the result came up empty (seen in the app, 2026-11-15).
         let box = NSView()

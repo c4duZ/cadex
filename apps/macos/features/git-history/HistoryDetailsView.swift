@@ -39,11 +39,11 @@ final class HistoryDetailsView: NSView, NSTableViewDataSource, NSTableViewDelega
     static func text(_ commit: HistoryCommit?, details: CommitDetails?) -> NSAttributedString {
         let text = NSMutableAttributedString()
         guard let commit else {
-            text.append(NSAttributedString(string: T("Select a commit", "Selecione um commit"), attributes: [.font: UILooks.font(12), .foregroundColor: NSColor.secondaryLabelColor]))
+            text.append(NSAttributedString(string: T("Select a commit", "Selecione um commit"), attributes: [.font: UILooks.font(12), .foregroundColor: DesignTokens.Color.textMuted]))
             return text
         }
         let message = details?.message ?? commit.subject
-        text.append(NSAttributedString(string: message + "\n\n", attributes: [.font: UILooks.font(13), .foregroundColor: NSColor.labelColor]))
+        text.append(NSAttributedString(string: message + "\n\n", attributes: [.font: UILooks.font(13), .foregroundColor: DesignTokens.Color.textPrimary]))
         let date = HistoryRows.fullDates.string(from: commit.date)
         var meta = "\(commit.author) <\(commit.email)>\n\(date)\ncommit \(commit.sha)"
         if !commit.parents.isEmpty {
@@ -51,7 +51,7 @@ final class HistoryDetailsView: NSView, NSTableViewDataSource, NSTableViewDelega
             let label = commit.parents.count > 1 ? T("parents", "pais") : T("parent", "pai")
             meta += "\n\(label) \(shas.joined(separator: " "))"
         }
-        text.append(NSAttributedString(string: meta, attributes: [.font: UILooks.monospaced(11), .foregroundColor: NSColor.secondaryLabelColor]))
+        text.append(NSAttributedString(string: meta, attributes: [.font: UILooks.monospaced(11), .foregroundColor: DesignTokens.Color.textMuted]))
         return text
     }
 
@@ -82,13 +82,13 @@ final class HistoryDetailsView: NSView, NSTableViewDataSource, NSTableViewDelega
             .font: UILooks.monospaced(11, weight: .bold), .foregroundColor: color(for: file.letter),
         ])
         let name = file.orig.isEmpty ? file.path : "\(file.orig) → \(file.path)"
-        text.append(NSAttributedString(string: name, attributes: [.font: UILooks.font(12), .foregroundColor: NSColor.labelColor]))
+        text.append(NSAttributedString(string: name, attributes: [.font: UILooks.font(12), .foregroundColor: DesignTokens.Color.textPrimary]))
         let small = UILooks.monospacedDigits(11)
         if let added = file.added, let removed = file.removed {
-            text.append(NSAttributedString(string: "  +\(added)", attributes: [.font: small, .foregroundColor: NSColor.systemGreen]))
-            text.append(NSAttributedString(string: " −\(removed)", attributes: [.font: small, .foregroundColor: NSColor.systemRed]))
+            text.append(NSAttributedString(string: "  +\(added)", attributes: [.font: small, .foregroundColor: DesignTokens.Color.accentGreenText]))
+            text.append(NSAttributedString(string: " −\(removed)", attributes: [.font: small, .foregroundColor: DesignTokens.Color.accentRedText]))
         } else {
-            text.append(NSAttributedString(string: T("  binary", "  binário"), attributes: [.font: small, .foregroundColor: NSColor.secondaryLabelColor]))
+            text.append(NSAttributedString(string: T("  binary", "  binário"), attributes: [.font: small, .foregroundColor: DesignTokens.Color.textMuted]))
         }
         return text
     }

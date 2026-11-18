@@ -6,7 +6,6 @@ import UILooks
 final class EditorBanner: NSView {
     private let label = NSTextField(wrappingLabelWithString: "")
     private let buttons = NSStackView()
-    private var actions: [() -> Void] = []
     private var height: NSLayoutConstraint!
 
     init() {
@@ -36,13 +35,9 @@ final class EditorBanner: NSView {
     func show(_ text: String, actions list: [(String, () -> Void)] = []) {
         label.stringValue = text
         buttons.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        actions = list.map(\.1)
-        for (i, item) in list.enumerated() {
-            let button = NSButton(title: item.0, target: self, action: #selector(run(_:)))
-            button.tag = i
-            button.bezelStyle = .rounded
-            button.controlSize = .small
-            buttons.addArrangedSubview(button)
+        for (title, run) in list {
+            // The app's secondary button (plan 31 E), not the system's rounded one.
+            buttons.addArrangedSubview(DesignButton.make(title, .secondary, height: DesignTokens.Button.Heights.small * 6 / 7) { run() })
         }
         isHidden = false
         height.constant = 30
@@ -51,11 +46,6 @@ final class EditorBanner: NSView {
     func hide() {
         isHidden = true
         height.constant = 0
-    }
-
-    @objc private func run(_ sender: NSButton) {
-        guard sender.tag < actions.count else { return }
-        actions[sender.tag]()
     }
 }
 
@@ -68,9 +58,9 @@ final class EditorMessageView: NSView {
         super.init(frame: .zero)
         let label = NSTextField(labelWithString: text)
         label.font = UILooks.font(14)
-        label.textColor = .secondaryLabelColor
+        label.textColor = DesignTokens.Color.textMuted
         var views: [NSView] = [label]
-        if let title { views.append(NSButton(title: title, target: self, action: #selector(press))) }
+        if let title { views.append(DesignButton.make(title, .secondary) { [weak self] in self?.press() }) }
         let stack = NSStackView(views: views)
         stack.orientation = .vertical
         stack.spacing = 12

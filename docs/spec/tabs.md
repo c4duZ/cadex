@@ -185,3 +185,10 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 - [ ] Trocar de tarefa na árvore troca as abas da barra de título.
 - [ ] Uma aba com o Claude Code mostra o estado e o nome da conversa; o nome dado à mão
       continua; com keepSessions ligado, fechar e reabrir o app religa a aba ao mesmo shell.
+
+## Páginas (plano 31 E)
+- O que é para ler de corpo inteiro abre como página, na própria aba, nunca dividido ao lado de um
+  terminal, qualquer que seja general.openFiles: a revisão (e o diff de um arquivo), o histórico do
+  git, a transcrição de uma conversa, o briefing da memória, o arquivo de conversas, o quadro, a
+  página do projeto, a da execução e a da automação. Arquivo, Markdown, mídia e preview continuam
+  abrindo ao lado, porque se trabalha com eles junto do terminal.

@@ -165,7 +165,12 @@ extension WindowSession {
     /// An action of the agent's CLI; refused, the reason in a sheet; done,
     /// the page read again.
     private func memoryAct(_ words: [String]) {
-        guard settings.store.settings.memory.enabled else { return NSSound.beep() }
+        // Said, not a beep: the command ran and nothing showed (the UX audit, 2026-11-18).
+        guard settings.store.settings.memory.enabled else {
+            return say(T("Project memory is off", "A memória do projeto está desligada"),
+                       T("With it off there is no briefing: turn it on in the right panel's Memory tab (memory.enable).",
+                         "Desligada, não há briefing: ligue na aba Memória do painel da direita (memory.enable)."))
+        }
         MemoryWiring.runAgent(words) { [weak self] code, answer in
             guard let self else { return }
             if code != 0 {
