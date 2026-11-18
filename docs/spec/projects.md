@@ -61,10 +61,24 @@ agora sempre com a pasta (`../adr/0035-work-frame.md`).
   caminho.
 
 ### A página do projeto (mockup Project; plano 30 A, feito junto da revisão do plano 29)
-- Clicar no nome do projeto na árvore, ou project.show-overview no ⌘K, abre no centro a aba
-  "Overview", sem a caixa de painel (ocupa o centro inteiro), com o painel da direita em Memory. A
-  barra de título mostra "projeto · Overview · Automations · Conversations": as duas últimas abrem a
-  lista de automações e o arquivo e histórico.
+- Clicar no nome do projeto na árvore, um cartão da página Projetos, ou project.show-overview no
+  ⌘K, abre a página no centro, abaixo da barra de cima, que não muda (plano 34; a proposta em
+  `docs/design/projects/proposta.html`); o painel da direita fecha e volta ao sair; o Esc ou uma aba
+  de terminal saem dela.
+- Em cima, "Projects › nome" (o primeiro leva à página Projetos), o nome, a linha "caminho · branch ·
+  remoto · N páginas de memória · N sessões", Race… e New task, e as seções num controle sob o
+  cabeçalho: Visão geral (o que segue), Sessões, Memória, Automações e Configurações.
+- Sessões: as conversas do projeto e das tarefas dele, com a conta (o logo), a pasta e a idade; a
+  escolhida mostra ao lado o resumo da página de sessão da memória, as tags, o corpo, o que a memória
+  guardou dela, Retomar, Continuar em outra conta… e Ver a página (já renderizada).
+- Memória: a busca e as páginas agrupadas (regras, decisões, cuidados, padrões, outras) com o
+  sinal do tipo; a escolhida aparece renderizada, sem o frontmatter (o tipo, de qual sessão veio, a
+  conta, o corpo), com Editar (o .md no editor), Abrir a sessão e Apagar…. O clique numa página do
+  painel Memory da direita, ou na busca da memória do ⌘K, abre aqui.
+- Automações: as do projeto, com o liga e desliga, Criar automação e a página de todas;
+  Configurações: a memória do projeto (o .ai-memory.toml, plano 32).
+- A página Projetos (project.show-all): um cartão por projeto com a pasta e o branch, tarefas,
+  sessões, memórias e o que acontece agora; Adicionar projeto.
 - De cima para baixo: o nome, o caminho · o branch · o remoto, e Race… e New task; quatro números
   (tarefas abertas com quantas trabalham e quantas precisam de você; o gasto da semana pelo custo
   que a status line gravou de cada sessão, com sessões e contas; os merges dos últimos 30 dias,

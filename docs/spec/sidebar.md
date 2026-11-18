@@ -33,9 +33,9 @@ de você sem abrir página nenhuma (`../adr/0035-work-frame.md`; mockup e texto 
   dela, como os do projeto. Clicar num terminal mostra a aba dele; clicar na tarefa mostra a aba
   usada por último nela.
 - "+ Add project" no fim da lista abre uma pasta como projeto (project.new).
-- **Pé da coluna:** "Automations" com quantas estão ligadas e a próxima ("2 on · next 09:00"), que
-  abre as automações no centro; e "Archive & history ⌘⇧H", que abre no centro as conversas dos
-  agentes e as tarefas arquivadas.
+- **Pé da coluna (plano 34 B):** "Projects" com quantos (abre a página Projetos) e "Automations" com
+  quantas estão ligadas (abre a página Automações, vazia ou não); o da página aberta fica aceso. O
+  "Archive & history" virou a aba Sessões de cada projeto e continua no ⌘K (agents.show-history).
 - ⌘B recolhe e mostra a coluna. A largura padrão é 292 pt; arrastar a borda muda e fica salva.
 - Projeto sem tarefa mostra só os terminais da pasta dele: o uso normal (abrir o projeto, um
   terminal com o Claude) nunca precisa de tarefa.

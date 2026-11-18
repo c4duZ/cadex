@@ -172,6 +172,13 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
 - orchestration.stop-run para todos os despachos da execução, com confirmação.
 
 ### Automações
+- A página Automações (orchestration.show-automations, o "Automations" do pé da barra lateral; plano
+  34 F) sempre abre. Vazia, a área inteira diz o que é uma automação, dá um exemplo e põe "Criar
+  automação" no meio; com as automações desligadas, avisa que criar a primeira as liga (a mesma
+  pergunta de orchestration.toggle-automations). Com itens, uma tabela: a chave de ligar na linha, o
+  nome, quando, o projeto, a conta, a última rodada e a próxima; o clique abre as rodadas e o botão
+  direito tem Executar agora, Ligar ou desligar e Apagar (a automação e o registro das rodadas).
+  Criar volta à tabela, com a nova desligada.
 - "New Automation" (orchestration.new-automation): nome, prompt, recorrência (dias úteis a uma hora,
   todo dia a uma hora, a cada N horas, a cada N minutos, uma vez numa data), destino (uma worktree nova a cada
   execução, ou uma pasta fixa), conta, modelo, modo de permissão e ferramentas permitidas, teto de

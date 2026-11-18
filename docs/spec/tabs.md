@@ -186,7 +186,10 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 - [ ] Uma aba com o Claude Code mostra o estado e o nome da conversa; o nome dado à mão
       continua; com keepSessions ligado, fechar e reabrir o app religa a aba ao mesmo shell.
 
-## Páginas (plano 31 E)
+## Páginas (plano 31 E; plano 34)
+- Uma página nunca aparece na barra de cima: ela mostra as abas de terminal de onde se veio, nenhuma
+  acesa, com o "+" e a conta iguais. Uma página por vez (abrir outra troca); o Esc numa página, ou o
+  clique numa aba, volta ao terminal de antes. As seções de uma página ficam dentro dela.
 - O que é para ler de corpo inteiro abre como página, na própria aba, nunca dividido ao lado de um
   terminal, qualquer que seja general.openFiles: a revisão (e o diff de um arquivo), o histórico do
   git, a transcrição de uma conversa, o briefing da memória, o arquivo de conversas, o quadro, a
