@@ -26,7 +26,7 @@ que ela digitar já vai ter".
 - Esconder do Claude o que mostra uma escolha: o diálogo de permissão fica inteiro no painel.
 - Reconhecer a tela do Claude sem a medida dos bytes de uma versão real, ou de um jeito que, se
   falhar, esconda coisa errada: falhando, a peça do Claude aparece como hoje.
-- Compartilhar `projects/` entre contas (ADR 0021): a troca leva o trabalho pela memória.
+- Compartilhar a pasta projects/ entre contas (ADR 0021): a troca leva o trabalho pela memória.
 
 ## Como eu quero
 - **A. Medir.** Feita (2026-11-18, Claude Code 2.1.327, `docs/spec/terminal.md`, As cores e as
