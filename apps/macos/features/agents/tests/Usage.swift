@@ -117,7 +117,7 @@ let usageChecks: [(name: String, body: Checks.Body)] = [
         expect(AgentLaunch.continueCommand(for: work, tools: "/A/cadex") == "CLAUDE_CONFIG_DIR='/Users/me/.claude-work' '/A/cadex' continue claude")
         expect(AgentLaunch.continueCommand(for: codex, tools: "/A/cadex") == "CODEX_HOME='/Users/me/.codex-2' '/A/cadex' continue codex")
         expect(AgentLaunch.continueCommand(for: AgentAccount(dir: "/Users/me/.claude", name: "D", isDefault: true), tools: "/A/cadex")
-               == "'/A/cadex' continue claude")
+               == "CADEX_ACCOUNT_CHOSEN=1 '/A/cadex' continue claude")
         expect(AgentLaunch.continueCommand(for: nil, tools: "/A/cadex") == "'/A/cadex' continue")
     }),
     ("an account with no login, or out for over a day, is left out; a short pause is not", {

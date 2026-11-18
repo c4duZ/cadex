@@ -50,7 +50,9 @@ public enum AgentLaunch {
         guard let account else { return cadex + " continue" }
         let quoted = "'" + account.dir.replacingOccurrences(of: "'", with: "'\\''") + "'"
         switch account.provider {
-        case .claude: return (account.isDefault ? "" : "CLAUDE_CONFIG_DIR=\(quoted) ") + cadex + " continue claude"
+        // The default account has no folder to name (~/.claude by its absence): the mark says it was
+        // chosen, so `cadex continue` does not take the project's or the active one (plan 33 F).
+        case .claude: return (account.isDefault ? "CADEX_ACCOUNT_CHOSEN=1 " : "CLAUDE_CONFIG_DIR=\(quoted) ") + cadex + " continue claude"
         case .codex: return (account.isDefault ? "" : "CODEX_HOME=\(quoted) ") + cadex + " continue codex"
         }
     }
