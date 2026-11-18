@@ -30,6 +30,8 @@
   pedido (campo, popup, caixa de combinação, área de texto, checkbox), com o rótulo de seção em
   cima. As folhas da orquestração usam (`../../app/FormSheetWiring.swift`), no lugar do alerta do
   sistema.
+- `FramePill.swift` (plano 31 C): a pílula de filtro do quadro (components.board.filters.pill), que
+  o quadro e o arquivo de conversas usam.
 - `UILooks.swift`: o app chama UILooks.configure uma vez, antes de montar qualquer tela. As telas
   pedem `font(_:weight:)` (tamanho do desenho × zoom × fontSize/13, na família escolhida com o
   mesmo peso), `monospaced`/`monospacedDigits` (código curto e números), `pt` (larguras, margens,

@@ -69,32 +69,7 @@ public final class BoardDocument: TabDocument {
         page.show(pills: pills, buttons: [race, task], columns: columns)
     }
 
-    private func pill(_ title: String, on: Bool, run: @escaping () -> Void) -> NSView {
-        typealias P = BD.Filters.Pill
-        let pill = BoardBox()
-        pill.wantsLayer = true
-        pill.layer?.cornerRadius = UILooks.pt(P.height) / 2
-        pill.layer?.backgroundColor = on ? P.Active.bg.cgColor : nil
-        pill.layer?.borderColor = on ? nil : P.Inactive.border.cgColor
-        pill.layer?.borderWidth = on ? 0 : DesignTokens.Stroke.hairline
-        let label = NSTextField(labelWithString: title)
-        label.font = UILooks.font(P.fontSize, weight: on ? P.Active.weight : .regular)
-        label.textColor = on ? P.Active.color : P.Inactive.color
-        // Centered in the pill's height (pinned to the top it sat high, 2026-11-17).
-        label.translatesAutoresizingMaskIntoConstraints = false
-        pill.addSubview(label)
-        NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: pill.leadingAnchor, constant: UILooks.pt(P.padding.left)),
-            label.trailingAnchor.constraint(equalTo: pill.trailingAnchor, constant: -UILooks.pt(P.padding.right)),
-            label.centerYAnchor.constraint(equalTo: pill.centerYAnchor),
-            pill.heightAnchor.constraint(equalToConstant: UILooks.pt(P.height)),
-        ])
-        pill.onPress = run
-        pill.setAccessibilityElement(true)
-        pill.setAccessibilityRole(.button)
-        pill.setAccessibilityLabel(title)
-        return pill
-    }
+    private func pill(_ title: String, on: Bool, run: @escaping @MainActor () -> Void) -> NSView { FramePill.make(title, on: on, run: run) }
 
     private func column(_ column: BoardColumns.Column, _ cards: [BoardCard]) -> NSView {
         typealias H = BD.Column.Header

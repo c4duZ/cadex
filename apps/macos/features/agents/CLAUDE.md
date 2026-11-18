@@ -126,7 +126,9 @@
   contas só com alguém olhando; `AgentHistoryLaunch`, os comandos de retomar e continuar com o kit),
   `AgentHistoryList.swift` (filtro e grupos puros, `AgentHistoryRows`, e a tabela que só desenha o
   que aparece), `AgentHistoryView.swift` (a página, com busca, escopo e agrupamento; no centro, numa aba,
-  pelo `AgentHistoryDocument.swift` desde o plano 27 fase C: "Archive & History", agents.show-history) e
+  pelo `AgentHistoryDocument.swift` desde o plano 27 fase C: "Archive & history", agents.show-history; uma
+  página na cara da página do projeto desde o plano 31 C: o título e a contagem, a busca na caixa da
+  moldura, o escopo e o agrupamento em pílulas, cada conversa uma linha da lista) e
   `AgentHistoryCommands.swift` (agents.resume-session, -continue-in-account, -copy-resume-command e
   -reveal-session-log, com a lista de conversas no ⌘K). agents.history é o `isEnabled`. Sessão
   continuada de outra conta: AgentSubagent.origins acha a pasta de subagentes da origem (pelas

@@ -50,9 +50,10 @@ enum AgentHistoryRows {
     }
 }
 
-/// The table: one cell per conversation (title over the detail), a group
-/// row per group; only the rows on screen are drawn. Double click resumes;
-/// the right click lists what to do with it.
+/// The table: one cell per conversation (title over the detail, as a row of
+/// the project page's list; plan 31 C), a group's label per group; only the
+/// rows on screen are drawn. Double click resumes; the right click lists
+/// what to do with it.
 @MainActor
 final class AgentHistoryTable: NSTableView, NSTableViewDataSource, NSTableViewDelegate {
     var items: [AgentHistoryItem] = [] { didSet { reloadData() } }
@@ -68,8 +69,9 @@ final class AgentHistoryTable: NSTableView, NSTableViewDataSource, NSTableViewDe
         headerView = nil
         backgroundColor = .clear
         style = .plain
-        intercellSpacing = NSSize(width: 0, height: 2)
-        selectionHighlightStyle = .regular
+        intercellSpacing = NSSize(width: 0, height: UILooks.pt(DesignTokens.Project.Columns.listGap))
+        // The row's own card shows it; no system blue.
+        selectionHighlightStyle = .none
         dataSource = self
         delegate = self
         target = self
@@ -80,47 +82,39 @@ final class AgentHistoryTable: NSTableView, NSTableViewDataSource, NSTableViewDe
 
     func numberOfRows(in tableView: NSTableView) -> Int { items.count }
 
-    func tableView(_ tableView: NSTableView, isGroupRow row: Int) -> Bool {
-        if case .header = items[row] { return true }
-        return false
+    // No system group rows: a group's label sits on the page, it does not float over the list.
+    func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
+        if case .header = items[row] { return false }
+        return true
     }
 
-    func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool { !self.tableView(tableView, isGroupRow: row) }
-
     func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
-        if case .header = items[row] { return UILooks.pt(24) }
-        return UILooks.pt(38)
+        typealias R = DesignTokens.Project.Row
+        if case .header = items[row] { return UILooks.pt(DesignTokens.Project.Label.fontSize + R.padding.top + R.padding.bottom) }
+        return UILooks.pt(R.padding.top + R.padding.bottom + DesignTokens.FontSize.body + R.Meta.fontSize + R.textGap) + UILooks.labelInset * 4
     }
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
+        typealias R = DesignTokens.Project.Row
         switch items[row] {
         case .header(let title, let count):
-            let label = AgentText.label("\(title)  \(count)", size: 11, weight: .semibold, color: colors.secondary)
-            return wrap(label, top: 6)
-        case .entry(let entry):
-            let title = AgentText.label(entry.title, size: 12, color: colors.text)
-            let detail = AgentText.label(AgentHistoryRows.detail(entry, accountName: accountName(entry.account)), size: 11, color: colors.secondary)
-            let stack = NSStackView(views: [title, detail])
-            stack.orientation = .vertical
-            stack.alignment = .leading
-            stack.spacing = 1
-            let cell = wrap(stack, top: 3)
-            cell.toolTip = entry.title + "\n" + (entry.cwd as NSString).abbreviatingWithTildeInPath
-                + T("\nDouble click: resume in its account", "\nDuplo clique: retomar na conta dela")
+            let label = FrameField.label("\(title)  \(count)")
+            let cell = NSView()
+            label.translatesAutoresizingMaskIntoConstraints = false
+            cell.addSubview(label)
+            NSLayoutConstraint.activate([label.leadingAnchor.constraint(equalTo: cell.leadingAnchor), label.bottomAnchor.constraint(equalTo: cell.bottomAnchor)])
             return cell
+        case .entry(let entry):
+            let title = FrameField.text(entry.title, color: DesignTokens.Color.textPrimary, weight: DesignTokens.FontWeight.semibold)
+            let detail = FrameField.text(AgentHistoryRows.detail(entry, accountName: accountName(entry.account)), size: R.Meta.fontSize, color: R.Meta.color)
+            let words = FrameField.column([title, detail], gap: R.textGap)
+            let card = FrameBox()
+            card.box(bg: R.bg, border: R.border, radius: R.radius)
+            card.hold(words, padding: R.padding)
+            card.toolTip = entry.title + "\n" + (entry.cwd as NSString).abbreviatingWithTildeInPath
+                + T("\nDouble click: resume in its account", "\nDuplo clique: retomar na conta dela")
+            return card
         }
-    }
-
-    private func wrap(_ content: NSView, top: CGFloat) -> NSView {
-        let cell = NSView()
-        content.translatesAutoresizingMaskIntoConstraints = false
-        cell.addSubview(content)
-        NSLayoutConstraint.activate([
-            content.leadingAnchor.constraint(equalTo: cell.leadingAnchor, constant: 8),
-            content.trailingAnchor.constraint(lessThanOrEqualTo: cell.trailingAnchor, constant: -8),
-            content.topAnchor.constraint(equalTo: cell.topAnchor, constant: top),
-        ])
-        return cell
     }
 
     func entry(at row: Int) -> AgentHistoryEntry? {

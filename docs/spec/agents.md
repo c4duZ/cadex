@@ -148,7 +148,8 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
 
 ### Histórico
 - Archive & history (agents.show-history; o ⌘⇧H do mockup é hoje do preview web, e o dono
-  decide), no centro, numa aba, lista todas as conversas de todas as
+  decide), no centro, numa página (plano 31 C: o título e a contagem, a busca, o escopo e o
+  agrupamento em pílulas, cada conversa uma linha da lista da página do projeto), lista todas as conversas de todas as
   contas: título (o que você deu com /rename, senão o que o Claude deu, senão o primeiro pedido),
   e embaixo pasta · branch · conta · há quanto tempo. A pasta é a de onde a conversa rodou (uma
   conversa do repositório retomada numa worktree aparece na worktree). Conversa sem mensagem

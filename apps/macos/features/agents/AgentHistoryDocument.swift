@@ -10,10 +10,12 @@ import Tabs
 public final class AgentHistoryDocument: TabDocument {
     public static let identity = "cadex:agent-history"
     public let view: NSView
-    public var title: String { T("Archive & History", "Arquivo e histórico") }
+    public var title: String { T("Archive & history", "Arquivo e histórico") }
     public var identity: String { Self.identity }
     public var hasUnsavedChanges: Bool { false }
     public var onChange: (() -> Void)?
+    /// The center whole (plan 31 C): a list to read, not a pane beside a terminal.
+    public var isPage: Bool { true }
 
     public init(page: AgentHistoryView) {
         view = page
