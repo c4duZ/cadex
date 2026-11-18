@@ -105,6 +105,9 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
     }
 
     /// The list on screen changed without a new field (a prefix typed).
+    /// The empty list's words for the text typed now (the source's idle words when nothing is).
+    func setEmptyText(_ text: String) { emptyLabel.stringValue = text }
+
     func setLook(placeholder: String, emptyText: String, icon: Icon) {
         field.placeholderAttributedString = NSAttributedString(string: placeholder, attributes: [
             .font: UILooks.font(18), .foregroundColor: style.secondaryText.withAlphaComponent(0.7),

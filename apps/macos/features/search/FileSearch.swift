@@ -46,6 +46,9 @@ public final class FileSearch: PaletteSource {
 
     public var placeholder: String { T("Find file by name", "Buscar arquivo pelo nome") }
     public var emptyText: String { T("No files found", "Nenhum arquivo encontrado") }
+    public var idleText: String? {
+        T("Type part of a file's name; the ones you open show here.", "Digite parte do nome de um arquivo; os que você abrir aparecem aqui.")
+    }
     public var icon: Icon { .files }
     public var hints: [PaletteHint] {
         [PaletteHint("↩", T("open", "abrir")), PaletteHint("⌥↩", T("to the side", "ao lado")), PaletteHint("⌘↩", T("in new tab", "em nova aba"))]
@@ -53,7 +56,7 @@ public final class FileSearch: PaletteSource {
 
     public func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
         guard !query.isEmpty else {
-            return show(recent.map { item(path: $0, positions: []) }, recent.isEmpty ? T("Type to find files", "Digite para buscar arquivos") : T("Recent", "Recentes"))
+            return show(recent.map { item(path: $0, positions: []) }, recent.isEmpty ? nil : T("Recent", "Recentes"))
         }
         show(rank(query).map { item(path: $0.path, positions: $0.positions) }, indexStatus())
     }

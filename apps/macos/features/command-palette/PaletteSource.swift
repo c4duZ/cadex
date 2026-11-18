@@ -11,6 +11,9 @@ public protocol PaletteSource: AnyObject {
     var placeholder: String { get }
     /// Shown when the list is empty for a query.
     var emptyText: String { get }
+    /// What the list says before anything is typed and nothing shows (⌘P with no recent file);
+    /// nil: `emptyText`. "No files found" before typing read as broken (the owner, 2026-11-18).
+    var idleText: String? { get }
     /// The text changed. `show` may be called many times, as results
     /// arrive; the second value is a short status on the right of the field.
     func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void)
@@ -29,6 +32,7 @@ public protocol PaletteSource: AnyObject {
 }
 
 extension PaletteSource {
+    public var idleText: String? { nil }
     public func choose(_ item: PaletteItem, as choice: PaletteChoice) { choose(item) }
     public var hints: [PaletteHint] { [PaletteHint("↩", T("choose", "escolher"))] }
     public var icon: Icon { .magnifyingGlass }

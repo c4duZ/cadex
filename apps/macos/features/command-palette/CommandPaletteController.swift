@@ -121,6 +121,7 @@ public final class CommandPaletteController {
             if let list { panel.setLook(placeholder: list.placeholder, emptyText: list.emptyText, icon: list.icon) }
         }
         let hints = footer(for: list, empty: query.isEmpty)
+        if let list { panel.setEmptyText(text.isEmpty ? list.idleText ?? list.emptyText : list.emptyText) }
         list?.search(text) { [weak self] items, status in
             guard let self, current == self.generation else { return }
             self.items = items

@@ -43,6 +43,10 @@ public final class ContentSearch: PaletteSource {
 
     public var placeholder: String { T("Find text in files", "Buscar texto nos arquivos") }
     public var emptyText: String { T("No results", "Nenhum resultado") }
+    public var idleText: String? {
+        let name = (root as NSString).lastPathComponent
+        return T("Type to search the text of every file in \(name).", "Digite para buscar no texto de todos os arquivos de \(name).")
+    }
     public var icon: Icon { .magnifyingGlass }
     public var hints: [PaletteHint] {
         [PaletteHint("↩", T("open", "abrir")), PaletteHint("⌥↩", T("to the side", "ao lado")), PaletteHint("⌘↩", T("in new tab", "em nova aba"))]
