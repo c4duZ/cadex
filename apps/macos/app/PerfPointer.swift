@@ -67,6 +67,9 @@ extension WindowSession {
                     self.window.sendEvent(event)
                 }
             }
+            // Which view takes it, for whoever reads the log (a drag in the side column blanked the window, 2026-11-18).
+            let hit = self.window.contentView?.superview?.hitTest(from) ?? self.window.contentView?.hitTest(from)
+            NSLog("perf drag hit %@", hit.map { String(describing: type(of: $0)) } ?? "nothing")
             send(.leftMouseDown, from)
             for step in 1...10 {
                 let t = CGFloat(step) / 10

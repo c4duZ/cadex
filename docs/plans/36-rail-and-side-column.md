@@ -36,8 +36,10 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
   e abre a coluna; ⌥⌘I deixa de existir (o comando vira o mesmo do ⌘B). Os tokens novos.
   Feita em 2026-11-18: o trilho (`RailView`) e a coluna à esquerda com os ícones e a linha de
   contexto no pé; conferida com cliques de verdade numa instância de teste (o projeto B troca as
-  abas e a coluna; o ícone Files troca a página; o ⌘B fecha a coluna e o trilho fica). Não
-  conferido: arrastar a borda da coluna e o tema claro. A árvore fica fora da tela, ainda montada
+  abas e a coluna; o ícone Files troca a página; o ⌘B fecha a coluna e o trilho fica; arrastar a
+  borda leva a coluna de 260 a 343 pt e a largura fica salva; o tema claro pinta trilho e coluna).
+  Um arraste de teste dentro de uma lista ou do terminal deixa a janela em branco, também na dist de
+  antes da fase A: é o arraste sintético numa janela sem foco, não conferido com o mouse de verdade. A árvore fica fora da tela, ainda montada
   para o sidebar.find, até a fase F; o botão da coluna na barra de título continua (abre e fecha a
   coluna).
 - [ ] B. As páginas da coluna: os pés (Files: a pasta, criar e buscar; Changes: a checagem, Commit,
