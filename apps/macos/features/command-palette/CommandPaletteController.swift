@@ -77,10 +77,14 @@ public final class CommandPaletteController {
         source = newSource
         panel.listWidth = newSource.width ?? CommandPalettePanel.width
         panel.footerShown = newSource.showsFooter
+        // The list first, then the panel shows at its size (it showed the last list's size and
+        // jumped, the owner, 2026-11-18).
         if !panel.isVisible {
             guard let window = NSApp.keyWindow ?? NSApp.mainWindow ?? home else { return }
             parent = window
+            panel.prepare(placeholder: newSource.placeholder, emptyText: newSource.emptyText, icon: newSource.icon)
             panel.show(over: window)
+            return
         }
         panel.prepare(placeholder: newSource.placeholder, emptyText: newSource.emptyText, icon: newSource.icon)
     }

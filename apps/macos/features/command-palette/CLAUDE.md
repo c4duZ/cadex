@@ -36,7 +36,10 @@
   o campo vazio; fuzzy no título, depois palavra-chave e o título no outro idioma; indisponíveis no fim; fuzzy do núcleo),
   `CommandPalettePanel.swift` (NSPanel sem borda, feito uma vez e reaproveitado: ícone da lista,
   campo, status, linhas com títulos de seção, rodapé com as teclas; fecha ao perder o foco) e
-  `PaletteRows.swift` (as linhas, os títulos, as teclas desenhadas e o `PaletteStyle`).
+  `PaletteRows.swift` (as linhas, os títulos, as teclas desenhadas e o `PaletteStyle`). A resposta
+  (o dono, 2026-11-18, "duro"): `PaletteTable.swift` escolhe a linha sob o ponteiro quando o mouse
+  se move; o painel abre já no tamanho da lista, aparecendo em 0,12 s; a altura segue a lista numa
+  transição de 0,1 s; o rodapé só é refeito quando as teclas mudam.
 - Outras features entram na paleta implementando `PaletteSource` (a busca: ⌘P e ⌘⇧F; as abas e os
   projetos no `@`).
 - Spec em `../../../../docs/spec/command-palette.md`. Status: registro, menu e paleta prontos.

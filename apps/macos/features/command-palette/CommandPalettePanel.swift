@@ -31,7 +31,9 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
     private let background = NSView()
     private let fieldIcon = NSImageView()
     private let field = NSTextField()
-    private let table = NSTableView()
+    private let table = PaletteTable()
+    /// The footer's keys shown, rebuilt only when they change (not at every key typed).
+    private var shownHints: [PaletteHint]?
     private let scroll = NSScrollView()
     private let emptyLabel = NSTextField(labelWithString: "")
     /// A short note from the source on the right of the field ("Indexando…").
@@ -48,6 +50,7 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         super.init(contentRect: NSRect(x: 0, y: 0, width: Self.width, height: 120),
                    styleMask: [.borderless], backing: .buffered, defer: true)
         isFloatingPanel = true
+        acceptsMouseMovedEvents = true
         backgroundColor = .clear
         isOpaque = false
         hasShadow = true
@@ -72,8 +75,25 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         own.size.width = listWidth
         setFrame(own, display: false)
         setFrameTopLeftPoint(NSPoint(x: frame.midX - listWidth / 2, y: frame.maxY - 56))
+        // In already sized to its list (the controller prepares it first), fading in quickly: it
+        // appeared at the last list's height and then jumped (the owner, 2026-11-18).
+        alphaValue = 0
         makeKeyAndOrderFront(nil)
         makeFirstResponder(field)
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = Self.fadeIn
+            animator().alphaValue = 1
+        }
+    }
+
+    /// The fade in on opening, and the height following the list while typing.
+    static let fadeIn: TimeInterval = 0.12
+    static let resize: TimeInterval = 0.1
+
+    /// The row under a moving pointer becomes the chosen one, without scrolling the list.
+    private func hover(_ row: Int) {
+        guard row != table.selectedRow, row < rows.count, case .item = rows[row] else { return }
+        table.selectRowIndexes([row], byExtendingSelection: false)
     }
 
     /// A new source: empty field, its placeholder and icon, and its first list.
@@ -99,7 +119,10 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         rows = PaletteRows.rows(for: newItems)
         table.reloadData()
         emptyLabel.isHidden = !items.isEmpty
-        footer.show(hints, style: style)
+        if hints != shownHints {
+            footer.show(hints, style: style)
+            shownHints = hints
+        }
         if let first = rows.firstIndex(where: { if case .item = $0 { true } else { false } }) {
             table.selectRowIndexes([first], byExtendingSelection: false)
         }
@@ -135,6 +158,7 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         table.delegate = self
         table.target = self
         table.action = #selector(rowClicked)
+        table.onHover = { [weak self] row in self?.hover(row) }
         scroll.documentView = table
         scroll.drawsBackground = false
         scroll.hasVerticalScroller = true
@@ -184,6 +208,7 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
     }
 
     private func applyStyle() {
+        shownHints = nil
         background.layer?.backgroundColor = style.background.cgColor
         background.layer?.borderColor = style.border.cgColor
         for line in [topLine, bottomLine] { line.layer?.backgroundColor = style.border.cgColor }
@@ -199,9 +224,16 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         let list = rows.isEmpty ? Self.rowHeight : min(rows.reduce(0) { $0 + height(of: $1) }, Self.listMaxHeight)
         let total = Self.fieldHeight + 1 + 6 + list + 6 + (footerShown ? 1 + Self.footerHeight : 0)
         var frame = self.frame
+        guard frame.height != total else { return }
         frame.origin.y += frame.height - total
         frame.size.height = total
-        setFrame(frame, display: true)
+        // On screen the height follows the list in a short move, not a jump at every key.
+        guard isVisible, alphaValue > 0 else { return setFrame(frame, display: true) }
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = Self.resize
+            context.allowsImplicitAnimation = true
+            animator().setFrame(frame, display: true)
+        }
     }
 
     private func height(of row: PaletteRows.Row) -> CGFloat {
