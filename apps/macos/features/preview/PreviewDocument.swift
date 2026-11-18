@@ -26,7 +26,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     let phone = PreviewBar.icon(.deviceMobile, T("Phone width", "Largura de celular"))
     var phoneSized = false
     var sizes: (full: [NSLayoutConstraint], phone: [NSLayoutConstraint]) = ([], [])
-    private lazy var picker = PreviewPicker(web: web, overlay: overlay)
+    lazy var picker = PreviewPicker(web: web, overlay: overlay)
     /// Runs a command by id: the bar's pick button fires preview.pick-element.
     public var runCommand: ((String) -> Bool)?
     /// More controls at the end of the bar, given by the app (plan 23:
@@ -189,7 +189,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     public func stopPicking() { picker.stop() }
 
     private func showPicking() {
-        PreviewBar.pickChip(pick, picking: picker.isPicking)
+        PreviewBar.pickChip(pick, picking: picker.isPicking, available: pick.isEnabled)
     }
 
     /// Loads an address; without a scheme, http:// for local servers and

@@ -50,24 +50,33 @@ enum PreviewBar {
         return box
     }
 
-    /// "Pick element": the blue chip; lit (the stronger fill) while picking.
-    static func pickChip(_ button: NSButton, picking: Bool) {
+    /// "Pick element": the blue chip; lit (the stronger fill) while picking. The glyph and the words
+    /// together in the middle: the glyph sat on the chip's left edge and the words off center. With
+    /// no page, gray words and no fill: the blue chip dimmed read as a smudge (the owner, 2026-11-18).
+    static func pickChip(_ button: NSButton, picking: Bool, available: Bool = true) {
         typealias P = B.Pick
+        let color = available ? P.color : DesignTokens.Color.textTertiary
         button.isBordered = false
         button.wantsLayer = true
-        button.image = Icon.crosshair.image(size: UILooks.pt(P.fontSize))
+        let glyph = Icon.crosshair.image(size: UILooks.pt(P.fontSize))
+        button.image = glyph
         button.imagePosition = .imageLeading
-        button.contentTintColor = P.color
+        button.imageHugsTitle = true
+        button.alignment = .center
+        button.contentTintColor = color
         button.attributedTitle = NSAttributedString(string: " " + T("Pick element", "Escolher elemento"), attributes: [
-            .font: UILooks.font(P.fontSize, weight: P.weight), .foregroundColor: P.color,
+            .font: UILooks.font(P.fontSize, weight: P.weight), .foregroundColor: color,
         ])
         button.layer?.cornerRadius = UILooks.pt(P.radius)
-        button.layer?.backgroundColor = (picking ? P.color.withAlphaComponent(0.28) : P.bg).cgColor
-        let width = button.attributedTitle.size().width + UILooks.pt(P.fontSize + P.padding.left + P.padding.right)
+        button.layer?.backgroundColor = available ? (picking ? P.color.withAlphaComponent(0.28) : P.bg).cgColor : nil
+        let width = (glyph.size.width + button.attributedTitle.size().width + UILooks.pt(P.padding.left + P.padding.right)).rounded(.up)
         if let old = button.constraints.first(where: { $0.firstAttribute == .width }) { old.constant = width } else {
             button.widthAnchor.constraint(equalToConstant: width).isActive = true
         }
-        button.heightAnchor.constraint(equalToConstant: UILooks.pt(B.Url.height)).isActive = true
+        // Once: each restyle (picking on and off) added another.
+        if !button.constraints.contains(where: { $0.firstAttribute == .height }) {
+            button.heightAnchor.constraint(equalToConstant: UILooks.pt(B.Url.height)).isActive = true
+        }
     }
 
     /// The page's dot: what the page is doing.
@@ -164,7 +173,9 @@ extension PreviewDocument {
     }
 
     func showHasPage(_ has: Bool) {
-        for button in [pick, desktop, phone] { button.isEnabled = has; button.alphaValue = has ? 1 : 0.4 }
+        for button in [pick, desktop, phone] { button.isEnabled = has }
+        for button in [desktop, phone] { button.alphaValue = has ? 1 : 0.4 }
+        PreviewBar.pickChip(pick, picking: picker.isPicking, available: has)
         if !has { dot.layer?.backgroundColor = DesignTokens.Color.stateIdle.cgColor }
     }
 
