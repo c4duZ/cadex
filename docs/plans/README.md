@@ -71,8 +71,9 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 31 | `docs/plans/31-leftover-screens.md` | as telas que ficaram na casca velha (diff e revisão, folhas, arquivo, configurações) | fechado (2026-11-18): fases A a F; o travamento da revisão corrigido antes (9df527d) |
 
 | 32 | `docs/plans/32-settings-and-memory.md` | as configurações numa janela com lista e busca (a barra de status e as contas dentro), a memória por projeto numa tela | fechado (2026-11-18): fases A a E; o `make perf` passa menos o browser_agent_after_cpu (1,1 e 1,4 % na rodada completa, 0,2 a 0,4 sozinho), aceito pelo dono como ruído desta máquina |
+| 33 | `docs/plans/33-claude-pane-and-accounts.md` | o painel do Claude vestido de verdade (cores, sem o mascote, a caixa, o modo na status line) e a troca de conta num clique pela memória; o `claude` digitado na conta certa e com as permissões da opção | em andamento |
 
-- Depois: a moldura nova no app do Windows (plano 33, a escrever), sobre o port dos planos 9 a 13;
+- Depois: a moldura nova no app do Windows (plano 34, a escrever), sobre o port dos planos 9 a 13;
   até lá o Windows segue com spaces e os comandos novos ficam no `MAC_ONLY` da paridade.
 
 ## O que eu não quero

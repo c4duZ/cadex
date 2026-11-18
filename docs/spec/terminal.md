@@ -206,7 +206,43 @@ permissão.
   "light-ansi" num claro (fase C); o ANSI do Cadex Night é afinado para que o Claude, assim, fique
   com a cara do mockup 10. Quem digita `claude` numa aba sem o kit continua com o tema da conta.
 - O que o Claude desenha continua dele: a caixa da mensagem, as ferramentas e o diff só mudam de
-  cor, nunca de forma.
+  cor, nunca de forma. (Revisto no plano 33: o terminal passa a trocar as cores fixas e a desenhar
+  algumas formas por cima; abaixo.)
+
+### As cores e as formas do Claude Code (plano 33, fase A)
+Medido em 2026-11-18 com o Claude Code 2.1.327 (conta bkdg, Haiku), num PTY de 110 × 40 com cada
+célula fotografada (cor do texto, do fundo, negrito), nos temas "dark", "light" e "dark-ansi".
+- **No "dark-ansi" o diff não tem fundo** (só o número e o sinal coloridos) e a mensagem do dono
+  tem o fundo em ANSI 8 (brightblack), que no Cadex Night é um cinza claro: as duas diferenças do
+  mockup 10 vistas no dist vêm daí. Por isso o plano 33 volta ao tema de cores fixas.
+- **As cores fixas** (o que o terminal troca pelas do tema, components.terminalTheme):
+
+  | o que | "dark" | "light" |
+  |---|---|---|
+  | fundo da mensagem do dono / texto / ❯ | 373737 / ffffff / 999999 | f0f0f0 / 000000 / 666666 |
+  | linha removida: fundo / sinal / texto | 3d0100 / dc5a5a / f8f8f2 | ffdcdc / cf222e / 333333 |
+  | linha adicionada: fundo / sinal / texto | 022800 / 50c850 / f8f8f2 | dcffdc / 248a3d / 333333 |
+  | ⏺ de ferramenta que terminou | 4eba65 | 2c7a39 |
+  | ⏺ de ferramenta rodando, texto apagado | 999999 | 666666 |
+  | o trabalhando ("✳ Flambéing…") e o mascote | d77757 | d77757 |
+  | destaques do diálogo ("Bash command", ❯ 1. Yes) | b1b9f9 | 5769f7 |
+  | as linhas da caixa de entrada / os tracejados | 888888 / 505050 | 8a8a8a / afafaf |
+  | o modo: accept edits / plan | af87ff / 48968c | 8700ff / — |
+- **O mascote:** as três primeiras linhas, colunas 0 a 9, só caracteres do bloco Unicode
+  "Block Elements" (U+2580 a U+259F) em d77757, com partes de fundo 000000; o desenho muda entre
+  sessões (▐▛███▜▌ e ▐▛███▛█ vistos). À direita, "Claude Code v…", o modelo e a pasta.
+- **A caixa de entrada:** duas linhas inteiras de "─" (U+2500) na cor das linhas, uma acima e uma
+  abaixo da linha que começa com "❯" (com um espaço sem quebra depois).
+- **A linha do modo:** a última da tela, "⏵⏵ accept edits on (shift+tab to cycle)", "⏵⏵ auto mode
+  on (…)", "⏸ plan mode on (…)", "⏸ manual mode on", às vezes com " · esc to interrupt" ou
+  " · ← for agents" no fim. O modo vem em cor própria, o resto apagado.
+- **O modo não chega ao Cadex por outro caminho na hora:** os hooks trazem `permission_mode`, mas
+  só nos eventos (pedido, ferramenta, parada), e o ⇧⇥ não dispara hook; a status line roda de novo
+  a cada ⇧⇥, mas o JSON dela não traz o modo. Quem sabe o modo na hora é a própria linha do modo:
+  o terminal o lê de lá.
+- **O pedido de permissão** é um diálogo do Claude no lugar da caixa de entrada: uma linha inteira
+  de "─", "Bash command" no destaque, o comando entre duas linhas de "╌", "Do you want to
+  proceed?" e as opções. Fica como o Claude desenha (o dono, 2026-11-18).
 
 ### A gaveta de terminais (mockup Drawer; plano 30 C, feito junto da revisão do plano 29)
 - drawer.toggle (⌃`, e o item "Terminal ⌃`" da barra de status) mostra ou esconde a gaveta: terminais
