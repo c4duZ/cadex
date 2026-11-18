@@ -299,7 +299,7 @@
   captura salva também um painel visível, como o da paleta, num arquivo terminado em -panel.png, CADEX_PERF_TYPE digita um comando no terminal com foco, CADEX_PERF_HOME_PROMPT manda o pedido da
   tela de início, CADEX_PERF_DUMP_SCREEN grava a tela de cada terminal num arquivo, CADEX_PERF_SEND manda uma mensagem ao agente
   com o Return como tecla (a marca da barra),
-  CADEX_PERF_SPLIT divide o painel, CADEX_PERF_SWITCH troca a conta do Claude em foco e CADEX_PERF_LIMIT_AT olha os avisos de limite (plano 33), CADEX_PERF_SNAPSHOT_AT atrasa a captura; abrir a conversa de um subagente, abrir
+  CADEX_PERF_SPLIT divide o painel, CADEX_PERF_SWITCH troca a conta do Claude em foco e CADEX_PERF_LIMIT_AT olha os avisos de limite (plano 33), CADEX_PERF_MENU abre o menu "new" (o "+" das abas) ou "pane" (o "+" de um painel) para a captura, CADEX_PERF_SNAPSHOT_AT atrasa a captura; abrir a conversa de um subagente, abrir
   abas, abrir e rolar a revisão da pasta com CADEX_PERF_REVIEW, abrir duas vezes o grupo das máquinas da tailnet com CADEX_PERF_MACHINES); sem a variável, nada roda.
   `RacePerfHooks.swift` (plano 24): CADEX_PERF_RACE, um JSON com uma corrida que começa sozinha sem
   folha (e, com `pickAfter`, o #1 vence e os outros são descartados), anotada em `out`; CADEX_PERF_NEW_TASK

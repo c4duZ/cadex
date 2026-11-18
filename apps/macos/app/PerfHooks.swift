@@ -1,3 +1,4 @@
+import Menus
 import Agents
 import Machines
 import AppKit
@@ -78,6 +79,16 @@ extension WindowSession {
         if let id = environment["CADEX_PERF_COMMAND2"] {
             let at = environment["CADEX_PERF_COMMAND2_AT"].flatMap(Double.init) ?? 10
             DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in _ = self?.commands.run(id) }
+        }
+        // A menu shown for a capture (the owner's review, 2026-11-18): "new" (the tabs' "+"), "pane"
+        // (a pane's "+"), at CADEX_PERF_MENU_AT s, under the title bar's search.
+        if let which = environment["CADEX_PERF_MENU"] {
+            let at = environment["CADEX_PERF_MENU_AT"].flatMap(Double.init) ?? 3
+            DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in
+                guard let self, let anchor = self.workspace?.titleBar else { return }
+                let entries = which == "pane" ? self.paneMenu() : (self.menu?.popup(Self.newOpeners) ?? [])
+                PopupMenu.show(entries, below: anchor)
+            }
         }
         // Plan 33 E: the focused Claude goes on in the account of this folder at CADEX_PERF_SWITCH_AT s,
         // as a click on it in the pane's header; the limit notices looked at at CADEX_PERF_LIMIT_AT s.
