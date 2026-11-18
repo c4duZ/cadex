@@ -65,7 +65,9 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
   abaixo dos projetos e do "+", depois de uma linha (o dono, 2026-11-18): o clique abre a coluna na
   página, mesmo fechada, e o clique no aceso a fecha; a coluna sem fileira no topo (feito em
   2026-11-18 e conferido no app: com a coluna fechada pelo ⌘B, o clique em Files a abre em Files,
-  aceso). Os pés (Files: a pasta, criar e buscar; Changes: a checagem, Commit,
+  aceso). A página Sessions (feita em 2026-11-18): as conversas do projeto por quando, a busca, o
+  histórico lido só enquanto ela aparece e "Reading the history…" antes da primeira leitura; o
+  clique abre a página do projeto em Sessions com o resumo e o Resume; conferida no app. Os pés (Files: a pasta, criar e buscar; Changes: a checagem, Commit,
   Open PR e a branch com ↑↓; Memory: o briefing; Git graph: a branch e abrir numa aba); Changes com
   o escopo num menu pequeno, o total e o +/− de cada arquivo; a página nova Sessions (agora, hoje,
   antes; o clique mostra o resumo no centro, como na página do projeto); a ordem Files, Changes,

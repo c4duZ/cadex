@@ -106,6 +106,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case arrowsLeftRight = 0xE0A0
     case brain = 0xE74E
     case squaresFour = 0xE464
+    case chatsCircle = 0xE17E
 
     /// The fonts' family names inside the TTFs.
     static let fontName = "Phosphor"

@@ -92,6 +92,10 @@ final class WindowSession: NSObject, NSWindowDelegate {
     var paneHeaderClock: Timer?
     /// The history read while a project's page shows (ProjectPageWiring.swift).
     var projectPageHistory: UUID?
+    /// The history read while the side column's Sessions shows (plan 36 C).
+    var sessionsColumnHistory: UUID?
+    /// The history answered once since the page showed: an empty list then means none.
+    var sessionsColumnRead = false
     /// Each project's memory pages, read with its page (plan 34 E): the sections list them at each key.
     var projectMemory: [String: [MemoryPage]] = [:]
     /// The terminal drawer, made on its first show (DrawerWiring.swift).

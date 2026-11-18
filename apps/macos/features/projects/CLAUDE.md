@@ -55,6 +55,10 @@
   `ProjectEditParts.swift`: a prévia (`ProjectPreview`, também nos cartões da página Projetos e no
   cabeçalho da página do projeto) e a bolinha de cor. O app mostra a folha e aplica
   (`../../app/ProjectEditWiring.swift`).
+- `SessionsColumnView.swift` (plano 36 fase C): a página Sessions da coluna lateral, as conversas do
+  projeto em Today, This week e Earlier, com a busca (no título e na nota); "Reading the history…"
+  enquanto a primeira leitura corre; o clique diz a sessão (`onPick`). O app dá as linhas
+  (`../../app/SessionsColumnWiring.swift`) só enquanto a página aparece.
 - `ProjectsPinned.swift` (plano 36): o projeto fixado fica no trilho sem terminal (a última aba
   fechando não o tira: `keepEmpty`, e se era o mostrado, aparece outro com terminais ou a tela de
   início); `setPinned` (solto e sem terminal, sai), `closeTerminals(folder:)` (fixado fica),

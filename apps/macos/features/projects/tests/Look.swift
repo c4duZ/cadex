@@ -71,4 +71,19 @@ let lookTests: [(name: String, body: Checks.Body)] = [
         expect(before.isPinned(a))
         before.projects.forEach { $0.tabs.closeAll() }
     }),
+    ("the column's Sessions: the groups with their lines, the search filters, the click picks", {
+        let view = SessionsColumnView()
+        var picked: [String] = []
+        view.onPick = { picked.append($0) }
+        view.show([("Today", [PageListItem(id: "1", title: "Estado da memória", note: "bkdg · 8 min")]),
+                   ("This week", []),
+                   ("Earlier", [PageListItem(id: "2", title: "Handoff plano 24", note: "bhband · 9 d")])])
+        expect(view.rowTitles == ["Estado da memória", "Handoff plano 24"], "\(view.rowTitles)")
+        view.setQuery("bhband")
+        expect(view.rowTitles == ["Handoff plano 24"], "the note matches too")
+        view.setQuery("")
+        let row = view.subviews.compactMap { $0 as? NSScrollView }.first?.documentView?.subviews.compactMap { $0 as? SessionRowView }.first
+        row?.onPress?()
+        expect(picked == ["1"])
+    }),
 ]

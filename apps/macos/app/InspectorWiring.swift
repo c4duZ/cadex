@@ -16,8 +16,7 @@ import UILooks
 /// command (ADR 0005) and the commands open the panel on it.
 extension WindowSession {
     func makeInspector(explorer: ExplorerController, git: SourceControlController) -> InspectorView {
-        // The order of use (ADR 0038): Files, Changes, Memory, then the graph, the least used
-        // (Sessions joins in plan 36 phase B).
+        // The order of use (ADR 0038): Files, Changes, Sessions, Memory, then the graph, the least used.
         let tabs = [
             InspectorTab(id: "files", title: T("Files", "Arquivos"), icon: .folder, command: "explorer.focus", view: explorer.view, actions: [
                 InspectorAction("explorer.new-file", .filePlus, T("New File", "Novo arquivo")),
@@ -37,6 +36,11 @@ extension WindowSession {
                 InspectorAction("git.stage-all", .plus, T("Stage All", "Adicionar tudo ao stage")),
                 InspectorAction("git.unstage-all", .minus, T("Unstage All", "Tirar tudo do stage")),
                 InspectorAction("git.refresh", .arrowClockwise, T("Refresh", "Atualizar")),
+            ]),
+            // The project's conversations (plan 36 C): the history read only while this shows.
+            InspectorTab(id: "sessions", title: T("Sessions", "Sessões"), icon: .chatsCircle, command: "project.sessions-column",
+                         view: makeSessionsColumn(), actions: [], more: [
+                InspectorAction("project.show-sessions", .arrowSquareOut, T("All Sessions in the Project Page", "Todas as sessões na página do projeto")),
             ]),
             // Every action by its name in the "…" menu: three bare icons (sparkle, reload, eye) said
             // nothing (the owner, 2026-11-18).
@@ -58,6 +62,7 @@ extension WindowSession {
         inspector.onShow = { [weak self] id in
             if id == "history" { self?.showHistoryTab() }
             self?.workspace?.syncRailPages()
+            if id == "sessions" { self?.showSessionsColumn() }
             self?.settings.store.update { $0.inspector.tab = id }
         }
         git.onBusy = { [weak inspector] busy in inspector?.setBusy(busy, for: "changes") }
@@ -75,7 +80,7 @@ extension WindowSession {
     /// ⌃⌘1 to ⌃⌘4: the column's pages in order (plan 26 phase E; the sidebar.page-N ids of the old
     /// sidebar left in plan 27 phase D).
     func inspectorTabCommands() -> [Command] {
-        (1...4).map { n in
+        (1...5).map { n in
             Command(id: "inspector.tab-\(n)", title: T("Go to Side Column Page \(n)", "Ir para a página \(n) da coluna lateral"),
                     keywords: ["panel \(n)", "tab \(n)", "inspector", "painel \(n)", "aba \(n)"], category: .view,
                     defaultShortcut: "ctrl+cmd+\(n)",

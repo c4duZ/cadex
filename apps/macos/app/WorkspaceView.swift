@@ -210,7 +210,11 @@ final class WorkspaceView: NSView {
     /// The rail lights the page the column shows; none with the column closed.
     func syncRailPages() {
         rail.pageLit = inspectorVisible ? inspector.tab : nil
+        onColumnPage?(rail.pageLit)
     }
+
+    /// The page the column shows changed (nil: closed): a page that reads lets go when it goes.
+    var onColumnPage: ((String?) -> Void)?
 
     /// The column's width, within the settings' range and what the window leaves after the rail
     /// and a center of `minCenter` (a 640 pt panel in a 700 pt window squeezed the terminals to
