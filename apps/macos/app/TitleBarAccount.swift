@@ -5,17 +5,18 @@ import Strings
 import UILooks
 
 /// The account on the title bar's right (the owner, 2026-11-18, after the Zed and JetBrains
-/// toolbars): a small ring that fills with how much of its limit the account used (green, amber
-/// from 70 %, red from 90 %, as the usage card's bars), then the account's name, and the number
-/// only from 70 %, when it matters; the rest in the tip. The focused agent's account, else the
-/// active one; a click runs agents.switch-account. Hidden with no account to say. (A gauge icon
-/// and "bkdg · 0%" read as a loose label, the owner said.)
+/// toolbars and the AI usage meters): the provider's logo (ADR 0020), the account's name, a thin
+/// bar of how much of its limit it used and the number (green, amber from 70 %, red from 90 %, as
+/// the usage card's bars). The focused agent's account, else the active one; a click runs
+/// agents.switch-account. Hidden with no account to say. (A gauge icon, then a ring, read as a
+/// loose label and as a mouse's battery, the owner said.)
 final class TitleBarAccount: NSView {
     typealias Look = DesignTokens.TitleIconButton
 
     var onPress: (() -> Void)?
-    private let ring = UsageRing()
+    private let logo = NSImageView()
     private let label = NSTextField(labelWithString: "")
+    private let bar = UsageBar()
     private let number = NSTextField(labelWithString: "")
     private var hovered = false { didSet { restyle() } }
     private var pressed = false { didSet { restyle() } }
@@ -26,11 +27,15 @@ final class TitleBarAccount: NSView {
         layer?.cornerRadius = UILooks.pt(Look.radius)
         label.font = UILooks.font(DesignTokens.Breadcrumb.fontSize)
         label.lineBreakMode = .byTruncatingTail
-        number.font = UILooks.font(DesignTokens.Breadcrumb.fontSize)
+        number.font = UILooks.monospacedDigits(DesignTokens.Breadcrumb.fontSize)
         let side = UILooks.pt(Look.icon)
-        ring.widthAnchor.constraint(equalToConstant: side).isActive = true
-        ring.heightAnchor.constraint(equalToConstant: side).isActive = true
-        let row = NSStackView(views: [ring, label, number])
+        logo.widthAnchor.constraint(equalToConstant: side).isActive = true
+        logo.heightAnchor.constraint(equalToConstant: side).isActive = true
+        // As wide as two glyphs of the bar's text and as thick as the state glyph's line.
+        bar.widthAnchor.constraint(equalToConstant: side * 2.5).isActive = true
+        bar.heightAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Stroke.glyph) * 2).isActive = true
+        let row = NSStackView(views: [logo, label, bar, number])
+        row.setCustomSpacing(UILooks.pt(DesignTokens.TitleBar.gap) / 2, after: logo)
         row.spacing = UILooks.pt(DesignTokens.TitleBar.gap)
         row.edgeInsets = NSEdgeInsets(top: 0, left: UILooks.pt(DesignTokens.TitleBar.gap), bottom: 0, right: UILooks.pt(DesignTokens.TitleBar.gap))
         row.translatesAutoresizingMaskIntoConstraints = false
@@ -51,15 +56,17 @@ final class TitleBarAccount: NSView {
 
     /// The account's short name (the part after its organization's) and its usage when known (the
     /// ring; the number from `warn`). Nil hides it.
-    func show(name: String?, used: Int?) {
+    func show(name: String?, used: Int?, provider: ProviderLogo = .claude) {
         guard let name, !name.isEmpty else { isHidden = true; return }
         let short = name.components(separatedBy: " · ").last ?? name
+        logo.image = provider.image(size: UILooks.pt(Look.icon))
         label.stringValue = short
-        ring.share = used.map { Double($0) / 100 }
-        ring.color = Self.color(used)
-        number.stringValue = used.map { $0 >= Self.warn ? "\($0)%" : "" } ?? ""
-        number.textColor = ring.color
-        number.isHidden = number.stringValue.isEmpty
+        bar.share = used.map { Double($0) / 100 }
+        bar.color = Self.color(used)
+        bar.isHidden = used == nil
+        number.stringValue = used.map { "\($0)%" } ?? ""
+        number.textColor = (used ?? 0) >= Self.warn ? bar.color : Look.Inactive.color
+        number.isHidden = used == nil
         let usage = used.map { T("\($0)% of its limit used", "\($0)% do limite usado") } ?? T("no usage read yet", "uso ainda não lido")
         let tip = name + "\n" + usage + "\n" + T("Click to switch account", "Clique para trocar de conta")
         HoverTip.attach(tip, to: self)
@@ -67,7 +74,7 @@ final class TitleBarAccount: NSView {
         isHidden = false
     }
 
-    /// From here the number shows and the ring turns amber; red from `alarm` (the usage card's).
+    /// From here the bar and the number turn amber; red from `alarm` (the usage card's).
     static let warn = 70, alarm = 90
 
     static func color(_ used: Int?) -> NSColor {
@@ -79,6 +86,7 @@ final class TitleBarAccount: NSView {
         let lit = hovered || pressed
         layer?.backgroundColor = lit ? Look.Active.bg.cgColor : nil
         label.textColor = lit ? Look.Active.color : Look.Inactive.color
+        logo.contentTintColor = lit ? Look.Active.color : Look.Inactive.color
     }
 
     override func updateTrackingAreas() {
@@ -102,25 +110,18 @@ final class TitleBarAccount: NSView {
     }
 }
 
-/// A ring that fills clockwise from the top with `share` (0…1) in `color`, over a faint track.
-final class UsageRing: NSView {
+/// A thin rounded bar filled from the left with `share` (0…1) in `color`, over a faint track.
+final class UsageBar: NSView {
     var share: Double? { didSet { needsDisplay = true } }
-    var color: NSColor = DesignTokens.Color.textSeparator { didSet { needsDisplay = true } }
+    var color: NSColor = DesignTokens.Color.stateDone { didSet { needsDisplay = true } }
 
     override func draw(_ dirtyRect: NSRect) {
-        let line = max(DesignTokens.Stroke.glyph, UILooks.pt(DesignTokens.Stroke.glyph))
-        let rect = bounds.insetBy(dx: line, dy: line)
-        let track = NSBezierPath(ovalIn: rect)
-        track.lineWidth = line
-        DesignTokens.Color.lineControl.setStroke()
-        track.stroke()
+        let radius = bounds.height / 2
+        DesignTokens.Color.lineControl.setFill()
+        NSBezierPath(roundedRect: bounds, xRadius: radius, yRadius: radius).fill()
         guard let share, share > 0 else { return }
-        let center = NSPoint(x: rect.midX, y: rect.midY)
-        let arc = NSBezierPath()
-        arc.appendArc(withCenter: center, radius: rect.width / 2, startAngle: 90, endAngle: 90 - 360 * min(share, 1), clockwise: true)
-        arc.lineWidth = line
-        arc.lineCapStyle = .round
-        color.setStroke()
-        arc.stroke()
+        color.setFill()
+        let width = max(bounds.width * min(share, 1), bounds.height)
+        NSBezierPath(roundedRect: NSRect(x: 0, y: 0, width: width, height: bounds.height), xRadius: radius, yRadius: radius).fill()
     }
 }

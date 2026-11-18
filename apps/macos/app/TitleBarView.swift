@@ -135,7 +135,7 @@ final class TitleBarView: NSView {
     func setInspectorOpen(_ open: Bool) { panelButton.isOn = open }
 
     /// The account shown on the right: its name and how much of its limit it used.
-    func setAccount(name: String?, used: Int?) { account.show(name: name, used: used) }
+    func setAccount(name: String?, used: Int?, provider: ProviderLogo) { account.show(name: name, used: used, provider: provider) }
 
     /// The bell's count: what needs you, and finished agents you have not seen.
     func setBell(count: Int) {

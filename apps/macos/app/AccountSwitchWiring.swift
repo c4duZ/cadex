@@ -58,7 +58,8 @@ extension WindowSession {
         let active = AgentUsageController.shared.activeAccount
         let account = tabs?.activeTerminal.flatMap { claudeAccount(in: $0) }
             ?? every.first { $0.dir == active } ?? every.first { $0.isDefault }
-        workspace?.titleBar.setAccount(name: account?.name, used: account.flatMap { AgentSwitch.used(AgentUsage.current(of: $0)) })
+        workspace?.titleBar.setAccount(name: account?.name, used: account.flatMap { AgentSwitch.used(AgentUsage.current(of: $0)) },
+                                       provider: account?.provider == .codex ? .codex : .claude)
     }
 
     /// The header's list: every Claude account with its usage, the pane's own marked and inert.
