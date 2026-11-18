@@ -17,7 +17,11 @@
   não põe outro): voltar, avançar, recarregar pequenos, o endereço na caixa com o ponto da página
   (verde carregada, cinza carregando, vermelho com falha), "Pick element" em azul, os tamanhos
   (desktop e celular, 390 pt centrado) e o que o app acrescenta; título da página na aba; progresso
-  fino; erro de conexão com o motivo. A página carrega quando a aba
+  fino. Sem página (`PreviewStart.swift`, o dono em 2026-11-18: a aba vazia era cinza com o ponto
+  verde): "Open a page" e os servidores locais que respondem nas portas de sempre (`LocalServers`,
+  um connect de 100 ms por porta fora da linha principal; 5000 e 7000 fora, são do AirPlay), um botão
+  cada; uma página que não carregou diz "Nothing at <endereço>" com o motivo e os mesmos botões;
+  "Pick element", os tamanhos e o ponto apagados até haver página; recarregar sem página procura de novo. A página carrega quando a aba
   aparece pela primeira vez (carregada antes de estar numa janela, não desenhava).
 - Identidade da aba pelo endereço: a oferta do terminal para um endereço já aberto recarrega aquela
   aba; preview em branco é sempre aba nova.

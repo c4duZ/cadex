@@ -92,15 +92,15 @@ extension PreviewDocument {
         back.isEnabled = false
         forward.isEnabled = false
         address.delegate = self
-        address.placeholderString = "http://localhost:3000"
+        // Dim, and plainly a hint: "http://localhost:3000" read as the page's address (2026-11-18).
+        address.placeholderAttributedString = NSAttributedString(string: T("Address or localhost:port", "Endereço ou localhost:porta"), attributes: [
+            .font: UILooks.font(PreviewBar.B.Url.fontSize), .foregroundColor: DesignTokens.Color.textTertiary,
+        ])
         PreviewBar.pickChip(pick, picking: false)
         progress.style = .bar
         progress.isIndeterminate = false
         progress.controlSize = .small
         progress.isHidden = true
-        message.alignment = .center
-        message.textColor = .secondaryLabelColor
-        message.isHidden = true
         let bar = NSStackView(views: [back, forward, reload, PreviewBar.urlBox(address, dot: dot), pick, desktop, phone]
                               + (Self.extraBarItems?(self) ?? []))
         bar.spacing = UILooks.pt(PreviewBar.B.Bar.gap)
@@ -111,7 +111,7 @@ extension PreviewDocument {
         let line = NSView()
         line.wantsLayer = true
         line.layer?.backgroundColor = PreviewBar.B.Bar.borderBottom.cgColor
-        for v in [bar, line, progress, web, overlay, message] as [NSView] {
+        for v in [bar, line, progress, web, overlay, start] as [NSView] {
             v.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(v)
         }
@@ -138,9 +138,8 @@ extension PreviewDocument {
             overlay.leadingAnchor.constraint(equalTo: web.leadingAnchor),
             overlay.trailingAnchor.constraint(equalTo: web.trailingAnchor),
             overlay.bottomAnchor.constraint(equalTo: web.bottomAnchor),
-            message.centerXAnchor.constraint(equalTo: web.centerXAnchor),
-            message.centerYAnchor.constraint(equalTo: web.centerYAnchor),
-            message.widthAnchor.constraint(lessThanOrEqualTo: web.widthAnchor, constant: -40),
+            start.topAnchor.constraint(equalTo: web.topAnchor), start.bottomAnchor.constraint(equalTo: web.bottomAnchor),
+            start.leadingAnchor.constraint(equalTo: view.leadingAnchor), start.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
         showSize()
         showDot(loading: false, failed: false)
@@ -156,6 +155,17 @@ extension PreviewDocument {
 
     func showDot(loading: Bool, failed: Bool) {
         dot.layer?.backgroundColor = PreviewBar.dotColor(loading: loading, failed: failed).cgColor
+    }
+
+    /// No page yet: the gray dot, and "Pick element" and the sizes dim (nothing to pick or size).
+    func showBlank() {
+        showHasPage(false)
+        start.showBlank()
+    }
+
+    func showHasPage(_ has: Bool) {
+        for button in [pick, desktop, phone] { button.isEnabled = has; button.alphaValue = has ? 1 : 0.4 }
+        if !has { dot.layer?.backgroundColor = DesignTokens.Color.stateIdle.cgColor }
     }
 
     @objc func backPressed() { goBack() }

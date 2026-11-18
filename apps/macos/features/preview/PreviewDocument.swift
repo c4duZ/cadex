@@ -40,7 +40,8 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     let progress = NSProgressIndicator()
     let back = PreviewBar.icon(.caretLeft, T("Back", "Voltar"))
     let forward = PreviewBar.icon(.caretRight, T("Forward", "Avançar"))
-    let message = NSTextField(labelWithString: "")
+    /// The page-less view: what to type and the local servers, or why the page did not load.
+    let start = PreviewStart()
     private var observations: [NSKeyValueObservation] = []
     /// Loaded when the tab first shows: a page loaded before its view was
     /// in a window was never drawn (2026-10-19).
@@ -90,6 +91,8 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         ]
         pending = url
         address.stringValue = Self.url(from: url)?.absoluteString ?? ""
+        start.open = { [weak self] address in self?.load(address); self?.focus() }
+        if url.isEmpty { showBlank() } else { start.isHidden = true }
     }
 
     public var title: String {
@@ -194,7 +197,7 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     public func load(_ text: String) {
         guard let url = Self.url(from: text) else { return }
         address.stringValue = url.absoluteString
-        message.isHidden = true
+        start.isHidden = true
         web.load(URLRequest(url: url))
     }
 
@@ -220,7 +223,14 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         return ["127.", "10.", "192.168."].contains { host.hasPrefix($0) }
     }
 
-    public func reload() { web.reload() }
+    /// Reload with no page asks the servers again (the start view's "reload").
+    public func reload() {
+        if !start.isHidden && web.url == nil {
+            if let url = Self.url(from: address.stringValue) { return load(url.absoluteString) }
+            return start.scan()
+        }
+        web.reload()
+    }
     public func goBack() { web.goBack() }
     public func goForward() { web.goForward() }
 
@@ -237,7 +247,8 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     /// A page started showing: an older error no longer applies (it stayed
     /// over the next page, 2026-10-19).
     public func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        message.isHidden = true
+        start.isHidden = true
+        showHasPage(true)
         picker.pageChanged()
         agentController?.pageChanged()
     }
@@ -247,8 +258,8 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
         if (error as NSError).code == NSURLErrorCancelled { return }
         agentController?.navigationEnded(error: "could not load \(address.stringValue): \(error.localizedDescription)")
         showDot(loading: false, failed: true)
-        message.stringValue = T("Couldn't connect to \(address.stringValue)\n\(error.localizedDescription)", "Não foi possível conectar a \(address.stringValue)\n\(error.localizedDescription)")
-        message.isHidden = false
+        start.showFailure(address.stringValue, error.localizedDescription)
+        if web.url == nil { showHasPage(false) }
     }
 
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
