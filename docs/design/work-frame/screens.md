@@ -194,7 +194,7 @@ de tokens.
 
 ### Rail.dc.html — peça · O trilho e a coluna lateral (ADR 0038, plano 36)
 - **Trilho (56 pt):** os projetos em quadrados de 38 pt com a marca (a imagem do projeto, depois a
-  letra), o escolhido num anel; a peça de estado no canto (só o que se deve ver) e o ponto de
+  letra), o escolhido com um halo suave, do mesmo tamanho dos outros; a peça de estado no canto (só o que se deve ver) e o ponto de
   terminal aberto embaixo; o "+"; no pé, depois de uma linha, Projects e Automations, aceso o da
   página aberta.
 - **Coluna lateral (260 pt):** no topo, só os ícones das páginas (Files, Changes, Memory, Git
