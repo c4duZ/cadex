@@ -374,10 +374,9 @@ public extension DesignTokens {
             public static var weight: NSFont.Weight { DesignTokens.FontWeight.bold }
             public static var bg: NSColor { DesignTokens.Color.bgButton }
             public static var color: NSColor { DesignTokens.Color.textPrimary }
-            public enum Ring {
-                public static let width: CGFloat = 2
-                public static let gap: CGFloat = 2
-                public static var color: NSColor { DesignTokens.Color.textPrimary }
+            public enum Chosen {
+                public static let halo: CGFloat = 3
+                public static var color: NSColor { DesignTokens.Color.lineFocus }
             }
             public enum Badge {
                 public static let size: CGFloat = 12

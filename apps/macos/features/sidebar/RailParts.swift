@@ -3,8 +3,9 @@ import Icons
 import StateGlyph
 import UILooks
 
-/// A project's tile in the rail (components.rail.tile): the mark on the project's color, a ring
-/// around the chosen one, the state badge in the top right corner and the open dot under it.
+/// A project's tile in the rail (components.rail.tile): the mark on the project's color, a soft
+/// halo around the chosen one (the owner, 2026-11-18: a white ring made it look thicker than the
+/// others; the halo keeps its size), the state badge in the top right corner and the open dot.
 @MainActor
 final class RailTile: NSView {
     typealias T = DesignTokens.Rail.Tile
@@ -16,8 +17,8 @@ final class RailTile: NSView {
     private let badge = NSView()
     private let dot = NSView()
 
-    /// The tile and its ring: the ring sits `gap` outside the face, `width` thick.
-    static var outer: CGFloat { UILooks.pt(T.size + (T.Ring.gap + T.Ring.width) * 2) }
+    /// The tile and room for its halo.
+    static var outer: CGFloat { UILooks.pt(T.size + T.Chosen.halo * 2) }
 
     init(project: RailProject, chosen: Bool) {
         self.project = project
@@ -31,9 +32,9 @@ final class RailTile: NSView {
         mark.textColor = T.color
         mark.alignment = .center
         ring.wantsLayer = true
-        ring.layer?.cornerRadius = UILooks.pt(T.radius + T.Ring.gap + T.Ring.width)
-        ring.layer?.borderWidth = UILooks.pt(T.Ring.width)
-        ring.layer?.borderColor = T.Ring.color.cgColor
+        ring.layer?.cornerRadius = UILooks.pt(T.radius + T.Chosen.halo)
+        ring.layer?.borderWidth = UILooks.pt(T.Chosen.halo)
+        ring.layer?.borderColor = T.Chosen.color.cgColor
         ring.isHidden = !chosen
         badge.wantsLayer = true
         badge.layer?.cornerRadius = UILooks.pt(T.Badge.size) / 2
@@ -70,7 +71,7 @@ final class RailTile: NSView {
             dot.widthAnchor.constraint(equalToConstant: UILooks.pt(T.Open.size)),
             dot.heightAnchor.constraint(equalToConstant: UILooks.pt(T.Open.size)),
             dot.centerXAnchor.constraint(equalTo: face.centerXAnchor),
-            // Under the ring, not on it (the ring sits gap + width outside the face).
+            // Under the halo, not on it.
             dot.topAnchor.constraint(equalTo: face.bottomAnchor, constant: UILooks.pt(T.Open.offset)),
         ])
         toolTip = project.name

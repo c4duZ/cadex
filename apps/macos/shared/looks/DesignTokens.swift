@@ -378,6 +378,8 @@ public enum DesignTokens {
         public static var permission: [ShadowLayer] { [.init(x: 0, y: 12, blur: 32, spread: 0, color: DesignTokens.Color.shadow50, inset: false)] }
         /// 0 -16px 40px {shadow.45}
         public static var drawer: [ShadowLayer] { [.init(x: 0, y: -16, blur: 40, spread: 0, color: DesignTokens.Color.shadow45, inset: false)] }
+        /// 0 0 0 3px {line.focus}
+        public static var haloChosen: [ShadowLayer] { [.init(x: 0, y: 0, blur: 0, spread: 3, color: DesignTokens.Color.lineFocus, inset: false)] }
     }
 
     /// The spacing scale: every gap, padding and margin of the mockups.

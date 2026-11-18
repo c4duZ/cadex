@@ -3,7 +3,7 @@
 ## O que eu quero
 - O trilho (plano 36 fase A; `../../../../docs/adr/0038-rail-and-side-column.md`; a peça Rail de
   `../../../../docs/design/work-frame/screens.md`): na borda esquerda, os projetos com a marca, o
-  anel do escolhido, a peça de estado e o ponto de terminal aberto; o "+" (project.new); no pé,
+  halo do escolhido (do mesmo tamanho; o anel branco o deixava mais grosso, o dono, 2026-11-18), a peça de estado e o ponto de terminal aberto; o "+" (project.new); no pé,
   Projects (project.show-all) e Automations (orchestration.show-automations), aceso o da página aberta.
 - A árvore do trabalho (fora da tela desde a ADR 0038; ainda junta o que o sidebar.find lista, até a
   fase F do plano 36), a coluna da esquerda (`../../../../docs/spec/sidebar.md`; a peça Sidebar do
@@ -25,7 +25,7 @@
   terminal aberto; `mark`, a letra até haver imagem; `badge`, o estado que se mostra) e `RailFoot`.
   `RailView.swift`: a porta de entrada; `show` recebe os projetos e o escolhido e redesenha só quando
   mudam; `onPick` diz a pasta clicada; `footLit` acende o pé. `RailParts.swift`: `RailTile` (o
-  quadrado, o anel, a peça de estado, o ponto) e `RailButton` (o "+" e os do pé). Tokens:
+  quadrado, o halo, a peça de estado, o ponto) e `RailButton` (o "+" e os do pé). Tokens:
   components.rail.
 - `WorkTree.swift`: o modelo puro (`WorkTreeProject`, `WorkTreeTask`, `WorkTreeTerminal`) e
   `WorkTreePick` (projeto, tarefa ou terminal).
@@ -57,6 +57,6 @@
   (`../../app/JumpWiring.swift`).
 
 ## Como validar
-- `make macos-test` passa: o trilho (um quadrado por projeto, o escolhido no anel, a peça de estado
+- `make macos-test` passa: o trilho (um quadrado por projeto, o escolhido com o halo, a peça de estado
   só fora de parado, o ponto, o clique, o pé com os comandos e aceso); a árvore com os projetos, as tarefas e os terminais, os terminais só sob a
   tarefa escolhida, "Add project" no fim; com CADEX_SNAPSHOT_DIR, tree.png com os dados do Sidebar.dc.html no tamanho dele (292×826), para pôr sobre o mockup.
