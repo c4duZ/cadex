@@ -44,7 +44,7 @@
   achou dura e difícil de ler): `MemoryView.swift`, numa rolagem só (antes a árvore da wiki rolava
   dentro da rolagem da aba): desligada, o texto e "Turn On"; ligada, "Search what this project
   knows" (memory.search), até 3 propostas com Approve/Reject, "LEARNED TODAY" (as páginas de hoje,
-  sem os registros de sessão), "PROJECT RULES" (as de `_rules/`), "LAST SESSIONS" pelo título da
+  sem os registros de sessão), "PROJECT RULES" (as da pasta _rules da wiki), "LAST SESSIONS" pelo título da
   conversa (`titleOf`, do índice do histórico: o nome dado, senão o do Claude), a conta e a pasta,
   "All in the Archive" (agents.show-history) e "All N pages" (memory.search, com o estado do engine
   e do agente na dica), a nota do briefing e o "Configure this project's memory…".
