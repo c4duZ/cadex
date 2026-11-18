@@ -86,6 +86,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// The pane headers' agent details (PaneHeaderWiring.swift): the agent notice and the minute clock.
     var paneHeaderObserver: NSObjectProtocol?
     var paneHeaderClock: Timer?
+    /// The history read while a project's page shows (ProjectPageWiring.swift).
+    var projectPageHistory: UUID?
     /// The New Task sheet while it shows (NewTaskWiring.swift).
     var newTaskSheet: NewTaskSheet?
     /// The home screen while shown, and its choices (HomeWiring.swift).

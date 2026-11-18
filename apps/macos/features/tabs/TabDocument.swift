@@ -24,8 +24,12 @@ public protocol TabDocument: AnyObject {
     func close()
     /// Its own bar is its pane's header (the preview, plan 28 phase E): the pane draws none.
     var barIsHeader: Bool { get }
+    /// A page of the app (a project's, the board): alone in its tab it takes the whole center,
+    /// flat, with no pane box (the Project and Board mockups).
+    var isPage: Bool { get }
 }
 
 public extension TabDocument {
     var barIsHeader: Bool { false }
+    var isPage: Bool { false }
 }

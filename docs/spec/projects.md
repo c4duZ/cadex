@@ -60,6 +60,23 @@ agora sempre com a pasta (`../adr/0035-work-frame.md`).
 - Dois projetos com o mesmo nome (pastas diferentes) -> permitido; a árvore e a paleta mostram o
   caminho.
 
+### A página do projeto (mockup Project; plano 30 A, feito junto da revisão do plano 29)
+- Clicar no nome do projeto na árvore, ou project.show-overview no ⌘K, abre no centro a aba
+  "Overview", sem a caixa de painel (ocupa o centro inteiro), com o painel da direita em Memory. A
+  barra de título mostra "projeto · Overview · Automations · Conversations": as duas últimas abrem a
+  lista de automações e o arquivo e histórico.
+- De cima para baixo: o nome, o caminho · o branch · o remoto, e Race… e New task; quatro números
+  (tarefas abertas com quantas trabalham e quantas precisam de você; o gasto da semana pelo custo
+  que a status line gravou de cada sessão, com sessões e contas; os merges dos últimos 30 dias,
+  "N PRs" quando vêm de pull requests, e o último; as páginas da memória e as de hoje, ou "off");
+  as conversas recentes do projeto e das tarefas dele (as abertas fora do Cadex também, pelo
+  arquivo e histórico), com o estado, a tarefa, o agente e a conta; as automações do projeto com o
+  liga e desliga (o mesmo orchestration.toggle-automation, que pergunta ao ligar); as contas
+  usadas ali nos últimos 30 dias, com o uso em âmbar acima de 80%.
+- Responsiva: os números em 4, 2 ou 1 coluna pela largura; as duas colunas lado a lado ou uma
+  embaixo da outra abaixo de 720 pt, com os botões sob o nome; a página rola.
+- Clicar numa conversa viva traz o terminal dela; numa terminada, continua numa aba da pasta dela.
+
 ## Critérios de aceite
 - [x] Um projeto salvo e restaurado volta igual: abas, nomes, divisões com proporções, pastas, foco.
   (Valia para os spaces; conferir de novo com os projetos.)

@@ -30,8 +30,8 @@ public final class TabsController {
     /// The group of a folder (a task's worktree, else the project): the bar shows the active
     /// tab's group only (TabsGroups.swift); nil shows every tab.
     public var groupOf: ((String?) -> String)?
-    /// Whether a group is a task's (the bar then ends with "Review").
-    public var isTask: ((String) -> Bool)?
+    /// The items a group's bar ends with (TabsGroups.swift).
+    public var extrasOf: ((String) -> [TabsExtra])?
     /// Each second while a command shows "running N s": the tree's note moves too.
     public var onCommandTick: (() -> Void)?
     /// The pane header's "+" menu, built by the app from commands.
@@ -61,10 +61,14 @@ public final class TabsController {
         view = TabsView(frame: window.contentView?.bounds ?? .zero)
         bar.onSelect = { [weak self] id in
             guard let self else { return }
-            if id == reviewItemID { _ = self.runCommand?("git.review-open"); return }
+            if id <= extraItemBase {
+                let extras = self.extraItems
+                if extras.indices.contains(extraItemBase - id) { _ = self.runCommand?(extras[extraItemBase - id].command) }
+                return
+            }
             self.select(id)
         }
-        bar.onClose = { [weak self] id in if id != reviewItemID { self?.closeTab(id) } }
+        bar.onClose = { [weak self] id in if id > extraItemBase { self?.closeTab(id) } }
         bar.onRename = { [weak self] in self?.rename($0) }
         bar.onContextMenu = { [weak self] _, point in
             guard let self, let entries = self.contextMenu?(), !entries.isEmpty else { return }
@@ -72,7 +76,7 @@ public final class TabsController {
         }
         bar.onStyleChange = { [weak self] in self?.refreshHeaders() }
         bar.onMove = { [weak self] id, index in
-            guard id != reviewItemID else { return }
+            guard id > extraItemBase else { return }
             self?.moveShown(id, to: index)
             self?.refreshBar()
         }
@@ -252,7 +256,7 @@ public final class TabsController {
 
     func refreshBar() {
         bar.items = shownIDs.compactMap { id in tabs[id].map(barItem) }
-            + (reviewOffered ? [TabBarView.Item(id: reviewItemID, title: T("Review", "Revisão"), active: false)] : [])
+            + extraItems.enumerated().map { TabBarView.Item(id: extraItemBase - $0.offset, title: $0.element.title, active: false) }
         armCommandClock()
         activeTab?.layout.refreshHeaders()
         onStateChange?()

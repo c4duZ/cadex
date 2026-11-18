@@ -88,6 +88,9 @@
   1 s só enquanto um painel mostra "running", que também move a árvore por onCommandTick) e
   `TabsGroups.swift` (a barra só com as abas do grupo da aba ativa, pelo `groupOf` do app, e
   "Review" no fim de uma tarefa; ⌘1…⌘9 e arrastar pela ordem mostrada).
+- TabDocument.isPage (plano 30): uma página sozinha na aba ocupa o centro inteiro, sem caixa nem
+  cabeçalho (`PaneLayoutView.swift`). `TabsExtra`: os itens do fim da barra que rodam um comando
+  ("Review" de uma tarefa; "Automations" e "Conversations" das páginas), dados pelo app em `extrasOf`.
 - `TabAgentTitle.swift` (plano 19; plano 25 fase D): o estado do agente como `GlyphState` da peça
   única de estado (`../../shared/state-glyph/`): trabalhando, precisa de você, pronto, falhou, e
   hibernado como parado ("Hibernando" na dica); o `TabBarView` põe o sinal antes do nome da aba

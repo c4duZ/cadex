@@ -66,6 +66,7 @@ extension WindowSession {
         commands.register(inspectorTabCommands())
         commands.register(treeCommands(palette: palette))
         commands.register(jumpCommands(palette: palette))
+        commands.register(projectPageCommands())
         commands.register(SSHCommands.all(palette: palette) { [weak self] alias in self?.connectSSH(alias) })
         commands.register(MachinesCommands.all(palette: palette) { [weak self] machine, ask in self?.connectMachine(machine, askUser: ask) })
         commands.register(DockerCommands.all(palette: palette, actions: dockerActions()))

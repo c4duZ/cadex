@@ -68,8 +68,19 @@ extension WindowSession {
         tabs.paneMenu = { [weak self] in self?.paneMenu() ?? [] }
         // The bar shows the tabs of where you are: a task's (its worktree, as the tree lists them),
         // else the project's own (the Main mockup).
-        tabs.groupOf = { [weak self] folder in self?.taskFolder(containing: folder) ?? "" }
-        tabs.isTask = { !$0.isEmpty }
+        tabs.groupOf = { [weak self] folder in
+            // The project's page and the app's pages: one group of their own.
+            if let folder, ["project:", "cadex:", "automation:"].contains(where: folder.hasPrefix) { return "pages" }
+            return self?.taskFolder(containing: folder) ?? ""
+        }
+        tabs.extrasOf = { group in
+            switch group {
+            case "": []
+            case "pages": [TabsExtra(title: T("Automations", "Automações"), command: "orchestration.show-automation-history", identity: "automation:"),
+                           TabsExtra(title: T("Conversations", "Conversas"), command: "agents.show-history", identity: "cadex:agent-history")]
+            default: [TabsExtra(title: T("Review", "Revisão"), command: "git.review-open", identity: "review:")]
+            }
+        }
         tabs.onCommandTick = { [weak self] in self?.refreshTree() }
         // Beside the terminal that showed the address (plan 28 phase E; the PreviewOne mockup).
         tabs.onOpenPreview = { [weak self] url in self?.openPreview(url, beside: true) }
@@ -96,6 +107,7 @@ extension WindowSession {
         projects.start(folder: folder.root, openFolder: folder.launchedWithFolder || !isMain) { [weak self] identity in
             // Archive & History comes back too (plan 27 C): a tab, not a file.
             if identity == AgentHistoryDocument.identity, let self { return AgentHistoryDocument(page: self.makeHistoryPage()) }
+            if identity.hasPrefix("project:"), let self { return self.makeProjectPage(String(identity.dropFirst("project:".count))) }
             return self?.opener?.makeDocument(identity: identity)
         }
         // Opened on a folder: the old projects come back and the folder becomes its own project

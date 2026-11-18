@@ -26,6 +26,10 @@
   fecha. `recent`: os projetos usados por último, abertos ou fechados, até 8, salvos no arquivo
   (SavedProjects.Recent, a lista RECENT PROJECTS); cada recente fechado guarda as abas que tinha
   (o retrato tirado antes de os shells acabarem), e `open(folder:)` o devolve com elas; `forgetRecent` tira um; `close(folder:)` fecha um projeto pela pasta (o Clone… da tela de início).
+- A página do projeto (plano 30 A): `ProjectPageModel.swift` (o estado e as palavras, puros),
+  `ProjectPageParts.swift` (as peças: cartão, linha, chave, etiqueta de conta, `PageFlow` que
+  quebra as linhas) e `ProjectPageView.swift` (`ProjectPageDocument`, uma aba-página, isPage: o
+  centro inteiro, responsiva). O que ela mostra o app junta (`../../app/ProjectPageWiring.swift`).
 - `ProjectsFile.swift`: o JSON em Application Support/Cadex/projects.json (gravação atômica), com os
   projetos (nome, pasta, abas, cor), o ativo, a pasta do workspace e os recentes; uma lista vazia
   (a tela de início) é um arquivo bom. Arquivo ilegível vai para

@@ -326,7 +326,8 @@ extension WindowSession {
         case .terminal(let key):
             app.goToAgent(key: key, pid: 0)
         case .project(let folder):
-            if let index = projects?.projects.firstIndex(where: { $0.folder == folder }) { projects?.select(index) }
+            // The project's name: its page (the Project mockup).
+            openProjectPage(folder)
         case .task(let folder):
             // Only in the project that has the task (another project's terminal there is not it).
             let owner = projects?.projects.first { project in (treeTasks[project.folder] ?? []).contains { $0.path == folder } }

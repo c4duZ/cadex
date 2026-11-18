@@ -73,6 +73,16 @@ final class PaneLayoutView: NSView {
         super.layout()
         let frames = zoomed.map { [$0: paneArea] } ?? tree.frames(in: paneArea, gap: Self.gap)
         needsDisplay = true
+        // A page alone in its tab: the whole center, flat (the Project mockup), no box drawn.
+        if frames.count == 1, let only = frames.keys.first, headers[only]?.info.page == true, let view = panes[only] {
+            chrome.place([:], focused: nil)
+            headers[only]?.isHidden = true
+            view.frame = bounds
+            view.layer?.cornerRadius = 0
+            view.alphaValue = 1
+            placeHandles()
+            return
+        }
         chrome.place(frames, focused: focused)
         placeHeaders(Array(frames.keys))
         typealias P = DesignTokens.Pane

@@ -12,6 +12,8 @@ extension TabsController {
     func folder(of tab: Tab) -> String? {
         if let terminal = tab.focused.terminal { return terminal.currentDirectory }
         guard let identity = tab.focused.document?.identity else { return nil }
+        // A page of the app (a project's, the history): its identity is its group's key.
+        if ["project:", "cadex:", "automation:"].contains(where: identity.hasPrefix) { return identity }
         if identity.hasPrefix("review:") {
             return String(identity.dropFirst("review:".count).split(separator: "…", maxSplits: 1).first ?? "")
         }
@@ -31,10 +33,12 @@ extension TabsController {
         return list.order.filter { id in tabs[id].map { group(of: $0) == key } ?? false }
     }
 
-    /// The task shown has no review tab yet: the bar ends with "Review", which opens it.
-    var reviewOffered: Bool {
-        guard let active = activeTab, let key = group(of: active), isTask?(key) == true else { return false }
-        return !shownIDs.contains { id in tabs[id]?.documents.contains { $0.identity.hasPrefix("review:") } ?? false }
+    /// The items the bar ends with for the shown group (a task's "Review", a project page's
+    /// "Automations" and "Conversations"), those not open already; each runs its command.
+    var extraItems: [TabsExtra] {
+        guard let active = activeTab, let extras = extrasOf?(group(of: active) ?? "") else { return [] }
+        let open = shownIDs.flatMap { id in tabs[id]?.documents.map(\.identity) ?? [] }
+        return extras.filter { extra in !open.contains { $0.hasPrefix(extra.identity) } }
     }
 
     /// The bar again (the app learned which folders are tasks).
@@ -50,5 +54,18 @@ extension TabsController {
     }
 }
 
-/// The "Review" item's id in the bar: no tab has it.
-let reviewItemID = -1
+/// An item at the end of the bar that runs a command (it opens a tab whose identity starts with
+/// `identity`, and then the tab shows instead).
+public struct TabsExtra: Sendable {
+    public var title: String
+    public var command: String
+    public var identity: String
+    public init(title: String, command: String, identity: String) {
+        self.title = title
+        self.command = command
+        self.identity = identity
+    }
+}
+
+/// The extra items' ids in the bar: below any tab's.
+let extraItemBase = -100

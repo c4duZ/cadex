@@ -97,12 +97,25 @@ public extension DesignTokens {
                 public static let fontSize: CGFloat = DesignTokens.FontSize.small
                 public static var color: NSColor { DesignTokens.Color.textTertiary }
             }
+            public static let gap: CGFloat = 4
+            public static let gridGap: CGFloat = 10
+            public static let minWidth: CGFloat = 150
         }
         public enum Row {
             public static let padding = NSEdgeInsets(top: 10, left: 12, bottom: 10, right: 12)
             public static let radius: CGFloat = DesignTokens.Radius.row
             public static var bg: NSColor { DesignTokens.Color.bgSidebar }
             public static var border: NSColor { DesignTokens.Color.lineSubtle }
+            public static let gap: CGFloat = 12
+            public static let textGap: CGFloat = 2
+            public enum Meta {
+                public static let fontSize: CGFloat = DesignTokens.FontSize.small
+                public static var color: NSColor { DesignTokens.Color.textMuted }
+            }
+            public enum When {
+                public static let fontSize: CGFloat = DesignTokens.FontSize.small
+                public static var color: NSColor { DesignTokens.Color.textTertiary }
+            }
         }
         public enum Toggle {
             public static let width: CGFloat = 30
@@ -114,6 +127,35 @@ public extension DesignTokens {
                 public static let size: CGFloat = 14
                 public static var color: NSColor { DesignTokens.Color.textStrong }
             }
+        }
+        public enum Head {
+            public static let gap: CGFloat = 16
+            public static let titleGap: CGFloat = 6
+            public static var meta: NSColor { DesignTokens.Color.textMuted }
+        }
+        public enum Columns {
+            public static let gap: CGFloat = 24
+            public static let listGap: CGFloat = 8
+            public static let left: CGFloat = 1.2
+            public static let right: CGFloat = 1
+            public static let stackBelow: CGFloat = 720
+        }
+        public enum Label {
+            public static let fontSize: CGFloat = DesignTokens.FontSize.caption
+            public static var weight: NSFont.Weight { DesignTokens.FontWeight.semibold }
+            public static let tracking: CGFloat = DesignTokens.Tracking.label
+            public static var color: NSColor { DesignTokens.Color.textTertiary }
+            public static let marginTop: CGFloat = 12
+        }
+        public enum Account {
+            public static let padding = NSEdgeInsets(top: 6, left: 10, bottom: 6, right: 10)
+            public static let radius: CGFloat = DesignTokens.Radius.row
+            public static var bg: NSColor { DesignTokens.Color.bgSidebar }
+            public static var border: NSColor { DesignTokens.Color.lineSubtle }
+            public static let gap: CGFloat = 8
+            public static var muted: NSColor { DesignTokens.Color.textMuted }
+            public static var warn: NSColor { DesignTokens.Color.stateNeeds }
+            public static let warnAbovePercent: CGFloat = 80
         }
     }
     enum Home {

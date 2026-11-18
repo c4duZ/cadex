@@ -30,6 +30,8 @@ final class PaneHeaderView: NSView {
         var padded = false
         /// The pane's own bar is its header (a preview): this one is not shown.
         var hidden = false
+        /// A page: alone in its tab, it fills the center with no box (TabDocument.isPage).
+        var page = false
         /// "Open :5173 in preview": the blue chip on the right (a command serving an address).
         var offer = ""
     }

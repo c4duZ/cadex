@@ -79,7 +79,8 @@ extension TabsController {
             let (icon, color) = Self.tabIcon(for: document.identity)
             var info = PaneHeaderView.Info(title: document.title, icon: icon, iconColor: color, image: Self.tabImage(for: document.identity),
                                            dirty: document.hasUnsavedChanges)
-            info.hidden = document.barIsHeader
+            info.hidden = document.barIsHeader || document.isPage
+            info.page = document.isPage
             return info
         }
     }

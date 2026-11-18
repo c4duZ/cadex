@@ -44,6 +44,20 @@ func folders() -> (String, String) {
 }
 
 let exitCode = await Checks.run([
+    ("the project page's words: a conversation's dot, when, the merges, the remote", {
+        let now = Date()
+        expect(ProjectPageWords.state(live: true, working: true, asking: false, updated: now, now: now) == .working)
+        expect(ProjectPageWords.state(live: true, working: false, asking: true, updated: now, now: now) == .needs)
+        expect(ProjectPageWords.state(live: false, working: false, asking: false, updated: now - 3600, now: now) == .done)
+        expect(ProjectPageWords.state(live: false, working: false, asking: false, updated: now - 3 * 86400, now: now) == .idle)
+        expect(ProjectPageWords.when(now - 240, now: now) == "4m" && ProjectPageWords.when(now, now: now) == "now")
+        expect(ProjectPageWords.mergedName("Merge pull request #41 from c4duZ/bell-cards") == "bell-cards")
+        expect(ProjectPageWords.mergedName("Merge branch 'hero-images'") == "hero-images")
+        expect(ProjectPageWords.remote("git@github.com:c4duZ/cadex.git") == "github.com/c4duZ/cadex")
+        expect(ProjectPageWords.remote("https://github.com/c4duZ/cadex.git") == "github.com/c4duZ/cadex")
+        expect(ProjectPageWords.tasksNote(working: 1, needYou: 1) == "1 working · 1 needs you")
+        expect(ProjectPageWords.usd(6.4) == "US$ 6.40")
+    }),
     ("a first launch has the launch folder's project, named after it, with a terminal in it", {
         let (a, _) = folders()
         let projects = controller(tempFile(), window: window())

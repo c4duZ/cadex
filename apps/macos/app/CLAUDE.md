@@ -255,6 +255,12 @@
   linhas da feature sidebar (`JumpRow`) tiradas do `treeModel()` da árvore (`TreeWiring.swift`),
   mais as sessões de fora do Cadex (lidas enquanto o ⌘J está aberto); escolher leva à tarefa, ao
   terminal ou à sessão (`openAgent`); o texto que não acha nada vira o pedido da folha Nova tarefa.
+- `ProjectPageWiring.swift` (plano 30 A): project.show-overview e o clique no nome do projeto na
+  árvore abrem a página (`makeProjectPage`, refeita ao restaurar pela identidade `project:<pasta>`)
+  com o painel da direita em Memory; junta fora da linha principal as tarefas da árvore, as sessões
+  do histórico (lido enquanto a página existe), o custo de cada uma, os merges e o remoto pelo git,
+  as automações e as páginas da memória. A barra de título agrupa as páginas ("pages": Overview, e
+  Automations e Conversations como itens extras, `extrasOf`).
 - `CheckLineWiring.swift` (plano 29, revisão): a linha "make check passed · 2 min ago" do pé de
   Changes, o último comando de checagem (CheckLine, da source-control) que terminou num terminal da
   pasta, a cada redesenho da árvore. `ProjectsWiring.swift` dá às abas o grupo de cada pasta
