@@ -5,7 +5,7 @@
   de `../../../../docs/design/work-frame/screens.md`): à esquerda, ao lado do trilho, os ícones das
   páginas no topo (o nome sob o ponteiro), a página, e no pé a linha de contexto com os botões da
   página. Era o painel da direita (`../../../../docs/spec/inspector.md`, plano 26 fase C); a spec
-  muda na fase F do plano 36.
+  muda na fase G do plano 36.
 
 ## O que eu não quero
 - Esta feature conhecendo o source-control, o explorer, o git-history ou a memory: o app passa a
@@ -31,7 +31,7 @@
 - Status: fase C1 no código (o painel, as abas com as páginas de antes, ⌥⌘I, o botão da barra de
   título, inspector.visible e inspector.tab salvos). C2a a C2d feitas: as abas no desenho e a borda arrastável.
   Plano 36 fase A: a coluna à esquerda, os ícones no topo e a linha de contexto no pé; a regra da
-  janela estreita saiu (a nova vem na fase E).
+  janela estreita saiu (a nova vem na fase F).
 
 ## Como validar
 - `make macos-test` passa: as abas na ordem, uma página à vista e as outras escondidas, a linha de

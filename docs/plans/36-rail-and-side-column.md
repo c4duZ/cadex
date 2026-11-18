@@ -40,26 +40,32 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
   borda leva a coluna de 260 a 343 pt e a largura fica salva; o tema claro pinta trilho e coluna).
   Um arraste de teste dentro de uma lista ou do terminal deixa a janela em branco, também na dist de
   antes da fase A: é o arraste sintético numa janela sem foco, não conferido com o mouse de verdade. A árvore fica fora da tela, ainda montada
-  para o sidebar.find, até a fase F; o botão da coluna na barra de título continua (abre e fecha a
+  para o sidebar.find, até a fase G; o botão da coluna na barra de título continua (abre e fecha a
   coluna).
-- [ ] B. As páginas da coluna: os pés (Files: a pasta, criar e buscar; Changes: a checagem, Commit,
+- [ ] B. Editar o projeto (o dono pediu desde o começo; vem antes de tudo o mais, 2026-11-18): o
+  nome que ele quiser, não o da pasta; a imagem (uma foto ou imagem do Mac, também arrastada para o
+  quadrado do trilho, um emoji, ou a letra numa cor); a cor do projeto; tudo numa folha "Edit
+  project", aberta pelo clique direito no quadrado do trilho ("Edit name and image…") e pelo ⌘K, e a
+  mesma folha cria um projeto pelo "+" (nome, imagem, pasta). A imagem fica copiada para a pasta do
+  Cadex (Application Support), não lida da origem a cada vez, e aparece no trilho, na página
+  Projects, na página do projeto e no seletor ⇧⌘S. O clique direito no quadrado, inteiro: New
+  terminal, New task, Edit name and image…, Pin/Unpin, Project settings…, Show in Finder, Copy path,
+  Close terminals e Remove from the sidebar, cada um um comando.
+- [ ] C. As páginas da coluna: os pés (Files: a pasta, criar e buscar; Changes: a checagem, Commit,
   Open PR e a branch com ↑↓; Memory: o briefing; Git graph: a branch e abrir numa aba); Changes com
   o escopo num menu pequeno, o total e o +/− de cada arquivo; a página nova Sessions (agora, hoje,
   antes; o clique mostra o resumo no centro, como na página do projeto); a ordem Files, Changes,
   Sessions, Memory, Git graph.
-- [ ] C. As abas: a tarefa como aba (ícone de branch, estado, seta) que troca a barra para os
+- [ ] D. As abas: a tarefa como aba (ícone de branch, estado, seta) que troca a barra para os
   terminais dela; "‹ projeto" volta; "» N" com a lista de todos quando não cabem; ⌘1 a ⌘9 pela
   ordem mostrada; as abas sem projeto quando nenhum projeto está aceso.
-- [ ] D. Os projetos: nome e imagem próprios (a folha de editar, também a de criar pelo "+"),
-  fixar, a ordem arrastada (projetos e ícones da coluna), os abertos não fixados depois de uma
-  linha, o fixado sem terminal abrindo um; o clique direito (New terminal, New task, Edit name and
-  image, Pin/Unpin, Project settings, Show in Finder, Copy path, Close terminals, Remove from the
-  sidebar). A página Projects só pelo pé do trilho, sem editar nada, e o cartão abrindo a página do
-  projeto (com Open terminal).
-- [ ] E. Quando a coluna fecha e o pé: o quadro fecha a coluna e o segundo clique no ícone dele a
+- [ ] E. Fixar e ordenar: fixar e desafixar, a ordem arrastada (projetos e ícones da coluna), os
+  abertos não fixados depois de uma linha, o fixado sem terminal abrindo um. A página Projects só
+  pelo pé do trilho, sem editar nada, e o cartão abrindo a página do projeto (com Open terminal).
+- [ ] F. Quando a coluna fecha e o pé: o quadro fecha a coluna e o segundo clique no ícone dele a
   devolve (conferir o bug que o dono viu); a janela estreita; Remote no pé (os hosts do ssh e as
   máquinas da tailnet, Connect); o item Memory da barra de status abrindo a página Memory da coluna.
-- [ ] F. Fechar: as specs (sidebar, inspector, tabs, projects, home, status-bar, ssh), os CLAUDE.md,
+- [ ] G. Fechar: as specs (sidebar, inspector, tabs, projects, home, status-bar, ssh), os CLAUDE.md,
   o inventário da moldura (`docs/design/work-frame/inventory.md`) com a árvore e a coluna da
   direita em `sai`, a paridade (`MAC_ONLY`), `make check`, `make perf` e a dist.
 

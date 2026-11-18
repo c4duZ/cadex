@@ -6,7 +6,7 @@
   halo do escolhido (do mesmo tamanho; o anel branco o deixava mais grosso, o dono, 2026-11-18), a peça de estado e o ponto de terminal aberto; o "+" (project.new); no pé,
   Projects (project.show-all) e Automations (orchestration.show-automations), aceso o da página aberta.
 - A árvore do trabalho (fora da tela desde a ADR 0038; ainda junta o que o sidebar.find lista, até a
-  fase F do plano 36), a coluna da esquerda (`../../../../docs/spec/sidebar.md`; a peça Sidebar do
+  fase G do plano 36), a coluna da esquerda (`../../../../docs/spec/sidebar.md`; a peça Sidebar do
   mockup, plano 27 fase B): "New task" e o filtro no topo; cada projeto dobrável com as tarefas
   (as worktrees) e os terminais da pasta dele; sob a tarefa escolhida, os terminais dela; "+ Add
   project"; no pé, Projects (project.show-all, com o número) e Automations

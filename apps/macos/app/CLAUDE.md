@@ -114,7 +114,7 @@
   Changes diz "<tarefa> · against <ponto de partida>" e History "<tarefa> · N commits ahead of
   <ponto de partida>" (contado pelo git fora da linha principal), como no mockup Inspector;
   inspector.toggle (⌥⌘I) e inspector.visible, inspector.tab e inspector.width (a borda) salvos (a
-  regra da janela estreita saiu com a árvore; a nova vem na fase E do plano 36); git.show, explorer.focus,
+  regra da janela estreita saiu com a árvore; a nova vem na fase F do plano 36); git.show, explorer.focus,
   git.show-history e memory.show abrem a aba deles (WorkspaceView.showInspector).
 - `AgentToolsWiring.swift` (plano 20, fase B): o pedido de comando do agente acha o terminal dele
   (pela sessão do kit, senão pelos pids acima do `cadex`), confere agentTools.enabled e a lista do
