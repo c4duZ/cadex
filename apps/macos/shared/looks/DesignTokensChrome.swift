@@ -17,7 +17,7 @@ public extension DesignTokens {
         public static let gap: CGFloat = 10
         public static var bg: NSColor { DesignTokens.Color.bgChrome }
         public static var borderBottom: NSColor { DesignTokens.Color.lineSubtle }
-        public static let afterTrafficLights: CGFloat = 70
+        public static let afterTrafficLights: CGFloat = 6
     }
     enum Search {
         public static let height: CGFloat = 28
