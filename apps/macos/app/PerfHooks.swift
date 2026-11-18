@@ -86,7 +86,7 @@ extension WindowSession {
             let at = environment["CADEX_PERF_MENU_AT"].flatMap(Double.init) ?? 3
             DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in
                 guard let self, let anchor = self.workspace?.titleBar else { return }
-                let entries = which == "pane" ? self.paneMenu() : (self.menu?.popup(Self.newOpeners) ?? [])
+                let entries = which == "pane" ? self.paneMenu() : self.newTabMenu()
                 PopupMenu.show(entries, below: anchor)
             }
         }

@@ -19,9 +19,13 @@ ação do app (ADR 0005). Quando existirem, acha também abas, projetos e arquiv
 - A paleta aparece no topo da janela, centralizada: um campo de busca e a lista de resultados
   embaixo. Abre na hora, sem animação perceptível.
 - Com o campo vazio, lista em seções com título. Primeiro "Abrir", as formas de abrir coisas ao
-  lado do terminal, com nome próprio: Terminal em nova aba (⌘T), Terminal ao lado (⌘D), Terminal abaixo (⇧⌘D),
-  Arquivo… (⌘P), Preview web, Preview web em nova aba, Nova janela (⇧⌘N). O grafo do git saiu daqui e
-  dos menus "+" (o dono, 2026-10-22); continua no ⌘K pelo nome. Depois "Recentes" e uma seção por área (Abas, Painéis, Arquivos,
+  lado do terminal, uma forma de cada coisa: Terminal (⌘T), Agente… (⇧⌘A), Nova tarefa… (⌘N),
+  Arquivo… (⌘P), Preview web (⇧⌘H). Ao lado, abaixo, em nova aba e nova janela se acham pelo nome (o
+  dono, 2026-11-18: sete formas de abrir antes de qualquer coisa, e nenhuma de agente). O "+" das
+  abas: Terminal, Agente…, Tarefa…, Corrida…, uma linha, Arquivo… e Preview web, em nova aba; o "+"
+  do painel: só o que abre ao lado (Terminal ao lado, abaixo, Preview web ao lado), sem maximizar e
+  fechar, que são botões do cabeçalho. O grafo do git saiu daqui e dos menus "+" (o dono, 2026-10-22);
+  continua no ⌘K pelo nome. Depois "Recentes" e uma seção por área (Abas, Painéis, Arquivos,
   Busca, Editor, Terminal, Git, Web e mídia, Projetos e tarefas, Editar, Cadex), cada uma em ordem alfabética.
   O dono sentiu falta das seções e de ter as aberturas primeiro (2026-10-19).
 - Comando que não pode rodar agora não aparece, nem na lista nem na busca (o dono, 2026-10-19:

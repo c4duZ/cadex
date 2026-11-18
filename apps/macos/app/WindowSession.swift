@@ -187,7 +187,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         let workspace = WorkspaceView(explorer: explorer, tree: makeTree(), inspector: makeInspector(explorer: explorer, git: git)) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace
         self.workspace = workspace
-        workspace.titleBar.newMenu = { [weak self] in self?.menu?.popup(Self.newOpeners) ?? [] }
+        workspace.titleBar.newMenu = { [weak self] in self?.newTabMenu() ?? [] }
         showLocation(folder.root)
         showPanelFolder(folder.root)
         applyInspector(settings.store.settings.inspector)
