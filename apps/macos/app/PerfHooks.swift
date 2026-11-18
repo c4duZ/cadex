@@ -79,6 +79,18 @@ extension WindowSession {
             let at = environment["CADEX_PERF_COMMAND2_AT"].flatMap(Double.init) ?? 10
             DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in _ = self?.commands.run(id) }
         }
+        // Plan 33 E: the focused Claude goes on in the account of this folder at CADEX_PERF_SWITCH_AT s,
+        // as a click on it in the pane's header; the limit notices looked at at CADEX_PERF_LIMIT_AT s.
+        if let dir = environment["CADEX_PERF_SWITCH"] {
+            let at = environment["CADEX_PERF_SWITCH_AT"].flatMap(Double.init) ?? 25
+            DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in
+                guard let account = AgentsController.shared.everyAccount().first(where: { $0.dir == dir }) else { return NSLog("Cadex script: no account %@", dir) }
+                self?.switchOrLaunch(account)
+            }
+        }
+        if let at = environment["CADEX_PERF_LIMIT_AT"].flatMap(Double.init) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in self?.refreshLimitCards() }
+        }
         // The home screen clicked as the owner would: "card:task", "recent:<folder>" (plan 29).
         if let action = environment["CADEX_PERF_HOME_ACTION"], let colon = action.firstIndex(of: ":") {
             let kind = String(action[..<colon]), value = String(action[action.index(after: colon)...])
@@ -248,7 +260,8 @@ extension WindowSession {
                 func terminals(_ v: NSView) -> [TerminalView] { ((v as? TerminalView).map { [$0] } ?? []) + v.subviews.flatMap(terminals) }
                 // A view over the terminals (the drawer) stays on top: the ones under it are cut out.
                 func drawers(_ v: NSView) -> [NSView] { (v is DrawerView ? [v] : []) + v.subviews.flatMap(drawers) }
-                let overlays = drawers(view)
+                // And a card at a terminal's foot (TerminalView.footCard, plan 33): the picture covered it.
+                let overlays = drawers(view) + terminals(view).compactMap(\.footCard).filter { $0.superview != nil }
                 for terminal in terminals(view) where terminal.window != nil && !terminal.isHiddenOrHasHiddenAncestor {
                     guard let picture = terminal.snapshotImage() else { continue }
                     let rect = terminal.convert(terminal.bounds, to: view)

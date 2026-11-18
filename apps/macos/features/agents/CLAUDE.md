@@ -91,7 +91,7 @@
   logs do Codex a cada 5 min fora da linha principal; uma falha de login vale até uma sessão
   posterior gravar uso. `AgentUsageViews.swift`:
   `AgentUsageRows`, as barras que o cartão e o popover dividem (destaque, laranja a partir de 70%,
-  vermelho a partir de 90%). `AgentUsageStrip.swift`: o item
+  vermelho a partir de 90%). `AgentSwitch.swift` (plano 33 E): as regras de trocar a conta de um Claude (no limite: 100 % da sessão ou da semana; a outra de mais folga) e o `AgentLimitCard`, o aviso no pé do painel; a troca é do app (`../../app/AccountSwitchWiring.swift`), e agents.switch-account fica com os comandos das contas. `AgentUsageStrip.swift`: o item
   Agent usage, com a conta do terminal com foco (`focused`, que o app diz) ou a última, e o popover
   ao passar o ponteiro (`AgentUsageCard.swift` no `HoverCard` compartilhado, todas as contas; subir para dentro dele o mantém aberto). `CodexUsage.swift`: as contas
   do Codex e o uso tirado dos logs dele (os limites de cada uso), sem rede. A página Accounts saiu da barra lateral (plano 26 fase E): as

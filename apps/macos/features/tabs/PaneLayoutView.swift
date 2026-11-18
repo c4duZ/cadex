@@ -152,10 +152,16 @@ final class PaneLayoutView: NSView {
     private func placeFootCard(_ terminal: TerminalView, box: CGRect) {
         guard let card = terminal.footCard else { return }
         typealias I = DesignTokens.Pane.Permission.Inset
-        if card.superview !== self { addSubview(card, positioned: .below, relativeTo: handles.first) }
+        // Over its terminal: below the first divider handle put it under every view when a tab has
+        // one pane (no handles), behind the terminal, so the card was never seen (plan 33, 2026-11-18).
+        if card.superview !== self { addSubview(card, positioned: .above, relativeTo: terminal) }
         let height = card.fittingSize.height
         let left = box.minX + UILooks.pt(I.left), right = box.maxX - UILooks.pt(I.right)
-        card.frame = CGRect(x: left, y: box.maxY - UILooks.pt(I.bottom) - height, width: max(right - left, 0), height: height)
+        // Over the agent's input box, whose top rule is the row above the cursor (Claude's, plan 33);
+        // never lower than the mockup's place.
+        let input = terminal.frame.minY + terminal.rowTop(terminal.cursorRow - 1) - UILooks.pt(DesignTokens.Pane.Permission.gap)
+        let bottom = min(box.maxY - UILooks.pt(I.bottom), terminal.cursorRow > 1 ? input : .infinity)
+        card.frame = CGRect(x: left, y: bottom - height, width: max(right - left, 0), height: height)
     }
 
     /// One header per shown pane, under the dimming like its pane.

@@ -20,7 +20,7 @@ extension WindowSession {
         let strip = AgentUsageStrip()
         strip.onClick = { [weak self] in _ = self?.commands.run("agents.show-accounts") }
         strip.onSetActive = { [weak self] account in self?.setActiveAccount(account) }
-        strip.onLaunch = { [weak self] account in self?.launchAgent(for: account) }
+        strip.onLaunch = { [weak self] account in self?.switchOrLaunch(account) }
         let item = StatusItem(id: "usage", title: T("Agent usage", "Uso dos agentes"),
                               subtitle: T("Each account's 5 h session and week", "A sessão de 5 h e a semana de cada conta"),
                               icon: .sparkle, side: .right, view: strip)

@@ -32,6 +32,9 @@ public struct AgentAccountActions {
     /// Rename an account (the app asks the name): it was the Accounts page's right click until
     /// the page left the sidebar (plan 26 phase E).
     public var rename: @MainActor (AgentAccount) -> Void = { _ in }
+    /// Plan 33 E: the Claude in the focused terminal goes on in this account (the session ends, its
+    /// handoff goes to the memory, "Continue in…" runs in the same pane); with none, the account opens.
+    public var switchTo: @MainActor (AgentAccount) -> Void = { _ in }
     /// The account this window's project has now, by folder.
     public var projectAccount: @MainActor () -> String? = { nil }
 
@@ -77,6 +80,16 @@ public enum AgentAccountCommands {
                         }
                     }) { dir in
                         if let account = agents.everyAccount().first(where: { $0.dir == dir }) { actions.setActive(account) }
+                    }),
+            Command(id: "agents.switch-account", title: T("Switch Account…", "Trocar de conta…"),
+                    keywords: ["account", "switch", "limit", "continue", "conta", "trocar", "limite", "continuar", "claude"], category: .terminal,
+                    action: list(T("Go on in this account", "Continuar nesta conta"), T("No account in use", "Nenhuma conta em uso"), {
+                        AgentUsageController.shared.visibleAccounts().filter { $0.provider == .claude }.map { account in
+                            PaletteItem(id: account.dir, title: account.name,
+                                        detail: AgentSwitch.usedText(AgentSwitch.used(AgentUsage.current(of: account))), icon: .gauge)
+                        }
+                    }) { dir in
+                        if let account = agents.everyAccount().first(where: { $0.dir == dir }) { actions.switchTo(account) }
                     }),
             Command(id: "agents.rename-account", title: T("Rename an Agent Account…", "Renomear uma conta de agente…"),
                     keywords: ["account", "rename", "name", "conta", "renomear", "nome"], category: .terminal,

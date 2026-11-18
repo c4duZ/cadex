@@ -43,10 +43,13 @@ final class PaneHeaderView: NSView {
         var lane: PaneLane?
         /// "Open :5173 in preview": the blue chip on the right (a command serving an address).
         var offer = ""
+        /// An agent's account can be switched: a click on the detail (where the account is) lists the
+        /// accounts (plan 33 E).
+        var accountSwitch = false
     }
 
     enum DragPhase { case began, moved, ended }
-    enum Action { case focus, close, zoom, menu(NSView), drag(DragPhase, NSPoint), offer }
+    enum Action { case focus, close, zoom, menu(NSView), drag(DragPhase, NSPoint), offer, account(NSView) }
 
     var info = Info(title: "", icon: .terminalWindow) { didSet { if info != oldValue { refresh() } } }
     var focused = false { didSet { if focused != oldValue { refresh() } } }
@@ -162,6 +165,10 @@ final class PaneHeaderView: NSView {
     override func mouseUp(with event: NSEvent) {
         defer { pressedAt = nil; dragging = false }
         if dragging { return onAction?(.drag(.ended, event.locationInWindow)) ?? () }
+        if info.accountSwitch, event.clickCount == 1, !detail.isHidden,
+           detail.convert(detail.bounds, to: self).contains(convert(event.locationInWindow, from: nil)) {
+            return onAction?(.account(detail)) ?? ()
+        }
         onAction?(event.clickCount == 2 ? .zoom : .focus)
     }
 

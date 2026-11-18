@@ -52,7 +52,7 @@ que ela digitar já vai ter".
 - **D. Permissão.** Feita (2026-11-18): o cartão do pé do painel e o AgentPermissionCard saíram; o pedido chega pelo hook (o `cadex hook PermissionRequest` fica esperando) e o sino mostra Allow, Deny e Go to tab, conferido no app com um `claude` real; o cartão do painel falhava do lado do painel, que saiu. Plano original: O cartão "Wants to run…" sai do pé do painel (fica o diálogo do Claude) e
   continua no sino e no feed, para quem não está olhando o terminal. Conferir que o pedido chega
   pelo hook ao sino (no teste de 2026-11-18 o cartão não apareceu: achar o motivo).
-- **E. Trocar de conta.** `agents.switch-account`: com um Claude em foco, encerra a sessão (o
+- **E. Trocar de conta.** Feita (2026-11-18; `docs/spec/agents.md`, Trocar de conta): agents.switch-account, o detalhe do cabeçalho com a lista de contas, o aviso de limite no pé do painel e o clique no cartão de uso; conferido no app com um `claude` real (a troca de bkdg para bhband no mesmo painel; o aviso com um arquivo de uso a 100 %). Achados no caminho: o cartão do pé ia para baixo de todas as vistas num painel sozinho (o mesmo motivo de o cartão de permissão do plano 28 nunca aparecer) e a captura de teste pintava o terminal por cima dele; agora fica acima da caixa de entrada pela linha do cursor. Plano original: `agents.switch-account`: com um Claude em foco, encerra a sessão (o
   handoff vai para a memória) e abre no mesmo painel o "Continue in…" da conta escolhida; sem
   Claude em foco, abre a conta como hoje. Pontos de entrada:
   - a conta no cabeçalho do painel vira botão: a lista das contas com o uso de cada uma;

@@ -32,18 +32,23 @@ public struct PaneDetail: Equatable, Sendable {
     public var trailing: String
     /// A race's contender: the lane's second line and cap bar.
     public var lane: PaneLane?
+    /// A click on the detail lists the accounts to go on in (plan 33 E; paneAccountMenu).
+    public var accountSwitch: Bool
 
-    public init(title: String, detail: String, trailing: String, lane: PaneLane? = nil) {
+    public init(title: String, detail: String, trailing: String, lane: PaneLane? = nil, accountSwitch: Bool = false) {
         self.title = title
         self.detail = detail
         self.trailing = trailing
         self.lane = lane
+        self.accountSwitch = accountSwitch
     }
 }
 
 extension TabsController {
     /// The detail of an agent's terminal, from the app (every window's); nil: a plain terminal.
     @MainActor public static var paneDetail: (TerminalView) -> PaneDetail? = { _ in nil }
+    /// The accounts an agent's terminal can go on in, from the app (plan 33 E).
+    @MainActor public static var paneAccountMenu: (TerminalView) -> [MenuEntry] = { _ in [] }
 
     /// Every pane header of these tabs says again what it shows (an agent's detail changed).
     public func refreshPaneHeaders() {
@@ -67,6 +72,8 @@ extension TabsController {
             case .zoom: self.run("pane.zoom") { self.toggleZoom() }
             case .menu(let anchor): PopupMenu.show(self.paneMenu?() ?? [], below: anchor)
             case .offer: tab.panes[id]?.terminal?.openServed()
+            case .account(let anchor):
+                if let terminal = tab.panes[id]?.terminal { PopupMenu.show(Self.paneAccountMenu(terminal), below: anchor) }
             case .drag: break
             }
         }
@@ -89,6 +96,7 @@ extension TabsController {
                 info.detail = agent.detail
                 info.trailing = agent.trailing
                 info.lane = agent.lane
+                info.accountSwitch = agent.accountSwitch
             }
             return info
         case .document(let document):

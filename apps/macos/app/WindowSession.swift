@@ -134,6 +134,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
                    vibrancy: looks.vibrancy)
         startProjects()
         startPaneHeaders()
+        startAccountSwitch()
     }
 
     /// The title area is the app's (fullSizeContentView, transparent title

@@ -146,6 +146,25 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
   confirmar, a pasta vai para a lixeira e o Cadex esquece o nome, o esconder e a conta ativa ou de
   projeto que apontavam para ela. As contas de antes não são removidas: elas se escondem.
 
+### Trocar de conta (plano 33 E)
+- Trocar a conta de um Claude é continuar o trabalho noutra conta: a sessão acaba (SIGTERM, como na
+  hibernação; o handoff vai para a memória) e, com o shell de volta, o mesmo painel roda o
+  "Continue in…" da conta escolhida, que começa lá com o briefing do trabalho (`memory.md`). Sem a
+  memória, abre o agente da outra conta sem o contexto. As conversas de cada conta continuam na
+  pasta dela (ADR 0021); a conversa inteira vai por "Continue in Another Account" (Histórico).
+- Quatro caminhos, a mesma troca:
+  - a conta no cabeçalho do painel: um clique na linha de detalhe lista as contas do Claude com o
+    uso de cada uma (a desta sessão marcada);
+  - o aviso no pé do painel quando a conta chega ao limite (100 % da sessão de 5 h ou da semana,
+    pelo uso que a status line gravou): "<conta> reached its limit · Go on in <outra> · N% used",
+    com "Continue in <outra>" (a de mais folga; as sem números vêm depois) e "Not now" (não volta
+    para o mesmo par naquele terminal); fica acima da caixa de entrada do Claude;
+  - o clique numa conta no cartão de uso, com um Claude de outra conta em foco (sem, abre a conta
+    como antes);
+  - agents.switch-account ("Switch Account…") no ⌘K, com o uso de cada conta.
+- A conta padrão (~/.claude) vai sem pasta no comando, marcada por CADEX_ACCOUNT_CHOSEN=1 para não
+  virar a do projeto ou a ativa (`terminal.md`, o `claude` digitado).
+
 ### Histórico
 - Archive & history (agents.show-history; o ⌘⇧H do mockup é hoje do preview web, e o dono
   decide), no centro, numa página (plano 31 C: o título e a contagem, a busca, o escopo e o

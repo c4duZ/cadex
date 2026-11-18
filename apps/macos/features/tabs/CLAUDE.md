@@ -25,7 +25,8 @@
   documentsOnLeft (tabs.documentSide, que o app define).
   `PaneHeaderView.swift`: o cabeçalho de todo painel (plano 28 fase B, components.pane.header: o
   estado, o nome, de onde é e, à direita, o custo e o tempo; +, maximizar e ✕ só ao passar o
-  ponteiro; issue #1); o que um agente acrescenta vem do app por TabsController.paneDetail
+  ponteiro; issue #1); o que um agente acrescenta vem do app por TabsController.paneDetail Plano 33 E: PaneDetail.accountSwitch deixa o clique no detalhe (onde fica a conta) abrir a lista
+  que o app dá (TabsController.paneAccountMenu).
   (`PaneDetail`, guardado pelo app e só lido aqui); posto pelo `PaneLayoutView.swift`, que também mostra só o painel maximizado (`zoomed`);
   Um documento cuja barra é o cabeçalho (`barIsHeader`, o preview) fica sem o cabeçalho do painel e
   com os cantos da caixa. `TabsPaneHeaders.swift` diz o que cada um mostra e liga os botões aos comandos pelo `runCommand`

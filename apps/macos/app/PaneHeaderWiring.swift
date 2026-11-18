@@ -37,6 +37,7 @@ extension WindowSession {
             }
         }
         if changed { for project in projects.projects { project.tabs.refreshPaneHeaders() } }
+        refreshLimitCards()
     }
 
     private func paneDetail(of terminal: TerminalView, project: String) -> PaneDetail? {
@@ -50,7 +51,8 @@ extension WindowSession {
         var trailing: [String] = []
         if let cost = usage.cost { trailing.append(String(format: "US$ %.2f", cost)) }
         if let started = PaneDetails.started(pid: session.pid) { trailing.append(PaneDetails.duration(since: started)) }
-        return PaneDetail(title: "Claude", detail: detail.joined(separator: " · "), trailing: trailing.joined(separator: " · "))
+        return PaneDetail(title: "Claude", detail: detail.joined(separator: " · "), trailing: trailing.joined(separator: " · "),
+                          accountSwitch: session.account.provider == .claude)
     }
 }
 

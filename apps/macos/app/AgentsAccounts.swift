@@ -27,6 +27,7 @@ extension WindowSession {
                 return self.settings.store.settings.agents.projectAccounts[SettingsBridge.tilde(self.projectRoot)].map(SettingsBridge.expand)
             })
         actions.rename = { [weak self] account in self?.renameAccount(account) }
+        actions.switchTo = { [weak self] account in self?.switchOrLaunch(account) }
         return actions
     }
 

@@ -273,6 +273,14 @@ public final class TerminalView: NSView {
 
     private var scale: CGFloat { window?.backingScaleFactor ?? 2 }
 
+    /// The top of a screen row in points from the view's top, and the cursor's row: a card at the
+    /// pane's foot stays over the agent's input box, which sits on the cursor's row (plan 33 E).
+    public func rowTop(_ row: Int) -> CGFloat {
+        Self.paddingPoints + CGFloat(max(row, 0)) * CGFloat(renderer?.metrics.height ?? 1) / scale
+    }
+
+    public var cursorRow: Int { lastCursorRow }
+
     /// Points to cells for the current size, font and screen.
     var geometry: TerminalGeometry {
         let m = renderer?.metrics
