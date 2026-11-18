@@ -132,12 +132,16 @@ public final class MemoryView: NSView {
                                                           "Nada ainda: começa com a primeira sessão de agente deste projeto.")
                                                       : T("Nothing learned yet.", "Nada aprendido ainda.")))
         }
-        renderLearned(pages)
-        renderRules(pages)
-        renderSessions(pages)
-        if !knowledge.isEmpty {
-            add(link(T("All \(knowledge.count) pages", "Todas as \(knowledge.count) páginas"), status: status(state)) { [weak self] in self?.run?("project.show-memory") })
+        // "All N pages" closes the last section of pages (the rules, else what was learned today), as
+        // "All sessions" closes the sessions: alone under them it looked stray (the owner, 2026-11-18).
+        let all = knowledge.isEmpty ? nil : link(T("All \(knowledge.count) pages", "Todas as \(knowledge.count) páginas"), status: status(state)) { [weak self] in
+            self?.run?("project.show-memory")
         }
+        let hasRules = pages.contains { $0.relative.hasPrefix("_rules/") }
+        let learnedShown = renderLearned(pages, closing: hasRules ? nil : all)
+        renderRules(pages, closing: all)
+        renderSessions(pages)
+        if let all, !hasRules, !learnedShown { add(all) }
         let card = MemoryParts.foot(see: { [weak self] in self?.run?("memory.show-briefing") },
                                     configure: { [weak self] in self?.run?("memory.configure-project") })
         foot.addArrangedSubview(card)
@@ -155,23 +159,29 @@ public final class MemoryView: NSView {
     }
 
     /// "LEARNED TODAY": what an agent wrote today, newest first, the session logs left out.
-    private func renderLearned(_ pages: [MemoryPage]) {
+    @discardableResult
+    private func renderLearned(_ pages: [MemoryPage], closing: NSView?) -> Bool {
         let today = pages.filter { $0.learnedAt.map(Calendar.current.isDateInToday) == true && !Self.isSession($0) }
             .sorted { ($0.learnedAt ?? .distantPast) > ($1.learnedAt ?? .distantPast) }
-        guard !today.isEmpty else { return }
+        guard !today.isEmpty else { return false }
         var rows: [NSView] = today.prefix(Self.shownLearned).map(pageRow)
-        if today.count > Self.shownLearned {
+        if let closing {
+            rows.append(closing)
+        } else if today.count > Self.shownLearned {
             rows.append(link(T("See all \(today.count)", "Ver as \(today.count)")) { [weak self] in self?.run?("project.show-memory") })
         }
         add(MemoryParts.section(T("LEARNED TODAY", "APRENDIDO HOJE"), count: today.count, rows))
+        return true
     }
 
     /// "PROJECT RULES": the pages every agent gets (`_rules/`).
-    private func renderRules(_ pages: [MemoryPage]) {
+    private func renderRules(_ pages: [MemoryPage], closing: NSView?) {
         let rules = pages.filter { $0.relative.hasPrefix("_rules/") }
         guard !rules.isEmpty else { return }
         var rows: [NSView] = rules.prefix(Self.shownRules).map(pageRow)
-        if rules.count > Self.shownRules {
+        if let closing {
+            rows.append(closing)
+        } else if rules.count > Self.shownRules {
             rows.append(link(T("See all \(rules.count)", "Ver as \(rules.count)")) { [weak self] in self?.run?("project.show-memory") })
         }
         add(MemoryParts.section(T("PROJECT RULES", "REGRAS DO PROJETO"), count: rules.count, rows))
