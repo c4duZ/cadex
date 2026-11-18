@@ -7,9 +7,9 @@ import Tabs
 
 /// The title bar of the new frame (docs/adr/0035-work-frame.md; screens.md, TitleBar;
 /// components.titleBar): the window buttons, the search (the palette, ⌘K), where you are
-/// ("project › task"), the tabs of what is open and "+", and on the right the bell. Every
-/// control runs a command by id (ADR 0005); the sidebar, the space and the settings left the bar
-/// (⌘B, ⇧⌘S and ⌘, in the palette, the shortcuts and the menu).
+/// (only on pages: the board's "All projects", a run, a race), the tabs of what is open and "+",
+/// and on the right the account with its usage, the board, the bell, the settings and the right
+/// panel (the owner, 2026-11-18). Every control runs a command by id (ADR 0005).
 final class TitleBarView: NSView {
     typealias Look = DesignTokens.TitleBar
     /// Zoomed but never compact: macOS places the window buttons itself (plan 15, phase D).
@@ -20,6 +20,9 @@ final class TitleBarView: NSView {
     /// macOS put them they sat 2.5 pt right, and the search with them (measured 2026-11-17).
     private static let windowButtonMids: [CGFloat] = [22, 42, 62] // token-exempt: macOS's own buttons
     private var searchLeading: NSLayoutConstraint!
+    /// The gaps around "project › task", closed when it says nothing (tabs right after the search).
+    private var locationLeading: NSLayoutConstraint!
+    private var tabsLeading: NSLayoutConstraint?
 
     private let run: (String) -> Void
     private let search = TitleBarSearch()
@@ -30,6 +33,10 @@ final class TitleBarView: NSView {
     /// The bell: the requests waiting for you, its count on the badge (docs/spec/agents.md).
     private let bellButton = TitleBarButton(icon: .bell, tip: T("Needs you", "Precisa de você"))
     private let boardButton = TitleBarButton(icon: .kanban, tip: T("Board", "Quadro"))
+    /// The settings window (settings.open, ⌘,).
+    private let settingsButton = TitleBarButton(icon: .gearSix, tip: T("Settings", "Configurações"))
+    /// The focused agent's account (else the active one) and its usage; a click switches accounts.
+    private let account = TitleBarAccount()
     /// The right panel's button (inspector.toggle), lit while the panel is open.
     private let panelButton = TitleBarButton(icon: .sidebarSimple, tip: T("Right panel", "Painel da direita"), mirrored: true)
     private let trailing = NSStackView()
@@ -50,7 +57,9 @@ final class TitleBarView: NSView {
         bellButton.onPress = { [weak self] in self?.run("agents.show-attention") }
         boardButton.onPress = { [weak self] in self?.run("view.board") }
         panelButton.onPress = { [weak self] in self?.run("inspector.toggle") }
-        trailing.setViews([boardButton, bellButton, panelButton], in: .leading)
+        settingsButton.onPress = { [weak self] in self?.run("settings.open") }
+        account.onPress = { [weak self] in self?.run("agents.switch-account") }
+        trailing.setViews([account, boardButton, bellButton, settingsButton, panelButton], in: .leading)
         trailing.spacing = UILooks.pt(Look.gap)
 
         location.font = UILooks.font(DesignTokens.Breadcrumb.fontSize)
@@ -65,11 +74,11 @@ final class TitleBarView: NSView {
             addSubview(view)
         }
         searchLeading = search.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Self.searchStart(fullScreen: false))
+        // The bar's gap and the tabs group's margin, as the mockup lays them out.
+        locationLeading = location.leadingAnchor.constraint(equalTo: search.trailingAnchor, constant: Self.locationGap)
         NSLayoutConstraint.activate([
             searchLeading,
-            // The bar's gap and the tabs group's margin, as the mockup lays them out.
-            location.leadingAnchor.constraint(equalTo: search.trailingAnchor,
-                                              constant: UILooks.pt(Look.gap + DesignTokens.Tab.groupMarginLeft)),
+            locationLeading,
             trailing.leadingAnchor.constraint(greaterThanOrEqualTo: newTabButton.trailingAnchor, constant: UILooks.pt(Look.gap)),
             trailing.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -UILooks.pt(Look.padding.right)),
             hairline.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -87,6 +96,9 @@ final class TitleBarView: NSView {
     private static func searchStart(fullScreen: Bool) -> CGFloat {
         fullScreen ? UILooks.pt(Look.padding.left) : windowButtonsEnd + UILooks.pt(Look.gap + Look.afterTrafficLights)
     }
+
+    private static var locationGap: CGFloat { UILooks.pt(Look.gap + DesignTokens.Tab.groupMarginLeft) }
+    private static var tabsGap: CGFloat { UILooks.pt(DesignTokens.Breadcrumb.marginRight + DesignTokens.Tab.groupGap) }
 
     private func showNewMenu() {
         guard let entries = newMenu?(), !entries.isEmpty else { return run("tab.new") }
@@ -107,6 +119,10 @@ final class TitleBarView: NSView {
     /// Where you are: the project, and the task when one is selected.
     func setLocation(project: String, task: String?) {
         location.stringValue = [project, task].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " › ")
+        // Nothing to say: the tabs come right after the search, one gap away.
+        let empty = location.stringValue.isEmpty
+        locationLeading.constant = empty ? 0 : Self.locationGap
+        tabsLeading?.constant = empty ? UILooks.pt(Look.gap) : Self.tabsGap
     }
 
     /// The bell, where its popover opens; lit while it is open.
@@ -117,6 +133,9 @@ final class TitleBarView: NSView {
     /// No "+" beside a page's tabs (the board, a project's overview).
     func setNewTabHidden(_ hidden: Bool) { newTabButton.isHidden = hidden || tabsHidden }
     func setInspectorOpen(_ open: Bool) { panelButton.isOn = open }
+
+    /// The account shown on the right: its name and how much of its limit it used.
+    func setAccount(name: String?, used: Int?) { account.show(name: name, used: used) }
 
     /// The bell's count: what needs you, and finished agents you have not seen.
     func setBell(count: Int) {
@@ -140,9 +159,11 @@ final class TitleBarView: NSView {
         NSLayoutConstraint.deactivate(tabBarConstraints)
         bar.translatesAutoresizingMaskIntoConstraints = false
         addSubview(bar)
+        let leading = bar.leadingAnchor.constraint(equalTo: location.trailingAnchor,
+                                                   constant: location.stringValue.isEmpty ? UILooks.pt(Look.gap) : Self.tabsGap)
+        tabsLeading = leading
         tabBarConstraints = [
-            bar.leadingAnchor.constraint(equalTo: location.trailingAnchor,
-                                         constant: UILooks.pt(DesignTokens.Breadcrumb.marginRight + DesignTokens.Tab.groupGap)),
+            leading,
             bar.heightAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Tab.height)),
             bar.centerYAnchor.constraint(equalTo: centerYAnchor),
             newTabButton.leadingAnchor.constraint(equalTo: bar.trailingAnchor, constant: UILooks.pt(DesignTokens.Tab.groupGap)),

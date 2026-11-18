@@ -106,11 +106,9 @@ final class Tab {
         if let document = focused.document { return dot + document.title }
         // Several terminals: the mockup's "Terminals · 3".
         if let group = TabCommandLooks.groupTitle(self) { return dot + group }
-        if let command = TabCommandLooks.commandTitle(terminal) { return dot + command }
-        if agent != nil, let terminal {
-            let name = TabAgentTitle.name(programTitle: terminal.programTitle)
-            if !name.isEmpty { return dot + name }
-        }
+        // An agent's tab is named by where it works (the project, or the task's folder), not by the
+        // agent ("Claude" on every tab told nothing apart; the owner, 2026-11-18); its state is the glyph.
+        if agent == nil, let command = TabCommandLooks.commandTitle(terminal) { return dot + command }
         return dot + folderTitle(terminal?.currentDirectory, home: home)
     }
 

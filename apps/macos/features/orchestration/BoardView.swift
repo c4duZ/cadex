@@ -13,6 +13,8 @@ public struct BoardActions {
     public var newRace: () -> Void = {}
     public var newTask: () -> Void = {}
     public var load: (@escaping @MainActor ([BoardCard]) -> Void) -> Void = { _ in }
+    /// Esc on the board: back to where the owner was.
+    public var back: () -> Void = {}
     public init() {}
 }
 
@@ -40,7 +42,11 @@ public final class BoardDocument: TabDocument {
         reload()
     }
 
-    public func focus() { reload() }
+    public func focus() {
+        reload()
+        page.onEscape = actions.back
+        page.window?.makeFirstResponder(page)
+    }
     public func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) { close() }
     public func close() {}
 

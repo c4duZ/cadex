@@ -105,8 +105,9 @@
   hibernado como parado ("Hibernando" na dica); o `TabBarView` põe o sinal antes do nome da aba
   (uma `StateGlyphView` por aba com estado, 9 na ativa e 7 nas outras, parada e desenhada enquanto
   uma aba é arrastada) e o título em negrito quando o agente terminou sem você ver; os sinais de
-  texto de antes (◐ ● ✓ ✕ ☾) saíram do título. O nome da conversa no lugar da pasta e a frase do
-  que ele faz na dica; o nome dado à mão continua.
+  texto de antes (◐ ● ✓ ✕ ☾) saíram do título. A frase do que ele faz na dica; o nome da aba é o dado
+  à mão ou o da pasta (o projeto ou a tarefa), nunca o título que o agente escreve ("Claude", o nome
+  da conversa; o dono, 2026-11-18).
 
 ## Como validar
 - `make macos-test` passa: `TabList` e `PaneTree` têm os testes das regras; o snapshot ida e volta

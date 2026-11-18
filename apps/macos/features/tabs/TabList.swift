@@ -40,6 +40,10 @@ struct TabList: Equatable {
     /// Ctrl+Tab: the tab used before the current one.
     var previouslyUsed: Int? { recent.count > 1 ? recent[1] : nil }
 
+    /// The tab to go back to: the one used before, else any other in the order (a restored tab
+    /// is in no use list until it is selected: the board had nowhere to go back to, 2026-11-18).
+    var backTo: Int? { previouslyUsed ?? order.first { $0 != active } }
+
     /// Ctrl+Shift+Tab: the tab used longest ago.
     var leastRecentlyUsed: Int? { recent.count > 1 ? recent.last : nil }
 

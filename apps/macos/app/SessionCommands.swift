@@ -270,11 +270,13 @@ extension WindowSession {
             workspace?.titleBar.setLocation(project: projects?.activeName ?? "", task: T("run ", "execução ") + document.title)
             return showProject(branch: lastBranch)
         }
-        let (project, task) = TitleBarView.location(of: root)
-        // A race's lane: "cadex › race kite" (the Race mockup).
+        let (project, _) = TitleBarView.location(of: root)
+        // A race's lane: "cadex › race kite" (the Race mockup). Elsewhere no "project › task": the
+        // tabs name it now, and the status bar says the project and the branch (the owner, 2026-11-18).
         let race = raceName(of: root).map { T("race ", "corrida ") + $0 }
-        workspace?.titleBar.setLocation(project: project, task: race ?? task)
+        workspace?.titleBar.setLocation(project: race == nil ? "" : project, task: race)
         showProject(branch: lastBranch)
+        refreshTitleAccount()
     }
 
     /// The status bar follows the focused terminal's folder, and its folder
@@ -282,6 +284,8 @@ extension WindowSession {
     func connectStatusBar(_ bar: StatusBarView, to tabs: TabsController) {
         tabs.onActiveChange = { [weak self, weak tabs, weak bar] in
             let terminal = tabs?.activeTerminal
+            // The title bar's account follows the focused agent (the owner, 2026-11-18).
+            self?.refreshTitleAccount()
             // A read that fails for a moment keeps the last folder: the
             // trail emptied and came back, moving the whole bar (2026-10-22).
             if let folder = terminal?.currentDirectory { bar?.path = folder }

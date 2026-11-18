@@ -21,15 +21,6 @@ enum TabAgentTitle {
         }
     }
 
-    /// The conversation's name from the title the agent set (OSC 0/2):
-    /// Claude Code drops its own spinner from the title once the terminal
-    /// answers OSC 7501 (test of 2026-11-14), and any glyph left before the
-    /// first letter or digit goes too ("✳ Fix login" → "Fix login").
-    static func name(programTitle: String) -> String {
-        let trimmed = programTitle.drop { !$0.isLetter && !$0.isNumber }
-        return String(trimmed).trimmingCharacters(in: .whitespaces)
-    }
-
     /// The tab's tip: what the agent does now, over the folder.
     static func tip(_ status: TerminalAgentStatus?, folder: String?, hibernated: Bool = false) -> String? {
         let state = hibernated ? T("Hibernating: comes back when you open this tab", "Hibernando: volta quando você abre esta aba") : status?.message

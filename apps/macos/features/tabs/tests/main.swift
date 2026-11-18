@@ -60,7 +60,7 @@ let exitCode = await Checks.run([
         expect(project.count == 2 && project.activeTerminal === moved && moved?.session != nil, "the shell goes on")
         project.closeAll()
     }),
-    ("a tab whose agent waits for a permission shows the needs-you glyph and its conversation's name, and the tip says what", {
+    ("a tab whose agent waits for a permission shows the needs-you glyph and the folder's name (not the agent's title), and the tip says what", {
         let tabs = makeTabs()
         tabs.newTab()
         guard let terminal = tabs.activeTerminal else { return expect(false, "no terminal") }
@@ -70,7 +70,9 @@ let exitCode = await Checks.run([
         defer { NotificationCenter.default.removeObserver(observer) }
         // As Claude Code does: it names the conversation (OSC 2) and reports blocked (OSC 7501), and keeps running.
         terminal.session?.write("sh -c \"printf '\\\\033]2;Fix login\\\\007\\\\033]7501;state=blocked:app=claude-code:kind=permission:msg=YXBwcm92ZSBCYXNoOiBybSB4\\\\007'; sleep 20\"\n")
-        let shown = await eventually { tabs.bar.items.first?.title == "Fix login" && tabs.bar.items.first?.state == .needs }
+        // The tab is named by where the agent works, as the owner asked (2026-11-18), never by the
+        // title the agent writes.
+        let shown = await eventually { tabs.bar.items.first?.state == .needs && tabs.bar.items.first?.title != "Fix login" }
         expect(shown, "\(tabs.bar.items.map(\.title))")
         expect(notices >= 1, "the terminal tells the app its agent changed")
         expect(tabs.bar.items.first?.tip?.hasPrefix("approve Bash: rm x") == true, "\(String(describing: tabs.bar.items.first?.tip))")
@@ -87,7 +89,6 @@ let exitCode = await Checks.run([
         expect(TabAgentTitle.state(nil) == nil, "no agent, no glyph")
         expect(TabAgentTitle.state(nil, hibernated: true) == .idle, "hibernated: idle")
         expect(TabAgentTitle.tip(nil, folder: "~/a", hibernated: true)?.hasSuffix("\n~/a") == true)
-        expect(TabAgentTitle.name(programTitle: "✳ Fix login") == "Fix login" && TabAgentTitle.name(programTitle: "  ") == "")
         expect(TabAgentTitle.tip(waiting, folder: "~/code/app") == "approve Bash: touch x\n~/code/app")
         expect(TabAgentTitle.tip(nil, folder: "~/code/app") == "~/code/app")
     }),
@@ -161,6 +162,19 @@ let exitCode = await Checks.run([
         [1, 2, 3].forEach { list.insert($0) }
         expect(list.id(atPosition: 1) == 1 && list.id(atPosition: 3) == 3)
         expect(list.id(atPosition: 5) == nil && list.id(atPosition: 0) == nil)
+    }),
+    ("leaving a page goes back to the tab used before, else to any other (the board had nowhere to go)", {
+        var list = TabList()
+        [1, 2].forEach { list.insert($0) }
+        list.select(1)
+        expect(list.backTo == 2, "used before: \(list.recent)")
+        var alone = TabList()
+        alone.insert(1)
+        expect(alone.backTo == nil, "one tab: nowhere")
+        alone.insert(2)
+        alone.remove(1)
+        alone.insert(3)
+        expect(alone.backTo == 2, "the other tab even with no use before it: \(alone.recent)")
     }),
     ("Ctrl+Tab goes back to the tab used before", {
         var list = TabList()

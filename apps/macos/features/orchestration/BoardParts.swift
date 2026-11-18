@@ -29,6 +29,10 @@ final class BoardBox: NSView {
 /// side on a wide window, two on a medium one, one on a narrow one (components.board.minColumn).
 @MainActor
 final class BoardPage: NSView {
+    /// Esc: leave the board (BoardActions.back).
+    var onEscape: () -> Void = {}
+    override var acceptsFirstResponder: Bool { true }
+    override func cancelOperation(_ sender: Any?) { onEscape() }
     private let bar = BoardWrap()
     private let scroll = NSScrollView()
     private let content = BoardContent()

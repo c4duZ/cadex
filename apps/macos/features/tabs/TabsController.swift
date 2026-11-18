@@ -194,6 +194,11 @@ public final class TabsController {
         if let id = list.previouslyUsed { select(id) }
     }
 
+    /// Leaving a page (the board): the tab used before, else any other tab.
+    public func goBack() {
+        if let id = list.backTo { select(id) }
+    }
+
     /// Ctrl+Shift+Tab.
     public func selectLeastRecentlyUsed() {
         if let id = list.leastRecentlyUsed { select(id) }

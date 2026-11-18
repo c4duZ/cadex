@@ -49,9 +49,13 @@
   `../../../docs/design/work-frame/screens.md`, TitleBar; components.titleBar): 44 pt, com os
   botões da janela descidos para o meio dela a cada mudança de tamanho e de foco (a barra compacta
   os centra em 38), a busca `TitleBarSearch.swift` ("Search ⌘K", abre a paleta), "projeto ›
-  tarefa" (`location(of:)`: `<repo>.worktrees/<tarefa>` é o projeto e a tarefa), as abas e "+",
-  e à direita o sino com o número (`setBell`, de `AgentsAttention.swift`) e o botão do painel da
-  direita (inspector.toggle, aceso com ele aberto; `setInspectorOpen`); o café e a
+  tarefa" só nas páginas (o "All projects" do quadro, uma execução, uma corrida; nos terminais as
+  abas já dizem o lugar, o dono em 2026-11-18), as abas e "+", e à direita a conta
+  (`TitleBarAccount.swift`: a do agente com foco, senão a ativa, com o uso; o clique roda
+  agents.switch-account), o quadro (view.board liga e desliga: com ele aberto volta à aba de antes,
+  TabsController.goBack, e o Esc faz o mesmo), o sino com o número (`setBell`, de
+  `AgentsAttention.swift`), as configurações (settings.open) e o botão do painel da direita
+  (inspector.toggle, aceso com ele aberto; `setInspectorOpen`); o café e a
   atualização foram para a barra de status (fase B, `StatusBarItems.swift`); o botão da barra
   lateral, o de space e o das configurações saíram (⌘B, ⇧⌘S e ⌘, no ⌘K, nos atalhos e no menu). Cada botão é
   um `TitleBarButton.swift` (components.titleIconButton: 30 pt, aceso quando o que abre está

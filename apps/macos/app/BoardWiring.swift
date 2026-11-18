@@ -20,7 +20,11 @@ extension WindowSession {
                  action: .run { [weak self] in self?.openBoard() })]
     }
 
+    /// The board's button and view.board open the board, and shut it when it shows: back to the
+    /// tab used before (it opened as a page over the whole center, and the button only opened it,
+    /// so there was no way out; the owner, 2026-11-18). Esc on the board does the same.
     func openBoard() {
+        if tabs?.activeDocument?.identity == BoardDocument.identity { return tabs?.goBack() ?? () }
         if let open = tabs?.document(identity: BoardDocument.identity) { return tabs?.open(open) ?? () }
         tabs?.open(makeBoard())
     }
@@ -31,6 +35,7 @@ extension WindowSession {
         actions.newTask = { [weak self] in _ = self?.commands.run("worktrees.new-task") }
         actions.open = { [weak self] id in self?.pickInTree(.task(id)) }
         actions.load = { [weak self] show in show(self?.boardCards() ?? []) }
+        actions.back = { [weak self] in self?.tabs?.goBack() }
         return BoardDocument(actions: actions)
     }
 

@@ -37,7 +37,7 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | trecho | "sidebarButton" em `apps/macos/app/TitleBarView.swift` | saiu | ⌘B e view.toggle-sidebar no ⌘K | 26 |
 | trecho | "powerButton" em `apps/macos/app/TitleBarView.swift` | saiu | o café é o item keepAwake da barra de status (power.toggle) | 26 |
 | trecho | "updateButton" em `apps/macos/app/TitleBarView.swift` | saiu | o item update da barra de status, só com versão nova (app.check-for-updates) | 26 |
-| trecho | "settingsButton" em `apps/macos/app/TitleBarView.swift` | saiu | só ⌘, e o menu | 26 |
+| trecho | "settingsButton" em `apps/macos/app/TitleBarView.swift` | muda | saiu no 26 (só ⌘, e o menu) e voltou à direita da barra, com a conta, o quadro e o sino (o dono, 2026-11-18) | 26 |
 | arquivo | `apps/macos/features/tabs/TabBarView.swift` | muda | as abas com estado e a largura do título (components.tab), feito | 26 |
 | arquivo | `apps/macos/features/tabs/TabAgentTitle.swift` | muda | vira a peça de estado das fundações | 25 |
 
