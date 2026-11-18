@@ -85,7 +85,8 @@ public final class AutomationsPageDocument: TabDocument {
             return
         }
         let on = lines.filter(\.on).count
-        var meta = T("\(lines.count) automations · \(on) on", "\(lines.count) automações · \(on) ligada" + (on == 1 ? "" : "s"))
+        let count = lines.count == 1 ? T("1 automation", "1 automação") : T("\(lines.count) automations", "\(lines.count) automações")
+        var meta = count + T(" · \(on) on", " · \(on) ligada" + (on == 1 ? "" : "s"))
         if let next = lines.first(where: { $0.on && $0.next != "—" })?.next { meta += T(" · the next runs ", " · a próxima roda ") + next }
         page.show([OrchestrationPage.head(title, meta: meta, buttons: [create]), table(lines),
                    boardLabel(T("Click a line for its runs and to edit it; the right click has Run Now, Turn On or Off and Delete.",

@@ -131,6 +131,7 @@ extension WindowSession {
                         return T("last: ", "último: ") + ProjectPageWords.mergedName(line[0]) + (when.isEmpty ? "" : ", " + when)
                     } ?? T("none in 30 days", "nenhum em 30 dias")
                     let today = Calendar.current.startOfDay(for: now)
+                    let knowledge = pages.map { $0.filter { !$0.relative.hasPrefix("sessions/") } }
                     let stats = [
                         ProjectPageState.Stat(label: T("Tasks open", "Tarefas abertas"), value: "\(tasks.count)",
                                               note: ProjectPageWords.tasksNote(working: tasks.filter { $0.state == .working }.count,
@@ -140,8 +141,9 @@ extension WindowSession {
                                                       "\(week.count) sessões · \(Set(week.map(\.account)).count) contas")),
                         ProjectPageState.Stat(label: T("Merged", "Juntados"), value: pulls ? "\(lines.count) PRs" : T("\(lines.count) merges", "\(lines.count) merges"),
                                               note: lastMerge),
-                        ProjectPageState.Stat(label: T("Memory", "Memória"), value: pages.map { T("\($0.count) pages", "\($0.count) páginas") } ?? T("off", "desligada"),
-                                              note: pages.map { pages in "+\(pages.filter { ($0.time ?? .distantPast) >= today }.count) " + T("today", "hoje") } ?? ""),
+                        // Knowledge only, as the head and the Memory section count it.
+                        ProjectPageState.Stat(label: T("Memory", "Memória"), value: knowledge.map { T("\($0.count) pages", "\($0.count) páginas") } ?? T("off", "desligada"),
+                                              note: knowledge.map { pages in "+\(pages.filter { ($0.time ?? .distantPast) >= today }.count) " + T("today", "hoje") } ?? ""),
                     ]
                     let accountName = { (dir: String) in accounts.first { $0.dir == dir }?.name ?? (dir as NSString).lastPathComponent }
                     let talks = mine.sorted { ($0.updated ?? .distantPast) > ($1.updated ?? .distantPast) }.prefix(5).map { entry in

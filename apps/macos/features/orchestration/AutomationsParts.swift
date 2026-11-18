@@ -186,6 +186,8 @@ final class AutomationTableRow: NSView {
         trackingAreas.filter { $0.owner === self }.forEach(removeTrackingArea)
         addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .mouseMoved, .activeAlways, .inVisibleRect], owner: self))
     }
+    /// The first click of an inactive window presses too (the Projects card took none, 2026-11-18).
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
     override func mouseEntered(with event: NSEvent) { hovering = true }
     override func mouseMoved(with event: NSEvent) { hovering = true }
     override func mouseExited(with event: NSEvent) { hovering = false }
@@ -226,6 +228,8 @@ final class AutomationSwitch: NSView {
         NSBezierPath(ovalIn: NSRect(x: x, y: track.midY - knob / 2, width: knob, height: knob)).fill()
     }
 
+    /// The first click of an inactive window presses too (the Projects card took none, 2026-11-18).
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
     override func mouseDown(with event: NSEvent) {}
     override func mouseUp(with event: NSEvent) { onPress?() }
     override func resetCursorRects() { addCursorRect(bounds, cursor: .pointingHand) }

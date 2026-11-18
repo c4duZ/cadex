@@ -18,4 +18,9 @@ func pageTextTests() -> [(name: String, body: Checks.Body)] { [
         expect(MemoryPageText.tags("no frontmatter\ntags: [a]").isEmpty)
         expect(MemoryPageText.blocks("plain line") == [.paragraph("plain line")])
     }),
+    ("the engine's own files are not pages: _meta, a month's log, the pending proposals", {
+        func page(_ relative: String) -> MemoryPage { MemoryPage(path: "/w/" + relative, relative: relative, title: relative) }
+        expect(page("_meta.md").isEngineFile && page("log-2026-11.md").isEngineFile && page("_pending/01a1.md").isEngineFile)
+        expect(!page("_rules/no-migration.md").isEngineFile && !page("decisions/x.md").isEngineFile && !page("sessions/log-x.md").isEngineFile)
+    }),
 ] }

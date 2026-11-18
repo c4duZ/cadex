@@ -49,7 +49,7 @@ extension WindowSession {
         let home = NSHomeDirectory()
         let wikis = open.map { MemoryPageState.wikiDir(overview: nil, root: $0.0, folder: MemoryKit.folder()) }
         DispatchQueue.global(qos: .userInitiated).async {
-            let memories = wikis.map { wiki in wiki.flatMap { FileManager.default.fileExists(atPath: $0) ? MemoryWiki.tree($0).allPages.count : nil } ?? 0 }
+            let memories = wikis.map { wiki in wiki.flatMap { FileManager.default.fileExists(atPath: $0) ? MemoryWiki.tree($0).allPages.filter { !$0.relative.hasPrefix("sessions/") }.count : nil } ?? 0 }
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
                     let now = Date()

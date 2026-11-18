@@ -109,7 +109,10 @@ public final class MemoryView: NSView {
             return add(MemoryParts.button(T("Turn On", "Ligar")) { [weak self] in self?.run?("memory.enable") })
         }
         let pages = state.tree?.allPages ?? []
-        add(MemoryParts.line(Self.subtitle(projectName(), pages: pages)))
+        // What the project knows: the session logs are not counted (the project's page and its
+        // Memory say the same number, 2026-11-18).
+        let knowledge = pages.filter { !Self.isSession($0) }
+        add(MemoryParts.line(Self.subtitle(projectName(), pages: knowledge)))
         add(MemoryParts.search { [weak self] in self?.run?("memory.search") })
         if let problem = state.problem { add(MemoryParts.paragraph(problem)) }
         renderProposals(state.proposals)
@@ -121,8 +124,8 @@ public final class MemoryView: NSView {
         renderLearned(pages)
         renderRules(pages)
         renderSessions(pages)
-        if !pages.isEmpty {
-            add(link(T("All \(pages.count) pages", "Todas as \(pages.count) páginas"), status: status(state)) { [weak self] in self?.run?("project.show-memory") })
+        if !knowledge.isEmpty {
+            add(link(T("All \(knowledge.count) pages", "Todas as \(knowledge.count) páginas"), status: status(state)) { [weak self] in self?.run?("project.show-memory") })
         }
         add(MemoryParts.foot(see: { [weak self] in self?.run?("memory.show-briefing") },
                              configure: { [weak self] in self?.run?("memory.configure-project") }))

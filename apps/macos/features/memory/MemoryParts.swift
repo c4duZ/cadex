@@ -179,6 +179,8 @@ final class MemoryBox: NSStackView {
     }
 
     override func mouseDown(with event: NSEvent) { if press == nil { super.mouseDown(with: event) } }
+    /// The first click of an inactive window presses too (2026-11-18).
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { press != nil }
     override func mouseUp(with event: NSEvent) {
         guard let press, bounds.contains(convert(event.locationInWindow, from: nil)) else { return super.mouseUp(with: event) }
         press()

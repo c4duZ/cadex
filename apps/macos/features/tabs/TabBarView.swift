@@ -321,6 +321,10 @@ public final class TabBarView: NSView {
         HoverTip.hover(items[i].tip ?? items[i].title, over: tab, in: self)
     }
 
+    /// A tab is chosen by the first click of an inactive window too, as in Safari (clicking a
+    /// terminal's tab from a page only woke the window, 2026-11-18).
+    public override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
     public override func mouseDown(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
         guard let i = index(at: point) else { return }

@@ -89,17 +89,25 @@ enum ProjectSplit {
             let meta = pageLabel(detail.meta, size: DesignTokens.FontSize.meta, color: DesignTokens.Color.textTertiary)
             views.append(detail.metaLogo ? logoLine(meta) : meta)
         }
-        for block in detail.blocks {
+        // The proposal's order: the summary, the tags, then the rest; a long page is cut, whole in
+        // "View the Page" (a real session page put the buttons out of sight, 2026-11-18).
+        var blocks = Array(detail.blocks.prefix(Self.shownBlocks))
+        var tagsShown = detail.tags.isEmpty
+        if case .paragraph(let first)? = blocks.first {
+            views.append(wrapped(first, size: DesignTokens.FontSize.body, color: DesignTokens.Color.textRow))
+            blocks.removeFirst()
+            if !detail.tags.isEmpty { views.append(tagRow(detail.tags)); tagsShown = true }
+        }
+        for block in blocks {
             switch block {
             case .heading(let text): views.append(pageLabel(text.uppercased(), size: DesignTokens.FontSize.caption, color: DesignTokens.Color.textTertiary, weight: .bold, tracking: 0.06))
             case .paragraph(let text): views.append(wrapped(text, size: DesignTokens.FontSize.body, color: DesignTokens.Color.textRow))
             case .item(let text): views.append(wrapped("•  " + text, size: DesignTokens.FontSize.body, color: DesignTokens.Color.textRow))
             }
         }
-        if !detail.tags.isEmpty {
-            let tags = NSStackView(views: detail.tags.prefix(6).map { tag in chipView(tag, DesignTokens.Color.textSecondary, filled: true) })
-            tags.spacing = UILooks.pt(6)
-            views.append(tags)
+        if !tagsShown { views.append(tagRow(detail.tags)) }
+        if detail.blocks.count > Self.shownBlocks {
+            views.append(pageLabel(T("…the rest in View the Page", "…o resto em Ver a página"), size: DesignTokens.FontSize.meta, color: DesignTokens.Color.textTertiary))
         }
         if !detail.related.isEmpty {
             views.append(pageLabel(detail.relatedTitle.uppercased(), size: DesignTokens.FontSize.caption, color: DesignTokens.Color.textTertiary, weight: .bold, tracking: 0.06))
@@ -138,6 +146,15 @@ enum ProjectSplit {
     }
 
     // MARK: Pieces
+
+    /// The body's lines shown beside the list; the whole page is the detail's own button.
+    static let shownBlocks = 10
+
+    private static func tagRow(_ tags: [String]) -> NSView {
+        let row = NSStackView(views: tags.prefix(6).map { tag in chipView(tag, DesignTokens.Color.textSecondary, filled: true) })
+        row.spacing = UILooks.pt(6)
+        return row
+    }
 
     static func kindTile(_ glyph: Icon, _ tint: NSColor) -> NSView {
         let tile = NSImageView(image: glyph.image(size: UILooks.pt(12)))

@@ -43,5 +43,7 @@ final class MemoryPageSource: PaletteSource {
 
 extension MemoryFolder {
     /// Every page under this folder, at any depth.
-    public var allPages: [MemoryPage] { pages + folders.flatMap(\.allPages) }
+    /// Every page a person reads: the engine's own files left out (plan 34, seen with bkdg-center's
+    /// wiki on 2026-11-18: _meta, the month's log and the pending proposals listed as pages, by id).
+    public var allPages: [MemoryPage] { (pages + folders.flatMap(\.allPages)).filter { !$0.isEngineFile } }
 }

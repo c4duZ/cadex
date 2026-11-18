@@ -29,9 +29,22 @@ class PageBox: NSView {
     override var isFlipped: Bool { true }
     override var mouseDownCanMoveWindow: Bool { false }
     override func resetCursorRects() { if onPress != nil { addCursorRect(bounds, cursor: .pointingHand) } }
+    /// The first click of an inactive window presses too, as the system's sidebar items do.
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { onPress != nil }
     override func mouseDown(with event: NSEvent) {}
     override func mouseUp(with event: NSEvent) {
         if bounds.contains(convert(event.locationInWindow, from: nil)) { onPress?() }
+    }
+
+    /// A box that presses takes the click that lands on its words or glyphs: a label kept the
+    /// mouse-down and the box never got the mouse-up, so a click on a card's or a row's text did
+    /// nothing (found with clicks given to a test window, 2026-11-18). Buttons, switches, fields
+    /// and boxes that press inside it keep theirs.
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        guard let hit = super.hitTest(point), onPress != nil, hit !== self else { return super.hitTest(point) }
+        if hit is NSButton || (hit as? PageBox)?.onPress != nil { return hit }
+        if let field = hit as? NSTextField, field.isEditable || field.isSelectable { return hit }
+        return self
     }
 
     func box(bg: NSColor, border: NSColor, radius: CGFloat) {
@@ -219,6 +232,15 @@ final class PageFlow: NSView {
         if y != height {
             height = y
             invalidateIntrinsicContentSize()
+            superview?.needsLayout = true
         }
+    }
+
+    /// A click finds its card even while the flow's own height lags behind its cards (they are
+    /// placed by hand and drawn past its bounds): the Projects page's cards took no click, 2026-11-18.
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        let local = convert(point, from: superview)
+        for item in items.reversed() where item.frame.contains(local) { return item.hitTest(local) ?? item }
+        return super.hitTest(point)
     }
 }

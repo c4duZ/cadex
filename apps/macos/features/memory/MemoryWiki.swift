@@ -16,6 +16,13 @@ public struct MemoryPage: Equatable, Sendable {
     /// When an agent wrote it, as the frontmatter says; nil when only the file's date is known
     /// (a clone or a pull makes every file new: "LEARNED TODAY" must not count those).
     public var learnedAt: Date? = nil
+
+    /// The engine's bookkeeping, not knowledge: _meta.md, the log of a month (log-2026-11.md) and the
+    /// proposals waiting in _pending/ (they show as proposals, not pages).
+    public var isEngineFile: Bool {
+        relative.hasPrefix("_pending/") || relative == "_meta.md"
+            || (!relative.contains("/") && relative.hasPrefix("log-") && relative.hasSuffix(".md"))
+    }
 }
 
 /// A folder of the wiki with its pages and folders, or the wiki itself.

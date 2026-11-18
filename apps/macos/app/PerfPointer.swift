@@ -21,6 +21,34 @@ extension WindowSession {
         }
     }
 
+    /// CADEX_PERF_CLICK: clicks given to the window at "fx,fy;fx,fy…" of the window (y from
+    /// the top), one every CADEX_PERF_CLICK_GAP s (1.5) from CADEX_PERF_CLICK_AT s: the real path of
+    /// a click (the window's hit test, the view's mouseUp), without the owner's mouse.
+    func startPerfClicks(_ spec: String, at: Double, gap: Double) {
+        let points = spec.split(separator: ";").compactMap { pair -> CGPoint? in
+            let xy = pair.split(separator: ",").compactMap { Double($0) }
+            return xy.count == 2 ? CGPoint(x: xy[0], y: xy[1]) : nil
+        }
+        for (index, fraction) in points.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + at + Double(index) * gap) { [weak self] in
+                guard let self else { return }
+                let frame = self.window.frame
+                let point = NSPoint(x: frame.minX + frame.width * fraction.x, y: frame.maxY - frame.height * fraction.y)
+                // Built with the window and given to it: a click posted to the process came with no
+                // window (logged 2026-11-18, windowNumber 0) and reached no view. From sendEvent on it is
+                // a click's own path: the hit test, mouseDown, mouseUp.
+                let local = self.window.convertPoint(fromScreen: point)
+                for type in [NSEvent.EventType.leftMouseDown, .leftMouseUp] {
+                    if let event = NSEvent.mouseEvent(with: type, location: local, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+                                                      windowNumber: self.window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1) {
+                        self.window.sendEvent(event)
+                    }
+                }
+                NSLog("perf click %.0f,%.0f", point.x, point.y)
+            }
+        }
+    }
+
     private static func frontPanel(besides window: NSWindow) -> NSWindow? {
         NSApp.windows.filter { $0 !== window && $0.isVisible && $0 is NSPanel && $0.frame.width > 100 }.last
     }
