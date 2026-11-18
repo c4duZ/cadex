@@ -44,8 +44,14 @@ final class InspectorTabButton: NSView {
 
     var isOn = false {
         didSet {
-            label.font = isOn ? UILooks.font(T.fontSize, weight: T.Active.weight) : UILooks.font(T.fontSize)
-            label.textColor = isOn ? T.Active.color : T.Inactive.color
+            // The text rewritten with its look: setting only font and color left the old picture
+            // on screen, the tab shown before still bold (2026-11-18, logged: the state was right).
+            let font = isOn ? UILooks.font(T.fontSize, weight: T.Active.weight) : UILooks.font(T.fontSize)
+            let color = isOn ? T.Active.color : T.Inactive.color
+            label.font = font
+            label.textColor = color
+            label.attributedStringValue = NSAttributedString(string: label.stringValue, attributes: [.font: font, .foregroundColor: color])
+            label.needsDisplay = true
             underline.isHidden = !isOn
         }
     }
