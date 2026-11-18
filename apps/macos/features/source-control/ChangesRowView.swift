@@ -91,71 +91,85 @@ final class ChangesRowView: NSView {
     }
 }
 
-/// Last turn / Task / Uncommitted (components.inspector.segmented): the chosen one raised.
+
+/// What Changes shows (plan 36 phase C; docs/adr/0038-rail-and-side-column.md): the scope in a small
+/// menu ("Last turn ▾"; the three-part control did not fit the 260 pt column) and beside it the
+/// total of the scope, "4 files · +96 −15". Each scope's line runs its command (ADR 0005).
 @MainActor
 final class ChangesSegmented: NSView {
     typealias S = DesignTokens.Inspector.Segmented
     var onPick: ((ChangesScope) -> Void)?
-    private var segments: [(ChangesScope, NSTextField, NSView)] = []
+    private let scopeBox = NSView()
+    private let scopeLabel = NSTextField(labelWithString: "")
+    private let caret = NSImageView()
+    let total = NSTextField(labelWithString: "")
+    private(set) var chosen: ChangesScope = .lastTurn
 
     init() {
         super.init(frame: .zero)
-        wantsLayer = true
-        layer?.backgroundColor = S.bg.cgColor
-        layer?.borderColor = S.border.cgColor
-        layer?.borderWidth = DesignTokens.Stroke.hairline
-        layer?.cornerRadius = UILooks.pt(S.radius)
-        let stack = NSStackView()
-        stack.distribution = .fillEqually
-        stack.spacing = 0
-        stack.edgeInsets = NSEdgeInsets(top: UILooks.pt(S.padding), left: UILooks.pt(S.padding), bottom: UILooks.pt(S.padding), right: UILooks.pt(S.padding))
-        for scope in ChangesScope.allCases {
-            let box = NSView()
-            box.wantsLayer = true
-            box.layer?.cornerRadius = UILooks.pt(S.Segment.Active.radius)
-            let text = NSTextField(labelWithString: scope.title)
-            text.alignment = .center
-            text.translatesAutoresizingMaskIntoConstraints = false
-            box.addSubview(text)
-            NSLayoutConstraint.activate([
-                text.centerXAnchor.constraint(equalTo: box.centerXAnchor),
-                text.topAnchor.constraint(equalTo: box.topAnchor, constant: UILooks.pt(S.Segment.padding.top)),
-                text.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -UILooks.pt(S.Segment.padding.bottom)),
-            ])
-            box.setAccessibilityRole(.button)
-            box.setAccessibilityLabel(scope.title)
-            stack.addArrangedSubview(box)
-            segments.append((scope, text, box))
-        }
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(stack)
+        scopeBox.wantsLayer = true
+        scopeBox.layer?.backgroundColor = S.Segment.Active.bg.cgColor
+        scopeBox.layer?.cornerRadius = UILooks.pt(S.Segment.Active.radius)
+        scopeLabel.font = UILooks.font(S.Segment.fontSize, weight: S.Segment.Active.weight)
+        scopeLabel.textColor = DesignTokens.Color.textPrimary
+        caret.image = Icon.caretDown.image(size: UILooks.pt(S.Segment.fontSize))
+        caret.contentTintColor = S.Segment.Inactive.color
+        total.font = UILooks.font(S.Segment.fontSize)
+        total.textColor = S.Segment.Inactive.color
+        total.lineBreakMode = .byTruncatingTail
+        total.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        let inner = NSStackView(views: [scopeLabel, caret])
+        inner.spacing = UILooks.pt(S.padding)
+        inner.edgeInsets = NSEdgeInsets(top: UILooks.pt(S.Segment.padding.top), left: UILooks.pt(S.padding) * 3,
+                                        bottom: UILooks.pt(S.Segment.padding.bottom), right: UILooks.pt(S.padding) * 2)
+        inner.translatesAutoresizingMaskIntoConstraints = false
+        scopeBox.addSubview(inner)
+        let row = NSStackView(views: [scopeBox, total])
+        row.alignment = .centerY
+        row.spacing = UILooks.pt(S.padding) * 3
+        row.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(row)
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: topAnchor),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            inner.topAnchor.constraint(equalTo: scopeBox.topAnchor), inner.bottomAnchor.constraint(equalTo: scopeBox.bottomAnchor),
+            inner.leadingAnchor.constraint(equalTo: scopeBox.leadingAnchor), inner.trailingAnchor.constraint(equalTo: scopeBox.trailingAnchor),
+            row.topAnchor.constraint(equalTo: topAnchor), row.bottomAnchor.constraint(equalTo: bottomAnchor),
+            row.leadingAnchor.constraint(equalTo: leadingAnchor), row.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor),
         ])
+        scopeBox.setAccessibilityRole(.popUpButton)
+        select(.lastTurn)
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("ChangesSegmented is created in code") }
 
     override var mouseDownCanMoveWindow: Bool { false }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
-    func select(_ chosen: ChangesScope) {
-        for (scope, text, box) in segments {
-            let on = scope == chosen
-            box.layer?.backgroundColor = on ? S.Segment.Active.bg.cgColor : nil
-            text.font = on ? UILooks.font(S.Segment.fontSize, weight: S.Segment.Active.weight) : UILooks.font(S.Segment.fontSize)
-            text.textColor = on ? DesignTokens.Color.textPrimary : S.Segment.Inactive.color
+    func select(_ scope: ChangesScope) {
+        chosen = scope
+        scopeLabel.stringValue = scope.title
+        scopeBox.setAccessibilityLabel(scope.title)
+    }
+
+    /// The scope's total: "4 files · +96 −15" (the lines only when git counted them).
+    func setTotal(files: Int, added: Int, removed: Int) {
+        let words = files == 1 ? T("1 file", "1 arquivo") : T("\(files) files", "\(files) arquivos")
+        let text = NSMutableAttributedString(string: words, attributes: [.foregroundColor: S.Segment.Inactive.color, .font: UILooks.font(S.Segment.fontSize)])
+        if files > 0 {
+            text.append(NSAttributedString(string: " · ", attributes: [.foregroundColor: S.Segment.Inactive.color, .font: UILooks.font(S.Segment.fontSize)]))
+            text.append(NSAttributedString(string: "+\(added)", attributes: [.foregroundColor: DesignTokens.Color.accentGreenText, .font: UILooks.font(S.Segment.fontSize)]))
+            text.append(NSAttributedString(string: " −\(removed)", attributes: [.foregroundColor: DesignTokens.Color.accentRedText, .font: UILooks.font(S.Segment.fontSize)]))
         }
+        total.attributedStringValue = text
     }
 
     override func mouseDown(with event: NSEvent) {}
     override func mouseUp(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
-        guard let hit = segments.first(where: { $0.2.convert($0.2.bounds, to: self).contains(point) }) else { return }
-        onPick?(hit.0)
+        guard scopeBox.convert(scopeBox.bounds, to: self).contains(point) else { return }
+        PopupMenu.show(ChangesScope.allCases.map { scope in
+            MenuEntry(scope.title, icon: scope == chosen ? .check : nil) { [weak self] in self?.onPick?(scope) }
+        }, below: scopeBox)
     }
 }
 

@@ -28,7 +28,9 @@
   tarefa, `taskStart`; a última rodada filtra pelos arquivos que o app diz, `lastTurnFiles`; sem HEAD
   ainda, os arquivos do status sem números), o clique (o diff sem commit, ou a revisão), o Commit…
   (a mensagem numa folha; nada no stage, tudo entra) e o Open PR (`onOpenPullRequest`).
-  `ChangesRowView.swift`: a linha, o seletor e o menu de contexto no `MenuTableView` compartilhado.
+  `ChangesRowView.swift`: a linha, o seletor (desde o plano 36 fase C um menu pequeno, "Last turn ▾",
+  com o total do escopo ao lado, "4 files · +96 −15", porque as três partes não cabiam na coluna de
+  260 pt) e o menu de contexto no `MenuTableView` compartilhado.
 - Comandos em `SourceControlCommands.swift`: git.commit, git.open-pr, git.changes-last-turn,
   git.changes-task, git.changes-uncommitted (os três do seletor), git.stage-all, git.unstage-all, git.stage,
   git.unstage, git.discard, git.open-diff e git.open-file (com -beside e -in-tab: ao lado, em nova aba; o menu mostra só o que vale

@@ -5,7 +5,7 @@ import Menus
 import Strings
 
 /// The Changes tab of the right panel (docs/spec/inspector.md, Changes; the Inspector mockup;
-/// plan 26 phase C2): Last turn / Task / Uncommitted on top, one row per changed file, and the
+/// plan 26 phase C2): the scope on top (a small menu with the total since plan 36 C), one row per changed file, and the
 /// footer with Commit… and Open PR. The branch and the sync buttons are in the panel's scope row,
 /// which the app fills from onBranch and onBusy. Every click runs a command by id (ADR 0005).
 @MainActor
@@ -81,6 +81,9 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
         rows = controller.changeRows
         table.reloadData()
         segmented.select(controller.scope)
+        // The scope's total beside the menu (plan 36 C): every file, the lines of those listed.
+        segmented.setTotal(files: controller.changeTotal, added: rows.compactMap(\.file.added).reduce(0, +),
+                           removed: rows.compactMap(\.file.removed).reduce(0, +))
         let hidden = controller.changeTotal - rows.count
         more.stringValue = hidden > 0 ? T("\(hidden) more", "Mais \(hidden)") : ""
         more.isHidden = hidden <= 0
