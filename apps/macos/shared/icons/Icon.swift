@@ -65,6 +65,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case hardDrives = 0xE2A0
     case info = 0xE2CE
     case keyboard = 0xE2D8
+    case lightbulb = 0xE2DC
     case link = 0xE2E2
     case lockKey = 0xE2FE
     case magnifyingGlass = 0xE30C
@@ -75,6 +76,8 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case pencilSimple = 0xE3B4
     case plug = 0xE946
     case plus = 0xE3D4
+    case pushPin = 0xE3E2
+    case puzzlePiece = 0xE596
     case question = 0xE3E8
     case sidebar = 0xEAB6
     case sidebarSimple = 0xEC24
@@ -85,6 +88,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case stack = 0xE466
     case terminalWindow = 0xEAE8
     case trash = 0xE4A6
+    case warning = 0xE4E0
     case x = 0xE4F6
     // Added in plans 28 and 29 (the preview's bar, the home screen).
     case caretLeft = 0xE138

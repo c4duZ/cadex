@@ -40,23 +40,26 @@
   (0600) que o engine lê a cada trabalho; `appToken`, o token do próprio app na pasta de tokens
   (memory-agent.token, feito uma vez); `environment` e `run`, o `cadex memory-agent` fora da linha
   principal, com o JSON de volta; também o texto puro (o briefing) e o stdin (write-page).
-- A aba Memory do painel da direita (fase H; plano 26 fase C2c, na cara do mockup Inspector,
-  components.inspector.memory): `MemoryView.swift` (desligada, o texto e "Turn On"; ligada, "Search
-  what this project knows" (memory.search), até 3 propostas com Approve/Reject, "LEARNED TODAY" com
-  as páginas de hoje em cartões, "WIKI" com a árvore (os tipos na ordem do mockup, sem seta; o estado do engine e do agente na dica
-  do rótulo) e a
-  nota do briefing com "See the briefing"; só pede dados quando aparece; cada botão roda um comando
-  pelo `run`), `MemoryParts.swift` (as peças: a busca, os rótulos, os cartões, a nota),
-  `MemorySearch.swift` (a busca no ⌘K pelas páginas: título, tipo, caminho e resumo),
-  `MemoryWikiOutline.swift` (a árvore: cada pasta uma linha de 28 com a marca do tipo, o nome e a
-  contagem; o clique abre a página no Markdown; o menu tem Open the Session, Reveal in Finder e
-  Delete Page), `MemoryWiki.swift` (a árvore lida da pasta da wiki: só .md, sem
+- A aba Memory do painel da direita (fase H; plano 26 fase C2c; refeita em 2026-11-18, o dono
+  achou dura e difícil de ler): `MemoryView.swift`, numa rolagem só (antes a árvore da wiki rolava
+  dentro da rolagem da aba): desligada, o texto e "Turn On"; ligada, "Search what this project
+  knows" (memory.search), até 3 propostas com Approve/Reject, "LEARNED TODAY" (as páginas de hoje,
+  sem os registros de sessão), "PROJECT RULES" (as de `_rules/`), "LAST SESSIONS" pelo título da
+  conversa (`titleOf`, do índice do histórico: o nome dado, senão o do Claude), a conta e a pasta,
+  "All in the Archive" (agents.show-history) e "All N pages" (memory.search, com o estado do engine
+  e do agente na dica), a nota do briefing e o "Configure this project's memory…".
+  `MemoryRows.swift`: a linha (`MemoryRow`: o tipo como ícone colorido num quadradinho, `MemoryKind`;
+  o título numa linha; a idade, `MemoryAge`; acende sob o ponteiro; clique abre, clique direito dá
+  Open, Open the Session, Reveal in Finder e Delete Page) e `MemoryText`. `MemoryParts.swift` (a
+  busca, os rótulos, os cartões das propostas, a nota), `MemorySearch.swift` (a busca no ⌘K pelas
+  páginas: título, tipo, caminho e resumo), `MemoryWiki.swift` (a wiki lida da pasta: só .md, sem
   .git nem arquivos ocultos, pastas primeiro, páginas mais novas primeiro; o frontmatter e a origem:
   sessão, agente, hora), `MemoryData.swift` (o JSON do `overview`, do `status`, das `proposals` e o
   projects.json), `MemoryPageState.swift` (o que a página mostra e os textos do estado; os custos com
   as casas que importam) e `MemoryCommands.swift` (memory.show, memory.search, memory.show-briefing numa aba só de
   leitura, memory.reindex, memory.refresh, memory.enable, memory.approve e memory.reject com a lista
-  das propostas no ⌘K; memory.show-history, os commits da wiki na aba do Git History).
+  das propostas no ⌘K; memory.show-history, os commits da wiki na aba do Git History). As ações da
+  aba ficam todas, com nome, no "…" da linha de cima (`../../app/InspectorWiring.swift`).
 - `MemoryProject.swift`: a regra da chave do projeto (a raiz do repositório principal lida dos
   arquivos `.git`: a worktree e a subpasta dão a do checkout principal; fora do git, a própria
   pasta; os 16 primeiros hex do SHA-256 do caminho), a mesma de

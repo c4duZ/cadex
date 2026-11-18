@@ -39,11 +39,12 @@ extension WindowSession {
             InspectorTab(id: "history", title: T("History", "Histórico"), command: "git.show-history", view: panelHistoryHost, actions: [
                 InspectorAction("git.history-in-tab", .arrowSquareOut, T("Open Git History in New Tab", "Abrir o histórico do git em nova aba")),
             ]),
-            InspectorTab(id: "memory", title: T("Memory", "Memória"), command: "memory.show", view: makeMemoryPage(), actions: [
+            // Every action by its name in the "…" menu: three bare icons (sparkle, reload, eye) said
+            // nothing (the owner, 2026-11-18).
+            InspectorTab(id: "memory", title: T("Memory", "Memória"), command: "memory.show", view: makeMemoryPage(), actions: [], more: [
+                InspectorAction("memory.show-briefing", .eye, T("What the Agent Will See", "O que o agente vai ver")),
                 InspectorAction("memory.bootstrap", .sparkle, T("Organize History with AI", "Organizar o histórico com IA")),
                 InspectorAction("memory.reindex", .arrowsClockwise, T("Reindex", "Reindexar")),
-                InspectorAction("memory.show-briefing", .eye, T("What the Agent Will See", "O que o agente vai ver")),
-            ], more: [
                 InspectorAction("memory.show-history", .clockCounterClockwise, T("Show Memory History", "Mostrar o histórico da memória")),
                 InspectorAction("memory.pause-agent", .slidersHorizontal, T("Pause or Resume the Memory Agent", "Pausar ou retomar o agente de memória")),
                 InspectorAction("memory.refresh", .arrowClockwise, T("Refresh", "Atualizar")),
@@ -127,8 +128,9 @@ extension WindowSession {
             }
         }
         let project = TitleBarView.location(of: root).project
-        inspector.setScope(InspectorScope(project + T(" · the project’s memory, shared by every task and account",
-                                                   " · a memória do projeto, de todas as tarefas e contas"), tip: root), for: "memory")
+        // The project alone: the sentence was cut ("the project's me…"); it is in the tip.
+        inspector.setScope(InspectorScope(project, tip: root + "\n" + T("The project's memory, shared by every task and account",
+                                                                         "A memória do projeto, de todas as tarefas e contas")), for: "memory")
     }
 
     /// Changes' scope: the branch with ↑ and ↓, the click switches branch; "Git" outside a
