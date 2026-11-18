@@ -32,7 +32,7 @@
 - Um clique abre (arquivo na aba, pasta abre ou fecha); ⌘ e ⇧ só selecionam; a seta não abre duas
   vezes. Dois cliques numa pasta rodam explorer.open-in-terminal (o app faz `cd` ou, com programa
   rodando, abre aba nova na pasta). Aparência da aba Files do painel da direita (plano 26 fase C2b, components.inspector.tree, o
-  desenho que o dono aprovou): linhas de 28 pt, recuo de 16 pt, a seta apagada, o nome em 13 (o
+  desenho que o dono aprovou): linhas de 24 pt (eram 28, o dono achou duro em 2026-11-18), recuo de 16 pt, nenhuma linha escolhida ao abrir a aba, a seta apagada, o nome em 13 (o
   mudado em âmbar, o novo em verde), a letra do git à direita e a linha escolhida com o fundo e o
   contorno arredondados; guias de recuo com o ponteiro sobre a árvore e fundo leve na linha sob ele (`ExplorerOutline.swift` e
   `ExplorerRowView`), a seta e o nome no lugar do desenho (`frameOfOutlineCell`, `frameOfCell`, components.inspector.tree.listPadding). `ExplorerCompact.swift`: pastas compactas; a linha é a primeira pasta da cadeia,

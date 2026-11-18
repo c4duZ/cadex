@@ -169,11 +169,11 @@ extension ExplorerController {
         outline.collapseItem(nil, collapseChildren: true)
     }
 
-    /// ⇧⌘E: the tree takes the keyboard, with a row selected.
+    /// ⇧⌘E and the Files tab: the tree takes the keyboard. No row is chosen for it: the first one lit
+    /// up every time the tab opened, a selection nobody made (the owner, 2026-11-18); ↓ chooses it.
     func focus() {
         revealSidebar?()
         outline.window?.makeFirstResponder(outline)
-        if outline.selectedRow < 0, outline.numberOfRows > 0 { outline.selectRowIndexes([0], byExtendingSelection: false) }
     }
 
     private func reloadParents(of nodes: [FileNode]) {

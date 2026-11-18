@@ -20,8 +20,8 @@ final class ExplorerOutline: NSOutlineView {
         columnAutoresizingStyle = .firstColumnOnlyAutoresizingStyle
         outlineTableColumn = column
         headerView = nil
-        // The right panel's Files tab (plan 26 C2b; components.inspector.tree): 28 pt rows,
-        // 16 pt per level, as the drawing the owner approved.
+        // The right panel's Files tab (plan 26 C2b; components.inspector.tree): 24 pt rows (28 in the
+        // drawing read loose and stiff beside the rest, the owner, 2026-11-18), 16 pt per level.
         rowHeight = UILooks.rowHeight(DesignTokens.Inspector.Tree.rowHeight)
         indentationPerLevel = UILooks.pt(DesignTokens.Inspector.Tree.indent)
         backgroundColor = .clear

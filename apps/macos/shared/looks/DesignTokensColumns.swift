@@ -269,7 +269,7 @@ public extension DesignTokens {
             public static let wikiGap: CGFloat = 4
         }
         public enum Tree {
-            public static let rowHeight: CGFloat = 28
+            public static let rowHeight: CGFloat = 24
             public static let indent: CGFloat = 16
             public static let padding = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
             public static let gap: CGFloat = 6
