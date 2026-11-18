@@ -2,6 +2,7 @@
 
 Data: 2026-11-17 · Status: aceita (o dono, 2026-11-17: "aprovo") · Revê a fileira de ícones de `docs/spec/sidebar.md` (plano 17)
 e o botão de space de `docs/spec/spaces.md` · Planos `docs/plans/25-work-frame.md` a `docs/plans/30-overview.md`
+· A esquerda e a direita foram revistas pela `docs/adr/0038-rail-and-side-column.md` (trilho e coluna lateral; a coluna da direita sai)
 
 ## Contexto
 O dono testou o Cadex depois do plano 24 e achou a cara velha (2026-11-17): a fileira de ícones da

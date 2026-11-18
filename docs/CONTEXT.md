@@ -37,7 +37,13 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   e as tarefas quando existem. Antes era a barra lateral de ícones, com uma página por ícone; a
   fileira e as páginas saem pela moldura nova.
 - **Painel da seleção** (`inspector`): a coluna opcional à direita, com Changes, Files, History e
-  Memory do projeto ou da tarefa selecionada.
+  Memory do projeto ou da tarefa selecionada. Sai pela `docs/adr/0038-rail-and-side-column.md`.
+- **Trilho** (`rail`): a faixa estreita na borda esquerda com os projetos (imagem, nome dado pelo
+  dono, peça de estado) e, no pé, Projects e Automations. Substitui a árvore do trabalho (ADR 0038).
+- **Coluna lateral** (`side column`): ao lado do trilho, as páginas do projeto escolhido, uma por
+  vez: Files, Changes, Sessions, Memory e Git graph, trocadas pelos ícones do topo (ADR 0038).
+- **Projeto fixado** (`pinned project`): fica no trilho mesmo sem terminal aberto; o clique abre um
+  terminal na pasta dele.
 - **Barra de status** (`status-bar`): a faixa inferior, montada com itens que quem usa escolhe e
   arrasta. **Item da barra de status** (`status item`): uma peça dela (pasta, ambiente, RAM, CPU, SSH...).
 - **Conta** (`agent account`): uma pasta de configuração do Claude Code (`~/.claude`, `~/.claude-*`), com
