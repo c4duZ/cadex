@@ -11,7 +11,8 @@
   da sessão é do Cadex: vem na env que o kit põe e só vai ao socket do app.)
 - Atrapalhar a sessão: erro é engolido; sem o uso gravado, a linha sai do mesmo jeito.
 - Quebrar o `claude` digitado: `cadex claude` sem app, recusado ou com qualquer erro roda o `claude`
-  de verdade exatamente como foi digitado, e nunca troca a conta (o CLAUDE_CONFIG_DIR da aba).
+  de verdade exatamente como foi digitado, e nunca troca a conta que a aba tem (o
+  CLAUDE_CONFIG_DIR dela); sem conta na aba, usa a que o app manda no kit (`config_dir`, plano 33 F).
 - Depender da libghostty ou do resto do núcleo: só libc, `../../shared/fs.zig`, `../../shared/process.zig`
   e a entrada da feature memory (`../memory/memory.zig`), para o `cadex memory-hook`.
 

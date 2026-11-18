@@ -28,6 +28,11 @@ do dia a dia, mais simples por dentro e com o texto nítido.
   aba já é o do dono, sem a função.
   - A função roda `cadex claude`, que dá o kit da sessão ao `claude` interativo digitado na aba
     (`docs/spec/memory.md`, "O `claude` digitado à mão"); sem o `cadex`, roda o `claude` de verdade.
+  - A conta (plano 33 F): a da aba, quando ela tem `CLAUDE_CONFIG_DIR` (escrito na linha ou herdado);
+    sem, a mesma de uma sessão que o Cadex abre ali (a do projeto, senão a ativa, senão a padrão).
+    Com "Sem pedir permissões" (agents.launchSkipPermissions), todo `claude` digitado ganha
+    `--dangerously-skip-permissions`, menos quando a linha já diz o modo (`--permission-mode`, a
+    própria flag). Vale também na gaveta de terminais.
   - Um `alias claude=` ou uma função `claude` do dono passa por cima da do Cadex: aquela aba fica
     sem o kit. Bash e fish não recebem nada.
   - Funciona nos terminais mantidos (terminal.keepSessions): o daemon herda do app o ambiente que

@@ -39,13 +39,26 @@ pub const path_max = 1024;
 const loop_mark = "CADEX_CLAUDE_WRAP";
 
 /// The kit as the app sent it: words to put before the owner's, names to
-/// drop from the environment, a folder to put first on PATH.
+/// drop from the environment, a folder to put first on PATH, and the
+/// account when the tab had none (plan 33 F: the project's or the active
+/// one; a tab's own CLAUDE_CONFIG_DIR is never replaced, the app sends
+/// none then).
 pub const Kit = struct {
     ok: bool = false,
     args: []const []const u8 = &.{},
     unset: []const []const u8 = &.{},
     path_first: ?[]const u8 = null,
+    config_dir: ?[]const u8 = null,
 };
+
+/// The kit's environment: the names dropped, PATH, the account.
+pub fn applyEnvironment(arena: std.mem.Allocator, kit: Kit) void {
+    for (kit.unset) |name| _ = unsetenv((arena.dupeZ(u8, name) catch continue).ptr);
+    if (kit.path_first) |dir| prependPath(arena, dir);
+    if (kit.config_dir) |dir| {
+        if (std.c.getenv("CLAUDE_CONFIG_DIR") == null) _ = setenv("CLAUDE_CONFIG_DIR", (arena.dupeZ(u8, dir) catch return).ptr, 1);
+    }
+}
 
 /// The request line: the pids above this process (the app checks the
 /// ancestry on its side too), the tab's account and folder, the owner's
@@ -96,8 +109,7 @@ pub fn run(words: []const [:0]const u8) u8 {
     const p = claude_args.plan(arena, plain) catch return execAs(arena, real, &.{}, owner, prompt);
     if (p == .pass_through) return execAs(arena, real, &.{}, owner, prompt);
     const kit = kitFor(arena, p.kit.user_settings, p.kit.words) orelse return execAs(arena, real, &.{}, owner, prompt);
-    for (kit.unset) |name| _ = unsetenv((arena.dupeZ(u8, name) catch continue).ptr);
-    if (kit.path_first) |dir| prependPath(arena, dir);
+    applyEnvironment(arena, kit);
     const rest = toSentinels(arena, p.kit.words) catch return execAs(arena, real, &.{}, owner, prompt);
     return execAs(arena, real, kit.args, rest, prompt);
 }
@@ -238,6 +250,8 @@ test "the app's answer: the kit's words, names to drop and PATH; a refusal is no
     try testing.expect(parseKit(arena, "{\"ok\":false,\"error\":\"not a Cadex terminal\"}") == null);
     try testing.expect(parseKit(arena, "garbage") == null);
     try testing.expect(parseKit(arena, "{\"ok\":true}").?.args.len == 0);
+    try testing.expect(parseKit(arena, "{\"ok\":true}").?.config_dir == null);
+    try testing.expectEqualStrings("/acct", parseKit(arena, "{\"ok\":true,\"config_dir\":\"/acct\"}").?.config_dir.?);
 }
 
 test "no app on the socket: no kit, so claude runs as typed" {

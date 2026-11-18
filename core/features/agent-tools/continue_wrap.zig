@@ -84,6 +84,10 @@ pub fn run(words: []const [:0]const u8) u8 {
     const asked = toSlices(arena, words) catch return 127;
     const kit = claude_wrap.kitFor(arena, null, asked) orelse return say("cadex continue: run it in a Cadex terminal with the app open\n");
     for (kit.unset) |name| _ = unsetenv((arena.dupeZ(u8, name) catch continue).ptr);
+    // The project's or the active account when the tab has none (plan 33 F), as `cadex claude`.
+    if (kit.config_dir) |dir| {
+        if (std.c.getenv("CLAUDE_CONFIG_DIR") == null) _ = setenv((arena.dupeZ(u8, "CLAUDE_CONFIG_DIR") catch return 127).ptr, (arena.dupeZ(u8, dir) catch return 127).ptr, 1);
+    }
     const settings = settingsPath(kit.args) orelse return say("cadex continue: the app sent no session settings\n");
     const text = readFile(arena, settings) orelse return say("cadex continue: the session settings do not read\n");
     const env = memoryEnv(arena, text) catch return say("cadex continue: the session settings do not read\n");

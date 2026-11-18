@@ -59,7 +59,7 @@ que ela digitar já vai ter".
   - o aviso no pé do painel quando a conta bate o limite: "<conta> chegou ao limite · Continuar
     na <outra> (N% usado)", a de mais folga sugerida;
   - o clique numa conta no cartão de uso e "Switch account" no ⌘K.
-- **F. O `claude` digitado.** Sem `CLAUDE_CONFIG_DIR` na linha, usa a conta do projeto, senão a
+- **F. O `claude` digitado.** Feita (2026-11-18): o kit leva `config_dir` (a conta) quando a aba não tem; `cadex claude` e `cadex continue` a põem no ambiente só sem uma da aba; a flag de permissões pela opção, menos com o modo na linha; a gaveta entra na conferência dos shells. Conferido no app (a conta ativa sem prefixo, a flag; a da aba mantida); a gaveta só pelo código. Plano original: Sem `CLAUDE_CONFIG_DIR` na linha, usa a conta do projeto, senão a
   ativa (como as sessões que o Cadex abre); com agents.launchSkipPermissions, ganha
   `--dangerously-skip-permissions`, a menos que a linha diga o modo (`--permission-mode`, a própria
   flag). O texto da opção diz "todo claude". Conferir o `claude` digitado na gaveta de terminais

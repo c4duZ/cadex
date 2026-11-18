@@ -75,8 +75,8 @@ extension WindowSession {
         let entries: [CustomizeEntry] = [.header(T("Accounts", "Contas"))] + rows + [
             .header(T("Opening an agent", "Abrir um agente")),
             .row(CustomizeRow(id: "launch.skipPermissions", icon: .lockKey, title: T("Without permission prompts", "Sem pedir permissões"),
-                              subtitle: T("A click on an account opens claude --dangerously-skip-permissions (codex: --dangerously-bypass-approvals-and-sandbox)",
-                                          "Um clique numa conta abre claude --dangerously-skip-permissions (codex: --dangerously-bypass-approvals-and-sandbox)"),
+                              subtitle: T("Every claude Cadex opens or you type in a tab runs with --dangerously-skip-permissions (codex: --dangerously-bypass-approvals-and-sandbox)",
+                                          "Todo claude que o Cadex abre ou que você digita numa aba roda com --dangerously-skip-permissions (codex: --dangerously-bypass-approvals-and-sandbox)"),
                               on: skip)),
         ]
         return CustomizePage(id: "accounts", title: T("Accounts", "Contas"), icon: .sparkle,

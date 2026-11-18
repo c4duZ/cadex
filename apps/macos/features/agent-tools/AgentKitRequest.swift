@@ -62,16 +62,18 @@ public struct AgentKitRequest: Sendable, Equatable {
 
 /// What the app answers a kit request.
 public enum AgentKitAnswer: Sendable, Equatable {
-    /// The words before the owner's, the names to drop, the folder first on PATH.
-    case kit(arguments: [String], unset: [String], pathFirst: String?)
+    /// The words before the owner's, the names to drop, the folder first on PATH, and the account
+    /// for a tab that had none (plan 33 F; nil keeps the tab's).
+    case kit(arguments: [String], unset: [String], pathFirst: String?, configDir: String? = nil)
     /// `cadex claude` then runs the real `claude` as typed.
     case refused(String)
 
     var json: [String: Any] {
         switch self {
-        case .kit(let arguments, let unset, let pathFirst):
+        case .kit(let arguments, let unset, let pathFirst, let configDir):
             var out: [String: Any] = ["ok": true, "args": arguments, "unset": unset]
             if let pathFirst { out["path_first"] = pathFirst }
+            if let configDir { out["config_dir"] = configDir }
             return out
         case .refused(let reason): return ["ok": false, "error": reason]
         }

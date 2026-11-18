@@ -112,7 +112,9 @@
   sendo a aba daquele terminal (`AgentPreviewTabs`), e os pedidos respondem quando a página responde.
 - `TypedClaudeWiring.swift` (plano 22, fase C): o kit do `claude` digitado numa aba zsh; só para
   quem tem o shell de um terminal do app acima (`shellPid` de todos os terminais, de todas as janelas
-  e projetos), pelo SessionKit.typedLaunch. O `main.swift` põe as variáveis da integração do zsh no
+  e projetos, e os da gaveta), pelo SessionKit.typedLaunch. Plano 33 F: sem conta na aba, a de uma
+  sessão nova ali (`newSessionAccount`: a do projeto, a ativa, a padrão) vai no kit (`config_dir`);
+  com agents.launchSkipPermissions, `SessionKit.skipPermissions` põe a flag. O `main.swift` põe as variáveis da integração do zsh no
   ambiente antes de abrir qualquer terminal (`exportTypedClaudeEnvironment`; numa instância de teste,
   também o CADEX_APP_SOCKET dela, para as abas não pedirem ao app do dono).
 - `AgentsHibernate.swift` (plano 19, fase F): os hooks guardam no terminal o que traz o agente de

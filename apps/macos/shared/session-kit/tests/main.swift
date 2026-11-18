@@ -28,6 +28,13 @@ func json(_ path: String) -> [String: Any] {
 
 let launchExit = await Checks.run(launchChecks)
 let exitCode = await Checks.run([
+    ("the typed claude skips permissions with the option on, unless the line says how to ask (plan 33 F)", {
+        expect(SessionKit.skipPermissions(on: true, typed: ["--model", "haiku"]) == ["--dangerously-skip-permissions"])
+        expect(SessionKit.skipPermissions(on: false, typed: []).isEmpty)
+        expect(SessionKit.skipPermissions(on: true, typed: ["--permission-mode", "plan"]).isEmpty)
+        expect(SessionKit.skipPermissions(on: true, typed: ["--permission-mode=plan"]).isEmpty)
+        expect(SessionKit.skipPermissions(on: true, typed: ["--dangerously-skip-permissions"]).isEmpty)
+    }),
     ("the account key is the same rule as cadex statusline", {
         expect(SessionKit.accountKey("/Users/a/.claude-x") == "-Users-a--claude-x")
         expect(SessionKit.accountKey("/Users/a/My Acct_é") == "-Users-a-My-Acct---", "per UTF-8 byte, like the Zig side")

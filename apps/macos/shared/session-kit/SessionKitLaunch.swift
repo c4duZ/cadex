@@ -114,3 +114,15 @@ extension SessionKit {
         return out
     }
 }
+
+extension SessionKit {
+    static let permissionWords: Set<String> = ["--permission-mode", "--dangerously-skip-permissions", "--allow-dangerously-skip-permissions"]
+
+    /// The typed `claude`'s permission flag (plan 33 F): with "Without permission prompts" on
+    /// (agents.launchSkipPermissions), every `claude` typed in a Cadex tab skips them, as the ones
+    /// Cadex opens, unless the line already says how to ask.
+    public static func skipPermissions(on: Bool, typed: [String]) -> [String] {
+        guard on, !typed.contains(where: { permissionWords.contains($0) || $0.hasPrefix("--permission-mode=") }) else { return [] }
+        return ["--dangerously-skip-permissions"]
+    }
+}
