@@ -116,7 +116,7 @@ let package = Package(
         .target(name: "Machines", dependencies: ["CommandPalette", "Icons", "Menus", "Strings", "UILooks"], path: "features/machines",
                 exclude: ["CLAUDE.md", "tests"], swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]),
         // Races, runs and automations: many agents at once (docs/spec/orchestration.md, ADR 0033).
-        .target(name: "Orchestration", dependencies: ["CommandPalette", "Icons", "SessionKit", "Strings", "Tabs", "StateGlyph", "UILooks"], path: "features/orchestration", exclude: ["CLAUDE.md", "tests"],
+        .target(name: "Orchestration", dependencies: ["CommandPalette", "Icons", "Menus", "SessionKit", "Strings", "Tabs", "StateGlyph", "UILooks"], path: "features/orchestration", exclude: ["CLAUDE.md", "tests"],
                 linkerSettings: [.linkedLibrary("sqlite3")]),
         // What a session opened by Cadex gets: --settings, --plugin-dir,
         // --mcp-config and the tab's environment (docs/adr/0021-cadex-managed-accounts.md).

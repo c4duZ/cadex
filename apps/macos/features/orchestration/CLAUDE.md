@@ -100,6 +100,12 @@
   histórico) e `AutomationCommands.swift` (orchestration.toggle-automations, -new-automation,
   -toggle-automation, -run-automation-now e -show-automation-history). O controlador avisa quando
   orchestration.automations muda (`onAutomationsSwitch`).
+- A página Automações (plano 34 F): `AutomationsPage.swift` (`AutomationsPageDocument`, "automation:all",
+  isPage, sempre abre) e `AutomationsParts.swift` (vazia: a caixa tracejada que ocupa a área, o relógio
+  num quadrado, o exemplo e Create automation no meio, e o aviso de desligadas; com itens, a tabela:
+  `AutomationTableRow`, a chave, nome, quando, projeto, a conta com o logo, a última e a próxima, o
+  clique abre as rodadas e o botão direito tem Executar agora, Ligar ou desligar e Apagar);
+  AutomationBook.delete apaga a automação e as rodadas. O app junta (`../../app/AutomationsPageWiring.swift`).
 - `OrchestrationPage.swift` (plano 30 B): a cara nova das páginas da orquestração (a página que
   rola, o cabeçalho com o nome e os botões, o rótulo de seção, o cartão com a peça de estado e o
   recuo do grafo, os botões do app); a página da execução (`RunPageView.swift`, cada tarefa um

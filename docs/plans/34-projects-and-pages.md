@@ -46,7 +46,7 @@ aprovada ("Ficou do caralho... segue isso exatamente") está em
 - [ ] E. Memória: a busca, as páginas agrupadas (Regras, Decisões, Cuidados, o resto) e, ao lado, a
   escolhida renderizada sem o frontmatter (o tipo, de qual sessão veio, a conta, o corpo); Editar
   (o .md no editor), Abrir a sessão e Apagar….
-- [ ] F. Automações: vazia, o ícone, "Nenhuma automação ainda", o exemplo e o Criar automação no
+- [x] F. Automações: vazia, o ícone, "Nenhuma automação ainda", o exemplo e o Criar automação no
   meio da área; desligadas, o aviso de que criar a primeira as liga. Com itens, a tabela (ligar e
   desligar na linha, nome, quando, projeto, conta, a última e a próxima rodada); o clique na linha
   abre as rodadas; o botão direito tem Executar agora, Ligar ou desligar e Apagar, todos comandos.

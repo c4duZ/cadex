@@ -22,6 +22,7 @@ extension WindowSession {
         actions.runNow = { [weak self] in self?.runAutomationNow($0.id) }
         actions.showHistory = { [weak self] in self?.showAutomationHistory($0.id) }
         commands.register(AutomationCommands.all(palette: palette, actions: actions))
+        commands.register(automationsPageCommands())
     }
 
     /// orchestration.toggle-automations: turning on says first what changes,
@@ -42,14 +43,16 @@ extension WindowSession {
         let repo = mainRepository
         let form = NewAutomationForm(accounts: raceAccounts(repo: repo ?? here), repository: repo, folder: here, caps: controller.defaultCaps)
         fillPerfAutomationForm(form)
-        showForm(T("New Automation", "Nova automação"), text: T("It is made off: turn it on from its history. Each run shows in a tab, within its cap.",
-                                  "Ela nasce desligada: ligue pelo histórico dela. Cada execução aparece numa aba, dentro do teto."), form: form, primary: T("Create", "Criar"), first: form.firstField) { [weak self] in
+        showForm(T("New Automation", "Nova automação"), text: T("It is made off: turn it on with its switch in Automations. Each run shows in a tab, within its cap.",
+                                  "Ela nasce desligada: ligue pela chave dela em Automações. Cada execução aparece numa aba, dentro do teto."), form: form, primary: T("Create", "Criar"), first: form.firstField) { [weak self] in
             guard let self else { return }
             switch form.automation(id: book.newId(), fallback: controller.defaultCaps) {
             case .failure(let problem): self.say(T("The automation was not made", "A automação não foi criada"), problem.message)
             case .success(let automation):
                 do { try book.save(automation) } catch { return self.say(T("The automation was not made", "A automação não foi criada"), "\(error)") }
-                self.showAutomationHistory(automation.id)
+                // Back on the table with its switch (plan 34 F), not its history.
+                self.openAutomationsPage()
+                self.refreshAutomationsPage()
             }
         }
     }
@@ -93,7 +96,10 @@ extension WindowSession {
         tabs?.open(page)
     }
 
-    func refreshAutomationPages() { AutomationWatch.shared.pages.forEach { $0.refresh() } }
+    func refreshAutomationPages() {
+        AutomationWatch.shared.pages.forEach { $0.refresh() }
+        refreshAutomationsPage()
+    }
 
     /// "Session": its tab when still open, else a tab resuming it on its account.
     private func goToAutomationSession(run id: String, automation: String) {

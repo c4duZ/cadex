@@ -102,6 +102,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case kanban = 0xEB54
     case hand = 0xE298
     case folders = 0xE260
+    case play = 0xE3D0
     case arrowsLeftRight = 0xE0A0
 
     /// The fonts' family names inside the TTFs.

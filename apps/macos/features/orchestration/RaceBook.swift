@@ -100,6 +100,14 @@ public final class AutomationBook {
         try save(automation)
     }
 
+    /// An automation and its history, gone (the Automations page's Delete…, plan 34 F).
+    public func delete(_ id: String) throws {
+        try store.batch {
+            for run in try history(of: id) { try store.delete(.automationRuns, id: run.id) }
+            try store.delete(.automations, id: id)
+        }
+    }
+
     /// A run of an automation, new or updated.
     public func record(_ run: AutomationRun) throws { try store.put(.automationRuns, id: run.id, parent: run.automation, run) }
 

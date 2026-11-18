@@ -268,6 +268,9 @@
   do histórico (lido enquanto a página existe), o custo de cada uma, os merges e o remoto pelo git,
   as automações e as páginas da memória. A barra de título agrupa as páginas ("pages": Overview, e
   Automations e Conversations como itens extras, `extrasOf`).
+- `AutomationsPageWiring.swift` (plano 34 F): orchestration.show-automations; Create automation liga as
+  automações antes (a pergunta do orchestration.toggle-automations) quando estão desligadas; criar
+  volta à tabela; Apagar pergunta. `ProjectsPageWiring.swift` (plano 34 B): project.show-all.
 - `PageWiring.swift` (plano 34 A): o Esc numa página volta ao terminal de antes (TabsController.leavePage);
   um campo com texto e uma folha guardam o Esc. Com uma página, a barra de título fica igual: o "+"
   à mostra e sem "projeto › tarefa" (`showLocation`), e os extras "pages" saíram.
