@@ -42,7 +42,7 @@ MAC_ONLY = {"app.check-for-updates", "app.install-update", "app.skip-update",
             "worktrees.environment-up", "worktrees.environment-suspend", "worktrees.environment-resume", "worktrees.environment-destroy", "agents.mute-machine",
             "machines.share-port", "machines.stop-sharing", "machines.share-public",
             # Races (plan 24, phase C): the orchestration feature is Mac only for now.
-            "orchestration.toggle", "orchestration.new-race", "orchestration.show-race", "orchestration.pick-winner",
+            "orchestration.toggle", "worktrees.new-race", "orchestration.show-race", "orchestration.pick-winner",
             "orchestration.discard-race", "orchestration.delete-race-branches",
             # Runs with the owner coordinating (plan 24, phase D1).
             "orchestration.new-run", "orchestration.show-run", "orchestration.add-task", "orchestration.dispatch",

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Sessions running in the background (agent view, `claude --bg`). They
-/// have no registry in sessions/ when parked, so the Agents page missed the
+/// have no registry in sessions/ when parked, so the session list missed the
 /// "blocked" ones waiting for the owner, some for days (test loop,
 /// 2026-11-14). The source is `claude agents --json`, the interface the
 /// docs support (their jobs/ files are internal); 0.15 s of CPU a call, so

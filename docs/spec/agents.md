@@ -41,7 +41,7 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
   quanto tempo. No máximo 10, os mais recentes primeiro. Funciona em pastas com espaço, "_",
   acento ou caminho longo (a pasta de conversas segue a regra do Claude Code; 2026-11-14).
 - Duplo clique numa sessão que roda num terminal do Cadex foca esse terminal em qualquer janela,
-  trazendo a janela para a frente e trocando de space e de aba se preciso; clique num subagente leva
+  trazendo a janela para a frente e trocando de projeto e de aba se preciso; clique num subagente leva
   ao terminal da sessão dele (o terminal certo é o que tem o processo da sessão na frente). Sessão de fora do
   Cadex (outro terminal) mostra "outside Cadex" e o duplo clique mostra a pasta dela na árvore do
   explorer, quando ela está no workspace.
@@ -269,7 +269,7 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
   Cadex nos Ajustes valem): o Cadex copia o escolhido para `~/Library/Sounds` como "Cadex
   Permission" (Question, Finished), onde o sistema procura os sons de um app fora de sandbox.
 - Ao ir ao terminal de um agente, a notificação dele sai da Central de Notificações.
-- Clicar leva ao terminal do agente, trazendo a janela, o space e a aba. Não avisa enquanto você
+- Clicar leva ao terminal do agente, trazendo a janela, o projeto e a aba. Não avisa enquanto você
   olha aquele terminal na janela da frente. Uma notificação por sessão: a nova troca a anterior.
 - Três chaves, cada tipo desligável sozinho: agents.notifyPermission, agents.notifyQuestion e
   agents.notifyFinished, ligadas por padrão; com agents.sessions desligado, nenhuma. Os sons em

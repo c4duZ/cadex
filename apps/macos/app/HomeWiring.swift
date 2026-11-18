@@ -204,7 +204,7 @@ extension WindowSession {
         case .terminal: "tab.new"
         case .agent: "agents.open-account"
         case .task: "worktrees.new-task"
-        case .race: "orchestration.new-race"
+        case .race: "worktrees.new-race"
         }
     }
 

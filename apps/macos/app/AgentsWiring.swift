@@ -10,11 +10,9 @@ import Strings
 import Terminal
 import Themes
 
-/// The Agents page, its icon's dot and the status bar's Agents item in this
-/// window (docs/spec/agents.md). All of them read through the one
-/// AgentsController, and only while they show: the page while it is on
-/// screen, the dot while the icon is in the sidebar, the item while it is
-/// in the bar.
+/// The agents in this window (docs/spec/agents.md): the status bar's usage
+/// item and the accounts. All read through the one AgentsController, and
+/// only while they show.
 extension WindowSession {
     /// Agent usage in the status bar: "Claude bkdg 84% · resets 3h" for the focused terminal's
     /// account, the amber chip above 80%; reads only while the item shows.
@@ -105,7 +103,7 @@ extension WindowSession {
         }
     }
 
-    /// The theme's colors for the Agents page and the usage item.
+    /// The theme's colors for the agents' views (history, transcript, usage).
     static func agentColors() -> AgentColors {
         let ui = ThemeStore.shared.current.interface
         return AgentColors(text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, accent: ui.accent.nsColor,

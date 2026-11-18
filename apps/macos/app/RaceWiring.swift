@@ -19,7 +19,6 @@ extension WindowSession {
     func registerRaces(palette: CommandPaletteController) {
         var actions = RaceCommandActions()
         actions.toggle = { [weak self] in self?.toggleOrchestration() }
-        actions.newRace = { [weak self] in self?.newRace() }
         actions.show = { [weak self] in self?.showRace($0.id) }
         actions.pickWinner = { [weak self] race, contender in self?.pickWinner(race, contender) }
         actions.discard = { [weak self] in self?.discardRace($0) }
@@ -48,10 +47,6 @@ extension WindowSession {
         let ordered = ((first.map { [$0] } ?? []) + all).filter { seen.insert($0.dir).inserted }
         return ordered.map { AccountChoice(title: $0.name, dir: $0.isDefault ? nil : $0.dir) }
     }
-
-    /// orchestration.new-race: the New Task sheet with two agents (plan 29: one sheet for a task
-    /// and a race; the old form left).
-    func newRace() { showNewTask(agents: 2) }
 
     /// `askFirst` false: a test instance's own race (`RacePerfHooks.swift`), no sheet.
     func startRace(_ request: RaceRequest, askFirst: Bool = true) {

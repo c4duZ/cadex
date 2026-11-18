@@ -22,7 +22,7 @@ enum CommandSections {
         Section(title: "Terminal", icon: .terminalWindow, prefixes: ["terminal"]),
         Section(title: "Git", icon: .gitBranch, prefixes: ["git", "history", "diff"]),
         Section(title: T("Web and media", "Web e mídia"), icon: .globe, prefixes: ["preview", "media"]),
-        Section(title: "Spaces", icon: .stack, prefixes: ["space"]),
+        Section(title: T("Projects and tasks", "Projetos e tarefas"), icon: .stack, prefixes: ["project", "worktrees", "home"]),
         Section(title: T("Edit", "Editar"), icon: .keyboard, prefixes: ["edit"]),
     ]
 
@@ -56,7 +56,7 @@ public struct PalettePin: Sendable {
 }
 
 /// Several lists in one, each under its own title: `@` shows the tabs and
-/// the spaces together. Ids get the part's index, so choosing goes back to
+/// the projects together. Ids get the part's index, so choosing goes back to
 /// the list that made the row.
 @MainActor
 public final class MergedSource: PaletteSource {

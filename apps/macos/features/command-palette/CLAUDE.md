@@ -4,7 +4,7 @@
 - O registro único de comandos: toda ação do app é um comando com id, título, palavras-chave,
   condição de disponibilidade e a função que executa.
 - A paleta no ⌘K, aberta de qualquer lugar (inclusive com o foco no terminal), com busca fuzzy de
-  comandos, abas, spaces e arquivos.
+  comandos, abas, projetos e arquivos.
 - Comando indisponível fica fora da paleta e apagado no menu (ex.: "salvar" sem editor ativo).
 - As aberturas (terminal ao lado, arquivo, preview, grafo) primeiro, em "Abrir" (`PalettePin`).
 
@@ -38,7 +38,7 @@
   campo, status, linhas com títulos de seção, rodapé com as teclas; fecha ao perder o foco) e
   `PaletteRows.swift` (as linhas, os títulos, as teclas desenhadas e o `PaletteStyle`).
 - Outras features entram na paleta implementando `PaletteSource` (a busca: ⌘P e ⌘⇧F; as abas e os
-  spaces no `@`).
+  projetos no `@`).
 - Spec em `../../../../docs/spec/command-palette.md`. Status: registro, menu e paleta prontos.
 - Fontes e medidas principais da interface vêm de UILooks (`../../shared/looks/CLAUDE.md`): zoom, densidade e fonte da interface, lidos ao montar a tela.
 

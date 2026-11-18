@@ -29,6 +29,7 @@ extension WindowSession {
                                        editSetupHooks: { [weak self] in self?.editSetupHooks() }, repository: { [weak self] in self?.repository })
         actions.targets = { [weak self] in self?.runTargets() ?? [] }
         actions.newTaskOn = { [weak self] in self?.showNewTask(machine: $0) }
+        actions.newRace = { [weak self] in self?.showNewTask(agents: 2) }
         actions.openRemote = { [weak self] in self?.openRemoteTask($0) }
         actions.removeRemote = { [weak self] in self?.removeRemoteTask($0) }
         actions.environment = { [weak self] action, key in self?.environmentAction(action, key: key) }

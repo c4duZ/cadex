@@ -160,9 +160,9 @@ extension WindowSession {
     }
 }
 
-/// The sessions on the machines tasks run on, for Agents, read with
-/// `claude agents --json` over ssh (BatchMode: never a question) every
-/// 30 s, and only while the Agents page is watched (ADR 0031; nothing is
+/// The sessions on the machines tasks run on, for the project's page, read
+/// with `claude agents --json` over ssh (BatchMode: never a question) every
+/// 30 s, and only while a project's page is open (ADR 0031; nothing is
 /// read with nobody looking).
 extension AppDelegate {
     func startRemoteAgents() {

@@ -66,7 +66,10 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 27 | `docs/plans/27-projects-tree.md` | projetos (os spaces) e a árvore do trabalho; sai a fileira de ícones | fechado (2026-11-17): fases A a E; a revisão de fidelidade contra os mockups renderizados e a moldura de novo no tema entraram junto |
 | 28 | `docs/plans/28-dressed-terminal.md` | o terminal vestido e o preview ao lado | fechado (2026-11-17): fases A a G; o elemento escolhido chega ao agente como arquivo citado com @ (escolha do dono) |
 | 29 | `docs/plans/29-entrances.md` | tela de início, a folha única do ⌘N (tarefa e corrida), ⌘J | fechado (2026-11-17): fases A a E; a tela de início, a folha Nova tarefa (tarefa e corrida, Claude e Codex) e o ⌘J |
-| 30 | `docs/plans/30-overview.md` | página do projeto, quadro, corrida, gaveta e a auditoria final | escrito |
+| 30 | `docs/plans/30-overview.md` | página do projeto, quadro, corrida, gaveta e a auditoria final | fechado (2026-11-17): fases A a F; o inventário sem `sai`, `make check` e `make perf` passando |
+
+- Próximo: a moldura nova no app do Windows (plano 31, a escrever), sobre o port dos planos 9 a 13;
+  até lá o Windows segue com spaces e os comandos novos ficam no `MAC_ONLY` da paridade.
 
 ## O que eu não quero
 - Executar plano sem ler antes o `CLAUDE.md` da raiz e o da feature que vai mexer.

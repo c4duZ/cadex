@@ -6,6 +6,9 @@ import Strings
 /// What the app does for the tasks' commands: the asking and the tabs.
 public struct WorktreesActions {
     public var newTask: @MainActor () -> Void
+    /// worktrees.new-race: the New Task sheet with two agents (a race; plan 30 D, it was
+    /// the race command of the orchestration before).
+    public var newRace: @MainActor () -> Void = {}
     public var open: @MainActor (TaskWorktree) -> Void
     public var remove: @MainActor (TaskWorktree) -> Void
     public var comment: @MainActor (TaskWorktree) -> Void
@@ -53,6 +56,9 @@ public enum WorktreesCommands {
                     // ⌘N: the way in for a task, and with a second agent a race (plan 29; the mockups).
                     defaultShortcut: "cmd+n",
                     action: .run { actions.newTask() }),
+            Command(id: "worktrees.new-race", title: T("New Race: the Same Task in Several Agents", "Nova corrida: a mesma tarefa em vários agentes"),
+                    keywords: ["race", "agents", "compare", "corrida", "agentes", "comparar", "task", "tarefa"], category: .terminal,
+                    action: .run { actions.newRace() }),
             Command(id: "worktrees.open", title: T("Open Task…", "Abrir tarefa…"),
                     keywords: ["task", "worktree", "open", "tarefa", "abrir"], category: .terminal,
                     action: pick(T("The task to open", "A tarefa a abrir"), actions.open)),

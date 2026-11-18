@@ -3,7 +3,8 @@
 Swift of apps/macos that nobody else calls, run in each plan's sweep so the
 old shell does not linger as dead code.
 
-- types (class, struct, enum, protocol) declared and named nowhere, not even in their file;
+- types (class, struct, enum, protocol) declared and named nowhere, not even in their file
+  (comment lines and fatalError's message are not a use);
 - functions and properties declared once and named nowhere else, not even in
   their own file (overrides, @objc, protocol requirements and AppKit
   callbacks are left out, and so are tests);
@@ -47,7 +48,11 @@ def report(folders):
     everything = {p: p.read_text() for p in swift_files([APP], with_tests=True)}
     words = collections.Counter()
     for p, text in everything.items():
-        found = collections.Counter(re.findall(r"\b[A-Za-z_][A-Za-z0-9_]*\b", text))
+        # Comment lines and fatalError's message do not count as a use: "AgentCaret is created in
+        # code" kept a dead view alive in the list (plan 30 E, 2026-11-17).
+        code = re.sub(r"(?m)^\s*//.*$", "", text)
+        code = re.sub(r'fatalError\("[^"]*"\)', "fatalError()", code)
+        found = collections.Counter(re.findall(r"\b[A-Za-z_][A-Za-z0-9_]*\b", code))
 
         words.update(found)
     lines = []

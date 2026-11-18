@@ -30,7 +30,7 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 - Com terminal.keepSessions ligado (plano 19), fechar a janela principal ou o app deixa os shells das
   abas vivos no daemon do terminal, sem perguntar por programa rodando (ele segue rodando), e reabrir
   religa cada aba ao seu; fechar uma aba ou um painel encerra o shell dele, pedindo confirmação com
-  programa rodando, como hoje. As janelas do ⇧⌘N (window.new) não salvam spaces: os terminais delas são do app,
+  programa rodando, como hoje. As janelas do ⇧⌘N (window.new) não salvam projetos: os terminais delas são do app,
   como com a opção desligada.
 - ⌘1 a ⌘9 vão para a aba daquela posição. Ctrl+Tab e Ctrl+⇧+Tab alternam pela ordem de uso
   (Ctrl+Tab volta para a aba usada antes da atual).
@@ -74,7 +74,7 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 ### Documentos em painéis
 - Todo painel guarda um terminal ou um documento e funciona igual nos dois casos: dividir (⌘D,
   ⌘⇧D), passar o foco (⌘], ⌘[, ⌘⌥ + seta, clique), fechar (⌘W, ×), arrastar o divisor, tamanhos
-  iguais, escurecer quando sem foco, salvar e restaurar nos spaces. Uma aba de documento é uma aba
+  iguais, escurecer quando sem foco, salvar e restaurar nos projetos. Uma aba de documento é uma aba
   com um painel só.
 - A configuração "Abrir arquivos" (Geral; `general.openFiles`) decide onde arquivos, mídia, diff,
   histórico e preview web abrem: **Ao lado** (padrão) ou **Em nova aba**. "Abrir ao lado" e "Abrir
@@ -90,7 +90,7 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 - O documento encostado guarda a metade dele: dividir ou fechar terminais reparte só a outra
   metade, e arrastar o divisor entre os dois lados mantém a proporção escolhida. Fechar o documento
   devolve a aba inteira aos painéis, no arranjo de antes. Um documento num lado da divisão de fora
-  da aba é tratado como encostado, inclusive numa aba restaurada pelos spaces.
+  da aba é tratado como encostado, inclusive numa aba restaurada pelos projetos.
 - "Em nova aba": o documento abre numa aba própria à direita da ativa, ou vai para a aba/painel
   que já o mostra.
 - ⌘D e ⌘⇧D com o foco num documento abrem um terminal ao lado, na pasta do arquivo.

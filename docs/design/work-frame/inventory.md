@@ -71,7 +71,7 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | arquivo | página tasks (`apps/macos/features/worktrees/WorktreesView.swift`) | saiu | as tarefas na árvore (fase D) | 27 |
 | comando | `worktrees.show` | saiu | sidebar.show mostra a árvore (plano 28 fase F) | 28 |
 | arquivo | página agents: `apps/macos/features/agents/AgentsView.swift`, `apps/macos/features/agents/AgentSessionList.swift`, `apps/macos/features/agents/AgentsLayout.swift` | saiu | os agentes nos terminais da árvore; as sessões de fora do Cadex na página do projeto (plano 30); fase D | 27 |
-| trecho | `pageShown` / `onWatching` em `apps/macos/features/agents/AgentsController.swift` e a leitura das máquinas em `apps/macos/app/RunOnWiring.swift` | muda | sem a página Agents ninguém os chama: a página do projeto mostra as sessões das outras máquinas e volta a chamá-los | 30 |
+| trecho | `pageShown` / `onWatching` em `apps/macos/features/agents/AgentsController.swift` e a leitura das máquinas em `apps/macos/app/RunOnWiring.swift` | muda | a página do projeto os chama enquanto aparece e mostra as sessões das outras máquinas entre as conversas, feito no plano 30 D | 30 |
 | comando | `agents.show` | saiu | sidebar.show (⇧⌘J) mostra a árvore, onde estão os agentes (plano 28 fase F) | 28 |
 | arquivo | página agent-history (`apps/macos/features/agents/AgentHistoryView.swift`, `AgentHistoryList.swift`) | muda | Arquivo e histórico, no centro: uma aba (`AgentHistoryDocument.swift`), feito na fase C | 27 |
 | arquivo | página attention (`apps/macos/features/agents/AgentAttentionView.swift`) | muda | o conteúdo do popover do sino, feito | 26 |
@@ -105,15 +105,15 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | trecho | "confirmTask" em `apps/macos/app/WorktreesWiring.swift` | saiu | o fluxo de alertas do New Task: a folha única do ⌘N (`apps/macos/features/worktrees/NewTaskSheet.swift`), fase B | 29 |
 | trecho | "askTaskName" em `apps/macos/app/RunOnWiring.swift` | saiu | o nome e o "Rodar em" num alerta: a máquina é uma linha de agente da folha, fase B | 29 |
 | arquivo | `apps/macos/features/orchestration/NewRaceForm.swift` | saiu | a folha única do ⌘N (2+ agentes); as contas das folhas de execução e automação em `apps/macos/features/orchestration/AccountChoice.swift`, fase D | 29 |
-| comando | `orchestration.new-race` | sai | apelido do ⌘N com 2 agentes no 29, sai no 30 | 30 |
+| comando | `orchestration.new-race` | saiu | saiu no plano 30 D: a corrida pela folha Nova tarefa é worktrees.new-race | 30 |
 | comando | `window.new` no ⌘N | muda | ⇧⌘N; o ⌘N é Nova tarefa, feito na fase A | 29 |
 
 ### Visão geral (plano 30)
 | tipo | peça | estado | destino | plano |
 |---|---|---|---|---|
-| arquivo | `apps/macos/features/orchestration/RaceBoardView.swift`, `RaceColumns.swift` | muda | a corrida no centro, na cara nova | 30 |
-| arquivo | `apps/macos/features/orchestration/RunPageView.swift`, `RunRows.swift` | muda | o quadro com filtro de execução | 30 |
-| arquivo | `apps/macos/features/orchestration/AutomationHistory.swift` | muda | a página do projeto e Automações no pé da árvore | 30 |
+| arquivo | `apps/macos/features/orchestration/RaceBoardView.swift`, `RaceColumns.swift` | muda | a corrida no centro, na cara nova; sem terminal aqui, uma página de cartões (OrchestrationPage), feito | 30 |
+| arquivo | `apps/macos/features/orchestration/RunPageView.swift`, `RunRows.swift` | muda | o quadro com filtro de execução e a página da execução na cara nova (OrchestrationPage), feito | 30 |
+| arquivo | `apps/macos/features/orchestration/AutomationHistory.swift` | muda | a página do projeto e Automações no pé da árvore; o histórico na cara nova, feito | 30 |
 
 ### Tema (plano 25)
 | tipo | peça | estado | destino | plano |

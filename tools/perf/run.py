@@ -3,7 +3,7 @@
 indexes through the situations that once made it heavy, and fails when one
 goes over its limit. Mac only; takes about five minutes.
 
-Each scenario starts a test Cadex (CADEX_BACKGROUND=1, its own spaces file,
+Each scenario starts a test Cadex (CADEX_BACKGROUND=1, its own projects file,
 so the owner's are untouched) whose "shell" runs a load (loadshell.sh), and
 samples its memory (footprint) and CPU (ps). The indexes are measured
 through the C API by index_probe.c, compiled here against libcadex.a.

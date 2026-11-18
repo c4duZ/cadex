@@ -50,7 +50,7 @@ final class WorkspaceView: NSView {
     private var backgroundImage: WindowBackdrop.Image?
     private var vibrancy = false
     private var tabBarStyle: TabBarView.Style?
-    /// The shown space's tabs in the content panel.
+    /// The shown project's tabs in the content panel.
     private weak var tabsView: NSView?
 
     init(explorer: ExplorerController, tree: WorkTreeView, inspector: InspectorView, run: @escaping (String) -> Void) {
@@ -110,7 +110,7 @@ final class WorkspaceView: NSView {
     /// window repaints from its own, so a second window changes too.
     private var paintedWith = DesignTokens.themedColors()
 
-    /// A space's tabs come into the window (docs/spec/projects.md).
+    /// A project's tabs come into the window (docs/spec/projects.md).
     func show(_ tabs: TabsController) {
         hideHome()
         guard tabs.view !== tabsView else { return }

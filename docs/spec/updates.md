@@ -27,7 +27,7 @@ em 2026-10-20. Decisão em
   - falha: o que deu errado, numa frase, e os botões Fechar e Tentar de novo.
 - "Instalar e reabrir" (também "Instalar atualização" no ⌘K) baixa a versão nova com uma barra de
   progresso (porcentagem e MB), confere, troca o app em Aplicativos e reabre o Cadex. Antes de
-  sair, pergunta pelos programas rodando como ao fechar o app; as abas e os spaces voltam.
+  sair, pergunta pelos programas rodando como ao fechar o app; as abas e os projetos voltam.
 - Cancelada a saída, a atualização já está instalada: o botão da barra fica, dizendo "Reabrir para
   terminar a atualização", e clicar reabre.
 - A versão nova abre sem o aviso "Abrir mesmo assim" e mantém as permissões já dadas ao Cadex.

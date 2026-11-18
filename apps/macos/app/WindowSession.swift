@@ -19,10 +19,10 @@ import SourceControl
 import Projects
 import Tabs
 
-/// One window (docs/spec/workspace.md): its workspace folder, spaces and
+/// One window (docs/spec/workspace.md): its workspace folder, projects and
 /// tabs, explorer, search and git, and its own commands, which the menu and
 /// the shortcuts run while it has the focus. ⌘N makes another; only the
-/// main one (opened with the app) saves its spaces.
+/// main one (opened with the app) saves its projects.
 @MainActor
 final class WindowSession: NSObject, NSWindowDelegate {
     let window: NSWindow
@@ -32,11 +32,11 @@ final class WindowSession: NSObject, NSWindowDelegate {
     private(set) var mainMenu: NSMenu?
     var palette: CommandPaletteController?
     var projects: ProjectsController?
-    /// The shown space's tabs: every command acts on these.
+    /// The shown project's tabs: every command acts on these.
     var tabs: TabsController? { projects?.active }
     var workspace: WorkspaceView?
     let folder: WorkspaceFolder
-    /// The window the app opened with: its spaces are saved and restored.
+    /// The window the app opened with: its projects are saved and restored.
     let isMain: Bool
     unowned let app: AppDelegate
     var explorer: ExplorerController?
@@ -97,13 +97,12 @@ final class WindowSession: NSObject, NSWindowDelegate {
     var homeChoice = HomeChoice()
     /// The agents' permissions at the foot of their panes (PanePermissionWiring.swift).
     var panePermissionWatch: UUID?
-    /// The Agents page, for its sub-tabs (AgentsWiring.swift).
     /// The status bar's Agent usage item, for the theme's colors.
     weak var usageStrip: AgentUsageStrip?
     /// The bell's popover (AgentsAttention.swift).
     let bellPanel = AnchoredPanel()
-    /// The bell's page (AgentsAttention.swift), for its sub-tab.
-    weak var attentionPage: AgentAttentionView?
+    /// The bell's popover content (AgentsAttention.swift), for its sub-tab.
+    weak var bellContent: AgentAttentionView?
     /// The Ports item's label and what it last read (SSHWiring.swift).
     weak var portsLabel: StatusLabel?
     var ports: [UInt16] = []
@@ -209,7 +208,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         startPerfHooks()
     }
 
-    /// Whether a terminal in any space of this window runs a program.
+    /// Whether a terminal in any project of this window runs a program.
     var hasRunningProgram: Bool { projects?.projects.contains { $0.tabs.hasRunningProgram } ?? false }
 
     /// The menu and the shortcut labels from the keymap in effect.

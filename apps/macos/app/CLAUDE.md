@@ -84,7 +84,7 @@
   "Escolher outra pasta…" da folha, que vira worktrees.root); abrir, remover sem perder trabalho,
   comentar, os hooks de preparo. `NewTaskWiring.swift` (plano 29 fase B): a folha da feature
   worktrees sobre a janela, aberta pelo ⌘N, pelo worktrees.new-task-on (a máquina na primeira linha),
-  pelo orchestration.new-race (duas linhas) e pela tela de início (com o pedido); as escolhas (as
+  pelo worktrees.new-race (duas linhas) e pela tela de início (com o pedido); as escolhas (as
   contas daqui com o uso lido na hora, as máquinas do "Rodar em"), as linhas no lugar das perguntas
   (a pasta das cópias, os hooks novos, a confiança; numa corrida, a conta que ainda não confia trava
   o Começar e abre o Claude lá, e as corridas desligadas são ligadas pelo Começar); começar: na
@@ -169,7 +169,7 @@
   as máquinas são os hosts do ~/.ssh/config e as da tailnet online), a pasta do repositório lá
   perguntada uma vez, clonar só com sim, a aba `ssh -t` com os hooks e o `claude`, abrir e remover a
   tarefa remota, a sessão remota em Agents abrindo o shell da tarefa; e `startRemoteAgents`: com uma
-  página Agents na tela, o `claude agents --json` de cada máquina com tarefa, por ssh, a cada 30 s.
+  página de projeto aberta, o `claude agents --json` de cada máquina com tarefa, por ssh, a cada 30 s.
   agents.mute-machine (fase F) lista este Mac, os hosts e as máquinas e liga ou desliga cada uma em
   agents.mutedMachines. `MachinesWiring.swift` entrega a conexão aceita pelo listener da tailnet ao
   servidor do app.sock (`serveRemote`). Fase G: `startPreviewSharing` põe na barra de todo preview o
@@ -177,7 +177,7 @@
   permissão do Funnel) e machines.stop-sharing (apagado sem nada compartilhado), cada um pelo id; `shareActions` dá a porta do preview com foco, confirma o
   Funnel e mostra o endereço com Copiar e Abrir.
 - `RaceWiring.swift` (plano 24, fase C): registra os comandos da corrida; orchestration.toggle
-  mostra antes o que muda ao ligar; orchestration.new-race abre a folha Nova tarefa com dois agentes (plano 29; o formulário
+  mostra antes o que muda ao ligar; worktrees.new-race abre a folha Nova tarefa com dois agentes (plano 29; o formulário
   New Race saiu do caminho), `startRace` confere antes de criar (RaceLaunch.check, a
   confiança pela conta de cada concorrente local), e sem a folha pede uma vez o que o New Task
   pediria (a pasta, hooks novos), e cria por concorrente a worktree pelo `plan`/`make` da worktrees e uma aba com os
@@ -246,7 +246,7 @@
   abre o projeto escolhido e o agente da conta escolhida com o pedido por arquivo
   (RaceLaunch.localCommand, ADR 0036), no terminal que o projeto recém-aberto trouxe; numa cópia
   separada, worktrees.new-task; os cartões rodam tab.new, agents.open-account (⇧⌘A),
-  worktrees.new-task e orchestration.new-race; os recentes com o estado dos terminais; sem projeto
+  worktrees.new-task e worktrees.new-race; os recentes com o estado dos terminais; sem projeto
   nenhum, Tarefa e Corrida pedem a pasta antes. Clone… pede o endereço e a pasta, digita o `git
   clone` numa aba lá e, terminado com o repositório na pasta (`CloneWatch`, uma olhada por
   segundo), abre o projeto dele e fecha o da pasta-mãe aberto só para isso; CADEX_PERF_HOME_CLONE o

@@ -2,7 +2,7 @@
 
 ## Para que serve
 Fazer tudo pelo teclado a partir de um atalho só. O ⌘K abre uma busca que acha e executa qualquer
-ação do app (ADR 0005). Quando existirem, acha também abas, spaces e arquivos.
+ação do app (ADR 0005). Quando existirem, acha também abas, projetos e arquivos.
 
 ## Comportamento
 
@@ -22,7 +22,7 @@ ação do app (ADR 0005). Quando existirem, acha também abas, spaces e arquivos
   lado do terminal, com nome próprio: Terminal em nova aba (⌘T), Terminal ao lado (⌘D), Terminal abaixo (⇧⌘D),
   Arquivo… (⌘P), Preview web, Preview web em nova aba, Nova janela (⇧⌘N). O grafo do git saiu daqui e
   dos menus "+" (o dono, 2026-10-22); continua no ⌘K pelo nome. Depois "Recentes" e uma seção por área (Abas, Painéis, Arquivos,
-  Busca, Editor, Terminal, Git, Web e mídia, Spaces, Editar, Cadex), cada uma em ordem alfabética.
+  Busca, Editor, Terminal, Git, Web e mídia, Projetos e tarefas, Editar, Cadex), cada uma em ordem alfabética.
   O dono sentiu falta das seções e de ter as aberturas primeiro (2026-10-19).
 - Comando que não pode rodar agora não aparece, nem na lista nem na busca (o dono, 2026-10-19:
   "então pra que mostrar?"). O menu da aplicação continua com ele apagado.
@@ -32,7 +32,7 @@ ação do app (ADR 0005). Quando existirem, acha também abas, spaces e arquivos
 - Cada linha mostra o ícone da área, o título e, à direita, o atalho do comando desenhado como
   teclas (⇧ ⌘ D), se houver.
 - Prefixos no começo do campo trocam a lista sem sair da paleta: `>` comandos, `/` arquivos, `#`
-  texto nos arquivos, `@` abas e spaces. O ícone à esquerda do campo mostra a lista da vez.
+  texto nos arquivos, `@` abas e projetos. O ícone à esquerda do campo mostra a lista da vez.
 - Um rodapé mostra as teclas que valem na lista (↩ executar, ↑↓ mover, esc fechar); com o campo
   vazio, também os prefixos.
 - Visual com a cara do Cadex: as cores do tema (painel, borda, texto, destaque), cantos de 14 pt,
@@ -71,7 +71,7 @@ ação do app (ADR 0005). Quando existirem, acha também abas, spaces e arquivos
 - [x] Enter executa o comando selecionado; Esc fecha sem executar.
 - [x] Comando indisponível não aparece na paleta.
 - [x] Campo vazio: "Abrir" primeiro, depois recentes e as seções na ordem da spec.
-- [ ] `/` acha arquivos, `#` texto, `@` abas e spaces, `>` volta aos comandos.
+- [ ] `/` acha arquivos, `#` texto, `@` abas e projetos, `>` volta aos comandos.
 - [ ] ⌥↩ num arquivo abre ao lado; ⌘↩, em nova aba.
 
 ## ⌘J (plano 29)

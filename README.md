@@ -31,34 +31,43 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   desenho em Metal), com abas, divisões, busca, links e colagem de imagens.
 - **Documentos ao lado do terminal:** código, Markdown, mídia, diffs, histórico e previews abrem
   num painel da mesma aba (ou em aba própria, se preferir), divididos como terminais.
-- **Painéis que se arrumam** (Mac): com a aba dividida, cada painel ganha um cabeçalho fino com o
-  nome, abrir ao lado, maximizar e fechar (o clique do meio também fecha). Arrastar o cabeçalho
-  move o painel para um lado de outro, ou troca os dois, vendo o resultado ao vivo.
-- **Spaces:** grupos de abas com nome, que voltam como estavam ao reabrir o app.
+- **A moldura** (Mac): à esquerda a árvore do trabalho (cada projeto com as tarefas e os terminais,
+  e o estado do agente de cada um), no centro as abas e os painéis, à direita o painel da seleção
+  (Changes, Files, History e Memory), e no topo a busca, onde você está, o quadro e o sino. Abrir o
+  Cadex sem projeto mostra a tela de início: o pedido, os cartões Terminal, Agent, Task e Race e os
+  projetos recentes. `⌘J` pula para qualquer projeto, tarefa ou terminal.
+- **Painéis que se arrumam** (Mac): cada painel tem um cabeçalho com o estado, a conta, o custo e o
+  tempo do agente que roda nele; abrir ao lado, maximizar e fechar (o clique do meio também fecha).
+  Arrastar o cabeçalho move o painel para um lado de outro, ou troca os dois, vendo o resultado ao
+  vivo.
+- **Projetos:** a pasta de um repositório com as abas abertas nela, que voltam como estavam ao
+  reabrir o app. Clicar no nome mostra a página do projeto: tarefas abertas, gasto da semana, PRs,
+  memória, conversas recentes (inclusive as de outras máquinas), automações e contas usadas ali.
+- **A gaveta** (Mac): terminais rápidos fora de qualquer projeto, de baixo (`` ⌃` ``); `⌘↩` leva um
+  deles para o projeto.
 - **Explorador e busca** de arquivos por nome e por conteúdo, respeitando o `.gitignore`.
 - **Editor de código** com destaque de sintaxe (tree-sitter), números de linha e dobras.
 - **Markdown** renderizado, com links entre notas, links quebrados e quem aponta pra cá.
 - **Git:** mudanças, stage, commit, push e pull, diff lado a lado e o grafo do histórico.
 - **Previews:** servidores locais e páginas web, imagem, vídeo, áudio e PDF.
-- **Agentes à vista** (Mac): a página Agents mostra as sessões do Claude Code rodando em todas as
-  contas deste Mac, por projeto, com o estado (trabalhando, esperando você) e os subagentes. Um clique
-  num subagente abre a conversa dele numa aba, no jeito do Claude Code; um duplo clique na sessão
-  vai ao terminal dela. Uma notificação avisa quando um agente pede permissão, pergunta ou termina.
-  O título da aba mostra o estado exato do agente que roda nela (◐ trabalhando, ● esperando você, ✓
-  terminou), contado pelo próprio Claude Code. O Cadex não manda prompt nem fala com modelo.
-- **O que precisa de você** (Mac): um sininho na barra lateral conta os pedidos abertos dos agentes e
-  os que terminaram sem você ver, também no ícone do Dock. A página dele tem o quadro, onde se permite
-  ou nega um pedido de permissão sem ir até o terminal (nada vai ao agente sem o seu clique), e o feed
-  com a linha do tempo de todos os agentes.
+- **Agentes à vista** (Mac): cada terminal na árvore e cada aba mostram o estado exato do agente
+  que roda nele (trabalhando, esperando você, terminou), contado pelo próprio Claude Code, e o
+  comando que o terminal está rodando. Uma notificação avisa quando um agente pede permissão,
+  pergunta ou termina. O Cadex não fala com modelo: quando você escreve o pedido (na tela de início,
+  numa tarefa nova), ele abre o agente com o seu texto num terminal.
+- **O que precisa de você** (Mac): o sino na barra de título conta os pedidos abertos dos agentes e
+  os que terminaram sem você ver, também no ícone do Dock; ele abre o quadro, onde se permite ou nega
+  um pedido de permissão sem ir até o terminal (nada vai ao agente sem o seu clique), e o feed com a
+  linha do tempo de todos os agentes.
 - **Uma tarefa, uma worktree** (Mac): "New Task" cria o branch e a worktree ao lado do repositório,
   copia os arquivos fora do git que o `.worktreeinclude` pede (`.env` e afins), roda os hooks de
   preparo e abre o agente nela, na conta do projeto. Cada tarefa tem status e um comentário; sair
   dela é recusado enquanto houver trabalho que se perderia.
 - **Agentes parados hibernam** (Mac): um agente aberto pelo Cadex que terminou e que ninguém olha há
   30 minutos encerra para liberar memória, e volta com a conversa quando você abre a aba dele.
-- **Uso dos planos** (Mac): a página Accounts mostra quanto cada conta do Claude Code e do Codex usou
-  da sessão de 5 horas e da semana, e quando reinicia; um clique abre o agente daquela conta. O
-  número do Claude Code vem do próprio Claude Code, pela status line das sessões que o Cadex abre: o
+- **Uso dos planos** (Mac): o item de uso na barra de status mostra quanto cada conta do Claude
+  Code e do Codex usou da sessão de 5 horas e da semana, e quando reinicia; um clique numa conta
+  abre o agente dela. O número do Claude Code vem do próprio Claude Code, pela status line das sessões que o Cadex abre: o
   Cadex nunca lê login nem token e não pergunta a serviço nenhum
   ([ADR 0021](docs/adr/0021-cadex-managed-accounts.md)). A sua status line continua aparecendo igual.
 - **Várias contas, uma configuração** (Mac): "Add Agent Account" cria uma conta na pasta do Cadex e
@@ -66,15 +75,13 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   hooks, settings, plugins), menos o que é da conta (login, conversas, histórico). As contas que já
   existem ficam onde estão e podem passar a seguir também. A conta ativa (clique direito no item de
   uso) e a de cada projeto escolhem onde as sessões novas abrem.
-- **Histórico de todas as conversas** (Mac): a página History junta as conversas de todas as contas,
-  com busca pelo que foi dito, por projeto, pasta ou conta. Duplo clique retoma na conta dona;
-  "Continue in Another Account" leva a conversa para outra conta quando o limite de uma acaba, com o
-  original intacto.
-- **Barra lateral e barra de status do seu jeito** (Mac): os ícones do topo da barra lateral (Files,
-  Git, Git History, Agents, History, Accounts) e os itens da barra de status (pasta, branch,
-  terminais, agentes, uso, RAM, CPU, memória do Cadex, portas abertas, hosts SSH) são escolhidos e
-  arrastados para o lugar; o que fica desligado não pesa nada. Toda página da barra lateral tem o
-  mesmo cabeçalho: o nome (a pasta, a branch) à esquerda e as ações dela à direita.
+- **Histórico de todas as conversas** (Mac): "Archive & history", no pé da árvore, junta as
+  conversas de todas as contas, com busca pelo que foi dito, por projeto, pasta ou conta. Duplo
+  clique retoma na conta dona; "Continue in Another Account" leva a conversa para outra conta quando
+  o limite de uma acaba, com o original intacto.
+- **Barra de status do seu jeito** (Mac): os itens (pasta, branch, terminais, gaveta, uso, RAM, CPU,
+  memória do Cadex, portas abertas, hosts SSH) são escolhidos e arrastados para o lugar; o que fica
+  desligado não pesa nada.
 - **Hosts SSH** (Mac): os do `~/.ssh/config`, se respondem, e um clique conecta numa aba.
 - **Suas máquinas pelo Tailscale** (Mac, opcional): com o Tailscale que você já tem, o cartão do SSH
   lista as máquinas da sua tailnet (no ar, caminho direto ou por relay, latência) e um clique abre o
@@ -110,15 +117,16 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   para a próxima sessão, de uma conta para outra e do Claude para o Codex, sem você repetir nada. O
   engine é o do [ai-memory](https://github.com/akitaonrails/ai-memory), num processo à parte que só
   existe enquanto há sessão de agente; a busca por sentido roda um modelo local pequeno, e quem
-  escreve as páginas é o Claude da própria sessão, sem chave nem custo extra. A página Memory mostra
-  e edita a wiki (Markdown em git) e o que o agente recebe ao começar
+  escreve as páginas é o Claude da própria sessão, sem chave nem custo extra. A aba Memory do painel
+  da direita mostra e edita a wiki (Markdown em git) e o que o agente recebe ao começar
   ([ADR 0028](docs/adr/0028-project-memory.md)).
 - **Vários agentes de uma vez** (Mac, desligado por padrão): uma **corrida** dá a mesma tarefa a 2 a 6
-  agentes, cada um na sua worktree, com o quadro lado a lado (estado, tempo, custo, diff), comparar
-  dois e escolher o vencedor; uma **execução** encadeia tarefas com dependências e portões, cada uma
+  agentes, cada um na sua worktree, lado a lado no centro (estado, tempo, custo, diff e o teto),
+  comparar dois e escolher o vencedor; uma **execução** encadeia tarefas com dependências e portões, cada uma
   despachada a um agente numa worktree e aba novas, que reporta pelo `cadex` (concluído, sinal de
   vida, perguntas, recados, sub-tarefas), coordenada por você ou por um agente; uma **automação**
-  roda um prompt num horário, mesmo com o Cadex fechado (o launchd o acorda), com histórico. O
+  roda um prompt num horário, mesmo com o Cadex fechado (o launchd o acorda), com histórico. O quadro
+  (o botão na barra de título) junta todas as tarefas por estado, com filtro por corrida e execução. O
   prompt nunca passa pelo shell, o Cadex mostra antes o que vai rodar, onde e em qual conta, e tudo
   tem teto de gasto, de duração e de agentes ([ADR 0033](docs/adr/0033-cadex-launches-agents.md),
   [ADR 0034](docs/adr/0034-scheduled-automations.md)).
@@ -126,7 +134,7 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   acessibilidade, com a sua permissão app por app, nunca em campos de senha nem nos Ajustes do
   Sistema, com uma faixa e um botão Parar ([ADR 0026](docs/adr/0026-computer-use.md)).
 - **Temas:** centenas, com busca, importação e pasta própria; claro e escuro, cor de destaque, alto
-  contraste, zoom da interface, cores de space e de aba, imagem de fundo e vibrância.
+  contraste, zoom da interface, cores de projeto e de aba, imagem de fundo e vibrância.
 - **Atualiza sozinho** (Mac): avisa quando sai versão nova e atualiza com um clique, conferindo a
   assinatura antes de trocar o app.
 - **Inglês por padrão**, português nas configurações.
@@ -215,23 +223,26 @@ máquinas: ⌘ vira Ctrl+Shift (como no Windows Terminal), e ⌘ com ⇧, ⌥ ou
 | Ação | Mac | Windows |
 |---|---|---|
 | Paleta de comandos | `⌘K` | `Ctrl+Shift+K` |
+| Nova tarefa (a worktree e o agente) | `⌘N` | só no Mac |
+| Pular para projeto, tarefa ou terminal | `⌘J` | só no Mac |
 | Nova aba / fechar painel | `⌘T` / `⌘W` | `Ctrl+Shift+T` / `Ctrl+Shift+W` |
-| Nova janela | `⌘N` | pela paleta (sem atalho) |
-| Manter acordado (ligar ou desligar) | `⇧⌘A` | `Ctrl+Shift+Alt+A` |
+| Nova janela | `⌘⇧N` | pela paleta (sem atalho) |
 | Dividir à direita / para baixo | `⌘D` / `⌘⇧D` | `Ctrl+Shift+D` / `Ctrl+Shift+Alt+D` |
 | Maximizar o painel (e voltar) | `⌘⇧↩` | só no Mac |
 | Ir para a aba 1…9 | `⌘1…9` | `Ctrl+Shift+1…9` |
 | Abrir arquivo por nome / buscar no conteúdo | `⌘P` / `⌘⇧F` | `Ctrl+Shift+P` / `Ctrl+Shift+Alt+F` |
 | Abrir pasta | `⌘O` | `Ctrl+Shift+O` |
-| Painel lateral / arquivos / git | `⌘B` / `⌘⇧E` / `⌘⇧G` | `Ctrl+Shift+B` / `Ctrl+Shift+Alt+E` / `Ctrl+Shift+Alt+G` |
+| Árvore à esquerda / painel da direita | `⌘B` / `⌥⌘I` | `Ctrl+Shift+B` / só no Mac |
+| Changes, Files, History, Memory no painel da direita | `⌃⌘1…4` | só no Mac |
+| Arquivos / git / histórico do git | `⌘⇧E` / `⌘⇧G` / `⌘⇧L` | `Ctrl+Shift+Alt+E` / `Ctrl+Shift+Alt+G` / só no Mac |
+| A gaveta / levar o terminal ao projeto | `` ⌃` `` / `⌘↩` | só no Mac |
+| Abrir o agente numa conta / uso das contas | `⌘⇧A` / `⌘⇧U` | só no Mac |
 | Preview web | `⌘⇧H` | `Ctrl+Shift+Alt+H` |
-| Agents / Accounts / Git History / ícone 1…9 da barra lateral | `⌘⇧J` / `⌘⇧U` / `⌘⇧L` / `⌃⌘1…9` | só no Mac |
 | Escolher elemento no preview / parar | `⌘⇧C` / `Esc` | só no Mac |
 | Tirar o agente do preview | `Esc` (com o agente na aba) | só no Mac |
 | Na revisão: próximo/anterior arquivo, mudança; comentar | `j` `k`, `n` `p`; `c` (com a revisão em foco) | só no Mac |
-| Histórico do git | pela paleta (sem atalho) | pela paleta (sem atalho) |
-| Trocar de space / novo space | `⌘⇧S` / `⌃⌘N` | `Ctrl+Shift+Alt+S` / `Ctrl+Shift+Alt+N` |
-| Próximo / anterior space | `⌃⌘→` / `⌃⌘←` | `Ctrl+Shift+Alt+PgDn` / `Ctrl+Shift+Alt+PgUp` |
+| Trocar de projeto / abrir projeto | `⌘⇧S` / `⌃⌘N` | spaces: `Ctrl+Shift+Alt+S` / `Ctrl+Shift+Alt+N` |
+| Próximo / anterior projeto | `⌃⌘→` / `⌃⌘←` | spaces: `Ctrl+Shift+Alt+PgDn` / `Ctrl+Shift+Alt+PgUp` |
 | Buscar no terminal / limpar | `⌘F` / `⌘L` | `Ctrl+Shift+F` / `Ctrl+Shift+L` |
 | Copiar / colar no terminal | `⌘C` / `⌘V` | `Ctrl+Shift+C` / `Ctrl+Shift+V` (ou `Ctrl+C` com texto selecionado) |
 | Configurações | `⌘,` | `Ctrl+Shift+,` |

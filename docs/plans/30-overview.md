@@ -30,16 +30,33 @@ execução, automações), agents, memory, terminal (a gaveta), tabs · Decisõe
   RaceBoardView.swift; a execução como filtro do quadro, com a página dela na cara nova.
 - **C. A gaveta.** Feita (2026-11-17, idem): conferida no app contra o mockup 9, e o ⌘↩ levando o terminal ao projeto. Plano original: Terminais rápidos fora de qualquer projeto, de baixo (⌃`, drawer.toggle), com
   abas, arrastar para cima, e ⌘↩ que leva um terminal da gaveta para um projeto.
-- **D. Remoção.** O apelido `orchestration.new-race`; o que a página do projeto substituiu; toda
+- **D. Remoção.** Feita (2026-11-17): o comando da corrida passou para worktrees.new-race (o de orchestration saiu), a página do projeto lê as sessões das outras máquinas pelo gancho que era da página Agents, a corrida sem terminal aqui virou página de cartões, e a seta e o sinal da página Agents saíram (sem uso). Plano original: O apelido `orchestration.new-race`; o que a página do projeto substituiu; toda
   linha que ainda está em `sai`.
-- **E. Auditoria final.** Varrer `apps/macos/`, `docs/spec/`, os `CLAUDE.md`, o README e
+- **E. Auditoria final.** Feita (2026-11-17): comentários, specs e textos da tela sem spaces, página Agents, Accounts nem barra lateral de ícones (o `@` da paleta dizia "abas e spaces"; o histórico do git, "no painel lateral"); o atalho ⌘↩ da gaveta corrigido (cmd+enter era recusado); tools/find_unused.py passou a não contar comentário nem a mensagem do fatalError como uso, o que achou três vistas mortas; na conferência contra os mockups, a página do projeto com o painel da direita aberto cortava os rótulos das colunas e deixava os botões colados no caminho, e o "+" aparecia ao lado das páginas (corrigidos); `make perf` limpo na terceira rodada completa (as duas antes falharam cada uma numa medida diferente, a troca de tema e a CPU depois do agente, depois a pasta pessoal, e cada uma passou 3 de 3 sozinha). Plano original: Varrer `apps/macos/`, `docs/spec/`, os `CLAUDE.md`, o README e
   `tools/perf/` atrás de nomes da casca velha (sidebar de ícones, space, Tasks, Attention,
   Accounts como página, paneHeaders); tools/find_unused.py limpo; o inventário sem `sai`;
   `make check`, `make perf`; cada mockup ao lado do print do app, e o dono vê todos.
-- **F. Fechamento.** README com a moldura nova, notas da release em inglês, o status dos planos 25 a
+- **F. Fechamento.** Feita (2026-11-17): o README com a moldura e a tabela de atalhos de hoje, as notas abaixo, o índice, a ADR 0035 e o plano 31 (Windows) anotado como próximo. Plano original: README com a moldura nova, notas da release em inglês, o status dos planos 25 a
   30 no índice, a ADR 0035 sem pendência, e o plano do Windows com a moldura nova anotado como
   próximo.
 
 ## Como validar
 - `make check` e `make perf` passam; tools/check_leftovers.py sem nenhuma linha em `sai`.
 - O dono usa o Cadex com a moldura nova e aprova contra os mockups.
+
+## Notas da release (inglês)
+
+As da série inteira (planos 25 a 30), a moldura nova.
+
+```markdown
+## A new frame (Mac)
+
+- **One window, four places.** On the left, the tree of your work: each project with its tasks and terminals, and each agent's state beside it. In the center, tabs and panes. On the right, the selection's panel: Changes, Files, History and Memory (⌥⌘I, ⌃⌘1…4). On top, search, where you are (project › task), the board and the bell. The icon rail and its pages are gone; everything they did is a command in ⌘K.
+- **Projects instead of spaces.** A project is a repository's folder with the tabs open in it, restored when Cadex opens. Spaces from 2.2 are not carried over: open each repository again (⌃⌘N) and it stays. ⇧⌘S switches, ⌃⌘N opens one, ⌘J jumps to any project, task or terminal.
+- **A home screen.** Opening Cadex with no project shows a prompt box, the Terminal, Agent, Task and Race cards, and your recent projects with their terminals' state. Write what you want and pick a card: the agent opens with your words.
+- **New Task is ⌘N.** One sheet for a task and a race: the branch, the base, one agent or several (account, model, machine), and the prompt. New window moved to ⇧⌘N.
+- **Dressed terminals.** Each pane's header shows the agent's state, account, cost and time, and the command the shell is running; the tab shows the same state. Cadex Night is the default theme.
+- **The project's page.** Click a project's name: open tasks, this week's spend, PRs, memory, recent conversations (also those on your other machines), its automations with their switch, and the accounts used there.
+- **The board and the race in the center.** The board (the title bar's button) shows every task by state, filtered by race, run or automations. A race shows its agents side by side, each with state, time, cost, diff and its cap. A run's page and an automation's history use the same cards.
+- **The drawer.** Quick terminals outside any project slide up from the bottom (⌃`); ⌘↩ moves one into the project.
+```

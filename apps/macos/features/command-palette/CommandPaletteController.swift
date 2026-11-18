@@ -21,7 +21,7 @@ public final class CommandPaletteController {
     /// background opening ⌘J by its hook).
     public weak var home: NSWindow?
     /// Lists reached from ⌘K by the first character: "/" files, "#" text,
-    /// "@" tabs and spaces (docs/spec/command-palette.md). ">" is commands.
+    /// "@" tabs and projects (docs/spec/command-palette.md). ">" is commands.
     private var prefixes: [(prefix: Character, label: String, source: PaletteSource)] = []
     /// The list answering now: the source, or the one its prefix picked.
     private var answering: PaletteSource?

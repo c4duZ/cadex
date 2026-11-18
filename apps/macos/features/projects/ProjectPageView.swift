@@ -11,6 +11,9 @@ public struct ProjectPageActions {
     public var openConversation: (String) -> Void = { _ in }
     public var toggleAutomation: (String) -> Void = { _ in }
     public var newTaskShortcut: () -> String? = { nil }
+    /// The page came (true) or went (false): the app reads the other machines' sessions only
+    /// while one shows.
+    public var shown: (Bool) -> Void = { _ in }
     /// Gathers the page's state (off the main thread where it reads git or files) and gives it.
     public var load: (@escaping @MainActor (ProjectPageState) -> Void) -> Void = { _ in }
 
@@ -40,12 +43,13 @@ public final class ProjectPageDocument: TabDocument {
         self.actions = actions
         page.wantsLayer = true
         page.layer?.backgroundColor = DesignTokens.Color.bgWindow.cgColor
+        actions.shown(true)
         reload()
     }
 
     public func focus() { reload() }
     public func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) { close() }
-    public func close() {}
+    public func close() { actions.shown(false) }
 
     /// Reads again (the tab shows, an automation turned on or off).
     public func reload() {
@@ -62,6 +66,9 @@ public final class ProjectPageDocument: TabDocument {
                                         tracking: PP.Title.tracking),
                               pageLabel(state.place, size: DesignTokens.FontSize.body, color: H.meta)], gap: H.titleGap)
         words.setContentHuggingPriority(.init(1), for: .horizontal)
+        // A stack view's own hug is this one, not the content's: without it the words kept their
+        // text's width and the buttons sat beside the path (2026-11-17).
+        words.setHuggingPriority(.init(1), for: .horizontal)
         words.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         let race = DesignButton.make(T("Race…", "Corrida…"), .secondary) { [weak self] in self?.actions.race() }
         let shortcut = actions.newTaskShortcut().map { "  " + $0 } ?? ""
@@ -69,6 +76,9 @@ public final class ProjectPageDocument: TabDocument {
         let buttons = NSStackView(views: [race, task])
         buttons.spacing = UILooks.pt(H.gap)
         let row = NSStackView(views: [words, buttons])
+        // The words take the rest of the row, the buttons go right (they sat beside the path with
+        // the right panel open, 2026-11-17).
+        row.distribution = .fill
         row.alignment = .bottom
         row.spacing = UILooks.pt(H.gap)
         page.head = row
@@ -188,6 +198,9 @@ final class FlippedPage: NSView {
         pair.orientation = wanted
         pair.alignment = narrow ? .leading : .top
         pair.spacing = UILooks.pt(narrow ? PP.gap : PP.Columns.gap)
+        // Side by side they share the row by the ratio: with .gravityAreas two short columns kept
+        // their text's width and cut their labels (the right panel open, 2026-11-17).
+        pair.distribution = narrow ? .gravityAreas : .fill
         ratio?.isActive = !narrow
         stacked.forEach { $0.isActive = narrow }
     }

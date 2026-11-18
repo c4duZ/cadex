@@ -56,7 +56,7 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
   "Compare". orchestration.show-race leva aos concorrentes; o quadro de colunas antigo fica só para
   a corrida sem nenhum concorrente local.
 - A corrida nasce na folha "New task" (`worktrees.md`) com dois agentes ou mais: não há folha
-  própria (`../adr/0035-work-frame.md`). orchestration.new-race abre a folha já com duas linhas de
+  própria (`../adr/0035-work-frame.md`). worktrees.new-race abre a folha já com duas linhas de
   agente; com a feature desligada, a folha diz numa linha que o Começar a liga (o
   comando não fica indisponível). O que a
   folha pede para a corrida: o prompt, o ponto de partida (o branch atual, ou outro), e

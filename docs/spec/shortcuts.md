@@ -24,8 +24,8 @@ comando; o usuário pode mudar qualquer um.
 - No Windows, os mesmos atalhos por uma regra só, para o settings.json servir nas duas máquinas: ⌘
   é Ctrl+Shift (⌘T vira Ctrl+Shift+T, como no Windows Terminal); ⌘ com ⇧ ou ⌥ é Ctrl+Shift+Alt
   (⌘⇧D vira Ctrl+Shift+Alt+D), e o mesmo com ⌃. `ctrl`, `alt` e `shift` escritos sem `cmd` valem
-  como estão. Onde a regra junta dois atalhos do Mac, o Windows tem o seu: Próximo space e Space
-  anterior (⌃⌘→ e ⌃⌘←, que cairiam em Ctrl+Shift+Alt+→ e ←, os de ir para o painel ao lado) são
+  como estão. Onde a regra junta dois atalhos do Mac, o Windows tem o seu: Próximo projeto e
+  Projeto anterior (⌃⌘→ e ⌃⌘←; space no Windows, que ainda tem spaces, que cairiam em Ctrl+Shift+Alt+→ e ←, os de ir para o painel ao lado) são
   Ctrl+Shift+Alt+PgDn e PgUp. A
   tecla de um símbolo segue o layout do teclado (ABNT2 incluído). Os menus e a paleta mostram
   "Ctrl+Shift+D".

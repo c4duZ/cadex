@@ -49,5 +49,7 @@ essa fica para depois) e quer os terminais e as abas no centro, divididos e movi
   `tools/check_leftovers.py` (plano 25) falha no `make manifests` se uma peça tirada voltar.
 - O app do Windows segue depois, com plano próprio; os comandos novos entram no `MAC_ONLY` da
   paridade até lá.
+- Situação (2026-11-17): feita no Mac, planos 25 a 30, sem nenhuma linha do inventário em `sai`.
+  O que falta é só o Windows, o próximo plano do índice (`docs/plans/README.md`).
 - Toda ação nova é comando (ADR 0005): abrir a tela de início, alternar o painel da direita, cada
   aba dele, a gaveta de terminais.

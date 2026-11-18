@@ -7,13 +7,13 @@ import Strings
 import Worktrees
 
 /// The New Task sheet in this window (plan 29 phase B; docs/spec/worktrees.md): the one way in
-/// for a task and a race (⌘N, worktrees.new-task-on with its machine, orchestration.new-race with
+/// for a task and a race (⌘N, worktrees.new-task-on with its machine, worktrees.new-race with
 /// two agents, the home screen). What New Task used to ask in a row of alerts (the tasks' folder,
 /// new setup hooks, the trust) are lines of the sheet; Start is the yes. One agent: in the
 /// project's folder, a terminal with the agent and the words (ADR 0036); in a copy, the task's
 /// worktree and a tab with the hooks and the agent. Two or more: a race, each in its own copy.
 extension WindowSession {
-    /// `agents`: how many rows it opens with (the Race card, orchestration.new-race: two);
+    /// `agents`: how many rows it opens with (the Race card, worktrees.new-race: two);
     /// `machine`: the first row on that machine (worktrees.new-task-on).
     func showNewTask(prompt: String = "", agents count: Int = 1, machine: RunTarget? = nil, keeping kept: NewTaskRequest? = nil) {
         guard let repo = mainRepository else {

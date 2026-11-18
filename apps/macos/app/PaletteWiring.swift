@@ -8,7 +8,7 @@ import Tabs
 import Themes
 
 /// The palette in the app's colors and its prefixes (docs/spec/
-/// command-palette.md): "/" files, "#" text, "@" the tabs and spaces.
+/// command-palette.md): "/" files, "#" text, "@" the tabs and projects.
 extension WindowSession {
     /// The ways to open things, first in ⌘K and in the "+" menu next to
     /// the tabs (owner, 2026-10-19).
@@ -64,8 +64,8 @@ extension WindowSession {
         }
         var places: [(String, PaletteSource)] = [(T("Tabs", "Abas"), TabCommands.source { [weak self] in self?.tabs })]
         if let projects { places.append((T("Projects", "Projetos"), ProjectsCommands.source(projects))) }
-        palette.addPrefix("@", label: T("tabs and spaces", "abas e spaces"), source: MergedSource(
-            placeholder: T("Go to a tab or space", "Ir para a aba ou o space"),
-            emptyText: T("No tabs or projects", "Nenhuma aba ou space"), icon: .stack, parts: places))
+        palette.addPrefix("@", label: T("tabs and projects", "abas e projetos"), source: MergedSource(
+            placeholder: T("Go to a tab or project", "Ir para a aba ou o projeto"),
+            emptyText: T("No tabs or projects", "Nenhuma aba ou projeto"), icon: .stack, parts: places))
     }
 }

@@ -38,57 +38,6 @@ enum AgentTime {
     }
 }
 
-/// A session's sign: a turning ring while it works, a dot while it waits
-/// for an answer, a grey dot for a status the page does not know.
-@MainActor
-final class AgentSign: NSView {
-    enum Kind { case working, waiting, done, unknown }
-
-    private let shape = CAShapeLayer()
-
-    init(_ kind: Kind, colors: AgentColors, size: CGFloat) {
-        super.init(frame: NSRect(x: 0, y: 0, width: size, height: size))
-        wantsLayer = true
-        shape.frame = bounds
-        layer?.addSublayer(shape)
-        let inset = size * 0.15
-        let box = bounds.insetBy(dx: inset, dy: inset)
-        switch kind {
-        case .working:
-            shape.path = CGPath(ellipseIn: box, transform: nil)
-            shape.fillColor = nil
-            shape.strokeColor = colors.accent.cgColor
-            shape.lineWidth = max(1.5, size * 0.16)
-            shape.strokeEnd = 0.72
-            shape.lineCap = .round
-            let spin = CABasicAnimation(keyPath: "transform.rotation.z")
-            spin.fromValue = 0
-            spin.toValue = -2 * Double.pi
-            spin.duration = 1
-            spin.repeatCount = .infinity
-            shape.add(spin, forKey: "spin")
-        case .waiting, .unknown:
-            shape.path = CGPath(ellipseIn: box.insetBy(dx: size * 0.08, dy: size * 0.08), transform: nil)
-            shape.fillColor = (kind == .waiting ? colors.waiting : colors.secondary).cgColor
-        case .done:
-            let path = CGMutablePath()
-            path.move(to: CGPoint(x: box.minX, y: box.midY))
-            path.addLine(to: CGPoint(x: box.minX + box.width * 0.38, y: box.minY + box.height * 0.2))
-            path.addLine(to: CGPoint(x: box.maxX, y: box.maxY - box.height * 0.1))
-            shape.path = path
-            shape.fillColor = nil
-            shape.strokeColor = NSColor.systemGreen.cgColor
-            shape.lineWidth = 1.6
-            shape.lineCap = .round
-        }
-        translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([widthAnchor.constraint(equalToConstant: size), heightAnchor.constraint(equalToConstant: size)])
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) { fatalError("AgentSign is created in code") }
-}
-
 /// A row of the page that answers clicks: one click and a double click.
 @MainActor
 final class AgentRow: NSView {

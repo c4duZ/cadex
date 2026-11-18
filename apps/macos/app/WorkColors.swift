@@ -6,7 +6,7 @@ import Themes
 
 /// Colors for spaces and tabs (plan 15, phase D): a name saved in
 /// spaces.json, drawn as the theme's own ANSI color so it fits any theme.
-/// The active tab's color, else the space's, else the accent paints the
+/// The active tab's color, else the project's, else the accent paints the
 /// window's tab bar and side panel (theme, accent, space, tab: each layer
 /// over the one before).
 enum WorkColor: String, CaseIterable {
@@ -56,7 +56,7 @@ extension WindowSession {
         ])
     }
 
-    /// The window's accent from the active tab's color or the space's.
+    /// The window's accent from the active tab's color or the project's.
     func refreshWorkColor() {
         let name = tabs?.activeColor ?? projects?.activeColor
         workspace?.workColor = name.flatMap(WorkColor.init(rawValue:))

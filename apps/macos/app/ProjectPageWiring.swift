@@ -37,8 +37,8 @@ extension WindowSession {
 
     func makeProjectPage(_ folder: String) -> ProjectPageDocument {
         var actions = ProjectPageActions()
-        actions.race = { [weak self] in self?.showNewTask(agents: 2) }
-        actions.newTask = { [weak self] in self?.showNewTask() }
+        actions.race = { [weak self] in _ = self?.commands.run("worktrees.new-race") }
+        actions.newTask = { [weak self] in _ = self?.commands.run("worktrees.new-task") }
         actions.newTaskShortcut = { [weak self] in self?.app.keymapLabel("worktrees.new-task") }
         actions.toggleAutomation = { [weak self] id in
             self?.toggleAutomation(id)
@@ -46,12 +46,15 @@ extension WindowSession {
         }
         actions.openConversation = { [weak self] id in self?.openConversation(id) }
         actions.load = { [weak self] show in self?.loadProjectPage(folder, show: show) }
+        // The tasks' sessions on other machines (plan 23), read over ssh only while a page shows.
+        actions.shown = { shown in AgentsController.shared.pageShown(shown) }
         return ProjectPageDocument(folder: folder, actions: actions)
     }
 
     /// A live session comes to the front; an ended one goes on in a tab of its folder.
     private func openConversation(_ id: String) {
-        if let live = AgentsController.shared.sessions.first(where: { $0.id == id }) { return openAgent(live) }
+        // A live one, here or on another machine (its shell there, openAgent's rule).
+        if let live = (AgentsController.shared.sessions + AgentsController.shared.remote).first(where: { $0.id == id }) { return openAgent(live) }
         guard let entry = AgentHistoryController.shared.entries.first(where: { $0.id == id }) else { return NSSound.beep() }
         tabs?.newTab(cwd: AgentHistoryLaunch.folder(entry))
         tabs?.activeTerminal?.typeWhenReady(AgentHistoryLaunch.resume(entry) + "\n")
@@ -64,6 +67,9 @@ extension WindowSession {
         let accounts = AgentsController.shared.everyAccount()
         let mine = AgentHistoryController.shared.entries.filter { Self.belongs($0.cwd, to: folder) }
         let live = AgentsController.shared.sessions
+        // This project's tasks on other machines: their sessions, as the remote reading gives them.
+        let remotePaths = Set(WorktreesController.shared.remoteTasks(repo: folder).map(\.path))
+        let remote = AgentsController.shared.remote.filter { session in remotePaths.contains { session.cwd == $0 || session.cwd.hasPrefix($0 + "/") } }
         let automations = (try? OrchestrationController.shared.automations()?.automations()) ?? []
         let book = OrchestrationController.shared.automations()
         let lastResults = automations.reduce(into: [String: String]()) { found, job in
@@ -108,6 +114,12 @@ extension WindowSession {
                                                              detail: [place, "Claude", accountName(entry.account)].joined(separator: " · "),
                                                              when: ProjectPageWords.when(entry.updated, now: now))
                     }
+                    let away = remote.map { session in
+                        ProjectPageState.Conversation(id: session.id, state: session.status == .working ? .working : session.waitingFor != nil ? .needs : .done,
+                                                      title: session.name, detail: [(session.cwd as NSString).lastPathComponent, "Claude", session.machine ?? ""]
+                                                          .filter { !$0.isEmpty }.joined(separator: " · "),
+                                                      when: ProjectPageWords.when(session.since, now: now))
+                    }
                     let jobs = automations.filter { Self.automation($0, in: folder) }.map { job -> ProjectPageState.Automation in
                         let last = lastResults[job.id].map { T(" · last ", " · último ") + $0 } ?? ""
                         return ProjectPageState.Automation(id: job.id, name: job.name,
@@ -121,7 +133,7 @@ extension WindowSession {
                     }
                     let remote = origin.isEmpty ? nil : ProjectPageWords.remote(origin)
                     let place = [(folder as NSString).abbreviatingWithTildeInPath, branch, remote].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
-                    show(ProjectPageState(name: name, place: place, stats: stats, conversations: Array(talks), automations: jobs, accounts: chips))
+                    show(ProjectPageState(name: name, place: place, stats: stats, conversations: Array((away + talks).prefix(6)), automations: jobs, accounts: chips))
                 }
             }
         }

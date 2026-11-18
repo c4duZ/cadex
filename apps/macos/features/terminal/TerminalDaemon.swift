@@ -10,7 +10,7 @@ public final class TerminalDaemon {
     public static let shared = TerminalDaemon()
 
     /// This app's sessions start with it: another Cadex (a test instance,
-    /// with its own spaces file) never ends this one's. Set by the app.
+    /// with its own projects file) never ends this one's. Set by the app.
     public var instance = "cadex"
     private var running = false
 

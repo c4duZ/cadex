@@ -140,9 +140,10 @@ extension WindowSession {
         projects.saveNow()
     }
 
-    /// The daemon's names of this Cadex's sessions start with this: the
-    /// spaces file's path, hashed (FNV-1a, the same in every launch), so a
-    /// test instance with its own file never ends the owner's sessions.
+    /// The daemon's names of this Cadex's sessions start with this: the path
+    /// of the spaces.json beside the projects file (the name from before plan
+    /// 27), hashed (FNV-1a, the same in every launch), so a test instance with
+    /// its own file never ends the owner's sessions.
     static func instanceName(_ path: String) -> String {
         var hash: UInt32 = 2_166_136_261
         for byte in path.utf8 { hash = (hash ^ UInt32(byte)) &* 16_777_619 }

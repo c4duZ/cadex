@@ -26,8 +26,8 @@ extension WindowSession {
 
     func makeBoard() -> BoardDocument {
         var actions = BoardActions()
-        actions.newRace = { [weak self] in self?.showNewTask(agents: 2) }
-        actions.newTask = { [weak self] in self?.showNewTask() }
+        actions.newRace = { [weak self] in _ = self?.commands.run("worktrees.new-race") }
+        actions.newTask = { [weak self] in _ = self?.commands.run("worktrees.new-task") }
         actions.open = { [weak self] id in self?.pickInTree(.task(id)) }
         actions.load = { [weak self] show in show(self?.boardCards() ?? []) }
         return BoardDocument(actions: actions)

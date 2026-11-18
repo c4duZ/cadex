@@ -168,7 +168,7 @@ public final class TabsController {
     public var activePaneCount: Int { activeTab?.tree.leaves.count ?? 0 }
 
     /// The active tab's work color (tab.set-color); the app paints the
-    /// window's accent with it over the space's (plan 15, phase D).
+    /// window's accent with it over the project's (plan 15, phase D).
     public var activeColor: String? { activeTab?.color }
 
     public func setActiveColor(_ name: String?) {

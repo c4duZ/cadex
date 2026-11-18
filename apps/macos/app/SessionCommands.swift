@@ -155,8 +155,8 @@ extension WindowSession {
             keywords: ["notifications", "agents", "test", "notificações", "teste", "avisos"], category: .view,
             action: .run { [weak self] in self?.sendTestNotifications() }))
         commands.register(Command(
-            id: "git.show-history", title: T("Show Git History in Sidebar", "Mostrar o histórico do Git no painel lateral"),
-            keywords: ["history", "log", "commits", "histórico", "sidebar", "painel"], category: .view,
+            id: "git.show-history", title: T("Show Git History", "Mostrar o histórico do Git"),
+            keywords: ["history", "log", "commits", "histórico", "inspector", "painel"], category: .view,
             // L for log, as in git log.
             defaultShortcut: "cmd+shift+l",
             action: .run { [weak self] in self?.workspace?.showInspector("history") }))
@@ -255,6 +255,8 @@ extension WindowSession {
     /// "project › task" in the title bar: a task's worktree (`<repo>.worktrees/<branch>`, plan 19)
     /// names its repository and the task; any other folder is the project alone.
     func showLocation(_ root: String) {
+        // A page (the board, a project's overview, a run) has no "+": the mockups show none there.
+        workspace?.titleBar.setNewTabHidden(tabs?.activeDocument?.isPage == true)
         // The board is of every project: "All projects" (the Board mockup).
         if tabs?.activeDocument?.identity == BoardDocument.identity {
             workspace?.titleBar.setLocation(project: T("All projects", "Todos os projetos"), task: nil)

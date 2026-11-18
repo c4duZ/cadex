@@ -136,7 +136,7 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
 ### Fechar e restaurar
 - Fechar painel, aba ou janela com um processo rodando em primeiro plano (por exemplo, um agente ou
   um servidor) pede confirmação. A confirmação pode ser desligada nas configurações.
-- Ao reabrir o app, os spaces voltam com as abas, as divisões e a pasta de cada painel. Com
+- Ao reabrir o app, os projetos voltam com as abas, as divisões e a pasta de cada painel. Com
   terminal.keepSessions desligado (o padrão), o conteúdo antigo da tela não volta: cada painel
   começa um shell novo.
 - Com terminal.keepSessions ligado (plano 19, `docs/adr/0022-terminal-daemon.md`), um processo à
@@ -154,8 +154,8 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
   (cor de fundo, `ESC]7501;?`) ficam sem resposta.
 - O app pelo daemon (fase E2, 2026-11-15): com a opção ligada (Configurações › Terminal), cada
   terminal da janela principal abre no daemon com um nome (`<instância>-<uuid>`, a instância vinda do
-  arquivo de spaces, para outra cópia do Cadex nunca encerrar as sessões desta) e o nome vai nos
-  spaces; reabrir religa por ele, com a saída guardada e dois redimensionamentos para um programa de
+  caminho do arquivo de estado, para outra cópia do Cadex nunca encerrar as sessões desta) e o nome
+  vai nos projetos; reabrir religa por ele, com a saída guardada e dois redimensionamentos para um programa de
   tela cheia se redesenhar. Sessão que o daemon não tem mais (o Mac reiniciou) vira um shell novo que
   mostra antes a saída gravada no SIGTERM (`scrollback/<nome>.raw`, apagado depois de lido). Depois
   de restaurar, as sessões desta instância que nenhum painel pegou de volta são encerradas. O app

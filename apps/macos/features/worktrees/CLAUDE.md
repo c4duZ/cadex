@@ -37,7 +37,7 @@
   tarefa do terminal dele (`taskOf`, só uma worktree de tarefa, nunca o repositório), sem lista.
 - As tarefas aparecem na árvore da esquerda (feature sidebar; a página Tasks saiu no plano 27 fase D).
   `WorktreesCommands.swift`:
-  worktrees.new-task, -open, -remove, -set-status, -set-comment e -edit-setup-hooks, com as listas
+  worktrees.new-task, -new-race (a folha com dois agentes), -open, -remove, -set-status, -set-comment e -edit-setup-hooks, com as listas
   no ⌘K; o que pergunta e abre abas é do app (`../../app/WorktreesWiring.swift`).
 - "Rodar em" outra máquina (plano 23, fase C; `../../../../docs/adr/0031-run-on-remote.md`, o
   mínimo): `RemoteTaskScript.swift` (puro: o script que acha ou clona o repositório lá, busca o

@@ -114,6 +114,8 @@ final class TitleBarView: NSView {
     func setBellOpen(_ open: Bool) { bellButton.isOn = open }
     /// Lit while the board shows.
     func setBoardOpen(_ open: Bool) { boardButton.isOn = open }
+    /// No "+" beside a page's tabs (the board, a project's overview).
+    func setNewTabHidden(_ hidden: Bool) { newTabButton.isHidden = hidden || tabsHidden }
     func setInspectorOpen(_ open: Bool) { panelButton.isOn = open }
 
     /// The bell's count: what needs you, and finished agents you have not seen.
@@ -122,7 +124,9 @@ final class TitleBarView: NSView {
     }
 
     /// The home screen shows no terminal tabs and no "+" (the Home mockup).
+    private var tabsHidden = false
     func setTabsHidden(_ hidden: Bool) {
+        tabsHidden = hidden
         tabBar?.isHidden = hidden
         newTabButton.isHidden = hidden
         // No project, no "project › task" (the mockup's "All projects · Board" is plan 30's).

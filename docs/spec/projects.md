@@ -79,7 +79,7 @@ agora sempre com a pasta (`../adr/0035-work-frame.md`).
 
 ## Critérios de aceite
 - [x] Um projeto salvo e restaurado volta igual: abas, nomes, divisões com proporções, pastas, foco.
-  (Valia para os spaces; conferir de novo com os projetos.)
+  (Conferido com os projetos: o teste "projects saved and restored come back the same".)
 - [x] Arquivo de estado corrompido não impede o app de abrir: volta ao padrão e guarda o ruim ao lado.
 - [ ] Trocar de projeto pela árvore, pela paleta e pelos atalhos mostra as abas daquele projeto.
 - [x] Fechar o app pelo menu e reabrir traz os mesmos projetos e o mesmo projeto ativo.

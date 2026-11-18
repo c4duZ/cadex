@@ -6,6 +6,8 @@ comando, e o Cadex mostra em que pé cada uma está (`docs/plans/19-agent-sessio
 
 ## Comportamento
 ### Nova tarefa
+- "New race" (worktrees.new-race; o cartão Race da tela de início e o botão do quadro): a mesma folha
+  já com duas linhas de agente (plano 30 D; antes era um comando da orquestração).
 - "New task" (worktrees.new-task, ⌘N, o botão do topo da árvore e o cartão Task da tela de início)
   abre uma folha só, a mesma da corrida (`../design/work-frame/screens.md`, seção NewTask; tokens
   components.newTask e components.sheet), no lugar das perguntas em sequência de antes:

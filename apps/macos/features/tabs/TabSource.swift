@@ -43,7 +43,7 @@ final class TabSource: PaletteSource {
 }
 
 extension TabCommands {
-    /// The tabs of the shown space as a palette list.
+    /// The tabs of the shown project as a palette list.
     @MainActor
     public static func source(_ tabs: @escaping @MainActor () -> TabsController?) -> PaletteSource {
         TabSource(tabs: tabs)

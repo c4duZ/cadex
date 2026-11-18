@@ -51,7 +51,7 @@
   (as colunas do quadro, puras, e `SessionCost`, o `cost.total_cost_usd` que o `cadex statusline`
   grava por sessão), `AccountChoice.swift` (as contas das folhas de execução e automação; o formulário de corrida saiu no plano 29, a corrida nasce na folha Nova tarefa da worktrees), `RaceBoardView.swift` e
   `RaceBoardDocument.swift` (o quadro numa aba), `RaceCommands.swift` (orchestration.toggle,
-  -new-race, -show-race, -pick-winner, -discard-race e -delete-race-branches, com as listas no ⌘K).
+  -show-race, -pick-winner, -discard-race e -delete-race-branches, com as listas no ⌘K).
   O que junta worktrees, agents, tabs e source-control é do app (`../../app/RaceWiring.swift`,
   `../../app/RaceBoardWiring.swift`). CADEX_ORCHESTRATION_DIR troca a pasta do estado numa
   instância de teste.

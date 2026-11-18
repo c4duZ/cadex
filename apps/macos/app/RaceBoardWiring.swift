@@ -67,6 +67,12 @@ extension WindowSession {
         if let lane = ((try? book.contenders(of: id)) ?? []).sorted(by: { $0.index < $1.index }).first(where: { contenderTerminal($0) != nil }) {
             return goToContender(lane)
         }
+        showRaceBoard(id)
+    }
+
+    /// The race as a page of cards (contenders with no terminal here).
+    func showRaceBoard(_ id: String) {
+        guard let book = OrchestrationController.shared.races() else { return }
         if let open = RaceWatch.shared.boards.first(where: { $0.raceID == id }), tabs?.open(open) != nil { return }
         var actions = RaceBoardActions()
         actions.goToTerminal = { [weak self] contender in self?.goToContender(contender) }
@@ -80,16 +86,11 @@ extension WindowSession {
             guard let race: Race = try? book.store.get(.races, id: id) else { return }
             self?.discardRace(race)
         }
-        let board = RaceBoardDocument(raceID: id, book: book, colors: Self.raceColors(), actions: actions) { [weak self] in self?.live($0) }
+        let board = RaceBoardDocument(raceID: id, book: book, actions: actions) { [weak self] in self?.live($0) }
         board.onClose = { [weak board] in RaceWatch.shared.boards.removeAll { $0 === board } }
         RaceWatch.shared.boards.append(board)
         tabs?.open(board)
         armRaceWatch()
-    }
-
-    static func raceColors() -> RaceBoardColors {
-        let ui = ThemeStore.shared.current.interface
-        return RaceBoardColors(background: ui.panel.nsColor, text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, accent: ui.accent.nsColor)
     }
 
     func refreshRaceBoards() { RaceWatch.shared.boards.forEach { $0.refresh() } }

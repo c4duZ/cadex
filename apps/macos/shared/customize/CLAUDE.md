@@ -12,8 +12,7 @@
 ## Como eu quero
 - `CustomizeLayout.swift`: o modelo (`CustomizeRow`, `CustomizeEntry` com títulos de seção) e as
   regras puras: as seções, mover uma linha (passando por um título ela muda de seção; nada sobe
-  acima do primeiro título), virar a chave e `dropIndex`, a vaga sob o meio do que se arrasta
-  (também usada pela fileira de ícones da barra lateral).
+  acima do primeiro título), virar a chave e `dropIndex`, a vaga sob o meio do que se arrasta.
 - `CustomizeList.swift`: a lista desenhada (títulos, linhas em caixa com alça, ícone, nome, linha
   menor opcional, valor numa coluna fixa e chave); arrastar reorganiza enquanto o mouse se move,
   com a linha por cima das outras, e avisa uma vez ao soltar.

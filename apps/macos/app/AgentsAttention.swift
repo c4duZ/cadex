@@ -145,13 +145,13 @@ extension AppDelegate {
     }
 }
 
-/// The bell's page in this window.
+/// The bell's popover content in this window.
 extension WindowSession {
-    func makeAttentionPage() -> AgentAttentionView {
+    func makeBellContent() -> AgentAttentionView {
         let page = AgentAttentionView()
         page.onGoTo = { [weak self] key, pid in self?.app.goToAgent(key: key, pid: pid) }
         page.onEnable = { [weak self] in self?.settings.store.update { $0.agents.attention = true } }
-        attentionPage = page
+        bellContent = page
         return page
     }
 
@@ -160,8 +160,8 @@ extension WindowSession {
     /// again on what shows closes it, as a second click on the bell.
     func showAttention(_ subtab: String) {
         guard let workspace else { return }
-        if bellPanel.isOpen, attentionPage?.subtab == subtab { return bellPanel.close() }
-        let page = attentionPage ?? makeAttentionPage()
+        if bellPanel.isOpen, bellContent?.subtab == subtab { return bellPanel.close() }
+        let page = bellContent ?? makeBellContent()
         page.subtab = subtab
         page.onRender = { [weak self] in self?.bellPanel.refit() }
         page.render()

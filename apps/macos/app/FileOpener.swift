@@ -15,9 +15,9 @@ import Themes
 /// pane or in a new tab, as general.openFiles says (docs/spec/tabs.md).
 @MainActor
 final class FileOpener {
-    /// The shown space's tabs, where things open.
+    /// The shown project's tabs, where things open.
     private let currentTabs: () -> TabsController?
-    /// Every space's tabs, for disk changes.
+    /// Every project's tabs, for disk changes.
     private let everyTabs: () -> [TabsController]
     /// A file was opened in a new editor tab (markdown attaches its help).
     var onEditorOpened: ((EditorDocument) -> Void)?

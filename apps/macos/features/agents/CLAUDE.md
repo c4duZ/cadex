@@ -55,15 +55,15 @@
 - Sessões em outra máquina (plano 23, "Rodar em"): AgentBackground.parseRemote lê o `claude
   agents --json` de lá (interativas e em segundo plano; o formato das interativas não foi visto numa
   sessão real ainda), AgentSession.machine e a linha "· em pc"; o controller recebe a lista em
-  `remote`, e `pageShown`/`onWatching` diziam ao app quando a página Agents estava na tela: sem ela
-  (plano 27 fase D) ninguém os chama até a página do projeto, no plano 30, mostrar essas sessões. O silêncio por máquina
+  `remote`, e `pageShown`/`onWatching` dizem ao app quando uma página de projeto está aberta (plano
+  30 D; antes era a página Agents): ela mostra essas sessões entre as conversas. O silêncio por máquina
   (agents.mutedMachines: "local" e o nome de cada máquina) é conferido por sessão no
   `AgentNotifier.swift` (`mutedMachines`): a sessão de uma máquina silenciada para sem notificação,
   e o sininho e o feed continuam.
 - A página Agents (AgentsView, AgentSessionList, AgentsLayout) saiu no plano 27
-  fase D: os agentes estão nos terminais da árvore. `AgentMotion.swift`: a seta que gira e o `AgentReveal`, que
-  desdobra e dobra (altura e opacidade, 0,2 s). `AgentRows.swift`: o sinal (anel girando, ponto
-  azul, ✓), a linha clicável que acende ao passar e escurece ao apertar, e os rótulos.
+  fase D: os agentes estão nos terminais da árvore; a seta que girava e o sinal da página saíram no
+  plano 30 D. `AgentRows.swift`: a linha clicável que acende ao passar e escurece ao apertar (o
+  sino e a folha Nova tarefa a usam), o tempo ("3m") e os rótulos.
 - `AgentStop.swift`: por que uma sessão parou, do fim do log (64 KB, uma vez por parada):
   permissão (ferramenta pedida sem resposta), pergunta (AskUserQuestion, ExitPlanMode), terminou
   (fim de turno), parada por você (o Esc, que não avisa), login vencido (`"error":

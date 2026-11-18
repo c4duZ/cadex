@@ -146,7 +146,7 @@ extension WindowSession {
                 }
                 report["inspectorTexts"] = self.workspace.map { [$0.inspector.tab] + Array(texts($0.inspector).filter { !$0.isEmpty }.prefix(8)) } ?? []
                 report["panels"] = NSApp.windows.filter { $0 is NSPanel && $0.isVisible }.map { panel in texts(panel.contentView ?? NSView()).filter { !$0.isEmpty } }
-                report["commands"] = ["home.show", "tab.new", "agents.open-account", "worktrees.new-task", "orchestration.new-race", "view.jump"]
+                report["commands"] = ["home.show", "tab.new", "agents.open-account", "worktrees.new-task", "worktrees.new-race", "view.jump"]
                     .filter { self.commands.command($0) != nil }
                 if let data = try? JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]) {
                     try? data.write(to: URL(fileURLWithPath: out))
@@ -164,6 +164,11 @@ extension WindowSession {
                     guard let self else { return }
                     if let id = step["command"] as? String, !self.commands.run(id) {
                         NSLog("Cadex script: %@ did not run: %@", id, self.commands.command(id)?.unavailableReason() ?? "unknown")
+                    }
+                    // The newest race as its page of cards.
+                    if step["raceBoard"] as? Bool == true, let book = OrchestrationController.shared.races(),
+                       let race = ((try? book.races()) ?? []).max(by: { $0.createdAt < $1.createdAt }) {
+                        self.showRaceBoard(race.id)
                     }
                     // The newest run's page (its command asks which in the palette).
                     if step["runPage"] as? Bool == true, let book = OrchestrationController.shared.runs(),
@@ -242,6 +247,12 @@ extension WindowSession {
                 NSGraphicsContext.restoreGraphicsState()
             }
             try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: out))
+            // The New Task sheet sits over the terminals, which are drawn over it above: on its
+            // own, next to it, -sheet.png.
+            if let content = self?.newTaskSheet, let shot = content.bitmapImageRepForCachingDisplay(in: content.bounds) {
+                content.cacheDisplay(in: content.bounds, to: shot)
+                try? shot.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: (out as NSString).deletingPathExtension + "-sheet.png"))
+            }
             // A panel over it (the palette, ⌘J) is a window of its own: next to it, -panel.png.
             for panel in NSApp.windows where panel is NSPanel && panel.isVisible {
                 guard let content = panel.contentView?.superview ?? panel.contentView,

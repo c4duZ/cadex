@@ -2,8 +2,8 @@ import CoreServices
 import Foundation
 
 /// The agents of every account on this Mac, read once for the whole app,
-/// and only while something shows them (the Agents page, its icon's dot,
-/// the status bar's Agents item): with nobody watching there is no file
+/// and only while something shows them (a project's page, the bell, the
+/// board, the tree): with nobody watching there is no file
 /// watched and no timer (the owner's rule for plan 17, 2026-10-21).
 /// Watching is FSEvents on each account's sessions folder, with file events:
 /// a folder-only watch missed Claude Code writing in place (proof of
@@ -88,15 +88,15 @@ public final class AgentsController {
     lazy var claude: String? = AgentBackground.claudePath(home: home)
 
     /// Sessions on other machines (plan 23): the app reads them over ssh
-    /// only while this page is watched (`onWatching`) and sets them here.
+    /// only while a project's page is open (`onWatching`) and sets them here.
     public var remote: [AgentSession] = [] { didSet { if remote != oldValue { reload(accounts: false) } } }
-    /// Told when the Agents page starts (true) and stops (false) showing:
+    /// Told when the first project page opens (true) and the last closes (false):
     /// the notifier also watches this controller all the time, so being
     /// watched is not the page being looked at.
     public var onWatching: ((Bool) -> Void)?
     private var pagesShown = 0
 
-    /// An Agents page came on or left the screen (each window has one).
+    /// A project's page opened or closed (plan 30 D; it was the Agents page).
     public func pageShown(_ shown: Bool) {
         pagesShown = max(0, pagesShown + (shown ? 1 : -1))
         if shown, pagesShown == 1 { onWatching?(true) }
