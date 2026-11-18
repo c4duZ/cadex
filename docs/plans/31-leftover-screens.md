@@ -16,20 +16,20 @@ terminal, preview, memory · Decisões: `docs/adr/0035-work-frame.md` · Origem:
 - Dois jeitos de ver um diff: o diff de um arquivo e o de um commit são a revisão, aberta no arquivo.
 
 ## Como eu quero
-- **A. Diff e revisão.** A revisão é página; o painel da direita fecha enquanto ela aparece (a lista
+- **A. Diff e revisão.** Feita (2026-11-18, 6c988d3), conferida no app. A revisão é página; o painel da direita fecha enquanto ela aparece (a lista
   dela é a mesma) e volta depois, como no quadro. Clicar num arquivo no Changes (ou git.open-diff*)
   abre a revisão naquele arquivo; o diff de um commit é a revisão de `sha^` a `sha`; o
   `DiffDocument` sai. Cores: color.diff.*, a lista com as medidas de components.inspector.fileRow, a
   barra com os botões do app.
-- **B. Folhas.** New Run e New Automation como a folha Nova tarefa (a mesma moldura, campos e botões),
+- **B. Folhas.** Feita (e748bb9): a `FrameSheet` e os `FrameField` em shared/looks; Add Task, Despacho e Dependências também. New Run e New Automation como a folha Nova tarefa (a mesma moldura, campos e botões),
   no lugar do alerta do sistema.
-- **C. Archive & history** como página, com a linha e o cartão da moldura e os filtros em pílula (os
+- **C. Archive & history** feita (d33df5b): a `FramePill` subiu para shared/looks. Como página, com a linha e o cartão da moldura e os filtros em pílula (os
   do quadro).
-- **D. Configurações e personalizar** com os tokens: fundo, cartões, controles (a chave da página do
+- **D. Configurações e personalizar** feita (388a9b4): as seções e as páginas em pílulas. Com os tokens: fundo, cartões, controles (a chave da página do
   projeto, botões do app), sem "spaces" nem "Agents" nos textos.
-- **E. O resto:** busca do terminal, notas do preview, transcrição, editor de comentário da revisão,
+- **E. O resto** feito (31f1a2a): e mais, uma página nunca abre ao lado de um terminal; o histórico do git, a transcrição e o briefing viraram páginas. Busca do terminal, notas do preview, transcrição, editor de comentário da revisão,
   conflito, o botão Preview do Markdown; o briefing da memória desligada diz por quê.
-- **F. Fechamento:** inventário, specs, manifestos, `make check`, `make perf`, cada tela conferida no
+- **F. Fechamento** feito (2026-11-18): `make check` e `make perf` passando (76 medidas; a revisão abre em 0,7 s e gasta menos CPU que antes), cada tela conferida no app e posta ao lado da de antes. Inventário, specs, manifestos, `make check`, `make perf`, cada tela conferida no
   app.
 
 ## Como validar
