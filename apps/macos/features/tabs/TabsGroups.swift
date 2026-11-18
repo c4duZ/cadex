@@ -69,6 +69,9 @@ extension TabsController {
         return extras.filter { extra in !open.contains { $0.hasPrefix(extra.identity) } }
     }
 
+    /// The ids of the tabs in the bar, in order (a test instance logs them after a drag).
+    public var barOrder: [Int] { bar.items.map(\.id) }
+
     /// The bar again (the app learned which folders are tasks).
     public func refreshTabBar() { refreshBar() }
 

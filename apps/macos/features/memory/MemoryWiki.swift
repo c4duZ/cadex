@@ -88,7 +88,9 @@ public enum MemoryWiki {
         }
         for source in front.list("sources") {
             guard let resource = source["resource"] else { continue }
-            for prefix in ["session:", "sessions/", "claude-session:"] where resource.hasPrefix(prefix) {
+            // ai-memory://session/<id> is what the engine writes (seen in bkdg-center's pages,
+            // 2026-11-18): without it a page never knew the session it came from.
+            for prefix in ["ai-memory://session/", "session:", "sessions/", "claude-session:"] where resource.hasPrefix(prefix) {
                 let id = String(resource.dropFirst(prefix.count))
                 return id.hasSuffix(".md") ? String(id.dropLast(3)) : id
             }

@@ -67,10 +67,17 @@ public final class ProjectPageDocument: TabDocument {
     public func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) { close() }
     public func close() { actions.shown(false) }
 
-    /// Reads again (the tab shows, an automation turned on or off).
+    /// Reads again (the tab shows, an automation turned on or off). Only the latest read shows: the
+    /// first one, slower (it runs git), came after the history's and put back "0 sessions" (2026-11-18).
     public func reload() {
-        actions.load { [weak self] state in self?.show(state) }
+        reads += 1
+        let read = reads
+        actions.load { [weak self] state in
+            guard let self, read == self.reads else { return }
+            self.show(state)
+        }
     }
+    private var reads = 0
 
     /// Shows a section, with a line chosen when given (the Memory panel's click, plan 34 G).
     public func show(section: ProjectSection, item: String? = nil) {

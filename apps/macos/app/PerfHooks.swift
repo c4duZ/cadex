@@ -82,6 +82,9 @@ extension WindowSession {
         }
         // A menu shown for a capture (the owner's review, 2026-11-18): "new" (the tabs' "+"), "pane"
         // (a pane's "+"), at CADEX_PERF_MENU_AT s, under the title bar's search.
+        if let spec = environment["CADEX_PERF_DRAG"] {
+            startPerfDrag(spec, at: environment["CADEX_PERF_DRAG_AT"].flatMap(Double.init) ?? 6)
+        }
         if let spec = environment["CADEX_PERF_CLICK"] {
             startPerfClicks(spec, at: environment["CADEX_PERF_CLICK_AT"].flatMap(Double.init) ?? 5,
                             gap: environment["CADEX_PERF_CLICK_GAP"].flatMap(Double.init) ?? 1.5)

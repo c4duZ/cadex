@@ -23,4 +23,8 @@ func pageTextTests() -> [(name: String, body: Checks.Body)] { [
         expect(page("_meta.md").isEngineFile && page("log-2026-11.md").isEngineFile && page("_pending/01a1.md").isEngineFile)
         expect(!page("_rules/no-migration.md").isEngineFile && !page("decisions/x.md").isEngineFile && !page("sessions/log-x.md").isEngineFile)
     }),
+    ("a page knows its session from the engine's own source form, ai-memory://session/<id>", {
+        let front = MemoryFrontmatter.parse("---\ntitle: X\nsources:\n- resource: ai-memory://session/4d9262aa-d4f4\n  author: process:claude-code\n---\n")
+        expect(MemoryWiki.sessionID(front, relative: "decisions/x.md") == "4d9262aa-d4f4")
+    }),
 ] }

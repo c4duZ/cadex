@@ -49,6 +49,36 @@ extension WindowSession {
         }
     }
 
+    /// CADEX_PERF_DRAG: "fx,fy>fx,fy" of the window: press, move in ten steps, let go, given to the
+    /// window as clicks are; then the tabs' order in the log ("perf tabs …").
+    func startPerfDrag(_ spec: String, at: Double) {
+        let ends = spec.split(separator: ">").map { $0.split(separator: ",").compactMap { Double($0) } }
+        guard ends.count == 2, ends.allSatisfy({ $0.count == 2 }) else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in
+            guard let self else { return }
+            let frame = self.window.frame
+            func local(_ fx: Double, _ fy: Double) -> NSPoint {
+                self.window.convertPoint(fromScreen: NSPoint(x: frame.minX + frame.width * fx, y: frame.maxY - frame.height * fy))
+            }
+            let from = local(ends[0][0], ends[0][1]), to = local(ends[1][0], ends[1][1])
+            func send(_ type: NSEvent.EventType, _ point: NSPoint) {
+                if let event = NSEvent.mouseEvent(with: type, location: point, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+                                                  windowNumber: self.window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1) {
+                    self.window.sendEvent(event)
+                }
+            }
+            send(.leftMouseDown, from)
+            for step in 1...10 {
+                let t = CGFloat(step) / 10
+                send(.leftMouseDragged, NSPoint(x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t))
+            }
+            send(.leftMouseUp, to)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                NSLog("perf tabs %@", self.tabs?.barOrder.map(String.init).joined(separator: ",") ?? "")
+            }
+        }
+    }
+
     private static func frontPanel(besides window: NSWindow) -> NSWindow? {
         NSApp.windows.filter { $0 !== window && $0.isVisible && $0 is NSPanel && $0.frame.width > 100 }.last
     }
@@ -71,9 +101,16 @@ extension WindowSession {
         var view = content.hitTest(content.convert(local.locationInWindow, from: nil))
         while let current = view {
             // The app's own views only: AppKit's (the window frame) ask a posted event for its area and throw.
-            if !NSStringFromClass(type(of: current)).hasPrefix("NS"),
-               current.trackingAreas.contains(where: { $0.owner === current && $0.options.contains(.mouseMoved) }) {
-                current.mouseMoved(with: local)
+            if !NSStringFromClass(type(of: current)).hasPrefix("NS") {
+                let areas = current.trackingAreas.filter { $0.owner === current }
+                // The rows that light on entering (a list's, the memory's, the table's, the sidebar's foot).
+                if areas.contains(where: { $0.options.contains(.mouseEnteredAndExited) }),
+                   let enter = NSEvent.enterExitEvent(with: .mouseEntered, location: local.locationInWindow, modifierFlags: [],
+                                                      timestamp: local.timestamp, windowNumber: target.windowNumber, context: nil,
+                                                      eventNumber: 0, trackingNumber: 0, userData: nil) {
+                    current.mouseEntered(with: enter)
+                }
+                if areas.contains(where: { $0.options.contains(.mouseMoved) }) { current.mouseMoved(with: local) }
             }
             view = current.superview
         }

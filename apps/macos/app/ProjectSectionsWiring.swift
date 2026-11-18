@@ -59,7 +59,7 @@ extension WindowSession {
                        PageDetail.Button(T("Continue in Another Account…", "Continuar em outra conta…")) { [weak self] in self?.historyActions().continueIn(entry) }]
         if let page { buttons.append(PageDetail.Button(T("View the Page", "Ver a página")) { [weak self] in self?.openRendered(page.path) }) }
         return PageDetail(title: entry.title, meta: [Self.accountName(entry.account), Self.place(entry.cwd, folder), when].filter { !$0.isEmpty }.joined(separator: " · "),
-                          metaLogo: true, blocks: blocks.isEmpty ? [.paragraph(T("The memory has no summary of this session yet.", "A memória ainda não tem um resumo desta sessão."))] : blocks,
+                          metaLogo: true, blocks: blocks.isEmpty ? Self.historyBlocks(entry) : blocks,
                           tags: MemoryPageText.tags(text), relatedTitle: T("What the memory kept", "O que a memória guardou"), related: kept, buttons: buttons)
     }
 
@@ -80,6 +80,27 @@ extension WindowSession {
         var blocks = Self.blocks(text)
         if blocks.isEmpty, let summary = page.summary { blocks = [.paragraph(summary)] }
         return PageDetail(chip: (chip, tint), title: page.title, meta: meta, metaLogo: session != nil, blocks: blocks, tags: MemoryPageText.tags(text), buttons: buttons)
+    }
+
+    /// A session the memory has no page of, told from the history itself (2026-11-18: most of
+    /// bkdg-center's said only "no summary yet"): what was asked first, when and how long, where.
+    private static func historyBlocks(_ entry: AgentHistoryEntry) -> [PageDetail.Block] {
+        var blocks: [PageDetail.Block] = []
+        let asked = entry.firstPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !asked.isEmpty {
+            blocks += [.heading(T("What was asked", "O que foi pedido")), .paragraph(asked.count > 400 ? String(asked.prefix(400)) + "…" : asked)]
+        }
+        var when: [String] = []
+        if let started = entry.started { when.append(T("started ", "começou ") + started.formatted(date: .abbreviated, time: .shortened)) }
+        if let started = entry.started, let updated = entry.updated, updated > started {
+            let minutes = Int(updated.timeIntervalSince(started) / 60)
+            when.append(minutes < 60 ? "\(minutes) min" : "\(minutes / 60) h \(minutes % 60) min")
+        }
+        if !entry.branch.isEmpty { when.append(T("branch ", "branch ") + entry.branch) }
+        if !when.isEmpty { blocks += [.heading(T("When and where", "Quando e onde")), .paragraph(when.joined(separator: " · "))] }
+        blocks.append(.paragraph(T("The memory has no summary of this session: what it kept shows here once it has one.",
+                                   "A memória não tem um resumo desta sessão: o que ela guardar aparece aqui quando tiver.")))
+        return blocks
     }
 
     /// The memory's markdown as the page's blocks.
