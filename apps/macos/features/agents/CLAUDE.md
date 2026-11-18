@@ -143,8 +143,7 @@
   terminal só dá o título), só para uma pergunta de escolha única, e as teclas que respondem;
   AgentAttention.answerQuestion, que o app digita pelo onAnswer, e agents.answer no ⌘K) e
   `AgentAttentionCommands.swift` (agents.approve, agents.deny e agents.mark-unread com a lista no ⌘K).
-  `AgentPermissionCard.swift` (plano 28 fase D): o mesmo pedido no pé do painel do agente, no
-  desenho do mockup Pane (components.pane.permission).
+  O mesmo pedido no pé do painel do agente saiu no plano 33 (fica o diálogo do Claude).
 - Hibernação (plano 19, fase F): `AgentHibernation.swift`, as regras puras (`isDue`/`dueAt`: parado há
   agents.hibernateAfterMinutes e ninguém olhando; `configDir`: a conta pelo arquivo da conversa;
   `resumeCommand`: `cd <pasta> && claude --resume <id>` pelo kit, mantendo a sessão do kit e o token)

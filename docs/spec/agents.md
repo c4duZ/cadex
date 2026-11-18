@@ -227,8 +227,8 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
   ainda está naquela pergunta, e senão o cartão diz "The agent moved on". Formulário (várias
   perguntas), múltipla escolha (o número marca uma caixa) e sessão sem o hook não têm resposta no
   sino: o texto e "Go to tab". Todo cartão tem "Go to
-  tab"; sessão aberta fora do Cadex tem só ele. O mesmo pedido de permissão aparece como cartão no pé do painel do agente
-  (`tabs.md`, plano 28): responder num fecha o outro.
+  tab"; sessão aberta fora do Cadex tem só ele. No painel do agente fica o diálogo
+  do próprio Claude (o cartão do pé, do plano 28, saiu no 33): responder lá também fecha o daqui.
 - O cartão some quando o pedido se resolve: pelo clique aqui, ou quando o agente deixa de estar
   "blocked" no OSC 7501 (respondido na TUI). O Claude Code não fecha o hook quando a TUI responde
   (teste de 2026-11-15), então é a saída do "blocked" que tira o cartão e fecha o hook que esperava.

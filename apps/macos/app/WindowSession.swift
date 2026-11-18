@@ -95,8 +95,6 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// The home screen while shown, and its choices (HomeWiring.swift).
     var home: HomeView?
     var homeChoice = HomeChoice()
-    /// The agents' permissions at the foot of their panes (PanePermissionWiring.swift).
-    var panePermissionWatch: UUID?
     /// The status bar's Agent usage item, for the theme's colors.
     weak var usageStrip: AgentUsageStrip?
     /// The bell's popover (AgentsAttention.swift).
@@ -136,7 +134,6 @@ final class WindowSession: NSObject, NSWindowDelegate {
                    vibrancy: looks.vibrancy)
         startProjects()
         startPaneHeaders()
-        startPanePermissions()
     }
 
     /// The title area is the app's (fullSizeContentView, transparent title
@@ -293,7 +290,6 @@ final class WindowSession: NSObject, NSWindowDelegate {
         treeClock?.invalidate()
         if let paneHeaderObserver { NotificationCenter.default.removeObserver(paneHeaderObserver) }
         paneHeaderClock?.invalidate()
-        if let panePermissionWatch { AgentAttention.shared.stop(panePermissionWatch) }
         treeTallyTimer?.invalidate()
         workspace?.statusBar.stopReading()
         bellPanel.close()

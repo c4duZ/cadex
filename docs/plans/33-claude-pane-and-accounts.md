@@ -49,7 +49,7 @@ que ela digitar já vai ter".
   na hora), não a desenha e põe o modo à direita da linha de cima, a status line; o ⏺ de uma
   ferramenta rodando fica âmbar. Linha que não reconhece fica como o Claude desenha. Seleção,
   busca e cópia continuam no texto de verdade.
-- **D. Permissão.** O cartão "Wants to run…" sai do pé do painel (fica o diálogo do Claude) e
+- **D. Permissão.** Feita (2026-11-18): o cartão do pé do painel e o AgentPermissionCard saíram; o pedido chega pelo hook (o `cadex hook PermissionRequest` fica esperando) e o sino mostra Allow, Deny e Go to tab, conferido no app com um `claude` real; o cartão do painel falhava do lado do painel, que saiu. Plano original: O cartão "Wants to run…" sai do pé do painel (fica o diálogo do Claude) e
   continua no sino e no feed, para quem não está olhando o terminal. Conferir que o pedido chega
   pelo hook ao sino (no teste de 2026-11-18 o cartão não apareceu: achar o motivo).
 - **E. Trocar de conta.** `agents.switch-account`: com um Claude em foco, encerra a sessão (o

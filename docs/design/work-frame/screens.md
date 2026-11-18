@@ -117,8 +117,8 @@ de tokens.
     pergunta com opções mostra também um botão por opção, acima do campo.
 - **"EARLIER":** linhas curtas com estado, o que houve e quando ("bell-cards finished · PR #41
   ready", "hero-images failed · exited", "Memory learned 3 pages · cadex").
-- Responder aqui responde no terminal; o cartão de permissão no pé do painel (tela 10) é o mesmo
-  pedido, e responder num fecha o outro.
+- Responder aqui responde no terminal; no painel do agente fica o diálogo do Claude, e responder
+  num fecha o outro (o cartão no pé do painel da tela 10 saiu no plano 33, pelo dono).
 
 ### Switcher.dc.html — 6 · ⌘J
 - Painel de 600 no alto da tela, com o fundo escurecido.
@@ -164,7 +164,8 @@ de tokens.
      barrinha, custo, a pasta e o modo à direita.
   4. Barra de rolagem de 8 com uma marca por mensagem do dono (âmbar onde o agente pediu algo).
   5. O cartão de permissão no pé: ponto âmbar com halo, "Wants to run Bash", o comando, Allow e
-     Deny.
+     Deny. Saiu no plano 33 (o dono, 2026-11-18): dentro do painel fica o diálogo do próprio Claude;
+     o cartão fica no sino.
 - A geometria do que o Claude desenha é dele; o Cadex dá a moldura, as cores, o respiro, a status
   line, as marcas e o cartão (plano 28, fase A, mede o que vale).
 
