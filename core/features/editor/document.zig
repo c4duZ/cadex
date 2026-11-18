@@ -167,6 +167,10 @@ pub const Document = struct {
         if (self.inline_tree) |tree| try self.collect(gpa, tree, languages.get(.markdown_inline), lo, hi, &captures);
         std.mem.sort(Capture, captures.items, {}, Capture.paintOrder);
         for (captures.items) |c| {
+            // A match touching the range comes whole: a capture of it may end before `lo` or
+            // start after `hi`, and `end - lo` wrapped into a write past `paint` (the review
+            // crashed painting one line, 2026-11-17).
+            if (c.end <= lo or c.start >= hi) continue;
             const a = (@max(c.start, lo) - lo) / u;
             const b = (@min(c.end, hi) - lo) / u;
             if (b > a) @memset(paint[a..b], c.kind);

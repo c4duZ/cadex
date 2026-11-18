@@ -141,3 +141,30 @@ test "unknown names and big files are plain text" {
     const regions = try doc.foldRegions(testing.allocator);
     try testing.expectEqual(@as(usize, 0), regions.len);
 }
+
+// A query match is returned whole when it touches the range, so some of its captures can end
+// before the range starts: `@min(end, hi) - lo` wrapped and the memset wrote past the buffer.
+// The review asks for one line at a time and crashed on a Swift file (2026-11-17).
+test "highlights of every line alone, captures outside the range left out" {
+    const samples = [_]struct { file: []const u8, text: []const u8 }{
+        .{ .file = "Cache.swift", .text = "import Foundation\n\n/// Cache 1\nstruct Cache1 {\n    var items: [String: Int] = [:]\n" ++
+            "    public func get(_ k: String) -> Int? { items[k] }\n    mutating func put(_ k: String, _ v: Int) { items[k] = v }\n}\n// change 2\n" },
+        .{ .file = "README.md", .text = "# App\n\nA small app. See [notes](docs/notes.md).\n\n## Build\n\n```\nmake\n```\n\n## Usage\n\nRun it.\n" },
+    };
+    for (samples) |sample| {
+        for ([_]@import("document.zig").Encoding{ .utf8, .utf16 }) |encoding| {
+            const doc = try Document.open(testing.allocator, sample.file, sample.text, encoding);
+            defer doc.close();
+            const units: u32 = @intCast(if (encoding == .utf16) sample.text.len else sample.text.len);
+            var start: u32 = 0;
+            while (start < units) : (start += 1) {
+                var end = start + 1;
+                while (end <= units) : (end += 7) {
+                    const spans = try doc.highlights(testing.allocator, start, end);
+                    defer testing.allocator.free(spans);
+                    for (spans) |s| try testing.expect(start <= s.start and s.end <= end and s.start < s.end);
+                }
+            }
+        }
+    }
+}

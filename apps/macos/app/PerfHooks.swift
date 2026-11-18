@@ -165,6 +165,10 @@ extension WindowSession {
                     if let id = step["command"] as? String, !self.commands.run(id) {
                         NSLog("Cadex script: %@ did not run: %@", id, self.commands.command(id)?.unavailableReason() ?? "unknown")
                     }
+                    // A file's diff, as a click on it in Changes opens it.
+                    if let path = step["diff"] as? String, let repo = self.mainRepository {
+                        self.opener?.openDiff(.init(repo: repo, path: path, orig: path, staged: false), beside: nil)
+                    }
                     // The newest race as its page of cards.
                     if step["raceBoard"] as? Bool == true, let book = OrchestrationController.shared.races(),
                        let race = ((try? book.races()) ?? []).max(by: { $0.createdAt < $1.createdAt }) {
@@ -247,6 +251,13 @@ extension WindowSession {
                 NSGraphicsContext.restoreGraphicsState()
             }
             try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: out))
+            // Another window (Settings): next to it, -window.png.
+            for other in NSApp.windows where other !== self?.window && !(other is NSPanel) && other.isVisible {
+                guard let content = other.contentView?.superview ?? other.contentView,
+                      let shot = content.bitmapImageRepForCachingDisplay(in: content.bounds) else { continue }
+                content.cacheDisplay(in: content.bounds, to: shot)
+                try? shot.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: (out as NSString).deletingPathExtension + "-window.png"))
+            }
             // The New Task sheet sits over the terminals, which are drawn over it above: on its
             // own, next to it, -sheet.png.
             if let content = self?.newTaskSheet, let shot = content.bitmapImageRepForCachingDisplay(in: content.bounds) {
