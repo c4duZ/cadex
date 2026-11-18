@@ -28,6 +28,7 @@ extension WindowSession {
             })
         actions.rename = { [weak self] account in self?.renameAccount(account) }
         actions.switchTo = { [weak self] account in self?.switchOrLaunch(account) }
+        actions.current = { [weak self] in self?.shownAccountDir() }
         return actions
     }
 

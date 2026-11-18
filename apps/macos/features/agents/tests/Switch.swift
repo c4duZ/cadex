@@ -1,5 +1,6 @@
 import Checks
 import Foundation
+import Strings
 @testable import Agents
 
 /// Plan 33 E: the rules of switching a session's account.
@@ -21,5 +22,18 @@ import Foundation
         expect(full == nil, "every other at its limit: none")
         expect(AgentSwitch.usedText(32) == "32% used" || AgentSwitch.usedText(32) == "32% usado")
         expect(AgentSwitch.usedText(nil).isEmpty)
+    }),
+    ("the switch list's line: session, week, when it comes back once half used, and the folder", {
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let account = AgentAccount(dir: home + "/.claude-bkdg", name: "fba. + BKDG", isDefault: false)
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let low = AgentUsage(session: .init(percent: 15, resets: now.addingTimeInterval(3600)), week: .init(percent: 22, resets: nil), sonnetWeek: nil)
+        let line = AgentSwitch.detail(account, usage: low, now: now)
+        expect(line.contains("15%") && line.contains("22%") && line.hasSuffix("~/.claude-bkdg") && !line.contains("16"), line)
+        let high = AgentUsage(session: .init(percent: 80, resets: now.addingTimeInterval(3600)), week: nil, sonnetWeek: nil)
+        expect(AgentSwitch.detail(account, usage: high, now: now).contains(T("back at", "volta às")), "half used: when it comes back")
+        let managed = AgentAccount(dir: home + "/Library/Application Support/Cadex/accounts/bkdg", name: "fba. + BKDG", isDefault: false)
+        let empty = AgentSwitch.detail(managed, usage: AgentUsage(session: nil, week: nil, sonnetWeek: nil), now: now)
+        expect(empty.contains(T("after a session", "depois de uma sessão")) && empty.hasSuffix(T("Cadex account", "conta do Cadex")), empty)
     }),
 ]

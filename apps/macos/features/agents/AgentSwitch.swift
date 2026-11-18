@@ -33,6 +33,23 @@ public enum AgentSwitch {
         }.map { (account: $0.0, used: $0.1) }
     }
 
+    /// A switch list's line: "session 15% · week 22% · back at 16:10 · ~/.claude-bkdg"; with no
+    /// numbers, why ("usage shows after a session in Cadex").
+    public static func detail(_ account: AgentAccount, usage: AgentUsage? = nil, now: Date = Date()) -> String {
+        let numbers = usage ?? AgentUsage.current(of: account)
+        var parts: [String] = []
+        if let session = numbers?.session { parts.append(T("session \(Int(session.percent.rounded()))%", "sessão \(Int(session.percent.rounded()))%")) }
+        if let week = numbers?.week { parts.append(T("week \(Int(week.percent.rounded()))%", "semana \(Int(week.percent.rounded()))%")) }
+        if let back = numbers?.session?.resets, back > now, (numbers?.session?.percent ?? 0) >= 50 {
+            parts.append(T("back at ", "volta às ") + back.formatted(date: .omitted, time: .shortened))
+        }
+        if parts.isEmpty { parts.append(T("usage shows after a session in Cadex", "o uso aparece depois de uma sessão no Cadex")) }
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let folder = account.dir.hasPrefix(home) ? "~" + account.dir.dropFirst(home.count) : account.dir
+        parts.append(folder.contains("/Application Support/Cadex/accounts/") ? T("Cadex account", "conta do Cadex") : String(folder))
+        return parts.joined(separator: " · ")
+    }
+
     /// "32% used", or nothing with no numbers.
     public static func usedText(_ used: Int?) -> String {
         used.map { T("\($0)% used", "\($0)% usado") } ?? ""
