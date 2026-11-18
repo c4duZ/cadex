@@ -50,7 +50,7 @@ aprovada ("Ficou do caralho... segue isso exatamente") está em
   meio da área; desligadas, o aviso de que criar a primeira as liga. Com itens, a tabela (ligar e
   desligar na linha, nome, quando, projeto, conta, a última e a próxima rodada); o clique na linha
   abre as rodadas; o botão direito tem Executar agora, Ligar ou desligar e Apagar, todos comandos.
-- [ ] G. O painel Memory da direita leva a essas telas: o clique numa página ou sessão abre a página
+- [x] G. O painel Memory da direita leva a essas telas: o clique numa página ou sessão abre a página
   do projeto na seção dela com o item escolhido; "Todas no Archive" vira "Todas as sessões".
 - [ ] H. Fechar: as specs (projects, sidebar, inspector, memory, orchestration), os CLAUDE.md, o
   `make check`, o `make perf` e a dist.

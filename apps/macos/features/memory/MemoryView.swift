@@ -122,7 +122,7 @@ public final class MemoryView: NSView {
         renderRules(pages)
         renderSessions(pages)
         if !pages.isEmpty {
-            add(link(T("All \(pages.count) pages", "Todas as \(pages.count) páginas"), status: status(state)) { [weak self] in self?.run?("memory.search") })
+            add(link(T("All \(pages.count) pages", "Todas as \(pages.count) páginas"), status: status(state)) { [weak self] in self?.run?("project.show-memory") })
         }
         add(MemoryParts.foot(see: { [weak self] in self?.run?("memory.show-briefing") },
                              configure: { [weak self] in self?.run?("memory.configure-project") }))
@@ -145,7 +145,7 @@ public final class MemoryView: NSView {
         guard !today.isEmpty else { return }
         var rows: [NSView] = today.prefix(Self.shownLearned).map(pageRow)
         if today.count > Self.shownLearned {
-            rows.append(link(T("See all \(today.count)", "Ver as \(today.count)")) { [weak self] in self?.run?("memory.search") })
+            rows.append(link(T("See all \(today.count)", "Ver as \(today.count)")) { [weak self] in self?.run?("project.show-memory") })
         }
         add(MemoryParts.section(T("LEARNED TODAY", "APRENDIDO HOJE"), count: today.count, rows))
     }
@@ -156,7 +156,7 @@ public final class MemoryView: NSView {
         guard !rules.isEmpty else { return }
         var rows: [NSView] = rules.prefix(Self.shownRules).map(pageRow)
         if rules.count > Self.shownRules {
-            rows.append(link(T("See all \(rules.count)", "Ver as \(rules.count)")) { [weak self] in self?.run?("memory.search") })
+            rows.append(link(T("See all \(rules.count)", "Ver as \(rules.count)")) { [weak self] in self?.run?("project.show-memory") })
         }
         add(MemoryParts.section(T("PROJECT RULES", "REGRAS DO PROJETO"), count: rules.count, rows))
     }
@@ -174,7 +174,7 @@ public final class MemoryView: NSView {
                              tint: accountTint,
                              press: { [weak self] in self?.onOpenPage?(page) }, menu: { [weak self] in self?.menu(page) ?? [] })
         }
-        rows.append(link(T("All in the Archive", "Todas no Archive")) { [weak self] in self?.run?("agents.show-history") })
+        rows.append(link(T("All sessions", "Todas as sessões")) { [weak self] in self?.run?("project.show-sessions") })
         add(MemoryParts.section(T("LAST SESSIONS", "ÚLTIMAS SESSÕES"), rows))
     }
 

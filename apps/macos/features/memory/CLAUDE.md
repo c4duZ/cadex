@@ -47,8 +47,8 @@
   "Search memory" (memory.search), as seções com o número apagado, até 3 propostas com Approve/Reject, "LEARNED TODAY" (as páginas de hoje,
   sem os registros de sessão), "PROJECT RULES" (as da pasta _rules da wiki), "LAST SESSIONS" pelo título da
   conversa (`titleOf`, do índice do histórico: o nome dado, senão o do Claude), a conta e a pasta,
-  "All in the Archive" (agents.show-history) e "All N pages" (memory.search, com o estado do engine
-  e do agente na dica) e o cartão do pé, "Every new agent here starts with the briefing of this." com
+  "All sessions" (project.show-sessions) e "All N pages" (project.show-memory, com o estado do
+  engine e do agente na dica); o clique numa linha abre a página do projeto nela (plano 34 G) e o cartão do pé, "Every new agent here starts with the briefing of this." com
   See the briefing e Configure; as sessões sem ícone, com o logo da conta na segunda linha.
   `MemoryRows.swift`: a linha (`MemoryRow`: o tipo como ícone colorido num quadradinho, `MemoryKind`;
   o título numa linha; a idade, `MemoryAge`; acende sob o ponteiro; clique abre, clique direito dá

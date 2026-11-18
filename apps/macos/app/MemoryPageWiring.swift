@@ -29,6 +29,8 @@ extension WindowSession {
             Self.historyEntry(session: id).flatMap { entry in [entry.customTitle, entry.aiTitle].first { !$0.isEmpty } }
         }
         page.onShowing = { [weak self] shows in self?.memoryPageShowing(shows) }
+        // A click opens the project's page on the line (plan 34 G): a session in Sessions with its
+        // summary, any other page in Memory rendered; the raw .md is the page's Edit.
         page.onOpenPage = { [weak self] memoryPage in self?.openMemoryPage(memoryPage) }
         page.onOpenSession = { [weak self] id in self?.openMemorySession(id) }
         page.onReveal = { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: $0.path)]) }
@@ -133,9 +135,16 @@ extension WindowSession {
 
     /// A page in the Markdown tab; its folder authorized first, as the
     /// wiki lives outside the workspace (the core refuses files out of it).
+    /// A memory page from the panel or ⌘K's memory search: the project's page on the line (plan 34
+    /// G), a session in Sessions with its summary, any other page in Memory rendered; the raw .md is
+    /// the page's Edit.
     private func openMemoryPage(_ page: MemoryPage) {
-        WorkspaceFolder.allow((page.path as NSString).deletingLastPathComponent)
-        opener?.open(page.path)
+        guard let folder = projects?.activeFolder else { return }
+        if page.relative.hasPrefix("sessions/"), let id = page.sessionID {
+            openProjectPage(folder, section: .sessions, item: id)
+        } else {
+            openProjectPage(folder, section: .memory, item: page.path)
+        }
     }
 
     /// "Open the Session": resumed in its account, as History does.
