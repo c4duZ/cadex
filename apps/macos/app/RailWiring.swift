@@ -25,8 +25,10 @@ extension WindowSession {
     /// The projects as the rail draws them.
     func railModel() -> [RailProject] {
         let theme = ThemeStore.shared.current
-        // The pinned first, in their order; then the open ones that are not pinned.
-        let ordered = (projects?.projects ?? []).filter(\.pinned) + (projects?.projects ?? []).filter { !$0.pinned }
+        // The pinned first, in their order; then the open ones that are not pinned. The home
+        // folder's terminals are no project (plan 36: tabs of no project, no tile lit).
+        let all = (projects?.projects ?? []).filter { !Self.isLoose($0.folder) }
+        let ordered = all.filter(\.pinned) + all.filter { !$0.pinned }
         return ordered.map { project in
             let terminals = project.tabs.allTerminals
             let states = terminals.compactMap { Self.treeRow($0).state }
@@ -41,10 +43,15 @@ extension WindowSession {
 
     func drawRail() {
         guard let rail = workspace?.rail else { return }
-        rail.show(railModel(), chosen: projects?.activeFolder)
+        rail.show(railModel(), chosen: projects?.activeFolder.flatMap { Self.isLoose($0) ? nil : $0 })
         let page = tabs?.showsPage == true ? tabs?.activeDocument?.identity : nil
         rail.footLit = page == ProjectsListDocument.identity ? .projects
             : page?.hasPrefix("automation") == true ? .automations : nil
+    }
+
+    /// The terminals opened in the home folder: tabs of no project (ADR 0038, decided 2026-11-18).
+    static func isLoose(_ folder: String) -> Bool {
+        folder == NSHomeDirectory() || folder == URL(fileURLWithPath: NSHomeDirectory()).resolvingSymlinksInPath().path
     }
 
     /// A tile clicked: that project's tabs and column; one without a terminal gets one in its folder.

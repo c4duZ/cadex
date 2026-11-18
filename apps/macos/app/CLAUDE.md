@@ -120,6 +120,11 @@
 - O trilho mostra os ícones das páginas da coluna (plano 36 fase C, ADR 0038 revista): `railPages`
   em `RailWiring.swift`, postos pelo `WindowSession.swift`; syncRailPages (em `WorkspaceView.swift`) acende o
   da página aberta quando a coluna abre, fecha ou troca de página; a coluna sem a fileira de cima.
+- Plano 36 fase D: em `ProjectsWiring.swift`, a barra do projeto ganha um item por tarefa com
+  terminal aberto (`taskItems`, o estado dela) e a da tarefa, "‹ projeto"; project.show-terminals
+  volta às abas do próprio projeto; `TitleBarView.swift` diz à faixa de abas quanto espaço ela tem;
+  os terminais da pasta pessoal são abas sem projeto (`RailWiring.swift`, `isLoose`: fora do
+  trilho); a coluna segue a tarefa quando a lista das tarefas chega (`TreeWiring.swift`).
 - `SessionsColumnWiring.swift` (plano 36 fase C): a página Sessions da coluna (project.sessions-column):
   as conversas do projeto escolhido por quando, lidas do histórico só enquanto a página aparece
   (o onColumnPage do WorkspaceView solta ao sair); o clique abre a página do projeto em Sessions.

@@ -74,9 +74,16 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
   o escopo num menu pequeno, o total e o +/− de cada arquivo; a página nova Sessions (agora, hoje,
   antes; o clique mostra o resumo no centro, como na página do projeto); a ordem Files, Changes,
   Sessions, Memory, Git graph.
-- [ ] D. As abas: a tarefa como aba (ícone de branch, estado, seta) que troca a barra para os
+- [x] D. As abas: a tarefa como aba (ícone de branch, estado, seta) que troca a barra para os
   terminais dela; "‹ projeto" volta; "» N" com a lista de todos quando não cabem; ⌘1 a ⌘9 pela
   ordem mostrada; as abas sem projeto quando nenhum projeto está aceso.
+  Feita em 2026-11-18: a tarefa como item da barra do projeto, "‹ projeto" dentro dela, "» N" com a
+  lista quando não cabem (o espaço vem da barra de título), ⌘1…⌘9 já contavam as mostradas; os
+  terminais da pasta pessoal são abas sem projeto (fora do trilho, nenhum projeto aceso); a coluna
+  segue a tarefa assim que a lista das tarefas é lida (na abertura pegava o projeto). Conferido no
+  app: a barra do projeto com a tarefa, a barra da tarefa com "‹ repo" e Review, a coluna na
+  tarefa. Não conferido: o clique na barra de título (o clique de teste não chega lá; o teste de
+  unidade cobre a tarefa e o "‹"), o "» N" na janela, as abas sem projeto.
 - [ ] E. Ordenar: a ordem arrastada (projetos e ícones da coluna; arrastar um aberto para cima da
   linha o fixa). A página Projects só
   pelo pé do trilho, sem editar nada, e o cartão abrindo a página do projeto (com Open terminal).

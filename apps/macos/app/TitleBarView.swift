@@ -208,6 +208,12 @@ final class TitleBarView: NSView {
     override func layout() {
         super.layout()
         centerWindowButtons()
+        // The room the tabs have: up to the "+" before the buttons on the right (plan 36 D: the
+        // tabs that do not fit go under "» N"; the strip itself is only as wide as its tabs).
+        if let bar = tabBar, trailing.frame.width > 0 {
+            bar.room = trailing.frame.minX - UILooks.pt(Look.gap) - newTabButton.frame.width
+                - UILooks.pt(DesignTokens.Tab.groupGap) - bar.frame.minX
+        }
     }
 
     /// The compact toolbar centers the window buttons in 38 pt; the new frame's bar is 44, so

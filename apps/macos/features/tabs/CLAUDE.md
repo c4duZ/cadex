@@ -112,6 +112,13 @@
   à mão ou o da pasta (o projeto ou a tarefa), nunca o título que o agente escreve ("Claude", o nome
   da conversa; o dono, 2026-11-18).
 
+- Plano 36 fase D (`../../../../docs/adr/0038-rail-and-side-column.md`): `TabsBarOverflow.swift`. Um
+  `TabsExtra` com `group` vai às abas daquele grupo em vez de rodar um comando (`enterGroup`: a
+  usada por último nele): a tarefa como item da barra do projeto, com o estado dela antes do nome, e
+  "‹ projeto" (`leading`, antes das abas) na barra da tarefa. A barra de título diz quanto espaço a
+  faixa tem (TabBarView.room); quando as abas não cabem nem no menor tamanho, as que sobram vão para
+  "» N" no fim, uma lista para escolher, e a ativa fica sempre à mostra.
+
 ## Como validar
 - `make macos-test` passa: `TabList` e `PaneTree` têm os testes das regras; o snapshot ida e volta
   pelo JSON e um TabsController restaurado igual; com um `FakeDocument`, as regras de abrir ao lado,

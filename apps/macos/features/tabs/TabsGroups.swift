@@ -1,4 +1,5 @@
 import AppKit
+import StateGlyph
 import Strings
 import Terminal
 
@@ -91,10 +92,20 @@ public struct TabsExtra: Sendable {
     public var title: String
     public var command: String
     public var identity: String
-    public init(title: String, command: String, identity: String) {
+    /// Set: the item goes to that group's tabs instead of running a command (a task's item in the
+    /// project's bar, "‹ project" in a task's; plan 36 phase D). "" is the project's own.
+    public var group: String?
+    /// A task's state, drawn before its name.
+    public var state: GlyphState?
+    /// Before the tabs ("‹ project"), not after them.
+    public var leading = false
+    public init(title: String, command: String, identity: String, group: String? = nil, state: GlyphState? = nil, leading: Bool = false) {
         self.title = title
         self.command = command
         self.identity = identity
+        self.group = group
+        self.state = state
+        self.leading = leading
     }
 }
 

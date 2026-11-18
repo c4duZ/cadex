@@ -46,7 +46,7 @@ func eventually(_ body: () -> Bool) async -> Bool {
     return false
 }
 
-let exitCode = await Checks.run([
+let exitCode = await Checks.run(groupChecks + [
     ("a terminal moves between tabs with its shell alive (the drawer's ⌘↩); the last one empties the drawer", { @MainActor in
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 500), styleMask: [.titled], backing: .buffered, defer: false)
         let drawer = TabsController(window: window), project = TabsController(window: window)

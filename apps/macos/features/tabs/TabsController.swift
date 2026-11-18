@@ -51,6 +51,8 @@ public final class TabsController {
     var tabs: [Int: Tab] = [:]
     var nextId = 1
     var nextPane = 1
+    /// The tabs under "» N" now (TabsBarOverflow.swift).
+    var overflowHidden: [Int] = []
     /// Terminals by their last focus, newest first (TabsTerminals.swift).
     var recentTerminals: [ObjectIdentifier] = []
     weak var window: NSWindow?
@@ -63,14 +65,24 @@ public final class TabsController {
         view = TabsView(frame: window.contentView?.bounds ?? .zero)
         bar.onSelect = { [weak self] id in
             guard let self else { return }
+            if id == Self.overflowItem { return self.showOverflow() }
             if id <= extraItemBase {
                 let extras = self.extraItems
-                if extras.indices.contains(extraItemBase - id) { _ = self.runCommand?(extras[extraItemBase - id].command) }
+                guard extras.indices.contains(extraItemBase - id) else { return }
+                let extra = extras[extraItemBase - id]
+                // A group's item goes to its tabs; the others run their command (plan 36 D).
+                if let group = extra.group { self.enterGroup(group) } else { _ = self.runCommand?(extra.command) }
                 return
             }
             self.select(id)
         }
         bar.onClose = { [weak self] id in if id > extraItemBase { self?.closeTab(id) } }
+        // The bar's width changed: as many tabs as fit, the rest under "» N" (plan 36 D).
+        bar.onResize = { [weak self] in
+            guard let self else { return }
+            let items = self.barItems()
+            if items != self.bar.items { self.bar.items = items }
+        }
         bar.onRename = { [weak self] in self?.rename($0) }
         bar.onContextMenu = { [weak self] _, point in
             guard let self, let entries = self.contextMenu?(), !entries.isEmpty else { return }
@@ -263,8 +275,7 @@ public final class TabsController {
     }
 
     func refreshBar() {
-        bar.items = shownIDs.compactMap { id in tabs[id].map(barItem) }
-            + extraItems.enumerated().map { TabBarView.Item(id: extraItemBase - $0.offset, title: $0.element.title, active: false) }
+        bar.items = barItems()
         armCommandClock()
         activeTab?.layout.refreshHeaders()
         onStateChange?()
@@ -280,7 +291,7 @@ public final class TabsController {
     }
 
     /// A tab in the strip, titled and iconed by its focused pane.
-    private func barItem(_ tab: Tab) -> TabBarView.Item {
+    func barItem(_ tab: Tab) -> TabBarView.Item {
         let title = tab.title(home: home)
         guard let document = tab.focused.document else {
             let terminal = tab.focused.terminal

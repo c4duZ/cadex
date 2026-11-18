@@ -81,6 +81,10 @@ public final class TabBarView: NSView {
         NSSize(width: naturalWidths.reduce(0, +) + Self.gap * CGFloat(max(items.count - 1, 0)), height: Self.height)
     }
     var onSelect: ((Int) -> Void)?
+    /// The room the title bar has for the strip changed (the tabs that fit change).
+    var onResize: (() -> Void)?
+    /// How wide the strip may grow, said by the title bar; 0 before it knows.
+    public var room: CGFloat = 0 { didSet { if room.rounded() != oldValue.rounded() { onResize?() } } }
     var onClose: ((Int) -> Void)?
     var onRename: ((Int) -> Void)?
     /// A right click on a tab, at a point of the bar (the tab is selected first).

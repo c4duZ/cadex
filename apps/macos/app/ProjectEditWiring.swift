@@ -54,6 +54,10 @@ extension WindowSession {
                         self.projects?.removeFromRail(folder: folder)
                         self.refreshTree()
                     }),
+            // From a task's tabs back to the project's own (the bar's "‹ project", plan 36 D).
+            Command(id: "project.show-terminals", title: T("Show the Project's Own Terminals", "Mostrar os terminais do próprio projeto"),
+                    keywords: ["project", "terminals", "back", "tabs", "projeto", "terminais", "voltar", "abas"], category: .tabs,
+                    action: .run { [weak self] in self?.tabs?.enterGroup("") }),
             Command(id: "project.reveal", title: T("Show the Project in Finder", "Mostrar o projeto no Finder"),
                     keywords: ["project", "finder", "reveal", "folder", "projeto", "pasta"], category: .tabs,
                     action: .run { [weak self] in

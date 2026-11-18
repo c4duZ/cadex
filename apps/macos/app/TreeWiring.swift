@@ -84,6 +84,9 @@ extension WindowSession {
                     self.treeTasks = found
                     // The tab bar groups by these tasks: shown again with them.
                     self.projects?.projects.forEach { $0.tabs.refreshTabBar() }
+                    // The column shows the task the terminal is in, now that the tasks are known
+                    // (plan 36 D: at launch it took the project, the list not read yet).
+                    self.followProject()
                     self.treeBranches = branches
                     self.treeTallies = tallies
                     // What is gone is forgotten: a task made again at the same path starts fresh.
