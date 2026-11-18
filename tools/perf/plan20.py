@@ -106,11 +106,20 @@ def browser_scenario(perf):
         (pathlib.Path(folder) / "go").write_text(app.app_socket)
         during = []
         deadline = time.time() + 150
+        # One sample at a time, kept only while the agent still drives: when it ends the shell's
+        # prompt is drawn, and a terminal drawing after a pause holds ~45 MB of Metal buffers for a
+        # second (graphics, given back after); the 2 s samples caught that second or not, and the
+        # measure swung from 13 to 56 MB with the driving itself at ~11 (2026-11-18, plan 32).
         while not out.exists() and time.time() < deadline:
-            during += app.sample(4)
+            sample = app.sample(2)
+            if not out.exists():
+                during += sample
         if not out.exists():
             raise RuntimeError("the fake agent did not finish in 150 s")
         result = json.loads(out.read_text())
+        # The shell starting and drawing its prompt is not something left running: 2 s for it, the
+        # slack the 4 s samples above gave before they became one at a time.
+        app.sample(2)
         after = app.sample(10)
         top = max(m for m, _ in during) if during else 0
         if result.get("first_error"):

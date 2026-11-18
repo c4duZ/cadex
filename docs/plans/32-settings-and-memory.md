@@ -43,3 +43,16 @@ automaticamente" e o .ai-memory.toml do projeto "numa tela, ao invés de ficar m
 - Cada configuração de antes está numa seção (um teste lista as chaves e as linhas).
 - A busca acha "tailscale", "hibernar", "barra de status", "teto".
 - Gravar a tela num .ai-memory.toml com comentários e chaves desconhecidas mantém os dois.
+
+## Fechamento (2026-11-18)
+- Fases A a E no código: b105689 (A e B), 680d5c0 (C e D) e o fechamento.
+- `make perf`: o browser_agent_mb dava 56 MB e o theme_switch_mb 11 por um engano da medida, não do
+  app: o terminal que volta a desenhar depois de uma pausa segura ~45 MB de memória gráfica do Metal
+  por um segundo e devolve; a amostra de 2 s pegava esse segundo ou não (de 13 a 56 MB entre os
+  planos). Agora o preview conta só as amostras com o agente dirigindo (13 MB) e a troca de tema o
+  piso de 6 s (0 MB); nenhum limite subiu.
+- Fica aberto: o browser_agent_after_cpu deu 1,1 e 1,4 % na rodada completa (limite 1,0; 0,2 a 0,4
+  sozinho, e já tinha falhado com 1,5 no plano 28). O que roda nesse tempo: a releitura, a cada 10 s,
+  das contas do Claude da pasta pessoal de verdade (a instância de teste não tem pasta própria) e
+  pedidos de acessibilidade de outro programa do Mac. O dono aceitou como ruído desta máquina; dar
+  à instância de teste uma pasta pessoal própria é o próximo passo se voltar a falhar.

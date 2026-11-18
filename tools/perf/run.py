@@ -182,10 +182,13 @@ def measure_theme_switch(app):
     app.sample(12)
     # The first switches grow the app once (~25 MB: each theme's first
     # drawing), then it stays flat (2026-10-20); the growth after is the leak.
+    # The lowest of 6 s, not the last sample: a leak raises the floor, while the last redraw holds
+    # ~45 MB of Metal buffers for a second and, late under a full run's load, read as 9 to 41 MB of
+    # "leak" (2026-11-18, plan 32).
     switch(150)
-    before = app.sample(4)[-1][0]
+    before = min(m for m, _ in app.sample(6))
     switch(300)
-    after = app.sample(4)[-1][0]
+    after = min(m for m, _ in app.sample(6))
     return {"theme_switch_mb": after - before}
 
 
