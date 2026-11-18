@@ -641,7 +641,7 @@ let exitCode = await Checks.run([
         bar.items += [.init(id: 4, title: "hero-images", active: false, state: .failed), .init(id: 5, title: "~", active: false)]
         snapshot(bar, "tab-states")
     }),
-])
+] + pageChecks)
 
 /// With CADEX_SNAPSHOT_DIR set, saves a picture of `view` there, to put the strip beside the mockup.
 @MainActor func snapshot(_ view: NSView, _ name: String) {

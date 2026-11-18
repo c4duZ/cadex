@@ -268,6 +268,9 @@
   do histórico (lido enquanto a página existe), o custo de cada uma, os merges e o remoto pelo git,
   as automações e as páginas da memória. A barra de título agrupa as páginas ("pages": Overview, e
   Automations e Conversations como itens extras, `extrasOf`).
+- `PageWiring.swift` (plano 34 A): o Esc numa página volta ao terminal de antes (TabsController.leavePage);
+  um campo com texto e uma folha guardam o Esc. Com uma página, a barra de título fica igual: o "+"
+  à mostra e sem "projeto › tarefa" (`showLocation`), e os extras "pages" saíram.
 - `BoardWiring.swift` (plano 30 B): view.board e o botão da barra de título abrem o quadro; os
   cartões vêm do `treeModel()` com o que o agente faz e o grupo (corrida, execução, automação) pelas
   worktrees dos registros; "All projects", o botão aceso e o painel da direita fechado enquanto ele

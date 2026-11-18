@@ -258,17 +258,13 @@ extension WindowSession {
     /// "project › task" in the title bar: a task's worktree (`<repo>.worktrees/<branch>`, plan 19)
     /// names its repository and the task; any other folder is the project alone.
     func showLocation(_ root: String) {
-        // A page (the board, a project's overview, a run) has no "+": the mockups show none there.
-        workspace?.titleBar.setNewTabHidden(tabs?.activeDocument?.isPage == true)
-        // The board is of every project: "All projects" (the Board mockup).
-        if tabs?.activeDocument?.identity == BoardDocument.identity {
-            workspace?.titleBar.setLocation(project: T("All projects", "Todos os projetos"), task: nil)
-            return showProject(branch: lastBranch)
-        }
-        // A run's page: "project › run <name>".
-        if let document = tabs?.activeDocument, document.identity.hasPrefix("run:") {
-            workspace?.titleBar.setLocation(project: projects?.activeName ?? "", task: T("run ", "execução ") + document.title)
-            return showProject(branch: lastBranch)
+        // The bar is the same with a page open (plan 34 A, the owner 2026-11-18): the "+" stays,
+        // and a page says where it is inside itself, not in the bar.
+        workspace?.titleBar.setNewTabHidden(false)
+        if tabs?.showsPage == true {
+            workspace?.titleBar.setLocation(project: "", task: nil)
+            showProject(branch: lastBranch)
+            return refreshTitleAccount()
         }
         let (project, _) = TitleBarView.location(of: root)
         // A race's lane: "cadex › race kite" (the Race mockup). Elsewhere no "project › task": the

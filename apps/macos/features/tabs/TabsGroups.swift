@@ -26,17 +26,45 @@ extension TabsController {
         return groupOf(folder(of: tab))
     }
 
-    /// The tabs the bar shows, in order: those of the active tab's group.
-    var shownIDs: [Int] {
-        guard groupOf != nil, let active = activeTab else { return list.order }
-        let key = group(of: active)
-        return list.order.filter { id in tabs[id].map { group(of: $0) == key } ?? false }
+    /// A page alone in its tab (a project's, the automations, the board): it opens under the bar
+    /// and never shows in it (plan 34 A; the owner, 2026-11-18: opening a page changed the bar).
+    func isPageTab(_ tab: Tab) -> Bool { tab.panes.count == 1 && tab.focused.document?.isPage == true }
+
+    /// The active tab is a page.
+    public var showsPage: Bool { activeTab.map(isPageTab) ?? false }
+
+    /// The tab the bar is about: the active one, or with a page the terminal tab used last.
+    var barAnchor: Tab? {
+        guard let active = activeTab, isPageTab(active) else { return activeTab }
+        return list.recent.lazy.compactMap { self.tabs[$0] }.first { !self.isPageTab($0) }
     }
 
-    /// The items the bar ends with for the shown group (a task's "Review", a project page's
-    /// "Automations" and "Conversations"), those not open already; each runs its command.
+    /// The tabs the bar shows, in order: those of the anchor's group, never a page.
+    var shownIDs: [Int] {
+        let notPages = list.order.filter { id in tabs[id].map { !isPageTab($0) } ?? false }
+        guard groupOf != nil, let anchor = barAnchor else { return notPages }
+        let key = group(of: anchor)
+        return notPages.filter { id in tabs[id].map { group(of: $0) == key } ?? false }
+    }
+
+    /// Back from a page to the terminal tab used before it (Esc on a page); the page stays open
+    /// behind, the one page there is.
+    public func leavePage() {
+        guard showsPage, let anchor = barAnchor else { return }
+        select(anchor.id)
+    }
+
+    /// One page at a time: opening one closes the others (they hold nothing unsaved).
+    func closeOtherPages(than kept: Int) {
+        for id in list.order where id != kept {
+            if let tab = tabs[id], isPageTab(tab) { remove(id) }
+        }
+    }
+
+    /// The items the bar ends with for the shown group (a task's "Review"), those not open
+    /// already; each runs its command. None with a page.
     var extraItems: [TabsExtra] {
-        guard let active = activeTab, let extras = extrasOf?(group(of: active) ?? "") else { return [] }
+        guard !showsPage, let active = activeTab, let extras = extrasOf?(group(of: active) ?? "") else { return [] }
         let open = shownIDs.flatMap { id in tabs[id]?.documents.map(\.identity) ?? [] }
         return extras.filter { extra in !open.contains { $0.hasPrefix(extra.identity) } }
     }

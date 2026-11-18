@@ -31,7 +31,7 @@ aprovada ("Ficou do caralho... segue isso exatamente") está em
   do app, pelas portas de entrada delas.
 
 ## Como eu quero
-- [ ] A. As páginas fora da barra de cima: um documento de página não vira aba; uma página por vez
+- [x] A. As páginas fora da barra de cima: um documento de página não vira aba; uma página por vez
   no centro (abrir outra troca); o Esc e o clique numa aba voltam ao terminal de antes; o "+" e as
   abas iguais com a página aberta.
 - [ ] B. O pé da barra lateral com Projetos (o número) e Automações ("N ligada"), cada um aceso com

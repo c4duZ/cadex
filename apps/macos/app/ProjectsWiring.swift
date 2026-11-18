@@ -77,10 +77,8 @@ extension WindowSession {
         }
         tabs.extrasOf = { [weak self] group in
             switch group {
-            case "", "board": []
-            case "pages": [TabsExtra(title: T("Automations", "Automações"), command: "orchestration.show-automation-history", identity: "automation:"),
-                           TabsExtra(title: T("Conversations", "Conversas"), command: "agents.show-history", identity: "cadex:agent-history"),
-                           TabsExtra(title: T("Settings", "Configurações"), command: "project.show-settings", identity: "project:settings:")]
+            // Pages never put items in the bar (plan 34 A): their sections are inside them.
+            case "", "board", "pages": []
             default:
                 // A race's lanes compare their worktrees; a task reviews its own (the mockups).
                 self?.raceName(of: group) != nil

@@ -99,7 +99,10 @@
   (`TabsDocuments.swift`, plano 31 E: a revisão, o histórico, a transcrição, o briefing, o arquivo).
   Uma página sozinha na aba ocupa o centro inteiro, sem caixa nem
   cabeçalho (`PaneLayoutView.swift`). `TabsExtra`: os itens do fim da barra que rodam um comando
-  ("Review" de uma tarefa; "Automations" e "Conversations" das páginas), dados pelo app em `extrasOf`.
+  ("Review" de uma tarefa), dados pelo app em `extrasOf`. Plano 34 A: uma página nunca aparece na
+  barra (`TabsGroups.swift`: `isPageTab`, `shownIDs` sem páginas e pelo grupo do último terminal
+  usado, `showsPage`); abrir uma página fecha a outra (uma por vez); `leavePage` volta ao terminal
+  de antes (o Esc do app, `../../app/PageWiring.swift`).
 - `TabAgentTitle.swift` (plano 19; plano 25 fase D): o estado do agente como `GlyphState` da peça
   única de estado (`../../shared/state-glyph/`): trabalhando, precisa de você, pronto, falhou, e
   hibernado como parado ("Hibernando" na dica); o `TabBarView` põe o sinal antes do nome da aba

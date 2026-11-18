@@ -43,6 +43,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
     var search: SearchController?
     var opener: FileOpener?
     var markdown: MarkdownController?
+    /// The Esc of the pages (`PageWiring.swift`).
+    var pageKeys: Any?
     var git: SourceControlController?
     /// The focused terminal's folder last seen, and whether the tree follows
     /// it (FolderFollow.swift).
@@ -204,6 +206,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         wireChanges(git)
         git.onOpenDiff = { [weak opener] request, beside in opener?.openDiff(request, beside: beside) }
         git.onMarks = { [weak explorer] marks in explorer?.gitMarks = marks }
+        startPageKeys()
         startPerfHooks()
     }
 
@@ -289,6 +292,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         if let treeWatch { WorktreesController.shared.stop(treeWatch) }
         if let treeObserver { NotificationCenter.default.removeObserver(treeObserver) }
         treeClock?.invalidate()
+        if let pageKeys { NSEvent.removeMonitor(pageKeys) }
         if let paneHeaderObserver { NotificationCenter.default.removeObserver(paneHeaderObserver) }
         paneHeaderClock?.invalidate()
         treeTallyTimer?.invalidate()
