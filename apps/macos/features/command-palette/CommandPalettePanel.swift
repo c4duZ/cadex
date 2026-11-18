@@ -7,11 +7,14 @@ import Icons
 /// window, in the theme's colors (docs/spec/command-palette.md). Made once
 /// and reused, so ⌘K shows it in the same frame.
 final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSource, NSTableViewDelegate {
-    static var width: CGFloat { UILooks.pt(640) }
-    static var rowHeight: CGFloat { UILooks.rowHeight(36) }
-    static var headerHeight: CGFloat { UILooks.rowHeight(30) }
-    static var listMaxHeight: CGFloat { UILooks.pt(400) }
-    private static var fieldHeight: CGFloat { UILooks.rowHeight(54) }
+    // The approved proposal's measures (scratchpad ux2/index.html, `.pal`, 2026-11-18): 600 wide,
+    // the field 52 in 16, rows of 9 + a 13 line + 9 and 2 apart (40; 52 with a second line).
+    static var width: CGFloat { UILooks.pt(600) }
+    static var rowHeight: CGFloat { UILooks.rowHeight(40) }
+    static var twoLineHeight: CGFloat { UILooks.rowHeight(52) }
+    static var headerHeight: CGFloat { UILooks.rowHeight(28) }
+    static var listMaxHeight: CGFloat { UILooks.pt(420) }
+    private static var fieldHeight: CGFloat { UILooks.rowHeight(52) }
     private static var footerHeight: CGFloat { UILooks.rowHeight(36) }
     /// The footer for the list shown (a source can go without, ⌘J).
     var footerShown = true {
@@ -39,6 +42,11 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
     /// A short note from the source on the right of the field ("Indexando…").
     private let statusLabel = NSTextField(labelWithString: "")
     private let topLine = NSView()
+    /// The source's sentence under the field (the account switch: what choosing does).
+    private let hintLabel = NSTextField(wrappingLabelWithString: "")
+    private var scrollUnderLine: NSLayoutConstraint?
+    private var scrollUnderHint: NSLayoutConstraint?
+    private var hintHeight: CGFloat { hintLabel.isHidden ? 0 : ceil(hintLabel.intrinsicContentSize.height) + 12 }
     private let bottomLine = NSView()
     private let footer = PaletteFooterView()
     private var items: [PaletteItem] = []
@@ -114,12 +122,21 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
     /// The empty list's words for the text typed now (the source's idle words when nothing is).
     func setEmptyText(_ text: String) { emptyLabel.stringValue = text }
 
+    /// The source's sentence under the field, or none.
+    func setHint(_ text: String?) {
+        hintLabel.stringValue = text ?? ""
+        hintLabel.isHidden = text == nil
+        hintLabel.preferredMaxLayoutWidth = listWidth - 32
+        scrollUnderLine?.isActive = text == nil
+        scrollUnderHint?.isActive = text != nil
+    }
+
     func setLook(placeholder: String, emptyText: String, icon: Icon) {
         field.placeholderAttributedString = NSAttributedString(string: placeholder, attributes: [
-            .font: UILooks.font(18), .foregroundColor: style.secondaryText.withAlphaComponent(0.7),
+            .font: UILooks.font(16), .foregroundColor: style.secondaryText.withAlphaComponent(0.8),
         ])
         emptyLabel.stringValue = emptyText
-        fieldIcon.image = icon.image(size: 18)
+        fieldIcon.image = icon.image(size: 16)
     }
 
     func show(items newItems: [PaletteItem], status: String?, hints: [PaletteHint]) {
@@ -149,7 +166,7 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         background.layer?.borderWidth = 1
         contentView = background
 
-        field.font = UILooks.font(18)
+        field.font = UILooks.font(16)
         field.isBordered = false
         field.drawsBackground = false
         field.focusRingType = .none
@@ -183,16 +200,18 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
 
         let bottomLineToBottom = bottomLine.bottomAnchor.constraint(equalTo: background.bottomAnchor, constant: -Self.footerHeight)
         footerSpace = bottomLineToBottom
-        for view in [fieldIcon, field, statusLabel, topLine, scroll, emptyLabel, bottomLine, footer] as [NSView] {
+        hintLabel.font = UILooks.font(12)
+        hintLabel.isHidden = true
+        for view in [fieldIcon, field, statusLabel, topLine, hintLabel, scroll, emptyLabel, bottomLine, footer] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             background.addSubview(view)
         }
         NSLayoutConstraint.activate([
-            fieldIcon.leadingAnchor.constraint(equalTo: background.leadingAnchor, constant: 20),
+            fieldIcon.leadingAnchor.constraint(equalTo: background.leadingAnchor, constant: 16),
             fieldIcon.centerYAnchor.constraint(equalTo: background.topAnchor, constant: Self.fieldHeight / 2),
-            fieldIcon.widthAnchor.constraint(equalToConstant: 18),
-            fieldIcon.heightAnchor.constraint(equalToConstant: 18),
-            field.leadingAnchor.constraint(equalTo: fieldIcon.trailingAnchor, constant: 12),
+            fieldIcon.widthAnchor.constraint(equalToConstant: 16),
+            fieldIcon.heightAnchor.constraint(equalToConstant: 16),
+            field.leadingAnchor.constraint(equalTo: fieldIcon.trailingAnchor, constant: 10),
             field.centerYAnchor.constraint(equalTo: fieldIcon.centerYAnchor),
             statusLabel.trailingAnchor.constraint(equalTo: background.trailingAnchor, constant: -20),
             statusLabel.centerYAnchor.constraint(equalTo: fieldIcon.centerYAnchor),
@@ -201,7 +220,9 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
             topLine.leadingAnchor.constraint(equalTo: background.leadingAnchor),
             topLine.trailingAnchor.constraint(equalTo: background.trailingAnchor),
             topLine.heightAnchor.constraint(equalToConstant: 1),
-            scroll.topAnchor.constraint(equalTo: topLine.bottomAnchor, constant: 6),
+            hintLabel.topAnchor.constraint(equalTo: topLine.bottomAnchor, constant: 8),
+            hintLabel.leadingAnchor.constraint(equalTo: background.leadingAnchor, constant: 16),
+            hintLabel.trailingAnchor.constraint(equalTo: background.trailingAnchor, constant: -16),
             scroll.leadingAnchor.constraint(equalTo: background.leadingAnchor, constant: 8),
             scroll.trailingAnchor.constraint(equalTo: background.trailingAnchor, constant: -8),
             scroll.bottomAnchor.constraint(equalTo: bottomLine.topAnchor, constant: -6),
@@ -214,6 +235,9 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
             footer.leadingAnchor.constraint(equalTo: background.leadingAnchor, constant: 20),
             footer.centerYAnchor.constraint(equalTo: background.bottomAnchor, constant: -Self.footerHeight / 2),
         ])
+        scrollUnderLine = scroll.topAnchor.constraint(equalTo: topLine.bottomAnchor, constant: 6)
+        scrollUnderHint = scroll.topAnchor.constraint(equalTo: hintLabel.bottomAnchor, constant: 4)
+        scrollUnderLine?.isActive = true
     }
 
     private func applyStyle() {
@@ -222,8 +246,9 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         background.layer?.borderColor = style.border.cgColor
         for line in [topLine, bottomLine] { line.layer?.backgroundColor = style.border.cgColor }
         field.textColor = style.text
-        fieldIcon.contentTintColor = style.accent
+        fieldIcon.contentTintColor = style.secondaryText
         statusLabel.textColor = style.secondaryText
+        hintLabel.textColor = style.secondaryText.withAlphaComponent(0.85)
         emptyLabel.textColor = style.secondaryText
         appearance = NSAppearance(named: style.background.isDark ? .darkAqua : .aqua)
         table.reloadData()
@@ -231,7 +256,7 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
 
     private func resizeToFit() {
         let list = rows.isEmpty ? Self.rowHeight : min(rows.reduce(0) { $0 + height(of: $1) }, Self.listMaxHeight)
-        let total = Self.fieldHeight + 1 + 6 + list + 6 + (footerShown ? 1 + Self.footerHeight : 0)
+        let total = Self.fieldHeight + 1 + hintHeight + 6 + list + 6 + (footerShown ? 1 + Self.footerHeight : 0)
         var frame = self.frame
         guard frame.height != total else { return }
         frame.origin.y += frame.height - total
@@ -246,8 +271,10 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
     }
 
     private func height(of row: PaletteRows.Row) -> CGFloat {
-        if case .header = row { return Self.headerHeight }
-        return Self.rowHeight
+        switch row {
+        case .header: return Self.headerHeight
+        case .item(let index): return items[index].note == nil ? Self.rowHeight : Self.twoLineHeight
+        }
     }
 
     // MARK: Keys in the field

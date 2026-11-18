@@ -32,6 +32,12 @@ public final class CommandPaletteController {
         set { panel.style = newValue }
     }
 
+    /// ⌘K's "Now" rows and what choosing one does (the app knows the agents).
+    public func setNow(_ items: @escaping @MainActor () -> [PaletteItem], run: @escaping @MainActor (String) -> Void) {
+        commands.now = items
+        commands.runNow = run
+    }
+
     /// The commands ⌘K shows first, under "Abrir".
     public var pins: [PalettePin] {
         get { commands.pins }
@@ -83,10 +89,12 @@ public final class CommandPaletteController {
             guard let window = NSApp.keyWindow ?? NSApp.mainWindow ?? home else { return }
             parent = window
             panel.prepare(placeholder: newSource.placeholder, emptyText: newSource.emptyText, icon: newSource.icon)
+            panel.setHint(newSource.hint)
             panel.show(over: window)
             return
         }
         panel.prepare(placeholder: newSource.placeholder, emptyText: newSource.emptyText, icon: newSource.icon)
+        panel.setHint(newSource.hint)
     }
 
     /// ⌘1…⌘9 while the list shows that shortcut (⌘J): the row is chosen here and the press ends,
@@ -118,7 +126,7 @@ public final class CommandPaletteController {
         if list !== answering {
             answering?.stop()
             answering = list
-            if let list { panel.setLook(placeholder: list.placeholder, emptyText: list.emptyText, icon: list.icon) }
+            if let list { panel.setLook(placeholder: list.placeholder, emptyText: list.emptyText, icon: list.icon); panel.setHint(list.hint) }
         }
         let hints = footer(for: list, empty: query.isEmpty)
         if let list { panel.setEmptyText(text.isEmpty ? list.idleText ?? list.emptyText : list.emptyText) }

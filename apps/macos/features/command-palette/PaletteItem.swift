@@ -24,6 +24,17 @@ public struct PaletteItem: Equatable {
     /// `jumpAction`: ⌘J's last row ("+ New task in **cadex**… ⌘N"): the bold part white, one key.
     public enum Look: Sendable { case standard, jump, jumpAction }
     public var look: Look = .standard
+    /// A second, smaller line under the title (the approved proposal's account rows and "Now").
+    public var note: String?
+    /// A colored square on the left instead of the bare glyph: a kind (a glyph in its color over
+    /// the color at 14 %) or a provider's logo in its color.
+    public enum Tile { case kind(Icon, NSColor), logo(NSImage, NSColor) }
+    public var tile: Tile?
+    /// A thin bar on the right, 0…1, with `meterText` beside it ("22%").
+    public var meter: Double?
+    public var meterText: String?
+    /// A small rounded label on the right ("in use").
+    public var chip: String?
 
     public init(id: String, title: String, bold: [Range<String.Index>] = [], detail: String? = nil,
                 shortcut: String? = nil, unavailableReason: String? = nil, section: String? = nil,
@@ -42,6 +53,7 @@ public struct PaletteItem: Equatable {
     public static func == (a: PaletteItem, b: PaletteItem) -> Bool {
         a.id == b.id && a.title == b.title && a.bold == b.bold && a.detail == b.detail && a.shortcut == b.shortcut
             && a.unavailableReason == b.unavailableReason && a.section == b.section && a.icon == b.icon
+            && a.note == b.note && a.meter == b.meter && a.meterText == b.meterText && a.chip == b.chip
     }
 
     /// The characters at the matched UTF-8 offsets, as ranges of `text`:

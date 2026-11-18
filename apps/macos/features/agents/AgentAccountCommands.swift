@@ -85,20 +85,14 @@ public enum AgentAccountCommands {
                     }),
             Command(id: "agents.switch-account", title: T("Switch Account…", "Trocar de conta…"),
                     keywords: ["account", "switch", "limit", "continue", "conta", "trocar", "limite", "continuar", "claude"], category: .terminal,
-                    action: list(T("Go on in another account…", "Continuar em outra conta…"), T("No account in use", "Nenhuma conta em uso"), {
-                        // The provider's logo, the usage with when it comes back and the folder (two
-                        // accounts of one organization read alike); the one in use marked and inert
-                        // (the owner, 2026-11-18: the list said too little).
-                        let current = actions.current()
-                        // The one in use last: the first row is the one chosen, and it cannot be.
-                        let accounts = AgentUsageController.shared.visibleAccounts().filter { $0.provider == .claude }
-                        return (accounts.filter { $0.dir != current } + accounts.filter { $0.dir == current }).map { account in
-                            PaletteItem(id: account.dir, title: account.name, detail: AgentSwitch.detail(account),
-                                        unavailableReason: account.dir == current ? T("in use here", "em uso aqui") : nil,
-                                        image: ProviderLogo.claude.image(size: 16))
-                        }
-                    }) { dir in
-                        if let account = agents.everyAccount().first(where: { $0.dir == dir }) { actions.switchTo(account) }
+                    action: .run {
+                        palette.open(AgentChoiceSource(
+                            placeholder: T("Go on in another account…", "Continuar em outra conta…"), empty: T("No account in use", "Nenhuma conta em uso"),
+                            hint: T("This session ends and the work goes on in the account you choose, through the memory.",
+                                    "A sessão de agora termina e o trabalho continua na conta escolhida, pela memória."),
+                            icon: .arrowsLeftRight, items: { AgentSwitch.rows(current: actions.current()) }) { dir in
+                            if let account = agents.everyAccount().first(where: { $0.dir == dir }) { actions.switchTo(account) }
+                        })
                     }),
             Command(id: "agents.rename-account", title: T("Rename an Agent Account…", "Renomear uma conta de agente…"),
                     keywords: ["account", "rename", "name", "conta", "renomear", "nome"], category: .terminal,
@@ -206,17 +200,20 @@ public enum AgentAccountPicker {
 public final class AgentChoiceSource: PaletteSource {
     public let placeholder: String
     public let emptyText: String
+    public let hint: String?
+    public let icon: Icon
     private let items: () -> [PaletteItem]
     private let pick: (String) -> Void
 
-    public init(placeholder: String, empty: String, items: @escaping () -> [PaletteItem], choose: @escaping (String) -> Void) {
+    public init(placeholder: String, empty: String, hint: String? = nil, icon: Icon = .gauge,
+                items: @escaping () -> [PaletteItem], choose: @escaping (String) -> Void) {
         self.placeholder = placeholder
         self.emptyText = empty
+        self.hint = hint
+        self.icon = icon
         self.items = items
         self.pick = choose
     }
-
-    public var icon: Icon { .gauge }
 
     public func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
         show(items().filter { query.isEmpty || $0.title.localizedCaseInsensitiveContains(query) }, nil)

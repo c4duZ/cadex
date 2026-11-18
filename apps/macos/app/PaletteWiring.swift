@@ -8,6 +8,7 @@ import Projects
 import Strings
 import Tabs
 import Themes
+import UILooks
 
 /// The palette in the app's colors and its prefixes (docs/spec/
 /// command-palette.md): "/" files, "#" text, "@" the tabs and projects.
@@ -76,6 +77,30 @@ extension WindowSession {
         return entry
     }
 
+    /// ⌘K's "Now" (the approved proposal): each agent waiting for you, "Answer <where>" with what it
+    /// asks, and going on in another account when the focused terminal runs Claude.
+    private func nowRows() -> [PaletteItem] {
+        var rows = AgentAttention.shared.cards.prefix(3).map { card in
+            var item = PaletteItem(id: "now:card:" + card.id, title: T("Answer \(card.project)", "Responder \(card.project)"))
+            item.note = card.title.isEmpty ? card.detail : card.title
+            item.tile = .kind(.hand, DesignTokens.Color.stateNeeds)
+            return item
+        }
+        if let terminal = tabs?.activeTerminal, claudeAccount(in: terminal) != nil {
+            var item = PaletteItem(id: "now:switch", title: T("Go on in another account…", "Continuar em outra conta…"))
+            item.tile = .kind(.arrowsLeftRight, DesignTokens.Color.stateWorking)
+            rows.append(item)
+        }
+        return Array(rows)
+    }
+
+    private func runNow(_ id: String) {
+        if id == "now:switch" { _ = commands.run("agents.switch-account"); return }
+        let cardID = String(id.dropFirst("now:card:".count))
+        guard let card = AgentAttention.shared.cards.first(where: { $0.id == cardID }) else { return }
+        app.goToAgent(key: card.key, pid: card.pid)
+    }
+
     /// The pane header's menu: what opens beside it.
     func paneMenu() -> [MenuEntry] {
         guard let menu else { return [] }
@@ -84,12 +109,15 @@ extension WindowSession {
 
     func connectPalette(_ palette: CommandPaletteController) {
         palette.pins = Self.openers
+        palette.setNow({ [weak self] in self?.nowRows() ?? [] }, run: { [weak self] id in self?.runNow(id) })
         ThemeStore.shared.observe { [weak palette] theme in
             let ui = theme.interface
+            // The chosen row blue-gray, as the approved proposal (#202833 on the dark theme).
             palette?.style = PaletteStyle(
                 background: ui.panel.nsColor, border: ui.panelBorder.nsColor, text: ui.text.nsColor,
-                secondaryText: ui.secondaryText.nsColor, selection: ui.tabActive.nsColor, accent: ui.accent.nsColor,
-                keycap: ui.field.nsColor)
+                secondaryText: ui.secondaryText.nsColor,
+                selection: ui.panel.nsColor.blended(withFraction: 0.14, of: ui.accent.nsColor) ?? ui.tabActive.nsColor,
+                accent: ui.accent.nsColor, keycap: ui.field.nsColor)
         }
         if let search {
             palette.addPrefix("/", label: T("files", "arquivos"), source: search.files)

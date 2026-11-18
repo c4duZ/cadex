@@ -1,4 +1,6 @@
 import AppKit
+import CommandPalette
+import Icons
 import StateGlyph
 import Strings
 import UILooks
@@ -48,6 +50,29 @@ public enum AgentSwitch {
         let folder = account.dir.hasPrefix(home) ? "~" + account.dir.dropFirst(home.count) : account.dir
         parts.append(folder.contains("/Application Support/Cadex/accounts/") ? T("Cadex account", "conta do Cadex") : String(folder))
         return parts.joined(separator: " · ")
+    }
+
+    /// The switch list as the approved proposal draws it (2026-11-18): each account with its logo
+    /// in a square, the name over "session 15% · week 22% · back at 16:10 · ~/.claude-bkdg", a bar
+    /// and the number on the right; the one in use last, dim, with "in use".
+    @MainActor
+    public static func rows(current: String?) -> [PaletteItem] {
+        let accounts = AgentUsageController.shared.visibleAccounts().filter { $0.provider == .claude }
+        let logo = PaletteItem.Tile.logo(ProviderLogo.claude.image(size: 12), ProviderLogo.claude.brandColor ?? .systemOrange)
+        return (accounts.filter { $0.dir != current } + accounts.filter { $0.dir == current }).map { account in
+            let inUse = account.dir == current
+            let used = AgentSwitch.used(AgentUsage.current(of: account))
+            var item = PaletteItem(id: account.dir, title: account.name, unavailableReason: inUse ? "" : nil)
+            item.note = detail(account) + (inUse ? T(" · this session", " · esta sessão") : "")
+            item.tile = logo
+            if inUse {
+                item.chip = T("in use", "em uso")
+            } else {
+                item.meter = used.map { Double($0) / 100 }
+                item.meterText = used.map { "\($0)%" } ?? "—"
+            }
+            return item
+        }
     }
 
     /// "32% used", or nothing with no numbers.

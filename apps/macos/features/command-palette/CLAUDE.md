@@ -36,7 +36,11 @@
   o campo vazio; fuzzy no título, depois palavra-chave e o título no outro idioma; indisponíveis no fim; fuzzy do núcleo),
   `CommandPalettePanel.swift` (NSPanel sem borda, feito uma vez e reaproveitado: ícone da lista,
   campo, status, linhas com títulos de seção, rodapé com as teclas; fecha ao perder o foco) e
-  `PaletteRows.swift` (as linhas, os títulos, as teclas desenhadas e o `PaletteStyle`). A resposta
+  `PaletteRows.swift` (os títulos, as teclas desenhadas e o `PaletteStyle`) e `PaletteRowView.swift`
+  (a linha no desenho da proposta aprovada em 2026-11-18, `.pal`: 600 pt, campo de 52 em 16, linhas
+  de 40, ou 52 com a segunda linha `note`; o quadradinho `tile`, a barra `meter`, o `chip`, o atalho
+  numa tecla fina; a escolhida azulada). A fonte pode ter uma frase sob o campo (`hint`); o ⌘K abre
+  com "Agora" (`setNow`: quem espera você, trocar de conta) antes de "Abrir". A resposta
   (o dono, 2026-11-18, "duro"): `PaletteTable.swift` escolhe a linha sob o ponteiro quando o mouse
   se move (o painel entrega cada movimento: a área de rastreamento da lista nunca os recebia); o painel abre já no tamanho da lista, aparecendo em 0,12 s; a altura segue a lista numa
   transição de 0,1 s; o rodapé só é refeito quando as teclas mudam.

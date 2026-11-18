@@ -78,19 +78,20 @@ final class KeycapsView: NSStackView {
         spacing = 3
         for key in joined ? [label].compactMap({ $0 }).filter { !$0.isEmpty } : Self.keys(of: label ?? "") {
             let text = NSTextField(labelWithString: key)
-            text.font = UILooks.font(11, weight: .medium)
+            // One thin key, as the proposal's `kbd`: a line, no fill, dim letters.
+            text.font = UILooks.font(11)
             text.textColor = style.secondaryText
             text.alignment = .center
             text.translatesAutoresizingMaskIntoConstraints = false
             let cap = NSView()
             cap.wantsLayer = true
-            cap.layer?.backgroundColor = style.keycap.cgColor
+            cap.layer?.backgroundColor = nil
             cap.layer?.cornerRadius = 5
             cap.layer?.borderWidth = 1
             cap.layer?.borderColor = style.border.cgColor
             cap.addSubview(text)
             NSLayoutConstraint.activate([
-                cap.heightAnchor.constraint(equalToConstant: 20),
+                cap.heightAnchor.constraint(equalToConstant: 18),
                 cap.widthAnchor.constraint(greaterThanOrEqualToConstant: 20),
                 text.centerYAnchor.constraint(equalTo: cap.centerYAnchor),
                 text.leadingAnchor.constraint(equalTo: cap.leadingAnchor, constant: 5),
@@ -107,7 +108,7 @@ final class PaletteRowBackground: NSTableRowView {
 
     override func drawSelection(in dirtyRect: NSRect) {
         fill.setFill()
-        NSBezierPath(roundedRect: bounds.insetBy(dx: 0, dy: 1), xRadius: 8, yRadius: 8).fill()
+        NSBezierPath(roundedRect: bounds.insetBy(dx: 0, dy: 1), xRadius: 9, yRadius: 9).fill()
     }
 
     override var isEmphasized: Bool { get { false } set {} }
@@ -153,87 +154,6 @@ final class PaletteHeaderView: NSView {
     }
 }
 
-/// A row: the icon, the title with the matched letters in bold, then on
-/// the right the detail, the reason it is unavailable, or the shortcut
-/// as keys.
-final class PaletteRowView: NSTableCellView {
-    static let identifier = NSUserInterfaceItemIdentifier("palette-row")
-    private let icon = NSImageView()
-    private let title = NSTextField(labelWithString: "")
-    private let detail = NSTextField(labelWithString: "")
-    private let keys = KeycapsView()
-    private var style = PaletteStyle.system
-    private var available = true
-    /// The detail on the right (the palette) or right after the title (⌘J).
-    private var detailRight: [NSLayoutConstraint] = []
-    private var detailInline: [NSLayoutConstraint] = []
-
-    init() {
-        super.init(frame: .zero)
-        identifier = Self.identifier
-        detail.alignment = .right
-        detail.font = UILooks.font(12)
-        for view in [icon, title, detail, keys] as [NSView] {
-            view.translatesAutoresizingMaskIntoConstraints = false
-            addSubview(view)
-        }
-        for label in [title, detail] { label.lineBreakMode = .byTruncatingMiddle }
-        title.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        detail.setContentCompressionResistancePriority(.defaultLow - 1, for: .horizontal)
-        NSLayoutConstraint.activate([
-            icon.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
-            icon.centerYAnchor.constraint(equalTo: centerYAnchor),
-            icon.widthAnchor.constraint(equalToConstant: 16),
-            icon.heightAnchor.constraint(equalToConstant: 16),
-            title.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 10),
-            title.centerYAnchor.constraint(equalTo: centerYAnchor),
-            detail.centerYAnchor.constraint(equalTo: centerYAnchor),
-            keys.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
-            keys.centerYAnchor.constraint(equalTo: centerYAnchor),
-        ])
-        detailRight = [detail.leadingAnchor.constraint(greaterThanOrEqualTo: title.trailingAnchor, constant: 12),
-                       detail.trailingAnchor.constraint(equalTo: keys.leadingAnchor, constant: -8)]
-        detailInline = [detail.leadingAnchor.constraint(equalTo: title.trailingAnchor, constant: 10),
-                        detail.trailingAnchor.constraint(lessThanOrEqualTo: keys.leadingAnchor, constant: -8)]
-        NSLayoutConstraint.activate(detailRight)
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) { fatalError("PaletteRowView is created in code") }
-
-    func show(_ item: PaletteItem, style: PaletteStyle, selected: Bool) {
-        self.style = style
-        available = item.unavailableReason == nil
-        let color = available ? style.text : style.secondaryText.withAlphaComponent(0.6)
-        let jump = item.look == .jump
-        let text = NSMutableAttributedString(string: item.title, attributes: [
-            .font: UILooks.font(14, weight: jump ? .semibold : .regular), .foregroundColor: color,
-        ])
-        NSLayoutConstraint.deactivate(jump ? detailRight : detailInline)
-        NSLayoutConstraint.activate(jump ? detailInline : detailRight)
-        detail.alignment = jump ? .left : .right
-        detail.font = UILooks.font(jump ? 13 : 12)
-        title.setContentHuggingPriority(jump ? .required : .defaultLow, for: .horizontal)
-        for range in item.bold {
-            // The search's matched letters take the accent; ⌘J's action keeps the text's color.
-            text.addAttributes([.font: UILooks.font(14, weight: .semibold), .foregroundColor: available && item.look == .standard ? style.accent : color],
-                               range: NSRange(range, in: item.title))
-        }
-        title.attributedStringValue = text
-        detail.stringValue = item.unavailableReason ?? item.detail ?? ""
-        detail.textColor = style.secondaryText.withAlphaComponent(available ? 1 : 0.7)
-        keys.show(available ? item.shortcut : nil, style: style, joined: item.look != .standard)
-        icon.image = item.image ?? item.icon?.image(size: 16)
-        setSelected(selected)
-    }
-
-    /// The icon takes the accent on the selected row.
-    func setSelected(_ selected: Bool) {
-        let tint = selected && available ? style.accent : style.secondaryText
-        icon.contentTintColor = available ? tint : tint.withAlphaComponent(0.5)
-    }
-}
-
 /// The footer: the keys this list answers to ("↩ executar  ⌥↩ ao lado").
 final class PaletteFooterView: NSStackView {
     func show(_ hints: [PaletteHint], style: PaletteStyle) {
@@ -241,7 +161,7 @@ final class PaletteFooterView: NSStackView {
         spacing = 14
         for hint in hints {
             let keys = KeycapsView()
-            keys.show(hint.keys, style: style)
+            keys.show(hint.keys, style: style, joined: true)
             let label = NSTextField(labelWithString: hint.label)
             label.font = UILooks.font(12)
             label.textColor = style.secondaryText
