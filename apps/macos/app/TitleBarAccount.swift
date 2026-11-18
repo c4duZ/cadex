@@ -27,6 +27,9 @@ final class TitleBarAccount: NSView {
         layer?.cornerRadius = UILooks.pt(Look.radius)
         label.font = UILooks.font(DesignTokens.Breadcrumb.fontSize)
         label.lineBreakMode = .byTruncatingTail
+        // A long name ("Liderhub Development", an e-mail) no wider than a tab's title; whole in the tip.
+        label.widthAnchor.constraint(lessThanOrEqualToConstant: UILooks.pt(DesignTokens.Tab.maxTitle)).isActive = true
+        label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         number.font = UILooks.monospacedDigits(DesignTokens.Breadcrumb.fontSize)
         let side = UILooks.pt(Look.icon)
         logo.widthAnchor.constraint(equalToConstant: side).isActive = true
@@ -54,13 +57,14 @@ final class TitleBarAccount: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("TitleBarAccount is created in code") }
 
-    /// The account's short name (the part after its organization's) and its usage when known (the
-    /// ring; the number from `warn`). Nil hides it.
+    /// The account's name and its usage when known (the bar and the number). Nil hides it.
     func show(name: String?, used: Int?, provider: ProviderLogo = .claude) {
         guard let name, !name.isEmpty else { isHidden = true; return }
-        let short = name.components(separatedBy: " · ").last ?? name
+        // The account's name as the rest of the app says it: the organization's, or the one the
+        // owner gave it, with the folder only when two share it ("fba. + BKDG · bkdg"); cutting to
+        // the part after "·" left only the folder (the owner, 2026-11-18).
         logo.image = provider.image(size: UILooks.pt(Look.icon))
-        label.stringValue = short
+        label.stringValue = name
         bar.share = used.map { Double($0) / 100 }
         bar.color = Self.color(used)
         bar.isHidden = used == nil
