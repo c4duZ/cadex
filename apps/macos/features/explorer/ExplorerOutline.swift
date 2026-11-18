@@ -149,10 +149,10 @@ final class ExplorerOutline: NSOutlineView {
     @objc private func rowClicked() {
         guard clickedRow >= 0, let event = NSApp.currentEvent else { return }
         if !event.modifierFlags.intersection([.command, .shift]).isEmpty { return }
-        if event.clickCount >= 2 {
-            if (item(atRow: clickedRow) as? FileNode)?.isFolder == true { run("explorer.open-in-terminal") }
-            return
-        }
+        // The second click of a quick pair does nothing: it used to open a terminal in the folder,
+        // which fought the first click's open and close (the owner, 2026-11-18). The terminal is
+        // in the right click.
+        if event.clickCount >= 2 { return }
         let point = convert(event.locationInWindow, from: nil)
         if frameOfOutlineCell(atRow: clickedRow).insetBy(dx: -4, dy: 0).contains(point) { return }
         run("explorer.open")

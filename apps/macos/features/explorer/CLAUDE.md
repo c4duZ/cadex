@@ -30,8 +30,9 @@
   quando está indisponível), `FileTypeIcon.swift` (pasta, link, e os arquivos pelo `FileIcons` compartilhado, em Phosphor
   e nas cores do desenho, components.inspector.tree.iconColor; o Material ficou de fora da árvore).
 - Um clique abre (arquivo na aba, pasta abre ou fecha); ⌘ e ⇧ só selecionam; a seta não abre duas
-  vezes. Dois cliques numa pasta rodam explorer.open-in-terminal (o app faz `cd` ou, com programa
-  rodando, abre aba nova na pasta). Aparência da aba Files do painel da direita (plano 26 fase C2b, components.inspector.tree, o
+  vezes; abrir e fechar pasta é na hora, sem deslizar. Dois cliques não fazem nada a mais (abriam o
+  terminal na pasta e brigavam com o primeiro clique, o dono em 2026-11-18): o terminal na pasta fica
+  no clique direito (explorer.open-in-terminal). Aparência da aba Files do painel da direita (plano 26 fase C2b, components.inspector.tree, o
   desenho que o dono aprovou): linhas de 24 pt (eram 28, o dono achou duro em 2026-11-18), recuo de 16 pt, nenhuma linha escolhida ao abrir a aba, a seta apagada, o nome em 13 (o
   mudado em âmbar, o novo em verde), a letra do git à direita e a linha escolhida com o fundo e o
   contorno arredondados; guias de recuo com o ponteiro sobre a árvore e fundo leve na linha sob ele (`ExplorerOutline.swift` e

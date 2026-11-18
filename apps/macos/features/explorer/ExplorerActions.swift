@@ -37,7 +37,11 @@ extension ExplorerController {
             if node.isFolder {
                 guard beside == nil else { continue }
                 let row = item(of: node)
-                outline.isItemExpanded(row) ? outline.collapseItem(row) : outline.expandItem(row)
+                // At once: the slide redrew every guide and caret on the way and felt stuck (2026-11-18).
+                NSAnimationContext.runAnimationGroup { context in
+                    context.duration = 0
+                    outline.isItemExpanded(row) ? outline.collapseItem(row) : outline.expandItem(row)
+                }
             } else if cadex_workspace_is_authorized(node.path) {
                 if let beside, let openFileAs { openFileAs(node.path, beside) }
                 else if let openFile { openFile(node.path) }

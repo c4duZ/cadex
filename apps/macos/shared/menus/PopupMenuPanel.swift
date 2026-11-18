@@ -15,6 +15,7 @@ final class PopupMenuPanel: NSPanel {
         opener = parent
         super.init(contentRect: NSRect(origin: .zero, size: size), styleMask: [.borderless], backing: .buffered, defer: true)
         isFloatingPanel = true
+        acceptsMouseMovedEvents = true
         level = .popUpMenu
         backgroundColor = .clear
         isOpaque = false
@@ -29,6 +30,13 @@ final class PopupMenuPanel: NSPanel {
     }
 
     override var canBecomeKey: Bool { true }
+
+    /// The pointer's moves, read here: the list's tracking area, in this floating panel, missed
+    /// them, and no row lit under the mouse (the palette's same fault, logged 2026-11-18).
+    override func sendEvent(_ event: NSEvent) {
+        if event.type == .mouseMoved { list.pointerMoved(event) }
+        super.sendEvent(event)
+    }
 
     /// Top-left at `point` (screen), or bottom-left when `upward`; flipped
     /// when there is no room that way, and inside the screen sideways.
@@ -108,6 +116,10 @@ final class PopupMenuList: NSView {
     }
 
     override func mouseMoved(with event: NSEvent) { select(at: event) }
+    func pointerMoved(_ event: NSEvent) {
+        let point = convert(event.locationInWindow, from: nil)
+        if bounds.contains(point) { select(at: event) } else { setSelected(nil) }
+    }
     override func mouseExited(with event: NSEvent) { setSelected(nil) }
     override func mouseDown(with event: NSEvent) { select(at: event) }
 

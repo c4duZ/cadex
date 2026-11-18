@@ -89,6 +89,9 @@ public final class TabBarView: NSView {
     var onMove: ((Int, Int) -> Void)?
 
     private var hovered: Int?
+    /// The pointer on the hovered tab's ×: it lights, a round fill and the × brighter (the owner,
+    /// 2026-11-18: the × gave no sign under the mouse).
+    private var pointerOnClose = false
     /// The tab the middle button went down on.
     private var middlePressed: Int?
     var dragging: (id: Int, startX: CGFloat, offset: CGFloat)? { didSet { syncGlyphs() } }
@@ -262,7 +265,13 @@ public final class TabBarView: NSView {
         guard hovered else { return }
         (item.active ? Look.Active.bg : DesignTokens.Color.bgButton).setFill()
         closeBackdrop(in: rect).fill()
-        tinted(.x, size: Self.closeSize, color: Look.Inactive.color).draw(in: closeFrame(in: rect))
+        let close = closeFrame(in: rect)
+        if pointerOnClose {
+            Look.Inactive.color.withAlphaComponent(0.22).setFill()
+            let spot = close.insetBy(dx: -UILooks.pt(DesignTokens.Stroke.glyph), dy: -UILooks.pt(DesignTokens.Stroke.glyph))
+            NSBezierPath(ovalIn: spot).fill()
+        }
+        tinted(.x, size: Self.closeSize, color: pointerOnClose ? Look.Active.color : Look.Inactive.color).draw(in: close)
     }
 
     /// A template icon in a color: drawn on a copy, filled over with sourceAtop.
@@ -280,9 +289,12 @@ public final class TabBarView: NSView {
 
     public override func mouseMoved(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
-        let id = index(at: point).map { items[$0].id }
-        if id != hovered {
+        let index = index(at: point)
+        let id = index.map { items[$0].id }
+        let close = index.map { closeFrame(in: frame(at: $0)).insetBy(dx: -3, dy: -3).contains(point) } ?? false
+        if id != hovered || close != pointerOnClose {
             hovered = id
+            pointerOnClose = close
             needsDisplay = true
         }
         showTip(at: point)
@@ -295,6 +307,7 @@ public final class TabBarView: NSView {
     public override func mouseExited(with event: NSEvent) {
         TitleBarHold.exited(self, holding: dragging != nil)
         hovered = nil
+        pointerOnClose = false
         needsDisplay = true
         HoverTip.hide()
     }

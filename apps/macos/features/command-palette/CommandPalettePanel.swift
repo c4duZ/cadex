@@ -59,6 +59,12 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
     }
 
     override var canBecomeKey: Bool { true }
+    /// The pointer's moves, read here: the list's own tracking area never got them (logged on
+    /// 2026-11-18: the panel had every move, the table none), so no row lit under the mouse.
+    override func sendEvent(_ event: NSEvent) {
+        if event.type == .mouseMoved { table.pointerMoved(event) }
+        super.sendEvent(event)
+    }
 
     override func resignKey() {
         super.resignKey()

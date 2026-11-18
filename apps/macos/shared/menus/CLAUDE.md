@@ -19,7 +19,7 @@
   (barra de status, embaixo da janela); `MenuLayout`
   são as medidas e as setas, separadas do desenho para os testes.
 - `PopupMenuPanel.swift`: a janela do menu (pega o teclado: setas, Return, Esc; fecha ao perder o
-  foco, que é o clique fora) e a lista desenhada à mão. A ação roda depois de fechar, com o
+  foco, que é o clique fora; o painel entrega cada movimento do ponteiro à lista, que acende a linha) e a lista desenhada à mão. A ação roda depois de fechar, com o
   teclado já de volta na janela de onde o menu abriu.
 - `HoverTip.swift`: o nome de um botão de ícone, embaixo dele 0,2 s depois de o ponteiro chegar (o
   do sistema levava cerca de 1 s e tinha outra cara; o dono, 2026-10-20), nas cores dos menus. Some

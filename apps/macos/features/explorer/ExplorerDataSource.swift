@@ -211,9 +211,13 @@ final class ExplorerRowView: NSTableRowView {
         guard let outline else { return }
         let row = outline.row(for: self)
         guard row >= 0 else { return }
+        // Under the pointer: the selection's rounded shape, lighter (a flat band edge to edge
+        // looked like another control than the chosen row, 2026-11-18).
         if !isSelected, row == outline.hoveredRow {
-            NSColor.labelColor.withAlphaComponent(0.06).setFill()
-            bounds.fill()
+            typealias Tree = DesignTokens.Inspector.Tree
+            let radius = UILooks.pt(Tree.radius)
+            DesignTokens.Color.bgButton.setFill()
+            NSBezierPath(roundedRect: bounds.insetBy(dx: UILooks.pt(Tree.listPadding.left), dy: 0), xRadius: radius, yRadius: radius).fill()
         }
         guard outline.pointerInside else { return }
         guide.setFill()
