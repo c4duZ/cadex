@@ -5,9 +5,9 @@ import Strings
 import UILooks
 
 /// The review's file list on the left (docs/spec/review.md): each changed
-/// file with its letter, its name and its folder, and +/−; a click goes to
-/// the file in the stack, and the list follows the cursor. A right click
-/// offers to open the file.
+/// file as the Changes tab's row (its letter, name, folder, +/−; plan 31 A);
+/// a click goes to the file in the stack, and the list follows the cursor.
+/// A right click offers to open the file.
 @MainActor
 final class ReviewTree: NSObject, NSTableViewDataSource, NSTableViewDelegate {
     let table = MenuTableView()
@@ -23,13 +23,14 @@ final class ReviewTree: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         let column = NSTableColumn(identifier: .init("file"))
         table.addTableColumn(column)
         table.headerView = nil
-        table.rowHeight = UILooks.rowHeight(36)
+        table.rowHeight = UILooks.pt(DesignTokens.Inspector.FileRow.height)
         // Plain and clear: the source-list style painted a grey slab over
         // the theme's panel (seen in the app, 2026-11-15).
         table.backgroundColor = .clear
         table.style = .plain
+        // The frame's selected row (bg.selected), drawn by ReviewTreeRow, not the system's blue.
         table.selectionHighlightStyle = .regular
-        table.intercellSpacing = NSSize(width: 0, height: 2)
+        table.intercellSpacing = NSSize(width: 0, height: 0)
         table.dataSource = self
         table.delegate = self
         table.contextEntries = { [weak self] row in
@@ -48,6 +49,7 @@ final class ReviewTree: NSObject, NSTableViewDataSource, NSTableViewDelegate {
     func show(_ files: [GitRepository.ReviewFile]) {
         self.files = files
         table.reloadData()
+        paintChosen()
     }
 
     /// The cursor is in this file now: select it without jumping back.
@@ -56,41 +58,54 @@ final class ReviewTree: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         following = true
         table.selectRowIndexes(IndexSet(integer: index), byExtendingSelection: false)
         table.scrollRowToVisible(index)
+        paintChosen()
         following = false
     }
 
     func numberOfRows(in tableView: NSTableView) -> Int { files.count }
 
     func tableViewSelectionDidChange(_ notification: Notification) {
+        paintChosen()
         guard !following, files.indices.contains(table.selectedRow) else { return }
         onPick?(table.selectedRow)
     }
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         let file = files[row]
-        let letter = text(String(file.status), size: 11, weight: .bold, color: ReviewTextView.statusColor(file.status))
-        letter.setContentHuggingPriority(.required, for: .horizontal)
-        let name = text((file.path as NSString).lastPathComponent, size: 12, weight: .medium, color: .labelColor)
-        let folder = text((file.path as NSString).deletingLastPathComponent, size: 10.5, color: .secondaryLabelColor)
-        let counts = text(file.added.map { "+\($0) −\(file.removed ?? 0)" } ?? "bin", size: 10.5, color: .secondaryLabelColor)
-        counts.setContentHuggingPriority(.required, for: .horizontal)
-        counts.setContentCompressionResistancePriority(.required, for: .horizontal)
-        let names = NSStackView(views: [name, folder])
-        names.orientation = .vertical
-        names.alignment = .leading
-        names.spacing = 0
-        let line = NSStackView(views: [letter, names, NSView(), counts])
-        line.spacing = 7
-        line.edgeInsets = NSEdgeInsets(top: 0, left: 6, bottom: 0, right: 8)
-        line.toolTip = file.orig.isEmpty ? file.path : "\(file.orig) → \(file.path)"
-        return line
+        let view = ChangesRowView(ChangesRow(file: file, entry: nil))
+        view.toolTip = file.orig.isEmpty ? file.path : "\(file.orig) → \(file.path)"
+        return view
     }
 
-    private func text(_ string: String, size: CGFloat, weight: NSFont.Weight = .regular, color: NSColor) -> NSTextField {
-        let field = NSTextField(labelWithString: string)
-        field.font = UILooks.font(size, weight: weight)
-        field.textColor = color
-        field.lineBreakMode = .byTruncatingMiddle
-        return field
+    func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
+        ReviewTreeRow()
     }
+
+    // Marked as each row comes on: rows made by a reload were born before the selection came back.
+    func tableView(_ tableView: NSTableView, didAdd rowView: NSTableRowView, forRow row: Int) {
+        (rowView as? ReviewTreeRow)?.chosen = row == tableView.selectedRow
+    }
+
+    /// Each row on screen shows whether it is the selected one.
+    private func paintChosen() {
+        table.enumerateAvailableRowViews { view, row in (view as? ReviewTreeRow)?.chosen = row == self.table.selectedRow }
+    }
+}
+
+/// The selected file in the right panel's chosen box (components.inspector.tree.selected), set by
+/// the list: the table's own selection drawing did not show (2026-11-17), as in the history's list.
+final class ReviewTreeRow: NSTableRowView {
+    var chosen = false { didSet { if chosen != oldValue { needsDisplay = true } } }
+
+    override func drawBackground(in dirtyRect: NSRect) {
+        guard chosen else { return }
+        typealias Selected = DesignTokens.Inspector.Tree.Selected
+        let radius = UILooks.pt(DesignTokens.Inspector.Commit.radius)
+        Selected.bg.setFill()
+        // In from the list's edges by the row's own padding, as the Changes rows sit.
+        let inset = UILooks.pt(DesignTokens.Inspector.FileRow.padding.left) / 2
+        NSBezierPath(roundedRect: bounds.insetBy(dx: inset, dy: 0), xRadius: radius, yRadius: radius).fill()
+    }
+
+    override func drawSelection(in dirtyRect: NSRect) {}
 }

@@ -6,8 +6,7 @@ import Strings
 /// ⌘Enter in the message run these ids.
 public enum SourceControlCommands {
     @MainActor
-    public static func all(_ git: SourceControlController, palette: CommandPaletteController,
-                           activeDiff: @escaping @MainActor () -> DiffDocument? = { nil }) -> [Command] {
+    public static func all(_ git: SourceControlController, palette: CommandPaletteController) -> [Command] {
         func needsRepo() -> String? { git.repo == nil ? T("No git repository open", "Nenhum repositório git aberto") : nil }
         func needsSelection() -> String? { git.panel.selectedEntries().isEmpty ? T("No file selected", "Nenhum arquivo selecionado") : nil }
         // One entry per file: a file staged and changed again comes in twice (both sides), and
@@ -50,9 +49,6 @@ public enum SourceControlCommands {
                     action: .run { git.push() }, unavailableReason: needsRepo),
             Command(id: "git.refresh", title: T("Refresh Git Status", "Atualizar o status do git"), keywords: ["status", "refresh"], category: .file,
                     action: .run { git.refresh() }, unavailableReason: needsRepo),
-            Command(id: "diff.toggle-layout", title: T("Toggle Side-by-Side/Unified Diff", "Alternar diff lado a lado/unificado"), keywords: ["diff", "patch", "unified"],
-                    category: .view, action: .run { activeDiff()?.toggleLayout() },
-                    unavailableReason: { activeDiff() == nil ? T("No diff open", "Nenhum diff aberto") : nil }),
             Command(id: "git.switch-branch", title: T("Switch Branch", "Trocar de branch"), keywords: ["checkout", "switch", "branch"], category: .file,
                     action: .run { palette.open(BranchSource(git: git)) }, unavailableReason: needsRepo),
         ]

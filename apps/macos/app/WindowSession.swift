@@ -169,6 +169,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
                                 opensBeside: { [weak self] in self?.settings.opensBeside ?? true })
         opener.onEditorOpened = { [weak self] document in self?.markdown?.attach(document) }
         opener.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
+        opener.onReview = { [weak self] request in self?.openReview(diff: request) }
         opener.onPickElement = { [weak self] delivery in
             let driving = delivery.agentTerminal.flatMap { key in self?.app.locate { AppDelegate.key($0) == key }?.terminal }
             return ElementPickDelivery.deliver(delivery, tabs: self?.tabs, toClipboard: self?.settings.picksToClipboard ?? false, driving: driving)

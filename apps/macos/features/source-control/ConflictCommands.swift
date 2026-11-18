@@ -7,8 +7,7 @@ import Strings
 /// or the diff in front.
 public enum ConflictCommands {
     @MainActor
-    public static func all(conflict: @escaping @MainActor () -> ConflictDocument?, review: @escaping @MainActor () -> ReviewDocument?,
-                           diff: @escaping @MainActor () -> DiffDocument?) -> [Command] {
+    public static func all(conflict: @escaping @MainActor () -> ConflictDocument?, review: @escaping @MainActor () -> ReviewDocument?) -> [Command] {
         func needsConflict() -> String? { conflict() == nil ? T("No conflict open", "Nenhum conflito aberto") : nil }
         func onConflict(_ id: String, _ title: String, _ keywords: [String], _ body: @escaping @MainActor (ConflictDocument) -> Void) -> Command {
             Command(id: id, title: title, keywords: keywords + ["conflict", "merge", "conflito"], category: .file,
@@ -22,10 +21,10 @@ public enum ConflictCommands {
             Command(id: "git.review-image-mode", title: T("Next Image Comparison Mode", "Próximo modo de comparar a imagem"),
                     keywords: ["image", "slide", "overlay", "imagem", "deslizar", "sobrepor"], category: .view,
                     action: .run {
-                        if let review = review() { review.cycleImageMode() } else { diff()?.cycleImageMode() }
+                        review()?.cycleImageMode()
                     },
                     unavailableReason: {
-                        review()?.hasImages == true || diff()?.showsImage == true ? nil : T("No image diff open", "Nenhum diff de imagem aberto")
+                        review()?.hasImages == true ? nil : T("No image diff open", "Nenhum diff de imagem aberto")
                     }),
         ]
     }

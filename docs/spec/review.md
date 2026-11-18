@@ -10,8 +10,12 @@ do source-control (`source-control.md`); comentários e autoria são desta featu
 ## Comportamento
 
 ### A aba de revisão
-- Abre por git.review-open (⌘K, o botão no grupo da worktree em Agents e no cabeçalho do Git): uma
+- Abre por git.review-open (⌘K, a aba Review da tarefa) e por um clique num arquivo do Changes: uma
   aba por worktree, com o nome da tarefa. Abrir de novo a mesma worktree vai à aba que já existe.
+- É uma página (plano 31 A): o centro inteiro, sem caixa, e o painel da direita fecha enquanto ela
+  aparece (a lista dela é a mesma) e volta depois, como no quadro. A cara da moldura: a lista com a
+  linha do Changes, o cabeçalho de cada arquivo como linha de cartão, as cores color.diff.*, a barra
+  com os botões do app.
 - À esquerda, a árvore dos arquivos mudados (com A, M, D, R e a contagem +/−); à direita, todos os
   arquivos empilhados numa rolagem só, cada um com o cabeçalho (caminho, estado, +/−) e os trechos.
   Clicar na árvore leva ao arquivo.

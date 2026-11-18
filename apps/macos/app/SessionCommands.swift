@@ -84,9 +84,7 @@ extension WindowSession {
         connectPalette(palette)
         let git = SourceControlController(folder: folder.root) { [weak self] id in self?.commands.run(id) ?? false }
         self.git = git
-        commands.register(SourceControlCommands.all(git, palette: palette) { [weak self] in
-            self?.tabs?.activeDocument as? DiffDocument
-        })
+        commands.register(SourceControlCommands.all(git, palette: palette))
         registerReview(palette: palette)
         registerRaces(palette: palette)
         registerRuns(palette: palette)

@@ -68,7 +68,9 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 29 | `docs/plans/29-entrances.md` | tela de início, a folha única do ⌘N (tarefa e corrida), ⌘J | fechado (2026-11-17): fases A a E; a tela de início, a folha Nova tarefa (tarefa e corrida, Claude e Codex) e o ⌘J |
 | 30 | `docs/plans/30-overview.md` | página do projeto, quadro, corrida, gaveta e a auditoria final | fechado (2026-11-17): fases A a F; o inventário sem `sai`, `make check` e `make perf` passando |
 
-- Próximo: a moldura nova no app do Windows (plano 31, a escrever), sobre o port dos planos 9 a 13;
+| 31 | `docs/plans/31-leftover-screens.md` | as telas que ficaram na casca velha (diff e revisão, folhas, arquivo, configurações) | em andamento |
+
+- Depois: a moldura nova no app do Windows (plano 32, a escrever), sobre o port dos planos 9 a 13;
   até lá o Windows segue com spaces e os comandos novos ficam no `MAC_ONLY` da paridade.
 
 ## O que eu não quero

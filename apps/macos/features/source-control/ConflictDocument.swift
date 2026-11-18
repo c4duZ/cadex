@@ -226,7 +226,8 @@ public final class ConflictDocument: NSObject, TabDocument, NSTextViewDelegate {
     }
 }
 
-/// A button that runs a closure (the command by id).
+/// A button that runs a closure (the command by id), in the frame's secondary face
+/// (components.button; plan 31): its title can change (the review's "Send to Agent (2)").
 @MainActor
 final class CommandButton: NSButton {
     var onPress: (() -> Void)? {
@@ -236,12 +237,35 @@ final class CommandButton: NSButton {
     private var run: (() -> Void)?
 
     convenience init(title: String, run: @escaping () -> Void) {
-        self.init(title: title, target: nil, action: nil)
+        self.init(frame: .zero)
         self.run = run
         target = self
         action = #selector(pressed)
-        bezelStyle = .rounded
-        controlSize = .small
+        typealias B = DesignTokens.Button
+        isBordered = false
+        wantsLayer = true
+        layer?.cornerRadius = UILooks.pt(B.radius)
+        layer?.backgroundColor = B.Secondary.bg.cgColor
+        layer?.borderColor = B.Secondary.border.cgColor
+        layer?.borderWidth = DesignTokens.Stroke.hairline
+        self.title = title
+    }
+
+    override var title: String {
+        get { super.title }
+        set {
+            super.title = newValue
+            attributedTitle = NSAttributedString(string: newValue, attributes: [
+                .font: UILooks.font(DesignTokens.FontSize.body, weight: DesignTokens.Button.Secondary.weight),
+                .foregroundColor: DesignTokens.Button.Secondary.color,
+            ])
+            invalidateIntrinsicContentSize()
+        }
+    }
+
+    override var intrinsicContentSize: NSSize {
+        NSSize(width: ceil(attributedTitle.size().width) + UILooks.pt(DesignTokens.Button.paddingX[1]) * 2,
+               height: UILooks.pt(DesignTokens.Button.Heights.medium))
     }
 
     @objc private func pressed() { run?() }

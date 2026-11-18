@@ -1,6 +1,7 @@
 import AppKit
 import Editor
 import Strings
+import UILooks
 
 /// The review's files stacked in one view (docs/spec/review.md): only the
 /// rows on screen are drawn, so 5 thousand lines in 50 files scroll like
@@ -37,7 +38,8 @@ final class ReviewTextView: NSView {
     let look = EditorAppearance.current
     lazy var charWidth: CGFloat = ("M" as NSString).size(withAttributes: [.font: look.font]).width
     lazy var lineHeight: CGFloat = ceil(look.font.ascender - look.font.descender + look.font.leading) + 3
-    var headerHeight: CGFloat { lineHeight + 14 }
+    /// The header's card row (the Changes row's height) and 6 pt over it.
+    var headerHeight: CGFloat { UILooks.pt(DesignTokens.Inspector.FileRow.height) + 6 }
     /// Each row's top; one more at the end for the total height.
     private(set) var tops: [CGFloat] = [0]
     /// Each file side's syntax tree and line ranges; lines are colored as drawn.
@@ -129,7 +131,7 @@ final class ReviewTextView: NSView {
     func annotationHeight(_ note: ReviewAnnotation) -> CGFloat {
         let width = max(bounds.width - gutterWidth - 40, 100)
         let body = (note.text as NSString).boundingRect(with: NSSize(width: width, height: 10_000), options: [.usesLineFragmentOrigin],
-                                                         attributes: [.font: NSFont.systemFont(ofSize: 12)])
+                                                         attributes: [.font: UILooks.font(DesignTokens.FontSize.meta)])
         return ceil(body.height) + lineHeight + 22
     }
 

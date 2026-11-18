@@ -23,6 +23,8 @@ final class FileOpener {
     var onEditorOpened: ((EditorDocument) -> Void)?
     /// Runs a command by id, for tabs whose menus fire commands (history).
     var runCommand: ((String) -> Bool)?
+    /// A file's diff is the review opened on that file (plan 31 A): the app opens it.
+    var onReview: ((SourceControlController.DiffRequest) -> Void)?
     /// Hands an element picked in a preview over (ElementPickDelivery).
     var onPickElement: ((PickDelivery) -> PickOutcome)?
     /// The setting: a picked element carries a picture of itself.
@@ -77,19 +79,11 @@ final class FileOpener {
         return media
     }
 
-    /// A file's git diff in a tab; the same diff again selects its tab and
-    /// reads it again.
-    /// `beside` overrides the setting ("Ver o diff ao lado", "em nova aba").
+    /// A file's git diff: the review, a page, opened on that file (plan 31 A; the two narrow
+    /// columns beside the terminal left). A file in conflict opens in three columns.
     func openDiff(_ request: SourceControlController.DiffRequest, from source: TabDocument? = nil, beside: Bool? = nil) {
-        guard let tabs = currentTabs() else { return }
         if request.conflict { return openConflict(repo: request.repo, path: request.path, beside: beside) }
-        if let existing = tabs.document(identity: DiffDocument.identity(for: request)) as? DiffDocument {
-            existing.load()
-            return tabs.open(existing)
-        }
-        let diff = DiffDocument(request: request)
-        diff.openFile = { [weak self, weak diff] path in self?.open(path, from: diff) }
-        tabs.open(diff, beside: beside ?? opensBeside(), keeping: source)
+        onReview?(request)
     }
 
     /// A file in conflict, in three columns and the result (plan 21 phase C).
@@ -162,9 +156,6 @@ final class FileOpener {
         for document in documents where changed.contains((document.identity as NSString).deletingLastPathComponent) {
             (document as? EditorDocument)?.diskMayHaveChanged()
             (document as? MediaDocument)?.diskMayHaveChanged()
-        }
-        for case let diff as DiffDocument in documents where changed.contains((diff.request.repo + "/" + diff.request.path as NSString).deletingLastPathComponent) {
-            diff.load()
         }
         for case let history as HistoryDocument in documents {
             history.diskChanged(folders)

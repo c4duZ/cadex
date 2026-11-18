@@ -23,8 +23,7 @@ extension WindowSession {
             repo: { [weak self] in self?.reviewFolder() }))
         commands.register(ConflictCommands.all(
             conflict: { [weak self] in self?.tabs?.activeDocument as? ConflictDocument },
-            review: { [weak self] in self?.tabs?.activeDocument as? ReviewDocument },
-            diff: { [weak self] in self?.tabs?.activeDocument as? DiffDocument }))
+            review: { [weak self] in self?.tabs?.activeDocument as? ReviewDocument }))
         registerReviewComments(palette: palette)
         registerAuthorship()
     }
@@ -42,11 +41,25 @@ extension WindowSession {
         openReview(ReviewDocument.Request(repo: repo, start: start))
     }
 
-    func openReview(_ request: ReviewDocument.Request) {
-        guard let tabs else { return }
+    /// A file's diff (Changes, History): the review on that file; a commit's is the review of
+    /// that commit (its parent to it), the rest the worktree's against its base (plan 31 A).
+    func openReview(diff: SourceControlController.DiffRequest) {
+        let request: ReviewDocument.Request
+        if let sha = diff.commit {
+            request = ReviewDocument.Request(repo: diff.repo, base: sha + "^", to: sha)
+        } else {
+            request = ReviewDocument.Request(repo: diff.repo, start: WorktreesController.shared.store.task(diff.repo)?.base)
+        }
+        openReview(request)?.reveal(path: diff.path)
+    }
+
+    @discardableResult
+    func openReview(_ request: ReviewDocument.Request) -> ReviewDocument? {
+        guard let tabs else { return nil }
         if let existing = tabs.document(identity: ReviewDocument.identity(for: request)) as? ReviewDocument {
             existing.load()
-            return tabs.open(existing)
+            tabs.open(existing)
+            return existing
         }
         let git = settings.store.settings.git
         let review = ReviewDocument(request: request, context: git.reviewContextLines, wrap: git.reviewWrap, whitespace: git.reviewShowWhitespace)
@@ -62,6 +75,7 @@ extension WindowSession {
         attachComments(to: review)
         attachAuthorship(to: review)
         tabs.open(review, beside: false)
+        return review
     }
 
     /// Folders changed on disk: a review whose repository holds one reads again.

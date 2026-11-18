@@ -36,12 +36,12 @@ e pull. Os agentes mexem no código pelo terminal; aqui se confere e se faz o co
   mensagem do git e não muda nada.
 
 ### Diff
-- Aba com o arquivo antes (HEAD ou o índice) e depois (índice ou o disco), lado a lado, com as
-  linhas removidas em vermelho à esquerda e as adicionadas em verde à direita, e o destaque de
-  sintaxe do editor. O comando "Alternar diff lado a lado/unificado" troca para uma coluna só, com o
-  patch.
-- Arquivo binário: "Arquivo binário, sem diff". Arquivo acima de 2 MB: "Arquivo grande demais para o
-  diff" com "Abrir o arquivo".
+- O diff de um arquivo é a revisão (`review.md`) aberta naquele arquivo, uma página no centro
+  inteiro (plano 31 A): clicar numa linha do Changes, "Ver o diff" e os atalhos dele vão ao cabeçalho
+  do arquivo na pilha, com ele escolhido na lista. O de um commit (o histórico) é a revisão daquele
+  commit, do pai até ele. As duas colunas estreitas ao lado do terminal saíram, e o comando de
+  alternar lado a lado/unificado com elas.
+- Arquivo binário: "binário" no cabeçalho; imagem, as duas versões (Imagem e conflito).
 
 ### Diff contra base (plano 21)
 - O diff de uma worktree inteira contra uma base, que a aba de revisão mostra (`review.md`): as

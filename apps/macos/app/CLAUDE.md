@@ -37,7 +37,7 @@
   status ao terminal com foco. Pastas e arquivos da linha de comando ou soltos no ícone do Dock
   (`application(_:open:)`, o Dock só com o pacote .app do plano 7): pasta vira workspace, arquivo
   abre numa aba, endereço http(s) abre no preview. `FileOpener.swift` decide o que abre (mídia pelo
-  tipo, o resto no editor; diffs do git num DiffDocument, o histórico num HistoryDocument que recebe
+  tipo, o resto no editor; diffs do git na revisão aberta no arquivo (`ReviewWiring.swift`, plano 31), o histórico num HistoryDocument que recebe
   as mudanças em .git, páginas web num PreviewDocument) e onde: ao lado do painel com foco ou em
   nova aba, por general.openFiles (opensBeside em `SettingsBridge.swift`), ou pela escolha do explorer; quem
   pede (o histórico abrindo um diff) fica no painel dele. `makeDocument(identity:)` refaz os

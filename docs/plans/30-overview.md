@@ -36,7 +36,7 @@ execução, automações), agents, memory, terminal (a gaveta), tabs · Decisõe
   `tools/perf/` atrás de nomes da casca velha (sidebar de ícones, space, Tasks, Attention,
   Accounts como página, paneHeaders); tools/find_unused.py limpo; o inventário sem `sai`;
   `make check`, `make perf`; cada mockup ao lado do print do app, e o dono vê todos.
-- **F. Fechamento.** Feita (2026-11-17): o README com a moldura e a tabela de atalhos de hoje, as notas abaixo, o índice, a ADR 0035 e o plano 31 (Windows) anotado como próximo. Plano original: README com a moldura nova, notas da release em inglês, o status dos planos 25 a
+- **F. Fechamento.** Feita (2026-11-17): o README com a moldura e a tabela de atalhos de hoje, as notas abaixo, o índice, a ADR 0035 e o Windows anotado como próximo (plano 32 desde a auditoria que virou o 31). Plano original: README com a moldura nova, notas da release em inglês, o status dos planos 25 a
   30 no índice, a ADR 0035 sem pendência, e o plano do Windows com a moldura nova anotado como
   próximo.
 

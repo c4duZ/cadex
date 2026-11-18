@@ -1,4 +1,5 @@
 import AppKit
+import SourceControl
 import CommandPalette
 import Orchestration
 import Sidebar
@@ -90,8 +91,9 @@ extension WindowSession {
     func showBoardChrome() {
         let on = tabs?.activeDocument?.identity == BoardDocument.identity
         workspace?.titleBar.setBoardOpen(on)
-        // The board has the right panel closed (the mockup), given back when it goes.
-        workspace?.setBoardShown(on)
+        // The board has the right panel closed (the mockup), given back when it goes; so has the
+        // review, whose list is the same files (plan 31 A).
+        workspace?.setBoardShown(on || tabs?.activeDocument is ReviewDocument)
         showLocation(folder.root)
     }
 }

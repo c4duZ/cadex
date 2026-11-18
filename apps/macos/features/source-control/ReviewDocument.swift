@@ -80,6 +80,24 @@ public final class ReviewDocument: TabDocument {
         return request.to.map { T("Compare \(request.base ?? "") ↔ \($0)", "Comparar \(request.base ?? "") ↔ \($0)") } ?? T("Review · \(name)", "Revisão · \(name)")
     }
     public var hasUnsavedChanges: Bool { false }
+    /// The center whole (plan 31 A): a review is read across the page, not beside a terminal.
+    public var isPage: Bool { true }
+    /// A file to show once read (a click on it in Changes, a commit's file in History).
+    private var pendingPath: String?
+
+    /// Goes to the file's header in the stack, now or after the read in progress.
+    public func reveal(path: String) {
+        pendingPath = path
+        revealPending()
+    }
+
+    func revealPending() {
+        guard let path = pendingPath, let index = files.firstIndex(where: { $0.file.path == path || $0.file.orig == path }),
+              text.layout.fileStarts.indices.contains(index) else { return }
+        pendingPath = nil
+        text.go(to: text.layout.fileStarts[index])
+        tree.follow(index)
+    }
     public var isFocused: Bool { view.window?.firstResponder === text }
     /// Back on the tab: read again, since a worktree outside the workspace
     /// sends no disk events.
@@ -133,6 +151,9 @@ public final class ReviewDocument: TabDocument {
         self.files = files
         tree.show(files.map(\.file))
         relayout()
+        // The list on the cursor's file again: a reload took its selection (2026-11-17).
+        if text.layout.rows.indices.contains(text.cursor) { tree.follow(ReviewLayout.file(of: text.layout.rows[text.cursor])) }
+        revealPending()
         let added = files.compactMap(\.file.added).reduce(0, +)
         let removed = files.compactMap(\.file.removed).reduce(0, +)
         let shown = base.map { String($0.prefix(7)) } ?? "—"
@@ -230,13 +251,13 @@ public final class ReviewDocument: TabDocument {
     }
 
     private func build() {
-        bar.font = UILooks.font(11.5)
-        bar.textColor = .secondaryLabelColor
+        bar.font = UILooks.font(DesignTokens.FontSize.meta)
+        bar.textColor = DesignTokens.Color.textSecondary
         bar.lineBreakMode = .byTruncatingTail
         scroll.documentView = text
         scroll.hasVerticalScroller = true
         scroll.drawsBackground = true
-        scroll.backgroundColor = text.look.background
+        scroll.backgroundColor = DesignTokens.Color.bgWindow
         text.autoresizingMask = [.width]
         text.onOpenFold = { [weak self] file, region in self?.openFold(file, region) }
         text.onCursor = { [weak self] row in
@@ -261,17 +282,27 @@ public final class ReviewDocument: TabDocument {
             onCommentRequest?(selection)
         }
         barButton.isHidden = true
+        // The page's bar (the board's filters row): what is reviewed and the totals, the button right.
+        typealias P = DesignTokens.Board.Filters
         let top = NSStackView(views: [bar, NSView(), barButton])
-        top.edgeInsets = NSEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
-        let body = NSSplitView()
-        body.isVertical = true
-        body.dividerStyle = .thin
-        body.addArrangedSubview(tree.scroll)
-        body.addArrangedSubview(scroll)
-        tree.scroll.widthAnchor.constraint(equalToConstant: UILooks.pt(250)).isActive = true
+        top.edgeInsets = NSEdgeInsets(top: UILooks.pt(P.padding.top), left: UILooks.pt(P.padding.left),
+                                      bottom: UILooks.pt(P.padding.bottom), right: UILooks.pt(P.padding.right))
+        // The list in the right panel's place and width, a hairline between (the frame's panels).
+        let line = NSView()
+        line.wantsLayer = true
+        line.layer?.backgroundColor = DesignTokens.Color.lineSubtle.cgColor
+        line.widthAnchor.constraint(equalToConstant: DesignTokens.Stroke.hairline).isActive = true
+        let body = NSStackView(views: [tree.scroll, line, scroll])
+        body.spacing = 0
+        body.alignment = .top
+        body.distribution = .fill
+        tree.scroll.widthAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Inspector.width)).isActive = true
+        for side in [tree.scroll, line, scroll] as [NSView] { side.heightAnchor.constraint(equalTo: body.heightAnchor).isActive = true }
         let column = NSStackView(views: [top, body])
         column.orientation = .vertical
         column.spacing = 0
+        view.wantsLayer = true
+        view.layer?.backgroundColor = DesignTokens.Color.bgWindow.cgColor
         column.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(column)
         NSLayoutConstraint.activate([

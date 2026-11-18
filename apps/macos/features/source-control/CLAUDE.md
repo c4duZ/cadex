@@ -4,7 +4,7 @@
 - A aba Changes do painel da direita (plano 26 fase C2; `../../../../docs/spec/inspector.md`): Last
   turn, Task e Uncommitted, um arquivo por linha com a letra, a pasta e +/−, Commit… e Open PR; stage
   por arquivo no clique direito, push e pull, troca de branch.
-- Diff lado a lado ou unificado.
+- O diff de um arquivo ou de um commit como a revisão aberta nele (plano 31 A).
 - A aba de revisão (plano 21): todas as mudanças de uma worktree contra a base, num lugar só, com
   stage por trecho e por linha.
 
@@ -33,20 +33,22 @@
   git.changes-task, git.changes-uncommitted (os três do seletor), git.stage-all, git.unstage-all, git.stage,
   git.unstage, git.discard, git.open-diff e git.open-file (com -beside e -in-tab: ao lado, em nova aba; o menu mostra só o que vale
   para a linha, em `ChangesRowView.swift`), git.reveal, git.fetch, git.pull, git.push,
-  git.refresh, git.switch-branch (branches na paleta) e diff.toggle-layout. Botões, seletor e menu
+  git.refresh e git.switch-branch (branches na paleta). Botões, seletor e menu
   só disparam esses ids. O git.show (⇧⌘G, mostrar o painel) é registrado em `apps/macos/app/main.swift`.
-- `DiffDocument.swift`: aba de diff (TabDocument) com as cores do editor, linhas de `DiffLines.swift`
-  marcadas, as duas colunas rolando juntas, ou o patch numa coluna. Com `commit` no DiffRequest, o
-  arquivo como aquele commit o mudou (o histórico pede pelo app).
+- O DiffRequest (o arquivo, o commit) vai ao app por `onOpenDiff`, que abre a revisão naquele
+  arquivo (`ReviewDocument.reveal(path:)`); a aba de diff em duas colunas saiu no plano 31 A.
+  `DiffLines.swift`: as linhas do patch, usadas pela revisão e pelo stage.
 - Revisão (plano 21, fase B2; `docs/spec/review.md`): `GitReview.swift` chama `cadex_git_review_*`
   (base, arquivos, um arquivo, o patch de stage e aplicar linhas); ReviewTally (público, plano 24)
   conta arquivos e linhas de uma worktree contra o ponto de partida, para o quadro da corrida. `ReviewLayout.swift`, puro: as
   linhas empilhadas (cabeçalho por arquivo, os números dos dois lados, regiões sem mudança recolhidas
   além das linhas de contexto, abertas uma a uma ou todas) e onde começa cada arquivo e cada mudança.
-  `ReviewTextView.swift` desenha só as linhas na tela (`ReviewRowDrawing.swift`: cores do editor,
+  `ReviewTextView.swift` desenha só as linhas na tela (`ReviewRowDrawing.swift`: a cara da moldura, plano 31 A: o fundo da página, color.diff.*, o
+  cabeçalho de cada arquivo como linha de cartão; o código com as cores do editor,
   colorido uma vez por arquivo ao aparecer, espaços visíveis, quebra de linha pela largura), marca
-  linhas pelo clique (⇧ estende) e ↑ ↓. `ReviewTree.swift`: a lista à esquerda (`MenuTableView`),
-  que segue o cursor. `ReviewDocument.swift`: a aba (TabDocument), lida na fila do repositório, a
+  linhas pelo clique (⇧ estende) e ↑ ↓. `ReviewTree.swift`: a lista à esquerda (`MenuTableView`, cada arquivo a `ChangesRowView` do Changes, a
+  escolhida na caixa da árvore do painel),
+  que segue o cursor. `ReviewDocument.swift`: a aba, uma página (isPage; o painel da direita fecha com ela, `../../app/BoardWiring.swift`), lida na fila do repositório, a
   barra com a base e os totais, j/k e n/p, recolher, quebrar, espaços, trocar a base; relê ao voltar
   à aba e quando o disco muda (`loadSoon`, uma vez por rajada). `ReviewDocumentStaging.swift` e
   `ReviewStaging.swift`: o stage da mudança do cursor ou das linhas marcadas, só no arquivo do cursor:
@@ -62,8 +64,7 @@
 - Imagem e conflito (plano 21, fase C): `GitConflict.swift` chama `cadex_git_show_blob` e
   `cadex_git_conflict_*`. `ImageDiffView.swift`: as duas versões de uma imagem (NSImage, pelo
   ImageIO) lado a lado, deslizando uma barra ou sobrepostas com a opacidade num controle, e os
-  tamanhos embaixo; acima de 20 MB só os tamanhos. Aparece na aba de diff (`DiffDocument.swift`, no
-  lugar de "arquivo binário") e na revisão, como uma linha alta com a vista por cima
+  tamanhos embaixo; acima de 20 MB só os tamanhos. Aparece na revisão, como uma linha alta com a vista por cima
   (`ReviewTextView.swift`). `ConflictDocument.swift`: o arquivo com U em três colunas (base, a nossa
   e a deles, os estágios `:1` `:2` `:3`) e o resultado editável embaixo, os blocos pintados; a
   nossa, a deles e as duas agem no bloco do cursor; marcar resolvido grava e faz o stage, recusado com

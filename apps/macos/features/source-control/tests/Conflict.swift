@@ -81,11 +81,6 @@ let conflictChecks: [(name: String, body: Checks.Body)] = [
         expect(images.count == 1 && images.first?.isEmpty == false, "\(images.count)")
         review.cycleImageMode()
         expect(images.first?.mode == .slide)
-        let diff = DiffDocument(request: .init(repo: repo, path: "logo.png", orig: "", staged: false))
-        let drawn = await eventually { diff.showsImage }
-        expect(drawn, "the panel's diff shows the image")
-        diff.cycleImageMode()
-        expect(diff.imageMode == .slide && diff.imageView?.mode == .slide)
         // Above 20 MB: no image, the sizes.
         var big = review.files[0]
         big.afterData = Data(count: ImageDiffView.maxBytes + 1)
