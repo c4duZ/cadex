@@ -16,6 +16,8 @@ let exitCode = await Checks.run([
         expect(read(#"{"version": 4, "terminal": {"lineHeight": 1}}"#).terminal.lineHeight == 1.6, "the old default moves to the mockups' 1.6")
         expect(read(#"{"version": 4, "terminal": {"lineHeight": 1.2}}"#).terminal.lineHeight == 1.2, "a height the owner chose stays")
         expect(read(#"{"version": 5, "terminal": {"lineHeight": 1}}"#).terminal.lineHeight == 1, "after the move, 1 is a choice")
+        expect(read(#"{"version": 5, "statusBar": {"left": ["project"], "right": ["memory"]}}"#).statusBar.right == ["drawer", "memory"])
+        expect(read(#"{"version": 6, "statusBar": {"left": ["project"], "right": ["memory"]}}"#).statusBar.right == ["memory"], "after, its absence is a choice")
         expect(read(#"{"appearance": {"theme": "dracula"}}"#).appearance.theme == "dracula")
         expect(read(#"{"version": 2, "appearance": {"theme": "caffeine"}}"#).appearance.theme == "caffeine")
         expect(Settings().appearance.theme == "cadex-night")
@@ -208,12 +210,13 @@ let exitCode = await Checks.run([
         let old = read(#"{"version": 2, "statusBar": {"left": ["folder"], "right": ["environment"]}}"#)
         expect(old == Settings.StatusBar(), "\(old)")
         let mine = read(#"{"version": 2, "statusBar": {"left": ["folder", "ram"], "right": ["branch", "environment"]}}"#)
-        expect(mine.left == ["project", "ram"] && mine.right == ["environment", "keepAwake", "update"], "\(mine)")
+        // Every file before version 6 also gets the drawer's item first on the right, once (plan 30).
+        expect(mine.left == ["project", "ram"] && mine.right == ["drawer", "environment", "keepAwake", "update"], "\(mine)")
         let oneSide = read(#"{"version": 2, "statusBar": {"left": ["folder", "ram"]}}"#)
         expect(oneSide.left == ["project", "ram"] || oneSide.left == ["folder", "ram"], "\(oneSide)")
-        expect(oneSide.right == ["environment", "keepAwake", "update"], "the side not written was the old default: \(oneSide)")
+        expect(oneSide.right == ["drawer", "environment", "keepAwake", "update"], "the side not written was the old default: \(oneSide)")
         let now = read(#"{"version": 3, "statusBar": {"left": ["folder"], "right": []}}"#)
-        expect(now.left == ["folder"] && now.right.isEmpty, "a version 3 file is left alone")
+        expect(now.left == ["folder"] && now.right == ["drawer"], "a version 3 file keeps its sides, with the drawer's item: \(now)")
     }),
     ("an old file is moved once and written back, so a later hand edit to Caffeine stays", {
         let file = FileManager.default.temporaryDirectory.appendingPathComponent("cadex-settings-\(UUID())/settings.json")

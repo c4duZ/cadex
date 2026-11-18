@@ -28,4 +28,13 @@ extension TabsController {
         tab.banner = banner
         if tab === activeTab { showActive() }
     }
+
+    /// Every tab's lone pane flat, with no box or header (the terminal drawer, the mockup).
+    public var plainPanes: Bool {
+        get { tabs.values.first?.layout.plain ?? plainDefault }
+        set {
+            plainDefault = newValue
+            tabs.values.forEach { $0.layout.plain = newValue }
+        }
+    }
 }

@@ -47,6 +47,19 @@ func eventually(_ body: () -> Bool) async -> Bool {
 }
 
 let exitCode = await Checks.run([
+    ("a terminal moves between tabs with its shell alive (the drawer's ⌘↩); the last one empties the drawer", { @MainActor in
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 500), styleMask: [.titled], backing: .buffered, defer: false)
+        let drawer = TabsController(window: window), project = TabsController(window: window)
+        var emptied = 0
+        drawer.onEmpty = { emptied += 1 }
+        drawer.newTab(cwd: NSTemporaryDirectory())
+        project.newTab(cwd: NSTemporaryDirectory())
+        let moved = drawer.takeFocusedTerminal()
+        expect(moved != nil && emptied == 1 && drawer.count == 0)
+        if let moved { project.adopt(moved) }
+        expect(project.count == 2 && project.activeTerminal === moved && moved?.session != nil, "the shell goes on")
+        project.closeAll()
+    }),
     ("a tab whose agent waits for a permission shows the needs-you glyph and its conversation's name, and the tip says what", {
         let tabs = makeTabs()
         tabs.newTab()

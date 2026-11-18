@@ -300,6 +300,14 @@ public extension DesignTokens {
                 public static let padding = NSEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
                 public static let fontSize: CGFloat = DesignTokens.FontSize.panel
             }
+            public static let padding = NSEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
+            public static let gap: CGFloat = 8
         }
+        public enum Hint {
+            public static let fontSize: CGFloat = DesignTokens.FontSize.small
+            public static var color: NSColor { DesignTokens.Color.textTertiary }
+        }
+        public static let minHeight: CGFloat = 160
+        public static let grip: CGFloat = 4
     }
 }

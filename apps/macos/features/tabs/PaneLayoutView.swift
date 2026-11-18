@@ -70,6 +70,9 @@ final class PaneLayoutView: NSView {
         needsLayout = true
     }
 
+    /// A lone pane fills the view flat, with no box or header (the drawer's terminals).
+    var plain = false { didSet { needsLayout = true } }
+
     override func layout() {
         super.layout()
         let frames = zoomed.map { [$0: paneArea] } ?? tree.frames(in: paneArea, gap: Self.gap)
@@ -77,10 +80,13 @@ final class PaneLayoutView: NSView {
         // A page alone in its tab: the whole center, flat (the Project mockup), no box drawn. The
         // headers say first what each pane is (the first layout had none yet and drew the box).
         placeHeaders(Array(frames.keys))
-        if frames.count == 1, let only = frames.keys.first, headers[only]?.info.page == true, let view = panes[only] {
+        if frames.count == 1, let only = frames.keys.first, headers[only]?.info.page == true || plain, let view = panes[only] {
             chrome.place([:], focused: nil)
             headers[only]?.isHidden = true
-            view.frame = bounds
+            // A plain terminal (the drawer's) keeps the mockup's room around its text.
+            let pad = DesignTokens.Pane.bodyPadding, own = TerminalView.innerPadding
+            view.frame = view is TerminalView && plain
+                ? bounds.insetBy(dx: max(UILooks.pt(pad.left) - own, 0), dy: max(UILooks.pt(pad.top) - own, 0)) : bounds
             view.layer?.cornerRadius = 0
             view.alphaValue = 1
             placeHandles()

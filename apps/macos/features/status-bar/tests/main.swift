@@ -83,9 +83,9 @@ let exitCode = await Checks.run([
         let hidden = StatusBarLayout.toggled(left: ["folder", "ram"], right: [], "ram", side: .right)
         expect(hidden.left == ["folder"] && hidden.right.isEmpty)
     }),
-    ("with nothing set the bar is the new frame's: project and agents left; memory, usage, keep-awake, update and environment right", {
+    ("with nothing set the bar is the new frame's: project and agents left; the drawer, memory, usage, keep-awake, update and environment right", {
         expect(StatusBarLayout.defaultLeft == ["project", "agents"])
-        expect(StatusBarLayout.defaultRight == ["memory", "usage", "keepAwake", "update", "environment"])
+        expect(StatusBarLayout.defaultRight == ["drawer", "memory", "usage", "keepAwake", "update", "environment"])
         // The bar alone knows only its own items: the app adds the rest and lays it out again.
         let bar = StatusBarView()
         expect(bar.left.isEmpty && bar.right == ["environment"], "\(bar.left) \(bar.right)")

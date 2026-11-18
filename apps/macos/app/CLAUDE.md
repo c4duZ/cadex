@@ -268,6 +268,10 @@
   `RaceLanesWiring.swift`: os concorrentes locais lado a lado numa aba (`dressLanes`: o nome, a
   faixa e o pé de cada um), o cabeçalho de cada um pelo `laneDetail` (refeito pelo relógio da
   corrida) e `raceName(of:)` para "projeto › race <nome>" e o "Compare" da barra.
+- `DrawerWiring.swift` (plano 30 C): a gaveta de terminais (`DrawerView` da feature tabs, com um
+  TabsController só dela, painéis planos), drawer.toggle (⌃`) e drawer.move-to-project (⌘↩,
+  indisponível sem o foco na gaveta, para a tecla seguir ao terminal), o item "Terminal ⌃`" da
+  barra de status; WorkspaceView.showDrawer a põe no pé do centro.
 - `CheckLineWiring.swift` (plano 29, revisão): a linha "make check passed · 2 min ago" do pé de
   Changes, o último comando de checagem (CheckLine, da source-control) que terminou num terminal da
   pasta, a cada redesenho da árvore. `ProjectsWiring.swift` dá às abas o grupo de cada pasta

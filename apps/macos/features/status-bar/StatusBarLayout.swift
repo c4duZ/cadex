@@ -12,7 +12,7 @@ public enum StatusBarLayout {
     /// agents on the left; the memory, the usage, keep-awake, the update and where it runs on the
     /// right (the drawer's Terminal item joins in plan 30).
     public static let defaultLeft = ["project", "agents"]
-    public static let defaultRight = ["memory", "usage", "keepAwake", "update", "environment"]
+    public static let defaultRight = ["drawer", "memory", "usage", "keepAwake", "update", "environment"]
 
     /// The saved sides against the ids the app knows: unknown ids, and an
     /// id listed again (on the same side or the other), are dropped and noted.

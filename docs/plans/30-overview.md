@@ -20,15 +20,15 @@ execução, automações), agents, memory, terminal (a gaveta), tabs · Decisõe
   exatos em `docs/design/work-frame/tokens.json`).
 - Cada arquivo reescrito entra na lista de tools/check_design_literals.py: só valores de
   `DesignTokens`, nada digitado.
-- **A. A página do projeto.** No centro, ao clicar no nome do projeto: números (tarefas abertas,
+- **A. A página do projeto.** Feita (2026-11-17, junto da revisão do plano 29, a pedido do dono): conferida no app em 1440 e 900 pt. Plano original: No centro, ao clicar no nome do projeto: números (tarefas abertas,
   gasto da semana, PRs, memória), conversas recentes (as sessões dos agentes, inclusive as de fora
   do Cadex que a página Agents mostrava), automações com liga e desliga, contas usadas ali; a aba
   Memória do painel da direita aberta junto.
-- **B. Quadro e corrida.** O quadro de todas as tarefas por estado, com filtros (corrida, execução,
+- **B. Quadro e corrida.** Feita (2026-11-17, idem): o quadro e a corrida no centro conferidos no app contra os mockups 7 e 8; a página de execução na cara nova fica para a fase D. Plano original: O quadro de todas as tarefas por estado, com filtros (corrida, execução,
   automações) e Nova corrida / Nova execução; a corrida no centro com as colunas do mockup 8
   (estado, tempo, custo, diff, barra do teto, Revisar e Escolher vencedora), na cara nova de
   RaceBoardView.swift; a execução como filtro do quadro, com a página dela na cara nova.
-- **C. A gaveta.** Terminais rápidos fora de qualquer projeto, de baixo (⌃`, drawer.toggle), com
+- **C. A gaveta.** Feita (2026-11-17, idem): conferida no app contra o mockup 9, e o ⌘↩ levando o terminal ao projeto. Plano original: Terminais rápidos fora de qualquer projeto, de baixo (⌃`, drawer.toggle), com
   abas, arrastar para cima, e ⌘↩ que leva um terminal da gaveta para um projeto.
 - **D. Remoção.** O apelido `orchestration.new-race`; o que a página do projeto substituiu; toda
   linha que ainda está em `sai`.

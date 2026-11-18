@@ -139,6 +139,30 @@ final class WorkspaceView: NSView {
     }
 
     private var inspectorBeforeBoard: Bool?
+    private weak var drawer: DrawerView?
+    private var drawerHeight: NSLayoutConstraint?
+
+    /// The terminal drawer over the center's bottom (the Drawer mockup), at its own height; nil
+    /// takes it away.
+    func showDrawer(_ next: DrawerView?) {
+        if let next, next === drawer {
+            drawerHeight?.constant = next.height
+            return
+        }
+        drawer?.removeFromSuperview()
+        drawer = next
+        guard let next else { return }
+        next.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(next, positioned: .above, relativeTo: contentPanel)
+        let height = next.heightAnchor.constraint(equalToConstant: next.height)
+        drawerHeight = height
+        NSLayoutConstraint.activate([
+            next.leadingAnchor.constraint(equalTo: contentPanel.leadingAnchor),
+            next.trailingAnchor.constraint(equalTo: contentPanel.trailingAnchor),
+            next.bottomAnchor.constraint(equalTo: contentPanel.bottomAnchor),
+            height,
+        ])
+    }
 
     /// The board shows: the right panel closes, and comes back as it was when the board goes.
     func setBoardShown(_ shown: Bool) {

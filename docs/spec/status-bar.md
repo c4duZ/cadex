@@ -98,3 +98,6 @@ ligados.
       guarda; reabrir o app mantém.
 - [ ] Cada ação de personalizar também está no ⌘K.
 - [ ] Com todos os itens novos escondidos, o `make perf` dá o mesmo de antes.
+
+- "Terminal ⌃`" (o item `drawer`, plano 30 C): o primeiro da direita por padrão, mostra ou esconde
+  a gaveta de terminais; uma configuração de antes da versão 6 o ganha uma vez.

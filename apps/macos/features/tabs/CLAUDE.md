@@ -88,6 +88,9 @@
   1 s só enquanto um painel mostra "running", que também move a árvore por onCommandTick) e
   `TabsGroups.swift` (a barra só com as abas do grupo da aba ativa, pelo `groupOf` do app, e
   "Review" no fim de uma tarefa; ⌘1…⌘9 e arrastar pela ordem mostrada).
+- `TabsDrawer.swift` e `TabsMove.swift` (plano 30 C): a vista da gaveta (as abas dela, "+", a dica,
+  a borda que muda a altura) e mover um terminal entre conjuntos de abas com o shell vivo
+  (`takeFocusedTerminal`, `adopt`); `plainPanes`, painel sozinho sem caixa nem cabeçalho.
 - `TabsLanes.swift` (plano 30 B): `splitRight(cwd:)`, o nome de uma aba e a faixa sobre os painéis
   dela (Tab.banner, que o TabsView põe em cima); o cabeçalho de duas linhas com a barra do teto
   (`PaneLane` no PaneDetail) e TerminalView.footBar, a barra no pé do painel.

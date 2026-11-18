@@ -32,6 +32,8 @@ public final class TabsController {
     public var groupOf: ((String?) -> String)?
     /// The items a group's bar ends with (TabsGroups.swift).
     public var extrasOf: ((String) -> [TabsExtra])?
+    /// New tabs' panes flat (TabsLanes.plainPanes).
+    var plainDefault = false
     /// Each second while a command shows "running N s": the tree's note moves too.
     public var onCommandTick: (() -> Void)?
     /// The pane header's "+" menu, built by the app from commands.
@@ -109,6 +111,7 @@ public final class TabsController {
 
     func add(_ tab: Tab) {
         tabs[tab.id] = tab
+        tab.layout.plain = plainDefault
         tab.onLayoutChange = { [weak self] in self?.onStateChange?() }
         wireHeaders(tab)
     }

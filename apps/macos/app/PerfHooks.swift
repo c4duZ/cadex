@@ -1,6 +1,7 @@
 import Agents
 import Machines
 import AppKit
+import Tabs
 import Terminal
 import Home
 import SourceControl
@@ -213,11 +214,22 @@ extension WindowSession {
                 NSGraphicsContext.saveGraphicsState()
                 NSGraphicsContext.current = context
                 func terminals(_ v: NSView) -> [TerminalView] { ((v as? TerminalView).map { [$0] } ?? []) + v.subviews.flatMap(terminals) }
+                // A view over the terminals (the drawer) stays on top: the ones under it are cut out.
+                func drawers(_ v: NSView) -> [NSView] { (v is DrawerView ? [v] : []) + v.subviews.flatMap(drawers) }
+                let overlays = drawers(view)
                 for terminal in terminals(view) where terminal.window != nil && !terminal.isHiddenOrHasHiddenAncestor {
                     guard let picture = terminal.snapshotImage() else { continue }
                     let rect = terminal.convert(terminal.bounds, to: view)
-                    let flipped = view.isFlipped ? rect : NSRect(x: rect.minX, y: rect.minY, width: rect.width, height: rect.height)
-                    NSImage(cgImage: picture, size: rect.size).draw(in: flipped)
+                    NSGraphicsContext.saveGraphicsState()
+                    let covering = overlays.filter { !terminal.isDescendant(of: $0) }.map { $0.convert($0.bounds, to: view) }
+                    if !covering.isEmpty {
+                        let clip = NSBezierPath(rect: view.bounds)
+                        covering.forEach { clip.append(NSBezierPath(rect: $0)) }
+                        clip.windingRule = .evenOdd
+                        clip.addClip()
+                    }
+                    NSImage(cgImage: picture, size: rect.size).draw(in: rect)
+                    NSGraphicsContext.restoreGraphicsState()
                 }
                 NSGraphicsContext.restoreGraphicsState()
             }

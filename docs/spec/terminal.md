@@ -208,6 +208,17 @@ permissão.
 - O que o Claude desenha continua dele: a caixa da mensagem, as ferramentas e o diff só mudam de
   cor, nunca de forma.
 
+### A gaveta de terminais (mockup Drawer; plano 30 C, feito junto da revisão do plano 29)
+- drawer.toggle (⌃`, e o item "Terminal ⌃`" da barra de status) mostra ou esconde a gaveta: terminais
+  rápidos de nenhum projeto, subindo de baixo por cima do centro (entre a árvore e o painel da
+  direita), 340 pt com sombra para cima; a primeira vez abre um shell na pasta pessoal.
+- O topo tem as abas dela, "+" e "⌃` show or hide · drag up to resize · ⌘↩ move to a task";
+  arrastar a borda de cima muda a altura (de 160 até perto da barra de título). Os terminais da
+  gaveta ficam sem a caixa de painel.
+- drawer.move-to-project (⌘↩, só com o terminal da gaveta em foco) leva esse terminal, com o shell
+  vivo, a uma aba do projeto que aparece. A última aba fechada esconde a gaveta. Não é salva entre
+  aberturas do app: são terminais rápidos.
+
 ### O comando de cada terminal (plano 29, revisão contra os mockups)
 - A integração do zsh manda as marcas de comando do padrão OSC 133 (C com o comando, codificado
   em URL, ao começar; D com o código de saída ao voltar o prompt), só em shell interativo, por
