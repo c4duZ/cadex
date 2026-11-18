@@ -51,13 +51,11 @@ extension WindowSession {
         return AgentsController.shared.sessions.first { self.terminal(of: $0)?.terminal === terminal && $0.account.provider == .claude }?.account
     }
 
-    /// The title bar's account: the focused Claude's, else the active one, else the default, with
-    /// how much of its limit it used.
+    /// The title bar's account (shownAccountDir, the same as the status bar's usage item), with how
+    /// much of its limit it used.
     func refreshTitleAccount() {
-        let every = AgentsController.shared.everyAccount().filter { $0.provider == .claude }
-        let active = AgentUsageController.shared.activeAccount
-        let account = tabs?.activeTerminal.flatMap { claudeAccount(in: $0) }
-            ?? every.first { $0.dir == active } ?? every.first { $0.isDefault }
+        let dir = shownAccountDir()
+        let account = AgentsController.shared.everyAccount().first { $0.dir == dir }
         workspace?.titleBar.setAccount(name: account?.name, used: account.flatMap { AgentSwitch.used(AgentUsage.current(of: $0)) },
                                        provider: account?.provider == .codex ? .codex : .claude)
     }

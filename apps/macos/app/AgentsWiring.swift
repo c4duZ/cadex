@@ -43,20 +43,27 @@ extension WindowSession {
         return item
     }
 
-    /// The usage item shows the account of the agent in the focused
-    /// terminal: a Claude Code session whose process group is the
-    /// terminal's, or Codex by its program's name; none keeps the last.
+    /// The usage item shows the same account as the title bar (shownAccountDir): they told two
+    /// different accounts apart before (the owner, 2026-11-18).
     func showFocusedAccount() {
         guard let strip = usageStrip, strip.window != nil else { return }
-        guard let terminal = tabs?.activeTerminal, terminal.foregroundGroup > 0 else { return strip.focused = nil }
-        let group = terminal.foregroundGroup
-        if let session = AgentsController.shared.sessions.first(where: { getpgid($0.pid) == group }) {
-            return strip.focused = session.account.dir
+        strip.focused = shownAccountDir()
+    }
+
+    /// The account both bars show: the focused terminal's agent's (a Claude Code session whose
+    /// process group is the terminal's, or Codex by its program's name), else the active one, else
+    /// the default; nil with none.
+    func shownAccountDir() -> String? {
+        if let terminal = tabs?.activeTerminal, terminal.foregroundGroup > 0 {
+            let group = terminal.foregroundGroup
+            if let session = AgentsController.shared.sessions.first(where: { getpgid($0.pid) == group }) { return session.account.dir }
+            var name = [CChar](repeating: 0, count: 64)
+            proc_name(group, &name, UInt32(name.count))
+            if String(cString: name) == "codex" { return NSHomeDirectory() + "/.codex" }
         }
-        var name = [CChar](repeating: 0, count: 64)
-        proc_name(group, &name, UInt32(name.count))
-        if String(cString: name) == "codex" { return strip.focused = NSHomeDirectory() + "/.codex" }
-        strip.focused = nil
+        let every = AgentsController.shared.everyAccount().filter { $0.provider == .claude }
+        let active = AgentUsageController.shared.activeAccount
+        return (every.first { $0.dir == active } ?? every.first { $0.isDefault })?.dir
     }
 
     /// The terminal an agent runs in: the one whose foreground process

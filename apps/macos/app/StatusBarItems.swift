@@ -51,20 +51,28 @@ extension WindowSession {
                               subtitle: T("How many work and how many need you", "Quantos trabalham e quantos precisam de você"),
                               icon: .sparkle, side: .left, view: row)
         var token: UUID?
-        item.onVisible = { [weak working, weak needs, weak row] visible in
+        var attention: UUID?
+        // "Need you" is what the bell counts (a permission or a question waiting), not every session
+        // idle at its prompt: it said "3 need you" with the bell empty (the owner, 2026-11-18).
+        let show = { [weak working, weak needs, weak row] in
+            let busy = AgentsController.shared.counts.working
+            let waiting = AgentAttention.shared.cards.count
+            working?.text = T("\(busy) working", "\(busy) trabalhando")
+            needs?.text = T("\(waiting) need you", "\(waiting) precisam de você")
+            working?.isHidden = busy == 0
+            needs?.isHidden = waiting == 0
+            // Both zero: the item takes no room, or the bar showed a double gap.
+            row?.isHidden = busy == 0 && waiting == 0
+        }
+        item.onVisible = { visible in
             if visible {
-                token = AgentsController.shared.watch {
-                    let counts = AgentsController.shared.counts
-                    working?.text = T("\(counts.working) working", "\(counts.working) trabalhando")
-                    needs?.text = T("\(counts.waiting) need you", "\(counts.waiting) precisam de você")
-                    working?.isHidden = counts.working == 0
-                    needs?.isHidden = counts.waiting == 0
-                    // Both zero: the item takes no room, or the bar showed a double gap.
-                    row?.isHidden = counts.working == 0 && counts.waiting == 0
-                }
-            } else if let id = token {
-                AgentsController.shared.stop(id)
+                token = AgentsController.shared.watch { show() }
+                attention = AgentAttention.shared.watch { show() }
+            } else {
+                if let id = token { AgentsController.shared.stop(id) }
+                if let id = attention { AgentAttention.shared.stop(id) }
                 token = nil
+                attention = nil
             }
         }
         return item
