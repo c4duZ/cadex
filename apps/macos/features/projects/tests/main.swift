@@ -1,5 +1,6 @@
 import AppKit
 import Checks
+import Strings
 @testable import Projects
 import Tabs
 
@@ -182,6 +183,11 @@ let exitCode = await Checks.run([
         try? FileManager.default.createDirectory(at: sibling, withIntermediateDirectories: true)
         try? Data("gitdir: ../\((a as NSString).lastPathComponent)/.git/worktrees/rel\n".utf8).write(to: sibling.appendingPathComponent(".git"))
         expect(ProjectsFile.repositoryRoot(sibling.path) == a, ProjectsFile.repositoryRoot(sibling.path))
+    }),
+    ("a project's card counts its tasks, sessions and memories, one in the singular (plan 34 B)", { @MainActor in
+        let card = ProjectCard(folder: "/r", name: "r", place: "~/r · main", tasks: 2, sessions: 1, memories: 0, status: "no session yet", state: nil)
+        let text = ProjectsListDocument.stats(card).string
+        expect(text.contains("2 " + T("tasks", "tarefas")) && text.contains("1 " + T("session", "sessão")) && text.contains("0 " + T("memories", "memórias")), text)
     }),
 ])
 exit(exitCode)

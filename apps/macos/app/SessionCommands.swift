@@ -68,6 +68,7 @@ extension WindowSession {
         commands.register(treeCommands(palette: palette))
         commands.register(jumpCommands(palette: palette))
         commands.register(projectPageCommands())
+        commands.register(projectsPageCommands())
         commands.register(boardCommands())
         commands.register(drawerCommands())
         commands.register(SSHCommands.all(palette: palette) { [weak self] alias in self?.connectSSH(alias) })
@@ -288,6 +289,7 @@ extension WindowSession {
             bar?.canNavigate = terminal?.hasForegroundProcess == false
             self?.terminalFolderMoved(terminal?.currentDirectory)
             self?.showBoardChrome()
+            if let tree = self?.workspace?.tree { self?.showFootLines(tree) }
             self?.refreshWorkColor()
             self?.countTerminals()
             self?.showFocusedAccount()

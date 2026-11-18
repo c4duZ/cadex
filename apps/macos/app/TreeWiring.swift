@@ -1,5 +1,6 @@
 import AppKit
 import Orchestration
+import Projects
 import SourceControl
 import Menus
 import CommandPalette
@@ -125,11 +126,25 @@ extension WindowSession {
     private func drawTree() {
         guard let tree = workspace?.tree else { return }
         tree.show(treeModel(), chosen: tabs?.activeTerminal.map { .terminal(AppDelegate.key($0)) })
+        showFootLines(tree)
         showCheckLine()
         // The board moves its cards with the tree (a state changed, a task came or went).
         for project in projects?.projects ?? [] {
             (project.tabs.document(identity: BoardDocument.identity) as? BoardDocument)?.reload()
         }
+    }
+
+    /// The foot's numbers and the line whose page shows (plan 34 B): Projects "3", Automations
+    /// "1 on" (nothing when there are none), lit while its page is the one shown.
+    func showFootLines(_ tree: WorkTreeView) {
+        tree.projectsDetail = "\(projects?.projects.count ?? 0)"
+        // The database only when automations are on (it opens on first use; off, nothing to count).
+        let jobs = OrchestrationController.shared.automationsEnabled ? (try? OrchestrationController.shared.automations()?.automations()) ?? [] : []
+        let on = jobs.filter(\.enabled).count
+        tree.automationsDetail = jobs.isEmpty ? "" : T("\(on) on", "\(on) ligada" + (on == 1 ? "" : "s"))
+        let page = tabs?.showsPage == true ? tabs?.activeDocument?.identity : nil
+        tree.footChosen = page == ProjectsListDocument.identity || page?.hasPrefix("project:") == true ? "projects"
+            : page?.hasPrefix("automation") == true ? "automations" : nil
     }
 
     /// The projects with their tasks and terminals and the state of each, from what is open now:

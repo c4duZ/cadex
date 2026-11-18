@@ -183,6 +183,19 @@ final class FlippedPage: NSView {
         arrange(force: true)
     }
 
+    /// A page of a head and one body under it (Projects, Automations; plan 34): no columns.
+    func show(head: NSView, body: NSView) {
+        column.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        pair.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        ratio = nil
+        stacked = []
+        for view in [head, body] {
+            column.addArrangedSubview(view)
+            view.widthAnchor.constraint(equalTo: column.widthAnchor).isActive = true
+        }
+        arrange(force: true)
+    }
+
     override func layout() {
         super.layout()
         arrange(force: false)

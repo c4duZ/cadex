@@ -44,13 +44,9 @@ extension WindowSession {
     func openProjectPage(_ folder: String) {
         if let index = projects?.projects.firstIndex(where: { $0.folder == folder }) { projects?.select(index) }
         tabs?.open(makeProjectPage(folder))
-        workspace?.showInspector("memory")
-        // The history is read while a page shows it: the conversations need it.
-        if projectPageHistory == nil {
-            projectPageHistory = AgentHistoryController.shared.watch { [weak self] in
-                (self?.tabs?.document(identity: ProjectPageDocument.identity(for: folder)) as? ProjectPageDocument)?.reload()
-            }
-        }
+        // No right panel on a page (plan 34): the project's memory is in the page's Memory.
+        // The history is read while a page shows it: the sessions need it.
+        watchHistoryForPages()
     }
 
     func makeProjectPage(_ folder: String) -> ProjectPageDocument {

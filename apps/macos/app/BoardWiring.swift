@@ -96,9 +96,10 @@ extension WindowSession {
     func showBoardChrome() {
         let on = tabs?.activeDocument?.identity == BoardDocument.identity
         workspace?.titleBar.setBoardOpen(on)
-        // The board has the right panel closed (the mockup), given back when it goes; so has the
-        // review, whose list is the same files (plan 31 A).
-        workspace?.setBoardShown(on || tabs?.activeDocument is ReviewDocument)
+        // Every page has the right panel closed, given back when it goes: the board (its mockup),
+        // the review (plan 31 A) and, from plan 34, the Projects, a project's and Automations pages,
+        // drawn without it in the proposal.
+        workspace?.setBoardShown(on || tabs?.showsPage == true)
         showLocation(folder.root)
     }
 }

@@ -4,7 +4,9 @@
 - A árvore do trabalho, a coluna da esquerda (`../../../../docs/spec/sidebar.md`; a peça Sidebar do
   mockup, plano 27 fase B): "New task" e o filtro no topo; cada projeto dobrável com as tarefas
   (as worktrees) e os terminais da pasta dele; sob a tarefa escolhida, os terminais dela; "+ Add
-  project"; no pé, Automations e Archive & history.
+  project"; no pé, Projects (project.show-all, com o número) e Automations
+  (orchestration.show-automations, com "N ligada"), aceso o da página aberta (`footChosen`; plano 34 B:
+  o Archive & history virou a aba Sessões de cada projeto).
 
 ## O que eu não quero
 - Esta feature conhecendo terminais, worktrees, projetos ou agentes: o app monta o modelo

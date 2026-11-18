@@ -17,6 +17,10 @@ public final class WorkTreeView: NSView {
     public var menuFor: ((String) -> [MenuEntry])?
     /// The foot's Automations line ("2 on · next 09:00"), from the app.
     public var automationsDetail = "" { didSet { if automationsDetail != oldValue { render() } } }
+    /// The foot's Projects line: how many (plan 34 B).
+    public var projectsDetail = "" { didSet { if projectsDetail != oldValue { render() } } }
+    /// The foot's line whose page shows ("projects", "automations"), lit; nil, none.
+    public var footChosen: String? { didSet { if footChosen != oldValue { render() } } }
     private let run: (String) -> Void
     private let list = NSStackView()
     private let scroll = NSScrollView()
@@ -116,11 +120,15 @@ public final class WorkTreeView: NSView {
         add.onPress = { [weak self] in self?.run("project.new") }
         place(add)
         foot.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        // Projects and Automations (plan 34 B): Archive & history went into each project's
+        // Sessions; Automations opens its page, empty or not (it ran a list that was off).
+        let projects = WorkTreeRows.foot(.folders, T("Projects", "Projetos"), detail: projectsDetail)
+        projects.onPress = { [weak self] in self?.run("project.show-all") }
+        projects.isChosen = footChosen == "projects"
         let automations = WorkTreeRows.foot(.clock, T("Automations", "Automações"), detail: automationsDetail)
-        automations.onPress = { [weak self] in self?.run("orchestration.show-automation-history") }
-        let archive = WorkTreeRows.foot(.archive, T("Archive & history", "Arquivo e histórico"), detail: archiveShortcut ?? "")
-        archive.onPress = { [weak self] in self?.run("agents.show-history") }
-        for row in [automations, archive] {
+        automations.onPress = { [weak self] in self?.run("orchestration.show-automations") }
+        automations.isChosen = footChosen == "automations"
+        for row in [projects, automations] {
             foot.addArrangedSubview(row)
             row.widthAnchor.constraint(equalTo: foot.widthAnchor, constant: -UILooks.pt(S.Foot.padding.left + S.Foot.padding.right)).isActive = true
         }

@@ -115,6 +115,7 @@ extension WindowSession {
             if identity.hasPrefix("project:settings:"), let self { return self.makeProjectSettings(String(identity.dropFirst("project:settings:".count))) }
             if identity.hasPrefix("project:"), let self { return self.makeProjectPage(String(identity.dropFirst("project:".count))) }
             if identity == BoardDocument.identity, let self { return self.makeBoard() }
+            if identity == ProjectsListDocument.identity, let self { return self.makeProjectsPage() }
             return self?.opener?.makeDocument(identity: identity)
         }
         // Opened on a folder: the old projects come back and the folder becomes its own project

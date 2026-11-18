@@ -96,4 +96,5 @@ pub const git_fork: u21 = 0xE27E;
 pub const terminal: u21 = 0xE47E;
 pub const kanban: u21 = 0xEB54;
 pub const hand: u21 = 0xE298;
+pub const folders: u21 = 0xE260;
 pub const arrows_left_right: u21 = 0xE0A0;
