@@ -100,6 +100,9 @@ public enum FrameField {
         field.isBordered = false
         field.drawsBackground = false
         field.focusRingType = .none
+        // A search field's magnifier sits on its text once the bezel goes (the themes' search,
+        // 2026-11-18): the frame's box says it is a field, the placeholder says what for.
+        (field.cell as? NSSearchFieldCell)?.searchButtonCell = nil
         field.font = UILooks.font(DesignTokens.FontSize.body)
         field.textColor = DesignTokens.Color.textPrimary
         if let hint = field.placeholderString {
@@ -116,6 +119,26 @@ public enum FrameField {
         popup.font = UILooks.font(DesignTokens.FontSize.body)
         paint(popup)
         return boxed(popup)
+    }
+
+    /// A popup in the frame's face on its own (no box around it, for a caller that keeps it as a
+    /// popup): the field's fill, line and corner on its layer, the title inset by the row's padding.
+    public static func framed(_ popup: NSPopUpButton) {
+        let cell = FramePopupCell(textCell: "", pullsDown: popup.pullsDown)
+        cell.menu = popup.menu
+        let selected = popup.indexOfSelectedItem
+        popup.cell = cell
+        popup.selectItem(at: selected)
+        popup.isBordered = false
+        popup.font = UILooks.font(DesignTokens.FontSize.body)
+        popup.wantsLayer = true
+        popup.layer?.backgroundColor = NT.Field.bg.cgColor
+        popup.layer?.borderColor = NT.Field.border.cgColor
+        popup.layer?.borderWidth = DesignTokens.Stroke.hairline
+        popup.layer?.cornerRadius = UILooks.pt(DesignTokens.Button.radius)
+        popup.translatesAutoresizingMaskIntoConstraints = false
+        popup.heightAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Button.Heights.medium)).isActive = true
+        paint(popup)
     }
 
     /// The popup's items again in the frame's colors (after items change).
@@ -169,5 +192,17 @@ public enum FrameField {
             .font: UILooks.font(DesignTokens.FontSize.body), .foregroundColor: DesignTokens.Color.textBody,
         ])
         return button
+    }
+}
+
+/// A borderless popup's cell whose title and arrow sit inside the frame's padding.
+final class FramePopupCell: NSPopUpButtonCell {
+    override func drawingRect(forBounds rect: NSRect) -> NSRect {
+        let pad = DesignTokens.NewTask.AgentRow.padding
+        return rect.insetBy(dx: UILooks.pt(pad.left) / 2, dy: 0)
+    }
+    override func cellSize(forBounds rect: NSRect) -> NSSize {
+        let size = super.cellSize(forBounds: rect)
+        return NSSize(width: size.width + UILooks.pt(DesignTokens.NewTask.AgentRow.padding.left), height: size.height)
     }
 }

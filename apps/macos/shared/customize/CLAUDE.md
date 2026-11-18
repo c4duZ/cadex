@@ -21,7 +21,7 @@
   do app em tela cheia, na mesma mesa (fullScreenAuxiliary e moveToActiveSpace, a lição das
   configurações); centrada sobre a janela de onde abriu; fecha com Esc, ⌘W ou o botão. Cada mudança
   vai na hora para o `onChange` da aba aberta, com a lista inteira; `refresh` mostra o que mudou por
-  fora; `recolor` repinta na troca de tema. O desenho é o das configurações: abas no topo, título
+  fora; `recolor` repinta na troca de tema. O desenho é o das configurações (a cara da moldura desde o plano 31 D, as páginas em pílulas): abas no topo, título
   da página em 20 pt, legenda, linhas em caixa com cantos de 8 pt e borda de 1 pt (o dono pediu as
   duas janelas iguais, 2026-10-21). `CustomizeColors` vem do tema, pelo app, nunca do destaque da
   janela (que a cor do space troca); `ThemeSwitch`, a chave do app na cor de destaque, pública: as configurações usam a mesma.

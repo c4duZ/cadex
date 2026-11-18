@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Themes
 
 /// The themes page's grid of cards, two per row, for hundreds of themes:
@@ -139,9 +140,11 @@ final class ThemeCard: NSView {
     }
 
     private func updateBorder() {
-        layer?.borderColor = (selected ? SettingsColors.accent : SettingsColors.border).cgColor
-        layer?.backgroundColor = SettingsColors.box.cgColor
-        layer?.borderWidth = selected ? 2 : 1
+        // The chosen theme as New Task's chosen option (components.newTask.option.selected).
+        typealias Option = DesignTokens.NewTask.Option
+        layer?.borderColor = (selected ? Option.Selected.border : SettingsColors.border).cgColor
+        layer?.backgroundColor = (selected ? Option.Selected.bg : SettingsColors.box).cgColor
+        layer?.borderWidth = DesignTokens.Stroke.hairline
     }
 }
 

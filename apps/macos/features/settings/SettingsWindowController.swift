@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import CommandPalette
 import Icons
 import Shortcuts
@@ -14,7 +15,9 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let shortcuts: ShortcutsPage
     private let themes: ThemesPage
     private var window: NSWindow?
-    private let tabs = NSSegmentedControl()
+    /// The sections as the board's pills (plan 31 D; it was the system's segmented control).
+    private let tabs = NSStackView()
+    private var selectedSection = 0
     private let content = NSView()
     private static let sections: [(title: String, icon: Icon)] = [
         (T("General", "Geral"), .gearSix), ("Terminal", .terminalWindow), (T("Themes", "Temas"), .palette), (T("Shortcuts", "Atalhos"), .keyboard), (T("About", "Sobre"), .info),
@@ -76,16 +79,8 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         window.collectionBehavior = [.fullScreenAuxiliary, .moveToActiveSpace]
         window.delegate = self
 
-        tabs.segmentCount = Self.sections.count
-        for (i, section) in Self.sections.enumerated() {
-            tabs.setLabel(section.title, forSegment: i)
-            tabs.setImage(section.icon.image(size: 14), forSegment: i)
-            tabs.setImageScaling(.scaleNone, forSegment: i)
-        }
-        tabs.segmentStyle = .automatic
-        tabs.trackingMode = .selectOne
-        tabs.target = self
-        tabs.action = #selector(tabChanged)
+        tabs.spacing = UILooks.pt(DesignTokens.Board.Filters.gap)
+        showTabs()
 
         let root = NSView()
         for view in [tabs, content] {
@@ -93,14 +88,17 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
             root.addSubview(view)
         }
         NSLayoutConstraint.activate([
-            tabs.topAnchor.constraint(equalTo: root.topAnchor, constant: 8),
+            // Beside the window's buttons, in the title bar's height (components.titleBar).
+            tabs.centerYAnchor.constraint(equalTo: root.topAnchor, constant: UILooks.pt(DesignTokens.TitleBar.height) / 2),
             tabs.centerXAnchor.constraint(equalTo: root.centerXAnchor),
-            content.topAnchor.constraint(equalTo: tabs.bottomAnchor, constant: 10),
+            content.topAnchor.constraint(equalTo: root.topAnchor, constant: UILooks.pt(DesignTokens.TitleBar.height)),
             content.leadingAnchor.constraint(equalTo: root.leadingAnchor),
             content.trailingAnchor.constraint(equalTo: root.trailingAnchor),
             content.bottomAnchor.constraint(equalTo: root.bottomAnchor),
         ])
         window.contentView = root
+        root.wantsLayer = true
+        root.layer?.backgroundColor = SettingsColors.background.cgColor
         window.center()
         ThemeStore.shared.observe { [weak self] _ in self?.themeChanged() }
         return window
@@ -112,20 +110,28 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         guard let window else { return }
         window.appearance = NSAppearance(named: SettingsColors.isDark ? .darkAqua : .aqua)
         window.backgroundColor = SettingsColors.background
-        tabs.selectedSegmentBezelColor = SettingsColors.accent
-        if window.isVisible { select(tabs.selectedSegment) }
+        // On the content too: the window's own color left a lighter grey under the pages.
+        window.contentView?.wantsLayer = true
+        window.contentView?.layer?.backgroundColor = SettingsColors.background.cgColor
+        showTabs()
+        if window.isVisible { select(selectedSection) }
     }
 
-    @objc private func tabChanged() {
-        select(tabs.selectedSegment)
+    /// One pill per section, the open one filled.
+    private func showTabs() {
+        tabs.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        for (i, section) in Self.sections.enumerated() {
+            tabs.addArrangedSubview(FramePill.make(section.title, on: i == selectedSection) { [weak self] in self?.select(i) })
+        }
     }
 
     private func select(_ section: Int) {
         // Rebuilding the same page (a theme change) keeps where it was
         // scrolled, or picking a card would jump the list to the top.
-        let sameSection = tabs.selectedSegment == section
+        let sameSection = selectedSection == section
         let scrolled = (content.subviews.first as? NSScrollView)?.contentView.bounds.origin
-        tabs.selectedSegment = section
+        selectedSection = section
+        showTabs()
         let page: NSView
         switch section {
         case 1: page = TerminalPage.make(store)
@@ -159,7 +165,7 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         let alert = NSAlert()
         alert.messageText = language == nil ? (pt ? "Reabrir o Cadex com a nova interface?" : "Reopen Cadex with the new interface?")
             : pt ? "Reabrir o Cadex em português?" : "Reopen Cadex in English?"
-        alert.informativeText = pt ? "As abas e os spaces voltam como estão." : "Your tabs and spaces come back as they are."
+        alert.informativeText = pt ? "As abas e os projetos voltam como estão." : "Your tabs and projects come back as they are."
         alert.addButton(withTitle: pt ? "Reabrir agora" : "Reopen now")
         alert.addButton(withTitle: pt ? "Depois" : "Later")
         alert.beginSheetModal(for: window) { [weak self] answer in

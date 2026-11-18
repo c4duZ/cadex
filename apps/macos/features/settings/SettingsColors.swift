@@ -1,18 +1,18 @@
 import AppKit
 import Themes
+import UILooks
 
-/// The settings window's colors, from the theme in use, so the window looks
-/// like the rest of the app. Pages read these when they are built and are
-/// rebuilt when the theme changes (SettingsWindowController).
+/// The settings window's colors: the new frame's tokens (plan 31 D; they follow the theme through
+/// DesignTokens.applyTheme), so the window looks like the rest of the app. Pages read these when
+/// they are built and are rebuilt when the theme changes (SettingsWindowController).
 @MainActor
 enum SettingsColors {
-    private static var ui: Theme.Interface { ThemeStore.shared.current.interface }
-
-    static var background: NSColor { ui.panel.nsColor }
-    static var box: NSColor { ui.chrome.color(alpha: 0.6) }
-    static var border: NSColor { ui.panelBorder.nsColor }
-    static var text: NSColor { ui.text.nsColor }
-    static var secondaryText: NSColor { ui.secondaryText.nsColor }
-    static var accent: NSColor { ui.accent.nsColor }
+    static var background: NSColor { DesignTokens.Color.bgWindow }
+    static var box: NSColor { DesignTokens.Project.Row.bg }
+    static var border: NSColor { DesignTokens.Project.Row.border }
+    static var text: NSColor { DesignTokens.Color.textPrimary }
+    static var secondaryText: NSColor { DesignTokens.Color.textMuted }
+    /// A switch on: the project page's toggle.
+    static var accent: NSColor { DesignTokens.Project.Toggle.on }
     static var isDark: Bool { ThemeStore.shared.current.dark }
 }

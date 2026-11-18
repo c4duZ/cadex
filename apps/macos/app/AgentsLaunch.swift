@@ -1,5 +1,6 @@
 import Agents
 import AppKit
+import UILooks
 import Customize
 import Icons
 import Settings
@@ -79,8 +80,8 @@ extension WindowSession {
                               on: skip)),
         ]
         return CustomizePage(id: "accounts", title: T("Accounts", "Contas"), icon: .sparkle,
-                             note: T("Shown accounts appear in Agents, the usage item and its card. One with no login, or out for over a day, stays out until it is used again; a hidden one comes back when its login changes.",
-                                     "As contas que aparecem estão em Agents, no item de uso e no cartão dele. Uma sem login, ou vencida há mais de um dia, fica de fora até ser usada de novo; uma escondida volta quando o login dela muda."),
+                             note: T("Shown accounts appear in the usage item, its card and the New Task sheet. One with no login, or out for over a day, stays out until it is used again; a hidden one comes back when its login changes.",
+                                     "As contas que aparecem estão no item de uso, no cartão dele e na folha Nova tarefa. Uma sem login, ou vencida há mais de um dia, fica de fora até ser usada de novo; uma escondida volta quando o login dela muda."),
                              entries: entries) { [weak self] entries in
             guard let self else { return }
             let rows = entries.compactMap(\.row)

@@ -71,9 +71,7 @@ final class CustomizeList: NSView {
     }
 
     private static func header(_ title: String, colors: CustomizeColors) -> NSView {
-        let label = NSTextField(labelWithString: title.uppercased())
-        label.font = UILooks.font(11, weight: .semibold)
-        label.textColor = colors.secondary
+        let label = FrameField.label(title)
         let box = NSView()
         label.translatesAutoresizingMaskIntoConstraints = false
         box.addSubview(label)
@@ -143,10 +141,10 @@ final class CustomizeRowView: NSView {
         id = row.id
         toggle = ThemeSwitch(on: row.on, colors: colors, label: row.title)
         super.init(frame: .zero)
-        // The settings window's row box: 8 pt corners, a 1 pt border.
+        // The settings window's row box: the project page's row (plan 31 D).
         wantsLayer = true
-        layer?.cornerRadius = 8
-        layer?.borderWidth = 1
+        layer?.cornerRadius = UILooks.pt(DesignTokens.Project.Row.radius)
+        layer?.borderWidth = DesignTokens.Stroke.hairline
         layer?.borderColor = colors.border.cgColor
         layer?.backgroundColor = colors.box.cgColor
         let handle = NSImageView(image: Icon.dotsSixVertical.image(size: UILooks.pt(13)))
@@ -155,11 +153,11 @@ final class CustomizeRowView: NSView {
         icon.contentTintColor = row.logo == nil ? colors.secondary : colors.text
         icon.isHidden = row.icon == nil && row.logo == nil
         let title = NSTextField(labelWithString: row.title)
-        title.font = .systemFont(ofSize: 13, weight: .medium)
+        title.font = UILooks.font(DesignTokens.FontSize.body, weight: DesignTokens.FontWeight.semibold)
         title.textColor = colors.text
         title.lineBreakMode = .byTruncatingTail
         let subtitle = NSTextField(labelWithString: row.subtitle ?? "")
-        subtitle.font = UILooks.font(11)
+        subtitle.font = UILooks.font(DesignTokens.Project.Row.Meta.fontSize)
         subtitle.textColor = colors.secondary
         subtitle.lineBreakMode = .byTruncatingTail
         let texts = NSStackView(views: row.subtitle == nil ? [title] : [title, subtitle])
@@ -167,7 +165,7 @@ final class CustomizeRowView: NSView {
         texts.alignment = .leading
         texts.spacing = 1
         let trailing = NSTextField(labelWithString: row.trailing ?? "")
-        trailing.font = UILooks.font(11)
+        trailing.font = UILooks.font(DesignTokens.Project.Row.Meta.fontSize)
         trailing.textColor = colors.secondary
         trailing.alignment = .right
         for view in [handle, icon, texts, trailing, toggle] as [NSView] {

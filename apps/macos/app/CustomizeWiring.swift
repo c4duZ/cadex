@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Worktrees
 import Themes
 import Customize
@@ -26,10 +27,10 @@ extension WindowSession {
     /// The settings window's colors, from the theme itself: not the window's
     /// accent, which a space's or tab's color replaces (the owner saw blue
     /// switches under Caffeine, 2026-10-21).
+    /// The frame's tokens since plan 31 D (they follow the theme): the settings window's own.
     static func customizeColors() -> CustomizeColors {
-        let ui = ThemeStore.shared.current.interface
-        return CustomizeColors(text: ui.text.nsColor, secondary: ui.secondaryText.nsColor, accent: ui.accent.nsColor,
-                               panel: ui.panel.nsColor, box: ui.chrome.color(alpha: 0.6), border: ui.panelBorder.nsColor)
+        CustomizeColors(text: DesignTokens.Color.textPrimary, secondary: DesignTokens.Color.textMuted, accent: DesignTokens.Project.Toggle.on,
+                        panel: DesignTokens.Color.bgWindow, box: DesignTokens.Project.Row.bg, border: DesignTokens.Project.Row.border)
     }
 
     private static var followsTheme = false

@@ -33,9 +33,11 @@
   settings.open-themes e terminal.toggle-ligatures (`pageCommands`), `ShortcutsPage.swift` (grava a próxima combinação com os atalhos do
   app suspensos; Delete tira, Esc cancela, "Padrão" volta) e `SettingsPage.swift` (linhas, títulos de
   seção, notas, caixas e controles que mudam o arquivo na hora; a chave é o `ThemeSwitch` de
-  `../../shared/customize/`, a mesma do Customize, na cor de destaque do tema, pedido do dono em
-  2026-10-21). Textos em par inglês/português
-  (`T`, `../../shared/strings`); trocar o idioma pergunta "Reabrir agora" e chama `relaunch`, do app. A janela segue o tema (`SettingsColors.swift`): a página
+  `../../shared/customize/`, a mesma do Customize, pedido do dono em 2026-10-21). A cara da moldura
+  desde o plano 31 D: o título e as linhas da página do projeto, os rótulos de seção da Nova
+  tarefa, os popups e campos na caixa da moldura (`FrameField`), os botões do app, a chave nas cores
+  da chave da página do projeto e as seções em pílulas no topo (`FramePill`). Textos em par inglês/português
+  (`T`, `../../shared/strings`); trocar o idioma pergunta "Reabrir agora" e chama `relaunch`, do app. A janela segue o tema (`SettingsColors.swift`, os tokens da moldura): a página
   aberta se refaz com as cores novas, mantendo a rolagem.
 - O app (`../../app/SettingsBridge.swift`) passa as preferências ao `TerminalPreferences` do
   terminal, ao tema e aos atalhos, e salva o que um alerta desliga ("não perguntar de novo").

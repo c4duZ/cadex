@@ -18,8 +18,8 @@ enum GeneralPages {
             rows: [
                 SettingsPage.section(T("Language", "Idioma")),
                 SettingsPage.row(T("Language", "Idioma"),
-                                 T("Cadex reopens in the new language, with your tabs and spaces.",
-                                   "O Cadex reabre no idioma novo, com as suas abas e spaces."),
+                                 T("Cadex reopens in the new language, with your tabs and projects.",
+                                   "O Cadex reabre no idioma novo, com as suas abas e projetos."),
                                  control: SettingsPage.popup([("English", "en"), ("Português", "pt")], selected: g.language) { value in
                                      guard value != store.settings.general.language else { return }
                                      store.update { $0.general.language = value }
@@ -28,8 +28,8 @@ enum GeneralPages {
 
                 SettingsPage.section(T("Files", "Arquivos")),
                 SettingsPage.row(T("Open files", "Abrir arquivos"),
-                                 T("Where a file, a diff or a web preview opens: next to the focused pane, or in a new tab. “Open beside” and “Open in new tab” choose on the spot.",
-                                   "Onde abre um arquivo, um diff ou um preview web: ao lado do painel com foco, ou numa aba nova. “Abrir ao lado” e “Abrir em nova aba” escolhem na hora."),
+                                 T("Where a file or a web preview opens: next to the focused pane, or in a new tab (a diff opens in the review). “Open beside” and “Open in new tab” choose on the spot.",
+                                   "Onde abre um arquivo ou um preview web: ao lado do painel com foco, ou numa aba nova (um diff abre na revisão). “Abrir ao lado” e “Abrir em nova aba” escolhem na hora."),
                                  control: SettingsPage.popup([(T("Beside", "Ao lado"), "beside"), (T("New tab", "Em nova aba"), "tab")],
                                                              selected: g.openFiles) { value in store.update { $0.general.openFiles = value } }),
                 SettingsPage.row(T("Side of a file opened beside", "Lado do arquivo aberto ao lado"),

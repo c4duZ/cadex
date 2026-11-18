@@ -54,7 +54,8 @@ public struct CustomizePage {
 public final class CustomizeWindow: NSWindow {
     public static let shared = CustomizeWindow()
 
-    private let tabs = NSSegmentedControl()
+    /// The pages as the board's pills (plan 31 D; it was the system's segmented control).
+    private let tabs = NSStackView()
     private let heading = NSTextField(labelWithString: "")
     private let note = NSTextField(wrappingLabelWithString: "")
     private let list = CustomizeList()
@@ -75,8 +76,6 @@ public final class CustomizeWindow: NSWindow {
         // settings window's lesson, 2026-10-20).
         collectionBehavior = [.fullScreenAuxiliary, .moveToActiveSpace]
         contentView = makeContent()
-        tabs.target = self
-        tabs.action = #selector(tabChanged)
         list.onChange = { [weak self] entries in
             guard let self, self.pages.indices.contains(self.selected) else { return }
             self.pages[self.selected].onChange(entries)
@@ -91,13 +90,6 @@ public final class CustomizeWindow: NSWindow {
         self.colors = colors
         backgroundColor = colors.panel
         appearance = parent?.effectiveAppearance
-        tabs.segmentCount = pages.count
-        for (index, page) in pages.enumerated() {
-            tabs.setLabel(page.title, forSegment: index)
-            tabs.setImage(page.icon.image(size: 14), forSegment: index)
-            tabs.setImageScaling(.scaleNone, forSegment: index)
-        }
-        tabs.selectedSegmentBezelColor = colors.accent
         select(pages.firstIndex { $0.id == id } ?? 0)
         if !wasVisible, let parent {
             let frame = parent.frame
@@ -120,7 +112,6 @@ public final class CustomizeWindow: NSWindow {
         self.colors = colors
         guard isVisible else { return }
         backgroundColor = colors.panel
-        tabs.selectedSegmentBezelColor = colors.accent
         select(selected)
     }
 
@@ -129,12 +120,18 @@ public final class CustomizeWindow: NSWindow {
 
     override public func cancelOperation(_ sender: Any?) { close() }
 
-    @objc private func tabChanged() { select(tabs.selectedSegment) }
+    /// One pill per page, the open one filled.
+    private func showTabs() {
+        tabs.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        for (index, page) in pages.enumerated() {
+            tabs.addArrangedSubview(FramePill.make(page.title, on: index == selected) { [weak self] in self?.select(index) })
+        }
+    }
 
     private func select(_ index: Int) {
         guard pages.indices.contains(index) else { return }
         selected = index
-        tabs.selectedSegment = index
+        showTabs()
         heading.stringValue = pages[index].title
         heading.textColor = colors.text
         note.stringValue = pages[index].note
@@ -153,17 +150,17 @@ public final class CustomizeWindow: NSWindow {
     /// title (20 pt), its caption and the rows (the owner, 2026-10-21: the
     /// two windows must look the same).
     private func makeContent() -> NSView {
-        tabs.segmentStyle = .automatic
-        tabs.trackingMode = .selectOne
-        heading.font = .systemFont(ofSize: 20, weight: .semibold)
-        note.font = .systemFont(ofSize: 13)
+        typealias P = DesignTokens.Project
+        tabs.spacing = UILooks.pt(DesignTokens.Board.Filters.gap)
+        heading.font = UILooks.font(P.Title.fontSize, weight: P.Title.weight)
+        note.font = UILooks.font(DesignTokens.FontSize.meta)
         let width = Self.width - 56
         note.preferredMaxLayoutWidth = width
         let page = NSStackView(views: [heading, note, list])
         page.orientation = .vertical
         page.alignment = .leading
-        page.spacing = 4
-        page.setCustomSpacing(20, after: note)
+        page.spacing = UILooks.pt(P.Head.titleGap)
+        page.setCustomSpacing(UILooks.pt(P.gap), after: note)
         for view in [note, list] as [NSView] { view.widthAnchor.constraint(equalToConstant: width).isActive = true }
         let stack = NSStackView(views: [tabs, page])
         stack.orientation = .vertical

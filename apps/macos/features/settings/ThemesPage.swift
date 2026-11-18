@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 import Strings
 import Themes
 import UniformTypeIdentifiers
@@ -79,8 +80,9 @@ final class ThemesPage {
             self?.filter = ["dark": .dark, "light": .light][value] ?? .all
             self?.applyFilter()
         }
-        let bar = NSStackView(views: [search, kinds])
-        bar.spacing = 8
+        // The search in the frame's box (plan 31 D), the filter beside it.
+        let bar = NSStackView(views: [FrameField.field(search), kinds])
+        bar.spacing = UILooks.pt(DesignTokens.NewTask.Option.gap)
         return bar
     }
 
