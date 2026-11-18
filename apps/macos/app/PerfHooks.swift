@@ -1,6 +1,7 @@
 import Agents
 import Machines
 import AppKit
+import UILooks
 import Orchestration
 import Tabs
 import Terminal
@@ -260,7 +261,7 @@ extension WindowSession {
             }
             // The New Task sheet sits over the terminals, which are drawn over it above: on its
             // own, next to it, -sheet.png.
-            if let content = self?.newTaskSheet, let shot = content.bitmapImageRepForCachingDisplay(in: content.bounds) {
+            if let content = self?.newTaskSheet ?? self?.window.contentView?.subviews.first(where: { $0 is FrameSheet }), let shot = content.bitmapImageRepForCachingDisplay(in: content.bounds) {
                 content.cacheDisplay(in: content.bounds, to: shot)
                 try? shot.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: (out as NSString).deletingPathExtension + "-sheet.png"))
             }

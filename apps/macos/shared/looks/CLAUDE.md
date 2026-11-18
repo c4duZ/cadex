@@ -24,6 +24,12 @@
   texto do tema ativo (`applyTheme`; no Cadex Night, os valores dos mockups); as cores de estado
   ficam iguais em todo tema. `repaint` troca, numa janela já montada, cada cor de token pela nova
   (camadas, textos, ícones, botões) e redesenha tudo, sem refazer as views.
+- `FrameSheet.swift` e `FrameFields.swift` (plano 31 B): a folha da moldura (o fundo escurecido, o
+  painel com as medidas da Nova tarefa, o título, o que vai acontecer, o formulário e o rodapé com
+  Cancelar e o botão principal; Esc e ⌘↩) e os controles do sistema sem moldura dentro da caixa do
+  pedido (campo, popup, caixa de combinação, área de texto, checkbox), com o rótulo de seção em
+  cima. As folhas da orquestração usam (`../../app/FormSheetWiring.swift`), no lugar do alerta do
+  sistema.
 - `UILooks.swift`: o app chama UILooks.configure uma vez, antes de montar qualquer tela. As telas
   pedem `font(_:weight:)` (tamanho do desenho × zoom × fontSize/13, na família escolhida com o
   mesmo peso), `monospaced`/`monospacedDigits` (código curto e números), `pt` (larguras, margens,

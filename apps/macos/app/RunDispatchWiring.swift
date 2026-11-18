@@ -25,17 +25,9 @@ extension WindowSession {
                                 prompt: RunLaunch.prompt(task),
                                 permissions: skip ? T("none asked (--dangerously-skip-permissions)", "nenhuma pedida (--dangerously-skip-permissions)")
                                                   : T("Claude Code asks, in the tab", "o Claude Code pergunta, na aba"))
-        let alert = NSAlert()
-        alert.messageText = T("Dispatch \(task.title)?", "Despachar \(task.title)?")
-        alert.informativeText = T("Claude in a new worktree in \((worktrees.tasksRoot(of: run.repository) as NSString).abbreviatingWithTildeInPath) and a tab, or in the idle terminal you pick, with the prompt below. Run cap: US$ \(String(format: "%.2f", run.caps.budgetUsd)) and \(run.caps.maxMinutes) min.",
-                                  "O Claude numa worktree nova em \((worktrees.tasksRoot(of: run.repository) as NSString).abbreviatingWithTildeInPath) e numa aba, ou no terminal parado que você escolher, com o prompt abaixo. Teto da execução: US$ \(String(format: "%.2f", run.caps.budgetUsd)) e \(run.caps.maxMinutes) min.")
-        alert.accessoryView = form
-        alert.addButton(withTitle: T("Dispatch", "Despachar"))
-        alert.addButton(withTitle: T("Cancel", "Cancelar"))
         fillPerfDispatchForm(form)
-        perfAnswer(alert)
-        alert.beginSheetModal(for: window) { [weak self] response in
-            guard response == .alertFirstButtonReturn else { return }
+        showForm(T("Dispatch \(task.title)?", "Despachar \(task.title)?"), text: T("Claude in a new worktree in \((worktrees.tasksRoot(of: run.repository) as NSString).abbreviatingWithTildeInPath) and a tab, or in the idle terminal you pick, with the prompt below. Run cap: US$ \(String(format: "%.2f", run.caps.budgetUsd)) and \(run.caps.maxMinutes) min.",
+                                  "O Claude numa worktree nova em \((worktrees.tasksRoot(of: run.repository) as NSString).abbreviatingWithTildeInPath) e numa aba, ou no terminal parado que você escolher, com o prompt abaixo. Teto da execução: US$ \(String(format: "%.2f", run.caps.budgetUsd)) e \(run.caps.maxMinutes) min."), form: form, primary: T("Dispatch", "Despachar")) { [weak self] in
             self?.startDispatch(form.request(task: taskID))
         }
     }

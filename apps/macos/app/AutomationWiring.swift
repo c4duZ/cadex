@@ -41,18 +41,10 @@ extension WindowSession {
         let here = folder.root
         let repo = mainRepository
         let form = NewAutomationForm(accounts: raceAccounts(repo: repo ?? here), repository: repo, folder: here, caps: controller.defaultCaps)
-        let alert = NSAlert()
-        alert.messageText = T("New Automation", "Nova automação")
-        alert.informativeText = T("It is made off: turn it on from its history. Each run shows in a tab, within its cap.",
-                                  "Ela nasce desligada: ligue pelo histórico dela. Cada execução aparece numa aba, dentro do teto.")
-        alert.accessoryView = form
-        alert.addButton(withTitle: T("Create", "Criar"))
-        alert.addButton(withTitle: T("Cancel", "Cancelar"))
-        alert.window.initialFirstResponder = form.firstField
         fillPerfAutomationForm(form)
-        perfAnswer(alert)
-        alert.beginSheetModal(for: window) { [weak self] response in
-            guard response == .alertFirstButtonReturn, let self else { return }
+        showForm(T("New Automation", "Nova automação"), text: T("It is made off: turn it on from its history. Each run shows in a tab, within its cap.",
+                                  "Ela nasce desligada: ligue pelo histórico dela. Cada execução aparece numa aba, dentro do teto."), form: form, primary: T("Create", "Criar"), first: form.firstField) { [weak self] in
+            guard let self else { return }
             switch form.automation(id: book.newId(), fallback: controller.defaultCaps) {
             case .failure(let problem): self.say(T("The automation was not made", "A automação não foi criada"), problem.message)
             case .success(let automation):

@@ -17,6 +17,8 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # Written for the new frame, relative to the repository (plan that added it).
 FRAME_FILES = [
+    "apps/macos/shared/looks/FrameSheet.swift",  # plano 31
+    "apps/macos/shared/looks/FrameFields.swift",  # plano 31
     "apps/macos/features/source-control/ReviewTree.swift",  # plano 31
     "apps/macos/features/source-control/ReviewDocument.swift",  # plano 31
     "apps/macos/features/orchestration/OrchestrationPage.swift",  # plano 30

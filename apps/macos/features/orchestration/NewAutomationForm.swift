@@ -1,5 +1,6 @@
 import AppKit
 import Strings
+import UILooks
 
 /// "New Automation" (docs/spec/orchestration.md "Automações"; plan 24 E):
 /// the name, the prompt, the recurrence, where it runs (a new worktree each
@@ -33,7 +34,7 @@ public final class NewAutomationForm: NSView {
         self.accounts = accounts.isEmpty ? [AccountChoice(title: "~/.claude", dir: nil)] : accounts
         self.repository = repository
         self.folder = folder
-        super.init(frame: NSRect(x: 0, y: 0, width: 540, height: 470))
+        super.init(frame: .zero)
         nameField.placeholderString = T("Automation name", "Nome da automação")
         for title in [T("Weekdays at (HH:MM)", "Dias úteis às (HH:MM)"), T("Every day at (HH:MM)", "Todo dia às (HH:MM)"),
                       T("Every N hours", "A cada N horas"), T("Every N minutes", "A cada N minutos"),
@@ -55,14 +56,13 @@ public final class NewAutomationForm: NSView {
             missed.menu?.addItem(NSMenuItem(title: title, action: nil, keyEquivalent: ""))
         }
         let prompt = FormKit.textArea(promptView, height: 110)
-        FormKit.stack([FormKit.labeled(T("Name", "Nome"), nameField), NSTextField(labelWithString: T("Prompt", "Prompt")), prompt,
+        FormKit.stack([FormKit.labeled(T("Name", "Nome"), nameField), FrameField.labeled(T("Prompt", "Prompt"), prompt),
                        FormKit.labeled(T("When", "Quando"), NSStackView(views: [recurrence, timeField])),
                        FormKit.labeled(T("Runs in", "Roda em"), target), FormKit.labeled(T("Account", "Conta"), account),
                        FormKit.labeled(T("Model", "Modelo"), model, width: 140), FormKit.labeled(T("Permissions", "Permissões"), permission),
                        FormKit.labeled(T("Tools", "Ferramentas"), toolsField),
                        FormKit.labeled(T("Cap (US$, min)", "Teto (US$, min)"), NSStackView(views: [budgetField, minutesField]), width: 160),
                        subscription, missed], in: self)
-        prompt.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
     }
 
     required init?(coder: NSCoder) { nil }

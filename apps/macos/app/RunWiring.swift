@@ -48,18 +48,10 @@ extension WindowSession {
             return say(T("A run needs a git repository", "Uma execução precisa de um repositório git"), T("Open a repository's folder first.", "Abra antes a pasta de um repositório."))
         }
         let form = NewRunForm(caps: controller.defaultCaps, accounts: raceAccounts(repo: repo))
-        let alert = NSAlert()
-        alert.messageText = T("New Run", "Nova execução")
-        alert.informativeText = T("Tasks in \((repo as NSString).abbreviatingWithTildeInPath), each in its own worktree and agent. You coordinate (each dispatch yours, or ready tasks starting on their own as the account below), or an agent does: Claude opens in a tab here with your goal and spawns the tasks. The cap is for the whole run.",
-                                  "Tarefas em \((repo as NSString).abbreviatingWithTildeInPath), cada uma na sua worktree e agente. Você coordena (cada despacho seu, ou as prontas começando sozinhas na conta abaixo), ou um agente coordena: o Claude abre numa aba aqui com o seu objetivo e cria as tarefas. O teto vale para a execução inteira.")
-        alert.accessoryView = form
-        alert.addButton(withTitle: T("Create Run", "Criar a execução"))
-        alert.addButton(withTitle: T("Cancel", "Cancelar"))
-        alert.window.initialFirstResponder = form.firstField
         fillPerfRunForm(form)
-        perfAnswer(alert)
-        alert.beginSheetModal(for: window) { [weak self] response in
-            guard response == .alertFirstButtonReturn, let self else { return }
+        showForm(T("New Run", "Nova execução"), text: T("Tasks in \((repo as NSString).abbreviatingWithTildeInPath), each in its own worktree and agent. You coordinate (each dispatch yours, or ready tasks starting on their own as the account below), or an agent does: Claude opens in a tab here with your goal and spawns the tasks. The cap is for the whole run.",
+                                  "Tarefas em \((repo as NSString).abbreviatingWithTildeInPath), cada uma na sua worktree e agente. Você coordena (cada despacho seu, ou as prontas começando sozinhas na conta abaixo), ou um agente coordena: o Claude abre numa aba aqui com o seu objetivo e cria as tarefas. O teto vale para a execução inteira."), form: form, primary: T("Create Run", "Criar a execução"), first: form.firstField) { [weak self] in
+            guard let self else { return }
             self.createRun(form.values(fallback: controller.defaultCaps), repo: repo)
         }
     }
@@ -85,17 +77,9 @@ extension WindowSession {
     func addRunTask(_ runID: String) {
         guard let book = OrchestrationController.shared.runs(), let run = try? book.run(runID) else { return }
         let form = AddTaskForm(others: (try? book.tasks(of: runID)) ?? [])
-        let alert = NSAlert()
-        alert.messageText = T("Add a Task to \(run.name)", "Adicionar uma tarefa a \(run.name)")
-        alert.informativeText = T("It is ready when every task it starts after is done.", "Ela fica pronta quando todas as tarefas de que depende estão concluídas.")
-        alert.accessoryView = form
-        alert.addButton(withTitle: T("Add Task", "Adicionar"))
-        alert.addButton(withTitle: T("Cancel", "Cancelar"))
-        alert.window.initialFirstResponder = form.firstField
         fillPerfTaskForm(form)
-        perfAnswer(alert)
-        alert.beginSheetModal(for: window) { [weak self] response in
-            guard response == .alertFirstButtonReturn, let self else { return }
+        showForm(T("Add a Task to \(run.name)", "Adicionar uma tarefa a \(run.name)"), text: T("It is ready when every task it starts after is done.", "Ela fica pronta quando todas as tarefas de que depende estão concluídas."), form: form, primary: T("Add Task", "Adicionar"), first: form.firstField) { [weak self] in
+            guard let self else { return }
             let values = form.values()
             guard !values.title.isEmpty else { return self.say(T("The task did not go in", "A tarefa não entrou"), T("It needs a title.", "Ela precisa de um título.")) }
             do {
@@ -193,16 +177,9 @@ extension WindowSession {
         guard let book = OrchestrationController.shared.runs(), let task: RunTask = try? book.store.get(.tasks, id: taskID) else { return }
         let others = ((try? book.tasks(of: task.run)) ?? []).filter { $0.id != taskID }
         let form = DependenciesForm(others: others, checked: task.dependsOn)
-        let alert = NSAlert()
-        alert.messageText = T("\(task.title) starts after…", "\(task.title) começa depois de…")
-        alert.informativeText = T("It is ready when every task checked here is done.", "Ela fica pronta quando todas as tarefas marcadas aqui estão concluídas.")
-        alert.accessoryView = form
-        alert.addButton(withTitle: T("Save", "Salvar"))
-        alert.addButton(withTitle: T("Cancel", "Cancelar"))
         fillPerfDependenciesForm(form)
-        perfAnswer(alert)
-        alert.beginSheetModal(for: window) { [weak self] response in
-            guard response == .alertFirstButtonReturn, let self else { return }
+        showForm(T("\(task.title) starts after…", "\(task.title) começa depois de…"), text: T("It is ready when every task checked here is done.", "Ela fica pronta quando todas as tarefas marcadas aqui estão concluídas."), form: form, primary: T("Save", "Salvar")) { [weak self] in
+            guard let self else { return }
             do { try book.setDependencies(task: taskID, form.values()) } catch {
                 self.say(T("The dependencies did not change", "As dependências não mudaram"), Self.runMessage(error, run: task.run))
             }

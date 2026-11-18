@@ -1,5 +1,6 @@
 import AppKit
 import Strings
+import UILooks
 
 /// Who coordinates a new run (docs/spec/orchestration.md "Execuções"; plan 24 D1 and D2).
 public enum RunMode: Int, Equatable, Sendable {
@@ -37,7 +38,7 @@ public final class NewRunForm: NSView {
 
     public init(caps: Caps, accounts: [AccountChoice] = []) {
         self.accounts = accounts.isEmpty ? [AccountChoice(title: "~/.claude", dir: nil)] : accounts
-        super.init(frame: NSRect(x: 0, y: 0, width: 520, height: 330))
+        super.init(frame: .zero)
         nameField.placeholderString = T("Run name", "Nome da execução")
         budgetField.stringValue = String(format: "%.2f", caps.budgetUsd)
         minutesField.stringValue = "\(caps.maxMinutes)"
@@ -56,8 +57,7 @@ public final class NewRunForm: NSView {
                        FormKit.labeled(T("Cap (min)", "Teto (min)"), minutesField, width: 80),
                        FormKit.labeled(T("Coordinated by", "Coordenada por"), mode),
                        FormKit.labeled(T("Agents' account", "Conta dos agentes"), account), FormKit.labeled(T("Model", "Modelo"), model, width: 140),
-                       NSTextField(labelWithString: T("Goal (the coordinating agent's prompt)", "Objetivo (o prompt do agente coordenador)")), goal], in: self)
-        goal.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
+                       FrameField.labeled(T("Goal (the coordinating agent's prompt)", "Objetivo (o prompt do agente coordenador)"), goal)], in: self)
         modeChanged()
     }
 

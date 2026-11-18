@@ -1,47 +1,47 @@
 import AppKit
 import Strings
+import UILooks
 
 /// The run's sheets (plan 24 D1): "New Run" (name and caps), "Add Task"
 /// (title, specification, dependencies) and the dispatch's (account, model,
-/// starting branch). The app shows each in an NSAlert with what will run
-/// in its text, and reads it back.
+/// starting branch). The app shows each in a FrameSheet (plan 31 B; it was
+/// the system alert) with what will run in its text, and reads it back.
 @MainActor
 enum FormKit {
-    static func labeled(_ title: String, _ control: NSView, width: CGFloat = 260) -> NSView {
-        let label = NSTextField(labelWithString: title)
-        label.widthAnchor.constraint(equalToConstant: 110).isActive = true
-        control.widthAnchor.constraint(greaterThanOrEqualToConstant: width).isActive = true
-        return NSStackView(views: [label, control])
+    /// The label over the control, the control in the frame's box (plan 31 B).
+    static func labeled(_ title: String, _ control: NSView, width: CGFloat = 0) -> NSView {
+        FrameField.labeled(title, styled(control))
     }
 
+    /// A control in the frame's face by its kind; a row of them shares the row.
+    static func styled(_ control: NSView) -> NSView {
+        switch control {
+        case let combo as NSComboBox: return FrameField.combo(combo)
+        case let popup as NSPopUpButton: return FrameField.popup(popup)
+        case let button as NSButton: return FrameField.check(button)
+        case let field as NSTextField where field.isEditable: return FrameField.field(field)
+        case let row as NSStackView where row.orientation == .horizontal:
+            let parts = row.arrangedSubviews
+            parts.forEach { $0.removeFromSuperview() }
+            return FrameField.row(parts.map(styled))
+        default: return control
+        }
+    }
+
+    /// The form's column, filling the host, its height the form's.
     static func stack(_ views: [NSView], in host: NSView) {
-        let stack = NSStackView(views: views)
-        stack.orientation = .vertical
-        stack.alignment = .leading
-        stack.spacing = 8
-        stack.translatesAutoresizingMaskIntoConstraints = false
+        let stack = FrameField.column(views.map { $0 is NSButton || $0 is NSPopUpButton ? styled($0) : $0 }, gap: DesignTokens.NewTask.Frame.labelTop)
         host.addSubview(stack)
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: host.leadingAnchor), stack.trailingAnchor.constraint(equalTo: host.trailingAnchor),
-            stack.topAnchor.constraint(equalTo: host.topAnchor),
+            stack.topAnchor.constraint(equalTo: host.topAnchor), stack.bottomAnchor.constraint(equalTo: host.bottomAnchor),
         ])
+        for view in stack.arrangedSubviews where !(view is NSButton) { view.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true }
     }
 
     /// A plain-text editor: no smart quotes or dashes, the spec goes as typed.
-    static func textArea(_ view: NSTextView, height: CGFloat) -> NSScrollView {
-        view.isRichText = false
-        view.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
-        view.isAutomaticQuoteSubstitutionEnabled = false
-        view.isAutomaticDashSubstitutionEnabled = false
-        view.autoresizingMask = [.width]
-        view.minSize = NSSize(width: 0, height: height)
-        view.isVerticallyResizable = true
-        let scroll = NSScrollView()
-        scroll.documentView = view
-        scroll.hasVerticalScroller = true
-        scroll.borderType = .bezelBorder
-        scroll.heightAnchor.constraint(equalToConstant: height).isActive = true
-        return scroll
+    static func textArea(_ view: NSTextView, height: CGFloat) -> NSView {
+        FrameField.area(view, height: height)
     }
 }
 
@@ -59,12 +59,12 @@ public final class AddTaskForm: NSView {
 
     public init(others: [RunTask]) {
         self.others = others
-        super.init(frame: NSRect(x: 0, y: 0, width: 520, height: 260 + CGFloat(min(others.count, 8)) * 22))
+        super.init(frame: .zero)
         titleField.placeholderString = T("Title", "Título")
         var views: [NSView] = [FormKit.labeled(T("Title", "Título"), titleField),
-                               NSTextField(labelWithString: T("Specification (the agent's prompt)", "Especificação (o prompt do agente)")),
-                               FormKit.textArea(specView, height: 160)]
-        if !others.isEmpty { views.append(NSTextField(labelWithString: T("Starts after", "Começa depois de"))) }
+                               FrameField.labeled(T("Specification (the agent's prompt)", "Especificação (o prompt do agente)"),
+                                                  FormKit.textArea(specView, height: 160))]
+        if !others.isEmpty { views.append(FrameField.label(T("Starts after", "Começa depois de"))) }
         for task in others {
             let box = NSButton(checkboxWithTitle: task.title, target: nil, action: nil)
             boxes.append(box)
@@ -72,7 +72,6 @@ public final class AddTaskForm: NSView {
         }
         views.append(gateBox)
         FormKit.stack(views, in: self)
-        if let scroll = specView.enclosingScrollView { scroll.widthAnchor.constraint(equalTo: widthAnchor).isActive = true }
     }
 
     required init?(coder: NSCoder) { nil }
@@ -120,7 +119,7 @@ public final class DispatchForm: NSView {
         self.accounts = accounts.isEmpty ? [AccountChoice(title: "~/.claude", dir: nil)] : accounts
         self.bases = bases
         self.idle = idle
-        super.init(frame: NSRect(x: 0, y: 0, width: 520, height: 300))
+        super.init(frame: .zero)
         for title in AccountChoice.titles(self.accounts) { account.menu?.addItem(NSMenuItem(title: title, action: nil, keyEquivalent: "")) }
         model.addItems(withObjectValues: AccountChoice.models.map { $0.isEmpty ? T("default", "padrão") : $0 })
         model.selectItem(at: 0)
@@ -134,9 +133,8 @@ public final class DispatchForm: NSView {
         promptView.isEditable = false
         FormKit.stack([FormKit.labeled(T("Account", "Conta"), account), FormKit.labeled(T("Model", "Modelo"), model, width: 140),
                        FormKit.labeled(T("Runs in", "Roda em"), place), FormKit.labeled(T("From branch", "Da branch"), base),
-                       NSTextField(labelWithString: T("Prompt (the task's specification) · permissions: ", "Prompt (a especificação da tarefa) · permissões: ") + permissions),
-                       scroll], in: self)
-        scroll.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
+                       FrameField.labeled(T("Prompt (the task's specification) · permissions: ", "Prompt (a especificação da tarefa) · permissões: ") + permissions, scroll)],
+                      in: self)
     }
 
     required init?(coder: NSCoder) { nil }
@@ -173,13 +171,13 @@ public final class DependenciesForm: NSView {
 
     public init(others: [RunTask], checked: [String]) {
         self.others = others
-        super.init(frame: NSRect(x: 0, y: 0, width: 360, height: CGFloat(max(1, min(others.count, 12))) * 24))
+        super.init(frame: .zero)
         for task in others {
             let box = NSButton(checkboxWithTitle: task.title, target: nil, action: nil)
             box.state = checked.contains(task.id) ? .on : .off
             boxes.append(box)
         }
-        FormKit.stack(boxes.isEmpty ? [NSTextField(labelWithString: T("No other task in this run.", "Nenhuma outra tarefa nesta execução."))] : boxes, in: self)
+        FormKit.stack(boxes.isEmpty ? [FrameField.text(T("No other task in this run.", "Nenhuma outra tarefa nesta execução."))] : boxes, in: self)
     }
 
     required init?(coder: NSCoder) { nil }
