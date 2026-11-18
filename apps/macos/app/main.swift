@@ -1,5 +1,6 @@
 import AgentTools
 import AppKit
+import Customize
 import CommandPalette
 import Explorer
 import Menus
@@ -27,16 +28,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// The commands' titles and defaults for the settings window and the
     /// keymap: the same in every window, copied from the main one.
     private let catalog = CommandRegistry()
-    private lazy var settingsWindow = SettingsWindowController(
-        store: settings.store, registry: catalog,
-        keymap: { [weak self] in self?.keymap ?? Keymap(registry: CommandRegistry()) },
-        suspendShortcuts: { [weak self] on in self?.dispatcher?.isSuspended = on },
-        relaunch: { [weak self] in self?.relaunch() })
+    private lazy var settingsWindow: SettingsWindowController = {
+        let controller = SettingsWindowController(
+            store: settings.store, registry: catalog,
+            keymap: { [weak self] in self?.keymap ?? Keymap(registry: CommandRegistry()) },
+            suspendShortcuts: { [weak self] on in self?.dispatcher?.isSuspended = on },
+            relaunch: { [weak self] in self?.relaunch() })
+        // The status bar's items and the accounts of the window in use (⌘, opens it too).
+        controller.customizePages = { [weak self] in
+            guard let session = self?.sessions.first(where: { $0.window.isKeyWindow || $0.window.isMainWindow }) ?? self?.sessions.first,
+                  let workspace = session.workspace else { return [] }
+            return session.customizePages(workspace)
+        }
+        return controller
+    }()
     /// Quitting to open again (the language changed): applicationWillTerminate
     /// starts the new Cadex.
     private var relaunching = false
 
     var settingsCommand: Command { settingsWindow.openCommand }
+    /// The settings window on a section ("statusBar", "agents", "memory"), its lists from `session`
+    /// (the status bar's items and the accounts are this window's; plan 32 B).
+    func showSettings(_ section: String) { settingsWindow.show(section: section) }
+
+    /// The open settings window shows the lists again (they changed from ⌘K or a window).
+    func refreshSettingsLists() { settingsWindow.refreshLists() }
     var settingsPageCommands: [Command] { settingsWindow.pageCommands }
     /// The Cadex symbol by the clock: filled while keep-awake is on.
     private var menuBarItem: MenuBarItem?

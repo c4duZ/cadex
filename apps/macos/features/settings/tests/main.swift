@@ -246,6 +246,30 @@ let exitCode = await Checks.run([
             snapshot(page, "themes-page")
         }
     }),
+    ("each module has its section and the search finds a setting by its words (plan 32)", {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("cadex-settings-\(UUID())/settings.json")
+        defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
+        let store = SettingsStore(file: file)
+        let sections: [(SettingsSection, [NSView])] = [
+            (.general, SectionRows.general(store) { _ in }), (.terminal, TerminalPage.rows(store)), (.files, SectionRows.files(store)),
+            (.git, SectionRows.git(store)), (.agents, SectionRows.agents(store)), (.notifications, SectionRows.notifications(store)),
+            (.memory, MemoryRows.make(store)), (.orchestration, OrchestrationRows.make(store)), (.machines, SectionRows.machines(store)),
+        ]
+        @MainActor func found(_ words: String) -> [SettingsSection] {
+            sections.filter { $0.1.contains { ($0 as? SettingsRowBox)?.matches(words) == true } }.map(\.0)
+        }
+        expect(found("tailnet") == [.machines], "\(found("tailnet"))")
+        expect(found("hibernate") == [.agents], "\(found("hibernate"))")
+        expect(found("Option as Meta") == [.terminal], "\(found("Option as Meta"))")
+        expect(found("hidden files") == [.files], "\(found("hidden files"))")
+        expect(found("daily cap").contains(.memory), "\(found("daily cap"))")
+        expect(found("ZZZ nothing").isEmpty)
+        // No section is empty, and General is no longer everything.
+        for (section, rows) in sections { expect(rows.contains { $0 is SettingsRowBox }, "\(section) has rows") }
+        let general = SectionRows.general(store) { _ in }.filter { $0 is SettingsRowBox }.count
+        expect(general < 12, "General holds \(general) rows")
+    }),
+
 ])
 
 /// The card views in a view tree.

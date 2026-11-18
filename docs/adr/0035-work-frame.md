@@ -50,6 +50,6 @@ essa fica para depois) e quer os terminais e as abas no centro, divididos e movi
 - O app do Windows segue depois, com plano próprio; os comandos novos entram no `MAC_ONLY` da
   paridade até lá.
 - Situação (2026-11-17): feita no Mac, planos 25 a 30, sem nenhuma linha do inventário em `sai`.
-  O plano 31 refaz as telas que os mockups não desenharam; depois falta só o Windows (plano 32) (`docs/plans/README.md`).
+  O plano 31 refaz as telas que os mockups não desenharam; o 32 organiza as configurações; depois falta só o Windows (plano 33) (`docs/plans/README.md`).
 - Toda ação nova é comando (ADR 0005): abrir a tela de início, alternar o painel da direita, cada
   aba dele, a gaveta de terminais.

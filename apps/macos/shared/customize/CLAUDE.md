@@ -16,15 +16,12 @@
 - `CustomizeList.swift`: a lista desenhada (títulos, linhas em caixa com alça, ícone, nome, linha
   menor opcional, valor numa coluna fixa e chave); arrastar reorganiza enquanto o mouse se move,
   com a linha por cima das outras, e avisa uma vez ao soltar.
-- `CustomizeWindow.swift`: uma janela só para o app (`shared`), como a de configurações, com uma aba
-  por `CustomizePage` (Sidebar, Status Bar; o dono pediu uma janela com abas, 2026-10-21). Por cima
-  do app em tela cheia, na mesma mesa (fullScreenAuxiliary e moveToActiveSpace, a lição das
-  configurações); centrada sobre a janela de onde abriu; fecha com Esc, ⌘W ou o botão. Cada mudança
-  vai na hora para o `onChange` da aba aberta, com a lista inteira; `refresh` mostra o que mudou por
-  fora; `recolor` repinta na troca de tema. O desenho é o das configurações (a cara da moldura desde o plano 31 D, as páginas em pílulas): abas no topo, título
-  da página em 20 pt, legenda, linhas em caixa com cantos de 8 pt e borda de 1 pt (o dono pediu as
-  duas janelas iguais, 2026-10-21). `CustomizeColors` vem do tema, pelo app, nunca do destaque da
-  janela (que a cor do space troca); `ThemeSwitch`, a chave do app na cor de destaque, pública: as configurações usam a mesma.
+- `CustomizePage.swift`: `CustomizePage` (uma lista para arrumar: os itens da barra de status, as
+  contas; quem monta recebe cada mudança) e `CustomizeColors` (`.frame`: os tokens da moldura).
+  `CustomizePageView.swift`: a lista dentro de outra vista, as seções Barra de status e Agentes e
+  contas da janela de configurações (plano 32 B; a janela Personalizar, com abas, saiu: o dono quis
+  tudo nas configurações, 2026-11-18). Cada mudança vai na hora para o `onChange`; `refresh` mostra o
+  que mudou por fora. `ThemeSwitch.swift`: a chave do app, pública, a mesma das configurações.
 
 ## Como validar
 - `make macos-test` passa: seções, mover entre seções, chave, a vaga, o arrastar com eventos de

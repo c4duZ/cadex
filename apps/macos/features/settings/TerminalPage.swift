@@ -7,16 +7,18 @@ import Strings
 @MainActor
 enum TerminalPage {
     static func make(_ store: SettingsStore) -> NSView {
+        SettingsPage.make(title: "Terminal", subtitle: T("The shell, the questions before closing or pasting, the text and the keyboard.",
+                                                          "O shell, as perguntas antes de fechar ou colar, o texto e o teclado."),
+                          rows: rows(store))
+    }
+
+    static func rows(_ store: SettingsStore) -> [NSView] {
         let g = store.settings.general
         let t = store.settings.terminal
         let fonts = ["SF Mono"] + NSFontManager.shared.availableFontFamilies.filter { family in
             NSFont(name: family, size: 12)?.isFixedPitch == true && family != "SF Mono"
         }
-        return SettingsPage.make(
-            title: "Terminal",
-            subtitle: T("The shell, the questions before closing or pasting, the text and the keyboard.",
-                        "O shell, as perguntas antes de fechar ou colar, o texto e o teclado."),
-            rows: [
+        return [
                 SettingsPage.section("Shell"),
                 SettingsPage.row("Shell",
                                  T("The program each new terminal runs. Empty uses your login shell.",
@@ -80,6 +82,6 @@ enum TerminalPage {
                 SettingsPage.row(T("Copy on select", "Copiar ao selecionar"),
                                  T("Selecting text copies it. Off, only ⌘C copies.", "Selecionar um texto já copia. Desligado, só o ⌘C copia."),
                                  control: SettingsPage.toggle(t.copyOnSelect) { on in store.update { $0.terminal.copyOnSelect = on } }),
-            ])
+            ]
     }
 }

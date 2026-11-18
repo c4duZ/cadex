@@ -105,6 +105,7 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | trecho | "confirmTask" em `apps/macos/app/WorktreesWiring.swift` | saiu | o fluxo de alertas do New Task: a folha única do ⌘N (`apps/macos/features/worktrees/NewTaskSheet.swift`), fase B | 29 |
 | trecho | "askTaskName" em `apps/macos/app/RunOnWiring.swift` | saiu | o nome e o "Rodar em" num alerta: a máquina é uma linha de agente da folha, fase B | 29 |
 | arquivo | `apps/macos/features/orchestration/NewRaceForm.swift` | saiu | a folha única do ⌘N (2+ agentes); as contas das folhas de execução e automação em `apps/macos/features/orchestration/AccountChoice.swift`, fase D | 29 |
+| arquivo | `apps/macos/shared/customize/CustomizeWindow.swift` | saiu | a barra de status e as contas são seções das configurações (plano 32 B) | 32 |
 | arquivo | `apps/macos/features/source-control/DiffDocument.swift` | saiu | o diff de um arquivo ou commit é a revisão aberta nele (plano 31 A) | 31 |
 | comando | `diff.toggle-layout` | saiu | no Mac, com a aba de diff; o Windows ainda o tem até a moldura chegar lá | 31 |
 | comando | `orchestration.new-race` | saiu | saiu no plano 30 D: a corrida pela folha Nova tarefa é worktrees.new-race | 30 |

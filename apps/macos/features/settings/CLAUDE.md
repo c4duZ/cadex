@@ -14,11 +14,12 @@
   padrões novos uma vez (versão 2: do Caffeine ao Cadex Night, ADR 0035). `SettingsStore.swift`: memória e disco (Application Support/Cadex), salva a cada
   mudança e relê edição à mão observando a pasta (salvar atômico) e o arquivo (edição no lugar). CADEX_SETTINGS_FILE
   aponta para outro arquivo (os cenários do `make perf`).
-- A janela (⌘,, comando settings.open): `SettingsWindowController.swift`, com as seções em abas no
-  topo, auxiliar de tela cheia (com o app em tela cheia, abre por cima dele, na mesma
-  mesa, e não numa mesa à parte); `GeneralPages.swift` (General e About; em Agents também as linhas
-  do plano 19: o que precisa de você, o número no Dock, silenciar, hibernar depois de N minutos;
-  em Tarefas, a pasta das tarefas), `TerminalPage.swift` (com as notificações dos programas e manter
+- A janela (⌘,, comando settings.open): `SettingsWindowController.swift`, desde o plano 32 com as
+  seções numa lista à esquerda e a busca em cima (`SettingsNavigation.swift`; as seções em
+  `SettingsSections.swift`; as linhas de cada uma, que eram uma página Geral só, em `SectionRows.swift`,
+  a busca pelas palavras de cada linha, `SettingsRowBox`); a barra de status e as contas (as listas
+  do antigo Personalizar, `customizePages`, dadas pelo app) são seções daqui; auxiliar de tela cheia (com o app em tela cheia, abre por cima dele, na mesma
+  mesa, e não numa mesa à parte); `GeneralPages.swift` (About), `TerminalPage.swift` (com as notificações dos programas e manter
   os terminais quando o Cadex fecha, plano 19), `KeepAwakeRows.swift` (as seções do manter acordado em General), `MemoryRows.swift` (a seção
   Memória em General: memory.enabled e memory.shareAcrossAccounts; ao lado do SSH, machines.tailscale, plano 23), `OrchestrationRows.swift` e `OrchestrationSettings.swift` (a seção Muitos agentes:
   orchestration.*, desligadas por padrão, os números com limite ao ler; plano 24), `ThemesPage.swift` (modo, seus temas,

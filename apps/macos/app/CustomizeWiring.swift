@@ -13,43 +13,20 @@ import Sidebar
 import SourceControl
 import Strings
 
-/// The one Customize window in this window: the status bar's items and the accounts. The sidebar's
-/// icons left with the sidebar, which became the work's tree (plan 27 phase B, TreeWiring.swift).
+/// The lists to arrange (the status bar's items, the accounts): sections of the settings window
+/// since plan 32 B (it was the Customize window, refused by the owner on 2026-11-18: "as
+/// configurações que estão em outra coisa hoje" come into settings).
 extension WindowSession {
-    /// The one Customize window, on a tab (sidebar or statusBar), with this
-    /// window's sidebar and status bar; over this window, in full screen too.
+    /// The settings window on the section of `page` ("statusBar", "accounts"), with this window's
+    /// status bar and accounts.
     func openCustomize(_ page: String) {
-        guard let workspace else { return }
-        Self.followThemeInCustomize()
-        CustomizeWindow.shared.show(customizePages(workspace), selecting: page, colors: Self.customizeColors(), over: window)
-    }
-
-    /// The settings window's colors, from the theme itself: not the window's
-    /// accent, which a space's or tab's color replaces (the owner saw blue
-    /// switches under Caffeine, 2026-10-21).
-    /// The frame's tokens since plan 31 D (they follow the theme): the settings window's own.
-    static func customizeColors() -> CustomizeColors {
-        CustomizeColors(text: DesignTokens.Color.textPrimary, secondary: DesignTokens.Color.textMuted, accent: DesignTokens.Project.Toggle.on,
-                        panel: DesignTokens.Color.bgWindow, box: DesignTokens.Project.Row.bg, border: DesignTokens.Project.Row.border)
-    }
-
-    private static var followsTheme = false
-
-    /// Once for the app: a theme change repaints the open Customize window.
-    private static func followThemeInCustomize() {
-        guard !followsTheme else { return }
-        followsTheme = true
-        ThemeStore.shared.observe { _ in CustomizeWindow.shared.recolor(customizeColors()) }
+        app.showSettings(page == "accounts" ? "agents" : page)
     }
 
     /// Settings changed while it is open: it shows them.
-    func refreshCustomize() {
-        guard let workspace, window.isKeyWindow || CustomizeWindow.shared.isKeyWindow else { return }
-        CustomizeWindow.shared.refresh(customizePages(workspace))
-    }
+    func refreshCustomize() { app.refreshSettingsLists() }
 
-    private func customizePages(_ workspace: WorkspaceView) -> [CustomizePage] {
+    func customizePages(_ workspace: WorkspaceView) -> [CustomizePage] {
         [workspace.statusBar.customizePage, accountsPage()]
     }
-
 }

@@ -12,8 +12,8 @@ enum KeepAwakeRows {
         return [
             SettingsPage.section(T("Keep awake", "Manter acordado")),
             SettingsPage.note(T(
-                "Keeps the computer from sleeping while your work runs. The coffee in the title bar, the Cadex icon in the menu bar and ⇧⌘A turn it on and off; ⌘K can also turn on either mode.",
-                "Impede o computador de dormir enquanto o seu trabalho roda. O café na barra de título, o ícone do Cadex na barra de menus e o ⇧⌘A ligam e desligam; o ⌘K também liga qualquer um dos modos.")),
+                "Keeps the computer from sleeping while your work runs. The coffee in the status bar and the Cadex icon in the menu bar turn it on and off; ⌘K can also turn on either mode.",
+                "Impede o computador de dormir enquanto o seu trabalho roda. O café na barra de status e o ícone do Cadex na barra de menus ligam e desligam; o ⌘K também liga qualquer um dos modos.")),
             SettingsPage.row(T("Mode", "Modo"),
                              T("Always: awake until you turn it off. While a program runs: awake only while a terminal runs something, such as an agent, a build or a server; once they all finish, the computer sleeps as usual.",
                                "Sempre: acordado até você desligar. Com programa rodando: acordado só enquanto algum terminal roda alguma coisa, como um agente, um build ou um servidor; quando todos terminam, o computador dorme como sempre."),

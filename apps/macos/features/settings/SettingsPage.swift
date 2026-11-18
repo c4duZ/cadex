@@ -50,6 +50,7 @@ enum SettingsPage {
     /// A row: the label and its explanation on the left, the control right.
     static func row(_ label: String, _ detail: String?, control: NSView) -> NSView {
         if let toggle = control as? ThemeSwitch { toggle.setAccessibilityLabel(label) }
+        let words = label + " " + (detail ?? "")
         let title = FrameField.text(label, color: SettingsColors.text, weight: DesignTokens.FontWeight.semibold)
         var texts: [NSView] = [title]
         if let detail {
@@ -65,7 +66,9 @@ enum SettingsPage {
         row.alignment = .centerY
         left.setContentHuggingPriority(.defaultLow, for: .horizontal)
         control.setContentHuggingPriority(.required, for: .horizontal)
-        return boxed(row)
+        let box = boxed(row)
+        box.words = words
+        return box
     }
 
     private static let sectionID = NSUserInterfaceItemIdentifier("settingsSectionTitle")
@@ -84,9 +87,9 @@ enum SettingsPage {
     }
 
     /// The rounded box around a row.
-    static func boxed(_ content: NSView) -> NSView {
+    static func boxed(_ content: NSView) -> SettingsRowBox {
         typealias R = DesignTokens.Project.Row
-        let box = FrameBox()
+        let box = SettingsRowBox()
         box.box(bg: SettingsColors.box, border: SettingsColors.border, radius: R.radius)
         box.hold(content, padding: DesignTokens.Project.Stat.padding)
         return box
@@ -191,4 +194,16 @@ final class ActionBox: NSObject {
 
 final class FlippedView: NSView {
     override var isFlipped: Bool { true }
+}
+
+/// A row's box that remembers its words (the label and the explanation), for the search (plan 32 A).
+@MainActor
+final class SettingsRowBox: FrameBox {
+    var words = ""
+
+    /// Whether every word typed is in the row's, ignoring case and accents.
+    func matches(_ query: String) -> Bool {
+        let wanted = query.split(separator: " ").map(String.init)
+        return !words.isEmpty && wanted.allSatisfy { words.range(of: $0, options: [.caseInsensitive, .diacriticInsensitive]) != nil }
+    }
 }

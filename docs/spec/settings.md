@@ -54,6 +54,15 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
   reabrir o Cadex, como o idioma. settings.open-themes e settings.open-terminal abrem essas páginas
   pelo ⌘K.
 
+### A janela organizada (plano 32)
+- Uma lista de seções à esquerda (Geral, Aparência, Terminal, Arquivos e preview, Git e revisão,
+  Agentes e contas, Notificações, Memória, Muitos agentes, Máquinas e SSH, Barra de status,
+  Atalhos, Sobre), a seção aberta marcada, e a página à direita. Em cima da lista, a busca: cada
+  linha de todas as seções que tem as palavras digitadas (no nome ou na explicação, sem ligar para
+  maiúsculas e acentos) aparece sob o nome da seção; vazia, volta à seção aberta.
+- A barra de status (os itens, arrastar entre Esquerda e Direita, ligar e desligar) e as contas
+  (mostrar, esconder, a ordem) ficam aqui; o "Personalizar" da barra e o das contas abrem a seção.
+
 ## Estados
 - **Sem arquivo:** valem os padrões; o arquivo nasce na primeira mudança.
 - **Arquivo com erro:** valem os padrões para o que estiver errado; o aviso vai para o log e o resto

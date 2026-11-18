@@ -1,27 +1,29 @@
 import AppKit
 import UILooks
 import CommandPalette
+import Customize
 import Icons
 import Shortcuts
 import Strings
 import Themes
 
-/// The settings window (⌘,): the sections as tabs at
-/// the top, the page below. One window, brought back if open
-/// (docs/spec/settings.md).
+/// The settings window (⌘,): the sections in a list on the left with a search over every row, the
+/// page on the right (plan 32 A; it was General, Terminal, Themes, Shortcuts and About as tabs, with
+/// most modules in one long General). The status bar's items and the accounts (the Customize
+/// window's lists) are sections here. One window, brought back if open (docs/spec/settings.md).
 @MainActor
 public final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let store: SettingsStore
     private let shortcuts: ShortcutsPage
     private let themes: ThemesPage
     private var window: NSWindow?
-    /// The sections as the board's pills (plan 31 D; it was the system's segmented control).
-    private let tabs = NSStackView()
-    private var selectedSection = 0
+    private let navigation = SettingsNavigation()
+    private(set) var selected = SettingsSection.general
+    private var query = ""
     private let content = NSView()
-    private static let sections: [(title: String, icon: Icon)] = [
-        (T("General", "Geral"), .gearSix), ("Terminal", .terminalWindow), (T("Themes", "Temas"), .palette), (T("Shortcuts", "Atalhos"), .keyboard), (T("About", "Sobre"), .info),
-    ]
+    /// The lists to arrange, from the app: "statusBar" and "accounts" (the Customize pages).
+    public var customizePages: () -> [CustomizePage] = { [] }
+    private var shownLists: [String: CustomizePageView] = [:]
     /// Reopens Cadex (the language counts at launch).
     private let relaunch: () -> Void
 
@@ -44,10 +46,10 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
     public var pageCommands: [Command] {
         [Command(id: "settings.open-terminal", title: T("Open Terminal Settings", "Abrir configurações do terminal"),
                  keywords: ["font", "fonte", "line height", "altura da linha", "spacing", "espaçamento", "contrast", "contraste", "cursor"],
-                 category: .app, action: .run { [weak self] in self?.show(section: 1) }),
+                 category: .app, action: .run { [weak self] in self?.show(section: "terminal") }),
          Command(id: "settings.open-themes", title: T("Open Theme Settings", "Abrir configurações de temas"),
                  keywords: ["theme", "tema", "accent", "destaque", "contrast", "contraste", "background", "fundo"],
-                 category: .app, action: .run { [weak self] in self?.show(section: 2) }),
+                 category: .app, action: .run { [weak self] in self?.show(section: "appearance") }),
          Command(id: "terminal.toggle-ligatures", title: T("Turn Ligatures On or Off", "Ligar ou desligar as ligaduras"),
                  keywords: ["ligatures", "ligaduras", "fira code", "font", "fonte"], category: .terminal,
                  action: .run { [store] in
@@ -56,43 +58,66 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
                  })]
     }
 
-    /// `section` shows that page; nil keeps the one open (⌘,).
-    public func show(section: Int? = nil) {
+    /// `section` (a SettingsSection's id: "memory", "statusBar") shows that page; nil keeps the one
+    /// open (⌘,).
+    public func show(section: String? = nil) {
         let window = self.window ?? makeWindow()
         self.window = window
-        if let section { select(section) } else if !window.isVisible { select(0) }
+        if let section, let found = SettingsSection(rawValue: section) {
+            navigation.clearSearch()
+            query = ""
+            select(found)
+        } else if !window.isVisible {
+            select(selected)
+        }
         window.makeKeyAndOrderFront(nil)
     }
 
+    /// The lists changed elsewhere (⌘K, another window): an open list shows it.
+    public func refreshLists() {
+        guard window?.isVisible == true else { return }
+        for page in customizePages() { shownLists[page.id]?.refresh(page) }
+    }
+
     private func makeWindow() -> NSWindow {
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 900, height: 640),
+        let width = UILooks.pt(DesignTokens.Inspector.width) * 3 / 4 + UILooks.pt(DesignTokens.Sheet.newTaskWidth + DesignTokens.Project.padding.left * 4)
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: width, height: UILooks.pt(DesignTokens.Sheet.newTaskWidth) * 9 / 8),
                               styleMask: [.titled, .closable, .resizable, .fullSizeContentView], backing: .buffered, defer: true)
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
         window.title = T("Settings", "Configurações")
         window.isReleasedWhenClosed = false
-        window.minSize = NSSize(width: 720, height: 420)
+        window.minSize = NSSize(width: width * 3 / 4, height: UILooks.pt(DesignTokens.Sheet.newTaskWidth) * 2 / 3)
         // Over the app when it is in full screen, in the same Space: a plain
         // window opened in another Space and took the user out of the app
         // (owner's report, 2026-10-20). Auxiliary windows also cannot go
         // full screen themselves.
         window.collectionBehavior = [.fullScreenAuxiliary, .moveToActiveSpace]
         window.delegate = self
-
-        tabs.spacing = UILooks.pt(DesignTokens.Board.Filters.gap)
-        showTabs()
-
+        navigation.onPick = { [weak self] section in
+            self?.query = ""
+            self?.select(section)
+        }
+        navigation.onSearch = { [weak self] words in
+            guard let self else { return }
+            self.query = words.trimmingCharacters(in: .whitespaces)
+            self.query.isEmpty ? self.select(self.selected) : self.showResults()
+        }
+        let line = NSView()
+        line.wantsLayer = true
+        line.layer?.backgroundColor = DesignTokens.Inspector.borderLeft.cgColor
         let root = NSView()
-        for view in [tabs, content] {
+        for view in [navigation, line, content] {
             view.translatesAutoresizingMaskIntoConstraints = false
             root.addSubview(view)
         }
         NSLayoutConstraint.activate([
-            // Beside the window's buttons, in the title bar's height (components.titleBar).
-            tabs.centerYAnchor.constraint(equalTo: root.topAnchor, constant: UILooks.pt(DesignTokens.TitleBar.height) / 2),
-            tabs.centerXAnchor.constraint(equalTo: root.centerXAnchor),
-            content.topAnchor.constraint(equalTo: root.topAnchor, constant: UILooks.pt(DesignTokens.TitleBar.height)),
-            content.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+            navigation.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+            navigation.topAnchor.constraint(equalTo: root.topAnchor), navigation.bottomAnchor.constraint(equalTo: root.bottomAnchor),
+            line.leadingAnchor.constraint(equalTo: navigation.trailingAnchor), line.widthAnchor.constraint(equalToConstant: DesignTokens.Stroke.hairline),
+            line.topAnchor.constraint(equalTo: root.topAnchor), line.bottomAnchor.constraint(equalTo: root.bottomAnchor),
+            content.topAnchor.constraint(equalTo: root.topAnchor, constant: UILooks.pt(DesignTokens.TitleBar.height) / 2),
+            content.leadingAnchor.constraint(equalTo: line.trailingAnchor),
             content.trailingAnchor.constraint(equalTo: root.trailingAnchor),
             content.bottomAnchor.constraint(equalTo: root.bottomAnchor),
         ])
@@ -113,33 +138,79 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         // On the content too: the window's own color left a lighter grey under the pages.
         window.contentView?.wantsLayer = true
         window.contentView?.layer?.backgroundColor = SettingsColors.background.cgColor
-        showTabs()
-        if window.isVisible { select(selectedSection) }
+        if window.isVisible { query.isEmpty ? select(selected) : showResults() }
     }
 
-    /// One pill per section, the open one filled.
-    private func showTabs() {
-        tabs.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        for (i, section) in Self.sections.enumerated() {
-            tabs.addArrangedSubview(FramePill.make(section.title, on: i == selectedSection) { [weak self] in self?.select(i) })
+    /// The rows of a section made of rows; nil for the pages of their own.
+    func rows(of section: SettingsSection) -> [NSView]? {
+        switch section {
+        case .general: SectionRows.general(store) { [weak self] language in self?.askRelaunch(language) }
+        case .terminal: TerminalPage.rows(store)
+        case .files: SectionRows.files(store)
+        case .git: SectionRows.git(store)
+        case .agents: SectionRows.agents(store) + list("accounts", note: true)
+        case .notifications: SectionRows.notifications(store)
+        case .memory: MemoryRows.make(store)
+        case .orchestration: OrchestrationRows.make(store)
+        case .machines: SectionRows.machines(store)
+        case .statusBar: list("statusBar", note: false)
+        case .appearance, .shortcuts, .about: nil
         }
     }
 
-    private func select(_ section: Int) {
+    /// A Customize list (the accounts, the status bar's items) as rows: its note and its list, whose
+    /// own headers name it ("Accounts", "Left", "Right").
+    private func list(_ id: String, note: Bool) -> [NSView] {
+        guard let page = customizePages().first(where: { $0.id == id }) else { return [] }
+        let view = CustomizePageView(page)
+        shownLists[id] = view
+        var views: [NSView] = []
+        // Among other rows (the accounts) the note says what the list is; alone, the section's
+        // subtitle already does (the status bar's said it twice).
+        if note, !page.note.isEmpty { views.append(SettingsPage.note(page.note)) }
+        return views + [view]
+    }
+
+    private func select(_ section: SettingsSection) {
         // Rebuilding the same page (a theme change) keeps where it was
         // scrolled, or picking a card would jump the list to the top.
-        let sameSection = selectedSection == section
+        let sameSection = selected == section
         let scrolled = (content.subviews.first as? NSScrollView)?.contentView.bounds.origin
-        selectedSection = section
-        showTabs()
+        selected = section
+        navigation.show(section)
+        shownLists = [:]
         let page: NSView
         switch section {
-        case 1: page = TerminalPage.make(store)
-        case 2: page = themes.makeView()
-        case 3: page = shortcuts.makeView()
-        case 4: page = GeneralPages.about()
-        default: page = GeneralPages.general(store) { [weak self] language in self?.askRelaunch(language) }
+        case .appearance: page = themes.makeView()
+        case .shortcuts: page = shortcuts.makeView()
+        case .about: page = GeneralPages.about()
+        default: page = SettingsPage.make(title: section.title, subtitle: section.subtitle, rows: rows(of: section) ?? [])
         }
+        place(page)
+        if sameSection, let scrolled, let scroll = page as? NSScrollView {
+            content.layoutSubtreeIfNeeded()
+            scroll.contentView.scroll(to: scrolled)
+            scroll.reflectScrolledClipView(scroll.contentView)
+        }
+    }
+
+    /// Every row that has the words typed, under its section's name.
+    private func showResults() {
+        navigation.show(nil)
+        shownLists = [:]
+        var found: [NSView] = []
+        for section in SettingsSection.allCases {
+            let matches = (rows(of: section) ?? []).compactMap { $0 as? SettingsRowBox }.filter { $0.matches(query) }
+            let named = section.title.range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil
+            guard !matches.isEmpty || named else { continue }
+            found.append(SettingsPage.section(section.title))
+            found += matches.isEmpty ? [SettingsPage.note(T("Open the section from the list on the left.", "Abra a seção pela lista à esquerda."))] : matches
+        }
+        if found.isEmpty { found = [SettingsPage.note(T("No setting has these words.", "Nenhuma configuração tem essas palavras."))] }
+        place(SettingsPage.make(title: T("Search", "Busca"), subtitle: "“\(query)”", rows: found))
+    }
+
+    private func place(_ page: NSView) {
         content.subviews.forEach { $0.removeFromSuperview() }
         page.translatesAutoresizingMaskIntoConstraints = false
         content.addSubview(page)
@@ -149,11 +220,6 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
             page.trailingAnchor.constraint(equalTo: content.trailingAnchor),
             page.bottomAnchor.constraint(equalTo: content.bottomAnchor),
         ])
-        if sameSection, let scrolled, let scroll = page as? NSScrollView {
-            content.layoutSubtreeIfNeeded()
-            scroll.contentView.scroll(to: scrolled)
-            scroll.reflectScrolledClipView(scroll.contentView)
-        }
     }
 
     /// The language, the interface's size and font count when Cadex opens:

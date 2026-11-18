@@ -17,6 +17,8 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # Written for the new frame, relative to the repository (plan that added it).
 FRAME_FILES = [
+    "apps/macos/features/settings/SettingsNavigation.swift",  # plano 32
+    "apps/macos/shared/customize/CustomizePageView.swift",  # plano 32
     "apps/macos/features/settings/SettingsPage.swift",  # plano 31
     "apps/macos/features/settings/SettingsColors.swift",  # plano 31
     "apps/macos/shared/looks/FramePill.swift",  # plano 31

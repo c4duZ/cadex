@@ -2,8 +2,8 @@ import AppKit
 
 /// A box of the new frame: its fill, line and corner, its content held inside a padding.
 @MainActor
-public class FrameBox: NSView {
-    public override var isFlipped: Bool { true }
+open class FrameBox: NSView {
+    open override var isFlipped: Bool { true }
 
     public func box(bg: NSColor?, border: NSColor?, radius: CGFloat) {
         wantsLayer = true
