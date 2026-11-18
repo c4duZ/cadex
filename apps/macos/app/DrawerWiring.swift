@@ -19,7 +19,7 @@ extension WindowSession {
                  keywords: ["drawer", "terminal", "quick", "gaveta", "rápido"], category: .terminal, defaultShortcut: "ctrl+`",
                  action: .run { [weak self] in self?.toggleDrawer() }),
          Command(id: "drawer.move-to-project", title: T("Move the Drawer's Terminal to the Project", "Levar o terminal da gaveta ao projeto"),
-                 keywords: ["drawer", "move", "project", "task", "gaveta", "mover", "projeto"], category: .terminal, defaultShortcut: "cmd+enter",
+                 keywords: ["drawer", "move", "project", "task", "gaveta", "mover", "projeto"], category: .terminal, defaultShortcut: "cmd+return",
                  action: .run { [weak self] in self?.moveDrawerTerminal() },
                  unavailableReason: { [weak self] in
                      self?.drawerHasFocus == true ? nil : T("The drawer's terminal has no focus", "O terminal da gaveta não tem o foco")

@@ -95,7 +95,7 @@ extension WindowSession {
         actions.toggle = { [weak self] in self?.toggleAutomation(id) }
         actions.goToSession = { [weak self] in self?.goToAutomationSession(run: $0, automation: id) }
         actions.openTranscript = { [weak self] in self?.openAutomationTranscript(run: $0, automation: id) }
-        let page = AutomationHistoryDocument(automationID: id, book: book, colors: Self.raceColors(), actions: actions)
+        let page = AutomationHistoryDocument(automationID: id, book: book, actions: actions)
         page.onClose = { [weak page] in AutomationWatch.shared.pages.removeAll { $0 === page } }
         AutomationWatch.shared.pages.append(page)
         tabs?.open(page)

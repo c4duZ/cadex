@@ -62,7 +62,7 @@ extension WindowSession {
         actions.answer = { [weak self] in self?.answerQuestion($0) }
         actions.markDone = { [weak self] in self?.markDispatchDone($0) }
         actions.retry = { [weak self] in self?.retryTask($0) }
-        let page = RunPageDocument(runID: id, book: book, colors: Self.raceColors(), actions: actions) { [weak self] in self?.live($0) }
+        let page = RunPageDocument(runID: id, book: book, actions: actions) { [weak self] in self?.live($0) }
         page.heartbeatMinutes = { OrchestrationController.shared.limits.heartbeatMinutes }
         page.slots = { [weak self] in ((self?.liveRunAgents() ?? 0) + (self?.liveRaceAgents() ?? 0), OrchestrationController.shared.limits.maxAgents) }
         page.refresh()

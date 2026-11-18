@@ -30,6 +30,14 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
 - O prompt chega ao `claude` como argumento do exec, nunca dentro de um comando de shell (ADR 0033).
   Aspas, `$()`, crases, `;` e quebras de linha chegam intactos e nada é executado.
 
+### As páginas da execução e da automação (plano 30 B)
+- Na cara da moldura nova, como a página do projeto: o nome grande, a pasta e quem coordena (ou a
+  agenda, onde e em qual conta), os botões à direita; a execução com o gasto contra o teto e cada
+  tarefa num cartão com a peça de estado, recuado um passo à direita do que espera, com o que falta,
+  o último despacho ("stalled?" em âmbar), o portão e as ações; a caixa de entrada em cartões; a
+  automação com Turn on/off, Run now e cada rodada num cartão. A barra de título diz "projeto › run
+  <nome>" na execução.
+
 ### O quadro (mockup Board; plano 30 B, feito junto da revisão do plano 29)
 - view.board e o botão do quadro na barra de título (aceso com ele aberto) abrem a página "Board",
   com "All projects" no lugar do projeto e o painel da direita fechado (volta como estava).

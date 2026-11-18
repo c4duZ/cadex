@@ -100,6 +100,11 @@
   histórico) e `AutomationCommands.swift` (orchestration.toggle-automations, -new-automation,
   -toggle-automation, -run-automation-now e -show-automation-history). O controlador avisa quando
   orchestration.automations muda (`onAutomationsSwitch`).
+- `OrchestrationPage.swift` (plano 30 B): a cara nova das páginas da orquestração (a página que
+  rola, o cabeçalho com o nome e os botões, o rótulo de seção, o cartão com a peça de estado e o
+  recuo do grafo, os botões do app); a página da execução (`RunPageView.swift`, cada tarefa um
+  cartão) e o histórico de uma automação (`AutomationHistory.swift`, cada rodada um cartão) são
+  páginas (isPage) feitas com ela.
 - O quadro (plano 30 B): `BoardModel.swift` (cartões, colunas pelo estado e filtros, puros),
   `BoardView.swift` (`BoardDocument`, a página "cadex:board") e `BoardParts.swift` (a página com a
   rolagem, as colunas em 4, 2 ou 1 e a fileira de filtros que quebra). A corrida no centro:

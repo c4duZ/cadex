@@ -260,6 +260,11 @@ extension WindowSession {
             workspace?.titleBar.setLocation(project: T("All projects", "Todos os projetos"), task: nil)
             return showProject(branch: lastBranch)
         }
+        // A run's page: "project › run <name>".
+        if let document = tabs?.activeDocument, document.identity.hasPrefix("run:") {
+            workspace?.titleBar.setLocation(project: projects?.activeName ?? "", task: T("run ", "execução ") + document.title)
+            return showProject(branch: lastBranch)
+        }
         let (project, task) = TitleBarView.location(of: root)
         // A race's lane: "cadex › race kite" (the Race mockup).
         let race = raceName(of: root).map { T("race ", "corrida ") + $0 }

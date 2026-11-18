@@ -24,7 +24,7 @@ execução, automações), agents, memory, terminal (a gaveta), tabs · Decisõe
   gasto da semana, PRs, memória), conversas recentes (as sessões dos agentes, inclusive as de fora
   do Cadex que a página Agents mostrava), automações com liga e desliga, contas usadas ali; a aba
   Memória do painel da direita aberta junto.
-- **B. Quadro e corrida.** Feita (2026-11-17, idem): o quadro e a corrida no centro conferidos no app contra os mockups 7 e 8; a página de execução na cara nova fica para a fase D. Plano original: O quadro de todas as tarefas por estado, com filtros (corrida, execução,
+- **B. Quadro e corrida.** Feita (2026-11-17, idem): o quadro e a corrida no centro conferidos no app contra os mockups 7 e 8; as páginas da execução e da automação na cara nova (OrchestrationPage), conferidas no app. Plano original: O quadro de todas as tarefas por estado, com filtros (corrida, execução,
   automações) e Nova corrida / Nova execução; a corrida no centro com as colunas do mockup 8
   (estado, tempo, custo, diff, barra do teto, Revisar e Escolher vencedora), na cara nova de
   RaceBoardView.swift; a execução como filtro do quadro, com a página dela na cara nova.

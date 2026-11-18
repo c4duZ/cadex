@@ -1,6 +1,7 @@
 import Agents
 import Machines
 import AppKit
+import Orchestration
 import Tabs
 import Terminal
 import Home
@@ -161,7 +162,14 @@ extension WindowSession {
                 let at = (step["at"] as? NSNumber)?.doubleValue ?? 3
                 DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in
                     guard let self else { return }
-                    if let id = step["command"] as? String { _ = self.commands.run(id) }
+                    if let id = step["command"] as? String, !self.commands.run(id) {
+                        NSLog("Cadex script: %@ did not run: %@", id, self.commands.command(id)?.unavailableReason() ?? "unknown")
+                    }
+                    // The newest run's page (its command asks which in the palette).
+                    if step["runPage"] as? Bool == true, let book = OrchestrationController.shared.runs(),
+                       let run = ((try? book.store.all(.runs)) as [Run]?)?.max(by: { $0.createdAt < $1.createdAt }) {
+                        self.showRun(run.id)
+                    }
                     if let text = step["type"] as? String { self.tabs?.activeTerminal?.typeWhenReady(text + "\n") }
                     if let text = step["tab"] as? String {
                         self.tabs?.newTab(cwd: self.tabs?.activeTerminal?.currentDirectory)

@@ -1,4 +1,6 @@
 import AppKit
+import StateGlyph
+import UILooks
 import Strings
 import Tabs
 
@@ -39,16 +41,18 @@ public enum AutomationLines {
 }
 
 /// What the history's buttons do, given by the app (ADR 0005).
+@MainActor
 public struct AutomationHistoryActions {
-    public var runNow: () -> Void = {}
-    public var toggle: () -> Void = {}
+    public var runNow: @MainActor () -> Void = {}
+    public var toggle: @MainActor () -> Void = {}
     public var goToSession: (String) -> Void = { _ in }
     public var openTranscript: (String) -> Void = { _ in }
     public init() {}
 }
 
-/// An automation's history in a tab: what it runs and when, then one line
-/// per run, newest first; read when it opens and on `refresh`.
+/// An automation's history in a tab, in the new frame's face (plan 30 B): its name, when it
+/// runs, where, on which agent and under which cap; Run now and its switch; then a card per run,
+/// newest first, with Session and Transcript. A page (isPage); read when it opens and on refresh.
 @MainActor
 public final class AutomationHistoryDocument: TabDocument {
     public let automationID: String
@@ -56,26 +60,13 @@ public final class AutomationHistoryDocument: TabDocument {
     public var onClose: (() -> Void)?
     public private(set) var title = "Automation"
     private let book: AutomationBook
-    private let page = FlippedView()
-    private let stack = NSStackView()
-    private let colors: RaceBoardColors
+    private let page = OrchestrationPage()
     private let actions: AutomationHistoryActions
 
-    public init(automationID: String, book: AutomationBook, colors: RaceBoardColors, actions: AutomationHistoryActions) {
+    public init(automationID: String, book: AutomationBook, actions: AutomationHistoryActions) {
         self.automationID = automationID
         self.book = book
-        self.colors = colors
         self.actions = actions
-        page.wantsLayer = true
-        page.layer?.backgroundColor = colors.background.cgColor
-        stack.orientation = .vertical
-        stack.alignment = .leading
-        stack.spacing = 8
-        stack.edgeInsets = NSEdgeInsets(top: 24, left: 28, bottom: 24, right: 28)
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        page.addSubview(stack)
-        NSLayoutConstraint.activate([stack.leadingAnchor.constraint(equalTo: page.leadingAnchor), stack.topAnchor.constraint(equalTo: page.topAnchor),
-                                     stack.trailingAnchor.constraint(lessThanOrEqualTo: page.trailingAnchor)])
         refresh()
     }
 
@@ -83,56 +74,55 @@ public final class AutomationHistoryDocument: TabDocument {
     public var identity: String { Self.identity(for: automationID) }
     public var view: NSView { page }
     public var hasUnsavedChanges: Bool { false }
+    public var isPage: Bool { true }
 
     public func refresh() {
         guard let automation = try? book.automation(automationID) else { return }
-        stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        stack.addArrangedSubview(label(automation.name, 18, .semibold, colors.text))
         let place = AutomationLaunch.place(automation)
         let target = { () -> String in
             if case .newWorktree = automation.target { return T("a new worktree of ", "uma worktree nova de ") + (place as NSString).lastPathComponent }
             return (place as NSString).abbreviatingWithTildeInPath
         }()
-        stack.addArrangedSubview(label(AutomationSchedule.label(automation.recurrence) + " · " + target + " · " + RaceColumns.agentLabel(automation.agent)
-                                       + " · " + T("cap US$ \(String(format: "%.2f", automation.caps.budgetUsd)) and \(automation.caps.maxMinutes) min",
-                                                   "teto US$ \(String(format: "%.2f", automation.caps.budgetUsd)) e \(automation.caps.maxMinutes) min"),
-                                       12, .regular, colors.secondary))
-        stack.addArrangedSubview(label(automation.enabled ? T("On", "Ligada") : T("Off", "Desligada"), 12, .regular, automation.enabled ? colors.accent : colors.secondary))
-        stack.addArrangedSubview(NSStackView(views: [
-            button(T("Run Now", "Executar agora"), actions.runNow),
-            button(automation.enabled ? T("Turn Off", "Desligar") : T("Turn On…", "Ligar…"), actions.toggle),
-        ]))
+        let meta = AutomationSchedule.label(automation.recurrence) + " · " + target + " · " + RaceColumns.agentLabel(automation.agent)
+            + " · " + T("cap US$ \(String(format: "%.2f", automation.caps.budgetUsd)) and \(automation.caps.maxMinutes) min",
+                        "teto US$ \(String(format: "%.2f", automation.caps.budgetUsd)) e \(automation.caps.maxMinutes) min")
+        let actions = actions
+        let buttons = [OrchestrationPage.button(automation.enabled ? T("Turn off", "Desligar") : T("Turn on…", "Ligar…")) { actions.toggle() },
+                       OrchestrationPage.button(T("Run now", "Executar agora"), primary: true) { actions.runNow() }]
+        var runs: [NSView] = [OrchestrationPage.section(T("RUNS", "EXECUÇÕES"))]
         let lines = AutomationLines.make((try? book.history(of: automationID)) ?? [])
-        if lines.isEmpty { stack.addArrangedSubview(label(T("No runs yet.", "Nenhuma execução ainda."), 12, .regular, colors.secondary)) }
-        for line in lines {
-            var row: [NSView] = [label(line.result, 12, .semibold, colors.text), label(line.text, 12, .regular, colors.secondary)]
-            let go = actions.goToSession, open = actions.openTranscript
-            if line.hasSession { row.append(button(T("Session", "Sessão")) { go(line.run) }) }
-            if line.hasTranscript { row.append(button(T("Transcript", "Transcrição")) { open(line.run) }) }
-            stack.addArrangedSubview(NSStackView(views: row))
+        if lines.isEmpty {
+            runs.append(boardLabel(T("No runs yet.", "Nenhuma execução ainda."), size: DesignTokens.FontSize.meta, color: DesignTokens.Color.textMuted))
         }
+        for line in lines {
+            var row: [NSView] = []
+            if line.hasSession { row.append(OrchestrationPage.button(T("Session", "Sessão")) { actions.goToSession(line.run) }) }
+            if line.hasTranscript { row.append(OrchestrationPage.button(T("Transcript", "Transcrição")) { actions.openTranscript(line.run) }) }
+            runs.append(OrchestrationPage.card(state: Self.glyph(line.result), title: line.result,
+                                               lines: [(line.text, DesignTokens.Board.Card.Meta.color)], buttons: row))
+        }
+        let column = OrchestrationPage.stack(runs, gap: DesignTokens.Board.Column.gap)
+        for view in runs.dropFirst() { view.widthAnchor.constraint(equalTo: column.widthAnchor).isActive = true }
+        let state = boardLabel(automation.enabled ? T("On", "Ligada") : T("Off", "Desligada"), size: DesignTokens.FontSize.body,
+                               color: automation.enabled ? DesignTokens.Color.stateDone : DesignTokens.Color.textMuted)
+        page.show([OrchestrationPage.head(automation.name, meta: meta, buttons: buttons), state, column])
         if title != automation.name {
             title = automation.name
             onChange?()
         }
     }
 
-    private func label(_ text: String, _ size: CGFloat, _ weight: NSFont.Weight, _ color: NSColor) -> NSTextField {
-        let field = NSTextField(labelWithString: text)
-        field.font = .systemFont(ofSize: size, weight: weight)
-        field.textColor = color
-        field.lineBreakMode = .byTruncatingTail
-        return field
+    /// A run's result as its card's glyph.
+    static func glyph(_ result: String) -> GlyphState {
+        switch result {
+        case AutomationLines.label(.running): .working
+        case AutomationLines.label(.done): .done
+        case AutomationLines.label(.skipped): .idle
+        default: .failed
+        }
     }
 
-    private func button(_ title: String, _ action: @escaping () -> Void) -> NSButton {
-        let button = ClosureButton(title: title, action: action)
-        button.bezelStyle = .rounded
-        button.controlSize = .small
-        return button
-    }
-
-    public func focus() { page.window?.makeFirstResponder(page) }
+    public func focus() { refresh() }
     public func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) { close() }
     public func close() { onClose?() }
 }
