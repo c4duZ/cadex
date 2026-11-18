@@ -127,6 +127,7 @@ public final class MemoryView: NSView {
         }
         outline.show(state.tree)
         add(MemoryParts.briefing { [weak self] in self?.run?("memory.show-briefing") }, to: bottom)
+        add(MemoryParts.configure { [weak self] in self?.run?("memory.configure-project") }, to: bottom)
     }
 
     /// "LEARNED TODAY": the pages the agents wrote today, newest first.

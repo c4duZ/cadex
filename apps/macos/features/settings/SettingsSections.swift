@@ -35,7 +35,7 @@ enum SettingsSection: String, CaseIterable, Sendable {
         case .git: T("Where tasks' worktrees go and what the review marks.", "Onde ficam as worktrees das tarefas e o que a revisão marca.")
         case .agents: T("What Cadex reads of the agents, what they can use, and the accounts.", "O que o Cadex lê dos agentes, o que eles podem usar, e as contas.")
         case .notifications: T("The bell, the Dock and each kind of notification with its sound.", "O sino, o Dock e cada tipo de notificação com o som dele.")
-        case .memory: T("What every agent session of a project starts with, and this project's own settings.", "Com o que cada sessão de agente de um projeto começa, e as configurações deste projeto.")
+        case .memory: T("The defaults for every project; a project's own are on its Settings page.", "Os padrões de todos os projetos; os de um projeto ficam na página Configurações dele.")
         case .orchestration: T("Races, runs and scheduled automations, and their caps.", "Corridas, execuções e automações agendadas, e os tetos delas.")
         case .machines: T("SSH hosts and the machines of your tailnet.", "Hosts SSH e as máquinas da sua tailnet.")
         case .statusBar: T("Drag between Left and Right; a hidden item measures nothing.", "Arraste entre Esquerda e Direita; um item escondido não mede nada.")

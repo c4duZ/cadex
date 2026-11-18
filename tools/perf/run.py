@@ -30,6 +30,10 @@ import plan24
 import plan27
 from plan22_engine import engine_running
 
+# The settings file's version (Settings.currentVersion): a file without one reads as version 1 and
+# the app's migrations run on it; the one of plan 32 turns the memory on, which the scenarios that
+# measure it off must not get (2026-11-18).
+SETTINGS_VERSION = 7
 ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 HERE = pathlib.Path(__file__).resolve().parent
 APP = ROOT / "dist/Cadex.app"
@@ -76,7 +80,7 @@ class TestApp:
         self.terminal_socket = f"{self.sockets}/terminal-1.sock"
         self.sessions_dir = f"{self.dir}/sessions"
         self.settings_file = pathlib.Path(self.dir) / "settings.json"
-        self.settings_file.write_text(json.dumps(settings or {}))
+        self.settings_file.write_text(json.dumps({"version": SETTINGS_VERSION, **(settings or {})}))
         env = dict(os.environ, CADEX_BACKGROUND="1", CADEX_PROJECTS_FILE=f"{self.dir}/projects.json",
                    CADEX_SETTINGS_FILE=str(self.settings_file), CADEX_THEMES_DIR=f"{self.dir}/themes",
                    SHELL=str(HERE / "loadshell.sh"), CADEX_LOAD=load, CADEX_LOAD_SECONDS=str(seconds),
@@ -173,7 +177,7 @@ def measure_theme_switch(app):
     def switch(count):
         for i in range(count):
             theme = SWITCH_THEMES[i % len(SWITCH_THEMES)]
-            app.settings_file.write_text(json.dumps({"appearance": {"theme": theme, "mode": "dark" if (i // 7) % 2 else "light"}}))
+            app.settings_file.write_text(json.dumps({"version": SETTINGS_VERSION, "appearance": {"theme": theme, "mode": "dark" if (i // 7) % 2 else "light"}}))
             time.sleep(0.12)
     app.sample(12)
     # The first switches grow the app once (~25 MB: each theme's first

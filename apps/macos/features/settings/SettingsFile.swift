@@ -221,6 +221,14 @@ public enum SettingsFile {
         if version < 6, !settings.statusBar.left.contains("drawer"), !settings.statusBar.right.contains("drawer") {
             settings.statusBar.right.insert("drawer", at: 0)
         }
+        // The memory and its agent on, and proposals in without waiting, once (ADR 0037; the owner,
+        // 2026-11-18: "sempre tem que estar ligada automaticamente"): every file wrote the old
+        // defaults, so a never-touched one cannot be told from a choice.
+        if version < 7 {
+            settings.memory.enabled = true
+            settings.memory.backgroundAgent = true
+            settings.memory.requireApproval = false
+        }
         settings.version = max(version, Settings.currentVersion)
     }
 

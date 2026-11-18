@@ -150,7 +150,7 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         case .git: SectionRows.git(store)
         case .agents: SectionRows.agents(store) + list("accounts", note: true)
         case .notifications: SectionRows.notifications(store)
-        case .memory: MemoryRows.make(store)
+        case .memory: MemoryRows.make(store) + MemoryRows.turnOff(store)
         case .orchestration: OrchestrationRows.make(store)
         case .machines: SectionRows.machines(store)
         case .statusBar: list("statusBar", note: false)

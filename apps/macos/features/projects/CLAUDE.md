@@ -30,6 +30,9 @@
   `ProjectPageParts.swift` (as peças: cartão, linha, chave, etiqueta de conta, `PageFlow` que
   quebra as linhas) e `ProjectPageView.swift` (`ProjectPageDocument`, uma aba-página, isPage: o
   centro inteiro, responsiva). O que ela mostra o app junta (`../../app/ProjectPageWiring.swift`).
+- `ProjectSettingsDocument.swift` (plano 32 D): a página Settings do projeto, ao lado do Overview
+  (identidade `project:settings:<pasta>`, no grupo das páginas), com as seções que o app dá (a
+  memória do projeto, o .ai-memory.toml); os padrões de todos ficam na janela de configurações.
 - `ProjectsFile.swift`: o JSON em Application Support/Cadex/projects.json (gravação atômica), com os
   projetos (nome, pasta, abas, cor), o ativo, a pasta do workspace e os recentes; uma lista vazia
   (a tela de início) é um arquivo bom. Arquivo ilegível vai para

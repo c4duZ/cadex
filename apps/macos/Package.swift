@@ -157,7 +157,7 @@ let package = Package(
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
         ),
         // The project memory's part in the sessions and the engine's warm-up (docs/adr/0028-project-memory.md).
-        .target(name: "Memory", dependencies: ["SessionKit", "CommandPalette", "Icons", "Menus", "Strings", "Tabs", "UILooks"],
+        .target(name: "Memory", dependencies: ["SessionKit", "CommandPalette", "Customize", "Icons", "Menus", "Strings", "Tabs", "UILooks"],
                 path: "features/memory", exclude: ["CLAUDE.md", "tests"],
                 swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],
                 linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),

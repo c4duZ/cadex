@@ -20,7 +20,25 @@ extension WindowSession {
                  category: .view, action: .run { [weak self] in
                      guard let folder = self?.projects?.activeFolder else { return }
                      self?.openProjectPage(folder)
+                 }),
+         // The project's own settings, beside its Overview (plan 32 D): the defaults stay in ⌘,.
+         Command(id: "project.show-settings", title: T("Show the Project's Settings", "Mostrar as configurações do projeto"),
+                 keywords: ["project", "settings", "memory", "ai-memory.toml", "projeto", "configurações", "memória"],
+                 category: .view, action: .run { [weak self] in
+                     guard let folder = self?.projects?.activeFolder else { return }
+                     self?.openProjectSettings(folder)
                  })]
+    }
+
+    func openProjectSettings(_ folder: String) {
+        if let index = projects?.projects.firstIndex(where: { $0.folder == folder }) { projects?.select(index) }
+        if let open = tabs?.document(identity: ProjectSettingsDocument.identity(for: folder)) { return tabs?.open(open) ?? () }
+        tabs?.open(makeProjectSettings(folder))
+    }
+
+    /// The page's sections: the project's memory (its .ai-memory.toml) for now.
+    func makeProjectSettings(_ folder: String) -> ProjectSettingsDocument {
+        ProjectSettingsDocument(folder: folder) { [MemoryProjectForm(folder: folder)] }
     }
 
     func openProjectPage(_ folder: String) {

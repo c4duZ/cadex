@@ -32,6 +32,10 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   (abaixo): a chamada a um deles não é gravada.
 
 ### O `.ai-memory.toml` do repositório
+- Numa tela (plano 32 D): a página Settings do projeto (ao lado de Overview) mostra as chaves que o
+  Cadex lê, com palavras simples, e grava na hora só essas, deixando comentários e o resto do
+  arquivo; um arquivo novo só nasce quando algo difere do padrão. Os padrões de todos os projetos
+  ficam em Configurações › Memória.
 - O mesmo arquivo do ai-memory, com as mesmas regras: o mais perto subindo da pasta da sessão (até a
   pasta pessoal; fora dela, até a raiz do repositório). Um arquivo só com `[capture]` não esconde o
   de cima para o resto.

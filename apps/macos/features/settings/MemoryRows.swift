@@ -1,18 +1,15 @@
 import AppKit
 import Strings
 
-/// The project memory's section in General (docs/spec/memory.md, plan 22
-/// phase C): on or off, and whether the accounts share it.
+/// The Memory section (docs/spec/memory.md, plan 22 phase C; plan 32 C): on by itself, how the
+/// accounts share it and how it consolidates; the switch to turn it off at the end, for who needs
+/// it (the owner, 2026-11-18: "sempre tem que estar ligada automaticamente").
 @MainActor
 enum MemoryRows {
     static func make(_ store: SettingsStore) -> [NSView] {
         let m = store.settings.memory
         return [
             SettingsPage.section(T("Memory", "Memória")),
-            SettingsPage.row(T("Project memory", "Memória do projeto"),
-                             T("What each agent session opened by Cadex did (prompts, the files it touched, how it ended) is kept per repository on this Mac, and the next session starts with it. Besides a short preparation after each update, nothing runs until an agent session opens. Off, sessions get no memory hooks.",
-                               "O que cada sessão de agente aberta pelo Cadex fez (prompts, os arquivos que mexeu, como terminou) fica guardado por repositório neste Mac, e a próxima sessão começa com isso. Fora uma preparação curta depois de cada atualização, nada roda até uma sessão de agente abrir. Desligado, as sessões não ganham os hooks da memória."),
-                             control: SettingsPage.toggle(m.enabled) { on in store.update { $0.memory.enabled = on } }),
             SettingsPage.row(T("Share across accounts", "Compartilhar entre contas"),
                              T("Every account sees the same memory of a project. Off, each account keeps its own, for clients' accounts that must not see each other's work.",
                                "Todas as contas veem a mesma memória de um projeto. Desligado, cada conta tem a sua, para contas de clientes que não podem ver o trabalho uma da outra."),
@@ -28,8 +25,8 @@ enum MemoryRows {
                                  store.update { $0.memory.consolidateAtContext = Int(value) }
                              }),
             SettingsPage.row(T("Background memory agent", "Agente de memória de fundo"),
-                             T("Off by default. On, Cadex runs `claude -p` on your account, with no tools and a cap per call and per day, to consolidate sessions that ended without a milestone and to propose rules and lessons. Anthropic's Consumer Terms (§3.7) restrict automated use of a subscription: an API key set in the account's Claude Code (apiKeyHelper) is the alternative; Cadex never stores or reads it. Organize History with AI runs only when you click, even with this off.",
-                               "Desligado por padrão. Ligado, o Cadex roda `claude -p` na sua conta, sem ferramentas e com teto por chamada e por dia, para consolidar sessões que terminaram sem marco e propor regras e lições. Os Termos de Consumidor da Anthropic (§3.7) restringem o uso automatizado de uma assinatura: uma chave de API configurada no Claude Code da conta (apiKeyHelper) é a alternativa; o Cadex nunca guarda nem lê a chave. Organizar o histórico com IA só roda no seu clique, mesmo com isto desligado."),
+                             T("On by default (it makes the difference). Cadex runs `claude -p` on your account, with no tools and a cap per call and per day, to consolidate sessions that ended without a milestone and to propose rules and lessons. Anthropic's Consumer Terms (§3.7) restrict automated use of a subscription: an API key set in the account's Claude Code (apiKeyHelper) is the alternative; Cadex never stores or reads it. Organize History with AI runs only when you click, even with this off.",
+                               "Ligado por padrão (é o que faz a diferença). O Cadex roda `claude -p` na sua conta, sem ferramentas e com teto por chamada e por dia, para consolidar sessões que terminaram sem marco e propor regras e lições. Os Termos de Consumidor da Anthropic (§3.7) restringem o uso automatizado de uma assinatura: uma chave de API configurada no Claude Code da conta (apiKeyHelper) é a alternativa; o Cadex nunca guarda nem lê a chave. Organizar o histórico com IA só roda no seu clique, mesmo com isto desligado."),
                              control: SettingsPage.toggle(m.backgroundAgent) { on in store.update { $0.memory.backgroundAgent = on } }),
             SettingsPage.row(T("Daily cap", "Teto por dia"),
                              T("The most the memory agent may spend in a day, in US dollars of the account's usage.",
@@ -41,6 +38,18 @@ enum MemoryRows {
                              T("Rules and lessons the agent proposes wait on the Memory page until you approve them.",
                                "As regras e lições que o agente propõe esperam na página Memory até você aprovar."),
                              control: SettingsPage.toggle(m.requireApproval) { on in store.update { $0.memory.requireApproval = on } }),
+        ]
+    }
+
+    /// The switch to turn the memory off, after everything else (plan 32 C).
+    static func turnOff(_ store: SettingsStore) -> [NSView] {
+        let m = store.settings.memory
+        return [
+            SettingsPage.section(T("Turn off", "Desligar")),
+            SettingsPage.row(T("Project memory", "Memória do projeto"),
+                             T("What each agent session opened by Cadex did (prompts, the files it touched, how it ended) is kept per repository on this Mac, and the next session starts with it. Besides a short preparation after each update, nothing runs until an agent session opens. Off, sessions get no memory hooks.",
+                               "O que cada sessão de agente aberta pelo Cadex fez (prompts, os arquivos que mexeu, como terminou) fica guardado por repositório neste Mac, e a próxima sessão começa com isso. Fora uma preparação curta depois de cada atualização, nada roda até uma sessão de agente abrir. Desligado, as sessões não ganham os hooks da memória."),
+                             control: SettingsPage.toggle(m.enabled) { on in store.update { $0.memory.enabled = on } }),
         ]
     }
 }

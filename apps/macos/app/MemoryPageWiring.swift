@@ -1,5 +1,6 @@
 import Agents
 import AppKit
+import UILooks
 import CommandPalette
 import Editor
 import Explorer

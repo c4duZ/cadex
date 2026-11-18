@@ -122,6 +122,11 @@ extension WindowSession {
             action: .run { AgentUsageController.shared.refreshNow() }))
         commands.register(memoryCommands())
         commands.register(MemoryPageCommands.commands(palette: palette, actions: memoryPageActions()))
+        // The project's .ai-memory.toml on a screen, in the project's Settings page (plan 32 D).
+        commands.register(Command(
+            id: "memory.configure-project", title: T("Configure This Project's Memory", "Configurar a memória deste projeto"),
+            keywords: ["memory", "ai-memory.toml", "briefing", "ignore", "memória", "configurar", "projeto"], category: .app,
+            action: .run { [weak self] in _ = self?.commands.run("project.show-settings") }))
         commands.register(AgentLaunch.commands(palette: palette, launch: { [weak self] account in self?.launchAgent(for: account) },
                                                continueIn: { [weak self] account in self?.continueInAgent(account) },
                                                customize: { [weak self] in self?.openCustomize("accounts") }))

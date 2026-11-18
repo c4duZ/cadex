@@ -1,6 +1,7 @@
 import Agents
 import Machines
 import AppKit
+import Strings
 import UILooks
 import Orchestration
 import Tabs
@@ -165,6 +166,15 @@ extension WindowSession {
                     guard let self else { return }
                     if let id = step["command"] as? String, !self.commands.run(id) {
                         NSLog("Cadex script: %@ did not run: %@", id, self.commands.command(id)?.unavailableReason() ?? "unknown")
+                    }
+                    // The settings window's page scrolled to a fraction of its height (1: the end).
+                    if let at = (step["scrollSettings"] as? NSNumber)?.doubleValue,
+                       let settings = NSApp.windows.first(where: { $0.title == T("Settings", "Configurações") }),
+                       let scroll = Self.firstScroll(in: settings.contentView, skipping: 0) {
+                        let document = scroll.documentView?.bounds.height ?? 0
+                        let room = max(document - scroll.contentView.bounds.height, 0)
+                        scroll.contentView.scroll(to: NSPoint(x: 0, y: room * at))
+                        scroll.reflectScrolledClipView(scroll.contentView)
                     }
                     // The terminal's find bar, as ⌘F opens it with the terminal focused.
                     if step["find"] as? Bool == true { self.tabs?.activeTerminal?.showFind(nil) }
@@ -372,5 +382,16 @@ extension WindowSession {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) { [weak review] in
             if let review { scroll(review, until: end, forward: turn ? !forward : forward, out: out) }
         }
+    }
+
+    /// The `skipping`-th scroll view under `view`, depth first (0: the settings window's page).
+    static func firstScroll(in view: NSView?, skipping: Int) -> NSScrollView? {
+        var found: [NSScrollView] = []
+        func walk(_ v: NSView) {
+            if let scroll = v as? NSScrollView { found.append(scroll) }
+            v.subviews.forEach(walk)
+        }
+        if let view { walk(view) }
+        return found.count > skipping ? found[skipping] : found.last
     }
 }

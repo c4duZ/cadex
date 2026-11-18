@@ -87,6 +87,15 @@ enum MemoryParts {
     }
 
     /// "Each new agent here starts with a briefing of this. See the briefing": the note at the foot.
+    /// "Configure this project…": its .ai-memory.toml on a screen, in the settings (plan 32 D).
+    static func configure(_ open: @escaping @MainActor () -> Void) -> NSView {
+        let field = NSTextField(labelWithString: T("Configure this project's memory…", "Configurar a memória deste projeto…"))
+        field.font = UILooks.font(M.Briefing.fontSize)
+        field.textColor = DesignTokens.Color.textPrimary
+        field.isSelectable = false
+        return MemoryBox(views: [field], press: open)
+    }
+
     static func briefing(_ see: @escaping @MainActor () -> Void) -> NSView {
         // The mockup's line-height (1.5 × the size), as a fixed line: a multiple of the font's own
         // line made it taller than the drawing (measured 2026-11-17).

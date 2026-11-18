@@ -29,11 +29,14 @@ automaticamente" e o .ai-memory.toml do projeto "numa tela, ao invés de ficar m
 - **B. Os módulos nas seções.** Cada linha da página Geral de hoje vai para a seção dela; a barra
   de status e as contas (a lista de arrastar e ligar do Personalizar) viram as seções Barra de status
   e Agentes › Contas; a janela Personalizar e os comandos dela abrem a seção nas configurações.
-- **C. Memória sempre ligada.** Nasce ligada e fica: nada pede "Ligar" no caminho; desligar fica
+- **C. Memória sempre ligada.** Com o agente de memória ligado e as propostas sem esperar aprovação
+  (a ADR 0037, que esperava o código), numa migração (Settings.version 7) para quem vem de antes. Nasce ligada e fica: nada pede "Ligar" no caminho; desligar fica
   no fim da seção, para quem precisa.
-- **D. A memória do projeto numa tela.** Na seção Memória, o projeto (os abertos e os recentes) e
-  os campos do .ai-memory.toml dele; gravar mexe só nas chaves que a tela mostra, o resto do
-  arquivo fica como estava. O painel Memória leva até ela ("Configurar este projeto").
+- **D. A memória do projeto numa tela.** Na página Settings do próprio projeto, ao lado de Overview,
+  Automations e Conversations (o dono, 2026-11-18: a janela de configurações fica com os padrões, e o
+  projeto tem a tela dele), os campos do .ai-memory.toml dele; gravar mexe só nas chaves que a tela mostra, o resto do
+  arquivo fica como estava. O painel Memória leva até ela ("Configurar a memória deste projeto", memory.configure-project;
+  project.show-settings abre a página).
 - **E. Fechamento.** Specs, manifestos, inventário, `make check`, `make perf`, conferido no app.
 
 ## Como validar

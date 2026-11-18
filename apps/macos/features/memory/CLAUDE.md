@@ -64,6 +64,12 @@
   de cada lado; `autoFolder` cria `<memória>/auto/[<conta>/]<chave>` (0700; a conta só com
   memory.shareAcrossAccounts desligada) e grava nela um project.json (`root`, `account`) com que o
   engine acha o projeto. Lê arquivos, sem chamar o git: roda a cada sessão aberta.
+- `MemoryMarker.swift` e `MemoryProjectForm.swift` (plano 32 D): o .ai-memory.toml do repositório
+  numa tela, a seção Memória da página Settings do projeto (nome e espaço, o que fica de fora,
+  briefing e seu tamanho, subagentes, handoff, retomada, busca em todos, perfil); cada mudança grava
+  na hora só as chaves da tela, mantendo comentários e o resto do arquivo, e um arquivo novo só
+  nasce para dizer algo diferente do padrão. O painel Memory leva até ela
+  ("Configurar a memória deste projeto…", memory.configure-project).
 - `MemoryWarmUp.swift`: `start` roda `cadex-memory --warm --data-dir <pasta>` em segundo plano
   (QoS utility, saída em /dev/null) quando a versão do app difere da guardada no arquivo
   `warmed-version` da própria pasta da memória (não em UserDefaults: uma instância de teste, com
@@ -71,7 +77,7 @@
   2026-11-16); guarda a versão só se o engine sai 0 (falhou, tenta na próxima abertura). No `make run` a versão é "0", aquecida uma vez também.
 
 ## Como validar
-- `make macos-test` (MemoryTests): os 9 eventos e o comando de cada um, a `env` do pacote e a do
+- `make macos-test` (MemoryTests; o .ai-memory.toml lido como o engine lê, gravado sem perder linha): os 9 eventos e o comando de cada um, a `env` do pacote e a do
   `make run`, a workspace só sem compartilhar, os hooks com agents.stateHooks desligada, a parte
   retirada, a chave do projeto (o valor fixado igual ao do engine, worktree e subpasta no
   checkout principal, fora do git a pasta), o `autoMemoryDirectory` de uma sessão no repositório,

@@ -6,7 +6,7 @@ public struct Settings: Equatable, Sendable {
     /// The file's version: what an old file (without it) gets moved to once,
     /// when the defaults change (SettingsFile.migrate). 2: the new frame's
     /// theme; 3: the new frame's status bar (docs/adr/0035-work-frame.md, 2026-11-17).
-    public static let currentVersion = 6
+    public static let currentVersion = 7
     public var version = Settings.currentVersion
 
     public struct General: Equatable, Sendable {
@@ -245,9 +245,10 @@ public struct Settings: Equatable, Sendable {
         public var consolidateAtContext = 70
         /// The memory agent, a `claude -p` on the account (ADR 0029): off by
         /// default; its daily cap and whether its proposals wait for the owner.
-        public var backgroundAgent = false
+        /// On by default (ADR 0037, plan 32 C).
+        public var backgroundAgent = true
         public var dailyBudgetUsd = 1.0
-        public var requireApproval = true
+        public var requireApproval = false
     }
 
     public struct StatusBar: Equatable, Sendable {

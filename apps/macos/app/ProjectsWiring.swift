@@ -79,7 +79,8 @@ extension WindowSession {
             switch group {
             case "", "board": []
             case "pages": [TabsExtra(title: T("Automations", "Automações"), command: "orchestration.show-automation-history", identity: "automation:"),
-                           TabsExtra(title: T("Conversations", "Conversas"), command: "agents.show-history", identity: "cadex:agent-history")]
+                           TabsExtra(title: T("Conversations", "Conversas"), command: "agents.show-history", identity: "cadex:agent-history"),
+                           TabsExtra(title: T("Settings", "Configurações"), command: "project.show-settings", identity: "project:settings:")]
             default:
                 // A race's lanes compare their worktrees; a task reviews its own (the mockups).
                 self?.raceName(of: group) != nil
@@ -113,6 +114,7 @@ extension WindowSession {
         projects.start(folder: folder.root, openFolder: folder.launchedWithFolder || !isMain) { [weak self] identity in
             // Archive & History comes back too (plan 27 C): a tab, not a file.
             if identity == AgentHistoryDocument.identity, let self { return AgentHistoryDocument(page: self.makeHistoryPage()) }
+            if identity.hasPrefix("project:settings:"), let self { return self.makeProjectSettings(String(identity.dropFirst("project:settings:".count))) }
             if identity.hasPrefix("project:"), let self { return self.makeProjectPage(String(identity.dropFirst("project:".count))) }
             if identity == BoardDocument.identity, let self { return self.makeBoard() }
             return self?.opener?.makeDocument(identity: identity)
