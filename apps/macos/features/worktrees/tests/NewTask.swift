@@ -46,14 +46,18 @@ let newTaskTests: [(name: String, body: Checks.Body)] = [
         sheet.frame = NSRect(x: 0, y: 0, width: 1000, height: 800)
         sheet.layoutSubtreeIfNeeded()
         let start = sheetButtons(sheet).first { $0.attributedTitle.string.hasPrefix("Start") }
-        expect(start?.isEnabled == false, "no words yet")
+        expect(start?.alphaValue ?? 1 < 1, "no words yet: dimmed")
+        sheet.pressStart()
+        expect(started.isEmpty, "no words yet: refused")
         var request = sheet.request
         request.prompt = "fix the login"
         sheet.fill(request)
-        expect(start?.isEnabled == false, "a blocking line")
+        expect(start?.alphaValue ?? 1 < 1, "a blocking line")
+        sheet.pressStart()
+        expect(started.isEmpty, "a blocking line: refused")
         blocking = false
         sheet.refreshNotes()
-        expect(start?.isEnabled == true)
+        expect(start?.alphaValue == 1)
         sheet.pressStart()
         expect(started.count == 1 && started[0].branchName == "fix-login")
     }),

@@ -32,6 +32,9 @@ public final class NewTaskSheet: NSView, NSTextViewDelegate, NSTextFieldDelegate
     private let actions: NewTaskSheetActions
     private let panel = NewTaskClickable()
     let prompt = NSTextView()
+    /// The request's hint while it is empty (the box said nothing, 2026-11-18).
+    private let promptHint = newTaskLabel(T("What should the agent do? Describe the task…", "O que o agente deve fazer? Descreva a tarefa…"),
+                                          size: DesignTokens.FontSize.body, color: DesignTokens.Color.textTertiary)
     private let folderOption = NewTaskOption(title: T("In the project's folder", "Na pasta do projeto"),
                                              note: T("Works on your files, on main. One at a time.", "Mexe nos seus arquivos, no main. Um de cada vez."),
                                              withBranch: false)
@@ -179,6 +182,12 @@ public final class NewTaskSheet: NSView, NSTextViewDelegate, NSTextFieldDelegate
         prompt.isVerticallyResizable = true
         prompt.setAccessibilityLabel(T("What the agent should do", "O que o agente deve fazer"))
         box.hold(prompt, padding: Fd.padding)
+        promptHint.translatesAutoresizingMaskIntoConstraints = false
+        box.addSubview(promptHint)
+        NSLayoutConstraint.activate([
+            promptHint.leadingAnchor.constraint(equalTo: prompt.leadingAnchor),
+            promptHint.topAnchor.constraint(equalTo: prompt.topAnchor),
+        ])
         box.heightAnchor.constraint(greaterThanOrEqualToConstant: UILooks.pt(Fd.minHeight)).isActive = true
         return box
     }
@@ -221,7 +230,9 @@ public final class NewTaskSheet: NSView, NSTextViewDelegate, NSTextFieldDelegate
         let race = request.isRace
         folderOption.show(chosen: !request.runsInCopy, enabled: !race)
         copyOption.show(chosen: request.runsInCopy, enabled: true)
-        copyOption.branch.placeholderString = NewTaskWords.branch(from: request.prompt).isEmpty ? T("branch-name", "nome-do-branch") : NewTaskWords.branch(from: request.prompt)
+        promptHint.isHidden = !request.prompt.isEmpty
+        // Named from the request: "branch-name" read as a real branch (2026-11-18).
+        copyOption.branch.placeholderString = NewTaskWords.branch(from: request.prompt).isEmpty ? T("from the request", "do pedido") : NewTaskWords.branch(from: request.prompt)
         agentsBox.arrangedSubviews.forEach { $0.removeFromSuperview() }
         for (index, agent) in request.agents.enumerated() {
             let row = NewTaskAgentRow(index: index + 1, agent: agent)
@@ -250,7 +261,9 @@ public final class NewTaskSheet: NSView, NSTextViewDelegate, NSTextFieldDelegate
             styled.mutableString.setString(NewTaskWords.startTitle(request))
             start.attributedTitle = styled
         }
-        start?.isEnabled = request.missing == nil && blocked == nil
+        // Not disabled: AppKit draws a disabled button's title white, white on white (2026-11-18).
+        // Dimmed whole instead; tryStart refuses until the request is complete.
+        start?.alphaValue = request.missing == nil && blocked == nil ? 1 : 0.4
         start?.toolTip = request.missing ?? blocked
     }
 
@@ -278,11 +291,12 @@ public final class NewTaskSheet: NSView, NSTextViewDelegate, NSTextFieldDelegate
         let link = NewTaskClickable()
         link.onPress = run
         link.hold(button, padding: NSEdgeInsetsZero)
-        let column = NSStackView(views: [text, link])
-        column.orientation = .vertical
-        column.alignment = .leading
-        column.spacing = UILooks.pt(NT.Option.textGap)
-        return column
+        // The action on the note's line ("… · Change…"), not a line of its own.
+        text.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        let row = NSStackView(views: [text, link])
+        row.alignment = .centerY
+        row.spacing = UILooks.pt(NT.Option.textGap)
+        return row
     }
 
     // MARK: Changes

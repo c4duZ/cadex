@@ -128,8 +128,9 @@ extension WindowSession {
         guard request.runsInCopy, request.agents.contains(where: { $0.machine.isEmpty }) else { return notes }
         let plan = WorktreesController.shared.plan(name: request.branchName.isEmpty ? "task" : request.branchName, repo: repo)
         if plan.needsAuthorization {
-            notes.append(NewTaskNote(T("The copies go in \(plan.root).", "As cópias ficam em \(plan.root)."),
-                                     action: T("Choose Another Folder…", "Escolher outra pasta…")) { [weak self] in self?.chooseTasksRoot() })
+            let root = (plan.root as NSString).abbreviatingWithTildeInPath
+            notes.append(NewTaskNote(T("Copies go in \(root)", "As cópias ficam em \(root)"),
+                                     action: T("Change…", "Trocar…")) { [weak self] in self?.chooseTasksRoot() })
         }
         if plan.hooksNeedConfirmation {
             notes.append(NewTaskNote(T("Setup hooks that will run in the copy: ", "Hooks de preparo que vão rodar na cópia: ") + plan.hooks.joined(separator: " && ")))
@@ -137,8 +138,8 @@ extension WindowSession {
         // A race asks the trust before it starts (the line above): this one is for a single task.
         if plan.explainTrust, !request.isRace {
             let name = (repo as NSString).lastPathComponent
-            notes.append(NewTaskNote(T("If Claude Code asks to trust the folder, accept it in the task's tab: it counts for \(name) and every task of it.",
-                                       "Se o Claude Code perguntar se confia na pasta, aceite na aba da tarefa: vale para \(name) e todas as tarefas dele.")))
+            notes.append(NewTaskNote(T("Claude may ask once to trust \(name): accept it in the task's tab.",
+                                       "O Claude pode perguntar uma vez se confia em \(name): aceite na aba da tarefa.")))
         }
         return notes
     }
