@@ -39,7 +39,10 @@ enum MemoryParts {
             ]))
             head.attributedStringValue = text
         }
-        let stack = NSStackView(views: [head] + cards)
+        // The title at the rows' words, not at their lit box's edge.
+        let titled = NSStackView(views: [head])
+        titled.edgeInsets = NSEdgeInsets(top: 0, left: MemoryAge.inset, bottom: 0, right: 0)
+        let stack = NSStackView(views: [titled] + cards)
         stack.orientation = .vertical
         stack.alignment = .leading
         stack.spacing = UILooks.pt(M.learnedGap)

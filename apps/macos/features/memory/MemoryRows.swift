@@ -36,7 +36,21 @@ final class MemoryRow: NSView {
         tile.widthAnchor.constraint(equalToConstant: side).isActive = true
         tile.heightAnchor.constraint(equalToConstant: side).isActive = true
         let name = MemoryText.label(title, size: DesignTokens.FontSize.body, color: DesignTokens.Color.textRow)
-        var lines: [NSView] = [name]
+        // The age on the title's line, against the right edge (the proposal's `.sess .a`): beside
+        // the title it sat at a different place on each row (the owner, 2026-11-18: "tudo torto").
+        var first: NSView = name
+        if let age, !age.isEmpty {
+            let when = MemoryText.label(age, size: M.Card.Meta.fontSize, color: M.Card.Meta.color)
+            when.setContentCompressionResistancePriority(.required, for: .horizontal)
+            when.setContentHuggingPriority(.required, for: .horizontal)
+            name.setContentHuggingPriority(.init(1), for: .horizontal)
+            let line = NSStackView(views: [name, when])
+            line.distribution = .fill
+            line.alignment = .firstBaseline
+            line.spacing = UILooks.pt(M.WikiRow.gap)
+            first = line
+        }
+        var lines: [NSView] = [first]
         if let meta, !meta.isEmpty {
             let text = MemoryText.label(meta, size: M.Card.Meta.fontSize, color: M.Card.Meta.color)
             // The account's logo before it, as the proposal's sessions (`.acct`).
@@ -55,13 +69,11 @@ final class MemoryRow: NSView {
         words.alignment = .leading
         words.spacing = UILooks.pt(M.Card.gap)
         words.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        var views: [NSView] = glyph == nil ? [words] : [tile, words]
-        if let age, !age.isEmpty {
-            let when = MemoryText.label(age, size: M.Card.Meta.fontSize, color: M.Card.Meta.color)
-            when.setContentCompressionResistancePriority(.required, for: .horizontal)
-            views.append(when)
-        }
+        words.setHuggingPriority(.init(1), for: .horizontal)
+        first.widthAnchor.constraint(equalTo: words.widthAnchor).isActive = true
+        let views: [NSView] = glyph == nil ? [words] : [tile, words]
         let row = NSStackView(views: views)
+        row.distribution = .fill
         row.spacing = UILooks.pt(M.WikiRow.gap)
         row.alignment = .centerY
         row.edgeInsets = NSEdgeInsets(top: UILooks.pt(M.Card.padding.top) / 2, left: UILooks.pt(M.Card.padding.left) / 2,
@@ -126,6 +138,10 @@ enum MemoryKind {
 
 /// "now", "12 min", "3 h", "yesterday", "4 d": how long ago, short.
 enum MemoryAge {
+    /// How far a row's words sit inside its lit box: the section's title and links sit the same, so
+    /// the box goes out past them on both sides (the proposal: text at 14, box from 6).
+    @MainActor static var inset: CGFloat { UILooks.pt(DesignTokens.Inspector.Memory.Card.padding.left) / 2 }
+
     static func text(_ date: Date?, now: Date = Date()) -> String? {
         guard let date else { return nil }
         let minutes = max(0, Int(now.timeIntervalSince(date) / 60))

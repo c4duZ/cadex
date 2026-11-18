@@ -50,6 +50,9 @@ public final class MemoryView: NSView {
     private let scroll = NSScrollView()
     private let content = MemoryFlipped()
     private let stack = NSStackView()
+    /// The briefing's card, pinned at the panel's foot under the scroll (the owner, 2026-11-18: it sat
+    /// right under the list, high up, and the tab ended in the middle of the panel).
+    private let foot = NSStackView()
 
     public override init(frame: NSRect) {
         super.init(frame: frame)
@@ -68,9 +71,16 @@ public final class MemoryView: NSView {
         scroll.drawsBackground = false
         scroll.translatesAutoresizingMaskIntoConstraints = false
         addSubview(scroll)
+        foot.orientation = .vertical
+        foot.edgeInsets = NSEdgeInsets(top: UILooks.pt(M.gap) / 2, left: UILooks.pt(M.padding.left),
+                                       bottom: UILooks.pt(M.padding.bottom), right: UILooks.pt(M.padding.right))
+        foot.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(foot)
         NSLayoutConstraint.activate([
+            foot.leadingAnchor.constraint(equalTo: leadingAnchor), foot.trailingAnchor.constraint(equalTo: trailingAnchor),
+            foot.bottomAnchor.constraint(equalTo: bottomAnchor),
             scroll.leadingAnchor.constraint(equalTo: leadingAnchor), scroll.trailingAnchor.constraint(equalTo: trailingAnchor),
-            scroll.topAnchor.constraint(equalTo: topAnchor), scroll.bottomAnchor.constraint(equalTo: bottomAnchor),
+            scroll.topAnchor.constraint(equalTo: topAnchor), scroll.bottomAnchor.constraint(equalTo: foot.topAnchor),
             content.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor),
             stack.leadingAnchor.constraint(equalTo: content.leadingAnchor), stack.trailingAnchor.constraint(equalTo: content.trailingAnchor),
             stack.topAnchor.constraint(equalTo: content.topAnchor), stack.bottomAnchor.constraint(equalTo: content.bottomAnchor),
@@ -103,6 +113,7 @@ public final class MemoryView: NSView {
 
     func render() {
         stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        foot.arrangedSubviews.forEach { $0.removeFromSuperview() }
         guard let state else { return add(MemoryParts.line(T("Loading…", "Carregando…"))) }
         guard state.enabled else {
             add(MemoryParts.paragraph(MemoryStatusText.offText))
@@ -127,8 +138,10 @@ public final class MemoryView: NSView {
         if !knowledge.isEmpty {
             add(link(T("All \(knowledge.count) pages", "Todas as \(knowledge.count) páginas"), status: status(state)) { [weak self] in self?.run?("project.show-memory") })
         }
-        add(MemoryParts.foot(see: { [weak self] in self?.run?("memory.show-briefing") },
-                             configure: { [weak self] in self?.run?("memory.configure-project") }))
+        let card = MemoryParts.foot(see: { [weak self] in self?.run?("memory.show-briefing") },
+                                    configure: { [weak self] in self?.run?("memory.configure-project") })
+        foot.addArrangedSubview(card)
+        card.widthAnchor.constraint(equalTo: foot.widthAnchor, constant: -UILooks.pt(M.padding.left + M.padding.right)).isActive = true
     }
 
     /// "cadex · 14 pages · updated 52 min ago" (the proposal's head).
@@ -204,6 +217,7 @@ public final class MemoryView: NSView {
     private func link(_ text: String, status: String? = nil, press: @escaping @MainActor () -> Void) -> NSView {
         let label = MemoryText.label(text + " →", size: M.Card.Meta.fontSize, color: DesignTokens.Color.accentLink)
         let box = MemoryBox(views: [label], press: press)
+        box.edgeInsets = NSEdgeInsets(top: 0, left: MemoryAge.inset, bottom: 0, right: 0)
         box.toolTip = status
         return box
     }
