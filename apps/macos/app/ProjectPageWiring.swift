@@ -21,6 +21,19 @@ extension WindowSession {
                      guard let folder = self?.projects?.activeFolder else { return }
                      self?.openProjectPage(folder)
                  }),
+         // Its sections from ⌘K (plan 34): the page on Sessions or Memory.
+         Command(id: "project.show-sessions", title: T("Show the Project's Sessions", "Mostrar as sessões do projeto"),
+                 keywords: ["project", "sessions", "conversations", "archive", "history", "projeto", "sessões", "conversas", "arquivo", "histórico"],
+                 category: .view, action: .run { [weak self] in
+                     guard let folder = self?.projects?.activeFolder else { return }
+                     self?.openProjectPage(folder, section: .sessions)
+                 }),
+         Command(id: "project.show-memory", title: T("Show the Project's Memory", "Mostrar a memória do projeto"),
+                 keywords: ["project", "memory", "pages", "rules", "decisions", "projeto", "memória", "páginas", "regras", "decisões"],
+                 category: .view, action: .run { [weak self] in
+                     guard let folder = self?.projects?.activeFolder else { return }
+                     self?.openProjectPage(folder, section: .memory)
+                 }),
          // The project's own settings, beside its Overview (plan 32 D): the defaults stay in ⌘,.
          Command(id: "project.show-settings", title: T("Show the Project's Settings", "Mostrar as configurações do projeto"),
                  keywords: ["project", "settings", "memory", "ai-memory.toml", "projeto", "configurações", "memória"],
@@ -41,9 +54,12 @@ extension WindowSession {
         ProjectSettingsDocument(folder: folder) { [MemoryProjectForm(folder: folder)] }
     }
 
-    func openProjectPage(_ folder: String) {
+    /// The project's page, on a section and a line when given (plan 34 G).
+    func openProjectPage(_ folder: String, section: ProjectSection = .overview, item: String? = nil) {
         if let index = projects?.projects.firstIndex(where: { $0.folder == folder }) { projects?.select(index) }
-        tabs?.open(makeProjectPage(folder))
+        let page = (tabs?.document(identity: ProjectPageDocument.identity(for: folder)) as? ProjectPageDocument) ?? makeProjectPage(folder)
+        tabs?.open(page)
+        page.show(section: section, item: item)
         // No right panel on a page (plan 34): the project's memory is in the page's Memory.
         // The history is read while a page shows it: the sessions need it.
         watchHistoryForPages()
@@ -60,6 +76,14 @@ extension WindowSession {
         }
         actions.openConversation = { [weak self] id in self?.openConversation(id) }
         actions.load = { [weak self] show in self?.loadProjectPage(folder, show: show) }
+        // The sections (plan 34 C to F): the lines and the rendered detail, the project's settings,
+        // the automations' creation and their page.
+        actions.showAll = { [weak self] in self?.openProjectsPage() }
+        actions.items = { [weak self] section, query in self?.projectItems(folder, section, query: query) ?? [] }
+        actions.detail = { [weak self] section, id in self?.projectDetail(folder, section, id) }
+        actions.sectionView = { section in section == .settings ? MemoryProjectForm(folder: folder) : nil }
+        actions.createAutomation = { [weak self] in _ = self?.commands.run("orchestration.new-automation") }
+        actions.openAutomations = { [weak self] in self?.openAutomationsPage() }
         // The tasks' sessions on other machines (plan 23), read over ssh only while a page shows.
         actions.shown = { shown in AgentsController.shared.pageShown(shown) }
         return ProjectPageDocument(folder: folder, actions: actions)
@@ -96,6 +120,7 @@ extension WindowSession {
             let pages = wiki.flatMap { FileManager.default.fileExists(atPath: $0) ? MemoryWiki.tree($0).allPages : nil }
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
+                    if let pages { self.projectMemory[folder] = pages }
                     let now = Date()
                     let week = mine.filter { ($0.updated ?? .distantPast) > now.addingTimeInterval(-7 * 86400) }
                     let cost = week.compactMap { SessionCost.read(session: $0.id) }.reduce(0, +)
@@ -147,7 +172,10 @@ extension WindowSession {
                     }
                     let remote = origin.isEmpty ? nil : ProjectPageWords.remote(origin)
                     let place = [(folder as NSString).abbreviatingWithTildeInPath, branch, remote].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
-                    show(ProjectPageState(name: name, place: place, stats: stats, conversations: Array((away + talks).prefix(6)), automations: jobs, accounts: chips))
+                    // The proposal's line: where, the branch, the remote, then the memory's pages and the sessions.
+                    let counts = [pages.map { T("\($0.filter { !$0.relative.hasPrefix("sessions/") }.count) memory pages", "\($0.filter { !$0.relative.hasPrefix("sessions/") }.count) páginas de memória") },
+                                  T("\(mine.count) sessions", "\(mine.count) sessões")].compactMap { $0 }
+                    show(ProjectPageState(name: name, place: ([place] + counts).joined(separator: " · "), stats: stats, conversations: Array((away + talks).prefix(6)), automations: jobs, accounts: chips))
                 }
             }
         }

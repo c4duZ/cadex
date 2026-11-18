@@ -37,13 +37,13 @@ aprovada ("Ficou do caralho... segue isso exatamente") está em
 - [x] B. O pé da barra lateral com Projetos (o número) e Automações ("N ligada"), cada um aceso com
   a página dele aberta; a página Projetos: um cartão por projeto (nome, pasta e branch, tarefas,
   sessões, memórias, o que está acontecendo agora) e Adicionar projeto.
-- [ ] C. A página do projeto com as seções num controle segmentado sob o cabeçalho ("Projetos ›
+- [x] C. A página do projeto com as seções num controle segmentado sob o cabeçalho ("Projetos ›
   nome", o nome, a pasta, o branch, as memórias e as sessões, Corrida… e Nova tarefa ⌘N). A Visão
   geral é a de hoje; Configurações, a página do projeto do plano 32 dentro desta.
-- [ ] D. Sessões: a lista (título da conversa, a conta com o logo, a pasta, a idade) e, ao lado, o
+- [x] D. Sessões: a lista (título da conversa, a conta com o logo, a pasta, a idade) e, ao lado, o
   resumo da escolhida: o resumo e as tags da página de sessão da memória, o que foi feito, o que a
   memória guardou dela, Retomar, Continuar em outra conta… e Ver a página.
-- [ ] E. Memória: a busca, as páginas agrupadas (Regras, Decisões, Cuidados, o resto) e, ao lado, a
+- [x] E. Memória: a busca, as páginas agrupadas (Regras, Decisões, Cuidados, o resto) e, ao lado, a
   escolhida renderizada sem o frontmatter (o tipo, de qual sessão veio, a conta, o corpo); Editar
   (o .md no editor), Abrir a sessão e Apagar….
 - [x] F. Automações: vazia, o ícone, "Nenhuma automação ainda", o exemplo e o Criar automação no

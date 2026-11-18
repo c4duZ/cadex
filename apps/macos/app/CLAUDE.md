@@ -268,6 +268,10 @@
   do histórico (lido enquanto a página existe), o custo de cada uma, os merges e o remoto pelo git,
   as automações e as páginas da memória. A barra de título agrupa as páginas ("pages": Overview, e
   Automations e Conversations como itens extras, `extrasOf`).
+- `ProjectSectionsWiring.swift` (plano 34 D e E): as Sessões (do histórico; o resumo, as tags e o corpo da
+  página de sessão da memória, o que ela guardou, Retomar, Continuar em outra conta e Ver a página
+  aberta já renderizada) e a Memória (agrupada pelo tipo, a escolhida renderizada, Editar, Abrir a
+  sessão, Apagar); project.show-sessions e project.show-memory abrem a página na seção.
 - `AutomationsPageWiring.swift` (plano 34 F): orchestration.show-automations; Create automation liga as
   automações antes (a pergunta do orchestration.toggle-automations) quando estão desligadas; criar
   volta à tabela; Apagar pergunta. `ProjectsPageWiring.swift` (plano 34 B): project.show-all.

@@ -28,7 +28,7 @@ MAC_ONLY = {"agents.switch-account", "memory.configure-project", "project.show-s
             "terminal.open-pasted-image-beside", "terminal.open-pasted-image-in-tab",
             "preview.pick-element", "preview.stop-picking",
             "git.show-history", "inspector.tab-1", "inspector.tab-2", "inspector.tab-3", "inspector.tab-4", "history.show-in-tab",
-            "statusBar.customize", "statusBar.toggle-item", "statusBar.activity-monitor", "sidebar.show", "view.jump", "project.show-overview", "project.show-all", "orchestration.show-automations", "view.board", "drawer.toggle", "drawer.move-to-project", "agents.test-notifications", "agents.show-accounts", "agents.refresh-usage", "ssh.connect", "ssh.test-again", "agents.open-account", "agents.customize-accounts",
+            "statusBar.customize", "statusBar.toggle-item", "statusBar.activity-monitor", "sidebar.show", "view.jump", "project.show-overview", "project.show-all", "project.show-sessions", "project.show-memory", "orchestration.show-automations", "view.board", "drawer.toggle", "drawer.move-to-project", "agents.test-notifications", "agents.show-accounts", "agents.refresh-usage", "ssh.connect", "ssh.test-again", "agents.open-account", "agents.customize-accounts",
             "pane.zoom",
             # Managed accounts (plan 18, phase C), Mac only like the rest of agents.
             "agents.add-account", "agents.set-active-account", "agents.set-project-account", "agents.sync-account-config", "agents.share-account-config",

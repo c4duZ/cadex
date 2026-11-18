@@ -44,7 +44,7 @@ func folders() -> (String, String) {
     return (String(cString: realpath(a.path, nil)), String(cString: realpath(b.path, nil)))
 }
 
-let exitCode = await Checks.run([
+let mainTests: [(name: String, body: Checks.Body)] = [
     ("the project page's words: a conversation's dot, when, the merges, the remote", {
         let now = Date()
         expect(ProjectPageWords.state(live: true, working: true, asking: false, updated: now, now: now) == .working)
@@ -189,5 +189,6 @@ let exitCode = await Checks.run([
         let text = ProjectsListDocument.stats(card).string
         expect(text.contains("2 " + T("tasks", "tarefas")) && text.contains("1 " + T("session", "sessão")) && text.contains("0 " + T("memories", "memórias")), text)
     }),
-])
+]
+let exitCode = await Checks.run(mainTests + sectionTests)
 exit(exitCode)

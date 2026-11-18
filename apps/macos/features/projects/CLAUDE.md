@@ -30,6 +30,13 @@
   `ProjectPageParts.swift` (as peças: cartão, linha, chave, etiqueta de conta, `PageFlow` que
   quebra as linhas) e `ProjectPageView.swift` (`ProjectPageDocument`, uma aba-página, isPage: o
   centro inteiro, responsiva). O que ela mostra o app junta (`../../app/ProjectPageWiring.swift`).
+- As seções da página do projeto (plano 34 C a E): `ProjectSections.swift` (`ProjectSection`: Visão geral,
+  Sessões, Memória, Automações, Configurações, no `SectionSwitch` sob o cabeçalho "Projects › nome";
+  `PageListItem`, `PageDetail`) e `ProjectSplit.swift` (a lista com grupos, a escolhida azulada com a
+  barra, a busca da Memória, e ao lado o detalhe renderizado: chip, título, a linha com o logo,
+  títulos, parágrafos, itens, tags, o relacionado e os botões). O que cada seção diz o app dá
+  (`../../app/ProjectSectionsWiring.swift`); Automações vem do estado da página; Configurações é a
+  view do app (a memória do projeto). `ProjectPageDocument.show(section:item:)`.
 - `ProjectsListView.swift` (plano 34 B): a página Projetos (`ProjectsListDocument`, "cadex:projects", isPage):
   o título, quantos, Adicionar projeto e um `ProjectCard` por projeto (nome, pasta e branch, tarefas,
   sessões, memórias, o que acontece agora com o ponto do estado), em 3, 2 ou 1 colunas; o clique

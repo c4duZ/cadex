@@ -17,6 +17,9 @@ public final class MarkdownController {
     private var sessions: [ObjectIdentifier: MarkdownSession] = [:]
     /// markdown.openAs in settings.json: a note opens rendered, not as text.
     public var opensRendered = false
+    /// Paths opened rendered once, whatever markdown.openAs says (a memory page's "View the page",
+    /// plan 34 D: the raw .md was what the owner got).
+    public var renderNext: Set<String> = []
     /// Runs a command by id: the tab's button runs markdown.toggle-preview.
     public var runCommand: ((String) -> Bool)?
 
@@ -51,7 +54,7 @@ public final class MarkdownController {
             if self.runCommand?("markdown.toggle-preview") != true { self.togglePreview(document) }
         }
         document.accessory = toggle
-        if opensRendered { togglePreview(document) }
+        if opensRendered || renderNext.remove(document.path) != nil { togglePreview(document) }
         if !readyBefore { refreshWhenReady() }
     }
 

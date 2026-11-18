@@ -16,6 +16,16 @@ public struct ProjectPageActions {
     public var shown: (Bool) -> Void = { _ in }
     /// Gathers the page's state (off the main thread where it reads git or files) and gives it.
     public var load: (@escaping @MainActor (ProjectPageState) -> Void) -> Void = { _ in }
+    /// "Projects ›" in the crumb: the Projects page.
+    public var showAll: () -> Void = {}
+    /// A section's lines (Sessions, Memory), filtered by the search when there is one.
+    public var items: (ProjectSection, String) -> [PageListItem] = { _, _ in [] }
+    /// The chosen line, rendered beside the list.
+    public var detail: (ProjectSection, String) -> PageDetail? = { _, _ in nil }
+    public var createAutomation: () -> Void = {}
+    public var openAutomations: () -> Void = {}
+    /// The sections drawn by other features (Settings), whole.
+    public var sectionView: (ProjectSection) -> NSView? = { _ in nil }
 
     public init() {}
 }
@@ -38,6 +48,12 @@ public final class ProjectPageDocument: TabDocument {
     public var onChange: (() -> Void)?
     public var isPage: Bool { true }
 
+    /// The section shown and, in each, the line chosen and the search (plan 34 C to E).
+    public private(set) var section: ProjectSection = .overview
+    private var chosen: [ProjectSection: String] = [:]
+    private var query = ""
+    private var state: ProjectPageState?
+
     public init(folder: String, actions: ProjectPageActions) {
         self.folder = folder
         self.actions = actions
@@ -56,8 +72,81 @@ public final class ProjectPageDocument: TabDocument {
         actions.load { [weak self] state in self?.show(state) }
     }
 
+    /// Shows a section, with a line chosen when given (the Memory panel's click, plan 34 G).
+    public func show(section: ProjectSection, item: String? = nil) {
+        self.section = section
+        if let item { chosen[section] = item }
+        if let state { show(state) }
+    }
+
     func show(_ state: ProjectPageState) {
-        page.show(head: head(state), stats: stats(state), columns: columns(state))
+        self.state = state
+        let top = top(state)
+        switch section {
+        case .overview:
+            page.show(head: top, stats: stats(state), columns: columns(state))
+        case .sessions, .memory:
+            let items = actions.items(section, query)
+            let id = chosen[section].flatMap { id in items.contains { $0.id == id } ? id : nil } ?? items.first?.id
+            let detail = id.flatMap { actions.detail(section, $0) }
+            let search: ((String) -> Void)? = section == .memory ? { [weak self] text in self?.search(text) } : nil
+            let empty = section == .sessions ? T("No session in this project yet", "Nenhuma sessão neste projeto ainda")
+                                             : T("Nothing learned here yet", "Nada aprendido aqui ainda")
+            page.show(head: top, body: ProjectSplit.view(items: items, chosen: id, search: search, query: query, detail: detail, empty: empty) { [weak self] id in
+                guard let self else { return }
+                self.chosen[self.section] = id
+                self.show(state)
+            })
+        case .automations:
+            page.show(head: top, body: automations(state))
+        case .settings:
+            page.show(head: top, body: actions.sectionView(section) ?? NSView())
+        }
+    }
+
+    /// This project's automations, each with its switch; Create automation and the whole page.
+    private func automations(_ state: ProjectPageState) -> NSView {
+        let rows: [NSView] = state.automations.map { job in
+            let toggle = PageSwitch(on: job.on)
+            toggle.onPress = { [weak self] in self?.actions.toggleAutomation(job.id) }
+            return pageRow(state: nil, title: job.name, meta: job.detail, tail: toggle)
+        }
+        let create = DesignButton.make("+  " + T("Create automation", "Criar automação"), .primary) { [weak self] in self?.actions.createAutomation() }
+        let all = PageBox()
+        all.hold(pageLabel(T("All automations →", "Todas as automações →"), size: DesignTokens.FontSize.meta, color: DesignTokens.Color.accentLink), padding: NSEdgeInsets())
+        all.onPress = { [weak self] in self?.actions.openAutomations() }
+        let empty = pageLabel(T("No automation in this project yet", "Nenhuma automação neste projeto ainda"), size: DesignTokens.FontSize.body, color: DesignTokens.Color.textTertiary)
+        let column = vertical((rows.isEmpty ? [empty] : rows) + [create, all], gap: PP.Columns.listGap)
+        for row in rows { row.widthAnchor.constraint(equalTo: column.widthAnchor).isActive = true }
+        return column
+    }
+
+    private func search(_ text: String) {
+        query = text
+        guard let state else { return }
+        show(state)
+        Self.searchFields(in: page).first?.takeFocus()
+    }
+
+    private static func searchFields(in view: NSView) -> [SearchField] {
+        ((view as? SearchField).map { [$0] } ?? []) + view.subviews.flatMap { searchFields(in: $0) }
+    }
+
+    /// "Projects › name", the head, and the sections' switch under it.
+    private func top(_ state: ProjectPageState) -> NSView {
+        let crumb = PageBox()
+        let projects = pageLabel(T("Projects", "Projetos"), size: DesignTokens.FontSize.meta, color: DesignTokens.Color.accentLink)
+        let words = NSStackView(views: [projects, pageLabel("›  " + state.name, size: DesignTokens.FontSize.meta, color: DesignTokens.Color.textTertiary)])
+        words.spacing = UILooks.pt(PP.Head.titleGap)
+        crumb.hold(words, padding: NSEdgeInsets())
+        crumb.onPress = { [weak self] in self?.actions.showAll() }
+        let switcher = SectionSwitch()
+        switcher.show(section)
+        switcher.onChoose = { [weak self] chosen in self?.show(section: chosen) }
+        let stack = vertical([crumb, head(state), switcher], gap: 10)
+        stack.setCustomSpacing(UILooks.pt(PP.Stat.gridGap + PP.Head.gap / 2), after: stack.arrangedSubviews[1])
+        stack.arrangedSubviews[1].widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+        return stack
     }
 
     private func head(_ state: ProjectPageState) -> NSView {

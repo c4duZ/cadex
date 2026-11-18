@@ -30,7 +30,7 @@
   é da nota enquanto aparece: voltar para o texto ou fechar a aba libera o WebKit, e alternar de
   novo renderiza outra (o controlador não guarda nenhuma).
 - `MarkdownToggle.swift`: o botão "Visualizar"/"Código" no canto da aba (o acessório do editor),
-  que roda markdown.toggle-preview; `opensRendered` (markdown.openAs do settings.json, que o app
+  que roda markdown.toggle-preview; `opensRendered` (markdown.openAs (e `renderNext`: um caminho aberto já renderizado uma vez, o "Ver a página" da memória) do settings.json, que o app
   passa) abre a nota já renderizada.
 - Comandos em `MarkdownCommands.swift`: markdown.toggle-preview (⇧⌘V), markdown.open-link,
   markdown.backlinks.

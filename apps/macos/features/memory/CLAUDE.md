@@ -62,6 +62,9 @@
   leitura, memory.reindex, memory.refresh, memory.enable, memory.approve e memory.reject com a lista
   das propostas no ⌘K; memory.show-history, os commits da wiki na aba do Git History). As ações da
   aba ficam todas, com nome, no "…" da linha de cima (`../../app/InspectorWiring.swift`).
+- `MemoryPageText.swift` (plano 34 D e E): uma página lida para mostrar renderizada: o corpo sem o
+  frontmatter em títulos, parágrafos e itens (marcas de markdown viram texto), e as tags nas duas
+  formas.
 - `MemoryProject.swift`: a regra da chave do projeto (a raiz do repositório principal lida dos
   arquivos `.git`: a worktree e a subpasta dão a do checkout principal; fora do git, a própria
   pasta; os 16 primeiros hex do SHA-256 do caminho), a mesma de
