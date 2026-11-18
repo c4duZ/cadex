@@ -139,6 +139,7 @@ extension TerminalView {
         guard let renderer, let frame = session?.currentFrame() else { return nil }
         let scale = window?.backingScaleFactor ?? 2
         let padding = Float(Self.innerPadding * scale)
-        return renderer.image(frame.pointee, padding: SIMD2(padding, padding), size: CGSize(width: bounds.width * scale, height: bounds.height * scale))
+        return renderer.image(frame.pointee, padding: SIMD2(padding, padding), size: CGSize(width: bounds.width * scale, height: bounds.height * scale),
+                              overlay: DrawOverlay(dressClaude: agentStatus != nil))
     }
 }

@@ -50,8 +50,9 @@ final class SettingsBridge {
         // "Increase contrast" in the system changes the theme, not the settings.
         var wasHighContrast = ThemeStore.shared.isHighContrast
         ThemeStore.shared.observe { [weak self] theme in
-            // The sessions the app opens draw in the theme's ANSI colors, light or dark as it is.
-            SessionKit.shared.claudeTheme = theme.dark ? "dark-ansi" : "light-ansi"
+            // Claude's fixed-color theme, light or dark as the theme is: the terminal swaps its colors
+            // for the theme's (ClaudeDress, plan 33; the -ansi ones have no diff background).
+            SessionKit.shared.claudeTheme = theme.dark ? "dark" : "light"
             guard ThemeStore.shared.isHighContrast != wasHighContrast else { return }
             wasHighContrast = ThemeStore.shared.isHighContrast
             self?.applyLooks()

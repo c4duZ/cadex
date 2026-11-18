@@ -24,6 +24,9 @@ struct QuadInstance {
     static let solid: UInt32 = 0
     static let maskGlyph: UInt32 = 1
     static let colorGlyph: UInt32 = 2
+    /// A rounded rectangle (ClaudeDress): uv is the quad's own pixels, pad1 the corner radius and
+    /// pad2 the outline's width (0 filled), both as Float bits.
+    static let rounded: UInt32 = 3
 }
 
 /// Draws a cadex_terminal_frame with Metal: one instanced draw call.
@@ -64,6 +67,16 @@ final class TerminalRenderer {
 
     var metrics: CellMetrics { font.metrics }
 
+    /// The theme's colors for Claude's (ClaudeDress), set with the terminal's colors.
+    var claudePalette: ClaudeDress.Palette?
+
+    /// The dressing of this frame, while Claude runs in front.
+    private func dress(_ frame: cadex_terminal_frame, _ overlay: DrawOverlay) -> ClaudeDress.Plan? {
+        guard overlay.dressClaude, let palette = claudePalette, let cells = frame.cells, let text = frame.text else { return nil }
+        return ClaudeDress.plan(cells: cells, text: text, cols: Int(frame.cols), rows: Int(frame.rows), palette: palette,
+                                atBottom: frame.scroll_offset + UInt32(frame.rows) >= frame.scroll_total)
+    }
+
     /// The display scale or font changed: the atlas for the new one.
     func setAtlas(_ newAtlas: GlyphAtlas) {
         font = newAtlas.font
@@ -74,7 +87,7 @@ final class TerminalRenderer {
               overlay: DrawOverlay = DrawOverlay(), synchronously: Bool = false) {
         let quads = builder.build(frame: frame, atlas: atlas, metrics: font.metrics, padding: padding,
                                   viewSize: SIMD2(Float(size.width), Float(size.height)), overlay: overlay,
-                                  selection: selectionColor)
+                                  selection: selectionColor, dress: dress(frame, overlay))
 
         inFlight.wait()
         bufferIndex = (bufferIndex + 1) % Self.buffersInFlight
@@ -117,11 +130,12 @@ final class TerminalRenderer {
 
     /// The frame as a picture, drawn the same way into a texture off screen (a window capture does
     /// not get the Metal layer: the test instance's snapshots and the comparisons with the mockups).
-    func image(_ frame: cadex_terminal_frame, padding: SIMD2<Float>, size: CGSize) -> CGImage? {
+    func image(_ frame: cadex_terminal_frame, padding: SIMD2<Float>, size: CGSize, overlay: DrawOverlay = DrawOverlay()) -> CGImage? {
         let width = Int(size.width), height = Int(size.height)
         guard width > 0, height > 0 else { return nil }
         let quads = builder.build(frame: frame, atlas: atlas, metrics: font.metrics, padding: padding,
-                                  viewSize: SIMD2(Float(size.width), Float(size.height)), overlay: DrawOverlay(), selection: selectionColor)
+                                  viewSize: SIMD2(Float(size.width), Float(size.height)), overlay: overlay, selection: selectionColor,
+                                  dress: dress(frame, overlay))
         let described = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: width, height: height, mipmapped: false)
         described.usage = [.renderTarget]
         described.storageMode = .shared

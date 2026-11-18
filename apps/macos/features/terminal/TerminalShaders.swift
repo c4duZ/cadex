@@ -15,7 +15,7 @@ enum TerminalShaders {
         float2 size;     // device pixels
         float4 uv;       // atlas rect: x0, y0, x1, y1 (normalized)
         float4 color;    // straight RGBA
-        uint kind;       // 0 solid, 1 tinted glyph mask, 2 color glyph
+        uint kind;       // 0 solid, 1 tinted glyph mask, 2 color glyph, 3 rounded rectangle
         uint background; // a glyph's cell background, 0xRRGGBB
         uint pad1;
         uint pad2;
@@ -55,6 +55,9 @@ enum TerminalShaders {
         float2 uv;
         float4 color;
         uint kind [[flat]];
+        float2 size [[flat]];
+        float radius [[flat]];
+        float stroke [[flat]];
     };
 
     vertex Fragment terminal_vertex(uint vid [[vertex_id]],
@@ -74,6 +77,9 @@ enum TerminalShaders {
             out.color.rgb = contrasted(quad.color.rgb, bg, uniforms.minimumContrast);
         }
         out.kind = quad.kind;
+        out.size = quad.size;
+        out.radius = as_type<float>(quad.pad1);
+        out.stroke = as_type<float>(quad.pad2);
         return out;
     }
 
@@ -84,6 +90,16 @@ enum TerminalShaders {
         constexpr sampler pixelExact(filter::nearest, address::clamp_to_edge);
         if (in.kind == 0) {
             return float4(in.color.rgb * in.color.a, in.color.a);
+        }
+        if (in.kind == 3) {
+            // Distance to the rounded edge, antialiased over one pixel; an outline keeps the band
+            // `stroke` wide inside the edge.
+            float2 q = abs(in.uv - in.size * 0.5) - (in.size * 0.5 - in.radius);
+            float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - in.radius;
+            float a = clamp(0.5 - d, 0.0, 1.0);
+            if (in.stroke > 0.0) a -= clamp(0.5 - (d + in.stroke), 0.0, 1.0);
+            a *= in.color.a;
+            return float4(in.color.rgb * a, a);
         }
         float4 texel = atlas.sample(pixelExact, in.uv);
         if (in.kind == 1) {

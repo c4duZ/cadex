@@ -187,6 +187,7 @@ public final class TerminalView: NSView {
         guard let appearance = TerminalAppearance.current else { return }
         session?.setColors(appearance)
         renderer?.selectionColor = appearance.selection
+        renderer?.claudePalette = ClaudeDress.Palette(appearance)
         renderer?.backgroundAlpha = appearance.backgroundAlpha
         // Opaque unless a background image shows through: an opaque layer
         // costs less to composite.
@@ -223,7 +224,8 @@ public final class TerminalView: NSView {
         else { return }
         let padding = Float(Self.paddingPoints * scale)
         updateBlink(programWantsBlink: frame.pointee.cursor_blinking)
-        let overlay = DrawOverlay(linkCells: hoveredLinkCells, hideCursor: !signals.cursorShown, flash: isFlashing)
+        let overlay = DrawOverlay(linkCells: hoveredLinkCells, hideCursor: !signals.cursorShown, flash: isFlashing,
+                                  dressClaude: agentStatus != nil)
         renderer.draw(frame.pointee, padding: SIMD2(padding, padding), in: drawable, size: canvas.drawableSize,
                       overlay: overlay, synchronously: synchronously)
         let shown = frame.pointee

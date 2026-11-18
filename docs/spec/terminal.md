@@ -202,8 +202,8 @@ permissão.
   "trabalhando" em 93, os destaques e o ❯ em 94, as bordas em 37, o logo em 91 e 40, o modo em 95.
   Aí o ANSI do tema do Cadex manda nas cores do Claude.
 - A status line do kit já usa ANSI (36, 32, 33, 35).
-- Decisão: o kit das sessões abertas pelo Cadex pede o tema "dark-ansi" num tema escuro do Cadex e
-  "light-ansi" num claro (fase C); o ANSI do Cadex Night é afinado para que o Claude, assim, fique
+- Decisão do plano 28 (revista no 33, abaixo): o kit das sessões abertas pelo Cadex pedia o tema
+  "dark-ansi" num tema escuro do Cadex e "light-ansi" num claro (fase C); o ANSI do Cadex Night é afinado para que o Claude, assim, fique
   com a cara do mockup 10. Quem digita `claude` numa aba sem o kit continua com o tema da conta.
 - O que o Claude desenha continua dele: a caixa da mensagem, as ferramentas e o diff só mudam de
   cor, nunca de forma. (Revisto no plano 33: o terminal passa a trocar as cores fixas e a desenhar
@@ -240,6 +240,14 @@ célula fotografada (cor do texto, do fundo, negrito), nos temas "dark", "light"
   só nos eventos (pedido, ferramenta, parada), e o ⇧⇥ não dispara hook; a status line roda de novo
   a cada ⇧⇥, mas o JSON dela não traz o modo. Quem sabe o modo na hora é a própria linha do modo:
   o terminal o lê de lá.
+- **O que o terminal faz com isso (plano 33, fases B e C):** enquanto o Claude se reporta pelo OSC
+  7501 (sem o kit também), o desenho troca as cores fixas da tabela pelas tiradas do tema do
+  terminal (fundo, texto e ANSI: o fundo da mensagem do dono a 7 % do texto, o fundo do diff a 13 %
+  do verde e do vermelho, o ⏺ rodando no amarelo, o trabalhando no azul); não desenha o mascote nem
+  a linha do modo e põe o modo à direita da linha de cima; desenha a caixa arredondada no lugar das
+  duas linhas da entrada e a mensagem do dono num bloco com cantos. Só o desenho muda: seleção,
+  busca e cópia leem o texto de verdade. O que não bate com a medida fica como o Claude desenha; a
+  dica "esc to interrupt" da linha do modo some junto com ela.
 - **O pedido de permissão** é um diálogo do Claude no lugar da caixa de entrada: uma linha inteira
   de "─", "Bash command" no destaque, o comando entre duas linhas de "╌", "Do you want to
   proceed?" e as opções. Fica como o Claude desenha (o dono, 2026-11-18).

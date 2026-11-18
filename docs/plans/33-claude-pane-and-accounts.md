@@ -38,12 +38,12 @@ que ela digitar já vai ter".
   byte, nos temas "dark" e "dark-ansi": o mascote (caracteres, linhas, cor), a linha do modo em
   cada modo, as duas linhas da caixa de entrada, os fundos da mensagem do dono e do diff, o ponto
   de uma ferramenta esperando; o `permission_mode` que os hooks recebem.
-- **B. Cores.** O kit volta a pedir o tema de cores fixas do Claude ("dark" ou "light", pelo modo
+- **B. Cores.** Feita (2026-11-18): o kit pede "dark" ou "light"; `../../apps/macos/features/terminal/ClaudeDress.swift` troca as cores fixas medidas pelas tiradas do tema do terminal (o fundo, o texto e o ANSI), enquanto o Claude se reporta pelo OSC 7501. Plano original: O kit volta a pedir o tema de cores fixas do Claude ("dark" ou "light", pelo modo
   do tema do Cadex) e o terminal troca as cores fixas que o Claude usa pelas do tema
   (components.terminalTheme) enquanto o programa em frente é o `claude`: fundo e texto do diff,
   fundo da mensagem do dono, destaques, o trabalhando, o modo. Uma tabela na spec, conferida a
   cada versão do Claude que mudar uma cor.
-- **C. Formas.** O terminal, enquanto o programa é o `claude`: não desenha o mascote (o texto ao
+- **C. Formas.** Feita (2026-11-18): o mascote não é desenhado; a caixa arredondada no lugar das duas linhas da entrada; a mensagem do dono num bloco com cantos; a linha do modo lida, não desenhada, e o modo à direita da status line; o ⏺ rodando âmbar; um tipo de quad novo no shader (retângulo arredondado, cheio ou contorno). Conferido no app com um `claude` real. Plano original: O terminal, enquanto o programa é o `claude`: não desenha o mascote (o texto ao
   lado fica); desenha a caixa arredondada no lugar das duas linhas da entrada; dá cantos e respiro
   ao fundo da mensagem do dono; lê o modo da linha do modo (a fase A mostrou que só ela o sabe
   na hora), não a desenha e põe o modo à direita da linha de cima, a status line; o ⏺ de uma

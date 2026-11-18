@@ -71,8 +71,8 @@ let exitCode = await Checks.run([
         expect(json(settingsPath(kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json")))["hooks"] == nil, "agents.stateHooks off: no hooks")
         // Claude Code's -ansi theme, so the Cadex theme's ANSI colors are its colors (plan 28 phase C).
         expect(file["theme"] == nil, "no theme asked: the account's own")
-        kit.claudeTheme = "dark-ansi"
-        expect(json(settingsPath(kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json")))["theme"] as? String == "dark-ansi")
+        kit.claudeTheme = "dark"
+        expect(json(settingsPath(kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json")))["theme"] as? String == "dark")
     }),
     ("the default account: no folder, a stray CLAUDE_CONFIG_DIR dropped; no tools, only the synchronized output", {
         let dir = scratch()

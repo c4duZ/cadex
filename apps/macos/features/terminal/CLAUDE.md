@@ -102,6 +102,12 @@
   CADEX_ZSH_INTEGRATION e CADEX_TOOLS no próprio ambiente antes de qualquer terminal e do daemon
   (`../../app/main.swift`). TerminalSession.shellPid (e o do `TerminalView`) é o pid do shell, com que
   o app reconhece um `cadex claude` vindo de uma aba dele (`../../app/TypedClaudeWiring.swift`).
+- `ClaudeDress.swift` (plano 33, fases B e C; `../../../../docs/spec/terminal.md`, As cores e as
+  formas do Claude Code): enquanto o Claude se reporta pelo OSC 7501, o plano de cada quadro troca
+  as cores fixas dele pelas do tema (`Palette`, tirada do `TerminalAppearance`), esconde o mascote e
+  a linha do modo, põe o modo à direita da status line, e as formas (a caixa da entrada, o bloco da
+  mensagem do dono) vão como retângulos arredondados (quad do tipo 3 no `TerminalShaders.swift`).
+  O `QuadBuilder.swift` desenha com o plano (DrawOverlay.dressClaude); o texto não muda.
 - `TerminalScrollbar.swift` (plano 28 fase D): a barra de rolagem do mockup Pane, uma coluna de 8 pt
   que o painel põe na borda da caixa (`scrollbar`), com o polegar e as marcas: cinza onde o dono
   mandou uma mensagem ao agente (Enter com agente rodando), âmbar onde o agente passou a esperar;

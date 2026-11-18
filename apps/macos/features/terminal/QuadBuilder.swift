@@ -10,6 +10,8 @@ struct DrawOverlay {
     var hideCursor = false
     /// The bell's flash over the whole view.
     var flash = false
+    /// Claude Code runs in front (it reported by OSC 7501): its screen in the theme (ClaudeDress).
+    var dressClaude = false
 }
 
 /// Turns a frame into quads, in painting order: cell backgrounds, selection,
@@ -32,11 +34,29 @@ struct QuadBuilder {
 
     mutating func build(frame: cadex_terminal_frame, atlas: GlyphAtlas, metrics m: CellMetrics,
                         padding: SIMD2<Float>, viewSize: SIMD2<Float>, overlay: DrawOverlay = DrawOverlay(),
-                        selection: UInt32? = nil) -> [QuadInstance] {
+                        selection: UInt32? = nil, dress: ClaudeDress.Plan? = nil) -> [QuadInstance] {
         quads.removeAll(keepingCapacity: true)
+        guard Int(frame.cols) > 0, Int(frame.rows) > 0, let frameCells = frame.cells else { return quads }
+        guard let dress, dress.cells.count == Int(frame.cols) * Int(frame.rows) else {
+            build(cells: frameCells, frame: frame, atlas: atlas, metrics: m, padding: padding, viewSize: viewSize,
+                  overlay: overlay, selection: selection, dress: nil)
+            return quads
+        }
+        let dressed = dress.cells
+        dressed.withUnsafeBufferPointer { buffer in
+            build(cells: buffer.baseAddress!, frame: frame, atlas: atlas, metrics: m, padding: padding, viewSize: viewSize,
+                  overlay: overlay, selection: selection, dress: dress)
+        }
+        return quads
+    }
+
+    private mutating func build(cells: UnsafePointer<cadex_terminal_cell>, frame: cadex_terminal_frame, atlas: GlyphAtlas,
+                                metrics m: CellMetrics, padding: SIMD2<Float>, viewSize: SIMD2<Float>, overlay: DrawOverlay,
+                                selection: UInt32?, dress: ClaudeDress.Plan?) {
         let cols = Int(frame.cols)
         let rows = Int(frame.rows)
-        guard cols > 0, rows > 0, let cells = frame.cells else { return quads }
+        let hidden = dress?.hidden
+        func shown(_ index: Int) -> Bool { hidden.map { !$0[index] } ?? true }
         let cellW = Float(m.width)
         let cellH = Float(m.height)
         let cursorAt = frame.cursor_visible && !overlay.hideCursor ? Int(frame.cursor_y) * cols + Int(frame.cursor_x) : -1
@@ -47,7 +67,10 @@ struct QuadBuilder {
             SIMD2(padding.x + Float(index % cols) * cellW, padding.y + Float(index / cols) * cellH)
         }
 
-        for index in 0..<(cols * rows) where cells[index].flags & UInt16(CADEX_CELL_HAS_BACKGROUND) != 0 {
+        for shape in dress?.shapes ?? [] {
+            rounded(shape, cols: cols, cell: SIMD2(cellW, cellH), padding: padding, scale: Float(m.lineThickness))
+        }
+        for index in 0..<(cols * rows) where cells[index].flags & UInt16(CADEX_CELL_HAS_BACKGROUND) != 0 && shown(index) {
             solid(origin(index), SIMD2(cellW, cellH), rgba(cells[index].bg))
         }
         // The theme's selection color is opaque and drawn under the text;
@@ -69,6 +92,7 @@ struct QuadBuilder {
         var index = 0
         while index < cols * rows {
             let cell = cells[index]
+            if !shown(index) { index += 1; continue }
             // The cell's background, for the minimum contrast (the shader
             // moves text that would not read on it).
             let underCursor = index == cursorAt && blockCursor
@@ -91,8 +115,16 @@ struct QuadBuilder {
             glyph(cell, frame: frame, at: origin(index), color: rgba(fgRGB, alpha: faint ? 0.5 : 1), background: bg, atlas: atlas)
         }
 
-        for index in 0..<(cols * rows) {
+        for index in 0..<(cols * rows) where shown(index) {
             decorations(cells[index], at: origin(index), metrics: m)
+        }
+        if let label = dress?.label {
+            for (i, ch) in label.text.enumerated() {
+                let col = cols - label.text.count - 1 + i
+                guard col >= 0, label.row < rows else { continue }
+                glyph(text: String(ch), bold: false, italic: false, cells: 1, at: origin(label.row * cols + col),
+                      color: rgba(label.color), background: frame.background, atlas: atlas)
+            }
         }
         if let linkCells = overlay.linkCells {
             let y = Float(m.baseline + m.underlineOffset)
@@ -107,7 +139,6 @@ struct QuadBuilder {
         if overlay.flash {
             solid(.zero, viewSize, rgba(frame.foreground, alpha: Self.flashAlpha))
         }
-        return quads
     }
 
     private mutating func glyph(_ cell: cadex_terminal_cell, frame: cadex_terminal_frame, at origin: SIMD2<Float>,
@@ -163,6 +194,21 @@ struct QuadBuilder {
             solid(origin, SIMD2(line, h), color)
             solid(SIMD2(origin.x + w - line, origin.y), SIMD2(line, h), color)
         }
+    }
+
+    /// A ClaudeDress shape in pixels: the owner's message a half cell wider than its rows, the input
+    /// box from the middle of its first rule to the middle of the last.
+    private mutating func rounded(_ shape: ClaudeDress.Shape, cols: Int, cell: SIMD2<Float>, padding: SIMD2<Float>, scale: Float) {
+        let half = cell.y * 0.5
+        let top = padding.y + Float(shape.top) * cell.y + (shape.midRows ? half : 0)
+        let bottom = padding.y + Float(shape.bottom + 1) * cell.y - (shape.midRows ? half : 0)
+        let left = padding.x + Float(shape.left) * cell.x - cell.x * 0.5
+        let right = padding.x + Float(shape.right + 1) * cell.x + cell.x * 0.5
+        let size = SIMD2(right - left, bottom - top)
+        let radius = min(cell.y * (shape.outline ? 0.6 : 0.4), size.y * 0.5)
+        quads.append(QuadInstance(origin: SIMD2(left, top), size: size, uv: SIMD4(0, 0, size.x, size.y), color: rgba(shape.color),
+                                  kind: QuadInstance.rounded, background: 0,
+                                  pad1: radius.bitPattern, pad2: shape.outline ? max(scale, 1).bitPattern : Float(0).bitPattern))
     }
 
     private mutating func solid(_ origin: SIMD2<Float>, _ size: SIMD2<Float>, _ color: SIMD4<Float>) {
