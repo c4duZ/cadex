@@ -29,8 +29,17 @@ enum MemoryParts {
     }
 
     /// A label over its cards.
-    static func section(_ title: String, _ cards: [NSView]) -> NSView {
-        let stack = NSStackView(views: [label(title)] + cards)
+    static func section(_ title: String, count: Int? = nil, _ cards: [NSView]) -> NSView {
+        let head = label(title)
+        if let count {
+            // The count beside it, dimmer (the proposal's `.lbl .n`).
+            let text = NSMutableAttributedString(attributedString: head.attributedStringValue)
+            text.append(NSAttributedString(string: "  \(count)", attributes: [
+                .font: UILooks.font(M.Label.fontSize, weight: .semibold), .foregroundColor: DesignTokens.Color.textSeparator,
+            ]))
+            head.attributedStringValue = text
+        }
+        let stack = NSStackView(views: [head] + cards)
         stack.orientation = .vertical
         stack.alignment = .leading
         stack.spacing = UILooks.pt(M.learnedGap)
@@ -42,8 +51,10 @@ enum MemoryParts {
     static func search(_ press: @escaping @MainActor () -> Void) -> NSView {
         let icon = NSImageView(image: Icon.magnifyingGlass.image(size: UILooks.pt(M.Search.icon)))
         icon.contentTintColor = M.Search.color
-        let text = MemoryText.label(T("Search what this project knows", "Buscar o que este projeto sabe"), size: DesignTokens.FontSize.body, color: M.Search.color)
-        let box = MemoryBox(views: [icon, text], press: press)
+        let text = MemoryText.label(T("Search memory", "Buscar na memória"), size: DesignTokens.FontSize.body, color: M.Search.color)
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.init(1), for: .horizontal)
+        let box = MemoryBox(views: [icon, text, spacer], press: press)
         box.spacing = UILooks.pt(M.WikiRow.gap)
         box.edgeInsets = insets(M.Search.padding)
         box.layer?.backgroundColor = M.Search.bg.cgColor
@@ -94,6 +105,35 @@ enum MemoryParts {
         field.textColor = DesignTokens.Color.textPrimary
         field.isSelectable = false
         return MemoryBox(views: [field], press: open)
+    }
+
+    /// The proposal's foot (`.foot`): one card, "Every new agent here starts with the briefing of
+    /// this." and two links, See the briefing and Configure, each running its command.
+    static func foot(see: @escaping @MainActor () -> Void, configure: @escaping @MainActor () -> Void) -> NSView {
+        let words = MemoryText.label(T("Every new agent here starts with the briefing of this.", "Todo agente novo aqui começa com o briefing disto."),
+                                     size: M.Briefing.fontSize, color: M.Briefing.color, wraps: true)
+        func link(_ title: String, _ press: @escaping @MainActor () -> Void) -> NSView {
+            MemoryBox(views: [MemoryText.label(title, size: M.Briefing.fontSize, color: DesignTokens.Color.accentLink)], press: press)
+        }
+        let dot = MemoryText.label("·", size: M.Briefing.fontSize, color: M.Briefing.color)
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.init(1), for: .horizontal)
+        let links = NSStackView(views: [link(T("See the briefing", "Ver o briefing"), see), dot, link(T("Configure", "Configurar"), configure), spacer])
+        links.spacing = UILooks.pt(M.WikiRow.gap)
+        links.distribution = .fill
+        let column = NSStackView(views: [words, links])
+        column.orientation = .vertical
+        column.alignment = .leading
+        column.spacing = UILooks.pt(M.Card.gap)
+        let box = NSStackView(views: [column])
+        box.wantsLayer = true
+        box.edgeInsets = NSEdgeInsets(top: UILooks.pt(M.Briefing.padding), left: UILooks.pt(M.Briefing.padding),
+                                      bottom: UILooks.pt(M.Briefing.padding), right: UILooks.pt(M.Briefing.padding))
+        box.layer?.backgroundColor = M.Search.bg.cgColor
+        box.layer?.borderColor = M.Briefing.border.cgColor
+        box.layer?.borderWidth = DesignTokens.Stroke.hairline
+        box.layer?.cornerRadius = UILooks.pt(M.Briefing.radius)
+        return box
     }
 
     static func briefing(_ see: @escaping @MainActor () -> Void) -> NSView {

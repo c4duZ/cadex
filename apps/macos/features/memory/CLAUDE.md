@@ -42,12 +42,14 @@
   principal, com o JSON de volta; também o texto puro (o briefing) e o stdin (write-page).
 - A aba Memory do painel da direita (fase H; plano 26 fase C2c; refeita em 2026-11-18, o dono
   achou dura e difícil de ler): `MemoryView.swift`, numa rolagem só (antes a árvore da wiki rolava
-  dentro da rolagem da aba): desligada, o texto e "Turn On"; ligada, "Search what this project
-  knows" (memory.search), até 3 propostas com Approve/Reject, "LEARNED TODAY" (as páginas de hoje,
+  dentro da rolagem da aba), no desenho da proposta aprovada: desligada, o texto e "Turn On";
+  ligada, sob o título "What the project knows" da linha de cima, "<projeto> · N pages · updated…",
+  "Search memory" (memory.search), as seções com o número apagado, até 3 propostas com Approve/Reject, "LEARNED TODAY" (as páginas de hoje,
   sem os registros de sessão), "PROJECT RULES" (as da pasta _rules da wiki), "LAST SESSIONS" pelo título da
   conversa (`titleOf`, do índice do histórico: o nome dado, senão o do Claude), a conta e a pasta,
   "All in the Archive" (agents.show-history) e "All N pages" (memory.search, com o estado do engine
-  e do agente na dica), a nota do briefing e o "Configure this project's memory…".
+  e do agente na dica) e o cartão do pé, "Every new agent here starts with the briefing of this." com
+  See the briefing e Configure; as sessões sem ícone, com o logo da conta na segunda linha.
   `MemoryRows.swift`: a linha (`MemoryRow`: o tipo como ícone colorido num quadradinho, `MemoryKind`;
   o título numa linha; a idade, `MemoryAge`; acende sob o ponteiro; clique abre, clique direito dá
   Open, Open the Session, Reveal in Finder e Delete Page) e `MemoryText`. `MemoryParts.swift` (a

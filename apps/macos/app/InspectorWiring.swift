@@ -110,7 +110,8 @@ extension WindowSession {
         guard let inspector = workspace?.inspector else { return }
         let name = Self.folderName(root)
         let place = ((root as NSString).deletingLastPathComponent as NSString).lastPathComponent + "/" + name
-        inspector.setScope(InspectorScope(name + " · " + place, tip: root), for: "files")
+        // The name alone, as the proposal's Files: "name · parent/name" repeated it, cut (2026-11-18).
+        inspector.setScope(InspectorScope(name, tip: root), for: "files")
         inspector.setScope(InspectorScope(name + " · " + place, tip: root), for: "history")
         // A task's history: how far it went from where it started (the Inspector drawing,
         // "orchestration-e · 3 commits ahead of main"), counted by git off the main thread.
@@ -129,8 +130,10 @@ extension WindowSession {
         }
         let project = TitleBarView.location(of: root).project
         // The project alone: the sentence was cut ("the project's me…"); it is in the tip.
-        inspector.setScope(InspectorScope(project, tip: root + "\n" + T("The project's memory, shared by every task and account",
-                                                                         "A memória do projeto, de todas as tarefas e contas")), for: "memory")
+        // The proposal's head: "What the project knows", the project under it in the tab.
+        let memoryTip = project + " · " + root + "\n" + T("The project's memory, shared by every task and account",
+                                                          "A memória do projeto, de todas as tarefas e contas")
+        inspector.setScope(InspectorScope(T("What the project knows", "O que o projeto sabe"), tip: memoryTip, strong: true), for: "memory")
     }
 
     /// Changes' scope: the branch with ↑ and ↓, the click switches branch; "Git" outside a

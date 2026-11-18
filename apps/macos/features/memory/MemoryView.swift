@@ -22,6 +22,11 @@ public final class MemoryView: NSView {
     public var placeOf: (String) -> String? = { _ in nil }
     /// The title of a session's conversation (the one Claude gave it, or the owner's), when known.
     public var titleOf: (String) -> String? = { _ in nil }
+    /// The project's name, for the line under the tab's title.
+    public var projectName: () -> String = { "" }
+    /// The provider's logo before a session's account, in its color (the app knows the logos).
+    public var accountLogo: NSImage?
+    public var accountTint: NSColor = DesignTokens.Color.textSecondary
     /// Whether "Open the Session" can resume it (the History has it).
     public var canResume: (String) -> Bool = { _ in false }
     /// The page came on screen (true) or left it (false): the app refreshes.
@@ -51,7 +56,8 @@ public final class MemoryView: NSView {
         stack.orientation = .vertical
         stack.alignment = .leading
         stack.spacing = UILooks.pt(M.gap)
-        stack.edgeInsets = NSEdgeInsets(top: UILooks.pt(M.padding.top), left: UILooks.pt(M.padding.left),
+        // The project's line sits right under the title above (the proposal's head): no top gap.
+        stack.edgeInsets = NSEdgeInsets(top: 0, left: UILooks.pt(M.padding.left),
                                         bottom: UILooks.pt(M.padding.bottom), right: UILooks.pt(M.padding.right))
         stack.translatesAutoresizingMaskIntoConstraints = false
         content.addSubview(stack)
@@ -102,10 +108,11 @@ public final class MemoryView: NSView {
             add(MemoryParts.paragraph(MemoryStatusText.offText))
             return add(MemoryParts.button(T("Turn On", "Ligar")) { [weak self] in self?.run?("memory.enable") })
         }
+        let pages = state.tree?.allPages ?? []
+        add(MemoryParts.line(Self.subtitle(projectName(), pages: pages)))
         add(MemoryParts.search { [weak self] in self?.run?("memory.search") })
         if let problem = state.problem { add(MemoryParts.paragraph(problem)) }
         renderProposals(state.proposals)
-        let pages = state.tree?.allPages ?? []
         if pages.isEmpty {
             add(MemoryParts.line(state.wikiDir == nil ? T("Nothing yet: it starts with this project's first agent session.",
                                                           "Nada ainda: começa com a primeira sessão de agente deste projeto.")
@@ -117,8 +124,18 @@ public final class MemoryView: NSView {
         if !pages.isEmpty {
             add(link(T("All \(pages.count) pages", "Todas as \(pages.count) páginas"), status: status(state)) { [weak self] in self?.run?("memory.search") })
         }
-        add(MemoryParts.briefing { [weak self] in self?.run?("memory.show-briefing") })
-        add(MemoryParts.configure { [weak self] in self?.run?("memory.configure-project") })
+        add(MemoryParts.foot(see: { [weak self] in self?.run?("memory.show-briefing") },
+                             configure: { [weak self] in self?.run?("memory.configure-project") }))
+    }
+
+    /// "cadex · 14 pages · updated 52 min ago" (the proposal's head).
+    static func subtitle(_ project: String, pages: [MemoryPage], now: Date = Date()) -> String {
+        var parts = [project].filter { !$0.isEmpty }
+        parts.append(pages.count == 1 ? T("1 page", "1 página") : T("\(pages.count) pages", "\(pages.count) páginas"))
+        if let latest = pages.compactMap({ $0.learnedAt ?? $0.time }).max(), let age = MemoryAge.text(latest, now: now) {
+            parts.append(age == T("now", "agora") ? T("updated now", "atualizado agora") : T("updated \(age) ago", "atualizado há \(age)"))
+        }
+        return parts.joined(separator: " · ")
     }
 
     /// "LEARNED TODAY": what an agent wrote today, newest first, the session logs left out.
@@ -130,7 +147,7 @@ public final class MemoryView: NSView {
         if today.count > Self.shownLearned {
             rows.append(link(T("See all \(today.count)", "Ver as \(today.count)")) { [weak self] in self?.run?("memory.search") })
         }
-        add(MemoryParts.section(Self.title(T("LEARNED TODAY", "APRENDIDO HOJE"), today.count), rows))
+        add(MemoryParts.section(T("LEARNED TODAY", "APRENDIDO HOJE"), count: today.count, rows))
     }
 
     /// "PROJECT RULES": the pages every agent gets (`_rules/`).
@@ -141,7 +158,7 @@ public final class MemoryView: NSView {
         if rules.count > Self.shownRules {
             rows.append(link(T("See all \(rules.count)", "Ver as \(rules.count)")) { [weak self] in self?.run?("memory.search") })
         }
-        add(MemoryParts.section(Self.title(T("PROJECT RULES", "REGRAS DO PROJETO"), rules.count), rows))
+        add(MemoryParts.section(T("PROJECT RULES", "REGRAS DO PROJETO"), count: rules.count, rows))
     }
 
     /// "LAST SESSIONS": by their conversation's title, the account and where they ran.
@@ -152,8 +169,9 @@ public final class MemoryView: NSView {
             let id = page.sessionID
             let title = id.flatMap(titleOf) ?? page.title
             let meta = [id.flatMap(accountOf), id.flatMap(placeOf)].compactMap { $0 }.joined(separator: " · ")
-            return MemoryRow(title: title, meta: meta, age: MemoryAge.text(page.time), glyph: .terminalWindow,
-                             tint: DesignTokens.Color.textSecondary,
+            // The proposal's sessions: the title, then the account with its logo and the place; no glyph.
+            return MemoryRow(title: title, meta: meta, metaImage: meta.isEmpty ? nil : accountLogo, age: MemoryAge.text(page.time), glyph: nil,
+                             tint: accountTint,
                              press: { [weak self] in self?.onOpenPage?(page) }, menu: { [weak self] in self?.menu(page) ?? [] })
         }
         rows.append(link(T("All in the Archive", "Todas no Archive")) { [weak self] in self?.run?("agents.show-history") })
@@ -197,7 +215,6 @@ public final class MemoryView: NSView {
     }
 
     static func isSession(_ page: MemoryPage) -> Bool { page.relative.hasPrefix("sessions/") }
-    static func title(_ title: String, _ count: Int) -> String { "\(title)  \(count)" }
 
     func menu(_ page: MemoryPage) -> [MenuEntry] {
         let session = page.sessionID.flatMap { canResume($0) ? $0 : nil }

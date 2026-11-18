@@ -4,6 +4,7 @@ import UILooks
 import CommandPalette
 import Editor
 import Explorer
+import Icons
 import Memory
 import Strings
 import Themes
@@ -17,6 +18,9 @@ extension WindowSession {
         let page = MemoryView()
         page.run = { [weak self] id in _ = self?.commands.run(id) }
         page.accountName = Self.accountName
+        page.projectName = { [weak self] in self.map { TitleBarView.location(of: $0.folder.root).project } ?? "" }
+        page.accountLogo = ProviderLogo.claude.image(size: 10)
+        page.accountTint = ProviderLogo.claude.brandColor ?? DesignTokens.Color.textSecondary
         page.accountOf = { id in Self.historyEntry(session: id).map { Self.accountName($0.account) } }
         page.placeOf = { id in Self.historyEntry(session: id).map { ($0.cwd as NSString).lastPathComponent }.flatMap { $0.isEmpty ? nil : $0 } }
         page.canResume = { id in Self.historyEntry(session: id) != nil }

@@ -20,10 +20,14 @@ public struct InspectorScope: Equatable {
     public let text: String
     public let command: String?
     public let tip: String?
-    public init(_ text: String, command: String? = nil, tip: String? = nil) {
+    /// A title, not a place: in the text's own color and semibold (Memory's "What the project knows",
+    /// the approved proposal of 2026-11-18).
+    public let strong: Bool
+    public init(_ text: String, command: String? = nil, tip: String? = nil, strong: Bool = false) {
         self.text = text
         self.command = command
         self.tip = tip
+        self.strong = strong
     }
 }
 

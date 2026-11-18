@@ -170,6 +170,9 @@ public final class InspectorView: NSView {
         let scope = scopes[shown.id] ?? InspectorScope(shown.title)
         scopeLabel.stringValue = scope.text
         scopeLabel.toolTip = scope.tip
+        typealias Scope = I.Scope
+        scopeLabel.font = scope.strong ? UILooks.font(Scope.fontSize + 1, weight: .semibold) : UILooks.font(Scope.fontSize)
+        scopeLabel.textColor = scope.strong ? DesignTokens.Color.textPrimary : Scope.color
         scopeButtons.forEach { $0.removeFromSuperview() }
         let first = shown.actions.prefix(Self.maxShown)
         overflow = Array(shown.actions.dropFirst(Self.maxShown)) + shown.more

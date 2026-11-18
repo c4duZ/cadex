@@ -18,7 +18,7 @@ final class MemoryRow: NSView {
     private var hovered = false { didSet { layer?.backgroundColor = hovered ? DesignTokens.Color.bgButton.cgColor : nil } }
 
     /// `glyph` and `tint`: the kind's sign in its tile; `meta`: a second dim line; `age`: on the right.
-    init(title: String, meta: String?, age: String?, glyph: Icon, tint: NSColor,
+    init(title: String, meta: String?, metaImage: NSImage? = nil, age: String?, glyph: Icon?, tint: NSColor,
          press: @escaping () -> Void, menu: @escaping () -> [MenuEntry] = { [] }) {
         self.press = press
         self.entries = menu
@@ -27,7 +27,8 @@ final class MemoryRow: NSView {
         layer?.cornerRadius = UILooks.pt(M.Card.radius)
         // The kind's tile: 20 pt, its color at 14 % behind the glyph (the review's proposal, 2026-11-18).
         let side = UILooks.pt(20)
-        let tile = NSImageView(image: glyph.image(size: UILooks.pt(M.Search.icon)))
+        let tile = NSImageView(image: (glyph ?? .fileText).image(size: UILooks.pt(M.Search.icon)))
+        tile.isHidden = glyph == nil
         tile.contentTintColor = tint
         tile.wantsLayer = true
         tile.layer?.backgroundColor = tint.withAlphaComponent(0.14).cgColor
@@ -36,13 +37,25 @@ final class MemoryRow: NSView {
         tile.heightAnchor.constraint(equalToConstant: side).isActive = true
         let name = MemoryText.label(title, size: DesignTokens.FontSize.body, color: DesignTokens.Color.textRow)
         var lines: [NSView] = [name]
-        if let meta, !meta.isEmpty { lines.append(MemoryText.label(meta, size: M.Card.Meta.fontSize, color: M.Card.Meta.color)) }
+        if let meta, !meta.isEmpty {
+            let text = MemoryText.label(meta, size: M.Card.Meta.fontSize, color: M.Card.Meta.color)
+            // The account's logo before it, as the proposal's sessions (`.acct`).
+            if let metaImage {
+                let logo = NSImageView(image: metaImage)
+                logo.contentTintColor = tint
+                let line = NSStackView(views: [logo, text])
+                line.spacing = UILooks.pt(4)
+                lines.append(line)
+            } else {
+                lines.append(text)
+            }
+        }
         let words = NSStackView(views: lines)
         words.orientation = .vertical
         words.alignment = .leading
         words.spacing = UILooks.pt(M.Card.gap)
         words.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        var views: [NSView] = [tile, words]
+        var views: [NSView] = glyph == nil ? [words] : [tile, words]
         if let age, !age.isEmpty {
             let when = MemoryText.label(age, size: M.Card.Meta.fontSize, color: M.Card.Meta.color)
             when.setContentCompressionResistancePriority(.required, for: .horizontal)
