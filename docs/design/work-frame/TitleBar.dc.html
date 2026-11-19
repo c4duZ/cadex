@@ -40,7 +40,7 @@ body{margin:0}
   <button aria-label="Right panel" style="{{panelStyle}}"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2"></rect><path d="M10 2.5v11"></path></svg></button>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["task","split","project","board","race"],"default":"task"},"panel":{"editor":"boolean","default":true},"bell":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":44}}'>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["task","split","project","board","race","memory"],"default":"task"},"panel":{"editor":"boolean","default":true},"bell":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":44}}'>
 class Component extends DCLogic {
   renderVals() {
     const view = this.props.view ?? 'task';
@@ -56,6 +56,7 @@ class Component extends DCLogic {
       project: { where: 'cadex', add: false, tabs: [tab('Overview', none, true), tab('Automations', none), tab('Conversations', none)] },
       board: { where: 'All projects', add: false, tabs: [tab('Board', none, true)] },
       race: { where: 'cadex › race kite', add: false, tabs: [tab('Contenders · 3', ring(9), true), tab('Compare', none)] },
+      memory: { where: 'Memória', add: false, tabs: [] },
     };
     const v = views[view] ?? views.task;
     const icon = (on) => 'position: relative; width: 30px; height: 30px; border: 0; border-radius: 7px; display: flex; align-items: center; justify-content: center; ' + (on ? 'background: #1D1F23; color: #E7E8EA' : 'background: transparent; color: #9BA0A8');

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<title>Memory agent</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<!-- Plan 40 D: an agent in a project, its sessions and usage (print 13). -->
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #0C0D0F; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px; border-radius: 12px; overflow: hidden; border: 1px solid #25282D">
+  <dc-import name="TitleBar" view="memory" panel="{{ false }}" hint-size="1440px,44px"></dc-import>
+
+  <div style="flex: 1; display: flex; min-height: 0">
+    <dc-import name="MemorySidebar" section="projects" hint-size="448px,826px"></dc-import>
+
+    <div style="flex: 1; min-width: 0; padding: 24px 32px; display: flex; flex-direction: column; gap: 14px; overflow: hidden">
+      <div style="font-size: 12px; color: #7C828B">Projetos <span style="color: #4A4F57">›</span> cadex <span style="color: #4A4F57">›</span> <span style="color: #9BA0A8">Claude Code</span></div>
+      <div style="display: flex; align-items: flex-end; gap: 16px">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+          <span style="font-size: 22px; font-weight: 700; letter-spacing: -0.01em">Claude Code</span>
+          <span style="color: #8A9099">Sessões, consumo e cobertura em cadex</span>
+        </div>
+        <button style="height: 30px; padding: 0 12px; border-radius: 7px; border: 0; background: #E7E8EA; color: #111214; font: inherit; font-weight: 600">Mensagem ao agente</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+        <sc-for list="{{stats}}" as="s" hint-placeholder-count="4">
+          <div style="padding: 14px 16px; border-radius: 10px; background: #131417; border: 1px solid #1F2125; display: flex; flex-direction: column; gap: 4px">
+            <span style="font-size: 12px; color: #8A9099">{{s.label}}</span>
+            <span style="font-size: 20px; font-weight: 650">{{s.value}}</span>
+            <span style="font-size: 11.5px; color: #7C828B">{{s.note}}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="padding: 10px 14px; border-radius: 10px; background: #1C1812; border: 1px solid #4A3A1C; display: flex; align-items: center; gap: 10px">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: #F2A93B"></span>
+        <span style="font-weight: 600; color: #F2B65E">Há uma lacuna de visibilidade</span>
+        <span style="color: #F2D29B">44 sessões sem uso informado</span>
+        <span style="margin-left: auto; color: #F2B65E">ⓘ</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; min-height: 0">
+        <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: #7C828B; padding-bottom: 8px">SESSÕES</div>
+        <div style="display: grid; grid-template-columns: 130px 110px 110px 90px 80px minmax(0, 1fr) 110px; align-items: center; column-gap: 12px; padding: 8px 12px; border-bottom: 1px solid #1F2125; font-size: 11px; font-weight: 600; color: #7C828B">
+          <span>Sessão</span><span>Estado</span><span>Início</span><span>Duração</span><span>Eventos</span><span>Tokens · entrada / saída</span><span></span>
+        </div>
+        <sc-for list="{{rows}}" as="r" hint-placeholder-count="12">
+          <div style="{{r.style}}">
+            <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #9BC1FF">{{r.id}} ↗</span>
+            <span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 2px 7px; border-radius: 5px; font-size: 10.5px; font-weight: 600; background: #1D1F23; color: #9BA0A8"><span style="width: 6px; height: 6px; border-radius: 50%; background: #6B7079"></span>Encerrada</span></span>
+            <span style="color: #9BA0A8">{{r.start}}</span>
+            <span>{{r.dur}}</span>
+            <span>{{r.events}}</span>
+            <span style="color: #7C828B">—</span>
+            <span style="{{r.openStyle}}">Abrir no Cadex</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <dc-import name="StatusBar" hint-size="1440px,30px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const row = (hover) => 'display: grid; grid-template-columns: 130px 110px 110px 90px 80px minmax(0, 1fr) 110px; align-items: center; column-gap: 12px; padding: 9px 12px; border-bottom: 1px solid #1F2125; font-size: 12.5px; color: #D5D7DB; ' + (hover ? 'background: #17191C' : 'background: transparent');
+    // "Abrir no Cadex" shows on the row under the pointer (here the first).
+    const open = (hover) => hover ? 'font-size: 12px; color: #9BC1FF; font-weight: 500; text-align: right' : 'display: none';
+    const r = (id, start, dur, events, hover) => ({ id, start, dur, events, style: row(hover), openStyle: open(hover) });
+    return {
+      stats: [
+        { label: 'Sessões registradas', value: '44', note: '0 sem evento de encerramento' },
+        { label: 'Tokens informados', value: '—', note: 'entrada + saída + cache' },
+        { label: 'Chamadas medidas', value: '0', note: 'respostas deste agente' },
+        { label: 'Cobertura de uso', value: '0%', note: '0 de 44 sessões' },
+      ],
+      rows: [
+        r('877fe54b', 'há 23 horas', '5h 33m', '882', true),
+        r('840a0599', 'há 1 dia', '13m', '2'),
+        r('d1817bd2', 'há 1 dia', '56s', '2'),
+        r('0880cf28', 'há 2 dias', '1h 27m', '728'),
+        r('9a4e3b76', 'há 2 dias', '0s', '3'),
+        r('2f644e15', 'há 3 dias', '4h 12m', '776'),
+        r('eccd778b', 'há 3 dias', '18h 3m', '1.576'),
+        r('5d8ebd5f', 'há 4 dias', '40s', '6'),
+        r('2bbc47c4', 'há 4 dias', '7s', '6'),
+        r('65439ec8', 'há 4 dias', '4s', '6'),
+        r('a6c2c299', 'há 4 dias', '4s', '6'),
+        r('071fcdb5', 'há 4 dias', '6s', '6'),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

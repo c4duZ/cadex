@@ -211,7 +211,8 @@ de tokens.
   o agente, o tempo e o pedido em frase), o seletor "Trabalho | Arquivos" na largura toda, e a vista.
 - Trabalho: PROJETOS, cada projeto com o avatar, o nome e o número de terminais à direita; aberto, o
   main e as tarefas presos por um fio guia, o lugar atual aceso; projeto fechado com pedido leva a
-  etiqueta âmbar com o número; "Novo projeto…"; no pé, Quadro, Automações e Máquinas.
+  etiqueta âmbar com o número; "Novo projeto…"; no pé, Quadro, Automações, Máquinas e Memória
+  (plano 40; acesa na página Memória, ver MemorySidebar).
 - Arquivos: o cabeçalho em palavras ("tarefa de cadex · contra main"), a árvore com o M e o A à
   direita, e "3 mudanças · ver" no fim; a marca âmbar na borda de baixo diz quem espera fora da vista.
 - Todas as situações (o normal, um agente esperando num projeto escondido, a janela estreita, nada
@@ -260,7 +261,10 @@ de tokens.
 - À direita: o quadro, o sino (com o número em âmbar) e o botão do painel da direita (aceso quando
   aberto). Por tela, as abas mudam: tarefa (os terminais e Review), terminais divididos
   ("Terminals · 3"), projeto (Overview, Automations, Conversations), quadro (Board), corrida
-  (Contenders, Compare).
+  (Contenders, Compare), Memória (só "Memória", sem abas: as seções ficam na página, plano 40).
+
+### As telas da página Memória (plano 40)
+Descritas à parte, em `docs/design/work-frame/screens-memory.md`, no mesmo formato.
 
 ## Como validar
 - `tools/check_design_tokens.py` falha se um `.dc.html` não tem seção aqui ou se uma seção não é

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<title>Memory page</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<!-- Plan 40 D: a memory page with its metadata (print 10). -->
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #0C0D0F; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px; border-radius: 12px; overflow: hidden; border: 1px solid #25282D">
+  <dc-import name="TitleBar" view="memory" panel="{{ false }}" hint-size="1440px,44px"></dc-import>
+
+  <div style="flex: 1; display: flex; min-height: 0">
+    <dc-import name="MemorySidebar" section="projects" scope="cadex" hint-size="448px,826px"></dc-import>
+
+    <div style="flex: 1; min-width: 0; padding: 24px 32px; display: flex; gap: 32px; overflow: hidden">
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+        <div style="font-size: 12px; color: #7C828B">Projetos <span style="color: #4A4F57">›</span> cadex <span style="color: #4A4F57">›</span> <span style="color: #9BA0A8">decisions/cadex-decisoes-do-dono-termina…</span></div>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <span style="font-size: 22px; font-weight: 700; letter-spacing: -0.01em">Decisões do dono do Cadex sobre terminal e temas</span>
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #8A9099">
+            <span style="display: flex; align-items: center; gap: 5px; padding: 2px 7px; border-radius: 5px; font-size: 10.5px; font-weight: 600; background: #1E2A20; color: #7FD3A2"><span style="width: 6px; height: 6px; border-radius: 50%; background: #3FB97A"></span>semantic</span>
+            <span style="padding: 2px 7px; border-radius: 5px; font-size: 10.5px; font-weight: 600; background: #1D1F23; color: #9BA0A8">decision</span>
+            <span>Atualizada há 1 dia</span><span style="color: #4A4F57">·</span>
+            <span style="color: #9BC1FF; font-weight: 500">Histórico</span><span style="color: #4A4F57">·</span>
+            <span>Criada há 1 dia</span>
+          </div>
+        </div>
+
+        <!-- Evidências e validade: a settings-like box, a name and one short value per row. -->
+        <div style="padding: 4px 14px; border-radius: 10px; background: #131417; border: 1px solid #1F2125; display: flex; flex-direction: column">
+          <div style="display: flex; align-items: center; gap: 8px; padding: 10px 0; font-weight: 600"><span style="font-size: 10px; color: #7C828B">▾</span>Evidências e validade</div>
+          <sc-for list="{{evidence}}" as="e" hint-placeholder-count="4">
+            <div style="display: flex; align-items: center; gap: 16px; padding: 9px 0; border-top: 1px solid #1F2125">
+              <span style="width: 180px; color: #D5D7DB">{{e.name}}</span>
+              <span style="{{e.valueStyle}}">{{e.value}}</span>
+              <span style="margin-left: auto; color: #7C828B">ⓘ</span>
+            </div>
+          </sc-for>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid #1F2125; color: #D5D7DB"><span style="font-size: 10px; color: #7C828B">▸</span>Por que esta página foi recuperada?</div>
+        </div>
+
+        <!-- The Markdown, rendered by the markdown feature. -->
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.6; color: #C3C6CB">
+          <sc-for list="{{body}}" as="b" hint-placeholder-count="5">
+            <div style="display: flex; gap: 10px"><span style="color: #7C828B">•</span><span><span style="font-weight: 600; color: #E7E8EA">{{b.key}}</span> {{b.text}}</span></div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="width: 220px; display: flex; flex-direction: column; gap: 8px; padding-top: 36px">
+        <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: #7C828B">CITADA POR</div>
+        <span style="font-size: 12px; color: #8A9099">Nenhuma página aponta para cá.</span>
+      </div>
+    </div>
+  </div>
+
+  <dc-import name="StatusBar" hint-size="1440px,30px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const plain = 'font-size: 12.5px; color: #9BA0A8';
+    const mono = "font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #9BA0A8";
+    return {
+      evidence: [
+        { name: 'Versão', value: '01a1efac-d887-7582-a5ab-f87c5ef7d2d8', valueStyle: mono },
+        { name: 'Expiração', value: 'Sem expiração registrada', valueStyle: plain },
+        { name: 'Fontes acessíveis', value: '0 citações registradas', valueStyle: plain },
+        { name: 'Contradições declaradas', value: '0 conexões ativas', valueStyle: plain },
+      ],
+      body: [
+        { key: 'Ícones:', text: 'Phosphor em todo o repositório.' },
+        { key: 'Copiar ao selecionar:', text: 'desligado por padrão. É uma configuração e vale para qualquer conteúdo copiado, não só imagens.' },
+        { key: 'Temas:', text: '46 temas, com Caffeine como padrão. Não importar temas do Terax.' },
+        { key: 'Configuração:', text: 'um único arquivo settings.json.' },
+        { key: 'Push:', text: 'feito pelo usuário.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

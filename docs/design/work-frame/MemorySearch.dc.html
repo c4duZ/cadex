@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<title>Memory search</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<!-- Plan 40 E: search in the memory (print 04), "memória" in every project. -->
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #0C0D0F; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px; border-radius: 12px; overflow: hidden; border: 1px solid #25282D">
+  <dc-import name="TitleBar" view="memory" panel="{{ false }}" hint-size="1440px,44px"></dc-import>
+
+  <div style="flex: 1; display: flex; min-height: 0">
+    <dc-import name="MemorySidebar" section="search" hint-size="448px,826px"></dc-import>
+
+    <div style="flex: 1; min-width: 0; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+      <span style="font-size: 22px; font-weight: 700; letter-spacing: -0.01em">Pesquisar: <span style="color: #6FCF97">memória</span></span>
+
+      <div style="display: flex; align-items: center; gap: 8px">
+        <sc-for list="{{popups}}" as="p" hint-placeholder-count="3">
+          <span style="height: 30px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 0 10px; border-radius: 7px; background: #1A1C20; border: 1px solid #2A2D33; font-size: 12.5px; white-space: nowrap">{{p}} <span style="font-size: 11px; color: #9BA0A8">▾</span></span>
+        </sc-for>
+        <span style="flex: 1; height: 30px; box-sizing: border-box; display: flex; align-items: center; padding: 0 10px; border-radius: 7px; background: #0F1012; border: 1px solid #2E3238; box-shadow: 0 0 0 3px rgba(91,156,245,0.08); color: #E7E8EA; font-size: 12.5px">memória</span>
+        <span style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #9BA0A8; white-space: nowrap"><span style="width: 12px; height: 12px; border-radius: 3px; box-sizing: border-box; border: 1px solid #2A2D33"></span>Explicar classificação</span>
+        <button style="height: 30px; padding: 0 12px; border-radius: 7px; border: 0; background: #E7E8EA; color: #111214; font: inherit; font-weight: 600">Pesquisar</button>
+      </div>
+
+      <span style="font-size: 12px; color: #8A9099">34 resultados</span>
+
+      <div style="display: flex; flex-direction: column">
+        <sc-for list="{{results}}" as="r" hint-placeholder-count="7">
+          <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 0; border-bottom: 1px solid #1F2125">
+            <span style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.title}}</span>
+            <span style="font-size: 12.5px; color: #C3C6CB; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.before}}<span style="padding: 0 2px; border-radius: 3px; background: #2A2113; color: #F2B65E">{{r.hit}}</span>{{r.after}}</span>
+            <span style="font-size: 11.5px; color: #7C828B">{{r.where}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <dc-import name="StatusBar" hint-size="1440px,30px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const r = (title, before, hit, after, where) => ({ title, before, hit, after, where });
+    return {
+      popups: ['Todos os projetos', 'Qualquer tipo', 'Qualquer camada'],
+      results: [
+        r('Sessão de auditoria da memória ai-memory no bkdg-center e limpeza de páginas', '## Objetivo da sessão O usuário pediu uma passada pelo AI Memory para entender o que existe de ', 'memória', ' no projeto `bkdg-center`. Depois pediu comparação…', 'bkdg-center · sessions/4d9262aa-d4f4-4f7b-963f-3e2ebbd4f7b2.md'),
+        r('user-prompt', '…Ei, não só isso, mano, mas também o controle de ', 'memória', '. Essas coisas são impor… 11. Tá, me faz um cloud docs aí, me…', 'cadex · sessions/80268cb2-63dd-4b13-82e0-fd9025c08018.md'),
+        r('/Users/cadu/Downloads/handoff-plano-22.md', '…nota de ', 'memoria', ' do projeto? mantenha assim e tire a nota. 56. garante que foi tudo feito, depois pode 57. pode ir pra D…', 'cadex · sessions/88822b1c-2798-4a40-bcf4-5414eccd778b.md'),
+        r('1. uai, a gentenão tinha decidido isso: que eles iam por json?', '…a ', 'memória', ' não cresce mais com o número de mensagens. Agora o … - `other [ai-memory-backfill:tool_call]` @ 2026-11-10T23:24:49Z — Bash…', 'bkdg-center · sessions/91abe4e3-9a7b-465d-b70a-496ade7e5821.md'),
+        r('/Users/cadu/Downloads/handoff-plano-22-fase-I.md', '…a ', 'memória', ' nas features, no diagrama, na tabela de tamanho e nos… - `other [ai-memory-backfill:tool_call]` @ 2026-11-16T17:59:38Z…', 'cadex · sessions/73a093e1-7854-410c-9ed4-b81f2f644e15.md'),
+        r('cara, testei aqui, terax com um terminal tava comendo 60mb, a gente com um term…', '…Já dá pra ver o culpado: **183 MB de "Malloc Small"** (', 'memória', ' alocada pelo pró… - `other…', 'cadex · sessions/d32e1297-4112-49e5-804b-b2dec121afa6.md'),
+        r('Cara, eu preciso que você faça uma análise de módulos aqui porque eu acabei de …', '…Anotei na ', 'memória', ' que esses `DROP` só rodam depois do deploy, para n… - `user-prompt` @ 2026-11-13T16:09:21Z…', 'cadu · sessions/aa31088c-d8a2-41a4-be33-e733f483a9a7.md'),
+        r('Cara, uns 1 mês atrás, 1 mês e meio, eu fiz um trabalho de quebra do worker mas…', '…Bash: {"command":"grep -n \\"get_settings\\" app/nucleo/', 'memoria', '.py | head; grep -… - `other [ai-memory-backfill:tool_result…', 'cadu · sessions/ea9f2da9-bddb-4508-9c4f-1ed64ca7b149.md'),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

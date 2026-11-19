@@ -66,6 +66,14 @@ Cada fase de tela: o print do Cadex ao lado do print do upstream sobre o mesmo s
 escrito com o motivo; o print aprovado fica como referência e o teste do app avisa quando a tela
 muda.
 
+- Telas: MemorySidebar.dc.html, MemoryOverview.dc.html, MemoryProject.dc.html, MemoryPage.dc.html,
+  MemoryHistory.dc.html, MemorySession.dc.html, MemoryAgent.dc.html, MemorySearch.dc.html,
+  MemoryGraph.dc.html, MemoryInbox.dc.html, MemoryWorkstreams.dc.html, MemoryReview.dc.html,
+  MemoryHealth.dc.html, MemoryDocs.dc.html (descritas em `docs/design/work-frame/screens-memory.md`, com
+  cada corte de texto em relação ao upstream; os prints do upstream em
+  `docs/research/memory-panel-screens.md`).
+- Tokens: components.memoryPanel (valores exatos em `docs/design/work-frame/tokens.json`).
+
 ## Como validar
 - `make check` ao fim de cada fase; testes do engine para cada rota nova, cada um com a paridade
   contra o painel do upstream sobre o seed, e a memória intacta depois.

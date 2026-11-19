@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<title>Memory docs</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<!-- Plan 40 G: upstream's documentation index (print 08), the guides of ai-memory 3.5.0. -->
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #0C0D0F; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px; border-radius: 12px; overflow: hidden; border: 1px solid #25282D">
+  <dc-import name="TitleBar" view="memory" panel="{{ false }}" hint-size="1440px,44px"></dc-import>
+
+  <div style="flex: 1; display: flex; min-height: 0">
+    <dc-import name="MemorySidebar" section="docs" hint-size="448px,826px"></dc-import>
+
+    <div style="flex: 1; min-width: 0; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+      <div style="display: flex; align-items: flex-end; gap: 16px">
+        <span style="flex: 1; font-size: 22px; font-weight: 700; letter-spacing: -0.01em">Documentação</span>
+        <button style="height: 30px; padding: 0 12px; border-radius: 7px; border: 1px solid #2A2D33; background: #1A1C20; color: #E7E8EA; font: inherit; font-weight: 500">Histórico de alterações</button>
+      </div>
+
+      <div style="padding: 14px 16px; border-radius: 10px; background: #131417; border: 1px solid #1F2125; display: flex; align-items: center; gap: 16px">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+          <span style="display: flex; align-items: center; gap: 8px"><span style="font-size: 15px; font-weight: 600">Comece pelo guia de ativação</span><span style="padding: 2px 7px; border-radius: 5px; font-size: 10.5px; font-weight: 600; background: #1D1F23; color: #9BA0A8">versão 3.5.0</span></span>
+          <span style="font-size: 12px; color: #8A9099">Pré-requisitos, configuração e verificações</span>
+        </div>
+        <button style="height: 30px; padding: 0 12px; border-radius: 7px; border: 0; background: #E7E8EA; color: #111214; font: inherit; font-weight: 600">Explorar recursos</button>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px">
+        <span style="flex: 1; height: 30px; box-sizing: border-box; display: flex; align-items: center; padding: 0 10px; border-radius: 7px; background: #0F1012; border: 1px solid #25282D; color: #7C828B; font-size: 12.5px">Buscar recurso, comando ou chave de configuração…</span>
+        <span style="font-size: 12px; color: #8A9099">28 guias <span style="color: #7C828B">ⓘ</span></span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+        <sc-for list="{{guides}}" as="g" hint-placeholder-count="12">
+          <div style="padding: 12px 14px; border-radius: 10px; background: #131417; border: 1px solid #1F2125; display: flex; flex-direction: column; gap: 4px; min-width: 0">
+            <span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; color: #7C828B">{{g.cat}}</span>
+            <span style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{g.title}}</span>
+            <span style="font-size: 12px; color: #8A9099; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{g.text}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <dc-import name="StatusBar" hint-size="1440px,30px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const g = (cat, title, text) => ({ cat, title, text });
+    const start = 'COMECE AQUI', flows = 'FLUXOS DE AGENTES', learn = 'APRENDIZADO E RECUPERAÇÃO', access = 'ACESSO E INTEGRAÇÃO', ops = 'OPERAÇÕES';
+    return {
+      guides: [
+        g(start, 'Recursos e ativação', 'O que cada recurso faz, pré-requisitos, como habilitá-lo e verificar.'),
+        g(start, 'Instalação e configuração de agentes', 'Nativa e com Docker, hooks de cliente, MCP, harnesses.'),
+        g(start, 'Uso e painel', 'Recuperação, handoffs, tokens em tempo real, caixa de entrada.'),
+        g(start, 'Receitas de tarefas', 'Capturar, recuperar, importar e coordenar trabalho.'),
+        g(flows, 'Caixa de entrada e mensagens de agentes', 'Mensagens compartilhadas e diretas, envio, entrega única.'),
+        g(flows, 'Sessões gerenciadas e workstreams', 'ai-memory run, perfis, continuidade entre harnesses.'),
+        g(flows, 'Roteamento de projetos e privacidade da captura', 'Identidade de workspace/projeto e exclusões em .ai-memory.toml.'),
+        g(flows, 'Memória programática', 'O protocolo MCP público a partir de aplicações.'),
+        g(flows, 'Captura externa de ciclo de vida', 'Orquestradores e o relay pela API de ingestão.'),
+        g(learn, 'Provedores de LLM e embeddings', 'Consolidação, embeddings, autenticação e fallback.'),
+        g(learn, 'Fallback de provedores', 'A cadeia de provedores e quais falhas a acionam.'),
+        g(flows, 'Formato portátil da wiki', 'Frontmatter, layout portátil, importação e compatibilidade.'),
+        g(access, 'API de gerenciamento de sessões', 'Rotas de inspeção e remoção das próprias sessões.'),
+        g(access, 'Chaves de API de autoatendimento', 'Usuários gerenciam as próprias credenciais nativas.'),
+        g(learn, 'Aprendizado e revisão de propostas', 'Aprovação, agendador e histórico do design.'),
+        g(ops, 'Configuração e arquitetura', 'Configuração, armazenamento, recuperação, APIs e limites.'),
+        g(ops, 'Diagnóstico e saúde', 'Captura, provedores, logs e saúde do servidor.'),
+        g(ops, 'Backup, recuperação e ciclo de vida', 'Backups, restauração, retenção e movimentações.'),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

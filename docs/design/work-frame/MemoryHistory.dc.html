@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<title>Memory page history</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<!-- Plan 40 D: a page's history with the diff (print 11). -->
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #0C0D0F; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px; border-radius: 12px; overflow: hidden; border: 1px solid #25282D">
+  <dc-import name="TitleBar" view="memory" panel="{{ false }}" hint-size="1440px,44px"></dc-import>
+
+  <div style="flex: 1; display: flex; min-height: 0">
+    <dc-import name="MemorySidebar" section="projects" scope="cadex" hint-size="448px,826px"></dc-import>
+
+    <div style="flex: 1; min-width: 0; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+      <div style="font-size: 12px; color: #7C828B">Projetos <span style="color: #4A4F57">›</span> cadex <span style="color: #4A4F57">›</span> decisions/cadex-decisoes-do-dono-termina… <span style="color: #4A4F57">›</span> <span style="color: #9BA0A8">histórico</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 22px; font-weight: 700; letter-spacing: -0.01em">Histórico</span>
+        <span style="color: #8A9099"><span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px">decisions/cadex-decisoes-do-dono-terminal.md</span> · 1 versão, a mais recente primeiro <span style="color: #7C828B">ⓘ</span></span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <span style="font-weight: 600">Conteúdo de <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px">5ef7d2d8</span> <span style="color: #8A9099; font-weight: 500">· nenhuma versão anterior</span></span>
+        <span style="font-size: 12px; color: #8A9099">Decisões do dono do Cadex sobre terminal e temas</span>
+      </div>
+      <div style="border-radius: 8px; border: 1px solid #1F2125; overflow: hidden; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; line-height: 1.6">
+        <div style="padding: 2px 12px; background: #0F1012; color: #7C828B">@@ -0,0 +1,7 @@</div>
+        <sc-for list="{{lines}}" as="l" hint-placeholder-count="7">
+          <div style="padding: 0 12px; background: #15261C; color: #B9E5C8; white-space: pre">{{l}}</div>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; flex-direction: column; margin-top: 8px">
+        <div style="font-weight: 600; padding-bottom: 8px">Versões 1–1 de 1</div>
+        <div style="display: grid; grid-template-columns: 36px 36px 200px 100px 60px minmax(0, 1fr) 110px; align-items: center; column-gap: 12px; padding: 8px 12px; border-bottom: 1px solid #1F2125; font-size: 11px; font-weight: 600; color: #7C828B">
+          <span>De</span><span>Para</span><span>Versão</span><span>Gravação</span><span>Autor</span><span>Título</span><span>Tamanho</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 36px 36px 200px 100px 60px minmax(0, 1fr) 110px; align-items: center; column-gap: 12px; padding: 9px 12px; border-bottom: 1px solid #1F2125; font-size: 12.5px; color: #D5D7DB">
+          <span style="width: 12px; height: 12px; border-radius: 50%; box-sizing: border-box; border: 1px solid #2A2D33"></span>
+          <span style="width: 12px; height: 12px; border-radius: 50%; box-sizing: border-box; border: 2px solid #5B9CF5"></span>
+          <span style="display: flex; align-items: center; gap: 8px"><span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px">5ef7d2d8</span><span style="padding: 2px 7px; border-radius: 5px; font-size: 10.5px; font-weight: 600; background: #1E2A20; color: #7FD3A2">mais recente</span></span>
+          <span style="color: #8A9099">há 1 dia</span>
+          <span style="color: #7C828B">—</span>
+          <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Decisões do dono do Cadex sobre terminal e temas</span>
+          <span style="color: #8A9099">386 caracteres</span>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 12px">
+          <button style="height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid #2A2D33; background: #1A1C20; color: #E7E8EA; font: inherit; font-size: 12px; font-weight: 500">Comparar selecionadas</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <dc-import name="StatusBar" hint-size="1440px,30px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      lines: [
+        '+# Decisões do dono do Cadex sobre terminal e temas',
+        '+',
+        '+- **Ícones:** Phosphor em todo o repositório.',
+        '+- **Copiar ao selecionar:** desligado por padrão. É uma configuração e vale para qualquer conteúdo copiado, não só imagens.',
+        '+- **Temas:** 46 temas, com Caffeine como padrão. Não importar temas do Terax.',
+        '+- **Configuração:** um único arquivo `settings.json`.',
+        '+- **Push:** feito pelo usuário.',
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -156,6 +156,104 @@
       "w": 320,
       "h": 826,
       "title": "Part · Right panel, History tab (to approve)"
+    },
+    "MemoryOverview.dc.html": {
+      "x": 0,
+      "y": 6120,
+      "w": 1440,
+      "h": 900,
+      "title": "M1 · Memória: visão geral (upstream 01)"
+    },
+    "MemoryProject.dc.html": {
+      "x": 1520,
+      "y": 6120,
+      "w": 1440,
+      "h": 900,
+      "title": "M2 · Memória: um projeto, Visão geral e Conhecimento (09)"
+    },
+    "MemoryPage.dc.html": {
+      "x": 3040,
+      "y": 6120,
+      "w": 1440,
+      "h": 900,
+      "title": "M3 · Memória: uma página e as evidências (10)"
+    },
+    "MemoryHistory.dc.html": {
+      "x": 0,
+      "y": 7140,
+      "w": 1440,
+      "h": 900,
+      "title": "M4 · Memória: o histórico da página com o diff (11)"
+    },
+    "MemorySession.dc.html": {
+      "x": 1520,
+      "y": 7140,
+      "w": 1440,
+      "h": 900,
+      "title": "M5 · Memória: a linha do tempo da sessão (12)"
+    },
+    "MemoryAgent.dc.html": {
+      "x": 3040,
+      "y": 7140,
+      "w": 1440,
+      "h": 900,
+      "title": "M6 · Memória: um agente, sessões e uso (13)"
+    },
+    "MemorySearch.dc.html": {
+      "x": 0,
+      "y": 8160,
+      "w": 1440,
+      "h": 900,
+      "title": "M7 · Memória: pesquisar (04)"
+    },
+    "MemoryGraph.dc.html": {
+      "x": 1520,
+      "y": 8160,
+      "w": 1440,
+      "h": 900,
+      "title": "M8 · Memória: o grafo de links do projeto (14, 05)"
+    },
+    "MemoryInbox.dc.html": {
+      "x": 3040,
+      "y": 8160,
+      "w": 1440,
+      "h": 900,
+      "title": "M9 · Memória: caixa de entrada (02)"
+    },
+    "MemoryWorkstreams.dc.html": {
+      "x": 0,
+      "y": 9180,
+      "w": 1440,
+      "h": 900,
+      "title": "M10 · Memória: workstreams (03)"
+    },
+    "MemoryReview.dc.html": {
+      "x": 1520,
+      "y": 9180,
+      "w": 1440,
+      "h": 900,
+      "title": "M11 · Memória: revisão de aprendizado (06)"
+    },
+    "MemoryHealth.dc.html": {
+      "x": 3040,
+      "y": 9180,
+      "w": 1440,
+      "h": 900,
+      "title": "M12 · Memória: saúde (07)"
+    },
+    "MemoryDocs.dc.html": {
+      "x": 0,
+      "y": 10200,
+      "w": 1440,
+      "h": 900,
+      "title": "M13 · Memória: documentação (08)"
+    },
+    "MemorySidebar.dc.html": {
+      "x": 4560,
+      "y": 6120,
+      "w": 448,
+      "h": 826,
+      "title": "Part · Memória: the sidebar with Memória lit and the page's sections"
     }
   },
   "order": [
@@ -179,13 +277,34 @@
     "StatusBar.dc.html",
     "TitleBar.dc.html",
     "InspectorFiles.dc.html",
-    "InspectorHistory.dc.html"
+    "InspectorHistory.dc.html",
+    "MemoryOverview.dc.html",
+    "MemoryProject.dc.html",
+    "MemoryPage.dc.html",
+    "MemoryHistory.dc.html",
+    "MemorySession.dc.html",
+    "MemoryAgent.dc.html",
+    "MemorySearch.dc.html",
+    "MemoryGraph.dc.html",
+    "MemoryInbox.dc.html",
+    "MemoryWorkstreams.dc.html",
+    "MemoryReview.dc.html",
+    "MemoryHealth.dc.html",
+    "MemoryDocs.dc.html",
+    "MemorySidebar.dc.html"
   ],
   "notes": {
     "t1": {
       "x": 0,
       "y": -300,
       "text": "Cadex: one frame — Work tree · what you opened · the selection's panel",
+      "kind": "title1",
+      "maxW": 4480
+    },
+    "t2": {
+      "x": 0,
+      "y": 5820,
+      "text": "Memória (plan 40): upstream ai-memory 3.5.0's panel, screen by screen, native",
       "kind": "title1",
       "maxW": 4480
     }

@@ -137,7 +137,7 @@ def check(tokens, texts):
 
 PLANS = ["25-work-frame.md", "26-frame.md", "27-projects-tree.md", "28-dressed-terminal.md",
          "29-entrances.md", "30-overview.md", "36-rail-and-side-column.md",
-         "38-sidebar-work-and-files.md"]
+         "38-sidebar-work-and-files.md", "40-memory-panel.md"]
 
 
 def check_plans(tokens, plans_dir=ROOT / "docs/plans"):
@@ -156,14 +156,17 @@ def check_plans(tokens, plans_dir=ROOT / "docs/plans"):
 
 def check_screens(plans_dir):
     mockups = {p.name for p in FOLDER.glob("*.dc.html")}
-    described = set(re.findall(r"^### ([A-Za-z]+\.dc\.html)", (FOLDER / "screens.md").read_text(), re.M))
+    # screens.md and its continuations (screens-memory.md, plan 40), each under the 500-line rule.
+    described = set()
+    for path in sorted(FOLDER.glob("screens*.md")):
+        described |= set(re.findall(r"^### ([A-Za-z]+\.dc\.html)", path.read_text(), re.M))
     listed = set()
     for name in PLANS:
         path = plans_dir / name
         # The "Telas:" item, with the lines that continue it (indented, not a new item).
         for item in re.findall(r"^- Telas:.*(?:\n  .*)*", path.read_text() if path.exists() else "", re.M):
             listed |= set(re.findall(r"[A-Za-z]+\.dc\.html", item))
-    problems = [f"screens.md: {m} sem descrição" for m in sorted(mockups - described)]
+    problems = [f"screens*.md: {m} sem descrição" for m in sorted(mockups - described)]
     problems += [f"screens.md: descreve {m}, que não existe" for m in sorted(described - mockups)]
     problems += [f"{m} não está na linha Telas: de nenhum plano da moldura" for m in sorted(mockups - listed)]
     problems += [f"um plano cita {m}, que não existe" for m in sorted(listed - mockups)]

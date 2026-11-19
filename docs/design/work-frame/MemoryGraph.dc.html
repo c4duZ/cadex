@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<title>Memory graph</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<!-- Plan 40 E: a project's link graph (print 14): its 49 newest pages on a ring, 0 links. -->
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #0C0D0F; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px; border-radius: 12px; overflow: hidden; border: 1px solid #25282D">
+  <dc-import name="TitleBar" view="memory" panel="{{ false }}" hint-size="1440px,44px"></dc-import>
+
+  <div style="flex: 1; display: flex; min-height: 0">
+    <dc-import name="MemorySidebar" section="projects" scope="cadex" hint-size="448px,826px"></dc-import>
+
+    <div style="flex: 1; min-width: 0; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+      <div style="font-size: 12px; color: #7C828B">Projetos <span style="color: #4A4F57">›</span> cadex <span style="color: #4A4F57">›</span> <span style="color: #9BA0A8">grafo</span></div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 22px; font-weight: 700; letter-spacing: -0.01em">Grafo de links de cadex</span>
+        <span style="color: #8A9099">49 páginas mais recentes · 0 links entre elas</span>
+      </div>
+
+      <div style="display: flex; gap: 24px; min-height: 0">
+        <div style="position: relative; width: 600px; height: 600px; flex: none; border-radius: 10px; background: #0F1012; border: 1px solid #1F2125">
+          <sc-for list="{{nodes}}" as="n" hint-placeholder-count="49">
+            <span style="{{n.style}}"></span>
+          </sc-for>
+          <!-- The node under the pointer: its title, and a click opens the page. -->
+          <div style="position: absolute; left: 330px; top: 60px; padding: 6px 10px; border-radius: 7px; background: #17191C; border: 1px solid #24272C; box-shadow: 0 18px 48px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4); font-size: 12px; white-space: nowrap">Scrollback grande sem limite<div style="font-size: 11px; color: #7C828B">sessions/f79756a9-daa2-4f….md</div></div>
+        </div>
+        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+          <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: #7C828B">CONEXÕES</div>
+          <span style="font-size: 12px; color: #8A9099">Nenhum link resolvido.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <dc-import name="StatusBar" hint-size="1440px,30px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    // Upstream's circular_layout: the nodes evenly on one circle, the first at the top.
+    const count = 49, cx = 300, cy = 300, r = 250, size = 10;
+    const nodes = [];
+    for (let i = 0; i < count; i++) {
+      const a = -Math.PI / 2 + (2 * Math.PI * i) / count;
+      const x = Math.round(cx + r * Math.cos(a) - size / 2);
+      const y = Math.round(cy + r * Math.sin(a) - size / 2);
+      const hot = i === 3;
+      nodes.push({ style: `position: absolute; left: ${x}px; top: ${y}px; width: ${size}px; height: ${size}px; border-radius: 50%; background: #6FCF97; ` + (hot ? 'box-shadow: 0 0 0 3px #2E3238' : 'opacity: 0.92') });
+    }
+    return { nodes };
+  }
+}
+</script>
+</body>
+</html>

@@ -181,6 +181,10 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   primeira abertura) e com teto de gasto (`docs/adr/0029-memory-agent.md`).
 - **Busca por sentido** (`embeddings`): achar texto parecido, não só igual, com o modelo de vetores
   local; carregado só enquanto é usado.
+- **Página Memória** (`memory panel`): o painel web do ai-memory 3.5.0 refeito nativo, aberto por
+  Memória no pé da barra lateral, com as seções dele numa coluna própria (Projetos, Caixa de
+  entrada, Workstreams, Pesquisar, Grafo, Revisão de aprendizado, Saúde, Documentação, Histórico de
+  alterações); plano 40. Não é a seção Memória da página do projeto nem a aba do inspector.
 
 ## Máquinas
 - **Tailnet**: a rede do Tailscale do dono, as máquinas dele ligadas entre si com nome e IP 100.x,

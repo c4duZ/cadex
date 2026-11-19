@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<title>Memory session</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<!-- Plan 40 D: a session's timeline (print 12), with its token usage folded to one box. -->
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #0C0D0F; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px; border-radius: 12px; overflow: hidden; border: 1px solid #25282D">
+  <dc-import name="TitleBar" view="memory" panel="{{ false }}" hint-size="1440px,44px"></dc-import>
+
+  <div style="flex: 1; display: flex; min-height: 0">
+    <dc-import name="MemorySidebar" section="projects" scope="cadex" hint-size="448px,826px"></dc-import>
+
+    <div style="flex: 1; min-width: 0; padding: 24px 32px; display: flex; flex-direction: column; gap: 14px; overflow: hidden">
+      <div style="display: flex; align-items: center; gap: 12px; font-size: 12px; color: #7C828B">
+        <span>Projetos <span style="color: #4A4F57">›</span> cadex <span style="color: #4A4F57">›</span> <span style="color: #9BA0A8">sessão 1301a3b0…</span></span>
+        <span style="flex: 1"></span>
+        <span style="color: #9BC1FF; font-weight: 500">← Sessões de claude-code</span>
+        <span style="color: #9BC1FF; font-weight: 500">Recuperações</span>
+      </div>
+      <div style="display: flex; align-items: flex-end; gap: 16px">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+          <span style="font-size: 22px; font-weight: 700; letter-spacing: -0.01em">Linha do tempo da sessão</span>
+          <span style="display: flex; align-items: center; gap: 8px; color: #8A9099"><span style="padding: 2px 7px; border-radius: 5px; font-size: 10.5px; font-weight: 600; background: #1D1F23; color: #A98BF0">claude-code</span>iniciada 18/11 21:13:34 · encerrada 19/11 02:46:59 <span style="color: #7C828B">ⓘ</span></span>
+        </div>
+        <button style="height: 30px; padding: 0 12px; border-radius: 7px; border: 1px solid #2A2D33; background: #1A1C20; color: #E7E8EA; font: inherit; font-weight: 500">Abrir no Cadex</button>
+      </div>
+
+      <!-- Uso de tokens: the six numbers in one strip; filters behind "Filtrar…". -->
+      <div style="border-radius: 10px; background: #131417; border: 1px solid #1F2125; display: flex; flex-direction: column">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #1F2125">
+          <span style="font-weight: 600">Uso de tokens</span>
+          <span style="padding: 2px 7px; border-radius: 5px; font-size: 10.5px; font-weight: 600; background: #1E2A20; color: #7FD3A2">Durante as sessões</span>
+          <span style="flex: 1"></span>
+          <span style="font-size: 12px; color: #8A9099">0–0 de 0 respostas</span>
+          <button style="height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid #2A2D33; background: #1A1C20; color: #E7E8EA; font: inherit; font-size: 12px; font-weight: 500">Filtrar…</button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr))">
+          <sc-for list="{{usage}}" as="u" hint-placeholder-count="6">
+            <div style="padding: 10px 14px; display: flex; flex-direction: column; gap: 2px; border-right: 1px solid #1F2125">
+              <span style="font-size: 11.5px; color: #8A9099">{{u.label}}</span>
+              <span style="font-size: 15px; font-weight: 600">{{u.value}}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding: 10px 14px; border-top: 1px solid #1F2125; font-size: 12px; color: #8A9099">Nenhum uso de resposta informado ainda <span style="color: #7C828B">ⓘ</span></div>
+      </div>
+
+      <!-- The pager: first, previous, the range, next, last, and "Ir para". -->
+      <div style="display: flex; align-items: center; gap: 12px; font-size: 12px; color: #7C828B">
+        <span>« Primeira</span><span>‹ Anterior</span>
+        <span style="color: #D5D7DB; font-weight: 600">1–50 de 882</span>
+        <span style="color: #9BC1FF; font-weight: 500">Próxima ›</span><span style="color: #9BC1FF; font-weight: 500">Última »</span>
+        <span style="flex: 1"></span>
+        <span>Ir para</span>
+        <span style="width: 140px; height: 4px; border-radius: 2px; background: #2A2D33; position: relative"><span style="position: absolute; left: 0; top: -4px; width: 12px; height: 12px; border-radius: 50%; background: #5B9CF5"></span></span>
+        <span style="width: 56px; height: 28px; box-sizing: border-box; display: flex; align-items: center; padding: 0 10px; border-radius: 7px; background: #0F1012; border: 1px solid #25282D; color: #E7E8EA">1</span>
+        <button style="height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid #2A2D33; background: #1A1C20; color: #E7E8EA; font: inherit; font-size: 12px; font-weight: 500">Ir</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; min-height: 0">
+        <sc-for list="{{events}}" as="e" hint-placeholder-count="4">
+          <div style="padding: 10px 14px; border-radius: 8px; background: #131417; border: 1px solid #1F2125; display: flex; flex-direction: column; gap: 6px">
+            <div style="display: flex; align-items: center; gap: 8px">
+              <span style="font-size: 11.5px; color: #7C828B">#{{e.n}}</span>
+              <span style="padding: 2px 7px; border-radius: 5px; font-size: 10.5px; font-weight: 600; background: #1D1F23; color: #9BA0A8">{{e.kind}}</span>
+              <span style="flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{e.title}}</span>
+              <span style="font-size: 11.5px; color: #7C828B">há 23 horas</span>
+            </div>
+            <div style="{{e.bodyStyle}}">{{e.body}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <dc-import name="StatusBar" hint-size="1440px,30px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const body = (text) => text ? "font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; line-height: 1.5; color: #C3C6CB; white-space: pre-wrap" : 'display: none';
+    const ev = (n, kind, title, text) => ({ n, kind, title, body: text, bodyStyle: body(text) });
+    return {
+      usage: [
+        { label: 'Chamadas capturadas', value: '0' },
+        { label: 'Entrada nova', value: '0' },
+        { label: 'Saída', value: '0' },
+        { label: 'Leitura do cache', value: '0' },
+        { label: 'Gravação no cache', value: '0' },
+        { label: 'Entrada do cache', value: '—' },
+      ],
+      events: [
+        ev('1', 'session-start', 'session-start', ''),
+        ev('2', 'user-prompt', 'user-prompt', '<pasted_content id="1263">\nCara, na nova dist eu quero adicionar:\n1. Tem alguns temas que estão meio bugados, tipo que o terminal tá muito claro, muito mais do que deveria.\n2. A possibilidade da pessoa adicionar um tema meio transparente…'),
+        ev('3', 'other', 'Bash: {"command":"cat docs/plans/README.md | head -80; ls apps/macos/; find . -…', 'Bash: {"command":"cat docs/plans/README.md | head -80; ls apps/macos/; find . -path ./node_modules -prune -o -ipath \'*theme*\' -print | grep -v \'.build\' | head -50"}'),
+        ev('4', 'other', '# Planos: do fim do terminal ao MVP no Mac, e o port para o Windows', '# Planos: do fim do terminal ao MVP no Mac, e o port para o Windows\n\nUm plano por entrega que o dono abre e usa…'),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

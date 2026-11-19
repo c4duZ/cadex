@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<title>Memory project</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090A}
+</style>
+</helmet>
+<!-- Plan 40 D: a project in the memory (print 09), the Visão geral tab, and the Conhecimento tab
+     below it (no print upstream; read from its HTML) to show the page tree and recent activity. -->
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #0C0D0F; color: #E7E8EA; font-family: Inter, system-ui, sans-serif; font-size: 13px; border-radius: 12px; overflow: hidden; border: 1px solid #25282D">
+  <dc-import name="TitleBar" view="memory" panel="{{ false }}" hint-size="1440px,44px"></dc-import>
+
+  <div style="flex: 1; display: flex; min-height: 0">
+    <dc-import name="MemorySidebar" section="projects" scope="cadex" hint-size="448px,826px"></dc-import>
+
+    <div style="flex: 1; min-width: 0; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+      <div style="font-size: 12px; color: #7C828B">Projetos <span style="color: #4A4F57">›</span> <span style="color: #9BA0A8">cadex</span></div>
+      <div style="display: flex; align-items: flex-end; gap: 10px">
+        <span style="flex: 1; font-size: 22px; font-weight: 700; letter-spacing: -0.01em">cadex</span>
+        <button style="height: 30px; padding: 0 12px; border-radius: 7px; border: 1px solid #2A2D33; background: #1A1C20; color: #E7E8EA; font: inherit; font-weight: 500">Abrir no Cadex</button>
+        <button style="height: 30px; padding: 0 12px; border-radius: 7px; border: 0; background: #E7E8EA; color: #111214; font: inherit; font-weight: 600">Mensagem a um agente</button>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px">
+        <div style="display: flex; gap: 2px; background: #15171A; border: 1px solid #25282D; border-radius: 9px; padding: 3px">
+          <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+            <span style="{{t.style}}">{{t.label}}</span>
+          </sc-for>
+        </div>
+        <span style="flex: 1"></span>
+        <span style="font-size: 12.5px; color: #9BC1FF; font-weight: 500">Caixa de entrada ↗</span>
+        <span style="font-size: 12.5px; color: #9BC1FF; font-weight: 500">Grafo de links ↗</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px">
+        <sc-for list="{{stats}}" as="s" hint-placeholder-count="5">
+          <div style="padding: 14px 16px; border-radius: 10px; background: #131417; border: 1px solid #1F2125; display: flex; flex-direction: column; gap: 4px">
+            <span style="font-size: 12px; color: #8A9099">{{s.label}}</span>
+            <span style="{{s.valueStyle}}">{{s.value}}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: #8A9099">
+        <span>Última captura: há 9 horas · nenhuma sessão aberta</span>
+        <span style="flex: 1"></span>
+        <span>Agentes</span>
+        <span style="display: flex; align-items: center; gap: 5px; padding: 2px 7px; border-radius: 5px; font-size: 10.5px; font-weight: 600; background: #1D1F23; color: #A98BF0"><span style="width: 6px; height: 6px; border-radius: 50%; background: #A98BF0"></span>Claude Code · 44</span>
+      </div>
+
+      <div style="padding: 12px 14px; border-radius: 10px; background: #131417; border: 1px solid #1F2125; display: flex; align-items: center; gap: 16px">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-weight: 600">Caixa de mensagens</span>
+          <span style="font-size: 12px; color: #8A9099">Nenhuma mensagem pendente.</span>
+        </div>
+        <button style="height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid #2A2D33; background: #1A1C20; color: #E7E8EA; font: inherit; font-size: 12px; font-weight: 500">Abrir caixa de entrada</button>
+      </div>
+
+      <!-- The Conhecimento tab, as it shows when picked (drawn here under the overview). -->
+      <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px">
+        <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: #7C828B">ABA CONHECIMENTO</span>
+        <span style="flex: 1; height: 1px; background: #1F2125"></span>
+      </div>
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 24px; min-height: 0; flex: 1">
+        <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+          <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: #7C828B; padding: 0 8px 6px">PÁGINAS</div>
+          <sc-for list="{{folders}}" as="f" hint-placeholder-count="6">
+            <div style="{{f.style}}"><span style="flex: 1; overflow: hidden; text-overflow: ellipsis">{{f.name}}</span><span style="font-size: 11.5px; color: #7C828B">{{f.count}}</span></div>
+          </sc-for>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+          <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: #7C828B">ATIVIDADE RECENTE</div>
+          <sc-for list="{{recent}}" as="r" hint-placeholder-count="4">
+            <div style="display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; background: #131417; border: 1px solid #1F2125">
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                <span style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.title}}</span>
+                <span style="font-size: 11.5px; color: #8A9099">{{r.meta}}</span>
+              </div>
+              <span style="padding: 2px 7px; border-radius: 5px; font-size: 10.5px; font-weight: 600; background: #1D1F23; color: #9BA0A8">{{r.kind}}</span>
+              <span style="font-size: 11.5px; color: #7C828B">{{r.when}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <dc-import name="StatusBar" hint-size="1440px,30px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const tab = (label, on) => ({ label, style: 'height: 26px; padding: 0 12px; border-radius: 7px; font-size: 12.5px; display: flex; align-items: center; ' + (on ? 'background: #22252A; color: #E7E8EA; font-weight: 600' : 'color: #8A9099; font-weight: 500') });
+    const value = (amber) => 'font-size: 20px; font-weight: 650; ' + (amber ? 'color: #F2B65E' : 'color: #E7E8EA');
+    const folder = (name, count, dim) => ({ name, count, style: 'display: flex; align-items: center; gap: 9px; height: 28px; padding: 0 8px; border-radius: 7px; font-size: 12.5px; ' + (dim ? 'color: #8A9099' : 'color: #D5D7DB') });
+    return {
+      tabs: [tab('Visão geral', true), tab('Agentes'), tab('Uso de tokens'), tab('Sessões'), tab('Conhecimento')],
+      stats: [
+        { label: 'Sessões', value: '44', valueStyle: value(false) },
+        { label: 'Eventos capturados', value: '15.098', valueStyle: value(false) },
+        { label: 'Páginas compiladas', value: '49', valueStyle: value(false) },
+        { label: 'Sessões abertas', value: '0', valueStyle: value(true) },
+        { label: 'Tokens (entrada / saída)', value: '—', valueStyle: value(false) },
+      ],
+      folders: [
+        folder('▸ _rules/', '2'),
+        folder('▸ decisions/', '1'),
+        folder('▸ gotchas/', '2'),
+        folder('▸ Sistema', '', true),
+        folder('    _lint/', '1', true),
+        folder('    sessions/', '43', true),
+      ],
+      recent: [
+        { title: 'Decisões do dono do Cadex sobre terminal e temas', meta: 'decisions/cadex-decisoes-do-dono-terminal.md · Claude Code', kind: 'decision', when: 'há 1 dia' },
+        { title: 'Session 1301a3b0', meta: 'sessions/1301a3b0-bc1c-4c30-aac1-eb9e877fe….md · Claude Code', kind: 'session', when: 'há 9 horas' },
+        { title: 'Session 877fe54b', meta: 'sessions/877fe54b-….md · Claude Code', kind: 'session', when: 'há 23 horas' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
