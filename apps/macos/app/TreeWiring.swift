@@ -35,14 +35,33 @@ extension WindowSession {
         treeWatch = WorktreesController.shared.watch { [weak self] in self?.loadTreeTasks() }
     }
 
-    /// sidebar.find: a project, task or terminal of the work's model by name.
+    /// sidebar.find: a project, task or terminal of the work's model by name; place.go and project.go.
     func treeCommands(palette: CommandPaletteController) -> [Command] {
         [Command(id: "sidebar.find", title: T("Find a Project, Task or Terminal…", "Achar um projeto, tarefa ou terminal…"),
                  keywords: ["find", "filter", "tree", "project", "task", "terminal", "achar", "filtrar", "árvore", "tarefa"], category: .view,
                  action: .run { [weak self] in
                      guard let self else { return }
                      palette.open(WorkTreeFindSource(projects: self.treeModel()) { [weak self] pick in self?.pickInTree(pick) })
-                 })]
+                 }),
+         // The place's menu runs these with the folder (ADR 0005; plan 38, what was left of H): from
+         // the palette, with no folder, they open the finder of a place or of a project.
+         Command(id: "place.go", title: T("Go to a Place (the Project's Own or a Task)", "Ir a um lugar (o do projeto ou uma tarefa)"),
+                 keywords: ["go", "place", "task", "main", "ir", "lugar", "tarefa"], category: .view,
+                 action: .run { [weak self] in _ = self?.commands.run("sidebar.find") })
+             .accepting("folder=<the project's or the task's folder>") { [weak self] request in
+                 guard let self, let folder = request["folder"], !folder.isEmpty else { return .failed("folder is the place's folder") }
+                 self.pickPlace(folder)
+                 return .ok("went to \(folder)")
+             },
+         Command(id: "project.go", title: T("Go to a Project", "Ir a um projeto"),
+                 keywords: ["go", "project", "switch", "ir", "projeto", "trocar"], category: .view,
+                 action: .run { [weak self] in _ = self?.commands.run("project.switch") })
+             .accepting("folder=<the project's folder>") { [weak self] request in
+                 guard let self, let folder = request["folder"], self.projects?.projects.contains(where: { $0.folder == folder }) == true
+                 else { return .failed("folder is an open project's folder") }
+                 self.pickProject(folder)
+                 return .ok("went to \(folder)")
+             }]
     }
 
     /// The tasks of each project, listed by git off the main thread, then the tree again; with the

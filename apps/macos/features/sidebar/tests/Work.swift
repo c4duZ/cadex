@@ -32,6 +32,13 @@ let workChecks: [(name: String, body: Checks.Body)] = [
         let main = view.list.arrangedSubviews.compactMap { $0 as? WorkChildren }.flatMap(\.rows).first { $0.title == "main" }
         _ = kite?.rightMenu?()
         expect(asked == ["/w/kite-fix"] && main?.rightMenu == nil, "a task's line has its menu, main's none: \(asked)")
+        // An image dropped on a project's line becomes its picture, as on the strip's tile.
+        var dropped: [String] = []
+        view.onDropImage = { folder, url in dropped.append(folder + "|" + url.lastPathComponent) }
+        let notes = view.list.arrangedSubviews.compactMap { $0 as? WorkRow }.first { $0.title == "notes" }
+        expect(notes?.registeredDraggedTypes.contains(.fileURL) == true && kite?.registeredDraggedTypes.isEmpty == true)
+        notes?.onDropImage?(URL(fileURLWithPath: "/tmp/face.png"))
+        expect(dropped == ["/nt|face.png"], "\(dropped)")
         expect(WorkProject(id: "/a", name: "bhband-site").initials == "BS" && WorkProject(id: "/b", name: "cadex").initials == "CA")
     }),
     ("the switch: Work by default; Files shows the view the app gave, and back", {

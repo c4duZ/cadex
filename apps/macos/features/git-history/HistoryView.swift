@@ -8,10 +8,7 @@ import Strings
 @MainActor
 final class HistoryView: NSView, NSSearchFieldDelegate {
     weak var document: HistoryDocument? {
-        didSet {
-            rows.document = document
-            compactRows.document = document
-        }
+        didSet { rows.document = document }
     }
     let searchField = NSSearchField()
     private let currentOnly = NSButton(checkboxWithTitle: T("Current branch only", "Só a branch atual"), target: nil, action: nil)
@@ -19,10 +16,6 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
     private let count = NSTextField(labelWithString: "")
     let table = MenuTableView()
     private let rows = HistoryRows()
-    private let compactRows = HistoryCompactRows()
-    private(set) var isCompact = false
-    private var detailsShare: NSLayoutConstraint!
-    private var detailsNone: NSLayoutConstraint!
     private let scroll = NSScrollView()
     let detailsView = HistoryDetailsView()
     private let separator = NSBox()
@@ -45,19 +38,12 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         guard let document else { return }
         rows.commits = document.shown
         rows.showsGraph = document.showsGraph
-        compactRows.commits = rows.commits
-        compactRows.showsGraph = rows.showsGraph
         let lanes = rows.showsGraph ? rows.commits.lazy.compactMap(\.graph?.width).max() ?? 1 : 0
         let graphColumn = table.tableColumns[0]
         graphColumn.isHidden = !rows.showsGraph
-        graphColumn.width = HistoryGraphView.width(lanes: lanes, compact: isCompact)
-        if isCompact {
-            // The description fits what is left of the panel's width: it is cut with "…", never past
-            // the edge.
-            table.sizeToFit()
-            compactRows.reload()
-        } else { table.reloadData() }
-        if !isCompact, let sha = document.selected?.sha, let row = rows.commits.firstIndex(where: { $0.sha == sha }) {
+        graphColumn.width = HistoryGraphView.width(lanes: lanes)
+        table.reloadData()
+        if let sha = document.selected?.sha, let row = rows.commits.firstIndex(where: { $0.sha == sha }) {
             rows.selecting = true
             table.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
             rows.selecting = false
@@ -74,67 +60,7 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         empty.isHidden = empty.stringValue.isEmpty
     }
 
-    private var header: NSTableHeaderView?
-    /// The search bar, and the list under it or (compact) at the top: the History drawing of the
-    /// right panel has no filter, the commits start right under the scope row (2026-11-17).
-    private var bar: NSView?
-    private var listBelowBar: NSLayoutConstraint?
-    private var listAtTop: NSLayoutConstraint?
-    private var listLeading: NSLayoutConstraint?
-    private var listTrailing: NSLayoutConstraint?
-
-    /// The sidebar's narrow look: the columns a pane of 240 points cannot
-    /// show go, and so do the column titles, the checkbox and the count
-    /// (the checkbox's command stays in ⌘K).
-    func setCompact(_ compact: Bool) {
-        if header == nil { header = table.headerView }
-        table.headerView = compact ? nil : header
-        for column in table.tableColumns where ["author", "date", "sha"].contains(column.identifier.rawValue) {
-            column.isHidden = compact
-        }
-        currentOnly.isHidden = compact
-        count.isHidden = compact
-        bar?.isHidden = compact
-        // The drawing's list: 6 pt in on each side, no space between the cells or the rows (the
-        // open commit's box runs over its files).
-        let side = DesignTokens.Inspector.Tree.listPadding
-        listLeading?.constant = compact ? UILooks.pt(side.left) : 0
-        listTrailing?.constant = compact ? -UILooks.pt(side.right) : 0
-        table.intercellSpacing = compact ? .zero : NSSize(width: 3, height: 2)
-        listBelowBar?.isActive = !compact
-        listAtTop?.isActive = compact
-        // Compact (the right panel's History): the description takes the width, not the graph,
-        // which is the first column and so was the one stretched (a wide gap after the dots, the
-        // subjects cut past the edge: seen 2026-11-17); the panel's own ground shows through.
-        let graph = table.tableColumns.first { $0.identifier.rawValue == "graph" }
-        graph?.resizingMask = compact ? [] : .userResizingMask
-        table.columnAutoresizingStyle = compact ? .uniformColumnAutoresizingStyle : .firstColumnOnlyAutoresizingStyle
-        // As a page, the page's background (plan 31 E; it was the system's grey).
-        table.backgroundColor = .clear
-        wantsLayer = true
-        layer?.backgroundColor = compact ? nil : DesignTokens.Color.bgWindow.cgColor
-        table.sizeLastColumnToFit()
-        detailsView.setCompact(compact)
-        // The sidebar's rows: two lines per commit, files opening under it,
-        // and no details pane (HistoryCompactRows).
-        isCompact = compact
-        table.dataSource = compact ? compactRows : rows
-        table.delegate = compact ? compactRows : rows
-        table.contextEntries = compact
-            ? { [weak self] row in self?.compactRows.menuEntries(row) ?? [] }
-            : { [weak self] row in self?.rows.menuEntries(row) ?? [] }
-        table.target = compact ? compactRows : nil
-        table.action = compact ? #selector(HistoryCompactRows.clicked(_:)) : nil
-        compactRows.table = table
-        separator.isHidden = compact
-        detailsView.isHidden = compact
-        detailsShare.isActive = !compact
-        detailsNone.isActive = compact
-        render()
-    }
-
     func showDetails() {
-        if isCompact { return compactRows.detailsArrived() }
         detailsView.show(document?.selected, details: document?.details)
     }
 
@@ -172,14 +98,13 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         searchBox.setContentHuggingPriority(.defaultLow, for: .horizontal)
         _ = FrameField.check(currentOnly)
         let top = NSStackView(views: [searchBox, currentOnly, progress, count])
-        bar = top
         top.spacing = 10
         top.edgeInsets = NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
         searchField.setContentHuggingPriority(.defaultLow, for: .horizontal)
 
         rows.table = table
         rows.build()
-        // The page's background until setCompact says otherwise (the right panel's list).
+        // The page's background (plan 31 E; it was the system's grey).
         table.backgroundColor = .clear
         wantsLayer = true
         layer?.backgroundColor = DesignTokens.Color.bgWindow.cgColor
@@ -196,15 +121,6 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
             v.translatesAutoresizingMaskIntoConstraints = false
             addSubview(v)
         }
-        detailsShare = detailsView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 0.34)
-        detailsNone = detailsView.heightAnchor.constraint(equalToConstant: 0)
-        listBelowBar = scroll.topAnchor.constraint(equalTo: top.bottomAnchor, constant: 8)
-        listBelowBar?.isActive = true
-        listAtTop = scroll.topAnchor.constraint(equalTo: topAnchor)
-        listLeading = scroll.leadingAnchor.constraint(equalTo: leadingAnchor)
-        listTrailing = scroll.trailingAnchor.constraint(equalTo: trailingAnchor)
-        listLeading?.isActive = true
-        listTrailing?.isActive = true
         NSLayoutConstraint.activate([
             top.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             top.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -212,12 +128,15 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
             // Without a height the bar took the free space and the list
             // none (2026-10-19).
             top.heightAnchor.constraint(equalToConstant: 28),
+            scroll.topAnchor.constraint(equalTo: top.bottomAnchor, constant: 8),
+            scroll.leadingAnchor.constraint(equalTo: leadingAnchor),
+            scroll.trailingAnchor.constraint(equalTo: trailingAnchor),
             separator.topAnchor.constraint(equalTo: scroll.bottomAnchor),
             separator.leadingAnchor.constraint(equalTo: leadingAnchor),
             separator.trailingAnchor.constraint(equalTo: trailingAnchor),
-            // One point: without it, in the sidebar's narrow page the
-            // separator took the free height, drew upright and left the list
-            // none (owner's print, 2026-10-21).
+            // One point: without it, in a narrow page the separator took
+            // the free height, drew upright and left the list none (owner's
+            // print, 2026-10-21).
             separator.heightAnchor.constraint(equalToConstant: 1),
             // A third for the details. A split view put its divider at the
             // bottom and hid them, as it hid a side of the diff (2026-10-19).
@@ -225,7 +144,7 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
             detailsView.leadingAnchor.constraint(equalTo: leadingAnchor),
             detailsView.trailingAnchor.constraint(equalTo: trailingAnchor),
             detailsView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            detailsShare,
+            detailsView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 0.34),
             empty.centerXAnchor.constraint(equalTo: scroll.centerXAnchor),
             empty.centerYAnchor.constraint(equalTo: scroll.centerYAnchor),
         ])

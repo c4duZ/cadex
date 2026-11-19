@@ -101,91 +101,18 @@ let exitCode = await Checks.run([
         expect(updated, "\(document.commits.map(\.subject))")
         try? FileManager.default.removeItem(atPath: repo)
     }),
-    ("in the sidebar the history shows the graph and the subject on one line, nothing else", {
-        let repo = mergedRepository()
-        let document = HistoryDocument(root: repo)
-        document.compact = true
-        _ = await eventually { document.state == .ready && document.commits.count == 4 }
-        let table = document.historyView.table
-        let shown = table.tableColumns.filter { !$0.isHidden }.map(\.identifier.rawValue)
-        expect(shown == ["graph", "subject"] && table.headerView == nil, "\(shown)")
-        let subject = HistoryRows.subject(document.commits[0])
+    ("the subject never wraps over the next row", {
+        let commit = HistoryCommit(sha: "abc1234567", parents: [], author: "Ana", email: "a@x", date: Date(timeIntervalSince1970: 0),
+                                   refs: ["HEAD -> main"], subject: "a subject", graph: nil)
+        let subject = HistoryRows.subject(commit)
         let style = subject.attribute(.paragraphStyle, at: subject.length - 1, effectiveRange: nil) as? NSParagraphStyle
         expect(style?.lineBreakMode == .byTruncatingTail, "the subject never wraps over the next row")
-        document.compact = false
-        expect(table.tableColumns.allSatisfy { !$0.isHidden } && table.headerView != nil, "the tab gets its columns back")
-        document.compact = true
-        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
-            let view = document.view
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 240, height: 420), styleMask: [.borderless], backing: .buffered, defer: false)
-            window.appearance = NSAppearance(named: .darkAqua)
-            window.contentView = view
-            view.layoutSubtreeIfNeeded()
-            if let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
-                view.cacheDisplay(in: view.bounds, to: bitmap)
-                try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/history-compact.png"))
-            }
-        }
-        try? FileManager.default.removeItem(atPath: repo)
     }),
-    ("in the sidebar, hidden and sized late as the app builds it, the list still gets the height", {
+    ("a SHA asked before the log came is selected when it comes", {
         let repo = mergedRepository()
-        let host = NSView()
-        let outer = NSView(frame: NSRect(x: 0, y: 0, width: 240, height: 600))
-        let window = NSWindow(contentRect: outer.frame, styleMask: [.borderless], backing: .buffered, defer: false)
-        window.contentView = outer
-        host.translatesAutoresizingMaskIntoConstraints = false
-        host.isHidden = true
-        outer.addSubview(host)
-        NSLayoutConstraint.activate([host.topAnchor.constraint(equalTo: outer.topAnchor), host.bottomAnchor.constraint(equalTo: outer.bottomAnchor),
-                                     host.leadingAnchor.constraint(equalTo: outer.leadingAnchor), host.trailingAnchor.constraint(equalTo: outer.trailingAnchor)])
-        let document = HistoryDocument(root: repo)
-        document.compact = true
-        let view = document.view
-        view.translatesAutoresizingMaskIntoConstraints = false
-        host.addSubview(view)
-        NSLayoutConstraint.activate([view.topAnchor.constraint(equalTo: host.topAnchor), view.bottomAnchor.constraint(equalTo: host.bottomAnchor),
-                                     view.leadingAnchor.constraint(equalTo: host.leadingAnchor), view.trailingAnchor.constraint(equalTo: host.trailingAnchor)])
-        host.isHidden = false
-        _ = await eventually { document.state == .ready && document.commits.count == 4 }
-        outer.layoutSubtreeIfNeeded()
-        let table = document.historyView.table
-        let listHeight = table.enclosingScrollView?.frame.height ?? 0
-        expect(table.numberOfRows > 0 && listHeight > 200, "rows \(table.numberOfRows), list \(listHeight) high")
-        (table.dataSource as? HistoryCompactRows)?.press(0)
-        _ = await eventually { table.numberOfRows == 5 }
-        outer.layoutSubtreeIfNeeded()
-        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"], let bitmap = outer.bitmapImageRepForCachingDisplay(in: outer.bounds) {
-            outer.cacheDisplay(in: outer.bounds, to: bitmap)
-            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/history-repro.png"))
-        }
-        try? FileManager.default.removeItem(atPath: repo)
-    }),
-    ("the sidebar's rows: a commit opens its files under it, a file opens its diff, a click closes it", {
-        expect(HistoryCompactRows.items(commits: 3, expandedAt: 1, files: 2) == [.commit(0), .commit(1), .file(1, 0), .file(1, 1), .commit(2)])
-        expect(HistoryCompactRows.items(commits: 2, expandedAt: nil, files: 5) == [.commit(0), .commit(1)])
-        let tipped = HistoryCommit(sha: "abc1234567", parents: [], author: "Ana", email: "a@x", date: Date(timeIntervalSince1970: 0),
-                                   refs: ["HEAD -> main", "origin/main"], subject: "a subject far too long for 240 points", graph: nil)
-        let tip = HistoryCompactRows.tip(tipped).split(separator: "\n").map(String.init)
-        expect(tip.count == 5 && tip[0] == "a subject far too long for 240 points" && tip[1] == "main, origin/main"
-               && tip[2] == "Ana <a@x>" && tip[4] == "abc1234567", "\(tip)")
-        let repo = mergedRepository()
-        let document = HistoryDocument(root: repo)
-        document.compact = true
-        _ = await eventually { document.state == .ready && document.commits.count == 4 }
-        let table = document.historyView.table
-        expect(table.numberOfRows == 4 && table.delegate?.tableView?(table, heightOfRow: 0) ?? 0 > 30, "two lines per commit")
-        let rows = table.dataSource as? HistoryCompactRows
-        rows?.press(0)
-        let opened = await eventually { table.numberOfRows == 5 }
-        expect(opened, "the merge's file shows under it: \(table.numberOfRows) rows")
-        var diffs: [String] = []
-        document.onOpenDiff = { _, _, path, _ in diffs.append(path) }
-        rows?.press(1)
-        expect(diffs == ["b.txt"], "\(diffs)")
-        rows?.press(0)
-        expect(table.numberOfRows == 4, "a second click closes it")
-        let sha = document.commits[2].sha
+        let first = HistoryDocument(root: repo)
+        _ = await eventually { first.state == .ready && first.commits.count == 4 }
+        let sha = first.commits[2].sha
         let other = HistoryDocument(root: repo)
         other.select(sha: sha)
         let picked = await eventually { other.selectedSha == sha }

@@ -16,12 +16,6 @@ final class HistoryDetailsView: NSView, NSTableViewDataSource, NSTableViewDelega
 
     private let columns = NSStackView()
 
-    /// The sidebar: the message above the files, not side by side (two
-    /// columns of 120 points showed neither).
-    func setCompact(_ compact: Bool) {
-        columns.orientation = compact ? .vertical : .horizontal
-    }
-
     init() {
         super.init(frame: .zero)
         build()

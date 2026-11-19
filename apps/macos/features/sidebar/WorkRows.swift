@@ -62,6 +62,11 @@ final class WorkRow: NSView {
     /// Past a few points the press is a drag (a project's line, plan 38: the order of the rail stays);
     /// the sidebar gets each move and the release.
     var onDrag: ((NSEvent, Bool) -> Void)?
+    /// An image file dropped on a project's line becomes its picture, as on the strip's tile (plan 38,
+    /// left from phase H): set, the line takes file drops.
+    var onDropImage: ((URL) -> Void)? {
+        didSet { onDropImage == nil ? unregisterDraggedTypes() : registerForDraggedTypes([.fileURL]) }
+    }
     private let press = RailPress()
     let title: String
     private(set) var selected = false
@@ -173,6 +178,14 @@ final class WorkRow: NSView {
         // The caret's room (the padding and the caret) folds; the rest goes.
         if onCaret != nil, point.x < UILooks.pt(R.padding.left + R.Caret.size + R.gap) { return onCaret?() ?? () }
         onPress?()
+    }
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        onDropImage != nil && RailTile.droppedImage(sender) != nil ? .copy : []
+    }
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let onDropImage, let url = RailTile.droppedImage(sender) else { return false }
+        onDropImage(url)
+        return true
     }
     override func rightMouseDown(with event: NSEvent) {
         guard let entries = rightMenu?(), !entries.isEmpty else { return super.rightMouseDown(with: event) }

@@ -1,4 +1,5 @@
 import AppKit
+import CommandPalette
 import Menus
 import Projects
 import Sidebar
@@ -35,7 +36,7 @@ extension WindowSession {
         if let project = projectsModel.first(where: { $0.id == current }) {
             for place in project.places {
                 entries.append(MenuEntry(place.isMain ? T("\(place.name) (the project's own)", "\(place.name) (o do projeto)") : place.name,
-                                         icon: place.isMain ? .terminalWindow : .gitBranch) { [weak self] in self?.pickPlace(place.id) })
+                                         icon: place.isMain ? .terminalWindow : .gitBranch) { [weak self] in self?.go("place.go", place.id) })
             }
             entries.append(MenuEntry(T("Project Page", "Página do projeto"), icon: .squaresFour) { [weak self] in
                 _ = self?.commands.run("project.show-overview")
@@ -43,11 +44,16 @@ extension WindowSession {
             entries.append(.separator)
         }
         for project in projectsModel where project.id != current {
-            entries.append(MenuEntry(project.name, icon: .folder) { [weak self] in self?.pickProject(project.id) })
+            entries.append(MenuEntry(project.name, icon: .folder) { [weak self] in self?.go("project.go", project.id) })
         }
         entries.append(MenuEntry(T("Switch Project…", "Trocar de projeto…"), icon: .magnifyingGlass) { [weak self] in
             _ = self?.commands.run("project.switch")
         })
         return entries
+    }
+
+    /// Every row runs a command by its id (ADR 0005), with the row's folder.
+    private func go(_ id: String, _ folder: String) {
+        _ = commands.run(id, request: CommandRequest(arguments: ["folder": folder], folder: folder))
     }
 }

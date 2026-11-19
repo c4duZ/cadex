@@ -65,7 +65,7 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 |---|---|---|---|---|
 | arquivo | página files (`apps/macos/features/explorer/ExplorerOutline.swift` e a árvore) | muda | aba Arquivos do painel da direita | 26 |
 | arquivo | página git (`apps/macos/features/source-control/SourceControlView.swift`) | muda | aba Mudanças do painel da direita | 26 |
-| arquivo | página history (`apps/macos/features/git-history/HistoryCompactRows.swift`) | muda | aba Histórico do painel da direita | 26 |
+| trecho | página history: "compactRows" em `apps/macos/features/git-history/HistoryView.swift` | saiu | foi a aba Histórico do painel da direita (plano 26); a aba saiu na fase H do plano 38 e o modo compacto do histórico, com as linhas e as células dele, logo depois: o grafo do git é uma página (git.history-in-tab) | 38 |
 | arquivo | página memory (`apps/macos/features/memory/MemoryView.swift`) | muda | aba Memória do painel da direita | 26 |
 | comando | `git.show`, `git.show-history`, `memory.show`, `explorer.focus` | muda | abrem a aba do painel da direita | 26 |
 | arquivo | página tasks (`apps/macos/features/worktrees/WorktreesView.swift`) | saiu | as tarefas na árvore (fase D) | 27 |

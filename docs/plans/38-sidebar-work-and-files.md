@@ -90,6 +90,10 @@ o que o clique faz). O dono aprovou em 2026-11-19 ("pode fazer").
   na barra lateral. Specs, CONTEXT.md e a nota na ADR 0038 escritos; `make check` passou. Ficam para
   depois: o modo compacto do histórico do git sem uso no app, as linhas do menu do lugar chamando o
   código direto em vez de comandos pelo id, a imagem solta numa linha da lista Trabalho e a dist.
+  Depois (2026-11-19, o dono: "faz aí o que ficou para depois"): o modo compacto do histórico saiu
+  (HistoryCompactRows e HistoryCompactCells); as linhas do menu do lugar rodam place.go e
+  project.go com a pasta; a linha de um projeto aceita a imagem solta; o Esc com o foco na barra
+  volta de Mudanças para Arquivos.
 
 - Telas: WorkSidebar.dc.html (descrita em `docs/design/work-frame/screens.md`; as quatro situações em
   `docs/design/sidebar/6-estrutura-ideal.html`).

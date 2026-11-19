@@ -35,7 +35,8 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
     página no centro dá lugar aos terminais); num item, põe as abas dele em cima (`tabs.md`).
   - O clique direito num projeto: New Terminal, New Task…, Edit Name and Image…, Pin ou Unpin,
     Project Settings…, Show in Finder, Copy Path, Close Terminals e Remove from the Sidebar (fecha e
-    solta; nada do disco sai). Cada um é um comando que age naquele projeto. Numa tarefa, o menu
+    solta; nada do disco sai). Cada um é um comando que age naquele projeto. Soltar uma imagem na
+    linha a faz a imagem do projeto, como nos quadrados da faixa. Numa tarefa, o menu
     dela (o estado, hibernar, revisar, remover…), o mesmo do quadro.
   - **Ordem:** os fixados primeiro, na ordem do dono, depois os abertos não fixados. Arrastar a
     linha de um projeto muda a ordem ao soltar (sem deslizar ao vivo); fica no arquivo dos projetos.
@@ -48,7 +49,7 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
   em `inspector.md`) e, no fim, "N mudanças · ver" quando há arquivo mudado. O clique mostra
   **Mudanças** na própria barra (o painel do git, `source-control.md`, com Commit e Abrir PR); ⇧⌘G
   (git.show) e o projeto · branch da barra de baixo também. Para voltar à árvore, Arquivos no
-  seletor ou ⌃⌘1.
+  seletor, ⌃⌘1 ou o Esc com o foco na barra (com o foco num terminal, o Esc é dele).
 - **Pé**, fixo e separado da lista: Quadro (view.board), Automações (orchestration.show-automations)
   e Máquinas (os hosts do `~/.ssh/config` e as máquinas da tailnet numa lista, remote.show; escolher
   conecta numa aba), esta só quando há algum host.
@@ -100,7 +101,8 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
 - [ ] A marca da borda com um agente de verdade esperando num projeto fora da vista (só no teste).
 - [x] Arquivos com o cabeçalho, a contagem e "ver" abrindo Mudanças (conferido num repositório com
   dois arquivos mudados).
-- [ ] O Esc voltando de Mudanças para a árvore (hoje é do terminal com foco).
+- [x] O Esc voltando de Mudanças para a árvore, com o foco na barra (com o foco num terminal, o Esc
+  é dele).
 - [x] Abaixo de 1000 pt a faixa no lugar da barra; alargar a devolve; nada aberto com os recentes
   (conferido no app nas três situações).
-- [ ] Soltar uma imagem num projeto da lista (só os quadrados da faixa a aceitam).
+- [x] Soltar uma imagem num projeto da lista (no teste; os quadrados da faixa também).

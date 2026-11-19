@@ -24,6 +24,8 @@ public final class WorkSidebarView: NSView {
     public var onShowChanges: (() -> Void)?
     /// A project dragged to a new place: its folder and the projects' folders in the new order.
     public var onMove: ((String, [String]) -> Void)?
+    /// An image file dropped on a project's line: its folder and the file (it becomes the picture).
+    public var onDropImage: ((String, URL) -> Void)?
     /// Nothing open: a recent clicked, its folder (the app opens the project).
     public var onPickRecent: ((String) -> Void)?
     /// The switch was clicked: the app shows that view (and runs what goes with it).
@@ -161,6 +163,7 @@ public final class WorkSidebarView: NSView {
         row.onPress = { [weak self] in self?.onPickProject?(project.id) }
         row.onCaret = { [weak self] in self?.onToggle?(project.id) }
         row.rightMenu = { [weak self] in self?.menuFor?(project.id) ?? [] }
+        row.onDropImage = { [weak self] url in self?.onDropImage?(project.id, url) }
         row.onDrag = { [weak self, weak row] event, ended in
             guard let self, let row else { return }
             row.alphaValue = ended ? 1 : 0.6

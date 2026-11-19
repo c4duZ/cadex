@@ -14,26 +14,9 @@
   pedidas conforme a lista rola, filtro no que já veio, Enter busca no repositório, só a branch
   atual, detalhes e URL do remoto do commit selecionado, recarga quando algo muda em .git
   (`diskChanged`, vindo do watcher do explorer pelo app).
-- `compact` (a aba History do painel da direita; plano 26 fase C2b, components.inspector.commit: o
-  título em 13, seminegrito no commit atual, e depois dele as etiquetas de branch e tag em pílulas
-  (`HistoryRefChip`), "autor · tempo · sha" em 11,5 com o tempo curto ("4m", "yesterday"), sem a
-  caixa de filtro, a lista 6 pt para dentro de cada lado, o grafo com uma cor só, linha de 2 e ponto de 10, azul cheio no HEAD e contorno nos
-  outros, o commit aberto com o fundo e o contorno por cima dos arquivos dele (`HistoryCompactRowView`
-  em partes), os arquivos em 24 com a letra, o caminho e o +/− à direita (`HistoryCompactFileCell`,
-  em `HistoryCompactCells.swift`), a descrição na
-  largura que sobra): só o grafo e a descrição, sem títulos de
-  coluna, autor, data, sha, caixa de seleção, contagem nem painel de detalhes. As linhas são de
-  `HistoryCompactRows.swift`: cada commit em duas linhas (descrição; autor · tempo · sha), clicar
-  abre os arquivos dele embaixo com o grafo passando por trás; parar o mouse num commit mostra a
-  dica com a descrição inteira, branches, autor e e-mail, data e sha inteiro (`tip`); num arquivo,
-  o caminho (`passing` do
-  `HistoryGraphView.swift`), clicar num arquivo abre o diff; o clique direito roda
-  history.show-in-tab (registrado pelo app, abre a aba com o commit: `select(sha:)`),
-  history.copy-sha e history.open-remote, que agem no histórico da barra quando a aba da frente não
-  é um. Como VS Code e GitLens fazem na barra lateral, pela documentação deles (2026-10-21). A descrição nunca quebra linha (com
-  etiquetas, quebrava por cima da linha de baixo; print do dono, 2026-10-21); os detalhes ficam um
-  embaixo do outro. O separador entre a lista e os detalhes tem 1 pt fixo: sem isso, na página
-  estreita ele tomou a altura toda e a lista ficou com zero (conferido no app, 2026-10-21).
+- Na página, a descrição nunca quebra linha (com etiquetas, quebrava por cima da linha de baixo;
+  print do dono, 2026-10-21). O separador entre a lista e os detalhes tem 1 pt fixo: sem isso, numa
+  página estreita ele tomou a altura toda e a lista ficou com zero (conferido no app, 2026-10-21).
 - `HistoryView.swift` (busca, lista, detalhes embaixo), `HistoryRows.swift` (células reaproveitadas
   só das linhas na tela, etiquetas, datas em português, menu de contexto no `MenuTableView` compartilhado), `HistoryGraphView.swift`
   (uma linha do grafo: retas, curvas nas bifurcações e merges, ponto vazado no merge) e

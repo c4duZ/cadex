@@ -19,6 +19,7 @@ extension WindowSession {
         sidebar.menuForPlace = { [weak self] folder in self?.treeMenu(task: folder) ?? [] }
         sidebar.onPickRequest = { [weak self] id in self?.goToRequest(id) }
         sidebar.onPickRecent = { [weak self] folder in self?.homeOpen(folder) }
+        sidebar.onDropImage = { [weak self] folder, url in self?.dropProjectImage(folder, url) }
         sidebar.onShowChanges = { [weak self] in _ = self?.commands.run("git.show") }
         // Dragged: the order kept in projects.json, as the rail's (plan 36 E); pinned does not change.
         sidebar.onMove = { [weak self] folder, order in

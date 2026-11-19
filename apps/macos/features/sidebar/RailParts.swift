@@ -115,19 +115,20 @@ final class RailTile: NSView {
     override func rightMouseDown(with event: NSEvent) { onMenu?(event) }
 
     // An image file dragged onto the tile: copy, to become the project's picture.
-    private func droppedImage(_ sender: NSDraggingInfo) -> URL? {
-        let options: [NSPasteboard.ReadingOptionKey: Any] = [.urlReadingFileURLsOnly: true, .urlReadingContentsConformToTypes: ["public.image"]]
-        return (sender.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: options) as? [URL])?.first
-    }
-
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        droppedImage(sender) == nil ? [] : .copy
+        Self.droppedImage(sender) == nil ? [] : .copy
     }
 
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        guard let url = droppedImage(sender) else { return false }
+        guard let url = Self.droppedImage(sender) else { return false }
         onDropImage?(url)
         return true
+    }
+
+    /// The image file being dragged, if it is one (the tile and the Work list's project line).
+    static func droppedImage(_ sender: NSDraggingInfo) -> URL? {
+        let options: [NSPasteboard.ReadingOptionKey: Any] = [.urlReadingFileURLsOnly: true, .urlReadingContentsConformToTypes: ["public.image"]]
+        return (sender.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: options) as? [URL])?.first
     }
 
     var chosen: Bool { !ring.isHidden }

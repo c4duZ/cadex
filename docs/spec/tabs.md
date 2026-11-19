@@ -14,8 +14,8 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 - A barra de cima, da esquerda para a direita (`../adr/0039-sidebar-with-work-and-files.md`, plano
   38): o botão da barra lateral (⌘B, aceso com ela aberta); **o lugar**, o avatar e "projeto ›
   tarefa ▾" (no main, só o projeto), cujo clique abre o menu do lugar: o main e as tarefas do
-  projeto, a página do projeto, os outros projetos e "Trocar de projeto…" (project.switch, a lista
-  com busca no ⌘K); as abas do lugar e o "+"; **Revisar**, só dentro de uma tarefa, um botão com
+  projeto (place.go), a página do projeto, os outros projetos (project.go) e "Trocar de projeto…"
+  (project.switch, a lista com busca no ⌘K), cada linha um comando com a pasta dela; as abas do lugar e o "+"; **Revisar**, só dentro de uma tarefa, um botão com
   contorno depois de um fio (git.review-open); à direita, a pílula "precisa de você" (só com a barra
   lateral fechada e algum pedido aberto; `sidebar.md`) e Buscar ⌘K no fim. A conta, o quadro, o sino
   e a engrenagem não estão na barra de cima (a conta e o café na barra de baixo, o quadro no pé da
