@@ -199,7 +199,19 @@ final class TitleBarView: NSView {
         centerWindowButtons()
     }
 
-    @objc private func buttonMoved() { centerWindowButtons() }
+    /// Deferred to the end of the run loop's turn, once for many notices: called at once, it ran
+    /// inside AppKit's own tiling of the buttons, which then put the last one (zoom) back 2 pt
+    /// higher than the other two (the owner's print, 2026-11-19; logged: our move, then AppKit's).
+    @objc private func buttonMoved() {
+        guard !centerPending else { return }
+        centerPending = true
+        DispatchQueue.main.async { [weak self] in
+            self?.centerPending = false
+            self?.centerWindowButtons()
+        }
+    }
+
+    private var centerPending = false
 
     override func layout() {
         super.layout()
