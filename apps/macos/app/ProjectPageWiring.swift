@@ -94,10 +94,14 @@ extension WindowSession {
     /// The project's Settings: how it shows in the rail (name, picture, pinned; plan 36 E), then
     /// its memory's file.
     private func projectSettingsView(_ folder: String) -> NSView {
-        let column = NSStackView(views: [projectLook(folder), MemoryProjectForm(folder: folder)])
+        let blocks = [projectLook(folder), MemoryProjectForm(folder: folder)]
+        let column = NSStackView(views: blocks)
         column.orientation = .vertical
         column.alignment = .leading
         column.spacing = UILooks.pt(DesignTokens.Project.Columns.gap)
+        // Each block as wide as the page: without it the memory's form kept its smallest width, a
+        // narrow strip as if still in a side panel (the owner, 2026-11-18).
+        for block in blocks { block.widthAnchor.constraint(equalTo: column.widthAnchor).isActive = true }
         return column
     }
 
