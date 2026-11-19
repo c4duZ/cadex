@@ -33,7 +33,15 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   diff ou histórico do git.
 - **Painel** (`pane`): uma divisão dentro de uma aba de terminal. Uma aba pode ter vários painéis.
 - **Folha** (`leaf`): um painel final da árvore de divisões, que contém uma sessão de terminal.
-- **Trilho** (`rail`, a feature `sidebar`): a faixa estreita na borda esquerda com os projetos
+- **Barra lateral** (`sidebar`, desde a `docs/adr/0039-sidebar-with-work-and-files.md`): à esquerda,
+  a fila "Precisa de você" no topo e duas vistas com nome, **Trabalho** (os projetos, o main e as
+  tarefas: para onde vou) e **Arquivos** (a árvore do lugar: o que mexo aqui), com **Mudanças**
+  discreta no fim de Arquivos. Substitui o trilho e a coluna lateral (plano 38).
+- **Fila "Precisa de você"** (`needs-you queue`): o cartão âmbar no topo da barra lateral com os
+  pedidos abertos dos agentes (permissão, pergunta), em qualquer vista e largura; a casa única deles.
+- **Lugar** (`place`): onde se está, "projeto › tarefa", no começo da barra de cima; o clique troca
+  de projeto ou de tarefa e abre a página do projeto.
+- **Trilho** (`rail`, a feature `sidebar` até o plano 38): a faixa estreita na borda esquerda com os projetos
   (imagem, nome dado pelo dono, peça de estado), o "+", os ícones das páginas da coluna e, no pé,
   Projects, Automations e Remote (este só com algum host). Substituiu a árvore do trabalho (ADR 0038).
 - **Coluna lateral** (`side column`, a feature `inspector`; nos textos, nunca "painel da direita"):

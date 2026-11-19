@@ -1,6 +1,7 @@
 # 0038 — A esquerda em trilho e coluna lateral; a coluna da direita sai
 
-Data: 2026-11-18 · Status: aceita (o dono, 2026-11-18: "pode deixar o open terminal, escreve a
+Data: 2026-11-18 · Status: substituída pela `docs/adr/0039-sidebar-with-work-and-files.md`
+(2026-11-19), que a auditoria de UX levou a uma barra lateral só; antes: aceita (o dono, 2026-11-18: "pode deixar o open terminal, escreve a
 ADR") · Revê, da `docs/adr/0035-work-frame.md`, a "Esquerda, a árvore do trabalho" e a "Direita, a
 seleção"; o resto dela vale · Mockups em `docs/design/sidebar/` (1 a 3)
 

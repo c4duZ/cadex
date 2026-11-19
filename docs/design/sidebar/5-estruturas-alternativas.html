@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estruturas alternativas</title>
+<style>
+:root{
+  --page:#0A0B0C; --win:#0C0D0F; --chrome:#121316; --side:#131417; --card:#15171A; --raised:#17191C; --btn:#1A1C20;
+  --chip:#1D1F23; --sel:#1F2226; --seg:#22252A; --pidle:#111214;
+  --line:#1F2125; --line2:#25282D; --ctl:#2A2D33; --focus:#2E3238;
+  --strong:#F4F5F6; --text:#E7E8EA; --row:#D5D7DB; --body:#C3C6CB; --dim:#9BA0A8; --muted:#8A9099; --ter:#7C828B; --sep:#4A4F57;
+  --blue:#5B9CF5; --amber:#F2A93B; --green:#3FB97A; --red:#EF5B5B; --purple:#A98BF0; --idle:#6B7079;
+  --amberT:#F2B65E; --greenT:#6FCF97; --redT:#F08A8A; --link:#9BC1FF; --linkbg:#1A2333; --usagebg:#2A2113;
+  --tneeds:#1C1812; --lamber:#4A3A1C; --note:#F2D29B;
+  --mono: "SF Mono", ui-monospace, Menlo, monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--text);font:14px/1.55 -apple-system,"SF Pro Text",Inter,system-ui,sans-serif}
+main{max-width:1240px;margin:0 auto;padding:36px 16px 100px}
+h1{font-size:28px;margin:0 0 6px;letter-spacing:-.01em}
+.sub{color:var(--dim);font-size:15px;max-width:900px;margin:0}
+section{margin-top:64px}
+h2{font-size:21px;margin:0 0 6px;letter-spacing:-.01em}
+h2 small{color:var(--ter);font-weight:500;font-size:13px;margin-left:8px}
+h3{font-size:16px;margin:0}
+p{margin:8px 0;color:var(--body);max-width:900px}
+b,strong{color:var(--text)}
+a{color:var(--link)}
+code{font:12.5px var(--mono);color:var(--row);background:var(--chip);padding:1px 5px;border-radius:5px}
+kbd{font:11px -apple-system,system-ui;color:var(--ter);border:1px solid var(--ctl);border-radius:5px;padding:0 5px}
+.scroll{overflow-x:auto;padding:16px 4px 8px 26px}
+.row{display:flex;align-items:center;gap:8px}.grow{flex:1;min-width:0}
+.muted{color:var(--muted)}.ter{color:var(--ter)}.amb{color:var(--amberT)}.grn{color:var(--greenT)}.blu{color:#8FB8F7}
+
+/* ---------- resumo ---------- */
+.sum{margin-top:22px;border:1px solid var(--line2);border-radius:14px;background:var(--card);padding:6px 0}
+.sum div{display:grid;grid-template-columns:120px 1fr;gap:14px;padding:11px 18px;border-bottom:1px solid var(--line)}
+.sum div:last-child{border-bottom:0}
+.sum span{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ter);padding-top:2px}
+.sum .k-ok span{color:var(--greenT)}.sum .k-no span{color:var(--amberT)}.sum .k-go span{color:#8FB8F7}
+.sum p{margin:0;max-width:none;color:var(--row)}
+
+/* ---------- ícones ---------- */
+.ic{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ic.s{width:13px;height:13px}.ic.xs{width:11px;height:11px}
+
+/* ---------- a janela ---------- */
+.win{position:relative;width:1180px;height:620px;display:grid;grid-template-rows:44px 1fr 30px;background:var(--win);border:1px solid var(--line2);border-radius:12px;box-shadow:0 30px 70px rgba(0,0,0,.5)}
+.win.short{height:560px}
+.tb{position:relative;display:flex;align-items:center;gap:10px;padding:0 12px 0 16px;background:var(--chrome);border-bottom:1px solid var(--line);border-radius:12px 12px 0 0}
+.lights{display:flex;gap:8px;margin-right:6px}.lights i{width:12px;height:12px;border-radius:50%;background:#3A3D42;display:block}
+.srch{position:relative;height:28px;width:150px;border:1px solid var(--ctl);border-radius:8px;padding:0 9px;display:flex;align-items:center;gap:7px;color:var(--ter);font-size:12.5px}
+.srch kbd{margin-left:auto;border:0}
+.tabs{display:flex;align-items:center;gap:2px;margin-left:26px}
+.tab{position:relative;height:30px;padding:0 12px;border-radius:8px;display:flex;align-items:center;gap:7px;color:var(--dim);font-size:12.5px;white-space:nowrap}
+.tab.on{background:var(--chip);color:var(--text);font-weight:550}
+.tab.task{color:var(--row)}
+.tab.more{color:var(--muted)}
+.tb .plus{color:var(--ter);padding:0 6px;display:flex}
+.tright{margin-left:auto;display:flex;align-items:center;gap:6px}
+.tbtn{position:relative;width:32px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--muted)}
+.tbtn.on{background:var(--sel);color:var(--text)}
+.tbadge{position:absolute;top:2px;right:1px;min-width:15px;height:15px;border-radius:8px;background:var(--amber);color:#1A1206;font-size:9.5px;font-weight:800;display:grid;place-items:center;padding:0 3px}
+.acct{position:relative;height:28px;padding:0 9px;border-radius:8px;display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--row)}
+.acct i{font-style:normal;color:#D97757}
+.where{position:relative;display:flex;align-items:center;gap:7px;height:30px;padding:0 10px 0 6px;border-radius:8px;border:1px solid var(--ctl);font-size:13px;font-weight:650;margin-left:6px;white-space:nowrap}
+.where .av{width:20px;height:20px;border-radius:6px;background:#26324A;color:#B7CCF5;display:grid;place-items:center;font-size:11px;font-weight:800}
+.where .t{color:var(--muted);font-weight:500}
+.where .chev{color:var(--ter);font-weight:400;font-size:10px}
+
+.mid{display:grid;grid-template-columns:56px 260px 1fr;min-height:0}
+.mid.nocol{grid-template-columns:56px 1fr}
+.rail{position:relative;background:var(--chrome);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:10px 0 8px;gap:7px;min-height:0}
+.tile{position:relative;width:38px;height:38px;border-radius:10px;background:var(--btn);display:grid;place-items:center;font-weight:750;font-size:13px;color:var(--text);flex:none}
+.tile.on{box-shadow:0 0 0 3px var(--focus)}
+.tile.img1{background:linear-gradient(135deg,#2B4C7E,#1C2B45);color:#CFE0FF}
+.tile.img2{background:linear-gradient(135deg,#5A3A22,#2C1E14);color:#FFD9B0}
+.tile.img3{background:linear-gradient(135deg,#24473A,#16271F);color:#BDEBD3}
+.tile .bd{position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;border:2px solid var(--chrome)}
+.tile .od{position:absolute;bottom:-9px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--dim)}
+.tile + .tile{margin-top:6px}
+.hl{width:28px;height:1px;background:var(--ctl);margin:4px 0;flex:none}
+.rb{position:relative;width:38px;height:30px;border-radius:7px;display:grid;place-items:center;color:var(--muted);flex:none}
+.rb.lit{background:var(--sel);color:var(--text)}
+.rb .cnt{position:absolute;top:1px;right:0;font-size:9px;font-weight:800;color:var(--dim)}
+.rspace{flex:1}
+.inbox{position:relative;width:38px;height:38px;border-radius:10px;background:var(--tneeds);border:1px solid var(--lamber);display:grid;place-items:center;color:var(--amberT);flex:none}
+.inbox .n{position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;border-radius:9px;background:var(--amber);color:#1A1206;font-size:10px;font-weight:800;display:grid;place-items:center;padding:0 4px;border:2px solid var(--chrome)}
+.edgepill{font-size:9.5px;font-weight:800;color:#1A1206;background:var(--amber);border-radius:8px;padding:1px 6px;flex:none}
+
+.col{position:relative;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.colhead{display:flex;align-items:center;gap:8px;padding:9px 10px 8px;border-bottom:1px solid var(--line)}
+.colhead .pn{font-weight:650;font-size:12.5px}
+.segm{display:inline-flex;gap:2px;background:var(--card);border:1px solid var(--line2);border-radius:8px;padding:2px;margin-left:auto}
+.segm span{padding:3px 9px;border-radius:6px;font-size:12px;color:var(--muted)}
+.segm span.on{background:var(--sel);color:var(--text);font-weight:600}
+.scope{display:flex;align-items:center;gap:8px;padding:10px 12px 6px;font-size:12px}
+.scope .dd{background:var(--btn);border-radius:7px;padding:3px 8px;font-weight:600;color:var(--row)}
+.fr{display:flex;align-items:center;gap:8px;padding:5px 12px;font-size:12.5px;color:var(--row)}
+.fr .l{width:12px;font-weight:800;font-size:11px}
+.fr .p{color:var(--ter);font-size:11.5px}
+.fr .n{margin-left:auto;font:11px var(--mono);color:var(--ter)}
+.colfoot{margin-top:auto}
+.check{display:flex;align-items:center;gap:7px;padding:8px 12px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line)}
+.btns{display:flex;gap:8px;padding:4px 12px 10px}
+.btn{flex:1;height:28px;border-radius:7px;border:1px solid var(--ctl);display:grid;place-items:center;font-size:12px;font-weight:600;color:var(--row)}
+.btn.pri{background:var(--text);color:#111;border-color:var(--text)}
+.ctx{position:relative;display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+
+.center{padding:8px;min-width:0;display:flex}
+.pane{position:relative;flex:1;border:1px solid var(--line2);border-radius:10px;background:var(--win);box-shadow:0 0 0 3px rgba(91,156,245,.10);display:flex;flex-direction:column;min-width:0}
+.ph{position:relative;height:34px;display:flex;align-items:center;gap:8px;padding:0 12px;border-bottom:1px solid var(--line);font-size:12.5px}
+.ph .o{color:var(--ter)}
+.ph .r{margin-left:auto;color:var(--ter);font:11.5px var(--mono)}
+.term{padding:14px 16px;font:12px/1.7 var(--mono);color:#C9CCD1;overflow:hidden}
+.term .u{background:#1C1F24;border-radius:6px;padding:4px 8px;display:inline-block;margin-bottom:6px;color:var(--text)}
+.term .s{color:#8FB8F7}
+
+.sb{position:relative;display:flex;align-items:center;gap:16px;padding:0 14px;background:var(--chrome);border-top:1px solid var(--line);font-size:12px;color:var(--muted);border-radius:0 0 12px 12px}
+.sb .it{position:relative;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.sb .r{margin-left:auto}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex:none}
+.chip{background:var(--usagebg);color:var(--amberT);font-weight:650;border-radius:5px;padding:1px 7px}
+
+/* peças de estado */
+.g{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.g.needs{background:var(--amber);box-shadow:0 0 0 3px rgba(242,169,59,.18)}
+.g.work{border:2px solid var(--blue);border-top-color:transparent}
+.g.done{background:var(--green)}
+.g.idle{border:1.5px solid var(--idle)}
+.g.fail{background:var(--red)}
+
+/* chamadas numeradas */
+.co{position:absolute;z-index:9;width:20px;height:20px;border-radius:50%;background:var(--amber);color:#1A1206;font:800 11px/20px -apple-system,system-ui;text-align:center;box-shadow:0 0 0 3px var(--page)}
+.co.p{background:var(--blue);color:#fff}
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:4px 22px;margin-top:16px;font-size:13px;color:var(--row)}
+.legend div{display:flex;gap:9px;align-items:baseline}
+.legend b.n{flex:none;width:20px;height:20px;border-radius:50%;background:var(--amber);color:#1A1206;font-size:11px;display:grid;place-items:center}
+.legend.p b.n{background:var(--blue);color:#fff}
+
+/* princípios */
+.prin{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;margin-top:16px}
+.pc{border:1px solid var(--line2);border-radius:12px;background:var(--card);padding:14px 16px}
+.pc h4{margin:0 0 4px;font-size:14px}
+.pc h4 em{font-style:normal;color:var(--ter);font-weight:600;margin-right:6px}
+.pc p{margin:0;font-size:13px;color:var(--body)}
+.pc .src{margin-top:8px;font-size:11.5px;color:var(--ter)}
+.pc .src a{color:var(--ter)}
+
+/* achados */
+.region{margin-top:40px;padding-top:10px;border-top:1px solid var(--line2)}
+.region > h3{font-size:13px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+.f{margin-top:22px;border:1px solid var(--line2);border-radius:14px;background:var(--card);overflow:hidden}
+.fh{display:flex;align-items:flex-start;gap:12px;padding:14px 18px 10px}
+.fid{font:700 12px var(--mono);color:var(--ter);padding-top:3px;flex:none}
+.fh h3{font-size:16.5px;line-height:1.35}
+.sev{flex:none;margin-left:auto;font-size:11px;font-weight:800;letter-spacing:.04em;border-radius:6px;padding:3px 8px}
+.S1{background:#2A1719;color:var(--redT)}.S2{background:var(--usagebg);color:var(--amberT)}.S3{background:var(--linkbg);color:var(--link)}.S4{background:var(--seg);color:var(--dim)}
+.fb{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;padding:0 18px 14px}
+.fb dl{margin:0}
+.fb dt{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ter);margin-top:10px}
+.fb dd{margin:3px 0 0;color:var(--row);font-size:13.5px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px 18px;background:#0E0F11;border-top:1px solid var(--line)}
+.fig{position:relative;min-width:0}
+.fig > .lbl{font-size:11px;font-weight:800;letter-spacing:.08em;margin-bottom:10px;color:var(--amberT)}
+.fig.pro > .lbl{color:#8FB8F7}
+.fig .cap{font-size:12.5px;color:var(--muted);margin-top:10px}
+.frame{position:relative;background:var(--win);border:1px solid var(--line2);border-radius:10px;overflow:visible}
+.dir{padding:12px 18px 14px;border-top:1px solid var(--line);font-size:13.5px;color:var(--row)}
+.dir b{color:#8FB8F7}
+
+/* recortes */
+.strip{display:flex;align-items:center;gap:8px;height:44px;padding:0 10px;background:var(--chrome);border-radius:10px}
+.vrail{position:relative;width:56px;background:var(--chrome);border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:7px;padding:10px 0}
+.duo{display:flex;gap:16px;align-items:flex-start}
+.sbs{display:flex;align-items:center;gap:14px;height:30px;padding:0 12px;background:var(--chrome);border-radius:10px;font-size:12px;color:var(--muted);white-space:nowrap}
+
+/* tabela */
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
+th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ter);padding:8px 10px;border-bottom:1px solid var(--line2);font-weight:700}
+td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--row);vertical-align:top}
+td.x{color:var(--amberT);font-weight:700}
+td.no{color:var(--sep)}
+td:first-child{color:var(--text);font-weight:550}
+
+.keep{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px;margin-top:16px}
+.keep div{border:1px solid #1E2A20;background:#111814;border-radius:12px;padding:12px 16px}
+.keep h4{margin:0 0 4px;font-size:14px;color:var(--greenT)}
+.keep p{margin:0;font-size:13px}
+.why{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px;margin-top:18px}
+.why div{border:1px solid var(--line2);border-radius:12px;background:var(--card);padding:12px 16px}
+.why h4{margin:0 0 6px;font-size:14px;display:flex;gap:8px;align-items:center}
+.why ul{margin:0;padding-left:18px;font-size:13px;color:var(--row)}.why li{margin:3px 0}
+.src ol{padding-left:20px;font-size:13px;color:var(--row)}.src li{margin:5px 0}
+.note{background:var(--tneeds);border:1px solid var(--lamber);color:var(--note);border-radius:10px;padding:10px 14px;font-size:13px;margin-top:14px;max-width:900px}
+@media (max-width:860px){.fb,.pair{grid-template-columns:1fr}.sum div{grid-template-columns:1fr;gap:2px}}
+
+/* ---------- extra: estruturas alternativas ---------- */
+.win.alt{height:560px}
+.side{position:relative;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;padding:8px 6px;gap:1px;font-size:12.5px;overflow:hidden}
+.sec{font-size:10.5px;font-weight:800;letter-spacing:.07em;color:var(--ter);padding:9px 8px 4px;display:flex;align-items:center;gap:6px}
+.sec .pill{margin-left:auto}
+.tr{position:relative;display:flex;align-items:center;gap:8px;min-height:26px;padding:0 8px;border-radius:7px;color:var(--row);white-space:nowrap;flex:none}
+.tr.l2{padding-left:24px}.tr.l3{padding-left:42px}
+.tr.on{background:var(--sel);color:var(--text);font-weight:550}
+.tr.need{background:var(--tneeds);box-shadow:inset 0 0 0 1px var(--lamber)}
+.tr.proj{font-weight:650;color:var(--text)}
+.tr.dim{color:var(--ter)}
+.tr .m{margin-left:auto;color:var(--ter);font-size:11px;font-weight:500}
+.tr .car{width:9px;color:var(--ter);font-size:9px;flex:none}
+.tr .ic{color:var(--muted)}
+.av{width:18px;height:18px;border-radius:5px;display:grid;place-items:center;font-size:9px;font-weight:800;flex:none}
+.av.lg{width:22px;height:22px;border-radius:6px;font-size:10px}
+.av.cx{background:#26324A;color:#B7CCF5}.av.bh{background:#4A3220;color:#FFD9B0}.av.al{background:#1F3A2E;color:#BDEBD3}.av.am{background:#33264A;color:#D9C7F7}.av.nt{background:#2A2D33;color:#C3C6CB}
+.pill{font-size:10px;font-weight:800;border-radius:8px;padding:0 6px;line-height:16px;flex:none}
+.pill.a{background:var(--amber);color:#1A1206}.pill.b{background:#1D2230;color:#9BB8F0}.pill.g{background:#1E2A20;color:#7FD3A2}
+.ask{display:block;margin:2px 0 4px 30px;font:11px var(--mono);color:var(--note);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sfoot{margin-top:auto;border-top:1px solid var(--line);padding-top:6px;display:flex;flex-direction:column;gap:1px}
+.navseg{display:flex;gap:2px;background:var(--card);border:1px solid var(--line2);border-radius:8px;padding:2px;margin:2px 2px 4px}
+.navseg span{flex:1;text-align:center;padding:3px 4px;border-radius:6px;font-size:11.5px;color:var(--muted);white-space:nowrap}
+.navseg span.on{background:var(--sel);color:var(--text);font-weight:600}
+
+/* duas fileiras */
+.prow{position:relative;display:flex;align-items:center;gap:4px;padding:0 12px 0 16px;background:var(--chrome);border-bottom:1px solid var(--line)}
+.trow{position:relative;display:flex;align-items:center;gap:2px;padding:0 12px;background:var(--win);border-bottom:1px solid var(--line)}
+.ptab{position:relative;height:30px;padding:0 10px;border-radius:8px;display:flex;gap:7px;align-items:center;font-size:12.5px;color:var(--dim);white-space:nowrap}
+.ptab.on{background:var(--sel);color:var(--text);font-weight:650}
+
+/* gaveta de baixo */
+.drawer{position:absolute;left:8px;right:8px;bottom:8px;height:170px;background:var(--side);border:1px solid var(--line2);border-radius:10px;box-shadow:0 -14px 40px rgba(0,0,0,.45);display:flex;flex-direction:column}
+
+/* caixa de entrada */
+.ir{position:relative;padding:8px 10px;border-radius:9px;display:grid;grid-template-columns:12px 1fr auto;gap:1px 9px;align-items:center;flex:none}
+.ir .t{font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ir .a{color:var(--ter);font-size:11px}
+.ir .s{grid-column:2/4;color:var(--ter);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ir.on{background:var(--sel)}
+.ir.need{background:var(--tneeds);box-shadow:inset 0 0 0 1px var(--lamber)}
+.chips{display:flex;gap:5px;flex-wrap:wrap;padding:4px 6px 6px}
+.chips span{font-size:11px;padding:2px 8px;border-radius:7px;background:var(--btn);color:var(--dim);display:flex;gap:5px;align-items:center}
+.chips span.on{background:var(--sel);color:var(--text);font-weight:600}
+
+/* mosaico */
+.mos{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:8px;padding:8px;flex:1;min-height:0}
+.mt{position:relative;border:1px solid var(--line2);border-radius:9px;background:var(--win);display:flex;flex-direction:column;min-height:0;overflow:hidden;opacity:.94}
+.mt .ph{height:28px;font-size:11.5px;padding:0 9px}
+.mt .term{padding:7px 9px;font-size:10.5px;line-height:1.55}
+.mt.need{border-color:#8A6420;box-shadow:0 0 0 3px rgba(242,169,59,.18);opacity:1}
+.mt.on{box-shadow:0 0 0 3px rgba(91,156,245,.18);opacity:1}
+.mt .act{display:flex;gap:6px;padding:0 9px 8px;margin-top:auto}
+.mt .act span{font-size:11px;font-weight:650;border:1px solid var(--ctl);border-radius:6px;padding:2px 9px;color:var(--row)}
+.mt .act span.pri{background:var(--text);color:#111;border-color:var(--text)}
+
+/* espaços */
+.ov{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:18px}
+.oc{position:relative;border:1px solid var(--line2);border-radius:12px;background:var(--card);padding:10px;display:flex;flex-direction:column;gap:8px}
+.oc.on{box-shadow:0 0 0 3px var(--focus)}
+.oc.need{border-color:#8A6420}
+.oc .th{height:92px;border-radius:7px;background:var(--win);border:1px solid var(--line);display:grid;grid-template-columns:1.4fr 1fr;gap:4px;padding:4px}
+.oc .th i{display:block;border-radius:4px;background:#141619;border:1px solid var(--line)}
+.oc .th i.n{border-color:#8A6420;background:#1A1711}
+.oc .h{display:flex;align-items:center;gap:7px;font-weight:650;font-size:13px}
+.oc .s{font-size:11.5px;color:var(--ter)}
+.spacesdots{display:flex;gap:5px;align-items:center}
+.spacesdots i{width:6px;height:6px;border-radius:50%;background:var(--sep);display:block}
+.spacesdots i.on{background:var(--text)}
+.spacesdots i.n{background:var(--amber)}
+.attpill{display:flex;align-items:center;gap:7px;height:26px;padding:0 10px;border-radius:13px;background:var(--tneeds);border:1px solid var(--lamber);color:var(--amberT);font-size:12px;font-weight:600;white-space:nowrap}
+
+/* comando */
+.hud{position:absolute;left:50%;top:70px;transform:translateX(-50%);width:560px;background:#16181B;border:1px solid var(--ctl);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.6);overflow:hidden;z-index:5}
+.hud .in{height:46px;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid var(--line);font-size:15px;color:var(--muted)}
+.hud .gr{padding:8px 14px 3px;font-size:10.5px;font-weight:800;letter-spacing:.07em;color:var(--ter)}
+.hud .it{margin:1px 7px;padding:7px 9px;border-radius:8px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--row)}
+.hud .it.on{background:#202833}
+.hud .it .m{margin-left:auto;color:var(--ter);font-size:11.5px}
+
+/* blocos de texto de cada estrutura */
+.st{margin-top:56px;padding-top:12px;border-top:1px solid var(--line2)}
+.st > .hd{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.st > .hd .k{font:800 13px var(--mono);color:var(--ter)}
+.st > .hd h3{font-size:20px}
+.st > .hd .ref{color:var(--ter);font-size:12.5px}
+.jobs{display:grid;grid-template-columns:200px 1fr;margin-top:14px;border:1px solid var(--line2);border-radius:12px;overflow:hidden;background:var(--card)}
+.jobs div{padding:8px 14px;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--row)}
+.jobs div:nth-child(odd){color:var(--text);font-weight:600;background:#131518}
+.jobs div:nth-last-child(-n+2){border-bottom:0}
+.pc2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px}
+.pc2 > div{border:1px solid var(--line2);border-radius:12px;background:var(--card);padding:12px 16px}
+.pc2 h4{margin:0 0 6px;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.pc2 .pro h4{color:var(--greenT)}.pc2 .con h4{color:var(--amberT)}.pc2 .who h4{color:#8FB8F7}
+.pc2 ul{margin:0;padding-left:18px;font-size:13px;color:var(--row)}.pc2 li{margin:3px 0}
+.pc2 p{margin:0;font-size:13px}
+.cmp td{text-align:center;white-space:nowrap}
+.cmp td:first-child{text-align:left;white-space:normal}
+.cmp th{text-align:center}.cmp th:first-child{text-align:left}
+.r3{color:var(--greenT);letter-spacing:2px}.r2{color:var(--amberT);letter-spacing:2px}.r1{color:var(--redT);letter-spacing:2px}
+.cmp td small{display:block;color:var(--ter);font-size:11px;white-space:normal;margin-top:2px}
+.states{display:grid;grid-template-columns:1fr;gap:22px;margin-top:16px}
+.stlbl{font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#8FB8F7;margin:26px 0 0}
+.give{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin-top:14px}
+.give div{border:1px solid var(--lamber);background:var(--tneeds);border-radius:12px;padding:12px 16px}
+.give h4{margin:0 0 4px;font-size:14px;color:var(--amberT)}
+.give p{margin:0;font-size:13px;color:var(--note)}
+@media (max-width:860px){.pc2{grid-template-columns:1fr}.jobs{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-diff" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="18" r="2.2"/><path d="M6 8.5V14a3 3 0 0 0 3 3h3M18 15.5V10a3 3 0 0 0-3-3h-3M10 15l2 2-2 2M14 5l-2 2 2 2"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h11a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H9l-4 3v-3H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M16 9h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-1v3l-4-3h-3"/></symbol>
+    <symbol id="i-brain" viewBox="0 0 24 24"><path d="M12 5v14M12 5a3 3 0 0 0-5.5 1.5A3 3 0 0 0 4 10a3 3 0 0 0 1 4.5A3 3 0 0 0 8 19a3 3 0 0 0 4 0M12 5a3 3 0 0 1 5.5 1.5A3 3 0 0 1 20 10a3 3 0 0 1-1 4.5A3 3 0 0 1 16 19a3 3 0 0 1-4 0M8 10h2M14 13h2"/></symbol>
+    <symbol id="i-branch" viewBox="0 0 24 24"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="7" r="2"/><path d="M6 7v10M18 9c0 5-6 4-11 8"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.5 3.5 5.5 3.5 8.5s-1 6-3.5 8.5c-2.5-2.5-3.5-5.5-3.5-8.5s1-6 3.5-8.5"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-kanban" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="1.5"/><path d="M9 4v16M15 4v16M5.5 8h1.5M11 8h2M17 8h1.5"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7.5" stroke-dasharray="3 2.9"/></symbol>
+    <symbol id="i-side" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M15 4.5v15"/></symbol>
+    <symbol id="i-sideL" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M9 4.5v15"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></symbol>
+    <symbol id="i-tray" viewBox="0 0 24 24"><path d="M4 13l2.5-7h11L20 13v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 13h4.5l1 2h5l1-2H20"/></symbol>
+    <symbol id="i-cup" viewBox="0 0 24 24"><path d="M5 9h11v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM16 10h1.5a2 2 0 0 1 0 4H16M8 3.5v2.5M11 3.5v2.5"/></symbol>
+    <symbol id="i-term" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="M7.5 10l2.5 2-2.5 2M12 15h4"/></symbol>
+  </defs>
+</svg>
+
+<main>
+<h1>Estruturas alternativas para a janela</h1>
+<p class="sub">Seis jeitos diferentes de organizar a janela do Cadex. Cada um é julgado pelos princípios de UX e pelo uso: uma pessoa com muitos agentes do Claude Code em terminais, em vários projetos ao mesmo tempo, que precisa saber onde está, trocar rápido e nunca deixar passar um agente esperando permissão. Os terminais são o conteúdo principal. A única restrição do dono é que não haja painel à direita da janela. Nada do layout de hoje é ponto de partida. Continua a <a href="4-auditoria-estrutura.html">auditoria da estrutura</a>, e os princípios P1 a P12 são os de lá.</p>
+
+<p>Em todos os desenhos aparecem os mesmos dados:<br>• cinco projetos: <b>cadex</b>, <b>bhband-site</b>, <b>alpha</b>, <b>ai-memory</b> e <b>notes</b>;<br>• você está em <b>cadex › kite-fix</b>;<br>• um agente em outro projeto, <b>bhband-site › checkout-copy</b>, pede permissão para rodar <code>npm install stripe</code>.<br>A pergunta de cada desenho é: dá para perceber esse pedido sem procurar?</p>
+
+<div class="note">Pesquisa somada à da auditoria:<br>• HIG <a href="https://developer.apple.com/design/human-interface-guidelines/outline-views">Outline views</a>: guardar o que a pessoa expandiu e usar a coluna da esquerda para a hierarquia.<br>• HIG <a href="https://developer.apple.com/design/human-interface-guidelines/split-views">Split views</a>: destacar a seleção em cada pane que leva ao detalhe e oferecer vários jeitos de reabrir um pane escondido.<br>• HIG <a href="https://developer.apple.com/design/human-interface-guidelines/sidebars">Sidebars</a>: no máximo dois níveis na barra lateral.<br>• NN/g <a href="https://www.nngroup.com/articles/ui-accelerators/">UI Accelerators</a>: atalho é alternativa, nunca o único caminho.</div>
+
+<!-- ======================================================= A -->
+<section class="st" id="A">
+<div class="hd"><span class="k">A</span><h3>Árvore do trabalho</h3><span class="ref">uma barra lateral só, com projetos, tarefas e terminais em árvore, e nenhuma aba. Lembra o Finder em lista, o navegador do Xcode e o Conductor.</span></div>
+<div class="scroll">
+<div class="win alt" style="grid-template-rows:44px 1fr">
+  <div class="tb">
+    <div class="lights"><i></i><i></i><i></i></div>
+    <div class="tbtn on"><svg class="ic"><use href="#i-sideL"/></svg></div>
+    <div class="where" style="position:relative"><span class="av cx">CX</span>cadex<span class="t">› kite-fix › Claude</span><b class="co" style="top:-12px;left:-8px">1</b></div>
+    <span class="grow"></span>
+    <div class="srch"><svg class="ic s"><use href="#i-search"/></svg>Search<kbd>⌘K</kbd></div>
+    <div class="acct"><i>✳</i>bkdg 84%</div>
+  </div>
+  <div class="mid" style="grid-template-columns:260px 1fr">
+    <div class="side">
+      <b class="co" style="top:30px;right:6px">2</b>
+      <div class="tr proj"><span class="car">▾</span><span class="av cx">CX</span>cadex<span class="m"><span class="pill b">2</span></span></div>
+      <div class="tr l2"><span class="g done"></span>npm run dev<span class="m">:5173</span></div>
+      <div class="tr l2"><span class="g idle"></span>zsh</div>
+      <div class="tr l2"><svg class="ic s"><use href="#i-branch"/></svg>kite-fix<span class="m">3</span></div>
+      <div class="tr l3 on"><span class="g work"></span>Claude · Opus<span class="m">4 min</span></div>
+      <div class="tr l3"><span class="g work"></span>make check</div>
+      <div class="tr l3"><span class="g idle"></span>zsh</div>
+      <div class="tr l2"><svg class="ic s"><use href="#i-branch"/></svg>bell-cards<span class="m"><span class="g done"></span></span></div>
+      <div class="tr proj"><span class="car">▾</span><span class="av bh">BH</span>bhband-site<span class="m"><span class="pill a">1</span></span></div>
+      <div class="tr l2"><svg class="ic s"><use href="#i-branch"/></svg>checkout-copy</div>
+      <div class="tr l3 need"><span class="g needs"></span>Claude · Sonnet<span class="m amb">1 min</span><b class="co" style="top:3px;right:-12px">3</b></div>
+      <div class="tr l3"><span class="g done"></span>npm run dev</div>
+      <div class="tr proj"><span class="car">▸</span><span class="av al">AL</span>alpha<span class="m">2</span></div>
+      <div class="tr proj"><span class="car">▸</span><span class="av am">AM</span>ai-memory<span class="m"><span class="pill b">1</span></span></div>
+      <div class="tr proj dim"><span class="car">▸</span><span class="av nt">NT</span>notes</div>
+      <div class="sfoot"><div class="tr"><svg class="ic s"><use href="#i-plus"/></svg>Novo projeto</div><div class="tr"><svg class="ic s"><use href="#i-kanban"/></svg>Quadro</div><div class="tr" style="position:relative"><svg class="ic s"><use href="#i-gear"/></svg>Configurações<b class="co" style="top:3px;right:6px">4</b></div></div>
+    </div>
+    <div class="center">
+      <div class="pane">
+        <div class="ph"><span class="g work"></span><b>Claude</b><span class="o">kite-fix · Opus · bkdg</span><span class="r">US$ 0.31 · 4 min</span></div>
+        <div class="term"><div class="u">› o trilho precisa rolar quando há muitos projetos</div><br>⏺ Read RailView.swift<br>&nbsp;&nbsp;⎿ Read 221 lines<br>⏺ Update(RailView.swift)<br>&nbsp;&nbsp;⎿ Updated with 18 additions and 4 removals<br><span class="s">✻ Wiring the scroll… 12s · esc to interrupt</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="legend"><div><b class="n">1</b><span>A trilha "projeto › tarefa › terminal" no título. O clique em cada pedaço sobe até ele.</span></div><div><b class="n">2</b><span>A árvore: projeto, tarefa e terminal. A linha escolhida fica acesa, e o projeto fechado mostra a contagem.</span></div><div><b class="n">3</b><span>O agente que espera é uma linha âmbar no lugar dele.</span></div><div><b class="n">4</b><span>Novo projeto, quadro e configurações, com nome, no pé.</span></div></div>
+<div class="jobs">
+  <div>Saber onde estou</div><div>A linha acesa na árvore e a trilha no título. É o melhor "você está aqui" das seis: o lugar e os vizinhos aparecem juntos.</div>
+  <div>Trocar de terminal, tarefa ou projeto</div><div>Um clique na linha; ⌃Tab e ⌘J pelo teclado. Projeto, tarefa e terminal são o mesmo gesto, a diferença é a profundidade.</div>
+  <div>Ver o que precisa de mim</div><div>A linha âmbar e a contagem no projeto fechado. Se a árvore rolar, o pedido pode ficar fora da vista, e então só sobra o número no projeto.</div>
+  <div>Files, Changes, Sessions, Memory</div><div>Não há outro lugar na janela. Cada um abre no centro como página ou como pane ao lado do terminal, pelo menu do projeto ou pelo ⌘K.</div>
+  <div>Configurações</div><div>Item com nome no pé da árvore, ⌘, e o menu.</div>
+</div>
+<div class="pc2">
+  <div class="pro"><h4>Serve</h4><ul><li>P1: o lugar dentro da hierarquia inteira.</li><li>P3: tudo tem nome, nada é ícone solto.</li><li>P4: cada terminal aparece uma vez só, porque não há abas.</li><li>Jakob: Finder, Xcode, VS Code.</li></ul></div>
+  <div class="con"><h4>Custa</h4><ul><li>São três níveis (projeto, tarefa, terminal), e o HIG pede no máximo dois numa barra lateral.</li><li>P6: abrir e fechar grupos empurra as linhas, e o alvo muda de altura.</li><li>Com 40 terminais, a árvore rola e o âmbar sai da vista (P10).</li><li>260 pt de largura sempre ocupados.</li></ul></div>
+  <div class="who"><h4>Para quem</h4><p>Quem tem poucos projetos com muitos terminais e gosta de ver tudo listado. Fica pior quando há mais de 6 ou 8 projetos ativos.</p></div>
+</div>
+</section>
+
+<!-- ======================================================= B -->
+<section class="st" id="B">
+<div class="hd"><span class="k">B</span><h3>Duas fileiras em cima</h3><span class="ref">nenhuma barra lateral: projetos numa fileira de abas e terminais em outra, embaixo. O que muda, o que estiver aberto, sobe da gaveta de baixo. Lembra os grupos de abas de um navegador.</span></div>
+<div class="scroll">
+<div class="win alt" style="grid-template-rows:42px 38px 1fr">
+  <div class="prow">
+    <div class="lights" style="margin-right:14px"><i></i><i></i><i></i></div>
+    <div class="ptab on" style="position:relative"><span class="av cx">CX</span>cadex<span class="pill b">2</span><b class="co" style="top:-10px;left:-8px">1</b></div>
+    <div class="ptab" style="position:relative"><span class="av bh">BH</span>bhband-site<span class="pill a">1</span><b class="co" style="top:-10px;right:-8px">2</b></div>
+    <div class="ptab"><span class="av al">AL</span>alpha</div>
+    <div class="ptab"><span class="av am">AM</span>ai-memory<span class="pill b">1</span></div>
+    <div class="ptab"><span class="av nt">NT</span>notes</div>
+    <div class="ptab" style="color:var(--ter)">+</div>
+    <span class="grow"></span>
+    <div class="srch" style="width:120px"><svg class="ic s"><use href="#i-search"/></svg>⌘K</div>
+    <div class="tbtn"><svg class="ic"><use href="#i-gear"/></svg></div>
+  </div>
+  <div class="trow">
+    <div class="tab task" style="position:relative">main<b class="co" style="top:-10px;left:-10px">3</b></div>
+    <div class="tab on"><svg class="ic s"><use href="#i-branch"/></svg>kite-fix</div>
+    <div class="tab"><svg class="ic s"><use href="#i-branch"/></svg>bell-cards <span class="g done"></span></div>
+    <span style="width:1px;height:18px;background:var(--ctl);margin:0 8px"></span>
+    <div class="tab on"><span class="g work"></span>Claude</div>
+    <div class="tab"><span class="g work"></span>make check</div>
+    <div class="tab">zsh</div>
+    <div class="plus"><svg class="ic"><use href="#i-plus"/></svg></div>
+    <span class="grow"></span>
+    <div class="tab" style="position:relative"><svg class="ic s"><use href="#i-diff"/></svg>Changes 3<b class="co" style="top:-10px;right:-10px">4</b></div>
+    <div class="tab"><svg class="ic s"><use href="#i-folder"/></svg>Files</div>
+  </div>
+  <div class="center" style="position:relative">
+    <div class="pane">
+      <div class="ph"><span class="g work"></span><b>Claude</b><span class="o">kite-fix · Opus · bkdg</span><span class="r">US$ 0.31 · 4 min</span></div>
+      <div class="term"><div class="u">› o trilho precisa rolar quando há muitos projetos</div><br>⏺ Read RailView.swift<br>&nbsp;&nbsp;⎿ Read 221 lines<br><span class="s">✻ Wiring the scroll… 12s · esc to interrupt</span></div>
+    </div>
+    <div class="drawer">
+      <div class="colhead"><span class="pn">Changes · kite-fix</span><span class="ter" style="font-size:11.5px">against main · ↑2</span><span class="grow"></span><span class="btn" style="flex:none;padding:0 12px">Commit…</span><span class="btn pri" style="flex:none;padding:0 12px">Open PR</span></div>
+      <div class="fr"><span class="l amb">M</span>RailView.swift<span class="p">sidebar</span><span class="n">+18 −4</span></div>
+      <div class="fr"><span class="l amb">M</span>RailParts.swift<span class="p">sidebar</span><span class="n">+9 −3</span></div>
+      <div class="fr"><span class="l grn">A</span>RailEdge.swift<span class="p">sidebar</span><span class="n">+15</span></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="legend"><div><b class="n">1</b><span>Fileira de projetos. A aba de cada um mostra quantos agentes trabalham e quantos esperam.</span></div><div><b class="n">2</b><span>O pedido do bhband-site é a contagem âmbar na aba do projeto.</span></div><div><b class="n">3</b><span>Fileira do projeto: main e as tarefas à esquerda, os terminais da escolhida à direita.</span></div><div><b class="n">4</b><span>Changes e Files sobem como gaveta por cima da parte de baixo do terminal.</span></div></div>
+<div class="jobs">
+  <div>Saber onde estou</div><div>Duas abas acesas, uma por fileira. É claro e fica no ponto mais olhado da janela.</div>
+  <div>Trocar de terminal, tarefa ou projeto</div><div>Clique ou teclado: ⌃⌘1…9 para projetos, ⌘1…9 para terminais. Tudo à vista, sem rolar, enquanto couber.</div>
+  <div>Ver o que precisa de mim</div><div>A contagem âmbar na aba do projeto. Com projetos demais, a fileira transborda num "» N", que precisa levar o âmbar junto.</div>
+  <div>Files, Changes, Sessions, Memory</div><div>Changes e Files numa gaveta que sobe de baixo, sobre o terminal. Sessions e Memory abrem como página do projeto pelo menu da aba dele.</div>
+  <div>Configurações</div><div>Engrenagem no canto e ⌘,.</div>
+</div>
+<div class="pc2">
+  <div class="pro"><h4>Serve</h4><ul><li>A largura inteira fica para os terminais.</li><li>P6: a ordem horizontal é estável.</li><li>P1 com dois níveis à vista.</li><li>Jakob: todo mundo conhece abas de navegador.</li></ul></div>
+  <div class="con"><h4>Custa</h4><ul><li>Escala: oito projetos já cortam os nomes. A largura é o recurso mais escasso da barra (HIG Toolbars).</li><li>Duas fileiras gastam cerca de 80 pt de altura.</li><li>A gaveta cobre o fim da saída do agente, justo a parte que se quer ler.</li><li>Tarefas e terminais disputam a mesma fileira.</li></ul></div>
+  <div class="who"><h4>Para quem</h4><p>Quem trabalha em 3 a 6 projetos, com tela larga, e quer o máximo de largura para os terminais.</p></div>
+</div>
+</section>
+
+<!-- ======================================================= C -->
+<section class="st" id="C">
+<div class="hd"><span class="k">C</span><h3>Comando primeiro</h3><span class="ref">quase nenhuma moldura: só os painéis, uma linha de título e o ⌘J como navegação. Lembra o Ghostty, o Zed em modo foco e o Raycast.</span></div>
+<div class="scroll">
+<div class="win alt" style="grid-template-rows:32px 1fr">
+  <div class="tb" style="justify-content:center;gap:10px">
+    <div class="lights" style="position:absolute;left:14px"><i></i><i></i><i></i></div>
+    <span style="font-size:12.5px;color:var(--dim);position:relative"><b style="color:var(--text)">cadex › kite-fix</b> · Claude<b class="co" style="top:-6px;left:-26px">1</b></span>
+    <div class="attpill" style="position:absolute;right:12px;height:22px"><span class="g needs" style="width:7px;height:7px"></span>1 precisa de você · ⌘J<b class="co" style="top:-10px;left:-14px">2</b></div>
+  </div>
+  <div class="center" style="position:relative;gap:8px">
+    <div class="pane"><div class="ph"><span class="g work"></span><b>Claude</b><span class="o">kite-fix</span><span class="r">4 min</span></div><div class="term"><div class="u">› o trilho precisa rolar</div><br>⏺ Update(RailView.swift)<br><span class="s">✻ Wiring the scroll…</span></div></div>
+    <div class="pane" style="box-shadow:none;opacity:.92;max-width:380px"><div class="ph"><span class="g work"></span><b>make check</b><span class="r">running 38 s</span></div><div class="term"><span class="grn">ok</span> CoreTests<br><span class="grn">ok</span> RailTests<br><span class="s">… TerminalTests</span></div></div>
+    <div class="hud">
+      <div class="in"><svg class="ic"><use href="#i-search"/></svg>Ir para…<span class="grow"></span><kbd>⌘J</kbd><b class="co" style="top:13px;right:48px">3</b></div>
+      <div class="gr">PRECISA DE VOCÊ</div>
+      <div class="it on"><span class="g needs"></span><span class="av bh">BH</span>checkout-copy · quer rodar npm install stripe<span class="m">⌘1</span></div>
+      <div class="gr">TERMINOU</div>
+      <div class="it"><span class="g done"></span><span class="av cx">CX</span>bell-cards · PR #41 pronto<span class="m">⌘2</span></div>
+      <div class="gr">TRABALHANDO</div>
+      <div class="it"><span class="g work"></span><span class="av cx">CX</span>kite-fix · Claude<span class="m">⌘3</span></div>
+      <div class="it"><span class="g work"></span><span class="av am">AM</span>wiki-merge · Claude<span class="m">⌘4</span></div>
+      <div class="gr">AÇÕES</div>
+      <div class="it"><svg class="ic s"><use href="#i-diff"/></svg>Mudanças de kite-fix<span class="m">⇧⌘G</span></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="legend"><div><b class="n">1</b><span>O lugar, como título da janela.</span></div><div><b class="n">2</b><span>A única chamada permanente: "N precisa de você", que abre o ⌘J.</span></div><div><b class="n">3</b><span>O ⌘J é a navegação inteira: pedidos, terminados, trabalhando e ações.</span></div></div>
+<div class="jobs">
+  <div>Saber onde estou</div><div>O título. Os vizinhos não aparecem: para saber o que mais existe, é preciso abrir o ⌘J.</div>
+  <div>Trocar de terminal, tarefa ou projeto</div><div>⌘J e digitar, ou ⌃Tab. É rápido para quem já sabe o nome do que procura.</div>
+  <div>Ver o que precisa de mim</div><div>A pílula âmbar no título, mais a notificação e o Dock. Fica sempre à vista, mas mostra só um número.</div>
+  <div>Files, Changes, Sessions, Memory</div><div>Pelo ⌘K e pelos atalhos, como página ou pane. Nada fica à vista.</div>
+  <div>Configurações</div><div>⌘, e o menu.</div>
+</div>
+<div class="pc2">
+  <div class="pro"><h4>Serve</h4><ul><li>O máximo de espaço para os terminais.</li><li>Velocidade para quem usa o teclado.</li><li>Uma única chamada de atenção, impossível de não ver (P10).</li></ul></div>
+  <div class="con"><h4>Custa</h4><ul><li>P3 e P9: lembrar no lugar de reconhecer. Navegação escondida é usada metade das vezes e deixa as tarefas 39% mais lentas.</li><li>NN/g Accelerators: o atalho não pode ser o único caminho.</li><li>P6: não há lugar para a mão decorar.</li><li>Quem chega novo não descobre o que existe.</li></ul></div>
+  <div class="who"><h4>Para quem</h4><p>Quem já sabe tudo de cor e usa só o teclado. Funciona bem como <b>modo foco</b> que se liga e desliga (⌃⌘F), não como padrão.</p></div>
+</div>
+</section>
+
+<!-- ======================================================= D -->
+<section class="st" id="D">
+<div class="hd"><span class="k">D</span><h3>Caixa de entrada primeiro</h3><span class="ref">à esquerda, os agentes de todos os projetos numa fila ordenada por atenção; o projeto vira filtro. Lembra o Mail, a caixa de entrada do Linear e as notificações do GitHub.</span></div>
+<div class="scroll">
+<div class="win alt" style="grid-template-rows:44px 1fr">
+  <div class="tb">
+    <div class="lights"><i></i><i></i><i></i></div>
+    <div class="tbtn on"><svg class="ic"><use href="#i-sideL"/></svg></div>
+    <div class="where"><span class="av cx">CX</span>cadex<span class="t">› kite-fix</span></div>
+    <div class="tabs" style="margin-left:10px"><div class="tab on"><span class="g work"></span>Claude</div><div class="tab"><span class="g work"></span>make check</div><div class="tab">zsh</div></div>
+    <span class="grow"></span>
+    <div class="srch" style="width:120px"><svg class="ic s"><use href="#i-search"/></svg>⌘K</div>
+  </div>
+  <div class="mid" style="grid-template-columns:300px 1fr">
+    <div class="side" style="padding:6px">
+      <div class="chips" style="position:relative"><span class="on">Todos</span><span><span class="av cx" style="width:14px;height:14px;font-size:7px">CX</span>cadex</span><span><span class="av bh" style="width:14px;height:14px;font-size:7px">BH</span>bhband</span><span><span class="av am" style="width:14px;height:14px;font-size:7px">AM</span>ai-mem</span><span>+2</span><b class="co" style="top:-6px;right:-4px">1</b></div>
+      <div class="sec">PRECISA DE VOCÊ<span class="pill a">1</span></div>
+      <div class="ir need"><span class="g needs"></span><span class="t">checkout-copy · Claude</span><span class="a">1 min</span><span class="s"><span class="av bh" style="display:inline-grid;width:14px;height:14px;font-size:7px;vertical-align:-3px">BH</span> quer rodar <span style="font-family:var(--mono);color:var(--note)">npm install stripe</span></span><b class="co" style="top:6px;right:-12px">2</b></div>
+      <div class="sec">TERMINOU</div>
+      <div class="ir"><span class="g done"></span><span class="t">bell-cards · Claude</span><span class="a">12 min</span><span class="s">cadex · PR #41 pronto para revisar</span></div>
+      <div class="sec">TRABALHANDO<span class="pill b">3</span></div>
+      <div class="ir on"><span class="g work"></span><span class="t">kite-fix · Claude</span><span class="a">4 min</span><span class="s">cadex · Wiring the scroll…</span></div>
+      <div class="ir"><span class="g work"></span><span class="t">wiki-merge · Claude</span><span class="a">9 min</span><span class="s">ai-memory · Running cargo test</span></div>
+      <div class="ir"><span class="g work"></span><span class="t">main · Codex</span><span class="a">1 min</span><span class="s">alpha · Reading the schema</span></div>
+      <div class="sec">OUTROS TERMINAIS<b class="co" style="position:static;margin-left:auto">3</b></div>
+      <div class="tr"><span class="g done"></span>npm run dev<span class="m">cadex</span></div>
+      <div class="tr"><span class="g idle"></span>zsh<span class="m">notes</span></div>
+    </div>
+    <div class="center"><div class="pane"><div class="ph"><span class="g work"></span><b>Claude</b><span class="o">kite-fix · Opus · bkdg</span><span class="r">US$ 0.31 · 4 min</span></div><div class="term"><div class="u">› o trilho precisa rolar quando há muitos projetos</div><br>⏺ Update(RailView.swift)<br>&nbsp;&nbsp;⎿ Updated with 18 additions and 4 removals<br><span class="s">✻ Wiring the scroll… 12s · esc to interrupt</span></div></div></div>
+  </div>
+</div>
+</div>
+<div class="legend"><div><b class="n">1</b><span>Os projetos são filtros, não lugares.</span></div><div><b class="n">2</b><span>O pedido vem primeiro, com o que ele quer, venha de onde vier.</span></div><div><b class="n">3</b><span>Terminais sem agente (servidores, shells) ficam num grupo de segunda classe.</span></div></div>
+<div class="jobs">
+  <div>Saber onde estou</div><div>A linha acesa na fila e o lugar no título. O projeto aparece como etiqueta, não como lugar.</div>
+  <div>Trocar de terminal, tarefa ou projeto</div><div>Trocar de agente é um clique. Trocar de projeto é filtrar, e os terminais comuns ficam desajeitados.</div>
+  <div>Ver o que precisa de mim</div><div>Imbatível: os pedidos ficam sempre no topo, com o que cada um pede, de todos os projetos, sem rolar.</div>
+  <div>Files, Changes, Sessions, Memory</div><div>Como página ou pane do agente escolhido. As Sessions viram a própria fila, com os terminados.</div>
+  <div>Configurações</div><div>⌘, e o menu.</div>
+</div>
+<div class="pc2">
+  <div class="pro"><h4>Serve</h4><ul><li>P10 e P8 no máximo: o app junta a atenção num lugar e a ordena.</li><li>Hick: o provável vem primeiro.</li><li>Jakob: Mail.</li></ul></div>
+  <div class="con"><h4>Custa</h4><ul><li>P6: a fila muda de ordem sozinha. A pessoa mira numa linha e outra sobe no lugar, e o clique cai no agente errado (precisa congelar sob o ponteiro).</li><li>P1: o projeto deixa de ser lugar.</li><li>Terminal sem agente vira cidadão de segunda.</li></ul></div>
+  <div class="who"><h4>Para quem</h4><p>Quem conduz 10 ou mais agentes em paralelo e quase não digita em terminal próprio. Como vista ou seção fixa vale ouro; como estrutura inteira, desorienta.</p></div>
+</div>
+</section>
+
+<!-- ======================================================= E -->
+<section class="st" id="E">
+<div class="hd"><span class="k">E</span><h3>Espaços com visão geral</h3><span class="ref">cada projeto ocupa a janela inteira como um espaço; ⌃← e ⌃→ trocam, ⌃↑ mostra todos em grade. Lembra os espaços do macOS, o Mission Control e o Arc.</span></div>
+<div class="scroll">
+<div class="duo" style="gap:18px;align-items:flex-start">
+<div class="win alt" style="width:640px;grid-template-rows:38px 1fr">
+  <div class="tb" style="gap:8px;padding-left:12px">
+    <div class="lights" style="margin-right:2px"><i></i><i></i><i></i></div>
+    <div class="spacesdots" style="position:relative"><i class="on"></i><i class="n"></i><i></i><i></i><i></i><b class="co" style="top:-14px;left:-6px">1</b></div>
+    <b style="font-size:13px">cadex</b>
+    <div class="tab on" style="height:26px"><span class="g work"></span>Claude</div><div class="tab" style="height:26px">make check</div>
+    <span class="grow"></span>
+    <div class="attpill" style="position:relative"><span class="g needs" style="width:7px;height:7px"></span>bhband ⌃↑<b class="co" style="top:-12px;right:-8px">2</b></div>
+  </div>
+  <div class="center"><div class="pane"><div class="ph"><span class="g work"></span><b>Claude</b><span class="o">kite-fix</span><span class="r">4 min</span></div><div class="term"><div class="u">› o trilho precisa rolar</div><br>⏺ Update(RailView.swift)<br><span class="s">✻ Wiring the scroll…</span></div></div></div>
+</div>
+<div class="win alt" style="width:540px;grid-template-rows:38px 1fr">
+  <div class="tb"><div class="lights"><i></i><i></i><i></i></div><b style="font-size:13px;margin-left:8px">Todos os projetos</b><span class="grow"></span><span class="ter" style="font-size:12px">⌃↑ · Esc</span></div>
+  <div class="ov" style="grid-template-columns:repeat(2,1fr);position:relative">
+    <b class="co" style="top:6px;left:6px">3</b>
+    <div class="oc on"><div class="th"><i></i><i></i></div><div class="h"><span class="av cx">CX</span>cadex<span class="pill b" style="margin-left:auto">2</span></div><div class="s">kite-fix · bell-cards terminou</div></div>
+    <div class="oc need"><div class="th"><i class="n"></i><i></i></div><div class="h"><span class="av bh">BH</span>bhband-site<span class="pill a" style="margin-left:auto">1</span></div><div class="s amb">checkout-copy quer npm install</div></div>
+    <div class="oc"><div class="th"><i></i><i></i></div><div class="h"><span class="av al">AL</span>alpha</div><div class="s">1 agente trabalhando</div></div>
+    <div class="oc"><div class="th"><i></i><i></i></div><div class="h"><span class="av am">AM</span>ai-memory</div><div class="s">wiki-merge trabalhando</div></div>
+  </div>
+</div>
+</div>
+</div>
+<div class="legend"><div><b class="n">1</b><span>Os pontos dos espaços. O âmbar marca o projeto que espera.</span></div><div><b class="n">2</b><span>A pílula do pedido aparece em todo espaço e leva até ele.</span></div><div><b class="n">3</b><span>A visão geral: cada projeto com miniaturas ao vivo e o que acontece nele.</span></div></div>
+<div class="jobs">
+  <div>Saber onde estou</div><div>O espaço inteiro é o projeto: o nome no alto e os pontos. Fica claro, mas sem os vizinhos.</div>
+  <div>Trocar de terminal, tarefa ou projeto</div><div>Terminal pela aba. Projeto com ⌃→ em sequência (três toques para o terceiro) ou com ⌃↑ e um clique.</div>
+  <div>Ver o que precisa de mim</div><div>Só a pílula e o ponto âmbar. O resto dos outros projetos fica longe da vista, e por isso fora da cabeça.</div>
+  <div>Files, Changes, Sessions, Memory</div><div>Como página ou gaveta dentro do espaço.</div>
+  <div>Configurações</div><div>⌘, e o menu.</div>
+</div>
+<div class="pc2">
+  <div class="pro"><h4>Serve</h4><ul><li>Foco total num projeto e a largura toda para ele.</li><li>Metáfora de lugar: cada projeto é uma sala (P1).</li><li>A visão geral troca a memória pelo reconhecimento (P3).</li></ul></div>
+  <div class="con"><h4>Custa</h4><ul><li>P2: os outros projetos somem por inteiro.</li><li>Trocar é sequencial (Fitts e Hick ao contrário: o terceiro custa três gestos).</li><li>A animação de troca a cada salto cansa em 100 trocas por dia.</li><li>Mais um modo a aprender, que é a visão geral.</li></ul></div>
+  <div class="who"><h4>Para quem</h4><p>Quem fica uma hora num projeto e só de vez em quando visita outro. É o oposto do uso de quem conduz agentes em paralelo.</p></div>
+</div>
+</section>
+
+<!-- ======================================================= F -->
+<section class="st" id="F">
+<div class="hd"><span class="k">F</span><h3>Mosaico de agentes</h3><span class="ref">o centro é uma grade ao vivo de todos os agentes; o clique amplia um, e os outros viram uma faixa. Lembra os pequenos múltiplos de Tufte, uma central de monitoramento e um painel de tmux.</span></div>
+<div class="scroll">
+<div class="win alt" style="grid-template-rows:42px 1fr">
+  <div class="tb">
+    <div class="lights"><i></i><i></i><i></i></div>
+    <div class="chips" style="padding:0;margin-left:10px;position:relative"><span class="on">Todos · 6</span><span>cadex</span><span>bhband</span><span>ai-memory</span><span>Só os que esperam</span><b class="co" style="top:-12px;left:-12px">1</b></div>
+    <span class="grow"></span><div class="srch" style="width:120px"><svg class="ic s"><use href="#i-search"/></svg>⌘K</div>
+  </div>
+  <div class="mos">
+    <div class="mt need"><div class="ph"><span class="g needs"></span><b>checkout-copy</b><span class="o">bhband · Sonnet</span><span class="r amb">1 min</span></div><div class="term">⏺ Bash(npm install stripe)<br><span class="amb">Allow this command?</span></div><div class="act"><span class="pri">Allow</span><span>Deny</span><span>Ir</span></div><b class="co" style="bottom:8px;right:8px">2</b></div>
+    <div class="mt on"><div class="ph"><span class="g work"></span><b>kite-fix</b><span class="o">cadex · Opus</span><span class="r">4 min</span></div><div class="term">⏺ Update(RailView.swift)<br><span class="s">✻ Wiring the scroll…</span></div></div>
+    <div class="mt"><div class="ph"><span class="g done"></span><b>bell-cards</b><span class="o">cadex</span><span class="r">12 min</span></div><div class="term">PR #41 ready<br><span class="grn">✓ make check passed</span></div></div>
+    <div class="mt"><div class="ph"><span class="g work"></span><b>wiki-merge</b><span class="o">ai-memory</span><span class="r">9 min</span></div><div class="term">running 214 tests<br><span class="s">… store::tests</span></div></div>
+    <div class="mt"><div class="ph"><span class="g work"></span><b>main</b><span class="o">alpha · Codex</span><span class="r">1 min</span></div><div class="term">Reading schema.sql</div></div>
+    <div class="mt" style="position:relative"><div class="ph"><span class="g done"></span><b>npm run dev</b><span class="o">cadex</span><span class="r">:5173</span></div><div class="term">VITE ready in 412 ms<br>➜ Local: http://localhost:5173</div><b class="co" style="bottom:6px;right:6px">3</b></div>
+  </div>
+</div>
+</div>
+<div class="legend"><div><b class="n">1</b><span>Filtros por projeto e por estado, no lugar de navegar.</span></div><div><b class="n">2</b><span>O pedido é um quadro com borda âmbar, com Allow e Deny à vista.</span></div><div><b class="n">3</b><span>Cada quadro é um terminal de verdade, pequeno demais para trabalhar.</span></div></div>
+<div class="jobs">
+  <div>Saber onde estou</div><div>"Em todos", o que não é um lugar. Ao ampliar um quadro, o lugar dele.</div>
+  <div>Trocar de terminal, tarefa ou projeto</div><div>Clicar no quadro amplia. Projeto é filtro.</div>
+  <div>Ver o que precisa de mim</div><div>Tudo à vista ao mesmo tempo, com a borda âmbar e a resposta no próprio quadro.</div>
+  <div>Files, Changes, Sessions, Memory</div><div>Só no quadro ampliado; no mosaico não há lugar.</div>
+  <div>Configurações</div><div>⌘, e o menu.</div>
+</div>
+<div class="pc2">
+  <div class="pro"><h4>Serve</h4><ul><li>P2 no máximo: nada fica escondido.</li><li>P8: comparar agentes lado a lado, como numa corrida.</li><li>Responder a um pedido sem sair do lugar.</li></ul></div>
+  <div class="con"><h4>Custa</h4><ul><li>Legibilidade e Fitts: um terminal de 1/9 da tela não se lê nem se usa.</li><li>Não passa de 9 agentes sem paginar.</li><li>Desenhar todos os terminais ao mesmo tempo pesa no orçamento de desempenho.</li><li>Responder "Allow" sem ler o contexto é arriscado.</li></ul></div>
+  <div class="who"><h4>Para quem</h4><p>Quem vigia uma corrida ou uma rodada de tarefas. É uma <b>vista</b> que se abre (o quadro de hoje é parente dela), não a casa.</p></div>
+</div>
+</section>
+
+<!-- ======================================================= comparação -->
+<section>
+<h2>Comparação <small>●●● bom · ●● aceitável · ● ruim, pelo uso descrito</small></h2>
+<div class="scroll" style="padding-left:2px">
+<table class="cmp" style="min-width:980px">
+<tr><th>Critério</th><th>A · Árvore</th><th>B · Duas fileiras</th><th>C · Comando</th><th>D · Caixa de entrada</th><th>E · Espaços</th><th>F · Mosaico</th><th>Ideal (abaixo)</th></tr>
+<tr><td>Saber onde estou (P1)</td><td class="r3">●●●</td><td class="r3">●●●</td><td class="r2">●●<small>só o título</small></td><td class="r2">●●<small>projeto é filtro</small></td><td class="r3">●●●</td><td class="r1">●</td><td class="r3">●●●</td></tr>
+<tr><td>Trocar de terminal no projeto</td><td class="r3">●●●</td><td class="r3">●●●</td><td class="r2">●●<small>exige lembrar</small></td><td class="r2">●●<small>terminal comum</small></td><td class="r3">●●●</td><td class="r2">●●</td><td class="r3">●●●</td></tr>
+<tr><td>Trocar de projeto</td><td class="r3">●●●</td><td class="r2">●●<small>até 6</small></td><td class="r2">●●</td><td class="r2">●●<small>filtro</small></td><td class="r1">●<small>sequencial</small></td><td class="r1">●</td><td class="r3">●●●</td></tr>
+<tr><td>Nunca perder quem espera (P10)</td><td class="r2">●●<small>rola para fora</small></td><td class="r2">●●<small>transborda</small></td><td class="r2">●●<small>só um número</small></td><td class="r3">●●●</td><td class="r1">●<small>longe da vista</small></td><td class="r3">●●●</td><td class="r3">●●●</td></tr>
+<tr><td>Escala: 10 projetos, 40 terminais</td><td class="r2">●●</td><td class="r1">●</td><td class="r3">●●●</td><td class="r3">●●●</td><td class="r2">●●</td><td class="r1">●</td><td class="r3">●●●</td></tr>
+<tr><td>Largura para os terminais</td><td class="r2">●●</td><td class="r3">●●●</td><td class="r3">●●●</td><td class="r2">●●</td><td class="r3">●●●</td><td class="r1">●</td><td class="r2">●●<small>recolhe</small></td></tr>
+<tr><td>Aprender sem decorar (P3, P9)</td><td class="r3">●●●</td><td class="r3">●●●</td><td class="r1">●</td><td class="r3">●●●</td><td class="r2">●●</td><td class="r2">●●</td><td class="r3">●●●</td></tr>
+<tr><td>Layout estável (P6)</td><td class="r2">●●<small>expandir empurra</small></td><td class="r3">●●●</td><td class="r1">●</td><td class="r1">●<small>reordena</small></td><td class="r3">●●●</td><td class="r2">●●</td><td class="r2">●●<small>só a fila muda</small></td></tr>
+<tr><td>Changes e Files junto do terminal</td><td class="r2">●●</td><td class="r2">●●<small>gaveta cobre</small></td><td class="r1">●</td><td class="r2">●●</td><td class="r2">●●</td><td class="r1">●</td><td class="r3">●●●</td></tr>
+<tr><td>Familiar no Mac (Jakob)</td><td class="r3">●●●</td><td class="r3">●●●</td><td class="r2">●●</td><td class="r3">●●●</td><td class="r2">●●</td><td class="r1">●</td><td class="r3">●●●</td></tr>
+</table>
+</div>
+<p>Leitura: nenhuma das seis é boa em tudo. Cada uma ganha num critério que importa para quem conduz agentes:<br>• <b>A</b> e <b>B</b> são as melhores para saber onde se está;<br>• <b>D</b> e <b>F</b> são as melhores para não perder ninguém;<br>• <b>B</b>, <b>C</b> e <b>E</b> dão mais largura aos terminais.<br>A estrutura ideal junta A e D na barra lateral e deixa os terminais em abas, como em B: o lugar em dois níveis à esquerda, a fila de pedidos fixa no topo dela, e o conteúdo do lugar em abas no alto. O modo foco de C e o mosaico de F ficam como vistas que se abrem pelo ⌘K, não como a casa.</p>
+</section>
+
+<!-- ======================================================= IDEAL -->
+<section>
+<h2>A estrutura que eu construiria <small>"o lugar à esquerda, o conteúdo em cima, os pedidos sempre no topo"</small></h2>
+<p>Três regras definem esta estrutura:<br>1. <b>A barra lateral responde "onde"</b>, em dois níveis: projeto, e embaixo dele o main e as tarefas.<br>2. <b>As abas respondem "o quê"</b>: os terminais e os documentos do lugar escolhido.<br>3. <b>Uma fila "Precisa de você" fica presa no topo da barra lateral</b>, acima de tudo, em todos os modos da barra e em todas as larguras.<br>Não há barra de baixo, trilho de ícones nem coluna. Changes e Files são outra vista da mesma barra lateral, com nome, como o navegador do Xcode, e a fila de pedidos continua presa no alto nessa vista também.</p>
+
+<p class="stlbl">1 · Estado normal</p>
+<div class="scroll">
+<div class="win" style="grid-template-rows:44px 1fr">
+  <div class="tb">
+    <div class="lights"><i></i><i></i><i></i></div>
+    <div class="tbtn on" style="position:relative"><svg class="ic"><use href="#i-sideL"/></svg><b class="co p" style="top:-12px;left:-8px">1</b></div>
+    <div class="where" style="position:relative"><span class="av cx">CX</span>cadex<span class="t">› kite-fix</span><span class="ter" style="font-weight:500;font-size:11.5px">⎇ ↑2</span><span class="chev">▾</span><b class="co p" style="top:-12px;left:-8px">2</b></div>
+    <div class="tabs" style="margin-left:8px;position:relative"><b class="co p" style="top:-12px;left:-10px">3</b>
+      <div class="tab on"><span class="g work"></span>Claude</div>
+      <div class="tab"><span class="g work"></span>make check</div>
+      <div class="tab">zsh</div>
+      <div class="tab task">Review</div>
+    </div>
+    <div class="plus"><svg class="ic"><use href="#i-plus"/></svg></div>
+    <span class="grow"></span>
+    <div class="srch" style="width:130px"><svg class="ic s"><use href="#i-search"/></svg>Search<kbd>⌘K</kbd></div>
+    <div class="acct" style="position:relative"><i>✳</i>bkdg 84%<b class="co p" style="top:-12px;left:-8px">4</b></div>
+    <div class="tbtn"><svg class="ic"><use href="#i-cup"/></svg></div>
+  </div>
+  <div class="mid" style="grid-template-columns:248px 1fr">
+    <div class="side">
+      <div class="navseg" style="position:relative"><span class="on">Trabalho</span><span>Mudanças 3</span><span>Arquivos</span><b class="co p" style="top:-8px;right:-10px">5</b></div>
+      <div class="sec" style="position:relative">PRECISA DE VOCÊ<span class="pill a">1</span><b class="co p" style="top:4px;right:34px">6</b></div>
+      <div class="tr need"><span class="g needs"></span><span class="av bh">BH</span>checkout-copy<span class="m amb">1 min</span></div>
+      <span class="ask">quer rodar npm install stripe</span>
+      <div class="sec" style="position:relative">PROJETOS<b class="co p" style="top:4px;right:34px">7</b></div>
+      <div class="tr proj"><span class="car">▾</span><span class="av cx">CX</span>cadex<span class="m"><span class="g work" style="width:8px;height:8px"></span> 2</span></div>
+      <div class="tr l2"><span class="ic s" style="width:13px"></span>main<span class="m">npm run dev · <span class="g done" style="width:7px;height:7px"></span></span></div>
+      <div class="tr l2 on"><svg class="ic s"><use href="#i-branch"/></svg>kite-fix<span class="m"><span class="g work" style="width:8px;height:8px"></span> 3</span></div>
+      <div class="tr l2"><svg class="ic s"><use href="#i-branch"/></svg>bell-cards<span class="m"><span class="g done" style="width:7px;height:7px"></span> PR</span></div>
+      <div class="tr proj"><span class="car">▸</span><span class="av bh">BH</span>bhband-site<span class="m"><span class="pill a">1</span></span></div>
+      <div class="tr proj"><span class="car">▸</span><span class="av al">AL</span>alpha<span class="m"><span class="g work" style="width:8px;height:8px"></span> 1</span></div>
+      <div class="tr proj"><span class="car">▸</span><span class="av am">AM</span>ai-memory<span class="m"><span class="g work" style="width:8px;height:8px"></span> 1</span></div>
+      <div class="tr proj dim"><span class="car">▸</span><span class="av nt">NT</span>notes</div>
+      <div class="tr dim"><svg class="ic s"><use href="#i-plus"/></svg>Novo projeto…</div>
+      <div class="sfoot" style="position:relative"><b class="co p" style="top:-10px;right:4px">8</b>
+        <div class="tr"><svg class="ic s"><use href="#i-kanban"/></svg>Quadro</div>
+        <div class="tr"><svg class="ic s"><use href="#i-clock"/></svg>Automações</div>
+        <div class="tr"><svg class="ic s"><use href="#i-globe"/></svg>Máquinas</div>
+      </div>
+    </div>
+    <div class="center">
+      <div class="pane">
+        <div class="ph"><span class="g work"></span><b>Claude</b><span class="o">kite-fix · Opus · bkdg</span><span class="r">US$ 0.31 · 4 min</span></div>
+        <div class="term"><div class="u">› o trilho precisa rolar quando há muitos projetos</div><br>⏺ Read RailView.swift<br>&nbsp;&nbsp;⎿ Read 221 lines<br>⏺ Update(RailView.swift)<br>&nbsp;&nbsp;⎿ Updated with 18 additions and 4 removals<br><span class="s">✻ Wiring the scroll… 12s · esc to interrupt</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="legend p">
+  <div><b class="n">1</b><span>Barra lateral (⌘B) na borda de entrada.</span></div>
+  <div><b class="n">2</b><span><b>Onde estou</b>, com o branch. O menu traz a página do projeto (Visão geral, Sessões, Memória, Configurações do projeto) e a troca de lugar.</span></div>
+  <div><b class="n">3</b><span><b>O que está aberto aqui</b>: as abas do lugar. ⌘1…9 contam essas. O "» N" leva a peça mais urgente.</span></div>
+  <div><b class="n">4</b><span>O geral que roda: a conta com o uso e o café. Não há barra de baixo.</span></div>
+  <div><b class="n">5</b><span>As três vistas da barra, com nome: Trabalho, Mudanças, Arquivos (⇧⌘1…3).</span></div>
+  <div><b class="n">6</b><span><b>Precisa de você</b>: fixa no topo e só aparece quando há pedido. Mostra o que cada agente pede, de qualquer projeto. O clique leva ao terminal.</span></div>
+  <div><b class="n">7</b><span><b>Projetos</b> em dois níveis: projeto e, dentro dele, o main e as tarefas, com a peça e a contagem. Terminais não entram aqui; eles são as abas.</span></div>
+  <div><b class="n">8</b><span>O global e raro, com nome, no pé. As configurações do app ficam no ⌘, e no menu.</span></div>
+</div>
+
+<p class="stlbl">2 · Agente esperando num projeto fechado, com a lista rolada e a barra em Mudanças</p>
+<div class="scroll">
+<div class="duo" style="gap:18px">
+  <div class="fig"><div class="frame" style="width:260px;height:400px;display:flex;flex-direction:column;background:var(--side);padding:8px 6px;overflow:hidden">
+    <div class="navseg"><span>Trabalho</span><span class="on">Mudanças 3</span><span>Arquivos</span></div>
+    <div class="sec" style="position:relative">PRECISA DE VOCÊ<span class="pill a">1</span><b class="co p" style="top:4px;right:34px">1</b></div>
+    <div class="tr need"><span class="g needs"></span><span class="av bh">BH</span>checkout-copy<span class="m amb">1 min</span></div>
+    <span class="ask">quer rodar npm install stripe</span>
+    <div class="colhead" style="padding:8px 4px 6px;border-top:1px solid var(--line);border-bottom:0;flex-wrap:wrap;row-gap:2px;margin-top:4px"><span class="pn">kite-fix</span><span class="ter" style="font-size:11px;width:100%">against main · ↑2 · 3 files</span></div>
+    <div class="fr" style="padding:4px"><span class="l amb">M</span>RailView.swift<span class="n">+18 −4</span></div>
+    <div class="fr" style="padding:4px"><span class="l amb">M</span>RailParts.swift<span class="n">+9 −3</span></div>
+    <div class="fr" style="padding:4px"><span class="l grn">A</span>RailEdge.swift<span class="n">+15</span></div>
+    <div class="btns" style="margin-top:auto;padding:4px"><span class="btn">Commit…</span><span class="btn pri">Open PR</span></div>
+  </div><div class="cap" style="max-width:260px">① Em Mudanças, a fila de pedidos continua presa no topo. Ver o diff não esconde quem espera.</div></div>
+  <div class="fig"><div class="frame" style="width:260px;height:400px;display:flex;flex-direction:column;background:var(--side);padding:8px 6px;overflow:hidden">
+    <div class="navseg"><span class="on">Trabalho</span><span>Mudanças</span><span>Arquivos</span></div>
+    <div class="sec">PRECISA DE VOCÊ<span class="pill a">1</span></div>
+    <div class="tr need"><span class="g needs"></span><span class="av bh">BH</span>checkout-copy<span class="m amb">1 min</span></div>
+    <span class="ask">quer rodar npm install stripe</span>
+    <div class="sec">PROJETOS</div>
+    <div style="position:relative;flex:1;overflow:hidden;border-top:1px dashed var(--line2)">
+      <div class="tr proj"><span class="car">▸</span><span class="av am">AM</span>ai-memory</div>
+      <div class="tr proj"><span class="car">▸</span><span class="av nt">NT</span>notes</div>
+      <div class="tr proj"><span class="car">▸</span><span class="av al">AL</span>api-gateway</div>
+      <div class="tr proj"><span class="car">▸</span><span class="av cx">DS</span>design-sys</div>
+      <div class="tr proj"><span class="car">▸</span><span class="av am">IN</span>infra</div>
+      <div style="position:absolute;bottom:6px;left:0;right:0;display:flex;justify-content:center"><span class="edgepill" style="position:relative">▼ bhband-site espera<b class="co p" style="top:-12px;right:-14px">2</b></span></div>
+    </div>
+  </div><div class="cap" style="max-width:260px">② Com a lista rolada para fora de bhband-site, a borda diz quem espera lá embaixo. Os dois sinais apontam para o mesmo pedido.</div></div>
+  <div class="fig"><div class="frame" style="width:300px;padding:12px;background:var(--side)">
+    <div style="display:flex;gap:10px;align-items:center"><div style="position:relative;width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#2b2f36,#16181b);display:grid;place-items:center;font-weight:800;color:var(--text)">Cx<span style="position:absolute;top:-6px;right:-6px;background:#EF5B5B;color:#fff;font-size:11px;font-weight:800;border-radius:10px;padding:0 6px;line-height:18px">1</span></div><span class="ter" style="font-size:12.5px">③ Com o app atrás de outros: a notificação do sistema e o número no ícone do Dock, que só conta pedidos.</span></div>
+  </div></div>
+</div>
+</div>
+
+<p class="stlbl">3 · Janela estreita (abaixo de 1000 pt)</p>
+<div class="scroll">
+<div class="win" style="width:760px;height:500px;grid-template-rows:44px 1fr">
+  <div class="tb" style="gap:8px">
+    <div class="lights"><i></i><i></i><i></i></div>
+    <div class="where"><span class="av cx">CX</span>cadex<span class="t">› kite-fix</span><span class="chev">▾</span></div>
+    <div class="tabs" style="margin-left:4px"><div class="tab on"><span class="g work"></span>Claude</div><div class="tab more">» 2</div></div>
+    <span class="grow"></span>
+    <div class="tbtn"><svg class="ic"><use href="#i-search"/></svg></div>
+  </div>
+  <div class="mid" style="grid-template-columns:56px 1fr">
+    <div class="rail">
+      <div class="inbox" style="position:relative"><svg class="ic"><use href="#i-tray"/></svg><span class="n">1</span><b class="co p" style="top:8px;left:-21px">1</b></div>
+      <div class="hl" style="margin:6px 0"></div>
+      <div class="tile img1 on">CX<span class="bd" style="background:transparent;border:2px solid var(--blue);border-top-color:transparent;width:12px;height:12px"></span></div>
+      <div class="tile img2">BH<span class="bd" style="background:var(--amber)"></span></div>
+      <div class="tile img3">AL</div>
+      <div class="tile">AM</div>
+      <div class="rspace"></div>
+      <div class="rb"><svg class="ic"><use href="#i-kanban"/></svg></div>
+    </div>
+    <div class="center"><div class="pane"><div class="ph"><span class="g work"></span><b>Claude</b><span class="o">kite-fix</span><span class="r">4 min</span></div><div class="term"><div class="u">› o trilho precisa rolar</div><br>⏺ Update(RailView.swift)<br><span class="s">✻ Wiring the scroll… 12s</span></div></div></div>
+  </div>
+</div>
+</div>
+<p class="ter" style="font-size:13px">① A barra lateral recolhe sozinha para uma faixa de 56 pt, como o HIG recomenda. A fila vira a caixa âmbar do topo, com o número; os projetos viram quadrados com a peça; as tarefas aparecem pelo menu do lugar e pelo ⌘J. Alargar a janela devolve a barra inteira. A faixa é a mesma barra lateral recolhida, não uma segunda estrutura.</p>
+
+<p class="stlbl">4 · Nada aberto</p>
+<div class="scroll">
+<div class="win" style="height:470px;grid-template-rows:44px 1fr">
+  <div class="tb"><div class="lights"><i></i><i></i><i></i></div><div class="tbtn on"><svg class="ic"><use href="#i-sideL"/></svg></div><span class="grow"></span><div class="srch" style="width:130px"><svg class="ic s"><use href="#i-search"/></svg>Search<kbd>⌘K</kbd></div><div class="acct"><i>✳</i>bkdg</div></div>
+  <div class="mid" style="grid-template-columns:248px 1fr">
+    <div class="side">
+      <div class="navseg"><span class="on">Trabalho</span><span>Mudanças</span><span>Arquivos</span></div>
+      <div class="sec">RECENTES</div>
+      <div class="tr dim"><span class="car">▸</span><span class="av cx">CX</span>cadex<span class="m">ontem</span></div>
+      <div class="tr dim"><span class="car">▸</span><span class="av bh">BH</span>bhband-site<span class="m">2 dias</span></div>
+      <div class="tr dim"><span class="car">▸</span><span class="av al">AL</span>alpha<span class="m">1 sem</span></div>
+      <div class="tr"><svg class="ic s"><use href="#i-plus"/></svg>Novo projeto…</div>
+      <div class="sfoot"><div class="tr"><svg class="ic s"><use href="#i-kanban"/></svg>Quadro</div><div class="tr"><svg class="ic s"><use href="#i-clock"/></svg>Automações</div></div>
+    </div>
+    <div class="center" style="display:block;padding:40px 60px">
+      <div style="font-size:22px;font-weight:700">Good evening</div>
+      <div class="muted" style="margin:4px 0 16px">Pick up where you were, or start something.</div>
+      <div style="border:1px solid var(--ctl);border-radius:12px;background:var(--card);padding:14px 16px;color:var(--muted)">What do you want to do in <b style="color:var(--text)">cadex</b>?<div class="ter" style="font-size:12px;margin-top:14px;border-top:1px solid var(--line);padding-top:8px">◆ Claude · bkdg ▾ &nbsp; In this folder ▾ <span style="float:right">↩ opens a terminal with Claude</span></div></div>
+    </div>
+  </div>
+</div>
+</div>
+<p class="ter" style="font-size:13px">Sem nada aberto, a barra lateral mostra os recentes no lugar dos projetos abertos, e o centro mostra a tela de início. A fila "Precisa de você" não aparece porque não há pedido, e o lugar some do título porque não há lugar. A estrutura é a mesma; só muda o conteúdo.</p>
+
+<h3 style="margin-top:34px">Por que esta, e não uma das seis</h3>
+<div class="why">
+  <div><h4>Dois níveis à esquerda, o terceiro em cima</h4><ul><li>Fica dentro do limite de dois níveis do HIG e evita a árvore funda de A.</li><li>A hierarquia é lida como uma frase: barra lateral (onde), título (onde, de novo), abas (o quê). É o split view do HIG: a seleção à esquerda leva ao detalhe.</li><li>Os terminais aparecem uma vez só (P4). Abas são o que todo Mac conhece (Jakob).</li></ul></div>
+  <div><h4>A fila presa no topo</h4><ul><li>Traz o melhor de D sem a fila mandar na estrutura. Como só ela muda de ordem, o resto fica estável (P6).</li><li>Fica no canto mais olhado e não sai com a rolagem nem com a troca de vista (P10).</li><li>Mostra o que cada agente pede, não só um número (P2), e o clique leva ao terminal, onde está o contexto, porque responder às cegas é o risco de F.</li></ul></div>
+  <div><h4>Mudanças e Arquivos como vistas da barra, com nome</h4><ul><li>Sem painel à direita, que é a restrição do dono.</li><li>Ficam ao lado do terminal, não por cima dele (o problema de B).</li><li>Três nomes cabem nos 248 pt (P3). É o padrão do navegador do Xcode, conhecido no Mac.</li></ul></div>
+  <div><h4>Sem barra de baixo</h4><ul><li>Cada fato que ela tinha ganhou uma casa: o branch no lugar, a conta e o café em cima, as portas no cabeçalho do painel que serve, a memória na página do projeto.</li><li>Uma região a menos para olhar (Hick) e 30 pt de altura de volta para os terminais.</li><li>A borda de baixo some quando a janela é arrastada (HIG).</li></ul></div>
+</div>
+
+<h3 style="margin-top:34px">O que o dono abre mão</h3>
+<div class="give">
+  <div><h4>O trilho de quadrados como cara do app</h4><p>A imagem do projeto vira um avatar de 18 pt na lista. O quadrado grande só volta na janela estreita. Em troca, o nome fica sempre escrito.</p></div>
+  <div><h4>248 pt de largura com a barra aberta</h4><p>São 192 pt a mais que os 56 do trilho sozinho e 68 a menos que trilho e coluna juntos. Quem quer a largura inteira usa ⌘B ou o modo foco de C, e a fila continua no título como pílula âmbar.</p></div>
+  <div><h4>Ver os terminais de outro projeto sem ir até ele</h4><p>A barra mostra o projeto e as tarefas, não os terminais de cada um. Para ver terminais de outro lugar, vai-se até ele, ou usa-se o ⌘J ou o quadro. A fila cobre o único caso urgente.</p></div>
+  <div><h4>A barra de baixo e os cartões dela</h4><p>CPU, RAM e portas no cartão ao passar o ponteiro deixam de estar a um olhar de distância. Ficam no ⌘K, e as portas aparecem no cabeçalho do painel que as abriu. Quem quer um painel de máquina tem o Monitor de Atividade.</p></div>
+  <div><h4>Sessões, Memória e Git graph à mão na barra</h4><p>Moram na página do projeto, a um clique pelo menu do lugar. São coisas de ler de corpo inteiro, não de olhar enquanto o agente trabalha.</p></div>
+  <div><h4>Mudanças e trabalho ao mesmo tempo na barra</h4><p>Na vista Mudanças, a lista de projetos sai da vista, mas a fila não. Trocar de projeto dali é pelo lugar no título ou pelo ⌘J.</p></div>
+</div>
+</section>
+
+<section class="src">
+<h2>Fontes</h2>
+<ol>
+  <li>As fontes da <a href="4-auditoria-estrutura.html">auditoria da estrutura</a> (NN/g, Apple HIG, Laws of UX, VS Code, Cursor, Warp), que definem P1 a P12.</li>
+  <li>Apple. Human Interface Guidelines: Outline views. <a href="https://developer.apple.com/design/human-interface-guidelines/outline-views">developer.apple.com/…/outline-views</a></li>
+  <li>Apple. Human Interface Guidelines: Split views. <a href="https://developer.apple.com/design/human-interface-guidelines/split-views">developer.apple.com/…/split-views</a></li>
+  <li>Apple. Human Interface Guidelines: Sidebars (dois níveis; recolher com a janela). <a href="https://developer.apple.com/design/human-interface-guidelines/sidebars">developer.apple.com/…/sidebars</a></li>
+  <li>NN/g. UI Accelerators. <a href="https://www.nngroup.com/articles/ui-accelerators/">nngroup.com/articles/ui-accelerators</a></li>
+  <li>NN/g. Hamburger Menus and Hidden Navigation Hurt UX Metrics. <a href="https://www.nngroup.com/articles/hamburger-menus/">nngroup.com/articles/hamburger-menus</a></li>
+  <li>NN/g. Spatial Memory. <a href="https://www.nngroup.com/articles/spatial-memory/">nngroup.com/articles/spatial-memory</a></li>
+  <li>Tufte, E. Small multiples, em <i>Envisioning Information</i> (1990), como base do mosaico F.</li>
+</ol>
+</section>
+</main>
+</body>
+</html>

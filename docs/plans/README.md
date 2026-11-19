@@ -76,6 +76,7 @@ cabem numa sessão. Escritos em 2026-10-19, quando o Cadex tinha o terminal func
 | 35 | `docs/plans/35-memory-that-gets-it-right.md` | a memória do jeito do upstream: primeiro o estudo do ai-memory do Fabio Akita (onde importamos errado, onde é ele); o .ai-memory.toml em todo projeto; sessão sem prompt não vira página nem chama o agente; o pedido e a resposta do agente e o briefing de cada sessão guardados; a 3.5.0 (o handoff do bkdg-center, 2026-11-18) | a fazer, depois do 34 |
 | 36 | `docs/plans/36-rail-and-side-column.md` | o trilho com os projetos e a coluna lateral com Files, Changes, Sessions, Memory e Git graph à esquerda; a coluna da direita sai; a tarefa como aba e "» N" (`docs/adr/0038-rail-and-side-column.md`, `docs/design/sidebar/`) | feito (2026-11-18; sem o `make perf`) |
 | 37 | `docs/plans/37-ux-audit-fixes.md` | as correções da auditoria de UX: a atenção (um número só para o que precisa de você, um estado só), onde estou, menus e atalhos do Mac, comandos e menus de contexto, textos | feito (2026-11-19) |
+| 38 | `docs/plans/38-sidebar-work-and-files.md` | a barra lateral com a fila "Precisa de você", Trabalho e Arquivos; o lugar "projeto › tarefa" em cima; a barra de baixo sem a contagem de pedidos (`docs/adr/0039-sidebar-with-work-and-files.md`, `docs/design/sidebar/6-estrutura-ideal.html`) | a fazer (o próximo) |
 
 - Depois: a moldura nova no app do Windows (plano 34, a escrever), sobre o port dos planos 9 a 13;
   até lá o Windows segue com spaces e os comandos novos ficam no `MAC_ONLY` da paridade.
