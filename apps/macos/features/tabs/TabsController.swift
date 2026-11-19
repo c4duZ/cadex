@@ -25,6 +25,8 @@ public final class TabsController {
     /// The right click's menu on a tab, built by the app from commands
     /// (rename, color, close), for the tab already selected.
     public var contextMenu: (() -> [MenuEntry])?
+    /// A right click on a group's item in the bar (a task's, plan 36 D): the app's menu for it.
+    public var groupMenu: ((String) -> [MenuEntry])?
     /// Runs a command by id: the pane headers' buttons (ADR 0005).
     public var runCommand: ((String) -> Bool)?
     /// The group of a folder (a task's worktree, else the project): the bar shows the active
@@ -84,8 +86,16 @@ public final class TabsController {
             if items != self.bar.items { self.bar.items = items }
         }
         bar.onRename = { [weak self] in self?.rename($0) }
-        bar.onContextMenu = { [weak self] _, point in
-            guard let self, let entries = self.contextMenu?(), !entries.isEmpty else { return }
+        bar.onContextMenu = { [weak self] id, point in
+            guard let self else { return }
+            var entries: [MenuEntry] = []
+            if id > extraItemBase {
+                entries = self.contextMenu?() ?? []
+            } else if self.extraItems.indices.contains(extraItemBase - id), let group = self.extraItems[extraItemBase - id].group, !group.isEmpty {
+                // A task's item: the app's menu for that task (plan 36; the tree's menu until then).
+                entries = self.groupMenu?(group) ?? []
+            }
+            guard !entries.isEmpty else { return }
             PopupMenu.show(entries, at: point, in: self.bar)
         }
         bar.onStyleChange = { [weak self] in self?.refreshHeaders() }

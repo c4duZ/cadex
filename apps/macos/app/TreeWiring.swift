@@ -11,16 +11,13 @@ import Strings
 import Terminal
 import Worktrees
 
-/// The work's tree in this window (plan 27 phase B; docs/spec/sidebar.md): the projects with their
-/// terminals and their tasks, gathered here from the features that own them (projects, worktrees,
-/// terminals, agents) and drawn by the sidebar feature. Rebuilt when a tab, a project, a task or
-/// an agent's state changes; the tasks' worktrees are listed off the main thread (git), once per
-/// project and again when the tasks change.
+/// The work's model in this window (plan 27 phase B; its tree left the screen with ADR 0038 and the
+/// view went in plan 36): the projects with their terminals and their tasks, gathered here from the
+/// features that own them (projects, worktrees, terminals, agents). The rail, ⌘J, sidebar.find and
+/// the board read it. Redrawn when a tab, a project, a task or an agent's state changes; the tasks'
+/// worktrees are listed off the main thread (git), once per project and again when they change.
 extension WindowSession {
-    func makeTree() -> WorkTreeView {
-        let tree = WorkTreeView(newTaskShortcut: app.keymapLabel("worktrees.new-task")) { [weak self] id in _ = self?.commands.run(id) }
-        tree.onPick = { [weak self] pick in self?.pickInTree(pick) }
-        tree.menuFor = { [weak self] folder in self?.treeMenu(task: folder) ?? [] }
+    func startTree() {
         treeObserver = NotificationCenter.default.addObserver(forName: TerminalView.agentDidChange, object: nil, queue: .main) { [weak self] note in
             let sender = (note.object as AnyObject?).map(ObjectIdentifier.init)
             MainActor.assumeIsolated {
@@ -36,16 +33,15 @@ extension WindowSession {
         RunLoop.main.add(clock, forMode: .common)
         treeClock = clock
         treeWatch = WorktreesController.shared.watch { [weak self] in self?.loadTreeTasks() }
-        return tree
     }
 
-    /// sidebar.find, the tree's filter button: a project, task or terminal of the tree by name.
+    /// sidebar.find: a project, task or terminal of the work's model by name.
     func treeCommands(palette: CommandPaletteController) -> [Command] {
         [Command(id: "sidebar.find", title: T("Find in the Work Tree…", "Achar na árvore do trabalho…"),
                  keywords: ["find", "filter", "tree", "project", "task", "terminal", "achar", "filtrar", "árvore", "tarefa"], category: .view,
                  action: .run { [weak self] in
-                     guard let tree = self?.workspace?.tree else { return }
-                     palette.open(tree.findSource())
+                     guard let self else { return }
+                     palette.open(WorkTreeFindSource(projects: self.treeModel()) { [weak self] pick in self?.pickInTree(pick) })
                  })]
     }
 
@@ -125,30 +121,15 @@ extension WindowSession {
         }
     }
 
-    /// The tree from what is open now (no git, no disk).
+    /// What reads the model, from what is open now (no git, no disk): the rail, the check line, the board.
     private func drawTree() {
-        guard let tree = workspace?.tree else { return }
-        tree.show(treeModel(), chosen: tabs?.activeTerminal.map { .terminal(AppDelegate.key($0)) })
-        showFootLines(tree)
+        guard workspace != nil else { return }
         drawRail()
         showCheckLine()
         // The board moves its cards with the tree (a state changed, a task came or went).
         for project in projects?.projects ?? [] {
             (project.tabs.document(identity: BoardDocument.identity) as? BoardDocument)?.reload()
         }
-    }
-
-    /// The foot's numbers and the line whose page shows (plan 34 B): Projects "3", Automations
-    /// "1 on" (nothing when there are none), lit while its page is the one shown.
-    func showFootLines(_ tree: WorkTreeView) {
-        tree.projectsDetail = "\(projects?.projects.count ?? 0)"
-        // The database only when automations are on (it opens on first use; off, nothing to count).
-        let jobs = OrchestrationController.shared.automationsEnabled ? (try? OrchestrationController.shared.automations()?.automations()) ?? [] : []
-        let on = jobs.filter(\.enabled).count
-        tree.automationsDetail = jobs.isEmpty ? "" : T("\(on) on", "\(on) ligada" + (on == 1 ? "" : "s"))
-        let page = tabs?.showsPage == true ? tabs?.activeDocument?.identity : nil
-        tree.footChosen = page == ProjectsListDocument.identity || page?.hasPrefix("project:") == true ? "projects"
-            : page?.hasPrefix("automation") == true ? "automations" : nil
     }
 
     /// The projects with their tasks and terminals and the state of each, from what is open now:
@@ -244,7 +225,8 @@ extension WindowSession {
         return "\(seconds / 86400)d"
     }
 
-    /// A task's right click (plan 27 phase B2): what the Tasks and Agents pages did, each a command;
+    /// A task's right click (plan 27 phase B2; on the task's item in the bar since plan 36): what the
+    /// Tasks and Agents pages did, each a command;
     /// the status runs with the task, the rest after going to it (they act on the focused terminal).
     func treeMenu(task folder: String) -> [MenuEntry] {
         let terminals = (projects?.projects ?? []).flatMap(\.tabs.allTerminals).filter { terminal in

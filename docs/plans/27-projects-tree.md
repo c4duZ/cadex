@@ -33,7 +33,7 @@ agents, tabs, command-palette · Decisões: `docs/adr/0035-work-frame.md` · Moc
   project.close, project.rename, project.next, project.previous, `project.set-color`; os
   `space.*` viram apelidos (saem no 28). SpacesWiring.swift vira ProjectsWiring.swift.
 - **B. A árvore.** B1 feita (2026-11-17): a árvore na coluna da esquerda
-  (`apps/macos/features/sidebar/WorkTreeView.swift`, o modelo juntado em
+  (apps/macos/features/sidebar/WorkTreeView.swift, que saiu no plano 36; o modelo juntado em
   `apps/macos/app/TreeWiring.swift`): "New task" e o filtro (sidebar.find), os projetos com a seta que
   dobra e o nome que abre, as tarefas com o estado e o agente, os terminais (os da tarefa sob ela
   quando escolhida), "+ Add project" e o pé; os redesenhos juntados, o git só quando os projetos

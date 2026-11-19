@@ -43,7 +43,7 @@ extension RailView {
         case .project:
             return top.arrangedSubviews.filter { $0 is RailTile || $0 === groupLine }
         case .page:
-            return top.arrangedSubviews.filter { view in pageButtons.contains { $0.1 === view } }
+            return pagesStack.arrangedSubviews.filter { view in pageButtons.contains { $0.1 === view } }
         }
     }
 
@@ -53,7 +53,8 @@ extension RailView {
             view.alphaValue = Self.liftedAlpha
         }
         let items = movable(kind)
-        guard let base = items.first.flatMap({ top.arrangedSubviews.firstIndex(of: $0) }) else { return }
+        let stack = kind == .project ? top : pagesStack
+        guard let base = items.first.flatMap({ stack.arrangedSubviews.firstIndex(of: $0) }) else { return }
         var others = items.filter { $0 !== view }
         // Its slot: past every other whose middle is above the pointer (window coordinates go up).
         let pointer = event.locationInWindow.y
@@ -64,8 +65,8 @@ extension RailView {
         others.insert(view, at: slot)
         guard others != items else { return }
         for (offset, item) in others.enumerated() {
-            top.removeArrangedSubview(item)
-            top.insertArrangedSubview(item, at: base + offset)
+            stack.removeArrangedSubview(item)
+            stack.insertArrangedSubview(item, at: base + offset)
         }
         NSAnimationContext.runAnimationGroup { context in
             context.duration = Self.slideDuration

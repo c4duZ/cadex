@@ -42,8 +42,7 @@ trabalho que ocupava este lugar (ADR 0035) saiu com a ADR 0038.
   hooks, abas abertas ou fechadas, projetos editados).
 - Toda ação do trilho é comando e está no ⌘K (ADR 0005): trocar de projeto (⇧⌘S), cada página,
   fixar, editar, criar, a página Projetos, o Remote.
-- A árvore que saiu da tela ainda junta o que o sidebar.find e o ⌘J listam (os projetos, as
-  tarefas e os terminais).
+- sidebar.find (⌘K) e o ⌘J acham qualquer projeto, tarefa ou terminal pelo nome.
 
 ## Estados
 - **Nenhum projeto:** o trilho mostra só o "+", os ícones das páginas e o pé; o centro mostra a tela
@@ -52,8 +51,8 @@ trabalho que ocupava este lugar (ADR 0035) saiu com a ADR 0038.
 - **Sem host SSH nem máquina da tailnet:** o pé sem Remote.
 
 ## Casos de borda
-- Muitos projetos: o trilho ainda não rola; os que não cabem passam por baixo dos ícones das
-  páginas (falta resolver; ⇧⌘S acha qualquer um).
+- Muitos projetos: os projetos rolam numa área própria; os ícones das páginas e o pé ficam no
+  lugar.
 - Nome sem letra nem número: o quadrado mostra "•".
 - Imagem que some do disco: o quadrado volta ao emoji ou à letra.
 

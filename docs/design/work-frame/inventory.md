@@ -121,7 +121,8 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 ### O trilho e a coluna lateral (plano 36, `docs/adr/0038-rail-and-side-column.md`)
 | tipo | peça | estado | destino | plano |
 |---|---|---|---|---|
-| arquivo | `apps/macos/features/sidebar/WorkTreeView.swift` | sai | fora da tela desde a fase A; ainda junta o que o sidebar.find e o ⌘J listam: sai quando eles lerem do modelo (`apps/macos/features/sidebar/WorkTree.swift`) sem a view | depois do 36 |
+| arquivo | `apps/macos/features/sidebar/WorkTreeView.swift` | saiu | o sidebar.find e o ⌘J leem do modelo (`apps/macos/features/sidebar/WorkTree.swift`); o menu da tarefa foi para o item dela na barra de cima | 36 |
+| arquivo | `apps/macos/features/sidebar/WorkTreeRows.swift` | saiu | as linhas da árvore, com ela | 36 |
 | arquivo | a árvore do trabalho na borda esquerda | muda | o trilho (`apps/macos/features/sidebar/RailView.swift`): os projetos em quadrados, os ícones das páginas e o pé | 36 |
 | arquivo | o painel da direita (`apps/macos/features/inspector/InspectorView.swift`) | muda | a coluna lateral, à esquerda do centro, sem a fileira de abas (os ícones no trilho) | 36 |
 | spec | `docs/spec/sidebar.md`: "a árvore do trabalho. Os projetos" | saiu | a spec é a do trilho | 36 |

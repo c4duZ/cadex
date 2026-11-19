@@ -20,9 +20,6 @@ final class WorkspaceView: NSView {
 
     let titleBar: TitleBarView
     let statusBar = StatusBarView()
-    /// The work's tree of plan 27: off screen since ADR 0038 (the rail took its place); it still
-    /// gathers what sidebar.find lists, until plan 36 phase F takes it out.
-    let tree: WorkTreeView
     /// The rail (ADR 0038): flush with the window's left edge, the projects and the foot.
     let rail: RailView
     /// The side column (the right panel until ADR 0038): right of the rail, its own line on the
@@ -49,10 +46,9 @@ final class WorkspaceView: NSView {
     /// The shown project's tabs in the content panel.
     private weak var tabsView: NSView?
 
-    init(explorer: ExplorerController, tree: WorkTreeView, rail: RailView, inspector: InspectorView, run: @escaping (String) -> Void) {
+    init(explorer: ExplorerController, rail: RailView, inspector: InspectorView, run: @escaping (String) -> Void) {
         titleBar = TitleBarView(run: run)
         self.explorer = explorer
-        self.tree = tree
         self.rail = rail
         self.inspector = inspector
         super.init(frame: .zero)

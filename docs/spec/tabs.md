@@ -16,7 +16,8 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 - **Uma tarefa é um item da barra do projeto** (plano 36 D): uma por tarefa com terminal aberto, com
   o estado dela antes do nome e "›"; o clique leva às abas da tarefa (a usada por último nela). Lá,
   a barra começa com "‹ projeto", que volta às do projeto (também project.show-terminals no ⌘K), e
-  termina com "Review".
+  termina com "Review". O clique direito no item da tarefa traz o menu dela: ir à aba, revisar,
+  hibernar o agente, o status, remover.
 - **Quando não cabem:** as abas encolhem juntas até o tamanho mínimo; daí em diante as que sobram vão
   para "» N" no fim, que abre a lista delas para escolher; a ativa fica sempre à mostra.
 - **Abas sem projeto:** os terminais da pasta pessoal não viram projeto; enquanto se está neles,

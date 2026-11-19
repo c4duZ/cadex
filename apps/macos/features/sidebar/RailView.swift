@@ -20,7 +20,12 @@ public final class RailView: NSView {
     /// The foot's page that shows (lit), or nil.
     public var footLit: RailFoot? { didSet { if footLit != oldValue { lightFoot() } } }
     private let run: (String) -> Void
+    /// The projects and the "+", in `projectsScroll`: many projects scroll there, the pages and the
+    /// foot stay put (the owner, 2026-11-18).
     let top = NSStackView()
+    private let projectsScroll = NSScrollView()
+    /// The pages' line and icons, under the projects.
+    let pagesStack = NSStackView()
     private let foot = NSStackView()
     private var shown: (projects: [RailProject], chosen: String?)?
     var tiles: [RailTile] = []
@@ -56,7 +61,7 @@ public final class RailView: NSView {
             let command = button.command
             button.onPress = { [weak self] in self?.run(command) }
         }
-        for stack in [top, foot] {
+        for stack in [top, foot, pagesStack] {
             stack.orientation = .vertical
             stack.alignment = .centerX
             stack.spacing = UILooks.pt(R.gap)
@@ -77,15 +82,35 @@ public final class RailView: NSView {
         pagesLine.layer?.backgroundColor = R.Separator.color.cgColor
         pagesLine.translatesAutoresizingMaskIntoConstraints = false
         pagesLine.isHidden = true
-        top.addArrangedSubview(pagesLine)
-        for view in [top, foot, border] as [NSView] {
+        pagesStack.addArrangedSubview(pagesLine)
+        let clip = RailClip()
+        clip.drawsBackground = false
+        projectsScroll.contentView = clip
+        projectsScroll.documentView = top
+        projectsScroll.drawsBackground = false
+        projectsScroll.hasVerticalScroller = false
+        projectsScroll.verticalScrollElasticity = .none
+        top.translatesAutoresizingMaskIntoConstraints = false
+        for view in [projectsScroll, pagesStack, foot, border] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
+        // As tall as the projects when they fit; shorter, and scrolling, when the pages would meet the foot.
+        let fit = projectsScroll.heightAnchor.constraint(equalTo: top.heightAnchor)
+        // Under the window's own (500): stronger, the projects held the window open and nothing scrolled.
+        fit.priority = .defaultLow
         let hairline = DesignTokens.Stroke.hairline
         NSLayoutConstraint.activate([
-            top.topAnchor.constraint(equalTo: topAnchor, constant: UILooks.pt(R.padding.top)),
-            top.centerXAnchor.constraint(equalTo: centerXAnchor),
+            projectsScroll.topAnchor.constraint(equalTo: topAnchor, constant: UILooks.pt(R.padding.top)),
+            projectsScroll.leadingAnchor.constraint(equalTo: leadingAnchor),
+            projectsScroll.trailingAnchor.constraint(equalTo: trailingAnchor),
+            fit,
+            top.topAnchor.constraint(equalTo: clip.topAnchor),
+            top.leadingAnchor.constraint(equalTo: clip.leadingAnchor),
+            top.widthAnchor.constraint(equalTo: clip.widthAnchor),
+            pagesStack.topAnchor.constraint(equalTo: projectsScroll.bottomAnchor, constant: UILooks.pt(R.gap)),
+            pagesStack.centerXAnchor.constraint(equalTo: centerXAnchor),
+            pagesStack.bottomAnchor.constraint(lessThanOrEqualTo: foot.topAnchor, constant: -UILooks.pt(R.gap)),
             foot.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -UILooks.pt(R.padding.bottom)),
             foot.centerXAnchor.constraint(equalTo: centerXAnchor),
             separator.widthAnchor.constraint(equalToConstant: UILooks.pt(R.Separator.width)),
@@ -160,9 +185,9 @@ public final class RailView: NSView {
             }
             return (page, button)
         }
-        for (_, button) in pageButtons { top.addArrangedSubview(button) }
+        for (_, button) in pageButtons { pagesStack.addArrangedSubview(button) }
         pagesLine.isHidden = pages.isEmpty
-        top.setCustomSpacing(UILooks.pt(R.Separator.margin) + UILooks.pt(R.gap), after: pagesLine)
+        pagesStack.setCustomSpacing(UILooks.pt(R.Separator.margin) + UILooks.pt(R.gap), after: pagesLine)
         lightPages()
     }
 
@@ -188,4 +213,9 @@ public final class RailView: NSView {
     var chosenID: String? { tiles.first(where: \.chosen)?.project.id }
     var footCommands: [String] { footButtons.filter { !$0.1.isHidden }.map(\.1.command) }
     var litCommands: [String] { footButtons.filter(\.1.lit).map(\.1.command) }
+}
+
+/// The projects' clip: laid from the top, so the first project sits under the padding.
+private final class RailClip: NSClipView {
+    override var isFlipped: Bool { true }
 }

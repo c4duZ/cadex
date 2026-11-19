@@ -2,22 +2,30 @@ import CommandPalette
 import Icons
 import Strings
 
-/// sidebar.find, the tree's filter button (plan 27 phase B): every project, task and terminal of the
-/// tree in ⌘K, found by name; picked, it shows as a click on its row would.
+/// sidebar.find (plan 27 phase B; the tree left the screen with ADR 0038 and its view went in plan
+/// 36): every project, task and terminal of the work's model in ⌘K, found by name; picked, the app
+/// shows it as a click on its row did (`pick`).
 @MainActor
-final class WorkTreeFindSource: PaletteSource {
-    private weak var tree: WorkTreeView?
+public final class WorkTreeFindSource: PaletteSource {
+    private let projects: [WorkTreeProject]
+    private let pick: (WorkTreePick) -> Void
 
-    init(tree: WorkTreeView) { self.tree = tree }
+    public init(projects: [WorkTreeProject], pick: @escaping (WorkTreePick) -> Void) {
+        self.projects = projects
+        self.pick = pick
+    }
 
-    var placeholder: String { T("Find a project, task or terminal", "Achar um projeto, tarefa ou terminal") }
-    var emptyText: String { T("Nothing by that name", "Nada com esse nome") }
-    var icon: Icon { .magnifyingGlass }
+    public var placeholder: String { T("Find a project, task or terminal", "Achar um projeto, tarefa ou terminal") }
+    public var emptyText: String { T("Nothing by that name", "Nada com esse nome") }
+    public var icon: Icon { .magnifyingGlass }
 
-    func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
-        guard let tree else { return show([], nil) }
+    public func search(_ query: String, show: @escaping @MainActor ([PaletteItem], String?) -> Void) {
+        show(items(query), nil)
+    }
+
+    func items(_ query: String) -> [PaletteItem] {
         var items: [PaletteItem] = []
-        for project in tree.projects {
+        for project in projects {
             items.append(PaletteItem(id: "p\u{1}" + project.id, title: project.name, detail: project.branch, icon: .folder))
             for task in project.tasks {
                 items.append(PaletteItem(id: "k\u{1}" + task.id, title: task.name, detail: project.name, icon: .stack))
@@ -26,23 +34,18 @@ final class WorkTreeFindSource: PaletteSource {
             items += project.terminals.map { PaletteItem(id: "t\u{1}" + $0.id, title: $0.title, detail: project.name, icon: .terminalWindow) }
         }
         let words = query.lowercased().split(separator: " ").map(String.init)
-        show(items.filter { item in words.allSatisfy { (item.title + " " + (item.detail ?? "")).lowercased().contains($0) } }, nil)
+        return items.filter { item in words.allSatisfy { (item.title + " " + (item.detail ?? "")).lowercased().contains($0) } }
     }
 
-    func choose(_ item: PaletteItem) {
+    public func choose(_ item: PaletteItem) {
         let parts = item.id.split(separator: "\u{1}", maxSplits: 1).map(String.init)
         guard parts.count == 2 else { return }
         switch parts[0] {
-        case "p": tree?.onPick?(.project(parts[1]))
-        case "k": tree?.onPick?(.task(parts[1]))
-        default: tree?.onPick?(.terminal(parts[1]))
+        case "p": pick(.project(parts[1]))
+        case "k": pick(.task(parts[1]))
+        default: pick(.terminal(parts[1]))
         }
     }
 
-    func stop() {}
-}
-
-extension WorkTreeView {
-    /// sidebar.find's list, for the app to open in the palette.
-    public func findSource() -> PaletteSource { WorkTreeFindSource(tree: self) }
+    public func stop() {}
 }

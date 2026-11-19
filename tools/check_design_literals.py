@@ -64,8 +64,6 @@ FRAME_FILES = [
     "apps/macos/features/source-control/SourceControlView.swift",  # plano 26
     "apps/macos/features/source-control/ChangesRowView.swift",  # plano 26
     "apps/macos/shared/menus/AnchoredPanel.swift",  # plano 26
-    "apps/macos/features/sidebar/WorkTreeView.swift",  # plano 27
-    "apps/macos/features/sidebar/WorkTreeRows.swift",  # plano 27
     "apps/macos/features/sidebar/RailView.swift",  # plano 36
     "apps/macos/features/sidebar/RailParts.swift",  # plano 36
 ]

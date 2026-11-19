@@ -114,8 +114,9 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
   `docs/spec/inspector.md` a da coluna lateral; projects, tabs, home, orchestration, memory,
   status-bar e ssh ajustadas; o inventário ganhou a seção do plano 36 (a árvore fora da tela em
   `sai`, as specs velhas em `saiu`); a paridade passa sem mudança; `make check` passou. O `make
-  perf` não rodou (só a pedido do dono). A dist saiu do 6932a0f. Ficou de fora: o trilho não rola
-  com muitos projetos, e a árvore fora da tela ainda existe para o sidebar.find e o ⌘J.
+  perf` não rodou (só a pedido do dono). A dist saiu do 6932a0f. As duas pendências, resolvidas a
+  pedido do dono no mesmo dia: o trilho rola com muitos projetos (as páginas e o pé fixos), e a
+  árvore saiu do código (o sidebar.find lê do modelo; o menu da tarefa foi para o item dela na barra).
 
 Fora deste plano, anotados na ADR 0038 ("Levantado junto"): o celular controlando a sessão, as
 contas na barra de cima, o item Ports sozinho, o aviso do computer-use e "All sessions" na página

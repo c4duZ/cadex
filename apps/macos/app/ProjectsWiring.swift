@@ -69,6 +69,8 @@ extension WindowSession {
         let tabs = TabsController(window: window)
         tabs.keepsSessions = isMain
         tabs.contextMenu = { [weak self] in self?.menu?.popup(Self.tabActions) ?? [] }
+        // The task's menu that the tree had (status, review, hibernate, remove…), on its item.
+        tabs.groupMenu = { [weak self] task in self?.treeMenu(task: task) ?? [] }
         tabs.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
         tabs.paneMenu = { [weak self] in self?.paneMenu() ?? [] }
         // The bar shows the tabs of where you are: a task's (its worktree, as the tree lists them),

@@ -348,7 +348,8 @@ public final class TabBarView: NSView {
     public override func rightMouseDown(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
         guard let i = index(at: point) else { return }
-        onSelect?(items[i].id)
+        // A tab is chosen first; an item that is no tab (a task's, "‹ project") only shows its menu.
+        if items[i].id > extraItemBase { onSelect?(items[i].id) }
         onContextMenu?(items[i].id, point)
     }
 

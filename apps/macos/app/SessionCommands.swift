@@ -292,7 +292,7 @@ extension WindowSession {
             bar?.canNavigate = terminal?.hasForegroundProcess == false
             self?.terminalFolderMoved(terminal?.currentDirectory)
             self?.showBoardChrome()
-            if let tree = self?.workspace?.tree { self?.showFootLines(tree) }
+            self?.drawRail()
             self?.refreshWorkColor()
             self?.countTerminals()
             self?.showFocusedAccount()
