@@ -16,6 +16,11 @@ repositório. O código dele está no checkout do cargo, no commit fixado (411d9
 - A página "Memória" no pé da barra lateral, ao lado de Quadro, Automações e Máquinas (as páginas
   do app inteiro, `docs/design/sidebar/6-estrutura-ideal.html`), com as seções dentro dela, como o
   menu da esquerda do upstream.
+- Testado contra um banco falso e contra o próprio upstream (o dono, 2026-11-19: "é muito
+  importante que a gente consiga testar as telas [...] contra um banco de dados falso [...] e testar
+  o repositório do Fabio Akita contra o nosso [...] isso é capaz de quebrar, mesmo a gente portando
+  o código idêntico"): cada número e cada lista das telas iguais aos do painel dele, sobre os
+  mesmos dados, e nenhuma tela gravando na memória.
 - Adaptado ao Cadex só no que ajuda: um projeto ou uma sessão levam também ao projeto e ao
   terminal no Cadex; o idioma é o do Cadex.
 
@@ -35,6 +40,16 @@ repositório. O código dele está no checkout do cargo, no commit fixado (411d9
   mostra, de onde vem o dado: a API JSON do upstream ou só o HTML); os mockups com os tokens do
   Cadex num .dc.html, revisados por um agente de UX contra os prints e os estudos da barra lateral;
   o dono aprova antes do código.
+- [ ] A2. O banco falso e a paridade, antes de qualquer tela:
+  - Um seed no engine que cria uma pasta de memória de teste pelas funções do upstream (como os
+    testes dele: Store, Wiki e o writer): projetos, sessões abertas e fechadas, eventos, páginas com
+    histórico, regras e slots, mensagens na caixa de entrada, workstreams, propostas na revisão de
+    aprendizado e uso de tokens. Sempre o mesmo resultado; os testes e os prints usam só ele.
+  - Testes de paridade no `cargo test` do engine: o painel do upstream (ai-memory-web, só de
+    desenvolvimento) e a nossa API sobre o mesmo seed. Onde ele tem JSON, o nosso igual; onde só tem
+    HTML, os números e as listas tirados do HTML dele e comparados com o nosso JSON.
+  - A memória intacta: depois de todas as rotas e telas, o banco e a wiki iguais byte a byte.
+  - O `make memory-upstream-test` roda também a suíte do ai-memory-web.
 - [ ] B. O engine: a API JSON do upstream (`/api/v1`: projetos, visão geral, páginas, histórico,
   recentes, briefing, handoffs, sessões, observações, busca, grafo) no socket da memória, e rotas
   nossas para o que só existe no HTML (caixa de entrada, workstreams, revisão de aprendizado, saúde,
@@ -47,10 +62,12 @@ repositório. O código dele está no checkout do cargo, no commit fixado (411d9
 - [ ] F. A caixa de entrada e os workstreams.
 - [ ] G. A revisão de aprendizado, a saúde do servidor e a documentação.
 
-Cada fase de tela: o print do Cadex ao lado do print do upstream da fase A, e o que difere
-escrito com o motivo.
+Cada fase de tela: o print do Cadex ao lado do print do upstream sobre o mesmo seed, e o que difere
+escrito com o motivo; o print aprovado fica como referência e o teste do app avisa quando a tela
+muda.
 
 ## Como validar
-- `make check` ao fim de cada fase; testes do engine para cada rota nova.
+- `make check` ao fim de cada fase; testes do engine para cada rota nova, cada um com a paridade
+  contra o painel do upstream sobre o seed, e a memória intacta depois.
 - Os prints lado a lado de cada tela (instância de teste com os dados de teste, nunca os do dono).
 - Sem o `make perf`, a menos que o dono peça.
