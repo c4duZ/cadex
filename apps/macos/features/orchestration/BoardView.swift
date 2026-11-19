@@ -1,4 +1,5 @@
 import AppKit
+import Menus
 import StateGlyph
 import Strings
 import Tabs
@@ -10,6 +11,8 @@ typealias BD = DesignTokens.Board
 @MainActor
 public struct BoardActions {
     public var open: (String) -> Void = { _ in }
+    /// A card's right click: the app's menu for that task.
+    public var menu: (String) -> [MenuEntry] = { _ in [] }
     public var newRace: () -> Void = {}
     public var newTask: () -> Void = {}
     public var load: (@escaping @MainActor ([BoardCard]) -> Void) -> Void = { _ in }
@@ -144,6 +147,7 @@ public final class BoardDocument: TabDocument {
         for view in views where view !== views.last || card.group == nil { view.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true }
         box.hold(stack, padding: NSEdgeInsets(top: C.padding, left: C.padding, bottom: C.padding, right: C.padding))
         box.onPress = { [weak self] in self?.actions.open(card.id) }
+        box.rightMenu = { [weak self] in self?.actions.menu(card.id) ?? [] }
         box.setAccessibilityElement(true)
         box.setAccessibilityRole(.button)
         box.setAccessibilityLabel(card.name + ", " + card.text)

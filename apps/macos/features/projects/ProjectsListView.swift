@@ -1,4 +1,5 @@
 import AppKit
+import Menus
 import StateGlyph
 import Strings
 import Tabs
@@ -37,6 +38,8 @@ public struct ProjectCard: Equatable {
 @MainActor
 public struct ProjectsListActions {
     public var open: (String) -> Void = { _ in }
+    /// A card's right click: the app's menu for that project (the rail's).
+    public var menu: (String) -> [MenuEntry] = { _ in [] }
     public var add: () -> Void = {}
     public var load: (@escaping @MainActor ([ProjectCard]) -> Void) -> Void = { _ in }
     public init() {}
@@ -102,8 +105,12 @@ public final class ProjectsListDocument: TabDocument {
         let box = PageBox()
         box.box(bg: S.bg, border: S.border, radius: S.radius)
         box.onPress = { [weak self] in self?.actions.open(project.folder) }
+        box.rightMenu = { [weak self] in self?.actions.menu(project.folder) ?? [] }
         let name = pageLabel(project.name, size: DesignTokens.FontSize.prompt, color: DesignTokens.Color.textPrimary, weight: DesignTokens.FontWeight.bold)
         let place = pageLabel(project.place, size: DesignTokens.FontSize.small, color: DesignTokens.Color.textTertiary)
+        // Cut in the middle: the folder's name and the branch are the end of the line (UX audit, 2026-11-18).
+        place.lineBreakMode = .byTruncatingMiddle
+        place.toolTip = project.place
         let stats = NSTextField(labelWithString: "")
         stats.attributedStringValue = Self.stats(project)
         var lines: [NSView] = [name, place, stats]

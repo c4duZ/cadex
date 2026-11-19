@@ -18,26 +18,33 @@ fraco achado é a atenção (saber que um agente precisa de você); o resto é a
 - Ação visível que não é comando (ADR 0005).
 
 ## Como eu quero
-- [ ] A. Bugs rápidos: "Remove Task…" do menu da tarefa remove a tarefa clicada; "Update and
+- [x] A. Bugs rápidos: "Remove Task…" do menu da tarefa remove a tarefa clicada; "Update and
   reopen" instala; "Turn On" da Memory diz que liga para todos os projetos; a tela de início sempre
   com Open folder e Clone.
-- [ ] B. A atenção: o sino e o Dock contam só o que precisa de você; "terminou sem ver" fica
+- [x] B. A atenção: o sino e o Dock contam só o que precisa de você; "terminou sem ver" fica
   quieto (sem banner nem som com o Cadex na frente); o ⌘J vai ao terminal que espera e diz "Nothing
   needs you"; "» N" mostra o estado mais urgente e o de cada aba escondida.
-- [ ] C. Um estado só: o trilho com a peça de estado (não só a cor); "servindo" com sinal próprio;
+- [x] C. Um estado só: o trilho com a peça de estado (não só a cor); "servindo" com sinal próprio;
   conversas antigas sem o verde; o estado sem sinal ("unknown") e o agente que morreu trabalhando
   ("failed", com aviso); hibernar aparece no feed.
-- [ ] D. Onde estou: o título da janela "projeto › tarefa"; o quadro com título; os ícones das
+- [x] D. Onde estou: o título da janela "projeto › tarefa"; o quadro com título; os ícones das
   páginas apagados sem projeto; o ícone das Automações que não lê como histórico.
-- [ ] E. Menus e atalhos: o menu do Mac com Window e Help e os comandos agrupados; aba
+- [x] E. Menus e atalhos: o menu do Mac com Window e Help e os comandos agrupados; aba
   próxima/anterior (⇧⌘] e ⇧⌘[); a gaveta fora do ⌃`; ⌘W num agente sempre pergunta; o ⌘K mostra o
   que não roda agora, apagado, com o motivo; nomes de comando num padrão e sem duplicados.
-- [ ] F. Comandos e menus de contexto: Allow e Deny do sino, rodar e apagar automação, apagar
+- [x] F. Comandos e menus de contexto: Allow e Deny do sino, rodar e apagar automação, apagar
   memória e ir a um projeto como comandos; clique direito nos cartões do quadro, da página Projects,
   nos recentes e nas linhas de Sessions.
-- [ ] G. Configurações e textos: o agente de memória avisado na primeira vez e a migração sem
+- [x] G. Configurações e textos: o agente de memória avisado na primeira vez e a migração sem
   ligar o que o dono desligou; mensagens que citam seções que não existem; Open PR forte só quando
   faz sentido; caminhos cortados no meio; os termos e o `docs/CONTEXT.md` em dia.
+
+Feito em 2026-11-19 (três commits). Ficou de fora, de propósito: o estado "sem sinal" por tempo
+(o Claude não se reporta durante uma ferramenta longa, daria alarme falso); o ícone das Automações
+(a fonte não tem os nomes dos glifos para conferir um novo, e o estudo da estrutura pode mudar o pé);
+Allow e Deny do sino continuam chamando a mesma função dos comandos agents.approve e agents.deny;
+⇧⌘S (trocar projeto) e ⌘P (achar arquivo) ficam, convenção de editor de código. A migração da
+memória fica: ligada por padrão é decisão do dono (ADR 0037); o que faltava era o aviso.
 
 ## Como validar
 - Os testes de cada feature e `make check`; cada mudança visível conferida numa instância de teste.

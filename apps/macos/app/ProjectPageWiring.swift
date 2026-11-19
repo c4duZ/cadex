@@ -118,7 +118,7 @@ extension WindowSession {
     }
 
     /// A live session comes to the front; an ended one goes on in a tab of its folder.
-    private func openConversation(_ id: String) {
+    func openConversation(_ id: String) {
         // A live one, here or on another machine (its shell there, openAgent's rule).
         if let live = (AgentsController.shared.sessions + AgentsController.shared.remote).first(where: { $0.id == id }) { return openAgent(live) }
         guard let entry = AgentHistoryController.shared.entries.first(where: { $0.id == id }) else { return NSSound.beep() }

@@ -10,6 +10,9 @@ import Strings
 /// which the app fills from onBranch and onBusy. Every click runs a command by id (ADR 0005).
 @MainActor
 final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegate {
+    private let footerButtons = NSStackView()
+    private var footerHasChanges = false
+
     typealias I = DesignTokens.Inspector
     weak var controller: SourceControlController?
     let table = MenuTableView()
@@ -91,6 +94,28 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
             ? (turnSeen ? T("No changes", "Nenhuma mudança") : T("No agent turn seen here yet", "Nenhuma rodada de agente vista aqui ainda")) : nil)
         self.none.stringValue = none ?? ""
         self.none.isHidden = none == nil || scroll.isHidden
+        restyleFooter(hasChanges: !rows.isEmpty)
+    }
+
+    /// The footer's emphasis follows what there is to do: with changes, Commit… is the main button;
+    /// without, Commit… is off and Open PR leads. Open PR was the brightest thing on screen with
+    /// "No changes" under it (UX audit, 2026-11-18).
+    func restyleFooter(hasChanges: Bool) {
+        guard footerHasChanges != hasChanges || footerButtons.arrangedSubviews.isEmpty else { return }
+        footerHasChanges = hasChanges
+        typealias Large = DesignTokens.Button.Heights
+        let commit = DesignButton.make(T("Commit…", "Commit…"), hasChanges ? .primary : .secondary, height: Large.large, fill: true) { [weak self] in
+            _ = self?.controller?.run("git.commit")
+        }
+        commit.isEnabled = hasChanges
+        commit.alphaValue = hasChanges ? 1 : 0.5
+        commit.toolTip = hasChanges ? nil : T("Nothing to commit", "Nada para commitar")
+        let pr = DesignButton.make(T("Open PR", "Abrir PR"), hasChanges ? .secondary : .primary, height: Large.large, fill: true) { [weak self] in
+            _ = self?.controller?.run("git.open-pr")
+        }
+        footerButtons.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        footerButtons.addArrangedSubview(commit)
+        footerButtons.addArrangedSubview(pr)
     }
 
     // MARK: Table
@@ -137,14 +162,8 @@ final class SourceControlView: NSView, NSTableViewDataSource, NSTableViewDelegat
 
         // The footer: the project's check line waits for a source of it (docs/spec/inspector.md);
         // Commit… asks the message, Open PR opens the GitHub CLI in a tab.
-        typealias Large = DesignTokens.Button.Heights
-        let commit = DesignButton.make(T("Commit…", "Commit…"), .secondary, height: Large.large, fill: true) { [weak self] in
-            _ = self?.controller?.run("git.commit")
-        }
-        let pr = DesignButton.make(T("Open PR", "Abrir PR"), .primary, height: Large.large, fill: true) { [weak self] in
-            _ = self?.controller?.run("git.open-pr")
-        }
-        let buttons = NSStackView(views: [commit, pr])
+        let buttons = footerButtons
+        restyleFooter(hasChanges: false)
         buttons.distribution = .fillEqually
         buttons.spacing = UILooks.pt(I.Footer.gap)
         // The error over the buttons; hidden, the stack lets go of its room.

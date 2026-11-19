@@ -1,4 +1,5 @@
 import AppKit
+import Menus
 import Icons
 import Strings
 import UILooks
@@ -11,6 +12,13 @@ typealias H = DesignTokens.Home
 @MainActor
 class HomeClickable: NSView {
     var onPress: (() -> Void)?
+    /// The right click's entries, given by the app (each runs a command or the same thing as a click);
+    /// cards and rows had none (UX audit, 2026-11-18).
+    var rightMenu: (() -> [MenuEntry])?
+    override func rightMouseDown(with event: NSEvent) {
+        guard let entries = rightMenu?(), !entries.isEmpty else { return super.rightMouseDown(with: event) }
+        PopupMenu.show(entries, at: convert(event.locationInWindow, from: nil), in: self)
+    }
     override var isFlipped: Bool { true }
     override var mouseDownCanMoveWindow: Bool { false }
     override func resetCursorRects() { addCursorRect(bounds, cursor: .pointingHand) }

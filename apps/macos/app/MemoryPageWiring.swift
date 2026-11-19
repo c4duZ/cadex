@@ -186,8 +186,8 @@ extension WindowSession {
         // Said, not a beep: the command ran and nothing showed (the UX audit, 2026-11-18).
         guard settings.store.settings.memory.enabled else {
             return say(T("Project memory is off", "A memória do projeto está desligada"),
-                       T("With it off there is no briefing: turn it on in the right panel's Memory tab (memory.enable).",
-                         "Desligada, não há briefing: ligue na aba Memória do painel da direita (memory.enable)."))
+                       T("With it off there is no briefing: turn it on in the side column's Memory page.",
+                         "Desligada, não há briefing: ligue na página Memória da coluna lateral."))
         }
         MemoryWiring.runAgent(words) { [weak self] code, answer in
             guard let self else { return }

@@ -42,6 +42,19 @@ extension WindowSession {
                 self?.projects?.forgetRecent(folder: folder)
                 self?.refreshHome()
             }
+            actions.recentMenu = { [weak self] folder in
+                [MenuEntry(T("Open", "Abrir"), icon: .folderOpen) { [weak self] in self?.homeOpen(folder) },
+                 MenuEntry(T("Show in Finder", "Mostrar no Finder"), icon: .folder) { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: folder)]) },
+                 MenuEntry(T("Copy Path", "Copiar o caminho"), icon: .copy) {
+                     NSPasteboard.general.clearContents()
+                     NSPasteboard.general.setString(folder, forType: .string)
+                 },
+                 .separator,
+                 MenuEntry(T("Remove from Recents", "Tirar dos recentes"), icon: .x) { [weak self] in
+                     self?.projects?.forgetRecent(folder: folder)
+                     self?.refreshHome()
+                 }]
+            }
             actions.openFolder = { [weak self] in self?.chooseProjectFolder() }
             actions.clone = { [weak self] in self?.homeClone() }
             actions.shortcut = { [weak self] card in

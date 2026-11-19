@@ -14,7 +14,7 @@ public enum AutomationRefusal: Error, Equatable {
 
     public var message: String {
         switch self {
-        case .off: return T("Automations are off in Settings › General › Many Agents.", "Automações estão desligadas em Configurações › Geral › Muitos agentes.")
+        case .off: return T("Automations are off in Settings › Many Agents.", "Automações estão desligadas em Configurações › Muitos agentes.")
         case .emptyPrompt: return RaceRefusal.emptyPrompt.message
         case .promptTooBig(let bytes): return RaceRefusal.promptTooBig(bytes).message
         case .noFolder(let path): return T("The folder \(path) is gone.", "A pasta \(path) sumiu.")

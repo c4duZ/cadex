@@ -254,6 +254,9 @@ public struct Settings: Equatable, Sendable {
         public var backgroundAgent = true
         public var dailyBudgetUsd = 1.0
         public var requireApproval = false
+        /// The one-time notice that the memory agent is on, what it spends and how to turn it off
+        /// was shown (ADR 0037 asks for it on the first opening; it did not exist: UX audit, 2026-11-18).
+        public var agentNoticeShown = false
     }
 
     public struct StatusBar: Equatable, Sendable {

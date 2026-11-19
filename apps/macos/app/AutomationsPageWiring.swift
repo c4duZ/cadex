@@ -43,7 +43,7 @@ extension WindowSession {
         }
     }
 
-    private func deleteAutomation(_ id: String) {
+    func deleteAutomation(_ id: String) {
         guard let book = OrchestrationController.shared.automations(), let automation = try? book.automation(id) else { return }
         confirm(T("Delete \(automation.name)?", "Apagar \(automation.name)?"),
                 T("The automation and the record of its runs go; the sessions it ran stay in their accounts.",

@@ -155,6 +155,7 @@ public enum SettingsFile {
                 settings.memory.consolidateAtContext = min(max(Int(percent), 10), 95)
             }
             settings.memory.backgroundAgent = reader.bool(s, "memory.backgroundAgent") ?? settings.memory.backgroundAgent
+            settings.memory.agentNoticeShown = reader.bool(s, "memory.agentNoticeShown") ?? settings.memory.agentNoticeShown
             if let budget = reader.number(s, "memory.dailyBudgetUsd") {
                 settings.memory.dailyBudgetUsd = min(max(budget, 0), 50)
             }
@@ -296,7 +297,7 @@ public enum SettingsFile {
             "memory": ["enabled": s.memory.enabled, "shareAcrossAccounts": s.memory.shareAcrossAccounts,
                        "consolidateInSession": s.memory.consolidateInSession, "consolidateAtContext": s.memory.consolidateAtContext,
                        "backgroundAgent": s.memory.backgroundAgent, "dailyBudgetUsd": s.memory.dailyBudgetUsd,
-                       "requireApproval": s.memory.requireApproval],
+                       "requireApproval": s.memory.requireApproval, "agentNoticeShown": s.memory.agentNoticeShown],
             "git": ["reviewContextLines": s.git.reviewContextLines, "reviewWrap": s.git.reviewWrap,
                     "reviewShowWhitespace": s.git.reviewShowWhitespace],
             "worktrees": ["root": s.worktrees.root, "setupHooks": s.worktrees.setupHooks],

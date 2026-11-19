@@ -1,4 +1,5 @@
 import AppKit
+import Menus
 import Agents
 import CommandPalette
 import Inspector
@@ -14,6 +15,14 @@ extension WindowSession {
         view.onPick = { [weak self] id in
             guard let self, let folder = self.projects?.activeFolder else { return }
             self.openProjectPage(folder, section: .sessions, item: id)
+        }
+        // Right click: see its summary, or go on with it (a live one comes to the front).
+        view.menuFor = { [weak self] id in
+            [MenuEntry(T("Show Summary", "Mostrar o resumo"), icon: .eye) { [weak self] in
+                 guard let self, let folder = self.projects?.activeFolder else { return }
+                 self.openProjectPage(folder, section: .sessions, item: id)
+             },
+             MenuEntry(T("Resume", "Retomar"), icon: .play) { [weak self] in self?.openConversation(id) }]
         }
         return view
     }

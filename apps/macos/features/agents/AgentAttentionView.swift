@@ -89,7 +89,7 @@ public final class AgentAttentionView: NSView {
         for view in stack.arrangedSubviews { view.removeFromSuperview() }
         add(header(), padding: DesignTokens.Popover.Header.padding, line: true)
         guard attention.isEnabled else {
-            return note(T("Attention is off (agents.attention).", "A atenção está desligada (agents.attention)."), button: T("Turn On", "Ligar"))
+            return note(T("Agent alerts are off: nothing that waits on you shows here.", "Os avisos dos agentes estão desligados: nada que espera você aparece aqui."), button: T("Turn On", "Ligar"))
         }
         if subtab == "feed" { return renderFeed() }
         let cards = attention.cards

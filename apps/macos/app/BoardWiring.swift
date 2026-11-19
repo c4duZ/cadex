@@ -34,6 +34,7 @@ extension WindowSession {
         actions.newRace = { [weak self] in _ = self?.commands.run("worktrees.new-race") }
         actions.newTask = { [weak self] in _ = self?.commands.run("worktrees.new-task") }
         actions.open = { [weak self] id in self?.pickInTree(.task(id)) }
+        actions.menu = { [weak self] id in self?.treeMenu(task: id) ?? [] }
         actions.load = { [weak self] show in show(self?.boardCards() ?? []) }
         actions.back = { [weak self] in self?.tabs?.leavePage() }
         return BoardDocument(actions: actions)

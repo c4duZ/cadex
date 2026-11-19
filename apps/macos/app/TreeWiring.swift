@@ -37,7 +37,7 @@ extension WindowSession {
 
     /// sidebar.find: a project, task or terminal of the work's model by name.
     func treeCommands(palette: CommandPaletteController) -> [Command] {
-        [Command(id: "sidebar.find", title: T("Find in the Work Tree…", "Achar na árvore do trabalho…"),
+        [Command(id: "sidebar.find", title: T("Find a Project, Task or Terminal…", "Achar um projeto, tarefa ou terminal…"),
                  keywords: ["find", "filter", "tree", "project", "task", "terminal", "achar", "filtrar", "árvore", "tarefa"], category: .view,
                  action: .run { [weak self] in
                      guard let self else { return }

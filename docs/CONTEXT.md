@@ -33,15 +33,14 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
   diff ou histórico do git.
 - **Painel** (`pane`): uma divisão dentro de uma aba de terminal. Uma aba pode ter vários painéis.
 - **Folha** (`leaf`): um painel final da árvore de divisões, que contém uma sessão de terminal.
-- **Árvore do trabalho** (`sidebar`): a coluna à esquerda, com os projetos, os terminais de cada um
-  e as tarefas quando existem. Antes era a barra lateral de ícones, com uma página por ícone; a
-  fileira e as páginas saem pela moldura nova.
-- **Painel da seleção** (`inspector`): a coluna opcional à direita, com Changes, Files, History e
-  Memory do projeto ou da tarefa selecionada. Sai pela `docs/adr/0038-rail-and-side-column.md`.
-- **Trilho** (`rail`): a faixa estreita na borda esquerda com os projetos (imagem, nome dado pelo
-  dono, peça de estado) e, no pé, Projects e Automations. Substitui a árvore do trabalho (ADR 0038).
-- **Coluna lateral** (`side column`): ao lado do trilho, as páginas do projeto escolhido, uma por
-  vez: Files, Changes, Sessions, Memory e Git graph, trocadas pelos ícones do topo (ADR 0038).
+- **Trilho** (`rail`, a feature `sidebar`): a faixa estreita na borda esquerda com os projetos
+  (imagem, nome dado pelo dono, peça de estado), o "+", os ícones das páginas da coluna e, no pé,
+  Projects, Automations e Remote (este só com algum host). Substituiu a árvore do trabalho (ADR 0038).
+- **Coluna lateral** (`side column`, a feature `inspector`; nos textos, nunca "painel da direita"):
+  ao lado do trilho, as páginas do projeto escolhido, uma por vez: Files, Changes, Sessions, Memory
+  e Git graph, abertas pelos ícones delas no trilho (ADR 0038).
+- **Sessão** (`session`): uma conversa de um agente numa conta. Nos textos, "sessão" (não
+  "conversa" nem "arquivo"); a lista de todas é "All sessions".
 - **Projeto fixado** (`pinned project`): fica no trilho mesmo sem terminal aberto; o clique abre um
   terminal na pasta dele.
 - **Barra de status** (`status-bar`): a faixa inferior, montada com itens que quem usa escolhe e
@@ -158,7 +157,8 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Consolidação** (`consolidation`): transformar o que uma sessão fez em páginas de decisões,
   armadilhas e conceitos. Feita pelo próprio agente, num marco, ou pelo agente de memória.
 - **Agente de memória** (`memory agent`): um `claude -p` na conta que faz as tarefas de memória sem
-  sessão aberta, desligado por padrão e com teto de gasto (`docs/adr/0029-memory-agent.md`).
+  sessão aberta, ligado por padrão desde a `docs/adr/0037-memory-agent-on-by-default.md` (avisado na
+  primeira abertura) e com teto de gasto (`docs/adr/0029-memory-agent.md`).
 - **Busca por sentido** (`embeddings`): achar texto parecido, não só igual, com o modelo de vetores
   local; carregado só enquanto é usado.
 

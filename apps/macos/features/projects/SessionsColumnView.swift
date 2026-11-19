@@ -1,4 +1,5 @@
 import AppKit
+import Menus
 import Strings
 import UILooks
 
@@ -11,6 +12,8 @@ public final class SessionsColumnView: NSView {
     typealias M = DesignTokens.Inspector.Memory
     /// A line clicked: its session's id.
     public var onPick: ((String) -> Void)?
+    /// A line's right click: the app's menu for that session.
+    public var menuFor: ((String) -> [MenuEntry])?
     private let search = NSTextField()
     private let list = NSStackView()
     private let scroll = NSScrollView()
@@ -87,6 +90,7 @@ public final class SessionsColumnView: NSView {
             for item in items {
                 let row = SessionRowView(item: item)
                 row.onPress = { [weak self] in self?.onPick?(item.id) }
+                row.rightMenu = { [weak self] in self?.menuFor?(item.id) ?? [] }
                 list.addArrangedSubview(row)
                 row.widthAnchor.constraint(equalTo: list.widthAnchor).isActive = true
                 shown += 1
@@ -117,6 +121,13 @@ final class SessionRowView: NSView {
     typealias M = DesignTokens.Inspector.Memory
     let item: PageListItem
     var onPress: (() -> Void)?
+    /// The right click's entries, given by the app (each runs a command or the same thing as a click);
+    /// cards and rows had none (UX audit, 2026-11-18).
+    var rightMenu: (() -> [MenuEntry])?
+    override func rightMouseDown(with event: NSEvent) {
+        guard let entries = rightMenu?(), !entries.isEmpty else { return super.rightMouseDown(with: event) }
+        PopupMenu.show(entries, at: convert(event.locationInWindow, from: nil), in: self)
+    }
     private var hovering = false { didSet { layer?.backgroundColor = hovering ? DesignTokens.Color.bgSelected.cgColor : nil } }
 
     init(item: PageListItem) {

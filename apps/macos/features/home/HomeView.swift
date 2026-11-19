@@ -1,4 +1,5 @@
 import AppKit
+import Menus
 import Icons
 import Strings
 import UILooks
@@ -49,6 +50,8 @@ public struct HomeActions {
     public var card: (HomeCard) -> Void = { _ in }
     public var openRecent: (String) -> Void = { _ in }
     public var removeRecent: (String) -> Void = { _ in }
+    /// A recent's right click: the app's menu for that folder.
+    public var recentMenu: (String) -> [MenuEntry] = { _ in [] }
     public var openFolder: () -> Void = {}
     public var clone: () -> Void = {}
     /// The shortcut each card shows ("⌘T"), from the keymap.
@@ -106,6 +109,7 @@ public final class HomeView: NSView, NSTextFieldDelegate {
         for recent in state.recents {
             let row = HomeRecentRow(recent) { [weak self] in self?.actions.removeRecent(recent.folder) }
             row.onPress = { [weak self] in if recent.state != .missing { self?.actions.openRecent(recent.folder) } }
+            row.rightMenu = { [weak self] in self?.actions.recentMenu(recent.folder) ?? [] }
             recentsBox.addArrangedSubview(row)
             row.widthAnchor.constraint(equalTo: recentsBox.widthAnchor).isActive = true
         }

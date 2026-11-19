@@ -31,8 +31,9 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
   pasta. Renomear para vazio volta ao nome da pasta.
 - Toda aba que roda algo mostra antes do título a peça de estado do app (components.stateGlyph):
   um agente do Claude Code (plano 19) com os estados dele (trabalhando, precisa de você, pronto,
-  falhou, parado), um programa qualquer com o anel enquanto roda e o ponto verde quando serve algo
-  (uma porta aberta). Aba de agente: o nome da conversa no lugar da pasta e, ao passar o ponteiro,
+  falhou, parado), um programa qualquer com o anel enquanto roda; um servidor (uma porta aberta) fica
+  sem peça, com o nome do comando e a oferta do preview, porque o verde é só "agente pronto" (plano
+  37). "» N" leva o estado mais urgente das abas escondidas, e a lista dele diz o de cada uma. Aba de agente: o nome da conversa no lugar da pasta e, ao passar o ponteiro,
   a frase do que ele faz agora; "pronto sem você ver" deixa o título em negrito até o terminal
   ganhar o foco. O nome dado à mão continua vencendo; o estado aparece mesmo assim.
 - Com terminal.keepSessions ligado (plano 19), fechar a janela principal ou o app deixa os shells das

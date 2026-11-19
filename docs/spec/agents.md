@@ -217,10 +217,13 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
 - agents.stateHooks (ligada) desliga os hooks do kit; o 7501 continua.
 
 ### Atenção (plano 19)
-- O sino (na barra de título, sempre à vista) conta os pedidos abertos de todas as
-  sessões (permissão, pergunta) e os agentes que terminaram sem você ver; o mesmo número no ícone do
-  Dock (agents.dockBadge). Ir ao terminal do agente marca como visto; "Mark as Unread"
-  (agents.mark-unread, ou o clique direito numa linha do feed) volta.
+- O sino (na barra de título, sempre à vista) conta só os pedidos abertos de todas as sessões
+  (permissão, pergunta), o que espera você; o mesmo número no ícone do Dock (agents.dockBadge). Os
+  agentes que terminaram sem você ver ficam no feed, quietos, fora do número: somados, um "3" âmbar
+  não dizia se algo esperava (plano 37, a auditoria de UX). "Terminou" não dá banner nem som com o
+  Cadex na frente; permissão e pergunta dão. Ir ao terminal do agente marca como visto; "Mark as
+  Unread" (agents.mark-unread, ou o clique direito numa linha do feed) volta. Hibernar entra no
+  feed. Um agente cujo processo some no meio do trabalho aparece como "falhou".
 - O popover do sino (400 pt; `../design/work-frame/screens.md`, seção Bell) tem duas vistas, "Needs
   you" (os cartões) e "Activity" (agents.show-feed): a linha
   do tempo de terminou, pediu permissão, perguntou, falhou e tarefa criada, de todas as sessões, a

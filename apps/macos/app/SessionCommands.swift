@@ -131,7 +131,7 @@ extension WindowSession {
                                                customize: { [weak self] in self?.openCustomize("accounts") }))
         commands.register(AgentAccountCommands.commands(palette: palette, actions: accountActions()))
         commands.register(Command(
-            id: "agents.show-history", title: T("Show Archive & History", "Mostrar o arquivo e histórico"),
+            id: "agents.show-history", title: T("Show All Sessions (Archive)", "Mostrar todas as sessões (arquivo)"),
             keywords: ["history", "archive", "conversations", "resume", "claude", "histórico", "arquivo", "conversas", "retomar"], category: .view,
             // In the center, as a tab (plan 27 phase C): the sidebar becomes the work's tree.
             action: .run { [weak self] in
@@ -170,7 +170,7 @@ extension WindowSession {
                 self?.opener?.openHistory(history.root, beside: false, selecting: sha)
             },
             unavailableReason: { [weak self] in
-                self?.panelHistory?.selectedSha == nil ? T("Pick a commit in the History tab", "Escolha um commit na aba History") : nil
+                self?.panelHistory?.selectedSha == nil ? T("Pick a commit in the Git Graph", "Escolha um commit no grafo do git") : nil
             }))
         commands.register(HistoryCommands.all(
             open: { [weak self] beside in if let root = self?.git?.repositoryRoot { self?.opener?.openHistory(root, beside: beside) } },

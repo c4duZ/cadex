@@ -56,7 +56,7 @@ public final class AgentHistoryView: NSView {
         scroll.autohidesScrollers = true
         scroll.drawsBackground = false
         pills.spacing = UILooks.pt(DesignTokens.Board.Filters.gap)
-        let title = FrameField.text(T("Archive & history", "Arquivo e histórico"), size: DesignTokens.Project.Title.fontSize,
+        let title = FrameField.text(T("All sessions", "Todas as sessões"), size: DesignTokens.Project.Title.fontSize,
                                     color: DesignTokens.Color.textPrimary, weight: DesignTokens.Project.Title.weight)
         let head = FrameField.column([title, count], gap: DesignTokens.Project.Head.titleGap)
         let field = FrameField.field(search)

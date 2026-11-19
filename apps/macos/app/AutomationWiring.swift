@@ -21,6 +21,7 @@ extension WindowSession {
         actions.toggle = { [weak self] in self?.toggleAutomation($0.id) }
         actions.runNow = { [weak self] in self?.runAutomationNow($0.id) }
         actions.showHistory = { [weak self] in self?.showAutomationHistory($0.id) }
+        actions.delete = { [weak self] in self?.deleteAutomation($0.id) }
         commands.register(AutomationCommands.all(palette: palette, actions: actions))
         commands.register(automationsPageCommands())
     }

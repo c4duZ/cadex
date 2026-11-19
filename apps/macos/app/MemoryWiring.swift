@@ -69,6 +69,7 @@ extension AppDelegate {
     /// Once per version, with memory on: the migrations and macOS's check
     /// of the new binary happen now, not in the first SessionStart's 1 s.
     func startMemory() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in self?.showMemoryAgentNotice() }
         // A task marked ready is a consolidation milestone for the agents
         // working in it (plan 22 phase F): the hook asks at their next Stop.
         WorktreesController.shared.onStatusChange = { [weak self] status, path in
@@ -152,4 +153,30 @@ extension WindowSession {
               terminal.agentResume != nil, terminal.pasteFromApp(MemoryKit.consolidateNowText, images: []) else { return NSSound.beep() }
         tabs?.focus(terminal)
     }
+}
+
+extension AppDelegate {
+    /// Once: the memory agent is on by default (ADR 0037), runs `claude -p` on the account with a
+    /// daily cap, and here is how to turn it off. The ADR asked for it on the first opening; nobody
+    /// was told (UX audit, 2026-11-18).
+    func showMemoryAgentNotice() {
+        let memory = settings.store.settings.memory
+        guard memory.enabled, memory.backgroundAgent, !memory.agentNoticeShown,
+              let window = sessions.first?.window else { return }
+        settings.store.update { $0.memory.agentNoticeShown = true }
+        let alert = NSAlert()
+        alert.messageText = T("The memory agent is on", "O agente de memória está ligado")
+        alert.informativeText = T(
+            "After your sessions, a short `claude -p` on your account organizes what the agents learned into the project's memory, up to US$ \(Self.money(memory.dailyBudgetUsd)) a day. It uses your plan's usage. You can turn it off here or later in Settings › Memory; an API key (apiKeyHelper) can pay for it instead.",
+            "Depois das suas sessões, um `claude -p` curto na sua conta organiza o que os agentes aprenderam na memória do projeto, até US$ \(Self.money(memory.dailyBudgetUsd)) por dia. Ele usa o uso do seu plano. Dá para desligar aqui ou depois em Configurações › Memória; uma chave de API (apiKeyHelper) pode pagar no lugar.")
+        alert.addButton(withTitle: T("Keep On", "Manter ligado"))
+        alert.addButton(withTitle: T("Turn Off", "Desligar"))
+        alert.beginSheetModal(for: window) { [weak self] response in
+            MainActor.assumeIsolated {
+                if response == .alertSecondButtonReturn { self?.settings.store.update { $0.memory.backgroundAgent = false } }
+            }
+        }
+    }
+
+    static func money(_ value: Double) -> String { String(format: "%.2f", value) }
 }

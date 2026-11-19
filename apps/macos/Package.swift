@@ -181,7 +181,7 @@ let package = Package(
         // The home screen: the prompt, the four cards, the recent projects (docs/spec/home.md).
         .target(
             name: "Home",
-            dependencies: ["Icons", "Strings", "UILooks"],
+            dependencies: ["Icons", "Menus", "Strings", "UILooks"],
             path: "features/home",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]
@@ -289,7 +289,7 @@ let package = Package(
         ),
         .target(
             name: "Projects",
-            dependencies: ["CommandPalette", "Tabs", "Icons", "Strings", "StateGlyph", "UILooks"],
+            dependencies: ["CommandPalette", "Tabs", "Icons", "Menus", "Strings", "StateGlyph", "UILooks"],
             path: "features/projects",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],

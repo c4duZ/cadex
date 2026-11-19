@@ -11,6 +11,8 @@ public struct AutomationCommandActions {
     public var toggle: (Automation) -> Void = { _ in }
     public var runNow: (Automation) -> Void = { _ in }
     public var showHistory: (Automation) -> Void = { _ in }
+    /// Delete, asked first by the app (it had only the page's right click: UX audit, 2026-11-18).
+    public var delete: (Automation) -> Void = { _ in }
     public init() {}
 }
 
@@ -35,6 +37,7 @@ public enum AutomationCommands {
                     keywords: keywords + ["new", "nova"], category: .view, action: .run { actions.new() }, unavailableReason: off),
             list(.toggle, "orchestration.toggle-automation", T("Turn an Automation On or Off", "Ligar ou desligar uma automação"), ["toggle", "ligar"]),
             list(.runNow, "orchestration.run-automation-now", T("Run an Automation Now", "Executar uma automação agora"), ["run", "now", "agora"]),
+            list(.delete, "orchestration.delete-automation", T("Delete an Automation…", "Apagar uma automação…"), ["delete", "remove", "apagar", "remover"]),
             list(.history, "orchestration.show-automation-history", T("Show an Automation's History", "Mostrar o histórico de uma automação"),
                  ["history", "histórico", "runs"]),
         ]
@@ -43,7 +46,7 @@ public enum AutomationCommands {
 
 @MainActor
 final class AutomationSource: PaletteSource {
-    enum Kind { case toggle, runNow, history }
+    enum Kind { case toggle, runNow, history, delete }
     private let kind: Kind
     private let actions: AutomationCommandActions
 
@@ -57,6 +60,7 @@ final class AutomationSource: PaletteSource {
         case .toggle: T("The automation to turn on or off", "A automação para ligar ou desligar")
         case .runNow: T("The automation to run now", "A automação para executar agora")
         case .history: T("The automation whose history to show", "A automação cujo histórico mostrar")
+        case .delete: T("The automation to delete", "A automação a apagar")
         }
     }
     var emptyText: String { T("No automations yet: New Automation (orchestration.new-automation)", "Nenhuma automação ainda: Nova automação (orchestration.new-automation)") }
@@ -84,6 +88,7 @@ final class AutomationSource: PaletteSource {
             case .toggle: actions.toggle(automation)
             case .runNow: actions.runNow(automation)
             case .history: actions.showHistory(automation)
+            case .delete: actions.delete(automation)
             }
         }
     }

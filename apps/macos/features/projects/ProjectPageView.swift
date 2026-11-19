@@ -162,7 +162,7 @@ public final class ProjectPageDocument: TabDocument {
         typealias H = PP.Head
         let words = vertical([pageLabel(state.name, size: PP.Title.fontSize, color: DesignTokens.Color.textPrimary, weight: PP.Title.weight,
                                         tracking: PP.Title.tracking),
-                              pageLabel(state.place, size: DesignTokens.FontSize.body, color: H.meta)], gap: H.titleGap)
+                              Self.middle(pageLabel(state.place, size: DesignTokens.FontSize.body, color: H.meta), tip: state.place)], gap: H.titleGap)
         words.setContentHuggingPriority(.init(1), for: .horizontal)
         // A stack view's own hug is this one, not the content's: without it the words kept their
         // text's width and the buttons sat beside the path (2026-11-17).
@@ -329,4 +329,14 @@ final class FlippedPage: NSView {
 /// The scroll view's document: top-down.
 final class FlippedContent: NSView {
     override var isFlipped: Bool { true }
+}
+
+extension ProjectPageDocument {
+    /// A path cut in the middle, whole in the tip: cut at the end, the project's folder and its
+    /// branch, the useful part, went (UX audit, 2026-11-18).
+    static func middle(_ label: NSTextField, tip: String) -> NSTextField {
+        label.lineBreakMode = .byTruncatingMiddle
+        label.toolTip = tip
+        return label
+    }
 }

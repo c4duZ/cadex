@@ -35,7 +35,7 @@ public enum RaceRefusal: Error, Equatable {
 
     public var message: String {
         switch self {
-        case .off: return T("Races and runs are off in Settings › General › Many Agents.", "Corridas e execuções estão desligadas em Configurações › Geral › Muitos agentes.")
+        case .off: return T("Races and runs are off in Settings › Many Agents.", "Corridas e execuções estão desligadas em Configurações › Muitos agentes.")
         case .tooFew: return T("A race needs at least 2 agents.", "Uma corrida precisa de pelo menos 2 agentes.")
         case .tooMany(let max): return T("At most \(max) agents at once (Settings › Many Agents).", "No máximo \(max) agentes ao mesmo tempo (Configurações › Muitos agentes).")
         case .emptyPrompt: return T("The prompt is empty.", "O prompt está vazio.")

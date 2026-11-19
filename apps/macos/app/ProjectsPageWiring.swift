@@ -28,6 +28,7 @@ extension WindowSession {
     func makeProjectsPage() -> ProjectsListDocument {
         var actions = ProjectsListActions()
         actions.open = { [weak self] folder in self?.openProjectPage(folder) }
+        actions.menu = { [weak self] folder in self?.railMenu(folder) ?? [] }
         actions.add = { [weak self] in _ = self?.commands.run("project.create") }
         actions.load = { [weak self] show in self?.loadProjectCards(show) }
         return ProjectsListDocument(actions: actions)
