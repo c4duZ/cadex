@@ -215,8 +215,12 @@ extension WindowSession {
             guard let self, let tabs = self.tabs else { return }
             guard code == 0 else {
                 let alert = NSAlert()
-                alert.messageText = T("The memory agent did not answer", "O agente de memória não respondeu")
-                alert.informativeText = text
+                alert.messageText = T("The memory did not answer", "A memória não respondeu")
+                // The client's `{"error":…}` in words: the raw JSON was on screen (2026-11-19).
+                let reason = (try? JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any])?["error"] as? String ?? text
+                alert.informativeText = reason.contains("did not answer")
+                    ? T("It may still be starting. Try again in a few seconds.", "Ela pode estar começando. Tente de novo em alguns segundos.")
+                    : reason
                 return alert.beginSheetModal(for: self.window)
             }
             if let open = tabs.document(identity: MemoryBriefingDocument.identity(for: root)) as? MemoryBriefingDocument {
