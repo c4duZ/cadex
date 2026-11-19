@@ -61,9 +61,5 @@ extension TerminalView {
     @objc public func paste(_ sender: Any?) {
         pasteFromClipboard()
     }
-
-    public override func selectAll(_ sender: Any?) {
-        session?.selectAll()
-        needsDisplay = true
-    }
+    // selectAll: (⌘A) is in TerminalInputSelection.swift: the typed text first.
 }

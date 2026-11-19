@@ -243,6 +243,8 @@ cadex_status cadex_terminal_set_colors(cadex_terminal *terminal, const cadex_ter
 /* A match of the open search, and the current match. */
 #define CADEX_CELL_MATCH          (1u << 11)
 #define CADEX_CELL_MATCH_CURRENT  (1u << 12)
+/* What the user types at the shell's prompt (after OSC 133 B, until C). */
+#define CADEX_CELL_INPUT          (1u << 13)
 /* Underline kind: (flags >> CADEX_CELL_UNDERLINE_SHIFT) & 7.
  * 0 none, 1 single, 2 double, 3 curly, 4 dotted, 5 dashed. */
 #define CADEX_CELL_UNDERLINE_SHIFT 8

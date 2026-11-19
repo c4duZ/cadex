@@ -50,7 +50,15 @@ if [[ -o interactive ]]; then
     builtin print -rn -- $'\e]133;D;'"$code"$'\a'
     _cadex_command_running=
   }
+  # Where the prompt ends and the typing starts (OSC 133 B), so ⌘A, the triple click and Delete
+  # take just what is typed (2026-11-18). Kept last among the precmd hooks: a theme that builds
+  # its prompt in its own hook would drop the mark.
+  _cadex_prompt_end() {
+    precmd_functions=(${precmd_functions:#_cadex_prompt_end} _cadex_prompt_end)
+    [[ $PS1 == *$'\e]133;B\a'* ]] || PS1+=$'%{\e]133;B\a%}'
+  }
   builtin autoload -Uz add-zsh-hook
   add-zsh-hook preexec _cadex_command_start
   add-zsh-hook precmd _cadex_command_end
+  add-zsh-hook precmd _cadex_prompt_end
 fi

@@ -30,6 +30,9 @@ pub const CellFlags = struct {
     /// A match of the open search (⌘F), and the current one.
     pub const match: u16 = 1 << 11;
     pub const match_current: u16 = 1 << 12;
+    /// What the user types at the shell's prompt (OSC 133 B to C): ⌘A and the triple click
+    /// select it, Delete clears it (the app, 2026-11-18).
+    pub const input: u16 = 1 << 13;
 };
 
 pub const Cell = extern struct {
@@ -167,6 +170,7 @@ pub const Renderer = struct {
         if (style.flags.faint) flags |= CellFlags.faint;
         if (style.flags.strikethrough) flags |= CellFlags.strikethrough;
         flags |= @as(u16, @intFromEnum(style.flags.underline)) << CellFlags.underline_shift;
+        if (cell.raw.semantic_content == .input) flags |= CellFlags.input;
         switch (cell.raw.wide) {
             .wide => flags |= CellFlags.wide,
             .spacer_tail, .spacer_head => flags |= CellFlags.spacer,

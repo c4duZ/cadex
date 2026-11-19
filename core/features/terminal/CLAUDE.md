@@ -23,7 +23,8 @@
 - Porta de entrada: `terminal.zig`. API C: `c_api.zig`, declarada em `../../include/cadex.h`.
 - `model.zig`: libghostty-vt (Terminal + TerminalStream); respostas ao programa por callback.
   Liga o agrupamento de grafemas (modo 2027), senão emoji com tom de pele vira dois glifos.
-- `render.zig`: traduz o RenderState num quadro plano (cores RGB, texto UTF-8, flags). Campos
+- `render.zig`: traduz o RenderState num quadro plano (cores RGB, texto UTF-8, flags; a
+  CADEX_CELL_INPUT marca o que o usuário digita no prompt, entre o OSC 133 B e o C). Campos
   `style` e `grapheme` do RenderState só valem em certas células: ver `render.zig:translateCell`.
 - `input.zig`: teclas (Key e Mods nossos, CADEX_KEY_* e CADEX_MOD_*) codificadas pelo encoder da
   libghostty com os modos atuais do terminal (setas em modo de aplicação, kitty). Lê os modos com a

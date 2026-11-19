@@ -67,11 +67,20 @@ do dia a dia, mais simples por dentro e com o texto nítido.
 - Programas de tela cheia (vim, htop, less) recebem a rolagem como o programa espera.
 
 ### Seleção e copiar
-- Arrastar seleciona; duplo clique seleciona a palavra; triplo clique, a linha.
+- Arrastar seleciona; duplo clique seleciona a palavra.
+- O que você está escrevendo funciona como numa caixa de texto (o dono, 2026-11-18): no prompt do
+  shell (o que vem depois do prompt, pela marca OSC 133 B da integração do zsh) e na caixa de
+  entrada do Claude Code. ⌘A seleciona só esse texto; um segundo ⌘A seleciona tudo. Duplo clique
+  no vazio ou triplo clique sobre ele também o seleciona; fora dele, selecionam o parágrafo sob o
+  ponteiro (as linhas com texto até uma linha vazia). Com ele selecionado, ⌘C copia, Delete o
+  apaga e uma letra o troca pelo que foi digitado. O Cadex apaga com as teclas do próprio programa:
+  no shell, Ctrl+E e Ctrl+U; no Claude, um clique logo depois do texto (o cursor vai ao fim),
+  Ctrl+E e um Backspace por caractere.
 - ⌘C copia a seleção. Sem seleção, ⌘C não faz nada (Ctrl+C continua sendo o interromper do shell).
 - No Windows, além do Ctrl+Shift+C (o ⌘C), Ctrl+C com texto selecionado copia, como no Windows
   Terminal; sem seleção, Ctrl+C é o interromper do shell.
-- ⌘A seleciona todo o conteúdo do painel, inclusive o histórico.
+- O segundo ⌘A (ou o primeiro, sem nada escrito) seleciona todo o conteúdo do painel, inclusive o
+  histórico.
 - A configuração "copiar ao selecionar" decide se selecionar copia. Desligada (padrão), a área de
   transferência só muda com ⌘C ou o comando de copiar: passar o mouse, clicar ou selecionar não
   copia nada, e o que já estava copiado (texto, imagem, arquivo) continua lá para colar. Ligada,
@@ -251,7 +260,9 @@ célula fotografada (cor do texto, do fundo, negrito), nos temas "dark", "light"
   do verde e do vermelho, o ⏺ rodando no amarelo, o trabalhando no azul); não desenha o mascote nem
   a linha do modo e põe o modo à direita da linha de cima; desenha a caixa arredondada no lugar das
   duas linhas da entrada e a mensagem do dono num bloco com cantos. Só o desenho muda: seleção,
-  busca e cópia leem o texto de verdade. O que não bate com a medida fica como o Claude desenha; a
+  busca e cópia leem o texto de verdade, e o mouse vai à célula que o Claude escreveu (a caixa é
+  desenhada uma linha abaixo; sem desfazer isso, o clique no meio do texto caía na borda e o cursor
+  não ia, 2026-11-18). O que não bate com a medida fica como o Claude desenha; a
   dica "esc to interrupt" da linha do modo some junto com ela.
 - **O pedido de permissão** é um diálogo do Claude no lugar da caixa de entrada: uma linha inteira
   de "─", "Bash command" no destaque, o comando entre duas linhas de "╌", "Do you want to

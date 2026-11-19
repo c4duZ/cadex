@@ -4,6 +4,8 @@ import CCadex
 /// What the view remembers between mouse events.
 struct MouseState {
     var scroll = ScrollAccumulator()
+    /// The typed text, while ⌘A or the clicks have it selected (TerminalInputSelection.swift).
+    var field: InputField?
     /// Runs while a drag is past the top or bottom edge (selection.zig).
     var autoscrollTimer: Timer?
     var lastDragLocation: CGPoint = .zero
@@ -32,17 +34,22 @@ extension TerminalView {
             precise: event.hasPreciseScrollingDeltas,
             cellHeightPoints: CGFloat(g.cellHeight) / g.scale)
         guard rows != 0 else { return }
-        let location = convert(event.locationInWindow, from: nil)
+        let location = written(event)
         session.wheel(programEvent(location, CADEX_MOUSE_PRESS, CADEX_MOUSE_BUTTON_NONE, event), rows: rows)
         needsDisplay = true
     }
 
     public override func mouseDown(with event: NSEvent) {
         window?.makeFirstResponder(self)
-        let location = convert(event.locationInWindow, from: nil)
+        let location = written(event)
         if event.modifierFlags.contains(.command), openLink(at: location) { return }
         if event.modifierFlags.intersection([.command, .shift, .option, .control]).isEmpty, event.clickCount == 1,
            openPastedImage(at: location) { return }
+        // A double click on blank or a triple click: the typed text or the paragraph, here and not in
+        // the program (Claude selects a line, and cannot delete what it selected).
+        mouse.field = nil
+        if event.modifierFlags.intersection([.command, .shift, .option, .control]).isEmpty,
+           selectByClicks(at: location, clicks: event.clickCount) { return }
         if reportPress(event, button: CADEX_MOUSE_BUTTON_LEFT) { return }
         session?.selectPress(
             geometry.pointer(at: location),
@@ -55,7 +62,7 @@ extension TerminalView {
     public override func mouseDragged(with event: NSEvent) {
         if reportMotion(event) { return }
         guard mouse.selecting, let session else { return }
-        mouse.lastDragLocation = convert(event.locationInWindow, from: nil)
+        mouse.lastDragLocation = written(event)
         let direction = session.selectDrag(geometry.pointer(at: mouse.lastDragLocation))
         updateAutoscroll(direction)
         needsDisplay = true
@@ -66,7 +73,7 @@ extension TerminalView {
         guard mouse.selecting else { return }
         mouse.selecting = false
         updateAutoscroll(0)
-        let location = convert(event.locationInWindow, from: nil)
+        let location = written(event)
         session?.selectRelease(geometry.pointer(at: location))
         // Only when the setting is on; a click without a selection never
         // copies (docs/spec/terminal.md).
@@ -90,7 +97,7 @@ extension TerminalView {
     /// Motion without a button, for programs that track every motion.
     func reportHover(_ event: NSEvent) {
         guard let session, session.mouseTracking == UInt8(CADEX_MOUSE_TRACKING_MOTION) else { return }
-        let location = convert(event.locationInWindow, from: nil)
+        let location = written(event)
         session.mouse(programEvent(location, CADEX_MOUSE_MOTION, CADEX_MOUSE_BUTTON_NONE, event))
     }
 
@@ -102,7 +109,7 @@ extension TerminalView {
         guard let session, session.mouseTracking != UInt8(CADEX_MOUSE_TRACKING_NONE),
               !event.modifierFlags.contains(.shift)
         else { return false }
-        let location = convert(event.locationInWindow, from: nil)
+        let location = written(event)
         session.mouse(programEvent(location, CADEX_MOUSE_PRESS, button, event))
         mouse.reportedButton = button
         return true
@@ -110,7 +117,7 @@ extension TerminalView {
 
     private func reportMotion(_ event: NSEvent) -> Bool {
         guard let session, let button = mouse.reportedButton else { return false }
-        let location = convert(event.locationInWindow, from: nil)
+        let location = written(event)
         session.mouse(programEvent(location, CADEX_MOUSE_MOTION, button, event))
         return true
     }
@@ -118,7 +125,7 @@ extension TerminalView {
     private func reportRelease(_ event: NSEvent) -> Bool {
         guard let session, let button = mouse.reportedButton else { return false }
         mouse.reportedButton = nil
-        let location = convert(event.locationInWindow, from: nil)
+        let location = written(event)
         session.mouse(programEvent(location, CADEX_MOUSE_RELEASE, button, event))
         return true
     }
@@ -150,5 +157,21 @@ extension TerminalView {
         let direction = session.selectAutoscroll(geometry.pointer(at: mouse.lastDragLocation))
         needsDisplay = true
         if direction == 0 { updateAutoscroll(0) }
+    }
+}
+
+extension TerminalView {
+    /// Where the event is, moved to the cell that was written there: the drawing of Claude's
+    /// screen moves some rows (ClaudeDress.source), and clicks, drags and selections go by the
+    /// written cells, as the program and the core know them.
+    func written(_ event: NSEvent) -> CGPoint {
+        let location = convert(event.locationInWindow, from: nil)
+        guard let shift = renderer?.lastShift else { return location }
+        let g = geometry
+        let width = CGFloat(g.cellWidth) / g.scale, height = CGFloat(g.cellHeight) / g.scale
+        let col = Int(((location.x - g.padding) / width).rounded(.down))
+        let row = Int(((g.viewSize.height - location.y - g.padding) / height).rounded(.down))
+        let source = ClaudeDress.source(row: row, col: col, shift: shift)
+        return CGPoint(x: location.x + CGFloat(source.col - col) * width, y: location.y - CGFloat(source.row - row) * height)
     }
 }

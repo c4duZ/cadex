@@ -226,3 +226,16 @@ func mix(_ a: UInt32, _ b: UInt32, _ t: Double) -> UInt32 {
     func part(_ s: UInt32) -> UInt32 { UInt32((ch(a, s) + (ch(b, s) - ch(a, s)) * t).rounded()) << s }
     return part(16) | part(8) | part(0)
 }
+
+extension ClaudeDress {
+    /// The cell Claude wrote that is drawn at (`row`, `col`), from a plan's `shift`: the dressing
+    /// draws the input box a row lower and the banner further left, and a click went to the cell
+    /// under the pointer, a row above the input (its rule): clicking in the prompt never moved
+    /// Claude's cursor, and its selection started a row off (owner, 2026-11-18).
+    static func source(row: Int, col: Int, shift: [(dx: Int, dy: Int)]) -> (row: Int, col: Int) {
+        for r in shift.indices where shift[r] != (0, 0) && r + shift[r].dy == row {
+            return (r, col - shift[r].dx)
+        }
+        return (row, col)
+    }
+}

@@ -129,4 +129,19 @@ enum Claude {
         other.row(("  ⏵⏵ accept edits enabled", 0xAF87FF, nil))
         expect(other.plan().label == nil && !other.plan().hidden.contains(true), "unknown words stay drawn")
     }),
+    ("a click on a moved row goes to the cell Claude wrote: the prompt a row up, the banner further right", {
+        var boxed = FakeScreen(cols: 50)
+        boxed.row(("", Claude.text, nil))
+        boxed.row((String(repeating: "─", count: 50), 0x888888, nil))
+        boxed.row(("❯\u{00A0}hello world", Claude.text, nil))
+        boxed.row((String(repeating: "─", count: 50), 0x888888, nil))
+        boxed.row(("  Haiku 5.5", 0x999999, nil))
+        boxed.row(("  ⏵⏵ auto mode on", 0xAF87FF, nil), (" (shift+tab to cycle)", 0x999999, nil))
+        let shift = boxed.plan().shift
+        // The prompt, written on row 2, is drawn on row 3: a click there is a click on row 2.
+        expect(ClaudeDress.source(row: 3, col: 8, shift: shift) == (2, 8), "\(ClaudeDress.source(row: 3, col: 8, shift: shift))")
+        expect(ClaudeDress.source(row: 0, col: 4, shift: shift) == (0, 4), "a row that did not move")
+        let banner = [(dx: -11, dy: 0), (dx: 0, dy: 0)]
+        expect(ClaudeDress.source(row: 0, col: 3, shift: banner) == (0, 14), "the banner's words were written 11 columns right")
+    }),
 ]

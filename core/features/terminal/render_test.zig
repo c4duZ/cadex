@@ -112,3 +112,16 @@ test "the frame follows a resize" {
     try testing.expectEqual(@as(u16, 20), frame.cols);
     try testing.expectEqual(@as(u16, 5), frame.rows);
 }
+
+test "what is typed after the prompt's end (OSC 133 B) is marked as input, the prompt is not" {
+    var f = try Fixture.init(20, 3);
+    defer f.deinit();
+    f.model.feed("\x1b]133;A\x07$ \x1b]133;B\x07ls -la");
+    const frame = try f.frame();
+    try testing.expect(cellAt(frame, 0, 0).flags & Flags.input == 0);
+    try testing.expect(cellAt(frame, 2, 0).flags & Flags.input != 0);
+    try testing.expect(cellAt(frame, 7, 0).flags & Flags.input != 0);
+    f.model.feed("\x1b]133;C\x07\r\noutput");
+    const after = try f.frame();
+    try testing.expect(cellAt(after, 0, 1).flags & Flags.input == 0);
+}

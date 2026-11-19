@@ -319,6 +319,8 @@ public final class TerminalView: NSView {
             interpretKeyEvents([event])
             return
         }
+        // The typed text selected (⌘A, the clicks): Delete clears it, a letter replaces it.
+        if replaceSelectedText(event) { return }
         // Return to an agent: a message sent, a mark on the scrollbar (the Pane mockup).
         if event.keyCode == 36 || event.keyCode == 76, !event.modifierFlags.contains(.shift), agentStatus != nil {
             scrollbar.mark(cursorRow: lastCursorRow, needs: false)

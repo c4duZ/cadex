@@ -147,6 +147,11 @@ extension TerminalSession {
         _ = cadex_terminal_select_release(handle, &p)
     }
 
+    func clearSelection() {
+        guard let handle else { return }
+        cadex_terminal_select_clear(handle)
+    }
+
     func selectAll() {
         guard let handle else { return }
         _ = cadex_terminal_select_all(handle)

@@ -107,7 +107,18 @@
   as cores fixas dele pelas do tema (`Palette`, tirada do `TerminalAppearance`), esconde o mascote e
   a linha do modo, põe o modo à direita da status line, e as formas (a caixa da entrada, o bloco da
   mensagem do dono) vão como retângulos arredondados (quad do tipo 3 no `TerminalShaders.swift`).
-  O `QuadBuilder.swift` desenha com o plano (DrawOverlay.dressClaude); o texto não muda.
+  O `QuadBuilder.swift` desenha com o plano (DrawOverlay.dressClaude); o texto não muda. As linhas
+  que o plano move (a caixa uma linha abaixo, o banner à esquerda) voltam ao lugar escrito no mouse:
+  o `TerminalRenderer.swift` guarda o `shift` do último quadro, ClaudeDress.source o desfaz, e
+  cliques, arrastos e seleções vão à célula que o Claude escreveu (`written` em `TerminalMouse.swift`;
+  sem isso o clique no meio do texto caía na borda de cima da caixa e o cursor não ia, 2026-11-18).
+- O texto que você escreve como numa caixa de texto (`../../../../docs/spec/terminal.md`, Seleção):
+  `TerminalInputField.swift` acha, puro e testado, a caixa de entrada do Claude (uma linha de "─",
+  linhas começando em "❯", outra de "─"), o que foi digitado no shell (as células CADEX_CELL_INPUT
+  da linha do cursor, que o núcleo marca depois do OSC 133 B que a integração do zsh põe no fim do
+  prompt) e o parágrafo sob uma linha; `TerminalInputSelection.swift` liga o ⌘A (o texto primeiro,
+  tudo no segundo), o duplo clique no vazio e o triplo clique (antes de o clique ir ao programa) e,
+  com o texto selecionado, o Delete e a letra que o troca, apagando pelas teclas do programa.
 - `TerminalScrollbar.swift` (plano 28 fase D): a barra de rolagem do mockup Pane, uma coluna de 8 pt
   que o painel põe na borda da caixa (`scrollbar`), com o polegar e as marcas: cinza onde o dono
   mandou uma mensagem ao agente (Enter com agente rodando), âmbar onde o agente passou a esperar;

@@ -69,6 +69,9 @@ final class TerminalRenderer {
 
     /// The theme's colors for Claude's (ClaudeDress), set with the terminal's colors.
     var claudePalette: ClaudeDress.Palette?
+    /// Where the last frame drew each row, from where it was written (ClaudeDress.Plan.shift); nil
+    /// when nothing moved. The mouse undoes it: a click lands on the cell Claude wrote.
+    private(set) var lastShift: [(dx: Int, dy: Int)]?
 
     /// The dressing of this frame, while Claude runs in front.
     private func dress(_ frame: cadex_terminal_frame, _ overlay: DrawOverlay) -> ClaudeDress.Plan? {
@@ -85,9 +88,11 @@ final class TerminalRenderer {
 
     func draw(_ frame: cadex_terminal_frame, padding: SIMD2<Float>, in drawable: CAMetalDrawable, size: CGSize,
               overlay: DrawOverlay = DrawOverlay(), synchronously: Bool = false) {
+        let plan = dress(frame, overlay)
+        lastShift = plan.map(\.shift)
         let quads = builder.build(frame: frame, atlas: atlas, metrics: font.metrics, padding: padding,
                                   viewSize: SIMD2(Float(size.width), Float(size.height)), overlay: overlay,
-                                  selection: selectionColor, dress: dress(frame, overlay))
+                                  selection: selectionColor, dress: plan)
 
         inFlight.wait()
         bufferIndex = (bufferIndex + 1) % Self.buffersInFlight
