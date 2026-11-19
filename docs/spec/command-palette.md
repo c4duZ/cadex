@@ -22,7 +22,7 @@ ação do app (ADR 0005). Quando existirem, acha também abas, projetos e arquiv
   lado do terminal, uma forma de cada coisa: Terminal (⌘T), Agente… (⇧⌘A), Nova tarefa… (⌘N),
   Arquivo… (⌘P), Preview web (⇧⌘H). Ao lado, abaixo, em nova aba e nova janela se acham pelo nome (o
   dono, 2026-11-18: sete formas de abrir antes de qualquer coisa, e nenhuma de agente). O "+" das
-  abas: Terminal, Agente…, Tarefa…, Corrida…, uma linha, Arquivo… e Preview web, em nova aba; o "+"
+  abas: Terminal, Agente…, Sessão sem memória (plano 35 I), Tarefa…, Corrida…, uma linha, Arquivo… e Preview web, em nova aba; o "+"
   do painel: só o que abre ao lado (Terminal ao lado, abaixo, Preview web ao lado), sem maximizar e
   fechar, que são botões do cabeçalho. O grafo do git saiu daqui e dos menus "+" (o dono, 2026-10-22);
   continua no ⌘K pelo nome. Depois "Recentes" e uma seção por área (Abas, Painéis, Arquivos,

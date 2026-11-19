@@ -52,7 +52,7 @@ extension WindowSession {
 
     /// The page's sections: the project's memory (its .ai-memory.toml) for now.
     func makeProjectSettings(_ folder: String) -> ProjectSettingsDocument {
-        ProjectSettingsDocument(folder: folder) { [weak self] in [self?.projectLook(folder), MemoryProjectForm(folder: folder)].compactMap { $0 } }
+        ProjectSettingsDocument(folder: folder) { [weak self] in [self?.projectLook(folder), self?.projectMemoryForm(folder)].compactMap { $0 } }
     }
 
     /// The project's page, on a section and a line when given (plan 34 G).
@@ -94,7 +94,7 @@ extension WindowSession {
     /// The project's Settings: how it shows in the rail (name, picture, pinned; plan 36 E), then
     /// its memory's file.
     private func projectSettingsView(_ folder: String) -> NSView {
-        let blocks = [projectLook(folder), MemoryProjectForm(folder: folder)]
+        let blocks = [projectLook(folder), projectMemoryForm(folder)]
         let column = NSStackView(views: blocks)
         column.orientation = .vertical
         column.alignment = .leading

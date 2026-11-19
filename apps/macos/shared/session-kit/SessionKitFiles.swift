@@ -20,7 +20,7 @@ extension SessionKit {
     /// `owner`: the owner's own `--settings` of a typed `claude`, merged in
     /// (SessionKitLaunch.swift), since two `--settings` do not add up.
     func writeSettings(session: String, token: String?, accountDir: String, cwd: String? = nil, owner: [String: Any]? = nil,
-                       sessionEnvironment: [String: String] = [:]) -> String? {
+                       sessionEnvironment: [String: String] = [:], parts chosen: [(id: String, part: SessionKitPart)]? = nil) -> String? {
         var settings: [String: Any] = [:]
         if let tools = toolsPath {
             settings["statusLine"] = ["type": "command", "command": Self.quote(tools) + " statusline"]
@@ -42,10 +42,10 @@ extension SessionKit {
         if let claudeTheme { settings["theme"] = claudeTheme }
         // Contributed hooks stay with agents.stateHooks off: that setting is
         // about the kit's own hooks only (the memory's run regardless).
-        for id in parts.keys.sorted() {
-            settings = Self.merge(settings, parts[id]!.settings)
-            if let perAccount = parts[id]!.perAccount { settings = Self.merge(settings, perAccount(accountDir)) }
-            if let cwd, !cwd.isEmpty, let perSession = parts[id]!.perSession { settings = Self.merge(settings, perSession(accountDir, cwd)) }
+        for (_, part) in chosen ?? parts(cwd: cwd, leaving: []) {
+            settings = Self.merge(settings, part.settings)
+            if let perAccount = part.perAccount { settings = Self.merge(settings, perAccount(accountDir)) }
+            if let cwd, !cwd.isEmpty, let perSession = part.perSession { settings = Self.merge(settings, perSession(accountDir, cwd)) }
         }
         if let owner { settings = Self.mergeOwner(kit: settings, owner: owner) }
         guard !settings.isEmpty || owner != nil else { return nil }

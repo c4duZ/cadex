@@ -200,3 +200,27 @@ fn each_start_learns_the_outside_sessions_since_the_last_one() {
     wait_for_change(&checkpoints, Some(&before));
     assert!(!observations(&engine, S_LATE, "default").contains("quail"), "the checkpoint bounds the scan");
 }
+
+#[test]
+fn an_off_projects_sessions_are_never_imported() {
+    // Plan 35 I: the memory off in a project (the app's off-projects.json): neither its history
+    // nor the sessions that ran outside Cadex come in.
+    let tmp = tempfile::tempdir().unwrap();
+    let project = repo(tmp.path(), "acme");
+    let main = account(tmp.path(), ".claude");
+    let data = tmp.path().join("data");
+    let checkpoints = data.join("imports/outside.json");
+    let args = ["--keep-alive", "--import-delay-ms", "0"];
+    {
+        let engine = start(tmp.path(), &args);
+        session_start(&engine, S_START, &project, None);
+        wait_for_change(&backfill_marker(&data), None);
+    }
+    std::fs::remove_file(&checkpoints).ok();
+    std::fs::write(data.join("off-projects.json"), serde_json::json!({"roots": [project]}).to_string()).unwrap();
+    transcript(&main, S_ROOT, &project, "heron", Duration::from_secs(86_400));
+    let engine = start(tmp.path(), &args);
+    wait_for_change(&checkpoints, None);
+    std::fs::write(data.join("off-projects.json"), r#"{"roots":[]}"#).unwrap();
+    assert!(!observations(&engine, S_ROOT, "default").contains("heron"), "an off project's outside session");
+}

@@ -19,6 +19,7 @@ const context = @import("context.zig");
 const http = @import("http.zig");
 const launch = @import("launch.zig");
 const spool = @import("spool.zig");
+const fs = @import("../../shared/fs.zig");
 
 extern "c" fn getppid() c_int;
 
@@ -142,6 +143,8 @@ pub fn runWith(gpa: std.mem.Allocator, env: Env, claude_event: []const u8, input
     var parsed = std.json.parseFromSlice(std.json.Value, gpa, input, .{}) catch null;
     defer if (parsed) |*p| p.deinit();
     const payload = events.Payload.of(if (parsed) |p| p.value else .null);
+    // Plan 35 I: the owner paused the memory in this conversation: nothing sent, nothing printed.
+    if (payload.session_id) |id| if (isPaused(env.data_dir, id)) return null;
     var key_buf: [32]u8 = undefined;
     const pid: ?c_int = if (events.sendsPid(event)) claude_pid else null;
     const base = try events.hookTarget(gpa, event, payload, env.workspace, events.ingestKey(&key_buf), pid);
@@ -182,6 +185,17 @@ pub fn runWith(gpa: std.mem.Allocator, env: Env, claude_event: []const u8, input
         return null;
     }
     return fetchReply(gpa, env, payload, reply, milestone, deadline);
+}
+
+/// Whether the app left `<data_dir>/paused/<session id>` (MemoryOff.swift, "Pause Memory in This
+/// Session"); the engine drops such a session's events too (server/src/off.rs). Only a plain id
+/// names a file.
+pub fn isPaused(data_dir: []const u8, session_id: []const u8) bool {
+    if (session_id.len == 0) return false;
+    for (session_id) |ch| if (!(std.ascii.isAlphanumeric(ch) or ch == '-' or ch == '_')) return false;
+    var buf: [1200]u8 = undefined;
+    const path = std.fmt.bufPrint(&buf, "{s}/paused/{s}", .{ data_dir, session_id }) catch return false;
+    return fs.exists(path);
 }
 
 /// The milestone percent, when consolidation in the session is on.
@@ -326,4 +340,20 @@ test "with the engine down an event is queued and the hook does not wait" {
     var reader = try @import("../../shared/fs.zig").DirReader.open(try std.fmt.bufPrint(&spool_buf, "{s}/spool", .{data_dir}));
     defer reader.close();
     try testing.expect(reader.next() != null);
+}
+
+test "a paused session sends nothing, even with the engine down" {
+    var tmp = try @import("../../shared/test_dir.zig").TestDir.init();
+    defer tmp.deinit();
+    try tmp.makeDir("memory/paused");
+    try tmp.writeFile("memory/paused/s-1", "");
+    var dir_buf: [1024]u8 = undefined;
+    const data_dir = try std.fmt.bufPrintZ(&dir_buf, "{s}/memory", .{tmp.path()});
+    try testing.expect(isPaused(data_dir, "s-1"));
+    try testing.expect(!isPaused(data_dir, "../paused/s-1"));
+    const env: Env = .{ .token = "t", .socket = "/nonexistent/m.sock", .data_dir = data_dir };
+    try testing.expect(try runWith(testing.allocator, env, "UserPromptSubmit", "{\"cwd\":\"/p\",\"session_id\":\"s-1\",\"prompt\":\"x\"}", 7) == null);
+    try testing.expect(!tmp.exists("memory/spool"));
+    try testing.expect(try runWith(testing.allocator, env, "UserPromptSubmit", "{\"cwd\":\"/p\",\"session_id\":\"s-2\",\"prompt\":\"x\"}", 7) == null);
+    try testing.expect(tmp.exists("memory/spool"));
 }

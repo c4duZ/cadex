@@ -119,6 +119,21 @@
   - `server/src/model_fetch.rs`: o download do modelo com os arquivos e SHA-256 do upstream, mas
     retomando por `Range` num `.part` (o do upstream lê o arquivo inteiro e recomeça); só renomeia o
     que confere. O teste com o modelo de verdade é `cargo test -- --ignored real_model` (rede).
+  - A memória desligada (plano 35 I; spec "Desligar"), o interruptor que o upstream não tem:
+    `server/src/off.rs` lê o `<data-dir>/off-projects.json` que o app grava (as raízes dos projetos
+    desligados; relido só quando o mtime ou o tamanho muda; uma pasta é desligada sob uma raiz ou
+    quando o checkout principal dela, lido dos arquivos por `server/src/project_key.rs`, é uma) e as
+    marcas `<data-dir>/paused/<sessão>` (só id simples); o middleware `gate`, por fora de todos os
+    vigias (importação, sessões, agente, handoff, manutenção), responde 202 sem gravar a um `/hook`
+    de pasta desligada ou de sessão pausada e 204 a `/handoff`, `/brief`, `/recap` e
+    `/cadex/consolidate` delas; a fila e a importação passam por ele também.
+    `server/src/off_search.rs`, no `/mcp`, com algum projeto desligado: a chamada que nomeia um
+    (`project`, ou um item de `scopes`) recebe um erro da ferramenta sem chegar ao upstream, e da
+    resposta saem os itens de lista com o nome dele (`project_name`, como os `global_hits`, ou
+    `project`), também no JSON do `text`; pelo nome, o único que a resposta traz. A importação
+    (`server/src/import_jobs.rs`) não traz o histórico de um projeto desligado (sem marcar: religado,
+    vem) nem as sessões de fora dele (essas nunca: o ponto de controle passa); o agente
+    (`server/src/agent/jobs.rs`) não roda trabalho de projeto desligado nem de sessão pausada.
   - `server/src/mcp_scope.rs`: numa chamada do `cadex mcp`, o projeto de reserva (os cabeçalhos
     `x-memory-actor-fallback-*` do upstream) pela pasta que ele manda: o `project` do
     .ai-memory.toml, senão o nome da raiz do repositório principal, como os hooks.
@@ -313,6 +328,10 @@
     `claude` dela sai (plano 35 H); overview com o engine de pé e parado, o briefing igual ao do
     SessionStart seguinte e sem pegar o handoff, gravar e apagar página com commit, o reindex de um
     arquivo editado no disco, propostas aprovadas e recusadas, o projects.json;
+    `server/tests/memory_off.rs` (plano 35 I): um projeto desligado não grava nem chama o agente,
+    sai da busca em todos e a chamada que o nomeia é recusada, e o gravado antes fica; uma sessão
+    pausada não grava mais nada nem chama o agente ao terminar; `server/tests/import.rs` também: as
+    sessões de fora de um projeto desligado não entram;
     `server/tests/session_end.rs`: o handoff de uma sessão com 10 edições lista os 10 arquivos, e
     um pânico forçado não perde evento (a fila espera e o engine seguinte a esvazia); ajudas em
     `server/tests/common/mod.rs`.
@@ -344,7 +363,9 @@
     `CADEX_MEMORY_SOCKET` (padrão: sockets/memory.sock na pasta do Cadex), `CADEX_MEMORY_DIR`
     (padrão: memory/ na pasta do Cadex), `CADEX_MEMORY_BIN`, `CADEX_SESSIONS_DIR` e `CADEX_MEMORY_WORKSPACE` (a chave da conta, posta pelo
     kit com memory.shareAcrossAccounts desligada; vai como `workspace=` em todo `/hook` e `/handoff`,
-    e sem ela tudo cai na workspace `default`). SessionStart: sobe o engine se
+    e sem ela tudo cai na workspace `default`). Uma sessão com a marca `<memória>/paused/<id>`
+    (o app a deixa ao pausar a memória da conversa, plano 35 I) não manda nem imprime nada, em
+    nenhum evento. SessionStart: sobe o engine se
     preciso, manda o evento e pede o briefing, tudo em 1 s, e imprime o `additionalContext`. Os
     outros eventos: 200 ms e, sem resposta (ou com 5xx), vão para a fila. Sempre sai 0.
   - `events.zig`: o nome do evento do Claude Code no do engine (o `HookEvent::parse` do upstream;
@@ -387,10 +408,10 @@
 ## Como validar
 - `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs`,
   `server/tests/import.rs`, `server/tests/auto_memory.rs`, `server/tests/marker.rs`,
-  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs`, `server/tests/agent.rs`, `server/tests/agent_audit.rs`, `server/tests/agent_guard.rs`, `server/tests/memory_page.rs` e `server/tests/session_end.rs` (parte do `make check`, em segundos).
+  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs`, `server/tests/agent.rs`, `server/tests/agent_audit.rs`, `server/tests/agent_guard.rs`, `server/tests/memory_page.rs`, `server/tests/memory_off.rs` e `server/tests/session_end.rs` (parte do `make check`, em segundos).
 - `make memory-eval MODELS=<pasta>`: as 30 perguntas, só texto contra híbrida (`../../../tools/memory_eval.py`).
 - `make core-test`: os testes do cliente (eventos, query com e sem workspace, fila, respostas HTTP,
-  sem token).
+  sem token, a sessão pausada que não manda nem enfileira nada).
 - Na mão, tudo em pastas temporárias: um `.token` em `CADEX_SESSIONS_DIR`, e
   `echo '<json do SessionStart>' | CADEX_SESSION_TOKEN=… CADEX_MEMORY_BIN=… CADEX_MEMORY_DIR=…
   CADEX_MEMORY_SOCKET=… CADEX_SESSIONS_DIR=… core/zig-out/bin/cadex memory-hook SessionStart`.

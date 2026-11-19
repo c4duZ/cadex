@@ -32,6 +32,8 @@ public final class ProjectSettingsDocument: TabDocument {
 
     /// Back on the tab: read again (the file may have changed in a terminal or a commit).
     public func focus() { show() }
+    /// Built again: a setting changed from elsewhere (⌘K's memory.toggle-project, plan 35 I).
+    public func reload() { show() }
     public func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) { close() }
     public func close() {}
 

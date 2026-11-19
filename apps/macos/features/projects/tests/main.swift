@@ -174,6 +174,32 @@ let mainTests: [(name: String, body: Checks.Body)] = [
         expect(projects.activeFolder == a && projects.active?.count == 2, "\(String(describing: projects.active?.count))")
         projects.projects.forEach { $0.tabs.closeAll() }
     }),
+    ("the memory off in a project (plan 35 I): saved, told, kept when the project closes, and read from a file of before as none", {
+        let (a, b) = folders()
+        let file = tempFile()
+        let projects = controller(file, window: window())
+        projects.start(folder: a) { _ in nil }
+        var told: [Set<String>] = []
+        projects.onMemoryOffChange = { told.append($0) }
+        projects.setMemoryOff(true, for: a)
+        projects.setMemoryOff(true, for: a)
+        expect(projects.isMemoryOff(a) && !projects.isMemoryOff(b) && told == [[a]], "\(told)")
+        projects.open(folder: b)
+        projects.select(0)
+        projects.closeActive()
+        projects.saveNow()
+        expect(ProjectsFile.load(from: file)?.memoryOff == [a], "kept with the project closed")
+        let again = controller(file, window: window())
+        again.start(folder: b) { _ in nil }
+        expect(again.isMemoryOff(a), "restored")
+        again.setMemoryOff(false, for: a)
+        again.saveNow()
+        expect(ProjectsFile.load(from: file)?.memoryOff == nil, "none off: nothing written")
+        let before = #"{"version":1,"projects":[],"active":0}"#
+        try? Data(before.utf8).write(to: file)
+        expect(ProjectsFile.load(from: file)?.memoryOff == nil, "a file of before reads")
+        (projects.projects + again.projects).forEach { $0.tabs.closeAll() }
+    }),
     ("a worktree's folder belongs to its main repository", {
         let (a, _) = folders()
         let worktree = tempDir()

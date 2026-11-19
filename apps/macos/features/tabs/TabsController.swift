@@ -25,6 +25,8 @@ public final class TabsController {
     /// The right click's menu on a tab, built by the app from commands
     /// (rename, color, close), for the tab already selected.
     public var contextMenu: (() -> [MenuEntry])?
+    /// A terminal tab's discreet sign after its title (the memory paused, plan 35 I); the app says.
+    public var markOf: ((TerminalView) -> Icon?)?
     /// A right click on a group's item in the bar (a task's, plan 36 D): the app's menu for it.
     public var groupMenu: ((String) -> [MenuEntry])?
     /// Runs a command by id: the pane headers' buttons (ADR 0005).
@@ -318,7 +320,8 @@ public final class TabsController {
                                    tip: TabAgentTitle.tip(terminal?.agentStatus, folder: terminal?.currentDirectory.map(shortPath),
                                                          hibernated: terminal?.isHibernated ?? false),
                                    state: TabCommandLooks.state(of: tab),
-                                   unseen: terminal?.agentFinishedUnseen ?? false)
+                                   unseen: terminal?.agentFinishedUnseen ?? false,
+                                   mark: terminal.flatMap { markOf?($0) })
         }
         return TabBarView.Item(id: tab.id, title: title, active: tab.id == list.active,
                                tip: document.identity.hasPrefix("/") ? shortPath(document.identity) : nil)

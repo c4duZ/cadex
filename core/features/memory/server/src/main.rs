@@ -45,6 +45,8 @@ mod model_fetch;
 mod page;
 mod marker_query;
 mod mcp_scope;
+mod off;
+mod off_search;
 mod plugin;
 mod project_key;
 mod project_paths;

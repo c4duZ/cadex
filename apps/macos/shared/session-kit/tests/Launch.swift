@@ -33,6 +33,22 @@ import Foundation
         else { return expect(false, "refused") }
         expect((json(typed.arguments[1])["where"] as? String)?.hasSuffix("@/w/tab") == true, "the tab's folder")
     }),
+    ("a part goes without where it does not apply (the memory off, plan 35 I) and for a session that leaves it out", {
+        let dir = scratch()
+        defer { try? fm.removeItem(atPath: dir) }
+        let kit = SessionKit(folder: dir + "/kit", toolsPath: "/H/cadex", environment: [:])
+        kit.contribute("p", SessionKitPart(settings: ["mine": true], pluginDirs: ["/plug"], appliesTo: { !$0.hasPrefix("/off") }))
+        let with = { (cwd: String?, leaving: Set<String>) in
+            kit.launch(configDir: dir + "/acct", cwd: cwd, defaultClaudeJSON: dir + "/none.json", leaving: leaving)
+        }
+        let on = with("/on/app", [])
+        expect(json(on.arguments[1])["mine"] as? Bool == true && on.arguments.contains("/plug"), "\(on.arguments)")
+        let off = with("/off/app", [])
+        expect(json(off.arguments[1])["mine"] == nil && !off.arguments.contains("/plug"), "\(off.arguments)")
+        expect(json(with(nil, []).arguments[1])["mine"] as? Bool == true, "no folder known: the part goes")
+        let left = with("/on/app", ["p"])
+        expect(json(left.arguments[1])["mine"] == nil && !left.arguments.contains("/plug"), "\(left.arguments)")
+    }),
     ("a launch's own variables (a dispatch's CADEX_DISPATCH_ID) reach only that session, under the kit's names", {
         let dir = scratch()
         defer { try? fm.removeItem(atPath: dir) }

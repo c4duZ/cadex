@@ -130,6 +130,7 @@ extension WindowSession {
             keywords: ["usage", "plan", "limit", "refresh", "uso", "plano", "limite", "atualizar"], category: .view,
             action: .run { AgentUsageController.shared.refreshNow() }))
         commands.register(memoryCommands())
+        commands.register(memoryOffCommands())
         commands.register(MemoryPageCommands.commands(palette: palette, actions: memoryPageActions()))
         // The project's .ai-memory.toml on a screen, in the project's Settings page (plan 32 D).
         commands.register(Command(

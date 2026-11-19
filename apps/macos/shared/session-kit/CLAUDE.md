@@ -47,7 +47,11 @@
   contribuídos ficam com agents.stateHooks desligada, que só vale para os do kit; o `perAccount` de
   uma parte recebe a pasta da conta da sessão e junta o que devolve, como a workspace da memória por
   conta; o `perSession` recebe a conta e a pasta da sessão, só quando ela é conhecida, como a pasta
-  da memória automática do Claude por projeto); e, para contas que
+  da memória automática do Claude por projeto; o `appliesTo` de uma parte, com a pasta conhecida,
+  pode deixá-la de fora, `settings` e `pluginDirs`, como a memória num projeto desligado, plano 35
+  I; e `leaving` no `launch`/`claudeCommand` tira partes de uma sessão só, a "Nova sessão sem
+  memória"; os `mcpServers` de uma parte são por conta, um arquivo para todas as sessões dela, e
+  ficam); e, para contas que
   não são a padrão, `mcp-<conta>.json` (0600) com os `mcpServers` do .claude.json da conta padrão,
   lidos sem escrever.
 - `CLAUDE_CODE_FORCE_SYNC_OUTPUT=1` na `env` do `--settings` (`synchronizedOutput`): o terminal respeita

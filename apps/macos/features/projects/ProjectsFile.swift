@@ -67,8 +67,12 @@ public struct SavedProjects: Codable, Equatable, Sendable {
     public var folder: String?
     /// The latest first, at most `ProjectsController.recentLimit`; nil in a file of before plan 29.
     public var recent: [Recent]?
+    /// The folders (repository roots) with the project memory off on this Mac (plan 35 I), open or
+    /// not: closing a project must not turn its memory back on. nil in a file of before.
+    public var memoryOff: [String]?
 
-    public init(projects: [Project], active: Int, folder: String? = nil, recent: [Recent]? = nil) {
+    public init(projects: [Project], active: Int, folder: String? = nil, recent: [Recent]? = nil, memoryOff: [String]? = nil) {
+        self.memoryOff = memoryOff
         self.projects = projects
         self.active = active
         self.folder = folder

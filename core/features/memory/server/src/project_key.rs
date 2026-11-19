@@ -22,8 +22,9 @@
 //! `main_repo_root` asks git for, read from the files instead: the app
 //! computes it at every launch and should not spawn git for it.
 //!
-//! The engine itself only needs step 4 (auto_wiki.rs checks a folder's name
-//! against its project.json); steps 1 to 3 are here so the tests pin both
+//! The engine needs step 4 (auto_wiki.rs checks a folder's name against its
+//! project.json) and steps 1 to 3 for a folder of an off project (off.rs,
+//! plan 35 I: a worktree outside its root); the tests pin both
 //! implementations to the same answers.
 
 use std::os::unix::ffi::OsStrExt;
@@ -31,13 +32,11 @@ use std::path::{Path, PathBuf};
 
 use sha2::{Digest, Sha256};
 
-#[cfg_attr(not(test), allow(dead_code))]
 fn canonical(path: &Path) -> PathBuf {
     path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
 }
 
 /// The common dir a worktree's `.git` file leads to.
-#[cfg_attr(not(test), allow(dead_code))]
 fn common_dir_of_file(dot_git: &Path, holder: &Path) -> Option<PathBuf> {
     let text = std::fs::read_to_string(dot_git).ok()?;
     let named = text.lines().find_map(|l| l.strip_prefix("gitdir:"))?.trim();
@@ -50,7 +49,6 @@ fn common_dir_of_file(dot_git: &Path, holder: &Path) -> Option<PathBuf> {
 
 /// Steps 1 to 3: the main checkout of the repository `cwd` is in, or
 /// `cwd` itself (canonical).
-#[cfg_attr(not(test), allow(dead_code))]
 pub(crate) fn main_root(cwd: &Path) -> PathBuf {
     let start = canonical(cwd);
     let mut dir = start.as_path();

@@ -27,9 +27,20 @@ enum MemoryMarkerWiring {
         flush()
     }
 
+    /// The memory turned off or on in a project (plan 35 I): an off project gets no file; turned
+    /// on again, it gets one now.
+    static func memoryOffChanged(_ roots: Set<String>) {
+        offRoots = roots
+        flush()
+    }
+
+    /// The projects whose memory is off: no file made in them (2026-11-19, seen in the app: the
+    /// file appeared in a project with its memory off).
+    private static var offRoots: Set<String> = []
+
     private static func flush() {
         guard enabled else { return }
-        let new = seen.subtracting(tried)
+        let new = seen.subtracting(tried).filter { !MemoryOff.isOff(cwd: $0, roots: offRoots) }
         guard !new.isEmpty else { return }
         tried.formUnion(new)
         DispatchQueue.global(qos: .utility).async {
@@ -41,6 +52,8 @@ enum MemoryMarkerWiring {
 extension WindowSession {
     /// The window's projects to MemoryMarkerWiring (projects.onChange: one opened, one shown).
     func noteMemoryMarkers() {
+        // The off list as the projects file has it now: it is read at start, after the wiring.
+        if let projects, isMain { MemoryMarkerWiring.memoryOffChanged(projects.memoryOff) }
         MemoryMarkerWiring.note((projects?.projects ?? []).map(\.folder).filter { !Self.isLoose($0) })
     }
 }

@@ -32,11 +32,12 @@ extension WindowSession {
         PalettePin(id: "search.files", title: T("File…", "Arquivo…"), icon: .file),
         PalettePin(id: "preview.open", title: T("Web Preview", "Preview web"), icon: .globe),
     ]
-    /// The "+" next to the tabs: a terminal, an agent, a task or a race, then a file or a preview in
-    /// a new tab. A new window is not the tabs' (⇧⌘N, the menu).
+    /// The "+" next to the tabs: a terminal, an agent (also without memory, plan 35 I), a task or a
+    /// race, then a file or a preview in a new tab. A new window is not the tabs' (⇧⌘N, the menu).
     static let newOpeners = [
         PalettePin(id: "tab.new", title: T("Terminal", "Terminal"), icon: .terminalWindow),
         PalettePin(id: "agents.open-account", title: T("Agent…", "Agente…"), icon: .sparkle),
+        PalettePin(id: "memory.new-session-without", title: T("Session without Memory", "Sessão sem memória"), icon: .sparkle),
         PalettePin(id: "worktrees.new-task", title: T("Task…", "Tarefa…"), icon: .gitBranch),
         PalettePin(id: "worktrees.new-race", title: T("Race…", "Corrida…"), icon: .flag),
         PalettePin(id: "search.files", title: T("File…", "Arquivo…"), icon: .file),
@@ -58,6 +59,8 @@ extension WindowSession {
         let pins = Self.newOpeners
         var new = menu.popup(pins.filter { $0.id == "tab.new" })
         if let agent = claudeMenuEntry() { new.append(agent) }
+        // Plan 35 I: a session that records nothing and gets no briefing.
+        new += menu.popup(pins.filter { $0.id == "memory.new-session-without" })
         new += menu.popup(pins.filter { ["worktrees.new-task", "worktrees.new-race"].contains($0.id) })
         let open = menu.popup(pins.filter { ["search.files", "preview.open-in-tab"].contains($0.id) })
         return MenuEntry.tidy([.caption(T("New", "Novo"))] + new + [.separator, .caption(T("Open", "Abrir"))] + open)

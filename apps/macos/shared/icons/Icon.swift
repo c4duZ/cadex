@@ -103,6 +103,7 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case hand = 0xE298
     case folders = 0xE260
     case play = 0xE3D0
+    case pause = 0xE39E
     case arrowsLeftRight = 0xE0A0
     case brain = 0xE74E
     case squaresFour = 0xE464

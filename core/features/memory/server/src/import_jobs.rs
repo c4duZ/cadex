@@ -76,6 +76,10 @@ async fn backfill_pending(ctx: &Context, row: &ScopeRow) -> bool {
 /// that writes to its workspace, the starting session left out.
 pub(crate) async fn backfill(ctx: &Context, job: &SessionStarted) {
     let started = Instant::now();
+    // Plan 35 I: an off project's history waits until it is turned back on (no marker set).
+    if job.cwd.as_deref().is_some_and(|cwd| crate::off::is_off(&ctx.data_dir, Path::new(cwd))) {
+        return;
+    }
     let Some((ws, proj, session_cwd)) = session_scope(ctx, &job.session_id).await else {
         tracing::debug!(session = %job.session_id, "session not in the store; no history import");
         return;
@@ -173,6 +177,9 @@ pub(crate) async fn outside(ctx: &Context) {
         found.extend(tokio::task::spawn_blocking(move || transcripts::list(&dir, after, until)).await.unwrap_or_default());
     }
     transcripts::newest_first_once(&mut found);
+    // Plan 35 I: what ran in an off project is never imported, not even once it is back on (the
+    // checkpoint moves past it): off is off.
+    found.retain(|t| !crate::off::is_off(&ctx.data_dir, &t.cwd));
     let known = if found.is_empty() { Vec::new() } else { known_projects(ctx, &scopes).await };
     let targets: Vec<Option<Target>> = found.iter().map(|t| {
         let project = owner(&known, &accounts::key(&t.account), &t.cwd)?;

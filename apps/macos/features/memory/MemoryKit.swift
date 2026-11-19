@@ -60,7 +60,10 @@ public enum MemoryKit {
     /// `default`. A session whose folder is known saves Claude's automatic
     /// memory in the project's folder under the memory (`autoMemoryDirectory`,
     /// MemoryProject.swift), the account's own with sharing off; unknown,
-    /// Claude's default folder stays.
+    /// Claude's default folder stays. A session whose folder is in a project
+    /// with the memory off (`MemoryOff`, plan 35 I) gets none of the part:
+    /// no hooks, no briefing, no CADEX_MEMORY_DIR, so `cadex mcp` offers no
+    /// memory tool either.
     public nonisolated static func part(tools: String, engine: String?, shareAcrossAccounts: Bool, plugin: String? = nil,
                                         consolidateAt: Int? = nil,
                                         environment: [String: String] = ProcessInfo.processInfo.environment) -> SessionKitPart {
@@ -83,7 +86,8 @@ public enum MemoryKit {
                                   let account = shareAcrossAccounts ? nil : SessionKit.accountKey(accountDir)
                                   guard let dir = MemoryProject.autoFolder(memory: memory, cwd: cwd, account: account) else { return [:] }
                                   return ["autoMemoryDirectory": dir]
-                              })
+                              },
+                              appliesTo: { cwd in !MemoryOff.isOff(cwd: cwd, memory: memory) })
     }
 
     /// "The task is ready" for a session (plan 22 phase F): the file

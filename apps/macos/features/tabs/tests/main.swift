@@ -284,6 +284,19 @@ let exitCode = await Checks.run(groupChecks + [
         let two = three.removing(2)!.balanced()
         expect(two.frames(in: CGRect(x: 0, y: 0, width: 300, height: 100)).values.allSatisfy { $0.width == 150 })
     }),
+    ("a terminal tab's mark (the memory paused, plan 35 I): from the app, after the title, with room for it", {
+        let tabs = makeTabs()
+        tabs.newTab(cwd: "/")
+        var paused = false
+        tabs.markOf = { _ in paused ? .pause : nil }
+        let plain = tabs.barItems()
+        paused = true
+        let marked = tabs.barItems()
+        expect(plain.first?.mark == nil && marked.first?.mark == .pause, "\(marked)")
+        let bar = TabBarView(frame: NSRect(x: 0, y: 0, width: 600, height: 30))
+        expect(bar.naturalWidth(marked[0]) > bar.naturalWidth(plain[0]))
+        tabs.closeAll()
+    }),
     ("a document opens in a tab of its own; its identity again goes back to it", {
         let tabs = makeTabs()
         tabs.newTab(cwd: "/")

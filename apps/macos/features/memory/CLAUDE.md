@@ -36,6 +36,17 @@
   Stop seguinte; `consolidateNowText` é o que o memory.consolidate-now cola.
   O `perSession` da parte, quando quem abre a sessão sabe a pasta dela, põe `autoMemoryDirectory`
   na pasta do projeto (`MemoryProject.swift`); sem pasta conhecida, fica a padrão do Claude.
+- `MemoryOff.swift` (plano 35 I; spec "Desligar"): o off-projects.json na pasta da memória
+  (`write`, as raízes canônicas, 0600, por rename; `roots`), que o kit e o engine leem; `isOff` (a
+  pasta sob uma raiz, ou o checkout principal dela, a worktree de uma tarefa fora da raiz: a regra
+  do engine, `../../../../core/features/memory/server/src/off.rs`); a pausa de uma conversa em
+  `paused/<sessão>` (`setPaused`, `isPaused`, só id simples, 0600; `prunePaused` tira as de mais de
+  30 dias). O `appliesTo` da parte do kit (MemoryKit.part) a deixa de fora de uma sessão numa
+  pasta desligada: sem hooks, sem CADEX_MEMORY_DIR (o `cadex mcp` não oferece as ferramentas da
+  memória), sem plugin, sem `autoMemoryDirectory`. A `MemoryProjectForm` tem, como primeira linha,
+  "Memória neste projeto" quando o app dá `setMemoryOn`; desligada, só essa linha aparece. Quem
+  guarda o interruptor é o arquivo de projetos (feature projects) e quem liga tudo é o app
+  (`../../app/MemoryOffWiring.swift`).
 - `MemoryAgent.swift` (fase G, ADR 0029): `Config` (o que o dono escolheu: ligado, teto por dia,
   aprovação, a conta padrão e as de cada projeto, o `claude`) e `write`, o `<memória>/agent.json`
   (0600) que o engine lê a cada trabalho; `appToken`, o token do próprio app na pasta de tokens
@@ -110,6 +121,8 @@
   retirada, a chave do projeto (o valor fixado igual ao do engine, worktree e subpasta no
   checkout principal, fora do git a pasta), o `autoMemoryDirectory` de uma sessão no repositório,
   na worktree, sem compartilhar e sem pasta, e o aquecimento uma vez por versão e só com saída 0
-  (um engine falso em script).
+  (um engine falso em script); a memória desligada (`tests/OffTests.swift`): a sessão num projeto
+  desligado, na worktree dele e com `leaving` sem a parte, outro projeto com ela, de volta ao
+  religar; a pausa com id simples, 0600, retomada e podada.
 - No app, sem sessão real: o `--settings` de uma sessão do kit
   (Application Support/Cadex/kit) traz os 9 hooks e a `env` da memória.

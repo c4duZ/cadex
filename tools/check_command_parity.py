@@ -26,7 +26,9 @@ NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "termi
 # pane.zoom (issue #1, 2026-10-22).
 MAC_ONLY = {"project.edit", "project.create", "project.new-terminal", "project.reveal", "project.copy-path",  # plano 36 B
             "project.pin", "project.close-terminals", "project.remove", "project.show-terminals",
-            "agents.switch-account", "memory.configure-project", "project.show-settings", "app.check-for-updates", "app.install-update", "app.skip-update",
+            "agents.switch-account", "memory.configure-project",
+            "project.show-settings", "app.check-for-updates", "app.install-update", "app.skip-update",
+            "memory.toggle-project", "memory.new-session-without", "memory.pause-session", "memory.resume-session",  # plano 35 I
             "terminal.open-pasted-image-beside", "terminal.open-pasted-image-in-tab",
             "preview.pick-element", "preview.stop-picking",
             "git.show-history", "inspector.tab-1", "inspector.tab-2", "history.show-in-tab",

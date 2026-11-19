@@ -8,7 +8,8 @@
 //! handoff (handoff.rs) and Claude's automatic memory folders
 //! (auto_watch.rs), the memory agent (agent/, plan 22 phase G) and the
 //! Memory page's routes with projects.json (page/, projects_file.rs, phase H)
-//! and the briefing each session started with (agent/briefings.rs, plan 35 D).
+//! the briefing each session started with (agent/briefings.rs, plan 35 D) and
+//! the memory turned off in a project or a session (off.rs, plan 35 I).
 
 use std::fs::File;
 use std::future::IntoFuture;
@@ -172,6 +173,8 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
         .layer(from_fn_with_state(agent, crate::agent::routes::watch))
         .layer(from_fn_with_state(sessions.clone(), sessions::track))
         .layer(from_fn_with_state(import_tx, import::watch))
+        // Plan 35 I: an off project's or a paused session's events and reads, outside every watcher.
+        .layer(from_fn_with_state(Arc::new(args.data_dir.clone()), crate::off::gate))
         .layer(from_fn_with_state(in_flight.clone(), restart::count));
     page.set_inner(inner.clone());
     let outer = inner.clone().layer(from_fn_with_state(

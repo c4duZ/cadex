@@ -127,15 +127,38 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   mexida nos últimos 2 minutos espera a próxima subida (pode estar aberta).
 
 ### Desligar
-- **Num projeto:** "Memória neste projeto", no topo da seção Memória das Configurações do projeto.
-  Desligada, as sessões que o Cadex abre ali não gravam nada nem recebem briefing, a importação e o
-  agente o pulam, e a busca de outros projetos não o enxerga. O que já estava gravado fica. A
-  escolha é desta máquina (o arquivo de projetos do Cadex), não do .ai-memory.toml do repositório.
-- **Numa conversa:** "Nova sessão sem memória" abre uma sessão que não grava nem recebe nada;
-  "Pausar a memória nesta sessão" para de gravar dali em diante (a sessão não vira página nem chama
-  o agente ao terminar) e a aba mostra que está pausada; "Retomar" volta a gravar. Pausar não apaga
-  o que já foi gravado.
-- O ai-memory não tem esse interruptor; é do Cadex (plano 35 I).
+- **Num projeto:** "Memória neste projeto", a primeira linha da seção Memória das Configurações do
+  projeto (e memory.toggle-project no ⌘K). Desligada, a seção mostra só essa linha. A escolha é desta
+  máquina: fica no arquivo de projetos do Cadex (a lista `memoryOff`, que vale com o projeto aberto
+  ou fechado), não no .ai-memory.toml, que é commitado e valeria para o time. O app a passa à
+  memória em `<memória>/off-projects.json` (as raízes dos projetos desligados), que o kit e o engine
+  leem:
+  - as sessões que o Cadex abre ali (na raiz, numa subpasta ou na worktree de uma tarefa do projeto)
+    vêm sem a parte da memória do kit: sem os hooks, sem as ferramentas `memory_*` do `cadex mcp`,
+    sem briefing e sem a pasta da memória automática;
+  - o engine descarta, como recebidos e sem gravar, os eventos de uma pasta do projeto (um `claude`
+    cuja pasta o kit não sabia, um evento que estava na fila) e responde vazio aos pedidos de
+    briefing; a importação não traz as sessões dele, nem o histórico na primeira sessão nem as de
+    fora do Cadex (as que rodaram desligado nunca entram, nem depois de religar); o agente não roda
+    trabalho dele;
+  - a busca de outros projetos não o enxerga: a chamada que nomeia o projeto recebe "a memória deste
+    projeto está desligada neste Mac", e os resultados que trazem o nome dele (os `global_hits` da
+    busca em todos) saem da resposta. O engine compara pelo nome do projeto, o único que a resposta
+    do ai-memory traz: outro projeto de mesmo nome some junto.
+  - O que já estava gravado fica; religar volta a gravar dali em diante.
+- **Numa conversa:**
+  - "Nova sessão sem memória" (o "+" das abas e o ⌘K, memory.new-session-without) abre o Claude da
+    conta das sessões novas numa aba nova, com o kit sem a parte da memória, como num projeto
+    desligado. Se ela hibernar e voltar, volta com a memória (o kit de sempre).
+  - "Pausar a memória nesta sessão" (memory.pause-session, o clique direito da aba e o ⌘K) marca a
+    sessão do Claude do terminal com foco em `<memória>/paused/<id>`: o `cadex memory-hook` não manda
+    nem imprime nada dela, e o engine descarta o que ainda chegar. Ela não vira página nem chama o
+    agente ao terminar; para o ai-memory fica uma sessão sem fim, como uma cortada. A aba mostra o
+    ícone de pausa depois do título. "Retomar a memória nesta sessão" (memory.resume-session) tira a
+    marca. Um `/clear` começa outra sessão, que grava. Pausar não apaga o que já foi gravado; as
+    marcas somem 30 dias depois.
+- O ai-memory não tem esse interruptor (só `[capture] ignore_paths` e `AI_MEMORY_HANDOFF=off`); é do
+  Cadex (plano 35 I).
 
 ### O briefing
 - Ao começar uma sessão (nova, retomada, depois de `/clear`), o agente recebe o briefing do projeto:

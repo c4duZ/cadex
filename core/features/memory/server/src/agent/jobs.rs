@@ -11,6 +11,8 @@
 //! - after a compaction: the same consolidation of the session so far;
 //! - neither for a session with no prompt and no tool (upstream's own test;
 //!   plan 35 C): a ledger line with no cost and nothing else;
+//! - nothing at all for a project with the memory off or a paused session
+//!   (off.rs, plan 35 I);
 //! - dream (dream.rs) and bootstrap (bootstrap.rs).
 //!
 //! **The "already consolidated in the session" rule is upstream's own:** a
@@ -129,6 +131,10 @@ pub(crate) async fn run(ctx: &Ctx, queue: &Queue, job: &Job) {
         debug!(kind = job.kind.as_str(), "memory agent off; job dropped");
         return;
     }
+    if let Some(why) = turned_off(ctx, job) {
+        debug!(kind = job.kind.as_str(), why, "memory agent job dropped");
+        return;
+    }
     if !ledger::fits(&ctx.data_dir, cfg.call_budget_usd, cfg.daily_budget_usd) {
         info!(kind = job.kind.as_str(), "memory agent daily budget reached; job skipped");
         note(ctx, job, &cfg, None, job.kind.as_str(), false, "budget");
@@ -168,6 +174,15 @@ pub(crate) async fn run(ctx: &Ctx, queue: &Queue, job: &Job) {
         Kind::Bootstrap => super::bootstrap::run(&step).await,
     }
     info!(kind = job.kind.as_str(), project = %job.scope.project, ms = started.elapsed().as_millis() as u64, "memory agent job done");
+}
+
+/// Plan 35 I: the owner turned the memory off in the job's project, or paused it in its session (a
+/// job queued before the switch); nothing runs and nothing is filed.
+fn turned_off(ctx: &Ctx, job: &Job) -> Option<&'static str> {
+    if job.session.as_deref().is_some_and(|s| crate::off::is_paused(&ctx.data_dir, s)) {
+        return Some("memory paused in the session");
+    }
+    crate::off::current(&ctx.data_dir).covers(job.scope.root.as_deref(), &job.scope.project).then_some("memory off in the project")
 }
 
 /// Whether the job's session did anything: a prompt or a tool, upstream's own test

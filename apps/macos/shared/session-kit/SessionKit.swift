@@ -19,10 +19,17 @@ public struct SessionKitPart {
     /// when the caller knows the folder: Claude's automatic memory folder
     /// per project (plan 22, phase C).
     public var perSession: ((_ accountDir: String, _ cwd: String) -> [String: Any])?
+    /// Whether the part goes into a session in `cwd`, when the caller knows
+    /// the folder: false leaves its settings and plugin folders out (the
+    /// memory off in a project, plan 35 I). Its MCP servers are per account
+    /// (one file for every session of it) and stay.
+    public var appliesTo: ((_ cwd: String) -> Bool)?
 
     public init(settings: [String: Any] = [:], pluginDirs: [String] = [], mcpServers: [String: Any] = [:],
                 perAccount: ((_ accountDir: String) -> [String: Any])? = nil,
-                perSession: ((_ accountDir: String, _ cwd: String) -> [String: Any])? = nil) {
+                perSession: ((_ accountDir: String, _ cwd: String) -> [String: Any])? = nil,
+                appliesTo: ((_ cwd: String) -> Bool)? = nil) {
+        self.appliesTo = appliesTo
         self.settings = settings
         self.pluginDirs = pluginDirs
         self.mcpServers = mcpServers
@@ -78,6 +85,17 @@ public final class SessionKit {
     }
     private(set) var parts: [String: SessionKitPart] = [:]
 
+    /// The parts a session gets: all but those it goes without and those
+    /// that do not apply to its folder.
+    func parts(cwd: String?, leaving: Set<String>) -> [(id: String, part: SessionKitPart)] {
+        parts.keys.sorted().compactMap { id in
+            let part = parts[id]!
+            if leaving.contains(id) { return nil }
+            if let cwd, !cwd.isEmpty, let applies = part.appliesTo, !applies(cwd) { return nil }
+            return (id, part)
+        }
+    }
+
     init(folder: String? = nil, toolsPath: String? = SessionKit.findTools(),
          environment: [String: String] = ProcessInfo.processInfo.environment) {
         let home = FileManager.default.homeDirectoryForCurrentUser.path
@@ -129,11 +147,13 @@ public final class SessionKit {
     /// `sessionEnvironment`: variables for this session only, in the
     /// `--settings` env (a dispatch's CADEX_DISPATCH_ID, plan 24); the kit's
     /// own names win over them.
+    /// `leaving`: the parts this session goes without (New Session without
+    /// Memory, plan 35 I).
     public func claudeCommand(configDir: String?, arguments: [String] = [], session reused: String? = nil, cwd: String? = nil,
                               defaultClaudeJSON: String = FileManager.default.homeDirectoryForCurrentUser.path + "/.claude.json",
-                              sessionEnvironment: [String: String] = [:]) -> String {
+                              sessionEnvironment: [String: String] = [:], leaving: Set<String> = []) -> String {
         let kit = launch(configDir: configDir, arguments: arguments, session: reused, cwd: cwd, defaultClaudeJSON: defaultClaudeJSON,
-                         sessionEnvironment: sessionEnvironment)
+                         sessionEnvironment: sessionEnvironment, leaving: leaving)
         return Self.compose(unset: kit.unset, configDir: configDir, arguments: kit.arguments + arguments, pathFirst: kit.pathFirst)
     }
 

@@ -51,6 +51,9 @@ public final class ProjectsController {
     public var onTabsChange: (() -> Void)?
     /// The workspace folder to save with the projects.
     public var workspaceFolder: (() -> String?)?
+    /// The folders with the memory off (ProjectsMemoryOff.swift, plan 35 I).
+    var memoryOffFolders: Set<String> = []
+    public var onMemoryOffChange: ((Set<String>) -> Void)?
     private let makeTabs: () -> TabsController
     /// Nil for a passing window (⌘N): only the main window is saved (docs/spec/workspace.md).
     let fileURL: URL?
@@ -80,6 +83,7 @@ public final class ProjectsController {
         defer { restoring = false }
         let saved = fileURL.flatMap(ProjectsFile.load(from:))
         recent = saved?.recent ?? []
+        memoryOffFolders = Set(saved?.memoryOff ?? [])
         for project in saved?.projects ?? [] {
             let tabs = add(name: project.name, folder: project.folder)
             projects[projects.count - 1].color = project.color
@@ -277,7 +281,8 @@ public final class ProjectsController {
     public var saved: SavedProjects {
         SavedProjects(projects: projects.map { .init(name: $0.name, folder: $0.folder, tabs: $0.tabs.snapshot(), color: $0.color,
                                                      image: $0.image, emoji: $0.emoji, pinned: $0.pinned, expanded: $0.expanded) },
-                      active: max(activeIndex, 0), folder: workspaceFolder?(), recent: recent)
+                      active: max(activeIndex, 0), folder: workspaceFolder?(), recent: recent,
+                      memoryOff: memoryOffFolders.isEmpty ? nil : memoryOffFolders.sorted())
     }
 
     /// The project goes to the top of the recent ones.

@@ -15,10 +15,17 @@ public final class MemoryProjectForm: NSView {
     private var marker = MemoryMarker()
     private let column = FrameField.column([], gap: DesignTokens.Project.Group.sectionGap)
     private let paths = NSTextView()
+    /// "Memory in this project" (plan 35 I): this Mac's switch, kept by the app in Cadex's projects
+    /// file, not in the .ai-memory.toml (committed, it would turn it off for the team).
+    private var memoryOn: Bool
+    private let setMemoryOn: ((Bool) -> Void)?
 
-    /// `folder`: the project's repository root, where its .ai-memory.toml lives.
-    public init(folder: String) {
+    /// `folder`: the project's repository root, where its .ai-memory.toml lives. `setMemoryOn`
+    /// nil: no switch (the memory is on).
+    public init(folder: String, memoryOn: Bool = true, setMemoryOn: ((Bool) -> Void)? = nil) {
         self.folder = folder
+        self.memoryOn = memoryOn
+        self.setMemoryOn = setMemoryOn
         super.init(frame: .zero)
         column.translatesAutoresizingMaskIntoConstraints = false
         addSubview(column)
@@ -62,7 +69,21 @@ public final class MemoryProjectForm: NSView {
     private func show() {
         column.arrangedSubviews.forEach { $0.removeFromSuperview() }
         typealias R = SettingGroup
-        let start = R.section(T("Memory", "Memória"), [
+        // Off, the file's settings do nothing here: only the switch shows (plan 35 I).
+        let master = setMemoryOn.map { set in
+            R.row(T("Memory in this project", "Memória neste projeto"), nil, toggle(memoryOn) { [weak self] on in
+                // Redrawn after the switch's own action has returned.
+                DispatchQueue.main.async { self?.memoryOn = on; self?.show() }
+                set(on)
+            })
+        }
+        guard memoryOn else {
+            let only = R.section(T("Memory", "Memória"), master.map { [$0] } ?? [])
+            column.addArrangedSubview(only)
+            only.widthAnchor.constraint(equalTo: column.widthAnchor).isActive = true
+            return
+        }
+        let start = R.section(T("Memory", "Memória"), (master.map { [$0] } ?? []) + [
             R.row(T("Briefing at session start", "Briefing ao começar a sessão"),
                   T("The rules and pinned pages, before the first prompt.", "As regras e as páginas fixadas, antes do primeiro pedido."),
                   toggle(marker.briefing) { [weak self] on in self?.change { $0.briefing = on } }),

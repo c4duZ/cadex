@@ -13,7 +13,7 @@
 - `PaletteWiring.swift`: a paleta nas cores do tema, os prefixos do ⌘K (`/` arquivos, `#` texto,
   `@` abas e projetos) e as aberturas (`openers`: Terminal, Agente, Nova tarefa, Arquivo, Preview),
   primeiro no ⌘K; o "+" das abas (`newTabMenu`: NOVO com Terminal, "Claude em <conta>" com o logo, o uso e a
-  lista das contas, Tarefa e Corrida; ABRIR com Arquivo e Preview em nova aba) e o "+" do cabeçalho de cada painel, só o que abre ao lado
+  lista das contas, Sessão sem memória (plano 35 I), Tarefa e Corrida; ABRIR com Arquivo e Preview em nova aba) e o "+" do cabeçalho de cada painel, só o que abre ao lado
   (`besideOpeners`, `paneMenu`; maximizar e fechar são botões do cabeçalho; o dono, 2026-11-18).
   Comando novo que abre algo (terminal, arquivo, web, janela) entra nos `openers` daqui e nos de
   `../../windows/app/app_commands.zig`, e na lista "Abrir" de `../../../docs/spec/command-palette.md`.
@@ -209,7 +209,15 @@
   agente com foco; fase G: o agent.json do agente de memória a cada mudança das configurações
   (memory.backgroundAgent só vale com a memória ligada; as contas pelas de Agents) e
   memory.bootstrap (a estimativa num alerta antes, só roda no sim), memory.run-dream e
-  memory.pause-agent, todos pelo `cadex memory-agent`. `MemoryMarkerWiring.swift` (plano 35 B): o .ai-memory.toml de cada
+  memory.pause-agent, todos pelo `cadex memory-agent`. `MemoryOffWiring.swift` (plano 35 I): a memória desligada num
+  projeto (memory.toggle-project, que age no `projectTarget` ou no projeto mostrado e guarda nos
+  projetos da janela principal, a que salva; `connectMemoryOff` escreve o off-projects.json da memória
+  ao abrir e a cada mudança, e poda as pausas velhas; `projectMemoryForm`, a seção Memória das
+  Configurações do projeto com o interruptor), memory.new-session-without (o Claude da conta das
+  sessões novas numa aba, sem a parte da memória do kit; também no "+" das abas, `PaletteWiring.swift`)
+  e memory.pause-session / memory.resume-session no terminal com foco (pela sessão que os hooks
+  deram, `agentResume`; no clique direito da aba, `memoryTabPins`, e o ícone de pausa na aba,
+  `memoryMark`, ligados em `ProjectsWiring.swift`). `MemoryMarkerWiring.swift` (plano 35 B): o .ai-memory.toml de cada
   projeto aberto (projects.onChange, de todas as janelas, sem os terminais soltos da pasta pessoal) e
   dos já abertos quando a memória liga (`SettingsBridge.swift`), uma vez por pasta por abertura, fora
   da linha principal, pelo MemoryMarker.ensure. `MemoryPageWiring.swift` (fase H): a página

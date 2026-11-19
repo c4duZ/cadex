@@ -69,7 +69,9 @@ extension WindowSession {
     private func makeTabs() -> TabsController {
         let tabs = TabsController(window: window)
         tabs.keepsSessions = isMain
-        tabs.contextMenu = { [weak self] in self?.menu?.popup(Self.tabActions) ?? [] }
+        tabs.contextMenu = { [weak self] in self.flatMap { $0.menu?.popup(Self.tabActions + $0.memoryTabPins()) } ?? [] }
+        // The memory paused in the tab's session (plan 35 I).
+        tabs.markOf = Self.memoryMark
         // The task's menu that the tree had (status, review, hibernate, remove…), on its item.
         tabs.groupMenu = { [weak self] task in self?.treeMenu(task: task) ?? [] }
         tabs.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
@@ -128,6 +130,8 @@ extension WindowSession {
             if identity == AutomationsPageDocument.identity, let self { return self.makeAutomationsPage() }
             return self?.opener?.makeDocument(identity: identity)
         }
+        // The memory off in projects (plan 35 I): the main window's projects keep the flag.
+        if isMain { connectMemoryOff(projects) }
         // Opened on a folder: the old projects come back and the folder becomes its own project
         // (docs/spec/projects.md), shown; a project it already had gets a terminal there unless one
         // is (opening the same folder again stacked tabs). It went into whichever project was

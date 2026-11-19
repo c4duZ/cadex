@@ -69,8 +69,12 @@
   (project.pin), nas peças de `../../shared/customize/SettingGroup.swift`; a página não tem título
   nem explicação próprios. A página Projects não edita nada (ADR 0038); a página do projeto tem Open
   terminal (ProjectPageActions.openTerminal).
+- `ProjectsMemoryOff.swift` (plano 35 I): as pastas com a memória do projeto desligada neste Mac
+  (`memoryOff`, `isMemoryOff`, `setMemoryOff`, que salva e avisa `onMemoryOffChange`); valem com o
+  projeto aberto ou fechado. O app as passa à memória (`../../app/MemoryOffWiring.swift`).
 - `ProjectsFile.swift`: o JSON em Application Support/Cadex/projects.json (gravação atômica), com os
-  projetos (nome, pasta, abas, cor, imagem, emoji, fixado), o ativo, a pasta do workspace e os recentes; uma lista vazia
+  projetos (nome, pasta, abas, cor, imagem, emoji, fixado), o ativo, a pasta do workspace, os
+  recentes e `memoryOff` (as pastas com a memória desligada; sem nenhuma, a chave não vai); uma lista vazia
   (a tela de início) é um arquivo bom. Arquivo ilegível vai para
   projects.bad-<data>.json e o app começa do zero. CADEX_PROJECTS_FILE aponta para outro arquivo:
   conferir o app em teste não pode apagar os projetos do dono. O spaces.json de antes do plano 27
@@ -88,7 +92,8 @@
   sidebar (ADR 0039) e, na janela estreita, na faixa.
 
 ## Como validar
-- `make macos-test` passa: o briefing da sessão fechado no detalhe e aberto no clique; o visual do projeto (nome, cor, imagem quadrada e pequena, emoji; salvo e
+- `make macos-test` passa: a memória desligada salva, avisada, mantida com o projeto fechado e lida
+  de um arquivo de antes; o briefing da sessão fechado no detalhe e aberto no clique; o visual do projeto (nome, cor, imagem quadrada e pequena, emoji; salvo e
   de volta; a imagem trocada sai), primeira abertura, salvar e restaurar igual, arquivo corrompido, abrir
   pasta (nova e de um projeto que existe), próximo, renomear, fechar, a migração do spaces.json e o
   repositório de uma worktree.

@@ -42,6 +42,9 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
   37). "» N" leva o estado mais urgente das abas escondidas, e a lista dele diz o de cada uma. Aba de agente: o nome da conversa no lugar da pasta e, ao passar o ponteiro,
   a frase do que ele faz agora; "pronto sem você ver" deixa o título em negrito até o terminal
   ganhar o foco. O nome dado à mão continua vencendo; o estado aparece mesmo assim.
+- Aba de uma sessão do Claude com a memória pausada (plano 35 I, `memory.pause-session`): depois do
+  título, o ícone de pausa, apagado (o texto terciário); o clique direito na aba oferece "Pausar a
+  memória" ou "Retomar a memória", conforme o estado.
 - Com terminal.keepSessions ligado (plano 19), fechar a janela principal ou o app deixa os shells das
   abas vivos no daemon do terminal, sem perguntar por programa rodando (ele segue rodando), e reabrir
   religa cada aba ao seu; fechar uma aba ou um painel encerra o shell dele, pedindo confirmação com

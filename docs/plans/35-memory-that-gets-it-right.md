@@ -158,7 +158,7 @@ caminhos deste repositório.
   receber"; e a prévia não mostra como cortada uma sessão viva (o engine guarda o id de cada sessão
   viva e pergunta de novo com `recovery=0`, divergência escrita na spec). Não conferido no app.
 
-- [ ] I. Desligar a memória num projeto ou numa conversa (o dono, 2026-11-19: "a gente precisa
+- [x] I. Desligar a memória num projeto ou numa conversa (o dono, 2026-11-19: "a gente precisa
   poder desligar o AI memory em projetos específicos ou conversas específicas"). O ai-memory não tem
   esse interruptor (só `[capture] ignore_paths` e `AI_MEMORY_HANDOFF=off`); é do Cadex.
   1. **Por projeto:** "Memória neste projeto" no topo da seção Memória das Configurações do
@@ -172,6 +172,15 @@ caminhos deste repositório.
      e, dali em diante, o hook e o engine descartam os eventos dela, e ela não vira página nem chama
      o agente ao terminar; a aba mostra um sinal discreto. Pausar não apaga o que já foi gravado.
   Apagar a memória de um projeto e esquecer uma sessão ficam para depois.
+  Feito: a lista dos projetos desligados fica no arquivo de projetos do Cadex (`memoryOff`) e o app
+  a escreve em `<memória>/off-projects.json`, que o kit lê ao abrir uma sessão (sem hooks, briefing,
+  pasta automática nem ferramentas da memória) e o engine lê antes de tudo (descarta os eventos,
+  pula a importação e o agente, recusa a ferramenta que nomeia o projeto e tira o projeto das
+  respostas de busca pelo nome); nele o Cadex não cria o .ai-memory.toml. A sessão pausada é
+  `<memória>/paused/<sessão>`: o `cadex memory-hook` não manda nada e o engine descarta; a aba mostra
+  o ícone de pausa. Limites: uma sessão pausada ainda tem as ferramentas `memory_*` e, para o engine,
+  parece cortada; o `/clear` começa outra sessão, que grava; uma sessão sem memória hibernada volta
+  com ela.
 
 ## Como validar
 - O estudo lido e aprovado pelo dono antes das fases B a G.

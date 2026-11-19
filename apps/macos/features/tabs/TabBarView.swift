@@ -44,6 +44,9 @@ public final class TabBarView: NSView {
         /// Something finished that the owner has not seen: the title in bold, no badge
         /// (docs/spec/tabs.md).
         var unseen = false
+        /// A discreet sign after the title, in the faint text: the memory paused in its session
+        /// (plan 35 I).
+        var mark: Icon?
     }
 
     typealias Look = DesignTokens.Tab
@@ -129,7 +132,7 @@ public final class TabBarView: NSView {
     func naturalWidth(_ item: Item) -> CGFloat {
         let widest = UILooks.font(DesignTokens.FontSize.body, weight: DesignTokens.FontWeight.semibold)
         let title = min((item.title as NSString).size(withAttributes: [.font: widest]).width, Self.maxTitle)
-        return (Self.padding * 2 + Self.lead(item) + title).rounded(.up)
+        return (Self.padding * 2 + Self.lead(item) + title + Self.trail(item)).rounded(.up)
     }
 
     private var naturalWidths: [CGFloat] { items.map(naturalWidth) }
@@ -237,6 +240,11 @@ public final class TabBarView: NSView {
         item.state == nil ? 0 : UILooks.pt(glyphSize(item)) + inner
     }
 
+    /// Room after the title: the mark and its gap, when there is one.
+    static func trail(_ item: Item) -> CGFloat {
+        item.mark == nil ? 0 : UILooks.pt(Look.icon) + inner
+    }
+
     /// The glyph's spot: right after the padding, as wide as the glyph.
     static func glyphSpot(_ item: Item, in rect: NSRect) -> NSRect {
         let side = UILooks.pt(glyphSize(item))
@@ -259,10 +267,16 @@ public final class TabBarView: NSView {
         paragraph.lineBreakMode = .byTruncatingTail
         let attributes: [NSAttributedString.Key: Any] = [.font: font(item), .foregroundColor: color, .paragraphStyle: paragraph]
         let textX = rect.minX + Self.padding + Self.lead(item)
-        let textWidth = max(rect.maxX - Self.padding - textX, 0)
+        let textWidth = max(rect.maxX - Self.padding - Self.trail(item) - textX, 0)
         let lineHeight = ceil(font(item).ascender - font(item).descender)
         (item.title as NSString).draw(in: NSRect(x: textX, y: rect.midY - lineHeight / 2, width: textWidth, height: lineHeight),
                                       withAttributes: attributes)
+        if let mark = item.mark {
+            let used = min((item.title as NSString).size(withAttributes: attributes).width, textWidth)
+            let side = UILooks.pt(Look.icon)
+            tinted(mark, size: side, color: DesignTokens.Color.textTertiary)
+                .draw(in: NSRect(x: textX + used + Self.inner, y: rect.midY - side / 2, width: side, height: side))
+        }
 
         // Only under the pointer: the mockups show no × on the active tab, and it would cover
         // the end of a title the tab is sized to (2026-11-17).
