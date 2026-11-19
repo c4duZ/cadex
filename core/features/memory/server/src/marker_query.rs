@@ -30,10 +30,24 @@ pub(crate) fn amend(path: &str, query: &str) -> Option<String> {
     let mut pairs: Vec<(String, String)> = serde_urlencoded::from_str(query).ok()?;
     let cwd = pairs.iter().find(|(k, _)| k == "cwd").map(|(_, v)| v.clone())?;
     let home = marker::home_dir();
-    let found = marker::find_settings_marker(&cwd, home.as_deref())?;
+    let found = settings_marker(&cwd, home.as_deref())?;
     let text = std::fs::read_to_string(&found).ok()?;
     apply(&mut pairs, path, &text);
     serde_urlencoded::to_string(&pairs).ok()
+}
+
+/// The marker for `cwd`, as upstream finds it; else, in a worktree, the main checkout's (plan 35,
+/// 2026-11-19): the file Cadex makes sits in the main checkout and a worktree in a sibling folder
+/// (a Cadex task, the bkdg-space) sees it only once it is committed, or never when the owner keeps
+/// it "only on this Mac", and with the brief coming only from the marker such a session started
+/// with none. A divergence from upstream, which counts on the commit. A worktree's own file wins.
+pub(crate) fn settings_marker(cwd: &str, home: Option<&std::path::Path>) -> Option<std::path::PathBuf> {
+    if let Some(found) = marker::find_settings_marker(cwd, home) {
+        return Some(found);
+    }
+    let main = ai_memory_consolidate::discover_main_repo_root(std::path::Path::new(cwd)).ok()?;
+    let main = main.to_str()?;
+    marker::find_settings_marker(main, home).filter(|found| found.parent().is_some_and(|dir| dir == std::path::Path::new(main)))
 }
 
 fn set(pairs: &mut Vec<(String, String)>, key: &str, value: String) {
@@ -160,6 +174,26 @@ mod tests {
         std::fs::write(sub.join(".ai-memory.toml"), "[retrieval]\nmin_relevance = 0.4\n").unwrap();
         let found = marker::find_settings_marker(sub.to_str().unwrap(), Some(home.path())).unwrap();
         assert_eq!(found, sub.join(".ai-memory.toml"));
+    }
+
+    #[test]
+    fn a_sibling_worktree_reads_the_main_checkouts_marker_until_it_has_its_own() {
+        let tmp = tempfile::tempdir().unwrap();
+        let tmp = tmp.path().canonicalize().unwrap();
+        let main = tmp.join("center");
+        std::fs::create_dir_all(&main).unwrap();
+        let git = |dir: &std::path::Path, args: &[&str]| {
+            assert!(std::process::Command::new("git").args(args).current_dir(dir).output().unwrap().status.success(), "git {args:?}");
+        };
+        git(&main, &["init", "-q"]);
+        git(&main, &["-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q", "--allow-empty", "-m", "first"]);
+        git(&main, &["worktree", "add", "-q", tmp.join("space").to_str().unwrap()]);
+        let space = tmp.join("space");
+        assert!(settings_marker(space.to_str().unwrap(), Some(&tmp)).is_none(), "no marker anywhere");
+        std::fs::write(main.join(".ai-memory.toml"), "project = \"center\"\n[briefing]\ninject_on_session_start = true\n").unwrap();
+        assert_eq!(settings_marker(space.to_str().unwrap(), Some(&tmp)), Some(main.join(".ai-memory.toml")), "the main checkout's, uncommitted");
+        std::fs::write(space.join(".ai-memory.toml"), "project = \"space\"\n").unwrap();
+        assert_eq!(settings_marker(space.to_str().unwrap(), Some(&tmp)), Some(space.join(".ai-memory.toml")), "its own wins");
     }
 
     #[test]

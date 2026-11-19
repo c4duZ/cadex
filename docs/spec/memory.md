@@ -53,7 +53,9 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   voltar tira exatamente essa linha. O estado é lido desse arquivo. O exclude não tira do git um
   arquivo que já está nele; a tela avisa. O Cadex nunca faz `git add` nem commit.
 - O mesmo arquivo do ai-memory, com as mesmas regras: o mais perto subindo da pasta da sessão (até a
-  pasta pessoal; fora dela, até a raiz do repositório). Um arquivo só com `[capture]` não esconde o
+  pasta pessoal; fora dela, até a raiz do repositório). Numa worktree sem o arquivo (uma tarefa, uma
+  pasta irmã), vale o do checkout principal: o que o Cadex cria só chega lá depois do commit, e com
+  "Só neste Mac" nunca chegaria (diferença do ai-memory). Um arquivo só com `[capture]` não esconde o
   de cima para o resto.
 - Vale: `project` e `workspace` (o nome do projeto e do espaço), `project_strategy`,
   `[capture] ignore_paths` (com `[capture]` inválido, das ferramentas de arquivo e terminal só fica o

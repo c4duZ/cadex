@@ -28,7 +28,7 @@ const WORKSPACE_HEADER: &str = "x-cadex-workspace";
 /// without a marker naming the project.
 pub(crate) fn scope_of(cwd: &str, account_workspace: Option<&str>) -> Option<(String, String)> {
     let home = marker::home_dir();
-    let text = marker::find_settings_marker(cwd, home.as_deref()).and_then(|m| std::fs::read_to_string(m).ok());
+    let text = crate::marker_query::settings_marker(cwd, home.as_deref()).and_then(|m| std::fs::read_to_string(m).ok());
     let from_marker = |key: &str| text.as_deref().and_then(|t| marker::parse_key_in(t, key));
     let project = from_marker("project").or_else(|| {
         let root = ai_memory_consolidate::discover_main_repo_root(Path::new(cwd)).ok()?;

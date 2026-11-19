@@ -70,7 +70,9 @@
       `server/src/core_brief.rs` (plano 35 E: pedido o briefing e sem página de núcleo do projeto,
       fixada, _rules/ ou _slots/, o pedido segue com `briefing=0`; dentro da camada do marcador),
       `server/src/marker_query.rs` (os pares que o `build_marker_query_suffix` do upstream manda;
-      o briefing só com o marcador pedindo, como no upstream, desde o plano 35 B; o `workspace` da conta vale mais que o do arquivo;
+      o briefing só com o marcador pedindo, como no upstream, desde o plano 35 B; numa worktree sem
+      marcador próprio vale o do checkout principal, `settings_marker`, porque o arquivo que o Cadex cria
+      só chega a uma worktree irmã depois do commit; o `workspace` da conta vale mais que o do arquivo;
       desde a 3.5.0 também `[retrieval] default_result_limit` e `min_relevance`, vazios quando o
       arquivo não os tem; o engine não tem reranker, então um `min_relevance` faz o `memory_query` do
       projeto ser recusado, como no upstream, e o app não oferece a chave) e

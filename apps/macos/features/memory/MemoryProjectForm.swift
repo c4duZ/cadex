@@ -37,7 +37,12 @@ public final class MemoryProjectForm: NSView {
     var file: String { (folder as NSString).appendingPathComponent(MemoryMarker.fileName) }
 
     private func load() {
-        marker = MemoryMarker.read((try? String(contentsOfFile: file, encoding: .utf8)) ?? "")
+        // Before Cadex has made the file (it does that off the main thread as the project opens),
+        // what it is about to say, not the bare defaults: the brief showed off on a first open
+        // and on a moment later (2026-11-19).
+        let text = (try? String(contentsOfFile: file, encoding: .utf8))
+            ?? MemoryMarker.template(project: MemoryMarker.projectName(folder: folder))
+        marker = MemoryMarker.read(text)
         show()
     }
 
