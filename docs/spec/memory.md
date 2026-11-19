@@ -126,6 +126,17 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
 - Por subida, até 50 sessões, as mais novas primeiro; o resto entra na subida seguinte. Uma sessão
   mexida nos últimos 2 minutos espera a próxima subida (pode estar aberta).
 
+### Desligar
+- **Num projeto:** "Memória neste projeto", no topo da seção Memória das Configurações do projeto.
+  Desligada, as sessões que o Cadex abre ali não gravam nada nem recebem briefing, a importação e o
+  agente o pulam, e a busca de outros projetos não o enxerga. O que já estava gravado fica. A
+  escolha é desta máquina (o arquivo de projetos do Cadex), não do .ai-memory.toml do repositório.
+- **Numa conversa:** "Nova sessão sem memória" abre uma sessão que não grava nem recebe nada;
+  "Pausar a memória nesta sessão" para de gravar dali em diante (a sessão não vira página nem chama
+  o agente ao terminar) e a aba mostra que está pausada; "Retomar" volta a gravar. Pausar não apaga
+  o que já foi gravado.
+- O ai-memory não tem esse interruptor; é do Cadex (plano 35 I).
+
 ### O briefing
 - Ao começar uma sessão (nova, retomada, depois de `/clear`), o agente recebe o briefing do projeto:
   o handoff aberto (só fatos, escrito pelo Cadex), as páginas fixadas, as regras (`_rules/`) e as

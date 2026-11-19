@@ -158,6 +158,21 @@ caminhos deste repositório.
   receber"; e a prévia não mostra como cortada uma sessão viva (o engine guarda o id de cada sessão
   viva e pergunta de novo com `recovery=0`, divergência escrita na spec). Não conferido no app.
 
+- [ ] I. Desligar a memória num projeto ou numa conversa (o dono, 2026-11-19: "a gente precisa
+  poder desligar o AI memory em projetos específicos ou conversas específicas"). O ai-memory não tem
+  esse interruptor (só `[capture] ignore_paths` e `AI_MEMORY_HANDOFF=off`); é do Cadex.
+  1. **Por projeto:** "Memória neste projeto" no topo da seção Memória das Configurações do
+     projeto, guardado no arquivo de projetos do Cadex (não no .ai-memory.toml: commitado, valeria
+     para o time). Desligada: as sessões que o Cadex abre ali não recebem os hooks nem as
+     ferramentas da memória (nada gravado, nada injetado), a importação o pula, o agente não o
+     revisa, e a busca de outros projetos não o enxerga (desligado é desligado; o dono concordou).
+     O que já está gravado fica.
+  2. **Por conversa:** "Nova sessão sem memória" (o "+" das abas e o ⌘K) abre a sessão sem os
+     hooks e as ferramentas; "Pausar a memória nesta sessão" (o menu da aba e o ⌘K) marca a sessão
+     e, dali em diante, o hook e o engine descartam os eventos dela, e ela não vira página nem chama
+     o agente ao terminar; a aba mostra um sinal discreto. Pausar não apaga o que já foi gravado.
+  Apagar a memória de um projeto e esquecer uma sessão ficam para depois.
+
 ## Como validar
 - O estudo lido e aprovado pelo dono antes das fases B a G.
 - `make memory-test` e o `make memory-upstream-test` no PC depois de F.
