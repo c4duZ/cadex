@@ -2,7 +2,7 @@
 #
 # ai-memory's crates come from upstream pinned by commit, never edited, like
 # libghostty in core/build.zig.zon. Updating upstream means changing AI_MEMORY_REV
-# below (all eight lines, and the dev-dependency's) and following the procedure in ../CLAUDE.md.
+# below (all nine lines) and following the procedure in ../CLAUDE.md.
 # v3.5.0 = 411d90d1ede070d874b1d5039b0ba0a08764eb49 (2026-11-18).
 
 [package]
@@ -70,16 +70,19 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"]
 # recovery journal's entry ids (run/journal.rs, 2026-11-16).
 uuid = { version = "1", features = ["v4"] }
 
-# Only for examples/web_reference.rs (plan 40 A): upstream's web panel over a
-# copy of a memory folder, the reference for the native screens; never in the
-# engine's binary, which leaves the web UI out (src/main.rs).
-[dev-dependencies]
-ai-memory-web = { git = "https://github.com/akitaonrails/ai-memory", rev = "411d90d1ede070d874b1d5039b0ba0a08764eb49" }
 
 # Upstream's own patch (its Cargo.toml, 2026-11-15): candle needs zip 8.x and
 # 8.6.0 has GHSA-m665-v7pm-7grj; patches only apply from the root workspace.
 [patch.crates-io]
 zip = { git = "https://github.com/zip-rs/zip2", rev = "507c5c76ddd4cde767e64832fc6f848c51a99e44" }
+
+# Never in the engine's binary: its docs and translations cost 4.3 MB of the
+# release build (plan 40 B, 2026-11-19), so the panel's JSON is Cadex's own
+# (src/page/panel/). Here for examples/web_reference.rs (the reference panel
+# over a copy of a memory folder) and for the parity tests, which mount
+# upstream's real panel and API next to the engine (tests/panel_api.rs).
+[dev-dependencies]
+ai-memory-web = { git = "https://github.com/akitaonrails/ai-memory", rev = "411d90d1ede070d874b1d5039b0ba0a08764eb49" }
 
 [workspace]
 

@@ -35,7 +35,7 @@ const LIST_LIMIT: usize = 200;
 const QUEUE_LIMIT: usize = 10_000;
 const REJECT_REASON: &str = "rejected by the owner in Cadex's Memory page";
 
-fn row(review: PendingAutoImproveReview) -> Value {
+pub(super) fn row(review: PendingAutoImproveReview) -> Value {
     let s = review.summary;
     let created = jiff::Timestamp::from_microsecond(s.staged_at).map(|t| t.to_string()).unwrap_or_default();
     json!({

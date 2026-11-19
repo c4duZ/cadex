@@ -319,6 +319,28 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   memory.approve e memory.reject (no ⌘K, a lista das pendentes).
 - Com o processo parado, a página mostra a árvore e não o sobe; só "What the Next Agent Will Get" sobe.
 
+### Os dados do painel Memória (plano 40)
+- O painel nativo (as telas do painel web do ai-memory, `docs/plans/40-memory-panel.md`) lê tudo do
+  engine pelo `cadex memory-agent panel --path P`, que faz um GET de `/cadex/memory/panel/<P>` e
+  imprime o JSON. Só leitura; aprovar e recusar propostas seguem em memory.approve e memory.reject.
+- `api/v1/…`: a API JSON do ai-memory, com os mesmos caminhos e o mesmo JSON (projetos, visão
+  geral, páginas, uma página, histórico com o diff, recentes, briefing, handoffs, sessões,
+  observações, busca, grafo), respondida pelo próprio engine, com o dono visto como o administrador
+  de um servidor de um usuário só. O crate web do ai-memory não entra no engine: a API dele embute
+  os guias e o changelog (cerca de 4 MB a mais no binário), e os testes comparam a nossa com a dele.
+- Sem guias no engine: a tela Documentação abre os guias e o changelog do ai-memory no GitHub.
+- `extra/…`: o que o ai-memory só mostra no HTML, montado pelas mesmas leituras dele, para os
+  números serem os mesmos: a visão geral (agentes e fila por projeto, a captura), a caixa de entrada
+  (com o filtro de estado e o contador), os workstreams, a revisão de aprendizado de todos os
+  projetos, a Saúde, o resumo, as sessões e os agentes de um projeto, o uso de tokens (do projeto e
+  da sessão), as recuperações de uma sessão e as evidências de uma página.
+- A Saúde mostra o engine local: hooks aceitos e descartados desde que ele subiu, a fila de
+  gravação, a fila do hook, o diário do "continuar em outro agente", o modelo de vetores e o índice,
+  com as verificações do ai-memory (em inglês; o app escreve as suas palavras); sem provedores
+  remotos, que o Cadex não usa.
+- A busca do painel num projeto ordena como o `memory_query` do agente: texto e, com o modelo de
+  vetores baixado, sentido; a busca em todos os projetos é só por texto, como no ai-memory.
+
 ## Estados
 - **Desligada:** nenhum hook a mais nas sessões, nenhum processo, a página Memory explica e oferece
   ligar.

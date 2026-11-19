@@ -141,3 +141,42 @@ pub fn api_routes() -> Vec<String> {
         "/api/v1/docs/features/status".into(),
     ]
 }
+
+/// Where the engine serves the panel's data (src/page/panel/, plan 40 B).
+pub const PANEL: &str = "/cadex/memory/panel";
+
+/// Every GET route of our `extra/` side, for the seed's ids, the way the
+/// app calls them (plan 40 B): the parity test compares each with
+/// upstream's screen and the read-only test requests them all.
+pub fn extra_routes() -> Vec<String> {
+    use seed::*;
+    let x = format!("{PANEL}/extra");
+    let p = format!("{x}/workspaces/{WORKSPACE}/projects/{MAIN}");
+    let mailbox = format!("{x}/inbox?workspace={WORKSPACE}&project={MAIN}");
+    vec![
+        format!("{x}/home"),
+        format!("{x}/inbox/notifications"),
+        format!("{x}/inbox"),
+        mailbox.clone(),
+        format!("{mailbox}&state=claimed"),
+        format!("{mailbox}&state="),
+        format!("{mailbox}&box=outbox"),
+        format!("{x}/workstreams"),
+        format!("{x}/review"),
+        format!("{x}/review?sort=confidence-desc"),
+        format!("{x}/review?sort=staged-desc&project={WORKSPACE}/{MAIN}"),
+        format!("{x}/health"),
+        format!("{p}/summary"),
+        format!("{p}/sessions"),
+        format!("{p}/sessions?state=open"),
+        format!("{p}/sessions?sort=events"),
+        format!("{p}/agents"),
+        format!("{p}/agents/claude-code"),
+        format!("{p}/agents/codex"),
+        format!("{p}/tokens"),
+        format!("{p}/tokens?calls_sort=recent"),
+        format!("{p}/sessions/{S_DONE}/tokens"),
+        format!("{p}/sessions/{S_DONE}/retrievals"),
+        format!("{p}/evidence/{VERSIONED_PAGE}"),
+    ]
+}

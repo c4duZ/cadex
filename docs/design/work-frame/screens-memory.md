@@ -325,6 +325,15 @@ pesar fidelidade contra brevidade. Escrito em 2026-11-19.
   tooltip); o link "Markdown para agentes →" de cada cartão (fica "Ler Markdown" no guia aberto); a
   caixa final "Para agentes e integrações". Os títulos e descrições vêm em inglês da API: a fase B
   decide de onde sai o português.
+- **Corte da fase B (o dono, 2026-11-19):** os guias e o changelog não vêm do engine. A API de
+  documentação do upstream embute os guias e o changelog em Markdown (cerca de 3,7 MB do binário,
+  com as traduções 4,3 MB), e o crate não deixa tirá-los; o engine responde a API sem as rotas
+  `/docs`. A tela lista os guias (título, categoria e descrição de cada um, numa lista fixa da
+  versão 3.5.0 do upstream) e cada cartão, o destaque, "Explorar recursos" e "Histórico de
+  alterações" abrem o guia no GitHub do upstream, no commit da versão, no navegador. Saem com isso:
+  o guia aberto na mesma página ("Nesta página", "Ler Markdown"), a busca no conteúdo dos guias (a
+  busca filtra pelo título e pela descrição), o "Estado efetivo da instalação" e o seletor de
+  versão do changelog.
 
 ## Decisão depois dos prints (2026-11-19)
 - O grafo (MemoryGraph, o geral e o do projeto) usa um layout de forças: as páginas ligadas se

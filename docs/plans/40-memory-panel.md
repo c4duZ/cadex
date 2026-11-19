@@ -70,10 +70,19 @@ repositório. O código dele está no checkout do cargo, no commit fixado (411d9
   testes `core/features/memory/server/tests/panel_parity.rs` (todas as telas e a API do upstream
   sobre o seed, com os números; a pasta igual byte a byte depois) e a suíte do ai-memory-web no
   `make memory-upstream-test` (344 testes, 0 falhas, no Mac).
-- [ ] B. O engine: a API JSON do upstream (`/api/v1`: projetos, visão geral, páginas, histórico,
+- [x] B. O engine: a API JSON do upstream (`/api/v1`: projetos, visão geral, páginas, histórico,
   recentes, briefing, handoffs, sessões, observações, busca, grafo) no socket da memória, e rotas
   nossas para o que só existe no HTML (caixa de entrada, workstreams, revisão de aprendizado, saúde,
   agentes e uso de tokens), pelas funções do upstream.
+  Feito: `core/features/memory/server/src/page/panel/` sob `/cadex/memory/panel` (o token de
+  sessão; quem pede é o dono): as rotas `/api/v1` que as telas usam, por handlers nossos com as
+  mesmas leituras do upstream (o diff do histórico e as verificações da Saúde copiados, com a
+  origem), e as rotas extra/ do que só existe no HTML; `cadex memory-agent panel --path`. O
+  ai-memory-web voltou a ser só dos testes (o dono, 2026-11-19, escolheu deixar a documentação
+  embutida de fora): com o `api_router` o engine crescia 4,3 MB, assim 0,35 MB (arm64). A
+  Documentação abre os guias do upstream no GitHub. Paridade em `core/features/memory/server/tests/panel_api.rs`:
+  cada rota igual ao `api_router` e às telas HTML do upstream sobre o seed, as recusas iguais, a
+  pasta igual byte a byte depois.
 - [ ] C. A página Memória no pé da barra lateral, com as seções, e a Visão geral: os cinco
   números, a saúde da captura, o aviso da caixa de entrada e os cartões dos projetos com filtro.
 - [ ] D. O projeto: a árvore de páginas e a atividade recente, a página (Markdown e metadados), o

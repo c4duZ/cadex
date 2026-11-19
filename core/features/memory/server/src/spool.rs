@@ -54,6 +54,22 @@ fn queued_files(dir: &Path) -> Vec<PathBuf> {
     files
 }
 
+/// The queue as the Memory panel's health shows it (plan 40 B, upstream's
+/// `SpoolState`): the files waiting and the age of the oldest, in ms, from
+/// the time its name starts with. The hook never retries a file (the engine
+/// replays it once, at start) and keeps no cap, so there are no retries
+/// nor capacity to report.
+pub(crate) fn health(dir: &Path) -> (usize, Option<u64>) {
+    let files = queued_files(dir);
+    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_millis() as u64);
+    let oldest = files.first().and_then(|p| {
+        let name = p.file_name()?.to_str()?;
+        let written: u64 = name.get(..13)?.parse().ok()?;
+        Some(now.saturating_sub(written))
+    });
+    (files.len(), oldest)
+}
+
 enum Outcome {
     Delivered,
     /// The engine refused it (4xx): retrying would refuse it again.

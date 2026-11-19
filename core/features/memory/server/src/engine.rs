@@ -81,9 +81,10 @@ fn hook_state(
     ids: (ai_memory_core::WorkspaceId, ai_memory_core::ProjectId),
     active_project: &ActiveProject,
     session_ended: Arc<tokio::sync::Notify>,
+    ingest_metrics: Arc<ai_memory_core::IngestMetrics>,
 ) -> HookState {
     HookState {
-        ingest_metrics: Arc::new(ai_memory_core::IngestMetrics::default()),
+        ingest_metrics,
         workspace_id: ids.0,
         project_id: ids.1,
         writer: store.writer.clone(),
@@ -152,6 +153,10 @@ pub(crate) struct Engine {
     /// For the maintenance jobs (maintenance.rs, plan 22 phase F).
     pub(crate) wiki: Wiki,
     pub(crate) embedder: Option<Arc<dyn Embedder>>,
+    /// The hook router's counters (accepted, dropped, shed), which the
+    /// Memory panel's health and capture lines read (plan 40 B), as
+    /// upstream serve hands the same Arc to its web state.
+    pub(crate) ingest_metrics: Arc<ai_memory_core::IngestMetrics>,
     /// The default workspace and project, for the memory agent's consolidator
     /// (agent/jobs.rs), as upstream serve builds its `Consolidator`.
     pub(crate) default_scope: (ai_memory_core::WorkspaceId, ai_memory_core::ProjectId),
@@ -200,7 +205,8 @@ pub(crate) async fn build(args: &Args, cancel: &CancellationToken) -> Result<Eng
             .with_json_response(true),
     );
     let session_ended = Arc::new(tokio::sync::Notify::new());
-    let hooks = hook_router(hook_state(&store, &wiki, (ws, proj), &active_project, session_ended.clone()));
+    let ingest_metrics = Arc::new(ai_memory_core::IngestMetrics::default());
+    let hooks = hook_router(hook_state(&store, &wiki, (ws, proj), &active_project, session_ended.clone(), ingest_metrics.clone()));
     let workstreams = workstream_router(WorkstreamState {
         writer: store.writer.clone(),
         reader: store.reader.clone(),
@@ -223,5 +229,5 @@ pub(crate) async fn build(args: &Args, cancel: &CancellationToken) -> Result<Eng
         .route("/cadex/consolidate", axum::routing::get(crate::consolidate_prompt::handle))
         .layer(DefaultBodyLimit::max(MAX_BODY_BYTES))
         .layer(axum::middleware::from_fn_with_state(auth, require_bearer));
-    Ok(Engine { store, router, model, session_ended, wiki: wiki.clone(), embedder, default_scope: (ws, proj), _watcher: watcher })
+    Ok(Engine { store, router, model, session_ended, wiki: wiki.clone(), embedder, ingest_metrics, default_scope: (ws, proj), _watcher: watcher })
 }

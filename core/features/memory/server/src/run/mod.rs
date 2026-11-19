@@ -71,6 +71,7 @@ mod jail_choices;
 mod jail_exec;
 mod jail_folders;
 mod journal;
+pub(crate) use journal::summary as journal_summary;
 mod launch;
 mod ledger_capture;
 mod local;

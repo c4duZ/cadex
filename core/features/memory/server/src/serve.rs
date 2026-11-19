@@ -8,8 +8,9 @@
 //! handoff (handoff.rs) and Claude's automatic memory folders
 //! (auto_watch.rs), the memory agent (agent/, plan 22 phase G) and the
 //! Memory page's routes with projects.json (page/, projects_file.rs, phase H)
-//! the briefing each session started with (agent/briefings.rs, plan 35 D) and
-//! the memory turned off in a project or a session (off.rs, plan 35 I).
+//! the briefing each session started with (agent/briefings.rs, plan 35 D),
+//! the memory turned off in a project or a session (off.rs, plan 35 I) and
+//! the native Memory panel's data (page/panel/, plan 40 B).
 
 use std::fs::File;
 use std::future::IntoFuture;
@@ -153,11 +154,18 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
         built.model.clone(),
         sessions.clone(),
     ));
+    // Plan 40 B: the native Memory panel's data (page/panel/).
+    let panel = crate::page::panel::router(page.clone(), crate::page::panel::Sources {
+        ingest: built.ingest_metrics.clone(),
+        spool_dir: args.spool_dir.clone(),
+        model: built.embedder.clone(),
+    });
     let routes = built
         .router
         .clone()
         .merge(crate::agent::routes::router(agent.clone()))
-        .merge(crate::page::router(page.clone()));
+        .merge(crate::page::router(page.clone()))
+        .merge(panel);
     #[cfg(debug_assertions)]
     let routes = if crate::debug_panic::enabled() { crate::debug_panic::route(routes) } else { routes };
     let inner = routes

@@ -16,6 +16,9 @@
 //!   `POST /cadex/memory/approve?id`, `POST /cadex/memory/reject?id`
 //!   (proposals.rs).
 //!
+//! - `/cadex/memory/panel/...`: the native Memory panel's data, upstream's
+//!   JSON API and ours (panel/, plan 40 B).
+//!
 //! Every route that names a project also refreshes `<data-dir>/projects.json`
 //! (crate::projects_file), the list the page shows while the engine is down.
 
@@ -27,6 +30,7 @@ mod briefing;
 mod handoff_text;
 mod overview;
 mod pages;
+pub(crate) mod panel;
 mod proposals;
 mod reindex;
 

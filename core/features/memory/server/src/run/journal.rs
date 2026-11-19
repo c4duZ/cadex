@@ -97,6 +97,15 @@ pub(crate) fn load_journal(run_dir: &Path) -> Result<Vec<JournalEntry>> {
     Ok(journal.entries)
 }
 
+/// What the Memory panel's health shows of the journal (plan 40 B): the
+/// entries waiting, the degraded runs and the failed finishes, as upstream's
+/// `recovery::journal_summary` counts them for its health page.
+pub(crate) fn summary(run_dir: &Path) -> Result<(usize, usize, usize)> {
+    let entries = load_journal(run_dir)?;
+    let count = |kind| entries.iter().filter(|e| e.kind == kind).count();
+    Ok((entries.len(), count(JournalKind::DegradedRun), count(JournalKind::FinishFailed)))
+}
+
 fn mutate_journal(run_dir: &Path, mutate: impl FnOnce(&mut Vec<JournalEntry>) -> Result<()>) -> Result<()> {
     let mut entries = load_journal(run_dir)?;
     mutate(&mut entries)?;

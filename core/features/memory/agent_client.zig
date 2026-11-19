@@ -10,6 +10,11 @@
 //! bootstrap (`/cadex/agent/*`). The Memory page (phase H, 2026-11-16;
 //! `/cadex/memory/*`, server/src/page/): overview, briefing, write-page (the
 //! Markdown on stdin), delete-page, reindex, proposals, approve, reject.
+//! The native Memory panel (plan 40 B): `panel --path P`, a GET of
+//! `/cadex/memory/panel/<P>` (P is the rest of the route with its query,
+//! already encoded, e.g. `api/v1/projects` or `extra/inbox?state=claimed`;
+//! server/src/page/panel/), printing the JSON as is. One generic read keeps
+//! this client out of the panel's routes, which grow with the screens.
 //!
 //! `status` and `overview` never start the engine (down: `{"running":false}`);
 //! the others start it. One JSON line out, except `briefing`: the text the
@@ -24,7 +29,7 @@ const http = @import("http.zig");
 const launch = @import("launch.zig");
 const events = @import("events.zig");
 
-pub const Action = enum { status, pause, @"resume", dream, bootstrap, overview, briefing, @"write-page", @"delete-page", reindex, proposals, approve, reject };
+pub const Action = enum { status, pause, @"resume", dream, bootstrap, overview, briefing, @"write-page", @"delete-page", reindex, proposals, approve, reject, panel };
 
 pub const Options = struct {
     cwd: ?[]const u8 = null,
@@ -36,13 +41,23 @@ pub const Options = struct {
 
 fn needsCwd(action: Action) bool {
     return switch (action) {
-        .status, .pause, .@"resume", .approve, .reject => false,
+        .status, .pause, .@"resume", .approve, .reject, .panel => false,
         else => true,
     };
 }
 
 fn needsPath(action: Action) bool {
-    return action == .@"write-page" or action == .@"delete-page";
+    return action == .@"write-page" or action == .@"delete-page" or action == .panel;
+}
+
+/// A panel path stays under the panel's prefix: no `..` segment, no
+/// fragment, no whitespace or control byte (it goes into the request line).
+fn panelPathOk(path: []const u8) bool {
+    if (path.len == 0) return false;
+    var segments = std.mem.splitScalar(u8, std.mem.sliceTo(path, '?'), '/');
+    while (segments.next()) |segment| if (std.mem.eql(u8, segment, "..")) return false;
+    for (path) |c| if (c <= ' ' or c == '#' or c == 0x7f) return false;
+    return true;
 }
 
 fn needsId(action: Action) bool {
@@ -54,7 +69,7 @@ fn needsId(action: Action) bool {
 fn budgetMs(action: Action) i64 {
     return switch (action) {
         .reindex => 120_000,
-        .@"write-page", .@"delete-page", .approve, .briefing => 30_000,
+        .@"write-page", .@"delete-page", .approve, .briefing, .panel => 30_000,
         else => 5_000,
     };
 }
@@ -71,7 +86,7 @@ pub fn target(gpa: std.mem.Allocator, action: Action, o: Options) !struct { meth
     var out: std.ArrayList(u8) = .empty;
     errdefer out.deinit(gpa);
     const method: []const u8 = switch (action) {
-        .status, .overview, .briefing, .proposals => "GET",
+        .status, .overview, .briefing, .proposals, .panel => "GET",
         else => "POST",
     };
     switch (action) {
@@ -79,13 +94,15 @@ pub fn target(gpa: std.mem.Allocator, action: Action, o: Options) !struct { meth
         .pause, .@"resume" => try out.print(gpa, "/cadex/agent/pause?on={s}", .{if (action == .pause) "1" else "0"}),
         .dream => try out.appendSlice(gpa, "/cadex/agent/run-dream"),
         .bootstrap => try out.appendSlice(gpa, "/cadex/agent/bootstrap"),
+        // Verbatim: the caller encodes the query (the route is its own).
+        .panel => try out.print(gpa, "/cadex/memory/panel/{s}", .{std.mem.trimStart(u8, o.path orelse "", "/")}),
         else => try out.print(gpa, "/cadex/memory/{s}", .{@tagName(action)}),
     }
     if (needsCwd(action)) {
         try appendPair(gpa, &out, "cwd", o.cwd orelse "");
         if (o.workspace) |ws| try appendPair(gpa, &out, "workspace", ws);
     }
-    if (needsPath(action)) try appendPair(gpa, &out, "path", o.path orelse "");
+    if (needsPath(action) and action != .panel) try appendPair(gpa, &out, "path", o.path orelse "");
     if (needsId(action)) try appendPair(gpa, &out, "id", o.id orelse "");
     if (action == .bootstrap and o.dry_run) try out.appendSlice(gpa, "&dry_run=1");
     return .{ .method = method, .path = try out.toOwnedSlice(gpa) };
@@ -116,6 +133,7 @@ fn parse(words: []const []const u8) ?Parsed {
     if (needsCwd(action) and o.cwd == null) return null;
     if (needsPath(action) and o.path == null) return null;
     if (needsId(action) and o.id == null) return null;
+    if (action == .panel and !panelPathOk(o.path.?)) return null;
     return .{ .action = action, .options = o };
 }
 
@@ -187,7 +205,7 @@ fn readStdin(gpa: std.mem.Allocator) ![]u8 {
 
 fn usage(gpa: std.mem.Allocator) !Result {
     return .{ .out = try gpa.dupe(u8, "usage: cadex memory-agent <status|pause|resume|dream|bootstrap|overview|briefing|write-page|" ++
-        "delete-page|reindex|proposals|approve|reject> [--cwd DIR] [--workspace W] [--path P] [--id ID] [--dry-run]\n"), .code = 2 };
+        "delete-page|reindex|proposals|approve|reject|panel> [--cwd DIR] [--workspace W] [--path P] [--id ID] [--dry-run]\n"), .code = 2 };
 }
 
 const testing = std.testing;
@@ -212,6 +230,17 @@ test "each action's request" {
     try expectTarget(.proposals, .{ .cwd = "/r" }, "GET", "/cadex/memory/proposals?cwd=%2Fr");
     try expectTarget(.approve, .{ .id = "0198-ab" }, "POST", "/cadex/memory/approve?id=0198-ab");
     try expectTarget(.reject, .{ .id = "x" }, "POST", "/cadex/memory/reject?id=x");
+    try expectTarget(.panel, .{ .path = "api/v1/projects" }, "GET", "/cadex/memory/panel/api/v1/projects");
+    try expectTarget(.panel, .{ .path = "/extra/inbox?state=claimed&workspace=a%20b", .workspace = "acct" }, "GET", "/cadex/memory/panel/extra/inbox?state=claimed&workspace=a%20b");
+}
+
+test "a panel path stays under the panel" {
+    try testing.expect(parse(&.{ "panel", "--path", "extra/workspaces/default/projects/cadex/evidence/decisions/a..b.md" }) != null);
+    try testing.expect(parse(&.{ "panel", "--path", "extra/search?q=../x" }) != null);
+    for ([_][]const u8{ "", "../agent/pause", "extra/../../agent/status", "api/v1/x y", "api/v1/x#frag", "api/v1/x\r\nX: 1" }) |bad| {
+        try testing.expect(parse(&.{ "panel", "--path", bad }) == null);
+    }
+    try testing.expect(parse(&.{"panel"}) == null);
 }
 
 test "a command line missing what its action needs is a usage error" {

@@ -24,7 +24,7 @@ use super::{Ctx, Params, Project, cwd_of, ids_of, scope_of};
 use crate::import_state::{Backfill, BackfillMarker};
 
 /// The vector model's state, as the page names it.
-fn model_state(ctx: &Ctx) -> &'static str {
+pub(super) fn model_state(ctx: &Ctx) -> &'static str {
     let Some(events) = &ctx.model else { return "off" };
     if events.loaded.load(Ordering::SeqCst) {
         "loaded"

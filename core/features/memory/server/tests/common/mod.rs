@@ -30,6 +30,14 @@ impl Drop for Engine {
 }
 
 impl Engine {
+    /// End the engine as a signal does (it closes the store: queue drained,
+    /// WAL checkpointed) and wait for it, so the folder can be read after.
+    pub fn stop(&mut self) {
+        // SAFETY: kill(2) on our own child's pid; no memory is touched.
+        unsafe { libc::kill(self.child.id() as i32, libc::SIGTERM) };
+        assert!(self.exits_within(Duration::from_secs(20)), "the engine did not leave on SIGTERM");
+    }
+
     /// Whether the process ended within `limit`.
     pub fn exits_within(&mut self, limit: Duration) -> bool {
         let deadline = Instant::now() + limit;
