@@ -33,7 +33,7 @@ pub fn due() u8 {
 /// Starts `argv` in a session of its own (the LaunchAgent's group may be
 /// ended when this exits), with this environment and, for the app itself,
 /// CADEX_BACKGROUND=1: no window in front, no focus taken.
-fn launch(arena: std.mem.Allocator, argv: []const []const u8, background: bool) u8 {
+pub fn launch(arena: std.mem.Allocator, argv: []const []const u8, background: bool) u8 {
     var args: std.ArrayList(?[*:0]const u8) = .empty;
     for (argv) |word| args.append(arena, (arena.dupeZ(u8, word) catch return 1).ptr) catch return 1;
     args.append(arena, null) catch return 1;

@@ -36,7 +36,7 @@ pub fn main(words: []const []const u8) u8 {
     return join(arena, &conn, choice);
 }
 
-fn join(arena: std.mem.Allocator, conn: *remote.Connection, choice: Choice) u8 {
+pub fn join(arena: std.mem.Allocator, conn: *remote.Connection, choice: Choice) u8 {
     _ = conn.join(arena, choice.id) catch return say(1, "cadex: that terminal is gone\n");
     // A clean screen for the replay; the program draws itself again on the size.
     remote.writeAll(1, "\x1b[H\x1b[2J") catch {};
@@ -127,7 +127,7 @@ fn ask(choices: []const Choice) ?Choice {
     return pick(choices, word);
 }
 
-fn say(code: u8, message: []const u8) u8 {
+pub fn say(code: u8, message: []const u8) u8 {
     if (message.len > 0) remote.writeAll(2, message) catch {};
     return code;
 }

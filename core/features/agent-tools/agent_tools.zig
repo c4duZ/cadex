@@ -23,4 +23,5 @@ test {
     _ = @import("attach.zig");
     _ = @import("attach_session.zig");
     _ = @import("attach_replies.zig");
+    _ = @import("attach_new.zig");
 }

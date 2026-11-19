@@ -37,6 +37,9 @@ public final class AgentToolsServer: @unchecked Sendable {
     /// this user (getpeereid): the owner over SSH is that user, and the
     /// names say no more than `ps` does.
     public var onTerminals: (@MainActor () -> [[String: Any]])?
+    /// `cadex new <project> [claude]` (plan 39 C): a new tab in the project, by the
+    /// registered command, as a click; the answer names its session in the daemon.
+    public var onNewTerminal: (@MainActor (_ project: String, _ claude: Bool) -> [String: Any])?
     public let path: String
     let tokens: AgentSessionTokens
     private let queue = DispatchQueue(label: "cadex.agent-tools.server", qos: .utility)
@@ -122,6 +125,16 @@ public final class AgentToolsServer: @unchecked Sendable {
             DispatchQueue.main.async { [weak self] in
                 MainActor.assumeIsolated {
                     Self.send(client, ["ok": true, "terminals": self?.onTerminals?() ?? []])
+                }
+            }
+            return
+        }
+        if object["new"] as? Bool == true {
+            guard local, let project = object["project"] as? String else { close(client); return }
+            let claude = object["claude"] as? Bool == true
+            DispatchQueue.main.async { [weak self] in
+                MainActor.assumeIsolated {
+                    Self.send(client, self?.onNewTerminal?(project, claude) ?? ["ok": false, "error": "Cadex is closing"])
                 }
             }
             return

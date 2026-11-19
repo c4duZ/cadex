@@ -26,7 +26,14 @@ public final class TerminalDaemon {
     }
 
     /// Where the daemon saves each session's output when the Mac shuts down.
-    var scrollback: String { support + "/scrollback" }
+    /// Beside a test instance's socket (CADEX_TERMINAL_SOCKET): its daemon saved into the
+    /// owner's folder when stopped (found 2026-11-19, plan 39's checks).
+    var scrollback: String {
+        if let socket = ProcessInfo.processInfo.environment["CADEX_TERMINAL_SOCKET"] {
+            return (socket as NSString).deletingLastPathComponent + "/scrollback"
+        }
+        return support + "/scrollback"
+    }
 
     /// cadex-terminald: in the bundle (Contents/Helpers), else in the core's build.
     var helper: String? {

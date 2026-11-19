@@ -58,7 +58,8 @@
   `TerminalView`; a pergunta ao fechar com programa rodando é da feature tabs. Botão "Cancelar" de
   alerta ganha Esc à mão: o NSAlert só dá Esc a "Cancel".
 - Terminais mantidos (terminal.keepSessions, plano 19 fase E2): `TerminalDaemon.swift` (o programa,
-  o socket, a pasta da saída gravada, iniciar uma vez, os nomes `<instância>-<uuid>`,
+  o socket, a pasta da saída gravada (numa instância de teste, ao lado do CADEX_TERMINAL_SOCKET: o
+  daemon dela gravava na pasta do dono, 2026-11-19), iniciar uma vez, os nomes `<instância>-<uuid>`,
   `closeUnclaimed` depois de restaurar) e `TerminalKeep.swift` (`openSession`: abrir no daemon, religar
   por `keptID`, um shell novo com a saída gravada quando o daemon não tem mais, PTY próprio se o
   daemon falhar; `detachSession`). O `TerminalView` guarda `keptID`.

@@ -112,7 +112,10 @@
   vezes manda um); na saída, desliga o que o programa deixou ligado (tela alternativa, mouse, colagem
   com colchetes, cursor). `attach_replies.zig`: tira das teclas as respostas que o terminal do
   telefone dá sozinho (atributos, cores, posição do cursor, teclado, modos), que o terminal do app já
-  deu e que chegariam ao programa como digitação.
+  deu e que chegariam ao programa como digitação. `attach_new.zig` (plano 39 C): `cadex new <projeto>
+  [claude]` pede ao app uma aba nova (`{"v":1,"new":true,…}`), e com o app fechado abre o Cadex (o
+  CADEX_APP_BUNDLE, senão o .app onde este `cadex` mora, com `open -g`) e pergunta de novo por até
+  30 s; depois entra na aba como o `cadex attach`.
 - O build (`../../build.zig`, `addCli`) instala `zig-out/bin/cadex` só no Mac; o empacotamento o põe em
   Contents/Helpers.
 

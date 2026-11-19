@@ -11,6 +11,7 @@ const codex_wrap = @import("codex_wrap.zig");
 const continue_wrap = @import("continue_wrap.zig");
 const automations = @import("automations.zig");
 const attach = @import("attach.zig");
+const attach_new = @import("attach_new.zig");
 // The memory's hook (plan 22): the memory feature's entry, the only code
 // that talks to the engine's socket.
 const memory = @import("../memory/memory.zig");
@@ -21,6 +22,7 @@ const usage_text =
     \\       cadex memory-hook <event> (a Claude Code hook: feeds the project memory)
     \\       cadex memory-agent <action> [--cwd DIR] … (the app's way to the memory: agent, page, briefing)
     \\       cadex attach [n|id]    (from the phone over SSH: into a terminal open in Cadex, beside the Mac)
+    \\       cadex new <project> [claude] (from the phone: a new tab in that project in Cadex, then into it)
     \\       cadex automations due   (the automations' LaunchAgent: the app checks its agenda, or opens)
     \\       cadex mcp              (the MCP server of the sessions Cadex opens)
     \\       cadex claude [args…]   (the `claude` typed in a Cadex zsh tab: the session kit)
@@ -39,13 +41,14 @@ pub fn main(init: std.process.Init.Minimal) u8 {
     if (std.mem.eql(u8, sub, "codex")) return runCodex(&args);
     if (std.mem.eql(u8, sub, "continue")) return runContinue(&args);
     if (std.mem.eql(u8, sub, "memory-agent")) return runMemoryAgent(&args);
-    if (std.mem.eql(u8, sub, "attach")) {
-        var words: [2][]const u8 = undefined;
+    if (std.mem.eql(u8, sub, "attach") or std.mem.eql(u8, sub, "new")) {
+        var words: [3][]const u8 = undefined;
         var n: usize = 0;
         while (args.next()) |word| : (n += 1) {
             if (n == words.len) break;
             words[n] = word;
         }
+        if (std.mem.eql(u8, sub, "new")) return attach_new.main(words[0..n]);
         return attach.main(words[0..n]);
     }
     if (std.mem.eql(u8, sub, "automations")) {

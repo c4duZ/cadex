@@ -136,7 +136,8 @@
 - Files e Changes seguem o projeto escolhido, ou a tarefa do terminal com foco, não o `cd`
   (`FolderFollow.swift`, `projectAnchor`, `followProject` na troca de projeto). O ⌘B
   (view.toggle-sidebar) fecha e abre a barra lateral.
-- `ProjectEditWiring.swift` (plano 36 fase B): a folha "Edit project" (project.edit, também pelo
+- `ProjectEditWiring.swift` (plano 36 fase B; project.new-claude, plano 39 C: uma aba nova no
+  projeto com o `claude` digitado, como o dono faria, com o kit e a conta do projeto): a folha "Edit project" (project.edit, também pelo
   clique direito na barra lateral; nome, imagem ou emoji, cor) e a mesma folha criando pelo Novo
   projeto… (project.create: a pasta, o nome, a imagem); a imagem solta num quadrado da faixa vira a do
   projeto; o clique direito (`railMenu`: New Terminal, New Task…, Edit Name and Image…, Pin ou
@@ -168,6 +169,8 @@
   sendo a aba daquele terminal (`AgentPreviewTabs`), e os pedidos respondem quando a página responde.
 - `RemoteTerminalsWiring.swift` (plano 39 B): responde ao `cadex attach` as abas da janela principal,
   por projeto, só as que o daemon mantém (`keptID`; com terminal.keepSessions desligado, nenhuma).
+  Plano 39 C: o `cadex new <projeto> [claude]` acha o projeto (nome em qualquer caixa, o começo do
+  nome ou a pasta), roda project.new-terminal ou project.new-claude e devolve o id da aba no daemon.
 - `TypedClaudeWiring.swift` (plano 22, fase C): o kit do `claude` digitado numa aba zsh; só para
   quem tem o shell de um terminal do app acima (`shellPid` de todos os terminais, de todas as janelas
   e projetos, e os da gaveta), pelo SessionKit.typedLaunch. Plano 33 F: sem conta na aba, a de uma

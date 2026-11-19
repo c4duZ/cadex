@@ -49,7 +49,9 @@
   agenda"; não diz o que rodar.
 - `onTerminals` (plano 39 B): o pedido `{"v":1,"terminals":true}` do `cadex attach`, sem token e só
   local (getpeereid, o dono no SSH é o mesmo usuário): as abas abertas com o nome da sessão no daemon,
-  o projeto, a aba, a pasta e o estado do agente; nada que o `ps` já não diga.
+  o projeto, a aba, a pasta e o estado do agente; nada que o `ps` já não diga. `onNewTerminal` (plano
+  39 C): `{"v":1,"new":true,"project","claude"}` do `cadex new`, só local: o app abre a aba pelo
+  comando registrado e responde o id dela.
 - `serveRemote` (plano 23, fase F): a conexão de outra máquina da tailnet que o listener da feature
   machines já conferiu pelo WhoIs; o mesmo protocolo, só com o token de uma sessão; o pedido do kit
   é fechado (ele confia na ancestralidade de um processo deste Mac).

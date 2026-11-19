@@ -46,11 +46,16 @@ quero poder abrir uma sessão num projeto por lá"; "um HTML pode ser"; "pode s�
   entra, o que se digita roda no shell do Mac, o pty com 18×50 (o menor dos dois), a marca do
   telefone na aba (print), Ctrl+\ e d sai e a aba segue. Só vale com "Manter as sessões"
   (terminal.keepSessions) ligado, que vem desligado: sem ele, as abas não moram no daemon.
-- [ ] C. `cadex new <projeto> [claude]` (o `cadex open` já abre um arquivo): pede ao app, pelo socket que o `cadex` já usa, o comando
+- [x] C. `cadex new <projeto> [claude]` (o `cadex open` já abre um arquivo): pede ao app, pelo socket que o `cadex` já usa, o comando
   registrado que abre uma aba no projeto (um terminal, ou o Claude pelo kit, com memória e hooks); o
   app devolve o id da sessão e o `cadex` entra nela como na B. Com o app fechado, o `cadex` o abre e
   espera o socket. Fora de uma sessão do Cadex não há token: o comando vale só para o dono no SSH
   (mesmo usuário do Mac), e a lista do que pode é curta (abrir aba, listar).
+  Feito: `core/features/agent-tools/attach_new.zig`, o pedido `new` no app
+  (`apps/macos/app/RemoteTerminalsWiring.swift`) e o comando project.new-claude (a aba com o `claude`
+  digitado). Conferido numa instância de teste: `cadex new work` abriu uma aba no Mac com a marca do
+  telefone e o que se digitou rodou nela; um projeto que não existe diz os abertos. O `cadex new
+  … claude` não foi rodado (abriria o Claude de verdade numa conta do dono), nem o Cadex fechado.
 - [ ] D. O menu: `cadex` sem argumentos, num terminal que não é uma aba do Cadex, mostra os
   projetos e as abas numerados; um número entra, `n` abre um terminal no projeto escolhido, `c` abre
   o Claude. Feito para teclado de telefone: uma tecla por escolha, nada de digitar nome.

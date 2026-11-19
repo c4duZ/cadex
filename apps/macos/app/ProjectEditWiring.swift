@@ -33,6 +33,17 @@ extension WindowSession {
                         self.pickProject(folder)
                         self.projects?.active?.newTab(cwd: folder)
                     }),
+            // The `claude` the owner would type, in a new tab there: the kit, the project's
+            // account and memory come as for a typed one (plan 39 C: `cadex new <project> claude`).
+            Command(id: "project.new-claude", title: T("New Claude in the Project", "Novo Claude no projeto"),
+                    keywords: ["project", "claude", "agent", "new", "session", "projeto", "agente", "novo", "sessão"], category: .tabs,
+                    action: .run { [weak self] in
+                        guard let self, let folder = self.takeProjectTarget() else { return }
+                        self.pickProject(folder)
+                        guard let tabs = self.projects?.active else { return }
+                        tabs.newTab(cwd: folder)
+                        tabs.activeTerminal?.typeWhenReady("claude\n")
+                    }),
             Command(id: "project.pin", title: T("Pin or Unpin the Project", "Fixar ou soltar o projeto"),
                     keywords: ["project", "pin", "unpin", "keep", "rail", "projeto", "fixar", "soltar", "trilho"], category: .tabs,
                     action: .run { [weak self] in
