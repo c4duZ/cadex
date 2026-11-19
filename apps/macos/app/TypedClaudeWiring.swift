@@ -29,11 +29,29 @@ extension AppDelegate {
             switch SessionKit.shared.typedLaunch(configDir: chosen ?? request.configDir, cwd: request.cwd,
                                                  ownerSettings: request.userSettings, arguments: request.arguments) {
             case .success(let kit):
+                self.noteTypedAccount(chosen ?? request.configDir, request: request)
                 let skip = SessionKit.skipPermissions(on: self.settings.store.settings.agents.launchSkipPermissions, typed: request.arguments)
                 return .kit(arguments: kit.arguments + skip, unset: kit.unset, pathFirst: kit.pathFirst, configDir: chosen)
             case .failure(let refusal): return .refused(refusal.reason)
             }
         }
+    }
+
+    /// A `claude` typed in the terminal the owner is looking at makes its account the one the next
+    /// `claude` and new terminals open in (the owner, 2026-11-18: ⌘D follows the last Claude). Only
+    /// from the focused terminal of the key window (any window's with none key, as a test instance
+    /// in the background): an automation's tab must not move it. A project with its own account
+    /// keeps it.
+    private func noteTypedAccount(_ dir: String, request: AgentKitRequest) {
+        let key = sessions.filter { $0.window.isKeyWindow || $0.window.isMainWindow }
+        let focused = (key.isEmpty ? sessions : key).compactMap { $0.tabs?.activeTerminal?.shellPid }.filter { $0 > 0 }
+        guard request.comesFrom(shells: focused) else { return }
+        let projectKey = SettingsBridge.tilde(AgentProject.of(request.cwd).root)
+        guard settings.store.settings.agents.projectAccounts[projectKey] == nil else { return }
+        let home = FileManager.default.homeDirectoryForCurrentUser.path + "/.claude"
+        let value = dir.isEmpty || dir == home ? "" : SettingsBridge.tilde(dir)
+        guard settings.store.settings.agents.activeAccount != value else { return }
+        settings.store.update { $0.agents.activeAccount = value }
     }
 
     /// The account of a new session in `cwd`: the project's, else the active one, else the default.

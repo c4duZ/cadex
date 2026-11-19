@@ -78,7 +78,9 @@
   seguras); espera, desliga (SIGHUP) e mata o filho. `pty_windows.zig`: ConPTY, shell (pwsh, senão
   Windows PowerShell) num Job Object; uma thread espera o processo e fecha o console, porque o
   ConPTY não fecha a saída sozinho quando o shell sai.
-- `shell_env.zig`: shell, argv de login e ambiente (TERM=xterm-256color, TERM_PROGRAM=Cadex). A
+- `shell_env.zig`: shell, argv de login e ambiente (TERM=xterm-256color, TERM_PROGRAM=Cadex; sem
+  CLAUDECODE, CLAUDE_CODE_* nem CLAUDE_CONFIG_DIR herdados, `isAgentMarker`: o que uma sessão do
+  Claude Code que abriu o app deixa não chega às abas, 2026-11-18). A
   integração do zsh (plano 22, fase C; `../../../docs/spec/terminal.md`): com o shell `zsh` e
   CADEX_ZSH_INTEGRATION=<pasta> no ambiente (o app o põe no dele ao abrir), `ZDOTDIR=<pasta>` e o
   `ZDOTDIR` que havia vai em CADEX_USER_ZDOTDIR (`zshIntegration`); bash e fish ficam como estão. Vale

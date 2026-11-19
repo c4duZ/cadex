@@ -161,7 +161,11 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
     para o mesmo par naquele terminal); fica acima da caixa de entrada do Claude;
   - o clique numa conta no cartão de uso, com um Claude de outra conta em foco (sem, abre a conta
     como antes);
-  - agents.switch-account ("Switch Account…") no ⌘K, com o uso de cada conta.
+  - agents.switch-account ("Switch Account…") no ⌘K e a conta na barra de cima, com o uso de cada
+    conta. A barra de cima mostra a conta do terminal com foco: a do Claude que roda nele, senão a
+    em que um `claude` digitado ali abre. Sem Claude no foco, a lista ("Account for the next
+    claude…") escolhe essa conta, sem encerrar nada: digitar `claude` ou abrir um terminal novo já
+    começa nela (o dono, 2026-11-18). As contas escondidas não entram na lista.
 - A conta padrão (~/.claude) vai sem pasta no comando, marcada por CADEX_ACCOUNT_CHOSEN=1 para não
   virar a do projeto ou a ativa (`terminal.md`, o `claude` digitado).
 

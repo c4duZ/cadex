@@ -46,7 +46,7 @@ pub fn sessionEnv(arena: std.mem.Allocator, parent: []const [*:0]const u8, shell
     var user_zdotdir: ?[]const u8 = null;
     for (parent) |entry| {
         const text = std.mem.span(entry);
-        if (isOwned(text)) continue;
+        if (isOwned(text) or isAgentMarker(text)) continue;
         if (valueOf(text, "CADEX_USER_ZDOTDIR") != null) continue;
         const own_zdotdir = valueOf(text, "ZDOTDIR");
         if (zsh_dir != null and own_zdotdir != null) {
@@ -86,6 +86,19 @@ pub fn zshIntegration(parent: []const [*:0]const u8, shell_path: []const u8) ?[]
 fn valueOf(entry: []const u8, name: []const u8) ?[]const u8 {
     if (entry.len <= name.len or entry[name.len] != '=' or !std.mem.startsWith(u8, entry, name)) return null;
     return entry[name.len + 1 ..];
+}
+
+/// What a Claude Code session leaves to its children (CLAUDECODE, CLAUDE_CODE_*, and the account
+/// it runs in, CLAUDE_CONFIG_DIR): a Cadex opened from a Claude Code session passed them to every
+/// tab, and a `claude` typed there saw CLAUDE_CODE_CHILD_SESSION and kept no transcript, and ran in
+/// that session's account whatever the title bar chose (the owner, 2026-11-18). A tab is a terminal
+/// of its own: the account of a typed `claude` is the app's (the kit) or the one the owner's own
+/// startup files export, which run after this.
+pub fn isAgentMarker(entry: []const u8) bool {
+    const eq = std.mem.indexOfScalar(u8, entry, '=') orelse return false;
+    const name = entry[0..eq];
+    return std.mem.eql(u8, name, "CLAUDECODE") or std.mem.eql(u8, name, "CLAUDE_CONFIG_DIR") or
+        std.mem.startsWith(u8, name, "CLAUDE_CODE_");
 }
 
 pub fn isOwned(entry: []const u8) bool {
@@ -178,4 +191,15 @@ test "bash, fish and a zsh without the integration folder are left as they are" 
     const zsh = try envList(a, try sessionEnv(a, &without, "/bin/zsh"));
     try testing.expect(has(zsh, "ZDOTDIR=/own") and !hasName(zsh, "CADEX_USER_ZDOTDIR"));
     try testing.expect(zshIntegration(&parent, "/bin/zshx") == null);
+}
+
+test "a tab never inherits a Claude Code session's marks nor its account" {
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const parent = [_][*:0]const u8{ "HOME=/Users/c", "CLAUDECODE=1", "CLAUDE_CODE_CHILD_SESSION=1", "CLAUDE_CODE_ENTRYPOINT=cli", "CLAUDE_CONFIG_DIR=/Users/c/.claude-x", "CLAUDE_CODEX=keep" };
+    const got = try envList(a, try sessionEnv(a, &parent, "/bin/bash"));
+    try testing.expect(!hasName(got, "CLAUDECODE") and !hasName(got, "CLAUDE_CODE_CHILD_SESSION") and !hasName(got, "CLAUDE_CODE_ENTRYPOINT"));
+    try testing.expect(!hasName(got, "CLAUDE_CONFIG_DIR"));
+    try testing.expect(has(got, "CLAUDE_CODEX=keep") and has(got, "HOME=/Users/c"));
 }

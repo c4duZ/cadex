@@ -56,9 +56,23 @@ public enum AgentSwitch {
     /// in a square, the name over "session 15% · week 22% · back at 16:10 · ~/.claude-bkdg", a bar
     /// and the number on the right; the one in use last, dim, with "in use".
     @MainActor
-    public static func rows(current: String?) -> [PaletteItem] {
+    /// `inSession` false (no Claude in the focused terminal): the list picks the account of the next
+    /// `claude`, the chosen one marked "chosen" and still first-class (choosing it again does nothing).
+    public static func rows(current: String?, inSession: Bool = true) -> [PaletteItem] {
         let accounts = AgentUsageController.shared.visibleAccounts().filter { $0.provider == .claude }
         let logo = PaletteItem.Tile.logo(ProviderLogo.claude.image(size: 12), ProviderLogo.claude.brandColor ?? .systemOrange)
+        guard inSession else {
+            return accounts.map { account in
+                let used = AgentSwitch.used(AgentUsage.current(of: account))
+                var item = PaletteItem(id: account.dir, title: account.name)
+                item.note = detail(account)
+                item.tile = logo
+                if account.dir == current { item.chip = T("chosen", "escolhida") }
+                item.meter = used.map { Double($0) / 100 }
+                item.meterText = used.map { "\($0)%" } ?? "—"
+                return item
+            }
+        }
         return (accounts.filter { $0.dir != current } + accounts.filter { $0.dir == current }).map { account in
             let inUse = account.dir == current
             let used = AgentSwitch.used(AgentUsage.current(of: account))

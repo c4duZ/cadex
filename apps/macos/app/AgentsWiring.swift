@@ -51,8 +51,10 @@ extension WindowSession {
     }
 
     /// The account both bars show: the focused terminal's agent's (a Claude Code session whose
-    /// process group is the terminal's, or Codex by its program's name), else the active one, else
-    /// the default; nil with none.
+    /// process group is the terminal's, or Codex by its program's name), else the one a `claude`
+    /// typed there opens in (the project's, the active one, the default: TypedClaudeWiring's
+    /// newSessionAccount; the owner picks it in the title bar and types `claude`, 2026-11-18); nil
+    /// with none.
     func shownAccountDir() -> String? {
         if let terminal = tabs?.activeTerminal, terminal.foregroundGroup > 0 {
             let group = terminal.foregroundGroup
@@ -61,9 +63,8 @@ extension WindowSession {
             proc_name(group, &name, UInt32(name.count))
             if String(cString: name) == "codex" { return NSHomeDirectory() + "/.codex" }
         }
-        let every = AgentsController.shared.everyAccount().filter { $0.provider == .claude }
-        let active = AgentUsageController.shared.activeAccount
-        return (every.first { $0.dir == active } ?? every.first { $0.isDefault })?.dir
+        let cwd = tabs?.activeTerminal?.currentDirectory ?? folder.root
+        return app.newSessionAccount(cwd: cwd)?.dir
     }
 
     /// The terminal an agent runs in: the one whose foreground process

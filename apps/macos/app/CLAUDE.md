@@ -147,7 +147,11 @@
   quem tem o shell de um terminal do app acima (`shellPid` de todos os terminais, de todas as janelas
   e projetos, e os da gaveta), pelo SessionKit.typedLaunch. Plano 33 F: sem conta na aba, a de uma
   sessão nova ali (`newSessionAccount`: a do projeto, a ativa, a padrão) vai no kit (`config_dir`);
-  com agents.launchSkipPermissions, SessionKit.skipPermissions põe a flag. O `main.swift` põe as variáveis da integração do zsh no
+  com agents.launchSkipPermissions, SessionKit.skipPermissions põe a flag. Um `claude` digitado no
+  terminal com foco faz da conta dele a ativa (`noteTypedAccount`; um projeto com conta própria a
+  mantém): o próximo terminal segue o último Claude. A conta da barra de cima é a do terminal com
+  foco (`shownAccountDir`: o Claude dele, senão a de um `claude` digitado ali); sem Claude no foco,
+  a lista dela escolhe essa conta (`chooseAccount` em `AgentsAccounts.swift`), sem encerrar nada. O `main.swift` põe as variáveis da integração do zsh no
   ambiente antes de abrir qualquer terminal (`exportTypedClaudeEnvironment`; numa instância de teste,
   também o CADEX_APP_SOCKET dela, para as abas não pedirem ao app do dono).
 - `AgentsHibernate.swift` (plano 19, fase F): os hooks guardam no terminal o que traz o agente de
@@ -338,7 +342,7 @@
   captura salva também um painel visível, como o da paleta, num arquivo terminado em -panel.png, CADEX_PERF_TYPE digita um comando no terminal com foco, CADEX_PERF_HOME_PROMPT manda o pedido da
   tela de início, CADEX_PERF_DUMP_SCREEN grava a tela de cada terminal num arquivo, CADEX_PERF_SEND manda uma mensagem ao agente
   com o Return como tecla (a marca da barra),
-  CADEX_PERF_SPLIT divide o painel, CADEX_PERF_SWITCH troca a conta do Claude em foco e CADEX_PERF_LIMIT_AT olha os avisos de limite (plano 33), CADEX_PERF_DRAG arrasta (pressiona, move em dez passos, solta) e anota a ordem das abas, CADEX_PERF_CLICK dá cliques à janela de teste ("r" antes do ponto: o clique direito, plano 36 B) (montados com a janela e entregues pelo sendEvent dela: postado no processo, o clique chegava sem janela), CADEX_PERF_HOVER move o ponteiro só dentro do app (`PerfPointer.swift`: o movimento postado no processo e entregue às views que rastreiam, sem mexer no mouse do dono), CADEX_PERF_MENU abre o menu "new" (o "+" das abas) ou "pane" (o "+" de um painel) para a captura, CADEX_PERF_SNAPSHOT_AT atrasa a captura; abrir a conversa de um subagente, abrir
+  CADEX_PERF_SPLIT divide o painel, CADEX_PERF_SWITCH escolhe a conta como a lista da barra de cima (leva o Claude em foco, ou escolhe a do próximo `claude`) e CADEX_PERF_LIMIT_AT olha os avisos de limite (plano 33), CADEX_PERF_DRAG arrasta (pressiona, move em dez passos, solta) e anota a ordem das abas, CADEX_PERF_CLICK dá cliques à janela de teste ("r" antes do ponto: o clique direito, plano 36 B) (montados com a janela e entregues pelo sendEvent dela: postado no processo, o clique chegava sem janela), CADEX_PERF_HOVER move o ponteiro só dentro do app (`PerfPointer.swift`: o movimento postado no processo e entregue às views que rastreiam, sem mexer no mouse do dono), CADEX_PERF_MENU abre o menu "new" (o "+" das abas) ou "pane" (o "+" de um painel) para a captura, CADEX_PERF_SNAPSHOT_AT atrasa a captura; abrir a conversa de um subagente, abrir
   abas, abrir e rolar a revisão da pasta com CADEX_PERF_REVIEW, abrir duas vezes o grupo das máquinas da tailnet com CADEX_PERF_MACHINES); sem a variável, nada roda.
   `RacePerfHooks.swift` (plano 24): CADEX_PERF_RACE, um JSON com uma corrida que começa sozinha sem
   folha (e, com `pickAfter`, o #1 vence e os outros são descartados), anotada em `out`; CADEX_PERF_NEW_TASK

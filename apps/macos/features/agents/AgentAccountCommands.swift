@@ -37,6 +37,9 @@ public struct AgentAccountActions {
     public var switchTo: @MainActor (AgentAccount) -> Void = { _ in }
     /// The account the focused agent runs in (the one both bars show): marked in the switch's list.
     public var current: @MainActor () -> String? = { nil }
+    /// A Claude runs in the focused terminal: the list takes it to another account; with none, the
+    /// list picks the account the next `claude` typed there opens in (the owner, 2026-11-18).
+    public var inSession: @MainActor () -> Bool = { true }
     /// The account this window's project has now, by folder.
     public var projectAccount: @MainActor () -> String? = { nil }
 
@@ -86,11 +89,16 @@ public enum AgentAccountCommands {
             Command(id: "agents.switch-account", title: T("Switch Account…", "Trocar de conta…"),
                     keywords: ["account", "switch", "limit", "continue", "conta", "trocar", "limite", "continuar", "claude"], category: .terminal,
                     action: .run {
+                        let session = actions.inSession()
                         palette.open(AgentChoiceSource(
-                            placeholder: T("Go on in another account…", "Continuar em outra conta…"), empty: T("No account in use", "Nenhuma conta em uso"),
-                            hint: T("This session ends and the work goes on in the account you choose, through the memory.",
-                                    "A sessão de agora termina e o trabalho continua na conta escolhida, pela memória."),
-                            icon: .arrowsLeftRight, items: { AgentSwitch.rows(current: actions.current()) }) { dir in
+                            placeholder: session ? T("Go on in another account…", "Continuar em outra conta…")
+                                                 : T("Account for the next claude…", "Conta do próximo claude…"),
+                            empty: T("No account in use", "Nenhuma conta em uso"),
+                            hint: session ? T("This session ends and the work goes on in the account you choose, through the memory.",
+                                              "A sessão de agora termina e o trabalho continua na conta escolhida, pela memória.")
+                                          : T("Type claude here, or open a new terminal, and it starts in the account you choose.",
+                                              "Digite claude aqui, ou abra um terminal novo, e ele começa na conta escolhida."),
+                            icon: .arrowsLeftRight, items: { AgentSwitch.rows(current: actions.current(), inSession: session) }) { dir in
                             if let account = agents.everyAccount().first(where: { $0.dir == dir }) { actions.switchTo(account) }
                         })
                     }),

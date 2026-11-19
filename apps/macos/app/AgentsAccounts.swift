@@ -27,8 +27,9 @@ extension WindowSession {
                 return self.settings.store.settings.agents.projectAccounts[SettingsBridge.tilde(self.projectRoot)].map(SettingsBridge.expand)
             })
         actions.rename = { [weak self] account in self?.renameAccount(account) }
-        actions.switchTo = { [weak self] account in self?.switchOrLaunch(account) }
+        actions.switchTo = { [weak self] account in self?.chooseAccount(account) }
         actions.current = { [weak self] in self?.shownAccountDir() }
+        actions.inSession = { [weak self] in self?.tabs?.activeTerminal.flatMap { self?.claudeAccount(in: $0) } != nil }
         return actions
     }
 
@@ -74,6 +75,23 @@ extension WindowSession {
                 self.tell(T("Could not make the account", "Não deu para criar a conta"), error.localizedDescription)
             }
         }
+    }
+
+    /// The title bar's list (agents.switch-account): with a Claude in the focused terminal, it goes
+    /// on in `account`; with none, `account` is the one the next `claude` opens in, here and in new
+    /// terminals (the owner, 2026-11-18: pick it on top, type `claude`). A project with its own
+    /// account takes the choice there, or the project's would still win.
+    func chooseAccount(_ account: AgentAccount) {
+        if let terminal = tabs?.activeTerminal, claudeAccount(in: terminal) != nil { return switchOrLaunch(account) }
+        let cwd = tabs?.activeTerminal?.currentDirectory ?? folder.root
+        let key = SettingsBridge.tilde(AgentProject.of(cwd).root)
+        if settings.store.settings.agents.projectAccounts[key] != nil {
+            settings.store.update { $0.agents.projectAccounts[key] = SettingsBridge.tilde(account.dir) }
+        } else {
+            setActiveAccount(account)
+        }
+        refreshTitleAccount()
+        showFocusedAccount()
     }
 
     /// agents.set-active-account and "Use for New Sessions": the default

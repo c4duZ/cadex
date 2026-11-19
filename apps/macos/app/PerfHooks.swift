@@ -106,7 +106,8 @@ extension WindowSession {
             let at = environment["CADEX_PERF_SWITCH_AT"].flatMap(Double.init) ?? 25
             DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in
                 guard let account = AgentsController.shared.everyAccount().first(where: { $0.dir == dir }) else { return NSLog("Cadex script: no account %@", dir) }
-                self?.switchOrLaunch(account)
+                // As the title bar's list: a focused Claude goes on there; a shell picks the next one's.
+                self?.chooseAccount(account)
             }
         }
         if let at = environment["CADEX_PERF_LIMIT_AT"].flatMap(Double.init) {
