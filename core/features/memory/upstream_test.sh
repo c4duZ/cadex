@@ -1,6 +1,8 @@
 #!/bin/bash
 # Upstream ai-memory's own tests for the crates cadex-memory uses, at the commit
 # pinned in server/Cargo.toml (`make memory-upstream-test`, docs/adr/0028-project-memory.md).
+# ai-memory-web too: only a dev-dependency (the reference panel, plan 40), but
+# the native panel is checked against it, so its own suite must pass at the pin.
 # Meant for the PC (Linux x86_64, 12 cores; the `pc` host of roda-no-pc): ~16 min,
 # too slow for `make check` (measured 2026-11-15: 4,804 tests, 15 min 54 s).
 # The Makefile sends this script over ssh with the commit as $1: mirroring the
@@ -31,4 +33,5 @@ cd "$SRC"
 trap 'rm -rf "$SRC/target"' EXIT
 time cargo test --locked --quiet \
     -p ai-memory-core -p ai-memory-store -p ai-memory-wiki -p ai-memory-consolidate \
-    -p ai-memory-hooks -p ai-memory-mcp -p ai-memory-llm -p ai-memory-workstream
+    -p ai-memory-hooks -p ai-memory-mcp -p ai-memory-llm -p ai-memory-workstream \
+    -p ai-memory-web

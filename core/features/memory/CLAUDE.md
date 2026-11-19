@@ -409,11 +409,29 @@
   no binário) sobre a cópia de uma pasta da memória, em 127.0.0.1, com quem olha como o dono (root);
   `cargo run --example web_reference -- <cópia> [porta]`. Nunca sobre a pasta de verdade: o crate
   migra o banco ao abrir.
+- A memória falsa e a paridade com o painel do upstream (plano 40 A2):
+  - `server/tests/panel/seed.rs` e `server/tests/panel/seed_queues.rs`: o seed, só pelas gravações do
+    upstream (writer do Store, `Wiki::write_page`, `send_agent_message`, workstream, auto-improve),
+    como a suíte do ai-memory-web semeia: workspace `default` com `cadex` (4 sessões, 1 aberta, 15
+    eventos, 5 páginas, uma com 2 versões, links, páginas de regra e de slot, handoff, 3 mensagens com 2
+    na fila, um workstream, 2 propostas), `site` (1 sessão, página com link para o `cadex`, 1
+    proposta), `_global` (1 página) e `empty`. Ids e `occurred_at` fixos; o que o upstream carimba
+    com "agora" (versões, fim de sessão, mensagens) varia, então os testes comparam contagens e ordem.
+    `cargo run --example panel_seed -- <pasta vazia>` (`server/examples/panel_seed.rs`) escreve o
+    mesmo seed para os prints e os testes do app.
+  - `server/tests/panel/mod.rs`: o painel do upstream montado como no `web_reference` e as listas
+    de rotas GET do inventário (`../../../docs/research/memory-panel-screens.md`);
+    `server/tests/panel/html.rs`: tirar números, listas e atributos do HTML dele (texto, pedaços por
+    marcador, `<strong>`, `data-*`), para a fase B comparar com o nosso JSON;
+    `server/tests/panel/snapshot.rs`: o hash de cada arquivo da pasta (menos `-shm`, as marcas de
+    leitura do SQLite), tirado com o store fechado pelo `Store::close` (fila drenada e WAL no arquivo
+    principal); o ponto de partida é abrir e fechar sem pedido até nada mudar (o `PRAGMA optimize`
+    do `Store::open` acrescenta uma linha de `sqlite_stat1` na segunda abertura).
 
 ## Como validar
 - `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs`,
   `server/tests/import.rs`, `server/tests/auto_memory.rs`, `server/tests/marker.rs`,
-  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs`, `server/tests/agent.rs`, `server/tests/agent_audit.rs`, `server/tests/agent_guard.rs`, `server/tests/memory_page.rs`, `server/tests/memory_off.rs` e `server/tests/session_end.rs` (parte do `make check`, em segundos).
+  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs`, `server/tests/agent.rs`, `server/tests/agent_audit.rs`, `server/tests/agent_guard.rs`, `server/tests/memory_page.rs`, `server/tests/memory_off.rs`, `server/tests/session_end.rs` e `server/tests/panel_parity.rs` (o painel do upstream sobre o seed: toda tela e rota `/api/v1` responde 200 com os números do seed, e ler tudo deixa a pasta igual byte a byte) (parte do `make check`, em segundos).
 - `make memory-eval MODELS=<pasta>`: as 30 perguntas, só texto contra híbrida (`../../../tools/memory_eval.py`).
 - `make core-test`: os testes do cliente (eventos, query com e sem workspace, fila, respostas HTTP,
   sem token, a sessão pausada que não manda nem enfileira nada).
@@ -424,8 +442,8 @@
 - Teste que falha: `CADEX_TEST_ENGINE_LOG=info` no `cargo test` põe o log do engine na saída do
   teste (`server/tests/common/mod.rs`; padrão `warn`). Para pegar corrida, rodar os binários de
   `server/target/debug/deps/` várias vezes em paralelo, sem compilar de novo.
-- `make memory-upstream-test` (`upstream_test.sh`): a suíte do upstream para os crates usados, no
-  PC; a cada atualização do upstream.
+- `make memory-upstream-test` (`upstream_test.sh`): a suíte do upstream para os crates usados e
+  para o ai-memory-web (a referência do painel), no PC; a cada atualização do upstream.
 - `make package`: o binário universal assinado, cada fatia respondendo, sem provedor.
 - `make perf` (`../../../tools/perf/plan22.py`): o engine do pacote parado com sessão (até 25 MB, CPU
   zero), com o modelo (pico até 400 MB) e de volta ao parado depois do reinício sozinho, e uma wiki
