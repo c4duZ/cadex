@@ -44,10 +44,14 @@ o que o clique faz). O dono aprovou em 2026-11-19 ("pode fazer").
   pedido falso (CADEX_PERF_REQUEST): a fila no topo e a pílula com a barra fechada. A marca da borda
   só no teste (falta um agente de verdade esperando num projeto fora da vista). O "N need you" da
   barra de baixo sai na F.
-- [ ] D. A vista Arquivos: o seletor "Trabalho | Arquivos" (⇧⌘1, ⇧⌘2), a árvore do lugar (o
+- [x] D. A vista Arquivos: o seletor "Trabalho | Arquivos" (⇧⌘1, ⇧⌘2), a árvore do lugar (o
   explorer de hoje) com o cabeçalho em palavras, e "N mudanças · ver" mostrando Mudanças na própria
   barra (o painel do git de hoje, com Commit e Abrir PR); ⇧⌘G e o branch da barra de baixo abrem
   Mudanças; Esc volta.
+  Feito: o cabeçalho, a árvore (o explorer com a linha dele de ações) e "N mudanças · ver", que mostra
+  Mudanças na barra (Commit forte quando há o que commitar, do plano 37). Conferido no app num
+  repositório com dois arquivos mudados: o cabeçalho, a contagem e o clique abrindo Mudanças. Para
+  voltar, o clique em Arquivos no seletor (o Esc não volta ainda: ele é do terminal com foco).
 - [ ] E. A barra de cima: o botão da barra lateral na borda de entrada, o lugar ("projeto › tarefa
   ▾" com o menu: trocar de projeto ou tarefa com busca, voltar ao main, a página do projeto), as abas
   do lugar, "» N", "+", Revisar só numa tarefa e Buscar ⌘K no fim; saem a conta, o quadro, o sino e a

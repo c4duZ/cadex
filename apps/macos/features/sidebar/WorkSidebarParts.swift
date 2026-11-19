@@ -217,3 +217,97 @@ final class WorkEdge: NSView {
         onPress?()
     }
 }
+
+/// Files' head (components.workSidebar.files.head): the place's name and, under it, what it is.
+@MainActor
+final class WorkFilesHead: NSView {
+    typealias H = DesignTokens.WorkSidebar.Files.Head
+    private let title = NSTextField(labelWithString: "")
+    private let detail = NSTextField(labelWithString: "")
+
+    init() {
+        super.init(frame: .zero)
+        title.font = UILooks.font(H.fontSize, weight: H.weight)
+        title.textColor = DesignTokens.Color.textPrimary
+        detail.font = UILooks.font(H.Detail.fontSize)
+        detail.textColor = H.Detail.color
+        for label in [title, detail] {
+            label.lineBreakMode = .byTruncatingMiddle
+            label.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(label)
+        }
+        NSLayoutConstraint.activate([
+            title.topAnchor.constraint(equalTo: topAnchor),
+            title.leadingAnchor.constraint(equalTo: leadingAnchor, constant: UILooks.pt(H.padding.left)),
+            title.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -UILooks.pt(H.padding.right)),
+            detail.topAnchor.constraint(equalTo: title.bottomAnchor),
+            detail.leadingAnchor.constraint(equalTo: title.leadingAnchor),
+            detail.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -UILooks.pt(H.padding.right)),
+            detail.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -UILooks.pt(H.padding.bottom)),
+        ])
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("WorkFilesHead is created in code") }
+
+    func say(_ name: String, _ what: String) {
+        title.stringValue = name
+        detail.stringValue = what
+        toolTip = name + " · " + what
+    }
+
+    var said: String { title.stringValue + " · " + detail.stringValue }
+}
+
+/// "N changes · see" (components.workSidebar.changes): Changes, discreet, at the end of the tree.
+@MainActor
+final class WorkChangesLine: NSView {
+    typealias C = DesignTokens.WorkSidebar.Changes
+    var onPress: (() -> Void)?
+    private let words = NSTextField(labelWithString: "")
+
+    init() {
+        super.init(frame: .zero)
+        wantsLayer = true
+        layer?.borderColor = C.border.cgColor
+        layer?.borderWidth = DesignTokens.Stroke.hairline
+        layer?.cornerRadius = UILooks.pt(C.radius)
+        words.font = UILooks.font(C.fontSize)
+        words.textColor = C.color
+        let see = NSTextField(labelWithString: T("see", "ver"))
+        see.font = UILooks.font(C.fontSize, weight: C.Link.weight)
+        see.textColor = C.Link.color
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.init(1), for: .horizontal)
+        let stack = NSStackView(views: [words, spacer, see])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(stack)
+        NSLayoutConstraint.activate([
+            heightAnchor.constraint(equalToConstant: UILooks.rowHeight(C.height)),
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: UILooks.pt(C.padding.left)),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -UILooks.pt(C.padding.right)),
+            stack.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
+        setAccessibilityRole(.button)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("WorkChangesLine is created in code") }
+
+    func say(_ count: Int) {
+        words.stringValue = count == 1 ? T("1 change", "1 mudança") : T("\(count) changes", "\(count) mudanças")
+        setAccessibilityLabel(words.stringValue)
+    }
+
+    var said: String { words.stringValue }
+
+    override var mouseDownCanMoveWindow: Bool { false }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+    override func hitTest(_ point: NSPoint) -> NSView? { frame.contains(point) ? self : nil }
+    override func resetCursorRects() { addCursorRect(bounds, cursor: .pointingHand) }
+    override func mouseDown(with event: NSEvent) {}
+    override func mouseUp(with event: NSEvent) {
+        guard bounds.contains(convert(event.locationInWindow, from: nil)) else { return }
+        onPress?()
+    }
+}

@@ -34,11 +34,11 @@ let workChecks: [(name: String, body: Checks.Body)] = [
         view.onMode = { modes.append($0) }
         let files = NSView()
         view.setFiles(files)
-        expect(view.mode == .work && files.isHidden)
+        expect(view.mode == .work && !view.filesShown)
         view.setMode(.files)
-        expect(view.mode == .files && !files.isHidden)
+        expect(view.mode == .files && view.filesShown)
         view.setMode(.work)
-        expect(files.isHidden)
+        expect(!view.filesShown)
     }),
     ("the needs-you queue shows only with requests; a waiting project out of sight puts its name on the edge", {
         var picked: [String] = []
@@ -59,5 +59,19 @@ let workChecks: [(name: String, body: Checks.Body)] = [
         view.layoutSubtreeIfNeeded()
         view.updateEdge()
         expect(view.edgeSaid.hasPrefix("▼ bhband-site"), "\(view.edgeSaid)")
+    }),
+    ("Files: the head in words, \"N changes · see\" at the end, hidden with none or while Changes shows", {
+        var shown = 0
+        let view = WorkSidebarView { _ in }
+        view.onShowChanges = { shown += 1 }
+        view.setFiles(NSView())
+        view.setFilesHead(title: "kite-fix", detail: "task of cadex · against main")
+        expect(view.filesHeadSaid == "kite-fix · task of cadex · against main")
+        view.setChanges(count: 3, showingChanges: false)
+        expect(view.changesSaid == "3 changes")
+        view.setChanges(count: 0, showingChanges: false)
+        expect(view.changesSaid.isEmpty, "none: no line")
+        view.setChanges(count: 2, showingChanges: true)
+        expect(view.changesSaid.isEmpty, "while Changes shows: no line")
     }),
 ]

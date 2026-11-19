@@ -68,6 +68,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// The work's tree: the tasks of each project, listed by git off the main thread, and the
     /// worktrees' watch (TreeWiring.swift).
     var treeTasks: [String: [TaskWorktree]] = [:]
+    /// The files with a change (the git marks), for Files' "N changes · see" (plan 38 phase D).
+    var changedFiles = 0
     /// Each project's branch, read with its tasks (not on every redraw: review of 2026-11-17).
     var treeBranches: [String: String] = [:]
     var treeWatch: UUID?
@@ -228,7 +230,11 @@ final class WindowSession: NSObject, NSWindowDelegate {
         git.onOpenFile = { [weak opener] path, beside in opener?.open(path, beside: beside) }
         wireChanges(git)
         git.onOpenDiff = { [weak opener] request, beside in opener?.openDiff(request, beside: beside) }
-        git.onMarks = { [weak explorer] marks in explorer?.gitMarks = marks }
+        git.onMarks = { [weak self, weak explorer] marks in
+            explorer?.gitMarks = marks
+            self?.changedFiles = marks.count
+            self?.showChangesLine()
+        }
         startPageKeys()
         startPerfHooks()
     }

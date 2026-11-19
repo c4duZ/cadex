@@ -36,7 +36,10 @@
   ele). `WorkQueue.swift` (fase C): a fila "Precisa de você" (`WorkRequest`, `WorkQueueView`: o
   cartão âmbar com o número, cada pedido com quem pede, há quanto tempo e o pedido em frase; o clique
   diz qual); a barra lateral a mostra no topo em toda vista (`showQueue`, `onPickRequest`,
-  `queueAnchor`). Tokens: components.workSidebar.
+  `queueAnchor`). Fase D: a vista Arquivos tem o cabeçalho em palavras (`setFilesHead`,
+  `WorkFilesHead`), a vista do app no meio e, no fim, "N mudanças · ver" (`setChanges`,
+  `WorkChangesLine`; some sem mudança ou com Mudanças à vista; o clique, `onShowChanges`). Tokens:
+  components.workSidebar.
 - `Rail.swift`: o modelo puro do trilho (`RailProject`: a pasta, o nome, a cor, o estado e se tem
   terminal aberto; `mark`, a letra até haver imagem; `badge`, o estado que se mostra) e `RailFoot`.
   `RailView.swift`: a porta de entrada; `show` recebe os projetos e o escolhido e redesenha só quando

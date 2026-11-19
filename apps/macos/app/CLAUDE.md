@@ -114,6 +114,10 @@
   lugar do trilho, com a coluna (Files e Changes) dentro dela como a vista Arquivos; sidebar.show-work
   (⇧⌘1) e sidebar.show-files (⇧⌘2); Sessions, Memory e o grafo saíram da coluna: memory.show e
   project.sessions-column abrem a página do projeto, git.show-history abre o histórico numa aba.
+- Plano 38 fase D: `InspectorWiring.swift` dá o cabeçalho de Arquivos (`showFilesHead`: a tarefa
+  "tarefa de X · contra base", o main o nome e o caminho) e a linha de mudanças (`showChangesLine`,
+  a contagem pelas marcas do git, WindowSession.changedFiles); o clique na linha roda git.show, que
+  mostra Mudanças na barra.
 - `NeedsQueueWiring.swift` (plano 38 fase C): a fila da barra lateral com os pedidos abertos
   (AgentAttention.cards, o que o sino listava; `askWords` diz o pedido em frase), redesenhada a cada
   mudança da atenção e quando a barra abre ou fecha (`drawQueue`); com a barra fechada, a pílula da

@@ -18,6 +18,8 @@ public final class WorkSidebarView: NSView {
     public var menuFor: ((String) -> [MenuEntry])?
     /// A request of the queue clicked: its id (the app goes to its terminal).
     public var onPickRequest: ((String) -> Void)?
+    /// "N changes · see" clicked, at the end of Files: the app shows Changes there.
+    public var onShowChanges: (() -> Void)?
     /// A project dragged to a new place: its folder and the projects' folders in the new order.
     public var onMove: ((String, [String]) -> Void)?
     /// The switch was clicked: the app shows that view (and runs what goes with it).
@@ -36,6 +38,10 @@ public final class WorkSidebarView: NSView {
     private let list = NSStackView()
     private let scroll = NSScrollView()
     private var files: NSView?
+    /// Files' parts: the head in words, the host (the app's Files and Changes), the changes line.
+    private let filesStack = NSStackView()
+    private let filesHead = WorkFilesHead()
+    private let changesLine = WorkChangesLine()
     private let foot = NSStackView()
     private var machines = NSView()
     private var shown: (projects: [WorkProject], place: String?)?
@@ -192,19 +198,41 @@ public final class WorkSidebarView: NSView {
         updateEdge()
     }
 
-    /// The Files view (the explorer and Changes, with their header and foot), held for the Files mode.
+    /// The Files view (the explorer and Changes, with their header and foot), held for the Files
+    /// mode, under the head in words and over the changes line (plan 38 phase D).
     public func setFiles(_ view: NSView) {
         files?.removeFromSuperview()
-        files = view
-        view.translatesAutoresizingMaskIntoConstraints = false
-        content.addSubview(view)
+        filesStack.removeFromSuperview()
+        files = filesStack
+        filesStack.orientation = .vertical
+        filesStack.alignment = .leading
+        filesStack.spacing = 0
+        filesStack.setViews([filesHead, view, changesLine], in: .top)
+        for part in [filesHead, view, changesLine] as [NSView] {
+            part.widthAnchor.constraint(equalTo: filesStack.widthAnchor).isActive = true
+        }
+        view.setContentHuggingPriority(.init(1), for: .vertical)
+        filesStack.setCustomSpacing(UILooks.pt(W.Changes.marginTop), after: view)
+        changesLine.isHidden = true
+        changesLine.onPress = { [weak self] in self?.onShowChanges?() }
+        filesStack.translatesAutoresizingMaskIntoConstraints = false
+        content.addSubview(filesStack)
         NSLayoutConstraint.activate([
-            view.topAnchor.constraint(equalTo: content.topAnchor),
-            view.leadingAnchor.constraint(equalTo: content.leadingAnchor),
-            view.trailingAnchor.constraint(equalTo: content.trailingAnchor),
-            view.bottomAnchor.constraint(equalTo: content.bottomAnchor),
+            filesStack.topAnchor.constraint(equalTo: content.topAnchor),
+            filesStack.leadingAnchor.constraint(equalTo: content.leadingAnchor),
+            filesStack.trailingAnchor.constraint(equalTo: content.trailingAnchor),
+            filesStack.bottomAnchor.constraint(equalTo: content.bottomAnchor),
         ])
-        view.isHidden = mode != .files
+        filesStack.isHidden = mode != .files
+    }
+
+    /// Files' head: where it is, in words ("kite-fix", "task of cadex · against main").
+    public func setFilesHead(title: String, detail: String) { filesHead.say(title, detail) }
+
+    /// "N changes · see" at the end of the tree; none with no change or while Changes shows.
+    public func setChanges(count: Int, showingChanges: Bool) {
+        changesLine.say(count)
+        changesLine.isHidden = count == 0 || showingChanges
     }
 
     /// The needs-you queue on top (plan 38 phase C), in every view; none hides it.
@@ -275,6 +303,9 @@ public final class WorkSidebarView: NSView {
         if let kids = view as? WorkChildren { return kids.rows.map(\.title) }
         return []
     } }
+    var filesShown: Bool { !filesStack.isHidden && filesStack.superview != nil }
+    var filesHeadSaid: String { filesHead.said }
+    var changesSaid: String { changesLine.isHidden ? "" : changesLine.said }
     var edgeSaid: String { edge.isHidden ? "" : edge.said }
     var litTitle: String? { list.arrangedSubviews.compactMap { $0 as? WorkChildren }.flatMap(\.rows).first(where: \.selected)?.title }
     func press(_ title: String) { (list.arrangedSubviews.compactMap { $0 as? WorkRow } + list.arrangedSubviews.compactMap { $0 as? WorkChildren }.flatMap(\.rows)).first { $0.title == title }?.onPress?() }

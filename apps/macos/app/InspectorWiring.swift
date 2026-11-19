@@ -43,6 +43,7 @@ extension WindowSession {
         // The pages' icons are the rail's (ADR 0038, revised 2026-11-18): none on top of the column.
         let inspector = InspectorView(tabs: tabs, shortcut: shortcut, tabsOnTop: false) { [weak self] id in _ = self?.commands.run(id) }
         inspector.onShow = { [weak self] id in
+            self?.showChangesLine()
             if id == "history" { self?.showHistoryTab() }
             self?.workspace?.syncRailPages()
             if id == "sessions" { self?.showSessionsColumn() }
@@ -103,6 +104,7 @@ extension WindowSession {
     func showPanelFolder(_ root: String) {
         guard let inspector = workspace?.inspector else { return }
         let name = Self.folderName(root)
+        showFilesHead(root)
         let place = ((root as NSString).deletingLastPathComponent as NSString).lastPathComponent + "/" + name
         // The name alone, as the proposal's Files: "name · parent/name" repeated it, cut (2026-11-18).
         inspector.setScope(InspectorScope(name, tip: root), for: "files")
@@ -219,4 +221,25 @@ extension WindowSession {
         ])
     }
 
+
+    /// Files' head in words (plan 38 phase D): a task says whose and against what ("task of cadex ·
+    /// against main"), a project's main its branch, a folder outside git where it is.
+    func showFilesHead(_ root: String) {
+        guard let sidebar = workspace?.sidebar else { return }
+        let home = NSHomeDirectory()
+        let path = root.hasPrefix(home) ? "~" + root.dropFirst(home.count) : root
+        if let task = WorktreesController.shared.store.task(root) {
+            let project = TitleBarView.location(of: root).project
+            let base = task.base.isEmpty ? "" : T(" · against \(task.base)", " · contra \(task.base)")
+            return sidebar.setFilesHead(title: Self.folderName(root), detail: T("task of \(project)", "tarefa de \(project)") + base)
+        }
+        let name = projects?.projects.first { $0.folder == root }?.name ?? Self.folderName(root)
+        sidebar.setFilesHead(title: name, detail: String(path))
+    }
+
+    /// "N changes · see" at the end of Files, hidden while Changes shows.
+    func showChangesLine() {
+        guard let workspace else { return }
+        workspace.sidebar.setChanges(count: changedFiles, showingChanges: workspace.inspector.tab == "changes")
+    }
 }
