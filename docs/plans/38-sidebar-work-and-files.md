@@ -19,7 +19,7 @@ o que o clique faz). O dono aprovou em 2026-11-19 ("pode fazer").
 
 ## Como eu quero
 - [ ] A. Os tokens e o mockup: a barra lateral, a fila, o seletor de vistas, as linhas da lista, o
-  lugar em cima e o botão Revisar no `docs/design/work-frame/tokens.json` e num mockup `.dc.html`
+  lugar em cima e o botão Revisar no `docs/design/work-frame/tokens.json` e num mockup .dc.html
   tirado da referência; `tools/check_design_tokens.py` passando.
 - [ ] B. A barra lateral, vista Trabalho: a lista de projetos (avatar, nome, estado e terminais;
   aberto, o main e as tarefas com o fio guia; o aberto ou fechado guardado; o clique no nome ao
