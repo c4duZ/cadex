@@ -103,6 +103,12 @@ caminhos deste repositório.
 - [ ] G. O auto-improve com proteção: recusar a proposta que cita caminhos ou tabelas que não
   existem no repositório do projeto; rodar o backfill do Center com `require_approval = true`.
   Conforme o estudo, isso pode ser configuração do upstream e não código nosso.
+  Feito antes (2026-11-19, com o aval do dono): no banco do dono, a marca d'água do `bkdg-center` e
+  do `cadex` foi para o fim do histórico importado (a sessão mais nova terminada antes de a marca
+  nascer), com cópia em memory.sqlite.before-plan35 ao lado; o `cadu` (a pasta pessoal) segue em 0.
+  As quatro páginas de competências já tinham saído em 18/11 (a sessão do Center); as três que o
+  auto-improve escreveu depois (o Suporte do admin, o disco do Postgres de dev, a migration 0259)
+  são do Center e ficam.
 - [ ] H. Na tela (com o plano 34): o resumo de uma sessão mostra o briefing que ela recebeu; as
   sessões vazias não aparecem; o painel Memory diz "o próximo agente vai receber" quando mostra o
   briefing de agora.
