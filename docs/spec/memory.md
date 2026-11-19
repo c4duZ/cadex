@@ -43,6 +43,9 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
 - Numa tela (plano 32 D): a página Settings do projeto (ao lado de Overview) mostra as chaves que o
   Cadex lê, com palavras simples, e grava na hora só essas, deixando comentários e o resto do
   arquivo. Os padrões de todos os projetos ficam em Configurações › Memória.
+- A tela tem quatro grupos, na ordem de uso: Memória (o briefing, o tamanho, nos subagentes, o
+  handoff, retomar), Busca e perfil, Não gravado (as sessões dos subagentes e os arquivos) e O
+  arquivo (onde fica, o nome na memória, o espaço); cada linha diz no máximo uma frase curta.
 - Onde o arquivo fica, escolhido na mesma tela: "No repositório (faça commit)", o padrão, como o
   ai-memory recomenda (todo checkout e o time seguem igual), ou "Só neste Mac": a linha
   `/.ai-memory.toml` no `info/exclude` do diretório comum do git (o de uma worktree leva a ele);

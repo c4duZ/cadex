@@ -98,7 +98,7 @@ extension WindowSession {
         let column = NSStackView(views: blocks)
         column.orientation = .vertical
         column.alignment = .leading
-        column.spacing = UILooks.pt(DesignTokens.Project.Columns.gap)
+        column.spacing = UILooks.pt(DesignTokens.Project.Group.sectionGap)
         // Each block as wide as the page: without it the memory's form kept its smallest width, a
         // narrow strip as if still in a side panel (the owner, 2026-11-18).
         for block in blocks { block.widthAnchor.constraint(equalTo: column.widthAnchor).isActive = true }
@@ -108,7 +108,7 @@ extension WindowSession {
     /// How the project shows in the rail, on top of its Settings: Edit Name and Image… and pinned.
     func projectLook(_ folder: String) -> NSView {
         let name = projects?.projects.first { $0.folder == folder }?.name ?? (folder as NSString).lastPathComponent
-        return ProjectSettingsLook(picture: projectPicture(folder), name: name, pinned: projects?.isPinned(folder) ?? false,
+        return ProjectSettingsLook(picture: projectPicture(folder), name: name, folder: folder, pinned: projects?.isPinned(folder) ?? false,
                                    edit: { [weak self] in self?.projectTarget = folder; _ = self?.commands.run("project.edit") },
                                    pinned: { [weak self] on in
                                        guard let self, let projects = self.projects, projects.isPinned(folder) != on else { return }

@@ -21,7 +21,11 @@
   `CustomizePageView.swift`: a lista dentro de outra vista, as seções Barra de status e Agentes e
   contas da janela de configurações (plano 32 B; a janela Personalizar, com abas, saiu: o dono quis
   tudo nas configurações, 2026-11-18). Cada mudança vai na hora para o `onChange`; `refresh` mostra o
-  que mudou por fora. `ThemeSwitch.swift`: a chave do app, pública, a mesma das configurações.
+  que mudou por fora. `ThemeSwitch.swift`: a chave do app, pública, a mesma das configurações. `SettingGroup.swift` (2026-11-19, o
+  dono: explicação demais, sem hierarquia, espaçamento desigual): a seção como nos ajustes do macOS, o
+  rótulo e uma caixa só com as linhas e um fio entre elas, o mesmo respiro em toda linha e o mesmo
+  espaço entre seções (components.project.group); a linha é o nome, no máximo uma linha curta e o
+  controle à direita. As Settings do projeto (projects) e o formulário da memória (memory) usam.
 
 ## Como validar
 - `make macos-test` passa: seções, mover entre seções, chave, a vaga, o arrastar com eventos de

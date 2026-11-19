@@ -64,9 +64,11 @@
   antes (sem "pinned") volta tudo fixado. O seletor ⇧⌘S mostra a imagem e o emoji. `arrange`
   (plano 36 E): a ordem arrastada no trilho, o mostrado continua o mostrado, acima da linha fixa
   (um vazio nunca se solta por arrasto).
-- `ProjectSettingsLook.swift` (plano 36 E): o topo das Settings do projeto, como ele aparece no
-  trilho (a prévia, o nome, Edit Name and Image… e a caixa de fixado). A página Projects não edita
-  nada (ADR 0038); a página do projeto tem Open terminal (ProjectPageActions.openTerminal).
+- `ProjectSettingsLook.swift` (plano 36 E; refeito em 2026-11-19): o topo das Settings do projeto,
+  a imagem, o nome e a pasta com Editar… ao lado (project.edit), e a seção Barra lateral com Fixado
+  (project.pin), nas peças de `../../shared/customize/SettingGroup.swift`; a página não tem título
+  nem explicação próprios. A página Projects não edita nada (ADR 0038); a página do projeto tem Open
+  terminal (ProjectPageActions.openTerminal).
 - `ProjectsFile.swift`: o JSON em Application Support/Cadex/projects.json (gravação atômica), com os
   projetos (nome, pasta, abas, cor, imagem, emoji, fixado), o ativo, a pasta do workspace e os recentes; uma lista vazia
   (a tela de início) é um arquivo bom. Arquivo ilegível vai para

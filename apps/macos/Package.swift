@@ -289,7 +289,7 @@ let package = Package(
         ),
         .target(
             name: "Projects",
-            dependencies: ["CommandPalette", "Tabs", "Icons", "Menus", "Strings", "StateGlyph", "UILooks"],
+            dependencies: ["CommandPalette", "Tabs", "Icons", "Menus", "Strings", "StateGlyph", "UILooks", "Customize"],
             path: "features/projects",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))],

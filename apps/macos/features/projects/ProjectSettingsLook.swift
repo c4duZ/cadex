@@ -1,37 +1,42 @@
 import AppKit
+import Customize
 import Strings
 import UILooks
 
-/// The top of the project's Settings (plan 36 phase E; docs/adr/0038-rail-and-side-column.md): how
-/// it shows in the rail, the picture and the name with "Edit Name and Image…", and whether it stays
-/// there with no terminal (pinned). The Projects page edits nothing; this, the rail's right click
-/// and ⌘K do. The app runs each change by its command.
+/// The top of the project's Settings (plan 36 phase E; redone 2026-11-19, the owner: "a hierarquia
+/// visual não tá boa", too much explaining): the project as the sidebar shows it, picture, name and
+/// folder with Edit… beside them, then the Sidebar section with Pinned. The app runs each change by
+/// its command (project.edit, project.pin).
 @MainActor
 public final class ProjectSettingsLook: NSView {
-    private let pin: NSButton
-    private let pinned: (Bool) -> Void
+    private let pin: ThemeSwitch
 
-    public init(picture: ProjectPicture?, name: String, pinned isPinned: Bool,
+    public init(picture: ProjectPicture?, name: String, folder: String = "", pinned isPinned: Bool,
                 edit: @escaping () -> Void, pinned: @escaping (Bool) -> Void) {
-        self.pinned = pinned
-        pin = NSButton(checkboxWithTitle: T("Keep in the sidebar with no terminal open (pinned)",
-                                            "Manter na barra lateral sem terminal aberto (fixado)"), target: nil, action: nil)
+        pin = ThemeSwitch(on: isPinned, accent: DesignTokens.Project.Toggle.on, off: DesignTokens.Project.Toggle.off, label: "")
         super.init(frame: .zero)
-        pin.state = isPinned ? .on : .off
-        pin.target = self
-        pin.action = #selector(pinChanged)
+        pin.onChange = pinned
+        typealias P = DesignTokens.Project
         let preview = ProjectPreview.of(picture ?? ProjectPicture(), name: name)
-        let title = FrameField.text(name, color: DesignTokens.Color.textPrimary)
-        let button = DesignButton.make(T("Edit Name and Image…", "Editar nome e imagem…"), .secondary) { edit() }
-        let row = NSStackView(views: [preview, title, button])
-        row.alignment = .centerY
-        row.spacing = UILooks.pt(DesignTokens.Project.Head.gap)
-        let column = FrameField.column([FrameField.label(T("In the sidebar", "Na barra lateral")), row, FrameField.check(pin)],
-                                       gap: DesignTokens.Project.Columns.listGap)
+        let title = FrameField.text(name, size: P.Title.fontSize, color: DesignTokens.Color.textPrimary, weight: P.Title.weight)
+        var words: [NSView] = [title]
+        if !folder.isEmpty { words.append(FrameField.text((folder as NSString).abbreviatingWithTildeInPath, color: P.Head.meta)) }
+        let names = FrameField.column(words, gap: P.Head.titleGap)
+        names.setHuggingPriority(.init(1), for: .horizontal)
+        let button = DesignButton.make(T("Edit…", "Editar…"), .secondary) { edit() }
+        button.toolTip = T("Name, image and color", "Nome, imagem e cor")
+        let head = NSStackView(views: [preview, names, button])
+        head.alignment = .centerY
+        head.spacing = UILooks.pt(P.Head.gap)
+        let sidebar = SettingGroup.section(T("Sidebar", "Barra lateral"), [
+            SettingGroup.row(T("Pinned", "Fixado"), T("Stays in the sidebar with no terminal open.", "Fica na barra lateral sem terminal aberto."), pin),
+        ])
+        let column = FrameField.column([head, sidebar], gap: P.Group.sectionGap)
+        for view in [head, sidebar] { view.widthAnchor.constraint(equalTo: column.widthAnchor).isActive = true }
         column.translatesAutoresizingMaskIntoConstraints = false
         addSubview(column)
         NSLayoutConstraint.activate([
-            column.leadingAnchor.constraint(equalTo: leadingAnchor), column.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor),
+            column.leadingAnchor.constraint(equalTo: leadingAnchor), column.trailingAnchor.constraint(equalTo: trailingAnchor),
             column.topAnchor.constraint(equalTo: topAnchor), column.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
@@ -41,8 +46,6 @@ public final class ProjectSettingsLook: NSView {
 
     public override var isFlipped: Bool { true }
 
-    @objc private func pinChanged() { pinned(pin.state == .on) }
-
-    var pinShown: Bool { pin.state == .on }
-    func clickPin() { pin.performClick(nil) }
+    var pinShown: Bool { pin.isOn }
+    func clickPin() { pin.flip() }
 }

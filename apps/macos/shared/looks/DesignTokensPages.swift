@@ -189,6 +189,17 @@ public extension DesignTokens {
             public static var warn: NSColor { DesignTokens.Color.stateNeeds }
             public static let warnAbovePercent: CGFloat = 80
         }
+        public enum Group {
+            public static let padding = NSEdgeInsets(top: 12, left: 14, bottom: 12, right: 14)
+            public static let radius: CGFloat = DesignTokens.Radius.pane
+            public static var bg: NSColor { DesignTokens.Color.bgSidebar }
+            public static var border: NSColor { DesignTokens.Color.lineSubtle }
+            public static var divider: NSColor { DesignTokens.Color.lineSubtle }
+            public static let labelGap: CGFloat = 8
+            public static let sectionGap: CGFloat = 28
+            public static let textGap: CGFloat = 2
+            public static let gap: CGFloat = 16
+        }
     }
     enum Home {
         public enum Column {
