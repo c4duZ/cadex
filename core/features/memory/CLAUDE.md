@@ -404,6 +404,11 @@
      `profile_notify` ainda toca a cada SessionEnd (o `server/src/handoff.rs` depende disso, e o
      `server/tests/session_end.rs` falha se parar);
   5. `make check` e `make perf`; anotar o commit novo no topo do `server/Cargo.toml`.
+- O painel web do upstream só como referência (plano 40 A, `../../../docs/plans/40-memory-panel.md`):
+  `server/examples/web_reference.rs` monta o ai-memory-web (dependência só de desenvolvimento, nunca
+  no binário) sobre a cópia de uma pasta da memória, em 127.0.0.1, com quem olha como o dono (root);
+  `cargo run --example web_reference -- <cópia> [porta]`. Nunca sobre a pasta de verdade: o crate
+  migra o banco ao abrir.
 
 ## Como validar
 - `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs`,
