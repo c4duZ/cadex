@@ -97,7 +97,7 @@ pub(crate) async fn when_model_unloads(
 }
 
 /// Replace this process with a fresh copy of itself. Only returns on error.
-pub(crate) fn exec(sessions: &[i32], lock: &OwnedFd, listener: &OwnedFd) -> anyhow::Error {
+pub(crate) fn exec(sessions: &[crate::sessions::Live], lock: &OwnedFd, listener: &OwnedFd) -> anyhow::Error {
     let argv: Vec<String> = std::env::args().skip(1).collect();
     let next = crate::args::restart_argv(&argv, sessions, lock.as_raw_fd(), listener.as_raw_fd());
     for fd in [lock.as_raw_fd(), listener.as_raw_fd()] {

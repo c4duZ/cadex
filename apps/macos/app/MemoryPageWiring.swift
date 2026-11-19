@@ -24,6 +24,7 @@ extension WindowSession {
         page.accountOf = { id in Self.historyEntry(session: id).map { Self.accountName($0.account) } }
         page.placeOf = { id in Self.historyEntry(session: id).map { ($0.cwd as NSString).lastPathComponent }.flatMap { $0.isEmpty ? nil : $0 } }
         page.canResume = { id in Self.historyEntry(session: id) != nil }
+        page.isEmptySession = { id in Self.historyEntry(session: id).map { !$0.hasPrompt } ?? false }
         // The title of the session's conversation: the owner's (/rename), else the one Claude gave.
         page.titleOf = { id in
             Self.historyEntry(session: id).flatMap { entry in [entry.customTitle, entry.aiTitle].first { !$0.isEmpty } }

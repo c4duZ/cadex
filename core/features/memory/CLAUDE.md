@@ -49,6 +49,9 @@
     /workstream/runs?pid=` traz o do `cadex-memory run` (o engine fica de pé até o launcher importar
     e fechar a execução, depois do fim do agente); o kqueue avisa quando ele termina e o SessionEnd o tira; sem sessão viva, espera 3 s e sai (fecha o store, apaga o
     socket); sem nenhuma sessão em 10 s depois de subir, sai também. Nenhum timer com sessão viva.
+    O SessionStart também nomeia a sessão (`session_id=`, só id simples): o registro sabe quais
+    sessões estão vivas (`live_sessions`), para a prévia do briefing (plano 35 H), e o reinício as
+    passa junto dos pids (`--sessions 12:<id>,34`).
   - `server/src/restart.rs`: depois que o modelo descarrega, sem pedido em andamento, o engine se
     executa de novo (~35 ms em debug) com as sessões vivas, a trava e o socket abertos, e volta ao
     tamanho de parado (o alocador não devolvia os 68 MB). Sem sessão viva, sai em vez de reiniciar.
@@ -173,7 +176,9 @@
     `server/src/page/briefing.rs` e `server/src/page/handoff_text.rs` (o que a próxima sessão recebe,
     sem pegar o handoff: o `/handoff` com `claim=0` pela própria rota, o aviso de handoff trocado pelo
     texto dele com o renderizador do upstream **copiado**, e o corte de 9.800 caracteres como o
-    upstream; igual byte a byte ao SessionStart seguinte, no teste), `server/src/page/pages.rs`
+    upstream; igual byte a byte ao SessionStart seguinte, no teste; plano 35 H: se o snapshot de
+    sessão não terminada do upstream é de uma sessão viva, a prévia pede de novo com `recovery=0`,
+    para não mostrar a sessão em que o dono está, ou uma paralela rodando, como cortada), `server/src/page/pages.rs`
     (gravar e apagar como as ferramentas, com commit; sem frontmatter, a página guarda o que tinha),
     `server/src/page/reindex.rs` (o arquivo editado no disco entra pelo `Wiki::reindex_page`, com a
     varredura **copiada** do vigia do upstream, e um commit; arquivo apagado no disco não apaga a
@@ -297,7 +302,8 @@
     proposta que só cita caminhos que o repositório não tem é recusada, com a linha no ledger, e a
     que cita um arquivo dele fica pendente; a linha do auto-improve nomeia a sessão revisada, com a
     que terminou em `trigger`;
-    `server/tests/memory_page.rs`: overview com o engine de pé e parado, o briefing igual ao do
+    `server/tests/memory_page.rs`: a sessão viva fora do snapshot da prévia e de volta quando o
+    `claude` dela sai (plano 35 H); overview com o engine de pé e parado, o briefing igual ao do
     SessionStart seguinte e sem pegar o handoff, gravar e apagar página com commit, o reindex de um
     arquivo editado no disco, propostas aprovadas e recusadas, o projects.json;
     `server/tests/session_end.rs`: o handoff de uma sessão com 10 edições lista os 10 arquivos, e

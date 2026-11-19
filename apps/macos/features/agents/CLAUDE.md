@@ -118,7 +118,8 @@
   Sessions Use"). AgentNewSession.account: a conta de uma sessão nova (a do projeto, a ativa, a padrão).
   AgentAccount.find inclui as contas criadas pelo Cadex quando já têm .claude.json.
 - O histórico (plano 18, fase D): `AgentHistory.swift` (`AgentHistoryEntry`, uma conversa com a
-  pasta, o branch, as datas, os títulos e a origem; `AgentHistoryReader`, que lê só o acrescentado,
+  pasta, o branch, as datas, os títulos e a origem; `hasPrompt`, falso na conversa sem prompt do
+  dono, a sessão vazia que as listas do projeto tiram, plano 35 H; `AgentHistoryReader`, que lê só o acrescentado,
   em pedaços com o próprio autorelease pool, acha o fim de linha com memchr, olha o nível de cima da
   linha pelos bytes antes de montar o JSON, pula linha acima de 64 KB e nunca guarda resultado de
   ferramenta), `AgentHistoryStore.swift` (o índice no `../../shared/text-index/`, uma fila só, lê o

@@ -49,8 +49,8 @@ public enum MemoryPageCommands {
         return [
             Command(id: "memory.show", title: T("Show Project Memory", "Mostrar a memória do projeto"),
                     keywords: ["memory", "wiki", "sidebar", "memória", "painel"], category: .view, action: .run(actions.show)),
-            Command(id: "memory.show-briefing", title: T("What the Agent Will See", "O que o agente vai ver"),
-                    keywords: ["memory", "briefing", "context", "next session", "memória", "contexto", "próxima sessão"], category: .view,
+            Command(id: "memory.show-briefing", title: T("What the Next Agent Will Get", "O que o próximo agente vai receber"),
+                    keywords: ["memory", "briefing", "context", "next session", "next agent", "memória", "contexto", "próxima sessão", "próximo agente"], category: .view,
                     action: .run(actions.showBriefing)),
             Command(id: "memory.reindex", title: T("Reindex Project Memory", "Reindexar a memória do projeto"),
                     keywords: ["memory", "reindex", "wiki", "commit", "memória", "reindexar"], category: .view, action: .run(actions.reindex)),
@@ -133,13 +133,18 @@ final class MemoryProposalSource: PaletteSource {
     }
 }
 
-/// "What the Agent Will See" (memory.show-briefing): the briefing text as
-/// the next session in the project receives it, read-only, in a tab.
+/// "What the Next Agent Will Get" (memory.show-briefing): the briefing text as
+/// the next session in the project receives it, read-only, in a tab. Said so on top (plan 35 H):
+/// it is the preview of the next start, not what a session got (that is in the session's detail,
+/// the project page's Sessions).
 @MainActor
 public final class MemoryBriefingDocument: TabDocument {
     public let view: NSView
     public let identity: String
-    public var title: String { T("Memory Briefing", "Briefing da memória") }
+    public var title: String { Self.heading }
+    public static var heading: String { T("The Next Agent Will Get", "O próximo agente vai receber") }
+    public static var note: String { T("What a new agent session in this project starts with now. What a past session received is in its summary, in the project's Sessions.",
+                               "O que uma sessão de agente nova neste projeto recebe agora. O que uma sessão já recebeu fica no resumo dela, nas Sessões do projeto.") }
     public var hasUnsavedChanges: Bool { false }
     /// The center whole (plan 31 E): something to read, not a pane beside a terminal.
     public var isPage: Bool { true }
@@ -160,11 +165,12 @@ public final class MemoryBriefingDocument: TabDocument {
         show(briefing)
     }
 
-    /// The briefing again (the command run with the tab open).
+    /// The briefing again (the command run with the tab open), under what it is.
     public func show(_ briefing: String) {
-        text.string = briefing.isEmpty
+        let body = briefing.isEmpty
             ? T("The briefing is empty: the memory has nothing for this project yet.", "O briefing está vazio: a memória ainda não tem nada deste projeto.")
             : briefing
+        text.string = Self.heading.uppercased() + "\n" + Self.note + "\n\n" + body
     }
 
     /// The theme's colors (the app passes the editor's, so it reads like a file).

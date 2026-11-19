@@ -131,7 +131,10 @@ fn the_first_session_learns_the_projects_history_from_every_account_once() {
     assert!(observations(&engine, S_TREE, "default").contains("condor"), "a worktree's, from the other account");
     assert!(!observations(&engine, S_ELSE, "default").contains("dingo"), "a folder beside the repo is another project");
     assert!(!observations(&engine, S_START, "default").contains("eagle"), "the starting session is not imported");
-    // Posted oldest first: the briefing's recent pages put the newest on top.
+    // Posted oldest first: the briefing's recent pages put the newest on top. A rule first: with
+    // no core page the brief is not sent at all (plan 35 E, core_brief.rs).
+    common::tool(&engine.socket, "memory_write_page", serde_json::json!({"workspace": "default", "project": "acme",
+        "path": "_rules/tabs.md", "body": "# Tabs\n\nIndent with tabs.\n", "kind": "rule"}));
     let qs = query(&[("agent", "claude-code"), ("cwd", project.to_str().unwrap()), ("project_strategy", "repo-root"),
         ("briefing", "1"), ("session_id", S_START)]);
     let briefing = ok(&engine.socket, "GET", &format!("/handoff?{qs}"), None).unwrap_or_default();

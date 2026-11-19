@@ -27,6 +27,8 @@ public final class MemoryView: NSView {
     /// The provider's logo before a session's account, in its color (the app knows the logos).
     public var accountLogo: NSImage?
     public var accountTint: NSColor = DesignTokens.Color.textSecondary
+    /// Whether the History knows the session as one with no prompt (plan 35 H): left out.
+    public var isEmptySession: (String) -> Bool = { _ in false }
     /// Whether "Open the Session" can resume it (the History has it).
     public var canResume: (String) -> Bool = { _ in false }
     /// The page came on screen (true) or left it (false): the app refreshes.
@@ -189,9 +191,9 @@ public final class MemoryView: NSView {
 
     /// "LAST SESSIONS": by their conversation's title, the account and where they ran.
     private func renderSessions(_ pages: [MemoryPage]) {
-        let sessions = pages.filter(Self.isSession).sorted { ($0.time ?? .distantPast) > ($1.time ?? .distantPast) }
+        let sessions = Self.listedSessions(pages, emptyInHistory: isEmptySession, limit: Self.shownSessions)
         guard !sessions.isEmpty else { return }
-        var rows: [NSView] = sessions.prefix(Self.shownSessions).map { page in
+        var rows: [NSView] = sessions.map { page in
             let id = page.sessionID
             let title = id.flatMap(titleOf) ?? page.title
             let meta = [id.flatMap(accountOf), id.flatMap(placeOf)].compactMap { $0 }.joined(separator: " · ")
@@ -242,6 +244,16 @@ public final class MemoryView: NSView {
     }
 
     static func isSession(_ page: MemoryPage) -> Bool { page.relative.hasPrefix("sessions/") }
+
+    /// The newest `limit` session pages the list shows: not of an empty session, by its page or by
+    /// the History (plan 35 H: a panel opened and closed with no prompt made a page before plan 35
+    /// C). The History is asked only for the newest, until `limit` are found.
+    static func listedSessions(_ pages: [MemoryPage], emptyInHistory: (String) -> Bool, limit: Int) -> [MemoryPage] {
+        let newest = pages.filter { isSession($0) && !$0.emptySession }.sorted { ($0.time ?? .distantPast) > ($1.time ?? .distantPast) }
+        var listed: [MemoryPage] = []
+        for page in newest where listed.count < limit && !(page.sessionID.map(emptyInHistory) ?? false) { listed.append(page) }
+        return listed
+    }
 
     func menu(_ page: MemoryPage) -> [MenuEntry] {
         let session = page.sessionID.flatMap { canResume($0) ? $0 : nil }

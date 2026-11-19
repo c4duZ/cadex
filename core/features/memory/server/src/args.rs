@@ -6,6 +6,8 @@ use std::time::Duration;
 
 use anyhow::{Context, Result, bail};
 
+use crate::sessions::Live;
+
 /// What `cadex-memory` was started with.
 #[derive(Debug)]
 pub(crate) struct Args {
@@ -35,8 +37,9 @@ pub(crate) struct Args {
     /// How long an import waits after the engine is ready or after a
     /// SessionStart, so the briefing goes first (import.rs).
     pub(crate) import_delay: Duration,
-    /// The `claude` pids still alive when the previous image restarted.
-    pub(crate) sessions: Vec<i32>,
+    /// The `claude` pids still alive when the previous image restarted, with
+    /// the session each one runs when known.
+    pub(crate) sessions: Vec<Live>,
     /// The data folder's lock and the listening socket, kept open across a
     /// restart so no second engine starts and no hook finds the socket gone.
     pub(crate) lock_fd: Option<i32>,
@@ -96,7 +99,7 @@ pub(crate) fn parse(argv: &[String]) -> Result<Args> {
             }
             "--sessions" => {
                 let list = value(&mut it, &arg)?;
-                args.sessions = list.split(',').filter_map(|p| p.trim().parse().ok()).collect();
+                args.sessions = list.split(',').filter_map(live_of).collect();
             }
             "--lock-fd" => args.lock_fd = fd(&mut it, &arg)?,
             "--listen-fd" => args.listen_fd = fd(&mut it, &arg)?,
@@ -115,9 +118,18 @@ pub(crate) fn parse(argv: &[String]) -> Result<Args> {
     Ok(args)
 }
 
+/// One `--sessions` entry: `<pid>` or `<pid>:<session id>` (plan 35 H).
+fn live_of(entry: &str) -> Option<Live> {
+    let (pid, session) = match entry.trim().split_once(':') {
+        Some((pid, id)) => (pid, Some(id).filter(|id| crate::agent::audit::session_file_name(id).is_some())),
+        None => (entry.trim(), None),
+    };
+    Some((pid.parse().ok()?, session.map(str::to_owned)))
+}
+
 /// The arguments of the restarted image: the same ones, without what the
 /// previous restart added, plus the live sessions and the kept descriptors.
-pub(crate) fn restart_argv(argv: &[String], sessions: &[i32], lock_fd: i32, listen_fd: i32) -> Vec<String> {
+pub(crate) fn restart_argv(argv: &[String], sessions: &[Live], lock_fd: i32, listen_fd: i32) -> Vec<String> {
     let mut out = Vec::with_capacity(argv.len() + 6);
     let mut it = argv.iter();
     while let Some(arg) = it.next() {
@@ -128,7 +140,10 @@ pub(crate) fn restart_argv(argv: &[String], sessions: &[i32], lock_fd: i32, list
         out.push(arg.clone());
     }
     if !sessions.is_empty() {
-        let list: Vec<String> = sessions.iter().map(i32::to_string).collect();
+        let list: Vec<String> = sessions
+            .iter()
+            .map(|(pid, id)| id.as_ref().map_or_else(|| pid.to_string(), |id| format!("{pid}:{id}")))
+            .collect();
         out.extend(["--sessions".into(), list.join(",")]);
     }
     out.extend(["--lock-fd".into(), lock_fd.to_string()]);
@@ -160,11 +175,13 @@ mod tests {
     #[test]
     fn sessions_and_descriptors_are_read() {
         let args = parse(&strings(&[
-            "--socket", "/s", "--data-dir", "/d", "--sessions", "12,x,34", "--lock-fd", "5",
+            "--socket", "/s", "--data-dir", "/d", "--sessions", "12,x,34:s-1,56:a/b", "--lock-fd", "5",
             "--listen-fd", "6", "--keep-alive", "--watcher",
         ]))
         .unwrap();
-        assert_eq!(args.sessions, vec![12, 34]);
+        assert_eq!(args.sessions, vec![(12, None), (34, Some("s-1".to_owned())), (56, None)]);
+        let again = restart_argv(&[], &args.sessions, 5, 6);
+        assert_eq!(again[..2], strings(&["--sessions", "12,34:s-1,56"])[..]);
         assert_eq!((args.lock_fd, args.listen_fd), (Some(5), Some(6)));
         assert!(args.keep_alive && args.watcher);
         assert!(parse(&strings(&["--socket", "/s"])).is_err());
@@ -182,10 +199,10 @@ mod tests {
     #[test]
     fn a_restart_replaces_what_the_previous_one_added() {
         let first = strings(&["--socket", "/s", "--data-dir", "/d", "--no-embeddings"]);
-        let once = restart_argv(&first, &[10, 11], 3, 4);
+        let once = restart_argv(&first, &[(10, None), (11, Some("s-1".into()))], 3, 4);
         assert_eq!(
             once,
-            strings(&["--socket", "/s", "--data-dir", "/d", "--no-embeddings", "--sessions", "10,11",
+            strings(&["--socket", "/s", "--data-dir", "/d", "--no-embeddings", "--sessions", "10,11:s-1",
                 "--lock-fd", "3", "--listen-fd", "4"])
         );
         let twice = restart_argv(&once, &[], 7, 8);

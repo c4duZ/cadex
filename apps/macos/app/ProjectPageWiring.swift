@@ -131,7 +131,7 @@ extension WindowSession {
         let tasks = treeModel().first { $0.id == folder }?.tasks ?? []
         let branch = treeBranches[folder] ?? ""
         let accounts = AgentsController.shared.everyAccount()
-        let mine = AgentHistoryController.shared.entries.filter { Self.belongs($0.cwd, to: folder) }
+        let mine = AgentHistoryController.shared.entries.filter { $0.hasPrompt && Self.belongs($0.cwd, to: folder) }
         let live = AgentsController.shared.sessions
         // This project's tasks on other machines: their sessions, as the remote reading gives them.
         let remotePaths = Set(WorktreesController.shared.remoteTasks(repo: folder).map(\.path))

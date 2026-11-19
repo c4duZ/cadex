@@ -111,7 +111,8 @@ enum MemoryParts {
     }
 
     /// The proposal's foot (`.foot`): one card, "Every new agent here starts with the briefing of
-    /// this." and two links, See the briefing and Configure, each running its command.
+    /// this." and two links, See What the Next Agent Gets (plan 35 H: the preview of the next start,
+    /// not what a session got) and Configure, each running its command.
     static func foot(see: @escaping @MainActor () -> Void, configure: @escaping @MainActor () -> Void) -> NSView {
         let words = MemoryText.label(T("Every new agent here starts with the briefing of this.", "Todo agente novo aqui começa com o briefing disto."),
                                      size: M.Briefing.fontSize, color: M.Briefing.color, wraps: true)
@@ -121,7 +122,7 @@ enum MemoryParts {
         let dot = MemoryText.label("·", size: M.Briefing.fontSize, color: M.Briefing.color)
         let spacer = NSView()
         spacer.setContentHuggingPriority(.init(1), for: .horizontal)
-        let links = NSStackView(views: [link(T("See the briefing", "Ver o briefing"), see), dot, link(T("Configure", "Configurar"), configure), spacer])
+        let links = NSStackView(views: [link(T("See What the Next Agent Gets", "Ver o que o próximo agente recebe"), see), dot, link(T("Configure", "Configurar"), configure), spacer])
         links.spacing = UILooks.pt(M.WikiRow.gap)
         links.distribution = .fill
         let column = NSStackView(views: [words, links])
@@ -148,7 +149,7 @@ enum MemoryParts {
         let font = UILooks.font(M.Briefing.fontSize)
         let text = NSMutableAttributedString(string: T("Each new agent here starts with a briefing of this. ", "Cada agente novo aqui começa com um briefing disto. "),
                                              attributes: [.font: font, .foregroundColor: M.Briefing.color, .paragraphStyle: style])
-        text.append(NSAttributedString(string: T("See the briefing", "Ver o briefing"),
+        text.append(NSAttributedString(string: T("See what the next agent gets", "Ver o que o próximo agente recebe"),
                                        attributes: [.font: font, .foregroundColor: DesignTokens.Color.textPrimary, .paragraphStyle: style]))
         let field = NSTextField(wrappingLabelWithString: "")
         // Not selectable: a click on the words must reach the box and open the briefing.

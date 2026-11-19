@@ -7,7 +7,8 @@
 //!   wiki folder, the model, the counts and the imported history
 //!   (overview.rs).
 //! - `GET /cadex/memory/briefing?cwd&workspace`: what the next SessionStart
-//!   in that folder would receive, without claiming the handoff (briefing.rs).
+//!   in that folder would receive, without claiming the handoff and without
+//!   a live session's recovery snapshot (briefing.rs).
 //! - `POST /cadex/memory/write-page?cwd&workspace&path` (Markdown body),
 //!   `POST /cadex/memory/delete-page?cwd&workspace&path` (pages.rs) and
 //!   `POST /cadex/memory/reindex?cwd&workspace` (reindex.rs).
@@ -44,6 +45,7 @@ use axum::routing::{get, post};
 use serde_json::json;
 
 use crate::restart::ModelEvents;
+use crate::sessions::Sessions;
 
 /// What the page's routes read and write.
 pub(crate) struct Ctx {
@@ -53,15 +55,23 @@ pub(crate) struct Ctx {
     pub(crate) data_dir: PathBuf,
     /// `None` with `--no-embeddings`.
     pub(crate) model: Option<Arc<ModelEvents>>,
+    /// The live sessions: the briefing's preview leaves their recovery
+    /// snapshot out (briefing.rs, plan 35 H).
+    pub(crate) sessions: Arc<Sessions>,
     /// The inner router (the marker's query pairs, the MCP tools), set once
     /// it is built: these routes are part of it, so it cannot be passed in.
     inner: OnceLock<Router>,
 }
 
 impl Ctx {
-    pub(crate) fn new(stores: (ReaderPool, WriterHandle, Wiki), data_dir: PathBuf, model: Option<Arc<ModelEvents>>) -> Self {
+    pub(crate) fn new(
+        stores: (ReaderPool, WriterHandle, Wiki),
+        data_dir: PathBuf,
+        model: Option<Arc<ModelEvents>>,
+        sessions: Arc<Sessions>,
+    ) -> Self {
         let (reader, writer, wiki) = stores;
-        Self { reader, writer, wiki, data_dir, model, inner: OnceLock::new() }
+        Self { reader, writer, wiki, data_dir, model, sessions, inner: OnceLock::new() }
     }
 
     pub(crate) fn set_inner(&self, router: Router) {

@@ -55,12 +55,26 @@ extension WindowSession {
             return PageDetail.Related(tile: glyph, tint: tint, text: kept.title)
         }
         let when = entry.updated?.formatted(date: .abbreviated, time: .shortened) ?? ""
+        let fold = settings.store.settings.memory.enabled ? Self.receivedFold(entry.id) : nil
         var buttons = [PageDetail.Button(T("Resume", "Retomar"), primary: true) { [weak self] in self?.historyActions().resume(entry) },
                        PageDetail.Button(T("Continue in Another Account…", "Continuar em outra conta…")) { [weak self] in self?.historyActions().continueIn(entry) }]
         if let page { buttons.append(PageDetail.Button(T("View the Page", "Ver a página")) { [weak self] in self?.openRendered(page.path) }) }
         return PageDetail(title: entry.title, meta: [Self.accountName(entry.account), Self.place(entry.cwd, folder), when].filter { !$0.isEmpty }.joined(separator: " · "),
                           metaLogo: true, blocks: blocks.isEmpty ? Self.historyBlocks(entry) : blocks,
-                          tags: MemoryPageText.tags(text), relatedTitle: T("What the memory kept", "O que a memória guardou"), related: kept, buttons: buttons)
+                          tags: MemoryPageText.tags(text), relatedTitle: T("What the memory kept", "O que a memória guardou"), related: kept, buttons: buttons,
+                          fold: fold)
+    }
+
+    /// What the session received at its start (plan 35 H): the briefing the engine kept for it, read
+    /// from the memory's folder; a plain note when none was kept.
+    private static func receivedFold(_ session: String) -> PageDetail.Fold {
+        let title = T("What this session was given", "O que esta sessão recebeu")
+        if let text = MemorySessions.received(session: session, folder: MemoryKit.folder()) {
+            return PageDetail.Fold(title: title, text: text)
+        }
+        return PageDetail.Fold(title: title, text: T(
+            "Nothing kept for this session: it started before Cadex kept briefings, more than 30 days ago, with an empty briefing, or without the memory.",
+            "Nada guardado desta sessão: ela começou antes de o Cadex guardar o briefing, há mais de 30 dias, com o briefing vazio, ou sem a memória."), plain: true)
     }
 
     private func memoryDetail(_ folder: String, _ path: String) -> PageDetail? {
@@ -132,9 +146,10 @@ extension WindowSession {
             .firstIndex(of: group ?? "") ?? 9
     }
 
-    /// The project's conversations, newest first.
+    /// The project's conversations, newest first; the empty ones left out (plan 35 H: a panel
+    /// opened and closed with no prompt is not a session of the project).
     func projectSessions(_ folder: String) -> [AgentHistoryEntry] {
-        AgentHistoryController.shared.entries.filter { Self.belongs($0.cwd, to: folder) }
+        AgentHistoryController.shared.entries.filter { $0.hasPrompt && Self.belongs($0.cwd, to: folder) }
             .sorted { ($0.updated ?? .distantPast) > ($1.updated ?? .distantPast) }
     }
 

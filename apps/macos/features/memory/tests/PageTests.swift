@@ -23,6 +23,32 @@ func fakeCadex(_ dir: String, code: Int) -> String {
 
 @MainActor
 func pageTests() -> [(name: String, body: Checks.Body)] { [
+    ("a session's kept briefing: as the hook gave it, a plain id only, none when not kept (plan 35 H)", {
+        let dir = scratch()
+        write(dir + "/agent/briefings/s-1.md", "\n<!-- ai-memory:backfill session=x -->\n> 🛟 snapshot\nbrief\n\n")
+        expect(MemorySessions.received(session: "s-1", folder: dir) == "> 🛟 snapshot\nbrief", "the marker dropped, trimmed")
+        expect(MemorySessions.received(session: "s-2", folder: dir) == nil, "none kept")
+        write(dir + "/agent/briefings/blank.md", " \n")
+        expect(MemorySessions.received(session: "blank", folder: dir) == nil, "an empty one is none")
+        for bad in ["", "../s-1", "a/b", "a.b", String(repeating: "x", count: 129)] {
+            expect(MemorySessions.briefingPath(session: bad, folder: dir) == nil, bad)
+        }
+    }),
+    ("an empty session's page is known and left out of the last sessions, as is one the History has empty", {
+        let dir = scratch()
+        let head = "---\ntitle: s\n---\n# s\n\n## Session metadata\n\n- **observations:** 2\n\n"
+        write(dir + "/sessions/a.md", head + "## Raw observations\n\n- session-start\n")
+        write(dir + "/sessions/b.md", head + "## Prompts\n\n1. fix it\n\n## Raw observations\n")
+        write(dir + "/sessions/c.md", head + "## Tool calls\n\n- `Bash`: 1\n")
+        write(dir + "/sessions/d.md", "---\ntitle: d\nconsolidated_by: agent\n---\n# d\n\nWhat was done.\n")
+        write(dir + "/sessions/e.md", head + "## Prompts\n\n1. hi\n")
+        let pages = ["a", "b", "c", "d", "e"].map { MemoryWiki.page(dir + "/sessions/\($0).md", relative: "sessions/\($0).md") }
+        expect(pages.map(\.emptySession) == [true, false, false, false, false], "\(pages.map(\.emptySession))")
+        var asked: [String] = []
+        let listed = MemoryView.listedSessions(pages, emptyInHistory: { asked.append($0); return $0 == "e" }, limit: 2)
+        expect(Set(listed.map { $0.sessionID ?? "" }).isSubset(of: ["b", "c", "d"]) && listed.count == 2, "\(listed.map(\.sessionID))")
+        expect(!asked.contains("a"), "a page known empty is not asked about")
+    }),
     ("overview: down says only that; up gives the wiki, the model and the import by account", {
         expect(MemoryOverview.parse(["running": false]) == MemoryOverview())
         let up = MemoryOverview.parse(["running": true, "workspace": "w", "project": "p", "wiki_dir": "/m/wiki/p", "model": "downloading",

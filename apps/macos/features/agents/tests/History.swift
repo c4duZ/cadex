@@ -24,6 +24,21 @@ func appendTo(_ path: String, _ text: String) {
 }
 
 let historyChecks: [(name: String, body: Checks.Body)] = [
+    ("a conversation with only a /command and no prompt is empty; a prompt or Claude's title is not (plan 35 H)", {
+        let dir = NSTemporaryDirectory() + "cadex-history-empty-\(UUID().uuidString)"
+        try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+        let path = dir + "/e.jsonl"
+        FileManager.default.createFile(atPath: path, contents: Data(userLine("<command-name>/model</command-name>", session: "e", cwd: "/w", at: "2026-11-19T10:00:00Z").utf8))
+        var entry = AgentHistoryEntry(id: "e", path: path, account: "/h/.claude")
+        _ = AgentHistoryReader.readNew(&entry)
+        expect(entry.cwd == "/w" && !entry.hasPrompt, "only a command: \(entry)")
+        appendTo(path, userLine("fix the cache", session: "e", cwd: "/w", at: "2026-11-19T10:01:00Z"))
+        _ = AgentHistoryReader.readNew(&entry)
+        expect(entry.hasPrompt, "a prompt")
+        var titled = AgentHistoryEntry(id: "t", path: "", account: "")
+        titled.aiTitle = "Cache fix"
+        expect(titled.hasPrompt, "a title Claude gave from a prompt starting with <")
+    }),
     ("the top level is read from the bytes: the type, a tool result, strings and nesting followed", {
         let top = AgentHistoryReader.topLevel(Data(#"{"message":{"type":"x","content":"a \"type\":\"user\" {"},"type":"assistant","n":[1,{"toolUseResult":1}]}"#.utf8))
         expect(top.known && top.type == "assistant" && !top.toolResult, "\(top)")

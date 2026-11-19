@@ -258,13 +258,23 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   pede confirmação. "Show Memory History" (memory.show-history) abre os commits da wiki (cada
   gravação, reindexação e aprovação é um) na aba do Git History.
 - Cada página mostra de onde veio: sessão, conta e hora, com "Abrir a sessão".
-- "What the Agent Will See" (memory.show-briefing): o briefing exato da próxima sessão neste
-  projeto.
+- "What the Next Agent Will Get" (memory.show-briefing): o briefing exato da próxima sessão neste
+  projeto, dito assim no título e no topo ("O próximo agente vai receber"): é a prévia, não o que
+  uma sessão recebeu. Uma exceção ao "exato" (plano 35 H): o ai-memory põe no início o snapshot da
+  sessão mais nova sem fim, de propósito, mesmo que ela ainda rode; na prévia, se essa sessão está
+  viva (o `claude` dela registrado), o snapshot sai, para a página não mostrar a sessão em que o
+  dono está como cortada.
+- O briefing que uma sessão recebeu de fato aparece no resumo dela (Sessões da página do projeto),
+  fechado, em "O que esta sessão recebeu"; sem arquivo guardado (sessão de antes do plano 35, de
+  mais de 30 dias, com briefing vazio ou sem a memória), o lugar diz isso.
+- As listas de sessões (Sessões da página do projeto, as contas da página Projetos, "LAST SESSIONS"
+  do painel) não mostram sessão vazia (sem prompt e sem ferramenta): nem a conversa sem prompt do
+  histórico, nem a página de sessão que o ai-memory gravou para ela antes do plano 35 C.
 - O estado do processo e do modelo de vetores (baixando, pronto, carregado); o histórico importado
   (quantas sessões, de quais contas, contado a partir desta versão); o agente de fundo (ligado,
   pausado, o gasto do dia contra o teto, a fila e os últimos trabalhos com custo); as propostas, com
   memory.approve e memory.reject (no ⌘K, a lista das pendentes).
-- Com o processo parado, a página mostra a árvore e não o sobe; só "What the Agent Will See" sobe.
+- Com o processo parado, a página mostra a árvore e não o sobe; só "What the Next Agent Will Get" sobe.
 
 ## Estados
 - **Desligada:** nenhum hook a mais nas sessões, nenhum processo, a página Memory explica e oferece

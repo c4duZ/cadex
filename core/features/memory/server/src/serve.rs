@@ -35,7 +35,7 @@ use crate::{auto_watch, engine, handoff, hook_body, import, maintenance, mcp_sco
 pub(crate) enum Exit {
     Done,
     /// Exec a fresh image with these sessions and descriptors.
-    Restart { sessions: Vec<i32>, lock: OwnedFd, listener: OwnedFd },
+    Restart { sessions: Vec<crate::sessions::Live>, lock: OwnedFd, listener: OwnedFd },
 }
 
 /// How long a new engine waits for an old one that holds the lock to
@@ -127,8 +127,8 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
     let cancel = CancellationToken::new();
     let built = engine::build(&args, &cancel).await?;
     let sessions = Sessions::start();
-    for pid in &args.sessions {
-        sessions.register(*pid);
+    for (pid, session) in &args.sessions {
+        sessions.register(*pid, session.as_deref());
     }
     let in_flight = Arc::new(InFlight::default());
     let (import_tx, import_rx) = import::channel();
@@ -150,6 +150,7 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
         (built.store.reader.clone(), built.store.writer.clone(), built.wiki.clone()),
         args.data_dir.clone(),
         built.model.clone(),
+        sessions.clone(),
     ));
     let routes = built
         .router
@@ -252,7 +253,7 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
     result?;
     // With no session left the engine would only linger and leave: leaving
     // now also spares the new image the startup grace (found 2026-11-16).
-    let live = sessions.pids();
+    let live = sessions.handover();
     if restarting.load(Ordering::SeqCst) && (args.keep_alive || !live.is_empty()) {
         return Ok(Exit::Restart { sessions: live, lock: lock.into(), listener: kept });
     }

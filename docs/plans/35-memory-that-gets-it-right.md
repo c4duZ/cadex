@@ -138,9 +138,14 @@ caminhos deste repositório.
   (`../../core/features/memory/server/src/agent/cited_paths.rs`); a linha do auto-improve diz a
   sessão revisada em `session` e a que terminou em `trigger`. O backfill do Center revisado com
   aprovação (o bootstrap) fica para quando o dono quiser rodar.
-- [ ] H. Na tela (com o plano 34): o resumo de uma sessão mostra o briefing que ela recebeu; as
+- [x] H. Na tela (com o plano 34): o resumo de uma sessão mostra o briefing que ela recebeu; as
   sessões vazias não aparecem; o painel Memory diz "o próximo agente vai receber" quando mostra o
   briefing de agora.
+  Feito: o detalhe de uma sessão na página do projeto tem "O que esta sessão recebeu" (o arquivo
+  da fase D, lido do disco); as sessões sem prompt saem das listas (a história do Claude e as
+  páginas de sessão do upstream sem prompt nem ferramenta); a prévia se chama "O próximo agente vai
+  receber"; e a prévia não mostra como cortada uma sessão viva (o engine guarda o id de cada sessão
+  viva e pergunta de novo com `recovery=0`, divergência escrita na spec). Não conferido no app.
 
 ## Como validar
 - O estudo lido e aprovado pelo dono antes das fases B a G.

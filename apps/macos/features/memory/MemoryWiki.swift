@@ -16,6 +16,9 @@ public struct MemoryPage: Equatable, Sendable {
     /// When an agent wrote it, as the frontmatter says; nil when only the file's date is known
     /// (a clone or a pull makes every file new: "LEARNED TODAY" must not count those).
     public var learnedAt: Date? = nil
+    /// A session page of a session with no prompt and no tool (plan 35 H, `MemorySessions.isEmptyPage`):
+    /// the lists leave it out.
+    public var emptySession = false
 
     /// The engine's bookkeeping, not knowledge: _meta.md, the log of a month (log-2026-11.md) and the
     /// proposals waiting in _pending/ (they show as proposals, not pages).
@@ -73,10 +76,12 @@ public enum MemoryWiki {
         let generated = front.map("generated")
         let written = MemoryJSON.date(front.scalar("updated_at")) ?? MemoryJSON.date(generated["at"])
         let sources = front.list("sources")
-        return MemoryPage(path: path, relative: relative, title: front.scalar("title") ?? name,
-                          kind: front.scalar("kind") ?? front.scalar("type"), sessionID: sessionID(front, relative: relative),
-                          agent: front.scalar("agent") ?? sources.first?["author"] ?? generated["by"],
-                          time: written ?? modified, summary: front.scalar("summary"), learnedAt: written)
+        var page = MemoryPage(path: path, relative: relative, title: front.scalar("title") ?? name,
+                              kind: front.scalar("kind") ?? front.scalar("type"), sessionID: sessionID(front, relative: relative),
+                              agent: front.scalar("agent") ?? sources.first?["author"] ?? generated["by"],
+                              time: written ?? modified, summary: front.scalar("summary"), learnedAt: written)
+        page.emptySession = relative.hasPrefix("sessions/") && MemorySessions.isEmptyPage(head: head)
+        return page
     }
 
     /// The session a page came from: `session_id`, else the name of a

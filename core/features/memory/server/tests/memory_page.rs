@@ -3,7 +3,8 @@
 //! equal to what the following real SessionStart gets and never consuming
 //! the handoff; writing a page (a new version and a commit, the metadata
 //! kept); deleting one; the reindex of a file edited on disk; the proposals
-//! approved and rejected; projects.json. (The engine down is the client's
+//! approved and rejected; projects.json; a live session's recovery snapshot
+//! left out of the briefing (plan 35 H). (The engine down is the client's
 //! answer, `{"running":false}` without connecting: agent_client.zig.)
 
 mod common;
@@ -128,6 +129,38 @@ fn the_briefing_is_what_the_next_session_start_gets_and_claims_nothing() {
     let empty = repo(tmp.path(), "empty");
     let none = ok(s, "GET", &route("briefing", &[("cwd", empty.to_str().unwrap())]), None).expect("an empty briefing");
     assert!(none.trim().is_empty(), "{none}");
+}
+
+#[test]
+fn a_live_session_is_not_shown_as_interrupted_and_an_unfinished_one_is() {
+    // Plan 35 H (the study's point 6): asked with no session, upstream's recovery snapshot was the
+    // session the owner was in, shown as cut off.
+    let tmp = tempfile::tempdir().unwrap();
+    let project = repo(tmp.path(), "acme");
+    let cwd = project.to_str().unwrap();
+    let engine = start(tmp.path(), ARGS);
+    let s = &engine.socket;
+    work(s, cwd, S1, 1, None);
+    let briefing = || ok(s, "GET", &route("briefing", &[("cwd", cwd)]), None).expect("the briefing");
+    let snapshot = "unfinished-session recovery snapshot";
+    let unfinished = briefing();
+    assert!(unfinished.contains(snapshot) && unfinished.contains(S1), "S1 has work and no end: {unfinished}");
+    let qs = query(&[("agent", "claude-code"), ("cwd", cwd), ("project_strategy", "repo-root"), ("session_id", S2)]);
+    let real = ok(s, "GET", &format!("/handoff?{qs}"), None).expect("a real start's context");
+    assert_eq!(real, unfinished, "no live session: byte for byte a real start");
+
+    // S1's claude is running: its SessionStart named its pid, as `cadex memory-hook` does.
+    let mut claude = Command::new("/bin/sleep").arg("60").spawn().unwrap();
+    let pid = claude.id().to_string();
+    let start_qs = query(&[("event", "session-start"), ("agent", "claude-code"), ("cwd", cwd), ("session_id", S1),
+        ("project_strategy", "repo-root"), ("ingest_key", "s1-live"), ("pid", &pid)]);
+    let body = serde_json::json!({"session_id": S1, "cwd": cwd, "source": "resume"}).to_string();
+    ok(s, "POST", &format!("/hook?{start_qs}"), Some(&body)).expect("the live start");
+    wait_for("the live session left out", Duration::from_secs(10), || !briefing().contains(snapshot));
+
+    claude.kill().unwrap();
+    claude.wait().unwrap();
+    wait_for("the ended claude's session back as unfinished", Duration::from_secs(10), || briefing().contains(snapshot));
 }
 
 #[test]

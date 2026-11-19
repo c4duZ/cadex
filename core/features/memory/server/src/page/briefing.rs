@@ -21,14 +21,24 @@
 //!    Claude Code's 9,800 characters: when the swap goes over, the answer is
 //!    the one asked with `briefing=0`.
 //!
+//! One divergence, on purpose (plan 35 H; the study's point 6): upstream's
+//! unfinished-session recovery snapshot is of the newest session with work
+//! and no SessionEnd. Asked without a session, that is often the session the
+//! owner is in, or a parallel one still running, and the page showed it as
+//! cut off. When the snapshot's session is live (its `claude` registered by
+//! its SessionStart, sessions.rs), the preview asks with upstream's own
+//! `recovery=0` (the marker's `[recovery] deliver_on_session_start = false`).
+//! Otherwise the text is byte for byte a real start's.
+//!
 //! Upstream's side effects of the ask are a start's: the active-project
 //! pointer and the marker's `[profile]` flags, and the project row for a
 //! folder the store did not know.
 
+use std::collections::HashSet;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use ai_memory_core::HandoffId;
+use ai_memory_core::{HandoffId, SessionId};
 use axum::Router;
 use axum::body::Body;
 use axum::extract::State;
@@ -41,6 +51,11 @@ use super::{Ctx, Params, cwd_of, error};
 
 /// The first words of upstream's `render_handoff_notice`.
 const NOTICE: &str = "📬 ai-memory: a pending handoff `";
+
+/// The head of upstream's recovery snapshot
+/// (`render_interrupted_session_markdown`), up to the agent's name.
+const SNAPSHOT: &str = "**ai-memory: unfinished-session recovery snapshot**\n> from `";
+const SNAPSHOT_SESSION: &str = "` session `";
 
 type Pairs = Vec<(String, String)>;
 
@@ -96,10 +111,27 @@ fn swap(text: &str, rendered: &str) -> Option<String> {
     Some(format!("{}{rendered}{}", &text[..range.start], &text[range.end..]))
 }
 
+/// The session a recovery snapshot in `text` is of.
+fn snapshot_session(text: &str) -> Option<SessionId> {
+    let rest = &text[text.find(SNAPSHOT)? + SNAPSHOT.len()..];
+    let rest = &rest[rest.find(SNAPSHOT_SESSION)? + SNAPSHOT_SESSION.len()..];
+    SessionId::from_str(&rest[..rest.find('`')?]).ok()
+}
+
+/// Whether `text` carries the recovery snapshot of one of the `live`
+/// sessions (named as Claude Code names them, as the store maps them).
+fn snapshot_of_live(text: &str, live: &HashSet<String>) -> bool {
+    snapshot_session(text).is_some_and(|id| live.iter().any(|native| SessionId::from_native(native) == id))
+}
+
 pub(crate) async fn preview(ctx: &Ctx, cwd: &str, workspace: Option<&str>) -> Result<String, Response> {
     let inner = ctx.inner()?;
     let mut pairs = base(cwd, workspace);
-    let first = ask(&inner, &pairs).await?;
+    let mut first = ask(&inner, &pairs).await?;
+    if snapshot_of_live(&first, &ctx.sessions.live_sessions()) {
+        set(&mut pairs, "recovery", "0");
+        first = ask(&inner, &pairs).await?;
+    }
     let Some((_, id)) = notice_in(&first) else { return Ok(first) };
     let Ok(Some(handoff)) = ctx.reader.handoff_by_id(id).await else { return Ok(first) };
     let rendered = render(&handoff, Some(CLAUDE_HANDOFF_CHARS));
@@ -142,6 +174,19 @@ mod tests {
         assert!(text[range].ends_with(&format!("`{id}`.")));
         assert_eq!(swap(&text, "HANDOFF\n").unwrap(), "profile\nHANDOFF\n\nbrief");
         assert!(notice_in("no notice here").is_none());
+    }
+
+    #[test]
+    fn a_snapshot_is_known_by_its_session() {
+        let id = "b2b2b2b2-0000-4000-8000-000000000001";
+        let text = format!(
+            "<!-- ai-memory:backfill x -->\n> \u{1f6df} **ai-memory: unfinished-session recovery snapshot**\n\
+             > from `claude-code` session `{id}` · last activity 2026-11-19T10:00:00Z\n"
+        );
+        assert_eq!(snapshot_session(&text).map(|s| s.to_string()).as_deref(), Some(id));
+        assert!(snapshot_of_live(&text, &HashSet::from([id.to_owned()])));
+        assert!(!snapshot_of_live(&text, &HashSet::from(["b2b2b2b2-0000-4000-8000-000000000002".to_owned()])));
+        assert!(!snapshot_of_live("no snapshot", &HashSet::from([id.to_owned()])));
     }
 
     #[test]

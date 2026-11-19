@@ -41,6 +41,12 @@ public struct AgentHistoryEntry: Codable, Equatable, Sendable {
     public var title: String {
         [customTitle, aiTitle, firstPrompt].first { !$0.isEmpty } ?? id
     }
+
+    /// Whether the owner said anything in it: a prompt of theirs, or a title Claude gave from one
+    /// (a first prompt starting with "<" is not read as one). Without it the conversation is empty
+    /// (a panel opened and closed, only a /command): upstream's empty session, no prompt and no
+    /// tool, as a tool runs only after a prompt (plan 35 H; the lists leave it out).
+    public var hasPrompt: Bool { !firstPrompt.isEmpty || !aiTitle.isEmpty }
 }
 
 /// Reads the new part of a transcript into its entry and gives the texts to

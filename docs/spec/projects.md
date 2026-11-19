@@ -83,9 +83,11 @@ agora sempre com a pasta (`../adr/0035-work-frame.md`).
   linha "caminho · branch · remoto · N páginas de memória · N sessões", Open terminal (os terminais
   do projeto, um aberto se não há), Race… e New task, e as seções num controle sob o
   cabeçalho: Visão geral (o que segue), Sessões, Memória, Automações e Configurações.
-- Sessões: as conversas do projeto e das tarefas dele, com a conta (o logo), a pasta e a idade; a
-  escolhida mostra ao lado o resumo da página de sessão da memória, as tags, o corpo, o que a memória
-  guardou dela, Retomar, Continuar em outra conta… e Ver a página (já renderizada).
+- Sessões: as conversas do projeto e das tarefas dele, com a conta (o logo), a pasta e a idade, sem
+  as vazias (nenhum prompt do dono; plano 35 H); a escolhida mostra ao lado o resumo da página de
+  sessão da memória, as tags, o corpo, o que a memória guardou dela, "O que esta sessão recebeu"
+  (fechado: o briefing que ela recebeu ao começar, ou que não há um guardado), Retomar, Continuar
+  em outra conta… e Ver a página (já renderizada).
 - Memória: a busca e as páginas agrupadas (regras, decisões, cuidados, padrões, outras) com o
   sinal do tipo; a escolhida aparece renderizada, sem o frontmatter (o tipo, de qual sessão veio, a
   conta, o corpo), com Editar (o .md no editor), Abrir a sessão e Apagar…. A busca da memória do ⌘K

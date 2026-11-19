@@ -52,6 +52,10 @@ public struct PageDetail {
     public struct Button { public var title: String; public var primary: Bool; public var danger: Bool; public var action: @MainActor () -> Void
         public init(_ title: String, primary: Bool = false, danger: Bool = false, action: @escaping @MainActor () -> Void) {
             self.title = title; self.primary = primary; self.danger = danger; self.action = action } }
+    /// A part that starts closed (`ProjectFold`): its title and text; `plain` for a note in place
+    /// of the text (nothing kept), in the body's font.
+    public struct Fold { public var title: String; public var text: String; public var plain: Bool
+        public init(title: String, text: String, plain: Bool = false) { self.title = title; self.text = text; self.plain = plain } }
 
     public var chip: (text: String, tint: NSColor)?
     public var title: String
@@ -62,9 +66,10 @@ public struct PageDetail {
     public var relatedTitle: String
     public var related: [Related]
     public var buttons: [Button]
+    public var fold: Fold?
 
     public init(chip: (text: String, tint: NSColor)? = nil, title: String, meta: String, metaLogo: Bool = false, blocks: [Block] = [],
-                tags: [String] = [], relatedTitle: String = "", related: [Related] = [], buttons: [Button] = []) {
+                tags: [String] = [], relatedTitle: String = "", related: [Related] = [], buttons: [Button] = [], fold: Fold? = nil) {
         self.chip = chip
         self.title = title
         self.meta = meta
@@ -74,6 +79,7 @@ public struct PageDetail {
         self.relatedTitle = relatedTitle
         self.related = related
         self.buttons = buttons
+        self.fold = fold
     }
 }
 

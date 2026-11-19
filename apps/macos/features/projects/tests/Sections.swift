@@ -31,7 +31,8 @@ func sectionsPage(_ section: ProjectSection) -> (ProjectPageDocument, NSWindow) 
             : PageDetail(title: "Estado da memória do AI Memory", meta: "fba. + BKDG · dev/center · today 14:34", metaLogo: true,
                          blocks: [.paragraph("Auditoria da memória ai-memory do bkdg-center."), .heading("What was done"), .item("Apagadas 6 páginas de outro projeto.")],
                          tags: ["ai-memory", "cadex"], relatedTitle: "What the memory kept", related: [.init(tile: .warning, tint: DesignTokens.Color.stateNeeds, text: "Páginas de sessão misturam projetos")],
-                         buttons: [PageDetail.Button("Resume", primary: true) {}, PageDetail.Button("View the Page") {}])
+                         buttons: [PageDetail.Button("Resume", primary: true) {}, PageDetail.Button("View the Page") {}],
+                         fold: PageDetail.Fold(title: "What this session was given", text: "> profile\nIndent with tabs."))
     }
     let page = ProjectPageDocument(folder: "/tmp/bkdg-center", actions: actions)
     let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1200, height: 760), styleMask: [.titled], backing: .buffered, defer: false)
@@ -65,6 +66,13 @@ let sectionTests: [(name: String, body: Checks.Body)] = [
         let (page, _) = sectionsPage(.sessions)
         Checks.expect(sectionViews(ListRow.self, in: page.view).count == 2)
         Checks.expect(sectionViews(SearchField.self, in: page.view).isEmpty, "no search in Sessions")
+        // Plan 35 H: the briefing the session received, closed under the summary; a click opens it.
+        let folds = sectionViews(ProjectFold.self, in: page.view)
+        Checks.expect(folds.count == 1 && folds[0].isOpen == false, "the briefing starts closed")
+        let body = sectionViews(NSTextField.self, in: folds[0]).first { $0.stringValue.contains("Indent with tabs") }
+        Checks.expect(body?.isHidden == true, "its text hidden")
+        folds[0].toggle()
+        Checks.expect(folds[0].isOpen && body?.isHidden == false, "open, the text shows")
         saveSectionsSnapshot(page.view, "project-sessions")
     }),
 ]

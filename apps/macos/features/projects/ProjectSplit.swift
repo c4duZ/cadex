@@ -117,6 +117,7 @@ enum ProjectSplit {
                 views.append(line)
             }
         }
+        if let fold = detail.fold { views.append(ProjectFold(fold)) }
         if !detail.buttons.isEmpty {
             let buttons = NSStackView(views: detail.buttons.map { button -> NSView in
                 let made = DesignButton.make(button.title, button.primary ? .primary : .secondary, action: button.action)
@@ -133,7 +134,7 @@ enum ProjectSplit {
         }
         let column = vertical(views, gap: 8)
         if views.count > 1, !detail.buttons.isEmpty { column.setCustomSpacing(UILooks.pt(16), after: views[views.count - 2]) }
-        for view in views where view is NSTextField && (view as? NSTextField)?.maximumNumberOfLines == 0 {
+        for view in views where (view is NSTextField && (view as? NSTextField)?.maximumNumberOfLines == 0) || view is ProjectFold {
             view.widthAnchor.constraint(equalTo: column.widthAnchor).isActive = true
         }
         let box = PageBox()

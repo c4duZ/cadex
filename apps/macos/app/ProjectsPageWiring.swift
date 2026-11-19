@@ -57,7 +57,7 @@ extension WindowSession {
                     let now = Date()
                     show(open.enumerated().map { index, project in
                         let (folder, name) = project
-                        let mine = history.filter { Self.belongs($0.cwd, to: folder) }
+                        let mine = history.filter { $0.hasPrompt && Self.belongs($0.cwd, to: folder) }
                         let here = live.filter { Self.belongs($0.cwd, to: folder) }
                         let branch = tree.first { $0.id == folder }?.branch ?? ""
                         let path = folder.hasPrefix(home) ? "~" + folder.dropFirst(home.count) : folder

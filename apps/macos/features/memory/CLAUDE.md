@@ -47,9 +47,11 @@
   "Search memory" (memory.search), as seções com o número apagado, até 3 propostas com Approve/Reject, "LEARNED TODAY" (as páginas de hoje,
   sem os registros de sessão), "PROJECT RULES" (as da pasta _rules da wiki), "LAST SESSIONS" pelo título da
   conversa (`titleOf`, do índice do histórico: o nome dado, senão o do Claude), a conta e a pasta,
+  sem as sessões vazias (plano 35 H, `listedSessions`: a página de sessão do upstream sem prompt nem
+  ferramenta, ou a conversa que o histórico tem sem prompt, `isEmptySession`),
   "All sessions" (project.show-sessions) e "All N pages" (project.show-memory, com o estado do
   engine e do agente na dica); o clique numa linha abre a página do projeto nela (plano 34 G) e o cartão do pé, "Every new agent here starts with the briefing of this." com
-  See the briefing e Configure; as sessões sem ícone, com o logo da conta na segunda linha.
+  See What the Next Agent Gets e Configure; as sessões sem ícone, com o logo da conta na segunda linha.
   `MemoryRows.swift`: a linha (`MemoryRow`: o tipo como ícone colorido num quadradinho, `MemoryKind`;
   o título numa linha; a idade, `MemoryAge`; acende sob o ponteiro; clique abre, clique direito dá
   Open, Open the Session, Reveal in Finder e Delete Page) e `MemoryText`. `MemoryParts.swift` (a
@@ -59,9 +61,16 @@
   sessão, agente, hora), `MemoryData.swift` (o JSON do `overview`, do `status`, das `proposals` e o
   projects.json), `MemoryPageState.swift` (o que a página mostra e os textos do estado; os custos com
   as casas que importam) e `MemoryCommands.swift` (memory.show, memory.search, memory.show-briefing numa aba só de
-  leitura, memory.reindex, memory.refresh, memory.enable, memory.approve e memory.reject com a lista
+  leitura, "The Next Agent Will Get" no título e no topo: a prévia do próximo início, não o que uma
+  sessão recebeu (plano 35 H), memory.reindex, memory.refresh, memory.enable, memory.approve e memory.reject com a lista
   das propostas no ⌘K; memory.show-history, os commits da wiki na aba do Git History). As ações da
   aba ficam todas, com nome, no "…" da linha de cima (`../../app/InspectorWiring.swift`).
+- `MemorySessions.swift` (plano 35 H): `received`, o briefing que uma sessão recebeu, lido do disco
+  em `<memória>/agent/briefings/<sessão>.md` (o engine o guarda, plano 35 D; só id simples, as linhas
+  do marcador de backfill tiradas e aparado, como o hook entrega; nil sem arquivo), e
+  `isEmptyPage`, a página de sessão do upstream sem as seções Prompts e Tool calls (sessão sem
+  prompt e sem ferramenta; MemoryPage.emptySession). O app põe o briefing no detalhe da sessão
+  (`../../app/ProjectSectionsWiring.swift`).
 - `MemoryPageText.swift` (plano 34 D e E): uma página lida para mostrar renderizada: o corpo sem o
   frontmatter em títulos, parágrafos e itens (marcas de markdown viram texto), e as tags nas duas
   formas.
@@ -93,7 +102,8 @@
   2026-11-16); guarda a versão só se o engine sai 0 (falhou, tenta na próxima abertura). No `make run` a versão é "0", aquecida uma vez também.
 
 ## Como validar
-- `make macos-test` (MemoryTests; o .ai-memory.toml lido como o engine lê, gravado sem perder linha;
+- `make macos-test` (MemoryTests; o briefing guardado de uma sessão e o id recusado, a página de
+  sessão vazia fora das últimas sessões; o .ai-memory.toml lido como o engine lê, gravado sem perder linha;
   o modelo, o `ensure` que não sobrescreve, o nome numa worktree e a linha do exclude): os 9 eventos e o comando de cada um, a `env` do pacote e a do
   `make run`, a workspace só sem compartilhar, os hooks com agents.stateHooks desligada, a parte
   retirada, a chave do projeto (o valor fixado igual ao do engine, worktree e subpasta no

@@ -35,7 +35,9 @@
   Sessões, Memória, Automações, Configurações, no `SectionSwitch` sob o cabeçalho "Projects › nome";
   `PageListItem`, `PageDetail`) e `ProjectSplit.swift` (a lista com grupos, a escolhida azulada com a
   barra, a busca da Memória, e ao lado o detalhe renderizado: chip, título, a linha com o logo,
-  títulos, parágrafos, itens, tags, o relacionado e os botões). O que cada seção diz o app dá
+  títulos, parágrafos, itens, tags, o relacionado, a parte fechada e os botões). `ProjectFold.swift`
+  (plano 35 H): a parte fechada do detalhe (PageDetail.Fold), um título com a seta que abre o
+  texto puro em monoespaçada (o briefing que a sessão recebeu) ou, `plain`, uma nota. O que cada seção diz o app dá
   (`../../app/ProjectSectionsWiring.swift`); Automações vem do estado da página; Configurações é a
   view do app (a memória do projeto). `ProjectPageDocument.show(section:item:)`.
 - `ProjectsListView.swift` (plano 34 B): a página Projetos (`ProjectsListDocument`, "cadex:projects", isPage):
@@ -84,7 +86,7 @@
   sidebar (ADR 0039) e, na janela estreita, na faixa.
 
 ## Como validar
-- `make macos-test` passa: o visual do projeto (nome, cor, imagem quadrada e pequena, emoji; salvo e
+- `make macos-test` passa: o briefing da sessão fechado no detalhe e aberto no clique; o visual do projeto (nome, cor, imagem quadrada e pequena, emoji; salvo e
   de volta; a imagem trocada sai), primeira abertura, salvar e restaurar igual, arquivo corrompido, abrir
   pasta (nova e de um projeto que existe), próximo, renomear, fechar, a migração do spaces.json e o
   repositório de uma worktree.
