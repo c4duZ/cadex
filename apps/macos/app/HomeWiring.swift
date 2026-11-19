@@ -57,6 +57,7 @@ extension WindowSession {
             }
             actions.openFolder = { [weak self] in self?.chooseProjectFolder() }
             actions.clone = { [weak self] in self?.homeClone() }
+            actions.openShortcut = { [weak self] in self?.app.keymapLabel("project.new") ?? "" }
             actions.shortcut = { [weak self] card in
                 let key = self?.app.keymapLabel(Self.homeCommand(card == .race ? .task : card)) ?? ""
                 // The Race card: New Task with a second agent (the Home mockup).
@@ -159,7 +160,7 @@ extension WindowSession {
         return (folder, (projects?.projects.count ?? 0) > before && !restores)
     }
 
-    private func homeOpen(_ folder: String) {
+    func homeOpen(_ folder: String) {
         self.folder.open(folder)
         projects?.open(folder: folder)
     }

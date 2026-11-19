@@ -83,6 +83,17 @@ let exitCode = await Checks.run([
         let hidden = StatusBarLayout.toggled(left: ["folder", "ram"], right: [], "ram", side: .right)
         expect(hidden.left == ["folder"] && hidden.right.isEmpty)
     }),
+    ("nothing open keeps only the given items; a narrow window keeps one left and two right, the rest in the \"…\"", {
+        let left = ["project", "agents"], right = ["drawer", "memory", "usage", "keepAwake", "environment"]
+        let none = StatusBarLayout.shown(left: left, right: right, only: ["drawer", "usage", "keepAwake", "environment"], compact: false)
+        expect(none.left.isEmpty && none.right == ["drawer", "usage", "keepAwake", "environment"] && none.folded.isEmpty, "\(none)")
+        let narrow = StatusBarLayout.shown(left: left, right: right, only: nil, compact: true)
+        expect(narrow.left == ["project"] && narrow.right == ["drawer", "memory"], "\(narrow)")
+        expect(narrow.folded == ["agents", "usage", "keepAwake", "environment"], "\(narrow.folded)")
+        let bar = StatusBarView()
+        bar.compact = true
+        expect(bar.folded.isEmpty, "the bar alone has one item: nothing folds")
+    }),
     ("with nothing set the bar is the new frame's: project and agents left; the drawer, memory, usage, keep-awake, update and environment right", {
         expect(StatusBarLayout.defaultLeft == ["project", "agents"])
         expect(StatusBarLayout.defaultRight == ["drawer", "memory", "usage", "keepAwake", "update", "environment"])

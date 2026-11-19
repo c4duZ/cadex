@@ -17,6 +17,7 @@ extension WindowSession {
         sidebar.onToggle = { [weak self] folder in self?.toggleProject(folder) }
         sidebar.menuFor = { [weak self] folder in self?.railMenu(folder) ?? [] }
         sidebar.onPickRequest = { [weak self] id in self?.goToRequest(id) }
+        sidebar.onPickRecent = { [weak self] folder in self?.homeOpen(folder) }
         sidebar.onShowChanges = { [weak self] in _ = self?.commands.run("git.show") }
         // Dragged: the order kept in projects.json, as the rail's (plan 36 E); pinned does not change.
         sidebar.onMove = { [weak self] folder, order in
@@ -34,7 +35,6 @@ extension WindowSession {
     /// not pinned; the home folder's terminals are no project (plan 36). Each with main and its
     /// tasks, their states and terminals, and how many of its agents wait on you.
     func sidebarModel() -> [WorkProject] {
-        let theme = ThemeStore.shared.current
         let all = (projects?.projects ?? []).filter { !Self.isLoose($0.folder) }
         let ordered = all.filter(\.pinned) + all.filter { !$0.pinned }
         let tree = Dictionary(treeModel().map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
@@ -43,10 +43,7 @@ extension WindowSession {
         return ordered.map { project in
             let terminals = project.tabs.allTerminals
             let states = terminals.compactMap { Self.treeRow($0).state }
-            let tint = project.color.flatMap(WorkColor.init(rawValue:)).map { color -> [Double] in
-                let value = color.rgb(in: theme).value
-                return [Double((value >> 16) & 0xFF) / 255, Double((value >> 8) & 0xFF) / 255, Double(value & 0xFF) / 255]
-            }
+            let tint = Self.workTint(project.color)
             let node = tree[project.folder]
             let ownStates = node?.terminals.compactMap(\.state) ?? []
             var places = [WorkPlace(id: project.folder, name: node.map { $0.branch.isEmpty ? "main" : $0.branch } ?? "main", isMain: true,
@@ -61,6 +58,26 @@ extension WindowSession {
         }
     }
 
+    /// The narrow window's strip (plan 38 G): the projects' squares, the requests' box, Files and the
+    /// board; a square's click goes to the project, the right click is its menu, dragging reorders.
+    func makeStrip() -> RailView {
+        let rail = RailView { [weak self] id in _ = self?.commands.run(id) }
+        rail.onPick = { [weak self] folder in self?.pickProject(folder) }
+        rail.menuFor = { [weak self] folder in self?.railMenu(folder) ?? [] }
+        rail.onDropImage = { [weak self] folder, url in self?.dropProjectImage(folder, url) }
+        rail.onMove = { [weak self] folder, order, pinned in
+            self?.projects?.arrange(order, moved: folder, pinned: pinned)
+            self?.drawRail()
+        }
+        return rail
+    }
+
+    /// The strip's squares, from the sidebar's model.
+    func stripModel(_ projects: [WorkProject]) -> [RailProject] {
+        projects.map { RailProject(id: $0.id, name: $0.name, tint: $0.tint, state: $0.waiting > 0 ? .needs : $0.state,
+                                   open: $0.terminals > 0, image: $0.image, emoji: $0.emoji, pinned: $0.pinned) }
+    }
+
     /// Redrawn with the tree (TreeWiring.drawTree), from what is open now; the place lit is where
     /// the top bar's tabs are: a task's, or the project's main.
     func drawRail() {
@@ -68,8 +85,14 @@ extension WindowSession {
         let folder = projects?.activeFolder.flatMap { Self.isLoose($0) ? nil : $0 }
         let group = tabs?.currentGroup
         let place = folder.map { group.flatMap { $0.isEmpty ? nil : $0 } ?? $0 }
-        sidebar.show(sidebarModel(), place: place)
+        let model = sidebarModel()
+        if model.isEmpty { drawNothingOpen(sidebar) } else { sidebar.show(model, place: place) }
+        workspace?.statusBar.only = model.isEmpty ? Self.nothingOpenItems : nil
         sidebar.remoteShown = hasRemote
+        if let strip = workspace?.rail {
+            strip.show(stripModel(model), chosen: folder)
+            strip.requests = AgentAttention.shared.cards.count
+        }
         showPlace()
     }
 

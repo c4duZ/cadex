@@ -205,7 +205,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
             AuthorshipHub.diskChanged(folders)
         }
         startTree()
-        let workspace = WorkspaceView(explorer: explorer, sidebar: makeSidebar(), inspector: makeInspector(explorer: explorer, git: git)) { [weak self] id in self?.commands.run(id) }
+        let workspace = WorkspaceView(explorer: explorer, sidebar: makeSidebar(), rail: makeStrip(), inspector: makeInspector(explorer: explorer, git: git)) { [weak self] id in self?.commands.run(id) }
         window.contentView = workspace
         self.workspace = workspace
         workspace.inspector.reorder(settings.store.settings.inspector.order)

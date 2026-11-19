@@ -51,6 +51,9 @@ public struct RailProject: Equatable, Sendable {
 
 /// The rail's foot: the pages that are about every project (ADR 0038).
 public enum RailFoot: String, Sendable {
+    /// The narrow window's strip (plan 38 G): Files and the board at its foot.
+    case files
+    case board
     case projects
     case automations
     /// The SSH hosts and the tailnet's machines (plan 36 phase F), only when there is some.

@@ -28,6 +28,10 @@
   (`customizePage`) da janela única de `../../shared/customize/`, que o app abre. Avisa cada item quando ele pode ser visto (na barra e a janela na
   tela, pela oclusão). `path`, `canNavigate` e `onNavigate` vão para a trilha; `itemView` dá a view de um item para o app
   pôr o cartão dele.
+- Plano 38 G: `only` mostra só os ids dados (nada aberto: gaveta, conta, café, ambiente) e
+  `compact` (janela estreita) guarda o primeiro da esquerda e os dois primeiros da direita, o resto
+  no "…" (`folded`, um menu com cada um; escolher faz o que o clique dele faz); os lados salvos não
+  mudam. A regra pura é StatusBarLayout.shown.
 - `FolderTrail.swift`: a trilha "Home › … › cadex" com o menu de subpastas de cada pedaço (o do app,
   `../../shared/menus`, para cima); só se refaz quando a pasta muda. `Breadcrumb.swift`: os pedaços
   e as subpastas, puros e testados.

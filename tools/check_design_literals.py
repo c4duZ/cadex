@@ -70,6 +70,7 @@ FRAME_FILES = [
     "apps/macos/features/sidebar/WorkSidebarParts.swift",  # plano 38
     "apps/macos/features/sidebar/WorkRows.swift",  # plano 38
     "apps/macos/features/sidebar/WorkQueue.swift",  # plano 38
+    "apps/macos/features/sidebar/WorkRecents.swift",  # plano 38 G
     "apps/macos/app/TitleBarNeeds.swift",  # plano 38
     "apps/macos/app/TitleBarPlace.swift",  # plano 38
 ]

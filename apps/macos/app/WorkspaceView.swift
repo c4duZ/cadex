@@ -23,6 +23,14 @@ final class WorkspaceView: NSView {
     /// The sidebar (docs/adr/0039-sidebar-with-work-and-files.md, plan 38): flush with the window's
     /// left edge; ⌘B shows and hides it (`inspectorVisible`, the old name of the left column).
     let sidebar: WorkSidebarView
+    /// The narrow window's strip (plan 38 G): the requests' box, the projects' squares, Files and the
+    /// board; 0 pt wide and hidden in a wide window.
+    let rail: RailView
+    private var stripWidth: NSLayoutConstraint!
+    private var sidebarAtEdge: NSLayoutConstraint!
+    private var sidebarAtRail: NSLayoutConstraint!
+    /// Under `narrowBelow`: the strip shows, and the sidebar opens over the center.
+    private(set) var isNarrow = false
     /// Files and Changes, with their header and foot: the sidebar's Files view (it was the side
     /// column, and the right panel before ADR 0038).
     let inspector: InspectorView
@@ -47,10 +55,11 @@ final class WorkspaceView: NSView {
     /// The shown project's tabs in the content panel.
     private weak var tabsView: NSView?
 
-    init(explorer: ExplorerController, sidebar: WorkSidebarView, inspector: InspectorView, run: @escaping (String) -> Void) {
+    init(explorer: ExplorerController, sidebar: WorkSidebarView, rail: RailView, inspector: InspectorView, run: @escaping (String) -> Void) {
         titleBar = TitleBarView(run: run)
         self.explorer = explorer
         self.sidebar = sidebar
+        self.rail = rail
         self.inspector = inspector
         sidebar.setFiles(inspector)
         super.init(frame: .zero)
@@ -60,7 +69,9 @@ final class WorkspaceView: NSView {
         frost.isHidden = true
         glass.wantsLayer = true
         glass.isHidden = true
-        for view in [frost, glass, titleBar, statusBar, sidebar, contentPanel] as [NSView] {
+        rail.isHidden = true
+        // The sidebar after the center, so it can lie over it in a narrow window.
+        for view in [frost, glass, titleBar, statusBar, rail, contentPanel, sidebar] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
@@ -68,7 +79,10 @@ final class WorkspaceView: NSView {
         let gap = Self.gap
         inspectorWidth = sidebar.widthAnchor.constraint(equalToConstant: inspectorPoints)
         contentToInspector = contentPanel.leadingAnchor.constraint(equalTo: sidebar.trailingAnchor, constant: gap)
-        contentToRail = contentPanel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: gap)
+        contentToRail = contentPanel.leadingAnchor.constraint(equalTo: rail.trailingAnchor, constant: gap)
+        stripWidth = rail.widthAnchor.constraint(equalToConstant: 0)
+        sidebarAtEdge = sidebar.leadingAnchor.constraint(equalTo: leadingAnchor)
+        sidebarAtRail = sidebar.leadingAnchor.constraint(equalTo: rail.trailingAnchor)
         NSLayoutConstraint.activate([
             frost.topAnchor.constraint(equalTo: topAnchor),
             frost.bottomAnchor.constraint(equalTo: bottomAnchor),
@@ -87,8 +101,12 @@ final class WorkspaceView: NSView {
             statusBar.bottomAnchor.constraint(equalTo: bottomAnchor),
             statusBar.heightAnchor.constraint(equalToConstant: StatusBarView.height),
             sidebar.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
-            sidebar.leadingAnchor.constraint(equalTo: leadingAnchor),
+            sidebarAtEdge,
             sidebar.bottomAnchor.constraint(equalTo: statusBar.topAnchor),
+            rail.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
+            rail.leadingAnchor.constraint(equalTo: leadingAnchor),
+            rail.bottomAnchor.constraint(equalTo: statusBar.topAnchor),
+            stripWidth,
             inspectorWidth,
             contentPanel.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
             contentToInspector,
@@ -117,9 +135,8 @@ final class WorkspaceView: NSView {
     }
 
     /// The home screen in the center (plan 29; the Home mockup): over the tabs, the title bar
-    /// without them, the right panel closed (it comes back with the tabs).
+    /// without them. The sidebar stays: with nothing open it lists the recents (plan 38 G).
     private(set) weak var home: NSView?
-    private var inspectorBeforeHome = false
 
     func showHome(_ view: NSView) {
         home?.removeFromSuperview()
@@ -127,10 +144,6 @@ final class WorkspaceView: NSView {
         fill(contentPanel, with: view)
         home = view
         titleBar.setTabsHidden(true)
-        if inspectorVisible {
-            inspectorBeforeHome = true
-            setInspector(visible: false)
-        }
     }
 
     private var inspectorBeforeBoard: Bool?
@@ -146,15 +159,37 @@ final class WorkspaceView: NSView {
         fitColumn(to: newSize.width)
     }
 
-    /// Closes the column in a narrow window and gives it back when it widens.
+    /// A narrow window shows the strip in place of the sidebar, and gives the sidebar back when it
+    /// widens (ADR 0039).
     func fitColumn(to width: CGFloat) {
-        guard width > 0, home == nil, inspectorBeforeBoard == nil else { return }
-        if width < Self.narrowBelow, inspectorVisible {
+        guard width > 0 else { return }
+        // Opened by hand while already narrow, it stays (over the center); getting narrow closes it.
+        let wasNarrow = isNarrow
+        setNarrow(width < Self.narrowBelow)
+        guard inspectorBeforeBoard == nil else { return }
+        if width < Self.narrowBelow, inspectorVisible, !wasNarrow {
             setInspector(visible: false)
             closedByNarrow = true
         } else if width >= Self.narrowBelow, closedByNarrow {
             setInspector(visible: true)
         }
+    }
+
+    private func setNarrow(_ narrow: Bool) {
+        guard narrow != isNarrow else { return }
+        isNarrow = narrow
+        rail.isHidden = !narrow
+        stripWidth.constant = narrow ? UILooks.pt(DesignTokens.Rail.width) : 0
+        statusBar.compact = narrow
+        layoutSidebar()
+    }
+
+    /// Where the sidebar sits: at the edge pushing the center, or over the center after the strip.
+    private func layoutSidebar() {
+        sidebarAtEdge.isActive = !isNarrow
+        sidebarAtRail.isActive = isNarrow
+        contentToInspector.isActive = inspectorVisible && !isNarrow
+        contentToRail.isActive = !(inspectorVisible && !isNarrow)
     }
     private weak var drawer: DrawerView?
     private var drawerHeight: NSLayoutConstraint?
@@ -198,10 +233,6 @@ final class WorkspaceView: NSView {
         self.home = nil
         tabsView?.isHidden = false
         titleBar.setTabsHidden(false)
-        if inspectorBeforeHome {
-            inspectorBeforeHome = false
-            setInspector(visible: true)
-        }
     }
 
     /// sidebar.show (⇧⌘J): the side column comes up (the tree it showed left with ADR 0038).
@@ -232,8 +263,7 @@ final class WorkspaceView: NSView {
         closedByNarrow = false
         inspectorVisible = visible
         sidebar.isHidden = !visible
-        contentToInspector.isActive = visible
-        contentToRail.isActive = !visible
+        layoutSidebar()
         titleBar.setInspectorOpen(visible)
         onSidebarShown?(visible)
         syncRailPages()

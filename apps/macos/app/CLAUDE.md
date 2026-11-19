@@ -127,6 +127,12 @@
   "tarefa de X · contra base", o main o nome e o caminho) e a linha de mudanças (`showChangesLine`,
   a contagem pelas marcas do git, WindowSession.changedFiles); o clique na linha roda git.show, que
   mostra Mudanças na barra.
+- Plano 38 fase G: abaixo de 1000 pt (`WorkspaceView.swift`, fitColumn e setNarrow) a barra lateral
+  vira a faixa (`makeStrip` em `RailWiring.swift`) e fecha; aberta à mão ali, fica por cima do centro
+  e o Esc a fecha (`PageWiring.swift`); a barra de baixo fica compacta. Nada aberto
+  (`RecentsWiring.swift`): os recentes na barra lateral (`drawNothingOpen`; o clique abre como a tela
+  de início, homeOpen) e a barra de baixo só com `nothingOpenItems`; a tela de início não fecha mais
+  a barra lateral.
 - `NeedsQueueWiring.swift` (plano 38 fase C): a fila da barra lateral com os pedidos abertos
   (AgentAttention.cards, o que o sino listava; `askWords` diz o pedido em frase), redesenhada a cada
   mudança da atenção e quando a barra abre ou fecha (`drawQueue`); com a barra fechada, a pílula da

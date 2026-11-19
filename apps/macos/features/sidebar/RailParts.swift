@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import Icons
 import StateGlyph
 import UILooks
@@ -223,5 +224,54 @@ final class RailButton: NSView {
     private func restyle() {
         layer?.backgroundColor = lit || hovering ? B.Lit.bg.cgColor : nil
         glyph.contentTintColor = lit || hovering ? B.Lit.color : B.color
+    }
+}
+
+/// The narrow strip's requests (components.workSidebar.queue, collapsed): an amber box with the
+/// number of agents waiting on you; the click goes there (plan 38 G).
+@MainActor
+final class RailAsking: NSView {
+    typealias Q = DesignTokens.WorkSidebar.Queue
+    var onPress: (() -> Void)?
+    private let number = NSTextField(labelWithString: "")
+
+    init() {
+        super.init(frame: .zero)
+        wantsLayer = true
+        layer?.backgroundColor = Q.bg.cgColor
+        layer?.borderColor = Q.border.cgColor
+        layer?.borderWidth = DesignTokens.Stroke.hairline
+        layer?.cornerRadius = UILooks.pt(DesignTokens.WorkSidebar.Edge.radius)
+        number.font = UILooks.font(Q.Row.fontSize, weight: Q.Head.weight)
+        number.textColor = Q.Head.color
+        number.alignment = .center
+        number.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(number)
+        NSLayoutConstraint.activate([
+            widthAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Rail.Tile.size)),
+            heightAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.WorkSidebar.Edge.height)),
+            number.centerXAnchor.constraint(equalTo: centerXAnchor),
+            number.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
+        setAccessibilityRole(.button)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("RailAsking is created in code") }
+
+    func say(_ count: Int) {
+        number.stringValue = "\(count)"
+        let words = count == 1 ? T("1 agent needs you", "1 agente precisa de você") : T("\(count) agents need you", "\(count) agentes precisam de você")
+        toolTip = words
+        setAccessibilityLabel(words)
+    }
+
+    override var mouseDownCanMoveWindow: Bool { false }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+    override func hitTest(_ point: NSPoint) -> NSView? { frame.contains(point) ? self : nil }
+    override func mouseDown(with event: NSEvent) {}
+    override func mouseUp(with event: NSEvent) {
+        guard bounds.contains(convert(event.locationInWindow, from: nil)) else { return }
+        onPress?()
     }
 }

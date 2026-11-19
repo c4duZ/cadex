@@ -52,15 +52,13 @@ let railChecks: [(name: String, body: Checks.Body)] = [
     }),
     ("the rail's foot: Projects and Automations run their commands, lit with their page", {
         let rail = RailView { _ in }
-        expect(rail.footCommands == ["project.show-all", "orchestration.show-automations"], "\(rail.footCommands)")
-        rail.footLit = .automations
-        expect(rail.litCommands == ["orchestration.show-automations"])
+        expect(rail.footCommands == ["sidebar.show-files", "view.board"], "the narrow strip's foot (plan 38 G): \(rail.footCommands)")
+        rail.footLit = .board
+        expect(rail.litCommands == ["view.board"])
         rail.footLit = nil
         expect(rail.litCommands.isEmpty)
         rail.remoteShown = true
-        expect(rail.footCommands.last == "remote.show", "Remote with some host (plan 36 F)")
-        rail.remoteShown = false
-        expect(!rail.footCommands.contains("remote.show"))
+        expect(!rail.footCommands.contains("remote.show"), "Machines is the sidebar's (plan 38)")
     }),
     ("the pages' icons in the rail: a click opens the column on the page; on the lit one, folds it", {
         var ran: [String] = []

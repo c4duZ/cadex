@@ -40,6 +40,13 @@
   `WorkFilesHead`), a vista do app no meio e, no fim, "N mudanças · ver" (`setChanges`,
   `WorkChangesLine`; some sem mudança ou com Mudanças à vista; o clique, `onShowChanges`). Tokens:
   components.workSidebar.
+- `WorkRecents.swift` (fase G): nada aberto, `showRecents` lista os recentes (`WorkRecent`: a cara
+  do projeto e quando foi usado), Novo projeto… (project.create) e Abrir pasta… (project.new, com o
+  atalho que o app dá), sem o seletor; `onPickRecent` diz a pasta; o próximo `show` com projetos
+  devolve o seletor e a vista.
+- A faixa da janela estreita (fase G) é o `RailView` abaixo: a caixa âmbar dos pedidos no topo
+  (`requests`, `RailAsking`), os quadrados e, no pé, Arquivos (sidebar.show-files) e Quadro
+  (view.board); o "+" escondido.
 - `Rail.swift`: o modelo puro do trilho (`RailProject`: a pasta, o nome, a cor, o estado e se tem
   terminal aberto; `mark`, a letra até haver imagem; `badge`, o estado que se mostra) e `RailFoot`.
   `RailView.swift`: a porta de entrada; `show` recebe os projetos e o escolhido e redesenha só quando

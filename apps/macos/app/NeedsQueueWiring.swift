@@ -34,7 +34,9 @@ extension WindowSession {
         workspace.sidebar.showQueue(requests)
         let first = requests.first.map { $0.who + T(" needs you", " precisa de você") }
         let pill = requests.count > 1 ? T("\(requests.count) need you", "\(requests.count) precisam de você") : first
-        workspace.titleBar.setNeeds(workspace.inspectorVisible ? nil : pill)
+        // The narrow strip has its own box; the pill is for the sidebar closed in a wide window.
+        workspace.rail.requests = requests.count
+        workspace.titleBar.setNeeds(workspace.inspectorVisible || workspace.isNarrow ? nil : pill)
     }
 
     /// A request of the queue clicked: its agent's terminal, wherever it is.

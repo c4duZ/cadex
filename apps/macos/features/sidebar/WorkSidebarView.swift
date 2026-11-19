@@ -22,20 +22,22 @@ public final class WorkSidebarView: NSView {
     public var onShowChanges: (() -> Void)?
     /// A project dragged to a new place: its folder and the projects' folders in the new order.
     public var onMove: ((String, [String]) -> Void)?
+    /// Nothing open: a recent clicked, its folder (the app opens the project).
+    public var onPickRecent: ((String) -> Void)?
     /// The switch was clicked: the app shows that view (and runs what goes with it).
     public var onMode: ((WorkSidebarMode) -> Void)?
     /// Machines at the foot: only with some SSH host or tailnet machine.
     public var remoteShown = false { didSet { machines.isHidden = !remoteShown } }
     public private(set) var mode: WorkSidebarMode = .work
 
-    private let run: (String) -> Void
+    let run: (String) -> Void
     private let queueSlot = NSStackView()
     private let queue = WorkQueueView()
     /// The edge of the Work list when a project waiting on you is scrolled out of sight.
     private let edge = WorkEdge()
-    private let switchRow = WorkSwitch()
+    let switchRow = WorkSwitch()
     private let content = NSView()
-    private let list = NSStackView()
+    let list = NSStackView()
     private let scroll = NSScrollView()
     private var files: NSView?
     /// Files' parts: the head in words, the host (the app's Files and Changes), the changes line.
@@ -44,7 +46,9 @@ public final class WorkSidebarView: NSView {
     private let changesLine = WorkChangesLine()
     private let foot = NSStackView()
     private var machines = NSView()
-    private var shown: (projects: [WorkProject], place: String?)?
+    var shown: (projects: [WorkProject], place: String?)?
+    /// Nothing open: the recents drawn instead of the projects (`WorkRecents.swift`).
+    var recentsShown: [WorkRecent]?
 
     public init(run: @escaping (String) -> Void) {
         self.run = run
@@ -129,7 +133,8 @@ public final class WorkSidebarView: NSView {
 
     /// The projects and the place you are in (a folder: main's or a task's); redrawn only when they change.
     public func show(_ projects: [WorkProject], place: String?) {
-        if let shown, shown.projects == projects, shown.place == place { return }
+        if recentsShown == nil, let shown, shown.projects == projects, shown.place == place { return }
+        leaveRecents()
         shown = (projects, place)
         list.arrangedSubviews.forEach { $0.removeFromSuperview() }
         let label = NSTextField(labelWithString: T("PROJECTS", "PROJETOS"))
@@ -184,7 +189,7 @@ public final class WorkSidebarView: NSView {
         if order != ids { onMove?(folder, order) }
     }
 
-    private func add(_ view: NSView) {
+    func add(_ view: NSView) {
         list.addArrangedSubview(view)
         view.widthAnchor.constraint(equalTo: list.widthAnchor).isActive = true
     }
@@ -193,9 +198,16 @@ public final class WorkSidebarView: NSView {
     public func setMode(_ next: WorkSidebarMode) {
         mode = next
         switchRow.select(next)
+        guard recentsShown == nil else { return }
         scroll.isHidden = next != .work
         files?.isHidden = next != .files
         updateEdge()
+    }
+
+    /// The list alone, the Files view hidden (nothing open).
+    func setFilesHidden(_ hidden: Bool) {
+        scroll.isHidden = !hidden
+        files?.isHidden = hidden
     }
 
     /// The Files view (the explorer and Changes, with their header and foot), held for the Files

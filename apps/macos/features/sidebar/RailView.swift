@@ -44,19 +44,30 @@ public final class RailView: NSView {
     /// The page the column shows (nil: closed): its icon lit.
     public var pageLit: String? { didSet { if pageLit != oldValue { lightPages() } } }
     private let footButtons: [(RailFoot, RailButton)]
+    /// The requests, as an amber box with their number on top of the strip (plan 38 G).
+    private let asking = RailAsking()
+    public var requests = 0 {
+        didSet {
+            asking.say(requests)
+            asking.isHidden = requests == 0
+        }
+    }
 
     public init(run: @escaping (String) -> Void) {
         self.run = run
         add = RailButton(command: "project.create", icon: .plus, tip: T("New Project…", "Novo projeto…"))
+        // The rail is the narrow window's strip since plan 38 G (ADR 0039): Files and the board.
         footButtons = [
-            (.projects, RailButton(command: "project.show-all", icon: .squaresFour, tip: T("Projects", "Projetos"))),
-            (.automations, RailButton(command: "orchestration.show-automations", icon: .clock, tip: T("Automations", "Automações"))),
-            (.remote, RailButton(command: "remote.show", icon: .globe, tip: T("Remote Machines", "Máquinas remotas"))),
+            (.files, RailButton(command: "sidebar.show-files", icon: .folder, tip: T("Files", "Arquivos"))),
+            (.board, RailButton(command: "view.board", icon: .kanban, tip: T("Board", "Quadro"))),
         ]
         super.init(frame: .zero)
         wantsLayer = true
         layer?.backgroundColor = R.bg.cgColor
         add.onPress = { [weak self] in self?.run("project.create") }
+        add.isHidden = true
+        asking.onPress = { [weak self] in self?.run("agents.go-to-request") }
+        asking.isHidden = true
         for (_, button) in footButtons {
             let command = button.command
             button.onPress = { [weak self] in self?.run(command) }
@@ -77,6 +88,7 @@ public final class RailView: NSView {
         for (_, button) in footButtons { foot.addArrangedSubview(button) }
         // Observers do not run in init: hidden by hand until the app says there is a host.
         footButtons.first { $0.0 == .remote }?.1.isHidden = true
+        top.addArrangedSubview(asking)
         top.addArrangedSubview(add)
         pagesLine.wantsLayer = true
         pagesLine.layer?.backgroundColor = R.Separator.color.cgColor
@@ -149,10 +161,11 @@ public final class RailView: NSView {
             }
             return tile
         }
-        for (index, tile) in tiles.enumerated() { top.insertArrangedSubview(tile, at: index) }
+        // After the requests' box, which leads the strip (plan 38 G).
+        for (index, tile) in tiles.enumerated() { top.insertArrangedSubview(tile, at: index + 1) }
         // The pinned ones first, then a line, then the open ones not pinned (the Dock's two parts).
         if let first = tiles.firstIndex(where: { !$0.project.pinned }), first > 0 {
-            top.insertArrangedSubview(groupLine, at: first)
+            top.insertArrangedSubview(groupLine, at: first + 1)
         }
     }
 

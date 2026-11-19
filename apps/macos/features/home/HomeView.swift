@@ -56,6 +56,8 @@ public struct HomeActions {
     public var clone: () -> Void = {}
     /// The shortcut each card shows ("⌘T"), from the keymap.
     public var shortcut: (HomeCard) -> String = { _ in "" }
+    /// Open folder's shortcut, from the keymap (it said ⌘O, which ran another command; plan 38 G).
+    public var openShortcut: () -> String = { "" }
 
     public init() {}
 }
@@ -217,7 +219,8 @@ public final class HomeView: NSView, NSTextFieldDelegate {
         typealias R = H.Recent.Header
         let words = !state.recents.isEmpty ? T("RECENT PROJECTS", "PROJETOS RECENTES") : T("START A PROJECT", "COMECE UM PROJETO")
         let title = homeLabel(words, size: R.fontSize, color: R.color, weight: R.weight, tracking: R.tracking)
-        let open = link(T("Open folder ⌘O", "Abrir pasta ⌘O")) { [weak self] in self?.actions.openFolder() }
+        let key = actions.openShortcut()
+        let open = link(T("Open folder", "Abrir pasta") + (key.isEmpty ? "" : " " + key)) { [weak self] in self?.actions.openFolder() }
         let dot = homeLabel("·", size: R.fontSize, color: R.color)
         let clone = link(T("Clone…", "Clonar…")) { [weak self] in self?.actions.clone() }
         let spacer = NSView()

@@ -35,6 +35,19 @@ public final class StatusBarView: NSView {
     public var run: ((String) -> Void)?
     public private(set) var left: [String] = []
     public private(set) var right: [String] = []
+    /// Only these show, when set: nothing open, only what counts without a project (the drawer, the
+    /// account, the coffee, the environment; plan 38 G). The saved sides stay as they are.
+    public var only: Set<String>? { didSet { if only != oldValue { setLayout(left: left, right: right) } } }
+    /// A narrow window (plan 38 G): the left keeps its first item and the right its first two; the
+    /// rest go to the "…" at the end, a menu with each one.
+    public var compact = false { didSet { if compact != oldValue { setLayout(left: left, right: right) } } }
+    /// The ids in the "…" now.
+    public private(set) var folded: [String] = []
+    private lazy var more: StatusLabel = {
+        let more = StatusLabel(icon: .dotsThree, tip: T("More", "Mais"))
+        more.onClick = { [weak self] in self?.showFolded() }
+        return more
+    }()
     private(set) var catalog: [StatusItem] = []
     private let folder = FolderTrail()
     private let environment = StatusLabel(icon: nil)
@@ -105,8 +118,10 @@ public final class StatusBarView: NSView {
         let placed = StatusBarLayout.placed(left: left, right: right, known: known)
         self.left = placed.left
         self.right = placed.right
-        arrange(leftStack, placed.left)
-        arrange(rightStack, placed.right)
+        let shown = StatusBarLayout.shown(left: placed.left, right: placed.right, only: only, compact: compact)
+        folded = shown.folded
+        arrange(leftStack, shown.left)
+        arrange(rightStack, shown.right, more: folded.isEmpty ? nil : more)
         updateVisibility()
         return placed.problems
     }
@@ -135,8 +150,8 @@ public final class StatusBarView: NSView {
         onLayoutChange?(left, right)
     }
 
-    private func arrange(_ stack: NSStackView, _ ids: [String]) {
-        let views = ids.compactMap { id in catalog.first { $0.id == id }?.view }
+    private func arrange(_ stack: NSStackView, _ ids: [String], more: NSView? = nil) {
+        let views = ids.compactMap { id in catalog.first { $0.id == id }?.view } + [more].compactMap { $0 }
         guard stack.arrangedSubviews != views else { return }
         stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         views.forEach(stack.addArrangedSubview)
@@ -174,7 +189,19 @@ public final class StatusBarView: NSView {
     /// (not minimized, not hidden, not behind another Space).
     private func updateVisibility() {
         let onScreen = window?.occlusionState.contains(.visible) == true
-        for item in catalog { item.setVisible(onScreen && (left.contains(item.id) || right.contains(item.id))) }
+        let shown = Set((leftStack.arrangedSubviews + rightStack.arrangedSubviews).map(ObjectIdentifier.init))
+        for item in catalog { item.setVisible(onScreen && shown.contains(ObjectIdentifier(item.view))) }
+    }
+
+    /// The "…": each folded item with what it says; picking one does what its click does.
+    private func showFolded() {
+        let entries = folded.compactMap { id in catalog.first { $0.id == id } }.map { item in
+            let said = (item.view as? StatusLabel)?.text ?? ""
+            return MenuEntry(said.isEmpty ? item.title : item.title + " · " + said, icon: item.icon) { [weak item] in
+                _ = item?.view.accessibilityPerformPress()
+            }
+        }
+        PopupMenu.show(entries, above: more)
     }
 
     // MARK: Right click

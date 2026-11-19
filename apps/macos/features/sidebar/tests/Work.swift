@@ -60,6 +60,20 @@ let workChecks: [(name: String, body: Checks.Body)] = [
         view.updateEdge()
         expect(view.edgeSaid.hasPrefix("▼ bhband-site"), "\(view.edgeSaid)")
     }),
+    ("nothing open: the recents with their faces, New Project… and Open Folder…, no switch; a project brings it back", {
+        var ran: [String] = []
+        var picked: [String] = []
+        let view = WorkSidebarView { ran.append($0) }
+        view.onPickRecent = { picked.append($0) }
+        view.showRecents([WorkRecent(project: WorkProject(id: "/cadex", name: "cadex"), when: "4m"),
+                          WorkRecent(project: WorkProject(id: "/nt", name: "notes"), when: "2d")], openShortcut: "⌃⌘N")
+        expect(view.showsRecents && view.lineTitles == ["cadex", "notes", "New Project…", "Open Folder…"], "\(view.lineTitles)")
+        view.press("notes")
+        view.press("Open Folder…")
+        expect(picked == ["/nt"] && ran == ["project.new"], "\(picked) \(ran)")
+        view.show([WorkProject(id: "/cadex", name: "cadex")], place: nil)
+        expect(!view.showsRecents && view.lineTitles == ["cadex", "New Project…"], "\(view.lineTitles)")
+    }),
     ("Files: the head in words, \"N changes · see\" at the end, hidden with none or while Changes shows", {
         var shown = 0
         let view = WorkSidebarView { _ in }

@@ -65,10 +65,20 @@ o que o clique faz). O dono aprovou em 2026-11-19 ("pode fazer").
   Feito: o item Agents conta só quem trabalha (o clique abre o quadro); o projeto · branch já rodava
   git.show, que agora mostra Mudanças na barra lateral; Sessions, Memory e o grafo foram na fase B. O
   clique no uso da conta continua como era (o cartão das contas, com trocar a conta nele).
-- [ ] G. A janela estreita (abaixo de 1000 pt): a faixa de 56 pt com a caixa âmbar, os quadrados dos
+- [x] G. A janela estreita (abaixo de 1000 pt): a faixa de 56 pt com a caixa âmbar, os quadrados dos
   projetos e, no pé, Arquivos (por cima do centro, Esc fecha) e Quadro; a barra de baixo encurtada
   com o "…". E nada aberto: os recentes na barra lateral, Novo projeto… e Abrir pasta… ⌘O, a tela de
   início no centro e a barra de baixo só com o que vale sem projeto.
+  Feito: a faixa é o RailView de antes (a caixa dos pedidos no topo, os quadrados, Arquivos e Quadro
+  no pé; o "+" escondido); ficar estreita fecha a barra lateral e alargar a devolve; aberta à mão na
+  janela estreita, ela fica por cima do centro, ao lado da faixa, e o Esc a fecha. A barra de baixo
+  estreita guarda o primeiro item da esquerda e os dois primeiros da direita; o resto vai para o
+  "…", um menu com cada um. Nada aberto: os recentes com a cara dos projetos e "4m", "1d"; Novo
+  projeto… e Abrir pasta… com o atalho de verdade (project.new, ⌃⌘N: o ⌘O é o workspace.open-folder,
+  que não abre projeto; a tela de início dizia ⌘O e agora lê o atalho); a tela de início não fecha
+  mais a barra lateral; a barra de baixo só com gaveta, conta, café e ambiente. Visto no app nas três
+  situações; não conferido: o "…" aberto (o clique de teste) e o atalho trocado para ⌘O, que fica
+  para o dono decidir.
 - [ ] H. Fechar: o que sai (o trilho, a coluna lateral, as páginas Sessions/Memory/Git graph da
   coluna, o item de tarefa nas abas) entra no inventário da moldura em `saiu`; as specs (sidebar,
   inspector, tabs, status-bar, projects, home, agents), os CLAUDE.md, o `docs/CONTEXT.md` e a ADR 0038

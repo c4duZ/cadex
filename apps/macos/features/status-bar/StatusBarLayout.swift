@@ -31,6 +31,17 @@ public enum StatusBarLayout {
         return (l, r, problems)
     }
 
+    /// What the bar shows of the saved sides: only the `only` ones when set (nothing open), and in a
+    /// narrow window the left's first and the right's first two, the rest folded into the "…"
+    /// (plan 38 G).
+    public static func shown(left: [String], right: [String], only: Set<String>?, compact: Bool)
+        -> (left: [String], right: [String], folded: [String]) {
+        let l = only.map { only in left.filter(only.contains) } ?? left
+        let r = only.map { only in right.filter(only.contains) } ?? right
+        guard compact else { return (l, r, []) }
+        return (Array(l.prefix(1)), Array(r.prefix(2)), Array(l.dropFirst(1)) + Array(r.dropFirst(2)))
+    }
+
     /// Shows a hidden item at the end of its usual side, or hides it.
     public static func toggled(left: [String], right: [String], _ id: String, side: StatusItem.Side) -> (left: [String], right: [String]) {
         if left.contains(id) || right.contains(id) { return (left.filter { $0 != id }, right.filter { $0 != id }) }
