@@ -20,4 +20,7 @@ test {
     _ = @import("prompt_file.zig");
     _ = @import("continue_wrap.zig");
     _ = @import("automations.zig");
+    _ = @import("attach.zig");
+    _ = @import("attach_session.zig");
+    _ = @import("attach_replies.zig");
 }

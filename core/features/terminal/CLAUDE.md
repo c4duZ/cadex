@@ -108,6 +108,9 @@
   guests, `cadex_terminal_guests`, a marca na aba). Convidado atrasado demais é solto, para não
   segurar o programa. Sem versão nova: a revisão 2 (wire.revision) vai depois da versão no hello e no
   hello_ok, e um daemon de antes (revisão 1) segue com o app redimensionando direto no pty.
+- `remote.zig` (plano 39 B): a porta do terminal para outro programa (o `cadex attach`): o cliente
+  do daemon, o protocolo e o caminho do socket (CADEX_TERMINAL_SOCKET, senão o da pasta de sockets),
+  sem a libghostty.
 - Spec em `../../../docs/spec/terminal.md`. Status: sessão, PTY, quadro para desenhar, teclas pelo
   núcleo, rolagem, seleção, colagem, busca, links, mouse
   para programas, foco, título, sino e API C prontos. Reflow ao redimensionar coberto por teste.

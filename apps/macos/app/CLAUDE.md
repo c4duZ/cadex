@@ -166,6 +166,8 @@
   da tarefa), avisar (notificação e feed), preview.open com url=, a lista de sessões no ⌘K; o
   navegador do agente (fase C): o primeiro goto abre um preview ao lado do terminal dele, que fica
   sendo a aba daquele terminal (`AgentPreviewTabs`), e os pedidos respondem quando a página responde.
+- `RemoteTerminalsWiring.swift` (plano 39 B): responde ao `cadex attach` as abas da janela principal,
+  por projeto, só as que o daemon mantém (`keptID`; com terminal.keepSessions desligado, nenhuma).
 - `TypedClaudeWiring.swift` (plano 22, fase C): o kit do `claude` digitado numa aba zsh; só para
   quem tem o shell de um terminal do app acima (`shellPid` de todos os terminais, de todas as janelas
   e projetos, e os da gaveta), pelo SessionKit.typedLaunch. Plano 33 F: sem conta na aba, a de uma

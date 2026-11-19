@@ -92,6 +92,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         startAgentTools()
         startAutomations()
         startTypedClaude()
+        startRemoteTerminals()
         startComputerUse()
         let main = WindowSession(app: self, folder: WorkspaceFolder(), isMain: true)
         sessions.append(main)

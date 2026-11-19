@@ -14,7 +14,9 @@
   de verdade exatamente como foi digitado, e nunca troca a conta que a aba tem (o
   CLAUDE_CONFIG_DIR dela); sem conta na aba, usa a que o app manda no kit (`config_dir`, plano 33 F).
 - Depender da libghostty ou do resto do núcleo: só libc, `../../shared/fs.zig`, `../../shared/process.zig`
-  e a entrada da feature memory (`../memory/memory.zig`), para o `cadex memory-hook`.
+  e a entrada da feature memory (`../memory/memory.zig`), para o `cadex memory-hook`, e a porta do
+  terminal para outros programas (`../terminal/remote.zig`: o cliente do daemon, sem libghostty), para
+  o `cadex attach`.
 
 ## Como eu quero
 - `cli.zig`: o `main` (raiz em `../../cadex_cli.zig`, fora da pasta para poder usar shared/),
@@ -101,6 +103,16 @@
   token no env dele); o launcher usa só o do agente que roda. Memória desligada (sem
   CADEX_MEMORY_BIN no kit): diz e sai.
 - Plano 22, fase G: `cadex memory-agent …` só despacha para a feature memory (`../memory/agent_client.zig`).
+- Plano 39 B (`../../../docs/plans/39-terminals-from-the-phone.md`): `attach.zig`, `cadex attach
+  [n|id]`, de um terminal que não é aba do Cadex (o telefone no SSH): pede ao app as abas
+  (`{"v":1,"terminals":true}`), cruza com as sessões vivas do daemon (app fechado: só os ids),
+  mostra o menu numerado por projeto e entra como segunda tela (o join do daemon).
+  `attach_session.zig`: o terminal em modo cru, as teclas no master, a saída na tela, o tamanho ao
+  daemon (olhado a cada 250 ms, sem SIGWINCH); Ctrl+\ e depois d sai sem fechar nada (Ctrl+\ duas
+  vezes manda um); na saída, desliga o que o programa deixou ligado (tela alternativa, mouse, colagem
+  com colchetes, cursor). `attach_replies.zig`: tira das teclas as respostas que o terminal do
+  telefone dá sozinho (atributos, cores, posição do cursor, teclado, modos), que o terminal do app já
+  deu e que chegariam ao programa como digitação.
 - O build (`../../build.zig`, `addCli`) instala `zig-out/bin/cadex` só no Mac; o empacotamento o põe em
   Contents/Helpers.
 
@@ -111,6 +123,8 @@
   as decisões do `cadex claude` (`--model haiku mcp list`, `-p`, `--version`, `claude`, um prompt,
   `--resume abc`, `--settings x.json`), o pedido do kit, a resposta e o app ausente; o
   `--cadex-prompt-file` saindo das palavras nas duas grafias, o prompt inteiro e o arquivo apagado,
-  e fora da pasta, link ou nome com ponto recusados e mantidos.
+  e fora da pasta, link ou nome com ponto recusados e mantidos; o `cadex attach`: os nomes do app
+  cruzados com o daemon, a escolha por número ou id, a tecla de sair e as respostas do terminal
+  tiradas.
 - Na mão, sem o app: `CADEX_APP_SOCKET=/nada PATH=<pasta com um claude falso>:$PATH core/zig-out/bin/cadex claude --model haiku mcp list`.
 - Na mão: `echo '<json>' | CLAUDE_CONFIG_DIR=<pasta> CADEX_USAGE_DIR=<pasta> core/zig-out/bin/cadex statusline`.

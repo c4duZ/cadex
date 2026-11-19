@@ -32,6 +32,11 @@ public final class AgentToolsServer: @unchecked Sendable {
     /// your agenda". No token: it says nothing of what to run, so any process
     /// of this user (getpeereid) may at most bring a check forward.
     public var onDue: (@MainActor () -> Void)?
+    /// `cadex attach` (plan 39 B): the terminals open in Cadex, each with the
+    /// daemon's name of its session, the project and the tab. No token, only
+    /// this user (getpeereid): the owner over SSH is that user, and the
+    /// names say no more than `ps` does.
+    public var onTerminals: (@MainActor () -> [[String: Any]])?
     public let path: String
     let tokens: AgentSessionTokens
     private let queue = DispatchQueue(label: "cadex.agent-tools.server", qos: .utility)
@@ -109,6 +114,15 @@ public final class AgentToolsServer: @unchecked Sendable {
             DispatchQueue.main.async { [weak self] in
                 MainActor.assumeIsolated { self?.onDue?() }
                 Self.answer(client, nil)
+            }
+            return
+        }
+        if object["terminals"] as? Bool == true {
+            guard local else { close(client); return }
+            DispatchQueue.main.async { [weak self] in
+                MainActor.assumeIsolated {
+                    Self.send(client, ["ok": true, "terminals": self?.onTerminals?() ?? []])
+                }
             }
             return
         }

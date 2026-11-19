@@ -34,12 +34,18 @@ quero poder abrir uma sessão num projeto por lá"; "um HTML pode ser"; "pode s�
   telefone na aba (`deviceMobile`, depois da pausa da memória). Testado só no núcleo
   (`core/features/terminal/daemon_guests_test.zig`, shells de verdade); no app, quando a B der um
   convidado de verdade. Sem o `make perf`.
-- [ ] B. `cadex attach`: no programa `cadex` (`core/features/agent-tools/`), um cliente do daemon
+- [x] B. `cadex attach`: no programa `cadex` (`core/features/agent-tools/`), um cliente do daemon
   que põe o terminal em modo cru, lista as sessões (projeto, nome da aba, se tem agente) e entra
   numa com o replay; a saída vai direto ao terminal de quem chamou (quem desenha é o app do
   telefone); ao mudar de tamanho, avisa o daemon. Uma tecla (Ctrl+\ e depois d, como o tmux) sai sem
   fechar a sessão. Os nomes das abas e projetos vêm do app pelo socket dele; com o app fechado, só
   os ids.
+  Feito: `core/features/agent-tools/attach.zig` (com attach_session.zig e attach_replies.zig) e
+  `core/features/terminal/remote.zig`; no app, o pedido `terminals` (`apps/macos/app/RemoteTerminalsWiring.swift`).
+  Conferido com uma instância de teste e o `cadex attach` num pty de 50×20: o menu com a aba, `1`
+  entra, o que se digita roda no shell do Mac, o pty com 18×50 (o menor dos dois), a marca do
+  telefone na aba (print), Ctrl+\ e d sai e a aba segue. Só vale com "Manter as sessões"
+  (terminal.keepSessions) ligado, que vem desligado: sem ele, as abas não moram no daemon.
 - [ ] C. `cadex new <projeto> [claude]` (o `cadex open` já abre um arquivo): pede ao app, pelo socket que o `cadex` já usa, o comando
   registrado que abre uma aba no projeto (um terminal, ou o Claude pelo kit, com memória e hooks); o
   app devolve o id da sessão e o `cadex` entra nela como na B. Com o app fechado, o `cadex` o abre e
