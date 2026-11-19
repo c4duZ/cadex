@@ -6,29 +6,43 @@ que a tela mostra, na ordem, o que cada clique faz e, em "Cortes" e "Divergênci
 ou mudou em relação ao print do upstream (`docs/research/memory-panel-screens.md`), para o dono
 pesar fidelidade contra brevidade. Escrito em 2026-11-19.
 
-### MemorySidebar.dc.html — peça · A página Memória: a barra lateral e as seções (plano 40)
+### MemorySidebar.dc.html — peça · A barra lateral com a página Memória aberta (plano 40)
 - **Os textos das telas Memória estão em português**, como os prints do upstream (pt-BR), para
   comparar um a um; no app cada texto é um par inglês/português (ADR 0015) e o padrão é o inglês.
-- **À esquerda, a barra lateral de sempre** (components.workSidebar), na vista Trabalho, com
-  Memória acesa no pé, depois de Quadro, Automações e Máquinas. O clique em Memória abre a página
-  no centro, na Visão geral (ou na última seção vista).
-- **Ao lado, a coluna das seções da página** (200 pt, fundo da janela, fio à direita), o menu da
-  esquerda do upstream nos mesmos grupos e na mesma ordem:
-  1. O campo "Pesquisar na memória" (num projeto, "Pesquisar em cadex"): Enter abre Pesquisar com
-     o termo (e o escopo do projeto). Era a busca do cabeçalho do upstream.
-  2. ESPAÇO DE TRABALHO: Projetos, Caixa de entrada (com o número de mensagens na fila à direita,
-     só quando há), Workstreams, Pesquisar, Grafo.
-  3. OBSERVAR E MELHORAR: Revisão de aprendizado, Saúde.
-  4. RECURSOS: Documentação, Histórico de alterações (abre o changelog na mesma tela da
-     documentação, com o seletor de versão; sem board próprio).
-  5. No pé, "ai-memory 3.5.0".
+- **Uma barra lateral só** (o dono, 2026-11-19): a barra de sempre (components.workSidebar, a mesma
+  moldura de 248, a fila "Precisa de você" no topo e o pé) troca o conteúdo pelas seções do painel
+  enquanto a página Memória está aberta. O clique em Memória, no pé, abre a página no centro (na
+  Visão geral, ou na última seção vista) e faz a troca. De cima para baixo:
+  1. A fila "Precisa de você", igual à da vista Trabalho (some sem pedido).
+  2. "‹ Trabalho", no lugar do seletor Trabalho | Arquivos: volta a barra para a vista Trabalho (o
+     centro fica na página Memória até o dono abrir outra coisa). Esc com o foco na barra faz o
+     mesmo.
+  3. O campo "Pesquisar na memória" (num projeto, "Pesquisar em cadex"): Enter abre Pesquisar com o
+     termo (e o escopo do projeto). Era a busca do cabeçalho do upstream.
+  4. Os três grupos do menu do upstream, na mesma ordem e com os mesmos nomes: ESPAÇO DE TRABALHO
+     (Projetos, Caixa de entrada com o número de mensagens na fila à direita, só quando há,
+     Workstreams, Pesquisar na memória, Grafo de conhecimento); OBSERVAR E MELHORAR (Revisão de
+     aprendizado, Saúde do servidor); RECURSOS (Documentação, Histórico de alterações, que abre o
+     changelog na tela da documentação com o seletor de versão; sem board próprio).
+  5. O pé de sempre (Quadro, Automações, Máquinas, Memória), com Memória acesa e, à direita dela,
+     "ai-memory 3.5.0".
   O item da seção aberta fica com o fundo da linha escolhida; dentro de um projeto (a página, o
   histórico, a sessão, o agente, o grafo do projeto) fica aceso Projetos, como no upstream.
-- **Por que uma coluna, e não abas no topo da página:** são nove destinos em três grupos, com um
-  contador vivo na Caixa de entrada; um seletor segmentado do macOS cabe até uns cinco itens e
-  perderia os grupos. A coluna repete o menu do upstream (fidelidade direta, item por item) e é o
-  padrão de "barra de fontes" do macOS (Mail, Ajustes); a barra lateral do Cadex continua igual,
-  com Memória acesa, para voltar ao trabalho num clique.
+- **Ícones** (Phosphor, pela fonte do app; o desenho os imita): Projetos folder-simple, Caixa de
+  entrada envelope-simple, Workstreams git-branch, Pesquisar magnifying-glass (também no campo),
+  Grafo graph, Revisão de aprendizado shield-check, Saúde pulse, Documentação file-text, Histórico
+  de alterações clock-counter-clockwise; o ⓘ das telas é info.
+- **Por que trocar o conteúdo, e não abas no topo da página:** são nove destinos em três grupos,
+  com um contador vivo; um seletor segmentado do macOS cabe uns cinco itens e perderia os grupos.
+  A lista repete o menu do upstream item por item, e trocar o conteúdo da barra (em vez de uma
+  segunda coluna) mantém uma barra só, com a fila à vista.
+- **Regras de acesso de todas as telas:**
+  - O ⓘ é um botão de ajuda (o estilo do botão de ajuda do macOS): o clique abre um popover com a
+    frase inteira (components.memoryPanel.help), e a frase é o accessibilityHelp do elemento ao
+    lado; não é só tooltip.
+  - "Abrir no Cadex" (cartão do projeto, cabeçalho do projeto, sessão, linha de sessão) está também
+    no menu de contexto da linha ou do cartão, e com a linha ou o cartão escolhido, Enter abre a
+    memória dele e ⌘O abre no Cadex. É o comando memory.open-in-cadex, com o projeto ou a sessão.
 - **Cortes do upstream na moldura:** a marca ("ai-memory", "ESPAÇO DE TRABALHO DOS AGENTES"), o pé
   "Contexto que permanece. Entre agentes. Entre sessões.", a legenda "Espaço de trabalho /
   Operações dos agentes", o rodapé "ai-memory · Memória do projeto e operações dos agentes" (fica
@@ -44,7 +58,7 @@ pesar fidelidade contra brevidade. Escrito em 2026-11-19.
     default / cadex"); um workspace diferente aparece.
   - Números com separador de milhar em português (86.023, não 86023), menos onde o valor é técnico
     (a Saúde mostra os números como o upstream).
-  - Frase explicativa longa vira uma linha curta ou um ⓘ com a frase inteira no tooltip.
+  - Frase explicativa longa vira uma linha curta ou um ⓘ com a frase inteira no popover dele.
 
 ### MemoryOverview.dc.html — Memória · Visão geral (print 01)
 - **Cabeçalho:** "Painel de memória"; à direita "Abrir caixa de entrada" → seção Caixa de entrada.
@@ -52,14 +66,17 @@ pesar fidelidade contra brevidade. Escrito em 2026-11-19.
   Sessões 201, Eventos capturados 86.023, Páginas compiladas 196, Sessões abertas 0 (em âmbar). O
   clique em cada um ordena os cartões abaixo (sessões, eventos, páginas; Sessões abertas filtra
   as com sessão aberta), como os links do upstream; Projetos rola até a lista.
-- **Linha da captura:** "Última captura: há 9 horas ⓘ" e, se o engine tem métricas, "Captura: 0
-  aceitos · 0 descartados pela política · 0 por capacidade · 0 limitados por taxa" (o bloco "Saúde
-  da captura dos hooks" do upstream, que no print não aparece por falta de métricas).
+- **Linha da captura:** "Última captura: há 9 horas ⓘ" e "Captura: 0 aceitos · 0 descartados pela
+  política · 0 por capacidade · 0 limitados por taxa", o bloco "Saúde da captura dos hooks" do
+  upstream numa linha, com os contadores do engine do Cadex (cadex-memory, o mesmo processo da
+  Saúde). No print não aparece: o exemplo do upstream não liga as métricas.
 - **Aviso da fila** (não desenhado: o dono não tem fila): com mensagens na fila, uma faixa âmbar
   (components.memoryPanel.notice) "N mensagens aguardando agentes em projeto (n), …" (até 5),
   entre a linha da captura e os projetos; o clique abre a Caixa de entrada.
-- **"Seus projetos" 5**, o campo "Filtrar projetos…" e o seletor "Todos os projetos ▾" (Com
-  sessões abertas, Com mensagens na fila). Filtrando: "N de M"; nada: "Nenhum projeto corresponde
+- **"Seus projetos" 5**, o campo "Filtrar projetos…", o seletor "Todos os projetos ▾" (Com
+  sessões abertas, Com mensagens na fila) e "Ordenar: Padrão ▾" (Padrão, a ordem do upstream;
+  Sessões, Eventos, Páginas, Sessões abertas). O clique num número põe a ordem dele no seletor
+  ("Ordenar: Sessões"), para a ordem dos cartões estar sempre escrita. Filtrando: "N de M"; nada: "Nenhum projeto corresponde
   a estes filtros".
 - **Cartões em três colunas:** a marca, o nome, os agentes ("Claude Code" ou "Nenhuma sessão de
   agente ainda"); quatro números (Sessões, Eventos capturados, Páginas compiladas, Sessões
@@ -69,7 +86,9 @@ pesar fidelidade contra brevidade. Escrito em 2026-11-19.
   no cartão abre o projeto (MemoryProject).
 - **Cortes:** a linha "Acompanhe a atividade, investigue o uso de tokens e coordene seus agentes.";
   as notas dos números ("Visíveis no seu espaço de trabalho", "Projetos com mais sessões
-  primeiro"…), que viram tooltip; a nota da captura ("Aberta significa que nenhum SessionEnd foi
+  primeiro"…), no ⓘ de cada número (a ordem fica no seletor); os ícones dos cinco números (pasta,
+  terminal, chip, arquivo, relógio; os números do Cadex não têm ícone); a nota da captura
+  ("Aberta significa que nenhum SessionEnd foi
   recebido; pode ser um agente ativo ou uma interrupção. Os contadores contêm apenas metadados;
   prompts e comandos brutos permanecem nas visualizações detalhadas do escopo."), no ⓘ; o
   workspace "default" em mono no cartão; "páginas" depois do número; "Explorar agentes" vira
@@ -78,7 +97,8 @@ pesar fidelidade contra brevidade. Escrito em 2026-11-19.
 
 ### MemoryProject.dc.html — Memória · Um projeto (print 09)
 - **Trilha** "Projetos › cadex"; título "cadex"; à direita "Abrir no Cadex" (o projeto no Cadex) e
-  "Mensagem a um agente" (Caixa de entrada, com o projeto preenchido).
+  "Enviar mensagem a um agente" (Caixa de entrada, com o projeto preenchido). "Abrir no Cadex"
+  também por ⌘O na página do projeto (as regras de acesso, em MemorySidebar).
 - **Abas** no seletor segmentado: Visão geral, Agentes, Uso de tokens, Sessões, Conhecimento; à
   direita "Caixa de entrada ↗" e "Grafo de links ↗" (MemoryGraph).
 - **Visão geral:** cinco números: Sessões 44, Eventos capturados 15.098, Páginas compiladas 49,
@@ -108,7 +128,7 @@ pesar fidelidade contra brevidade. Escrito em 2026-11-19.
 - **Caixa "Evidências e validade"** (aberta), uma linha por item com nome e valor curto e ⓘ:
   Versão (o id em mono), Expiração "Sem expiração registrada", Fontes acessíveis "0 citações
   registradas" (com fontes: a lista paginada embaixo), Contradições declaradas "0 conexões
-  ativas" (com contradições: a lista); a dobra "Por que esta página foi recuperada?".
+  ativas e acessíveis" (com contradições: a lista); a dobra "Por que esta página foi recuperada?".
 - **O Markdown** renderizado pela feature markdown; um link de página abre a página aqui.
 - **Coluna da direita:** "Nesta página" (só com títulos), CITADA POR ("Nenhuma página aponta para
   cá." ou a lista com "e mais N"), "Cita" (só com links).
@@ -138,8 +158,8 @@ pesar fidelidade contra brevidade. Escrito em 2026-11-19.
 - **Título** "Linha do tempo da sessão"; o selo do agente e "iniciada 18/11 21:13:34 · encerrada
   19/11 02:46:59 ⓘ" (ou "ainda aberta"); à direita "Abrir no Cadex": o terminal onde a sessão
   roda, se aberta, ou um terminal novo que retoma a conversa do Claude Code (cwd e id da sessão).
-- **Uso de tokens** numa caixa: o título, o selo "Durante as sessões", "0–0 de 0 respostas" e
-  "Filtrar…"; os seis números (Chamadas capturadas, Entrada nova, Saída, Leitura do cache,
+- **Uso de tokens** numa caixa: o título, o selo "Durante as sessões", "0–0 de 0 respostas · 0
+  capturadas · 0 tokens nas correspondências" e "Filtrar…"; os seis números (Chamadas capturadas, Entrada nova, Saída, Leitura do cache,
   Gravação no cache, Entrada do cache); com respostas, a tabela delas embaixo (resposta/sessão,
   modelo, entrada, saída, cache, total, sinal); sem: "Nenhum uso de resposta informado ainda ⓘ".
 - **A barra de páginas:** « Primeira, ‹ Anterior, "1–50 de 882", Próxima ›, Última », e "Ir para"
@@ -161,8 +181,8 @@ pesar fidelidade contra brevidade. Escrito em 2026-11-19.
   Uso não informado é desconhecido, nunca zero.") vão para o ⓘ.
 
 ### MemoryAgent.dc.html — Memória · Um agente num projeto (print 13)
-- **Trilha** "Projetos › cadex › Claude Code"; título "Claude Code" e "Sessões, consumo e cobertura
-  em cadex"; à direita "Mensagem ao agente".
+- **Trilha** "Projetos › cadex › Claude Code"; título "Claude Code"; à direita "Enviar mensagem ao
+  agente". A busca da barra lateral fica no escopo do projeto ("Pesquisar em cadex").
 - **Quatro números com nota curta:** Sessões registradas 44 "0 sem evento de encerramento";
   Tokens informados — "entrada + saída + cache"; Chamadas medidas 0 "respostas deste agente";
   Cobertura de uso 0% "0 de 44 sessões".
@@ -170,26 +190,27 @@ pesar fidelidade contra brevidade. Escrito em 2026-11-19.
   sem uso informado ⓘ".
 - **SESSÕES:** a tabela Sessão (id curto em mono, ↗ abre MemorySession), Estado (o selo
   "Encerrada" com ponto cinza; "Aberta" com ponto azul), Início, Duração, Eventos, Tokens · entrada
-  / saída; na linha sob o ponteiro, "Abrir no Cadex" à direita (o terminal ou a retomada, como na
-  sessão). "Mais novas / Mais antigas" no fim.
+  / saída; na linha sob o ponteiro ou escolhida, "Abrir no Cadex" à direita (o terminal ou a
+  retomada, como na sessão), também no menu de contexto da linha e por ⌘O; Enter abre a sessão. "Mais novas / Mais antigas" no fim.
 - **Cortes:** "INFORMAÇÕES DO AGENTE · default"; "Sessões, consumo e cobertura de captura de
-  cadex." encurta; "Atualize o cliente e os hooks deste agente para capturar as respostas do
+  cadex." (a trilha já diz o projeto); "Atualize o cliente e os hooks deste agente para capturar as respostas do
   modelo durante o trabalho." vai para o ⓘ da faixa; "ATIVIDADE" e "Abra uma sessão para examinar
   as respostas capturadas e a linha do tempo de eventos.".
 
 ### MemorySearch.dc.html — Memória · Pesquisar (print 04)
-- **Título** "Pesquisar: memória" com o termo em verde; num projeto, o selo "em cadex ×" ao lado
+- **Título** "Pesquisar: memória" com o termo marcado como nos resultados; num projeto, o selo "em cadex ×" ao lado
   (× volta à busca geral).
 - **A barra:** os seletores Todos os projetos (e os projetos), Qualquer tipo, Qualquer camada; o
   campo com o termo (com foco); "Explicar classificação"; "Pesquisar".
-- **"34 resultados"**, e um resultado por bloco: o título (seminegrito), o trecho numa linha com o
-  termo marcado em âmbar, e "projeto · caminho". O clique abre a página (MemoryPage).
+- **"34 resultados"**, e um resultado por bloco: o título (seminegrito), o trecho numa linha, o
+  termo marcado do mesmo jeito no título e no trecho (um destaque só,
+  components.memoryPanel.search.hit), e "projeto · caminho". O clique abre a página (MemoryPage).
 - Com "Explicar classificação": a caixa "Rastro da recuperação" acima dos resultados e, em cada
   um, posição, rank e a tabela dos streams, numa dobra.
 - Vazio: "Nenhum resultado para X" e "Pesquisar em todos os projetos"; sem termo, as páginas
   recentes.
-- **Divergências:** o título do resultado em branco, não em verde (o verde fica só no termo do
-  título, como destaque); o trecho numa linha só (o upstream quebra em duas); o workspace "default"
+- **Divergências:** o título do resultado em branco, não em verde, e o termo marcado em âmbar em
+  todo lugar (no upstream, verde no título da página e âmbar no trecho); o trecho numa linha só (o upstream quebra em duas); o workspace "default"
   sai do "default/cadex".
 
 ### MemoryGraph.dc.html — Memória · O grafo de links (prints 14 e 05)
@@ -198,12 +219,14 @@ pesar fidelidade contra brevidade. Escrito em 2026-11-19.
   esquerda o quadro de 600 com as 49 páginas num círculo (o circular_layout do upstream), as
   arestas como linhas; à direita CONEXÕES (De → Para, uma por linha; "Nenhum link resolvido.").
   Aviso âmbar quando cortado no teto de nós.
-- **O geral** (o item Grafo da coluna, sem desenho): título "Grafo de links", "Links entre
+- **O geral** (o item Grafo de conhecimento da barra lateral, sem desenho): título "Grafo de links", "Links entre
   projetos" e, nos dados do dono, "Ainda não há links entre projetos." e "Nenhum link resolvido."
   em CONEXÕES.
 - **Divergência:** os títulos das páginas não ficam escritos em volta do círculo (no upstream se
-  sobrepõem e não se leem); aparecem num balão sobre o nó sob o ponteiro (título e caminho), e o
-  clique abre a página.
+  sobrepõem e não se leem); aparecem num balão sobre o nó sob o ponteiro ou com foco (título e
+  caminho), e o clique abre a página.
+- **Acesso:** Tab e as setas andam de nó em nó, na ordem do círculo; o nó com foco leva o anel de
+  escolhido e o balão; o nome acessível do nó é o título e o caminho; Enter abre a página.
 - **Cortes:** "Páginas mais recentes deste projeto e os wikilinks resolvidos entre elas." vira os
   números; "Wikilinks resolvidos cujas extremidades estão em projetos diferentes. Uma conexão só
   aparece quando as duas extremidades podem ser lidas." vira "Links entre projetos" com o resto
@@ -213,15 +236,17 @@ pesar fidelidade contra brevidade. Escrito em 2026-11-19.
 - **Título** "Caixa de entrada dos agentes" e, embaixo, o estado da fila: "Nenhuma mensagem
   aguardando agentes" (com fila: "N na fila · M projetos" e um link por projeto). À direita "Nova
   mensagem" (põe o foco no formulário).
-- **À esquerda, a caixa do projeto:** o seletor do projeto ("cadex", com "· n" na fila), Recebidas
-  | Enviadas, e o estado (Todas as mensagens, Aguardando coleta, Coletadas, Canceladas, Em
+- **À esquerda, CAIXA DE MENSAGENS DO PROJETO:** o seletor do projeto ("cadex", com "· n" na fila), Recebidas
+  | Enviadas, e "Estado da mensagem" (Todas as mensagens, Aguardando coleta, Coletadas, Canceladas, Em
   edição). Cada mensagem numa linha que abre: envelope, assunto, "origem → destino", "agente ·
   quando", o selo do estado; aberta, o corpo, o id e Editar (ou Continuar editando / Descartar
-  alterações). Vazio: "Um pouco de tranquilidade" e "Nenhuma mensagem neste estado.".
+  alterações). Vazio: o ícone envelope-simple, "Um pouco de tranquilidade" e "Nenhuma mensagem neste estado.".
 - **À direita, Nova mensagem:** Do projeto, Para o projeto ⓘ, Para o agente ⓘ ("Selecione um
-  agente registrado…"; só os registrados no destino), Assunto (opcional), Mensagem ("Descreva o
+  agente registrado…"; só os registrados no destino), Assunto ("opcional · até 200"), Mensagem ("Descreva o
   pedido, o contexto e o resultado esperado."), "Texto simples · segredos são removidos" e "0 /
-  8.000", "Fica na fila até a próxima verificação do agente ⓘ" e "Colocar na fila"; o resultado
+  8.000", "Fica na fila até a próxima verificação · Não inicia o agente ⓘ" (a parte "Não inicia o
+  agente" sempre à vista: mandar nunca abre um agente nem roda a mensagem) e "Colocar mensagem
+  na fila"; o resultado
   aparece no lugar da nota, com "Ver enviadas".
 - **Cortes:** a trilha "Projetos / default / cadex / Caixa de entrada" e "Caixa de mensagens:
   default / cadex" (o seletor do projeto já diz); a caixa "Aguardando agentes" vira a linha sob o
@@ -231,8 +256,9 @@ pesar fidelidade contra brevidade. Escrito em 2026-11-19.
   Escolha outro projeto para enviar uma mensagem entre projetos." e "Somente agentes registrados no
   projeto de destino são exibidos." vão para o ⓘ; "Na fila para a próxima verificação da caixa de
   entrada deste agente. Enviar uma mensagem não inicia um agente nem executa seu conteúdo." encurta
-  (o resto no ⓘ); o campo de token de escrita (o app fala pelo socket). "Colocar mensagem na fila"
-  vira "Colocar na fila".
+  (o resto no ⓘ); o campo de token de escrita (o app fala pelo socket); a dica do limite de 200 do
+  assunto fica no rótulo; "Nenhuma mensagem corresponde a este estado na caixa selecionada." vira
+  "Nenhuma mensagem neste estado.".
 
 ### MemoryWorkstreams.dc.html — Memória · Workstreams (print 03)
 - **Título** "Workstreams gerenciados", "Por atenção e atividade recente" e "Página 1" à direita.
@@ -258,22 +284,29 @@ pesar fidelidade contra brevidade. Escrito em 2026-11-19.
 - **Cortes:** "Abra uma proposta para lê-la e depois aprove ou rejeite."; a dica da CLI no corte
   de 500.
 
-### MemoryHealth.dc.html — Memória · Saúde (print 07)
-- **Título** "Saúde do servidor" e "Somente leitura: cada correção é um comando".
-- **Faixa âmbar** quando os contadores do processo não estão ligados: "Contadores de hooks, spool e
-  provedores não ligados a este painel".
+### MemoryHealth.dc.html — Memória · Saúde do servidor (print 07)
+- **O "servidor" é o processo local da memória** (o dono, 2026-11-19): no Cadex, o engine
+  cadex-memory deste Mac. A tela mantém os blocos do upstream com os contadores do engine.
+- **Título** "Saúde do servidor" e "O processo cadex-memory deste Mac · somente leitura".
 - **Verificações:** "● Todas as verificações do servidor passaram" em verde, ou a lista (erro em
-  vermelho, aviso em âmbar, cada um com "Correção:" e o comando).
-- **As seções em caixas, em duas colunas**, cada linha o nome e o valor em mono (o valor quebra
-  linha, nunca corta): HOOKS (DESDE O INÍCIO DO SERVIDOR), GRAVAÇÃO, SPOOL E RECUPERAÇÃO,
-  CONSOLIDAÇÃO à esquerda; EMBEDDINGS E MODELOS, ÍNDICE E ARMAZENAMENTO à direita. Os valores
-  como os do upstream.
-- **Cortes:** "Contadores, filas e estado dos modelos deste processo do servidor." sai; "Este
-  servidor não conectou seus contadores de processo à interface web; os dados de hooks, spool e
-  provedores abaixo estão vazios." encurta; "pendente mais antigo desde" vira "pendente mais
-  antigo".
-- **No Cadex:** hooks, spool e provedores são do servidor do upstream; a fase B decide se essas
-  linhas mostram os contadores do engine ou caem (o inventário, seção 7).
+  vermelho, aviso em âmbar, cada um com "Correção:" e o comando do ⌘K que resolve).
+- **As seções em caixas**, cada linha o nome e o valor em mono (o valor quebra linha, nunca
+  corta): HOOKS (DESDE O INÍCIO DO SERVIDOR): aceitos, rejeitados (429), resultados,
+  descartados, última gravação; GRAVAÇÃO, SPOOL E RECUPERAÇÃO: fila de gravação, spool de hooks,
+  registro de recuperação; CONSOLIDAÇÃO: última conclusão, fila, pendente mais antigo; EMBEDDINGS
+  E MODELOS: gerador de embeddings, reclassificador, vetores, identidade armazenada; ÍNDICE E
+  ARMAZENAMENTO: fts, banco de dados. Os mesmos contadores alimentam a linha "Captura" da Visão
+  geral. Os números do desenho são os do print; fila de gravação "0", spool "0 arquivos na fila" e
+  registro de recuperação "desligado" são de exemplo (no print, "desconhecido" e "não visível para
+  este servidor", porque o exemplo do upstream não liga os contadores).
+- **Divergências:** duas colunas de caixas (Hooks, Gravação e Consolidação à esquerda; Embeddings e
+  Índice à direita), no lugar da coluna única do upstream, para caber sem rolar.
+- **Cortes:** "provedor de embeddings" e "provedor LLM", provedores remotos que não existem no
+  Cadex (ele não roda modelo nem guarda chave; os embeddings são do modelo local); a faixa âmbar
+  "Este servidor não conectou seus contadores de processo à interface web…" (o engine liga os
+  dele); "Contadores, filas e estado dos modelos deste processo do servidor. Somente leitura: cada
+  correção é um comando a executar, não um botão." vira a linha sob o título; "pendente mais
+  antigo desde" vira "pendente mais antigo".
 
 ### MemoryDocs.dc.html — Memória · Documentação (print 08)
 - **Título** "Documentação" e, à direita, "Histórico de alterações".

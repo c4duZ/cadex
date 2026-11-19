@@ -24,6 +24,16 @@ repositório. O código dele está no checkout do cargo, no commit fixado (411d9
 - Adaptado ao Cadex só no que ajuda: um projeto ou uma sessão levam também ao projeto e ao
   terminal no Cadex; o idioma é o do Cadex.
 
+- Decisões do dono sobre os mockups (2026-11-19, depois da revisão de UX):
+  - Uma barra lateral só: com a Memória aberta, a barra de Trabalho troca o conteúdo pelas seções
+    do painel, com "‹ Trabalho" em cima; nada de segunda coluna.
+  - A Memória entra no pé da barra lateral, e só isso: o item Memory da barra de baixo, a seção
+    Memória da página do projeto, o inspector e Arquivo e Histórico ficam como estão, para estudar
+    depois.
+  - A Saúde e a linha "Captura" da Visão geral com os contadores do engine local (o cadex-memory é
+    o servidor local do upstream na máquina da pessoa); sai só o que não existe localmente (os
+    provedores remotos).
+
 ## O que eu não quero
 - WebView (ADR 0001): as telas são nativas.
 - Mudar o que existe: a seção Memória da página do projeto, o item Memory da barra de baixo e o

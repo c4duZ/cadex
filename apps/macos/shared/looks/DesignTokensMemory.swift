@@ -8,10 +8,16 @@ import AppKit
 public extension DesignTokens {
     enum MemoryPanel {
         public enum Nav {
-            public static let width: CGFloat = 200
-            public static var bg: NSColor { DesignTokens.Color.bgWindow }
-            public static var borderRight: NSColor { DesignTokens.Color.lineSubtle }
-            public static let padding = NSEdgeInsets(top: 14, left: 8, bottom: 10, right: 8)
+            public enum Back {
+                public static let height: CGFloat = 28
+                public static let padding = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
+                public static let gap: CGFloat = 6
+                public static let radius: CGFloat = DesignTokens.Radius.control
+                public static let fontSize: CGFloat = DesignTokens.FontSize.panel
+                public static var weight: NSFont.Weight { DesignTokens.FontWeight.semibold }
+                public static var color: NSColor { DesignTokens.Color.textSecondary }
+                public static let marginBottom: CGFloat = 8
+            }
             public enum Search {
                 public static let height: CGFloat = 28
                 public static let padding = NSEdgeInsets(top: 0, left: 9, bottom: 0, right: 9)
@@ -21,7 +27,7 @@ public extension DesignTokens {
                 public static var border: NSColor { DesignTokens.Color.lineDefault }
                 public static var color: NSColor { DesignTokens.Color.textTertiary }
                 public static let fontSize: CGFloat = DesignTokens.FontSize.meta
-                public static let marginBottom: CGFloat = 16
+                public static let margin = NSEdgeInsets(top: 0, left: 2, bottom: 14, right: 2)
                 public static let icon: CGFloat = 13
             }
             public enum Group {
@@ -30,7 +36,7 @@ public extension DesignTokens {
                 public static let tracking: CGFloat = DesignTokens.Tracking.label
                 public static var color: NSColor { DesignTokens.Color.textTertiary }
                 public static let padding = NSEdgeInsets(top: 0, left: 8, bottom: 6, right: 8)
-                public static let marginTop: CGFloat = 16
+                public static let marginTop: CGFloat = 14
             }
             public enum Row {
                 public static let height: CGFloat = 28
@@ -46,15 +52,14 @@ public extension DesignTokens {
                     public static var weight: NSFont.Weight { DesignTokens.FontWeight.semibold }
                 }
             }
-            public enum Version {
-                public static let fontSize: CGFloat = DesignTokens.FontSize.caption
-                public static var color: NSColor { DesignTokens.Color.textTertiary }
-                public static let padding = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
-            }
             public enum FootItem {
                 public enum Selected {
                     public static var bg: NSColor { DesignTokens.Color.bgSelected }
                     public static var color: NSColor { DesignTokens.Color.textPrimary }
+                }
+                public enum Version {
+                    public static let fontSize: CGFloat = DesignTokens.FontSize.caption
+                    public static var color: NSColor { DesignTokens.Color.textTertiary }
                 }
             }
         }
@@ -345,11 +350,12 @@ public extension DesignTokens {
             }
         }
         public enum Search {
-            public static var term: NSColor { DesignTokens.Color.accentGreenText }
             public enum Hit {
                 public static var bg: NSColor { DesignTokens.Color.chipUsageBg }
                 public static var color: NSColor { DesignTokens.Color.accentAmberText }
                 public static let radius: CGFloat = DesignTokens.Radius.line
+                public static let padding = NSEdgeInsets(top: 0, left: 2, bottom: 0, right: 2)
+                public static let inTitle = true
             }
             public enum Result {
                 public static let padding = NSEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
@@ -378,6 +384,16 @@ public extension DesignTokens {
         public enum Aside {
             public static let width: CGFloat = 220
             public static let paddingTop: CGFloat = 36
+        }
+        public enum Help {
+            public static var glyph: NSColor { DesignTokens.Color.textTertiary }
+            public enum Popover {
+                public static let padding = NSEdgeInsets(top: 6, left: 10, bottom: 6, right: 10)
+                public static let radius: CGFloat = DesignTokens.Radius.control
+                public static var bg: NSColor { DesignTokens.Color.bgRaised }
+                public static var border: NSColor { DesignTokens.Color.linePopover }
+                public static var shadow: [DesignTokens.ShadowLayer] { DesignTokens.Shadow.popover }
+            }
         }
     }
 }

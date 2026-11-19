@@ -19,10 +19,10 @@ body{margin:0;background:#08090A}
   <dc-import name="TitleBar" view="memory" panel="{{ false }}" hint-size="1440px,44px"></dc-import>
 
   <div style="flex: 1; display: flex; min-height: 0">
-    <dc-import name="MemorySidebar" section="search" hint-size="448px,826px"></dc-import>
+    <dc-import name="MemorySidebar" section="search" hint-size="248px,826px"></dc-import>
 
     <div style="flex: 1; min-width: 0; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
-      <span style="font-size: 22px; font-weight: 700; letter-spacing: -0.01em">Pesquisar: <span style="color: #6FCF97">memória</span></span>
+      <span style="font-size: 22px; font-weight: 700; letter-spacing: -0.01em">Pesquisar: <span style="padding: 0 2px; border-radius: 3px; background: #2A2113; color: #F2B65E">memória</span></span>
 
       <div style="display: flex; align-items: center; gap: 8px">
         <sc-for list="{{popups}}" as="p" hint-placeholder-count="3">
@@ -38,7 +38,7 @@ body{margin:0;background:#08090A}
       <div style="display: flex; flex-direction: column">
         <sc-for list="{{results}}" as="r" hint-placeholder-count="7">
           <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 0; border-bottom: 1px solid #1F2125">
-            <span style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.title}}</span>
+            <span style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.tb}}<span style="{{r.thStyle}}">{{r.th}}</span>{{r.ta}}</span>
             <span style="font-size: 12.5px; color: #C3C6CB; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.before}}<span style="padding: 0 2px; border-radius: 3px; background: #2A2113; color: #F2B65E">{{r.hit}}</span>{{r.after}}</span>
             <span style="font-size: 11.5px; color: #7C828B">{{r.where}}</span>
           </div>
@@ -53,7 +53,10 @@ body{margin:0;background:#08090A}
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
 class Component extends DCLogic {
   renderVals() {
-    const r = (title, before, hit, after, where) => ({ title, before, hit, after, where });
+    const hit = 'padding: 0 2px; border-radius: 3px; background: #2A2113; color: #F2B65E';
+    // The term is marked the same way in the title and in the snippet (memoryPanel.search.hit).
+    const split = (t) => { const m = t.match(/mem[óo]ria/i); return m ? [t.slice(0, m.index), m[0], t.slice(m.index + m[0].length)] : [t, '', '']; };
+    const r = (title, before, hit_, after, where) => { const [tb, th, ta] = split(title); return { tb, th, ta, thStyle: th ? hit : 'display: none', before, hit: hit_, after, where }; };
     return {
       popups: ['Todos os projetos', 'Qualquer tipo', 'Qualquer camada'],
       results: [

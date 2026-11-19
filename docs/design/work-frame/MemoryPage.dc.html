@@ -19,7 +19,7 @@ body{margin:0;background:#08090A}
   <dc-import name="TitleBar" view="memory" panel="{{ false }}" hint-size="1440px,44px"></dc-import>
 
   <div style="flex: 1; display: flex; min-height: 0">
-    <dc-import name="MemorySidebar" section="projects" scope="cadex" hint-size="448px,826px"></dc-import>
+    <dc-import name="MemorySidebar" section="projects" scope="cadex" hint-size="248px,826px"></dc-import>
 
     <div style="flex: 1; min-width: 0; padding: 24px 32px; display: flex; gap: 32px; overflow: hidden">
       <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px">
@@ -76,7 +76,7 @@ class Component extends DCLogic {
         { name: 'Versão', value: '01a1efac-d887-7582-a5ab-f87c5ef7d2d8', valueStyle: mono },
         { name: 'Expiração', value: 'Sem expiração registrada', valueStyle: plain },
         { name: 'Fontes acessíveis', value: '0 citações registradas', valueStyle: plain },
-        { name: 'Contradições declaradas', value: '0 conexões ativas', valueStyle: plain },
+        { name: 'Contradições declaradas', value: '0 conexões ativas e acessíveis', valueStyle: plain },
       ],
       body: [
         { key: 'Ícones:', text: 'Phosphor em todo o repositório.' },

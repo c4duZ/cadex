@@ -19,7 +19,7 @@ body{margin:0;background:#08090A}
   <dc-import name="TitleBar" view="memory" panel="{{ false }}" hint-size="1440px,44px"></dc-import>
 
   <div style="flex: 1; display: flex; min-height: 0">
-    <dc-import name="MemorySidebar" section="inbox" hint-size="448px,826px"></dc-import>
+    <dc-import name="MemorySidebar" section="inbox" hint-size="248px,826px"></dc-import>
 
     <div style="flex: 1; min-width: 0; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
       <div style="display: flex; align-items: flex-end; gap: 16px">
@@ -33,6 +33,7 @@ body{margin:0;background:#08090A}
       <div style="display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; min-height: 0; flex: 1">
         <!-- The project's mailbox. -->
         <div style="padding: 14px 16px; border-radius: 10px; background: #131417; border: 1px solid #1F2125; display: flex; flex-direction: column; gap: 12px">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: #7C828B">CAIXA DE MENSAGENS DO PROJETO</span>
           <div style="display: flex; align-items: center; gap: 8px">
             <span style="height: 30px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 0 10px; border-radius: 7px; background: #1A1C20; border: 1px solid #2A2D33; font-size: 12.5px">cadex <span style="font-size: 11px; color: #9BA0A8">▾</span></span>
             <div style="display: flex; gap: 2px; background: #15171A; border: 1px solid #25282D; border-radius: 9px; padding: 3px">
@@ -40,6 +41,7 @@ body{margin:0;background:#08090A}
               <span style="height: 24px; padding: 0 12px; border-radius: 7px; color: #8A9099; font-size: 12.5px; font-weight: 500; display: flex; align-items: center">Enviadas</span>
             </div>
             <span style="flex: 1"></span>
+            <span style="font-size: 12px; font-weight: 600; color: #D5D7DB">Estado da mensagem</span>
             <span style="height: 30px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 0 10px; border-radius: 7px; background: #1A1C20; border: 1px solid #2A2D33; font-size: 12.5px">Aguardando coleta <span style="font-size: 11px; color: #9BA0A8">▾</span></span>
           </div>
           <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px">
@@ -63,8 +65,8 @@ body{margin:0;background:#08090A}
             <span style="height: 112px; box-sizing: border-box; padding: 8px 10px; border-radius: 7px; background: #0F1012; border: 1px solid #25282D; color: #7C828B; font-size: 12.5px">Descreva o pedido, o contexto e o resultado esperado.</span>
             <span style="display: flex; font-size: 11.5px; color: #7C828B">Texto simples · segredos são removidos<span style="flex: 1"></span>0 / 8.000</span>
           </div>
-          <span style="font-size: 12px; color: #8A9099">Fica na fila até a próxima verificação do agente <span style="color: #7C828B">ⓘ</span></span>
-          <button style="height: 32px; padding: 0 14px; border-radius: 7px; border: 0; background: #E7E8EA; color: #111214; font: inherit; font-weight: 600">Colocar na fila</button>
+          <span style="font-size: 12px; color: #8A9099">Fica na fila até a próxima verificação · <span style="color: #D5D7DB; font-weight: 600">Não inicia o agente</span> <span style="color: #7C828B">ⓘ</span></span>
+          <button style="height: 32px; padding: 0 14px; border-radius: 7px; border: 0; background: #E7E8EA; color: #111214; font: inherit; font-weight: 600">Colocar mensagem na fila</button>
         </div>
       </div>
     </div>
@@ -84,7 +86,7 @@ class Component extends DCLogic {
         { label: 'Do projeto', side: '', value: 'cadex', style: popup, caret: caret(true) },
         { label: 'Para o projeto', side: 'ⓘ', value: 'cadex', style: popup, caret: caret(true) },
         { label: 'Para o agente', side: 'ⓘ', value: 'Selecione um agente registrado…', style: popup, caret: caret(true) },
-        { label: 'Assunto', side: 'opcional', value: 'O que precisa ser feito?', style: field, caret: caret(false) },
+        { label: 'Assunto', side: 'opcional · até 200', value: 'O que precisa ser feito?', style: field, caret: caret(false) },
       ],
     };
   }
