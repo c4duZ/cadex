@@ -16,7 +16,7 @@ A barra tem dois lados, esquerda e direita, e cada lado é uma lista de itens em
 | Project | "cadex · main ↑3": o projeto e o branch, com ↑↓ de commits a enviar/receber | ligado, esquerda |
 | Agents | "● 3 working" (azul) e "● 2 need you" (âmbar); some o que for zero | ligado, esquerda |
 | Folder | a trilha "Home › Cadu › Trabalho › cadex" do terminal com foco | desligado |
-| Terminal | "Terminal ⌃`": mostra ou esconde a gaveta de terminais | ligado, direita |
+| Terminal | "Terminal ⌥⌘`": mostra ou esconde a gaveta de terminais | ligado, direita |
 | Memory | "Memory · 214 pages": abre a página Memory da coluna lateral | ligado, direita |
 | Agent usage | a conta do agente do terminal com foco, ou a última (a escolha do dono, 2026-10-21): "Claude bkdg 84% · resets 3h", em etiqueta âmbar acima de 80% e texto comum abaixo; passar o ponteiro abre todas as contas (`agents.md`) | ligado, direita |
 | Environment | "Local" no macOS (no Windows, a distro WSL), ou a máquina onde roda | ligado, direita |
@@ -93,7 +93,7 @@ do ⌘K. O cartão só lê enquanto está aberto.
 | Cadex memory | o app, os ajudantes dele (engine da memória, daemon do terminal) e o que roda em cada terminal; o total. O número da barra continua só o app. |
 | Ports | cada porta com o processo, o pid e o projeto; "Open" no preview; Stop a port… (ports.stop, SIGTERM) e Share on the tailnet… |
 | Agents | os agentes de todas as janelas: precisa de você, trabalhando, pronto, parados; o clique leva ao terminal; o quadro e as notificações |
-| Terminals e Terminal ⌃` | os terminais da janela e os da gaveta: o que roda, a pasta, há quanto tempo; novo terminal e a gaveta |
+| Terminals e Terminal ⌥⌘` | os terminais da janela e os da gaveta: o que roda, a pasta, há quanto tempo; novo terminal e a gaveta |
 | Agent usage | o das contas, como antes; a conta da barra de cima abre o mesmo cartão (para baixo) |
 | Memory | quantas páginas, as que mudaram por último (lidas da wiki ao abrir); abrir e consolidar |
 | Project | o branch contra o remoto (âmbar com algo a enviar ou receber), quantos arquivos mudaram, o último commit; Changes, Push, trocar de branch |
@@ -127,5 +127,5 @@ do ⌘K. O cartão só lê enquanto está aberto.
 - [ ] Cada ação de personalizar também está no ⌘K.
 - [ ] Com todos os itens novos escondidos, o `make perf` dá o mesmo de antes.
 
-- "Terminal ⌃`" (o item `drawer`, plano 30 C): o primeiro da direita por padrão, mostra ou esconde
+- "Terminal ⌥⌘`" (o item `drawer`, plano 30 C): o primeiro da direita por padrão, mostra ou esconde
   a gaveta de terminais; uma configuração de antes da versão 6 o ganha uma vez.

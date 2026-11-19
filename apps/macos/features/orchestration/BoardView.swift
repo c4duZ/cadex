@@ -61,7 +61,17 @@ public final class BoardDocument: TabDocument {
     }
 
     private func show() {
-        let pills = [pill(T("All", "Tudo"), on: filter == nil) { [weak self] in self?.filter = nil; self?.show() }]
+        // A title, as every page has: the board had none, and only a lit icon said where you were
+        // (UX audit, 2026-11-18). With no task anywhere, it says what goes here.
+        let title = NSTextField(labelWithString: T("Board", "Quadro"))
+        title.font = UILooks.font(DesignTokens.FontSize.pageTitle, weight: DesignTokens.FontWeight.semibold)
+        title.textColor = DesignTokens.Color.textPrimary
+        let note = NSTextField(labelWithString: cards.isEmpty
+            ? T("Every task of every project, by state. None yet: New task makes one.", "Toda tarefa de todo projeto, pelo estado. Nenhuma ainda: Nova tarefa cria uma.")
+            : T("Every task of every project, by state", "Toda tarefa de todo projeto, pelo estado"))
+        note.font = UILooks.font(DesignTokens.FontSize.meta)
+        note.textColor = DesignTokens.Color.textSecondary
+        let pills = [title, note, pill(T("All", "Tudo"), on: filter == nil) { [weak self] in self?.filter = nil; self?.show() }]
             + BoardColumns.filters(cards).map { item in
                 pill("\(item.name)" + (item.name == T("Automations", "Automações") ? "" : " (\(item.count))"), on: filter == item.name) { [weak self] in
                     self?.filter = item.name

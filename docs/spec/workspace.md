@@ -15,7 +15,7 @@ explorer e da busca) e garantir que o app só mexe em arquivos dentro das pastas
     (`status-bar.md`), as configurações ficam no ⌘, e no menu;
   - **esquerda:** a árvore do trabalho (`sidebar.md`), recolhível (⌘B);
   - **centro:** o que se abriu: os terminais e documentos da seleção, a página do projeto, o quadro,
-    a corrida, a tela de início (`home.md`); a gaveta de terminais sobe por cima dele (⌃`);
+    a corrida, a tela de início (`home.md`); a gaveta de terminais sobe por cima dele (⌥⌘`);
   - **direita:** o painel da seleção (`inspector.md`), opcional (⌥⌘I);
   - **barra de status** embaixo (30 pt).
 - A janela tem cantos de 12 e o fundo da moldura nova; a imagem de fundo e a vibrância, quando

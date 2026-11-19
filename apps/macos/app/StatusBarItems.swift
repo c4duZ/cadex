@@ -44,7 +44,8 @@ extension WindowSession {
         working.isHidden = true
         needs.isHidden = true
         needs.onClick = { [weak self] in _ = self?.commands.run("agents.show-attention") }
-        working.onClick = { [weak self] in _ = self?.commands.run("sidebar.show") }
+        // The working agents in a list (⌘J), not the side column (UX audit, 2026-11-18).
+        working.onClick = { [weak self] in _ = self?.commands.run("view.jump") }
         let row = NSStackView(views: [working, needs])
         row.isHidden = true
         attachCard(to: row) { [weak self] close in self?.agentsCard(close: close) ?? NSView() }

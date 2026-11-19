@@ -9,20 +9,28 @@ import Terminal
 enum CloseConfirmation {
     /// Runs `close` now if nothing is running or the user turned the
     /// question off; otherwise asks in a sheet and runs it on "Fechar".
-    static func confirm(running: Bool, in window: NSWindow?, what: String,
+    /// `busyAgent`: an agent working or waiting on you there (its name): always asked, whatever
+    /// "Don't ask again" said, and named; one ⌘W slip ended an agent mid-turn (UX audit, 2026-11-18).
+    static func confirm(running: Bool, busyAgent: String? = nil, in window: NSWindow?, what: String,
                         then close: @escaping @MainActor () -> Void, cancelled: @escaping @MainActor () -> Void = {}) {
-        let asks = TerminalPreferences.current.confirmClose
+        let asks = TerminalPreferences.current.confirmClose || busyAgent != nil
         guard asks, running, let window else {
             close()
             return
         }
         let alert = NSAlert()
-        alert.messageText = T("Close \(what) with a program running?", "Fechar \(what) com um programa rodando?")
-        alert.informativeText = T("The program in the foreground will be ended.", "O programa em primeiro plano vai ser encerrado.")
+        if let busyAgent {
+            alert.messageText = T("\(busyAgent) is working in \(what). Close it?", "O \(busyAgent) está trabalhando em \(what). Fechar?")
+            alert.informativeText = T("Its turn ends now; the conversation stays and can be resumed.",
+                                      "O turno dele acaba agora; a conversa fica e pode ser retomada.")
+        } else {
+            alert.messageText = T("Close \(what) with a program running?", "Fechar \(what) com um programa rodando?")
+            alert.informativeText = T("The program in the foreground will be ended.", "O programa em primeiro plano vai ser encerrado.")
+        }
         alert.addButton(withTitle: T("Close", "Fechar"))
         // NSAlert gives Esc only to a button titled "Cancel" in English.
         alert.addButton(withTitle: T("Cancel", "Cancelar")).keyEquivalent = "\u{1B}"
-        alert.showsSuppressionButton = true
+        alert.showsSuppressionButton = busyAgent == nil
         alert.suppressionButton?.title = T("Don't ask again", "Não perguntar de novo")
         alert.beginSheetModal(for: window) { response in
             MainActor.assumeIsolated {

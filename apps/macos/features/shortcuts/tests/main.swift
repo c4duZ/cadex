@@ -102,9 +102,13 @@ let exitCode = await Checks.run([
     ("every menu item runs a registered command", {
         let registry = appRegistry()
         let menu = CommandMenu(registry: registry) { _ in nil }.build()
-        let ids = menu.items.flatMap { $0.submenu?.items ?? [] }.compactMap { $0.representedObject as? String }
-        expect(ids.count == registry.commands.count)
-        expect(ids.allSatisfy { registry.command($0) != nil })
+        // Every level (the areas' submenus, plan 37); the palette is also in Help.
+        func ids(_ items: [NSMenuItem]) -> [String] {
+            items.flatMap { item in [item.representedObject as? String].compactMap { $0 } + ids(item.submenu?.items ?? []) }
+        }
+        let all = ids(menu.items)
+        expect(Set(all) == Set(registry.commands.map(\.id)), "every command is in the menu")
+        expect(all.allSatisfy { registry.command($0) != nil })
     }),
     ("shortcuts from settings.json override and turn off defaults", {
         let registry = appRegistry()

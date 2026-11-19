@@ -203,6 +203,12 @@ public final class RailView: NSView {
         for (page, button) in footButtons { button.lit = page == footLit }
     }
 
+    /// The pages' icons: only with a project to show (on the home screen the column cannot open,
+    /// and five icons did nothing: UX audit, 2026-11-18).
+    public var pagesShown = true {
+        didSet { if pagesShown != oldValue { pagesStack.isHidden = !pagesShown } }
+    }
+
     /// Remote at the foot: only with some SSH host or tailnet machine (ADR 0038).
     public var remoteShown = false {
         didSet { footButtons.first { $0.0 == .remote }?.1.isHidden = !remoteShown }

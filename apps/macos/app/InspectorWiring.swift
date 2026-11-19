@@ -56,7 +56,7 @@ extension WindowSession {
                 InspectorAction("git.history-in-tab", .arrowSquareOut, T("Open Git History in New Tab", "Abrir o histórico do git em nova aba")),
             ]),
         ]
-        let shortcut = app.keymapLabel("inspector.toggle") ?? "⌥⌘I"
+        let shortcut = app.keymapLabel("view.toggle-sidebar") ?? "⌘B"
         // The pages' icons are the rail's (ADR 0038, revised 2026-11-18): none on top of the column.
         let inspector = InspectorView(tabs: tabs, shortcut: shortcut, tabsOnTop: false) { [weak self] id in _ = self?.commands.run(id) }
         inspector.onShow = { [weak self] id in
@@ -106,7 +106,7 @@ extension WindowSession {
         if workspace.inspector.tab != prefs.tab { workspace.inspector.show(prefs.tab, announce: prefs.visible) }
     }
 
-    /// inspector.toggle (⌥⌘I, the title bar's button): saved, so it comes back on reopen.
+    /// view.toggle-sidebar (⌘B, the title bar's button): saved, so it comes back on reopen.
     func toggleInspector() {
         guard let workspace else { return }
         workspace.setInspector(visible: !workspace.inspectorVisible)

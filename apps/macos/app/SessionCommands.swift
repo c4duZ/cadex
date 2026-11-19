@@ -52,13 +52,8 @@ extension WindowSession {
             id: "view.toggle-sidebar", title: T("Show or Hide the Side Column", "Mostrar ou esconder a coluna lateral"),
             keywords: ["sidebar", "explorer", "column", "painel", "coluna"], category: .view, defaultShortcut: "cmd+b",
             action: .run { [weak self] in self?.toggleInspector() }))
-        // The same column by its old name and shortcut (it was the right panel, plan 26 phase C);
-        // its pages open by git.show, explorer.focus, git.show-history and memory.show.
-        commands.register(Command(
-            id: "inspector.toggle", title: T("Show or Hide the Side Column (Files, Changes, Memory)", "Mostrar ou esconder a coluna lateral (Arquivos, Mudanças, Memória)"),
-            keywords: ["inspector", "panel", "changes", "files", "painel", "lateral"], category: .view,
-            defaultShortcut: "cmd+opt+i",
-            action: .run { [weak self] in self?.toggleInspector() }))
+        // inspector.toggle (⌥⌘I) did the same as ⌘B under another name: one command now (UX audit,
+        // 2026-11-18).
         commands.register(PowerCommands.all(app.power))
         commands.register(ThemeCommands.all(store: app.settings.store, palette: palette))
         commands.register(UpdateCommands.all(app.updates))
@@ -101,10 +96,10 @@ extension WindowSession {
                 self?.git?.refresh()
             }))
         commands.register(Command(
-            // The work's tree, where the agents and the tasks are (plan 28: agents.show and
-            // worktrees.show, which showed the old pages, left; ⇧⌘J stays).
-            id: "sidebar.show", title: T("Show the Work Tree", "Mostrar a árvore do trabalho"),
-            keywords: ["tree", "agents", "tasks", "claude", "sessions", "árvore", "agentes", "tarefas", "sessões"], category: .view,
+            // Opens the side column (never closes it, unlike ⌘B); its name said "Work Tree", gone with
+            // ADR 0038 (UX audit, 2026-11-18). ⇧⌘J stays.
+            id: "sidebar.show", title: T("Show the Side Column", "Mostrar a coluna lateral"),
+            keywords: ["sidebar", "column", "files", "changes", "tree", "coluna", "lateral", "arquivos", "mudanças", "árvore"], category: .view,
             defaultShortcut: "cmd+shift+j",
             action: .run { [weak self] in self?.workspace?.showTree() }))
         commands.register(Command(
@@ -268,9 +263,14 @@ extension WindowSession {
         if tabs?.showsPage == true {
             workspace?.titleBar.setLocation(project: "", task: nil)
             showProject(branch: lastBranch)
+            window.title = [tabs?.activeDocument?.title, "Cadex"].compactMap { $0 }.joined(separator: " — ")
             return refreshTitleAccount()
         }
-        let (project, _) = TitleBarView.location(of: root)
+        let (project, task) = TitleBarView.location(of: root)
+        // Where you are, in words, where macOS shows it (Mission Control, ⌘`, the Window menu): the
+        // project by the name the owner gave, and the task (UX audit, 2026-11-18).
+        let named = projects?.projects.first { $0.folder == projects?.activeFolder }?.name ?? project
+        window.title = [[named, task].compactMap { $0 }.joined(separator: " › "), "Cadex"].joined(separator: " — ")
         // A race's lane: "cadex › race kite" (the Race mockup). Elsewhere no "project › task": the
         // tabs name it now, and the status bar says the project and the branch (the owner, 2026-11-18).
         let race = raceName(of: root).map { T("race ", "corrida ") + $0 }

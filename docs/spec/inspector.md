@@ -9,7 +9,7 @@ e Rail).
 
 ## Comportamento
 - **Abrir e fechar:** os ícones das páginas no trilho (`sidebar.md`) abrem a coluna na página; o
-  clique no ícone aceso a fecha. ⌘B (view.toggle-sidebar), ⌥⌘I (inspector.toggle) e o botão da
+  clique no ícone aceso a fecha. ⌘B (view.toggle-sidebar) e o botão da
   barra de título abrem e fecham; o botão fica aceso com ela aberta. O trilho fica sempre.
 - **Largura:** 260 pt por padrão; arrastar a borda direita muda (de 240 a 640 pt, deixando ao
   centro pelo menos 320) e fica salva. Aberta ou fechada, a página e a largura voltam ao reabrir.

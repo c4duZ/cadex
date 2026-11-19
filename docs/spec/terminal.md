@@ -276,10 +276,10 @@ célula fotografada (cor do texto, do fundo, negrito), nos temas "dark", "light"
   proceed?" e as opções. Fica como o Claude desenha (o dono, 2026-11-18).
 
 ### A gaveta de terminais (mockup Drawer; plano 30 C, feito junto da revisão do plano 29)
-- drawer.toggle (⌃`, e o item "Terminal ⌃`" da barra de status) mostra ou esconde a gaveta: terminais
+- drawer.toggle (⌥⌘`, e o item "Terminal ⌥⌘`" da barra de status) mostra ou esconde a gaveta: terminais
   rápidos de nenhum projeto, subindo de baixo por cima do centro (entre a árvore e o painel da
   direita), 340 pt com sombra para cima; a primeira vez abre um shell na pasta pessoal.
-- O topo tem as abas dela, "+" e "⌃` show or hide · drag up to resize · ⌘↩ move to a task";
+- O topo tem as abas dela, "+" e "⌥⌘` show or hide · drag up to resize · ⌘↩ move to a task";
   arrastar a borda de cima muda a altura (de 160 até perto da barra de título). Os terminais da
   gaveta ficam sem a caixa de painel.
 - drawer.move-to-project (⌘↩, só com o terminal da gaveta em foco) leva esse terminal, com o shell

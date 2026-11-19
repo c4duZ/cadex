@@ -241,7 +241,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         let menu = CommandMenu(registry: commands) { keymap.combo(for: $0)?.menuKeyEquivalent }
         mainMenu = menu.build()
         self.menu = menu
-        workspace?.inspector.setShortcut(app.keymapLabel("inspector.toggle"))
+        workspace?.inspector.setShortcut(app.keymapLabel("view.toggle-sidebar"))
     }
 
     // MARK: Settings, from SettingsBridge through the app

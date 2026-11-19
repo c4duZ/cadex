@@ -57,7 +57,7 @@
   agents.switch-account), o quadro (view.board liga e desliga: com ele aberto volta à aba de antes,
   TabsController.goBack, e o Esc faz o mesmo), o sino com o número (`setBell`, de
   `AgentsAttention.swift`), as configurações (settings.open) e o botão do painel da direita
-  (inspector.toggle, aceso com ele aberto; `setInspectorOpen`); o café e a
+  (view.toggle-sidebar, aceso com ela aberta; `setInspectorOpen`); o café e a
   atualização foram para a barra de status (fase B, `StatusBarItems.swift`); o botão da barra
   lateral, o de space e o das configurações saíram (⌘B, ⇧⌘S e ⌘, no ⌘K, nos atalhos e no menu). Cada botão é
   um `TitleBarButton.swift` (components.titleIconButton: 30 pt, aceso quando o que abre está
@@ -111,7 +111,7 @@
   (`WorkspaceView.swift`): os projetos com a cor, o estado mais urgente dos terminais e o ponto de
   terminal aberto, redesenhados com a árvore (drawTree, em `TreeWiring.swift`); o clique escolhe o projeto (as
   abas e a coluna), abre um terminal se ele não tem, e sai de uma página aberta no centro. O ⌘B
-  (view.toggle-sidebar) e o inspector.toggle fecham e abrem a coluna; o trilho fica. Files e Changes
+  (view.toggle-sidebar) fecha e abre a coluna (o inspector.toggle, igual, saiu no plano 37); o trilho fica. Files e Changes
   seguem o projeto escolhido, ou a tarefa do terminal com foco, não o `cd` (`FolderFollow.swift`,
   `projectAnchor`, `followProject` na troca de projeto).
 - `ProjectEditWiring.swift` (plano 36 fase B): a folha "Edit project" (project.edit, também pelo
@@ -146,7 +146,7 @@
   e os botões de antes; a linha de contexto com a pasta, o branch (o clique troca) e a memória do projeto; numa tarefa,
   Changes diz "<tarefa> · against <ponto de partida>" e History "<tarefa> · N commits ahead of
   <ponto de partida>" (contado pelo git fora da linha principal), como no mockup Inspector;
-  inspector.toggle (⌥⌘I) e inspector.visible, inspector.tab e inspector.width (a borda) salvos (a
+  view.toggle-sidebar (⌘B) e inspector.visible, inspector.tab e inspector.width (a borda) salvos (a
   regra da janela estreita saiu com a árvore; a nova vem na fase F do plano 36); git.show, explorer.focus,
   git.show-history e memory.show abrem a aba deles (WorkspaceView.showInspector).
 - `AgentToolsWiring.swift` (plano 20, fase B): o pedido de comando do agente acha o terminal dele
@@ -331,8 +331,8 @@
   faixa e o pé de cada um), o cabeçalho de cada um pelo `laneDetail` (refeito pelo relógio da
   corrida) e `raceName(of:)` para "projeto › race <nome>" e o "Compare" da barra.
 - `DrawerWiring.swift` (plano 30 C): a gaveta de terminais (`DrawerView` da feature tabs, com um
-  TabsController só dela, painéis planos), drawer.toggle (⌃`) e drawer.move-to-project (⌘↩,
-  indisponível sem o foco na gaveta, para a tecla seguir ao terminal), o item "Terminal ⌃`" da
+  TabsController só dela, painéis planos), drawer.toggle (⌥⌘`) e drawer.move-to-project (⌘↩,
+  indisponível sem o foco na gaveta, para a tecla seguir ao terminal), o item "Terminal ⌥⌘`" da
   barra de status; WorkspaceView.showDrawer a põe no pé do centro.
 - `CheckLineWiring.swift` (plano 29, revisão): a linha "make check passed · 2 min ago" do pé de
   Changes, o último comando de checagem (CheckLine, da source-control) que terminou num terminal da

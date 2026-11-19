@@ -211,6 +211,15 @@ public final class TabsController {
         select(id)
     }
 
+    /// The next or previous tab of the bar, going round (⇧⌘] and ⇧⌘[, as Safari, Terminal and
+    /// every Mac app with tabs; only most-recent-use was there: UX audit, 2026-11-18).
+    public func selectAdjacent(step: Int) {
+        let shown = shownIDs
+        guard shown.count > 1 else { return }
+        let here = shown.firstIndex { $0 == activeTab?.id } ?? 0
+        select(shown[(here + step + shown.count) % shown.count])
+    }
+
     /// Ctrl+Tab.
     public func selectPreviouslyUsed() {
         if let id = list.previouslyUsed { select(id) }

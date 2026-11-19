@@ -89,12 +89,14 @@ let exitCode = await Checks.run([
         expect(items.first?.shortcut == "⌘D")
         expect(items.first?.bold.contains { items[0].title[$0] == "à" } == true)
     }),
-    ("a command that cannot run now is not listed, empty or searched", {
+    ("a command that cannot run now: not in the empty list; searched, last, with why (ADR 0005)", {
         let registry = CommandRegistry()
         registry.register(Command(id: "x.blocked", title: "Salvar", category: .app, action: .run {},
                                   unavailableReason: { "Sem editor ativo" }))
-        expect(PaletteModel.items(for: "salvar", registry: registry) { _ in nil }.isEmpty)
-        expect(PaletteModel.items(for: "", registry: registry) { _ in nil }.isEmpty)
+        registry.register(Command(id: "x.ok", title: "Salvar tudo", category: .app, action: .run {}))
+        let found = PaletteModel.items(for: "salvar", registry: registry) { _ in nil }
+        expect(found.map(\.id) == ["x.ok", "x.blocked"] && found.last?.unavailableReason == "Sem editor ativo", "\(found.map(\.id))")
+        expect(PaletteModel.items(for: "", registry: registry) { _ in nil }.map(\.id) == ["x.ok"])
     }),
     ("the pins come first under Abrir, with their names, and not again below", {
         let registry = sampleRegistry()
@@ -139,7 +141,7 @@ let exitCode = await Checks.run([
         let registry = CommandRegistry()
         registry.register(StandardCommands.all)
         let menu = CommandMenu(registry: registry) { _ in nil }.build()
-        expect(menu.items.map(\.title) == ["Cadex", "Edit"], "\(menu.items.map(\.title))")
+        expect(menu.items.map(\.title) == ["Cadex", "Edit", "Window", "Help"], "the Mac's Window and Help menus: \(menu.items.map(\.title))")
         let copy = menu.items[1].submenu?.items.first { ($0.representedObject as? String) == "edit.copy" }
         expect(copy?.title == "Copy")
     }),

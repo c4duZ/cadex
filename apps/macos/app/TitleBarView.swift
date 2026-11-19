@@ -37,8 +37,8 @@ final class TitleBarView: NSView {
     private let settingsButton = TitleBarButton(icon: .gearSix, tip: T("Settings", "Configurações"))
     /// The focused agent's account (else the active one) and its usage; a click switches accounts.
     private let account = TitleBarAccount()
-    /// The right panel's button (inspector.toggle), lit while the panel is open.
-    private let panelButton = TitleBarButton(icon: .sidebarSimple, tip: T("Right panel", "Painel da direita"), mirrored: true)
+    /// The side column's button (view.toggle-sidebar), lit while the column is open.
+    private let panelButton = TitleBarButton(icon: .sidebarSimple, tip: T("Side Column", "Coluna lateral"), mirrored: true)
     private let trailing = NSStackView()
     /// The line under the bar.
     private let hairline = NSView()
@@ -56,7 +56,7 @@ final class TitleBarView: NSView {
         newTabButton.onPress = { [weak self] in self?.showNewMenu() }
         bellButton.onPress = { [weak self] in self?.run("agents.show-attention") }
         boardButton.onPress = { [weak self] in self?.run("view.board") }
-        panelButton.onPress = { [weak self] in self?.run("inspector.toggle") }
+        panelButton.onPress = { [weak self] in self?.run("view.toggle-sidebar") }
         settingsButton.onPress = { [weak self] in self?.run("settings.open") }
         account.onPress = { [weak self] in self?.run("agents.switch-account") }
         trailing.setViews([account, boardButton, bellButton, settingsButton, panelButton], in: .leading)

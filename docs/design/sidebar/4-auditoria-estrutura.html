@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auditoria da moldura</title>
+<style>
+:root{
+  --page:#0A0B0C; --win:#0C0D0F; --chrome:#121316; --side:#131417; --card:#15171A; --raised:#17191C; --btn:#1A1C20;
+  --chip:#1D1F23; --sel:#1F2226; --seg:#22252A; --pidle:#111214;
+  --line:#1F2125; --line2:#25282D; --ctl:#2A2D33; --focus:#2E3238;
+  --strong:#F4F5F6; --text:#E7E8EA; --row:#D5D7DB; --body:#C3C6CB; --dim:#9BA0A8; --muted:#8A9099; --ter:#7C828B; --sep:#4A4F57;
+  --blue:#5B9CF5; --amber:#F2A93B; --green:#3FB97A; --red:#EF5B5B; --purple:#A98BF0; --idle:#6B7079;
+  --amberT:#F2B65E; --greenT:#6FCF97; --redT:#F08A8A; --link:#9BC1FF; --linkbg:#1A2333; --usagebg:#2A2113;
+  --tneeds:#1C1812; --lamber:#4A3A1C; --note:#F2D29B;
+  --mono: "SF Mono", ui-monospace, Menlo, monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--text);font:14px/1.55 -apple-system,"SF Pro Text",Inter,system-ui,sans-serif}
+main{max-width:1240px;margin:0 auto;padding:36px 16px 100px}
+h1{font-size:28px;margin:0 0 6px;letter-spacing:-.01em}
+.sub{color:var(--dim);font-size:15px;max-width:900px;margin:0}
+section{margin-top:64px}
+h2{font-size:21px;margin:0 0 6px;letter-spacing:-.01em}
+h2 small{color:var(--ter);font-weight:500;font-size:13px;margin-left:8px}
+h3{font-size:16px;margin:0}
+p{margin:8px 0;color:var(--body);max-width:900px}
+b,strong{color:var(--text)}
+a{color:var(--link)}
+code{font:12.5px var(--mono);color:var(--row);background:var(--chip);padding:1px 5px;border-radius:5px}
+kbd{font:11px -apple-system,system-ui;color:var(--ter);border:1px solid var(--ctl);border-radius:5px;padding:0 5px}
+.scroll{overflow-x:auto;padding:16px 4px 8px 26px}
+.row{display:flex;align-items:center;gap:8px}.grow{flex:1;min-width:0}
+.muted{color:var(--muted)}.ter{color:var(--ter)}.amb{color:var(--amberT)}.grn{color:var(--greenT)}.blu{color:#8FB8F7}
+
+/* ---------- resumo ---------- */
+.sum{margin-top:22px;border:1px solid var(--line2);border-radius:14px;background:var(--card);padding:6px 0}
+.sum div{display:grid;grid-template-columns:120px 1fr;gap:14px;padding:11px 18px;border-bottom:1px solid var(--line)}
+.sum div:last-child{border-bottom:0}
+.sum span{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ter);padding-top:2px}
+.sum .k-ok span{color:var(--greenT)}.sum .k-no span{color:var(--amberT)}.sum .k-go span{color:#8FB8F7}
+.sum p{margin:0;max-width:none;color:var(--row)}
+
+/* ---------- ícones ---------- */
+.ic{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ic.s{width:13px;height:13px}.ic.xs{width:11px;height:11px}
+
+/* ---------- a janela ---------- */
+.win{position:relative;width:1180px;height:620px;display:grid;grid-template-rows:44px 1fr 30px;background:var(--win);border:1px solid var(--line2);border-radius:12px;box-shadow:0 30px 70px rgba(0,0,0,.5)}
+.win.short{height:560px}
+.tb{position:relative;display:flex;align-items:center;gap:10px;padding:0 12px 0 16px;background:var(--chrome);border-bottom:1px solid var(--line);border-radius:12px 12px 0 0}
+.lights{display:flex;gap:8px;margin-right:6px}.lights i{width:12px;height:12px;border-radius:50%;background:#3A3D42;display:block}
+.srch{position:relative;height:28px;width:150px;border:1px solid var(--ctl);border-radius:8px;padding:0 9px;display:flex;align-items:center;gap:7px;color:var(--ter);font-size:12.5px}
+.srch kbd{margin-left:auto;border:0}
+.tabs{display:flex;align-items:center;gap:2px;margin-left:26px}
+.tab{position:relative;height:30px;padding:0 12px;border-radius:8px;display:flex;align-items:center;gap:7px;color:var(--dim);font-size:12.5px;white-space:nowrap}
+.tab.on{background:var(--chip);color:var(--text);font-weight:550}
+.tab.task{color:var(--row)}
+.tab.more{color:var(--muted)}
+.tb .plus{color:var(--ter);padding:0 6px;display:flex}
+.tright{margin-left:auto;display:flex;align-items:center;gap:6px}
+.tbtn{position:relative;width:32px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--muted)}
+.tbtn.on{background:var(--sel);color:var(--text)}
+.tbadge{position:absolute;top:2px;right:1px;min-width:15px;height:15px;border-radius:8px;background:var(--amber);color:#1A1206;font-size:9.5px;font-weight:800;display:grid;place-items:center;padding:0 3px}
+.acct{position:relative;height:28px;padding:0 9px;border-radius:8px;display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--row)}
+.acct i{font-style:normal;color:#D97757}
+.where{position:relative;display:flex;align-items:center;gap:7px;height:30px;padding:0 10px 0 6px;border-radius:8px;border:1px solid var(--ctl);font-size:13px;font-weight:650;margin-left:6px;white-space:nowrap}
+.where .av{width:20px;height:20px;border-radius:6px;background:#26324A;color:#B7CCF5;display:grid;place-items:center;font-size:11px;font-weight:800}
+.where .t{color:var(--muted);font-weight:500}
+.where .chev{color:var(--ter);font-weight:400;font-size:10px}
+
+.mid{display:grid;grid-template-columns:56px 260px 1fr;min-height:0}
+.mid.nocol{grid-template-columns:56px 1fr}
+.rail{position:relative;background:var(--chrome);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:10px 0 8px;gap:7px;min-height:0}
+.tile{position:relative;width:38px;height:38px;border-radius:10px;background:var(--btn);display:grid;place-items:center;font-weight:750;font-size:13px;color:var(--text);flex:none}
+.tile.on{box-shadow:0 0 0 3px var(--focus)}
+.tile.img1{background:linear-gradient(135deg,#2B4C7E,#1C2B45);color:#CFE0FF}
+.tile.img2{background:linear-gradient(135deg,#5A3A22,#2C1E14);color:#FFD9B0}
+.tile.img3{background:linear-gradient(135deg,#24473A,#16271F);color:#BDEBD3}
+.tile .bd{position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;border:2px solid var(--chrome)}
+.tile .od{position:absolute;bottom:-9px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--dim)}
+.tile + .tile{margin-top:6px}
+.hl{width:28px;height:1px;background:var(--ctl);margin:4px 0;flex:none}
+.rb{position:relative;width:38px;height:30px;border-radius:7px;display:grid;place-items:center;color:var(--muted);flex:none}
+.rb.lit{background:var(--sel);color:var(--text)}
+.rb .cnt{position:absolute;top:1px;right:0;font-size:9px;font-weight:800;color:var(--dim)}
+.rspace{flex:1}
+.inbox{position:relative;width:38px;height:38px;border-radius:10px;background:var(--tneeds);border:1px solid var(--lamber);display:grid;place-items:center;color:var(--amberT);flex:none}
+.inbox .n{position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;border-radius:9px;background:var(--amber);color:#1A1206;font-size:10px;font-weight:800;display:grid;place-items:center;padding:0 4px;border:2px solid var(--chrome)}
+.edgepill{font-size:9.5px;font-weight:800;color:#1A1206;background:var(--amber);border-radius:8px;padding:1px 6px;flex:none}
+
+.col{position:relative;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.colhead{display:flex;align-items:center;gap:8px;padding:9px 10px 8px;border-bottom:1px solid var(--line)}
+.colhead .pn{font-weight:650;font-size:12.5px}
+.segm{display:inline-flex;gap:2px;background:var(--card);border:1px solid var(--line2);border-radius:8px;padding:2px;margin-left:auto}
+.segm span{padding:3px 9px;border-radius:6px;font-size:12px;color:var(--muted)}
+.segm span.on{background:var(--sel);color:var(--text);font-weight:600}
+.scope{display:flex;align-items:center;gap:8px;padding:10px 12px 6px;font-size:12px}
+.scope .dd{background:var(--btn);border-radius:7px;padding:3px 8px;font-weight:600;color:var(--row)}
+.fr{display:flex;align-items:center;gap:8px;padding:5px 12px;font-size:12.5px;color:var(--row)}
+.fr .l{width:12px;font-weight:800;font-size:11px}
+.fr .p{color:var(--ter);font-size:11.5px}
+.fr .n{margin-left:auto;font:11px var(--mono);color:var(--ter)}
+.colfoot{margin-top:auto}
+.check{display:flex;align-items:center;gap:7px;padding:8px 12px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line)}
+.btns{display:flex;gap:8px;padding:4px 12px 10px}
+.btn{flex:1;height:28px;border-radius:7px;border:1px solid var(--ctl);display:grid;place-items:center;font-size:12px;font-weight:600;color:var(--row)}
+.btn.pri{background:var(--text);color:#111;border-color:var(--text)}
+.ctx{position:relative;display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+
+.center{padding:8px;min-width:0;display:flex}
+.pane{position:relative;flex:1;border:1px solid var(--line2);border-radius:10px;background:var(--win);box-shadow:0 0 0 3px rgba(91,156,245,.10);display:flex;flex-direction:column;min-width:0}
+.ph{position:relative;height:34px;display:flex;align-items:center;gap:8px;padding:0 12px;border-bottom:1px solid var(--line);font-size:12.5px}
+.ph .o{color:var(--ter)}
+.ph .r{margin-left:auto;color:var(--ter);font:11.5px var(--mono)}
+.term{padding:14px 16px;font:12px/1.7 var(--mono);color:#C9CCD1;overflow:hidden}
+.term .u{background:#1C1F24;border-radius:6px;padding:4px 8px;display:inline-block;margin-bottom:6px;color:var(--text)}
+.term .s{color:#8FB8F7}
+
+.sb{position:relative;display:flex;align-items:center;gap:16px;padding:0 14px;background:var(--chrome);border-top:1px solid var(--line);font-size:12px;color:var(--muted);border-radius:0 0 12px 12px}
+.sb .it{position:relative;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.sb .r{margin-left:auto}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex:none}
+.chip{background:var(--usagebg);color:var(--amberT);font-weight:650;border-radius:5px;padding:1px 7px}
+
+/* peças de estado */
+.g{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.g.needs{background:var(--amber);box-shadow:0 0 0 3px rgba(242,169,59,.18)}
+.g.work{border:2px solid var(--blue);border-top-color:transparent}
+.g.done{background:var(--green)}
+.g.idle{border:1.5px solid var(--idle)}
+.g.fail{background:var(--red)}
+
+/* chamadas numeradas */
+.co{position:absolute;z-index:9;width:20px;height:20px;border-radius:50%;background:var(--amber);color:#1A1206;font:800 11px/20px -apple-system,system-ui;text-align:center;box-shadow:0 0 0 3px var(--page)}
+.co.p{background:var(--blue);color:#fff}
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:4px 22px;margin-top:16px;font-size:13px;color:var(--row)}
+.legend div{display:flex;gap:9px;align-items:baseline}
+.legend b.n{flex:none;width:20px;height:20px;border-radius:50%;background:var(--amber);color:#1A1206;font-size:11px;display:grid;place-items:center}
+.legend.p b.n{background:var(--blue);color:#fff}
+
+/* princípios */
+.prin{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;margin-top:16px}
+.pc{border:1px solid var(--line2);border-radius:12px;background:var(--card);padding:14px 16px}
+.pc h4{margin:0 0 4px;font-size:14px}
+.pc h4 em{font-style:normal;color:var(--ter);font-weight:600;margin-right:6px}
+.pc p{margin:0;font-size:13px;color:var(--body)}
+.pc .src{margin-top:8px;font-size:11.5px;color:var(--ter)}
+.pc .src a{color:var(--ter)}
+
+/* achados */
+.region{margin-top:40px;padding-top:10px;border-top:1px solid var(--line2)}
+.region > h3{font-size:13px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+.f{margin-top:22px;border:1px solid var(--line2);border-radius:14px;background:var(--card);overflow:hidden}
+.fh{display:flex;align-items:flex-start;gap:12px;padding:14px 18px 10px}
+.fid{font:700 12px var(--mono);color:var(--ter);padding-top:3px;flex:none}
+.fh h3{font-size:16.5px;line-height:1.35}
+.sev{flex:none;margin-left:auto;font-size:11px;font-weight:800;letter-spacing:.04em;border-radius:6px;padding:3px 8px}
+.S1{background:#2A1719;color:var(--redT)}.S2{background:var(--usagebg);color:var(--amberT)}.S3{background:var(--linkbg);color:var(--link)}.S4{background:var(--seg);color:var(--dim)}
+.fb{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;padding:0 18px 14px}
+.fb dl{margin:0}
+.fb dt{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ter);margin-top:10px}
+.fb dd{margin:3px 0 0;color:var(--row);font-size:13.5px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px 18px;background:#0E0F11;border-top:1px solid var(--line)}
+.fig{position:relative;min-width:0}
+.fig > .lbl{font-size:11px;font-weight:800;letter-spacing:.08em;margin-bottom:10px;color:var(--amberT)}
+.fig.pro > .lbl{color:#8FB8F7}
+.fig .cap{font-size:12.5px;color:var(--muted);margin-top:10px}
+.frame{position:relative;background:var(--win);border:1px solid var(--line2);border-radius:10px;overflow:visible}
+.dir{padding:12px 18px 14px;border-top:1px solid var(--line);font-size:13.5px;color:var(--row)}
+.dir b{color:#8FB8F7}
+
+/* recortes */
+.strip{display:flex;align-items:center;gap:8px;height:44px;padding:0 10px;background:var(--chrome);border-radius:10px}
+.vrail{position:relative;width:56px;background:var(--chrome);border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:7px;padding:10px 0}
+.duo{display:flex;gap:16px;align-items:flex-start}
+.sbs{display:flex;align-items:center;gap:14px;height:30px;padding:0 12px;background:var(--chrome);border-radius:10px;font-size:12px;color:var(--muted);white-space:nowrap}
+
+/* tabela */
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
+th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ter);padding:8px 10px;border-bottom:1px solid var(--line2);font-weight:700}
+td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--row);vertical-align:top}
+td.x{color:var(--amberT);font-weight:700}
+td.no{color:var(--sep)}
+td:first-child{color:var(--text);font-weight:550}
+
+.keep{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px;margin-top:16px}
+.keep div{border:1px solid #1E2A20;background:#111814;border-radius:12px;padding:12px 16px}
+.keep h4{margin:0 0 4px;font-size:14px;color:var(--greenT)}
+.keep p{margin:0;font-size:13px}
+.why{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px;margin-top:18px}
+.why div{border:1px solid var(--line2);border-radius:12px;background:var(--card);padding:12px 16px}
+.why h4{margin:0 0 6px;font-size:14px;display:flex;gap:8px;align-items:center}
+.why ul{margin:0;padding-left:18px;font-size:13px;color:var(--row)}.why li{margin:3px 0}
+.src ol{padding-left:20px;font-size:13px;color:var(--row)}.src li{margin:5px 0}
+.note{background:var(--tneeds);border:1px solid var(--lamber);color:var(--note);border-radius:10px;padding:10px 14px;font-size:13px;margin-top:14px;max-width:900px}
+@media (max-width:860px){.fb,.pair{grid-template-columns:1fr}.sum div{grid-template-columns:1fr;gap:2px}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-diff" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="18" r="2.2"/><path d="M6 8.5V14a3 3 0 0 0 3 3h3M18 15.5V10a3 3 0 0 0-3-3h-3M10 15l2 2-2 2M14 5l-2 2 2 2"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h11a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H9l-4 3v-3H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M16 9h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-1v3l-4-3h-3"/></symbol>
+    <symbol id="i-brain" viewBox="0 0 24 24"><path d="M12 5v14M12 5a3 3 0 0 0-5.5 1.5A3 3 0 0 0 4 10a3 3 0 0 0 1 4.5A3 3 0 0 0 8 19a3 3 0 0 0 4 0M12 5a3 3 0 0 1 5.5 1.5A3 3 0 0 1 20 10a3 3 0 0 1-1 4.5A3 3 0 0 1 16 19a3 3 0 0 1-4 0M8 10h2M14 13h2"/></symbol>
+    <symbol id="i-branch" viewBox="0 0 24 24"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="7" r="2"/><path d="M6 7v10M18 9c0 5-6 4-11 8"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.5 3.5 5.5 3.5 8.5s-1 6-3.5 8.5c-2.5-2.5-3.5-5.5-3.5-8.5s1-6 3.5-8.5"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-kanban" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="1.5"/><path d="M9 4v16M15 4v16M5.5 8h1.5M11 8h2M17 8h1.5"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7.5" stroke-dasharray="3 2.9"/></symbol>
+    <symbol id="i-side" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M15 4.5v15"/></symbol>
+    <symbol id="i-sideL" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M9 4.5v15"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></symbol>
+    <symbol id="i-tray" viewBox="0 0 24 24"><path d="M4 13l2.5-7h11L20 13v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 13h4.5l1 2h5l1-2H20"/></symbol>
+    <symbol id="i-cup" viewBox="0 0 24 24"><path d="M5 9h11v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM16 10h1.5a2 2 0 0 1 0 4H16M8 3.5v2.5M11 3.5v2.5"/></symbol>
+    <symbol id="i-term" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="M7.5 10l2.5 2-2.5 2M12 15h4"/></symbol>
+  </defs>
+</svg>
+
+<main>
+<h1>Auditoria da estrutura da janela</h1>
+<p class="sub">O trilho e a coluna lateral à esquerda, a barra de cima com as abas e a barra de baixo, julgados só pelos princípios de UX. As ADRs e as specs entram como descrição do que existe, nunca como argumento de que está certo. Situação de uso: uma pessoa com muitos agentes do Claude Code em terminais, em vários projetos ao mesmo tempo, que precisa saber onde está, trocar rápido e nunca deixar passar um agente esperando permissão. Estado do app em 18/11/2026 (commit 240d2ed).</p>
+
+<!-- ===================================================== 1 -->
+<section>
+<h2>1 · Resumo</h2>
+<div class="sum">
+  <div class="k-ok"><span>Funciona</span><p>Os projetos ficam sempre à vista na borda esquerda, cada um com a peça de estado. Os terminais só existem como abas, então não há lista repetida. O cabeçalho de cada painel diz o que roda nele. A coluna segue o projeto, não o <code>cd</code>, e o ⌘K e o ⌘J acham tudo.</p></div>
+  <div class="k-no"><span>Não funciona</span><p>Nenhum lugar da barra de cima diz "você está no projeto X, tarefa Y". O nome do projeto aparece como uma letra no trilho e em texto apagado no canto de baixo. A mesma palavra ("alpha") aparece quatro vezes, uma como aba, uma como painel, uma como pé da coluna e uma como barra de status, e nenhuma delas diz "projeto".</p></div>
+  <div class="k-no"><span>Não funciona</span><p>"Precisa de você" aparece em oito lugares e com três linguagens. O sinal some quando some o que o contém: a aba que foi para o "» N" e o projeto que rolou para fora do trilho não deixam nenhum sinal na borda.</p></div>
+  <div class="k-no"><span>Não funciona</span><p>O trilho mistura três tipos de coisa com a mesma cara: lugares, painéis e páginas globais. Os ícones das páginas descem cada vez que entra um projeto. A coluna repete a página do projeto em três das cinco páginas, e a barra de baixo repete a de cima.</p></div>
+  <div class="k-go"><span>Mudar primeiro</span><p>Dar a cada fato uma casa só:<br>• <b>onde estou</b>: um seletor "projeto › tarefa" no começo da barra de cima;<br>• <b>quem precisa de mim</b>: uma caixa "Precisa de você" no topo do trilho, e o estado de tudo que está escondido sobe para a borda visível;<br>• <b>o trilho</b>: só projetos;<br>• <b>a coluna</b>: duas páginas com nome, Changes e Files.</p></div>
+</div>
+</section>
+
+<!-- ===================================================== 2 -->
+<section>
+<h2>2 · A janela hoje <small>desenhada a partir do código e das capturas do app; dados de exemplo</small></h2>
+<div class="scroll">
+<div class="win" id="hoje">
+  <div class="tb">
+    <div class="lights"><i></i><i></i><i></i></div>
+    <div class="srch"><svg class="ic s"><use href="#i-search"/></svg>Search<kbd>⌘K</kbd><b class="co" style="top:-12px;left:-10px">6</b></div>
+    <div class="tabs" style="position:relative">
+      <b class="co" style="top:-12px;left:-12px">7</b>
+      <div class="tab on"><span class="g work"></span>Claude · fix-rail</div>
+      <div class="tab"><span class="g done"></span>npm run dev</div>
+      <div class="tab task"><span class="g needs"></span>kite-fix ›</div>
+      <div class="tab">make check</div>
+      <div class="tab more" style="position:relative">» 3<b class="co" style="top:-12px;right:-12px">8</b></div>
+    </div>
+    <div class="plus"><svg class="ic"><use href="#i-plus"/></svg></div>
+    <div class="tright">
+      <div class="acct"><i>✳</i>bkdg<b class="co" style="top:-12px;left:-8px">9</b></div>
+      <div class="tbtn"><svg class="ic"><use href="#i-kanban"/></svg></div>
+      <div class="tbtn"><svg class="ic"><use href="#i-bell"/></svg><span class="tbadge">2</span><b class="co" style="top:-12px;left:-6px">10</b></div>
+      <div class="tbtn"><svg class="ic"><use href="#i-gear"/></svg></div>
+      <div class="tbtn on"><svg class="ic"><use href="#i-side"/></svg><b class="co" style="top:-12px;right:-8px">11</b></div>
+    </div>
+  </div>
+  <div class="mid">
+    <div class="rail">
+      <b class="co" style="top:14px;left:-12px">1</b>
+      <div class="tile img1 on">C<span class="bd" style="background:var(--amber)"></span><span class="od"></span></div>
+      <div class="tile img2">B<span class="bd" style="background:var(--blue)"></span><span class="od"></span></div>
+      <div class="hl" style="margin-top:12px"></div>
+      <div class="tile">A<span class="od"></span></div>
+      <div class="rb" style="margin-top:6px"><svg class="ic"><use href="#i-plus"/></svg></div>
+      <div class="hl"></div>
+      <div class="rb" style="position:relative"><svg class="ic"><use href="#i-folder"/></svg><b class="co" style="top:4px;left:-20px">2</b></div>
+      <div class="rb lit"><svg class="ic"><use href="#i-diff"/></svg><span class="cnt">3</span></div>
+      <div class="rb"><svg class="ic"><use href="#i-chat"/></svg></div>
+      <div class="rb"><svg class="ic"><use href="#i-brain"/></svg></div>
+      <div class="rb"><svg class="ic"><use href="#i-branch"/></svg></div>
+      <div class="rspace"></div>
+      <div class="hl"></div>
+      <div class="rb" style="position:relative"><svg class="ic"><use href="#i-grid"/></svg><b class="co" style="top:4px;left:-20px">3</b></div>
+      <div class="rb"><svg class="ic"><use href="#i-clock"/></svg></div>
+      <div class="rb"><svg class="ic"><use href="#i-globe"/></svg></div>
+    </div>
+    <div class="col">
+      <b class="co" style="top:6px;right:8px">4</b>
+      <div class="scope"><span class="dd">Last turn ▾</span><span class="muted">3 files <span class="grn">+42</span> <span style="color:var(--redT)">−7</span></span></div>
+      <div class="fr"><span class="l amb">M</span>RailView.swift<span class="p">sidebar</span><span class="n">+18 −4</span></div>
+      <div class="fr"><span class="l amb">M</span>RailParts.swift<span class="p">sidebar</span><span class="n">+9 −3</span></div>
+      <div class="fr"><span class="l grn">A</span>RailEdge.swift<span class="p">sidebar</span><span class="n">+15</span></div>
+      <div class="colfoot">
+        <div class="check"><span class="dot" style="background:var(--green)"></span>make check passed · 2 min ago</div>
+        <div class="btns"><span class="btn">Commit…</span><span class="btn pri">Open PR</span></div>
+        <div class="ctx">cadex · main ↑3<span class="grow"></span>⟳ ↓ ↑ ⋯<b class="co" style="top:-10px;left:-10px">5</b></div>
+      </div>
+    </div>
+    <div class="center">
+      <div class="pane">
+        <div class="ph"><span class="g work"></span><b>Claude</b><span class="o">fix-rail · Opus · bkdg</span><span class="r">US$ 0.31 · 4 min</span><b class="co" style="top:-10px;left:-10px">12</b></div>
+        <div class="term">
+          <div class="u">› o trilho precisa rolar quando há muitos projetos</div><br>
+          ⏺ Read RailView.swift<br>&nbsp;&nbsp;⎿ Read 221 lines<br>
+          ⏺ Update(RailView.swift)<br>&nbsp;&nbsp;⎿ Updated with 18 additions and 4 removals<br>
+          <span class="s">✻ Wiring the scroll… 12s · esc to interrupt</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sb">
+    <span class="it">cadex · main ↑3<b class="co" style="top:-24px;left:-6px">13</b></span>
+    <span class="it"><span class="dot" style="background:var(--blue)"></span>3 working</span>
+    <span class="it"><span class="dot" style="background:var(--amber)"></span>2 need you</span>
+    <span class="it r">Terminal ⌃`<b class="co" style="top:-14px;left:-12px">14</b></span>
+    <span class="it">Memory · 214 pages</span>
+    <span class="it"><span class="chip">Claude bkdg 84% · resets 3h</span></span>
+    <span class="it"><svg class="ic s"><use href="#i-cup"/></svg></span>
+    <span class="it">Local</span>
+  </div>
+</div>
+</div>
+<div class="legend">
+  <div><b class="n">1</b><span><b>Trilho, projetos</b> (56 pt). Quadrado de 38 pt com a imagem ou a letra, halo no escolhido, a peça de estado de 12 pt no canto, o ponto de terminal aberto. Primeiro vêm os fixados, depois uma linha e os abertos.</span></div>
+  <div><b class="n">2</b><span><b>Trilho, páginas da coluna</b>: Files, Changes, Sessions, Memory e Git graph, só ícones. Clicar abre a coluna; clicar no ícone aceso a fecha.</span></div>
+  <div><b class="n">3</b><span><b>Trilho, pé</b>: Projects, Automations e Remote, páginas que valem para todos os projetos.</span></div>
+  <div><b class="n">4</b><span><b>Coluna lateral</b> (260 pt), uma página por vez e sem cabeçalho. Ela não diz que página é nem de que projeto.</span></div>
+  <div><b class="n">5</b><span><b>Pé da coluna</b>: "projeto · branch" e as ações da página.</span></div>
+  <div><b class="n">6</b><span><b>Busca</b>: abre o ⌘K.</span></div>
+  <div><b class="n">7</b><span><b>Abas</b> do projeto. A tarefa entra como item com "›"; dentro dela a barra troca e começa com "‹ projeto".</span></div>
+  <div><b class="n">8</b><span><b>"» N"</b>: as abas que não cabem, sem estado.</span></div>
+  <div><b class="n">9</b><span><b>Conta</b> do agente com foco, com o uso.</span></div>
+  <div><b class="n">10</b><span><b>Quadro, sino e configurações.</b> O número do sino soma o que precisa de você e o que terminou sem você ver.</span></div>
+  <div><b class="n">11</b><span><b>Botão da coluna</b>, na borda direita. A dica diz "Right panel", mas a coluna fica à esquerda.</span></div>
+  <div><b class="n">12</b><span><b>Cabeçalho do painel</b>: estado, nome, origem, custo e tempo.</span></div>
+  <div><b class="n">13</b><span><b>Barra de baixo, esquerda</b>: projeto · branch, "N working" e "N need you". Cada contagem some quando chega a zero.</span></div>
+  <div><b class="n">14</b><span><b>Barra de baixo, direita</b>: gaveta, Memory, uso da conta, café e "Local". Cada item abre um cartão ao passar o ponteiro.</span></div>
+</div>
+</section>
+
+<!-- ===================================================== 3 -->
+<section>
+<h2>3 · Os princípios usados</h2>
+<p>Cada achado cita um destes pelo número.</p>
+<div class="prin">
+  <div class="pc"><h4><em>P1</em>Você está aqui</h4><p>A navegação mostra para onde se pode ir e também onde se está agora. Mudanças sutis passam despercebidas, então quem chega a uma tela precisa identificar o lugar de relance. Toda janela deve ter um título útil para a pessoa confirmar onde está.</p><div class="src"><a href="https://www.nngroup.com/articles/navigation-you-are-here/">NN/g, Navigation: You Are Here</a> · <a href="https://developer.apple.com/design/human-interface-guidelines/toolbars">Apple HIG, Toolbars › Titles</a></div></div>
+  <div class="pc"><h4><em>P2</em>Visibilidade do estado</h4><p>O sistema mantém a pessoa informada do que acontece. O indicador fica perto do elemento que ele descreve. Um sinal no canto, longe do foco, sofre de cegueira à mudança.</p><div class="src"><a href="https://www.nngroup.com/articles/ten-usability-heuristics/">Nielsen #1</a> · <a href="https://www.nngroup.com/articles/indicators-validations-notifications/">NN/g, Indicators</a> · <a href="https://www.nngroup.com/articles/change-blindness/">NN/g, Change blindness</a></div></div>
+  <div class="pc"><h4><em>P3</em>Reconhecer em vez de lembrar; ícone pede nome</h4><p>Fora casa, busca e imprimir, ícone sem nome é ambíguo. O nome deve ficar sempre à vista, não só sob o ponteiro. Na NN/g, "ícone obscuro = recurso desperdiçado". Navegação só com ícones é aceitável em app de uso diário, mas o padrão é mostrar o nome.</p><div class="src"><a href="https://www.nngroup.com/articles/icon-usability/">NN/g, Icon usability</a> · <a href="https://www.nngroup.com/articles/vertical-nav/">NN/g, Vertical nav</a> · Nielsen #6</div></div>
+  <div class="pc"><h4><em>P4</em>Um lugar para cada coisa; consistência</h4><p>O mesmo conceito tem o mesmo nome e a mesma casa. Duas portas para o mesmo lugar, sem diferença entre elas, atrapalham a pessoa a montar o mapa do app, e a NN/g recomenda não duplicar categorias em duas navegações.</p><div class="src">Nielsen #4 · <a href="https://www.nngroup.com/articles/vertical-nav/">NN/g, Vertical nav</a></div></div>
+  <div class="pc"><h4><em>P5</em>Agrupamento (Gestalt)</h4><p>Coisas com a mesma forma, perto umas das outras, são lidas como do mesmo tipo. Coisas de tipos diferentes precisam de forma ou região diferente, não só de uma linha fina entre elas.</p><div class="src"><a href="https://www.nngroup.com/articles/gestalt-proximity/">NN/g, Proximity</a> · <a href="https://www.nngroup.com/articles/gestalt-similarity/">NN/g, Similarity</a></div></div>
+  <div class="pc"><h4><em>P6</em>Memória espacial e layout estável</h4><p>As pessoas aprendem onde as coisas ficam pela repetição, e isso só funciona se a interface for estável. Elemento que muda de lugar obriga a procurar de novo.</p><div class="src"><a href="https://www.nngroup.com/articles/spatial-memory/">NN/g, Spatial memory</a></div></div>
+  <div class="pc"><h4><em>P7</em>Fitts</h4><p>Alvo grande e perto é rápido. A borda da tela funciona como parede para o ponteiro. Controles usados em sequência ficam juntos.</p><div class="src"><a href="https://www.nngroup.com/articles/fitts-law/">NN/g, Fitts's Law</a></div></div>
+  <div class="pc"><h4><em>P8</em>Hick e Miller</h4><p>Quanto mais opções do mesmo peso, mais demora a escolha. A memória de trabalho segura poucas coisas, então quem acompanha N agentes não deve guardar N estados de cabeça: o app reúne os estados num lugar.</p><div class="src"><a href="https://lawsofux.com/hicks-law/">Hick's law</a> · <a href="https://lawsofux.com/millers-law/">Miller's law</a></div></div>
+  <div class="pc"><h4><em>P9</em>Esconder tem custo; divulgação progressiva</h4><p>No desktop, navegação escondida foi usada em 27% dos casos, contra 48% da visível, e as tarefas levaram pelo menos 39% mais tempo. O que se usa todo dia fica à vista; o resto fica um nível abaixo, atrás de um gatilho com nome.</p><div class="src"><a href="https://www.nngroup.com/articles/hamburger-menus/">NN/g, Hamburger menus</a> · <a href="https://www.nngroup.com/articles/progressive-disclosure/">NN/g, Progressive disclosure</a></div></div>
+  <div class="pc"><h4><em>P10</em>Atenção: o sinal sobe para o que está visível</h4><p>Interromper só pelo que está bloqueado em você; "terminou" é mais quieto. Quando o contêiner de um item some (aba que transbordou, projeto rolado, área recolhida), o estado dele sobe para o pai visível. Isso tem precedente em reclamação real de usuários do Cursor. Badge com número só para o que é "não lido".</p><div class="src"><a href="https://developer.apple.com/design/human-interface-guidelines/notifications">Apple HIG, Notifications › Badging</a> · <a href="https://forum.cursor.com/t/agent-completion-notifications-are-difficult-to-find-when-the-workspace-containing-the-agent-is-collapsed-or-not-pinned/163553">Fórum do Cursor</a></div></div>
+  <div class="pc"><h4><em>P11</em>Convenções do macOS para a moldura</h4><p>As regras do HIG que valem aqui:<br>• o botão de mostrar e esconder a barra lateral fica na borda de entrada, logo depois do título;<br>• no máximo três grupos de controles na barra de cima;<br>• o significado de cada controle tem que ser claro;<br>• nada crítico no pé de uma barra lateral, porque "as pessoas reposicionam a janela de um jeito que esconde a borda de baixo";<br>• toda ação da barra também fica no menu.</p><div class="src"><a href="https://developer.apple.com/design/human-interface-guidelines/toolbars">Apple HIG, Toolbars</a> · <a href="https://developer.apple.com/design/human-interface-guidelines/sidebars">Apple HIG, Sidebars</a></div></div>
+  <div class="pc"><h4><em>P12</em>Abas são panes do mesmo tipo</h4><p>Uma vista em abas agrupa conteúdos parecidos; cada aba tem um nome que deixa prever o conteúdo. Mais de seis abas já pesa, e para isso a alternativa é outro tipo de controle, não ícones menores.</p><div class="src"><a href="https://developer.apple.com/design/human-interface-guidelines/tab-views">Apple HIG, Tab views</a></div></div>
+</div>
+</section>
+
+<!-- ===================================================== 4 -->
+<section>
+<h2>4 · Achados <small>S1 perde agente esperando ou trabalho · S2 se perde ou escolhe errado com frequência · S3 atrito · S4 acabamento</small></h2>
+
+<!-- ============ JANELA COMO UM TODO ============ -->
+<div class="region"><h3>A janela como um todo</h3>
+<p>Começo pela janela inteira porque os achados das regiões são sintomas disto: as três barras não dividem o trabalho entre si. A tabela mostra onde cada fato aparece hoje.</p>
+<table>
+  <tr><th>Fato</th><th>Trilho</th><th>Coluna</th><th>Barra de cima</th><th>Painel</th><th>Barra de baixo</th><th>Fora da janela</th></tr>
+  <tr><td>Em que projeto estou</td><td class="x">letra com halo</td><td class="x">pé "cadex · main" (Changes, Files)</td><td class="no">nenhum (a aba tem o nome da pasta)</td><td class="x">nome da pasta</td><td class="x">"cadex · main"</td><td class="no">—</td></tr>
+  <tr><td>Em que tarefa estou</td><td class="no">—</td><td class="x">pé "tarefa · against main"</td><td class="x">só o item "‹ projeto"</td><td class="x">origem, em cinza</td><td class="no">—</td><td class="no">—</td></tr>
+  <tr><td>Branch</td><td class="no">—</td><td class="x">pé</td><td class="no">—</td><td class="no">—</td><td class="x">projeto · branch</td><td class="no">—</td></tr>
+  <tr><td>Quantos precisam de você</td><td class="no">—</td><td class="no">—</td><td class="x">número do sino (soma "terminou")</td><td class="no">—</td><td class="x">"N need you" (some no zero)</td><td class="x">notificação do sistema</td></tr>
+  <tr><td>Quem precisa de você</td><td class="x">peça de 12 pt por projeto</td><td class="no">—</td><td class="x">peça na aba (não no "» N")</td><td class="x">peça no cabeçalho</td><td class="no">—</td><td class="x">⌘J, quadro, sino</td></tr>
+  <tr><td>Conta e uso</td><td class="no">—</td><td class="no">—</td><td class="x">"bkdg"</td><td class="x">conta no cabeçalho</td><td class="x">"Claude bkdg 84%"</td><td class="no">—</td></tr>
+  <tr><td>Memória</td><td class="x">ícone</td><td class="x">página</td><td class="no">—</td><td class="no">—</td><td class="x">"Memory · 214 pages"</td><td class="x">seção da página do projeto</td></tr>
+  <tr><td>Sessões</td><td class="x">ícone</td><td class="x">página</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="x">seção da página do projeto</td></tr>
+  <tr><td>Configurações</td><td class="no">—</td><td class="no">—</td><td class="x">engrenagem</td><td class="no">—</td><td class="no">—</td><td class="x">menu, ⌘,</td></tr>
+</table>
+<p>Em uma linha: o lugar onde se está não aparece em cima; a atenção aparece em tudo que é canto, com números diferentes; conta, memória e projeto · branch moram em dois ou três lugares cada.</p>
+
+<div class="f">
+  <div class="fh"><span class="fid">J1</span><h3>A janela não diz "você está aqui" onde se olha primeiro</h3><span class="sev S2">S2</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>Três projetos, todos com uma aba chamada "Claude". Ela volta do navegador e olha a barra de cima. O que vê são as abas e um "alpha" que é o nome da pasta, não do projeto. Para saber em que projeto está, precisa achar qual dos quadrados tem o halo (a diferença é um anel de 3 pt em cinza escuro) ou baixar os olhos até o texto apagado do canto de baixo. Dentro de uma tarefa piora: a única pista é o item "‹ cadex" no começo das abas.</dd>
+    <dt>Evidência</dt><dd>O nome do projeto saiu da barra de cima de propósito (<code>SessionCommands.swift</code>, <code>showLocation</code>: "Elsewhere no 'project › task'"). Nas capturas, "alpha" aparece em quatro lugares com quatro papéis.</dd></dl>
+    <dl><dt>Princípio</dt><dd>P1. A janela precisa de um título útil e não pode depender de uma mudança sutil, como o halo cinza. Um modo, aqui a tarefa, precisa estar visível e ter nome (<a href="https://www.nngroup.com/articles/modes/">NN/g, Modes</a>).</dd>
+    <dt>Direção</dt><dd>Um seletor de lugar no começo da barra de cima, antes das abas: imagem e nome do projeto, e "› tarefa" quando há uma. É a âncora "você está aqui", fica perto das abas que ele explica (P5) e, clicado, abre a troca de projeto e a página do projeto. A barra de baixo deixa de repetir o projeto.</dd></dl>
+  </div>
+  <div class="pair">
+    <div class="fig"><div class="lbl">HOJE</div>
+      <div class="strip"><div class="lights"><i></i><i></i><i></i></div><div class="srch" style="width:118px"><svg class="ic s"><use href="#i-search"/></svg>Search</div><div class="tab task" style="margin-left:6px;position:relative">‹ cadex<b class="co" style="top:-12px;left:-8px">1</b></div><div class="tab on"><span class="g work"></span>Claude</div><div class="tab">npm run dev</div></div>
+      <div class="cap">① Dentro da tarefa "kite-fix", a única pista do lugar é "‹ cadex". O nome da tarefa não aparece em lugar nenhum da barra.</div>
+    </div>
+    <div class="fig pro"><div class="lbl">PROPOSTA</div>
+      <div class="strip"><div class="lights"><i></i><i></i><i></i></div><div class="srch" style="width:96px"><svg class="ic s"><use href="#i-search"/></svg>⌘K</div><div class="where"><span class="av">C</span>cadex<span class="t">› kite-fix</span><span class="chev">▾</span><b class="co p" style="top:-12px;left:-8px">1</b></div><div class="tab on" style="margin-left:6px"><span class="g work"></span>Claude</div><div class="tab">npm run dev</div></div>
+      <div class="cap">① O lugar tem nome e forma própria, logo antes das abas que ele explica. O clique abre a troca de projeto e de tarefa e a página do projeto.</div>
+    </div>
+  </div>
+</div>
+
+<div class="f">
+  <div class="fh"><span class="fid">J2</span><h3>"Precisa de você" está em oito lugares, com três linguagens e nenhuma casa</h3><span class="sev S2">S2</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>Cinco agentes em três projetos. Um pede permissão para rodar <code>make perf</code>. Na janela isso aparece em vários lugares ao mesmo tempo:<br>• uma bolinha de 12 pt no quadrado do projeto;<br>• um número no sino, no canto oposto, que também conta quem terminou;<br>• "1 need you" em texto apagado embaixo à esquerda;<br>• a peça na aba, se a aba estiver à vista.<br>Cada lugar dá um número ou um recorte diferente, e para responder ela precisa abrir o sino no canto direito.</dd></dl>
+    <dl><dt>Princípio</dt><dd>P8: o app deve reunir os estados num lugar, não espalhar. P2: o resumo fica perto do detalhe, mas hoje o total está no canto direito e o detalhe por projeto na borda esquerda. P4: o sino e a barra de baixo contam coisas diferentes com a mesma cor âmbar. P10: um número só para o que pede ação.</dd>
+    <dt>Direção</dt><dd>Uma casa para a atenção: a caixa "Precisa de você" no topo do trilho, em cima dos projetos que ela resume. É a mesma lista do sino, aberta para a direita. O número conta só pedido de permissão e pergunta; "terminou" ganha um ponto verde sem número. O sino sai da barra de cima e o "need you" sai da de baixo. Com o app atrás de outros, o mesmo número vai para o ícone do Dock, que é o uso que o HIG prevê para o badge.</dd></dl>
+  </div>
+</div>
+
+<div class="f">
+  <div class="fh"><span class="fid">J3</span><h3>O estado de um agente some junto com o que o contém</h3><span class="sev S1">S1</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>Dois casos.<br>• Um projeto com dez terminais: quatro abas vão para o "» 4". Uma delas pede permissão, e o "» 4" é só texto (<code>TabsBarOverflow.swift</code> monta o item sem estado).<br>• Uma janela de 900 pt com 14 projetos: o trilho rola, o projeto que pede algo fica fora da vista, e a borda não mostra nada (<code>RailView.swift</code> não tem indicador de rolagem).<br>Se a notificação do sistema foi dispensada ou o Foco está ligado, sobra o número do sino, que mistura pedidos e "terminou". O agente fica parado esperando, e a pessoa nem sabe que precisa ir lá.</dd></dl>
+    <dl><dt>Princípio</dt><dd>P10: o sinal de um item escondido sobe para o pai visível. A reclamação de usuários do Cursor é este mesmo caso, e o pedido deles foi um sinal no contêiner, não abrir tudo à força.</dd>
+    <dt>Direção</dt><dd>O "» N" leva a peça mais urgente das abas que esconde, e dentro do menu dele as abas aparecem com a peça. As bordas do trilho rolado mostram uma pílula "▲ 1" ou "▼ 1" em âmbar quando há projeto esperando fora da vista; o clique rola até ele. A regra geral: nenhuma peça âmbar pode ficar só dentro de algo escondido.</dd></dl>
+  </div>
+  <div class="pair">
+    <div class="fig"><div class="lbl">HOJE</div>
+      <div class="duo">
+        <div class="vrail" style="height:230px;justify-content:flex-start;overflow:hidden">
+          <div class="tile img1 on">C<span class="od"></span></div><div class="tile img2">B</div><div class="tile">D</div><div class="tile">E</div>
+          <b class="co" style="bottom:-8px;left:44px">1</b>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div class="strip" style="position:relative"><div class="tab on"><span class="g work"></span>Claude</div><div class="tab">vite</div><div class="tab more" style="position:relative">» 4<b class="co" style="top:-12px;right:-10px">2</b></div></div>
+          <p class="ter" style="font-size:12px">① O projeto "K", que pede permissão, está rolado para baixo do trilho e nada aparece na borda.<br>② Um dos quatro escondidos espera você e o "» 4" não mostra.</p>
+        </div>
+      </div>
+    </div>
+    <div class="fig pro"><div class="lbl">PROPOSTA</div>
+      <div class="duo">
+        <div class="vrail" style="height:230px;overflow:hidden">
+          <div class="tile img1 on">C<span class="od"></span></div><div class="tile img2">B</div><div class="tile">D</div><div class="tile">E</div>
+          <span class="edgepill" style="position:absolute;bottom:6px">▼ 1</span>
+          <b class="co p" style="bottom:-8px;left:44px">1</b>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div class="strip"><div class="tab on"><span class="g work"></span>Claude</div><div class="tab">vite</div><div class="tab more" style="position:relative"><span class="g needs"></span>» 4<b class="co p" style="top:-12px;right:-10px">2</b></div></div>
+          <p class="ter" style="font-size:12px">① A pílula na borda diz que há alguém esperando lá embaixo, e o clique rola até ele.<br>② O "» 4" leva a peça mais urgente que esconde.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ============ TRILHO ============ -->
+<div class="region"><h3>Barra lateral · o trilho</h3>
+
+<div class="f">
+  <div class="fh"><span class="fid">T1</span><h3>O trilho mistura três tipos de coisa com a mesma cara</h3><span class="sev S2">S2</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>Na mesma faixa de 56 pt, de cima para baixo, há três tipos de coisa:<br>• <b>lugares</b>: os projetos, e o clique muda tudo, abas, coluna e conta;<br>• <b>painéis</b>: as páginas da coluna, e o clique abre ou fecha a coluna;<br>• <b>páginas globais</b>: Projects, Automations e Remote, e o clique troca o centro.<br>São três consequências diferentes para o mesmo gesto, em botões de tamanho quase igual, cinza sobre cinza, separados por um fio de 1 pt. Quem quer "ir para o projeto B" e quem quer "ver as mudanças" miram na mesma faixa e leem os mesmos quadrados.</dd></dl>
+    <dl><dt>Princípio</dt><dd>P5: mesma forma e mesma região dizem "mesmo tipo". P4: uma faixa, um papel. P11: o HIG define a barra lateral como navegação entre áreas, enquanto controles de vista e ações vão para a barra de cima ou para o próprio painel.</dd>
+    <dt>Direção</dt><dd>O trilho fica só com lugares: a caixa de atenção, os projetos e o "+" no alto, e as páginas globais no pé. As páginas da coluna vão para o cabeçalho da coluna, com nome (C1). O padrão da barra de atividades do VS Code é conhecido de quem programa (Jakob), mas lá a faixa só tem vistas; aqui ela também tem lugares, e é essa mistura que confunde.</dd></dl>
+  </div>
+</div>
+
+<div class="f">
+  <div class="fh"><span class="fid">T2</span><h3>Os ícones das páginas mudam de altura quando muda o número de projetos</h3><span class="sev S2">S2</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>O grupo das páginas é ancorado embaixo da área dos projetos (<code>pagesStack.top = projectsScroll.bottom</code>). Fechar o último terminal de um projeto solto tira o quadrado dele, e Changes sobe 45 pt. Abrir uma pasta faz Changes descer. Nas capturas da auditoria anterior, Files está cerca de 110 pt mais abaixo com três projetos do que com um. A mão que ia direto ao ícone erra e cai num projeto, que é um clique com consequência grande: troca as abas.</dd></dl>
+    <dl><dt>Princípio</dt><dd>P6: posição estável é o que permite clicar sem olhar. P7: um alvo que muda de lugar perde a vantagem da borda.</dd>
+    <dt>Direção</dt><dd>Sai junto com T1: com as páginas no cabeçalho da coluna, elas ficam sempre no mesmo lugar. Se as páginas continuarem no trilho, o mínimo é fixá-las num ponto que não depende dos projetos, por exemplo logo acima do pé.</dd></dl>
+  </div>
+  <div class="pair">
+    <div class="fig"><div class="lbl">HOJE · 1 projeto e 3 projetos</div>
+      <div class="duo">
+        <div class="vrail" style="height:300px"><div class="tile img1 on">C</div><div class="rb"><svg class="ic"><use href="#i-plus"/></svg></div><div class="hl"></div><div class="rb lit" style="position:relative"><svg class="ic"><use href="#i-diff"/></svg><b class="co" style="top:4px;left:42px">1</b></div><div class="rb"><svg class="ic"><use href="#i-folder"/></svg></div><div class="rb"><svg class="ic"><use href="#i-chat"/></svg></div></div>
+        <div class="vrail" style="height:300px"><div class="tile img1 on">C</div><div class="tile img2">B</div><div class="tile">A</div><div class="rb"><svg class="ic"><use href="#i-plus"/></svg></div><div class="hl"></div><div class="rb lit" style="position:relative"><svg class="ic"><use href="#i-diff"/></svg><b class="co" style="top:4px;left:42px">1</b></div><div class="rb"><svg class="ic"><use href="#i-folder"/></svg></div></div>
+      </div>
+      <div class="cap">① Changes num lugar diferente a cada projeto aberto ou fechado. A cada momento, a mão precisa reaprender onde ele está.</div>
+    </div>
+    <div class="fig pro"><div class="lbl">PROPOSTA</div>
+      <div class="frame" style="width:300px">
+        <div class="colhead"><span class="pn">cadex</span><span class="segm"><span class="on">Changes 3</span><span>Files</span></span><b class="co p" style="top:-10px;right:-10px">1</b></div>
+        <div class="fr"><span class="l amb">M</span>RailView.swift</div><div class="fr"><span class="l grn">A</span>RailEdge.swift</div>
+      </div>
+      <div class="cap">① Trocar de página é sempre no mesmo lugar, com nome, colado ao que troca.</div>
+    </div>
+  </div>
+</div>
+
+<div class="f">
+  <div class="fh"><span class="fid">T3</span><h3>Tudo no trilho é ícone sem nome; os projetos viram letras</h3><span class="sev S2">S2</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>Sem imagem, os projetos aparecem como "A", "B", "G" e "C", e duas pastas com a mesma inicial ficam iguais. A pessoa decora a letra ou passa o ponteiro e espera a dica. As cinco páginas e as três globais são ícones sem nome: um balão para Sessions, um cérebro para Memory, um relógio para Automations, um galho para Git graph, e Changes também é um desenho de galho. Os dois de git se parecem entre si. A ADR 0038 registra que o próprio dono não reconheceu o ícone do History; isso é um dado de uso, não uma opinião.</dd></dl>
+    <dl><dt>Princípio</dt><dd>P3: o nome deve ficar visível, e não só ao passar o ponteiro. Navegação só com ícones é tolerável em uso diário, mas mesmo assim a NN/g recomenda mostrar o nome por padrão. A letra não tem cheiro de informação (<a href="https://www.nngroup.com/articles/information-scent/">NN/g</a>).</dd>
+    <dt>Direção</dt><dd>Os projetos sem imagem ganham, em vez de uma letra, duas letras e a cor do projeto. A pessoa é convidada a pôr uma imagem na primeira vez. A dica com o nome aparece na hora, sem atraso, e diz também o estado ("cadex · 1 precisa de você"). As páginas ganham nome ao irem para a coluna (C1). As três globais do pé podem ficar só com ícone, porque são de uso raro e estão num lugar fixo.</dd></dl>
+  </div>
+</div>
+
+<div class="f">
+  <div class="fh"><span class="fid">T4</span><h3>A peça de estado do projeto é pequena e diz pouco</h3><span class="sev S3">S3</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>A peça de 12 pt no canto do quadrado mostra o estado mais urgente, mas não quantos agentes estão nele. Um projeto com um agente esperando e outro com quatro ficam iguais. O azul de "trabalhando" e o âmbar de "precisa de você" são discos do mesmo tamanho: na tela da tarefa, de canto de olho, só a cor separa os dois. Isso falha para quem não distingue bem as cores e também na visão periférica.</dd></dl>
+    <dl><dt>Princípio</dt><dd>P2, e acessibilidade: a cor não pode ser o único canal. O formato da peça já existe no app (anel para trabalhando, disco com halo para precisa de você) e no quadrado não é usado.</dd>
+    <dt>Direção</dt><dd>No trilho, "precisa de você" vira um selo âmbar com o número; "trabalhando" é um anel azul sem número; "terminou" é um ponto verde pequeno. As mesmas formas das abas e dos cabeçalhos, para a pessoa aprender uma vez só.</dd></dl>
+  </div>
+</div>
+</div>
+
+<!-- ============ COLUNA ============ -->
+<div class="region"><h3>Barra lateral · a coluna</h3>
+
+<div class="f">
+  <div class="fh"><span class="fid">C1</span><h3>A coluna não diz o que é nem de quem é</h3><span class="sev S2">S2</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>A coluna não tem cabeçalho. Na página Memory, a primeira coisa no topo é "Project memory is off. Turned on, each agent session…", e o nome da página só aparece no pé ("What the project knows"). Em Changes, o topo é "Uncommitted ▾ 0 files". Para saber que página é, a pessoa olha qual ícone do trilho está aceso. Para saber de que projeto, olha o pé ou o halo. Com a coluna sobre uma tarefa, só o pé diz "tarefa · against main".</dd></dl>
+    <dl><dt>Princípio</dt><dd>P1: título e cabeçalho são sinais de lugar. P11: o HIG pede nada crítico no pé de uma barra lateral, porque a borda de baixo some quando a janela é arrastada para baixo da tela.</dd>
+    <dt>Direção</dt><dd>Um cabeçalho de uma linha, com o nome do projeto ou da tarefa à esquerda e o seletor das páginas à direita. A linha de contexto (branch, ↑↓) sobe para esse cabeçalho, embaixo do nome. No pé ficam só as ações da página, como Commit e Open PR, perto da lista que elas usam (P7).</dd></dl>
+  </div>
+  <div class="pair">
+    <div class="fig"><div class="lbl">HOJE · página Memory</div>
+      <div class="frame" style="width:300px;height:260px;display:flex;flex-direction:column;background:var(--side)">
+        <div style="padding:10px 12px;font-size:12px;color:var(--body);position:relative">Project memory is off. Turned on, each agent session Cadex opens starts with what the earlier ones did…<b class="co" style="top:-10px;right:-10px">1</b></div>
+        <div style="margin:0 12px" class="btn">Turn On</div>
+        <div class="ctx" style="margin-top:auto;color:var(--text);font-weight:650">What the project knows<span class="grow"></span>⋯<b class="co" style="top:-10px;left:-10px">2</b></div>
+      </div>
+      <div class="cap">① Não há título nem projeto. ② O nome da página fica no pé.</div>
+    </div>
+    <div class="fig pro"><div class="lbl">PROPOSTA · página Changes</div>
+      <div class="frame" style="width:300px;height:260px;display:flex;flex-direction:column;background:var(--side)">
+        <div class="colhead" style="flex-wrap:wrap;row-gap:2px"><span class="pn">cadex <span class="ter" style="font-weight:500">› kite-fix</span></span><span class="segm"><span class="on">Changes 3</span><span>Files</span></span><b class="co p" style="top:-10px;left:-10px">1</b>
+          <div style="width:100%;font-size:11.5px;color:var(--ter)">⎇ kite-fix · against main · ↑2</div></div>
+        <div class="fr"><span class="l amb">M</span>RailView.swift<span class="n">+18 −4</span></div>
+        <div class="fr"><span class="l grn">A</span>RailEdge.swift<span class="n">+15</span></div>
+        <div class="btns" style="margin-top:auto;position:relative"><span class="btn">Commit…</span><span class="btn pri">Open PR</span><b class="co p" style="top:-8px;right:4px">2</b></div>
+      </div>
+      <div class="cap">① De quem, onde, contra o quê. ② O pé fica só com as ações da lista.</div>
+    </div>
+  </div>
+</div>
+
+<div class="f">
+  <div class="fh"><span class="fid">C2</span><h3>Três das cinco páginas da coluna repetem a página do projeto</h3><span class="sev S3">S3</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>Três páginas só levam a outro lugar:<br>• <b>Sessions</b>: o clique numa conversa abre a página do projeto, na seção Sessões;<br>• <b>Memory</b>: o clique numa página da memória abre a página do projeto, na seção Memória;<br>• <b>Git graph</b>: o detalhe de um commit abre numa aba.<br>Na prática a coluna é um índice da página do projeto, com uma segunda busca e outro layout. A pessoa aprende dois caminhos para a mesma coisa e não sabe qual é o "de verdade". Em ps4.png a coluna mostra Memory desligada ao lado da página do projeto em Settings, que fala da memória de novo.</dd></dl>
+    <dl><dt>Princípio</dt><dd>P4: um lugar para cada coisa. P12: abas agrupam conteúdos parecidos. Changes e Files são de trabalho, usados ao lado do terminal; Sessions, Memory e Git graph são de leitura, e o próprio app já os abre de corpo inteiro no centro.</dd>
+    <dt>Direção</dt><dd>A coluna fica com duas páginas, <b>Changes</b> e <b>Files</b>: o que se olha enquanto um agente trabalha. Sessions e Memory moram na página do projeto, que abre pelo seletor de lugar (J1) e pelo ⌘K. Git graph abre como página, como o detalhe já abre hoje. Com dois nomes, o seletor cabe por escrito nos 260 pt, e o motivo para ter ícones some.</dd></dl>
+  </div>
+</div>
+
+<div class="f">
+  <div class="fh"><span class="fid">C3</span><h3>A coluna aparece e some por regras que a pessoa não vê</h3><span class="sev S3">S3</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>A coluna fecha sozinha em cinco casos:<br>• quando o quadro abre;<br>• abaixo de 1000 pt de largura;<br>• na tela de início;<br>• no clique no ícone aceso;<br>• com ⌘B.<br>Ela volta com outras regras: "se o dono não a abriu ou fechou no meio". O mesmo clique num ícone abre a página ou fecha a coluna, dependendo do que já está aceso. Quem clicou em Changes para "atualizar a vista" vê a coluna desaparecer.</dd></dl>
+    <dl><dt>Princípio</dt><dd>NN/g, Modes: o mesmo gesto com dois efeitos conforme um estado pouco visível gera deslize de modo. P6: o centro muda de largura sem que a pessoa tenha pedido.</dd>
+    <dt>Direção</dt><dd>O fechamento automático pela largura é bom e o HIG o recomenda. Os outros casos podem ser mais previsíveis. Clicar numa página já aberta não fecha nada; fechar é com o botão da coluna, no começo da barra de cima (B2), ou com ⌘B. O quadro, por ser uma página inteira, pode cobrir a coluna sem mudar o estado dela, e ao sair do quadro tudo está como estava.</dd></dl>
+  </div>
+</div>
+</div>
+
+<!-- ============ BARRA DE CIMA ============ -->
+<div class="region"><h3>Barra de cima</h3>
+
+<div class="f">
+  <div class="fh"><span class="fid">B1</span><h3>A tarefa é um modo da barra de abas, sinalizado só por "‹ projeto"</h3><span class="sev S2">S2</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>Clicar no item "kite-fix ›" troca todas as abas pelas da tarefa. A barra tem a mesma cara, as mesmas posições e o mesmo "Claude" como primeira aba. ⌘1 a ⌘9 passam a contar outras abas. A pessoa aperta ⌘2 achando que vai ao <code>npm run dev</code> do projeto e cai num terminal da tarefa. Para voltar, procura o "‹ cadex", que é texto do tamanho de uma aba.</dd></dl>
+    <dl><dt>Princípio</dt><dd>NN/g, Modes: um modo precisa estar visível e ter nome. P1: na hierarquia projeto › tarefa › aba, um nível inteiro não tem título.</dd>
+    <dt>Direção</dt><dd>O seletor de lugar de J1 resolve isso: "cadex › kite-fix ▾" é o título do modo, e a seta volta ao projeto. As abas da tarefa podem ganhar uma faixa da cor do projeto, ou um fundo de grupo, para o modo se ver também de canto de olho. O item da tarefa dentro das abas do projeto continua, com a peça de estado; é um bom atalho.</dd></dl>
+  </div>
+</div>
+
+<div class="f">
+  <div class="fh"><span class="fid">B2</span><h3>À direita há cinco botões de quatro naturezas, e o botão da coluna está do lado errado</h3><span class="sev S3">S3</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>Na ponta direita estão:<br>• a conta com o uso, que é um estado;<br>• o quadro, que é navegação;<br>• o sino, que é atenção;<br>• a engrenagem, que é o app;<br>• o botão que abre e fecha a coluna, que é a vista.<br>São todos ícones do mesmo tamanho e da mesma cor. O botão da coluna está a 1100 pt da coluna que ele mexe, usa o desenho de painel à direita (<code>mirrored: true</code>) e a dica dele diz "Right panel / Painel da direita" (<code>TitleBarView.swift</code>). A coluna fica à esquerda.</dd></dl>
+    <dl><dt>Princípio</dt><dd>P11: o botão da barra lateral fica na borda de entrada; no máximo três grupos; o significado de cada controle precisa ser claro; não é preciso botão para o que já está no menu e no ⌘, (configurações). P7: o controle fica perto do que controla. P4: o nome tem que ser o da coisa.</dd>
+    <dt>Direção</dt><dd>O botão da coluna vai para logo depois dos semáforos, com o desenho de painel à esquerda e a dica "Barra lateral ⌘B". A engrenagem sai, porque ⌘, e o menu bastam. O sino vai para o trilho (J2). À direita sobram dois itens de um mesmo grupo, a conta e o quadro, que são "o que está rodando no geral".</dd></dl>
+  </div>
+  <div class="pair">
+    <div class="fig"><div class="lbl">HOJE</div>
+      <div class="strip" style="justify-content:flex-end;position:relative"><div class="acct"><i>✳</i>bkdg</div><div class="tbtn"><svg class="ic"><use href="#i-kanban"/></svg></div><div class="tbtn"><svg class="ic"><use href="#i-bell"/></svg><span class="tbadge">2</span></div><div class="tbtn"><svg class="ic"><use href="#i-gear"/></svg></div><div class="tbtn on" style="position:relative"><svg class="ic"><use href="#i-side"/></svg><b class="co" style="top:-12px;right:-8px">1</b></div></div>
+      <div class="cap">① "Right panel": abre a coluna que está do outro lado da janela.</div>
+    </div>
+    <div class="fig pro"><div class="lbl">PROPOSTA</div>
+      <div class="strip"><div class="lights"><i></i><i></i><i></i></div><div class="tbtn on" style="position:relative"><svg class="ic"><use href="#i-sideL"/></svg><b class="co p" style="top:-12px;right:-8px">1</b></div><div class="where"><span class="av">C</span>cadex<span class="chev">▾</span></div><span class="grow"></span><div class="acct"><i>✳</i>bkdg 84%</div><div class="tbtn"><svg class="ic"><use href="#i-kanban"/></svg></div></div>
+      <div class="cap">① Barra lateral na borda de entrada, como no Finder, no Mail e no Xcode. À direita, um grupo só.</div>
+    </div>
+  </div>
+</div>
+
+<div class="f">
+  <div class="fh"><span class="fid">B3</span><h3>Abas de agente sem diferença de forma de abas comuns</h3><span class="sev S4">S4</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>Com seis abas, três agentes, um servidor e dois shells, todas têm a mesma forma, e só a peça de 9 pt diferencia. A peça de "parado" é um anel cinza de 1,5 pt quase invisível no fundo escuro.</dd></dl>
+    <dl><dt>Princípio</dt><dd>P2 e P5.</dd>
+    <dt>Direção</dt><dd>Pouca coisa: a aba de agente que espera você ganha o fundo âmbar escuro (<code>tint.needs</code>) além da peça, como os cartões do quadro já fazem. Basta isso para a fileira de abas virar um mapa de atenção.</dd></dl>
+  </div>
+</div>
+</div>
+
+<!-- ============ BARRA DE BAIXO ============ -->
+<div class="region"><h3>Barra de baixo</h3>
+
+<div class="f">
+  <div class="fh"><span class="fid">S1</span><h3>A contagem mais importante está no lugar menos olhado, e o clique leva ao lugar errado</h3><span class="sev S2">S2</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>"● 2 need you" fica em texto de 12 pt na cor apagada, no canto de baixo à esquerda, e some quando chega a zero. Por isso não há um "0" estável que a pessoa aprenda a conferir: a ausência não se distingue do item escondido. Clicar em "3 working" roda <code>sidebar.show</code>, um comando ainda chamado "Show the Work Tree" no ⌘K, que só abre a coluna na página que ela já mostrava. Não aparece a lista de quem trabalha.</dd></dl>
+    <dl><dt>Princípio</dt><dd>P2 e cegueira à mudança: o sinal fica longe do foco. P11: o HIG avisa que a borda de baixo some quando a janela é reposicionada. Nielsen #2 e #4: o nome do comando fala de uma árvore que não existe mais.</dd>
+    <dt>Direção</dt><dd>"Precisa de você" sai daqui e vai para a caixa do trilho (J2). "N trabalhando" pode ficar como informação passiva, com o clique levando ao quadro, onde está a lista. O comando <code>sidebar.show</code> ganha nome e destino atuais ou sai.</dd></dl>
+  </div>
+</div>
+
+<div class="f">
+  <div class="fh"><span class="fid">S2</span><h3>Metade dos itens repete outro lugar ou nunca muda</h3><span class="sev S3">S3</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>Dos oito itens do padrão, só três dizem algo que não está em outro lugar (gaveta, café e Local), e um deles nunca muda:<br>• "cadex · main ↑3" repete o pé da coluna, na mesma tela, a 30 pt de distância;<br>• "Claude bkdg 84%" repete a conta da barra de cima;<br>• "Memory · 214 pages" repete o ícone do trilho e a página do projeto;<br>• "Local" mostra a mesma palavra o dia inteiro em quase todos os Macs.<br>A barra gasta 30 pt de altura em toda a largura da janela e a vista aprende a pular por cima dela. É por isso que o "need you" que mora lá também passa despercebido.</dd></dl>
+    <dl><dt>Princípio</dt><dd>Sinal e ruído: item que nunca muda ensina a não olhar. P4: cada fato numa casa.</dd>
+    <dt>Direção</dt><dd>A barra de baixo fica para o que é ambiente e muda de vez em quando:<br>• o branch do terminal com foco, com ↑↓;<br>• as portas abertas, só quando há;<br>• o uso da conta, só acima de 80%, em âmbar;<br>• o café;<br>• a atualização;<br>• a gaveta.<br>"Local" só aparece quando não é local. O projeto sai, porque está em cima (J1), e Memory sai, porque está na página do projeto. Tudo isso continua personalizável.</dd></dl>
+  </div>
+  <div class="pair">
+    <div class="fig"><div class="lbl">HOJE</div>
+      <div class="sbs" style="position:relative;overflow:hidden"><span>cadex · main ↑3</span><span><span class="dot" style="background:var(--blue)"></span> 3 working</span><span><span class="dot" style="background:var(--amber)"></span> 2 need you</span><span style="margin-left:auto">Memory · 214</span><span class="chip">bkdg 84%</span><span>Local</span></div>
+      <div class="cap">Projeto, conta e memória aparecem também em outra barra.</div>
+    </div>
+    <div class="fig pro"><div class="lbl">PROPOSTA</div>
+      <div class="sbs"><span>⎇ main ↑3</span><span><span class="g work" style="width:8px;height:8px"></span> 3 trabalhando</span><span>⌁ :5173</span><span style="margin-left:auto"><span class="chip">bkdg 84% · 3h</span></span><svg class="ic s"><use href="#i-cup"/></svg><span>Terminal ⌃`</span></div>
+      <div class="cap">Só o que é ambiente e só quando diz algo.</div>
+    </div>
+  </div>
+</div>
+
+<div class="f">
+  <div class="fh"><span class="fid">S3</span><h3>Cartão ao passar o ponteiro em todos os itens, na borda que o ponteiro cruza a caminho do Dock</h3><span class="sev S4">S4</span></div>
+  <div class="fb">
+    <dl><dt>O que a pessoa vive</dt><dd>Com a janela maximizada e o Dock embaixo, o ponteiro atravessa a barra para chegar ao Dock. Ao passar parando, abre um cartão de CPU ou de portas que ninguém pediu (0,18 s de atraso).</dd></dl>
+    <dl><dt>Princípio</dt><dd>P9: divulgar sob demanda, não por acidente.</dd>
+    <dt>Direção</dt><dd>O cartão abre no clique nos itens de medida (CPU, RAM, portas) e ao passar o ponteiro só no item de conta, que já tinha esse comportamento. Outra opção é aumentar o atraso para cerca de 0,5 s nessa borda.</dd></dl>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- ===================================================== 5 -->
+<section>
+<h2>5 · O que manter</h2>
+<div class="keep">
+  <div><h4>Projetos sempre à vista na borda esquerda</h4><p>Estão sempre à vista (P9), num lugar fixo, e a borda funciona como parede para o ponteiro (P7). O ponto de "terminal aberto" segue o Dock, que todo usuário de Mac conhece. Mantenha o trilho e tire dele o que não é lugar.</p></div>
+  <div><h4>Fixados separados dos abertos</h4><p>Dois grupos com papéis diferentes, separados por região (P5), como as duas partes do Dock. Arrastar para cima ou para baixo da linha é direto.</p></div>
+  <div><h4>Terminais só nas abas</h4><p>Uma lista de terminais na coluna repetiria as abas (P4) e gastaria altura. O que ela teria de único, o estado de outros projetos, fica melhor resolvido pela caixa de atenção e pelo estado que sobe (J2, J3). A conclusão não muda com muitos agentes: quem está em vários projetos precisa de uma lista por atenção, não de outra lista por lugar, e o ⌘J já é essa lista.</p></div>
+  <div><h4>A coluna segue o projeto, não o <code>cd</code></h4><p>A coluna fala de um lugar estável e não pula enquanto se navega no shell (P6). Isso é o que deixa a coluna e as abas falarem da mesma coisa.</p></div>
+  <div><h4>A coluna fecha sozinha em janela estreita</h4><p>O HIG recomenda exatamente isto (Sidebars, macOS: esconder e mostrar a barra lateral conforme a janela muda de tamanho).</p></div>
+  <div><h4>Cabeçalho de painel com estado, origem, custo e tempo</h4><p>É o indicador colado ao elemento (P2). Dá para ler sem procurar: quem é, de onde vem, quanto custou.</p></div>
+  <div><h4>A busca ⌘K na barra de cima e o ⌘J</h4><p>Tudo pode ser achado digitando (reconhecer em vez de lembrar, P3), e o ⌘J ordena por atenção (P8). A busca à vista, com o atalho escrito, ensina o atalho.</p></div>
+  <div><h4>Barra de baixo personalizável e item escondido sem custo</h4><p>O HIG apoia barras personalizáveis em apps de uso longo. A proposta muda o padrão, não o mecanismo.</p></div>
+  <div><h4>Uma peça de estado com forma, não só cor</h4><p>Anel para trabalhando e disco com halo para "precisa de você" já existem nas abas e nos painéis. Use as mesmas formas no trilho (T4).</p></div>
+</div>
+</section>
+
+<!-- ===================================================== 6 -->
+<section>
+<h2>6 · A estrutura proposta</h2>
+<p>As mesmas regiões, com um trabalho para cada uma: <b>em cima, onde estou e o que está aberto aqui</b>; <b>à esquerda, para onde posso ir e quem precisa de mim</b>; <b>a coluna, o que mudou e os arquivos daqui</b>; <b>embaixo, o ambiente</b>.</p>
+<div class="scroll">
+<div class="win" id="proposta">
+  <div class="tb">
+    <div class="lights"><i></i><i></i><i></i></div>
+    <div class="tbtn on" style="position:relative"><svg class="ic"><use href="#i-sideL"/></svg><b class="co p" style="top:-12px;left:-8px">1</b></div>
+    <div class="srch" style="width:128px"><svg class="ic s"><use href="#i-search"/></svg>Search<kbd>⌘K</kbd></div>
+    <div class="where"><span class="av">C</span>cadex<span class="t">› kite-fix</span><span class="chev">▾</span><b class="co p" style="top:-12px;left:-8px">2</b></div>
+    <div class="tabs" style="margin-left:10px;position:relative">
+      <b class="co p" style="top:-12px;left:-10px">3</b>
+      <div class="tab on"><span class="g work"></span>Claude</div>
+      <div class="tab" style="background:var(--tneeds)"><span class="g needs"></span>Claude · tests</div>
+      <div class="tab"><span class="g done"></span>npm run dev</div>
+      <div class="tab more"><span class="g needs"></span>» 2</div>
+      <div class="tab task">Review</div>
+    </div>
+    <div class="plus"><svg class="ic"><use href="#i-plus"/></svg></div>
+    <div class="tright">
+      <div class="acct"><i>✳</i>bkdg 84%<b class="co p" style="top:-12px;left:-8px">4</b></div>
+      <div class="tbtn"><svg class="ic"><use href="#i-kanban"/></svg></div>
+    </div>
+  </div>
+  <div class="mid">
+    <div class="rail">
+      <div class="inbox"><svg class="ic"><use href="#i-tray"/></svg><span class="n">2</span><b class="co p" style="top:8px;left:-21px">5</b></div>
+      <div class="hl" style="margin:6px 0"></div>
+      <div class="tile img1 on">CX<span class="bd" style="background:var(--amber)"></span><span class="od"></span><b class="co p" style="top:8px;left:-21px">6</b></div>
+      <div class="tile img2">BH<span class="bd" style="background:transparent;border:2px solid var(--blue);border-top-color:transparent;width:12px;height:12px"></span><span class="od"></span></div>
+      <div class="hl" style="margin-top:12px"></div>
+      <div class="tile img3">AL<span class="od"></span></div>
+      <div class="rb" style="margin-top:6px"><svg class="ic"><use href="#i-plus"/></svg></div>
+      <span class="edgepill" style="margin-top:4px">▼ 1</span>
+      <div class="rspace"></div>
+      <div class="hl"></div>
+      <div class="rb" style="position:relative"><svg class="ic"><use href="#i-grid"/></svg><b class="co p" style="top:4px;left:-20px">7</b></div>
+      <div class="rb"><svg class="ic"><use href="#i-clock"/></svg></div>
+      <div class="rb"><svg class="ic"><use href="#i-globe"/></svg></div>
+    </div>
+    <div class="col">
+      <div class="colhead" style="flex-wrap:wrap;row-gap:2px;position:relative"><span class="pn">kite-fix</span><span class="segm"><span class="on">Changes 3</span><span>Files</span></span>
+        <div style="width:100%;font-size:11.5px;color:var(--ter)">⎇ kite-fix · against main · ↑2</div><b class="co p" style="top:4px;right:-10px">8</b></div>
+      <div class="scope"><span class="dd">Last turn ▾</span><span class="muted">3 files <span class="grn">+42</span> <span style="color:var(--redT)">−7</span></span></div>
+      <div class="fr"><span class="l amb">M</span>RailView.swift<span class="p">sidebar</span><span class="n">+18 −4</span></div>
+      <div class="fr"><span class="l amb">M</span>RailParts.swift<span class="p">sidebar</span><span class="n">+9 −3</span></div>
+      <div class="fr"><span class="l grn">A</span>RailEdge.swift<span class="p">sidebar</span><span class="n">+15</span></div>
+      <div class="colfoot">
+        <div class="check"><span class="dot" style="background:var(--green)"></span>make check passed · 2 min ago</div>
+        <div class="btns"><span class="btn">Commit…</span><span class="btn pri">Open PR</span></div>
+      </div>
+    </div>
+    <div class="center">
+      <div class="pane">
+        <div class="ph"><span class="g work"></span><b>Claude</b><span class="o">kite-fix · Opus · bkdg</span><span class="r">US$ 0.31 · 4 min</span></div>
+        <div class="term">
+          <div class="u">› o trilho precisa rolar quando há muitos projetos</div><br>
+          ⏺ Read RailView.swift<br>&nbsp;&nbsp;⎿ Read 221 lines<br>
+          ⏺ Update(RailView.swift)<br>&nbsp;&nbsp;⎿ Updated with 18 additions and 4 removals<br>
+          <span class="s">✻ Wiring the scroll… 12s · esc to interrupt</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sb">
+    <span class="it">⎇ main ↑3<b class="co p" style="top:-14px;left:-12px">9</b></span>
+    <span class="it"><span class="g work" style="width:8px;height:8px"></span>3 trabalhando</span>
+    <span class="it">⌁ :5173</span>
+    <span class="it r"><span class="chip">bkdg 84% · resets 3h</span></span>
+    <span class="it"><svg class="ic s"><use href="#i-cup"/></svg></span>
+    <span class="it">Terminal ⌃`</span>
+  </div>
+</div>
+</div>
+<div class="legend p">
+  <div><b class="n">1</b><span><b>Barra lateral</b> (⌘B) na borda de entrada, com o desenho do lado certo. <span class="ter">B2</span></span></div>
+  <div><b class="n">2</b><span><b>Onde estou</b>: imagem, projeto › tarefa. O clique troca de projeto ou tarefa e abre a página do projeto (Visão geral, Sessões, Memória, Automações, Configurações). <span class="ter">J1, B1</span></span></div>
+  <div><b class="n">3</b><span><b>Abas daqui</b>, com a peça; a que espera ganha o fundo âmbar; o "» N" leva a peça mais urgente. <span class="ter">J3, B3</span></span></div>
+  <div><b class="n">4</b><span><b>O geral que roda</b>: a conta com o uso e o quadro. Sem engrenagem e sem sino. <span class="ter">B2</span></span></div>
+  <div><b class="n">5</b><span><b>Precisa de você</b>: a caixa no canto de cima, com a contagem só do que bloqueia. O clique abre a lista que hoje é o sino. O mesmo número vai para o Dock. <span class="ter">J2</span></span></div>
+  <div><b class="n">6</b><span><b>Projetos</b>, com imagem ou duas letras e cor, a peça com forma, e a pílula "▼ 1" na borda quando alguém espera fora da vista. <span class="ter">T3, T4, J3</span></span></div>
+  <div><b class="n">7</b><span><b>Global e raro</b>, no pé e fixo: Projects, Automations, Remote. <span class="ter">T1</span></span></div>
+  <div><b class="n">8</b><span><b>Coluna com cabeçalho</b>: de quem é e duas páginas com nome, Changes e Files. O contexto no alto, as ações no pé. <span class="ter">C1, C2, T2</span></span></div>
+  <div><b class="n">9</b><span><b>Ambiente</b>: o branch do terminal com foco, quem trabalha (o clique leva ao quadro), as portas, o uso só acima de 80%, o café, a gaveta. <span class="ter">S1, S2</span></span></div>
+</div>
+
+<div class="why">
+  <div><h4>Barra de cima: onde estou e o que está aberto aqui</h4><ul>
+    <li>É onde o olho chega primeiro ao voltar para a janela; o título do lugar mora aí (P1, HIG Toolbars › Titles).</li>
+    <li>O seletor fica ao lado das abas que ele explica: lugar e conteúdo leem como uma frase, "cadex › kite-fix: Claude, tests, dev" (P5).</li>
+    <li>À direita, um grupo só, em vez de cinco botões de naturezas diferentes (HIG: no máximo três grupos).</li>
+  </ul></div>
+  <div><h4>Trilho: para onde posso ir e quem precisa de mim</h4><ul>
+    <li>Só lugares, então a forma diz o tipo (P5) e nada muda de altura quando um projeto entra (P6).</li>
+    <li>A atenção global fica no canto de cima à esquerda, o ponto mais olhado e mais fácil de acertar (P7), em cima do detalhe por projeto que ela resume (P2).</li>
+    <li>O estado de quem está escondido sobe para a borda (P10).</li>
+  </ul></div>
+  <div><h4>Coluna: o que mudou e os arquivos daqui</h4><ul>
+    <li>Duas páginas de trabalho, usadas ao lado do terminal enquanto o agente roda. O que é de leitura vai para a página do projeto, que já é a casa dele (P4).</li>
+    <li>Com dois nomes, o seletor cabe escrito; não é preciso decorar ícone (P3).</li>
+    <li>Um cabeçalho diz de quem ela fala, inclusive numa tarefa (P1).</li>
+  </ul></div>
+  <div><h4>Barra de baixo: o ambiente</h4><ul>
+    <li>Só o que é ambiente e muda de vez em quando. Nada que exija ação imediata, porque a borda de baixo some com facilidade (HIG Sidebars, macOS).</li>
+    <li>Itens que aparecem só quando dizem algo (porta, uso alto, atualização) mantêm a barra calma, e por isso o que aparece nela é notado.</li>
+  </ul></div>
+</div>
+<div class="note">Custo da proposta, dito às claras. Com a coluna fechada, abrir direto numa página leva dois passos: abrir a coluna, depois escolher a página. Também dá para usar ⇧⌘G ou ⇧⌘E, que já existem. É o preço de tirar os ícones do trilho, e ele cai sobre a pessoa que fechou a coluna de propósito, não sobre o uso de todo dia. Se a medição mostrar que abrir Changes com a coluna fechada é frequente, a alternativa é manter só o ícone de Changes no trilho, num lugar fixo acima do pé, com o número de arquivos.</div>
+</section>
+
+<!-- ===================================================== 7 -->
+<section class="src">
+<h2>7 · Fontes</h2>
+<ol>
+  <li>Nielsen, J. 10 Usability Heuristics for User Interface Design. <a href="https://www.nngroup.com/articles/ten-usability-heuristics/">nngroup.com/articles/ten-usability-heuristics</a></li>
+  <li>NN/g. Navigation: You Are Here. <a href="https://www.nngroup.com/articles/navigation-you-are-here/">nngroup.com/articles/navigation-you-are-here</a></li>
+  <li>NN/g. Hamburger Menus and Hidden Navigation Hurt UX Metrics (179 participantes; uso de 27% contra 48%, tarefas pelo menos 39% mais lentas no desktop). <a href="https://www.nngroup.com/articles/hamburger-menus/">nngroup.com/articles/hamburger-menus</a></li>
+  <li>NN/g. Left-Side Vertical Navigation on Desktop. <a href="https://www.nngroup.com/articles/vertical-nav/">nngroup.com/articles/vertical-nav</a></li>
+  <li>NN/g. Icon Usability. <a href="https://www.nngroup.com/articles/icon-usability/">nngroup.com/articles/icon-usability</a></li>
+  <li>NN/g. Information Scent. <a href="https://www.nngroup.com/articles/information-scent/">nngroup.com/articles/information-scent</a></li>
+  <li>NN/g. Indicators, Validations, and Notifications. <a href="https://www.nngroup.com/articles/indicators-validations-notifications/">nngroup.com/articles/indicators-validations-notifications</a></li>
+  <li>NN/g. Change Blindness in UX. <a href="https://www.nngroup.com/articles/change-blindness/">nngroup.com/articles/change-blindness</a></li>
+  <li>NN/g. Fitts's Law and Its Applications in UX. <a href="https://www.nngroup.com/articles/fitts-law/">nngroup.com/articles/fitts-law</a></li>
+  <li>NN/g. Spatial Memory. <a href="https://www.nngroup.com/articles/spatial-memory/">nngroup.com/articles/spatial-memory</a></li>
+  <li>NN/g. Modes in User Interfaces. <a href="https://www.nngroup.com/articles/modes/">nngroup.com/articles/modes</a></li>
+  <li>NN/g. Progressive Disclosure. <a href="https://www.nngroup.com/articles/progressive-disclosure/">nngroup.com/articles/progressive-disclosure</a></li>
+  <li>NN/g. Proximity Principle; Similarity Principle. <a href="https://www.nngroup.com/articles/gestalt-proximity/">gestalt-proximity</a> · <a href="https://www.nngroup.com/articles/gestalt-similarity/">gestalt-similarity</a></li>
+  <li>Laws of UX. Hick's Law; Miller's Law; Jakob's Law. <a href="https://lawsofux.com/hicks-law/">hicks-law</a> · <a href="https://lawsofux.com/millers-law/">millers-law</a> · <a href="https://lawsofux.com/jakobs-law/">jakobs-law</a></li>
+  <li>Apple. Human Interface Guidelines: Sidebars (o pé da barra lateral, esconder com a janela, dois níveis). <a href="https://developer.apple.com/design/human-interface-guidelines/sidebars">developer.apple.com/…/sidebars</a></li>
+  <li>Apple. Human Interface Guidelines: Toolbars (títulos, grupos de itens, significado claro, comandos no menu). <a href="https://developer.apple.com/design/human-interface-guidelines/toolbars">developer.apple.com/…/toolbars</a></li>
+  <li>Apple. Human Interface Guidelines: Tab views. <a href="https://developer.apple.com/design/human-interface-guidelines/tab-views">developer.apple.com/…/tab-views</a></li>
+  <li>Apple. Human Interface Guidelines: Notifications (badging). <a href="https://developer.apple.com/design/human-interface-guidelines/notifications">developer.apple.com/…/notifications</a></li>
+  <li>Visual Studio Code. User Interface (barra de atividades, barra lateral, barra de status). <a href="https://code.visualstudio.com/docs/getstarted/userinterface">code.visualstudio.com/docs/getstarted/userinterface</a></li>
+  <li>Fórum do Cursor. Agent completion notifications are difficult to find when the workspace containing the agent is collapsed or not pinned. <a href="https://forum.cursor.com/t/agent-completion-notifications-are-difficult-to-find-when-the-workspace-containing-the-agent-is-collapsed-or-not-pinned/163553">forum.cursor.com/…/163553</a></li>
+  <li>Warp. Agent notifications (Complete, Request, Error; lida ao ir até a aba). <a href="https://docs.warp.dev/agents/capabilities/agent-notifications/">docs.warp.dev/agents/capabilities/agent-notifications</a></li>
+  <li>Cadex, como está: <code>docs/spec/sidebar.md</code>, <code>docs/spec/inspector.md</code>, <code>docs/spec/tabs.md</code>, <code>docs/spec/status-bar.md</code>, <code>docs/spec/projects.md</code>, <code>docs/adr/0038-rail-and-side-column.md</code>; código em <code>apps/macos/features/sidebar/RailView.swift</code>, <code>apps/macos/app/TitleBarView.swift</code>, <code>apps/macos/features/tabs/TabsBarOverflow.swift</code>, <code>apps/macos/app/StatusBarItems.swift</code>, <code>apps/macos/app/SessionCommands.swift</code>; capturas da auditoria anterior (e5b, ps4, m3, g3, r1).</li>
+</ol>
+</section>
+</main>
+</body>
+</html>

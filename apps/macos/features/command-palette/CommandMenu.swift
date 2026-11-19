@@ -9,7 +9,7 @@ import Menus
 public final class CommandMenu: NSObject, NSMenuItemValidation {
     public typealias KeyEquivalent = (key: String, modifiers: NSEvent.ModifierFlags)
 
-    private let registry: CommandRegistry
+    let registry: CommandRegistry
     private let keyEquivalent: (String) -> KeyEquivalent?
 
     /// keyEquivalent: the shortcut of a command id, from Shortcuts.
@@ -24,15 +24,17 @@ public final class CommandMenu: NSObject, NSMenuItemValidation {
             let commands = registry.commands.filter { $0.category == category }
             guard !commands.isEmpty else { continue }
             let submenu = NSMenu(title: category.title)
-            commands.forEach { submenu.addItem(item(for: $0)) }
+            fill(submenu, with: commands)
             let top = NSMenuItem(title: category.title, action: nil, keyEquivalent: "")
             top.submenu = submenu
             main.addItem(top)
         }
+        main.addItem(windowMenu())
+        main.addItem(helpMenu())
         return main
     }
 
-    private func item(for command: Command) -> NSMenuItem {
+    func item(for command: Command) -> NSMenuItem {
         let item = NSMenuItem(title: command.title, action: #selector(runItem(_:)), keyEquivalent: "")
         item.target = self
         item.representedObject = command.id

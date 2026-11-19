@@ -77,7 +77,7 @@ extension WindowSession {
             .header(T("Terminals", "Terminais"), detail: T("\(rows.count) open · \(drawerRows.count) in the drawer", "\(rows.count) abertos · \(drawerRows.count) na gaveta")),
             .rows(rows),
             .actions([.init(T("New terminal", "Novo terminal")) { [weak self] in _ = self?.commands.run("tab.new") },
-                      .init(T("Drawer ", "Gaveta ") + (app.keymapLabel("drawer.toggle") ?? "⌃`")) { [weak self] in _ = self?.commands.run("drawer.toggle") }]),
+                      .init(T("Drawer ", "Gaveta ") + (app.keymapLabel("drawer.toggle") ?? "⌥⌘`")) { [weak self] in _ = self?.commands.run("drawer.toggle") }]),
         ]
         return StatusCard.build(blocks, close: close)
     }

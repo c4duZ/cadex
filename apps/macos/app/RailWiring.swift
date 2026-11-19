@@ -55,6 +55,7 @@ extension WindowSession {
         guard let rail = workspace?.rail else { return }
         rail.show(railModel(), chosen: projects?.activeFolder.flatMap { Self.isLoose($0) ? nil : $0 })
         rail.remoteShown = hasRemote
+        rail.pagesShown = projects?.activeFolder != nil
         let page = tabs?.showsPage == true ? tabs?.activeDocument?.identity : nil
         rail.footLit = page == ProjectsListDocument.identity ? .projects
             : page?.hasPrefix("automation") == true ? .automations : nil

@@ -9,14 +9,16 @@ import UILooks
 
 /// The terminal drawer of this window (plan 30 C, done with plan 29's review; the Drawer mockup):
 /// quick terminals that are no project's, in their own tabs, rising over the center from the
-/// bottom. drawer.toggle (⌃`, and the status bar's "Terminal ⌃`") shows or hides it; the first
+/// bottom. drawer.toggle (⌥⌘`, and the status bar's "Terminal ⌥⌘`") shows or hides it; the first
 /// show opens a shell in the home folder; drawer.move-to-project (⌘↩, only with the drawer's
 /// terminal focused) takes it to the project shown, its shell going on. Not saved: they are
 /// quick ones.
 extension WindowSession {
     func drawerCommands() -> [Command] {
+        // ⌥⌘`, not ⌃`: Control keys belong to the shell (⌃` sends NUL, zsh's set-mark), the rule
+        // KeyCombo already applies to the owner's own shortcuts (UX audit, 2026-11-18).
         [Command(id: "drawer.toggle", title: T("Show or Hide the Terminal Drawer", "Mostrar ou esconder a gaveta de terminais"),
-                 keywords: ["drawer", "terminal", "quick", "gaveta", "rápido"], category: .terminal, defaultShortcut: "ctrl+`",
+                 keywords: ["drawer", "terminal", "quick", "gaveta", "rápido"], category: .terminal, defaultShortcut: "cmd+opt+`",
                  action: .run { [weak self] in self?.toggleDrawer() }),
          Command(id: "drawer.move-to-project", title: T("Move the Drawer's Terminal to the Project", "Levar o terminal da gaveta ao projeto"),
                  keywords: ["drawer", "move", "project", "task", "gaveta", "mover", "projeto"], category: .terminal, defaultShortcut: "cmd+return",
@@ -53,7 +55,7 @@ extension WindowSession {
         tabs.runCommand = { [weak self] id in self?.commands.run(id) ?? false }
         tabs.plainPanes = true
         tabs.bar.style = workspace?.titleBar.tabBar?.style ?? tabs.bar.style
-        let toggle = app.keymapLabel("drawer.toggle") ?? "⌃`", move = app.keymapLabel("drawer.move-to-project") ?? "⌘↩"
+        let toggle = app.keymapLabel("drawer.toggle") ?? "⌥⌘`", move = app.keymapLabel("drawer.move-to-project") ?? "⌘↩"
         let drawer = DrawerView(tabs: tabs, hint: T("\(toggle) show or hide · drag up to resize · \(move) move to a task",
                                                    "\(toggle) mostra ou esconde · arraste para cima · \(move) leva a uma tarefa"))
         // The last quick terminal closed: the drawer goes, ready for the next.
@@ -72,10 +74,10 @@ extension WindowSession {
         window.makeFirstResponder(terminal)
     }
 
-    /// "Terminal ⌃`" on the status bar's right (the mockups).
+    /// "Terminal ⌥⌘`" on the status bar's right (the mockups).
     func makeDrawerItem() -> StatusItem {
         let label = StatusLabel(icon: nil, tip: T("The terminal drawer", "A gaveta de terminais"))
-        label.text = T("Terminal ", "Terminal ") + (app.keymapLabel("drawer.toggle") ?? "⌃`")
+        label.text = T("Terminal ", "Terminal ") + (app.keymapLabel("drawer.toggle") ?? "⌥⌘`")
         label.onClick = { [weak self] in _ = self?.commands.run("drawer.toggle") }
         attachCard(to: label) { [weak self] close in self?.terminalsCard(close: close) ?? NSView() }
         return StatusItem(id: "drawer", title: T("Terminal drawer", "Gaveta de terminais"),

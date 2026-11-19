@@ -18,7 +18,8 @@ extension TabsController {
         case .document(let document):
             document.confirmClose(in: window, then: close)
         case .terminal(let terminal):
-            CloseConfirmation.confirm(running: terminal.hasForegroundProcess, in: window, what: T("the pane", "o painel"), then: close)
+            CloseConfirmation.confirm(running: terminal.hasForegroundProcess, busyAgent: Self.busyAgent([terminal]), in: window,
+                                      what: T("the pane", "o painel"), then: close)
         }
     }
 
@@ -53,7 +54,8 @@ extension TabsController {
         }
         let window = window
         let afterUnsaved = { @MainActor [weak self] in
-            CloseConfirmation.confirm(running: tab.hasForegroundProcess, in: window, what: T("the tab", "a aba")) { self?.remove(id) }
+            CloseConfirmation.confirm(running: tab.hasForegroundProcess, busyAgent: Self.busyAgent(tab.terminals), in: window,
+                                      what: T("the tab", "a aba")) { self?.remove(id) }
         }
         let unsaved = tab.unsavedCount
         guard unsaved > 0 else { return afterUnsaved() }
@@ -114,4 +116,14 @@ extension TabsController {
 
     /// The terminals in every tab and pane (the status bar's Terminals item).
     public var terminalCount: Int { tabs.values.reduce(0) { $0 + $1.terminals.count } }
+}
+
+extension TabsController {
+    /// The name of an agent working or waiting on you among these terminals, if any.
+    static func busyAgent(_ terminals: [TerminalView]) -> String? {
+        terminals.lazy.compactMap { terminal -> String? in
+            guard let status = terminal.agentStatus, status.state == .working || status.state == .blocked else { return nil }
+            return status.app.isEmpty ? "Claude" : status.app.prefix(1).uppercased() + status.app.dropFirst()
+        }.first
+    }
 }

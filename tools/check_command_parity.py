@@ -36,6 +36,8 @@ MAC_ONLY = {"project.edit", "project.create", "project.new-terminal", "project.r
             "theme.toggle-translucent", "theme.toggle-vibrancy",
             # The status bar's cards (2026-11-18): the coffee's "For 1 hour" and Stop a port, Mac first.
             "power.keep-awake-hour", "ports.stop",
+            # Next and previous tab (plan 37, the UX audit), Mac first.
+            "tab.next", "tab.previous",
             # Managed accounts (plan 18, phase C), Mac only like the rest of agents.
             "agents.add-account", "agents.set-active-account", "agents.set-project-account", "agents.sync-account-config", "agents.share-account-config",
             "agents.use-own-copy", "agents.follow-default-config", "agents.remove-account",
@@ -64,7 +66,7 @@ MAC_ONLY = {"project.edit", "project.create", "project.new-terminal", "project.r
             "memory.show", "memory.show-briefing", "memory.show-history", "memory.reindex", "memory.refresh", "memory.enable", "memory.approve", "memory.reject", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).
-            "agents.show-attention", "agents.show-feed", "agents.approve", "agents.deny", "agents.answer", "inspector.toggle", "sidebar.find", "agents.rename-account", "memory.search", "git.open-pr", "git.changes-last-turn", "git.changes-task", "git.changes-uncommitted", "agents.mark-unread",
+            "agents.show-attention", "agents.show-feed", "agents.approve", "agents.deny", "agents.answer", "sidebar.find", "agents.rename-account", "memory.search", "git.open-pr", "git.changes-last-turn", "git.changes-task", "git.changes-uncommitted", "agents.mark-unread",
             "agents.hibernate", "agents.restart",
             # Plan 20: the agent uses the Cadex (ADR 0024), Mac only for now.
             "agent-tools.open-file", "agent-tools.open-diff", "agent-tools.notify", "agent-tools.toggle",

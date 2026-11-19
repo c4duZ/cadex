@@ -48,6 +48,15 @@ enum PaletteModel {
             seen.insert(match.index)
             items.append(item(commands[match.index]))
         }
+        // What matches but cannot run now comes last, dimmed, with why (ADR 0005): hidden, "commit"
+        // in the wrong place read as "Cadex has no commit" (UX audit, 2026-11-18).
+        let off = registry.commands.compactMap { command in command.unavailableReason().map { (command, $0) } }
+        let offTexts = off.map { ([$0.0.title, Strings.counterpart(of: $0.0.title)].compactMap { $0 } + $0.0.keywords).joined(separator: " ") }
+        for match in FuzzyRank.rank(query, offTexts) {
+            let (command, reason) = off[match.index]
+            items.append(PaletteItem(id: command.id, title: command.title, shortcut: shortcut(command.id), unavailableReason: reason,
+                                     icon: CommandSections.section(of: command.id).icon))
+        }
         return items
     }
 }

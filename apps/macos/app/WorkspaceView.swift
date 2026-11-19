@@ -217,7 +217,7 @@ final class WorkspaceView: NSView {
         inspector.show(tab)
     }
 
-    /// ⌘B, inspector.toggle and the saved inspector.visible. Closed, the column is hidden, so no
+    /// ⌘B (view.toggle-sidebar) and the saved inspector.visible. Closed, the column is hidden, so no
     /// page of it reads (docs/spec/inspector.md); the rail stays (ADR 0038).
     /// `launching`: the saved state applied when the window opens.
     func setInspector(visible: Bool, launching: Bool = false) {
