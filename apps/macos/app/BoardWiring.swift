@@ -96,10 +96,11 @@ extension WindowSession {
     func showBoardChrome() {
         let on = tabs?.activeDocument?.identity == BoardDocument.identity
         workspace?.titleBar.setBoardOpen(on)
-        // Every page has the right panel closed, given back when it goes: the board (its mockup),
-        // the review (plan 31 A) and, from plan 34, the Projects, a project's and Automations pages,
-        // drawn without it in the proposal.
-        workspace?.setBoardShown(on || tabs?.showsPage == true)
+        // Only the board closes the side column, given back when it goes (ADR 0038): a page in the
+        // center (Projects, a project's, the review) keeps it, so nothing jumps. With every page
+        // counted, going from the board to another page kept the column shut, and the board's
+        // second click did not bring it back (the owner, 2026-11-18).
+        workspace?.setBoardShown(on)
         showLocation(folder.root)
     }
 }

@@ -95,9 +95,18 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
   no app: arrastar gamma para cima de alpha (fixado, primeiro, salvo e de volta ao reabrir), o Git
   graph para cima de Files (salvo e de volta), as Settings e o Open terminal. Não conferido: o
   arrasto com o mouse de verdade (só o de teste) e a animação de deslizar.
-- [ ] F. Quando a coluna fecha e o pé: o quadro fecha a coluna e o segundo clique no ícone dele a
+- [x] F. Quando a coluna fecha e o pé: o quadro fecha a coluna e o segundo clique no ícone dele a
   devolve (conferir o bug que o dono viu); a janela estreita; Remote no pé (os hosts do ssh e as
   máquinas da tailnet, Connect); o item Memory da barra de status abrindo a página Memory da coluna.
+  Feito: o bug era toda página fechar a coluna (o quadro, a página Projects, a do projeto), que só
+  voltava sem página nenhuma; agora só o quadro fecha, e sair dele a devolve. Abaixo de 1000 pt a
+  coluna fecha e volta ao alargar, menos se o dono a abriu ou fechou no meio. Remote
+  (`apps/macos/app/RemoteWiring.swift`, remote.show): os hosts SSH e as máquinas da tailnet numa
+  lista, escolher conecta numa aba; o botão só com algum host. O item Memory já rodava memory.show,
+  a página da coluna. Conferido no app: o quadro duas vezes (coluna fechada e de volta), a janela
+  de 900 pt, o clique no item Memory, a lista do Remote com os 4 hosts e as máquinas. Não
+  conferido: conectar de verdade (o caminho é o do ssh.connect e do machines.connect, já usados).
+  Junto, a pedido do dono (2026-11-18): a conta da barra de cima é a do próximo `claude`.
 - [ ] G. Fechar: as specs (sidebar, inspector, tabs, projects, home, status-bar, ssh), os CLAUDE.md,
   o inventário da moldura (`docs/design/work-frame/inventory.md`) com a árvore e a coluna da
   direita em `sai`, a paridade (`MAC_ONLY`), `make check`, `make perf` e a dist.

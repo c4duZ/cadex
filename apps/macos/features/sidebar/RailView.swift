@@ -46,6 +46,7 @@ public final class RailView: NSView {
         footButtons = [
             (.projects, RailButton(command: "project.show-all", icon: .squaresFour, tip: T("Projects", "Projetos"))),
             (.automations, RailButton(command: "orchestration.show-automations", icon: .clock, tip: T("Automations", "Automações"))),
+            (.remote, RailButton(command: "remote.show", icon: .globe, tip: T("Remote Machines", "Máquinas remotas"))),
         ]
         super.init(frame: .zero)
         wantsLayer = true
@@ -69,6 +70,8 @@ public final class RailView: NSView {
         foot.addArrangedSubview(separator)
         foot.setCustomSpacing(UILooks.pt(R.Separator.margin) + UILooks.pt(R.gap), after: separator)
         for (_, button) in footButtons { foot.addArrangedSubview(button) }
+        // Observers do not run in init: hidden by hand until the app says there is a host.
+        footButtons.first { $0.0 == .remote }?.1.isHidden = true
         top.addArrangedSubview(add)
         pagesLine.wantsLayer = true
         pagesLine.layer?.backgroundColor = R.Separator.color.cgColor
@@ -175,9 +178,14 @@ public final class RailView: NSView {
         for (page, button) in footButtons { button.lit = page == footLit }
     }
 
+    /// Remote at the foot: only with some SSH host or tailnet machine (ADR 0038).
+    public var remoteShown = false {
+        didSet { footButtons.first { $0.0 == .remote }?.1.isHidden = !remoteShown }
+    }
+
     /// For tests: the tiles' folders, the chosen one, the foot's commands and what is lit.
     var tileIDs: [String] { tiles.map(\.project.id) }
     var chosenID: String? { tiles.first(where: \.chosen)?.project.id }
-    var footCommands: [String] { footButtons.map(\.1.command) }
+    var footCommands: [String] { footButtons.filter { !$0.1.isHidden }.map(\.1.command) }
     var litCommands: [String] { footButtons.filter(\.1.lit).map(\.1.command) }
 }

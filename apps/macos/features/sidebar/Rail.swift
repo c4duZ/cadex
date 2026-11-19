@@ -53,6 +53,8 @@ public struct RailProject: Equatable, Sendable {
 public enum RailFoot: String, Sendable {
     case projects
     case automations
+    /// The SSH hosts and the tailnet's machines (plan 36 phase F), only when there is some.
+    case remote
 }
 
 /// A page of the side column, as the rail shows it (docs/adr/0038-rail-and-side-column.md, revised

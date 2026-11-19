@@ -100,6 +100,8 @@ extension WindowSession {
         // Always: the title bar's button lights with the panel open from the start too.
         workspace.setInspector(width: UILooks.pt(prefs.width))
         workspace.setInspector(visible: prefs.visible, launching: true)
+        // A window that opens narrow keeps its terminals' room (ADR 0038).
+        workspace.fitColumn(to: workspace.bounds.width)
         // Closed: the tab is only picked, so nothing reads behind a hidden panel.
         if workspace.inspector.tab != prefs.tab { workspace.inspector.show(prefs.tab, announce: prefs.visible) }
     }

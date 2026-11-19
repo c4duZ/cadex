@@ -140,6 +140,28 @@ final class WorkspaceView: NSView {
     }
 
     private var inspectorBeforeBoard: Bool?
+    /// The column closed because the window got narrow (ADR 0038): it comes back when the window
+    /// is wide again, unless the owner opened or closed it meanwhile.
+    private var closedByNarrow = false
+    /// Below this the side column closes and the rail stays (ADR 0038: under 1000 pt, the terminals
+    /// keep the room).
+    static let narrowBelow: CGFloat = 1000
+
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        fitColumn(to: newSize.width)
+    }
+
+    /// Closes the column in a narrow window and gives it back when it widens.
+    func fitColumn(to width: CGFloat) {
+        guard width > 0, home == nil, inspectorBeforeBoard == nil else { return }
+        if width < Self.narrowBelow, inspectorVisible {
+            setInspector(visible: false)
+            closedByNarrow = true
+        } else if width >= Self.narrowBelow, closedByNarrow {
+            setInspector(visible: true)
+        }
+    }
     private weak var drawer: DrawerView?
     private var drawerHeight: NSLayoutConstraint?
 
@@ -204,6 +226,7 @@ final class WorkspaceView: NSView {
     /// `launching`: the saved state applied when the window opens.
     func setInspector(visible: Bool, launching: Bool = false) {
         let opening = visible && (!inspectorVisible || launching)
+        closedByNarrow = false
         inspectorVisible = visible
         inspector.isHidden = !visible
         contentToInspector.isActive = visible

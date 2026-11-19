@@ -57,6 +57,10 @@ let railChecks: [(name: String, body: Checks.Body)] = [
         expect(rail.litCommands == ["orchestration.show-automations"])
         rail.footLit = nil
         expect(rail.litCommands.isEmpty)
+        rail.remoteShown = true
+        expect(rail.footCommands.last == "remote.show", "Remote with some host (plan 36 F)")
+        rail.remoteShown = false
+        expect(!rail.footCommands.contains("remote.show"))
     }),
     ("the pages' icons in the rail: a click opens the column on the page; on the lit one, folds it", {
         var ran: [String] = []

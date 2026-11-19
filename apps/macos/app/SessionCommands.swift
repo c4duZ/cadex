@@ -71,6 +71,7 @@ extension WindowSession {
         commands.register(jumpCommands(palette: palette))
         commands.register(projectPageCommands())
         commands.register(projectsPageCommands())
+        commands.register(remoteCommands())
         commands.register(boardCommands())
         commands.register(drawerCommands())
         commands.register(SSHCommands.all(palette: palette) { [weak self] alias in self?.connectSSH(alias) })

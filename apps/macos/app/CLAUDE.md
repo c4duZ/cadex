@@ -125,6 +125,11 @@
   volta às abas do próprio projeto; `TitleBarView.swift` diz à faixa de abas quanto espaço ela tem;
   os terminais da pasta pessoal são abas sem projeto (`RailWiring.swift`, `isLoose`: fora do
   trilho); a coluna segue a tarefa quando a lista das tarefas chega (`TreeWiring.swift`).
+- Plano 36 fase F: só o quadro fecha a coluna (`BoardWiring.swift`, setBoardShown), e sair dele a
+  devolve; uma página no centro a mantém. Abaixo de 1000 pt a coluna fecha e volta ao alargar
+  (WorkspaceView.fitColumn, também ao abrir a janela). `RemoteWiring.swift`: remote.show, os hosts
+  SSH e as máquinas da tailnet numa lista (`RemoteSource`), escolher conecta numa aba (connectSSH,
+  connectMachine); o trilho mostra Remote no pé só com algum host (`hasRemote`).
 - `SessionsColumnWiring.swift` (plano 36 fase C): a página Sessions da coluna (project.sessions-column):
   as conversas do projeto escolhido por quando, lidas do histórico só enquanto a página aparece
   (o onColumnPage do WorkspaceView solta ao sair); o clique abre a página do projeto em Sessions.
