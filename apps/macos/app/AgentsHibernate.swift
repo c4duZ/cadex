@@ -1,6 +1,7 @@
 import AgentTools
 import Agents
 import AppKit
+import Strings
 import Terminal
 
 /// Hibernation for the whole app (docs/spec/agents.md, Hibernação; plan 19
@@ -93,6 +94,12 @@ extension AppDelegate {
         guard pid > 0, terminal.agentResume != nil else { return false }
         terminal.isHibernated = true
         kill(pid, SIGTERM)
+        // Said in the bell's feed: it happened silently, and a hibernated agent read as finished or
+        // gone (UX audit, 2026-11-18). Focusing its terminal brings it back.
+        let folder = terminal.currentDirectory ?? ""
+        AgentAttention.shared.note(.note, text: T("Hibernated after \(hibernateMinutes) min with nobody looking; it comes back when you open its terminal",
+                                                  "Hibernado depois de \(hibernateMinutes) min sem ninguém olhar; volta quando você abrir o terminal dele"),
+                                   project: AgentProject.of(folder).name, key: AppDelegate.key(terminal))
         // Its task's environment sleeps with it (plan 23, ADR 0032).
         sessions.first?.followEnvironment(of: terminal.currentDirectory, to: .suspend)
         return true

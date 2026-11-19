@@ -261,7 +261,9 @@ extension WindowSession {
         entries += [
             .separator,
             MenuEntry(T("Comment…", "Comentar…"), icon: .pencilSimple) { [weak self] in self?.askTreeComment(task: folder) },
-            MenuEntry(T("Remove Task…", "Remover a tarefa…"), icon: .trash) { [weak self] in _ = self?.commands.run("worktrees.remove") },
+            MenuEntry(T("Remove Task…", "Remover a tarefa…"), icon: .trash) { [weak self] in
+                _ = self?.commands.run("worktrees.remove", request: CommandRequest(arguments: [:], folder: folder))
+            },
         ]
         return entries
     }
@@ -337,8 +339,15 @@ extension WindowSession {
         case .task(let folder):
             // Only in the project that has the task (another project's terminal there is not it).
             let owner = projects?.projects.first { project in (treeTasks[project.folder] ?? []).contains { $0.path == folder } }
-            let terminal = owner?.tabs.allTerminals
-                .first { ($0.currentDirectory ?? "") == folder || ($0.currentDirectory ?? "").hasPrefix(folder + "/") }
+            // The task's most urgent terminal (the one asking, else failed, finished, working): ⌘J on
+            // a task with Claude and `npm run dev` landed on the server, the prompt out of sight
+            // (UX audit, 2026-11-18).
+            let here = (owner?.tabs.allTerminals ?? [])
+                .filter { ($0.currentDirectory ?? "") == folder || ($0.currentDirectory ?? "").hasPrefix(folder + "/") }
+            let rank: (GlyphState?) -> Int = { state in
+                switch state { case .needs: 0; case .failed: 1; case .done: 2; case .working: 3; default: 4 }
+            }
+            let terminal = here.min { rank(Self.treeRow($0).state) < rank(Self.treeRow($1).state) }
             if let owner, let index = projects?.projects.firstIndex(where: { $0 === owner }) { projects?.select(index) }
             if let terminal { app.goToAgent(key: AppDelegate.key(terminal), pid: 0) } else { tabs?.newTab(cwd: folder) }
         }

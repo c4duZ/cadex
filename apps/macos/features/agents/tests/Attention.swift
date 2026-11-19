@@ -53,13 +53,13 @@ let attentionChecks: [(name: String, body: Checks.Body)] = [
         attention.update([report("t1", pid: 7, .working)])
         expect(attention.cards.isEmpty && replies.count == 1 && replies[0] == nil, "\(replies)")
     }),
-    ("the feed: finished, questions and failures as they happen, newest first, at most 200; the count adds the unseen", {
+    ("the feed: finished, questions and failures as they happen, newest first, at most 200; the bell counts only what waits on you", {
         let attention = AgentAttention()
         attention.update([report("t1", pid: 1, .working)])
         attention.update([report("t1", pid: 1, .done, .none, "", unseen: true)])
         attention.update([report("t1", pid: 1, .done, .none, "", unseen: true)])
         expect(attention.feed.map(\.kind) == [.finished], "\(attention.feed.map(\.kind))")
-        expect(attention.unseen == 1, "a finished agent nobody saw counts")
+        expect(attention.unseen == 0 && attention.finishedUnseen == 1, "a finished agent nobody saw is counted apart, not on the bell")
         attention.update([report("t1", pid: 1, .blocked, .question, "answer: Qual?")])
         expect(attention.feed.first?.kind == .question && attention.feed.first?.text == "Qual?")
         for i in 0..<250 { attention.note(.taskCreated, text: "t\(i)", project: "p") }

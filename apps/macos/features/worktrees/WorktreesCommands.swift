@@ -68,7 +68,16 @@ public enum WorktreesCommands {
                         palette.open(TaskSource(placeholder: T("The task to remove", "A tarefa a remover"), tasks: {
                             actions.repository().map { controller.tasks(repo: $0).map(\.worktree) } ?? []
                         }, choose: actions.remove, remote: { actions.repository().map(controller.remoteTasks) ?? [] }, chooseRemote: actions.removeRemote))
-                    }),
+                    })
+                // The task's own menu removes that task, not a list of all of them (UX audit, 2026-11-18).
+                .accepting("the request's folder is the task's") { request in
+                    guard let repo = WorktreesCore.repository(of: request.folder),
+                          let task = controller.tasks(repo: repo).map(\.worktree).first(where: { $0.path == request.folder }) else {
+                        return .failed("this folder is not a task's")
+                    }
+                    actions.remove(task)
+                    return .ok("asked to remove \(task.branch)")
+                },
             environmentCommand(.up, palette: palette, actions: actions),
             environmentCommand(.suspend, palette: palette, actions: actions),
             environmentCommand(.resume, palette: palette, actions: actions),

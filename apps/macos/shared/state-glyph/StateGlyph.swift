@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 import UILooks
 
 /// The app's one sign of state (docs/adr/0035-work-frame.md; components.stateGlyph of
@@ -93,6 +94,33 @@ public enum StateGlyphLook {
         case .done, .failed, .review:
             context.setFillColor(color(state).cgColor)
             context.fillEllipse(in: rect)
+        }
+    }
+}
+
+extension GlyphState {
+    /// How urgent the state is for the owner, lowest first: what waits on you, then failed, done,
+    /// in review, working, idle. Every list that picks "the most urgent" uses this order.
+    public var urgency: Int {
+        switch self {
+        case .needs: 0
+        case .failed: 1
+        case .done: 2
+        case .review: 3
+        case .working: 4
+        case .idle: 5
+        }
+    }
+
+    /// The state in words, for a list or a tip.
+    public var words: String {
+        switch self {
+        case .needs: T("needs you", "precisa de você")
+        case .failed: T("failed", "falhou")
+        case .done: T("done", "pronto")
+        case .review: T("in review", "em revisão")
+        case .working: T("working", "trabalhando")
+        case .idle: T("idle", "parado")
         }
     }
 }

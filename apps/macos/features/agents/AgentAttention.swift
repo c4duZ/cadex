@@ -122,11 +122,20 @@ public final class AgentAttention {
         return hooked + reported
     }
 
-    /// The bell's and the Dock's number: open requests and agents that
-    /// finished while nobody looked.
+    /// The bell's and the Dock's number: only what waits on you (the open
+    /// requests). With the finished agents nobody saw added, an amber "3" did
+    /// not say whether anything was blocked, and people stopped looking (UX
+    /// audit, 2026-11-18; ADR 0035 asked for this from the start).
     public var unseen: Int {
         guard isEnabled else { return 0 }
-        return cards.count + reports.filter(\.finishedUnseen).count
+        return cards.count
+    }
+
+    /// The agents that finished while nobody looked: shown quietly in the
+    /// bell's list, never in its number.
+    public var finishedUnseen: Int {
+        guard isEnabled else { return 0 }
+        return reports.filter(\.finishedUnseen).count
     }
 
     /// A permission request whose hook waits; `reply` answers it once.

@@ -40,6 +40,9 @@ final class JumpSource: PaletteSource {
 
     var placeholder: String { T("Jump to a task, or type to start one", "Ir para uma tarefa, ou escreva para começar uma") }
     var emptyText: String { "" }
+    /// Nothing to list before typing: said, not a blank box (UX audit, 2026-11-18).
+    var idleText: String? { T("Nothing needs you right now. Type to find a task, or to start one.",
+                              "Nada precisa de você agora. Escreva para achar uma tarefa, ou começar uma.") }
     var icon: Icon { .magnifyingGlass }
     var width: CGFloat? { UILooks.pt(DesignTokens.Sheet.switcherWidth) }
     var showsFooter: Bool { false }

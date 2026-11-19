@@ -53,7 +53,7 @@ let package = Package(
         // The app's one sign of state (docs/adr/0035-work-frame.md, plan 25 phase D).
         .target(
             name: "StateGlyph",
-            dependencies: ["UILooks"],
+            dependencies: ["Strings", "UILooks"],
             path: "shared/state-glyph",
             exclude: ["CLAUDE.md", "tests"],
             swiftSettings: [.unsafeFlags(["-enable-testing"], .when(configuration: .debug))]

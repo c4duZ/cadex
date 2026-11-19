@@ -150,8 +150,13 @@ extension WindowSession {
         } else {
             blocks.append(.note(app.updates.buttonTip))
         }
-        blocks.append(.actions([.init(T("Update and reopen", "Atualizar e reabrir")) { [weak self] in _ = self?.commands.run("app.check-for-updates") },
-                                .init(T("Skip this version", "Pular esta versão")) { [weak self] in _ = self?.commands.run("app.skip-update") }]))
+        // With a version to install, the button installs (it only checked again: UX audit, 2026-11-18).
+        if case .available = app.updates.state {
+            blocks.append(.actions([.init(T("Update and reopen", "Atualizar e reabrir")) { [weak self] in _ = self?.commands.run("app.install-update") },
+                                    .init(T("Skip this version", "Pular esta versão")) { [weak self] in _ = self?.commands.run("app.skip-update") }]))
+        } else {
+            blocks.append(.actions([.init(T("Check for updates", "Procurar atualizações")) { [weak self] in _ = self?.commands.run("app.check-for-updates") }]))
+        }
         return StatusCard.build(blocks, close: close)
     }
 

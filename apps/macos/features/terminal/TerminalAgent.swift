@@ -1,4 +1,5 @@
 import AppKit
+import Strings
 
 /// The agent running in this terminal, as it reports itself by OSC 7501
 /// (docs/spec/tabs.md, plan 19): its state for the tab's title, and whether
@@ -6,10 +7,16 @@ import AppKit
 /// focus.
 extension TerminalView {
     /// The last report, while a program runs in the foreground: an agent
-    /// that quit without saying so (back at the shell) reports nothing.
+    /// that quit without saying so (back at the shell) reports nothing. One
+    /// that was working when its process went away died mid-turn: it says
+    /// "failed", not nothing, until the shell runs something else (a crash
+    /// just lost its glyph and read as "nothing to do": UX audit, 2026-11-18).
     public var agentStatus: TerminalAgentStatus? {
-        guard let agent = signals.agent, hasForegroundProcess else { return nil }
-        return agent
+        guard let agent = signals.agent else { return nil }
+        if hasForegroundProcess { return agent }
+        guard agent.state == .working, !isHibernated else { return nil }
+        return TerminalAgentStatus(state: .failed, kind: agent.kind, app: agent.app,
+                                   message: T("Exited while working", "Saiu no meio do trabalho"))
     }
 
     /// It finished (done) while this terminal did not have the focus.

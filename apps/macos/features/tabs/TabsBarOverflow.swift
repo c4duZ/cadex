@@ -51,8 +51,12 @@ extension TabsController {
         let trailing = extras.enumerated().filter { !$0.element.leading }.map { item($0.offset, $0.element) }
         let (visible, hidden) = fitting(shownIDs, extras: leading + trailing)
         overflowHidden = hidden
+        // The chip carries the most urgent state of the hidden tabs: an agent asking for permission
+        // behind "» 3" was invisible (UX audit, 2026-11-18).
+        let urgent = hidden.compactMap { id in tabs[id].flatMap { barItem($0).state } }.min { $0.urgency < $1.urgency }
         let more = hidden.isEmpty ? [] : [TabBarView.Item(id: Self.overflowItem, title: "» \(hidden.count)", active: false,
-                                                          tip: T("\(hidden.count) more tabs", "Mais \(hidden.count) abas"))]
+                                                          tip: T("\(hidden.count) more tabs", "Mais \(hidden.count) abas")
+                                                              + (urgent.map { " · " + $0.words } ?? ""), state: urgent)]
         return leading + visible.compactMap { id in tabs[id].map(barItem) } + more + trailing
     }
 
@@ -61,7 +65,11 @@ extension TabsController {
         guard let index = bar.items.firstIndex(where: { $0.id == Self.overflowItem }) else { return }
         let frame = bar.frame(at: index)
         PopupMenu.show(overflowHidden.compactMap { id in
-            tabs[id].map { tab in MenuEntry(tab.title(home: home)) { [weak self] in self?.select(id) } }
+            tabs[id].map { tab in
+                // Each hidden tab with its state in words, the urgent ones first to see.
+                let state = barItem(tab).state
+                return MenuEntry(tab.title(home: home) + (state.map { "  ·  " + $0.words } ?? "")) { [weak self] in self?.select(id) }
+            }
         }, at: NSPoint(x: frame.minX, y: frame.maxY), in: bar)
     }
 }

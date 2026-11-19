@@ -117,7 +117,7 @@ public final class MemoryView: NSView {
         guard let state else { return add(MemoryParts.line(T("Loading…", "Carregando…"))) }
         guard state.enabled else {
             add(MemoryParts.paragraph(MemoryStatusText.offText))
-            return add(MemoryParts.button(T("Turn On", "Ligar")) { [weak self] in self?.run?("memory.enable") })
+            return add(MemoryParts.button(T("Turn On for All Projects", "Ligar para todos os projetos")) { [weak self] in self?.run?("memory.enable") })
         }
         let pages = state.tree?.allPages ?? []
         // What the project knows: the session logs are not counted (the project's page and its

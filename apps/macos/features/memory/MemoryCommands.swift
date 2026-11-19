@@ -59,7 +59,7 @@ public enum MemoryPageCommands {
                     action: .run(actions.showHistory)),
             Command(id: "memory.refresh", title: T("Refresh Memory Page", "Atualizar a página da memória"),
                     keywords: ["memory", "refresh", "reload", "memória", "atualizar"], category: .view, action: .run(actions.refresh)),
-            Command(id: "memory.enable", title: T("Turn On Project Memory", "Ligar a memória do projeto"),
+            Command(id: "memory.enable", title: T("Turn On Project Memory (All Projects)", "Ligar a memória dos projetos (todos)"),
                     keywords: ["memory", "enable", "turn on", "memória", "ligar"], category: .view, action: .run(actions.turnOn)),
             Command(id: "memory.search", title: T("Search Project Memory…", "Buscar na memória do projeto…"),
                     keywords: ["memory", "search", "wiki", "find", "memória", "buscar"], category: .view,

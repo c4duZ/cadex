@@ -79,12 +79,12 @@ public struct ProjectPageState: Equatable {
 }
 
 public enum ProjectPageWords {
-    /// A conversation's dot: live and working, live and asking (needs you), live and quiet or
-    /// ended in the last two days (finished), older (gray).
+    /// A conversation's dot: live and working, live and asking (needs you), live and quiet
+    /// (finished its turn); an ended one is gray, however recent: green on a two-day-old
+    /// conversation read as "just finished, go look" (UX audit, 2026-11-18).
     public static func state(live: Bool, working: Bool, asking: Bool, updated: Date?, now: Date = Date()) -> GlyphState {
         if live { return working ? .working : asking ? .needs : .done }
-        guard let updated else { return .idle }
-        return now.timeIntervalSince(updated) < 2 * 86400 ? .done : .idle
+        return .idle
     }
 
     /// "now", "4m", "1h", "yesterday", "2d".

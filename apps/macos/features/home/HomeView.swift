@@ -109,7 +109,14 @@ public final class HomeView: NSView, NSTextFieldDelegate {
             recentsBox.addArrangedSubview(row)
             row.widthAnchor.constraint(equalTo: recentsBox.widthAnchor).isActive = true
         }
-        recentsBox.isHidden = state.recents.isEmpty
+        // Always shown: it holds the only Open folder and Clone…; a first run had no way to open a
+        // project but ⌘O (UX audit, 2026-11-18).
+        if state.recents.isEmpty {
+            typealias R = H.Recent.Header
+            recentsBox.addArrangedSubview(homeLabel(T("Open a folder to start a project: its terminals, tasks and memory live there.",
+                                                      "Abra uma pasta para começar um projeto: os terminais, as tarefas e a memória dele moram lá."),
+                                                    size: DesignTokens.FontSize.body, color: R.color))
+        }
         needsLayout = true
     }
 
@@ -204,7 +211,8 @@ public final class HomeView: NSView, NSTextFieldDelegate {
 
     private func recentsHeader() -> NSView {
         typealias R = H.Recent.Header
-        let title = homeLabel(T("RECENT PROJECTS", "PROJETOS RECENTES"), size: R.fontSize, color: R.color, weight: R.weight, tracking: R.tracking)
+        let words = !state.recents.isEmpty ? T("RECENT PROJECTS", "PROJETOS RECENTES") : T("START A PROJECT", "COMECE UM PROJETO")
+        let title = homeLabel(words, size: R.fontSize, color: R.color, weight: R.weight, tracking: R.tracking)
         let open = link(T("Open folder ⌘O", "Abrir pasta ⌘O")) { [weak self] in self?.actions.openFolder() }
         let dot = homeLabel("·", size: R.fontSize, color: R.color)
         let clone = link(T("Clone…", "Clonar…")) { [weak self] in self?.actions.clone() }

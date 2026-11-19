@@ -115,8 +115,15 @@ public final class AgentNotifier: NSObject {
         guard wants(stop), !isLooking(session) else { return }
         didStop?(session, stop)
         guard !mutedMachines.contains(session.machine ?? "local") else { return }
+        // A finished turn is quiet while you are in Cadex: the bell's list and the tab say it. A
+        // banner and a sound on every finished turn taught people to turn all notifications off,
+        // permission ones too (UX audit, 2026-11-18). Permission and questions still interrupt.
+        if case .finished = stop, appIsActive() { return }
         post(session, stop)
     }
+
+    /// Whether Cadex is the app in front (NSApp.isActive); a test can say otherwise.
+    var appIsActive: () -> Bool = { NSApp?.isActive ?? false }
 
     func wants(_ stop: AgentStop) -> Bool {
         switch stop {

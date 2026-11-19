@@ -15,7 +15,9 @@ enum TabCommandLooks {
         if let agent = TabAgentTitle.state(terminal.agentStatus, hibernated: terminal.isHibernated) { return agent }
         if terminal.agentStatus != nil { return nil }
         guard terminal.command.running != nil else { return nil }
-        return terminal.command.served != nil ? .done : .working
+        // A server (a port open) has no glyph: its green read as "an agent finished, go look" (UX
+        // audit, 2026-11-18). Its tab says the command, and the pane offers the preview.
+        return terminal.command.served != nil ? nil : .working
     }
 
     /// A tab's state: its only terminal's, or what matters most among several (needs, works,

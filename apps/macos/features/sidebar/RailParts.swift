@@ -47,12 +47,18 @@ final class RailTile: NSView {
         ring.layer?.borderWidth = UILooks.pt(T.Chosen.halo)
         ring.layer?.borderColor = T.Chosen.color.cgColor
         ring.isHidden = !chosen
+        // The badge is the app's state glyph on a disc of the rail's ground (the ring spins while
+        // working, needs has its halo): a plain dot told working from needs by color alone (UX
+        // audit, 2026-11-18).
         badge.wantsLayer = true
         badge.layer?.cornerRadius = UILooks.pt(T.Badge.size) / 2
-        badge.layer?.borderWidth = UILooks.pt(T.Badge.border)
-        badge.layer?.borderColor = T.Badge.borderColor.cgColor
-        badge.layer?.backgroundColor = project.badge.map(StateGlyphLook.color)?.cgColor
+        badge.layer?.backgroundColor = T.Badge.borderColor.cgColor
         badge.isHidden = project.badge == nil
+        let glyph = StateGlyphView(size: UILooks.pt(T.Badge.size - T.Badge.border * 2), state: project.badge)
+        glyph.translatesAutoresizingMaskIntoConstraints = false
+        badge.addSubview(glyph)
+        NSLayoutConstraint.activate([glyph.centerXAnchor.constraint(equalTo: badge.centerXAnchor),
+                                     glyph.centerYAnchor.constraint(equalTo: badge.centerYAnchor)])
         dot.wantsLayer = true
         dot.layer?.cornerRadius = UILooks.pt(T.Open.size) / 2
         dot.layer?.backgroundColor = T.Open.color.cgColor
@@ -91,9 +97,11 @@ final class RailTile: NSView {
             // Under the halo, not on it.
             dot.topAnchor.constraint(equalTo: face.bottomAnchor, constant: UILooks.pt(T.Open.offset)),
         ])
-        toolTip = project.name
+        // The state in words too, never color alone (UX audit, 2026-11-18).
+        let said = project.name + (project.badge.map { " · " + $0.words } ?? "")
+        toolTip = said
         setAccessibilityRole(.button)
-        setAccessibilityLabel(project.name)
+        setAccessibilityLabel(said)
         registerForDraggedTypes([.fileURL])
     }
 

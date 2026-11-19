@@ -49,7 +49,7 @@ let mainTests: [(name: String, body: Checks.Body)] = [
         let now = Date()
         expect(ProjectPageWords.state(live: true, working: true, asking: false, updated: now, now: now) == .working)
         expect(ProjectPageWords.state(live: true, working: false, asking: true, updated: now, now: now) == .needs)
-        expect(ProjectPageWords.state(live: false, working: false, asking: false, updated: now - 3600, now: now) == .done)
+        expect(ProjectPageWords.state(live: false, working: false, asking: false, updated: now - 3600, now: now) == .idle, "ended is gray, however recent")
         expect(ProjectPageWords.state(live: false, working: false, asking: false, updated: now - 3 * 86400, now: now) == .idle)
         expect(ProjectPageWords.when(now - 240, now: now) == "4m" && ProjectPageWords.when(now, now: now) == "now")
         expect(ProjectPageWords.mergedName("Merge pull request #41 from c4duZ/bell-cards") == "bell-cards")
