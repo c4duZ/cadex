@@ -18,6 +18,7 @@ import Shortcuts
 import SourceControl
 import Projects
 import Tabs
+import Themes
 
 /// One window (docs/spec/workspace.md): its workspace folder, projects and
 /// tabs, explorer, search and git, and its own commands, which the menu and
@@ -140,8 +141,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         applyExplorer(current.explorer)
         applyMarkdown(current.markdown)
         let looks = current.appearance
-        applyLooks(looks.backgroundImage.map { .init(path: $0, opacity: looks.backgroundOpacity, blur: looks.backgroundBlur) },
-                   vibrancy: looks.vibrancy)
+        applyLooks(SettingsBridge.looks(looks, plain: ThemeStore.shared.isHighContrast))
         startProjects()
         startPaneHeaders()
         startAccountSwitch()
@@ -243,8 +243,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
         markdown?.opensRendered = prefs.openAs == "rendered"
     }
 
-    func applyLooks(_ image: WindowBackdrop.Image?, vibrancy: Bool) {
-        workspace?.setLooks(image: image, vibrancy: vibrancy)
+    func applyLooks(_ looks: WindowBackdrop.Looks) {
+        workspace?.setLooks(looks)
     }
 
     // MARK: Opening things

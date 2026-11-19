@@ -92,6 +92,8 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         // In already sized to its list (the controller prepares it first), fading in quickly: it
         // appeared at the last list's height and then jumped (the owner, 2026-11-18).
         alphaValue = 0
+        // The window may have turned translucent or solid since the last opening.
+        Glass.dress(background, style.background)
         makeKeyAndOrderFront(nil)
         makeFirstResponder(field)
         NSAnimationContext.runAnimationGroup { context in
@@ -242,7 +244,7 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
 
     private func applyStyle() {
         shownHints = nil
-        background.layer?.backgroundColor = style.background.cgColor
+        Glass.dress(background, style.background)
         background.layer?.borderColor = style.border.cgColor
         for line in [topLine, bottomLine] { line.layer?.backgroundColor = style.border.cgColor }
         field.textColor = style.text

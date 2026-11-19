@@ -87,7 +87,7 @@ public final class ThemeStore {
         case .dark: wantsDark = true
         case .light: wantsDark = false
         }
-        var next = (wantsDark ? darkFamily : lightFamily).theme(dark: wantsDark)
+        var next = (wantsDark ? darkFamily : lightFamily).theme(dark: wantsDark).onTerminalGround()
         if let accent = choice.accent {
             next.interface.accent = accent
             next.interface.tabActive = next.interface.chrome.mixed(accent, 0.22)

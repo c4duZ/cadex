@@ -18,6 +18,9 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let themes: ThemesPage
     private var window: NSWindow?
     private let navigation = SettingsNavigation()
+    /// The tokens' colors the navigation was built with: it is built once, so a theme repaints it
+    /// (it stayed in Cadex Night's dark colors under a light theme until 2026-11-18).
+    private var paintedWith = DesignTokens.themedColors()
     private(set) var selected = SettingsSection.general
     private var query = ""
     private let content = NSView()
@@ -125,7 +128,18 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         root.wantsLayer = true
         root.layer?.backgroundColor = SettingsColors.background.cgColor
         window.center()
+        // The navigation was made with the controller, maybe before the theme: in today's colors.
+        repaintNavigation()
+        if Glass.opacity != nil {
+            window.isOpaque = false
+            window.backgroundColor = .clear
+            Glass.dress(root, SettingsColors.background)
+        }
         ThemeStore.shared.observe { [weak self] _ in self?.themeChanged() }
+        // The window's opacity changes the tokens without changing the theme (appearance.windowOpacity).
+        NotificationCenter.default.addObserver(forName: DesignTokens.didChange, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.themeChanged() }
+        }
         return window
     }
 
@@ -134,11 +148,19 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
     private func themeChanged() {
         guard let window else { return }
         window.appearance = NSAppearance(named: SettingsColors.isDark ? .darkAqua : .aqua)
-        window.backgroundColor = SettingsColors.background
-        // On the content too: the window's own color left a lighter grey under the pages.
-        window.contentView?.wantsLayer = true
-        window.contentView?.layer?.backgroundColor = SettingsColors.background.cgColor
+        // Translucent with the main window (Glass): clear, with the frost and the tint under the
+        // pages; solid, the window's color on the content too (the window's own left a lighter
+        // grey under the pages).
+        window.isOpaque = Glass.opacity == nil
+        window.backgroundColor = Glass.opacity == nil ? SettingsColors.background : .clear
+        if let root = window.contentView { Glass.dress(root, SettingsColors.background) }
+        repaintNavigation()
         if window.isVisible { query.isEmpty ? select(selected) : showResults() }
+    }
+
+    private func repaintNavigation() {
+        DesignTokens.repaint(navigation, from: paintedWith)
+        paintedWith = DesignTokens.themedColors()
     }
 
     /// The rows of a section made of rows; nil for the pages of their own.

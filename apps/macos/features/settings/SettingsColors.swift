@@ -7,7 +7,9 @@ import UILooks
 /// they are built and are rebuilt when the theme changes (SettingsWindowController).
 @MainActor
 enum SettingsColors {
-    static var background: NSColor { DesignTokens.Color.bgWindow }
+    /// Solid even under glass: the window lays it in its GlassPane at the glass's opacity, and the
+    /// see-through grounds of its views go over that.
+    static var background: NSColor { DesignTokens.solid(DesignTokens.Color.bgWindow) }
     static var box: NSColor { DesignTokens.Project.Row.bg }
     static var border: NSColor { DesignTokens.Project.Row.border }
     static var text: NSColor { DesignTokens.Color.textPrimary }

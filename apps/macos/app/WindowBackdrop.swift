@@ -13,6 +13,16 @@ final class WindowBackdrop {
         var blur: Double
     }
 
+    /// What the settings ask of the window: the image, vibrancy and the window's opacity
+    /// (appearance.windowOpacity; under 1 the window is glass, see WorkspaceView.apply).
+    struct Looks: Equatable {
+        var image: Image?
+        var vibrancy = false
+        var opacity = 1.0
+
+        var translucent: Bool { opacity < 1 }
+    }
+
     /// The blurred image, made once per path and blur, not per frame.
     private var cache: (key: Image, image: CGImage)?
 

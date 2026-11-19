@@ -171,7 +171,10 @@ enum EditorLooks {
         let t = theme.terminal
         let ui = theme.interface
         EditorAppearance.current = EditorAppearance(
-            font: font, background: t.background.nsColor, foreground: t.foreground.nsColor,
+            // The terminal's ground, as see-through as the terminal's (a translucent window or a
+            // background image): code beside a terminal had stayed a solid block (2026-11-18).
+            font: font, background: t.background.color(alpha: TerminalAppearance.current?.backgroundAlpha ?? 1),
+            foreground: t.foreground.nsColor,
             currentLine: t.foreground.color(alpha: 0.06), lineNumber: ui.secondaryText.color(alpha: 0.7),
             selection: t.selection.color(alpha: 0.45),
             tokens: EditorAppearance.tokens(ansi: t.ansi.map(\.value), foreground: t.foreground.value))

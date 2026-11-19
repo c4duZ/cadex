@@ -15,10 +15,12 @@ temas que ele já usava em outros apps.
   esquemas base16/base24 saíram em 2026-11-17: centenas de temas parecidos que o dono não usava
   (`docs/adr/0017-base16-themes.md`). Quem estava num deles volta ao Cadex Night.
 
-  O padrão é o Cadex Night, o tema da moldura nova, só escuro por enquanto (o par claro vem com um
-  mockup claro), com as cores de
+  O padrão é o Cadex Night, o tema da moldura nova, só escuro, com as cores de
   `../design/work-frame/tokens.json` geradas para o app (`../adr/0035-work-frame.md`; antes era o
-  Caffeine). Quem escolheu outro tema fica com o dele; um settings.json de antes (sem versão) ainda no
+  Caffeine). O Cadex Day (o dono, 2026-11-18) é o mesmo jeito de dia: cinzas claros neutros, cor só
+  para estado, só claro e numa família à parte, para quem segue o sistema com o Cadex Night não
+  ver o tema mudar sozinho; as cores ANSI dele passam 4,5:1 no fundo (menos o par "branco").
+  Quem escolheu outro tema fica com o dele; um settings.json de antes (sem versão) ainda no
   Caffeine, o padrão antigo, passa para o Cadex Night uma vez, e o arquivo é regravado com a versão
   nova (um Caffeine escolhido depois fica). As cores de estado (trabalhando, precisa de você, pronto, falhou,
   parado, em revisão) são as mesmas em todo tema: cor no app quer dizer estado. Todo tema tem o texto legível: o contraste é conferido ao gerar o
@@ -44,9 +46,26 @@ temas que ele já usava em outros apps.
   sistema (o dono, 2026-10-20). Só a barra de menus do macOS fica do sistema.
 - Botões de ícone mostram o nome ao passar o ponteiro, em 0,2 s, embaixo do botão e nas mesmas
   cores dos menus (o dono, 2026-10-20).
+- A moldura fica no chão do terminal: a janela, a coluna lateral e a caixa de cada painel usam o
+  fundo do terminal do tema, como no Cadex Night. Os catálogos davam a muitos temas uma moldura um
+  tom fora do terminal (GitHub Light: #F6F8FA em volta de #FFFFFF), e o terminal aparecia como um
+  quadro enquadrado no meio da janela (o dono, 2026-11-18). As outras cores da moldura saem dessa e
+  do texto, pelas receitas.
 - Imagem de fundo: opcional, atrás da área do terminal, com opacidade e desfoque; a imagem escolhida
-  é copiada para o Cadex. Vibrância: a moldura fica fosca sobre o que está atrás da janela, e os
-  painéis continuam sólidos. As duas vêm desligadas, porque custam desempenho a cada quadro.
+  é copiada para o Cadex. Vibrância: a moldura fica fosca sobre o que está atrás da janela (a
+  janela translúcida é sempre fosca). As duas vêm desligadas, porque custam desempenho a
+  cada quadro.
+- Janela translúcida (appearance.windowOpacity, de 10% a 100%, padrão 100%; o dono, 2026-11-18):
+  abaixo de 100% os chãos da moldura (janela, barra de título, coluna, painéis, gaveta) viram um vidro
+  só, na cor do fundo do terminal com essa opacidade, e o fundo de tela ou a janela de trás aparece.
+  Um vidro só, e não cada camada translúcida, porque camadas empilhadas somavam opacidade e o painel
+  ficava quase sólido. O que vira vidro (o dono, 2026-11-18): a moldura, as colunas, os painéis, o
+  terminal, o editor e o Markdown (o fundo padrão deles transparente), o ⌘K, os menus, os popovers e
+  a janela de configurações (cada um com o fosco e a cor dele nessa opacidade). Fica sólido: linhas,
+  texto, cartões, botões, chips, seleções, campos, a folha de Nova tarefa e o preview web (a página
+  desenha o fundo dela, como no navegador). O vidro é sempre fosco: o fundo de tela nítido sob um tom fino
+  brigava com o texto (o dono, 2026-11-18, uma ilustração verde e clara). ⌘K:
+  theme.toggle-translucent (100% ou 35%: o fundo de tela aparece forte, escurecido pelo tema, como na referência do dono; 80% ficava leitoso) e theme.toggle-vibrancy. Sem efeito no alto contraste.
 
 - Claro e escuro (plano 15, fase B): com "seguir o sistema", um tema para o modo escuro e outro
   para o claro (appearance.darkTheme, appearance.lightTheme; vazio usa appearance.theme). Na página
@@ -86,3 +105,7 @@ temas que ele já usava em outros apps.
 - [x] Com alto contraste ligado, todo texto passa 7:1 (todos os temas embutidos).
 - [ ] "Aumentar contraste" do macOS liga o modo sozinho.
 - [ ] A cor de um space volta ao reabrir o Cadex.
+- [x] Num tema claro (GitHub Light) o terminal tem a cor da moldura em volta, sem quadro.
+- [x] Com a janela a 70%, o fundo aparece por igual na moldura, na coluna e no painel; o texto dos
+  botões e do segmento escolhido continua legível (Cadex Day e Cadex Night).
+- [ ] O vidro conferido à mão sobre o fundo de tela e sobre outra janela, com e sem vibrância.

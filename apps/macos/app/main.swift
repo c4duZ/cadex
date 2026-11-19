@@ -203,7 +203,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.power.defaultMode = PowerController.Mode(rawValue: prefs.mode) ?? .always
             self?.showPower()
         }
-        settings.onLooks = { [weak self] image, vibrancy in self?.sessions.forEach { $0.applyLooks(image, vibrancy: vibrancy) } }
+        settings.onLooks = { [weak self] looks in self?.sessions.forEach { $0.applyLooks(looks) } }
         settings.onShortcuts = { [weak self] shortcuts in
             self?.shortcuts = shortcuts
             self?.applyShortcuts()

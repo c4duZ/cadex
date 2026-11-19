@@ -75,3 +75,18 @@ public struct RGB: Equatable, Hashable, Sendable {
         return (max(a, b) + 0.05) / (min(a, b) + 0.05)
     }
 }
+
+public extension Theme {
+    /// The frame on the terminal's ground: the window, the sidebar and each pane's box take the
+    /// terminal's background, as Cadex Night's mockups do (chrome == terminal). The catalogs gave
+    /// many themes a frame a shade off the terminal (GitHub Light: #F6F8FA around #FFFFFF), and
+    /// the terminal showed as a box framed in the middle of the window (owner, 2026-11-18).
+    func onTerminalGround() -> Theme {
+        var theme = self
+        guard theme.interface.chrome != terminal.background else { return theme }
+        let accent = theme.interface.accent
+        theme.interface.chrome = terminal.background
+        theme.interface.tabActive = terminal.background.mixed(accent, 0.22)
+        return theme
+    }
+}

@@ -38,7 +38,7 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
     `terminal.keepSessions`, desligado por padrão, ver `terminal.md`; perguntar antes de fechar um programa rodando; perguntar antes
     de colar várias linhas). Texto e cursor (fonte, tamanho, cursor,
     piscando). Histórico e teclado (linhas, Option esquerdo como Meta, copiar ao selecionar).
-  - **Themes / Temas:** modo claro ou escuro, o tema, a vibrância e a imagem de fundo.
+  - **Themes / Temas:** modo claro ou escuro, o tema, a opacidade da janela, a vibrância e a imagem de fundo.
   - **Shortcuts / Atalhos:** a lista de comandos com o atalho de cada um, editável, com aviso de
     conflito.
   - **About / Sobre:** versão e créditos.

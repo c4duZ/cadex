@@ -54,6 +54,36 @@ let exitCode = await Checks.run([
         DesignTokens.applyTheme(chrome: nil, text: nil)
         expect(ColorKey(DesignTokens.Color.bgSidebar) == ColorKey(night), "back to Cadex Night")
     }),
+    ("a label repainted once: its new color is not taken for another token's old one", {
+        let label = NSTextField(labelWithString: "Uncommitted")
+        label.textColor = DesignTokens.Color.textPrimary
+        let before = DesignTokens.themedColors()
+        // Cadex Day: its text #1D1F23 is Cadex Night's bg.chip.
+        DesignTokens.applyTheme(chrome: DesignTokens.rgb(0xF9F9FA), text: DesignTokens.rgb(0x1D1F23))
+        DesignTokens.repaint(label, from: before)
+        expect(ColorKey(label.textColor!) == ColorKey(DesignTokens.Color.textPrimary), "\(label.textColor!)")
+        DesignTokens.applyTheme(chrome: nil, text: nil)
+    }),
+    ("a translucent window: the grounds turn to glass, cards and text in a ground's color stay solid", {
+        let view = NSView(frame: NSRect(x: 0, y: 0, width: 10, height: 10))
+        view.wantsLayer = true
+        view.layer?.backgroundColor = DesignTokens.Color.bgChrome.cgColor
+        let card = NSView(), label = NSTextField(labelWithString: "Open PR")
+        card.wantsLayer = true
+        card.layer?.backgroundColor = DesignTokens.Color.bgCard.cgColor
+        label.textColor = DesignTokens.Color.bgPaneIdle
+        view.addSubview(card); view.addSubview(label)
+        var before = DesignTokens.themedColors()
+        expect(DesignTokens.applyTheme(chrome: nil, text: nil, glass: true))
+        DesignTokens.repaint(view, from: before)
+        expect(DesignTokens.Color.bgChrome.alphaComponent < 0.05 && DesignTokens.Color.bgCard.alphaComponent == 1)
+        expect(view.layer!.backgroundColor!.alpha < 0.05 && card.layer!.backgroundColor!.alpha == 1, "the ground is glass, the card solid")
+        expect(label.textColor!.alphaComponent == 1, "the text stays solid")
+        before = DesignTokens.themedColors()
+        DesignTokens.applyTheme(chrome: nil, text: nil)
+        DesignTokens.repaint(view, from: before)
+        expect(ColorKey(view.layer!.backgroundColor!) == ColorKey(DesignTokens.Color.bgChrome.cgColor), "solid again")
+    }),
     ("out-of-range values are clamped", {
         UILooks.configure(zoom: 9, compact: false, fontFamily: "", fontSize: 1)
         expect(UILooks.zoom == 1.5 && UILooks.fontSize == 9)

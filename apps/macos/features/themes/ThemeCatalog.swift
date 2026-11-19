@@ -11,16 +11,19 @@ public enum ThemeCatalog {
     /// (docs/adr/0035-work-frame.md), generated from the mockups' tokens.
     public static let defaultId = ThemeFamily.cadexNight.id
 
-    /// Every built-in family, Cadex Night (the default) first. Only Cadex Night
-    /// if the bundled file is missing or broken, which the tests catch.
+    /// Cadex's own families, first in the list: Night (the default) and Day.
+    static let own = [ThemeFamily.cadexNight, ThemeFamily.cadexDay]
+
+    /// Every built-in family, Cadex's own first. Only those if the bundled file
+    /// is missing or broken, which the tests catch.
     public static func all() -> [ThemeFamily] {
-        guard let entries = entries() else { return [ThemeFamily.cadexNight] }
-        return [ThemeFamily.cadexNight] + entries.compactMap { try? family($0) }
+        guard let entries = entries() else { return own }
+        return own + entries.compactMap { try? family($0) }
     }
 
     /// One built-in family, reading only its entry.
     public static func family(id: String) -> ThemeFamily? {
-        if id == ThemeFamily.cadexNight.id { return ThemeFamily.cadexNight }
+        if let mine = own.first(where: { $0.id == id }) { return mine }
         guard let entry = entries()?.first(where: { $0["id"] as? String == id }) else { return nil }
         return try? family(entry)
     }

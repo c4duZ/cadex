@@ -26,8 +26,19 @@ final class PopupMenuPanel: NSPanel {
         // window (2026-10-20).
         collectionBehavior = [.fullScreenAuxiliary, .moveToActiveSpace, .transient, .ignoresCycle]
         list.frame = NSRect(origin: .zero, size: size)
+        list.autoresizingMask = [.width, .height]
         list.onChoose = { [weak self] entry in self?.close(running: entry.action) }
-        contentView = list
+        // The list draws its rows itself, so the glass goes in a box under it (Glass, the
+        // translucent window); the box clips to the list's corners.
+        let box = NSView(frame: list.frame)
+        box.wantsLayer = true
+        box.layer?.cornerRadius = MenuLayout.radius
+        box.layer?.cornerCurve = .continuous
+        box.layer?.masksToBounds = true
+        box.addSubview(list)
+        Glass.dress(box, MenuStyle.current.background)
+        if Glass.opacity != nil { list.layer?.backgroundColor = NSColor.clear.cgColor }
+        contentView = box
     }
 
     override var canBecomeKey: Bool { true }

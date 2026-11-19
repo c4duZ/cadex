@@ -39,7 +39,9 @@
   tarefa, os popups e campos na caixa da moldura (`FrameField`), os botões do app, a chave nas cores
   da chave da página do projeto e as seções em pílulas no topo (`FramePill`). Textos em par inglês/português
   (`T`, `../../shared/strings`); trocar o idioma pergunta "Reabrir agora" e chama `relaunch`, do app. A janela segue o tema (`SettingsColors.swift`, os tokens da moldura): a página
-  aberta se refaz com as cores novas, mantendo a rolagem.
+  aberta se refaz com as cores novas, mantendo a rolagem, e a navegação, feita uma vez, é repintada
+  (DesignTokens.repaint) ao abrir e a cada troca de tema ou de opacidade (DesignTokens.didChange). O
+  fundo da janela é sólido mesmo com a janela principal translúcida (DesignTokens.solid).
 - O app (`../../app/SettingsBridge.swift`) passa as preferências ao `TerminalPreferences` do
   terminal, ao tema e aos atalhos, e salva o que um alerta desliga ("não perguntar de novo").
 - Spec em `../../../../docs/spec/settings.md`. Status: arquivo, store, aplicação ao vivo e janela

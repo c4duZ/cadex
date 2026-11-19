@@ -16,16 +16,25 @@ public extension DesignTokens {
     /// The theme's colors by token name; empty with Cadex Night. Written on the main thread only,
     /// when the theme changes (`applyTheme`); read wherever a token is.
     nonisolated(unsafe) internal static var palette: [String: NSColor] = [:]
+    /// The grounds' solid colors while the palette has them as glass: a text or icon painted in a
+    /// ground's color (the primary button's) keeps it solid through `repaint`.
+    nonisolated(unsafe) internal static var solidGrounds: [String: NSColor] = [:]
 
     /// A themed token: the theme's color when one is set, else Cadex Night's.
     static func themed(_ name: String, _ cadexNight: @autoclosure () -> NSColor) -> NSColor {
         palette[name] ?? cadexNight()
     }
 
+    /// The grounds of the frame: what a translucent window (appearance.windowOpacity) turns into
+    /// glass. Cards, buttons, chips and selections over them stay solid.
+    static let grounds = ["bg.window", "bg.inset", "bg.drawer", "bg.paneIdle", "bg.chrome", "bg.sidebar"]
+
     /// The frame in a theme's colors, from its frame color and its text (`nil`: Cadex Night,
-    /// the mockups as they are). Returns whether anything changed.
+    /// the mockups as they are). With `glass` the grounds go see-through: the window paints
+    /// one tint under them (WorkspaceView), so the frame, the sidebar and the panes are one glass
+    /// instead of translucent layers stacking into a solid one. Returns whether anything changed.
     @MainActor @discardableResult
-    static func applyTheme(chrome: NSColor?, text: NSColor?) -> Bool {
+    static func applyTheme(chrome: NSColor?, text: NSColor?, glass: Bool = false) -> Bool {
         var next: [String: NSColor] = [:]
         if let chrome = chrome?.usingColorSpace(.sRGB), let text = text?.usingColorSpace(.sRGB) {
             for (name, recipe) in recipes {
@@ -36,8 +45,21 @@ public extension DesignTokens {
                 }
             }
         }
+        var solid: [String: NSColor] = [:]
+        if glass {
+            // Not quite clear, and each its own alpha (1/255, 2/255…): `repaint` finds a layer's
+            // token by its color, so two grounds both clear would come back as the same one,
+            // and a view that was clear on its own would be taken for a ground.
+            for (i, name) in grounds.enumerated() {
+                let color = next[name] ?? cadexNight[name].map { rgb($0) } ?? .clear
+                solid[name] = color
+                next[name] = color.withAlphaComponent(CGFloat(i + 1) / 255)
+            }
+        }
         guard !samePalette(next, palette) else { return false }
         palette = next
+        solidGrounds = solid
+        NotificationCenter.default.post(name: didChange, object: nil)
         return true
     }
 
@@ -52,9 +74,22 @@ public extension DesignTokens {
         a.count == b.count && a.allSatisfy { key, color in b[key].map { $0.isEqual(color) } ?? false }
     }
 
-    /// Every themed token's color now, by name: what `repaint` maps from.
+    /// Posted when the tokens' colors change (a theme, or the window turning translucent): windows
+    /// that build their colors once (settings) build them again.
+    static let didChange = Notification.Name("DesignTokens.didChange")
+
+    /// A color as it is without glass: an opaque window (settings) lays its ground in it, and
+    /// the see-through grounds of its views show that and not the black behind (2026-11-18).
+    static func solid(_ color: NSColor) -> NSColor {
+        color.alphaComponent < 1 ? color.withAlphaComponent(1) : color
+    }
+
+    /// Every themed token's color now, by name: what `repaint` maps from. A ground under glass
+    /// also gives its solid color, as "<name>#solid".
     static func themedColors() -> [String: NSColor] {
-        Dictionary(uniqueKeysWithValues: cadexNight.map { name, value in (name, palette[name] ?? rgb(value)) })
+        var colors = Dictionary(uniqueKeysWithValues: cadexNight.map { name, value in (name, palette[name] ?? rgb(value)) })
+        for name in grounds { colors[name + "#solid"] = solidGrounds[name] ?? colors[name] }
+        return colors
     }
 
     /// The frame painted again after a theme change: every layer, text, icon and button color
@@ -64,11 +99,19 @@ public extension DesignTokens {
     /// no view has to rebuild for a theme (2026-11-17).
     @MainActor
     static func repaint(_ root: NSView, from before: [String: NSColor]) {
-        var map: [ColorKey: NSColor] = [:]
+        var map: [ColorKey: NSColor] = [:], ink: [ColorKey: NSColor] = [:]
         let now = themedColors()
-        for (name, old) in before { if let new = now[name] { map[ColorKey(old)] = new } }
+        for (name, old) in before where !name.hasSuffix("#solid") {
+            guard let new = now[name] else { continue }
+            map[ColorKey(old)] = new
+            ink[ColorKey(old)] = new
+        }
+        // Text and icons in a ground's color stay solid under glass (the primary button's label).
+        for name in grounds {
+            if let old = before[name + "#solid"], let new = now[name + "#solid"] { ink[ColorKey(old)] = new }
+        }
         guard !map.isEmpty else { return }
-        Repaint(map: map).view(root)
+        Repaint(map: map, ink: ink).view(root)
     }
 }
 
@@ -90,11 +133,14 @@ struct ColorKey: Hashable {
 
 @MainActor
 private struct Repaint {
+    /// For backgrounds, borders and shapes.
     let map: [ColorKey: NSColor]
+    /// For text and icons: the same, but a ground stays solid under glass.
+    let ink: [ColorKey: NSColor]
 
     func swap(_ color: NSColor?) -> NSColor? {
         guard let color else { return nil }
-        return map[ColorKey(color)]
+        return ink[ColorKey(color)]
     }
 
     func swap(_ color: CGColor?) -> CGColor? {
@@ -106,9 +152,13 @@ private struct Repaint {
         if let layer = view.layer { self.layer(layer) }
         switch view {
         case let field as NSTextField:
-            // The plain color first (it colors the whole text), then any runs of their own.
+            // The runs read before the plain color changes: setting textColor recolors them, and
+            // read after they were swapped twice (Cadex Night's text #E7E8EA became Cadex Day's
+            // #1D1F23, which is Night's bg.chip, and then Day's light chip: the chosen segment's
+            // label vanished, 2026-11-18). The plain color first, then any runs of their own.
+            let attributed = text(field.attributedStringValue)
             if let new = swap(field.textColor) { field.textColor = new }
-            if let attributed = text(field.attributedStringValue) { field.attributedStringValue = attributed }
+            if let attributed { field.attributedStringValue = attributed }
         case let button as NSButton:
             if let new = swap(button.contentTintColor) { button.contentTintColor = new }
             if let attributed = text(button.attributedTitle) { button.attributedTitle = attributed }

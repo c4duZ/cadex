@@ -28,6 +28,7 @@ public final class AnchoredPanel: NSObject {
         box.subviews.forEach { $0.removeFromSuperview() }
         content.translatesAutoresizingMaskIntoConstraints = false
         box.addSubview(content)
+        Glass.dress(box, DesignTokens.Popover.bg)
         NSLayoutConstraint.activate([
             content.topAnchor.constraint(equalTo: box.topAnchor),
             content.bottomAnchor.constraint(equalTo: box.bottomAnchor),
@@ -133,7 +134,8 @@ final class AnchoredBox: NSView {
     override var wantsUpdateLayer: Bool { true }
 
     override func updateLayer() {
-        layer?.backgroundColor = Look.bg.cgColor
+        // Under glass the ground is the GlassPane's (`show` dresses the box), not the layer's.
+        if Glass.opacity == nil { layer?.backgroundColor = Look.bg.cgColor }
         layer?.borderColor = Look.border.cgColor
     }
 }

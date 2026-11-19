@@ -22,8 +22,10 @@
   árvore e no ícone da aba ativa. `ThemeFamily.swift`: um tema com
   versão escura e/ou clara, e o modo (sistema, escuro, claro). Padrão: Cadex Night
   (ThemeFamily.cadexNight, primeira família de `ThemeCatalog.all()`, só escura;
-  `../../../../docs/adr/0035-work-frame.md`).
-- `Theme.swift`: o tema (cores da interface e do terminal, 16 ANSI). `CadexNight.swift`: o tema da
+  `../../../../docs/adr/0035-work-frame.md`). `CadexDay.swift`: o Cadex Day, só claro, segunda
+  família (ThemeCatalog.own), feito à mão até haver um mockup claro.
+- `Theme.swift`: o tema (cores da interface e do terminal, 16 ANSI); `onTerminalGround()`, aplicado
+  pelo `ThemeStore` ao tema em uso, põe a moldura no fundo do terminal (sem quadro em volta dele). `CadexNight.swift`: o tema da
   moldura nova, gerado por `../../../../tools/design/build_tokens.py` dos tokens dos mockups (não
   editar à mão; os Cadex Escuro e Claro de antes saíram no plano 25). `ThemeStore.swift`: o tema
   em uso (só as famílias do escuro e do claro ficam na memória), pela escolha das configurações
@@ -40,5 +42,6 @@
 
 ## Como validar
 - `make macos-test` passa.
-- Teste: o catálogo tem mais de 300 temas, o Cadex Night primeiro e padrão (o Caffeine continua), todos com texto legível; os do
+- Teste: o catálogo tem mais de 300 temas, o Cadex Night primeiro e padrão (o Caffeine continua), o Cadex Day
+  segundo com o ANSI legível, a moldura no fundo do terminal, todos com texto legível; os do
   tweakcn com ANSI próprio; importar Ghostty, iTerm2 e base16; a pasta do usuário.

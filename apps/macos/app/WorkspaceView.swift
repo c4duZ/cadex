@@ -41,8 +41,10 @@ final class WorkspaceView: NSView {
     private let backdrop = WindowBackdrop()
     /// The frosted frame, shown only with vibrancy on.
     private let frost = NSVisualEffectView()
-    private var backgroundImage: WindowBackdrop.Image?
-    private var vibrancy = false
+    /// A translucent window's one tint, in the theme's ground color at the window's opacity,
+    /// over the frost and under everything else (the grounds above it are see-through).
+    private let glass = NSView()
+    private var looks = WindowBackdrop.Looks()
     private var tabBarStyle: TabBarView.Style?
     /// The shown project's tabs in the content panel.
     private weak var tabsView: NSView?
@@ -58,7 +60,9 @@ final class WorkspaceView: NSView {
         frost.material = .underWindowBackground
         frost.state = .active
         frost.isHidden = true
-        for view in [frost, titleBar, statusBar, rail, inspector, contentPanel] as [NSView] {
+        glass.wantsLayer = true
+        glass.isHidden = true
+        for view in [frost, glass, titleBar, statusBar, rail, inspector, contentPanel] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
@@ -72,6 +76,10 @@ final class WorkspaceView: NSView {
             frost.bottomAnchor.constraint(equalTo: bottomAnchor),
             frost.leadingAnchor.constraint(equalTo: leadingAnchor),
             frost.trailingAnchor.constraint(equalTo: trailingAnchor),
+            glass.topAnchor.constraint(equalTo: topAnchor),
+            glass.bottomAnchor.constraint(equalTo: bottomAnchor),
+            glass.leadingAnchor.constraint(equalTo: leadingAnchor),
+            glass.trailingAnchor.constraint(equalTo: trailingAnchor),
             titleBar.topAnchor.constraint(equalTo: topAnchor),
             titleBar.leadingAnchor.constraint(equalTo: leadingAnchor),
             titleBar.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -247,22 +255,22 @@ final class WorkspaceView: NSView {
         didSet { if workColor != oldValue { apply(ThemeStore.shared.current) } }
     }
 
-    /// The background image and vibrancy from settings.
-    func setLooks(image: WindowBackdrop.Image?, vibrancy: Bool) {
-        backgroundImage = image
-        self.vibrancy = vibrancy
+    /// The background image, vibrancy and the window's opacity from settings.
+    func setLooks(_ looks: WindowBackdrop.Looks) {
+        self.looks = looks
         apply(ThemeStore.shared.current)
     }
 
     private func apply(_ theme: Theme) {
         let term = theme.terminal
-        let picture = backgroundImage.flatMap { backdrop.image(for: $0) }
+        let picture = looks.image.flatMap { backdrop.image(for: $0) }
         contentPanel.layer?.contents = picture
         contentPanel.layer?.contentsGravity = .resizeAspectFill
         let colors = TerminalAppearance(
             background: term.background.value, foreground: term.foreground.value, cursor: term.cursor.value,
             selection: term.selection.value, ansi: term.ansi.map(\.value),
-            backgroundAlpha: picture == nil ? 1 : 1 - (backgroundImage?.opacity ?? 0))
+            // A translucent window: the terminal's own ground is clear, the glass shows under it.
+            backgroundAlpha: looks.translucent ? 0 : picture == nil ? 1 : 1 - (looks.image?.opacity ?? 0))
         if TerminalAppearance.current != colors { TerminalAppearance.current = colors }
         EditorLooks.refresh()
         var ui = theme.interface
@@ -274,9 +282,17 @@ final class WorkspaceView: NSView {
         // filled layer here covered the close, minimize and zoom buttons in
         // the transparent title bar (2026-10-19). With vibrancy the window is
         // clear and the frost shows the desktop through, tinted by the chrome.
-        frost.isHidden = !vibrancy
-        window?.isOpaque = !vibrancy
-        window?.backgroundColor = vibrancy ? ui.chrome.color(alpha: 0.55) : ui.chrome.nsColor
+        // Translucent (appearance.windowOpacity), the window is clear and one tint at that opacity
+        // lies under the see-through grounds (DesignTokens.applyTheme glass).
+        // Always frosted when translucent: a sharp wallpaper through a thin tint fought the text
+        // (the owner's green illustration, 2026-11-18); blurred it is color under it, as in Orca.
+        let vibrancy = looks.vibrancy, see = vibrancy || looks.translucent
+        Glass.set(opacity: looks.translucent ? looks.opacity : nil)
+        frost.isHidden = !see
+        glass.isHidden = !looks.translucent
+        glass.layer?.backgroundColor = ui.chrome.color(alpha: looks.opacity).cgColor
+        window?.isOpaque = !see
+        window?.backgroundColor = looks.translucent ? .clear : vibrancy ? ui.chrome.color(alpha: 0.55) : ui.chrome.nsColor
         raiseWindowButtons()
         window?.appearance = NSAppearance(named: theme.dark ? .darkAqua : .aqua)
         // The center's ground is the window's (the Main mockup): the panes are the boxes on it.
@@ -290,7 +306,8 @@ final class WorkspaceView: NSView {
         // The new frame in the theme's colors (owner, 2026-11-17: every theme looked like Cadex
         // Night): the tokens follow its frame color and text; Cadex Night keeps the mockups'.
         let mockups = theme.interface == Theme.cadexNight.interface
-        DesignTokens.applyTheme(chrome: mockups ? nil : theme.interface.chrome.nsColor, text: mockups ? nil : theme.interface.text.nsColor)
+        DesignTokens.applyTheme(chrome: mockups ? nil : theme.interface.chrome.nsColor, text: mockups ? nil : theme.interface.text.nsColor,
+                                glass: looks.translucent)
         DesignTokens.repaint(self, from: paintedWith)
         paintedWith = DesignTokens.themedColors()
     }

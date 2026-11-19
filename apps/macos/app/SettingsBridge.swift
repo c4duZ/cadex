@@ -31,7 +31,7 @@ final class SettingsBridge {
     /// The power section changed (the display; the mode counts at launch).
     var onPower: ((Settings.Power) -> Void)?
     /// The background image or vibrancy changed.
-    var onLooks: ((WindowBackdrop.Image?, Bool) -> Void)?
+    var onLooks: ((WindowBackdrop.Looks) -> Void)?
     private var lastShortcuts: [String: String?]?
 
     /// general.openFiles: files open beside the focused pane unless it
@@ -118,11 +118,17 @@ final class SettingsBridge {
     private func applyLooks() {
         let a = store.settings.appearance
         let plain = ThemeStore.shared.isHighContrast
-        onLooks?(plain ? nil : a.backgroundImage.map { .init(path: $0, opacity: a.backgroundOpacity, blur: a.backgroundBlur) },
-                 a.vibrancy && !plain)
+        onLooks?(Self.looks(a, plain: plain))
         var preferences = Self.terminalPreferences(from: store.settings)
         if plain { preferences.minimumContrast = max(preferences.minimumContrast, Theme.highContrastText) }
         TerminalPreferences.current = preferences
+    }
+
+    /// The window's looks from the settings; none of them in high contrast (no transparency).
+    static func looks(_ a: Settings.Appearance, plain: Bool) -> WindowBackdrop.Looks {
+        guard !plain else { return .init() }
+        return .init(image: a.backgroundImage.map { .init(path: $0, opacity: a.backgroundOpacity, blur: a.backgroundBlur) },
+                     vibrancy: a.vibrancy, opacity: a.windowOpacity)
     }
 
     /// "~/.claude-x" in settings.json, the full folder in the app.

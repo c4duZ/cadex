@@ -114,9 +114,15 @@ final class ThemesPage {
         buttons.spacing = 6
         return [
             SettingsPage.section(T("Window", "Janela")),
+            SettingsPage.row(T("Window opacity", "Opacidade da janela"),
+                             T("Below 100% the whole window turns into frosted glass in the theme's color, and your desktop or the window behind shows through, blurred so the text stays readable. Lines, text and cards stay as they are.",
+                               "Abaixo de 100% a janela inteira vira um vidro fosco na cor do tema, e o seu fundo de tela ou a janela de trás aparece, desfocado para o texto continuar legível. Linhas, texto e cartões continuam iguais."),
+                             control: SettingsPage.slider(a.windowOpacity, range: Settings.windowOpacityRange, format: "%.0f%%", shown: { $0 * 100 }) { [store] value in
+                                 store.update { $0.appearance.windowOpacity = (value * 20).rounded() / 20 }
+                             }),
             SettingsPage.row(T("Vibrancy", "Vibrância"),
-                             T("The window's frame turns frosted over what is behind it. The panels stay solid.",
-                               "A moldura da janela fica fosca sobre o que está atrás dela. Os painéis continuam sólidos."),
+                             T("The window's frame turns frosted over what is behind it. A translucent window is always frosted.",
+                               "A moldura da janela fica fosca sobre o que está atrás dela. A janela translúcida é sempre fosca."),
                              control: SettingsPage.toggle(a.vibrancy) { [store] on in store.update { $0.appearance.vibrancy = on } }),
             SettingsPage.row(T("Background image", "Imagem de fundo"),
                              T("Shown behind the terminal; Cadex keeps a copy. Now: \(image).", "Aparece atrás do terminal; o Cadex guarda uma cópia. Agora: \(image)."),

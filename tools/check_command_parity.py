@@ -32,6 +32,8 @@ MAC_ONLY = {"project.edit", "project.create", "project.new-terminal", "project.r
             "git.show-history", "inspector.tab-1", "inspector.tab-2", "inspector.tab-3", "inspector.tab-4", "history.show-in-tab",
             "statusBar.customize", "statusBar.toggle-item", "statusBar.activity-monitor", "sidebar.show", "view.jump", "project.show-overview", "project.show-all", "project.show-sessions", "project.show-memory", "orchestration.show-automations", "view.board", "drawer.toggle", "drawer.move-to-project", "agents.test-notifications", "agents.show-accounts", "agents.refresh-usage", "ssh.connect", "ssh.test-again", "agents.open-account", "agents.customize-accounts",
             "pane.zoom",
+            # The translucent window and vibrancy from ⌘K (2026-11-18): the Windows app has no glass yet.
+            "theme.toggle-translucent", "theme.toggle-vibrancy",
             # Managed accounts (plan 18, phase C), Mac only like the rest of agents.
             "agents.add-account", "agents.set-active-account", "agents.set-project-account", "agents.sync-account-config", "agents.share-account-config",
             "agents.use-own-copy", "agents.follow-default-config", "agents.remove-account",

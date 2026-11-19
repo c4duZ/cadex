@@ -55,6 +55,7 @@ public enum SettingsFile {
             if a["backgroundImage"] is NSNull { settings.appearance.backgroundImage = nil }
             else { settings.appearance.backgroundImage = reader.string(a, "appearance.backgroundImage") }
             if let opacity = reader.number(a, "appearance.backgroundOpacity") { settings.appearance.backgroundOpacity = min(max(opacity, 0), 1) }
+            if let v = reader.number(a, "appearance.windowOpacity") { settings.appearance.windowOpacity = v.clamped(to: Settings.windowOpacityRange) }
             if let blur = reader.number(a, "appearance.backgroundBlur") { settings.appearance.backgroundBlur = min(max(blur, 0), 50) }
             settings.appearance.highContrast = reader.bool(a, "appearance.highContrast") ?? settings.appearance.highContrast
             if let v = reader.number(a, "appearance.uiZoom") { settings.appearance.uiZoom = v.clamped(to: Settings.zoomRange) }
@@ -273,6 +274,7 @@ public enum SettingsFile {
                          "letterSpacing": s.terminal.letterSpacing, "fontFeatures": s.terminal.fontFeatures],
             "appearance": ["theme": s.appearance.theme, "lightTheme": s.appearance.lightTheme, "darkTheme": s.appearance.darkTheme,
                            "accent": s.appearance.accent, "mode": s.appearance.mode, "vibrancy": s.appearance.vibrancy,
+                           "windowOpacity": s.appearance.windowOpacity,
                            "backgroundImage": s.appearance.backgroundImage ?? NSNull(),
                            "backgroundOpacity": s.appearance.backgroundOpacity, "backgroundBlur": s.appearance.backgroundBlur,
                            "highContrast": s.appearance.highContrast, "uiZoom": s.appearance.uiZoom,

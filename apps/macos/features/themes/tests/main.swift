@@ -42,7 +42,7 @@ let exitCode = await Checks.run([
     }),
     ("the built-in catalog: the official themes, Cadex Night first and the default", {
         let families = ThemeCatalog.all()
-        expect(families.count > 30 && families.allSatisfy { $0.source == "official" || $0.id == "cadex-night" }, "\(families.count)")
+        expect(families.count > 30 && families.allSatisfy { $0.source == "official" || $0.source == "cadex" }, "\(families.count)")
         expect(families.first?.id == "cadex-night" && ThemeCatalog.defaultId == "cadex-night")
         expect(ThemeCatalog.family(id: "caffeine") == nil, "the tweakcn presets left on 2026-11-17")
         expect(Set(families.map(\.id)).count == families.count, "repeated ids")
@@ -53,6 +53,21 @@ let exitCode = await Checks.run([
         expect(families.first { $0.id == "nord" }?.light == nil, "Nord has no light version")
         expect(ThemeCatalog.family(id: "gruvbox")?.light != nil)
         expect(ThemeCatalog.family(id: "nope") == nil)
+    }),
+    ("Cadex Day: light only, second, its ANSI readable on its ground", {
+        expect(ThemeCatalog.all().dropFirst().first?.id == "cadex-day" && ThemeFamily.cadexDay.dark == nil)
+        expect(ThemeCatalog.family(id: "cadex-day") == .cadexDay)
+        let day = Theme.cadexDay.terminal
+        for (i, color) in day.ansi.enumerated() where ![0, 7, 8, 15].contains(i) {
+            expect(color.contrast(with: day.background) >= 4.5, "ansi \(i) \(color.hex)")
+        }
+    }),
+    ("the frame sits on the terminal's ground: no box around the terminal", {
+        let github = ThemeCatalog.family(id: "github")!.theme(dark: false)
+        expect(github.interface.chrome != github.terminal.background, "the catalog's frame is a shade off")
+        let grounded = github.onTerminalGround()
+        expect(grounded.interface.chrome == github.terminal.background && grounded.terminal == github.terminal)
+        expect(Theme.cadexNight.onTerminalGround() == .cadexNight, "Night already is")
     }),
     ("every built-in theme's text is readable", {
         for family in ThemeCatalog.all() {

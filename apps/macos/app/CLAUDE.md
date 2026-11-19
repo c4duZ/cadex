@@ -358,6 +358,9 @@
   ligado, com a chama (fire-simple do Phosphor fill) saindo do braço de cima do >, e cinza desligado (o logo cheio nos dois); o clique roda power.toggle.
 - `WindowBackdrop.swift`: imagem de fundo atrás da área do terminal (desfoque calculado uma vez) e,
   com vibrância, a moldura fosca; depois de ligar, os botões da janela voltam para cima da camada.
+  `Looks` junta a imagem, a vibrância e a opacidade da janela (SettingsBridge.looks); abaixo de 1,
+  `WorkspaceView.swift` deixa a janela clara com uma camada de vidro na cor do tema, os chãos dos
+  tokens quase transparentes (DesignTokens.applyTheme glass) e o fundo do terminal transparente.
 - Sem pacote .app (make run), `main.swift` põe o ícone de `docs/cadex-icon.png` no Dock; no .app ele
   vem do AppIcon.icns.
 - Abrir para teste com CADEX_BACKGROUND=1: a janela aparece sem tomar o foco do teclado. Abas, projetos e a paleta
