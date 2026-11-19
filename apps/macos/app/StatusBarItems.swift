@@ -33,39 +33,29 @@ extension WindowSession {
         projectLabel?.text = [project, branch.map(Self.branchText)].compactMap { $0 }.joined(separator: " · ")
     }
 
-    /// "● 3 working  ● 2 need you": the blue and amber of the state glyph, a count left out when
-    /// it is zero; read only while shown.
+    /// "● 3 working": the blue of the state glyph, nothing when it is zero; read only while shown.
+    /// The requests are not counted here: their home is the sidebar's queue (ADR 0039).
     func makeAgentsItem() -> StatusItem {
         let working = StatusLabel(icon: nil, tip: T("Agents working", "Agentes trabalhando"))
-        let needs = StatusLabel(icon: nil, tip: T("Agents waiting for you", "Agentes esperando você"))
         working.dot = DesignTokens.Color.stateWorking
-        needs.dot = DesignTokens.Color.stateNeeds
         // Nothing until the first count, and a zero count shows nothing (a bare dot said nothing).
         working.isHidden = true
-        needs.isHidden = true
-        needs.onClick = { [weak self] in _ = self?.commands.run("agents.show-attention") }
-        // The working agents in a list (⌘J), not the side column (UX audit, 2026-11-18).
-        working.onClick = { [weak self] in _ = self?.commands.run("view.jump") }
-        let row = NSStackView(views: [working, needs])
+        // The working agents on the board (ADR 0039).
+        working.onClick = { [weak self] in _ = self?.commands.run("view.board") }
+        let row = NSStackView(views: [working])
         row.isHidden = true
         attachCard(to: row) { [weak self] close in self?.agentsCard(close: close) ?? NSView() }
-        row.spacing = UILooks.pt(DesignTokens.StatusBar.gap) - 2 * StatusBarView.itemInset
         let item = StatusItem(id: "agents", title: T("Agents", "Agentes"),
-                              subtitle: T("How many work and how many need you", "Quantos trabalham e quantos precisam de você"),
+                              subtitle: T("How many agents work", "Quantos agentes trabalham"),
                               icon: .sparkle, side: .left, view: row)
         var token: UUID?
         var attention: UUID?
-        // "Need you" is what the bell counts (a permission or a question waiting), not every session
-        // idle at its prompt: it said "3 need you" with the bell empty (the owner, 2026-11-18).
-        let show = { [weak working, weak needs, weak row] in
+        let show = { [weak working, weak row] in
             let busy = AgentsController.shared.counts.working
-            let waiting = AgentAttention.shared.cards.count
             working?.text = T("\(busy) working", "\(busy) trabalhando")
-            needs?.text = T("\(waiting) need you", "\(waiting) precisam de você")
             working?.isHidden = busy == 0
-            needs?.isHidden = waiting == 0
-            // Both zero: the item takes no room, or the bar showed a double gap.
-            row?.isHidden = busy == 0 && waiting == 0
+            // Zero: the item takes no room, or the bar showed a double gap.
+            row?.isHidden = busy == 0
         }
         item.onVisible = { visible in
             if visible {

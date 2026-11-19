@@ -114,6 +114,8 @@
   lugar do trilho, com a coluna (Files e Changes) dentro dela como a vista Arquivos; sidebar.show-work
   (⇧⌘1) e sidebar.show-files (⇧⌘2); Sessions, Memory e o grafo saíram da coluna: memory.show e
   project.sessions-column abrem a página do projeto, git.show-history abre o histórico numa aba.
+- Plano 38 fase F: o item Agents da barra de baixo (`StatusBarItems.swift`) conta só quem trabalha e o
+  clique abre o quadro; os pedidos não são contados lá (a casa deles é a fila).
 - Plano 38 fase E: a barra de cima (`TitleBarView.swift`) começa com o botão da barra lateral (⌘B), o
   lugar (`TitleBarPlace.swift`: o avatar e "projeto › tarefa ▾"; o clique abre o menu do lugar,
   `PlaceWiring.swift`: o main e as tarefas do projeto, a página do projeto, os outros projetos e

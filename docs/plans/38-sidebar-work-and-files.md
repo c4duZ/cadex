@@ -59,9 +59,12 @@ o que o clique faz). O dono aprovou em 2026-11-19 ("pode fazer").
   Feito: `apps/macos/app/TitleBarPlace.swift` e `apps/macos/app/PlaceWiring.swift`. Conferido no app: a
   ordem da barra (botão, lugar, abas, "+", busca à direita). Não conferido: o menu do lugar e o
   Revisar numa tarefa (o clique de teste não chega à barra de cima, e a instância não tinha tarefa).
-- [ ] F. A barra de baixo: os itens de hoje sem a contagem de pedidos; o clique no projeto · branch
+- [x] F. A barra de baixo: os itens de hoje sem a contagem de pedidos; o clique no projeto · branch
   abre Mudanças, nos agentes abre o quadro, na conta troca de conta. Sessões, Memória e o grafo do
   git saem da barra lateral para a página do projeto (e o grafo como página).
+  Feito: o item Agents conta só quem trabalha (o clique abre o quadro); o projeto · branch já rodava
+  git.show, que agora mostra Mudanças na barra lateral; Sessions, Memory e o grafo foram na fase B. O
+  clique no uso da conta continua como era (o cartão das contas, com trocar a conta nele).
 - [ ] G. A janela estreita (abaixo de 1000 pt): a faixa de 56 pt com a caixa âmbar, os quadrados dos
   projetos e, no pé, Arquivos (por cima do centro, Esc fecha) e Quadro; a barra de baixo encurtada
   com o "…". E nada aberto: os recentes na barra lateral, Novo projeto… e Abrir pasta… ⌘O, a tela de
