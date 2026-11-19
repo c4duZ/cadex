@@ -1,6 +1,6 @@
 //! `cadex-memory run [launcher flags] [harness] [native args...]`: upstream's
 //! managed cross-harness launcher (`ai-memory run`,
-//! crates/ai-memory-cli/src/commands/run.rs at fa0ec25, docs/
+//! crates/ai-memory-cli/src/commands/run.rs at fa0ec25, compared again at v3.5.0 = 411d90d, docs/
 //! managed-workstreams.md) against the Cadex engine on memory.sock. It opens
 //! a lease-backed run in the checkout's workstream, resumes the native
 //! session the workstream links (or adopts or starts one), hands a harness

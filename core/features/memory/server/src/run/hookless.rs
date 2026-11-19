@@ -2,7 +2,7 @@
 //! hook (Command Code, Kiro, Antigravity), so it does not stay open.
 //!
 //! Follows `finalize_hookless_session` and its report in ai-memory v3.4.7
-//! (fa0ec25), crates/ai-memory-cli/src/commands/run.rs, with the synthetic
+//! (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/run.rs, with the synthetic
 //! end of `finalize_session::post_session_end_batch` and
 //! `session_end_hook_url` (commands/finalize_session.rs). Changed for Cadex
 //! (2026-11-16): upstream first lists the scope's open sessions with

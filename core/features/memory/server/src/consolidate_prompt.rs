@@ -10,7 +10,8 @@
 //! upstream's own instructions: `BATCH_SYSTEM_PROMPT` (public in the crate,
 //! so it follows upstream's updates) up to its JSON output contract, and
 //! the path/tier/kind conventions of `batch_request_plan` (private there,
-//! copied below from consolidator.rs at fa0ec25, 2026-11-16). In place of
+//! copied below from consolidator.rs at fa0ec25, 2026-11-16; unchanged at
+//! v3.5.0, 411d90d). In place of
 //! the JSON reply, the agent writes the same pages with the memory tools
 //! (`memory_write_pages_batch`, `memory_write_page`), which do what the
 //! consolidator's write does (supersession, git commit).

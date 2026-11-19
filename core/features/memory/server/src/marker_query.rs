@@ -1,6 +1,6 @@
 //! The query pairs upstream's hook client adds from a repository's
 //! `.ai-memory.toml` (`build_marker_query_suffix` in the cli's
-//! hook_capture.rs at fa0ec25), added here to `/hook`, `/handoff` and
+//! hook_capture.rs at 411d90d, v3.5.0), added here to `/hook`, `/handoff` and
 //! `/brief` before upstream's routes read them, since `cadex memory-hook`
 //! does not read the marker (plan 22, 2026-11-16).
 //!
@@ -79,6 +79,14 @@ pub(crate) fn apply(pairs: &mut Vec<(String, String)>, path: &str, text: &str) {
     }
     set(pairs, "profile_contribute", profile_flag(text, "contribute"));
     set(pairs, "profile_consume", profile_flag(text, "consume"));
+    // `[retrieval]` (v3.5.0, upstream #2038): sent empty when the key is
+    // absent, so removing it clears what the project stored. The server
+    // checks the range. Cadex's engine has no reranker, so a
+    // `min_relevance` makes every `memory_query` of the project fail
+    // (upstream's rule); the app does not offer it (plan 35 F, 2026-11-19).
+    for key in ["default_result_limit", "min_relevance"] {
+        set(pairs, key, marker::parse_flag_in(text, key).unwrap_or_default());
+    }
     let off = |v: Option<String>| v.is_some_and(|v| marker::is_falsy(&v));
     if off(marker::parse_scoped_flag_in(text, "recovery", "deliver_on_session_start", true)) {
         set(pairs, "handoff", "0".into());
@@ -133,6 +141,25 @@ mod tests {
         let mut r = pairs("cwd=%2Fr");
         apply(&mut r, "/brief", "[recovery]\ndeliver_on_session_start = 0\n[briefing]\ninject_on_subagent_start = true\n");
         assert_eq!((get(&r, "recovery"), get(&r, "handoff"), get(&r, "briefing")), (Some("0"), None, Some("true")));
+    }
+
+    #[test]
+    fn the_retrieval_keys_are_sent_as_written_and_empty_when_absent() {
+        let mut p = pairs("cwd=%2Fr");
+        apply(&mut p, "/handoff", "[retrieval]\ndefault_result_limit = 25\nmin_relevance = 0.35\n");
+        assert_eq!(get(&p, "default_result_limit"), Some("25"));
+        assert_eq!(get(&p, "min_relevance"), Some("0.35"));
+        let mut q = pairs("cwd=%2Fr");
+        apply(&mut q, "/handoff", "project = \"app\"\n");
+        assert_eq!((get(&q, "default_result_limit"), get(&q, "min_relevance")), (Some(""), Some("")));
+        // A `[retrieval]`-only marker is a settings boundary (upstream's marker.rs).
+        let home = tempfile::tempdir().unwrap();
+        let sub = home.path().join("repo/pkg");
+        std::fs::create_dir_all(&sub).unwrap();
+        std::fs::write(home.path().join("repo/.ai-memory.toml"), "project = \"outer\"\n").unwrap();
+        std::fs::write(sub.join(".ai-memory.toml"), "[retrieval]\nmin_relevance = 0.4\n").unwrap();
+        let found = marker::find_settings_marker(sub.to_str().unwrap(), Some(home.path())).unwrap();
+        assert_eq!(found, sub.join(".ai-memory.toml"));
     }
 
     #[test]

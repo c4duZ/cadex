@@ -2,7 +2,8 @@
 //! live capture uses, so a past session becomes a real session with its
 //! observations, sanitized and bounded by the server, with no LLM.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25),
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on
+//! 2026-11-19: unchanged),
 //! crates/ai-memory-cli/src/commands/backfill.rs: `import_exported_transcript`,
 //! `resolve_occurred_at`, `map_event`, `first_line`, `replay_ingest_key`,
 //! `hook_item`, `hook_batch_end`, `post_hook_items` and `acknowledged_items`.

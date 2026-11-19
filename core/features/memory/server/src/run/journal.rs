@@ -3,7 +3,7 @@
 //! it), as locators and digests only, never transcript content, so the next
 //! run with the engine up replays it (recover.rs).
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25): `JournalKind`, `JournalEntry`,
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged): `JournalKind`, `JournalEntry`,
 //! `JournalFile`, `load_journal`, `append_journal_entry`, `mutate_journal`,
 //! `finish_journal`, `MAX_JOURNAL_ENTRIES`, `MAX_JOURNAL_BYTES`,
 //! `MAX_ENTRY_FAILURES`, `MAX_FAILURE_REASON_BYTES` (crates/ai-memory-cli/src/

@@ -2,7 +2,7 @@
 //! workstream in another installed harness, runs this one again, or quits
 //! (the default); off with `--no-exit-prompt` or `run.exit_prompt = false`.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: its new `--or-new` not brought, `cadex continue` does not use it), crates/ai-memory-cli/src/commands/
 //! run.rs: `AfterRunAction`, `run_with_exit_prompt`,
 //! `run_with_exit_prompt_loop`, `should_offer_after_run`,
 //! `available_switch_harnesses`, `choose_after_run` and

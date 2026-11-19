@@ -5,7 +5,9 @@
 //! ignored).
 //!
 //! Copied from upstream's `crates/ai-memory-cli/src/marker.rs` at
-//! fa0ec25dbe987b7574a7487ecf92f0873040c2f2 (MIT, Fábio Akita), whose crate
+//! fa0ec25dbe987b7574a7487ecf92f0873040c2f2 (MIT, Fábio Akita), compared again
+//! at 411d90d1ede070d874b1d5039b0ba0a08764eb49 (v3.5.0: the two `[retrieval]`
+//! keys made boundaries, 2026-11-19), whose crate
 //! Cadex does not build: `find_marker_matching`, `checkout_root`,
 //! `absolute_normalized`, `lexically_normalize`, `declares_more_than_capture`
 //! and the line parsers, unchanged but for `pub(crate)` and the cut parts:
@@ -83,7 +85,7 @@ fn find_marker_matching<T>(
 fn declares_more_than_capture(text: &str) -> bool {
     const QUOTED_KEYS: [&str; 6] =
         ["workspace", "project", "project_strategy", "drop_subagent_captures", "identity", "identity_style"];
-    const FLAG_KEYS: [&str; 9] = [
+    const FLAG_KEYS: [&str; 11] = [
         "default_global",
         "inject_on_session_start",
         "inject_on_subagent_start",
@@ -92,6 +94,8 @@ fn declares_more_than_capture(text: &str) -> bool {
         "consume",
         "deliver_on_session_start",
         "inbox_notice_on_prompt",
+        "default_result_limit",
+        "min_relevance",
         "server",
     ];
     QUOTED_KEYS.iter().any(|key| parse_key_in(text, key).is_some())

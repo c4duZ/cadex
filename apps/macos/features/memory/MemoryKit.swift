@@ -13,9 +13,11 @@ public enum MemoryKit {
     /// The Claude Code events the memory captures. PostToolUse has no
     /// matcher, so every tool counts; the review's own PostToolUse entry
     /// (a matcher on edits) stays apart, and both run on an edit (ADR 0028,
-    /// ~4 ms more).
+    /// ~4 ms more). StopFailure fires in place of Stop when an API error
+    /// ends the turn: without it that turn had no end in the memory
+    /// (ai-memory v3.5.0, plan 35 F).
     public static let hookEvents = ["SessionStart", "UserPromptSubmit", "PostToolUse", "PreCompact", "PostCompact",
-                                    "SubagentStart", "SubagentStop", "Stop", "SessionEnd"]
+                                    "SubagentStart", "SubagentStop", "Stop", "StopFailure", "SessionEnd"]
 
     /// `~/Library/Application Support/Cadex/memory`; CADEX_MEMORY_DIR for a
     /// test instance, which must not touch the owner's memory.

@@ -2,7 +2,7 @@
 //! newest checkout-local session among the installed harnesses, then the
 //! engine's `resolved_agent` precedence; and Kiro's engine (v2 or v3).
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/
 //! run.rs: `AUTO_HARNESSES`, `AutoSessionCandidate`, `list_auto_sessions`,
 //! `unique_auto_agents`, `automatic_harness_flavor`,
 //! `filter_usable_auto_sessions`, `no_auto_session_error` and

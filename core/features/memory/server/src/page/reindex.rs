@@ -8,7 +8,8 @@
 //! version only when the text changed); Cadex runs with the watcher off
 //! (nothing by a clock), and upstream's walker is private, so the walk below
 //! is **copied** from crates/ai-memory-wiki/src/watcher.rs at commit
-//! fa0ec25dbe987b7574a7487ecf92f0873040c2f2 (2026-11-16):
+//! fa0ec25dbe987b7574a7487ecf92f0873040c2f2 (2026-11-16; unchanged at v3.5.0,
+//! 411d90d, 2026-11-19):
 //! `walk_markdown_partial` → [`walk`] (without fingerprints and the partial
 //! flag, which only its reconcile-delete safety net reads), `is_markdown`,
 //! `is_tempfile`, `is_manifest_filename` and `is_reserved_page_file` →

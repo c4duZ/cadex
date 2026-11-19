@@ -3,7 +3,9 @@
 //! maintenance.rs's: on events, never by a clock.
 //!
 //! **Copied code.** Origin: ai-memory fa0ec25dbe987b7574a7487ecf92f0873040c2f2
-//! (v3.4.7), crates/ai-memory-cli/src/commands/serve.rs, copied 2026-11-16:
+//! (v3.4.7), crates/ai-memory-cli/src/commands/serve.rs, copied 2026-11-16,
+//! compared at v3.5.0 (411d90d, 2026-11-19: only the lint's new
+//! `keep_llm_findings`, false here, since no LLM lint runs):
 //! - `run_scheduled_sweep_tick` and `ABANDONED_SESSION_CUTOFF` → `forget_sweep`;
 //! - `run_scheduled_lint_tick` → `rule_lint`;
 //! - the hollow-project task in `start_maintenance_scheduler` (its constants
@@ -192,6 +194,9 @@ async fn rule_lint(s: &Stores, stop: &CancellationToken) -> Result<()> {
             embedding: None,
             contradiction_band_min: ai_memory_consolidate::DEFAULT_CONTRADICTION_SIM_LOW,
             contradiction_band_max: ai_memory_consolidate::DEFAULT_CONTRADICTION_SIM_HIGH,
+            // Upstream keeps the last LLM pass's findings only when an LLM
+            // lint is scheduled (serve.rs, v3.5.0); here none ever runs.
+            keep_llm_findings: false,
         };
         match run_lint(&s.reader, &s.wiki, None, scope.workspace_id, scope.project_id, options).await {
             Ok(report) => findings += report.findings.len(),

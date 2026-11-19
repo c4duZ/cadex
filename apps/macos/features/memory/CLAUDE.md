@@ -18,7 +18,8 @@
 - `MemoryKit.swift`: `part` monta o `SessionKitPart` da memória: em `hooks`, um
   `cadex memory-hook <evento>` (5 s, sem matcher, então o PostToolUse pega toda ferramenta; o hook
   de autoria da revisão fica à parte e, numa edição, os dois rodam) em SessionStart,
-  UserPromptSubmit, PostToolUse, PreCompact, PostCompact, SubagentStart, SubagentStop, Stop e
+  UserPromptSubmit, PostToolUse, PreCompact, PostCompact, SubagentStart, SubagentStop, Stop,
+  StopFailure (o turno que um erro da API terminou, no lugar do Stop; ai-memory 3.5.0) e
   SessionEnd; na `env`, `CADEX_MEMORY_BIN` (o engine, `findEngine`: Contents/Helpers no pacote,
   senão o build de debug do `make app` em `core/features/memory/server/target/debug`),
   `CADEX_MEMORY_DIR` (`folder`: Application Support/Cadex/memory, ou o CADEX_MEMORY_DIR do app numa

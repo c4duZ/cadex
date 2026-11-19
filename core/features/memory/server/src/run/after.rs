@@ -3,7 +3,7 @@
 //! that continuation left behind, the transcript import and the finish; an
 //! engine gone meanwhile journals the run for the next launch.
 //!
-//! Follows the tail of `run_once_with_wiring` in ai-memory v3.4.7 (fa0ec25),
+//! Follows the tail of `run_once_with_wiring` in ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged),
 //! crates/ai-memory-cli/src/commands/run.rs (lines ~1640–1960), with its
 //! stderr lines, and `offline_import_warning` and `missing_context_warning`
 //! copied. Changed for Cadex (2026-11-16): the journal is Cadex's

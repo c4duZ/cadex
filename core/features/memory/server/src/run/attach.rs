@@ -2,7 +2,7 @@
 //! `--resume` on it and points at `claude attach <id>`, so the launcher
 //! attaches instead.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/
 //! run.rs: `claude_background_attach_id` and `CLAUDE_AGENTS_TIMEOUT`
 //! (2026-11-16). The transcript is read first, so a foreground session never
 //! costs a `claude agents` call; any failure keeps the native resume.

@@ -4,7 +4,8 @@
 //! (core/features/memory/hook_client.zig). Plan 22 phase E, 2026-11-16.
 //!
 //! The command line is upstream's `RunArgs` (crates/ai-memory-cli/src/cli.rs
-//! at fa0ec25): wrapper flags before the harness, the native argv after it,
+//! at fa0ec25; at v3.5.0, 411d90d, it adds `--or-new`, not brought: `cadex
+//! continue` does not use it): wrapper flags before the harness, the native argv after it,
 //! untouched (`delimit_run_native_args` puts a `--` right after the harness).
 //! Copied: `parse_env_kv`. Cadex's own: `--socket`, `--data-dir`, and the
 //! session kit's words per harness (`--claude-kit-arg`, `--codex-kit-arg`).

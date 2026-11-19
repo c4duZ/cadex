@@ -99,6 +99,10 @@ fn hook_state(
         )),
         ingest_gates: ai_memory_hooks::IngestGates::default(),
         session_agents: ai_memory_hooks::SessionAgents::default(),
+        // Upstream's `[routing] brief_on_project_change`, off by default
+        // there too (v3.5.0): no second brief when a session's cwd changes
+        // project; the briefing comes from the .ai-memory.toml (plan 35 B).
+        project_briefs: ai_memory_hooks::ProjectBriefs::default(),
         cwd_probes: ai_memory_hooks::CwdProbes::default(),
         consolidate_on_session_end: false,
         session_consolidation_notify: None,
@@ -106,6 +110,8 @@ fn hook_state(
         // handoff.rs takes it as "a session end is done" (plan 22, phase C).
         profile_notify: Some(session_ended),
         capture_assistant_enabled: false,
+        // Upstream's default (v3.5.0); unused while capture_assistant is off.
+        assistant_excerpt_max_bytes: ai_memory_hooks::ASSISTANT_EXCERPT_MAX_BYTES,
         claim_handoff_on_session_start: true,
         create_handoff_on_session_end: true,
         per_user_slots: false,

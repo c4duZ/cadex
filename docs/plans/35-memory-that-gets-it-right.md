@@ -120,8 +120,19 @@ caminhos deste repositório.
   projeto ficou fixado no arquivo (B). O painel que mostra a própria sessão como cortada fica na H.
   Falta ver uma sessão de verdade no `bkdg-space` cair no `bkdg-center`; o rodapé com núcleo vazio
   vale relatar ao upstream.
-- [ ] F. A 3.5.0: atualizar o commit fixado, com a suíte do upstream (`make memory-upstream-test`, no
+- [x] F. A 3.5.0: atualizar o commit fixado, com a suíte do upstream (`make memory-upstream-test`, no
   PC) e a nossa.
+  Antes de instalar um pacote com a 3.5.0: copiar o memory.sqlite do dono para o lado (como o
+  memory.sqlite.before-plan35 da G). As migrações V108 a V112 rodam ao subir e não voltam; o engine
+  novo só rodou em pastas temporárias.
+  Feito: o upstream fixado na 3.5.0 (`411d90d`); no crate, os três campos novos com os padrões do
+  upstream, o repasse de `[retrieval] default_result_limit` e `min_relevance` (o engine não tem
+  reranker: o `min_relevance` recusa a busca, a tela não o oferece) e a correção do upstream que
+  tira de um ai-jail sem preset as chaves de outros provedores. O StopFailure (turno cortado por
+  erro da API) entra no kit e vai como `stop`, sem pedir consolidação. A suíte do upstream rodou no
+  Mac, sem o PC: 5.029 testes, nenhuma falha, 18 min; a nossa passa inteira. Fica o `make perf`, a
+  suíte no PC se o dono quiser, e copiar o memory.sqlite do dono antes de instalar o pacote
+  (V108–V112 não voltam).
 - [x] G. O auto-improve com proteção: recusar a proposta que cita caminhos ou tabelas que não
   existem no repositório do projeto; rodar o backfill do Center com `require_approval = true`.
   Conforme o estudo, isso pode ser configuração do upstream e não código nosso.

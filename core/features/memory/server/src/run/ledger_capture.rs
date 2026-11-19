@@ -3,7 +3,7 @@
 //! call and its result never reach the engine or the other vendor
 //! (GHSA-h8wj-74hc-vjjp).
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/
 //! transcript_capture.rs: `EventCapture` (with `MetadataOnly`),
 //! `TranscriptCapture::{decide, filter_ledger_events, orphan_result,
 //! drops_codex_memory_agent, decide_call}`, `inspect_call`, `record_cwd` and

@@ -1,7 +1,7 @@
 //! After the agent exits: its transcript, read once the writer settled, sent
 //! to the run's `/finish` in batches as the workstream's ledger.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/
 //! run.rs: `export_after_flush`, `import_batches`,
 //! `import_incomplete_batches`, `event_batches`, `nonempty_session` and the
 //! batch limits. Changed for Cadex (2026-11-16): the client is uds_http.rs,

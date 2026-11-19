@@ -1,6 +1,7 @@
 //! What the import keeps of each transcript event, as the live hook would.
 //!
-//! Copied, reduced, from ai-memory v3.4.7 (fa0ec25),
+//! Copied, reduced, from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0,
+//! 411d90d, on 2026-11-19: unchanged),
 //! crates/ai-memory-cli/src/commands/transcript_capture.rs (`TranscriptCapture::
 //! decide`, `orphan_result`, `decide_call`, `record_call`, `call_id`,
 //! `shell_mode_output`, `skipped_record`). The cli crate is not a library, and

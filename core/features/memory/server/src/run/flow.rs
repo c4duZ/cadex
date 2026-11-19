@@ -3,7 +3,7 @@
 //! replay what an earlier outage left in the journal, prepare the run and
 //! hand it to launch.rs.
 //!
-//! Follows `run_once_with_wiring` of ai-memory v3.4.7 (fa0ec25),
+//! Follows `run_once_with_wiring` of ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: the jail launch now names the harness, jail_exec.rs),
 //! crates/ai-memory-cli/src/commands/run.rs (lines ~613–1000), with
 //! `capture_interrupts` and `RunOutcome` copied. Changed for Cadex
 //! (2026-11-16): the engine is started here when it does not answer
@@ -82,7 +82,11 @@ async fn exec_explicit_jail(local: &Local, ctx: &JailContext<'_>, spec: &str) ->
     if let Err(error) = server::ensure_engine(&client, ctx.env).await {
         eprintln!("ai-memory: {error:#}; the jailed run will launch without the memory engine");
     }
-    Ok(exec_under_ai_jail(ai_jail, ctx, JailLaunch { support: &support, contract: contract.as_ref() }, &toggles,
+    Ok(exec_under_ai_jail(ai_jail, ctx, JailLaunch {
+        support: &support,
+        contract: contract.as_ref(),
+        harness: local.requested.is_some().then_some(local.provisional),
+    }, &toggles,
         local.jail_facts.project_config, &local.jail_inputs.flag_folders, None))
 }
 

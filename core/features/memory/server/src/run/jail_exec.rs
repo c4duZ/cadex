@@ -7,7 +7,9 @@
 //! `ContractExec`, `exec_under_ai_jail_contract`, `jail_refusal_error`,
 //! `jail_status`, `exec_under_ai_jail`, `jail_forwarded_args`,
 //! `jail_forwarded_names`, `reexec_under_ai_jail` (Unix), and
-//! `render_shared::shell_quote`. Changed for Cadex (2026-11-16):
+//! `render_shared::shell_quote`; compared again at v3.5.0 (411d90d,
+//! 2026-11-19): `JailLaunch::harness` and `jail_launch_env_names` came along
+//! (the flag-based launch no longer hands a jailed Codex the Anthropic key). Changed for Cadex (2026-11-16):
 //! - upstream forwards its server URL/base path (`jail_resolved_env`); Cadex
 //!   has no URL, so the jailed launcher gets the session token, the absolute
 //!   memory.sock path, the memory folder and the account's workspace
@@ -69,6 +71,19 @@ pub(crate) fn jail_contract_for(ai_jail: &Path, support: &JailSupport, harness: 
 pub(crate) struct JailLaunch<'a> {
     pub(crate) support: &'a JailSupport,
     pub(crate) contract: Option<&'a ContractTarget>,
+    /// The harness asked for, when known before the re-exec; `None` on an
+    /// automatic choice, which the engine resolves later.
+    pub(crate) harness: Option<ManagedHarness>,
+}
+
+/// The forwarded names a jail launch may pass for `harness`: the provider
+/// keys of other harnesses filtered out on the flag-based path too, as the
+/// contract path does (upstream v3.5.0).
+fn jail_launch_env_names(harness: Option<ManagedHarness>, present: &[&'static str]) -> Vec<&'static str> {
+    match harness {
+        Some(harness) => harness_env_names(harness, present),
+        None => present.to_vec(),
+    }
 }
 
 pub(crate) fn shell_quote(s: &str) -> String {
@@ -160,7 +175,8 @@ pub(crate) fn exec_under_ai_jail(ai_jail: &Path, ctx: &JailContext<'_>, launch: 
         );
         return reexec_under_ai_jail(ai_jail, &contract_invocation(&flags, &exe, &forwarded), &resolved);
     }
-    let jail_args = build_ai_jail_invocation(&exe, &forwarded, &present, true, launch.support.supports("no-save-config"),
+    let env_names = jail_launch_env_names(launch.harness, &present);
+    let jail_args = build_ai_jail_invocation(&exe, &forwarded, &env_names, true, launch.support.supports("no-save-config"),
         toggles, &pairs);
     eprintln!("{}", jail_summary(toggles, project_config, folders));
     reexec_under_ai_jail(ai_jail, &jail_args, &resolved)
@@ -216,5 +232,13 @@ mod tests {
         settings.run.exit_prompt = false;
         assert_eq!(jail_forwarded_args(&settings, [OsString::from("run")]), [OsString::from("run"), "--no-exit-prompt".into()]);
         assert_eq!(shell_quote("a b"), "'a b'");
+    }
+
+    #[test]
+    fn a_flag_based_jail_keeps_other_harnesses_keys_out() {
+        let present = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "CADEX_SESSION_TOKEN"];
+        let codex = jail_launch_env_names(Some(ManagedHarness::Codex), &present);
+        assert_eq!(codex, ["OPENAI_API_KEY", "CADEX_SESSION_TOKEN"]);
+        assert_eq!(jail_launch_env_names(None, &present), present);
     }
 }

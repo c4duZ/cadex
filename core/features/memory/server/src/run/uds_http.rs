@@ -3,7 +3,7 @@
 //! bodies and the session token in `X-Cadex-Token` (auth.rs). Stands in for
 //! upstream's reqwest-based `http_client.rs` (`get_json`, `post_json`,
 //! `post_empty`, `post_json_no_content`, `ServerResponseError`, ai-memory
-//! fa0ec25): the engine has no TCP endpoint (ADR 0028). Plan 22 phase E,
+//! fa0ec25, unchanged at v3.5.0 = 411d90d): the engine has no TCP endpoint (ADR 0028). Plan 22 phase E,
 //! 2026-11-16.
 
 use std::fmt;

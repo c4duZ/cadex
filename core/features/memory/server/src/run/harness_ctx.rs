@@ -3,7 +3,7 @@
 //! generated config dir (`CRUSH_GLOBAL_CONFIG`), Grok as `--rules` text.
 //! Both are acknowledged (`/context/accept`) only after the child spawns.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/
 //! run.rs: `fetch_grok_context`, `prepare_crush_context`,
 //! `crush_context_source`, `write_crush_context_config`, `write_private` and
 //! `user_supplied_grok_rules`, and the Crush/Grok steps of

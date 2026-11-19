@@ -3,7 +3,7 @@
 //! (another `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, profile) is not replaced by a
 //! fresh one.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25): `effective_store`,
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged): `effective_store`,
 //! `canonical_prefix`, `remember_session_store`, `store_mismatch_error`
 //! (crates/ai-memory-cli/src/commands/run.rs) and `record_session_store`,
 //! `recorded_session_store`, `SessionStore`, `MAX_SESSION_STORES`

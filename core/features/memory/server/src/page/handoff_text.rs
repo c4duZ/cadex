@@ -1,5 +1,6 @@
 //! **Copied from upstream** (ai-memory, commit
-//! fa0ec25dbe987b7574a7487ecf92f0873040c2f2, 2026-11-16),
+//! fa0ec25dbe987b7574a7487ecf92f0873040c2f2, 2026-11-16; compared at v3.5.0,
+//! 411d90d, on 2026-11-19: unchanged),
 //! crates/ai-memory-hooks/src/router.rs, private there:
 //! - `render_handoff_markdown_with_budget` → [`render`]
 //! - `escape_untrusted_history` and `escape_untrusted_history_tail` →

@@ -2,7 +2,7 @@
 //! `--profile` presets, `exit_prompt`, `require_server` and the retired
 //! `claude_true_yolo`. Cadex never writes that file.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25): `RunSettings`, `RunProfile`,
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged): `RunSettings`, `RunProfile`,
 //! `validate_run_profiles`, `default_data_dir` and the `[run]` env overrides
 //! of `Config::load_with_runtime_env` (crates/ai-memory-cli/src/config.rs);
 //! `unknown_run_profile`, `resolve_run_env`, `upsert_env` (commands/run.rs).

@@ -1,7 +1,7 @@
 //! The harness names `cadex-memory run` takes and the managed harness each
 //! one launches.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25): `RunHarnessChoice` with its clap
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged): `RunHarnessChoice` with its clap
 //! names and aliases, `parse_run_harness_choice` and
 //! `claude_wrapper_spelling` (crates/ai-memory-cli/src/cli.rs), and
 //! `managed_harness`, `run_harness_choice`, `managed_harness_for_args`,

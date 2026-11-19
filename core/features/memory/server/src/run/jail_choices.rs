@@ -2,7 +2,7 @@
 //! offers them again and Enter keeps them. Never in the repository: a
 //! repository must not be able to grant itself a credential or a mount.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/
 //! jail_choices.rs: `Store`, `Remembered`, `Applied`, `load`, `save`, `apply`
 //! and `remember`. Changed for Cadex (2026-11-16): the file is
 //! `<data-dir>/run/jail-choices.json`, never upstream's data dir.

@@ -3,7 +3,7 @@
 //! `--env-file`, `--env`), the harness (named, or the newest checkout-local
 //! session's), its executable, the scope and the jail plan.
 //!
-//! Follows the head of `run_once_with_wiring` in ai-memory v3.4.7 (fa0ec25),
+//! Follows the head of `run_once_with_wiring` in ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged),
 //! crates/ai-memory-cli/src/commands/run.rs (lines ~619–820). Changed for
 //! Cadex (2026-11-16): the scope is the hooks' (mod.rs `scope`, with
 //! `--workspace`/`--project` over it); `--no-autowire` is read and ignored.

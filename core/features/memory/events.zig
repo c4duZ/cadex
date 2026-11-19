@@ -20,6 +20,10 @@ pub fn engineEvent(claude_event: []const u8) ?[]const u8 {
         .{ "PostCompact", "post-compaction" },
         .{ "Notification", "notification" },
         .{ "Stop", "stop" },
+        // An API error ended the turn (Claude Code 2.1.78+): the engine ends
+        // the turn all the same and reads the error from the payload's
+        // `hook_event_name` (ai-memory v3.5.0, #2303; its plugin sends `stop`).
+        .{ "StopFailure", "stop" },
         .{ "SessionEnd", "session-end" },
         .{ "SubagentStart", "subagent-start" },
         .{ "SubagentStop", "subagent-stop" },
@@ -217,6 +221,7 @@ test "Claude Code's events map to the engine's names" {
     try testing.expectEqualStrings("post-tool-use", engineEvent("PostToolUseFailure").?);
     try testing.expectEqualStrings("post-compaction", engineEvent("PostCompact").?);
     try testing.expectEqualStrings("subagent-stop", engineEvent("SubagentStop").?);
+    try testing.expectEqualStrings("stop", engineEvent("StopFailure").?);
     try testing.expect(engineEvent("PermissionRequest") == null);
     try testing.expect(engineEvent("session-start") == null);
     try testing.expect(sendsPid("session-end") and !sendsPid("stop"));

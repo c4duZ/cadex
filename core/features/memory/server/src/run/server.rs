@@ -2,7 +2,7 @@
 //! the engine if it does not answer, prepare the run (waiting out a busy
 //! lease), heartbeats, cancel after a failure and the finish.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: its new `--or-new` not brought, `cadex continue` does not use it), crates/ai-memory-cli/src/commands/
 //! run.rs: `HeartbeatHealth`, `HeartbeatFailureKind`, `heartbeat_failure_notice`,
 //! `heartbeat_failure_kind`, `send_managed_heartbeat_with_timeout`,
 //! `cancel_managed_run_after_failure`, `prepare_managed_run` (without the

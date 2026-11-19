@@ -2,7 +2,7 @@
 //! `--profile`/`--env-file`/`--env` overrides) and the executables found
 //! through its `PATH`.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/
 //! run.rs: `EffectiveChildEnv` (Unix only: case-sensitive keys),
 //! `ExecutableSearch`, `resolve_program`, `resolve_candidate` (Unix branch),
 //! `executable_file`, `executable_available`, `harness_available`,

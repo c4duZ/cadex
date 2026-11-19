@@ -23,7 +23,8 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
 
 ### O que entra na memória, sozinho e sem IA
 - Nas sessões que o Cadex abre (e no `claude` digitado numa aba do Cadex, abaixo): os prompts, as
-  ferramentas que o agente usou e em quais arquivos, as compactações, os subagentes e o fim da
+  ferramentas que o agente usou e em quais arquivos, as compactações, os subagentes, o fim de cada
+  turno (também o que um erro da API cortou: limite, saldo, servidor sobrecarregado) e o fim da
   sessão. A sessão nunca espera por isso; com o processo fora do ar, os eventos esperam numa fila e
   entram quando ele volta.
 - De cada ferramenta fica um trecho do que ela devolveu (até 2.000 bytes, o padrão do ai-memory;
@@ -58,7 +59,10 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   `[capture] ignore_paths` (com `[capture]` inválido, das ferramentas de arquivo e terminal só fica o
   nome, como no ai-memory), `[briefing] inject_on_session_start` e `max_chars`,
   `inject_on_subagent_start`, `[recall] default_global`, `drop_subagent_captures`,
-  `[profile] contribute`/`consume`, `[handoff]` e `[recovery] deliver_on_session_start`.
+  `[profile] contribute`/`consume`, `[handoff]` e `[recovery] deliver_on_session_start`, e
+  `[retrieval] default_result_limit` (quantos resultados a busca devolve no projeto quando o agente
+  não diz). O `[retrieval] min_relevance` também vale como no ai-memory, mas pede um reranker, que o
+  Cadex não tem: com ele no arquivo, toda busca do projeto é recusada. Por isso a tela não o oferece.
 - O que o arquivo não diz vale o padrão do ai-memory, o briefing desligado entre eles; o briefing
   fica ligado porque o arquivo que o Cadex cria o liga (plano 35, o dono em 2026-11-19).
 - Diferenças do Cadex: o arquivo nasce sozinho em todo projeto (no ai-memory, só pelo `project

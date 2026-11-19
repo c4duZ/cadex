@@ -4,7 +4,7 @@
 //! run with the engine up replays it (recover.rs). `--require-server` (or
 //! `run.require_server`, or `--project-id`) fails closed instead (flow.rs).
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/
 //! run.rs: `run_degraded_offline`, `degraded_launch`, `journal_degraded_run`,
 //! `DEGRADED_SESSION_SNAPSHOT_LIMIT`, `snapshot_native_sessions`,
 //! `resolve_degraded_session`, `unique_new_session`, `export_exact_after_run`,

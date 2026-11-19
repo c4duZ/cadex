@@ -34,7 +34,9 @@
   - `server/src/engine.rs`: store, wiki, embedder, roteador de hooks e de workstream e o MCP
     (streamable HTTP, JSON, sem estado), montados como o serve.rs do cli do upstream os monta, sem
     TCP, web, autenticação multiusuário (o `require_bearer` dele roda sem token, como anônimo) nem
-    provedores. Do `HookState`: `record_tool_names` e `index_file_paths` ligados (o nome de cada
+    provedores; sem as rotas `/messages*` da 3.5.0 (só o comando `ai-memory message` as usa; as
+    ferramentas `memory_message_*` do MCP seguem) e com o `[routing] brief_on_project_change`
+    desligado, o padrão do upstream. Do `HookState`: `record_tool_names` e `index_file_paths` ligados (o nome de cada
     ferramenta, nunca os argumentos; o corpo guarda até 2.000 bytes do que ela devolveu, o padrão
     do upstream, que numa gravação do Claude traz o conteúdo do arquivo; e o caminho relativo ao checkout do arquivo que ela nomeou, para o handoff) e o `profile_notify` com o aviso de "um SessionEnd terminou" que o
     `server/src/handoff.rs` espera (o passo de perfil do agente de memória roda depois do SessionEnd,
@@ -68,7 +70,10 @@
       `server/src/core_brief.rs` (plano 35 E: pedido o briefing e sem página de núcleo do projeto,
       fixada, _rules/ ou _slots/, o pedido segue com `briefing=0`; dentro da camada do marcador),
       `server/src/marker_query.rs` (os pares que o `build_marker_query_suffix` do upstream manda;
-      o briefing só com o marcador pedindo, como no upstream, desde o plano 35 B; o `workspace` da conta vale mais que o do arquivo) e
+      o briefing só com o marcador pedindo, como no upstream, desde o plano 35 B; o `workspace` da conta vale mais que o do arquivo;
+      desde a 3.5.0 também `[retrieval] default_result_limit` e `min_relevance`, vazios quando o
+      arquivo não os tem; o engine não tem reranker, então um `min_relevance` faz o `memory_query` do
+      projeto ser recusado, como no upstream, e o app não oferece a chave) e
       `server/src/capture.rs` (o `CapturePolicy` do upstream: some, só metadados ou fica).
     - `server/src/file_claim.rs`: o campo `_ai_memory_file` que o cliente do upstream manda e o
       `cadex memory-hook` não (o arquivo único que o `file_target` do upstream lê, relativo à pasta
@@ -216,7 +221,7 @@
       do próprio transcript, repetidas tiradas pelo id; `cadex-memory scan-transcripts --cwd <dir>
       [--claude-dirs a:b]` lista o que a importação leria (diagnóstico).
     - `server/src/replay.rs` e `server/src/replay_capture.rs`: **código copiado do cli do
-      upstream** (v3.4.7, backfill.rs e transcript_capture.rs, origem no topo de cada um): o
+      upstream** (v3.4.7, backfill.rs e transcript_capture.rs, iguais na 3.5.0; origem no topo de cada um): o
       transcript, lido pelo `export_transcript` do upstream, vira eventos de hook mandados ao
       `/hook/batch` pela rota, em processo, com a raiz do projeto como cwd e `auto_handoff=0`.
   - Continuar em outro agente (fase E), `cadex-memory run`, em `server/src/run/`: **cópia do
@@ -340,7 +345,9 @@
     e sem ela tudo cai na workspace `default`). SessionStart: sobe o engine se
     preciso, manda o evento e pede o briefing, tudo em 1 s, e imprime o `additionalContext`. Os
     outros eventos: 200 ms e, sem resposta (ou com 5xx), vão para a fila. Sempre sai 0.
-  - `events.zig`: o nome do evento do Claude Code no do engine (o `HookEvent::parse` do upstream)
+  - `events.zig`: o nome do evento do Claude Code no do engine (o `HookEvent::parse` do upstream;
+    o StopFailure, turno cortado por erro da API, vai como `stop`, como o plugin do upstream manda, e
+    não pede a consolidação na sessão, que o Claude Code ignora nesse hook)
     e a query (`event`, `agent=claude-code`, `cwd`, `workspace` quando há, `session_id`, `project_strategy=repo-root`,
     `ingest_key` aleatória; `pid` no SessionStart e no SessionEnd; sem `briefing=1` no `/handoff` desde o plano 35 B: o briefing vem do .ai-memory.toml, que o app cria em todo projeto) e,
     numa execução gerenciada (fase E), `managed_run` (o AI_MEMORY_RUN_ID) no `/hook` e no `/handoff`
@@ -361,7 +368,8 @@
      de cada crate `ai-memory-*` (o lock segue as versões que o upstream travou);
   2. `make memory` e corrigir no crate do Cadex as mudanças de API (na prova de 2026-11-15, duas
      semanas de upstream deram 3 linhas);
-  3. `make memory-upstream-test` no PC;
+  3. `make memory-upstream-test` no PC (sem o PC, o mesmo `cargo test` roda num clone no Mac: na
+     3.5.0, em 2026-11-19, 5.029 testes em 18 min com 10 núcleos; o `target` dele, apagado depois);
   4. comparar, entre o commit velho e o novo, o serve.rs, o backfill.rs e o
      transcript_capture.rs do cli do upstream, o run.rs (as funções que o topo de cada arquivo de
      `server/src/run/` lista), e o marker.rs e o `build_marker_query_suffix` do

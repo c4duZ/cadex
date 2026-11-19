@@ -64,11 +64,11 @@ func warm(_ engine: String, _ folder: String, _ version: String) async -> Bool? 
 }
 
 let featureTests: [(name: String, body: Checks.Body)] = [
-    ("nine events, each `cadex memory-hook <Event>` with no matcher and 5 s", {
+    ("ten events, each `cadex memory-hook <Event>` with no matcher and 5 s", {
         let part = MemoryKit.part(tools: "/App/Cadex.app/Contents/Helpers/cadex", engine: nil, shareAcrossAccounts: true, environment: [:])
         let hooks = part.settings["hooks"] as? [String: Any] ?? [:]
         expect(hooks.keys.sorted() == ["PostCompact", "PostToolUse", "PreCompact", "SessionEnd", "SessionStart", "Stop",
-                                       "SubagentStart", "SubagentStop", "UserPromptSubmit"], "\(hooks.keys.sorted())")
+                                       "StopFailure", "SubagentStart", "SubagentStop", "UserPromptSubmit"], "\(hooks.keys.sorted())")
         for event in MemoryKit.hookEvents {
             let entry = (hooks[event] as? [[String: Any]])?.first
             let hook = (entry?["hooks"] as? [[String: Any]])?.first
@@ -148,7 +148,7 @@ let featureTests: [(name: String, body: Checks.Body)] = [
         kit.hooksEnabled = false
         kit.contribute(MemoryKit.partID, MemoryKit.part(tools: "/bin/cadex", engine: "/e", shareAcrossAccounts: false, environment: [:]))
         let file = settings(of: kit.claudeCommand(configDir: dir + "/acct", defaultClaudeJSON: dir + "/none.json"))
-        expect((file["hooks"] as? [String: Any])?.count == 9, "\(file)")
+        expect((file["hooks"] as? [String: Any])?.count == 10, "\(file)")
         let env = file["env"] as? [String: String] ?? [:]
         expect(env["CADEX_MEMORY_WORKSPACE"] == SessionKit.accountKey(dir + "/acct"), "\(env)")
         expect(env["CADEX_MEMORY_BIN"] == "/e" && env["CADEX_SESSION_TOKEN"]?.count == 64, "\(env)")

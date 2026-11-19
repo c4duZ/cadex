@@ -6,7 +6,7 @@
 //! native store and refuse it when its digests changed. Entries clear as
 //! they succeed; failures stay with their reason.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/
 //! recovery.rs: `recover_entry`, `recovery_session_dir`,
 //! `recover_finish_failed`, `failed_reason`, `recover_spool_only`,
 //! `recover_degraded_run`; and backfill.rs's `import_exact_session_range`.

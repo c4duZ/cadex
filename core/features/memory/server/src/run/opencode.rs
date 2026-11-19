@@ -5,7 +5,8 @@
 //! `resolve_generic`, `resolve_generic_with_timeout`, `spawn_retrying_busy`,
 //! `timeout_error` and `read_bounded` (crates/ai-memory-cli/src/commands/
 //! opencode_dialect.rs) and `resolve_opencode_for_launch` (commands/run.rs).
-//! Changed for Cadex (2026-11-16): no i18n; the installer resolvers
+//! Compared again at v3.5.0 (411d90d, 2026-11-19): the timeout's command is
+//! quoted (a path with a space). Changed for Cadex (2026-11-16): no i18n; the installer resolvers
 //! (`resolve_agent`, `resolve_client`) are autowire's and stay out.
 
 use std::ffi::OsStr;
@@ -132,7 +133,7 @@ fn timeout_error(program: &std::path::Path, timeout: Duration) -> anyhow::Error 
         "OpenCode version probe timed out after {} seconds for {}; run `{} --version` and verify it exits promptly",
         timeout.as_secs_f64(),
         program.display(),
-        program.display()
+        super::jail_exec::shell_quote(&program.to_string_lossy())
     )
 }
 

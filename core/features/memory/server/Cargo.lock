@@ -33,8 +33,8 @@ dependencies = [
 
 [[package]]
 name = "ai-memory-consolidate"
-version = "3.4.7"
-source = "git+https://github.com/akitaonrails/ai-memory?rev=fa0ec25dbe987b7574a7487ecf92f0873040c2f2#fa0ec25dbe987b7574a7487ecf92f0873040c2f2"
+version = "3.5.0"
+source = "git+https://github.com/akitaonrails/ai-memory?rev=411d90d1ede070d874b1d5039b0ba0a08764eb49#411d90d1ede070d874b1d5039b0ba0a08764eb49"
 dependencies = [
  "ai-memory-core",
  "ai-memory-llm",
@@ -57,8 +57,8 @@ dependencies = [
 
 [[package]]
 name = "ai-memory-core"
-version = "3.4.7"
-source = "git+https://github.com/akitaonrails/ai-memory?rev=fa0ec25dbe987b7574a7487ecf92f0873040c2f2#fa0ec25dbe987b7574a7487ecf92f0873040c2f2"
+version = "3.5.0"
+source = "git+https://github.com/akitaonrails/ai-memory?rev=411d90d1ede070d874b1d5039b0ba0a08764eb49#411d90d1ede070d874b1d5039b0ba0a08764eb49"
 dependencies = [
  "fluent-bundle",
  "fluent-syntax",
@@ -76,8 +76,8 @@ dependencies = [
 
 [[package]]
 name = "ai-memory-hooks"
-version = "3.4.7"
-source = "git+https://github.com/akitaonrails/ai-memory?rev=fa0ec25dbe987b7574a7487ecf92f0873040c2f2#fa0ec25dbe987b7574a7487ecf92f0873040c2f2"
+version = "3.5.0"
+source = "git+https://github.com/akitaonrails/ai-memory?rev=411d90d1ede070d874b1d5039b0ba0a08764eb49#411d90d1ede070d874b1d5039b0ba0a08764eb49"
 dependencies = [
  "ai-memory-consolidate",
  "ai-memory-core",
@@ -100,8 +100,8 @@ dependencies = [
 
 [[package]]
 name = "ai-memory-llm"
-version = "3.4.7"
-source = "git+https://github.com/akitaonrails/ai-memory?rev=fa0ec25dbe987b7574a7487ecf92f0873040c2f2#fa0ec25dbe987b7574a7487ecf92f0873040c2f2"
+version = "3.5.0"
+source = "git+https://github.com/akitaonrails/ai-memory?rev=411d90d1ede070d874b1d5039b0ba0a08764eb49#411d90d1ede070d874b1d5039b0ba0a08764eb49"
 dependencies = [
  "ai-memory-core",
  "anyhow",
@@ -113,6 +113,7 @@ dependencies = [
  "jiff",
  "regex",
  "reqwest",
+ "ring",
  "schemars",
  "secrecy",
  "serde",
@@ -127,8 +128,8 @@ dependencies = [
 
 [[package]]
 name = "ai-memory-mcp"
-version = "3.4.7"
-source = "git+https://github.com/akitaonrails/ai-memory?rev=fa0ec25dbe987b7574a7487ecf92f0873040c2f2#fa0ec25dbe987b7574a7487ecf92f0873040c2f2"
+version = "3.5.0"
+source = "git+https://github.com/akitaonrails/ai-memory?rev=411d90d1ede070d874b1d5039b0ba0a08764eb49#411d90d1ede070d874b1d5039b0ba0a08764eb49"
 dependencies = [
  "ai-memory-consolidate",
  "ai-memory-core",
@@ -159,8 +160,8 @@ dependencies = [
 
 [[package]]
 name = "ai-memory-store"
-version = "3.4.7"
-source = "git+https://github.com/akitaonrails/ai-memory?rev=fa0ec25dbe987b7574a7487ecf92f0873040c2f2#fa0ec25dbe987b7574a7487ecf92f0873040c2f2"
+version = "3.5.0"
+source = "git+https://github.com/akitaonrails/ai-memory?rev=411d90d1ede070d874b1d5039b0ba0a08764eb49#411d90d1ede070d874b1d5039b0ba0a08764eb49"
 dependencies = [
  "ai-memory-core",
  "anyhow",
@@ -186,8 +187,8 @@ dependencies = [
 
 [[package]]
 name = "ai-memory-wiki"
-version = "3.4.7"
-source = "git+https://github.com/akitaonrails/ai-memory?rev=fa0ec25dbe987b7574a7487ecf92f0873040c2f2#fa0ec25dbe987b7574a7487ecf92f0873040c2f2"
+version = "3.5.0"
+source = "git+https://github.com/akitaonrails/ai-memory?rev=411d90d1ede070d874b1d5039b0ba0a08764eb49#411d90d1ede070d874b1d5039b0ba0a08764eb49"
 dependencies = [
  "ai-memory-core",
  "ai-memory-llm",
@@ -216,8 +217,8 @@ dependencies = [
 
 [[package]]
 name = "ai-memory-workstream"
-version = "3.4.7"
-source = "git+https://github.com/akitaonrails/ai-memory?rev=fa0ec25dbe987b7574a7487ecf92f0873040c2f2#fa0ec25dbe987b7574a7487ecf92f0873040c2f2"
+version = "3.5.0"
+source = "git+https://github.com/akitaonrails/ai-memory?rev=411d90d1ede070d874b1d5039b0ba0a08764eb49#411d90d1ede070d874b1d5039b0ba0a08764eb49"
 dependencies = [
  "ai-memory-core",
  "anyhow",
@@ -2482,7 +2483,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

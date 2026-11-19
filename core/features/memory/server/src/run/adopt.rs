@@ -4,7 +4,7 @@
 //! checkout-local session (automatic launch) or the one picked on the
 //! terminal.
 //!
-//! Follows `run_once_with_wiring` of ai-memory v3.4.7 (fa0ec25),
+//! Follows `run_once_with_wiring` of ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: its new `--or-new` not brought, `cadex continue` does not use it),
 //! crates/ai-memory-cli/src/commands/run.rs (lines ~1130–1330): the orphan,
 //! store-mismatch and adoption branches. Changed for Cadex (2026-11-16): no
 //! i18n; `prepare.project_id.is_none()` is `--project-id` absent.

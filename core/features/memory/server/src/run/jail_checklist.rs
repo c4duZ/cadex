@@ -2,7 +2,7 @@
 //! line by line on injected I/O, and the one-line summary of what the
 //! jailed re-run enables.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/
 //! run.rs: `CHECKLIST_MAX_INVALID`, `ChecklistAnswer`,
 //! `apply_checklist_answer`, `ChecklistView`, `FolderPicker`,
 //! `ChecklistOutcome`, `folder_names`, `render_checklist`,

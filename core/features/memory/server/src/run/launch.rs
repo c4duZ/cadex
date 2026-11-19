@@ -4,7 +4,7 @@
 //! dossier, the Crush/Grok context, then the agent with the terminal and the
 //! heartbeat while it runs.
 //!
-//! Follows `run_once_with_wiring` of ai-memory v3.4.7 (fa0ec25),
+//! Follows `run_once_with_wiring` of ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: its new `--or-new` not brought, `cadex continue` does not use it),
 //! crates/ai-memory-cli/src/commands/run.rs (lines ~1000–1640). Changed for
 //! Cadex (2026-11-16): no autowire (the kit wires hooks and MCP; `--no-autowire`
 //! is ignored); the kit's words for the resolved harness go after the plan

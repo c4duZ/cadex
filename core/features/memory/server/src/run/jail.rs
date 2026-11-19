@@ -3,7 +3,7 @@
 //! folder flags, the `--yolo` gate with its offer and checklist, and the
 //! line that repeats the choices next time.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: the jail launch now names the harness, jail_exec.rs), crates/ai-memory-cli/src/commands/
 //! run.rs: `JailMode`, `JailPlan`, `jail_decision`, `NextRun`, `JailInputs`,
 //! `NEXT_RUN_ENV`, `folder_rules`, `folders_need_a_jail`,
 //! `validate_flag_folders`, `next_run_command`, `print_next_run_hint`,
@@ -268,7 +268,7 @@ pub(crate) async fn confirm_yolo_and_maybe_reexec(ctx: &JailContext<'_>, plan: &
     if let Some((client, run_path)) = lease {
         super::server::cancel_after_failure(client, run_path).await;
     }
-    Err(exec_under_ai_jail(ai_jail, ctx, JailLaunch { support: &support, contract: contract.as_ref() }, &toggles,
+    Err(exec_under_ai_jail(ai_jail, ctx, JailLaunch { support: &support, contract: contract.as_ref(), harness: Some(offer.harness) }, &toggles,
         facts.project_config, &folders, next_run))
 }
 

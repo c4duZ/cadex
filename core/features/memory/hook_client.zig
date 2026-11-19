@@ -154,7 +154,9 @@ pub fn runWith(gpa: std.mem.Allocator, env: Env, claude_event: []const u8, input
     var reply = replyFor(event, payload);
     var milestone: consolidate.Reason = .asked;
     if (reply == .none) if (consolidationAt(env)) |threshold| {
-        if (std.mem.eql(u8, event, "stop")) {
+        // Not on StopFailure: Claude Code ignores that hook's output, and the
+        // milestone, once spent, would not ask again at the next Stop.
+        if (std.mem.eql(u8, claude_event, "Stop")) {
             if (stopMilestone(gpa, env, payload, threshold)) |reason| {
                 milestone = reason;
                 reply = .consolidate_stop;

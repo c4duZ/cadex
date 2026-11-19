@@ -2,7 +2,7 @@
 //! 22 phase G, 2026-11-16).
 //!
 //! **Copied code.** Origin: ai-memory fa0ec25dbe987b7574a7487ecf92f0873040c2f2
-//! (v3.4.7), crates/ai-memory-consolidate/src/auto_improve_schedule.rs,
+//! (v3.4.7; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-consolidate/src/auto_improve_schedule.rs,
 //! copied 2026-11-16: the per-scope body of `run_auto_improve_scheduler_tick`
 //! → `run`, `run_scheduled_auto_improve` → `review_session`,
 //! `run_scheduled_experience` → `experience`, `stage_and_apply`,

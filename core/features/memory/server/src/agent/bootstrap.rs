@@ -150,6 +150,9 @@ fn bootstrap_config(scope: &Scope, ws: WorkspaceId, proj: ProjectId, dry_run: bo
         dry_run,
         force: false,
         resume: true,
+        // Upstream's `[consolidation] output_language` unset (v3.5.0): the
+        // prose follows the language of the sessions.
+        output_language: None,
     }
 }
 

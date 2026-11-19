@@ -2,7 +2,7 @@
 //! launcher, so they are taken out of the native argv before the harness
 //! sees it.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/
 //! run.rs: `remove_wrapper_yolo`, `remove_wrapper_true_yolo`,
 //! `take_wrapper_yolo`, `yolo_deprecation_notes`, `remove_wrapper_fresh`,
 //! `remove_wrapper_force_unlock`, `remove_wrapper_no_autowire`,

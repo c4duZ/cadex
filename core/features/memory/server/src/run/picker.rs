@@ -3,7 +3,7 @@
 //! lease keeps beating, and the hint naming the selector that resumes the
 //! checkout's newest session when the linked one is gone.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/
 //! run.rs: `choose_native_session_interactive`,
 //! `wait_for_native_session_choice`, `choose_native_session`, `session_age`,
 //! `orphan_resume_hint`, `run_harness_name`, `resume_selector` and the

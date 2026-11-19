@@ -2,7 +2,7 @@
 //! ai-jail is usable, the offer to re-run the session inside it; and the
 //! terminal emphasis the jail prompts share.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/
 //! run.rs: `yolo_decision`, `YoloConfirmation`, `read_yolo_confirmation` and
 //! `Paint` (with `terminal::color_enabled`). Changed for Cadex (2026-11-16):
 //! no i18n, and `Paint` writes the SGR codes crossterm's `Stylize` writes

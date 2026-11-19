@@ -3,7 +3,7 @@
 //! the home, a credential store or memory's data, by path and again after
 //! resolving links.
 //!
-//! Copied from ai-memory v3.4.7 (fa0ec25), crates/ai-memory-cli/src/commands/
+//! Copied from ai-memory v3.4.7 (fa0ec25; compared at v3.5.0, 411d90d, on 2026-11-19: unchanged), crates/ai-memory-cli/src/commands/
 //! jail_folders.rs: `ExtraFolder`, `upsert`, `FolderRefusal`, `FolderRules`,
 //! `SENSITIVE_HOME_DIRS`, `ProtectedPaths`, `canonical`,
 //! `validate_extra_folder`, `refuse` and `absolutize`. Changed for Cadex
