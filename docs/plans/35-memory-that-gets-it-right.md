@@ -36,8 +36,25 @@ caminhos deste repositório.
   rodapé "compiled from pinned / _rules/ / _slots/" sem nenhuma dessas páginas.
 - Gastar o haiku com sessão vazia.
 
+## Decidido com o dono (2026-11-19, lendo o estudo `../research/ai-memory-upstream.md`)
+- **Por que as competências caíram no Center** (o que importa mais que o Center): a sessão
+  `98ee49fa` começou na raiz do Center e trabalhou noutra pasta (a regra do upstream, a sessão é da
+  pasta em que começou); três erros nossos fizeram disso páginas: a marca d'água do auto-improve
+  criada em 0 antes da importação (o upstream nunca revisa o histórico), a revisão disparada pelo
+  fim de uma sessão vazia (a `3cd2e5f6`), e nada conferindo se a proposta fala do repositório. O
+  ledger, ainda, registra a sessão que terminou e não a revisada.
+- Corrigir o banco do Center (avançar a marca d'água até o fim do backfill): pode.
+- Sessão vazia: o critério do upstream, sem prompt **e** sem ferramenta.
+- O briefing continua ligado para o dono, mas pelo marcador: o .ai-memory.toml nasce em todo
+  projeto com `inject_on_session_start = true` escrito nele (o aviso volta a ser verdade). Sem
+  página de núcleo (fixadas, _rules/, _slots/), não se injeta nada: só títulos de sessão não
+  ajudam (no Center eram "s", "pode fazer." e as quatro páginas erradas); divergência com o motivo.
+- O marcador vai para o git do repositório por padrão; nas Configurações do projeto o dono escolhe
+  "só nesta máquina" (o arquivo no .git/info/exclude). O Cadex não faz commit.
+- O experience fica ligado (decisão do dono; o upstream o deixa desligado), escrito na ADR.
+
 ## Como eu quero
-- [ ] A. O estudo, num arquivo novo em docs/research (ai-memory-upstream.md): o upstream na 3.5.0 (commit `411d90d`)
+- [x] A. O estudo, num arquivo novo em docs/research (ai-memory-upstream.md): o upstream na 3.5.0 (commit `411d90d`)
   contra o que o Cadex fixa (`fa0ec25`, a 3.4.7, `../../core/features/memory/server/Cargo.toml`). Para
   cada ponto, como ele faz, onde está (o doc e o código dele), como o Cadex faz, e o veredito
   (importamos errado, divergência de propósito, ou erro dele):
@@ -62,13 +79,18 @@ caminhos deste repositório.
      continua andando.
   7. O perfil e a precedência (usuário, `CLAUDE.md`, memória do projeto, perfil).
   8. O que mudou da 3.4.7 para a 3.5.0.
+  Feito: `../research/ai-memory-upstream.md`, lido e decidido com o dono (acima).
 - [ ] B. O marcador em todo projeto: ao adicionar um projeto (e nos que já existem, ao abrir), o
   Cadex cria o .ai-memory.toml com o que o estudo disser que é o padrão certo, comentado; a
   seção Memória das Configurações do projeto (plano 32, que no plano 34 fica dentro da página do
   projeto) edita esse arquivo. Decidir com o dono se o arquivo entra no git do repositório.
-- [ ] C. A sessão vazia: sem nenhum `user-prompt`, não grava página de sessão e não dispara o
+- [x] C. A sessão vazia: sem nenhum `user-prompt`, não grava página de sessão e não dispara o
   agente (consolidate, perfil, auto-improve). O caso: as sessões `4fc4d46a` e `3cd2e5f6`, um painel
   aberto às 14:20 sem prompt (`sessions/cfa808ed-….args.json` com `[]`).
+  Feito: o critério do upstream (sem prompt e sem ferramenta, `session_has_substantive_observation`),
+  no começo do trabalho de SessionEnd e de PostCompact em
+  `../../core/features/memory/server/src/agent/jobs.rs`: só uma linha sem custo no ledger ("empty
+  session"); teste em `../../core/features/memory/server/tests/agent.rs` (falha sem o filtro).
 - [ ] D. A auditoria do agente: cada chamada do `claude -p` (que vai pelo stdin, com
   `--no-session-persistence` e hooks desligados, `../../core/features/memory/server/src/agent/claude_cli.rs`)
   grava o pedido e a resposta ao lado do memory/agent/ledger.jsonl, 0600, com retenção; e o

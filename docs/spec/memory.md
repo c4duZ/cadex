@@ -196,6 +196,9 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   consolida o que houve; com o Mac parado há 10 minutos e nenhuma sessão aberta, reorganiza a wiki
   (dream), e para quando o dono volta. São os passos do próprio ai-memory, com o Claude da conta no
   lugar de um provedor com chave. Ver `docs/adr/0029-memory-agent.md`.
+- Sessão sem nenhum prompt e sem nenhuma ferramenta (um painel aberto e fechado) não vira página e
+  não chama o agente: o ai-memory já a fecha assim, e o agente segue a mesma regra; fica só uma
+  linha sem custo no registro (plano 35 C).
 - Teto por dia (memory.dailyBudgetUsd, US$ 1,00): passou, nada mais roda no dia; cada trabalho fica
   registrado com custo e versão do Claude Code. Propostas esperam aprovação na página Memory
   (memory.requireApproval: desligada por padrão pela ADR 0037, como no ai-memory, e as propostas

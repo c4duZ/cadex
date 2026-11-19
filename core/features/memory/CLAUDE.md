@@ -141,7 +141,9 @@
       trabalho; sem arquivo, desligado), `server/src/agent/ledger.rs` (`<data-dir>/agent/ledger.jsonl`,
       0600: tipo, projeto, custo, versão do Claude Code, modelo; o gasto do dia local),
       `server/src/agent/queue.rs` (um trabalho por vez, sem repetir, pausa; segura o engine e o
-      reinício enquanto há trabalho), `server/src/agent/jobs.rs` (no SessionEnd ao vivo: consolidar
+      reinício enquanto há trabalho), `server/src/agent/jobs.rs` (sessão sem prompt e sem ferramenta, pelo
+      `session_has_substantive_observation` do upstream, não roda nada, só uma linha sem custo no
+      ledger: plano 35 C; no SessionEnd ao vivo: consolidar
       pelo caminho do worker do upstream, que pula a página que o Claude da sessão já consolidou
       (`consolidated_by: agent`), o perfil, o experience a cada 5 sessões, o auto-improve no máximo
       de hora em hora por projeto, com propostas pendentes quando memory.requireApproval; no
@@ -266,7 +268,8 @@
     não; a subida varre o que venceu; sem evento, nada; o SessionStart responde rápido durante a
     varredura;
     `server/tests/agent.rs` (um `claude` falso em `server/tests/common/agent.rs`): desligado, nada; ligado,
-    o SessionEnd consolida pelo falso, com a linha de comando e o ambiente exatos da prova; pausa e
+    o SessionEnd consolida pelo falso, com a linha de comando e o ambiente exatos da prova; sessão
+    vazia não chama nada; pausa e
     teto; a estimativa sem chamar e o bootstrap com o agente desligado; propostas pendentes com
     aprovação; o dream depois de um SessionEnd só com o Mac parado;
     `server/tests/memory_page.rs`: overview com o engine de pé e parado, o briefing igual ao do

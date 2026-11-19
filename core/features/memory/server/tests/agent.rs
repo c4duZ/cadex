@@ -4,7 +4,8 @@
 //! environment, in the project's account, and the ledger has the cost; the
 //! daily budget skips a job; a pause starts none; the bootstrap estimate
 //! calls nothing and the run works with the agent off; auto-improve stages
-//! its proposal for the owner; a dream follows a SessionEnd only when the
+//! its proposal for the owner; a session with no prompt and no tool calls
+//! nothing; a dream follows a SessionEnd only when the
 //! Mac is idle. (The dream stopping when the owner comes back is the unit
 //! test in src/agent/dream.rs: with no embedder, a dream has nothing to run.)
 
@@ -161,6 +162,28 @@ fn on_a_session_end_consolidates_through_claude_with_the_proven_command() {
     assert_eq!(call.env.get("CLAUDE_CONFIG_DIR").map(String::as_str), account.to_str(), "the project's account");
     assert!(!call.env.contains_key("CLAUDECODE"));
     assert!(!call.env.keys().any(|k| k.starts_with("CLAUDE_CODE_")), "{:?}", call.env.keys());
+}
+
+#[test]
+fn a_session_with_no_prompt_and_no_tool_calls_nothing() {
+    // Plan 35 C: a panel opened and closed with no prompt (3cd2e5f6, d2a9e4be in the owner's
+    // memory) made a page and set off consolidate, profile and auto-improve.
+    let tmp = tempfile::tempdir().unwrap();
+    let cwd = repo(tmp.path(), "acme");
+    let cwd = cwd.to_str().unwrap();
+    let fake = fake_claude(tmp.path());
+    let data = tmp.path().join("data");
+    fake.configure(&data, serde_json::json!({"enabled": true}));
+    let engine = start_with_env(tmp.path(), ARGS, &[]);
+    hook(&engine.socket, "session-start", cwd, S1, &format!("{S1}-s"),
+         serde_json::json!({"session_id": S1, "cwd": cwd, "source": "startup"}));
+    end(&engine.socket, cwd, S1, None);
+    wait_for("the empty session's line", Duration::from_secs(20), || {
+        ledger(&data).iter().any(|l| l["session"] == S1 && l["error"] == "empty session: no prompt and no tool")
+    });
+    assert!(fake.calls().is_empty(), "claude ran for an empty session");
+    assert!(ledger(&data).iter().all(|l| l["cost_usd"].as_f64() == Some(0.0)));
+    assert!(page(&data.join("wiki"), &format!("{S1}.md")).is_none(), "an empty session has no page");
 }
 
 #[test]

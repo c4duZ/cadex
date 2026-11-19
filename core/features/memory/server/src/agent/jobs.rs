@@ -9,6 +9,8 @@
 //!   (improve.rs), then, with no session live and the Mac idle 10 min, a
 //!   dream;
 //! - after a compaction: the same consolidation of the session so far;
+//! - neither for a session with no prompt and no tool (upstream's own test;
+//!   plan 35 C): a ledger line with no cost and nothing else;
 //! - dream (dream.rs) and bootstrap (bootstrap.rs).
 //!
 //! **The "already consolidated in the session" rule is upstream's own:** a
@@ -113,6 +115,13 @@ pub(crate) async fn run(ctx: &Ctx, queue: &Queue, job: &Job) {
     };
     let step = Step { ctx, cfg, job, inv, version };
     let started = Instant::now();
+    if matches!(job.kind, Kind::SessionEnd | Kind::Compact) && !has_work(&step).await {
+        // Upstream closes such a session with no page, handoff, consolidation or profile
+        // (router.rs, `end_admitted_lifecycle_only_session`); this job went past it and spent the
+        // haiku on panels opened and closed with no prompt (plan 35 C: 3cd2e5f6, d2a9e4be).
+        step.note(job.kind.as_str(), true, "empty session: no prompt and no tool");
+        return;
+    }
     match job.kind {
         Kind::SessionEnd => {
             consolidate(&step, "consolidate").await;
@@ -125,6 +134,20 @@ pub(crate) async fn run(ctx: &Ctx, queue: &Queue, job: &Job) {
         Kind::Bootstrap => super::bootstrap::run(&step).await,
     }
     info!(kind = job.kind.as_str(), project = %job.scope.project, ms = started.elapsed().as_millis() as u64, "memory agent job done");
+}
+
+/// Whether the job's session did anything: a prompt or a tool, upstream's own test
+/// (`session_has_substantive_observation`, the one its SessionEnd uses). A session the store
+/// does not know did nothing; a store error lets the job run, as before.
+async fn has_work(step: &Step<'_>) -> bool {
+    let Some(session) = step.job.session.as_deref() else { return true };
+    let reader = &step.ctx.reader;
+    let id = SessionId::from_native(session);
+    match reader.find_session_scope(id.clone()).await {
+        Ok(Some((ws, proj, _))) => reader.session_has_substantive_observation(ws, proj, id).await.unwrap_or(true),
+        Ok(None) => false,
+        Err(_) => true,
+    }
 }
 
 /// Consolidate the job's session as upstream's SessionEnd worker does.
