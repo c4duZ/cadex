@@ -347,7 +347,38 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   fila, o filtro, o escopo e os cartões. "Abrir no Cadex" (memory.open-in-cadex, com `project=`;
   também no clique direito do cartão e no ⌘O com o cartão escolhido pelas setas) só quando um
   projeto aberto ou recente do Cadex tem a pasta com esse nome. As outras seções dizem "Em breve."
-  até as fases D a G. Com a memória desligada, a página diz isso e não lê nada.
+  até as fases E a G. Com a memória desligada, a página diz isso e não lê nada.
+- As telas de um projeto (plano 40 D), cada uma um lugar do memory.show-panel (`project=` e
+  `tab=`, `page=`, `history=` com `from=` e `to=`, `session=` com `offset=`, `retrievals=` ou
+  `agent=`); todo clique dentro da página roda esse comando, e memory.panel-back e
+  memory.panel-forward (⌘[ e ⌘] na página) andam pelos lugares vistos. A barra lateral fica em
+  Projetos e a busca dela diz "Pesquisar em <projeto>". O clique no cartão de um projeto abre a tela
+  dele; "Agentes ↗", a aba Agentes.
+  - O projeto: a trilha, "Abrir no Cadex" (só com um projeto do Cadex na pasta) e "Enviar mensagem a
+    um agente" (a Caixa de entrada, fase F); as abas Visão geral (os cinco números, que abrem a aba
+    com o filtro do upstream; "Última captura · N sessões abertas"; os agentes, cada um levando à
+    tela dele; a caixa de mensagens com as cinco mais novas), Agentes (um cartão por agente),
+    Uso de tokens, Sessões ("Só abertas" e a ordem por eventos, `state=open` e `sort=events`) e
+    Conhecimento (as pastas, "Sistema" com as de máquina pela regra do upstream, e a atividade
+    recente sem elas). Lê `api/v1/projects`, `extra/.../summary`, `api/v1/.../pages`,
+    `extra/.../agents`, `extra/.../sessions` e `extra/.../tokens`, uma de cada vez.
+  - A página: os selos (camada, tipo, fixada, expirada), "Atualizada · Histórico · Criada", o que
+    substitui e o autor; a caixa "Evidências e validade" (versão, expiração, fontes, contradições,
+    cada frase longa do upstream no ⓘ); o Markdown desenhado nativo (sem WebView, ADR 0001: as
+    linhas como a página do projeto as lê e as marcas de cada linha pelo Foundation; um link para
+    outra página da memória a abre no painel); Nesta página, Citada por e Cita.
+  - O histórico: o diff do par (hunks com + verde e − vermelho em fonte mono; "mesmo corpo" e
+    "grande demais" no lugar) e as versões com De e Para e "Comparar selecionadas".
+  - A sessão: o agente, o início e o fim na hora local (o ISO na dica), o uso de tokens com
+    "Filtrar…" (os dez filtros do upstream num popover), a barra de páginas com "Ir para" e as
+    observações, 50 por página (j/k e as setas andam uma); "Abrir no Cadex" vai ao terminal onde a
+    sessão roda, senão ao projeto; Recuperações, as buscas que a sessão fez.
+  - O agente: os quatro números com a nota, a faixa âmbar quando há sessão sem uso informado, e as
+    sessões, 50 por página; na linha sob o ponteiro ou escolhida, "Abrir no Cadex" (também no clique
+    direito e no ⌘O); Enter abre a sessão.
+- Um engine que sobe com uma sessão aberta e sem atividade há mais de 48 horas a fecha na limpeza
+  da subida (o `close_abandoned_sessions` do forget sweep, como o servidor do ai-memory faz um minuto
+  depois de subir): o fim fica na hora da última observação.
 - A busca do painel num projeto ordena como o `memory_query` do agente: texto e, com o modelo de
   vetores baixado, sentido; a busca em todos os projetos é só por texto, como no ai-memory.
 

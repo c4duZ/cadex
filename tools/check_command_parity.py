@@ -70,6 +70,8 @@ MAC_ONLY = {"project.edit", "project.create", "project.new-terminal", "project.n
             "orchestration.run-automation-now", "orchestration.show-automation-history",
             # The Memória page (plan 40 C), the panel of ai-memory redrawn on the Mac.
             "memory.show-panel", "memory.open-in-cadex",
+            # A project's screens (plan 40 D): back and forward within the page.
+            "memory.panel-back", "memory.panel-forward",
             "memory.show", "memory.show-briefing", "memory.show-history", "memory.reindex", "memory.refresh", "memory.enable", "memory.approve", "memory.reject", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).

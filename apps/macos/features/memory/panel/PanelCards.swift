@@ -133,7 +133,14 @@ final class PanelCard: PanelPress {
     }
 
     private func footLine(now: Date) -> NSView {
-        let last = PanelText.line(PanelWords.lastCapture(project.lastActivity, now: now), size: C.Foot.fontSize, color: C.Foot.color)
+        // The time alone ("há 9 horas"), the whole line in the tooltip: with both links, "Última
+        // captura: há 9 horas" was cut to "Última captura:…" (phase C, 2026-11-19; the owner's short copy).
+        let whole = PanelWords.lastCapture(project.lastActivity, now: now)
+        let last = PanelText.line(project.lastActivity.map { PanelWords.ago($0, now: now) } ?? T("No capture", "Nenhuma captura"),
+                                  size: C.Foot.fontSize, color: C.Foot.color)
+        last.setContentCompressionResistancePriority(.required, for: .horizontal)
+        last.toolTip = whole
+        last.setAccessibilityLabel(whole)
         var views: [NSView] = [last, PanelText.spring(),
                                PanelLink(T("Agents ↗", "Agentes ↗"), size: C.Foot.fontSize) { [actions, project] in actions.agents(project) }]
         if let open = actions.openInCadex {

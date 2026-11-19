@@ -346,12 +346,17 @@
   página de sessão da memória, o que ela guardou, Retomar, Continuar em outra conta e Ver a página
   aberta já renderizada) e a Memória (agrupada pelo tipo, a escolhida renderizada, Editar, Abrir a
   sessão, Apagar); project.show-sessions e project.show-memory abrem a página na seção.
-- `MemoryPanelWiring.swift` (plano 40 C): memory.show-panel (com `section=`) abre a página Memória
-  da feature memory como Automações e põe a barra lateral no modo Memória com as seções (uma
-  `MemoryPanelNav` por janela); lê as rotas do painel pelo MemoryWiring.runAgentData, os projetos
-  antes (podem subir o engine) e os outros dois juntos; memory.open-in-cadex (`project=`) acha o
-  projeto aberto ou recente com a pasta daquele nome (`cadexFolder`) e vai a ele ou o abre. A página
-  volta ao restaurar pela identidade (`ProjectsWiring.swift`).
+- `MemoryPanelWiring.swift` (planos 40 C e D): memory.show-panel (com `section=`, ou com `project=` e a
+  tela: `tab=`, `page=`, `history=` com `from=`/`to=`, `session=` com `offset=`, `retrievals=`,
+  `agent=`) abre a página Memória da feature memory como Automações, no lugar pedido, e põe a barra
+  lateral no modo Memória com as seções (uma `MemoryPanelNav` por janela; num projeto, Projetos acesa
+  e a busca "Pesquisar em <projeto>"); todo clique dentro da página roda esse comando
+  (MemoryPanelActions.go); memory.panel-back e memory.panel-forward andam pelos lugares vistos
+  (⌘[ e ⌘] na página). Lê as rotas do painel pelo MemoryWiring.runAgentData, uma de cada vez numa
+  tela de projeto (a primeira pode subir o engine); memory.open-in-cadex (`project=`, `session=`) vai
+  ao terminal onde a sessão roda (`locate` pelo `agentResume`), senão ao projeto aberto ou recente
+  com a pasta daquele nome (`cadexFolder`), ou o abre; no ⌘K, age na sessão escolhida, na tela do
+  projeto ou no cartão escolhido. A página volta ao restaurar pela identidade (`ProjectsWiring.swift`).
 - `AutomationsPageWiring.swift` (plano 34 F): orchestration.show-automations; Create automation liga as
   automações antes (a pergunta do orchestration.toggle-automations) quando estão desligadas; criar
   volta à tabela; Apagar pergunta. `ProjectsPageWiring.swift` (plano 34 B): project.show-all.
@@ -386,7 +391,7 @@
   sino e no feed, com Permitir e Negar.
 - `PerfHooks.swift`: só para o `make perf` (`../../../tools/perf/run.py`): cada variável CADEX_PERF_
   faz a instância de teste agir sozinha em horas marcadas (CADEX_PERF_HOME_ACTION clica num cartão ou num recente da tela de início, CADEX_PERF_JUMP
-  busca e escolhe no ⌘J, CADEX_PERF_REPORT grava em JSON o que a janela mostra; CADEX_PERF_COMMAND roda um comando pelo id, e CADEX_PERF_COMMAND2 um segundo mais tarde; a
+  busca e escolhe no ⌘J, CADEX_PERF_REPORT grava em JSON o que a janela mostra; CADEX_PERF_COMMAND roda um comando pelo id (com `chave=valor` depois do id, com esses argumentos: cada tela da Memória numa instância de teste, plano 40 D), e CADEX_PERF_COMMAND2 um segundo mais tarde; a
   captura salva também um painel visível, como o da paleta, num arquivo terminado em -panel.png, CADEX_PERF_TYPE digita um comando no terminal com foco, CADEX_PERF_HOME_PROMPT manda o pedido da
   tela de início, CADEX_PERF_DUMP_SCREEN grava a tela de cada terminal num arquivo, CADEX_PERF_SEND manda uma mensagem ao agente
   com o Return como tecla (a marca da barra),

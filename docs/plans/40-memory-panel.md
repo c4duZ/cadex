@@ -92,8 +92,19 @@ repositório. O código dele está no checkout do cargo, no commit fixado (411d9
   Diferenças do board: as letras do cartão seguem a regra da barra lateral (cadex é CA, não CX);
   a aba da página fica sob a barra de cima, como Automações. Achado no caminho: no `make run` o app
   não achava o engine (o #filePath padrão era o do chamador), corrigido em MemoryKit.findEngine.
-- [ ] D. O projeto: a árvore de páginas e a atividade recente, a página (Markdown e metadados), o
+- [x] D. O projeto: a árvore de páginas e a atividade recente, a página (Markdown e metadados), o
   histórico com diff, a sessão (linha do tempo) e o agente (sessões e uso).
+  Feito: as telas em `apps/macos/features/memory/panel/` (o projeto com as cinco abas, a página, o
+  histórico com o diff, a sessão com o uso de tokens e "Filtrar…", as recuperações, o agente), cada
+  lugar um memory.show-panel com `project=` e a tela, voltar e avançar (memory.panel-back e
+  memory.panel-forward); memory.open-in-cadex com `session=` vai ao terminal da sessão. O Markdown é
+  desenhado nativo (as linhas do MemoryPageText e as marcas pelo Foundation), sem o WebKit da
+  feature markdown. Testes com o JSON de cada rota gravado do seed e um PNG de cada tela; os prints
+  da instância de teste comparados com os boards. Diferenças: os ids curtos são os 8 últimos, como o
+  `short_id` do upstream (o board tinha os primeiros); "Última captura" no cartão virou só a hora,
+  com a frase na dica (cortava com os dois links); o histórico não pagina as versões (o seed tem 2).
+  Achado: a sessão aberta do seed fecha na subida do engine; é o `close_abandoned_sessions` do
+  forget sweep (sem atividade há 48 horas), o mesmo do servidor do upstream.
 - [ ] E. Pesquisar na memória e o grafo de conhecimento (o geral e o do projeto).
 - [ ] F. A caixa de entrada e os workstreams.
 - [ ] G. A revisão de aprendizado, a saúde do servidor e a documentação.

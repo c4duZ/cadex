@@ -1,0 +1,1 @@
+{"agents":[{"agent":"claude-code","sessions":3,"open":1,"measured_sessions":2,"coverage":66,"calls":0,"input":14000,"output":4000,"cache_read":89000,"cache_write":500},{"agent":"codex","sessions":1,"open":0,"measured_sessions":0,"coverage":0,"calls":0,"input":0,"output":0,"cache_read":0,"cache_write":0}]}

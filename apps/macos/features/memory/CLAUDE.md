@@ -89,7 +89,27 @@
   (o clique, o link, o ⓘ com popover e accessibilityHelp, o seletor no menu do app),
   `panel/PanelSections.swift` (`MemoryPanelSection`, os nove destinos em três grupos, e
   `MemoryPanelNav`, a busca e as linhas que o app põe na barra lateral) e `panel/PanelDocument.swift`
-  (`MemoryPanelDocument`, a página; só a Visão geral desenhada, as outras seções dizem "Em breve.").
+  (`MemoryPanelDocument`, a página; a Visão geral e as telas de um projeto desenhadas, as outras
+  seções dizem "Em breve."). As telas de um projeto (plano 40 D): `panel/PanelPlace.swift`
+  (`PanelPlace`, o lugar da página e os argumentos do memory.show-panel; a trilha; `PanelTrail`,
+  voltar e avançar; `PanelPath`, os caminhos escapados), `panel/PanelNavigation.swift` (as rotas de
+  cada lugar, `PanelLoads`; ir, voltar e avançar; ler uma rota de cada vez e montar a tela; uma
+  leitura antiga que chega tarde não desenha), os dados puros (`panel/PanelProjectData.swift`:
+  resumo, páginas, sessões, agentes, uso de tokens; `panel/PanelDetailData.swift`: a página, as
+  evidências, o histórico e as linhas do diff; `panel/PanelSessionData.swift`: a linha do tempo, as
+  recuperações e a barra de páginas; `panel/PanelProjectModel.swift`: a árvore do Conhecimento com o
+  `is_system_page` do upstream e as palavras), a moldura das telas (`panel/PanelScreen.swift`: a
+  rolagem, a trilha, o título, as abas; ⌘[ e ⌘]), as peças (`panel/PanelTable.swift`, a tabela e o
+  selo; `panel/PanelSessionList.swift`, as sessões com "Abrir no Cadex" na linha sob o ponteiro, no
+  clique direito e no ⌘O, Enter abre; `panel/PanelTokensBox.swift`, o uso de tokens com "Filtrar…" num
+  popover com os dez filtros do upstream; `panel/PanelPagerBar.swift`; `panel/PanelPageTree.swift`) e
+  as telas: `panel/PanelProjectView.swift` com `panel/PanelProjectTabs.swift` (o projeto e as cinco
+  abas; um número abre a aba com o filtro do upstream), `panel/PanelPageView.swift` (a página, as
+  evidências, Citada por), `panel/PanelMarkdown.swift` (o Markdown desenhado nativo, sem WebView: as
+  linhas como o MemoryPageText e as marcas de cada linha pelo Foundation, como o AgentMarkdown; um
+  link de página abre a página no painel), `panel/PanelHistoryView.swift` (o diff e as versões com De
+  e Para), `panel/PanelSessionView.swift` (a linha do tempo; j/k e as setas),
+  `panel/PanelRetrievalsView.swift` e `panel/PanelAgentView.swift`.
   Tokens: components.memoryPanel.
 - `MemorySessions.swift` (plano 35 H): `received`, o briefing que uma sessão recebeu, lido do disco
   em `<memória>/agent/briefings/<sessão>.md` (o engine o guarda, plano 35 D; só id simples, as linhas
@@ -131,7 +151,11 @@
 - `make macos-test` (MemoryTests; o painel, `tests/PanelTests.swift`, sobre o JSON do seed gravado
   em `tests/fixtures/`: a leitura, as somas, a ordem e o filtro, as palavras em português, os
   cliques e as teclas da Visão geral, as seções, a página, e com CADEX_SNAPSHOT_DIR o
-  memory-overview.png; o briefing guardado de uma sessão e o id recusado, a página de
+  memory-overview.png; as telas de um projeto, `tests/PanelDetailTests.swift` e
+  `tests/PanelScreenTests.swift`, sobre o JSON de cada rota gravado do seed: os lugares e a trilha,
+  voltar e avançar, os caminhos, cada leitura, a árvore, as palavras, o diff, o Markdown e os links,
+  a barra de páginas, a página indo de tela em tela com um engine falso, os cliques e as teclas, e
+  com CADEX_SNAPSHOT_DIR um PNG de cada tela; o briefing guardado de uma sessão e o id recusado, a página de
   sessão vazia fora das últimas sessões; o .ai-memory.toml lido como o engine lê, gravado sem perder linha;
   o modelo, o `ensure` que não sobrescreve, o nome numa worktree e a linha do exclude): os 9 eventos e o comando de cada um, a `env` do pacote e a do
   `make run`, a workspace só sem compartilhar, os hooks com agents.stateHooks desligada, a parte

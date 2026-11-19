@@ -22,6 +22,21 @@ FRAME_FILES = [
     "apps/macos/features/memory/panel/PanelOverviewView.swift",  # plano 40
     "apps/macos/features/memory/panel/PanelSections.swift",  # plano 40
     "apps/macos/features/memory/panel/PanelDocument.swift",  # plano 40
+    "apps/macos/features/memory/panel/PanelScreen.swift",  # plano 40 D
+    "apps/macos/features/memory/panel/PanelTable.swift",  # plano 40 D
+    "apps/macos/features/memory/panel/PanelSessionList.swift",  # plano 40 D
+    "apps/macos/features/memory/panel/PanelTokensBox.swift",  # plano 40 D
+    "apps/macos/features/memory/panel/PanelProjectView.swift",  # plano 40 D
+    "apps/macos/features/memory/panel/PanelProjectTabs.swift",  # plano 40 D
+    "apps/macos/features/memory/panel/PanelPageTree.swift",  # plano 40 D
+    "apps/macos/features/memory/panel/PanelMarkdown.swift",  # plano 40 D
+    "apps/macos/features/memory/panel/PanelPageView.swift",  # plano 40 D
+    "apps/macos/features/memory/panel/PanelHistoryView.swift",  # plano 40 D
+    "apps/macos/features/memory/panel/PanelSessionView.swift",  # plano 40 D
+    "apps/macos/features/memory/panel/PanelPagerBar.swift",  # plano 40 D
+    "apps/macos/features/memory/panel/PanelRetrievalsView.swift",  # plano 40 D
+    "apps/macos/features/memory/panel/PanelAgentView.swift",  # plano 40 D
+    "apps/macos/features/memory/panel/PanelNavigation.swift",  # plano 40 D
     "apps/macos/features/sidebar/WorkSidebarMemory.swift",  # plano 40
     "apps/macos/features/projects/ProjectSettingsDocument.swift",  # plano 32
     "apps/macos/features/memory/MemoryProjectForm.swift",  # plano 32

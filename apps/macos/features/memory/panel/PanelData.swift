@@ -33,6 +33,8 @@ public struct PanelProject: Equatable, Sendable {
 
     /// The key a project goes by in the routes and the commands: "default/cadex".
     public var key: String { workspace + "/" + name }
+    /// The project as the routes and the places name it.
+    public var ref: PanelProjectRef { PanelProjectRef(workspace: workspace, name: name) }
 }
 
 /// Upstream's "hook capture health" block, from the local engine's counters since it started.

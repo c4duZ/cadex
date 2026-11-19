@@ -1,3 +1,4 @@
+import CommandPalette
 import Menus
 import Agents
 import Machines
@@ -81,8 +82,18 @@ extension WindowSession {
                                                     account: "bkdg", key: nil, reply: { _ in })
             }
         }
-        if let id = environment["CADEX_PERF_COMMAND"] {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in _ = self?.commands.run(id) }
+        // With "key=value" words after the id, run with those arguments (plan 40 D: each Memória
+        // screen of a test instance, "memory.show-panel project=cadex page=decisions/engine.md").
+        if let line = environment["CADEX_PERF_COMMAND"] {
+            let words = line.split(separator: " ").map(String.init)
+            let arguments = Dictionary(words.dropFirst().compactMap { word -> (String, String)? in
+                guard let eq = word.firstIndex(of: "=") else { return nil }
+                return (String(word[..<eq]), String(word[word.index(after: eq)...]))
+            }, uniquingKeysWith: { $1 })
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in
+                guard let id = words.first else { return }
+                if arguments.isEmpty { _ = self?.commands.run(id) } else { _ = self?.commands.run(id, request: CommandRequest(arguments: arguments, folder: "")) }
+            }
         }
         // A second command later (⌘J over what the first one started).
         if let id = environment["CADEX_PERF_COMMAND2"] {

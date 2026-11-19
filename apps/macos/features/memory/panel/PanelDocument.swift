@@ -17,22 +17,40 @@ public enum PanelLoad: Sendable {
 public struct MemoryPanelActions {
     /// Reads the overview's routes; `done` on the main thread.
     public var load: (@escaping @MainActor (PanelLoad) -> Void) -> Void = { $0(.off) }
+    /// Reads one panel route (`cadex memory-agent panel --path P`): the bytes, or the engine's words.
+    public var read: (String, @escaping @MainActor (Result<Data, PanelReadError>) -> Void) -> Void = { _, done in done(.failure(PanelReadError(words: ""))) }
+    /// A click that goes somewhere: the app runs memory.show-panel with the place, which comes back
+    /// to `go`. Nil (the tests): the page goes itself.
+    public var go: ((PanelPlace) -> Void)?
+    /// ⌘[ and ⌘] in the page: memory.panel-back and memory.panel-forward (nil: the page itself).
+    public var back: (() -> Void)?
+    public var forward: (() -> Void)?
     public var overview = MemoryOverviewActions()
+    /// A project's screens: "Abrir no Cadex", the inbox.
+    public var project = PanelProjectActions()
     /// The tab closed: the sidebar goes back to Work.
     public var closed: () -> Void = {}
     public init() {}
 }
 
-/// The Memória page (plan 40 C): a page of the app in the center, like Automations; the sidebar
-/// shows its sections meanwhile (MemoryPanelNav). This phase draws Visão geral; the other sections
-/// say in one line that they come soon.
+/// A read that failed: the engine's words.
+public struct PanelReadError: Error, Sendable {
+    public var words: String
+    public init(words: String) { self.words = words }
+}
+
+/// The Memória page (plan 40 C and D): a page of the app in the center, like Automations; the
+/// sidebar shows its sections meanwhile (MemoryPanelNav). Visão geral and a project's screens (the
+/// project, a page, its history, a session, its retrievals, an agent) are drawn; the other sections
+/// say in one line that they come soon. Back and forward go through the places seen
+/// (PanelNavigation.swift).
 @MainActor
 public final class MemoryPanelDocument: TabDocument {
     public static let identity = "memory:panel"
-    private let actions: MemoryPanelActions
-    private let host = FrameBox()
+    let actions: MemoryPanelActions
+    let host = FrameBox()
     public let overview: MemoryOverviewView
-    public private(set) var section: MemoryPanelSection = .projects
+    public internal(set) var section: MemoryPanelSection = .projects
     public var view: NSView { host }
     public var title: String { T("Memory", "Memória") }
     public var identity: String { Self.identity }
@@ -41,6 +59,12 @@ public final class MemoryPanelDocument: TabDocument {
     public var isPage: Bool { true }
     /// The last read gave data: the overview shows it.
     public private(set) var loaded = false
+    /// Where the page is and where it was (back and forward).
+    public internal(set) var trail = PanelTrail()
+    /// The screen of a project's place, once read.
+    public internal(set) var screen: NSView?
+    /// Counts the reads, so an older answer arriving late draws nothing.
+    var generation = 0
 
     public init(actions: MemoryPanelActions) {
         self.actions = actions
@@ -50,6 +74,7 @@ public final class MemoryPanelDocument: TabDocument {
     }
 
     public func focus() {
+        guard case .section = trail.current else { _ = host.window?.makeFirstResponder(screen); return }
         refresh()
         if section == .projects { host.window?.makeFirstResponder(overview) }
     }
@@ -59,6 +84,13 @@ public final class MemoryPanelDocument: TabDocument {
 
     /// The section in the center: the overview, or the one line of a section still to come.
     public func show(_ next: MemoryPanelSection) {
+        trail.go(.section(next))
+        showSection(next)
+    }
+
+    func showSection(_ next: MemoryPanelSection) {
+        generation += 1
+        screen = nil
         section = next
         guard next.isBuilt else { return place(PanelEmpty.view(next.title, T("Coming soon.", "Em breve."))) }
         place(overview)
@@ -67,9 +99,9 @@ public final class MemoryPanelDocument: TabDocument {
 
     /// The overview read again (the page shown, a section picked).
     public func refresh() {
-        guard section == .projects else { return }
+        guard section == .projects, case .section = trail.current else { return }
         actions.load { [weak self] load in
-            guard let self, self.section == .projects else { return }
+            guard let self, self.section == .projects, case .section = self.trail.current else { return }
             switch load {
             case .data(let data):
                 self.loaded = true
@@ -86,7 +118,7 @@ public final class MemoryPanelDocument: TabDocument {
         }
     }
 
-    private func place(_ view: NSView) {
+    func place(_ view: NSView) {
         guard view.superview !== host else { return }
         host.subviews.forEach { $0.removeFromSuperview() }
         host.hold(view, padding: NSEdgeInsets())
