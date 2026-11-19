@@ -38,6 +38,8 @@ MAC_ONLY = {"project.edit", "project.create", "project.new-terminal", "project.r
             "power.keep-awake-hour", "ports.stop",
             # Next and previous tab (plan 37, the UX audit), Mac first.
             "tab.next", "tab.previous", "orchestration.delete-automation",
+            # The sidebar's two views (plan 38), Mac first.
+            "sidebar.show-work", "sidebar.show-files",
             # Managed accounts (plan 18, phase C), Mac only like the rest of agents.
             "agents.add-account", "agents.set-active-account", "agents.set-project-account", "agents.sync-account-config", "agents.share-account-config",
             "agents.use-own-copy", "agents.follow-default-config", "agents.remove-account",

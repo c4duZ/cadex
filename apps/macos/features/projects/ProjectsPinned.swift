@@ -72,3 +72,15 @@ extension ProjectsController {
         scheduleSave()
     }
 }
+
+// MARK: Folded (plan 38)
+
+extension ProjectsController {
+    /// The project folded or unfolded in the sidebar's Work list, kept in projects.json.
+    public func setExpanded(_ expanded: Bool, for folder: String) {
+        guard let project = projects.first(where: { $0.folder == folder }), project.expanded != expanded else { return }
+        project.expanded = expanded
+        onChange?()
+        scheduleSave()
+    }
+}

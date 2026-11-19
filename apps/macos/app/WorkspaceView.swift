@@ -12,27 +12,28 @@ import UILooks
 /// a collapsible sidebar and the terminal area as rounded panels, and the
 /// status bar at the bottom (docs/plans/3-window-and-theme.md, fase A).
 final class WorkspaceView: NSView {
-    /// The rail's width (components.rail.width; docs/adr/0038-rail-and-side-column.md).
-    static var railWidth: CGFloat { UILooks.pt(DesignTokens.Rail.width) }
+    /// Nothing at the left edge with the sidebar closed (ADR 0039; the narrow strip comes in plan 38 G).
+    static let railWidth: CGFloat = 0
     /// Between the columns and the center: none. The center runs from the tree's line to the
     /// panel's, and its 8 pt around the panes are the pane layout's (components.pane.outerPadding).
     static let gap: CGFloat = 0
 
     let titleBar: TitleBarView
     let statusBar = StatusBarView()
-    /// The rail (ADR 0038): flush with the window's left edge, the projects and the foot.
-    let rail: RailView
-    /// The side column (the right panel until ADR 0038): right of the rail, its own line on the
-    /// right (components.inspector), with the pages' icons on top.
+    /// The sidebar (docs/adr/0039-sidebar-with-work-and-files.md, plan 38): flush with the window's
+    /// left edge; ⌘B shows and hides it (`inspectorVisible`, the old name of the left column).
+    let sidebar: WorkSidebarView
+    /// Files and Changes, with their header and foot: the sidebar's Files view (it was the side
+    /// column, and the right panel before ADR 0038).
     let inspector: InspectorView
     private var inspectorWidth: NSLayoutConstraint!
-    /// The center starts at the column, or at the rail with it closed: the column keeps its width
-    /// hidden, since 0 pt could not hold its rows (review of 2026-11-17).
+    /// The center starts at the sidebar, or at the window's edge with it closed: the sidebar keeps
+    /// its width hidden, since 0 pt could not hold its rows (review of 2026-11-17).
     private var contentToInspector: NSLayoutConstraint!
     private var contentToRail: NSLayoutConstraint!
     private(set) var inspectorVisible = true
     /// The column's width (inspector.width), dragged by its edge.
-    private(set) var inspectorPoints = UILooks.pt(DesignTokens.Inspector.width)
+    private(set) var inspectorPoints = UILooks.pt(DesignTokens.WorkSidebar.width)
     private let explorer: ExplorerController
     private let contentPanel = PanelView()
     private let backdrop = WindowBackdrop()
@@ -46,11 +47,12 @@ final class WorkspaceView: NSView {
     /// The shown project's tabs in the content panel.
     private weak var tabsView: NSView?
 
-    init(explorer: ExplorerController, rail: RailView, inspector: InspectorView, run: @escaping (String) -> Void) {
+    init(explorer: ExplorerController, sidebar: WorkSidebarView, inspector: InspectorView, run: @escaping (String) -> Void) {
         titleBar = TitleBarView(run: run)
         self.explorer = explorer
-        self.rail = rail
+        self.sidebar = sidebar
         self.inspector = inspector
+        sidebar.setFiles(inspector)
         super.init(frame: .zero)
         frost.blendingMode = .behindWindow
         frost.material = .underWindowBackground
@@ -58,15 +60,15 @@ final class WorkspaceView: NSView {
         frost.isHidden = true
         glass.wantsLayer = true
         glass.isHidden = true
-        for view in [frost, glass, titleBar, statusBar, rail, inspector, contentPanel] as [NSView] {
+        for view in [frost, glass, titleBar, statusBar, sidebar, contentPanel] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
 
         let gap = Self.gap
-        inspectorWidth = inspector.widthAnchor.constraint(equalToConstant: inspectorPoints)
-        contentToInspector = contentPanel.leadingAnchor.constraint(equalTo: inspector.trailingAnchor, constant: gap)
-        contentToRail = contentPanel.leadingAnchor.constraint(equalTo: rail.trailingAnchor, constant: gap)
+        inspectorWidth = sidebar.widthAnchor.constraint(equalToConstant: inspectorPoints)
+        contentToInspector = contentPanel.leadingAnchor.constraint(equalTo: sidebar.trailingAnchor, constant: gap)
+        contentToRail = contentPanel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: gap)
         NSLayoutConstraint.activate([
             frost.topAnchor.constraint(equalTo: topAnchor),
             frost.bottomAnchor.constraint(equalTo: bottomAnchor),
@@ -84,13 +86,9 @@ final class WorkspaceView: NSView {
             statusBar.trailingAnchor.constraint(equalTo: trailingAnchor),
             statusBar.bottomAnchor.constraint(equalTo: bottomAnchor),
             statusBar.heightAnchor.constraint(equalToConstant: StatusBarView.height),
-            rail.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
-            rail.leadingAnchor.constraint(equalTo: leadingAnchor),
-            rail.bottomAnchor.constraint(equalTo: statusBar.topAnchor),
-            rail.widthAnchor.constraint(equalToConstant: Self.railWidth),
-            inspector.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
-            inspector.leadingAnchor.constraint(equalTo: rail.trailingAnchor),
-            inspector.bottomAnchor.constraint(equalTo: statusBar.topAnchor),
+            sidebar.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
+            sidebar.leadingAnchor.constraint(equalTo: leadingAnchor),
+            sidebar.bottomAnchor.constraint(equalTo: statusBar.topAnchor),
             inspectorWidth,
             contentPanel.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
             contentToInspector,
@@ -214,7 +212,16 @@ final class WorkspaceView: NSView {
     /// Opens the side column on a page (git.show, explorer.focus, git.show-history, memory.show).
     func showInspector(_ tab: String) {
         if !inspectorVisible { setInspector(visible: true) }
+        sidebar.setMode(.files)
         inspector.show(tab)
+        syncRailPages()
+    }
+
+    /// The sidebar's Work view (its switch, ⇧⌘1).
+    func showWork() {
+        if !inspectorVisible { setInspector(visible: true) }
+        sidebar.setMode(.work)
+        syncRailPages()
     }
 
     /// ⌘B (view.toggle-sidebar) and the saved inspector.visible. Closed, the column is hidden, so no
@@ -224,7 +231,7 @@ final class WorkspaceView: NSView {
         let opening = visible && (!inspectorVisible || launching)
         closedByNarrow = false
         inspectorVisible = visible
-        inspector.isHidden = !visible
+        sidebar.isHidden = !visible
         contentToInspector.isActive = visible
         contentToRail.isActive = !visible
         titleBar.setInspectorOpen(visible)
@@ -234,10 +241,10 @@ final class WorkspaceView: NSView {
         if opening, let tab = inspector.tab { inspector.show(tab) }
     }
 
-    /// The rail lights the page the column shows; none with the column closed.
+    /// Says which page of Files reads now (Files or Changes; none in Work or closed), so a page that
+    /// reads lets go when it goes.
     func syncRailPages() {
-        rail.pageLit = inspectorVisible ? inspector.tab : nil
-        onColumnPage?(rail.pageLit)
+        onColumnPage?(inspectorVisible && sidebar.mode == .files ? inspector.tab : nil)
     }
 
     /// The page the column shows changed (nil: closed): a page that reads lets go when it goes.

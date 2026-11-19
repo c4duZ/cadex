@@ -1,6 +1,10 @@
 # sidebar (app macOS)
 
 ## O que eu quero
+- A barra lateral (`../../../../docs/adr/0039-sidebar-with-work-and-files.md`, plano 38; a
+  referência `../../../../docs/design/sidebar/6-estrutura-ideal.html`): a fila "Precisa de você" no
+  topo, o seletor "Trabalho | Arquivos" e a vista; no pé, Quadro, Automações e Máquinas. O trilho
+  abaixo é o de antes (plano 36), fora da tela desde a fase B do 38, e sai na fase H.
 - O trilho (plano 36 fase A; `../../../../docs/adr/0038-rail-and-side-column.md`; a peça Rail de
   `../../../../docs/design/work-frame/screens.md`): na borda esquerda, os projetos com a marca, o
   halo do escolhido (do mesmo tamanho; o anel branco o deixava mais grosso, o dono, 2026-11-18), a peça de estado e o ponto de terminal aberto; o "+" (project.new); no pé,
@@ -18,6 +22,17 @@
 - Valor digitado: só `DesignTokens` (components.sidebar; `../../../../tools/check_design_literals.py`).
 
 ## Como eu quero
+- `WorkSidebar.swift`: o modelo (`WorkProject`: a pasta, o nome, a cor, a imagem ou o emoji, o
+  estado, os terminais, os pedidos, aberto ou fechado, os lugares; `initials`, as duas letras do
+  avatar; `WorkPlace`, o main ou uma tarefa; `WorkSidebarMode`). `WorkSidebarView.swift`: a porta de
+  entrada; `show` (os projetos e o lugar aceso) redesenha só quando mudam; `onPickProject`,
+  `onPickPlace`, `onToggle` (a seta), `menuFor` (o clique direito), `onMove` (arrastar a linha de um
+  projeto muda a ordem), `onMode` (o seletor); `setFiles` recebe a vista de Arquivos (a coluna de
+  Files e Changes do app), `setQueue` a fila; `remoteShown` mostra Máquinas no pé. `WorkRows.swift`:
+  o avatar e a linha (a seta do Phosphor, o nome, à direita o estado e os terminais, "nada aberto" ou
+  a contagem âmbar dos pedidos; a linha inteira pega o clique, a seta dobra). `WorkSidebarParts.swift`:
+  o seletor, o grupo do main e das tarefas com o fio guia, e a linha do pé. Tokens:
+  components.workSidebar.
 - `Rail.swift`: o modelo puro do trilho (`RailProject`: a pasta, o nome, a cor, o estado e se tem
   terminal aberto; `mark`, a letra até haver imagem; `badge`, o estado que se mostra) e `RailFoot`.
   `RailView.swift`: a porta de entrada; `show` recebe os projetos e o escolhido e redesenha só quando

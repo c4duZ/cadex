@@ -5,40 +5,36 @@ import Sidebar
 import StateGlyph
 import Themes
 
-/// The rail in this window (docs/adr/0038-rail-and-side-column.md; plan 36 phase A): the projects
-/// with their state, the chosen one ringed; a click shows its terminals in the tabs and the side
-/// column on it. Redrawn with the tree (TreeWiring.drawTree), from what is open now.
 extension WindowSession {
-    func makeRail() -> RailView {
-        let rail = RailView { [weak self] id in _ = self?.commands.run(id) }
-        rail.onPick = { [weak self] folder in self?.pickProject(folder) }
-        rail.menuFor = { [weak self] folder in self?.railMenu(folder) ?? [] }
-        rail.onDropImage = { [weak self] folder, url in self?.dropProjectImage(folder, url) }
-        // Dragged (plan 36 phase E): the projects' order and pinned kept in projects.json, the pages'
-        // in the settings (inspector.order), which the inspector.tab-N commands follow too.
-        rail.onMove = { [weak self] folder, order, pinned in
-            self?.projects?.arrange(order, moved: folder, pinned: pinned)
-            self?.drawRail()
+    /// The sidebar (docs/adr/0039-sidebar-with-work-and-files.md; plan 38 phase B): the Work list
+    /// from what is open now; a project's click goes to its last place, a place's to its tabs; the
+    /// caret folds; the right click is the project's menu (the rail's, plan 36).
+    func makeSidebar() -> WorkSidebarView {
+        let sidebar = WorkSidebarView { [weak self] id in _ = self?.commands.run(id) }
+        sidebar.onPickProject = { [weak self] folder in self?.pickProject(folder) }
+        sidebar.onPickPlace = { [weak self] folder in self?.pickPlace(folder) }
+        sidebar.onToggle = { [weak self] folder in self?.toggleProject(folder) }
+        sidebar.menuFor = { [weak self] folder in self?.railMenu(folder) ?? [] }
+        // Dragged: the order kept in projects.json, as the rail's (plan 36 E); pinned does not change.
+        sidebar.onMove = { [weak self] folder, order in
+            guard let self, let projects = self.projects else { return }
+            projects.arrange(order, moved: folder, pinned: projects.isPinned(folder))
+            self.drawRail()
         }
-        rail.onMovePages = { [weak self] ids in
-            self?.workspace?.inspector.reorder(ids)
-            self?.settings.store.update { $0.inspector.order = ids }
+        sidebar.onMode = { [weak self] mode in
+            _ = self?.commands.run(mode == .work ? "sidebar.show-work" : "sidebar.show-files")
         }
-        return rail
+        return sidebar
     }
 
-    /// The side column's pages as the rail shows them: their icons, under the projects.
-    func railPages(_ inspector: InspectorView) -> [RailPage] {
-        inspector.pages.map { RailPage(id: $0.id, title: $0.title, icon: $0.icon, command: $0.command) }
-    }
-
-    /// The projects as the rail draws them.
-    func railModel() -> [RailProject] {
+    /// The projects as the sidebar lists them: the pinned first in their order, then the open ones
+    /// not pinned; the home folder's terminals are no project (plan 36). Each with main and its
+    /// tasks, their states and terminals, and how many of its agents wait on you.
+    func sidebarModel() -> [WorkProject] {
         let theme = ThemeStore.shared.current
-        // The pinned first, in their order; then the open ones that are not pinned. The home
-        // folder's terminals are no project (plan 36: tabs of no project, no tile lit).
         let all = (projects?.projects ?? []).filter { !Self.isLoose($0.folder) }
         let ordered = all.filter(\.pinned) + all.filter { !$0.pinned }
+        let tree = Dictionary(treeModel().map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
         return ordered.map { project in
             let terminals = project.tabs.allTerminals
             let states = terminals.compactMap { Self.treeRow($0).state }
@@ -46,19 +42,51 @@ extension WindowSession {
                 let value = color.rgb(in: theme).value
                 return [Double((value >> 16) & 0xFF) / 255, Double((value >> 8) & 0xFF) / 255, Double(value & 0xFF) / 255]
             }
-            return RailProject(id: project.folder, name: project.name, tint: tint, state: Self.summary(states), open: !terminals.isEmpty,
-                               image: projects?.imageURL(project.image)?.path, emoji: project.emoji, pinned: project.pinned)
+            let node = tree[project.folder]
+            let ownStates = node?.terminals.compactMap(\.state) ?? []
+            var places = [WorkPlace(id: project.folder, name: node.map { $0.branch.isEmpty ? "main" : $0.branch } ?? "main", isMain: true,
+                                    state: Self.summary(ownStates), terminals: node?.terminals.count ?? 0)]
+            places += (node?.tasks ?? []).map { task in
+                WorkPlace(id: task.id, name: task.name, state: task.state, terminals: task.terminals.count)
+            }
+            return WorkProject(id: project.folder, name: project.name, tint: tint, image: projects?.imageURL(project.image)?.path,
+                               emoji: project.emoji, state: Self.summary(states), terminals: terminals.count,
+                               waiting: states.filter { $0 == .needs }.count, expanded: isExpanded(project.folder),
+                               places: places, pinned: project.pinned)
         }
     }
 
+    /// Redrawn with the tree (TreeWiring.drawTree), from what is open now; the place lit is where
+    /// the top bar's tabs are: a task's, or the project's main.
     func drawRail() {
-        guard let rail = workspace?.rail else { return }
-        rail.show(railModel(), chosen: projects?.activeFolder.flatMap { Self.isLoose($0) ? nil : $0 })
-        rail.remoteShown = hasRemote
-        rail.pagesShown = projects?.activeFolder != nil
-        let page = tabs?.showsPage == true ? tabs?.activeDocument?.identity : nil
-        rail.footLit = page == ProjectsListDocument.identity ? .projects
-            : page?.hasPrefix("automation") == true ? .automations : nil
+        guard let sidebar = workspace?.sidebar else { return }
+        let folder = projects?.activeFolder.flatMap { Self.isLoose($0) ? nil : $0 }
+        let group = tabs?.currentGroup
+        let place = folder.map { group.flatMap { $0.isEmpty ? nil : $0 } ?? $0 }
+        sidebar.show(sidebarModel(), place: place)
+        sidebar.remoteShown = hasRemote
+    }
+
+    /// Folded or unfolded, as the owner left it (projects.json, plan 38); the shown one unfolded
+    /// until the owner folds it.
+    func isExpanded(_ folder: String) -> Bool {
+        if let choice = projects?.projects.first(where: { $0.folder == folder })?.expanded { return choice }
+        return folder == projects?.activeFolder
+    }
+
+    func toggleProject(_ folder: String) {
+        projects?.setExpanded(!isExpanded(folder), for: folder)
+        drawRail()
+    }
+
+    /// A place clicked: its project shown and its tabs in the top bar (a task's, or the project's own).
+    func pickPlace(_ folder: String) {
+        if let project = projects?.projects.first(where: { $0.folder == folder }) {
+            pickProject(project.folder)
+            _ = commands.run("project.show-terminals")
+            return
+        }
+        pickInTree(.task(folder))
     }
 
     /// The terminals opened in the home folder: tabs of no project (ADR 0038, decided 2026-11-18).

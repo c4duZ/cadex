@@ -107,7 +107,14 @@
   thread principal), ports.stop (as portas no ⌘K, `ChoiceSource`) e a conta da barra de título com o
   cartão das contas (`WindowSession.swift`). `cadexTerminals` dá aos cartões de sistema os terminais
   com programa.
-- `RailWiring.swift` (plano 36 fase A, ADR 0038): o trilho da feature `sidebar` na borda esquerda
+- Plano 38 fase B (`../../../docs/adr/0039-sidebar-with-work-and-files.md`): `RailWiring.swift` monta a
+  barra lateral (`makeSidebar`, `sidebarModel`: os projetos, o main e as tarefas da árvore com os
+  estados e os pedidos; `drawRail` acende o lugar pelo TabsController.currentGroup; `pickPlace`;
+  aberto ou fechado no projects.json, `isExpanded`/`toggleProject`); o `WorkspaceView.swift` a põe no
+  lugar do trilho, com a coluna (Files e Changes) dentro dela como a vista Arquivos; sidebar.show-work
+  (⇧⌘1) e sidebar.show-files (⇧⌘2); Sessions, Memory e o grafo saíram da coluna: memory.show e
+  project.sessions-column abrem a página do projeto, git.show-history abre o histórico numa aba.
+- `RailWiring.swift` (plano 36 fase A, ADR 0038; o trilho saiu da tela no plano 38 B): o trilho da feature `sidebar` na borda esquerda
   (`WorkspaceView.swift`): os projetos com a cor, o estado mais urgente dos terminais e o ponto de
   terminal aberto, redesenhados com a árvore (drawTree, em `TreeWiring.swift`); o clique escolhe o projeto (as
   abas e a coluna), abre um terminal se ele não tem, e sai de uma página aberta no centro. O ⌘B

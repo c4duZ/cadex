@@ -47,11 +47,21 @@ extension WindowSession {
                 self.app.newWindow(from: self)
             }))
         commands.register(Command(
-            // The side column next to the rail (ADR 0038): the tree that ⌘B folded left; ⌘B folds
-            // the column now, the rail stays.
-            id: "view.toggle-sidebar", title: T("Show or Hide the Side Column", "Mostrar ou esconder a coluna lateral"),
-            keywords: ["sidebar", "explorer", "column", "painel", "coluna"], category: .view, defaultShortcut: "cmd+b",
+            // The sidebar (ADR 0039): ⌘B shows and hides it.
+            id: "view.toggle-sidebar", title: T("Show or Hide the Sidebar", "Mostrar ou esconder a barra lateral"),
+            keywords: ["sidebar", "explorer", "column", "painel", "coluna", "barra lateral"], category: .view, defaultShortcut: "cmd+b",
             action: .run { [weak self] in self?.toggleInspector() }))
+        // The sidebar's two views (ADR 0039, plan 38): Work and Files, by name and by key.
+        commands.register(Command(
+            id: "sidebar.show-work", title: T("Show Work in the Sidebar", "Mostrar o Trabalho na barra lateral"),
+            keywords: ["work", "projects", "tasks", "sidebar", "trabalho", "projetos", "tarefas"], category: .view,
+            defaultShortcut: "cmd+shift+1",
+            action: .run { [weak self] in self?.workspace?.showWork() }))
+        commands.register(Command(
+            id: "sidebar.show-files", title: T("Show Files in the Sidebar", "Mostrar os Arquivos na barra lateral"),
+            keywords: ["files", "explorer", "tree", "sidebar", "arquivos", "árvore"], category: .view,
+            defaultShortcut: "cmd+shift+2",
+            action: .run { [weak self] in self?.workspace?.showInspector("files") }))
         // inspector.toggle (⌥⌘I) did the same as ⌘B under another name: one command now (UX audit,
         // 2026-11-18).
         commands.register(PowerCommands.all(app.power))
@@ -161,7 +171,8 @@ extension WindowSession {
             keywords: ["history", "log", "commits", "histórico", "inspector", "painel"], category: .view,
             // L for log, as in git log.
             defaultShortcut: "cmd+shift+l",
-            action: .run { [weak self] in self?.workspace?.showInspector("history") }))
+            // The graph is a page now (ADR 0039): it left the sidebar.
+            action: .run { [weak self] in _ = self?.commands.run("git.history-in-tab") }))
         commands.register(Command(
             id: "history.show-in-tab", title: T("Show Commit Details in a Tab", "Mostrar o commit numa aba"),
             keywords: ["commit", "details", "message", "detalhes", "mensagem", "history", "histórico"], category: .view,

@@ -43,7 +43,11 @@ extension WindowSession {
 
     func memoryPageActions() -> MemoryPageActions {
         var actions = MemoryPageActions(
-            show: { [weak self] in self?.workspace?.showInspector("memory") },
+            // The project's memory is a section of its page now (ADR 0039).
+            show: { [weak self] in
+                guard let self, let folder = self.projects?.activeFolder else { return }
+                self.openProjectPage(folder, section: .memory)
+            },
             showBriefing: { [weak self] in self?.showMemoryBriefing() },
             reindex: { [weak self] in if let self { self.reindexMemory(root: self.projectRoot) } },
             refresh: { [weak self] in self?.refreshMemoryPage() },

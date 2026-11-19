@@ -19,9 +19,12 @@ public struct SavedProjects: Codable, Equatable, Sendable {
         /// Kept in the rail with no terminal open (plan 36); nil in a file of before: pinned, so a
         /// project the owner had does not leave the rail when its last terminal closes.
         public var pinned: Bool?
+        /// Unfolded in the sidebar's Work list (plan 38); nil: as the sidebar decides (the shown one).
+        public var expanded: Bool?
 
         public init(name: String, folder: String, tabs: TabsSnapshot, color: String? = nil, image: String? = nil, emoji: String? = nil,
-                    pinned: Bool? = nil) {
+                    pinned: Bool? = nil, expanded: Bool? = nil) {
+            self.expanded = expanded
             self.name = name
             self.folder = folder
             self.tabs = tabs

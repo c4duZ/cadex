@@ -31,6 +31,10 @@ extension TabsController {
     /// and never shows in it (plan 34 A; the owner, 2026-11-18: opening a page changed the bar).
     func isPageTab(_ tab: Tab) -> Bool { tab.panes.count == 1 && tab.focused.document?.isPage == true }
 
+    /// The group the bar shows (a task's folder, or "" for the project's own tabs); nil without
+    /// grouping or tabs. The sidebar lights the place by it (plan 38).
+    public var currentGroup: String? { barAnchor.flatMap(group(of:)) }
+
     /// The active tab is a page.
     public var showsPage: Bool { activeTab.map(isPageTab) ?? false }
 

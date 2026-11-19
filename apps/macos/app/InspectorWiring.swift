@@ -16,7 +16,8 @@ import UILooks
 /// command (ADR 0005) and the commands open the panel on it.
 extension WindowSession {
     func makeInspector(explorer: ExplorerController, git: SourceControlController) -> InspectorView {
-        // The order of use (ADR 0038): Files, Changes, Sessions, Memory, then the graph, the least used.
+        // Files and Changes, the sidebar's Files view (ADR 0039): Sessions, Memory and the graph moved
+        // to the project's page.
         let tabs = [
             InspectorTab(id: "files", title: T("Files", "Arquivos"), icon: .folder, command: "explorer.focus", view: explorer.view, actions: [
                 InspectorAction("explorer.new-file", .filePlus, T("New File", "Novo arquivo")),
@@ -36,24 +37,6 @@ extension WindowSession {
                 InspectorAction("git.stage-all", .plus, T("Stage All", "Adicionar tudo ao stage")),
                 InspectorAction("git.unstage-all", .minus, T("Unstage All", "Tirar tudo do stage")),
                 InspectorAction("git.refresh", .arrowClockwise, T("Refresh", "Atualizar")),
-            ]),
-            // The project's conversations (plan 36 C): the history read only while this shows.
-            InspectorTab(id: "sessions", title: T("Sessions", "Sessões"), icon: .chatsCircle, command: "project.sessions-column",
-                         view: makeSessionsColumn(), actions: [], more: [
-                InspectorAction("project.show-sessions", .arrowSquareOut, T("All Sessions in the Project Page", "Todas as sessões na página do projeto")),
-            ]),
-            // Every action by its name in the "…" menu: three bare icons (sparkle, reload, eye) said
-            // nothing (the owner, 2026-11-18).
-            InspectorTab(id: "memory", title: T("Memory", "Memória"), icon: .brain, command: "memory.show", view: makeMemoryPage(), actions: [], more: [
-                InspectorAction("memory.show-briefing", .eye, T("What the Agent Will See", "O que o agente vai ver")),
-                InspectorAction("memory.bootstrap", .sparkle, T("Organize History with AI", "Organizar o histórico com IA")),
-                InspectorAction("memory.reindex", .arrowsClockwise, T("Reindex", "Reindexar")),
-                InspectorAction("memory.show-history", .clockCounterClockwise, T("Show Memory History", "Mostrar o histórico da memória")),
-                InspectorAction("memory.pause-agent", .slidersHorizontal, T("Pause or Resume the Memory Agent", "Pausar ou retomar o agente de memória")),
-                InspectorAction("memory.refresh", .arrowClockwise, T("Refresh", "Atualizar")),
-            ]),
-            InspectorTab(id: "history", title: T("Git Graph", "Grafo do git"), icon: .gitBranch, command: "git.show-history", view: panelHistoryHost, actions: [
-                InspectorAction("git.history-in-tab", .arrowSquareOut, T("Open Git History in New Tab", "Abrir o histórico do git em nova aba")),
             ]),
         ]
         let shortcut = app.keymapLabel("view.toggle-sidebar") ?? "⌘B"

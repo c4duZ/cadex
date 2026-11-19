@@ -24,11 +24,17 @@ o que o clique faz). O dono aprovou em 2026-11-19 ("pode fazer").
   Feito: components.workSidebar e components.place, gerados em
   `apps/macos/shared/looks/DesignTokensSidebar.swift`; o mockup é WorkSidebar.dc.html (a seta das
   linhas ficou com 10 pt e o recuo das tarefas com 22, os tokens mais perto da referência).
-- [ ] B. A barra lateral, vista Trabalho: a lista de projetos (avatar, nome, estado e terminais;
+- [x] B. A barra lateral, vista Trabalho: a lista de projetos (avatar, nome, estado e terminais;
   aberto, o main e as tarefas com o fio guia; o aberto ou fechado guardado; o clique no nome ao
   último lugar, num item as abas dele em cima; o clique direito com o menu do projeto de hoje),
   "Novo projeto…" e o pé (Quadro, Automações, Máquinas com algum host); a ordem e o fixado de hoje
   continuam (arrastar). Ela toma o lugar do trilho e da coluna; ⌘B mostra e esconde.
+  Feito: `apps/macos/features/sidebar/WorkSidebarView.swift` e as peças; a coluna de Files e Changes
+  ficou dentro dela como a vista Arquivos (o cabeçalho e "N mudanças" vêm na D); Sessions, Memory e
+  o grafo saíram da coluna (os comandos abrem a página do projeto e o histórico numa aba); aberto ou
+  fechado fica no projects.json; arrastar a linha de um projeto muda a ordem (sem deslizar ao vivo).
+  Conferido no app: a lista, o lugar aceso, escolher outro projeto, a seta, arrastar e salvar. Falta:
+  soltar uma imagem num projeto (o trilho fazia), que fica para a H.
 - [ ] C. A fila "Precisa de você": o cartão âmbar no topo, das mesmas fontes do sino (os pedidos
   abertos), cada linha com o agente, o projeto, o pedido em frase e o tempo; o clique leva ao
   terminal; a etiqueta âmbar no projeto fechado e a marca na borda da lista rolada; a pílula na

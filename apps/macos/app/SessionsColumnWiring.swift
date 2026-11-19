@@ -30,7 +30,11 @@ extension WindowSession {
     func sessionsColumnCommands() -> [Command] {
         [Command(id: "project.sessions-column", title: T("Show Sessions in the Side Column", "Mostrar as sessões na coluna lateral"),
                  keywords: ["sessions", "conversations", "history", "resume", "sessões", "conversas", "histórico", "retomar"],
-                 category: .view, action: .run { [weak self] in self?.workspace?.showInspector("sessions") })]
+                 // The project's sessions are a section of its page now (ADR 0039).
+                 category: .view, action: .run { [weak self] in
+                     guard let self, let folder = self.projects?.activeFolder else { return }
+                     self.openProjectPage(folder, section: .sessions)
+                 })]
     }
 
     private var sessionsColumn: SessionsColumnView? {

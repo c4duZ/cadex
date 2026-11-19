@@ -66,6 +66,9 @@ FRAME_FILES = [
     "apps/macos/shared/menus/AnchoredPanel.swift",  # plano 26
     "apps/macos/features/sidebar/RailView.swift",  # plano 36
     "apps/macos/features/sidebar/RailParts.swift",  # plano 36
+    "apps/macos/features/sidebar/WorkSidebarView.swift",  # plano 38
+    "apps/macos/features/sidebar/WorkSidebarParts.swift",  # plano 38
+    "apps/macos/features/sidebar/WorkRows.swift",  # plano 38
 ]
 # A design value: any number but a bare 0 or 1 (those are counts, identities and the hairline
 # of an edge, not mockup values; review of 2026-11-17).

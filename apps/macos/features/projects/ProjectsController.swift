@@ -20,6 +20,8 @@ public final class ProjectsController {
         public var emoji: String?
         /// Kept in the rail with no terminal open (plan 36): its last tab closing leaves it there.
         public var pinned = false
+        /// Unfolded in the sidebar's Work list (plan 38); nil until the owner folds or unfolds it.
+        public var expanded: Bool?
 
         init(name: String, folder: String, tabs: TabsController) {
             self.name = name
@@ -84,6 +86,7 @@ public final class ProjectsController {
             projects[projects.count - 1].image = project.image
             projects[projects.count - 1].emoji = project.emoji
             projects[projects.count - 1].pinned = project.pinned ?? true
+            projects[projects.count - 1].expanded = project.expanded
             activeIndex = projects.count - 1
             tabs.restore(project.tabs, makeDocument: makeDocument)
             // Saved with no tab: a terminal in its folder (the spec), or the launch folder when gone;
@@ -273,7 +276,7 @@ public final class ProjectsController {
 
     public var saved: SavedProjects {
         SavedProjects(projects: projects.map { .init(name: $0.name, folder: $0.folder, tabs: $0.tabs.snapshot(), color: $0.color,
-                                                     image: $0.image, emoji: $0.emoji, pinned: $0.pinned) },
+                                                     image: $0.image, emoji: $0.emoji, pinned: $0.pinned, expanded: $0.expanded) },
                       active: max(activeIndex, 0), folder: workspaceFolder?(), recent: recent)
     }
 
