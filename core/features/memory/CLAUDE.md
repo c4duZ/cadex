@@ -62,6 +62,8 @@
     - O .ai-memory.toml do repositório, lido pelo engine porque o `cadex memory-hook` não o lê
       (o cliente do upstream lê): `server/src/marker.rs` (achar e ler: **cópia** do marker.rs do
       cli do upstream, origem no topo, sem rotas da pasta pessoal nem perfis de servidor),
+      `server/src/core_brief.rs` (plano 35 E: pedido o briefing e sem página de núcleo do projeto,
+      fixada, _rules/ ou _slots/, o pedido segue com `briefing=0`; dentro da camada do marcador),
       `server/src/marker_query.rs` (os pares que o `build_marker_query_suffix` do upstream manda;
       o briefing só com o marcador pedindo, como no upstream, desde o plano 35 B; o `workspace` da conta vale mais que o do arquivo) e
       `server/src/capture.rs` (o `CapturePolicy` do upstream: some, só metadados ou fica).

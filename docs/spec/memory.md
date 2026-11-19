@@ -127,6 +127,10 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   ai-memory vai junto ("conteúdo guardado não é instrução"). Uma página de `_rules/` informa; regra
   que o agente precisa seguir fica no `CLAUDE.md` do projeto (teste real de 2026-11-16: o Claude
   leu a regra do briefing e, corretamente, não a tomou como ordem).
+- Sem nenhuma página de núcleo (fixada, `_rules/`, `_slots/`), a parte do briefing que lista
+  páginas não vai: seriam só os títulos das páginas mudadas por último, sob um rodapé que cita
+  páginas que não existem (no bkdg-center, títulos como "s" e "pode fazer."). O handoff, o retrato
+  da sessão cortada e o perfil continuam. Diferença do ai-memory, com esse motivo (plano 35 E).
 - Se o processo da memória não responde em 1 s, a sessão segue sem briefing.
 - Numa pasta que o Claude ainda não conhece, o briefing chega depois que o dono aceita a confiança
   da pasta.

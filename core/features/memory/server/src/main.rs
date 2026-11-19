@@ -25,6 +25,7 @@ mod auto_watch;
 mod auto_wiki;
 mod capture;
 mod consolidate_prompt;
+mod core_brief;
 #[cfg(debug_assertions)]
 mod debug_panic;
 mod engine;

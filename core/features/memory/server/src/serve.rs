@@ -159,6 +159,8 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
     #[cfg(debug_assertions)]
     let routes = if crate::debug_panic::enabled() { crate::debug_panic::route(routes) } else { routes };
     let inner = routes
+        // Plan 35 E: no core page, no brief; inside the marker's layer, which sets `briefing`.
+        .layer(from_fn_with_state(built.store.reader.clone(), crate::core_brief::gate))
         .layer(axum::middleware::from_fn(hook_body::amend))
         .layer(axum::middleware::from_fn(mcp_scope::scope))
         // Plan 35 D: the briefing a session started with, kept for the audit.

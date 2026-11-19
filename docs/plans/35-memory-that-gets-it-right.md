@@ -110,9 +110,16 @@ caminhos deste repositório.
   duas pastas guardam 30 dias e no máximo 500 arquivos
   (`../../core/features/memory/server/src/agent/audit.rs`,
   `../../core/features/memory/server/src/agent/briefings.rs`).
-- [ ] E. O que o estudo apontar como importado errado: o texto do aviso e do rodapé, o briefing
+- [x] E. O que o estudo apontar como importado errado: o texto do aviso e do rodapé, o briefing
   por padrão, o snapshot com sessão viva, o nome do projeto e a worktree irmã, cada um com o veredito
   do estudo.
+  Feito: o aviso do briefing ficou verdadeiro na B (o briefing só vem do arquivo); sem página de
+  núcleo o briefing não vai, o que tira também o rodapé que mentia
+  (`../../core/features/memory/server/src/core_brief.rs`, teste em
+  `../../core/features/memory/server/tests/memory_page.rs`, que falha sem o filtro); o nome do
+  projeto ficou fixado no arquivo (B). O painel que mostra a própria sessão como cortada fica na H.
+  Falta ver uma sessão de verdade no `bkdg-space` cair no `bkdg-center`; o rodapé com núcleo vazio
+  vale relatar ao upstream.
 - [ ] F. A 3.5.0: atualizar o commit fixado, com a suíte do upstream (`make memory-upstream-test`, no
   PC) e a nossa.
 - [x] G. O auto-improve com proteção: recusar a proposta que cita caminhos ou tabelas que não

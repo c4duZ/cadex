@@ -131,6 +131,27 @@ fn the_briefing_is_what_the_next_session_start_gets_and_claims_nothing() {
 }
 
 #[test]
+fn with_no_core_page_the_brief_is_not_sent_even_when_the_marker_asks() {
+    // Plan 35 E: the bkdg-center's brief was only titles of session pages, under a footer naming
+    // pinned / _rules/ / _slots/ pages it did not have.
+    let tmp = tempfile::tempdir().unwrap();
+    let project = repo(tmp.path(), "acme");
+    let cwd = project.to_str().unwrap();
+    std::fs::write(project.join(".ai-memory.toml"), "project = \"acme\"\n[briefing]\ninject_on_session_start = true\n").unwrap();
+    let engine = start(tmp.path(), ARGS);
+    let s = &engine.socket;
+    tool(s, "memory_write_page", serde_json::json!({"workspace": "default", "project": "acme",
+        "path": "decisions/wal-lock.md", "body": "# Keep the WAL lock\n\nOne writer.\n", "kind": "decision"}));
+    let briefing = || ok(s, "GET", &route("briefing", &[("cwd", cwd)]), None).expect("the briefing");
+    let none = briefing();
+    assert!(!none.contains("Keep the WAL lock") && !none.contains("compiled from"), "only recent titles, no brief: {none}");
+    tool(s, "memory_write_page", serde_json::json!({"workspace": "default", "project": "acme",
+        "path": "_rules/tabs.md", "body": "# Tabs\n\nIndent with tabs.\n", "kind": "rule"}));
+    let some = briefing();
+    assert!(some.contains("Indent with tabs") && some.contains("Keep the WAL lock"), "a core page brings the brief: {some}");
+}
+
+#[test]
 fn writing_a_page_keeps_its_metadata_and_commits_and_deleting_removes_it() {
     let tmp = tempfile::tempdir().unwrap();
     let project = repo(tmp.path(), "acme");
