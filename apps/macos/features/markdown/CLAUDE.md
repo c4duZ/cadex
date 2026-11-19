@@ -18,7 +18,8 @@
 - Conteúdo sanitizado antes de exibir.
 - Porta de entrada: `MarkdownController.swift` (o índice das notas, `attach` de cada nota aberta no
   editor, alternar o renderizado, seguir links, sugestões, "quem aponta pra cá" como lista da
-  paleta). `MarkdownIndex.swift` fala com a feature markdown do núcleo.
+  paleta). `MarkdownIndex.swift` fala com a feature markdown do núcleo; `MarkdownHTML.swift` (plano 39
+  E) é o Markdown em HTML de qualquer thread, para a página de um .md mandado ao telefone.
 - `MarkdownSession.swift`, uma por nota aberta: confere os links um pouco depois de parar de
   digitar, sublinha os quebrados com atributos do texto (os de desenho do TextKit 2 se perdiam quando
   o editor repintava as cores), ⌘+clique pelo gancho do editor, sugestões por

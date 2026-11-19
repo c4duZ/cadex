@@ -58,6 +58,17 @@
   shares.json dele), `MachinesShare.swift` (`share` e `stopSharing` pelo CLI do dono, nunca
   `serve reset`, nunca a porta que o dono serve) e `ShareCommands.swift` (machines.share-port,
   machines.share-public, que o app confirma, e machines.stop-sharing com a lista no ⌘K).
+- Arquivos para o telefone (plano 39 E, `../../../../docs/plans/39-terminals-from-the-phone.md`):
+  `FileShareStore.swift` (cada arquivo por um token aleatório no link, por uma hora; o mesmo arquivo
+  de novo, o mesmo link; um HTML leva a própria pasta, para o que a página carrega, e nada acima dela
+  nem link para fora), `FileSharePage.swift` (a página em volta: nome, tamanho, Abrir e Baixar, e o
+  arquivo à vista quando o Safari mostra numa página; Word, Excel e PowerPoint pelo Abrir, que o
+  Safari do iPhone pré-visualiza pelo tipo; Markdown pelo `markdown` que o app dá; texto escapado; o
+  visual próprio, claro e escuro, sem nada de fora), `FileShareServer.swift` (HTTP na porta 47101,
+  presa ao 100.x como o 47100 e com o mesmo WhoIs; `/s/<token>/`, `raw/<arquivo>` com Range, que o
+  vídeo do Safari pede, e `download`) e `MachinesFileShare.swift` (`shareFile`: o endereço deste Mac,
+  lido na hora se ninguém leu, e o servidor ligado ali; `sharedFiles`). Com machines.tailscale
+  desligado, nada.
 - O app (`../../app/MachinesWiring.swift`) liga o grupo ao cartão do ssh, lê só com o cartão aberto
   (`onCardOpen`, pelo `onOpenChange` do `HoverCard`) e abre a aba com `ssh '<usuário>@<máquina>'`;
   o usuário é pedido uma vez por máquina e guardado em machines.users.
@@ -69,7 +80,9 @@
 - `make macos-test` (`tests/main.swift`, respostas gravadas em `tests/Fixtures.swift`, uma LocalAPI
   falsa em `tests/FakeDaemon.swift`): status completo, versão velha, JSON quebrado, sem login,
   sozinho; pings; o fluxo de mudanças; compartilhar com um CLI falso (`tests/ShareTests.swift`, nunca o
-  `serve` de verdade); o listener com WhoIs falso (`tests/ListenerTests.swift`); o Docker (`tests/DockerTests.swift`); um nome ser máquina; a ordem da detecção; a prova e o cabeçalho no pedido, 401;
+  `serve` de verdade); o listener com WhoIs falso (`tests/ListenerTests.swift`); os arquivos para o telefone
+  (`tests/FileShareTests.swift`: o link, a hora, nada fora da pasta, a página por tipo, o servidor
+  com Range e download, o aparelho de outro dono fechado); o Docker (`tests/DockerTests.swift`); um nome ser máquina; a ordem da detecção; a prova e o cabeçalho no pedido, 401;
   nada lido sem ninguém olhando, o fluxo parando ao fechar, os 30 s quando o fluxo falha, desligado.
 - Na mão, com o Tailscale do dono: o cartão do ssh mostra o grupo em até 2 s, igual ao
   `tailscale status`; com o PC na tailnet, desligá-lo o marca offline.

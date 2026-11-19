@@ -63,7 +63,7 @@ quero poder abrir uma sessão num projeto por lá"; "um HTML pode ser"; "pode s�
   resposta das abas leva os projetos. Conferido numa instância de teste: `cadex` sozinho mostrou o
   menu, a tecla 1 entrou sem Enter, a tecla n abriu um terminal novo no único projeto, e o que se
   digitou rodou nos dois.
-- [ ] E. `cadex share <arquivo>`: o app serve o arquivo num endereço da tailnet (só o IP do
+- [x] E. `cadex share <arquivo>`: o app serve o arquivo num endereço da tailnet (só o IP do
   Tailscale, achado pela feature machines) e o `cadex` imprime o link; o telefone abre e baixa. Vale
   para o que o agente gerar no lugar de um artefato (o dono, 2026-11-19: "imagem e outras variações:
   PDF, Word"): HTML funcionando (com o que carrega da pasta dele: CSS, scripts, imagens vizinhas),
@@ -72,6 +72,12 @@ quero poder abrir uma sessão num projeto por lá"; "um HTML pode ser"; "pode s�
   texto. Uma página do arquivo em volta: nome, tamanho, o arquivo à vista e Baixar. `cadex share`
   sem argumento lista os compartilhados que ainda valem. O link expira (uma hora) e tem um token no
   caminho. Sem Tailscale, o comando diz isso e sai.
+  Feito: `apps/macos/features/machines/FileShareServer.swift` (com FileShareStore.swift,
+  FileSharePage.swift e MachinesFileShare.swift), `core/features/agent-tools/share.zig` e
+  `apps/macos/features/markdown/MarkdownHTML.swift`. Conferido com o Tailscale do dono numa
+  instância de teste: o link de um HTML abriu com o CSS do lado, o Markdown veio renderizado, `cadex
+  share` sozinho listou os dois, e por 127.0.0.1 e pelo IP do Wi-Fi ninguém responde. Sem o
+  telefone: o Office pelo Quick Look e o vídeo no Safari não foram vistos.
 - [ ] F. O guia do dono em docs/guides/phone.md (novo): Tailscale no Mac e no telefone, Login Remoto
   no Mac, o app de terminal com mosh, e os comandos `cadex`, `cadex attach`, `cadex new`, `cadex
   share`.

@@ -25,4 +25,5 @@ test {
     _ = @import("attach_replies.zig");
     _ = @import("attach_new.zig");
     _ = @import("attach_menu.zig");
+    _ = @import("share.zig");
 }

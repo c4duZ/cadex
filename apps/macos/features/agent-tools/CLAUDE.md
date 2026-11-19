@@ -52,7 +52,8 @@
   o projeto, a aba, a pasta e o estado do agente, e os nomes dos projetos (`onProjects`, plano 39 D,
   para o n e o c do menu); nada que o `ps` já não diga. `onNewTerminal` (plano
   39 C): `{"v":1,"new":true,"project","claude"}` do `cadex new`, só local: o app abre a aba pelo
-  comando registrado e responde o id dela.
+  comando registrado e responde o id dela. `onShare` (plano 39 E): `{"v":1,"share":<caminho>}` e
+  `{"v":1,"shares":true}` do `cadex share`, só local: o link do arquivo na tailnet ou os que valem.
 - `serveRemote` (plano 23, fase F): a conexão de outra máquina da tailnet que o listener da feature
   machines já conferiu pelo WhoIs; o mesmo protocolo, só com o token de uma sessão; o pedido do kit
   é fechado (ele confia na ancestralidade de um processo deste Mac).

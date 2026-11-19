@@ -1,4 +1,6 @@
 import AgentTools
+import Machines
+import Markdown
 import Foundation
 import Terminal
 
@@ -10,6 +12,20 @@ extension AppDelegate {
     func startRemoteTerminals() {
         AgentToolsServer.shared.onTerminals = { [weak self] in self?.remoteTerminals() ?? [] }
         AgentToolsServer.shared.onProjects = { [weak self] in self?.sessions.first?.projects?.projects.map(\.name) ?? [] }
+        FileShareServer.shared.markdown = { MarkdownHTML.render($0) }
+        AgentToolsServer.shared.onShare = { path, reply in
+            guard let path else {
+                return reply(["ok": true, "shares": MachinesController.shared.sharedFiles().map {
+                    ["url": $0.url, "name": $0.share.name, "minutes": max(1, Int($0.share.expires.timeIntervalSinceNow / 60))]
+                }])
+            }
+            MachinesController.shared.shareFile(path) { result in
+                switch result {
+                case .success(let shared): reply(["ok": true, "url": shared.url, "name": shared.share.name])
+                case .failure(let error): reply(["ok": false, "error": error.words])
+                }
+            }
+        }
         AgentToolsServer.shared.onNewTerminal = { [weak self] project, claude in
             self?.newRemoteTerminal(project, claude: claude) ?? ["ok": false, "error": "Cadex is closing"]
         }

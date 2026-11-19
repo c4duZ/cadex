@@ -281,7 +281,7 @@ let machineTests: [(name: String, body: Checks.Body)] = [
         expect(lines > 0)
     }),
 ]
-let exitCode = await Checks.run(machineTests + dockerTests + listenerTests + shareTests)
+let exitCode = await Checks.run(machineTests + dockerTests + listenerTests + shareTests + fileShareTests)
 
 @MainActor func eventually(_ condition: () async -> Bool) async -> Bool {
     for _ in 0..<60 {

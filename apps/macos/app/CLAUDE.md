@@ -171,6 +171,8 @@
   por projeto, só as que o daemon mantém (`keptID`; com terminal.keepSessions desligado, nenhuma).
   Plano 39 C: o `cadex new <projeto> [claude]` acha o projeto (nome em qualquer caixa, o começo do
   nome ou a pasta), roda project.new-terminal ou project.new-claude e devolve o id da aba no daemon.
+  Plano 39 E: o `cadex share` pela feature machines (`shareFile`), com o Markdown da feature markdown
+  (`MarkdownHTML`).
 - `TypedClaudeWiring.swift` (plano 22, fase C): o kit do `claude` digitado numa aba zsh; só para
   quem tem o shell de um terminal do app acima (`shellPid` de todos os terminais, de todas as janelas
   e projetos, e os da gaveta), pelo SessionKit.typedLaunch. Plano 33 F: sem conta na aba, a de uma

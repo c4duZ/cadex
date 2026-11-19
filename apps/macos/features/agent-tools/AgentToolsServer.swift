@@ -43,6 +43,9 @@ public final class AgentToolsServer: @unchecked Sendable {
     /// `cadex new <project> [claude]` (plan 39 C): a new tab in the project, by the
     /// registered command, as a click; the answer names its session in the daemon.
     public var onNewTerminal: (@MainActor (_ project: String, _ claude: Bool) -> [String: Any])?
+    /// `cadex share <file>` (plan 39 E): its link on the tailnet; with no file, the links
+    /// still valid. Only local: any process of this user may share its own files.
+    public var onShare: (@MainActor (_ path: String?, _ reply: @escaping @MainActor ([String: Any]) -> Void) -> Void)?
     public let path: String
     let tokens: AgentSessionTokens
     private let queue = DispatchQueue(label: "cadex.agent-tools.server", qos: .utility)
@@ -138,6 +141,17 @@ public final class AgentToolsServer: @unchecked Sendable {
             DispatchQueue.main.async { [weak self] in
                 MainActor.assumeIsolated {
                     Self.send(client, self?.onNewTerminal?(project, claude) ?? ["ok": false, "error": "Cadex is closing"])
+                }
+            }
+            return
+        }
+        if object["share"] != nil || object["shares"] as? Bool == true {
+            guard local else { close(client); return }
+            let path = object["share"] as? String
+            DispatchQueue.main.async { [weak self] in
+                MainActor.assumeIsolated {
+                    guard let onShare = self?.onShare else { return Self.send(client, ["ok": false, "error": "Cadex is closing"]) }
+                    onShare(path) { Self.send(client, $0) }
                 }
             }
             return

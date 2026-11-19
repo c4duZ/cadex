@@ -94,15 +94,7 @@ final class MarkdownIndex {
     }
 
     /// Rendered HTML for a Markdown text.
-    static func render(_ text: String) -> String {
-        let bytes = Array(text.utf8)
-        var out: UnsafeMutablePointer<UInt8>?
-        var len = 0
-        let status = bytes.withUnsafeBufferPointer { cadex_markdown_render($0.baseAddress, $0.count, &out, &len) }
-        guard status == CADEX_OK, let out else { return "" }
-        defer { cadex_free(out) }
-        return String(decoding: UnsafeBufferPointer(start: out, count: len), as: UTF8.self)
-    }
+    static func render(_ text: String) -> String { MarkdownHTML.render(text) }
 
     /// Runs a call that hands back tab-separated lines and splits them.
     private func lines(_ call: (inout UnsafeMutablePointer<UInt8>?, inout Int) -> cadex_status) -> [[String]] {
