@@ -209,7 +209,7 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   Cadex nunca guarda nem lê a chave.
 
 ### Página Memory
-- Página da barra lateral (ícone Phosphor), memory.show, na lista padrão. A wiki em árvore (pastas,
+- Página da coluna lateral (o ícone do cérebro no trilho, `inspector.md`), memory.show. A wiki em árvore (pastas,
   páginas mais novas primeiro), aberta e editada como Markdown; salvar com ⌘S faz da edição um
   commit (o reindex do projeto). Edição fora do Cadex entra com memory.reindex. Apagar uma página
   pede confirmação. "Show Memory History" (memory.show-history) abre os commits da wiki (cada

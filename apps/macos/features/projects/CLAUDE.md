@@ -84,8 +84,8 @@
 - O app (`../../app/ProjectsWiring.swift`) cria as abas de cada projeto, reabre os documentos
   salvos e devolve a pasta do workspace quando o app abre sem pasta; o daemon do terminal mantém o
   nome que tinha com os spaces (do caminho do spaces.json), para religar as sessões.
-- Status: plano 27 fase A no código (a feature, o arquivo, a migração e os comandos). A árvore da
-  esquerda vem na fase B.
+- Status: planos 27, 34 e 36 no código. Os projetos aparecem no trilho da feature sidebar (ADR
+  0038); a árvore da esquerda do plano 27 saiu da tela.
 
 ## Como validar
 - `make macos-test` passa: o visual do projeto (nome, cor, imagem quadrada e pequena, emoji; salvo e

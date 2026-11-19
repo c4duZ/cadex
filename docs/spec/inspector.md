@@ -1,79 +1,76 @@
 # inspector
 
 ## Para que serve
-A coluna opcional à direita da janela: o que se sabe do projeto ou da tarefa selecionada, em quatro
-abas (Changes, Files, History, Memory), sem tirar os terminais do centro
-(`../adr/0035-work-frame.md`; mockup e texto em `../design/work-frame/screens.md`, seção Inspector).
-São as páginas que ficavam na barra lateral de ícones (Git, Files, Git History, Memory), no lugar
-novo.
+A coluna lateral: à esquerda do centro, logo depois do trilho, o que se sabe do projeto ou da
+tarefa escolhida, em cinco páginas (Files, Changes, Sessions, Memory, Git graph), sem tirar os
+terminais do centro (`../adr/0038-rail-and-side-column.md`, que tirou a coluna da direita da
+`../adr/0035-work-frame.md`; mockup e texto em `../design/work-frame/screens.md`, seções Inspector
+e Rail).
 
 ## Comportamento
-- ⌥⌘I (inspector.toggle) e o botão à direita da barra de título abrem e fecham a coluna; o botão
-  fica aceso com ela aberta. Largura padrão 320 pt; arrastar a borda muda e fica salva. Aberta ou
-  fechada e a aba escolhida voltam ao reabrir.
-- **Abas no topo:** Changes, Files, History e Memory, a ativa sublinhada, e "⌥⌘I" à direita. Cada
-  uma tem comando para abrir a coluna já nela: git.show (⇧⌘G) abre Changes, explorer.focus (⇧⌘E)
-  abre Files, git.show-history (⇧⌘L) abre History, memory.show abre Memory.
-- **Linha de contexto** abaixo das abas: de que se trata ("orchestration-e · against main" numa
-  tarefa; o nome do projeto fora de tarefa; em Memory, "cadex · the project's memory, shared by every
-  task and account").
-- **O que a coluna mostra** segue a seleção: a tarefa da aba com foco, ou o projeto quando o foco
-  está num terminal fora de tarefa ou na página do projeto.
-- **Cabeçalho de cada aba:** é a própria linha de contexto (o mockup Inspector, com os botões
-  desenhados no plano 26 fase C), igual em todas, com as palavras à esquerda (a pasta em Files,
-  com o caminho na dica; a branch em Changes, com o ícone de branch e ↑ ↓, e o clique troca de
-  branch, git.switch-branch, ou "Git" fora de um repositório) e até 3 botões à direita (o resto no
-  "⋯"), sempre à vista, discretos, acesos sob o ponteiro, cada um rodando um comando:
-  - Changes: fetch, pull, push e um indicador girando enquanto uma ação roda; no "⋯", trocar de
-    branch, tudo para o stage, tudo fora do stage e atualizar.
+- **Abrir e fechar:** os ícones das páginas no trilho (`sidebar.md`) abrem a coluna na página; o
+  clique no ícone aceso a fecha. ⌘B (view.toggle-sidebar), ⌥⌘I (inspector.toggle) e o botão da
+  barra de título abrem e fecham; o botão fica aceso com ela aberta. O trilho fica sempre.
+- **Largura:** 260 pt por padrão; arrastar a borda direita muda (de 240 a 640 pt, deixando ao
+  centro pelo menos 320) e fica salva. Aberta ou fechada, a página e a largura voltam ao reabrir.
+- **Fecha sozinha:** com o quadro aberto (volta quando o quadro sai: o segundo clique no ícone dele,
+  ou o Esc), numa janela abaixo de 1000 pt (volta ao alargar, se o dono não a abriu ou fechou no
+  meio) e na tela de início, sem projeto (volta quando um aparece). Uma página no centro (Projects,
+  a página do projeto, a revisão) não a fecha, para nada pular.
+- **Páginas, sem fileira no topo:** os ícones delas ficam no trilho, na ordem do dono
+  (inspector.order). ⌃⌘1 a ⌃⌘5 (inspector.tab-1…5) vão às páginas nessa ordem; cada uma tem também
+  o comando dela: explorer.focus (⇧⌘E) abre Files, git.show (⇧⌘G) Changes, project.sessions-column
+  Sessions, memory.show Memory, git.show-history (⇧⌘L) Git graph.
+- **O que a coluna mostra** segue o projeto escolhido no trilho, ou a tarefa do terminal com foco;
+  nunca o `cd` de um terminal (Files e Changes não pulam de pasta enquanto você navega no shell).
+- **Pé de cada página:** a linha de contexto, com as palavras à esquerda (a pasta em Files, com o
+  caminho na dica; a branch em Changes, com ↑ ↓, e o clique troca de branch, git.switch-branch, ou
+  "Git" fora de um repositório; numa tarefa, "<tarefa> · against <ponto de partida>") e até 3
+  botões à direita (o resto no "⋯"), cada um rodando um comando:
   - Files: novo arquivo, nova pasta, recolher tudo; no "⋯", buscar arquivo e recarregar.
-  - History: abrir o histórico numa aba.
-  - Memory: inicializar, reindexar, ver o briefing; no "⋯", o histórico da memória, pausar o agente
-    de memória e atualizar.
-- **Changes** (o painel de `source-control.md`): o seletor "Last turn / Task / Uncommitted" (o que
-  o agente mudou na última rodada, tudo da tarefa contra o ponto de partida, ou o que não tem
-  commit; a rodada são os arquivos que as edições do agente tocaram desde a última parada dele,
-  pelos hooks, guardada só enquanto o app está aberto); um arquivo por linha com M (âmbar) ou A (verde), o nome, a pasta e +/−; no pé, o último
-  resultado da checagem do projeto ("make check passed · 2 min ago": o último comando de checagem,
-  make/npm/cargo/swift… com check, test, lint ou build, ou pytest/jest…, que terminou num terminal
-  da pasta, pelo que o shell contou, `terminal.md`; vermelho e "failed" quando falhou) e os botões "Commit…" (a
-  mensagem numa folha) e "Open PR" (uma aba com `gh pr create --web`, ou como instalar o GitHub
-  CLI). Clicar num arquivo abre o diff no centro. As ações de hoje (stage, unstage, descartar, abrir
-  diff ao lado ou em aba) continuam, no clique direito e no ⌘K.
-- **Files** (o explorer de `explorer.md`): a árvore de arquivos da pasta da seleção, com as mesmas
-  ações de hoje.
-- **History** (o histórico de `git-history.md`): cada commit em duas linhas, o grafo e a descrição
-  (com as etiquetas de branch e tag) sobre o autor, há quanto tempo e o hash curto. Clicar num commit
-  abre os arquivos dele logo abaixo, com o grafo continuando por trás; clicar de novo fecha; clicar
-  num arquivo abre o diff no centro. Parar o mouse num commit mostra, em 0,2 s, a descrição inteira,
-  as branches e tags, o autor com e-mail, a data completa e o hash inteiro; num arquivo, o caminho
-  completo. O clique direito (e o ⌘K) tem "Show Commit Details in a Tab", "Copy SHA" e "Open on
-  Remote". Fora de um repositório, "Not a Git repository".
-- **Memory** (a página de `memory.md`): "Search what this project knows"; "LEARNED TODAY" com o que
-  os agentes aprenderam (título e "tipo · de qual tarefa · agente"); "WIKI" com Decisions, Gotchas,
-  Concepts e Sessions e as contagens; no pé, o tamanho do briefing que cada agente novo recebe e
-  "See the briefing".
-- Aba que ninguém abriu não lê nada; com a coluna fechada, nenhuma aba lê (o mesmo de as páginas
-  de antes só lerem enquanto apareciam).
-- O Changes desenhado tem o mockup; Files e History ainda não: são desenhadas no canvas com os
-  tokens das abas e vistas pelo dono antes de implementar (plano 26).
+  - Changes: fetch, pull, push e revisar; no "⋯", trocar de branch, tudo para o stage, tudo fora do
+    stage e atualizar; um indicador gira enquanto uma ação roda.
+  - Sessions: no "⋯", todas as sessões na página do projeto.
+  - Memory: tudo no "⋯", pelo nome: o que o agente vai ver, organizar o histórico com IA,
+    reindexar, o histórico da memória, pausar ou retomar o agente de memória e atualizar.
+  - Git graph: abrir o histórico numa aba.
+- **Files** (o explorer de `explorer.md`): a árvore de arquivos da pasta do projeto ou da tarefa,
+  com as ações de sempre.
+- **Changes** (o painel de `source-control.md`): no topo, um menu pequeno com o escopo ("Last turn
+  ▾": o que o agente mudou na última rodada, tudo da tarefa contra o ponto de partida, ou o que não
+  tem commit) e o total ao lado ("N files +a −r"); um arquivo por linha com M (âmbar) ou A (verde),
+  o nome, a pasta e +/−; no pé, o último resultado da checagem do projeto ("make check passed · 2 min
+  ago", pelo que o shell contou, `terminal.md`) e os botões "Commit…" e "Open PR". Clicar num arquivo
+  abre o diff no centro; stage, unstage, descartar e abrir ao lado ficam no clique direito e no ⌘K.
+- **Sessions:** as conversas do projeto escolhido em Today, This week e Earlier, a mais nova
+  primeiro, com a busca (no título e na nota: a conta, a tarefa, quando). O clique abre a página do
+  projeto em Sessões nela, com o resumo e Retomar (`projects.md`). O histórico só é lido enquanto a
+  página aparece; na primeira leitura, "Reading the history…".
+- **Memory** (a página de `memory.md`): a busca, o que os agentes aprenderam hoje, a wiki por tipo
+  e o tamanho do briefing; o clique numa página ou sessão abre a página do projeto na seção dela.
+- **Git graph** (o histórico de `git-history.md`): cada commit em duas linhas, o grafo e a
+  descrição sobre o autor, a idade e o hash curto; o clique abre os arquivos dele embaixo, o clique
+  num arquivo abre o diff no centro; a dica completa sob o ponteiro; Show Commit Details in a Tab,
+  Copy SHA e Open on Remote no clique direito e no ⌘K. Feito na primeira vez que a página aparece.
+- Página que ninguém abriu não lê nada; com a coluna fechada, nenhuma lê.
 
 ## Estados
-- **Sem seleção** (nenhum projeto): a coluna mostra "Open a project to see its changes, files,
-  history and memory."
-- **Fora de um repositório git:** Changes e History mostram "Not a Git repository"; Files e Memory
-  funcionam.
+- **Sem projeto:** a coluna fica fechada (a tela de início ocupa o centro).
+- **Fora de um repositório git:** Changes e Git graph mostram "Not a Git repository"; Files,
+  Sessions e Memory funcionam.
 - **Memória desligada** (memory.enabled): Memory explica o que está desligado e tem o botão para
   ligar.
+- **Projeto sem conversas:** Sessions diz "No sessions in this project yet".
 
 ## Casos de borda
-- Janela estreita (abaixo de 1000 pt com a árvore aberta): abrir a coluna recolhe a árvore, e
-  fechar a coluna devolve.
 - Muitas mudanças (milhares de arquivos): a lista mostra os primeiros 500 e "N more", com o filtro.
+- A borda arrastada além do que a janela deixa: a coluna para no limite (o centro guarda 320 pt).
 
 ## Critérios de aceite
-- [ ] ⌥⌘I abre e fecha; o botão da barra de título acende com a coluna aberta.
-- [ ] ⇧⌘G, ⇧⌘E, ⇧⌘L e memory.show abrem a coluna na aba deles.
-- [ ] Trocar de tarefa no centro troca o que Changes mostra.
+- [x] Os ícones do trilho abrem a coluna na página; o aceso fecha; ⌘B e ⌥⌘I abrem e fecham.
+- [x] O quadro fecha a coluna e sair dele a devolve; uma página no centro não a fecha (conferido
+  no app, plano 36 F).
+- [x] Abaixo de 1000 pt a coluna fecha (conferido numa janela de 900 pt).
+- [x] Files e Changes seguem o projeto ou a tarefa, não o `cd`.
+- [x] Sessions lista as conversas do projeto e o clique abre a página dele.
 - [ ] Com a coluna fechada, nada é lido (medido no `make perf`).
-- [ ] Toda ação que existia nas páginas Git, Files, Git History e Memory está na aba nova e no ⌘K.

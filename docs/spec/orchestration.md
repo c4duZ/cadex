@@ -40,7 +40,8 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
 
 ### O quadro (mockup Board; plano 30 B, feito junto da revisão do plano 29)
 - view.board e o botão do quadro na barra de título (aceso com ele aberto) abrem a página "Board",
-  com "All projects" no lugar do projeto e o painel da direita fechado (volta como estava).
+  com "All projects" no lugar do projeto e a coluna lateral fechada; o segundo clique no botão (ou
+  o Esc) volta à aba de antes e devolve a coluna (ADR 0038; só o quadro fecha a coluna).
 - As tarefas de todos os projetos da janela em quatro colunas: Needs you (pede permissão ou
   resposta, ou falhou), Working, In review (a tarefa em revisão) e Done; a parada fica de fora.
   Cada cartão: o estado, o nome, a idade, o que faz ou espera ("Wants to run Bash: make perf"),
@@ -172,7 +173,7 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
 - orchestration.stop-run para todos os despachos da execução, com confirmação.
 
 ### Automações
-- A página Automações (orchestration.show-automations, o "Automations" do pé da barra lateral; plano
+- A página Automações (orchestration.show-automations, o "Automations" do pé do trilho; plano
   34 F) sempre abre. Vazia, a área inteira diz o que é uma automação, dá um exemplo e põe "Criar
   automação" no meio; com as automações desligadas, avisa que criar a primeira as liga (a mesma
   pergunta de orchestration.toggle-automations). Com itens, uma tabela: a chave de ligar na linha, o

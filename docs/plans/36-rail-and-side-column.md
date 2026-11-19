@@ -107,9 +107,15 @@ nenhum projeto está aceso; ⌘1 a ⌘9 continuam nas abas, contando as que a ba
   de 900 pt, o clique no item Memory, a lista do Remote com os 4 hosts e as máquinas. Não
   conferido: conectar de verdade (o caminho é o do ssh.connect e do machines.connect, já usados).
   Junto, a pedido do dono (2026-11-18): a conta da barra de cima é a do próximo `claude`.
-- [ ] G. Fechar: as specs (sidebar, inspector, tabs, projects, home, status-bar, ssh), os CLAUDE.md,
+- [x] G. Fechar: as specs (sidebar, inspector, tabs, projects, home, status-bar, ssh), os CLAUDE.md,
   o inventário da moldura (`docs/design/work-frame/inventory.md`) com a árvore e a coluna da
   direita em `sai`, a paridade (`MAC_ONLY`), `make check`, `make perf` e a dist.
+  Feito junto da fase H do plano 34 (2026-11-18): `docs/spec/sidebar.md` virou a do trilho e
+  `docs/spec/inspector.md` a da coluna lateral; projects, tabs, home, orchestration, memory,
+  status-bar e ssh ajustadas; o inventário ganhou a seção do plano 36 (a árvore fora da tela em
+  `sai`, as specs velhas em `saiu`); a paridade passa sem mudança; `make check` passou. O `make
+  perf` não rodou (só a pedido do dono). A dist saiu do 6932a0f. Ficou de fora: o trilho não rola
+  com muitos projetos, e a árvore fora da tela ainda existe para o sidebar.find e o ⌘J.
 
 Fora deste plano, anotados na ADR 0038 ("Levantado junto"): o celular controlando a sessão, as
 contas na barra de cima, o item Ports sozinho, o aviso do computer-use e "All sessions" na página

@@ -34,7 +34,8 @@
   Plano 36 fase A: a coluna à esquerda, os ícones no topo e a linha de contexto no pé; a regra da
   janela estreita saiu (a nova vem na fase F). Fase C: `tabsOnTop` falso tira a fileira de ícones
   (o app usa assim: os ícones foram para o trilho, o dono em 2026-11-18); `pages` dá as abas ao
-  trilho.
+  trilho. Fase F: a janela estreita (abaixo de 1000 pt) e o quadro fecham a coluna, decididos no app
+  (WorkspaceView.fitColumn, setBoardShown). Spec reescrita no fechamento do plano 36.
 
 ## Como validar
 - `make macos-test` passa: as abas na ordem, uma página à vista e as outras escondidas, a linha de

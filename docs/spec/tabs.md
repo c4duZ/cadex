@@ -11,9 +11,16 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 ## Comportamento
 
 ### Abas
-- As abas são da seleção da árvore (`sidebar.md`): as da tarefa selecionada, ou as do projeto (os
-  terminais e documentos fora de tarefa). Trocar de tarefa ou de projeto troca as abas da barra.
-  Antes delas, na barra de título, "projeto › tarefa" (só o projeto fora de tarefa).
+- As abas são do projeto escolhido no trilho (`sidebar.md`, ADR 0038): os terminais e documentos
+  dele fora de tarefa. Os terminais só aparecem aqui, nunca listados na coluna lateral.
+- **Uma tarefa é um item da barra do projeto** (plano 36 D): uma por tarefa com terminal aberto, com
+  o estado dela antes do nome e "›"; o clique leva às abas da tarefa (a usada por último nela). Lá,
+  a barra começa com "‹ projeto", que volta às do projeto (também project.show-terminals no ⌘K), e
+  termina com "Review".
+- **Quando não cabem:** as abas encolhem juntas até o tamanho mínimo; daí em diante as que sobram vão
+  para "» N" no fim, que abre a lista delas para escolher; a ativa fica sempre à mostra.
+- **Abas sem projeto:** os terminais da pasta pessoal não viram projeto; enquanto se está neles,
+  nenhum quadrado do trilho fica aceso.
 - ⌘T abre uma aba de terminal na pasta da seleção (a da tarefa, ou a do projeto); sem projeto, na
   pasta pessoal. A aba nova entra à direita da atual e ganha o foco. O "+" depois das abas faz o
   mesmo, com o menu do que mais abrir.
@@ -47,7 +54,7 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 - A barra de abas aparece mesmo com uma aba só.
 
 - Arrastar uma aba pela barra muda a ordem: ela vai por cima seguindo o ponteiro e as outras deslizam
-  para a vaga nova enquanto ela passa (0,15 s), como os ícones da barra lateral; cai onde o meio dela
+  para a vaga nova enquanto ela passa (0,15 s), como os quadrados do trilho; cai onde o meio dela
   está. Nada clicável da barra de cima (abas e botões) arrasta a janela: ela fica travada enquanto o
   ponteiro está neles e solta ao sair; a parte vazia da barra continua movendo a janela. O macOS
   decide mover a janela antes de o app ver o clique, então travar só no clique não bastava (o dono,
@@ -182,7 +189,9 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 - [x] ⌘D num documento abre um terminal ao lado, na pasta do arquivo.
 - [x] Fechar painel, aba ou janela com documento não salvo pergunta antes.
 - [ ] Cada aba e cada cabeçalho de painel com algo rodando mostra a peça de estado certa.
-- [ ] Trocar de tarefa na árvore troca as abas da barra de título.
+- [x] O item de uma tarefa leva às abas dela, e "‹ projeto" volta (teste da feature; o clique de
+      verdade na barra de título não conferido).
+- [ ] "» N" aparece numa janela de verdade com abas demais.
 - [ ] Uma aba com o Claude Code mostra o estado e o nome da conversa; o nome dado à mão
       continua; com keepSessions ligado, fechar e reabrir o app religa a aba ao mesmo shell.
 

@@ -1,70 +1,66 @@
 # sidebar
 
 ## Para que serve
-A coluna à esquerda da janela: a árvore do trabalho. Os projetos, os terminais de cada um e as
-tarefas quando existem, com o estado de cada coisa à vista, para saber onde se está e o que precisa
-de você sem abrir página nenhuma (`../adr/0035-work-frame.md`; mockup e texto em
-`../design/work-frame/screens.md`, seção Sidebar).
+O trilho: a faixa estreita na borda esquerda da janela, sempre à vista, com os projetos e o que é
+de todos eles, para trocar de projeto e saber o que precisa de você sem abrir página nenhuma
+(`../adr/0038-rail-and-side-column.md`; a peça Rail de `../design/work-frame/screens.md`; os
+estudos aprovados em `../design/sidebar/`). Os terminais ficam só nas abas de cima (`tabs.md`); o
+que se sabe do projeto fica na coluna lateral, ao lado do trilho (`inspector.md`). A árvore do
+trabalho que ocupava este lugar (ADR 0035) saiu com a ADR 0038.
 
 ## Comportamento
-- **Topo:** o botão "New task ⌘N" (abre a folha Nova tarefa, worktrees.new-task) e, ao lado, o botão
-  de filtrar e agrupar (só os que precisam de você, só os trabalhando; agrupar por projeto, que é o
-  padrão, ou por estado).
-- **Projetos:** um cabeçalho por projeto (`projects.md`), dobrável pelo ▾, com o nome, o branch atual
-  da pasta e quantas tarefas tem. Clicar no nome abre a página do projeto no centro, e o cabeçalho
-  fica marcado enquanto ela está aberta. A ordem é a de criação; arrastar um projeto muda a ordem.
-- **Dentro de um projeto, nesta ordem:**
-  - os terminais da pasta do projeto (fora de tarefa), uma linha cada: ponto de estado, o nome (o
-    do programa ou o dado à aba) e uma nota curta à direita (o modelo do agente, a porta que o
-    programa abriu, o tempo de um comando);
-  - as tarefas (worktrees do projeto), cada uma com a linha de tarefa abaixo.
-- **Linha de tarefa**, em duas linhas:
-  - a primeira: o estado (a peça única de estado do app: trabalhando, precisa de você, pronto,
-    falhou, parado, em revisão), o nome da tarefa (o título do PR quando existe), a etiqueta de PR ou
-    CI quando há (verde aberto, âmbar checagens falhando, roxo mesclado) e a idade (desde a última
-    troca de estado);
-  - a segunda: agente · conta, as linhas adicionadas e removidas da tarefa, e o que ela espera em
-    âmbar ("approve Bash", "question").
-  - Nome em negrito quando há novidade que o dono não viu (o agente terminou, pediu algo): sem
-    número nem bolinha. Ver a tarefa tira o negrito.
-  - Passar o mouse mostra o comentário da tarefa e os botões Go to Tab, Review e Hibernate; os
-    sub-agentes de um agente dobram sob a linha.
-- **A tarefa selecionada** (a da aba com foco) tem fundo e contorno, e embaixo dela os terminais
-  dela, como os do projeto. Clicar num terminal mostra a aba dele; clicar na tarefa mostra a aba
-  usada por último nela.
-- "+ Add project" no fim da lista abre uma pasta como projeto (project.new).
-- **Pé da coluna (plano 34 B):** "Projects" com quantos (abre a página Projetos) e "Automations" com
-  quantas estão ligadas (abre a página Automações, vazia ou não); o da página aberta fica aceso. O
-  "Archive & history" virou a aba Sessões de cada projeto e continua no ⌘K (agents.show-history).
-- ⌘B recolhe e mostra a coluna. A largura padrão é 292 pt; arrastar a borda muda e fica salva.
-- Projeto sem tarefa mostra só os terminais da pasta dele: o uso normal (abrir o projeto, um
-  terminal com o Claude) nunca precisa de tarefa.
-- A árvore não lê nada a cada tecla: muda com os avisos que já existem (estado dos agentes pelos
-  hooks, worktrees criadas ou removidas, branch trocado, abas abertas ou fechadas).
-- Toda ação da árvore é comando e está no ⌘K (ADR 0005): ir para um terminal, uma tarefa, um
-  projeto; recolher; filtrar.
+- **Largura:** 56 pt, fixa. O trilho nunca fecha: ⌘B fecha e abre só a coluna lateral.
+- **Projetos, no topo:** um quadrado por projeto (`projects.md`) com a imagem dele, senão o emoji,
+  senão a primeira letra do nome, sobre a cor do projeto. O nome na dica. O escolhido tem um halo em
+  volta, do mesmo tamanho dos outros. A peça de estado no canto (o estado mais urgente dos terminais
+  do projeto: precisa de você, trabalhando, pronto, falhou; parado não tem peça) e um ponto embaixo
+  quando há terminal aberto, como o Dock.
+- **Ordem:** os fixados primeiro, na ordem do dono; depois de uma linha, os abertos não fixados.
+  Arrastar um quadrado muda a ordem ao vivo (os outros abrem caminho); soltar acima da linha fixa,
+  abaixo solta. Um projeto sem terminal não desce da linha (solto e vazio, nada o manteria). A ordem
+  fica no arquivo dos projetos.
+- **Clique num quadrado:** mostra as abas do projeto e a coluna nele; sem terminal, abre um na pasta
+  dele; uma página aberta no centro (Projects, Automations) dá lugar aos terminais.
+- **Clique direito num quadrado:** New Terminal, New Task…, Edit Name and Image…, Pin ou Unpin,
+  Project Settings…, Show in Finder, Copy Path, Close Terminals e Remove from the Sidebar (fecha e
+  solta; nada do disco sai). Cada um é um comando que age naquele projeto.
+- **Soltar uma imagem num quadrado** a faz a imagem do projeto (cortada quadrada, pequena, copiada
+  para a pasta das imagens dos projetos).
+- **"+"** depois dos projetos abre a folha de projeto novo (project.create): a pasta, o nome, a
+  imagem ou o emoji e a cor; o projeto criado nasce fixado.
+- **As páginas da coluna**, depois de outra linha: os ícones de Files, Changes, Sessions, Memory e
+  Git graph (a ordem do dono: arrastar reordena, salva em inspector.order). O clique abre a coluna
+  naquela página; no ícone aceso (a página que a coluna mostra), fecha a coluna, como a barra de
+  atividades do VS Code.
+- **Pé:** Projects (a página Projetos, project.show-all), Automations (a página Automações,
+  orchestration.show-automations) e Remote (os hosts do `~/.ssh/config` e as máquinas da tailnet numa
+  lista, remote.show; escolher conecta numa aba), este só quando há algum host. O da página aberta
+  fica aceso.
+- **Terminais sem projeto:** os da pasta pessoal não viram quadrado; enquanto se está neles nenhum
+  quadrado fica aceso (`tabs.md`, abas sem projeto).
+- O trilho não lê nada a cada tecla: muda com os avisos que já existem (estado dos agentes pelos
+  hooks, abas abertas ou fechadas, projetos editados).
+- Toda ação do trilho é comando e está no ⌘K (ADR 0005): trocar de projeto (⇧⌘S), cada página,
+  fixar, editar, criar, a página Projetos, o Remote.
+- A árvore que saiu da tela ainda junta o que o sidebar.find e o ⌘J listam (os projetos, as
+  tarefas e os terminais).
 
 ## Estados
-- **Nenhum projeto:** a árvore mostra só "+ Add project" e o centro mostra a tela de início
-  (`home.md`).
-- **Projeto fora de um repositório git:** o cabeçalho sem branch; tarefas não se criam nele (a
-  folha Nova tarefa só oferece "In the project's folder").
-- **Pasta do projeto sumida:** o cabeçalho em cinza com "Folder not found" e Locate… e Remove.
+- **Nenhum projeto:** o trilho mostra só o "+", os ícones das páginas e o pé; o centro mostra a tela
+  de início (`home.md`).
+- **Projeto fixado sem terminal:** o quadrado fica, sem o ponto; o clique abre um terminal.
+- **Sem host SSH nem máquina da tailnet:** o pé sem Remote.
 
 ## Casos de borda
-- Muitas tarefas num projeto: as prontas há mais de um dia e sem novidade dobram em "N done" no fim
-  do projeto.
-- Nome longo: corta com reticências; o nome inteiro na dica.
-- Tarefa de outra máquina ("Rodar em", plano 23): a linha mostra o nome da máquina junto da conta.
+- Muitos projetos: o trilho ainda não rola; os que não cabem passam por baixo dos ícones das
+  páginas (falta resolver; ⇧⌘S acha qualquer um).
+- Nome sem letra nem número: o quadrado mostra "•".
+- Imagem que some do disco: o quadrado volta ao emoji ou à letra.
 
 ## Critérios de aceite
-- [ ] Um projeto com dois terminais e uma tarefa mostra os dois terminais e a linha da tarefa; clicar
-  num terminal mostra a aba dele.
-- [ ] Um agente que pede permissão deixa a linha dele em âmbar, com o que espera, e o nome em negrito
-  até o dono ver.
-- [ ] Clicar no nome do projeto abre a página do projeto e marca o cabeçalho.
-- [ ] Projeto sem tarefa nunca mostra nada de tarefa.
-- [ ] ⌘B recolhe e mostra; a largura volta ao reabrir.
-- [ ] Cada ação da árvore está no ⌘K.
-- [ ] Nada da barra de antes existe: sem ícones de página, sem Customize Sidebar, sem a lista de
-  ícones nas configurações (`../design/work-frame/inventory.md`).
+- [x] Um quadrado por projeto, o escolhido com o halo, a peça de estado só fora de parado, o ponto
+  com terminal aberto, o clique escolhe (teste da feature).
+- [x] Arrastar um aberto para cima da linha o fixa e fica na ordem ao reabrir (conferido no app).
+- [x] Os ícones das páginas abrem a coluna na página; o aceso a fecha; arrastar reordena e salva.
+- [x] O pé com Projects e Automations, acesos com a página deles; Remote só com algum host.
+- [ ] O clique direito e a imagem solta conferidos com o mouse de verdade.

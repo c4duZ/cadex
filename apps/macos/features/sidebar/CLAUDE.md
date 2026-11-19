@@ -58,8 +58,9 @@
   programa, ou "Terminal" num shell) e a idade; embaixo o agente e a conta, ou a pasta, e o que espera.
 - A linha de tarefa inteira (fase B2): a idade à direita do nome, embaixo o agente, o +/− e o que
   espera em âmbar; o comentário sob o ponteiro; o clique direito pede ao app o menu (`menuFor`).
-- Status: plano 27 fases B e D no código. A etiqueta de PR do mockup fica de fora: o app não tem de onde
-  saber de um PR.
+- Status: o trilho (plano 36, fases A a F) é o que aparece; a árvore (plano 27 fases B e D) ficou
+  fora da tela e só junta o sidebar.find e o ⌘J, e sai quando eles lerem do modelo sem a view
+  (`../../../../docs/design/work-frame/inventory.md`). Spec em `../../../../docs/spec/sidebar.md` (o trilho).
 
 - `WorkTreeJump.swift` (plano 29 fase C): as linhas do ⌘J tiradas do modelo da árvore (`JumpRow`:
   PRECISA DE VOCÊ, com o que pede ou falhou; TERMINOU, com o terminado e o em revisão; TRABALHANDO;

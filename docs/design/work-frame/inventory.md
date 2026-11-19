@@ -118,6 +118,16 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | arquivo | `apps/macos/features/orchestration/RunPageView.swift`, `RunRows.swift` | muda | o quadro com filtro de execução e a página da execução na cara nova (OrchestrationPage), feito | 30 |
 | arquivo | `apps/macos/features/orchestration/AutomationHistory.swift` | muda | a página do projeto e Automações no pé da árvore; o histórico na cara nova, feito | 30 |
 
+### O trilho e a coluna lateral (plano 36, `docs/adr/0038-rail-and-side-column.md`)
+| tipo | peça | estado | destino | plano |
+|---|---|---|---|---|
+| arquivo | `apps/macos/features/sidebar/WorkTreeView.swift` | sai | fora da tela desde a fase A; ainda junta o que o sidebar.find e o ⌘J listam: sai quando eles lerem do modelo (`apps/macos/features/sidebar/WorkTree.swift`) sem a view | depois do 36 |
+| arquivo | a árvore do trabalho na borda esquerda | muda | o trilho (`apps/macos/features/sidebar/RailView.swift`): os projetos em quadrados, os ícones das páginas e o pé | 36 |
+| arquivo | o painel da direita (`apps/macos/features/inspector/InspectorView.swift`) | muda | a coluna lateral, à esquerda do centro, sem a fileira de abas (os ícones no trilho) | 36 |
+| spec | `docs/spec/sidebar.md`: "a árvore do trabalho. Os projetos" | saiu | a spec é a do trilho | 36 |
+| spec | `docs/spec/inspector.md`: "A coluna opcional à direita da janela" | saiu | a spec é a da coluna lateral | 36 |
+| trecho | "painel da direita" em `docs/spec/status-bar.md` | saiu | a coluna lateral | 36 |
+
 ### Tema (plano 25)
 | tipo | peça | estado | destino | plano |
 |---|---|---|---|---|

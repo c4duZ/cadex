@@ -10,8 +10,8 @@ tokens components.home).
 - Aparece no centro quando nenhum projeto está aberto (a primeira abertura, ou depois de fechar o
   último) e pelo comando home.show (no ⌘K). Quem estava trabalhando abre o Cadex direto onde parou,
   sem passar por ela.
-- A moldura é a de sempre: barra de título sem abas de terminal, a árvore à esquerda, o painel da
-  direita fechado, a barra de status.
+- A moldura é a de sempre: barra de título sem abas de terminal, o trilho à esquerda, a coluna
+  lateral fechada (volta quando um projeto aparece), a barra de status.
 - **De cima para baixo**, numa coluna de 760 pt centrada:
   1. A saudação pela hora ("Good morning", "Good afternoon", "Good evening") e "Pick up where you
      were, or start something."

@@ -52,8 +52,10 @@ aprovada ("Ficou do caralho... segue isso exatamente") está em
   abre as rodadas; o botão direito tem Executar agora, Ligar ou desligar e Apagar, todos comandos.
 - [x] G. O painel Memory da direita leva a essas telas: o clique numa página ou sessão abre a página
   do projeto na seção dela com o item escolhido; "Todas no Archive" vira "Todas as sessões".
-- [ ] H. Fechar: as specs (projects, sidebar, inspector, memory, orchestration), os CLAUDE.md, o
-  `make check`, o `make perf` e a dist.
+- [x] H. Fechar: as specs (projects, sidebar, inspector, memory, orchestration), os CLAUDE.md, o
+  `make check`, o `make perf` e a dist. Feita junto da fase G do plano 36 (o dono, 2026-11-18: o 36
+  mudou essas telas por cima, e as specs foram escritas uma vez, como estão agora). O `make perf`
+  não rodou: só a pedido do dono.
 
 ## Como validar
 - Cada fase: os testes da feature, o print da instância de teste ao lado da tela da proposta, e a
