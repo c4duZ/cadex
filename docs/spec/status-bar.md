@@ -17,7 +17,7 @@ A barra tem dois lados, esquerda e direita, e cada lado é uma lista de itens em
 | Agents | "● 3 working" (azul) e "● 2 need you" (âmbar); some o que for zero | ligado, esquerda |
 | Folder | a trilha "Home › Cadu › Trabalho › cadex" do terminal com foco | desligado |
 | Terminal | "Terminal ⌃`": mostra ou esconde a gaveta de terminais | ligado, direita |
-| Memory | "Memory · 214 pages": abre a aba Memory do painel da direita | ligado, direita |
+| Memory | "Memory · 214 pages": abre a página Memory da coluna lateral | ligado, direita |
 | Agent usage | a conta do agente do terminal com foco, ou a última (a escolha do dono, 2026-10-21): "Claude bkdg 84% · resets 3h", em etiqueta âmbar acima de 80% e texto comum abaixo; passar o ponteiro abre todas as contas (`agents.md`) | ligado, direita |
 | Environment | "Local" no macOS (no Windows, a distro WSL), ou a máquina onde roda | ligado, direita |
 | Keep awake | o café, sempre à vista como era na barra de título: cheio ligado, contorno desligado; o clique roda power.toggle (`power.md`) | ligado, direita |
@@ -28,6 +28,8 @@ A barra tem dois lados, esquerda e direita, e cada lado é uma lista de itens em
 | Terminals | terminais abertos: "›_ 4" | desligado |
 | Ports | portas ouvindo nos processos dos terminais do Cadex: "⌁ 2 (:3000, :5173)" | desligado |
 | SSH | hosts no ar: "SSH 3/3 ●" (`ssh.md`) | desligado |
+| Tailscale | as máquinas da tailnet: "Tailnet 2/3" (`machines.md`) | desligado |
+| Docker | o contexto do Docker da aba com foco, quando não é o deste Mac | desligado |
 
 Sem mexer em nada, a barra é a do mockup: projeto e agentes à esquerda; Terminal, Memory, a
 conta, o café, o ambiente (e a atualização quando há versão nova) à direita. O mockup não desenha
@@ -75,7 +77,33 @@ ligados.
   (passar o ponteiro também abre; "localhost:3000" abre no preview); em Agent usage, o popover das
   contas (cada conta com plano, quando zera, a barra e "84% of the 5-hour window · 61% of the
   week", e "Open an agent on… · Add account · Accounts settings"; é o que era a página Accounts);
-  em Agents, o sino; em Project, a aba Changes do painel da direita.
+  em Agents, o sino; em Project, a página Changes da coluna lateral.
+
+### Os cartões (o dono, 2026-11-18; a proposta aprovada em https://claude.ai/artifact/4nVtRBCgr1PRhhMVRSWmRK)
+Todo item abre um cartão ao passar o ponteiro (o comportamento do cartão das contas: 0,18 s depois
+de parar, fica enquanto o ponteiro está no item ou no cartão); o clique continua fazendo o que
+fazia. Todos têm a mesma cara: título e detalhe, às vezes um número grande e uma barra em partes,
+seções de linhas (a linha clicável acende e leva ao lugar) e as ações no pé, cada uma um comando
+do ⌘K. O cartão só lê enquanto está aberto.
+
+| item | o cartão |
+|---|---|
+| CPU | o uso, usuário e sistema, a carga; os seus 5 processos mais ocupados; o que roda nos terminais do Cadex (o clique leva ao terminal). Os processos do sistema (WindowServer) só o Monitor de Atividade lê. |
+| RAM | usado de total, apps/fixa/comprimida, a pressão de memória (o item fica âmbar fora de normal, vermelho em crítica); os 5 maiores processos |
+| Cadex memory | o app, os ajudantes dele (engine da memória, daemon do terminal) e o que roda em cada terminal; o total. O número da barra continua só o app. |
+| Ports | cada porta com o processo, o pid e o projeto; "Open" no preview; Stop a port… (ports.stop, SIGTERM) e Share on the tailnet… |
+| Agents | os agentes de todas as janelas: precisa de você, trabalhando, pronto, parados; o clique leva ao terminal; o quadro e as notificações |
+| Terminals e Terminal ⌃` | os terminais da janela e os da gaveta: o que roda, a pasta, há quanto tempo; novo terminal e a gaveta |
+| Agent usage | o das contas, como antes; a conta da barra de cima abre o mesmo cartão (para baixo) |
+| Memory | quantas páginas, as que mudaram por último (lidas da wiki ao abrir); abrir e consolidar |
+| Project | o branch contra o remoto (âmbar com algo a enviar ou receber), quantos arquivos mudaram, o último commit; Changes, Push, trocar de branch |
+| Folder | o que ocupa espaço na pasta (medido ao abrir, fora da thread principal; "measuring…" até lá) e o disco livre, âmbar abaixo de 10% |
+| Environment | este Mac (macOS, processador, shell) e as outras máquinas da tailnet; Nova tarefa em… |
+| Tailscale | as máquinas com online, caminho e latência (o ping só com o cartão aberto); o clique conecta |
+| SSH | os hosts, como antes, sem o grupo Tailnet |
+| Docker | o contexto e os contêineres rodando (o `docker ps` ao abrir) |
+| Keep awake | ligado ou não, o modo, desde quando, até quando; desligar, com programa rodando, por 1 hora (power.keep-awake-hour) |
+| Update | a versão nova e as primeiras novidades; atualizar e pular |
 
 ## Estados
 - **Pasta desconhecida** (sessão ainda abrindo): Folder fica vazio, o resto aparece.

@@ -19,7 +19,6 @@ extension WindowSession {
                                                                   "Hosts do ~/.ssh/config que respondem, testados ao abrir e a cada 10 min"),
                               icon: .hardDrives, side: .right, view: strip)
         strip.onConnect = { [weak self] alias in self?.connectSSH(alias) }
-        attachMachines(to: strip)
         ThemeStore.shared.observe { [weak strip] theme in
             strip?.text = theme.interface.text.nsColor
             strip?.secondary = theme.interface.secondaryText.nsColor
@@ -52,7 +51,7 @@ extension WindowSession {
                                           "O que os programas dos terminais ouvem, a cada 10 s com um rodando"),
                               icon: .plug, side: .right, view: label)
         // The card on hover (or a click): each port opens in the preview.
-        let card = HoverCard(over: label) { [weak self] in self?.portsCardContent() ?? NSView() }
+        let card = attachCard(to: label) { [weak self] close in self?.portsCard(close: close) ?? NSView() }
         label.onClick = { card.openNow() }
         portsCard = card
         var timer: Timer?
@@ -72,47 +71,12 @@ extension WindowSession {
         return item
     }
 
-    private func portsCardContent() -> NSView {
-        let ui = ThemeStore.shared.current.interface
-        let title = NSTextField(labelWithString: T("Listening ports", "Portas ouvindo"))
-        title.font = UILooks.font(12, weight: .semibold)
-        title.textColor = ui.text.nsColor
-        var rows: [NSView] = [title]
-        if ports.isEmpty {
-            let none = NSTextField(labelWithString: T("No program in your terminals is listening", "Nenhum programa dos terminais está ouvindo"))
-            none.font = UILooks.font(11)
-            none.textColor = ui.secondaryText.nsColor
-            rows.append(none)
-        }
-        for port in ports {
-            let name = NSTextField(labelWithString: "localhost:\(port)")
-            name.font = UILooks.monospacedDigits(12)
-            name.textColor = ui.text.nsColor
-            let open = NSTextField(labelWithString: T("Open in preview", "Abrir no preview"))
-            open.font = UILooks.font(11)
-            open.textColor = ui.secondaryText.nsColor
-            let line = NSStackView(views: [name, NSView(), open])
-            let row = HoverRow(line)
-            row.onClick = { [weak self] in
-                self?.portsCard?.close()
-                self?.openPreview("http://localhost:\(port)")
-            }
-            row.widthAnchor.constraint(equalToConstant: UILooks.pt(240)).isActive = true
-            rows.append(row)
-        }
-        let stack = NSStackView(views: rows)
-        stack.orientation = .vertical
-        stack.alignment = .leading
-        stack.spacing = 4
-        stack.setCustomSpacing(8, after: title)
-        return stack
-    }
-
     /// Only terminals running a program are asked: a shell at its prompt
     /// listens on nothing, and with none running nothing is read.
     func readPorts(into label: StatusLabel) {
         let groups = (projects?.projects ?? []).flatMap { $0.tabs.allTerminals }.map(\.foregroundGroup).filter { $0 > 0 }
-        ports = groups.isEmpty ? [] : ListeningPorts.ports(inGroups: groups)
+        listeners = groups.isEmpty ? [] : ListeningPorts.listeners(inGroups: groups)
+        ports = listeners.map(\.port)
         label.text = "\(ports.count)"
         portsCard?.refresh()
         label.setTip(ports.isEmpty ? T("No program is listening", "Nenhum programa ouvindo") : ports.map { ":\($0)" }.joined(separator: " "))

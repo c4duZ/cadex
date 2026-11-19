@@ -29,6 +29,7 @@ extension WindowSession {
         }
         branchItem.onVisible = { [weak git] visible in if visible { git?.refresh() } }
         let terminals = StatusLabel(icon: .terminalWindow, tip: T("Open terminals", "Terminais abertos"))
+        attachCard(to: terminals) { [weak self] close in self?.terminalsCard(close: close) ?? NSView() }
         let terminalsItem = StatusItem(id: "terminals", title: T("Terminals", "Terminais"),
                                        subtitle: T("How many are open in this window", "Quantos estão abertos nesta janela"),
                                        icon: .terminalWindow, side: .right, view: terminals)
@@ -36,8 +37,11 @@ extension WindowSession {
         self.terminalsLabel = terminals
         self.terminalsItem = terminalsItem
         bar.add([makeDrawerItem(), makeProjectItem(), branchItem, terminalsItem, makeAgentsItem(), makeMemoryItem(), makeUsageItem(),
-                 makeKeepAwakeItem(), makeUpdateItem(), makePortsItem(), makeSSHItem(), makeDockerItem()] + SystemItems.all { [weak self] in _ = self?.commands.run("statusBar.activity-monitor") })
+                 makeKeepAwakeItem(), makeUpdateItem(), makePortsItem(), makeSSHItem(), makeTailscaleItem(), makeDockerItem()]
+                + SystemItems.all(click: { [weak self] in _ = self?.commands.run("statusBar.activity-monitor") },
+                                  terminals: { [weak self] in self?.cadexTerminals() ?? [] }))
         bar.run = { [weak self] id in _ = self?.commands.run(id) }
+        attachItemCards(bar)
         bar.onLayoutChange = { [weak self] left, right in
             self?.settings.store.update {
                 $0.statusBar.left = left
@@ -66,5 +70,19 @@ extension WindowSession {
         if branch.ahead > 0 { text += " ↑\(branch.ahead)" }
         if branch.behind > 0 { text += " ↓\(branch.behind)" }
         return text
+    }
+
+    /// Cadex's terminals with a program in front, in every window, for the system cards' "In
+    /// Cadex": the program's group, "project", and the way to it.
+    func cadexTerminals() -> [SystemCards.Terminal] {
+        app.sessions.flatMap { window in
+            (window.projects?.projects ?? []).flatMap { project in
+                project.tabs.allTerminals.compactMap { terminal -> SystemCards.Terminal? in
+                    let group = terminal.foregroundGroup
+                    guard group > 0, group != terminal.shellPid else { return nil }
+                    return SystemCards.Terminal(group: group, name: project.name) { [weak app] in app?.goToAgent(key: nil, pid: group) }
+                }
+            }
+        }
     }
 }

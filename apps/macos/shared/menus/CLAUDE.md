@@ -39,6 +39,10 @@
   nada. A primeira versão esperava avisos de saída com atrasos encadeados: piscava ao entrar e ficava
   quase 1 s ao sair (o dono, 2026-10-21). `refresh` troca o conteúdo no lugar, sem reabrir. Nas cores
   dos menus, nunca pega o teclado. `HoverRow`, a linha clicável dele, com fundo ao passar.
+- `StatusCard.swift`: o conteúdo de todo cartão da barra de status (cabeçalho, número grande,
+  barra em partes, legenda, seções de linhas clicáveis, nota, ações no pé), nos tokens da moldura;
+  cada item só dá os blocos (`../../../../docs/spec/status-bar.md`, Os cartões). O `HoverCard` abre
+  também embaixo do item (`below`, a seta em cima), para a conta da barra de título.
 - `MenuTableView.swift`: tabela cujo clique direito abre o PopupMenu; `menuRow` é a linha clicada
   enquanto o menu está aberto e a ação roda (source control e histórico do git).
 - Fontes e medidas de MenuLayout e da dica vêm de UILooks (`../looks/CLAUDE.md`).

@@ -5,6 +5,10 @@ Ver os servidores do `~/.ssh/config` (as VPS de quem usa), saber se estão no ar
 num deles com um clique.
 
 ## Comportamento
+- Remote, no pé do trilho (`sidebar.md`, plano 36 F; só quando há algum host ou máquina da tailnet):
+  os hosts daqui e as máquinas da tailnet (`machines.md`) numa lista só (remote.show, também no ⌘K);
+  escolher abre uma aba conectada. O item SSH da barra de status vem desligado por padrão e quase
+  ninguém o via (ADR 0038).
 - Os hosts vêm do `~/.ssh/config` (e dos arquivos que ele inclui com `Include`): cada `Host` com
   nome fixo vira um item. `Host` com `*` ou `?` é regra, não servidor, e fica de fora.
 - Ao abrir o app, e de novo a cada 10 minutos enquanto o item SSH aparece na barra de status, o
@@ -18,9 +22,9 @@ num deles com um clique.
   fecha quando o ponteiro sai dos dois. Clicar num host abre uma aba com `ssh <host>` (ssh.connect,
   também no ⌘K); "Test Again" testa na hora.
 - Mudar o `~/.ssh/config` atualiza a lista sem reabrir o app.
-- Com o Tailscale do dono rodando, o cartão ganha, abaixo dos hosts, o grupo "Tailnet" com as
-  máquinas da tailnet (`docs/spec/machines.md`, plano 23). Quem põe o grupo no cartão é o app: o
-  ssh não lê o Tailscale. O número do item continua contando só os hosts do `~/.ssh/config`.
+- As máquinas da tailnet ficavam num grupo "Tailnet" abaixo dos hosts; desde 2026-11-18 são o item
+  Tailscale, com o cartão dele (`docs/spec/machines.md`, `docs/spec/status-bar.md`). O cartão do SSH
+  mostra só os hosts do `~/.ssh/config`.
 
 ## Estados
 - **Sem `~/.ssh/config` ou sem hosts**: o item mostra "SSH" apagado; o cartão diz "No hosts in

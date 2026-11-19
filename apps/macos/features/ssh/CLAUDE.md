@@ -22,7 +22,8 @@
   verde ou testando. Passar o ponteiro (ou clicar) abre o cartão (`HoverCard` de
   `../../shared/menus`) com cada host, a cor, o endereço e a resposta; clicar num host conecta,
   "Test Again" testa. Sem menu: o cartão é o caminho (o dono, 2026-10-21). O app pode pôr mais
-  conteúdo embaixo (`extraContent`, as máquinas da tailnet do plano 23) e saber quando o cartão abre
+  conteúdo embaixo (`extraContent`; as máquinas da tailnet do plano 23 ficaram ali até 2026-11-18 e
+  hoje são o item Tailscale, então o app não usa) e saber quando o cartão abre
   e fecha (`onCardOpen`) e quando "Test Again" é clicado (`onTestAgain`), sem o ssh saber o que é; `closeCard` fecha depois do clique numa linha dele.
 - O app (`../../app/SSHWiring.swift`) põe o item na barra e faz o ssh.connect (aba nova com `ssh
   '<host>'`).

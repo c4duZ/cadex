@@ -17,6 +17,15 @@ public final class SystemStats {
         public var cpu: Double?
         /// Cadex's footprint, the number Activity Monitor shows for it.
         public var own: UInt64
+        /// The memory in use in parts (the RAM card): app, wired, compressed.
+        public var ramApp: UInt64 = 0
+        public var ramWired: UInt64 = 0
+        public var ramCompressed: UInt64 = 0
+        /// The processor's user and system shares, 0 to 100 (the CPU card).
+        public var cpuUser: Double?
+        public var cpuSystem: Double?
+        /// The system's memory pressure: 1 normal, 2 warning, 4 critical (as Activity Monitor).
+        public var pressure: Int = 1
     }
 
     public static let shared = SystemStats()
@@ -24,7 +33,7 @@ public final class SystemStats {
 
     private var watchers: [UUID: (Reading) -> Void] = [:]
     private var timer: Timer?
-    private var lastTicks: (busy: UInt64, total: UInt64)?
+    private var lastTicks: (user: UInt64, system: UInt64, busy: UInt64, total: UInt64)?
     private(set) var last: Reading?
 
     /// Whether anything reads now: false means no timer.
@@ -58,25 +67,40 @@ public final class SystemStats {
     }
 
     private func read() {
-        let reading = Reading(ramUsed: Self.memoryUsed(), ramTotal: ProcessInfo.processInfo.physicalMemory,
-                              cpu: cpuBusy(), own: Self.footprint())
+        let parts = Self.memoryParts()
+        let cpu = cpuBusy()
+        var reading = Reading(ramUsed: parts.app + parts.wired + parts.compressed, ramTotal: ProcessInfo.processInfo.physicalMemory,
+                              cpu: cpu?.busy, own: Self.footprint())
+        reading.ramApp = parts.app
+        reading.ramWired = parts.wired
+        reading.ramCompressed = parts.compressed
+        reading.cpuUser = cpu?.user
+        reading.cpuSystem = cpu?.system
+        reading.pressure = Self.pressure()
         last = reading
         for handler in watchers.values { handler(reading) }
     }
 
-    private static func memoryUsed() -> UInt64 {
+    private static func memoryParts() -> (app: UInt64, wired: UInt64, compressed: UInt64) {
         var stats = vm_statistics64()
         var count = mach_msg_type_number_t(MemoryLayout<vm_statistics64>.size / MemoryLayout<integer_t>.size)
         let result = withUnsafeMutablePointer(to: &stats) {
             $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) { host_statistics64(mach_host_self(), HOST_VM_INFO64, $0, &count) }
         }
-        guard result == KERN_SUCCESS else { return 0 }
+        guard result == KERN_SUCCESS else { return (0, 0, 0) }
         let page = UInt64(getpagesize())
         let app = UInt64(stats.internal_page_count) - UInt64(min(stats.purgeable_count, stats.internal_page_count))
-        return (app + UInt64(stats.wire_count) + UInt64(stats.compressor_page_count)) * page
+        return (app * page, UInt64(stats.wire_count) * page, UInt64(stats.compressor_page_count) * page)
     }
 
-    private func cpuBusy() -> Double? {
+    /// kern.memorystatus_vm_pressure_level: 1 normal, 2 warning, 4 critical.
+    private static func pressure() -> Int {
+        var level: Int32 = 1
+        var size = MemoryLayout<Int32>.size
+        return sysctlbyname("kern.memorystatus_vm_pressure_level", &level, &size, nil, 0) == 0 ? Int(level) : 1
+    }
+
+    private func cpuBusy() -> (busy: Double, user: Double, system: Double)? {
         var info = host_cpu_load_info()
         var count = mach_msg_type_number_t(MemoryLayout<host_cpu_load_info>.size / MemoryLayout<integer_t>.size)
         let result = withUnsafeMutablePointer(to: &info) {
@@ -85,10 +109,12 @@ public final class SystemStats {
         guard result == KERN_SUCCESS else { return nil }
         let t = info.cpu_ticks
         let user = UInt64(t.0), system = UInt64(t.1), idle = UInt64(t.2), nice = UInt64(t.3)
-        let ticks = (busy: user + system + nice, total: user + system + idle + nice)
+        let ticks = (user: user + nice, system: system, busy: user + system + nice, total: user + system + idle + nice)
         defer { lastTicks = ticks }
         guard let lastTicks, ticks.total > lastTicks.total else { return nil }
-        return Double(ticks.busy - lastTicks.busy) / Double(ticks.total - lastTicks.total) * 100
+        let span = Double(ticks.total - lastTicks.total)
+        return (Double(ticks.busy - lastTicks.busy) / span * 100, Double(ticks.user - lastTicks.user) / span * 100,
+                Double(ticks.system - lastTicks.system) / span * 100)
     }
 
     private static func footprint() -> UInt64 {

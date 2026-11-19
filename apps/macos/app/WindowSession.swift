@@ -101,6 +101,14 @@ final class WindowSession: NSObject, NSWindowDelegate {
     var projectMemory: [String: [MemoryPage]] = [:]
     /// The terminal drawer, made on its first show (DrawerWiring.swift).
     var drawer: DrawerView?
+    /// The status bar items' cards (StatusBarCards.swift), kept while the window is.
+    var statusCards: [HoverCard] = []
+    /// The listening ports with their process (the Ports card), read with `ports`.
+    var listeners: [(port: UInt16, pid: Int32)] = []
+    /// The folder card's sizes, measured when it opens (StatusBarMoreCards.swift).
+    var folderSizes: (folder: String, total: UInt64, largest: [(name: String, bytes: UInt64)])?
+    var measuringFolder: String?
+    var folderCard: HoverCard?
     /// The New Task sheet while it shows (NewTaskWiring.swift).
     var newTaskSheet: NewTaskSheet?
     /// The home screen while shown, and its choices (HomeWiring.swift).
@@ -207,6 +215,10 @@ final class WindowSession: NSObject, NSWindowDelegate {
         workspace.titleBar.setBell(count: AgentAttention.shared.unseen)
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
         setUpStatusBar(workspace.statusBar, git: git)
+        // The account up top opens the accounts card on hover, as the status bar's usage does.
+        statusCards.append(HoverCard(over: workspace.titleBar.accountView, below: true) { [weak self] in
+            AgentUsageCard.make(colors: self?.usageStrip?.colors ?? AgentColors()) { account in self?.switchOrLaunch(account) }
+        })
         // After the status bar's items exist: they show keep-awake and the update (review of
         // 2026-11-17: before, a new window drew them in the wrong state).
         showPower()

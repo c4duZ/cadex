@@ -175,5 +175,39 @@ let exitCode = await Checks.run([
             try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/status-bar.png"))
         }
     }),
+    ("the CPU, RAM and Cadex cards read this user's processes, and draw (a picture with CADEX_SNAPSHOT_DIR)", {
+        let first = ProcessTable.shared.sample()
+        expect(first.contains { $0.pid == getpid() }, "this test's own process is readable")
+        expect(ProcessTable.displayName(path: "/Users/x/.local/share/claude/versions/2.1.327") == "claude")
+        expect(ProcessTable.displayName(path: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome") == "Google Chrome")
+        SystemCards.cardOpened(true)
+        defer { SystemCards.cardOpened(false) }
+        var reading = SystemStats.Reading(ramUsed: 15 * 1_073_741_824, ramTotal: 16 * 1_073_741_824, cpu: 32, own: 61 * 1_048_576)
+        reading.ramApp = 10 * 1_073_741_824; reading.ramWired = 2_700_000_000; reading.ramCompressed = 2_800_000_000
+        reading.cpuUser = 13.5; reading.cpuSystem = 18.5; reading.pressure = 2
+        let cards = [("cpu", SystemCards.cpu(reading) {}), ("ram", SystemCards.ram(reading) {}), ("cadex", SystemCards.cadex(reading) {})]
+        guard let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] else { return }
+        for (name, content) in cards {
+            let box = NSView()
+            box.wantsLayer = true
+            box.layer?.backgroundColor = NSColor(srgbRed: 0x17 / 255, green: 0x19 / 255, blue: 0x1C / 255, alpha: 1).cgColor
+            content.translatesAutoresizingMaskIntoConstraints = false
+            box.addSubview(content)
+            NSLayoutConstraint.activate([content.topAnchor.constraint(equalTo: box.topAnchor, constant: 14),
+                                         content.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -14),
+                                         content.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 14),
+                                         content.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -14)])
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 330, height: 400), styleMask: [.borderless], backing: .buffered, defer: false)
+            window.appearance = NSAppearance(named: .darkAqua)
+            window.contentView = box
+            box.layoutSubtreeIfNeeded()
+            window.setContentSize(box.fittingSize)
+            box.layoutSubtreeIfNeeded()
+            if let bitmap = box.bitmapImageRepForCachingDisplay(in: box.bounds) {
+                box.cacheDisplay(in: box.bounds, to: bitmap)
+                try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/card-\(name).png"))
+            }
+        }
+    }),
 ])
 exit(exitCode)

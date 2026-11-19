@@ -100,6 +100,13 @@
   junto com os comandos, antes de as configurações montarem os atalhos.
   As cores vêm do tema; a cor da moldura vai na janela, não numa camada da view, porque uma
   camada pintada cobria os botões da janela.
+- `StatusBarCards.swift` e `StatusBarMoreCards.swift`: os cartões dos itens da barra de status que
+  o app faz (`../../../docs/spec/status-bar.md`, Os cartões): Agents, Terminals (e a gaveta),
+  Project, Memory, Ports, Folder, Environment, Keep awake, Update e Docker, cada um montado ao abrir
+  (`attachCard`, `attachItemCards`; o git e o docker perguntados só então, a pasta medida fora da
+  thread principal), ports.stop (as portas no ⌘K, `ChoiceSource`) e a conta da barra de título com o
+  cartão das contas (`WindowSession.swift`). `cadexTerminals` dá aos cartões de sistema os terminais
+  com programa.
 - `RailWiring.swift` (plano 36 fase A, ADR 0038): o trilho da feature `sidebar` na borda esquerda
   (`WorkspaceView.swift`): os projetos com a cor, o estado mais urgente dos terminais e o ponto de
   terminal aberto, redesenhados com a árvore (drawTree, em `TreeWiring.swift`); o clique escolhe o projeto (as
@@ -195,8 +202,9 @@
   Memory na barra lateral, com as contas e o "Open the Session" pelo índice do History (vigiado só com
   a página na tela); abrir uma página autoriza a pasta da wiki antes; o ⌘S (editor.save) num .md de
   uma wiki roda o `reindex` do projeto, e a edição vira commit.
-- `MachinesWiring.swift` (plano 23, fase B): o grupo "Tailnet" da feature machines no cartão do ssh
-  (`attachMachines`, chamado pelo `SSHWiring.swift`), lido só com o cartão aberto, e o
+- `MachinesWiring.swift` (plano 23, fase B): o item Tailscale da barra de status
+  (`makeTailscaleItem`; era o grupo "Tailnet" no cartão do ssh até 2026-11-18), lido só enquanto
+  aparece, com o cartão das máquinas (o ping só com ele aberto), e o
   machines.connect: aba nova com `ssh '<usuário>@<máquina>'`, o usuário pedido uma vez por máquina
   (o deste Mac sugerido; ⌥↩ pergunta de novo) e guardado em machines.users.
 - `EnvironmentWiring.swift` (plano 23, fase E): New Task num repositório com receita sobe o ambiente

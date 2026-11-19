@@ -19,8 +19,12 @@ public final class HoverCard: NSObject {
     private var watch: Timer?
 
     /// Shows `content()`, rebuilt each time it opens, over `view`.
-    public init(over view: NSView, content: @escaping () -> NSView) {
+    /// Under the item instead of over it (an item of the title bar: the account, 2026-11-18).
+    private let below: Bool
+
+    public init(over view: NSView, below: Bool = false, content: @escaping () -> NSView) {
         self.view = view
+        self.below = below
         self.content = content
         super.init()
         view.addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect], owner: self))
@@ -35,7 +39,7 @@ public final class HoverCard: NSObject {
     /// content in place, no animation, no new window.
     public func refresh() {
         guard isOpen, let panel else { return }
-        panel.place(content(), above: view)
+        panel.place(content(), at: view, below: below)
     }
 
     /// A click on the item: open now, no wait.
@@ -96,7 +100,7 @@ public final class HoverCard: NSObject {
         guard let view, view.window?.isVisible == true, !PopupMenu.isOpen, !isOpen else { return }
         let panel = self.panel ?? HoverCardPanel()
         self.panel = panel
-        panel.place(content(), above: view)
+        panel.place(content(), at: view, below: below)
         panel.present()
         let timer = Timer(timeInterval: 1.0 / 30, repeats: true) { [weak self] _ in MainActor.assumeIsolated { self?.look() } }
         RunLoop.main.add(timer, forMode: .common)
@@ -110,8 +114,9 @@ public final class HoverCard: NSObject {
         let pointer = NSEvent.mouseLocation
         let item = window.convertToScreen(view.convert(view.bounds, to: nil)).insetBy(dx: -2, dy: -2)
         let card = panel.frame.insetBy(dx: -2, dy: -2)
-        let bridge = NSRect(x: min(item.minX, card.minX), y: item.maxY - 2, width: max(item.maxX, card.maxX) - min(item.minX, card.minX),
-                            height: max(card.minY - item.maxY, 0) + 4)
+        let low = below ? card.maxY - 2 : item.maxY - 2
+        let bridge = NSRect(x: min(item.minX, card.minX), y: low, width: max(item.maxX, card.maxX) - min(item.minX, card.minX),
+                            height: max(below ? item.minY - card.maxY : card.minY - item.maxY, 0) + 4)
         let inside = item.contains(pointer) || card.contains(pointer) || bridge.contains(pointer)
         // Pinned: the pointer has not come yet; once it does, the hover rule takes over.
         if pinned {
@@ -143,7 +148,7 @@ final class HoverCardPanel: NSPanel {
     /// The content, sized, above `view` like a popover: the arrow on its
     /// bottom edge points at the item's middle, its tip on the item's top,
     /// so the pointer goes straight in. Kept on screen.
-    func place(_ content: NSView, above view: NSView?) {
+    func place(_ content: NSView, at view: NSView?, below: Bool) {
         guard let view, let window = view.window else { return }
         let style = MenuStyle.current
         box.fill = style.background
@@ -152,19 +157,20 @@ final class HoverCardPanel: NSPanel {
         content.translatesAutoresizingMaskIntoConstraints = false
         box.addSubview(content)
         NSLayoutConstraint.activate([
-            content.topAnchor.constraint(equalTo: box.topAnchor, constant: 14),
-            content.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -(14 + CardBox.arrow)),
+            content.topAnchor.constraint(equalTo: box.topAnchor, constant: 14 + (below ? CardBox.arrow : 0)),
+            content.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -(14 + (below ? 0 : CardBox.arrow))),
             content.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 14),
             content.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -14),
         ])
         box.layoutSubtreeIfNeeded()
         let size = box.fittingSize
         let rect = window.convertToScreen(view.convert(view.bounds, to: nil))
-        var origin = NSPoint(x: rect.midX - size.width / 2, y: rect.maxY - 2)
+        var origin = NSPoint(x: rect.midX - size.width / 2, y: below ? rect.minY - size.height + 2 : rect.maxY - 2)
         if let screen = window.screen?.visibleFrame {
             origin.x = min(max(origin.x, screen.minX + 6), screen.maxX - size.width - 6)
-            origin.y = min(origin.y, screen.maxY - size.height - 6)
+            origin.y = min(max(origin.y, screen.minY + 6), screen.maxY - size.height - 6)
         }
+        box.pointsUp = below
         target = NSRect(origin: origin, size: size)
         if isVisible { setFrame(target, display: true) }
         box.arrowX = min(max(rect.midX - origin.x, 18), size.width - 18)
@@ -209,8 +215,16 @@ private final class CardBox: NSView {
     var fill: NSColor = .windowBackgroundColor
     var stroke: NSColor = .separatorColor
     var arrowX: CGFloat = 40
+    /// Under its item: the same shape upside down, the arrow on top.
+    var pointsUp = false { didSet { needsDisplay = true } }
 
     override func draw(_ dirtyRect: NSRect) {
+        if pointsUp {
+            let flip = NSAffineTransform()
+            flip.translateX(by: 0, yBy: bounds.height)
+            flip.scaleX(by: 1, yBy: -1)
+            flip.concat()
+        }
         let a = Self.arrow
         let body = NSRect(x: 0.5, y: a + 0.5, width: bounds.width - 1, height: bounds.height - a - 1)
         let path = NSBezierPath(roundedRect: body, xRadius: 10, yRadius: 10)

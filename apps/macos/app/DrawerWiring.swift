@@ -77,6 +77,7 @@ extension WindowSession {
         let label = StatusLabel(icon: nil, tip: T("The terminal drawer", "A gaveta de terminais"))
         label.text = T("Terminal ", "Terminal ") + (app.keymapLabel("drawer.toggle") ?? "⌃`")
         label.onClick = { [weak self] in _ = self?.commands.run("drawer.toggle") }
+        attachCard(to: label) { [weak self] close in self?.terminalsCard(close: close) ?? NSView() }
         return StatusItem(id: "drawer", title: T("Terminal drawer", "Gaveta de terminais"),
                           subtitle: T("Quick terminals outside the projects", "Terminais rápidos fora dos projetos"),
                           icon: .terminal, side: .right, view: label)

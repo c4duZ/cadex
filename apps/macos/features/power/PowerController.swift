@@ -39,8 +39,30 @@ public final class PowerController {
         self.holder = holder
     }
 
+    /// Since when the mode is on (the coffee's card); nil while off.
+    public private(set) var since: Date?
+    /// When a timed keep-awake (`keepAwake(for:)`) lets the computer sleep again; nil without one.
+    public private(set) var until: Date?
+    private var untilTimer: Timer?
+
+    /// Awake for a while, then off by itself (power.keep-awake-hour; the card's "For 1 hour").
+    public func keepAwake(for seconds: TimeInterval) {
+        set(.always)
+        until = Date().addingTimeInterval(seconds)
+        untilTimer?.invalidate()
+        untilTimer = Timer.scheduledTimer(withTimeInterval: seconds, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated { self?.set(.off) }
+        }
+        onChange?()
+    }
+
     public func set(_ mode: Mode) {
         guard mode != self.mode else { return }
+        if mode == .off || self.mode == .off { since = mode == .off ? nil : Date() }
+        // Any other choice ends a timed one.
+        untilTimer?.invalidate()
+        untilTimer = nil
+        until = nil
         self.mode = mode
         timer?.invalidate()
         timer = nil

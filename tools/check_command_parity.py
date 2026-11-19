@@ -34,6 +34,8 @@ MAC_ONLY = {"project.edit", "project.create", "project.new-terminal", "project.r
             "pane.zoom",
             # The translucent window and vibrancy from ⌘K (2026-11-18): the Windows app has no glass yet.
             "theme.toggle-translucent", "theme.toggle-vibrancy",
+            # The status bar's cards (2026-11-18): the coffee's "For 1 hour" and Stop a port, Mac first.
+            "power.keep-awake-hour", "ports.stop",
             # Managed accounts (plan 18, phase C), Mac only like the rest of agents.
             "agents.add-account", "agents.set-active-account", "agents.set-project-account", "agents.sync-account-config", "agents.share-account-config",
             "agents.use-own-copy", "agents.follow-default-config", "agents.remove-account",

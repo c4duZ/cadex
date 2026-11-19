@@ -20,7 +20,8 @@
   sem mudar o modo nem o café; sai com o último trabalho.
 - `PowerHold.swift`: os pedidos do IOKit (PreventSystemSleep, que vale com a tampa fechada na
   tomada; PreventUserIdleSystemSleep; e o da tela, se pedido). Pedido recusado volta a off.
-- `PowerCommands.swift`: power.toggle (sem atalho desde o plano 29, o ⇧⌘A é do cartão Agent da tela de início: o modo padrão, `defaultMode`, ou desligar), power.keep-awake, power.keep-awake-while-running e power.allow-sleep; cada
+- `PowerCommands.swift`: power.toggle (sem atalho desde o plano 29, o ⇧⌘A é do cartão Agent da tela de início: o modo padrão, `defaultMode`, ou desligar), power.keep-awake, power.keep-awake-while-running, power.keep-awake-hour (o "For 1 hour" do cartão do café:
+  `keepAwake(for:)` desliga sozinho; `since` e `until` dizem desde quando e até quando) e power.allow-sleep; cada
   um some quando não muda nada.
 - Spec: `docs/spec/power.md`.
 

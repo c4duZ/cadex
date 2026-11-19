@@ -15,6 +15,15 @@ public enum ListeningPorts {
         return found.sorted()
     }
 
+    /// Each port with the process that listens on it (the Ports card: its name, its pid, Stop).
+    public static func listeners(inGroups groups: [Int32]) -> [(port: UInt16, pid: Int32)] {
+        var found: [UInt16: Int32] = [:]
+        for group in groups where group > 0 {
+            for pid in pids(inGroup: group) { for port in listening(pid) where found[port] == nil { found[port] = pid } }
+        }
+        return found.keys.sorted().map { ($0, found[$0]!) }
+    }
+
     static func pids(inGroup group: Int32) -> [Int32] {
         let size = proc_listpids(UInt32(PROC_PGRP_ONLY), UInt32(group), nil, 0)
         guard size > 0 else { return [] }

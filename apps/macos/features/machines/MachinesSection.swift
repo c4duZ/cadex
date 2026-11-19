@@ -58,7 +58,7 @@ public enum MachinesSection {
     }
 
     /// "Tailnet 2/3": online of the other machines.
-    static func titleText(_ status: TailnetStatus) -> String {
+    public static func titleText(_ status: TailnetStatus) -> String {
         let others = status.others
         guard status.isRunning, !others.isEmpty else { return "Tailnet" }
         return "Tailnet \(others.filter(\.online).count)/\(others.count)"

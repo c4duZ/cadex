@@ -8,10 +8,10 @@ import UILooks
 /// usage item lists one per account, and so does Agents › Accounts: the
 /// owner liked the card's look and asked the same for the tab (2026-10-21).
 @MainActor
-enum AgentUsageCard {
+public enum AgentUsageCard {
     /// Every account worth showing, one block each, in the card over the usage item; a click on one
     /// opens its agent (`launch`).
-    static func make(colors: AgentColors, launch: (@MainActor (AgentAccount) -> Void)? = nil) -> NSView {
+    public static func make(colors: AgentColors, launch: (@MainActor (AgentAccount) -> Void)? = nil) -> NSView {
         let stack = NSStackView()
         stack.orientation = .vertical
         stack.alignment = .leading

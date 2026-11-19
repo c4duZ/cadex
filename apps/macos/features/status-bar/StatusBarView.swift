@@ -94,6 +94,8 @@ public final class StatusBarView: NSView {
     }
 
     public var known: [String] { catalog.map(\.id) }
+    /// An item's view, for the app to put its card on (the folder's, the environment's).
+    public func itemView(_ id: String) -> NSView? { catalog.first { $0.id == id }?.view }
     var catalogItems: [StatusItem] { catalog }
 
     /// statusBar.left and statusBar.right from settings; unknown ids are

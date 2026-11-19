@@ -20,16 +20,16 @@ celular. A rede é o Tailscale que o dono já tem (`docs/adr/0030-installed-tail
   Tailscale). Se esse fluxo falhar, o Cadex relê a lista a cada 30 s, só enquanto o cartão ou a
   paleta mostram máquinas.
 
-### No cartão do ssh
-- O cartão do item SSH da barra de status (`docs/spec/ssh.md`) ganha, abaixo dos hosts do
-  `~/.ssh/config`, o grupo "Tailnet" com as máquinas: a bolinha (verde online e direto, amarela
+### No item Tailscale
+- O item Tailscale da barra de status ("Tailnet 2/3", desligado por padrão; até 2026-11-18 era um
+  grupo no cartão do SSH, o dono pediu um item próprio) abre o cartão com as máquinas: a bolinha (verde online e direto, amarela
   online pelo relay, vermelha offline), o nome, o sistema e "direct 12 ms", "relay (sao) 80 ms" ou
   "offline, seen 3h ago".
 - A latência vem do ping do Tailscale (pela API local, sem abrir processo; só com a CLI, um
   `tailscale ping`), uma vez por máquina online, ao abrir o cartão e no "Test Again"; nunca por
   relógio.
-- O número do item ("SSH 3/3") conta os hosts do `~/.ssh/config`; as máquinas da tailnet têm a
-  contagem delas no título do grupo ("Tailnet 2/3").
+- O item diz "Tailnet 2/3" (online das outras máquinas); o "SSH 3/3" conta só os hosts do
+  `~/.ssh/config`. O cartão também tem "Share a port…" e "Ping again".
 - Uma máquina que também é um host do `~/.ssh/config` (mesmo nome ou mesmo endereço) aparece nos
   dois grupos.
 

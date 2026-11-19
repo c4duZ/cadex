@@ -18,6 +18,7 @@ extension WindowSession {
         // Room for two tab titles: a long branch is cut, not pushing the bar (owner, 2026-10-22).
         label.maxTextWidth = UILooks.pt(DesignTokens.Tab.maxTitle) * 2
         label.onClick = { [weak self] in _ = self?.commands.run("git.show") }
+        attachCard(to: label) { [weak self] close in self?.projectCard(close: close) ?? NSView() }
         projectLabel = label
         return StatusItem(id: "project", title: T("Project", "Projeto"),
                           subtitle: T("The project, its branch, commits to push ↑ and to pull ↓", "O projeto, o branch, commits a enviar ↑ e a receber ↓"),
@@ -46,6 +47,7 @@ extension WindowSession {
         working.onClick = { [weak self] in _ = self?.commands.run("sidebar.show") }
         let row = NSStackView(views: [working, needs])
         row.isHidden = true
+        attachCard(to: row) { [weak self] close in self?.agentsCard(close: close) ?? NSView() }
         row.spacing = UILooks.pt(DesignTokens.StatusBar.gap) - 2 * StatusBarView.itemInset
         let item = StatusItem(id: "agents", title: T("Agents", "Agentes"),
                               subtitle: T("How many work and how many need you", "Quantos trabalham e quantos precisam de você"),
@@ -84,6 +86,7 @@ extension WindowSession {
         let label = StatusLabel(icon: nil, tip: T("The project's memory", "A memória do projeto"))
         label.text = T("Memory", "Memória")
         label.onClick = { [weak self] in _ = self?.commands.run("memory.show") }
+        attachCard(to: label) { [weak self] close in self?.memoryCard(close: close) ?? NSView() }
         return StatusItem(id: "memory", title: T("Memory", "Memória"),
                           subtitle: T("Opens the project's memory", "Abre a memória do projeto"),
                           icon: .memory, side: .right, view: label)

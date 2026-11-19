@@ -1,8 +1,8 @@
 # machines (app macOS)
 
 ## O que eu quero
-- As máquinas da tailnet do dono à vista e a um clique: no cartão do ssh, abaixo dos hosts do
-  `~/.ssh/config`, com online, caminho (direto ou relay) e latência, e `ssh <usuário>@<máquina>`
+- As máquinas da tailnet do dono à vista e a um clique: no item Tailscale da barra de status e no
+  cartão dele (até 2026-11-18, um grupo no cartão do ssh), com online, caminho (direto ou relay) e latência, e `ssh <usuário>@<máquina>`
   numa aba (plano `../../../../docs/plans/23-machines.md`, fase B; `../../../../docs/spec/machines.md`;
   `../../../../docs/adr/0030-installed-tailscale.md`).
 
@@ -33,8 +33,8 @@
   processo), segue o `watch-ipn-bus` relendo o status a cada mudança e, se o fluxo não começar ou
   cair, relê a cada 30 s; `refresh` (a paleta lê uma vez); `ping`; `isEnabled` (machines.tailscale)
   desligado para e esquece tudo. Leitura, ping e fluxo são campos, para os testes.
-- `MachinesSection.swift`: o grupo "Tailnet 2/3" que o app põe no cartão do ssh (`extraContent` do
-  `SSHStrip`): a bolinha (verde direto, amarela relay, vermelha offline, cinza antes do ping), nome,
+- `MachinesSection.swift`: o grupo "Tailnet 2/3" que o app põe no cartão do item Tailscale
+  (`titleText` é também o texto do item): a bolinha (verde direto, amarela relay, vermelha offline, cinza antes do ping), nome,
   sistema, endereço e a resposta; estados sem login, sozinho na tailnet e leitura parcial.
 - `MachinesCommands.swift`: machines.connect (⌥↩ pergunta o usuário de novo), machines.ping (a
   paleta reabre com a resposta), machines.refresh, machines.copy-address (⌥↩ copia o IP).

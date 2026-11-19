@@ -26,15 +26,19 @@
   soma (`add`), `setLayout` com statusBar.left/right, `onLayoutChange` para o app salvar, o menu do
   botão direito (cada item com marca e "Customize Status Bar…") e a aba Status Bar
   (`customizePage`) da janela única de `../../shared/customize/`, que o app abre. Avisa cada item quando ele pode ser visto (na barra e a janela na
-  tela, pela oclusão). `path`, `canNavigate` e `onNavigate` vão para a trilha.
+  tela, pela oclusão). `path`, `canNavigate` e `onNavigate` vão para a trilha; `itemView` dá a view de um item para o app
+  pôr o cartão dele.
 - `FolderTrail.swift`: a trilha "Home › … › cadex" com o menu de subpastas de cada pedaço (o do app,
   `../../shared/menus`, para cima); só se refaz quando a pasta muda. `Breadcrumb.swift`: os pedaços
   e as subpastas, puros e testados.
 - `SystemStats.swift`: RAM (app + wired + comprimida, como o Monitor de Atividade), CPU (pela
   diferença de ticks) e a memória do próprio Cadex (phys_footprint), lidos a cada 2 s uma vez para o
   app inteiro, só com alguém olhando; sem ninguém, sem timer. `SystemItems.swift`: os itens RAM,
-  CPU e Cadex memory.
-- `ListeningPorts.swift`: as portas TCP em LISTEN dos processos de um grupo (o da frente de cada
+  CPU e Cadex memory, cada um com o cartão dele (`SystemCards.swift`: o uso em partes, os processos
+  deste usuário e o que roda nos terminais do Cadex, que o app dá; lidos só com um cartão aberto).
+  `ProcessTable.swift`: os processos deste usuário (os do sistema exigem admin), CPU pela diferença
+  entre duas amostras e a memória (phys_footprint), o nome do `claude` pelo caminho.
+- `ListeningPorts.swift`: as portas TCP em LISTEN (com o pid de cada uma, `listeners`, para o cartão) dos processos de um grupo (o da frente de cada
   terminal), pelo libproc, sem lsof; o app faz o item Ports (`../../app/SSHWiring.swift`), lido a
   cada 10 s e na troca de aba só enquanto aparece, e só com algum terminal rodando programa.
 - `StatusBarCommands.swift`: statusBar.customize, statusBar.toggle-item (a lista no ⌘K) e

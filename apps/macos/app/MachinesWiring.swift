@@ -6,30 +6,66 @@ import Preview
 import Machines
 import SSH
 import Strings
+import UILooks
+import StatusBar
 import Terminal
 
 /// The tailnet's machines in this window (docs/spec/machines.md, plan 23):
-/// the "Tailnet" group under the hosts of the SSH card, read only while
-/// the card is open, and machines.connect's ssh tab. The ssh feature only
-/// gets a view and an open/close notice; it does not import machines.
+/// the Tailscale item of the status bar and its card, read only while they show, and
+/// machines.connect's ssh tab.
 extension WindowSession {
-    func attachMachines(to strip: SSHStrip) {
-        strip.extraContent = { [weak self, weak strip] width, text, secondary in
-            MachinesSection.make(width: width, text: text, secondary: secondary) { machine in
-                strip?.closeCard()
-                self?.connectMachine(machine, askUser: false)
-            }
+    /// The Tailscale item (its own since 2026-11-18; it was a group in the SSH card): "Tailnet
+    /// 2/3", the machines read while it shows, and its card with each one (a click connects),
+    /// pinged while the card is open.
+    func makeTailscaleItem() -> StatusItem {
+        let label = StatusLabel(icon: .globe, tip: "Tailscale")
+        let item = StatusItem(id: "tailscale", title: "Tailscale",
+                              subtitle: T("The machines of your tailnet: online, path, latency; a click connects",
+                                          "As máquinas da sua tailnet: online, caminho, latência; o clique conecta"),
+                              icon: .globe, side: .right, view: label)
+        let show = { [weak label] in
+            guard let label, let status = MachinesController.shared.status else { return }
+            label.text = MachinesSection.titleText(status)
+            label.dot = status.isRunning ? DesignTokens.Color.stateDone : DesignTokens.Color.textTertiary
         }
-        strip.onTestAgain = { MachinesController.shared.pingOnline() }
         var token: UUID?
-        strip.onCardOpen = { [weak strip] open in
-            if open {
-                token = MachinesController.shared.watch { strip?.refreshCard() }
+        item.onVisible = { visible in
+            if visible {
+                token = MachinesController.shared.watch { show() }
+                MachinesController.shared.refresh()
             } else if let id = token {
                 MachinesController.shared.stop(id)
                 token = nil
             }
         }
+        let card = attachCard(to: label) { [weak self] close in
+            let section = MachinesSection.make(width: UILooks.pt(StatusCard.width), text: DesignTokens.Color.textPrimary,
+                                               secondary: DesignTokens.Color.textMuted) { machine in
+                close()
+                self?.connectMachine(machine, askUser: false)
+            } ?? NSTextField(labelWithString: T("Tailscale is not running on this Mac", "O Tailscale não está rodando neste Mac"))
+            let foot = StatusCard.build([.actions([
+                .init(T("Share a port…", "Compartilhar uma porta…")) { [weak self] in _ = self?.commands.run("machines.share-port") },
+                .init(T("Ping again", "Medir de novo")) { MachinesController.shared.pingOnline() },
+            ])], close: close)
+            let stack = NSStackView(views: [section, foot])
+            stack.orientation = .vertical
+            stack.alignment = .leading
+            stack.spacing = 6
+            return stack
+        }
+        label.onClick = { card.openNow() }
+        var cardToken: UUID?
+        card.onOpenChange = { [weak card] open in
+            if open {
+                cardToken = MachinesController.shared.watch { card?.refresh() }
+                MachinesController.shared.pingOnline()
+            } else if let id = cardToken {
+                MachinesController.shared.stop(id)
+                cardToken = nil
+            }
+        }
+        return item
     }
 
     /// machines.connect: a new tab typing `ssh '<user>@<machine>'`. The user
