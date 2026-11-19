@@ -7,7 +7,9 @@
 //! Every call is checked against the day's spend first (a job may make
 //! several calls, and upstream's own loops do not know the budget) and
 //! written to the ledger after, with its cost, whether it worked, and the
-//! Claude Code version.
+//! Claude Code version. Before the ledger line, the call's request and
+//! response go to the audit folder (audit.rs, plan 35 D) and the line names
+//! that file in `call`.
 //!
 //! How a request becomes the stdin text: the system prompt goes in
 //! `--system-prompt`; a single user message is sent as it is; a request with
@@ -27,7 +29,8 @@ use std::sync::Mutex;
 use ai_memory_llm::{ChatRequest, ChatResponse, LlmError, LlmProvider, LlmResult, Role, Usage};
 use async_trait::async_trait;
 
-use super::claude_cli::{self, Invocation};
+use super::audit;
+use super::claude_cli::{self, Exchange, Invocation};
 use super::ledger::{self, Entry};
 
 /// What the ledger says about the calls of one job step.
@@ -37,6 +40,9 @@ pub(crate) struct Label {
     pub(crate) workspace: String,
     pub(crate) project: String,
     pub(crate) session: Option<String>,
+    /// The ending session that set the job off, when `session` is another
+    /// (the reviewed one: plan 35 G).
+    pub(crate) trigger: Option<String>,
 }
 
 pub(crate) struct ClaudeProvider {
@@ -63,7 +69,7 @@ impl ClaudeProvider {
         *self.spent.lock().unwrap_or_else(|e| e.into_inner())
     }
 
-    fn record(&self, cost_usd: f64, error: Option<String>) {
+    fn record(&self, cost_usd: f64, error: Option<String>, call: Option<String>) {
         {
             let mut spent = self.spent.lock().unwrap_or_else(|e| e.into_inner());
             spent.0 += 1;
@@ -75,12 +81,33 @@ impl ClaudeProvider {
             workspace: self.label.workspace.clone(),
             project: self.label.project.clone(),
             session: self.label.session.clone(),
+            trigger: self.label.trigger.clone(),
             cost_usd,
             ok: error.is_none(),
             error,
             claude_version: self.version.clone(),
             model: self.inv.model.clone(),
+            call,
         });
+    }
+
+    /// The call's audit file: who asked, what was sent, what came back.
+    fn audit(&self, system: &str, prompt: &str, seen: &Exchange, error: Option<&str>) -> Option<String> {
+        let stdout = serde_json::from_str::<serde_json::Value>(seen.stdout.trim())
+            .unwrap_or_else(|_| capped(&seen.stdout).into());
+        let record = serde_json::json!({
+            "at": ledger::now(),
+            "kind": self.label.kind,
+            "workspace": self.label.workspace,
+            "project": self.label.project,
+            "session": self.label.session,
+            "trigger": self.label.trigger,
+            "model": self.inv.model,
+            "claude_version": self.version,
+            "request": {"argv": seen.argv, "system": capped(system), "stdin": capped(prompt)},
+            "response": {"exit": seen.exit, "millis": seen.millis, "stdout": stdout, "stderr": seen.stderr, "error": error},
+        });
+        audit::keep_call(&self.data_dir, self.label.kind, &record)
     }
 
     /// One call: budget check, run, ledger.
@@ -89,23 +116,42 @@ impl ClaudeProvider {
             return Err(LlmError::NotConfigured("the memory agent's daily budget is reached".into()));
         }
         let system = request.system.as_deref().filter(|s| !s.trim().is_empty()).unwrap_or(PLAIN_SYSTEM);
-        let result = claude_cli::run(&self.inv, system, &prompt_text(request, schema)).await;
+        let prompt = prompt_text(request, schema);
+        let (result, seen) = claude_cli::run(&self.inv, system, &prompt).await;
         match result {
             Ok(output) if output.is_error => {
                 let error = claude_cli::error_of(&output);
-                self.record(output.total_cost_usd, Some(short(&error)));
+                let call = self.audit(system, &prompt, &seen, Some(&short(&error)));
+                self.record(output.total_cost_usd, Some(short(&error)), call);
                 Err(error)
             }
             Ok(output) => {
-                self.record(output.total_cost_usd, None);
+                let call = self.audit(system, &prompt, &seen, None);
+                self.record(output.total_cost_usd, None, call);
                 Ok(output)
             }
             Err(error) => {
-                self.record(0.0, Some(short(&error)));
+                let call = self.audit(system, &prompt, &seen, Some(&short(&error)));
+                self.record(0.0, Some(short(&error)), call);
                 Err(error)
             }
         }
     }
+}
+
+/// A text the audit stores whole up to 2 MiB: a prompt near the model's
+/// context is under 1 MiB, and 500 files of 8 MiB (the output cap) would be
+/// 4 GB of disk.
+fn capped(text: &str) -> String {
+    const CAP: usize = 2 << 20;
+    if text.len() <= CAP {
+        return text.to_owned();
+    }
+    let mut end = CAP;
+    while !text.is_char_boundary(end) {
+        end -= 1;
+    }
+    format!("{}\n[cut at {CAP} bytes of {}]", &text[..end], text.len())
 }
 
 /// An error for the ledger: its class and a short text.

@@ -214,6 +214,27 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
 - Sessão sem nenhum prompt e sem nenhuma ferramenta (um painel aberto e fechado) não vira página e
   não chama o agente: o ai-memory já a fecha assim, e o agente segue a mesma regra; fica só uma
   linha sem custo no registro (plano 35 C).
+- Auditoria (plano 35 D): cada chamada do `claude -p` fica guardada com o pedido (o prompt de
+  sistema, o texto mandado no stdin e os argumentos; nunca o ambiente nem token) e a resposta (o
+  JSON que o Claude devolveu, ou o erro, a saída de erro resumida e limpa), em
+  memory/agent/calls/`<hora UTC>-<tipo>-<id>.json`, e a linha do registro (memory/agent/ledger.jsonl)
+  aponta para o arquivo no campo `call`. O briefing que cada sessão recebeu no SessionStart fica em
+  memory/agent/briefings/`<id da sessão>`.md (a prévia da página Memory, que não pega o handoff,
+  não grava; a sessão retomada grava o mais novo). Pastas 0700, arquivos 0600, gravados com
+  arquivo temporário e rename. Retenção, em cada pasta, a cada gravação: 30 dias e no máximo 500
+  arquivos (sai o mais velho).
+- Auto-improve com proteção (plano 35 G; o caso do `bkdg-center`, 2026-11-18, quando o histórico
+  importado foi revisado do mais velho ao mais novo e uma sessão que trabalhou noutra pasta virou
+  quatro páginas sobre um sistema que o repositório não tem):
+  - só revisa sessões que terminam depois de o projeto ser visto, como o ai-memory: o histórico
+    importado na primeira sessão e as sessões de fora do Cadex importadas a cada subida nunca são
+    revisados sozinhos (o dono pode revisá-los à mão ou organizar o histórico com o bootstrap);
+  - a proposta que cita caminhos de arquivo e nenhum deles existe no repositório do projeto (a
+    raiz principal, também para worktrees) é recusada antes de virar pendente ou página, com uma
+    linha sem custo no registro dizendo quais caminhos faltaram; tabelas e nomes de código não são
+    conferidos;
+  - a linha do auto-improve no registro nomeia a sessão revisada (`session`) e a que terminou e
+    disparou a revisão (`trigger`).
 - Teto por dia (memory.dailyBudgetUsd, US$ 1,00): passou, nada mais roda no dia; cada trabalho fica
   registrado com custo e versão do Claude Code. Propostas esperam aprovação na página Memory
   (memory.requireApproval: desligada por padrão pela ADR 0037, como no ai-memory, e as propostas

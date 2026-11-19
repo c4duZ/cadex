@@ -30,6 +30,7 @@ mod debug_panic;
 mod engine;
 mod file_claim;
 mod handoff;
+mod history_review;
 mod hook_body;
 mod import;
 mod import_jobs;

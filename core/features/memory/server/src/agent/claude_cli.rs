@@ -146,11 +146,45 @@ pub(crate) fn excerpt(text: &str) -> String {
     cut
 }
 
-/// Run `claude -p` once with `system` and `prompt` (on stdin).
-pub(crate) async fn run(inv: &Invocation, system: &str, prompt: &str) -> Result<Output, LlmError> {
+/// What went to and came from one run, for the audit (agent/audit.rs):
+/// the arguments (the system prompt in its own field), what the child
+/// printed and how it ended. No environment: it holds the account's folder
+/// and whatever the engine inherited.
+#[derive(Debug, Default)]
+pub(crate) struct Exchange {
+    pub(crate) argv: Vec<String>,
+    pub(crate) stdout: String,
+    /// Scrubbed and short (excerpt): it is for "why did it fail", and a
+    /// child's stderr may echo anything.
+    pub(crate) stderr: String,
+    pub(crate) exit: Option<i32>,
+    pub(crate) millis: u64,
+}
+
+/// The argument that carries the system prompt, as the audit stores it.
+const SYSTEM_IN_AUDIT: &str = "<system prompt: see request.system>";
+
+/// Run `claude -p` once with `system` and `prompt` (on stdin): the result
+/// and what was exchanged, even when it failed.
+pub(crate) async fn run(inv: &Invocation, system: &str, prompt: &str) -> (Result<Output, LlmError>, Exchange) {
+    let started = std::time::Instant::now();
+    let mut exchange = Exchange::default();
+    let result = run_inner(inv, system, prompt, &mut exchange).await;
+    exchange.millis = started.elapsed().as_millis() as u64;
+    (result, exchange)
+}
+
+async fn run_inner(inv: &Invocation, system: &str, prompt: &str, seen: &mut Exchange) -> Result<Output, LlmError> {
     let dir = scratch()?;
+    let args = argv(inv, dir.path(), system);
+    seen.argv = args.clone();
+    if let Some(at) = seen.argv.iter().position(|a| a == "--system-prompt")
+        && let Some(value) = seen.argv.get_mut(at + 1)
+    {
+        *value = SYSTEM_IN_AUDIT.to_owned();
+    }
     let mut cmd = command(&inv.exe, inv.account.as_deref());
-    cmd.args(argv(inv, dir.path(), system))
+    cmd.args(args)
         .current_dir(dir.path().join("work"))
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -179,10 +213,14 @@ pub(crate) async fn run(inv: &Invocation, system: &str, prompt: &str) -> Result<
         .await
         .map_err(|_| LlmError::UnexpectedShape(format!("claude -p timed out after {} s", inv.timeout.as_secs())))?;
     let stdout = String::from_utf8_lossy(&out);
+    let code = status.ok().and_then(|s| s.code());
+    seen.stdout = stdout.clone().into_owned();
+    seen.stderr = excerpt(&String::from_utf8_lossy(&err));
+    seen.exit = code;
     match serde_json::from_str::<Output>(stdout.trim()) {
         Ok(output) => Ok(output),
         Err(_) => {
-            let code = status.ok().and_then(|s| s.code()).unwrap_or(-1);
+            let code = code.unwrap_or(-1);
             let said = if stdout.trim().is_empty() { String::from_utf8_lossy(&err).into_owned() } else { stdout.into_owned() };
             Err(LlmError::UnexpectedShape(format!("claude -p exited {code} without a JSON result: {}", excerpt(&said))))
         }

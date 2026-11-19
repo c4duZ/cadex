@@ -139,7 +139,14 @@
     - `server/src/agent/provider.rs` (o `LlmProvider`, que confere o teto antes de cada chamada e
       registra depois), `server/src/agent/config.rs` (o agent.json que o app grava, lido a cada
       trabalho; sem arquivo, desligado), `server/src/agent/ledger.rs` (`<data-dir>/agent/ledger.jsonl`,
-      0600: tipo, projeto, custo, versão do Claude Code, modelo; o gasto do dia local),
+      0600: tipo, projeto, custo, versão do Claude Code, modelo, `call` com o arquivo da chamada; no
+      auto-improve, `session` é a sessão revisada e `trigger` a que terminou e disparou o trabalho,
+      plano 35 G; o gasto do dia local), `server/src/agent/audit.rs` (plano 35 D: o pedido e a resposta de cada
+      chamada em `<data-dir>/agent/calls/<hora UTC>-<tipo>-<id>.json`, sem ambiente, e o briefing de
+      cada sessão em `<data-dir>/agent/briefings/<sessão>.md`; pasta 0700, arquivo 0600, temporário e
+      rename; 30 dias e 500 arquivos por pasta, podados a cada gravação),
+      `server/src/agent/briefings.rs` (o middleware do `/handoff` com `session_id` e sem `claim=0`:
+      guarda a resposta depois de respondê-la, numa thread à parte),
       `server/src/agent/queue.rs` (um trabalho por vez, sem repetir, pausa; segura o engine e o
       reinício enquanto há trabalho), `server/src/agent/jobs.rs` (sessão sem prompt e sem ferramenta, pelo
       `session_has_substantive_observation` do upstream, não roda nada, só uma linha sem custo no
@@ -149,7 +156,10 @@
       de hora em hora por projeto, com propostas pendentes quando memory.requireApproval; no
       PostCompact, consolidar o que houve; e um dream se não há sessão viva e o Mac está parado há
       10 min), `server/src/agent/improve.rs` (**cópia** do agendador do auto-improve do upstream,
-      por projeto), `server/src/agent/dream.rs` (o dream e o tempo parado do Mac pelo `ioreg`; o
+      por projeto), `server/src/agent/cited_paths.rs` (plano 35 G, não é do upstream: antes de
+      preparar as propostas, a que cita caminhos e nenhum deles existe na raiz principal do projeto,
+      nem como fim de um arquivo do `git ls-files`, é tirada, com uma linha sem custo no ledger e
+      um aviso na execução; `.md` só conta como achado, pode ser página da wiki), `server/src/agent/dream.rs` (o dream e o tempo parado do Mac pelo `ioreg`; o
       automático para quando o dono volta), `server/src/agent/bootstrap.rs` (a estimativa sem
       chamar o Claude e o bootstrap do upstream sobre as sessões do projeto) e
       `server/src/agent/routes.rs` (`GET /cadex/agent/status`, `POST /cadex/agent/pause`,
@@ -182,6 +192,12 @@
       sessão, a regra do upstream; 200 sessões, 50 mil eventos; sem a sessão que começa) e, a cada
       subida que não é reinício, as sessões de fora do Cadex dos projetos conhecidos (50 sessões e
       10 mil eventos por subida, nada mexido nos últimos 2 min, ponto de controle por conta).
+    - `server/src/history_review.rs` (plano 35 G): o histórico importado nunca é revisado sozinho
+      pelo auto-improve, como no upstream: ao subir, o `initialize_auto_improve_scheduler_scopes`
+      dele (o passo do serve.rs); e cada sessão que uma importação grava (o histórico e as de fora
+      do Cadex) é reivindicada na hora (`claim_auto_improve_scheduler_session`), o que a tira da
+      fila sem mexer na marca d'água (o upstream não tem chamada pública que a mova, e movê-la
+      levaria junto as sessões ao vivo que esperam a vez).
     - `server/src/import_state.rs`: em `<data-dir>/imports/`, a marca de cada projeto
       (`started`/`done`) e os pontos de controle por conta (outside.json).
     - `server/src/accounts.rs`: as pastas de conta, pela regra do app (`~/.claude`, `~/.claude-*`
@@ -271,7 +287,14 @@
     o SessionEnd consolida pelo falso, com a linha de comando e o ambiente exatos da prova; sessão
     vazia não chama nada; pausa e
     teto; a estimativa sem chamar e o bootstrap com o agente desligado; propostas pendentes com
-    aprovação; o dream depois de um SessionEnd só com o Mac parado;
+    aprovação; o dream depois de um SessionEnd só com o Mac parado (as sessões de teste em
+    `server/tests/common/agent.rs`); `server/tests/agent_audit.rs`: o SessionEnd deixa o pedido e a
+    resposta de cada chamada, 0600, apontados pelo ledger; o SessionStart deixa o briefing que
+    recebeu, e a prévia (`claim=0`) não deixa nada (a poda é teste de unidade em `server/src/agent/audit.rs`);
+    `server/tests/agent_guard.rs` (plano 35 G): sessões de fora importadas não são revisadas; a
+    proposta que só cita caminhos que o repositório não tem é recusada, com a linha no ledger, e a
+    que cita um arquivo dele fica pendente; a linha do auto-improve nomeia a sessão revisada, com a
+    que terminou em `trigger`;
     `server/tests/memory_page.rs`: overview com o engine de pé e parado, o briefing igual ao do
     SessionStart seguinte e sem pegar o handoff, gravar e apagar página com commit, o reindex de um
     arquivo editado no disco, propostas aprovadas e recusadas, o projects.json;
@@ -346,7 +369,7 @@
 ## Como validar
 - `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs`,
   `server/tests/import.rs`, `server/tests/auto_memory.rs`, `server/tests/marker.rs`,
-  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs`, `server/tests/agent.rs`, `server/tests/memory_page.rs` e `server/tests/session_end.rs` (parte do `make check`, em segundos).
+  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs`, `server/tests/agent.rs`, `server/tests/agent_audit.rs`, `server/tests/agent_guard.rs`, `server/tests/memory_page.rs` e `server/tests/session_end.rs` (parte do `make check`, em segundos).
 - `make memory-eval MODELS=<pasta>`: as 30 perguntas, só texto contra híbrida (`../../../tools/memory_eval.py`).
 - `make core-test`: os testes do cliente (eventos, query com e sem workspace, fila, respostas HTTP,
   sem token).

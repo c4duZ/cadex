@@ -17,7 +17,7 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use ai_memory_core::SessionId;
-use ai_memory_store::ReaderPool;
+use ai_memory_store::{ReaderPool, WriterHandle};
 use ai_memory_workstream::{ExportedTranscript, ManagedHarness, export_transcript};
 use anyhow::Result;
 use axum::Router;
@@ -73,6 +73,9 @@ pub(crate) async fn watch(State(tx): State<Sender>, req: Request, next: Next) ->
 pub(crate) struct Context {
     pub(crate) router: Router,
     pub(crate) reader: ReaderPool,
+    /// For the claims that keep imported sessions out of auto-improve
+    /// (history_review.rs, plan 35 G).
+    pub(crate) writer: WriterHandle,
     pub(crate) data_dir: PathBuf,
     pub(crate) home: PathBuf,
     /// `--claude-dirs`, in place of the app's account folders.
@@ -124,6 +127,9 @@ impl Report {
 /// Run the jobs until the engine stops: first the outside sessions (unless
 /// this image is a restart), then each SessionStart as it comes.
 pub(crate) async fn run(ctx: Context, mut rx: Receiver, outside_at_start: bool) {
+    // Upstream's serve.rs step at startup: every known project gets its auto-improve
+    // watermark before anything is imported (plan 35 G).
+    crate::history_review::init(&ctx.reader, &ctx.writer).await;
     if outside_at_start {
         // Taken before the wait, so the start's maintenance, which takes it
         // after the same wait, runs after this import (maintenance.rs).
@@ -197,6 +203,8 @@ pub(crate) async fn import_all(ctx: &Context, sessions: &[Planned<'_>], budget: 
         }
         match import_one(ctx, &sessions[i]).await {
             Ok(events) => {
+                // Imported history is never reviewed on its own, as upstream (plan 35 G).
+                crate::history_review::skip(&ctx.reader, &ctx.writer, &sessions[i].transcript.id).await;
                 report.imported += 1;
                 report.events += events;
                 let target = sessions[i].target;

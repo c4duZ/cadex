@@ -63,8 +63,40 @@ impl Step<'_> {
             workspace: self.job.scope.workspace.clone(),
             project: self.job.scope.project.clone(),
             session: self.job.session.clone(),
+            trigger: None,
         };
         Arc::new(ClaudeProvider::new(self.inv.clone(), self.cfg.daily_budget_usd, self.ctx.data_dir.clone(), label, self.version.clone()))
+    }
+
+    /// A provider whose calls the ledger files under `kind` and the session
+    /// they are about, with the job's own session as the `trigger` (plan 35 G:
+    /// the auto-improve line named the session that ended, not the one reviewed).
+    pub(crate) fn provider_about(&self, kind: &'static str, about: Option<String>) -> Arc<ClaudeProvider> {
+        let label = Label {
+            kind,
+            workspace: self.job.scope.workspace.clone(),
+            project: self.job.scope.project.clone(),
+            trigger: self.job.session.clone().filter(|t| about.as_ref() != Some(t)),
+            session: about,
+        };
+        Arc::new(ClaudeProvider::new(self.inv.clone(), self.cfg.daily_budget_usd, self.ctx.data_dir.clone(), label, self.version.clone()))
+    }
+
+    /// A ledger line with no cost about `about`, as `provider_about` files it.
+    pub(crate) fn note_about(&self, kind: &str, about: Option<String>, ok: bool, error: &str) {
+        ledger::append(&self.ctx.data_dir, &Entry {
+            at: ledger::now(),
+            kind: kind.into(),
+            workspace: self.job.scope.workspace.clone(),
+            project: self.job.scope.project.clone(),
+            trigger: self.job.session.clone().filter(|t| about.as_ref() != Some(t)),
+            session: about,
+            ok,
+            error: Some(error.into()),
+            claude_version: self.version.clone(),
+            model: self.cfg.model.clone(),
+            ..Entry::default()
+        });
     }
 
     /// A ledger line with no cost: how a job ended without a call.
@@ -80,11 +112,13 @@ fn note(ctx: &Ctx, job: &Job, cfg: &Config, version: Option<String>, kind: &str,
         workspace: job.scope.workspace.clone(),
         project: job.scope.project.clone(),
         session: job.session.clone(),
+        trigger: None,
         cost_usd: 0.0,
         ok,
         error: Some(error.into()),
         claude_version: version,
         model: cfg.model.clone(),
+        call: None,
     });
 }
 
@@ -143,7 +177,7 @@ async fn has_work(step: &Step<'_>) -> bool {
     let Some(session) = step.job.session.as_deref() else { return true };
     let reader = &step.ctx.reader;
     let id = SessionId::from_native(session);
-    match reader.find_session_scope(id.clone()).await {
+    match reader.find_session_scope(id).await {
         Ok(Some((ws, proj, _))) => reader.session_has_substantive_observation(ws, proj, id).await.unwrap_or(true),
         Ok(None) => false,
         Err(_) => true,

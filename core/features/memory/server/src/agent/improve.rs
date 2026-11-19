@@ -47,6 +47,7 @@ use ai_memory_store::{
 use anyhow::Result;
 use tracing::{info, warn};
 
+use super::cited_paths::refuse_foreign;
 use super::jobs::Step;
 use super::provider::ClaudeProvider;
 use crate::maintenance_state;
@@ -151,7 +152,8 @@ pub(crate) async fn run(step: &Step<'_>) {
                 continue;
             }
         }
-        let llm = step.provider("auto-improve");
+        // The line names the reviewed session, the ending one as `trigger` (plan 35 G).
+        let llm = step.provider_about("auto-improve", Some(candidate.session_id.to_string()));
         let result = review_session(&s, &llm, candidate.session_id).await;
         // Only a review that called the model uses the project's hour: upstream's
         // preflight (too few observations, too short) skips the call.
@@ -191,7 +193,8 @@ async fn review_session(s: &Scoped<'_>, llm: &ClaudeProvider, session_id: Sessio
 
 /// Upstream's `run_scheduled_experience`; `None` on a preflight skip.
 async fn experience(s: &Scoped<'_>, cfg: &ExperienceConfig) -> Result<Option<usize>> {
-    let llm = s.step.provider("experience");
+    // Experience reads many sessions, none of them the one that ended (plan 35 G).
+    let llm = s.step.provider_about("experience", None);
     let report = run_experience_review(s.reader, &*llm as &dyn LlmProvider, s.ws, s.proj, s.settings.review.clone(), cfg).await?;
     if report.provider == "none" {
         return Ok(None);
@@ -204,6 +207,7 @@ async fn experience(s: &Scoped<'_>, cfg: &ExperienceConfig) -> Result<Option<usi
 async fn stage_and_apply(s: &Scoped<'_>, session_id: Option<SessionId>, report: &AutoImproveReport, trigger: &str) -> Result<usize> {
     let cfg = &s.settings.review;
     let (ctx, ws, proj) = (s.step.ctx, s.ws, s.proj);
+    let report = &refuse_foreign(s.step, session_id, report, trigger).await;
     let proposals = new_proposals(s.reader, ws, proj, report).await?;
     let staged = ctx
         .writer

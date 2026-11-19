@@ -25,6 +25,12 @@ pub(crate) struct Entry {
     pub(crate) project: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(crate) session: Option<String>,
+    /// The session whose end set the job off, when it is not `session`: an
+    /// auto-improve line names the session it reviewed, and the ledger read
+    /// "session 3cd2e5f6" for the review of 98ee49fa (plan 35 G, the
+    /// bkdg-center case 2026-11-18).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) trigger: Option<String>,
     pub(crate) cost_usd: f64,
     pub(crate) ok: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -32,6 +38,10 @@ pub(crate) struct Entry {
     #[serde(default)]
     pub(crate) claude_version: Option<String>,
     pub(crate) model: String,
+    /// The call's request and response, relative to `<data-dir>/agent`
+    /// (audit.rs, plan 35 D); absent on a line with no call.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) call: Option<String>,
 }
 
 /// Appends from the worker and from a call never interleave.

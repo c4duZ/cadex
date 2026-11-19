@@ -7,7 +7,8 @@
 //! arrival time and the file a tool call named (hook_body.rs), Cadex's
 //! handoff (handoff.rs) and Claude's automatic memory folders
 //! (auto_watch.rs), the memory agent (agent/, plan 22 phase G) and the
-//! Memory page's routes with projects.json (page/, projects_file.rs, phase H).
+//! Memory page's routes with projects.json (page/, projects_file.rs, phase H)
+//! and the briefing each session started with (agent/briefings.rs, plan 35 D).
 
 use std::fs::File;
 use std::future::IntoFuture;
@@ -160,6 +161,8 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
     let inner = routes
         .layer(axum::middleware::from_fn(hook_body::amend))
         .layer(axum::middleware::from_fn(mcp_scope::scope))
+        // Plan 35 D: the briefing a session started with, kept for the audit.
+        .layer(from_fn_with_state(Arc::new(args.data_dir.clone()), crate::agent::briefings::keep))
         .layer(from_fn_with_state(page.clone(), crate::projects_file::watch))
         .layer(from_fn_with_state(ended_tx, handoff::watch))
         .layer(from_fn_with_state(maint_tx, maintenance::watch))
@@ -206,6 +209,7 @@ pub(crate) async fn run(args: Args, started: Instant) -> Result<Exit> {
     let importer = import::Context {
         router: inner,
         reader: built.store.reader.clone(),
+        writer: built.store.writer.clone(),
         data_dir: args.data_dir.clone(),
         home: std::env::var_os("HOME").map(Into::into).unwrap_or_default(),
         claude_dirs: args.claude_dirs.clone(),

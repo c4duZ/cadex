@@ -100,16 +100,22 @@ caminhos deste repositório.
   no começo do trabalho de SessionEnd e de PostCompact em
   `../../core/features/memory/server/src/agent/jobs.rs`: só uma linha sem custo no ledger ("empty
   session"); teste em `../../core/features/memory/server/tests/agent.rs` (falha sem o filtro).
-- [ ] D. A auditoria do agente: cada chamada do `claude -p` (que vai pelo stdin, com
+- [x] D. A auditoria do agente: cada chamada do `claude -p` (que vai pelo stdin, com
   `--no-session-persistence` e hooks desligados, `../../core/features/memory/server/src/agent/claude_cli.rs`)
   grava o pedido e a resposta ao lado do memory/agent/ledger.jsonl, 0600, com retenção; e o
   briefing injetado em cada SessionStart fica guardado por sessão.
+  Feito: cada chamada grava `agent/calls/<hora>-<tipo>-<id>.json` (o argv, o system prompt, o
+  stdin, a resposta; sem ambiente nem token; 0600, pasta 0700), apontado pela linha do ledger
+  (`call`); o briefing de cada SessionStart de verdade fica em `agent/briefings/<sessão>.md`; as
+  duas pastas guardam 30 dias e no máximo 500 arquivos
+  (`../../core/features/memory/server/src/agent/audit.rs`,
+  `../../core/features/memory/server/src/agent/briefings.rs`).
 - [ ] E. O que o estudo apontar como importado errado: o texto do aviso e do rodapé, o briefing
   por padrão, o snapshot com sessão viva, o nome do projeto e a worktree irmã, cada um com o veredito
   do estudo.
 - [ ] F. A 3.5.0: atualizar o commit fixado, com a suíte do upstream (`make memory-upstream-test`, no
   PC) e a nossa.
-- [ ] G. O auto-improve com proteção: recusar a proposta que cita caminhos ou tabelas que não
+- [x] G. O auto-improve com proteção: recusar a proposta que cita caminhos ou tabelas que não
   existem no repositório do projeto; rodar o backfill do Center com `require_approval = true`.
   Conforme o estudo, isso pode ser configuração do upstream e não código nosso.
   Feito antes (2026-11-19, com o aval do dono): no banco do dono, a marca d'água do `bkdg-center` e
@@ -118,6 +124,13 @@ caminhos deste repositório.
   As quatro páginas de competências já tinham saído em 18/11 (a sessão do Center); as três que o
   auto-improve escreveu depois (o Suporte do admin, o disco do Postgres de dev, a migration 0259)
   são do Center e ficam.
+  Feito no código: o engine inicializa o agendador ao subir, como o upstream, e cada sessão
+  importada (o histórico do projeto e as de fora do Cadex) é marcada como já vista, sem revisão
+  automática (`../../core/features/memory/server/src/history_review.rs`); a proposta que cita só
+  caminhos que não existem no repositório é recusada, com uma linha sem custo no ledger
+  (`../../core/features/memory/server/src/agent/cited_paths.rs`); a linha do auto-improve diz a
+  sessão revisada em `session` e a que terminou em `trigger`. O backfill do Center revisado com
+  aprovação (o bootstrap) fica para quando o dono quiser rodar.
 - [ ] H. Na tela (com o plano 34): o resumo de uma sessão mostra o briefing que ela recebeu; as
   sessões vazias não aparecem; o painel Memory diz "o próximo agente vai receber" quando mostra o
   briefing de agora.

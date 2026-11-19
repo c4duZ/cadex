@@ -7,16 +7,24 @@
 //! - `config.rs`: `<data-dir>/agent.json`, written by the app, read at each job.
 //! - `claude_cli.rs` and `provider.rs`: the `LlmProvider` over `claude -p`.
 //! - `ledger.rs`: `<data-dir>/agent/ledger.jsonl` and the day's spend.
+//! - `audit.rs`: each call's request and response next to the ledger, with
+//!   retention; `briefings.rs`: the briefing each session started with
+//!   (plan 35 D).
 //! - `queue.rs`: the queue, the worker and what keeps the engine up.
 //! - `jobs.rs`: what each kind of job runs (upstream's public functions).
 //! - `improve.rs`: auto-improve and experience for one project (**copied**
-//!   from upstream's scheduler, which only runs over every project at once).
+//!   from upstream's scheduler, which only runs over every project at once);
+//!   `cited_paths.rs`: a proposal citing only paths the repository lacks is
+//!   refused before it is staged (plan 35 G).
 //! - `dream.rs`: the dream pass and the idle watch that stops it.
 //! - `bootstrap.rs`: "Organize History with AI" over the imported sessions.
 //! - `routes.rs`: `/cadex/agent/*` and the middleware that turns a live
 //!   SessionEnd or PostCompact into a job.
 
+pub(crate) mod audit;
 pub(crate) mod bootstrap;
+pub(crate) mod briefings;
+pub(crate) mod cited_paths;
 pub(crate) mod claude_cli;
 pub(crate) mod config;
 pub(crate) mod dream;
