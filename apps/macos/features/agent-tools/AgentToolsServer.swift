@@ -37,6 +37,9 @@ public final class AgentToolsServer: @unchecked Sendable {
     /// this user (getpeereid): the owner over SSH is that user, and the
     /// names say no more than `ps` does.
     public var onTerminals: (@MainActor () -> [[String: Any]])?
+    /// The projects' names in the sidebar's order, beside the terminals (plan 39 D: the
+    /// menu's n and c ask for one).
+    public var onProjects: (@MainActor () -> [String])?
     /// `cadex new <project> [claude]` (plan 39 C): a new tab in the project, by the
     /// registered command, as a click; the answer names its session in the daemon.
     public var onNewTerminal: (@MainActor (_ project: String, _ claude: Bool) -> [String: Any])?
@@ -124,7 +127,7 @@ public final class AgentToolsServer: @unchecked Sendable {
             guard local else { close(client); return }
             DispatchQueue.main.async { [weak self] in
                 MainActor.assumeIsolated {
-                    Self.send(client, ["ok": true, "terminals": self?.onTerminals?() ?? []])
+                    Self.send(client, ["ok": true, "terminals": self?.onTerminals?() ?? [], "projects": self?.onProjects?() ?? []])
                 }
             }
             return

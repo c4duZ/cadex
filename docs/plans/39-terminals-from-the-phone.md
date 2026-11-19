@@ -56,9 +56,13 @@ quero poder abrir uma sessão num projeto por lá"; "um HTML pode ser"; "pode s�
   digitado). Conferido numa instância de teste: `cadex new work` abriu uma aba no Mac com a marca do
   telefone e o que se digitou rodou nela; um projeto que não existe diz os abertos. O `cadex new
   … claude` não foi rodado (abriria o Claude de verdade numa conta do dono), nem o Cadex fechado.
-- [ ] D. O menu: `cadex` sem argumentos, num terminal que não é uma aba do Cadex, mostra os
+- [x] D. O menu: `cadex` sem argumentos, num terminal que não é uma aba do Cadex, mostra os
   projetos e as abas numerados; um número entra, `n` abre um terminal no projeto escolhido, `c` abre
   o Claude. Feito para teclado de telefone: uma tecla por escolha, nada de digitar nome.
+  Feito: `core/features/agent-tools/attach_menu.zig` (também o `cadex attach` sem número); a
+  resposta das abas leva os projetos. Conferido numa instância de teste: `cadex` sozinho mostrou o
+  menu, a tecla 1 entrou sem Enter, a tecla n abriu um terminal novo no único projeto, e o que se
+  digitou rodou nos dois.
 - [ ] E. `cadex share <arquivo>`: o app serve o arquivo num endereço da tailnet (só o IP do
   Tailscale, achado pela feature machines) e o `cadex` imprime o link; o telefone abre e baixa. Vale
   para o que o agente gerar no lugar de um artefato (o dono, 2026-11-19: "imagem e outras variações:

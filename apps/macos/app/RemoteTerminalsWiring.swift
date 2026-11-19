@@ -9,6 +9,7 @@ import Terminal
 extension AppDelegate {
     func startRemoteTerminals() {
         AgentToolsServer.shared.onTerminals = { [weak self] in self?.remoteTerminals() ?? [] }
+        AgentToolsServer.shared.onProjects = { [weak self] in self?.sessions.first?.projects?.projects.map(\.name) ?? [] }
         AgentToolsServer.shared.onNewTerminal = { [weak self] project, claude in
             self?.newRemoteTerminal(project, claude: claude) ?? ["ok": false, "error": "Cadex is closing"]
         }

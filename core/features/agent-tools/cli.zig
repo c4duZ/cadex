@@ -21,6 +21,7 @@ const usage_text =
     \\       cadex hook <event>     (a Claude Code hook: tells the Cadex app, never waits)
     \\       cadex memory-hook <event> (a Claude Code hook: feeds the project memory)
     \\       cadex memory-agent <action> [--cwd DIR] … (the app's way to the memory: agent, page, briefing)
+    \\       cadex                  (alone, outside Cadex: the menu of its terminals, for the phone over SSH)
     \\       cadex attach [n|id]    (from the phone over SSH: into a terminal open in Cadex, beside the Mac)
     \\       cadex new <project> [claude] (from the phone: a new tab in that project in Cadex, then into it)
     \\       cadex automations due   (the automations' LaunchAgent: the app checks its agenda, or opens)
@@ -33,7 +34,9 @@ const usage_text =
 pub fn main(init: std.process.Init.Minimal) u8 {
     var args = init.args.iterate();
     _ = args.next();
-    const sub = args.next() orelse return fail(usage_text);
+    // Alone, outside a Cadex tab (the phone over SSH): the menu of the terminals open in
+    // Cadex (plan 39 D). In a tab, or with no terminal to type in, the usage as before.
+    const sub = args.next() orelse return if (menuHere()) attach.main(&.{}) else fail(usage_text);
     if (std.mem.eql(u8, sub, "statusline")) return runStatusline();
     if (std.mem.eql(u8, sub, "hook")) return runHook(args.next() orelse return fail(usage_text), hook.run);
     if (std.mem.eql(u8, sub, "memory-hook")) return runHook(args.next() orelse return fail(usage_text), memory.hook.run);
@@ -64,6 +67,12 @@ pub fn main(init: std.process.Init.Minimal) u8 {
         words_buf[n] = word;
     }
     return agent.main(sub, words_buf[0..n], usage_text);
+}
+
+fn menuHere() bool {
+    if (std.c.getenv("CADEX_SESSION_TOKEN") != null) return false;
+    if (std.c.getenv("TERM_PROGRAM")) |program| if (std.mem.eql(u8, std.mem.span(program), "Cadex")) return false;
+    return std.c.isatty(0) == 1 and std.c.isatty(1) == 1;
 }
 
 /// Every word after `claude`, however many (a prompt may be long): the

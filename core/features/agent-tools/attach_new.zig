@@ -19,7 +19,12 @@ pub fn main(words: []const []const u8) u8 {
     const arena = arena_state.allocator();
     const claude = words.len == 2 and std.mem.eql(u8, words[1], "claude");
     if (words.len == 0 or words.len > 2 or (words.len == 2 and !claude)) return attach.say(2, "usage: cadex new <project> [claude]\n");
-    const line = request(arena, words[0], claude) catch return attach.say(1, "cadex: out of memory\n");
+    return open(arena, words[0], claude);
+}
+
+/// The new tab in `project`, then into it (also the menu's n and c, plan 39 D).
+pub fn open(arena: std.mem.Allocator, project: []const u8, claude: bool) u8 {
+    const line = request(arena, project, claude) catch return attach.say(1, "cadex: out of memory\n");
     const answer = ask(arena, line) orelse return attach.say(1, "cadex: Cadex did not answer (could not open it)\n");
     const opened = parseOpened(arena, answer) catch return attach.say(1, "cadex: Cadex's answer did not read\n");
     if (opened.err.len > 0) {

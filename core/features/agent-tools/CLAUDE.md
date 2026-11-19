@@ -115,7 +115,11 @@
   deu e que chegariam ao programa como digitação. `attach_new.zig` (plano 39 C): `cadex new <projeto>
   [claude]` pede ao app uma aba nova (`{"v":1,"new":true,…}`), e com o app fechado abre o Cadex (o
   CADEX_APP_BUNDLE, senão o .app onde este `cadex` mora, com `open -g`) e pergunta de novo por até
-  30 s; depois entra na aba como o `cadex attach`.
+  30 s; depois entra na aba como o `cadex attach`. `attach_menu.zig` (plano 39 D): `cadex` sozinho,
+  fora de uma aba do Cadex (sem CADEX_SESSION_TOKEN, TERM_PROGRAM não é Cadex, num terminal), e o
+  `cadex attach` sem número: projetos e terminais numerados, uma tecla por escolha (dois dígitos só
+  com mais de 9), n abre um terminal e c o Claude num projeto (o único, ou outro número), Enter, q
+  ou Esc saem. Numa aba, `cadex` sozinho segue mostrando o uso.
 - O build (`../../build.zig`, `addCli`) instala `zig-out/bin/cadex` só no Mac; o empacotamento o põe em
   Contents/Helpers.
 
