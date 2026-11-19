@@ -129,6 +129,26 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | spec | `docs/spec/inspector.md`: "A coluna opcional à direita da janela" | saiu | a spec é a da coluna lateral | 36 |
 | trecho | "painel da direita" em `docs/spec/status-bar.md` | saiu | a coluna lateral | 36 |
 
+### A barra lateral com Trabalho e Arquivos (plano 38, `docs/adr/0039-sidebar-with-work-and-files.md`)
+| tipo | peça | estado | destino | plano |
+|---|---|---|---|---|
+| arquivo | o trilho (`apps/macos/features/sidebar/RailView.swift`) | muda | a faixa da janela estreita: a caixa dos pedidos, os quadrados, Arquivos e Quadro; a barra lateral (`apps/macos/features/sidebar/WorkSidebarView.swift`) no lugar dele | 38 |
+| trecho | "RailPage" em `apps/macos/features/sidebar/Rail.swift` | saiu | os ícones das páginas no trilho: a coluna só tem Files e Changes, a vista Arquivos da barra lateral | 38 |
+| trecho | "onMovePages" em `apps/macos/features/sidebar/RailView.swift` | saiu | sem páginas, nada a ordenar | 38 |
+| arquivo | a coluna lateral (`apps/macos/features/inspector/InspectorView.swift`) | muda | a vista Arquivos da barra lateral: Files e, no fim, "N mudanças · ver" | 38 |
+| arquivo | `apps/macos/app/SessionsColumnWiring.swift` | saiu | as Sessões são uma seção da página do projeto (project.show-sessions) | 38 |
+| arquivo | `apps/macos/features/projects/SessionsColumnView.swift` | saiu | a seção Sessões da página do projeto | 38 |
+| comando | `project.sessions-column` | saiu | project.show-sessions | 38 |
+| comando | `inspector.tab-3` … `inspector.tab-5` | saiu | a coluna só tem Files e Changes (⌃⌘1, ⌃⌘2) | 38 |
+| trecho | "panelHistory" em `apps/macos/app/WindowSession.swift` | saiu | o grafo do git é uma página (git.history-in-tab) | 38 |
+| gancho | `CADEX_PERF_HISTORY_OPEN` | saiu | abria um commit no grafo da coluna | 38 |
+| arquivo | `apps/macos/app/TitleBarAccount.swift` | saiu | a conta está no item de uso da barra de baixo e no cabeçalho do painel | 38 |
+| trecho | "boardButton" em `apps/macos/app/TitleBarView.swift` | saiu | o Quadro no pé da barra lateral e da faixa, e view.board | 38 |
+| trecho | "settingsButton" em `apps/macos/app/TitleBarView.swift` | saiu | ⌘, (settings.open) e o menu | 38 |
+| trecho | "setBellOpen" em `apps/macos/app/TitleBarView.swift` | saiu | o sino virou a fila "Precisa de você" e a pílula | 38 |
+| trecho | "setLocation" em `apps/macos/app/TitleBarView.swift` | saiu | o lugar (`apps/macos/app/TitleBarPlace.swift`) | 38 |
+| trecho | "taskItems" em `apps/macos/app/ProjectsWiring.swift` | saiu | as tarefas no menu do lugar e na barra lateral | 38 |
+
 ### Tema (plano 25)
 | tipo | peça | estado | destino | plano |
 |---|---|---|---|---|

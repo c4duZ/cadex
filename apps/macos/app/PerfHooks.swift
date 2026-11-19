@@ -254,9 +254,6 @@ extension WindowSession {
         if environment["CADEX_PERF_SPLIT"] != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in _ = self?.commands.run("pane.split-right") }
         }
-        if environment["CADEX_PERF_HISTORY_OPEN"] != nil {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in self?.panelHistory?.openFirstCommit() }
-        }
         if let paths = environment["CADEX_PERF_REVEAL"]?.split(separator: ",").map(String.init) {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
                 for path in paths { self?.explorer?.reveal(path) }

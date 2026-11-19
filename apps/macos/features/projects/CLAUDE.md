@@ -55,10 +55,6 @@
   `ProjectEditParts.swift`: a prévia (`ProjectPreview`, também nos cartões da página Projetos e no
   cabeçalho da página do projeto) e a bolinha de cor. O app mostra a folha e aplica
   (`../../app/ProjectEditWiring.swift`).
-- `SessionsColumnView.swift` (plano 36 fase C): a página Sessions da coluna lateral, as conversas do
-  projeto em Today, This week e Earlier, com a busca (no título e na nota); "Reading the history…"
-  enquanto a primeira leitura corre; o clique diz a sessão (`onPick`). O app dá as linhas
-  (`../../app/SessionsColumnWiring.swift`) só enquanto a página aparece.
 - `ProjectsPinned.swift` (plano 36): o projeto fixado fica no trilho sem terminal (a última aba
   fechando não o tira: `keepEmpty`, e se era o mostrado, aparece outro com terminais ou a tela de
   início); `setPinned` (solto e sem terminal, sai), `closeTerminals(folder:)` (fixado fica),
@@ -84,8 +80,8 @@
 - O app (`../../app/ProjectsWiring.swift`) cria as abas de cada projeto, reabre os documentos
   salvos e devolve a pasta do workspace quando o app abre sem pasta; o daemon do terminal mantém o
   nome que tinha com os spaces (do caminho do spaces.json), para religar as sessões.
-- Status: planos 27, 34 e 36 no código. Os projetos aparecem no trilho da feature sidebar (ADR
-  0038); a árvore da esquerda do plano 27 saiu da tela.
+- Status: planos 27, 34, 36 e 38 no código. Os projetos aparecem na barra lateral da feature
+  sidebar (ADR 0039) e, na janela estreita, na faixa.
 
 ## Como validar
 - `make macos-test` passa: o visual do projeto (nome, cor, imagem quadrada e pequena, emoji; salvo e

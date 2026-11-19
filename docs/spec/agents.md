@@ -12,14 +12,16 @@ continua uma conversa em outra conta, sem nunca tocar em token
 ### Onde cada coisa fica (moldura nova, `../adr/0035-work-frame.md`)
 As páginas Agents, Accounts, History e o sininho da barra lateral de ícones saem
 (`../design/work-frame/inventory.md`); o que elas mostravam continua, nestes lugares:
-- **As sessões:** as que rodam num terminal do Cadex aparecem na árvore (`sidebar.md`), no terminal e
-  na tarefa delas, com o estado e os subagentes dobrados sob a linha; todas, inclusive as abertas
+- **As sessões:** as que rodam num terminal do Cadex aparecem com o estado nas abas (`tabs.md`) e,
+  somadas por projeto e por tarefa, na vista Trabalho da barra lateral (`sidebar.md`); todas, inclusive as abertas
   fora do Cadex, aparecem na página do projeto (Recent conversations, plano 30) e no ⌘J. Até o plano
   30, as de fora do Cadex ficam no Arquivo e histórico (plano 27).
 - **O uso das contas:** a etiqueta Agent usage da barra de status e o popover dela (`status-bar.md`),
   e "Accounts used here" na página do projeto.
-- **O histórico das conversas:** "Archive & history" (⌘⇧H), no pé da árvore, abre no centro.
-- **O sininho:** o sino da barra de título, com o número, abre um popover (seção Atenção).
+- **O histórico das conversas:** "Archive & history" (agents.show-history), no ⌘K, abre no centro.
+- **O que precisa de você:** a fila "Precisa de você" no topo da barra lateral e, com a barra
+  fechada, a pílula na barra de cima (`sidebar.md`, ADR 0039); o sino saiu da barra de cima no
+  plano 38, e o popover dele abre da fila (seção Atenção).
 Onde o texto abaixo diz "a lista de sessões", "o uso" ou "o histórico", vale o lugar novo; as regras
 de leitura (só enquanto aparece) passam a valer para o lugar novo.
 
@@ -30,7 +32,7 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
 - Cada sessão: um sinal de estado no meio da linha do nome, o nome, há quanto tempo está naquele
   estado, uma seta e, embaixo, o logo do provedor da conta, o branch e a conta ("main · Liderhub").
   - **Trabalhando**: o anel azul girando da peça de estado (components.stateGlyph).
-  - **Esperando você**: o âmbar com halo da peça de estado; o sino conta.
+  - **Esperando você**: o âmbar com halo da peça de estado; entra na fila.
   - Estado desconhecido: ponto cinza, com o nome do estado na dica.
 - A lista acompanha na hora: sessão nova aparece, sessão encerrada some, estado muda, sem botão de
   atualizar.
@@ -161,11 +163,11 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
     para o mesmo par naquele terminal); fica acima da caixa de entrada do Claude;
   - o clique numa conta no cartão de uso, com um Claude de outra conta em foco (sem, abre a conta
     como antes);
-  - agents.switch-account ("Switch Account…") no ⌘K e a conta na barra de cima, com o uso de cada
-    conta. A barra de cima mostra a conta do terminal com foco: a do Claude que roda nele, senão a
-    em que um `claude` digitado ali abre. Sem Claude no foco, a lista ("Account for the next
-    claude…") escolhe essa conta, sem encerrar nada: digitar `claude` ou abrir um terminal novo já
-    começa nela (o dono, 2026-11-18). As contas escondidas não entram na lista.
+  - agents.switch-account ("Switch Account…") no ⌘K, com o uso de cada conta. Sem Claude no foco,
+    a lista ("Account for the next claude…") escolhe a conta do próximo, sem encerrar nada: digitar
+    `claude` ou abrir um terminal novo já começa nela (o dono, 2026-11-18). As contas escondidas não
+    entram na lista. A conta saiu da barra de cima no plano 38: ela fica no item de uso da barra de
+    baixo (`status-bar.md`) e no cabeçalho do painel.
 - A conta padrão (~/.claude) vai sem pasta no comando, marcada por CADEX_ACCOUNT_CHOSEN=1 para não
   virar a do projeto ou a ativa (`terminal.md`, o `claude` digitado).
 
@@ -217,28 +219,32 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
 - agents.stateHooks (ligada) desliga os hooks do kit; o 7501 continua.
 
 ### Atenção (plano 19)
-- O sino (na barra de título, sempre à vista) conta só os pedidos abertos de todas as sessões
-  (permissão, pergunta), o que espera você; o mesmo número no ícone do Dock (agents.dockBadge). Os
+- Os pedidos abertos de todas as sessões (permissão, pergunta), o que espera você, ficam na fila
+  "Precisa de você" no topo da barra lateral, em qualquer vista e largura (na janela estreita, a
+  caixa âmbar da faixa com o número); com a barra fechada, a pílula da barra de cima diz quem espera
+  ("checkout-copy precisa de você"); com o app atrás de outros, a notificação do sistema e o número
+  no ícone do Dock (agents.dockBadge), que contam só pedidos. A barra de baixo não os conta. Os
   agentes que terminaram sem você ver ficam no feed, quietos, fora do número: somados, um "3" âmbar
   não dizia se algo esperava (plano 37, a auditoria de UX). "Terminou" não dá banner nem som com o
   Cadex na frente; permissão e pergunta dão. Ir ao terminal do agente marca como visto; "Mark as
   Unread" (agents.mark-unread, ou o clique direito numa linha do feed) volta. Hibernar entra no
   feed. Um agente cujo processo some no meio do trabalho aparece como "falhou".
-- O popover do sino (400 pt; `../design/work-frame/screens.md`, seção Bell) tem duas vistas, "Needs
-  you" (os cartões) e "Activity" (agents.show-feed): a linha
+- O popover da atenção (400 pt; `../design/work-frame/screens.md`, seção Bell; agents.show-attention,
+  que abre sob a fila, ou sob a busca sem a fila à vista) tem duas vistas, "Needs you" (os cartões)
+  e "Activity" (agents.show-feed): a linha
   do tempo de terminou, pediu permissão, perguntou, falhou e tarefa criada, de todas as sessões, a
   mais nova em cima, até 200, com filtro por tipo e por projeto; clicar leva ao terminal.
-- O popover só acompanha as mudanças enquanto aparece; o número do sino é o mesmo do Dock e não lê
-  nada a mais.
+- O popover só acompanha as mudanças enquanto aparece; a fila, a pílula e o número do Dock vêm da
+  mesma fonte e não leem nada a mais.
 - Silenciar as notificações de uma máquina (agents.mutedMachines): este Mac, cada host do
   `~/.ssh/config` e cada máquina da tailnet (plano 23).
 - Sessões remotas (plano 23, `docs/adr/0031-run-on-remote.md`): com uma tarefa remota à vista na
-  árvore ou a página do projeto dela aberta, o Cadex
+  barra lateral ou a página do projeto dela aberta, o Cadex
   roda `claude agents --json` por ssh (sem perguntar nada: uma máquina que pede senha fica de fora) em cada máquina onde uma tarefa do "Run on" está, ao abrir e a cada 30 s, e lista as
   sessões de lá no projeto, com "em <máquina>". Sem kit nem hooks lá, o estado é o que esse comando
   diz, e a notificação de "terminou" ou "esperando você" de uma sessão remota só vem enquanto a página
   está à vista (nada de cartão "Precisa de você" para elas); um duplo clique leva à aba ssh da tarefa.
-  Nada à vista, nenhum ssh roda. agents.attention desliga o sininho, o feed e o número.
+  Nada à vista, nenhum ssh roda. agents.attention desliga a fila, o feed e o número.
 
 ### Quadro "Precisa de você" (plano 19)
 - agents.show-attention mostra um cartão por pedido aberto. Permissão: a ferramenta e o comando ou o
@@ -252,7 +258,7 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
   e Enter; testado com o Claude Code 2.1.326 em 2026-11-17), também pelo ⌘K (agents.answer); o Cadex digita a resposta no terminal do agente só se ele
   ainda está naquela pergunta, e senão o cartão diz "The agent moved on". Formulário (várias
   perguntas), múltipla escolha (o número marca uma caixa) e sessão sem o hook não têm resposta no
-  sino: o texto e "Go to tab". Todo cartão tem "Go to
+  quadro: o texto e "Go to tab". Todo cartão tem "Go to
   tab"; sessão aberta fora do Cadex tem só ele. No painel do agente fica o diálogo
   do próprio Claude (o cartão do pé, do plano 28, saiu no 33): responder lá também fecha o daqui.
 - O cartão some quando o pedido se resolve: pelo clique aqui, ou quando o agente deixa de estar

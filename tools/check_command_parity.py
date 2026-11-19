@@ -25,11 +25,11 @@ NOT_COMMANDS = {"tabs.paneHeaders", "explorer.cell", "explorer.git-mark", "termi
 # (plan 17) start on the Mac, 2026-10-21; so do the pane headers and
 # pane.zoom (issue #1, 2026-10-22).
 MAC_ONLY = {"project.edit", "project.create", "project.new-terminal", "project.reveal", "project.copy-path",  # plano 36 B
-            "project.pin", "project.close-terminals", "project.remove", "project.sessions-column", "inspector.tab-5", "project.show-terminals",
+            "project.pin", "project.close-terminals", "project.remove", "project.show-terminals",
             "agents.switch-account", "memory.configure-project", "project.show-settings", "app.check-for-updates", "app.install-update", "app.skip-update",
             "terminal.open-pasted-image-beside", "terminal.open-pasted-image-in-tab",
             "preview.pick-element", "preview.stop-picking",
-            "git.show-history", "inspector.tab-1", "inspector.tab-2", "inspector.tab-3", "inspector.tab-4", "history.show-in-tab",
+            "git.show-history", "inspector.tab-1", "inspector.tab-2", "history.show-in-tab",
             "statusBar.customize", "statusBar.toggle-item", "statusBar.activity-monitor", "sidebar.show", "view.jump", "project.show-overview", "project.show-all", "project.show-sessions", "project.show-memory", "orchestration.show-automations", "view.board", "drawer.toggle", "drawer.move-to-project", "agents.test-notifications", "agents.show-accounts", "agents.refresh-usage", "ssh.connect", "ssh.test-again", "agents.open-account", "agents.customize-accounts",
             "pane.zoom",
             # The translucent window and vibrancy from ⌘K (2026-11-18): the Windows app has no glass yet.

@@ -133,10 +133,6 @@ final class HistoryView: NSView, NSSearchFieldDelegate {
         render()
     }
 
-    func openFirstCompactCommit() {
-        if isCompact { compactRows.press(0) }
-    }
-
     func showDetails() {
         if isCompact { return compactRows.detailsArrived() }
         detailsView.show(document?.selected, details: document?.details)

@@ -163,8 +163,6 @@ extension WindowSession {
         page.subtab = subtab
         page.onRender = { [weak self] in self?.bellPanel.refit() }
         page.render()
-        bellPanel.onClose = { [weak workspace] in workspace?.titleBar.setBellOpen(false) }
         bellPanel.show(page, below: workspace.sidebar.queueAnchor ?? workspace.titleBar.bellAnchor, width: UILooks.pt(DesignTokens.Popover.bellWidth))
-        workspace.titleBar.setBellOpen(true)
     }
 }

@@ -182,7 +182,7 @@ extension WindowSession {
                 self?.refreshHome()
             })
         }
-        entries += [.separator, MenuEntry(T("Open Folder…", "Abrir pasta…"), shortcut: app.keymapLabel("workspace.open-folder")) { [weak self] in
+        entries += [.separator, MenuEntry(T("Open Folder…", "Abrir pasta…"), shortcut: app.keymapLabel("project.new")) { [weak self] in
             self?.chooseProjectFolder()
         }]
         PopupMenu.show(MenuEntry.tidy(entries), below: anchor)

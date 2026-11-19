@@ -1,5 +1,10 @@
 # 0038 — A esquerda em trilho e coluna lateral; a coluna da direita sai
 
+> **Substituída pela `docs/adr/0039-sidebar-with-work-and-files.md`** (plano 38, 2026-11-19): a
+> barra lateral com Trabalho e Arquivos tomou o lugar do trilho e da coluna lateral. O trilho
+> sobrevive só como a faixa da janela estreita (abaixo de 1000 pt); da coluna ficaram Files e
+> Changes, como a vista Arquivos. O texto abaixo fica como histórico.
+
 Data: 2026-11-18 · Status: substituída pela `docs/adr/0039-sidebar-with-work-and-files.md`
 (2026-11-19), que a auditoria de UX levou a uma barra lateral só; antes: aceita (o dono, 2026-11-18: "pode deixar o open terminal, escreve a
 ADR") · Revê, da `docs/adr/0035-work-frame.md`, a "Esquerda, a árvore do trabalho" e a "Direita, a

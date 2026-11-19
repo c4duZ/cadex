@@ -53,10 +53,6 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// it (FolderFollow.swift).
     var lastTerminalFolder: String?
     var followTerminal = true
-    /// The sidebar's Git History page, made the first time it shows
-    /// (SidebarWiring.swift); nil while nobody opened it, so it costs nothing.
-    var panelHistory: HistoryDocument?
-    let panelHistoryHost = NSView()
     /// The status bar's Terminals item (StatusBarWiring.swift).
     var terminalsLabel: StatusLabel?
     /// The status bar's Project, keep-awake and update items (StatusBarItems.swift).
@@ -95,10 +91,6 @@ final class WindowSession: NSObject, NSWindowDelegate {
     var paneHeaderClock: Timer?
     /// The history read while a project's page shows (ProjectPageWiring.swift).
     var projectPageHistory: UUID?
-    /// The history read while the side column's Sessions shows (plan 36 C).
-    var sessionsColumnHistory: UUID?
-    /// The history answered once since the page showed: an empty list then means none.
-    var sessionsColumnRead = false
     /// Each project's memory pages, read with its page (plan 34 E): the sections list them at each key.
     var projectMemory: [String: [MemoryPage]] = [:]
     /// The terminal drawer, made on its first show (DrawerWiring.swift).
@@ -200,7 +192,6 @@ final class WindowSession: NSObject, NSWindowDelegate {
         explorer.onFolderChange = { [weak self, weak opener] folders in
             opener?.foldersChanged(folders)
             self?.git?.diskChanged(folders)
-            self?.panelHistory?.diskChanged(folders)
             self?.reviewsDiskChanged(folders)
             AuthorshipHub.diskChanged(folders)
         }
@@ -219,10 +210,6 @@ final class WindowSession: NSObject, NSWindowDelegate {
         drawQueue()
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
         setUpStatusBar(workspace.statusBar, git: git)
-        // The account up top opens the accounts card on hover, as the status bar's usage does.
-        statusCards.append(HoverCard(over: workspace.titleBar.accountView, below: true) { [weak self] in
-            AgentUsageCard.make(colors: self?.usageStrip?.colors ?? AgentColors()) { account in self?.switchOrLaunch(account) }
-        })
         // After the status bar's items exist: they show keep-awake and the update (review of
         // 2026-11-17: before, a new window drew them in the wrong state).
         showPower()

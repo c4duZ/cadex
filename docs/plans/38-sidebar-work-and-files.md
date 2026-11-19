@@ -79,10 +79,17 @@ o que o clique faz). O dono aprovou em 2026-11-19 ("pode fazer").
   mais a barra lateral; a barra de baixo só com gaveta, conta, café e ambiente. Visto no app nas três
   situações; não conferido: o "…" aberto (o clique de teste) e o atalho trocado para ⌘O, que fica
   para o dono decidir.
-- [ ] H. Fechar: o que sai (o trilho, a coluna lateral, as páginas Sessions/Memory/Git graph da
+- [x] H. Fechar: o que sai (o trilho, a coluna lateral, as páginas Sessions/Memory/Git graph da
   coluna, o item de tarefa nas abas) entra no inventário da moldura em `saiu`; as specs (sidebar,
   inspector, tabs, status-bar, projects, home, agents), os CLAUDE.md, o `docs/CONTEXT.md` e a ADR 0038
   com a nota; a paridade (`MAC_ONLY`), `make check`, `make perf` só se o dono pedir, e a dist.
+  Feito: o trilho ficou como a faixa (sem os ícones de páginas, sem o "+", sem Projects e
+  Automations no pé); saíram a página Sessions da coluna, o grafo compacto, ⌃⌘3 a ⌃⌘5, a conta, o
+  quadro e a engrenagem da barra de cima e o project.sessions-column (o inventário, seção do plano
+  38). O menu da tarefa, que estava no item dela nas abas, foi para o clique direito da linha dela
+  na barra lateral. Specs, CONTEXT.md e a nota na ADR 0038 escritos; `make check` passou. Ficam para
+  depois: o modo compacto do histórico do git sem uso no app, as linhas do menu do lugar chamando o
+  código direto em vez de comandos pelo id, a imagem solta numa linha da lista Trabalho e a dist.
 
 - Telas: WorkSidebar.dc.html (descrita em `docs/design/work-frame/screens.md`; as quatro situações em
   `docs/design/sidebar/6-estrutura-ideal.html`).

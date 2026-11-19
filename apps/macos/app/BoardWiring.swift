@@ -96,7 +96,6 @@ extension WindowSession {
     /// The title bar while the board shows: "All projects", the board's button lit.
     func showBoardChrome() {
         let on = tabs?.activeDocument?.identity == BoardDocument.identity
-        workspace?.titleBar.setBoardOpen(on)
         // Only the board closes the side column, given back when it goes (ADR 0038): a page in the
         // center (Projects, a project's, the review) keeps it, so nothing jumps. With every page
         // counted, going from the board to another page kept the column shut, and the board's

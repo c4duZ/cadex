@@ -33,27 +33,20 @@ final class RailPress {
 /// Dragging in the rail (docs/adr/0038-rail-and-side-column.md; plan 36 phase E): the dragged tile
 /// or icon goes among the others live, they slide out of its way, and the order is kept on release.
 /// A project dragged above the line is pinned, below it is not; one with no terminal cannot go
-/// below (unpinned and empty, nothing would keep it). The pages move only among the pages.
+/// below (unpinned and empty, nothing would keep it).
 extension RailView {
-    enum DragKind { case project, page }
-
-    /// What moves together: the tiles and the line between pinned and not, or the page icons.
-    func movable(_ kind: DragKind) -> [NSView] {
-        switch kind {
-        case .project:
-            return top.arrangedSubviews.filter { $0 is RailTile || $0 === groupLine }
-        case .page:
-            return pagesStack.arrangedSubviews.filter { view in pageButtons.contains { $0.1 === view } }
-        }
+    /// What moves together: the tiles and the line between pinned and not.
+    func movable() -> [NSView] {
+        top.arrangedSubviews.filter { $0 is RailTile || $0 === groupLine }
     }
 
-    func dragMoved(_ view: NSView, _ kind: DragKind, _ event: NSEvent) {
+    func dragMoved(_ view: NSView, _ event: NSEvent) {
         if dragged !== view {
             dragged = view
             view.alphaValue = Self.liftedAlpha
         }
-        let items = movable(kind)
-        let stack = kind == .project ? top : pagesStack
+        let items = movable()
+        let stack = top
         guard let base = items.first.flatMap({ stack.arrangedSubviews.firstIndex(of: $0) }) else { return }
         var others = items.filter { $0 !== view }
         // Its slot: past every other whose middle is above the pointer (window coordinates go up).
@@ -75,25 +68,18 @@ extension RailView {
         }
     }
 
-    func dragEnded(_ view: NSView, _ kind: DragKind) {
+    func dragEnded(_ view: NSView) {
         dragged = nil
         view.alphaValue = 1
-        switch kind {
-        case .project:
-            guard let tile = view as? RailTile else { return }
-            let items = movable(.project)
-            let order = items.compactMap { ($0 as? RailTile)?.project.id }
-            var pinned = tile.project.pinned
-            if let line = items.firstIndex(where: { $0 === groupLine }), let at = items.firstIndex(of: tile) {
-                pinned = at < line
-            }
-            tiles.sort { (order.firstIndex(of: $0.project.id) ?? 0) < (order.firstIndex(of: $1.project.id) ?? 0) }
-            onMove?(tile.project.id, order, pinned)
-        case .page:
-            let items = movable(.page)
-            pageButtons.sort { a, b in (items.firstIndex(of: a.1) ?? 0) < (items.firstIndex(of: b.1) ?? 0) }
-            onMovePages?(pageButtons.map(\.0.id))
+        guard let tile = view as? RailTile else { return }
+        let items = movable()
+        let order = items.compactMap { ($0 as? RailTile)?.project.id }
+        var pinned = tile.project.pinned
+        if let line = items.firstIndex(where: { $0 === groupLine }), let at = items.firstIndex(of: tile) {
+            pinned = at < line
         }
+        tiles.sort { (order.firstIndex(of: $0.project.id) ?? 0) < (order.firstIndex(of: $1.project.id) ?? 0) }
+        onMove?(tile.project.id, order, pinned)
     }
 
     static let liftedAlpha: CGFloat = 0.7

@@ -50,18 +50,11 @@
   botões da janela); `TitleBarView.swift`, a barra de título da moldura nova (plano 26, fase A;
   `../../../docs/design/work-frame/screens.md`, TitleBar; components.titleBar): 44 pt, com os
   botões da janela descidos para o meio dela a cada mudança de tamanho e de foco (a barra compacta
-  os centra em 38), a busca `TitleBarSearch.swift` ("Search ⌘K", abre a paleta), "projeto ›
-  tarefa" só nas páginas (o "All projects" do quadro, uma execução, uma corrida; nos terminais as
-  abas já dizem o lugar, o dono em 2026-11-18), as abas e "+", e à direita a conta
-  (`TitleBarAccount.swift`: a do agente com foco, senão a ativa, com o uso; o clique roda
-  agents.switch-account), o quadro (view.board liga e desliga: com ele aberto volta à aba de antes,
-  TabsController.goBack, e o Esc faz o mesmo), o sino com o número (`setBell`, de
-  `AgentsAttention.swift`), as configurações (settings.open) e o botão do painel da direita
-  (view.toggle-sidebar, aceso com ela aberta; `setInspectorOpen`); o café e a
-  atualização foram para a barra de status (fase B, `StatusBarItems.swift`); o botão da barra
-  lateral, o de space e o das configurações saíram (⌘B, ⇧⌘S e ⌘, no ⌘K, nos atalhos e no menu). Cada botão é
-  um `TitleBarButton.swift` (components.titleIconButton: 30 pt, aceso quando o que abre está
-  aberto, com o número do sino), todos por comando; nada de valor digitado
+  os centra em 38), o que ela mostra é o do plano 38 fase E (abaixo), a busca `TitleBarSearch.swift`
+  ("Search ⌘K", abre a paleta); o café e a atualização foram para a barra de status (plano 26 fase B,
+  `StatusBarItems.swift`); a conta, o quadro, o sino e as configurações saíram no plano 38. Cada
+  botão é um `TitleBarButton.swift` (components.titleIconButton: 30 pt, aceso quando o que abre
+  está aberto), todos por comando; nada de valor digitado
   (`../../../tools/check_design_literals.py`), `WorkspaceView.swift` (painéis arredondados de `PanelView.swift`,
   painel lateral recolhível, barra de status) e `TreeWiring.swift` (plano 27 fase B; a view da árvore saiu no plano 36, ficou o modelo, que o trilho, o ⌘J, o sidebar.find e o quadro leem: o modelo
   juntado dos projetos, das worktrees de cada um, listadas fora da linha principal, do estado do
@@ -112,8 +105,8 @@
   estados e os pedidos; `drawRail` acende o lugar pelo TabsController.currentGroup; `pickPlace`;
   aberto ou fechado no projects.json, `isExpanded`/`toggleProject`); o `WorkspaceView.swift` a põe no
   lugar do trilho, com a coluna (Files e Changes) dentro dela como a vista Arquivos; sidebar.show-work
-  (⇧⌘1) e sidebar.show-files (⇧⌘2); Sessions, Memory e o grafo saíram da coluna: memory.show e
-  project.sessions-column abrem a página do projeto, git.show-history abre o histórico numa aba.
+  (⇧⌘1) e sidebar.show-files (⇧⌘2); Sessions, Memory e o grafo saíram da coluna: memory.show abre a
+  página do projeto (project.sessions-column saiu na fase H), git.show-history abre o histórico numa aba.
 - Plano 38 fase F: o item Agents da barra de baixo (`StatusBarItems.swift`) conta só quem trabalha e o
   clique abre o quadro; os pedidos não são contados lá (a casa deles é a fila).
 - Plano 38 fase E: a barra de cima (`TitleBarView.swift`) começa com o botão da barra lateral (⌘B), o
@@ -140,48 +133,33 @@
   pedido) ou abre a lista (vários). O sino saiu da barra de cima; a lista dele abre da fila
   (agents.show-attention). O número do Dock continua (só pedidos). CADEX_PERF_REQUEST cria um pedido
   falso para ver a fila numa instância de teste.
-- `RailWiring.swift` (plano 36 fase A, ADR 0038; o trilho saiu da tela no plano 38 B): o trilho da feature `sidebar` na borda esquerda
-  (`WorkspaceView.swift`): os projetos com a cor, o estado mais urgente dos terminais e o ponto de
-  terminal aberto, redesenhados com a árvore (drawTree, em `TreeWiring.swift`); o clique escolhe o projeto (as
-  abas e a coluna), abre um terminal se ele não tem, e sai de uma página aberta no centro. O ⌘B
-  (view.toggle-sidebar) fecha e abre a coluna (o inspector.toggle, igual, saiu no plano 37); o trilho fica. Files e Changes
-  seguem o projeto escolhido, ou a tarefa do terminal com foco, não o `cd` (`FolderFollow.swift`,
-  `projectAnchor`, `followProject` na troca de projeto).
+- Files e Changes seguem o projeto escolhido, ou a tarefa do terminal com foco, não o `cd`
+  (`FolderFollow.swift`, `projectAnchor`, `followProject` na troca de projeto). O ⌘B
+  (view.toggle-sidebar) fecha e abre a barra lateral.
 - `ProjectEditWiring.swift` (plano 36 fase B): a folha "Edit project" (project.edit, também pelo
-  clique direito no trilho; nome, imagem ou emoji, cor) e a mesma folha criando pelo "+" do trilho
-  (project.create: a pasta, o nome, a imagem); a imagem solta num quadrado do trilho vira a do
+  clique direito na barra lateral; nome, imagem ou emoji, cor) e a mesma folha criando pelo Novo
+  projeto… (project.create: a pasta, o nome, a imagem); a imagem solta num quadrado da faixa vira a do
   projeto; o clique direito (`railMenu`: New Terminal, New Task…, Edit Name and Image…, Pin ou
   Unpin, Project Settings…, Show in Finder, Copy Path, Close Terminals, Remove from the Sidebar),
   cada linha um comando (project.pin, project.close-terminals, project.remove e os de baixo): `projectTarget` diz
   a qual projeto o próximo comando se refere (project.new-terminal, project.reveal,
   project.copy-path, project.edit), e New Task e Settings mostram o projeto antes; criar pela folha
-  fixa o projeto; o trilho põe os fixados primeiro (`RailWiring.swift`);
+  fixa o projeto; a barra lateral põe os fixados primeiro (`RailWiring.swift`);
   `projectPicture`, o quadrado dos cartões da página Projetos e do cabeçalho da página do projeto.
-- O trilho mostra os ícones das páginas da coluna (plano 36 fase C, ADR 0038 revista): `railPages`
-  em `RailWiring.swift`, postos pelo `WindowSession.swift`; syncRailPages (em `WorkspaceView.swift`) acende o
-  da página aberta quando a coluna abre, fecha ou troca de página; a coluna sem a fileira de cima.
-- Plano 36 fase D: em `ProjectsWiring.swift`, a barra do projeto ganha um item por tarefa com
-  terminal aberto (`taskItems`, o estado dela) e a da tarefa, "‹ projeto"; project.show-terminals
-  volta às abas do próprio projeto; `TitleBarView.swift` diz à faixa de abas quanto espaço ela tem;
-  os terminais da pasta pessoal são abas sem projeto (`RailWiring.swift`, `isLoose`: fora do
-  trilho); a coluna segue a tarefa quando a lista das tarefas chega (`TreeWiring.swift`).
-- Plano 36 fase F: só o quadro fecha a coluna (`BoardWiring.swift`, setBoardShown), e sair dele a
-  devolve; uma página no centro a mantém. Abaixo de 1000 pt a coluna fecha e volta ao alargar
-  (WorkspaceView.fitColumn, também ao abrir a janela). `RemoteWiring.swift`: remote.show, os hosts
-  SSH e as máquinas da tailnet numa lista (`RemoteSource`), escolher conecta numa aba (connectSSH,
-  connectMachine); o trilho mostra Remote no pé só com algum host (`hasRemote`).
-- `SessionsColumnWiring.swift` (plano 36 fase C): a página Sessions da coluna (project.sessions-column):
-  as conversas do projeto escolhido por quando, lidas do histórico só enquanto a página aparece
-  (o onColumnPage do WorkspaceView solta ao sair); o clique abre a página do projeto em Sessions.
-- `InspectorWiring.swift` (plano 26, fase C; desde o plano 36 a coluna lateral, à esquerda, ao lado
-  do trilho): Files (a árvore do explorer), Changes (o painel do git), Memory e Git graph (o
-  histórico compacto, feito na primeira vez que a página aparece), nessa ordem, cada uma com o ícone
-  e os botões de antes; a linha de contexto com a pasta, o branch (o clique troca) e a memória do projeto; numa tarefa,
-  Changes diz "<tarefa> · against <ponto de partida>" e History "<tarefa> · N commits ahead of
-  <ponto de partida>" (contado pelo git fora da linha principal), como no mockup Inspector;
-  view.toggle-sidebar (⌘B) e inspector.visible, inspector.tab e inspector.width (a borda) salvos (a
-  regra da janela estreita saiu com a árvore; a nova vem na fase F do plano 36); git.show, explorer.focus,
-  git.show-history e memory.show abrem a aba deles (WorkspaceView.showInspector).
+- Plano 36 fase D: project.show-terminals volta às abas do próprio projeto; `TitleBarView.swift` diz à faixa de abas quanto espaço ela tem;
+  os terminais da pasta pessoal são abas sem projeto (`RailWiring.swift`, `isLoose`: fora da
+  barra lateral); a coluna segue a tarefa quando a lista das tarefas chega (`TreeWiring.swift`).
+- Plano 36 fase F: só o quadro fecha a barra lateral (`BoardWiring.swift`, setBoardShown), e sair
+  dele a devolve; uma página no centro a mantém. `RemoteWiring.swift`: remote.show, os hosts SSH e
+  as máquinas da tailnet numa lista (`RemoteSource`), escolher conecta numa aba (connectSSH,
+  connectMachine); a barra lateral mostra Máquinas no pé só com algum host (`hasRemote`).
+- `InspectorWiring.swift` (plano 26, fase C; desde o plano 38 a vista Arquivos da barra lateral):
+  Files (a árvore do explorer) e Changes (o painel do git), cada uma com os botões de antes; a linha
+  de contexto com a pasta e o branch (o clique troca); numa tarefa, Changes diz "<tarefa> · contra
+  <ponto de partida>"; view.toggle-sidebar (⌘B) e inspector.visible, inspector.tab e inspector.width
+  (a borda) salvos; git.show e explorer.focus abrem a deles (WorkspaceView.showInspector); ⌃⌘1 e
+  ⌃⌘2 (inspector.tab-1 e -2). Sessions, Memory e o grafo saíram no plano 38 (a página do projeto e
+  git.history-in-tab).
 - `AgentToolsWiring.swift` (plano 20, fase B): o pedido de comando do agente acha o terminal dele
   (pela sessão do kit, senão pelos pids acima do `cadex`), confere agentTools.enabled e a lista do
   agente e roda na janela daquele terminal, com a pasta e a conversa; abrir arquivo e diff (só dentro

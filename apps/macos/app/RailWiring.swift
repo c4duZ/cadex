@@ -16,6 +16,7 @@ extension WindowSession {
         sidebar.onPickPlace = { [weak self] folder in self?.pickPlace(folder) }
         sidebar.onToggle = { [weak self] folder in self?.toggleProject(folder) }
         sidebar.menuFor = { [weak self] folder in self?.railMenu(folder) ?? [] }
+        sidebar.menuForPlace = { [weak self] folder in self?.treeMenu(task: folder) ?? [] }
         sidebar.onPickRequest = { [weak self] id in self?.goToRequest(id) }
         sidebar.onPickRecent = { [weak self] folder in self?.homeOpen(folder) }
         sidebar.onShowChanges = { [weak self] in _ = self?.commands.run("git.show") }

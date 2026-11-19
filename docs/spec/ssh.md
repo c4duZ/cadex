@@ -5,7 +5,7 @@ Ver os servidores do `~/.ssh/config` (as VPS de quem usa), saber se estão no ar
 num deles com um clique.
 
 ## Comportamento
-- Remote, no pé do trilho (`sidebar.md`, plano 36 F; só quando há algum host ou máquina da tailnet):
+- Máquinas, no pé da barra lateral (`sidebar.md`, plano 38; só quando há algum host ou máquina da tailnet):
   os hosts daqui e as máquinas da tailnet (`machines.md`) numa lista só (remote.show, também no ⌘K);
   escolher abre uma aba conectada. O item SSH da barra de status vem desligado por padrão e quase
   ninguém o via (ADR 0038).

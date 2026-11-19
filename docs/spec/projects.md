@@ -9,27 +9,31 @@ agora sempre com a pasta (`../adr/0035-work-frame.md`).
 - Um projeto é uma pasta mais os terminais e documentos abertos nela, as tarefas dela (worktrees,
   `worktrees.md`), um nome (o da pasta, ou o que o dono der), uma cor opcional e uma imagem ou um
   emoji (plano 36 B).
-- Os projetos aparecem no trilho, à esquerda (`sidebar.md`, ADR 0038), um quadrado cada. O centro
-  mostra as abas do projeto escolhido (`tabs.md`); a coluna lateral fala dele (`inspector.md`).
-- **Fixado:** o projeto fixado fica no trilho mesmo sem terminal; os outros saem quando o último
-  terminal fecha. Criado pela folha, nasce fixado; aberto pelo ⌘O, não. Fixar e soltar pelo clique
-  direito (project.pin), pelas Configurações do projeto ou arrastando para cima ou para baixo da
-  linha do trilho. Um arquivo de antes do plano 36 volta com tudo fixado.
-- **Abrir um projeto:** o "+" do trilho (project.create, a folha com a pasta, o nome, a imagem e a
-  cor), Open folder (⌘O, project.new) e os recentes da tela de início (`home.md`), `cadex .` num
+- Os projetos aparecem na vista Trabalho da barra lateral, à esquerda (`sidebar.md`, ADR 0039),
+  uma linha cada, com o main e as tarefas embaixo; na janela estreita, um quadrado cada na faixa. O
+  centro mostra as abas do lugar escolhido (`tabs.md`), o lugar fica no começo da barra de cima e a
+  vista Arquivos mostra a árvore dele (`inspector.md`).
+- **Fixado:** o projeto fixado fica na barra lateral mesmo sem terminal; os outros saem quando o
+  último terminal fecha. Criado pela folha, nasce fixado; aberto por Abrir projeto… (project.new),
+  não. Fixar e soltar pelo clique direito (project.pin), pelas Configurações do projeto ou, na faixa
+  da janela estreita, arrastando o quadrado para cima ou para baixo da linha. Um arquivo de antes do
+  plano 36 volta com tudo fixado.
+- **Abrir um projeto:** "Novo projeto…" no fim da barra lateral (project.create, a folha com a
+  pasta, o nome, a imagem e a cor), Abrir projeto… (⌃⌘N, project.new; o "Abrir pasta…" de nada
+  aberto) e os recentes da barra lateral e da tela de início (`home.md`), `cadex .` num
   terminal, ou soltar a pasta no ícone do Dock. Abrir a pasta de um projeto que já existe vai para
   ele. Os terminais da pasta pessoal não viram projeto (abas sem projeto).
-- **Trocar de projeto:** clicar nele no trilho, project.switch (⇧⌘S, a lista na paleta com a imagem
-  e a busca, o atual marcado), project.next (⌃⌘→) e project.previous (⌃⌘←), dando a volta; e o ⌘J,
-  por atenção. O foco volta para onde estava no projeto.
+- **Trocar de projeto:** clicar nele na barra lateral (vai ao último lugar usado nele), no menu do
+  lugar, project.switch (⇧⌘S, a lista na paleta com a imagem e a busca, o atual marcado),
+  project.next (⌃⌘→) e project.previous (⌃⌘←), dando a volta; e o ⌘J, por atenção. O foco volta para onde estava no projeto.
 - **Editar:** project.edit (Edit Name and Image…, no clique direito, nas Configurações do projeto e
   no ⌘K) abre a folha com o nome (vazio volta ao da pasta), a imagem (Choose Image…, Remove; ou solta
-  no quadrado), o emoji e a cor, com a prévia como o trilho mostra. project.rename e
-  project.set-color continuam no ⌘K; a cor pinta o quadrado e a barra de abas enquanto o projeto
+  num quadrado da faixa), o emoji e a cor, com a prévia. project.rename e
+  project.set-color continuam no ⌘K; a cor pinta o avatar e a barra de abas enquanto o projeto
   aparece (`themes.md`, cores de trabalho).
 - project.close encerra os terminais e documentos do projeto (pergunta antes se algum roda um
-  programa ou se há arquivo não salvo) e tira o projeto do trilho; Close Terminals fecha os
-  terminais e deixa um fixado no trilho; Remove from the Sidebar solta e fecha. As tarefas e as worktrees ficam
+  programa ou se há arquivo não salvo) e tira o projeto da barra lateral; Close Terminals fecha os
+  terminais e deixa um fixado na barra; Remove from the Sidebar solta e fecha. As tarefas e as worktrees ficam
   no disco e voltam se a pasta for aberta de novo. Fechar o último projeto mostra a tela de início.
   Um projeto fechado fica nos recentes com as abas que tinha, e reabri-lo (pela tela de início ou
   pela pasta) as devolve.
@@ -60,20 +64,21 @@ agora sempre com a pasta (`../adr/0035-work-frame.md`).
 ## Casos de borda
 - Pasta de um painel apagada entre as sessões -> o shell abre na pasta do projeto, ou na pessoal se
   ela também sumiu.
-- Pasta do projeto apagada -> o quadrado fica, sem aviso próprio ainda (o Locate… da árvore de
+- Pasta do projeto apagada -> a linha fica, sem aviso próprio ainda (o Locate… da árvore de
   antes saiu com ela); Remove from the Sidebar o tira.
 - Arquivo aberto que sumiu -> a aba dele não volta; num painel dividido, o painel vira um terminal
   na pasta do arquivo, para o layout não mudar. O resto volta.
 - Diff, preview web e janelas de mensagem não são restaurados (são passageiros).
 - Projeto salvo sem nenhuma aba -> volta com um terminal na pasta dele.
 - Dois projetos com o mesmo nome (pastas diferentes) -> permitido; a paleta mostra o caminho e o
-  trilho, a imagem ou a cor de cada um.
+  barra lateral, a imagem ou a cor de cada um.
 
 ### A página do projeto (mockup Project; plano 30 A, feito junto da revisão do plano 29)
-- Um cartão da página Projetos, project.show-overview no ⌘K, ou o clique numa conversa ou página da
-  coluna lateral abre a página no centro, abaixo da barra de cima, que não muda (plano 34; a
-  proposta em `docs/design/projects/proposta.html`); a coluna lateral fica (ADR 0038); o Esc ou uma
-  aba de terminal saem dela.
+- Um cartão da página Projetos, "Página do projeto" no menu do lugar, project.show-overview no ⌘K,
+  project.show-sessions ou memory.show abrem a página no centro, abaixo da barra de cima, que não
+  muda (plano 34; a proposta em `docs/design/projects/proposta.html`); a barra lateral fica (ADR
+  0039); o Esc ou uma aba de terminal saem dela. Sessões e Memória moram aqui desde o plano 38 (a
+  coluna lateral as tinha).
 - Em cima, "Projects › nome" (o primeiro leva à página Projetos), a imagem do projeto, o nome, a
   linha "caminho · branch · remoto · N páginas de memória · N sessões", Open terminal (os terminais
   do projeto, um aberto se não há), Race… e New task, e as seções num controle sob o
@@ -83,14 +88,14 @@ agora sempre com a pasta (`../adr/0035-work-frame.md`).
   guardou dela, Retomar, Continuar em outra conta… e Ver a página (já renderizada).
 - Memória: a busca e as páginas agrupadas (regras, decisões, cuidados, padrões, outras) com o
   sinal do tipo; a escolhida aparece renderizada, sem o frontmatter (o tipo, de qual sessão veio, a
-  conta, o corpo), com Editar (o .md no editor), Abrir a sessão e Apagar…. O clique numa página da
-  Memory da coluna lateral, ou na busca da memória do ⌘K, abre aqui.
+  conta, o corpo), com Editar (o .md no editor), Abrir a sessão e Apagar…. A busca da memória do ⌘K
+  abre aqui.
 - Automações: as do projeto, com o liga e desliga, Criar automação e a página de todas;
   Configurações: no topo, "In the sidebar" (a prévia, Edit Name and Image… e a caixa de fixado,
   plano 36 E), depois a memória do projeto (o .ai-memory.toml, plano 32).
-- A página Projetos (project.show-all, o pé do trilho): um cartão por projeto com a imagem, a pasta
+- A página Projetos (project.show-all, no ⌘K): um cartão por projeto com a imagem, a pasta
   e o branch, tarefas, sessões, memórias e o que acontece agora; o cartão abre a página do projeto.
-  Ela não edita nada (ADR 0038); Add project é o mesmo "+" do trilho.
+  Ela não edita nada (ADR 0038); Add project é o mesmo "Novo projeto…" da barra lateral.
 - De cima para baixo: o nome, o caminho · o branch · o remoto, e Race… e New task; quatro números
   (tarefas abertas com quantas trabalham e quantas precisam de você; o gasto da semana pelo custo
   que a status line gravou de cada sessão, com sessões e contas; os merges dos últimos 30 dias,
@@ -107,9 +112,9 @@ agora sempre com a pasta (`../adr/0035-work-frame.md`).
 - [x] Um projeto salvo e restaurado volta igual: abas, nomes, divisões com proporções, pastas, foco.
   (Conferido com os projetos: o teste "projects saved and restored come back the same".)
 - [x] Arquivo de estado corrompido não impede o app de abrir: volta ao padrão e guarda o ruim ao lado.
-- [x] Trocar de projeto pelo trilho, pela paleta e pelos atalhos mostra as abas daquele projeto.
+- [x] Trocar de projeto pela barra lateral, pela paleta e pelos atalhos mostra as abas daquele projeto.
 - [x] O nome, a imagem, o emoji e a cor editados voltam ao reabrir; a imagem trocada sai da pasta.
-- [x] Um fixado sem terminal fica no trilho; solto e sem terminal, sai.
+- [x] Um fixado sem terminal fica na barra lateral; solto e sem terminal, sai.
 - [x] Fechar o app pelo menu e reabrir traz os mesmos projetos e o mesmo projeto ativo.
 - [x] Um terminal e um documento lado a lado voltam lado a lado.
 - [ ] Com terminal.keepSessions ligado, reabrir o app traz a tela e o scrollback de cada painel;

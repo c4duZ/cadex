@@ -44,9 +44,6 @@ extension WindowSession {
         let inspector = InspectorView(tabs: tabs, shortcut: shortcut, tabsOnTop: false) { [weak self] id in _ = self?.commands.run(id) }
         inspector.onShow = { [weak self] id in
             self?.showChangesLine()
-            if id == "history" { self?.showHistoryTab() }
-            self?.workspace?.syncRailPages()
-            if id == "sessions" { self?.showSessionsColumn() }
             self?.settings.store.update { $0.inspector.tab = id }
         }
         git.onBusy = { [weak inspector] busy in inspector?.setBusy(busy, for: "changes") }
@@ -61,11 +58,11 @@ extension WindowSession {
         return inspector
     }
 
-    /// ⌃⌘1 to ⌃⌘4: the column's pages in order (plan 26 phase E; the sidebar.page-N ids of the old
-    /// sidebar left in plan 27 phase D).
+    /// ⌃⌘1 and ⌃⌘2: Files and Changes, the sidebar's Files view (plan 26 phase E; Sessions, Memory
+    /// and the graph, ⌃⌘3 to ⌃⌘5, left with plan 38).
     func inspectorTabCommands() -> [Command] {
-        (1...5).map { n in
-            Command(id: "inspector.tab-\(n)", title: T("Go to Side Column Page \(n)", "Ir para a página \(n) da coluna lateral"),
+        (1...2).map { n in
+            Command(id: "inspector.tab-\(n)", title: T(n == 1 ? "Show Files in the Sidebar" : "Show Changes in the Sidebar", n == 1 ? "Mostrar Arquivos na barra lateral" : "Mostrar Mudanças na barra lateral"),
                     keywords: ["panel \(n)", "tab \(n)", "inspector", "painel \(n)", "aba \(n)"], category: .view,
                     defaultShortcut: "ctrl+cmd+\(n)",
                     action: .run { [weak self] in
@@ -98,38 +95,10 @@ extension WindowSession {
         settings.store.update { $0.inspector.visible = visible }
     }
 
-    /// The scope row of Files and Memory and History, as the Inspector drawing has it: Files and
-    /// History "orchestration-e · cadex.worktrees/orchestration-e" (the folder, then where it
-    /// sits), Memory the project's name; the whole path in the tip.
+    /// The scope row of Files: the folder's name, the whole path in the tip; and Files' head in words.
     func showPanelFolder(_ root: String) {
-        guard let inspector = workspace?.inspector else { return }
-        let name = Self.folderName(root)
         showFilesHead(root)
-        let place = ((root as NSString).deletingLastPathComponent as NSString).lastPathComponent + "/" + name
-        // The name alone, as the proposal's Files: "name · parent/name" repeated it, cut (2026-11-18).
-        inspector.setScope(InspectorScope(name, tip: root), for: "files")
-        inspector.setScope(InspectorScope(name + " · " + place, tip: root), for: "history")
-        // A task's history: how far it went from where it started (the Inspector drawing,
-        // "orchestration-e · 3 commits ahead of main"), counted by git off the main thread.
-        if let base = WorktreesController.shared.store.task(root)?.base, !base.isEmpty {
-            DispatchQueue.global(qos: .utility).async { [weak self] in
-                let ahead = Self.commitsAhead(of: base, in: root)
-                DispatchQueue.main.async {
-                    MainActor.assumeIsolated {
-                        guard let self, let ahead, self.folder.root == root else { return }
-                        let words = ahead == 1 ? T("1 commit ahead of \(base)", "1 commit à frente de \(base)")
-                            : T("\(ahead) commits ahead of \(base)", "\(ahead) commits à frente de \(base)")
-                        self.workspace?.inspector.setScope(InspectorScope(name + " · " + words, tip: root), for: "history")
-                    }
-                }
-            }
-        }
-        let project = TitleBarView.location(of: root).project
-        // The project alone: the sentence was cut ("the project's me…"); it is in the tip.
-        // The proposal's head: "What the project knows", the project under it in the tab.
-        let memoryTip = project + " · " + root + "\n" + T("The project's memory, shared by every task and account",
-                                                          "A memória do projeto, de todas as tarefas e contas")
-        inspector.setScope(InspectorScope(T("What the project knows", "O que o projeto sabe"), tip: memoryTip, strong: true), for: "memory")
+        workspace?.inspector.setScope(InspectorScope(Self.folderName(root), tip: root), for: "files")
     }
 
     /// Changes' scope: the branch with ↑ and ↓, the click switches branch; "Git" outside a
@@ -147,80 +116,6 @@ extension WindowSession {
     }
 
     static func folderName(_ path: String) -> String { (path as NSString).lastPathComponent }
-
-    /// `git rev-list --count <base>..HEAD` in `folder`; nil when git says no.
-    nonisolated static func commitsAhead(of base: String, in folder: String) -> Int? {
-        let git = Process()
-        git.executableURL = URL(fileURLWithPath: "/usr/bin/git")
-        git.arguments = ["-C", folder, "rev-list", "--count", base + "..HEAD"]
-        let out = Pipe()
-        git.standardOutput = out
-        git.standardError = FileHandle.nullDevice
-        guard (try? git.run()) != nil else { return nil }
-        let data = out.fileHandleForReading.readDataToEndOfFile()
-        git.waitUntilExit()
-        guard git.terminationStatus == 0 else { return nil }
-        return Int(String(decoding: data, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines))
-    }
-
-    /// The History tab: the repository's history, compact, made the
-    /// first time the tab shows and again when the repository changes.
-    /// Outside a repository the tab says so. The root comes from git, off
-    /// the main thread (source-control's rule).
-    func showHistoryTab() {
-        let folder = self.folder.root
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            let root = SourceControlController.repositoryRoot(containing: folder)
-            DispatchQueue.main.async {
-                MainActor.assumeIsolated {
-                    guard let self, self.folder.root == folder else { return }
-                    self.placeHistoryTab(root)
-                }
-            }
-        }
-    }
-
-    private func placeHistoryTab(_ root: String?) {
-        if let current = panelHistory, current.root == root { return }
-        panelHistory?.view.removeFromSuperview()
-        panelHistory = nil
-        panelHistoryHost.subviews.forEach { $0.removeFromSuperview() }
-        guard let root, let opener else {
-            let label = NSTextField(labelWithString: T("Not a Git repository", "Não é um repositório Git"))
-            label.textColor = .secondaryLabelColor
-            fill(panelHistoryHost, with: label, centered: true)
-            return
-        }
-        let history = opener.makeHistory(root)
-        history.compact = true
-        panelHistory = history
-        fill(panelHistoryHost, with: history.view, centered: false)
-    }
-
-    /// The workspace moved: the page follows, if it was ever opened.
-    func panelFolderChanged() {
-        guard panelHistory != nil || !panelHistoryHost.subviews.isEmpty else { return }
-        if workspace?.inspectorVisible == true, workspace?.inspector.tab == "history" { showHistoryTab() } else {
-            panelHistory?.view.removeFromSuperview()
-            panelHistory = nil
-            panelHistoryHost.subviews.forEach { $0.removeFromSuperview() }
-        }
-    }
-
-    private func fill(_ host: NSView, with view: NSView, centered: Bool) {
-        view.translatesAutoresizingMaskIntoConstraints = false
-        host.addSubview(view)
-        NSLayoutConstraint.activate(centered ? [
-            view.centerXAnchor.constraint(equalTo: host.centerXAnchor),
-            view.centerYAnchor.constraint(equalTo: host.centerYAnchor),
-        ] : [
-            view.topAnchor.constraint(equalTo: host.topAnchor),
-            view.bottomAnchor.constraint(equalTo: host.bottomAnchor),
-            view.leadingAnchor.constraint(equalTo: host.leadingAnchor),
-            view.trailingAnchor.constraint(equalTo: host.trailingAnchor),
-        ])
-    }
-
 
     /// Files' head in words (plan 38 phase D): a task says whose and against what ("task of cadex ·
     /// against main"), a project's main its branch, a folder outside git where it is.

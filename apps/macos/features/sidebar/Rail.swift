@@ -1,5 +1,4 @@
 import Foundation
-import Icons
 import StateGlyph
 
 /// One project in the rail (docs/adr/0038-rail-and-side-column.md; the Rail mockup): the app
@@ -46,32 +45,5 @@ public struct RailProject: Equatable, Sendable {
     public var badge: GlyphState? {
         guard let state, state != .idle else { return nil }
         return state
-    }
-}
-
-/// The rail's foot: the pages that are about every project (ADR 0038).
-public enum RailFoot: String, Sendable {
-    /// The narrow window's strip (plan 38 G): Files and the board at its foot.
-    case files
-    case board
-    case projects
-    case automations
-    /// The SSH hosts and the tailnet's machines (plan 36 phase F), only when there is some.
-    case remote
-}
-
-/// A page of the side column, as the rail shows it (docs/adr/0038-rail-and-side-column.md, revised
-/// 2026-11-18): its icon, its name under the pointer, the command that opens the column on it.
-public struct RailPage: Equatable, Sendable {
-    public var id: String
-    public var title: String
-    public var icon: Icon
-    public var command: String
-
-    public init(id: String, title: String, icon: Icon, command: String) {
-        self.id = id
-        self.title = title
-        self.icon = icon
-        self.command = command
     }
 }

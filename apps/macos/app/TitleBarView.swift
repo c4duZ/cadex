@@ -26,17 +26,10 @@ final class TitleBarView: NSView {
 
     private let run: (String) -> Void
     private let search = TitleBarSearch()
-    /// "cadex › orchestration-e": the project, then the task when one is selected.
-    private let location = NSTextField(labelWithString: "")
     private let newTabButton = TitleBarButton(
         icon: .plus, tip: T("Open a terminal, file, preview or git graph", "Abrir terminal, arquivo, preview ou grafo do git"), kind: .add)
     /// The needs-you pill, with the sidebar closed (ADR 0039: the bell became the sidebar's queue).
     let needs = TitleBarNeeds()
-    private let boardButton = TitleBarButton(icon: .kanban, tip: T("Board", "Quadro"))
-    /// The settings window (settings.open, ⌘,).
-    private let settingsButton = TitleBarButton(icon: .gearSix, tip: T("Settings", "Configurações"))
-    /// The focused agent's account (else the active one) and its usage; a click switches accounts.
-    private let account = TitleBarAccount()
     /// The sidebar's button (view.toggle-sidebar, ⌘B) at the leading edge, lit while it is open.
     private let panelButton = TitleBarButton(icon: .sidebarSimple, tip: T("Sidebar ⌘B", "Barra lateral ⌘B"))
     /// Where you are; the click opens the place's menu (`placeMenu`, the app's).
@@ -61,10 +54,7 @@ final class TitleBarView: NSView {
         search.onPress = { [weak self] in self?.run("palette.open") }
         newTabButton.onPress = { [weak self] in self?.showNewMenu() }
         needs.onPress = { [weak self] in self?.run("agents.go-to-request") }
-        boardButton.onPress = { [weak self] in self?.run("view.board") }
         panelButton.onPress = { [weak self] in self?.run("view.toggle-sidebar") }
-        settingsButton.onPress = { [weak self] in self?.run("settings.open") }
-        account.onPress = { [weak self] in self?.run("agents.switch-account") }
         place.onPress = { [weak self] in self?.showPlaceMenu() }
         review.onPress = { [weak self] in self?.run("git.review-open") }
         review.isHidden = true
@@ -74,10 +64,6 @@ final class TitleBarView: NSView {
         trailing.setViews([needs, search], in: .leading)
         trailing.spacing = UILooks.pt(Look.gap)
 
-        location.font = UILooks.font(DesignTokens.Breadcrumb.fontSize)
-        location.textColor = DesignTokens.Breadcrumb.color
-        location.lineBreakMode = .byTruncatingMiddle
-        location.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
         wantsLayer = true
         hairline.wantsLayer = true
@@ -143,24 +129,11 @@ final class TitleBarView: NSView {
         return (url.lastPathComponent, nil)
     }
 
-    /// Where you are: the project, and the task when one is selected.
-    /// The place says where you are now (plan 38); kept for the pages' callers, which set nothing.
-    func setLocation(project: String, task: String?) {}
-
     /// Where the requests' list opens when the sidebar's queue is not in sight: the search.
     var bellAnchor: NSView { search }
-    func setBellOpen(_ open: Bool) {}
-    /// Lit while the board shows.
-    func setBoardOpen(_ open: Bool) { boardButton.isOn = open }
     /// No "+" beside a page's tabs (the board, a project's overview).
     func setNewTabHidden(_ hidden: Bool) { newTabButton.isHidden = hidden || tabsHidden }
     func setInspectorOpen(_ open: Bool) { panelButton.isOn = open }
-
-    /// The account shown on the right: its name and how much of its limit it used.
-    /// The account's place, for its card (StatusBarCards.swift: the same as the status bar's usage).
-    var accountView: NSView { account }
-
-    func setAccount(name: String?, used: Int?, provider: ProviderLogo) { account.show(name: name, used: used, provider: provider) }
 
     /// The needs-you pill: who waits, or nil to hide it (it shows only with the sidebar closed).
     func setNeeds(_ text: String?) { needs.say(text) }

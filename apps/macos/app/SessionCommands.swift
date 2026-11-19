@@ -107,9 +107,8 @@ extension WindowSession {
                 self?.git?.refresh()
             }))
         commands.register(Command(
-            // Opens the side column (never closes it, unlike ⌘B); its name said "Work Tree", gone with
-            // ADR 0038 (UX audit, 2026-11-18). ⇧⌘J stays.
-            id: "sidebar.show", title: T("Show the Side Column", "Mostrar a coluna lateral"),
+            // Opens the sidebar (never closes it, unlike ⌘B); ⇧⌘J stays.
+            id: "sidebar.show", title: T("Show the Sidebar", "Mostrar a barra lateral"),
             keywords: ["sidebar", "column", "files", "changes", "tree", "coluna", "lateral", "arquivos", "mudanças", "árvore"], category: .view,
             defaultShortcut: "cmd+shift+j",
             action: .run { [weak self] in self?.workspace?.showTree() }))
@@ -178,18 +177,17 @@ extension WindowSession {
             id: "history.show-in-tab", title: T("Show Commit Details in a Tab", "Mostrar o commit numa aba"),
             keywords: ["commit", "details", "message", "detalhes", "mensagem", "history", "histórico"], category: .view,
             action: .run { [weak self] in
-                guard let history = self?.panelHistory, let sha = history.selectedSha else { return }
+                guard let history = self?.tabs?.activeDocument as? HistoryDocument, let sha = history.selectedSha else { return }
                 self?.opener?.openHistory(history.root, beside: false, selecting: sha)
             },
             unavailableReason: { [weak self] in
-                self?.panelHistory?.selectedSha == nil ? T("Pick a commit in the Git Graph", "Escolha um commit no grafo do git") : nil
+                (self?.tabs?.activeDocument as? HistoryDocument)?.selectedSha == nil
+                    ? T("Pick a commit in the Git Graph", "Escolha um commit no grafo do git") : nil
             }))
         commands.register(HistoryCommands.all(
             open: { [weak self] beside in if let root = self?.git?.repositoryRoot { self?.opener?.openHistory(root, beside: beside) } },
             repository: { [weak self] in self?.git?.repositoryRoot },
-            // The sidebar's history when the tab in front is not one: its
-            // right-click menu runs these too.
-            active: { [weak self] in self?.tabs?.activeDocument as? HistoryDocument ?? self?.panelHistory }))
+            active: { [weak self] in self?.tabs?.activeDocument as? HistoryDocument }))
         commands.register(withMemoryReindex(EditorCommands.all { [weak self] in self?.tabs?.activeDocument as? EditorDocument }))
         commands.register(MediaCommands.all { [weak self] in self?.tabs?.activeDocument as? MediaDocument })
         // preview.open also takes url= from the agent (docs/adr/0024-agent-tools.md).
@@ -260,7 +258,6 @@ extension WindowSession {
             self.search?.setRoot(root, showHidden: self.explorer?.showHidden ?? true)
             self.markdown?.setRoot(root)
             self.git?.setFolder(root)
-            self.panelFolderChanged()
             self.projects?.scheduleSave()
             self.showLocation(root)
         }
@@ -273,22 +270,16 @@ extension WindowSession {
         // and a page says where it is inside itself, not in the bar.
         workspace?.titleBar.setNewTabHidden(false)
         if tabs?.showsPage == true {
-            workspace?.titleBar.setLocation(project: "", task: nil)
             showProject(branch: lastBranch)
             window.title = [tabs?.activeDocument?.title, "Cadex"].compactMap { $0 }.joined(separator: " — ")
-            return refreshTitleAccount()
+            return
         }
         let (project, task) = TitleBarView.location(of: root)
         // Where you are, in words, where macOS shows it (Mission Control, ⌘`, the Window menu): the
         // project by the name the owner gave, and the task (UX audit, 2026-11-18).
         let named = projects?.projects.first { $0.folder == projects?.activeFolder }?.name ?? project
         window.title = [[named, task].compactMap { $0 }.joined(separator: " › "), "Cadex"].joined(separator: " — ")
-        // A race's lane: "cadex › race kite" (the Race mockup). Elsewhere no "project › task": the
-        // tabs name it now, and the status bar says the project and the branch (the owner, 2026-11-18).
-        let race = raceName(of: root).map { T("race ", "corrida ") + $0 }
-        workspace?.titleBar.setLocation(project: race == nil ? "" : project, task: race)
         showProject(branch: lastBranch)
-        refreshTitleAccount()
     }
 
     /// The status bar follows the focused terminal's folder, and its folder
@@ -296,8 +287,6 @@ extension WindowSession {
     func connectStatusBar(_ bar: StatusBarView, to tabs: TabsController) {
         tabs.onActiveChange = { [weak self, weak tabs, weak bar] in
             let terminal = tabs?.activeTerminal
-            // The title bar's account follows the focused agent (the owner, 2026-11-18).
-            self?.refreshTitleAccount()
             // A read that fails for a moment keeps the last folder: the
             // trail emptied and came back, moving the whole bar (2026-10-22).
             if let folder = terminal?.currentDirectory { bar?.path = folder }

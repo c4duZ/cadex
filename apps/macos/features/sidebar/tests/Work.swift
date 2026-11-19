@@ -26,6 +26,12 @@ let workChecks: [(name: String, body: Checks.Body)] = [
         view.press("kite-fix")
         view.press("New Project…")
         expect(projects == ["/bh"] && places == ["/w/kite-fix"] && ran == ["project.create"], "\(projects) \(places) \(ran)")
+        var asked: [String] = []
+        view.menuForPlace = { asked.append($0); return [] }
+        let kite = view.list.arrangedSubviews.compactMap { $0 as? WorkChildren }.flatMap(\.rows).first { $0.title == "kite-fix" }
+        let main = view.list.arrangedSubviews.compactMap { $0 as? WorkChildren }.flatMap(\.rows).first { $0.title == "main" }
+        _ = kite?.rightMenu?()
+        expect(asked == ["/w/kite-fix"] && main?.rightMenu == nil, "a task's line has its menu, main's none: \(asked)")
         expect(WorkProject(id: "/a", name: "bhband-site").initials == "BS" && WorkProject(id: "/b", name: "cadex").initials == "CA")
     }),
     ("the switch: Work by default; Files shows the view the app gave, and back", {

@@ -50,44 +50,27 @@ let railChecks: [(name: String, body: Checks.Body)] = [
         rail.menuFor = { menus.append($0); return [] }
         expect(rail.menuFor?("/b").isEmpty == true && menus == ["/b"])
     }),
-    ("the rail's foot: Projects and Automations run their commands, lit with their page", {
-        let rail = RailView { _ in }
-        expect(rail.footCommands == ["sidebar.show-files", "view.board"], "the narrow strip's foot (plan 38 G): \(rail.footCommands)")
-        rail.footLit = .board
-        expect(rail.litCommands == ["view.board"])
-        rail.footLit = nil
-        expect(rail.litCommands.isEmpty)
-        rail.remoteShown = true
-        expect(!rail.footCommands.contains("remote.show"), "Machines is the sidebar's (plan 38)")
-    }),
-    ("the pages' icons in the rail: a click opens the column on the page; on the lit one, folds it", {
+    ("the narrow strip (plan 38 G): Files and the board at the foot; the requests' box only with some", {
         var ran: [String] = []
         let rail = RailView { ran.append($0) }
-        rail.setPages([RailPage(id: "files", title: "Files", icon: .folder, command: "explorer.focus"),
-                       RailPage(id: "changes", title: "Changes", icon: .gitDiff, command: "git.show")])
-        expect(rail.pageCommands == ["explorer.focus", "git.show"])
-        rail.pressPage(1)
-        expect(ran == ["git.show"], "closed: opens on the page")
-        rail.pageLit = "changes"
-        expect(rail.litPage == "changes")
-        rail.pressPage(1)
-        expect(ran == ["git.show", "view.toggle-sidebar"], "lit: folds the column")
-        rail.pressPage(0)
-        expect(ran.last == "explorer.focus", "another page: goes to it")
+        expect(rail.footCommands == ["sidebar.show-files", "view.board"], "\(rail.footCommands)")
+        rail.pressFoot(0)
+        expect(ran == ["sidebar.show-files"], "\(ran)")
+        expect(!rail.askingShown)
+        rail.requests = 2
+        expect(rail.askingShown)
+        rail.requests = 0
+        expect(!rail.askingShown)
     }),
-    ("dragging in the rail: a tile goes among the others live and past the line pins; the pages reorder", {
+    ("dragging in the rail: a tile goes among the others live and past the line pins", {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 56, height: 700), styleMask: [.borderless], backing: .buffered, defer: true)
         let rail = RailView { _ in }
         window.contentView = rail
         rail.show([RailProject(id: "/a", name: "a", open: true), RailProject(id: "/b", name: "b", open: true),
                    RailProject(id: "/c", name: "c", open: true, pinned: false), RailProject(id: "/d", name: "d", pinned: false)], chosen: nil)
-        rail.setPages([RailPage(id: "files", title: "Files", icon: .folder, command: "explorer.focus"),
-                       RailPage(id: "changes", title: "Changes", icon: .gitDiff, command: "git.show")])
         rail.layoutSubtreeIfNeeded()
         var moved: [(String, [String], Bool)] = []
-        var pages: [[String]] = []
         rail.onMove = { moved.append(($0, $1, $2)) }
-        rail.onMovePages = { pages.append($0) }
         var picked: [String] = []
         rail.onPick = { picked.append($0) }
         func at(_ view: NSView, _ dy: CGFloat = 0) -> NSPoint {
@@ -119,9 +102,5 @@ let railChecks: [(name: String, body: Checks.Body)] = [
         // A short press is still a click.
         drag(rail.tiles[0], to: at(rail.tiles[0], 2))
         expect(picked == ["/a"], "\(picked)")
-        // The pages: Changes over Files.
-        let changes = rail.pageButtons[1].1
-        drag(changes, to: at(rail.pageButtons[0].1, 4))
-        expect(pages == [["changes", "files"]] && rail.pageCommands == ["git.show", "explorer.focus"], "\(pages)")
     }),
 ]

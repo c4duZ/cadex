@@ -17,8 +17,9 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Janela** (`window`): uma janela do app, com workspace, projetos, explorer, busca e git próprios.
   ⇧⌘N abre outra (o ⌘N é Nova tarefa). A **janela principal** é a que abriu com o app: só ela é
   salva e restaurada.
-- **Moldura** (`work frame`): as quatro regiões iguais em toda tela, barra de título, árvore do
-  trabalho, centro e painel da seleção, mais a barra de status (`docs/adr/0035-work-frame.md`).
+- **Moldura** (`work frame`): as regiões iguais em toda tela (`docs/adr/0035-work-frame.md`, revista
+  pela `docs/adr/0039-sidebar-with-work-and-files.md`): a barra de cima, a barra lateral, o centro e
+  a barra de status; nada à direita.
 - **Projeto** (`project`): uma pasta de código com os terminais, documentos e tarefas abertos nela,
   restaurado entre sessões. É o que antes se chamava **space** (`space`), agora sempre com pasta.
 - **Tela de início** (`home`): o centro quando nenhum projeto está aberto: a caixa do pedido, os
@@ -26,7 +27,7 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Gaveta de terminais** (`terminal drawer`): os terminais rápidos fora de qualquer projeto, que
   sobem de baixo por cima do centro (⌃`).
 - **Peça de estado** (`state glyph`): o sinal único de estado do app (trabalhando, precisa de você,
-  pronto, falhou, parado, em revisão), igual na árvore, nas abas, no sino, no ⌘J, no quadro e no Dock.
+  pronto, falhou, parado, em revisão), igual na barra lateral, nas abas, no ⌘J e no quadro.
 - **Token de design** (`design token`): um valor nomeado dos mockups da moldura (cor, fonte, raio,
   espaço, medida de peça), em `docs/design/work-frame/tokens.json`, de onde o app gera os dele.
 - **Aba** (`tab`): um item da barra de abas. Pode ser terminal, editor, preview, markdown, mídia,
@@ -36,20 +37,31 @@ numa conversa entra nesta lista. Entre parênteses, o nome usado no código.
 - **Barra lateral** (`sidebar`, desde a `docs/adr/0039-sidebar-with-work-and-files.md`): à esquerda,
   a fila "Precisa de você" no topo e duas vistas com nome, **Trabalho** (os projetos, o main e as
   tarefas: para onde vou) e **Arquivos** (a árvore do lugar: o que mexo aqui), com **Mudanças**
-  discreta no fim de Arquivos. Substitui o trilho e a coluna lateral (plano 38).
+  discreta no fim de Arquivos; no pé, Quadro, Automações e Máquinas. Substitui o trilho e a coluna
+  lateral (plano 38). ⌘B a mostra e esconde.
 - **Fila "Precisa de você"** (`needs-you queue`): o cartão âmbar no topo da barra lateral com os
   pedidos abertos dos agentes (permissão, pergunta), em qualquer vista e largura; a casa única deles.
-- **Lugar** (`place`): onde se está, "projeto › tarefa", no começo da barra de cima; o clique troca
-  de projeto ou de tarefa e abre a página do projeto.
-- **Trilho** (`rail`, a feature `sidebar` até o plano 38): a faixa estreita na borda esquerda com os projetos
+- **Lugar** (`place`): onde se está, "projeto › tarefa", no começo da barra de cima; o clique abre
+  o menu do lugar: trocar de projeto ou de tarefa, voltar ao main e abrir a página do projeto. As
+  abas de cima são as do lugar.
+- **Pílula** (`needs-you pill`): na barra de cima, com a barra lateral fechada, quem espera você
+  ("checkout-copy precisa de você"); o clique leva ao pedido.
+- **Faixa** (`strip`, a janela estreita): abaixo de 1000 pt, a barra lateral vira uma faixa de 56 pt
+  com a caixa âmbar dos pedidos, os quadrados dos projetos e, no pé, Arquivos e Quadro. Não
+  confundir com a faixa do grafo do git.
+- **Nada aberto** (`nothing open`): a janela sem projeto: a tela de início no centro, os recentes na
+  barra lateral (sem o seletor de vistas) e a barra de status só com o que vale sem projeto.
+- **Trilho** (`rail`; substituído pela barra lateral no plano 38, ADR 0039; sobrevive só como a
+  faixa da janela estreita): a faixa estreita na borda esquerda com os projetos
   (imagem, nome dado pelo dono, peça de estado), o "+", os ícones das páginas da coluna e, no pé,
   Projects, Automations e Remote (este só com algum host). Substituiu a árvore do trabalho (ADR 0038).
-- **Coluna lateral** (`side column`, a feature `inspector`; nos textos, nunca "painel da direita"):
-  ao lado do trilho, as páginas do projeto escolhido, uma por vez: Files, Changes, Sessions, Memory
+- **Coluna lateral** (`side column`, a feature `inspector`; substituída no plano 38: Files e Changes
+  viraram a vista Arquivos, o resto foi para a página do projeto; nos textos, nunca "painel da
+  direita"): ao lado do trilho, as páginas do projeto escolhido, uma por vez: Files, Changes, Sessions, Memory
   e Git graph, abertas pelos ícones delas no trilho (ADR 0038).
 - **Sessão** (`session`): uma conversa de um agente numa conta. Nos textos, "sessão" (não
   "conversa" nem "arquivo"); a lista de todas é "All sessions".
-- **Projeto fixado** (`pinned project`): fica no trilho mesmo sem terminal aberto; o clique abre um
+- **Projeto fixado** (`pinned project`): fica na barra lateral mesmo sem terminal aberto; o clique abre um
   terminal na pasta dele.
 - **Barra de status** (`status-bar`): a faixa inferior, montada com itens que quem usa escolhe e
   arrasta. **Item da barra de status** (`status item`): uma peça dela (pasta, ambiente, RAM, CPU, SSH...).

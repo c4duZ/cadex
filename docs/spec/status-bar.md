@@ -1,9 +1,10 @@
 # status-bar
 
 ## Para que serve
-Mostrar, embaixo da janela, o que quem usa quer ter sempre à vista: o projeto e o branch, quantos
-agentes trabalham e quantos precisam de você, a conta mais perto do limite, onde roda e, se quiser,
-RAM, CPU, SSH e outros. Cada pessoa monta a própria barra. Cara e medidas da moldura nova
+Mostrar, embaixo da janela, o ambiente que quem usa quer ter sempre à vista: o projeto e o branch,
+quantos agentes trabalham, a conta mais perto do limite, onde roda e, se quiser, RAM, CPU, SSH e
+outros. Cada pessoa monta a própria barra. Ela não conta pedidos: a casa deles é a fila "Precisa de
+você" da barra lateral (`sidebar.md`; `../adr/0039-sidebar-with-work-and-files.md`). Cara e medidas da moldura nova
 (`../adr/0035-work-frame.md`; `../design/work-frame/screens.md`, seção StatusBar; tokens em
 `../design/work-frame/tokens.json`, components.statusBar).
 
@@ -14,13 +15,13 @@ A barra tem dois lados, esquerda e direita, e cada lado é uma lista de itens em
 | item | mostra | padrão |
 |---|---|---|
 | Project | "cadex · main ↑3": o projeto e o branch, com ↑↓ de commits a enviar/receber | ligado, esquerda |
-| Agents | "● 3 working" (azul) e "● 2 need you" (âmbar); some o que for zero | ligado, esquerda |
+| Agents | "● 3 working" (azul), só quem trabalha; some com zero; o clique abre o quadro (view.board) | ligado, esquerda |
 | Folder | a trilha "Home › Cadu › Trabalho › cadex" do terminal com foco | desligado |
 | Terminal | "Terminal ⌥⌘`": mostra ou esconde a gaveta de terminais | ligado, direita |
-| Memory | "Memory · 214 pages": abre a página Memory da coluna lateral | ligado, direita |
+| Memory | "Memory · 214 pages": abre a memória do projeto (memory.show, a seção Memória da página do projeto) | ligado, direita |
 | Agent usage | a conta do agente do terminal com foco, ou a última (a escolha do dono, 2026-10-21): "Claude bkdg 84% · resets 3h", em etiqueta âmbar acima de 80% e texto comum abaixo; passar o ponteiro abre todas as contas (`agents.md`) | ligado, direita |
 | Environment | "Local" no macOS (no Windows, a distro WSL), ou a máquina onde roda | ligado, direita |
-| Keep awake | o café, sempre à vista como era na barra de título: cheio ligado, contorno desligado; o clique roda power.toggle (`power.md`) | ligado, direita |
+| Keep awake | o café, sempre à vista como era na barra de cima: cheio ligado, contorno desligado; o clique roda power.toggle (`power.md`) | ligado, direita |
 | Update | "Update to 2.6": só com versão nova para instalar; o clique roda app.check-for-updates (`updates.md`) | ligado, direita, só com versão nova |
 | RAM | memória do sistema em uso: "12.4 / 16 GB" | desligado |
 | CPU | uso do processador do sistema: "CPU 18%" | desligado |
@@ -33,8 +34,8 @@ A barra tem dois lados, esquerda e direita, e cada lado é uma lista de itens em
 
 Sem mexer em nada, a barra é a do mockup: projeto e agentes à esquerda; Terminal, Memory, a
 conta, o café, o ambiente (e a atualização quando há versão nova) à direita. O mockup não desenha
-o café: ele entra na barra de status para continuar sempre à vista, como o dono pediu na barra de
-título (`power.md`). Quem tinha a barra
+o café: ele entra na barra de status para continuar sempre à vista, como o dono pediu quando ele
+estava na barra de cima (`power.md`). A conta e o café só estão aqui: a barra de cima não os tem. Quem tinha a barra
 personalizada antes mantém a dele, com Folder e Git branch virando Project quando os dois estavam
 ligados.
 
@@ -77,7 +78,7 @@ ligados.
   (passar o ponteiro também abre; "localhost:3000" abre no preview); em Agent usage, o popover das
   contas (cada conta com plano, quando zera, a barra e "84% of the 5-hour window · 61% of the
   week", e "Open an agent on… · Add account · Accounts settings"; é o que era a página Accounts);
-  em Agents, o sino; em Project, a página Changes da coluna lateral.
+  em Agents, o quadro; em Project, Mudanças na barra lateral (git.show).
 
 ### Os cartões (o dono, 2026-11-18; a proposta aprovada em https://claude.ai/artifact/4nVtRBCgr1PRhhMVRSWmRK)
 Todo item abre um cartão ao passar o ponteiro (o comportamento do cartão das contas: 0,18 s depois
@@ -92,11 +93,11 @@ do ⌘K. O cartão só lê enquanto está aberto.
 | RAM | usado de total, apps/fixa/comprimida, a pressão de memória (o item fica âmbar fora de normal, vermelho em crítica); os 5 maiores processos |
 | Cadex memory | o app, os ajudantes dele (engine da memória, daemon do terminal) e o que roda em cada terminal; o total. O número da barra continua só o app. |
 | Ports | cada porta com o processo, o pid e o projeto; "Open" no preview; Stop a port… (ports.stop, SIGTERM) e Share on the tailnet… |
-| Agents | os agentes de todas as janelas: precisa de você, trabalhando, pronto, parados; o clique leva ao terminal; o quadro e as notificações |
+| Agents | os agentes de todas as janelas: precisa de você, trabalhando, pronto, parados; o clique leva ao terminal; o quadro e as notificações (agents.show-attention) |
 | Terminals e Terminal ⌥⌘` | os terminais da janela e os da gaveta: o que roda, a pasta, há quanto tempo; novo terminal e a gaveta |
-| Agent usage | o das contas, como antes; a conta da barra de cima abre o mesmo cartão (para baixo) |
+| Agent usage | o das contas, como antes; o clique troca de conta pelo mesmo cartão |
 | Memory | quantas páginas, as que mudaram por último (lidas da wiki ao abrir); abrir e consolidar |
-| Project | o branch contra o remoto (âmbar com algo a enviar ou receber), quantos arquivos mudaram, o último commit; Changes, Push, trocar de branch |
+| Project | o branch contra o remoto (âmbar com algo a enviar ou receber), quantos arquivos mudaram, o último commit; Changes (na barra lateral), Push, trocar de branch |
 | Folder | o que ocupa espaço na pasta (medido ao abrir, fora da thread principal; "measuring…" até lá) e o disco livre, âmbar abaixo de 10% |
 | Environment | este Mac (macOS, processador, shell) e as outras máquinas da tailnet; Nova tarefa em… |
 | Tailscale | as máquinas com online, caminho e latência (o ping só com o cartão aberto); o clique conecta |
@@ -104,6 +105,13 @@ do ⌘K. O cartão só lê enquanto está aberto.
 | Docker | o contexto e os contêineres rodando (o `docker ps` ao abrir) |
 | Keep awake | ligado ou não, o modo, desde quando, até quando; desligar, com programa rodando, por 1 hora (power.keep-awake-hour) |
 | Update | a versão nova e as primeiras novidades; atualizar e pular |
+
+### Janela estreita e nada aberto (plano 38)
+- Abaixo de 1000 pt a barra encurta: fica o primeiro item da esquerda e os dois primeiros da
+  direita, cada um com a palavra; o resto vai para um "…", um menu com cada item (escolher faz o que
+  o clique dele faz). Os lados salvos não mudam; alargar devolve a barra inteira.
+- Sem projeto aberto, a barra mostra só o que vale sem projeto: a gaveta (Terminal ⌥⌘`), a conta
+  (Agent usage), o café e o ambiente.
 
 ## Estados
 - **Pasta desconhecida** (sessão ainda abrindo): Folder fica vazio, o resto aparece.

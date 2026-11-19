@@ -70,7 +70,7 @@
 - O app (`../../app/TreeWiring.swift`) junta o modelo: os projetos e as abas deles, as worktrees de
   cada projeto (o git fora da linha principal), o estado do agente de cada terminal, a conta do
   agente na pasta da tarefa; redesenha o trilho quando uma aba, um projeto, uma tarefa ou um agente
-  muda. O menu de uma tarefa (o clique direito da árvore) está no item dela na barra de cima.
+  muda. O menu de uma tarefa (`treeMenu`) está no clique direito da linha dela na barra lateral (`menuForPlace`) e no quadro.
 - O trilho rola: os projetos e o "+" ficam numa área que rola quando não cabem; os ícones das
   páginas e o pé ficam no lugar (a altura dos projetos tem prioridade abaixo da da janela, senão
   eles seguravam a janela aberta).

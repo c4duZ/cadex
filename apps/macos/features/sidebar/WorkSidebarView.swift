@@ -16,6 +16,8 @@ public final class WorkSidebarView: NSView {
     public var onPickPlace: ((String) -> Void)?
     public var onToggle: ((String) -> Void)?
     public var menuFor: ((String) -> [MenuEntry])?
+    /// A right click on a task's line: its menu's entries (each runs a command).
+    public var menuForPlace: ((String) -> [MenuEntry])?
     /// A request of the queue clicked: its id (the app goes to its terminal).
     public var onPickRequest: ((String) -> Void)?
     /// "N changes · see" clicked, at the end of Files: the app shows Changes there.
@@ -172,6 +174,8 @@ public final class WorkSidebarView: NSView {
                                meta: item.terminals > 0 || item.state != nil ? .terminals(item.state == .idle ? nil : item.state, item.terminals) : .none,
                                selected: item.id == place)
             line.onPress = { [weak self] in self?.onPickPlace?(item.id) }
+            // A task's menu (status, hibernate, remove…): it lived on the task's tab item, gone in plan 38.
+            if !item.isMain { line.rightMenu = { [weak self] in self?.menuForPlace?(item.id) ?? [] } }
             kids.add(line)
         }
         add(kids)

@@ -38,7 +38,6 @@ extension WindowSession {
         }
         if changed { for project in projects.projects { project.tabs.refreshPaneHeaders() } }
         refreshLimitCards()
-        refreshTitleAccount()
     }
 
     private func paneDetail(of terminal: TerminalView, project: String) -> PaneDetail? {

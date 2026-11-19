@@ -46,7 +46,7 @@ temas que ele já usava em outros apps.
   sistema (o dono, 2026-10-20). Só a barra de menus do macOS fica do sistema.
 - Botões de ícone mostram o nome ao passar o ponteiro, em 0,2 s, embaixo do botão e nas mesmas
   cores dos menus (o dono, 2026-10-20).
-- A moldura fica no chão do terminal: a janela, a coluna lateral e a caixa de cada painel usam o
+- A moldura fica no chão do terminal: a janela, a barra lateral e a caixa de cada painel usam o
   fundo do terminal do tema, como no Cadex Night. Os catálogos davam a muitos temas uma moldura um
   tom fora do terminal (GitHub Light: #F6F8FA em volta de #FFFFFF), e o terminal aparecia como um
   quadro enquadrado no meio da janela (o dono, 2026-11-18). As outras cores da moldura saem dessa e

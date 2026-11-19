@@ -53,10 +53,6 @@ public final class HistoryDocument: TabDocument {
     public var hasUnsavedChanges: Bool { false }
     /// The center whole (plan 31 E): something to read, not a pane beside a terminal.
     public var isPage: Bool { true }
-    /// Opens the first commit's files, as the History drawing shows it (make perf and the
-    /// fidelity check, CADEX_PERF_HISTORY_OPEN).
-    public func openFirstCommit() { historyView.openFirstCompactCommit() }
-
     public func focus() { view.window?.makeFirstResponder(historyView.table) }
     public func confirmClose(in window: NSWindow?, then close: @escaping @MainActor () -> Void) { close() }
     public func close() {}

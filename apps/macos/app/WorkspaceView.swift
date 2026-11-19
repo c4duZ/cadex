@@ -245,14 +245,12 @@ final class WorkspaceView: NSView {
         if !inspectorVisible { setInspector(visible: true) }
         sidebar.setMode(.files)
         inspector.show(tab)
-        syncRailPages()
     }
 
     /// The sidebar's Work view (its switch, ⇧⌘1).
     func showWork() {
         if !inspectorVisible { setInspector(visible: true) }
         sidebar.setMode(.work)
-        syncRailPages()
     }
 
     /// ⌘B (view.toggle-sidebar) and the saved inspector.visible. Closed, the column is hidden, so no
@@ -266,23 +264,13 @@ final class WorkspaceView: NSView {
         layoutSidebar()
         titleBar.setInspectorOpen(visible)
         onSidebarShown?(visible)
-        syncRailPages()
         // Opened again: its page is announced, so a page that went while closed (History after a
         // folder change) comes back (review of 2026-11-17).
         if opening, let tab = inspector.tab { inspector.show(tab) }
     }
 
-    /// Says which page of Files reads now (Files or Changes; none in Work or closed), so a page that
-    /// reads lets go when it goes.
-    func syncRailPages() {
-        onColumnPage?(inspectorVisible && sidebar.mode == .files ? inspector.tab : nil)
-    }
-
     /// The sidebar showed or hid (⌘B, a narrow window): the top bar's needs-you pill follows.
     var onSidebarShown: ((Bool) -> Void)?
-
-    /// The page the column shows changed (nil: closed): a page that reads lets go when it goes.
-    var onColumnPage: ((String?) -> Void)?
 
     /// The column's width, within the settings' range and what the window leaves after the rail
     /// and a center of `minCenter` (a 640 pt panel in a 700 pt window squeezed the terminals to

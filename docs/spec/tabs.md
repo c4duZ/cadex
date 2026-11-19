@@ -1,7 +1,7 @@
 # tabs
 
 ## Para que serve
-Ter vários terminais e arquivos abertos na mesma janela: abas lado a lado na barra de título, cada
+Ter vários terminais e arquivos abertos na mesma janela: abas lado a lado na barra de cima, cada
 aba dividida em painéis. Um painel mostra um terminal ou um documento (código, Markdown, mídia,
 preview web, diff, histórico do git), e um documento tem um ponto no título quando há mudança não
 salva. Cara e medidas da moldura nova (`../adr/0035-work-frame.md`; `../design/work-frame/screens.md`,
@@ -11,17 +11,23 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 ## Comportamento
 
 ### Abas
-- As abas são do projeto escolhido no trilho (`sidebar.md`, ADR 0038): os terminais e documentos
-  dele fora de tarefa. Os terminais só aparecem aqui, nunca listados na coluna lateral.
-- **Uma tarefa é um item da barra do projeto** (plano 36 D): uma por tarefa com terminal aberto, com
-  o estado dela antes do nome e "›"; o clique leva às abas da tarefa (a usada por último nela). Lá,
-  a barra começa com "‹ projeto", que volta às do projeto (também project.show-terminals no ⌘K), e
-  termina com "Review". O clique direito no item da tarefa traz o menu dela: ir à aba, revisar,
-  hibernar o agente, o status, remover.
+- A barra de cima, da esquerda para a direita (`../adr/0039-sidebar-with-work-and-files.md`, plano
+  38): o botão da barra lateral (⌘B, aceso com ela aberta); **o lugar**, o avatar e "projeto ›
+  tarefa ▾" (no main, só o projeto), cujo clique abre o menu do lugar: o main e as tarefas do
+  projeto, a página do projeto, os outros projetos e "Trocar de projeto…" (project.switch, a lista
+  com busca no ⌘K); as abas do lugar e o "+"; **Revisar**, só dentro de uma tarefa, um botão com
+  contorno depois de um fio (git.review-open); à direita, a pílula "precisa de você" (só com a barra
+  lateral fechada e algum pedido aberto; `sidebar.md`) e Buscar ⌘K no fim. A conta, o quadro, o sino
+  e a engrenagem não estão na barra de cima (a conta e o café na barra de baixo, o quadro no pé da
+  barra lateral, ⌘, e o menu para as configurações).
+- As abas são do lugar escolhido na barra lateral (`sidebar.md`): os terminais e documentos do
+  projeto fora de tarefa (o main), ou os de uma tarefa (na worktree dela). Os terminais só aparecem
+  aqui, nunca listados na barra lateral. As tarefas não são itens da barra de abas: elas estão na
+  barra lateral e no menu do lugar; o único item extra é "Compare", nas abas de uma corrida.
 - **Quando não cabem:** as abas encolhem juntas até o tamanho mínimo; daí em diante as que sobram vão
   para "» N" no fim, que abre a lista delas para escolher; a ativa fica sempre à mostra.
 - **Abas sem projeto:** os terminais da pasta pessoal não viram projeto; enquanto se está neles,
-  nenhum quadrado do trilho fica aceso.
+  nenhum lugar da barra lateral fica aceso e a barra de cima fica sem o lugar.
 - ⌘T abre uma aba de terminal na pasta da seleção (a da tarefa, ou a do projeto); sem projeto, na
   pasta pessoal. A aba nova entra à direita da atual e ganha o foco. O "+" depois das abas faz o
   mesmo, com o menu do que mais abrir.
@@ -56,7 +62,7 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 - A barra de abas aparece mesmo com uma aba só.
 
 - Arrastar uma aba pela barra muda a ordem: ela vai por cima seguindo o ponteiro e as outras deslizam
-  para a vaga nova enquanto ela passa (0,15 s), como os quadrados do trilho; cai onde o meio dela
+  para a vaga nova enquanto ela passa (0,15 s); cai onde o meio dela
   está. Nada clicável da barra de cima (abas e botões) arrasta a janela: ela fica travada enquanto o
   ponteiro está neles e solta ao sair; a parte vazia da barra continua movendo a janela. O macOS
   decide mover a janela antes de o app ver o clique, então travar só no clique não bastava (o dono,
@@ -166,10 +172,11 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 - Abrir ao lado com o painel de documento da aba não salvo: divide em vez de trocar (nada se perde).
 - Abrir ao lado num painel pequeno demais para dividir: abre em nova aba.
 
-### Abas da tarefa (plano 29, revisão contra os mockups)
-- A barra de título mostra as abas de onde você está: com uma aba de tarefa ativa, as abas da
-  tarefa (os terminais e documentos na worktree dela) e, no fim, "Review" (abre a revisão, até a
-  aba de revisão existir); com uma do projeto, as dele. ⌘1…⌘9 e arrastar contam as mostradas.
+### Abas da tarefa (plano 29; plano 38)
+- A barra de cima mostra as abas de onde você está: numa tarefa, as dela (os terminais e documentos
+  na worktree dela), com o botão Revisar depois delas; no main, as do projeto. ⌘1…⌘9 e arrastar
+  contam as mostradas. Ir de uma para a outra é pela barra lateral ou pelo menu do lugar
+  (project.show-terminals volta às do projeto).
 - Uma aba com vários terminais se chama "Terminals · N", com o estado mais importante deles; um
   terminal rodando um comando leva o nome do comando (`terminal.md`).
 
@@ -191,15 +198,17 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
 - [x] ⌘D num documento abre um terminal ao lado, na pasta do arquivo.
 - [x] Fechar painel, aba ou janela com documento não salvo pergunta antes.
 - [ ] Cada aba e cada cabeçalho de painel com algo rodando mostra a peça de estado certa.
-- [x] O item de uma tarefa leva às abas dela, e "‹ projeto" volta (teste da feature; o clique de
-      verdade na barra de título não conferido).
+- [x] Escolher uma tarefa na barra lateral põe as abas dela em cima, e o main volta às do projeto
+      (conferido no app, plano 38 B).
+- [ ] O menu do lugar e o Revisar numa tarefa conferidos com o clique de verdade (plano 38 E: o
+      clique de teste não chega à barra de cima).
 - [ ] "» N" aparece numa janela de verdade com abas demais.
 - [ ] Uma aba com o Claude Code mostra o estado e o nome da conversa; o nome dado à mão
       continua; com keepSessions ligado, fechar e reabrir o app religa a aba ao mesmo shell.
 
 ## Páginas (plano 31 E; plano 34)
 - Uma página nunca aparece na barra de cima: ela mostra as abas de terminal de onde se veio, nenhuma
-  acesa, com o "+" e a conta iguais. Uma página por vez (abrir outra troca); o Esc numa página, ou o
+  acesa, com o "+" e o lugar iguais. Uma página por vez (abrir outra troca); o Esc numa página, ou o
   clique numa aba, volta ao terminal de antes. As seções de uma página ficam dentro dela.
 - O que é para ler de corpo inteiro abre como página, na própria aba, nunca dividido ao lado de um
   terminal, qualquer que seja general.openFiles: a revisão (e o diff de um arquivo), o histórico do

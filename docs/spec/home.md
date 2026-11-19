@@ -10,8 +10,10 @@ tokens components.home).
 - Aparece no centro quando nenhum projeto está aberto (a primeira abertura, ou depois de fechar o
   último) e pelo comando home.show (no ⌘K). Quem estava trabalhando abre o Cadex direto onde parou,
   sem passar por ela.
-- A moldura é a de sempre: barra de título sem abas de terminal, o trilho à esquerda, a coluna
-  lateral fechada (volta quando um projeto aparece), a barra de status.
+- A moldura é a de sempre: a barra de cima sem o lugar, as abas e o "+"; a barra lateral à vista,
+  em nada aberto (os recentes, Novo projeto… e Abrir pasta…, sem o seletor de vistas; `sidebar.md`):
+  a tela de início não a fecha; a barra de baixo só com o que vale sem projeto (a gaveta, a conta, o
+  café e o ambiente; `status-bar.md`).
 - **De cima para baixo**, numa coluna de 760 pt centrada:
   1. A saudação pela hora ("Good morning", "Good afternoon", "Good evening") e "Pick up where you
      were, or start something."
@@ -28,7 +30,8 @@ tokens components.home).
      separate copy on a new branch, so it works in parallel with you.") e Race ("The same task given
      to 2–3 agents; you keep the best.", que abre a folha Nova tarefa com duas linhas de agente).
      Cada cartão roda o comando dele.
-  4. **Projetos recentes:** "RECENT PROJECTS" e, à direita, "Open folder ⌘O · Clone…"; uma linha por
+  4. **Projetos recentes:** "RECENT PROJECTS" e, à direita, "Open folder · Clone…", o Open folder
+     (project.new) com o atalho que o keymap dá a ele (⌃⌘N por padrão); uma linha por
      projeto (nome, caminho, estado em cor: âmbar quando algo precisa de você, verde quando um
      agente terminou, cinza sem nada aberto; e quando foi usado), os mais recentes primeiro, até 8.
      Clicar abre o projeto.

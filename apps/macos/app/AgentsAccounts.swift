@@ -90,7 +90,6 @@ extension WindowSession {
         } else {
             setActiveAccount(account)
         }
-        refreshTitleAccount()
         showFocusedAccount()
     }
 
