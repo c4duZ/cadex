@@ -114,6 +114,13 @@
   lugar do trilho, com a coluna (Files e Changes) dentro dela como a vista Arquivos; sidebar.show-work
   (⇧⌘1) e sidebar.show-files (⇧⌘2); Sessions, Memory e o grafo saíram da coluna: memory.show e
   project.sessions-column abrem a página do projeto, git.show-history abre o histórico numa aba.
+- Plano 38 fase E: a barra de cima (`TitleBarView.swift`) começa com o botão da barra lateral (⌘B), o
+  lugar (`TitleBarPlace.swift`: o avatar e "projeto › tarefa ▾"; o clique abre o menu do lugar,
+  `PlaceWiring.swift`: o main e as tarefas do projeto, a página do projeto, os outros projetos e
+  Trocar de projeto…), as abas do lugar e o "+", Revisar (`TitleBarReview`, git.review-open) só numa
+  tarefa depois de um fio; à direita, a pílula e a busca. A conta, o quadro e a engrenagem saíram
+  (as propriedades ficam para quem ainda as chama); o item da tarefa, o "‹ projeto" e o Review das
+  abas também (`ProjectsWiring.swift`, extrasOf: só o Compare de uma corrida).
 - Plano 38 fase D: `InspectorWiring.swift` dá o cabeçalho de Arquivos (`showFilesHead`: a tarefa
   "tarefa de X · contra base", o main o nome e o caminho) e a linha de mudanças (`showChangesLine`,
   a contagem pelas marcas do git, WindowSession.changedFiles); o clique na linha roda git.show, que

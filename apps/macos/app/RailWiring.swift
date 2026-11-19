@@ -70,6 +70,7 @@ extension WindowSession {
         let place = folder.map { group.flatMap { $0.isEmpty ? nil : $0 } ?? $0 }
         sidebar.show(sidebarModel(), place: place)
         sidebar.remoteShown = hasRemote
+        showPlace()
     }
 
     /// Folded or unfolded, as the owner left it (projects.json, plan 38); the shown one unfolded

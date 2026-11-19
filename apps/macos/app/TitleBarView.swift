@@ -5,11 +5,11 @@ import Menus
 import Strings
 import Tabs
 
-/// The title bar of the new frame (docs/adr/0035-work-frame.md; screens.md, TitleBar;
-/// components.titleBar): the window buttons, the search (the palette, ⌘K), where you are
-/// (only on pages: the board's "All projects", a run, a race), the tabs of what is open and "+",
-/// and on the right the account with its usage, the board, the bell, the settings and the right
-/// panel (the owner, 2026-11-18). Every control runs a command by id (ADR 0005).
+/// The top bar (docs/adr/0039-sidebar-with-work-and-files.md, plan 38 phase E; components.titleBar
+/// and components.place): after the window buttons, the sidebar's button, the place ("project ›
+/// task ▾"), the place's tabs and "+", Review in a task; on the right the needs-you pill (sidebar
+/// closed) and the search (⌘K). The account, the board and the settings left it (the bottom bar,
+/// the sidebar's foot, ⌘,). Every control runs a command by id (ADR 0005).
 final class TitleBarView: NSView {
     typealias Look = DesignTokens.TitleBar
     /// Zoomed but never compact: macOS places the window buttons itself (plan 15, phase D).
@@ -37,8 +37,14 @@ final class TitleBarView: NSView {
     private let settingsButton = TitleBarButton(icon: .gearSix, tip: T("Settings", "Configurações"))
     /// The focused agent's account (else the active one) and its usage; a click switches accounts.
     private let account = TitleBarAccount()
-    /// The side column's button (view.toggle-sidebar), lit while the column is open.
-    private let panelButton = TitleBarButton(icon: .sidebarSimple, tip: T("Side Column", "Coluna lateral"), mirrored: true)
+    /// The sidebar's button (view.toggle-sidebar, ⌘B) at the leading edge, lit while it is open.
+    private let panelButton = TitleBarButton(icon: .sidebarSimple, tip: T("Sidebar ⌘B", "Barra lateral ⌘B"))
+    /// Where you are; the click opens the place's menu (`placeMenu`, the app's).
+    let place = TitleBarPlace()
+    /// Review, only inside a task, after a divider.
+    let review = TitleBarReview()
+    private let divider = NSView()
+    var placeMenu: (() -> [MenuEntry])?
     private let trailing = NSStackView()
     /// The line under the bar.
     private let hairline = NSView()
@@ -59,7 +65,13 @@ final class TitleBarView: NSView {
         panelButton.onPress = { [weak self] in self?.run("view.toggle-sidebar") }
         settingsButton.onPress = { [weak self] in self?.run("settings.open") }
         account.onPress = { [weak self] in self?.run("agents.switch-account") }
-        trailing.setViews([needs, account, boardButton, settingsButton, panelButton], in: .leading)
+        place.onPress = { [weak self] in self?.showPlaceMenu() }
+        review.onPress = { [weak self] in self?.run("git.review-open") }
+        review.isHidden = true
+        divider.wantsLayer = true
+        divider.layer?.backgroundColor = DesignTokens.Place.Divider.color.cgColor
+        divider.isHidden = true
+        trailing.setViews([needs, search], in: .leading)
         trailing.spacing = UILooks.pt(Look.gap)
 
         location.font = UILooks.font(DesignTokens.Breadcrumb.fontSize)
@@ -69,23 +81,27 @@ final class TitleBarView: NSView {
 
         wantsLayer = true
         hairline.wantsLayer = true
-        for view in [search, location, newTabButton, trailing, hairline] as [NSView] {
+        for view in [panelButton, place, newTabButton, divider, review, trailing, hairline] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
-        searchLeading = search.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Self.searchStart(fullScreen: false))
-        // The bar's gap and the tabs group's margin, as the mockup lays them out.
-        locationLeading = location.leadingAnchor.constraint(equalTo: search.trailingAnchor, constant: Self.locationGap)
+        searchLeading = panelButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Self.searchStart(fullScreen: false))
+        locationLeading = place.leadingAnchor.constraint(equalTo: panelButton.trailingAnchor, constant: UILooks.pt(Look.gap))
+        place.setContentCompressionResistancePriority(.defaultHigh - 1, for: .horizontal)
         NSLayoutConstraint.activate([
             searchLeading,
             locationLeading,
-            trailing.leadingAnchor.constraint(greaterThanOrEqualTo: newTabButton.trailingAnchor, constant: UILooks.pt(Look.gap)),
+            divider.leadingAnchor.constraint(equalTo: newTabButton.trailingAnchor, constant: UILooks.pt(DesignTokens.Place.Divider.margin.left)),
+            divider.widthAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Place.Divider.width)),
+            divider.heightAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Place.Divider.height)),
+            review.leadingAnchor.constraint(equalTo: divider.trailingAnchor, constant: UILooks.pt(DesignTokens.Place.Divider.margin.right)),
+            trailing.leadingAnchor.constraint(greaterThanOrEqualTo: review.trailingAnchor, constant: UILooks.pt(Look.gap)),
             trailing.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -UILooks.pt(Look.padding.right)),
             hairline.leadingAnchor.constraint(equalTo: leadingAnchor),
             hairline.trailingAnchor.constraint(equalTo: trailingAnchor),
             hairline.bottomAnchor.constraint(equalTo: bottomAnchor),
             hairline.heightAnchor.constraint(equalToConstant: DesignTokens.Stroke.hairline),
-        ] + [search, location, newTabButton, trailing].map { $0.centerYAnchor.constraint(equalTo: centerYAnchor) })
+        ] + [panelButton, place, newTabButton, divider, review, trailing].map { $0.centerYAnchor.constraint(equalTo: centerYAnchor) })
     }
 
     @available(*, unavailable)
@@ -99,6 +115,17 @@ final class TitleBarView: NSView {
 
     private static var locationGap: CGFloat { UILooks.pt(Look.gap + DesignTokens.Tab.groupMarginLeft) }
     private static var tabsGap: CGFloat { UILooks.pt(DesignTokens.Breadcrumb.marginRight + DesignTokens.Tab.groupGap) }
+
+    private func showPlaceMenu() {
+        guard let entries = placeMenu?(), !entries.isEmpty else { return }
+        PopupMenu.show(entries, below: place)
+    }
+
+    /// Review shows inside a task only (ADR 0039).
+    func setReviewShown(_ shown: Bool) {
+        review.isHidden = !shown || tabsHidden
+        divider.isHidden = review.isHidden
+    }
 
     private func showNewMenu() {
         guard let entries = newMenu?(), !entries.isEmpty else { return run("tab.new") }
@@ -117,13 +144,8 @@ final class TitleBarView: NSView {
     }
 
     /// Where you are: the project, and the task when one is selected.
-    func setLocation(project: String, task: String?) {
-        location.stringValue = [project, task].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " › ")
-        // Nothing to say: the tabs come right after the search, one gap away.
-        let empty = location.stringValue.isEmpty
-        locationLeading.constant = empty ? 0 : Self.locationGap
-        tabsLeading?.constant = empty ? UILooks.pt(Look.gap) : Self.tabsGap
-    }
+    /// The place says where you are now (plan 38); kept for the pages' callers, which set nothing.
+    func setLocation(project: String, task: String?) {}
 
     /// Where the requests' list opens when the sidebar's queue is not in sight: the search.
     var bellAnchor: NSView { search }
@@ -149,8 +171,9 @@ final class TitleBarView: NSView {
         tabsHidden = hidden
         tabBar?.isHidden = hidden
         newTabButton.isHidden = hidden
-        // No project, no "project › task" (the mockup's "All projects · Board" is plan 30's).
-        location.isHidden = hidden
+        // No project, no place (ADR 0039: nothing open is the home screen).
+        place.isHidden = hidden
+        if hidden { setReviewShown(false) }
     }
 
     /// Puts a project's tab bar after where you are, "+" right after its tabs.
@@ -160,8 +183,7 @@ final class TitleBarView: NSView {
         NSLayoutConstraint.deactivate(tabBarConstraints)
         bar.translatesAutoresizingMaskIntoConstraints = false
         addSubview(bar)
-        let leading = bar.leadingAnchor.constraint(equalTo: location.trailingAnchor,
-                                                   constant: location.stringValue.isEmpty ? UILooks.pt(Look.gap) : Self.tabsGap)
+        let leading = bar.leadingAnchor.constraint(equalTo: place.trailingAnchor, constant: UILooks.pt(Look.gap))
         tabsLeading = leading
         tabBarConstraints = [
             leading,
@@ -212,8 +234,9 @@ final class TitleBarView: NSView {
         // The room the tabs have: up to the "+" before the buttons on the right (plan 36 D: the
         // tabs that do not fit go under "» N"; the strip itself is only as wide as its tabs).
         if let bar = tabBar, trailing.frame.width > 0 {
+            let reviewRoom = review.isHidden ? 0 : review.frame.width + UILooks.pt(DesignTokens.Place.Divider.margin.left + DesignTokens.Place.Divider.margin.right)
             bar.room = trailing.frame.minX - UILooks.pt(Look.gap) - newTabButton.frame.width
-                - UILooks.pt(DesignTokens.Tab.groupGap) - bar.frame.minX
+                - UILooks.pt(DesignTokens.Tab.groupGap) - reviewRoom - bar.frame.minX
         }
     }
 

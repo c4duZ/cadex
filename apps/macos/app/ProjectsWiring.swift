@@ -81,21 +81,17 @@ extension WindowSession {
             if let folder, ["project:", "cadex:", "automation:"].contains(where: folder.hasPrefix) { return "pages" }
             return self?.taskFolder(containing: folder) ?? ""
         }
-        tabs.extrasOf = { [weak self, weak tabs] group in
-            guard let self, let tabs else { return [] }
+        tabs.extrasOf = { [weak self] group in
+            guard let self else { return [] }
             switch group {
             // Pages never put items in the bar (plan 34 A): their sections are inside them.
             case "board", "pages": return []
-            // The project's own: an item per task with terminals here, which goes to its tabs
-            // (plan 36 D: the task as a tab of the project's bar).
-            case "": return self.taskItems(in: tabs)
+            // The tasks are in the sidebar and the place's menu, and Review is the top bar's button
+            // (ADR 0039, plan 38 E): the bar holds only the place's tabs. A race's lanes compare.
+            case "": return []
             default:
-                // "‹ project" goes back; a race's lanes compare their worktrees; a task reviews its own.
-                let name = self.projects?.projects.first { $0.tabs === tabs }?.name ?? T("Project", "Projeto")
-                let back = TabsExtra(title: "‹ " + name, command: "", identity: "back:", group: "", leading: true)
-                return [back] + (self.raceName(of: group) != nil
-                    ? [TabsExtra(title: T("Compare", "Comparar"), command: "git.review-compare-worktrees", identity: "review:")]
-                    : [TabsExtra(title: T("Review", "Revisão"), command: "git.review-open", identity: "review:")])
+                return self.raceName(of: group) != nil
+                    ? [TabsExtra(title: T("Compare", "Comparar"), command: "git.review-compare-worktrees", identity: "review:")] : []
             }
         }
         tabs.onCommandTick = { [weak self] in self?.refreshTree() }
@@ -172,20 +168,6 @@ extension WindowSession {
     }
 
     /// The task worktree a folder is in (the tree's lists), nil for the project's own.
-    /// The tasks with a terminal open in these tabs, as items of the project's bar: the name and
-    /// "›", the state of its terminals (the tree's summary).
-    func taskItems(in tabs: TabsController) -> [TabsExtra] {
-        var states: [String: [GlyphState]] = [:]
-        for terminal in tabs.allTerminals {
-            guard let task = taskFolder(containing: terminal.currentDirectory) else { continue }
-            states[task, default: []].append(Self.treeRow(terminal).state ?? .idle)
-        }
-        return states.keys.sorted().map { task in
-            TabsExtra(title: (task as NSString).lastPathComponent + "  ›", command: "", identity: "task:" + task, group: task,
-                      state: Self.summary(states[task] ?? []))
-        }
-    }
-
     func taskFolder(containing folder: String?) -> String? {
         guard let folder, !folder.isEmpty else { return nil }
         return treeTasks.values.joined().map(\.path).filter { folder == $0 || folder.hasPrefix($0 + "/") }.max { $0.count < $1.count }

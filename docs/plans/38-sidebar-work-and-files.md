@@ -52,10 +52,13 @@ o que o clique faz). O dono aprovou em 2026-11-19 ("pode fazer").
   Mudanças na barra (Commit forte quando há o que commitar, do plano 37). Conferido no app num
   repositório com dois arquivos mudados: o cabeçalho, a contagem e o clique abrindo Mudanças. Para
   voltar, o clique em Arquivos no seletor (o Esc não volta ainda: ele é do terminal com foco).
-- [ ] E. A barra de cima: o botão da barra lateral na borda de entrada, o lugar ("projeto › tarefa
+- [x] E. A barra de cima: o botão da barra lateral na borda de entrada, o lugar ("projeto › tarefa
   ▾" com o menu: trocar de projeto ou tarefa com busca, voltar ao main, a página do projeto), as abas
   do lugar, "» N", "+", Revisar só numa tarefa e Buscar ⌘K no fim; saem a conta, o quadro, o sino e a
   engrenagem. A tarefa deixa de ser item da barra de abas e o "‹ projeto" sai.
+  Feito: `apps/macos/app/TitleBarPlace.swift` e `apps/macos/app/PlaceWiring.swift`. Conferido no app: a
+  ordem da barra (botão, lugar, abas, "+", busca à direita). Não conferido: o menu do lugar e o
+  Revisar numa tarefa (o clique de teste não chega à barra de cima, e a instância não tinha tarefa).
 - [ ] F. A barra de baixo: os itens de hoje sem a contagem de pedidos; o clique no projeto · branch
   abre Mudanças, nos agentes abre o quadro, na conta troca de conta. Sessões, Memória e o grafo do
   git saem da barra lateral para a página do projeto (e o grafo como página).

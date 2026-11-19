@@ -210,6 +210,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
         self.workspace = workspace
         workspace.inspector.reorder(settings.store.settings.inspector.order)
         workspace.titleBar.newMenu = { [weak self] in self?.newTabMenu() ?? [] }
+        workspace.titleBar.placeMenu = { [weak self] in self?.placeMenu() ?? [] }
         showLocation(folder.root)
         showPanelFolder(folder.root)
         applyInspector(settings.store.settings.inspector)
