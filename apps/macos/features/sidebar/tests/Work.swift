@@ -40,4 +40,24 @@ let workChecks: [(name: String, body: Checks.Body)] = [
         view.setMode(.work)
         expect(files.isHidden)
     }),
+    ("the needs-you queue shows only with requests; a waiting project out of sight puts its name on the edge", {
+        var picked: [String] = []
+        let view = WorkSidebarView { _ in }
+        view.onPickRequest = { picked.append($0) }
+        view.frame = NSRect(x: 0, y: 0, width: 248, height: 260)
+        let window = NSWindow(contentRect: view.frame, styleMask: [.borderless], backing: .buffered, defer: true)
+        window.contentView = view
+        view.showQueue([])
+        expect(view.queueAnchor == nil, "no request, no queue")
+        view.showQueue([WorkRequest(id: "r1", who: "checkout-copy", project: "bhband-site", ask: "wants to run npm install stripe",
+                                    since: Date().addingTimeInterval(-90))])
+        expect(view.queueAnchor != nil)
+        expect(WorkRequest.waited(Date().addingTimeInterval(-90)) == "1 min")
+        var projects = (1...12).map { WorkProject(id: "/p\($0)", name: "p\($0)", terminals: 1) }
+        projects.append(WorkProject(id: "/bh", name: "bhband-site", terminals: 1, waiting: 1))
+        view.show(projects, place: nil)
+        view.layoutSubtreeIfNeeded()
+        view.updateEdge()
+        expect(view.edgeSaid.hasPrefix("▼ bhband-site"), "\(view.edgeSaid)")
+    }),
 ]

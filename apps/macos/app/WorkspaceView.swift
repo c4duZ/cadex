@@ -235,6 +235,7 @@ final class WorkspaceView: NSView {
         contentToInspector.isActive = visible
         contentToRail.isActive = !visible
         titleBar.setInspectorOpen(visible)
+        onSidebarShown?(visible)
         syncRailPages()
         // Opened again: its page is announced, so a page that went while closed (History after a
         // folder change) comes back (review of 2026-11-17).
@@ -246,6 +247,9 @@ final class WorkspaceView: NSView {
     func syncRailPages() {
         onColumnPage?(inspectorVisible && sidebar.mode == .files ? inspector.tab : nil)
     }
+
+    /// The sidebar showed or hid (⌘B, a narrow window): the top bar's needs-you pill follows.
+    var onSidebarShown: ((Bool) -> Void)?
 
     /// The page the column shows changed (nil: closed): a page that reads lets go when it goes.
     var onColumnPage: ((String?) -> Void)?

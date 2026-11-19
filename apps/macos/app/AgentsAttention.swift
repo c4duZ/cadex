@@ -95,9 +95,7 @@ extension AppDelegate {
     /// The bell's number in each window and the Dock's (agents.dockBadge).
     func showAttentionCount() {
         let count = AgentAttention.shared.unseen
-        for window in sessions {
-            window.workspace?.titleBar.setBell(count: count)
-        }
+        for window in sessions { window.drawQueue() }
         NSApp.dockTile.badgeLabel = settings.store.settings.agents.dockBadge && count > 0 ? "\(count)" : nil
     }
 
@@ -166,7 +164,7 @@ extension WindowSession {
         page.onRender = { [weak self] in self?.bellPanel.refit() }
         page.render()
         bellPanel.onClose = { [weak workspace] in workspace?.titleBar.setBellOpen(false) }
-        bellPanel.show(page, below: workspace.titleBar.bellAnchor, width: UILooks.pt(DesignTokens.Popover.bellWidth))
+        bellPanel.show(page, below: workspace.sidebar.queueAnchor ?? workspace.titleBar.bellAnchor, width: UILooks.pt(DesignTokens.Popover.bellWidth))
         workspace.titleBar.setBellOpen(true)
     }
 }

@@ -212,7 +212,8 @@ final class WindowSession: NSObject, NSWindowDelegate {
         showPanelFolder(folder.root)
         applyInspector(settings.store.settings.inspector)
         // A window opened later shows what already needs you, not only the next change.
-        workspace.titleBar.setBell(count: AgentAttention.shared.unseen)
+        workspace.onSidebarShown = { [weak self] _ in self?.drawQueue() }
+        drawQueue()
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
         setUpStatusBar(workspace.statusBar, git: git)
         // The account up top opens the accounts card on hover, as the status bar's usage does.

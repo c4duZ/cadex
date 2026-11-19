@@ -1,4 +1,5 @@
 import AppKit
+import Agents
 import Inspector
 import Projects
 import Sidebar
@@ -15,6 +16,7 @@ extension WindowSession {
         sidebar.onPickPlace = { [weak self] folder in self?.pickPlace(folder) }
         sidebar.onToggle = { [weak self] folder in self?.toggleProject(folder) }
         sidebar.menuFor = { [weak self] folder in self?.railMenu(folder) ?? [] }
+        sidebar.onPickRequest = { [weak self] id in self?.goToRequest(id) }
         // Dragged: the order kept in projects.json, as the rail's (plan 36 E); pinned does not change.
         sidebar.onMove = { [weak self] folder, order in
             guard let self, let projects = self.projects else { return }
@@ -35,6 +37,8 @@ extension WindowSession {
         let all = (projects?.projects ?? []).filter { !Self.isLoose($0.folder) }
         let ordered = all.filter(\.pinned) + all.filter { !$0.pinned }
         let tree = Dictionary(treeModel().map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+        // The queue's requests by project too: the amber count and the queue never disagree.
+        let asking = Dictionary(grouping: AgentAttention.shared.cards, by: \.project).mapValues(\.count)
         return ordered.map { project in
             let terminals = project.tabs.allTerminals
             let states = terminals.compactMap { Self.treeRow($0).state }
@@ -51,7 +55,7 @@ extension WindowSession {
             }
             return WorkProject(id: project.folder, name: project.name, tint: tint, image: projects?.imageURL(project.image)?.path,
                                emoji: project.emoji, state: Self.summary(states), terminals: terminals.count,
-                               waiting: states.filter { $0 == .needs }.count, expanded: isExpanded(project.folder),
+                               waiting: max(states.filter { $0 == .needs }.count, asking[project.name] ?? 0), expanded: isExpanded(project.folder),
                                places: places, pinned: project.pinned)
         }
     }

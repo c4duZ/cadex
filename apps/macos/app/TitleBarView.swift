@@ -30,8 +30,8 @@ final class TitleBarView: NSView {
     private let location = NSTextField(labelWithString: "")
     private let newTabButton = TitleBarButton(
         icon: .plus, tip: T("Open a terminal, file, preview or git graph", "Abrir terminal, arquivo, preview ou grafo do git"), kind: .add)
-    /// The bell: the requests waiting for you, its count on the badge (docs/spec/agents.md).
-    private let bellButton = TitleBarButton(icon: .bell, tip: T("Needs you", "Precisa de você"))
+    /// The needs-you pill, with the sidebar closed (ADR 0039: the bell became the sidebar's queue).
+    let needs = TitleBarNeeds()
     private let boardButton = TitleBarButton(icon: .kanban, tip: T("Board", "Quadro"))
     /// The settings window (settings.open, ⌘,).
     private let settingsButton = TitleBarButton(icon: .gearSix, tip: T("Settings", "Configurações"))
@@ -54,12 +54,12 @@ final class TitleBarView: NSView {
         super.init(frame: .zero)
         search.onPress = { [weak self] in self?.run("palette.open") }
         newTabButton.onPress = { [weak self] in self?.showNewMenu() }
-        bellButton.onPress = { [weak self] in self?.run("agents.show-attention") }
+        needs.onPress = { [weak self] in self?.run("agents.go-to-request") }
         boardButton.onPress = { [weak self] in self?.run("view.board") }
         panelButton.onPress = { [weak self] in self?.run("view.toggle-sidebar") }
         settingsButton.onPress = { [weak self] in self?.run("settings.open") }
         account.onPress = { [weak self] in self?.run("agents.switch-account") }
-        trailing.setViews([account, boardButton, bellButton, settingsButton, panelButton], in: .leading)
+        trailing.setViews([needs, account, boardButton, settingsButton, panelButton], in: .leading)
         trailing.spacing = UILooks.pt(Look.gap)
 
         location.font = UILooks.font(DesignTokens.Breadcrumb.fontSize)
@@ -125,9 +125,9 @@ final class TitleBarView: NSView {
         tabsLeading?.constant = empty ? UILooks.pt(Look.gap) : Self.tabsGap
     }
 
-    /// The bell, where its popover opens; lit while it is open.
-    var bellAnchor: NSView { bellButton }
-    func setBellOpen(_ open: Bool) { bellButton.isOn = open }
+    /// Where the requests' list opens when the sidebar's queue is not in sight: the search.
+    var bellAnchor: NSView { search }
+    func setBellOpen(_ open: Bool) {}
     /// Lit while the board shows.
     func setBoardOpen(_ open: Bool) { boardButton.isOn = open }
     /// No "+" beside a page's tabs (the board, a project's overview).
@@ -140,10 +140,8 @@ final class TitleBarView: NSView {
 
     func setAccount(name: String?, used: Int?, provider: ProviderLogo) { account.show(name: name, used: used, provider: provider) }
 
-    /// The bell's count: what needs you, and finished agents you have not seen.
-    func setBell(count: Int) {
-        bellButton.setBadge(count)
-    }
+    /// The needs-you pill: who waits, or nil to hide it (it shows only with the sidebar closed).
+    func setNeeds(_ text: String?) { needs.say(text) }
 
     /// The home screen shows no terminal tabs and no "+" (the Home mockup).
     private var tabsHidden = false

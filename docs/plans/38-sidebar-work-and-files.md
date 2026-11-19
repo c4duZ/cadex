@@ -35,10 +35,15 @@ o que o clique faz). O dono aprovou em 2026-11-19 ("pode fazer").
   fechado fica no projects.json; arrastar a linha de um projeto muda a ordem (sem deslizar ao vivo).
   Conferido no app: a lista, o lugar aceso, escolher outro projeto, a seta, arrastar e salvar. Falta:
   soltar uma imagem num projeto (o trilho fazia), que fica para a H.
-- [ ] C. A fila "Precisa de você": o cartão âmbar no topo, das mesmas fontes do sino (os pedidos
+- [x] C. A fila "Precisa de você": o cartão âmbar no topo, das mesmas fontes do sino (os pedidos
   abertos), cada linha com o agente, o projeto, o pedido em frase e o tempo; o clique leva ao
   terminal; a etiqueta âmbar no projeto fechado e a marca na borda da lista rolada; a pílula na
   barra de cima com a barra lateral fechada. O sino sai da barra de cima; o feed fica no ⌘K.
+  Feito: `apps/macos/features/sidebar/WorkQueue.swift` e `apps/macos/app/NeedsQueueWiring.swift`; a
+  contagem âmbar do projeto soma os pedidos dele (a mesma fonte da fila). Conferido no app com um
+  pedido falso (CADEX_PERF_REQUEST): a fila no topo e a pílula com a barra fechada. A marca da borda
+  só no teste (falta um agente de verdade esperando num projeto fora da vista). O "N need you" da
+  barra de baixo sai na F.
 - [ ] D. A vista Arquivos: o seletor "Trabalho | Arquivos" (⇧⌘1, ⇧⌘2), a árvore do lugar (o
   explorer de hoje) com o cabeçalho em palavras, e "N mudanças · ver" mostrando Mudanças na própria
   barra (o painel do git de hoje, com Commit e Abrir PR); ⇧⌘G e o branch da barra de baixo abrem

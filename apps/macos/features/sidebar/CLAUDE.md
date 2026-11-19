@@ -31,8 +31,12 @@
   Files e Changes do app), `setQueue` a fila; `remoteShown` mostra Máquinas no pé. `WorkRows.swift`:
   o avatar e a linha (a seta do Phosphor, o nome, à direita o estado e os terminais, "nada aberto" ou
   a contagem âmbar dos pedidos; a linha inteira pega o clique, a seta dobra). `WorkSidebarParts.swift`:
-  o seletor, o grupo do main e das tarefas com o fio guia, e a linha do pé. Tokens:
-  components.workSidebar.
+  o seletor, o grupo do main e das tarefas com o fio guia, a linha do pé e a marca da borda
+  (`WorkEdge`: um projeto com pedido fora da vista da lista diz o nome e o lado; o clique rola até
+  ele). `WorkQueue.swift` (fase C): a fila "Precisa de você" (`WorkRequest`, `WorkQueueView`: o
+  cartão âmbar com o número, cada pedido com quem pede, há quanto tempo e o pedido em frase; o clique
+  diz qual); a barra lateral a mostra no topo em toda vista (`showQueue`, `onPickRequest`,
+  `queueAnchor`). Tokens: components.workSidebar.
 - `Rail.swift`: o modelo puro do trilho (`RailProject`: a pasta, o nome, a cor, o estado e se tem
   terminal aberto; `mark`, a letra até haver imagem; `badge`, o estado que se mostra) e `RailFoot`.
   `RailView.swift`: a porta de entrada; `show` recebe os projetos e o escolhido e redesenha só quando

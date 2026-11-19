@@ -16,6 +16,8 @@ public final class WorkSidebarView: NSView {
     public var onPickPlace: ((String) -> Void)?
     public var onToggle: ((String) -> Void)?
     public var menuFor: ((String) -> [MenuEntry])?
+    /// A request of the queue clicked: its id (the app goes to its terminal).
+    public var onPickRequest: ((String) -> Void)?
     /// A project dragged to a new place: its folder and the projects' folders in the new order.
     public var onMove: ((String, [String]) -> Void)?
     /// The switch was clicked: the app shows that view (and runs what goes with it).
@@ -26,6 +28,9 @@ public final class WorkSidebarView: NSView {
 
     private let run: (String) -> Void
     private let queueSlot = NSStackView()
+    private let queue = WorkQueueView()
+    /// The edge of the Work list when a project waiting on you is scrolled out of sight.
+    private let edge = WorkEdge()
     private let switchRow = WorkSwitch()
     private let content = NSView()
     private let list = NSStackView()
@@ -42,6 +47,17 @@ public final class WorkSidebarView: NSView {
         layer?.backgroundColor = W.bg.cgColor
         queueSlot.orientation = .vertical
         queueSlot.isHidden = true
+        queueSlot.addArrangedSubview(queue)
+        queue.widthAnchor.constraint(equalTo: queueSlot.widthAnchor).isActive = true
+        queue.onPick = { [weak self] id in self?.onPickRequest?(id) }
+        edge.isHidden = true
+        edge.onPress = { [weak self] in self?.scrollToWaiting() }
+        content.addSubview(edge)
+        edge.translatesAutoresizingMaskIntoConstraints = false
+        scroll.contentView.postsBoundsChangedNotifications = true
+        clipWatch = NotificationCenter.default.addObserver(forName: NSView.boundsDidChangeNotification, object: scroll.contentView, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.updateEdge() }
+        }
         switchRow.onPick = { [weak self] mode in self?.onMode?(mode) }
         list.orientation = .vertical
         list.alignment = .leading
@@ -83,6 +99,9 @@ public final class WorkSidebarView: NSView {
             list.topAnchor.constraint(equalTo: clip.topAnchor),
             list.leadingAnchor.constraint(equalTo: clip.leadingAnchor),
             list.widthAnchor.constraint(equalTo: clip.widthAnchor),
+            edge.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: UILooks.pt(W.Edge.inset)),
+            edge.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -UILooks.pt(W.Edge.inset)),
+            edge.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -UILooks.pt(W.Edge.inset)),
             border.topAnchor.constraint(equalTo: topAnchor),
             border.bottomAnchor.constraint(equalTo: bottomAnchor),
             border.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -118,6 +137,7 @@ public final class WorkSidebarView: NSView {
                           fontSize: W.Row.fontSize, meta: .none, selected: false)
         new.onPress = { [weak self] in self?.run("project.create") }
         add(new)
+        DispatchQueue.main.async { [weak self] in self?.updateEdge() }
     }
 
     private func addProject(_ project: WorkProject, place: String?) {
@@ -169,6 +189,7 @@ public final class WorkSidebarView: NSView {
         switchRow.select(next)
         scroll.isHidden = next != .work
         files?.isHidden = next != .files
+        updateEdge()
     }
 
     /// The Files view (the explorer and Changes, with their header and foot), held for the Files mode.
@@ -186,11 +207,43 @@ public final class WorkSidebarView: NSView {
         view.isHidden = mode != .files
     }
 
-    /// The needs-you queue on top (plan 38 phase C); nil hides it.
-    public func setQueue(_ view: NSView?) {
-        queueSlot.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        if let view { queueSlot.addArrangedSubview(view) }
-        queueSlot.isHidden = view == nil
+    /// The needs-you queue on top (plan 38 phase C), in every view; none hides it.
+    public func showQueue(_ requests: [WorkRequest], now: Date = Date()) {
+        if requests != queue.shown { queue.show(requests, now: now) }
+        queueSlot.isHidden = requests.isEmpty
+    }
+
+    /// Where the bell's list opens from: the queue while it shows.
+    public var queueAnchor: NSView? { queueSlot.isHidden ? nil : queue }
+
+    private var clipWatch: NSObjectProtocol?
+
+    /// A project waiting on you whose line is out of the list's sight: the edge says which, on the
+    /// side it is (ADR 0039: no amber may live only inside something hidden).
+    func updateEdge() {
+        let visible = scroll.contentView.bounds
+        let waiting = projectRows().filter { $0.1.waiting > 0 && !$0.1.expanded }
+        // The line's frame in the clip's own (flipped) space, where the visible part is.
+        let clip = scroll.contentView
+        let inClip = { (row: WorkRow) in clip.convert(row.bounds, from: row) }
+        guard mode == .work, let out = waiting.first(where: { !visible.intersects(inClip($0.0)) }) else { return edge.isHidden = true }
+        let below = inClip(out.0).minY >= visible.maxY
+        let count = out.1.waiting
+        edge.say((below ? "▼ " : "▲ ") + out.1.name + " · " + (count == 1 ? T("1 request ", "1 pedido ") : T("\(count) requests ", "\(count) pedidos "))
+                 + (below ? T("below", "abaixo") : T("above", "acima")))
+        edge.isHidden = false
+    }
+
+    private func scrollToWaiting() {
+        guard let row = projectRows().first(where: { $0.1.waiting > 0 && !$0.1.expanded })?.0 else { return }
+        row.scrollToVisible(row.bounds)
+        updateEdge()
+    }
+
+    /// Each project's line with its project.
+    private func projectRows() -> [(WorkRow, WorkProject)] {
+        let rows = list.arrangedSubviews.compactMap { $0 as? WorkRow }
+        return (shown?.projects ?? []).compactMap { project in rows.first { $0.title == project.name }.map { ($0, project) } }
     }
 
     private func buildFoot() {
@@ -222,6 +275,7 @@ public final class WorkSidebarView: NSView {
         if let kids = view as? WorkChildren { return kids.rows.map(\.title) }
         return []
     } }
+    var edgeSaid: String { edge.isHidden ? "" : edge.said }
     var litTitle: String? { list.arrangedSubviews.compactMap { $0 as? WorkChildren }.flatMap(\.rows).first(where: \.selected)?.title }
     func press(_ title: String) { (list.arrangedSubviews.compactMap { $0 as? WorkRow } + list.arrangedSubviews.compactMap { $0 as? WorkChildren }.flatMap(\.rows)).first { $0.title == title }?.onPress?() }
 }

@@ -72,6 +72,15 @@ extension WindowSession {
             }
         }
         // A command by its id, as the palette runs it (the New Task sheet, plan 29 phase B).
+        // An open permission request with no agent (plan 38 C, to see the needs-you queue):
+        // "project|who|tool|subject" at CADEX_PERF_REQUEST_AT s.
+        if let spec = environment["CADEX_PERF_REQUEST"]?.split(separator: "|").map(String.init), spec.count == 4 {
+            let at = environment["CADEX_PERF_REQUEST_AT"].flatMap(Double.init) ?? 3
+            DispatchQueue.main.asyncAfter(deadline: .now() + at) {
+                _ = AgentAttention.shared.addPermission(pid: 0, tool: spec[2], subject: spec[3], project: spec[0], session: spec[1],
+                                                    account: "bkdg", key: nil, reply: { _ in })
+            }
+        }
         if let id = environment["CADEX_PERF_COMMAND"] {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in _ = self?.commands.run(id) }
         }

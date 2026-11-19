@@ -167,3 +167,53 @@ final class WorkFootRow: NSView {
         onPress?()
     }
 }
+
+/// The edge marker (components.workSidebar.edge): an amber bar as wide as the list saying who waits
+/// out of sight; the click scrolls to it.
+@MainActor
+final class WorkEdge: NSView {
+    typealias E = DesignTokens.WorkSidebar.Edge
+    var onPress: (() -> Void)?
+    private let label = NSTextField(labelWithString: "")
+
+    init() {
+        super.init(frame: .zero)
+        wantsLayer = true
+        layer?.backgroundColor = E.bg.cgColor
+        layer?.borderColor = E.border.cgColor
+        layer?.borderWidth = DesignTokens.Stroke.hairline
+        layer?.cornerRadius = UILooks.pt(E.radius)
+        label.font = UILooks.font(E.fontSize, weight: E.weight)
+        label.textColor = E.color
+        label.alignment = .center
+        label.lineBreakMode = .byTruncatingTail
+        label.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(label)
+        NSLayoutConstraint.activate([
+            heightAnchor.constraint(equalToConstant: UILooks.rowHeight(E.height)),
+            label.centerYAnchor.constraint(equalTo: centerYAnchor),
+            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: UILooks.pt(E.gap)),
+            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -UILooks.pt(E.gap)),
+        ])
+        setAccessibilityRole(.button)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("WorkEdge is created in code") }
+
+    func say(_ text: String) {
+        label.stringValue = text
+        setAccessibilityLabel(text)
+    }
+
+    var said: String { label.stringValue }
+
+    override var mouseDownCanMoveWindow: Bool { false }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+    override func hitTest(_ point: NSPoint) -> NSView? { frame.contains(point) ? self : nil }
+    override func mouseDown(with event: NSEvent) {}
+    override func mouseUp(with event: NSEvent) {
+        guard bounds.contains(convert(event.locationInWindow, from: nil)) else { return }
+        onPress?()
+    }
+}

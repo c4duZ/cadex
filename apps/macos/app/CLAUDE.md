@@ -114,6 +114,13 @@
   lugar do trilho, com a coluna (Files e Changes) dentro dela como a vista Arquivos; sidebar.show-work
   (⇧⌘1) e sidebar.show-files (⇧⌘2); Sessions, Memory e o grafo saíram da coluna: memory.show e
   project.sessions-column abrem a página do projeto, git.show-history abre o histórico numa aba.
+- `NeedsQueueWiring.swift` (plano 38 fase C): a fila da barra lateral com os pedidos abertos
+  (AgentAttention.cards, o que o sino listava; `askWords` diz o pedido em frase), redesenhada a cada
+  mudança da atenção e quando a barra abre ou fecha (`drawQueue`); com a barra fechada, a pílula da
+  barra de cima (`TitleBarNeeds.swift`) diz quem espera; agents.go-to-request vai ao terminal (um
+  pedido) ou abre a lista (vários). O sino saiu da barra de cima; a lista dele abre da fila
+  (agents.show-attention). O número do Dock continua (só pedidos). CADEX_PERF_REQUEST cria um pedido
+  falso para ver a fila numa instância de teste.
 - `RailWiring.swift` (plano 36 fase A, ADR 0038; o trilho saiu da tela no plano 38 B): o trilho da feature `sidebar` na borda esquerda
   (`WorkspaceView.swift`): os projetos com a cor, o estado mais urgente dos terminais e o ponto de
   terminal aberto, redesenhados com a árvore (drawTree, em `TreeWiring.swift`); o clique escolhe o projeto (as
