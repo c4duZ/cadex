@@ -91,8 +91,9 @@ class Engine:
             raise RuntimeError(f"{event} refused ({status})")
 
     def briefing(self, session):
-        """GET /handoff with briefing=1 (events.zig, handoffTarget), not
-        claiming the handoff (claim=0, as the Memory page asks)."""
+        """GET /handoff with the brief asked (briefing=1, what the marker's
+        inject_on_session_start gives since plan 35 B), not claiming the
+        handoff (claim=0, as the Memory page asks)."""
         query = {"agent": "claude-code", "cwd": self.repo, "project_strategy": "repo-root",
                  "briefing": "1", "session_id": session, "claim": "0"}
         status, body = self.request("GET", "/handoff?" + urllib.parse.urlencode(query))

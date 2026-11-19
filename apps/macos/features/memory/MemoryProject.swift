@@ -47,22 +47,27 @@ public enum MemoryProject {
         return join(gitdir, common.trimmingCharacters(in: .whitespacesAndNewlines))
     }
 
-    /// Steps 1 to 3: the main checkout of the repository `cwd` is in, or
-    /// `cwd` itself.
-    public nonisolated static func mainRoot(cwd: String) -> String {
-        let start = canonical(cwd)
-        var dir = start
+    /// Step 2: the common dir of the repository `cwd` is in (canonical), nil outside git. Its
+    /// `info/exclude` is the one every worktree reads (MemoryMarkerPlace).
+    public nonisolated static func gitCommonDir(cwd: String) -> String? {
+        var dir = canonical(cwd)
         while true {
             let dotGit = (dir == "/" ? "" : dir) + "/.git"
             var isDirectory: ObjCBool = false
             if FileManager.default.fileExists(atPath: dotGit, isDirectory: &isDirectory) {
-                let common = (isDirectory.boolValue ? dotGit : commonDir(dotGit: dotGit, holder: dir)).map(canonical)
-                guard let common, (common as NSString).lastPathComponent == ".git" else { return start }
-                return (common as NSString).deletingLastPathComponent
+                return (isDirectory.boolValue ? dotGit : commonDir(dotGit: dotGit, holder: dir)).map(canonical)
             }
-            if dir == "/" || dir.isEmpty { return start }
+            if dir == "/" || dir.isEmpty { return nil }
             dir = (dir as NSString).deletingLastPathComponent
         }
+    }
+
+    /// Steps 1 to 3: the main checkout of the repository `cwd` is in, or
+    /// `cwd` itself.
+    public nonisolated static func mainRoot(cwd: String) -> String {
+        let start = canonical(cwd)
+        guard let common = gitCommonDir(cwd: start), (common as NSString).lastPathComponent == ".git" else { return start }
+        return (common as NSString).deletingLastPathComponent
     }
 
     /// Step 4, for a root already found.

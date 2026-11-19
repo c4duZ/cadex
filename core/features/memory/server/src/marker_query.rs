@@ -5,9 +5,11 @@
 //! does not read the marker (plan 22, 2026-11-16).
 //!
 //! The same keys and values, with Cadex's choices on top:
-//! - `briefing=1` by default (Cadex turns the brief on; upstream leaves it
-//!   off): `[briefing] inject_on_session_start` (or `inject_on_subagent_start`
-//!   on `/brief`) replaces it when the marker has it.
+//! - the brief, as upstream, only when the marker asks for it
+//!   (`[briefing] inject_on_session_start`, or `inject_on_subagent_start` on
+//!   `/brief`); the client sends no `briefing=1` since plan 35 B (the
+//!   warning "auto-injected — .ai-memory.toml [briefing]" was a lie without
+//!   the file), and Cadex writes the file in every project with it on.
 //! - a `workspace` the client sent (the account's, with
 //!   memory.shareAcrossAccounts off) outranks the marker's: that setting is the
 //!   owner's privacy choice, and a committed file must not undo it.
@@ -124,7 +126,7 @@ mod tests {
         let text = "workspace = \"team\"\n[handoff]\ndeliver_on_session_start = false\n[profile]\nconsume = no\n";
         apply(&mut p, "/handoff", text);
         assert_eq!(get(&p, "workspace"), Some("acct-1"));
-        assert_eq!(get(&p, "briefing"), Some("1"), "no briefing key keeps Cadex's default");
+        assert_eq!(get(&p, "briefing"), Some("1"), "no briefing key leaves what the query had");
         assert_eq!(get(&p, "handoff"), Some("0"));
         assert_eq!(get(&p, "recovery"), None);
         assert_eq!(get(&p, "profile_consume"), Some("0"));

@@ -5,9 +5,10 @@ import UILooks
 
 /// A project's memory settings on a screen (plan 32 D; the owner, 2026-11-18: the .ai-memory.toml
 /// "numa tela, ao invés de ficar mexendo nas coisas"), a section of the project's Settings page:
-/// its name, what stays out, what each session starts with, and the search and the profile. Each change is written at
-/// once to the repository's .ai-memory.toml, only the keys shown (`MemoryMarker`); no file is made
-/// while everything is the default.
+/// where the file lives, its name, what stays out, what each session starts with, and the search and
+/// the profile. Each change is written at once to the repository's .ai-memory.toml, only the keys
+/// shown (`MemoryMarker`); Cadex makes the file when the project opens (plan 35 B), so what it says
+/// is what the hooks do.
 @MainActor
 public final class MemoryProjectForm: NSView {
     private let folder: String
@@ -53,8 +54,15 @@ public final class MemoryProjectForm: NSView {
     private func show() {
         column.arrangedSubviews.forEach { $0.removeFromSuperview() }
         let where_ = FrameField.wrapping(T("Saved in ", "Gravado em ") + (file as NSString).abbreviatingWithTildeInPath
-                                             + T(", the repository's own file: commit it to share it with the team.", ", o arquivo do próprio repositório: faça commit para valer para o time."))
+                                             + T(", the repository's own file, which the memory's hooks read at every session.",
+                                                 ", o arquivo do próprio repositório, que os hooks da memória leem a cada sessão."))
         var rows: [NSView] = [FrameField.label(T("Memory", "Memória")), where_]
+        if MemoryMarkerPlace.excludeFile(folder: folder) != nil {
+            rows.append(row(T("Where the file lives", "Onde o arquivo fica"),
+                            T("In the repository: commit it, so every checkout and the team route the same way. Only on this Mac: git ignores it here (.git/info/exclude); a file already committed stays tracked until you remove it from git.",
+                              "No repositório: faça commit, e todo checkout e o time seguem igual. Só neste Mac: o git o ignora aqui (.git/info/exclude); um arquivo que já está no git continua nele até você tirá-lo."),
+                            place()))
+        }
         rows += [FrameField.label(T("Name", "Nome")),
                  row(T("Project name", "Nome do projeto"), T("Empty: the repository's folder.", "Vazio: a pasta do repositório."),
                      text(marker.project, T("From the repository", "Do repositório")) { [weak self] value in self?.change { $0.project = value } }),
@@ -68,7 +76,8 @@ public final class MemoryProjectForm: NSView {
                      toggle(marker.dropSubagents) { [weak self] on in self?.change { $0.dropSubagents = on } }),
                  FrameField.label(T("When a session starts", "Quando uma sessão começa")),
                  row(T("The project's briefing", "O briefing do projeto"),
-                     T("The rules, pinned pages and what changed lately, before the first prompt.", "As regras, as páginas fixadas e o que mudou por último, antes do primeiro pedido."),
+                     T("The rules, pinned pages and what changed lately, before the first prompt. On only while this file says so (inject_on_session_start).",
+                       "As regras, as páginas fixadas e o que mudou por último, antes do primeiro pedido. Ligado só enquanto este arquivo diz (inject_on_session_start)."),
                      toggle(marker.briefing) { [weak self] on in self?.change { $0.briefing = on } }),
                  row(T("Briefing size", "Tamanho do briefing"), T("In characters, about 4 per token.", "Em caracteres, uns 4 por token."), stepper()),
                  row(T("Briefing in subagents too", "Briefing nos subagentes também"), T("Each subagent pays for it in tokens.", "Cada subagente paga em tokens."),
@@ -127,6 +136,18 @@ public final class MemoryProjectForm: NSView {
         box.widthAnchor.constraint(equalToConstant: UILooks.pt(DesignTokens.Inspector.width) * 3 / 4).isActive = true
         FormTarget.keep(field) { changed(field.stringValue.trimmingCharacters(in: .whitespaces)) }
         return box
+    }
+
+    /// In the repository or only on this Mac (the line in the common dir's info/exclude).
+    private func place() -> NSView {
+        let popup = NSPopUpButton()
+        popup.addItems(withTitles: [T("In the repository (commit it)", "No repositório (faça commit)"), T("Only on this Mac", "Só neste Mac")])
+        popup.selectItem(at: MemoryMarkerPlace.isLocalOnly(folder: folder) ? 1 : 0)
+        FormTarget.keep(popup) { [weak self] in
+            guard let self else { return }
+            MemoryMarkerPlace.setLocalOnly(popup.indexOfSelectedItem == 1, folder: self.folder)
+        }
+        return FrameField.popup(popup)
     }
 
     private func stepper() -> NSView {

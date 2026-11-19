@@ -98,6 +98,8 @@ fn the_briefing_is_what_the_next_session_start_gets_and_claims_nothing() {
     let tmp = tempfile::tempdir().unwrap();
     let project = repo(tmp.path(), "acme");
     let cwd = project.to_str().unwrap();
+    // The brief comes from the marker only, as upstream (plan 35 B): Cadex writes this file.
+    std::fs::write(project.join(".ai-memory.toml"), "project = \"acme\"\n[briefing]\ninject_on_session_start = true\n").unwrap();
     let engine = start(tmp.path(), ARGS);
     let s = &engine.socket;
     tool(s, "memory_write_page", serde_json::json!({"workspace": "default", "project": "acme",
@@ -116,10 +118,12 @@ fn the_briefing_is_what_the_next_session_start_gets_and_claims_nothing() {
 
     // The real start, as `cadex memory-hook` makes it.
     hook(s, "session-start", cwd, S2, "s2", serde_json::json!({"session_id": S2, "cwd": cwd, "source": "startup"}));
-    let qs = query(&[("agent", "claude-code"), ("cwd", cwd), ("project_strategy", "repo-root"), ("briefing", "1"), ("session_id", S2)]);
+    let qs = query(&[("agent", "claude-code"), ("cwd", cwd), ("project_strategy", "repo-root"), ("session_id", S2)]);
     let real = ok(s, "GET", &format!("/handoff?{qs}"), None).expect("the session's context");
     assert_eq!(real, first, "the page showed what the session got");
     assert!(!briefing().contains("pending handoff from previous session"), "the session claimed it");
+    std::fs::remove_file(project.join(".ai-memory.toml")).unwrap();
+    assert!(!briefing().contains("Indent with tabs"), "no marker, no brief (upstream's default)");
 
     let empty = repo(tmp.path(), "empty");
     let none = ok(s, "GET", &route("briefing", &[("cwd", empty.to_str().unwrap())]), None).expect("an empty briefing");

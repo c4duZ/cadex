@@ -80,10 +80,19 @@ caminhos deste repositório.
   7. O perfil e a precedência (usuário, `CLAUDE.md`, memória do projeto, perfil).
   8. O que mudou da 3.4.7 para a 3.5.0.
   Feito: `../research/ai-memory-upstream.md`, lido e decidido com o dono (acima).
-- [ ] B. O marcador em todo projeto: ao adicionar um projeto (e nos que já existem, ao abrir), o
+- [x] B. O marcador em todo projeto: ao adicionar um projeto (e nos que já existem, ao abrir), o
   Cadex cria o .ai-memory.toml com o que o estudo disser que é o padrão certo, comentado; a
   seção Memória das Configurações do projeto (plano 32, que no plano 34 fica dentro da página do
   projeto) edita esse arquivo. Decidir com o dono se o arquivo entra no git do repositório.
+  Feito: o app cria o .ai-memory.toml ao abrir, criar ou restaurar um projeto e ao ligar a memória
+  (uma vez por abertura, fora da linha principal, nunca por cima de um que existe, nunca na pasta
+  pessoal, só com memory.enabled), com `workspace`, `project` (o nome que a memória já usa) e
+  `[briefing] inject_on_session_start = true`, o resto comentado
+  (`../../apps/macos/features/memory/MemoryMarkerPlace.swift`, `../../apps/macos/app/MemoryMarkerWiring.swift`);
+  a seção Memória do projeto escolhe "No repositório" ou "Só neste Mac" (o `info/exclude` do git).
+  O cliente e o engine deixaram de pedir `briefing=1`: o briefing vem só do arquivo, como no
+  upstream (`../../core/features/memory/events.zig`, `../../core/features/memory/server/src/page/briefing.rs`).
+  Apagar o arquivo à mão: ele volta na próxima abertura do projeto.
 - [x] C. A sessão vazia: sem nenhum `user-prompt`, não grava página de sessão e não dispara o
   agente (consolidate, perfil, auto-improve). O caso: as sessões `4fc4d46a` e `3cd2e5f6`, um painel
   aberto às 14:20 sem prompt (`sessions/cfa808ed-….args.json` com `[]`).

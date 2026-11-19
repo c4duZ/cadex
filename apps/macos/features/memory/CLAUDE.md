@@ -75,9 +75,17 @@
 - `MemoryMarker.swift` e `MemoryProjectForm.swift` (plano 32 D): o .ai-memory.toml do repositório
   numa tela, a seção Memória da página Settings do projeto (nome e espaço, o que fica de fora,
   briefing e seu tamanho, subagentes, handoff, retomada, busca em todos, perfil); cada mudança grava
-  na hora só as chaves da tela, mantendo comentários e o resto do arquivo, e um arquivo novo só
-  nasce para dizer algo diferente do padrão. O painel Memory leva até ela
+  na hora só as chaves da tela, mantendo comentários e o resto do arquivo. O que o arquivo não diz
+  vale o padrão do ai-memory (o briefing desligado; plano 35 B). O painel Memory leva até ela
   ("Configurar a memória deste projeto…", memory.configure-project).
+- `MemoryMarkerPlace.swift` (plano 35 B): MemoryMarker.template (o que o `ai-memory project init`
+  grava, `workspace` e `project`, mais `[briefing] inject_on_session_start = true`; o resto comentado
+  com o padrão do upstream e um cabeçalho dizendo o que é o arquivo), `projectName` (a pasta da raiz
+  do repositório principal, a regra do `MemoryProject.swift`) e `ensure`, que cria o arquivo só se
+  não existe (por `link`, que falha se o nome já existe; nunca sobrescreve); quem chama é o app
+  (`../../app/MemoryMarkerWiring.swift`). `MemoryMarkerPlace`: "Só neste Mac", a linha
+  /.ai-memory.toml no `info/exclude` do diretório comum do git (MemoryProject.gitCommonDir, lido
+  dos arquivos), posta ou tirada exatamente; a tela escolhe entre isso e "No repositório".
 - `MemoryWarmUp.swift`: `start` roda `cadex-memory --warm --data-dir <pasta>` em segundo plano
   (QoS utility, saída em /dev/null) quando a versão do app difere da guardada no arquivo
   `warmed-version` da própria pasta da memória (não em UserDefaults: uma instância de teste, com
@@ -85,7 +93,8 @@
   2026-11-16); guarda a versão só se o engine sai 0 (falhou, tenta na próxima abertura). No `make run` a versão é "0", aquecida uma vez também.
 
 ## Como validar
-- `make macos-test` (MemoryTests; o .ai-memory.toml lido como o engine lê, gravado sem perder linha): os 9 eventos e o comando de cada um, a `env` do pacote e a do
+- `make macos-test` (MemoryTests; o .ai-memory.toml lido como o engine lê, gravado sem perder linha;
+  o modelo, o `ensure` que não sobrescreve, o nome numa worktree e a linha do exclude): os 9 eventos e o comando de cada um, a `env` do pacote e a do
   `make run`, a workspace só sem compartilhar, os hooks com agents.stateHooks desligada, a parte
   retirada, a chave do projeto (o valor fixado igual ao do engine, worktree e subpasta no
   checkout principal, fora do git a pasta), o `autoMemoryDirectory` de uma sessão no repositório,

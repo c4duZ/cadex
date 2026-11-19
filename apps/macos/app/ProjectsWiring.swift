@@ -35,6 +35,8 @@ extension WindowSession {
             // A project opened or closed: the tasks are listed again (git, off the main thread);
             // a switch only redraws.
             self?.loadTreeTasks(onlyIfProjectsChanged: true)
+            // The project's .ai-memory.toml, made once if it has none (plan 35 B).
+            self?.noteMemoryMarkers()
         }
         projects.onTabsChange = { [weak self] in self?.refreshTree() }
         // No project open (plan 29): the home screen in the center.

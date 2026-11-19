@@ -32,10 +32,22 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   (abaixo): a chamada a um deles não é gravada.
 
 ### O `.ai-memory.toml` do repositório
+- O Cadex cria o arquivo em todo projeto (plano 35 B): ao adicionar ou abrir um projeto, ao
+  restaurar os projetos na abertura do app e ao ligar a memória, uma vez por abertura, fora da linha
+  principal; nunca por cima de um arquivo que já existe, nunca para os terminais soltos da pasta
+  pessoal, e só com memory.enabled. O conteúdo é o que o `ai-memory project init` grava
+  (`workspace = "default"` e `project = "<o nome que a memória já usa>"`, a pasta da raiz do
+  repositório principal, então a memória fica onde está) mais `[briefing] inject_on_session_start =
+  true` escrito; as outras chaves vão comentadas com o padrão do ai-memory, e um comentário no alto
+  diz o que é o arquivo (o docs/marker-file.md do ai-memory) e que a tela do Cadex o edita.
 - Numa tela (plano 32 D): a página Settings do projeto (ao lado de Overview) mostra as chaves que o
   Cadex lê, com palavras simples, e grava na hora só essas, deixando comentários e o resto do
-  arquivo; um arquivo novo só nasce quando algo difere do padrão. Os padrões de todos os projetos
-  ficam em Configurações › Memória.
+  arquivo. Os padrões de todos os projetos ficam em Configurações › Memória.
+- Onde o arquivo fica, escolhido na mesma tela: "No repositório (faça commit)", o padrão, como o
+  ai-memory recomenda (todo checkout e o time seguem igual), ou "Só neste Mac": a linha
+  `/.ai-memory.toml` no `info/exclude` do diretório comum do git (o de uma worktree leva a ele);
+  voltar tira exatamente essa linha. O estado é lido desse arquivo. O exclude não tira do git um
+  arquivo que já está nele; a tela avisa. O Cadex nunca faz `git add` nem commit.
 - O mesmo arquivo do ai-memory, com as mesmas regras: o mais perto subindo da pasta da sessão (até a
   pasta pessoal; fora dela, até a raiz do repositório). Um arquivo só com `[capture]` não esconde o
   de cima para o resto.
@@ -44,7 +56,10 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   nome, como no ai-memory), `[briefing] inject_on_session_start` e `max_chars`,
   `inject_on_subagent_start`, `[recall] default_global`, `drop_subagent_captures`,
   `[profile] contribute`/`consume`, `[handoff]` e `[recovery] deliver_on_session_start`.
-- Diferenças do Cadex: o briefing já nasce ligado (no ai-memory é preciso pedir), e o `workspace`
+- O que o arquivo não diz vale o padrão do ai-memory, o briefing desligado entre eles; o briefing
+  fica ligado porque o arquivo que o Cadex cria o liga (plano 35, o dono em 2026-11-19).
+- Diferenças do Cadex: o arquivo nasce sozinho em todo projeto (no ai-memory, só pelo `project
+  init`), e o `workspace`
   da conta (com o compartilhamento entre contas desligado) vale mais que o do arquivo, porque é a
   escolha de privacidade do dono. Não vale: `identity`, `aliases`, `server` e as rotas do
   `~/.ai-memory.toml` (o Cadex é local e nomeia o projeto pela raiz do repositório principal).

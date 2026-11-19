@@ -4,7 +4,9 @@ import Foundation
 /// owner, 2026-11-18: configure it "numa tela, ao invés de ficar mexendo nas coisas"). Only the
 /// keys the engine forwards that the screen shows (docs/spec/memory.md, upstream's
 /// docs/marker-file.md); writing changes those lines and keeps every other line, comment and key as
-/// it was. Pure, so it is tested without a window.
+/// it was. Pure, so it is tested without a window. Cadex makes the file in every project
+/// (`template`, `ensure` in MemoryMarkerPlace.swift; plan 35 B), so what it does not say keeps
+/// upstream's defaults, the brief off among them.
 public struct MemoryMarker: Equatable, Sendable {
     /// The project's and the workspace's names; empty: from the repository (Cadex's default).
     public var project = ""
@@ -13,8 +15,10 @@ public struct MemoryMarker: Equatable, Sendable {
     public var ignorePaths: [String] = []
     /// `drop_subagent_captures`: subagents' sessions are not stored.
     public var dropSubagents = false
-    /// `[briefing]`: the brief at session start (on in Cadex), its size, and in subagents.
-    public var briefing = true
+    /// `[briefing]`: the brief at session start, its size, and in subagents. Off unless the file
+    /// says so, as upstream (plan 35 B, the owner 2026-11-19: the brief comes only from the file,
+    /// whose template turns it on).
+    public var briefing = false
     public var briefingChars = 4000
     public var subagentBriefing = false
     /// `[handoff]` and `[recovery] deliver_on_session_start`: on unless turned off.
@@ -40,7 +44,7 @@ public struct MemoryMarker: Equatable, Sendable {
         marker.workspace = doc.string(nil, "workspace") ?? ""
         marker.ignorePaths = doc.array("capture", "ignore_paths") ?? []
         marker.dropSubagents = doc.flag(nil, "drop_subagent_captures") ?? false
-        marker.briefing = doc.flag("briefing", "inject_on_session_start") ?? true
+        marker.briefing = doc.flag("briefing", "inject_on_session_start") ?? false
         marker.briefingChars = doc.value("briefing", "max_chars").flatMap(Int.init) ?? 4000
         marker.subagentBriefing = doc.flag("briefing", "inject_on_subagent_start") ?? false
         marker.handoff = doc.flag("handoff", "deliver_on_session_start") ?? true
@@ -49,6 +53,11 @@ public struct MemoryMarker: Equatable, Sendable {
         marker.contribute = doc.flag("profile", "contribute") ?? true
         marker.consume = doc.flag("profile", "consume") ?? true
         return marker
+    }
+
+    /// A TOML basic string: quotes and backslashes escaped.
+    static func quoted(_ string: String) -> String {
+        "\"" + string.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"") + "\""
     }
 
     /// `text` with this marker's keys: a key already there takes the new value in its line; a key
@@ -60,12 +69,11 @@ public struct MemoryMarker: Equatable, Sendable {
         func set(_ section: String?, _ key: String, _ value: String, isDefault: Bool) {
             if doc.has(section, key) || !isDefault { doc.set(section, key, value) }
         }
-        func quoted(_ string: String) -> String { "\"" + string.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"") + "\"" }
         for (key, name) in [("project", project), ("workspace", workspace)] {
-            name.isEmpty ? doc.remove(nil, key) : doc.set(nil, key, quoted(name))
+            name.isEmpty ? doc.remove(nil, key) : doc.set(nil, key, Self.quoted(name))
         }
-        set("capture", "ignore_paths", "[" + ignorePaths.map(quoted).joined(separator: ", ") + "]", isDefault: ignorePaths.isEmpty)
-        set(nil, "drop_subagent_captures", quoted(String(dropSubagents)), isDefault: dropSubagents == defaults.dropSubagents)
+        set("capture", "ignore_paths", "[" + ignorePaths.map(Self.quoted).joined(separator: ", ") + "]", isDefault: ignorePaths.isEmpty)
+        set(nil, "drop_subagent_captures", Self.quoted(String(dropSubagents)), isDefault: dropSubagents == defaults.dropSubagents)
         set("briefing", "inject_on_session_start", String(briefing), isDefault: briefing == defaults.briefing)
         let chars = min(max(briefingChars, Self.briefingRange.lowerBound), Self.briefingRange.upperBound)
         set("briefing", "max_chars", String(chars), isDefault: chars == defaults.briefingChars)

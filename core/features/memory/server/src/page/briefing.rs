@@ -4,9 +4,10 @@
 //! 22 phase H, 2026-11-16). The backfill marker line stays in; the client
 //! drops it as the hook does (`briefingText`, hook_client.zig).
 //!
-//! The hook's request is upstream's `/handoff` with `briefing=1`
-//! (events.zig `handoffTarget`), through the inner router so the marker's
-//! pairs apply (marker_query.rs). A real start claims the handoff; asked
+//! The hook's request is upstream's `/handoff` (events.zig `handoffTarget`),
+//! through the inner router so the marker's pairs apply (marker_query.rs):
+//! the brief is in only when the repository's .ai-memory.toml asks for it,
+//! as upstream (plan 35 B; Cadex writes the file in every project with it on). A real start claims the handoff; asked
 //! with upstream's own `claim=0` (#2148, the external-capture run's switch)
 //! the route renders everything else the same and puts a one-line notice
 //! where the handoff's text goes. So:
@@ -55,7 +56,6 @@ fn base(cwd: &str, workspace: Option<&str>) -> Pairs {
         pairs.push(("workspace".into(), ws.into()));
     }
     pairs.push(("project_strategy".into(), "repo-root".into()));
-    pairs.push(("briefing".into(), "1".into()));
     set(&mut pairs, "claim", "0");
     pairs
 }
@@ -148,6 +148,6 @@ mod tests {
     fn the_query_is_the_hooks_without_a_claim() {
         let pairs = base("/r", Some("acct"));
         let query = serde_urlencoded::to_string(&pairs).unwrap();
-        assert_eq!(query, "agent=claude-code&cwd=%2Fr&workspace=acct&project_strategy=repo-root&briefing=1&claim=0");
+        assert_eq!(query, "agent=claude-code&cwd=%2Fr&workspace=acct&project_strategy=repo-root&claim=0");
     }
 }

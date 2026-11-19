@@ -90,6 +90,7 @@ final class SettingsBridge {
         Self.applyAgentTools(settings.agentTools.enabled)
         AuthorshipHub.apply(settings.review.authorship)
         MemoryWiring.apply(settings.memory)
+        MemoryMarkerWiring.apply(enabled: settings.memory.enabled)
         MemoryWiring.writeAgentConfig(settings.memory, agents: settings.agents)
         onComputerUse?(settings.computerUse)
         WorktreesController.shared.rootSetting = settings.worktrees.root

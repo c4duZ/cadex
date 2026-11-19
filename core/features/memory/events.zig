@@ -113,9 +113,10 @@ pub fn hookTarget(gpa: std.mem.Allocator, engine_event: []const u8, payload: Pay
     return out.toOwnedSlice(gpa);
 }
 
-/// `GET /handoff` with `briefing=1`: without it the project's pages stay
-/// out of the briefing (plan 22). The same `workspace` as the hook's, so the
-/// briefing comes from the memory the events went to.
+/// `GET /handoff`. No `briefing=1` (plan 35 B): the brief comes from the
+/// repository's .ai-memory.toml, as upstream's client does it, and Cadex
+/// writes that file in every project. The same `workspace` as the hook's, so
+/// the briefing comes from the memory the events went to.
 pub fn handoffTarget(gpa: std.mem.Allocator, payload: Payload, workspace: ?[]const u8) ![]u8 {
     var out: std.ArrayList(u8) = .empty;
     errdefer out.deinit(gpa);
@@ -124,7 +125,6 @@ pub fn handoffTarget(gpa: std.mem.Allocator, payload: Payload, workspace: ?[]con
     if (payload.cwd) |cwd| try appendPair(gpa, &out, "cwd", cwd);
     if (workspace) |name| try appendPair(gpa, &out, "workspace", name);
     try appendPair(gpa, &out, "project_strategy", "repo-root");
-    try appendPair(gpa, &out, "briefing", "1");
     if (payload.session_id) |id| try appendPair(gpa, &out, "session_id", id);
     return out.toOwnedSlice(gpa);
 }
@@ -234,7 +234,7 @@ test "the hook's query encodes the folder and carries the pid only when asked" {
     const handoff = try handoffTarget(testing.allocator, payload, null);
     defer testing.allocator.free(handoff);
     try testing.expect(std.mem.startsWith(u8, handoff, "/handoff?agent=claude-code&cwd=%2FUsers"));
-    try testing.expect(std.mem.endsWith(u8, handoff, "&project_strategy=repo-root&briefing=1&session_id=s-1"));
+    try testing.expect(std.mem.endsWith(u8, handoff, "&project_strategy=repo-root&session_id=s-1"));
 }
 
 test "an account's own memory: the workspace goes on the hook and on the handoff" {
@@ -246,7 +246,7 @@ test "an account's own memory: the workspace goes on the hook and on the handoff
     const handoff = try handoffTarget(testing.allocator, payload, "-Users-a--claude-x");
     defer testing.allocator.free(handoff);
     try testing.expectEqualStrings("/handoff?agent=claude-code&cwd=%2Fp&workspace=-Users-a--claude-x" ++
-        "&project_strategy=repo-root&briefing=1&session_id=s", handoff);
+        "&project_strategy=repo-root&session_id=s", handoff);
 }
 
 test "the payload's session and folder are read; ingest keys differ" {

@@ -34,7 +34,8 @@ func markerTests() -> [(name: String, body: Checks.Body)] { [
         expect(marker.ignorePaths == ["*.env", "secrets/**"], "\(marker.ignorePaths)")
         expect(marker.dropSubagents && !marker.briefing && marker.briefingChars == 6000)
         expect(!marker.handoff && marker.recovery && !marker.consume && marker.contribute && !marker.searchAll)
-        expect(MemoryMarker.read("") == MemoryMarker(), "no file: Cadex's defaults (the brief on)")
+        expect(MemoryMarker.read("") == MemoryMarker(), "no file: upstream's defaults")
+        expect(!MemoryMarker().briefing, "the brief is off unless the file says so (plan 35 B)")
     }),
     ("writing changes only the screen's keys: comments, other tables and unknown keys stay", {
         let text = """
@@ -76,7 +77,7 @@ func markerTests() -> [(name: String, body: Checks.Body)] { [
     ("a new file holds only what differs from the defaults", {
         var marker = MemoryMarker()
         expect(marker.written(over: "").isEmpty, "nothing to say")
-        marker.briefing = false
-        expect(marker.written(over: "") == "[briefing]\ninject_on_session_start = false", marker.written(over: ""))
+        marker.briefing = true
+        expect(marker.written(over: "") == "[briefing]\ninject_on_session_start = true", marker.written(over: ""))
     }),
 ] }

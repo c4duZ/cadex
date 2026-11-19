@@ -63,7 +63,7 @@
       (o cliente do upstream lê): `server/src/marker.rs` (achar e ler: **cópia** do marker.rs do
       cli do upstream, origem no topo, sem rotas da pasta pessoal nem perfis de servidor),
       `server/src/marker_query.rs` (os pares que o `build_marker_query_suffix` do upstream manda;
-      o briefing do Cadex nasce ligado e o `workspace` da conta vale mais que o do arquivo) e
+      o briefing só com o marcador pedindo, como no upstream, desde o plano 35 B; o `workspace` da conta vale mais que o do arquivo) e
       `server/src/capture.rs` (o `CapturePolicy` do upstream: some, só metadados ou fica).
     - `server/src/file_claim.rs`: o campo `_ai_memory_file` que o cliente do upstream manda e o
       `cadex memory-hook` não (o arquivo único que o `file_target` do upstream lê, relativo à pasta
@@ -311,7 +311,7 @@
     outros eventos: 200 ms e, sem resposta (ou com 5xx), vão para a fila. Sempre sai 0.
   - `events.zig`: o nome do evento do Claude Code no do engine (o `HookEvent::parse` do upstream)
     e a query (`event`, `agent=claude-code`, `cwd`, `workspace` quando há, `session_id`, `project_strategy=repo-root`,
-    `ingest_key` aleatória; `pid` no SessionStart e no SessionEnd; `briefing=1` no `/handoff`) e,
+    `ingest_key` aleatória; `pid` no SessionStart e no SessionEnd; sem `briefing=1` no `/handoff` desde o plano 35 B: o briefing vem do .ai-memory.toml, que o app cria em todo projeto) e,
     numa execução gerenciada (fase E), `managed_run` (o AI_MEMORY_RUN_ID) no `/hook` e no `/handoff`
     e `auto_handoff=0` (AI_MEMORY_AUTO_HANDOFF falso) no `/hook`, como o cliente do upstream.
   - `http.zig`: HTTP/1.1 mínimo no socket Unix (`Connection: close`, tamanho ou chunked), com
