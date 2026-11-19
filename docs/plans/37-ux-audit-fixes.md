@@ -4,7 +4,7 @@ O dono, 2026-11-18, depois da auditoria de UX (um agente estudou os princípios,
 app inteiro com eles; o guia está no histórico da sessão): "vamos corrigindo esses 23". O ponto
 fraco achado é a atenção (saber que um agente precisa de você); o resto é atrito de nomes, menus e
 "onde estou". A estrutura da janela (barra lateral, barra de cima e de baixo) tem um estudo à parte,
-`docs/design/sidebar/4-auditoria-estrutura.html`, e as mudanças de estrutura saem dele, não daqui.
+docs/design/sidebar/4-auditoria-estrutura.html, e as mudanças de estrutura saem dele, não daqui.
 
 ## O que eu quero
 - Nunca perder um agente que espera você: um número só para "precisa de você", a mesma fonte para
