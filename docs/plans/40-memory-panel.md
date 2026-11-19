@@ -44,13 +44,19 @@ repositório. O código dele está no checkout do cargo, no commit fixado (411d9
   o original: uma cópia, apagada no fim.
 
 ## Como eu quero
-- [ ] A. Referência e mockups. O painel do upstream rodando sobre uma cópia do banco do dono, por
+- [x] A. Referência e mockups. O painel do upstream rodando sobre uma cópia do banco do dono, por
   um programa de exemplo do engine (só nos testes: o ai-memory-web como dependência de
   desenvolvimento, nunca no binário), e um print de cada tela; o inventário de cada uma (o que
   mostra, de onde vem o dado: a API JSON do upstream ou só o HTML); os mockups com os tokens do
   Cadex num .dc.html, revisados por um agente de UX contra os prints e os estudos da barra lateral;
   o dono aprova antes do código.
-- [ ] A2. O banco falso e a paridade, antes de qualquer tela:
+  Feito: o painel do upstream sobre a cópia (`core/features/memory/server/examples/web_reference.rs`),
+  15 prints, o inventário (`docs/research/memory-panel-screens.md`), 13 boards Memory*.dc.html com
+  `docs/design/work-frame/screens-memory.md`, revisados por um agente de UX; o dono viu os prints
+  (um visualizador local dos .dc.html) e mandou montar para testar (2026-11-19). O grafo foge do
+  upstream: layout de forças (as páginas ligadas se aproximam), não o círculo dele, que com muitas
+  páginas vira emaranhado (o dono: "pode fazer o 2").
+- [x] A2. O banco falso e a paridade, antes de qualquer tela:
   - Um seed no engine que cria uma pasta de memória de teste pelas funções do upstream (como os
     testes dele: Store, Wiki e o writer): projetos, sessões abertas e fechadas, eventos, páginas com
     histórico, regras e slots, mensagens na caixa de entrada, workstreams, propostas na revisão de
@@ -60,6 +66,10 @@ repositório. O código dele está no checkout do cargo, no commit fixado (411d9
     HTML, os números e as listas tirados do HTML dele e comparados com o nosso JSON.
   - A memória intacta: depois de todas as rotas e telas, o banco e a wiki iguais byte a byte.
   - O `make memory-upstream-test` roda também a suíte do ai-memory-web.
+  Feito: o seed (`core/features/memory/server/tests/panel/seed.rs`, e o exemplo panel_seed), os
+  testes `core/features/memory/server/tests/panel_parity.rs` (todas as telas e a API do upstream
+  sobre o seed, com os números; a pasta igual byte a byte depois) e a suíte do ai-memory-web no
+  `make memory-upstream-test` (344 testes, 0 falhas, no Mac).
 - [ ] B. O engine: a API JSON do upstream (`/api/v1`: projetos, visão geral, páginas, histórico,
   recentes, briefing, handoffs, sessões, observações, busca, grafo) no socket da memória, e rotas
   nossas para o que só existe no HTML (caixa de entrada, workstreams, revisão de aprendizado, saúde,

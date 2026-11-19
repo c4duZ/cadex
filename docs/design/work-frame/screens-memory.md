@@ -325,3 +325,8 @@ pesar fidelidade contra brevidade. Escrito em 2026-11-19.
   tooltip); o link "Markdown para agentes →" de cada cartão (fica "Ler Markdown" no guia aberto); a
   caixa final "Para agentes e integrações". Os títulos e descrições vêm em inglês da API: a fase B
   decide de onde sai o português.
+
+## Decisão depois dos prints (2026-11-19)
+- O grafo (MemoryGraph, o geral e o do projeto) usa um layout de forças: as páginas ligadas se
+  aproximam e formam grupos, as soltas ficam na borda. O board ainda mostra o círculo do upstream;
+  o nativo segue esta decisão (o dono: "pode fazer o 2").
