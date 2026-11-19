@@ -78,9 +78,12 @@ quero poder abrir uma sessão num projeto por lá"; "um HTML pode ser"; "pode s�
   instância de teste: o link de um HTML abriu com o CSS do lado, o Markdown veio renderizado, `cadex
   share` sozinho listou os dois, e por 127.0.0.1 e pelo IP do Wi-Fi ninguém responde. Sem o
   telefone: o Office pelo Quick Look e o vídeo no Safari não foram vistos.
-- [ ] F. O guia do dono em docs/guides/phone.md (novo): Tailscale no Mac e no telefone, Login Remoto
+- [x] F. O guia do dono em `docs/guides/phone.md`: Tailscale no Mac e no telefone, Login Remoto
   no Mac, o app de terminal com mosh, e os comandos `cadex`, `cadex attach`, `cadex new`, `cadex
   share`.
+  Feito: o guia, com os nomes das configurações como estão na tela, o atalho do `cadex` em
+  `~/.local/bin`, o mosh pelo Homebrew e as mensagens do `cadex` com o que fazer.
+
 
 Ordem: A, B, C, D (o caminho principal); E é independente e pode vir antes. A fase A mexe no
 terminal: pede o `make perf`, que só roda quando o dono pedir.
