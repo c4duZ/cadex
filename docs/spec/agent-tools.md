@@ -88,6 +88,21 @@ Cadex: `docs/adr/0024-agent-tools.md`).
 - O kit libera no Claude Code (`permissions.allow`) as ferramentas MCP que só leem (árvore da
   página, print, console, notas); as que agem perguntam ao dono na primeira vez.
 
+### Pelo telefone (plano 39, `docs/plans/39-terminals-from-the-phone.md`)
+O dono, no telefone, entra por SSH no Mac pela tailnet e usa o `cadex` de um terminal que não é aba
+do Cadex (sem token: vale porque é o mesmo usuário do Mac, e só para estes comandos).
+- `cadex` sem argumentos: o menu numerado de projetos e abas; um número entra numa aba, `n` abre um
+  terminal no projeto, `c` abre o Claude.
+- `cadex attach [id]`: entra numa aba aberta no Cadex, com a tela de antes, ao vivo; o Mac continua
+  mostrando a mesma aba e os dois digitam. O tamanho é o menor dos dois e volta quando o telefone
+  sai. Ctrl+\ e depois `d` sai sem fechar nada. A aba no Mac mostra uma marca enquanto há alguém de
+  fora.
+- `cadex new <projeto> [claude]`: abre a aba no Cadex do Mac pelo comando registrado (com memória,
+  hooks e status, como um clique) e entra nela. Com o app fechado, abre o app antes.
+- `cadex share <arquivo>`: devolve um link da tailnet (com token, por uma hora) que abre o arquivo no
+  Safari do telefone; um HTML leva junto o que carrega da pasta dele. Nada escuta fora do IP do
+  Tailscale; sem Tailscale, diz isso e sai.
+
 ## Estados
 - **JSON sem `rate_limits`** (antes da primeira resposta da sessão): só o arquivo da sessão.
 - **JSON sem modelo, contexto ou custo**: a linha fica sem a parte que falta; sem nenhuma, vazia.
@@ -122,3 +137,6 @@ Cadex: `docs/adr/0024-agent-tools.md`).
 - [x] O `~/.claude` do dono não muda (datas dos arquivos antes e depois do teste).
 - [x] O Claude Code de uma sessão do Cadex chama uma ferramenta `mcp__cadex__*` e o app age
       (`cadex_worktree_comment`: o comentário gravado).
+- [ ] Plano 39: do telefone, `cadex attach` entra numa aba com o Claude aberto no Mac, o que se digita
+      lá aparece no Mac e o Mac não perde a aba; `cadex new cadex claude` abre uma aba que aparece no
+      Mac; `cadex share x.html` abre no Safari pela tailnet e não pelo IP da rede local.
