@@ -108,6 +108,12 @@ public enum Icon: UInt32, CaseIterable, Sendable {
     case brain = 0xE74E
     case squaresFour = 0xE464
     case chatsCircle = 0xE17E
+    // The Memória page's sections (plan 40 C, docs/design/work-frame/screens-memory.md).
+    case folderSimple = 0xE25A
+    case envelopeSimple = 0xE218
+    case graph = 0xEB58
+    case shieldCheck = 0xE40C
+    case pulse = 0xE000
 
     /// The fonts' family names inside the TTFs.
     static let fontName = "Phosphor"

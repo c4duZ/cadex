@@ -24,6 +24,7 @@ extension WindowSession {
         actions.delete = { [weak self] in self?.deleteAutomation($0.id) }
         commands.register(AutomationCommands.all(palette: palette, actions: actions))
         commands.register(automationsPageCommands())
+        commands.register(memoryPanelCommands())
     }
 
     /// orchestration.toggle-automations: turning on says first what changes,

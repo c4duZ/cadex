@@ -56,6 +56,14 @@ extension MemoryWiring {
         MemoryAgent.runText(tools: tools, words: words, environment: MemoryAgent.environment(engine: engine, token: token), done: done)
     }
 
+    /// The same, the bytes as printed (the Memória page's routes, plan 40 C).
+    static func runAgentData(_ words: [String], done: @escaping @MainActor @Sendable (Int32, Data) -> Void) {
+        guard let tools = SessionKit.shared.toolsPath, let token = MemoryAgent.appToken(tokens: SessionKit.tokensFolder) else {
+            return done(1, Data(#"{"error":"cadex is missing"}"#.utf8))
+        }
+        MemoryAgent.runData(tools: tools, words: words, environment: MemoryAgent.environment(engine: engine, token: token), done: done)
+    }
+
     /// The same with `input` on stdin (`write-page`'s body).
     static func runAgent(_ words: [String], input: String, done: @escaping @MainActor @Sendable (Int32, [String: Any]) -> Void) {
         guard let tools = SessionKit.shared.toolsPath, let token = MemoryAgent.appToken(tokens: SessionKit.tokensFolder) else {

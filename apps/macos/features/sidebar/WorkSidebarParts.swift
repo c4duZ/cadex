@@ -121,31 +121,54 @@ final class WorkChildren: NSView {
 @MainActor
 final class WorkFootRow: NSView {
     typealias F = DesignTokens.WorkSidebar.Foot.Row
+    typealias Lit = DesignTokens.MemoryPanel.Nav.FootItem
     var onPress: (() -> Void)?
-    private var hovering = false {
-        didSet { layer?.backgroundColor = hovering ? DesignTokens.WorkSidebar.Row.Selected.bg.cgColor : nil }
-    }
+    private var hovering = false { didSet { paint() } }
+    /// Its page is open (Memória, plan 40 C): the selected fill and the primary text.
+    var lit = false { didSet { paint() } }
+    private let glyph: NSImageView
+    private let label: NSTextField
+    /// Small on the right ("ai-memory 3.5.0"), only while lit.
+    private let detail = NSTextField(labelWithString: "")
 
     init(title: String, icon: Icon) {
+        glyph = NSImageView(image: icon.fittedImage(size: UILooks.pt(F.icon)))
+        label = NSTextField(labelWithString: title)
         super.init(frame: .zero)
         wantsLayer = true
         layer?.cornerRadius = UILooks.pt(DesignTokens.WorkSidebar.Row.radius)
-        let glyph = NSImageView(image: icon.fittedImage(size: UILooks.pt(F.icon)))
-        glyph.contentTintColor = F.color
-        let label = NSTextField(labelWithString: title)
         label.font = UILooks.font(F.fontSize)
-        label.textColor = F.color
-        let stack = NSStackView(views: [glyph, label])
+        detail.font = UILooks.font(Lit.Version.fontSize)
+        detail.textColor = Lit.Version.color
+        detail.isHidden = true
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.init(1), for: .horizontal)
+        let stack = NSStackView(views: [glyph, label, spacer, detail])
         stack.spacing = UILooks.pt(F.gap)
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
         NSLayoutConstraint.activate([
             heightAnchor.constraint(equalToConstant: UILooks.rowHeight(F.height)),
             stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: UILooks.pt(F.paddingX)),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -UILooks.pt(F.paddingX)),
             stack.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
+        paint()
         setAccessibilityRole(.button)
         setAccessibilityLabel(title)
+    }
+
+    func setDetail(_ text: String) { detail.stringValue = text }
+
+    var detailSaid: String { detail.isHidden ? "" : detail.stringValue }
+
+    private func paint() {
+        layer?.backgroundColor = lit ? Lit.Selected.bg.cgColor : hovering ? DesignTokens.WorkSidebar.Row.Selected.bg.cgColor : nil
+        let color = lit ? Lit.Selected.color : F.color
+        label.textColor = color
+        glyph.contentTintColor = color
+        detail.isHidden = !lit || detail.stringValue.isEmpty
+        setAccessibilityValue(lit ? T("open", "aberta") : nil)
     }
 
     @available(*, unavailable)

@@ -103,6 +103,13 @@ public enum MemoryAgent {
         }
     }
 
+    /// The same, the bytes as printed: the panel's routes answer arrays too (`api/v1/projects`),
+    /// which the dictionary of `run` would drop (plan 40 C).
+    public nonisolated static func runData(tools: String, words: [String], environment: [String: String],
+                                           done: @escaping @MainActor @Sendable (Int32, Data) -> Void) {
+        runRaw(tools: tools, words: words, environment: environment, input: nil, done: done)
+    }
+
     /// The same with `input` on stdin (`write-page`'s body), JSON back.
     public nonisolated static func run(tools: String, words: [String], input: String, environment: [String: String],
                                        done: @escaping @MainActor @Sendable (Int32, [String: Any]) -> Void) {

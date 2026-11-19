@@ -30,11 +30,14 @@ public enum MemoryKit {
     /// where packaging puts it), else the debug build `make app` makes next
     /// to this source (`make run`). nil: the hooks still queue the events,
     /// but nothing can start the engine.
-    public nonisolated static func findEngine(bundle: String = Bundle.main.bundlePath, source: String = #filePath) -> String? {
+    public nonisolated static func findEngine(bundle: String = Bundle.main.bundlePath, source: String? = nil) -> String? {
         let fm = FileManager.default
         let bundled = bundle + "/Contents/Helpers/cadex-memory"
         if fm.isExecutableFile(atPath: bundled) { return bundled }
-        var root = URL(fileURLWithPath: source)
+        // #filePath here, not as the parameter's default: a default is the caller's file, so the
+        // app's call (app/MemoryWiring.swift) looked one folder above the repository and the
+        // debug build never got CADEX_MEMORY_BIN (plan 40 C, the panel's first test instance).
+        var root = URL(fileURLWithPath: source ?? #filePath)
         for _ in 0..<5 { root.deleteLastPathComponent() }
         let built = root.path + "/core/features/memory/server/target/debug/cadex-memory"
         return fm.isExecutableFile(atPath: built) ? built : nil
@@ -43,11 +46,11 @@ public enum MemoryKit {
     /// The plugin with ai-memory's own skills (when to search, save, hand
     /// off; `cadex-memory export-plugin`, plan 22 phase D): in the bundle's
     /// Resources (packaging writes it), else where `make app` writes it.
-    public nonisolated static func findPlugin(bundle: String = Bundle.main.bundlePath, source: String = #filePath) -> String? {
+    public nonisolated static func findPlugin(bundle: String = Bundle.main.bundlePath, source: String? = nil) -> String? {
         let fm = FileManager.default
         let bundled = bundle + "/Contents/Resources/memory-plugin"
         if fm.fileExists(atPath: bundled + "/.claude-plugin/plugin.json") { return bundled }
-        var root = URL(fileURLWithPath: source)
+        var root = URL(fileURLWithPath: source ?? #filePath)
         for _ in 0..<5 { root.deleteLastPathComponent() }
         let built = root.path + "/core/features/memory/server/target/memory-plugin"
         return fm.fileExists(atPath: built + "/.claude-plugin/plugin.json") ? built : nil

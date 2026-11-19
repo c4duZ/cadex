@@ -51,7 +51,8 @@
   aprovação, a conta padrão e as de cada projeto, o `claude`) e `write`, o `<memória>/agent.json`
   (0600) que o engine lê a cada trabalho; `appToken`, o token do próprio app na pasta de tokens
   (memory-agent.token, feito uma vez); `environment` e `run`, o `cadex memory-agent` fora da linha
-  principal, com o JSON de volta; também o texto puro (o briefing) e o stdin (write-page).
+  principal, com o JSON de volta; também o texto puro (o briefing), os bytes (`runData`, o painel) e
+  o stdin (write-page).
 - A aba Memory do painel da direita (fase H; plano 26 fase C2c; refeita em 2026-11-18, o dono
   achou dura e difícil de ler): `MemoryView.swift`, numa rolagem só (antes a árvore da wiki rolava
   dentro da rolagem da aba), no desenho da proposta aprovada: desligada, o texto e "Turn On";
@@ -77,6 +78,19 @@
   sessão recebeu (plano 35 H), memory.reindex, memory.refresh, memory.enable, memory.approve e memory.reject com a lista
   das propostas no ⌘K; memory.show-history, os commits da wiki na aba do Git History). As ações da
   aba ficam todas, com nome, no "…" da linha de cima (`../../app/InspectorWiring.swift`).
+- `panel/` (plano 40 C; `../../../../docs/plans/40-memory-panel.md`): a página Memória, o painel do
+  ai-memory redesenhado nativo, com o JSON das rotas do engine (o app as lê pelo `cadex memory-agent
+  panel`, MemoryAgent.runData). `panel/PanelData.swift` (PanelOverviewData.parse: projetos,
+  agentes, fila e captura; `MemoryPanelInfo`, a versão do upstream), `panel/PanelOverviewModel.swift`
+  (o modelo puro: as somas, a ordem estável, o escopo, o filtro, "N de M"; `PanelWords`, os números,
+  o "há 9 horas" e as frases), `panel/PanelOverviewView.swift` (a Visão geral: os cinco números
+  clicáveis, a captura com o ⓘ, o aviso da fila, o filtro e os seletores, os cartões; setas, Enter e
+  ⌘O), `panel/PanelCards.swift` (o número e o cartão, com o menu de contexto), `panel/PanelParts.swift`
+  (o clique, o link, o ⓘ com popover e accessibilityHelp, o seletor no menu do app),
+  `panel/PanelSections.swift` (`MemoryPanelSection`, os nove destinos em três grupos, e
+  `MemoryPanelNav`, a busca e as linhas que o app põe na barra lateral) e `panel/PanelDocument.swift`
+  (`MemoryPanelDocument`, a página; só a Visão geral desenhada, as outras seções dizem "Em breve.").
+  Tokens: components.memoryPanel.
 - `MemorySessions.swift` (plano 35 H): `received`, o briefing que uma sessão recebeu, lido do disco
   em `<memória>/agent/briefings/<sessão>.md` (o engine o guarda, plano 35 D; só id simples, as linhas
   do marcador de backfill tiradas e aparado, como o hook entrega; nil sem arquivo), e
@@ -114,7 +128,10 @@
   2026-11-16); guarda a versão só se o engine sai 0 (falhou, tenta na próxima abertura). No `make run` a versão é "0", aquecida uma vez também.
 
 ## Como validar
-- `make macos-test` (MemoryTests; o briefing guardado de uma sessão e o id recusado, a página de
+- `make macos-test` (MemoryTests; o painel, `tests/PanelTests.swift`, sobre o JSON do seed gravado
+  em `tests/fixtures/`: a leitura, as somas, a ordem e o filtro, as palavras em português, os
+  cliques e as teclas da Visão geral, as seções, a página, e com CADEX_SNAPSHOT_DIR o
+  memory-overview.png; o briefing guardado de uma sessão e o id recusado, a página de
   sessão vazia fora das últimas sessões; o .ai-memory.toml lido como o engine lê, gravado sem perder linha;
   o modelo, o `ensure` que não sobrescreve, o nome numa worktree e a linha do exclude): os 9 eventos e o comando de cada um, a `env` do pacote e a do
   `make run`, a workspace só sem compartilhar, os hooks com agents.stateHooks desligada, a parte

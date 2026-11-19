@@ -68,6 +68,8 @@ MAC_ONLY = {"project.edit", "project.create", "project.new-terminal", "project.n
             # Scheduled automations (plan 24, phase E).
             "orchestration.toggle-automations", "orchestration.new-automation", "orchestration.toggle-automation",
             "orchestration.run-automation-now", "orchestration.show-automation-history",
+            # The Memória page (plan 40 C), the panel of ai-memory redrawn on the Mac.
+            "memory.show-panel", "memory.open-in-cadex",
             "memory.show", "memory.show-briefing", "memory.show-history", "memory.reindex", "memory.refresh", "memory.enable", "memory.approve", "memory.reject", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).

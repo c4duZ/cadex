@@ -52,7 +52,12 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
   seletor, ⌃⌘1 ou o Esc com o foco na barra (com o foco num terminal, o Esc é dele).
 - **Pé**, fixo e separado da lista: Quadro (view.board), Automações (orchestration.show-automations)
   e Máquinas (os hosts do `~/.ssh/config` e as máquinas da tailnet numa lista, remote.show; escolher
-  conecta numa aba), esta só quando há algum host.
+  conecta numa aba), esta só quando há algum host, e Memória (memory.show-panel, plano 40).
+- **Com a página Memória aberta** (plano 40 C): a barra troca o conteúdo, sem segunda coluna. A
+  fila fica no topo; "‹ Trabalho" no lugar do seletor (sidebar.show-work; o Esc com o foco na barra
+  faz o mesmo; o centro continua na página); as seções do painel no lugar da lista (a busca e os
+  três grupos, `memory.md`); no pé, Memória acesa com "ai-memory 3.5.0" à direita. Fechar a aba da
+  página volta a barra ao Trabalho.
 - **Terminais sem projeto:** os da pasta pessoal não viram projeto na lista; enquanto se está neles,
   nenhum lugar fica aceso (`tabs.md`, abas sem projeto).
 - **Com a barra fechada,** quem espera aparece na pílula da barra de cima ("checkout-copy precisa

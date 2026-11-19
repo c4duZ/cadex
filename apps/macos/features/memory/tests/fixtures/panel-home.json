@@ -1,0 +1,45 @@
+{
+ "projects": [
+  {
+   "workspace": "default",
+   "project": "_global",
+   "agents": [],
+   "pending_inbox": 0
+  },
+  {
+   "workspace": "default",
+   "project": "site",
+   "agents": [
+    "claude-code"
+   ],
+   "pending_inbox": 0
+  },
+  {
+   "workspace": "default",
+   "project": "cadex",
+   "agents": [
+    "claude-code",
+    "codex"
+   ],
+   "pending_inbox": 2
+  },
+  {
+   "workspace": "default",
+   "project": "empty",
+   "agents": [],
+   "pending_inbox": 0
+  },
+  {
+   "workspace": "default",
+   "project": "scratch",
+   "agents": [],
+   "pending_inbox": 0
+  }
+ ],
+ "capture": {
+  "accepted": 0,
+  "dropped_by_policy": 0,
+  "shed_saturated": 0,
+  "shed_rate_limited": 0
+ }
+}

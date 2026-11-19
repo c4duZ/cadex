@@ -83,8 +83,15 @@ repositório. O código dele está no checkout do cargo, no commit fixado (411d9
   Documentação abre os guias do upstream no GitHub. Paridade em `core/features/memory/server/tests/panel_api.rs`:
   cada rota igual ao `api_router` e às telas HTML do upstream sobre o seed, as recusas iguais, a
   pasta igual byte a byte depois.
-- [ ] C. A página Memória no pé da barra lateral, com as seções, e a Visão geral: os cinco
+- [x] C. A página Memória no pé da barra lateral, com as seções, e a Visão geral: os cinco
   números, a saúde da captura, o aviso da caixa de entrada e os cartões dos projetos com filtro.
+  Feito: `apps/macos/features/memory/panel/` (os dados, o modelo puro da ordem e do filtro, a Visão
+  geral, as seções, a página), a troca da barra em `apps/macos/features/sidebar/WorkSidebarMemory.swift`
+  e `apps/macos/app/MemoryPanelWiring.swift` (memory.show-panel, memory.open-in-cadex); testes com o
+  JSON do seed gravado (`apps/macos/features/memory/tests/fixtures/`) e o print memory-overview.png.
+  Diferenças do board: as letras do cartão seguem a regra da barra lateral (cadex é CA, não CX);
+  a aba da página fica sob a barra de cima, como Automações. Achado no caminho: no `make run` o app
+  não achava o engine (o #filePath padrão era o do chamador), corrigido em MemoryKit.findEngine.
 - [ ] D. O projeto: a árvore de páginas e a atividade recente, a página (Markdown e metadados), o
   histórico com diff, a sessão (linha do tempo) e o agente (sessões e uso).
 - [ ] E. Pesquisar na memória e o grafo de conhecimento (o geral e o do projeto).

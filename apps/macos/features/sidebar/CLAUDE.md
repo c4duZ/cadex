@@ -3,7 +3,7 @@
 ## O que eu quero
 - A barra lateral (`../../../../docs/adr/0039-sidebar-with-work-and-files.md`, plano 38; a
   referência `../../../../docs/design/sidebar/6-estrutura-ideal.html`): a fila "Precisa de você" no
-  topo, o seletor "Trabalho | Arquivos" e a vista; no pé, Quadro, Automações e Máquinas. Na janela
+  topo, o seletor "Trabalho | Arquivos" e a vista; no pé, Quadro, Automações, Máquinas e Memória. Na janela
   estreita, a faixa (o que ficou do trilho do plano 36).
 - O modelo do trabalho (`WorkTree.swift`: os projetos, as tarefas e os terminais com o estado), que
   o app junta e o ⌘J e o sidebar.find leem. A árvore que o desenhava (plano 27) saiu da tela com a
@@ -35,6 +35,10 @@
   `WorkFilesHead`), a vista do app no meio e, no fim, "N mudanças · ver" (`setChanges`,
   `WorkChangesLine`; some sem mudança ou com Mudanças à vista; o clique, `onShowChanges`). Tokens:
   components.workSidebar.
+- `WorkSidebarMemory.swift` (plano 40 C): o modo `.memory` com a página Memória aberta: "‹ Trabalho"
+  (`WorkBackRow`, sidebar.show-work; o Esc também) no lugar do seletor, a vista que o app dá
+  (`setMemory`, as seções da feature memory) no lugar da lista, e no pé Memória (memory.show-panel)
+  acesa com a versão à direita (`setMemoryVersion`). Tokens: components.memoryPanel.nav.
 - `WorkRecents.swift` (fase G): nada aberto, `showRecents` lista os recentes (`WorkRecent`: a cara
   do projeto e quando foi usado), Novo projeto… (project.create) e Abrir pasta… (project.new, com o
   atalho que o app dá), sem o seletor; `onPickRecent` diz a pasta; o próximo `show` com projetos
@@ -75,6 +79,6 @@
 
 ## Como validar
 - `make macos-test` passa: a lista Trabalho (as linhas, o lugar aceso, os cliques, o menu da tarefa,
-  a imagem solta), o seletor, a fila, os recentes; a faixa (um quadrado por projeto, o escolhido com
+  a imagem solta), o seletor, a fila, os recentes, o modo Memória; a faixa (um quadrado por projeto, o escolhido com
   o halo, a peça de estado só fora de parado, o ponto, o clique, o pé com os comandos; arrastar), o sidebar.find
   achando pelo nome no modelo, o ⌘J.

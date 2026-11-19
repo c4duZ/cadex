@@ -213,6 +213,7 @@ public extension DesignTokens {
         }
         public enum Field {
             public static let height: CGFloat = 30
+            public static let width: CGFloat = 200
             public static let padding = NSEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
             public static let radius: CGFloat = DesignTokens.Radius.control
             public static var bg: NSColor { DesignTokens.Color.bgInset }
@@ -223,6 +224,12 @@ public extension DesignTokens {
                 public static var border: NSColor { DesignTokens.Color.lineFocus }
                 public static var shadow: [DesignTokens.ShadowLayer] { DesignTokens.Shadow.haloInput }
             }
+        }
+        public enum Section {
+            public static let fontSize: CGFloat = DesignTokens.FontSize.sheetTitle
+            public static var weight: NSFont.Weight { DesignTokens.FontWeight.semibold }
+            public static let gap: CGFloat = 10
+            public static let marginTop: CGFloat = 8
         }
         public enum Popup {
             public static let height: CGFloat = 30

@@ -101,4 +101,24 @@ let workChecks: [(name: String, body: Checks.Body)] = [
         view.setChanges(count: 2, showingChanges: true)
         expect(view.changesSaid.isEmpty, "while Changes shows: no line")
     }),
+    ("the Memória page (plan 40 C): Memória in the foot, the sections in the list's place, back to Work", {
+        var ran: [String] = []
+        let view = WorkSidebarView { ran.append($0) }
+        view.show([WorkProject(id: "/cadex", name: "cadex")], place: nil)
+        view.pressMemoryFoot()
+        expect(ran == ["memory.show-panel"], "\(ran)")
+        let sections = NSView()
+        view.setMemory(sections)
+        view.setMemoryVersion("ai-memory 3.5.0")
+        expect(sections.isHidden && !view.memoryFootLit, "Work: the sections wait hidden")
+        view.setMode(.memory)
+        expect(view.memoryShown && view.memoryFootLit && view.memoryFootDetail == "ai-memory 3.5.0" && view.scroll.isHidden)
+        view.pressBack()
+        view.cancelOperation(nil)
+        expect(ran == ["memory.show-panel", "sidebar.show-work", "sidebar.show-work"], "‹ Trabalho and Esc: \(ran)")
+        view.setMode(.work)
+        expect(!view.memoryShown && sections.isHidden && !view.memoryFootLit && view.memoryFootDetail.isEmpty && !view.scroll.isHidden
+               && !view.switchRow.isHidden)
+        expect(view.lineTitles == ["cadex", "New Project…"], "the Work list is as it was")
+    }),
 ]

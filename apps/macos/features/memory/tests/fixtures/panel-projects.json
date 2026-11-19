@@ -1,0 +1,62 @@
+[
+ {
+  "workspace_id": "01a1f5fa-c9f3-7831-986c-d20774bb019b",
+  "workspace_name": "default",
+  "project_id": "01a1f5fa-c9f4-7412-a579-be871c666034",
+  "project_name": "_global",
+  "page_count": 1,
+  "session_count": 0,
+  "observation_count": 0,
+  "open_session_count": 0,
+  "last_updated": "2026-11-19T22:43:36.212394Z",
+  "last_activity": "2026-11-19T22:43:36.212394Z"
+ },
+ {
+  "workspace_id": "01a1f5fa-c9f3-7831-986c-d20774bb019b",
+  "workspace_name": "default",
+  "project_id": "01a1f5fa-c9f4-7412-a579-be72df2e6f5e",
+  "project_name": "site",
+  "page_count": 1,
+  "session_count": 1,
+  "observation_count": 2,
+  "open_session_count": 0,
+  "last_updated": "2026-11-19T22:43:36.199384Z",
+  "last_activity": "2026-11-19T22:43:36.199384Z"
+ },
+ {
+  "workspace_id": "01a1f5fa-c9f3-7831-986c-d20774bb019b",
+  "workspace_name": "default",
+  "project_id": "01a1f5fa-c9f4-7412-a579-be686fa450b3",
+  "project_name": "cadex",
+  "page_count": 5,
+  "session_count": 4,
+  "observation_count": 15,
+  "open_session_count": 1,
+  "last_updated": "2026-11-19T22:43:36.187283Z",
+  "last_activity": "2026-11-19T22:43:36.187283Z"
+ },
+ {
+  "workspace_id": "01a1f5fa-c9f3-7831-986c-d20774bb019b",
+  "workspace_name": "default",
+  "project_id": "01a1f5fa-c9f4-7412-a579-be97539c1461",
+  "project_name": "empty",
+  "page_count": 0,
+  "session_count": 0,
+  "observation_count": 0,
+  "open_session_count": 0,
+  "last_updated": null,
+  "last_activity": null
+ },
+ {
+  "workspace_id": "01a1f5fa-c9f3-7831-986c-d20774bb019b",
+  "workspace_name": "default",
+  "project_id": "01a1f5fb-71ee-7c82-8bcf-11dd57d724cb",
+  "project_name": "scratch",
+  "page_count": 0,
+  "session_count": 0,
+  "observation_count": 0,
+  "open_session_count": 0,
+  "last_updated": null,
+  "last_activity": null
+ }
+]

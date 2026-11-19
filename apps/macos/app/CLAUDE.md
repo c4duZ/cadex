@@ -346,6 +346,12 @@
   página de sessão da memória, o que ela guardou, Retomar, Continuar em outra conta e Ver a página
   aberta já renderizada) e a Memória (agrupada pelo tipo, a escolhida renderizada, Editar, Abrir a
   sessão, Apagar); project.show-sessions e project.show-memory abrem a página na seção.
+- `MemoryPanelWiring.swift` (plano 40 C): memory.show-panel (com `section=`) abre a página Memória
+  da feature memory como Automações e põe a barra lateral no modo Memória com as seções (uma
+  `MemoryPanelNav` por janela); lê as rotas do painel pelo MemoryWiring.runAgentData, os projetos
+  antes (podem subir o engine) e os outros dois juntos; memory.open-in-cadex (`project=`) acha o
+  projeto aberto ou recente com a pasta daquele nome (`cadexFolder`) e vai a ele ou o abre. A página
+  volta ao restaurar pela identidade (`ProjectsWiring.swift`).
 - `AutomationsPageWiring.swift` (plano 34 F): orchestration.show-automations; Create automation liga as
   automações antes (a pergunta do orchestration.toggle-automations) quando estão desligadas; criar
   volta à tabela; Apagar pergunta. `ProjectsPageWiring.swift` (plano 34 B): project.show-all.

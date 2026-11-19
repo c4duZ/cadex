@@ -75,4 +75,6 @@ public struct WorkPlace: Equatable, Sendable {
 public enum WorkSidebarMode: String, Sendable {
     case work
     case files
+    /// The Memória page's sections (plan 40 C): the app gives them by `setMemory`.
+    case memory
 }

@@ -140,6 +140,9 @@ let featureTests: [(name: String, body: Checks.Body)] = [
         let source = dir + "/repo/apps/macos/features/memory/MemoryKit.swift"
         expect(MemoryKit.findEngine(bundle: dir + "/none.app", source: source) == built)
         expect(MemoryKit.findEngine(bundle: dir + "/none.app", source: "/nowhere/a/b/c/d/e.swift") == nil)
+        // No source given: this repository's build, whoever calls (a default #filePath was the caller's).
+        let repoBuild = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../../../../../core/features/memory/server/target/debug/cadex-memory").standardized.path
+        if fm.isExecutableFile(atPath: repoBuild) { expect(MemoryKit.findEngine(bundle: dir + "/none.app").map { URL(fileURLWithPath: $0).standardized.path } == repoBuild) }
     }),
     ("through the kit: hooks with agents.stateHooks off, a workspace per account only when not shared, gone when withdrawn", {
         let dir = scratch()
@@ -215,5 +218,5 @@ let featureTests: [(name: String, body: Checks.Body)] = [
         expect(MemoryWarmUp.isNeeded(version: "1.2", folder: dir + "/other"), "another folder (a test instance) has its own")
     }),
 ]
-let exitCode = await Checks.run(featureTests + pageTests() + markerTests() + markerPlaceTests() + pageTextTests() + offTests())
+let exitCode = await Checks.run(featureTests + pageTests() + markerTests() + markerPlaceTests() + pageTextTests() + offTests() + panelTests())
 exit(exitCode)

@@ -17,6 +17,12 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # Written for the new frame, relative to the repository (plan that added it).
 FRAME_FILES = [
+    "apps/macos/features/memory/panel/PanelParts.swift",  # plano 40
+    "apps/macos/features/memory/panel/PanelCards.swift",  # plano 40
+    "apps/macos/features/memory/panel/PanelOverviewView.swift",  # plano 40
+    "apps/macos/features/memory/panel/PanelSections.swift",  # plano 40
+    "apps/macos/features/memory/panel/PanelDocument.swift",  # plano 40
+    "apps/macos/features/sidebar/WorkSidebarMemory.swift",  # plano 40
     "apps/macos/features/projects/ProjectSettingsDocument.swift",  # plano 32
     "apps/macos/features/memory/MemoryProjectForm.swift",  # plano 32
     "apps/macos/features/settings/SettingsNavigation.swift",  # plano 32

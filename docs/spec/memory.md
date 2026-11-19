@@ -338,6 +338,16 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   gravação, a fila do hook, o diário do "continuar em outro agente", o modelo de vetores e o índice,
   com as verificações do ai-memory (em inglês; o app escreve as suas palavras); sem provedores
   remotos, que o Cadex não usa.
+- A página Memória (plano 40 C): memory.show-panel (o pé da barra lateral, o ⌘K; com `section=`, uma
+  seção) abre a página no centro, como Automações, e a barra lateral mostra as seções do painel
+  (`sidebar.md`). A Visão geral lê `api/v1/projects`, `extra/home` e `extra/inbox/notifications`
+  (o primeiro antes, porque pode subir o engine; os três juntos disputavam a subida): os cinco
+  números (o clique ordena os cartões e o seletor "Ordenar" diz a ordem; Sessões abertas também
+  filtra), "Última captura" com o ⓘ, a linha "Captura" com os contadores do engine, o aviso da
+  fila, o filtro, o escopo e os cartões. "Abrir no Cadex" (memory.open-in-cadex, com `project=`;
+  também no clique direito do cartão e no ⌘O com o cartão escolhido pelas setas) só quando um
+  projeto aberto ou recente do Cadex tem a pasta com esse nome. As outras seções dizem "Em breve."
+  até as fases D a G. Com a memória desligada, a página diz isso e não lê nada.
 - A busca do painel num projeto ordena como o `memory_query` do agente: texto e, com o modelo de
   vetores baixado, sentido; a busca em todos os projetos é só por texto, como no ai-memory.
 

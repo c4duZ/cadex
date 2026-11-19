@@ -4,6 +4,7 @@ import Agents
 import CommandPalette
 import Explorer
 import GitHistory
+import Memory
 import Orchestration
 import Projects
 import Strings
@@ -128,6 +129,7 @@ extension WindowSession {
             if identity == BoardDocument.identity, let self { return self.makeBoard() }
             if identity == ProjectsListDocument.identity, let self { return self.makeProjectsPage() }
             if identity == AutomationsPageDocument.identity, let self { return self.makeAutomationsPage() }
+            if identity == MemoryPanelDocument.identity, let self { return self.makeMemoryPanel() }
             return self?.opener?.makeDocument(identity: identity)
         }
         // The memory off in projects (plan 35 I): the main window's projects keep the flag.

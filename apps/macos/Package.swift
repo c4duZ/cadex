@@ -504,7 +504,7 @@ let package = Package(
             dependencies: ["TextIndex", "Checks"],
             path: "shared/text-index/tests"
         ),
-        .executableTarget(name: "MemoryTests", dependencies: ["Memory", "SessionKit", "Checks", "UILooks"], path: "features/memory/tests",
+        .executableTarget(name: "MemoryTests", dependencies: ["Memory", "SessionKit", "Checks", "UILooks"], path: "features/memory/tests", exclude: ["fixtures"],
                           linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),
         .executableTarget(name: "MachinesTests", dependencies: ["Machines", "Checks"], path: "features/machines/tests",
                           linkerSettings: [.unsafeFlags(["-L", coreLibDir])]),

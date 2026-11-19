@@ -38,18 +38,23 @@ public final class WorkSidebarView: NSView {
     private let queueSlot = NSStackView()
     private let queue = WorkQueueView()
     /// The edge of the Work list when a project waiting on you is scrolled out of sight.
-    private let edge = WorkEdge()
+    let edge = WorkEdge()
     let switchRow = WorkSwitch()
-    private let content = NSView()
+    let content = NSView()
     let list = NSStackView()
-    private let scroll = NSScrollView()
-    private var files: NSView?
+    let scroll = NSScrollView()
+    var files: NSView?
     /// Files' parts: the head in words, the host (the app's Files and Changes), the changes line.
     private let filesStack = NSStackView()
     private let filesHead = WorkFilesHead()
     private let changesLine = WorkChangesLine()
     private let foot = NSStackView()
     private var machines = NSView()
+    /// The Memória page's parts (plan 40 C, `WorkSidebarMemory.swift`): "‹ Trabalho" in the
+    /// switch's place, the sections the app gives, the foot's Memória row.
+    let backRow = WorkBackRow()
+    public internal(set) var memoryHost: NSView?
+    var memoryFoot: WorkFootRow?
     var shown: (projects: [WorkProject], place: String?)?
     /// Nothing open: the recents drawn instead of the projects (`WorkRecents.swift`).
     var recentsShown: [WorkRecent]?
@@ -90,11 +95,13 @@ public final class WorkSidebarView: NSView {
         let border = NSView()
         border.wantsLayer = true
         border.layer?.backgroundColor = W.borderRight.cgColor
-        let column = NSStackView(views: [queueSlot, switchRow, content, foot])
+        backRow.onPress = { [weak self] in self?.run("sidebar.show-work") }
+        let column = NSStackView(views: [queueSlot, switchRow, backRow, content, foot])
         column.orientation = .vertical
         column.alignment = .leading
         column.spacing = 0
         column.setCustomSpacing(UILooks.pt(W.Switch.marginBottom), after: switchRow)
+        column.setCustomSpacing(UILooks.pt(DesignTokens.MemoryPanel.Nav.Back.marginBottom), after: backRow)
         column.setCustomSpacing(UILooks.pt(W.Queue.marginBottom), after: queueSlot)
         for view in [column, border] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
@@ -124,7 +131,7 @@ public final class WorkSidebarView: NSView {
         content.setContentHuggingPriority(.init(1), for: .vertical)
         // Each part as wide as the sidebar: a stack's .width alignment left them at their own width,
         // the switch small at the right (seen in the app, 2026-11-19).
-        for view in [queueSlot, switchRow, content, foot] as [NSView] {
+        for view in [queueSlot, switchRow, backRow, content, foot] as [NSView] {
             view.widthAnchor.constraint(equalTo: column.widthAnchor).isActive = true
         }
         setMode(.work)
@@ -201,11 +208,12 @@ public final class WorkSidebarView: NSView {
         view.widthAnchor.constraint(equalTo: list.widthAnchor).isActive = true
     }
 
-    /// Work or Files: the list, or the files view the app gave.
+    /// Work or Files: the list, or the files view the app gave; Memory, the page's sections.
     public func setMode(_ next: WorkSidebarMode) {
         mode = next
         switchRow.select(next)
-        guard recentsShown == nil else { return }
+        showMemoryParts(next == .memory)
+        guard recentsShown == nil, next != .memory else { return }
         scroll.isHidden = next != .work
         files?.isHidden = next != .files
         updateEdge()
@@ -307,8 +315,10 @@ public final class WorkSidebarView: NSView {
         line.widthAnchor.constraint(equalTo: foot.widthAnchor).isActive = true
         for (title, icon, command) in [(T("Board", "Quadro"), Icon.kanban, "view.board"),
                                        (T("Automations", "Automações"), Icon.clock, "orchestration.show-automations"),
-                                       (T("Machines", "Máquinas"), Icon.globe, "remote.show")] {
+                                       (T("Machines", "Máquinas"), Icon.globe, "remote.show"),
+                                       (T("Memory", "Memória"), Icon.brain, "memory.show-panel")] {
             let row = WorkFootRow(title: title, icon: icon)
+            if command == "memory.show-panel" { memoryFoot = row }
             row.onPress = { [weak self] in self?.run(command) }
             foot.addArrangedSubview(row)
             row.widthAnchor.constraint(equalTo: foot.widthAnchor).isActive = true
