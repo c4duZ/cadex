@@ -6,6 +6,7 @@
 const std = @import("std");
 const status = @import("../../status.zig");
 const client = @import("daemon_client.zig");
+const Session = @import("terminal.zig").Session;
 
 const gpa = std.heap.c_allocator;
 
@@ -20,6 +21,13 @@ pub export fn cadex_terminal_daemon_ensure(helper: ?[*:0]const u8, socket: ?[*:0
         else => status.io_failed,
     };
     return status.ok;
+}
+
+/// How many other screens share the terminal's session in the daemon (plan
+/// 39 A: the phone by `cadex attach`), for the tab's mark; 0 when none.
+pub export fn cadex_terminal_guests(session: ?*Session) callconv(.c) u32 {
+    const s = session orelse return 0;
+    return if (s.reaped) 0 else s.child.guests();
 }
 
 /// Ends the daemon's sessions named with `prefix` that are not among the

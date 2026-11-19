@@ -12,6 +12,13 @@ const c = std.c;
 /// hello and the app starts its own (the socket name carries it too).
 pub const version: u16 = 1;
 
+/// What a peer of this version also speaks, after the version in hello and
+/// hello_ok (a peer that sends none is 1). 2 (plan 39 A): join, size and
+/// guests, so a second screen (the phone, by `cadex attach`) shares a
+/// session with the app, and the pty takes the smaller of their sizes. Not
+/// a new version: the app keeps the sessions of a daemon already running.
+pub const revision: u16 = 2;
+
 pub const Kind = enum(u8) {
     // App to daemon.
     hello = 1,
@@ -19,6 +26,10 @@ pub const Kind = enum(u8) {
     attach = 3,
     list = 4,
     close = 5,
+    /// Revision 2: watch and type in a session another app holds.
+    join = 6,
+    /// Revision 2: this connection's size; the pty takes the smallest.
+    size = 7,
     // Daemon to app.
     hello_ok = 101,
     refused = 102,
@@ -26,6 +37,8 @@ pub const Kind = enum(u8) {
     output = 104,
     exited = 105,
     sessions = 106,
+    /// Revision 2, to the app holding a session: how many others joined it.
+    guests = 107,
     _,
 };
 

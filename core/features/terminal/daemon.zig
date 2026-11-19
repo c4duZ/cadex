@@ -13,6 +13,7 @@ const clock = @import("../../shared/clock.zig");
 const wire = @import("daemon_wire.zig");
 const state = @import("daemon_state.zig");
 const handle = @import("daemon_handle.zig");
+const guests = @import("daemon_guests.zig");
 const Session = state.Session;
 const Client = state.Client;
 
@@ -188,13 +189,15 @@ pub const Server = struct {
     /// and the app was told.
     fn drop(self: *Server, index: usize) void {
         const client = self.clients.swapRemove(index);
-        if (client.session) |s| self.release(s);
+        if (client.guest) guests.leave(self, client) else if (client.session) |s| self.release(s);
         client.destroy(self.gpa);
     }
 
+    /// The app let go of `s`: gone if it ended and the app was told, else
+    /// the pty takes the guests' size until an app takes it back.
     pub fn release(self: *Server, s: *Session) void {
         s.client = null;
-        if (!s.alive() and s.exit_told) self.remove(s);
+        if (!s.alive() and s.exit_told) self.remove(s) else guests.apply(s);
     }
 
     pub fn remove(self: *Server, s: *Session) void {
@@ -202,6 +205,7 @@ pub const Server = struct {
             _ = self.sessions.swapRemove(i);
             break;
         };
+        guests.detachAll(s);
         s.destroy(self.gpa);
     }
 
@@ -227,6 +231,7 @@ pub const Server = struct {
         s.ring.append(self.gpa, bytes) catch {};
         s.modes.feed(bytes);
         if (s.client) |client| client.sendOutput(self.gpa, bytes) catch {};
+        guests.fanOut(self, s, bytes);
     }
 
     /// Collects ended programs: the last output, then "exited" to the app.
@@ -244,6 +249,7 @@ pub const Server = struct {
             if (c.waitpid(s.pid, &status, c.W.NOHANG) != s.pid) continue;
             s.exit_code = decodeStatus(status);
             self.drain(s);
+            guests.tellExited(self, s);
             if (s.kill_at != null) {
                 // Closed by the app: nobody waits for its end.
                 self.remove(s);

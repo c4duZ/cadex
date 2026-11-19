@@ -101,6 +101,13 @@
   close); `daemon_state.zig` sessões e conexões; `daemon_wire.zig` os frames e a passagem do master
   (SCM_RIGHTS); `daemon_ring.zig` a saída crua guardada (2 MiB); `daemon_modes.zig` os modos lidos da
   saída para depois do replay; `daemon_client.zig` o lado do app (testes agora, a sessão na E2).
+  `daemon_guests.zig` (plano 39 A): outra tela na mesma sessão (o telefone pelo `cadex attach`): o
+  frame join entra ao lado do app sem tomar a sessão (o attach do app também não derruba o
+  convidado), a saída vai a todos, cada um escreve no master, e o pty fica com o menor tamanho dos
+  que mandaram o frame size (volta ao do app quando o convidado sai); o app ouve quantos são (frame
+  guests, `cadex_terminal_guests`, a marca na aba). Convidado atrasado demais é solto, para não
+  segurar o programa. Sem versão nova: a revisão 2 (wire.revision) vai depois da versão no hello e no
+  hello_ok, e um daemon de antes (revisão 1) segue com o app redimensionando direto no pty.
 - Spec em `../../../docs/spec/terminal.md`. Status: sessão, PTY, quadro para desenhar, teclas pelo
   núcleo, rolagem, seleção, colagem, busca, links, mouse
   para programas, foco, título, sino e API C prontos. Reflow ao redimensionar coberto por teste.
@@ -119,3 +126,6 @@
 - `daemon_test.zig`: o daemon numa thread com shells de verdade: a sessão sobrevive ao app, religa
   com o replay, termina sem app e guarda o código, close mata o shell, o segundo daemon e a versão
   errada são recusados, e o daemon sai sozinho sem sessão nem app.
+- `daemon_guests_test.zig`: o convidado vê a tela de antes e o que o app digita, digita e o app vê,
+  continua quando o app religa, sai sem fechar o shell; o pty fica com o menor tamanho e volta; o
+  convidado ouve o fim; o painel do app redimensiona pelo daemon e ouve o convidado.

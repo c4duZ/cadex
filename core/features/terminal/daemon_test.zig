@@ -12,14 +12,14 @@ const wire = @import("daemon_wire.zig");
 
 const size: @import("pty.zig").Size = .{ .cols = 80, .rows = 24 };
 
-const Running = struct {
+pub const Running = struct {
     server: daemon.Server,
     thread: std.Thread = undefined,
     path_buf: [64]u8 = undefined,
     path: []const u8 = "",
     result: ?anyerror = null,
 
-    fn start(self: *Running, name: []const u8) !void {
+    pub fn start(self: *Running, name: []const u8) !void {
         self.path = try std.fmt.bufPrint(&self.path_buf, "/tmp/cadex-td-{d}-{s}.sock", .{ c.getpid(), name });
         self.server = try daemon.Server.listen(testing.allocator, self.path);
         self.thread = try std.Thread.spawn(.{}, loop, .{self});
@@ -32,7 +32,7 @@ const Running = struct {
     }
 
     /// Waits for the loop to end on its own (idle), or stops it.
-    fn finish(self: *Running, expect_idle: bool) !void {
+    pub fn finish(self: *Running, expect_idle: bool) !void {
         if (!expect_idle) self.server.requestStop();
         self.thread.join();
         self.server.deinit();
@@ -44,7 +44,7 @@ const Running = struct {
 };
 
 /// Output frames until `needle` shows up in them, within ~5 s.
-fn waitOutput(conn: *client.Connection, needle: []const u8) !void {
+pub fn waitOutput(conn: *client.Connection, needle: []const u8) !void {
     var seen: std.ArrayList(u8) = .empty;
     defer seen.deinit(testing.allocator);
     const deadline = clock.monotonicMs() + 5000;
@@ -57,7 +57,7 @@ fn waitOutput(conn: *client.Connection, needle: []const u8) !void {
 }
 
 /// The exit code from the next "exited" frame, within ~5 s.
-fn waitExit(conn: *client.Connection) !i32 {
+pub fn waitExit(conn: *client.Connection) !i32 {
     const deadline = clock.monotonicMs() + 5000;
     while (clock.monotonicMs() < deadline) {
         const f = try conn.next(testing.allocator, 100) orelse continue;
@@ -69,7 +69,7 @@ fn waitExit(conn: *client.Connection) !i32 {
     return error.NeverExited;
 }
 
-fn type_(conn: *client.Connection, text: []const u8) !void {
+pub fn type_(conn: *client.Connection, text: []const u8) !void {
     try wire.writeAll(conn.master.?, text);
 }
 

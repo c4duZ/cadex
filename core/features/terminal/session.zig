@@ -242,6 +242,13 @@ pub const Session = struct {
     fn readLoop(self: *Session) void {
         var buf: [read_buffer_size]u8 = undefined;
         while (self.child.read(&buf, &self.stop)) |n| {
+            // Nothing read: the daemon's count of other screens changed
+            // (plan 39 A, `daemon_child.zig`); the tab's mark is redrawn
+            // with the title, which the app reads again on this call.
+            if (n == 0) {
+                if (self.callbacks.on_title) |notify| notify(self.callbacks.context);
+                continue;
+            }
             self.lock();
             self.model.feed(buf[0..n]);
             const synchronized = self.model.terminal.modes.get(.synchronized_output);

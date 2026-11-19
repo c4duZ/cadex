@@ -47,5 +47,6 @@ test {
         _ = @import("daemon_modes.zig");
         _ = @import("daemon_wire.zig");
         _ = @import("daemon_test.zig");
+        _ = @import("daemon_guests_test.zig");
     }
 }

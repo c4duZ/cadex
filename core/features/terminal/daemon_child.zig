@@ -32,6 +32,9 @@ pub const Child = struct {
     exit_code: ?i32 = null,
     /// finish() leaves the program running in the daemon.
     detach: bool = false,
+    /// How many others watch this session (plan 39 A: the phone), from the
+    /// daemon's guests frame; read off the reader thread.
+    guests: std.atomic.Value(u8) = .init(0),
 
     pub fn start(gpa: std.mem.Allocator, options: Start) !Child {
         var conn = client.Connection.connect(gpa, options.socket) catch |err| return switch (err) {
@@ -50,14 +53,14 @@ pub const Child = struct {
         if (options.attach and ready.alive and self.pty.fd >= 0) {
             var smaller = options.size;
             smaller.rows -|= 1;
-            self.pty.resize(smaller) catch {};
-            self.pty.resize(options.size) catch {};
+            self.resize(smaller) catch {};
+            self.resize(options.size) catch {};
         }
         return self;
     }
 
-    /// The next output frame's bytes into `buf` (at least wire.chunk), or
-    /// null once the program ended, the daemon went away or `stop` turned true.
+    /// The next output frame's bytes into `buf` (at least wire.chunk), 0
+    /// when the count of other screens changed, or null once the program ended, the daemon went away or `stop` turned true.
     pub fn read(self: *Child, buf: []u8, stop: *const std.atomic.Value(bool)) ?usize {
         std.debug.assert(buf.len >= wire.chunk);
         while (!stop.load(.acquire)) {
@@ -69,6 +72,13 @@ pub const Child = struct {
                 .output => {
                     @memcpy(buf[0..f.payload.len], f.payload);
                     return f.payload.len;
+                },
+                .guests => {
+                    var r: wire.Reader = .{ .rest = f.payload };
+                    self.guests.store(r.int(u8) catch 0, .release);
+                    // 0 bytes: the session tells the app (output never
+                    // comes empty).
+                    return 0;
                 },
                 .exited => {
                     var r: wire.Reader = .{ .rest = f.payload };
@@ -86,9 +96,12 @@ pub const Child = struct {
         return self.pty.write(bytes);
     }
 
+    /// Through the daemon when it shares the session with other screens
+    /// (it sets the smallest); straight on the pty with one from before.
     pub fn resize(self: *Child, size: pty.Size) error{ResizeFailed}!void {
         if (self.pty.fd < 0) return;
-        return self.pty.resize(size);
+        if (self.conn.revision < 2) return self.pty.resize(size);
+        self.conn.resize(self.gpa, size) catch return error.ResizeFailed;
     }
 
     pub fn hasForegroundProcess(self: *Child) bool {

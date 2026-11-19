@@ -7,6 +7,7 @@ const c = std.c;
 const wire = @import("daemon_wire.zig");
 const Ring = @import("daemon_ring.zig").Ring;
 const Modes = @import("daemon_modes.zig").Modes;
+const pty = @import("pty.zig");
 
 pub const Session = struct {
     /// The app's name for it (a pane's id); unique in the daemon.
@@ -17,7 +18,13 @@ pub const Session = struct {
     ring: Ring = .{},
     modes: Modes = .{},
     exit_code: ?i32 = null,
+    /// The app's connection that holds it (one: the newest attach wins).
     client: ?*Client = null,
+    /// Others watching and typing (plan 39 A, `daemon_guests.zig`): they
+    /// never take it from the app, and the app never takes it from them.
+    guests: std.ArrayList(*Client) = .empty,
+    /// The size last set on the pty by the daemon (the smallest screen).
+    size: ?pty.Size = null,
     /// The app closed it: SIGKILL at this time if SIGHUP did not end it.
     kill_at: ?i64 = null,
     /// An attached app was told it ended: it goes when that app lets go.
@@ -30,6 +37,7 @@ pub const Session = struct {
     pub fn destroy(self: *Session, gpa: std.mem.Allocator) void {
         if (self.master >= 0) _ = c.close(self.master);
         self.ring.deinit(gpa);
+        self.guests.deinit(gpa);
         gpa.free(self.id);
         gpa.destroy(self);
     }
@@ -55,6 +63,13 @@ pub const Client = struct {
     sent: usize = 0,
     said_hello: bool = false,
     session: ?*Session = null,
+    /// Joined its session as a guest instead of holding it.
+    guest: bool = false,
+    /// What it said it speaks (wire.revision); 1 sends no size and gets no
+    /// guests frame.
+    revision: u16 = 1,
+    /// Its screen's size (a size frame, or the open's).
+    size: ?pty.Size = null,
     /// Close once the outbox is out (a refused hello).
     closing: bool = false,
 
@@ -126,8 +141,9 @@ pub fn readyPayload(gpa: std.mem.Allocator, session: *const Session) !wire.Paylo
     return p;
 }
 
-/// "sessions": the count, then id, pid, running, exit code and attached.
-pub fn sessionsPayload(gpa: std.mem.Allocator, sessions: []const *Session) !wire.Payload {
+/// "sessions": the count, then id, pid, running, exit code and attached;
+/// for revision 2, also how many guests.
+pub fn sessionsPayload(gpa: std.mem.Allocator, sessions: []const *Session, revision: u16) !wire.Payload {
     var p: wire.Payload = .{ .gpa = gpa };
     errdefer p.deinit();
     try p.int(u32, @intCast(sessions.len));
@@ -137,6 +153,7 @@ pub fn sessionsPayload(gpa: std.mem.Allocator, sessions: []const *Session) !wire
         try p.int(u8, @intFromBool(s.alive()));
         try p.int(i32, s.exit_code orelse 0);
         try p.int(u8, @intFromBool(s.client != null));
+        if (revision >= 2) try p.int(u8, @intCast(@min(s.guests.items.len, 255)));
     }
     return p;
 }

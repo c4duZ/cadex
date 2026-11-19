@@ -197,6 +197,13 @@ public final class TerminalSession {
         return cadex_terminal_shell_pid(handle)
     }
 
+    /// How many other screens share the session in the daemon (plan 39 A:
+    /// the phone by `cadex attach`), 0 for none.
+    public var guests: Int {
+        guard let handle else { return 0 }
+        return Int(cadex_terminal_guests(handle))
+    }
+
     /// The screen to draw. Valid until the next call; main thread only.
     func currentFrame() -> UnsafePointer<cadex_terminal_frame>? {
         guard let handle else { return nil }

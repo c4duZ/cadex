@@ -15,6 +15,9 @@ pub const Connection = struct {
     /// copy: writes, resizes and the foreground program go through it.
     master: ?c_int = null,
     daemon_pid: i32 = 0,
+    /// What the daemon speaks (wire.revision); 1 for one from before plan
+    /// 39, which knows no join, size or guests frame.
+    revision: u16 = 1,
 
     /// Connects and says hello. error.NoDaemon when nobody listens,
     /// error.Version when the daemon speaks another version.
@@ -25,6 +28,7 @@ pub const Connection = struct {
         var p: wire.Payload = .{ .gpa = gpa };
         defer p.deinit();
         try p.int(u16, wire.version);
+        try p.int(u16, wire.revision);
         try self.send(gpa, .hello, p.bytes.items);
         const f = try self.next(gpa, 2000) orelse return error.Timeout;
         if (f.kind == .refused) return error.Version;
@@ -32,6 +36,7 @@ pub const Connection = struct {
         var r: wire.Reader = .{ .rest = f.payload };
         _ = try r.int(u16);
         self.daemon_pid = try r.int(i32);
+        self.revision = r.int(u16) catch 1;
         return self;
     }
 
@@ -88,7 +93,29 @@ pub const Connection = struct {
         return self.ready(gpa);
     }
 
-    /// Ends the session (SIGHUP, then SIGKILL).
+    /// Watches and types in the session `id` beside the app that holds it
+    /// (plan 39 A); the replay follows. error.Old from a daemon before it.
+    pub fn join(self: *Connection, gpa: std.mem.Allocator, id: []const u8) !Ready {
+        if (self.revision < 2) return error.Old;
+        var p: wire.Payload = .{ .gpa = gpa };
+        defer p.deinit();
+        try p.string(id);
+        try self.send(gpa, .join, p.bytes.items);
+        return self.ready(gpa);
+    }
+
+    /// This screen's size; the daemon sets the smallest one on the pty.
+    pub fn resize(self: *Connection, gpa: std.mem.Allocator, size: pty.Size) !void {
+        var p: wire.Payload = .{ .gpa = gpa };
+        defer p.deinit();
+        try p.int(u16, size.cols);
+        try p.int(u16, size.rows);
+        try p.int(u16, size.cell_width_px);
+        try p.int(u16, size.cell_height_px);
+        try self.send(gpa, .size, p.bytes.items);
+    }
+
+    /// Ends the session (SIGHUP, then SIGKILL); a guest's close only lets go.
     pub fn close(self: *Connection, gpa: std.mem.Allocator) !void {
         try self.send(gpa, .close, "");
     }
@@ -104,7 +131,7 @@ pub const Connection = struct {
 
 pub const Ready = struct { pid: i32, alive: bool, exit_code: i32 };
 
-pub const Listed = struct { id: []const u8, pid: i32, alive: bool, exit_code: i32, attached: bool };
+pub const Listed = struct { id: []const u8, pid: i32, alive: bool, exit_code: i32, attached: bool, guests: u8 = 0 };
 
 /// The daemon's sessions; strings live in `arena`, the connection's
 /// buffers in `gpa`.
@@ -121,6 +148,7 @@ pub fn list(gpa: std.mem.Allocator, arena: std.mem.Allocator, connection: *Conne
         .alive = try r.int(u8) != 0,
         .exit_code = try r.int(i32),
         .attached = try r.int(u8) != 0,
+        .guests = if (connection.revision >= 2) try r.int(u8) else 0,
     };
     return out;
 }

@@ -10,6 +10,8 @@ extension TerminalView {
     public var foregroundGroup: Int32 { session?.foregroundGroup ?? 0 }
     /// The shell's pid, 0 for none (TerminalSession).
     public var shellPid: Int32 { session?.shellPid ?? 0 }
+    /// Other screens on this session (plan 39 A: the phone), 0 for none.
+    public var guests: Int { session?.guests ?? 0 }
 
     /// The current directory of the session (OSC 7 or the foreground
     /// program's); new tabs and panes open there.

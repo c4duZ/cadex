@@ -100,8 +100,10 @@ do Cadex (sem token: vale porque é o mesmo usuário do Mac, e só para estes co
 - `cadex new <projeto> [claude]`: abre a aba no Cadex do Mac pelo comando registrado (com memória,
   hooks e status, como um clique) e entra nela. Com o app fechado, abre o app antes.
 - `cadex share <arquivo>`: devolve um link da tailnet (com token, por uma hora) que abre o arquivo no
-  Safari do telefone; um HTML leva junto o que carrega da pasta dele. Nada escuta fora do IP do
-  Tailscale; sem Tailscale, diz isso e sai.
+  Safari do telefone, numa página com o nome, o arquivo à vista e Baixar: HTML funcionando (com o que
+  carrega da pasta dele), imagem, PDF, vídeo, áudio, Word, Excel, PowerPoint (pelo Quick Look do
+  iPhone), Markdown renderizado e texto ou código. Sem argumento, lista os links que ainda valem.
+  Nada escuta fora do IP do Tailscale; sem Tailscale, diz isso e sai.
 
 ## Estados
 - **JSON sem `rate_limits`** (antes da primeira resposta da sessão): só o arquivo da sessão.
@@ -139,4 +141,5 @@ do Cadex (sem token: vale porque é o mesmo usuário do Mac, e só para estes co
       (`cadex_worktree_comment`: o comentário gravado).
 - [ ] Plano 39: do telefone, `cadex attach` entra numa aba com o Claude aberto no Mac, o que se digita
       lá aparece no Mac e o Mac não perde a aba; `cadex new cadex claude` abre uma aba que aparece no
-      Mac; `cadex share x.html` abre no Safari pela tailnet e não pelo IP da rede local.
+      Mac; `cadex share` de um HTML, um PDF, uma imagem e um .docx abre cada um no Safari pela
+      tailnet, e nada abre pelo IP da rede local.

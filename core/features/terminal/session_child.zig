@@ -91,6 +91,15 @@ pub const Child = union(enum) {
         };
     }
 
+    /// How many other screens share the session (plan 39 A: the phone by
+    /// `cadex attach`); 0 for a pty of the app's own.
+    pub fn guests(self: *Child) u8 {
+        return switch (self.*) {
+            .local => 0,
+            .remote => |*r| if (has_daemon) r.guests.load(.acquire) else unreachable,
+        };
+    }
+
     pub fn currentDirectory(self: *Child, buf: *pty.DirectoryBuffer) ?[]const u8 {
         return switch (self.*) {
             .local => |l| l.currentDirectory(buf),

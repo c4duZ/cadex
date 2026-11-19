@@ -92,9 +92,10 @@ extension WindowSession {
             : [PalettePin(id: "memory.pause-session", title: T("Pause Memory", "Pausar a memória"), icon: .pause)]
     }
 
-    /// The tab's sign: the memory paused in its session.
+    /// The tab's sign: the memory paused in its session, else another screen
+    /// on it (plan 39 A: the phone by `cadex attach`).
     static func memoryMark(_ terminal: TerminalView) -> Icon? {
-        guard let id = terminal.agentResume?.sessionID, MemoryOff.isPaused(sessionID: id) else { return nil }
-        return .pause
+        if let id = terminal.agentResume?.sessionID, MemoryOff.isPaused(sessionID: id) { return .pause }
+        return terminal.guests > 0 ? .deviceMobile : nil
     }
 }

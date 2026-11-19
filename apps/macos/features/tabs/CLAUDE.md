@@ -75,7 +75,7 @@
 - `TabSource.swift`: as abas como lista da paleta (TabCommands.source, o `@` do app).
 - Clique direito numa aba: seleciona e mostra `contextMenu` (as entradas vêm do app, por comandos).
   `markOf` (plano 35 I): o app diz o sinal discreto de uma aba de terminal (a memória pausada na
-  sessão dela, o ícone de pausa), desenhado depois do título no texto terciário
+  sessão dela, o ícone de pausa; senão outra tela na sessão, plano 39 A, o ícone do telefone), desenhado depois do título no texto terciário
   (`TabBarView.swift`, Item.mark, com espaço para ele na largura); `refreshTabBar` o redesenha.
   Cada aba guarda a cor de trabalho (`color`, no snapshot), `activeColor`/`setActiveColor`.
 - `TabCommands.swift`: tab.new, tab.rename, tab.select-1…9, tab.previous-used,

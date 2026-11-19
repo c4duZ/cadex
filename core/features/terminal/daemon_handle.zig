@@ -2,6 +2,7 @@
 //! (docs/adr/0022-terminal-daemon.md): the hello with the version, opening
 //! a session, attaching to one (the master, the replay, the end if it
 //! ended), the list and closing. A connection holds at most one session.
+//! Joining as a second screen and the sizes are `daemon_guests.zig`.
 
 const std = @import("std");
 const c = std.c;
@@ -12,6 +13,7 @@ const Server = daemon.Server;
 const Session = state.Session;
 const Client = state.Client;
 const pty = @import("pty.zig");
+const guests = @import("daemon_guests.zig");
 const clock = @import("../../shared/clock.zig");
 
 /// Reads what the app sent and answers it; false when the app went away
@@ -53,23 +55,29 @@ fn answer(server: *Server, client: *Client, f: wire.Frame) !void {
             client.closing = true;
             return;
         }
+        // Revision 2 and later say what they speak after the version.
+        client.revision = r.int(u16) catch 1;
         client.said_hello = true;
         server.ever_connected = true;
         var p: wire.Payload = .{ .gpa = gpa };
         defer p.deinit();
         try p.int(u16, wire.version);
         try p.int(i32, c.getpid());
+        try p.int(u16, wire.revision);
         return client.send(gpa, .hello_ok, p.bytes.items);
     }
     switch (f.kind) {
         .open => try open(server, client, &r),
         .attach => try attach(server, client, try r.string()),
+        .join => try guests.join(server, client, try r.string()),
+        .size => try guests.resize(client, &r),
         .list => {
-            var p = try state.sessionsPayload(gpa, server.sessions.items);
+            var p = try state.sessionsPayload(gpa, server.sessions.items, client.revision);
             defer p.deinit();
             try client.send(gpa, .sessions, p.bytes.items);
         },
-        .close => if (client.session) |s| {
+        // A guest's close lets go; the program is the app's to end.
+        .close => if (client.guest) guests.leave(server, client) else if (client.session) |s| {
             client.session = null;
             s.client = null;
             if (s.alive()) hangUp(s) else server.remove(s);
@@ -96,7 +104,9 @@ fn open(server: *Server, client: *Client, r: *wire.Reader) !void {
     if (id.len == 0 or server.find(id) != null) return client.refuse(gpa, "id");
     const s = openSession(server, id, size, if (cwd.len > 0) cwd else null, if (shell.len > 0) shell else null, limit) catch
         return client.refuse(gpa, "spawn");
-    try bind(server, client, s);
+    client.size = size;
+    s.size = size;
+    try bind(server, client, s, false);
 }
 
 fn attach(server: *Server, client: *Client, id: []const u8) !void {
@@ -109,12 +119,14 @@ fn attach(server: *Server, client: *Client, id: []const u8) !void {
         old.closing = true;
         s.client = null;
     }
-    try bind(server, client, s);
+    try bind(server, client, s, false);
+    guests.tellCount(server, s);
 }
 
 /// "ready" (with the master while the program runs), the replay, and
-/// "exited" when it ended already.
-fn bind(server: *Server, client: *Client, s: *Session) !void {
+/// "exited" when it ended already. A guest (plan 39 A) joins beside the
+/// app; the app holds the session.
+pub fn bind(server: *Server, client: *Client, s: *Session, guest: bool) !void {
     const gpa = server.gpa;
     var p = try state.readyPayload(gpa, s);
     defer p.deinit();
@@ -131,7 +143,10 @@ fn bind(server: *Server, client: *Client, s: *Session) !void {
         try wire.sendWithFd(client.fd, ready.items, s.master);
     } else try client.send(gpa, .ready, p.bytes.items);
     client.session = s;
-    s.client = client;
+    if (guest) {
+        try s.guests.append(gpa, client);
+        client.guest = true;
+    } else s.client = client;
     var replay: std.ArrayList(u8) = .empty;
     defer replay.deinit(gpa);
     try s.replay(gpa, &replay);
@@ -141,7 +156,7 @@ fn bind(server: *Server, client: *Client, s: *Session) !void {
         defer e.deinit();
         try e.int(i32, s.exit_code.?);
         try client.send(gpa, .exited, e.bytes.items);
-        s.exit_told = true;
+        if (!guest) s.exit_told = true;
     }
 }
 

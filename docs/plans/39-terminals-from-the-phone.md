@@ -9,7 +9,8 @@ quero poder abrir uma sessão num projeto por lá"; "um HTML pode ser"; "pode s�
 - A aba aberta no Mac aparece igual no telefone, ao vivo, com a tela de antes; o que se digita num
   lado chega no outro. É o mesmo processo: o mesmo Claude, a memória, os hooks, a conta.
 - Abrir pelo telefone um terminal ou o Claude num projeto, e a aba estar no Cadex do Mac também.
-- Um HTML (ou PDF) feito pelo agente aberto no Safari do telefone, funcionando, e que dá para baixar.
+- O que o agente gerar (HTML, imagem, PDF, Word, planilha, Markdown) aberto no Safari do telefone,
+  funcionando, e que dá para baixar.
 - Tudo pelo app de terminal que o dono já tem no telefone (Termius, Blink), sem app nosso.
 
 ## O que eu não quero
@@ -20,7 +21,7 @@ quero poder abrir uma sessão num projeto por lá"; "um HTML pode ser"; "pode s�
 - Mudar a interface do Mac além de uma marca na aba com alguém de fora conectado.
 
 ## Como eu quero
-- [ ] A. Duas telas na mesma sessão: o daemon (`core/features/terminal/daemon_handle.zig`,
+- [x] A. Duas telas na mesma sessão: o daemon (`core/features/terminal/daemon_handle.zig`,
   `core/features/terminal/daemon_state.zig`) guarda vários clientes por sessão em vez de um, manda a saída a todos e cada um
   escreve no master. O tamanho do pty é o menor entre os clientes, e volta ao do Mac quando o de
   fora sai (como o tmux). O app sabe quantos de fora há (para a marca na aba). Hoje quem lê o pty é
@@ -28,6 +29,11 @@ quero poder abrir uma sessão num projeto por lá"; "um HTML pode ser"; "pode s�
   saída já passa pelo daemon, o que muda é a lista de clientes e quem decide o tamanho.
   Testes em `core/features/terminal/daemon_test.zig`: dois clientes veem a mesma saída, os dois digitam, o tamanho menor
   vale e volta, um sai e o outro segue, o app religando não derruba o de fora.
+  Feito: `core/features/terminal/daemon_guests.zig` (join, size, guests; sem versão nova, a revisão
+  2 vai no hello), o painel do app redimensiona pelo daemon, `cadex_terminal_guests` e a marca do
+  telefone na aba (`deviceMobile`, depois da pausa da memória). Testado só no núcleo
+  (`core/features/terminal/daemon_guests_test.zig`, shells de verdade); no app, quando a B der um
+  convidado de verdade. Sem o `make perf`.
 - [ ] B. `cadex attach`: no programa `cadex` (`core/features/agent-tools/`), um cliente do daemon
   que põe o terminal em modo cru, lista as sessões (projeto, nome da aba, se tem agente) e entra
   numa com o replay; a saída vai direto ao terminal de quem chamou (quem desenha é o app do
@@ -43,9 +49,14 @@ quero poder abrir uma sessão num projeto por lá"; "um HTML pode ser"; "pode s�
   projetos e as abas numerados; um número entra, `n` abre um terminal no projeto escolhido, `c` abre
   o Claude. Feito para teclado de telefone: uma tecla por escolha, nada de digitar nome.
 - [ ] E. `cadex share <arquivo>`: o app serve o arquivo num endereço da tailnet (só o IP do
-  Tailscale, achado pela feature machines) e o `cadex` imprime o link; o Safari do telefone abre a
-  página e baixa. Uma pasta de HTML leva junto o que a página carrega (CSS, imagens vizinhas). O
-  link expira (uma hora) e tem um token no caminho. Sem Tailscale, o comando diz isso e sai.
+  Tailscale, achado pela feature machines) e o `cadex` imprime o link; o telefone abre e baixa. Vale
+  para o que o agente gerar no lugar de um artefato (o dono, 2026-11-19: "imagem e outras variações:
+  PDF, Word"): HTML funcionando (com o que carrega da pasta dele: CSS, scripts, imagens vizinhas),
+  imagem, PDF, vídeo e áudio, Word, Excel e PowerPoint (o Safari os mostra pelo Quick Look do
+  iPhone, com o tipo certo), Markdown renderizado (pela feature markdown) e texto ou código como
+  texto. Uma página do arquivo em volta: nome, tamanho, o arquivo à vista e Baixar. `cadex share`
+  sem argumento lista os compartilhados que ainda valem. O link expira (uma hora) e tem um token no
+  caminho. Sem Tailscale, o comando diz isso e sai.
 - [ ] F. O guia do dono em docs/guides/phone.md (novo): Tailscale no Mac e no telefone, Login Remoto
   no Mac, o app de terminal com mosh, e os comandos `cadex`, `cadex attach`, `cadex new`, `cadex
   share`.
