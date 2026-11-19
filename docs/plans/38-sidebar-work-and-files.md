@@ -18,9 +18,12 @@ o que o clique faz). O dono aprovou em 2026-11-19 ("pode fazer").
 - Valor digitado: os tokens novos entram em `docs/design/work-frame/tokens.json`, com o mockup.
 
 ## Como eu quero
-- [ ] A. Os tokens e o mockup: a barra lateral, a fila, o seletor de vistas, as linhas da lista, o
+- [x] A. Os tokens e o mockup: a barra lateral, a fila, o seletor de vistas, as linhas da lista, o
   lugar em cima e o botão Revisar no `docs/design/work-frame/tokens.json` e num mockup .dc.html
   tirado da referência; `tools/check_design_tokens.py` passando.
+  Feito: components.workSidebar e components.place, gerados em
+  `apps/macos/shared/looks/DesignTokensSidebar.swift`; o mockup é WorkSidebar.dc.html (a seta das
+  linhas ficou com 10 pt e o recuo das tarefas com 22, os tokens mais perto da referência).
 - [ ] B. A barra lateral, vista Trabalho: a lista de projetos (avatar, nome, estado e terminais;
   aberto, o main e as tarefas com o fio guia; o aberto ou fechado guardado; o clique no nome ao
   último lugar, num item as abas dele em cima; o clique direito com o menu do projeto de hoje),
@@ -49,6 +52,11 @@ o que o clique faz). O dono aprovou em 2026-11-19 ("pode fazer").
   coluna, o item de tarefa nas abas) entra no inventário da moldura em `saiu`; as specs (sidebar,
   inspector, tabs, status-bar, projects, home, agents), os CLAUDE.md, o `docs/CONTEXT.md` e a ADR 0038
   com a nota; a paridade (`MAC_ONLY`), `make check`, `make perf` só se o dono pedir, e a dist.
+
+- Telas: WorkSidebar.dc.html (descrita em `docs/design/work-frame/screens.md`; as quatro situações em
+  `docs/design/sidebar/6-estrutura-ideal.html`).
+- Tokens: components.workSidebar, components.place (valores exatos em
+  `docs/design/work-frame/tokens.json`).
 
 ## Como validar
 - Cada fase: os testes da feature e o print da instância de teste ao lado da referência

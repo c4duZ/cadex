@@ -136,7 +136,8 @@ def check(tokens, texts):
 
 
 PLANS = ["25-work-frame.md", "26-frame.md", "27-projects-tree.md", "28-dressed-terminal.md",
-         "29-entrances.md", "30-overview.md", "36-rail-and-side-column.md"]
+         "29-entrances.md", "30-overview.md", "36-rail-and-side-column.md",
+         "38-sidebar-work-and-files.md"]
 
 
 def check_plans(tokens, plans_dir=ROOT / "docs/plans"):

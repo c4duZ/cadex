@@ -203,6 +203,20 @@ de tokens.
 - **Coluna lateral (260 pt):** sem fileira no topo; a página; no pé, a linha de contexto com os
   botões da página.
 
+### WorkSidebar.dc.html — peça · A barra lateral e o lugar (ADR 0039, plano 38)
+- Em cima, o começo da barra de cima: o botão da barra lateral, o lugar "projeto › tarefa ▾"
+  (components.place), as abas, um fio e Revisar (só numa tarefa); a pílula "… precisa de você"
+  aparece com a barra lateral fechada.
+- A barra lateral (components.workSidebar), 248 pt: a fila "Precisa de você" no topo (o cartão âmbar,
+  o agente, o tempo e o pedido em frase), o seletor "Trabalho | Arquivos" na largura toda, e a vista.
+- Trabalho: PROJETOS, cada projeto com o avatar, o nome e o número de terminais à direita; aberto, o
+  main e as tarefas presos por um fio guia, o lugar atual aceso; projeto fechado com pedido leva a
+  etiqueta âmbar com o número; "Novo projeto…"; no pé, Quadro, Automações e Máquinas.
+- Arquivos: o cabeçalho em palavras ("tarefa de cadex · contra main"), a árvore com o M e o A à
+  direita, e "3 mudanças · ver" no fim; a marca âmbar na borda de baixo diz quem espera fora da vista.
+- Todas as situações (o normal, um agente esperando num projeto escondido, a janela estreita, nada
+  aberto) estão em `docs/design/sidebar/6-estrutura-ideal.html`.
+
 ### Inspector.dc.html — peça · O painel da direita
 - **Abas:** Changes, Files, History, Memory e "⌥⌘I"; a ativa sublinhada.
 - **Linha de contexto:** "orchestration-e · against main" (ou, em Memory, "cadex · the project's

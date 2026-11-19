@@ -34,6 +34,7 @@ PARTS = {
     "Chrome": ["window", "titleBar", "search", "breadcrumb", "tab", "titleIconButton", "badge", "statusBar",
                "stateGlyph", "button", "bell"],
     "Columns": ["sidebar", "inspector", "rail"],
+    "Sidebar": ["workSidebar", "place"],
     "Center": ["pane", "preview", "popover", "sheet", "newTask"],
     "Pages": ["board", "race", "project", "home", "drawer"],
 }
