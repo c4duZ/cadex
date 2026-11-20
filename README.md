@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <sub>Grátis e de código aberto (MIT) · 9 MB no Mac, 4 MB no Windows · em inglês ou português · <a href="#instalar-no-mac">instalar no Mac</a> · <a href="#instalar-no-windows">instalar no Windows</a></sub>
+  <sub>Grátis e de código aberto (MIT) · 31 MB para baixar no Mac (com o engine da memória), 4 MB no Windows · em inglês ou português · <a href="#instalar-no-mac">instalar no Mac</a> · <a href="#instalar-no-windows">instalar no Windows</a></sub>
 </p>
 
 ---
@@ -31,11 +31,13 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   desenho em Metal), com abas, divisões, busca, links e colagem de imagens.
 - **Documentos ao lado do terminal:** código, Markdown, mídia, diffs, histórico e previews abrem
   num painel da mesma aba (ou em aba própria, se preferir), divididos como terminais.
-- **A moldura** (Mac): à esquerda a árvore do trabalho (cada projeto com as tarefas e os terminais,
-  e o estado do agente de cada um), no centro as abas e os painéis, à direita o painel da seleção
-  (Changes, Files, History e Memory), e no topo a busca, onde você está, o quadro e o sino. Abrir o
-  Cadex sem projeto mostra a tela de início: o pedido, os cartões Terminal, Agent, Task e Race e os
-  projetos recentes. `⌘J` pula para qualquer projeto, tarefa ou terminal.
+- **A moldura** (Mac): à esquerda a barra lateral com duas vistas, **Trabalho** (cada projeto com os
+  terminais abertos nele e o estado do agente de cada um) e **Arquivos** (a árvore e as mudanças do
+  git), com a fila do que precisa de você no topo e o quadro, as automações e a memória no pé; no
+  centro as abas e os painéis; no topo onde você está, as abas do lugar, a conta (com o uso de cada
+  conta ao passar o mouse), a busca e as configurações. Abrir o Cadex sem projeto mostra a tela de
+  início: o pedido, os cartões Terminal, Agent, Task e Race e os projetos recentes. `⌘J` pula para
+  qualquer projeto, tarefa ou terminal.
 - **Painéis que se arrumam** (Mac): cada painel tem um cabeçalho com o estado, a conta, o custo e o
   tempo do agente que roda nele; abrir ao lado, maximizar e fechar (o clique do meio também fecha).
   Arrastar o cabeçalho move o painel para um lado de outro, ou troca os dois, vendo o resultado ao
@@ -55,10 +57,13 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   comando que o terminal está rodando. Uma notificação avisa quando um agente pede permissão,
   pergunta ou termina. O Cadex não fala com modelo: quando você escreve o pedido (na tela de início,
   numa tarefa nova), ele abre o agente com o seu texto num terminal.
-- **O que precisa de você** (Mac): o sino na barra de título conta os pedidos abertos dos agentes e
-  os que terminaram sem você ver, também no ícone do Dock; ele abre o quadro, onde se permite ou nega
-  um pedido de permissão sem ir até o terminal (nada vai ao agente sem o seu clique), e o feed com a
-  linha do tempo de todos os agentes.
+- **O que precisa de você** (Mac): a fila no topo da barra lateral mostra cada agente que espera
+  você, com o pedido em frase, e o número vai também ao ícone do Dock; dela se permite ou nega um
+  pedido de permissão sem ir até o terminal (nada vai ao agente sem o seu clique), e o feed mostra a
+  linha do tempo de todos os agentes. O quadro junta todos os agentes e tarefas pelo estado.
+- **O Claude volta ao reabrir** (Mac): fechar e abrir o Cadex, ou reiniciar o Mac, traz cada aba com
+  o Claude que rodava nela, na mesma conversa, na mesma conta e com as mesmas flags, como um
+  `/resume`. Um terminal que entra na pasta de outro projeto oferece "Mover para" aquele projeto.
 - **Uma tarefa, uma worktree** (Mac): "New Task" cria o branch e a worktree ao lado do repositório,
   copia os arquivos fora do git que o `.worktreeinclude` pede (`.env` e afins), roda os hooks de
   preparo e abre o agente nela, na conta do projeto. Cada tarefa tem status e um comentário; sair
@@ -75,7 +80,7 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   hooks, settings, plugins), menos o que é da conta (login, conversas, histórico). As contas que já
   existem ficam onde estão e podem passar a seguir também. A conta ativa (clique direito no item de
   uso) e a de cada projeto escolhem onde as sessões novas abrem.
-- **Histórico de todas as conversas** (Mac): "Archive & history", no pé da árvore, junta as
+- **Histórico de todas as conversas** (Mac): "Archive & history", no ⌘K, junta as
   conversas de todas as contas, com busca pelo que foi dito, por projeto, pasta ou conta. Duplo
   clique retoma na conta dona; "Continue in Another Account" leva a conversa para outra conta quando
   o limite de uma acaba, com o original intacto.
@@ -94,7 +99,9 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
 - **Terminais que sobrevivem ao app** (Mac, opção desligada por padrão): os shells e agentes da
   janela principal rodam num processo à parte; fechar, travar ou atualizar o Cadex os deixa rodando,
   e reabrir os mostra de novo com o histórico. Depois de reiniciar o Mac, o histórico volta em shells
-  novos ([ADR 0022](docs/adr/0022-terminal-daemon.md)).
+  novos ([ADR 0022](docs/adr/0022-terminal-daemon.md)). Com eles ligados, o **telefone** entra nas
+  abas do Cadex por SSH pela tailnet, abre abas novas que aparecem no Mac e vê no Safari o que o
+  agente gerou ([guia](docs/guides/phone.md)).
 - **Notificações dos programas** (Mac): um programa no terminal que pede uma notificação (OSC 777 ou
   OSC 9, como um build longo avisando que acabou) aparece como uma do macOS; o clique leva ao terminal.
 - **Escolher elemento para o agente** (Mac): no preview web, `⇧⌘C` e um clique mandam o elemento
@@ -117,8 +124,10 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   para a próxima sessão, de uma conta para outra e do Claude para o Codex, sem você repetir nada. O
   engine é o do [ai-memory](https://github.com/akitaonrails/ai-memory), num processo à parte que só
   existe enquanto há sessão de agente; a busca por sentido roda um modelo local pequeno, e quem
-  escreve as páginas é o Claude da própria sessão, sem chave nem custo extra. A aba Memory do painel
-  da direita mostra e edita a wiki (Markdown em git) e o que o agente recebe ao começar
+  escreve as páginas é o Claude da própria sessão, sem chave nem custo extra. A página Memória, no pé
+  da barra lateral, é o painel do ai-memory feito nativo: os projetos, as páginas e o histórico de
+  cada uma, as sessões, a busca com o porquê de cada resultado, o grafo, a caixa de entrada entre
+  agentes, a revisão do que o agente quer aprender, a saúde do engine e os guias
   ([ADR 0028](docs/adr/0028-project-memory.md)).
 - **Vários agentes de uma vez** (Mac, desligado por padrão): uma **corrida** dá a mesma tarefa a 2 a 6
   agentes, cada um na sua worktree, lado a lado no centro (estado, tempo, custo, diff e o teto),
@@ -126,12 +135,12 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   despachada a um agente numa worktree e aba novas, que reporta pelo `cadex` (concluído, sinal de
   vida, perguntas, recados, sub-tarefas), coordenada por você ou por um agente; uma **automação**
   roda um prompt num horário, mesmo com o Cadex fechado (o launchd o acorda), com histórico. O quadro
-  (o botão na barra de título) junta todas as tarefas por estado, com filtro por corrida e execução. O
+  (no pé da barra lateral) junta todas as tarefas por estado, com filtro por corrida e execução. O
   prompt nunca passa pelo shell, o Cadex mostra antes o que vai rodar, onde e em qual conta, e tudo
   tem teto de gasto, de duração e de agentes ([ADR 0033](docs/adr/0033-cadex-launches-agents.md),
   [ADR 0034](docs/adr/0034-scheduled-automations.md)).
-- **Outros apps do Mac** (opção desligada por padrão): o agente lê e opera outros apps pela
-  acessibilidade, com a sua permissão app por app, nunca em campos de senha nem nos Ajustes do
+- **Outros apps do Mac** (opção desligada por padrão, em Configurações › Agentes e contas › Computer
+  use): o agente lê e opera outros apps pela acessibilidade, com a sua permissão app por app, nunca em campos de senha nem nos Ajustes do
   Sistema, com uma faixa e um botão Parar ([ADR 0026](docs/adr/0026-computer-use.md)).
 - **Temas:** centenas, com busca, importação e pasta própria; claro e escuro, cor de destaque, alto
   contraste, zoom da interface, cores de projeto e de aba, imagem de fundo e vibrância.
