@@ -9,7 +9,8 @@ import UILooks
 /// The status bar items of the new frame (plan 26 phase B; docs/spec/status-bar.md;
 /// docs/design/work-frame/screens.md, StatusBar): Project, Agents in two counts, Memory,
 /// keep-awake and the update, the last two moved from the title bar. Every click runs a command
-/// by id (ADR 0005).
+/// by id (ADR 0005); an item with a card on hover has no click, its card's buttons act (a click
+/// opened a page when you only meant to read the card, the owner, 2026-11-20).
 extension WindowSession {
     /// "cadex · main ↑3": the project and its branch. Shown or not, the branch comes from the
     /// status the Changes panel already reads.
@@ -17,7 +18,6 @@ extension WindowSession {
         let label = StatusLabel(icon: nil, tip: T("The project and its branch", "O projeto e o branch dele"))
         // Room for two tab titles: a long branch is cut, not pushing the bar (owner, 2026-10-22).
         label.maxTextWidth = UILooks.pt(DesignTokens.Tab.maxTitle) * 2
-        label.onClick = { [weak self] in _ = self?.commands.run("git.show") }
         attachCard(to: label) { [weak self] close in self?.projectCard(close: close) ?? NSView() }
         projectLabel = label
         return StatusItem(id: "project", title: T("Project", "Projeto"),
@@ -40,8 +40,6 @@ extension WindowSession {
         working.dot = DesignTokens.Color.stateWorking
         // Nothing until the first count, and a zero count shows nothing (a bare dot said nothing).
         working.isHidden = true
-        // The working agents on the board (ADR 0039).
-        working.onClick = { [weak self] in _ = self?.commands.run("view.board") }
         let row = NSStackView(views: [working])
         row.isHidden = true
         attachCard(to: row) { [weak self] close in self?.agentsCard(close: close) ?? NSView() }
@@ -76,7 +74,6 @@ extension WindowSession {
     func makeMemoryItem() -> StatusItem {
         let label = StatusLabel(icon: nil, tip: T("The project's memory", "A memória do projeto"))
         label.text = T("Memory", "Memória")
-        label.onClick = { [weak self] in _ = self?.commands.run("memory.show") }
         attachCard(to: label) { [weak self] close in self?.memoryCard(close: close) ?? NSView() }
         return StatusItem(id: "memory", title: T("Memory", "Memória"),
                           subtitle: T("Opens the project's memory", "Abre a memória do projeto"),

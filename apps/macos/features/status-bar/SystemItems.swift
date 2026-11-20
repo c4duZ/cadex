@@ -4,8 +4,9 @@ import Menus
 import Strings
 
 /// The items made of SystemStats: RAM, CPU and Cadex's memory. Each one watches the stats only
-/// while it can be seen; the pointer over it opens its card (SystemCards), a click runs `click`,
-/// the command that opens Activity Monitor. `terminals` are Cadex's terminals with a program, for
+/// while it can be seen; the pointer over it opens its card (SystemCards), whose button runs
+/// `click`, the command that opens Activity Monitor. A click on the item does nothing: it opened
+/// Activity Monitor when you only meant to read the card (the owner, 2026-11-20). `terminals` are Cadex's terminals with a program, for
 /// the cards' "In Cadex" (given by the app; this feature imports no other).
 @MainActor
 public enum SystemItems {
@@ -38,7 +39,6 @@ public enum SystemItems {
                              card build: @escaping (SystemStats.Reading?, @escaping () -> Void) -> NSView,
                              show: @escaping (SystemStats.Reading, StatusLabel) -> Void) -> StatusItem {
         let label = StatusLabel(icon: icon, tip: title)
-        label.onClick = click
         var last: SystemStats.Reading?
         var card: HoverCard?
         card = HoverCard(over: label) { build(last, { card?.close() }) }

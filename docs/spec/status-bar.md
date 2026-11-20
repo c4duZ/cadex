@@ -15,7 +15,7 @@ A barra tem dois lados, esquerda e direita, e cada lado é uma lista de itens em
 | item | mostra | padrão |
 |---|---|---|
 | Project | "cadex · main ↑3": o projeto e o branch, com ↑↓ de commits a enviar/receber | ligado, esquerda |
-| Agents | "● 3 working" (azul), só quem trabalha; some com zero; o clique abre o quadro (view.board) | ligado, esquerda |
+| Agents | "● 3 working" (azul), só quem trabalha; some com zero; o cartão tem o quadro | ligado, esquerda |
 | Folder | a trilha "Home › Cadu › Trabalho › cadex" do terminal com foco | desligado |
 | Terminal | "Terminal ⌥⌘`": mostra ou esconde a gaveta de terminais | ligado, direita |
 | Memory | "Memory · 214 pages": abre a memória do projeto (memory.show, a seção Memória da página do projeto) | ligado, direita |
@@ -74,16 +74,17 @@ ligados.
   janela escondida ou minimizada, param.
 - Ports é lido quando um terminal abre, fecha ou um programa termina, e a cada 10 s enquanto um
   programa roda num terminal.
-- Clicar em RAM, CPU ou Cadex memory abre o Monitor de Atividade; em Ports, o cartão com cada porta
-  (passar o ponteiro também abre; "localhost:3000" abre no preview); em Agent usage, o popover das
-  contas (cada conta com plano, quando zera, a barra e "84% of the 5-hour window · 61% of the
-  week", e "Open an agent on… · Add account · Accounts settings"; é o que era a página Accounts);
-  em Agents, o quadro; em Project, Mudanças na barra lateral (git.show).
+- RAM, CPU, Cadex memory, Ports, Agent usage, Agents, Memory e Project mostram o cartão ao passar o
+  ponteiro e não fazem nada no clique (desde a 3.1): o Monitor de Atividade, cada porta no preview,
+  as contas ("Open an agent on… · Add account · Accounts settings"), o quadro e a página da memória
+  estão nos botões e linhas do cartão.
 
 ### Os cartões (o dono, 2026-11-18; a proposta aprovada em https://claude.ai/artifact/4nVtRBCgr1PRhhMVRSWmRK)
 Todo item abre um cartão ao passar o ponteiro (o comportamento do cartão das contas: 0,18 s depois
-de parar, fica enquanto o ponteiro está no item ou no cartão); o clique continua fazendo o que
-fazia. Todos têm a mesma cara: título e detalhe, às vezes um número grande e uma barra em partes,
+de parar, fica enquanto o ponteiro está no item ou no cartão). Item com cartão não faz nada no
+clique, quem age são os botões do cartão: o clique em RAM abria o Monitor de Atividade quando só se
+queria ler (o dono, 2026-11-20, na 3.1). Sem cartão (o café, Update, Docker, a gaveta, o branch), o
+clique faz o que a tabela diz. Todos têm a mesma cara: título e detalhe, às vezes um número grande e uma barra em partes,
 seções de linhas (a linha clicável acende e leva ao lugar) e as ações no pé, cada uma um comando
 do ⌘K. O cartão só lê enquanto está aberto.
 

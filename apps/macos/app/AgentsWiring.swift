@@ -18,7 +18,6 @@ extension WindowSession {
     /// account, the amber chip above 80%; reads only while the item shows.
     func makeUsageItem() -> StatusItem {
         let strip = AgentUsageStrip()
-        strip.onClick = { [weak self] in _ = self?.commands.run("agents.show-accounts") }
         strip.onSetActive = { [weak self] account in self?.setActiveAccount(account) }
         strip.onLaunch = { [weak self] account in self?.switchOrLaunch(account) }
         strip.onRun = { [weak self] id in _ = self?.commands.run(id) }

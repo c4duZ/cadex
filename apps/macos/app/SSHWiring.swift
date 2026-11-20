@@ -50,9 +50,8 @@ extension WindowSession {
                               subtitle: T("What your terminals' programs listen on, every 10 s while one runs",
                                           "O que os programas dos terminais ouvem, a cada 10 s com um rodando"),
                               icon: .plug, side: .right, view: label)
-        // The card on hover (or a click): each port opens in the preview.
+        // The card on hover: each port opens in the preview; a click on the item does nothing.
         let card = attachCard(to: label) { [weak self] close in self?.portsCard(close: close) ?? NSView() }
-        label.onClick = { card.openNow() }
         portsCard = card
         var timer: Timer?
         item.onVisible = { [weak self, weak label] visible in

@@ -139,7 +139,7 @@ public final class AgentUsageStrip: NSView {
     }
 
     public override func mouseUp(with event: NSEvent) {
-        if bounds.contains(convert(event.locationInWindow, from: nil)) {
+        if onClick != nil, bounds.contains(convert(event.locationInWindow, from: nil)) {
             card?.close()
             onClick?()
         }

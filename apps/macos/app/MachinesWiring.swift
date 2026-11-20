@@ -54,7 +54,6 @@ extension WindowSession {
             stack.spacing = 6
             return stack
         }
-        label.onClick = { card.openNow() }
         var cardToken: UUID?
         card.onOpenChange = { [weak card] open in
             if open {

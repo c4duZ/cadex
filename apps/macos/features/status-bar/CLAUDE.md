@@ -46,7 +46,7 @@
   terminal), pelo libproc, sem lsof; o app faz o item Ports (`../../app/SSHWiring.swift`), lido a
   cada 10 s e na troca de aba só enquanto aparece, e só com algum terminal rodando programa.
 - `StatusBarCommands.swift`: statusBar.customize, statusBar.toggle-item (a lista no ⌘K) e
-  statusBar.activity-monitor (o clique em RAM, CPU e memória).
+  statusBar.activity-monitor (o botão dos cartões de RAM, CPU e memória; o clique no item não faz nada desde a 3.1).
 - O app (`../../app/StatusBarWiring.swift`) soma Git branch (do status que o painel do Git já lê) e
   Terminals, e salva os lados.
 - Spec em `../../../../docs/spec/status-bar.md`. Status: fases B a E no código (itens Agents, Agent usage, SSH e Ports somados pelo app).
