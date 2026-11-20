@@ -53,6 +53,10 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
          Command(id: "settings.open-themes", title: T("Open Theme Settings", "Abrir configurações de temas"),
                  keywords: ["theme", "tema", "accent", "destaque", "contrast", "contraste", "background", "fundo"],
                  category: .app, action: .run { [weak self] in self?.show(section: "appearance") }),
+         // The accounts card's "Accounts settings" (2026-11-20).
+         Command(id: "settings.open-agents", title: T("Open Agent and Account Settings", "Abrir configurações de agentes e contas"),
+                 keywords: ["accounts", "contas", "agents", "agentes", "claude", "codex"],
+                 category: .app, action: .run { [weak self] in self?.show(section: "agents") }),
          Command(id: "terminal.toggle-ligatures", title: T("Turn Ligatures On or Off", "Ligar ou desligar as ligaduras"),
                  keywords: ["ligatures", "ligaduras", "fira code", "font", "fonte"], category: .terminal,
                  action: .run { [store] in

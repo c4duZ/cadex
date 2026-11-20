@@ -96,13 +96,14 @@ public enum StatusCard {
                 views.append(note)
             case .actions(let actions):
                 views.append(rule())
-                let line = NSStackView(views: actions.map { action in
+                let rows = actions.map { action in
                     let row = HoverRow(label(action.title, DesignTokens.FontSize.meta, .regular, DesignTokens.Color.accentLink), inset: 6)
                     row.onClick = { close(); action.run() }
                     return row
-                })
-                line.spacing = 2
-                views.append(line)
+                }
+                // Wrapped as the proposal's foot (flex-wrap): three actions cut the first one in the
+                // accounts card ("Open an agent ⋯", 2026-11-20).
+                views += footLines(rows, width: width)
             }
         }
         let stack = NSStackView(views: views)
@@ -113,6 +114,27 @@ public enum StatusCard {
             view.widthAnchor.constraint(equalToConstant: width).isActive = true
         }
         return stack
+    }
+
+    /// The foot's actions in lines no wider than `width`, in order.
+    private static func footLines(_ rows: [NSView], width: CGFloat) -> [NSView] {
+        let gap: CGFloat = 2
+        var lines: [[NSView]] = [[]]
+        var used: CGFloat = 0
+        for row in rows {
+            let w = row.fittingSize.width
+            if !lines[lines.count - 1].isEmpty, used + gap + w > width {
+                lines.append([])
+                used = 0
+            }
+            used += (lines[lines.count - 1].isEmpty ? 0 : gap) + w
+            lines[lines.count - 1].append(row)
+        }
+        return lines.map { views in
+            let line = NSStackView(views: views + [NSView()])
+            line.spacing = gap
+            return line
+        }
     }
 
     private static func rowView(_ row: Row, width: CGFloat, close: @escaping () -> Void) -> NSView {

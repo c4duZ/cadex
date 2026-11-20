@@ -17,6 +17,8 @@ public final class AgentUsageStrip: NSView {
     /// A click on an account in the card: open its agent (the app's), as the Accounts page did
     /// before it left the sidebar (plan 26 phase E).
     public var onLaunch: ((AgentAccount) -> Void)?
+    /// A foot action of the card (Open an agent on…, Add account, Accounts settings): its command id.
+    public var onRun: ((String) -> Void)?
 
     /// agents.show-accounts: the card at once, without the pointer over the item.
     public func openCard() { card?.openPinned() }
@@ -63,7 +65,7 @@ public final class AgentUsageStrip: NSView {
         ])
         render()
         card = HoverCard(over: self) { [weak self] in
-            AgentUsageCard.make(colors: self?.colors ?? AgentColors()) { account in self?.card?.close(); self?.onLaunch?(account) }
+            AgentAccountsCard.make(launch: { account in self?.onLaunch?(account) }, run: { self?.onRun?($0) }, close: { self?.card?.close() })
         }
     }
 

@@ -107,21 +107,62 @@ let accountChecks: [(name: String, body: Checks.Body)] = [
     ("the active account's card says so; the card's menu sets it", {
         let usage = AgentUsageController.shared
         let account = AgentAccount(dir: "/x/.claude-active", name: "A", isDefault: false)
-        func texts(_ view: NSView) -> [String] { ((view as? NSTextField).map { [$0.stringValue] } ?? []) + view.subviews.flatMap(texts) }
+        var launched: String?
         usage.plans[account.dir] = "max"
         usage.activeAccount = account.dir
-        expect(texts(AgentUsageCard.block(account, colors: AgentColors(), width: 200)).contains("· Max · active"))
-        usage.activeAccount = nil
-        expect(texts(AgentUsageCard.block(account, colors: AgentColors(), width: 200)).contains("· Max"))
-        // The card's account is a row: its click opens that account's agent (the Accounts page's
-        // click, plan 26 phase E).
-        var launched: String?
         usage.accounts = { [account] }
         usage.states[account.dir] = .noUsage
-        let card = AgentUsageCard.make(colors: AgentColors()) { launched = $0.dir }
-        func rows(_ view: NSView) -> [HoverRow] { ((view as? HoverRow).map { [$0] } ?? []) + view.subviews.flatMap(rows) }
-        rows(card).first?.onClick?()
+        @MainActor func rowsOf() -> [StatusCard.Row] {
+            AgentAccountsCard.blocks([account], launch: { launched = $0.dir }, run: { _ in })
+                .compactMap { if case .rows(let r) = $0 { return r } else { return nil } }.flatMap { $0 }
+        }
+        expect(rowsOf().first?.detail == "Max · active")
+        usage.activeAccount = nil
+        expect(rowsOf().first?.detail == "Max")
+        // The card's account is a row: its click opens that account's agent (the Accounts page's
+        // click, plan 26 phase E).
+        rowsOf().first?.action?()
         expect(launched == account.dir, "the card's row opens the account's agent")
+    }),
+    ("the accounts card (the approved proposal): Accounts · N Claude, each account's percent and bar, the foot's three commands", {
+        let usage = AgentUsageController.shared
+        let a = AgentAccount(dir: "/z/.claude", name: "bkdg", isDefault: true)
+        let b = AgentAccount(dir: "/z/.claude-fba", name: "fba", isDefault: false)
+        usage.accounts = { [a, b] }
+        usage.plans = [a.dir: "max", b.dir: "team"]
+        usage.activeAccount = nil
+        usage.states = [a.dir: .ready(AgentUsage(session: .init(percent: 84, resets: nil), week: .init(percent: 61, resets: nil), sonnetWeek: nil), Date()),
+                        b.dir: .noUsage]
+        var launched: [String] = [], ran: [String] = []
+        let blocks = AgentAccountsCard.blocks(usage.visibleAccounts(), launch: { launched.append($0.dir) }, run: { ran.append($0) })
+        guard case .header(let title, let detail, _) = blocks.first else { return expect(false) }
+        expect(title == "Accounts" && detail == "2 Claude", "\(title) \(String(describing: detail))")
+        let rows = blocks.compactMap { if case .rows(let r) = $0 { return r } else { return nil } }.flatMap { $0 }
+        expect(rows.map(\.title) == ["bkdg", "fba"] && rows[0].value == "84%" && rows[0].warn && rows[0].detail == "Max" && rows[1].value == "—",
+               "\(rows.map { [$0.title, $0.value ?? "", $0.detail ?? ""] })")
+        let notes = blocks.compactMap { if case .note(let t, _) = $0 { return t } else { return nil } }
+        expect(notes.first == "84% of the 5-hour window · 61% of the week", "\(notes)")
+        rows[1].action?()
+        guard case .actions(let actions) = blocks.last else { return expect(false) }
+        actions.forEach { $0.run() }
+        expect(launched == [b.dir] && ran == ["agents.open-account", "agents.add-account", "settings.open-agents"], "\(launched) \(ran)")
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"] {
+            let card = AgentAccountsCard.make(launch: { _ in }, run: { _ in }, close: {})
+            let view = NSView()
+            view.wantsLayer = true
+            view.layer?.backgroundColor = NSColor(white: 0.1, alpha: 1).cgColor
+            card.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(card)
+            NSLayoutConstraint.activate([card.topAnchor.constraint(equalTo: view.topAnchor, constant: 14), card.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 14),
+                                         card.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -14), card.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -14)])
+            view.layoutSubtreeIfNeeded()
+            view.frame = NSRect(origin: .zero, size: view.fittingSize)
+            view.layoutSubtreeIfNeeded()
+            if let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
+                view.cacheDisplay(in: view.bounds, to: bitmap)
+                try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/accounts-card.png"))
+            }
+        }
     }),
     ("the usage item's right click: New Sessions Use, the active account checked, a choice sets it", {
         let usage = AgentUsageController.shared

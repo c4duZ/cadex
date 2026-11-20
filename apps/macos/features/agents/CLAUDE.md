@@ -89,11 +89,9 @@
   `AgentUsageController.swift`: uma leitura para o app, só com Accounts ou o item na tela; vigia a
   pasta de uso (um descritor, o rename de cada arquivo avisa), relê a cada 60 s e lê os logins e os
   logs do Codex a cada 5 min fora da linha principal; uma falha de login vale até uma sessão
-  posterior gravar uso. `AgentUsageViews.swift`:
-  `AgentUsageRows`, as barras que o cartão e o popover dividem (destaque, laranja a partir de 70%,
-  vermelho a partir de 90%). `AgentSwitch.swift` (plano 33 E): as regras de trocar a conta de um Claude (no limite: 100 % da sessão ou da semana; a outra de mais folga) e o `AgentLimitCard`, o aviso no pé do painel; a troca é do app (`../../app/AccountSwitchWiring.swift`), e agents.switch-account fica com os comandos das contas. `AgentUsageStrip.swift`: o item
+  posterior gravar uso. `AgentUsageViews.swift`: `AgentResetTime`, a hora em que uma janela reinicia. `AgentSwitch.swift` (plano 33 E): as regras de trocar a conta de um Claude (no limite: 100 % da sessão ou da semana; a outra de mais folga) e o `AgentLimitCard`, o aviso no pé do painel; a troca é do app (`../../app/AccountSwitchWiring.swift`), e agents.switch-account fica com os comandos das contas. `AgentUsageStrip.swift`: o item
   Agent usage, com a conta do terminal com foco (`focused`, que o app diz) ou a última, e o popover
-  ao passar o ponteiro (`AgentUsageCard.swift` no `HoverCard` compartilhado, todas as contas; subir para dentro dele o mantém aberto). `CodexUsage.swift`: as contas
+  ao passar o ponteiro (`AgentAccountsCard.swift` no `HoverCard` compartilhado, o cartão da proposta aprovada em 2026-11-18, feito no StatusCard: "Accounts · N Claude", cada conta com o plano, a % da sessão e quando reinicia, a barra âmbar a partir de 80% e "84% of the 5-hour window · 61% of the week"; no pé Open an agent on… (agents.open-account), Add account (agents.add-account) e Accounts settings (settings.open-agents); o mesmo cartão abre na conta da barra de cima; subir para dentro dele o mantém aberto). `CodexUsage.swift`: as contas
   do Codex e o uso tirado dos logs dele (os limites de cada uso), sem rede. A página Accounts saiu da barra lateral (plano 26 fase E): as
   contas em uso (`visibleAccounts`: sem login ou vencida há mais de um dia ficam fora) estão no cartão
   do item de uso, cada uma clicável (abre o agente dela, `onLaunch`), e agents.show-accounts (⇧⌘U)

@@ -216,9 +216,6 @@ let exitCode = await Checks.run([
         controller.hidden = []
         controller.stop(token)
     }),
-    ("the bar's colors: accent, orange from 70%, red from 90%", {
-        expect(AgentMeter.color(95, accent: .blue) == .systemRed && AgentMeter.color(75, accent: .blue) == .systemOrange && AgentMeter.color(10, accent: .blue) == .blue)
-    }),
     ("Codex: its accounts by the login's email, and the limits its own logs carry", {
         let home = NSTemporaryDirectory() + "cadex-codex-\(UUID().uuidString)"
         defer { try? fm.removeItem(atPath: home) }
@@ -258,7 +255,7 @@ let exitCode = await Checks.run([
             usage.states["/a"] = .ready(AgentUsage(session: .init(percent: 19, resets: Date().addingTimeInterval(4000)),
                                                    week: .init(percent: 97, resets: Date().addingTimeInterval(200_000)), sonnetWeek: nil), Date())
             usage.plans["/b"] = "plus"
-            let card = AgentUsageCard.make(colors: AgentColors(text: .white, secondary: NSColor(white: 0.62, alpha: 1), accent: NSColor(red: 0.88, green: 0.64, blue: 0.35, alpha: 1)))
+            let card = AgentAccountsCard.make(launch: { _ in }, run: { _ in }, close: {})
             let view = NSView()
             view.wantsLayer = true
             view.layer?.backgroundColor = NSColor(white: 0.12, alpha: 1).cgColor
