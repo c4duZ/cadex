@@ -13,6 +13,7 @@ import SourceControl
 /// tree at every step. explorer.followTerminal in settings.json turns it off.
 extension WindowSession {
     func terminalFolderMoved(_ folder: String?) {
+        refreshMoveOffer()
         guard let folder, folder != lastTerminalFolder else { return }
         lastTerminalFolder = folder
         // ⌘P keeps the files nearest the terminal when the workspace is too

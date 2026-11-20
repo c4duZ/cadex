@@ -12,6 +12,9 @@ final class TerminalOffer: NSView {
     private let act: () -> Void
     /// The agent's "Restart", which typing takes away.
     var isRestart = false
+    /// "Move to <project>": stays while the terminal is in that project's folder.
+    var isMove: Bool { moveTarget != nil }
+    var moveTarget: String?
 
     init(title: String, icon: Icon, act: @escaping () -> Void) {
         self.act = act
@@ -99,6 +102,19 @@ extension TerminalView {
         offer.isRestart = true
     }
 
+    /// "Move to <project>" (the owner, 2026-11-20): the terminal went into the folder of another open
+    /// project; the click runs `act` (the app's project.move-terminal). nil takes it away.
+    public func offerMove(to project: String?, act: @escaping () -> Void = {}) {
+        guard let project else {
+            if previewOffer?.isMove == true { previewOffer?.removeFromSuperview() }
+            return
+        }
+        // A restart offered is the one that matters here; the same offer shown stays (no blink).
+        if previewOffer?.superview != nil, previewOffer?.isRestart == true || previewOffer?.moveTarget == project { return }
+        place(TerminalOffer(title: T("Move to \(project)", "Mover para \(project)"), icon: .arrowsLeftRight, act: act)).moveTarget = project
+    }
+
+    @discardableResult
     private func place(_ offer: TerminalOffer) -> TerminalOffer {
         previewOffer?.removeFromSuperview()
         offer.translatesAutoresizingMaskIntoConstraints = false

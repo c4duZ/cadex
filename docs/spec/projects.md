@@ -70,6 +70,10 @@ agora sempre com a pasta (`../adr/0035-work-frame.md`).
   na pasta do arquivo, para o layout não mudar. O resto volta.
 - Diff, preview web e janelas de mensagem não são restaurados (são passageiros).
 - Projeto salvo sem nenhuma aba -> volta com um terminal na pasta dele.
+- Terminal que dá `cd` para a pasta de outro projeto aberto (ou terminal sem projeto que entra na
+  pasta de um) -> continua no projeto em que abriu e mostra "Mover para <projeto>" no pé; o clique
+  (project.move-terminal) leva a aba, com o shell, para aquele projeto e o mostra. Nada muda de lugar
+  sozinho: entrar numa pasta só para olhar não move a aba (o dono, 2026-11-20).
 - Dois projetos com o mesmo nome (pastas diferentes) -> permitido; a paleta mostra o caminho e o
   barra lateral, a imagem ou a cor de cada um.
 

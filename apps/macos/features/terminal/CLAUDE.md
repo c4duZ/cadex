@@ -143,7 +143,8 @@
 - Hibernação (plano 19, fase F), em `TerminalAgent.swift`: `agentResume` (o que traz o agente de volta,
   preenchido pelo app pelos hooks), `isHibernated`, `agentQuietSince` (desde quando está done ou
   idle) e o aviso `didTakeFocus`; `TerminalOffer.swift` mostra "Reiniciar" (`offerRestart`, roda
-  `onRestartAgent`), que digitar tira.
+  `onRestartAgent`), que digitar tira; e "Mover para <projeto>" (`offerMove`, o app diz quando e o que
+  roda), que fica enquanto o terminal está na pasta daquele projeto.
 - `TerminalAgent.swift` e `TerminalAgentStatus.swift` (plano 19): o que o agente disse ao terminal
   pelo OSC 7501 (TerminalSession.agentStatus), só enquanto um programa roda em primeiro plano, e
   "terminou sem você ver" até o terminal ganhar o foco.

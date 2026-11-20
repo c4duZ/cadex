@@ -157,6 +157,10 @@
   os terminais da pasta pessoal são abas sem projeto (`RailWiring.swift`, `isLoose`; desde
   2026-11-20 uma linha "Sem projeto" no fim de Projetos enquanto houver terminal neles, para não se
   perderem ao entrar num projeto); a coluna segue a tarefa quando a lista das tarefas chega (`TreeWiring.swift`).
+- `MoveToProject.swift` (o dono, 2026-11-20): o terminal que entra na pasta de outro projeto aberto
+  (ou que não tem projeto) mostra "Mover para <projeto>" no pé (TerminalView.offerMove, refeito a
+  cada `cd` pelo `FolderFollow.swift`); o clique roda project.move-terminal, que leva a aba com o shell
+  para aquele projeto e o mostra; sozinho, nada muda de lugar.
 - Plano 36 fase F: o quadro fechava a barra lateral; desde 2026-11-20 ele a mantém, como toda página
   (o dono: sem ela não havia saída à vista), e tem "Fechar (Esc)". `RemoteWiring.swift`: remote.show, os hosts SSH e
   as máquinas da tailnet numa lista (`RemoteSource`), escolher conecta numa aba (connectSSH,
