@@ -4,9 +4,9 @@ import CommandPalette
 import Sidebar
 import Strings
 
-/// The needs-you queue of ADR 0039 (plan 38 phase C): the open requests (the bell's, which left the
-/// top bar) on top of the sidebar, in every view; with the sidebar closed, a pill in the top bar
-/// says who waits. A click goes to that agent's terminal, where Claude's own dialog is.
+/// The needs-you requests of ADR 0039 (plan 38 phase C): with the sidebar closed, a pill in the top
+/// bar says who waits. The amber card on top of the sidebar left in 3.1: it came and went over the
+/// projects, and each terminal's line already shows its state (the owner, 2026-11-20). A click goes to that agent's terminal, where Claude's own dialog is.
 extension WindowSession {
     /// The open requests as the queue draws them, oldest first.
     static func queueRequests() -> [WorkRequest] {
@@ -27,11 +27,10 @@ extension WindowSession {
         }
     }
 
-    /// The queue and the pill, from the open requests.
+    /// The pill and the narrow strip's count, from the open requests.
     func drawQueue() {
         guard let workspace else { return }
         let requests = Self.queueRequests()
-        workspace.sidebar.showQueue(requests)
         let first = requests.first.map { $0.who + T(" needs you", " precisa de você") }
         let pill = requests.count > 1 ? T("\(requests.count) need you", "\(requests.count) precisam de você") : first
         // The narrow strip has its own box; the pill is for the sidebar closed in a wide window.
@@ -39,7 +38,7 @@ extension WindowSession {
         workspace.titleBar.setNeeds(workspace.inspectorVisible || workspace.isNarrow ? nil : pill)
     }
 
-    /// A request of the queue clicked: its agent's terminal, wherever it is.
+    /// A request picked: its agent's terminal, wherever it is.
     func goToRequest(_ id: String) {
         guard let card = AgentAttention.shared.cards.first(where: { $0.id == id }) else { return NSSound.beep() }
         app.goToAgent(key: card.key, pid: card.pid)

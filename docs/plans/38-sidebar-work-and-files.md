@@ -39,7 +39,7 @@ o que o clique faz). O dono aprovou em 2026-11-19 ("pode fazer").
   abertos), cada linha com o agente, o projeto, o pedido em frase e o tempo; o clique leva ao
   terminal; a etiqueta âmbar no projeto fechado e a marca na borda da lista rolada; a pílula na
   barra de cima com a barra lateral fechada. O sino sai da barra de cima; o feed fica no ⌘K.
-  Feito: `apps/macos/features/sidebar/WorkQueue.swift` e `apps/macos/app/NeedsQueueWiring.swift`; a
+  Feito: `apps/macos/features/sidebar/WorkRequest.swift` (a fila saiu na 3.1) e `apps/macos/app/NeedsQueueWiring.swift`; a
   contagem âmbar do projeto soma os pedidos dele (a mesma fonte da fila). Conferido no app com um
   pedido falso (CADEX_PERF_REQUEST): a fila no topo e a pílula com a barra fechada. A marca da borda
   só no teste (falta um agente de verdade esperando num projeto fora da vista). O "N need you" da

@@ -115,7 +115,7 @@
   web abre (FileOpener.onPreviewOpened), sem gravar a escolha do ⌘B; Sessions, Memory e o grafo saíram da coluna: memory.show abre a
   página do projeto (project.sessions-column saiu na fase H), git.show-history abre o histórico numa aba.
 - Plano 38 fase F: o item Agents da barra de baixo (`StatusBarItems.swift`) conta só quem trabalha e o
-  clique abre o quadro; os pedidos não são contados lá (a casa deles é a fila).
+  clique abre o quadro; os pedidos não são contados lá (estão na linha de cada terminal e na pílula da barra de cima).
 - Plano 38 fase E: a barra de cima (`TitleBarView.swift`) começa com o botão da barra lateral (⌘B), o
   lugar (`TitleBarPlace.swift`: o avatar e "projeto › tarefa ▾"; o clique abre o menu do lugar,
   `PlaceWiring.swift`: o main e as tarefas do projeto, a página do projeto, os outros projetos e

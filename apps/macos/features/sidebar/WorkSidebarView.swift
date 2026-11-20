@@ -20,8 +20,6 @@ public final class WorkSidebarView: NSView {
     /// A project line's page icon (shown under the pointer): the app opens that project's page.
     public var onOpenProjectPage: ((String) -> Void)?
     public var menuForPlace: ((String) -> [MenuEntry])?
-    /// A request of the queue clicked: its id (the app goes to its terminal).
-    public var onPickRequest: ((String) -> Void)?
     /// "N changes · see" clicked, at the end of Files: the app shows Changes there.
     public var onShowChanges: (() -> Void)?
     /// A project dragged to a new place: its folder and the projects' folders in the new order.
@@ -37,8 +35,6 @@ public final class WorkSidebarView: NSView {
     public private(set) var mode: WorkSidebarMode = .work
 
     let run: (String) -> Void
-    private let queueSlot = NSStackView()
-    private let queue = WorkQueueView()
     /// The edge of the Work list when a project waiting on you is scrolled out of sight.
     let edge = WorkEdge()
     let switchRow = WorkSwitch()
@@ -66,11 +62,6 @@ public final class WorkSidebarView: NSView {
         super.init(frame: .zero)
         wantsLayer = true
         layer?.backgroundColor = W.bg.cgColor
-        queueSlot.orientation = .vertical
-        queueSlot.isHidden = true
-        queueSlot.addArrangedSubview(queue)
-        queue.widthAnchor.constraint(equalTo: queueSlot.widthAnchor).isActive = true
-        queue.onPick = { [weak self] id in self?.onPickRequest?(id) }
         edge.isHidden = true
         edge.onPress = { [weak self] in self?.scrollToWaiting() }
         content.addSubview(edge)
@@ -98,13 +89,12 @@ public final class WorkSidebarView: NSView {
         border.wantsLayer = true
         border.layer?.backgroundColor = W.borderRight.cgColor
         backRow.onPress = { [weak self] in self?.run("sidebar.show-work") }
-        let column = NSStackView(views: [queueSlot, switchRow, backRow, content, foot])
+        let column = NSStackView(views: [switchRow, backRow, content, foot])
         column.orientation = .vertical
         column.alignment = .leading
         column.spacing = 0
         column.setCustomSpacing(UILooks.pt(W.Switch.marginBottom), after: switchRow)
         column.setCustomSpacing(UILooks.pt(DesignTokens.MemoryPanel.Nav.Back.marginBottom), after: backRow)
-        column.setCustomSpacing(UILooks.pt(W.Queue.marginBottom), after: queueSlot)
         for view in [column, border] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
@@ -133,7 +123,7 @@ public final class WorkSidebarView: NSView {
         content.setContentHuggingPriority(.init(1), for: .vertical)
         // Each part as wide as the sidebar: a stack's .width alignment left them at their own width,
         // the switch small at the right (seen in the app, 2026-11-19).
-        for view in [queueSlot, switchRow, backRow, content, foot] as [NSView] {
+        for view in [switchRow, backRow, content, foot] as [NSView] {
             view.widthAnchor.constraint(equalTo: column.widthAnchor).isActive = true
         }
         setMode(.work)
@@ -276,15 +266,6 @@ public final class WorkSidebarView: NSView {
         changesLine.say(count)
         changesLine.isHidden = count == 0 || showingChanges
     }
-
-    /// The needs-you queue on top (plan 38 phase C), in every view; none hides it.
-    public func showQueue(_ requests: [WorkRequest], now: Date = Date()) {
-        if requests != queue.shown { queue.show(requests, now: now) }
-        queueSlot.isHidden = requests.isEmpty
-    }
-
-    /// Where the bell's list opens from: the queue while it shows.
-    public var queueAnchor: NSView? { queueSlot.isHidden ? nil : queue }
 
     private var clipWatch: NSObjectProtocol?
 

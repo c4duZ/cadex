@@ -1,8 +1,7 @@
 # sidebar
 
 ## Para que serve
-A barra lateral: à esquerda do centro, para onde vou e quem precisa de mim. No topo, a fila
-"Precisa de você"; embaixo dela, duas vistas com nome, **Trabalho** (os projetos e os terminais de cada um, antes o main e as
+A barra lateral: à esquerda do centro, para onde vou e quem precisa de mim. Duas vistas com nome, **Trabalho** (os projetos e os terminais de cada um, antes o main e as
 tarefas) e **Arquivos** (a árvore do lugar, com Mudanças discreta no fim); no pé, o que é de todos os
 projetos (`../adr/0039-sidebar-with-work-and-files.md`, plano 38; a referência desenhada em
 `../design/sidebar/6-estrutura-ideal.html`; tokens components.workSidebar em
@@ -16,12 +15,10 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
   abre.
 - **Largura:** 248 pt; arrastar a borda direita muda (de 240 a 640 pt, deixando ao centro pelo menos
   320) e fica salva.
-- **A fila "Precisa de você"**, presa no topo em qualquer vista: um cartão âmbar que só aparece com
-  pedido aberto (permissão, pergunta) de algum agente, com "PRECISA DE VOCÊ" e o número. Cada linha
-  diz quem pede, o projeto, o pedido em frase ("quer rodar `npm install stripe`", "quer usar Edit:
-  App.swift", ou a própria pergunta) e há quanto tempo ("agora", "3m"). O clique leva ao terminal do
-  agente, onde está o diálogo do próprio Claude (agents.go-to-request). É a mesma fonte do quadro de
-  atenção (`agents.md`), que abre da fila (agents.show-attention) com a lista e o feed.
+- **Pedidos (permissão, pergunta) de um agente:** a linha do terminal dele e a do projeto dizem que
+  espera, e a marca da borda diz quem espera fora da vista. O cartão âmbar "Precisa de você" que
+  ficava no topo saiu na 3.1: aparecia e sumia em cima dos projetos (o dono, 2026-11-20). Ir ao
+  agente que espera é agents.go-to-request; a lista com o feed, agents.show-attention.
 - **O seletor "Trabalho | Arquivos"**, na largura toda, com palavras: Trabalho (sidebar.show-work,
   ⇧⌘1) é o padrão, Arquivos (sidebar.show-files, ⇧⌘2) o segundo; ⌘E (sidebar.switch-view) alterna
   os dois. A barra desliza ao abrir e fechar (⌘B) e se fecha sozinha quando um preview web abre.
@@ -58,15 +55,14 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
 - **Pé**, fixo e separado da lista: Quadro (view.board), Automações (orchestration.show-automations)
   e Máquinas (os hosts do `~/.ssh/config` e as máquinas da tailnet numa lista, remote.show; escolher
   conecta numa aba), esta só quando há algum host, e Memória (memory.show-panel, plano 40).
-- **Com a página Memória aberta** (plano 40 C): a barra troca o conteúdo, sem segunda coluna. A
-  fila fica no topo; "‹ Trabalho" no lugar do seletor (sidebar.show-work; o Esc com o foco na barra
+- **Com a página Memória aberta** (plano 40 C): a barra troca o conteúdo, sem segunda coluna. "‹ Trabalho" no lugar do seletor (sidebar.show-work; o Esc com o foco na barra
   faz o mesmo; o centro continua na página); as seções do painel no lugar da lista (a busca e os
   três grupos, `memory.md`); no pé, Memória acesa com "ai-memory 3.5.0" à direita. Fechar a aba da
   página volta a barra ao Trabalho.
 - **Terminais sem projeto:** os da pasta pessoal não viram projeto na lista; enquanto se está neles,
   nenhum lugar fica aceso (`tabs.md`, abas sem projeto).
 - **Com a barra fechada,** quem espera aparece na pílula da barra de cima ("checkout-copy precisa
-  de você", ou "2 precisam de você"); o clique faz o mesmo que a fila.
+  de você", ou "2 precisam de você"); o clique leva ao agente que espera (agents.go-to-request).
 - **O quadro** e as páginas no centro mantêm a barra lateral (o quadro a fechava até 2026-11-20).
 - A barra não lê nada a cada tecla: muda com os avisos que já existem (estado dos agentes pelos
   hooks, pedidos abertos ou respondidos, abas abertas ou fechadas, projetos editados).
@@ -94,10 +90,10 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
   (`home.md`), que não fecha a barra.
 - **Projeto fixado sem terminal:** a linha fica, com "nada aberto"; o clique abre um terminal.
 - **Sem host SSH nem máquina da tailnet:** o pé sem Máquinas.
-- **Nenhum pedido aberto:** sem fila, sem pílula, sem caixa âmbar na faixa.
+- **Nenhum pedido aberto:** sem pílula, sem caixa âmbar na faixa.
 
 ## Casos de borda
-- Muitos projetos: a lista rola; a fila, o seletor e o pé ficam no lugar, e a marca da borda diz
+- Muitos projetos: a lista rola; o seletor e o pé ficam no lugar, e a marca da borda diz
   quem espera fora da vista.
 - Nome sem letra nem número: o avatar mostra "•".
 - Imagem que some do disco: o avatar volta ao emoji ou às letras.
@@ -106,7 +102,7 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
 ## Critérios de aceite
 - [x] A lista de projetos com o avatar, a seta, os terminais com o fio guia, o terminal com foco aceso,
   escolher outro projeto, arrastar e salvar a ordem (conferido no app, plano 38 B).
-- [x] A fila no topo com um pedido e a pílula com a barra fechada (conferido no app com um pedido
+- [x] A pílula com a barra fechada (a fila no topo saiu na 3.1) (conferido no app com um pedido
   falso, CADEX_PERF_REQUEST).
 - [ ] A marca da borda com um agente de verdade esperando num projeto fora da vista (só no teste).
 - [x] Arquivos com o cabeçalho, a contagem e "ver" abrindo Mudanças (conferido num repositório com

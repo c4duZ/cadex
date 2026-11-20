@@ -31,10 +31,9 @@
   sem cor própria em line.control, visível como o com cor; o dono, 2026-11-20). `WorkSidebarParts.swift`:
   o seletor, o grupo do main e das tarefas com o fio guia, a linha do pé e a marca da borda
   (`WorkEdge`: um projeto com pedido fora da vista da lista diz o nome e o lado; o clique rola até
-  ele). `WorkQueue.swift` (fase C): a fila "Precisa de você" (`WorkRequest`, `WorkQueueView`: o
-  cartão âmbar com o número, cada pedido com quem pede, há quanto tempo e o pedido em frase; o clique
-  diz qual); a barra lateral a mostra no topo em toda vista (`showQueue`, `onPickRequest`,
-  `queueAnchor`). Fase D: a vista Arquivos tem o cabeçalho em palavras (`setFilesHead`,
+  ele). `WorkRequest.swift`: um pedido aberto (`WorkRequest`, quem pede, o pedido em frase, há quanto
+  tempo), para a pílula da barra de cima; o cartão âmbar no topo da barra saiu na 3.1 (aparecia e
+  sumia em cima dos projetos, o dono, 2026-11-20). Fase D: a vista Arquivos tem o cabeçalho em palavras (`setFilesHead`,
   `WorkFilesHead`), a vista do app no meio e, no fim, "N mudanças · ver" (`setChanges`,
   `WorkChangesLine`; some sem mudança ou com Mudanças à vista; o clique, `onShowChanges`). Tokens:
   components.workSidebar.

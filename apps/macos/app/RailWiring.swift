@@ -31,7 +31,6 @@ extension WindowSession {
             guard let task = key == nil ? id : self.taskFolder(containing: terminal?.currentDirectory) else { return [] }
             return self.treeMenu(task: task)
         }
-        sidebar.onPickRequest = { [weak self] id in self?.goToRequest(id) }
         sidebar.onPickRecent = { [weak self] folder in self?.homeOpen(folder) }
         sidebar.onDropImage = { [weak self] folder, url in self?.dropProjectImage(folder, url) }
         sidebar.onShowChanges = { [weak self] in _ = self?.commands.run("git.show") }
