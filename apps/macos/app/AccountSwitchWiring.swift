@@ -8,9 +8,11 @@ import Tabs
 import Terminal
 
 /// Switching an agent's account in one click (plan 33 E; docs/spec/agents.md, Trocar de conta):
-/// the Claude in the pane ends (SIGTERM, as hibernating; its handoff goes to the memory) and, once
-/// the shell is back, the same pane runs "Continue in…" in the other account, which starts there
-/// with the work's briefing. Without the memory, the other account's agent opens plainly. Four
+/// the Claude in the pane ends (SIGTERM, as hibernating) and, once the shell is back, the same pane
+/// goes on in the other account: by default with the same conversation (its file resumed there and
+/// forked, the owner, 2026-11-20); or, chosen in ⌘K, "Continue in…", a new conversation with the
+/// memory's briefing. Without the conversation's file or the memory, the other account's agent
+/// opens plainly. Four
 /// ways in: the account in the pane's header, the notice when the account hits its limit, a click
 /// on an account in the usage card with a Claude focused, and agents.switch-account in ⌘K.
 extension WindowSession {
@@ -19,9 +21,11 @@ extension WindowSession {
     }
 
     /// The Claude in `terminal` goes on in `account`; a terminal with no program types it at once.
-    func switchAccount(_ terminal: TerminalView, to account: AgentAccount) {
+    func switchAccount(_ terminal: TerminalView, to account: AgentAccount, carry: AgentSwitch.Carry = .conversation) {
         let command: String
-        if settings.store.settings.memory.enabled, let tools = SessionKit.shared.toolsPath {
+        if carry == .conversation, let carried = carryConversation(terminal, to: account) {
+            command = carried
+        } else if settings.store.settings.memory.enabled, let tools = SessionKit.shared.toolsPath {
             command = AgentLaunch.continueCommand(for: account, tools: tools)
         } else {
             command = AgentLaunch.command(for: account, skipPermissions: settings.store.settings.agents.launchSkipPermissions,
@@ -38,11 +42,22 @@ extension WindowSession {
 
     /// The usage card's click and agents.switch-account: with a Claude focused in another account,
     /// it goes on there; else the account's agent opens as before (launchAgent).
-    func switchOrLaunch(_ account: AgentAccount) {
+    func switchOrLaunch(_ account: AgentAccount, carry: AgentSwitch.Carry = .conversation) {
         if let terminal = tabs?.activeTerminal, let current = claudeAccount(in: terminal), current.dir != account.dir {
-            return switchAccount(terminal, to: account)
+            return switchAccount(terminal, to: account, carry: carry)
         }
         launchAgent(for: account)
+    }
+
+    /// The command that resumes the pane's conversation in `account`: its file in the account it
+    /// runs in now (the conversation the hooks reported, agentResume), by path with --fork-session.
+    /// Nil with no conversation known or no file yet (a session with no message).
+    private func carryConversation(_ terminal: TerminalView, to account: AgentAccount) -> String? {
+        guard let resume = terminal.agentResume, let from = claudeAccount(in: terminal) else { return nil }
+        let transcript = AgentProjectFolder.path(for: resume.folder, in: from) + "/" + resume.sessionID + ".jsonl"
+        guard FileManager.default.fileExists(atPath: transcript) else { return nil }
+        return AgentHibernation.carryCommand(transcript: transcript, folder: resume.folder, configDir: account.isDefault ? nil : account.dir,
+                                             kitSession: resume.kitSession, skipPermissions: settings.store.settings.agents.launchSkipPermissions)
     }
 
     /// The account of the Claude running in `terminal`, by its live session.

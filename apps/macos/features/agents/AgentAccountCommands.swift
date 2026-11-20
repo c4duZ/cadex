@@ -32,9 +32,10 @@ public struct AgentAccountActions {
     /// Rename an account (the app asks the name): it was the Accounts page's right click until
     /// the page left the sidebar (plan 26 phase E).
     public var rename: @MainActor (AgentAccount) -> Void = { _ in }
-    /// Plan 33 E: the Claude in the focused terminal goes on in this account (the session ends, its
-    /// handoff goes to the memory, "Continue in…" runs in the same pane); with none, the account opens.
-    public var switchTo: @MainActor (AgentAccount) -> Void = { _ in }
+    /// Plan 33 E: the Claude in the focused terminal goes on in this account, with the same
+    /// conversation or a new one with the briefing (the session ends, the same pane goes on); with
+    /// none, the account becomes the next `claude`'s.
+    public var switchTo: @MainActor (AgentAccount, AgentSwitch.Carry) -> Void = { _, _ in }
     /// The account the focused agent runs in (the one both bars show): marked in the switch's list.
     public var current: @MainActor () -> String? = { nil }
     /// A Claude runs in the focused terminal: the list takes it to another account; with none, the
@@ -94,12 +95,13 @@ public enum AgentAccountCommands {
                             placeholder: session ? T("Go on in another account…", "Continuar em outra conta…")
                                                  : T("Account for the next claude…", "Conta do próximo claude…"),
                             empty: T("No account in use", "Nenhuma conta em uso"),
-                            hint: session ? T("This session ends and the work goes on in the account you choose, through the memory.",
-                                              "A sessão de agora termina e o trabalho continua na conta escolhida, pela memória.")
+                            hint: session ? T("Same conversation: it goes on there as it is. New, with the briefing: a new conversation that starts from the memory's summary.",
+                                              "Mesma conversa: continua lá do jeito que está. Nova, com o briefing: uma conversa nova que começa pelo resumo da memória.")
                                           : T("Type claude here, or open a new terminal, and it starts in the account you choose.",
                                               "Digite claude aqui, ou abra um terminal novo, e ele começa na conta escolhida."),
                             icon: .arrowsLeftRight, items: { AgentSwitch.rows(current: actions.current(), inSession: session) }) { dir in
-                            if let account = agents.everyAccount().first(where: { $0.dir == dir }) { actions.switchTo(account) }
+                            let picked = AgentSwitch.choice(dir) ?? (.conversation, dir)
+                            if let account = agents.everyAccount().first(where: { $0.dir == picked.dir }) { actions.switchTo(account, picked.carry) }
                         })
                     }),
             Command(id: "agents.rename-account", title: T("Rename an Agent Account…", "Renomear uma conta de agente…"),

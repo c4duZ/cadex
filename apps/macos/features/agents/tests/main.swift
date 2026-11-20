@@ -395,3 +395,9 @@ let hibernationExit = await Checks.run(hibernationChecks)
 let remoteExit = await Checks.run(remoteChecks)
 let switchExit = await Checks.run(switchChecks)
 exit([folderExit, usageExit, accountExit, historyExit, attentionExit, hibernationExit, remoteExit, switchExit, exitCode].first { $0 != 0 } ?? 0)
+
+/// A launch command without the kit's `--settings <file>`: the kit always writes one since it sets
+/// CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN (3.0.1), so the tests compare the rest.
+func noSettings(_ command: String) -> String {
+    command.replacingOccurrences(of: #" --settings \S+"#, with: "", options: .regularExpression)
+}

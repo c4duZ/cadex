@@ -6,10 +6,21 @@ import Strings
 import UILooks
 
 /// Switching a session's account (plan 33 E; docs/spec/agents.md, Trocar de conta): the session
-/// ends, its handoff goes to the memory, and the same pane goes on in the other account with
-/// "Continue in…". These are the rules; the terminals and the typing are the app's
+/// ends and the same pane goes on in the other account, with the same conversation (`Carry`
+/// .conversation, the default) or a new one with the memory's briefing ("Continue in…"). These
+/// are the rules; the terminals and the typing are the app's
 /// (apps/macos/app/AccountSwitchWiring.swift).
 public enum AgentSwitch {
+    /// What goes to the other account: the conversation itself (resumed there, forked) or the
+    /// memory's briefing in a new one (the owner asked for both in ⌘K, 2026-11-20).
+    public enum Carry: String, Sendable { case conversation, briefing }
+
+    /// A row's id in the list while in a session: "conversation:<dir>" or "briefing:<dir>".
+    public static func choice(_ id: String) -> (carry: Carry, dir: String)? {
+        guard let colon = id.firstIndex(of: ":"), let carry = Carry(rawValue: String(id[..<colon])) else { return nil }
+        return (carry, String(id[id.index(after: colon)...]))
+    }
+
     /// The most of the 5 hour session and the week, 0 to 100; nil with no numbers.
     public static func used(_ usage: AgentUsage?) -> Int? {
         guard let usage else { return nil }
@@ -73,20 +84,32 @@ public enum AgentSwitch {
                 return item
             }
         }
-        return (accounts.filter { $0.dir != current } + accounts.filter { $0.dir == current }).map { account in
+        // Two rows per other account: the same conversation first, then a new one with the briefing.
+        return (accounts.filter { $0.dir != current } + accounts.filter { $0.dir == current }).flatMap { account -> [PaletteItem] in
             let inUse = account.dir == current
             let used = AgentSwitch.used(AgentUsage.current(of: account))
-            var item = PaletteItem(id: account.dir, title: account.name, unavailableReason: inUse ? "" : nil)
-            item.note = detail(account) + (inUse ? T(" · this session", " · esta sessão") : "")
-            item.tile = logo
-            if inUse {
-                item.chip = T("in use", "em uso")
-            } else {
-                item.meter = used.map { Double($0) / 100 }
-                item.meterText = used.map { "\($0)%" } ?? "—"
-            }
-            return item
+            if inUse { return [row(account, carry: nil, used: used, logo: logo)] }
+            return [row(account, carry: .conversation, used: used, logo: logo), row(account, carry: .briefing, used: used, logo: logo)]
         }
+    }
+
+    private static func row(_ account: AgentAccount, carry: Carry?, used: Int?, logo: PaletteItem.Tile) -> PaletteItem {
+        let inUse = carry == nil
+        let title = switch carry {
+        case .conversation: account.name + T(" · same conversation", " · mesma conversa")
+        case .briefing: account.name + T(" · new, with the briefing", " · nova, com o briefing")
+        case nil: account.name
+        }
+        var item = PaletteItem(id: (carry.map { $0.rawValue + ":" } ?? "") + account.dir, title: title, unavailableReason: inUse ? "" : nil)
+        item.note = detail(account) + (inUse ? T(" · this session", " · esta sessão") : "")
+        item.tile = logo
+        if inUse {
+            item.chip = T("in use", "em uso")
+        } else {
+            item.meter = used.map { Double($0) / 100 }
+            item.meterText = used.map { "\($0)%" } ?? "—"
+        }
+        return item
     }
 
     /// "32% used", or nothing with no numbers.

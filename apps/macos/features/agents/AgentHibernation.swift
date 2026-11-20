@@ -39,9 +39,28 @@ public enum AgentHibernation {
     @MainActor
     public static func resumeCommand(sessionID: String, folder: String, configDir: String?, kitSession: String?,
                                      skipPermissions: Bool, kit: SessionKit = .shared) -> String {
-        let flags = kitSession.flatMap(kit.arguments(of:)).map(withoutConversation) ?? (skipPermissions ? ["--dangerously-skip-permissions"] : [])
+        let flags = openedFlags(kitSession: kitSession, skipPermissions: skipPermissions, kit: kit)
         let claude = kit.claudeCommand(configDir: configDir, arguments: ["--resume", sessionID] + flags, session: kitSession, cwd: folder)
         return "cd " + SessionKit.quote(folder) + " && " + claude
+    }
+
+    /// Switching account with the same conversation: its file resumed by path with --fork-session
+    /// in the other account (what History's Continue in Another Account does: by the id alone the
+    /// other account finds nothing, and without the fork it writes into the first one's file,
+    /// tested 2026-11-14), with the flags the session was opened with and a kit session of its own.
+    @MainActor
+    public static func carryCommand(transcript: String, folder: String, configDir: String?, kitSession: String?,
+                                    skipPermissions: Bool, kit: SessionKit = .shared) -> String {
+        let flags = openedFlags(kitSession: kitSession, skipPermissions: skipPermissions, kit: kit)
+        let claude = kit.claudeCommand(configDir: configDir, arguments: ["--resume", transcript, "--fork-session"] + flags, cwd: folder)
+        return "cd " + SessionKit.quote(folder) + " && " + claude
+    }
+
+    /// The arguments the session was opened with, without its conversation; with none kept, the
+    /// permission flag as agents.launchSkipPermissions says.
+    @MainActor
+    static func openedFlags(kitSession: String?, skipPermissions: Bool, kit: SessionKit) -> [String] {
+        kitSession.flatMap(kit.arguments(of:)).map(withoutConversation) ?? (skipPermissions ? ["--dangerously-skip-permissions"] : [])
     }
 
     /// The arguments without what picked the conversation then (`--resume

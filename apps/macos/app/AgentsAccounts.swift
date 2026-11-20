@@ -27,7 +27,7 @@ extension WindowSession {
                 return self.settings.store.settings.agents.projectAccounts[SettingsBridge.tilde(self.projectRoot)].map(SettingsBridge.expand)
             })
         actions.rename = { [weak self] account in self?.renameAccount(account) }
-        actions.switchTo = { [weak self] account in self?.chooseAccount(account) }
+        actions.switchTo = { [weak self] account, carry in self?.chooseAccount(account, carry: carry) }
         actions.current = { [weak self] in self?.shownAccountDir() }
         actions.inSession = { [weak self] in self?.tabs?.activeTerminal.flatMap { self?.claudeAccount(in: $0) } != nil }
         return actions
@@ -81,8 +81,8 @@ extension WindowSession {
     /// on in `account`; with none, `account` is the one the next `claude` opens in, here and in new
     /// terminals (the owner, 2026-11-18: pick it on top, type `claude`). A project with its own
     /// account takes the choice there, or the project's would still win.
-    func chooseAccount(_ account: AgentAccount) {
-        if let terminal = tabs?.activeTerminal, claudeAccount(in: terminal) != nil { return switchOrLaunch(account) }
+    func chooseAccount(_ account: AgentAccount, carry: AgentSwitch.Carry = .conversation) {
+        if let terminal = tabs?.activeTerminal, claudeAccount(in: terminal) != nil { return switchOrLaunch(account, carry: carry) }
         let cwd = tabs?.activeTerminal?.currentDirectory ?? folder.root
         let key = SettingsBridge.tilde(AgentProject.of(cwd).root)
         if settings.store.settings.agents.projectAccounts[key] != nil {

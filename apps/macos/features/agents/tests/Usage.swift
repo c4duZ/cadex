@@ -104,15 +104,15 @@ let usageChecks: [(name: String, body: Checks.Body)] = [
         let kit = SessionKit.forTests(folder: folder)
         let work = AgentAccount(dir: "/Users/me/.claude-work", name: "W", isDefault: false)
         let none = folder + "/none.json"
-        expect(AgentLaunch.command(for: work, skipPermissions: false, kit: kit, defaultClaudeJSON: none) == "CLAUDE_CONFIG_DIR=/Users/me/.claude-work claude")
-        expect(AgentLaunch.command(for: work, skipPermissions: true, kit: kit, defaultClaudeJSON: none)
+        expect(noSettings(AgentLaunch.command(for: work, skipPermissions: false, kit: kit, defaultClaudeJSON: none)) == "CLAUDE_CONFIG_DIR=/Users/me/.claude-work claude")
+        expect(noSettings(AgentLaunch.command(for: work, skipPermissions: true, kit: kit, defaultClaudeJSON: none))
                == "CLAUDE_CONFIG_DIR=/Users/me/.claude-work claude --dangerously-skip-permissions")
-        expect(AgentLaunch.command(for: AgentAccount(dir: "/Users/me/.claude", name: "D", isDefault: true), skipPermissions: false, kit: kit, defaultClaudeJSON: none) == "claude")
+        expect(noSettings(AgentLaunch.command(for: AgentAccount(dir: "/Users/me/.claude", name: "D", isDefault: true), skipPermissions: false, kit: kit, defaultClaudeJSON: none)) == "claude")
         var codex = AgentAccount(dir: "/Users/me/.codex-2", name: "C", isDefault: false)
         codex.provider = .codex
         expect(AgentLaunch.command(for: codex, skipPermissions: true, kit: kit) == "CODEX_HOME='/Users/me/.codex-2' codex --dangerously-bypass-approvals-and-sandbox")
         let odd = AgentAccount(dir: "/tmp/it's", name: "x", isDefault: false)
-        expect(AgentLaunch.command(for: odd, skipPermissions: false, kit: kit, defaultClaudeJSON: none) == "CLAUDE_CONFIG_DIR='/tmp/it'\\''s' claude")
+        expect(noSettings(AgentLaunch.command(for: odd, skipPermissions: false, kit: kit, defaultClaudeJSON: none)) == "CLAUDE_CONFIG_DIR='/tmp/it'\\''s' claude")
         // "Continue in…" (plan 22 phase E): `cadex continue`, the account by its variable.
         expect(AgentLaunch.continueCommand(for: work, tools: "/A/cadex") == "CLAUDE_CONFIG_DIR='/Users/me/.claude-work' '/A/cadex' continue claude")
         expect(AgentLaunch.continueCommand(for: codex, tools: "/A/cadex") == "CODEX_HOME='/Users/me/.codex-2' '/A/cadex' continue codex")

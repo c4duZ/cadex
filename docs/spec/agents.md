@@ -150,10 +150,17 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
 
 ### Trocar de conta (plano 33 E)
 - Trocar a conta de um Claude é continuar o trabalho noutra conta: a sessão acaba (SIGTERM, como na
-  hibernação; o handoff vai para a memória) e, com o shell de volta, o mesmo painel roda o
-  "Continue in…" da conta escolhida, que começa lá com o briefing do trabalho (`memory.md`). Sem a
-  memória, abre o agente da outra conta sem o contexto. As conversas de cada conta continuam na
-  pasta dela (ADR 0021); a conversa inteira vai por "Continue in Another Account" (Histórico).
+  hibernação) e, com o shell de volta, o mesmo painel continua na conta escolhida, de um de dois
+  jeitos (o dono, 2026-11-20):
+  - **a mesma conversa** (o padrão): o arquivo da conversa, na conta de agora, retomado na outra por
+    caminho com `--fork-session` (o mesmo do "Continue in Another Account" do Histórico; o original
+    fica intocado), com as flags com que a sessão abriu. Sem conversa conhecida ou sem arquivo ainda
+    (sessão sem mensagem), vai como o segundo jeito;
+  - **nova, com o briefing**: o "Continue in…" da conta escolhida, uma conversa nova que começa com o
+    briefing do trabalho (`memory.md`). Sem a memória, abre o agente da outra conta sem o contexto.
+  No ⌘K (agents.switch-account) cada conta aparece duas vezes, "· mesma conversa" e "· nova, com o
+  briefing"; os outros caminhos levam a mesma conversa. As conversas de cada conta continuam na pasta
+  dela (ADR 0021).
 - Quatro caminhos, a mesma troca:
   - a conta no cabeçalho do painel: um clique na linha de detalhe lista as contas do Claude com o
     uso de cada uma (a desta sessão marcada);

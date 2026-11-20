@@ -140,12 +140,12 @@ let historyChecks: [(name: String, body: Checks.Body)] = [
         let kit = SessionKit.forTests(folder: folder)
         var e = AgentHistoryEntry(id: "abc", path: "/h/.claude-b/projects/-w/abc.jsonl", account: "/h/.claude-b")
         e.cwd = "/nowhere/at/all"
-        expect(AgentHistoryLaunch.resume(e, kit: kit) == "CLAUDE_CONFIG_DIR=/h/.claude-b claude --resume abc")
+        expect(noSettings(AgentHistoryLaunch.resume(e, kit: kit)) == "CLAUDE_CONFIG_DIR=/h/.claude-b claude --resume abc")
         let other = AgentAccount(dir: "/h/.claude-c", name: "C", isDefault: false)
-        expect(AgentHistoryLaunch.continueIn(e, account: other, kit: kit)
+        expect(noSettings(AgentHistoryLaunch.continueIn(e, account: other, kit: kit))
                == "CLAUDE_CONFIG_DIR=/h/.claude-c claude --resume /h/.claude-b/projects/-w/abc.jsonl --fork-session")
         let home = AgentAccount(dir: NSHomeDirectory() + "/.claude", name: "D", isDefault: true)
-        expect(AgentHistoryLaunch.continueIn(e, account: home, kit: kit) == "claude --resume /h/.claude-b/projects/-w/abc.jsonl --fork-session")
+        expect(noSettings(AgentHistoryLaunch.continueIn(e, account: home, kit: kit)) == "claude --resume /h/.claude-b/projects/-w/abc.jsonl --fork-session")
         expect(AgentHistoryLaunch.folder(e) == NSHomeDirectory(), "a folder that is gone opens home")
     }),
     ("a continued session lists its own subagents and the origin's, and opens each in its folder", {

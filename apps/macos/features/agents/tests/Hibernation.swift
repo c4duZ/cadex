@@ -35,7 +35,7 @@ let hibernationChecks: [(name: String, body: Checks.Body)] = [
         let token = try String(contentsOfFile: folder + "/tokens/" + file, encoding: .utf8)
         let command = AgentHibernation.resumeCommand(sessionID: "abc", folder: "/w/my app", configDir: "/Users/me/.claude-work",
                                                      kitSession: session, skipPermissions: false, kit: kit)
-        expect(command == "cd '/w/my app' && CLAUDE_CONFIG_DIR=/Users/me/.claude-work claude --resume abc", command)
+        expect(noSettings(command) == "cd '/w/my app' && CLAUDE_CONFIG_DIR=/Users/me/.claude-work claude --resume abc", command)
         expect(tokens().filter { $0.hasSuffix(".token") } == [file], "the same kit session: \(tokens())")
         expect((try? String(contentsOfFile: folder + "/tokens/" + file, encoding: .utf8)) == token, "the token stays, so the app still knows the session")
         // The command it was opened with comes back: its flags, not its old conversation.
@@ -44,10 +44,15 @@ let hibernationChecks: [(name: String, body: Checks.Body)] = [
         _ = opened
         let newest = tokens().filter { $0.hasSuffix(".token") && $0 != file }.first.map { String($0.dropLast(6)) }
         let same = AgentHibernation.resumeCommand(sessionID: "abc", folder: "/w", configDir: nil, kitSession: newest, skipPermissions: false, kit: kit)
-        expect(same == "cd /w && claude --resume abc --model haiku --dangerously-skip-permissions", same)
+        expect(noSettings(same) == "cd /w && claude --resume abc --model haiku --dangerously-skip-permissions", same)
         // A kit session whose token is gone gets a new one.
         let fresh = AgentHibernation.resumeCommand(sessionID: "abc", folder: "/w", configDir: nil, kitSession: "gone", skipPermissions: true, kit: kit)
-        expect(fresh == "cd /w && claude --resume abc --dangerously-skip-permissions", fresh)
+        expect(noSettings(fresh) == "cd /w && claude --resume abc --dangerously-skip-permissions", fresh)
         expect(tokens().filter { $0.hasSuffix(".token") }.count == 3, "a new token for the gone one")
+        // Another account, the same conversation: its file by path, forked, with the flags it was opened with.
+        let carried = AgentHibernation.carryCommand(transcript: "/Users/me/.claude/projects/-w/abc.jsonl", folder: "/w", configDir: "/Users/me/.claude-work",
+                                                    kitSession: newest, skipPermissions: false, kit: kit)
+        expect(noSettings(carried) == "cd /w && CLAUDE_CONFIG_DIR=/Users/me/.claude-work claude --resume /Users/me/.claude/projects/-w/abc.jsonl --fork-session --model haiku --dangerously-skip-permissions", carried)
+        expect(AgentSwitch.choice("briefing:/Users/me/.claude-b")! == (.briefing, "/Users/me/.claude-b") && AgentSwitch.choice("/Users/me/.claude-b") == nil, "the list's ids")
     }),
 ]
