@@ -29,7 +29,9 @@
   do sistema levava cerca de 1 s e tinha outra cara; o dono, 2026-10-20), nas cores dos menus. Some
   ao sair, no clique, numa tecla ou na rolagem. Uma linha tem 22 pt, como sempre; texto maior quebra
   em até 360 pt e cresce para baixo (os commits do histórico na barra lateral, 2026-10-21).
-  `HoverTip.attach(_:to:)` troca o toolTip do sistema;
+  `HoverTip.attach(_:to:)` troca o toolTip do sistema; numa view com `HoverCard`
+  (`yieldToCard`) só o cartão aparece, a dica vira só o texto de acessibilidade (eram dois popovers
+  no item da memória da barra de status, o dono, 2026-11-20);
   o toolTip fica só para textos longos de linhas (caminhos, datas).
 - `HoverCard.swift` (`onOpenChange` avisa quando abre e fecha, para quem só lê com o cartão aberto, as máquinas da tailnet): o cartão sobre um item da barra de status (uso das contas, hosts SSH, portas),
   como popover (seta embaixo apontando o meio do item, a ponta encostada nele). Entra suave 0,18 s

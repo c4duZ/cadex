@@ -17,13 +17,23 @@ public enum HoverTip {
         if let old = objc_getAssociatedObject(view, &trackerKey) as? HoverTipTracker {
             view.removeTrackingArea(old.area)
         }
-        let tracker = text.flatMap { $0.isEmpty ? nil : HoverTipTracker(text: $0, view: view) }
+        // A view with a hover card shows the card only: the tip over it made two popovers (the
+        // memory item of the status bar, the owner 2026-11-20). The words stay as its help.
+        let carded = objc_getAssociatedObject(view, &cardedKey) != nil
+        let tracker = carded ? nil : text.flatMap { $0.isEmpty ? nil : HoverTipTracker(text: $0, view: view) }
         // The view keeps its tracker alive, and frees it with itself.
         objc_setAssociatedObject(view, &trackerKey, tracker, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         if let tracker { view.addTrackingArea(tracker.area) }
     }
 
+    /// The view has a HoverCard: its tip from now on is only its accessibility help.
+    public static func yieldToCard(on view: NSView) {
+        objc_setAssociatedObject(view, &cardedKey, true, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        attach(view.accessibilityHelp(), to: view)
+    }
+
     nonisolated(unsafe) private static var trackerKey: UInt8 = 0
+    nonisolated(unsafe) private static var cardedKey: UInt8 = 0
     private static var pending: DispatchWorkItem?
     private static var panel: HoverTipPanel?
     private static var monitor: Any?

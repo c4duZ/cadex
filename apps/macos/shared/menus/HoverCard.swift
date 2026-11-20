@@ -28,6 +28,8 @@ public final class HoverCard: NSObject {
         self.content = content
         super.init()
         view.addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect], owner: self))
+        HoverTip.yieldToCard(on: view)
+        view.toolTip = nil
     }
 
     var isOpen: Bool { watch != nil }

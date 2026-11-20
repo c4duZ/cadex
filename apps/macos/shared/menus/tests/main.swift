@@ -60,6 +60,17 @@ let exitCode = await Checks.run([
         }
         panel.orderOut(nil)
     }),
+    ("a view with a hover card shows the card only: its tip, set before or after, is only its help", {
+        let item = NSView(frame: NSRect(x: 0, y: 0, width: 80, height: 20))
+        HoverTip.attach("Memory used by Cadex", to: item)
+        let tips = { item.trackingAreas.filter { $0.owner is HoverTipTracker }.count }
+        expect(tips() == 1)
+        let card = HoverCard(over: item) { NSView() }
+        expect(tips() == 0 && item.accessibilityHelp() == "Memory used by Cadex", "\(tips())")
+        HoverTip.attach("Memory used by Cadex", to: item)
+        expect(tips() == 0 && item.toolTip == nil && item.accessibilityHelp() == "Memory used by Cadex")
+        _ = card
+    }),
     ("a hover card opens by the names the system calls, draws as a popover, and goes when the pointer is away", {
         // Far from the pointer, so the card's watch sees it away.
         let window = NSWindow(contentRect: NSRect(x: 12000, y: 12000, width: 300, height: 60), styleMask: [.borderless], backing: .buffered, defer: false)
