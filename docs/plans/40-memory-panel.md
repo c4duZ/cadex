@@ -132,7 +132,24 @@ repositório. O código dele está no checkout do cargo, no commit fixado (411d9
   palavras do upstream (pendente, coletada); o botão de enviar apagado até haver agente e texto.
   O que mudou nas telas de antes: o selo com bolinha saía espremido ("● semantic" da página), e no
   grafo o nó sem links virou um anel vazado (apagado, confundia com o cinza de "fact").
-- [ ] G. A revisão de aprendizado, a saúde do servidor e a documentação.
+- [x] G. A revisão de aprendizado, a saúde do servidor e a documentação.
+  Feito: a Revisão (`apps/macos/features/memory/panel/PanelReviewView.swift` com
+  `apps/macos/features/memory/panel/PanelProposalRow.swift`: os filtros do upstream, cada proposta que
+  abre com os avisos, a justificativa, o conteúdo, Aprovar e Rejeitar com o motivo), pelas rotas
+  `extra/review/approve|reject` do engine, que usam as decisões da página Memory; memory.approve e
+  memory.reject aceitam `id=` (e `reason=`). A Saúde (`apps/macos/features/memory/panel/PanelHealthView.swift`,
+  as palavras do upstream refeitas dos números em `apps/macos/features/memory/panel/PanelHealthData.swift`):
+  cada correção que o upstream manda digitar (`ai-memory recover`, `embed`, `embed --force`,
+  `compact --confirm`) virou um botão e o comando memory.fix-health, feito pelo engine
+  (`core/features/memory/server/src/page/panel/fixes.rs`: reenviar a fila do hook, gerar os vetores que
+  faltam ou refazer todos, compactar o banco, que pergunta antes); o registro de recuperação do `run`
+  fica para a próxima continuação, que o refaz. A Documentação e o Histórico de alterações
+  (`apps/macos/features/memory/panel/PanelDocsView.swift`): os 28 guias do catálogo do upstream, com o
+  português dele, gerados por `tools/memory_panel_guides.py`; o clique abre o guia no GitHub, no
+  commit fixado (memory.open-guide). Testes: `core/features/memory/server/tests/panel_fixes.rs` e
+  `apps/macos/features/memory/tests/PanelReviewTests.swift`. Diferenças do board: a linha da Saúde
+  perdeu "somente leitura" (as correções são botões); a Revisão diz "preparada há X", a palavra do
+  upstream (o board dizia "enviada"); o filtro da Documentação não muda o lugar a cada tecla.
 
 Cada fase de tela: o print do Cadex ao lado do print do upstream sobre o mesmo seed, e o que difere
 escrito com o motivo; o print aprovado fica como referência e o teste do app avisa quando a tela

@@ -26,7 +26,9 @@ public struct MemoryPanelActions {
     }
     /// A write of the inbox: the app runs its command (memory.send-message and the others, ADR 0005),
     /// which comes back to `perform`. Nil (the tests): the page performs it itself.
-    public var message: ((PanelMessageWrite) -> Void)?
+    public var message: ((PanelWrite) -> Void)?
+    /// A guide of the Documentação: the app runs memory.open-guide (nil: the page opens it).
+    public var openGuide: ((PanelGuide) -> Void)?
     /// A click that goes somewhere: the app runs memory.show-panel with the place, which comes back
     /// to `go`. Nil (the tests): the page goes itself.
     public var go: ((PanelPlace) -> Void)?
@@ -76,6 +78,8 @@ public final class MemoryPanelDocument: TabDocument {
     /// The search that opened each page, for its "Por que esta página foi recuperada?" (upstream
     /// carries it in the page's URL; here the page keeps it while the window lives).
     var recall: [PanelHitKey: PanelSearchQuery] = [:]
+    /// What the last health fix did, for the health screen read again after it (plan 40 G).
+    var healthSaid: String?
 
     public init(actions: MemoryPanelActions) {
         self.actions = actions

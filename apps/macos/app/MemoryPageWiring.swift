@@ -63,6 +63,12 @@ extension WindowSession {
             approve: { [weak self] proposal in self?.decideProposal(proposal, approve: true) },
             reject: { [weak self] proposal in self?.decideProposal(proposal, approve: false) })
         actions.showHistory = { [weak self] in self?.showMemoryHistory() }
+        // By id (the Memória panel's buttons, `cadex run`): through the panel's route, then this page read again.
+        actions.decide = { [weak self] id, approve, reason in
+            guard let self else { return }
+            let page = self.memoryPanelPage() ?? self.makeMemoryPanel()
+            page.perform(approve ? .approve(id: id) : .reject(id: id, reason: reason)) { [weak self] in self?.refreshMemoryPage() }
+        }
         // The tab's tree when it was read; otherwise the wiki read now, from projects.json: ⌘K may
         // come before the tab was ever opened (review of 2026-11-17).
         actions.pages = { [weak self] in

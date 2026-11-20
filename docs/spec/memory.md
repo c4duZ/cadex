@@ -348,8 +348,7 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   filtra), "Última captura" com o ⓘ, a linha "Captura" com os contadores do engine, o aviso da
   fila, o filtro, o escopo e os cartões. "Abrir no Cadex" (memory.open-in-cadex, com `project=`;
   também no clique direito do cartão e no ⌘O com o cartão escolhido pelas setas) só quando um
-  projeto aberto ou recente do Cadex tem a pasta com esse nome. A Revisão de aprendizado, a Saúde e
-  a Documentação dizem "Em breve." até a fase G. Com a memória desligada, a página diz isso e não lê nada.
+  projeto aberto ou recente do Cadex tem a pasta com esse nome. Toda seção tem a sua tela desde a fase G. Com a memória desligada, a página diz isso e não lê nada.
 - As telas de um projeto (plano 40 D), cada uma um lugar do memory.show-panel (`project=` e
   `tab=`, `page=`, `history=` com `from=` e `to=`, `session=` com `offset=`, `retrievals=` ou
   `agent=`); todo clique dentro da página roda esse comando, e memory.panel-back e
@@ -405,6 +404,19 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   memory.edit-message, memory.save-message e memory.discard-message-edit, pelas rotas POST
   `extra/messages` e `extra/messages/<id>/edit|save|release` do engine, com as regras do upstream.
 - Workstreams (plano 40 F): `section=workstreams` com `page=`, `extra/workstreams`, 100 por página.
+- A Revisão de aprendizado (plano 40 G): `section=review` com `scope=` e `sort=` (as quatro ordens do
+  upstream), `extra/review`: as propostas de todos os projetos, cada uma com os avisos (regra em
+  _rules/, página substituída), a justificativa e o conteúdo; Aprovar e Rejeitar (com o motivo,
+  até 500) são memory.approve e memory.reject com `id=` (e `reason=`), pelas rotas
+  `extra/review/approve|reject`, as mesmas decisões da página Memory.
+- A Saúde (plano 40 G): `section=health`, `extra/health`, as verificações e as cinco seções do
+  upstream com as palavras dele; cada correção que o upstream manda digitar é um botão e
+  memory.fix-health (`what=spool`: reenviar a fila do hook; `embed`: gerar os vetores que faltam;
+  `embed-all`: refazer todos; `compact`: compactar o banco, que pergunta antes, pois bloqueia as
+  gravações), feito pelo engine em `extra/fix`.
+- A Documentação e o Histórico de alterações (plano 40 G): `section=docs` e `section=changelog`, os
+  guias do catálogo do upstream (gerado para o app, com o português dele), filtrados pelo título, a
+  descrição e a categoria; o clique (memory.open-guide `id=`) abre o guia no GitHub, no commit fixado.
 - Grafo de conhecimento (plano 40 E): `section=graph` é o geral (os links entre projetos, um nó por
   projeto, `api/v1/graph`) e `project=<p> graph=1` o do projeto ("Grafo de links ↗"; `api/v1/.../graph`
   e `/pages` para o tipo de cada página). Desenho nativo (Core Graphics, sem WebView), com layout de

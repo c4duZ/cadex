@@ -49,7 +49,44 @@ extension WindowSession {
                 guard let folder = self.cadexFolder(forMemoryProject: name) else { return .failed("no Cadex project has this one's folder") }
                 self.openInCadex(folder)
                 return .ok("opened \(folder)")
-            }] + memoryMessageCommands()
+            }] + memoryMessageCommands() + memoryHealthCommands()
+    }
+
+    /// The health fixes and the guides (plan 40 G): memory.fix-health does upstream's fix lines
+    /// through the engine (compact asks first: it blocks writes while it runs); memory.open-guide
+    /// opens one of upstream's guides on GitHub at the pinned commit.
+    private func memoryHealthCommands() -> [Command] {
+        [Command(id: "memory.fix-health", title: T("Fix Memory Health…", "Corrigir a saúde da memória…"),
+                 keywords: ["memory", "health", "fix", "spool", "embed", "vectors", "compact", "memória", "saúde", "corrigir", "vetores", "compactar"],
+                 category: .view, action: .run { [weak self] in self?.openMemoryPanel(.health) })
+            .accepting("what=<spool|embed|embed-all|compact> [confirm=1]") { [weak self] request in
+                guard let self, let write = PanelWrite(command: "memory.fix-health", arguments: request.arguments) else {
+                    return .failed("what is spool, embed, embed-all or compact")
+                }
+                let page = self.memoryPanelPage() ?? self.makeMemoryPanel()
+                guard request["what"] == "compact", request["confirm"] != "1" else {
+                    page.perform(write)
+                    return .ok("fixing")
+                }
+                let alert = NSAlert()
+                alert.messageText = T("Compact the memory database?", "Compactar o banco da memória?")
+                alert.informativeText = T("It rebuilds the whole database; every write waits until it ends. Nothing is deleted.",
+                                          "Ele refaz o banco inteiro; toda gravação espera até o fim. Nada é apagado.")
+                alert.addButton(withTitle: T("Compact", "Compactar"))
+                alert.addButton(withTitle: T("Cancel", "Cancelar"))
+                alert.beginSheetModal(for: self.window) { response in
+                    if response == .alertFirstButtonReturn { page.perform(write) } else { page.fixCancelled("compact") }
+                }
+                return .ok("asking before compacting")
+            },
+         Command(id: "memory.open-guide", title: T("Open an ai-memory Guide", "Abrir um guia do ai-memory"),
+                 keywords: ["memory", "docs", "guide", "documentation", "changelog", "memória", "guia", "documentação"],
+                 category: .view, action: .run { [weak self] in self?.openMemoryPanel(.docs(words: "", history: false)) })
+            .accepting("id=<guide id>") { request in
+                guard let guide = PanelGuide.all.first(where: { $0.id == request["id"] }) else { return .failed("id is one of the guides") }
+                NSWorkspace.shared.open(guide.url)
+                return .ok("opened \(guide.url.absoluteString)")
+            }]
     }
 
     /// The inbox's writes (plan 40 F): each a command, so the buttons of the page run them by id and
@@ -72,7 +109,7 @@ extension WindowSession {
                 self?.openMemoryPanel(.mailbox(PanelMailboxQuery(compose: id == "memory.send-message")))
             })
             .accepting(usage) { [weak self] request in
-                guard let self, let write = PanelMessageWrite(command: id, arguments: request.arguments) else {
+                guard let self, let write = PanelWrite(command: id, arguments: request.arguments) else {
                     return .failed("missing arguments: \(usage)")
                 }
                 let page = self.memoryPanelPage() ?? self.makeMemoryPanel()
@@ -112,6 +149,9 @@ extension WindowSession {
         }
         actions.message = { [weak self] write in
             _ = self?.commands.run(write.command, request: CommandRequest(arguments: write.arguments, folder: ""))
+        }
+        actions.openGuide = { [weak self] guide in
+            _ = self?.commands.run("memory.open-guide", request: CommandRequest(arguments: ["id": guide.id], folder: ""))
         }
         actions.go = { [weak self] place in self?.runMemoryPlace(place) }
         actions.back = { [weak self] in _ = self?.commands.run("memory.panel-back") }

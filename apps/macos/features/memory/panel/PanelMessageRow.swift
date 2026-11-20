@@ -15,7 +15,7 @@ final class PanelMessageRow: NSView {
     let message: PanelMail
     let mailbox: PanelProjectRef
     private let editable: Bool
-    private let write: (PanelMessageWrite) -> Void
+    private let write: (PanelWrite) -> Void
     private let head = PanelPress()
     private let detail = PanelText.column([], gap: MP.Inbox.detailGap)
     private var chip: NSView?
@@ -28,7 +28,7 @@ final class PanelMessageRow: NSView {
     private let problem = PanelScreen.note("", color: MP.Inbox.error)
     private(set) var buttons: [String: NSButton] = [:]
 
-    init(_ message: PanelMail, mailbox: PanelProjectRef, editable: Bool, now: Date, write: @escaping (PanelMessageWrite) -> Void) {
+    init(_ message: PanelMail, mailbox: PanelProjectRef, editable: Bool, now: Date, write: @escaping (PanelWrite) -> Void) {
         (self.message, self.mailbox, self.editable, self.write, state) = (message, mailbox, editable, write, message.state)
         super.init(frame: .zero)
         let glyph = NSImageView(image: Icon.envelopeSimple.image(size: UILooks.pt(R.icon)))

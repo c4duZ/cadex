@@ -43,8 +43,8 @@ public enum MemoryPanelSection: String, CaseIterable, Sendable {
          (T("RESOURCES", "RECURSOS"), [.docs, .changelog])]
     }
 
-    /// The ones drawn so far (plan 40 C to F); the rest say they come soon (phase G).
-    public var isBuilt: Bool { [.projects, .inbox, .workstreams, .search, .graph].contains(self) }
+    /// Every section is drawn (plan 40 C to G); kept for a section upstream adds before Cadex draws it.
+    public var isBuilt: Bool { true }
 }
 
 /// The sidebar's content while the Memória page shows (components.memoryPanel.nav): the search

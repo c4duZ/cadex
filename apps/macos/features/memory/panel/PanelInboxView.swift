@@ -11,10 +11,10 @@ import UILooks
 /// write a command (`write`); `reload` reads the place again after a save or a discard, as upstream
 /// reloads its page.
 @MainActor
-final class PanelInboxView: PanelScreen {
+final class PanelInboxView: PanelScreen, PanelWriting {
     typealias I = MP.Inbox
     let box: PanelMailbox
-    private let write: (PanelMessageWrite) -> Void
+    private let write: (PanelWrite) -> Void
     private let reload: () -> Void
     private(set) var rows: [PanelMessageRow] = []
     private(set) var compose: PanelComposeBox!
@@ -22,7 +22,7 @@ final class PanelInboxView: PanelScreen {
     let statePopup = PanelPopup(prefix: nil, value: "")
     private(set) var boxTabs: PanelTabsView!
 
-    init(_ box: PanelMailbox, now: Date = Date(), write: @escaping (PanelMessageWrite) -> Void, reload: @escaping () -> Void,
+    init(_ box: PanelMailbox, now: Date = Date(), write: @escaping (PanelWrite) -> Void, reload: @escaping () -> Void,
          go: @escaping (PanelPlace) -> Void) {
         (self.box, self.write, self.reload) = (box, write, reload)
         super.init(go: go)
@@ -164,7 +164,7 @@ final class PanelInboxView: PanelScreen {
     }
 
     /// What the engine said to a write this screen sent.
-    func finished(_ done: PanelMessageWrite, _ answer: Result<Data, PanelReadError>) {
+    func finished(_ done: PanelWrite, _ answer: Result<Data, PanelReadError>) {
         switch done {
         case .send:
             compose.finished(answer.map { _ in () })
@@ -181,6 +181,7 @@ final class PanelInboxView: PanelScreen {
             case .success: reload()
             case .failure(let e): rows.first { $0.message.id == id }?.failed(e.words)
             }
+        case .approve, .reject, .fix: break
         }
     }
 }

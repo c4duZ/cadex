@@ -49,24 +49,24 @@ let siteRef = PanelProjectRef(name: "site")
         expect(PanelPlace.section(.inbox).normalized == .mailbox(PanelMailboxQuery()) && PanelPlace.section(.workstreams).normalized == .workstreams(page: 1))
         expect(PanelPlace.mailbox(q).section == .inbox && PanelPlace.workstreams(page: 2).section == .workstreams && PanelPlace.mailbox(q).project == nil)
         expect(PanelLoads.paths(.workstreams(page: 2)) == ["extra/workstreams?page=2"] && PanelLoads.paths(.mailbox(PanelMailboxQuery())) == ["extra/inbox"])
-        expect(MemoryPanelSection.inbox.isBuilt && MemoryPanelSection.workstreams.isBuilt && !MemoryPanelSection.health.isBuilt)
+        expect(MemoryPanelSection.inbox.isBuilt && MemoryPanelSection.workstreams.isBuilt )
     }),
     ("a write is a command and a POST: send, hold, save and discard, each back from its arguments", {
-        let writes: [PanelMessageWrite] = [.send(from: cadexRef, to: siteRef, agent: "claude-code", subject: "Hi", body: "Do it"),
+        let writes: [PanelWrite] = [.send(from: cadexRef, to: siteRef, agent: "claude-code", subject: "Hi", body: "Do it"),
                                            .hold(id: "m-1", mailbox: cadexRef), .save(id: "m-1", mailbox: cadexRef, subject: "", body: "New"),
                                            .discard(id: "m 2", mailbox: cadexRef)]
-        for w in writes { expect(PanelMessageWrite(command: w.command, arguments: w.arguments) == w, "\(w.arguments)") }
+        for w in writes { expect(PanelWrite(command: w.command, arguments: w.arguments) == w, "\(w.arguments)") }
         expect(writes.map(\.path) == ["extra/messages", "extra/messages/m-1/edit", "extra/messages/m-1/save", "extra/messages/m%202/release"], "\(writes.map(\.path))")
         expect(writes[0].body == #"{"body":"Do it","from_project":"cadex","from_workspace":"default","subject":"Hi","to_agent":"claude-code","to_project":"site","to_workspace":"default"}"#, writes[0].body)
         expect(writes[2].body == #"{"body":"New","project":"cadex","subject":"","workspace":"default"}"#, writes[2].body)
-        expect(PanelMessageWrite(command: "memory.send-message", arguments: ["from": "cadex", "agent": "codex", "body": "x"])
+        expect(PanelWrite(command: "memory.send-message", arguments: ["from": "cadex", "agent": "codex", "body": "x"])
                == .send(from: cadexRef, to: cadexRef, agent: "codex", subject: "", body: "x"), "the destination defaults to the source")
-        expect(PanelMessageWrite(command: "memory.save-message", arguments: ["id": "x", "mailbox": "cadex"]) == nil, "save needs the body")
+        expect(PanelWrite(command: "memory.save-message", arguments: ["id": "x", "mailbox": "cadex"]) == nil, "save needs the body")
     }),
     ("the screen: choices go to new places; Nova mensagem sends what was typed and says it queued; Editar opens the editor", {
         guard let box = PanelMailbox.parse(panelFixture("inbox"), query: PanelMailboxQuery()) else { return expect(false) }
         var gone: [PanelPlace] = []
-        var sent: [PanelMessageWrite] = []
+        var sent: [PanelWrite] = []
         var reloads = 0
         let view = PanelInboxView(box, now: panelNowF, write: { sent.append($0) }, reload: { reloads += 1 }) { gone.append($0) }
         inPortuguese { expect(view.statePopup.said == "Aguardando coleta" || view.statePopup.said == "Awaiting collection") }

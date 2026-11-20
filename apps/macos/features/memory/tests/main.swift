@@ -218,5 +218,5 @@ let featureTests: [(name: String, body: Checks.Body)] = [
         expect(MemoryWarmUp.isNeeded(version: "1.2", folder: dir + "/other"), "another folder (a test instance) has its own")
     }),
 ]
-let exitCode = await Checks.run(featureTests + pageTests() + markerTests() + markerPlaceTests() + pageTextTests() + offTests() + panelTests() + panelDetailTests() + panelScreenTests() + panelSearchTests() + panelGraphTests() + panelInboxTests())
+let exitCode = await Checks.run(featureTests + pageTests() + markerTests() + markerPlaceTests() + pageTextTests() + offTests() + panelTests() + panelDetailTests() + panelScreenTests() + panelSearchTests() + panelGraphTests() + panelInboxTests() + panelReviewTests())
 exit(exitCode)

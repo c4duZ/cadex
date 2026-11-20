@@ -30,6 +30,7 @@ func panelAnswer(_ path: String) -> Data? {
         "extra/inbox": "inbox", "extra/inbox?workspace=default&project=cadex&box=outbox": "inbox-sent",
         "extra/inbox?workspace=default&project=cadex&state=": "inbox-all", "extra/inbox?workspace=default&project=site&state=claimed": "inbox-empty",
         "extra/workstreams": "workstreams",
+        "extra/review": "review", "extra/review?project=default/site&sort=confidence-desc": "review-site", "extra/health": "health",
     ]
     return map[path].map(panelFixture)
 }
@@ -40,7 +41,7 @@ func panelProjectSeed() -> PanelProjectData? {
 
 @MainActor func panelDetailTests() -> [(name: String, body: Checks.Body)] { [
     ("a place's arguments come back as the same place, and the trail names it", {
-        let places: [PanelPlace] = [.section(.health), .graph(cadexRef), .graph(nil), .project(cadexRef, .knowledge), .page(cadexRef, "decisions/engine.md"),
+        let places: [PanelPlace] = [.section(.projects), .health, .graph(cadexRef), .graph(nil), .project(cadexRef, .knowledge), .page(cadexRef, "decisions/engine.md"),
                                     .history(cadexRef, "decisions/engine.md", from: "a", to: "b"), .session(cadexRef, "s-1", offset: 50),
                                     .retrievals(cadexRef, "s-1", offset: 0), .agent(PanelProjectRef(workspace: "acct", name: "cadex"), "codex")]
         for place in places { expect(PanelPlace(arguments: place.arguments) == place, "\(place.arguments)") }

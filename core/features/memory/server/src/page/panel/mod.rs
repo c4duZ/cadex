@@ -3,7 +3,8 @@
 //! (auth.rs); the app reaches it through `cadex memory-agent panel --path P`
 //! (agent_client.zig); its writes, `cadex memory-agent panel-post --path P`
 //! with the JSON on stdin. Everything here only reads but the inbox's
-//! messages (messages.rs, plan 40 F: send, and edit one still queued).
+//! messages (messages.rs, plan 40 F: send, and edit one still queued) and
+//! the Saúde screen's fixes (fixes.rs, plan 40 G).
 //!
 //! - `/cadex/memory/panel/api/v1/...`: upstream's read-only JSON API
 //!   (workspaces, projects, overview, pages, history, recent, briefing,
@@ -18,7 +19,7 @@
 //!   home.rs (overview extras and the inbox counter), inbox.rs with
 //!   messages.rs, queues.rs
 //!   (workstreams and the review list; approve and reject stay in
-//!   ../proposals.rs), health.rs with health_checks.rs, project.rs (a project's summary, sessions
+//!   ../proposals.rs), health.rs with health_checks.rs and fixes.rs, project.rs (a project's summary, sessions
 //!   and agents), tokens.rs (token usage of a project or a session),
 //!   session.rs (retrievals and a page's evidence), search.rs with
 //!   search_trace.rs (the search screen: filters, the recall trace, the
@@ -28,6 +29,7 @@
 //! update that adds a route can never collide with one of ours.
 
 mod api;
+mod fixes;
 mod health;
 mod health_checks;
 mod home;
@@ -97,7 +99,10 @@ pub(crate) fn router(page: Arc<Ctx>, sources: Sources) -> Router {
         .route("/messages/{id}/release", post(messages::release_edit))
         .route("/workstreams", get(queues::workstreams))
         .route("/review", get(queues::review))
+        .route("/review/approve", post(queues::approve))
+        .route("/review/reject", post(queues::reject))
         .route("/health", get(health::handle))
+        .route("/fix", post(fixes::handle))
         .route("/search", get(search::handle))
         .route(&format!("{p}/summary"), get(project::summary))
         .route(&format!("{p}/sessions"), get(project::sessions))

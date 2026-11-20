@@ -13,8 +13,10 @@
 //!   `{"total","project_count","truncated","sort","scopes":[{"workspace",
 //!   "project","pending"}],"proposals":[…]}`, each proposal the Memory page's
 //!   row (../proposals.rs) plus `workspace`, `project`, `operation`,
-//!   `confidence`, `is_rule`, `rewrites_existing` and `edit_mode`. Approving
-//!   and rejecting are the page's routes, `/cadex/memory/approve|reject?id`.
+//!   `confidence`, `is_rule`, `rewrites_existing` and `edit_mode`.
+//! - `POST extra/review/approve` and `extra/review/reject`, `{"id"[,"reason"]}`
+//!   (plan 40 G): the Memory page's own decisions (../proposals.rs, upstream's
+//!   pending-writes path), so the panel writes through the same code.
 
 use std::sync::Arc;
 
@@ -141,4 +143,27 @@ pub(crate) async fn review(State(ctx): State<Arc<PanelCtx>>, axum::extract::Quer
         "proposals": reviews.into_iter().map(proposal).collect::<Vec<_>>(),
     }))
     .into_response()
+}
+
+#[derive(serde::Deserialize)]
+pub(crate) struct Decision {
+    id: String,
+    #[serde(default)]
+    reason: Option<String>,
+}
+
+fn as_query(d: Decision) -> axum::extract::Query<std::collections::HashMap<String, String>> {
+    let mut q = std::collections::HashMap::from([("id".to_owned(), d.id)]);
+    if let Some(reason) = d.reason {
+        q.insert("reason".to_owned(), reason);
+    }
+    axum::extract::Query(q)
+}
+
+pub(crate) async fn approve(State(ctx): State<Arc<PanelCtx>>, Json(d): Json<Decision>) -> Response {
+    super::super::proposals::approve(State(ctx.page.clone()), as_query(d)).await
+}
+
+pub(crate) async fn reject(State(ctx): State<Arc<PanelCtx>>, Json(d): Json<Decision>) -> Response {
+    super::super::proposals::reject(State(ctx.page.clone()), as_query(d)).await
 }

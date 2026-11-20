@@ -148,9 +148,9 @@ let panelNow = ISO8601DateFormatter().date(from: "2026-11-20T07:43:40Z")!
         expect(picked == [.health] && searched == ["tenant"])
         nav.select(.inbox)
         expect(nav.litSection == .inbox)
-        expect(MemoryPanelSection.allCases.filter(\.isBuilt) == [.projects, .inbox, .workstreams, .search, .graph])
+        expect(MemoryPanelSection.allCases.allSatisfy(\.isBuilt))
     }),
-    ("the page: the overview with data, one line for a section still to come, the off state", {
+    ("the page: the overview with data, another section without reading it, the off state", {
         var actions = MemoryPanelActions()
         var reads = 0
         actions.load = { done in reads += 1; done(panelSeed().map { .data($0) } ?? .off) }
@@ -159,7 +159,7 @@ let panelNow = ISO8601DateFormatter().date(from: "2026-11-20T07:43:40Z")!
         let page = MemoryPanelDocument(actions: actions)
         expect(page.loaded && page.isPage && page.identity == "memory:panel" && reads == 1)
         page.show(.graph)
-        expect(page.section == .graph && reads == 1, "a section to come reads nothing")
+        expect(page.section == .graph && reads == 1, "another section reads nothing of the overview")
         page.show(.projects)
         expect(reads == 2 && page.overview.cards.count == 5)
         page.close()

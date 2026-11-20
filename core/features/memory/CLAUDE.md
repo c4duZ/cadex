@@ -207,7 +207,7 @@
     página, como no upstream) e `server/src/page/proposals.rs` (as propostas pendentes, até 200, e
     aprovar ou recusar pelo caminho do "pending-writes" do admin do upstream, com commit na aprovação).
   - Os dados do painel Memória nativo (plano 40 B), em `server/src/page/panel/`, sob
-    `/cadex/memory/panel`, só leitura (menos as mensagens da caixa de entrada, plano 40 F), com o token como toda rota e o pedido visto como o dono (o
+    `/cadex/memory/panel`, só leitura (menos as mensagens da caixa de entrada, plano 40 F, e as decisões e correções da fase G), com o token como toda rota e o pedido visto como o dono (o
     root do upstream, sem filtro de leitor, ator anônimo):
     - `api/v1/…`, em `server/src/page/panel/api/`: a API JSON do upstream respondida pelo Cadex, com
       os caminhos, as queries, os limites, as leituras e o JSON dos handlers dele (o routes/api.rs do
@@ -230,7 +230,11 @@
       verificações, limites, palavras das recusas e chamadas da wiki; sem as do navegador: o
       cabeçalho, a origem e o login),
       `server/src/page/panel/queues.rs` (workstreams e a revisão de aprendizado de todos os
-      projetos; aprovar e recusar seguem em `server/src/page/proposals.rs`),
+      projetos; aprovar e recusar, `extra/review/approve|reject`, chamam as de
+      `server/src/page/proposals.rs`, que também aceita o motivo da recusa, até 500),
+      `server/src/page/panel/fixes.rs` (plano 40 G, `extra/fix`: as correções que os checks do
+      upstream mandam digitar, feitas pelo engine: reenviar a fila do hook, gerar os vetores que
+      faltam ou refazer todos pelo `run_embedding_backfill`, compactar pelo `WriterHandle::compact`),
       `server/src/page/panel/health.rs` (a Saúde com os contadores deste engine: hooks do
       `IngestMetrics` do roteador, fila do writer, a fila do `cadex memory-hook`, o diário do `run`, o
       modelo local) com `server/src/page/panel/health_checks.rs` (**cópia** dos checks do upstream,
@@ -485,11 +489,14 @@
     aleatórios): enviar, as seis recusas do envio, segurar, salvar vazio e salvar, salvar de novo,
     segurar e descartar outra, descartar de novo, a coletada, um id que não é id, a caixa errada; cada
     passo com o mesmo status e as mesmas palavras, e a caixa no fim igual.
+  - As correções e as decisões (plano 40 G): `server/tests/panel_fixes.rs`: um evento na fila do hook
+    reenviado e a fila vazia na Saúde, os vetores sem o modelo com o 503 do upstream, o banco
+    compactado e ainda lido, uma recusa com motivo e uma aprovação pelas rotas do painel.
 
 ## Como validar
 - `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs`,
   `server/tests/import.rs`, `server/tests/auto_memory.rs`, `server/tests/marker.rs`,
-  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs`, `server/tests/agent.rs`, `server/tests/agent_audit.rs`, `server/tests/agent_guard.rs`, `server/tests/memory_page.rs`, `server/tests/memory_off.rs`, `server/tests/session_end.rs`, `server/tests/panel_parity.rs` (o painel do upstream sobre o seed: toda tela e rota `/api/v1` responde 200 com os números do seed, e ler tudo deixa a pasta igual byte a byte) e `server/tests/panel_api.rs` (os dados do painel pelo engine iguais aos do upstream, e a pasta intacta) e `server/tests/panel_messages.rs` (enviar e editar mensagens como o upstream) (parte do `make check`, em segundos).
+  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs`, `server/tests/agent.rs`, `server/tests/agent_audit.rs`, `server/tests/agent_guard.rs`, `server/tests/memory_page.rs`, `server/tests/memory_off.rs`, `server/tests/session_end.rs`, `server/tests/panel_parity.rs` (o painel do upstream sobre o seed: toda tela e rota `/api/v1` responde 200 com os números do seed, e ler tudo deixa a pasta igual byte a byte) e `server/tests/panel_api.rs` (os dados do painel pelo engine iguais aos do upstream, e a pasta intacta) e `server/tests/panel_messages.rs` (enviar e editar mensagens como o upstream) e `server/tests/panel_fixes.rs` (as correções da Saúde e as decisões da Revisão) (parte do `make check`, em segundos).
 - `make memory-eval MODELS=<pasta>`: as 30 perguntas, só texto contra híbrida (`../../../tools/memory_eval.py`).
 - `make core-test`: os testes do cliente (o pedido de cada ação do `memory-agent`, o `panel` e o `panel-post` presos ao prefixo, eventos, query com e sem workspace, fila, respostas HTTP,
   sem token, a sessão pausada que não manda nem enfileira nada).

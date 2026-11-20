@@ -67,6 +67,10 @@
 - `memory_eval.py` (`make memory-eval MODELS=<pasta>`): a busca da memória medida, as ADRs e specs
   como páginas e 30 perguntas, só por palavra contra a híbrida (plano 22 fase D; o resultado fica em
   `../docs/spec/memory.md`).
+- `memory_panel_guides.py`: os guias da tela Documentação da Memória (plano 40 G), do catálogo do
+  ai-memory-web e das traduções do ai-memory-core no checkout do cargo, no commit fixado em
+  `../core/features/memory/server/Cargo.toml`; gera `../apps/macos/features/memory/panel/PanelGuides.swift`.
+  Rodar de novo a cada atualização do upstream.
 - `webview2_sdk.py`: baixa o pacote Microsoft.Web.WebView2 (versão e sha256 fixados no script) e
   gera `../apps/windows/shared/webview/sdk/` (as declarações em C das interfaces que o app usa, os
   ids e o WebView2Loader.dll por arquitetura) (`../docs/adr/0014-webview2-on-windows.md`). Só roda

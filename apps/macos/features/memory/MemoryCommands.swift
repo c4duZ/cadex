@@ -19,6 +19,9 @@ public struct MemoryPageActions {
     public var proposals: @MainActor (@escaping @MainActor ([MemoryProposal]) -> Void) -> Void
     public var approve: @MainActor (MemoryProposal) -> Void
     public var reject: @MainActor (MemoryProposal) -> Void
+    /// A decision by the proposal's id (memory.approve and memory.reject with `id=`, the Memória
+    /// panel's buttons; plan 40 G): approve, or reject with the reason given ("" none).
+    public var decide: @MainActor (String, Bool, String) -> Void = { _, _, _ in }
     /// The wiki's pages as the Memory tab last read them, and opening one (memory.search).
     public var pages: @MainActor () -> [MemoryPage] = { [] }
     public var openPage: @MainActor (MemoryPage) -> Void = { _ in }
@@ -66,10 +69,20 @@ public enum MemoryPageCommands {
                     action: .run { palette.open(MemoryPageSource(pages: actions.pages(), open: actions.openPage)) }),
             Command(id: "memory.approve", title: T("Approve Memory Proposal…", "Aprovar proposta da memória…"),
                     keywords: ["memory", "proposal", "approve", "agent", "memória", "proposta", "aprovar"], category: .view,
-                    action: pick(T("The proposal to approve", "A proposta a aprovar"), actions.approve)),
+                    action: pick(T("The proposal to approve", "A proposta a aprovar"), actions.approve))
+                .accepting("id=<proposal id>") { request in
+                    guard let id = request["id"], !id.isEmpty else { return .failed("id is a pending proposal's id") }
+                    actions.decide(id, true, "")
+                    return .ok("approving \(id)")
+                },
             Command(id: "memory.reject", title: T("Reject Memory Proposal…", "Rejeitar proposta da memória…"),
                     keywords: ["memory", "proposal", "reject", "agent", "memória", "proposta", "rejeitar"], category: .view,
-                    action: pick(T("The proposal to reject", "A proposta a rejeitar"), actions.reject)),
+                    action: pick(T("The proposal to reject", "A proposta a rejeitar"), actions.reject))
+                .accepting("id=<proposal id> [reason=<why>]") { request in
+                    guard let id = request["id"], !id.isEmpty else { return .failed("id is a pending proposal's id") }
+                    actions.decide(id, false, request["reason"] ?? "")
+                    return .ok("rejecting \(id)")
+                },
         ]
     }
 }

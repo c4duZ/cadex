@@ -346,7 +346,10 @@
   página de sessão da memória, o que ela guardou, Retomar, Continuar em outra conta e Ver a página
   aberta já renderizada) e a Memória (agrupada pelo tipo, a escolhida renderizada, Editar, Abrir a
   sessão, Apagar); project.show-sessions e project.show-memory abrem a página na seção.
-- `MemoryPanelWiring.swift` (planos 40 C a E): memory.show-panel (com `section=`; Pesquisar com
+- `MemoryPanelWiring.swift` (planos 40 C a G; as escritas do painel são comandos: memory.send-message,
+  memory.edit-message, memory.save-message, memory.discard-message-edit, memory.fix-health, que pergunta
+  antes de compactar, e memory.open-guide; memory.approve e memory.reject com `id=` vêm de
+  `MemoryPageWiring.swift`, pelo `decide`): memory.show-panel (com `section=`; Pesquisar com
   `query=`, `scope=`, `kind=`, `tier=`, `explain=1`; ou com `project=` e a tela: `tab=`, `page=`,
   `history=` com `from=`/`to=`, `session=` com `offset=`, `retrievals=`, `agent=`, `graph=1`) abre a página Memória da feature memory como Automações, no lugar pedido, e põe a barra
   lateral no modo Memória com as seções (uma `MemoryPanelNav` por janela; num projeto, Projetos acesa

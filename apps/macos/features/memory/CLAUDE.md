@@ -89,7 +89,7 @@
   (o clique, o link, o ⓘ com popover e accessibilityHelp, o seletor no menu do app),
   `panel/PanelSections.swift` (`MemoryPanelSection`, os nove destinos em três grupos, e
   `MemoryPanelNav`, a busca e as linhas que o app põe na barra lateral) e `panel/PanelDocument.swift`
-  (`MemoryPanelDocument`, a página; a Revisão, a Saúde e a Documentação ainda dizem "Em breve."). As telas de um projeto (plano 40 D): `panel/PanelPlace.swift`
+  (`MemoryPanelDocument`, a página). As telas de um projeto (plano 40 D): `panel/PanelPlace.swift`
   (`PanelPlace`, o lugar da página e os argumentos do memory.show-panel; a trilha; `PanelTrail`,
   voltar e avançar; `PanelPath`, os caminhos escapados), `panel/PanelNavigation.swift` (as rotas de
   cada lugar, `PanelLoads`; ir, voltar e avançar; ler uma rota de cada vez e montar a tela; uma
@@ -124,14 +124,24 @@
   `panel/PanelGraphView.swift` (a tela, a legenda e CONEXÕES).
   A Caixa de entrada e os Workstreams (plano 40 F): `panel/PanelMailboxData.swift`
   (`PanelMailboxQuery`, o lugar e a rota `extra/inbox`; `PanelMailbox`, a caixa lida, as palavras do
-  upstream; `PanelMessageWrite`, cada escrita como comando e como POST; `PanelWorkstreams`),
+  upstream; `PanelWrite`, cada escrita como comando e como POST; `PanelWorkstreams`),
   `panel/PanelInboxView.swift` (a tela: a fila, o projeto, Recebidas e Enviadas, o estado, as
   mensagens, a barra de páginas; o que o engine respondeu a cada escrita), `panel/PanelMessageRow.swift`
   (a mensagem que abre: o id, o corpo, Editar e o editor no lugar), `panel/PanelComposeBox.swift`
   (Nova mensagem: os seletores, os limites, o aviso de que não inicia o agente, o resultado) e
   `panel/PanelWorkstreamsView.swift` (a tabela e Anterior / Próxima). As escritas vão pelo `write`
   das ações (`cadex memory-agent panel-post`, MemoryAgent.runData com o stdin) e cada uma é um
-  comando do app (`../../app/MemoryPanelWiring.swift`).
+  comando do app (`../../app/MemoryPanelWiring.swift`); `panel/PanelWrite.swift` (`PanelWrite`, cada
+  escrita do painel como comando e como POST, e `PanelWriting`, a tela que recebe a resposta).
+  A Revisão, a Saúde e a Documentação (plano 40 G): `panel/PanelReviewData.swift` (o lugar, a leitura
+  e as palavras do upstream), `panel/PanelReviewView.swift` com `panel/PanelProposalRow.swift` (os
+  filtros, a proposta que abre, Aprovar e Rejeitar com o motivo), `panel/PanelHealthData.swift` (as
+  verificações e as cinco seções nas palavras do upstream, refeitas dos números, e a correção de
+  cada uma), `panel/PanelHealthView.swift` (os botões das correções, memory.fix-health),
+  `panel/PanelGuides.swift` (gerado por `../../../../tools/memory_panel_guides.py`: os 28 guias do
+  upstream com o português dele e o endereço no GitHub no commit fixado) e `panel/PanelDocsView.swift`
+  (o destaque, o filtro, os cartões; o Histórico de alterações). memory.approve e memory.reject
+  aceitam `id=` (e `reason=`), pelo `decide` das ações da página Memory.
   Tokens: components.memoryPanel.
 - `MemorySessions.swift` (plano 35 H): `received`, o briefing que uma sessão recebeu, lido do disco
   em `<memória>/agent/briefings/<sessão>.md` (o engine o guarda, plano 35 D; só id simples, as linhas
@@ -185,7 +195,11 @@
   `tests/PanelInboxTests.swift`, sobre o `extra/inbox` de quatro caixas e o `extra/workstreams`
   gravados do seed: a leitura, os lugares, as palavras, cada escrita como comando e POST, a tela com
   um engine falso (os seletores, enviar, segurar, salvar) e os PNGs memory-inbox*.png e
-  memory-workstreams.png; o briefing guardado de uma sessão e o id recusado, a página de
+  memory-workstreams.png; a Revisão, a Saúde e a Documentação, `tests/PanelReviewTests.swift`, sobre
+  o `extra/review` e o `extra/health` gravados (`tests/fixtures/panel-health-warn.json` é o mesmo com
+  quatro verificações falhando, feito à mão): a leitura, as palavras, os lugares, as escritas, as
+  telas com um engine falso, o catálogo dos guias e os PNGs memory-review.png, memory-health*.png e
+  memory-docs.png; o briefing guardado de uma sessão e o id recusado, a página de
   sessão vazia fora das últimas sessões; o .ai-memory.toml lido como o engine lê, gravado sem perder linha;
   o modelo, o `ensure` que não sobrescreve, o nome numa worktree e a linha do exclude): os 9 eventos e o comando de cada um, a `env` do pacote e a do
   `make run`, a workspace só sem compartilhar, os hooks com agents.stateHooks desligada, a parte

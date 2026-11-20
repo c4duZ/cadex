@@ -53,6 +53,12 @@ public enum PanelPlace: Hashable, Sendable {
     case mailbox(PanelMailboxQuery)
     /// The managed workstreams across projects, one page (100 a page).
     case workstreams(page: Int)
+    /// Revisão de aprendizado: the pending proposals (plan 40 G).
+    case review(PanelReviewQuery)
+    /// Saúde do servidor: this Mac's engine.
+    case health
+    /// Documentação (upstream's guides, filtered by `words`), or with `history` the changelogs.
+    case docs(words: String, history: Bool)
 
     /// The section lit in the sidebar: a project's screens (its graph too) keep Projetos lit.
     public var section: MemoryPanelSection {
@@ -62,6 +68,9 @@ public enum PanelPlace: Hashable, Sendable {
         case .graph(nil): .graph
         case .mailbox: .inbox
         case .workstreams: .workstreams
+        case .review: .review
+        case .health: .health
+        case .docs(_, let history): history ? .changelog : .docs
         default: .projects
         }
     }
@@ -74,6 +83,10 @@ public enum PanelPlace: Hashable, Sendable {
         case .section(.graph): .graph(nil)
         case .section(.inbox): .mailbox(PanelMailboxQuery())
         case .section(.workstreams): .workstreams(page: 1)
+        case .section(.review): .review(PanelReviewQuery())
+        case .section(.health): .health
+        case .section(.docs): .docs(words: "", history: false)
+        case .section(.changelog): .docs(words: "", history: true)
         default: self
         }
     }
@@ -86,7 +99,7 @@ public enum PanelPlace: Hashable, Sendable {
 
     public var project: PanelProjectRef? {
         switch self {
-        case .section, .search, .graph(nil), .mailbox, .workstreams: nil
+        case .section, .search, .graph(nil), .mailbox, .workstreams, .review, .health, .docs: nil
         case .graph(let p?): p
         case .project(let p, _), .page(let p, _), .history(let p, _, _, _), .session(let p, _, _), .retrievals(let p, _, _), .agent(let p, _): p
         }
@@ -97,11 +110,17 @@ public enum PanelPlace: Hashable, Sendable {
         if case .search(let query) = self { return query.arguments }
         if case .mailbox(let query) = self { return query.arguments }
         if case .workstreams(let page) = self { return page > 1 ? ["section": "workstreams", "page": String(page)] : ["section": "workstreams"] }
+        if case .review(let query) = self { return query.arguments }
+        if case .docs(let words, let history) = self {
+            var out = ["section": history ? "changelog" : "docs"]
+            if !words.isEmpty { out["query"] = words }
+            return out
+        }
         guard let project else { return ["section": section.rawValue] }
         var out = ["project": project.name]
         if project.workspace != "default" { out["workspace"] = project.workspace }
         switch self {
-        case .section, .search, .mailbox, .workstreams: break
+        case .section, .search, .mailbox, .workstreams, .review, .health, .docs: break
         case .graph: out["graph"] = "1"
         case .project(_, let tab): out["tab"] = tab.rawValue
         case .page(_, let path): out["page"] = path
@@ -134,6 +153,14 @@ public enum PanelPlace: Hashable, Sendable {
             self = .workstreams(page: max(1, Int(a["page"] ?? "") ?? 1))
             return
         }
+        if a["section"] == "review" {
+            self = .review(PanelReviewQuery(arguments: a))
+            return
+        }
+        if a["section"] == "docs" || a["section"] == "changelog" {
+            self = .docs(words: a["query"] ?? "", history: a["section"] == "changelog")
+            return
+        }
         guard let name = a["project"], !name.isEmpty else {
             guard let section = MemoryPanelSection(rawValue: a["section"] ?? "projects") else { return nil }
             self = PanelPlace.section(section).normalized
@@ -158,7 +185,7 @@ public enum PanelPlace: Hashable, Sendable {
         if p.workspace != "default" { out.append(PanelCrumb(p.workspace, nil)) }
         let home = PanelCrumb(p.name, .project(p, .overview))
         switch self {
-        case .section, .search, .mailbox, .workstreams: return []
+        case .section, .search, .mailbox, .workstreams, .review, .health, .docs: return []
         case .graph: return out + [home, PanelCrumb(T("graph", "grafo"), nil)]
         case .project: return out + [PanelCrumb(p.name, nil)]
         case .page(_, let path): return out + [home, PanelCrumb(path, nil)]

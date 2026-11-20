@@ -6,7 +6,7 @@
 //!   (`list_pending_auto_improve_reviews`, ai-memory-web's pending.rs):
 //!   `{"proposals":[{"id","title","path","kind","summary","created_at","body"}]}`
 //!   (`summary` is the reviewer's rationale; `body` the proposed page text).
-//! - `POST /cadex/memory/approve?id=ID` and `/reject?id=ID`: upstream's own
+//! - `POST /cadex/memory/approve?id=ID` and `/reject?id=ID[&reason=…]`: upstream's own
 //!   decision path, the one its `/admin/pending-writes/{id}/approve|reject`
 //!   handlers take (ai-memory-mcp's admin.rs at fa0ec25; upstream has no MCP
 //!   tool for it): `Wiki::approve_auto_improve_proposal` (admission, the
@@ -34,6 +34,8 @@ const LIST_LIMIT: usize = 200;
 /// The whole pending queue, read to find one id's project.
 const QUEUE_LIMIT: usize = 10_000;
 const REJECT_REASON: &str = "rejected by the owner in Cadex's Memory page";
+/// The reason field's length on upstream's pending page.
+const REASON_MAX: usize = 500;
 
 pub(super) fn row(review: PendingAutoImproveReview) -> Value {
     let s = review.summary;
@@ -109,7 +111,9 @@ pub(crate) async fn reject(State(ctx): State<Arc<Ctx>>, axum::extract::Query(q):
         workspace_id: s.workspace_id,
         project_id: s.project_id,
         proposal_id: s.id,
-        reason: REJECT_REASON.to_owned(),
+        // The owner's words when given (upstream's page takes up to 500), else ours.
+        reason: q.get("reason").map(|r| r.trim().chars().take(REASON_MAX).collect::<String>()).filter(|r| !r.is_empty())
+            .unwrap_or_else(|| REJECT_REASON.to_owned()),
         actor: ActorContext::anonymous(),
         author_id: None,
     };

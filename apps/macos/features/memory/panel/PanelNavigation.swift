@@ -23,6 +23,10 @@ public enum PanelLoads {
         case .graph(nil): return ["api/v1/graph"]
         case .mailbox(let query): return [query.path]
         case .workstreams(let page): return ["extra/workstreams" + (page > 1 ? "?page=\(page)" : "")]
+        case .review(let query): return [query.path]
+        case .health: return ["extra/health"]
+        // The guides are a list of the app's (PanelGuides.swift): nothing to read.
+        case .docs: return []
         }
     }
 }
@@ -115,16 +119,27 @@ public extension MemoryPanelDocument {
     func reload() { open(trail.current, from: trail.current) }
 
     /// A write from the inbox: through the app's command when there is one (ADR 0005).
-    func send(_ write: PanelMessageWrite) {
+    func send(_ write: PanelWrite) {
         if let message = actions.message { return message(write) }
         perform(write)
     }
 
-    /// The write done: the engine's answer goes to the inbox on screen.
-    func perform(_ write: PanelMessageWrite) {
+    /// The write done: the engine's answer goes to the screen that asked (the inbox, the review, the
+    /// health); a decision made from ⌘K with the page elsewhere reaches no screen.
+    func perform(_ write: PanelWrite, then: (@MainActor () -> Void)? = nil) {
         actions.write(write.path, write.body) { [weak self] answer in
-            (self?.screen as? PanelInboxView)?.finished(write, answer)
+            (self?.screen as? PanelWriting)?.finished(write, answer)
+            then?()
         }
+    }
+
+    /// A fix the owner did not confirm: its button back.
+    func fixCancelled(_ what: String) { (screen as? PanelHealthView)?.cancelled(what) }
+
+    /// A guide opens on GitHub (memory.open-guide, ADR 0005), or the page opens it itself.
+    func openGuide(_ guide: PanelGuide) {
+        if let open = actions.openGuide { return open(guide) }
+        NSWorkspace.shared.open(guide.url)
     }
 
     /// The inbox is on screen (the message commands' availability).
@@ -204,6 +219,20 @@ public extension MemoryPanelDocument {
         case .workstreams:
             guard let read = PanelWorkstreams.parse(data[0]) else { return nil }
             return PanelWorkstreamsView(read, go: go)
+        case .review(let query):
+            guard let read = PanelReview.parse(data[0], query: query) else { return nil }
+            return PanelReviewView(read, write: { [weak self] in self?.send($0) }, reload: { [weak self] in self?.reload() }, go: go)
+        case .health:
+            guard let read = PanelHealth.parse(data[0]) else { return nil }
+            // What a fix did survives the read again it asks for, once.
+            let said = healthSaid
+            healthSaid = nil
+            return PanelHealthView(read, said: said, write: { [weak self] in self?.send($0) }, reload: { [weak self] said in
+                self?.healthSaid = said
+                self?.reload()
+            }, go: go)
+        case .docs(let words, let history):
+            return PanelDocsView(words: words, history: history, open: { [weak self] in self?.openGuide($0) }, go: go)
         }
     }
 }

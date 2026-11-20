@@ -12,7 +12,7 @@ import UILooks
 final class PanelComposeBox: NSView, NSTextViewDelegate, NSTextFieldDelegate {
     typealias I = MP.Inbox
     let box: PanelMailbox
-    private let write: (PanelMessageWrite) -> Void
+    private let write: (PanelWrite) -> Void
     private let viewSent: (PanelProjectRef) -> Void
     let fromPopup = PanelPopup(prefix: nil, value: "")
     let toPopup = PanelPopup(prefix: nil, value: "")
@@ -27,7 +27,7 @@ final class PanelComposeBox: NSView, NSTextViewDelegate, NSTextFieldDelegate {
     private(set) var agent: String?
     private var sending = false
 
-    init(_ box: PanelMailbox, write: @escaping (PanelMessageWrite) -> Void, viewSent: @escaping (PanelProjectRef) -> Void) {
+    init(_ box: PanelMailbox, write: @escaping (PanelWrite) -> Void, viewSent: @escaping (PanelProjectRef) -> Void) {
         (self.box, self.write, self.viewSent) = (box, write, viewSent)
         from = box.project ?? box.scopes.first?.project
         to = from
@@ -133,8 +133,8 @@ final class PanelComposeBox: NSView, NSTextViewDelegate, NSTextFieldDelegate {
     private func enable() {
         let length = bodyView.string.count
         queueButton.isEnabled = !sending && agent != nil && from != nil && to != nil
-            && !bodyView.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && length <= PanelMessageWrite.bodyLimit
-            && subjectField.stringValue.count <= PanelMessageWrite.subjectLimit
+            && !bodyView.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && length <= PanelWrite.bodyLimit
+            && subjectField.stringValue.count <= PanelWrite.subjectLimit
         // The primary button's disabled title vanished on its light fill: the whole button dims instead.
         queueButton.alphaValue = queueButton.isEnabled ? 1 : 0.45
     }
@@ -144,8 +144,8 @@ final class PanelComposeBox: NSView, NSTextViewDelegate, NSTextFieldDelegate {
 
     private func counted() {
         let n = bodyView.string.count
-        count.stringValue = PanelWords.number(n) + " / " + PanelWords.number(PanelMessageWrite.bodyLimit)
-        count.textColor = n > PanelMessageWrite.bodyLimit ? I.error : MP.Head.meta
+        count.stringValue = PanelWords.number(n) + " / " + PanelWords.number(PanelWrite.bodyLimit)
+        count.textColor = n > PanelWrite.bodyLimit ? I.error : MP.Head.meta
         enable()
     }
 
