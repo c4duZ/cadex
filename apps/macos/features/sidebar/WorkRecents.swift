@@ -31,8 +31,9 @@ extension WorkSidebarView {
         label.font = UILooks.font(R.Section.fontSize, weight: R.Section.weight)
         label.textColor = R.Section.color
         let labelBox = NSStackView(views: [label])
-        labelBox.edgeInsets = NSEdgeInsets(top: 0, left: UILooks.pt(R.Section.padding.left), bottom: UILooks.pt(R.Section.padding.bottom), right: 0)
+        labelBox.edgeInsets = NSEdgeInsets(top: 0, left: UILooks.pt(R.Section.padding.left), bottom: 0, right: 0)
         add(labelBox)
+        list.setCustomSpacing(UILooks.pt(R.Section.padding.bottom), after: labelBox)
         for recent in recents {
             let row = WorkRow(title: recent.project.name, caret: nil, avatar: WorkAvatar(recent.project), bold: true,
                               fontSize: R.Row.fontSize, meta: .nothing(recent.when), selected: false)

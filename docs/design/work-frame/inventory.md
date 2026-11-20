@@ -142,9 +142,9 @@ plano que tira cada uma. Levantado em 2026-11-17 a partir dos manifestos e do c�
 | comando | `inspector.tab-3` … `inspector.tab-5` | saiu | a coluna só tem Files e Changes (⌃⌘1, ⌃⌘2) | 38 |
 | trecho | "panelHistory" em `apps/macos/app/WindowSession.swift` | saiu | o grafo do git é uma página (git.history-in-tab) | 38 |
 | gancho | `CADEX_PERF_HISTORY_OPEN` | saiu | abria um commit no grafo da coluna | 38 |
-| arquivo | `apps/macos/app/TitleBarAccount.swift` | saiu | a conta está no item de uso da barra de baixo e no cabeçalho do painel | 38 |
+| arquivo | `apps/macos/app/TitleBarAccount.swift` | fica | saiu no plano 38 e voltou em 2026-11-20: sem ela o dono não tinha como trocar de conta na barra de cima | 38 |
 | trecho | "boardButton" em `apps/macos/app/TitleBarView.swift` | saiu | o Quadro no pé da barra lateral e da faixa, e view.board | 38 |
-| trecho | "settingsButton" em `apps/macos/app/TitleBarView.swift` | saiu | ⌘, (settings.open) e o menu | 38 |
+| trecho | "settingsButton" em `apps/macos/app/TitleBarView.swift` | fica | saiu no plano 38 e voltou em 2026-11-20: o dono não achava as configurações só pelo ⌘, e o menu | 38 |
 | trecho | "setBellOpen" em `apps/macos/app/TitleBarView.swift` | saiu | o sino virou a fila "Precisa de você" e a pílula | 38 |
 | trecho | "setLocation" em `apps/macos/app/TitleBarView.swift` | saiu | o lugar (`apps/macos/app/TitleBarPlace.swift`) | 38 |
 | trecho | "taskItems" em `apps/macos/app/ProjectsWiring.swift` | saiu | as tarefas no menu do lugar e na barra lateral | 38 |

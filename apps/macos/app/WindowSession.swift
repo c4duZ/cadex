@@ -210,6 +210,10 @@ final class WindowSession: NSObject, NSWindowDelegate {
         drawQueue()
         workspace.statusBar.onNavigate = { [weak self] folder in self?.tabs?.activeTerminal?.changeDirectory(to: folder) }
         setUpStatusBar(workspace.statusBar, git: git)
+        // The account up top opens the accounts card on hover, as the status bar's usage does.
+        statusCards.append(HoverCard(over: workspace.titleBar.accountView, below: true) { [weak self] in
+            AgentUsageCard.make(colors: self?.usageStrip?.colors ?? AgentColors()) { account in self?.switchOrLaunch(account) }
+        })
         // After the status bar's items exist: they show keep-awake and the update (review of
         // 2026-11-17: before, a new window drew them in the wrong state).
         showPower()

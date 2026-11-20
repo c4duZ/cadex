@@ -3,6 +3,7 @@ import Agents
 import Inspector
 import Projects
 import Sidebar
+import Strings
 import StateGlyph
 import Themes
 
@@ -42,6 +43,15 @@ extension WindowSession {
         let tree = Dictionary(treeModel().map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
         // The queue's requests by project too: the amber count and the queue never disagree.
         let asking = Dictionary(grouping: AgentAttention.shared.cards, by: \.project).mapValues(\.count)
+        // The home folder's terminals: no project, but a line at the end while any is open, so going
+        // into a project never loses them (the owner, 2026-11-20: "se eu entrar em projeto, eu vou
+        // perder ele").
+        let loose = (projects?.projects ?? []).first { Self.isLoose($0.folder) && !$0.tabs.allTerminals.isEmpty }.map { project in
+            let terminals = project.tabs.allTerminals
+            let states = terminals.compactMap { Self.treeRow($0).state }
+            return WorkProject(id: project.folder, name: T("No project", "Sem projeto"), emoji: "~", state: Self.summary(states),
+                               terminals: terminals.count, waiting: states.filter { $0 == .needs }.count, pinned: false)
+        }
         return ordered.map { project in
             let terminals = project.tabs.allTerminals
             let states = terminals.compactMap { Self.treeRow($0).state }
@@ -57,7 +67,7 @@ extension WindowSession {
                                emoji: project.emoji, state: Self.summary(states), terminals: terminals.count,
                                waiting: max(states.filter { $0 == .needs }.count, asking[project.name] ?? 0), expanded: isExpanded(project.folder),
                                places: places, pinned: project.pinned)
-        }
+        } + (loose.map { [$0] } ?? [])
     }
 
     /// The narrow window's strip (plan 38 G): the projects' squares, the requests' box, Files and the

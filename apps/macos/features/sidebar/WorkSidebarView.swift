@@ -152,8 +152,11 @@ public final class WorkSidebarView: NSView {
         label.font = UILooks.font(W.Section.fontSize, weight: W.Section.weight)
         label.textColor = W.Section.color
         let labelBox = NSStackView(views: [label])
-        labelBox.edgeInsets = NSEdgeInsets(top: 0, left: UILooks.pt(W.Section.padding.left), bottom: UILooks.pt(W.Section.padding.bottom), right: 0)
+        labelBox.edgeInsets = NSEdgeInsets(top: 0, left: UILooks.pt(W.Section.padding.left), bottom: 0, right: 0)
         add(labelBox)
+        // The board's 6 pt under PROJECTS: as the box's inset it never reached the list, and the label
+        // sat 5 pt closer to the first project than the board (measured 2026-11-20, the owner).
+        list.setCustomSpacing(UILooks.pt(W.Section.padding.bottom), after: labelBox)
         for project in projects { addProject(project, place: place) }
         let new = WorkRow(title: T("New Project…", "Novo projeto…"), caret: nil, avatar: nil, bold: false,
                           fontSize: W.Row.fontSize, meta: .none, selected: false)
@@ -165,7 +168,8 @@ public final class WorkSidebarView: NSView {
     private func addProject(_ project: WorkProject, place: String?) {
         let meta: WorkRow.Meta = project.waiting > 0 && !project.expanded ? .waiting(project.waiting)
             : project.terminals > 0 ? .terminals(project.badge, project.terminals) : .nothing(T("nothing open", "nada aberto"))
-        let row = WorkRow(title: project.name, caret: project.expanded, avatar: WorkAvatar(project), bold: true,
+        // No places (the home folder's "No project"): nothing to unfold, no arrow.
+        let row = WorkRow(title: project.name, caret: project.places.isEmpty ? nil : project.expanded, avatar: WorkAvatar(project), bold: true,
                           fontSize: W.Row.fontSize, meta: meta, selected: false)
         row.onPress = { [weak self] in self?.onPickProject?(project.id) }
         row.onCaret = { [weak self] in self?.onToggle?(project.id) }

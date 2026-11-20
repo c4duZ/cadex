@@ -114,8 +114,10 @@
   `PlaceWiring.swift`: o main e as tarefas do projeto, a página do projeto, os outros projetos e
   Trocar de projeto…; nos terminais da pasta pessoal, "Sem projeto ▾" em vez do lugar escondido, que
   deixava um buraco na barra), as abas do lugar e o "+", Revisar (`TitleBarReview`, git.review-open) só numa
-  tarefa depois de um fio; à direita, a pílula e a busca. A conta, o quadro e a engrenagem saíram
-  (as propriedades ficam para quem ainda as chama); o item da tarefa, o "‹ projeto" e o Review das
+  tarefa depois de um fio; à direita, a pílula, a conta (`TitleBarAccount.swift`, o uso; o clique
+  troca, agents.switch-account; o cartão das contas ao passar o mouse), a busca e a engrenagem
+  (settings.open): a conta e a engrenagem saíram no plano 38 e voltaram em 2026-11-20 (o dono, sem
+  elas não trocava de conta nem achava as configurações); o quadro saiu; o item da tarefa, o "‹ projeto" e o Review das
   abas também (`ProjectsWiring.swift`, extrasOf: só o Compare de uma corrida).
 - Plano 38 fase D: `InspectorWiring.swift` dá o cabeçalho de Arquivos (`showFilesHead`: a tarefa
   "tarefa de X · contra base", o main o nome e o caminho) e a linha de mudanças (`showChangesLine`,
@@ -149,8 +151,9 @@
   fixa o projeto; a barra lateral põe os fixados primeiro (`RailWiring.swift`);
   `projectPicture`, o quadrado dos cartões da página Projetos e do cabeçalho da página do projeto.
 - Plano 36 fase D: project.show-terminals volta às abas do próprio projeto; `TitleBarView.swift` diz à faixa de abas quanto espaço ela tem;
-  os terminais da pasta pessoal são abas sem projeto (`RailWiring.swift`, `isLoose`: fora da
-  barra lateral); a coluna segue a tarefa quando a lista das tarefas chega (`TreeWiring.swift`).
+  os terminais da pasta pessoal são abas sem projeto (`RailWiring.swift`, `isLoose`; desde
+  2026-11-20 uma linha "Sem projeto" no fim de Projetos enquanto houver terminal neles, para não se
+  perderem ao entrar num projeto); a coluna segue a tarefa quando a lista das tarefas chega (`TreeWiring.swift`).
 - Plano 36 fase F: só o quadro fecha a barra lateral (`BoardWiring.swift`, setBoardShown), e sair
   dele a devolve; uma página no centro a mantém. `RemoteWiring.swift`: remote.show, os hosts SSH e
   as máquinas da tailnet numa lista (`RemoteSource`), escolher conecta numa aba (connectSSH,

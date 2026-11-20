@@ -273,7 +273,7 @@ extension WindowSession {
         if tabs?.showsPage == true {
             showProject(branch: lastBranch)
             window.title = [tabs?.activeDocument?.title, "Cadex"].compactMap { $0 }.joined(separator: " — ")
-            return
+            return refreshTitleAccount()
         }
         let (project, task) = TitleBarView.location(of: root)
         // Where you are, in words, where macOS shows it (Mission Control, ⌘`, the Window menu): the
@@ -281,6 +281,7 @@ extension WindowSession {
         let named = projects?.projects.first { $0.folder == projects?.activeFolder }?.name ?? project
         window.title = [[named, task].compactMap { $0 }.joined(separator: " › "), "Cadex"].joined(separator: " — ")
         showProject(branch: lastBranch)
+        refreshTitleAccount()
     }
 
     /// The status bar follows the focused terminal's folder, and its folder
@@ -288,6 +289,8 @@ extension WindowSession {
     func connectStatusBar(_ bar: StatusBarView, to tabs: TabsController) {
         tabs.onActiveChange = { [weak self, weak tabs, weak bar] in
             let terminal = tabs?.activeTerminal
+            // The title bar's account follows the focused agent (the owner, 2026-11-18).
+            self?.refreshTitleAccount()
             // A read that fails for a moment keeps the last folder: the
             // trail emptied and came back, moving the whole bar (2026-10-22).
             if let folder = terminal?.currentDirectory { bar?.path = folder }

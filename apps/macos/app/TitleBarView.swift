@@ -8,8 +8,9 @@ import Tabs
 /// The top bar (docs/adr/0039-sidebar-with-work-and-files.md, plan 38 phase E; components.titleBar
 /// and components.place): after the window buttons, the sidebar's button, the place ("project ›
 /// task ▾"), the place's tabs and "+", Review in a task; on the right the needs-you pill (sidebar
-/// closed) and the search (⌘K). The account, the board and the settings left it (the bottom bar,
-/// the sidebar's foot, ⌘,). Every control runs a command by id (ADR 0005).
+/// closed), the account (its usage; the click switches) and the search (⌘K), and the settings. The
+/// account and the settings came back on 2026-11-20 (the owner: with them gone there was no way to
+/// switch accounts or open the settings). Every control runs a command by id (ADR 0005).
 final class TitleBarView: NSView {
     typealias Look = DesignTokens.TitleBar
     /// Zoomed but never compact: macOS places the window buttons itself (plan 15, phase D).
@@ -30,6 +31,10 @@ final class TitleBarView: NSView {
         icon: .plus, tip: T("Open a terminal, file, preview or git graph", "Abrir terminal, arquivo, preview ou grafo do git"), kind: .add)
     /// The needs-you pill, with the sidebar closed (ADR 0039: the bell became the sidebar's queue).
     let needs = TitleBarNeeds()
+    /// The settings window (settings.open, ⌘,).
+    private let settingsButton = TitleBarButton(icon: .gearSix, tip: T("Settings ⌘,", "Configurações ⌘,"))
+    /// The focused agent's account (else the active one) and its usage; a click switches accounts.
+    private let account = TitleBarAccount()
     /// The sidebar's button (view.toggle-sidebar, ⌘B) at the leading edge, lit while it is open.
     private let panelButton = TitleBarButton(icon: .sidebarSimple, tip: T("Sidebar ⌘B", "Barra lateral ⌘B"))
     /// Where you are; the click opens the place's menu (`placeMenu`, the app's).
@@ -55,13 +60,15 @@ final class TitleBarView: NSView {
         newTabButton.onPress = { [weak self] in self?.showNewMenu() }
         needs.onPress = { [weak self] in self?.run("agents.go-to-request") }
         panelButton.onPress = { [weak self] in self?.run("view.toggle-sidebar") }
+        settingsButton.onPress = { [weak self] in self?.run("settings.open") }
+        account.onPress = { [weak self] in self?.run("agents.switch-account") }
         place.onPress = { [weak self] in self?.showPlaceMenu() }
         review.onPress = { [weak self] in self?.run("git.review-open") }
         review.isHidden = true
         divider.wantsLayer = true
         divider.layer?.backgroundColor = DesignTokens.Place.Divider.color.cgColor
         divider.isHidden = true
-        trailing.setViews([needs, search], in: .leading)
+        trailing.setViews([needs, account, search, settingsButton], in: .leading)
         trailing.spacing = UILooks.pt(Look.gap)
 
 
@@ -128,6 +135,11 @@ final class TitleBarView: NSView {
         }
         return (url.lastPathComponent, nil)
     }
+
+    /// The account's place, for its card (the same as the status bar's usage).
+    var accountView: NSView { account }
+    /// The account shown on the right: its name and how much of its limit it used.
+    func setAccount(name: String?, used: Int?, provider: ProviderLogo) { account.show(name: name, used: used, provider: provider) }
 
     /// Where the requests' list opens when the sidebar's queue is not in sight: the search.
     var bellAnchor: NSView { search }
