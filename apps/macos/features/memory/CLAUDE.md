@@ -17,7 +17,9 @@
 ## Como eu quero
 - `MemoryKit.swift`: `part` monta o `SessionKitPart` da memória: em `hooks`, um
   `cadex memory-hook <evento>` (5 s, sem matcher, então o PostToolUse pega toda ferramenta; o hook
-  de autoria da revisão fica à parte e, numa edição, os dois rodam) em SessionStart,
+  de autoria da revisão fica à parte e, numa edição, os dois rodam; o do PostToolUse em segundo plano,
+  `async`, `backgroundEvents`: não devolve nada ao Claude, e desde o Claude Code 2.1.327 o hook que
+  segura o turno pinta a linha de trabalho de azul, que piscava a cada ferramenta; o dono, 2026-11-20) em SessionStart,
   UserPromptSubmit, PostToolUse, PreCompact, PostCompact, SubagentStart, SubagentStop, Stop,
   StopFailure (o turno que um erro da API terminou, no lugar do Stop; ai-memory 3.5.0) e
   SessionEnd; na `env`, `CADEX_MEMORY_BIN` (o engine, `findEngine`: Contents/Helpers no pacote,

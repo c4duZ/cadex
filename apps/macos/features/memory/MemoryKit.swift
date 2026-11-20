@@ -19,6 +19,13 @@ public enum MemoryKit {
     public static let hookEvents = ["SessionStart", "UserPromptSubmit", "PostToolUse", "PreCompact", "PostCompact",
                                     "SubagentStart", "SubagentStop", "Stop", "StopFailure", "SessionEnd"]
 
+    /// The events whose hook runs in the background (Claude Code's `async`): PostToolUse, after
+    /// every tool, prints nothing for Claude, and since Claude Code 2.1.327 a hook that holds the
+    /// turn turns the spinner blue, so a session using many tools blinked (the owner, 2026-11-20).
+    /// The engine stamps each event when it arrives, in milliseconds; the next event comes seconds
+    /// later. The others stay: they print the briefing, the context or the consolidation's ask.
+    public static let backgroundEvents: Set<String> = ["PostToolUse"]
+
     /// `~/Library/Application Support/Cadex/memory`; CADEX_MEMORY_DIR for a
     /// test instance, which must not touch the owner's memory.
     public nonisolated static func folder(environment: [String: String] = ProcessInfo.processInfo.environment) -> String {
@@ -73,7 +80,9 @@ public enum MemoryKit {
         let command = SessionKit.quote(tools) + " memory-hook "
         var hooks: [String: Any] = [:]
         for event in hookEvents {
-            hooks[event] = [["hooks": [["type": "command", "command": command + event, "timeout": 5]]]]
+            var hook: [String: Any] = ["type": "command", "command": command + event, "timeout": 5]
+            if backgroundEvents.contains(event) { hook["async"] = true }
+            hooks[event] = [["hooks": [hook]]]
         }
         let memory = folder(environment: environment)
         var env = env(engine: engine, environment: environment)

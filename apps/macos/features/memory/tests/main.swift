@@ -64,7 +64,7 @@ func warm(_ engine: String, _ folder: String, _ version: String) async -> Bool? 
 }
 
 let featureTests: [(name: String, body: Checks.Body)] = [
-    ("ten events, each `cadex memory-hook <Event>` with no matcher and 5 s", {
+    ("ten events, each `cadex memory-hook <Event>` with no matcher and 5 s, PostToolUse in the background", {
         let part = MemoryKit.part(tools: "/App/Cadex.app/Contents/Helpers/cadex", engine: nil, shareAcrossAccounts: true, environment: [:])
         let hooks = part.settings["hooks"] as? [String: Any] ?? [:]
         expect(hooks.keys.sorted() == ["PostCompact", "PostToolUse", "PreCompact", "SessionEnd", "SessionStart", "Stop",
@@ -75,6 +75,7 @@ let featureTests: [(name: String, body: Checks.Body)] = [
             expect(entry?["matcher"] == nil, "\(event) has a matcher")
             expect(hook?["command"] as? String == "/App/Cadex.app/Contents/Helpers/cadex memory-hook " + event, "\(String(describing: hook))")
             expect(hook?["timeout"] as? Int == 5 && hook?["type"] as? String == "command")
+            expect((hook?["async"] as? Bool ?? false) == (event == "PostToolUse"), "\(event) in the background: \(String(describing: hook?["async"]))")
         }
         let spaced = MemoryKit.part(tools: "/a b/cadex", engine: nil, shareAcrossAccounts: true, environment: [:])
         let stop = (((spaced.settings["hooks"] as? [String: Any])?["Stop"] as? [[String: Any]])?.first?["hooks"] as? [[String: Any]])?.first
