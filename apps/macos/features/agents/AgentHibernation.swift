@@ -59,7 +59,7 @@ public enum AgentHibernation {
     /// The arguments the session was opened with, without its conversation; with none kept, the
     /// permission flag as agents.launchSkipPermissions says.
     @MainActor
-    static func openedFlags(kitSession: String?, skipPermissions: Bool, kit: SessionKit) -> [String] {
+    public static func openedFlags(kitSession: String?, skipPermissions: Bool, kit: SessionKit) -> [String] {
         kitSession.flatMap(kit.arguments(of:)).map(withoutConversation) ?? (skipPermissions ? ["--dangerously-skip-permissions"] : [])
     }
 

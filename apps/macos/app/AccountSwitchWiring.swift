@@ -2,6 +2,7 @@ import AppKit
 import Agents
 import Darwin
 import Menus
+import Orchestration
 import SessionKit
 import Strings
 import Tabs
@@ -25,6 +26,8 @@ extension WindowSession {
         let command: String
         if carry == .conversation, let carried = carryConversation(terminal, to: account) {
             command = carried
+        } else if carry == .briefing, let briefed = briefedLaunch(terminal, to: account) {
+            command = briefed
         } else if settings.store.settings.memory.enabled, let tools = SessionKit.shared.toolsPath {
             command = AgentLaunch.continueCommand(for: account, tools: tools)
         } else {
@@ -56,11 +59,29 @@ extension WindowSession {
     /// runs in now (the conversation the hooks reported, agentResume), by path with --fork-session.
     /// Nil with no conversation known or no file yet (a session with no message).
     private func carryConversation(_ terminal: TerminalView, to account: AgentAccount) -> String? {
-        guard let resume = terminal.agentResume, let from = claudeAccount(in: terminal) else { return nil }
-        let transcript = AgentProjectFolder.path(for: resume.folder, in: from) + "/" + resume.sessionID + ".jsonl"
-        guard FileManager.default.fileExists(atPath: transcript) else { return nil }
+        guard let (resume, _, transcript) = conversationFile(terminal) else { return nil }
         return AgentHibernation.carryCommand(transcript: transcript, folder: resume.folder, configDir: account.isDefault ? nil : account.dir,
                                              kitSession: resume.kitSession, skipPermissions: settings.store.settings.agents.launchSkipPermissions)
+    }
+
+    /// A new conversation in `account` whose first message is Cadex's briefing (AgentBriefing): where
+    /// the pane's conversation stopped and its file. Nil without the file, a request in it or `cadex`.
+    private func briefedLaunch(_ terminal: TerminalView, to account: AgentAccount) -> String? {
+        guard let (resume, from, transcript) = conversationFile(terminal), let stop = AgentBriefing.stop(transcript: transcript),
+              case .success(let file) = PromptFiles.write(AgentBriefing.text(stop, transcript: transcript, fromAccount: from.name)) else { return nil }
+        let flags = AgentHibernation.openedFlags(kitSession: resume.kitSession, skipPermissions: settings.store.settings.agents.launchSkipPermissions,
+                                                 kit: .shared)
+        guard let opened = SessionKit.shared.claudeCommand(configDir: account.isDefault ? nil : account.dir, arguments: flags,
+                                                           cwd: resume.folder, promptFile: file) else { return nil }
+        return "cd " + SessionKit.quote(resume.folder) + " && " + opened.command
+    }
+
+    /// The pane's conversation: what the hooks reported, its account and its file there (nil with
+    /// no conversation known or no file yet, a session with no message).
+    private func conversationFile(_ terminal: TerminalView) -> (TerminalAgentResume, AgentAccount, String)? {
+        guard let resume = terminal.agentResume, let from = claudeAccount(in: terminal) else { return nil }
+        let transcript = AgentProjectFolder.path(for: resume.folder, in: from) + "/" + resume.sessionID + ".jsonl"
+        return FileManager.default.fileExists(atPath: transcript) ? (resume, from, transcript) : nil
     }
 
     /// The pid of the Claude running in `terminal`, by its live session.

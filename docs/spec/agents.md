@@ -156,8 +156,13 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
     caminho com `--fork-session` (o mesmo do "Continue in Another Account" do Histórico; o original
     fica intocado), com as flags com que a sessão abriu. Sem conversa conhecida ou sem arquivo ainda
     (sessão sem mensagem), vai como o segundo jeito;
-  - **nova, com o briefing**: o "Continue in…" da conta escolhida, uma conversa nova que começa com o
-    briefing do trabalho (`memory.md`). Sem a memória, abre o agente da outra conta sem o contexto.
+  - **nova, com o briefing**: uma conversa nova na conta escolhida cuja primeira mensagem é o briefing
+    que o Cadex escreve do arquivo da conversa: os últimos pedidos do dono (até 8), a última resposta
+    e o caminho do arquivo para o resto; o agente diz onde o trabalho está e espera. O briefing da
+    memória chega junto pelo hook. Antes era só o "Continue in…", e o resumo da memória vinha da
+    sessão errada (o id que o SessionEnd relatou era o antigo), depois de o engine subir, sem nada na
+    tela (o dono, 2026-11-20). Sem o arquivo, vai o "Continue in…"; sem a memória, o agente da outra
+    conta sem o contexto.
   No ⌘K (agents.switch-account) cada conta aparece duas vezes, "· mesma conversa" e "· nova, com o
   briefing"; os outros caminhos levam a mesma conversa. As conversas de cada conta continuam na pasta
   dela (ADR 0021).

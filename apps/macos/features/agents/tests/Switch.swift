@@ -36,4 +36,24 @@ import Strings
         let empty = AgentSwitch.detail(managed, usage: AgentUsage(session: nil, week: nil, sonnetWeek: nil), now: now)
         expect(empty.contains(T("after a session", "depois de uma sessão")) && empty.hasSuffix(T("Cadex account", "conta do Cadex")), empty)
     }),
+    ("the briefing of a new conversation: the owner's last requests and the last answer from the file, not Claude Code's own turns", {
+        let file = NSTemporaryDirectory() + "cadex-brief-\(UUID().uuidString).jsonl"
+        defer { try? FileManager.default.removeItem(atPath: file) }
+        let lines = [
+            #"{"type":"user","message":{"role":"user","content":"first ask"}}"#,
+            #"{"type":"assistant","message":{"content":[{"type":"text","text":"old answer"}]}}"#,
+            #"{"type":"user","isCompactSummary":true,"message":{"role":"user","content":"This session is being continued…"}}"#,
+            #"{"type":"user","message":{"role":"user","content":"<command-name>/compact</command-name>"}}"#,
+            #"{"type":"user","message":{"role":"user","content":[{"type":"text","text":"fix the briefing"}]}}"#,
+            #"{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Bash","input":{"command":"ls"}}]}}"#,
+            #"{"type":"user","message":{"role":"user","content":[{"type":"tool_result","content":"a.swift"}]}}"#,
+            #"{"type":"assistant","message":{"content":[{"type":"text","text":"Done: the briefing comes from the file."}]}}"#,
+        ]
+        try lines.joined(separator: "\n").write(toFile: file, atomically: true, encoding: .utf8)
+        guard let stop = AgentBriefing.stop(transcript: file) else { return expect(false, "no stop") }
+        expect(stop.prompts == ["first ask", "fix the briefing"] && stop.reply == "Done: the briefing comes from the file.", "\(stop)")
+        let text = AgentBriefing.text(stop, transcript: file, fromAccount: "bkdg")
+        expect(text.contains("(bkdg)") && text.contains(file) && text.contains("2. fix the briefing") && text.contains("Your last answer:"), text)
+        expect(AgentBriefing.stop(transcript: file + ".gone") == nil, "no file, no briefing")
+    }),
 ]
