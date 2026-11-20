@@ -32,8 +32,11 @@ extension WindowSession {
                                           cwd: terminal.currentDirectory)
         }
         terminal.footCard = nil
-        let group = terminal.foregroundGroup
-        if group > 0 { kill(group, SIGTERM) }
+        // Only the claude process: one started by `cadex continue` runs under the memory's launcher,
+        // which a SIGTERM to the whole group killed before it closed its run, and the next launch
+        // waited up to 100 s for the lease it left (traced in the launcher, 2026-11-20). With claude
+        // gone, the launcher ends its run and the shell comes back.
+        if let pid = claudePid(in: terminal) { kill(pid, SIGTERM) } else if terminal.foregroundGroup > 0 { kill(terminal.foregroundGroup, SIGTERM) }
         whenShellIsBack(terminal, tries: 50) { [weak self] in
             terminal.session?.write(command + "\n")
             self?.tabs?.focus(terminal)
@@ -58,6 +61,11 @@ extension WindowSession {
         guard FileManager.default.fileExists(atPath: transcript) else { return nil }
         return AgentHibernation.carryCommand(transcript: transcript, folder: resume.folder, configDir: account.isDefault ? nil : account.dir,
                                              kitSession: resume.kitSession, skipPermissions: settings.store.settings.agents.launchSkipPermissions)
+    }
+
+    /// The pid of the Claude running in `terminal`, by its live session.
+    private func claudePid(in terminal: TerminalView) -> pid_t? {
+        AgentsController.shared.sessions.first { self.terminal(of: $0)?.terminal === terminal && $0.account.provider == .claude }.map { $0.pid }
     }
 
     /// The account of the Claude running in `terminal`, by its live session.
