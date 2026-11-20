@@ -19,13 +19,14 @@ extension WindowSession {
         // big to index whole (docs/spec/search.md).
         search?.setFocus(folder)
         guard followTerminal else { return }
-        // Since ADR 0038 Files and Changes show the chosen project (or the task the terminal is
-        // in), not wherever `cd` went: the column and the tabs speak of the same place.
-        if let anchor = projectAnchor(for: folder) {
+        // Inside the chosen project (or the task the terminal is in), Files and Changes show it, so a
+        // `cd src` does not move the root (ADR 0038). A `cd` out of it is followed: the tree stayed on
+        // the project with the terminal elsewhere (the owner, 2026-11-20: "ele deveria mudar").
+        if let anchor = projectAnchor(for: folder), Self.folder(folder, isIn: anchor) {
             if anchor != self.folder.root, WorkspaceFolder.allow(anchor) != nil { self.folder.open(anchor) }
             return
         }
-        // No project (a terminal of no project): the old rule, the folder's repository.
+        // Outside the project, or no project: the folder's repository, else the folder.
         // git runs only inside authorized folders; the user went there.
         guard WorkspaceFolder.allow(folder) != nil else { return }
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
@@ -47,9 +48,20 @@ extension WindowSession {
         return projects?.activeFolder
     }
 
-    /// A project came into the window: the column shows it (the focused terminal's task, if any).
+    /// Whether `folder` is `root` or under it.
+    static func folder(_ folder: String, isIn root: String) -> Bool {
+        folder == root || folder.hasPrefix(root.hasSuffix("/") ? root : root + "/")
+    }
+
+    /// A project came into the window: the column shows it (the focused terminal's task, if any), or
+    /// where the focused terminal is when that is outside the project.
     func followProject() {
-        guard followTerminal, let anchor = projectAnchor(for: tabs?.activeTerminal?.currentDirectory) else { return }
+        let here = tabs?.activeTerminal?.currentDirectory
+        guard followTerminal, let anchor = projectAnchor(for: here) else { return }
+        if let here, !Self.folder(here, isIn: anchor) {
+            lastTerminalFolder = nil
+            return terminalFolderMoved(here)
+        }
         if anchor != folder.root, WorkspaceFolder.allow(anchor) != nil { folder.open(anchor) }
     }
 }

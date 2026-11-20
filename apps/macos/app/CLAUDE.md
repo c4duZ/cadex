@@ -136,8 +136,10 @@
   pedido) ou abre a lista (vários). O sino saiu da barra de cima; a lista dele abre da fila
   (agents.show-attention). O número do Dock continua (só pedidos). CADEX_PERF_REQUEST cria um pedido
   falso para ver a fila numa instância de teste.
-- Files e Changes seguem o projeto escolhido, ou a tarefa do terminal com foco, não o `cd`
-  (`FolderFollow.swift`, `projectAnchor`, `followProject` na troca de projeto). O ⌘B
+- Files e Changes seguem o projeto escolhido, ou a tarefa do terminal com foco, enquanto o terminal
+  está dentro dele; um `cd` para fora do projeto é seguido (o repositório da pasta, ou a pasta), como
+  num terminal sem projeto (o dono, 2026-11-20) (`FolderFollow.swift`, `projectAnchor`,
+  `followProject` na troca de projeto). O ⌘B
   (view.toggle-sidebar) fecha e abre a barra lateral.
 - `ProjectEditWiring.swift` (plano 36 fase B; project.new-claude, plano 39 C: uma aba nova no
   projeto com o `claude` digitado, como o dono faria, com o kit e a conta do projeto): a folha "Edit project" (project.edit, também pelo
