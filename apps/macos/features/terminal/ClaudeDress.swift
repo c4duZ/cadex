@@ -126,7 +126,9 @@ extension ClaudeDress {
         }
         var r = 0
         while r < lines.count {
-            guard isRule(r), let end = (r + 2..<min(lines.count, r + 12)).first(where: isRule),
+            // `max`: a rule on the screen's last row gave 29..<28, and a range whose start passes its
+            // end stops the app, on every frame (a friend's crash on 3.0.0, 2026-11-20).
+            guard isRule(r), let end = (r + 2..<max(r + 2, min(lines.count, r + 12))).first(where: isRule),
                   lines[r + 1].hasPrefix("❯") else { r += 1; continue }
             for row in [r, end] { for c in 0..<cols { plan.hidden[row * cols + c] = true } }
             plan.shapes.append(Shape(top: r, bottom: end, left: 0, right: cols - 1, color: p.boxFill, outline: false, midRows: true))
