@@ -37,9 +37,16 @@ extension AppDelegate {
             terminal.isHibernated = true
             return
         }
-        terminal.typeWhenReady(AgentHibernation.resumeCommand(sessionID: agent.sessionID, folder: agent.folder, configDir: agent.configDir,
-                                                              kitSession: agent.kitSession,
-                                                              skipPermissions: settings.store.settings.agents.launchSkipPermissions) + "\n")
+        // A pane that showed a background session (opened there by /resume) gets that session back.
+        let transcript = AgentAttachedJob.transcript(sessionID: agent.sessionID, folder: agent.folder, configDir: agent.configDir)
+        if let job = AgentAttachedJob.job(transcript: transcript) {
+            return terminal.typeWhenReady(AgentAttachedJob.attachCommand(job: job, folder: agent.folder, configDir: agent.configDir) + "\n")
+        }
+        // " clear && ": the long command the shell echoes does not stay above the conversation (the
+        // owner, 2026-11-20); the leading space keeps it out of a history that ignores those.
+        terminal.typeWhenReady(" clear && " + AgentHibernation.resumeCommand(sessionID: agent.sessionID, folder: agent.folder, configDir: agent.configDir,
+                                                                           kitSession: agent.kitSession,
+                                                                           skipPermissions: settings.store.settings.agents.launchSkipPermissions) + "\n")
     }
 
     private func saveProjectsSoon() {
@@ -151,7 +158,12 @@ extension AppDelegate {
         sessions.first?.followEnvironment(of: terminal.currentDirectory, to: .resume)
         let command = AgentHibernation.resumeCommand(sessionID: resume.sessionID, folder: resume.folder, configDir: resume.configDir,
                                                      kitSession: resume.kitSession, skipPermissions: settings.store.settings.agents.launchSkipPermissions)
-        terminal.session?.write(command + "\n")
+        let transcript = AgentAttachedJob.transcript(sessionID: resume.sessionID, folder: resume.folder, configDir: resume.configDir)
+        if let job = AgentAttachedJob.job(transcript: transcript) {
+            terminal.session?.write(AgentAttachedJob.attachCommand(job: job, folder: resume.folder, configDir: resume.configDir) + "\n")
+        } else {
+            terminal.session?.write(" clear && " + command + "\n")
+        }
         return true
     }
 }

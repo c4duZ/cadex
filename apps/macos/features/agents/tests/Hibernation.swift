@@ -55,4 +55,16 @@ let hibernationChecks: [(name: String, body: Checks.Body)] = [
         expect(noSettings(carried) == "cd /w && CLAUDE_CONFIG_DIR=/Users/me/.claude-work claude --resume /Users/me/.claude/projects/-w/abc.jsonl --fork-session --model haiku --dangerously-skip-permissions", carried)
         expect(AgentSwitch.choice("briefing:/Users/me/.claude-b")! == (.briefing, "/Users/me/.claude-b") && AgentSwitch.choice("/Users/me/.claude-b") == nil, "the list's ids")
     }),
+    ("a pane that showed a background session opened by /resume gets it back with claude attach", {
+        let file = NSTemporaryDirectory() + "cadex-attach-\(UUID().uuidString).jsonl"
+        defer { try? FileManager.default.removeItem(atPath: file) }
+        let resumed = #"{"type":"user","message":{"role":"user","content":"<local-command-stdout>Opening \"Cadex plano 34\", running in the background (69f16f5b)</local-command-stdout>"}}"#
+        try [#"{"type":"user","message":{"role":"user","content":"hi"}}"#, resumed].joined(separator: "\n").write(toFile: file, atomically: true, encoding: .utf8)
+        expect(AgentAttachedJob.job(transcript: file) == "69f16f5b", "the job opened last")
+        try [resumed, #"{"type":"user","message":{"role":"user","content":"now something else"}}"#].joined(separator: "\n").write(toFile: file, atomically: true, encoding: .utf8)
+        expect(AgentAttachedJob.job(transcript: file) == nil, "the owner wrote after it: the conversation itself")
+        expect(AgentAttachedJob.jobID(in: "running in the background (x; rm -rf)") == nil, "only an id goes into the command")
+        expect(AgentAttachedJob.attachCommand(job: "69f16f5b", folder: "/w/my app", configDir: "/Users/me/.claude-b")
+               == " clear && cd '/w/my app' && CLAUDE_CONFIG_DIR=/Users/me/.claude-b claude attach 69f16f5b")
+    }),
 ]
