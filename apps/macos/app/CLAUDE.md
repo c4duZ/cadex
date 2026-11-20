@@ -157,8 +157,8 @@
   os terminais da pasta pessoal são abas sem projeto (`RailWiring.swift`, `isLoose`; desde
   2026-11-20 uma linha "Sem projeto" no fim de Projetos enquanto houver terminal neles, para não se
   perderem ao entrar num projeto); a coluna segue a tarefa quando a lista das tarefas chega (`TreeWiring.swift`).
-- Plano 36 fase F: só o quadro fecha a barra lateral (`BoardWiring.swift`, setBoardShown), e sair
-  dele a devolve; uma página no centro a mantém. `RemoteWiring.swift`: remote.show, os hosts SSH e
+- Plano 36 fase F: o quadro fechava a barra lateral; desde 2026-11-20 ele a mantém, como toda página
+  (o dono: sem ela não havia saída à vista), e tem "Fechar (Esc)". `RemoteWiring.swift`: remote.show, os hosts SSH e
   as máquinas da tailnet numa lista (`RemoteSource`), escolher conecta numa aba (connectSSH,
   connectMachine); a barra lateral mostra Máquinas no pé só com algum host (`hasRemote`).
 - `InspectorWiring.swift` (plano 26, fase C; desde o plano 38 a vista Arquivos da barra lateral):
@@ -379,8 +379,9 @@
   à mostra e sem "projeto › tarefa" (`showLocation`), e os extras "pages" saíram.
 - `BoardWiring.swift` (plano 30 B): view.board e o botão da barra de título abrem o quadro; os
   cartões vêm do `treeModel()` com o que o agente faz e o grupo (corrida, execução, automação) pelas
-  worktrees dos registros; "All projects", o botão aceso e o painel da direita fechado enquanto ele
-  aparece (WorkspaceView.setBoardShown); a árvore o refaz a cada redesenho.
+  worktrees dos registros, e também cada agente rodando na pasta do próprio projeto (o main; sem eles o
+  quadro do dono ficava sempre vazio, 2026-11-20; o clique vai ao terminal); a barra lateral fica e o
+  "Fechar (Esc)" volta à aba de antes; a árvore o refaz a cada redesenho.
   `RaceLanesWiring.swift`: os concorrentes locais lado a lado numa aba (`dressLanes`: o nome, a
   faixa e o pé de cada um), o cabeçalho de cada um pelo `laneDetail` (refeito pelo relógio da
   corrida) e `raceName(of:)` para "projeto › race <nome>" e o "Compare" da barra.

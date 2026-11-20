@@ -40,9 +40,11 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
 
 ### O quadro (mockup Board; plano 30 B, feito junto da revisão do plano 29)
 - view.board, o Quadro no pé da barra lateral e na faixa da janela estreita e o clique no item
-  Agents da barra de baixo abrem a página "Board", com "All projects" no lugar do projeto e a barra
-  lateral fechada; view.board de novo (ou o Esc) volta à aba de antes e devolve a barra (só o
-  quadro fecha a barra lateral).
+  Agents da barra de baixo abrem a página "Board" com a barra lateral aberta, como toda página;
+  "Fechar (Esc)" no topo, view.board de novo ou o Esc voltam à aba de antes (até 2026-11-20 o quadro
+  fechava a barra lateral e o Esc era a única saída, sem nada dizendo; o dono).
+- Além das tarefas, cada agente rodando na pasta do próprio projeto (o main) é um cartão; o clique
+  vai ao terminal dele.
 - As tarefas de todos os projetos da janela em quatro colunas: Needs you (pede permissão ou
   resposta, ou falhou), Working, In review (a tarefa em revisão) e Done; a parada fica de fora.
   Cada cartão: o estado, o nome, a idade, o que faz ou espera ("Wants to run Bash: make perf"),

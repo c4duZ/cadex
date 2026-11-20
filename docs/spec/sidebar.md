@@ -62,7 +62,7 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
   nenhum lugar fica aceso (`tabs.md`, abas sem projeto).
 - **Com a barra fechada,** quem espera aparece na pílula da barra de cima ("checkout-copy precisa
   de você", ou "2 precisam de você"); o clique faz o mesmo que a fila.
-- **O quadro** fecha a barra lateral e sair dele a devolve; uma página no centro não a fecha.
+- **O quadro** e as páginas no centro mantêm a barra lateral (o quadro a fechava até 2026-11-20).
 - A barra não lê nada a cada tecla: muda com os avisos que já existem (estado dos agentes pelos
   hooks, pedidos abertos ou respondidos, abas abertas ou fechadas, projetos editados).
 - Toda ação da barra é comando e está no ⌘K (ADR 0005): as vistas, trocar de projeto (⇧⌘S), ir ao

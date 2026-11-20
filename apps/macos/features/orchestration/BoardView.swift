@@ -70,8 +70,8 @@ public final class BoardDocument: TabDocument {
         title.font = UILooks.font(DesignTokens.FontSize.pageTitle, weight: DesignTokens.FontWeight.semibold)
         title.textColor = DesignTokens.Color.textPrimary
         let note = NSTextField(labelWithString: cards.isEmpty
-            ? T("Every task of every project, by state. None yet: New task makes one.", "Toda tarefa de todo projeto, pelo estado. Nenhuma ainda: Nova tarefa cria uma.")
-            : T("Every task of every project, by state", "Toda tarefa de todo projeto, pelo estado"))
+            ? T("Every agent and task of every project, by state. None yet: New task makes one.", "Todo agente e tarefa de todo projeto, pelo estado. Nenhum ainda: Nova tarefa cria uma.")
+            : T("Every agent and task of every project, by state", "Todo agente e tarefa de todo projeto, pelo estado"))
         note.font = UILooks.font(DesignTokens.FontSize.meta)
         note.textColor = DesignTokens.Color.textSecondary
         let pills = [title, note, pill(T("All", "Tudo"), on: filter == nil) { [weak self] in self?.filter = nil; self?.show() }]
@@ -82,10 +82,12 @@ public final class BoardDocument: TabDocument {
                 }
             }
         let height = BD.Actions.height
+        // A way out in sight: Esc was the only one, and nothing said so (the owner, 2026-11-20).
+        let close = DesignButton.make(T("Close (Esc)", "Fechar (Esc)"), .secondary, height: height) { [weak self] in self?.actions.back() }
         let race = DesignButton.make(T("New race", "Nova corrida"), .secondary, height: height) { [weak self] in self?.actions.newRace() }
         let task = DesignButton.make(T("New task", "Nova tarefa"), .primary, height: height) { [weak self] in self?.actions.newTask() }
         let columns = BoardColumns.sort(cards, filter: filter).map { column, cards in self.column(column, cards) }
-        page.show(pills: pills, buttons: [race, task], columns: columns)
+        page.show(pills: pills, buttons: [close, race, task], columns: columns)
     }
 
     private func pill(_ title: String, on: Bool, run: @escaping @MainActor () -> Void) -> NSView { FramePill.make(title, on: on, run: run) }

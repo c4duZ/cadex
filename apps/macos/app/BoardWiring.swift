@@ -33,19 +33,33 @@ extension WindowSession {
         var actions = BoardActions()
         actions.newRace = { [weak self] in _ = self?.commands.run("worktrees.new-race") }
         actions.newTask = { [weak self] in _ = self?.commands.run("worktrees.new-task") }
-        actions.open = { [weak self] id in self?.pickInTree(.task(id)) }
-        actions.menu = { [weak self] id in self?.treeMenu(task: id) ?? [] }
+        actions.open = { [weak self] id in
+            if id.hasPrefix(Self.boardTerminal) { self?.pickInTree(.terminal(String(id.dropFirst(Self.boardTerminal.count)))) }
+            else { self?.pickInTree(.task(id)) }
+        }
+        actions.menu = { [weak self] id in id.hasPrefix(Self.boardTerminal) ? [] : self?.treeMenu(task: id) ?? [] }
         actions.load = { [weak self] show in show(self?.boardCards() ?? []) }
         actions.back = { [weak self] in self?.tabs?.leavePage() }
         return BoardDocument(actions: actions)
     }
 
-    /// Every task of the window's projects as a card.
+    /// A card of a project's own agent (not a task's): its id is the terminal's, after this.
+    static let boardTerminal = "terminal:"
+
+    /// Every task of the window's projects as a card, and every agent running in a project's own
+    /// folder: the board only had tasks, and with the owner's Claudes in the projects' main it was
+    /// always empty (the owner, 2026-11-20: "o board não funciona").
     func boardCards() -> [BoardCard] {
         let groups = boardGroups()
         let terminals = (projects?.projects ?? []).flatMap { $0.tabs.allTerminals }
         return treeModel().flatMap { project in
-            project.tasks.map { task -> BoardCard in
+            project.terminals.compactMap { row -> BoardCard? in
+                guard let state = row.state else { return nil }
+                let raw = !row.waiting.isEmpty ? Self.waitingText(row.waiting) : ""
+                return BoardCard(id: Self.boardTerminal + row.id, state: state, name: row.title, age: row.age,
+                                 text: raw.prefix(1).uppercased() + raw.dropFirst(), project: project.name,
+                                 agent: row.detail.components(separatedBy: " · ").first ?? "")
+            } + project.tasks.map { task -> BoardCard in
                 let mine = terminals.filter { ($0.currentDirectory ?? "") == task.id || ($0.currentDirectory ?? "").hasPrefix(task.id + "/") }
                 let said = mine.lazy.compactMap { $0.agentStatus?.message }.first { !$0.isEmpty }
                 let raw = !task.waiting.isEmpty ? Self.waitingText(task.waiting) : said ?? task.comment
@@ -91,16 +105,5 @@ extension WindowSession {
             }
         }
         return found
-    }
-
-    /// The title bar while the board shows: "All projects", the board's button lit.
-    func showBoardChrome() {
-        let on = tabs?.activeDocument?.identity == BoardDocument.identity
-        // Only the board closes the side column, given back when it goes (ADR 0038): a page in the
-        // center (Projects, a project's, the review) keeps it, so nothing jumps. With every page
-        // counted, going from the board to another page kept the column shut, and the board's
-        // second click did not bring it back (the owner, 2026-11-18).
-        workspace?.setBoardShown(on)
-        showLocation(folder.root)
     }
 }

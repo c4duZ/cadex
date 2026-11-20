@@ -147,7 +147,6 @@ final class WorkspaceView: NSView {
         titleBar.setTabsHidden(true)
     }
 
-    private var inspectorBeforeBoard: Bool?
     /// The column closed because the window got narrow (ADR 0038): it comes back when the window
     /// is wide again, unless the owner opened or closed it meanwhile.
     private var closedByNarrow = false
@@ -167,7 +166,6 @@ final class WorkspaceView: NSView {
         // Opened by hand while already narrow, it stays (over the center); getting narrow closes it.
         let wasNarrow = isNarrow
         setNarrow(width < Self.narrowBelow)
-        guard inspectorBeforeBoard == nil else { return }
         if width < Self.narrowBelow, inspectorVisible, !wasNarrow {
             setInspector(visible: false)
             closedByNarrow = true
@@ -215,17 +213,6 @@ final class WorkspaceView: NSView {
             next.bottomAnchor.constraint(equalTo: contentPanel.bottomAnchor),
             height,
         ])
-    }
-
-    /// The board shows: the right panel closes, and comes back as it was when the board goes.
-    func setBoardShown(_ shown: Bool) {
-        if shown, inspectorBeforeBoard == nil {
-            inspectorBeforeBoard = inspectorVisible
-            if inspectorVisible { setInspector(visible: false) }
-        } else if !shown, let before = inspectorBeforeBoard {
-            inspectorBeforeBoard = nil
-            if before, !inspectorVisible { setInspector(visible: true) }
-        }
     }
 
     func hideHome() {

@@ -296,7 +296,7 @@ extension WindowSession {
             if let folder = terminal?.currentDirectory { bar?.path = folder }
             bar?.canNavigate = terminal?.hasForegroundProcess == false
             self?.terminalFolderMoved(terminal?.currentDirectory)
-            self?.showBoardChrome()
+            if let self { self.showLocation(self.folder.root) }
             self?.drawRail()
             self?.refreshWorkColor()
             self?.countTerminals()
