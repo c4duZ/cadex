@@ -19,6 +19,14 @@ public struct MemoryPanelActions {
     public var load: (@escaping @MainActor (PanelLoad) -> Void) -> Void = { $0(.off) }
     /// Reads one panel route (`cadex memory-agent panel --path P`): the bytes, or the engine's words.
     public var read: (String, @escaping @MainActor (Result<Data, PanelReadError>) -> Void) -> Void = { _, done in done(.failure(PanelReadError(words: ""))) }
+    /// Writes one panel route (`cadex memory-agent panel-post --path P`, the JSON on stdin): the
+    /// answer's bytes, or the engine's words (plan 40 F, the inbox's messages).
+    public var write: (String, String, @escaping @MainActor (Result<Data, PanelReadError>) -> Void) -> Void = { _, _, done in
+        done(.failure(PanelReadError(words: "")))
+    }
+    /// A write of the inbox: the app runs its command (memory.send-message and the others, ADR 0005),
+    /// which comes back to `perform`. Nil (the tests): the page performs it itself.
+    public var message: ((PanelMessageWrite) -> Void)?
     /// A click that goes somewhere: the app runs memory.show-panel with the place, which comes back
     /// to `go`. Nil (the tests): the page goes itself.
     public var go: ((PanelPlace) -> Void)?

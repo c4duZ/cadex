@@ -1,0 +1,22 @@
+{
+    "page": 1,
+    "has_next": false,
+    "workstreams": [
+        {
+            "id": "01a1f5b3-b7c3-7a60-8a1f-ddc72792fd2a",
+            "name": "panel rewrite",
+            "workspace": "default",
+            "project": "cadex",
+            "status": "completed",
+            "latest_run_id": "01a1f5b3-b7c3-7a60-8a1f-dddec373985e",
+            "latest_agent": "claude-code",
+            "event_count": 1,
+            "linked_harnesses": [
+                "claude-code"
+            ],
+            "last_active_at": "2026-11-19T21:25:58.344678Z",
+            "latest_started_at": "2026-11-19T21:25:58.339316Z",
+            "latest_ended_at": "2026-11-19T21:25:58.344678Z"
+        }
+    ]
+}

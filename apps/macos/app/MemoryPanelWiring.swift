@@ -18,6 +18,7 @@ extension WindowSession {
                             "caixa de entrada", "grafo", "saúde"],
                  category: .view, action: .run { [weak self] in self?.openMemoryPanel(nil) })
             .accepting("section=<projects|inbox|workstreams|search|graph|review|health|docs|changelog> "
+                       + "[scope=<workspace/project>] [box=outbox] [state=<pending|claimed|cancelled|editing|all>] [offset=<n>] [compose=1] [page=<n>] "
                        + "[query=<words>] [scope=<workspace/project>] [kind=<kind>] [tier=<tier>] [explain=1] | project=<name> [workspace=<w>] "
                        + "[tab=<overview|agents|tokens|sessions|knowledge>|page=<path>|history=<path> [from=<id>] [to=<id>]|session=<id> [offset=<n>]|"
                        + "retrievals=<id>|agent=<claude-code|codex|…>|graph=1]") { [weak self] request in
@@ -48,7 +49,37 @@ extension WindowSession {
                 guard let folder = self.cadexFolder(forMemoryProject: name) else { return .failed("no Cadex project has this one's folder") }
                 self.openInCadex(folder)
                 return .ok("opened \(folder)")
-            }]
+            }] + memoryMessageCommands()
+    }
+
+    /// The inbox's writes (plan 40 F): each a command, so the buttons of the page run them by id and
+    /// ⌘K or `cadex run` can too (ADR 0005). With no arguments, memory.send-message opens Nova
+    /// mensagem; the others open the inbox.
+    private func memoryMessageCommands() -> [Command] {
+        let specs: [(String, String, String, [String], String)] = [
+            ("memory.send-message", T("Send a Message to an Agent", "Enviar mensagem a um agente"),
+             "from=<workspace/project> [to=<workspace/project>] agent=<claude-code|codex|…> [subject=<words>] body=<words>",
+             ["message", "agent", "inbox", "send", "mensagem", "agente", "enviar", "caixa de entrada"], "the message was queued"),
+            ("memory.edit-message", T("Edit a Queued Agent Message", "Editar mensagem na fila"), "id=<message id> mailbox=<workspace/project>",
+             ["message", "edit", "hold", "mensagem", "editar"], "held for editing"),
+            ("memory.save-message", T("Save an Edited Agent Message", "Salvar mensagem editada"),
+             "id=<message id> mailbox=<workspace/project> [subject=<words>] body=<words>", ["message", "save", "requeue", "mensagem", "salvar"], "saved and queued"),
+            ("memory.discard-message-edit", T("Discard an Agent Message's Edit", "Descartar a edição da mensagem"),
+             "id=<message id> mailbox=<workspace/project>", ["message", "discard", "release", "mensagem", "descartar"], "back in the queue unchanged"),
+        ]
+        return specs.map { id, title, usage, keywords, said in
+            Command(id: id, title: title, keywords: keywords, category: .view, action: .run { [weak self] in
+                self?.openMemoryPanel(.mailbox(PanelMailboxQuery(compose: id == "memory.send-message")))
+            })
+            .accepting(usage) { [weak self] request in
+                guard let self, let write = PanelMessageWrite(command: id, arguments: request.arguments) else {
+                    return .failed("missing arguments: \(usage)")
+                }
+                let page = self.memoryPanelPage() ?? self.makeMemoryPanel()
+                page.perform(write)
+                return .ok(said)
+            }
+        }
     }
 
     func memoryPanelPage() -> MemoryPanelDocument? { tabs?.document(identity: MemoryPanelDocument.identity) as? MemoryPanelDocument }
@@ -74,6 +105,14 @@ extension WindowSession {
                 done(code == 0 ? .success(data) : .failure(PanelReadError(words: PanelOverviewData.errorText(data))))
             }
         }
+        actions.write = { path, body, done in
+            MemoryWiring.runAgentData(["panel-post", "--path", path], input: body) { code, data in
+                done(code == 0 ? .success(data) : .failure(PanelReadError(words: PanelOverviewData.errorText(data))))
+            }
+        }
+        actions.message = { [weak self] write in
+            _ = self?.commands.run(write.command, request: CommandRequest(arguments: write.arguments, folder: ""))
+        }
         actions.go = { [weak self] place in self?.runMemoryPlace(place) }
         actions.back = { [weak self] in _ = self?.commands.run("memory.panel-back") }
         actions.forward = { [weak self] in _ = self?.commands.run("memory.panel-forward") }
@@ -88,8 +127,8 @@ extension WindowSession {
         actions.overview.inCadex = { [weak self] project in self?.cadexFolder(forMemoryProject: project.name) != nil }
         actions.project.openInCadex = { [weak self] ref, session in self?.runOpenInCadex(ref.name, session: session?.id) }
         actions.project.inCadex = { [weak self] ref in self?.cadexFolder(forMemoryProject: ref.name) != nil }
-        // The inbox comes in phase F: its section says so meanwhile.
-        actions.project.openInbox = { [weak self] _ in self?.runMemoryPlace(.section(.inbox)) }
+        // "Enviar mensagem a um agente": the project's mailbox with the keys in Nova mensagem.
+        actions.project.openInbox = { [weak self] ref in self?.runMemoryPlace(.mailbox(PanelMailboxQuery(project: ref, compose: true))) }
         return MemoryPanelDocument(actions: actions)
     }
 

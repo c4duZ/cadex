@@ -21,6 +21,8 @@ public enum PanelLoads {
         case .search(let query): return [query.path]
         case .graph(let p?): return [p.api + "/graph", p.api + "/pages"]
         case .graph(nil): return ["api/v1/graph"]
+        case .mailbox(let query): return [query.path]
+        case .workstreams(let page): return ["extra/workstreams" + (page > 1 ? "?page=\(page)" : "")]
         }
     }
 }
@@ -109,6 +111,25 @@ public extension MemoryPanelDocument {
     private func runBack() { if let run = actions.back { run() } else { back() } }
     private func runForward() { if let run = actions.forward { run() } else { forward() } }
 
+    /// The place read again (the inbox after a save or a discard, as upstream reloads its page).
+    func reload() { open(trail.current, from: trail.current) }
+
+    /// A write from the inbox: through the app's command when there is one (ADR 0005).
+    func send(_ write: PanelMessageWrite) {
+        if let message = actions.message { return message(write) }
+        perform(write)
+    }
+
+    /// The write done: the engine's answer goes to the inbox on screen.
+    func perform(_ write: PanelMessageWrite) {
+        actions.write(write.path, write.body) { [weak self] answer in
+            (self?.screen as? PanelInboxView)?.finished(write, answer)
+        }
+    }
+
+    /// The inbox is on screen (the message commands' availability).
+    var showsInbox: Bool { screen is PanelInboxView }
+
     /// A graph is on screen (memory.graph-fit's availability).
     var showsGraph: Bool { screen is PanelGraphView }
 
@@ -177,6 +198,12 @@ public extension MemoryPanelDocument {
         case .graph(nil):
             guard let read = PanelGraph.parse(global: data[0]) else { return nil }
             return PanelGraphView(read, go: go)
+        case .mailbox(let query):
+            guard let read = PanelMailbox.parse(data[0], query: query) else { return nil }
+            return PanelInboxView(read, write: { [weak self] in self?.send($0) }, reload: { [weak self] in self?.reload() }, go: go)
+        case .workstreams:
+            guard let read = PanelWorkstreams.parse(data[0]) else { return nil }
+            return PanelWorkstreamsView(read, go: go)
         }
     }
 }

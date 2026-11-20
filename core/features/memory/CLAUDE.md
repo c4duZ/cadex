@@ -207,7 +207,7 @@
     página, como no upstream) e `server/src/page/proposals.rs` (as propostas pendentes, até 200, e
     aprovar ou recusar pelo caminho do "pending-writes" do admin do upstream, com commit na aprovação).
   - Os dados do painel Memória nativo (plano 40 B), em `server/src/page/panel/`, sob
-    `/cadex/memory/panel`, só leitura, com o token como toda rota e o pedido visto como o dono (o
+    `/cadex/memory/panel`, só leitura (menos as mensagens da caixa de entrada, plano 40 F), com o token como toda rota e o pedido visto como o dono (o
     root do upstream, sem filtro de leitor, ator anônimo):
     - `api/v1/…`, em `server/src/page/panel/api/`: a API JSON do upstream respondida pelo Cadex, com
       os caminhos, as queries, os limites, as leituras e o JSON dos handlers dele (o routes/api.rs do
@@ -224,7 +224,11 @@
     - `extra/…`: o que o upstream só mostra no HTML, pelas mesmas leituras do store que os handlers
       web dele chamam (`server/src/page/panel/mod.rs` lista as rotas): `server/src/page/panel/home.rs`
       (agentes e fila por projeto, a linha de captura e o contador da caixa de entrada),
-      `server/src/page/panel/inbox.rs` (a caixa com o filtro de estado; enviar e editar ficam fora),
+      `server/src/page/panel/inbox.rs` (a caixa com o filtro de estado),
+      `server/src/page/panel/messages.rs` (plano 40 F: enviar uma mensagem a um agente e segurar,
+      salvar ou descartar a edição de uma na fila, as rotas POST do upstream com as mesmas
+      verificações, limites, palavras das recusas e chamadas da wiki; sem as do navegador: o
+      cabeçalho, a origem e o login),
       `server/src/page/panel/queues.rs` (workstreams e a revisão de aprendizado de todos os
       projetos; aprovar e recusar seguem em `server/src/page/proposals.rs`),
       `server/src/page/panel/health.rs` (a Saúde com os contadores deste engine: hooks do
@@ -387,7 +391,8 @@
     `overview`, `briefing` (texto puro), `write-page --path P` (corpo no stdin), `delete-page --path
     P`, `reindex`, `proposals`, `approve --id`, `reject --id`; do painel (plano 40 B), `panel --path P`,
     um GET de `/cadex/memory/panel/<P>` (P com a query já codificada; sem `..`, espaço nem `#`) que
-    imprime o JSON como veio. `status` e `overview` nunca sobem o
+    imprime o JSON como veio, e `panel-post --path P` (plano 40 F), o POST do JSON no stdin no
+    mesmo lugar. `status` e `overview` nunca sobem o
     engine (fora: `{"running":false}`); os outros sobem. Erro: saída 1 e `{"error":…}`; uso: 2.
   - `context.zig`: o que o hook devolve além do briefing, como o cliente do upstream: no
     SessionStart `compact` a âncora (`/recap?mode=anchor`, nunca o handoff; nada num subagente),
@@ -475,13 +480,18 @@
     com o mesmo `<mark>`, a contagem, o rastro e o seletor de projetos); e ler tudo
     pelo engine deixa a pasta igual byte a byte (o ponto de partida é subir e parar o engine sem
     pedido até nada mudar).
+  - As escritas da caixa (plano 40 F): `server/tests/panel_messages.rs` roda o mesmo roteiro no engine
+    e nas rotas `/web/messages…` do upstream, cada um no seu seed (os ids das mensagens são
+    aleatórios): enviar, as seis recusas do envio, segurar, salvar vazio e salvar, salvar de novo,
+    segurar e descartar outra, descartar de novo, a coletada, um id que não é id, a caixa errada; cada
+    passo com o mesmo status e as mesmas palavras, e a caixa no fim igual.
 
 ## Como validar
 - `make memory-test`: os testes do crate, `server/tests/smoke.rs`, `server/tests/lifecycle.rs`,
   `server/tests/import.rs`, `server/tests/auto_memory.rs`, `server/tests/marker.rs`,
-  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs`, `server/tests/agent.rs`, `server/tests/agent_audit.rs`, `server/tests/agent_guard.rs`, `server/tests/memory_page.rs`, `server/tests/memory_off.rs`, `server/tests/session_end.rs`, `server/tests/panel_parity.rs` (o painel do upstream sobre o seed: toda tela e rota `/api/v1` responde 200 com os números do seed, e ler tudo deixa a pasta igual byte a byte) e `server/tests/panel_api.rs` (os dados do painel pelo engine iguais aos do upstream, e a pasta intacta) (parte do `make check`, em segundos).
+  `server/tests/run.rs`, `server/tests/run_agents.rs`, `server/tests/run_launch.rs`, `server/tests/maintenance.rs`, `server/tests/agent.rs`, `server/tests/agent_audit.rs`, `server/tests/agent_guard.rs`, `server/tests/memory_page.rs`, `server/tests/memory_off.rs`, `server/tests/session_end.rs`, `server/tests/panel_parity.rs` (o painel do upstream sobre o seed: toda tela e rota `/api/v1` responde 200 com os números do seed, e ler tudo deixa a pasta igual byte a byte) e `server/tests/panel_api.rs` (os dados do painel pelo engine iguais aos do upstream, e a pasta intacta) e `server/tests/panel_messages.rs` (enviar e editar mensagens como o upstream) (parte do `make check`, em segundos).
 - `make memory-eval MODELS=<pasta>`: as 30 perguntas, só texto contra híbrida (`../../../tools/memory_eval.py`).
-- `make core-test`: os testes do cliente (o pedido de cada ação do `memory-agent`, o `panel` preso ao prefixo, eventos, query com e sem workspace, fila, respostas HTTP,
+- `make core-test`: os testes do cliente (o pedido de cada ação do `memory-agent`, o `panel` e o `panel-post` presos ao prefixo, eventos, query com e sem workspace, fila, respostas HTTP,
   sem token, a sessão pausada que não manda nem enfileira nada).
 - Na mão, tudo em pastas temporárias: um `.token` em `CADEX_SESSIONS_DIR`, e
   `echo '<json do SessionStart>' | CADEX_SESSION_TOKEN=… CADEX_MEMORY_BIN=… CADEX_MEMORY_DIR=…

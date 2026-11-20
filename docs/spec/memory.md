@@ -348,8 +348,8 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   filtra), "Última captura" com o ⓘ, a linha "Captura" com os contadores do engine, o aviso da
   fila, o filtro, o escopo e os cartões. "Abrir no Cadex" (memory.open-in-cadex, com `project=`;
   também no clique direito do cartão e no ⌘O com o cartão escolhido pelas setas) só quando um
-  projeto aberto ou recente do Cadex tem a pasta com esse nome. As outras seções dizem "Em breve."
-  até as fases F e G. Com a memória desligada, a página diz isso e não lê nada.
+  projeto aberto ou recente do Cadex tem a pasta com esse nome. A Revisão de aprendizado, a Saúde e
+  a Documentação dizem "Em breve." até a fase G. Com a memória desligada, a página diz isso e não lê nada.
 - As telas de um projeto (plano 40 D), cada uma um lugar do memory.show-panel (`project=` e
   `tab=`, `page=`, `history=` com `from=` e `to=`, `session=` com `offset=`, `retrievals=` ou
   `agent=`); todo clique dentro da página roda esse comando, e memory.panel-back e
@@ -357,7 +357,7 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   Projetos e a busca dela diz "Pesquisar em <projeto>". O clique no cartão de um projeto abre a tela
   dele; "Agentes ↗", a aba Agentes.
   - O projeto: a trilha, "Abrir no Cadex" (só com um projeto do Cadex na pasta) e "Enviar mensagem a
-    um agente" (a Caixa de entrada, fase F); as abas Visão geral (os cinco números, que abrem a aba
+    um agente" (a caixa do projeto, com o foco na Nova mensagem); as abas Visão geral (os cinco números, que abrem a aba
     com o filtro do upstream; "Última captura · N sessões abertas"; os agentes, cada um levando à
     tela dele; a caixa de mensagens com as cinco mais novas), Agentes (um cartão por agente),
     Uso de tokens, Sessões ("Só abertas" e a ordem por eventos, `state=open` e `sort=events`) e
@@ -394,13 +394,25 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   recuperada?" mostra "Aberta pela pesquisa …" e "Recalcular", que roda a busca de novo com o rastro
   e diz a posição da página (ou que ela saiu dos resultados); aberta direto, o ⓘ diz que não há
   busca a explicar.
+- A Caixa de entrada (plano 40 F): o lugar `section=inbox` com `scope=<workspace/projeto>`,
+  `box=outbox`, `state=<pending|claimed|cancelled|editing|all>`, `offset=` e `compose=1`. Lê
+  `extra/inbox` (sem projeto, o primeiro com mensagens na fila). A fila de todos os projetos sob o
+  título, a caixa do projeto (Recebidas e Enviadas, o estado, 50 por página) e a Nova mensagem (do
+  projeto, para o projeto, para um agente com sessão no projeto de destino, assunto até 200,
+  mensagem até 8.000). Mandar coloca na fila e nunca abre um agente: ele lê na próxima verificação
+  da caixa. Em Recebidas, uma mensagem na fila pode ser segurada para edição (os agentes não a
+  coletam), salva e recolocada, ou descartada. As escritas são os comandos memory.send-message,
+  memory.edit-message, memory.save-message e memory.discard-message-edit, pelas rotas POST
+  `extra/messages` e `extra/messages/<id>/edit|save|release` do engine, com as regras do upstream.
+- Workstreams (plano 40 F): `section=workstreams` com `page=`, `extra/workstreams`, 100 por página.
 - Grafo de conhecimento (plano 40 E): `section=graph` é o geral (os links entre projetos, um nó por
   projeto, `api/v1/graph`) e `project=<p> graph=1` o do projeto ("Grafo de links ↗"; `api/v1/.../graph`
   e `/pages` para o tipo de cada página). Desenho nativo (Core Graphics, sem WebView), com layout de
   forças e não o círculo do upstream (o dono, 2026-11-19): as páginas ligadas se agrupam no meio, as
   soltas ficam em anéis na borda, e sem link nenhum um girassol enche o quadro; sem nada aleatório
   (a mesma posição a cada abertura), fora da linha principal a partir de 40 nós (o engine corta em
-  120). O ponto tem a cor do tipo (regra, decisão, armadilha, sessão, projeto, outro, com a legenda);
+  120). O ponto tem a cor do tipo (regra, decisão, armadilha, sessão, projeto, outro, com a legenda), e a
+  página sem link é um anel vazado na cor dela ("sem links" na legenda);
   sob o ponteiro ou com o foco, um balão com o título e o caminho; o clique ou Enter abre a página (no
   geral, o grafo do projeto); Tab e as setas andam de nó em nó, cada nó um elemento de acessibilidade
   com o título e o caminho. Pinça aproxima e dois dedos arrastam; memory.graph-fit volta ao todo.

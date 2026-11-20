@@ -43,12 +43,15 @@ public struct PanelSearchQuery: Hashable, Sendable {
 
     /// The search memory.show-panel's arguments name (`scope` is "workspace/project" or a name).
     public init(arguments a: [String: String]) {
-        let scope: PanelProjectRef? = a["scope"].flatMap { raw in
-            let parts = raw.split(separator: "/", maxSplits: 1).map(String.init)
-            if parts.count == 2, !parts[0].isEmpty, !parts[1].isEmpty { return PanelProjectRef(workspace: parts[0], name: parts[1]) }
-            return raw.isEmpty ? nil : PanelProjectRef(name: raw)
-        }
-        self.init(words: a["query"] ?? "", scope: scope, kind: a["kind"] ?? "", tier: a["tier"] ?? "", explain: a["explain"] == "1")
+        self.init(words: a["query"] ?? "", scope: a["scope"].flatMap(Self.scope(from:)), kind: a["kind"] ?? "", tier: a["tier"] ?? "",
+                  explain: a["explain"] == "1")
+    }
+
+    /// A project named in a command's arguments: "workspace/project", or a name (in "default").
+    public static func scope(from raw: String) -> PanelProjectRef? {
+        let parts = raw.split(separator: "/", maxSplits: 1).map(String.init)
+        if parts.count == 2, !parts[0].isEmpty, !parts[1].isEmpty { return PanelProjectRef(workspace: parts[0], name: parts[1]) }
+        return raw.isEmpty ? nil : PanelProjectRef(name: raw)
     }
 }
 

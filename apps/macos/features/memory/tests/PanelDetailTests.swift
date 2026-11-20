@@ -27,6 +27,9 @@ func panelAnswer(_ path: String) -> Data? {
         extra + "/sessions/00000000-0000-4000-8000-000000000001/retrievals": "retrievals",
         "extra/search": "search-recent", "extra/search?q=engine": "search", "extra/search?q=zzzz&kind=decision": "search-none",
         "extra/search?q=engine&scope=default/cadex&explain=1": "search-explain", base + "/graph": "graph", "api/v1/graph": "graph-global",
+        "extra/inbox": "inbox", "extra/inbox?workspace=default&project=cadex&box=outbox": "inbox-sent",
+        "extra/inbox?workspace=default&project=cadex&state=": "inbox-all", "extra/inbox?workspace=default&project=site&state=claimed": "inbox-empty",
+        "extra/workstreams": "workstreams",
     ]
     return map[path].map(panelFixture)
 }

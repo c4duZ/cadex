@@ -1,0 +1,69 @@
+{
+    "workspace": "default",
+    "project": "cadex",
+    "box": "outbox",
+    "state": null,
+    "pending_total": 2,
+    "pending_projects": 1,
+    "scopes": [
+        {
+            "workspace": "default",
+            "project": "_global",
+            "pending": 0
+        },
+        {
+            "workspace": "default",
+            "project": "site",
+            "pending": 0
+        },
+        {
+            "workspace": "default",
+            "project": "cadex",
+            "pending": 2
+        },
+        {
+            "workspace": "default",
+            "project": "empty",
+            "pending": 0
+        },
+        {
+            "workspace": "default",
+            "project": "scratch",
+            "pending": 0
+        }
+    ],
+    "editing_count": 0,
+    "recipients": [
+        {
+            "workspace": "default",
+            "project": "cadex",
+            "agent": "claude-code"
+        },
+        {
+            "workspace": "default",
+            "project": "cadex",
+            "agent": "codex"
+        },
+        {
+            "workspace": "default",
+            "project": "site",
+            "agent": "claude-code"
+        }
+    ],
+    "more": false,
+    "messages": [
+        {
+            "id": "01a1f5b3-b7c3-7a60-8a1f-dda8dc153036",
+            "subject": "Panel question",
+            "body": "Should the inbox show collected mail?",
+            "from": "default / cadex",
+            "to": "default / cadex",
+            "from_agent": "claude-code",
+            "to_agent": "claude-code",
+            "state": "pending",
+            "nature": "unknown",
+            "created_at": "2026-11-19T21:25:58.339044Z",
+            "claimed_at": null
+        }
+    ]
+}

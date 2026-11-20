@@ -117,7 +117,21 @@ repositório. O código dele está no checkout do cargo, no commit fixado (411d9
   o círculo); a dica do nó geral diz "default/cadex"; a busca não manda formulário: cada seletor já
   pesquisa; o seed tem 4 projetos, então "4 resultados" e não 34. Os tokens novos em
   components.memoryPanel.graph (cores por tipo, aresta, legenda, coluna).
-- [ ] F. A caixa de entrada e os workstreams.
+- [x] F. A caixa de entrada e os workstreams.
+  Feito: no engine, enviar e editar uma mensagem na fila (`core/features/memory/server/src/page/panel/messages.rs`,
+  as rotas POST do upstream com as mesmas regras, limites e recusas; `cadex memory-agent panel-post`),
+  iguais ao upstream passo a passo, cada lado no seu seed (`core/features/memory/server/tests/panel_messages.rs`:
+  enviar, as recusas, segurar, salvar, descartar, e a caixa no fim). No app, a Caixa de entrada
+  (`apps/macos/features/memory/panel/PanelInboxView.swift`: a fila, o projeto, Recebidas e
+  Enviadas, o estado, as mensagens que abrem, com Editar e o editor no lugar; Nova mensagem em
+  `apps/macos/features/memory/panel/PanelComposeBox.swift`) e os Workstreams
+  (`apps/macos/features/memory/panel/PanelWorkstreamsView.swift`). Cada escrita é um comando:
+  memory.send-message, memory.edit-message, memory.save-message e memory.discard-message-edit;
+  "Enviar mensagem a um agente" abre a caixa do projeto com o foco na Nova mensagem. Diferenças do
+  board: a fila sob o título leva um link por projeto ("cadex · 2"); os selos dos estados nas
+  palavras do upstream (pendente, coletada); o botão de enviar apagado até haver agente e texto.
+  O que mudou nas telas de antes: o selo com bolinha saía espremido ("● semantic" da página), e no
+  grafo o nó sem links virou um anel vazado (apagado, confundia com o cinza de "fact").
 - [ ] G. A revisão de aprendizado, a saúde do servidor e a documentação.
 
 Cada fase de tela: o print do Cadex ao lado do print do upstream sobre o mesmo seed, e o que difere

@@ -72,6 +72,7 @@ MAC_ONLY = {"project.edit", "project.create", "project.new-terminal", "project.n
             "memory.show-panel", "memory.open-in-cadex",
             # A project's screens (plan 40 D): back and forward within the page.
             "memory.panel-back", "memory.panel-forward", "memory.graph-fit",
+            "memory.send-message", "memory.edit-message", "memory.save-message", "memory.discard-message-edit",
             "memory.show", "memory.show-briefing", "memory.show-history", "memory.reindex", "memory.refresh", "memory.enable", "memory.approve", "memory.reject", "agents.copy-resume-command",
             "agents.reveal-session-log",
             # Attention and the board (plan 19, phase C).

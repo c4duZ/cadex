@@ -1,7 +1,9 @@
 //! The native Memory panel's data (plan 40 B, 2026-11-19), under
 //! `/cadex/memory/panel`, behind the session token like every route
 //! (auth.rs); the app reaches it through `cadex memory-agent panel --path P`
-//! (agent_client.zig). Everything here only reads.
+//! (agent_client.zig); its writes, `cadex memory-agent panel-post --path P`
+//! with the JSON on stdin. Everything here only reads but the inbox's
+//! messages (messages.rs, plan 40 F: send, and edit one still queued).
 //!
 //! - `/cadex/memory/panel/api/v1/...`: upstream's read-only JSON API
 //!   (workspaces, projects, overview, pages, history, recent, briefing,
@@ -13,7 +15,8 @@
 //! - `/cadex/memory/panel/extra/...`: what upstream shows only in its HTML
 //!   (docs/research/memory-panel-screens.md, the final table), built from the
 //!   same store reads its web handlers call, so the numbers match its pages:
-//!   home.rs (overview extras and the inbox counter), inbox.rs, queues.rs
+//!   home.rs (overview extras and the inbox counter), inbox.rs with
+//!   messages.rs, queues.rs
 //!   (workstreams and the review list; approve and reject stay in
 //!   ../proposals.rs), health.rs with health_checks.rs, project.rs (a project's summary, sessions
 //!   and agents), tokens.rs (token usage of a project or a session),
@@ -29,6 +32,7 @@ mod health;
 mod health_checks;
 mod home;
 mod inbox;
+mod messages;
 mod project;
 mod queues;
 mod search;
@@ -45,7 +49,7 @@ use ai_memory_store::{ProjectAccess, ResolvedScope, lookup_existing_scope_guarde
 use axum::Router;
 use axum::http::StatusCode;
 use axum::response::Response;
-use axum::routing::get;
+use axum::routing::{get, post};
 
 use super::{Ctx, error};
 
@@ -87,6 +91,10 @@ pub(crate) fn router(page: Arc<Ctx>, sources: Sources) -> Router {
         .route("/home", get(home::home))
         .route("/inbox/notifications", get(home::notifications))
         .route("/inbox", get(inbox::handle))
+        .route("/messages", post(messages::send))
+        .route("/messages/{id}/edit", post(messages::begin_edit))
+        .route("/messages/{id}/save", post(messages::save_edit))
+        .route("/messages/{id}/release", post(messages::release_edit))
         .route("/workstreams", get(queues::workstreams))
         .route("/review", get(queues::review))
         .route("/health", get(health::handle))

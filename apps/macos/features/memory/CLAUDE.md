@@ -52,7 +52,7 @@
   (0600) que o engine lê a cada trabalho; `appToken`, o token do próprio app na pasta de tokens
   (memory-agent.token, feito uma vez); `environment` e `run`, o `cadex memory-agent` fora da linha
   principal, com o JSON de volta; também o texto puro (o briefing), os bytes (`runData`, o painel) e
-  o stdin (write-page).
+  o stdin (write-page e o `panel-post` do painel).
 - A aba Memory do painel da direita (fase H; plano 26 fase C2c; refeita em 2026-11-18, o dono
   achou dura e difícil de ler): `MemoryView.swift`, numa rolagem só (antes a árvore da wiki rolava
   dentro da rolagem da aba), no desenho da proposta aprovada: desligada, o texto e "Turn On";
@@ -89,8 +89,7 @@
   (o clique, o link, o ⓘ com popover e accessibilityHelp, o seletor no menu do app),
   `panel/PanelSections.swift` (`MemoryPanelSection`, os nove destinos em três grupos, e
   `MemoryPanelNav`, a busca e as linhas que o app põe na barra lateral) e `panel/PanelDocument.swift`
-  (`MemoryPanelDocument`, a página; a Visão geral e as telas de um projeto desenhadas, as outras
-  seções dizem "Em breve."). As telas de um projeto (plano 40 D): `panel/PanelPlace.swift`
+  (`MemoryPanelDocument`, a página; a Revisão, a Saúde e a Documentação ainda dizem "Em breve."). As telas de um projeto (plano 40 D): `panel/PanelPlace.swift`
   (`PanelPlace`, o lugar da página e os argumentos do memory.show-panel; a trilha; `PanelTrail`,
   voltar e avançar; `PanelPath`, os caminhos escapados), `panel/PanelNavigation.swift` (as rotas de
   cada lugar, `PanelLoads`; ir, voltar e avançar; ler uma rota de cada vez e montar a tela; uma
@@ -123,6 +122,16 @@
   `panel/PanelGraphCanvas.swift` (o desenho em Core Graphics, o balão, Tab e setas, um elemento de
   acessibilidade por nó, pinça e arrasto; fora da linha principal a partir de 40 nós) e
   `panel/PanelGraphView.swift` (a tela, a legenda e CONEXÕES).
+  A Caixa de entrada e os Workstreams (plano 40 F): `panel/PanelMailboxData.swift`
+  (`PanelMailboxQuery`, o lugar e a rota `extra/inbox`; `PanelMailbox`, a caixa lida, as palavras do
+  upstream; `PanelMessageWrite`, cada escrita como comando e como POST; `PanelWorkstreams`),
+  `panel/PanelInboxView.swift` (a tela: a fila, o projeto, Recebidas e Enviadas, o estado, as
+  mensagens, a barra de páginas; o que o engine respondeu a cada escrita), `panel/PanelMessageRow.swift`
+  (a mensagem que abre: o id, o corpo, Editar e o editor no lugar), `panel/PanelComposeBox.swift`
+  (Nova mensagem: os seletores, os limites, o aviso de que não inicia o agente, o resultado) e
+  `panel/PanelWorkstreamsView.swift` (a tabela e Anterior / Próxima). As escritas vão pelo `write`
+  das ações (`cadex memory-agent panel-post`, MemoryAgent.runData com o stdin) e cada uma é um
+  comando do app (`../../app/MemoryPanelWiring.swift`).
   Tokens: components.memoryPanel.
 - `MemorySessions.swift` (plano 35 H): `received`, o briefing que uma sessão recebeu, lido do disco
   em `<memória>/agent/briefings/<sessão>.md` (o engine o guarda, plano 35 D; só id simples, as linhas
@@ -172,7 +181,11 @@
   `tests/PanelGraphTests.swift`, sobre o `extra/search` e os grafos gravados do seed: a leitura, as
   marcas, a rota e os argumentos, a tela e as teclas, o "por que" recalculado, o layout (o mesmo a
   cada vez, ligados mais perto, sem sobrepor), o teclado, o balão e os nomes dos nós, e os PNGs
-  memory-search*.png e memory-graph*.png; o briefing guardado de uma sessão e o id recusado, a página de
+  memory-search*.png e memory-graph*.png; a Caixa de entrada e os Workstreams,
+  `tests/PanelInboxTests.swift`, sobre o `extra/inbox` de quatro caixas e o `extra/workstreams`
+  gravados do seed: a leitura, os lugares, as palavras, cada escrita como comando e POST, a tela com
+  um engine falso (os seletores, enviar, segurar, salvar) e os PNGs memory-inbox*.png e
+  memory-workstreams.png; o briefing guardado de uma sessão e o id recusado, a página de
   sessão vazia fora das últimas sessões; o .ai-memory.toml lido como o engine lê, gravado sem perder linha;
   o modelo, o `ensure` que não sobrescreve, o nome numa worktree e a linha do exclude): os 9 eventos e o comando de cada um, a `env` do pacote e a do
   `make run`, a workspace só sem compartilhar, os hooks com agents.stateHooks desligada, a parte

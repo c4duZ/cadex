@@ -138,7 +138,10 @@ enum PanelChip {
         }
         let inner = PanelText.row(views, gap: C.gap)
         // A row taller than the chip (a button beside it) stretched the chip to its height.
-        inner.setHuggingPriority(.required, for: .vertical)
+        // Just under required: at required it tied with the words' own height and the dot's 6 pt
+        // won, squeezing "● semantic" and "● pendente" to a sliver (plan 40 F's prints).
+        inner.setHuggingPriority(.init(999), for: .vertical)
+        label.setContentCompressionResistancePriority(.required, for: .vertical)
         box.hold(inner, padding: C.padding)
         box.setAccessibilityElement(true)
         box.setAccessibilityRole(.staticText)

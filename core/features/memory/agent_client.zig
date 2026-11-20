@@ -15,6 +15,8 @@
 //! already encoded, e.g. `api/v1/projects` or `extra/inbox?state=claimed`;
 //! server/src/page/panel/), printing the JSON as is. One generic read keeps
 //! this client out of the panel's routes, which grow with the screens.
+//! Its writes (plan 40 F, the inbox's messages): `panel-post --path P`, a
+//! POST of the JSON on stdin to the same place, printing the answer.
 //!
 //! `status` and `overview` never start the engine (down: `{"running":false}`);
 //! the others start it. One JSON line out, except `briefing`: the text the
@@ -29,7 +31,7 @@ const http = @import("http.zig");
 const launch = @import("launch.zig");
 const events = @import("events.zig");
 
-pub const Action = enum { status, pause, @"resume", dream, bootstrap, overview, briefing, @"write-page", @"delete-page", reindex, proposals, approve, reject, panel };
+pub const Action = enum { status, pause, @"resume", dream, bootstrap, overview, briefing, @"write-page", @"delete-page", reindex, proposals, approve, reject, panel, @"panel-post" };
 
 pub const Options = struct {
     cwd: ?[]const u8 = null,
@@ -41,13 +43,17 @@ pub const Options = struct {
 
 fn needsCwd(action: Action) bool {
     return switch (action) {
-        .status, .pause, .@"resume", .approve, .reject, .panel => false,
+        .status, .pause, .@"resume", .approve, .reject, .panel, .@"panel-post" => false,
         else => true,
     };
 }
 
 fn needsPath(action: Action) bool {
-    return action == .@"write-page" or action == .@"delete-page" or action == .panel;
+    return action == .@"write-page" or action == .@"delete-page" or isPanel(action);
+}
+
+fn isPanel(action: Action) bool {
+    return action == .panel or action == .@"panel-post";
 }
 
 /// A panel path stays under the panel's prefix: no `..` segment, no
@@ -69,7 +75,7 @@ fn needsId(action: Action) bool {
 fn budgetMs(action: Action) i64 {
     return switch (action) {
         .reindex => 120_000,
-        .@"write-page", .@"delete-page", .approve, .briefing, .panel => 30_000,
+        .@"write-page", .@"delete-page", .approve, .briefing, .panel, .@"panel-post" => 30_000,
         else => 5_000,
     };
 }
@@ -95,14 +101,14 @@ pub fn target(gpa: std.mem.Allocator, action: Action, o: Options) !struct { meth
         .dream => try out.appendSlice(gpa, "/cadex/agent/run-dream"),
         .bootstrap => try out.appendSlice(gpa, "/cadex/agent/bootstrap"),
         // Verbatim: the caller encodes the query (the route is its own).
-        .panel => try out.print(gpa, "/cadex/memory/panel/{s}", .{std.mem.trimStart(u8, o.path orelse "", "/")}),
+        .panel, .@"panel-post" => try out.print(gpa, "/cadex/memory/panel/{s}", .{std.mem.trimStart(u8, o.path orelse "", "/")}),
         else => try out.print(gpa, "/cadex/memory/{s}", .{@tagName(action)}),
     }
     if (needsCwd(action)) {
         try appendPair(gpa, &out, "cwd", o.cwd orelse "");
         if (o.workspace) |ws| try appendPair(gpa, &out, "workspace", ws);
     }
-    if (needsPath(action) and action != .panel) try appendPair(gpa, &out, "path", o.path orelse "");
+    if (needsPath(action) and !isPanel(action)) try appendPair(gpa, &out, "path", o.path orelse "");
     if (needsId(action)) try appendPair(gpa, &out, "id", o.id orelse "");
     if (action == .bootstrap and o.dry_run) try out.appendSlice(gpa, "&dry_run=1");
     return .{ .method = method, .path = try out.toOwnedSlice(gpa) };
@@ -133,7 +139,7 @@ fn parse(words: []const []const u8) ?Parsed {
     if (needsCwd(action) and o.cwd == null) return null;
     if (needsPath(action) and o.path == null) return null;
     if (needsId(action) and o.id == null) return null;
-    if (action == .panel and !panelPathOk(o.path.?)) return null;
+    if (isPanel(action) and !panelPathOk(o.path.?)) return null;
     return .{ .action = action, .options = o };
 }
 
@@ -143,7 +149,7 @@ pub fn run(gpa: std.mem.Allocator, words: []const []const u8) !Result {
     var dir_buf: [1024]u8 = undefined;
     const env = hook.Env.from(hook.Env.processEnv, &socket_buf, &dir_buf) orelse
         return .{ .out = try gpa.dupe(u8, "{\"error\":\"no CADEX_SESSION_TOKEN\"}\n"), .code = 1 };
-    const input = if (parsed.action == .@"write-page") try readStdin(gpa) else try gpa.dupe(u8, "");
+    const input = if (parsed.action == .@"write-page" or parsed.action == .@"panel-post") try readStdin(gpa) else try gpa.dupe(u8, "");
     defer gpa.free(input);
     return runWith(gpa, env, parsed, input);
 }
@@ -186,7 +192,7 @@ fn render(gpa: std.mem.Allocator, action: Action, answer: ?http.Response) !Resul
     return .{ .out = try std.fmt.allocPrint(gpa, "{s}\n", .{body}), .code = 0 };
 }
 
-/// The page body on stdin, up to the engine's body limit (10 MB, engine.rs).
+/// The page body (or the panel's JSON) on stdin, up to the engine's body limit (10 MB, engine.rs).
 fn readStdin(gpa: std.mem.Allocator) ![]u8 {
     var out: std.ArrayList(u8) = .empty;
     errdefer out.deinit(gpa);
@@ -205,7 +211,7 @@ fn readStdin(gpa: std.mem.Allocator) ![]u8 {
 
 fn usage(gpa: std.mem.Allocator) !Result {
     return .{ .out = try gpa.dupe(u8, "usage: cadex memory-agent <status|pause|resume|dream|bootstrap|overview|briefing|write-page|" ++
-        "delete-page|reindex|proposals|approve|reject|panel> [--cwd DIR] [--workspace W] [--path P] [--id ID] [--dry-run]\n"), .code = 2 };
+        "delete-page|reindex|proposals|approve|reject|panel|panel-post> [--cwd DIR] [--workspace W] [--path P] [--id ID] [--dry-run]\n"), .code = 2 };
 }
 
 const testing = std.testing;
@@ -231,6 +237,7 @@ test "each action's request" {
     try expectTarget(.approve, .{ .id = "0198-ab" }, "POST", "/cadex/memory/approve?id=0198-ab");
     try expectTarget(.reject, .{ .id = "x" }, "POST", "/cadex/memory/reject?id=x");
     try expectTarget(.panel, .{ .path = "api/v1/projects" }, "GET", "/cadex/memory/panel/api/v1/projects");
+    try expectTarget(.@"panel-post", .{ .path = "extra/messages/0198-ab/edit" }, "POST", "/cadex/memory/panel/extra/messages/0198-ab/edit");
     try expectTarget(.panel, .{ .path = "/extra/inbox?state=claimed&workspace=a%20b", .workspace = "acct" }, "GET", "/cadex/memory/panel/extra/inbox?state=claimed&workspace=a%20b");
 }
 
@@ -241,6 +248,8 @@ test "a panel path stays under the panel" {
         try testing.expect(parse(&.{ "panel", "--path", bad }) == null);
     }
     try testing.expect(parse(&.{"panel"}) == null);
+    try testing.expect(parse(&.{ "panel-post", "--path", "extra/messages" }) != null);
+    try testing.expect(parse(&.{ "panel-post", "--path", "../agent/pause" }) == null);
 }
 
 test "a command line missing what its action needs is a usage error" {

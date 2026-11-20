@@ -355,7 +355,6 @@ public extension DesignTokens {
                     public static var project: NSColor { DesignTokens.Color.accentGreenText }
                     public static var other: NSColor { DesignTokens.Color.textSecondary }
                 }
-                public static let loose: CGFloat = DesignTokens.Opacity.paneIdle
             }
             public enum Tip {
                 public static let padding = NSEdgeInsets(top: 6, left: 10, bottom: 6, right: 10)
@@ -394,6 +393,34 @@ public extension DesignTokens {
                 public static let gap: CGFloat = 4
                 public static var divider: NSColor { DesignTokens.Color.lineSubtle }
                 public static var snippet: NSColor { DesignTokens.Color.textBody }
+            }
+        }
+        public enum Inbox {
+            public static let columnGap: CGFloat = 24
+            public static let composeWidth: CGFloat = 380
+            public static let gap: CGFloat = 12
+            public static let fieldGap: CGFloat = 6
+            public static let bodyHeight: CGFloat = 112
+            public static let editHeight: CGFloat = 96
+            public enum Row {
+                public static let padding = NSEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+                public static let gap: CGFloat = 10
+                public static let icon: CGFloat = 16
+                public static var iconColor: NSColor { DesignTokens.Color.textTertiary }
+                public static let radius: CGFloat = DesignTokens.Radius.control
+                public static var hover: NSColor { DesignTokens.Color.bgRaised }
+            }
+            public static let detailGap: CGFloat = 8
+            public static let emptyIcon: CGFloat = 24
+            public static var error: NSColor { DesignTokens.Color.accentRedText }
+            public static var sent: NSColor { DesignTokens.Color.accentGreenText }
+        }
+        public enum Workstreams {
+            public enum Shares {
+                public static let workstream: CGFloat = 0.31
+                public static let status: CGFloat = 0.13
+                public static let run: CGFloat = 0.27
+                public static let evidence: CGFloat = 0.17
             }
         }
         public enum Empty {

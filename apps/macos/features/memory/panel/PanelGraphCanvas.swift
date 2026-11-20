@@ -127,8 +127,17 @@ final class PanelGraphCanvas: NSView {
             let center = viewPoint(index)
             let dot = CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2)
             let color = Self.color(graph.nodes[index].kind)
-            cg.setFillColor(color.withAlphaComponent(loose.contains(index) ? G.Node.loose : 1).cgColor)
-            cg.fillEllipse(in: dot)
+            // A loose page is a ring in its kind's color: a dimmed dot read as the grey of "fact" in
+            // the legend (plan 40 E's prints).
+            if loose.contains(index) {
+                cg.setStrokeColor(color.cgColor)
+                cg.setLineWidth(DesignTokens.Stroke.glyph)
+                cg.strokeEllipse(in: dot.insetBy(dx: DesignTokens.Stroke.glyph / 2, dy: DesignTokens.Stroke.glyph / 2))
+                cg.setLineWidth(G.Edge.width)
+            } else {
+                cg.setFillColor(color.cgColor)
+                cg.fillEllipse(in: dot)
+            }
             if index == chosen {
                 cg.setStrokeColor(G.focus.cgColor)
                 cg.setLineWidth(DesignTokens.Stroke.glyph)

@@ -69,19 +69,22 @@ final class PanelGraphView: PanelScreen {
         return row
     }
 
-    /// A dot and its kind for each kind drawn; the dim dot says "sem links" when some are loose.
+    /// A dot and its kind for each kind drawn; the ring says "sem links" when some are loose.
     private func legend() -> NSView {
         var items: [NSView] = graph.kinds.map { item(PanelGraphCanvas.color($0), $0 == "other" ? T("other", "outro") : $0) }
         if !graph.loose.isEmpty, !graph.edges.isEmpty {
-            items.append(item(G.Node.Kind.other.withAlphaComponent(G.Node.loose), T("no links", "sem links")))
+            items.append(item(.clear, T("no links", "sem links"), ring: G.Node.Kind.other))
         }
         return PanelText.row(items + [PanelText.spring()], gap: G.Legend.gap)
     }
 
-    private func item(_ color: NSColor, _ words: String) -> NSView {
+    /// `ring`: the loose pages' ring, as the canvas draws them.
+    private func item(_ color: NSColor, _ words: String, ring: NSColor? = nil) -> NSView {
         let dot = NSView()
         dot.wantsLayer = true
         dot.layer?.backgroundColor = color.cgColor
+        dot.layer?.borderColor = ring?.cgColor
+        dot.layer?.borderWidth = ring == nil ? 0 : DesignTokens.Stroke.glyph
         dot.layer?.cornerRadius = UILooks.pt(G.Legend.dot) / 2
         dot.widthAnchor.constraint(equalToConstant: UILooks.pt(G.Legend.dot)).isActive = true
         dot.heightAnchor.constraint(equalToConstant: UILooks.pt(G.Legend.dot)).isActive = true

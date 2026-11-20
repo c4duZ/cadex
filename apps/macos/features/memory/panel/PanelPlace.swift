@@ -49,6 +49,10 @@ public enum PanelPlace: Hashable, Sendable {
     case search(PanelSearchQuery)
     /// The link graph: a project's, or nil for the general one (between projects).
     case graph(PanelProjectRef?)
+    /// The agents' inbox: a project's mailbox and Nova mensagem (plan 40 F).
+    case mailbox(PanelMailboxQuery)
+    /// The managed workstreams across projects, one page (100 a page).
+    case workstreams(page: Int)
 
     /// The section lit in the sidebar: a project's screens (its graph too) keep Projetos lit.
     public var section: MemoryPanelSection {
@@ -56,6 +60,8 @@ public enum PanelPlace: Hashable, Sendable {
         case .section(let section): section
         case .search: .search
         case .graph(nil): .graph
+        case .mailbox: .inbox
+        case .workstreams: .workstreams
         default: .projects
         }
     }
@@ -66,6 +72,8 @@ public enum PanelPlace: Hashable, Sendable {
         switch self {
         case .section(.search): .search(PanelSearchQuery())
         case .section(.graph): .graph(nil)
+        case .section(.inbox): .mailbox(PanelMailboxQuery())
+        case .section(.workstreams): .workstreams(page: 1)
         default: self
         }
     }
@@ -78,7 +86,7 @@ public enum PanelPlace: Hashable, Sendable {
 
     public var project: PanelProjectRef? {
         switch self {
-        case .section, .search, .graph(nil): nil
+        case .section, .search, .graph(nil), .mailbox, .workstreams: nil
         case .graph(let p?): p
         case .project(let p, _), .page(let p, _), .history(let p, _, _, _), .session(let p, _, _), .retrievals(let p, _, _), .agent(let p, _): p
         }
@@ -87,11 +95,13 @@ public enum PanelPlace: Hashable, Sendable {
     /// memory.show-panel's arguments for this place, so every click runs the command (ADR 0005).
     public var arguments: [String: String] {
         if case .search(let query) = self { return query.arguments }
+        if case .mailbox(let query) = self { return query.arguments }
+        if case .workstreams(let page) = self { return page > 1 ? ["section": "workstreams", "page": String(page)] : ["section": "workstreams"] }
         guard let project else { return ["section": section.rawValue] }
         var out = ["project": project.name]
         if project.workspace != "default" { out["workspace"] = project.workspace }
         switch self {
-        case .section, .search: break
+        case .section, .search, .mailbox, .workstreams: break
         case .graph: out["graph"] = "1"
         case .project(_, let tab): out["tab"] = tab.rawValue
         case .page(_, let path): out["page"] = path
@@ -114,6 +124,14 @@ public enum PanelPlace: Hashable, Sendable {
     public init?(arguments a: [String: String]) {
         if a["section"] == "search" {
             self = .search(PanelSearchQuery(arguments: a))
+            return
+        }
+        if a["section"] == "inbox" {
+            self = .mailbox(PanelMailboxQuery(arguments: a))
+            return
+        }
+        if a["section"] == "workstreams" {
+            self = .workstreams(page: max(1, Int(a["page"] ?? "") ?? 1))
             return
         }
         guard let name = a["project"], !name.isEmpty else {
@@ -140,7 +158,7 @@ public enum PanelPlace: Hashable, Sendable {
         if p.workspace != "default" { out.append(PanelCrumb(p.workspace, nil)) }
         let home = PanelCrumb(p.name, .project(p, .overview))
         switch self {
-        case .section, .search: return []
+        case .section, .search, .mailbox, .workstreams: return []
         case .graph: return out + [home, PanelCrumb(T("graph", "grafo"), nil)]
         case .project: return out + [PanelCrumb(p.name, nil)]
         case .page(_, let path): return out + [home, PanelCrumb(path, nil)]
