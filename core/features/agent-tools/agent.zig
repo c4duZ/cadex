@@ -50,6 +50,7 @@ pub fn main(sub: []const u8, all_words: []const []const u8, usage_text: []const 
     const reply = request.send(gpa, p.id, p.args.items) catch |err| return say(1, switch (err) {
         error.NoToken => "cadex: not a session opened by Cadex\n",
         error.NotRunning => "cadex: Cadex is not running\n",
+        error.NoAnswer => "cadex: Cadex did not answer in 40 s; a question may be waiting for the owner in Cadex\n",
         else => "cadex: the request failed\n",
     });
     defer reply.deinit(gpa);

@@ -172,6 +172,7 @@ fn call(gpa: std.mem.Allocator, out: *std.ArrayList(u8), params: ?std.json.Value
     const reply = send(gpa, tool.command, args.items) catch |err| return result(gpa, out, false, switch (err) {
         error.NoToken => "not a session opened by Cadex",
         error.NotRunning => "Cadex is not running",
+        error.NoAnswer => "Cadex did not answer in 40 s; a question may be waiting for the owner in Cadex (ask them, then try again)",
         else => "the request failed",
     });
     defer reply.deinit(gpa);

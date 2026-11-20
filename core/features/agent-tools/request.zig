@@ -27,7 +27,7 @@ pub const Reply = struct {
     }
 };
 
-pub const Failure = error{ NoToken, NotRunning };
+pub const Failure = error{ NoToken, NotRunning, NoAnswer };
 
 /// The line for running `id` with `args`, or for the list (`id` null).
 /// `dispatch`: the session's CADEX_DISPATCH_ID (plan 24 D2), which the app
@@ -86,7 +86,11 @@ pub fn send(gpa: std.mem.Allocator, id: ?[]const u8, args: []const Arg) !Reply {
     const dispatch: ?[]const u8 = if (std.c.getenv("CADEX_DISPATCH_ID")) |d| std.mem.span(d) else null;
     const msg = try line(gpa, token, id, args, ancestors(&pids_buf), dispatch);
     defer gpa.free(msg);
-    const answer = (try hook.exchange(gpa, path, msg, wait_ms)) orelse return error.NotRunning;
+    // No answer from an app that is there (a question of its own waiting for the owner, the
+    // computer use's "Let the agent use…?"): said apart, "not running" sent the agent looking for
+    // a closed app (2026-11-20).
+    const answer = (try hook.exchange(gpa, path, msg, wait_ms)) orelse
+        return if (hook.reachable(path)) error.NoAnswer else error.NotRunning;
     defer gpa.free(answer);
     return parse(gpa, answer);
 }

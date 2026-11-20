@@ -62,6 +62,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let updates = UpdateController()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // A write to a connection the other side closed is an error, not the end of Cadex: an agent's
+        // `cadex` gave up after 40 s while computer use asked the owner, the answer went to the closed
+        // socket and SIGPIPE killed the app (2026-11-20, launchd: "exited due to SIGPIPE").
+        signal(SIGPIPE, SIG_IGN)
         // Before any text is made: every view reads its texts once (ADR 0015).
         Strings.setLanguage(Language(rawValue: settings.store.settings.general.language) ?? .en)
         // The same for the interface's zoom, density and font (plan 15, phase D).

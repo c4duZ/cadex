@@ -27,6 +27,9 @@
   0015); "Reabrir agora" nas configurações e a atualização (`startUpdates`) saem como de costume e um
   shell abre o Cadex de novo (`openAgain`), levando as variáveis CADEX_ (uma instância de teste
   reabre em segundo plano, com o arquivo de projetos dela).
+- `main.swift` ignora o SIGPIPE ao abrir: escrever numa conexão que o outro lado fechou é erro, não
+  o fim do app (o `cadex` desistiu em 40 s enquanto o computer use perguntava, e a resposta matou o
+  Cadex, 2026-11-20).
 - `main.swift` (AppDelegate) guarda o que as janelas dividem: configurações, a janela de
   configurações, o keymap e o despachante de atalhos, que trocam para os comandos da janela com
   foco (`sessionBecameKey`). Abre a janela principal e as do ⇧⌘N (`newWindow`, na pasta da janela de
@@ -204,8 +207,9 @@
   flags da sessão do kit, digitado com o shell pronto; o hibernado volta hibernado; uma conversa nova
   ou hibernada grava os projetos logo (`saveProjectsSoon`), não só ao sair.
 - `ComputerUseWiring.swift` (plano 20, fase E): liga a feature computer-use às configurações
-  (computerUse.enabled, allowedApps, blockedApps; o sim do dono é salvo), pergunta ao dono num alerta
-  "o agente quer usar <app>", explica ao ligar e abre os Ajustes da Acessibilidade e da Gravação de
+  (computerUse.enabled, allowedApps, blockedApps; o sim do dono é salvo), pergunta ao dono numa folha
+  sobre a janela "o agente quer usar <app>" (um alerta modal parava a fila principal e todo pedido
+  e hook das sessões ficava sem resposta, 2026-11-20), explica ao ligar e abre os Ajustes da Acessibilidade e da Gravação de
   Tela (computer-use.open-permissions); desligar para o que estiver agindo.
 - `ReviewWiring.swift` (plano 21, fase B2): registra os comandos da revisão; git.review-open revisa
   o repositório da pasta do terminal com foco (senão a do workspace) contra onde a tarefa começou (o

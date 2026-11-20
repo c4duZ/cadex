@@ -26,7 +26,14 @@ extension AppDelegate {
                 let allow = alert.addButton(withTitle: T("Always Allow", "Permitir sempre"))
                 allow.keyEquivalent = ""
                 NSApp.activate(ignoringOtherApps: true)
-                answer(alert.runModal() == .alertSecondButtonReturn)
+                // A sheet on the window, not runModal: a modal alert stopped the main queue, so every
+                // session's requests and hooks (the preview too) went unanswered until the owner saw
+                // the alert behind another window (2026-11-20, "Cadex is not running").
+                guard let window = NSApp.keyWindow ?? NSApp.mainWindow ?? NSApp.windows.first(where: \.isVisible) else {
+                    return answer(alert.runModal() == .alertSecondButtonReturn)
+                }
+                window.makeKeyAndOrderFront(nil)
+                alert.beginSheetModal(for: window) { response in answer(response == .alertSecondButtonReturn) }
             }
         }
         controller.runCommand = { [weak self] id in self?.sessions.first?.commands.run(id) ?? false }

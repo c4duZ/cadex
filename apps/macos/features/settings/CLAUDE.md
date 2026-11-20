@@ -16,7 +16,7 @@
   aponta para outro arquivo (os cenários do `make perf`).
 - A janela (⌘,, comando settings.open): `SettingsWindowController.swift`, desde o plano 32 com as
   seções numa lista à esquerda e a busca em cima (`SettingsNavigation.swift`; as seções em
-  `SettingsSections.swift`; as linhas de cada uma, que eram uma página Geral só, em `SectionRows.swift`,
+  `SettingsSections.swift`; as linhas de cada uma, que eram uma página Geral só, em `SectionRows.swift`, (em Agentes e contas, a seção Computer use: ligar, os apps já permitidos com Esquecer todos e o atalho para Privacidade e Segurança; o dono não a achava, 2026-11-20)
   a busca pelas palavras de cada linha, `SettingsRowBox`); a barra de status e as contas (as listas
   do antigo Personalizar, `customizePages`, dadas pelo app) são seções daqui; auxiliar de tela cheia (com o app em tela cheia, abre por cima dele, na mesma
   mesa, e não numa mesa à parte); `GeneralPages.swift` (About), `TerminalPage.swift` (com as notificações dos programas e manter

@@ -123,10 +123,36 @@ enum SectionRows {
                              T("An agent drives a preview tab beside you, as a browser: it goes to a page, reads it, clicks, fills and takes pictures; a band shows it and Esc stops it.",
                                "Um agente dirige uma aba de preview ao seu lado, como um navegador: vai a uma página, lê, clica, preenche e tira prints; uma faixa mostra e o Esc para."),
                              control: SettingsPage.toggle(store.settings.agentTools.browser) { on in store.update { $0.agentTools.browser = on } }),
+            // Its own section (the owner, 2026-11-20: "porque isso não está em settings?"; it was one
+            // row among the others, with no word "computer use" in its title).
+            SettingsPage.section(T("Computer use", "Computer use")),
             SettingsPage.row(T("Agents can use other apps", "Os agentes podem usar outros apps"),
                              T("Computer use: an agent reads and operates other apps of this Mac by accessibility, asking you app by app the first time. Never password fields, System Settings, Keychain Access, Terminal or Cadex itself. Turning it on asks macOS for Accessibility and Screen Recording.",
                                "Computer use: um agente lê e opera outros apps deste Mac pela acessibilidade, pedindo a você app por app na primeira vez. Nunca campos de senha, Ajustes do Sistema, Acesso às Chaves, Terminal nem o próprio Cadex. Ligar pede ao macOS Acessibilidade e Gravação de Tela."),
                              control: SettingsPage.toggle(store.settings.computerUse.enabled) { on in store.update { $0.computerUse.enabled = on } }),
+        ] + computerUseRows(store)
+    }
+
+    /// The apps already allowed (a yes is kept until forgotten) and macOS's two permissions.
+    static func computerUseRows(_ store: SettingsStore) -> [NSView] {
+        let allowed = store.settings.computerUse.allowedApps
+        let names = allowed.map { id in
+            NSWorkspace.shared.urlForApplication(withBundleIdentifier: id).map { FileManager.default.displayName(atPath: $0.path) } ?? id
+        }
+        let forget = SettingsPage.button(T("Forget All", "Esquecer todos")) { store.update { $0.computerUse.allowedApps = [] } }
+        forget.isEnabled = !allowed.isEmpty
+        let open = SettingsPage.button(T("Open Privacy & Security", "Abrir Privacidade e Segurança")) {
+            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy") { NSWorkspace.shared.open(url) }
+        }
+        return [
+            SettingsPage.row(T("Apps allowed", "Apps permitidos"),
+                             names.isEmpty ? T("None yet: the first time an agent wants an app, Cadex asks you.", "Nenhum ainda: na primeira vez que um agente quer um app, o Cadex pergunta a você.")
+                                 : names.sorted().joined(separator: ", "),
+                             control: forget),
+            SettingsPage.row(T("macOS permissions", "Permissões do macOS"),
+                             T("Cadex needs Accessibility (to read and operate apps) and Screen Recording (for a picture of one window).",
+                               "O Cadex precisa de Acessibilidade (para ler e operar os apps) e de Gravação de Tela (para o print de uma janela)."),
+                             control: open),
         ]
     }
 

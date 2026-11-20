@@ -62,6 +62,19 @@ pub fn socketPath(out: []u8) ?[]const u8 {
     return std.fmt.bufPrint(out, "{s}/Library/Application Support/Cadex/sockets/app.sock", .{home}) catch null;
 }
 
+/// Whether the app's socket takes a connection (the app is there, maybe busy).
+pub fn reachable(path: []const u8) bool {
+    const c = std.c;
+    var address: c.sockaddr.un = .{ .family = c.AF.UNIX, .path = undefined };
+    if (path.len >= address.path.len) return false;
+    @memset(&address.path, 0);
+    @memcpy(address.path[0..path.len], path);
+    const fd = c.socket(c.AF.UNIX, c.SOCK.STREAM, 0);
+    if (fd < 0) return false;
+    defer _ = c.close(fd);
+    return c.connect(fd, @ptrCast(&address), @sizeOf(c.sockaddr.un)) == 0;
+}
+
 /// One exchange: send `line`, read one line back within `wait_ms`. null
 /// when the app is not there or did not answer in time.
 pub fn exchange(gpa: std.mem.Allocator, path: []const u8, line: []const u8, wait_ms: u32) !?[]u8 {
