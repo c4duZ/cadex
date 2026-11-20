@@ -120,9 +120,9 @@ struct QuadBuilder {
         for index in 0..<(cols * rows) where shown(index) {
             decorations(cells[index], at: origin(index), metrics: m)
         }
-        if let label = dress?.label {
+        for label in dress?.labels ?? [] {
             for (i, ch) in label.text.enumerated() {
-                let col = cols - label.text.count - 1 + i
+                let col = label.col + i
                 guard col >= 0, label.row < rows else { continue }
                 glyph(text: String(ch), bold: false, italic: false, cells: 1, at: origin(label.row * cols + col),
                       color: rgba(label.color), background: frame.background, atlas: atlas)

@@ -270,7 +270,7 @@ célula fotografada (cor do texto, do fundo, negrito), nos temas "dark", "light"
   7501 (sem o kit também), o desenho troca as cores fixas da tabela pelas tiradas do tema do
   terminal (fundo, texto e ANSI: o fundo da mensagem do dono a 7 % do texto, o fundo do diff a 13 %
   do verde e do vermelho, o ⏺ rodando no amarelo, o trabalhando no azul); não desenha o mascote nem
-  a linha do modo e põe o modo à direita da linha de cima; desenha a caixa arredondada no lugar das
+  a linha do modo e põe o modo à direita da linha de cima e os shells em segundo plano ("1 shell · ↓ to manage") logo depois da última palavra dela; desenha a caixa arredondada no lugar das
   duas linhas da entrada e a mensagem do dono num bloco com cantos. Só o desenho muda: seleção,
   busca e cópia leem o texto de verdade, e o mouse vai à célula que o Claude escreveu (a caixa é
   desenhada uma linha abaixo; sem desfazer isso, o clique no meio do texto caía na borda e o cursor

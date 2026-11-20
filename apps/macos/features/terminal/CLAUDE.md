@@ -108,7 +108,8 @@
   as cores fixas dele pelas do tema (`Palette`, tirada do `TerminalAppearance`), esconde o mascote (só
   os blocos no laranja dele, nas linhas de "Claude Code": as barras do /usage começam a linha com
   blocos e sumiam, 2026-11-20) e
-  a linha do modo, põe o modo à direita da status line, e as formas (a caixa da entrada, o bloco da
+  a linha do modo, põe o modo à direita da status line e o que vem depois dele ("1 shell · ↓ to manage",
+  os shells em segundo plano) logo depois da última palavra dela (escondido, o dono não achava os shells, 2026-11-20), e as formas (a caixa da entrada, o bloco da
   mensagem do dono) vão como retângulos arredondados (quad do tipo 3 no `TerminalShaders.swift`).
   O `QuadBuilder.swift` desenha com o plano (DrawOverlay.dressClaude); o texto não muda. As linhas
   que o plano move (a caixa uma linha abaixo, o banner à esquerda) voltam ao lugar escrito no mouse:

@@ -55,11 +55,15 @@ struct ClaudeDress {
         var cells: [cadex_terminal_cell]
         var hidden: [Bool]
         var shapes: [Shape] = []
-        var label: (text: String, row: Int, color: UInt32)?
+        var labels: [Label] = []
         /// Where each row is drawn, in cells from where Claude wrote it: the banner moved left into
         /// the mascot's room, the input and the status line moved down into the mode line's.
         var shift: [(dx: Int, dy: Int)]
     }
+
+    /// Words drawn over a row from a column: the mode at the status line's right end, the
+    /// background shells right after its last word.
+    struct Label: Equatable { var text: String, row: Int, col: Int, color: UInt32 }
 
     /// `atBottom`: the view shows the screen, not the history above it (the mode line is the
     /// screen's last row only then).
@@ -173,8 +177,26 @@ extension ClaudeDress {
         if top > 0, lines[top - 1].contains("/effort") { top -= 1 }
         for row in top..<r { plan.shift[row].dy = 1 }
         let above = Array(lines[r - 1])
-        guard above.suffix(words.count + 2).allSatisfy({ $0 == " " }) else { return }
-        plan.label = (words, r, Fixed.mode[color].map { $0 == .plan ? p.modePlan : p.modeEdits } ?? p.modeEdits)
+        var free = cols
+        if above.suffix(words.count + 2).allSatisfy({ $0 == " " }) {
+            free = cols - words.count - 1
+            plan.labels.append(Label(text: words, row: r, col: free, color: Fixed.mode[color].map { $0 == .plan ? p.modePlan : p.modeEdits } ?? p.modeEdits))
+        }
+        // What follows the mode ("1 shell · ↓ to manage") goes right after the status line's last
+        // word: hidden with the row, the background shells could not be found and ↓ seemed to do
+        // nothing (the owner, 2026-11-20).
+        let extras = modeExtras(String(line[on.upperBound...])).joined(separator: " · ")
+        let start = (above.lastIndex(where: { $0 != " " }) ?? -1) + 3
+        if !extras.isEmpty, start + extras.count + 2 <= free {
+            plan.labels.append(Label(text: extras, row: r, col: start, color: p.dim))
+        }
+    }
+
+    /// The parts after the mode's "on", without the cycling hint: "(shift+tab to cycle) · 1 shell ·
+    /// ↓ to manage" gives ["1 shell", "↓ to manage"].
+    static func modeExtras(_ rest: String) -> [String] {
+        rest.components(separatedBy: " · ").map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty && !$0.contains("shift+tab") && !$0.hasPrefix("(") }
     }
 
     /// Claude's fixed colors to the theme's (the table in the spec), the text color by its background.
