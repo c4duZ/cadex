@@ -16,7 +16,9 @@ final class WorkAvatar: NSView {
         layer?.cornerRadius = UILooks.pt(A.radius)
         layer?.masksToBounds = true
         let tint = project.tint.map { NSColor(srgbRed: $0[0], green: $0[1], blue: $0[2], alpha: 1) } // token-exempt: the project's own color, from the app
-        layer?.backgroundColor = (tint ?? DesignTokens.Color.bgButton).cgColor
+        // Without a color, line.control as the reference's: on bg.button it all but vanished and the
+        // one project with a color looked bigger than the others (the owner, 2026-11-20).
+        layer?.backgroundColor = (tint ?? A.bg).cgColor
         if let path = project.image, let image = NSImage(contentsOfFile: path) {
             let view = NSImageView(image: image)
             view.imageScaling = .scaleProportionallyUpOrDown
@@ -73,7 +75,9 @@ final class WorkRow: NSView {
     private let caret = NSImageView()
     private var hovering = false { didSet { paint() } }
 
-    init(title: String, caret: Bool?, avatar: NSView?, bold: Bool, fontSize: CGFloat, meta: Meta, selected: Bool) {
+    /// `caretSlot`: the arrow's room kept empty, so the line's avatar and name stand under the
+    /// projects' (New Project…). `dim`: the name in the quiet color.
+    init(title: String, caret: Bool?, caretSlot: Bool = false, avatar: NSView?, bold: Bool, dim: Bool = false, fontSize: CGFloat, meta: Meta, selected: Bool) {
         self.title = title
         self.selected = selected
         super.init(frame: .zero)
@@ -86,11 +90,16 @@ final class WorkRow: NSView {
             self.caret.contentTintColor = R.Caret.color
             self.caret.widthAnchor.constraint(equalToConstant: UILooks.pt(R.Caret.size)).isActive = true
             views.append(self.caret)
+        } else if caretSlot {
+            let room = NSView()
+            room.translatesAutoresizingMaskIntoConstraints = false
+            room.widthAnchor.constraint(equalToConstant: UILooks.pt(R.Caret.size)).isActive = true
+            views.append(room)
         }
         if let avatar { views.append(avatar) }
         let name = NSTextField(labelWithString: title)
         name.font = UILooks.font(fontSize, weight: bold ? R.Project.weight : .regular)
-        name.textColor = selected ? R.Selected.color : bold ? R.Project.color : R.color
+        name.textColor = selected ? R.Selected.color : dim ? R.dim : bold ? R.Project.color : R.color
         name.lineBreakMode = .byTruncatingTail
         name.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         views.append(name)
@@ -191,4 +200,24 @@ final class WorkRow: NSView {
         guard let entries = rightMenu?(), !entries.isEmpty else { return super.rightMouseDown(with: event) }
         PopupMenu.show(entries, at: convert(event.locationInWindow, from: nil), in: self)
     }
+}
+
+/// An icon in the avatar's square (New Project…, Open Folder…): the foot's icon size and color, so
+/// the line's name starts where the projects' names start.
+@MainActor
+final class WorkIconSlot: NSView {
+    init(_ icon: Icon) {
+        super.init(frame: .zero)
+        let glyph = NSImageView(image: icon.fittedImage(size: UILooks.pt(DesignTokens.WorkSidebar.Foot.Row.icon)))
+        glyph.contentTintColor = DesignTokens.WorkSidebar.Row.icon
+        glyph.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(glyph)
+        translatesAutoresizingMaskIntoConstraints = false
+        let side = UILooks.pt(DesignTokens.WorkSidebar.Avatar.size)
+        NSLayoutConstraint.activate([widthAnchor.constraint(equalToConstant: side), heightAnchor.constraint(equalToConstant: side),
+                                     glyph.centerXAnchor.constraint(equalTo: centerXAnchor), glyph.centerYAnchor.constraint(equalTo: centerYAnchor)])
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("WorkIconSlot is created in code") }
 }

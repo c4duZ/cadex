@@ -2,6 +2,7 @@ import AppKit
 import Checks
 @testable import Sidebar
 import StateGlyph
+import UILooks
 
 // The sidebar of ADR 0039 (plan 38 phase B): the Work list, the place lit, the clicks, the switch.
 @MainActor
@@ -47,6 +48,27 @@ let workChecks: [(name: String, body: Checks.Body)] = [
         notes?.onDropImage?(URL(fileURLWithPath: "/tmp/face.png"))
         expect(dropped == ["/nt|face.png"], "\(dropped)")
         expect(WorkProject(id: "/a", name: "bhband-site").initials == "BS" && WorkProject(id: "/b", name: "cadex").initials == "CA")
+    }),
+    ("New Project… stands under the projects (the arrow's room, a + as the avatar) and a project without a color has a visible square", {
+        let view = WorkSidebarView { _ in }
+        view.frame = NSRect(x: 0, y: 0, width: 300, height: 400)
+        view.show([WorkProject(id: "/cadex", name: "Cadex", tint: [0.5, 0.8, 0.6], terminals: 1, expanded: true,
+                               places: [WorkPlace(id: "/cadex", name: "main", isMain: true, terminals: 1)]),
+                   WorkProject(id: "/bea", name: "Bea", terminals: 1)], place: "/cadex")
+        view.layoutSubtreeIfNeeded()
+        let rows = view.list.arrangedSubviews.compactMap { $0 as? WorkRow }
+        @MainActor func nameX(_ row: WorkRow?) -> CGFloat? {
+            guard let row, let name = row.descendants.compactMap({ $0 as? NSTextField }).first(where: { $0.stringValue == row.title }) else { return nil }
+            return name.convert(name.bounds, to: view).minX
+        }
+        let bea = rows.first { $0.title == "Bea" }, new = rows.first { $0.title == "New Project…" }
+        expect(nameX(new) != nil && nameX(new) == nameX(bea), "\(String(describing: nameX(new))) \(String(describing: nameX(bea)))")
+        let avatar = bea?.descendants.compactMap { $0 as? WorkAvatar }.first
+        expect(avatar?.layer?.backgroundColor == DesignTokens.WorkSidebar.Avatar.bg.cgColor)
+        if let dir = ProcessInfo.processInfo.environment["CADEX_SNAPSHOT_DIR"], let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
+            view.cacheDisplay(in: view.bounds, to: bitmap)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir + "/sidebar-projects.png"))
+        }
     }),
     ("the switch: Work by default; Files shows the view the app gave, and back", {
         var modes: [WorkSidebarMode] = []
@@ -129,3 +151,8 @@ let workChecks: [(name: String, body: Checks.Body)] = [
         expect(view.lineTitles == ["cadex", "New Project…"], "the Work list is as it was")
     }),
 ]
+
+extension NSView {
+    /// Every view under this one, for the measures of the tests.
+    var descendants: [NSView] { subviews + subviews.flatMap(\.descendants) }
+}

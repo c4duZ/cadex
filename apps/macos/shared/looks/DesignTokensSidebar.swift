@@ -108,6 +108,7 @@ public extension DesignTokens {
         public enum Avatar {
             public static let size: CGFloat = 22
             public static let radius: CGFloat = DesignTokens.Radius.tag
+            public static var bg: NSColor { DesignTokens.Color.lineControl }
             public static let fontSize: CGFloat = DesignTokens.FontSize.badge
             public static var weight: NSFont.Weight { DesignTokens.FontWeight.bold }
         }

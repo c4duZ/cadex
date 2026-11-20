@@ -25,7 +25,9 @@
   projeto muda a ordem), `onMode` (o seletor); `setFiles` recebe a vista de Arquivos (a coluna de
   Files e Changes do app) e `setFilesActions` os botões dela, no cabeçalho à direita do nome, `setQueue` a fila; `remoteShown` mostra Máquinas no pé. `WorkRows.swift`:
   o avatar e a linha (a seta do Phosphor, o nome, à direita o estado e os terminais, "nada aberto" ou
-  a contagem âmbar dos pedidos; a linha inteira pega o clique, a seta dobra). `WorkSidebarParts.swift`:
+  a contagem âmbar dos pedidos; a linha inteira pega o clique, a seta dobra; sem seta, o lugar dela
+  fica, e Novo projeto… tem um + no lugar do avatar, `WorkIconSlot`, alinhado com os projetos; o avatar
+  sem cor própria em line.control, visível como o com cor; o dono, 2026-11-20). `WorkSidebarParts.swift`:
   o seletor, o grupo do main e das tarefas com o fio guia, a linha do pé e a marca da borda
   (`WorkEdge`: um projeto com pedido fora da vista da lista diz o nome e o lado; o clique rola até
   ele). `WorkQueue.swift` (fase C): a fila "Precisa de você" (`WorkRequest`, `WorkQueueView`: o

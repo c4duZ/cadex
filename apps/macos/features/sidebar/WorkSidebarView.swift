@@ -158,8 +158,10 @@ public final class WorkSidebarView: NSView {
         // sat 5 pt closer to the first project than the board (measured 2026-11-20, the owner).
         list.setCustomSpacing(UILooks.pt(W.Section.padding.bottom), after: labelBox)
         for project in projects { addProject(project, place: place) }
-        let new = WorkRow(title: T("New Project…", "Novo projeto…"), caret: nil, avatar: nil, bold: false,
-                          fontSize: W.Row.fontSize, meta: .none, selected: false)
+        // As the reference: the arrow's room, a + where the avatar goes, the quiet color; it began under
+        // the arrows, out of line with the projects (the owner, 2026-11-20).
+        let new = WorkRow(title: T("New Project…", "Novo projeto…"), caret: nil, caretSlot: true, avatar: WorkIconSlot(.plus), bold: false,
+                          dim: true, fontSize: W.Row.fontSize, meta: .none, selected: false)
         new.onPress = { [weak self] in self?.run("project.create") }
         add(new)
         DispatchQueue.main.async { [weak self] in self?.updateEdge() }
@@ -168,8 +170,9 @@ public final class WorkSidebarView: NSView {
     private func addProject(_ project: WorkProject, place: String?) {
         let meta: WorkRow.Meta = project.waiting > 0 && !project.expanded ? .waiting(project.waiting)
             : project.terminals > 0 ? .terminals(project.badge, project.terminals) : .nothing(T("nothing open", "nada aberto"))
-        // No places (the home folder's "No project"): nothing to unfold, no arrow.
-        let row = WorkRow(title: project.name, caret: project.places.isEmpty ? nil : project.expanded, avatar: WorkAvatar(project), bold: true,
+        // No places (the home folder's "No project"): nothing to unfold, no arrow; its room stays, the
+        // avatar and the name under the others'.
+        let row = WorkRow(title: project.name, caret: project.places.isEmpty ? nil : project.expanded, caretSlot: true, avatar: WorkAvatar(project), bold: true,
                           fontSize: W.Row.fontSize, meta: meta, selected: false)
         row.onPress = { [weak self] in self?.onPickProject?(project.id) }
         row.onCaret = { [weak self] in self?.onToggle?(project.id) }

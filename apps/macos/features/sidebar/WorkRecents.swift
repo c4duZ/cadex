@@ -1,5 +1,6 @@
 import AppKit
 import Strings
+import Icons
 import UILooks
 
 /// A recent project while nothing is open (plan 38 G; ADR 0039, Nada aberto): its face as an open
@@ -41,9 +42,9 @@ extension WorkSidebarView {
             row.rightMenu = { [weak self] in self?.menuFor?(recent.project.id) ?? [] }
             add(row)
         }
-        for (title, key, command) in [(T("New Project…", "Novo projeto…"), "", "project.create"),
-                                      (T("Open Folder…", "Abrir pasta…"), openShortcut, "project.new")] {
-            let row = WorkRow(title: title, caret: nil, avatar: nil, bold: false, fontSize: R.Row.fontSize,
+        for (title, icon, key, command) in [(T("New Project…", "Novo projeto…"), Icon.plus, "", "project.create"),
+                                            (T("Open Folder…", "Abrir pasta…"), Icon.folder, openShortcut, "project.new")] {
+            let row = WorkRow(title: title, caret: nil, avatar: WorkIconSlot(icon), bold: false, dim: true, fontSize: R.Row.fontSize,
                               meta: key.isEmpty ? .none : .nothing(key), selected: false)
             row.onPress = { [weak self] in self?.run(command) }
             if command == "project.create" { list.setCustomSpacing(UILooks.pt(R.Section.padding.bottom), after: list.arrangedSubviews.last ?? row) }
