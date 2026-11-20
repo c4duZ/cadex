@@ -218,5 +218,5 @@ let mainTests: [(name: String, body: Checks.Body)] = [
         expect(text.contains("2 " + T("tasks", "tarefas")) && text.contains("1 " + T("session", "sessão")) && text.contains("0 " + T("memories", "memórias")), text)
     }),
 ]
-let exitCode = await Checks.run(mainTests + sectionTests + lookTests)
+let exitCode = await Checks.run(mainTests + sectionTests + lookTests + legacyTests)
 exit(exitCode)

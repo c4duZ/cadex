@@ -46,7 +46,12 @@ extension WindowSession {
                         self.window.sendEvent(event)
                     }
                 }
-                NSLog("perf click %.0f,%.0f", point.x, point.y)
+                // Which view the click landed on, outermost first: a view over another swallowed it
+                // (the sidebar's Files switch, 2026-11-20).
+                var chain: [String] = []
+                var hit = self.window.contentView?.superview?.hitTest(local)
+                while let view = hit { chain.append(String(describing: type(of: view))); hit = view.superview }
+                NSLog("perf click %.0f,%.0f on %@", point.x, point.y, chain.joined(separator: " < "))
             }
         }
     }

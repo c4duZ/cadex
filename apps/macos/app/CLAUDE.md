@@ -112,7 +112,8 @@
 - Plano 38 fase E: a barra de cima (`TitleBarView.swift`) começa com o botão da barra lateral (⌘B), o
   lugar (`TitleBarPlace.swift`: o avatar e "projeto › tarefa ▾"; o clique abre o menu do lugar,
   `PlaceWiring.swift`: o main e as tarefas do projeto, a página do projeto, os outros projetos e
-  Trocar de projeto…), as abas do lugar e o "+", Revisar (`TitleBarReview`, git.review-open) só numa
+  Trocar de projeto…; nos terminais da pasta pessoal, "Sem projeto ▾" em vez do lugar escondido, que
+  deixava um buraco na barra), as abas do lugar e o "+", Revisar (`TitleBarReview`, git.review-open) só numa
   tarefa depois de um fio; à direita, a pílula e a busca. A conta, o quadro e a engrenagem saíram
   (as propriedades ficam para quem ainda as chama); o item da tarefa, o "‹ projeto" e o Review das
   abas também (`ProjectsWiring.swift`, extrasOf: só o Compare de uma corrida).

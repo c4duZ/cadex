@@ -78,7 +78,10 @@
   (a tela de início) é um arquivo bom. Arquivo ilegível vai para
   projects.bad-<data>.json e o app começa do zero. CADEX_PROJECTS_FILE aponta para outro arquivo:
   conferir o app em teste não pode apagar os projetos do dono. O spaces.json de antes do plano 27
-  virou projetos uma vez; essa leitura saiu no plano 28. `repositoryRoot`: o repositório de uma pasta pelos arquivos
+  é lido uma vez (`ProjectsLegacy.swift`; tinha saído no plano 28 e voltou em 2026-11-20, quando o
+  dono pulou da 2.2.1 de outubro direto para o plano 40 e as abas dele sumiram): cada pasta das abas
+  antigas vira um projeto fixado ao lado dos que o projects.json tem, a aba vai para o projeto do seu
+  primeiro painel, e o arquivo vira spaces.migrated.json. `repositoryRoot`: o repositório de uma pasta pelos arquivos
   (`.git`; a worktree de uma tarefa pertence ao repositório principal), sem rodar o git.
 - Comandos em `ProjectsCommands.swift`: project.switch (⇧⌘S, a lista na paleta com a pasta de cada
   um), project.new (⌃⌘N, Abrir projeto: a pasta pelo seletor do sistema), project.rename,

@@ -219,6 +219,9 @@ public final class WorkSidebarView: NSView {
         updateEdge()
     }
 
+    /// The Files page's buttons, in the head at the right of the name.
+    public func setFilesActions(_ view: NSView) { filesHead.hold(view) }
+
     /// The list alone, the Files view hidden (nothing open).
     func setFilesHidden(_ hidden: Bool) {
         scroll.isHidden = !hidden

@@ -23,7 +23,7 @@
   entrada; `show` (os projetos e o lugar aceso) redesenha só quando mudam; `onPickProject`,
   `onPickPlace`, `onToggle` (a seta), `menuFor` (o clique direito), `onMove` (arrastar a linha de um
   projeto muda a ordem), `onMode` (o seletor); `setFiles` recebe a vista de Arquivos (a coluna de
-  Files e Changes do app), `setQueue` a fila; `remoteShown` mostra Máquinas no pé. `WorkRows.swift`:
+  Files e Changes do app) e `setFilesActions` os botões dela, no cabeçalho à direita do nome, `setQueue` a fila; `remoteShown` mostra Máquinas no pé. `WorkRows.swift`:
   o avatar e a linha (a seta do Phosphor, o nome, à direita o estado e os terminais, "nada aberto" ou
   a contagem âmbar dos pedidos; a linha inteira pega o clique, a seta dobra). `WorkSidebarParts.swift`:
   o seletor, o grupo do main e das tarefas com o fio guia, a linha do pé e a marca da borda

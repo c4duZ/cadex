@@ -15,7 +15,11 @@ extension WindowSession {
         let bar = workspace.titleBar
         guard let folder = projects?.activeFolder, !Self.isLoose(folder),
               let project = sidebarModel().first(where: { $0.id == folder }) else {
-            bar.place.isHidden = true
+            // The home folder's terminals are no project (ADR 0038): the place says so and its menu
+            // still leads to the projects. Hidden, it left a hole in the bar and no way to know where
+            // you were (the owner, 2026-11-20).
+            bar.place.isHidden = false
+            bar.place.show(project: T("No project", "Sem projeto"), task: nil, mark: "~", image: nil, tint: nil)
             bar.setReviewShown(false)
             return
         }

@@ -156,7 +156,10 @@ private struct Repaint {
             // read after they were swapped twice (Cadex Night's text #E7E8EA became Cadex Day's
             // #1D1F23, which is Night's bg.chip, and then Day's light chip: the chosen segment's
             // label vanished, 2026-11-18). The plain color first, then any runs of their own.
-            let attributed = text(field.attributedStringValue)
+            // Only runs of a color of their own: a plain label reports its text with its textColor as
+            // a run, and written back as runs it ignored every textColor after (the sidebar's Work |
+            // Files switch kept Work's word lit with Files chosen, 2026-11-20).
+            let attributed = ownRuns(field) ? text(field.attributedStringValue) : nil
             if let new = swap(field.textColor) { field.textColor = new }
             if let attributed { field.attributedStringValue = attributed }
         case let button as NSButton:
@@ -180,6 +183,21 @@ private struct Repaint {
             if let new = swap(shape.strokeColor) { shape.strokeColor = new }
         }
         for sub in layer.sublayers ?? [] { self.layer(sub) }
+    }
+
+    /// Whether the field's text has a color run other than its textColor (a multi-colored line).
+    func ownRuns(_ field: NSTextField) -> Bool {
+        let string = field.attributedStringValue
+        guard string.length > 0 else { return false }
+        let plain = field.textColor.map { ColorKey($0) }
+        var own = false
+        for key in [NSAttributedString.Key.foregroundColor, .backgroundColor] {
+            string.enumerateAttribute(key, in: NSRange(location: 0, length: string.length)) { value, _, stop in
+                guard let color = value as? NSColor else { return }
+                if key == .backgroundColor || ColorKey(color) != plain { own = true; stop.pointee = true }
+            }
+        }
+        return own
     }
 
     /// The string with its themed colors swapped, or nil when none was.

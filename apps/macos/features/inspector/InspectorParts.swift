@@ -49,7 +49,7 @@ final class InspectorTabButton: NSView {
     // The whole box takes the click: the icon's image view caught it and, in a window not yet
     // key, ate the first one (plan 36 phase A, a click on Files did nothing).
     override func hitTest(_ point: NSPoint) -> NSView? {
-        frame.contains(point) ? self : nil
+        !isHidden && frame.contains(point) ? self : nil
     }
 
     override func updateTrackingAreas() {

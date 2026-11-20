@@ -62,6 +62,7 @@ final class WorkspaceView: NSView {
         self.rail = rail
         self.inspector = inspector
         sidebar.setFiles(inspector)
+        sidebar.setFilesActions(inspector.actions)
         super.init(frame: .zero)
         frost.blendingMode = .behindWindow
         frost.material = .underWindowBackground

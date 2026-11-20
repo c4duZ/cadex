@@ -21,7 +21,9 @@
 - `InspectorView.swift`: a porta de entrada. `show` mostra uma aba e avisa `onShow`; `setScope`
   troca as palavras da linha de contexto de uma aba (a pasta, o branch, a memória do projeto);
   `setBusy` gira o indicador; até 3 botões, o resto no "⋯" (PopupMenu de `../../shared/menus`).
-  As palavras ocupam o que sobra e os botões ficam à direita.
+  As palavras ocupam o que sobra e os botões ficam à direita. Com `scopeOnTop` (a vista Arquivos da
+  barra lateral), a linha sai do pé: os botões vão por `actions` para o cabeçalho de quem a hospeda,
+  sem as palavras, e a página ocupa a coluna inteira (o dono, 2026-11-20).
 - `InspectorEdge.swift`: a borda direita (a coluna fica à esquerda do centro), uma faixa de 5 pt com o cursor de redimensionar; arrastar
   pede a largura (`onResize`), e o app a limita (Settings.inspectorWidths) e salva ao soltar
   (inspector.width). `reorder` põe as páginas na ordem arrastada no trilho (plano 36 E;

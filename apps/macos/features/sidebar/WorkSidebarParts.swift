@@ -64,10 +64,12 @@ final class WorkSwitch: NSView {
     }
 
     var lit: WorkSidebarMode? { options.first { $0.2.layer?.backgroundColor != nil }?.0 }
+    /// For tests: each option's word and whether it is drawn as the chosen one (bold, primary).
+    var words: [(WorkSidebarMode, Bool)] { options.map { ($0.0, $0.1.textColor == S.On.color) } }
 
     override var mouseDownCanMoveWindow: Bool { false }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
-    override func hitTest(_ point: NSPoint) -> NSView? { frame.contains(point) ? self : nil }
+    override func hitTest(_ point: NSPoint) -> NSView? { !isHidden && frame.contains(point) ? self : nil }
     override func mouseDown(with event: NSEvent) {}
     override func mouseUp(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
@@ -176,7 +178,7 @@ final class WorkFootRow: NSView {
 
     override var mouseDownCanMoveWindow: Bool { false }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
-    override func hitTest(_ point: NSPoint) -> NSView? { frame.contains(point) ? self : nil }
+    override func hitTest(_ point: NSPoint) -> NSView? { !isHidden && frame.contains(point) ? self : nil }
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
         trackingAreas.forEach(removeTrackingArea)
@@ -233,7 +235,7 @@ final class WorkEdge: NSView {
 
     override var mouseDownCanMoveWindow: Bool { false }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
-    override func hitTest(_ point: NSPoint) -> NSView? { frame.contains(point) ? self : nil }
+    override func hitTest(_ point: NSPoint) -> NSView? { !isHidden && frame.contains(point) ? self : nil }
     override func mouseDown(with event: NSEvent) {}
     override func mouseUp(with event: NSEvent) {
         guard bounds.contains(convert(event.locationInWindow, from: nil)) else { return }
@@ -272,6 +274,21 @@ final class WorkFilesHead: NSView {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("WorkFilesHead is created in code") }
+
+    /// The Files page's buttons at the right of the name (the owner, 2026-11-20: not a row of their own).
+    func hold(_ accessory: NSView) {
+        accessory.translatesAutoresizingMaskIntoConstraints = false
+        accessory.setContentHuggingPriority(.required, for: .horizontal)
+        accessory.setContentCompressionResistancePriority(.required, for: .horizontal)
+        addSubview(accessory)
+        let gap = UILooks.pt(H.padding.right)
+        NSLayoutConstraint.activate([
+            accessory.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -gap),
+            accessory.centerYAnchor.constraint(equalTo: title.bottomAnchor),
+            title.trailingAnchor.constraint(lessThanOrEqualTo: accessory.leadingAnchor, constant: -gap),
+            detail.trailingAnchor.constraint(lessThanOrEqualTo: accessory.leadingAnchor, constant: -gap),
+        ])
+    }
 
     func say(_ name: String, _ what: String) {
         title.stringValue = name
@@ -326,7 +343,7 @@ final class WorkChangesLine: NSView {
 
     override var mouseDownCanMoveWindow: Bool { false }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
-    override func hitTest(_ point: NSPoint) -> NSView? { frame.contains(point) ? self : nil }
+    override func hitTest(_ point: NSPoint) -> NSView? { !isHidden && frame.contains(point) ? self : nil }
     override func resetCursorRects() { addCursorRect(bounds, cursor: .pointingHand) }
     override func mouseDown(with event: NSEvent) {}
     override func mouseUp(with event: NSEvent) {

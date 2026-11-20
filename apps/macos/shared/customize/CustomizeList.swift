@@ -195,5 +195,5 @@ final class CustomizeRowView: NSView {
     required init?(coder: NSCoder) { fatalError("CustomizeRowView is created in code") }
 
     // The list handles clicks and drags.
-    override func hitTest(_ point: NSPoint) -> NSView? { frame.contains(point) ? self : nil }
+    override func hitTest(_ point: NSPoint) -> NSView? { !isHidden && frame.contains(point) ? self : nil }
 }

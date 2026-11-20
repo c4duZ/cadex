@@ -41,7 +41,7 @@ extension WindowSession {
         ]
         let shortcut = app.keymapLabel("view.toggle-sidebar") ?? "⌘B"
         // The pages' icons are the rail's (ADR 0038, revised 2026-11-18): none on top of the column.
-        let inspector = InspectorView(tabs: tabs, shortcut: shortcut, tabsOnTop: false) { [weak self] id in _ = self?.commands.run(id) }
+        let inspector = InspectorView(tabs: tabs, shortcut: shortcut, tabsOnTop: false, scopeOnTop: true) { [weak self] id in _ = self?.commands.run(id) }
         inspector.onShow = { [weak self] id in
             self?.showChangesLine()
             self?.settings.store.update { $0.inspector.tab = id }

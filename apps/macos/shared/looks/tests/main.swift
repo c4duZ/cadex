@@ -64,6 +64,18 @@ let exitCode = await Checks.run([
         expect(ColorKey(label.textColor!) == ColorKey(DesignTokens.Color.textPrimary), "\(label.textColor!)")
         DesignTokens.applyTheme(chrome: nil, text: nil)
     }),
+    ("a plain label repainted still follows the color set after (the Work | Files switch, 2026-11-20)", {
+        let label = NSTextField(labelWithString: "Work")
+        label.textColor = DesignTokens.Color.textPrimary
+        let before = DesignTokens.themedColors()
+        DesignTokens.applyTheme(chrome: DesignTokens.rgb(0x101214), text: DesignTokens.rgb(0xE0E0E0))
+        DesignTokens.repaint(label, from: before)
+        label.textColor = DesignTokens.Color.textMuted
+        var drawn: NSColor?
+        label.attributedStringValue.enumerateAttribute(.foregroundColor, in: NSRange(location: 0, length: 4)) { value, _, _ in drawn = value as? NSColor }
+        expect(drawn.map { ColorKey($0) } == ColorKey(DesignTokens.Color.textMuted), "the word draws the new color: \(String(describing: drawn))")
+        DesignTokens.applyTheme(chrome: nil, text: nil)
+    }),
     ("a translucent window: the grounds turn to glass, cards and text in a ground's color stay solid", {
         let view = NSView(frame: NSRect(x: 0, y: 0, width: 10, height: 10))
         view.wantsLayer = true

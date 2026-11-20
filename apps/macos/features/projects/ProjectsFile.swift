@@ -93,15 +93,15 @@ public enum ProjectsFile {
 
     /// The saved projects; nil without a file. A file that does not read is moved aside
     /// (projects.bad-<date>.json) and the app starts fresh. With no project open (the home screen,
-    /// plan 29) the file has none and is still good. (The spaces.json of before plan 27 was read
-    /// once to become this file; that reading left in plan 28.)
+    /// plan 29) the file has none and is still good. A spaces.json beside it (the Cadex of before
+    /// plan 27) adds its folders as projects once (ProjectsLegacy.swift).
     public static func load(from url: URL) -> SavedProjects? {
-        guard let data = try? Data(contentsOf: url) else { return nil }
+        guard let data = try? Data(contentsOf: url) else { return mergeLegacy(nil, beside: url) }
         if let saved = try? JSONDecoder().decode(SavedProjects.self, from: data) {
-            return saved
+            return mergeLegacy(saved, beside: url)
         }
         moveAside(url)
-        return nil
+        return mergeLegacy(nil, beside: url)
     }
 
     public static func save(_ projects: SavedProjects, to url: URL) throws {

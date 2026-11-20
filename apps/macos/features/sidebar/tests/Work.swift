@@ -6,6 +6,13 @@ import StateGlyph
 // The sidebar of ADR 0039 (plan 38 phase B): the Work list, the place lit, the clicks, the switch.
 @MainActor
 let workChecks: [(name: String, body: Checks.Body)] = [
+    ("the switch: the chosen option's box and word lit together, Work then Files", {
+        let view = WorkSidebarView { _ in }
+        view.setMode(.files)
+        expect(view.switchRow.lit == .files && view.switchRow.words.map(\.1) == [false, true], "\(view.switchRow.words)")
+        view.setMode(.work)
+        expect(view.switchRow.lit == .work && view.switchRow.words.map(\.1) == [true, false], "\(view.switchRow.words)")
+    }),
     ("the Work list: projects, an unfolded one with main and its tasks, the place lit, New Project last", {
         var ran: [String] = []
         var projects: [String] = []

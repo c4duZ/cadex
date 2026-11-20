@@ -39,9 +39,17 @@ public final class InspectorView: NSView {
     private var overflow: [InspectorAction] = []
     private let kbd = NSTextField(labelWithString: "")
 
+    /// The page's buttons go into the sidebar's own head (`actions`), without the words (the head
+    /// says where): at the foot, and then on a row of their own, they read as stray (the owner,
+    /// 2026-11-20).
+    private let scopeOnTop: Bool
+
     /// `tabsOnTop` false: no row of icons on top; the rail shows the pages (ADR 0038, revised).
-    public init(tabs: [InspectorTab], shortcut: String?, tabsOnTop: Bool = true, run: @escaping (String) -> Void) {
+    /// `scopeOnTop`: the buttons go out as `actions` for the host's head, without their words (the
+    /// sidebar's Files view); the page fills the column.
+    public init(tabs: [InspectorTab], shortcut: String?, tabsOnTop: Bool = true, scopeOnTop: Bool = false, run: @escaping (String) -> Void) {
         self.tabs = tabs
+        self.scopeOnTop = scopeOnTop
         self.run = run
         super.init(frame: .zero)
         wantsLayer = true
@@ -83,24 +91,42 @@ public final class InspectorView: NSView {
             underTabs.leadingAnchor.constraint(equalTo: leadingAnchor),
             underTabs.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -hairline),
             underTabs.heightAnchor.constraint(equalToConstant: hairline),
-            content.topAnchor.constraint(equalTo: underTabs.bottomAnchor),
             content.leadingAnchor.constraint(equalTo: leadingAnchor),
             content.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -hairline),
-            content.bottomAnchor.constraint(equalTo: overFoot.topAnchor),
-            overFoot.leadingAnchor.constraint(equalTo: leadingAnchor),
-            overFoot.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -hairline),
-            overFoot.heightAnchor.constraint(equalToConstant: hairline),
-            overFoot.bottomAnchor.constraint(equalTo: scopeRow.topAnchor),
-            scopeRow.leadingAnchor.constraint(equalTo: leadingAnchor),
-            scopeRow.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -hairline),
-            scopeRow.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
+        if scopeOnTop {
+            // The buttons live in the host's head; the page runs from top to bottom.
+            scopeRow.removeFromSuperview()
+            overFoot.isHidden = true
+            scopeLabel.isHidden = true
+            scopeRow.translatesAutoresizingMaskIntoConstraints = false
+            scopeRow.edgeInsets = NSEdgeInsets()
+            NSLayoutConstraint.activate([
+                content.topAnchor.constraint(equalTo: underTabs.bottomAnchor),
+                content.bottomAnchor.constraint(equalTo: bottomAnchor),
+            ])
+        } else {
+            NSLayoutConstraint.activate([
+                overFoot.leadingAnchor.constraint(equalTo: leadingAnchor),
+                overFoot.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -hairline),
+                overFoot.heightAnchor.constraint(equalToConstant: hairline),
+                scopeRow.leadingAnchor.constraint(equalTo: leadingAnchor),
+                scopeRow.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -hairline),
+                content.topAnchor.constraint(equalTo: underTabs.bottomAnchor),
+                content.bottomAnchor.constraint(equalTo: overFoot.topAnchor),
+                overFoot.bottomAnchor.constraint(equalTo: scopeRow.topAnchor),
+                scopeRow.bottomAnchor.constraint(equalTo: bottomAnchor),
+            ])
+        }
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("InspectorView is created in code") }
 
     override public var mouseDownCanMoveWindow: Bool { false }
+
+    /// The page's buttons, for the host's head (with `scopeOnTop`).
+    public var actions: NSView { scopeRow }
 
     /// The ids of the tabs, in order.
     public var known: [String] { tabs.map(\.id) }
@@ -197,8 +223,9 @@ public final class InspectorView: NSView {
 
     private func showScope(of shown: InspectorTab) {
         let scope = scopes[shown.id] ?? InspectorScope(shown.title)
-        scopeLabel.stringValue = scope.text
-        scopeLabel.toolTip = scope.tip
+        // On top the words stay empty: they hold the room that puts the buttons at the right.
+        scopeLabel.stringValue = scopeOnTop ? "" : scope.text
+        scopeLabel.toolTip = scopeOnTop ? nil : scope.tip
         typealias Scope = I.Scope
         scopeLabel.font = scope.strong ? UILooks.font(Scope.fontSize + 1, weight: .semibold) : UILooks.font(Scope.fontSize)
         scopeLabel.textColor = scope.strong ? DesignTokens.Color.textPrimary : Scope.color

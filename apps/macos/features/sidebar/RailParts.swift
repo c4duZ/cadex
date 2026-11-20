@@ -136,7 +136,7 @@ final class RailTile: NSView {
     // The whole box takes the click: the icon's image view caught it and, in a window not yet
     // key, ate the first one (plan 36 phase A, a click on Files did nothing).
     override func hitTest(_ point: NSPoint) -> NSView? {
-        frame.contains(point) ? self : nil
+        !isHidden && frame.contains(point) ? self : nil
     }
     var badgeShown: Bool { !badge.isHidden }
     var dotShown: Bool { !dot.isHidden }
@@ -172,7 +172,7 @@ final class RailButton: NSView {
     // The whole box takes the click: the icon's image view caught it and, in a window not yet
     // key, ate the first one (plan 36 phase A, a click on Files did nothing).
     override func hitTest(_ point: NSPoint) -> NSView? {
-        frame.contains(point) ? self : nil
+        !isHidden && frame.contains(point) ? self : nil
     }
 
     init(command: String, icon: Icon, tip: String) {
@@ -269,7 +269,7 @@ final class RailAsking: NSView {
 
     override var mouseDownCanMoveWindow: Bool { false }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
-    override func hitTest(_ point: NSPoint) -> NSView? { frame.contains(point) ? self : nil }
+    override func hitTest(_ point: NSPoint) -> NSView? { !isHidden && frame.contains(point) ? self : nil }
     override func mouseDown(with event: NSEvent) {}
     override func mouseUp(with event: NSEvent) {
         guard bounds.contains(convert(event.locationInWindow, from: nil)) else { return }
