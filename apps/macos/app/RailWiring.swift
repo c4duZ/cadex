@@ -60,7 +60,10 @@ extension WindowSession {
             let ownStates = node?.terminals.compactMap(\.state) ?? []
             var places = [WorkPlace(id: project.folder, name: node.map { $0.branch.isEmpty ? "main" : $0.branch } ?? "main", isMain: true,
                                     state: Self.summary(ownStates), terminals: node?.terminals.count ?? 0)]
-            places += (node?.tasks ?? []).map { task in
+            // Only the tasks with a terminal open in them: every worktree git knows of (old branches,
+            // other tools' agent-… copies) filled the project with lines nobody had open (the owner,
+            // 2026-11-20). The board and ⌘J still list them all.
+            places += (node?.tasks ?? []).filter { !$0.terminals.isEmpty }.map { task in
                 WorkPlace(id: task.id, name: task.name, state: task.state, terminals: task.terminals.count)
             }
             return WorkProject(id: project.folder, name: project.name, tint: tint, image: projects?.imageURL(project.image)?.path,

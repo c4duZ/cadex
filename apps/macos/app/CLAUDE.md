@@ -102,7 +102,8 @@
   com programa.
 - Plano 38 fase B (`../../../docs/adr/0039-sidebar-with-work-and-files.md`): `RailWiring.swift` monta a
   barra lateral (`makeSidebar`, `sidebarModel`: os projetos, o main e as tarefas da árvore com os
-  estados e os pedidos; `drawRail` acende o lugar pelo TabsController.currentGroup; `pickPlace`;
+  estados e os pedidos, só as tarefas com terminal aberto (as worktrees velhas do git enchiam a lista; o
+  dono, 2026-11-20); `drawRail` acende o lugar pelo TabsController.currentGroup; `pickPlace`;
   aberto ou fechado no projects.json, `isExpanded`/`toggleProject`); o `WorkspaceView.swift` a põe no
   lugar do trilho, com a coluna (Files e Changes) dentro dela como a vista Arquivos; sidebar.show-work
   (⇧⌘1) e sidebar.show-files (⇧⌘2); Sessions, Memory e o grafo saíram da coluna: memory.show abre a
