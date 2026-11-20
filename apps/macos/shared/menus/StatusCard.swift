@@ -47,6 +47,10 @@ public enum StatusCard {
         case rows([Row])
         case note(String, warn: Bool = false)
         case actions([Action])
+        /// A row with its bar (0 to 1, in a color; nil: no bar) and one short line under it, one block
+        /// that lights and takes the click as a whole (an account in the accounts card: the row, the
+        /// bar and the note at three different insets read as clutter, the owner 2026-11-20).
+        case meter(Row, bar: Double?, color: NSColor, caption: String?, captionWarn: Bool = false)
     }
 
     public static let width: CGFloat = 300
@@ -94,6 +98,8 @@ public enum StatusCard {
                 note.textColor = warn ? DesignTokens.Color.accentAmberText : DesignTokens.Color.textMuted
                 note.preferredMaxLayoutWidth = width
                 views.append(note)
+            case .meter(let row, let bar, let color, let caption, let warn):
+                views.append(meterView(row, bar: bar, color: color, caption: caption, warn: warn, close: close))
             case .actions(let actions):
                 views.append(rule())
                 let rows = actions.map { action in
@@ -180,6 +186,38 @@ public enum StatusCard {
         }
         let hover = HoverRow(line)
         hover.onClick = { close(); action() }
+        return hover
+    }
+
+    private static func meterView(_ row: Row, bar: Double?, color: NSColor, caption: String?, warn: Bool,
+                                  close: @escaping () -> Void) -> NSView {
+        var top: [NSView] = [label(row.title, DesignTokens.FontSize.meta, .semibold, DesignTokens.Color.textPrimary)]
+        if let detail = row.detail { top.append(label(detail, DesignTokens.FontSize.small, .regular, DesignTokens.Color.textMuted)) }
+        top.append(NSView())
+        if let value = row.value {
+            let v = label(value, DesignTokens.FontSize.meta, .medium, row.warn ? DesignTokens.Color.accentAmberText : DesignTokens.Color.textSecondary, digits: true)
+            v.setContentCompressionResistancePriority(.required, for: .horizontal)
+            top.append(v)
+        }
+        let line = NSStackView(views: top)
+        line.spacing = 6
+        (top.first as? NSTextField)?.lineBreakMode = .byTruncatingTail
+        top.first?.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        var views: [NSView] = [line]
+        if let bar { views.append(BarView(parts: [(bar, color)])) }
+        if let caption {
+            let c = label(caption, DesignTokens.FontSize.small, .regular, warn ? DesignTokens.Color.accentAmberText : DesignTokens.Color.textMuted)
+            c.lineBreakMode = .byTruncatingTail
+            c.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+            views.append(c)
+        }
+        let stack = NSStackView(views: views)
+        stack.orientation = .vertical
+        stack.alignment = .leading
+        stack.spacing = 5
+        for view in views { view.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true }
+        let hover = HoverRow(stack)
+        if let action = row.action { hover.onClick = { close(); action() } }
         return hover
     }
 

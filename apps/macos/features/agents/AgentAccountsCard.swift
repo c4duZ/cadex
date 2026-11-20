@@ -26,9 +26,10 @@ public enum AgentAccountsCard {
         if accounts.isEmpty { blocks.append(.note(T("No account in use on this Mac.", "Nenhuma conta em uso neste Mac."))) }
         for account in accounts { blocks += self.account(account, launch: launch) }
         blocks.append(.actions([
-            StatusCard.Action(T("Open an agent on…", "Abrir um agente em…")) { run("agents.open-account") },
+            // Short, on one line: the proposal's three long ones wrapped to two (2026-11-20).
+            StatusCard.Action(T("Open agent…", "Abrir agente…")) { run("agents.open-account") },
             StatusCard.Action(T("Add account", "Adicionar conta")) { run("agents.add-account") },
-            StatusCard.Action(T("Accounts settings", "Configurar contas")) { run("settings.open-agents") },
+            StatusCard.Action(T("Settings", "Configurar")) { run("settings.open-agents") },
         ]))
         return blocks
     }
@@ -40,46 +41,35 @@ public enum AgentAccountsCard {
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
+    /// One block per account: "bkdg  Max · active        84%", the session's bar, and one short
+    /// line, "resets 8:00 PM · week 61%". Four lines at three insets read as clutter (the owner,
+    /// 2026-11-20); an account with nothing read is its name and what to do.
     private static func account(_ account: AgentAccount, launch: @escaping (AgentAccount) -> Void) -> [StatusCard.Block] {
         let usage = AgentUsageController.shared
         let name = (account.provider == .codex ? "Codex · " : "") + account.name
         let marks = [usage.plans[account.dir]?.capitalized, usage.activeAccount == account.dir ? T("active", "ativa") : nil].compactMap { $0 }
         let detail = marks.isEmpty ? nil : marks.joined(separator: " · ")
         let row = { (value: String?, warn: Bool) in StatusCard.Row(name, detail: detail, value: value, warn: warn) { launch(account) } }
+        let quiet = DesignTokens.Color.stateWorking
         switch usage.states[account.dir] ?? .loading {
         case .ready(let numbers, let at):
             let session = numbers.session?.percent ?? 0
             let warn = session >= warnAt
-            let color = warn ? DesignTokens.Color.stateNeeds : DesignTokens.Color.stateWorking
-            var blocks: [StatusCard.Block] = [.rows([row(value(numbers), warn)]), .bar([(session / 100, color)])]
-            if let line = windows(numbers) { blocks.append(.note(line)) }
+            var caption = [numbers.session?.resets.map { T("resets ", "reinicia ") + AgentResetTime.text($0) },
+                           numbers.week.map { T("week ", "semana ") + "\(Int($0.percent.rounded()))%" }].compactMap { $0 }
             if account.provider == .claude, Date().timeIntervalSince(at) > agentUsageOld {
-                blocks.append(.note(T("updated ", "atualizado há ") + AgentTime.short(since: at)))
+                caption.append(T("read ", "lido há ") + AgentTime.short(since: at) + T(" ago", ""))
             }
-            return blocks
+            return [.meter(row(numbers.session.map { "\(Int($0.percent.rounded()))%" } ?? "—", warn), bar: session / 100,
+                           color: warn ? DesignTokens.Color.stateNeeds : quiet, caption: caption.isEmpty ? nil : caption.joined(separator: " · "))]
         case .noUsage:
-            return [.rows([row("—", false)]), .note(T("Open the agent from Cadex to see usage", "Abra o agente pelo Cadex para ver o uso"))]
+            return [.meter(row(nil, false), bar: nil, color: quiet, caption: T("No usage yet: open its agent here", "Sem uso ainda: abra o agente dela aqui"))]
         case .expired:
-            return [.rows([row("—", true)]), .note(T("Login expired. Click to open claude with this account and renew it.",
-                                                     "Login vencido. Clique para abrir o claude nesta conta e renovar."), warn: true)]
+            return [.meter(row(nil, true), bar: nil, color: quiet, caption: T("Login expired: click to renew", "Login vencido: clique para renovar"), captionWarn: true)]
         case .noLogin:
-            return [.rows([row("—", false)]), .note(T("No login", "Sem login"))]
+            return [.meter(row(nil, false), bar: nil, color: quiet, caption: T("No login", "Sem login"))]
         case .loading:
-            return [.rows([row(nil, false)]), .note(T("Reading…", "Lendo…"))]
+            return [.meter(row(nil, false), bar: nil, color: quiet, caption: T("Reading…", "Lendo…"))]
         }
-    }
-
-    /// "84% · resets 21:10" (the session's window).
-    static func value(_ numbers: AgentUsage) -> String {
-        guard let session = numbers.session else { return "—" }
-        let resets = session.resets.map { T(" · resets ", " · reinicia ") + AgentResetTime.text($0) } ?? ""
-        return "\(Int(session.percent.rounded()))%" + resets
-    }
-
-    /// "84% of the 5-hour window · 61% of the week".
-    static func windows(_ numbers: AgentUsage) -> String? {
-        let parts = [numbers.session.map { "\(Int($0.percent.rounded()))%" + T(" of the 5-hour window", " da janela de 5 horas") },
-                     numbers.week.map { "\(Int($0.percent.rounded()))%" + T(" of the week", " da semana") }].compactMap { $0 }
-        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 }

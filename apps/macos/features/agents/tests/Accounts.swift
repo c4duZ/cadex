@@ -114,7 +114,7 @@ let accountChecks: [(name: String, body: Checks.Body)] = [
         usage.states[account.dir] = .noUsage
         @MainActor func rowsOf() -> [StatusCard.Row] {
             AgentAccountsCard.blocks([account], launch: { launched = $0.dir }, run: { _ in })
-                .compactMap { if case .rows(let r) = $0 { return r } else { return nil } }.flatMap { $0 }
+                .compactMap { if case .meter(let row, _, _, _, _) = $0 { return row } else { return nil } }
         }
         expect(rowsOf().first?.detail == "Max · active")
         usage.activeAccount = nil
@@ -137,11 +137,13 @@ let accountChecks: [(name: String, body: Checks.Body)] = [
         let blocks = AgentAccountsCard.blocks(usage.visibleAccounts(), launch: { launched.append($0.dir) }, run: { ran.append($0) })
         guard case .header(let title, let detail, _) = blocks.first else { return expect(false) }
         expect(title == "Accounts" && detail == "2 Claude", "\(title) \(String(describing: detail))")
-        let rows = blocks.compactMap { if case .rows(let r) = $0 { return r } else { return nil } }.flatMap { $0 }
-        expect(rows.map(\.title) == ["bkdg", "fba"] && rows[0].value == "84%" && rows[0].warn && rows[0].detail == "Max" && rows[1].value == "—",
+        let meters = blocks.compactMap { block -> (StatusCard.Row, Double?, String?)? in
+            if case .meter(let row, let bar, _, let caption, _) = block { return (row, bar, caption) } else { return nil }
+        }
+        let rows = meters.map(\.0)
+        expect(rows.map(\.title) == ["bkdg", "fba"] && rows[0].value == "84%" && rows[0].warn && rows[0].detail == "Max" && rows[1].value == nil,
                "\(rows.map { [$0.title, $0.value ?? "", $0.detail ?? ""] })")
-        let notes = blocks.compactMap { if case .note(let t, _) = $0 { return t } else { return nil } }
-        expect(notes.first == "84% of the 5-hour window · 61% of the week", "\(notes)")
+        expect(meters[0].1 == 0.84 && meters[0].2 == "week 61%" && meters[1].1 == nil, "\(meters.map { [String(describing: $0.1), $0.2 ?? ""] })")
         rows[1].action?()
         guard case .actions(let actions) = blocks.last else { return expect(false) }
         actions.forEach { $0.run() }
