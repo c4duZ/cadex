@@ -167,4 +167,9 @@ muda.
 - `make check` ao fim de cada fase; testes do engine para cada rota nova, cada um com a paridade
   contra o painel do upstream sobre o seed, e a memória intacta depois.
 - Os prints lado a lado de cada tela (instância de teste com os dados de teste, nunca os do dono).
-- Sem o `make perf`, a menos que o dono peça.
+- Sem o `make perf`, a menos que o dono peça. Pedido em 2026-11-20: o app com 90,2 MB (limite de 85
+  para 95, com o motivo em `tools/perf/limits.py`) e o hook de ferramenta da memória em 3,5 ms (limite
+  2). A causa do hook, achada compilando o engine em cada commit desde o plano 22: a leitura do
+  .ai-memory.toml do checkout principal (plano 35) abria o repositório pela libgit2 a cada hook; lido
+  dos arquivos `.git` (project_key.rs), 1,2 ms. Instável, a investigar: o cenário do modelo de vetores
+  falhou uma vez em quatro (o memory_query não achou o projeto depois de gravar as 500 páginas).

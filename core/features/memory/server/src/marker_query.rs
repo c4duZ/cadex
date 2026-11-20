@@ -45,7 +45,9 @@ pub(crate) fn settings_marker(cwd: &str, home: Option<&std::path::Path>) -> Opti
     if let Some(found) = marker::find_settings_marker(cwd, home) {
         return Some(found);
     }
-    let main = ai_memory_consolidate::discover_main_repo_root(std::path::Path::new(cwd)).ok()?;
+    // Read from the `.git` files (project_key.rs), never git2: opening the repository with libgit2
+    // on every hook took the tool hook from 0.7 to 3.0 ms (make perf, 2026-11-20).
+    let main = crate::project_key::main_root(std::path::Path::new(cwd));
     let main = main.to_str()?;
     marker::find_settings_marker(main, home).filter(|found| found.parent().is_some_and(|dir| dir == std::path::Path::new(main)))
 }

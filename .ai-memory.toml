@@ -1,0 +1,29 @@
+# ai-memory's settings for this repository, read by the memory's hooks at every session.
+# What each key does: https://github.com/akitaonrails/ai-memory/blob/main/docs/marker-file.md
+# Cadex made this file; the project's Memory settings in Cadex edit it. A commented key
+# keeps upstream's default.
+
+workspace = "default"
+project = "cadex"
+# drop_subagent_captures = false
+
+[briefing]
+inject_on_session_start = true
+# max_chars = 4000
+# inject_on_subagent_start = false
+
+[handoff]
+# deliver_on_session_start = true
+
+[recovery]
+# deliver_on_session_start = true
+
+[recall]
+# default_global = false
+
+[profile]
+# contribute = true
+# consume = true
+
+[capture]
+# ignore_paths = []
