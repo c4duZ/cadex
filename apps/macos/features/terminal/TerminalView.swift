@@ -44,6 +44,8 @@ public final class TerminalView: NSView {
     /// Opaque unless a background image shows through (applyAppearance).
     private var canvasOpaque = true
     private var lastSize: (cols: UInt16, rows: UInt16) = (0, 0)
+    /// The pending size of an agent's terminal while the window is resized (resizeSession).
+    private var resizeSettle: Timer?
     var markedText = NSAttributedString()
     /// Left Option as Meta (Option+B goes to the shell as Meta+B) instead of
     /// typing ∫. Off by default (docs/spec/terminal.md, Teclado).
@@ -299,9 +301,27 @@ public final class TerminalView: NSView {
     }
 
     private func resizeSession() {
-        guard let session, let m = renderer?.metrics else { return }
+        guard session != nil, renderer != nil else { return }
         let size = gridSize()
         if size == lastSize { return }
+        // An agent gets the size once it settles: Claude Code redraws at every width it is told, and a
+        // window dragged wider left the box's rules, wrapped lines and the status line of each step on
+        // screen, which the dressing then did not recognise (the owner, 2026-11-20). A shell follows
+        // at once, as before.
+        resizeSettle?.invalidate()
+        guard agentStatus != nil, lastSize != (0, 0) else { return applySize(size) }
+        let timer = Timer(timeInterval: Self.agentResizeSettle, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated { if let self { self.applySize(self.gridSize()) } }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        resizeSettle = timer
+    }
+
+    /// How long the size stays still before an agent gets it.
+    static let agentResizeSettle: TimeInterval = 0.15
+
+    private func applySize(_ size: (cols: UInt16, rows: UInt16)) {
+        guard let session, let m = renderer?.metrics, size != lastSize else { return }
         lastSize = size
         session.resize(cols: size.cols, rows: size.rows, cellWidth: UInt16(m.width), cellHeight: UInt16(m.height))
         needsDisplay = true

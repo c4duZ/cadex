@@ -155,9 +155,22 @@ extension ClaudeDress {
     /// The mode line ("⏵⏵ accept edits on (shift+tab to cycle)") read, not drawn, and its words put
     /// at the right of the row above (the status line), when that end is free.
     static func modeLine(_ plan: inout Plan, lines: [String], cols: Int, palette p: Palette) {
-        guard let r = lines.lastIndex(where: { !$0.trimmingCharacters(in: .whitespaces).isEmpty }), r > 0 else { return }
+        guard var r = lines.lastIndex(where: { !$0.trimmingCharacters(in: .whitespaces).isEmpty }), r > 0 else { return }
+        // In a wider pane Claude puts its effort hint ("◐ medium · /effort") on a row of its own under
+        // the mode line: the mode line is the row above, and the hint's words go with its extras (the
+        // pane was left undressed after the window grew, the owner, 2026-11-20).
+        var effort: String?
+        let last = lines[r].trimmingCharacters(in: .whitespaces)
+        if last.hasSuffix("/effort"), r > 1 {
+            effort = last.replacingOccurrences(of: " · /effort", with: "").trimmingCharacters(in: .whitespaces)
+            for c in 0..<cols { plan.hidden[r * cols + c] = true }
+            r -= 1
+        }
         let line = lines[r].trimmingCharacters(in: .whitespaces)
-        guard line.hasPrefix("⏵⏵ ") || line.hasPrefix("⏸ "), let on = line.range(of: " on") else { return }
+        guard line.hasPrefix("⏵⏵ ") || line.hasPrefix("⏸ "), let on = line.range(of: " on") else {
+            if effort != nil { for c in 0..<cols { plan.hidden[(r + 1) * cols + c] = false } }
+            return
+        }
         let words = String(line[line.index(line.startIndex, offsetBy: 2)..<on.lowerBound]).trimmingCharacters(in: .whitespaces)
         guard !words.isEmpty, words.count < 30 else { return }
         let first = Array(lines[r]).firstIndex(where: { $0 != " " }) ?? 0
@@ -187,7 +200,7 @@ extension ClaudeDress {
         // What follows the mode ("1 shell · ↓ to manage") goes right after the status line's last
         // word: hidden with the row, the background shells could not be found and ↓ seemed to do
         // nothing (the owner, 2026-11-20).
-        let extras = modeExtras(String(line[on.upperBound...])).joined(separator: " · ")
+        let extras = (modeExtras(String(line[on.upperBound...])) + [effort].compactMap { $0 }.filter { !$0.isEmpty }).joined(separator: " · ")
         let start = (above.lastIndex(where: { $0 != " " }) ?? -1) + 3
         if !extras.isEmpty, start + extras.count + 2 <= free {
             plan.labels.append(Label(text: extras, row: r, col: start, color: p.dim))

@@ -50,6 +50,11 @@
 - Busca: `TerminalFind.swift` liga o ⌘F (comando edit.find da paleta, que chega pelo
   `showFind(_:)` de quem tem o foco) ao núcleo; `TerminalFindBar.swift` é a barra no canto
   superior direito ("3 de 12", ↩ próxima, ⇧↩ anterior, Esc fecha).
+- Redimensionar: um terminal com agente (agentStatus) só recebe o tamanho novo quando ele para de
+  mudar por 150 ms (`agentResizeSettle`); o Claude Code redesenha a cada largura que recebe, e a janela
+  arrastada deixava na tela as réguas da caixa, linhas quebradas e a status line de cada passo (o dono,
+  2026-11-20). Um shell segue na hora. O dressing acha a linha do modo também com a dica de esforço
+  ("◐ medium · /effort") numa linha própria embaixo dela, como o Claude a põe num painel largo.
 - Programas que pedem mouse recebem cliques, arrastos e a roda (`TerminalMouse.swift`); Shift
   força a seleção local. Foco, título da janela, sino (pisca a view, sem som) e cursor piscando em
   `TerminalSignals.swift`; o timer do cursor só roda com a janela na frente e o programa pedindo.
