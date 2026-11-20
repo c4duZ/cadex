@@ -31,7 +31,8 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
   número de pedidos (o único âmbar da lista, a mesma conta da fila).
   - Desdobrado, embaixo dele presos por um fio guia: um item por terminal aberto no projeto (o
     nome que a aba usa: o agente, o comando que roda ou a pasta), com o estado; o de uma tarefa vem
-    com o nome dela antes ("kite-fix · Claude"). O aceso é o terminal com foco; o clique vai a ele.
+    com o nome dela antes ("kite-fix · Claude"), e o clique direito nele dá o menu da tarefa (ir à aba,
+    revisar, status, comentário, remover). O aceso é o terminal com foco; o clique vai a ele.
     Até 2026-11-20 eram o main (o nome do branch e quantos terminais) e as tarefas; o dono queria ver
     os terminais.
   - O clique no nome vai ao último lugar usado no projeto (sem terminal, abre um na pasta dele; uma

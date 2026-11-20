@@ -17,7 +17,14 @@ extension WindowSession {
         sidebar.onPickPlace = { [weak self] folder in self?.pickPlace(folder) }
         sidebar.onToggle = { [weak self] folder in self?.toggleProject(folder) }
         sidebar.menuFor = { [weak self] folder in self?.railMenu(folder) ?? [] }
-        sidebar.menuForPlace = { [weak self] folder in self?.treeMenu(task: folder) ?? [] }
+        // A task's terminal: the task's menu (status, hibernate, remove…), found by the terminal's folder.
+        sidebar.menuForPlace = { [weak self] id in
+            guard let self else { return [] }
+            let key = id.hasPrefix(Self.terminalPlace) ? String(id.dropFirst(Self.terminalPlace.count)) : nil
+            let terminal = key.flatMap { key in (self.projects?.projects ?? []).flatMap(\.tabs.allTerminals).first { AppDelegate.key($0) == key } }
+            guard let task = key == nil ? id : self.taskFolder(containing: terminal?.currentDirectory) else { return [] }
+            return self.treeMenu(task: task)
+        }
         sidebar.onPickRequest = { [weak self] id in self?.goToRequest(id) }
         sidebar.onPickRecent = { [weak self] folder in self?.homeOpen(folder) }
         sidebar.onDropImage = { [weak self] folder, url in self?.dropProjectImage(folder, url) }
@@ -68,7 +75,10 @@ extension WindowSession {
             }
             for task in node?.tasks ?? [] {
                 places += task.terminals.map { row in
-                    WorkPlace(id: Self.terminalPlace + row.id, name: task.name + " · " + row.title, isMain: true, state: row.state)
+                    // Not "main": the right click gives the task's menu.
+                    // A shell at the task's folder is named as the task already: once, not "x · x".
+                    WorkPlace(id: Self.terminalPlace + row.id, name: row.title == task.name ? task.name : task.name + " · " + row.title,
+                              isMain: false, state: row.state)
                 }
             }
             return WorkProject(id: project.folder, name: project.name, tint: tint, image: projects?.imageURL(project.image)?.path,
