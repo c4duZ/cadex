@@ -2,7 +2,7 @@
 
 ## Para que serve
 A barra lateral: à esquerda do centro, para onde vou e quem precisa de mim. No topo, a fila
-"Precisa de você"; embaixo dela, duas vistas com nome, **Trabalho** (os projetos, o main e as
+"Precisa de você"; embaixo dela, duas vistas com nome, **Trabalho** (os projetos e os terminais de cada um, antes o main e as
 tarefas) e **Arquivos** (a árvore do lugar, com Mudanças discreta no fim); no pé, o que é de todos os
 projetos (`../adr/0039-sidebar-with-work-and-files.md`, plano 38; a referência desenhada em
 `../design/sidebar/6-estrutura-ideal.html`; tokens components.workSidebar em
@@ -29,8 +29,11 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
   a cor do projeto), o nome e, à direita: a peça de estado e quantos terminais; "nada aberto" sem
   terminal; ou, com o projeto dobrado e algum agente dele esperando você, a etiqueta âmbar com o
   número de pedidos (o único âmbar da lista, a mesma conta da fila).
-  - Desdobrado, embaixo dele presos por um fio guia: o main (com o nome do branch) e as tarefas
-    (`worktrees.md`), cada um com o estado e os terminais. O aceso é onde você está.
+  - Desdobrado, embaixo dele presos por um fio guia: um item por terminal aberto no projeto (o
+    nome que a aba usa: o agente, o comando que roda ou a pasta), com o estado; o de uma tarefa vem
+    com o nome dela antes ("kite-fix · Claude"). O aceso é o terminal com foco; o clique vai a ele.
+    Até 2026-11-20 eram o main (o nome do branch e quantos terminais) e as tarefas; o dono queria ver
+    os terminais.
   - O clique no nome vai ao último lugar usado no projeto (sem terminal, abre um na pasta dele; uma
     página no centro dá lugar aos terminais); num item, põe as abas dele em cima (`tabs.md`).
   - O clique direito num projeto: New Terminal, New Task…, Edit Name and Image…, Pin ou Unpin,
@@ -99,7 +102,7 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
 - Recente cuja pasta sumiu: não aparece na lista.
 
 ## Critérios de aceite
-- [x] A lista de projetos com o avatar, a seta, o main e as tarefas com o fio guia, o lugar aceso,
+- [x] A lista de projetos com o avatar, a seta, os terminais com o fio guia, o terminal com foco aceso,
   escolher outro projeto, arrastar e salvar a ordem (conferido no app, plano 38 B).
 - [x] A fila no topo com um pedido e a pílula com a barra fechada (conferido no app com um pedido
   falso, CADEX_PERF_REQUEST).

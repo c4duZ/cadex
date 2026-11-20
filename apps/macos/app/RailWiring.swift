@@ -57,14 +57,19 @@ extension WindowSession {
             let states = terminals.compactMap { Self.treeRow($0).state }
             let tint = Self.workTint(project.color)
             let node = tree[project.folder]
-            let ownStates = node?.terminals.compactMap(\.state) ?? []
-            var places = [WorkPlace(id: project.folder, name: node.map { $0.branch.isEmpty ? "main" : $0.branch } ?? "main", isMain: true,
-                                    state: Self.summary(ownStates), terminals: node?.terminals.count ?? 0)]
-            // Only the tasks with a terminal open in them: every worktree git knows of (old branches,
-            // other tools' agent-… copies) filled the project with lines nobody had open (the owner,
-            // 2026-11-20). The board and ⌘J still list them all.
-            places += (node?.tasks ?? []).filter { !$0.terminals.isEmpty }.map { task in
-                WorkPlace(id: task.id, name: task.name, state: task.state, terminals: task.terminals.count)
+            // One line per terminal open in the project, its own and its tasks' (the owner, 2026-11-20:
+            // "main 1", the branch with a count, said nothing of what runs; and the worktrees git knows
+            // of filled the list with lines nobody had open). The board and ⌘J still list the tasks.
+            // A shell with nothing running is named by its folder, as its tab ("macos"), not "Terminal".
+            var places = (node?.terminals ?? []).map { row in
+                let name = row.state == nil && row.title == T("Terminal", "Terminal") && !row.detail.isEmpty
+                    ? (row.detail as NSString).lastPathComponent : row.title
+                return WorkPlace(id: Self.terminalPlace + row.id, name: name, isMain: true, state: row.state)
+            }
+            for task in node?.tasks ?? [] {
+                places += task.terminals.map { row in
+                    WorkPlace(id: Self.terminalPlace + row.id, name: task.name + " · " + row.title, isMain: true, state: row.state)
+                }
             }
             return WorkProject(id: project.folder, name: project.name, tint: tint, image: projects?.imageURL(project.image)?.path,
                                emoji: project.emoji, state: Self.summary(states), terminals: terminals.count,
@@ -98,8 +103,8 @@ extension WindowSession {
     func drawRail() {
         guard let sidebar = workspace?.sidebar else { return }
         let folder = projects?.activeFolder.flatMap { Self.isLoose($0) ? nil : $0 }
-        let group = tabs?.currentGroup
-        let place = folder.map { group.flatMap { $0.isEmpty ? nil : $0 } ?? $0 }
+        // The focused terminal's line is lit (no line while a page shows).
+        let place = folder != nil && tabs?.showsPage == false ? tabs?.activeTerminal.map { Self.terminalPlace + AppDelegate.key($0) } : nil
         let model = sidebarModel()
         if model.isEmpty { drawNothingOpen(sidebar) } else { sidebar.show(model, place: place) }
         workspace?.statusBar.only = model.isEmpty ? Self.nothingOpenItems : nil
@@ -124,7 +129,11 @@ extension WindowSession {
     }
 
     /// A place clicked: its project shown and its tabs in the top bar (a task's, or the project's own).
+    /// A sidebar line that is a terminal: its id is the terminal's key after this.
+    static let terminalPlace = "terminal:"
+
     func pickPlace(_ folder: String) {
+        if folder.hasPrefix(Self.terminalPlace) { return pickInTree(.terminal(String(folder.dropFirst(Self.terminalPlace.count)))) }
         if let project = projects?.projects.first(where: { $0.folder == folder }) {
             pickProject(project.folder)
             _ = commands.run("project.show-terminals")

@@ -19,7 +19,7 @@
 ## Como eu quero
 - `WorkSidebar.swift`: o modelo (`WorkProject`: a pasta, o nome, a cor, a imagem ou o emoji, o
   estado, os terminais, os pedidos, aberto ou fechado, os lugares; `initials`, as duas letras do
-  avatar; `WorkPlace`, o main ou uma tarefa; `WorkSidebarMode`). `WorkSidebarView.swift`: a porta de
+  avatar; `WorkPlace`, uma linha sob o projeto (hoje um terminal, que o app dá); `WorkSidebarMode`). `WorkSidebarView.swift`: a porta de
   entrada; `show` (os projetos e o lugar aceso) redesenha só quando mudam; `onPickProject`,
   `onPickPlace`, `onToggle` (a seta), `menuFor` (o clique direito), `onMove` (arrastar a linha de um
   projeto muda a ordem), `onMode` (o seletor); `setFiles` recebe a vista de Arquivos (a coluna de
