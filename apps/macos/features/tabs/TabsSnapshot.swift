@@ -8,8 +8,9 @@ import Foundation
 public struct TabsSnapshot: Codable, Equatable, Sendable {
     public indirect enum Layout: Codable, Equatable, Sendable {
         /// A terminal pane; `session`: the terminal daemon's name for its
-        /// shell, taken back on restore (terminal.keepSessions, plan 19 E2).
-        case pane(folder: String, session: String? = nil)
+        /// shell, taken back on restore (terminal.keepSessions, plan 19 E2);
+        /// `agent`: the Claude conversation it ran, back on reopening.
+        case pane(folder: String, session: String? = nil, agent: PaneAgent? = nil)
         /// A document pane, made again by the app from its identity (a
         /// path, "history:<repo>"). Plan 8, 2026-10-19.
         case document(identity: String)
@@ -18,7 +19,7 @@ public struct TabsSnapshot: Codable, Equatable, Sendable {
 
         /// The terminal panes' folders in reading order.
         public var folders: [String] {
-            leaves.compactMap { if case .pane(let folder, _) = $0 { folder } else { nil } }
+            leaves.compactMap { if case .pane(let folder, _, _) = $0 { folder } else { nil } }
         }
 
         /// The panes (`.pane` and `.document`) in reading order.
@@ -27,6 +28,23 @@ public struct TabsSnapshot: Codable, Equatable, Sendable {
             case .pane, .document: [self]
             case .split(_, _, let a, let b): a.leaves + b.leaves
             }
+        }
+    }
+
+    /// The Claude a pane ran (the owner, 2026-11-20: reopening the app lost every conversation): the
+    /// conversation, its folder, its account (the config folder) and the kit session that keeps the
+    /// flags it was opened with (`--dangerously-skip-permissions`, `--model`…). On reopening, the
+    /// pane resumes it as `/resume` would, in that account with those flags; a hibernated one stays
+    /// hibernated until its terminal is opened.
+    public struct PaneAgent: Codable, Equatable, Sendable {
+        public var sessionID: String
+        public var folder: String
+        public var configDir: String?
+        public var kitSession: String?
+        public var hibernated: Bool?
+
+        public init(sessionID: String, folder: String, configDir: String?, kitSession: String?, hibernated: Bool? = nil) {
+            (self.sessionID, self.folder, self.configDir, self.kitSession, self.hibernated) = (sessionID, folder, configDir, kitSession, hibernated)
         }
     }
 

@@ -2,6 +2,7 @@ import AgentTools
 import Agents
 import AppKit
 import Strings
+import Tabs
 import Terminal
 
 /// Hibernation for the whole app (docs/spec/agents.md, Hibernação; plan 19
@@ -21,6 +22,39 @@ extension AppDelegate {
             nonisolated(unsafe) let object = note.object
             MainActor.assumeIsolated { if let terminal = object as? TerminalView { self?.wake(terminal) } }
         }
+        TabsController.restoreAgent = { [weak self] terminal, agent, running in self?.restoreAgent(terminal, agent, running: running) }
+    }
+
+    /// A pane reopened with the Claude it ran (the owner, 2026-11-20: "como se desse /resume, tudo
+    /// igual"): the conversation comes back in its account with the flags it was opened with (the
+    /// kit session's), typed once the new shell is ready; a hibernated one stays so until its
+    /// terminal is opened; one whose shell the daemon kept runs on, only known again.
+    func restoreAgent(_ terminal: TerminalView, _ agent: TabsSnapshot.PaneAgent, running: Bool) {
+        terminal.agentResume = TerminalAgentResume(sessionID: agent.sessionID, folder: agent.folder, configDir: agent.configDir, kitSession: agent.kitSession)
+        offerRestartOnEnd(terminal)
+        guard !running else { return }
+        if agent.hibernated == true {
+            terminal.isHibernated = true
+            return
+        }
+        terminal.typeWhenReady(AgentHibernation.resumeCommand(sessionID: agent.sessionID, folder: agent.folder, configDir: agent.configDir,
+                                                              kitSession: agent.kitSession,
+                                                              skipPermissions: settings.store.settings.agents.launchSkipPermissions) + "\n")
+    }
+
+    private func saveProjectsSoon() {
+        sessions.forEach { $0.projects?.scheduleSave() }
+    }
+
+    /// Restart, when the agent in `terminal` ends on its own, runs agents.restart there.
+    private func offerRestartOnEnd(_ terminal: TerminalView) {
+        guard terminal.onRestartAgent == nil else { return }
+        terminal.onRestartAgent = { [weak self, weak terminal] in
+            guard let terminal else { return }
+            terminal.window?.makeFirstResponder(terminal)
+            // The command acts on the focused terminal: this one now.
+            _ = self?.sessions.first { $0.window === terminal.window }?.commands.run("agents.restart")
+        }
     }
 
     /// A hook from a session Cadex opened: what brings it back, kept on its
@@ -35,14 +69,10 @@ extension AppDelegate {
             terminal.agentResume = TerminalAgentResume(sessionID: id, folder: event.cwd ?? old?.folder ?? terminal.currentDirectory ?? NSHomeDirectory(),
                                                        configDir: configDir, kitSession: event.kitSession ?? old?.kitSession)
         }
-        if terminal.onRestartAgent == nil {
-            terminal.onRestartAgent = { [weak self, weak terminal] in
-                guard let terminal else { return }
-                terminal.window?.makeFirstResponder(terminal)
-                // The command acts on the focused terminal: this one now.
-                _ = self?.sessions.first { $0.window === terminal.window }?.commands.run("agents.restart")
-            }
-        }
+        // A new conversation in this pane goes into projects.json now, not only on quitting: a crash
+        // kept the conversation from coming back.
+        if terminal.agentResume?.sessionID != old?.sessionID { saveProjectsSoon() }
+        offerRestartOnEnd(terminal)
         guard event.event == "SessionEnd", !terminal.isHibernated else { return }
         // Still running after it (/clear starts a new one): nothing.
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak terminal] in
@@ -94,6 +124,7 @@ extension AppDelegate {
         guard pid > 0, terminal.agentResume != nil else { return false }
         terminal.isHibernated = true
         kill(pid, SIGTERM)
+        saveProjectsSoon()
         // Said in the bell's feed: it happened silently, and a hibernated agent read as finished or
         // gone (UX audit, 2026-11-18). Focusing its terminal brings it back.
         let folder = terminal.currentDirectory ?? ""

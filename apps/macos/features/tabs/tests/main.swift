@@ -243,6 +243,34 @@ let exitCode = await Checks.run(groupChecks + [
         first.closeAll()
         expect(first.count == 0)
     }),
+    ("a pane's Claude is saved and comes back through the app; a file from before reads the same", {
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 500), styleMask: [.titled], backing: .buffered, defer: false)
+        let tabs = TabsController(window: window)
+        let tmp = String(cString: realpath(NSTemporaryDirectory(), nil))
+        let agent = TabsSnapshot.PaneAgent(sessionID: "s-1", folder: tmp, configDir: "/u/.claude-bkdg", kitSession: "k-1")
+        let sleeping = TabsSnapshot.PaneAgent(sessionID: "s-2", folder: "/", configDir: nil, kitSession: nil, hibernated: true)
+        let saved = TabsSnapshot(items: [.terminal(title: nil, layout: .split(sideBySide: true, ratio: 0.5, first: .pane(folder: tmp, agent: agent),
+                                                                              second: .pane(folder: "/", agent: sleeping)), focus: 0)], active: 0)
+        let json = try! JSONEncoder().encode(saved)
+        expect((try? JSONDecoder().decode(TabsSnapshot.self, from: json)) == saved)
+        let old = #"{"items":[{"terminal":{"layout":{"pane":{"folder":"/"}},"focus":0}}],"active":0}"#
+        expect((try? JSONDecoder().decode(TabsSnapshot.self, from: Data(old.utf8)))?.items == [.terminal(title: nil, layout: .pane(folder: "/"), focus: 0)])
+        var restored: [(String, Bool)] = []
+        let before = TabsController.restoreAgent
+        TabsController.restoreAgent = { terminal, agent, running in
+            restored.append((agent.sessionID, running))
+            terminal.agentResume = TerminalAgentResume(sessionID: agent.sessionID, folder: agent.folder, configDir: agent.configDir, kitSession: agent.kitSession)
+            if agent.hibernated == true { terminal.isHibernated = true }
+        }
+        defer { TabsController.restoreAgent = before }
+        tabs.restore(saved) { _ in nil }
+        expect(restored.map(\.0) == ["s-1", "s-2"] && restored.allSatisfy { !$0.1 }, "a new shell: not running, \(restored)")
+        // Saved again: the hibernated one stays; the one with no Claude running (agentStatus) is not
+        // saved, as after /exit.
+        guard case .terminal(_, .split(_, _, let a, let b), _, _) = tabs.snapshot().items.first else { return expect(false) }
+        expect(a == .pane(folder: tmp, agent: nil) && b == .pane(folder: "/", agent: sleeping), "\(a) \(b)")
+        tabs.closeAll()
+    }),
     ("a document tab's icon comes from what it shows", {
         expect(TabsController.tabIcon(for: "/repo/README.md").0 == .fileMd)
         expect(TabsController.tabIcon(for: "/repo/App.swift").1 == .systemOrange)

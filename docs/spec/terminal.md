@@ -160,6 +160,11 @@ imagem some da vista. O terminal liga a etiqueta ao arquivo que ele mesmo salvou
 - Ao reabrir o app, os projetos voltam com as abas, as divisões e a pasta de cada painel. Com
   terminal.keepSessions desligado (o padrão), o conteúdo antigo da tela não volta: cada painel
   começa um shell novo.
+- O Claude que rodava num painel volta sozinho ao reabrir (o dono, 2026-11-20): a mesma conversa,
+  na mesma conta e com as flags com que foi aberto (`--dangerously-skip-permissions`, o modelo…),
+  como um `/resume` nela, digitado quando o shell novo fica pronto. O hibernado volta hibernado e
+  acorda quando você abre o terminal; o que você fechou (`/exit`) não volta; num shell que o daemon
+  manteve, o Claude segue rodando e nada é digitado.
 - Com terminal.keepSessions ligado (plano 19, `docs/adr/0022-terminal-daemon.md`), um processo à
   parte, o daemon do terminal, é dono dos shells: fechar, travar ou atualizar o app não mata o que
   roda; ao reabrir, cada painel religa ao seu shell e a tela e o scrollback voltam. Depois de

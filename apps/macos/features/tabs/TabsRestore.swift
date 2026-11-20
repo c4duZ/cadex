@@ -46,8 +46,11 @@ extension TabsController {
         var panes: [Int: Pane] = [:]
         for (pane, leaf) in zip(tree.leaves, layout.leaves) {
             switch leaf {
-            case .pane(let folder, let session):
-                panes[pane] = .terminal(makeTerminal(cwd: folder, keptID: session))
+            case .pane(let folder, let session, let agent):
+                let terminal = makeTerminal(cwd: folder, keptID: session)
+                panes[pane] = .terminal(terminal)
+                // The shell the daemon still had: its Claude runs on in it, nothing to type.
+                if let agent { Self.restoreAgent(terminal, agent, session != nil && terminal.keptID == session) }
             case .document(let identity):
                 if let document = makeDocument(identity) {
                     panes[pane] = .document(document)
@@ -71,6 +74,10 @@ extension TabsController {
         showActive()
         return tab.id
     }
+
+    /// The app's: a restored pane's Claude (its conversation, account and flags) comes back;
+    /// `stillRunning`, the daemon kept the shell and the Claude in it.
+    @MainActor public static var restoreAgent: (TerminalView, TabsSnapshot.PaneAgent, _ stillRunning: Bool) -> Void = { _, _, _ in }
 
     /// A space comes into the window (or leaves it): only the shown tabs
     /// retitle the window and take the keyboard.

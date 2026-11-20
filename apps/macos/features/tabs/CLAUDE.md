@@ -60,6 +60,9 @@
   painel com foco, aba ativa) e reconstruir com shells novos e os documentos feitos pelo app
   (`restore(_:makeDocument:)`; documento sumido ao lado de outros vira terminal na pasta dele). O
   item `.document` do plano 7 ainda é lido, como aba de um painel; `setShown` e `closeAll` para os spaces.
+  O painel guarda também o Claude que roda nele ou hibernou (`.pane(folder:session:agent:)`,
+  `PaneAgent`: a conversa, a pasta, a conta e a sessão do kit com as flags); ao restaurar, o app o
+  traz de volta pelo `restoreAgent` do TabsController (o dono, 2026-11-20).
   Com `keepsSessions` (a janela principal, terminal.keepSessions), o painel guarda o nome do shell no
   daemon (`.pane(folder:session:)`) e o restore religa por ele; `closeAll(keepingSessions:)` solta
   esses shells em vez de encerrar, e a pergunta ao fechar a janela ou sair não conta programa que

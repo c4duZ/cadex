@@ -194,7 +194,10 @@
   volta; um relógio só, armado para o primeiro agente parado (agents.hibernateAfterMinutes, ninguém
   olhando), encerra com SIGTERM e marca a aba; o foco no terminal digita o `--resume` pelo kit; o fim
   de um agente que saiu sozinho mostra "Reiniciar"; agents.hibernate e agents.restart agem no
-  terminal com foco. Só sessões abertas pelo Cadex (têm hooks).
+  terminal com foco. Só sessões abertas pelo Cadex (têm hooks). Ao reabrir o app, `restoreAgent` traz
+  o Claude que cada painel salvo rodava (TabsController.restoreAgent): o `--resume` na conta e com as
+  flags da sessão do kit, digitado com o shell pronto; o hibernado volta hibernado; uma conversa nova
+  ou hibernada grava os projetos logo (`saveProjectsSoon`), não só ao sair.
 - `ComputerUseWiring.swift` (plano 20, fase E): liga a feature computer-use às configurações
   (computerUse.enabled, allowedApps, blockedApps; o sim do dono é salvo), pergunta ao dono num alerta
   "o agente quer usar <app>", explica ao ligar e abre os Ajustes da Acessibilidade e da Gravação de

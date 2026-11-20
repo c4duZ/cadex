@@ -84,9 +84,16 @@ final class Tab {
         let layout = tree.snapshot { id in
             if let document = panes[id]?.document { return .document(identity: document.identity) }
             let terminal = panes[id]?.terminal
-            return .pane(folder: terminal?.currentDirectory ?? home, session: terminal?.keptID)
+            return .pane(folder: terminal?.currentDirectory ?? home, session: terminal?.keptID, agent: terminal.flatMap(Self.agent))
         }
         return .terminal(title: customTitle, layout: layout, focus: tree.leaves.firstIndex(of: focusedPane) ?? 0, color: color)
+    }
+
+    /// The Claude running in `terminal`, or hibernated in it; one that quit (`/exit`) is not saved.
+    static func agent(_ terminal: TerminalView) -> TabsSnapshot.PaneAgent? {
+        guard let resume = terminal.agentResume, terminal.agentStatus != nil || terminal.isHibernated else { return nil }
+        return TabsSnapshot.PaneAgent(sessionID: resume.sessionID, folder: resume.folder, configDir: resume.configDir,
+                                      kitSession: resume.kitSession, hibernated: terminal.isHibernated ? true : nil)
     }
 
     var view: NSView { layout }
