@@ -23,7 +23,11 @@ public struct TerminalCommand: Equatable, Sendable {
     /// program's own name (`/usr/bin/make` is "make"; `cadex claude` is "claude"), at most 40
     /// characters.
     public static func shortName(_ line: String) -> String {
-        var words = line.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
+        // `cd <folder> && …` names what comes after: the Claude the app brings back types
+        // `cd '<folder>' && … claude --resume`, and the tab said "cd /Users/…" (2026-11-20).
+        var rest = Substring(line)
+        while rest.hasPrefix("cd "), let and = rest.range(of: "&&") { rest = rest[and.upperBound...].drop { $0 == " " } }
+        var words = rest.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
         while let first = words.first, first.contains("="), !first.hasPrefix("-"), first.first?.isLetter == true || first.first == "_" {
             words.removeFirst()
         }

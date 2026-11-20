@@ -251,6 +251,28 @@ let exitCode = await Checks.run([
             snapshot(page, "themes-page")
         }
     }),
+    ("the Phone section: what must be on, the cadex command and how it is used from the phone", {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("cadex-phone-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let store = await SettingsStore(file: folder.appendingPathComponent("settings.json"))
+        await MainActor.run {
+            let rows = PhoneRows.make(store)
+            @MainActor func texts(_ v: NSView) -> [String] { ((v as? NSTextField).map { [$0.stringValue] } ?? []) + v.subviews.flatMap(texts) }
+            let words = rows.flatMap(texts)
+            expect(words.contains("Keep terminals when Cadex quits") && words.contains("The cadex command") && words.contains("Remote Login"), "\(words.prefix(8))")
+            expect(SettingsSection.allCases.contains(.phone) && SettingsSection.phone.title == "Phone")
+            expect(!PhoneRows.macName.contains(" ") && PhoneRows.macName == PhoneRows.macName.lowercased(), PhoneRows.macName)
+            let stack = NSStackView(views: rows)
+            stack.orientation = .vertical
+            stack.alignment = .leading
+            stack.spacing = 8
+            for row in rows { row.widthAnchor.constraint(equalToConstant: 620).isActive = true }
+            stack.frame = NSRect(x: 0, y: 0, width: 660, height: 1200)
+            stack.layoutSubtreeIfNeeded()
+            stack.frame.size = stack.fittingSize
+            snapshot(stack, "phone-page")
+        }
+    }),
     ("each module has its section and the search finds a setting by its words (plan 32)", {
         let file = FileManager.default.temporaryDirectory.appendingPathComponent("cadex-settings-\(UUID())/settings.json")
         defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }

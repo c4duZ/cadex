@@ -6,7 +6,7 @@ import Strings
 /// module in its section, the status bar and the accounts inside, a search). The rows of the ones
 /// made of rows are searched; Appearance, Shortcuts and About are pages of their own.
 enum SettingsSection: String, CaseIterable, Sendable {
-    case general, appearance, terminal, files, git, agents, notifications, memory, orchestration, machines, statusBar, shortcuts, about
+    case general, appearance, terminal, files, git, agents, notifications, memory, orchestration, machines, phone, statusBar, shortcuts, about
 
     var title: String {
         switch self {
@@ -20,6 +20,7 @@ enum SettingsSection: String, CaseIterable, Sendable {
         case .memory: T("Memory", "Memória")
         case .orchestration: T("Many agents", "Muitos agentes")
         case .machines: T("Machines and SSH", "Máquinas e SSH")
+        case .phone: T("Phone", "Celular")
         case .statusBar: T("Status bar", "Barra de status")
         case .shortcuts: T("Shortcuts", "Atalhos")
         case .about: T("About", "Sobre")
@@ -38,6 +39,7 @@ enum SettingsSection: String, CaseIterable, Sendable {
         case .memory: T("The defaults for every project; a project's own are on its Settings page.", "Os padrões de todos os projetos; os de um projeto ficam na página Configurações dele.")
         case .orchestration: T("Races, runs and scheduled automations, and their caps.", "Corridas, execuções e automações agendadas, e os tetos delas.")
         case .machines: T("SSH hosts and the machines of your tailnet.", "Hosts SSH e as máquinas da sua tailnet.")
+        case .phone: T("Your Cadex terminals and Claude from your phone, over SSH through your tailnet.", "Os terminais do Cadex e o Claude pelo celular, por SSH pela sua tailnet.")
         case .statusBar: T("Drag between Left and Right; a hidden item measures nothing.", "Arraste entre Esquerda e Direita; um item escondido não mede nada.")
         case .shortcuts: T("Every command's shortcut.", "O atalho de cada comando.")
         case .about: ""
@@ -56,6 +58,7 @@ enum SettingsSection: String, CaseIterable, Sendable {
         case .memory: .memory
         case .orchestration: .kanban
         case .machines: .hardDrives
+        case .phone: .deviceMobile
         case .statusBar: .slidersHorizontal
         case .shortcuts: .keyboard
         case .about: .info

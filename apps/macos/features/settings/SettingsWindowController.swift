@@ -179,6 +179,7 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
         case .memory: MemoryRows.make(store) + MemoryRows.turnOff(store)
         case .orchestration: OrchestrationRows.make(store)
         case .machines: SectionRows.machines(store)
+        case .phone: PhoneRows.make(store)
         case .statusBar: list("statusBar", note: false)
         case .appearance, .shortcuts, .about: nil
         }

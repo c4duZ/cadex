@@ -85,12 +85,18 @@ struct ClaudeDress {
 }
 
 extension ClaudeDress {
-    /// The mascot: block elements in Claude's orange at the start of a banner row ("▐▛███▜▌").
+    /// The mascot: block elements in Claude's orange at the start of a banner row ("▐▛███▜▌"), in
+    /// the three rows from the one that says "Claude Code". Blocks of another color or elsewhere are
+    /// not it: /usage's bars start their rows with blocks, and were hidden and their rows moved left
+    /// (2026-11-20).
     static func hideMascot(_ plan: inout Plan, lines: [String], cols: Int) {
         var banner: [Int] = []
+        let named = lines.indices.filter { lines[$0].contains("Claude Code") }
         for (r, line) in lines.enumerated() {
+            guard named.contains(where: { r >= $0 && r <= $0 + 2 }) else { continue }
             let head = Array(line.prefix(10))
-            guard head.filter(isBlock).count >= 2, head.allSatisfy({ $0 == " " || isBlock($0) }) else { continue }
+            guard head.filter(isBlock).count >= 2, head.allSatisfy({ $0 == " " || isBlock($0) }),
+                  (0..<min(10, cols)).contains(where: { isBlock(head[$0]) && plan.cells[r * cols + $0].fg == Mascot.color }) else { continue }
             for c in 0..<min(10, cols) where plan.cells[r * cols + c].fg == Mascot.color || head[c] == " " {
                 plan.hidden[r * cols + c] = true
             }

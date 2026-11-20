@@ -109,7 +109,10 @@
   tarefas; o dono, 2026-11-20); `drawRail` acende o terminal com foco; `pickPlace` (um terminal vai a ele); o clique direito no terminal de uma tarefa dá o `treeMenu` dela, achada pela pasta;
   aberto ou fechado no projects.json, `isExpanded`/`toggleProject`); o `WorkspaceView.swift` a põe no
   lugar do trilho, com a coluna (Files e Changes) dentro dela como a vista Arquivos; sidebar.show-work
-  (⇧⌘1) e sidebar.show-files (⇧⌘2); Sessions, Memory e o grafo saíram da coluna: memory.show abre a
+  (⇧⌘1), sidebar.show-files (⇧⌘2) e sidebar.switch-view (⌘E, alterna as duas); a barra desliza ao
+  abrir e fechar (`slideSidebar`: o centro muda de largura uma vez, no começo, e só a barra anda; o
+  preview redimensionado a cada quadro ficava torto, 2026-11-20) e se fecha sozinha quando um preview
+  web abre (FileOpener.onPreviewOpened), sem gravar a escolha do ⌘B; Sessions, Memory e o grafo saíram da coluna: memory.show abre a
   página do projeto (project.sessions-column saiu na fase H), git.show-history abre o histórico numa aba.
 - Plano 38 fase F: o item Agents da barra de baixo (`StatusBarItems.swift`) conta só quem trabalha e o
   clique abre o quadro; os pedidos não são contados lá (a casa deles é a fila).
@@ -149,7 +152,7 @@
   projeto com o `claude` digitado, como o dono faria, com o kit e a conta do projeto): a folha "Edit project" (project.edit, também pelo
   clique direito na barra lateral; nome, imagem ou emoji, cor) e a mesma folha criando pelo Novo
   projeto… (project.create: a pasta, o nome, a imagem); a imagem solta num quadrado da faixa vira a do
-  projeto; o clique direito (`railMenu`: New Terminal, New Task…, Edit Name and Image…, Pin ou
+  projeto; o clique direito (`railMenu`: New Terminal, New Task…, Open Project Page (project.show-overview; a página não aparecia em lugar nenhum, o dono, 2026-11-20), Edit Name and Image…, Pin ou
   Unpin, Project Settings…, Show in Finder, Copy Path, Close Terminals, Remove from the Sidebar),
   cada linha um comando (project.pin, project.close-terminals, project.remove e os de baixo): `projectTarget` diz
   a qual projeto o próximo comando se refere (project.new-terminal, project.reveal,

@@ -185,6 +185,12 @@ final class WindowSession: NSObject, NSWindowDelegate {
             return ElementPickDelivery.deliver(delivery, tabs: self?.tabs, toClipboard: self?.settings.picksToClipboard ?? false, driving: driving)
         }
         opener.picksScreenshot = { [weak self] in self?.settings.picksScreenshot ?? true }
+        // A web preview takes the sidebar's room: it slides away (the owner, 2026-11-20), without
+        // touching the saved choice, so ⌘B and the next launch keep the owner's.
+        opener.onPreviewOpened = { [weak self] in
+            guard let workspace = self?.workspace, workspace.inspectorVisible else { return }
+            workspace.setInspector(visible: false)
+        }
         self.opener = opener
         guard let explorer, let git else { return }
         explorer.openFile = { [weak opener] path in opener?.open(path) }

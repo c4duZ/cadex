@@ -27,6 +27,8 @@ final class FileOpener {
     var onReview: ((SourceControlController.DiffRequest) -> Void)?
     /// Hands an element picked in a preview over (ElementPickDelivery).
     var onPickElement: ((PickDelivery) -> PickOutcome)?
+    /// A web preview opened or came to the front (the window gives it the room).
+    var onPreviewOpened: (() -> Void)?
     /// The setting: a picked element carries a picture of itself.
     var picksScreenshot: (() -> Bool)?
     /// The setting: beside (true) or in a new tab.
@@ -115,13 +117,15 @@ final class FileOpener {
         guard let tabs = currentTabs() else { return }
         if let existing = tabs.document(identity: PreviewDocument.identity(for: url)) as? PreviewDocument {
             existing.reload()
-            return tabs.open(existing)
+            tabs.open(existing)
+            return onPreviewOpened?() ?? ()
         }
         let preview = PreviewDocument(url: url)
         preview.runCommand = { [weak self] id in self?.runCommand?(id) ?? false }
         preview.onPickElement = { [weak self] delivery in self?.onPickElement?(delivery) ?? .copied(note: nil) }
         preview.takesPictures = { [weak self] in self?.picksScreenshot?() ?? true }
         tabs.open(preview, beside: beside ?? opensBeside())
+        onPreviewOpened?()
     }
 
     func makeHistory(_ root: String) -> HistoryDocument {

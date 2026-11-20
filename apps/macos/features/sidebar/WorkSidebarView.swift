@@ -17,6 +17,8 @@ public final class WorkSidebarView: NSView {
     public var onToggle: ((String) -> Void)?
     public var menuFor: ((String) -> [MenuEntry])?
     /// A right click on a task's line: its menu's entries (each runs a command).
+    /// A project line's page icon (shown under the pointer): the app opens that project's page.
+    public var onOpenProjectPage: ((String) -> Void)?
     public var menuForPlace: ((String) -> [MenuEntry])?
     /// A request of the queue clicked: its id (the app goes to its terminal).
     public var onPickRequest: ((String) -> Void)?
@@ -175,6 +177,9 @@ public final class WorkSidebarView: NSView {
         let row = WorkRow(title: project.name, caret: project.places.isEmpty ? nil : project.expanded, caretSlot: true, avatar: WorkAvatar(project), bold: true,
                           fontSize: W.Row.fontSize, meta: meta, selected: false)
         row.onPress = { [weak self] in self?.onPickProject?(project.id) }
+        if onOpenProjectPage != nil {
+            row.onOpenPage = { [weak self] in self?.onOpenProjectPage?(project.id) }
+        }
         row.onCaret = { [weak self] in self?.onToggle?(project.id) }
         row.rightMenu = { [weak self] in self?.menuFor?(project.id) ?? [] }
         row.onDropImage = { [weak self] url in self?.onDropImage?(project.id, url) }

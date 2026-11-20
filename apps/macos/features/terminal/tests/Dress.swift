@@ -68,6 +68,11 @@ enum Claude {
         expect(plan.cells[80].fg == p.live, "the working line in the theme's blue")
         expect(plan.cells[1].fg == Claude.text, "a color Claude did not fix stays")
     }),
+    ("a command's short name: variables, env and a leading cd … && go; an agent is its name", {
+        expect(TerminalCommand.shortName("PATH=/x /usr/bin/npm run dev") == "npm run dev")
+        expect(TerminalCommand.shortName("cd '/Users/d/mind' && env -u CLAUDECODE CLAUDE_CONFIG_DIR=/u/.claude-b claude --resume abc --settings x") == "claude")
+        expect(TerminalCommand.shortName("cd /a && cd b && make check") == "make check")
+    }),
     ("the mascot is not drawn, the banner's words are", {
         var s = FakeScreen(cols: 40)
         s.row((" ▐▛███▜▌", 0xD77757, nil), ("   Claude Code v2.1.327", Claude.text, nil))
@@ -78,6 +83,12 @@ enum Claude {
         expect((0..<3).allSatisfy { r in (0..<9).allSatisfy { plan.hidden[r * 40 + $0] } }, "mascot cells hidden")
         expect(!plan.hidden[12] && !plan.hidden[40 + 11], "the words stay")
         expect(!plan.hidden.suffix(40).contains(true), "a block inside text is not the mascot")
+        // /usage's bars start their rows with blocks: not the mascot, not moved.
+        var u = FakeScreen(cols: 40)
+        u.row(("  Current session", Claude.text, nil))
+        u.row(("  ██████▌               12% used", 0x8FB8F7, nil))
+        let usage = u.plan()
+        expect(!usage.hidden.contains(true) && usage.shift.allSatisfy { $0.dx == 0 }, "a usage bar stays where it is")
         expect((0..<3).allSatisfy { plan.shift[$0].dx == -11 } && plan.shift[3].dx == 0, "the banner's words to the start: \(plan.shift)")
     }),
     ("the input's two rules become one rounded box; one rule alone stays", {

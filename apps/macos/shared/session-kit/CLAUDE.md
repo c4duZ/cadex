@@ -54,6 +54,9 @@
   ficam); e, para contas que
   não são a padrão, `mcp-<conta>.json` (0600) com os `mcpServers` do .claude.json da conta padrão,
   lidos sem escrever.
+- `CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1` na `env` do `--settings`: o desenho "classic" do Claude
+  Code, que o 2.1.329 trocava em algumas máquinas pela tela cheia (a "TUI trial", `/tui fullscreen`),
+  com a caixa presa no pé e sem histórico no terminal, onde o Cadex não veste nem busca (2026-11-20).
 - `CLAUDE_CODE_FORCE_SYNC_OUTPUT=1` na `env` do `--settings` (`synchronizedOutput`): o terminal respeita
   o modo DEC 2026 (plano 19, fase E) e, com ele, o Claude Code manda cada redesenho num bloco
   (testado em 2026-11-15). Com agentTools.enabled (`agentToolsOnPath`), a pasta do `cadex` vai primeiro no `PATH` do

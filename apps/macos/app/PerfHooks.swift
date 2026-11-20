@@ -30,7 +30,10 @@ extension WindowSession {
         // A command typed in the focused terminal once its shell is ready: a real `claude` in the
         // pane, to compare its header with the Pane mockup (plan 28 phase B).
         if let command = environment["CADEX_PERF_TYPE"] {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in self?.tabs?.activeTerminal?.typeWhenReady(command + "\n") }
+            // CADEX_PERF_TYPE_AT: later than the shell's start (a claude typed by hand reported itself,
+            // one typed at launch did not, 2026-11-20).
+            let at = environment["CADEX_PERF_TYPE_AT"].flatMap(Double.init) ?? 1.5
+            DispatchQueue.main.asyncAfter(deadline: .now() + at) { [weak self] in self?.tabs?.activeTerminal?.typeWhenReady(command + "\n") }
         }
         // A message sent to the agent as the owner does: the text, then Return as a key event (it
         // marks the scrollbar), at CADEX_PERF_SEND_AT seconds (plan 28 phase D, seen in the app).

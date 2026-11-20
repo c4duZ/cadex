@@ -14,6 +14,12 @@ extension WindowSession {
     func makeSidebar() -> WorkSidebarView {
         let sidebar = WorkSidebarView { [weak self] id in _ = self?.commands.run(id) }
         sidebar.onPickProject = { [weak self] folder in self?.pickProject(folder) }
+        // The project's page, by its icon on the line (the name goes to the terminals).
+        sidebar.onOpenProjectPage = { [weak self] folder in
+            guard !Self.isLoose(folder) else { return }
+            self?.pickProject(folder)
+            _ = self?.commands.run("project.show-overview")
+        }
         sidebar.onPickPlace = { [weak self] folder in self?.pickPlace(folder) }
         sidebar.onToggle = { [weak self] folder in self?.toggleProject(folder) }
         sidebar.menuFor = { [weak self] folder in self?.railMenu(folder) ?? [] }

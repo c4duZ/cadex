@@ -1,6 +1,7 @@
 import AppKit
 import Icons
 import Menus
+import Strings
 import StateGlyph
 import UILooks
 
@@ -69,11 +70,20 @@ final class WorkRow: NSView {
     var onDropImage: ((URL) -> Void)? {
         didSet { onDropImage == nil ? unregisterDraggedTypes() : registerForDraggedTypes([.fileURL]) }
     }
+    /// A project's page (the owner, 2026-11-20: it showed nowhere): set, an icon shows at the right
+    /// while the pointer is on the line, and a click on it runs this instead of `onPress`.
+    var onOpenPage: (() -> Void)? { didSet { pageIcon.isHidden = true } }
+    private let pageIcon = NSImageView()
     private let press = RailPress()
     let title: String
     private(set) var selected = false
     private let caret = NSImageView()
-    private var hovering = false { didSet { paint() } }
+    private var hovering = false {
+        didSet {
+            paint()
+            pageIcon.isHidden = !(hovering && onOpenPage != nil)
+        }
+    }
 
     /// `caretSlot`: the arrow's room kept empty, so the line's avatar and name stand under the
     /// projects' (New Project…). `dim`: the name in the quiet color.
@@ -106,6 +116,11 @@ final class WorkRow: NSView {
         let spacer = NSView()
         spacer.setContentHuggingPriority(.init(1), for: .horizontal)
         views.append(spacer)
+        pageIcon.image = Icon.squaresFour.fittedImage(size: UILooks.pt(DesignTokens.WorkSidebar.Foot.Row.icon))
+        pageIcon.contentTintColor = R.icon
+        pageIcon.isHidden = true
+        pageIcon.setAccessibilityLabel(T("Project page", "Página do projeto"))
+        views.append(pageIcon)
         views += Self.metaViews(meta)
         let stack = NSStackView(views: views)
         stack.spacing = UILooks.pt(R.gap)
@@ -186,6 +201,10 @@ final class WorkRow: NSView {
         guard bounds.contains(point) else { return }
         // The caret's room (the padding and the caret) folds; the rest goes.
         if onCaret != nil, point.x < UILooks.pt(R.padding.left + R.Caret.size + R.gap) { return onCaret?() ?? () }
+        // The page's icon, a little wider than drawn so the click need not be exact.
+        if let onOpenPage, !pageIcon.isHidden, pageIcon.convert(pageIcon.bounds, to: self).insetBy(dx: -6, dy: -6).contains(point) {
+            return onOpenPage()
+        }
         onPress?()
     }
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {

@@ -246,15 +246,51 @@ final class WorkspaceView: NSView {
     /// `launching`: the saved state applied when the window opens.
     func setInspector(visible: Bool, launching: Bool = false) {
         let opening = visible && (!inspectorVisible || launching)
+        // It slides (the owner, 2026-11-20), but not at launch, in a narrow window (it lies over the
+        // center there), before the window shows, or with Reduce Motion on.
+        let slides = visible != inspectorVisible && !launching && !isNarrow && window?.isVisible == true
+            && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         closedByNarrow = false
         inspectorVisible = visible
-        sidebar.isHidden = !visible
-        layoutSidebar()
+        if slides {
+            slideSidebar(visible)
+        } else {
+            sidebar.isHidden = !visible
+            layoutSidebar()
+        }
         titleBar.setInspectorOpen(visible)
         onSidebarShown?(visible)
         // Opened again: its page is announced, so a page that went while closed (History after a
         // folder change) comes back (review of 2026-11-17).
         if opening, let tab = inspector.tab { inspector.show(tab) }
+    }
+
+    /// The sidebar slides out of the window's left edge or in from it, over the center. The center
+    /// takes its new width once, at the start: resized at every frame, a web preview kept a stale
+    /// frame and drew askew, and every terminal (a Claude) redrew a dozen times (2026-11-20).
+    private func slideSidebar(_ visible: Bool) {
+        let width = sidebar.frame.width > 0 ? sidebar.frame.width : inspectorPoints
+        sidebar.isHidden = false
+        // The center where it ends, at once: beside the room the sidebar will take, or the whole width.
+        contentToInspector.isActive = false
+        contentToRail.constant = Self.gap + (visible ? width : 0)
+        contentToRail.isActive = true
+        if visible { sidebarAtEdge.constant = -width }
+        layoutSubtreeIfNeeded()
+        NSAnimationContext.runAnimationGroup({ context in
+            context.duration = 0.2
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            sidebarAtEdge.animator().constant = visible ? 0 : -width
+        }, completionHandler: { [weak self] in
+            MainActor.assumeIsolated {
+                // A later ⌘B already decided: its own slide ends things.
+                guard let self, self.inspectorVisible == visible else { return }
+                self.sidebarAtEdge.constant = 0
+                self.contentToRail.constant = Self.gap
+                self.sidebar.isHidden = !visible
+                self.layoutSidebar()
+            }
+        })
     }
 
     /// The sidebar showed or hid (⌘B, a narrow window): the top bar's needs-you pill follows.

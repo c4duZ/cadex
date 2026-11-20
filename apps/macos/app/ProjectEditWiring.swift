@@ -99,6 +99,7 @@ extension WindowSession {
             MenuEntry(T("New Terminal", "Novo terminal"), icon: .terminalWindow, action: on("project.new-terminal")),
             MenuEntry(T("New Task…", "Nova tarefa…"), icon: .plus, action: shown("worktrees.new-task")),
             .separator,
+            MenuEntry(T("Open Project Page", "Abrir a página do projeto"), icon: .squaresFour, action: shown("project.show-overview")),
             MenuEntry(T("Edit Name and Image…", "Editar nome e imagem…"), icon: .pencilSimple, action: on("project.edit")),
             MenuEntry(pinned ? T("Unpin", "Soltar") : T("Pin", "Fixar"), icon: .pushPin, action: on("project.pin")),
             MenuEntry(T("Project Settings…", "Configurações do projeto…"), icon: .gearSix, action: shown("project.show-settings")),

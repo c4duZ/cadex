@@ -32,6 +32,11 @@ extension SessionKit {
         // plan 24 phase B): the kit's names below win over them.
         var env = sessionEnvironment
         if synchronizedOutput { env["CLAUDE_CODE_FORCE_SYNC_OUTPUT"] = "1" }
+        // The classic renderer: Claude Code 2.1.329 tries a full-screen one on some machines (its "TUI
+        // trial", `/tui fullscreen`), which pins the input to the screen's foot with the rest empty and
+        // keeps no scrollback, so Cadex's dressing, search and scrollbar marks have nothing to work on
+        // (the owner and a friend, 2026-11-20). Its own switch for the classic one, from the binary.
+        env["CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN"] = "1"
         if let token, toolsPath != nil {
             env["CADEX_SESSION_TOKEN"] = token
             // A test instance's own socket (CADEX_SOCKETS_DIR): its sessions'

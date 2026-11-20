@@ -19,7 +19,7 @@
   `SettingsSections.swift`; as linhas de cada uma, que eram uma página Geral só, em `SectionRows.swift`, (em Agentes e contas, a seção Computer use: ligar, os apps já permitidos com Esquecer todos e o atalho para Privacidade e Segurança; o dono não a achava, 2026-11-20)
   a busca pelas palavras de cada linha, `SettingsRowBox`); a barra de status e as contas (as listas
   do antigo Personalizar, `customizePages`, dadas pelo app) são seções daqui; auxiliar de tela cheia (com o app em tela cheia, abre por cima dele, na mesma
-  mesa, e não numa mesa à parte); `GeneralPages.swift` (About), `TerminalPage.swift` (com as notificações dos programas e manter
+  mesa, e não numa mesa à parte); `GeneralPages.swift` (About), `PhoneRows.swift` (a seção Celular: o que precisa estar ligado, Abrir Compartilhamento para o Login Remoto, o botão que instala o link `~/.local/bin/cadex` para o SSH, e como usar pelo celular com os comandos para copiar; o dono, 2026-11-20), `TerminalPage.swift` (com as notificações dos programas e manter
   os terminais quando o Cadex fecha, plano 19), `KeepAwakeRows.swift` (as seções do manter acordado em General), `MemoryRows.swift` (a seção
   Memória em General: memory.enabled e memory.shareAcrossAccounts; ao lado do SSH, machines.tailscale, plano 23), `OrchestrationRows.swift` e `OrchestrationSettings.swift` (a seção Muitos agentes:
   orchestration.*, desligadas por padrão, os números com limite ao ler; plano 24), `ThemesPage.swift` (modo, seus temas,

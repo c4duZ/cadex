@@ -88,7 +88,7 @@ let exitCode = await Checks.run([
         let command = kit.claudeCommand(configDir: nil, defaultClaudeJSON: dir + "/none.json")
         expect(command == "env -u CLAUDE_CONFIG_DIR claude --settings \(settingsPath(command))", command)
         let file = json(settingsPath(command))
-        expect(file.keys.sorted() == ["env"] && (file["env"] as? [String: String]) == ["CLAUDE_CODE_FORCE_SYNC_OUTPUT": "1"], "\(file)")
+        expect(file.keys.sorted() == ["env"] && (file["env"] as? [String: String]) == ["CLAUDE_CODE_FORCE_SYNC_OUTPUT": "1", "CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN": "1"], "\(file)")
         let clean = SessionKit(folder: dir + "/kit", toolsPath: nil, environment: [:])
         let plain = clean.claudeCommand(configDir: nil, arguments: ["--dangerously-skip-permissions"], defaultClaudeJSON: dir + "/none.json")
         expect(plain == "claude --settings \(settingsPath(plain)) --dangerously-skip-permissions", plain)

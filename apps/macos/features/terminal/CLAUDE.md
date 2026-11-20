@@ -105,7 +105,9 @@
   o app reconhece um `cadex claude` vindo de uma aba dele (`../../app/TypedClaudeWiring.swift`).
 - `ClaudeDress.swift` (plano 33, fases B e C; `../../../../docs/spec/terminal.md`, As cores e as
   formas do Claude Code): enquanto o Claude se reporta pelo OSC 7501, o plano de cada quadro troca
-  as cores fixas dele pelas do tema (`Palette`, tirada do `TerminalAppearance`), esconde o mascote e
+  as cores fixas dele pelas do tema (`Palette`, tirada do `TerminalAppearance`), esconde o mascote (só
+  os blocos no laranja dele, nas linhas de "Claude Code": as barras do /usage começam a linha com
+  blocos e sumiam, 2026-11-20) e
   a linha do modo, põe o modo à direita da status line, e as formas (a caixa da entrada, o bloco da
   mensagem do dono) vão como retângulos arredondados (quad do tipo 3 no `TerminalShaders.swift`).
   O `QuadBuilder.swift` desenha com o plano (DrawOverlay.dressClaude); o texto não muda. As linhas
@@ -130,7 +132,8 @@
   do desenho; para os testes e o CADEX_PERF_DUMP_SCREEN (a captura da janela não pega o Metal).
 - `TerminalCommand.swift` (plano 29): o comando que roda e o último (TerminalView.command), lido do
   núcleo a cada mudança de título e carimbado com a hora, o endereço local que ele mostrou
-  (`served`) e `openServed`; `shortName` ("npm run dev" de `PATH=… /usr/bin/npm run dev`), a
+  (`served`) e `openServed`; `shortName` ("npm run dev" de `PATH=… /usr/bin/npm run dev`; um `cd <pasta> &&` na frente sai, o
+  comando com que o app traz o Claude de volta), a
   duração e a porta. A integração do zsh manda as marcas OSC 133 por add-zsh-hook. A captura de
   teste desenha o terminal por `snapshotImage` (TerminalRenderer.image, fora da tela).
 - `TerminalTypeAhead.swift` (plano 24, fase F): `typeWhenReady`, o texto que o app digita numa aba

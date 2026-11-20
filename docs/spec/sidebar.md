@@ -23,7 +23,8 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
   agente, onde está o diálogo do próprio Claude (agents.go-to-request). É a mesma fonte do quadro de
   atenção (`agents.md`), que abre da fila (agents.show-attention) com a lista e o feed.
 - **O seletor "Trabalho | Arquivos"**, na largura toda, com palavras: Trabalho (sidebar.show-work,
-  ⇧⌘1) é o padrão, Arquivos (sidebar.show-files, ⇧⌘2) o segundo.
+  ⇧⌘1) é o padrão, Arquivos (sidebar.show-files, ⇧⌘2) o segundo; ⌘E (sidebar.switch-view) alterna
+  os dois. A barra desliza ao abrir e fechar (⌘B) e se fecha sozinha quando um preview web abre.
 - **Trabalho:** "PROJETOS" e, por projeto, uma linha com a seta (dobra e desdobra; aberto ou
   fechado fica no arquivo dos projetos), o avatar (a imagem, senão o emoji, senão duas letras sobre
   a cor do projeto), o nome e, à direita: a peça de estado e quantos terminais; "nada aberto" sem

@@ -62,6 +62,17 @@ extension WindowSession {
             keywords: ["files", "explorer", "tree", "sidebar", "arquivos", "árvore"], category: .view,
             defaultShortcut: "cmd+shift+2",
             action: .run { [weak self] in self?.workspace?.showInspector("files") }))
+        // ⌘E swaps the two views (the owner, 2026-11-20: a key beside the others, not only ⇧⌘1/⇧⌘2);
+        // from the Memória page or a hidden sidebar it goes to Work.
+        commands.register(Command(
+            id: "sidebar.switch-view", title: T("Switch Between Work and Files", "Alternar entre Trabalho e Arquivos"),
+            keywords: ["work", "files", "switch", "toggle", "sidebar", "trabalho", "arquivos", "alternar"], category: .view,
+            defaultShortcut: "cmd+e",
+            action: .run { [weak self] in
+                guard let self else { return }
+                let onWork = self.workspace?.inspectorVisible == true && self.workspace?.sidebar.mode == .work
+                _ = self.commands.run(onWork ? "sidebar.show-files" : "sidebar.show-work")
+            }))
         // inspector.toggle (⌥⌘I) did the same as ⌘B under another name: one command now (UX audit,
         // 2026-11-18).
         commands.register(PowerCommands.all(app.power))
