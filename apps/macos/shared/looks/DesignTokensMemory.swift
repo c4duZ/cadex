@@ -347,6 +347,15 @@ public extension DesignTokens {
                 public static var color: NSColor { DesignTokens.Color.accentGreenText }
                 public static let opacity: CGFloat = DesignTokens.Opacity.paneIdle
                 public static var hover: [DesignTokens.ShadowLayer] { DesignTokens.Shadow.haloChosen }
+                public enum Kind {
+                    public static var rule: NSColor { DesignTokens.Color.stateReview }
+                    public static var decision: NSColor { DesignTokens.Color.stateWorking }
+                    public static var gotcha: NSColor { DesignTokens.Color.stateNeeds }
+                    public static var session: NSColor { DesignTokens.Color.textTertiary }
+                    public static var project: NSColor { DesignTokens.Color.accentGreenText }
+                    public static var other: NSColor { DesignTokens.Color.textSecondary }
+                }
+                public static let loose: CGFloat = DesignTokens.Opacity.paneIdle
             }
             public enum Tip {
                 public static let padding = NSEdgeInsets(top: 6, left: 10, bottom: 6, right: 10)
@@ -354,6 +363,22 @@ public extension DesignTokens {
                 public static var bg: NSColor { DesignTokens.Color.bgRaised }
                 public static var border: NSColor { DesignTokens.Color.linePopover }
                 public static var shadow: [DesignTokens.ShadowLayer] { DesignTokens.Shadow.popover }
+            }
+            public enum Edge {
+                public static var color: NSColor { DesignTokens.Color.textTertiary }
+                public static let width: CGFloat = DesignTokens.Stroke.hairline
+                public static var chosen: NSColor { DesignTokens.Color.accentLink }
+            }
+            public static var focus: NSColor { DesignTokens.Color.lineFocus }
+            public enum Legend {
+                public static let gap: CGFloat = 12
+                public static let dot: CGFloat = 8
+                public static let fontSize: CGFloat = DesignTokens.FontSize.meta
+                public static var color: NSColor { DesignTokens.Color.textMuted }
+            }
+            public enum Side {
+                public static let width: CGFloat = 260
+                public static let gap: CGFloat = 8
             }
         }
         public enum Search {

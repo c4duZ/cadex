@@ -45,26 +45,54 @@ public enum PanelPlace: Hashable, Sendable {
     /// A session's retrievals from `offset` (25 a page).
     case retrievals(PanelProjectRef, String, offset: Int)
     case agent(PanelProjectRef, String)
+    /// Pesquisar na memória with its words, scope and filters (plan 40 E).
+    case search(PanelSearchQuery)
+    /// The link graph: a project's, or nil for the general one (between projects).
+    case graph(PanelProjectRef?)
 
+    /// The section lit in the sidebar: a project's screens (its graph too) keep Projetos lit.
     public var section: MemoryPanelSection {
-        if case .section(let section) = self { return section }
-        return .projects
+        switch self {
+        case .section(let section): section
+        case .search: .search
+        case .graph(nil): .graph
+        default: .projects
+        }
+    }
+
+    /// The same place, the sections with their own screens named as such: Pesquisar with no
+    /// words lists the newest pages, Grafo de conhecimento is the general graph.
+    public var normalized: PanelPlace {
+        switch self {
+        case .section(.search): .search(PanelSearchQuery())
+        case .section(.graph): .graph(nil)
+        default: self
+        }
+    }
+
+    /// What the sidebar's field searches: the project of a project's screen or of the search.
+    public var searchScope: PanelProjectRef? {
+        if case .search(let query) = self { return query.scope }
+        return project
     }
 
     public var project: PanelProjectRef? {
         switch self {
-        case .section: nil
+        case .section, .search, .graph(nil): nil
+        case .graph(let p?): p
         case .project(let p, _), .page(let p, _), .history(let p, _, _, _), .session(let p, _, _), .retrievals(let p, _, _), .agent(let p, _): p
         }
     }
 
     /// memory.show-panel's arguments for this place, so every click runs the command (ADR 0005).
     public var arguments: [String: String] {
+        if case .search(let query) = self { return query.arguments }
         guard let project else { return ["section": section.rawValue] }
         var out = ["project": project.name]
         if project.workspace != "default" { out["workspace"] = project.workspace }
         switch self {
-        case .section: break
+        case .section, .search: break
+        case .graph: out["graph"] = "1"
         case .project(_, let tab): out["tab"] = tab.rawValue
         case .page(_, let path): out["page"] = path
         case .history(_, let path, let from, let to):
@@ -84,9 +112,13 @@ public enum PanelPlace: Hashable, Sendable {
 
     /// The place memory.show-panel's arguments name; nil when they name none.
     public init?(arguments a: [String: String]) {
+        if a["section"] == "search" {
+            self = .search(PanelSearchQuery(arguments: a))
+            return
+        }
         guard let name = a["project"], !name.isEmpty else {
             guard let section = MemoryPanelSection(rawValue: a["section"] ?? "projects") else { return nil }
-            self = .section(section)
+            self = PanelPlace.section(section).normalized
             return
         }
         let project = PanelProjectRef(workspace: a["workspace"] ?? "default", name: name)
@@ -95,6 +127,7 @@ public enum PanelPlace: Hashable, Sendable {
         else if let id = a["session"] { self = .session(project, id, offset: Int(a["offset"] ?? "") ?? 0) }
         else if let id = a["retrievals"] { self = .retrievals(project, id, offset: Int(a["offset"] ?? "") ?? 0) }
         else if let wire = a["agent"] { self = .agent(project, wire) }
+        else if a["graph"] != nil { self = .graph(project) }
         else if let tab = PanelProjectTab(rawValue: a["tab"] ?? "overview") { self = .project(project, tab) }
         else { return nil }
     }
@@ -107,7 +140,8 @@ public enum PanelPlace: Hashable, Sendable {
         if p.workspace != "default" { out.append(PanelCrumb(p.workspace, nil)) }
         let home = PanelCrumb(p.name, .project(p, .overview))
         switch self {
-        case .section: return []
+        case .section, .search: return []
+        case .graph: return out + [home, PanelCrumb(T("graph", "grafo"), nil)]
         case .project: return out + [PanelCrumb(p.name, nil)]
         case .page(_, let path): return out + [home, PanelCrumb(path, nil)]
         case .history(_, let path, _, _): return out + [home, PanelCrumb(path, .page(p, path)), PanelCrumb(T("history", "histórico"), nil)]

@@ -233,7 +233,11 @@
       texto em inglês escrito no lugar, sem os de provedor), `server/src/page/panel/project.rs`
       (resumo, sessões com filtro, agentes e a tela do agente), `server/src/page/panel/tokens.rs`
       (uso de tokens do projeto e da sessão, com os filtros do upstream **copiados** do
-      `UsageQuery`) e `server/src/page/panel/session.rs` (recuperações e as evidências de uma página).
+      `UsageQuery`), `server/src/page/panel/session.rs` (recuperações e as evidências de uma página) e
+      `server/src/page/panel/search.rs` com `server/src/page/panel/search_trace.rs` (plano 40 E: a
+      tela de busca do upstream em JSON, com os filtros de tipo e camada, as recentes sem termo e o
+      rastro do "explicar", o `hit_trace` dele **copiado**; num projeto, o híbrido com o modelo do
+      engine e sem reranker).
     - A cada atualização do upstream: comparar o routes/api.rs, o routes/history.rs, o diff.rs, o
       recall.rs e o health.rs do ai-memory-web com as cópias; o `server/tests/panel_api.rs` falha se
       o JSON divergir.
@@ -466,7 +470,9 @@
     ordem, filtros, escopos) igual valor a valor, e as recusas (projeto, página e sessão que não
     existem, query errada) com o mesmo status e o mesmo corpo; cada rota extra/ (lista em
     `server/tests/panel/mod.rs`) contra a tela HTML dele (`server/tests/panel/screens.rs`: ordem dos
-    cartões e das linhas, ids das mensagens e das propostas, contagens, checks, cobertura); e ler tudo
+    cartões e das linhas, ids das mensagens e das propostas, contagens, checks, cobertura; e
+    `server/tests/panel/screen_search.rs`: as dez buscas de `search_pairs`, os resultados, os trechos
+    com o mesmo `<mark>`, a contagem, o rastro e o seletor de projetos); e ler tudo
     pelo engine deixa a pasta igual byte a byte (o ponto de partida é subir e parar o engine sem
     pedido até nada mudar).
 

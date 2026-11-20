@@ -346,13 +346,14 @@
   página de sessão da memória, o que ela guardou, Retomar, Continuar em outra conta e Ver a página
   aberta já renderizada) e a Memória (agrupada pelo tipo, a escolhida renderizada, Editar, Abrir a
   sessão, Apagar); project.show-sessions e project.show-memory abrem a página na seção.
-- `MemoryPanelWiring.swift` (planos 40 C e D): memory.show-panel (com `section=`, ou com `project=` e a
-  tela: `tab=`, `page=`, `history=` com `from=`/`to=`, `session=` com `offset=`, `retrievals=`,
-  `agent=`) abre a página Memória da feature memory como Automações, no lugar pedido, e põe a barra
+- `MemoryPanelWiring.swift` (planos 40 C a E): memory.show-panel (com `section=`; Pesquisar com
+  `query=`, `scope=`, `kind=`, `tier=`, `explain=1`; ou com `project=` e a tela: `tab=`, `page=`,
+  `history=` com `from=`/`to=`, `session=` com `offset=`, `retrievals=`, `agent=`, `graph=1`) abre a página Memória da feature memory como Automações, no lugar pedido, e põe a barra
   lateral no modo Memória com as seções (uma `MemoryPanelNav` por janela; num projeto, Projetos acesa
   e a busca "Pesquisar em <projeto>"); todo clique dentro da página roda esse comando
   (MemoryPanelActions.go); memory.panel-back e memory.panel-forward andam pelos lugares vistos
-  (⌘[ e ⌘] na página). Lê as rotas do painel pelo MemoryWiring.runAgentData, uma de cada vez numa
+  (⌘[ e ⌘] na página); Enter no campo da barra pesquisa no projeto da tela aberta; memory.graph-fit
+  desfaz a pinça e o arrasto do grafo. Lê as rotas do painel pelo MemoryWiring.runAgentData, uma de cada vez numa
   tela de projeto (a primeira pode subir o engine); memory.open-in-cadex (`project=`, `session=`) vai
   ao terminal onde a sessão roda (`locate` pelo `agentResume`), senão ao projeto aberto ou recente
   com a pasta daquele nome (`cadexFolder`), ou o abre; no ⌘K, age na sessão escolhida, na tela do

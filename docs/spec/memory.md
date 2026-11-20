@@ -333,7 +333,9 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   números serem os mesmos: a visão geral (agentes e fila por projeto, a captura), a caixa de entrada
   (com o filtro de estado e o contador), os workstreams, a revisão de aprendizado de todos os
   projetos, a Saúde, o resumo, as sessões e os agentes de um projeto, o uso de tokens (do projeto e
-  da sessão), as recuperações de uma sessão e as evidências de uma página.
+  da sessão), as recuperações de uma sessão, as evidências de uma página e a tela Pesquisar
+  (`extra/search`: os filtros de tipo e camada, o rastro do "Explicar classificação" e as páginas
+  recentes sem termo, que a `api/v1/search` não tem).
 - A Saúde mostra o engine local: hooks aceitos e descartados desde que ele subiu, a fila de
   gravação, a fila do hook, o diário do "continuar em outro agente", o modelo de vetores e o índice,
   com as verificações do ai-memory (em inglês; o app escreve as suas palavras); sem provedores
@@ -347,7 +349,7 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   fila, o filtro, o escopo e os cartões. "Abrir no Cadex" (memory.open-in-cadex, com `project=`;
   também no clique direito do cartão e no ⌘O com o cartão escolhido pelas setas) só quando um
   projeto aberto ou recente do Cadex tem a pasta com esse nome. As outras seções dizem "Em breve."
-  até as fases E a G. Com a memória desligada, a página diz isso e não lê nada.
+  até as fases F e G. Com a memória desligada, a página diz isso e não lê nada.
 - As telas de um projeto (plano 40 D), cada uma um lugar do memory.show-panel (`project=` e
   `tab=`, `page=`, `history=` com `from=` e `to=`, `session=` com `offset=`, `retrievals=` ou
   `agent=`); todo clique dentro da página roda esse comando, e memory.panel-back e
@@ -376,6 +378,34 @@ agente recebe ao começar (`docs/adr/0028-project-memory.md`, plano `docs/plans/
   - O agente: os quatro números com a nota, a faixa âmbar quando há sessão sem uso informado, e as
     sessões, 50 por página; na linha sob o ponteiro ou escolhida, "Abrir no Cadex" (também no clique
     direito e no ⌘O); Enter abre a sessão.
+- Pesquisar na memória (plano 40 E): o lugar `section=search` com `query=`, `scope=<workspace/projeto>`,
+  `kind=`, `tier=` e `explain=1`; o campo da barra lateral e a seção levam a ele (num projeto, o
+  campo pesquisa nele, "Pesquisar em cadex"). Lê `extra/search`: num projeto, o ranker híbrido do
+  `memory_query` com o modelo do engine (sem reranker, como o `memory_query` daqui); em todos, só
+  texto. O título com o termo marcado, "em cadex ×" (volta a todos), os seletores de projeto, tipo e
+  camada, o campo, "Explicar classificação" e Pesquisar (cada mudança é uma busca nova, então voltar
+  e avançar andam pelas buscas); a contagem ("primeiros N" quando cortada); com o explicar, a caixa
+  "Rastro da recuperação" (streams, embedder, tempos) e, em cada resultado, posição, rank, fundido e
+  autoridade com a tabela dos streams numa dobra; cada resultado com o título e o trecho numa linha,
+  o termo marcado com um destaque só nos dois (no título, as palavras da busca sem acento nem caixa),
+  e "projeto · caminho". Sem termo, as páginas recentes; sem resultado, "Nenhum resultado para X"
+  (com os filtros, "com estes filtros"; num projeto, "Pesquisar em todos os projetos"). ↑ e ↓
+  escolhem, Enter abre. A página aberta de um resultado guarda a busca: "Por que esta página foi
+  recuperada?" mostra "Aberta pela pesquisa …" e "Recalcular", que roda a busca de novo com o rastro
+  e diz a posição da página (ou que ela saiu dos resultados); aberta direto, o ⓘ diz que não há
+  busca a explicar.
+- Grafo de conhecimento (plano 40 E): `section=graph` é o geral (os links entre projetos, um nó por
+  projeto, `api/v1/graph`) e `project=<p> graph=1` o do projeto ("Grafo de links ↗"; `api/v1/.../graph`
+  e `/pages` para o tipo de cada página). Desenho nativo (Core Graphics, sem WebView), com layout de
+  forças e não o círculo do upstream (o dono, 2026-11-19): as páginas ligadas se agrupam no meio, as
+  soltas ficam em anéis na borda, e sem link nenhum um girassol enche o quadro; sem nada aleatório
+  (a mesma posição a cada abertura), fora da linha principal a partir de 40 nós (o engine corta em
+  120). O ponto tem a cor do tipo (regra, decisão, armadilha, sessão, projeto, outro, com a legenda);
+  sob o ponteiro ou com o foco, um balão com o título e o caminho; o clique ou Enter abre a página (no
+  geral, o grafo do projeto); Tab e as setas andam de nó em nó, cada nó um elemento de acessibilidade
+  com o título e o caminho. Pinça aproxima e dois dedos arrastam; memory.graph-fit volta ao todo.
+  CONEXÕES lista cada link (De → Para, cada ponta um link); sem link, uma linha diz por quê ("nenhuma
+  cita outra com [[caminho]]"; no geral, "uma página liga a de outro com [[projeto:caminho]]").
 - Um engine que sobe com uma sessão aberta e sem atividade há mais de 48 horas a fecha na limpeza
   da subida (o `close_abandoned_sessions` do forget sweep, como o servidor do ai-memory faz um minuto
   depois de subir): o fim fica na hora da última observação.

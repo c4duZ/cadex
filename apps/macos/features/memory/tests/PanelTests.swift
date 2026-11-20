@@ -148,7 +148,7 @@ let panelNow = ISO8601DateFormatter().date(from: "2026-11-20T07:43:40Z")!
         expect(picked == [.health] && searched == ["tenant"])
         nav.select(.inbox)
         expect(nav.litSection == .inbox)
-        expect(MemoryPanelSection.allCases.filter(\.isBuilt) == [.projects])
+        expect(MemoryPanelSection.allCases.filter(\.isBuilt) == [.projects, .search, .graph])
     }),
     ("the page: the overview with data, one line for a section still to come, the off state", {
         var actions = MemoryPanelActions()

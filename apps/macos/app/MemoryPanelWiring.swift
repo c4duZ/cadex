@@ -17,9 +17,10 @@ extension WindowSession {
                  keywords: ["memory", "panel", "projects", "inbox", "workstreams", "graph", "health", "memória", "painel", "projetos",
                             "caixa de entrada", "grafo", "saúde"],
                  category: .view, action: .run { [weak self] in self?.openMemoryPanel(nil) })
-            .accepting("section=<projects|inbox|workstreams|search|graph|review|health|docs|changelog> [query=<words>] | project=<name> [workspace=<w>] "
+            .accepting("section=<projects|inbox|workstreams|search|graph|review|health|docs|changelog> "
+                       + "[query=<words>] [scope=<workspace/project>] [kind=<kind>] [tier=<tier>] [explain=1] | project=<name> [workspace=<w>] "
                        + "[tab=<overview|agents|tokens|sessions|knowledge>|page=<path>|history=<path> [from=<id>] [to=<id>]|session=<id> [offset=<n>]|"
-                       + "retrievals=<id>|agent=<claude-code|codex|…>]") { [weak self] request in
+                       + "retrievals=<id>|agent=<claude-code|codex|…>|graph=1]") { [weak self] request in
                 guard let self, let place = PanelPlace(arguments: request.arguments) else {
                     return .failed("section is one of the panel's sections, or project names a memory project")
                 }
@@ -52,15 +53,16 @@ extension WindowSession {
 
     func memoryPanelPage() -> MemoryPanelDocument? { tabs?.document(identity: MemoryPanelDocument.identity) as? MemoryPanelDocument }
 
+
     /// The page in the center at `place` (nil: where it was), the sidebar on its sections (inside a
     /// project, Projetos stays lit).
     func openMemoryPanel(_ place: PanelPlace?) {
         let page = memoryPanelPage() ?? makeMemoryPanel()
         tabs?.open(page)
-        let next = place ?? page.place
+        let next = (place ?? page.place).normalized
         if next != page.place { page.go(next) } else if !page.loaded, case .section(let section) = next { page.show(section) }
         memoryNav().select(next.section)
-        memoryNav().setScope(next.project?.name)
+        memoryNav().setScope(next.normalized.searchScope?.name)
         workspace?.showMemoryNav()
     }
 
@@ -106,8 +108,11 @@ extension WindowSession {
         if let nav = workspace?.sidebar.memoryHost as? MemoryPanelNav { return nav }
         let nav = MemoryPanelNav()
         nav.onPick = { [weak self] section in self?.runMemorySection(section) }
-        // Pesquisar comes in phase E: Enter opens its section, which says so.
-        nav.onSearch = { [weak self] _ in self?.runMemorySection(.search) }
+        // Enter in the field: Pesquisar with the words, in the project of the screen shown (plan 40 E).
+        nav.onSearch = { [weak self] words in
+            let scope = self?.memoryPanelPage()?.place.searchScope
+            self?.runMemoryPlace(.search(PanelSearchQuery(words: words, scope: scope)))
+        }
         workspace?.sidebar.setMemory(nav)
         workspace?.sidebar.setMemoryVersion(MemoryPanelInfo.upstream)
         return nav

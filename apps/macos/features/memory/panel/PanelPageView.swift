@@ -16,9 +16,13 @@ final class PanelPageView: PanelScreen {
     private(set) var evidenceOpen = true
     private let evidenceHost = PanelText.column([], gap: 0)
     private let now: Date
+    /// "Por que esta página foi recuperada?": the search that opened it, recomputed on request.
+    let whyRow: PanelWhyRow
 
-    init(_ ref: PanelProjectRef, page: PanelPageDetail, evidence: PanelEvidence, now: Date = Date(), go: @escaping (PanelPlace) -> Void) {
+    init(_ ref: PanelProjectRef, page: PanelPageDetail, evidence: PanelEvidence, now: Date = Date(), recall: PanelSearchQuery? = nil,
+         read: PanelWhyRow.Read? = nil, go: @escaping (PanelPlace) -> Void) {
         (self.ref, self.page, self.evidence, self.now) = (ref, page, evidence, now)
+        whyRow = PanelWhyRow(PanelHitKey(project: ref, path: page.path), recall: recall, read: read)
         super.init(go: go)
         setAccessibilityLabel(page.title)
         let rendered = PanelMarkdown.render(page.body)
@@ -80,7 +84,7 @@ final class PanelPageView: PanelScreen {
         var rows: [NSView] = [head]
         if evidenceOpen {
             rows += evidenceRows()
-            rows.append(why())
+            rows.append(whyRow)
         }
         let column = PanelText.column([], gap: 0)
         var all: [NSView] = []
@@ -148,16 +152,6 @@ final class PanelPageView: PanelScreen {
         holder.hold(PanelText.row(views, gap: MP.Box.Row.gap), padding: MP.Box.Row.padding)
         holder.setAccessibilityElement(true)
         holder.setAccessibilityLabel(name + " " + value)
-        return holder
-    }
-
-    private func why() -> NSView {
-        let line = PanelText.line(T("Why was this page retrieved?", "Por que esta página foi recuperada?"), size: DesignTokens.FontSize.panel,
-                                  color: DesignTokens.Color.textPrimary)
-        let help = PanelHelpButton(T("Open the page from a search to see how it ranked for that query.",
-                                     "Abra a página por uma busca para ver como ela se classificou para aquela consulta."))
-        let holder = FrameBox()
-        holder.hold(PanelText.row([line, PanelText.spring(), help], gap: MP.Chip.gap), padding: MP.Box.Row.padding)
         return holder
     }
 

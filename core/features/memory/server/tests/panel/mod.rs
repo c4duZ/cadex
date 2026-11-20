@@ -179,4 +179,27 @@ pub fn extra_routes() -> Vec<String> {
         format!("{p}/sessions/{S_DONE}/retrievals"),
         format!("{p}/evidence/{VERSIONED_PAGE}"),
     ]
+    .into_iter()
+    .chain(search_pairs().into_iter().map(|(ours, _)| format!("{x}/{ours}")))
+    .collect()
 }
+
+/// Our suffix (under extra/) and upstream's screen for the same search.
+pub fn search_pairs() -> Vec<(String, String)> {
+    use seed::*;
+    let scoped = format!("scope={WORKSPACE}/{MAIN}");
+    let named = format!("workspace={WORKSPACE}&project={MAIN}");
+    vec![
+        ("search?q=engine".into(), "/web/search?q=engine".into()),
+        ("search?q=engine&explain=1".into(), "/web/search?q=engine&explain=1".into()),
+        (format!("search?q=engine&{scoped}&explain=1"), format!("/web/search?q=engine&{named}&explain=1")),
+        (format!("search?q=socket&{scoped}"), format!("/web/search?q=socket&{named}")),
+        ("search?q=engine&kind=decision".into(), "/web/search?q=engine&kind=decision".into()),
+        (format!("search?q=engine&{scoped}&tier=semantic&limit=1"), format!("/web/search?q=engine&{named}&tier=semantic&limit=1")),
+        ("search?q=engine&kind=nonsense".into(), "/web/search?q=engine&kind=nonsense".into()),
+        ("search?q=zzzz".into(), "/web/search?q=zzzz".into()),
+        ("search".into(), "/web/search".into()),
+        (format!("search?{scoped}"), format!("/web/search?{named}")),
+    ]
+}
+

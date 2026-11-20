@@ -105,7 +105,18 @@ repositório. O código dele está no checkout do cargo, no commit fixado (411d9
   com a frase na dica (cortava com os dois links); o histórico não pagina as versões (o seed tem 2).
   Achado: a sessão aberta do seed fecha na subida do engine; é o `close_abandoned_sessions` do
   forget sweep (sem atividade há 48 horas), o mesmo do servidor do upstream.
-- [ ] E. Pesquisar na memória e o grafo de conhecimento (o geral e o do projeto).
+- [x] E. Pesquisar na memória e o grafo de conhecimento (o geral e o do projeto).
+  Feito: a rota `extra/search` no engine (`core/features/memory/server/src/page/panel/search.rs` e
+  `core/features/memory/server/src/page/panel/search_trace.rs`: os filtros, o rastro e as recentes da tela do upstream), igual à tela dele em dez
+  buscas do seed (`core/features/memory/server/tests/panel/screen_search.rs`) e na leitura intacta;
+  no app, Pesquisar (`apps/macos/features/memory/panel/PanelSearchView.swift`, o destaque único em
+  título e trecho, o rastro numa dobra) e o "por que foi recuperada" da página, que recalcula a busca
+  que a abriu (`apps/macos/features/memory/panel/PanelWhyRow.swift`); o grafo com layout de forças determinístico
+  (`apps/macos/features/memory/panel/PanelForceLayout.swift`), desenhado em Core Graphics (`apps/macos/features/memory/panel/PanelGraphCanvas.swift`), com teclado,
+  balão, pinça e memory.graph-fit. Diferenças do board: o grafo segue a decisão do dono (forças, não
+  o círculo); a dica do nó geral diz "default/cadex"; a busca não manda formulário: cada seletor já
+  pesquisa; o seed tem 4 projetos, então "4 resultados" e não 34. Os tokens novos em
+  components.memoryPanel.graph (cores por tipo, aresta, legenda, coluna).
 - [ ] F. A caixa de entrada e os workstreams.
 - [ ] G. A revisão de aprendizado, a saúde do servidor e a documentação.
 

@@ -43,8 +43,8 @@ public enum MemoryPanelSection: String, CaseIterable, Sendable {
          (T("RESOURCES", "RECURSOS"), [.docs, .changelog])]
     }
 
-    /// The ones this phase draws (plan 40 C); the rest say they come soon (phases D to G).
-    public var isBuilt: Bool { self == .projects }
+    /// The ones drawn so far (plan 40 C to E); the rest say they come soon (phases F and G).
+    public var isBuilt: Bool { [.projects, .search, .graph].contains(self) }
 }
 
 /// The sidebar's content while the Memória page shows (components.memoryPanel.nav): the search

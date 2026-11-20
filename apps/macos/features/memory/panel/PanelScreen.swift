@@ -136,6 +136,9 @@ class PanelScreen: NSView {
     }
 
     override var acceptsFirstResponder: Bool { true }
+
+    /// What takes the keys when the screen opens: the screen itself, or its main part.
+    var firstFocus: NSView { self }
 }
 
 /// The project's tabs in the segmented selector (components.memoryPanel.tabs).

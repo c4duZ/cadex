@@ -110,6 +110,19 @@
   link de página abre a página no painel), `panel/PanelHistoryView.swift` (o diff e as versões com De
   e Para), `panel/PanelSessionView.swift` (a linha do tempo; j/k e as setas),
   `panel/PanelRetrievalsView.swift` e `panel/PanelAgentView.swift`.
+  Pesquisar e o grafo (plano 40 E): `panel/PanelSearchData.swift` (`PanelSearchQuery`, o lugar e a
+  rota `extra/search`; `PanelSearchResult`; `PanelMarked`, o `<mark>` do engine em faixas e o título
+  marcado pelas palavras, sem acento nem caixa), `panel/PanelSearchView.swift` (a tela: os seletores,
+  o campo, "Explicar classificação", o rastro, os resultados; ↑ ↓ e Enter),
+  `panel/PanelSearchParts.swift` (`PanelMarkedLabel`, o destaque único desenhado com o
+  NSLayoutManager, e `PanelHitRow`, o resultado com a tabela dos streams numa dobra),
+  `panel/PanelWhyRow.swift` (o "por que foi recuperada" da página: a busca que a abriu, guardada na
+  página, recalculada com o rastro), `panel/PanelGraphData.swift` (os dois grafos lidos, o tipo de
+  cada página, as conexões, as linhas de vazio), `panel/PanelForceLayout.swift` (o layout de forças
+  puro e determinístico: os ligados no meio, os soltos em anéis na borda, sem sobrepor),
+  `panel/PanelGraphCanvas.swift` (o desenho em Core Graphics, o balão, Tab e setas, um elemento de
+  acessibilidade por nó, pinça e arrasto; fora da linha principal a partir de 40 nós) e
+  `panel/PanelGraphView.swift` (a tela, a legenda e CONEXÕES).
   Tokens: components.memoryPanel.
 - `MemorySessions.swift` (plano 35 H): `received`, o briefing que uma sessão recebeu, lido do disco
   em `<memória>/agent/briefings/<sessão>.md` (o engine o guarda, plano 35 D; só id simples, as linhas
@@ -155,7 +168,11 @@
   `tests/PanelScreenTests.swift`, sobre o JSON de cada rota gravado do seed: os lugares e a trilha,
   voltar e avançar, os caminhos, cada leitura, a árvore, as palavras, o diff, o Markdown e os links,
   a barra de páginas, a página indo de tela em tela com um engine falso, os cliques e as teclas, e
-  com CADEX_SNAPSHOT_DIR um PNG de cada tela; o briefing guardado de uma sessão e o id recusado, a página de
+  com CADEX_SNAPSHOT_DIR um PNG de cada tela; Pesquisar e o grafo, `tests/PanelSearchTests.swift` e
+  `tests/PanelGraphTests.swift`, sobre o `extra/search` e os grafos gravados do seed: a leitura, as
+  marcas, a rota e os argumentos, a tela e as teclas, o "por que" recalculado, o layout (o mesmo a
+  cada vez, ligados mais perto, sem sobrepor), o teclado, o balão e os nomes dos nós, e os PNGs
+  memory-search*.png e memory-graph*.png; o briefing guardado de uma sessão e o id recusado, a página de
   sessão vazia fora das últimas sessões; o .ai-memory.toml lido como o engine lê, gravado sem perder linha;
   o modelo, o `ensure` que não sobrescreve, o nome numa worktree e a linha do exclude): os 9 eventos e o comando de cada um, a `env` do pacote e a do
   `make run`, a workspace só sem compartilhar, os hooks com agents.stateHooks desligada, a parte

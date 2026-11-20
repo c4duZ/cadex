@@ -25,6 +25,8 @@ func panelAnswer(_ path: String) -> Data? {
         base + "/sessions/00000000-0000-4000-8000-000000000001/observations?offset=0&limit=50": "observations",
         extra + "/sessions/00000000-0000-4000-8000-000000000001/tokens": "session-tokens",
         extra + "/sessions/00000000-0000-4000-8000-000000000001/retrievals": "retrievals",
+        "extra/search": "search-recent", "extra/search?q=engine": "search", "extra/search?q=zzzz&kind=decision": "search-none",
+        "extra/search?q=engine&scope=default/cadex&explain=1": "search-explain", base + "/graph": "graph", "api/v1/graph": "graph-global",
     ]
     return map[path].map(panelFixture)
 }
@@ -35,7 +37,7 @@ func panelProjectSeed() -> PanelProjectData? {
 
 @MainActor func panelDetailTests() -> [(name: String, body: Checks.Body)] { [
     ("a place's arguments come back as the same place, and the trail names it", {
-        let places: [PanelPlace] = [.section(.graph), .project(cadexRef, .knowledge), .page(cadexRef, "decisions/engine.md"),
+        let places: [PanelPlace] = [.section(.health), .graph(cadexRef), .graph(nil), .project(cadexRef, .knowledge), .page(cadexRef, "decisions/engine.md"),
                                     .history(cadexRef, "decisions/engine.md", from: "a", to: "b"), .session(cadexRef, "s-1", offset: 50),
                                     .retrievals(cadexRef, "s-1", offset: 0), .agent(PanelProjectRef(workspace: "acct", name: "cadex"), "codex")]
         for place in places { expect(PanelPlace(arguments: place.arguments) == place, "\(place.arguments)") }

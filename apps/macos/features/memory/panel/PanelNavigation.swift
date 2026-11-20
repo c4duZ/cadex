@@ -18,6 +18,9 @@ public enum PanelLoads {
         case .retrievals(let p, let id, let offset):
             return [p.extra + "/sessions/" + PanelPath.segment(id) + "/retrievals" + (offset > 0 ? "?offset=\(offset)" : "")]
         case .agent(let p, let wire): return [p.extra + "/agents/" + PanelPath.segment(wire)]
+        case .search(let query): return [query.path]
+        case .graph(let p?): return [p.api + "/graph", p.api + "/pages"]
+        case .graph(nil): return ["api/v1/graph"]
         }
     }
 }
@@ -36,7 +39,8 @@ public extension MemoryPanelDocument {
     }
 
     /// The page at `next`, kept in the trail.
-    func go(_ next: PanelPlace) {
+    func go(_ place: PanelPlace) {
+        let next = place.normalized
         let before = trail.current
         trail.go(next)
         open(next, from: before)
@@ -62,7 +66,7 @@ public extension MemoryPanelDocument {
     /// rest read from the engine, then drawn (an older read arriving late draws nothing).
     internal func open(_ next: PanelPlace, from before: PanelPlace) {
         if case .section(let section) = next { return showSection(section) }
-        section = .projects
+        section = next.section
         if case .project(let p, let tab) = next, case .project(let q, _) = before, p == q, let view = screen as? PanelProjectView {
             return view.select(tab)
         }
@@ -82,7 +86,7 @@ public extension MemoryPanelDocument {
             made.onBack = { [weak self] in self?.runBack() }
             made.onForward = { [weak self] in self?.runForward() }
             self.place(made)
-            made.window?.makeFirstResponder(made)
+            made.window?.makeFirstResponder(made.firstFocus)
         }
     }
 
@@ -105,6 +109,12 @@ public extension MemoryPanelDocument {
     private func runBack() { if let run = actions.back { run() } else { back() } }
     private func runForward() { if let run = actions.forward { run() } else { forward() } }
 
+    /// A graph is on screen (memory.graph-fit's availability).
+    var showsGraph: Bool { screen is PanelGraphView }
+
+    /// memory.graph-fit: the graph shown, zoom and pan undone.
+    func fitGraph() { (screen as? PanelGraphView)?.canvas.fit() }
+
     /// What memory.open-in-cadex from ⌘K acts on in a project's screen: the session chosen in a
     /// list or shown, else the project; nil on a section.
     var chosenForCadex: (PanelProjectRef, String?)? {
@@ -115,6 +125,14 @@ public extension MemoryPanelDocument {
         case let view as PanelProjectView: return (p, view.sessionList?.chosenSession?.id)
         default: return (p, nil)
         }
+    }
+
+    /// The search screen; a hit opens its page with the search kept for the page's "why".
+    private func makeSearch(_ result: PanelSearchResult, go: @escaping (PanelPlace) -> Void) -> PanelSearchView {
+        PanelSearchView(result, open: { [weak self] hit in
+            self?.recall[PanelHitKey(project: hit.project, path: hit.path)] = result.query
+            go(.page(hit.project, hit.path))
+        }, go: go)
     }
 
     /// The screen of `next` from its answers; nil when the first does not parse.
@@ -130,9 +148,10 @@ public extension MemoryPanelDocument {
         case .project(let p, let tab):
             guard let read = PanelProjectData.parse(p, data) else { return nil }
             return PanelProjectView(p, data: read, tab: tab, actions: project, go: go)
-        case .page(let p, _):
+        case .page(let p, let path):
             guard let page = PanelPageDetail.parse(data[0]) else { return nil }
-            return PanelPageView(p, page: page, evidence: PanelEvidence.parse(data.count > 1 ? data[1] : nil) ?? PanelEvidence(), go: go)
+            return PanelPageView(p, page: page, evidence: PanelEvidence.parse(data.count > 1 ? data[1] : nil) ?? PanelEvidence(),
+                                 recall: recall[PanelHitKey(project: p, path: path)], read: project.read, go: go)
         case .history(let p, _, _, _):
             guard let history = PanelHistory.parse(data[0]) else { return nil }
             return PanelHistoryView(p, history: history, go: go)
@@ -149,6 +168,15 @@ public extension MemoryPanelDocument {
         case .agent(let p, _):
             guard let read = PanelAgentData.parse(data[0]) else { return nil }
             return PanelAgentView(p, data: read, actions: project, go: go)
+        case .search:
+            guard let read = PanelSearchResult.parse(data[0]) else { return nil }
+            return makeSearch(read, go: go)
+        case .graph(let p?):
+            guard let read = PanelGraph.parse(project: p, graph: data[0], pages: data.count > 1 ? data[1] : nil) else { return nil }
+            return PanelGraphView(read, go: go)
+        case .graph(nil):
+            guard let read = PanelGraph.parse(global: data[0]) else { return nil }
+            return PanelGraphView(read, go: go)
         }
     }
 }

@@ -18,6 +18,8 @@ mod common;
 mod panel;
 #[path = "panel/screens.rs"]
 mod screens;
+#[path = "panel/screen_search.rs"]
+mod screen_search;
 
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -99,6 +101,7 @@ async fn extra_routes_match_upstreams_screens() {
     screens::project(&app, &ours).await;
     screens::agents(&app, &ours).await;
     screens::session(&app, &ours).await;
+    screen_search::search(&app, &ours).await;
     store.close().await;
 }
 

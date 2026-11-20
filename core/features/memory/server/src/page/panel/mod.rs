@@ -17,7 +17,9 @@
 //!   (workstreams and the review list; approve and reject stay in
 //!   ../proposals.rs), health.rs with health_checks.rs, project.rs (a project's summary, sessions
 //!   and agents), tokens.rs (token usage of a project or a session),
-//!   session.rs (retrievals and a page's evidence).
+//!   session.rs (retrievals and a page's evidence), search.rs with
+//!   search_trace.rs (the search screen: filters, the recall trace, the
+//!   recent pages with no term; plan 40 E).
 //!
 //! Ours sit under `extra/` rather than among upstream's paths so an upstream
 //! update that adds a route can never collide with one of ours.
@@ -29,6 +31,8 @@ mod home;
 mod inbox;
 mod project;
 mod queues;
+mod search;
+mod search_trace;
 mod session;
 mod tokens;
 
@@ -86,6 +90,7 @@ pub(crate) fn router(page: Arc<Ctx>, sources: Sources) -> Router {
         .route("/workstreams", get(queues::workstreams))
         .route("/review", get(queues::review))
         .route("/health", get(health::handle))
+        .route("/search", get(search::handle))
         .route(&format!("{p}/summary"), get(project::summary))
         .route(&format!("{p}/sessions"), get(project::sessions))
         .route(&format!("{p}/agents"), get(project::agents))

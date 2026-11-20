@@ -182,9 +182,14 @@ final class PanelPopup: PanelPress {
     }
 
     var said: String { value.stringValue }
+    private var picker: ((Int) -> Void)?
+
+    /// For tests: as if the choice at `index` was picked.
+    func pick(_ index: Int) { picker?(index) }
 
     /// The choices under it; `pick` gets the index chosen.
     func offer(_ titles: [String], chosen: Int, pick: @escaping (Int) -> Void) {
+        picker = pick
         onPress = { [weak self] in
             guard let self else { return }
             let entries = titles.enumerated().map { index, title in

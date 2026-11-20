@@ -65,6 +65,9 @@ public final class MemoryPanelDocument: TabDocument {
     public internal(set) var screen: NSView?
     /// Counts the reads, so an older answer arriving late draws nothing.
     var generation = 0
+    /// The search that opened each page, for its "Por que esta página foi recuperada?" (upstream
+    /// carries it in the page's URL; here the page keeps it while the window lives).
+    var recall: [PanelHitKey: PanelSearchQuery] = [:]
 
     public init(actions: MemoryPanelActions) {
         self.actions = actions
@@ -84,7 +87,9 @@ public final class MemoryPanelDocument: TabDocument {
 
     /// The section in the center: the overview, or the one line of a section still to come.
     public func show(_ next: MemoryPanelSection) {
-        trail.go(.section(next))
+        let place = PanelPlace.section(next).normalized
+        guard case .section = place else { return go(place) }
+        trail.go(place)
         showSection(next)
     }
 
