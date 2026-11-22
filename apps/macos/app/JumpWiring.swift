@@ -73,6 +73,8 @@ final class JumpSource: PaletteSource {
         if let pick = rows[index].pick { window.pickInTree(pick) }
     }
 
+    func stop() {}
+
     /// The state's glyph as the row's image (the tree's, not spinning).
     static func glyph(_ state: GlyphState) -> NSImage {
         let side = UILooks.pt(DesignTokens.Pane.Header.glyph)
