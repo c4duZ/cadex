@@ -306,7 +306,9 @@ final class WindowSession: NSObject, NSWindowDelegate {
     }
 
     func windowDidExitFullScreen(_ notification: Notification) {
-        window.toolbar?.isVisible = true
+        // The top bar gone with the sidebar keeps the toolbar off too (WorkspaceView.collapseTopBar).
+        window.toolbar?.isVisible = !(workspace?.topBarCollapsed ?? false)
+        workspace?.applyTopBarToWindow()
     }
 
     /// The tabs ask before closing over a running program; close() after

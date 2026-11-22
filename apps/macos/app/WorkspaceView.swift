@@ -39,6 +39,12 @@ final class WorkspaceView: NSView {
     /// its width hidden, since 0 pt could not hold its rows (review of 2026-11-17).
     private var contentToInspector: NSLayoutConstraint!
     private var contentToRail: NSLayoutConstraint!
+    /// The title bar's height: 0 while the owner keeps the sidebar closed (`collapseTopBar`).
+    private(set) var titleBarHeight: NSLayoutConstraint!
+    /// The top bar went up with the sidebar: the terminals take the whole window (the owner,
+    /// 2026-11-22). Only when the owner closed it (⌘B, or saved closed); a sidebar that closes on
+    /// its own (a narrow window, a preview opening) leaves the bar.
+    var topBarCollapsed = false
     private(set) var inspectorVisible = true
     /// The column's width (inspector.width), dragged by its edge.
     private(set) var inspectorPoints = UILooks.pt(DesignTokens.WorkSidebar.width)
@@ -82,6 +88,7 @@ final class WorkspaceView: NSView {
         contentToInspector = contentPanel.leadingAnchor.constraint(equalTo: sidebar.trailingAnchor, constant: gap)
         contentToRail = contentPanel.leadingAnchor.constraint(equalTo: rail.trailingAnchor, constant: gap)
         stripWidth = rail.widthAnchor.constraint(equalToConstant: 0)
+        titleBarHeight = titleBar.heightAnchor.constraint(equalToConstant: TitleBarView.height)
         sidebarAtEdge = sidebar.leadingAnchor.constraint(equalTo: leadingAnchor)
         sidebarAtRail = sidebar.leadingAnchor.constraint(equalTo: rail.trailingAnchor)
         NSLayoutConstraint.activate([
@@ -96,7 +103,7 @@ final class WorkspaceView: NSView {
             titleBar.topAnchor.constraint(equalTo: topAnchor),
             titleBar.leadingAnchor.constraint(equalTo: leadingAnchor),
             titleBar.trailingAnchor.constraint(equalTo: trailingAnchor),
-            titleBar.heightAnchor.constraint(equalToConstant: TitleBarView.height),
+            titleBarHeight,
             statusBar.leadingAnchor.constraint(equalTo: leadingAnchor),
             statusBar.trailingAnchor.constraint(equalTo: trailingAnchor),
             statusBar.bottomAnchor.constraint(equalTo: bottomAnchor),
@@ -259,6 +266,7 @@ final class WorkspaceView: NSView {
             layoutSidebar()
         }
         titleBar.setInspectorOpen(visible)
+        if visible { collapseTopBar(false, animated: slides) }
         onSidebarShown?(visible)
         // Opened again: its page is announced, so a page that went while closed (History after a
         // folder change) comes back (review of 2026-11-17).
@@ -396,5 +404,6 @@ final class WorkspaceView: NSView {
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         apply(ThemeStore.shared.current)
+        applyTopBarToWindow()
     }
 }

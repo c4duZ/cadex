@@ -80,7 +80,7 @@ extension WindowSession {
         guard let workspace else { return }
         // Always: the title bar's button lights with the panel open from the start too.
         workspace.setInspector(width: UILooks.pt(prefs.width))
-        workspace.setInspector(visible: prefs.visible, launching: true)
+        workspace.setSidebarByOwner(visible: prefs.visible, launching: true)
         // A window that opens narrow keeps its terminals' room (ADR 0038).
         workspace.fitColumn(to: workspace.bounds.width)
         // Closed: the tab is only picked, so nothing reads behind a hidden panel.
@@ -90,7 +90,7 @@ extension WindowSession {
     /// view.toggle-sidebar (⌘B, the title bar's button): saved, so it comes back on reopen.
     func toggleInspector() {
         guard let workspace else { return }
-        workspace.setInspector(visible: !workspace.inspectorVisible)
+        workspace.setSidebarByOwner(visible: !workspace.inspectorVisible)
         let visible = workspace.inspectorVisible
         settings.store.update { $0.inspector.visible = visible }
     }

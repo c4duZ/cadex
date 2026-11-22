@@ -13,6 +13,10 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
 - **Mostrar e esconder:** ⌘B (view.toggle-sidebar) e o botão da barra lateral, o primeiro da barra
   de cima, aceso com ela aberta. Aberta ou fechada, volta assim ao reabrir. sidebar.show (⇧⌘J) só
   abre.
+- **Foco nos terminais:** fechada pelo dono (⌘B, ou salva fechada), a barra de cima sobe junto,
+  com os botões da janela, e os terminais ficam com a janela toda, menos a barra de baixo. Fechada
+  sozinha (janela estreita, preview web abrindo), a barra de cima fica. Abrir a barra lateral de
+  qualquer jeito traz a de cima de volta (o dono, 2026-11-22).
 - **Largura:** 248 pt; arrastar a borda direita muda (de 240 a 640 pt, deixando ao centro pelo menos
   320) e fica salva.
 - **Pedidos (permissão, pergunta) de um agente:** a linha do terminal dele e a do projeto dizem que
