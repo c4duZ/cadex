@@ -227,9 +227,16 @@ são o `claude` do dono numa aba de terminal, abertos com prompt só porque o do
   orchestration.defaultMaxMinutes (60), o teto que uma execução nova propõe.
 
 ### O estado
-- Corridas, execuções, tarefas, despachos, mensagens, automações e o histórico ficam num SQLite do
-  sistema em `~/Library/Application Support/Cadex/orchestration/state.sqlite`, com o id da sessão
+- Corridas, execuções, tarefas, despachos, mensagens e o histórico das automações ficam num SQLite
+  do sistema em `~/Library/Application Support/Cadex/orchestration/state.sqlite`, com o id da sessão
   e o caminho do transcript de cada despacho. Aberto só com a feature ligada.
+- As automações (o que roda e quando) são configuração e ficam em texto: um JSON por automação em
+  `~/Library/Application Support/Cadex/orchestration/automations/<id>.json`, com as chaves em
+  ordem e as datas em ISO 8601, para o dono ou um agente lerem e editarem (o dono, 2026-11-22). O
+  nome do arquivo é o id. Criar, mudar ou apagar um arquivo com o Cadex aberto vale na hora: a página
+  se refaz e o agendamento do launchd segue as ligadas. Arquivo que não lê fica fora, com o motivo
+  no log, e os outros valem. As automações de um banco antigo viram arquivos uma vez, ao abrir.
+  O formato de cada campo está em `../guides/settings.md`.
 - Todo agente da feature roda numa aba; `claude --bg` fica de fora até um teste mostrar que os
   hooks e a status line do kit chegam a uma sessão em segundo plano (fase B, 2026-11-16).
 

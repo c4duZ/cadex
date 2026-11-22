@@ -41,6 +41,8 @@ public final class OrchestrationController {
     public var folder = ProcessInfo.processInfo.environment["CADEX_ORCHESTRATION_DIR"].flatMap { $0.isEmpty ? nil : $0 }
         ?? FileManager.default.homeDirectoryForCurrentUser.path + "/Library/Application Support/Cadex/orchestration"
     public var statePath: String { folder + "/state.sqlite" }
+    /// The automations' files (AutomationFiles), beside the state.
+    public var automationsFolder: String { folder + "/automations" }
 
     private var store: OrchestrationStore?
 
@@ -66,7 +68,7 @@ public final class OrchestrationController {
 
     public func runs() -> RunBook? { openStore().map(RunBook.init) }
     public func races() -> RaceBook? { openStore().map(RaceBook.init) }
-    public func automations() -> AutomationBook? { automationsEnabled ? openStore().map(AutomationBook.init) : nil }
+    public func automations() -> AutomationBook? { automationsEnabled ? openStore().map { AutomationBook(store: $0, folder: automationsFolder) } : nil }
 
     func close() { store = nil }
 

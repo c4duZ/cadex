@@ -36,6 +36,12 @@
 - `RaceBook.swift`: a corrida (2 a orchestration.maxAgents concorrentes numerados de 1), o vencedor
   e o descarte; `branchesLeft` e `markBranchDeleted`: as branches dos descartados que ainda
   existem, para o orchestration.delete-race-branches não listar de novo a apagada; `AutomationBook`: automações (nascem desligadas) e o histórico.
+- As automações em texto (o dono, 2026-11-22): `AutomationFiles.swift`, um JSON por automação em
+  `orchestration/automations/<id>.json` (chaves em ordem, datas ISO 8601, o id é o nome do arquivo;
+  arquivo que não lê fica fora e vai ao log; `migrate` tira do banco as de antes, uma vez), e
+  `AutomationFilesWatch.swift`, o FSEvents da pasta enquanto orchestration.automations está ligada:
+  o app refaz as páginas e o LaunchAgent a cada mudança (`../../app/AutomationRunWiring.swift`). O
+  histórico continua no banco. O formato está em `../../../../docs/guides/settings.md`.
 - `OrchestrationController.swift`: a porta de entrada (`shared`): `isEnabled`,
   `automationsEnabled` e `limits` vindos das configurações (`../../app/SettingsBridge.swift`); o banco só
   abre no primeiro uso com a feature ligada e fecha quando as duas desligam;

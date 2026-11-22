@@ -85,7 +85,7 @@ public enum AutomationLaunch {
 }
 
 extension AutomationBook {
-    public func automation(_ id: String) throws -> Automation? { try store.get(.automations, id: id) }
+    public func automation(_ id: String) throws -> Automation? { files.get(id) }
 
     /// The time of its newest run (skipped ones too): what "due" counts from.
     public func lastScheduled(_ automation: String) throws -> Date? { try history(of: automation).first?.scheduledAt }

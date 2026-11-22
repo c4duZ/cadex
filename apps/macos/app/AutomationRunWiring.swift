@@ -45,7 +45,10 @@ extension AppDelegate {
     /// Checks the agenda when the app opens, when the Mac wakes and when the
     /// job asks (`cadex automations due`); nothing with automations off.
     func startAutomations() {
-        OrchestrationController.shared.onAutomationsSwitch = { [weak self] _ in self?.syncAutomationAgent() }
+        OrchestrationController.shared.onAutomationsSwitch = { [weak self] on in
+            self?.syncAutomationAgent()
+            self?.watchAutomationFiles(on)
+        }
         AgentToolsServer.shared.onDue = { [weak self] in self?.checkAgenda() }
         NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { [weak self] _ in
             // The network and the disks come back a moment after the wake.
@@ -54,8 +57,19 @@ extension AppDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
             guard OrchestrationController.shared.automationsEnabled else { return }
             self?.syncAutomationAgent()
+            self?.watchAutomationFiles(true)
             self?.checkAgenda()
             if !((try? OrchestrationController.shared.automations()?.runningRuns()) ?? []).isEmpty { self?.armAutomationWatch() }
+        }
+    }
+
+    /// The automations' files edited by hand or by an agent (docs/spec/orchestration.md, "O
+    /// estado"): the launchd dates and the pages follow at once.
+    func watchAutomationFiles(_ on: Bool) {
+        guard on else { return AutomationFilesWatch.shared.stop() }
+        AutomationFilesWatch.shared.start(folder: OrchestrationController.shared.automationsFolder) { [weak self] in
+            self?.syncAutomationAgent()
+            self?.sessions.forEach { $0.refreshAutomationPages() }
         }
     }
 

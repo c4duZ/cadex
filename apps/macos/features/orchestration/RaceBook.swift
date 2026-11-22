@@ -82,20 +82,26 @@ public final class RaceBook {
     }
 }
 
-/// Automations and their history (docs/spec/orchestration.md,
-/// "Automações"). Scheduling and the LaunchAgent are phase E.
+/// Automations and their history (docs/spec/orchestration.md, "Automações" and "O estado"): the
+/// automations as JSON files (`AutomationFiles`), the runs in the database.
 public final class AutomationBook {
     public let store: OrchestrationStore
+    public let files: AutomationFiles
     public var newId: () -> String = { UUID().uuidString.lowercased() }
 
-    public init(store: OrchestrationStore) { self.store = store }
+    /// `folder`: where the automations' files are; those still in the database move there.
+    public init(store: OrchestrationStore, folder: String) {
+        self.store = store
+        files = AutomationFiles(folder: folder)
+        files.migrate(from: store)
+    }
 
-    public func save(_ automation: Automation) throws { try store.put(.automations, id: automation.id, automation) }
-    public func automations() throws -> [Automation] { try store.all(.automations) }
+    public func save(_ automation: Automation) throws { try files.save(automation) }
+    public func automations() throws -> [Automation] { files.all() }
     public func enabled() throws -> [Automation] { try automations().filter(\.enabled) }
 
     public func setEnabled(_ id: String, _ on: Bool) throws {
-        guard var automation: Automation = try store.get(.automations, id: id) else { throw RunError.unknown(id) }
+        guard var automation = files.get(id) else { throw RunError.unknown(id) }
         automation.enabled = on
         try save(automation)
     }
@@ -104,8 +110,8 @@ public final class AutomationBook {
     public func delete(_ id: String) throws {
         try store.batch {
             for run in try history(of: id) { try store.delete(.automationRuns, id: run.id) }
-            try store.delete(.automations, id: id)
         }
+        try files.delete(id)
     }
 
     /// A run of an automation, new or updated.

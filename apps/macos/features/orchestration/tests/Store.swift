@@ -67,7 +67,7 @@ let storeTests: [(name: String, body: Checks.Body)] = [
         expect(try races.branchesLeft(race: race.id).map(\.index) == [9])
     }),
     ("automations: born off, toggled, history newest first, a running one known", {
-        let book = AutomationBook(store: try OrchestrationStore(path: ":memory:"))
+        let book = AutomationBook(store: try OrchestrationStore(path: ":memory:"), folder: NSTemporaryDirectory() + "cadex-automations-" + UUID().uuidString)
         let auto = Automation(id: "a1", name: "triage", prompt: "look at the issues", recurrence: .weekdays(hour: 9, minute: 0),
                               target: .newWorktree(repository: "/r"), agent: AgentChoice(model: "haiku"), permissionMode: "default",
                               allowedTools: ["Read"], caps: Caps(budgetUsd: 1, maxMinutes: 15))

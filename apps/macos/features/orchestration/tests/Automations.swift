@@ -95,7 +95,7 @@ let automationTests: [(name: String, body: Checks.Body)] = [
         expect(AutomationLaunch.hasApiKeyHelper(configDir: dir))
     }),
     ("its history: turned on from now, a run started and finished, a skipped time, newest first with the result", {
-        let book = AutomationBook(store: try OrchestrationStore(path: ":memory:"))
+        let book = AutomationBook(store: try OrchestrationStore(path: ":memory:"), folder: NSTemporaryDirectory() + "cadex-automations-" + UUID().uuidString)
         var a = automation(.everyMinutes(2))
         a.enabled = false
         try book.save(a)
@@ -110,5 +110,46 @@ let automationTests: [(name: String, body: Checks.Body)] = [
         expect(lines.map(\.result) == ["Skipped: still running", "Hit the cap"] && lines[1].text.hasSuffix("US$ 0.60"), "\(lines)")
         expect(NewAutomationForm.parse(kind: 3, text: "2") == .everyMinutes(2) && NewAutomationForm.parse(kind: 0, text: "25:00") == nil)
         expect(AutomationLaunch.taskName(a, at: at("2026-11-16 10:02")).hasPrefix("nightly-20261116-"))
+    }),
+    ("automations are JSON files: one per id, readable, edited by hand, a broken one left out, the database's moved once", {
+        let fm = FileManager.default
+        let dir = NSTemporaryDirectory() + "cadex-automations-" + UUID().uuidString
+        defer { try? fm.removeItem(atPath: dir) }
+        let store = try OrchestrationStore(path: ":memory:")
+        // An automation from before the files, still a row: it moves to a file and out of the table.
+        var old = automation(.daily(hour: 9, minute: 30))
+        old.id = "old"
+        try store.put(.automations, id: "old", old)
+        let book = AutomationBook(store: store, folder: dir)
+        let rows: [Automation] = try store.all(.automations)
+        expect(fm.fileExists(atPath: dir + "/old.json") && rows.isEmpty, "moved to its file")
+        expect(try book.automation("old") == old, "the file reads back the same")
+        let text = try String(contentsOfFile: dir + "/old.json", encoding: .utf8)
+        expect(text.contains("\"enabledAt\" : \"2026-11-16T") && text.contains("\"daily\""), "dates in ISO 8601, keys a person reads: \(text)")
+        // By hand: a new file with no id takes its name; a broken one is left out; the others count.
+        var hand = old
+        hand.name = "by hand"
+        var object = try JSONSerialization.jsonObject(with: AutomationFiles.encoder.encode(hand)) as! [String: Any]
+        object["id"] = nil
+        try JSONSerialization.data(withJSONObject: object).write(to: URL(fileURLWithPath: dir + "/weekly-review.json"))
+        try Data("{ not json".utf8).write(to: URL(fileURLWithPath: dir + "/broken.json"))
+        let all = try book.automations()
+        expect(Set(all.map(\.id)) == ["old", "weekly-review"] && book.files.get("weekly-review")?.name == "by hand", "\(all.map(\.id))")
+        try book.delete("weekly-review")
+        expect(!fm.fileExists(atPath: dir + "/weekly-review.json") && book.files.get("../x") == nil, "deleted; a name outside the folder is not read")
+    }),
+    ("the agents' settings guide's automation example is an automation that reads from its file", {
+        let guidePath = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appendingPathComponent("../../../../../core/features/agent-tools/guides/settings.md").standardized.path
+        let guide = try String(contentsOfFile: guidePath, encoding: .utf8)
+        guard let section = guide.range(of: "## Automations"), let start = guide.range(of: "```json\n", range: section.upperBound..<guide.endIndex),
+              let end = guide.range(of: "```", range: start.upperBound..<guide.endIndex) else { return expect(false, "no example") }
+        let dir = NSTemporaryDirectory() + "cadex-automations-" + UUID().uuidString
+        defer { try? FileManager.default.removeItem(atPath: dir) }
+        try FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+        try Data(guide[start.upperBound..<end.lowerBound].utf8).write(to: URL(fileURLWithPath: dir + "/morning-triage.json"))
+        let read = AutomationFiles(folder: dir).get("morning-triage")
+        expect(read?.recurrence == .weekdays(hour: 9, minute: 0) && read?.target == .folder("/Users/me/code/app") && read?.enabled == false,
+               "\(String(describing: read))")
     }),
 ]
