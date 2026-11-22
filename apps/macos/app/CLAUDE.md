@@ -356,9 +356,9 @@
   segundo), abre o projeto dele e fecha o da pasta-mãe aberto só para isso; CADEX_PERF_HOME_CLONE o
   roda sem as perguntas.
 - `JumpWiring.swift` (plano 29 fase C): view.jump (⌘J) abre a paleta com a fonte `JumpSource`: as
-  linhas da feature sidebar (`JumpRow`) tiradas do `treeModel()` da árvore (`TreeWiring.swift`),
-  mais as sessões de fora do Cadex (lidas enquanto o ⌘J está aberto); escolher leva à tarefa, ao
-  terminal ou à sessão (`openAgent`); o texto que não acha nada vira o pedido da folha Nova tarefa.
+  linhas da feature sidebar (`JumpRow`) tiradas do `treeModel()` da árvore (`TreeWiring.swift`), só
+  o que roda no Cadex (as sessões de fora dele saíram: o dono, 2026-11-22); escolher leva à tarefa ou
+  ao terminal; o texto que não acha nada vira o pedido da folha Nova tarefa.
 - `ProjectPageWiring.swift` (plano 30 A): project.show-overview e o clique no nome do projeto na
   árvore abrem a página (`makeProjectPage`, refeita ao restaurar pela identidade `project:<pasta>`)
   com o painel da direita em Memory; junta fora da linha principal as tarefas da árvore, as sessões

@@ -14,7 +14,8 @@ As páginas Agents, Accounts, History e o sininho da barra lateral de ícones sa
 (`../design/work-frame/inventory.md`); o que elas mostravam continua, nestes lugares:
 - **As sessões:** as que rodam num terminal do Cadex aparecem com o estado nas abas (`tabs.md`) e,
   somadas por projeto e por tarefa, na vista Trabalho da barra lateral (`sidebar.md`); todas, inclusive as abertas
-  fora do Cadex, aparecem na página do projeto (Recent conversations, plano 30) e no ⌘J. Até o plano
+  fora do Cadex, aparecem na página do projeto (Recent conversations, plano 30); o ⌘J mostra só as do Cadex,
+  para ser a navegação rápida (o dono, 2026-11-22). Até o plano
   30, as de fora do Cadex ficam no Arquivo e histórico (plano 27).
 - **O uso das contas:** a etiqueta Agent usage da barra de status e o popover dela (`status-bar.md`),
   e "Accounts used here" na página do projeto.
