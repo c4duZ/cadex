@@ -123,9 +123,17 @@ let exitCode = await Checks.run([
         defer { try? FileManager.default.removeItem(at: folder) }
         let feed = folder.appendingPathComponent("latest.json")
         try Data(#"{"version":"1.3.0","notes":"","url":"https://example.com/Cadex.zip","sha256":"","signature":""}"#.utf8).write(to: feed)
-        let suite = "cadex-updates-test-\(UUID().uuidString)"
+        // One fixed name, emptied first: a name per run left an empty plist in ~/Library/Preferences
+        // each time (395 of them by 2026-11-22), since cfprefsd keeps (and rewrites) the file of a
+        // domain whose keys were removed; now there is one at most, reused.
+        let suite = "cadex-updates-test"
         let defaults = UserDefaults(suiteName: suite)!
-        defer { defaults.removePersistentDomain(forName: suite) }
+        defaults.removePersistentDomain(forName: suite)
+        defer {
+            defaults.removePersistentDomain(forName: suite)
+            let file = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Preferences/\(suite).plist")
+            try? FileManager.default.removeItem(at: file)
+        }
         var prompts = 0
         let updates = UpdateController(currentVersion: "1.2.0", feed: feed, installer: nil, defaults: defaults)
         updates.prompt = { prompts += 1 }
