@@ -9,6 +9,7 @@ manifests:
 	@python3 tools/check_manifests.py
 	@python3 -I tools/icons/windows_icons.py --check
 	@python3 -I tools/check_command_parity.py
+	@python3 -I tools/gen_commands.py --check
 	@python3 -I tools/check_design_tokens.py
 	@python3 -I tools/design/build_tokens.py --check
 	@python3 -I tools/check_design_literals.py --self-test

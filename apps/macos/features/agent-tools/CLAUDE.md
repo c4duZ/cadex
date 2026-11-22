@@ -36,8 +36,9 @@
   `AgentToolsCommands.swift`: agent-tools.open-file, -open-diff e -notify (com argumentos; pelo dono,
   o comando mais próximo dele), agent-tools.toggle e agent-tools.show-sessions;
   `AgentToolsActivity.swift`: quem usou o Cadex e o último pedido, só em memória;
-  `AgentToolsPlugin.swift` e `plugin/`: o plugin de skills curtas (`cadex`, `cadex-task` e
-  `cadex-orchestration`) que o kit passa por `--plugin-dir`
+  `AgentToolsPlugin.swift` e `plugin/`: o plugin de skills curtas (`cadex`, `cadex-task`,
+  `cadex-orchestration` e `cadex-settings`, que leva o agente ao guia de configurar o Cadex quando o
+  dono pede, 2026-11-22) que o kit passa por `--plugin-dir`
   (no pacote, em Resources/agent-plugin). O app acha o terminal e roda (`../../app/AgentToolsWiring.swift`).
 - O kit do `claude` digitado (plano 22, fase C): `AgentKitRequest.swift` lê o pedido do
   `cadex claude` (`"kit":true`, sem token), a ancestralidade de quem conectou (LOCAL_PEERPID e o

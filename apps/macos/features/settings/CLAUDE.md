@@ -44,6 +44,9 @@
   fundo da janela é sólido mesmo com a janela principal translúcida (DesignTokens.solid).
 - O app (`../../app/SettingsBridge.swift`) passa as preferências ao `TerminalPreferences` do
   terminal, ao tema e aos atalhos, e salva o que um alerta desliga ("não perguntar de novo").
+- Configurar por agentes (o dono, 2026-11-22): toda chave que SettingsFile.write grava tem a
+  linha dela em `../../../../core/features/agent-tools/guides/settings.md` (o teste quebra sem ela);
+  ao criar uma chave, escreva a linha lá. O guia em português é `../../../../docs/guides/settings.md`.
 - Spec em `../../../../docs/spec/settings.md`. Status: arquivo, store, aplicação ao vivo e janela
   prontos, com imagem de fundo (copiada para Application Support/Cadex/backgrounds) e vibrância.
 

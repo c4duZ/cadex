@@ -7,6 +7,25 @@ import Themes
 // shared/checks/Checks.swift for why this is an executable).
 
 let exitCode = await Checks.run([
+    ("the agents' settings guide has every key settings.json writes, and its theme example is a theme", {
+        // Cadex configured by agents (the owner, 2026-11-22): a key added without its line in the
+        // guide (core/features/agent-tools/guides/settings.md) fails here.
+        let guidePath = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appendingPathComponent("../../../../../core/features/agent-tools/guides/settings.md").standardized.path
+        guard let guide = try? String(contentsOfFile: guidePath, encoding: .utf8) else { return expect(false, "no guide at \(guidePath)") }
+        let written = try JSONSerialization.jsonObject(with: SettingsFile.write(Settings())) as! [String: Any]
+        var missing: [String] = []
+        for (section, value) in written where section != "version" && section != "shortcuts" {
+            for key in (value as? [String: Any] ?? [:]).keys where !guide.contains("`\(section).\(key)`") {
+                missing.append("\(section).\(key)")
+            }
+        }
+        expect(missing.isEmpty, "keys not in the guide: \(missing.sorted())")
+        guard let start = guide.range(of: "{ \"name\": \"My theme\""),
+              let end = guide.range(of: "```", range: start.upperBound..<guide.endIndex) else { return expect(false, "no theme example") }
+        let theme = try ThemeFile.read(Data(guide[start.lowerBound..<end.lowerBound].utf8))
+        expect(theme.name == "My theme" && theme.dark, "the example reads as a theme")
+    }),
     ("an old file on Caffeine moves to Cadex Night once; a theme picked since stays (ADR 0035)", {
         func read(_ json: String) -> Settings { SettingsFile.read(Data(json.utf8)).0 }
         let old = read(#"{"appearance": {"theme": "caffeine", "darkTheme": "caffeine"}}"#)

@@ -55,7 +55,9 @@
 - Plano 24, fase D2: o pedido leva o CADEX_DISPATCH_ID da sessão (`"dispatch"`), que o app confere
   contra o despacho do token; `run … spec-file=<arquivo>` lê o arquivo (comum, até 100 KB, sem
   NUL) e manda o texto como `spec=` (orchestration.spawn); o guia `guides/orchestration.md` sai por
-  `cadex skills get orchestration`. `cadex claude` executa o CADEX_CLAUDE_BIN quando ele existe: o
+  `cadex skills get orchestration`. `guides/settings.md` (`cadex skills get settings`): a referência
+  de configurar o Cadex pelos arquivos (cada chave do settings.json, atalhos, automações, temas, a
+  receita do repositório), que os testes do app conferem contra o código (`../../../docs/guides/settings.md`). `cadex claude` executa o CADEX_CLAUDE_BIN quando ele existe: o
   `claude` falso de uma instância de teste (`../../../tools/perf/fake_claude.py`), que o PATH do
   shell da aba nunca troca pelo de verdade.
 - Plano 24, fase E (`../../../docs/adr/0034-scheduled-automations.md`): `automations.zig`, `cadex

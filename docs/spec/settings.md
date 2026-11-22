@@ -46,6 +46,9 @@ Ajustar o Cadex num lugar só: a janela de configurações (⌘,) e o arquivo qu
 - As escolhas ficam num arquivo só, `settings.json` em Application Support/Cadex, que o usuário
   também pode editar à mão. Os atalhos personalizados moram nele, na seção `shortcuts`.
 - Editar o arquivo com o Cadex aberto também vale na hora.
+- Um agente configura o Cadex editando o arquivo: a referência de cada chave, com o tipo, o padrão e
+  os limites, está em `../guides/settings.md` e chega à sessão por `cadex skills get settings` (o
+  dono, 2026-11-22).
 
 - Plano 15: Temas ganha escuro e claro, cor de destaque, alto contraste e painéis sem foco;
   Terminal ganha a seção Leitura (contraste mínimo, altura de linha, espaçamento, ligaduras,
