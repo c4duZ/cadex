@@ -48,4 +48,32 @@ func runZsh(_ env: [String: String], _ arguments: [String]) -> String {
         expect(own.contains("own-zshenv") && own.contains("own-zshrc") && !own.contains("home-zshrc")
                && own.contains("Z=\(dir)/own U=unset") && own.contains("cadex claude --version"), own)
     }),
+    ("the interactive claude opens at the foot of the pane: one newline per row first, none for print mode", {
+        // Claude Code draws where the cursor is; at the top its box slid down as the talk grew (2026-11-22).
+        guard let zsh = TerminalShellIntegration.zshFolder(resources: nil) else { return expect(false, "no zsh folder") }
+        let dir = NSTemporaryDirectory() + "cadex-zsh-\(UUID().uuidString)"
+        defer { try? FileManager.default.removeItem(atPath: dir) }
+        try FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+        FileManager.default.createFile(atPath: dir + "/cadex", contents: Data("#!/bin/sh\necho \"cadex $*\"\n".utf8), attributes: [.posixPermissions: 0o755])
+        // `script` gives the zsh a terminal: the newlines go only to one.
+        func run(_ line: String) -> String {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/script")
+            process.arguments = ["-q", "/dev/null", "/bin/zsh", "-f", "-c", "source \(zsh)/.zshenv; LINES=4; \(line)"]
+            process.environment = ["HOME": dir, "CADEX_TOOLS": dir + "/cadex"]
+            let pipe = Pipe()
+            process.standardOutput = pipe
+            process.standardInput = FileHandle.nullDevice
+            try? process.run()
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            process.waitUntilExit()
+            return String(decoding: data, as: UTF8.self)
+        }
+        let open = run("X=1 claude --settings s")
+        expect(open.contains("\r\n\r\n\r\n\r\ncadex claude --settings s"), open.debugDescription)
+        let printed = run("claude -p hi")
+        expect(printed.contains("cadex claude -p hi") && !printed.contains("\r\n\r\ncadex"), printed.debugDescription)
+        let sub = run("claude mcp list")
+        expect(!sub.contains("\r\n\r\ncadex"), sub.debugDescription)
+    }),
 ]

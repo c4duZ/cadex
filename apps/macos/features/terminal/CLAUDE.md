@@ -103,7 +103,8 @@
 - Integração do zsh (plano 22, fase C; `../../../../docs/spec/terminal.md`):
   `shell-integration/zsh/.zshenv` é a pasta `ZDOTDIR` que o núcleo põe no zsh das abas: devolve o
   `ZDOTDIR` do dono, define a função `claude` (roda `$CADEX_TOOLS claude`, senão o `claude` de
-  verdade) e lê o `.zshenv` do dono. `TerminalShellIntegration.swift` acha a pasta (Resources do
+  verdade; antes da tela interativa, uma quebra de linha por linha da tela, para a caixa do Claude
+  abrir no pé do painel e não no alto, descendo com a conversa: o dono, 2026-11-22) e lê o `.zshenv` do dono. `TerminalShellIntegration.swift` acha a pasta (Resources do
   pacote, onde o `../../packaging/build.sh` a copia, ou ao lado da fonte) e o app põe
   CADEX_ZSH_INTEGRATION e CADEX_TOOLS no próprio ambiente antes de qualquer terminal e do daemon
   (`../../app/main.swift`). TerminalSession.shellPid (e o do `TerminalView`) é o pid do shell, com que
@@ -116,6 +117,10 @@
   a linha do modo, põe o modo à direita da status line e o que vem depois dele ("1 shell · ↓ to manage",
   os shells em segundo plano) logo depois da última palavra dela (escondido, o dono não achava os shells, 2026-11-20), e as formas (a caixa da entrada, o bloco da
   mensagem do dono) vão como retângulos arredondados (quad do tipo 3 no `TerminalShaders.swift`).
+  Com a vista no fim, a tela do Claude desce até o pé do painel (`toFoot`): as linhas vazias que o
+  renderizador clássico deixa embaixo quando o pé encolhe (o menu do /, um diálogo, a caixa de duas
+  linhas enviada) vão para cima, e a caixa não fica flutuando (o dono, 2026-11-22); `rowTop` conta
+  esse deslocamento.
   O `QuadBuilder.swift` desenha com o plano (DrawOverlay.dressClaude); o texto não muda. As linhas
   que o plano move (a caixa uma linha abaixo, o banner à esquerda) voltam ao lugar escrito no mouse:
   o `TerminalRenderer.swift` guarda o `shift` do último quadro, ClaudeDress.source o desfaz, e

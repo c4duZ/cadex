@@ -68,7 +68,7 @@ struct ClaudeDress {
     /// `atBottom`: the view shows the screen, not the history above it (the mode line is the
     /// screen's last row only then).
     static func plan(cells source: UnsafePointer<cadex_terminal_cell>, text: UnsafePointer<UInt8>,
-                     cols: Int, rows: Int, palette p: Palette, atBottom: Bool = true) -> Plan {
+                     cols: Int, rows: Int, palette p: Palette, atBottom: Bool = true, cursorRow: Int? = nil) -> Plan {
         let count = cols * rows
         var plan = Plan(cells: Array(UnsafeBufferPointer(start: source, count: count)), hidden: Array(repeating: false, count: count),
                         shift: Array(repeating: (0, 0), count: rows))
@@ -82,7 +82,10 @@ struct ClaudeDress {
         hideMascot(&plan, lines: lines, cols: cols)
         box(&plan, lines: lines, cols: cols, palette: p)
         userMessage(&plan, cols: cols, rows: rows, palette: p)
-        if atBottom { modeLine(&plan, lines: lines, cols: cols, palette: p) }
+        if atBottom {
+            modeLine(&plan, lines: lines, cols: cols, palette: p)
+            toFoot(&plan, lines: lines, cursorRow: cursorRow)
+        }
         recolor(&plan, string: string, palette: p)
         return plan
     }
@@ -204,6 +207,23 @@ extension ClaudeDress {
         let start = (above.lastIndex(where: { $0 != " " }) ?? -1) + 3
         if !extras.isEmpty, start + extras.count + 2 <= free {
             plan.labels.append(Label(text: extras, row: r, col: start, color: p.dim))
+        }
+    }
+
+    /// Everything down by the empty rows under Claude's last one, so its input box and status line
+    /// sit on the pane's foot. The classic renderer (the kit asks for it) draws where the cursor is
+    /// and, when its foot shrinks (the / menu, a dialog, a two-line input sent), erases the rows it
+    /// left without moving the rest down: the box floated rows above the foot and only came down as
+    /// the conversation grew (the owner, 2026-11-22). Rows above the cursor only: the cursor is in
+    /// the box, and an empty row under it may be where Claude writes next.
+    static func toFoot(_ plan: inout Plan, lines: [String], cursorRow: Int?) {
+        guard let last = lines.lastIndex(where: { !$0.trimmingCharacters(in: .whitespaces).isEmpty }) else { return }
+        let empty = lines.count - 1 - last
+        guard empty > 0, (cursorRow ?? 0) <= last else { return }
+        for r in plan.shift.indices { plan.shift[r].dy += empty }
+        for i in plan.shapes.indices {
+            plan.shapes[i].top += empty
+            plan.shapes[i].bottom += empty
         }
     }
 

@@ -162,6 +162,23 @@ enum Claude {
         other.row(("  ⏵⏵ accept edits enabled", 0xAF87FF, nil))
         expect(other.plan().labels.isEmpty && !other.plan().hidden.contains(true), "unknown words stay drawn")
     }),
+    ("Claude's screen sits on the pane's foot: the empty rows it left under its last one go above it", {
+        // The classic renderer erases a shrinking foot without moving the rest down (2026-11-22).
+        var s = FakeScreen(cols: 50)
+        s.row(("⏺ done", Claude.text, nil))
+        s.row((String(repeating: "─", count: 50), 0x888888, nil))
+        s.row(("❯\u{00A0}hi", Claude.text, nil))
+        s.row((String(repeating: "─", count: 50), 0x888888, nil))
+        s.row(("  Opus 5.5", 0x999999, nil))
+        s.row(("  ⏵⏵ auto mode on", 0xAF87FF, nil), (" (shift+tab to cycle)", 0x999999, nil))
+        s.row(("", Claude.text, nil))
+        s.row(("", Claude.text, nil))
+        s.row(("", Claude.text, nil))
+        let plan = s.plan()
+        expect(plan.shift[0].dy == 3 && (1...4).allSatisfy { plan.shift[$0].dy == 4 }, "all down by 3, the box and status line one more: \(plan.shift)")
+        expect(plan.shapes.allSatisfy { $0.top == 5 && $0.bottom == 7 }, "the box's shapes too: \(plan.shapes)")
+        expect(s.plan(atBottom: false).shift.allSatisfy { $0.dy == 0 }, "scrolled up: as Claude drew")
+    }),
     ("a click on a moved row goes to the cell Claude wrote: the prompt a row up, the banner further right", {
         var boxed = FakeScreen(cols: 50)
         boxed.row(("", Claude.text, nil))

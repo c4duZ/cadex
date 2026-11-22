@@ -28,6 +28,10 @@ do dia a dia, mais simples por dentro e com o texto nítido.
   aba já é o do dono, sem a função.
   - A função roda `cadex claude`, que dá o kit da sessão ao `claude` interativo digitado na aba
     (`docs/spec/memory.md`, "O `claude` digitado à mão"); sem o `cadex`, roda o `claude` de verdade.
+  - O Claude abre no pé do painel: antes da tela interativa (sem `-p`, `--version`, `--help` nem
+    subcomando), a função manda uma quebra de linha por linha da tela; o que estava nela, a linha
+    longa do comando também, sobe para o histórico, e a caixa de entrada nasce embaixo em vez de
+    começar no alto e descer conforme a conversa cresce (o dono, 2026-11-22).
   - A conta (plano 33 F): a da aba, quando ela tem `CLAUDE_CONFIG_DIR` (escrito na linha ou
     exportado pelos arquivos do dono); sem, a mesma de uma sessão que o Cadex abre ali (a do projeto,
     senão a ativa, senão a padrão). A ativa é a escolhida na barra de cima com um shell no foco, e

@@ -77,7 +77,7 @@ final class TerminalRenderer {
     private func dress(_ frame: cadex_terminal_frame, _ overlay: DrawOverlay) -> ClaudeDress.Plan? {
         guard overlay.dressClaude, let palette = claudePalette, let cells = frame.cells, let text = frame.text else { return nil }
         return ClaudeDress.plan(cells: cells, text: text, cols: Int(frame.cols), rows: Int(frame.rows), palette: palette,
-                                atBottom: frame.scroll_offset + UInt32(frame.rows) >= frame.scroll_total)
+                                atBottom: frame.scroll_offset + UInt32(frame.rows) >= frame.scroll_total, cursorRow: Int(frame.cursor_y))
     }
 
     /// The display scale or font changed: the atlas for the new one.

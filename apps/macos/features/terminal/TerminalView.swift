@@ -278,7 +278,9 @@ public final class TerminalView: NSView {
     /// The top of a screen row in points from the view's top, and the cursor's row: a card at the
     /// pane's foot stays over the agent's input box, which sits on the cursor's row (plan 33 E).
     public func rowTop(_ row: Int) -> CGFloat {
-        Self.paddingPoints + CGFloat(max(row, 0)) * CGFloat(renderer?.metrics.height ?? 1) / scale
+        // Where the dressing drew the row (ClaudeDress.toFoot moves Claude's screen down to the foot).
+        let moved = renderer?.lastShift.flatMap { $0.indices.contains(row) ? $0[row].dy : nil } ?? 0
+        return Self.paddingPoints + CGFloat(max(row + moved, 0)) * CGFloat(renderer?.metrics.height ?? 1) / scale
     }
 
     public var cursorRow: Int { lastCursorRow }

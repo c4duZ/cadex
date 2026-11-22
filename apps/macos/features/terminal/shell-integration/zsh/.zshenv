@@ -15,11 +15,31 @@ else
   builtin unset ZDOTDIR
 fi
 
+# Claude Code draws its screen where the cursor is: opened at the top of a pane, the input box
+# sat high and slid down as the conversation grew (the owner, 2026-11-22). One newline per row
+# scrolls what was on screen (the long launch line included) into the history and leaves the
+# cursor on the last row, so the box opens at the foot of the pane. Only for the interactive
+# screen on a terminal: print mode, --version and the subcommands print text where they are.
+_cadex_claude_at_bottom() {
+  [[ -t 1 && ${LINES:-0} -gt 1 ]] || return 0
+  local word
+  for word in "$@"; do
+    case $word in
+      -p|--print|-v|--version|-h|--help) return 0 ;;
+    esac
+  done
+  case ${1-} in
+    mcp|config|doctor|update|upgrade|install|plugin|plugins|setup-token|agents|auth|login|logout|migrate-installer) return 0 ;;
+  esac
+  builtin printf '\n%.0s' {1..$LINES}
+}
+
 # The typed `claude` gets the session kit through `cadex claude`, which
 # runs the real one unchanged when it should not (print mode, subcommands,
 # no app). Defined before the owner's files: an alias or function of the
 # owner's named claude wins.
 claude() {
+  _cadex_claude_at_bottom "$@"
   if [[ -n "$CADEX_TOOLS" && -x "$CADEX_TOOLS" ]]; then
     "$CADEX_TOOLS" claude "$@"
   else
