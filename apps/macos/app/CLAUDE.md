@@ -433,7 +433,9 @@
   teste da corrida no app e no `make perf` da fase F. Uma instância assim usa as pastas próprias
   CADEX_ORCHESTRATION_DIR, CADEX_PROMPTS_DIR, CADEX_KIT_DIR, CADEX_WORKTREES_FILE e CADEX_USAGE_DIR.
 - Tela cheia: a barra de ferramentas (vazia, só dá a altura da barra de título) some ao entrar e
-  volta ao sair, porque o macOS a punha numa faixa por cima da barra do app. Tamanho mínimo da
+  volta ao sair, porque o macOS a punha numa faixa por cima da barra do app. O Esc não tira da
+  tela cheia (`CadexWindow.swift`): o que sobrava do preview, o do dono e o do agente, fazia a janela
+  sair dela (o dono, 2026-11-23); sai-se pelo botão verde ou ⌃⌘F. Tamanho mínimo da
   janela 480×300.
 - `WorkColors.swift` (plano 15, fase D): as cores de projeto e de aba pelo nome, desenhadas com o ANSI
   do tema; registra project.set-color e tab.set-color

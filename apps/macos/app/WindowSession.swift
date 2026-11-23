@@ -153,7 +153,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// bar); an empty compact toolbar makes it 38 points tall with the window
     /// buttons centered in it.
     private static func makeWindow() -> NSWindow {
-        let window = NSWindow(
+        let window = CadexWindow(
             contentRect: NSRect(x: 0, y: 0, width: 1100, height: 700),
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered, defer: false)
