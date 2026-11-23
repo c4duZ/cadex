@@ -90,6 +90,12 @@ Workspace de desenvolvimento centrado no terminal, nativo e escrito do zero.
   pasta do Material Icon Theme (`docs/adr/0011-material-file-icons.md`) e logos dos provedores de IA
   numa conta (`docs/adr/0020-provider-logos.md`).
 - Ao mudar ponto de entrada, regra ou comando de uma feature, atualize o `CLAUDE.md` dela junto.
+- README: a página de quem chega, não o histórico do projeto. Feature nova entra como uma linha
+  curta na seção do assunto dela ("O terminal e a janela", "Código e git", "Agentes", "A memória do
+  projeto", "Vários agentes de uma vez", "Outras máquinas", "Do seu jeito"), marcada "(Mac)" se só
+  existir lá; o detalhe fica na spec e no ADR, com o link. Atalho só na tabela, conferido em
+  `docs/guides/commands.md`; tamanho com a versão em que foi medido. Mudou ou saiu algo, a linha
+  muda ou sai junto (o dono, 2026-11-23: o README tinha virado um catadão).
 - Termo novo do domínio entra em `docs/CONTEXT.md`. Decisão que alguém proporia desfazer vira ADR.
 
 ## Como validar

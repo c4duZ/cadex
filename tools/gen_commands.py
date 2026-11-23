@@ -13,9 +13,13 @@ SOURCES = [ROOT / "apps/macos/app", ROOT / "apps/macos/features", ROOT / "apps/m
 OUT = ROOT / "docs/guides/commands.md"
 
 # `Command(id: "x", title: …)` and the edit commands' `.responder("x", T("Title", …), …)`.
-COMMAND = re.compile(r'(?:Command\(\s*id:\s*|\.responder\(\s*)"([a-z][A-Za-z0-9.-]*)"')
+# A comment may sit between `Command(` and `id:` (view.toggle-sidebar was missed, 2026-11-23).
+COMMAND = re.compile(r'(?:Command\(\s*(?://[^\n]*\n\s*)*id:\s*|\.responder\(\s*)"([a-z][A-Za-z0-9.-]*)"')
 TITLE = re.compile(r'(?:title:\s*|^,\s*)(?:T\(\s*)?"((?:[^"\\]|\\.)*)"')
 SHORTCUT = re.compile(r'(?:defaultShortcut|shortcut):\s*"([^"]+)"')
+# The tables of tuples some features register from: ("id", T("Title", "Título"), [keywords], "shortcut" or nil, …).
+TUPLE = re.compile(r'\(\s*"([a-z][a-z-]*\.[a-z0-9-]+)",\s*T\(\s*"((?:[^"\\]|\\.)*)"(?:,\s*"(?:[^"\\]|\\.)*")?\)'
+                   r'(?:\s*,\s*\[[^\]]*\]\s*,\s*"([^"]+)")?')
 
 HEADER = """# Os comandos do Cadex
 
@@ -45,6 +49,8 @@ def commands():
                 title = TITLE.search(body)
                 shortcut = SHORTCUT.search(body)
                 found.setdefault(match.group(1), (title.group(1) if title else "", shortcut.group(1) if shortcut else ""))
+            for match in TUPLE.finditer(text):
+                found.setdefault(match.group(1), (match.group(2), match.group(3) or ""))
     return found
 
 

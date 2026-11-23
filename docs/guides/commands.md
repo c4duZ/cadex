@@ -67,6 +67,27 @@ tema, por conta, por item da barra de status) e não estão aqui: o ⌘K os most
 | `editor.fold-all` | Fold All Blocks |  |
 | `editor.save` | Save File | `cmd+s` |
 | `editor.unfold-all` | Unfold All Blocks |  |
+| `explorer.collapse-all` | Collapse All Folders |  |
+| `explorer.copy-files` | Copy Files |  |
+| `explorer.copy-path` | Copy Path |  |
+| `explorer.copy-relative-path` | Copy Relative Path |  |
+| `explorer.focus` | Show Files | `cmd+shift+e` |
+| `explorer.new-file` | New File |  |
+| `explorer.new-folder` | New Folder |  |
+| `explorer.open` | Open File |  |
+| `explorer.open-beside` | Open to the Side |  |
+| `explorer.open-in-finder` | Open in Finder |  |
+| `explorer.open-in-tab` | Open in New Tab |  |
+| `explorer.open-in-terminal` | Open in Terminal |  |
+| `explorer.paste-files` | Paste Files |  |
+| `explorer.refresh` | Reload Files |  |
+| `explorer.rename` | Rename |  |
+| `explorer.reveal` | Reveal in Finder |  |
+| `explorer.toggle-hidden` | Show or Hide Hidden Files | `cmd+shift+.` |
+| `explorer.trash` | Move to Trash |  |
+| `git.accept-both` | Keep Both in Conflict |  |
+| `git.accept-ours` | Keep Ours in Conflict |  |
+| `git.accept-theirs` | Keep Theirs in Conflict |  |
 | `git.changes-last-turn` | Changes: Last Turn |  |
 | `git.changes-task` | Changes: Task |  |
 | `git.changes-uncommitted` | Changes: Uncommitted |  |
@@ -75,6 +96,13 @@ tema, por conta, por item da barra de status) e não estão aqui: o ⌘K os most
 | `git.fetch` | Git Fetch |  |
 | `git.history` | Open Git History |  |
 | `git.history-in-tab` | Open Git History in New Tab |  |
+| `git.mark-resolved` | Mark Conflict Resolved |  |
+| `git.open-diff` | Open File Diff |  |
+| `git.open-diff-beside` | Open Diff Beside |  |
+| `git.open-diff-in-tab` | Open Diff in New Tab |  |
+| `git.open-file` | Open Changed File |  |
+| `git.open-file-beside` | Open File Beside |  |
+| `git.open-file-in-tab` | Open File in New Tab |  |
 | `git.open-pr` | Open Pull Request |  |
 | `git.pull` | Git Pull (Fast-Forward Only) |  |
 | `git.push` | Git Push |  |
@@ -82,7 +110,19 @@ tema, por conta, por item da barra de status) e não estão aqui: o ⌘K os most
 | `git.reveal` | Reveal Changed File in Finder |  |
 | `git.review-compare-worktrees` | Compare Two Worktrees |  |
 | `git.review-image-mode` | Next Image Comparison Mode |  |
+| `git.review-next-file` | Next File in Review |  |
+| `git.review-next-hunk` | Next Change in Review |  |
 | `git.review-open` | Review Changes |  |
+| `git.review-prev-file` | Previous File in Review |  |
+| `git.review-prev-hunk` | Previous Change in Review |  |
+| `git.review-set-base` | Set Review Base |  |
+| `git.review-stage-hunk` | Stage Change |  |
+| `git.review-stage-lines` | Stage Marked Lines |  |
+| `git.review-toggle-collapse` | Show or Fold Unchanged Lines |  |
+| `git.review-toggle-whitespace` | Show Whitespace in Review |  |
+| `git.review-toggle-wrap` | Toggle Line Wrap in Review |  |
+| `git.review-unstage-hunk` | Unstage Change |  |
+| `git.review-unstage-lines` | Unstage Marked Lines |  |
 | `git.show` | Show Git | `cmd+shift+g` |
 | `git.show-history` | Show Git History | `cmd+shift+l` |
 | `git.stage` | Stage File |  |
@@ -117,6 +157,8 @@ tema, por conta, por item da barra de status) e não estão aqui: o ⌘K os most
 | `memory.bootstrap` | Organize History with AI… |  |
 | `memory.configure-project` | Configure This Project's Memory |  |
 | `memory.consolidate-now` | Consolidate Memory Now |  |
+| `memory.discard-message-edit` | Discard an Agent Message's Edit |  |
+| `memory.edit-message` | Edit a Queued Agent Message |  |
 | `memory.enable` | Turn On Project Memory (All Projects) |  |
 | `memory.fix-health` | Fix Memory Health… |  |
 | `memory.new-session-without` | New Session without Memory |  |
@@ -131,7 +173,9 @@ tema, por conta, por item da barra de status) e não estão aqui: o ⌘K os most
 | `memory.reject` | Reject Memory Proposal… |  |
 | `memory.resume-session` | Resume Memory in This Session |  |
 | `memory.run-dream` | Reorganize Memory Now (Dream) |  |
+| `memory.save-message` | Save an Edited Agent Message |  |
 | `memory.search` | Search Project Memory… |  |
+| `memory.send-message` | Send a Message to an Agent |  |
 | `memory.show` | Show Project Memory |  |
 | `memory.show-briefing` | What the Next Agent Will Get |  |
 | `memory.show-history` | Show Memory History |  |
@@ -168,16 +212,21 @@ tema, por conta, por item da barra de status) e não estão aqui: o ⌘K os most
 | `preview.send-notes` | Send the Page's Notes to the Agent |  |
 | `preview.stop-agent` | Stop the Agent on This Preview |  |
 | `preview.stop-picking` | Stop Picking | `escape` |
+| `project.close` | Close Project |  |
 | `project.close-terminals` | Close the Project's Terminals |  |
 | `project.copy-path` | Copy the Project's Path |  |
 | `project.create` | New Project… |  |
 | `project.edit` | Edit Project (Name, Image, Color)… |  |
 | `project.go` | Go to a Project |  |
 | `project.move-terminal` | Move Terminal to Its Folder's Project |  |
+| `project.new` | Open Project… | `ctrl+cmd+n` |
 | `project.new-claude` | New Claude in the Project |  |
 | `project.new-terminal` | New Terminal in the Project |  |
+| `project.next` | Next Project | `ctrl+cmd+right` |
 | `project.pin` | Pin or Unpin the Project |  |
+| `project.previous` | Previous Project | `ctrl+cmd+left` |
 | `project.remove` | Remove the Project from the Sidebar |  |
+| `project.rename` | Rename Project |  |
 | `project.reveal` | Show the Project in Finder |  |
 | `project.set-color` | Set Project Color |  |
 | `project.show-all` | Show Projects |  |
@@ -186,6 +235,7 @@ tema, por conta, por item da barra de status) e não estão aqui: o ⌘K os most
 | `project.show-sessions` | Show the Project's Sessions |  |
 | `project.show-settings` | Show the Project's Settings |  |
 | `project.show-terminals` | Show the Project's Own Terminals |  |
+| `project.switch` | Switch Project | `cmd+shift+s` |
 | `remote.show` | Connect to a Remote Machine… |  |
 | `review.add-comment` | Comment on Lines | `c` |
 | `review.clear-comments` | Clear Comments |  |
@@ -204,6 +254,7 @@ tema, por conta, por item da barra de status) e não estão aqui: o ⌘K os most
 | `settings.open-terminal` | Open Terminal Settings |  |
 | `settings.open-themes` | Open Theme Settings |  |
 | `sidebar.find` | Find a Project, Task or Terminal… |  |
+| `sidebar.show` | Show the Sidebar | `cmd+shift+j` |
 | `sidebar.show-files` | Show Files in the Sidebar | `cmd+shift+2` |
 | `sidebar.show-work` | Show Work in the Sidebar | `cmd+shift+1` |
 | `sidebar.switch-view` | Switch Between Work and Files | `cmd+e` |
@@ -237,6 +288,7 @@ tema, por conta, por item da barra de status) e não estão aqui: o ⌘K os most
 | `theme.toggle-vibrancy` | Turn Vibrancy On or Off |  |
 | `view.board` | Show the Board |  |
 | `view.jump` | Jump to a Task… | `cmd+j` |
+| `view.toggle-sidebar` | Show or Hide the Sidebar | `cmd+b` |
 | `window.new` | New Window | `cmd+shift+n` |
 | `workspace.open-folder` | Open Folder… | `cmd+o` |
 | `workspace.use-terminal-folder` | Use the Terminal's Folder |  |

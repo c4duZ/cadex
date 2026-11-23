@@ -6,9 +6,8 @@
 
 <p align="center">
   Um workspace de desenvolvimento centrado no terminal, nativo e leve.<br>
-  Terminal, editor de código, explorador de arquivos, git com grafo e previews (web, Markdown, imagem,
-  vídeo, áudio e PDF) numa janela só. <b>Sem telemetria, sem conta, sem IA embutida:</b> rode os seus
-  agentes de código numa aba de terminal.
+  Terminal, código, git e previews numa janela só, feita para trabalhar com agentes de código.<br>
+  <b>Sem telemetria, sem conta, sem IA embutida:</b> os seus agentes rodam numa aba de terminal.
 </p>
 
 <p align="center">
@@ -17,136 +16,96 @@
 </p>
 
 <p align="center">
-  <sub>Grátis e de código aberto (MIT) · 31 MB para baixar no Mac (com o engine da memória), 4 MB no Windows · em inglês ou português · <a href="#instalar-no-mac">instalar no Mac</a> · <a href="#instalar-no-windows">instalar no Windows</a></sub>
+  <sub>Grátis e de código aberto (MIT) · 31 MB para baixar no Mac, 4 MB no Windows · em inglês ou português · <a href="#instalar-no-mac">instalar no Mac</a> · <a href="#instalar-no-windows">instalar no Windows</a></sub>
 </p>
 
 ---
 
 ## O que é
 
-O Cadex junta num app nativo do macOS e do Windows o que um dia de trabalho com agentes de código pede: o terminal
-onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tudo alcançável pelo ⌘K.
+O Cadex junta num app nativo o que um dia de trabalho com agentes de código pede: o terminal onde
+eles rodam e, em volta dele, os arquivos, o código, o git e os previews. Toda ação é um comando que
+o **⌘K** acha e roda. Algumas features ainda são só do Mac; elas estão marcadas.
 
-- **Terminal** rápido e nítido (modelo da [libghostty](https://github.com/ghostty-org/ghostty),
-  desenho em Metal), com abas, divisões, busca, links e colagem de imagens.
-- **Documentos ao lado do terminal:** código, Markdown, mídia, diffs, histórico e previews abrem
-  num painel da mesma aba (ou em aba própria, se preferir), divididos como terminais.
-- **A moldura** (Mac): à esquerda a barra lateral com duas vistas, **Trabalho** (cada projeto com os
-  terminais abertos nele e o estado do agente de cada um) e **Arquivos** (a árvore e as mudanças do
-  git), com a fila do que precisa de você no topo e o quadro, as automações e a memória no pé; no
-  centro as abas e os painéis; no topo onde você está, as abas do lugar, a conta (com o uso de cada
-  conta ao passar o mouse), a busca e as configurações. Abrir o Cadex sem projeto mostra a tela de
-  início: o pedido, os cartões Terminal, Agent, Task e Race e os projetos recentes. `⌘J` pula para
-  qualquer projeto, tarefa ou terminal.
-- **Painéis que se arrumam** (Mac): cada painel tem um cabeçalho com o estado, a conta, o custo e o
-  tempo do agente que roda nele; abrir ao lado, maximizar e fechar (o clique do meio também fecha).
-  Arrastar o cabeçalho move o painel para um lado de outro, ou troca os dois, vendo o resultado ao
-  vivo.
+### O terminal e a janela
+- **Terminal rápido e nítido:** modelo da [libghostty](https://github.com/ghostty-org/ghostty),
+  desenho em Metal, abas, divisões, busca, links e colagem de imagens.
 - **Projetos:** a pasta de um repositório com as abas abertas nela, que voltam como estavam ao
-  reabrir o app. Clicar no nome mostra a página do projeto: tarefas abertas, gasto da semana, PRs,
-  memória, conversas recentes (inclusive as de outras máquinas), automações e contas usadas ali.
-- **A gaveta** (Mac): terminais rápidos fora de qualquer projeto, de baixo (`` ⌃` ``); `⌘↩` leva um
-  deles para o projeto.
-- **Explorador e busca** de arquivos por nome e por conteúdo, respeitando o `.gitignore`.
-- **Editor de código** com destaque de sintaxe (tree-sitter), números de linha e dobras.
+  reabrir. A página do projeto mostra as tarefas, o gasto da semana, a memória e as conversas.
+- **Barra lateral** (Mac): **Trabalho**, cada projeto com os terminais abertos e o estado do agente
+  de cada um, e **Arquivos**, a árvore e as mudanças do git. `⌘B` a esconde e a barra de cima sobe
+  junto, deixando a janela para os terminais.
+- **Painéis:** código, Markdown, mídia, diffs e previews abrem ao lado do terminal, na mesma aba.
+  Cada painel tem um cabeçalho com o agente que roda nele (Mac), e arrastar o cabeçalho rearruma.
+- **Navegação rápida** (Mac): `⌘J` pula para qualquer tarefa ou terminal do Cadex; a gaveta
+  (`` ⌥⌘` ``) guarda terminais rápidos fora de projeto; sem projeto aberto, a tela de início.
+
+### Código e git
+- **Editor** com destaque de sintaxe (tree-sitter), números de linha e dobras.
 - **Markdown** renderizado, com links entre notas, links quebrados e quem aponta pra cá.
+- **Busca** de arquivos por nome e por conteúdo, respeitando o `.gitignore`.
 - **Git:** mudanças, stage, commit, push e pull, diff lado a lado e o grafo do histórico.
 - **Previews:** servidores locais e páginas web, imagem, vídeo, áudio e PDF.
-- **Agentes à vista** (Mac): cada terminal na árvore e cada aba mostram o estado exato do agente
-  que roda nele (trabalhando, esperando você, terminou), contado pelo próprio Claude Code, e o
-  comando que o terminal está rodando. Uma notificação avisa quando um agente pede permissão,
-  pergunta ou termina. O Cadex não fala com modelo: quando você escreve o pedido (na tela de início,
-  numa tarefa nova), ele abre o agente com o seu texto num terminal.
-- **O que precisa de você** (Mac): a fila no topo da barra lateral mostra cada agente que espera
-  você, com o pedido em frase, e o número vai também ao ícone do Dock; dela se permite ou nega um
-  pedido de permissão sem ir até o terminal (nada vai ao agente sem o seu clique), e o feed mostra a
-  linha do tempo de todos os agentes. O quadro junta todos os agentes e tarefas pelo estado.
-- **O Claude volta ao reabrir** (Mac): fechar e abrir o Cadex, ou reiniciar o Mac, traz cada aba com
-  o Claude que rodava nela, na mesma conversa, na mesma conta e com as mesmas flags, como um
-  `/resume`. Um terminal que entra na pasta de outro projeto oferece "Mover para" aquele projeto.
-- **Uma tarefa, uma worktree** (Mac): "New Task" cria o branch e a worktree ao lado do repositório,
-  copia os arquivos fora do git que o `.worktreeinclude` pede (`.env` e afins), roda os hooks de
-  preparo e abre o agente nela, na conta do projeto. Cada tarefa tem status e um comentário; sair
-  dela é recusado enquanto houver trabalho que se perderia.
-- **Agentes parados hibernam** (Mac): um agente aberto pelo Cadex que terminou e que ninguém olha há
-  30 minutos encerra para liberar memória, e volta com a conversa quando você abre a aba dele.
-- **Uso dos planos** (Mac): o item de uso na barra de status mostra quanto cada conta do Claude
-  Code e do Codex usou da sessão de 5 horas e da semana, e quando reinicia; um clique numa conta
-  abre o agente dela. O número do Claude Code vem do próprio Claude Code, pela status line das sessões que o Cadex abre: o
-  Cadex nunca lê login nem token e não pergunta a serviço nenhum
-  ([ADR 0021](docs/adr/0021-cadex-managed-accounts.md)). A sua status line continua aparecendo igual.
-- **Várias contas, uma configuração** (Mac): "Add Agent Account" cria uma conta na pasta do Cadex e
-  abre o `claude` nela para o `/login`; ela segue a configuração do `~/.claude` por links (skills,
-  hooks, settings, plugins), menos o que é da conta (login, conversas, histórico). As contas que já
-  existem ficam onde estão e podem passar a seguir também. A conta ativa (clique direito no item de
-  uso) e a de cada projeto escolhem onde as sessões novas abrem.
-- **Histórico de todas as conversas** (Mac): "Archive & history", no ⌘K, junta as
-  conversas de todas as contas, com busca pelo que foi dito, por projeto, pasta ou conta. Duplo
-  clique retoma na conta dona; "Continue in Another Account" leva a conversa para outra conta quando
-  o limite de uma acaba, com o original intacto.
-- **Barra de status do seu jeito** (Mac): os itens (pasta, branch, terminais, gaveta, uso, RAM, CPU,
-  memória do Cadex, portas abertas, hosts SSH) são escolhidos e arrastados para o lugar; o que fica
-  desligado não pesa nada.
-- **Hosts SSH** (Mac): os do `~/.ssh/config`, se respondem, e um clique conecta numa aba.
-- **Suas máquinas pelo Tailscale** (Mac, opcional): com o Tailscale que você já tem, o cartão do SSH
-  lista as máquinas da sua tailnet (no ar, caminho direto ou por relay, latência) e um clique abre o
-  ssh nelas. Uma tarefa pode **rodar em outra máquina** (a worktree e o agente lá, com o login do
-  Claude de lá), uma aba pode usar o **Docker de outra máquina**, e um repositório pode ter uma
-  **receita de ambiente** (`.cadex/environment.toml`) que sobe um contêiner por tarefa. Um servidor
-  deste Mac abre no seu celular pela tailnet com um clique. Sem o Tailscale, nada disso aparece
+- **Revisão** (Mac): uma aba por tarefa com tudo o que o agente mudou, stage por linha, conflito em
+  três vias, comentários mandados ao agente num texto só e as linhas que ele escreveu marcadas
+  ([ADR 0027](docs/adr/0027-local-authorship.md)).
+
+### Agentes (Mac)
+O Cadex não fala com modelo: ele observa os agentes que rodam nos terminais e, quando você escreve
+um pedido, abre o agente com o seu texto ([ADR 0019](docs/adr/0019-agents-observe-only.md),
+[ADR 0033](docs/adr/0033-cadex-launches-agents.md)).
+- **Estado à vista:** cada terminal mostra se o agente trabalha, espera você ou terminou, contado
+  pelo próprio Claude Code. Uma notificação avisa quando ele pede permissão, pergunta ou termina.
+- **Uma tarefa, uma worktree:** "New Task" (`⌘N`) cria o branch e a worktree, copia o `.env` e afins
+  (`.worktreeinclude`), roda os hooks de preparo e abre o agente nela.
+- **O Claude volta ao reabrir:** fechar o Cadex ou reiniciar o Mac traz cada aba com o Claude que
+  rodava nela, na mesma conversa, conta e flags. Agentes parados há 30 minutos hibernam e voltam
+  quando você abre a aba.
+- **Contas e uso:** várias contas do Claude Code e do Codex, com o uso da sessão e da semana de cada
+  uma na barra de status, sem ler login nem token ([ADR 0021](docs/adr/0021-cadex-managed-accounts.md)).
+  Trocar a conta de um Claude leva a mesma conversa; o histórico junta as conversas de todas as contas.
+- **O agente usa o Cadex:** nas sessões que o Cadex abre, o agente tem o comando `cadex` e um servidor
+  MCP para abrir arquivos e diffs ao lado, avisar você, marcar a tarefa e usar o preview como
+  navegador ([ADR 0024](docs/adr/0024-agent-tools.md), [ADR 0025](docs/adr/0025-agent-drives-preview.md)).
+  No preview, `⇧⌘C` e um clique mandam um elemento da página ao agente, com o arquivo e a linha dele.
+- **Outros apps do Mac** (desligado por padrão): o agente opera outros apps pela acessibilidade, com a
+  sua permissão app por app ([ADR 0026](docs/adr/0026-computer-use.md)).
+
+### A memória do projeto (Mac)
+O que cada sessão de agente fez, as decisões e as armadilhas passam para a próxima, de uma conta para
+outra e do Claude para o Codex. O engine é o do [ai-memory](https://github.com/akitaonrails/ai-memory),
+num processo que só existe enquanto há sessão de agente; quem escreve as páginas é o Claude da
+própria sessão, sem chave nem custo extra. A página Memória, no pé da barra lateral, mostra os
+projetos, as páginas, a busca, o grafo e a saúde do engine ([ADR 0028](docs/adr/0028-project-memory.md)).
+
+### Vários agentes de uma vez (Mac, desligado por padrão)
+- **Corrida:** a mesma tarefa em 2 a 6 agentes, cada um na sua worktree, lado a lado; você compara e
+  escolhe o vencedor.
+- **Execução:** tarefas encadeadas, com dependências e portões, despachadas a agentes que reportam
+  pelo `cadex`, coordenadas por você ou por um agente.
+- **Automação:** um prompt num horário, mesmo com o Cadex fechado, com histórico
+  ([ADR 0034](docs/adr/0034-scheduled-automations.md)).
+
+Tudo tem teto de gasto, de duração e de agentes, e o Cadex mostra antes o que vai rodar e onde.
+
+### Outras máquinas (Mac)
+- **SSH:** os hosts do `~/.ssh/config`, se respondem, e um clique conecta numa aba.
+- **Tailscale** (opcional): as máquinas da sua tailnet, rodar uma tarefa em outra máquina, o Docker de
+  outra máquina numa aba e um ambiente por tarefa (`.cadex/environment.toml`)
   ([ADR 0030](docs/adr/0030-installed-tailscale.md), [ADR 0031](docs/adr/0031-run-on-remote.md),
   [ADR 0032](docs/adr/0032-workspace-recipes.md)).
-- **Terminais que sobrevivem ao app** (Mac, opção desligada por padrão): os shells e agentes da
-  janela principal rodam num processo à parte; fechar, travar ou atualizar o Cadex os deixa rodando,
-  e reabrir os mostra de novo com o histórico. Depois de reiniciar o Mac, o histórico volta em shells
-  novos ([ADR 0022](docs/adr/0022-terminal-daemon.md)). Com eles ligados, o **telefone** entra nas
-  abas do Cadex por SSH pela tailnet, abre abas novas que aparecem no Mac e vê no Safari o que o
-  agente gerou ([guia](docs/guides/phone.md)).
-- **Notificações dos programas** (Mac): um programa no terminal que pede uma notificação (OSC 777 ou
-  OSC 9, como um build longo avisando que acabou) aparece como uma do macOS; o clique leva ao terminal.
-- **Escolher elemento para o agente** (Mac): no preview web, `⇧⌘C` e um clique mandam o elemento
-  para o terminal do agente, com o arquivo e a linha onde ele foi escrito (React, Next, Vue, Svelte)
-  e um print dele.
-- **O agente usa o Cadex** (Mac): nas sessões que o Cadex abre, o agente tem o comando `cadex` e um
-  servidor MCP para abrir arquivos e diffs ao lado do terminal dele, avisar você, marcar a tarefa e
-  rodar os comandos que a lista deixa ([ADR 0024](docs/adr/0024-agent-tools.md)).
-- **O preview como navegador do agente** (Mac): o agente abre a página do seu servidor no preview, ao
-  lado do terminal dele, lê a página como árvore, clica, preenche, tira print e lê o console, na mesma
-  aba que você olha, com uma faixa dizendo que ele está ali (`Esc` o tira). Você pode prender notas a
-  elementos da página e mandar todas para ele ([ADR 0025](docs/adr/0025-agent-drives-preview.md)).
-- **Revisar o que o agente fez** (Mac): uma aba por tarefa com todas as mudanças da worktree contra
-  onde ela começou, arquivos à esquerda e empilhados à direita, j/k e n/p, stage por trecho e por
-  linha, imagem lado a lado, deslizando ou sobreposta, e conflito de merge em três vias resolvido
-  por bloco. Comente em qualquer linha e mande todos os comentários ao agente da tarefa num texto só,
-  colado sem Enter; uma barra fina marca as linhas que o agente escreveu, guardadas só no Cadex
-  ([ADR 0027](docs/adr/0027-local-authorship.md)).
-- **O projeto lembra** (Mac): o que cada sessão de agente fez, as decisões e as armadilhas passam
-  para a próxima sessão, de uma conta para outra e do Claude para o Codex, sem você repetir nada. O
-  engine é o do [ai-memory](https://github.com/akitaonrails/ai-memory), num processo à parte que só
-  existe enquanto há sessão de agente; a busca por sentido roda um modelo local pequeno, e quem
-  escreve as páginas é o Claude da própria sessão, sem chave nem custo extra. A página Memória, no pé
-  da barra lateral, é o painel do ai-memory feito nativo: os projetos, as páginas e o histórico de
-  cada uma, as sessões, a busca com o porquê de cada resultado, o grafo, a caixa de entrada entre
-  agentes, a revisão do que o agente quer aprender, a saúde do engine e os guias
-  ([ADR 0028](docs/adr/0028-project-memory.md)).
-- **Vários agentes de uma vez** (Mac, desligado por padrão): uma **corrida** dá a mesma tarefa a 2 a 6
-  agentes, cada um na sua worktree, lado a lado no centro (estado, tempo, custo, diff e o teto),
-  comparar dois e escolher o vencedor; uma **execução** encadeia tarefas com dependências e portões, cada uma
-  despachada a um agente numa worktree e aba novas, que reporta pelo `cadex` (concluído, sinal de
-  vida, perguntas, recados, sub-tarefas), coordenada por você ou por um agente; uma **automação**
-  roda um prompt num horário, mesmo com o Cadex fechado (o launchd o acorda), com histórico. O quadro
-  (no pé da barra lateral) junta todas as tarefas por estado, com filtro por corrida e execução. O
-  prompt nunca passa pelo shell, o Cadex mostra antes o que vai rodar, onde e em qual conta, e tudo
-  tem teto de gasto, de duração e de agentes ([ADR 0033](docs/adr/0033-cadex-launches-agents.md),
-  [ADR 0034](docs/adr/0034-scheduled-automations.md)).
-- **Outros apps do Mac** (opção desligada por padrão, em Configurações › Agentes e contas › Computer
-  use): o agente lê e opera outros apps pela acessibilidade, com a sua permissão app por app, nunca em campos de senha nem nos Ajustes do
-  Sistema, com uma faixa e um botão Parar ([ADR 0026](docs/adr/0026-computer-use.md)).
-- **Temas:** centenas, com busca, importação e pasta própria; claro e escuro, cor de destaque, alto
-  contraste, zoom da interface, cores de projeto e de aba, imagem de fundo e vibrância.
-- **Atualiza sozinho** (Mac): avisa quando sai versão nova e atualiza com um clique, conferindo a
-  assinatura antes de trocar o app.
-- **Inglês por padrão**, português nas configurações.
+- **Terminais que sobrevivem ao app** (desligado por padrão): os terminais seguem rodando com o Cadex
+  fechado, e o celular entra neles por SSH ([ADR 0022](docs/adr/0022-terminal-daemon.md),
+  [guia do celular](docs/guides/phone.md)).
+
+### Do seu jeito
+- **Temas:** centenas, com busca e importação; claro e escuro, cor de destaque, alto contraste,
+  janela translúcida e imagem de fundo.
+- **Barra de status:** escolha e arraste os itens; o que fica desligado não pesa nada.
+- **Tudo é arquivo de texto:** as configurações e os atalhos no `settings.json`, as automações e os
+  temas em arquivos, que o Cadex relê na hora. Um agente configura o Cadex editando-os
+  ([guia](docs/guides/settings.md)).
+- **Atualiza sozinho** (Mac): avisa da versão nova e troca o app com um clique, conferindo a assinatura.
 
 ## Instalar no Mac
 
@@ -163,223 +122,170 @@ onde eles rodam, e em volta dele os arquivos, o código, o git e os previews, tu
   </tr>
 </table>
 
-Requisitos: macOS 13 ou superior, Intel ou Apple Silicon. Tudo o que o Cadex usa vem dentro do app: não
-precisa instalar Xcode, Homebrew nem nada antes, e funciona offline. Depois de instalado, o próprio
-Cadex avisa quando há versão nova e se atualiza com um clique.
+Requisitos: macOS 13 ou superior, Intel ou Apple Silicon. Tudo o que o Cadex usa vem dentro do app:
+não precisa de Xcode nem Homebrew, e funciona offline.
 
-### Pelo terminal
-
-Um comando baixa a última versão, confere o checksum e coloca o Cadex em Aplicativos, sem pedir
-senha e sem o aviso da primeira abertura:
+**Pelo terminal**, um comando baixa a última versão, confere o checksum e põe o Cadex em Aplicativos,
+sem senha e sem o aviso da primeira abertura (o script é curto: [`install.sh`](apps/macos/packaging/install.sh)):
 
 ```bash
 curl -fsSL https://github.com/c4duZ/cadex/releases/latest/download/install.sh | sh
 ```
-
-O script é curto e dá para ler antes de rodar: [`install.sh`](apps/macos/packaging/install.sh). Rodar
-de novo atualiza para a versão mais recente.
 
 <details>
 <summary><b>Problemas na instalação?</b></summary>
 
 - **O macOS não deixa abrir na primeira vez:** o Cadex ainda não é notarizado pela Apple. Vá em Ajustes do Sistema → Privacidade e Segurança → **Abrir Mesmo Assim**, ou rode `xattr -dr com.apple.quarantine /Applications/Cadex.app`.
 - **O comando instalou em `~/Applications`:** a pasta Aplicativos do sistema não aceitou a cópia sem senha; o Cadex funciona igual de lá.
-- **O botão de baixar dá 404:** enquanto o repositório for privado, os downloads só funcionam para quem tem acesso a ele e está logado no GitHub.
 - **Versões anteriores:** na [página de releases](https://github.com/c4duZ/cadex/releases).
 
 </details>
 
 ## Instalar no Windows
 
-> **Prévia.** O Windows sai na mesma release do Mac, com quase todas as features (menos o seletor de
-> elementos e a atualização dentro do app) e ainda pouco usado.
-> Se algo falhar, [abra uma issue](https://github.com/c4duZ/cadex/issues) contando o que aconteceu.
+> **Prévia.** O Windows sai na mesma release do Mac, com o terminal, o código, o git e os previews, e
+> ainda pouco usado. As features marcadas "Mac" acima não estão nele. Se algo falhar,
+> [abra uma issue](https://github.com/c4duZ/cadex/issues).
 
-No PowerShell, um comando baixa a última versão, confere o checksum e instala o Cadex para o seu
-usuário, com atalho no Menu Iniciar, sem pedir administrador:
+No PowerShell, um comando baixa a última versão, confere o checksum e instala para o seu usuário,
+sem administrador (o script: [`install.ps1`](apps/windows/packaging/install.ps1)):
 
 ```powershell
 irm https://github.com/c4duZ/cadex/releases/latest/download/install.ps1 | iex
 ```
 
-O script escolhe sozinho entre x64 e ARM64 e é curto para ler antes de rodar:
-[`install.ps1`](apps/windows/packaging/install.ps1). Rodar de novo atualiza para a versão mais recente
-(no Windows, o app ainda não se atualiza sozinho).
+Ou o ZIP portátil, para extrair e abrir o `Cadex.exe`:
+[x64](https://github.com/c4duZ/cadex/releases/latest/download/Cadex-windows-x64.zip) ·
+[ARM64](https://github.com/c4duZ/cadex/releases/latest/download/Cadex-windows-arm64.zip).
 
-Prefere sem instalar? Baixe o ZIP portátil, extraia e abra o `Cadex.exe`:
-[x64 (Intel e AMD)](https://github.com/c4duZ/cadex/releases/latest/download/Cadex-windows-x64.zip) ·
-[ARM64 (Snapdragon)](https://github.com/c4duZ/cadex/releases/latest/download/Cadex-windows-arm64.zip).
-
-Requisitos: Windows 11, x64 ou ARM64. O terminal abre o PowerShell (ou o shell que você escolher, e
-as distros do WSL); o Git usa o [Git for Windows](https://git-scm.com/download/win), se estiver
-instalado. O preview web e os de mídia usam o WebView2, que já vem no Windows 11.
+Requisitos: Windows 11, x64 ou ARM64. O terminal abre o PowerShell, outro shell ou uma distro do WSL;
+o git usa o [Git for Windows](https://git-scm.com/download/win), se instalado.
 
 <details>
 <summary><b>Problemas na instalação?</b></summary>
 
-- **O Windows avisa "O Windows protegeu o computador" ao abrir o ZIP:** o Cadex ainda não é assinado. Clique em **Mais informações → Executar assim mesmo**. Pelo comando do PowerShell o aviso não aparece.
-- **Para desinstalar:** Configurações → Apps → Aplicativos instalados → Cadex → Desinstalar. Suas configurações em `%APPDATA%\Cadex` ficam.
-- **Atalhos:** são os do Mac com ⌘ virando Ctrl+Shift (⌘T é Ctrl+Shift+T, ⌘K é Ctrl+Shift+K), como no Windows Terminal.
+- **"O Windows protegeu o computador" ao abrir o ZIP:** o Cadex ainda não é assinado. Clique em **Mais informações → Executar assim mesmo**. Pelo PowerShell o aviso não aparece.
+- **Desinstalar:** Configurações → Apps → Aplicativos instalados → Cadex. Suas configurações em `%APPDATA%\Cadex` ficam.
 
 </details>
 
 ## Atalhos
 
-Toda ação do Cadex é um comando: o **⌘K** acha e roda qualquer uma, e os atalhos podem ser trocados
-nas configurações. No Windows vale uma regra só, para o mesmo `settings.json` servir nas duas
-máquinas: ⌘ vira Ctrl+Shift (como no Windows Terminal), e ⌘ com ⇧, ⌥ ou ⌃ vira Ctrl+Shift+Alt.
+Os principais, no Mac. No Windows vale uma regra só, para o mesmo `settings.json` servir nas duas
+máquinas: ⌘ vira Ctrl+Shift (⌘T é Ctrl+Shift+T), e ⌘ com ⇧, ⌥ ou ⌃ vira Ctrl+Shift+Alt. Todos os
+comandos, com o atalho de cada um, estão em [`docs/guides/commands.md`](docs/guides/commands.md), e
+qualquer atalho pode ser trocado.
 
-| Ação | Mac | Windows |
-|---|---|---|
-| Paleta de comandos | `⌘K` | `Ctrl+Shift+K` |
-| Nova tarefa (a worktree e o agente) | `⌘N` | só no Mac |
-| Pular para projeto, tarefa ou terminal | `⌘J` | só no Mac |
-| Nova aba / fechar painel | `⌘T` / `⌘W` | `Ctrl+Shift+T` / `Ctrl+Shift+W` |
-| Nova janela | `⌘⇧N` | pela paleta (sem atalho) |
-| Dividir à direita / para baixo | `⌘D` / `⌘⇧D` | `Ctrl+Shift+D` / `Ctrl+Shift+Alt+D` |
-| Maximizar o painel (e voltar) | `⌘⇧↩` | só no Mac |
-| Ir para a aba 1…9 | `⌘1…9` | `Ctrl+Shift+1…9` |
-| Abrir arquivo por nome / buscar no conteúdo | `⌘P` / `⌘⇧F` | `Ctrl+Shift+P` / `Ctrl+Shift+Alt+F` |
-| Abrir pasta | `⌘O` | `Ctrl+Shift+O` |
-| Árvore à esquerda / painel da direita | `⌘B` / `⌥⌘I` | `Ctrl+Shift+B` / só no Mac |
-| Changes, Files, History, Memory no painel da direita | `⌃⌘1…4` | só no Mac |
-| Arquivos / git / histórico do git | `⌘⇧E` / `⌘⇧G` / `⌘⇧L` | `Ctrl+Shift+Alt+E` / `Ctrl+Shift+Alt+G` / só no Mac |
-| A gaveta / levar o terminal ao projeto | `` ⌃` `` / `⌘↩` | só no Mac |
-| Abrir o agente numa conta / uso das contas | `⌘⇧A` / `⌘⇧U` | só no Mac |
-| Preview web | `⌘⇧H` | `Ctrl+Shift+Alt+H` |
-| Escolher elemento no preview / parar | `⌘⇧C` / `Esc` | só no Mac |
-| Tirar o agente do preview | `Esc` (com o agente na aba) | só no Mac |
-| Na revisão: próximo/anterior arquivo, mudança; comentar | `j` `k`, `n` `p`; `c` (com a revisão em foco) | só no Mac |
-| Trocar de projeto / abrir projeto | `⌘⇧S` / `⌃⌘N` | spaces: `Ctrl+Shift+Alt+S` / `Ctrl+Shift+Alt+N` |
-| Próximo / anterior projeto | `⌃⌘→` / `⌃⌘←` | spaces: `Ctrl+Shift+Alt+PgDn` / `Ctrl+Shift+Alt+PgUp` |
-| Buscar no terminal / limpar | `⌘F` / `⌘L` | `Ctrl+Shift+F` / `Ctrl+Shift+L` |
-| Copiar / colar no terminal | `⌘C` / `⌘V` | `Ctrl+Shift+C` / `Ctrl+Shift+V` (ou `Ctrl+C` com texto selecionado) |
-| Configurações | `⌘,` | `Ctrl+Shift+,` |
+| Ação | Atalho |
+|---|---|
+| Paleta de comandos | `⌘K` |
+| Nova tarefa / pular para tarefa ou terminal | `⌘N` / `⌘J` |
+| Nova aba / fechar painel / nova janela | `⌘T` / `⌘W` / `⇧⌘N` |
+| Dividir à direita / para baixo / maximizar o painel | `⌘D` / `⇧⌘D` / `⇧⌘↩` |
+| Próxima / anterior aba | `⇧⌘]` / `⇧⌘[` |
+| Barra lateral / Trabalho / Arquivos / alternar | `⌘B` / `⇧⌘1` / `⇧⌘2` / `⌘E` |
+| Trocar de projeto / abrir projeto / próximo e anterior | `⇧⌘S` / `⌃⌘N` / `⌃⌘→` `⌃⌘←` |
+| Arquivo por nome / buscar no conteúdo / abrir pasta | `⌘P` / `⇧⌘F` / `⌘O` |
+| Git / histórico do git | `⇧⌘G` / `⇧⌘L` |
+| A gaveta / levar o terminal ao projeto | `` ⌥⌘` `` / `⌘↩` |
+| Abrir o agente de uma conta / uso das contas | `⇧⌘A` / `⇧⌘U` |
+| Preview web / escolher elemento | `⇧⌘H` / `⇧⌘C` |
+| Buscar no terminal / limpar | `⌘F` / `⌘L` |
+| Configurações | `⌘,` |
+
+## Configurar
+
+As escolhas ficam em arquivos de texto, que o Cadex relê sozinho: as preferências e os atalhos em
+`~/Library/Application Support/Cadex/settings.json`, as automações e os temas em pastas ao lado, e o
+ambiente de um repositório em `.cadex/environment.toml`. A janela de configurações (`⌘,`) edita o
+mesmo arquivo. Para pedir a um agente que mude algo, ele lê a referência completa com
+`cadex skills get settings`; o resumo em português está em [`docs/guides/settings.md`](docs/guides/settings.md).
 
 ## Tamanho e memória
 
-Métrica do projeto, medida a cada release ([ADR 0007](docs/adr/0007-one-step-install.md)).
-Tamanhos da versão 2.2.1 (2026-10-22); memória medida na 0.1.0 (2026-10-19), num Mac com M4 e macOS 27:
+Métrica do projeto, conferida a cada release ([ADR 0007](docs/adr/0007-one-step-install.md)), num Mac
+com M4. Entre parênteses, a versão ou o plano em que foi medido:
 
 | | Cadex |
 |---|---|
-| download (DMG) | 9,6 MB |
-| download (ZIP do instalador) | 9,9 MB |
-| download Windows (ZIP x64 / ARM64) | 3,9 MB / 3,7 MB |
-| app instalado (universal: Apple Silicon e Intel) | 46 MB |
-| memória com um terminal aberto (footprint) | 66 MB |
+| download no Mac (DMG ou ZIP, 3.1.3) | 31 MB |
+| download no Windows (ZIP x64 / ARM64, 2.2.1) | 3,9 MB / 3,7 MB |
+| app instalado no Mac (universal, com o engine da memória, 3.1.3) | 91 MB |
+| memória com um terminal aberto (0.1.0) | 66 MB |
 | cada aba de terminal a mais, escondida (2.2.0) | 1 MB |
-| tudo da barra lateral e da barra de status ligado (2.2.0) | +7% |
-| o processo da memória, com sessão de agente e sem o modelo (plano 22) | 13 MB |
-| o mesmo com o modelo de busca carregado (pico; sai depois de 60 s parado) | 300–380 MB |
-| uma corrida de 3 e uma execução de 5 tarefas, 9 abas, o quadro e a página abertos (plano 24) | 141–160 MB, 1,5–2,9% de CPU |
-| corridas, execuções e automações desligadas (plano 24) | o mesmo que sem elas |
+| o processo da memória com sessão de agente, sem o modelo de busca (plano 22) | 13 MB |
+| uma corrida de 3 e uma execução de 5 tarefas abertas (plano 24) | 141–160 MB |
 
-Os números da memória são do `make perf` em 2026-11-16; sem sessão de agente, o processo nem existe.
-O app instalado leva as duas arquiteturas e as 18 gramáticas do
-tree-sitter compiladas dentro (as tabelas delas são 15 MB de cada fatia); o download comprimido fica
-abaixo. O pico de memória ao abrir foi 111 MB.
+O app leva as duas arquiteturas, as gramáticas do tree-sitter e o engine da memória dentro; sem
+sessão de agente, o processo da memória nem existe. O `make perf` mede as situações que já deixaram
+o app pesado e falha acima do limite.
 
 ## Arquitetura
 
 ```
                     ┌──────────────────────────────────────┐
                     │          Núcleo (Zig, API C)         │
-                    │                                      │
                     │  terminal ── libghostty-vt           │
-                    │    (e o daemon `cadex-terminald`)    │
                     │  explorer · search · source-control  │
-                    │  git-history · editor (tree-sitter)  │
-                    │  markdown (índice de links)          │
-                    │  workspace                           │
-                    │  agent-tools (o programa `cadex`)    │
-                    │  memory ── `cadex-memory` (Rust,     │
-                    │    o engine do ai-memory)            │
+                    │  git-history · editor · markdown     │
+                    │  workspace · agent-tools (`cadex`)   │
+                    │  memory ── `cadex-memory` (Rust)     │
                     └──────────────────▲───────────────────┘
                                        │ API C
                ┌───────────────────────┴───────────────────────┐
-               │                                               │
   ┌────────────┴────────────┐                    ┌─────────────┴────────────┐
   │   App macOS (Swift)     │                    │   App Windows (Zig)      │
   │   AppKit · Metal        │                    │   Win32 · Direct3D 11    │
-  │   PDFKit · AVKit ·      │                    │   Direct2D · DirectWrite │
-  │   ImageIO · Quick Look  │                    │   WIC · WebView2         │
-  │   SQLite (histórico)    │                    │                          │
+  │   PDFKit · AVKit        │                    │   DirectWrite · WebView2 │
   └─────────────────────────┘                    └──────────────────────────┘
 ```
 
-- **Núcleo:** toda a lógica que não depende de plataforma, escrita uma vez em Zig. O modelo do
-  terminal é a [libghostty-vt](https://github.com/ghostty-org/ghostty). Ele também gera o `cadex`,
-  um programa sem interface que as sessões de agente abertas pelo Cadex rodam (a status line que
-  grava o uso de cada conta, os hooks que contam ao app o que cada sessão faz e os comandos, as skills
-  e o servidor MCP com que o agente usa o Cadex), e o
-  `cadex-terminald`, o processo que guarda os terminais quando a opção de mantê-los está ligada.
-  A memória do projeto é a exceção ao Zig: o engine do ai-memory, em Rust, num executável à parte, o
-  `cadex-memory`, que sobe com a primeira sessão de agente e sai com a última.
-- **App:** uma interface nativa e fina por sistema. Desenha, recebe entrada e chama o núcleo.
-  Previews de mídia usam os frameworks do próprio sistema, sem peso extra.
+- **Núcleo:** a lógica que não depende de sistema, escrita uma vez em Zig. Gera também o `cadex`, o
+  programa que as sessões de agente rodam (status line, hooks, comandos, skills e MCP), e o
+  `cadex-terminald`, que guarda os terminais quando essa opção está ligada. A memória é a exceção: o
+  engine do ai-memory, em Rust, num executável à parte.
+- **Apps:** uma interface nativa e fina por sistema, que desenha, recebe entrada e chama o núcleo.
 
-O porquê de cada escolha está nos ADRs:
-[macOS primeiro e app nativo](docs/adr/0001-macos-first-native-app.md) ·
-[núcleo em Zig](docs/adr/0002-zig-core-with-c-api.md) ·
-[libghostty-vt](docs/adr/0003-libghostty-vt-terminal-model.md) ·
-[reescrita do zero](docs/adr/0004-clean-rewrite.md) ·
-[Windows em Zig e Win32](docs/adr/0012-windows-zig-win32-d3d11.md).
-
-## Organização do repositório
-
-```
-core/             núcleo em Zig
-  shared/         o que 2+ features do núcleo usam
-  features/<x>/   uma pasta por feature, com CLAUDE.md e testes
-apps/macos/       app Swift
-  shared/         o que 2+ features do app usam
-  features/<x>/   uma pasta por feature, mesmos nomes do núcleo
-apps/windows/     app Windows em Zig (Win32, Direct3D 11, Direct2D)
-  shared/         o que 2+ features do app usam
-  features/<x>/   uma pasta por feature, mesmos nomes do Mac
-docs/             vocabulário, decisões (adr/) e spec de comportamento (spec/)
-tools/            verificações do repositório
-```
-
-Cada feature tem um `CLAUDE.md` curto com a responsabilidade, os pontos de entrada, as regras e como
-testar. O repositório segue um método de organização para trabalho com agentes de IA: estrutura por
-feature, manifestos curtos por pasta e verificação executável.
+O porquê de cada escolha está nos [ADRs](docs/adr/): [app nativo, macOS primeiro](docs/adr/0001-macos-first-native-app.md) ·
+[núcleo em Zig](docs/adr/0002-zig-core-with-c-api.md) · [libghostty-vt](docs/adr/0003-libghostty-vt-terminal-model.md) ·
+[reescrita do zero](docs/adr/0004-clean-rewrite.md) · [Windows em Zig e Win32](docs/adr/0012-windows-zig-win32-d3d11.md).
 
 ## Desenvolvimento
 
-Requisitos: macOS 13+, as Command Line Tools (Swift 6; o Xcode completo não é preciso) e Zig 0.16;
-para o engine da memória, o Rust do [rustup](https://rustup.rs) (a versão fica no
-`core/features/memory/server/rust-toolchain.toml`).
-
-```bash
-make check     # manifestos + testes do núcleo + testes do app
-make run       # compila e abre o app
-make package   # gera dist/Cadex.app universal (Intel + Apple Silicon), assinado ad hoc
-make perf      # orçamento de peso: o app de release nas situações que já o deixaram pesado
-make windows-app      # compila o app Windows (x64 e ARM64) daqui do Mac
-make windows-package  # gera os ZIPs do Windows e o install.ps1 em dist/
+```
+core/            núcleo em Zig: shared/ e features/<feature>/
+apps/macos/      app Swift: shared/ e features/<feature>/, mesmos nomes do núcleo
+apps/windows/    app Windows em Zig, mesmos nomes do Mac
+docs/            vocabulário, decisões (adr/), comportamento (spec/), planos e guias
+tools/           verificações do repositório
 ```
 
-O identificador `io.github.c4duz.cadex` é fixo na assinatura para o macOS manter as permissões dadas
-ao Cadex entre um build e outro.
+Cada feature tem um `CLAUDE.md` curto com o que ela faz, as regras e como testar; a regra geral está
+no [`CLAUDE.md`](CLAUDE.md) da raiz.
+
+Requisitos: macOS 13+, as Command Line Tools (Swift 6, sem o Xcode completo), Zig 0.16 e, para o
+engine da memória, o Rust do [rustup](https://rustup.rs).
+
+```bash
+make check            # manifestos, testes do núcleo, da memória e do app, build do Windows
+make run              # compila e abre o app
+make package          # dist/Cadex.app universal, assinado ad hoc
+make perf             # o orçamento de peso
+make windows-package  # os ZIPs do Windows e o install.ps1 em dist/
+```
 
 ### Publicar uma versão
 
-```bash
-# 1. Suba CFBundleShortVersionString (ex.: 0.2.0) e CFBundleVersion (inteiro, sempre maior)
-#    em apps/macos/packaging/Info.plist
-# 2. Gere e publique (requer: brew install create-dmg, o gh logado na conta dona do repositório
-#    e a chave de atualização no Keychain, item cadex-update-signing, ou CADEX_UPDATE_KEY no .env)
-apps/macos/packaging/release.sh --publish "O que mudou nesta versão"
-```
+1. Suba `CFBundleShortVersionString` e `CFBundleVersion` em `apps/macos/packaging/Info.plist`.
+2. Rode `apps/macos/packaging/release.sh --publish "O que mudou"`. Precisa do `create-dmg` (brew), do
+   `gh` logado na conta dona do repositório e da chave de atualização (Keychain `cadex-update-signing`
+   ou `CADEX_UPDATE_KEY` no `.env`) ([ADR 0016](docs/adr/0016-in-app-updates.md)).
 
-O script gera o `Cadex.dmg`, o `Cadex.zip` com o checksum, o `install.sh` e o `latest.json` assinado
-que o app lê para se atualizar ([ADR 0016](docs/adr/0016-in-app-updates.md)), e cria a release
-`vX.Y.Z`. Sem a chave de atualização ele não publica. Os arquivos sobem com nome fixo, sem a versão, para o botão de download e o comando de
-instalação do topo sempre pegarem a última. Sem `--publish`, ele só gera os arquivos em `dist/`. Com `CADEX_WINDOWS=1`, a mesma release leva os
-ZIPs do Windows e o `install.ps1`.
+O script gera o DMG, o ZIP com o checksum, o `install.sh` e o `latest.json` assinado, e cria a release
+com nomes sem a versão, para os links de download sempre pegarem a última. `CADEX_WINDOWS=1` inclui o
+Windows; `CADEX_DMG_PLAIN=1` faz o DMG sem a arrumação do Finder, para quando o terminal não pode
+controlá-lo.
 
 ## Licença
 
-[MIT](LICENSE), © 2026 Carlos Teixeira. Componentes de terceiros estão listados em [`NOTICE`](NOTICE).
+[MIT](LICENSE), © 2026 Carlos Teixeira. Componentes de terceiros estão em [`NOTICE`](NOTICE).
