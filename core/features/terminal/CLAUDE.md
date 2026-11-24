@@ -26,6 +26,11 @@
 - `render.zig`: traduz o RenderState num quadro plano (cores RGB, texto UTF-8, flags; a
   CADEX_CELL_INPUT marca o que o usuário digita no prompt, entre o OSC 133 B e o C). Campos
   `style` e `grapheme` do RenderState só valem em certas células: ver `render.zig:translateCell`.
+  `captureBottom`: o fim da tela (a área ativa) com a vista rolada, sem mexer nela, para o app
+  fixar o pé do Claude (cadex_terminal_set_want_bottom e cadex_terminal_bottom_frame, em
+  `c_api_view.zig`; o dono, 2026-11-24). Roda logo depois da captura do quadro, no mesmo lock, e
+  reconstrói todas as linhas: uma captura consome as marcas de linha suja, e tirá-las antes deixava
+  o quadro principal velho (teste em `render_test.zig`).
 - `input.zig`: teclas (Key e Mods nossos, CADEX_KEY_* e CADEX_MOD_*) codificadas pelo encoder da
   libghostty com os modos atuais do terminal (setas em modo de aplicação, kitty). Lê os modos com a
   sessão travada (`session.zig:key`). Alt só chega quando o app trata o Option como Meta.

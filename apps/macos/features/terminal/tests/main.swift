@@ -10,6 +10,7 @@ let keepExit = await Checks.run(keepChecks)
 let shellExit = await Checks.run(shellIntegrationChecks)
 let dressExit = await Checks.run(dressChecks)
 let inputFieldExit = await Checks.run(inputFieldChecks)
+let footPinExit = await Checks.run(footPinChecks)
 let exitCode = await Checks.run([
     ("the scrollbar's marks: at the cursor's row of the whole history, amber wins, gone with a clear", {
         let bar = TerminalScrollbar(frame: NSRect(x: 0, y: 0, width: 8, height: 400))
@@ -325,4 +326,4 @@ let exitCode = await Checks.run([
         expect(tags.first?.number == 5, "\(tags)")
     }),
 ])
-exit(keepExit != 0 ? keepExit : shellExit != 0 ? shellExit : dressExit != 0 ? dressExit : inputFieldExit != 0 ? inputFieldExit : exitCode)
+exit(keepExit != 0 ? keepExit : shellExit != 0 ? shellExit : dressExit != 0 ? dressExit : inputFieldExit != 0 ? inputFieldExit : footPinExit != 0 ? footPinExit : exitCode)

@@ -122,10 +122,17 @@
   linhas enviada) vão para cima, e a caixa não fica flutuando (o dono, 2026-11-22); `rowTop` conta
   esse deslocamento.
   O `QuadBuilder.swift` desenha com o plano (DrawOverlay.dressClaude); o texto não muda. As linhas
-  que o plano move (a caixa uma linha abaixo, o banner à esquerda) voltam ao lugar escrito no mouse:
+  que o plano move (a tela inteira uma linha abaixo, para dentro da linha do modo escondida, e não só a caixa, que deixava uma linha vazia a mais acima dela, o dono, 2026-11-24; o banner à esquerda) voltam ao lugar escrito no mouse:
   o `TerminalRenderer.swift` guarda o `shift` do último quadro, ClaudeDress.source o desfaz, e
   cliques, arrastos e seleções vão à célula que o Claude escreveu (`written` em `TerminalMouse.swift`;
   sem isso o clique no meio do texto caía na borda de cima da caixa e o cursor não ia, 2026-11-18).
+- `ClaudeFootPin.swift`: com a vista rolada num painel do Claude, a caixa de entrada e a status line
+  ficam no pé do painel, vivas, como na tela cheia do próprio Claude (que o Cadex desliga para a
+  conversa ficar no histórico; o dono, 2026-11-24). O `TerminalView` pede ao núcleo o fim da tela a
+  cada quadro (`setWantBottom`, `bottomFrame` em `TerminalSession+View.swift`); a junção põe o pé
+  dele sobre as últimas linhas do histórico e o `TerminalRenderer.swift` veste o resultado como se
+  estivesse no fim (`pinnedFrom`). Um clique no pé fixado volta ao fim antes (`returnToPinnedFoot`
+  em `TerminalMouse.swift`). Sem caixa no fim (um diálogo, o menu do /), nada fica fixo.
 - O texto que você escreve como numa caixa de texto (`../../../../docs/spec/terminal.md`, Seleção):
   `TerminalInputField.swift` acha, puro e testado, a caixa de entrada do Claude (uma linha de "─",
   linhas começando em "❯", outra de "─"), o que foi digitado no shell (as células CADEX_CELL_INPUT

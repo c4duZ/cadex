@@ -221,14 +221,15 @@ public final class TerminalView: NSView {
     }
 
     func drawFrame(in canvas: TerminalCanvas, synchronously: Bool) {
-        guard let renderer, let session, let drawable = canvas.currentDrawable,
-              let frame = session.currentFrame()
-        else { return }
+        guard let renderer, let session, let drawable = canvas.currentDrawable else { return }
+        // A Claude pane: the screen's bottom too while scrolled, its foot pinned (ClaudeFootPin).
+        session.setWantBottom(agentStatus != nil)
+        guard let frame = session.currentFrame() else { return }
         let padding = Float(Self.paddingPoints * scale)
         updateBlink(programWantsBlink: frame.pointee.cursor_blinking)
         let overlay = DrawOverlay(linkCells: hoveredLinkCells, hideCursor: !signals.cursorShown, flash: isFlashing,
                                   dressClaude: agentStatus != nil)
-        renderer.draw(frame.pointee, padding: SIMD2(padding, padding), in: drawable, size: canvas.drawableSize,
+        renderer.draw(frame.pointee, bottom: session.bottomFrame()?.pointee, padding: SIMD2(padding, padding), in: drawable, size: canvas.drawableSize,
                       overlay: overlay, synchronously: synchronously)
         let shown = frame.pointee
         lastCursorRow = Int(shown.cursor_y)

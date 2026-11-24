@@ -33,6 +33,25 @@ pub export fn cadex_terminal_scroll_to(session: ?*Session, where: u8) callconv(.
     return status.ok;
 }
 
+/// Whether update_frame also captures the screen's bottom while the view
+/// shows the history (a Claude pane pins its foot there).
+pub export fn cadex_terminal_set_want_bottom(session: ?*Session, on: bool) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    s.want_bottom = on;
+    if (!on) s.has_bottom = false;
+    return status.ok;
+}
+
+/// The screen's bottom captured with the last update_frame, or NULL when the
+/// view was at the bottom (or it was not asked for). Valid until the next
+/// update_frame.
+pub export fn cadex_terminal_bottom_frame(session: ?*Session, out: ?*?*const terminal.Frame) callconv(.c) status.Code {
+    const s = session orelse return status.invalid_argument;
+    const frame = out orelse return status.invalid_argument;
+    frame.* = if (s.has_bottom) &s.bottom.frame else null;
+    return status.ok;
+}
+
 pub export fn cadex_terminal_select_press(
     session: ?*Session,
     pointer: ?*const view.Pointer,

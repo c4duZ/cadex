@@ -294,6 +294,13 @@ _Static_assert(sizeof(cadex_terminal_frame) == 56, "cadex_terminal_frame layout"
 /* Captures the screen for drawing. Call only from the thread that draws;
  * the frame stays valid until the next call or cadex_terminal_close. */
 cadex_status cadex_terminal_update_frame(cadex_terminal *terminal, const cadex_terminal_frame **out);
+/* Whether update_frame also captures the screen's bottom (the active area)
+ * while the view shows the history: a Claude pane pins its input box and
+ * status line at the pane's foot as the owner scrolls. */
+cadex_status cadex_terminal_set_want_bottom(cadex_terminal *terminal, bool on);
+/* The screen's bottom from the last update_frame; *out is NULL when the view
+ * was at the bottom or it was not asked for. Valid until the next update_frame. */
+cadex_status cadex_terminal_bottom_frame(cadex_terminal *terminal, const cadex_terminal_frame **out);
 /* While the program is in a synchronized update (DEC mode 2026) the frame
  * drawn last comes back, for at most 200 ms: the milliseconds left, 0 when
  * not held. Draw again after that long. */

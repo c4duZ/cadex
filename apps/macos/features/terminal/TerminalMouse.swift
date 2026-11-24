@@ -41,6 +41,7 @@ extension TerminalView {
 
     public override func mouseDown(with event: NSEvent) {
         window?.makeFirstResponder(self)
+        returnToPinnedFoot(event)
         let location = written(event)
         if event.modifierFlags.contains(.command), openLink(at: location) { return }
         if event.modifierFlags.intersection([.command, .shift, .option, .control]).isEmpty, event.clickCount == 1,
@@ -175,3 +176,18 @@ extension TerminalView {
         return CGPoint(x: location.x + CGFloat(source.col - col) * width, y: location.y - CGFloat(source.row - row) * height)
     }
 }
+
+extension TerminalView {
+    /// A click on Claude's foot pinned over the history (ClaudeFootPin) goes back to the bottom
+    /// first: the foot is drawn on the rows it has there, so the click then lands where it shows.
+    func returnToPinnedFoot(_ event: NSEvent) {
+        guard let from = renderer?.pinnedFrom else { return }
+        let g = geometry
+        let location = convert(event.locationInWindow, from: nil)
+        let row = Int(((g.viewSize.height - location.y - g.padding) / (CGFloat(g.cellHeight) / g.scale)).rounded(.down))
+        guard row >= from else { return }
+        session?.scrollToBottom()
+        needsDisplay = true
+    }
+}
+

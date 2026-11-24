@@ -136,10 +136,11 @@ extension TerminalView {
     /// What the terminal shows now as a picture of its size in pixels (TerminalRenderer.image):
     /// for the test instance's snapshots, which a window capture leaves blank here.
     public func snapshotImage() -> CGImage? {
+        session?.setWantBottom(agentStatus != nil)
         guard let renderer, let frame = session?.currentFrame() else { return nil }
         let scale = window?.backingScaleFactor ?? 2
         let padding = Float(Self.innerPadding * scale)
-        return renderer.image(frame.pointee, padding: SIMD2(padding, padding), size: CGSize(width: bounds.width * scale, height: bounds.height * scale),
+        return renderer.image(frame.pointee, bottom: session?.bottomFrame()?.pointee, padding: SIMD2(padding, padding), size: CGSize(width: bounds.width * scale, height: bounds.height * scale),
                               overlay: DrawOverlay(dressClaude: agentStatus != nil))
     }
 }

@@ -59,6 +59,10 @@ struct ClaudeDress {
         /// Where each row is drawn, in cells from where Claude wrote it: the banner moved left into
         /// the mascot's room, the input and the status line moved down into the mode line's.
         var shift: [(dx: Int, dy: Int)]
+        /// The row of the last input box's top rule, as Claude wrote it: where its foot starts (the
+        /// box and the status line under it), which stays at the pane's bottom as the owner scrolls
+        /// (ClaudeFootPin).
+        var footTop: Int?
     }
 
     /// Words drawn over a row from a column: the mode at the status line's right end, the
@@ -136,6 +140,7 @@ extension ClaudeDress {
             for row in [r, end] { for c in 0..<cols { plan.hidden[row * cols + c] = true } }
             plan.shapes.append(Shape(top: r, bottom: end, left: 0, right: cols - 1, color: p.boxFill, outline: false, midRows: true))
             plan.shapes.append(Shape(top: r, bottom: end, left: 0, right: cols - 1, color: p.boxLine, outline: true, midRows: true))
+            plan.footTop = r
             r = end + 1
         }
     }
@@ -179,21 +184,15 @@ extension ClaudeDress {
         let first = Array(lines[r]).firstIndex(where: { $0 != " " }) ?? 0
         let color = plan.cells[r * cols + min(first, cols - 1)].fg
         for c in 0..<cols { plan.hidden[r * cols + c] = true }
-        // The status line, and the input box right above it, down into the mode line's row: they sit
-        // at the pane's foot, as in the mockup, with no empty row under them.
-        var top = r - 1
-        if let i = plan.shapes.lastIndex(where: { $0.outline && $0.bottom == r - 2 }) {
-            top = plan.shapes[i].top
-            // The box's fill and outline go down together.
-            for j in plan.shapes.indices where plan.shapes[j].midRows && plan.shapes[j].top == top {
-                plan.shapes[j].top += 1
-                plan.shapes[j].bottom += 1
-            }
+        // Everything above, down into the mode line's row: the status line and the box sit at the
+        // pane's foot, as in the mockup. Only the box and the status line went down at first, and
+        // the empty row they left above the box doubled Claude's own gap under the last answer
+        // (the owner, 2026-11-24: "um espaço entre Baked for 2m 11s e a caixa").
+        for row in 0..<r { plan.shift[row].dy = 1 }
+        for j in plan.shapes.indices {
+            plan.shapes[j].top += 1
+            plan.shapes[j].bottom += 1
         }
-        // Claude's effort hint ("◐ medium · /effort") sits on the row right above the box: it goes
-        // down with it, or it floated a row away (the owner, 2026-11-18).
-        if top > 0, lines[top - 1].contains("/effort") { top -= 1 }
-        for row in top..<r { plan.shift[row].dy = 1 }
         let above = Array(lines[r - 1])
         var free = cols
         if above.suffix(words.count + 2).allSatisfy({ $0 == " " }) {

@@ -73,11 +73,38 @@ final class TerminalRenderer {
     /// when nothing moved. The mouse undoes it: a click lands on the cell Claude wrote.
     private(set) var lastShift: [(dx: Int, dy: Int)]?
 
-    /// The dressing of this frame, while Claude runs in front.
-    private func dress(_ frame: cadex_terminal_frame, _ overlay: DrawOverlay) -> ClaudeDress.Plan? {
+    /// The dressing of this frame, while Claude runs in front; `atBottom` for a frame with the
+    /// screen's foot pinned over its history (ClaudeFootPin).
+    private func dress(_ frame: cadex_terminal_frame, _ overlay: DrawOverlay, atBottom: Bool? = nil) -> ClaudeDress.Plan? {
         guard overlay.dressClaude, let palette = claudePalette, let cells = frame.cells, let text = frame.text else { return nil }
         return ClaudeDress.plan(cells: cells, text: text, cols: Int(frame.cols), rows: Int(frame.rows), palette: palette,
-                                atBottom: frame.scroll_offset + UInt32(frame.rows) >= frame.scroll_total, cursorRow: Int(frame.cursor_y))
+                                atBottom: atBottom ?? (frame.scroll_offset + UInt32(frame.rows) >= frame.scroll_total), cursorRow: Int(frame.cursor_y))
+    }
+
+    /// The drawn row where Claude's pinned foot starts while the view is scrolled; nil when nothing
+    /// is pinned. A click there goes back to the bottom first (TerminalMouse).
+    private(set) var pinnedFrom: Int?
+
+    /// The quads of a frame, with Claude's foot pinned over the history when `bottom` (the screen's
+    /// bottom while the view is scrolled) has one.
+    private func quads(_ frame: cadex_terminal_frame, bottom: cadex_terminal_frame?, padding: SIMD2<Float>, size: CGSize,
+                       overlay: DrawOverlay) -> [QuadInstance] {
+        let viewSize = SIMD2(Float(size.width), Float(size.height))
+        if overlay.dressClaude, let bottom, let palette = claudePalette,
+           let pin = ClaudeFootPin.compose(view: frame, bottom: bottom, palette: palette) {
+            return pin.with { composite in
+                let plan = dress(composite, overlay, atBottom: true)
+                lastShift = plan.map(\.shift)
+                pinnedFrom = pin.from + (plan.map { $0.shift[pin.from].dy } ?? 0)
+                return builder.build(frame: composite, atlas: atlas, metrics: font.metrics, padding: padding, viewSize: viewSize,
+                                     overlay: overlay, selection: selectionColor, dress: plan)
+            }
+        }
+        let plan = dress(frame, overlay)
+        lastShift = plan.map(\.shift)
+        pinnedFrom = nil
+        return builder.build(frame: frame, atlas: atlas, metrics: font.metrics, padding: padding, viewSize: viewSize,
+                             overlay: overlay, selection: selectionColor, dress: plan)
     }
 
     /// The display scale or font changed: the atlas for the new one.
@@ -86,13 +113,9 @@ final class TerminalRenderer {
         atlas = newAtlas
     }
 
-    func draw(_ frame: cadex_terminal_frame, padding: SIMD2<Float>, in drawable: CAMetalDrawable, size: CGSize,
-              overlay: DrawOverlay = DrawOverlay(), synchronously: Bool = false) {
-        let plan = dress(frame, overlay)
-        lastShift = plan.map(\.shift)
-        let quads = builder.build(frame: frame, atlas: atlas, metrics: font.metrics, padding: padding,
-                                  viewSize: SIMD2(Float(size.width), Float(size.height)), overlay: overlay,
-                                  selection: selectionColor, dress: plan)
+    func draw(_ frame: cadex_terminal_frame, bottom: cadex_terminal_frame? = nil, padding: SIMD2<Float>, in drawable: CAMetalDrawable,
+              size: CGSize, overlay: DrawOverlay = DrawOverlay(), synchronously: Bool = false) {
+        let quads = quads(frame, bottom: bottom, padding: padding, size: size, overlay: overlay)
 
         inFlight.wait()
         bufferIndex = (bufferIndex + 1) % Self.buffersInFlight
@@ -135,12 +158,11 @@ final class TerminalRenderer {
 
     /// The frame as a picture, drawn the same way into a texture off screen (a window capture does
     /// not get the Metal layer: the test instance's snapshots and the comparisons with the mockups).
-    func image(_ frame: cadex_terminal_frame, padding: SIMD2<Float>, size: CGSize, overlay: DrawOverlay = DrawOverlay()) -> CGImage? {
+    func image(_ frame: cadex_terminal_frame, bottom: cadex_terminal_frame? = nil, padding: SIMD2<Float>, size: CGSize,
+               overlay: DrawOverlay = DrawOverlay()) -> CGImage? {
         let width = Int(size.width), height = Int(size.height)
         guard width > 0, height > 0 else { return nil }
-        let quads = builder.build(frame: frame, atlas: atlas, metrics: font.metrics, padding: padding,
-                                  viewSize: SIMD2(Float(size.width), Float(size.height)), overlay: overlay, selection: selectionColor,
-                                  dress: dress(frame, overlay))
+        let quads = quads(frame, bottom: bottom, padding: padding, size: size, overlay: overlay)
         let described = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: width, height: height, mipmapped: false)
         described.usage = [.renderTarget]
         described.storageMode = .shared

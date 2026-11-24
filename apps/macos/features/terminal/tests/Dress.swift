@@ -19,6 +19,35 @@ struct FakeScreen {
     }
 
     func plan(atBottom: Bool = true) -> ClaudeDress.Plan {
+        let (cells, bytes) = buffers()
+        return cells.withUnsafeBufferPointer { cellBuffer in
+            bytes.withUnsafeBufferPointer { textBuffer in
+                ClaudeDress.plan(cells: cellBuffer.baseAddress!, text: textBuffer.baseAddress ?? UnsafePointer(bitPattern: 1)!,
+                                 cols: cols, rows: rows.count, palette: Claude.palette, atBottom: atBottom)
+            }
+        }
+    }
+
+    /// The screen as a core frame for `body` (ClaudeFootPin).
+    func withFrame<R>(cursorRow: Int = 0, scrolled: Bool = false, _ body: (cadex_terminal_frame) -> R) -> R {
+        let (cells, bytes) = buffers()
+        return cells.withUnsafeBufferPointer { c in
+            bytes.withUnsafeBufferPointer { t in
+                var f = cadex_terminal_frame()
+                f.cells = c.baseAddress
+                f.text = t.baseAddress ?? UnsafePointer(bitPattern: 1)!
+                f.text_len = UInt32(bytes.count)
+                f.cols = UInt16(cols)
+                f.rows = UInt16(rows.count)
+                f.cursor_y = UInt16(cursorRow)
+                f.cursor_visible = true
+                f.scroll_total = UInt32(rows.count) + (scrolled ? 10 : 0)
+                return body(f)
+            }
+        }
+    }
+
+    func buffers() -> ([cadex_terminal_cell], [UInt8]) {
         var bytes: [UInt8] = []
         var cells: [cadex_terminal_cell] = []
         for row in rows {
@@ -34,12 +63,7 @@ struct FakeScreen {
                 cells.append(c)
             }
         }
-        return cells.withUnsafeBufferPointer { cellBuffer in
-            bytes.withUnsafeBufferPointer { textBuffer in
-                ClaudeDress.plan(cells: cellBuffer.baseAddress!, text: textBuffer.baseAddress ?? UnsafePointer(bitPattern: 1)!,
-                                 cols: cols, rows: rows.count, palette: Claude.palette, atBottom: atBottom)
-            }
-        }
+        return (cells, bytes)
     }
 }
 
@@ -133,7 +157,7 @@ enum Claude {
         boxed.row(("  Haiku 5.5", 0x999999, nil))
         boxed.row(("  ⏵⏵ auto mode on", 0xAF87FF, nil), (" (shift+tab to cycle)", 0x999999, nil))
         let moved = boxed.plan()
-        expect((1...5).allSatisfy { moved.shift[$0].dy == 1 } && moved.shift[0].dy == 0, "the box and the effort hint go down with it: \(moved.shift)")
+        expect((0...5).allSatisfy { moved.shift[$0].dy == 1 }, "everything above goes down with the box, no gap left over it: \(moved.shift)")
         expect(moved.shapes.count == 2 && moved.shapes.allSatisfy { $0.top == 3 && $0.bottom == 5 }, "\(moved.shapes)")
         var shells = FakeScreen(cols: 70)
         shells.row(("  Haiku 5.5  context 6%  macos", 0x999999, nil))
@@ -175,7 +199,7 @@ enum Claude {
         s.row(("", Claude.text, nil))
         s.row(("", Claude.text, nil))
         let plan = s.plan()
-        expect(plan.shift[0].dy == 3 && (1...4).allSatisfy { plan.shift[$0].dy == 4 }, "all down by 3, the box and status line one more: \(plan.shift)")
+        expect((0...4).allSatisfy { plan.shift[$0].dy == 4 }, "all down by 3, and one more into the mode line's row: \(plan.shift)")
         expect(plan.shapes.allSatisfy { $0.top == 5 && $0.bottom == 7 }, "the box's shapes too: \(plan.shapes)")
         expect(s.plan(atBottom: false).shift.allSatisfy { $0.dy == 0 }, "scrolled up: as Claude drew")
     }),
@@ -190,7 +214,7 @@ enum Claude {
         let shift = boxed.plan().shift
         // The prompt, written on row 2, is drawn on row 3: a click there is a click on row 2.
         expect(ClaudeDress.source(row: 3, col: 8, shift: shift) == (2, 8), "\(ClaudeDress.source(row: 3, col: 8, shift: shift))")
-        expect(ClaudeDress.source(row: 0, col: 4, shift: shift) == (0, 4), "a row that did not move")
+        expect(ClaudeDress.source(row: 1, col: 4, shift: shift) == (0, 4), "the row above the box moved too")
         let banner = [(dx: -11, dy: 0), (dx: 0, dy: 0)]
         expect(ClaudeDress.source(row: 0, col: 3, shift: banner) == (0, 14), "the banner's words were written 11 columns right")
     }),

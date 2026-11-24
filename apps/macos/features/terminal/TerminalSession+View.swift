@@ -113,6 +113,21 @@ extension TerminalSession {
         _ = cadex_terminal_scroll_to(handle, UInt8(CADEX_SCROLL_TOP))
     }
 
+    /// Whether the next frames also capture the screen's bottom while the view is scrolled (a
+    /// Claude pane pins its foot there, ClaudeFootPin).
+    func setWantBottom(_ on: Bool) {
+        guard let handle else { return }
+        _ = cadex_terminal_set_want_bottom(handle, on)
+    }
+
+    /// The screen's bottom from the last frame, nil when the view was at the bottom.
+    func bottomFrame() -> UnsafePointer<cadex_terminal_frame>? {
+        guard let handle else { return nil }
+        var frame: UnsafePointer<cadex_terminal_frame>?
+        guard cadex_terminal_bottom_frame(handle, &frame) == CADEX_OK else { return nil }
+        return frame
+    }
+
     func scrollToBottom() {
         guard let handle else { return }
         _ = cadex_terminal_scroll_to(handle, UInt8(CADEX_SCROLL_BOTTOM))

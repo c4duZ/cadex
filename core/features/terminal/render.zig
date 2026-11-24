@@ -94,6 +94,27 @@ pub const Renderer = struct {
         self.scrollbar = terminal.screens.active.pages.scrollbar();
     }
 
+    /// Like capture, but of the screen's bottom (the active area) while the view
+    /// shows the history: the app pins a program's foot (Claude's input box and
+    /// status line) at the pane's bottom as the owner scrolls, live, not a copy
+    /// taken before (2026-11-24). The view is put back as it was. Call it right
+    /// after the frame's own capture, in the same lock: a capture consumes the
+    /// rows' dirty marks, and taking them first would leave that frame stale;
+    /// this one rebuilds every row instead of reading them. False (nothing
+    /// captured) when the view is at the bottom already.
+    pub fn captureBottom(self: *Renderer, gpa: std.mem.Allocator, terminal: *vt.Terminal) !bool {
+        const pages = &terminal.screens.active.pages;
+        if (pages.viewport == .active) return false;
+        const shown = pages.viewport;
+        defer pages.viewport = shown;
+        pages.viewport = .active;
+        // A size that never matches: every row is built again (see above).
+        self.state.rows = 0;
+        try self.state.beginUpdate(gpa, terminal);
+        self.scrollbar = pages.scrollbar();
+        return true;
+    }
+
     /// Second phase: only touches memory this renderer owns, so it runs
     /// without the lock. The frame stays valid until the next capture.
     pub fn build(self: *Renderer, gpa: std.mem.Allocator, find: ?*search.Search) !*const Frame {

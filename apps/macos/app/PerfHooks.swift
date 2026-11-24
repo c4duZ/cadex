@@ -214,7 +214,7 @@ extension WindowSession {
         }
         // A scene in steps, for the comparisons with the mockups: a JSON list of {"at": seconds, and
         // one of "command": id, "type": text in the focused terminal, "tab": text in a new tab of
-        // its folder, "split": text in a pane split to the right ("split-down": below)}.
+        // its folder, "split": text in a pane split to the right ("split-down": below), "scrollTop": true}.
         if let file = environment["CADEX_PERF_SCRIPT"], let data = FileManager.default.contents(atPath: file),
            let steps = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
             for step in steps {
@@ -235,6 +235,9 @@ extension WindowSession {
                     }
                     // The terminal's find bar, as ⌘F opens it with the terminal focused.
                     if step["find"] as? Bool == true { self.tabs?.activeTerminal?.showFind(nil) }
+                    // The terminal's history from its top, as terminal.scroll-top does with it focused
+                    // (Claude's pinned foot, 2026-11-24).
+                    if step["scrollTop"] as? Bool == true { self.tabs?.activeTerminal?.terminalScrollToTop(nil) }
                     // The repository's history in a tab, as the History tab opens it.
                     if step["history"] as? Bool == true, let repo = self.mainRepository { self.opener?.openHistory(repo) }
                     // A file's diff, as a click on it in Changes opens it.

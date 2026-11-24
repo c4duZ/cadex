@@ -125,3 +125,64 @@ test "what is typed after the prompt's end (OSC 133 B) is marked as input, the p
     const after = try f.frame();
     try testing.expect(cellAt(after, 0, 1).flags & Flags.input == 0);
 }
+
+/// Main and bottom captures in the session's order (Session.updateFrame).
+fn frames(f: *Fixture, bottom: *render.Renderer) !struct { main: *const render.Frame, bottom: ?*const render.Frame } {
+    try f.renderer.capture(testing.allocator, &f.model.terminal, null);
+    const got = try bottom.captureBottom(testing.allocator, &f.model.terminal);
+    const main = try f.renderer.build(testing.allocator, null);
+    return .{ .main = main, .bottom = if (got) try bottom.build(testing.allocator, null) else null };
+}
+
+fn rowText(frame: *const render.Frame, y: usize) ![]u8 {
+    var out: std.ArrayList(u8) = .empty;
+    for (0..frame.cols) |x| {
+        const c = cellAt(frame, x, y);
+        try out.appendSlice(testing.allocator, if (c.text_len == 0) " " else textOf(frame, c));
+    }
+    return out.toOwnedSlice(testing.allocator);
+}
+
+test "the screen's bottom while the view shows the history, live, the view left where it was" {
+    var f = try Fixture.init(10, 3);
+    defer f.deinit();
+    var bottom: render.Renderer = .{};
+    defer bottom.deinit(testing.allocator);
+    for (0..10) |i| f.model.feed(if (i == 0) "line0" else (&[_]u8{ '\r', '\n', 'l', 'i', 'n', 'e', '0' + @as(u8, @intCast(i)) }));
+    const at_bottom = try frames(&f, &bottom);
+    try testing.expect(at_bottom.bottom == null);
+    f.model.scroll(-4);
+    const up = try frames(&f, &bottom);
+    const top_row = try rowText(up.main, 0);
+    defer testing.allocator.free(top_row);
+    try testing.expectEqualStrings("line3     ", top_row);
+    const foot = try rowText(up.bottom.?, 2);
+    defer testing.allocator.free(foot);
+    try testing.expectEqualStrings("line9     ", foot);
+    // New output: the bottom follows it, and the view stays on the history.
+    f.model.feed("\r\nnew");
+    const later = try frames(&f, &bottom);
+    const live = try rowText(later.bottom.?, 2);
+    defer testing.allocator.free(live);
+    try testing.expectEqualStrings("new       ", live);
+    try testing.expect(later.main.scroll_offset + later.main.rows < later.main.scroll_total);
+}
+
+test "the bottom's capture leaves the frame's own updates: a row seen in both changes in both" {
+    var f = try Fixture.init(10, 3);
+    defer f.deinit();
+    var bottom: render.Renderer = .{};
+    defer bottom.deinit(testing.allocator);
+    for (0..6) |i| f.model.feed(if (i == 0) "a0" else (&[_]u8{ '\r', '\n', 'a', '0' + @as(u8, @intCast(i)) }));
+    f.model.scroll(-1);
+    _ = try frames(&f, &bottom);
+    // The view's last row is the screen's middle one: rewrite it.
+    f.model.feed("\x1b[2;1HXX");
+    const next = try frames(&f, &bottom);
+    const seen = try rowText(next.main, 2);
+    defer testing.allocator.free(seen);
+    try testing.expectEqualStrings("XX        ", seen);
+    const foot = try rowText(next.bottom.?, 1);
+    defer testing.allocator.free(foot);
+    try testing.expectEqualStrings("XX        ", foot);
+}

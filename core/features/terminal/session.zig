@@ -73,6 +73,12 @@ pub const Session = struct {
     reaped: bool = false,
     /// Only used from the thread that draws (the app main thread).
     renderer: render.Renderer = .{},
+    /// The screen's bottom while the view shows the history, when the app
+    /// asked for it (`want_bottom`, a Claude pane): its foot stays drawn at the
+    /// pane's bottom as the owner scrolls. Main thread only, like `renderer`.
+    bottom: render.Renderer = .{},
+    want_bottom: bool = false,
+    has_bottom: bool = false,
     /// Only used by the reader thread.
     local_urls: local_url.Detector = undefined,
     /// Synchronized output (DEC mode 2026, plan 19 phase E): while the
@@ -128,6 +134,7 @@ pub const Session = struct {
         self.reader.join();
         self.child.finish(self.reaped);
         self.renderer.deinit(self.gpa);
+        self.bottom.deinit(self.gpa);
         self.local_urls.deinit();
         self.model.destroy();
         self.gpa.destroy(self);
@@ -194,9 +201,13 @@ pub const Session = struct {
             return &self.renderer.frame;
         }
         const captured = self.renderer.capture(self.gpa, &self.model.terminal, &self.model.search);
+        // Right after, in the same lock: see Renderer.captureBottom.
+        const bottom = if (captured) |_| (if (self.want_bottom) self.bottom.captureBottom(self.gpa, &self.model.terminal) else false) else |_| false;
         self.unlock();
         try captured;
         self.has_frame = true;
+        self.has_bottom = bottom catch false;
+        if (self.has_bottom) _ = try self.bottom.build(self.gpa, null);
         return self.renderer.build(self.gpa, &self.model.search);
     }
 
