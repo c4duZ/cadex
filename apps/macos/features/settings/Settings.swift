@@ -62,6 +62,9 @@ public struct Settings: Equatable, Sendable {
         /// The window's opacity, 1 solid: below it the frame, the sidebar and the panes become one
         /// glass in the theme's color over the desktop or the window behind (owner, 2026-11-18).
         public var windowOpacity: Double = 1
+        /// "auto", "system" or "cadex": the system's full screen is a Space over black, where a
+        /// translucent window shows black; Cadex's covers the screen over the wallpaper (2026-11-24).
+        public var fullScreen = "auto"
         /// A path, or nil for no background image.
         public var backgroundImage: String?
         public var backgroundOpacity: Double = 0.5
@@ -309,6 +312,7 @@ public struct Settings: Equatable, Sendable {
     /// appearance.windowOpacity: a thin dark tint already carries the text over a wallpaper (the
     /// owner's reference, 2026-11-18: 15 to 30%); under 10% nothing is left of the theme.
     public static let windowOpacityRange = 0.1...1.0
+    static let fullScreenModes = ["auto", "system", "cadex"]
     /// The opacity theme.toggle-translucent turns on when the window is solid: 80% looked milky,
     /// the owner wanted the wallpaper to show (2026-11-18).
     public static let translucentOpacity = 0.35

@@ -40,12 +40,13 @@ extension WorkspaceView {
     }
 
     /// The window's buttons and toolbar as the bar is. In full screen the toolbar stays off either
-    /// way (WindowSession hides it there, and gives it back on leaving by this state).
+    /// way (WindowSession hides it there, and gives it back on leaving by this state); in Cadex's
+    /// full screen the buttons go too, as the system's hides them (CadexWindow).
     func applyTopBarToWindow() {
         guard let window else { return }
         for kind in [NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton] {
-            window.standardWindowButton(kind)?.isHidden = topBarCollapsed
+            window.standardWindowButton(kind)?.isHidden = topBarCollapsed || window.isAnyFullScreen
         }
-        if !window.styleMask.contains(.fullScreen) { window.toolbar?.isVisible = !topBarCollapsed }
+        if !window.styleMask.contains(.fullScreen) { window.toolbar?.isVisible = !topBarCollapsed && !window.isAnyFullScreen }
     }
 }

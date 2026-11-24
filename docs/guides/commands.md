@@ -290,6 +290,7 @@ tema, por conta, por item da barra de status) e não estão aqui: o ⌘K os most
 | `view.jump` | Jump to a Task… | `cmd+j` |
 | `view.toggle-sidebar` | Show or Hide the Sidebar | `cmd+b` |
 | `window.new` | New Window | `cmd+shift+n` |
+| `window.toggle-full-screen` | Enter or Leave Full Screen | `ctrl+cmd+f` |
 | `workspace.open-folder` | Open Folder… | `cmd+o` |
 | `workspace.use-terminal-folder` | Use the Terminal's Folder |  |
 | `worktrees.edit-setup-hooks` | Edit Task Setup Hooks… |  |

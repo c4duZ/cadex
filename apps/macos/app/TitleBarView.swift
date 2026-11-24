@@ -190,7 +190,7 @@ final class TitleBarView: NSView {
         let center = NotificationCenter.default
         center.removeObserver(self)
         guard let window else { return }
-        for name in [NSWindow.didEnterFullScreenNotification, NSWindow.didExitFullScreenNotification] {
+        for name in [NSWindow.didEnterFullScreenNotification, NSWindow.didExitFullScreenNotification, CadexWindow.ownFullScreenDidChange] {
             center.addObserver(self, selector: #selector(windowChanged), name: name, object: window)
         }
         // AppKit tiles the window buttons again on many events (resize, focus, a screen or scale
@@ -206,7 +206,7 @@ final class TitleBarView: NSView {
     }
 
     @objc private func windowChanged() {
-        let full = window?.styleMask.contains(.fullScreen) == true
+        let full = window?.isAnyFullScreen == true
         searchLeading.constant = Self.searchStart(fullScreen: full)
         centerWindowButtons()
     }
@@ -241,7 +241,7 @@ final class TitleBarView: NSView {
     /// they move down to its middle, or they sit 3 pt above every other control (2026-11-17).
     /// macOS lays them out again on many events: this runs after each move of theirs.
     private func centerWindowButtons() {
-        guard let window, !window.styleMask.contains(.fullScreen) else { return }
+        guard let window, !window.isAnyFullScreen else { return }
         for (kind, mid) in zip([NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton], Self.windowButtonMids) {
             guard let button = window.standardWindowButton(kind), let container = button.superview else { continue }
             let middle = Self.height / 2

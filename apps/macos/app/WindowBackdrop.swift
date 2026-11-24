@@ -19,8 +19,13 @@ final class WindowBackdrop {
         var image: Image?
         var vibrancy = false
         var opacity = 1.0
+        /// appearance.fullScreen: "auto", "system" or "cadex".
+        var fullScreen = "auto"
 
         var translucent: Bool { opacity < 1 }
+        /// Cadex's full screen (CadexWindow): asked for, or "auto" with a translucent window, whose
+        /// glass showed black in the system's.
+        var ownFullScreen: Bool { fullScreen == "cadex" || (fullScreen == "auto" && translucent) }
     }
 
     /// The blurred image, made once per path and blur, not per frame.

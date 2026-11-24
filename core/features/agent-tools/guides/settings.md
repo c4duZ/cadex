@@ -63,6 +63,10 @@ Type, default, allowed values or range, and what it does.
 - `appearance.accent` (`"#RRGGBB"` or `""`, `""`): replaces the theme's accent; empty keeps it.
 - `appearance.highContrast` (bool, `false`).
 - `appearance.windowOpacity` (number 0.1–1, `1`): below 1 the window is glass over the desktop.
+- `appearance.fullScreen` (`"auto"` | `"system"` | `"cadex"`, `"auto"`): which full screen the green
+  button and ⌃⌘F give. The system's is a Space of its own over black (a translucent window shows
+  black); Cadex's covers the screen over the desktop, the menu bar and the Dock at the edges.
+  `"auto"`: Cadex's with `windowOpacity` below 1.
 - `appearance.vibrancy` (bool, `false`).
 - `appearance.backgroundImage` (path or `null`, `null`): an image behind the panes.
 - `appearance.backgroundOpacity` (number 0–1, `0.5`), `appearance.backgroundBlur` (number 0–50, `0`).

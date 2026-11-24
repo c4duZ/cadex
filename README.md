@@ -100,7 +100,8 @@ Tudo tem teto de gasto, de duração e de agentes, e o Cadex mostra antes o que 
 
 ### Do seu jeito
 - **Temas:** centenas, com busca e importação; claro e escuro, cor de destaque, alto contraste,
-  janela translúcida e imagem de fundo.
+  janela translúcida e imagem de fundo. A tela cheia do Cadex (Mac) deixa o fundo de tela aparecer
+  atrás da janela translúcida.
 - **Barra de status:** escolha e arraste os itens; o que fica desligado não pesa nada.
 - **Tudo é arquivo de texto:** as configurações e os atalhos no `settings.json`, as automações e os
   temas em arquivos, que o Cadex relê na hora. Um agente configura o Cadex editando-os
@@ -191,6 +192,7 @@ qualquer atalho pode ser trocado.
 | Abrir o agente de uma conta / uso das contas | `⇧⌘A` / `⇧⌘U` |
 | Preview web / escolher elemento | `⇧⌘H` / `⇧⌘C` |
 | Buscar no terminal / limpar | `⌘F` / `⌘L` |
+| Tela cheia | `⌃⌘F` |
 | Configurações | `⌘,` |
 
 ## Configurar

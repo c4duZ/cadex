@@ -126,7 +126,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let session = WindowSession(app: self, folder: folder, isMain: false)
         sessions.append(session)
         if let keymap { session.applyKeymap(keymap) }
-        if source.window.styleMask.contains(.fullScreen) {
+        if source.window.isAnyFullScreen {
             session.window.center()
         } else {
             session.window.setFrame(source.window.frame.offsetBy(dx: 28, dy: -28), display: false)
@@ -314,6 +314,9 @@ let app = NSApplication.shared
 // Run as a regular app (Dock icon, menu bar) even when launched as a bare
 // executable during development, before there is an .app bundle.
 app.setActivationPolicy(.regular)
+// ⌃⌘F is window.toggle-full-screen, in the menus as every command; AppKit's own "Enter Full Screen"
+// item would be a second one with the same key (2026-11-24).
+UserDefaults.standard.set(false, forKey: "NSFullScreenMenuItemEverywhere")
 // The bare executable has no bundle, so no icon: the Dock showed a generic
 // one in development while Cadex.app had ours (owner, 2026-10-19).
 if Bundle.main.bundleIdentifier == nil {

@@ -66,6 +66,13 @@ temas que ele já usava em outros apps.
   desenha o fundo dela, como no navegador). O vidro é sempre fosco: o fundo de tela nítido sob um tom fino
   brigava com o texto (o dono, 2026-11-18, uma ilustração verde e clara). ⌘K:
   theme.toggle-translucent (100% ou 35%: o fundo de tela aparece forte, escurecido pelo tema, como na referência do dono; 80% ficava leitoso) e theme.toggle-vibrancy. Sem efeito no alto contraste.
+- Tela cheia (appearance.fullScreen: "auto", "system" ou "cadex", padrão "auto"; o dono,
+  2026-11-24): a do sistema põe a janela num Space só dela sobre o preto, e a janela translúcida
+  mostrava preto e não o fundo de tela. A do Cadex (`apps/macos/app/CadexWindow.swift`) cobre a tela no
+  Space da mesa, por cima da barra de menus e do Dock, que voltam ao encostar o ponteiro na borda;
+  sem os botões da janela, sem mover nem redimensionar, e o tamanho segue a tela se ela mudar. Não
+  vira um Space próprio. "auto" usa a do Cadex com a janela translúcida. O botão verde, ⌃⌘F e
+  window.toggle-full-screen entram e saem da escolhida; o Esc não sai de nenhuma.
 
 - Claro e escuro (plano 15, fase B): com "seguir o sistema", um tema para o modo escuro e outro
   para o claro (appearance.darkTheme, appearance.lightTheme; vazio usa appearance.theme). Na página

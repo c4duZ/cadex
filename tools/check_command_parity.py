@@ -37,6 +37,8 @@ MAC_ONLY = {"project.edit", "project.create", "project.new-terminal", "project.n
             "pane.zoom",
             # The translucent window and vibrancy from ⌘K (2026-11-18): the Windows app has no glass yet.
             "theme.toggle-translucent", "theme.toggle-vibrancy",
+            # Cadex's full screen over the desktop (2026-11-24), for the translucent window: Mac first.
+            "window.toggle-full-screen",
             # The status bar's cards (2026-11-18): the coffee's "For 1 hour" and Stop a port, Mac first.
             "power.keep-awake-hour", "ports.stop",
             # Next and previous tab (plan 37, the UX audit), Mac first.

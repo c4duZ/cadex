@@ -47,6 +47,11 @@ extension WindowSession {
                 self.app.newWindow(from: self)
             }))
         commands.register(Command(
+            // The system's or Cadex's, by appearance.fullScreen (CadexWindow); ⌃⌘F as on any Mac app.
+            id: "window.toggle-full-screen", title: T("Enter or Leave Full Screen", "Entrar ou sair da tela cheia"),
+            keywords: ["full screen", "fullscreen", "tela cheia"], category: .view, defaultShortcut: "ctrl+cmd+f",
+            action: .run { [weak self] in self?.window.toggleFullScreen(nil) }))
+        commands.register(Command(
             // The sidebar (ADR 0039): ⌘B shows and hides it.
             id: "view.toggle-sidebar", title: T("Show or Hide the Sidebar", "Mostrar ou esconder a barra lateral"),
             keywords: ["sidebar", "explorer", "column", "painel", "coluna", "barra lateral"], category: .view, defaultShortcut: "cmd+b",

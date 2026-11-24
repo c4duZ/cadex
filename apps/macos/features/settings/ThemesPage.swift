@@ -120,6 +120,13 @@ final class ThemesPage {
                              control: SettingsPage.slider(a.windowOpacity, range: Settings.windowOpacityRange, format: "%.0f%%", shown: { $0 * 100 }) { [store] value in
                                  store.update { $0.appearance.windowOpacity = (value * 20).rounded() / 20 }
                              }),
+            SettingsPage.row(T("Full screen", "Tela cheia"),
+                             T("The system's puts the window on a screen of its own over black, so a translucent window shows black. Cadex's covers the screen over your desktop, with the menu bar and the Dock at the edges. Automatic uses Cadex's with a translucent window.",
+                               "A do sistema põe a janela numa tela só dela sobre o preto, e a janela translúcida mostra preto. A do Cadex cobre a tela sobre a sua mesa, com a barra de menus e o Dock nas bordas. Automática usa a do Cadex com a janela translúcida."),
+                             control: SettingsPage.popup([(T("Automatic", "Automática"), "auto"), (T("System", "Do sistema"), "system"), ("Cadex", "cadex")],
+                                                         selected: a.fullScreen) { [store] value in
+                                 store.update { $0.appearance.fullScreen = value }
+                             }),
             SettingsPage.row(T("Vibrancy", "Vibrância"),
                              T("The window's frame turns frosted over what is behind it. A translucent window is always frosted.",
                                "A moldura da janela fica fosca sobre o que está atrás dela. A janela translúcida é sempre fosca."),

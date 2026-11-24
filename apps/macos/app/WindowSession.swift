@@ -137,6 +137,9 @@ final class WindowSession: NSObject, NSWindowDelegate {
         window = Self.makeWindow()
         super.init()
         window.delegate = self
+        // Cadex's full screen (CadexWindow): the window's buttons and the toolbar go and come back.
+        NotificationCenter.default.addObserver(self, selector: #selector(ownFullScreenChanged),
+                                               name: CadexWindow.ownFullScreenDidChange, object: window)
         setUpCommands()
         connectWindow()
         let current = settings.store.settings
@@ -266,6 +269,7 @@ final class WindowSession: NSObject, NSWindowDelegate {
 
     func applyLooks(_ looks: WindowBackdrop.Looks) {
         workspace?.setLooks(looks)
+        (window as? CadexWindow)?.usesOwnFullScreen = looks.ownFullScreen
     }
 
     // MARK: Opening things
@@ -303,6 +307,10 @@ final class WindowSession: NSObject, NSWindowDelegate {
     /// screen; the title bar view moves to the edge (TitleBarView).
     func windowWillEnterFullScreen(_ notification: Notification) {
         window.toolbar?.isVisible = false
+    }
+
+    @objc private func ownFullScreenChanged() {
+        workspace?.applyTopBarToWindow()
     }
 
     func windowDidExitFullScreen(_ notification: Notification) {

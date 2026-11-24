@@ -127,9 +127,9 @@ final class SettingsBridge {
 
     /// The window's looks from the settings; none of them in high contrast (no transparency).
     static func looks(_ a: Settings.Appearance, plain: Bool) -> WindowBackdrop.Looks {
-        guard !plain else { return .init() }
+        guard !plain else { return .init(fullScreen: a.fullScreen) }
         return .init(image: a.backgroundImage.map { .init(path: $0, opacity: a.backgroundOpacity, blur: a.backgroundBlur) },
-                     vibrancy: a.vibrancy, opacity: a.windowOpacity)
+                     vibrancy: a.vibrancy, opacity: a.windowOpacity, fullScreen: a.fullScreen)
     }
 
     /// "~/.claude-x" in settings.json, the full folder in the app.
