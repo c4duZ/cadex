@@ -37,6 +37,11 @@ extension SessionKit {
         // keeps no scrollback, so Cadex's dressing, search and scrollbar marks have nothing to work on
         // (the owner and a friend, 2026-11-20). Its own switch for the classic one, from the binary.
         env["CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN"] = "1"
+        // No agent view: ← on an empty prompt sent the session to the background and brought it back
+        // full-screen for good, past the switch above (tested in a pty on 2.1.331), and its "← N
+        // agents" counted background sessions parked for days (the owner, 2026-11-24: "odeio essa
+        // seta"). Cadex lists background sessions by `claude agents --json`, in its own environment.
+        env["CLAUDE_CODE_DISABLE_AGENT_VIEW"] = "1"
         if let token, toolsPath != nil {
             env["CADEX_SESSION_TOKEN"] = token
             // A test instance's own socket (CADEX_SOCKETS_DIR): its sessions'

@@ -57,6 +57,11 @@
 - `CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1` na `env` do `--settings`: o desenho "classic" do Claude
   Code, que o 2.1.329 trocava em algumas máquinas pela tela cheia (a "TUI trial", `/tui fullscreen`),
   com a caixa presa no pé e sem histórico no terminal, onde o Cadex não veste nem busca (2026-11-20).
+- `CLAUDE_CODE_DISABLE_AGENT_VIEW=1` na mesma `env`: sem a vista de agentes. A ← com a caixa vazia
+  mandava a sessão para o segundo plano e a trazia de volta em tela cheia, de vez, apesar da
+  variável acima (testado num pty, 2.1.331), e o "← N agents" contava sessões paradas havia dias
+  (o dono, 2026-11-24). O Cadex lista as sessões em segundo plano pelo `claude agents --json`, com
+  ambiente próprio.
 - `CLAUDE_CODE_FORCE_SYNC_OUTPUT=1` na `env` do `--settings` (`synchronizedOutput`): o terminal respeita
   o modo DEC 2026 (plano 19, fase E) e, com ele, o Claude Code manda cada redesenho num bloco
   (testado em 2026-11-15). Com agentTools.enabled (`agentToolsOnPath`), a pasta do `cadex` vai primeiro no `PATH` do
