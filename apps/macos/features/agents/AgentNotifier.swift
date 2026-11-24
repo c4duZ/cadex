@@ -40,6 +40,8 @@ public final class AgentNotifier: NSObject {
 
     /// Each stop that notifies, before it is posted (the tests' window in).
     var didStop: ((AgentSession, AgentStop) -> Void)?
+    /// Each notification as it is posted, and whether quietly (the tests' window in).
+    var didPost: ((AgentSession, AgentStop, Bool) -> Void)?
     /// What the session's terminal heard from the agent (OSC 7501), when it
     /// runs in a Cadex terminal; the app says. Without it, the end of the log.
     public var reportedStop: ((AgentSession) -> AgentStop?)?
@@ -115,10 +117,11 @@ public final class AgentNotifier: NSObject {
         guard wants(stop), !isLooking(session) else { return }
         didStop?(session, stop)
         guard !mutedMachines.contains(session.machine ?? "local") else { return }
-        // A finished turn is quiet while you are in Cadex: the bell's list and the tab say it. A
-        // banner and a sound on every finished turn taught people to turn all notifications off,
-        // permission ones too (UX audit, 2026-11-18). Permission and questions still interrupt.
-        if case .finished = stop, appIsActive() { return }
+        // A finished turn while you are in Cadex (another tab or project): the banner without its
+        // sound. It used to post nothing there (UX audit, 2026-11-18: a sound on every turn taught
+        // people to turn them all off), and the owner, in Cadex all day, missed most stops (the
+        // owner, 2026-11-24: "muitas vezes o Cadex não avisa quando a sessão parou").
+        if case .finished = stop, appIsActive() { return post(session, stop, quiet: true) }
         post(session, stop)
     }
 
@@ -134,9 +137,11 @@ public final class AgentNotifier: NSObject {
         }
     }
 
-    private func post(_ session: AgentSession, _ stop: AgentStop) {
+    /// `quiet`: the banner without the kind's sound.
+    private func post(_ session: AgentSession, _ stop: AgentStop, quiet: Bool = false) {
+        didPost?(session, stop, quiet)
         post(id: session.id, agent: session.account.provider == .codex ? "Codex" : "Claude", project: AgentProject.of(session.cwd).name,
-             account: session.account.name, name: session.name, stop)
+             account: session.account.name, name: session.name, stop, quiet: quiet)
     }
 
     /// You went to the session's terminal: what it said is read, so its
@@ -177,7 +182,7 @@ public final class AgentNotifier: NSObject {
         }
     }
 
-    private func post(id: String, agent: String, project: String, account: String, name: String, _ stop: AgentStop) {
+    private func post(id: String, agent: String, project: String, account: String, name: String, _ stop: AgentStop, quiet: Bool = false) {
         guard Self.canPost else { return }
         let center = UNUserNotificationCenter.current()
         askPermission()
@@ -187,7 +192,7 @@ public final class AgentNotifier: NSObject {
         content.subtitle = text.subtitle
         content.body = text.body
         let kind = AgentNotifyText.kind(of: stop)
-        content.sound = AgentNotifySound.sound(sounds[kind] ?? "default", kind: kind)
+        content.sound = quiet ? nil : AgentNotifySound.sound(sounds[kind] ?? "default", kind: kind)
         content.threadIdentifier = id
         content.userInfo = ["session": id]
         // One per session: a new stop replaces the one before it.

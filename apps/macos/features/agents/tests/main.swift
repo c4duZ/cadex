@@ -155,6 +155,9 @@ let exitCode = await Checks.run([
         notifier.stopDelay = 0
         var stops: [String] = []
         notifier.didStop = { session, _ in stops.append(session.name) }
+        var quiet: [Bool] = []
+        notifier.didPost = { _, _, silent in quiet.append(silent) }
+        notifier.appIsActive = { false }
         notifier.kinds = .init(permission: false, question: true, finished: true)
         let me = ProcessInfo.processInfo.processIdentifier
         let file = home + "/.claude/sessions/1.json"
@@ -174,6 +177,17 @@ let exitCode = await Checks.run([
         controller.reload()
         notifier.changed()
         expect(stops == ["repo-1"], "you were looking: none")
+        expect(quiet == [false], "Cadex not in front: with its sound: \(quiet)")
+        // In Cadex, another tab: the finished turn still notifies, without its sound (2026-11-24).
+        notifier.isLooking = { _ in false }
+        notifier.appIsActive = { true }
+        write(file, #"{"pid":\#(me),"sessionId":"s1","cwd":"\#(home)/repo/sub","name":"repo-1","status":"busy","statusUpdatedAt":1792000500000}"#)
+        controller.reload()
+        notifier.changed()
+        write(file, #"{"pid":\#(me),"sessionId":"s1","cwd":"\#(home)/repo/sub","name":"repo-1","status":"idle","statusUpdatedAt":1792000600000}"#)
+        controller.reload()
+        notifier.changed()
+        expect(quiet == [false, true], "in Cadex, looking elsewhere: the banner, quiet: \(quiet)")
         expect(!notifier.wants(.permission(tool: "Bash", subject: "")) && notifier.wants(.question("")) && notifier.wants(.finished("")))
         notifier.kinds = .init(permission: false, question: false, finished: false)
         expect(!controller.isRunning, "all three off: it stops reading")
