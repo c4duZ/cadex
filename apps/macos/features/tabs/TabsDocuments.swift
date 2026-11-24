@@ -65,7 +65,7 @@ extension TabsController {
     private func dock(_ document: TabDocument, in tab: Tab) {
         let pane = nextPane
         nextPane += 1
-        tab.dock(pane: pane, content: .document(document), first: Self.documentsOnLeft)
+        tab.dock(pane: pane, content: .document(document), first: Self.documentsOnLeft, share: document.besideShare)
         wire(.document(document), pane: pane, in: tab)
         refreshBar()
     }

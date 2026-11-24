@@ -552,6 +552,11 @@ let exitCode = await Checks.run(groupChecks + [
         let docked = three.docking(9, first: false)
         expect(docked == .split(.horizontal, three, .leaf(9), ratio: 0.5))
         expect(three.docking(9, first: true) == .split(.horizontal, .leaf(9), three, ratio: 0.5))
+        // A web preview takes 70% beside the terminals, on either side (2026-11-24).
+        if case .split(_, let rest, .leaf(9), let terminals) = three.docking(9, first: false, share: 0.7) {
+            expect(rest == three && abs(terminals - 0.3) < 0.001, "right: the terminals 30%: \(terminals)")
+        } else { expect(false, "docked at the right") }
+        expect(three.docking(9, first: true, share: 0.7) == .split(.horizontal, .leaf(9), three, ratio: 0.7), "left: the preview 70%")
         guard case .split(_, let rest, _, let ratio) = docked.balanced(keeping: 9) else { return expect(false) }
         expect(ratio == 0.5, "the file keeps half: \(ratio)")
         expect(rest == three.balanced(), "the panes beside it share theirs evenly")

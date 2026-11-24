@@ -35,6 +35,9 @@ public final class PreviewDocument: NSObject, TabDocument, WKNavigationDelegate,
     @MainActor public static var extraBarItems: ((PreviewDocument) -> [NSView])?
     /// The bar is the pane's header (the PreviewOne mockup).
     public var barIsHeader: Bool { true }
+    /// Beside a terminal it takes 70% of the tab, the sidebar already closed for it: a page
+    /// needs the room, the terminal a column (the owner, 2026-11-24).
+    public var besideShare: CGFloat { 0.7 }
     /// The page shown now (nil before the first load).
     public var currentURL: URL? { web.url }
     let progress = NSProgressIndicator()

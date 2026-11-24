@@ -140,8 +140,8 @@ final class Tab {
 
     /// `content` beside all the panes, half the tab, at the left (`first`)
     /// or the right; it takes the focus.
-    func dock(pane: Int, content: Pane, first: Bool) {
-        layout.tree = layout.tree.docking(pane, first: first)
+    func dock(pane: Int, content: Pane, first: Bool, share: CGFloat = 0.5) {
+        layout.tree = layout.tree.docking(pane, first: first, share: share)
         panes[pane] = content
         layout.panes[pane] = content.view
         layout.syncSubviews()

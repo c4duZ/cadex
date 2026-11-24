@@ -21,7 +21,7 @@
   da spec (o painel que já o mostra, troca do painel de documento sem mudança não salva, encostado
   num lado com metade da aba, divisão à direita, nova aba sem espaço); `keeping` é o documento que
   pediu, que não é trocado. Encostado (issue #5): Tab.dockedPane é um documento num lado da
-  divisão de fora; `PaneTree.balanced(keeping:)` reequilibra só o outro lado; o lado vem de
+  divisão de fora, com a parte que TabDocument.besideShare pede (metade; o preview web 70%); `PaneTree.balanced(keeping:)` reequilibra só o outro lado; o lado vem de
   documentsOnLeft (tabs.documentSide, que o app define).
   `PaneHeaderView.swift`: o cabeçalho de todo painel (plano 28 fase B, components.pane.header: o
   estado, o nome, de onde é e, à direita, o custo e o tempo; +, maximizar e ✕ só ao passar o

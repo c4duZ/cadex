@@ -27,9 +27,12 @@ public protocol TabDocument: AnyObject {
     /// A page of the app (a project's, the board): alone in its tab it takes the whole center,
     /// flat, with no pane box (the Project and Board mockups).
     var isPage: Bool { get }
+    /// Its share of the tab when it docks beside the terminals (0.5: half).
+    var besideShare: CGFloat { get }
 }
 
 public extension TabDocument {
     var barIsHeader: Bool { false }
     var isPage: Bool { false }
+    var besideShare: CGFloat { 0.5 }
 }

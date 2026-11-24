@@ -101,7 +101,9 @@ seções TitleBar, Terminals e Pane; tokens components.tab e components.pane em
   foco); (2) a aba ativa já tem um painel de documento sem mudança não salva → o novo toma o lugar
   dele (o antigo fecha); (3) senão, o documento entra encostado num lado da aba, com metade dela e o
   foco, e os painéis que já existiam ficam na outra metade, do jeito que estavam (issue #5, o dono,
-  2026-10-21); o lado é a configuração "Lado do arquivo aberto ao lado" (`tabs.documentSide`,
+  2026-10-21; o preview web entra com 70% da aba e os terminais ficam com 30%, além de a barra
+  lateral fechar para ele: a página precisa do espaço, o terminal de uma coluna, o dono,
+  2026-11-24); o lado é a configuração "Lado do arquivo aberto ao lado" (`tabs.documentSide`,
   direita por padrão, ou esquerda); (4) com um documento já encostado e não salvo, o painel com
   foco divide para a direita; (5) sem espaço → nova aba. Abrir vários arquivos ao lado não empilha
   divisões.

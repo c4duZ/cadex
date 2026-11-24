@@ -123,8 +123,9 @@ indirect enum PaneTree: Equatable {
 
     /// `pane` docked beside the whole tree, half and half: first (left) or
     /// second (right).
-    func docking(_ pane: Int, first: Bool) -> PaneTree {
-        first ? .split(.horizontal, .leaf(pane), self, ratio: 0.5) : .split(.horizontal, self, .leaf(pane), ratio: 0.5)
+    /// `share`: the docked pane's part of the width (0.5, half).
+    func docking(_ pane: Int, first: Bool, share: CGFloat = 0.5) -> PaneTree {
+        first ? .split(.horizontal, .leaf(pane), self, ratio: share) : .split(.horizontal, self, .leaf(pane), ratio: 1 - share)
     }
 
     /// How many panes this subtree lines up along `axis`: a split the same
