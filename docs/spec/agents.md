@@ -315,8 +315,8 @@ de leitura (só enquanto aparece) passam a valer para o lugar novo.
   Cadex nos Ajustes valem): o Cadex copia o escolhido para `~/Library/Sounds` como "Cadex
   Permission" (Question, Finished), onde o sistema procura os sons de um app fora de sandbox.
 - Ao ir ao terminal de um agente, a notificação dele sai da Central de Notificações.
-- Com o Cadex na frente e você noutro terminal, o "terminou" avisa sem som; permissão e pergunta
-  tocam o som delas. Antes ele não avisava nada com o Cadex na frente, e quem passa o dia no Cadex
+- Todo tipo avisa com o som dele, também com o Cadex na frente; só o terminal que você está olhando
+  não avisa. Antes o "terminou" não avisava nada com o Cadex na frente, e quem passa o dia no Cadex
   perdia quase toda parada (o dono, 2026-11-24).
 - Clicar leva ao terminal do agente, trazendo a janela, o projeto e a aba. Não avisa enquanto você
   olha aquele terminal na janela da frente. Uma notificação por sessão: a nova troca a anterior.
