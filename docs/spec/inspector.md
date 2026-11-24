@@ -15,8 +15,9 @@ grafo do git foram para a página do projeto (`projects.md`) e para uma página 
   (view.toggle-sidebar) fecha e abre a barra inteira; a vista e a largura voltam ao reabrir
   (inspector.visible, inspector.tab, inspector.width).
 - **O que ela mostra** segue o projeto escolhido na barra lateral, ou a tarefa do terminal com
-  foco; nunca o `cd` de um terminal (Files e Changes não pulam de pasta enquanto você navega no
-  shell).
+  foco; Changes e a busca não pulam de pasta enquanto você navega no shell. A árvore de Files desce
+  para a subpasta do terminal com foco quando ele está numa (o terminal em `app/` mostra `app/`, com
+  o nome do projeto ou da tarefa e a subpasta no cabeçalho; o dono, 2026-11-24).
 - **O cabeçalho em palavras**, no topo da vista: numa tarefa, "tarefa de <projeto> · contra
   <ponto de partida>"; no main, o nome e o caminho.
 - **Files** (o explorer de `explorer.md`): a árvore de arquivos da pasta do projeto ou da tarefa,
@@ -52,6 +53,6 @@ grafo do git foram para a página do projeto (`projects.md`) e para uma página 
 - [x] ⇧⌘2, ⌃⌘1 e ⌃⌘2 mostram Files e Changes na barra lateral; ⌘B abre e fecha.
 - [x] O quadro fecha a barra e sair dele a devolve; uma página no centro não a fecha (conferido
   no app, plano 36 F).
-- [x] Files e Changes seguem o projeto ou a tarefa, não o `cd`.
+- [x] Changes segue o projeto ou a tarefa, não o `cd`; Files mostra a subpasta do terminal.
 - [x] O cabeçalho em palavras e "N mudanças · ver" abrindo Changes (conferido no app, plano 38 D).
 - [ ] Com a barra fechada, nada é lido (medido no `make perf`).

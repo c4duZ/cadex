@@ -123,13 +123,16 @@ extension WindowSession {
         guard let sidebar = workspace?.sidebar else { return }
         let home = NSHomeDirectory()
         let path = root.hasPrefix(home) ? "~" + root.dropFirst(home.count) : root
-        if let task = WorktreesController.shared.store.task(root) {
-            let project = TitleBarView.location(of: root).project
+        // A subfolder (the terminal's, showFilesWhereTerminalIs) is named by the project or task it is in.
+        let top = Self.folder(root, isIn: folder.root) ? folder.root : root
+        let sub = top == root ? "" : String(root.dropFirst(top.count))
+        if let task = WorktreesController.shared.store.task(top) {
+            let project = TitleBarView.location(of: top).project
             let base = task.base.isEmpty ? "" : T(" · against \(task.base)", " · contra \(task.base)")
-            return sidebar.setFilesHead(title: Self.folderName(root), detail: T("task of \(project)", "tarefa de \(project)") + base)
+            return sidebar.setFilesHead(title: Self.folderName(top) + sub, detail: T("task of \(project)", "tarefa de \(project)") + base)
         }
-        let name = projects?.projects.first { $0.folder == root }?.name ?? Self.folderName(root)
-        sidebar.setFilesHead(title: name, detail: String(path))
+        let name = projects?.projects.first { $0.folder == top }?.name ?? Self.folderName(top)
+        sidebar.setFilesHead(title: name + sub, detail: String(path))
     }
 
     /// "N changes · see" at the end of Files, hidden while Changes shows.

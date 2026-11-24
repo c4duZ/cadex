@@ -271,8 +271,7 @@ extension WindowSession {
     private func connectFolder() {
         folder.onChange = { [weak self] root in
             guard let self else { return }
-            self.explorer?.setRoot(root)
-            self.showPanelFolder(root)
+            self.showFilesWhereTerminalIs()
             self.search?.setRoot(root, showHidden: self.explorer?.showHidden ?? true)
             self.markdown?.setRoot(root)
             self.git?.setFolder(root)

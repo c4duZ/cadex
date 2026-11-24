@@ -29,6 +29,8 @@ public final class ExplorerController: NSObject {
     private let message = NSTextField(labelWithString: "")
     private var messageTimer: Timer?
     private(set) var root: FileNode
+    /// The folder the tree shows (the terminal's subfolder, or the workspace's root).
+    public var rootPath: String { root.path }
     private var watcher: FileWatcher?
     /// The row whose name is being edited (ExplorerRename.swift).
     var renaming: FileNode?

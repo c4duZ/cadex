@@ -20,6 +20,7 @@ extension WindowSession {
         // big to index whole (docs/spec/search.md).
         search?.setFocus(folder)
         guard followTerminal else { return }
+        showFilesWhereTerminalIs()
         // Inside the chosen project (or the task the terminal is in), Files and Changes show it, so a
         // `cd src` does not move the root (ADR 0038). A `cd` out of it is followed: the tree stayed on
         // the project with the terminal elsewhere (the owner, 2026-11-20: "ele deveria mudar").
@@ -64,5 +65,20 @@ extension WindowSession {
             return terminalFolderMoved(here)
         }
         if anchor != folder.root, WorkspaceFolder.allow(anchor) != nil { folder.open(anchor) }
+    }
+
+    /// Files shows the focused terminal's folder when it is under the root: a terminal in `app/` shows
+    /// `app/`, not the project's top (the owner, 2026-11-24: "se o terminal está em uma sub, a sub deve
+    /// aparecer"). Only the tree: git, the search and the title stay on the project.
+    func showFilesWhereTerminalIs() {
+        let root = folder.root
+        var shown = root
+        if followTerminal, let here = tabs?.activeTerminal?.currentDirectory, Self.folder(here, isIn: root) {
+            var isFolder: ObjCBool = false
+            if FileManager.default.fileExists(atPath: here, isDirectory: &isFolder), isFolder.boolValue { shown = here }
+        }
+        guard let explorer, explorer.rootPath != shown else { return showPanelFolder(shown) }
+        explorer.setRoot(shown)
+        showPanelFolder(shown)
     }
 }

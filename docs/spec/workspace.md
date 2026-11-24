@@ -36,7 +36,8 @@ explorer e da busca) e garantir que o app só mexe em arquivos dentro das pastas
     `cd /tmp`). Em 2026-10-20 a árvore deixou de seguir fora de repositórios, por medo do peso da
     pasta pessoal; o dono pediu de volta (2026-10-21), e os índices já ficam leves nela (começam na
     primeira busca e leem perto do terminal primeiro). `cd src` dentro de um projeto não troca o
-    workspace. A opção "A árvore segue o terminal"
+    workspace, mas a árvore mostra `src` (o dono, 2026-11-24: "se o terminal está em uma sub, a sub
+    deve aparecer"). A opção "A árvore segue o terminal"
     (explorer.followTerminal, ligada por padrão) desliga. O dono deu `cd` e a árvore ficou na pasta
     pessoal (2026-10-19).
 - Sem nenhuma dessas, o workspace é a pasta pessoal do usuário.

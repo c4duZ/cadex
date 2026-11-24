@@ -23,6 +23,8 @@
 - `FolderFollow.swift`: o workspace segue o projeto escolhido no trilho, ou a tarefa em que está o
   terminal com foco (plano 36 fase A, ADR 0038); só um terminal sem projeto o leva, a cada `cd`, à
   raiz do repositório git da pasta (ou à própria pasta); explorer.followTerminal desligado não segue nada.
+  Só a árvore desce para a subpasta do terminal com foco (`showFilesWhereTerminalIs`); git, busca e
+  título ficam no workspace.
 - Antes de montar qualquer tela, `main.swift` define Strings.language pelo general.language (ADR
   0015); "Reabrir agora" nas configurações e a atualização (`startUpdates`) saem como de costume e um
   shell abre o Cadex de novo (`openAgain`), levando as variáveis CADEX_ (uma instância de teste
