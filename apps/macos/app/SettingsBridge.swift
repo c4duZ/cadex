@@ -128,8 +128,12 @@ final class SettingsBridge {
     /// The window's looks from the settings; none of them in high contrast (no transparency).
     static func looks(_ a: Settings.Appearance, plain: Bool) -> WindowBackdrop.Looks {
         guard !plain else { return .init(fullScreen: a.fullScreen) }
+        let strong = a.glass == "strong"
+        // The strong glass is glass: a solid window turns translucent with it.
+        let opacity = strong ? min(a.windowOpacity, Settings.translucentOpacity) : a.windowOpacity
         return .init(image: a.backgroundImage.map { .init(path: $0, opacity: a.backgroundOpacity, blur: a.backgroundBlur) },
-                     vibrancy: a.vibrancy, opacity: a.windowOpacity, fullScreen: a.fullScreen)
+                     vibrancy: a.vibrancy, opacity: opacity, fullScreen: a.fullScreen,
+                     strongGlass: strong, glowBorders: a.paneBorder == "glow")
     }
 
     /// "~/.claude-x" in settings.json, the full folder in the app.

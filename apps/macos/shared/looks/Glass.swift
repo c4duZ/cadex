@@ -8,12 +8,38 @@ import AppKit
 public enum Glass {
     /// The window's opacity while it is translucent; nil when solid (or in high contrast).
     public private(set) static var opacity: CGFloat?
+    /// appearance.glass "strong" (the owner, 2026-11-24, after a fork's screenshot): the wallpaper
+    /// blurred behind everything through a clean dark frost, the panes glass boxes of their own,
+    /// and ⌘K, the menus and the cards in the same glass. "normal" keeps the window's frost, whose
+    /// own gray under a thin tint read dark and muddy.
+    public private(set) static var strong = false
+    /// appearance.paneBorder "glow": the panes' border in this color with a soft glow (the work
+    /// color, else the accent); nil keeps the line.
+    public private(set) static var glow: NSColor?
+
+    /// The system's frost for the glass: the strong one darker and cleaner, so the color under it
+    /// is the desktop's and the tint's, not the material's own gray.
+    public static var material: NSVisualEffectView.Material { strong ? .hudWindow : .underWindowBackground }
+    /// The frost's own look: dark under the strong glass whatever the window's, so it never goes
+    /// to the light gray the HUD material takes over bright windows (seen in a capture, 2026-11-24).
+    public static var frostAppearance: NSAppearance? { strong ? NSAppearance(named: .vibrantDark) : nil }
+    /// The tint's alpha over the frost: the window's opacity, and under the strong glass at least
+    /// `strongTint`, a dark glass the wallpaper shows through (the fork's screenshot) even with the
+    /// opacity at its floor (the owner keeps it at 0.1, which read as the frost's bare gray).
+    public static var tint: CGFloat? { opacity.map { strong ? max($0, strongTint) : $0 } }
+    static let strongTint: CGFloat = 0.62
+    /// The tint of what floats over the window (⌘K, ⌘P, the menus, the popovers, the cards,
+    /// settings): ten points above the window's, so it reads over the frame it covers (the owner,
+    /// 2026-11-24).
+    public static var panelTint: CGFloat? { tint.map { min($0 + 0.1, 1) } }
 
     /// Set by the app with the window's looks; a change tells the windows that build their
     /// colors once (DesignTokens.didChange).
-    public static func set(opacity new: CGFloat?) {
-        guard new != opacity else { return }
+    public static func set(opacity new: CGFloat?, strong newStrong: Bool = false, glow newGlow: NSColor? = nil) {
+        guard new != opacity || newStrong != strong || newGlow != glow else { return }
         opacity = new
+        strong = newStrong && new != nil
+        glow = newGlow
         NotificationCenter.default.post(name: DesignTokens.didChange, object: nil)
     }
 
@@ -30,7 +56,12 @@ public enum Glass {
         }
         let glass = pane ?? GlassPane(in: box)
         glass.isHidden = false
-        glass.tint.layer?.backgroundColor = color.withAlphaComponent(color.alphaComponent * opacity).cgColor
+        glass.frost.material = material
+        glass.frost.appearance = frostAppearance
+        // The strong glass: the window server's blur of the desktop, as the main window's.
+        glass.frost.isHidden = strong
+        glass.blurWindow()
+        glass.tint.layer?.backgroundColor = color.withAlphaComponent(color.alphaComponent * (panelTint ?? opacity)).cgColor
         box.layer?.backgroundColor = NSColor.clear.cgColor
     }
 }
@@ -39,13 +70,14 @@ public enum Glass {
 @MainActor
 final class GlassPane: NSView {
     let tint = NSView()
+    let frost = NSVisualEffectView()
 
     init(in box: NSView) {
         super.init(frame: box.bounds)
         autoresizingMask = [.width, .height]
-        let frost = NSVisualEffectView(frame: bounds)
+        frost.frame = bounds
         frost.blendingMode = .behindWindow
-        frost.material = .underWindowBackground
+        frost.material = Glass.material
         frost.state = .active
         frost.autoresizingMask = [.width, .height]
         tint.frame = bounds
@@ -58,6 +90,16 @@ final class GlassPane: NSView {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("GlassPane is created in code") }
+
+    /// The box's window blurred behind under the strong glass (WindowBlur), none otherwise.
+    func blurWindow() {
+        WindowBlur.set(window, radius: Glass.strong && !isHidden ? WindowBlur.strong : 0)
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        blurWindow()
+    }
 
     // The box's controls under the pointer, not this.
     override func hitTest(_ point: NSPoint) -> NSView? { nil }

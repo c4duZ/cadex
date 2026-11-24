@@ -31,6 +31,9 @@ public final class ThemeStore {
     public private(set) var darkFamily: ThemeFamily = .cadexNight
     public private(set) var lightFamily: ThemeFamily = .cadexNight
     public private(set) var current: Theme = .cadexNight
+    /// The theme's own accent, before appearance.accent replaces it: the panes' glowing border
+    /// follows the theme (the owner, 2026-11-24: "quero que seja a do tema").
+    public private(set) var themeAccent: RGB = Theme.cadexNight.interface.accent
     private var observers: [(Theme) -> Void] = []
     private var appearanceObservation: NSKeyValueObservation?
 
@@ -88,6 +91,7 @@ public final class ThemeStore {
         case .light: wantsDark = false
         }
         var next = (wantsDark ? darkFamily : lightFamily).theme(dark: wantsDark).onTerminalGround()
+        themeAccent = next.interface.accent
         if let accent = choice.accent {
             next.interface.accent = accent
             next.interface.tabActive = next.interface.chrome.mixed(accent, 0.22)

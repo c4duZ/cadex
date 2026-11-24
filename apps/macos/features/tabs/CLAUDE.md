@@ -50,7 +50,9 @@
 - Divisões: `PaneTree.swift` é a árvore pura (dividir, remover dando o espaço ao irmão, retângulos,
   ordem de leitura, vizinho por direção, proporção por caminho), testada. `PaneLayoutView.swift`
   posiciona os painéis pela árvore, cada um na caixa de `PaneChrome.swift` (cantos, linha, o anel do
-  foco, os sem foco a 92%), com 8 pt em volta e entre as caixas; o vão pega o mouse numa
+  foco, os sem foco a 92%; no vidro forte, caixas de vidro mais escuras que a moldura; com a borda
+  com brilho, appearance.paneBorder "glow", o anel na cor de Glass.glow com luz em volta; refaz as
+  caixas a cada DesignTokens.didChange), com 8 pt em volta e entre as caixas; o vão pega o mouse numa
   `DividerHandle` por cima de tudo (o cursor de redimensionar não briga com o do terminal) e mostra
   uma barra curta sob o ponteiro (tamanho mínimo de painel); o terminal com o respiro do mockup, a
   barra de rolagem dele na borda da caixa e o cartão do pé (`footCard`) onde o mockup Pane o põe. `balanced()` na árvore deixa

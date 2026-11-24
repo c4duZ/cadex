@@ -127,6 +127,20 @@ final class ThemesPage {
                                                          selected: a.fullScreen) { [store] value in
                                  store.update { $0.appearance.fullScreen = value }
                              }),
+            SettingsPage.row(T("Glass", "Vidro"),
+                             T("Strong blurs your desktop behind the whole window through a clean dark frost, turns the panes into glass boxes and puts ⌘K, the menus and the cards in the same glass. It makes a solid window translucent.",
+                               "O forte desfoca a sua mesa atrás da janela inteira num fosco escuro e limpo, faz dos painéis caixas de vidro e põe o ⌘K, os menus e os cartões no mesmo vidro. Ele deixa translúcida uma janela sólida."),
+                             control: SettingsPage.popup([(T("Normal", "Normal"), "normal"), (T("Strong", "Forte"), "strong")],
+                                                         selected: a.glass) { [store] value in
+                                 store.update { $0.appearance.glass = value }
+                             }),
+            SettingsPage.row(T("Pane borders", "Bordas dos painéis"),
+                             T("Glow draws each pane's border in the tab's or project's color, with a soft light around it.",
+                               "Com brilho, a borda de cada painel fica na cor da aba ou do projeto, com uma luz suave em volta."),
+                             control: SettingsPage.popup([(T("Line", "Linha"), "line"), (T("Glow", "Brilho"), "glow")],
+                                                         selected: a.paneBorder) { [store] value in
+                                 store.update { $0.appearance.paneBorder = value }
+                             }),
             SettingsPage.row(T("Vibrancy", "Vibrância"),
                              T("The window's frame turns frosted over what is behind it. A translucent window is always frosted.",
                                "A moldura da janela fica fosca sobre o que está atrás dela. A janela translúcida é sempre fosca."),

@@ -34,8 +34,13 @@ final class PaneChrome {
             layers.box.frame = frame
             layers.box.cornerRadius = radius
             layers.box.borderWidth = DesignTokens.Stroke.hairline
-            layers.box.backgroundColor = (lit ? P.Focused.bg : P.Idle.bg).cgColor
+            layers.box.backgroundColor = fill(lit: lit).cgColor
             layers.box.borderColor = (lit ? P.Focused.border : P.Idle.border).cgColor
+            if let glow = Glass.glow {
+                place(glow: glow, layers, frame: frame, radius: radius, lit: lit)
+                continue
+            }
+            layers.halo.shadowOpacity = 0
             // The mockup's `box-shadow: 0 0 0 3px`: a ring just outside the box.
             let spread = UILooks.pt(halo?.spread ?? 0)
             layers.halo.isHidden = !lit || halo == nil
@@ -44,6 +49,30 @@ final class PaneChrome {
             layers.halo.borderWidth = spread
             layers.halo.borderColor = halo?.color.cgColor
         }
+    }
+
+    /// The box's ground: the tokens', or under the strong glass a darker glass of its own, so each
+    /// pane reads as a box over the blurred wallpaper (the fork's screenshot, 2026-11-24); the
+    /// grounds are see-through under any glass, and the panes vanished into the frame.
+    private func fill(lit: Bool) -> NSColor {
+        guard Glass.strong else { return lit ? P.Focused.bg : P.Idle.bg }
+        return DesignTokens.solid(lit ? P.Focused.bg : P.Idle.bg).withAlphaComponent(lit ? 0.45 : 0.55)
+    }
+
+    /// appearance.paneBorder "glow": the border a ring in the glow's color with a soft light around
+    /// it, strong on the focused pane and faint on the others; the box's own line goes.
+    private func place(glow: NSColor, _ layers: (box: CALayer, halo: CALayer), frame: CGRect, radius: CGFloat, lit: Bool) {
+        layers.box.borderWidth = 0
+        layers.halo.isHidden = false
+        layers.halo.frame = frame
+        layers.halo.cornerRadius = radius
+        layers.halo.borderWidth = UILooks.pt(lit ? 2 : 1)
+        layers.halo.borderColor = glow.withAlphaComponent(lit ? 1 : 0.45).cgColor
+        // Without a ground the shadow follows the ring alone: light inside and outside its line.
+        layers.halo.shadowColor = glow.cgColor
+        layers.halo.shadowOffset = .zero
+        layers.halo.shadowRadius = UILooks.pt(lit ? 12 : 7)
+        layers.halo.shadowOpacity = lit ? 1 : 0.45
     }
 
     private func make() -> (box: CALayer, halo: CALayer) {

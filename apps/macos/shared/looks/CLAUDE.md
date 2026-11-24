@@ -30,7 +30,10 @@
   como a das configurações) e `didChange` avisa quem monta as cores uma vez. `Glass.swift`: o vidro
   das janelas à parte (⌘K, menus, popovers, configurações): Glass.dress põe o fosco e a cor na
   opacidade da janela debaixo das subviews de uma caixa, ou a cor sólida sem vidro; o app dá a
-  opacidade (Glass.set).
+  opacidade (Glass.set), o vidro forte (`strong`, `tint` a pelo menos 62%) e a cor da borda com brilho
+  (`glow`); o que flutua fica 10 pontos acima (`panelTint`). `WindowBlur.swift`: o desfoque de fundo
+  de janela do macOS (CGSSetWindowBackgroundBlurRadius, procurado na hora; sem ele, nada), que o vidro
+  forte usa no lugar do fosco do sistema, na janela e nos painéis à parte.
 - `FrameSheet.swift` e `FrameFields.swift` (plano 31 B): a folha da moldura (o fundo escurecido, o
   painel com as medidas da Nova tarefa, o título, o que vai acontecer, o formulário e o rodapé com
   Cancelar e o botão principal; Esc e ⌘↩) e os controles do sistema sem moldura dentro da caixa do

@@ -66,6 +66,18 @@ temas que ele já usava em outros apps.
   desenha o fundo dela, como no navegador). O vidro é sempre fosco: o fundo de tela nítido sob um tom fino
   brigava com o texto (o dono, 2026-11-18, uma ilustração verde e clara). ⌘K:
   theme.toggle-translucent (100% ou 35%: o fundo de tela aparece forte, escurecido pelo tema, como na referência do dono; 80% ficava leitoso) e theme.toggle-vibrancy. Sem efeito no alto contraste.
+- Vidro forte (appearance.glass: "normal" ou "strong", padrão "normal"; o dono, 2026-11-24, a partir
+  do print de quem mexeu no Cadex na máquina dele): o fundo de tela aparece atrás da janela inteira
+  desfocado e com as formas (o desfoque de fundo de janela do próprio macOS, o mesmo do "background
+  blur" do Ghostty e do iTerm2, raio 24), não o cinza liso do fosco do sistema, que lia escuro e
+  lamacento; a tinta do tema por cima a pelo menos 62%, os painéis caixas de vidro mais escuras que a
+  moldura, e o ⌘K, o ⌘P, os menus, os popovers, os cartões e as configurações no mesmo vidro. Liga a
+  janela translúcida se ela estava sólida. O que flutua sobre a janela fica 10 pontos de opacidade
+  acima dela, nos dois vidros. ⌘K: theme.toggle-strong-glass. Medido em 2026-11-24 contra o vidro
+  normal com o terminal jorrando: o WindowServer e o Cadex no mesmo nível (o desfoque troca o do fosco).
+- Bordas dos painéis (appearance.paneBorder: "line" ou "glow", padrão "line"): "glow" desenha a borda
+  de cada painel no destaque do tema (não a cor da aba nem o appearance.accent; o dono, 2026-11-24),
+  com um brilho suave, forte no painel com foco e fraco nos outros. ⌘K: theme.toggle-pane-glow.
 - Tela cheia (appearance.fullScreen: "auto", "system" ou "cadex", padrão "auto"; o dono,
   2026-11-24): a do sistema põe a janela num Space só dela sobre o preto, e a janela translúcida
   mostrava preto e não o fundo de tela. A do Cadex (`apps/macos/app/CadexWindow.swift`) cobre a tela no

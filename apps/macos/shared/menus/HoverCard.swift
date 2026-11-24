@@ -1,4 +1,5 @@
 import AppKit
+import UILooks
 
 /// A card over a status bar item while the pointer is on it: the usage of
 /// every account, the SSH hosts, the ports (the owner liked the usage one,
@@ -177,6 +178,8 @@ final class HoverCardPanel: NSPanel {
         if isVisible { setFrame(target, display: true) }
         box.arrowX = min(max(rect.midX - origin.x, 18), size.width - 18)
         box.needsDisplay = true
+        // The frost's cut follows the arrow's place and side (CardBox.layout).
+        box.needsLayout = true
     }
 
     private var target = NSRect.zero
@@ -220,13 +223,38 @@ private final class CardBox: NSView {
     /// Under its item: the same shape upside down, the arrow on top.
     var pointsUp = false { didSet { needsDisplay = true } }
 
-    override func draw(_ dirtyRect: NSRect) {
-        if pointsUp {
-            let flip = NSAffineTransform()
-            flip.translateX(by: 0, yBy: bounds.height)
-            flip.scaleX(by: 1, yBy: -1)
-            flip.concat()
+    /// Under the translucent window's glass: the system's frost cut to the card's shape, under
+    /// its content (the accounts and memory cards stayed solid while ⌘K and the menus were glass,
+    /// the owner, 2026-11-24).
+    private var frost: NSVisualEffectView?
+
+    override func layout() {
+        super.layout()
+        guard Glass.opacity != nil else {
+            frost?.removeFromSuperview()
+            return
         }
+        let glass = frost ?? NSVisualEffectView()
+        frost = glass
+        glass.blendingMode = .behindWindow
+        glass.state = .active
+        glass.material = Glass.material
+        glass.appearance = Glass.frostAppearance
+        glass.isHidden = Glass.strong
+        WindowBlur.set(window, radius: Glass.strong ? WindowBlur.strong : 0)
+        glass.frame = bounds
+        if glass.superview !== self { addSubview(glass, positioned: .below, relativeTo: nil) }
+        let size = bounds.size
+        glass.maskImage = NSImage(size: size, flipped: false) { [weak self] _ in
+            guard let self else { return false }
+            NSColor.black.setFill()
+            self.flipped(self.shape()).fill()
+            return true
+        }
+    }
+
+    /// The card's outline with its arrow, in this view's coordinates.
+    private func shape() -> NSBezierPath {
         let a = Self.arrow
         let body = NSRect(x: 0.5, y: a + 0.5, width: bounds.width - 1, height: bounds.height - a - 1)
         let path = NSBezierPath(roundedRect: body, xRadius: 10, yRadius: 10)
@@ -236,6 +264,32 @@ private final class CardBox: NSView {
         tip.line(to: NSPoint(x: arrowX + a + 1, y: a + 0.5))
         tip.close()
         path.append(tip)
+        return path
+    }
+
+    /// The path upside down when the card hangs under its item (the arrow on top).
+    private func flipped(_ path: NSBezierPath) -> NSBezierPath {
+        guard pointsUp else { return path }
+        let copy = path.copy() as! NSBezierPath
+        copy.transform(using: AffineTransform(scaleByX: 1, byY: -1))
+        copy.transform(using: AffineTransform(translationByX: 0, byY: bounds.height))
+        return copy
+    }
+
+    /// The card's color, at the glass's opacity under it.
+    private var ground: NSColor { Glass.panelTint.map { fill.withAlphaComponent(fill.alphaComponent * $0) } ?? fill }
+
+    override func draw(_ dirtyRect: NSRect) {
+        if pointsUp {
+            let flip = NSAffineTransform()
+            flip.translateX(by: 0, yBy: bounds.height)
+            flip.scaleX(by: 1, yBy: -1)
+            flip.concat()
+        }
+        let a = Self.arrow
+        let body = NSRect(x: 0.5, y: a + 0.5, width: bounds.width - 1, height: bounds.height - a - 1)
+        let path = shape()
+        let fill = ground
         fill.setFill()
         path.fill()
         stroke.setStroke()

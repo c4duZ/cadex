@@ -100,8 +100,9 @@ Tudo tem teto de gasto, de duração e de agentes, e o Cadex mostra antes o que 
 
 ### Do seu jeito
 - **Temas:** centenas, com busca e importação; claro e escuro, cor de destaque, alto contraste,
-  janela translúcida e imagem de fundo. A tela cheia do Cadex (Mac) deixa o fundo de tela aparecer
-  atrás da janela translúcida.
+  janela translúcida, vidro forte com o fundo de tela desfocado atrás e bordas com brilho (Mac), e
+  imagem de fundo. A tela cheia do Cadex (Mac) deixa o fundo de tela aparecer atrás da janela
+  translúcida.
 - **Barra de status:** escolha e arraste os itens; o que fica desligado não pesa nada.
 - **Tudo é arquivo de texto:** as configurações e os atalhos no `settings.json`, as automações e os
   temas em arquivos, que o Cadex relê na hora. Um agente configura o Cadex editando-os

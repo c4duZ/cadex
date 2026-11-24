@@ -47,6 +47,10 @@ final class PaneLayoutView: NSView {
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
+        // The glass or the glow changed (Glass.set): the boxes again.
+        NotificationCenter.default.addObserver(forName: DesignTokens.didChange, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.needsLayout = true }
+        }
     }
 
     @available(*, unavailable)

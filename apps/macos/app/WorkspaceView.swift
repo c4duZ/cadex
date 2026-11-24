@@ -219,9 +219,15 @@ final class WorkspaceView: NSView {
     /// The sidebar's own ground while it lies over the center in a translucent window.
     private func showOverlayGround() {
         let hidden = !(isNarrow && inspectorVisible && looks.translucent)
-        overlayFrost.isHidden = hidden
+        overlayFrost.isHidden = hidden || Glass.strong
         overlayTint.isHidden = hidden
     }
+
+    /// The window server's blur behind the window under the strong glass, none otherwise.
+    private func applyBlur() {
+        WindowBlur.set(window, radius: Glass.strong ? WindowBlur.strong : 0)
+    }
+
     private weak var drawer: DrawerView?
     private var drawerHeight: NSLayoutConstraint?
 
@@ -392,11 +398,19 @@ final class WorkspaceView: NSView {
         // Always frosted when translucent: a sharp wallpaper through a thin tint fought the text
         // (the owner's green illustration, 2026-11-18); blurred it is color under it, as in Orca.
         let vibrancy = looks.vibrancy, see = vibrancy || looks.translucent
-        Glass.set(opacity: looks.translucent ? looks.opacity : nil)
-        frost.isHidden = !see
+        Glass.set(opacity: looks.translucent ? looks.opacity : nil, strong: looks.strongGlass,
+                  glow: looks.glowBorders ? ThemeStore.shared.themeAccent.nsColor : nil)
+        frost.material = Glass.material
+        overlayFrost.material = Glass.material
+        frost.appearance = Glass.frostAppearance
+        overlayFrost.appearance = Glass.frostAppearance
+        // The strong glass: the window server's blur of the desktop, with its shapes, in place of
+        // the frost's flat gray (WindowBlur).
+        frost.isHidden = !see || Glass.strong
+        applyBlur()
         glass.isHidden = !looks.translucent
-        glass.layer?.backgroundColor = ui.chrome.color(alpha: looks.opacity).cgColor
-        overlayTint.layer?.backgroundColor = ui.chrome.color(alpha: looks.opacity).cgColor
+        glass.layer?.backgroundColor = ui.chrome.color(alpha: Glass.tint ?? looks.opacity).cgColor
+        overlayTint.layer?.backgroundColor = ui.chrome.color(alpha: Glass.tint ?? looks.opacity).cgColor
         showOverlayGround()
         window?.isOpaque = !see
         window?.backgroundColor = looks.translucent ? .clear : vibrancy ? ui.chrome.color(alpha: 0.55) : ui.chrome.nsColor

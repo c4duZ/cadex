@@ -284,6 +284,8 @@ tema, por conta, por item da barra de status) e não estão aqui: o ⌘K os most
 | `theme.import` | Import Theme… |  |
 | `theme.open-folder` | Open Themes Folder |  |
 | `theme.toggle-high-contrast` | Turn High Contrast On or Off |  |
+| `theme.toggle-pane-glow` | Glowing or Plain Pane Borders |  |
+| `theme.toggle-strong-glass` | Turn Strong Glass On or Off |  |
 | `theme.toggle-translucent` | Make the Window Translucent or Solid |  |
 | `theme.toggle-vibrancy` | Turn Vibrancy On or Off |  |
 | `view.board` | Show the Board |  |

@@ -24,7 +24,9 @@
 - `PopupMenuPanel.swift`: a janela do menu (pega o teclado: setas, Return, Esc; fecha ao perder o
   foco, que é o clique fora; o painel entrega cada movimento do ponteiro à lista, que acende a linha) e a lista desenhada à mão. A ação roda depois de fechar, com o
   teclado já de volta na janela de onde o menu abriu. Com a janela translúcida, a lista vai numa
-  caixa com o vidro (Glass, de `../looks/`), como o popover do `AnchoredPanel.swift`.
+  caixa com o vidro (Glass, de `../looks/`), como o popover do `AnchoredPanel.swift`. O cartão
+  (`HoverCard.swift`) desenha o próprio fundo com a seta: sob o vidro, o fosco recortado no formato
+  dele e a cor na opacidade de Glass.panelTint; no vidro forte, o desfoque da janela dele.
 - `HoverTip.swift`: o nome de um botão de ícone, embaixo dele 0,2 s depois de o ponteiro chegar (o
   do sistema levava cerca de 1 s e tinha outra cara; o dono, 2026-10-20), nas cores dos menus. Some
   ao sair, no clique, numa tecla ou na rolagem. Uma linha tem 22 pt, como sempre; texto maior quebra

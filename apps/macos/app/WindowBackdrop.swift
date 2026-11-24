@@ -21,6 +21,10 @@ final class WindowBackdrop {
         var opacity = 1.0
         /// appearance.fullScreen: "auto", "system" or "cadex".
         var fullScreen = "auto"
+        /// appearance.glass "strong" (Glass.strong).
+        var strongGlass = false
+        /// appearance.paneBorder "glow" (Glass.glow).
+        var glowBorders = false
 
         var translucent: Bool { opacity < 1 }
         /// Cadex's full screen (CadexWindow): asked for, or "auto" with a translucent window, whose

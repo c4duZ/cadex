@@ -95,6 +95,12 @@ final class CommandPalettePanel: NSPanel, NSTextFieldDelegate, NSTableViewDataSo
         // The window may have turned translucent or solid since the last opening.
         Glass.dress(background, style.background)
         makeKeyAndOrderFront(nil)
+        // A test instance in the background (CADEX_BACKGROUND, main.swift) is never active: the
+        // panel hid itself with the app, and its captures (the strong glass, 2026-11-24) had none.
+        if ProcessInfo.processInfo.environment["CADEX_BACKGROUND"] == "1" {
+            hidesOnDeactivate = false
+            orderFrontRegardless()
+        }
         makeFirstResponder(field)
         NSAnimationContext.runAnimationGroup { context in
             context.duration = Self.fadeIn

@@ -78,6 +78,9 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
             select(selected)
         }
         window.makeKeyAndOrderFront(nil)
+        // Over the other apps' windows in a test instance in the background (CADEX_BACKGROUND),
+        // which is never active, for its captures.
+        if ProcessInfo.processInfo.environment["CADEX_BACKGROUND"] == "1" { window.orderFrontRegardless() }
     }
 
     /// The lists changed elsewhere (⌘K, another window): an open list shows it.

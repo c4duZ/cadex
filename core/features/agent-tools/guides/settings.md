@@ -67,6 +67,11 @@ Type, default, allowed values or range, and what it does.
   button and ⌃⌘F give. The system's is a Space of its own over black (a translucent window shows
   black); Cadex's covers the screen over the desktop, the menu bar and the Dock at the edges.
   `"auto"`: Cadex's with `windowOpacity` below 1.
+- `appearance.glass` (`"normal"` | `"strong"`, `"normal"`): `"strong"` blurs the wallpaper behind
+  the whole window through a clean dark frost, makes the panes glass boxes and puts ⌘K, the menus and
+  the cards in the same glass; it makes a solid window translucent.
+- `appearance.paneBorder` (`"line"` | `"glow"`, `"line"`): `"glow"` draws the panes' border in the
+  work color (the tab's or project's, else the accent) with a soft glow.
 - `appearance.vibrancy` (bool, `false`).
 - `appearance.backgroundImage` (path or `null`, `null`): an image behind the panes.
 - `appearance.backgroundOpacity` (number 0–1, `0.5`), `appearance.backgroundBlur` (number 0–50, `0`).

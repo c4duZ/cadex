@@ -57,6 +57,8 @@ public enum SettingsFile {
             if let opacity = reader.number(a, "appearance.backgroundOpacity") { settings.appearance.backgroundOpacity = min(max(opacity, 0), 1) }
             if let v = reader.number(a, "appearance.windowOpacity") { settings.appearance.windowOpacity = v.clamped(to: Settings.windowOpacityRange) }
             settings.appearance.fullScreen = reader.choice(a, "appearance.fullScreen", Settings.fullScreenModes) ?? settings.appearance.fullScreen
+            settings.appearance.glass = reader.choice(a, "appearance.glass", Settings.glassModes) ?? settings.appearance.glass
+            settings.appearance.paneBorder = reader.choice(a, "appearance.paneBorder", Settings.paneBorders) ?? settings.appearance.paneBorder
             if let blur = reader.number(a, "appearance.backgroundBlur") { settings.appearance.backgroundBlur = min(max(blur, 0), 50) }
             settings.appearance.highContrast = reader.bool(a, "appearance.highContrast") ?? settings.appearance.highContrast
             if let v = reader.number(a, "appearance.uiZoom") { settings.appearance.uiZoom = v.clamped(to: Settings.zoomRange) }
@@ -277,6 +279,7 @@ public enum SettingsFile {
             "appearance": ["theme": s.appearance.theme, "lightTheme": s.appearance.lightTheme, "darkTheme": s.appearance.darkTheme,
                            "accent": s.appearance.accent, "mode": s.appearance.mode, "vibrancy": s.appearance.vibrancy,
                            "windowOpacity": s.appearance.windowOpacity, "fullScreen": s.appearance.fullScreen,
+                           "glass": s.appearance.glass, "paneBorder": s.appearance.paneBorder,
                            "backgroundImage": s.appearance.backgroundImage ?? NSNull(),
                            "backgroundOpacity": s.appearance.backgroundOpacity, "backgroundBlur": s.appearance.backgroundBlur,
                            "highContrast": s.appearance.highContrast, "uiZoom": s.appearance.uiZoom,
