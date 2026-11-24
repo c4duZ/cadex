@@ -1,9 +1,9 @@
 import AppKit
 
 /// The top bar goes up with the sidebar (the owner, 2026-11-22: "quando eu sumo com a barra lateral,
-/// a top bar sobe também, dando foco total aos terminais"). Only the owner's closing does it (⌘B,
-/// or inspector.visible saved off); a sidebar that closes on its own (a narrow window, a preview
-/// opening) leaves the bar, and any way of opening the sidebar brings the bar back
+/// a top bar sobe também, dando foco total aos terminais"). The owner's closing does it (⌘B,
+/// or inspector.visible saved off), and so does a web preview opening (2026-11-24); a sidebar that
+/// closes for a narrow window leaves the bar, and any way of opening the sidebar brings the bar back
 /// (`setInspector`). With the bar go the window's buttons and the empty toolbar that gives the title
 /// bar its height, so nothing of the frame stays over the terminals; ⌘B brings everything back.
 extension WorkspaceView {

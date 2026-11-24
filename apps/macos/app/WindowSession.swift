@@ -188,11 +188,14 @@ final class WindowSession: NSObject, NSWindowDelegate {
             return ElementPickDelivery.deliver(delivery, tabs: self?.tabs, toClipboard: self?.settings.picksToClipboard ?? false, driving: driving)
         }
         opener.picksScreenshot = { [weak self] in self?.settings.picksScreenshot ?? true }
-        // A web preview takes the sidebar's room: it slides away (the owner, 2026-11-20), without
-        // touching the saved choice, so ⌘B and the next launch keep the owner's.
+        // A web preview takes the sidebar's room: it slides away (the owner, 2026-11-20), and the top
+        // bar goes up with it, as with ⌘B (the owner, 2026-11-24: "quando eu abro o webpreview, ele
+        // não tá fechando a topbar"); the saved choice stays, so the next launch keeps the owner's.
         opener.onPreviewOpened = { [weak self] in
-            guard let workspace = self?.workspace, workspace.inspectorVisible else { return }
-            workspace.setInspector(visible: false)
+            guard let workspace = self?.workspace else { return }
+            let animated = workspace.window?.isVisible == true && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+            if workspace.inspectorVisible { workspace.setInspector(visible: false) }
+            workspace.collapseTopBar(true, animated: animated)
         }
         self.opener = opener
         guard let explorer, let git else { return }

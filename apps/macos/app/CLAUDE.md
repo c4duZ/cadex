@@ -149,7 +149,8 @@
   `followProject` na troca de projeto). O ⌘B
   (view.toggle-sidebar) fecha e abre a barra lateral; fechada pelo dono, a barra de cima sobe junto
   (`WorkspaceTopBar.swift`: altura 0, sem os botões da janela e a barra de ferramentas; a janela
-  estreita e o preview fecham a lateral sem mexer nela; o dono, 2026-11-22).
+  estreita fecha a lateral sem mexer nela, o preview web abrindo sobe a barra também; o dono,
+  2026-11-22 e 2026-11-24).
 - `ProjectEditWiring.swift` (plano 36 fase B; project.new-claude, plano 39 C: uma aba nova no
   projeto com o `claude` digitado, como o dono faria, com o kit e a conta do projeto): a folha "Edit project" (project.edit, também pelo
   clique direito na barra lateral; nome, imagem ou emoji, cor) e a mesma folha criando pelo Novo

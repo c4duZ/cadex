@@ -24,7 +24,9 @@ final class TitleBarPlace: NSView {
         avatar.layer?.cornerRadius = UILooks.pt(P.Avatar.radius)
         avatar.layer?.masksToBounds = true
         mark.font = UILooks.font(P.Avatar.fontSize, weight: P.Avatar.weight)
-        mark.textColor = P.Name.color
+        // The sidebar's avatar to the point (the owner, 2026-11-24: "porque o ícone está diferente?"):
+        // the same tokens, letters in text.primary, line.control without the project's color.
+        mark.textColor = DesignTokens.Color.textPrimary
         mark.alignment = .center
         picture.imageScaling = .scaleProportionallyUpOrDown
         for view in [mark, picture] as [NSView] {
@@ -73,7 +75,7 @@ final class TitleBarPlace: NSView {
         picture.image = image.flatMap { NSImage(contentsOfFile: $0) }
         picture.isHidden = picture.image == nil
         mark.isHidden = !picture.isHidden
-        avatar.layer?.backgroundColor = (tint ?? DesignTokens.Color.bgButton).cgColor
+        avatar.layer?.backgroundColor = (tint ?? P.Avatar.bg).cgColor
         let said = [project, task].compactMap { $0 }.joined(separator: " › ")
         toolTip = said
         setAccessibilityLabel(said)

@@ -97,10 +97,15 @@ final class WorkChildren: NSView {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
+        // The guide runs from the first line's text to the last one's, not the rows' whole height:
+        // across the group and its bottom margin it stood taller than the text and lower than it,
+        // out of line (the owner, 2026-11-24: "a linha da esquerda tá muito grande e torta").
+        let font = UILooks.font(C.fontSize)
+        let inset = max(0, (UILooks.rowHeight(DesignTokens.WorkSidebar.Row.height) - ceil(font.ascender - font.descender)) / 2)
         NSLayoutConstraint.activate([
             guide.leadingAnchor.constraint(equalTo: leadingAnchor, constant: UILooks.pt(C.indent)),
-            guide.topAnchor.constraint(equalTo: topAnchor),
-            guide.bottomAnchor.constraint(equalTo: bottomAnchor),
+            guide.topAnchor.constraint(equalTo: stack.topAnchor, constant: inset),
+            guide.bottomAnchor.constraint(equalTo: stack.bottomAnchor, constant: -inset),
             guide.widthAnchor.constraint(equalToConstant: DesignTokens.Stroke.hairline),
             stack.leadingAnchor.constraint(equalTo: guide.trailingAnchor, constant: UILooks.pt(C.paddingLeft)),
             stack.trailingAnchor.constraint(equalTo: trailingAnchor),

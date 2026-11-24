@@ -85,6 +85,7 @@ public extension DesignTokens {
             public static let fontSize: CGFloat = DesignTokens.FontSize.body
             public static var color: NSColor { DesignTokens.Color.textRow }
             public enum Project {
+                public static let height: CGFloat = 34
                 public static var weight: NSFont.Weight { DesignTokens.FontWeight.semibold }
                 public static var color: NSColor { DesignTokens.Color.textPrimary }
             }
@@ -189,8 +190,9 @@ public extension DesignTokens {
         public static let gap: CGFloat = 8
         public static var hover: NSColor { DesignTokens.Color.bgSelected }
         public enum Avatar {
-            public static let size: CGFloat = 18
-            public static let radius: CGFloat = DesignTokens.Radius.chip
+            public static let size: CGFloat = 22
+            public static let radius: CGFloat = DesignTokens.Radius.tag
+            public static var bg: NSColor { DesignTokens.Color.lineControl }
             public static let fontSize: CGFloat = DesignTokens.FontSize.badge
             public static var weight: NSFont.Weight { DesignTokens.FontWeight.bold }
         }
