@@ -38,6 +38,10 @@ public final class TerminalView: NSView {
 
     public private(set) var session: TerminalSession?
     var renderer: TerminalRenderer?
+    /// Over Claude's foot pinned while the history scrolls (TerminalFootDivider).
+    public internal(set) var footDivider: NSView?
+    /// Runs a registered command by id (ADR 0005): the divider's "Back to bottom". Set by the tabs.
+    public var runCommand: ((String) -> Bool)?
     let device = MTLCreateSystemDefaultDevice()
     /// The Metal surface, only while in a window (TerminalCanvas.swift).
     var canvas: TerminalCanvas?
@@ -233,6 +237,7 @@ public final class TerminalView: NSView {
                       overlay: overlay, synchronously: synchronously)
         let shown = frame.pointee
         lastCursorRow = Int(shown.cursor_y)
+        placeFootDivider()
         scrollbar.update(total: Int(shown.scroll_total), offset: Int(shown.scroll_offset), rows: Int(shown.rows))
         // A synchronized update (DEC 2026) held the last frame: look again
         // when the hold runs out, in case the program never ends it.

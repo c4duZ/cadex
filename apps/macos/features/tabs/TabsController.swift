@@ -274,6 +274,7 @@ public final class TabsController {
         }
         terminal.onActivity = { [weak self] in self?.scheduleTitleRefresh() }
         terminal.onOpenPreview = { [weak self] url in self?.onOpenPreview?(url) }
+        terminal.runCommand = { [weak self] id in self?.runCommand?(id) ?? false }
         terminal.onOpenFile = { [weak self] path, beside in self?.onOpenFile?(path, beside) }
         terminal.onProgramTitle = { [weak self] _ in self?.refreshBar() }
         terminal.onAgentStatus = { [weak self] in self?.refreshBar() }

@@ -306,7 +306,9 @@ extension WindowSession {
                 // A view over the terminals (the drawer) stays on top: the ones under it are cut out.
                 func drawers(_ v: NSView) -> [NSView] { (v is DrawerView ? [v] : []) + v.subviews.flatMap(drawers) }
                 // And a card at a terminal's foot (TerminalView.footCard, plan 33): the picture covered it.
-                let overlays = drawers(view) + terminals(view).compactMap(\.footCard).filter { $0.superview != nil }
+                // And the line with "Back to bottom" over Claude's pinned foot (TerminalFootDivider).
+                let overlays = drawers(view) + (terminals(view).compactMap(\.footCard) + terminals(view).compactMap(\.footDivider))
+                    .filter { $0.superview != nil }
                 for terminal in terminals(view) where terminal.window != nil && !terminal.isHiddenOrHasHiddenAncestor {
                     guard let picture = terminal.snapshotImage() else { continue }
                     let rect = terminal.convert(terminal.bounds, to: view)

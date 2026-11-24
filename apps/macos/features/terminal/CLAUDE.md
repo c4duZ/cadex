@@ -133,6 +133,9 @@
   dele sobre as últimas linhas do histórico e o `TerminalRenderer.swift` veste o resultado como se
   estivesse no fim (`pinnedFrom`). Um clique no pé fixado volta ao fim antes (`returnToPinnedFoot`
   em `TerminalMouse.swift`). Sem caixa no fim (um diálogo, o menu do /), nada fica fixo.
+  `TerminalFootDivider.swift`: sobre o pé fixado, uma linha fina entre o histórico e ele e, na
+  ponta direita, "Voltar ao fim", que roda terminal.scroll-bottom pelo `runCommand` que as abas
+  ligam (`../tabs/TabsController.swift`); só o botão recebe o clique.
 - O texto que você escreve como numa caixa de texto (`../../../../docs/spec/terminal.md`, Seleção):
   `TerminalInputField.swift` acha, puro e testado, a caixa de entrada do Claude (uma linha de "─",
   linhas começando em "❯", outra de "─"), o que foi digitado no shell (as células CADEX_CELL_INPUT

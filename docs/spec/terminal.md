@@ -281,7 +281,8 @@ célula fotografada (cor do texto, do fundo, negrito), nos temas "dark", "light"
   a caixa, 2026-11-24; sem desfazer isso, o clique no meio do texto caía na borda e o cursor
   não ia, 2026-11-18). Com a vista rolada, a caixa de entrada e a status line ficam no pé do
   painel, vivas (o que se digita, o contexto e o custo seguem), sobre as últimas linhas do
-  histórico, como na tela cheia do Claude, que o Cadex desliga; um clique nelas volta ao fim. Sem
+  histórico, como na tela cheia do Claude, que o Cadex desliga; uma linha fina os separa do
+  histórico, com "Voltar ao fim" (terminal.scroll-bottom) na ponta direita; um clique nelas volta ao fim. Sem
   caixa no fim da tela (um diálogo, o menu do /), nada fica fixo (o dono, 2026-11-24). O que não bate com a medida fica como o Claude desenha; a
   dica "esc to interrupt" da linha do modo some junto com ela.
 - **O pedido de permissão** é um diálogo do Claude no lugar da caixa de entrada: uma linha inteira
