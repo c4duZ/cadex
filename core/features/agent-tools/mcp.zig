@@ -84,7 +84,12 @@ pub const tools = [_]Tool{
         .schema = "{\"type\":\"object\",\"properties\":{}}" },
 };
 
-const instructions = "Cadex holds this terminal. Use these tools to open files, diffs and pages beside it, to notify the owner and to mark the task's progress. More: run `cadex skills get cadex`.";
+// The browser and the computer first (the owner, 2026-11-24): a session asked to look at a page
+// ran a headless Playwright the owner could not see, while Cadex's browser opens beside the
+// terminal and the owner watches and steps in.
+const instructions = "Cadex holds this terminal. Use these tools to open files, diffs and pages beside it, to notify the owner and to mark the task's progress. " ++
+    "Anything in a browser (open a page, click, fill, take a screenshot, test a flow, look at a generated image or page) goes through Cadex's browser_* tools, beside the terminal where the owner watches; never Playwright, Puppeteer, Selenium, a headless browser or another browser tool. " ++
+    "To operate another Mac app, use the computer_* tools (when the owner turned computer use on). More: run `cadex skills get cadex`.";
 
 /// The answer to one message, or null when none is due (a notification).
 pub fn handle(gpa: std.mem.Allocator, message: []const u8, send: Send) !?[]u8 {

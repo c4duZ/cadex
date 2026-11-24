@@ -46,7 +46,10 @@
   token, o id (ou a lista), os argumentos e os pids acima do processo (o app acha o terminal do
   agente), espera até 40 s e lê `{"ok", "result"|"error"}`; `skills.zig` traz os guias de `guides/`
   embutidos no binário (`cadex skills list|get`); `mcp.zig` é o servidor MCP (JSON-RPC por linha:
-  initialize, tools/list, tools/call, ping), cada ferramenta um pedido de comando. Saída 0 feito, 1
+  initialize, tools/list, tools/call, ping), cada ferramenta um pedido de comando; as instruções
+  que ele dá no initialize mandam fazer tudo de navegador pelas `browser_*` do Cadex, nunca
+  Playwright nem navegador headless, e outro app pelas `computer_*` (o dono, 2026-11-24: o agente
+  trabalha ao lado, com ele vendo; o guia `guides/cadex.md` diz o mesmo). Saída 0 feito, 1
   recusado ou app fechado (o motivo no stderr), 2 uso.
 - Plano 22 fase D: com a memória ligada na sessão (CADEX_MEMORY_DIR no ambiente), o `mcp.zig` junta à
   lista as ferramentas `memory_*` do engine e repassa as chamadas delas inteiras, pela entrada da
