@@ -56,6 +56,11 @@ final class WorkspaceView: NSView {
     /// A translucent window's one tint, in the theme's ground color at the window's opacity,
     /// over the frost and under everything else (the grounds above it are see-through).
     private let glass = NSView()
+    /// Under the sidebar while it lies over the center (a narrow window) in a translucent window:
+    /// the same frost and tint as the window's, so the terminal under it does not show through the
+    /// see-through grounds (the owner's screenshot, 2026-11-24: the sidebar's rows over Claude's text).
+    private let overlayFrost = NSVisualEffectView()
+    private let overlayTint = NSView()
     private var looks = WindowBackdrop.Looks()
     private var tabBarStyle: TabBarView.Style?
     /// The shown project's tabs in the content panel.
@@ -76,9 +81,13 @@ final class WorkspaceView: NSView {
         frost.isHidden = true
         glass.wantsLayer = true
         glass.isHidden = true
+        overlayFrost.blendingMode = .behindWindow
+        overlayFrost.material = .underWindowBackground
+        overlayFrost.state = .active
+        overlayTint.wantsLayer = true
         rail.isHidden = true
         // The sidebar after the center, so it can lie over it in a narrow window.
-        for view in [frost, glass, titleBar, statusBar, rail, contentPanel, sidebar] as [NSView] {
+        for view in [frost, glass, titleBar, statusBar, rail, contentPanel, overlayFrost, overlayTint, sidebar] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
@@ -100,6 +109,14 @@ final class WorkspaceView: NSView {
             glass.bottomAnchor.constraint(equalTo: bottomAnchor),
             glass.leadingAnchor.constraint(equalTo: leadingAnchor),
             glass.trailingAnchor.constraint(equalTo: trailingAnchor),
+            overlayFrost.topAnchor.constraint(equalTo: sidebar.topAnchor),
+            overlayFrost.bottomAnchor.constraint(equalTo: sidebar.bottomAnchor),
+            overlayFrost.leadingAnchor.constraint(equalTo: sidebar.leadingAnchor),
+            overlayFrost.trailingAnchor.constraint(equalTo: sidebar.trailingAnchor),
+            overlayTint.topAnchor.constraint(equalTo: sidebar.topAnchor),
+            overlayTint.bottomAnchor.constraint(equalTo: sidebar.bottomAnchor),
+            overlayTint.leadingAnchor.constraint(equalTo: sidebar.leadingAnchor),
+            overlayTint.trailingAnchor.constraint(equalTo: sidebar.trailingAnchor),
             titleBar.topAnchor.constraint(equalTo: topAnchor),
             titleBar.leadingAnchor.constraint(equalTo: leadingAnchor),
             titleBar.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -196,6 +213,14 @@ final class WorkspaceView: NSView {
         sidebarAtRail.isActive = isNarrow
         contentToInspector.isActive = inspectorVisible && !isNarrow
         contentToRail.isActive = !(inspectorVisible && !isNarrow)
+        showOverlayGround()
+    }
+
+    /// The sidebar's own ground while it lies over the center in a translucent window.
+    private func showOverlayGround() {
+        let hidden = !(isNarrow && inspectorVisible && looks.translucent)
+        overlayFrost.isHidden = hidden
+        overlayTint.isHidden = hidden
     }
     private weak var drawer: DrawerView?
     private var drawerHeight: NSLayoutConstraint?
@@ -371,6 +396,8 @@ final class WorkspaceView: NSView {
         frost.isHidden = !see
         glass.isHidden = !looks.translucent
         glass.layer?.backgroundColor = ui.chrome.color(alpha: looks.opacity).cgColor
+        overlayTint.layer?.backgroundColor = ui.chrome.color(alpha: looks.opacity).cgColor
+        showOverlayGround()
         window?.isOpaque = !see
         window?.backgroundColor = looks.translucent ? .clear : vibrancy ? ui.chrome.color(alpha: 0.55) : ui.chrome.nsColor
         raiseWindowButtons()

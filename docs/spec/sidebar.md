@@ -85,7 +85,9 @@ está fica no lugar, no começo da barra de cima. Ela tomou o lugar do trilho e 
 - Ficar estreita fecha a barra lateral; alargar a devolve na vista em que estava (se o dono não a
   abriu ou fechou no meio).
 - Aberta à mão na janela estreita (⌘B, Arquivos da faixa), ela fica por cima do centro, ao lado da
-  faixa, e o Esc a fecha.
+  faixa, e o Esc a fecha. Com a janela translúcida, ela tem por baixo o mesmo fosco e a mesma tinta
+  da janela: os fundos dela são quase transparentes, e o terminal aparecia através (o dono,
+  2026-11-24).
 
 ## Estados
 - **Nada aberto** (nenhum projeto): a barra mostra "RECENTES" com a cara de cada projeto (o avatar,
