@@ -134,6 +134,7 @@ public enum SettingsFile {
         if let s = reader.section(root, "agentTools") {
             settings.agentTools.enabled = reader.bool(s, "agentTools.enabled") ?? settings.agentTools.enabled
             settings.agentTools.browser = reader.bool(s, "agentTools.browser") ?? settings.agentTools.browser
+            settings.agentTools.webBrowser = reader.choice(s, "agentTools.webBrowser", Settings.webBrowsers) ?? settings.agentTools.webBrowser
         }
         if let s = reader.section(root, "worktrees") {
             settings.worktrees.root = reader.string(s, "worktrees.root") ?? settings.worktrees.root
@@ -305,7 +306,7 @@ public enum SettingsFile {
             "git": ["reviewContextLines": s.git.reviewContextLines, "reviewWrap": s.git.reviewWrap,
                     "reviewShowWhitespace": s.git.reviewShowWhitespace],
             "worktrees": ["root": s.worktrees.root, "setupHooks": s.worktrees.setupHooks],
-            "agentTools": ["enabled": s.agentTools.enabled, "browser": s.agentTools.browser],
+            "agentTools": ["enabled": s.agentTools.enabled, "browser": s.agentTools.browser, "webBrowser": s.agentTools.webBrowser],
             "computerUse": ["enabled": s.computerUse.enabled, "allowedApps": s.computerUse.allowedApps, "blockedApps": s.computerUse.blockedApps],
             "agents": ["sessions": s.agents.sessions, "notifyPermission": s.agents.notifyPermission,
                        "notifyQuestion": s.agents.notifyQuestion, "notifyFinished": s.agents.notifyFinished,

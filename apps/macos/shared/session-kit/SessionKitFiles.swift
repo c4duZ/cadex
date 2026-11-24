@@ -44,6 +44,9 @@ extension SessionKit {
         env["CLAUDE_CODE_DISABLE_AGENT_VIEW"] = "1"
         if let token, toolsPath != nil {
             env["CADEX_SESSION_TOKEN"] = token
+            // What the session's `cadex mcp` tells the agent about browsers and other apps (mcp.zig).
+            env["CADEX_BROWSER"] = browserRule
+            if computerUse { env["CADEX_COMPUTER_USE"] = "1" }
             // A test instance's own socket (CADEX_SOCKETS_DIR): its sessions'
             // hooks go there, not to the owner's app (hook.zig reads this).
             if ProcessInfo.processInfo.environment["CADEX_SOCKETS_DIR"] != nil { env["CADEX_APP_SOCKET"] = SessionKit.socketsFolder + "/app.sock" }

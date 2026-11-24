@@ -84,12 +84,51 @@ pub const tools = [_]Tool{
         .schema = "{\"type\":\"object\",\"properties\":{}}" },
 };
 
-// The browser and the computer first (the owner, 2026-11-24): a session asked to look at a page
-// ran a headless Playwright the owner could not see, while Cadex's browser opens beside the
-// terminal and the owner watches and steps in.
-const instructions = "Cadex holds this terminal. Use these tools to open files, diffs and pages beside it, to notify the owner and to mark the task's progress. " ++
-    "Anything in a browser (open a page, click, fill, take a screenshot, test a flow, look at a generated image or page) goes through Cadex's browser_* tools, beside the terminal where the owner watches; never Playwright, Puppeteer, Selenium, a headless browser or another browser tool. " ++
-    "To operate another Mac app, use the computer_* tools (when the owner turned computer use on). More: run `cadex skills get cadex`.";
+/// The browser the owner wants agents to use (agentTools.webBrowser, the owner, 2026-11-24): the
+/// app passes it in the session's environment (CADEX_BROWSER), with computer use on or off
+/// (CADEX_COMPUTER_USE). A session asked to look at a page ran a headless Playwright the owner
+/// could not see, where Cadex's browser opens beside the terminal and the owner watches.
+pub const Browser = enum { cadex, chrome, chrome_and_playwright, none };
+
+/// CADEX_BROWSER as the app writes it; unset or unknown is Cadex's own.
+pub fn browserFrom(value: ?[]const u8) Browser {
+    const v = value orelse return .cadex;
+    if (std.mem.eql(u8, v, "chrome")) return .chrome;
+    if (std.mem.eql(u8, v, "chromeAndPlaywright")) return .chrome_and_playwright;
+    if (std.mem.eql(u8, v, "none")) return .none;
+    return .cadex;
+}
+
+const intro = "Cadex holds this terminal. Use these tools to open files, diffs and pages beside it, to notify the owner and to mark the task's progress. ";
+const browser_work = "Anything in a browser (open a page, click, fill, take a screenshot, test a flow, look at a generated image or page) ";
+const browser_rules = [_][]const u8{
+    browser_work ++ "goes through Cadex's browser_* tools, beside the terminal where the owner watches; never Playwright, Puppeteer, Selenium, Claude in Chrome, a headless browser or another browser tool. ",
+    browser_work ++ "goes through Claude in Chrome, the owner's Chrome; not Playwright, Puppeteer, Selenium or a headless browser. ",
+    browser_work ++ "goes through Claude in Chrome or Playwright, whichever fits the task. ",
+    "",
+};
+const computer_rule = "To operate another Mac app, use Cadex's computer_* tools, never another computer-use tool. ";
+const outro = "More: run `cadex skills get cadex`.";
+
+/// The instructions `initialize` gives: the browser rule the owner chose and, with computer use
+/// on, Cadex's computer tools (always Cadex's MCP; off, nothing is said).
+pub fn instructionsFor(browser: Browser, computer: bool) []const u8 {
+    const table = comptime blk: {
+        var all: [8][]const u8 = undefined;
+        for (0..4) |b| {
+            all[b * 2] = intro ++ browser_rules[b] ++ outro;
+            all[b * 2 + 1] = intro ++ browser_rules[b] ++ computer_rule ++ outro;
+        }
+        break :blk all;
+    };
+    return table[@as(usize, @intFromEnum(browser)) * 2 + @intFromBool(computer)];
+}
+
+fn sessionInstructions() []const u8 {
+    const browser = browserFrom(if (std.c.getenv("CADEX_BROWSER")) |v| std.mem.span(v) else null);
+    const computer = if (std.c.getenv("CADEX_COMPUTER_USE")) |v| std.mem.eql(u8, std.mem.span(v), "1") else false;
+    return instructionsFor(browser, computer);
+}
 
 /// The answer to one message, or null when none is due (a notification).
 pub fn handle(gpa: std.mem.Allocator, message: []const u8, send: Send) !?[]u8 {
@@ -112,7 +151,7 @@ pub fn handleWith(gpa: std.mem.Allocator, message: []const u8, send: Send, mem: 
         const asked = if (params) |p| (if (p == .object) p.object.get("protocolVersion") else null) else null;
         const version = if (asked) |v| (if (v == .string) v.string else "2025-06-18") else "2025-06-18";
         try out.print(gpa, "\"result\":{{\"protocolVersion\":{f},\"capabilities\":{{\"tools\":{{}}}},\"serverInfo\":{{\"name\":\"cadex\",\"version\":\"1\"}},\"instructions\":{f}}}}}\n", .{
-            std.json.fmt(version, .{}), std.json.fmt(instructions, .{}),
+            std.json.fmt(version, .{}), std.json.fmt(sessionInstructions(), .{}),
         });
     } else if (std.mem.eql(u8, method, "tools/list")) {
         try out.appendSlice(gpa, "\"result\":{\"tools\":[");
@@ -272,4 +311,17 @@ test "initialize, the list of tools and a call that reaches the app as a command
     const odd = (try handle(gpa, "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"resources/list\"}", fakeSend)).?;
     defer gpa.free(odd);
     try testing.expect(std.mem.indexOf(u8, odd, "-32601") != null);
+}
+
+test "the instructions follow the owner's browser choice, and computer use only when on" {
+    const cadex = instructionsFor(.cadex, false);
+    try std.testing.expect(std.mem.indexOf(u8, cadex, "browser_* tools") != null and std.mem.indexOf(u8, cadex, "never Playwright") != null);
+    try std.testing.expect(std.mem.indexOf(u8, cadex, "computer_*") == null);
+    try std.testing.expect(std.mem.indexOf(u8, instructionsFor(.chrome, true), "Claude in Chrome, the owner's Chrome") != null);
+    try std.testing.expect(std.mem.indexOf(u8, instructionsFor(.chrome, true), "computer_* tools") != null);
+    try std.testing.expect(std.mem.indexOf(u8, instructionsFor(.chrome_and_playwright, false), "Claude in Chrome or Playwright") != null);
+    try std.testing.expect(std.mem.indexOf(u8, instructionsFor(.none, false), "browser") == null);
+    try std.testing.expectEqual(Browser.cadex, browserFrom(null));
+    try std.testing.expectEqual(Browser.chrome_and_playwright, browserFrom("chromeAndPlaywright"));
+    try std.testing.expectEqual(Browser.cadex, browserFrom("nonsense"));
 }

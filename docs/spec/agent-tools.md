@@ -60,7 +60,12 @@ Cadex: `docs/adr/0024-agent-tools.md`).
   age direto, ou recusa com o motivo (arquivo fora da tarefa, status desconhecido).
 - `cadex mcp`: servidor MCP pela entrada e saída padrão, com as mesmas ações como ferramentas
   (`cadex_open`, `cadex_diff`, `cadex_notify`, `cadex_worktree_status`, …), as do navegador
-  (`browser_*`, `preview.md`) e as do computer use (`computer_*`, `computer-use.md`).
+  (`browser_*`, `preview.md`) e as do computer use (`computer_*`, `computer-use.md`). As instruções
+  que ele dá ao começar dizem qual navegador usar, pela escolha do dono em Configurações › O que os
+  agentes podem usar (agentTools.webBrowser, padrão "cadex"): o preview do Cadex ao lado do terminal,
+  onde o dono vê e intervém, nunca Playwright nem navegador escondido; o Claude in Chrome; o Claude
+  in Chrome ou o Playwright; ou nada. Outro app vai sempre pelas `computer_*` do Cadex, com o
+  computer use ligado; desligado, não dizem nada dele (o dono, 2026-11-24).
 - `cadex skills get <tema>`: o guia completo de um tema (o preview, a tarefa, o computer use), da
   mesma versão do app; `cadex skills list` lista os temas. As skills do plugin do kit são curtas:
   dizem quando usar o Cadex e mandam rodar `cadex skills get`.

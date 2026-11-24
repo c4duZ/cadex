@@ -59,6 +59,11 @@ public final class SessionKit {
     public var hooksEnabled = true
     /// CLAUDE_CODE_FORCE_SYNC_OUTPUT=1 in the settings' env (SessionKitFiles).
     public var synchronizedOutput = true
+    /// agentTools.webBrowser for the session's `cadex mcp` (CADEX_BROWSER): the browser its
+    /// instructions tell the agent to use; "none" says nothing.
+    public var browserRule = "cadex"
+    /// computerUse.enabled (CADEX_COMPUTER_USE): its instructions send other apps to Cadex's tools.
+    public var computerUse = false
     /// Claude Code's theme for the session ("dark" or "light", plan 33 phase B): fixed 24-bit colors
     /// the terminal knows and swaps for the theme's (ClaudeDress); its -ansi themes, used since plan
     /// 28, have no diff background (measured 2026-11-18, docs/spec/terminal.md). nil: the account's own.

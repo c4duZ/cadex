@@ -197,6 +197,10 @@ public struct Settings: Equatable, Sendable {
         public var enabled = true
         /// The agent drives the preview (plan 20 phase C).
         public var browser = true
+        /// Which browser the sessions Cadex opens are told to use (the owner, 2026-11-24): "cadex"
+        /// (the preview beside the terminal, never Playwright), "chrome" (Claude in Chrome),
+        /// "chromeAndPlaywright" or "none" (Cadex says nothing). Computer use is always Cadex's.
+        public var webBrowser = "cadex"
     }
 
     /// The agent operates other apps (docs/adr/0026-computer-use.md): off
@@ -322,6 +326,7 @@ public struct Settings: Equatable, Sendable {
     static let fullScreenModes = ["auto", "system", "cadex"]
     static let glassModes = ["normal", "strong"]
     static let paneBorders = ["line", "glow"]
+    static let webBrowsers = ["cadex", "chrome", "chromeAndPlaywright", "none"]
     /// The opacity theme.toggle-translucent turns on when the window is solid: 80% looked milky,
     /// the owner wanted the wallpaper to show (2026-11-18).
     public static let translucentOpacity = 0.35

@@ -47,9 +47,10 @@
   agente), espera até 40 s e lê `{"ok", "result"|"error"}`; `skills.zig` traz os guias de `guides/`
   embutidos no binário (`cadex skills list|get`); `mcp.zig` é o servidor MCP (JSON-RPC por linha:
   initialize, tools/list, tools/call, ping), cada ferramenta um pedido de comando; as instruções
-  que ele dá no initialize mandam fazer tudo de navegador pelas `browser_*` do Cadex, nunca
-  Playwright nem navegador headless, e outro app pelas `computer_*` (o dono, 2026-11-24: o agente
-  trabalha ao lado, com ele vendo; o guia `guides/cadex.md` diz o mesmo). Saída 0 feito, 1
+  que ele dá no initialize (`instructionsFor`) dizem o navegador que o dono escolheu
+  (agentTools.webBrowser, que o app passa em CADEX_BROWSER: o do Cadex, nunca Playwright; o Claude
+  in Chrome; o Claude in Chrome ou o Playwright; ou nada) e, com o computer use ligado
+  (CADEX_COMPUTER_USE), outro app pelas `computer_*` do Cadex (o dono, 2026-11-24). Saída 0 feito, 1
   recusado ou app fechado (o motivo no stderr), 2 uso.
 - Plano 22 fase D: com a memória ligada na sessão (CADEX_MEMORY_DIR no ambiente), o `mcp.zig` junta à
   lista as ferramentas `memory_*` do engine e repassa as chamadas delas inteiras, pela entrada da

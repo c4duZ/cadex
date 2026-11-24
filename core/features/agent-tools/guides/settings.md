@@ -126,6 +126,10 @@ Type, default, allowed values or range, and what it does.
 ### agentTools, computerUse
 - `agentTools.enabled` (bool, `true`): sessions Cadex opens get the `cadex` command, its MCP and skills.
 - `agentTools.browser` (bool, `true`): agents may drive the preview.
+- `agentTools.webBrowser` (`"cadex"` | `"chrome"` | `"chromeAndPlaywright"` | `"none"`, `"cadex"`): the
+  browser the sessions Cadex opens are told to use: Cadex's preview beside the terminal (never
+  Playwright), Claude in Chrome, Claude in Chrome or Playwright, or nothing said. Computer use is
+  always Cadex's `computer_*` tools while `computerUse.enabled`. New sessions follow a change.
 - `computerUse.enabled` (bool, `false`): agents may operate other Mac apps. `computerUse.allowedApps`,
   `computerUse.blockedApps` (lists of bundle ids, `[]`). Turning this on is the owner's decision.
 

@@ -123,6 +123,13 @@ enum SectionRows {
                              T("An agent drives a preview tab beside you, as a browser: it goes to a page, reads it, clicks, fills and takes pictures; a band shows it and Esc stops it.",
                                "Um agente dirige uma aba de preview ao seu lado, como um navegador: vai a uma página, lê, clica, preenche e tira prints; uma faixa mostra e o Esc para."),
                              control: SettingsPage.toggle(store.settings.agentTools.browser) { on in store.update { $0.agentTools.browser = on } }),
+            SettingsPage.row(T("Browser agents use", "Navegador que os agentes usam"),
+                             T("What sessions Cadex opens are told to use for anything in a browser: Cadex's preview beside you, where you watch and step in; Claude in Chrome; Claude in Chrome or Playwright; or nothing said. Computer use always goes through Cadex. New sessions follow a change.",
+                               "O que as sessões que o Cadex abre são orientadas a usar para tudo de navegador: o preview do Cadex ao seu lado, onde você vê e intervém; o Claude in Chrome; o Claude in Chrome ou o Playwright; ou nada dito. O computer use vai sempre pelo Cadex. Sessões novas seguem a mudança."),
+                             control: SettingsPage.popup([(T("Cadex's preview", "Preview do Cadex"), "cadex"), ("Claude in Chrome", "chrome"),
+                                                          (T("Claude in Chrome and Playwright", "Claude in Chrome e Playwright"), "chromeAndPlaywright"),
+                                                          (T("Say nothing", "Não dizer nada"), "none")],
+                                                         selected: store.settings.agentTools.webBrowser) { value in store.update { $0.agentTools.webBrowser = value } }),
             // Its own section (the owner, 2026-11-20: "porque isso não está em settings?"; it was one
             // row among the others, with no word "computer use" in its title).
             SettingsPage.section(T("Computer use", "Computer use")),

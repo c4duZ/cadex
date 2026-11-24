@@ -87,6 +87,10 @@ final class SettingsBridge {
         AgentsController.shared.hidden = Set(settings.agents.hiddenAccounts.map(Self.expand))
         AgentHistoryController.shared.isEnabled = settings.agents.history
         SessionKit.shared.hooksEnabled = settings.agents.stateHooks
+        // Cadex's preview as the browser needs the agent allowed to drive it (agentTools.browser).
+        let web = settings.agentTools.webBrowser
+        SessionKit.shared.browserRule = web == "cadex" && !settings.agentTools.browser ? "none" : web
+        SessionKit.shared.computerUse = settings.computerUse.enabled
         Self.applyAgentTools(settings.agentTools.enabled)
         AuthorshipHub.apply(settings.review.authorship)
         MemoryWiring.apply(settings.memory)
