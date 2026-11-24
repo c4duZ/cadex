@@ -56,11 +56,16 @@ public enum AgentHibernation {
         return "cd " + SessionKit.quote(folder) + " && " + claude
     }
 
-    /// The arguments the session was opened with, without its conversation; with none kept, the
-    /// permission flag as agents.launchSkipPermissions says.
+    /// The arguments the session was opened with, without its conversation, and the permission flag
+    /// as agents.launchSkipPermissions says unless they choose a mode of their own. A typed `claude`
+    /// keeps what was typed, and its flag is added at launch, not kept: with the kept arguments
+    /// taken as the whole answer, every conversation reopened with the app came back asking for
+    /// permissions, in auto mode (the owner, 2026-11-24: "tem vezes que não abre com bypass
+    /// permissions, abre com auto mode"; the zsh history had `--resume` launches without it).
     @MainActor
     public static func openedFlags(kitSession: String?, skipPermissions: Bool, kit: SessionKit) -> [String] {
-        kitSession.flatMap(kit.arguments(of:)).map(withoutConversation) ?? (skipPermissions ? ["--dangerously-skip-permissions"] : [])
+        let kept = kitSession.flatMap(kit.arguments(of:)).map(withoutConversation) ?? []
+        return kept + SessionKit.skipPermissions(on: skipPermissions, typed: kept)
     }
 
     /// The arguments without what picked the conversation then (`--resume

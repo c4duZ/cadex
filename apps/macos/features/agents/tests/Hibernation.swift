@@ -36,6 +36,11 @@ let hibernationChecks: [(name: String, body: Checks.Body)] = [
         let command = AgentHibernation.resumeCommand(sessionID: "abc", folder: "/w/my app", configDir: "/Users/me/.claude-work",
                                                      kitSession: session, skipPermissions: false, kit: kit)
         expect(noSettings(command) == "cd '/w/my app' && CLAUDE_CONFIG_DIR=/Users/me/.claude-work claude --resume abc", command)
+        // Opened with nothing kept (a typed `claude`, its flag added at launch): the setting still
+        // gives the flag on reopening, not auto mode (2026-11-24).
+        let skipping = AgentHibernation.resumeCommand(sessionID: "abc", folder: "/w", configDir: nil, kitSession: session, skipPermissions: true, kit: kit)
+        expect(noSettings(skipping).hasSuffix("claude --resume abc --dangerously-skip-permissions"), skipping)
+        expect(AgentHibernation.openedFlags(kitSession: nil, skipPermissions: true, kit: kit) == ["--dangerously-skip-permissions"], "no kit session")
         expect(tokens().filter { $0.hasSuffix(".token") } == [file], "the same kit session: \(tokens())")
         expect((try? String(contentsOfFile: folder + "/tokens/" + file, encoding: .utf8)) == token, "the token stays, so the app still knows the session")
         // The command it was opened with comes back: its flags, not its old conversation.
