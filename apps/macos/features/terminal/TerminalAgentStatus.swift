@@ -22,10 +22,18 @@ public struct TerminalAgentStatus: Equatable, Sendable {
     public let message: String
 
     public init(state: State, kind: Kind, app: String, message: String) {
-        self.state = state
+        self.state = state == .working && Self.onlyShells(message) ? .done : state
         self.kind = kind
         self.app = app
         self.message = message
+    }
+
+    /// A finished turn with shells left in the background: Claude Code (2.1.331) keeps saying
+    /// "working" with "1 shell still running" as its message, while its session file says "shell"
+    /// (tested in a pty, 2026-11-24), and a pane with a dev server running looked busy for good,
+    /// its row spinning (the owner, 2026-11-24).
+    static func onlyShells(_ message: String) -> Bool {
+        message.range(of: #"^\d+ shells? still running$"#, options: .regularExpression) != nil
     }
 
     /// Waiting on you: a permission, a question or a login.

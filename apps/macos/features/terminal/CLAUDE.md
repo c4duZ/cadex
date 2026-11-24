@@ -170,7 +170,9 @@
   `onRestartAgent`), que digitar tira; e "Mover para <projeto>" (`offerMove`, o app diz quando e o que
   roda), que fica enquanto o terminal está na pasta daquele projeto.
 - `TerminalAgent.swift` e `TerminalAgentStatus.swift` (plano 19): o que o agente disse ao terminal
-  pelo OSC 7501 (TerminalSession.agentStatus), só enquanto um programa roda em primeiro plano, e
+  pelo OSC 7501 (TerminalSession.agentStatus; um "working" com só "N shell(s) still running" vale
+  como done: o Claude 2.1.331 segue dizendo working depois do turno com um shell em segundo plano, e
+  a linha girava para sempre, o dono, 2026-11-24), só enquanto um programa roda em primeiro plano, e
   "terminou sem você ver" até o terminal ganhar o foco.
 
 ## Como validar

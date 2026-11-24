@@ -193,6 +193,11 @@ let exitCode = await Checks.run([
         expect(status == TerminalAgentStatus(state: .blocked, kind: .permission, app: "claude-code", message: "approve Bash: touch x"),
                "\(String(describing: status))")
         expect(notices >= 1 && status?.needsYou == true)
+        // A finished turn with a shell left running: Claude Code 2.1.331 says "working" (2026-11-24).
+        let shells = TerminalAgentStatus(state: .working, kind: .none, app: "claude-code", message: "1 shell still running")
+        expect(shells.state == .done && TerminalAgentStatus(state: .working, kind: .none, app: "claude-code", message: "2 shells still running").state == .done,
+               "only shells left: done")
+        expect(TerminalAgentStatus(state: .working, kind: .none, app: "claude-code", message: "Running 1 shell…").state == .working, "other words: working")
     }),
     ("select all and copy through the core; typing clears the selection", {
         let session = try TerminalSession(cols: 80, rows: 24, shell: "/bin/sh")
