@@ -188,7 +188,9 @@
   agente e roda na janela daquele terminal, com a pasta e a conversa; abrir arquivo e diff (só dentro
   da tarefa), avisar (notificação e feed), preview.open com url=, a lista de sessões no ⌘K; o
   navegador do agente (fase C): o primeiro goto abre um preview ao lado do terminal dele, que fica
-  sendo a aba daquele terminal (`AgentPreviewTabs`), e os pedidos respondem quando a página responde.
+  sendo a aba daquele terminal (`AgentPreviewTabs`), e os pedidos respondem quando a página responde;
+  com o dono noutra aba ou projeto, o preview entra na aba do agente sem trazê-la e sem fechar as
+  barras (FileOpener.openAgentPreview, o dono em 2026-11-26).
 - `RemoteTerminalsWiring.swift` (plano 39 B): responde ao `cadex attach` as abas da janela principal,
   por projeto, só as que o daemon mantém (`keptID`; com terminal.keepSessions desligado, nenhuma).
   Plano 39 C: o `cadex new <projeto> [claude]` acha o projeto (nome em qualquer caixa, o começo do

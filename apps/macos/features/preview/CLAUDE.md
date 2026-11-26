@@ -69,7 +69,8 @@
   por cima do seletor; o Esc com o agente ligado roda preview.stop-agent pelo id.
   `PreviewAgentCommands.swift`: um comando só, preview.agent com `action=` (goto, wait, snapshot,
   click, fill, press, scroll, screenshot, console, notes), que responde depois; e preview.stop-agent.
-  Só no Mac.
+  Só no Mac. Com o dono noutra aba (a aba escondida sai da janela), cada pedido empresta à página a
+  janela que nunca aparece de `PreviewBackstage.swift` e a devolve na resposta (o dono, 2026-11-26).
 - Fase D do plano 20: `ConsoleScript.swift`, o leitor do console no mundo da página, injetado só com
   o agente ligado (ao ligar e a cada navegação), lido e esvaziado a pedido. Design Mode: o
   `PickerScript.swift` também lê os estilos calculados do layout; PickedElement.styles vai na linha
@@ -90,5 +91,6 @@
   entregue (limites e limpeza) e, numa página de teste, o mundo do seletor devolvendo seletor,
   texto, HTML e caixa sem a página enxergá-lo; o agente (`tests/Agent.swift`): a árvore, o clique
   confiável num botão que só aceita `isTrusted`, o preencher e enviar, a referência velha recusada,
-  o Esc soltando o agente, nenhum `WKUserScript`.
+  o Esc soltando o agente, nenhum `WKUserScript`, e a aba fora da janela lendo, clicando e tirando
+  print sem ficar presa à janela emprestada.
 - No app: `Cadex <pasta> http://localhost:8000/` abre o endereço numa aba de preview.

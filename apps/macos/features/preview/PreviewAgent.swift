@@ -101,8 +101,15 @@ public final class PreviewAgent {
         if stoppedByOwner { return "the owner stopped you on this tab; call browser_goto to start again" }
         if !isAttached { return "no page yet: call browser_goto first" }
         if document?.isPicking == true { return "the owner is picking an element on this tab; try again in a moment" }
-        if web?.window == nil { return "the preview tab is not on screen" }
         return nil
+    }
+
+    /// The page in a window for one request: its own while the tab shows,
+    /// the backstage one while the owner looks at another tab (PreviewBackstage).
+    /// The returned closure gives the page back once the request is answered.
+    func lendWindow() -> @MainActor () -> Void {
+        guard let view = document?.view else { return {} }
+        return PreviewBackstage.lend(view)
     }
 
     public func goto(_ address: String, reply: @escaping (CommandReply) -> Void) {

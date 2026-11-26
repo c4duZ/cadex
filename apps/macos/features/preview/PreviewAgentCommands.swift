@@ -31,14 +31,18 @@ public enum PreviewAgentCommands {
 
     @MainActor
     static func run(_ request: CommandRequest, tab: (CommandRequest) -> PreviewDocument?, open: (CommandRequest) -> PreviewDocument?,
-                    reply: @escaping @MainActor (CommandReply) -> Void) {
+                    reply answer: @escaping @MainActor (CommandReply) -> Void) {
         let action = request["action"] ?? ""
+        let found = action == "goto" && request["url"]?.isEmpty == false ? tab(request) ?? open(request) : tab(request)
+        // The page keeps a window while the agent acts, also with the owner on another tab.
+        let giveBack = found?.agent.lendWindow() ?? {}
+        let reply: @MainActor (CommandReply) -> Void = { giveBack(); answer($0) }
         if action == "goto" {
             guard let url = request["url"], !url.isEmpty else { return reply(.failed("url= is needed")) }
-            guard let doc = tab(request) ?? open(request) else { return reply(.failed("the preview could not open")) }
+            guard let doc = found else { return reply(.failed("the preview could not open")) }
             return doc.agent.goto(url, reply: reply)
         }
-        guard let doc = tab(request) else { return reply(.failed("no page yet: call browser_goto first")) }
+        guard let doc = found else { return reply(.failed("no page yet: call browser_goto first")) }
         let agent = doc.agent
         switch action {
         case "wait": agent.wait(selector: request["selector"], timeout: request["timeout"].flatMap(Double.init) ?? 10, reply: reply)

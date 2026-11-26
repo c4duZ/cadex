@@ -120,12 +120,27 @@ final class FileOpener {
             tabs.open(existing)
             return onPreviewOpened?() ?? ()
         }
+        tabs.open(makePreview(url), beside: beside ?? opensBeside())
+        onPreviewOpened?()
+    }
+
+    /// The agent's blank preview beside its terminal, in that terminal's tabs (any project of the
+    /// window): the sidebar and the top bar go only when it shows now; with the owner on another
+    /// tab or project it goes in behind, and nothing moves (the owner, 2026-11-26). Nil when that
+    /// tab has no room beside the terminal.
+    func openAgentPreview(beside terminal: TerminalView, in tabs: TabsController) -> PreviewDocument? {
+        let preview = makePreview("")
+        guard let shown = tabs.openQuietly(preview, besideTerminal: terminal) else { return nil }
+        if shown { onPreviewOpened?() }
+        return preview
+    }
+
+    private func makePreview(_ url: String) -> PreviewDocument {
         let preview = PreviewDocument(url: url)
         preview.runCommand = { [weak self] id in self?.runCommand?(id) ?? false }
         preview.onPickElement = { [weak self] delivery in self?.onPickElement?(delivery) ?? .copied(note: nil) }
         preview.takesPictures = { [weak self] in self?.picksScreenshot?() ?? true }
-        tabs.open(preview, beside: beside ?? opensBeside())
-        onPreviewOpened?()
+        return preview
     }
 
     func makeHistory(_ root: String) -> HistoryDocument {

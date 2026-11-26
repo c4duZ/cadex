@@ -104,6 +104,12 @@ vê, no lugar do Claude in Chrome ou do Playwright, pelo `cadex mcp` ou pela CLI
   topo diz "Agente usando esta aba", com a tecla esc desenhada ao lado, e um ponteiro mostra onde ele clica. Esc com o
   preview focado, ou preview.stop-agent, desliga: o próximo pedido dele é recusado com "the owner
   stopped you on this tab" até ele chamar `browser_goto` de novo.
+- O dono noutra aba ou noutro projeto não tira o navegador do agente (o dono, 2026-11-26: trocar de
+  aba fazia o agente perder o navegador e o próximo `browser_goto` puxava o dono de volta, fechando
+  a barra lateral e a de cima): a aba escondida sai da janela, e cada pedido do agente empresta à
+  página uma janela que nunca aparece, devolvida na resposta; o primeiro `browser_goto` com o dono
+  noutra aba abre o preview ao lado do terminal do agente, na aba dele, sem trazê-la para a frente
+  e sem fechar as barras. Com o dono na aba do agente, abre ali e as barras sobem, como antes.
 - A árvore (`browser_snapshot`): os elementos visíveis, cada um com papel (button, link, textbox,
   checkbox, heading…), nome, valor e estado (desabilitado, marcado, focado), em linhas indentadas, e
   os que se pode usar com uma referência (`@e1`, `@e2`). A referência vale até a próxima árvore ou

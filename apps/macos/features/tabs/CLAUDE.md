@@ -22,7 +22,9 @@
   num lado com metade da aba, divisão à direita, nova aba sem espaço); `keeping` é o documento que
   pediu, que não é trocado. Encostado (issue #5): Tab.dockedPane é um documento num lado da
   divisão de fora, com a parte que TabDocument.besideShare pede (metade; o preview web 70%); `PaneTree.balanced(keeping:)` reequilibra só o outro lado; o lado vem de
-  documentsOnLeft (tabs.documentSide, que o app define).
+  documentsOnLeft (tabs.documentSide, que o app define). `openQuietly(_:besideTerminal:)`: ao
+  lado de um terminal, na aba dele, sem trazê-la para a frente quando outra está à mostra (o
+  preview do agente, o dono em 2026-11-26).
   `PaneHeaderView.swift`: o cabeçalho de todo painel (plano 28 fase B, components.pane.header: o
   estado, o nome, de onde é e, à direita, o custo e o tempo; +, maximizar e ✕ só ao passar o
   ponteiro; issue #1); o que um agente acrescenta vem do app por TabsController.paneDetail Plano 33 E: PaneDetail.accountSwitch deixa o clique no detalhe (onde fica a conta) abrir a lista

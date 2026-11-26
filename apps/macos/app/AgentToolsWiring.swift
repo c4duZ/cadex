@@ -147,10 +147,20 @@ extension WindowSession {
 
     /// The agent's first goto: a blank preview beside its terminal, kept as
     /// its tab (docs/spec/preview.md, Agente no preview).
+    /// With the owner on another tab or project, it goes in behind: they are not pulled to the
+    /// agent's tab, and the sidebar and the top bar stay (the owner, 2026-11-26).
     func openAgentPreview(_ request: CommandRequest) -> PreviewDocument? {
-        besideAgent(request)
-        openPreview("", beside: true)
-        guard let doc = tabs?.activeDocument as? PreviewDocument else { return nil }
+        let doc: PreviewDocument
+        if let found = app.locate({ AppDelegate.key($0) == request.terminal }), found.window === self,
+           let spaces = projects?.projects, spaces.indices.contains(found.space),
+           let quiet = opener?.openAgentPreview(beside: found.terminal, in: spaces[found.space].tabs) {
+            doc = quiet
+        } else {
+            besideAgent(request)
+            openPreview("", beside: true)
+            guard let active = tabs?.activeDocument as? PreviewDocument else { return nil }
+            doc = active
+        }
         doc.agentTerminal = request.terminal
         AgentPreviewTabs.tabs[request.terminal] = AgentPreviewTabs.Held(document: doc)
         return doc

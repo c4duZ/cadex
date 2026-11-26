@@ -154,4 +154,20 @@ let agentChecks: [(name: String, body: Checks.Body)] = [
         expect(picture != nil && picture != .ok(""), "\(String(describing: picture))")
         expect(doc.web.configuration.userContentController.userScripts.isEmpty, "no WKUserScript, with or without the agent")
     }),
+    ("the owner on another tab: the agent still reads, clicks and takes pictures, and the page leaves the backstage after each request", {
+        let (window, doc) = try await agentWindow()
+        defer { window.close() }
+        // Another tab shown: the tabs take the preview out of the window (the owner, 2026-11-26).
+        doc.view.removeFromSuperview()
+        @MainActor func ask(_ arguments: [String: String]) -> CommandReply? {
+            reply { done in PreviewAgentCommands.run(CommandRequest(arguments: arguments, folder: "/"), tab: { _ in doc }, open: { _ in nil }, reply: { done($0) }) }
+        }
+        guard case .ok(let text) = ask(["action": "snapshot"]), let pay = refOf(text, #"button "Pay""#) else { return expect(false, "no snapshot off screen") }
+        expect(doc.view.superview == nil, "given back after the snapshot")
+        expect(ask(["action": "click", "ref": pay]) == .ok("clicked @\(pay)"))
+        expect(try await evaluate(doc.web, "document.getElementById('log').textContent", .page) as? String == "trusted=true", "a trusted click off screen")
+        guard case .ok(let path) = ask(["action": "screenshot"]) else { return expect(false, "no picture off screen") }
+        expect(FileManager.default.fileExists(atPath: path), path)
+        expect(doc.view.superview == nil && doc.view.window == nil, "the backstage keeps nothing")
+    }),
 ]

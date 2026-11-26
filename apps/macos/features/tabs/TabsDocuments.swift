@@ -1,4 +1,5 @@
 import AppKit
+import Terminal
 
 /// Documents in panes (docs/spec/tabs.md, "Documentos em painéis"): a
 /// document lives in a pane like a terminal, alone in its tab or beside
@@ -50,6 +51,34 @@ extension TabsController {
         } else {
             addTab(.document(document))
         }
+    }
+
+    /// Puts `document` beside `terminal`, in that terminal's own tab, without bringing the tab
+    /// forward when the owner is on another one: the agent's browser opening while the owner works
+    /// elsewhere pulled them to the agent's tab (the owner, 2026-11-26). True: it shows now (the
+    /// terminal's tab is the one on screen); false: it went in behind; nil: no tab here holds the
+    /// terminal, or its tab has no room beside it.
+    public func openQuietly(_ document: TabDocument, besideTerminal terminal: TerminalView) -> Bool? {
+        guard let id = list.order.first(where: { tabs[$0]?.terminals.contains { $0 === terminal } == true }), let tab = tabs[id],
+              let pane = tab.tree.leaves.first(where: { tab.panes[$0]?.terminal === terminal }) else { return nil }
+        if isShown, id == list.active {
+            tab.focus(pane)
+            open(document, beside: true)
+            return true
+        }
+        tab.noteFocus(pane)
+        if let reusable = reusablePane(in: tab, keeping: nil) {
+            replace(reusable, in: tab, with: document)
+        } else if tab.dockedPane == nil, tab.canDock {
+            dock(document, in: tab)
+        } else if tab.canSplit(axis: .horizontal) {
+            split(tab, axis: .horizontal, with: .document(document))
+        } else {
+            return nil
+        }
+        // Back in that tab, the owner finds the terminal they left, not the page.
+        tab.noteFocus(pane)
+        return false
     }
 
     /// A document pane whose content can go without asking: the focused
