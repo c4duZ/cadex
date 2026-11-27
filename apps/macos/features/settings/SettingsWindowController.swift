@@ -16,11 +16,13 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let store: SettingsStore
     private let shortcuts: ShortcutsPage
     private let themes: ThemesPage
-    private var window: NSWindow?
+    private(set) var window: NSWindow?
     private let navigation = SettingsNavigation()
     /// The tokens' colors the navigation was built with: it is built once, so a theme repaints it
     /// (it stayed in Cadex Night's dark colors under a light theme until 2026-11-18).
     private var paintedWith = DesignTokens.themedColors()
+    /// The glass the page was last built in: translucent, strong, the glow color.
+    private var paintedGlass: (Bool, Bool, NSColor?)?
     private(set) var selected = SettingsSection.general
     private var query = ""
     private let content = NSView()
@@ -142,12 +144,28 @@ public final class SettingsWindowController: NSObject, NSWindowDelegate {
             window.backgroundColor = .clear
             Glass.dress(root, SettingsColors.background)
         }
+        paintedGlass = (Glass.opacity != nil, Glass.strong, Glass.glow)
         ThemeStore.shared.observe { [weak self] _ in self?.themeChanged() }
         // The window's opacity changes the tokens without changing the theme (appearance.windowOpacity).
         NotificationCenter.default.addObserver(forName: DesignTokens.didChange, object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.themeChanged() }
+            MainActor.assumeIsolated { self?.tokensChanged() }
         }
         return window
+    }
+
+    /// Only the opacity's value moved (still glass, the same glass, the same colors): the tint is
+    /// laid again and the page stays. Rebuilt at every value, the page swapped the window opacity's
+    /// slider under the pointer mid-drag and it jumped back (the owner, 2026-11-27: "quando aumento
+    /// a opacidade não consigo abaixar").
+    private func tokensChanged() {
+        let glass = (Glass.opacity != nil, Glass.strong, Glass.glow)
+        defer { paintedGlass = glass }
+        if let painted = paintedGlass, painted.0 == glass.0, painted.1 == glass.1, painted.2 == glass.2,
+           glass.0, DesignTokens.themedColors() == paintedWith {
+            if let root = window?.contentView { Glass.dress(root, SettingsColors.background) }
+            return
+        }
+        themeChanged()
     }
 
     /// The window follows the theme like the rest of the app; the open page

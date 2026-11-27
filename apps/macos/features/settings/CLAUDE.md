@@ -40,7 +40,10 @@
   da chave da página do projeto e as seções em pílulas no topo (`FramePill`). Textos em par inglês/português
   (`T`, `../../shared/strings`); trocar o idioma pergunta "Reabrir agora" e chama `relaunch`, do app. A janela segue o tema (`SettingsColors.swift`, os tokens da moldura): a página
   aberta se refaz com as cores novas, mantendo a rolagem, e a navegação, feita uma vez, é repintada
-  (DesignTokens.repaint) ao abrir e a cada troca de tema ou de opacidade (DesignTokens.didChange). O
+  (DesignTokens.repaint) ao abrir e a cada troca de tema ou de opacidade (DesignTokens.didChange); só o
+  valor da opacidade mudando (o mesmo vidro, as mesmas cores) repinta o fundo sem refazer a página,
+  que trocava o slider debaixo do ponteiro no meio do arrasto (o dono, 2026-11-27). Os sliders salvam
+  ao soltar o mouse ou um instante depois de parar; só o soltar salvava, e o valor se perdia. O
   fundo da janela é sólido mesmo com a janela principal translúcida (DesignTokens.solid).
 - O app (`../../app/SettingsBridge.swift`) passa as preferências ao `TerminalPreferences` do
   terminal, ao tema e aos atalhos, e salva o que um alerta desliga ("não perguntar de novo").

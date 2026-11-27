@@ -2,11 +2,34 @@ import Checks
 import AppKit
 @testable import Settings
 import Themes
+import CommandPalette
+import Shortcuts
+import UILooks
 
 // Tests of the settings feature. Run with `make macos-test` (see
 // shared/checks/Checks.swift for why this is an executable).
 
 let exitCode = await Checks.run([
+    ("the window opacity moving keeps the open page: the slider under the pointer is not swapped", {
+        // The owner, 2026-11-27: each value rebuilt the page, the slider was replaced mid-drag and
+        // jumped back. A glass that turns solid, or strong, still rebuilds it.
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("opacity-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: file) }
+        let controller = SettingsWindowController(store: SettingsStore(file: file), registry: CommandRegistry(),
+                                                  keymap: { Keymap(registry: CommandRegistry()) }, suspendShortcuts: { _ in }, relaunch: {})
+        Glass.set(opacity: 0.4)
+        controller.show(section: "appearance")
+        defer { controller.window?.close(); Glass.set(opacity: nil) }
+        @MainActor func sliders() -> [NSSlider] {
+            func walk(_ v: NSView) -> [NSSlider] { ((v as? NSSlider).map { [$0] } ?? []) + v.subviews.flatMap(walk) }
+            return controller.window?.contentView.map(walk) ?? []
+        }
+        guard let before = sliders().first else { return expect(false, "no slider on the appearance page") }
+        Glass.set(opacity: 0.6)
+        expect(sliders().contains { $0 === before }, "the same slider after the opacity moved")
+        Glass.set(opacity: 0.6, strong: true)
+        expect(!sliders().contains { $0 === before }, "the strong glass rebuilds the page")
+    }),
     ("the themes page saves what is chosen: Strong in the Glass popup, and the window opacity without a mouse-up", {
         // The owner, 2026-11-27: Strong chosen in Settings, the glass did not change and Settings
         // showed Normal again.
