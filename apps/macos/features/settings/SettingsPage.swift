@@ -148,9 +148,17 @@ enum SettingsPage {
         let slider = NSSlider(value: value, minValue: range.lowerBound, maxValue: range.upperBound, target: nil, action: nil)
         slider.isContinuous = true
         slider.widthAnchor.constraint(equalToConstant: 160).isActive = true
+        // Saved when the slider stops: on the mouse coming up, or a moment after the last move. Only
+        // the mouse-up saved before, and the continuous slider's last action often comes with a drag
+        // event, or a key: the window opacity did not change (the owner, 2026-11-27).
+        var pending: DispatchWorkItem?
         slider.target = ActionBox.keep(slider) {
             label.stringValue = String(format: format, shown(slider.doubleValue))
-            if NSApp.currentEvent?.type == .leftMouseUp { changed(slider.doubleValue) }
+            pending?.cancel()
+            if NSApp.currentEvent?.type == .leftMouseUp { return changed(slider.doubleValue) }
+            let save = DispatchWorkItem { changed(slider.doubleValue) }
+            pending = save
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: save)
         }
         slider.action = #selector(ActionBox.fire)
         let stack = NSStackView(views: [slider, label])

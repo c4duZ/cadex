@@ -7,7 +7,7 @@ import Themes
 // shared/checks/Checks.swift for why this is an executable).
 
 let exitCode = await Checks.run([
-    ("the Glass popup on the themes page saves the strong glass to the file", {
+    ("the themes page saves what is chosen: Strong in the Glass popup, and the window opacity without a mouse-up", {
         // The owner, 2026-11-27: Strong chosen in Settings, the glass did not change and Settings
         // showed Normal again.
         let file = FileManager.default.temporaryDirectory.appendingPathComponent("glass-\(UUID().uuidString).json")
@@ -22,6 +22,15 @@ let exitCode = await Checks.run([
         glass.sendAction(glass.action, to: glass.target)
         expect(store.settings.appearance.glass == "strong", store.settings.appearance.glass)
         expect(SettingsStore(file: file).settings.appearance.glass == "strong", "saved to the file")
+        // The window opacity: a move without the mouse coming up (a key, the last drag) is saved too.
+        func sliders(_ v: NSView) -> [NSSlider] { ((v as? NSSlider).map { [$0] } ?? []) + v.subviews.flatMap(sliders) }
+        guard let opacity = sliders(view).first(where: { $0.maxValue == Settings.windowOpacityRange.upperBound && $0.minValue == Settings.windowOpacityRange.lowerBound })
+        else { return expect(false, "no opacity slider") }
+        opacity.doubleValue = 0.5
+        opacity.sendAction(opacity.action, to: opacity.target)
+        let end = Date().addingTimeInterval(2)
+        while store.settings.appearance.windowOpacity != 0.5, Date() < end { try await Task.sleep(nanoseconds: 50_000_000) }
+        expect(SettingsStore(file: file).settings.appearance.windowOpacity == 0.5, "\(store.settings.appearance.windowOpacity)")
     }),
     ("the agents' settings guide has every key settings.json writes, and its theme example is a theme", {
         // Cadex configured by agents (the owner, 2026-11-22): a key added without its line in the
