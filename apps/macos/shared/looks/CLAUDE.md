@@ -26,7 +26,9 @@
   (camadas, textos, ícones, botões) e redesenha tudo, sem refazer as views; o texto de um campo é lido
   antes de trocar a cor dele (lido depois, a cor nova era trocada de novo). `glass` (a janela
   translúcida) deixa os chãos (`grounds`) quase transparentes, cada um com o seu alfa; texto e ícone
-  na cor de um chão ficam com a cor sólida; `solid` dá a cor sem vidro (o fundo de uma janela opaca,
+  na cor de um chão ficam com a cor sólida, e os textos apagados (text.muted, text.tertiary)
+  sobem até perto do principal, porque o fundo atrás do vidro pode ser um fundo de tela claro
+  (sumiam em tela cheia, 2026-11-27); `solid` dá a cor sem vidro (o fundo de uma janela opaca,
   como a das configurações) e `didChange` avisa quem monta as cores uma vez. `Glass.swift`: o vidro
   das janelas à parte (⌘K, menus, popovers, configurações): Glass.dress põe o fosco e a cor na
   opacidade da janela debaixo das subviews de uma caixa, ou a cor sólida sem vidro; o app dá a

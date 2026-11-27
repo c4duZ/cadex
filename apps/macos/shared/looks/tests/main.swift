@@ -12,6 +12,18 @@ import Checks
 }
 
 let exitCode = await Checks.run([
+    ("under glass the quiet texts rise toward the primary, so they read over a light wallpaper", {
+        // The owner, 2026-11-27: New Project…, the sidebar's foot and the status bar's left vanished
+        // in full screen over a light wallpaper.
+        defer { DesignTokens.applyTheme(chrome: nil, text: nil, glass: false) }
+        func brightness(_ c: NSColor) -> CGFloat { (c.usingColorSpace(.sRGB) ?? c).brightnessComponent }
+        DesignTokens.applyTheme(chrome: nil, text: nil, glass: false)
+        let solid = (brightness(DesignTokens.Color.textMuted), brightness(DesignTokens.Color.textTertiary))
+        DesignTokens.applyTheme(chrome: nil, text: nil, glass: true)
+        let glass = (brightness(DesignTokens.Color.textMuted), brightness(DesignTokens.Color.textTertiary))
+        expect(glass.0 > solid.0 + 0.1 && glass.1 > solid.1 + 0.1, "muted \(solid.0)→\(glass.0), tertiary \(solid.1)→\(glass.1)")
+        expect(glass.1 < brightness(DesignTokens.Color.textPrimary), "still below the primary")
+    }),
     ("the window opacity slider is the glass's strength: its floor is the strong glass as it was, its top a solid window", {
         // The owner, 2026-11-27: "os 10% do vidro forte sejam os 10% aqui"; the strong glass held
         // 0.62 at every slider position before.

@@ -55,6 +55,14 @@ public extension DesignTokens {
                 solid[name] = color
                 next[name] = color.withAlphaComponent(CGFloat(i + 1) / 255)
             }
+            // The quiet texts halfway up to the primary: over glass the ground is whatever lies
+            // behind, a light wallpaper too, and their mid gray vanished there (New Project…, the
+            // sidebar's foot, the status bar's left in full screen; the owner, 2026-11-27).
+            let ink = next["text.primary"] ?? cadexNight["text.primary"].map { rgb($0) } ?? .white
+            for (name, lift) in [("text.muted", 0.45), ("text.tertiary", 0.5)] as [(String, CGFloat)] {
+                guard let base = next[name] ?? cadexNight[name].map({ rgb($0) }) else { continue }
+                next[name] = mix(base, ink, lift)
+            }
         }
         guard !samePalette(next, palette) else { return false }
         palette = next
