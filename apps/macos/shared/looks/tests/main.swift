@@ -5,7 +5,28 @@ import Checks
 // Tests of the interface's zoom, density and font. Run with `make macos-test`
 // (see shared/checks/Checks.swift for why this is an executable).
 
+/// Counts the actions a framed popup sends.
+@MainActor final class PopupProbe: NSObject {
+    var fired = 0
+    @objc func fire() { fired += 1 }
+}
+
 let exitCode = await Checks.run([
+    ("a popup framed after its target and action were set still sends its action", {
+        // The cell holds them; the frame's cell dropped them and every popup in Settings and the
+        // project's memory place did nothing (the owner, 2026-11-27).
+        let probe = PopupProbe()
+        let popup = NSPopUpButton()
+        popup.addItems(withTitles: ["a", "b"])
+        popup.selectItem(at: 1)
+        popup.target = probe
+        popup.action = #selector(PopupProbe.fire)
+        _ = FrameField.popup(popup)
+        expect(popup.target === probe && popup.action == #selector(PopupProbe.fire), "target and action kept")
+        expect(popup.indexOfSelectedItem == 1, "the selection kept")
+        popup.sendAction(popup.action, to: popup.target)
+        expect(probe.fired == 1, "the action reaches its target")
+    }),
     ("by default every design size comes back unchanged", {
         UILooks.configure(zoom: 1, compact: false, fontFamily: "", fontSize: 13)
         expect(UILooks.font(13).pointSize == 13 && UILooks.pt(38) == 38 && UILooks.rowHeight(22) == 22)
