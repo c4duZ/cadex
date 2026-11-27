@@ -7,6 +7,22 @@ import Themes
 // shared/checks/Checks.swift for why this is an executable).
 
 let exitCode = await Checks.run([
+    ("the Glass popup on the themes page saves the strong glass to the file", {
+        // The owner, 2026-11-27: Strong chosen in Settings, the glass did not change and Settings
+        // showed Normal again.
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("glass-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: file) }
+        let store = SettingsStore(file: file)
+        let view = ThemesPage(store: store).makeView()
+        func popups(_ v: NSView) -> [NSPopUpButton] { ((v as? NSPopUpButton).map { [$0] } ?? []) + v.subviews.flatMap(popups) }
+        guard let glass = popups(view).first(where: { $0.itemArray.contains { $0.representedObject as? String == "strong" } }) else {
+            return expect(false, "no Glass popup")
+        }
+        glass.selectItem(at: glass.itemArray.firstIndex { $0.representedObject as? String == "strong" }!)
+        glass.sendAction(glass.action, to: glass.target)
+        expect(store.settings.appearance.glass == "strong", store.settings.appearance.glass)
+        expect(SettingsStore(file: file).settings.appearance.glass == "strong", "saved to the file")
+    }),
     ("the agents' settings guide has every key settings.json writes, and its theme example is a theme", {
         // Cadex configured by agents (the owner, 2026-11-22): a key added without its line in the
         // guide (core/features/agent-tools/guides/settings.md) fails here.

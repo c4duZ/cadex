@@ -127,7 +127,13 @@ public enum FrameField {
         let cell = FramePopupCell(textCell: "", pullsDown: popup.pullsDown)
         cell.menu = popup.menu
         let selected = popup.indexOfSelectedItem
+        // The target and the action live in the cell: a popup framed after they were set lost them,
+        // and choosing did nothing (every popup in Settings; the owner, 2026-11-27: Strong glass
+        // chosen, nothing changed and Settings showed Normal again).
+        let (target, action) = (popup.target, popup.action)
         popup.cell = cell
+        popup.target = target
+        popup.action = action
         popup.selectItem(at: selected)
         popup.isBordered = false
         popup.font = UILooks.font(DesignTokens.FontSize.body)
