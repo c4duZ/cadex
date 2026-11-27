@@ -16,7 +16,11 @@
 
 ## Como eu quero
 - `AgentToolsServer.swift`: AgentToolsServer.shared, `start` (pasta `…/Cadex/sockets` 0700, socket
-  0600, troca um velho de um travamento), `stop`, `onEvent` (no main; devolve o que o hook imprime).
+  0600, troca um velho de um travamento e deixa em paz um que outro Cadex atende, AgentToolsError.inUse),
+  `stop` (apaga o arquivo só se ainda é o seu, pelo inode), `onEvent` (no main; devolve o que o hook imprime).
+  `AgentToolsSocketFile.swift`: a pasta vigiada; o arquivo que sumiu ou não é mais o seu é refeito
+  (um `make run` ao lado do app instalado levava o app.sock dele ao fechar, e o `cadex` e o navegador
+  diziam que o Cadex não rodava; o dono, 2026-11-27).
   Uma linha JSON entra, uma sai (`{"ok":true}` e, se houver, `stdout`).
 - A permissão (ADR 0023): `onPermission` recebe o pedido, a resposta para mandar depois (uma vez,
   no clique) e um aviso de que o hook saiu antes (`AgentToolsOnce.swift`); a conexão fica aberta

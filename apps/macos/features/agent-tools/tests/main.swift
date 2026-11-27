@@ -34,6 +34,26 @@ let commandExit = await Checks.run(commandChecks)
 let kitExit = await Checks.run(kitChecks)
 let remoteExit = await Checks.run(remoteChecks)
 let exitCode = await Checks.run([
+    ("app.sock: a second Cadex leaves the first's alone, quitting takes only its own, and a removed file comes back", {
+        // The owner, 2026-11-27: a `make run` beside the installed app took its app.sock, and on
+        // quitting removed it; the installed Cadex answered nobody until reopened.
+        let dir = "/tmp/cx-\(UUID().uuidString.prefix(8))"
+        defer { try? FileManager.default.removeItem(atPath: dir) }
+        let first = AgentToolsServer(folder: dir + "/sockets", tokens: AgentSessionTokens(folder: dir + "/tokens"))
+        try first.start()
+        defer { first.stop() }
+        let original = AgentToolsServer.inode(first.path)
+        let second = AgentToolsServer(folder: dir + "/sockets", tokens: AgentSessionTokens(folder: dir + "/tokens"))
+        var refused = false
+        do { try second.start() } catch AgentToolsError.inUse { refused = true }
+        expect(refused && !second.isListening, "the second does not take a live socket")
+        second.stop()
+        expect(AgentToolsServer.inode(first.path) == original && AgentToolsServer.answers(first.path), "the second quitting leaves the first's file")
+        unlink(first.path)
+        let end = Date().addingTimeInterval(3)
+        while !AgentToolsServer.answers(first.path), Date() < end { try await Task.sleep(nanoseconds: 50_000_000) }
+        expect(AgentToolsServer.answers(first.path), "the removed file is made again and answers")
+    }),
     ("AskUserQuestion's PreToolUse carries each question and option apart (Claude Code 2.1.326, 2026-11-17)", {
         // The payload as the real hook got it: a label with " · " in it stays one label.
         let event = AgentHookEvent.parse(["event": "PreToolUse", "pid": 9, "payload": ["tool_name": "AskUserQuestion", "tool_input": ["questions": [

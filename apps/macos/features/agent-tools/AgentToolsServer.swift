@@ -51,6 +51,10 @@ public final class AgentToolsServer: @unchecked Sendable {
     private let queue = DispatchQueue(label: "cadex.agent-tools.server", qos: .utility)
     private var listener: Int32 = -1
     private var source: DispatchSourceRead?
+    /// The socket file this server made (its inode), so it only ever removes its own
+    /// (AgentToolsSocketFile.swift).
+    var boundInode: ino_t?
+    var folderWatch: DispatchSourceFileSystemObject?
 
     init(folder: String = SessionKit.socketsFolder, tokens: AgentSessionTokens = AgentSessionTokens()) {
         path = folder + "/app.sock"
@@ -59,12 +63,19 @@ public final class AgentToolsServer: @unchecked Sendable {
 
     public var isListening: Bool { listener >= 0 }
 
-    /// Binds the socket; a stale one from a crash is replaced.
+    /// Binds the socket; a stale one from a crash is replaced, a live one (another Cadex, a
+    /// `make run` beside the installed app) is left alone. Then watches it (`watchSocketFile`).
     public func start() throws {
+        try bindSocket()
+        watchSocketFile()
+    }
+
+    func bindSocket() throws {
         guard listener < 0 else { return }
         let folder = (path as NSString).deletingLastPathComponent
         try FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
         chmod(folder, 0o700)
+        if Self.answers(path) { throw AgentToolsError.inUse }
         unlink(path)
         let fd = socket(AF_UNIX, SOCK_STREAM, 0)
         guard fd >= 0 else { throw AgentToolsError.socket(errno) }
@@ -76,6 +87,7 @@ public final class AgentToolsServer: @unchecked Sendable {
         let bound = withUnsafePointer(to: &address) { $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { bind(fd, $0, socklen_t(MemoryLayout<sockaddr_un>.size)) } }
         guard bound == 0, listen(fd, 16) == 0 else { close(fd); throw AgentToolsError.socket(errno) }
         chmod(path, 0o600)
+        boundInode = Self.inode(path)
         listener = fd
         let source = DispatchSource.makeReadSource(fileDescriptor: fd, queue: queue)
         source.setEventHandler { [weak self] in self?.accept() }
@@ -85,10 +97,20 @@ public final class AgentToolsServer: @unchecked Sendable {
     }
 
     public func stop() {
+        folderWatch?.cancel()
+        folderWatch = nil
+        unbind()
+    }
+
+    /// Closes the listener and removes the file only if it is still this server's: a test
+    /// instance quitting took the installed Cadex's app.sock with it, and every `cadex` and
+    /// browser tool answered "not running" until a reopen (the owner, 2026-11-27).
+    func unbind() {
         source?.cancel()
         source = nil
         listener = -1
-        unlink(path)
+        if let boundInode, Self.inode(path) == boundInode { unlink(path) }
+        boundInode = nil
     }
 
     private func accept() {
@@ -251,4 +273,6 @@ public final class AgentToolsServer: @unchecked Sendable {
 public enum AgentToolsError: Error {
     case socket(Int32)
     case pathTooLong
+    /// Another Cadex answers on this socket.
+    case inUse
 }
