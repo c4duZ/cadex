@@ -62,14 +62,13 @@ Type, default, allowed values or range, and what it does.
 - `appearance.mode` (`"system"` | `"dark"` | `"light"`, `"system"`).
 - `appearance.accent` (`"#RRGGBB"` or `""`, `""`): replaces the theme's accent; empty keeps it.
 - `appearance.highContrast` (bool, `false`).
-- `appearance.windowOpacity` (number 0.1–1, `1`): below 1 the window is glass over the desktop.
+- `appearance.windowOpacity` (number 0.1–1, `1`): below 1 the window is glass: the desktop blurred
+  behind it with its shapes, under the theme's color at this opacity; ⌘K, the menus, the cards and
+  Settings are the same glass. 1 is a solid window.
 - `appearance.fullScreen` (`"auto"` | `"system"` | `"cadex"`, `"auto"`): which full screen the green
-  button and ⌃⌘F give. The system's is a Space of its own over black (a translucent window shows
-  black); Cadex's covers the screen over the desktop, the menu bar and the Dock at the edges.
-  `"auto"`: Cadex's with `windowOpacity` below 1.
-- `appearance.glass` (`"normal"` | `"strong"`, `"normal"`): `"strong"` blurs the wallpaper behind
-  the whole window through a clean dark frost, makes the panes glass boxes and puts ⌘K, the menus and
-  the cards in the same glass; it makes a solid window translucent.
+  button and ⌃⌘F give. `"auto"` and `"system"`: the system's, a Space of its own with the window's
+  buttons at the top; a translucent window shows the wallpaper behind its glass there. `"cadex"`:
+  Cadex's, covering the screen over the desktop, the menu bar and the Dock at the edges.
 - `appearance.paneBorder` (`"line"` | `"glow"`, `"line"`): `"glow"` draws the panes' border in the
   work color (the tab's or project's, else the accent) with a soft glow.
 - `appearance.vibrancy` (bool, `false`).

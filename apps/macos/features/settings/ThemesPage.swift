@@ -115,8 +115,8 @@ final class ThemesPage {
         return [
             SettingsPage.section(T("Window", "Janela")),
             SettingsPage.row(T("Window opacity", "Opacidade da janela"),
-                             T("Below 100% the whole window turns into frosted glass in the theme's color, and your desktop or the window behind shows through, blurred so the text stays readable. Lines, text and cards stay as they are.",
-                               "Abaixo de 100% a janela inteira vira um vidro fosco na cor do tema, e o seu fundo de tela ou a janela de trás aparece, desfocado para o texto continuar legível. Linhas, texto e cartões continuam iguais."),
+                             T("Below 100% the whole window turns into glass: your desktop shows through it blurred, with its shapes, under the theme's color at this strength. ⌘K, the menus, the cards and Settings are the same glass. Lines, text and cards stay as they are.",
+                               "Abaixo de 100% a janela inteira vira vidro: o seu fundo de tela aparece atrás desfocado, com as formas, sob a cor do tema nessa força. O ⌘K, os menus, os cartões e as configurações são o mesmo vidro. Linhas, texto e cartões continuam iguais."),
                              control: SettingsPage.slider(a.windowOpacity, range: Settings.windowOpacityRange, format: "%.0f%%", shown: { $0 * 100 }) { [store] value in
                                  store.update { $0.appearance.windowOpacity = (value * 20).rounded() / 20 }
                              }),
@@ -127,13 +127,6 @@ final class ThemesPage {
                              control: SettingsPage.popup([(T("System", "Do sistema"), "auto"), ("Cadex", "cadex")],
                                                          selected: a.fullScreen == "cadex" ? "cadex" : "auto") { [store] value in
                                  store.update { $0.appearance.fullScreen = value }
-                             }),
-            SettingsPage.row(T("Glass", "Vidro"),
-                             T("Strong blurs your desktop behind the whole window through a clean dark frost, turns the panes into glass boxes and puts ⌘K, the menus and the cards in the same glass. It makes a solid window translucent.",
-                               "O forte desfoca a sua mesa atrás da janela inteira num fosco escuro e limpo, faz dos painéis caixas de vidro e põe o ⌘K, os menus e os cartões no mesmo vidro. Ele deixa translúcida uma janela sólida."),
-                             control: SettingsPage.popup([(T("Normal", "Normal"), "normal"), (T("Strong", "Forte"), "strong")],
-                                                         selected: a.glass) { [store] value in
-                                 store.update { $0.appearance.glass = value }
                              }),
             SettingsPage.row(T("Pane borders", "Bordas dos painéis"),
                              T("Glow draws each pane's border in the tab's or project's color, with a soft light around it.",

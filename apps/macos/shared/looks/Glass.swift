@@ -8,10 +8,10 @@ import AppKit
 public enum Glass {
     /// The window's opacity while it is translucent; nil when solid (or in high contrast).
     public private(set) static var opacity: CGFloat?
-    /// appearance.glass "strong" (the owner, 2026-11-24, after a fork's screenshot): the wallpaper
-    /// blurred behind everything through a clean dark frost, the panes glass boxes of their own,
-    /// and ⌘K, the menus and the cards in the same glass. "normal" keeps the window's frost, whose
-    /// own gray under a thin tint read dark and muddy.
+    /// The strong glass (the owner, 2026-11-24, after a fork's screenshot), on whenever the window is
+    /// translucent since 2026-11-27 (one glass, the opacity its tint): the wallpaper blurred behind
+    /// everything with its shapes, the panes glass boxes of their own, and ⌘K, the menus and the
+    /// cards in the same glass. The system's frost alone, the old "normal", read a flat muddy gray.
     public private(set) static var strong = false
     /// appearance.paneBorder "glow": the panes' border in this color with a soft glow (the work
     /// color, else the accent); nil keeps the line.
@@ -23,11 +23,10 @@ public enum Glass {
     /// The frost's own look: dark under the strong glass whatever the window's, so it never goes
     /// to the light gray the HUD material takes over bright windows (seen in a capture, 2026-11-24).
     public static var frostAppearance: NSAppearance? { strong ? NSAppearance(named: .vibrantDark) : nil }
-    /// The tint's alpha over the frost: the window's opacity, and under the strong glass at least
-    /// `strongTint`, a dark glass the wallpaper shows through (the fork's screenshot) even with the
-    /// opacity at its floor (the owner keeps it at 0.1, which read as the frost's bare gray).
-    public static var tint: CGFloat? { opacity.map { strong ? max($0, strongTint) : $0 } }
-    static let strongTint: CGFloat = 0.62
+    /// The tint's alpha over the blur: the window's opacity, the slider's own value. It had a floor
+    /// of 0.62 under the strong glass, which with the opacity capped at 0.35 there held every slider
+    /// position at the same glass (the owner, 2026-11-27).
+    public static var tint: CGFloat? { opacity }
     /// The tint of what floats over the window (⌘K, ⌘P, the menus, the popovers, the cards,
     /// settings): ten points above the window's, so it reads over the frame it covers (the owner,
     /// 2026-11-24).

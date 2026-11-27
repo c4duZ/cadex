@@ -30,21 +30,21 @@ let exitCode = await Checks.run([
         Glass.set(opacity: 0.6, strong: true)
         expect(!sliders().contains { $0 === before }, "the strong glass rebuilds the page")
     }),
-    ("the themes page saves what is chosen: Strong in the Glass popup, and the window opacity without a mouse-up", {
-        // The owner, 2026-11-27: Strong chosen in Settings, the glass did not change and Settings
-        // showed Normal again.
+    ("the themes page saves what is chosen: Glow in the Pane borders popup, and the window opacity without a mouse-up", {
+        // The owner, 2026-11-27: Strong glass chosen in Settings, nothing changed and Settings
+        // showed Normal again (every popup lost its action).
         let file = FileManager.default.temporaryDirectory.appendingPathComponent("glass-\(UUID().uuidString).json")
         defer { try? FileManager.default.removeItem(at: file) }
         let store = SettingsStore(file: file)
         let view = ThemesPage(store: store).makeView()
         func popups(_ v: NSView) -> [NSPopUpButton] { ((v as? NSPopUpButton).map { [$0] } ?? []) + v.subviews.flatMap(popups) }
-        guard let glass = popups(view).first(where: { $0.itemArray.contains { $0.representedObject as? String == "strong" } }) else {
-            return expect(false, "no Glass popup")
+        guard let borders = popups(view).first(where: { $0.itemArray.contains { $0.representedObject as? String == "glow" } }) else {
+            return expect(false, "no Pane borders popup")
         }
-        glass.selectItem(at: glass.itemArray.firstIndex { $0.representedObject as? String == "strong" }!)
-        glass.sendAction(glass.action, to: glass.target)
-        expect(store.settings.appearance.glass == "strong", store.settings.appearance.glass)
-        expect(SettingsStore(file: file).settings.appearance.glass == "strong", "saved to the file")
+        borders.selectItem(at: borders.itemArray.firstIndex { $0.representedObject as? String == "glow" }!)
+        borders.sendAction(borders.action, to: borders.target)
+        expect(store.settings.appearance.paneBorder == "glow", store.settings.appearance.paneBorder)
+        expect(SettingsStore(file: file).settings.appearance.paneBorder == "glow", "saved to the file")
         // The window opacity: a move without the mouse coming up (a key, the last drag) is saved too.
         func sliders(_ v: NSView) -> [NSSlider] { ((v as? NSSlider).map { [$0] } ?? []) + v.subviews.flatMap(sliders) }
         guard let opacity = sliders(view).first(where: { $0.maxValue == Settings.windowOpacityRange.upperBound && $0.minValue == Settings.windowOpacityRange.lowerBound })
@@ -73,6 +73,16 @@ let exitCode = await Checks.run([
               let end = guide.range(of: "```", range: start.upperBound..<guide.endIndex) else { return expect(false, "no theme example") }
         let theme = try ThemeFile.read(Data(guide[start.lowerBound..<end.lowerBound].utf8))
         expect(theme.name == "My theme" && theme.dark, "the example reads as a theme")
+    }),
+    ("one glass: a file in the strong glass keeps its look at 0.6 once, and the glass key is gone", {
+        // The owner, 2026-11-27: the slider changed nothing under the strong glass (its tint held at
+        // 0.62); one glass now, the opacity its tint.
+        func read(_ json: String) -> Settings { SettingsFile.read(Data(json.utf8)).0 }
+        expect(read(#"{"version": 7, "appearance": {"glass": "strong", "windowOpacity": 0.1}}"#).appearance.windowOpacity == 0.6)
+        expect(read(#"{"version": 7, "appearance": {"glass": "normal", "windowOpacity": 0.3}}"#).appearance.windowOpacity == 0.3, "the normal glass keeps its opacity")
+        expect(read(#"{"version": 8, "appearance": {"glass": "strong", "windowOpacity": 0.2}}"#).appearance.windowOpacity == 0.2, "after the move, the slider is the owner's")
+        let written = String(decoding: SettingsFile.write(read(#"{"version": 7, "appearance": {"glass": "strong"}}"#)), as: UTF8.self)
+        expect(!written.contains("\"glass\""), "no glass key written")
     }),
     ("an old file on Caffeine moves to Cadex Night once; a theme picked since stays (ADR 0035)", {
         func read(_ json: String) -> Settings { SettingsFile.read(Data(json.utf8)).0 }

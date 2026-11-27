@@ -6,7 +6,7 @@ public struct Settings: Equatable, Sendable {
     /// The file's version: what an old file (without it) gets moved to once,
     /// when the defaults change (SettingsFile.migrate). 2: the new frame's
     /// theme; 3: the new frame's status bar (docs/adr/0035-work-frame.md, 2026-11-17).
-    public static let currentVersion = 7
+    public static let currentVersion = 8
     public var version = Settings.currentVersion
 
     public struct General: Equatable, Sendable {
@@ -65,10 +65,6 @@ public struct Settings: Equatable, Sendable {
         /// "auto", "system" or "cadex": the system's full screen is a Space over black, where a
         /// translucent window shows black; Cadex's covers the screen over the wallpaper (2026-11-24).
         public var fullScreen = "auto"
-        /// "normal" or "strong": the strong glass blurs the wallpaper behind everything through a
-        /// clean dark frost, makes the panes glass boxes, and puts ⌘K, the menus and the cards in the
-        /// same glass; it turns a solid window translucent (the owner, 2026-11-24).
-        public var glass = "normal"
         /// "line" (the panes' border as the mockups draw it) or "glow": the border in the work color,
         /// with a soft glow (the owner, 2026-11-24: configurable, today's the default).
         public var paneBorder = "line"
@@ -324,12 +320,11 @@ public struct Settings: Equatable, Sendable {
     /// owner's reference, 2026-11-18: 15 to 30%); under 10% nothing is left of the theme.
     public static let windowOpacityRange = 0.1...1.0
     static let fullScreenModes = ["auto", "system", "cadex"]
-    static let glassModes = ["normal", "strong"]
     static let paneBorders = ["line", "glow"]
     static let webBrowsers = ["cadex", "chrome", "chromeAndPlaywright", "none"]
     /// The opacity theme.toggle-translucent turns on when the window is solid: 80% looked milky,
     /// the owner wanted the wallpaper to show (2026-11-18).
-    public static let translucentOpacity = 0.35
+    public static let translucentOpacity = 0.6
     static let lineHeights = 0.8...2.0
     static let letterSpacings = -1.0...4.0
     static let zoomRange = 0.8...1.5

@@ -57,7 +57,6 @@ public enum SettingsFile {
             if let opacity = reader.number(a, "appearance.backgroundOpacity") { settings.appearance.backgroundOpacity = min(max(opacity, 0), 1) }
             if let v = reader.number(a, "appearance.windowOpacity") { settings.appearance.windowOpacity = v.clamped(to: Settings.windowOpacityRange) }
             settings.appearance.fullScreen = reader.choice(a, "appearance.fullScreen", Settings.fullScreenModes) ?? settings.appearance.fullScreen
-            settings.appearance.glass = reader.choice(a, "appearance.glass", Settings.glassModes) ?? settings.appearance.glass
             settings.appearance.paneBorder = reader.choice(a, "appearance.paneBorder", Settings.paneBorders) ?? settings.appearance.paneBorder
             if let blur = reader.number(a, "appearance.backgroundBlur") { settings.appearance.backgroundBlur = min(max(blur, 0), 50) }
             settings.appearance.highContrast = reader.bool(a, "appearance.highContrast") ?? settings.appearance.highContrast
@@ -236,6 +235,12 @@ public enum SettingsFile {
             settings.memory.backgroundAgent = true
             settings.memory.requireApproval = false
         }
+        // One glass (the owner, 2026-11-27): the strong glass's look always, the window opacity
+        // its tint. The strong glass held its tint at 0.62 whatever the slider said; a file in it
+        // keeps that look at 0.6, the slider's nearest step.
+        if version < 8, ((root["appearance"] as? [String: Any])?["glass"] as? String) == "strong" {
+            settings.appearance.windowOpacity = 0.6
+        }
         settings.version = max(version, Settings.currentVersion)
     }
 
@@ -280,7 +285,7 @@ public enum SettingsFile {
             "appearance": ["theme": s.appearance.theme, "lightTheme": s.appearance.lightTheme, "darkTheme": s.appearance.darkTheme,
                            "accent": s.appearance.accent, "mode": s.appearance.mode, "vibrancy": s.appearance.vibrancy,
                            "windowOpacity": s.appearance.windowOpacity, "fullScreen": s.appearance.fullScreen,
-                           "glass": s.appearance.glass, "paneBorder": s.appearance.paneBorder,
+                           "paneBorder": s.appearance.paneBorder,
                            "backgroundImage": s.appearance.backgroundImage ?? NSNull(),
                            "backgroundOpacity": s.appearance.backgroundOpacity, "backgroundBlur": s.appearance.backgroundBlur,
                            "highContrast": s.appearance.highContrast, "uiZoom": s.appearance.uiZoom,

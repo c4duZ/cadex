@@ -442,7 +442,7 @@
   tela cheia (`CadexWindow.swift`): o que sobrava do preview, o do dono e o do agente, fazia a janela
   sair dela (o dono, 2026-11-23); sai-se pelo botão verde ou ⌃⌘F. Na do sistema (o padrão desde 2026-11-27), a janela
   translúcida desenha o fundo de tela embaixo de tudo (`FullScreenWallpaper.swift`), com o fosco
-  desfocando dentro da janela (no vidro forte, a imagem já desfocada pelo raio dele); uma janela filha
+  desfocando dentro da janela (com o desfoque forte, a imagem já desfocada pelo raio dele); uma janela filha
   atrás ficava por cima no Space da tela cheia (3.1.9). A tela cheia do Cadex (`CadexWindow.swift`,
   appearance.fullScreen "cadex"): a janela cobre a tela no Space da mesa, a barra de menus e o Dock escondidos
   (presentationOptions, pela janela com foco); o botão verde, ⌃⌘F e window.toggle-full-screen

@@ -21,7 +21,7 @@ final class WindowBackdrop {
         var opacity = 1.0
         /// appearance.fullScreen: "auto", "system" or "cadex".
         var fullScreen = "auto"
-        /// appearance.glass "strong" (Glass.strong).
+        /// The strong glass (Glass.strong): on with a translucent window (SettingsBridge.looks).
         var strongGlass = false
         /// appearance.paneBorder "glow" (Glass.glow).
         var glowBorders = false
