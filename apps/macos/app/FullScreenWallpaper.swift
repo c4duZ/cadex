@@ -74,9 +74,13 @@ final class FullScreenWallpaper: NSView {
         guard let screen = window?.screen ?? NSScreen.main, let url = NSWorkspace.shared.desktopImageURL(for: screen) else { return nil }
         if let cache, cache.url == url, cache.strong == looks.strong { return cache.image }
         guard let source = NSImage(contentsOf: url)?.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
-        // The strong glass's radius is in screen points; the picture has its own pixels per point.
-        let pixelsPerPoint = CGFloat(source.width) / max(screen.frame.width, 1)
-        let image = looks.strong ? Self.blurred(source, radius: CGFloat(WindowBlur.strong) * pixelsPerPoint) ?? source : source
+        // The window server's blur radius counts the screen's pixels, and it reads as about twice
+        // a Gaussian's: taken as points of the picture (≈65 px on a 4K wallpaper), the full
+        // screen's wallpaper went to a shapeless fog the desktop never shows (the owner's
+        // screenshot, 2026-11-27: "está opaco").
+        let screenPixels = max(screen.frame.width * screen.backingScaleFactor, 1)
+        let radius = CGFloat(WindowBlur.strong) * CGFloat(source.width) / screenPixels / 2
+        let image = looks.strong ? Self.blurred(source, radius: radius) ?? source : source
         cache = (url, looks.strong, image)
         return image
     }
