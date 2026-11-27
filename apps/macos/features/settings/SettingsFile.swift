@@ -235,11 +235,11 @@ public enum SettingsFile {
             settings.memory.backgroundAgent = true
             settings.memory.requireApproval = false
         }
-        // One glass (the owner, 2026-11-27): the strong glass's look always, the window opacity
-        // its tint. The strong glass held its tint at 0.62 whatever the slider said; a file in it
-        // keeps that look at 0.6, the slider's nearest step.
+        // One glass (the owner, 2026-11-27): the strong glass's look always, the slider its
+        // strength, its floor the strong glass as it was. A file in the strong glass looked the
+        // same at any opacity: it moves to that floor, 0.1, once.
         if version < 8, ((root["appearance"] as? [String: Any])?["glass"] as? String) == "strong" {
-            settings.appearance.windowOpacity = 0.6
+            settings.appearance.windowOpacity = 0.1
         }
         settings.version = max(version, Settings.currentVersion)
     }

@@ -23,10 +23,19 @@ public enum Glass {
     /// The frost's own look: dark under the strong glass whatever the window's, so it never goes
     /// to the light gray the HUD material takes over bright windows (seen in a capture, 2026-11-24).
     public static var frostAppearance: NSAppearance? { strong ? NSAppearance(named: .vibrantDark) : nil }
-    /// The tint's alpha over the blur: the window's opacity, the slider's own value. It had a floor
-    /// of 0.62 under the strong glass, which with the opacity capped at 0.35 there held every slider
-    /// position at the same glass (the owner, 2026-11-27).
-    public static var tint: CGFloat? { opacity }
+    /// The tint's alpha over the blur, from the window's opacity: the slider's floor (10%) is the
+    /// strong glass as it was (`floorTint`, a dark glass the wallpaper shows through; the fork's
+    /// screenshot), and the rest of the slider runs from there to a solid window (the owner,
+    /// 2026-11-27: "os 10% do vidro forte sejam os 10% aqui"). The strong glass held 0.62 at every
+    /// position before, so the slider changed nothing.
+    public static var tint: CGFloat? { opacity.map(tint(for:)) }
+    static let floorTint: CGFloat = 0.62
+
+    /// The tint for an opacity: 0.1 → `floorTint`, 1 → 1, in a line between.
+    static func tint(for opacity: CGFloat) -> CGFloat {
+        let along = min(max((opacity - 0.1) / 0.9, 0), 1)
+        return floorTint + (1 - floorTint) * along
+    }
     /// The tint of what floats over the window (⌘K, ⌘P, the menus, the popovers, the cards,
     /// settings): ten points above the window's, so it reads over the frame it covers (the owner,
     /// 2026-11-24).

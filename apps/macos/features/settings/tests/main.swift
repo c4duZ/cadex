@@ -74,11 +74,11 @@ let exitCode = await Checks.run([
         let theme = try ThemeFile.read(Data(guide[start.lowerBound..<end.lowerBound].utf8))
         expect(theme.name == "My theme" && theme.dark, "the example reads as a theme")
     }),
-    ("one glass: a file in the strong glass keeps its look at 0.6 once, and the glass key is gone", {
+    ("one glass: a file in the strong glass keeps its look at the slider's floor once, and the glass key is gone", {
         // The owner, 2026-11-27: the slider changed nothing under the strong glass (its tint held at
         // 0.62); one glass now, the opacity its tint.
         func read(_ json: String) -> Settings { SettingsFile.read(Data(json.utf8)).0 }
-        expect(read(#"{"version": 7, "appearance": {"glass": "strong", "windowOpacity": 0.1}}"#).appearance.windowOpacity == 0.6)
+        expect(read(#"{"version": 7, "appearance": {"glass": "strong", "windowOpacity": 0.5}}"#).appearance.windowOpacity == 0.1)
         expect(read(#"{"version": 7, "appearance": {"glass": "normal", "windowOpacity": 0.3}}"#).appearance.windowOpacity == 0.3, "the normal glass keeps its opacity")
         expect(read(#"{"version": 8, "appearance": {"glass": "strong", "windowOpacity": 0.2}}"#).appearance.windowOpacity == 0.2, "after the move, the slider is the owner's")
         let written = String(decoding: SettingsFile.write(read(#"{"version": 7, "appearance": {"glass": "strong"}}"#)), as: UTF8.self)

@@ -322,9 +322,9 @@ public struct Settings: Equatable, Sendable {
     static let fullScreenModes = ["auto", "system", "cadex"]
     static let paneBorders = ["line", "glow"]
     static let webBrowsers = ["cadex", "chrome", "chromeAndPlaywright", "none"]
-    /// The opacity theme.toggle-translucent turns on when the window is solid: 80% looked milky,
-    /// the owner wanted the wallpaper to show (2026-11-18).
-    public static let translucentOpacity = 0.6
+    /// The opacity theme.toggle-translucent turns on when the window is solid: the slider's floor,
+    /// the strong glass as the owner uses it (2026-11-27; 80% looked milky, 2026-11-18).
+    public static let translucentOpacity = 0.1
     static let lineHeights = 0.8...2.0
     static let letterSpacings = -1.0...4.0
     static let zoomRange = 0.8...1.5

@@ -12,6 +12,19 @@ import Checks
 }
 
 let exitCode = await Checks.run([
+    ("the window opacity slider is the glass's strength: its floor is the strong glass as it was, its top a solid window", {
+        // The owner, 2026-11-27: "os 10% do vidro forte sejam os 10% aqui"; the strong glass held
+        // 0.62 at every slider position before.
+        defer { Glass.set(opacity: nil) }
+        var tints: [CGFloat] = []
+        for opacity in [0.1, 0.5, 0.999] as [CGFloat] {
+            Glass.set(opacity: opacity, strong: true)
+            tints.append(Glass.tint ?? 0)
+        }
+        expect(abs(tints[0] - 0.62) < 0.001, "10% is the old strong glass: \(tints[0])")
+        expect(tints[0] < tints[1] && tints[1] < tints[2], "each position its own glass: \(tints)")
+        expect(tints[2] > 0.99, "the top nearly solid: \(tints[2])")
+    }),
     ("under the strong glass a borderless rounded panel keeps its frost cut to its corners, and only a titled window takes the square window blur", {
         // The owner's screenshot, 2026-11-27: a blurred square around ⌘K's rounded corners.
         Glass.set(opacity: 0.3, strong: true)
