@@ -78,12 +78,15 @@ temas que ele já usava em outros apps.
 - Bordas dos painéis (appearance.paneBorder: "line" ou "glow", padrão "line"): "glow" desenha a borda
   de cada painel no destaque do tema (não a cor da aba nem o appearance.accent; o dono, 2026-11-24),
   com um brilho suave, forte no painel com foco e fraco nos outros. ⌘K: theme.toggle-pane-glow.
-- Tela cheia (appearance.fullScreen: "auto", "system" ou "cadex", padrão "auto"; o dono,
-  2026-11-24): a do sistema põe a janela num Space só dela sobre o preto, e a janela translúcida
-  mostrava preto e não o fundo de tela. A do Cadex (`apps/macos/app/CadexWindow.swift`) cobre a tela no
-  Space da mesa, por cima da barra de menus e do Dock, que voltam ao encostar o ponteiro na borda;
-  sem os botões da janela, sem mover nem redimensionar, e o tamanho segue a tela se ela mudar. Não
-  vira um Space próprio. "auto" usa a do Cadex com a janela translúcida. O botão verde, ⌃⌘F e
+- Tela cheia (appearance.fullScreen: "auto", "system" ou "cadex", padrão "auto"): "auto" e "system"
+  são a do sistema, num Space só dela, com os botões da janela ao encostar no topo. Com a janela
+  translúcida, atrás do vidro fica o desktop como seria com a janela cobrindo a tela num desktop
+  vazio: uma janela com o fundo de tela, enquadrado como o desktop o desenha, fica logo atrás da do
+  Cadex (`apps/macos/app/FullScreenWallpaper.swift`), e o desfoque do vidro age sobre ela como age
+  sobre o desktop (o dono, 2026-11-27; antes o Space mostrava preto atrás do vidro, 2026-11-24). A
+  do Cadex ("cadex", `apps/macos/app/CadexWindow.swift`) cobre a tela no Space da mesa, por cima da
+  barra de menus e do Dock, que voltam ao encostar o ponteiro na borda; sem os botões da janela, sem
+  mover nem redimensionar, e o tamanho segue a tela se ela mudar. O botão verde, ⌃⌘F e
   window.toggle-full-screen entram e saem da escolhida; o Esc não sai de nenhuma.
 
 - Claro e escuro (plano 15, fase B): com "seguir o sistema", um tema para o modo escuro e outro

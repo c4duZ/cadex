@@ -27,9 +27,10 @@ final class WindowBackdrop {
         var glowBorders = false
 
         var translucent: Bool { opacity < 1 }
-        /// Cadex's full screen (CadexWindow): asked for, or "auto" with a translucent window, whose
-        /// glass showed black in the system's.
-        var ownFullScreen: Bool { fullScreen == "cadex" || (fullScreen == "auto" && translucent) }
+        /// Cadex's full screen (CadexWindow), only when asked for: "auto" was it with a translucent
+        /// window, but it stayed on the desktop without the window's buttons; the system's now
+        /// shows the wallpaper behind the glass (FullScreenWallpaper; the owner, 2026-11-27).
+        var ownFullScreen: Bool { fullScreen == "cadex" }
     }
 
     /// The blurred image, made once per path and blur, not per frame.

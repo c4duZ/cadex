@@ -53,6 +53,8 @@ final class WorkspaceView: NSView {
     private let backdrop = WindowBackdrop()
     /// The frosted frame, shown only with vibrancy on.
     private let frost = NSVisualEffectView()
+    /// The desktop behind a translucent window in the system's full screen (FullScreenWallpaper).
+    private let wallpaper = FullScreenWallpaper()
     /// A translucent window's one tint, in the theme's ground color at the window's opacity,
     /// over the frost and under everything else (the grounds above it are see-through).
     private let glass = NSView()
@@ -406,6 +408,7 @@ final class WorkspaceView: NSView {
         overlayFrost.appearance = Glass.frostAppearance
         // The strong glass: the window server's blur of the desktop, with its shapes, in place of
         // the frost's flat gray (WindowBlur).
+        wallpaper.translucent = looks.translucent
         frost.isHidden = !see || Glass.strong
         applyBlur()
         glass.isHidden = !looks.translucent
@@ -444,6 +447,7 @@ final class WorkspaceView: NSView {
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
+        wallpaper.attach(to: window)
         apply(ThemeStore.shared.current)
         applyTopBarToWindow()
     }
