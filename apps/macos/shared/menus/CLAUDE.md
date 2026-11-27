@@ -26,7 +26,8 @@
   teclado já de volta na janela de onde o menu abriu. Com a janela translúcida, a lista vai numa
   caixa com o vidro (Glass, de `../looks/`), como o popover do `AnchoredPanel.swift`. O cartão
   (`HoverCard.swift`) desenha o próprio fundo com a seta: sob o vidro, o fosco recortado no formato
-  dele e a cor na opacidade de Glass.panelTint; no vidro forte, o desfoque da janela dele.
+  dele e a cor na opacidade de Glass.panelTint; no vidro forte também o fosco recortado, porque o desfoque da janela seria um quadrado em volta
+  da seta e dos cantos (Glass.blursWindow).
 - `HoverTip.swift`: o nome de um botão de ícone, embaixo dele 0,2 s depois de o ponteiro chegar (o
   do sistema levava cerca de 1 s e tinha outra cara; o dono, 2026-10-20), nas cores dos menus. Some
   ao sair, no clique, numa tecla ou na rolagem. Uma linha tem 22 pt, como sempre; texto maior quebra

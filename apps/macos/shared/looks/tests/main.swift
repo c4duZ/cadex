@@ -12,6 +12,26 @@ import Checks
 }
 
 let exitCode = await Checks.run([
+    ("under the strong glass a borderless rounded panel keeps its frost cut to its corners, and only a titled window takes the square window blur", {
+        // The owner's screenshot, 2026-11-27: a blurred square around ⌘K's rounded corners.
+        Glass.set(opacity: 0.3, strong: true)
+        defer { Glass.set(opacity: nil) }
+        let titled = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 200, height: 100), styleMask: [.titled], backing: .buffered, defer: true)
+        let panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 200, height: 100), styleMask: [.borderless], backing: .buffered, defer: true)
+        titled.isReleasedWhenClosed = false
+        panel.isReleasedWhenClosed = false
+        expect(Glass.blursWindow(titled) && !Glass.blursWindow(panel), "the window blur only in a titled window")
+        let box = NSView(frame: NSRect(x: 0, y: 0, width: 200, height: 100))
+        box.wantsLayer = true
+        box.layer?.cornerRadius = 14
+        panel.contentView = box
+        Glass.dress(box, .black)
+        guard let pane = box.subviews.first(where: { $0 is GlassPane }) as? GlassPane else { return expect(false, "no glass") }
+        expect(!pane.frost.isHidden, "the panel keeps its frost under the strong glass")
+        expect(pane.frost.maskImage != nil, "cut to the box's corners")
+        Glass.set(opacity: 0.3, strong: false)
+        expect(!Glass.blursWindow(titled), "no window blur without the strong glass")
+    }),
     ("a popup framed after its target and action were set still sends its action", {
         // The cell holds them; the frame's cell dropped them and every popup in Settings and the
         // project's memory place did nothing (the owner, 2026-11-27).

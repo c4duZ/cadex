@@ -33,7 +33,10 @@
   opacidade (Glass.set), o vidro forte (`strong`, `tint` a pelo menos 62%) e a cor da borda com brilho
   (`glow`); o que flutua fica 10 pontos acima (`panelTint`). `WindowBlur.swift`: o desfoque de fundo
   de janela do macOS (CGSSetWindowBackgroundBlurRadius, procurado na hora; sem ele, nada), que o vidro
-  forte usa no lugar do fosco do sistema, na janela e nos painéis à parte; numa janela adiada, que só
+  forte usa no lugar do fosco do sistema, na janela e nos painéis à parte; só numa janela com barra de
+  título (`blursWindow`: o macOS desfoca o retângulo inteiro e só corta os cantos dela; nos painéis
+  sem moldura arredondados ficava um quadrado desfocado em volta, e eles guardam o fosco recortado
+  nos cantos da caixa, `roundedMask`; o dono, 2026-11-27); numa janela adiada, que só
   ganha número ao aparecer, a camada de vidro tenta de novo nas voltas seguintes (as configurações
   mostravam o terminal nítido atrás, 2026-11-27).
 - `FrameSheet.swift` e `FrameFields.swift` (plano 31 B): a folha da moldura (o fundo escurecido, o

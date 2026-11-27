@@ -240,8 +240,10 @@ private final class CardBox: NSView {
         glass.state = .active
         glass.material = Glass.material
         glass.appearance = Glass.frostAppearance
-        glass.isHidden = Glass.strong
-        WindowBlur.set(window, radius: Glass.strong ? WindowBlur.strong : 0)
+        // The card's window has no title bar: the window server's blur would be a square around the
+        // arrow and the corners (Glass.blursWindow); the frost below is cut to the card's shape.
+        glass.isHidden = Glass.blursWindow(window)
+        WindowBlur.set(window, radius: Glass.blursWindow(window) ? WindowBlur.strong : 0)
         glass.frame = bounds
         if glass.superview !== self { addSubview(glass, positioned: .below, relativeTo: nil) }
         let size = bounds.size

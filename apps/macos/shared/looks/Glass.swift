@@ -33,6 +33,28 @@ public enum Glass {
     /// 2026-11-24).
     public static var panelTint: CGFloat? { tint.map { min($0 + 0.1, 1) } }
 
+    /// The strong glass's window server blur, only in a window with a title bar: the window server
+    /// blurs the window's whole rectangle, and it cuts the corners of a titled window only. A
+    /// borderless panel with rounded corners (⌘K, the menus, the popovers, the cards) showed a blurred
+    /// square around them (the owner's screenshot, 2026-11-27): they keep the frost, cut to their shape.
+    public static func blursWindow(_ window: NSWindow?) -> Bool {
+        strong && window?.styleMask.contains(.titled) == true
+    }
+
+    /// A mask for a frost in a box with rounded corners: stretched, the corners stay round.
+    public static func roundedMask(_ radius: CGFloat) -> NSImage? {
+        guard radius > 0 else { return nil }
+        let side = radius * 2 + 1
+        let mask = NSImage(size: NSSize(width: side, height: side), flipped: false) { rect in
+            NSColor.black.setFill()
+            NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius).fill()
+            return true
+        }
+        mask.capInsets = NSEdgeInsets(top: radius, left: radius, bottom: radius, right: radius)
+        mask.resizingMode = .stretch
+        return mask
+    }
+
     /// Set by the app with the window's looks; a change tells the windows that build their
     /// colors once (DesignTokens.didChange).
     public static func set(opacity new: CGFloat?, strong newStrong: Bool = false, glow newGlow: NSColor? = nil) {
@@ -58,8 +80,9 @@ public enum Glass {
         glass.isHidden = false
         glass.frost.material = material
         glass.frost.appearance = frostAppearance
-        // The strong glass: the window server's blur of the desktop, as the main window's.
-        glass.frost.isHidden = strong
+        // The strong glass: the window server's blur of the desktop, as the main window's, in a titled
+        // window; elsewhere the frost, cut to the box's corners (blursWindow).
+        glass.frost.maskImage = roundedMask(box.layer?.cornerRadius ?? 0)
         glass.blurWindow()
         glass.tint.layer?.backgroundColor = color.withAlphaComponent(color.alphaComponent * (panelTint ?? opacity)).cgColor
         box.layer?.backgroundColor = NSColor.clear.cgColor
@@ -98,7 +121,8 @@ final class GlassPane: NSView {
     /// for a second at most (the occlusion notice did not come for a window's first showing).
     func blurWindow(tries: Int = 20) {
         guard let window else { return }
-        guard window.windowNumber <= 0 else { return WindowBlur.set(window, radius: Glass.strong && !isHidden ? WindowBlur.strong : 0) }
+        frost.isHidden = Glass.blursWindow(window)
+        guard window.windowNumber <= 0 else { return WindowBlur.set(window, radius: Glass.blursWindow(window) && !isHidden ? WindowBlur.strong : 0) }
         guard tries > 0 else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in self?.blurWindow(tries: tries - 1) }
     }
