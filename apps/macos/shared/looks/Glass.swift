@@ -91,9 +91,16 @@ final class GlassPane: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("GlassPane is created in code") }
 
-    /// The box's window blurred behind under the strong glass (WindowBlur), none otherwise.
-    func blurWindow() {
-        WindowBlur.set(window, radius: Glass.strong && !isHidden ? WindowBlur.strong : 0)
+    /// The box's window blurred behind under the strong glass (WindowBlur), none otherwise. A window
+    /// made deferred (settings, the menus, the cards) has no number until it shows, and the blur set
+    /// before was dropped: the settings window showed the terminal behind it sharp (the owner's
+    /// screenshot, 2026-11-27). Shown, it has one at once, so the next turns of the loop try again,
+    /// for a second at most (the occlusion notice did not come for a window's first showing).
+    func blurWindow(tries: Int = 20) {
+        guard let window else { return }
+        guard window.windowNumber <= 0 else { return WindowBlur.set(window, radius: Glass.strong && !isHidden ? WindowBlur.strong : 0) }
+        guard tries > 0 else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in self?.blurWindow(tries: tries - 1) }
     }
 
     override func viewDidMoveToWindow() {
