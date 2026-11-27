@@ -81,9 +81,12 @@ temas que ele já usava em outros apps.
 - Tela cheia (appearance.fullScreen: "auto", "system" ou "cadex", padrão "auto"): "auto" e "system"
   são a do sistema, num Space só dela, com os botões da janela ao encostar no topo. Com a janela
   translúcida, atrás do vidro fica o desktop como seria com a janela cobrindo a tela num desktop
-  vazio: uma janela com o fundo de tela, enquadrado como o desktop o desenha, fica logo atrás da do
-  Cadex (`apps/macos/app/FullScreenWallpaper.swift`), e o desfoque do vidro age sobre ela como age
-  sobre o desktop (o dono, 2026-11-27; antes o Space mostrava preto atrás do vidro, 2026-11-24). A
+  vazio: o fundo de tela, enquadrado como o desktop o desenha, é desenhado dentro da janela, embaixo
+  de tudo (`apps/macos/app/FullScreenWallpaper.swift`); o fosco do vidro normal passa a desfocar o
+  que está dentro da janela, e no vidro forte a imagem vem desfocada pelo mesmo raio (o dono,
+  2026-11-27; antes o Space mostrava preto atrás do vidro, 2026-11-24). Uma janela atrás da do Cadex
+  não serve: no Space da tela cheia o macOS põe as outras janelas do app por cima (a 3.1.9 mostrava
+  só o fundo de tela). A
   do Cadex ("cadex", `apps/macos/app/CadexWindow.swift`) cobre a tela no Space da mesa, por cima da
   barra de menus e do Dock, que voltam ao encostar o ponteiro na borda; sem os botões da janela, sem
   mover nem redimensionar, e o tamanho segue a tela se ela mudar. O botão verde, ⌃⌘F e

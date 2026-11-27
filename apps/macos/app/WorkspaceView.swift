@@ -89,7 +89,7 @@ final class WorkspaceView: NSView {
         overlayTint.wantsLayer = true
         rail.isHidden = true
         // The sidebar after the center, so it can lie over it in a narrow window.
-        for view in [frost, glass, titleBar, statusBar, rail, contentPanel, overlayFrost, overlayTint, sidebar] as [NSView] {
+        for view in [wallpaper, frost, glass, titleBar, statusBar, rail, contentPanel, overlayFrost, overlayTint, sidebar] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
@@ -102,7 +102,12 @@ final class WorkspaceView: NSView {
         titleBarHeight = titleBar.heightAnchor.constraint(equalToConstant: TitleBarView.height)
         sidebarAtEdge = sidebar.leadingAnchor.constraint(equalTo: leadingAnchor)
         sidebarAtRail = sidebar.leadingAnchor.constraint(equalTo: rail.trailingAnchor)
+        wallpaper.onChange = { [weak self] in self.map { $0.apply(ThemeStore.shared.current) } }
         NSLayoutConstraint.activate([
+            wallpaper.topAnchor.constraint(equalTo: topAnchor),
+            wallpaper.bottomAnchor.constraint(equalTo: bottomAnchor),
+            wallpaper.leadingAnchor.constraint(equalTo: leadingAnchor),
+            wallpaper.trailingAnchor.constraint(equalTo: trailingAnchor),
             frost.topAnchor.constraint(equalTo: topAnchor),
             frost.bottomAnchor.constraint(equalTo: bottomAnchor),
             frost.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -408,7 +413,12 @@ final class WorkspaceView: NSView {
         overlayFrost.appearance = Glass.frostAppearance
         // The strong glass: the window server's blur of the desktop, with its shapes, in place of
         // the frost's flat gray (WindowBlur).
-        wallpaper.translucent = looks.translucent
+        // The system's full screen: the frost blurs the wallpaper drawn in the window as it blurs
+        // the desktop behind it (FullScreenWallpaper).
+        wallpaper.looks = (looks.translucent, looks.strongGlass)
+        let blending: NSVisualEffectView.BlendingMode = wallpaper.isShowing ? .withinWindow : .behindWindow
+        frost.blendingMode = blending
+        overlayFrost.blendingMode = blending
         frost.isHidden = !see || Glass.strong
         applyBlur()
         glass.isHidden = !looks.translucent
@@ -447,7 +457,6 @@ final class WorkspaceView: NSView {
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        wallpaper.attach(to: window)
         apply(ThemeStore.shared.current)
         applyTopBarToWindow()
     }
